@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+        <groupId>org.maven.ide.eclipse.projects</groupId>
+		<artifactId>MNGECLIPSE-157parent</artifactId>
+		<version>0.0.1</version>
+	</parent>
+    <groupId>org.maven.ide.eclipse.projects</groupId>
+	<artifactId>MNGECLIPSE-157child</artifactId>
+	<dependencies>
+		<dependency>
+			<groupId>jaxen</groupId>
+			<artifactId>jaxen</artifactId>
+			<version>1.1-beta-9</version>
+		</dependency>
+	</dependencies>
+</project>

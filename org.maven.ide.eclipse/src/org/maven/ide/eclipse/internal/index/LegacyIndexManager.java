@@ -1,0 +1,206 @@
+/*******************************************************************************
+ * Copyright (c) 2008 Sonatype, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *******************************************************************************/
+
+package org.maven.ide.eclipse.internal.index;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.Map;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.store.Directory;
+
+import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.index.IndexInfo;
+import org.maven.ide.eclipse.index.IndexManager;
+import org.maven.ide.eclipse.index.IndexedArtifactFile;
+import org.maven.ide.eclipse.index.IndexedArtifactGroup;
+import org.maven.ide.eclipse.index.Indexer;
+import org.maven.ide.eclipse.internal.console.MavenConsoleImpl;
+
+
+/**
+ * Legacy index manager
+ * 
+ * @author Eugene Kuleshov
+ */
+public class LegacyIndexManager extends IndexManager {
+
+  public LegacyIndexManager(File stateDir, MavenConsoleImpl console) {
+    super(console, stateDir, "index");
+  }
+
+  public void addIndex(IndexInfo indexInfo, boolean reindex) {
+    String indexName = indexInfo.getIndexName();
+    addIndex(indexName, indexInfo);
+
+    // indexInfo.getType() == IndexInfo.Type.LOCAL
+    if(indexInfo.getRepositoryDir() != null && (reindex || !isValidIndex(indexName))) {
+      scheduleReindex(indexName, 5000L);
+    } else {
+      Indexer indexer = new Indexer();
+      try {
+        indexer.createIndex(workspaceIndexDirectory);
+      } catch(IOException ex) {
+        String msg = "Unable to create index " + indexInfo.getIndexName();
+        console.logError(msg + "; " + ex.getMessage());
+        MavenPlugin.log(msg, ex);
+      }
+    }
+  }
+
+  public void removeIndex(String indexName, boolean delete) {
+    removeIndex(indexName);
+  }
+
+  public synchronized void addDocument(String indexName, File pomFile, String name, long size, long date, File jarFile,
+      int sourcesExists, int javadocExists) {
+    try {
+      Directory indexDir = getIndexDirectory(indexName);
+      if(indexDir == null) {
+        // TODO log
+      } else {
+        Indexer indexer = new Indexer();
+        indexer.addDocument(indexDir, name, size, date, indexer.readNames(jarFile), indexName);
+      }
+    } catch(IOException ex) {
+      String msg = "Unable add " + name;
+      console.logError(msg + "; " + ex.getMessage());
+      MavenPlugin.log(msg, ex);
+    }
+  }
+
+  public synchronized void removeDocument(String indexName, File pomFile, String name) {
+    try {
+      Directory indexDir = getIndexDirectory(indexName);
+      if(indexDir == null) {
+        // TODO log
+      } else {
+        Indexer indexer = new Indexer();
+        indexer.removeDocument(indexDir, name);
+      }
+    } catch(IOException ex) {
+      String msg = "Unable to remove " + name;
+      console.logError(msg + "; " + ex.getMessage());
+      MavenPlugin.log(msg, ex);
+    }
+  }
+
+  public Map search(String query, String field) throws IOException {
+    Indexer indexer = new Indexer();
+    return indexer.search(getIndexDirs(), query, field);
+  }
+
+  public Map search(String indexName, String prefix, String searchGroup) {
+    // not supported
+    return Collections.EMPTY_MAP;
+  }
+
+  public IndexedArtifactGroup[] getRootGroups(String indexId) {
+    // not supported
+    return new IndexedArtifactGroup[0];
+  }
+
+  public Date getIndexArchiveTime(InputStream is) throws IOException {
+    // not supported
+    return null;
+  }
+  
+  public Date fetchAndUpdateIndex(String indexId, final IProgressMonitor monitor) {
+    // not supported
+    return null;
+  }
+
+  public Date replaceIndex(String indexName, InputStream is) {
+    // not supported
+    return null;
+  }
+
+  public Date mergeIndex(String indexName, InputStream is) {
+    // not supported
+    return null;
+  }
+
+  public Date reindex(String indexName, IProgressMonitor monitor) throws IOException {
+    IndexInfo indexInfo = getIndexInfo(indexName);
+    if(indexInfo == null) {
+      return null;
+    }
+
+//    File baseIndexDir = getBaseIndexDir();
+//    File indexDir = new File(baseIndexDir, indexName);
+//    if(!indexDir.exists()) {
+//      indexDir.mkdirs();
+//    }
+
+    if(indexInfo.getRepositoryDir() != null) {
+      String repositoryPath = indexInfo.getRepositoryDir().getAbsolutePath();
+      Directory indexDir = getIndexDirectory(indexInfo);
+
+      Indexer indexer = new Indexer();
+      indexer.reindex(indexDir, repositoryPath, indexName, monitor);
+    }
+    return null;
+  }
+
+  private Directory[] getIndexDirs() {
+    Map indexMap = getIndexes();
+    Directory[] indexDirs = new Directory[indexMap.size()];
+    int i = 0;
+    for(Iterator it = indexMap.values().iterator(); it.hasNext();) {
+      IndexInfo indexInfo = (IndexInfo) it.next();
+      try {
+        indexDirs[i++ ] = getIndexDirectory(indexInfo);
+      } catch(IOException ex) {
+        // TODO log
+      }
+    }
+    return indexDirs;
+  }
+
+  private boolean isValidIndex(String indexName) {
+    IndexInfo indexInfo = getIndexInfo(indexName);
+    if(indexInfo == null) {
+      return false;
+    }
+
+    File indexDir = new File(getBaseIndexDir(), LOCAL_INDEX);
+    if(indexDir.exists()) {
+      IndexReader reader = null;
+      try {
+        reader = IndexReader.open(indexDir);
+        return true;
+      } catch(Exception ex) {
+        // ignore
+      } finally {
+        try {
+          if(reader != null) {
+            reader.close();
+          }
+        } catch(IOException ex) {
+          // ignore
+        }
+      }
+    }
+    return false;
+  }
+
+  /* (non-Javadoc)
+   * @see org.maven.ide.eclipse.index.IndexManager#getIndexedArtifactFile(java.lang.String, java.lang.String)
+   */
+  public IndexedArtifactFile getIndexedArtifactFile(String indexName, String name) {
+    return null;
+  }
+
+}

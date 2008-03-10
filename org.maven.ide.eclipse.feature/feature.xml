@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.maven.ide.eclipse.feature"
+      label="Maven Integration for Eclipse"
+      version="0.9.0.20080307-2100-Sonatype"
+      provider-name="Sonatype, Inc."
+      plugin="org.maven.ide.eclipse">
+   <install-handler/>
+
+   <description url="http://m2eclipse.codehaus.org/">
+      Maven integration. Launching Maven from Eclipse, dependency management and search.
+   </description>
+
+   <copyright url="http://www.sonatype.com/">
+      Copyright (c) 2008 Sonatype, Inc.
+   </copyright>
+
+   <license url="http://www.eclipse.org/legal/epl-v10.html">
+      All rights reserved. This program and the accompanying materials
+are made available under the terms of the Eclipse Public License
+v1.0 which accompanies this distribution, and is available at
+http://www.eclipse.org/legal/epl-v10.html
+   </license>
+
+   <url>
+      <update label="Maven Integration" url="http://m2eclipse.codehaus.org/update/"/>
+   </url>
+
+   <requires>
+      <import feature="org.eclipse.platform" version="3.1.0" match="greaterOrEqual"/>
+      <import feature="org.eclipse.jdt" version="3.1.0" match="greaterOrEqual"/>
+      <import feature="org.eclipse.rcp" version="3.1.0" match="greaterOrEqual"/>
+   </requires>
+
+   <plugin
+         id="org.maven.ide.eclipse"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.maven.ide.components.archetype_common"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.maven.ide.components.maven_embedder"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.maven.ide.components.nexus_indexer"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.maven.ide.components.maven_model_edit"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.maven.ide.components.qname"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+</feature>

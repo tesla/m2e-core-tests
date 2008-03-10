@@ -1,0 +1,256 @@
+/*******************************************************************************
+ * Copyright (c) 2008 Sonatype, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *******************************************************************************/
+
+package org.maven.ide.eclipse.wizards;
+
+import java.util.Arrays;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.INewWizard;
+import org.eclipse.ui.IWorkbench;
+
+import org.apache.maven.archetype.catalog.Archetype;
+import org.apache.maven.model.Dependency;
+import org.apache.maven.model.Model;
+
+import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.Messages;
+import org.maven.ide.eclipse.project.ProjectImportConfiguration;
+
+/**
+ * A project wizard for creating a new Maven2 module project.
+ */
+public class MavenModuleWizard extends Wizard implements INewWizard {
+
+  /** The name of the default wizard page image. */
+  protected static final String DEFAULT_PAGE_IMAGE_NAME = "icons/new_m2_project_wizard.gif";
+
+  /** The default wizard page image. */
+  protected static final ImageDescriptor DEFAULT_PAGE_IMAGE = MavenPlugin.getImageDescriptor(DEFAULT_PAGE_IMAGE_NAME);
+  
+  /** the current selection */
+  private IStructuredSelection selection;
+
+  /** the parent page (#1) */
+  protected MavenModuleWizardParentPage parentPage;
+
+  /** The archetype selection page. */
+  protected MavenProjectWizardArchetypePage archetypePage;
+
+  /** The wizard page for gathering Maven2 project information. */
+  protected MavenProjectWizardArtifactPage artifactPage;
+
+  /** The wizard page for gathering archetype project information. */
+  protected MavenProjectWizardArchetypeParametersPage parametersPage;
+
+  /** The wizard page for choosing the Maven2 dependencies to use. */
+  private MavenDependenciesWizardPage dependenciesPage;
+
+  /** The project configuration bean. */
+  protected ProjectImportConfiguration configuration;
+  
+
+  /** Default constructor. Sets the title and image of the wizard. */
+  public MavenModuleWizard() {
+    super();
+    setWindowTitle( Messages.getString( "wizard.module.title" ) );
+    setDefaultPageImageDescriptor( DEFAULT_PAGE_IMAGE );
+    setNeedsProgressMonitor( true );
+  }
+
+  /** Creates the pages. */
+  public void addPages() {
+    configuration = new ProjectImportConfiguration();
+
+    parentPage = new MavenModuleWizardParentPage(configuration);
+    archetypePage = new MavenProjectWizardArchetypePage(configuration);
+    parametersPage = new MavenProjectWizardArchetypeParametersPage(configuration);
+    artifactPage = new MavenProjectWizardArtifactPage(configuration);
+    dependenciesPage = new MavenDependenciesWizardPage(configuration, //
+        Messages.getString("wizard.project.page.dependencies.title"), //
+        Messages.getString("wizard.project.page.dependencies.description"));
+    dependenciesPage.setDependencies(new Dependency[0]);
+
+    addPage( parentPage );
+    addPage( archetypePage );
+    addPage( parametersPage );
+    addPage( artifactPage );
+    addPage( dependenciesPage );
+  }
+  
+  /** Adds the listeners after the page controls are created. */
+  public void createPageControls( Composite pageContainer ) {
+    artifactPage.setParentReadonly(true);
+    artifactPage.setTitle(Messages.getString("wizard.module.page.artifact.title"));
+    archetypePage.setTitle(Messages.getString("wizard.module.page.archetype.title"));
+    parametersPage.setTitle(Messages.getString("wizard.module.page.parameters.title"));
+    
+    super.createPageControls( pageContainer );
+
+    parametersPage.setArtifactIdEnabled( false );
+    
+    parentPage.addArchetypeSelectionListener( new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        archetypePage.setUsed( ! parentPage.isSimpleProject() );
+      }
+    } );
+
+    parentPage.addModuleNameListener( new ModifyListener() {
+      public void modifyText( ModifyEvent e ) {
+        parametersPage.setProjectName( parentPage.getModuleName() );
+        artifactPage.setProjectName( parentPage.getModuleName() );
+      }
+    } );
+
+    parentPage.addParentProjectListener( new ModifyListener() {
+      public void modifyText( ModifyEvent e ) {
+        copyParentValues();
+      }
+    } );
+
+    if ( selection != null && selection.size() > 0 ) {
+      parentPage.setParent( selection.getFirstElement() );
+      copyParentValues();
+    }
+  }
+
+
+  /** Copies the parent project parameters to the artifact page. */
+  protected void copyParentValues() {
+    Model model = parentPage.getParentModel();
+    if ( model != null ) {
+      artifactPage.setParentProject(
+        model.getGroupId(), model.getArtifactId(), model.getVersion() );
+      parametersPage.setParentProject(
+          model.getGroupId(), model.getArtifactId(), model.getVersion() );
+    }
+  }
+  
+  
+  /** Stores the current selection. */
+  public void init( IWorkbench workbench, IStructuredSelection selection ) {
+    this.selection = selection;
+  }
+
+
+  /** Performs the "finish" action. */
+  public boolean performFinish() {
+    // First of all, we extract all the information from the wizard pages.
+    // Note that this should not be done inside the operation we will run
+    // since many of the wizard pages' methods can only be invoked from within
+    // the SWT event dispatcher thread. However, the operation spawns a new
+    // separate thread to perform the actual work, i.e. accessing SWT elements
+    // from within that thread would lead to an exception.
+
+    final String moduleName = parentPage.getModuleName();
+
+    // Get the location where to create the project. For some reason, when using
+    // the default workspace location for a project, we have to pass null
+    // instead of the actual location.
+    final IPath location = parentPage.getParentContainer().getLocation();
+    
+    final IFile parentPom = parentPage.getPom();
+
+    Job job;
+
+    if(parentPage.isSimpleProject()) {
+
+      final Model model = artifactPage.getModel();
+      model.getDependencies().addAll(Arrays.asList(dependenciesPage.getDependencies()));
+
+      final String[] folders = artifactPage.getFolders();
+
+      job = new Job(Messages.getString("wizard.project.job.creatingProject", moduleName)) {
+        public IStatus run(IProgressMonitor monitor) {
+          try {
+            MavenPlugin plugin = MavenPlugin.getDefault();
+            
+            String projectName = configuration.getProjectName(model);
+            
+            IProject project = configuration.getProject(ResourcesPlugin.getWorkspace().getRoot(), model);
+            
+            // XXX respect parent's setting for separate projects for modules
+            // XXX should run update sources on parent instead of creating new module project
+            
+            plugin.getBuildpathManager().createSimpleProject(project, location.append(moduleName), model, folders,
+                configuration.getResolverConfiguration(), monitor);
+            
+            plugin.getMavenModelManager().addModule(parentPom, projectName);
+            
+            return Status.OK_STATUS;
+          } catch(CoreException e) {
+            return e.getStatus();
+          } finally {
+            monitor.done();
+          }
+        }
+      };
+
+    } else {
+      final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(moduleName);
+      final Model model = parametersPage.getModel();
+      final Archetype archetype = archetypePage.getArchetype();
+
+      job = new Job(Messages.getString("wizard.project.job.creating", archetype.getArtifactId())) {
+        public IStatus run(IProgressMonitor monitor) {
+          try {
+            MavenPlugin plugin = MavenPlugin.getDefault();
+            plugin.getBuildpathManager().createArchetypeProject(project, location, archetype, model.getGroupId(),
+                model.getArtifactId(), model.getVersion(), model.getPackaging(), configuration, monitor);
+            plugin.getMavenModelManager().addModule(parentPom, moduleName);
+            return Status.OK_STATUS;
+          } catch(InterruptedException ex) {
+            return Status.OK_STATUS;
+          } catch(CoreException e) {
+            return e.getStatus();
+          } finally {
+            monitor.done();
+          }
+        }
+      };
+    }
+
+    job.addJobChangeListener(new JobChangeAdapter() {
+      public void done(IJobChangeEvent event) {
+        final IStatus result = event.getResult();
+        if(!result.isOK()) {
+          Display.getDefault().asyncExec(new Runnable() {
+            public void run() {
+              MessageDialog.openError(getShell(), //
+                  Messages.getString("wizard.project.job.failed", moduleName), //
+                  result.getMessage());
+            }
+          });
+        }
+      }
+    });
+    job.schedule();
+
+    return true;
+  }
+}

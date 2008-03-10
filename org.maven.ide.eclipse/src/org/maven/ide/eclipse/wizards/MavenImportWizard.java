@@ -1,0 +1,86 @@
+/*******************************************************************************
+ * Copyright (c) 2008 Sonatype, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *******************************************************************************/
+
+package org.maven.ide.eclipse.wizards;
+
+import java.util.Collection;
+import java.util.List;
+
+import org.eclipse.core.resources.WorkspaceJob;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.ui.IImportWizard;
+import org.eclipse.ui.IWorkbench;
+
+import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.project.BuildPathManager;
+import org.maven.ide.eclipse.project.ProjectImportConfiguration;
+
+
+/**
+ * Maven Import Wizard
+ * 
+ * @author Eugene Kuleshov
+ */
+public class MavenImportWizard extends Wizard implements IImportWizard {
+
+  final ProjectImportConfiguration importConfiguration;
+  
+  private MavenImportWizardPage page;
+
+  private List locations;
+  
+  public MavenImportWizard() {
+    importConfiguration = new ProjectImportConfiguration();
+    setNeedsProgressMonitor(true);
+  }
+
+  public MavenImportWizard(ProjectImportConfiguration importConfiguration, List locations) {
+    this.importConfiguration = importConfiguration;
+    this.locations = locations;
+    setNeedsProgressMonitor(true);
+  }
+  
+  public void init(IWorkbench workbench, IStructuredSelection selection) {
+  }
+
+  public void addPages() {
+    page = new MavenImportWizardPage(importConfiguration);
+    page.setLocations(locations);
+    addPage(page);
+  }
+
+  public boolean performFinish() {
+    if(!page.isPageComplete()) {
+      return false;
+    }
+
+    final Collection projects = page.getProjects();
+    
+    Job job = new WorkspaceJob("Importing Maven projects") {
+      public IStatus runInWorkspace(IProgressMonitor monitor) {
+        MavenPlugin plugin = MavenPlugin.getDefault();
+        
+        BuildPathManager buildpathManager = plugin.getBuildpathManager();
+        IStatus status = buildpathManager.importProjects(projects, importConfiguration, monitor);
+        if(!status.isOK()) {
+          plugin.getConsole().logError("Projects imported with errors");
+        }
+
+        return status;
+      }
+    };
+    job.schedule();
+
+    return true;
+  }
+
+}

@@ -1,0 +1,108 @@
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>m2eclipse-site</artifactId>
+  <groupId>org.codehaus.m2eclipse</groupId>
+  <version>1</version>
+  <url>http://m2eclipse.codehaus.org/</url>
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <name>Eugene Kuleshov</name>
+    </developer>
+    <developer>
+      <name>Jason van Zyl</name>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:svn:https://m2eclipse.codehaus.org/trunk/</connection>
+    <developerConnection>scm:svn:https://m2eclipse.codehaus.org/trunk/</developerConnection>
+    <url>http://cvs.codehaus.org/viewrep/m2eclipse/trunk/</url>
+  </scm>
+  <issueManagement>
+    <system>jira</system>
+    <url>http://jira.codehaus.org/browse/MNGECLIPSE</url>
+  </issueManagement>
+  <distributionManagement>
+    <site>
+      <id>m2eclipse-site</id>
+      <name>Eclipse Maven 2.x Extension</name>
+      <url>dav:https://dav.codehaus.org/m2eclipse/</url>
+    </site>
+  </distributionManagement>
+  <build>
+    <extensions>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-webdav</artifactId>
+        <version>1.0-beta-1</version>
+      </extension>
+    </extensions>
+  </build>
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>project-team</report>
+              <report>mailing-list</report>
+              <report>issue-tracking</report>
+              <report>license</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+    </plugins>
+  </reporting>
+  <mailingLists>
+    <mailingList>
+      <name>Users List</name>
+      <subscribe>user-subscribe@m2eclipse.codehaus.org</subscribe>
+      <unsubscribe>user-unsubscribe@m2eclipse.codehaus.org</unsubscribe>
+      <post>user@m2eclipse.codehaus.org</post>
+      <archive>http://archive.m2eclipse.codehaus.org/user</archive>
+    </mailingList>
+    <mailingList>
+      <name>Developer List</name>
+      <subscribe>dev-subscribe@m2eclipse.codehaus.org</subscribe>
+      <unsubscribe>dev-unsubscribe@m2eclipse.codehaus.org</unsubscribe>
+      <post>dev@m2eclipse.codehaus.org</post>
+      <archive>http://archive.m2eclipse.codehaus.org/dev</archive>
+    </mailingList>
+    <mailingList>
+      <name>Commits List</name>
+      <subscribe>scm-subscribe@m2eclipse.codehaus.org</subscribe>
+      <unsubscribe>scm-unsubscribe@m2eclipse.codehaus.org</unsubscribe>
+      <post>scm@m2eclipse.codehaus.org</post>
+      <archive>http://archive.m2eclipse.codehaus.org/scm</archive>
+    </mailingList>
+  </mailingLists>
+</project>

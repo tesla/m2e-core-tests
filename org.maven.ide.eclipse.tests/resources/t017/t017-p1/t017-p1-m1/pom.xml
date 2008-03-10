@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?><project>
+  <modelVersion>4.0.0</modelVersion>
+  
+  <parent>
+    <groupId>t017</groupId>
+    <artifactId>t017-p1</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+
+  <groupId>t017</groupId>
+  <artifactId>t017-p1-m1</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+
+  <dependencies>
+    <dependency>
+      <groupId>t017</groupId>
+      <artifactId>t017-p4</artifactId>
+      <version>${test.version}</version>
+    </dependency>
+  </dependencies>
+
+</project>

@@ -1,0 +1,22 @@
+<settings>
+  <localRepository>localrepo</localRepository>
+
+  <profiles>
+    <profile>
+      <id>test</id>
+        <repositories>
+          <repository>
+            <id>remoterepo</id>
+            <url>file:remoterepo</url>
+            <snapshots><enabled>true</enabled></snapshots>
+            <releases><enabled>true</enabled></releases>
+          </repository>
+        </repositories>
+    </profile>
+  </profiles>
+
+  <activeProfiles>
+    <activeProfile>test</activeProfile>
+  </activeProfiles>
+
+</settings>

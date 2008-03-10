@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?><project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>runtimeclasspath</groupId>
+  <artifactId>gensrc01</artifactId>
+  <name></name>
+  <version>0.0.1-SNAPSHOT</version>
+  <description></description>
+
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.modello</groupId>
+        <artifactId>modello-maven-plugin</artifactId>
+        <version>1.0-alpha-17</version>
+        <configuration>
+          <version>4.0.0</version>
+          <model>src/main/mdo/test.mdo</model>
+        </configuration> 
+        <executions>
+            <execution>
+              <id>standard</id>
+              <goals>
+                <goal>java</goal>
+              </goals>
+            </execution>
+         </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

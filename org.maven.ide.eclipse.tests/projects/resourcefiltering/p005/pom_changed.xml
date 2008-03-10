@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?><project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>resourcefiltering</groupId>
+  <artifactId>p005</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+
+  <build>
+    <resources>
+      <resource>
+        <directory>resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
+  </build>
+
+</project>

@@ -1,0 +1,55 @@
+/*******************************************************************************
+ * Copyright (c) 2007, 2008 Sonatype, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *******************************************************************************/
+
+package org.maven.ide.eclipse.actions;
+
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IObjectActionDelegate;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.PlatformUI;
+
+import org.apache.maven.model.Dependency;
+
+import org.maven.ide.eclipse.wizards.MavenMaterializePomWizard;
+
+
+public class MaterializeAction implements IObjectActionDelegate {
+
+  static final String ID = "org.maven.ide.eclipse.materializeAction";
+
+  private IStructuredSelection selection;
+
+  public void run(IAction action) {
+    MavenMaterializePomWizard wizard = new MavenMaterializePomWizard();
+    wizard.init(PlatformUI.getWorkbench(), selection);
+    
+    Dependency[] dependencies = wizard.getDependencies();
+    if(dependencies!=null && dependencies.length>0) {
+      WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), wizard);
+      dialog.open();
+    } else {
+      // TODO show info dialog
+    }
+  }
+
+  public void selectionChanged(IAction action, ISelection selection) {
+    if(selection instanceof IStructuredSelection) {
+      this.selection = (IStructuredSelection) selection;
+    } else {
+      this.selection = null;
+    }
+  }
+
+  public void setActivePart(IAction action, IWorkbenchPart targetPart) {
+  }
+
+}

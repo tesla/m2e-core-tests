@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?><project>
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>t009</groupId>
+  <artifactId>t009-p1</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+
+  <dependencies>
+    <dependency>
+	  <groupId>t009</groupId>
+	  <artifactId>t009-p3</artifactId>
+	  <version>0.0.1-SNAPSHOT</version>
+	</dependency>
+    <dependency>
+	  <groupId>t009</groupId>
+	  <artifactId>t009-p2</artifactId>
+	  <version>0.0.1-SNAPSHOT</version>
+	</dependency>
+  </dependencies>
+
+</project>

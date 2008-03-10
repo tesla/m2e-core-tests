@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?><project>
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>duplicateclasspath</groupId>
+    <artifactId>duplicateclasspath-p1</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>duplicateclasspath-p1-m2</artifactId>
+
+  <dependencies>
+    <dependency>
+	  <groupId>duplicateclasspath</groupId>
+	  <artifactId>duplicateclasspath-p2</artifactId>
+	  <version>0.0.1-SNAPSHOT</version>
+	  <scope>test</scope>
+	</dependency>
+  </dependencies>
+
+</project>

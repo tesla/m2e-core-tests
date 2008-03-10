@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?><project>
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>duplicateclasspath</groupId>
+  <artifactId>duplicateclasspath-p1</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  
+  <modules>
+    <module>duplicateclasspath-p1-m1</module>
+    <module>duplicateclasspath-p1-m2</module>
+  </modules>
+</project>

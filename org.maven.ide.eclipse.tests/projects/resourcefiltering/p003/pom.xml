@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?><project>
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>resourcefiltering</groupId>
+  <artifactId>p003</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  
+  <modules>
+    <module>p003-m1</module>
+  </modules>
+
+
+</project>

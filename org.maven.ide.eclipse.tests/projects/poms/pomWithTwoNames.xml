@@ -1,0 +1,20 @@
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>net.sf.jt400</groupId>
+  <artifactId>jt400-full</artifactId>
+  <packaging>jar</packaging>
+  <name>JT400</name>
+  <version>6.0</version>
+  <url>http://jt400.sourceforge.net/</url>
+  <licences>
+    <license>
+      <name>IBM Public License Version 1.0</name>
+      <url>http://downloads.sourceforge.net/jt400/license_6_0.html</url>
+      <distribution>repo</distribution>
+    </license>
+  </licences>
+  <scm>
+    <url>http://jt400.cvs.sourceforge.net/jt400/</url>
+  </scm>
+</project>
+

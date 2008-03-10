@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?><project>
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>t018</groupId>
+  <artifactId>t018-p2</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+
+  <modules>
+    <module>t018-p2-m1</module>
+  </modules>
+
+</project>

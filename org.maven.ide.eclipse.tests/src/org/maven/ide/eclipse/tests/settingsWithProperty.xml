@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<settings>
+
+  <profiles>
+    <profile>
+      <id>test-param</id>
+      <properties>
+        <maven.proxy.url>http://archiva.someserver.de/repository/releases</maven.proxy.url>
+      </properties>
+      <repositories>
+          <repository>
+              <id>central</id>
+              <name>central repo</name>
+              <url>${maven.proxy.url}</url>
+          </repository>
+      </repositories>
+    </profile>
+  </profiles>
+
+  <activeProfiles>
+    <activeProfile>test-param</activeProfile>
+  </activeProfiles>
+  
+</settings>

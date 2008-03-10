@@ -1,0 +1,18 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+	  <groupId>${parentpom.groupId}</groupId>
+	  <artifactId>${parentpom.artifactId}</artifactId>
+	  <version>${parentpom.version}</version>
+  </parent>
+  <properties>
+    <parentpom.groupId>t002</parentpom.groupId>
+    <parentpom.artifactId>t002-p1</parentpom.artifactId>
+    <parentpom.version>0.0.1-SNAPSHOT</parentpom.version>
+  </properties>
+
+  <artifactId>t002-p2</artifactId>
+  
+</project>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <description url="http://m2eclipse.codehaus.org/">
+      Maven Integration
+   </description>
+   <feature url="features/org.maven.ide.eclipse.feature_0.9.0.20080307-2100-Sonatype.jar" id="org.maven.ide.eclipse.feature" version="0.9.0.20080307-2100-Sonatype">
+      <category name="Maven Integration"/>
+   </feature>
+   <feature url="features/org.maven.ide.eclipse.subclipse.feature_0.9.0.20080301-0130-Sonatype.jar" id="org.maven.ide.eclipse.subclipse.feature" version="0.9.0.20080301-0130-Sonatype">
+      <category name="Optional Components"/>
+   </feature>
+   <feature url="features/org.maven.ide.eclipse.mylyn.feature_0.9.0.20080301-0130-Sonatype.jar" id="org.maven.ide.eclipse.mylyn.feature" version="0.9.0.20080301-0130-Sonatype">
+      <category name="Optional Components"/>
+   </feature>
+   <feature url="features/org.maven.ide.eclipse.central.feature_0.9.0.20080301-0130-Sonatype.jar" id="org.maven.ide.eclipse.central.feature" version="0.9.0.20080301-0130-Sonatype">
+      <category name="Optional Components"/>
+   </feature>
+   <category-def name="Maven Integration" label="Maven Integration"/>
+   <category-def name="Optional Components" label="Optional Components"/>
+</site>
