@@ -4,11 +4,11 @@ import java.util.List;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.PreferencePage;
-import org.eclipse.jface.viewers.BaseLabelProvider;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.IColorProvider;
+import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -221,7 +221,7 @@ public class MavenRuntimesPreferencePage extends PreferencePage implements IWork
   }
 
 
-  static class RuntimesLabelProvider extends BaseLabelProvider implements ITableLabelProvider, IColorProvider {
+  static class RuntimesLabelProvider implements ITableLabelProvider, IColorProvider {
     
     private Color disabledColor = Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GRAY);
 
@@ -245,8 +245,18 @@ public class MavenRuntimesPreferencePage extends PreferencePage implements IWork
     
     public void dispose() {
       disabledColor.dispose();
-      super.dispose();
+    }
+
+    public boolean isLabelProperty(Object element, String property) {
+      return false;
+    }
+
+    public void addListener(ILabelProviderListener listener) {
+    }
+    
+    public void removeListener(ILabelProviderListener listener) {
     }
 
   }
+  
 }
