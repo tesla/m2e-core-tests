@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Maven Integration for Eclipse
 Bundle-SymbolicName: org.maven.ide.eclipse;singleton:=true
-Bundle-Version: 0.9.0.20080310-1400-Sonatype
+Bundle-Version: 0.9.0.TEMPVERSION
 Bundle-Activator: org.maven.ide.eclipse.MavenPlugin
 Bundle-Vendor: Sinatype, Inc.
 Bundle-Localization: plugin
@@ -46,8 +46,12 @@ Export-Package: org.maven.ide.eclipse,
  org.maven.ide.eclipse.internal.index;x-friends:="org.maven.ide.eclipse.tests",
  org.maven.ide.eclipse.internal.project;x-friends:="org.maven.ide.eclipse.tests",
  org.maven.ide.eclipse.launch,
+ org.maven.ide.eclipse.launch.console,
+ org.maven.ide.eclipse.preferences,
  org.maven.ide.eclipse.project,
  org.maven.ide.eclipse.scm,
  org.maven.ide.eclipse.util,
  org.maven.ide.eclipse.wizards
 Import-Package: javax.xml.namespace
+MavenArtifact-GroupId: org.maven.ide.eclipse
+MavenArtifact-ArtifactId: org.maven.ide.eclipse

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (c) 2008 Sonatype, Inc.
+  All rights reserved. This program and the accompanying materials
+  are made available under the terms of the Eclipse Public License v1.0
+  which accompanies this distribution, and is available at
+  http://www.eclipse.org/legal/epl-v10.html
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.maven.ide</groupId>
+    <artifactId>org.maven.ide</artifactId>
+    <version>0.9.1-SNAPSHOT</version>
+  </parent>
+
+  <groupId>org.maven.ide.eclipse</groupId>
+  <artifactId>org.maven.ide.eclipse.tests</artifactId>
+  <version>1.0.0</version>
+  <packaging>osgi-bundle</packaging>
+  <name>Maven Integration for Eclipse JUnit Plug-in test</name>
+
+  <organization>
+    <name>Sonatype, Inc.</name>
+    <url>http://www.sonatype.com</url>
+  </organization>
+
+  <licenses>
+    <license>
+      <name>Eclipse Public License - v 1.0</name>
+      <url>http://www.eclipse.org/legal/epl-v10.html</url>
+    </license>
+  </licenses>
+
+  <prerequisites>
+    <maven>2.1-SNAPSHOT</maven>
+  </prerequisites>
+
+  <build>
+    <sourceDirectory>src</sourceDirectory>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.tycho</groupId>
+        <artifactId>maven-osgi-lifecycle-plugin</artifactId>
+        <extensions>true</extensions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.tycho</groupId>
+        <artifactId>maven-osgi-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.4</source>
+          <target>1.4</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.tycho</groupId>
+        <artifactId>maven-osgi-test-plugin</artifactId>
+        <configuration>
+          <testClassesDirectory>${project.build.outputDirectory}</testClassesDirectory>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <dependencies>
+    <dependency>
+      <groupId>org.eclipse</groupId>
+      <artifactId>org.eclipse.osgi</artifactId>
+      <version>3.2.1.R32x_v20060919</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse</groupId>
+      <artifactId>org.eclipse.core.runtime</artifactId>
+      <version>3.2.0.v20060603</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse</groupId>
+      <artifactId>org.eclipse.core.resources</artifactId>
+      <version>3.2.1.R32x_v20060914</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse</groupId>
+      <artifactId>org.eclipse.core.resources.compatibility</artifactId>
+      <version>3.2.0.v20060603</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse</groupId>
+      <artifactId>org.eclipse.core.resources.win32</artifactId>
+      <version>3.2.0.v20060603</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse</groupId>
+      <artifactId>org.eclipse.jdt.core</artifactId>
+      <version>3.2.1.v_677_R32x</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse</groupId>
+      <artifactId>org.eclipse.debug.core</artifactId>
+      <version>3.2.1.v20060823</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse</groupId>
+      <artifactId>org.eclipse.jdt.launching</artifactId>
+      <version>3.2.1.r321_v20060731</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse</groupId>
+      <artifactId>org.eclipse.jface</artifactId>
+      <version>3.2.1.M20060908-1000</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse</groupId>
+      <artifactId>org.eclipse.ui</artifactId>
+      <version>3.2.1.M20060913-0800</version>
+    </dependency>
+    <dependency>
+      <groupId>org.maven.ide.eclipse</groupId>
+      <artifactId>org.maven.ide.eclipse</artifactId>
+      <version>0.9.0.TEMPVERSION</version>
+    </dependency>
+    <dependency>
+      <groupId>org.maven.ide.components</groupId>
+      <artifactId>org.maven.ide.components.maven_embedder</artifactId>
+      <version>2.1.0.TEMPVERSION</version>
+    </dependency>
+    <dependency>
+      <groupId>org.maven.ide.components</groupId>
+      <artifactId>org.maven.ide.components.maven_model_edit</artifactId>
+      <version>1.0.0.TEMPVERSION</version>
+    </dependency>
+    <dependency>
+      <groupId>org.junit4</groupId>
+      <artifactId>org.junit4</artifactId>
+      <version>4.1.0.1</version>
+    </dependency>
+  </dependencies>
+</project>

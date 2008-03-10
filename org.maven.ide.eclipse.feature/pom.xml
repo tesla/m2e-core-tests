@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?><project>
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <artifactId>org.maven.ide</artifactId>
+    <groupId>org.maven.ide</groupId>
+    <version>0.9.1-TEMPVERSION</version>
+  </parent>
+
+  <groupId>org.maven.ide.eclipse</groupId>
+  <artifactId>org.maven.ide.eclipse.feature</artifactId>
+  <packaging>eclipse-feature</packaging>
+  <name>Maven Integration for Eclipse</name>
+  <version>0.9.0.TEMPVERSION</version>
+
+  <prerequisites>
+    <maven>2.1-SNAPSHOT</maven>
+  </prerequisites>
+
+  <licenses>
+    <license>
+      <name>Eclipse Public License - v 1.0</name>
+      <url>http://www.eclipse.org/legal/epl-v10.html</url>
+    </license>
+  </licenses>
+
+  <organization>
+    <name>Sonatype, Inc.</name>
+    <url>http://www.sonatype.com</url>
+  </organization>
+
+  <build>
+    <sourceDirectory>src</sourceDirectory>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.tycho</groupId>
+        <artifactId>maven-osgi-lifecycle-plugin</artifactId>
+        <extensions>true</extensions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.tycho</groupId>
+        <artifactId>maven-osgi-packaging-plugin</artifactId>
+        <configuration>
+          <featureOnly>true</featureOnly>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <dependencies>
+    <dependency>
+      <groupId>org.maven.ide.eclipse</groupId>
+      <artifactId>org.maven.ide.eclipse</artifactId>
+      <version>0.9.0.TEMPVERSION</version>
+    </dependency>
+    <dependency>
+      <groupId>org.maven.ide.components</groupId>
+      <artifactId>org.maven.ide.components.archetype_common</artifactId>
+      <version>2.0.0.TEMPVERSION</version>
+    </dependency>
+    <dependency>
+      <groupId>org.maven.ide.components</groupId>
+      <artifactId>org.maven.ide.components.maven_embedder</artifactId>
+      <version>2.1.0.TEMPVERSION</version>
+    </dependency>
+    <dependency>
+      <groupId>org.maven.ide.components</groupId>
+      <artifactId>org.maven.ide.components.nexus_indexer</artifactId>
+      <version>1.0.0.TEMPVERSION</version>
+    </dependency>
+    <dependency>
+      <groupId>org.maven.ide.components</groupId>
+      <artifactId>org.maven.ide.components.maven_model_edit</artifactId>
+      <version>1.0.0.TEMPVERSION</version>
+    </dependency>
+    <dependency>
+      <groupId>org.maven.ide.components</groupId>
+      <artifactId>org.maven.ide.components.qname</artifactId>
+      <version>1.0.0.TEMPVERSION</version>
+    </dependency>
+  </dependencies>
+</project>

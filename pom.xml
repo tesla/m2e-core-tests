@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?><project>
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.maven.ide</groupId>
+  <artifactId>org.maven.ide</artifactId>
+  <packaging>pom</packaging>
+  <version>0.9.1-TEMPVERSION</version>
+
+  <modules>
+    <module>org.maven.ide.components.qname</module>
+    <module>org.maven.ide.components.maven-embedder</module>
+    <module>org.maven.ide.components.archetype-common</module>
+    <module>org.maven.ide.components.nexus-indexer</module>
+    <module>org.maven.ide.components.maven-model-edit</module>
+
+    <module>org.maven.ide.eclipse</module>
+    <module>org.maven.ide.eclipse.feature</module>
+
+    <module>org.maven.ide.eclipse.central</module>
+    <module>org.maven.ide.eclipse.central.feature</module>
+
+    <module>org.maven.ide.eclipse.mylyn</module>
+    <module>org.maven.ide.eclipse.mylyn.feature</module>
+
+    <module>org.maven.ide.eclipse.subclipse</module>
+    <module>org.maven.ide.eclipse.subclipse.feature</module>
+
+    <!--
+    <module>org.maven.ide.eclipse.tests</module>
+    -->
+
+    <module>org.maven.ide.eclipse.update</module>
+
+  </modules>
+
+</project>
