@@ -3,7 +3,7 @@
    <description url="http://m2eclipse.codehaus.org/">
       Maven Integration
    </description>
-   <feature url="features/org.maven.ide.eclipse.feature_0.9.0.20080307-2100-Sonatype.jar" id="org.maven.ide.eclipse.feature" version="0.9.0.20080307-2100-Sonatype">
+   <feature url="features/org.maven.ide.eclipse.feature_0.9.0.20080310-1400-Sonatype.jar" id="org.maven.ide.eclipse.feature" version="0.9.0.20080310-1400-Sonatype">
       <category name="Maven Integration"/>
    </feature>
    <feature url="features/org.maven.ide.eclipse.subclipse.feature_0.9.0.20080301-0130-Sonatype.jar" id="org.maven.ide.eclipse.subclipse.feature" version="0.9.0.20080301-0130-Sonatype">

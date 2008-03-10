@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Maven Integration for Eclipse
 Bundle-SymbolicName: org.maven.ide.eclipse;singleton:=true
-Bundle-Version: 0.9.0.20080307-2100-Sonatype
+Bundle-Version: 0.9.0.20080310-1400-Sonatype
 Bundle-Activator: org.maven.ide.eclipse.MavenPlugin
 Bundle-Vendor: Sinatype, Inc.
 Bundle-Localization: plugin
