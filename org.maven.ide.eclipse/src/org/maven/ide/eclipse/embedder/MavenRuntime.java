@@ -151,7 +151,7 @@ public abstract class MavenRuntime {
     
     public String getOptions() {
       // TODO add quotes if location contains spaces
-      return " -Dclassworlds.conf=" + location + "\\bin\\m2.conf -Dmaven.home=" + location;
+      return " -Dclassworlds.conf=" + location + File.separator + "bin" + File.separator + "m2.conf -Dmaven.home=" + location;
     }
     
     public String[] getClasspath() {
