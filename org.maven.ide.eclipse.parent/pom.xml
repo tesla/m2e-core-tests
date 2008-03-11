@@ -33,4 +33,16 @@
 
   </modules>
 
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.maven.ide.tools</groupId>
+          <artifactId>maven-eclipsehelper-plugin</artifactId>
+          <version>0.0.2-SNAPSHOT</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
 </project>
