@@ -140,6 +140,7 @@ public class MavenClasspathContainerPage extends WizardPage implements IClasspat
 
     includeModulesText = new Text(tabComposite, SWT.WRAP | SWT.READ_ONLY | SWT.MULTI);
     includeModulesText.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_BLUE));
+    includeModulesText.setBackground(tabComposite.getBackground());
     GridData includeModulesData = new GridData(SWT.FILL, SWT.FILL, true, false);
     includeModulesData.widthHint = 300;
     includeModulesData.verticalIndent = -3;
