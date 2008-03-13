@@ -27,24 +27,23 @@
 
 
   ---------------
-  maven-embedder jar is currently committed at org.maven.ide.eclipse/lib
-  and its name is referenced/hardcoded in the following resources:
-    build.properties
-    META-INF\MANIFEST.MF
-
-
-  ---------------
   To build Maven Embedder:
 
   Maven svn repo:
-    svn co http://svn.apache.org/repos/asf/maven/components/trunk/ .
+    svn co http://svn.apache.org/repos/asf/maven/components/trunk/ maven
 
-  From the project root
+  From the maven dir run:
     mvn install
-
-  From maven-embedder folder 
-     mvn -Ptycho package 
 
   Building Maven:
     http://maven.apache.org/guides/development/guide-building-m2.html
 
+  ---------------
+  To build Maven Archetype Common:
+  
+  Maven svn repo:
+    svn co http://svn.apache.org/repos/asf/maven/archetype/trunk maven-archetype
+
+  From the maven-archetype dir run:
+    mvn install
+  
