@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <description url="http://m2eclipse.codehaus.org/">
+   <description url="http://m2eclipse.sonatype.org/update/">
       Maven Integration
    </description>
    <feature url="features/org.maven.ide.eclipse.feature_0.9.0.TEMPVERSION.jar" id="org.maven.ide.eclipse.feature" version="0.9.0.TEMPVERSION">
