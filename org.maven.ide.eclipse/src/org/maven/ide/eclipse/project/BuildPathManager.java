@@ -994,9 +994,12 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     ArtifactFilter scopeFilter;
     if(CLASSPATH_RUNTIME == kind) {
       // ECLIPSE-33: runtime+provided scope
+      // ECLIPSE-85: adding system scope
       scopeFilter = new ArtifactFilter() {
         public boolean include(Artifact artifact) {
-          return SCOPE_FILTER_RUNTIME.include(artifact) || Artifact.SCOPE_PROVIDED.equals( artifact.getScope() );
+          return SCOPE_FILTER_RUNTIME.include(artifact) 
+                  || Artifact.SCOPE_PROVIDED.equals( artifact.getScope() )
+                  || Artifact.SCOPE_SYSTEM.equals( artifact.getScope() );
         }
       };
     } else {
