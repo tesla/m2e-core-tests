@@ -8,9 +8,18 @@
 
 package org.maven.ide.eclipse.tests;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.apache.maven.model.Dependency;
+import org.apache.maven.model.Model;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.DebugPlugin;
@@ -198,4 +207,42 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
     assertEquals(new Path("/runtimeclasspath-providedscope/src/main/resources"), userClasspath[3].getPath());
     assertEquals("junit-3.8.1.jar", userClasspath[4].getPath().lastSegment());
   }
+
+  public void testSystemScope() throws Exception {
+    IProject project = createExisting("runtimeclasspath-systemscope", "projects/runtimeclasspath/systemscope");
+    
+    MavenXpp3Reader reader = new MavenXpp3Reader();
+    InputStream is = project.getFile("pom-orig.xml").getContents();
+    Model model;
+    try {
+      model = reader.read(is);
+    } finally {
+      is.close();
+    }
+    
+    Dependency d = (Dependency) model.getDependencies().get(0);
+    d.setSystemPath(new File("remoterepo/log4j/log4j/1.2.13/log4j-1.2.13.jar").getCanonicalPath());
+
+    MavenXpp3Writer writer = new MavenXpp3Writer();
+    
+    ByteArrayOutputStream buf = new ByteArrayOutputStream();
+    OutputStreamWriter out = new OutputStreamWriter(buf);
+    writer.write(out, model);
+    
+    project.getFile("pom.xml").create(new ByteArrayInputStream(buf.toByteArray()), true, null);
+    
+    waitForJobsToComplete();
+
+    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(project.getFile("SystemScope.launch"));
+
+    MavenRuntimeClasspathProvider classpathProvider = new MavenRuntimeClasspathProvider();
+    IRuntimeClasspathEntry[] unresolvedClasspath = classpathProvider.computeUnresolvedClasspath(configuration);
+    IRuntimeClasspathEntry[] resolvedClasspath = classpathProvider.resolveClasspath(unresolvedClasspath, configuration);
+    IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
+
+    assertEquals(Arrays.asList(userClasspath).toString(), 2, userClasspath.length);
+    assertEquals(new Path("/runtimeclasspath-systemscope/target-eclipse/classes"), userClasspath[0].getPath());
+    assertEquals("log4j-1.2.13.jar", userClasspath[1].getPath().lastSegment());
+  }
+
 }
