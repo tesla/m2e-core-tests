@@ -2,7 +2,7 @@
 <feature
       id="org.maven.ide.eclipse.feature"
       label="Maven Integration for Eclipse"
-      version="0.9.0.TEMPVERSION"
+      version="0.9.0.qualifier"
       provider-name="Sonatype, Inc."
       plugin="org.maven.ide.eclipse">
    <install-handler/>
@@ -36,37 +36,37 @@ http://www.eclipse.org/legal/epl-v10.html
          id="org.maven.ide.eclipse"
          download-size="0"
          install-size="0"
-         version="0.9.0.TEMPVERSION"
+         version="0.9.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.maven.ide.components.archetype_common"
          download-size="0"
          install-size="0"
-         version="2.0.0.TEMPVERSION"/>
+         version="2.0.0.qualifier"/>
 
    <plugin
          id="org.maven.ide.components.maven_embedder"
          download-size="0"
          install-size="0"
-         version="2.1.0.TEMPVERSION"/>
+         version="2.1.0.qualifier"/>
 
    <plugin
          id="org.maven.ide.components.nexus_indexer"
          download-size="0"
          install-size="0"
-         version="1.0.0.TEMPVERSION"/>
+         version="1.0.0.qualifier"/>
 
    <plugin
          id="org.maven.ide.components.maven_model_edit"
          download-size="0"
          install-size="0"
-         version="1.0.0.TEMPVERSION"/>
+         version="1.0.0.qualifier"/>
 
    <plugin
          id="org.maven.ide.components.qname"
          download-size="0"
          install-size="0"
-         version="1.0.0.TEMPVERSION"/>
+         version="1.0.0.qualifier"/>
 
 </feature>

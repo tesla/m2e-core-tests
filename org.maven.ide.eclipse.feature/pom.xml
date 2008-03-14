@@ -14,12 +14,12 @@
   <parent>
     <groupId>org.maven.ide.eclipse</groupId>
     <artifactId>parent</artifactId>
-    <version>0.9.1-TEMPVERSION</version>
+    <version>0.9.1-SNAPSHOT</version>
     <relativePath>../org.maven.ide.eclipse.parent</relativePath>
   </parent>
 
   <artifactId>org.maven.ide.eclipse.feature</artifactId>
-  <version>0.9.0.TEMPVERSION</version>
+  <version>0.9.0-SNAPSHOT</version>
   <packaging>eclipse-feature</packaging>
 
   <name>Maven Integration for Eclipse</name>
@@ -47,32 +47,32 @@
     <dependency>
       <groupId>org.maven.ide.eclipse</groupId>
       <artifactId>org.maven.ide.eclipse</artifactId>
-      <version>0.9.0.TEMPVERSION</version>
+      <version>0.9.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.maven.ide.components</groupId>
       <artifactId>org.maven.ide.components.archetype_common</artifactId>
-      <version>2.0.0.TEMPVERSION</version>
+      <version>2.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.maven.ide.components</groupId>
       <artifactId>org.maven.ide.components.maven_embedder</artifactId>
-      <version>2.1.0.TEMPVERSION</version>
+      <version>2.1.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.maven.ide.components</groupId>
       <artifactId>org.maven.ide.components.nexus_indexer</artifactId>
-      <version>1.0.0.TEMPVERSION</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.maven.ide.components</groupId>
       <artifactId>org.maven.ide.components.maven_model_edit</artifactId>
-      <version>1.0.0.TEMPVERSION</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.maven.ide.components</groupId>
       <artifactId>org.maven.ide.components.qname</artifactId>
-      <version>1.0.0.TEMPVERSION</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
   </dependencies>
   
