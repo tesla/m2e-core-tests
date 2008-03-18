@@ -12,14 +12,16 @@
             <releases><enabled>true</enabled></releases>
           </repository>
         </repositories>
+<!--
         <pluginRepositories>
-          <repository>
+          <pluginRepository>
             <id>remoterepo-plugins</id>
             <url>file:remoterepo</url>
             <snapshots><enabled>true</enabled></snapshots>
             <releases><enabled>true</enabled></releases>
-          </repository>
+          </pluginRepository>
         </pluginRepositories>
+-->
     </profile>
   </profiles>
 

@@ -157,7 +157,7 @@ public class MavenBuilderTest extends AsbtractMavenProjectTestCase {
     assertEquals("0.0.1-SNAPSHOT", properties.getProperty("a.version"));
   }
 
-  public void test006_testPluginProperties() throws Exception {
+  public void _test006_testPluginProperties() throws Exception {
     deleteProject("resourcefiltering-p006");
     IProject project = createExisting("resourcefiltering-p006", "projects/resourcefiltering/p006");
     waitForJobsToComplete();
