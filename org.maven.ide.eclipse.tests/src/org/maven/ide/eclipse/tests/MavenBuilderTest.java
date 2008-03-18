@@ -16,9 +16,13 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.IScopeContext;
+import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.internal.project.FilterResourcesPathTranslator;
 
 public class MavenBuilderTest extends AsbtractMavenProjectTestCase {
@@ -151,5 +155,31 @@ public class MavenBuilderTest extends AsbtractMavenProjectTestCase {
     Properties properties = loadProperties(a.getFullPath());
     assertEquals("Unnamed - resourcefiltering:p005:jar:0.0.1-SNAPSHOT", properties.getProperty("a.name"));
     assertEquals("0.0.1-SNAPSHOT", properties.getProperty("a.version"));
+  }
+
+  public void test006_testPluginProperties() throws Exception {
+    deleteProject("resourcefiltering-p006");
+    IProject project = createExisting("resourcefiltering-p006", "projects/resourcefiltering/p006");
+    waitForJobsToComplete();
+
+    project.build(IncrementalProjectBuilder.CLEAN_BUILD, monitor);
+    waitForJobsToComplete();
+
+    IFolder outputFolder = project.getFolder("target-eclipse/classes"); // XXX
+    IFile a = outputFolder.getFile("application.properties");
+    Properties properties = loadProperties(a.getFullPath());
+    assertEquals("1.0-SNAPSHOT.${timestamp}", properties.getProperty("buildVersion"));
+
+    IScopeContext projectScope = new ProjectScope(project);
+    IEclipsePreferences projectNode = projectScope.getNode(MavenPlugin.PLUGIN_ID);
+    // MavenPreferenceConstants.P_GOAL_ON_RESOURCE_FILTER stupid classpath access restrictions!!!
+    projectNode.put("eclipse.m2.goalOnResourceFilter", "process-resources resources:testResources");
+
+    project.build(IncrementalProjectBuilder.CLEAN_BUILD, monitor);
+    waitForJobsToComplete();
+
+    properties = loadProperties(a.getFullPath());
+    assertEquals("1.0-SNAPSHOT.123456789", properties.getProperty("buildVersion"));
+
   }
 }

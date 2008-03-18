@@ -77,7 +77,7 @@ public class MavenBuilder extends IncrementalProjectBuilder {
 
     MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
     MavenProjectFacade mavenProject = projectManager.create(getProject(), monitor);
-    
+
     if (mavenProject == null) {
       return;
     }

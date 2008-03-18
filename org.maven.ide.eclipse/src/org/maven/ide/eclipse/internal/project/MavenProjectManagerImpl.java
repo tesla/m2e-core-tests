@@ -27,15 +27,19 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.component.repository.ComponentDescriptor;
+import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 import org.apache.maven.artifact.Artifact;
@@ -59,6 +63,7 @@ import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.internal.embedder.TransferListenerAdapter;
+import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;
 import org.maven.ide.eclipse.project.BuildPathManager;
 import org.maven.ide.eclipse.project.DownloadSourceEvent;
 import org.maven.ide.eclipse.project.IDownloadSourceListener;
@@ -1019,10 +1024,13 @@ public class MavenProjectManagerImpl {
     try {
       IFile pom = facade.getPom();
       ResolverConfiguration resolverConfiguration = facade.getResolverConfiguration();
-      
-      // XXX error markers and error handling? 
-      // MavenExecutionResult result = 
-      execute(embedder, pom, resolverConfiguration, Arrays.asList(new String[] {"resources:resources", "resources:testResources"}), monitor);
+
+      IScopeContext projectScope = new ProjectScope(facade.getProject());
+      IEclipsePreferences projectNode = projectScope.getNode(MavenPlugin.PLUGIN_ID);
+
+      String goals = projectNode.get(MavenPreferenceConstants.P_GOAL_ON_RESOURCE_FILTER, "resources:resources resources:testResources");
+
+      execute(embedder, pom, resolverConfiguration, Arrays.asList(StringUtils.split(goals)), monitor);
 
       IProject project = pom.getProject();
 
