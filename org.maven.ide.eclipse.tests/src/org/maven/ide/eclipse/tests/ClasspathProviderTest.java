@@ -245,4 +245,18 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
     assertEquals("log4j-1.2.13.jar", userClasspath[1].getPath().lastSegment());
   }
 
+  public void testCustomClasspath() throws Exception {
+    IProject project = createExisting("runtimeclasspath-customentries", "projects/runtimeclasspath/customentries");
+    waitForJobsToComplete();
+
+    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(project.getFile("runtimeclasspath-customentries.launch"));
+
+    MavenRuntimeClasspathProvider classpathProvider = new MavenRuntimeClasspathProvider();
+    IRuntimeClasspathEntry[] unresolvedClasspath = classpathProvider.computeUnresolvedClasspath(configuration);
+    IRuntimeClasspathEntry[] resolvedClasspath = classpathProvider.resolveClasspath(unresolvedClasspath, configuration);
+    IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
+
+    assertEquals(Arrays.asList(userClasspath).toString(), 2, userClasspath.length);
+    assertEquals("custom.jar", userClasspath[0].getPath().lastSegment());
+  }
 }

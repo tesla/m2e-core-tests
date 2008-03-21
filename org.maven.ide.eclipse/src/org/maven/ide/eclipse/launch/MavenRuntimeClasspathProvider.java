@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.StandardClasspathProvider;
@@ -53,14 +54,18 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
   private static final Path MAVEN2_CONTAINER_PATH = new Path(MavenPlugin.CONTAINER_ID);
 
   public IRuntimeClasspathEntry[] computeUnresolvedClasspath(final ILaunchConfiguration configuration) throws CoreException {
-    IRuntimeClasspathEntry jreEntry = JavaRuntime.computeJREEntry(configuration);
-
-    IJavaProject javaProject = JavaRuntime.getJavaProject(configuration);
-    IRuntimeClasspathEntry projectEntry = JavaRuntime.newProjectRuntimeClasspathEntry(javaProject);
-
-    IRuntimeClasspathEntry mavenEntry = JavaRuntime.newRuntimeContainerClasspathEntry(MAVEN2_CONTAINER_PATH, IRuntimeClasspathEntry.USER_CLASSES);
-
-    return new IRuntimeClasspathEntry[] {jreEntry, projectEntry, mavenEntry};
+    boolean useDefault = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH, true);
+    IRuntimeClasspathEntry[] entries;
+    if (useDefault) {
+      IRuntimeClasspathEntry jreEntry = JavaRuntime.computeJREEntry(configuration);
+      IJavaProject javaProject = JavaRuntime.getJavaProject(configuration);
+      IRuntimeClasspathEntry projectEntry = JavaRuntime.newProjectRuntimeClasspathEntry(javaProject);
+      IRuntimeClasspathEntry mavenEntry = JavaRuntime.newRuntimeContainerClasspathEntry(MAVEN2_CONTAINER_PATH, IRuntimeClasspathEntry.USER_CLASSES);
+      entries = new IRuntimeClasspathEntry[] {jreEntry, projectEntry, mavenEntry};
+    } else {
+      entries = recoverRuntimePath(configuration, IJavaLaunchConfigurationConstants.ATTR_CLASSPATH);
+    }
+    return entries;
   }
 
   public IRuntimeClasspathEntry[] resolveClasspath(IRuntimeClasspathEntry[] entries, ILaunchConfiguration configuration)

@@ -620,7 +620,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     waitForJobsToComplete();
 
     File file = new File(repo, "junit/junit/3.8.1/junit-3.8.1.jar");
-    file.delete();
+    assertTrue(file.delete());
 
     MavenUpdateRequest updateRequest = new MavenUpdateRequest(true /*offline*/, false /* updateSources */);
     updateRequest.addPomFile(p1);
