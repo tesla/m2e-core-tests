@@ -75,18 +75,29 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
 
     Set all = new LinkedHashSet(entries.length);
     for (int i = 0; i < entries.length; i++) {
-      if (MAVEN2_CONTAINER_PATH.equals(entries[i].getPath()) && entries[i].getType() == IRuntimeClasspathEntry.CONTAINER) {
-        addMavenClasspathEntries(all, entries[i], configuration, scope);
-      } else if (entries[i].getType() == IRuntimeClasspathEntry.PROJECT) {
-        addProjectEntries(all, entries[i].getPath(), scope);
-      } else {
-        IRuntimeClasspathEntry[] resolved = JavaRuntime.resolveRuntimeClasspathEntry(entries[i], configuration);
-        for (int j = 0; j < resolved.length; j++) {
-          all.add(resolved[j]);
+      IRuntimeClasspathEntry entry = entries[i];
+      if (MAVEN2_CONTAINER_PATH.equals(entry.getPath()) && entry.getType() == IRuntimeClasspathEntry.CONTAINER) {
+        addMavenClasspathEntries(all, entry, configuration, scope);
+      } else if (entry.getType() == IRuntimeClasspathEntry.PROJECT) {
+        IJavaProject javaProject = JavaRuntime.getJavaProject(configuration);
+        if (javaProject.getPath().equals(entry.getPath())) {
+          addProjectEntries(all, entry.getPath(), scope);
+        } else {
+          addStandardClasspathEntries(all, entry, configuration);
         }
+      } else {
+        addStandardClasspathEntries(all, entry, configuration);
       }
     }
     return (IRuntimeClasspathEntry[])all.toArray(new IRuntimeClasspathEntry[all.size()]);
+  }
+
+  private void addStandardClasspathEntries(Set all, IRuntimeClasspathEntry entry, ILaunchConfiguration configuration)
+      throws CoreException {
+    IRuntimeClasspathEntry[] resolved = JavaRuntime.resolveRuntimeClasspathEntry(entry, configuration);
+    for (int j = 0; j < resolved.length; j++) {
+      all.add(resolved[j]);
+    }
   }
 
   private void addMavenClasspathEntries(Set resolved, IRuntimeClasspathEntry runtimeClasspathEntry,
