@@ -64,19 +64,21 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
     ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(cptest.getFile("TestApp.launch"));
     MavenSourcePathProvider classpathProvider = new MavenSourcePathProvider();
     IRuntimeClasspathEntry[] unresolvedClasspath = classpathProvider.computeUnresolvedClasspath(configuration);
-    
+
     assertEquals(Arrays.asList(unresolvedClasspath).toString(), 3, unresolvedClasspath.length);
 
     IRuntimeClasspathEntry[] resolvedClasspath = classpathProvider.resolveClasspath(unresolvedClasspath, configuration);
     IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
 
-    assertEquals(Arrays.asList(userClasspath).toString(), 4, userClasspath.length);
-    assertEquals(new Path("/cptest"), userClasspath[0].getPath());
-    assertEquals("testlib-2.0.jar", userClasspath[1].getPath().lastSegment());
-    assertEquals("commons-logging-1.0.2.jar", userClasspath[2].getPath().lastSegment());
-    assertEquals(new Path("/cptest2"), userClasspath[3].getPath());
+    assertEquals(Arrays.asList(userClasspath).toString(), 6, userClasspath.length);
+    assertEquals(new Path("/cptest/target/classes"), userClasspath[0].getPath());
+    assertEquals(new Path("/cptest/src/main/resources"), userClasspath[1].getPath());
+    assertEquals("testlib-2.0.jar", userClasspath[2].getPath().lastSegment());
+    assertEquals("commons-logging-1.0.2.jar", userClasspath[3].getPath().lastSegment());
+    assertEquals(new Path("/cptest2/target/classes"), userClasspath[4].getPath());
+    assertEquals(new Path("/cptest2/src/main/resources"), userClasspath[5].getPath());
   }
-  
+
   IRuntimeClasspathEntry[] getUserClasspathEntries(IRuntimeClasspathEntry[] entries) {
     ArrayList result = new ArrayList();
     for (int i = 0; i < entries.length; i++) {
@@ -274,5 +276,23 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
 
     assertEquals(Arrays.asList(userClasspath).toString(), 2, userClasspath.length);
     assertEquals(javaproject.getFullPath(), userClasspath[1].getPath());
+  }
+
+  public void testCustomBuildpath() throws Exception {
+    IProject project = createExisting("runtimeclasspath-custombuildpath", "projects/runtimeclasspath/custombuildpath");
+    IProject javaproject = createExisting("runtimeclasspath-javaproject", "projects/runtimeclasspath/javaproject");
+    waitForJobsToComplete();
+
+    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(project.getFile("runtimeclasspath-custombuildpath.launch"));
+
+    MavenRuntimeClasspathProvider classpathProvider = new MavenRuntimeClasspathProvider();
+    IRuntimeClasspathEntry[] unresolvedClasspath = classpathProvider.computeUnresolvedClasspath(configuration);
+    IRuntimeClasspathEntry[] resolvedClasspath = classpathProvider.resolveClasspath(unresolvedClasspath, configuration);
+    IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
+
+    assertEquals(Arrays.asList(userClasspath).toString(), 3, userClasspath.length);
+    assertEquals(new Path("/runtimeclasspath-custombuildpath/target-eclipse/classes"), userClasspath[0].getPath());
+    assertEquals(javaproject.getFullPath(), userClasspath[1].getPath());
+    assertEquals("custom.jar", userClasspath[2].getPath().lastSegment());
   }
 }
