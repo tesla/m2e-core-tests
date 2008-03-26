@@ -64,7 +64,7 @@ public class ResolverConfigurationComponent extends ExpandableComposite {
     setClient(advancedComposite);
     addExpansionListener(new ExpansionAdapter() {
       public void expansionStateChanged(ExpansionEvent e) {
-        parent.getShell().pack();
+//        parent.getShell().pack();
         parent.layout();
       }
     });
