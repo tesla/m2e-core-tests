@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.views;
+package org.maven.ide.eclipse.internal.views;
 
 import java.net.URL;
 import java.util.ArrayList;

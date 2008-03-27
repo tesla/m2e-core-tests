@@ -47,7 +47,7 @@ public class LegacyIndexManager extends IndexManager {
 
     // indexInfo.getType() == IndexInfo.Type.LOCAL
     if(indexInfo.getRepositoryDir() != null && (reindex || !isValidIndex(indexName))) {
-      scheduleReindex(indexName, 5000L);
+      scheduleIndexUpdate(IndexManager.LOCAL_INDEX, true, 5000L);
     } else {
       Indexer indexer = new Indexer();
       try {
@@ -117,7 +117,7 @@ public class LegacyIndexManager extends IndexManager {
     return null;
   }
   
-  public Date fetchAndUpdateIndex(String indexId, final IProgressMonitor monitor) {
+  public Date fetchAndUpdateIndex(String indexId, boolean force, final IProgressMonitor monitor) {
     // not supported
     return null;
   }

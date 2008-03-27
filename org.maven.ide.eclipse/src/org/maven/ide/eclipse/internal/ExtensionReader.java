@@ -12,9 +12,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.osgi.framework.Bundle;
 
@@ -89,8 +90,8 @@ public class ExtensionReader {
    * @param configFile previously saved indexes configuration
    * @return collection of {@link IndexInfo} from the extension points
    */
-  public static Collection readIndexInfoExtensions() {
-    ArrayList indexes = new ArrayList();
+  public static Map readIndexInfoExtensions() {
+    Map indexes = new LinkedHashMap();
 
     IExtensionRegistry registry = Platform.getExtensionRegistry();
     IExtensionPoint indexesExtensionPoint = registry.getExtensionPoint(EXTENSION_INDEXES);
@@ -102,7 +103,8 @@ public class ExtensionReader {
         IConfigurationElement[] elements = extension.getConfigurationElements();
         for(int j = 0; j < elements.length; j++ ) {
           if(elements[j].getName().equals(ELEMENT_INDEX)) {
-            indexes.add(readIndexElement(elements[j], contributor));
+            IndexInfo indexInfo = readIndexElement(elements[j], contributor);
+            indexes.put(indexInfo.getIndexName(), indexInfo);
           }
         }
       }

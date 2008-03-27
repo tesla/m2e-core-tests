@@ -6,21 +6,14 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.views;
+package org.maven.ide.eclipse.internal.views;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
@@ -444,49 +437,25 @@ public class MavenIndexesView extends ViewPart {
   };
 
   void updateIndex(final IndexInfo info) {
-    Job job;
-    if(IndexInfo.Type.REMOTE.equals(info.getType())) {
-      job = new Job("Updating index " + info.getIndexName() + " " + info.getRepositoryUrl()) {
-        protected IStatus run(IProgressMonitor monitor) {
-          IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
-          try {
-            Date indexTime = indexManager.fetchAndUpdateIndex(info.getIndexName(), monitor);
-            if(indexTime==null) {
-              MavenPlugin.getDefault().getConsole().logMessage("No index update available for " + info.getIndexName());
-            } else {
-              MavenPlugin.getDefault().getConsole().logMessage("Updated index for " + info.getIndexName() + " " + indexTime);
-            }
-          } catch(IOException ex) {
-            String msg = "Unable to update index for " + info.getIndexName() + " " + info.getRepositoryUrl();
-            MavenPlugin.log(msg, ex);
-            MavenPlugin.getDefault().getConsole().logError(msg);
-          }
-          return Status.OK_STATUS;
-        };
-      };
-    } else if(IndexInfo.Type.LOCAL.equals(info.getType())) {
-      job = new Job("Reindexing local repository") {
-        protected IStatus run(IProgressMonitor monitor) {
-          IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
-          try {
-            indexManager.reindex(info.getIndexName(), monitor);
-            MavenPlugin.getDefault().getConsole().logMessage("Updated index for local repository");
-          } catch(IOException ex) {
-            MavenPlugin.getDefault().getConsole().logError("Unable to reindex local repository");
-          }
-          return Status.OK_STATUS;
-        };
-      };
-    } else {
-      return;
-    }
-
-    job.addJobChangeListener(new JobChangeAdapter() {
-      public void done(IJobChangeEvent event) {
-        refreshView();
-      }
-    });
-    job.schedule();
+    IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
+    indexManager.scheduleIndexUpdate(info.getIndexName(), false, 0L);
+    
+//    Job job;
+//    if(IndexInfo.Type.REMOTE.equals(info.getType())) {
+//      job = new IndexUpdaterJob(info, plugin.getIndexManager(), plugin.getConsole());
+//    } else if(IndexInfo.Type.LOCAL.equals(info.getType())) {
+//      job = new IndexerJob(info.getIndexName(), plugin.getIndexManager(), plugin.getConsole());
+//    } else {
+//      return;
+//    }
+//
+//    job.addJobChangeListener(new JobChangeAdapter() {
+//      public void done(IJobChangeEvent event) {
+//        refreshView();
+//      }
+//    });
+//    
+//    job.schedule();
   }
 
   public class ViewContentProvider implements IStructuredContentProvider, ITreeContentProvider {

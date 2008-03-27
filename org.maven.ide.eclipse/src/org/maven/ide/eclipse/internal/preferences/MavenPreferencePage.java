@@ -80,24 +80,6 @@ public class MavenPreferencePage extends FieldEditorPreferencePage implements IW
 
     addField(new BooleanFieldEditor(MavenPreferenceConstants.P_OFFLINE, Messages.getString("preferences.offline"), //$NON-NLS-1$
         getFieldEditorParent()));
-
-    // addField( new BooleanFieldEditor( MavenPreferenceConstants.P_UPDATE_SNAPSHOTS, 
-    //     Messages.getString( "preferences.updateSnapshots" ), //$NON-NLS-1$
-    //     getFieldEditorParent() ) );
-
-    addField(new BooleanFieldEditor(MavenPreferenceConstants.P_DOWNLOAD_SOURCES, Messages
-        .getString("preferences.downloadSources"), //$NON-NLS-1$
-        getFieldEditorParent()));
-
-    addField(new BooleanFieldEditor(MavenPreferenceConstants.P_DOWNLOAD_JAVADOC, Messages
-        .getString("preferences.downloadJavadoc"), //$NON-NLS-1$
-        getFieldEditorParent()));
-
-    /*
-     * public static final String CHECKSUM_POLICY_FAIL = "fail"; 
-     * public static final String CHECKSUM_POLICY_WARN = "warn"; 
-     * public static final String CHECKSUM_POLICY_IGNORE = "ignore";
-     */
     //    addField(new RadioGroupFieldEditor(MavenPreferenceConstants.P_GLOBAL_CHECKSUM_POLICY, 
     //        Messages.getString("preferences.globalChecksumPolicy"), 1, //$NON-NLS-1$
     //        new String[][] {
@@ -112,6 +94,28 @@ public class MavenPreferencePage extends FieldEditorPreferencePage implements IW
     addField(new BooleanFieldEditor(MavenPreferenceConstants.P_DEBUG_OUTPUT, //
         Messages.getString("preferences.debugOutput"), //$NON-NLS-1$
         getFieldEditorParent()));
+
+    // addField( new BooleanFieldEditor( MavenPreferenceConstants.P_UPDATE_SNAPSHOTS, 
+    //     Messages.getString( "preferences.updateSnapshots" ), //$NON-NLS-1$
+    //     getFieldEditorParent() ) );
+
+    addField(new BooleanFieldEditor(MavenPreferenceConstants.P_DOWNLOAD_SOURCES, //
+        Messages.getString("preferences.downloadSources"), //$NON-NLS-1$
+        getFieldEditorParent()));
+
+    addField(new BooleanFieldEditor(MavenPreferenceConstants.P_DOWNLOAD_JAVADOC, //
+        Messages.getString("preferences.downloadJavadoc"), //$NON-NLS-1$
+        getFieldEditorParent()));
+
+    addField(new BooleanFieldEditor(MavenPreferenceConstants.P_UPDATE_INDEXES, //
+        "Download repository index updates on startup", //
+        getFieldEditorParent()));
+    
+    /*
+     * public static final String CHECKSUM_POLICY_FAIL = "fail"; 
+     * public static final String CHECKSUM_POLICY_WARN = "warn"; 
+     * public static final String CHECKSUM_POLICY_IGNORE = "ignore";
+     */
 
     addSeparator();
 
@@ -144,7 +148,7 @@ public class MavenPreferencePage extends FieldEditorPreferencePage implements IW
     addField(new ComboFieldEditor(MavenPreferenceConstants.P_GOAL_ON_UPDATE, //
         Messages.getString("preferences.goalOnUpdate"), //$NON-NLS-1$
         goals, comboComposite));
-    
+
     addSeparator();
     
     globalSettingsEditor = new MavenSettingsFieldEditor(MavenPreferenceConstants.P_GLOBAL_SETTINGS_FILE, //
@@ -162,6 +166,7 @@ public class MavenPreferencePage extends FieldEditorPreferencePage implements IW
       }
     };
     userSettingsEditor.setChangeButtonText("Bro&wse...");
+
     
 //    addField(new StringFieldEditor("", Messages.getString("preferences.userSettingsFile"), getFieldEditorParent()) { //$NON-NLS-1$
 //      protected void doLoad() {
@@ -218,7 +223,7 @@ public class MavenPreferencePage extends FieldEditorPreferencePage implements IW
     reindexButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         plugin.getMavenEmbedderManager().invalidateMavenSettings();
-        plugin.getIndexManager().scheduleReindex(IndexManager.LOCAL_INDEX, 0L);
+        plugin.getIndexManager().scheduleIndexUpdate(IndexManager.LOCAL_INDEX, true, 0L);
       }
     });
 
@@ -269,7 +274,7 @@ public class MavenPreferencePage extends FieldEditorPreferencePage implements IW
 
       File newRepositoryDir = plugin.getMavenEmbedderManager().getLocalRepositoryDir();
       if(!newRepositoryDir.equals(localRepositoryDir)) {
-        plugin.getIndexManager().scheduleReindex(IndexManager.LOCAL_INDEX, 0L);
+        plugin.getIndexManager().scheduleIndexUpdate(IndexManager.LOCAL_INDEX, true, 0L);
       }
     }
     return res;

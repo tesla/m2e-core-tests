@@ -101,28 +101,30 @@ public class NexusIndexManager extends IndexManager {
   }
 
   public void addIndex(IndexInfo indexInfo, boolean reindex) {
-    if(getIndexInfo(indexInfo.getIndexName()) != null) {
+    String indexName = indexInfo.getIndexName();
+    if(getIndexInfo(indexName) != null) {
       return;
     }
+    
     try {
       indexInfo.setNew(!getIndexDirectoryFile(indexInfo).exists());
       
       Directory directory = getIndexDirectory(indexInfo);
-      indexer.addIndexingContext(indexInfo.getIndexName(), indexInfo.getIndexName(), indexInfo.getRepositoryDir(),
+      indexer.addIndexingContext(indexName, indexName, indexInfo.getRepositoryDir(),
           directory, indexInfo.getRepositoryUrl(), indexInfo.getIndexUpdateUrl(), //
           indexInfo.isShort() ? NexusIndexer.MINIMAL_INDEX : NexusIndexer.FULL_INDEX);
-      addIndex(indexInfo.getIndexName(), indexInfo);
+      addIndex(indexName, indexInfo);
       fireIndexAdded(indexInfo);
 
     } catch(IOException ex) {
       // XXX how to recover from this?
-      String msg = "Error on adding indexing context " + indexInfo.getIndexName();
+      String msg = "Error on adding indexing context " + indexName;
       console.logError(msg + "; " + ex.getMessage());
       MavenPlugin.log(msg, ex);
 
     } catch(UnsupportedExistingLuceneIndexException ex) {
       // XXX how to recover from this?
-      String msg = "Unsupported existing index " + indexInfo.getIndexName();
+      String msg = "Unsupported existing index " + indexName;
       console.logError(msg + "; " + ex.getMessage());
       MavenPlugin.log(msg, ex);
 
@@ -422,7 +424,7 @@ public class NexusIndexManager extends IndexManager {
   }
 
   
-  public Date fetchAndUpdateIndex(String indexName, final IProgressMonitor monitor) throws IOException {
+  public Date fetchAndUpdateIndex(String indexName, boolean force, final IProgressMonitor monitor) throws IOException {
     IndexingContext context = getIndexingContext(indexName);
     if(context != null) {
       Settings settings = embedderManager.getWorkspaceEmbedder().getSettings();

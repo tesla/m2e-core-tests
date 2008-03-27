@@ -131,6 +131,10 @@ public class MavenRuntimeManager {
     return preferenceStore.getBoolean(MavenPreferenceConstants.P_DOWNLOAD_JAVADOC);
   }
   
+  public boolean isUpdateIndexesOnStartup() {
+    return preferenceStore.getBoolean(MavenPreferenceConstants.P_UPDATE_INDEXES);
+  }
+  
   public String getDefaultOutputFolder() {
     return preferenceStore.getString(MavenPreferenceConstants.P_OUTPUT_FOLDER);
   }
@@ -160,12 +164,16 @@ public class MavenRuntimeManager {
     preferenceStore.setValue(MavenPreferenceConstants.P_DEBUG_OUTPUT, debugOutput);
   }
 
-  public void setDownloadSources(String downloadSources) {
+  public void setDownloadSources(boolean downloadSources) {
     preferenceStore.setValue(MavenPreferenceConstants.P_DOWNLOAD_SOURCES, downloadSources);
   }
   
-  public void setDownloadJavadoc(String downloadJavaDoc) {
+  public void setDownloadJavadoc(boolean downloadJavaDoc) {
     preferenceStore.setValue(MavenPreferenceConstants.P_DOWNLOAD_JAVADOC, downloadJavaDoc);
+  }
+  
+  public void setUpdateIndexesOnStartup(boolean updateIndexesOnStartup) {
+    preferenceStore.setValue(MavenPreferenceConstants.P_UPDATE_INDEXES, updateIndexesOnStartup);
   }
   
   public void setDefaultOutputFolder(String name) {

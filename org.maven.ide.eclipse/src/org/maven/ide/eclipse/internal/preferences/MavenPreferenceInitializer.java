@@ -54,6 +54,8 @@ public class MavenPreferenceInitializer extends AbstractPreferenceInitializer {
 
     store.setDefault(MavenPreferenceConstants.P_RUNTIMES, "");
     store.setDefault(MavenPreferenceConstants.P_DEFAULT_RUNTIME, "");
+
+    store.setDefault(MavenPreferenceConstants.P_UPDATE_INDEXES, true);
   }
 
 }

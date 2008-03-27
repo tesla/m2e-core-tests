@@ -32,7 +32,12 @@ import org.maven.ide.eclipse.index.IndexManager;
  */
 public class IndexUnpackerJob extends Job {
   private final IndexManager indexManager;
+  
+  /**
+   * <code>Collection</code> of <code>IndexInfo</code>s to unpack 
+   */
   private final Collection extensionIndexes;
+  
   private boolean overwrite;
 
   public IndexUnpackerJob(IndexManager indexManager, Collection extensionIndexes) {

@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.jobs.Job;
 
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
@@ -35,7 +34,7 @@ import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.maven.ide.eclipse.MavenConsole;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.index.IndexInfo.Type;
-import org.maven.ide.eclipse.internal.index.IndexerJob;
+import org.maven.ide.eclipse.internal.index.IndexUpdaterJob;
 
 
 /**
@@ -87,7 +86,7 @@ public abstract class IndexManager {
 
   private final Map indexes = new LinkedHashMap();
 
-  private IndexerJob indexerJob;
+  private IndexUpdaterJob updaterJob;
 
   public IndexManager(MavenConsole console, File stateDir, String baseName) {
     this.console = console;
@@ -144,11 +143,14 @@ public abstract class IndexManager {
     return new File(getBaseIndexDir(), indexInfo.getIndexName());
   }
 
-  public void scheduleReindex(String indexName, long delay) {
-    if(indexerJob == null || indexerJob.getState() == Job.NONE) {
-      indexerJob = new IndexerJob(indexName, getBaseIndexDir(), this);
+  public void scheduleIndexUpdate(String indexName, boolean force, long delay) {
+    IndexInfo indexInfo = getIndexInfo(indexName);
+    if(indexInfo!=null) {
+      if(updaterJob == null) {
+        updaterJob = new IndexUpdaterJob(this, console);
+      }
+      updaterJob.scheduleUpdate(indexInfo, force, delay);
     }
-    indexerJob.reindex(indexName, delay);
   }
 
   public abstract void addIndex(IndexInfo indexInfo, boolean reindex);
@@ -179,7 +181,7 @@ public abstract class IndexManager {
 
   public abstract Date reindex(String indexName, IProgressMonitor monitor) throws IOException;
 
-  public abstract Date fetchAndUpdateIndex(String indexName, IProgressMonitor monitor) throws IOException;
+  public abstract Date fetchAndUpdateIndex(String indexName, boolean force, IProgressMonitor monitor) throws IOException;
 
   public abstract Date replaceIndex(String indexName, InputStream is) throws IOException;
 

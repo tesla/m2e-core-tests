@@ -11,12 +11,15 @@ package org.maven.ide.eclipse;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Collection;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 import org.osgi.framework.BundleContext;
 
@@ -58,7 +61,6 @@ import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.internal.ExtensionReader;
 import org.maven.ide.eclipse.internal.console.MavenConsoleImpl;
 import org.maven.ide.eclipse.internal.index.IndexInfoWriter;
-import org.maven.ide.eclipse.internal.index.IndexUnpackerJob;
 import org.maven.ide.eclipse.internal.index.NexusIndexManager;
 import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerImpl;
@@ -132,7 +134,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   private MavenProjectManager projectManager;
 
   private MavenRuntimeManager runtimeManager;
-  
+
   private MavenProjectManagerRefreshJob mavenBackgroundJob;
 
   public MavenPlugin() {
@@ -153,11 +155,10 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     }
 
     this.runtimeManager = new MavenRuntimeManager(getPreferenceStore());
-    
+
     this.embedderManager = new MavenEmbedderManager(console, runtimeManager);
 
     File stateLocationDir = getStateLocation().toFile();
-    File configFile = new File(stateLocationDir, "indexInfo.xml");
 
     // this.indexManager = new LegacyIndexManager(getStateLocation().toFile(), console);
     this.indexManager = new NexusIndexManager(embedderManager, console, stateLocationDir);
@@ -167,40 +168,29 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
     this.indexManager.addIndex(new IndexInfo(IndexManager.LOCAL_INDEX, //
         embedderManager.getLocalRepositoryDir(), null, IndexInfo.Type.LOCAL, false), false);
-    
+
     ExtensionReader.readScmHandlerExtensions();
-    
-    Collection extensionIndexes = ExtensionReader.readIndexInfoExtensions();
 
-    LinkedHashSet indexes = new LinkedHashSet(); 
-    indexes.addAll(ExtensionReader.readIndexInfoConfig(configFile));
-    indexes.addAll(extensionIndexes);
-    
-    for(Iterator it = indexes.iterator(); it.hasNext();) {
-      IndexInfo indexInfo = (IndexInfo) it.next();
-      this.indexManager.addIndex(indexInfo, false);
-    }
+    Set indexes = loadIndexConfiguration(new File(stateLocationDir, "indexInfo.xml"));
 
-    this.indexManager.addIndexListener(new IndexManagerWriterListener(indexManager, configFile));
-    
     this.modelManager = new MavenModelManager(embedderManager, console);
 
-    MavenProjectManagerImpl managerImpl = new MavenProjectManagerImpl(console, indexManager, embedderManager, runtimeManager);
+    MavenProjectManagerImpl managerImpl = new MavenProjectManagerImpl(console, indexManager, embedderManager,
+        runtimeManager);
 
     this.mavenBackgroundJob = new MavenProjectManagerRefreshJob(managerImpl);
-    
+
     IWorkspace workspace = ResourcesPlugin.getWorkspace();
-    workspace.addResourceChangeListener(mavenBackgroundJob,
-        IResourceChangeEvent.POST_CHANGE | IResourceChangeEvent.PRE_CLOSE | IResourceChangeEvent.PRE_DELETE);
-    
-    this.projectManager = new MavenProjectManager(managerImpl, indexManager, mavenBackgroundJob); 
+    workspace.addResourceChangeListener(mavenBackgroundJob, IResourceChangeEvent.POST_CHANGE
+        | IResourceChangeEvent.PRE_CLOSE | IResourceChangeEvent.PRE_DELETE);
+
+    this.projectManager = new MavenProjectManager(managerImpl, indexManager, mavenBackgroundJob);
     this.projectManager.refresh(new MavenUpdateRequest(workspace.getRoot().getProjects(), //
         true /*offline*/, false /* updateSnapshots */));
 
-    this.buildpathManager = new BuildPathManager(embedderManager, console, projectManager, indexManager,
-        modelManager, runtimeManager);
-    workspace.addResourceChangeListener(buildpathManager,
-        IResourceChangeEvent.PRE_DELETE);
+    this.buildpathManager = new BuildPathManager(embedderManager, console, projectManager, indexManager, modelManager,
+        runtimeManager);
+    workspace.addResourceChangeListener(buildpathManager, IResourceChangeEvent.PRE_DELETE);
 
     projectManager.addMavenProjectChangedListener(this.buildpathManager);
     projectManager.addDownloadSourceListener(this.buildpathManager);
@@ -208,15 +198,57 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     this.launchConfigurationListener = new MavenLaunchConfigurationListener();
     DebugPlugin.getDefault().getLaunchManager().addLaunchConfigurationListener(launchConfigurationListener);
 
-    IndexInfo localIndexInfo = indexManager.getIndexInfo(IndexManager.LOCAL_INDEX);
-    if(localIndexInfo!=null && localIndexInfo.isNew()) {
-      indexManager.scheduleReindex(IndexManager.LOCAL_INDEX, 4000L);
-    }
+    initializeIndexes(indexes, runtimeManager.isUpdateIndexesOnStartup());
 
-    IndexUnpackerJob indexUnpackerJob = new IndexUnpackerJob(indexManager, extensionIndexes);
-    indexUnpackerJob.schedule(2000L);
-    
     checkJdk();
+  }
+
+  private void initializeIndexes(Set indexes, boolean updateIndexesOnStartup) {
+    for(Iterator it = indexes.iterator(); it.hasNext();) {
+      IndexInfo indexInfo = (IndexInfo) it.next();
+      if(IndexInfo.Type.LOCAL.equals(indexInfo.getType())) {
+        if(indexInfo.isNew()) {
+          indexManager.scheduleIndexUpdate(indexInfo.getIndexName(), false, 4000L);
+        }
+      } else if(IndexInfo.Type.REMOTE.equals(indexInfo.getType())) {
+        if(indexInfo.isNew() || updateIndexesOnStartup) {
+          indexManager.scheduleIndexUpdate(indexInfo.getIndexName(), false, 4000L);
+        }
+      }
+    }
+  }
+
+  private Set loadIndexConfiguration(File configFile) throws IOException {
+    LinkedHashSet indexes = new LinkedHashSet();
+    indexes.addAll(ExtensionReader.readIndexInfoConfig(configFile));
+
+    Map extensionIndexes = ExtensionReader.readIndexInfoExtensions();
+    indexes.addAll(extensionIndexes.values());
+
+    for(Iterator it = indexes.iterator(); it.hasNext();) {
+      IndexInfo indexInfo = (IndexInfo) it.next();
+
+      IndexInfo extensionInfo = (IndexInfo) extensionIndexes.get(indexInfo.getIndexName());
+      if(extensionInfo != null) {
+        URL archiveUrl = extensionInfo.getArchiveUrl();
+        indexInfo.setArchiveUrl(archiveUrl);
+
+        if(archiveUrl != null) {
+          InputStream is = archiveUrl.openStream();
+          Date indexArchiveTime = indexManager.getIndexArchiveTime(is);
+          Date updateTime = indexInfo.getUpdateTime();
+          if(updateTime == null || indexArchiveTime.after(updateTime)) {
+            indexInfo = extensionInfo;
+          }
+        }
+      }
+
+      this.indexManager.addIndex(indexInfo, false);
+    }
+    
+    this.indexManager.addIndexListener(new IndexManagerWriterListener(indexManager, configFile));
+    
+    return indexes;
   }
 
   public void earlyStartup() {
@@ -259,7 +291,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     // There is no tools.jar on Mac OS X
     // http://developer.apple.com/documentation/Java/Conceptual/Java14Development/02-JavaDevTools/JavaDevTools.html
     String osName = System.getProperty("os.name", "");
-    if(osName.toLowerCase().indexOf("mac os")==-1) {
+    if(osName.toLowerCase().indexOf("mac os") == -1) {
       String javaHome = System.getProperty("java.home");
       File toolsJar = new File(javaHome, "../lib/tools.jar");
       if(!toolsJar.exists()) {
@@ -278,23 +310,20 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
         Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
         MessageDialogWithToggle dialog = new MessageDialogWithToggle(shell, //
             "Maven Integration for Eclipse JDK Warning", //
-            null,
-            "The Maven Integration requires that Eclipse be running in a JDK, "
+            null, "The Maven Integration requires that Eclipse be running in a JDK, "
                 + "because a number of Maven core plugins are using jars from the JDK.\n\n"
                 + "Please make sure the -vm option in <a>eclipse.ini</a> "
-                + "is pointing to a JDK and verify that <a>Installed JREs</a> "
-                + "are also using JDK installs.", //
+                + "is pointing to a JDK and verify that <a>Installed JREs</a> " + "are also using JDK installs.", //
             MessageDialog.WARNING, //
-            new String[] { IDialogConstants.OK_LABEL }, //
+            new String[] {IDialogConstants.OK_LABEL}, //
             0, "Do not warn again", false) {
-        protected Control createMessageArea(Composite composite) {
+          protected Control createMessageArea(Composite composite) {
             Image image = getImage();
-            if (image != null) {
+            if(image != null) {
               imageLabel = new Label(composite, SWT.NULL);
               image.setBackground(imageLabel.getBackground());
               imageLabel.setImage(image);
-              GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.BEGINNING)
-                  .applyTo(imageLabel);
+              GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.BEGINNING).applyTo(imageLabel);
             }
 
             Link link = new Link(composite, getMessageLabelStyle());
@@ -304,11 +333,13 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
                 if("eclipse.ini".equals(e.text)) {
 //                    String href = "topic=/org.eclipse.platform.doc.user/tasks/running_eclipse.htm";
 //                    BaseHelpSystem.getHelpDisplay().displayHelpResource(href, false);
-                  
+
                   try {
-                     IWebBrowser browser = PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser();
-                     // browser.openURL(new URL("http://www.eclipse.org/swt/launcher.html"));
-                     browser.openURL(new URL("http://help.eclipse.org/help33/index.jsp?topic=/org.eclipse.platform.doc.user/tasks/running_eclipse.htm"));
+                    IWebBrowser browser = PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser();
+                    // browser.openURL(new URL("http://www.eclipse.org/swt/launcher.html"));
+                    browser
+                        .openURL(new URL(
+                            "http://help.eclipse.org/help33/index.jsp?topic=/org.eclipse.platform.doc.user/tasks/running_eclipse.htm"));
                   } catch(MalformedURLException ex) {
                     log("Malformed URL", ex);
                   } catch(PartInitException ex) {
@@ -323,16 +354,16 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
             GridDataFactory.fillDefaults().align(SWT.FILL, SWT.BEGINNING).grab(true, false).hint(
                 convertHorizontalDLUsToPixels(IDialogConstants.MINIMUM_MESSAGE_AREA_WIDTH), SWT.DEFAULT).applyTo(link);
-            
+
             return composite;
           }
         };
-        
+
         dialog.setPrefStore(getPreferenceStore());
         dialog.setPrefKey(MavenPreferenceConstants.P_DISABLE_JDK_WARNING);
-        
+
         dialog.open();
-        
+
         getPreferenceStore().setValue(MavenPreferenceConstants.P_DISABLE_JDK_WARNING, dialog.getToggleState());
       }
     });
@@ -368,10 +399,10 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   public BuildPathManager getBuildpathManager() {
     return this.buildpathManager;
   }
-  
+
   public MavenRuntimeManager getMavenRuntimeManager() {
     return this.runtimeManager;
-    
+
   }
 
   /**
@@ -412,7 +443,9 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
    */
   static class IndexManagerWriterListener implements IndexListener {
     private final File configFile;
+
     private final IndexManager indexManager;
+
     private IndexInfoWriter writer = new IndexInfoWriter();
 
     public IndexManagerWriterListener(IndexManager indexManager, File configFile) {
