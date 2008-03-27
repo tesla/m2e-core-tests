@@ -32,18 +32,19 @@
         <version>1.0-SNAPSHOT</version>
         <extensions>true</extensions>
       </plugin>
+
       <plugin>
         <groupId>org.codehaus.tycho</groupId>
         <artifactId>maven-osgi-packaging-plugin</artifactId>
         <version>1.0-SNAPSHOT</version>
-	      <executions>
+	<executions>
           <execution>
             <phase>package</phase>
             <goals>
               <goal>update-site</goal>
             </goals>
           </execution>
-	      </executions>
+	</executions>
       </plugin>
     </plugins>
   </build>
