@@ -998,6 +998,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
 
     final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject( "simple-project" );
     final boolean modules = true;
+    final boolean mavenFolders = true;
 
     workspace.run(new IWorkspaceRunnable() {
       public void run(IProgressMonitor monitor) throws CoreException {
@@ -1010,6 +1011,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
 
         ResolverConfiguration resolverConfiguration = new ResolverConfiguration();
         resolverConfiguration.setIncludeModules(modules);
+        resolverConfiguration.setUseMavenOutputFolders(mavenFolders);
         
         MavenPlugin.getDefault().getBuildpathManager().createSimpleProject(project, null, model, directories, resolverConfiguration, monitor);
       }
@@ -1020,6 +1022,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
 
     ResolverConfiguration resolverConfiguration = BuildPathManager.getResolverConfiguration(javaProject);
     assertEquals(modules, resolverConfiguration.shouldIncludeModules());
+    assertEquals(mavenFolders, resolverConfiguration.shouldUseMavenOutputFolders());
   }
 
   public void test005_dependencyAvailableFromLocalRepoAndWorkspace() throws Exception {

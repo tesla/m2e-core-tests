@@ -329,7 +329,9 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
         }
       }
 
-      javaProject.setOption(JavaCore.CORE_JAVA_BUILD_CLEAN_OUTPUT_FOLDER, "ignore");
+      if (configuration.shouldUseMavenOutputFolders()) {
+        javaProject.setOption(JavaCore.CORE_JAVA_BUILD_CLEAN_OUTPUT_FOLDER, "ignore");
+      }
 
       IClasspathEntry[] currentClasspath = javaProject.getRawClasspath();
       for(int i = 0; i < currentClasspath.length; i++ ) {
