@@ -33,6 +33,7 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.index.IndexInfo;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.project.BuildPathManager;
+import org.maven.ide.eclipse.project.MavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 
@@ -61,8 +62,13 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
 
 //    waitForJob("Initializing " + project1.getProject().getName());
 //    waitForJob("Initializing " + project2.getProject().getName());
-    project1.build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
-    project2.build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
+
+    try {
+      project1.build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
+      project2.build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
+    } catch(Exception ex) {
+      throw ex;
+    }
     waitForJobsToComplete();
 
     IMarker[] markers1 = project1.findMarkers(null, true, IResource.DEPTH_INFINITE);
@@ -108,12 +114,12 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     waitForJobsToComplete();
 
     IClasspathEntry[] project1entries = getMavenContainerEntries(project1);
-    assertEquals(1, project1entries.length);
+    assertEquals(Arrays.asList(project1entries).toString(), 1, project1entries.length);
     assertEquals(IClasspathEntry.CPE_LIBRARY, project1entries[0].getEntryKind());
-    assertTrue(project1entries[0].getPath().lastSegment().equals("junit-4.1.jar"));
+    assertEquals("junit-4.1.jar", project1entries[0].getPath().lastSegment());
 
     IClasspathEntry[] project2entries = getMavenContainerEntries(project2);
-    assertEquals(1, project2entries.length);
+    assertEquals(Arrays.asList(project2entries).toString(), 1, project2entries.length);
     assertEquals(IClasspathEntry.CPE_LIBRARY, project2entries[0].getEntryKind());
     assertEquals("MNGECLIPSE-248parent-1.0.0.jar", project2entries[0].getPath().lastSegment());
   }
@@ -278,7 +284,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
       assertEquals(2, rawClasspath.length);
       assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", rawClasspath[0].getPath().toString());
-      assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER/noworkspace", rawClasspath[1].getPath().toString());
+      assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[1].getPath().toString());
 
       IMarker[] markers = project1.findMarkers(null, true, IResource.DEPTH_INFINITE);
       assertEquals(toString(markers), 0, markers.length);
@@ -294,7 +300,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       assertEquals(3, rawClasspath.length);
       assertEquals("/MNGECLIPSE-20-type/src/main/java", rawClasspath[0].getPath().toString());
       assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", rawClasspath[1].getPath().toString());
-      assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER/noworkspace", rawClasspath[2].getPath().toString());
+      assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[2].getPath().toString());
 
       IMarker[] markers = project2.findMarkers(null, true, IResource.DEPTH_INFINITE);
       assertEquals(toString(markers), 0, markers.length);
@@ -313,7 +319,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       assertEquals(3, rawClasspath.length);
       assertEquals("/MNGECLIPSE-20-app/src/main/java", rawClasspath[0].getPath().toString());
       assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", rawClasspath[1].getPath().toString());
-      assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER/noworkspace", rawClasspath[2].getPath().toString());
+      assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[2].getPath().toString());
 
       IMarker[] markers = project3.findMarkers(null, true, IResource.DEPTH_INFINITE);
       assertEquals(toString(markers), 3, markers.length);
@@ -332,7 +338,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       assertEquals(3, rawClasspath.length);
       assertEquals("/MNGECLIPSE-20-web/src/main/java", rawClasspath[0].getPath().toString());
       assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", rawClasspath[1].getPath().toString());
-      assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER/noworkspace", rawClasspath[2].getPath().toString());
+      assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[2].getPath().toString());
 
       IMarker[] markers = project4.findMarkers(null, true, IResource.DEPTH_INFINITE);
       assertEquals(toString(markers), 4, markers.length);
@@ -351,7 +357,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       assertEquals("/MNGECLIPSE-20-ejb/src/main/java", rawClasspath[0].getPath().toString());
       assertEquals("/MNGECLIPSE-20-ejb/src/main/resources", rawClasspath[1].getPath().toString());
       assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", rawClasspath[2].getPath().toString());
-      assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER/noworkspace", rawClasspath[3].getPath().toString());
+      assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[3].getPath().toString());
 
       IMarker[] markers = project5.findMarkers(null, true, IResource.DEPTH_INFINITE);
       assertEquals(toString(markers), 4, markers.length);
@@ -367,7 +373,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
       assertEquals(2, rawClasspath.length);
       assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", rawClasspath[0].getPath().toString());
-      assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER/noworkspace", rawClasspath[1].getPath().toString());
+      assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[1].getPath().toString());
 
       IMarker[] markers = project6.findMarkers(null, true, IResource.DEPTH_INFINITE);
       assertEquals(toString(markers), 4, markers.length);
@@ -396,19 +402,19 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     IJavaProject javaProject = JavaCore.create(project);
     IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
         .getClasspathEntries();
-    assertEquals(2, classpathEntries.length);
+    assertEquals(Arrays.asList(classpathEntries).toString(), 2, classpathEntries.length);
     assertEquals("log4j-1.2.13.jar", classpathEntries[0].getPath().lastSegment());
     assertEquals("junit-3.8.1.jar", classpathEntries[1].getPath().lastSegment());
 
     IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
-    assertEquals(7, rawClasspath.length);
+    assertEquals(Arrays.asList(rawClasspath).toString(), 7, rawClasspath.length);
     assertEquals("/MNGECLIPSE-20/type/src/main/java", rawClasspath[0].getPath().toString());
     assertEquals("/MNGECLIPSE-20/app/src/main/java", rawClasspath[1].getPath().toString());
     assertEquals("/MNGECLIPSE-20/web/src/main/java", rawClasspath[2].getPath().toString());
     assertEquals("/MNGECLIPSE-20/ejb/src/main/java", rawClasspath[3].getPath().toString());
     assertEquals("/MNGECLIPSE-20/ejb/src/main/resources", rawClasspath[4].getPath().toString());
     assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", rawClasspath[5].getPath().toString());
-    assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER/modules", rawClasspath[6].getPath().toString());
+    assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[6].getPath().toString());
 
     IMarker[] markers = project.findMarkers(null, true, IResource.DEPTH_INFINITE);
     assertEquals(toString(markers), 0, markers.length);
@@ -448,7 +454,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals("/MNGECLIPSE-20/ejb/src/main/java", rawClasspath[3].getPath().toString());
     assertEquals("/MNGECLIPSE-20/ejb/src/main/resources", rawClasspath[4].getPath().toString());
     assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", rawClasspath[5].getPath().toString());
-    assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER/modules/noworkspace", rawClasspath[6].getPath()
+    assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[6].getPath()
         .toString());
 
     IMarker[] markers = project.findMarkers(null, true, IResource.DEPTH_INFINITE);
@@ -995,6 +1001,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
   }
 
   public void testCreateSimpleProject() throws CoreException {
+    final MavenPlugin plugin = MavenPlugin.getDefault();
 
     final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject( "simple-project" );
     final boolean modules = true;
@@ -1013,16 +1020,16 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
         resolverConfiguration.setIncludeModules(modules);
         resolverConfiguration.setUseMavenOutputFolders(mavenFolders);
         
-        MavenPlugin.getDefault().getBuildpathManager().createSimpleProject(project, null, model, directories, resolverConfiguration, monitor);
+        plugin.getBuildpathManager().createSimpleProject(project, null, model, directories, resolverConfiguration, monitor);
       }
     }, monitor);
 
     IJavaProject javaProject = JavaCore.create(project);
     assertEquals("ignore", javaProject.getOption(JavaCore.CORE_JAVA_BUILD_CLEAN_OUTPUT_FOLDER, false));
 
-    ResolverConfiguration resolverConfiguration = BuildPathManager.getResolverConfiguration(javaProject);
-    assertEquals(modules, resolverConfiguration.shouldIncludeModules());
-    assertEquals(mavenFolders, resolverConfiguration.shouldUseMavenOutputFolders());
+    ResolverConfiguration configuration = MavenProjectFacade.readResolverConfiguration(project);
+    assertEquals(modules, configuration.shouldIncludeModules());
+    assertEquals(mavenFolders, configuration.shouldUseMavenOutputFolders());
   }
 
   public void test005_dependencyAvailableFromLocalRepoAndWorkspace() throws Exception {

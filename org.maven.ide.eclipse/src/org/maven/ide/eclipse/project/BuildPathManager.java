@@ -176,51 +176,24 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     return JavaCore.newContainerEntry(new Path(MavenPlugin.CONTAINER_ID));
   }
 
-  public static ResolverConfiguration getResolverConfiguration(IJavaProject javaProject) {
-    return getResolverConfiguration(getMavenContainerEntry(javaProject));
-  }
-
-  public static ResolverConfiguration getResolverConfiguration(IClasspathEntry entry) {
-    if(entry == null) {
-      return new ResolverConfiguration();
-    }
-
-    String containerPath = entry.getPath().toString();
-
-    boolean includeModules = containerPath.indexOf("/" + MavenPlugin.INCLUDE_MODULES) > -1;
-
-    boolean resolveWorkspaceProjects = containerPath.indexOf("/" + MavenPlugin.NO_WORKSPACE_PROJECTS) == -1;
-
-    boolean filterResources = containerPath.indexOf("/" + MavenPlugin.FILTER_RESOURCES) != -1;
-
-    boolean useMavenOutputFolders = containerPath.indexOf("/" + MavenPlugin.USE_MAVEN_OUPUT_FOLDERS) != -1;
-
-    ResolverConfiguration configuration = new ResolverConfiguration();
-    configuration.setIncludeModules(includeModules);
-    configuration.setResolveWorkspaceProjects(resolveWorkspaceProjects);
-    configuration.setFilterResources(filterResources);
-    configuration.setUseMavenOutputFolders(useMavenOutputFolders);
-    configuration.setActiveProfiles(getActiveProfiles(entry));
-    return configuration;
-  }
-
-  public static IClasspathEntry createContainerEntry(ResolverConfiguration configuration) {
+  private static IClasspathEntry createContainerEntry(ResolverConfiguration configuration) {
     IPath newPath = new Path(MavenPlugin.CONTAINER_ID);
-    if(configuration.shouldIncludeModules()) {
-      newPath = newPath.append(MavenPlugin.INCLUDE_MODULES);
-    }
-    if(!configuration.shouldResolveWorkspaceProjects()) {
-      newPath = newPath.append(MavenPlugin.NO_WORKSPACE_PROJECTS);
-    }
-    if(configuration.shouldFilterResources()) {
-      newPath = newPath.append(MavenPlugin.FILTER_RESOURCES);
-    }
-    if (configuration.shouldUseMavenOutputFolders()) {
-      newPath = newPath.append(MavenPlugin.USE_MAVEN_OUPUT_FOLDERS);
-    }
-    if(configuration.getActiveProfiles().length() > 0) {
-      newPath = newPath.append(MavenPlugin.ACTIVE_PROFILES + "[" + configuration.getActiveProfiles().trim() + "]");
-    }
+    
+//    if(configuration.shouldIncludeModules()) {
+//      newPath = newPath.append(MavenPlugin.INCLUDE_MODULES);
+//    }
+//    if(!configuration.shouldResolveWorkspaceProjects()) {
+//      newPath = newPath.append(MavenPlugin.NO_WORKSPACE_PROJECTS);
+//    }
+//    if(configuration.shouldFilterResources()) {
+//      newPath = newPath.append(MavenPlugin.FILTER_RESOURCES);
+//    }
+//    if (configuration.shouldUseMavenOutputFolders()) {
+//      newPath = newPath.append(MavenPlugin.USE_MAVEN_OUPUT_FOLDERS);
+//    }
+//    if(configuration.getActiveProfiles().length() > 0) {
+//      newPath = newPath.append(MavenPlugin.ACTIVE_PROFILES + "[" + configuration.getActiveProfiles().trim() + "]");
+//    }
 
     return JavaCore.newContainerEntry(newPath);
   }
@@ -243,17 +216,6 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
       }
     }
     return null;
-  }
-
-  private static String getActiveProfiles(IClasspathEntry entry) {
-    String path = entry.getPath().toString();
-    String prefix = "/" + MavenPlugin.ACTIVE_PROFILES + "[";
-    int n = path.indexOf(prefix);
-    if(n == -1) {
-      return "";
-    }
-
-    return path.substring(n + prefix.length(), path.indexOf("]", n));
   }
 
   /**
@@ -712,6 +674,8 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     }
     description.setNatureIds((String[]) newNatures.toArray(new String[newNatures.size()]));
     project.setDescription(description, monitor);
+    
+    MavenProjectFacade.saveResolverConfiguration(project, configuration);
 
     IJavaProject javaProject = JavaCore.create(project);
     if(javaProject != null) {

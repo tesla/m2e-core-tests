@@ -22,14 +22,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 
 import org.apache.maven.artifact.Artifact;
 
 import org.maven.ide.eclipse.MavenConsole;
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.project.BuildPathManager;
 import org.maven.ide.eclipse.project.IMavenProjectVisitor;
 import org.maven.ide.eclipse.project.MavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
@@ -39,9 +36,12 @@ import org.maven.ide.eclipse.project.ResolverConfiguration;
 public class MavenBuilder extends IncrementalProjectBuilder {
 
   private final MavenConsole console;
+  private MavenProjectManager projectManager;
 
   public MavenBuilder() {
-    console = MavenPlugin.getDefault().getConsole();
+    MavenPlugin plugin = MavenPlugin.getDefault();
+    console = plugin.getConsole();
+    this.projectManager = plugin.getMavenProjectManager();
   }
 
   /*
@@ -64,20 +64,24 @@ public class MavenBuilder extends IncrementalProjectBuilder {
 //        buildpathManager.updateClasspathContainer(project, monitor);
       }
 
-      IJavaProject javaProject = JavaCore.create(project);
-      ResolverConfiguration resolverConfiguration = BuildPathManager.getResolverConfiguration(javaProject);
+      MavenProjectFacade projectFacade = projectManager.create(project, monitor);
+      ResolverConfiguration resolverConfiguration;
+      if(projectFacade!=null) {
+        resolverConfiguration = projectFacade.getResolverConfiguration();
+      } else {
+        // XXX why there is no project facade at this point?
+        resolverConfiguration = MavenProjectFacade.readResolverConfiguration(project);
+      }
       if (resolverConfiguration.shouldFilterResources()) {
-        filterResources(javaProject, kind, monitor);
+        filterResources(project, kind, monitor);
       }
     }
     return null;
   }
 
-  private void filterResources(IJavaProject javaProject, int kind, final IProgressMonitor monitor) throws CoreException {
-
+  private void filterResources(IProject project, int kind, final IProgressMonitor monitor) throws CoreException {
     MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
     MavenProjectFacade mavenProject = projectManager.create(getProject(), monitor);
-
     if (mavenProject == null) {
       return;
     }
@@ -87,7 +91,7 @@ public class MavenBuilder extends IncrementalProjectBuilder {
     allResourceFolders.addAll(Arrays.asList(mavenProject.getTestCompileSourceLocations()));
 
     if (INCREMENTAL_BUILD == kind || AUTO_BUILD == kind) {
-      IResourceDelta delta = getDelta(javaProject.getProject());
+      IResourceDelta delta = getDelta(project);
       if (delta != null) {
         boolean found = false;
         found = delta.findMember(new Path(MavenPlugin.POM_FILE_NAME)) != null;

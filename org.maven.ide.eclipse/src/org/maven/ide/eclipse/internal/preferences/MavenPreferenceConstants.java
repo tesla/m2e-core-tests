@@ -52,11 +52,11 @@ public class MavenPreferenceConstants {
   /** String */
   public static final String P_GOAL_ON_UPDATE = PREFIX + "goalOnUpdate";
 
-  public static final String P_GOAL_ON_RESOURCE_FILTER = PREFIX + "goalOnResourceFilter";
-
   public static final String NO_GOAL = "none";
 
+  /** String */
   public static final String P_OUTPUT_FOLDER = PREFIX + "outputFolder";
+
   /** boolean */
   public static final String P_DISABLE_JDK_WARNING = PREFIX + "disableJdkwarning";
 
@@ -65,5 +65,8 @@ public class MavenPreferenceConstants {
 
   /** String */
   public static final String P_DEFAULT_RUNTIME = PREFIX + "defaultRuntime";
+
+  /** boolean */
+  public static final String P_UPDATE_INDEXES = PREFIX + "updateIndexes";
 
 }

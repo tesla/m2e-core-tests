@@ -27,15 +27,10 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.core.runtime.preferences.IScopeContext;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.component.repository.ComponentDescriptor;
@@ -63,8 +58,6 @@ import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.internal.embedder.TransferListenerAdapter;
-import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;
-import org.maven.ide.eclipse.project.BuildPathManager;
 import org.maven.ide.eclipse.project.DownloadSourceEvent;
 import org.maven.ide.eclipse.project.IDownloadSourceListener;
 import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
@@ -179,8 +172,7 @@ public class MavenProjectManagerImpl {
     // MavenProjectFacade projectFacade = (MavenProjectFacade) workspacePoms.get(pom.getFullPath());
     MavenProjectFacade projectFacade = getProjectFacade(pom);
     if(projectFacade == null && load) {
-      IJavaProject javaProject = JavaCore.create(pom.getProject());
-      ResolverConfiguration configuration = BuildPathManager.getResolverConfiguration(javaProject);
+      ResolverConfiguration configuration = MavenProjectFacade.readResolverConfiguration(pom.getProject());
 
       try {
         MavenExecutionResult executionResult = readProjectWithDependencies(pom, configuration, //
@@ -249,10 +241,11 @@ public class MavenProjectManagerImpl {
     addProjectChangeEvent(pom, MavenProjectChangedEvent.KIND_REMOVED, MavenProjectChangedEvent.FLAG_NONE, facade, null);
 
     // XXX this will likely NOT work for closed/removed projects, need to move to IResourceChangeEventListener
-    IJavaProject javaProject = JavaCore.create(pom.getProject());
-    ResolverConfiguration resolverConfiguration = BuildPathManager.getResolverConfiguration(javaProject);
-    if (resolverConfiguration != null && resolverConfiguration.shouldIncludeModules()) {
-      pomSet.addAll(removeNestedModules(pom, mavenProject));
+    if(facade!=null) {
+      ResolverConfiguration resolverConfiguration = facade.getResolverConfiguration();
+      if (resolverConfiguration != null && resolverConfiguration.shouldIncludeModules()) {
+        pomSet.addAll(removeNestedModules(pom, mavenProject));
+      }
     }
 
     pomSet.addAll(refreshWorkspaceModules(pom, mavenProject));
@@ -299,8 +292,7 @@ public class MavenProjectManagerImpl {
   private void refresh(MavenEmbedder embedder, IFile pom, MavenUpdateRequest updateRequest, IProgressMonitor monitor) throws CoreException {
     markerManager.deleteMarkers(pom);
 
-    IJavaProject javaProject = JavaCore.create(pom.getProject());
-    ResolverConfiguration resolverConfiguration = BuildPathManager.getResolverConfiguration(javaProject);
+    ResolverConfiguration resolverConfiguration = MavenProjectFacade.readResolverConfiguration(pom.getProject());
 
     MavenProject mavenProject = null;
     MavenExecutionResult result = null;
@@ -1024,12 +1016,8 @@ public class MavenProjectManagerImpl {
     try {
       IFile pom = facade.getPom();
       ResolverConfiguration resolverConfiguration = facade.getResolverConfiguration();
-
-      IScopeContext projectScope = new ProjectScope(facade.getProject());
-      IEclipsePreferences projectNode = projectScope.getNode(MavenPlugin.PLUGIN_ID);
-
-      String goals = projectNode.get(MavenPreferenceConstants.P_GOAL_ON_RESOURCE_FILTER, "resources:resources resources:testResources");
-
+      String goals = resolverConfiguration.getResourceFilteringGoals();
+      
       execute(embedder, pom, resolverConfiguration, Arrays.asList(StringUtils.split(goals)), monitor);
 
       IProject project = pom.getProject();

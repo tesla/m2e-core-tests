@@ -9,13 +9,14 @@
 package org.maven.ide.eclipse.actions;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.widgets.Menu;
 
+import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.Messages;
-import org.maven.ide.eclipse.project.BuildPathManager;
+import org.maven.ide.eclipse.project.MavenProjectFacade;
+import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 import org.maven.ide.eclipse.util.SelectionUtil;
 
@@ -63,10 +64,13 @@ public class DefaultMavenMenuCreator extends AbstractMavenMenuCreator {
       if(selection.size() == 1) {
         IProject project = (IProject) SelectionUtil.getType(selection.getFirstElement(), IProject.class);
         if(project!=null) {
-          IJavaProject javaProject = JavaCore.create(project);
-          ResolverConfiguration configuration = BuildPathManager.getResolverConfiguration(javaProject);
-          enableWorkspaceResolution = !configuration.shouldResolveWorkspaceProjects();
-          enableNestedModules = !configuration.shouldIncludeModules();
+          MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
+          MavenProjectFacade projectFacade = projectManager.create(project, new NullProgressMonitor());
+          if(projectFacade!=null) {
+            ResolverConfiguration configuration = projectFacade.getResolverConfiguration();
+            enableWorkspaceResolution = !configuration.shouldResolveWorkspaceProjects();
+            enableNestedModules = !configuration.shouldIncludeModules();
+          }
         }
       }
       

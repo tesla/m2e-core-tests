@@ -18,23 +18,25 @@ import java.util.List;
  */
 public class ResolverConfiguration {
 
-  private boolean includeModules;
-  private boolean resolveWorkspaceProjects;
-  private String activeProfiles;
-  private boolean filterResources;
-  private boolean useMavenOutputFolders;
-
-  public ResolverConfiguration() {
-    this(false, true, "", false, false);
-  }
+  public static final String DEFAULT_FILTERING_GOALS = "process-resources resources:testResources";
   
-  private ResolverConfiguration(boolean includeModules, boolean resolveWorkspaceProjects, String activeProfiles, boolean filterResources, boolean useMavenOutputFolders) {
-    this.includeModules = includeModules;
-    this.resolveWorkspaceProjects = resolveWorkspaceProjects;
-    this.activeProfiles = activeProfiles;
-    this.filterResources = filterResources;
-    this.useMavenOutputFolders = useMavenOutputFolders;
-  }
+  private boolean includeModules = false;
+  private boolean resolveWorkspaceProjects = true;
+  private String activeProfiles = "";
+  private boolean filterResources = false;
+  private boolean useMavenOutputFolders = false;
+  private String resourceFilteringGoals = DEFAULT_FILTERING_GOALS;
+
+//  public ResolverConfiguration() {
+//  }
+//  
+//  private ResolverConfiguration(boolean includeModules, boolean resolveWorkspaceProjects, String activeProfiles, boolean filterResources, boolean useMavenOutputFolders) {
+//    this.includeModules = includeModules;
+//    this.resolveWorkspaceProjects = resolveWorkspaceProjects;
+//    this.activeProfiles = activeProfiles;
+//    this.filterResources = filterResources;
+//    this.useMavenOutputFolders = useMavenOutputFolders;
+//  }
 
   public boolean shouldIncludeModules() {
     return this.includeModules;
@@ -78,5 +80,13 @@ public class ResolverConfiguration {
 
   public void setUseMavenOutputFolders(boolean useMavenOutputFolders) {
     this.useMavenOutputFolders = useMavenOutputFolders;
+  }
+
+  public String getResourceFilteringGoals() {
+    return resourceFilteringGoals;
+  }
+  
+  public void setResourceFilteringGoals(String resourceFilteringGoals) {
+    this.resourceFilteringGoals = resourceFilteringGoals;
   }
 }

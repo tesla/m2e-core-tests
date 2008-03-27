@@ -628,7 +628,7 @@
                 name="Maven"/>
       <view id="org.maven.ide.eclipse.views.MavenIndexesView"
             category="org.maven.ide.eclipse.views.indexes"
-            class="org.maven.ide.eclipse.views.MavenIndexesView"
+            class="org.maven.ide.eclipse.internal.views.MavenIndexesView"
             icon="icons/maven_indexes.gif"
             name="Maven Indexes"/>
    </extension>
@@ -638,6 +638,15 @@
          <view id="org.maven.ide.eclipse.views.MavenIndexesView"
                relationship="fast"/>
       </perspectiveExtension>
+   </extension>
+   
+   <extension point="org.eclipse.ui.propertyPages">
+      <page id="org.maven.ide.eclipse.MavenProjectPreferencePage"
+            class="org.maven.ide.eclipse.internal.preferences.MavenProjectPreferencePage"
+            name="Maven"
+            objectClass="org.eclipse.core.resources.IProject" 
+            adaptable="true">
+      </page>      
    </extension>
 
 </plugin>

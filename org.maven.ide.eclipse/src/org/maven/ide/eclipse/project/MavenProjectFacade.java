@@ -14,15 +14,20 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.osgi.service.prefs.BackingStoreException;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.IScopeContext;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.apache.maven.artifact.Artifact;
@@ -42,14 +47,23 @@ import org.maven.ide.eclipse.internal.project.MavenProjectManagerImpl;
  * getXXX methods work on this project only.
  */
 public class MavenProjectFacade {
-
+  private static final String P_VERSION = "version";
+  private static final String P_INCLUDE_MODULES = "includeModules";
+  private static final String P_RESOLVE_WORKSPACE_PROJECTS = "resolveWorkspaceProjects";
+  private static final String P_USE_MAVEN_FOLDERS = "useMavenFolders";
+  private static final String P_FILTER_RESOURCES = "filterResources";
+  private static final String P_RESOURCE_FILTER_GOALS = "resourceFilterGoals";
+  private static final String P_ACTIVE_PROFILES = "activeProfiles";
+  
+  private static final String VERSION = "1";
+  
   private final MavenProjectManagerImpl manager;
 
   private final IFile pom;
 
   private final MavenProject mavenProject;
 
-  private final ResolverConfiguration resolverConfiguration;
+  private ResolverConfiguration resolverConfiguration;
 
   public MavenProjectFacade(MavenProjectManagerImpl manager, IFile pom, MavenProject mavenProject,
       ResolverConfiguration resolverConfiguration) {
@@ -226,9 +240,6 @@ public class MavenProjectFacade {
    *          {@link IMavenProjectVisitor#NESTED_MODULES}.
    */
   public void accept(IMavenProjectVisitor visitor, int flags) throws CoreException {
-    IJavaProject javaProject = JavaCore.create(getProject());
-    ResolverConfiguration configuration = BuildPathManager.getResolverConfiguration(javaProject);
-
     if(visitor.visit(this)) {
       MavenProject mavenProject = getMavenProject();
       for(Iterator it = mavenProject.getArtifacts().iterator(); it.hasNext();) {
@@ -237,7 +248,7 @@ public class MavenProjectFacade {
 
       if((flags & IMavenProjectVisitor.FORCE_MODULES) > 0 //
           || ((flags & IMavenProjectVisitor.NESTED_MODULES) > 0 //
-              && configuration != null && configuration.shouldIncludeModules())) {
+              && resolverConfiguration.shouldIncludeModules())) {
         IFile pom = getPom();
         for(Iterator it = mavenProject.getModules().iterator(); it.hasNext();) {
           String moduleName = (String) it.next();
@@ -256,6 +267,94 @@ public class MavenProjectFacade {
 
   public ResolverConfiguration getResolverConfiguration() {
     return resolverConfiguration;
+  }
+
+  public boolean setResolverConfiguration(ResolverConfiguration configuration) {
+    resolverConfiguration = configuration;
+    return saveResolverConfiguration(getProject(), configuration);  
+  }
+
+  public static boolean saveResolverConfiguration(IProject project, ResolverConfiguration configuration) {
+    IScopeContext projectScope = new ProjectScope(project);
+    IEclipsePreferences projectNode = projectScope.getNode(MavenPlugin.PLUGIN_ID);
+    if(projectNode != null) {
+      projectNode.put(P_VERSION, VERSION);
+      
+      projectNode.putBoolean(P_USE_MAVEN_FOLDERS, configuration.shouldUseMavenOutputFolders());
+      projectNode.putBoolean(P_RESOLVE_WORKSPACE_PROJECTS, configuration.shouldResolveWorkspaceProjects());
+      projectNode.putBoolean(P_INCLUDE_MODULES, configuration.shouldIncludeModules());
+      projectNode.putBoolean(P_FILTER_RESOURCES, configuration.shouldFilterResources());
+      
+      projectNode.put(P_RESOURCE_FILTER_GOALS, configuration.getResourceFilteringGoals());
+      projectNode.put(P_ACTIVE_PROFILES, configuration.getActiveProfiles());
+      
+      try {
+        projectNode.flush();
+        return true;
+      } catch(BackingStoreException ex) {
+        MavenPlugin.log("Failed to save resolver configuration", ex);
+      }
+    }
+    
+    return false;
+  }
+  
+  public static ResolverConfiguration readResolverConfiguration(IProject project) {
+    IScopeContext projectScope = new ProjectScope(project);
+    IEclipsePreferences projectNode = projectScope.getNode(MavenPlugin.PLUGIN_ID);
+    if(projectNode==null) {
+      return new ResolverConfiguration();
+    }
+    
+    String version = projectNode.get(P_VERSION, null);
+    if(version == null) {  // migrate from old config
+      return getResolverConfiguration(BuildPathManager.getMavenContainerEntry(JavaCore.create(project)));
+    }
+
+    ResolverConfiguration configuration = new ResolverConfiguration();
+    configuration.setUseMavenOutputFolders(projectNode.getBoolean(P_USE_MAVEN_FOLDERS, false));
+    configuration.setResolveWorkspaceProjects(projectNode.getBoolean(P_RESOLVE_WORKSPACE_PROJECTS, false));
+    configuration.setIncludeModules(projectNode.getBoolean(P_INCLUDE_MODULES, false));
+    configuration.setFilterResources(projectNode.getBoolean(P_FILTER_RESOURCES, false));
+    
+    configuration.setResourceFilteringGoals(projectNode.get(P_RESOURCE_FILTER_GOALS, ResolverConfiguration.DEFAULT_FILTERING_GOALS));
+    configuration.setActiveProfiles(projectNode.get(P_ACTIVE_PROFILES, ""));
+    return configuration;
+  }
+  
+  private static ResolverConfiguration getResolverConfiguration(IClasspathEntry entry) {
+    if(entry == null) {
+      return new ResolverConfiguration();
+    }
+
+    String containerPath = entry.getPath().toString();
+
+    boolean includeModules = containerPath.indexOf("/" + MavenPlugin.INCLUDE_MODULES) > -1;
+
+    boolean resolveWorkspaceProjects = containerPath.indexOf("/" + MavenPlugin.NO_WORKSPACE_PROJECTS) == -1;
+
+    boolean filterResources = containerPath.indexOf("/" + MavenPlugin.FILTER_RESOURCES) != -1;
+
+    boolean useMavenOutputFolders = containerPath.indexOf("/" + MavenPlugin.USE_MAVEN_OUPUT_FOLDERS) != -1;
+
+    ResolverConfiguration configuration = new ResolverConfiguration();
+    configuration.setIncludeModules(includeModules);
+    configuration.setResolveWorkspaceProjects(resolveWorkspaceProjects);
+    configuration.setFilterResources(filterResources);
+    configuration.setUseMavenOutputFolders(useMavenOutputFolders);
+    configuration.setActiveProfiles(getActiveProfiles(entry));
+    return configuration;
+  }
+
+  private static String getActiveProfiles(IClasspathEntry entry) {
+    String path = entry.getPath().toString();
+    String prefix = "/" + MavenPlugin.ACTIVE_PROFILES + "[";
+    int n = path.indexOf(prefix);
+    if(n == -1) {
+      return "";
+    }
+
+    return path.substring(n + prefix.length(), path.indexOf("]", n));
   }
 
 }

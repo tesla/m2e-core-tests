@@ -158,119 +158,121 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
     }
   }
 
-  protected void addProjectEntries(Set resolved, IPath path, int scope, ILaunchConfiguration configuration) throws CoreException {
+  protected void addProjectEntries(Set resolved, IPath path, int scope, ILaunchConfiguration launchConfiguration) throws CoreException {
     IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
     IProject project = root.getProject(path.segment(0));
-    IJavaProject javaProject = JavaCore.create(project);
 
     MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
-    MavenProjectFacade facade = projectManager.create(project, new NullProgressMonitor());
-    ResolverConfiguration resolverConfiguration = BuildPathManager.getResolverConfiguration(javaProject);
+    MavenProjectFacade projectFacade = projectManager.create(project, new NullProgressMonitor());
+    if(projectFacade == null) {
+      return;
+    }
+    
+    ResolverConfiguration configuration = projectFacade.getResolverConfiguration();
+    if (configuration == null) {
+      return;
+    }
 
-    if (facade != null && resolverConfiguration != null) {
-
-      final Set allClasses = new LinkedHashSet();
-      final Set allResources = new LinkedHashSet();
-      final Set allTestClasses = new LinkedHashSet();
-      final Set allTestResources = new LinkedHashSet();
-      
-      // JDT source->output mapping
-      IClasspathEntry[] cp = javaProject.getRawClasspath();
-      for(int i = 0; i < cp.length; i++ ) {
-        if(IClasspathEntry.CPE_SOURCE == cp[i].getEntryKind()) {
-          IPath outputLocation;
-          if (cp[i].getOutputLocation() != null) {
-            outputLocation = cp[i].getOutputLocation();
-          } else {
-            outputLocation = javaProject.getOutputLocation();
-          }
-          outputLocation = outputLocation.removeFirstSegments(1).makeRelative();
-          if (BuildPathManager.TEST_TYPE.equals(getType(cp[i]))) {
-            allTestClasses.add(outputLocation);
-          } else {
-            allClasses.add(outputLocation);
-          }
+    final Set allClasses = new LinkedHashSet();
+    final Set allResources = new LinkedHashSet();
+    final Set allTestClasses = new LinkedHashSet();
+    final Set allTestResources = new LinkedHashSet();
+    
+    IJavaProject javaProject = JavaCore.create(project);
+    // JDT source->output mapping
+    IClasspathEntry[] cp = javaProject.getRawClasspath();
+    for(int i = 0; i < cp.length; i++ ) {
+      if(IClasspathEntry.CPE_SOURCE == cp[i].getEntryKind()) {
+        IPath outputLocation;
+        if (cp[i].getOutputLocation() != null) {
+          outputLocation = cp[i].getOutputLocation();
+        } else {
+          outputLocation = javaProject.getOutputLocation();
+        }
+        outputLocation = outputLocation.removeFirstSegments(1).makeRelative();
+        if (BuildPathManager.TEST_TYPE.equals(getType(cp[i]))) {
+          allTestClasses.add(outputLocation);
+        } else {
+          allClasses.add(outputLocation);
         }
       }
+    }
 
-      facade.accept(new IMavenProjectVisitor() {
-        public boolean visit(MavenProjectFacade projectFacade) {
-          allResources.addAll(Arrays.asList(projectFacade.getResourceLocations()));
-          allTestResources.addAll(Arrays.asList(projectFacade.getTestResourceLocations()));
-          return true; // continue traversal
-        }
+    projectFacade.accept(new IMavenProjectVisitor() {
+      public boolean visit(MavenProjectFacade projectFacade) {
+        allResources.addAll(Arrays.asList(projectFacade.getResourceLocations()));
+        allTestResources.addAll(Arrays.asList(projectFacade.getTestResourceLocations()));
+        return true; // continue traversal
+      }
 
-        public void visit(MavenProjectFacade projectFacade, Artifact artifact) {
-        }
-      }, IMavenProjectVisitor.NESTED_MODULES);
+      public void visit(MavenProjectFacade projectFacade, Artifact artifact) {
+      }
+    }, IMavenProjectVisitor.NESTED_MODULES);
 
-      // compensate for resources source entries 
-      allClasses.removeAll(allResources);
-      allClasses.removeAll(allTestResources);
+    // compensate for resources source entries 
+    allClasses.removeAll(allResources);
+    allClasses.removeAll(allTestResources);
 
-      boolean projectResolved = false;
-      for (int i = 0; i < cp.length; i++) {
-        IRuntimeClasspathEntry rce = null;
-        switch (cp[i].getEntryKind()) {
-          case IClasspathEntry.CPE_SOURCE:
-            if (!projectResolved) {
-              if (BuildPathManager.CLASSPATH_TEST == scope) {
-                // ECLIPSE-19: test classes resources come infront on the rest
-                addFolders(resolved, project, allTestClasses);
-                if (!resolverConfiguration.shouldFilterResources()) {
-                  addFolders(resolved, project, allTestResources);
-                }
+    boolean projectResolved = false;
+    for (int i = 0; i < cp.length; i++) {
+      IRuntimeClasspathEntry rce = null;
+      switch (cp[i].getEntryKind()) {
+        case IClasspathEntry.CPE_SOURCE:
+          if (!projectResolved) {
+            if (BuildPathManager.CLASSPATH_TEST == scope) {
+              // ECLIPSE-19: test classes resources come infront on the rest
+              addFolders(resolved, project, allTestClasses);
+              if (!configuration.shouldFilterResources()) {
+                addFolders(resolved, project, allTestResources);
               }
-              addFolders(resolved, project, allClasses);
-              if (!resolverConfiguration.shouldFilterResources()) {
-                addFolders(resolved, project, allResources);
-              }
-              projectResolved = true;
             }
-            break;
-          case IClasspathEntry.CPE_CONTAINER:
-            IClasspathContainer container = JavaCore.getClasspathContainer(cp[i].getPath(), javaProject);
-            if (container != null && !MAVEN2_CONTAINER_PATH.isPrefixOf(cp[i].getPath())) {
-              switch (container.getKind()) {
-                case IClasspathContainer.K_APPLICATION:
-                  rce = JavaRuntime.newRuntimeContainerClasspathEntry(container.getPath(), IRuntimeClasspathEntry.USER_CLASSES, javaProject);
-                  break;
+            addFolders(resolved, project, allClasses);
+            if (!configuration.shouldFilterResources()) {
+              addFolders(resolved, project, allResources);
+            }
+            projectResolved = true;
+          }
+          break;
+        case IClasspathEntry.CPE_CONTAINER:
+          IClasspathContainer container = JavaCore.getClasspathContainer(cp[i].getPath(), javaProject);
+          if (container != null && !MAVEN2_CONTAINER_PATH.isPrefixOf(cp[i].getPath())) {
+            switch (container.getKind()) {
+              case IClasspathContainer.K_APPLICATION:
+                rce = JavaRuntime.newRuntimeContainerClasspathEntry(container.getPath(), IRuntimeClasspathEntry.USER_CLASSES, javaProject);
+                break;
 //                case IClasspathContainer.K_DEFAULT_SYSTEM:
 //                  unresolved.add(JavaRuntime.newRuntimeContainerClasspathEntry(container.getPath(), IRuntimeClasspathEntry.STANDARD_CLASSES, javaProject));
 //                  break;
 //                case IClasspathContainer.K_SYSTEM:
 //                  unresolved.add(JavaRuntime.newRuntimeContainerClasspathEntry(container.getPath(), IRuntimeClasspathEntry.BOOTSTRAP_CLASSES, javaProject));
 //                  break;
-              }
             }
-            break;
-          case IClasspathEntry.CPE_LIBRARY:
-            rce = JavaRuntime.newArchiveRuntimeClasspathEntry(cp[i].getPath());
-            break;
-          case IClasspathEntry.CPE_VARIABLE:
-            if (!JavaRuntime.JRELIB_VARIABLE.equals(cp[i].getPath().segment(0))) {
-              rce = JavaRuntime.newVariableRuntimeClasspathEntry(cp[i].getPath());
+          }
+          break;
+        case IClasspathEntry.CPE_LIBRARY:
+          rce = JavaRuntime.newArchiveRuntimeClasspathEntry(cp[i].getPath());
+          break;
+        case IClasspathEntry.CPE_VARIABLE:
+          if (!JavaRuntime.JRELIB_VARIABLE.equals(cp[i].getPath().segment(0))) {
+            rce = JavaRuntime.newVariableRuntimeClasspathEntry(cp[i].getPath());
+          }
+          break;
+        case IClasspathEntry.CPE_PROJECT:
+          IProject res = root.getProject(cp[i].getPath().segment(0));
+          if (res != null) {
+            IJavaProject otherProject = JavaCore.create(res);
+            if (otherProject != null) {
+              rce = JavaRuntime.newDefaultProjectClasspathEntry(otherProject);
             }
-            break;
-          case IClasspathEntry.CPE_PROJECT:
-            IProject res = root.getProject(cp[i].getPath().segment(0));
-            if (res != null) {
-              IJavaProject otherProject = JavaCore.create(res);
-              if (otherProject != null) {
-                rce = JavaRuntime.newDefaultProjectClasspathEntry(otherProject);
-              }
-            }
-            break;
-          default:
-            break;
-        }
-        if (rce != null) {
-          addStandardClasspathEntries(resolved, rce, configuration);
-        }
+          }
+          break;
+        default:
+          break;
       }
-
+      if (rce != null) {
+        addStandardClasspathEntries(resolved, rce, launchConfiguration);
+      }
     }
-
   }
 
   private String getType(IClasspathEntry entry) {
