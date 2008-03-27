@@ -17,6 +17,8 @@ import java.io.StringWriter;
 import java.util.Collections;
 import java.util.Map;
 
+import javax.xml.namespace.QName;
+
 import org.apache.xmlbeans.XmlCursor;
 import org.apache.xmlbeans.XmlOptions;
 
@@ -51,6 +53,8 @@ public class MavenModelManager {
   private final MavenEmbedderManager embedderManager;
 
   private final MavenConsole console;
+
+  private XmlOptions xmlOptions;
 
   public MavenModelManager(MavenEmbedderManager embedderManager, MavenConsole console) {
     this.embedderManager = embedderManager;
@@ -117,10 +121,22 @@ public class MavenModelManager {
       MavenEmbedder embedder = embedderManager.getWorkspaceEmbedder();
       embedder.writeModel(w, model, true);
 
-      pomFile.create(new ByteArrayInputStream(w.toString().getBytes(model.getModelEncoding())), true, null);
+      String pom = w.toString();
+      
+      ProjectDocument projectDocument = ProjectDocument.Factory.parse(pom, getXmlOptions());
 
-    } catch(IOException ex) {
-      String msg = "Can't read model " + pomFileName + "; " + ex.toString();
+      new NamespaceAdder().update(projectDocument);
+      
+      XmlOptions options = new XmlOptions();
+      options.setSaveNamespacesFirst();
+      
+      ByteArrayOutputStream bos = new ByteArrayOutputStream();
+      projectDocument.save(bos, options);
+      
+      pomFile.create(new ByteArrayInputStream(bos.toByteArray()), true, null);
+
+    } catch(Exception ex) {
+      String msg = "Can't create model " + pomFileName + "; " + ex.toString();
       console.logError(msg);
       throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
     }
@@ -172,11 +188,7 @@ public class MavenModelManager {
   public void updateProject(IFile pomFile, ProjectUpdater updater) {
     File pom = pomFile.getLocation().toFile();
     try {
-      XmlOptions options = new XmlOptions();
-
-      Map ns = Collections.singletonMap("", ProjectDocument.type.getDocumentElementName().getNamespaceURI());
-      options.setLoadSubstituteNamespaces(ns);
-      options.setSaveImplicitNamespaces(ns);
+      XmlOptions options = getXmlOptions();
 
       ProjectDocument projectDocument = ProjectDocument.Factory.parse(pom, options);
       updater.update(projectDocument);
@@ -199,12 +211,46 @@ public class MavenModelManager {
     }
   }
 
+  private XmlOptions getXmlOptions() {
+    if(xmlOptions==null) {
+      xmlOptions = new XmlOptions();
+  
+      Map ns = Collections.singletonMap("", ProjectDocument.type.getDocumentElementName().getNamespaceURI());
+      xmlOptions.setLoadSubstituteNamespaces(ns);
+      xmlOptions.setSaveImplicitNamespaces(ns);
+    }
+    return xmlOptions;
+  }
+
   public void addDependency(IFile pomFile, final Dependency dependency) {
     updateProject(pomFile, new DependencyAdder(dependency));
   }
 
   public void addModule(IFile pomFile, final String moduleName) {
     updateProject(pomFile, new ModuleAdder(moduleName));
+  }
+
+  
+  /**
+   * Project updater for adding Maven namespace declaration
+   */
+  public static class NamespaceAdder implements ProjectUpdater {
+
+    public void update(ProjectDocument project) {
+      XmlCursor cursor = project.newCursor();
+      cursor.toNextToken();
+      if(!cursor.toFirstAttribute()) {
+        cursor.toNextToken();
+      }
+
+      String uri = ProjectDocument.type.getDocumentElementName().getNamespaceURI();
+      cursor.insertNamespace("", uri);
+      cursor.insertNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+      cursor.insertAttributeWithValue( //
+          new QName("http://www.w3.org/2001/XMLSchema-instance", "schemaLocation",  "xsi"), 
+          uri + " http://maven.apache.org/maven-v4_0_0.xsd");
+    }
+    
   }
   
   /**

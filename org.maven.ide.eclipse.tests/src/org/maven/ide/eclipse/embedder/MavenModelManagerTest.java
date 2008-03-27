@@ -9,16 +9,28 @@
 package org.maven.ide.eclipse.embedder;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.Collections;
 import java.util.Map;
+
+import javax.xml.namespace.QName;
 
 import junit.framework.TestCase;
 
 import org.apache.maven.model.Dependency;
 import org.apache.maven.pom.x400.ProjectDocument;
+import org.apache.xmlbeans.XmlCursor;
 import org.apache.xmlbeans.XmlException;
+import org.apache.xmlbeans.XmlObject;
 import org.apache.xmlbeans.XmlOptions;
+import org.apache.xmlbeans.XmlCursor.TokenType;
+import org.maven.ide.eclipse.MavenPlugin;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
 
 
 /**
@@ -230,6 +242,53 @@ public class MavenModelManagerTest extends TestCase {
         "</project>", toString(document));
   }
   
+  public void testCreateMavenModel() throws Exception {
+
+    testCreateMavenModel("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + // 
+        "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" " + //
+        "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " + // 
+        "xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd\">\n" + // 
+        "  <modelVersion>4.0.0</modelVersion>\n" + //
+        "  <groupId>org.sonatype.projects</groupId>\n" + // 
+        "  <artifactId>foo</artifactId>\n" + //
+        "  <version>0.0.1-SNAPSHOT</version>\n" + // 
+        "</project>");
+    
+    testCreateMavenModel("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + // 
+        "<project>\n" + //
+        "  <modelVersion>4.0.0</modelVersion>\n" + // 
+        "  <groupId>org.sonatype.projects</groupId>\n" + // 
+        "  <artifactId>foo</artifactId>\n" + //
+        "  <version>0.0.1-SNAPSHOT</version>\n" + // 
+        "</project>");
+    
+  }
+
+  private void testCreateMavenModel(String pom) throws XmlException, IOException {
+    XmlOptions options = new XmlOptions();
+    
+    Map ns = Collections.singletonMap("", URI);
+    options.setLoadSubstituteNamespaces(ns);
+    options.setSaveNamespacesFirst();
+
+    ProjectDocument document = ProjectDocument.Factory.parse(pom, options);
+
+    new MavenModelManager.NamespaceAdder().update(document);
+    
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    document.save(os, options);
+    
+    assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + 
+    		"<project xmlns=\"http://maven.apache.org/POM/4.0.0\" " +
+    		    "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " +
+    		    "xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd\">\n" + 
+    		"  <modelVersion>4.0.0</modelVersion>\n" + 
+    		"  <groupId>org.sonatype.projects</groupId>\n" + 
+    		"  <artifactId>foo</artifactId>\n" + 
+    		"  <version>0.0.1-SNAPSHOT</version>\n" + 
+    		"</project>", new String(os.toByteArray()).replaceAll("\r\n", "\n"));
+  }
+  
   private ProjectDocument getProjectDocument(String pom) throws XmlException {
     XmlOptions options = new XmlOptions();
     
@@ -237,8 +296,7 @@ public class MavenModelManagerTest extends TestCase {
     options.setLoadSubstituteNamespaces(ns);
     options.setSaveImplicitNamespaces(ns);
     
-    ProjectDocument document = ProjectDocument.Factory.parse(pom, options);
-    return document;
+    return ProjectDocument.Factory.parse(pom, options);
   }
 
   private String toString(ProjectDocument document) throws IOException {
