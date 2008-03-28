@@ -397,8 +397,8 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
       for(int k = 0; k < libraryLocations.length; k++ ) {
         IPath path = libraryLocations[k].getSystemLibraryPath();
         String jarName = path.lastSegment();
-        // TODO that won't be the case on Mac
-        if("rt.jar".equals(jarName)) {
+        // MNGECLIPSE-478 handle Sun and Apple JRE
+        if("rt.jar".equals(jarName) || "classes.jar".equals(jarName)) {
           JarFile jarFile = null;
           try {
             jarFile = new JarFile(path.toFile());
