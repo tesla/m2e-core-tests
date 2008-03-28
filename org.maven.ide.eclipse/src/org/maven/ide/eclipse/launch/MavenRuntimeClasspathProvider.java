@@ -31,7 +31,6 @@ import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
 import org.eclipse.jdt.launching.JavaRuntime;
@@ -57,17 +56,20 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
 
   public IRuntimeClasspathEntry[] computeUnresolvedClasspath(final ILaunchConfiguration configuration) throws CoreException {
     boolean useDefault = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH, true);
-    IRuntimeClasspathEntry[] entries;
     if (useDefault) {
-      IRuntimeClasspathEntry jreEntry = JavaRuntime.computeJREEntry(configuration);
       IJavaProject javaProject = JavaRuntime.getJavaProject(configuration);
+      IRuntimeClasspathEntry jreEntry = JavaRuntime.computeJREEntry(configuration);
       IRuntimeClasspathEntry projectEntry = JavaRuntime.newProjectRuntimeClasspathEntry(javaProject);
       IRuntimeClasspathEntry mavenEntry = JavaRuntime.newRuntimeContainerClasspathEntry(MAVEN2_CONTAINER_PATH, IRuntimeClasspathEntry.USER_CLASSES);
-      entries = new IRuntimeClasspathEntry[] {jreEntry, projectEntry, mavenEntry};
-    } else {
-      entries = recoverRuntimePath(configuration, IJavaLaunchConfigurationConstants.ATTR_CLASSPATH);
+
+      if(jreEntry == null) {
+        return new IRuntimeClasspathEntry[] {projectEntry, mavenEntry};
+      }
+
+      return new IRuntimeClasspathEntry[] {jreEntry, projectEntry, mavenEntry};
     }
-    return entries;
+    
+    return recoverRuntimePath(configuration, IJavaLaunchConfigurationConstants.ATTR_CLASSPATH);
   }
 
   public IRuntimeClasspathEntry[] resolveClasspath(IRuntimeClasspathEntry[] entries, ILaunchConfiguration configuration)
@@ -295,11 +297,11 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
     }
   }
 
-  private IRuntimeClasspathEntry newSourceClasspathEntry(IJavaProject javaProject, IClasspathEntry cpe) throws JavaModelException {
-    IPath path = cpe.getOutputLocation();
-    if (path != null) {
-      return JavaRuntime.newArchiveRuntimeClasspathEntry(path);
-    }
-    return JavaRuntime.newArchiveRuntimeClasspathEntry(javaProject.getOutputLocation());
-  }
+//  private IRuntimeClasspathEntry newSourceClasspathEntry(IJavaProject javaProject, IClasspathEntry cpe) throws JavaModelException {
+//    IPath path = cpe.getOutputLocation();
+//    if (path != null) {
+//      return JavaRuntime.newArchiveRuntimeClasspathEntry(path);
+//    }
+//    return JavaRuntime.newArchiveRuntimeClasspathEntry(javaProject.getOutputLocation());
+//  }
 }
