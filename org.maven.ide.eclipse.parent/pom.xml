@@ -27,10 +27,6 @@
       <url>http://www.eclipse.org/legal/epl-v10.html</url>
     </license>
   </licenses>
-
-  <prerequisites>
-    <maven>2.1-SNAPSHOT</maven>
-  </prerequisites>
   
   <issueManagement>
     <url>http://jira.codehaus.org/browse/MNGECLIPSE</url>
@@ -70,4 +66,42 @@
 
   </modules>
 
+  <build>
+
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.tycho</groupId>
+        <artifactId>maven-osgi-lifecycle-plugin</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <inherited>true</inherited>
+        <extensions>true</extensions>
+      </plugin>
+    </plugins>
+
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.codehaus.tycho</groupId>
+          <artifactId>maven-osgi-lifecycle-plugin</artifactId>
+          <version>1.0-SNAPSHOT</version>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.tycho</groupId>
+          <artifactId>maven-osgi-packaging-plugin</artifactId>
+          <version>1.0-SNAPSHOT</version>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.tycho</groupId>
+          <artifactId>maven-osgi-test-plugin</artifactId>
+          <version>1.0-SNAPSHOT</version>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.tycho</groupId>
+          <artifactId>maven-osgi-compiler-plugin</artifactId>
+          <version>1.0-SNAPSHOT</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+  
 </project>
