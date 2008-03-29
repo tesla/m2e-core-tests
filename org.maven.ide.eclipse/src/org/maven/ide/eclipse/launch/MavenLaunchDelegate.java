@@ -225,6 +225,8 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
   private String getPreferences(ILaunchConfiguration configuration) throws CoreException {
     StringBuffer sb = new StringBuffer();
 
+    sb.append(" -B");
+
     MavenRuntimeManager runtimeManager = MavenPlugin.getDefault().getMavenRuntimeManager();
 
     boolean debugOutput = configuration.getAttribute(MavenLaunchConstants.ATTR_DEBUG_OUTPUT, //
