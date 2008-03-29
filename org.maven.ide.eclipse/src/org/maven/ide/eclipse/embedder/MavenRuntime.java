@@ -19,6 +19,8 @@ import org.osgi.framework.Bundle;
 
 import org.eclipse.core.runtime.FileLocator;
 
+import org.codehaus.plexus.util.DirectoryScanner;
+
 import org.maven.ide.eclipse.MavenPlugin;
 
 /**
@@ -153,21 +155,28 @@ public abstract class MavenRuntime {
       // TODO add quotes if location contains spaces
       return " -Dclassworlds.conf=" + location + File.separator + "bin" + File.separator + "m2.conf -Dmaven.home=" + location;
     }
-    
+
     public String[] getClasspath() {
       File mavenHome = new File(location);
 
-      File classworlds = new File(mavenHome, "core" + File.separator + "boot" + File.separator + "classworlds-1.1.jar"); // 2.0.4
-      if(!classworlds.exists()) {
-        classworlds = new File(mavenHome, "boot" + File.separator + "classworlds-1.1.jar");  // 2.0.7
-        if(!classworlds.exists()) {
-          classworlds = new File(mavenHome, "boot" + File.separator + "plexus-classworlds-1.2-alpha-12.jar"); // 2.1
-        }
+      DirectoryScanner ds = new DirectoryScanner();
+      ds.setBasedir(mavenHome);
+      ds.setIncludes(new String[] {
+          "core/boot/classworlds-*.jar", // 2.0.4
+          "boot/classworlds-*.jar", // 2.0.7
+          "boot/plexus-classworlds-*.jar", // 2.1 as of 2008-03-27
+      });
+      ds.scan();
+      String[] includedFiles = ds.getIncludedFiles();
+
+      if (includedFiles.length != 1) {
+        // XXX show error dialog and fail launch
+        return new String[0];
       }
-      
-      return new String[] {classworlds.getAbsolutePath()};
+
+      return new String[] {new File(mavenHome, includedFiles[0]).getAbsolutePath()};
     }
-    
+
     public boolean equals(Object o) {
       if(o instanceof MavenExternalRuntime) {
         return location.equals(((MavenExternalRuntime) o).location);
