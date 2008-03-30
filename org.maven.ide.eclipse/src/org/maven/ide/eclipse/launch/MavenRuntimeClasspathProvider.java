@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -48,11 +49,18 @@ import org.maven.ide.eclipse.project.ResolverConfiguration;
 
 public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
 
+  private static final Path MAVEN2_CONTAINER_PATH = new Path(MavenPlugin.CONTAINER_ID);
+  
   public static final String JDT_JUNIT_TEST = "org.eclipse.jdt.junit.launchconfig";
 
   public static final String JDT_JAVA_APPLICATION = "org.eclipse.jdt.launching.localJavaApplication";
 
-  private static final Path MAVEN2_CONTAINER_PATH = new Path(MavenPlugin.CONTAINER_ID);
+  private static final Set supportedTypes = new HashSet();
+  static {
+    // not exactly nice, but works with eclipse 3.2, 3.3 and 3.4M3
+    supportedTypes.add(MavenRuntimeClasspathProvider.JDT_JAVA_APPLICATION);
+    supportedTypes.add(MavenRuntimeClasspathProvider.JDT_JUNIT_TEST);
+  }
 
   public IRuntimeClasspathEntry[] computeUnresolvedClasspath(final ILaunchConfiguration configuration) throws CoreException {
     boolean useDefault = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH, true);
@@ -297,11 +305,29 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
     }
   }
 
-//  private IRuntimeClasspathEntry newSourceClasspathEntry(IJavaProject javaProject, IClasspathEntry cpe) throws JavaModelException {
-//    IPath path = cpe.getOutputLocation();
-//    if (path != null) {
-//      return JavaRuntime.newArchiveRuntimeClasspathEntry(path);
-//    }
-//    return JavaRuntime.newArchiveRuntimeClasspathEntry(javaProject.getOutputLocation());
-//  }
+  public static boolean isSupportedType(String id) {
+    return supportedTypes.contains(id);
+  }
+
+  public static void enable(ILaunchConfiguration config) throws CoreException {
+    if (config instanceof ILaunchConfigurationWorkingCopy) {
+      enable((ILaunchConfigurationWorkingCopy) config);
+    } else {
+      ILaunchConfigurationWorkingCopy wc = config.getWorkingCopy();
+      enable(wc);
+      wc.doSave();
+    }
+  }
+
+  private static void enable(ILaunchConfigurationWorkingCopy wc) {
+    wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH_PROVIDER, "org.maven.ide.eclipse.launchconfig.classpathProvider");
+    wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_SOURCE_PATH_PROVIDER, "org.maven.ide.eclipse.launchconfig.sourcepathProvider");
+  }
+
+  public static void disable(ILaunchConfiguration config) throws CoreException {
+    ILaunchConfigurationWorkingCopy wc = config.getWorkingCopy();
+    wc.removeAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH_PROVIDER);
+    wc.removeAttribute(IJavaLaunchConfigurationConstants.ATTR_SOURCE_PATH_PROVIDER);
+    wc.doSave();
+  }
 }
