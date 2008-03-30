@@ -326,8 +326,8 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
 
   public static void disable(ILaunchConfiguration config) throws CoreException {
     ILaunchConfigurationWorkingCopy wc = config.getWorkingCopy();
-    wc.removeAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH_PROVIDER);
-    wc.removeAttribute(IJavaLaunchConfigurationConstants.ATTR_SOURCE_PATH_PROVIDER);
+    wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH_PROVIDER, (String) null);
+    wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_SOURCE_PATH_PROVIDER, (String) null);
     wc.doSave();
   }
 }
