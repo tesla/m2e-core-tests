@@ -19,19 +19,30 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.debug.core.DebugEvent;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.IDebugEventSetListener;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.ISourceLocator;
+import org.eclipse.debug.ui.RefreshTab;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.launching.IVMRunner;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
+import org.eclipse.jdt.launching.VMRunnerConfiguration;
 import org.eclipse.jdt.launching.sourcelookup.JavaProjectSourceLocation;
 import org.eclipse.jdt.launching.sourcelookup.JavaSourceLocator;
 import org.eclipse.ui.externaltools.internal.model.ExternalToolBuilder;
 import org.eclipse.ui.externaltools.internal.model.IExternalToolConstants;
 
+import org.maven.ide.eclipse.MavenConsole;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
@@ -44,20 +55,39 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
   private static final boolean TRACE_ENABLED = Boolean.valueOf(
       Platform.getDebugOption("org.maven.ide.eclipse/launcher")).booleanValue();
 
-  // private static final String MAVEN_EXECUTOR_CLASS = MavenExecutor.class.getName();
-  private static final String MAVEN_EXECUTOR_CLASS = org.apache.maven.cli.MavenCli.class.getName();
-
-  private static String[] CLASSPATH;
-
   public boolean isTraceEnabled() {
     return TRACE_ENABLED;
   }
 
   public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor)
       throws CoreException {
-    MavenPlugin.getDefault().getConsole().logMessage("mvn" + getProgramArguments(configuration));
+    MavenConsole console = MavenPlugin.getDefault().getConsole();
+    console.logMessage("" + getWorkingDirectory(configuration));
+    console.logMessage(" mvn" + getProgramArguments(configuration));
+    
     launch.setSourceLocator(createSourceLocator());
+    
     super.launch(configuration, ILaunchManager.DEBUG_MODE, launch, monitor);
+  }
+  
+  /* (non-Javadoc)
+   * @see org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate#getVMRunner(org.eclipse.debug.core.ILaunchConfiguration, java.lang.String)
+   */
+  public IVMRunner getVMRunner(final ILaunchConfiguration configuration, String mode) throws CoreException {
+    final IVMRunner runner = super.getVMRunner(configuration, mode);
+    
+    return new IVMRunner() {
+      public void run(VMRunnerConfiguration runnerConfiguration, ILaunch launch, IProgressMonitor monitor)
+          throws CoreException {
+        runner.run(runnerConfiguration, launch, monitor);
+        
+        IProcess[] processes = launch.getProcesses();
+        if(processes!=null && processes.length>0) {
+          BackgroundResourceRefresher refresher = new BackgroundResourceRefresher(configuration, processes[0]);
+          refresher.startBackgroundRefresh();
+        }
+      }
+    };
   }
 
   // grab source locations from all open java projects
@@ -139,7 +169,6 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
 //  }
 
   public File getWorkingDirectory(ILaunchConfiguration configuration) throws CoreException {
-    // TODO Auto-generated method getWorkingDirectory
     return super.getWorkingDirectory(configuration);
   }
 
@@ -286,4 +315,68 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
     }
   }
 
+  
+  /**
+   * Refreshes resources as specified by a launch configuration, when 
+   * an associated process terminates.
+   * 
+   * Adapted from org.eclipse.ui.externaltools.internal.program.launchConfigurations.BackgroundResourceRefresher
+   */
+  public class BackgroundResourceRefresher implements IDebugEventSetListener  {
+    final ILaunchConfiguration configuration;
+    final IProcess process;
+    
+    public BackgroundResourceRefresher(ILaunchConfiguration configuration, IProcess process) {
+      this.configuration = configuration;
+      this.process = process;
+    }
+    
+    /**
+     * If the process has already terminated, resource refreshing is done
+     * immediately in the current thread. Otherwise, refreshing is done when the
+     * process terminates.
+     */
+    public void startBackgroundRefresh() {
+      synchronized (process) {
+        if (process.isTerminated()) {
+          refresh();
+        } else {
+          DebugPlugin.getDefault().addDebugEventListener(this);
+        }
+      }
+    }
+    
+    /* (non-Javadoc)
+     * @see org.eclipse.debug.core.IDebugEventSetListener#handleDebugEvents(org.eclipse.debug.core.DebugEvent[])
+     */
+    public void handleDebugEvents(DebugEvent[] events) {
+      for (int i = 0; i < events.length; i++) {
+        DebugEvent event = events[i];
+        if (event.getSource() == process && event.getKind() == DebugEvent.TERMINATE) {
+          DebugPlugin.getDefault().removeDebugEventListener(this);
+          refresh();
+          break;
+        }
+      }
+    }
+    
+    /**
+     * Submits a job to do the refresh
+     */
+    protected void refresh() {
+      Job job= new Job("Refreshing resources...") {
+        public IStatus run(IProgressMonitor monitor) {
+          try {
+            RefreshTab.refreshResources(configuration, monitor);
+            return Status.OK_STATUS;
+          } catch (CoreException e) {
+            MavenPlugin.log(e);
+            return e.getStatus();
+          } 
+        }
+      };
+      job.schedule();
+    }
+  }
+  
 }
