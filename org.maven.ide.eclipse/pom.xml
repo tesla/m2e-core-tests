@@ -19,7 +19,6 @@
   </parent>
 
   <artifactId>org.maven.ide.eclipse</artifactId>
-  <version>0.9.0-SNAPSHOT</version>
   <packaging>osgi-bundle</packaging>
   
   <name>Maven Integration for Eclipse Plug-in</name>

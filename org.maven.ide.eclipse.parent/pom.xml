@@ -54,10 +54,10 @@
     <module>../org.maven.ide.eclipse.mylyn</module>
     <module>../org.maven.ide.eclipse.subclipse</module>
 
-    <!-- <module>../org.maven.ide.eclipse.feature</module> -->
-    <!-- <module>../org.maven.ide.eclipse.central.feature</module> -->
-    <!-- <module>../org.maven.ide.eclipse.mylyn.feature</module> -->
-    <!-- <module>../org.maven.ide.eclipse.subclipse.feature</module> -->
+    <module>../org.maven.ide.eclipse.feature</module>
+    <module>../org.maven.ide.eclipse.central.feature</module>
+    <module>../org.maven.ide.eclipse.mylyn.feature</module>
+    <module>../org.maven.ide.eclipse.subclipse.feature</module>
 
     <!--
     <module>org.maven.ide.eclipse.tests</module>
@@ -75,6 +75,14 @@
         <version>1.0-SNAPSHOT</version>
         <inherited>true</inherited>
         <extensions>true</extensions>
+      </plugin>
+      
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <configuration>
+          <tagBase>https://svn.sonatype.org/m2eclipse/tags</tagBase>
+        </configuration>
       </plugin>
     </plugins>
 
