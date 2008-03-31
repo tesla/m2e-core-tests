@@ -36,8 +36,8 @@
   </issueManagement>
   
   <scm>
-    <connection>http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.parent</connection>
-    <developerConnection>https://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.parent</developerConnection>
+    <connection>scm:svn:http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.parent</connection>
+    <developerConnection>scm:svn:https://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.parent</developerConnection>
     <url></url>
   </scm>
   
