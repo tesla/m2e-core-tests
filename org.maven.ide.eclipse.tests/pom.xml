@@ -29,12 +29,6 @@
     <plugins>
       <plugin>
         <groupId>org.codehaus.tycho</groupId>
-        <artifactId>maven-osgi-lifecycle-plugin</artifactId>
-        <version>1.0-SNAPSHOT</version>
-        <extensions>true</extensions>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.tycho</groupId>
         <artifactId>maven-osgi-compiler-plugin</artifactId>
         <version>1.0-SNAPSHOT</version>
         <configuration>
@@ -42,6 +36,7 @@
           <target>1.4</target>
         </configuration>
       </plugin>
+      
       <plugin>
         <groupId>org.codehaus.tycho</groupId>
         <artifactId>maven-osgi-test-plugin</artifactId>
