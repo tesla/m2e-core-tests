@@ -42,7 +42,7 @@
   </scm>
   
   <modules>
-    <module>../org.apache.maven.pom</module>
+    <module>../org.maven.ide.components.pom</module>
     <module>../org.maven.ide.components.qname</module>
     <module>../org.maven.ide.components.maven-embedder</module>
     <module>../org.maven.ide.components.archetype-common</module>
