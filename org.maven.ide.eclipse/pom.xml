@@ -19,6 +19,7 @@
   </parent>
 
   <artifactId>org.maven.ide.eclipse</artifactId>
+  <version>${m2eclipse.version}</version>
   <packaging>osgi-bundle</packaging>
   
   <name>Maven Integration for Eclipse Plug-in</name>
@@ -39,6 +40,23 @@
   </build>
   
   <dependencies>
+    <dependency>
+      <groupId>org.maven.ide.components</groupId>
+      <artifactId>org.maven.ide.components.maven_embedder</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.maven.ide.components</groupId>
+      <artifactId>org.maven.ide.components.archetype_common</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.maven.ide.components</groupId>
+      <artifactId>org.maven.ide.components.nexus_indexer</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.maven.ide.components</groupId>
+      <artifactId>org.maven.ide.components.maven_model_edit</artifactId>
+    </dependency>
+
     <dependency>
       <groupId>org.eclipse</groupId>
       <artifactId>org.eclipse.osgi</artifactId>
@@ -168,26 +186,6 @@
       <groupId>org.eclipse</groupId>
       <artifactId>org.eclipse.ltk.core.refactoring</artifactId>
       <version>3.2.1.r321_v20060823</version>
-    </dependency>
-    <dependency>
-      <groupId>org.maven.ide.components</groupId>
-      <artifactId>org.maven.ide.components.maven_embedder</artifactId>
-      <version>2.1.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.maven.ide.components</groupId>
-      <artifactId>org.maven.ide.components.archetype_common</artifactId>
-      <version>2.0.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.maven.ide.components</groupId>
-      <artifactId>org.maven.ide.components.nexus_indexer</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.maven.ide.components</groupId>
-      <artifactId>org.maven.ide.components.maven_model_edit</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse</groupId>
