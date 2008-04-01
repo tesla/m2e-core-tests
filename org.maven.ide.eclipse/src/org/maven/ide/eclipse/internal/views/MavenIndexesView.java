@@ -308,6 +308,7 @@ public class MavenIndexesView extends ViewPart {
             indexManager.removeIndex(indexName, false);
             indexManager.addIndex(indexInfo, false);
             updateIndex(indexInfo);
+            viewer.setSelection(null);
           }
         }
       }
