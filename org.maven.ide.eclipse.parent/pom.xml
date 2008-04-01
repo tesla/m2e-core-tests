@@ -19,16 +19,20 @@
   <name>Maven Integration for Eclipse Build</name>
 
   <properties>
-    <m2eclipse.version>0.9.1-SNAPSHOT</m2eclipse.version>
+    <buildId>20080331-1600</buildId>
+    <m2eclipse.version>0.9.1-${buildId}</m2eclipse.version>
+    
+    <maven_embedder.version>2.1.0.${buildId}</maven_embedder.version>
+    <archetype_common.version>2.0.0.${buildId}</archetype_common.version>
+    <maven_model_edit.version>1.0.0.${buildId}</maven_model_edit.version>
+    <qname.version>1.0.0.${buildId}</qname.version>
+    <nexus_indexer.version>1.0.0.${buildId}</nexus_indexer.version>
+
     <maven.version>2.1-SNAPSHOT</maven.version>
     <artifact.version>3.0-SNAPSHOT</artifact.version>
     <archetype.version>2.0-alpha-1</archetype.version>
-
-    <maven_embedder.version>2.1.0-SNAPSHOT</maven_embedder.version>
-    <archetype_common.version>2.0.0.qualifier</archetype_common.version>
-    <maven_model_edit.version>1.0.0-SNAPSHOT</maven_model_edit.version>
-    <qname.version>1.0.0-SNAPSHOT</qname.version>
-    <nexus_indexer.version>1.0.0-SNAPSHOT</nexus_indexer.version>
+    <maven_pom.version>1.0.0-SNAPSHOT</maven_pom.version>
+    <nexus.version>1.0.0-beta-1-20080331.202755-1</nexus.version>
   </properties>
 
   <organization>
@@ -120,6 +124,11 @@
         <groupId>org.maven.ide.components</groupId>
         <artifactId>org.maven.ide.components.nexus_indexer</artifactId>
         <version>${nexus_indexer.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.maven.ide.components</groupId>
+        <artifactId>org.maven.ide.components.pom</artifactId>
+        <version>${maven_pom.version}</version>
       </dependency>
       <dependency>
         <groupId>org.maven.ide.components</groupId>
