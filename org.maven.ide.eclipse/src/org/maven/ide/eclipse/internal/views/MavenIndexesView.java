@@ -29,6 +29,7 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
@@ -308,7 +309,8 @@ public class MavenIndexesView extends ViewPart {
             indexManager.removeIndex(indexName, false);
             indexManager.addIndex(indexInfo, false);
             updateIndex(indexInfo);
-            viewer.setSelection(null);
+            viewer.refresh();
+            viewer.setSelection(new StructuredSelection(indexInfo));
           }
         }
       }
