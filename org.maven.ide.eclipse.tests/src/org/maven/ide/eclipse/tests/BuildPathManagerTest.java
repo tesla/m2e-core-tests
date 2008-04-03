@@ -35,6 +35,7 @@ import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.project.BuildPathManager;
 import org.maven.ide.eclipse.project.MavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
+import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 
 
@@ -1054,5 +1055,23 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     cp = getMavenContainerEntries(p1);
     assertEquals(1, cp.length);
     assertEquals(p2.getFullPath(), cp[0].getPath());
+  }
+
+  
+  public void testProjectNameTemplate() throws Exception {
+    deleteProject("p003");
+    deleteProject("projectimport.p003-2.0");
+    
+    ResolverConfiguration configuration = new ResolverConfiguration();
+    ProjectImportConfiguration projectImportConfiguration = new ProjectImportConfiguration(configuration);
+    importProject("p003version1", "projects/projectimport/p003version1", projectImportConfiguration);
+    
+    projectImportConfiguration.setProjectNameTemplate("[groupId].[artifactId]-[version]");
+    importProject("p003version2", "projects/projectimport/p003version2", projectImportConfiguration);
+    
+    waitForJobsToComplete();
+    
+    assertTrue(workspace.getRoot().getProject("p003").exists());
+    assertTrue(workspace.getRoot().getProject("projectimport.p003-2.0").exists());
   }
 }

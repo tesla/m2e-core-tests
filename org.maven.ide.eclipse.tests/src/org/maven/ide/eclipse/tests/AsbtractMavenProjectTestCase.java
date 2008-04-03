@@ -191,15 +191,18 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
   }
 
   protected IProject importProject(String projectName, String projectLocation, ResolverConfiguration configuration) throws IOException, CoreException {
+    ProjectImportConfiguration importConfiguration = new ProjectImportConfiguration(configuration);
+    importConfiguration.setProjectNameTemplate(projectName);
+    return importProject(projectName, projectLocation, importConfiguration);
+  }
+
+  protected IProject importProject(String projectName, String projectLocation, final ProjectImportConfiguration importConfiguration) throws IOException, CoreException {
     File dir = new File(workspace.getRoot().getLocation().toFile(), projectName);
     copyDir(new File(projectLocation), dir);
 
     File pomFile = new File(dir, MavenPlugin.POM_FILE_NAME);
     Model model = MavenPlugin.getDefault().getMavenModelManager().readMavenModel(pomFile);
     final MavenProjectInfo projectInfo = new MavenProjectInfo(projectName, pomFile, model, null);
-    
-    final ProjectImportConfiguration importConfiguration = new ProjectImportConfiguration(configuration);
-    importConfiguration.setProjectNameTemplate(projectName);
     
     workspace.run(new IWorkspaceRunnable() {
       public void run(IProgressMonitor monitor) throws CoreException {
