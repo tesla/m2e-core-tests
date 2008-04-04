@@ -39,7 +39,7 @@ public class MavenSourcePathProvider extends MavenRuntimeClasspathProvider {
 
   }
 
-  protected void addProjectEntries(Set resolved, IPath path, int scope) {
+  protected void addProjectEntries(Set resolved, IPath path, int scope, ILaunchConfiguration launchConfiguration) {
     IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
     IProject project = root.getProject(path.segment(0));
     IJavaProject javaProject = JavaCore.create(project);

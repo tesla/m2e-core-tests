@@ -70,13 +70,14 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
     IRuntimeClasspathEntry[] resolvedClasspath = classpathProvider.resolveClasspath(unresolvedClasspath, configuration);
     IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
 
-    assertEquals(Arrays.asList(userClasspath).toString(), 6, userClasspath.length);
-    assertEquals(new Path("/cptest/target/classes"), userClasspath[0].getPath());
-    assertEquals(new Path("/cptest/src/main/resources"), userClasspath[1].getPath());
-    assertEquals("testlib-2.0.jar", userClasspath[2].getPath().lastSegment());
-    assertEquals("commons-logging-1.0.2.jar", userClasspath[3].getPath().lastSegment());
-    assertEquals(new Path("/cptest2/target/classes"), userClasspath[4].getPath());
-    assertEquals(new Path("/cptest2/src/main/resources"), userClasspath[5].getPath());
+    // source path contains project entries
+    assertEquals(Arrays.asList(userClasspath).toString(), 4, userClasspath.length);
+    assertEquals(new Path("/cptest"), userClasspath[0].getPath());
+    assertEquals(IRuntimeClasspathEntry.PROJECT, userClasspath[0].getType());
+    assertEquals("testlib-2.0.jar", userClasspath[1].getPath().lastSegment());
+    assertEquals("commons-logging-1.0.2.jar", userClasspath[2].getPath().lastSegment());
+    assertEquals(new Path("/cptest2"), userClasspath[3].getPath());
+    assertEquals(IRuntimeClasspathEntry.PROJECT, userClasspath[3].getType());
   }
 
   IRuntimeClasspathEntry[] getUserClasspathEntries(IRuntimeClasspathEntry[] entries) {
