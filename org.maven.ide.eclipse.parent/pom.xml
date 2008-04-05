@@ -23,6 +23,7 @@
     <m2eclipse.version>0.9.1-${buildId}</m2eclipse.version>
     
     <maven_embedder.version>2.1.0.${buildId}</maven_embedder.version>
+    <maven_scm.version>1.0.0.${buildId}</maven_scm.version>
     <archetype_common.version>2.0.0.${buildId}</archetype_common.version>
     <maven_model_edit.version>1.0.0.${buildId}</maven_model_edit.version>
     <qname.version>1.0.0.${buildId}</qname.version>
@@ -114,6 +115,11 @@
         <groupId>org.maven.ide.components</groupId>
         <artifactId>org.maven.ide.components.maven_embedder</artifactId>
         <version>${maven_embedder.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.maven.ide.components</groupId>
+        <artifactId>org.maven.ide.components.maven_scm</artifactId>
+        <version>${maven_scm.version}</version>
       </dependency>
       <dependency>
         <groupId>org.maven.ide.components</groupId>
