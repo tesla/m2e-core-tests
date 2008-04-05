@@ -9,9 +9,11 @@
 package org.maven.ide.eclipse.scm;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
@@ -24,12 +26,23 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.actions.NewProjectAction;
+
+import org.codehaus.plexus.util.DirectoryScanner;
+import org.codehaus.plexus.util.FileUtils;
 
 import org.apache.maven.model.Model;
 
+import org.maven.ide.eclipse.MavenConsole;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.project.BuildPathManager;
@@ -37,6 +50,7 @@ import org.maven.ide.eclipse.project.LocalProjectScanner;
 import org.maven.ide.eclipse.project.MavenProjectInfo;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.wizards.MavenImportWizard;
+import org.maven.ide.eclipse.wizards.ProjectsImportWizard;
 
 
 /**
@@ -134,8 +148,58 @@ public abstract class MavenProjectCheckoutJob extends WorkspaceJob {
       }
 
       if(projects.isEmpty()) {
-        MavenPlugin.getDefault().getConsole().logError("No Maven projects to import");
-        return;
+        MavenPlugin.getDefault().getConsole().logMessage("No Maven projects to import");
+        
+        final List locations = operation.getLocations();
+        if(locations.size()==1) {
+          final String location = (String) locations.get(0);
+          
+          DirectoryScanner projectScanner = new DirectoryScanner();
+          projectScanner.setBasedir(location);
+          projectScanner.setIncludes(new String[] {"**/.project"});
+          projectScanner.scan();
+          
+          String[] projectFiles = projectScanner.getIncludedFiles();
+          if(projectFiles!=null && projectFiles.length>0) {
+            Display.getDefault().asyncExec(new Runnable() {
+              public void run() {
+                boolean res = MessageDialog.openConfirm(Display.getDefault().getActiveShell(), //
+                    "Project Import", //
+                    "No Maven projects found, but there is Eclipse projects configuration avaialble.\n" +
+                    "Do you want to select and import Eclipse projects?");
+                if(res) {
+                  IWizard wizard = new ProjectsImportWizard(((String) locations.get(0)));
+                  WizardDialog dialog = new WizardDialog(Display.getDefault().getActiveShell(), wizard);
+                  dialog.open();
+                } else {
+                  cleanup(locations);
+                }
+              }
+            });
+            return;
+          }
+          
+          Display.getDefault().syncExec(new Runnable() {
+            public void run() {
+              boolean res = MessageDialog.openConfirm(Display.getDefault().getActiveShell(), //
+                  "Project Import", //
+                  "No Maven projects found. Do you want to create project using new project wizard?\n"
+                      + "Check out location will be copied into clipboard.");
+              if(res) {
+                Clipboard clipboard = new Clipboard(Display.getDefault());
+                clipboard.setContents(new Object[] { location }, new Transfer[] { TextTransfer.getInstance() });
+                
+                NewProjectAction newProjectAction = new NewProjectAction(PlatformUI.getWorkbench().getActiveWorkbenchWindow());
+                newProjectAction.run();
+              } else {
+                cleanup(locations);
+              }
+            }
+          });
+          return;
+        }
+
+        cleanup(locations);
       }
       
       if(checkoutAllProjects) {
@@ -160,17 +224,32 @@ public abstract class MavenProjectCheckoutJob extends WorkspaceJob {
       } else {
         Display.getDefault().asyncExec(new Runnable() {
           public void run() {
-            MavenImportWizard wizard = new MavenImportWizard(configuration, operation.getLocations());
-
+            List locations = operation.getLocations();
+            MavenImportWizard wizard = new MavenImportWizard(configuration, locations);
             WizardDialog dialog = new WizardDialog(Display.getDefault().getActiveShell(), wizard);
             int res = dialog.open();
             if(res == Window.CANCEL) {
-              // XXX offer to delete checkout folder
+              cleanup(locations);
             }
           }
         });
       }
     }
+
+    protected void cleanup(List locations) {
+      MavenConsole console = MavenPlugin.getDefault().getConsole();
+      for(Iterator it = locations.iterator(); it.hasNext();) {
+        String location = (String) it.next();
+        try {
+          FileUtils.deleteDirectory(location);
+        } catch(IOException ex) {
+          String msg = "Can't delete " + location;
+          console.logError(msg + "; " + (ex.getMessage()==null ? ex.toString() : ex.getMessage()));
+          MavenPlugin.log(msg, ex);
+        }
+      }
+    }
+    
   }
   
 }

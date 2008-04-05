@@ -193,7 +193,7 @@ public class MavenProjectPomScanner extends AbstractProjectScanner {
     
     // XXX read modules from profiles
     
-    return null;
+    return parentScm;
   }
 
   private Model resolveModel(MavenEmbedder embedder, String groupId, String artifactId, String version)

@@ -20,15 +20,15 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.project.MavenProjectScmInfo;
 
 /**
- * ScmHandler
+ * An SCM handler base class
  *
  * @author Eugene Kuleshov
  */
 public abstract class ScmHandler implements Comparable, IExecutableExtension {
 
-  public static final String ATTR_SCM_HANDLER_CLASS = "class";
-  public static final String ATTR_SCM_HANDLER_TYPE = "type";
-  public static final String ATTR_SCM_HANDLER_PRIORITY = "priority";
+  public static final String ATTR_CLASS = "class";
+  public static final String ATTR_TYPE = "type";
+  public static final String ATTR_PRIORITY = "priority";
   
   private String type;
   private int priority;
@@ -49,7 +49,9 @@ public abstract class ScmHandler implements Comparable, IExecutableExtension {
    *  
    * @see http://maven.apache.org/scm/scm-url-format.html
    */
-  public abstract InputStream open(String url, String revision) throws CoreException;
+  public InputStream open(String url, String revision) throws CoreException {
+    return null;
+  }
   
   /**
    * @param info
@@ -63,8 +65,8 @@ public abstract class ScmHandler implements Comparable, IExecutableExtension {
   
   public void setInitializationData(IConfigurationElement config, String propertyName, Object data) {
     String handlerClass = config.getAttribute(propertyName);
-    String type = config.getAttribute(ATTR_SCM_HANDLER_TYPE);
-    String priority = config.getAttribute(ATTR_SCM_HANDLER_PRIORITY);
+    String type = config.getAttribute(ATTR_TYPE);
+    String priority = config.getAttribute(ATTR_PRIORITY);
 
     this.type = type;
     
@@ -90,6 +92,5 @@ public abstract class ScmHandler implements Comparable, IExecutableExtension {
     }
     return -1;
   }
-
 
 }

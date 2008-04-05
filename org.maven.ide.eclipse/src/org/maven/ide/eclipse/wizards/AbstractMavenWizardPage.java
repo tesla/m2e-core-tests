@@ -37,13 +37,13 @@ public abstract class AbstractMavenWizardPage extends WizardPage {
   protected ResolverConfigurationComponent resolverConfigurationComponent;
   
   /** dialog settings to store input history */
-  private IDialogSettings dialogSettings;
+  protected IDialogSettings dialogSettings;
 
-  /** the list of fields that have an input history */
+  /** the Map of field ids to List of comboboxes that share the same history */
   private Map fieldsWithHistory;
 
   /** the history limit */
-  private static final int MAX_HISTORY = 15;
+  protected static final int MAX_HISTORY = 15;
 
   /**
    * The resolver configuration

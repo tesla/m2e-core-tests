@@ -32,6 +32,7 @@ import org.maven.ide.eclipse.index.IndexInfo;
 import org.maven.ide.eclipse.internal.index.IndexInfoWriter;
 import org.maven.ide.eclipse.scm.ScmHandler;
 import org.maven.ide.eclipse.scm.ScmHandlerFactory;
+import org.maven.ide.eclipse.scm.ScmHandlerUi;
 
 
 /**
@@ -44,6 +45,8 @@ public class ExtensionReader {
   public static final String EXTENSION_INDEXES = "org.maven.ide.eclipse.indexes";
 
   public static final String EXTENSION_SCM_HANDLERS = "org.maven.ide.eclipse.scmHandlers";
+  
+  public static final String EXTENSION_SCM_HANDLERS_UI = "org.maven.ide.eclipse.scmHandlersUi";
 
   private static final String ELEMENT_INDEX = "index";
 
@@ -58,6 +61,8 @@ public class ExtensionReader {
   private static final String ATTR_IS_SHORT = "isShort";
 
   private static final String ELEMENT_SCM_HANDLER = "handler";
+
+  private static final String ELEMENT_SCM_HANDLER_UI = "handlerUi";
 
   /**
    * @param configFile previously saved indexes configuration
@@ -140,22 +145,22 @@ public class ExtensionReader {
   }
 
   /**
-   * 
+   * Read SCM extension points 
    */
   public static void readScmHandlerExtensions() {
     IExtensionRegistry registry = Platform.getExtensionRegistry();
+    
     IExtensionPoint scmHandlersExtensionPoint = registry.getExtensionPoint(EXTENSION_SCM_HANDLERS);
     if(scmHandlersExtensionPoint != null) {
       IExtension[] scmHandlersExtensions = scmHandlersExtensionPoint.getExtensions();
       for(int i = 0; i < scmHandlersExtensions.length; i++ ) {
         IExtension extension = scmHandlersExtensions[i];
-        // IContributor contributor = extension.getContributor();
         IConfigurationElement[] elements = extension.getConfigurationElements();
         for(int j = 0; j < elements.length; j++ ) {
           IConfigurationElement element = elements[j];
           if(element.getName().equals(ELEMENT_SCM_HANDLER)) {
             try {
-              ScmHandler handler = (ScmHandler) element.createExecutableExtension(ScmHandler.ATTR_SCM_HANDLER_CLASS);
+              ScmHandler handler = (ScmHandler) element.createExecutableExtension(ScmHandler.ATTR_CLASS);
               ScmHandlerFactory.addScmHandler(handler);
             } catch(CoreException ex) {
               MavenPlugin.log(ex);
@@ -164,7 +169,27 @@ public class ExtensionReader {
         }
       }
     }
-
+    
+    IExtensionPoint scmHandlersUiExtensionPoint = registry.getExtensionPoint(EXTENSION_SCM_HANDLERS_UI);
+    if(scmHandlersUiExtensionPoint != null) {
+      IExtension[] scmHandlersUiExtensions = scmHandlersUiExtensionPoint.getExtensions();
+      for(int i = 0; i < scmHandlersUiExtensions.length; i++ ) {
+        IExtension extension = scmHandlersUiExtensions[i];
+        IConfigurationElement[] elements = extension.getConfigurationElements();
+        for(int j = 0; j < elements.length; j++ ) {
+          IConfigurationElement element = elements[j];
+          if(element.getName().equals(ELEMENT_SCM_HANDLER_UI)) {
+            try {
+              ScmHandlerUi handlerUi = (ScmHandlerUi) element.createExecutableExtension(ScmHandlerUi.ATTR_CLASS);
+              ScmHandlerFactory.addScmHandlerUi(handlerUi);
+            } catch(CoreException ex) {
+              MavenPlugin.log(ex);
+            }
+          }
+        }
+      }
+    }
   }
 
 }
+

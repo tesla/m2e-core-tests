@@ -10,6 +10,7 @@
 <plugin>
    <extension-point id="indexes" name="Maven Indexes" schema="schema/indexes.exsd"/>
    <extension-point id="scmHandlers" name="SCM Handlers" schema="schema/scmHandlers.exsd"/>
+   <extension-point id="scmHandlersUi" name="SCM Handlers UI" schema="schema/scmHandlersUi.exsd"/>
 
    <extension point="org.eclipse.core.resources.builders"
               id="maven2Builder"
@@ -160,7 +161,15 @@
          </visibility>  
          -->
       </objectContribution>
-
+      
+      <objectContribution id="org.maven.ide.eclipse.scmUrl"
+          objectClass="org.maven.ide.eclipse.scm.ScmUrl"
+          adaptable="true">
+        <action id="org.maven.ide.eclipse.ui.checkoutAsMaven"
+                label="Check out as Maven Project..."
+                class="org.maven.ide.eclipse.actions.CheckoutAsMavenAction"
+                menubarPath="checkoutGroup"/>
+      </objectContribution>
    </extension>
 
    <extension point="org.eclipse.core.expressions.propertyTesters">
@@ -522,19 +531,30 @@
          <description>%m2.wizard.project.description</description>
       </wizard>
 
-      <wizard
-            category="org.maven.ide.eclipse"
-            class="org.maven.ide.eclipse.wizards.MavenModuleWizard"
-            icon="icons/new_m2_project.gif"
-            id="org.maven.ide.eclipse.wizards.Maven2ModuleWizard"
-            name="%m2.wizard.module.name"
-            project="true">
+      <wizard id="org.maven.ide.eclipse.wizards.Maven2ModuleWizard"
+              category="org.maven.ide.eclipse"
+              class="org.maven.ide.eclipse.wizards.MavenModuleWizard"
+              icon="icons/new_m2_project.gif"
+              name="%m2.wizard.module.name"
+              project="true">
          <description>%m2.wizard.module.description</description>
       </wizard>
-      
+    
+      <wizard id="org.maven.ide.eclipse.wizards.MavenCheckoutWizard"
+              name="Checkout Maven Projects from SCM"
+              class="org.maven.ide.eclipse.wizards.MavenCheckoutWizard"
+              category="org.maven.ide.eclipse"
+              icon="icons/import_m2_project.gif">
+         <description>Check out Maven Project from SVN</description>
+         <!--
+         <selection class="org.tigris.subversion.subclipse.core.ISVNRemoteFolder"/>
+         -->
+      </wizard>
    </extension>
    
    <extension point="org.eclipse.ui.importWizards">
+     <category id="org.eclipse.ui.Basic" name="General"/>
+     
      <wizard id="org.maven.ide.eclipse.wizards.Maven2ImportWizard"
              class="org.maven.ide.eclipse.wizards.MavenImportWizard"
              icon="icons/import_m2_project.gif"
@@ -542,7 +562,6 @@
              name="%m2.wizard.import.name">
         <description>%m2.wizard.import.description</description>
      </wizard>
-     <category id="org.eclipse.ui.Basic" name="General"/>
      
      <wizard id="org.maven.ide.eclipse.wizards.MavenPomCheckoutWizard"
              class="org.maven.ide.eclipse.wizards.MavenMaterializePomWizard"
@@ -550,7 +569,17 @@
              icon="icons/import_m2_project.gif">
        <description>%m2.wizard.materialize.description</description>
      </wizard>
-   </extension>
+     
+     <wizard id="org.maven.ide.eclipse.wizards.MavenCheckoutWizard"
+             class="org.maven.ide.eclipse.wizards.MavenCheckoutWizard"
+             name="Check out Maven Projects from SCM"
+             icon="icons/import_m2_project.gif">
+       <description>Checkout Maven Project from SCM</description>
+       <!--
+       <selection class="org.tigris.subversion.subclipse.core.ISVNRemoteFolder"/>
+       -->
+     </wizard>
+  </extension>
 
    <extension point="org.eclipse.ui.console.consoleFactories">
       <consoleFactory label="Maven Console" icon="icons/m2.gif"
