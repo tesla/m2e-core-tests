@@ -15,6 +15,9 @@
    <feature url="features/org.maven.ide.eclipse.central.feature_0.9.1.200803311600.jar" id="org.maven.ide.eclipse.central.feature" version="0.9.1.200803311600">
       <category name="Optional Components"/>
    </feature>
+   <feature url="features/org.maven.ide.eclipse.scm.feature_0.9.1.200803311600.jar" id="org.maven.ide.eclipse.scm.feature" version="0.9.1.200803311600">
+      <category name="Optional Components"/>
+   </feature>
    <category-def name="Maven Integration" label="Maven Integration"/>
    <category-def name="Optional Components" label="Optional Components"/>
 </site>
