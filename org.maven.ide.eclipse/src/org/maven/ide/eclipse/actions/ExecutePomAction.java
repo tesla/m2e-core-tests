@@ -12,6 +12,7 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -112,10 +113,12 @@ public class ExecutePomAction implements ILaunchShortcut, IExecutableExtension, 
     }
   }
 
-  private void launch(IContainer basedir) {
-    if(basedir == null) {
+  private void launch(IContainer basecon) {
+    if(basecon == null) {
       return;
     }
+    
+    IContainer basedir = findPomXmlBasedir(basecon);
 
     Tracer.trace(this, "Launching", basedir);
 
@@ -144,6 +147,33 @@ public class ExecutePomAction implements ILaunchShortcut, IExecutableExtension, 
       Tracer.trace(this, "Launch configuration", launchConfiguration.getName());
       DebugUITools.launch(launchConfiguration, ILaunchManager.RUN_MODE);
     }
+  }
+
+  private IContainer findPomXmlBasedir(IContainer origDir) {
+    if(origDir == null) {
+      return null;
+    }
+
+    try {
+      // loop upwards through the parents as long as we do not cross the project boundary
+      while(origDir.exists() && origDir.getProject() != null && origDir.getProject() != origDir) {
+        // see if pom.xml exists
+        if(origDir.getType() == IResource.FOLDER) {
+          IFolder fold = (IFolder) origDir;
+          if(fold.findMember(MavenPlugin.POM_FILE_NAME) != null) {
+            return fold;
+          }
+        } else if(origDir.getType() == IResource.FILE) {
+          if(((IFile) origDir).getName().equals(MavenPlugin.POM_FILE_NAME)) {
+            return origDir.getParent();
+          }
+        }
+        origDir = origDir.getParent();
+      }
+    } catch(Exception e) {
+      return origDir;
+    }
+    return origDir;
   }
 
   private ILaunchConfiguration createLaunchConfiguration(IContainer basedir, String goal) {
