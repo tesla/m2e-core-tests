@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.launch;
+package org.maven.ide.eclipse.internal.launch.ui;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,6 +31,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.externaltools.internal.model.IExternalToolConstants;
 import org.eclipse.ui.externaltools.internal.model.IExternalToolsHelpContextIds;
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.internal.launch.MavenLaunchConstants;
 
 
 public class MavenGoalsTab extends AbstractLaunchConfigurationTab {

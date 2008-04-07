@@ -29,7 +29,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.PropertyPage;
 
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.launch.MavenGoalSelectionAdapter;
+import org.maven.ide.eclipse.internal.launch.ui.MavenGoalSelectionAdapter;
 import org.maven.ide.eclipse.project.MavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.ResolverConfiguration;

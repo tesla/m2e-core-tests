@@ -464,14 +464,14 @@
    <!-- careful when changing id, it's used to locate launch configuration from the java code! -->
       <launchConfigurationType
             category="org.eclipse.ui.externaltools"
-            delegate="org.maven.ide.eclipse.launch.MavenLaunchDelegate"
+            delegate="org.maven.ide.eclipse.internal.launch.MavenLaunchDelegate"
             id="org.maven.ide.eclipse.Maven2LaunchConfigurationType"
             modes="run"
             name="%m2.launch.type.name"
             public="true"/>
       <launchConfigurationType
             category="org.eclipse.ui.externaltools.builder"
-            delegate="org.maven.ide.eclipse.launch.MavenLaunchDelegate"
+            delegate="org.maven.ide.eclipse.internal.launch.MavenLaunchDelegate"
             name="%m2.launch.type.builder.name"
             id="org.maven.ide.eclipse.Maven2BuilderConfigurationType"
             modes="run">
@@ -481,10 +481,10 @@
    <extension point="org.eclipse.debug.ui.launchConfigurationTabGroups">
       <launchConfigurationTabGroup id="org.maven.ide.eclipse.LaunchConfigurationTabGroup"
             type="org.maven.ide.eclipse.Maven2LaunchConfigurationType"
-            class="org.maven.ide.eclipse.launch.MavenLaunchConfigurationTabGroup"/>
+            class="org.maven.ide.eclipse.internal.launch.ui.MavenLaunchConfigurationTabGroup"/>
       <launchConfigurationTabGroup id="org.maven.ide.eclipse.BuilderConfigurationTabGroup"
             type="org.maven.ide.eclipse.Maven2BuilderConfigurationType"
-            class="org.maven.ide.eclipse.launch.MavenBuilderConfigurationTabGroup"/>
+            class="org.maven.ide.eclipse.internal.launch.ui.MavenBuilderConfigurationTabGroup"/>
    </extension>
 
    <!-- Maven launcher configuration type image -->
@@ -606,10 +606,10 @@
    <extension point="org.eclipse.jdt.launching.classpathProviders">
       <classpathProvider 
           id="org.maven.ide.eclipse.launchconfig.classpathProvider"
-          class="org.maven.ide.eclipse.launch.MavenRuntimeClasspathProvider"/>
+          class="org.maven.ide.eclipse.internal.launch.MavenRuntimeClasspathProvider"/>
       <classpathProvider 
           id="org.maven.ide.eclipse.launchconfig.sourcepathProvider"
-          class="org.maven.ide.eclipse.launch.MavenSourcePathProvider"/>
+          class="org.maven.ide.eclipse.internal.launch.MavenSourcePathProvider"/>
    </extension>
 
    <extension point="org.eclipse.ui.actionSets">

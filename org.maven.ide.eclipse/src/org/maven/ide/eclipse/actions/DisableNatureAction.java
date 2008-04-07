@@ -24,7 +24,7 @@ import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.launch.MavenRuntimeClasspathProvider;
+import org.maven.ide.eclipse.internal.launch.MavenRuntimeClasspathProvider;
 import org.maven.ide.eclipse.project.BuildPathManager;
 
 

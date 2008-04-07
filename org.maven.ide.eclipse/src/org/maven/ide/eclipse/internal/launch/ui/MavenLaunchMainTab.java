@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.launch;
+package org.maven.ide.eclipse.internal.launch.ui;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -62,6 +62,7 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.Messages;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
+import org.maven.ide.eclipse.internal.launch.MavenLaunchConstants;
 import org.maven.ide.eclipse.util.ITraceable;
 import org.maven.ide.eclipse.util.Tracer;
 import org.maven.ide.eclipse.util.Util;

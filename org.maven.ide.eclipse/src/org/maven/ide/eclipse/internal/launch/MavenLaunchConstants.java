@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.launch;
+package org.maven.ide.eclipse.internal.launch;
 
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 

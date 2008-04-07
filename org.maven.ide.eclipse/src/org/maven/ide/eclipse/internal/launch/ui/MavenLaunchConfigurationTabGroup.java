@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.launch;
+package org.maven.ide.eclipse.internal.launch.ui;
 
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTabGroup;
 import org.eclipse.debug.ui.CommonTab;
@@ -14,11 +14,11 @@ import org.eclipse.debug.ui.ILaunchConfigurationDialog;
 import org.eclipse.debug.ui.ILaunchConfigurationTab;
 import org.eclipse.debug.ui.RefreshTab;
 
-public class MavenBuilderConfigurationTabGroup extends AbstractLaunchConfigurationTabGroup {
+public class MavenLaunchConfigurationTabGroup extends AbstractLaunchConfigurationTabGroup {
 
     public void createTabs(ILaunchConfigurationDialog dialog, String mode) {
         ILaunchConfigurationTab[] tabs = new ILaunchConfigurationTab[] {
-                new MavenLaunchMainTab(true),
+                new MavenLaunchMainTab(false),
                 new MavenJRETab(), 
                 new RefreshTab(), 
                 //new EnvironmentTab(), 
