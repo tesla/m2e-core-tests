@@ -181,6 +181,11 @@ public class MavenProjectManager {
     return null;
   }
 
-  
+  /**
+   * @return MavenProjectFacade[] all maven projects which exist under workspace root 
+   */
+  public MavenProjectFacade[] getProjects() {
+    return manager.getProjects();
+  }
 
 }

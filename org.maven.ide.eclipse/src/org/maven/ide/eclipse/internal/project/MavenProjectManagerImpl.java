@@ -1060,5 +1060,8 @@ public class MavenProjectManagerImpl {
     }
   }
 
+  public MavenProjectFacade[] getProjects() {
+    return (MavenProjectFacade[]) workspacePoms.values().toArray(new MavenProjectFacade[workspacePoms.size()]);
+  }
   
 }
