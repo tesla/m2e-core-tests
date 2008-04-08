@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project><modelVersion>4.0.0</modelVersion>
+  <groupId>org.maven.ide.eclipse</groupId>
+  <artifactId>org.maven.ide.eclipse.cliresolver</artifactId>
+  <version>0.9.2-SNAPSHOT</version>
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-core</artifactId>
+      <version>2.0.10-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
+</project>
