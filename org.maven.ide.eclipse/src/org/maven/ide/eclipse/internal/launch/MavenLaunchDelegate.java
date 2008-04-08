@@ -194,7 +194,21 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
   }
 
   public String getVMArguments(ILaunchConfiguration configuration) throws CoreException {
-    return super.getVMArguments(configuration) + getMavenRuntime(configuration).getOptions();
+    boolean workspaceResolution = configuration.getAttribute(ATTR_WORKSPACE_RESOLUTION, false);
+    StringBuffer sb = new StringBuffer();
+    if (workspaceResolution) {
+      File location = MavenPlugin.getDefault().getStateLocation().toFile();
+      File state = new File(location, WorkspaceStateWriter.STATE_FILENAME);
+      sb.append("-Dm2eclipse.workspace.state=\"").append(state.getAbsolutePath()).append("\"");
+      sb.append(" -Dclassworlds.conf=").append(new File(location, "m2.conf").getAbsolutePath());
+      sb.append(super.getVMArguments(configuration));
+      sb.append(getMavenRuntime(configuration).getOptions());
+      sb.append(" -Dclassworlds.conf=").append(new File(location, "m2.conf").getAbsolutePath());
+    } else {
+      sb.append(super.getVMArguments(configuration));
+      sb.append(getMavenRuntime(configuration).getOptions());
+    }
+    return  sb.toString();
   }
 
   private String getGoals(ILaunchConfiguration configuration) throws CoreException {

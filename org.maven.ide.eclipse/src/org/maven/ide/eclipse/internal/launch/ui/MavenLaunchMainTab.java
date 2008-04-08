@@ -100,6 +100,8 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
   private Button debugOutputButton;
 
   private Button skipTestsButton;
+  
+  private Button enableWorkspaceResolution;
 
   ComboViewer runtimeComboViewer;
 
@@ -304,6 +306,13 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
     skipTestsButton.setLayoutData(gd_skipTestsButton);
     skipTestsButton.setText("S&kip Tests");
     new Label(mainComposite, SWT.NONE);
+    new Label(mainComposite, SWT.NONE);
+
+    enableWorkspaceResolution = new Button(mainComposite, SWT.CHECK);
+    enableWorkspaceResolution.addSelectionListener(modyfyingListener);
+    enableWorkspaceResolution.setLayoutData(new GridData());
+    enableWorkspaceResolution.setText("Resolve workspace artifacts (experimental)");
+    new Label(mainComposite, SWT.NONE);
 
     TableViewer tableViewer = new TableViewer(mainComposite, SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
     tableViewer.addDoubleClickListener(new IDoubleClickListener() {
@@ -459,6 +468,7 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
 
     this.updateSnapshotsButton.setSelection(getAttribute(configuration, ATTR_UPDATE_SNAPSHOTS, false));
     this.skipTestsButton.setSelection(getAttribute(configuration, ATTR_SKIP_TESTS, false));
+    this.enableWorkspaceResolution.setSelection(getAttribute(configuration, ATTR_WORKSPACE_RESOLUTION, false));
 
     String location = getAttribute(configuration, ATTR_RUNTIME, "");
     MavenRuntime runtime = runtimeManager.getRuntime(location);
@@ -538,6 +548,7 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
     configuration.setAttribute(ATTR_OFFLINE, this.offlineButton.getSelection());
     configuration.setAttribute(ATTR_UPDATE_SNAPSHOTS, this.updateSnapshotsButton.getSelection());
     configuration.setAttribute(ATTR_SKIP_TESTS, this.skipTestsButton.getSelection());
+    configuration.setAttribute(ATTR_WORKSPACE_RESOLUTION, this.enableWorkspaceResolution.getSelection());
     configuration.setAttribute(ATTR_DEBUG_OUTPUT, this.debugOutputButton.getSelection());
 
     IStructuredSelection selection = (IStructuredSelection) runtimeComboViewer.getSelection();

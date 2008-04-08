@@ -63,6 +63,7 @@ import org.maven.ide.eclipse.internal.console.MavenConsoleImpl;
 import org.maven.ide.eclipse.internal.index.IndexInfoWriter;
 import org.maven.ide.eclipse.internal.index.NexusIndexManager;
 import org.maven.ide.eclipse.internal.launch.MavenLaunchConfigurationListener;
+import org.maven.ide.eclipse.internal.launch.WorkspaceStateWriter;
 import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerImpl;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerRefreshJob;
@@ -185,6 +186,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
         | IResourceChangeEvent.PRE_CLOSE | IResourceChangeEvent.PRE_DELETE);
 
     this.projectManager = new MavenProjectManager(managerImpl, indexManager, mavenBackgroundJob);
+    this.projectManager.addMavenProjectChangedListener(new WorkspaceStateWriter());
     this.projectManager.refresh(new MavenUpdateRequest(workspace.getRoot().getProjects(), //
         true /*offline*/, false /* updateSnapshots */));
 

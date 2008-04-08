@@ -31,7 +31,8 @@ public interface MavenLaunchConstants {
     public final String ATTR_UPDATE_SNAPSHOTS = "M2_UPDATE_SNAPSHOTS";
     public final String ATTR_DEBUG_OUTPUT = "M2_DEBUG_OUTPUT";
     public final String ATTR_SKIP_TESTS = "M2_SKIP_TESTS";
+    public final String ATTR_WORKSPACE_RESOLUTION = "M2_WORKSPACE_RESOLUTION";
 
     public final String ATTR_RUNTIME = "M2_RUNTIME";
-    
+
 }
