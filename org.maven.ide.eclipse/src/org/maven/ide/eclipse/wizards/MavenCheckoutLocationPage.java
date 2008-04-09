@@ -292,7 +292,7 @@ public class MavenCheckoutLocationPage extends AbstractMavenWizardPage {
       }
     });
 
-    GridData advancedSettingsData = new GridData(SWT.FILL, SWT.TOP, true, false, 4, 1);
+    GridData advancedSettingsData = new GridData(SWT.FILL, SWT.TOP, true, false, 5, 1);
     advancedSettingsData.verticalIndent = 10;
     createAdvancedSettings(composite, advancedSettingsData);
 

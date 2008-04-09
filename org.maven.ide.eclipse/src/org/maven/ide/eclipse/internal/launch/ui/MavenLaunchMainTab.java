@@ -287,11 +287,10 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
 
     updateSnapshotsButton = new Button(mainComposite, SWT.CHECK);
     updateSnapshotsButton.addSelectionListener(modyfyingListener);
-    GridData gd_updateSnapshotsButton = new GridData();
+    GridData gd_updateSnapshotsButton = new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1);
     gd_updateSnapshotsButton.horizontalIndent = 10;
     updateSnapshotsButton.setLayoutData(gd_updateSnapshotsButton);
     updateSnapshotsButton.setText("&Update Snapshots");
-    new Label(mainComposite, SWT.NONE);
     new Label(mainComposite, SWT.NONE);
 
     debugOutputButton = new Button(mainComposite, SWT.CHECK);
@@ -301,18 +300,16 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
 
     skipTestsButton = new Button(mainComposite, SWT.CHECK);
     skipTestsButton.addSelectionListener(modyfyingListener);
-    GridData gd_skipTestsButton = new GridData();
+    GridData gd_skipTestsButton = new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1);
     gd_skipTestsButton.horizontalIndent = 10;
     skipTestsButton.setLayoutData(gd_skipTestsButton);
     skipTestsButton.setText("S&kip Tests");
     new Label(mainComposite, SWT.NONE);
-    new Label(mainComposite, SWT.NONE);
 
     enableWorkspaceResolution = new Button(mainComposite, SWT.CHECK);
     enableWorkspaceResolution.addSelectionListener(modyfyingListener);
-    enableWorkspaceResolution.setLayoutData(new GridData());
-    enableWorkspaceResolution.setText("Resolve workspace artifacts (experimental)");
-    new Label(mainComposite, SWT.NONE);
+    enableWorkspaceResolution.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 3, 1));
+    enableWorkspaceResolution.setText("Resolve Workspace artifacts (experimental)");
 
     TableViewer tableViewer = new TableViewer(mainComposite, SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
     tableViewer.addDoubleClickListener(new IDoubleClickListener() {
