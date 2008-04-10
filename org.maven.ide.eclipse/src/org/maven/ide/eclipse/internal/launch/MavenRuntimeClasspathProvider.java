@@ -138,6 +138,13 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
   private int getArtifactScope(ILaunchConfiguration configuration) throws CoreException {
     String typeid = configuration.getType().getAttribute("id");
     if (JDT_JAVA_APPLICATION.equals(typeid)) {
+      IResource[] resources = configuration.getMappedResources();
+
+      // MNGECLIPSE-530: NPE starting openarchitecture workflow 
+      if (resources == null || resources.length == 0) {
+        return BuildPathManager.CLASSPATH_RUNTIME;
+      }
+
       // ECLIPSE-33: applications from test sources should use test scope 
       Set testSources = new HashSet();
       IJavaProject javaProject = JavaRuntime.getJavaProject(configuration);
@@ -150,7 +157,6 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
         }
       }
 
-      IResource[] resources = configuration.getMappedResources();
       for (int i = 0; i < resources.length; i++) {
         for (Iterator j = testSources.iterator(); j.hasNext(); ) {
           IPath testPath = (IPath) j.next();
