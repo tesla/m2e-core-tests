@@ -57,7 +57,7 @@ public class WorkspaceStateWriter implements IMavenProjectChangedListener {
             state.put(key, pom.getCanonicalPath());
           }
           File location = root.getLocation().append(facade.getOutputLocation()).toFile();
-          if (location.exists()) {
+          if (!"pom".equals(artifact.getType()) && location.exists()) {
             String key = artifact.getGroupId() + ":" + artifact.getArtifactId() + ":" + artifact.getType() + ":" + artifact.getBaseVersion();
             state.put(key, location.getCanonicalPath());
           }
