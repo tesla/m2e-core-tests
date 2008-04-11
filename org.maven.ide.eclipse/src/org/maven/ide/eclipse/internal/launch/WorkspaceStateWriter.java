@@ -18,6 +18,7 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.util.Properties;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.FileLocator;
@@ -56,10 +57,10 @@ public class WorkspaceStateWriter implements IMavenProjectChangedListener {
             String key = artifact.getGroupId() + ":" + artifact.getArtifactId() + ":pom:" + artifact.getBaseVersion();
             state.put(key, pom.getCanonicalPath());
           }
-          File location = root.findMember(facade.getOutputLocation()).getLocation().toFile();
-          if (!"pom".equals(artifact.getType()) && location.exists()) {
+          IResource outputLocation = root.findMember(facade.getOutputLocation());
+          if (!"pom".equals(artifact.getType()) && outputLocation != null && outputLocation.exists()) {
             String key = artifact.getGroupId() + ":" + artifact.getArtifactId() + ":" + artifact.getType() + ":" + artifact.getBaseVersion();
-            state.put(key, location.getCanonicalPath());
+            state.put(key, outputLocation.getLocation().toFile().getCanonicalPath());
           }
         }
       }
