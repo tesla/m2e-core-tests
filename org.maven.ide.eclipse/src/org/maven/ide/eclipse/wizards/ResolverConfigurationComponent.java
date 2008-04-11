@@ -13,16 +13,19 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
+
 import org.maven.ide.eclipse.Messages;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
@@ -35,24 +38,30 @@ public class ResolverConfigurationComponent extends ExpandableComposite {
 
   private static final String[] DEFAULT_NAME_TEMPLATES = {"[artifactId]", "[artifactId]-TRUNK",
       "[artifactId]-[version]", "[groupId].[artifactId]-[version]"};
-  
+
   /** The resolver configuration */
   protected final ResolverConfiguration resolverConfiguration;
-  
+
   /** project import configuration */
   private final ProjectImportConfiguration projectImportConfiguration;
 
   private ModifyListener modifyListener;
-  
+
   Button enableResourceFiltering;
+
   Button useMavenOutputFolders;
+
   Button resolveWorkspaceProjects;
+
   Button projectsForModules;
+
   Text profiles;
+
   Combo template;
 
   /** Creates a new component. */
-  public ResolverConfigurationComponent(final Composite parent, final ProjectImportConfiguration propectImportConfiguration, final boolean enableProjectNameTemplate) {
+  public ResolverConfigurationComponent(final Composite parent,
+      final ProjectImportConfiguration propectImportConfiguration, final boolean enableProjectNameTemplate) {
     super(parent, ExpandableComposite.COMPACT | ExpandableComposite.TWISTIE | ExpandableComposite.EXPANDED);
 
     this.projectImportConfiguration = propectImportConfiguration;
@@ -60,12 +69,16 @@ public class ResolverConfigurationComponent extends ExpandableComposite {
 
     setText(Messages.getString("resolverConfiguration.advanced"));
 
-    Composite advancedComposite = new Composite(this, SWT.NONE);
+    final Composite advancedComposite = new Composite(this, SWT.NONE);
     setClient(advancedComposite);
     addExpansionListener(new ExpansionAdapter() {
       public void expansionStateChanged(ExpansionEvent e) {
-//        parent.getShell().pack();
+        Shell shell = parent.getShell();
+        Point minSize = shell.getMinimumSize();
+        shell.setMinimumSize(shell.getSize().x, minSize.y);
+        shell.pack();
         parent.layout();
+        shell.setMinimumSize(minSize);
       }
     });
 
@@ -82,7 +95,7 @@ public class ResolverConfigurationComponent extends ExpandableComposite {
         resolverConfiguration.setFilterResources(enableResourceFiltering.getSelection());
       }
     });
-    
+
     useMavenOutputFolders = new Button(advancedComposite, SWT.CHECK);
     useMavenOutputFolders.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
     useMavenOutputFolders.setText(Messages.getString("resolverConfiguration.useMavenOutputFolders"));
@@ -91,7 +104,7 @@ public class ResolverConfigurationComponent extends ExpandableComposite {
         resolverConfiguration.setUseMavenOutputFolders(useMavenOutputFolders.getSelection());
       }
     });
-    
+
     resolveWorkspaceProjects = new Button(advancedComposite, SWT.CHECK);
     resolveWorkspaceProjects.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
     resolveWorkspaceProjects.setText(Messages.getString("resolverConfiguration.resolveWorkspaceProjects"));
@@ -122,11 +135,11 @@ public class ResolverConfigurationComponent extends ExpandableComposite {
       }
     });
 
-    if (enableProjectNameTemplate) {
+    if(enableProjectNameTemplate) {
       Label templateLabel = new Label(advancedComposite, SWT.NONE);
       templateLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
       templateLabel.setText(Messages.getString("resolverConfiguration.template"));
-  
+
       template = new Combo(advancedComposite, SWT.BORDER);
       template.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
       template.setToolTipText(Messages.getString("resolverConfiguration.templateDescription"));
@@ -137,7 +150,7 @@ public class ResolverConfigurationComponent extends ExpandableComposite {
         }
       });
     }
-    
+
     loadData();
   }
 
@@ -147,7 +160,7 @@ public class ResolverConfigurationComponent extends ExpandableComposite {
     resolveWorkspaceProjects.setSelection(resolverConfiguration.shouldResolveWorkspaceProjects());
     projectsForModules.setSelection(!resolverConfiguration.shouldIncludeModules());
     profiles.setText(resolverConfiguration.getActiveProfiles());
-    if (template != null) {
+    if(template != null) {
       template.setText(projectImportConfiguration.getProjectNameTemplate());
     }
   }
@@ -159,7 +172,7 @@ public class ResolverConfigurationComponent extends ExpandableComposite {
   public void setModifyListener(ModifyListener modifyListener) {
     this.modifyListener = modifyListener;
 
-    if (template != null) {
+    if(template != null) {
       template.addModifyListener(modifyListener);
     }
   }
@@ -167,9 +180,9 @@ public class ResolverConfigurationComponent extends ExpandableComposite {
   public void dispose() {
     super.dispose();
 
-    if (modifyListener != null) {
+    if(modifyListener != null) {
       template.removeModifyListener(modifyListener);
     }
   }
-  
+
 }
