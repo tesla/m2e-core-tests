@@ -13,21 +13,22 @@
 
   <groupId>org.maven.ide.eclipse</groupId>
   <artifactId>parent</artifactId>
-  <version>0.9.1-SNAPSHOT</version>
+  <version>0.9.2-SNAPSHOT</version>
   <packaging>pom</packaging>
   
   <name>Maven Integration for Eclipse Build</name>
 
   <properties>
-    <buildId>20080331-1600</buildId>
-    <m2eclipse.version>0.9.1-${buildId}</m2eclipse.version>
+    <buildId>20080410-2200</buildId>
+    <m2eclipse.version>0.9.2-${buildId}</m2eclipse.version>
     
     <maven_embedder.version>2.1.0.${buildId}</maven_embedder.version>
-    <maven_scm.version>1.0.0.${buildId}</maven_scm.version>
-    <archetype_common.version>2.0.0.${buildId}</archetype_common.version>
-    <maven_model_edit.version>1.0.0.${buildId}</maven_model_edit.version>
-    <qname.version>1.0.0.${buildId}</qname.version>
-    <nexus_indexer.version>1.0.0.${buildId}</nexus_indexer.version>
+    <archetype_common.version>2.0.0.20080331-1600</archetype_common.version>
+    <maven_scm.version>1.0.0.20080410-2200</maven_scm.version>
+
+    <maven_model_edit.version>1.0.0.20080331-1600</maven_model_edit.version>
+    <qname_version>1.0.0.20080331-1600</qname_version>
+    <nexus_indexer.version>1.0.0.20080331-1600</nexus_indexer.version>
 
     <maven.version>2.1-SNAPSHOT</maven.version>
     <artifact.version>3.0-SNAPSHOT</artifact.version>
@@ -66,11 +67,13 @@
     <module>../org.maven.ide.components.archetype-common</module>
     <module>../org.maven.ide.components.nexus-indexer</module>
     <module>../org.maven.ide.components.maven-model-edit</module>
+    <module>../org.maven.ide.components.maven-scm</module>
 
     <module>../org.maven.ide.eclipse</module>
     <module>../org.maven.ide.eclipse.central</module>
     <module>../org.maven.ide.eclipse.mylyn</module>
     <module>../org.maven.ide.eclipse.subclipse</module>
+    <module>../org.maven.ide.eclipse.scm</module>
 
     <!-- 
     <module>../org.maven.ide.eclipse.feature</module>
