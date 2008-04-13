@@ -862,17 +862,32 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     }
 
     File projectDir = pomFile.getParentFile();
-    String projectParent = projectDir.getParentFile().getAbsolutePath();
 
     if(projectDir.equals(root.getLocation().toFile())) {
       console.logError("Can't create project " + projectName + " at Workspace folder");
       return null;
-    } else if(projectParent.equals(root.getLocation().toFile().getAbsolutePath())) {
+    }
+
+    if(projectInfo.isNeedsRename()) {
+      File newProject = new File(projectDir.getParent(), projectName);
+      boolean renamed = projectDir.renameTo(newProject);
+      if(!renamed) {
+        throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, "Can't rename " + projectDir.getAbsolutePath(), null));
+      }
+      projectInfo.setPomFile(new File(newProject, MavenPlugin.POM_FILE_NAME));
+      projectDir = newProject;
+    }
+    
+    String projectParent = projectDir.getParentFile().getAbsolutePath();
+    if(projectParent.equals(root.getLocation().toFile().getAbsolutePath())) {
       // rename dir in workspace to match expected project name
       if(!projectDir.equals(root.getLocation().append(project.getName()).toFile())) {
         File newProject = new File(projectDir.getParent(), projectName);
-        projectDir.renameTo(newProject);
-        projectInfo.setPomFile(new File(newProject, MavenPlugin.PLUGIN_ID));
+        boolean renamed = projectDir.renameTo(newProject);
+        if(!renamed) {
+          throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, "Can't rename " + projectDir.getAbsolutePath(), null));
+        }
+        projectInfo.setPomFile(new File(newProject, MavenPlugin.POM_FILE_NAME));
       }
       project.create(monitor);
     } else {

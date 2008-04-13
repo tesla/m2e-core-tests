@@ -310,7 +310,7 @@ public class MavenCheckoutLocationPage extends AbstractMavenWizardPage {
   public void setVisible(boolean visible) {
     super.setVisible(visible);
     
-    if(dialogSettings!=null) {
+    if(dialogSettings!=null && scmUrlCombo!=null) {
       String[] items = dialogSettings.getArray("scmUrl");
       if(items != null) {
         String text = scmUrlCombo.getText();
@@ -327,8 +327,7 @@ public class MavenCheckoutLocationPage extends AbstractMavenWizardPage {
    * @see org.maven.ide.eclipse.wizards.AbstractMavenWizardPage#dispose()
    */
   public void dispose() {
-    if(dialogSettings != null) {
-      
+    if(dialogSettings != null && scmUrlCombo!=null) {
       Set history = new LinkedHashSet(MAX_HISTORY);
       
       String lastValue = scmUrlCombo.getText();

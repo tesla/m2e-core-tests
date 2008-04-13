@@ -57,7 +57,7 @@ public class MavenCheckoutOperation implements IRunnableWithProgress {
         MavenProjectScmInfo info2 = (MavenProjectScmInfo) it2.next();
         if(info != info2) {
           String path = info2.getFolderUrl().toString();
-          if(folderUrl.startsWith(path)) {
+          if(folderUrl.startsWith(path + "/")) {
             isNestedPath = true;
             break;
           }
@@ -79,10 +79,7 @@ public class MavenCheckoutOperation implements IRunnableWithProgress {
       try {
         // XXX if location is pointing to workspace folder need to create unique dir too 
         File workspaceRoot = ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile();
-        File location = this.location;
-        if(location == null || location.getAbsolutePath().equals(workspaceRoot.getAbsolutePath())) {
-          location = getUniqueDir(workspaceRoot);
-        }
+        File location = getUniqueDir(this.location == null ? workspaceRoot : this.location);
 
         ScmHandler handler = ScmHandlerFactory.getHandler(info.getFolderUrl());
         if(handler == null) {

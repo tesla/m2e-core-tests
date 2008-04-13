@@ -38,6 +38,8 @@ public class MavenProjectInfo {
 
   private final Set profiles = new HashSet();
 
+  private boolean needsRename;
+
 
   public MavenProjectInfo(String label, File pomFile, Model model, MavenProjectInfo parent) {
     this.label = label;
@@ -63,6 +65,14 @@ public class MavenProjectInfo {
     this.pomFile = pomFile;
   }
 
+  public void setNeedsRename(boolean needsRename) {
+    this.needsRename = needsRename;
+  }
+  
+  public boolean isNeedsRename() {
+    return this.needsRename;
+  }
+  
   private boolean isSubDir(File parentDir, File subDir) {
     if(parentDir.equals(subDir)) {
       return true;

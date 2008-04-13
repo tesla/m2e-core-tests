@@ -71,6 +71,7 @@ public class LocalProjectScanner extends AbstractProjectScanner {
     File pomFile = new File(folderDir, MavenPlugin.POM_FILE_NAME);
     MavenProjectInfo mavenProjectInfo = readMavenProjectInfo(baseFolderPath, pomFile, null);
     if(mavenProjectInfo != null) {
+      mavenProjectInfo.setNeedsRename(baseFolderPath == folderPath);
       addProject(mavenProjectInfo);
       return; // don't scan subfolders of the Maven project
     }
