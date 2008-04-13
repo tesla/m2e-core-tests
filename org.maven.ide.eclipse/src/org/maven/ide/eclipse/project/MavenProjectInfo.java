@@ -89,12 +89,12 @@ public class MavenProjectInfo {
   
   public void addProfile(String profileId) {
     if(profileId!=null) {
-      profiles.add(profileId);
+      this.profiles.add(profileId);
     }
   }
   
   public void addProfiles(Collection profiles) {
-    profiles.addAll(profiles);
+    this.profiles.addAll(profiles);
   }
   
   public String getLabel() {
