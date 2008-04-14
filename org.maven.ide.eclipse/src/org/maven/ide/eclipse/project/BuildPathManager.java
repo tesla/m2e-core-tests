@@ -140,9 +140,11 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
   public static final int CLASSPATH_TEST = 0;
 
   public static final int CLASSPATH_RUNTIME = 1;
-
-  //test is the widest possible scope, and this is what we need by default
+  
+  // test is the widest possible scope, and this is what we need by default
   public static final int CLASSPATH_DEFAULT = CLASSPATH_TEST;
+  
+  private static final List VERSIONS = Arrays.asList("1.1,1.2,1.3,1.4,1.5,1.6,1.7".split(","));
   
   static final ArtifactFilter SCOPE_FILTER_RUNTIME = new ScopeArtifactFilter(Artifact.SCOPE_RUNTIME); 
   static final ArtifactFilter SCOPE_FILTER_TEST = new ScopeArtifactFilter(Artifact.SCOPE_TEST);
@@ -546,8 +548,12 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
 
     String target = getBuildOption(mavenProject, "maven-compiler-plugin", "target");
     if(target != null) {
-      if(VERSIONS.contains(target)) {
-        console.logMessage("Setting target compatibility: " + source);
+      if("jsr14".equals(target)) {  
+        // see info about this at http://www.masutti.ch/eel/
+        console.logMessage("Setting target compatibility: jsr14");
+        setVersion(options, JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, "1.4");
+      } else if(VERSIONS.contains(target)) {
+        console.logMessage("Setting target compatibility: " + target);
         setVersion(options, JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, target);
       } else {
         console.logError("Invalid compiler target " + target + ". Using default");
@@ -781,8 +787,6 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     }
     return null;
   }
-
-  private static final List VERSIONS = Arrays.asList("1.1,1.2,1.3,1.4,1.5,1.6,1.7".split(","));
 
   private static void setVersion(Map options, String name, String value) {
     if(value == null) {
