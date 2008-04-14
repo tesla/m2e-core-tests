@@ -26,7 +26,16 @@
 
   <build>
     <sourceDirectory>src</sourceDirectory>
-    
+
+    <resources>
+	  <resource>
+	    <directory>${basedir}/src</directory>
+	    <includes>
+	      <include>**/*.properties</include>
+	    </includes>
+	  </resource>
+	</resources>
+
     <plugins>
       <plugin>
         <groupId>org.codehaus.tycho</groupId>
