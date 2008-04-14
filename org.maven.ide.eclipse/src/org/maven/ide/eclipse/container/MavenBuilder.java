@@ -64,15 +64,8 @@ public class MavenBuilder extends IncrementalProjectBuilder {
 //        buildpathManager.updateClasspathContainer(project, monitor);
       }
 
-      MavenProjectFacade projectFacade = projectManager.create(project, monitor);
-      ResolverConfiguration resolverConfiguration;
-      if(projectFacade!=null) {
-        resolverConfiguration = projectFacade.getResolverConfiguration();
-      } else {
-        // XXX why there is no project facade at this point?
-        resolverConfiguration = MavenProjectFacade.readResolverConfiguration(project);
-      }
-      if (resolverConfiguration.shouldFilterResources()) {
+      ResolverConfiguration configuration = projectManager.getResolverConfiguration(project);
+      if (configuration.shouldFilterResources()) {
         filterResources(project, kind, monitor);
       }
     }

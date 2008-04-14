@@ -33,7 +33,6 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.index.IndexInfo;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.project.BuildPathManager;
-import org.maven.ide.eclipse.project.MavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
@@ -1028,7 +1027,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     IJavaProject javaProject = JavaCore.create(project);
     assertEquals("ignore", javaProject.getOption(JavaCore.CORE_JAVA_BUILD_CLEAN_OUTPUT_FOLDER, false));
 
-    ResolverConfiguration configuration = MavenProjectFacade.readResolverConfiguration(project);
+    ResolverConfiguration configuration = plugin.getMavenProjectManager().getResolverConfiguration(project);
     assertEquals(modules, configuration.shouldIncludeModules());
     assertEquals(mavenFolders, configuration.shouldUseMavenOutputFolders());
   }

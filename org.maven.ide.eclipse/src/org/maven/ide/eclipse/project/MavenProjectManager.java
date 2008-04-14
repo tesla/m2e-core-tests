@@ -14,6 +14,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 
 import org.apache.maven.artifact.Artifact;
@@ -74,7 +75,23 @@ public class MavenProjectManager {
   public MavenProjectFacade getMavenProject(Artifact artifact) {
     return manager.getMavenProject(artifact);
   }
+  
+  public ResolverConfiguration getResolverConfiguration(IProject project) {
+    MavenProjectFacade projectFacade = create(project, new NullProgressMonitor());
+    if(projectFacade!=null) {
+      return projectFacade.getResolverConfiguration();
+    }
+    return manager.readResolverConfiguration(project);
+  }
 
+  public boolean setResolverConfiguration(IProject project, ResolverConfiguration configuration) {
+    MavenProjectFacade projectFacade = create(project, new NullProgressMonitor());
+    if(projectFacade!=null) {
+      projectFacade.setResolverConfiguration(configuration);
+    }
+    return manager.saveResolverConfiguration(project, configuration);
+  }
+  
   // Downloading sources
 
   public void downloadSources(IProject project, IPath path, String groupId, String artifactId, String version,

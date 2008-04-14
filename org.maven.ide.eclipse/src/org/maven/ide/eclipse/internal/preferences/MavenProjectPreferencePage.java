@@ -11,7 +11,6 @@ package org.maven.ide.eclipse.internal.preferences;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -30,7 +29,6 @@ import org.eclipse.ui.dialogs.PropertyPage;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.internal.launch.ui.MavenGoalSelectionAdapter;
-import org.maven.ide.eclipse.project.MavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 
@@ -132,7 +130,7 @@ public class MavenProjectPreferencePage extends PropertyPage {
   	  }
   	});
   	
-    init(getProjectFacade().getResolverConfiguration());
+    init(getResolverConfiguration());
     
   	return composite;
   }
@@ -152,9 +150,7 @@ public class MavenProjectPreferencePage extends PropertyPage {
   }
 
 	public boolean performOk() {
-	  MavenProjectFacade projectFacade = getProjectFacade();
-	  
-	  final ResolverConfiguration configuration = projectFacade.getResolverConfiguration();
+	  final ResolverConfiguration configuration = getResolverConfiguration();
 
 	  configuration.setUseMavenOutputFolders(useMavenOutputFoldersButton.getSelection());
 	  configuration.setResolveWorkspaceProjects(resolveWorspaceProjectsButton.getSelection());
@@ -164,8 +160,8 @@ public class MavenProjectPreferencePage extends PropertyPage {
 	  configuration.setResourceFilteringGoals(resourceFilteringGoalsText.getText());
 	  configuration.setActiveProfiles(activeProfilesText.getText());
 	  
-    boolean isSet = projectFacade.setResolverConfiguration(configuration);
-    
+	  MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
+    boolean isSet = projectManager.setResolverConfiguration(getProject(), configuration);
     if(isSet) {
       final IProject project = getProject();
       
@@ -191,10 +187,9 @@ public class MavenProjectPreferencePage extends PropertyPage {
     return isSet;
 	}
 
-  private MavenProjectFacade getProjectFacade() {
-    IProject project = getProject();
+  private ResolverConfiguration getResolverConfiguration() {
     MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
-    return projectManager.create(project, new NullProgressMonitor());
+    return projectManager.getResolverConfiguration(getProject());
   }
 
   private IProject getProject() {

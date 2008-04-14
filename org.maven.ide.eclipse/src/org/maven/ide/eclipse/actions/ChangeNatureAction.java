@@ -14,7 +14,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IAction;
@@ -26,7 +25,6 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.project.BuildPathManager;
-import org.maven.ide.eclipse.project.MavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
@@ -83,14 +81,8 @@ public class ChangeNatureAction implements IObjectActionDelegate {
   private void changeNature(final IProject project) {
     MavenPlugin plugin = MavenPlugin.getDefault();
     MavenProjectManager projectManager = plugin.getMavenProjectManager();
-    MavenProjectFacade projectFacade = projectManager.create(project, new NullProgressMonitor());
     
-    final ResolverConfiguration configuration;
-    if(projectFacade==null) {
-      configuration = new ResolverConfiguration();
-    } else {
-      configuration = projectFacade.getResolverConfiguration();
-    }
+    final ResolverConfiguration configuration = projectManager.getResolverConfiguration(project);
     
     boolean updateSourceFolders = false;
 
@@ -111,11 +103,7 @@ public class ChangeNatureAction implements IObjectActionDelegate {
         break;
     }
 
-    if(projectFacade!=null) {
-      projectFacade.setResolverConfiguration(configuration);
-    } else {
-      MavenProjectFacade.saveResolverConfiguration(project, configuration);
-    }
+    projectManager.setResolverConfiguration(project, configuration);
     
     new UpdateJob(project, updateSourceFolders, configuration, //
         plugin.getMavenRuntimeManager(), //

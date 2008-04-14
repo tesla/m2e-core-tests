@@ -681,7 +681,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     description.setNatureIds((String[]) newNatures.toArray(new String[newNatures.size()]));
     project.setDescription(description, monitor);
     
-    MavenProjectFacade.saveResolverConfiguration(project, configuration);
+    projectManager.setResolverConfiguration(project, configuration);
 
     IJavaProject javaProject = JavaCore.create(project);
     if(javaProject != null) {
