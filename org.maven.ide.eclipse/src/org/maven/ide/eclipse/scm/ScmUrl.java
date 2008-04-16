@@ -11,7 +11,11 @@ package org.maven.ide.eclipse.scm;
 import org.eclipse.core.runtime.CoreException;
 
 /**
- * An SCM URL wrapper used to adapt 3rd party resources
+ * An SCM URL wrapper used to adapt 3rd party resources:
+ * 
+ * <pre>
+ * scm:{scm_provider}:{scm_provider_specific_part}
+ * </pre>
  * 
  * @see http://maven.apache.org/scm/scm-url-format.html
  * @see org.eclipse.core.runtime.IAdapterManager

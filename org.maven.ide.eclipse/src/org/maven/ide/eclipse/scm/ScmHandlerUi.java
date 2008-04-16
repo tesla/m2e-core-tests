@@ -27,10 +27,25 @@ public abstract class ScmHandlerUi implements IExecutableExtension {
     return type;
   }
 
+  /**
+   * Show revision/tag browser dialog and allow user to select revision/tag
+   * 
+   * @param shell the shell for revison/tag browser dialog
+   * @param scmUrl the current <code>ScmUrl</code>, or null if none
+   * @param scmRevision the current revision, or null if none
+   * @return String selected revision
+   */
   public String selectRevision(Shell shell, ScmUrl scmUrl, String scmRevision) {
     return null;
   }
 
+  /**
+   * Show repository browser dialog and allow user to select location
+   * 
+   * @param shell the shell for repository browser dialog
+   * @param scmUrl the current <code>ScmUrl</code>, or null if none
+   * @return ScmUrl for selected location or null if dialog was canceled
+   */
   public ScmUrl selectUrl(Shell shell, ScmUrl scmUrl) {
     return null;
   }

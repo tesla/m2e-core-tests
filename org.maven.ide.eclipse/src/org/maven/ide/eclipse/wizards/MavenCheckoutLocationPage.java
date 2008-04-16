@@ -127,9 +127,10 @@ public class MavenCheckoutLocationPage extends AbstractMavenWizardPage {
       scmUrlBrowseButton.setText("&Browse...");
       scmUrlBrowseButton.addSelectionListener(new SelectionAdapter() {
         public void widgetSelected(SelectionEvent e) {
-          String scmType = scmTypeCombo.getText();
           ScmHandlerUi handlerUi = ScmHandlerFactory.getHandlerUiByType(scmType);
-          ScmUrl scmUrl = handlerUi.selectUrl(getShell(), new ScmUrl(scmUrlCombo.getText()));
+          // XXX should use null if there is no scmUrl selected
+          ScmUrl currentUrl = scmUrls==null || scmUrls.length==0 ? new ScmUrl("scm:" + scmType + ":") : scmUrls[0];
+          ScmUrl scmUrl = handlerUi.selectUrl(getShell(), currentUrl);
           if(scmUrl!=null) {
             scmUrlCombo.setText(scmUrl.getProviderUrl());
             if(scmUrls==null) {
@@ -170,9 +171,6 @@ public class MavenCheckoutLocationPage extends AbstractMavenWizardPage {
           updatePage();
         }
       });
-      
-      // TODO this should include the SCM type
-      // addFieldWithHistory("scmUrl", scmUrlCombo);  
     }
 
     headRevisionButton = new Button(composite, SWT.CHECK);
