@@ -9,7 +9,6 @@
 package org.maven.ide.eclipse.embedder;
 
 import java.io.File;
-import java.util.Properties;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -19,9 +18,6 @@ import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 
 import org.apache.maven.archetype.Archetype;
-import org.apache.maven.archetype.catalog.ArchetypeCatalog;
-import org.apache.maven.archetype.source.ArchetypeDataSource;
-import org.apache.maven.archetype.source.ArchetypeDataSourceException;
 import org.apache.maven.embedder.ContainerCustomizer;
 import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.embedder.MavenEmbedderException;
@@ -122,23 +118,6 @@ public class MavenEmbedderManager {
       return (Archetype) container.lookup(Archetype.class);
     } catch(ComponentLookupException ex) {
       String msg = "Error looking up the archetyper: " + ex.getMessage();
-      MavenPlugin.log(msg, ex);
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
-    }
-  }
-
-  public ArchetypeCatalog getArchetypeCatalog() throws CoreException {
-    PlexusContainer container = getWorkspaceEmbedder().getPlexusContainer();
-
-    try {
-      ArchetypeDataSource source = (ArchetypeDataSource) container.lookup(ArchetypeDataSource.class, "nexus");
-      return source.getArchetypeCatalog(new Properties());
-    } catch(ComponentLookupException ex) {
-      String msg = "Error looking up archetype data; " + ex.getMessage();
-      MavenPlugin.log(msg, ex);
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
-    } catch(ArchetypeDataSourceException ex) {
-      String msg = "Error looking up archetype catalog; " + ex.getMessage();
       MavenPlugin.log(msg, ex);
       throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
     }

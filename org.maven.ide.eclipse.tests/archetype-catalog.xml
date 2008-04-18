@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<archetype-catalog>
+  <archetypes>
+    <archetype>
+      <groupId>org.appfuse.archetypes</groupId>
+      <artifactId>appfuse-basic-jsf</artifactId>
+      <version>2.0</version>
+      <!-- <repository>http://static.appfuse.org/releases</repository> -->
+      <repository>http://repo1.maven.org/maven2/</repository>
+      <description>AppFuse archetype for creating a web application with Hibernate, Spring and JSF</description>
+    </archetype>
+  </archetypes>
+</archetype-catalog>

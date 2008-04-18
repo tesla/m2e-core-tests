@@ -11,6 +11,7 @@
    <extension-point id="indexes" name="Maven Indexes" schema="schema/indexes.exsd"/>
    <extension-point id="scmHandlers" name="SCM Handlers" schema="schema/scmHandlers.exsd"/>
    <extension-point id="scmHandlersUi" name="SCM Handlers UI" schema="schema/scmHandlersUi.exsd"/>
+   <extension-point id="archetypeCatalogs" name="Maven Archetypes" schema="schema/archetypes.exsd"/>
 
    <extension point="org.eclipse.core.resources.builders"
               id="maven2Builder"
@@ -453,6 +454,12 @@
             name="Installations">
          <keywordReference id="org.maven.ide.eclipse.maven"/>
       </page>
+      <page id="org.maven.ide.eclipse.preferences.MavenArchetypesPreferencePage"
+            category="org.maven.ide.eclipse.preferences.Maven2PreferencePage"
+            class="org.maven.ide.eclipse.internal.preferences.MavenArchetypesPreferencePage"
+            name="Archetypes">
+         <keywordReference id="org.maven.ide.eclipse.maven"/>
+      </page>
    </extension>
    
    <extension point="org.eclipse.core.runtime.preferences">
@@ -664,6 +671,17 @@
    
    <extension point="org.eclipse.ui.perspectiveExtensions">
       <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaPerspective">
+         <newWizardShortcut id="org.maven.ide.eclipse.wizards.Maven2ProjectWizard"/>
+         <view id="org.maven.ide.eclipse.views.MavenIndexesView"
+               relationship="fast"/>
+      </perspectiveExtension>
+      <perspectiveExtension targetID="org.eclipse.debug.ui.DebugPerspective">
+         <newWizardShortcut id="org.maven.ide.eclipse.wizards.Maven2ProjectWizard"/>
+         <view id="org.maven.ide.eclipse.views.MavenIndexesView"
+               relationship="fast"/>
+      </perspectiveExtension>
+      <perspectiveExtension targetID="org.eclipse.ui.resourcePerspective">
+         <newWizardShortcut id="org.maven.ide.eclipse.wizards.Maven2ProjectWizard"/>
          <view id="org.maven.ide.eclipse.views.MavenIndexesView"
                relationship="fast"/>
       </perspectiveExtension>

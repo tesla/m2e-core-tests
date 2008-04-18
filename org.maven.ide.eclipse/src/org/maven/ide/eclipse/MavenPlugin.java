@@ -52,6 +52,7 @@ import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
+import org.maven.ide.eclipse.embedder.ArchetypeManager;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
@@ -87,6 +88,11 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
   public static final String POM_FILE_NAME = "pom.xml"; //$NON-NLS-1$
 
+  // preferences
+  private static final String PREFS_INDEXES = "indexInfo.xml";
+  
+  private static final String PREFS_ARCHETYPES = "archetypesInfo.xml";
+  
   // container settings
   public static final String CONTAINER_ID = PLUGIN_ID + ".MAVEN2_CLASSPATH_CONTAINER"; //$NON-NLS-1$
 
@@ -138,6 +144,9 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
   private MavenProjectManagerRefreshJob mavenBackgroundJob;
 
+  private ArchetypeManager archetypeManager;
+  
+
   public MavenPlugin() {
     plugin = this;
   }
@@ -160,7 +169,20 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     this.embedderManager = new MavenEmbedderManager(console, runtimeManager);
 
     File stateLocationDir = getStateLocation().toFile();
-
+    
+    this.archetypeManager = new ArchetypeManager(new File(stateLocationDir, PREFS_ARCHETYPES));
+    this.archetypeManager.addArchetypeCatalogFactory(new ArchetypeManager.NexusIndexerCatalogFactory());
+    this.archetypeManager.addArchetypeCatalogFactory(new ArchetypeManager.InternalCatalogFactory());
+    this.archetypeManager.addArchetypeCatalogFactory(new ArchetypeManager.DefaultLocalCatalogFactory());
+    ExtensionReader.readArchetypeExtensions(archetypeManager);
+    try {
+      this.archetypeManager.readCatalogs();
+    } catch (Exception ex) {
+      String msg = "Can't read archetype catalog configuration";
+      this.console.logError(msg + "; " + ex.getMessage());
+      log(msg, ex);
+    }
+    
     // this.indexManager = new LegacyIndexManager(getStateLocation().toFile(), console);
     this.indexManager = new NexusIndexManager(embedderManager, console, stateLocationDir);
 
@@ -170,9 +192,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     this.indexManager.addIndex(new IndexInfo(IndexManager.LOCAL_INDEX, //
         embedderManager.getLocalRepositoryDir(), null, IndexInfo.Type.LOCAL, false), false);
 
-    ExtensionReader.readScmHandlerExtensions();
-
-    Set indexes = loadIndexConfiguration(new File(stateLocationDir, "indexInfo.xml"));
+    Set indexes = loadIndexConfiguration(new File(stateLocationDir, PREFS_INDEXES));
 
     this.modelManager = new MavenModelManager(embedderManager, console);
 
@@ -404,9 +424,12 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
   public MavenRuntimeManager getMavenRuntimeManager() {
     return this.runtimeManager;
-
   }
 
+  public ArchetypeManager getArchetypeManager() {
+    return this.archetypeManager;
+  }
+  
   /**
    * Returns an Image for the file at the given relative path.
    */

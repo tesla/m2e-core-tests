@@ -28,6 +28,8 @@ import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.embedder.ArchetypeManager;
+import org.maven.ide.eclipse.embedder.ArchetypeManager.ArchetypeCatalogFactory;
 import org.maven.ide.eclipse.index.IndexInfo;
 import org.maven.ide.eclipse.internal.index.IndexInfoWriter;
 import org.maven.ide.eclipse.scm.ScmHandler;
@@ -36,12 +38,14 @@ import org.maven.ide.eclipse.scm.ScmHandlerUi;
 
 
 /**
- * ExtensionReader
+ * Extension reader
  * 
  * @author Eugene Kuleshov
  */
 public class ExtensionReader {
 
+  public static final String EXTENSION_ARCHETYPES = "org.maven.ide.eclipse.archetypeCatalogs";
+  
   public static final String EXTENSION_INDEXES = "org.maven.ide.eclipse.indexes";
 
   public static final String EXTENSION_SCM_HANDLERS = "org.maven.ide.eclipse.scmHandlers";
@@ -63,6 +67,16 @@ public class ExtensionReader {
   private static final String ELEMENT_SCM_HANDLER = "handler";
 
   private static final String ELEMENT_SCM_HANDLER_UI = "handlerUi";
+
+  private static final String ELEMENT_LOCAL_ARCHETYPE = "local";
+
+  private static final String ELEMENT_REMOTE_ARCHETYPE = "remote";
+
+  private static final String ATTR_NAME = "name";
+
+  private static final String ATTR_URL = "url";
+  
+  private static final String ATTR_DESCRIPTION = "description";
 
   /**
    * @param configFile previously saved indexes configuration
@@ -149,7 +163,6 @@ public class ExtensionReader {
    */
   public static void readScmHandlerExtensions() {
     IExtensionRegistry registry = Platform.getExtensionRegistry();
-    
     IExtensionPoint scmHandlersExtensionPoint = registry.getExtensionPoint(EXTENSION_SCM_HANDLERS);
     if(scmHandlersExtensionPoint != null) {
       IExtension[] scmHandlersExtensions = scmHandlersExtensionPoint.getExtensions();
@@ -169,7 +182,10 @@ public class ExtensionReader {
         }
       }
     }
-    
+  }
+  
+  public static void readScmHandlerUiExtensions() {
+    IExtensionRegistry registry = Platform.getExtensionRegistry();
     IExtensionPoint scmHandlersUiExtensionPoint = registry.getExtensionPoint(EXTENSION_SCM_HANDLERS_UI);
     if(scmHandlersUiExtensionPoint != null) {
       IExtension[] scmHandlersUiExtensions = scmHandlersUiExtensionPoint.getExtensions();
@@ -189,6 +205,53 @@ public class ExtensionReader {
         }
       }
     }
+  }
+  
+  public static void readArchetypeExtensions(ArchetypeManager archetypeManager) {
+    IExtensionRegistry registry = Platform.getExtensionRegistry();
+    
+    IExtensionPoint archetypesExtensionPoint = registry.getExtensionPoint(EXTENSION_ARCHETYPES);
+    if(archetypesExtensionPoint != null) {
+      IExtension[] archetypesExtensions = archetypesExtensionPoint.getExtensions();
+      for(int i = 0; i < archetypesExtensions.length; i++ ) {
+        IExtension extension = archetypesExtensions[i];
+        IConfigurationElement[] elements = extension.getConfigurationElements();
+        IContributor contributor = extension.getContributor();
+        for(int j = 0; j < elements.length; j++ ) {
+          IConfigurationElement element = elements[j];
+          ArchetypeCatalogFactory factory = readArchetypeCatalogs(element, contributor);
+          archetypeManager.addArchetypeCatalogFactory(factory);
+        }
+      }
+    }
+  }
+
+  private static ArchetypeCatalogFactory readArchetypeCatalogs(IConfigurationElement element, IContributor contributor) {
+    if(ELEMENT_LOCAL_ARCHETYPE.equals(element.getName())) {
+      String name = element.getAttribute(ATTR_NAME);
+      if(name!=null) {
+        Bundle[] bundles = Platform.getBundles(contributor.getName(), null);
+        URL catalogUrl = null;
+        for(int i = 0; i < bundles.length; i++ ) {
+          Bundle bundle = bundles[i];
+          catalogUrl = bundle.getEntry(name);
+          if(catalogUrl!=null) {
+            String description = element.getAttribute(ATTR_DESCRIPTION);
+            String url = catalogUrl.toString();
+            // XXX ARCHETYPE-161: RemoteCatalogArchetypeDataSource don't allow to download arbitrary urls
+            return new ArchetypeManager.RemoteCatalogFactory(url.substring(0, url.lastIndexOf("/")), description, false);
+          }
+        }
+        MavenPlugin.log("Unable to find Archetype catalog " + name + " in " + contributor.getName(), null);
+      }
+    } else if(ELEMENT_REMOTE_ARCHETYPE.equals(element.getName())) {
+      String url = element.getAttribute(ATTR_URL);
+      if(url!=null) {
+        String description = element.getAttribute(ATTR_DESCRIPTION);
+        return new ArchetypeManager.RemoteCatalogFactory(url, description, false);
+      }
+    }
+    return null;
   }
 
 }

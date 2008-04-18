@@ -8,13 +8,15 @@
 -->
 <?eclipse version="3.2"?>
 <plugin>
-   <extension
-         point="org.maven.ide.eclipse.scmHandlers">
-      <handler
-            class="org.maven.ide.eclipse.scm.TestScmHandler"
-            priority="1000"
-            type="test">
-      </handler>
+
+   <extension point="org.maven.ide.eclipse.scmHandlers">
+      <handler class="org.maven.ide.eclipse.scm.TestScmHandler"
+               priority="1000" type="test"/>
+   </extension>
+   
+   <extension point="org.maven.ide.eclipse.archetypeCatalogs">
+      <local name="archetype-catalog.xml" description="Test Catalog"/>
+      <remote url="http://repo1.maven.org/maven2/archetype-catalog.xml" description="Test Remote Catalog"/>
    </extension>
 
 </plugin>

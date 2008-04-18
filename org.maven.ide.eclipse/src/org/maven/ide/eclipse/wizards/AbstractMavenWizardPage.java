@@ -63,6 +63,8 @@ public abstract class AbstractMavenWizardPage extends WizardPage {
     this.projectImportConfiguration = projectImportConfiguration;
 
     fieldsWithHistory = new HashMap();
+    
+    initDialogSettings();
   }
 
   /** Creates an advanced settings panel. */
@@ -96,21 +98,17 @@ public abstract class AbstractMavenWizardPage extends WizardPage {
 
   /** Saves the history when the page is disposed. */
   public void dispose() {
-    if(dialogSettings != null) {
-      saveInputHistory();
-    }
+    saveInputHistory();
     super.dispose();
   }
 
   /** Loads the dialog settings using the page name as a section name. */
   private void initDialogSettings() {
+    IDialogSettings pluginSettings = MavenPlugin.getDefault().getDialogSettings();
+    dialogSettings = pluginSettings.getSection(getName());
     if(dialogSettings == null) {
-      IDialogSettings pluginSettings = MavenPlugin.getDefault().getDialogSettings();
-      dialogSettings = pluginSettings.getSection(getName());
-      if(dialogSettings == null) {
-        dialogSettings = pluginSettings.addNewSection(getName());
-        pluginSettings.addSection(dialogSettings);
-      }
+      dialogSettings = pluginSettings.addNewSection(getName());
+      pluginSettings.addSection(dialogSettings);
     }
   }
 
