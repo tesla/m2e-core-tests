@@ -40,4 +40,20 @@ public class MavenProjectScmInfo extends MavenProjectInfo {
     return repositoryUrl;
   }
 
+  public boolean equals(Object obj) {
+    if(obj.getClass()==MavenProjectScmInfo.class) {
+      MavenProjectScmInfo info = (MavenProjectScmInfo) obj;
+      return folderUrl.equals(info.getFolderUrl());
+    }
+    return false;
+  }
+
+  public int hashCode() {
+    return folderUrl.hashCode();
+  }
+  
+  public String toString() {
+    return getLabel() + " " + folderUrl;
+  }
+  
 }

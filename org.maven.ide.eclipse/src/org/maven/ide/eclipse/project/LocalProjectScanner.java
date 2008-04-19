@@ -9,6 +9,7 @@
 package org.maven.ide.eclipse.project;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -123,6 +124,10 @@ public class LocalProjectScanner extends AbstractProjectScanner {
         String module = (String) e.getKey();
         Set profiles = (Set) e.getValue();
         File modulePom = new File(baseDir, module + "/" + MavenPlugin.POM_FILE_NAME);
+        try {
+          modulePom = modulePom.getCanonicalFile();
+        } catch(IOException ex) {
+        }
         MavenProjectInfo moduleInfo = readMavenProjectInfo(baseFolderPath, modulePom, projectInfo);
         if(moduleInfo != null) {
           moduleInfo.addProfiles(profiles);

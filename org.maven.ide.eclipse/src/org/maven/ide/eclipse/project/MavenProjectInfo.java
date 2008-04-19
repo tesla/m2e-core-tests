@@ -135,8 +135,23 @@ public class MavenProjectInfo {
     return this.profiles;
   }
   
-  public String toString() {
-    return label + " " + pomFile.getAbsolutePath();
+  public boolean equals(Object obj) {
+    if(obj.getClass()==MavenProjectInfo.class) {
+      MavenProjectInfo info = (MavenProjectInfo) obj;
+      if(pomFile==null) {
+        return info.getPomFile()==null;
+      }
+      return pomFile.equals(info.getPomFile());
+    }
+    return false;
+  }
+  
+  public int hashCode() {
+    return pomFile==null ? 0 : pomFile.hashCode();
   }
 
+  public String toString() {
+    return label + (pomFile == null ? "" : " " + pomFile.getAbsolutePath());
+  }
+  
 }

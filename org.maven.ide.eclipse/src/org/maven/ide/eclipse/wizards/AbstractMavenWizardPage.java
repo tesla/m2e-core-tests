@@ -33,6 +33,14 @@ import org.maven.ide.eclipse.project.ProjectImportConfiguration;
  */
 public abstract class AbstractMavenWizardPage extends WizardPage {
 
+  /** the history limit */
+  protected static final int MAX_HISTORY = 15;
+
+  /**
+   * The project import configuration
+   */
+  private ProjectImportConfiguration importConfiguration;
+
   /** The resolver configuration panel */
   protected ResolverConfigurationComponent resolverConfigurationComponent;
   
@@ -42,13 +50,7 @@ public abstract class AbstractMavenWizardPage extends WizardPage {
   /** the Map of field ids to List of comboboxes that share the same history */
   private Map fieldsWithHistory;
 
-  /** the history limit */
-  protected static final int MAX_HISTORY = 15;
-
-  /**
-   * The project import configuration
-   */
-  private ProjectImportConfiguration importConfiguration;
+  private boolean isHistoryLoaded = false;
 
   protected AbstractMavenWizardPage(String pageName) {
     this(pageName, null);
@@ -89,9 +91,9 @@ public abstract class AbstractMavenWizardPage extends WizardPage {
   /** Loads the advanced settings data when the page is displayed. */
   public void setVisible(boolean visible) {
     if(visible) {
-      if(dialogSettings == null) {
-        initDialogSettings();
+      if(!isHistoryLoaded) {
         loadInputHistory();
+        isHistoryLoaded = true;
       }
       if(resolverConfigurationComponent != null) {
         resolverConfigurationComponent.loadData();
