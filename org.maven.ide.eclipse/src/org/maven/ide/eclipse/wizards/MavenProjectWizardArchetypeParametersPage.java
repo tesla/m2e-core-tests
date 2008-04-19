@@ -192,7 +192,7 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
     }
 
     // validate project name
-    IStatus nameStatus = projectImportConfiguration.validateProjectName(getModel());
+    IStatus nameStatus = getImportConfiguration().validateProjectName(getModel());
     if(!nameStatus.isOK()) {
       setErrorMessage(nameStatus.getMessage());
       setPageComplete(false);

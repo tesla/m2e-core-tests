@@ -38,6 +38,8 @@ public class ProjectImportConfiguration {
 
   /** the project name template */
   private String projectNameTemplate = "";
+  
+  private boolean needsRename;
 
   /** Creates a new configuration. */
   public ProjectImportConfiguration(ResolverConfiguration resolverConfiguration) {
@@ -64,6 +66,14 @@ public class ProjectImportConfiguration {
     return projectNameTemplate;
   }
 
+  public void setNeedsRename(boolean needsRename) {
+    this.needsRename = needsRename;
+  }
+  
+  public boolean isNeedsRename() {
+    return this.needsRename;
+  }
+  
   /** Calculates the project name for the given model. */
   // XXX should use resolved MavenProject or Model
   public String getProjectName(Model model) {

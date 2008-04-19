@@ -89,7 +89,7 @@ public abstract class MavenProjectCheckoutJob extends WorkspaceJob {
       operation.setMavenProjects(getProjects(monitor));
       operation.run(monitor);
 
-      LocalProjectScanner scanner = new LocalProjectScanner(operation.getLocations());
+      LocalProjectScanner scanner = new LocalProjectScanner(operation.getLocations(), true);
       scanner.run(monitor);
 
       MavenPlugin plugin = MavenPlugin.getDefault();
@@ -201,6 +201,8 @@ public abstract class MavenProjectCheckoutJob extends WorkspaceJob {
 
         cleanup(locations);
       }
+      
+      configuration.setNeedsRename(true);
       
       if(checkoutAllProjects) {
         new WorkspaceJob("Importing Maven projects") {

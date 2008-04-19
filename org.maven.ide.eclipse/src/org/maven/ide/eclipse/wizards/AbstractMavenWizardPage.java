@@ -46,9 +46,9 @@ public abstract class AbstractMavenWizardPage extends WizardPage {
   protected static final int MAX_HISTORY = 15;
 
   /**
-   * The resolver configuration
+   * The project import configuration
    */
-  protected ProjectImportConfiguration projectImportConfiguration;
+  private ProjectImportConfiguration importConfiguration;
 
   protected AbstractMavenWizardPage(String pageName) {
     this(pageName, null);
@@ -58,19 +58,23 @@ public abstract class AbstractMavenWizardPage extends WizardPage {
    * Creates a page. This constructor should be used for the wizards where you need to have the advanced settings box on
    * each page. Pass the same bean to each page so they can share the data.
    */
-  protected AbstractMavenWizardPage(String pageName, ProjectImportConfiguration projectImportConfiguration) {
+  protected AbstractMavenWizardPage(String pageName, ProjectImportConfiguration importConfiguration) {
     super(pageName);
-    this.projectImportConfiguration = projectImportConfiguration;
+    this.importConfiguration = importConfiguration;
 
     fieldsWithHistory = new HashMap();
     
     initDialogSettings();
   }
+  
+  public ProjectImportConfiguration getImportConfiguration() {
+    return this.importConfiguration;
+  }
 
   /** Creates an advanced settings panel. */
   protected void createAdvancedSettings(Composite composite, GridData gridData) {
-    if(projectImportConfiguration != null) {
-      resolverConfigurationComponent = new ResolverConfigurationComponent(composite, projectImportConfiguration, true);
+    if(importConfiguration != null) {
+      resolverConfigurationComponent = new ResolverConfigurationComponent(composite, importConfiguration, true);
       resolverConfigurationComponent.setLayoutData(gridData);
       addFieldWithHistory("projectNameTemplate", resolverConfigurationComponent.template);
     }

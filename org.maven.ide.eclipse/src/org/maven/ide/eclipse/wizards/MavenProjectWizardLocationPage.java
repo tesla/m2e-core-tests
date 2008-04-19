@@ -297,7 +297,7 @@ public class MavenProjectWizardLocationPage extends AbstractMavenWizardPage {
 
     // If we do not place the contents in the workspace validate the location.
     if(!isInWorkspace()) {
-      String projectName = projectImportConfiguration.getProjectName(((MavenProjectWizard)getWizard()).getModel());
+      String projectName = getImportConfiguration().getProjectName(((MavenProjectWizard)getWizard()).getModel());
       if(projectName.length()>0){
         final IStatus locationStatus = workspace.validateProjectLocation(workspace.getRoot().getProject(projectName), projectPath);
         if(!locationStatus.isOK()) {

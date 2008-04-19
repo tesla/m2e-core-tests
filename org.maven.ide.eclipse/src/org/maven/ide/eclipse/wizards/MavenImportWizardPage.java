@@ -350,7 +350,7 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
   boolean isAlreadyExists(MavenProjectInfo info) {
     if(info!=null) {
       IWorkspace workspace = ResourcesPlugin.getWorkspace();
-      IProject project = projectImportConfiguration.getProject(workspace.getRoot(), info.getModel());
+      IProject project = getImportConfiguration().getProject(workspace.getRoot(), info.getModel());
       return project.exists();
     }
     return false;
@@ -358,9 +358,9 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
 
   protected AbstractProjectScanner getProjectScanner() {
     if(locations==null || locations.isEmpty()) {
-      return new LocalProjectScanner(rootDirectoryCombo.getText());
+      return new LocalProjectScanner(rootDirectoryCombo.getText(), false);
     }
-    return new LocalProjectScanner(locations);
+    return new LocalProjectScanner(locations, getImportConfiguration().isNeedsRename());
   }
 
   /**
@@ -369,7 +369,7 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
   public Collection getProjects() {
     List checkedProjects = Arrays.asList(projectTreeViewer.getCheckedElements());
 
-    if(!projectImportConfiguration.getResolverConfiguration().shouldIncludeModules()) {
+    if(!getImportConfiguration().getResolverConfiguration().shouldIncludeModules()) {
       return checkedProjects;
     }
 
@@ -391,7 +391,7 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
 
   protected boolean validateProjectInfo(MavenProjectInfo info) {
     if(info!=null) {
-      String projectName = projectImportConfiguration.getProjectName(info.getModel());
+      String projectName = getImportConfiguration().getProjectName(info.getModel());
       if(isWorkspaceFolder(info)) {
         setMessage(Messages.getString("wizard.import.validator.workspaceFolder", projectName), IMessageProvider.WARNING);
       } else if(isAlreadyExists(info)) {

@@ -1361,7 +1361,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     // XXX Archetyper don't allow to specify project folder
     String projectFolder = location.append(artifactId).toFile().getAbsolutePath();
     
-    LocalProjectScanner scanner = new LocalProjectScanner(projectFolder);
+    LocalProjectScanner scanner = new LocalProjectScanner(projectFolder, true);
     scanner.run(monitor);
     // XXX handle scanner errors
 

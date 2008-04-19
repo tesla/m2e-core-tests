@@ -33,13 +33,15 @@ import org.maven.ide.eclipse.embedder.MavenModelManager;
  */
 public class LocalProjectScanner extends AbstractProjectScanner {
   private final Collection folders;
+  private final boolean needsRename;
 
-  public LocalProjectScanner(String folder) {
-    this.folders = Collections.singletonList(folder);
+  public LocalProjectScanner(String folder, boolean needsRename) {
+    this(Collections.singletonList(folder), needsRename);
   }
 
-  public LocalProjectScanner(Collection folders) {
+  public LocalProjectScanner(Collection folders, boolean needsRename) {
     this.folders = folders;
+    this.needsRename = needsRename;
   }
 
   public void run(IProgressMonitor monitor) throws InterruptedException {
@@ -71,7 +73,7 @@ public class LocalProjectScanner extends AbstractProjectScanner {
     File pomFile = new File(folderDir, MavenPlugin.POM_FILE_NAME);
     MavenProjectInfo mavenProjectInfo = readMavenProjectInfo(baseFolderPath, pomFile, null);
     if(mavenProjectInfo != null) {
-      mavenProjectInfo.setNeedsRename(baseFolderPath == folderPath);
+      mavenProjectInfo.setNeedsRename(needsRename && baseFolderPath == folderPath);
       addProject(mavenProjectInfo);
       return; // don't scan subfolders of the Maven project
     }
