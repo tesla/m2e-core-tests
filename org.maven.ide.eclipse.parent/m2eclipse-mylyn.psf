@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<psf version="2.0">
+<provider id="org.eclipse.team.cvs.core.cvsnature">
+<project reference="1.0,:pserver:anonymous@dev.eclipse.org:/cvsroot/tools,org.eclipse.mylyn/org.eclipse.mylyn,org.eclipse.mylyn,e_3_3_m_2_x"/>
+<project reference="1.0,:pserver:anonymous@dev.eclipse.org:/cvsroot/tools,org.eclipse.mylyn/org.eclipse.mylyn.context.core,org.eclipse.mylyn.context.core,e_3_3_m_2_x"/>
+<project reference="1.0,:pserver:anonymous@dev.eclipse.org:/cvsroot/tools,org.eclipse.mylyn/org.eclipse.mylyn.monitor.core,org.eclipse.mylyn.monitor.core,e_3_3_m_2_x"/>
+<project reference="1.0,:pserver:anonymous@dev.eclipse.org:/cvsroot/tools,org.eclipse.mylyn/org.eclipse.mylyn.monitor.ui,org.eclipse.mylyn.monitor.ui,e_3_3_m_2_x"/>
+<project reference="1.0,:pserver:anonymous@dev.eclipse.org:/cvsroot/tools,org.eclipse.mylyn/org.eclipse.mylyn.tasks.core,org.eclipse.mylyn.tasks.core,e_3_3_m_2_x"/>
+<project reference="1.0,:pserver:anonymous@dev.eclipse.org:/cvsroot/tools,org.eclipse.mylyn/org.eclipse.mylyn.tasks.ui,org.eclipse.mylyn.tasks.ui,e_3_3_m_2_x"/>
+<project reference="1.0,:pserver:anonymous@dev.eclipse.org:/cvsroot/tools,org.eclipse.mylyn/org.eclipse.mylyn.web.core,org.eclipse.mylyn.web.core,e_3_3_m_2_x"/>
+</provider>
+</psf>

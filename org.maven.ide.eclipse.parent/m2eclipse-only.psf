@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<psf version="2.0">
+<provider id="org.tigris.subversion.subclipse.core.svnnature">
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.components.archetype-common,org.maven.ide.components.archetype-common"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.components.maven-embedder,org.maven.ide.components.maven-embedder"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.components.maven-model-edit,org.maven.ide.components.maven-model-edit"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.components.maven-scm,org.maven.ide.components.maven-scm"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.components.nexus-indexer,org.maven.ide.components.nexus-indexer"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.components.pom,org.maven.ide.components.pom"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.components.qname,org.maven.ide.components.qname"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse,org.maven.ide.eclipse"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.book,org.maven.ide.eclipse.book"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.central,org.maven.ide.eclipse.central"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.central.feature,org.maven.ide.eclipse.central.feature"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.feature,org.maven.ide.eclipse.feature"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.mylyn,org.maven.ide.eclipse.mylyn"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.mylyn.feature,org.maven.ide.eclipse.mylyn.feature"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.parent,org.maven.ide.eclipse.parent"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.scm,org.maven.ide.eclipse.scm"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.scm.feature,org.maven.ide.eclipse.scm.feature"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.subclipse,org.maven.ide.eclipse.subclipse"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.subclipse.feature,org.maven.ide.eclipse.subclipse.feature"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.tests,org.maven.ide.eclipse.tests"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.update,org.maven.ide.eclipse.update"/>
+</provider>
+</psf>

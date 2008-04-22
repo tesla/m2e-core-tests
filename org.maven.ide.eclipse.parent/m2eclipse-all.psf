@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<psf version="2.0">
+<provider id="org.tigris.subversion.subclipse.core.svnnature">
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.components.archetype-common,org.maven.ide.components.archetype-common"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.components.maven-embedder,org.maven.ide.components.maven-embedder"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.components.maven-model-edit,org.maven.ide.components.maven-model-edit"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.components.maven-scm,org.maven.ide.components.maven-scm"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.components.nexus-indexer,org.maven.ide.components.nexus-indexer"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.components.pom,org.maven.ide.components.pom"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.components.qname,org.maven.ide.components.qname"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse,org.maven.ide.eclipse"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.book,org.maven.ide.eclipse.book"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.central,org.maven.ide.eclipse.central"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.central.feature,org.maven.ide.eclipse.central.feature"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.feature,org.maven.ide.eclipse.feature"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.mylyn,org.maven.ide.eclipse.mylyn"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.mylyn.feature,org.maven.ide.eclipse.mylyn.feature"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.parent,org.maven.ide.eclipse.parent"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.scm,org.maven.ide.eclipse.scm"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.scm.feature,org.maven.ide.eclipse.scm.feature"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.subclipse,org.maven.ide.eclipse.subclipse"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.subclipse.feature,org.maven.ide.eclipse.subclipse.feature"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.tests,org.maven.ide.eclipse.tests"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.update,org.maven.ide.eclipse.update"/>
+<project reference="0.9.3,http://subclipse.tigris.org/svn/subclipse/trunk/subclipse/org.tigris.subversion.clientadapter,org.tigris.subversion.clientadapter"/>
+<project reference="0.9.3,http://subclipse.tigris.org/svn/subclipse/trunk/subclipse/org.tigris.subversion.clientadapter.javahl,org.tigris.subversion.clientadapter.javahl"/>
+<project reference="0.9.3,http://subclipse.tigris.org/svn/subclipse/trunk/subclipse/org.tigris.subversion.clientadapter.javahl.win32,org.tigris.subversion.clientadapter.javahl.win32"/>
+<project reference="0.9.3,http://subclipse.tigris.org/svn/subclipse/trunk/subclipse/org.tigris.subversion.subclipse.core,org.tigris.subversion.subclipse.core"/>
+<project reference="0.9.3,http://subclipse.tigris.org/svn/subclipse/trunk/subclipse/org.tigris.subversion.subclipse.ui,org.tigris.subversion.subclipse.ui"/>
+</provider>
+<provider id="org.eclipse.team.cvs.core.cvsnature">
+<project reference="1.0,:pserver:dev.eclipse.org:/cvsroot/tools,org.eclipse.mylyn/org.eclipse.mylyn,org.eclipse.mylyn,e_3_4_m_2_x"/>
+<project reference="1.0,:pserver:dev.eclipse.org:/cvsroot/tools,org.eclipse.mylyn/org.eclipse.mylyn.context.core,org.eclipse.mylyn.context.core,e_3_4_m_2_x"/>
+<project reference="1.0,:pserver:dev.eclipse.org:/cvsroot/tools,org.eclipse.mylyn/org.eclipse.mylyn.monitor.core,org.eclipse.mylyn.monitor.core,e_3_4_m_2_x"/>
+<project reference="1.0,:pserver:dev.eclipse.org:/cvsroot/tools,org.eclipse.mylyn/org.eclipse.mylyn.monitor.ui,org.eclipse.mylyn.monitor.ui,e_3_4_m_2_x"/>
+<project reference="1.0,:pserver:dev.eclipse.org:/cvsroot/tools,org.eclipse.mylyn/org.eclipse.mylyn.tasks.core,org.eclipse.mylyn.tasks.core,e_3_4_m_2_x"/>
+<project reference="1.0,:pserver:dev.eclipse.org:/cvsroot/tools,org.eclipse.mylyn/org.eclipse.mylyn.tasks.ui,org.eclipse.mylyn.tasks.ui,e_3_4_m_2_x"/>
+<project reference="1.0,:pserver:dev.eclipse.org:/cvsroot/tools,org.eclipse.mylyn/org.eclipse.mylyn.web.core,org.eclipse.mylyn.web.core,e_3_4_m_2_x"/>
+</provider>
+<workingSets editPageId="org.eclipse.jdt.ui.JavaWorkingSetPage" label="eclipse.m2eclipse" name="eclipse.m2eclipse">
+<item elementID="=org.maven.ide.components.archetype-common" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.maven.ide.components.maven-embedder" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.maven.ide.components.maven-model-edit" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.maven.ide.components.maven-scm" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.maven.ide.components.nexus-indexer" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.maven.ide.components.pom" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.maven.ide.components.qname" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.maven.ide.eclipse" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.maven.ide.eclipse.central" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.maven.ide.eclipse.mylyn" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.maven.ide.eclipse.parent" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.maven.ide.eclipse.scm" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.maven.ide.eclipse.subclipse" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.maven.ide.eclipse.tests" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/org.maven.ide.eclipse.book" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/org.maven.ide.eclipse.central.feature" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/org.maven.ide.eclipse.feature" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/org.maven.ide.eclipse.mylyn.feature" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/org.maven.ide.eclipse.scm.feature" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/org.maven.ide.eclipse.subclipse.feature" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/org.maven.ide.eclipse.update" type="4"/>
+</workingSets>
+<workingSets editPageId="org.eclipse.jdt.ui.JavaWorkingSetPage" label="eclipse.mylyn" name="eclipse.mylyn">
+<item elementID="=org.eclipse.mylyn.monitor.ui" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.eclipse.mylyn.web.core" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.eclipse.mylyn.tasks.core" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.eclipse.mylyn.context.core" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.eclipse.mylyn.monitor.core" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.eclipse.mylyn.tasks.ui" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.eclipse.mylyn" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+</workingSets>
+<workingSets editPageId="org.eclipse.jdt.ui.JavaWorkingSetPage" label="eclipse.subclipse" name="eclipse.subclipse">
+<item elementID="=org.tigris.subversion.subclipse.core" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.tigris.subversion.subclipse.ui" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.tigris.subversion.clientadapter" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.tigris.subversion.clientadapter.javahl" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/org.tigris.subversion.clientadapter.javahl.win32" type="4"/>
+</workingSets>
+</psf>

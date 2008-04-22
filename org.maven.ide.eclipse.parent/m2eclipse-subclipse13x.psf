@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<psf version="2.0">
+<provider id="org.tigris.subversion.subclipse.core.svnnature">
+<project reference="0.9.3,http://subclipse.tigris.org/svn/subclipse/trunk/subclipse/org.tigris.subversion.clientadapter,org.tigris.subversion.clientadapter"/>
+<project reference="0.9.3,http://subclipse.tigris.org/svn/subclipse/trunk/subclipse/org.tigris.subversion.clientadapter.javahl,org.tigris.subversion.clientadapter.javahl"/>
+<project reference="0.9.3,http://subclipse.tigris.org/svn/subclipse/trunk/subclipse/org.tigris.subversion.clientadapter.javahl.win32,org.tigris.subversion.clientadapter.javahl.win32"/>
+<project reference="0.9.3,http://subclipse.tigris.org/svn/subclipse/trunk/subclipse/org.tigris.subversion.subclipse.core,org.tigris.subversion.subclipse.core"/>
+<project reference="0.9.3,http://subclipse.tigris.org/svn/subclipse/trunk/subclipse/org.tigris.subversion.subclipse.ui,org.tigris.subversion.subclipse.ui"/>
+</provider>
+</psf>
