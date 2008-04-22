@@ -414,7 +414,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
   }
 
   public void dispose() {
-    if(dialogSettings != null) {
+    if(dialogSettings != null && catalogFactory!=null) {
       dialogSettings.put(KEY_CATALOG, catalogFactory.getId());
     }
     super.dispose();
