@@ -200,7 +200,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
       InputStream is = new URL(url).openStream();
       byte[] buff = readStream(is);
 
-      openEditor(new MavenEditorStorageInput(name + ".java", tooltip, buff), name + ".java");
+      openEditor(new MavenEditorStorageInput(name + ".java", tooltip, url, buff), name + ".java");
 
     } catch(AbstractArtifactResolutionException ex) {
       MavenPlugin.log("Can't resolve artifact " + name, ex);
@@ -231,7 +231,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
         return;
       }
 
-      openEditor(new MavenEditorStorageInput(name, name, readStream(new FileInputStream(file))), "pom.xml");
+      openEditor(new MavenEditorStorageInput(name, name, file.getAbsolutePath(), readStream(new FileInputStream(file))), "pom.xml");
 
     } catch(AbstractArtifactResolutionException ex) {
       MavenPlugin.log("Can't resolve artifact " + name, ex);
@@ -299,12 +299,15 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
 
     private final String name;
 
+    private final String path;
+    
     private final String tooltip;
 
     private final byte[] content;
 
-    public MavenEditorStorageInput(String name, String tooltip, byte[] content) {
+    public MavenEditorStorageInput(String name, String tooltip, String path, byte[] content) {
       this.name = name;
+      this.path = path;
       this.tooltip = tooltip;
       this.content = content;
     }
@@ -342,7 +345,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
     // IPathEditorInput
 
     public IPath getPath() {
-      return new Path(name);
+      return new Path(path);
     }
 
   }
