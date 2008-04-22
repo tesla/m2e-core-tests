@@ -3,11 +3,11 @@
    <description url="http://m2eclipse.sonatype.org/update/">
       Maven Integration
    </description>
+   <feature url="features/org.maven.ide.eclipse.feature_0.9.3.qualifier.jar" id="org.maven.ide.eclipse.feature" version="0.9.3.qualifier">
+      <category name="Maven Integration"/>
+   </feature>
    <feature url="features/org.maven.ide.eclipse.central.feature_0.9.1.qualifier.jar" id="org.maven.ide.eclipse.central.feature" version="0.9.1.qualifier">
       <category name="Optional Components"/>
-   </feature>
-   <feature url="features/org.maven.ide.eclipse.feature_0.9.2.qualifier.jar" id="org.maven.ide.eclipse.feature" version="0.9.2.qualifier">
-      <category name="Maven Integration"/>
    </feature>
    <feature url="features/org.maven.ide.eclipse.mylyn.feature_0.9.1.qualifier.jar" id="org.maven.ide.eclipse.mylyn.feature" version="0.9.1.qualifier">
       <category name="Optional Components"/>
