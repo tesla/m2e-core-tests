@@ -188,9 +188,10 @@
                 class="org.maven.ide.eclipse.actions.ExecutePomAction"
                 icon="icons/m2.gif"
                 label="%m2.popup.pomFile.label"
-                modes="run">
+                modes="run,debug">
          <contextualLaunch>
-           <contextLabel mode="run" label="%m2.popup.pomFile.label"/>
+           <contextLabel label="%m2.popup.pomFile.label" mode="run"/>
+           <contextLabel label="%m2.popup.pomFile.label" mode="debug"/>
            <enablement>
              <with variable="selection">
                <count value="1"/>
@@ -209,9 +210,10 @@
                class="org.maven.ide.eclipse.actions.ExecutePomAction:WITH_DIALOG"
                icon="icons/m2.gif"
                label="%m2.popup.pomFileWithDialog.label"
-               modes="run">
+               modes="run,debug">
         <contextualLaunch>
            <contextLabel label="%m2.popup.pomFileWithDialog.label" mode="run"/>
+           <contextLabel label="%m2.popup.pomFileWithDialog.label" mode="debug"/>
            <enablement>
               <with variable="selection">
                  <count value="1"/>
@@ -230,9 +232,10 @@
                class="org.maven.ide.eclipse.actions.ExecutePomAction:install"
                icon="icons/m2.gif"
                label="%m2.popup.lifecycle.install"
-               modes="run">
+               modes="run,debug">
         <contextualLaunch>
            <contextLabel label="%m2.popup.lifecycle.install" mode="run"/>
+           <contextLabel label="%m2.popup.lifecycle.install" mode="debug"/>
            <enablement>
               <with variable="selection">
                  <count value="1"/>
@@ -251,9 +254,10 @@
                class="org.maven.ide.eclipse.actions.ExecutePomAction:package"
                icon="icons/m2.gif"
                label="%m2.popup.lifecycle.package"
-               modes="run">
+               modes="run,debug">
         <contextualLaunch>
            <contextLabel label="%m2.popup.lifecycle.package" mode="run"/>
+           <contextLabel label="%m2.popup.lifecycle.package" mode="debug"/>
            <enablement>
               <with variable="selection">
                  <count value="1"/>
@@ -272,9 +276,10 @@
                class="org.maven.ide.eclipse.actions.ExecutePomAction:source:jar"
                icon="icons/m2.gif"
                label="%m2.popup.lifecycle.source"
-               modes="run">
+               modes="run,debug">
         <contextualLaunch>
            <contextLabel label="%m2.popup.lifecycle.source" mode="run"/>
+           <contextLabel label="%m2.popup.lifecycle.source" mode="debug"/>
            <enablement>
               <with variable="selection">
                  <count value="1"/>
@@ -293,9 +298,10 @@
                class="org.maven.ide.eclipse.actions.ExecutePomAction:test"
                icon="icons/m2.gif"
                label="%m2.popup.lifecycle.test"
-               modes="run">
+               modes="run,debug">
         <contextualLaunch>
            <contextLabel label="%m2.popup.lifecycle.test" mode="run"/>
+           <contextLabel label="%m2.popup.lifecycle.test" mode="debug"/>
            <enablement>
               <with variable="selection">
                  <count value="1"/>
@@ -314,9 +320,10 @@
            class="org.maven.ide.eclipse.actions.ExecutePomAction:generate-sources"
            icon="icons/m2.gif"
            label="%m2.popup.lifecycle.generate-sources"
-           modes="run">
+           modes="run,debug">
         <contextualLaunch>
            <contextLabel label="%m2.popup.lifecycle.generate-sources" mode="run"/>
+           <contextLabel label="%m2.popup.lifecycle.generate-sources" mode="debug"/>
            <enablement>
               <with variable="selection">
                  <count value="1"/>
@@ -335,9 +342,10 @@
            class="org.maven.ide.eclipse.actions.ExecutePomAction:assembly:assembly"
            icon="icons/m2.gif"
            label="%m2.popup.lifecycle.assembly"
-           modes="run">
+           modes="run,debug">
         <contextualLaunch>
            <contextLabel label="%m2.popup.lifecycle.assembly" mode="run"/>
+           <contextLabel label="%m2.popup.lifecycle.assembly" mode="debug"/>
            <enablement>
               <with variable="selection">
                  <count value="1"/>
@@ -356,9 +364,10 @@
                class="org.maven.ide.eclipse.actions.ExecutePomAction:clean"
                icon="icons/m2.gif"
                label="%m2.popup.lifecycle.clean"
-               modes="run">
+               modes="run,debug">
         <contextualLaunch>
            <contextLabel label="%m2.popup.lifecycle.clean" mode="run"/>
+           <contextLabel label="%m2.popup.lifecycle.clean" mode="debug"/>
            <enablement>
               <with variable="selection">
                  <count value="1"/>
@@ -469,20 +478,19 @@
    <!-- m2 LaunchGroup -->
    <extension point="org.eclipse.debug.core.launchConfigurationTypes">
    <!-- careful when changing id, it's used to locate launch configuration from the java code! -->
+      <!--      category="org.eclipse.ui.externaltools" -->
       <launchConfigurationType
-            category="org.eclipse.ui.externaltools"
-            delegate="org.maven.ide.eclipse.internal.launch.MavenLaunchDelegate"
             id="org.maven.ide.eclipse.Maven2LaunchConfigurationType"
-            modes="run"
+            delegate="org.maven.ide.eclipse.internal.launch.MavenLaunchDelegate"
             name="%m2.launch.type.name"
+            modes="run,debug"
             public="true"/>
       <launchConfigurationType
-            category="org.eclipse.ui.externaltools.builder"
-            delegate="org.maven.ide.eclipse.internal.launch.MavenLaunchDelegate"
-            name="%m2.launch.type.builder.name"
             id="org.maven.ide.eclipse.Maven2BuilderConfigurationType"
-            modes="run">
-      </launchConfigurationType>
+            delegate="org.maven.ide.eclipse.internal.launch.MavenLaunchDelegate"
+            category="org.eclipse.ui.externaltools.builder"
+            name="%m2.launch.type.builder.name"
+            modes="run"/>
    </extension>
 
    <extension point="org.eclipse.debug.ui.launchConfigurationTabGroups">

@@ -28,7 +28,6 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.IDebugEventSetListener;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.ISourceLocator;
 import org.eclipse.debug.ui.RefreshTab;
@@ -67,7 +66,7 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
     
     launch.setSourceLocator(createSourceLocator());
     
-    super.launch(configuration, ILaunchManager.DEBUG_MODE, launch, monitor);
+    super.launch(configuration, mode, launch, monitor);
   }
   
   /* (non-Javadoc)
@@ -208,7 +207,7 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
       sb.append(super.getVMArguments(configuration));
       sb.append(getMavenRuntime(configuration).getOptions());
     }
-    return  sb.toString();
+    return sb.toString();
   }
 
   private String getGoals(ILaunchConfiguration configuration) throws CoreException {

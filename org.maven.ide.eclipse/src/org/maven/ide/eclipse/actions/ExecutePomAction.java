@@ -27,6 +27,7 @@ import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.DebugUITools;
+import org.eclipse.debug.ui.ILaunchGroup;
 import org.eclipse.debug.ui.ILaunchShortcut;
 import org.eclipse.debug.ui.RefreshTab;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -37,6 +38,7 @@ import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
@@ -77,7 +79,7 @@ public class ExecutePomAction implements ILaunchShortcut, IExecutableExtension, 
   public void launch(IEditorPart editor, String mode) {
     IEditorInput editorInput = editor.getEditorInput();
     if(editorInput instanceof IFileEditorInput) {
-      launch(((IFileEditorInput) editorInput).getFile().getParent());
+      launch(((IFileEditorInput) editorInput).getFile().getParent(), mode);
     }
   }
 
@@ -109,11 +111,11 @@ public class ExecutePomAction implements ILaunchShortcut, IExecutableExtension, 
         }
       }
 
-      launch(basedir);
+      launch(basedir, mode);
     }
   }
 
-  private void launch(IContainer basecon) {
+  private void launch(IContainer basecon, String mode) {
     if(basecon == null) {
       return;
     }
@@ -141,11 +143,13 @@ public class ExecutePomAction implements ILaunchShortcut, IExecutableExtension, 
     if(openDialog) {
       Tracer.trace(this, "Opening dialog for launch configuration", launchConfiguration.getName());
       DebugUITools.saveBeforeLaunch();
-      DebugUITools.openLaunchConfigurationDialog(MavenPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow()
-          .getShell(), launchConfiguration, MavenLaunchMainTab.ID_EXTERNAL_TOOLS_LAUNCH_GROUP, null);
+      Shell shell = MavenPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow().getShell();
+      ILaunchGroup group = DebugUITools.getLaunchGroup(launchConfiguration, mode);
+      DebugUITools.openLaunchConfigurationDialog(shell, launchConfiguration,
+          MavenLaunchMainTab.ID_EXTERNAL_TOOLS_LAUNCH_GROUP, null);
     } else {
       Tracer.trace(this, "Launch configuration", launchConfiguration.getName());
-      DebugUITools.launch(launchConfiguration, ILaunchManager.RUN_MODE);
+      DebugUITools.launch(launchConfiguration, mode);
     }
   }
 
