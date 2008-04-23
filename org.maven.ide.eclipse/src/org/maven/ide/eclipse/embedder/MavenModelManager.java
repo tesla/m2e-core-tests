@@ -20,6 +20,7 @@ import java.util.Map;
 import javax.xml.namespace.QName;
 
 import org.apache.xmlbeans.XmlCursor;
+import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.XmlOptions;
 
 import org.eclipse.core.resources.IFile;
@@ -142,55 +143,40 @@ public class MavenModelManager {
     }
   }
 
-//  public MavenExecutionResult readMavenProject(File pomFile, IProgressMonitor monitor, boolean offline, boolean debug,
-//      ResolverConfiguration resolverConfiguration) {
-//    MavenEmbedder embedder = embedderManager.createEmbedder(EmbedderFactory.createWorkspaceCustomizer());
-//    return readMavenProject(pomFile, monitor, offline, debug, resolverConfiguration, embedder);
-//  }
-//
-//  public MavenExecutionResult readMavenProject(File pomFile, IProgressMonitor monitor, //
-//      boolean offline, boolean debug, ResolverConfiguration resolverConfiguration, MavenEmbedder embedder) {
-//    try {
-//      // monitor.subTask("Reading " + pomFile.getFullPath());
-//      // File file = pomFile.getLocation().toFile();
-//
-//      MavenExecutionRequest request = EmbedderFactory.createMavenExecutionRequest(embedder, offline, debug);
-//      request.setPomFile(pomFile.getAbsolutePath());
-//      request.setBaseDirectory(pomFile.getParentFile());
-//      request.setTransferListener(new TransferListenerAdapter(monitor, console, indexManager));
-//      request.setProfiles(resolverConfiguration.getActiveProfileList());
-//      request.addActiveProfiles(resolverConfiguration.getActiveProfileList());
-//
-//      return embedder.readProjectWithDependencies(request);
-//
-//      // XXX need to manage markers somehow see MNGECLIPSE-***
-//      // Util.deleteMarkers(pomFile);
-//
-////      if(!result.hasExceptions()) {
-////        return result.getMavenProject();
-////      }
-////      
-////      return result.getMavenProject();
-//
-////    } catch(Exception ex) {
-////      Util.deleteMarkers(this.file);
-////      Util.addMarker(this.file, "Unable to read project; " + ex.toString(), 1, IMarker.SEVERITY_ERROR);
-////      
-////      String msg = "Unable to read " + file.getLocation() + "; " + ex.toString();
-////      console.logError(msg);
-////      MavenPlugin.log(msg, ex);
-//
-//    } finally {
-//      monitor.done();
-//    }
-//  }
-
+  public ProjectDocument readProjectDocument(IFile pomFile) throws CoreException {
+    String name = pomFile.getProject().getName() + "/" + pomFile.getProjectRelativePath();
+    try {
+      return ProjectDocument.Factory.parse(pomFile.getLocation().toFile(), getXmlOptions());
+    } catch(XmlException ex) {
+      String msg = "Unable to parse " + name;
+      console.logError(msg + "; " + ex.toString());
+      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
+    } catch(IOException ex) {
+      String msg = "Unable to read " + name;
+      console.logError(msg + "; " + ex.toString());
+      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
+    }
+  }
+  
+  public ProjectDocument readProjectDocument(File pom) throws CoreException {
+    try {
+      return ProjectDocument.Factory.parse(pom, getXmlOptions());
+    } catch(XmlException ex) {
+      String msg = "Unable to parse " + pom.getAbsolutePath();
+      console.logError(msg + "; " + ex.toString());
+      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
+    } catch(IOException ex) {
+      String msg = "Unable to read " + pom.getAbsolutePath();
+      console.logError(msg + "; " + ex.toString());
+      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
+    }
+  }
+  
   public void updateProject(IFile pomFile, ProjectUpdater updater) {
     File pom = pomFile.getLocation().toFile();
     try {
-      XmlOptions options = getXmlOptions();
-
-      ProjectDocument projectDocument = ProjectDocument.Factory.parse(pom, options);
+      ProjectDocument projectDocument = readProjectDocument(pom);
+      
       updater.update(projectDocument);
 
 //      XmlCursor cursor = projectDocument.newCursor();
@@ -199,7 +185,7 @@ public class MavenModelManager {
 //      }      
 
       ByteArrayOutputStream bos = new ByteArrayOutputStream();
-      projectDocument.save(bos, options);
+      projectDocument.save(bos, getXmlOptions());
 
       pomFile.setContents(new ByteArrayInputStream(bos.toByteArray()), true, true, null);
       pomFile.refreshLocal(IResource.DEPTH_ONE, null); // TODO ???
