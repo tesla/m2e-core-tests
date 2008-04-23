@@ -106,7 +106,6 @@ public class ProjectImportManager implements IProjectImportManager {
           javaConfigurator
       };
 
-System.err.println("IMPORT start"); long start = System.currentTimeMillis();
       MavenEmbedder embedder = embedderManager.createEmbedder(EmbedderFactory.createWorkspaceCustomizer());
       try {
         MavenUpdateRequest updateRequest = new MavenUpdateRequest(false, false);
@@ -156,7 +155,6 @@ System.err.println("IMPORT start"); long start = System.currentTimeMillis();
       }
 
       projectManager.notifyProjectChangeListeners(monitor);
-System.err.println("IMPORT end " + (System.currentTimeMillis() - start));
 
     } catch(MavenEmbedderException ex) {
       throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, ex.getMessage(), ex));

@@ -346,7 +346,6 @@ public class MavenProjectManagerImpl {
    * @param monitor progress monitor
    */
   public void refresh(Set/*<MavenUpdateRequest>*/ updateRequests, IProgressMonitor monitor) throws CoreException, MavenEmbedderException, InterruptedException {
-System.err.println("REFRESH start"); long start = System.currentTimeMillis();
     MavenEmbedder embedder = embedderManager.createEmbedder(EmbedderFactory.createWorkspaceCustomizer());
     try {
       for(Iterator it = updateRequests.iterator(); it.hasNext();) {
@@ -374,8 +373,6 @@ System.err.println("REFRESH start"); long start = System.currentTimeMillis();
     }
     
     notifyProjectChangeListeners(monitor);
-System.err.println("REFRESH end " + (System.currentTimeMillis() - start));
-
   }
 
   public void refresh(MavenEmbedder embedder, IFile pom, MavenUpdateRequest updateRequest, IProgressMonitor monitor) throws CoreException {
@@ -393,7 +390,7 @@ System.err.println("REFRESH end " + (System.currentTimeMillis() - start));
     MavenProject mavenProject = null;
     MavenExecutionResult result = null;
     if (pom.isAccessible() && resolverConfiguration != null) {
-      result = readProjectWithDependencies(embedder, pom, resolverConfiguration, updateRequest, monitor);
+      result = execute(embedder, pom, resolverConfiguration, new MavenProjectReader(updateRequest), monitor);
       mavenProject = result.getProject();
       markerManager.addMarkers(pom, result);
     }
@@ -923,7 +920,7 @@ System.err.println("REFRESH end " + (System.currentTimeMillis() - start));
   public MavenExecutionResult readProjectWithDependencies(IFile pomFile, ResolverConfiguration resolverConfiguration, MavenUpdateRequest updateRequest, IProgressMonitor monitor) throws MavenEmbedderException {
     MavenEmbedder embedder = embedderManager.createEmbedder(EmbedderFactory.createWorkspaceCustomizer());
     try {
-      return readProjectWithDependencies(embedder, pomFile, resolverConfiguration, updateRequest, monitor);
+      return execute(embedder, pomFile, resolverConfiguration, new MavenProjectReader(updateRequest), monitor);
     } finally {
       try {
         embedder.stop();
@@ -933,29 +930,6 @@ System.err.println("REFRESH end " + (System.currentTimeMillis() - start));
     }
   }
   
-  public MavenExecutionResult execute(MavenEmbedder embedder, IFile pomFile, ResolverConfiguration resolverConfiguration, final List/*<String>*/ goals, IProgressMonitor monitor) {
-    return execute(embedder, pomFile, resolverConfiguration, new MavenRunnable() {
-      public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request) {
-        request.setGoals(goals);
-        return embedder.execute(request);
-      }
-    }, monitor);
-  }
-
-  public MavenExecutionResult readProjectWithDependencies(MavenEmbedder embedder, IFile pomFile, ResolverConfiguration resolverConfiguration, final MavenUpdateRequest updateRequest, IProgressMonitor monitor) {
-      return execute(embedder, pomFile, resolverConfiguration, new MavenRunnable() {
-        public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request) {
-          request.setOffline(updateRequest.isOffline());
-          request.setUpdateSnapshots(updateRequest.isUpdateSnapshots());
-          return embedder.readProjectWithDependencies(request);
-        }
-      }, monitor);
-  }
-
-  interface MavenRunnable {
-    public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request);
-  }
-
   MavenExecutionResult execute(MavenEmbedder embedder, IFile pomFile, ResolverConfiguration resolverConfiguration, MavenRunnable runnable, IProgressMonitor monitor) {
     File pom = pomFile.getLocation().toFile();
 
@@ -970,8 +944,7 @@ System.err.println("REFRESH end " + (System.currentTimeMillis() - start));
 
     context.set(new Context(this.state, resolverConfiguration, pomFile));
     try {
-      MavenExecutionResult result = runnable.execute(embedder, request);
-      return result;
+      return runnable.execute(embedder, request);
     } finally {
       context.set(null);
     }
@@ -995,7 +968,7 @@ System.err.println("REFRESH end " + (System.currentTimeMillis() - start));
       ResolverConfiguration resolverConfiguration = facade.getResolverConfiguration();
       String goals = resolverConfiguration.getResourceFilteringGoals();
       
-      execute(embedder, pom, resolverConfiguration, Arrays.asList(StringUtils.split(goals)), monitor);
+      execute(embedder, pom, resolverConfiguration, new MavenExecutor(Arrays.asList(StringUtils.split(goals))), monitor);
 
       IProject project = pom.getProject();
 
@@ -1020,23 +993,6 @@ System.err.println("REFRESH end " + (System.currentTimeMillis() - start));
     }
   }
   
-  /**
-   * Context
-   */
-  static class Context {
-    final WorkspaceState state;
-
-    final ResolverConfiguration resolverConfiguration;
-
-    final IFile pom;
-
-    Context(WorkspaceState state, ResolverConfiguration resolverConfiguration, IFile pom) {
-      this.state = state;
-      this.resolverConfiguration = resolverConfiguration;
-      this.pom = pom;
-    }
-  }
-
   public MavenProjectFacade[] getProjects() {
     return state.getProjects();
   }
@@ -1047,6 +1003,54 @@ System.err.println("REFRESH end " + (System.currentTimeMillis() - start));
       projectFacade.setResolverConfiguration(configuration);
     }
     return saveResolverConfiguration(project, configuration);
+  }
+
+  /**
+   * Context
+   */
+  static class Context {
+    final WorkspaceState state;
+  
+    final ResolverConfiguration resolverConfiguration;
+  
+    final IFile pom;
+  
+    Context(WorkspaceState state, ResolverConfiguration resolverConfiguration, IFile pom) {
+      this.state = state;
+      this.resolverConfiguration = resolverConfiguration;
+      this.pom = pom;
+    }
+  }
+
+  interface MavenRunnable {
+    public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request);
+  }
+
+  private static final class MavenExecutor implements MavenRunnable {
+    private final List goals;
+
+    MavenExecutor(List goals) {
+      this.goals = goals;
+    }
+
+    public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request) {
+      request.setGoals(goals);
+      return embedder.execute(request);
+    }
+  }
+
+  private static final class MavenProjectReader implements MavenRunnable {
+    private final MavenUpdateRequest updateRequest;
+
+    MavenProjectReader(MavenUpdateRequest updateRequest) {
+      this.updateRequest = updateRequest;
+    }
+
+    public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request) {
+      request.setOffline(updateRequest.isOffline());
+      request.setUpdateSnapshots(updateRequest.isUpdateSnapshots());
+      return embedder.readProjectWithDependencies(request);
+    }
   }
 
 }

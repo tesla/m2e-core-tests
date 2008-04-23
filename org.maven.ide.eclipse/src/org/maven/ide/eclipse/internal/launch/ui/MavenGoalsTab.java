@@ -120,8 +120,6 @@ public class MavenGoalsTab extends AbstractLaunchConfigurationTab {
     
     Object[] targetsSelected = dialog.getResult();
 
-    System.err.println(targetsSelected);
-    
 //    if(targetsSelected == null) {//default
 //      text.setEnabled(true);
 //      attributeToGoals.remove(attribute);
