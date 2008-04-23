@@ -71,6 +71,7 @@ import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
 import org.maven.ide.eclipse.project.IMavenProjectVisitor;
 import org.maven.ide.eclipse.project.MavenProjectChangedEvent;
 import org.maven.ide.eclipse.project.MavenProjectFacade;
+import org.maven.ide.eclipse.project.MavenUpdateRequest;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 
 /**
@@ -341,7 +342,7 @@ public class MavenProjectManagerImpl {
    * @param updateRequests a set of {@link MavenUpdateRequest}
    * @param monitor progress monitor
    */
-  public void refresh(Set/*<MavenUpdateRequest>*/ updateRequests, IProgressMonitor monitor) throws CoreException, MavenEmbedderException, InterruptedException {
+  public void refresh(Set/*<DependencyResolutionContext>*/ updateRequests, IProgressMonitor monitor) throws CoreException, MavenEmbedderException, InterruptedException {
     MavenEmbedder embedder = embedderManager.createEmbedder(EmbedderFactory.createWorkspaceCustomizer());
     try {
       for(Iterator it = updateRequests.iterator(); it.hasNext();) {
@@ -349,14 +350,14 @@ public class MavenProjectManagerImpl {
           throw new InterruptedException();
         }
 
-        MavenUpdateRequest updateRequest = (MavenUpdateRequest) it.next();
+        DependencyResolutionContext updateRequest = (DependencyResolutionContext) it.next();
         
         while(!updateRequest.isEmpty()) {
           IFile pom = updateRequest.pop();
           monitor.subTask(pom.getFullPath().toString());
-          
+
           if (!pom.isAccessible() || !pom.getProject().hasNature(MavenPlugin.NATURE_ID)) {
-            updateRequest.addPomFiles(remove(pom));
+            updateRequest.forcePomFiles(remove(pom));
             continue;
           }
 
@@ -371,7 +372,7 @@ public class MavenProjectManagerImpl {
     notifyProjectChangeListeners(monitor);
   }
 
-  public void refresh(MavenEmbedder embedder, IFile pom, MavenUpdateRequest updateRequest, IProgressMonitor monitor) throws CoreException {
+  public void refresh(MavenEmbedder embedder, IFile pom, DependencyResolutionContext updateRequest, IProgressMonitor monitor) throws CoreException {
     MavenProjectFacade oldFacade = state.getProjectFacade(pom);
 
     if(!updateRequest.isForce(pom) && oldFacade != null && !oldFacade.isStale()) {
@@ -386,13 +387,13 @@ public class MavenProjectManagerImpl {
     MavenProject mavenProject = null;
     MavenExecutionResult result = null;
     if (pom.isAccessible() && resolverConfiguration != null) {
-      result = execute(embedder, pom, resolverConfiguration, new MavenProjectReader(updateRequest), monitor);
+      result = execute(embedder, pom, resolverConfiguration, new MavenProjectReader(updateRequest.getRequest()), monitor);
       mavenProject = result.getProject();
       markerManager.addMarkers(pom, result);
     }
 
     if (resolverConfiguration == null || mavenProject == null) {
-      updateRequest.addPomFiles(remove(pom));
+      updateRequest.forcePomFiles(remove(pom));
       if (result != null && resolverConfiguration != null && resolverConfiguration.shouldResolveWorkspaceProjects()) {
         // this only really add missing parent
         addMissingProjectDependencies(pom, result);
@@ -406,17 +407,17 @@ public class MavenProjectManagerImpl {
 
     // refresh modules
     if (resolverConfiguration.shouldIncludeModules()) {
-      updateRequest.addPomFiles(remove(getRemovedNestedModules(pom, oldMavenProject, mavenProject), true));
-      updateRequest.addPomFiles(refreshNestedModules(pom, mavenProject));
+      updateRequest.forcePomFiles(remove(getRemovedNestedModules(pom, oldMavenProject, mavenProject), true));
+      updateRequest.forcePomFiles(refreshNestedModules(pom, mavenProject));
     } else {
-      updateRequest.addPomFiles(refreshWorkspaceModules(pom, oldMavenProject));
-      updateRequest.addPomFiles(refreshWorkspaceModules(pom, mavenProject));
+      updateRequest.forcePomFiles(refreshWorkspaceModules(pom, oldMavenProject));
+      updateRequest.forcePomFiles(refreshWorkspaceModules(pom, mavenProject));
     }
 
     // refresh dependents
     if (dependencyChanged) {
-      updateRequest.addPomFiles(state.getDependents(pom, oldMavenProject, resolverConfiguration.shouldIncludeModules()));
-      updateRequest.addPomFiles(state.getDependents(pom, mavenProject, resolverConfiguration.shouldIncludeModules()));
+      updateRequest.forcePomFiles(state.getDependents(pom, oldMavenProject, resolverConfiguration.shouldIncludeModules()));
+      updateRequest.forcePomFiles(state.getDependents(pom, mavenProject, resolverConfiguration.shouldIncludeModules()));
     }
 
     // cleanup old project and old dependencies
@@ -1040,7 +1041,7 @@ public class MavenProjectManagerImpl {
 
     MavenProjectReader(MavenUpdateRequest updateRequest) {
       this.updateRequest = updateRequest;
-    }
+  }
 
     public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request) {
       request.setOffline(updateRequest.isOffline());

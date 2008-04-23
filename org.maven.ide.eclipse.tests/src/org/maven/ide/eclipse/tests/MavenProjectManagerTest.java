@@ -26,12 +26,13 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.internal.project.DependencyResolutionContext;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerImpl;
-import org.maven.ide.eclipse.internal.project.MavenUpdateRequest;
 import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
 import org.maven.ide.eclipse.project.IMavenProjectVisitor;
 import org.maven.ide.eclipse.project.MavenProjectChangedEvent;
 import org.maven.ide.eclipse.project.MavenProjectFacade;
+import org.maven.ide.eclipse.project.MavenUpdateRequest;
 
 
 public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
@@ -84,14 +85,14 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
       updateRequest.addPomFile(projects[i].getFile(MavenPlugin.POM_FILE_NAME));
     }
     
-    manager.refresh(Collections.singleton(updateRequest), monitor);
+    manager.refresh(Collections.singleton(new DependencyResolutionContext(updateRequest)), monitor);
 //    manager.notifyListeners(monitor);
   }
 
   private void remove(MavenProjectManagerImpl manager, IProject project) throws Exception {
-    MavenUpdateRequest updateRequest = new MavenUpdateRequest(true /*offline*/, false /* updateSnapshots*/);
+    DependencyResolutionContext updateRequest = new DependencyResolutionContext(new MavenUpdateRequest(true /*offline*/, false /* updateSnapshots*/));
 
-    updateRequest.addPomFiles(manager.remove(project.getFile(MavenPlugin.POM_FILE_NAME)));
+    updateRequest.forcePomFiles(manager.remove(project.getFile(MavenPlugin.POM_FILE_NAME)));
     manager.refresh(Collections.singleton(updateRequest), monitor);
 //    manager.notifyListeners(monitor);
   }
@@ -624,7 +625,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
 
     MavenUpdateRequest updateRequest = new MavenUpdateRequest(true /*offline*/, false /* updateSources */);
     updateRequest.addPomFile(p1);
-    manager.refresh(Collections.singleton(updateRequest), monitor);
+    manager.refresh(Collections.singleton(new DependencyResolutionContext(updateRequest)), monitor);
 //    manager.notifyListeners(monitor);
 
     assertEquals(false, file.exists());

@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChang
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.project.MavenUpdateRequest;
 
 public class MavenProjectManagerRefreshJob extends Job implements IResourceChangeListener, IPreferenceChangeListener {
 
@@ -205,7 +206,7 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
   static final class CommandContext {
 
     public final MavenProjectManagerImpl manager;
-    
+
     public final List downloadSources = new ArrayList();
 
     public int sourcesCount = 0;
@@ -238,8 +239,9 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
     }
 
     void execute(CommandContext context, IProgressMonitor monitor) {
-      updateRequest.addPomFiles(context.manager.remove(updateRequest.getPomFiles(), updateRequest.isForce()));
-      context.updateRequests.add(updateRequest);
+      DependencyResolutionContext resolutionContext = new DependencyResolutionContext(updateRequest);
+      resolutionContext.forcePomFiles(context.manager.remove(updateRequest.getPomFiles(), updateRequest.isForce()));
+      context.updateRequests.add(resolutionContext);
     }
 
     public String toString() {
@@ -258,7 +260,7 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
     }
 
     void execute(CommandContext context, IProgressMonitor monitor) {
-      context.updateRequests.add(updateRequest);
+      context.updateRequests.add(new DependencyResolutionContext(updateRequest));
     }
 
     public String toString() {

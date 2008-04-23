@@ -25,7 +25,6 @@ import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerImpl;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerRefreshJob;
-import org.maven.ide.eclipse.internal.project.MavenUpdateRequest;
 
 
 /**

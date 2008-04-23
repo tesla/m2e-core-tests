@@ -60,6 +60,7 @@ import org.maven.ide.eclipse.project.IProjectImportManager;
 import org.maven.ide.eclipse.project.LocalProjectScanner;
 import org.maven.ide.eclipse.project.MavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectInfo;
+import org.maven.ide.eclipse.project.MavenUpdateRequest;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 import org.maven.ide.eclipse.util.Util;
@@ -128,11 +129,12 @@ public class ProjectImportManager implements IProjectImportManager {
         }
 
         // next, resolve maven dependencies for all projects
-        while(!updateRequest.isEmpty()) {
-          IFile pom = updateRequest.pop();
+        DependencyResolutionContext resolutionContext = new DependencyResolutionContext(updateRequest);
+        while(!resolutionContext.isEmpty()) {
+          IFile pom = resolutionContext.pop();
           monitor.subTask(pom.getFullPath().toString());
 
-          projectManager.refresh(embedder, pom, updateRequest, monitor);
+          projectManager.refresh(embedder, pom, resolutionContext, monitor);
           monitor.worked(1);
         }
 

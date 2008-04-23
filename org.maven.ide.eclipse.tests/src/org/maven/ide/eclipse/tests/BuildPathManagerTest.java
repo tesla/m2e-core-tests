@@ -33,9 +33,9 @@ import org.eclipse.jdt.core.JavaCore;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.index.IndexInfo;
 import org.maven.ide.eclipse.index.IndexManager;
-import org.maven.ide.eclipse.internal.project.MavenUpdateRequest;
 import org.maven.ide.eclipse.project.BuildPathManager;
 import org.maven.ide.eclipse.project.IProjectImportManager;
+import org.maven.ide.eclipse.project.MavenUpdateRequest;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 
