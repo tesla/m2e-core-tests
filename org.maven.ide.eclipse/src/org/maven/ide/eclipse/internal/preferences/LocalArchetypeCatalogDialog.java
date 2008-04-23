@@ -131,24 +131,19 @@ public class LocalArchetypeCatalogDialog extends TitleAreaDialog {
     catalogDescriptionText = new Text(composite, SWT.BORDER);
     catalogDescriptionText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
     
-    ModifyListener modifyListener = new ModifyListener() {
-      public void modifyText(final ModifyEvent e) {
-        update();
-      }
-    };
     
     if(archetypeCatalogFactory!=null) {
       catalogLocationCombo.setText(archetypeCatalogFactory.getId());
       catalogDescriptionText.setText(archetypeCatalogFactory.getDescription());
     }
     
+    ModifyListener modifyListener = new ModifyListener() {
+      public void modifyText(final ModifyEvent e) {
+        update();
+      }
+    };
     catalogLocationCombo.addModifyListener(modifyListener);
     catalogDescriptionText.addModifyListener(modifyListener);
-
-//    fullIndexButton = new Button(composite, SWT.CHECK);
-//    fullIndexButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
-//    fullIndexButton.setText("&Full Index");
-//    fullIndexButton.setSelection(true);
 
     return composite;
   }

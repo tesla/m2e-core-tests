@@ -130,11 +130,13 @@ public class RemoteArchetypeCatalogDialog extends TitleAreaDialog {
       catalogDescriptionText.setText(archetypeCatalogFactory.getDescription());
     }
     
-    catalogUrlCombo.addModifyListener(new ModifyListener() {
+    ModifyListener modifyListener = new ModifyListener() {
       public void modifyText(final ModifyEvent e) {
         update();
       }
-    });
+    };
+    catalogUrlCombo.addModifyListener(modifyListener);
+    catalogDescriptionText.addModifyListener(modifyListener);
     
     return composite;
   }
