@@ -27,6 +27,7 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.project.IProjectImportManager;
 import org.maven.ide.eclipse.project.MavenProjectManager;
+import org.maven.ide.eclipse.project.MavenUpdateRequest;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 
 
@@ -142,7 +143,7 @@ public class ChangeNatureAction implements IObjectActionDelegate {
       
       boolean offline = runtimeManager.isOffline();
       boolean updateSnapshots = false;
-      projectManager.refresh(project, offline, updateSnapshots);
+      projectManager.refresh(new MavenUpdateRequest(project, offline, updateSnapshots));
       
       return Status.OK_STATUS;
     }

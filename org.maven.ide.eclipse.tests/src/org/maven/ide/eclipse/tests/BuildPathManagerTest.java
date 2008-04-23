@@ -736,7 +736,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       // cleanup
       new File(repo, "downloadsources/downloadsources-t001/0.0.1/downloadsources-t001-0.0.1-sources.jar").delete();
       new File(repo, "downloadsources/downloadsources-t002/0.0.1/downloadsources-t002-0.0.1-sources.jar").delete();
-      MavenPlugin.getDefault().getMavenProjectManager().refresh(new IProject[] {project}, false /*offline*/, false);
+      MavenPlugin.getDefault().getMavenProjectManager().refresh(new MavenUpdateRequest(new IProject[] {project}, false /*offline*/, false));
       waitForJobsToComplete();
     }
 
@@ -753,7 +753,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       // cleanup
       new File(repo, "downloadsources/downloadsources-t001/0.0.1/downloadsources-t001-0.0.1-sources.jar").delete();
       new File(repo, "downloadsources/downloadsources-t002/0.0.1/downloadsources-t002-0.0.1-sources.jar").delete();
-      MavenPlugin.getDefault().getMavenProjectManager().refresh(new IProject[] {project}, false /*offline*/, false);
+      MavenPlugin.getDefault().getMavenProjectManager().refresh(new MavenUpdateRequest(new IProject[] {project}, false /*offline*/, false));
       waitForJobsToComplete();
     }
 

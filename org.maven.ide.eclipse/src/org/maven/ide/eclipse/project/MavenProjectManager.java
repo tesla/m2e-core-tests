@@ -47,11 +47,8 @@ public class MavenProjectManager {
 
   // Maven projects    
 
-  public void refresh(IProject[] projects, boolean offline, boolean updateSnapshots) {
-    mavenBackgroundJob.refresh(new MavenUpdateRequest(projects, offline, updateSnapshots));
-  }
-  public void refresh(IProject project, boolean offline, boolean updateSnapshots) {
-    mavenBackgroundJob.refresh(new MavenUpdateRequest(project, offline, updateSnapshots));
+  public void refresh(MavenUpdateRequest request) {
+    mavenBackgroundJob.refresh(request);
   }
 
   public void addMavenProjectChangedListener(IMavenProjectChangedListener listener) {

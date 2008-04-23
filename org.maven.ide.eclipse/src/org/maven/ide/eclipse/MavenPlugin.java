@@ -72,6 +72,7 @@ import org.maven.ide.eclipse.internal.project.ProjectImportManager;
 import org.maven.ide.eclipse.project.BuildPathManager;
 import org.maven.ide.eclipse.project.IProjectImportManager;
 import org.maven.ide.eclipse.project.MavenProjectManager;
+import org.maven.ide.eclipse.project.MavenUpdateRequest;
 
 
 /**
@@ -210,8 +211,8 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
     this.projectManager = new MavenProjectManager(managerImpl, indexManager, mavenBackgroundJob);
     this.projectManager.addMavenProjectChangedListener(new WorkspaceStateWriter());
-    this.projectManager.refresh(workspace.getRoot().getProjects(), //
-        true /*offline*/, false /* updateSnapshots */);
+    this.projectManager.refresh(new MavenUpdateRequest(workspace.getRoot().getProjects(), //
+        true /*offline*/, false /* updateSnapshots */));
 
     this.buildpathManager = new BuildPathManager(embedderManager, console, projectManager, indexManager, modelManager,
         runtimeManager);

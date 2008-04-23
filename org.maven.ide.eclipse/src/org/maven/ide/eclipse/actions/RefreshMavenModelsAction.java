@@ -23,6 +23,7 @@ import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.project.MavenProjectManager;
+import org.maven.ide.eclipse.project.MavenUpdateRequest;
 
 
 public class RefreshMavenModelsAction implements IWorkbenchWindowActionDelegate, IExecutableExtension {
@@ -48,10 +49,10 @@ public class RefreshMavenModelsAction implements IWorkbenchWindowActionDelegate,
     MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
 
     if(projects != null) {
-      projectManager.refresh(projects, offline, updateSnapshots);
+      projectManager.refresh(new MavenUpdateRequest(projects, offline, updateSnapshots));
     } else {
-      projectManager.refresh(ResourcesPlugin.getWorkspace().getRoot().getProjects(), //
-          offline, updateSnapshots);
+      projectManager.refresh(new MavenUpdateRequest(ResourcesPlugin.getWorkspace().getRoot().getProjects(), //
+          offline, updateSnapshots));
     }
   }
 
