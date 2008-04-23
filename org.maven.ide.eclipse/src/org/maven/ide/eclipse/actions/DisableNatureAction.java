@@ -25,7 +25,6 @@ import org.eclipse.ui.IWorkbenchPart;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.internal.launch.MavenRuntimeClasspathProvider;
-import org.maven.ide.eclipse.project.BuildPathManager;
 
 
 public class DisableNatureAction implements IObjectActionDelegate {
@@ -49,11 +48,11 @@ public class DisableNatureAction implements IObjectActionDelegate {
           project = (IProject) ((IAdaptable) element).getAdapter(IProject.class);
         }
         if(project != null) {
-          BuildPathManager buildpathManager = MavenPlugin.getDefault().getBuildpathManager();
+          MavenPlugin plugin = MavenPlugin.getDefault();
 
-          buildpathManager.disableMavenNature(project, new NullProgressMonitor());
-          
           try {
+            plugin.getProjectImportManager().disableMavenNature(project, new NullProgressMonitor());
+
             disableLaunchConfigurations(project);
           } catch(CoreException ex) {
             MavenPlugin.log(ex);

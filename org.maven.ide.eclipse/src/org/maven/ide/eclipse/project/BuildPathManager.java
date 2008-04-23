@@ -19,8 +19,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -29,34 +27,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.jar.Attributes;
-import java.util.jar.JarFile;
-import java.util.jar.Manifest;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectDescription;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathAttribute;
@@ -71,46 +56,23 @@ import org.eclipse.jdt.internal.core.DeltaProcessingState;
 import org.eclipse.jdt.internal.core.JavaElementDelta;
 import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerContentProvider;
-import org.eclipse.jdt.launching.IVMInstall;
-import org.eclipse.jdt.launching.IVMInstallType;
-import org.eclipse.jdt.launching.JavaRuntime;
-import org.eclipse.jdt.launching.LibraryLocation;
 
 import org.codehaus.plexus.digest.DigesterException;
 import org.codehaus.plexus.digest.Sha1Digester;
-import org.codehaus.plexus.util.xml.Xpp3Dom;
 
-import org.apache.maven.archetype.ArchetypeGenerationRequest;
-import org.apache.maven.archetype.ArchetypeGenerationResult;
-import org.apache.maven.archetype.catalog.Archetype;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.artifact.resolver.filter.ScopeArtifactFilter;
-import org.apache.maven.embedder.MavenEmbedder;
-import org.apache.maven.embedder.MavenEmbedderException;
-import org.apache.maven.execution.MavenExecutionRequest;
-import org.apache.maven.execution.MavenExecutionResult;
-import org.apache.maven.execution.ReactorManager;
-import org.apache.maven.model.Model;
-import org.apache.maven.model.Plugin;
-import org.apache.maven.model.PluginManagement;
-import org.apache.maven.model.Resource;
-import org.apache.maven.project.MavenProject;
 
 import org.maven.ide.eclipse.MavenConsole;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.container.MavenClasspathContainer;
-import org.maven.ide.eclipse.embedder.EmbedderFactory;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
-import org.maven.ide.eclipse.internal.embedder.PluginConsoleEventMonitor;
-import org.maven.ide.eclipse.internal.embedder.TransferListenerAdapter;
-import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;
-import org.maven.ide.eclipse.util.Util;
 
 /**
  * This class is responsible for mapping Maven classpath to JDT and back.
@@ -144,8 +106,6 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
   // test is the widest possible scope, and this is what we need by default
   public static final int CLASSPATH_DEFAULT = CLASSPATH_TEST;
   
-  private static final List VERSIONS = Arrays.asList("1.1,1.2,1.3,1.4,1.5,1.6,1.7".split(","));
-  
   static final ArtifactFilter SCOPE_FILTER_RUNTIME = new ScopeArtifactFilter(Artifact.SCOPE_RUNTIME); 
   static final ArtifactFilter SCOPE_FILTER_TEST = new ScopeArtifactFilter(Artifact.SCOPE_TEST);
   
@@ -156,8 +116,6 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
   final MavenProjectManager projectManager;
 
   final IndexManager indexManager;
-
-  final MavenModelManager modelManager;
   
   final MavenRuntimeManager runtimeManager;
   
@@ -170,34 +128,11 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     this.console = console;
     this.projectManager = projectManager;
     this.indexManager = indexManager;
-    this.modelManager = modelManager;
     this.runtimeManager = runtimeManager;
   }
 
   public static IClasspathEntry getDefaultContainerEntry() {
     return JavaCore.newContainerEntry(new Path(MavenPlugin.CONTAINER_ID));
-  }
-
-  private static IClasspathEntry createContainerEntry(ResolverConfiguration configuration) {
-    IPath newPath = new Path(MavenPlugin.CONTAINER_ID);
-    
-//    if(configuration.shouldIncludeModules()) {
-//      newPath = newPath.append(MavenPlugin.INCLUDE_MODULES);
-//    }
-//    if(!configuration.shouldResolveWorkspaceProjects()) {
-//      newPath = newPath.append(MavenPlugin.NO_WORKSPACE_PROJECTS);
-//    }
-//    if(configuration.shouldFilterResources()) {
-//      newPath = newPath.append(MavenPlugin.FILTER_RESOURCES);
-//    }
-//    if (configuration.shouldUseMavenOutputFolders()) {
-//      newPath = newPath.append(MavenPlugin.USE_MAVEN_OUPUT_FOLDERS);
-//    }
-//    if(configuration.getActiveProfiles().length() > 0) {
-//      newPath = newPath.append(MavenPlugin.ACTIVE_PROFILES + "[" + configuration.getActiveProfiles().trim() + "]");
-//    }
-
-    return JavaCore.newContainerEntry(newPath);
   }
 
   public static IClasspathEntry getMavenContainerEntry(IJavaProject javaProject) {
@@ -261,497 +196,6 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     return jdtVersion;
   }
 
-  public void updateSourceFolders(IProject project, ResolverConfiguration configuration, String goalToExecute, IProgressMonitor monitor) {
-    IFile pom = project.getFile(MavenPlugin.POM_FILE_NAME);
-    if(!pom.exists()) {
-      return;
-    }
-
-    monitor.beginTask("Updating sources " + project.getName(), IProgressMonitor.UNKNOWN);
-    monitor.setTaskName("Updating sources " + project.getName());
-    long t1 = System.currentTimeMillis();
-    try {
-      Set sources = new LinkedHashSet();
-      List entries = new ArrayList();
-
-      MavenProject mavenProject = collectSourceEntries(project, entries, sources, configuration, goalToExecute, monitor);
-
-      monitor.subTask("Configuring Build Path");
-      IJavaProject javaProject = JavaCore.create(project);
-
-      if(mavenProject != null) {
-        Map options = collectOptions(mavenProject);
-        setOption(javaProject, options, JavaCore.COMPILER_COMPLIANCE);
-        setOption(javaProject, options, JavaCore.COMPILER_SOURCE);
-        setOption(javaProject, options, JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM);
-
-        String source = (String) options.get(JavaCore.COMPILER_SOURCE);
-        if(source == null) {
-          entries.add(JavaRuntime.getDefaultJREContainerEntry());
-        } else {
-          entries.add(getJREContainer(source));
-        }
-      }
-
-      if (configuration.shouldUseMavenOutputFolders()) {
-        javaProject.setOption(JavaCore.CORE_JAVA_BUILD_CLEAN_OUTPUT_FOLDER, "ignore");
-      }
-
-      IClasspathEntry[] currentClasspath = javaProject.getRawClasspath();
-      for(int i = 0; i < currentClasspath.length; i++ ) {
-        // Delete all non container (e.g. JRE library) entries. See MNGECLIPSE-9 
-        IClasspathEntry entry = currentClasspath[i];
-        if(entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
-          if(!JavaRuntime.JRE_CONTAINER.equals(entry.getPath().segment(0))) {
-            entries.add(entry);
-          }
-        }
-      }
-
-      IContainer classesFolder;
-      if (configuration.shouldUseMavenOutputFolders()) {
-        if (mavenProject != null) {
-          String outputDirectory = toRelativeAndFixSeparator(project, //
-              mavenProject.getBuild().getOutputDirectory());
-          classesFolder = project.getFolder(outputDirectory);
-        } else {
-          classesFolder = project;
-        }
-      } else {
-        IFolder outputFolder = project.getFolder(runtimeManager.getDefaultOutputFolder());
-        classesFolder = outputFolder.getFolder(CLASSES_FOLDERNAME);
-      }
-
-      if (classesFolder instanceof IFolder) {
-        Util.createFolder((IFolder) classesFolder);
-      }
-      javaProject.setRawClasspath((IClasspathEntry[]) entries.toArray(new IClasspathEntry[entries.size()]),
-          classesFolder.getFullPath(), monitor);
-
-      long t2 = System.currentTimeMillis();
-      console.logMessage("Updated source folders for project " + project.getName() + " " + (t2 - t1) / 1000 + "sec");
-
-    } catch(Exception ex) {
-      String msg = "Unable to update source folders " + project.getName() + "; " + ex.toString();
-      console.logMessage(msg);
-      MavenPlugin.log(msg, ex);
-
-    } finally {
-      monitor.done();
-    }
-  }
-
-  private void setOption(IJavaProject javaProject, Map options, String name) {
-    String newValue = (String) options.get(name);
-    if(newValue == null) {
-      newValue = (String) JavaCore.getDefaultOptions().get(name);
-    }
-
-    String currentValue = javaProject.getOption(name, false);
-    if(!newValue.equals(currentValue)) {
-      javaProject.setOption(name, newValue);
-    }
-  }
-
-  private IClasspathEntry getJREContainer(String version) {
-    int n = VERSIONS.indexOf(version);
-    if(n > -1) {
-      Map jreContainers = getJREContainers();
-      for(int i = n; i < VERSIONS.size(); i++ ) {
-        IClasspathEntry entry = (IClasspathEntry) jreContainers.get(version);
-        if(entry != null) {
-          console.logMessage("JRE compliant to " + version + ". " + entry);
-          return entry;
-        }
-      }
-    }
-    IClasspathEntry entry = JavaRuntime.getDefaultJREContainerEntry();
-    console.logMessage("No JRE compliant to " + version + ". Using default JRE container " + entry);
-    return entry;
-  }
-
-  private Map getJREContainers() {
-    Map jreContainers = new HashMap();
-
-    jreContainers.put(getJREVersion(JavaRuntime.getDefaultVMInstall()), JavaRuntime.getDefaultJREContainerEntry());
-
-    IVMInstallType[] installTypes = JavaRuntime.getVMInstallTypes();
-    for(int i = 0; i < installTypes.length; i++ ) {
-      IVMInstall[] installs = installTypes[i].getVMInstalls();
-      for(int j = 0; j < installs.length; j++ ) {
-        IVMInstall install = installs[j];
-        String version = getJREVersion(install);
-        if(!jreContainers.containsKey(version)) {
-          // in Eclipse 3.2 one could use JavaRuntime.newJREContainerPath(install)
-          IPath jreContainerPath = new Path(JavaRuntime.JRE_CONTAINER).append(install.getVMInstallType().getId())
-              .append(install.getName());
-          jreContainers.put(version, JavaCore.newContainerEntry(jreContainerPath));
-        }
-      }
-    }
-
-    return jreContainers;
-  }
-
-  private String getJREVersion(IVMInstall install) {
-    LibraryLocation[] libraryLocations = JavaRuntime.getLibraryLocations(install);
-    if(libraryLocations != null) {
-      for(int k = 0; k < libraryLocations.length; k++ ) {
-        IPath path = libraryLocations[k].getSystemLibraryPath();
-        String jarName = path.lastSegment();
-        // MNGECLIPSE-478 handle Sun and Apple JRE
-        if("rt.jar".equals(jarName) || "classes.jar".equals(jarName)) {
-          JarFile jarFile = null;
-          try {
-            jarFile = new JarFile(path.toFile());
-            Manifest manifest = jarFile.getManifest();
-            Attributes attributes = manifest.getMainAttributes();
-            return attributes.getValue(Attributes.Name.SPECIFICATION_VERSION);
-          } catch(Exception ex) {
-            console.logError("Unable to read " + path + " " + ex.getMessage());
-          } finally {
-            if(jarFile!=null) {
-              try {
-                jarFile.close();
-              } catch(IOException ex) {
-                console.logError("Unable to close " + path + " " + ex.getMessage());
-              }
-            }
-          }
-        }
-      }
-    }
-    return null;
-  }
-
-  private MavenProject collectSourceEntries(IProject project, List sourceEntries, Set sources,
-      ResolverConfiguration configuration, String goalToExecute, IProgressMonitor monitor) throws CoreException {
-    if(monitor.isCanceled()) {
-      throw new OperationCanceledException();
-    }
-
-    MavenEmbedder mavenEmbedder;
-    try {
-      mavenEmbedder = embedderManager.createEmbedder(EmbedderFactory.createExecutionCustomizer());
-    } catch(MavenEmbedderException ex) {
-      console.logError("Unable to create embedder; " + ex.toString());
-      return null;
-    }
-
-    IFile pomResource = project.getFile(MavenPlugin.POM_FILE_NAME);
-
-    monitor.subTask("reading " + pomResource.getFullPath());
-    if(runtimeManager.isDebugOutput()) {
-      console.logMessage("Reading " + pomResource.getFullPath());
-    }
-
-    File pomFile = pomResource.getLocation().toFile();
-
-    MavenProject mavenProject = null;
-//    try {
-//      mavenProject = mavenEmbedder.readProject(pomFile);
-//    } catch(Exception ex) {
-//      console.logError("Unable to read project " + pomResource.getFullPath() + "; " + ex.toString());
-//      return null;
-//    }
-
-    monitor.subTask("generating sources " + pomResource.getFullPath());
-    try {
-      if(!MavenPreferenceConstants.NO_GOAL.equals(goalToExecute)) {
-        console.logMessage("Generating sources " + pomResource.getFullPath());
-  
-        MavenExecutionRequest request = embedderManager.createRequest(mavenEmbedder);
-  
-        request.setUseReactor(false);
-        request.setRecursive(configuration.shouldIncludeModules());
-  
-        request.setBaseDirectory(pomFile.getParentFile());
-        request.setGoals(Collections.singletonList(goalToExecute));
-        request.addEventMonitor(new PluginConsoleEventMonitor(console));
-        request.setTransferListener(new TransferListenerAdapter(monitor, console, indexManager));
-        // request.setPomFile(pomFile.getAbsolutePath());
-        // request.setGoals(Arrays.asList("generate-sources,generate-resources,generate-test-sources,generate-test-resources".split(",")));
-        // request.setProfiles(...);
-        // request.setReactorFailureBehavior(MavenExecutionRequest.REACTOR_FAIL_AT_END);
-  
-        MavenExecutionResult result = mavenEmbedder.execute(request);
-  
-        // TODO optimize project refresh
-        monitor.subTask("refreshing");
-        project.refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 1));
-  
-        mavenProject = result.getProject();
-  
-        ReactorManager reactorManager = result.getReactorManager();
-        if(reactorManager != null && reactorManager.getSortedProjects() != null) {
-          if(configuration.shouldIncludeModules()) {
-            for(Iterator it = reactorManager.getSortedProjects().iterator(); it.hasNext();) {
-              addDirs(project, configuration, sources, sourceEntries, (MavenProject) it.next());
-            }
-          } else {
-            addDirs(project, configuration, sources, sourceEntries, //
-                (MavenProject) reactorManager.getSortedProjects().iterator().next());
-          }
-        }
-  
-        if(result.hasExceptions()) {
-          for(Iterator it = result.getExceptions().iterator(); it.hasNext();) {
-            Exception ex = (Exception) it.next();
-            console.logError("Build error for " + pomResource.getFullPath() + "; " + ex.toString());
-          }
-        }
-      }
-
-      if(mavenProject == null) {
-        try {
-          mavenProject = mavenEmbedder.readProject(pomFile);
-          if(mavenProject!=null) {
-            addDirs(project, configuration, sources, sourceEntries, mavenProject);
-          }
-        } catch(Exception ex2) {
-          console.logError("Unable to read project " + pomResource.getFullPath() + "; " + ex2.toString());
-          return null;
-        }
-      }
-
-    } catch(Throwable ex) {
-      String msg = "Build error for " + pomResource.getFullPath();
-      console.logError(msg + "; " + ex.toString());
-      MavenPlugin.log(msg, ex);
-
-      try {
-        mavenProject = mavenEmbedder.readProject(pomFile);
-      } catch(Exception ex2) {
-        console.logError("Unable to read project " + pomResource.getFullPath() + "; " + ex.toString());
-        return null;
-      }
-
-      addDirs(project, configuration, sources, sourceEntries, mavenProject);
-    }
-
-    return mavenProject;
-  }
-
-  private Map collectOptions(MavenProject mavenProject) {
-    Map options = new HashMap();
-
-    String source = getBuildOption(mavenProject, "maven-compiler-plugin", "source");
-    if(source != null) {
-      if(VERSIONS.contains(source)) {
-        console.logMessage("Setting source compatibility: " + source);
-        setVersion(options, JavaCore.COMPILER_SOURCE, source);
-        setVersion(options, JavaCore.COMPILER_COMPLIANCE, source);
-      } else {
-        console.logError("Invalid compiler source " + source + ". Using default");
-      }
-    }
-
-    String target = getBuildOption(mavenProject, "maven-compiler-plugin", "target");
-    if(target != null) {
-      if("jsr14".equals(target)) {  
-        // see info about this at http://www.masutti.ch/eel/
-        console.logMessage("Setting target compatibility: jsr14");
-        setVersion(options, JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, "1.4");
-      } else if(VERSIONS.contains(target)) {
-        console.logMessage("Setting target compatibility: " + target);
-        setVersion(options, JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, target);
-      } else {
-        console.logError("Invalid compiler target " + target + ". Using default");
-      }
-    }
-
-    return options;
-  }
-
-  private void addDirs(IProject project, ResolverConfiguration resolverConfiguration, 
-      Set sources, List sourceEntries, MavenProject mavenProject) throws CoreException 
-  {
-    IFolder classes;
-    IFolder testClasses;
-
-    if (resolverConfiguration.shouldUseMavenOutputFolders()) {
-      classes = project.getFolder(toRelativeAndFixSeparator(project, mavenProject.getBuild().getOutputDirectory()));
-      testClasses = project.getFolder(toRelativeAndFixSeparator(project, mavenProject.getBuild().getTestOutputDirectory()));
-    } else {
-      IFolder outputFolder = project.getFolder(runtimeManager.getDefaultOutputFolder());
-      classes = outputFolder.getFolder(CLASSES_FOLDERNAME);
-      testClasses = outputFolder.getFolder(TEST_CLASSES_FOLDERNAME);
-    }
-
-    Util.createFolder(testClasses);
-
-    addSourceDirs(project, sources, sourceEntries, mavenProject.getCompileSourceRoots(), classes.getFullPath(), null);
-    addSourceDirs(project, sources, sourceEntries, mavenProject.getTestCompileSourceRoots(), testClasses.getFullPath(), TEST_TYPE);
-
-    addResourceDirs(project, sources, sourceEntries, mavenProject.getBuild().getResources());
-    addResourceDirs(project, sources, sourceEntries, mavenProject.getBuild().getTestResources());
-
-    // HACK to support xmlbeans generated classes MNGECLIPSE-374
-    File generatedClassesDir = new File(mavenProject.getBuild().getDirectory(), //
-        "generated-classes" + File.separator + "xmlbeans");
-    IResource generatedClasses = project.findMember(toRelativeAndFixSeparator(project, //
-        generatedClassesDir.getAbsolutePath()));
-    if(generatedClasses != null && generatedClasses.isAccessible() && generatedClasses.getType() == IResource.FOLDER) {
-      sourceEntries.add(JavaCore.newLibraryEntry(generatedClasses.getFullPath(), null, null));
-    }
-  }
-
-  private void addSourceDirs(IProject project, Set sources, List sourceEntries, List sourceRoots, IPath output, String scope) {
-    for(Iterator it = sourceRoots.iterator(); it.hasNext();) {
-      String sourceRoot = (String) it.next();
-      if(new File(sourceRoot).isDirectory()) {
-        IResource r = project.findMember(toRelativeAndFixSeparator(project, sourceRoot));
-        if(r != null && sources.add(r.getFullPath().toString())) {
-          console.logMessage("Adding source folder " + r.getFullPath());
-          IClasspathAttribute[] attrs = new IClasspathAttribute[0];
-          if (scope != null) {
-            attrs = new IClasspathAttribute[1]; 
-            attrs[0] = JavaCore.newClasspathAttribute(MavenPlugin.TYPE_ATTRIBUTE, scope);
-          }
-          sourceEntries.add(JavaCore.newSourceEntry(r.getFullPath(), //
-              new IPath[0] /*inclusion*/, new IPath[0] /*exclusion*/, output, attrs));
-        }
-      }
-    }
-  }
-
-  private void addResourceDirs(IProject project, Set sources, List sourceEntries, List resources) {
-    for(Iterator it = resources.iterator(); it.hasNext();) {
-      Resource resource = (Resource) it.next();
-      File resourceDirectory = new File(resource.getDirectory());
-      if(resourceDirectory.exists() && resourceDirectory.isDirectory()) {
-        String relativePath = toRelativeAndFixSeparator(project, resource.getDirectory());
-        IResource r = project.findMember(relativePath);
-        if(r == project) {
-          /* 
-           * Workaround for the Java Model Exception: 
-           *   Cannot nest output folder 'xxx/src/main/resources' inside output folder 'xxx'
-           * when pom.xml have something like this:
-           * 
-           * <build>
-           *   <resources>
-           *     <resource>
-           *       <directory>${basedir}</directory>
-           *       <targetPath>META-INF</targetPath>
-           *       <includes>
-           *         <include>LICENSE</include>
-           *       </includes>
-           *     </resource>
-           */
-          console.logError("Skipping resource folder " + r.getFullPath());
-        } else if(r != null && sources.add(r.getFullPath().toString())) {
-          sourceEntries.add(JavaCore.newSourceEntry(r.getFullPath(), //
-              new IPath[] {new Path("**")} /*exclusion*/, r.getFullPath())); //, new IPath[] { new Path( "**"+"/.svn/"+"**")} ) );
-          console.logMessage("Adding resource folder " + r.getFullPath());
-        }
-      }
-    }
-  }
-
-
-  private String toRelativeAndFixSeparator(IProject project, String absolutePath) {
-    File basedir = project.getLocation().toFile();
-    String relative;
-    if(absolutePath.equals(basedir.getAbsolutePath())) {
-      relative = ".";
-    } else if(absolutePath.startsWith(basedir.getAbsolutePath())) {
-      relative = absolutePath.substring(basedir.getAbsolutePath().length() + 1);
-    } else {
-      relative = absolutePath;
-    }
-    return relative.replace('\\', '/'); //$NON-NLS-1$ //$NON-NLS-2$
-  }
-
-  public void enableMavenNature(IProject project, ResolverConfiguration configuration, IProgressMonitor monitor)
-      throws CoreException {
-    monitor.subTask("Enable Maven nature");
-
-    ArrayList newNatures = new ArrayList();
-    newNatures.add(JavaCore.NATURE_ID);
-    newNatures.add(MavenPlugin.NATURE_ID);
-
-    IProjectDescription description = project.getDescription();
-    String[] natures = description.getNatureIds();
-    for(int i = 0; i < natures.length; ++i) {
-      String id = natures[i];
-      if(!MavenPlugin.NATURE_ID.equals(id) && !JavaCore.NATURE_ID.equals(natures[i])) {
-        newNatures.add(natures[i]);
-      }
-    }
-    description.setNatureIds((String[]) newNatures.toArray(new String[newNatures.size()]));
-    project.setDescription(description, monitor);
-    
-    projectManager.setResolverConfiguration(project, configuration);
-
-    IJavaProject javaProject = JavaCore.create(project);
-    if(javaProject != null) {
-      Set containerEntrySet = new LinkedHashSet();
-      IClasspathContainer container = getMaven2ClasspathContainer(javaProject);
-      if(container != null) {
-        IClasspathEntry[] entries = container.getClasspathEntries();
-        for(int i = 0; i < entries.length; i++ ) {
-          containerEntrySet.add(entries[i].getPath().toString());
-        }
-      }
-
-      // remove classpath container from JavaProject
-      IClasspathEntry[] entries = javaProject.getRawClasspath();
-      ArrayList newEntries = new ArrayList();
-      for(int i = 0; i < entries.length; i++ ) {
-        IClasspathEntry entry = entries[i];
-        if(!isMaven2ClasspathContainer(entry.getPath()) && !containerEntrySet.contains(entry.getPath().toString())) {
-          newEntries.add(entry);
-        }
-      }
-
-      newEntries.add(createContainerEntry(configuration));
-
-      javaProject.setRawClasspath((IClasspathEntry[]) newEntries.toArray(new IClasspathEntry[newEntries.size()]),
-          monitor);
-    }
-  }
-
-  public void disableMavenNature(IProject project, IProgressMonitor monitor) {
-    monitor.subTask("Disable Maven nature");
-
-    try {
-      project.deleteMarkers(MavenPlugin.MARKER_ID, true, IResource.DEPTH_INFINITE);
-
-      IProjectDescription description = project.getDescription();
-      String[] natures = description.getNatureIds();
-      ArrayList newNatures = new ArrayList();
-      for(int i = 0; i < natures.length; ++i) {
-        if(!MavenPlugin.NATURE_ID.equals(natures[i])) {
-          newNatures.add(natures[i]);
-        }
-      }
-      description.setNatureIds((String[]) newNatures.toArray(new String[newNatures.size()]));
-      project.setDescription(description, null);
-
-      IJavaProject javaProject = JavaCore.create(project);
-      if(javaProject != null) {
-        // remove classpatch container from JavaProject
-        IClasspathEntry[] entries = javaProject.getRawClasspath();
-        ArrayList newEntries = new ArrayList();
-        for(int i = 0; i < entries.length; i++ ) {
-          if(!isMaven2ClasspathContainer(entries[i].getPath())) {
-            newEntries.add(entries[i]);
-          }
-        }
-        javaProject.setRawClasspath((IClasspathEntry[]) newEntries.toArray(new IClasspathEntry[newEntries.size()]),
-            null);
-      }
-
-    } catch(CoreException ex) {
-      MavenPlugin.log(ex);
-    }
-  }
-
-  public static boolean isMaven2ClasspathContainer(IPath containerPath) {
-    return containerPath != null && containerPath.segmentCount() > 0
-        && MavenPlugin.CONTAINER_ID.equals(containerPath.segment(0));
-  }
-
   public static IClasspathContainer getMaven2ClasspathContainer(IJavaProject project) throws JavaModelException {
     IClasspathEntry[] entries = project.getRawClasspath();
     for(int i = 0; i < entries.length; i++ ) {
@@ -761,158 +205,6 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
       }
     }
     return null;
-  }
-
-  private static String getBuildOption(MavenProject project, String artifactId, String optionName) {
-    String option = getBuildOption(project.getBuild().getPlugins(), artifactId, optionName);
-    if(option != null) {
-      return option;
-    }
-    PluginManagement pluginManagement = project.getBuild().getPluginManagement();
-    if(pluginManagement != null) {
-      return getBuildOption(pluginManagement.getPlugins(), artifactId, optionName);
-    }
-    return null;
-  }
-
-  private static String getBuildOption(List plugins, String artifactId, String optionName) {
-    for(Iterator it = plugins.iterator(); it.hasNext();) {
-      Plugin plugin = (Plugin) it.next();
-      if(artifactId.equals(plugin.getArtifactId())) {
-        Xpp3Dom o = (Xpp3Dom) plugin.getConfiguration();
-        if(o != null && o.getChild(optionName) != null) {
-          return o.getChild(optionName).getValue();
-        }
-      }
-    }
-    return null;
-  }
-
-  private static void setVersion(Map options, String name, String value) {
-    if(value == null) {
-      return;
-    }
-    String current = (String) options.get(name);
-    if(current == null) {
-      options.put(name, value);
-    } else {
-      int oldIndex = VERSIONS.indexOf(current);
-      int newIndex = VERSIONS.indexOf(value.trim());
-      if(newIndex > oldIndex) {
-        options.put(name, value);
-      }
-    }
-  }
-
-  /**
-   * @param projects a flat collection of {@link MavenProjectInfo} to import
-   * @param configuration a project import configuration
-   * @param monitor a progress monitor
-   */
-  public IStatus importProjects(Collection projects, ProjectImportConfiguration configuration, IProgressMonitor monitor) {
-    MultiStatus status = new MultiStatus(MavenPlugin.PLUGIN_ID, -1, "Maven Project Import", null);
-    
-    for(Iterator it = projects.iterator(); it.hasNext();) {
-      MavenProjectInfo projectInfo = (MavenProjectInfo) it.next();
-      monitor.subTask(projectInfo.getLabel());
-      try {
-        importProject(projectInfo, configuration, monitor);
-      } catch(CoreException ex) {
-        MavenPlugin.log(ex);
-        MavenPlugin.getDefault().getConsole().logError("Import error for " + projectInfo.getLabel());
-        
-        logStatus(status);
-        
-        status.add(ex.getStatus());
-      }
-    }
-
-    return status; 
-  }
-
-  private void logStatus(IStatus status) {
-    if(status.isMultiStatus()) {
-      IStatus[] children = status.getChildren();
-      for(int i = 0; i < children.length; i++ ) {
-        IStatus child = children[i];
-        if(!child.isOK()) {
-          logStatus(child);
-        }
-      }
-    } else {
-      MavenPlugin.getDefault().getConsole().logError("  " + status.getMessage());
-    }
-  }
-  
-  public IProject importProject(MavenProjectInfo projectInfo, ProjectImportConfiguration configuration, IProgressMonitor monitor)
-      throws CoreException {
-    File pomFile = projectInfo.getPomFile(); 
-    Model model = projectInfo.getModel();
-    if(model == null) {
-      model = modelManager.readMavenModel(pomFile);
-      projectInfo.setModel(model);
-    }
-    
-    String projectName = configuration.getProjectName(model);
-
-    monitor.subTask("Importing project " + projectName);
-    
-    IWorkspace workspace = ResourcesPlugin.getWorkspace();
-    IWorkspaceRoot root = workspace.getRoot();
-    IProject project = configuration.getProject(root, model);
-    if(project.exists()) {
-      console.logError("Project " + projectName + " already exists");
-      return null;
-    }
-
-    File projectDir = pomFile.getParentFile();
-
-    if(projectDir.equals(root.getLocation().toFile())) {
-      console.logError("Can't create project " + projectName + " at Workspace folder");
-      return null;
-    }
-
-    if(projectInfo.isNeedsRename()) {
-      File newProject = new File(projectDir.getParent(), projectName);
-      boolean renamed = projectDir.renameTo(newProject);
-      if(!renamed) {
-        throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, "Can't rename " + projectDir.getAbsolutePath(), null));
-      }
-      projectInfo.setPomFile(new File(newProject, MavenPlugin.POM_FILE_NAME));
-      projectDir = newProject;
-    }
-    
-    String projectParent = projectDir.getParentFile().getAbsolutePath();
-    if(projectParent.equals(root.getLocation().toFile().getAbsolutePath())) {
-      // rename dir in workspace to match expected project name
-      if(!projectDir.equals(root.getLocation().append(project.getName()).toFile())) {
-        File newProject = new File(projectDir.getParent(), projectName);
-        boolean renamed = projectDir.renameTo(newProject);
-        if(!renamed) {
-          throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, "Can't rename " + projectDir.getAbsolutePath(), null));
-        }
-        projectInfo.setPomFile(new File(newProject, MavenPlugin.POM_FILE_NAME));
-      }
-      project.create(monitor);
-    } else {
-      IProjectDescription description = workspace.newProjectDescription(projectName);
-      description.setLocation(new Path(projectDir.getAbsolutePath()));
-      project.create(description, monitor);
-    }
-
-    if(!project.isOpen()) {
-      project.open(monitor);
-    }
-
-    configureProject(project, configuration.getResolverConfiguration(), monitor);
-
-    return project;
-  }
-
-  public void configureProject(IProject project, ResolverConfiguration configuration, IProgressMonitor monitor)
-      throws CoreException {
-    enableMavenNature(project, configuration, monitor);
-    updateSourceFolders(project, configuration, runtimeManager.getGoalOnImport(), monitor);
   }
 
   public void mavenProjectChanged(MavenProjectChangedEvent[] events, IProgressMonitor monitor) {
@@ -1279,102 +571,6 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
 
   }
   
-  // project creation
-
-  /**
-   * Creates simple Maven project
-   * <p>
-   * The following steps are executed in the given order:
-   * <ul>
-   * <li>Creates the workspace project</li>
-   * <li>Creates the required folders</li>
-   * <li>Creates the POM</li>
-   * <li>Configures project</li>
-   * </ul>
-   * </p>
-   */
-  // XXX should use Maven plugin configurations instead of manually specifying folders
-  public void createSimpleProject(IProject project, IPath location, Model model, String[] directories,
-      ResolverConfiguration resolverConfiguration, IProgressMonitor monitor) throws CoreException {
-    String projectName = project.getName();
-    monitor.beginTask("Creating project " + projectName, 4);
-
-    monitor.subTask("Creating workspace project...");
-    IProjectDescription description = ResourcesPlugin.getWorkspace().newProjectDescription(projectName);
-    description.setLocation(location);
-    project.create(description, monitor);
-    project.open(monitor);
-    monitor.worked(1);
-
-    monitor.subTask("Creating the POM file...");
-    IFile pomFile = project.getFile(MavenPlugin.POM_FILE_NAME);    
-    modelManager.createMavenModel(pomFile, model);
-    monitor.worked(1);
-    
-    monitor.subTask("Creating project folders...");
-    for(int i = 0; i < directories.length; i++ ) {
-      Util.createFolder(project.getFolder(directories[i]));
-    }
-    monitor.worked(1);
-  
-    monitor.subTask("Configuring project...");
-    configureProject(project, resolverConfiguration, monitor);
-
-    monitor.worked(1);
-  }
-  
-  /**
-   * Creates project structure using Archetype and then imports created project
-   */
-  public void createArchetypeProject(IProject project, IPath location, Archetype archetype, String groupId,
-      String artifactId, String version, String javaPackage, ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException, InterruptedException {
-    monitor.beginTask("Creating project " + project.getName(), 2);
-  
-    monitor.subTask("Executing Archetype " + archetype.getGroupId() + ":" + archetype.getArtifactId());
-    if(location == null) {
-      // if the project should be created in the workspace, figure out the path
-      location = ResourcesPlugin.getWorkspace().getRoot().getLocation();
-    }
-
-    ArchetypeGenerationRequest request = new ArchetypeGenerationRequest() //
-        .setTransferListener(new TransferListenerAdapter(new NullProgressMonitor(), console, indexManager)) //
-        .setArchetypeGroupId(archetype.getGroupId()) //
-        .setArchetypeArtifactId(archetype.getArtifactId()) //
-        .setArchetypeVersion(archetype.getVersion()) //
-        .setArchetypeRepository(archetype.getRepository()) //
-        .setGroupId(groupId) //
-        .setArtifactId(artifactId) //
-        .setVersion(version) //
-        .setPackage(javaPackage) // the model does not have a package field
-        .setLocalRepository(embedderManager.getWorkspaceEmbedder().getLocalRepository()) //
-        .setOutputDirectory(location.toPortableString());
-    
-    ArchetypeGenerationResult result = embedderManager.getArchetyper().generateProjectFromArchetype(request);
-    Exception cause = result.getCause();
-    if(cause != null) {
-      String msg = "Unable to create project from archetype " + archetype.toString();
-      MavenPlugin.log(msg, cause);
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, 0, msg, cause));
-    }
-    monitor.worked(1);
-    
-    // XXX Archetyper don't allow to specify project folder
-    String projectFolder = location.append(artifactId).toFile().getAbsolutePath();
-    
-    LocalProjectScanner scanner = new LocalProjectScanner(projectFolder, true);
-    scanner.run(monitor);
-    // XXX handle scanner errors
-
-    Set projectSet = collectProjects(scanner.getProjects(), configuration.getResolverConfiguration().shouldIncludeModules());
-    
-    IStatus status = importProjects(projectSet, configuration, monitor);
-    if(!status.isOK()) {
-      console.logError("Projects imported with errors");
-    }
-
-    monitor.worked(1);
-  }
-
   public void updateClasspathContainer(IJavaProject project, IClasspathContainer containerSuggestion) throws CoreException {
     IFile pom = project.getProject().getFile(MavenPlugin.POM_FILE_NAME);
     MavenProjectFacade facade = projectManager.create(pom, false, null);
@@ -1458,43 +654,9 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     }
   }
 
-  /**
-   * Flatten hierarchical projects
-   *   
-   * @param projects a collection of {@link MavenProjectInfo}
-   * @param includeModules of true 
-   * 
-   * @return flattened collection of {@link MavenProjectInfo}
-   */
-  public Set collectProjects(Collection projects, boolean includeModules) {
-    Set projectSet = collectProjects(projects);
-    if(!includeModules) {
-      return projectSet;
-    }
-    
-    Set parentProjects = new HashSet();
-    for(Iterator it = projectSet.iterator(); it.hasNext();) {
-      MavenProjectInfo projectInfo = (MavenProjectInfo) it.next();
-      MavenProjectInfo parent = projectInfo.getParent();
-      if(parent==null || !projectSet.contains(parent)) {
-        parentProjects.add(projectInfo);
-      }
-    }
-    return parentProjects;
+  public static boolean isMaven2ClasspathContainer(IPath containerPath) {
+    return containerPath != null && containerPath.segmentCount() > 0
+        && MavenPlugin.CONTAINER_ID.equals(containerPath.segment(0));
   }
 
-  private Set collectProjects(Collection projects) {
-    return new LinkedHashSet() {
-      private static final long serialVersionUID = 1L;
-      public Set collectProjects(Collection projects) {
-        for(Iterator it = projects.iterator(); it.hasNext();) {
-          MavenProjectInfo projectInfo = (MavenProjectInfo) it.next();
-          add(projectInfo);
-          collectProjects(projectInfo.getProjects());
-        }
-        return this;
-      }
-    }.collectProjects(projects);
-  }
-  
 }

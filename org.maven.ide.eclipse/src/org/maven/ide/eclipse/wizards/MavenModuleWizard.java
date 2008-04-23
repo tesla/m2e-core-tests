@@ -13,6 +13,7 @@ import java.util.Arrays;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -178,6 +179,8 @@ public class MavenModuleWizard extends Wizard implements INewWizard {
 
     Job job;
 
+    final MavenPlugin plugin = MavenPlugin.getDefault();
+
     if(parentPage.isSimpleProject()) {
 
       final Model model = artifactPage.getModel();
@@ -185,29 +188,23 @@ public class MavenModuleWizard extends Wizard implements INewWizard {
 
       final String[] folders = artifactPage.getFolders();
 
-      job = new Job(Messages.getString("wizard.project.job.creatingProject", moduleName)) {
-        public IStatus run(IProgressMonitor monitor) {
-          try {
-            MavenPlugin plugin = MavenPlugin.getDefault();
-            
-            String projectName = configuration.getProjectName(model);
-            
-            IProject project = configuration.getProject(ResourcesPlugin.getWorkspace().getRoot(), model);
-            
-            // XXX respect parent's setting for separate projects for modules
-            // XXX should run update sources on parent instead of creating new module project
-            
-            plugin.getBuildpathManager().createSimpleProject(project, location.append(moduleName), model, folders,
-                configuration.getResolverConfiguration(), monitor);
-            
-            plugin.getMavenModelManager().addModule(parentPom, projectName);
-            
-            return Status.OK_STATUS;
-          } catch(CoreException e) {
-            return e.getStatus();
-          } finally {
-            monitor.done();
-          }
+
+      job = new WorkspaceJob(Messages.getString("wizard.project.job.creatingProject", moduleName)) {
+        public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
+
+          String projectName = configuration.getProjectName(model);
+
+          IProject project = configuration.getProject(ResourcesPlugin.getWorkspace().getRoot(), model);
+
+          // XXX respect parent's setting for separate projects for modules
+          // XXX should run update sources on parent instead of creating new module project
+
+          plugin.getProjectImportManager().createSimpleProject(project, location.append(moduleName), model, folders,
+              configuration.getResolverConfiguration(), monitor);
+
+          plugin.getMavenModelManager().addModule(parentPom, projectName);
+
+          return Status.OK_STATUS;
         }
       };
 
@@ -216,25 +213,16 @@ public class MavenModuleWizard extends Wizard implements INewWizard {
       final Model model = parametersPage.getModel();
       final Archetype archetype = archetypePage.getArchetype();
 
-      job = new Job(Messages.getString("wizard.project.job.creating", archetype.getArtifactId())) {
-        public IStatus run(IProgressMonitor monitor) {
-          try {
-            MavenPlugin plugin = MavenPlugin.getDefault();
-            plugin.getBuildpathManager().createArchetypeProject(project, location, archetype, model.getGroupId(),
-                model.getArtifactId(), model.getVersion(), model.getPackaging(), configuration, monitor);
-            plugin.getMavenModelManager().addModule(parentPom, moduleName);
-            return Status.OK_STATUS;
-          } catch(InterruptedException ex) {
-            return Status.OK_STATUS;
-          } catch(CoreException e) {
-            return e.getStatus();
-          } finally {
-            monitor.done();
-          }
+      job = new WorkspaceJob(Messages.getString("wizard.project.job.creating", archetype.getArtifactId())) {
+        public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
+          MavenPlugin plugin = MavenPlugin.getDefault();
+          plugin.getProjectImportManager().createArchetypeProject(project, location, archetype, model.getGroupId(),
+              model.getArtifactId(), model.getVersion(), model.getPackaging(), configuration, monitor);
+          plugin.getMavenModelManager().addModule(parentPom, moduleName);
+          return Status.OK_STATUS;
         }
       };
     }
-
     job.addJobChangeListener(new JobChangeAdapter() {
       public void done(IJobChangeEvent event) {
         final IStatus result = event.getResult();
@@ -249,6 +237,7 @@ public class MavenModuleWizard extends Wizard implements INewWizard {
         }
       }
     });
+    job.setRule(plugin.getProjectImportManager().getRule());
     job.schedule();
 
     return true;

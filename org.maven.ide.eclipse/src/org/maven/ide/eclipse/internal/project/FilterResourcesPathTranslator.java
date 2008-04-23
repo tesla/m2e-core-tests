@@ -22,7 +22,7 @@ import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.project.BuildPathManager;
 
 /**
- * Special implementation or PathTranslator that redirects filtered resources
+ * Special implementation of PathTranslator that redirects filtered resources
  * into target-eclipse/resources and target-eclipse/resources.
  */
 public class FilterResourcesPathTranslator extends DefaultPathTranslator {

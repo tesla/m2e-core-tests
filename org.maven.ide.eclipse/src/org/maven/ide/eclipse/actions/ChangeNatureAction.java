@@ -11,6 +11,7 @@ package org.maven.ide.eclipse.actions;
 import java.util.Iterator;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -24,9 +25,8 @@ import org.eclipse.ui.IWorkbenchPart;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
-import org.maven.ide.eclipse.project.BuildPathManager;
+import org.maven.ide.eclipse.project.IProjectImportManager;
 import org.maven.ide.eclipse.project.MavenProjectManager;
-import org.maven.ide.eclipse.project.MavenUpdateRequest;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 
 
@@ -107,7 +107,7 @@ public class ChangeNatureAction implements IObjectActionDelegate {
     
     new UpdateJob(project, updateSourceFolders, configuration, //
         plugin.getMavenRuntimeManager(), //
-        plugin.getBuildpathManager(), //
+        plugin.getProjectImportManager(), //
         projectManager).schedule();
   }
 
@@ -116,29 +116,33 @@ public class ChangeNatureAction implements IObjectActionDelegate {
     private final boolean updateSourceFolders;
     private final ResolverConfiguration configuration;
     private final MavenRuntimeManager runtimeManager;
-    private final BuildPathManager buildpathManager;
+    private final IProjectImportManager importManager;
     private final MavenProjectManager projectManager;
     
     public UpdateJob(IProject project, boolean updateSourceFolders, ResolverConfiguration configuration, //
-        MavenRuntimeManager runtimeManager, BuildPathManager buildpathManager, MavenProjectManager projectManager) {
+        MavenRuntimeManager runtimeManager, IProjectImportManager importManager, MavenProjectManager projectManager) {
       super("Updating " + project.getName() + " sources");
       this.project = project;
       this.updateSourceFolders = updateSourceFolders;
       this.configuration = configuration;
       this.runtimeManager = runtimeManager;
-      this.buildpathManager = buildpathManager;
+      this.importManager = importManager;
       this.projectManager = projectManager;
     }
     
     protected IStatus run(IProgressMonitor monitor) {
       if(updateSourceFolders) {
-        buildpathManager.updateSourceFolders(project, //
-            configuration, runtimeManager.getGoalOnUpdate(), monitor);
+        try {
+          importManager.updateSourceFolders(project, //
+              configuration, runtimeManager.getGoalOnUpdate(), monitor);
+        } catch(CoreException ex) {
+          return ex.getStatus();
+        }
       }
       
       boolean offline = runtimeManager.isOffline();
       boolean updateSnapshots = false;
-      projectManager.refresh(new MavenUpdateRequest(project, offline, updateSnapshots));
+      projectManager.refresh(project, offline, updateSnapshots);
       
       return Status.OK_STATUS;
     }

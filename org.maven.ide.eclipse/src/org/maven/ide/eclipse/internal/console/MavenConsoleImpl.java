@@ -19,6 +19,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleListener;
@@ -180,11 +181,13 @@ public class MavenConsoleImpl extends MessageConsole implements MavenConsole, IP
 //  }
 
   private void bringConsoleToFront() {
-    IConsoleManager manager = ConsolePlugin.getDefault().getConsoleManager();
-    if(!visible) {
-      manager.addConsoles(new IConsole[] {this});
+    if (PlatformUI.isWorkbenchRunning()) {
+      IConsoleManager manager = ConsolePlugin.getDefault().getConsoleManager();
+      if(!visible) {
+        manager.addConsoles(new IConsole[] {this});
+      }
+      manager.showConsoleView(this);
     }
-    manager.showConsoleView(this);
   }
 
   // Called when console is removed from the console view

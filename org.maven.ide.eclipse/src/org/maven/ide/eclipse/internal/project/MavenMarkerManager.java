@@ -173,7 +173,9 @@ public class MavenMarkerManager {
   }
 
   void deleteMarkers(IFile pom) throws CoreException {
-    pom.deleteMarkers(MavenPlugin.MARKER_ID, true, IResource.DEPTH_INFINITE);
+    if (pom != null && pom.exists()) {
+      pom.deleteMarkers(MavenPlugin.MARKER_ID, true, IResource.DEPTH_INFINITE);
+    }
   }
 
   private void addMissingArtifactMarkers(IFile pomFile, MavenProject mavenProject) {

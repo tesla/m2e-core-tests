@@ -13,8 +13,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -33,6 +31,7 @@ import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
@@ -72,7 +71,6 @@ import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
 import org.maven.ide.eclipse.project.IMavenProjectVisitor;
 import org.maven.ide.eclipse.project.MavenProjectChangedEvent;
 import org.maven.ide.eclipse.project.MavenProjectFacade;
-import org.maven.ide.eclipse.project.MavenUpdateRequest;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 
 /**
@@ -100,38 +98,24 @@ public class MavenProjectManagerImpl {
   private static final String P_FILTER_RESOURCES = "filterResources";
   private static final String P_RESOURCE_FILTER_GOALS = "resourceFilterGoals";
   private static final String P_ACTIVE_PROFILES = "activeProfiles";
-  
+
   private static final String VERSION = "1";
-  
-  /** 
-   * Maps ArtifactKey to full workspace IPath of the POM file that defines this artifact. 
-   */
-  final Map workspaceArtifacts = new HashMap();
 
   /**
-   * Map<ArtifactKey, Set<IPath>> 
-   * Maps ArtifactKey to Set of IPath of poms that depend on the artifact.
-   * This map only includes dependencies between different (eclipse) projects.
+   * Path of project metadata files, relative to the project. These
+   * files are used to determine if project dependencies need to be
+   * updated.
+   * 
+   * Note that path of pom.xml varies for nested projects and pom.xml
+   * are treated separately.
    */
-  private final Map workspaceDependencies = new HashMap();
+  public static final IPath[] METADATA_PATH = {
+    new Path(".project"),
+    new Path(".classpath"),
+    new Path(".settings/org.maven.ide.eclipse.prefs") // dirty hack!
+  };
 
-  /**
-   * Map<ArtifactKey, Set<IPath>> 
-   * Maps ArtifactKey to Set of IPath of poms that depend on the artifact.
-   * This map only includes dependencies within the same (eclipse) projects.
-   */
-  private final Map inprojectDependencies = new HashMap();
-
-  /**
-   * Maps parent ArtifactKey to Set of module poms IPath. This map only includes
-   * module defined in eclipse projects other than project that defines parent pom. 
-   */
-  private final Map workspaceModules = new HashMap();
-
-  /**
-   * Maps full pom IPath to MavenProjectFacade
-   */
-  private final Map workspacePoms = new HashMap();
+  private final WorkspaceState state;
 
   private final MavenConsole console;
   private final IndexManager indexManager;
@@ -140,13 +124,13 @@ public class MavenProjectManagerImpl {
 
   private final MavenMarkerManager markerManager;
   
-  private final Set projectChangeListeners = new LinkedHashSet();
-  private final Map projectChangeEvents = new LinkedHashMap();
+  private final Set/*<IMavenProjectChangedListener>*/ projectChangeListeners = new LinkedHashSet/*<IMavenProjectChangedListener>*/();
+  private final Map/*<IFile, MavenProjectChangedEvent>*/ projectChangeEvents = new LinkedHashMap/*<IFile, MavenProjectChangedEvent>*/();
 
-  private final Set downloadSourceListeners = new LinkedHashSet();
-  private final Map downloadSourceEvents = new LinkedHashMap();
+  private final Set/*<IDownloadSourceListener>*/ downloadSourceListeners = new LinkedHashSet/*<IDownloadSourceListener>*/();
+  private final Map/*<IProject, DownloadSourceEvent>*/ downloadSourceEvents = new LinkedHashMap/*<IProject, DownloadSourceEvent>*/();
 
-  private static final ThreadLocal context = new ThreadLocal();
+  private static final ThreadLocal/*<Context>*/ context = new ThreadLocal/*<Context>*/();
   
   static Context getContext() {
     return (Context) context.get();
@@ -159,6 +143,7 @@ public class MavenProjectManagerImpl {
     this.embedderManager = embedderManager;
     this.markerManager = new MavenMarkerManager();
     this.runtimeManager = runtimeManager;
+    this.state = new WorkspaceState(null);
   }
 
   /**
@@ -188,7 +173,7 @@ public class MavenProjectManagerImpl {
     }
 
     // MavenProjectFacade projectFacade = (MavenProjectFacade) workspacePoms.get(pom.getFullPath());
-    MavenProjectFacade projectFacade = getProjectFacade(pom);
+    MavenProjectFacade projectFacade = state.getProjectFacade(pom);
     if(projectFacade == null && load) {
       ResolverConfiguration configuration = readResolverConfiguration(pom.getProject());
 
@@ -300,10 +285,6 @@ public class MavenProjectManagerImpl {
     return project.getFile(MavenPlugin.POM_FILE_NAME);
   }
 
-  private MavenProjectFacade getProjectFacade(IFile pom) {
-    return (MavenProjectFacade) workspacePoms.get(pom.getFullPath());
-  }
-
   /**
    * Removes specified poms from the cache.
    * Adds dependent poms to pomSet but does not directly refresh dependent poms.
@@ -311,10 +292,14 @@ public class MavenProjectManagerImpl {
    * 
    * @return a {@link Set} of {@link IFile} affected poms
    */
-  public Set remove(Set poms) {
+  public Set/*<IFile>*/ remove(Set/*<IFile>*/ poms, boolean force) {
     Set pomSet = new LinkedHashSet();
     for (Iterator it = poms.iterator(); it.hasNext(); ) {
-      pomSet.addAll(remove((IFile) it.next()));
+      IFile pom = (IFile) it.next();
+      MavenProjectFacade facade = state.getProjectFacade(pom);
+      if (force || facade == null || facade.isStale()) {
+        pomSet.addAll(remove(pom));
+      }
     }
     return pomSet;
   }
@@ -326,18 +311,18 @@ public class MavenProjectManagerImpl {
    * 
    * @return a {@link Set} of {@link IFile} affected poms
    */
-  public Set remove(IFile pom) {
-    MavenProjectFacade facade = getProjectFacade(pom);
+  public Set/*<IFile>*/ remove(IFile pom) {
+    MavenProjectFacade facade = state.getProjectFacade(pom);
     MavenProject mavenProject = facade != null ? facade.getMavenProject() : null;
 
     if (mavenProject == null) {
       return Collections.EMPTY_SET;
     }
-    
+
     Set pomSet = new LinkedHashSet();
-    
-    pomSet.addAll(refreshDependents(pom, mavenProject, workspaceDependencies));
-    removeProject(pom, mavenProject);
+
+    pomSet.addAll(state.getDependents(pom, mavenProject, false));
+    state.removeProject(pom, mavenProject);
     removeFromIndex(mavenProject);
     addProjectChangeEvent(pom, MavenProjectChangedEvent.KIND_REMOVED, MavenProjectChangedEvent.FLAG_NONE, facade, null);
 
@@ -360,14 +345,15 @@ public class MavenProjectManagerImpl {
    * @param updateRequests a set of {@link MavenUpdateRequest}
    * @param monitor progress monitor
    */
-  public void refresh(Set updateRequests, IProgressMonitor monitor) throws CoreException, MavenEmbedderException, InterruptedException {
+  public void refresh(Set/*<MavenUpdateRequest>*/ updateRequests, IProgressMonitor monitor) throws CoreException, MavenEmbedderException, InterruptedException {
+System.err.println("REFRESH start"); long start = System.currentTimeMillis();
     MavenEmbedder embedder = embedderManager.createEmbedder(EmbedderFactory.createWorkspaceCustomizer());
     try {
       for(Iterator it = updateRequests.iterator(); it.hasNext();) {
         if(monitor.isCanceled()) {
           throw new InterruptedException();
         }
-        
+
         MavenUpdateRequest updateRequest = (MavenUpdateRequest) it.next();
         
         while(!updateRequest.isEmpty()) {
@@ -388,9 +374,18 @@ public class MavenProjectManagerImpl {
     }
     
     notifyProjectChangeListeners(monitor);
+System.err.println("REFRESH end " + (System.currentTimeMillis() - start));
+
   }
 
-  private void refresh(MavenEmbedder embedder, IFile pom, MavenUpdateRequest updateRequest, IProgressMonitor monitor) throws CoreException {
+  public void refresh(MavenEmbedder embedder, IFile pom, MavenUpdateRequest updateRequest, IProgressMonitor monitor) throws CoreException {
+    MavenProjectFacade oldFacade = state.getProjectFacade(pom);
+
+    if(!updateRequest.isForce(pom) && oldFacade != null && !oldFacade.isStale()) {
+      // skip refresh if not forced and up-to-date facade
+      return;
+    }
+
     markerManager.deleteMarkers(pom);
 
     ResolverConfiguration resolverConfiguration = readResolverConfiguration(pom.getProject());
@@ -412,14 +407,13 @@ public class MavenProjectManagerImpl {
       return;
     }
 
-    MavenProjectFacade oldFacade = getProjectFacade(pom);
     MavenProject oldMavenProject = oldFacade != null? oldFacade.getMavenProject() : null;
 
     boolean dependencyChanged = hasDependencyChange(oldMavenProject, mavenProject);
 
     // refresh modules
     if (resolverConfiguration.shouldIncludeModules()) {
-      updateRequest.addPomFiles(remove(getRemovedNestedModules(pom, oldMavenProject, mavenProject)));
+      updateRequest.addPomFiles(remove(getRemovedNestedModules(pom, oldMavenProject, mavenProject), true));
       updateRequest.addPomFiles(refreshNestedModules(pom, mavenProject));
     } else {
       updateRequest.addPomFiles(refreshWorkspaceModules(pom, oldMavenProject));
@@ -428,20 +422,16 @@ public class MavenProjectManagerImpl {
 
     // refresh dependents
     if (dependencyChanged) {
-      updateRequest.addPomFiles(refreshDependents(pom, oldMavenProject, workspaceDependencies));
-      updateRequest.addPomFiles(refreshDependents(pom, mavenProject, workspaceDependencies));
-      if (resolverConfiguration.shouldIncludeModules()) {
-        updateRequest.addPomFiles(refreshDependents(pom, oldMavenProject, inprojectDependencies));
-        updateRequest.addPomFiles(refreshDependents(pom, mavenProject, inprojectDependencies));
-      }
+      updateRequest.addPomFiles(state.getDependents(pom, oldMavenProject, resolverConfiguration.shouldIncludeModules()));
+      updateRequest.addPomFiles(state.getDependents(pom, mavenProject, resolverConfiguration.shouldIncludeModules()));
     }
 
     // cleanup old project and old dependencies
-    removeProject(pom, oldMavenProject);
+    state.removeProject(pom, oldMavenProject);
 
     // create new project and new dependencies
     MavenProjectFacade facade = new MavenProjectFacade(this, pom, mavenProject, resolverConfiguration);
-    addProject(pom, facade);
+    state.addProject(pom, facade);
     if (resolverConfiguration.shouldResolveWorkspaceProjects()) {
       addProjectDependencies(pom, mavenProject, true);
     }
@@ -450,9 +440,9 @@ public class MavenProjectManagerImpl {
     }
     MavenProject parentProject = mavenProject.getParent();
     if (parentProject != null) {
-      addWorkspaceModules(pom, mavenProject);
+      state.addWorkspaceModules(pom, mavenProject);
       if (resolverConfiguration.shouldResolveWorkspaceProjects()) {
-        addProjectDependency(pom, new ArtifactKey(mavenProject.getParentArtifact()), true);
+        state.addProjectDependency(pom, new ArtifactKey(mavenProject.getParentArtifact()), true);
       }
     }
 
@@ -474,17 +464,7 @@ public class MavenProjectManagerImpl {
     addToIndex(mavenProject);
   }
 
-  private void addWorkspaceModules(IFile pom, MavenProject mavenProject) {
-    ArtifactKey parentArtifactKey = new ArtifactKey(mavenProject.getParentArtifact());
-    Set children = (Set) workspaceModules.get(parentArtifactKey);
-    if (children == null) {
-      children = new HashSet();
-      workspaceModules.put(parentArtifactKey, children);
-    }
-    children.add(pom.getFullPath());
-  }
-
-  private Set refreshNestedModules(IFile pom, MavenProject mavenProject) {
+  private Set/*<IFile>*/ refreshNestedModules(IFile pom, MavenProject mavenProject) {
     if (mavenProject == null) {
       return Collections.EMPTY_SET;
     }
@@ -499,7 +479,7 @@ public class MavenProjectManagerImpl {
     return pomSet;
   }
 
-  private Set removeNestedModules(IFile pom, MavenProject mavenProject) {
+  private Set/*<IFile>*/ removeNestedModules(IFile pom, MavenProject mavenProject) {
     if (mavenProject == null) {
       return Collections.EMPTY_SET;
     }
@@ -518,7 +498,7 @@ public class MavenProjectManagerImpl {
    * Returns Set<IFile> of nested module POMs that are present in oldMavenProject
    * but not in mavenProjec.
    */
-  private Set getRemovedNestedModules(IFile pom, MavenProject oldMavenProject, MavenProject mavenProject) {
+  private Set/*<IFile>*/ getRemovedNestedModules(IFile pom, MavenProject oldMavenProject, MavenProject mavenProject) {
     List modules = mavenProject != null? mavenProject.getModules(): null;
 
     Set result = new LinkedHashSet();
@@ -542,14 +522,14 @@ public class MavenProjectManagerImpl {
     return pom.getParent().getFile(new Path(moduleName).append(MavenPlugin.POM_FILE_NAME));
   }
 
-  private Set refreshWorkspaceModules(IFile pom, MavenProject mavenProject) {
+  private Set/*<IFile>*/ refreshWorkspaceModules(IFile pom, MavenProject mavenProject) {
     if (mavenProject == null) {
       return Collections.EMPTY_SET;
     }
 
+    Set modules = state.removeWorkspaceModules(pom, mavenProject);
+
     Set pomSet = new LinkedHashSet();
-    ArtifactKey key = new ArtifactKey(mavenProject.getArtifact());
-    Set modules = (Set) workspaceModules.remove(key);
     if (modules != null) {
       IWorkspaceRoot root = pom.getWorkspace().getRoot();
       for (Iterator it = modules.iterator(); it.hasNext(); ) {
@@ -566,30 +546,8 @@ public class MavenProjectManagerImpl {
   private void addProjectDependencies(IFile pom, MavenProject mavenProject, boolean workspace) {
     for (Iterator it = mavenProject.getArtifacts().iterator(); it.hasNext(); ) {
       Artifact artifact = (Artifact) it.next();
-      addProjectDependency(pom, new ArtifactKey(artifact), workspace);
+      state.addProjectDependency(pom, new ArtifactKey(artifact), workspace);
     }
-  }
-
-  /**
-   * Configures dependency management for maven projects after the projects have beed added to
-   * the workspace (created, opened, renamed, groupId/artifactId/version changed).
-   *
-   * More specifically, this method will
-   * * Add the project to workspaceProjects map
-   * * Add the project to workspaceArtifacts map
-   * * Force refresh of all projects that depend on artifact of the project
-   * 
-   * Note that this method does not add the project to artifactDependents map
-   * 
-   * XXX I do not like the name of the method
-   */
-  private void addProject(IFile pom, MavenProjectFacade facade) {
-    // Add the project to workspaceProjects map
-    workspacePoms.put(pom.getFullPath(), facade);
-
-    // Add the project to workspaceArtifacts map
-    ArtifactKey artifactKey = new ArtifactKey(facade.getMavenProject().getArtifact());
-    workspaceArtifacts.put(artifactKey, pom.getFullPath());
   }
 
   private void addToIndex(MavenProject mavenProject) {
@@ -606,75 +564,6 @@ public class MavenProjectManagerImpl {
     }
   }
 
-  /**
-   * Performs necessary cleanup/refresh after maven project has been removed
-   * from the workspace (closed, deleted, renamed, groupId/artifactId/version changed or
-   * POM cannot be parsed any more). 
-   *
-   * More specifically, this method will
-   * * Remove the project from workspaceProjects map
-   * * Remove the project from workspaceArtifacts map
-   * * Remove the project from artifactDependents map
-   * * Force refresh of all projects that depend on the project
-   * 
-   * XXX I do not like the name of the method
-   */
-  private void removeProject(IFile pom, MavenProject mavenProject) {
-    // Remove the project from workspaceDependents and inprojectDependenys maps
-    removeDependencies(pom, true);
-    removeDependencies(pom, false);
-
-    // Remove the project from workspaceProjects map
-    workspacePoms.remove(pom.getFullPath());
-
-    // Remove the project from workspaceArtifacts map
-    if (mavenProject != null) {
-      ArtifactKey artifactKey = new ArtifactKey(mavenProject.getArtifact());
-      workspaceArtifacts.remove(artifactKey);
-    }
-  }
-
-  private void removeDependencies(IFile pom, boolean workspace) {
-    // XXX may not be fast enough
-    Map dependencies = workspace? workspaceDependencies: inprojectDependencies;
-    for (Iterator it = dependencies.values().iterator(); it.hasNext(); ) {
-      Set dependents = (Set) it.next();
-      dependents.remove(pom.getFullPath());
-    }
-  }
-
-  private Set refreshDependents(IFile pom, MavenProject mavenProject, Map dependencies) {
-    if (mavenProject == null) {
-      return Collections.EMPTY_SET;
-    }
-    
-    IWorkspaceRoot root = pom.getWorkspace().getRoot();
-    // Map dependencies = workspace ? workspaceDependencies : inprojectDependencies;
-    Set dependents = (Set) dependencies.get(new ArtifactKey(mavenProject.getArtifact()));
-    if (dependents == null) {
-      return Collections.EMPTY_SET;
-    }
-      
-    Set pomSet = new LinkedHashSet();
-    for(Iterator it = dependents.iterator(); it.hasNext();) {
-      IFile dependentPom = root.getFile((IPath) it.next());
-      if(dependentPom == null || dependentPom.equals(pom)) {
-        continue;
-      }
-      if(dependencies == workspaceDependencies || isSameProject(pom, dependentPom)) {
-        pomSet.add(dependentPom);
-      }
-    }
-    return pomSet;
-  }
-
-  static boolean isSameProject(IResource r1, IResource r2) {
-    if (r1 == null || r2 == null) {
-      return false;
-    }
-    return r1.getProject().equals(r2.getProject());
-  }
-  
   private void addProjectChangeEvent(IFile pom, int kind, int flags, MavenProjectFacade oldMavenProject, MavenProjectFacade mavenProject) {
     MavenProjectChangedEvent event = (MavenProjectChangedEvent) projectChangeEvents.get(pom);
     if (event == null) {
@@ -689,16 +578,6 @@ public class MavenProjectManagerImpl {
     projectChangeEvents.put(pom, event);
   }
 
-  private void addProjectDependency(IFile pom, ArtifactKey dependencyKey, boolean workspace) {
-    Map dependencies = workspace? workspaceDependencies: inprojectDependencies;
-    Set dependentProjects = (Set) dependencies.get(dependencyKey);
-    if (dependentProjects == null) {
-      dependentProjects = new HashSet();
-      dependencies.put(dependencyKey, dependentProjects);
-    }
-    dependentProjects.add(pom.getFullPath());
-  }
-
   private void addMissingProjectDependencies(IFile pom, MavenExecutionResult result) {
     // kinda hack, but this is the only way I can get info about missing parent artifacts
     List exceptions = result.getExceptions();
@@ -711,7 +590,7 @@ public class MavenProjectManagerImpl {
         if (t instanceof AbstractArtifactResolutionException) {
           AbstractArtifactResolutionException re = (AbstractArtifactResolutionException) t;
           ArtifactKey dependencyKey = new ArtifactKey(re.getGroupId(), re.getArtifactId(), re.getVersion(), null);
-          addProjectDependency(pom, dependencyKey, true);
+          state.addProjectDependency(pom, dependencyKey, true);
         }
       }
     }
@@ -774,7 +653,7 @@ public class MavenProjectManagerImpl {
     }
   }
 
-  private void notifyProjectChangeListeners(IProgressMonitor monitor) {
+  public void notifyProjectChangeListeners(IProgressMonitor monitor) {
     if (projectChangeEvents.size() > 0) {
       Collection eventCollection = this.projectChangeEvents.values();
       MavenProjectChangedEvent[] events = (MavenProjectChangedEvent[]) eventCollection.toArray(new MavenProjectChangedEvent[eventCollection.size()]);
@@ -790,14 +669,10 @@ public class MavenProjectManagerImpl {
   }
 
   public MavenProjectFacade getMavenProject(Artifact artifact) {
-    IPath path = (IPath) workspaceArtifacts.get(new ArtifactKey(artifact));
-    if (path == null) {
-      return null;
-    }
-    return (MavenProjectFacade) workspacePoms.get(path);
+    return state.getMavenProject(artifact);
   }
 
-  public void downloadSources(List downloadRequests, IProgressMonitor monitor) throws MavenEmbedderException, InterruptedException, CoreException {
+  public void downloadSources(List/*<DownloadSourceRequest>*/ downloadRequests, IProgressMonitor monitor) throws MavenEmbedderException, InterruptedException, CoreException {
     MavenEmbedder embedder = embedderManager.createEmbedder(EmbedderFactory.createWorkspaceCustomizer());
     try {
       for (Iterator requestIterator = downloadRequests.iterator(); requestIterator.hasNext(); ) {
@@ -1058,7 +933,7 @@ public class MavenProjectManagerImpl {
     }
   }
   
-  public MavenExecutionResult execute(MavenEmbedder embedder, IFile pomFile, ResolverConfiguration resolverConfiguration, final List goals, IProgressMonitor monitor) {
+  public MavenExecutionResult execute(MavenEmbedder embedder, IFile pomFile, ResolverConfiguration resolverConfiguration, final List/*<String>*/ goals, IProgressMonitor monitor) {
     return execute(embedder, pomFile, resolverConfiguration, new MavenRunnable() {
       public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request) {
         request.setGoals(goals);
@@ -1077,11 +952,11 @@ public class MavenProjectManagerImpl {
       }, monitor);
   }
 
-  private interface MavenRunnable {
+  interface MavenRunnable {
     public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request);
   }
 
-  private MavenExecutionResult execute(MavenEmbedder embedder, IFile pomFile, ResolverConfiguration resolverConfiguration, MavenRunnable runnable, IProgressMonitor monitor) {
+  MavenExecutionResult execute(MavenEmbedder embedder, IFile pomFile, ResolverConfiguration resolverConfiguration, MavenRunnable runnable, IProgressMonitor monitor) {
     File pom = pomFile.getLocation().toFile();
 
     MavenExecutionRequest request = embedderManager.createRequest(embedder);
@@ -1093,9 +968,10 @@ public class MavenProjectManagerImpl {
     request.setRecursive(false);
     request.setUseReactor(false);
 
-    context.set(new Context(this, resolverConfiguration, pomFile));
+    context.set(new Context(this.state, resolverConfiguration, pomFile));
     try {
-      return runnable.execute(embedder, request);
+      MavenExecutionResult result = runnable.execute(embedder, request);
+      return result;
     } finally {
       context.set(null);
     }
@@ -1148,21 +1024,29 @@ public class MavenProjectManagerImpl {
    * Context
    */
   static class Context {
-    final MavenProjectManagerImpl manager;
+    final WorkspaceState state;
 
     final ResolverConfiguration resolverConfiguration;
 
     final IFile pom;
 
-    Context(MavenProjectManagerImpl manager, ResolverConfiguration resolverConfiguration, IFile pom) {
-      this.manager = manager;
+    Context(WorkspaceState state, ResolverConfiguration resolverConfiguration, IFile pom) {
+      this.state = state;
       this.resolverConfiguration = resolverConfiguration;
       this.pom = pom;
     }
   }
 
   public MavenProjectFacade[] getProjects() {
-    return (MavenProjectFacade[]) workspacePoms.values().toArray(new MavenProjectFacade[workspacePoms.size()]);
+    return state.getProjects();
   }
-  
+
+  public boolean setResolverConfiguration(IProject project, ResolverConfiguration configuration) {
+    MavenProjectFacade projectFacade = create(project, new NullProgressMonitor());
+    if(projectFacade!=null) {
+      projectFacade.setResolverConfiguration(configuration);
+    }
+    return saveResolverConfiguration(project, configuration);
+  }
+
 }

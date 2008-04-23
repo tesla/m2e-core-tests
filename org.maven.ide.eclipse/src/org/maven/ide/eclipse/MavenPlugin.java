@@ -68,9 +68,10 @@ import org.maven.ide.eclipse.internal.launch.WorkspaceStateWriter;
 import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerImpl;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerRefreshJob;
+import org.maven.ide.eclipse.internal.project.ProjectImportManager;
 import org.maven.ide.eclipse.project.BuildPathManager;
+import org.maven.ide.eclipse.project.IProjectImportManager;
 import org.maven.ide.eclipse.project.MavenProjectManager;
-import org.maven.ide.eclipse.project.MavenUpdateRequest;
 
 
 /**
@@ -141,6 +142,8 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   private MavenProjectManager projectManager;
 
   private MavenRuntimeManager runtimeManager;
+  
+  private ProjectImportManager importManager;
 
   private MavenProjectManagerRefreshJob mavenBackgroundJob;
 
@@ -207,8 +210,8 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
     this.projectManager = new MavenProjectManager(managerImpl, indexManager, mavenBackgroundJob);
     this.projectManager.addMavenProjectChangedListener(new WorkspaceStateWriter());
-    this.projectManager.refresh(new MavenUpdateRequest(workspace.getRoot().getProjects(), //
-        true /*offline*/, false /* updateSnapshots */));
+    this.projectManager.refresh(workspace.getRoot().getProjects(), //
+        true /*offline*/, false /* updateSnapshots */);
 
     this.buildpathManager = new BuildPathManager(embedderManager, console, projectManager, indexManager, modelManager,
         runtimeManager);
@@ -216,6 +219,10 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
     projectManager.addMavenProjectChangedListener(this.buildpathManager);
     projectManager.addDownloadSourceListener(this.buildpathManager);
+
+    this.importManager = new ProjectImportManager(modelManager, console, 
+        runtimeManager, managerImpl, 
+        indexManager, embedderManager);
 
     this.launchConfigurationListener = new MavenLaunchConfigurationListener();
     DebugPlugin.getDefault().getLaunchManager().addLaunchConfigurationListener(launchConfigurationListener);
@@ -302,6 +309,8 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     workspace.removeResourceChangeListener(this.buildpathManager);
 
     this.embedderManager.shutdown();
+
+    this.importManager = null;
 
     if(this.console != null) {
       this.console.shutdown();
@@ -509,4 +518,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     }
   }
 
+  public IProjectImportManager getProjectImportManager() {
+    return importManager;
+  }
 }

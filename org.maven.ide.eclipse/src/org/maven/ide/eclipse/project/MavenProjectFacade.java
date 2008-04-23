@@ -14,7 +14,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -49,12 +48,15 @@ public class MavenProjectFacade {
 
   private ResolverConfiguration resolverConfiguration;
 
+  private final long[] timestamp = new long[MavenProjectManagerImpl.METADATA_PATH.length + 1];
+
   public MavenProjectFacade(MavenProjectManagerImpl manager, IFile pom, MavenProject mavenProject,
       ResolverConfiguration resolverConfiguration) {
     this.manager = manager;
     this.pom = pom;
     this.mavenProject = mavenProject;
     this.resolverConfiguration = resolverConfiguration;
+    updateTimestamp();
   }
 
   /**
@@ -255,6 +257,31 @@ public class MavenProjectFacade {
 
   public void setResolverConfiguration(ResolverConfiguration configuration) {
     resolverConfiguration = configuration;
+  }
+
+  /**
+   * @return true if maven project needs to be re-read from disk  
+   */
+  public boolean isStale() {
+    IPath[] metadata = MavenProjectManagerImpl.METADATA_PATH;
+    IProject project = getProject();
+    for (int i = 0; i < metadata.length; i++) {
+      IFile file = project.getFile(metadata[i]);
+      if (timestamp[i] != file.getLocalTimeStamp()) {
+        return true;
+      }
+    }
+    return timestamp[timestamp.length - 1] != pom.getLocalTimeStamp();
+  }
+
+  private void updateTimestamp() {
+    IPath[] metadata = MavenProjectManagerImpl.METADATA_PATH;
+    IProject project = getProject();
+    for (int i = 0; i < metadata.length; i++) {
+      IFile file = project.getFile(metadata[i]);
+      timestamp[i] = file.getLocalTimeStamp(); 
+    }
+    timestamp[timestamp.length - 1] = pom.getLocalTimeStamp();
   }
 
 }

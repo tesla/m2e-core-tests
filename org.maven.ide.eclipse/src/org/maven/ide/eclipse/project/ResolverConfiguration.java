@@ -19,7 +19,7 @@ import java.util.List;
 public class ResolverConfiguration {
 
   public static final String DEFAULT_FILTERING_GOALS = "process-resources resources:testResources";
-  
+
   private boolean includeModules = false;
   private boolean resolveWorkspaceProjects = true;
   private String activeProfiles = "";

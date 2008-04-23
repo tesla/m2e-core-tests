@@ -6,8 +6,9 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.project;
+package org.maven.ide.eclipse.internal.project;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -25,11 +26,17 @@ import org.maven.ide.eclipse.MavenPlugin;
 public class MavenUpdateRequest {
   private boolean offline = false;
   private boolean updateSnapshots = false;
+  private boolean force = true;
   
   /**
    * Set of {@link IFile}
    */
   private final Set pomFiles = new LinkedHashSet();
+
+  /**
+   * Secondary poms always require force refresh
+   */
+  private final Set secondaryPomFiles = new HashSet();
 
   public MavenUpdateRequest(boolean offline, boolean updateSnapshots) {
     this.offline = offline;
@@ -59,6 +66,7 @@ public class MavenUpdateRequest {
 
   public void addPomFiles(Set pomFiles) {
     this.pomFiles.addAll(pomFiles);
+    this.secondaryPomFiles.addAll(pomFiles);
   }
 
   public void addPomFile(IFile pomFile) {
@@ -82,6 +90,17 @@ public class MavenUpdateRequest {
 
   public boolean isEmpty() {
     return this.pomFiles.isEmpty();
+  }
+
+  public boolean isForce() {
+    return force;
+  }
+  public void setForce(boolean force) {
+    this.force = force;
+  }
+
+  public boolean isForce(IFile pomFile) {
+    return secondaryPomFiles.contains(pomFile) || force;
   }
 
   public IFile pop() {

@@ -24,15 +24,14 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
 
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.project.MavenUpdateRequest;
 
-
-public class MavenProjectManagerRefreshJob extends Job implements IResourceChangeListener {
+public class MavenProjectManagerRefreshJob extends Job implements IResourceChangeListener, IPreferenceChangeListener {
 
   private final MavenProjectManagerImpl manager;
 
@@ -46,6 +45,7 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
   public MavenProjectManagerRefreshJob(MavenProjectManagerImpl manager) {
     super("Updating Maven Dependencies");
     this.manager = manager;
+    setRule(new SchedulingRule(true));
   }
   
   public void refresh(MavenUpdateRequest updateRequest) {
@@ -128,11 +128,11 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
     boolean updateSnapshots = false;
 
     int type = event.getType();
-    
+
     if(IResourceChangeEvent.PRE_CLOSE == type || IResourceChangeEvent.PRE_DELETE == type) {
       queue(refreshQueue, new RemoveCommand(new MavenUpdateRequest((IProject) event.getResource(), //
           offline, updateSnapshots)));
-      
+
     } else {
       // if (IResourceChangeEvent.POST_CHANGE == type)
       IResourceDelta delta = event.getDelta(); // workspace delta
@@ -149,11 +149,15 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
       
       if(!removeProjects.isEmpty()) {
         IProject[] projects = (IProject[]) removeProjects.toArray(new IProject[removeProjects.size()]);
-        queue(refreshQueue, new RemoveCommand(new MavenUpdateRequest(projects, offline, updateSnapshots)));
+        MavenUpdateRequest updateRequest = new MavenUpdateRequest(projects, offline, updateSnapshots);
+        updateRequest.setForce(false);
+        queue(refreshQueue, new RemoveCommand(updateRequest));
       }
       if(!refreshProjects.isEmpty()) {
         IProject[] projects = (IProject[]) refreshProjects.toArray(new IProject[refreshProjects.size()]);
-        queue(refreshQueue, new RefreshCommand(new MavenUpdateRequest(projects, offline, updateSnapshots)));
+        MavenUpdateRequest updateRequest = new MavenUpdateRequest(projects, offline, updateSnapshots);
+        updateRequest.setForce(false);
+        queue(refreshQueue, new RefreshCommand(updateRequest));
       }
     }
 
@@ -167,35 +171,31 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
   private void projectChanged(IResourceDelta delta, Set removeProjects, final Set refreshProjects)
       throws CoreException {
     final IProject project = (IProject) delta.getResource();
-    
-    // hasNature seem to report *before* state here
-    // XXX OPEN is not delta.getKind(), it is delta.getFlags()
-    if(IResourceDelta.OPEN == delta.getKind()) {
-      // IResourceDelta.CHANGED is coming shortly, don't need to refresh twice
-      return;
+
+    // refresh projects if metadata changes
+    IPath[] metadata = MavenProjectManagerImpl.METADATA_PATH;
+    for (int i = 0; i < metadata.length; i++) {
+      if (delta.findMember(metadata[i]) != null) {
+        removeProjects.add(project);
+        return;
+      }
     }
-    
-    if(delta.findMember(new Path(".project")) != null || delta.findMember(new Path(".classpath")) != null) {
-      // let's play safe here, and force refresh of the maven project cache
-      removeProjects.add(project);
-      
-    } else {
-      delta.accept(new IResourceDeltaVisitor() {
-        public boolean visit(IResourceDelta delta) {
-          IResource resource = delta.getResource();
-          if(resource instanceof IFile && MavenPlugin.POM_FILE_NAME.equals(resource.getName())) {
-            // XXX ignore output folders
-            if(delta.getKind() == IResourceDelta.REMOVED || (delta.getFlags() & DELTA_FLAGS) != 0) {
-              // XXX check for interesting resources
-              refreshProjects.add(project);
-            }
+
+    delta.accept(new IResourceDeltaVisitor() {
+      public boolean visit(IResourceDelta delta) {
+        IResource resource = delta.getResource();
+        if(resource instanceof IFile && MavenPlugin.POM_FILE_NAME.equals(resource.getName())) {
+          // XXX ignore output folders
+          if(delta.getKind() == IResourceDelta.REMOVED || (delta.getFlags() & DELTA_FLAGS) != 0) {
+            // XXX check for interesting resources
+            refreshProjects.add(project);
           }
-          return true;
         }
-      });
-    }
+        return true;
+      }
+    });
   }
-  
+
   private void queue(List queue, Command command) {
     synchronized(queue) {
       queue.add(command);
@@ -206,10 +206,6 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
 
     public final MavenProjectManagerImpl manager;
     
-    public final Set onlinePoms = new LinkedHashSet();
-
-    public final Set offlinePoms = new LinkedHashSet();
-
     public final List downloadSources = new ArrayList();
 
     public int sourcesCount = 0;
@@ -242,7 +238,7 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
     }
 
     void execute(CommandContext context, IProgressMonitor monitor) {
-      updateRequest.addPomFiles(context.manager.remove(updateRequest.getPomFiles()));
+      updateRequest.addPomFiles(context.manager.remove(updateRequest.getPomFiles(), updateRequest.isForce()));
       context.updateRequests.add(updateRequest);
     }
 
@@ -291,6 +287,16 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
 
     public String toString() {
       return "DOWNLOADSOURCES " + project.getName() + " " + path;
+    }
+  }
+
+  public void preferenceChange(PreferenceChangeEvent event) {
+    // XXX should respect the global settings
+    boolean offline = false;  
+    boolean updateSnapshots = false;
+
+    if (event.getSource() instanceof IProject) {
+      queue(refreshQueue, new RemoveCommand(new MavenUpdateRequest(new IProject[] {(IProject) event.getSource()}, offline, updateSnapshots)));
     }
   }
 }

@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPart;
+
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.internal.launch.MavenRuntimeClasspathProvider;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
@@ -119,7 +120,7 @@ public class EnableNatureAction implements IObjectActionDelegate, IExecutableExt
       configuration.setUseMavenOutputFolders(useMavenOutputFolders);
       configuration.setActiveProfiles("");
       
-      plugin.getBuildpathManager().enableMavenNature(project, //
+      plugin.getProjectImportManager().enableMavenNature(project, //
           configuration, //
           new NullProgressMonitor());
       

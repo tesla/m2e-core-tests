@@ -22,7 +22,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerImpl;
-import org.maven.ide.eclipse.project.MavenUpdateRequest;
+import org.maven.ide.eclipse.internal.project.MavenUpdateRequest;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 
 

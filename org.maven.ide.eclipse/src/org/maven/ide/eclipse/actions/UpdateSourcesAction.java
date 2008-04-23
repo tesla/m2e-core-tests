@@ -11,6 +11,7 @@ package org.maven.ide.eclipse.actions;
 import java.util.Iterator;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -55,11 +56,15 @@ public class UpdateSourcesAction implements IObjectActionDelegate {
             MavenPlugin plugin = MavenPlugin.getDefault();
             MavenProjectFacade projectFacade = plugin.getMavenProjectManager().create(p, monitor);
             if(projectFacade != null) {
-              plugin.getBuildpathManager().updateSourceFolders(p, //
-                  projectFacade.getResolverConfiguration(), //
-                  plugin.getMavenRuntimeManager().getGoalOnUpdate(), monitor);
+              try {
+                plugin.getProjectImportManager().updateSourceFolders(p, //
+                    projectFacade.getResolverConfiguration(), //
+                    plugin.getMavenRuntimeManager().getGoalOnUpdate(), monitor);
+              } catch(CoreException ex) {
+                return ex.getStatus();
+              }
             }
-            
+
             return Status.OK_STATUS;
           }
         }.schedule();

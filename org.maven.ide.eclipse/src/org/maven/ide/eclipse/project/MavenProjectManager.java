@@ -25,6 +25,7 @@ import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerImpl;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerRefreshJob;
+import org.maven.ide.eclipse.internal.project.MavenUpdateRequest;
 
 
 /**
@@ -47,8 +48,11 @@ public class MavenProjectManager {
 
   // Maven projects    
 
-  public void refresh(MavenUpdateRequest updateRequest) {
-    mavenBackgroundJob.refresh(updateRequest);
+  public void refresh(IProject[] projects, boolean offline, boolean updateSnapshots) {
+    mavenBackgroundJob.refresh(new MavenUpdateRequest(projects, offline, updateSnapshots));
+  }
+  public void refresh(IProject project, boolean offline, boolean updateSnapshots) {
+    mavenBackgroundJob.refresh(new MavenUpdateRequest(project, offline, updateSnapshots));
   }
 
   public void addMavenProjectChangedListener(IMavenProjectChangedListener listener) {
@@ -85,11 +89,7 @@ public class MavenProjectManager {
   }
 
   public boolean setResolverConfiguration(IProject project, ResolverConfiguration configuration) {
-    MavenProjectFacade projectFacade = create(project, new NullProgressMonitor());
-    if(projectFacade!=null) {
-      projectFacade.setResolverConfiguration(configuration);
-    }
-    return manager.saveResolverConfiguration(project, configuration);
+    return manager.setResolverConfiguration(project, configuration);
   }
   
   // Downloading sources

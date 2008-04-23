@@ -57,7 +57,7 @@ public class EclipseArtifactResolver extends DefaultArtifactResolver {
 
     // check in the workspace, note that workspace artifacts never have classifiers
     ArtifactKey key = new ArtifactKey(artifact.getGroupId(), artifact.getArtifactId(), artifact.getBaseVersion(), null); 
-    IPath pomPath = (IPath) context.manager.workspaceArtifacts.get(key);
+    IPath pomPath = context.state.getWorkspaceArtifact(key);
     if(pomPath == null) {
       return false;
     }
@@ -74,7 +74,7 @@ public class EclipseArtifactResolver extends DefaultArtifactResolver {
 //    }
 
     if(context.resolverConfiguration.shouldResolveWorkspaceProjects()
-        || (context.resolverConfiguration.shouldIncludeModules() && MavenProjectManagerImpl.isSameProject(context.pom, pom))) {
+        || (context.resolverConfiguration.shouldIncludeModules() && WorkspaceState.isSameProject(context.pom, pom))) {
       artifact.setFile(pom.getLocation().toFile());
       artifact.setResolved(true);
 

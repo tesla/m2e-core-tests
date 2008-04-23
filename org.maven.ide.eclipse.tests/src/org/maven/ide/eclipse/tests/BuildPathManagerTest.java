@@ -15,6 +15,7 @@ import org.apache.maven.model.Model;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -32,8 +33,9 @@ import org.eclipse.jdt.core.JavaCore;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.index.IndexInfo;
 import org.maven.ide.eclipse.index.IndexManager;
+import org.maven.ide.eclipse.internal.project.MavenUpdateRequest;
 import org.maven.ide.eclipse.project.BuildPathManager;
-import org.maven.ide.eclipse.project.MavenUpdateRequest;
+import org.maven.ide.eclipse.project.IProjectImportManager;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 
@@ -51,13 +53,13 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     final IProject project2 = createProject("MNGECLIPSE-248child", "projects/MNGECLIPSE-248child/pom.xml");
 
     NullProgressMonitor monitor = new NullProgressMonitor();
-    BuildPathManager buildpathManager = MavenPlugin.getDefault().getBuildpathManager();
+    IProjectImportManager importManager = MavenPlugin.getDefault().getProjectImportManager();
 
     ResolverConfiguration configuration = new ResolverConfiguration();
-    buildpathManager.enableMavenNature(project1, configuration, monitor);
+    importManager.enableMavenNature(project1, configuration, monitor);
 //    buildpathManager.updateSourceFolders(project1, monitor);
 
-    buildpathManager.enableMavenNature(project2, configuration, monitor);
+    importManager.enableMavenNature(project2, configuration, monitor);
 //    buildpathManager.updateSourceFolders(project2, monitor);
 
 //    waitForJob("Initializing " + project1.getProject().getName());
@@ -95,7 +97,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     final IProject project2 = createProject("MNGECLIPSE-248child", "projects/MNGECLIPSE-248child/pom.xml");
 
     NullProgressMonitor monitor = new NullProgressMonitor();
-    BuildPathManager buildpathManager = MavenPlugin.getDefault().getBuildpathManager();
+    IProjectImportManager importManager = MavenPlugin.getDefault().getProjectImportManager();
 
     ResolverConfiguration configuration = new ResolverConfiguration();
     configuration.setIncludeModules(false);
@@ -104,8 +106,8 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     configuration.setUseMavenOutputFolders(false);
     configuration.setActiveProfiles("");
     
-    buildpathManager.enableMavenNature(project1, configuration, monitor);
-    buildpathManager.enableMavenNature(project2, configuration, monitor);
+    importManager.enableMavenNature(project1, configuration, monitor);
+    importManager.enableMavenNature(project2, configuration, monitor);
 //    buildpathManager.updateSourceFolders(project1, monitor);
 //    buildpathManager.updateSourceFolders(project2, monitor);
 
@@ -133,17 +135,19 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     deleteProject("MNGECLIPSE-20-web");
 
     ResolverConfiguration configuration = new ResolverConfiguration();
-    IProject project1 = importProject("projects/MNGECLIPSE-20/pom.xml", configuration);
-    IProject project2 = importProject("projects/MNGECLIPSE-20/type/pom.xml", configuration);
-    IProject project3 = importProject("projects/MNGECLIPSE-20/app/pom.xml", configuration);
-    IProject project4 = importProject("projects/MNGECLIPSE-20/web/pom.xml", configuration);
-    IProject project5 = importProject("projects/MNGECLIPSE-20/ejb/pom.xml", configuration);
-    IProject project6 = importProject("projects/MNGECLIPSE-20/ear/pom.xml", configuration);
+    IProject[] projects = importProjects(new String[] {
+        "projects/MNGECLIPSE-20/pom.xml", 
+        "projects/MNGECLIPSE-20/type/pom.xml",
+        "projects/MNGECLIPSE-20/app/pom.xml",
+        "projects/MNGECLIPSE-20/web/pom.xml", 
+        "projects/MNGECLIPSE-20/ejb/pom.xml", 
+        "projects/MNGECLIPSE-20/ear/pom.xml",
+    }, configuration);
 
     waitForJobsToComplete();
     
     {
-      IJavaProject javaProject = JavaCore.create(project1);
+      IJavaProject javaProject = JavaCore.create(projects[0]);
       IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
           .getClasspathEntries();
       assertEquals(0, classpathEntries.length);
@@ -153,12 +157,12 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", rawClasspath[0].getPath().toString());
       assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[1].getPath().toString());
 
-      IMarker[] markers = project1.findMarkers(null, true, IResource.DEPTH_INFINITE);
+      IMarker[] markers = projects[0].findMarkers(null, true, IResource.DEPTH_INFINITE);
       assertEquals(toString(markers), 0, markers.length);
     }
 
     {
-      IJavaProject javaProject = JavaCore.create(project2);
+      IJavaProject javaProject = JavaCore.create(projects[1]);
       IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
           .getClasspathEntries();
       assertEquals(0, classpathEntries.length);
@@ -169,12 +173,12 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", rawClasspath[1].getPath().toString());
       assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[2].getPath().toString());
 
-      IMarker[] markers = project2.findMarkers(null, true, IResource.DEPTH_INFINITE);
+      IMarker[] markers = projects[1].findMarkers(null, true, IResource.DEPTH_INFINITE);
       assertEquals(toString(markers), 0, markers.length);
     }
 
     {
-      IJavaProject javaProject = JavaCore.create(project3);
+      IJavaProject javaProject = JavaCore.create(projects[2]);
       IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
           .getClasspathEntries();
       assertEquals(3, classpathEntries.length);
@@ -188,12 +192,12 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", rawClasspath[1].getPath().toString());
       assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[2].getPath().toString());
 
-      IMarker[] markers = project3.findMarkers(null, true, IResource.DEPTH_INFINITE);
+      IMarker[] markers = projects[2].findMarkers(null, true, IResource.DEPTH_INFINITE);
       assertEquals(toString(markers), 0, markers.length);
     }
 
     {
-      IJavaProject javaProject = JavaCore.create(project4);
+      IJavaProject javaProject = JavaCore.create(projects[3]);
       IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
           .getClasspathEntries();
       assertEquals(3, classpathEntries.length);
@@ -207,12 +211,12 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", rawClasspath[1].getPath().toString());
       assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[2].getPath().toString());
 
-      IMarker[] markers = project4.findMarkers(null, true, IResource.DEPTH_INFINITE);
+      IMarker[] markers = projects[3].findMarkers(null, true, IResource.DEPTH_INFINITE);
       assertEquals(toString(markers), 0, markers.length);
     }
 
     {
-      IJavaProject javaProject = JavaCore.create(project5);
+      IJavaProject javaProject = JavaCore.create(projects[4]);
       IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
           .getClasspathEntries();
       assertEquals(3, classpathEntries.length);
@@ -227,12 +231,12 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", rawClasspath[2].getPath().toString());
       assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[3].getPath().toString());
 
-      IMarker[] markers = project5.findMarkers(null, true, IResource.DEPTH_INFINITE);
+      IMarker[] markers = projects[4].findMarkers(null, true, IResource.DEPTH_INFINITE);
       assertEquals(toString(markers), 0, markers.length);
     }
 
     {
-      IJavaProject javaProject = JavaCore.create(project6);
+      IJavaProject javaProject = JavaCore.create(projects[5]);
       IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
           .getClasspathEntries();
       assertEquals(4, classpathEntries.length);
@@ -246,7 +250,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", rawClasspath[0].getPath().toString());
       assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[1].getPath().toString());
 
-      IMarker[] markers = project6.findMarkers(null, true, IResource.DEPTH_INFINITE);
+      IMarker[] markers = projects[5].findMarkers(null, true, IResource.DEPTH_INFINITE);
       assertEquals(toString(markers), 0, markers.length);
     }
   }
@@ -266,17 +270,17 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     configuration.setUseMavenOutputFolders(false);
     configuration.setActiveProfiles("");
     
-    IProject project1 = importProject("projects/MNGECLIPSE-20/pom.xml", configuration);
-    IProject project2 = importProject("projects/MNGECLIPSE-20/type/pom.xml", configuration);
-    IProject project3 = importProject("projects/MNGECLIPSE-20/app/pom.xml", configuration);
-    IProject project4 = importProject("projects/MNGECLIPSE-20/web/pom.xml", configuration);
-    IProject project5 = importProject("projects/MNGECLIPSE-20/ejb/pom.xml", configuration);
-    IProject project6 = importProject("projects/MNGECLIPSE-20/ear/pom.xml", configuration);
+    IProject[] projects = importProjects(new String[] {"projects/MNGECLIPSE-20/pom.xml", 
+        "projects/MNGECLIPSE-20/type/pom.xml", 
+        "projects/MNGECLIPSE-20/app/pom.xml", 
+        "projects/MNGECLIPSE-20/web/pom.xml", 
+        "projects/MNGECLIPSE-20/ejb/pom.xml", 
+        "projects/MNGECLIPSE-20/ear/pom.xml"}, configuration);
 
     waitForJobsToComplete();
     
     {
-      IJavaProject javaProject = JavaCore.create(project1);
+      IJavaProject javaProject = JavaCore.create(projects[0]);
       IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
           .getClasspathEntries();
       assertEquals(0, classpathEntries.length);
@@ -286,12 +290,12 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", rawClasspath[0].getPath().toString());
       assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[1].getPath().toString());
 
-      IMarker[] markers = project1.findMarkers(null, true, IResource.DEPTH_INFINITE);
+      IMarker[] markers = projects[0].findMarkers(null, true, IResource.DEPTH_INFINITE);
       assertEquals(toString(markers), 0, markers.length);
     }
 
     {
-      IJavaProject javaProject = JavaCore.create(project2);
+      IJavaProject javaProject = JavaCore.create(projects[1]);
       IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
           .getClasspathEntries();
       assertEquals(0, classpathEntries.length);
@@ -302,12 +306,12 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", rawClasspath[1].getPath().toString());
       assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[2].getPath().toString());
 
-      IMarker[] markers = project2.findMarkers(null, true, IResource.DEPTH_INFINITE);
+      IMarker[] markers = projects[1].findMarkers(null, true, IResource.DEPTH_INFINITE);
       assertEquals(toString(markers), 0, markers.length);
     }
 
     {
-      IJavaProject javaProject = JavaCore.create(project3);
+      IJavaProject javaProject = JavaCore.create(projects[2]);
       IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
           .getClasspathEntries();
       assertEquals(3, classpathEntries.length);
@@ -321,13 +325,13 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", rawClasspath[1].getPath().toString());
       assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[2].getPath().toString());
 
-      IMarker[] markers = project3.findMarkers(null, true, IResource.DEPTH_INFINITE);
+      IMarker[] markers = projects[2].findMarkers(null, true, IResource.DEPTH_INFINITE);
       assertEquals(toString(markers), 3, markers.length);
     }
 
     {
-      project4.build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
-      IJavaProject javaProject = JavaCore.create(project4);
+      projects[3].build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
+      IJavaProject javaProject = JavaCore.create(projects[3]);
       IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
           .getClasspathEntries();
       assertEquals(2, classpathEntries.length);
@@ -340,12 +344,12 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", rawClasspath[1].getPath().toString());
       assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[2].getPath().toString());
 
-      IMarker[] markers = project4.findMarkers(null, true, IResource.DEPTH_INFINITE);
+      IMarker[] markers = projects[3].findMarkers(null, true, IResource.DEPTH_INFINITE);
       assertEquals(toString(markers), 4, markers.length);
     }
 
     {
-      IJavaProject javaProject = JavaCore.create(project5);
+      IJavaProject javaProject = JavaCore.create(projects[4]);
       IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
           .getClasspathEntries();
       assertEquals(2, classpathEntries.length);
@@ -359,12 +363,12 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", rawClasspath[2].getPath().toString());
       assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[3].getPath().toString());
 
-      IMarker[] markers = project5.findMarkers(null, true, IResource.DEPTH_INFINITE);
+      IMarker[] markers = projects[4].findMarkers(null, true, IResource.DEPTH_INFINITE);
       assertEquals(toString(markers), 4, markers.length);
     }
 
     {
-      IJavaProject javaProject = JavaCore.create(project6);
+      IJavaProject javaProject = JavaCore.create(projects[5]);
       IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
           .getClasspathEntries();
       assertEquals(1, classpathEntries.length);
@@ -375,7 +379,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", rawClasspath[0].getPath().toString());
       assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[1].getPath().toString());
 
-      IMarker[] markers = project6.findMarkers(null, true, IResource.DEPTH_INFINITE);
+      IMarker[] markers = projects[5].findMarkers(null, true, IResource.DEPTH_INFINITE);
       assertEquals(toString(markers), 4, markers.length);
     }
   }
@@ -635,12 +639,12 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
   public void testEmbedderException() throws Exception {
     deleteProject("MNGECLIPSE-157parent");
 
-    importProject("projects/MNGECLIPSE-157parent/pom.xml", new ResolverConfiguration());
-    IProject project = importProject("projects/MNGECLIPSE-157child/pom.xml", new ResolverConfiguration());
-    project.build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
+    IProject[] projects = importProjects(new String[] {"projects/MNGECLIPSE-157parent/pom.xml",
+        "projects/MNGECLIPSE-157child/pom.xml"}, new ResolverConfiguration());
+    projects[1].build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
     waitForJobsToComplete();
 
-    IMarker[] markers = project.findMarkers(null, true, IResource.DEPTH_INFINITE);
+    IMarker[] markers = projects[1].findMarkers(null, true, IResource.DEPTH_INFINITE);
     assertEquals(toString(markers), 1, markers.length);
     assertEquals(toString(markers), "pom.xml", markers[0].getResource().getFullPath().lastSegment());
   }
@@ -656,15 +660,15 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     configuration.setUseMavenOutputFolders(false);
     configuration.setActiveProfiles("");
 
-    IProject p1 = importProject("projects/dependencyorder/p1/pom.xml", configuration);
-    IProject p2 = importProject("projects/dependencyorder/p2/pom.xml", configuration);
-    p1.build(IncrementalProjectBuilder.FULL_BUILD, null);
-    p2.build(IncrementalProjectBuilder.FULL_BUILD, null);
+    IProject[] projects = importProjects(new String[] {"projects/dependencyorder/p1/pom.xml", 
+        "projects/dependencyorder/p2/pom.xml"}, configuration);
+    projects[0].build(IncrementalProjectBuilder.FULL_BUILD, null);
+    projects[1].build(IncrementalProjectBuilder.FULL_BUILD, null);
     waitForJobsToComplete();
     
 //    MavenPlugin.getDefault().getBuildpathManager().updateClasspathContainer(p1, new NullProgressMonitor());
 
-    IJavaProject javaProject = JavaCore.create(p1);
+    IJavaProject javaProject = JavaCore.create(projects[0]);
     IClasspathContainer maven2ClasspathContainer = BuildPathManager.getMaven2ClasspathContainer(javaProject);
     IClasspathEntry[] cp = maven2ClasspathContainer.getClasspathEntries();
 
@@ -732,8 +736,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       // cleanup
       new File(repo, "downloadsources/downloadsources-t001/0.0.1/downloadsources-t001-0.0.1-sources.jar").delete();
       new File(repo, "downloadsources/downloadsources-t002/0.0.1/downloadsources-t002-0.0.1-sources.jar").delete();
-      MavenUpdateRequest updateRequest = new MavenUpdateRequest(new IProject[] {project}, false /*offline*/, false);
-      MavenPlugin.getDefault().getMavenProjectManager().refresh(updateRequest);
+      MavenPlugin.getDefault().getMavenProjectManager().refresh(new IProject[] {project}, false /*offline*/, false);
       waitForJobsToComplete();
     }
 
@@ -750,8 +753,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       // cleanup
       new File(repo, "downloadsources/downloadsources-t001/0.0.1/downloadsources-t001-0.0.1-sources.jar").delete();
       new File(repo, "downloadsources/downloadsources-t002/0.0.1/downloadsources-t002-0.0.1-sources.jar").delete();
-      MavenUpdateRequest updateRequest = new MavenUpdateRequest(new IProject[] {project}, false /*offline*/, false);
-      MavenPlugin.getDefault().getMavenProjectManager().refresh(updateRequest);
+      MavenPlugin.getDefault().getMavenProjectManager().refresh(new IProject[] {project}, false /*offline*/, false);
       waitForJobsToComplete();
     }
 
@@ -1020,9 +1022,9 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
         resolverConfiguration.setIncludeModules(modules);
         resolverConfiguration.setUseMavenOutputFolders(mavenFolders);
         
-        plugin.getBuildpathManager().createSimpleProject(project, null, model, directories, resolverConfiguration, monitor);
+        plugin.getProjectImportManager().createSimpleProject(project, null, model, directories, resolverConfiguration, monitor);
       }
-    }, monitor);
+    }, plugin.getProjectImportManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
 
     IJavaProject javaProject = JavaCore.create(project);
     assertEquals("ignore", javaProject.getOption(JavaCore.CORE_JAVA_BUILD_CLEAN_OUTPUT_FOLDER, false));

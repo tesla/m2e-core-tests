@@ -9,6 +9,7 @@
 package org.maven.ide.eclipse.internal.preferences;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -174,8 +175,12 @@ public class MavenProjectPreferencePage extends PropertyPage {
             new Job("Updating " + project.getName() + " Sources") {
               protected IStatus run(IProgressMonitor monitor) {
                 MavenPlugin plugin = MavenPlugin.getDefault();
-                plugin.getBuildpathManager().updateSourceFolders(project, configuration,
-                    plugin.getMavenRuntimeManager().getGoalOnUpdate(), monitor);
+                try {
+                  plugin.getProjectImportManager().updateSourceFolders(project, configuration,
+                      plugin.getMavenRuntimeManager().getGoalOnUpdate(), monitor);
+                } catch(CoreException ex) {
+                  return ex.getStatus();
+                }
                 return Status.OK_STATUS;
               }
             }.schedule();

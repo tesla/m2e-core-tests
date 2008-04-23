@@ -27,11 +27,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerImpl;
+import org.maven.ide.eclipse.internal.project.MavenUpdateRequest;
 import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
 import org.maven.ide.eclipse.project.IMavenProjectVisitor;
 import org.maven.ide.eclipse.project.MavenProjectChangedEvent;
 import org.maven.ide.eclipse.project.MavenProjectFacade;
-import org.maven.ide.eclipse.project.MavenUpdateRequest;
 
 
 public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {

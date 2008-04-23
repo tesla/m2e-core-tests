@@ -12,8 +12,10 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.core.resources.WorkspaceJob;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -21,7 +23,6 @@ import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
 
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.project.BuildPathManager;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 
 
@@ -64,20 +65,23 @@ public class MavenImportWizard extends Wizard implements IImportWizard {
     }
 
     final Collection projects = page.getProjects();
-    
+
+    final MavenPlugin plugin = MavenPlugin.getDefault();
+
     Job job = new WorkspaceJob("Importing Maven projects") {
       public IStatus runInWorkspace(IProgressMonitor monitor) {
-        MavenPlugin plugin = MavenPlugin.getDefault();
-        
-        BuildPathManager buildpathManager = plugin.getBuildpathManager();
-        IStatus status = buildpathManager.importProjects(projects, importConfiguration, monitor);
-        if(!status.isOK()) {
+
+        try {
+          plugin.getProjectImportManager().importProjects(projects, importConfiguration, monitor);
+        } catch(CoreException ex) {
           plugin.getConsole().logError("Projects imported with errors");
+          return ex.getStatus();
         }
 
-        return status;
+        return Status.OK_STATUS;
       }
     };
+    job.setRule(plugin.getProjectImportManager().getRule());
     job.schedule();
 
     return true;

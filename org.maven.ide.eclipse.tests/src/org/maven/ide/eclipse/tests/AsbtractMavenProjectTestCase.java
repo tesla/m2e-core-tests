@@ -17,6 +17,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Hashtable;
 
 import junit.framework.TestCase;
@@ -28,6 +30,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -43,8 +46,10 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.project.BuildPathManager;
+import org.maven.ide.eclipse.project.IProjectImportManager;
 import org.maven.ide.eclipse.project.MavenProjectInfo;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
@@ -171,23 +176,38 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
   }
 
   protected IProject importProject(String pomName, ResolverConfiguration configuration) throws IOException, CoreException {
-    final MavenPlugin plugin = MavenPlugin.getDefault();
-    File pomFile = new File(pomName);
+    return importProjects(new String[] {pomName}, configuration)[0];
+  }
 
-    Model model = plugin.getMavenModelManager().readMavenModel(pomFile);
-    final MavenProjectInfo projectInfo = new MavenProjectInfo(pomName, pomFile, model, null);
-    
+  protected IProject[] importProjects(String[] pomNames, ResolverConfiguration configuration) throws IOException, CoreException {
+    final MavenPlugin plugin = MavenPlugin.getDefault();
+    MavenModelManager mavenModelManager = plugin.getMavenModelManager();
+    IWorkspaceRoot root = workspace.getRoot();
+
+    final ArrayList projectInfos = new ArrayList();
+    for (int i = 0; i < pomNames.length; i++) {
+      File pomFile = new File(pomNames[i]);
+      Model model = mavenModelManager.readMavenModel(pomFile);
+      projectInfos.add(new MavenProjectInfo(pomNames[i], pomFile, model, null));
+    }
+
     final ProjectImportConfiguration importConfiguration = new ProjectImportConfiguration(configuration);
-    
+
     workspace.run(new IWorkspaceRunnable() {
       public void run(IProgressMonitor monitor) throws CoreException {
-        BuildPathManager buildpathManager = plugin.getBuildpathManager();
-        IProject project = buildpathManager.importProject(projectInfo, importConfiguration, new NullProgressMonitor());
-        assertNotNull("Failed to import project " + projectInfo, project);
+        plugin.getProjectImportManager().importProjects(projectInfos, importConfiguration, monitor);
       }
-    }, monitor);
+    }, plugin.getProjectImportManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
 
-    return importConfiguration.getProject(workspace.getRoot(), model);
+    IProject[] projects = new IProject[projectInfos.size()];
+    for (int i = 0; i < projectInfos.size(); i++) {
+      MavenProjectInfo projectInfo = (MavenProjectInfo) projectInfos.get(i);
+      IProject project = importConfiguration.getProject(root, projectInfo.getModel());
+      projects[i] = project;
+      assertNotNull("Failed to import project " + projectInfos, project);
+    }
+
+    return projects;
   }
 
   protected IProject importProject(String projectName, String projectLocation, ResolverConfiguration configuration) throws IOException, CoreException {
@@ -203,14 +223,16 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
     File pomFile = new File(dir, MavenPlugin.POM_FILE_NAME);
     Model model = MavenPlugin.getDefault().getMavenModelManager().readMavenModel(pomFile);
     final MavenProjectInfo projectInfo = new MavenProjectInfo(projectName, pomFile, model, null);
+
+    final MavenPlugin plugin = MavenPlugin.getDefault();
     
     workspace.run(new IWorkspaceRunnable() {
       public void run(IProgressMonitor monitor) throws CoreException {
-        BuildPathManager buildpathManager = MavenPlugin.getDefault().getBuildpathManager();
-        IProject project = buildpathManager.importProject(projectInfo, importConfiguration, new NullProgressMonitor());
+        plugin.getProjectImportManager().importProjects(Collections.singleton(projectInfo), importConfiguration, monitor);
+        IProject project = workspace.getRoot().getProject(importConfiguration.getProjectName(projectInfo.getModel()));
         assertNotNull("Failed to import project " + projectInfo, project);
       }
-    }, monitor);
+    }, plugin.getProjectImportManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
 
     return workspace.getRoot().getProject(projectName);
   }

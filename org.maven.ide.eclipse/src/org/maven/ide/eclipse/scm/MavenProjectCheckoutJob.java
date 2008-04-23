@@ -45,7 +45,6 @@ import org.apache.maven.model.Model;
 import org.maven.ide.eclipse.MavenConsole;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
-import org.maven.ide.eclipse.project.BuildPathManager;
 import org.maven.ide.eclipse.project.LocalProjectScanner;
 import org.maven.ide.eclipse.project.MavenProjectInfo;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
@@ -93,11 +92,10 @@ public abstract class MavenProjectCheckoutJob extends WorkspaceJob {
       scanner.run(monitor);
 
       MavenPlugin plugin = MavenPlugin.getDefault();
-      BuildPathManager buildpathManager = plugin.getBuildpathManager();
       MavenModelManager modelManager = plugin.getMavenModelManager();
 
       boolean includeModules = configuration.getResolverConfiguration().shouldIncludeModules();
-      this.projects = buildpathManager.collectProjects(scanner.getProjects(), includeModules);
+      this.projects = plugin.getProjectImportManager().collectProjects(scanner.getProjects(), includeModules);
 
       if(checkoutAllProjects) {
         // check if there any project name conflicts 
@@ -205,23 +203,24 @@ public abstract class MavenProjectCheckoutJob extends WorkspaceJob {
       configuration.setNeedsRename(true);
       
       if(checkoutAllProjects) {
-        new WorkspaceJob("Importing Maven projects") {
+        final MavenPlugin plugin = MavenPlugin.getDefault();
+        WorkspaceJob job = new WorkspaceJob("Importing Maven projects") {
           public IStatus runInWorkspace(IProgressMonitor monitor) {
-            MavenPlugin plugin = MavenPlugin.getDefault();
-
-            BuildPathManager buildpathManager = plugin.getBuildpathManager();
-
-            Set projectSet = buildpathManager.collectProjects(projects, //
+            Set projectSet = plugin.getProjectImportManager().collectProjects(projects, //
                 configuration.getResolverConfiguration().shouldIncludeModules());
 
-            IStatus status = buildpathManager.importProjects(projectSet, configuration, monitor);
-            if(!status.isOK()) {
+            try {
+              plugin.getProjectImportManager().importProjects(projectSet, configuration, monitor);
+            } catch(CoreException ex) {
               plugin.getConsole().logError("Projects imported with errors");
+              return ex.getStatus();
             }
 
-            return status;
+            return Status.OK_STATUS;
           }
-        }.schedule();
+        };
+        job.setRule(plugin.getProjectImportManager().getRule());
+        job.schedule();
 
       } else {
         Display.getDefault().asyncExec(new Runnable() {

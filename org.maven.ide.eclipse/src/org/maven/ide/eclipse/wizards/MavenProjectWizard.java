@@ -39,7 +39,6 @@ import org.apache.maven.model.Model;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.Messages;
-import org.maven.ide.eclipse.project.BuildPathManager;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 
 
@@ -182,6 +181,8 @@ public class MavenProjectWizard extends Wizard implements INewWizard {
 
     final Job job;
     
+    final MavenPlugin plugin = MavenPlugin.getDefault();
+
     if(locationPage.isSimpleProject()) {
       model.getDependencies().addAll(Arrays.asList(dependenciesPage.getDependencies()));
 
@@ -190,8 +191,7 @@ public class MavenProjectWizard extends Wizard implements INewWizard {
       job = new WorkspaceJob(Messages.getString("wizard.project.job.creatingProject", projectName)) {
         public IStatus runInWorkspace(IProgressMonitor monitor) {
           try {
-            BuildPathManager buildpathManager = MavenPlugin.getDefault().getBuildpathManager();
-            buildpathManager.createSimpleProject(project, location, model, folders, //
+            plugin.getProjectImportManager().createSimpleProject(project, location, model, folders, //
                 configuration.getResolverConfiguration(), monitor);
             return Status.OK_STATUS;
           } catch(CoreException e) {
@@ -213,11 +213,8 @@ public class MavenProjectWizard extends Wizard implements INewWizard {
       job = new WorkspaceJob(Messages.getString("wizard.project.job.creating", archetype.getArtifactId())) {
         public IStatus runInWorkspace(IProgressMonitor monitor) {
           try {
-            BuildPathManager buildpathManager = MavenPlugin.getDefault().getBuildpathManager();
-            buildpathManager.createArchetypeProject(project, location, archetype, //
+            plugin.getProjectImportManager().createArchetypeProject(project, location, archetype, //
                 groupId, artifactId, version, javaPackage, configuration, monitor);
-            return Status.OK_STATUS;
-          } catch(InterruptedException ex) {
             return Status.OK_STATUS;
           } catch(CoreException e) {
             return e.getStatus();
@@ -241,6 +238,7 @@ public class MavenProjectWizard extends Wizard implements INewWizard {
         }
       }
     });
+    job.setRule(plugin.getProjectImportManager().getRule());
     job.schedule();
 
     return true;
