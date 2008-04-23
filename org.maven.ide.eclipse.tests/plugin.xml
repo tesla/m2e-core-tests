@@ -18,5 +18,14 @@
       <local name="archetype-catalog.xml" description="Test Catalog"/>
       <remote url="http://repo1.maven.org/maven2/archetype-catalog.xml" description="Test Remote Catalog"/>
    </extension>
+   <extension
+         point="org.maven.ide.eclipse.projectConfigurators">
+      <configurator
+            class="org.maven.ide.eclipse.configurators.TestProjectConfigurator"
+            id="org.maven.ide.eclipse.configurator.test"
+            name="TEST"
+            priority="1000">
+      </configurator>
+   </extension>
 
 </plugin>

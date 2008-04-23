@@ -8,6 +8,8 @@
 
 package org.maven.ide.eclipse.project;
 
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.apache.maven.embedder.MavenEmbedder;
@@ -20,7 +22,45 @@ import org.apache.maven.embedder.MavenEmbedder;
  * 
  * @author Igor Fedorenko
  */
-public abstract class AbstractProjectConfigurator {
+public abstract class AbstractProjectConfigurator implements IExecutableExtension {
+
+  public static final String ATTR_ID = "id";
+  
+  public static final String ATTR_PRIORITY = "priority";
+
+  public static final String ATTR_NAME = "name";
+  
+  public static final String ATTR_CLASS = "class";
+  
+  private int priority;
+  private String id;
+  private String name;
 
   public abstract void configure(MavenEmbedder embedder, MavenProjectFacade facade, IProgressMonitor monitor);
+
+  public int getPriority() {
+    return priority;
+  }
+  
+  public String getId() {
+    return id;
+  }
+  
+  public String getName() {
+    return name;
+  }
+  
+  // IExecutableExtension  
+  
+  public void setInitializationData(IConfigurationElement config, String propertyName, Object data) {
+    this.id = config.getAttribute(ATTR_ID);
+    this.name = config.getAttribute(ATTR_NAME);
+    String priorityString = config.getAttribute(ATTR_PRIORITY);
+    try {
+      priority = Integer.parseInt(priorityString);
+    } catch (Exception ex) {
+      priority = Integer.MAX_VALUE;
+    }
+  }
+  
 }

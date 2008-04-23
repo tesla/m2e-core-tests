@@ -99,15 +99,11 @@ public class ProjectImportManager implements IProjectImportManager {
     this.indexManager = indexManager;
     this.embedderManager = embedderManager;
 
-    this.javaConfigurator = new JavaProjectConfigurator(runtimeManager, console, projectManager);
+    this.javaConfigurator = new JavaProjectConfigurator();
   }
 
   public void importProjects(Collection projectInfos, ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException {
     try {
-      AbstractProjectConfigurator[] configurators = new AbstractProjectConfigurator[] {
-          javaConfigurator
-      };
-
       MavenEmbedder embedder = embedderManager.createEmbedder(EmbedderFactory.createWorkspaceCustomizer());
       try {
         MavenUpdateRequest updateRequest = new MavenUpdateRequest(false, false);
@@ -143,13 +139,14 @@ public class ProjectImportManager implements IProjectImportManager {
           MavenProjectInfo projectInfo = (MavenProjectInfo) it.next();
           IProject project = (IProject) projects.get(projectInfo);
           MavenProjectFacade facade = projectManager.create(project, monitor);
-
           if (facade != null) {
-            for (int i = 0; i < configurators.length; i++) {
+            Set configurators = ProjectConfiguratorFacotry.getConfigurators();
+            for(Iterator cit = configurators.iterator(); cit.hasNext();) {
+              AbstractProjectConfigurator configurator = (AbstractProjectConfigurator) cit.next();
               if(monitor.isCanceled()) {
                 throw new OperationCanceledException();
               }
-              configurators[i].configure(embedder, facade, monitor);
+              configurator.configure(embedder, facade, monitor);
             }
           }
         }
@@ -174,6 +171,7 @@ public class ProjectImportManager implements IProjectImportManager {
     try {
       MavenEmbedder embedder = embedderManager.createEmbedder(EmbedderFactory.createExecutionCustomizer());
       try {
+        // XXX should iterate trough all available configurators
         javaConfigurator.updateSourceFolders(embedder, project, configuration, runtimeManager.getGoalOnUpdate(), monitor);
       } finally {
         embedder.stop();

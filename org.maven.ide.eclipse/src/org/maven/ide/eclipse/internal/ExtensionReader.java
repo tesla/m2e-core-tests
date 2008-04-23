@@ -32,6 +32,8 @@ import org.maven.ide.eclipse.embedder.ArchetypeManager;
 import org.maven.ide.eclipse.embedder.ArchetypeManager.ArchetypeCatalogFactory;
 import org.maven.ide.eclipse.index.IndexInfo;
 import org.maven.ide.eclipse.internal.index.IndexInfoWriter;
+import org.maven.ide.eclipse.internal.project.ProjectConfiguratorFacotry;
+import org.maven.ide.eclipse.project.AbstractProjectConfigurator;
 import org.maven.ide.eclipse.scm.ScmHandler;
 import org.maven.ide.eclipse.scm.ScmHandlerFactory;
 import org.maven.ide.eclipse.scm.ScmHandlerUi;
@@ -51,6 +53,8 @@ public class ExtensionReader {
   public static final String EXTENSION_SCM_HANDLERS = "org.maven.ide.eclipse.scmHandlers";
   
   public static final String EXTENSION_SCM_HANDLERS_UI = "org.maven.ide.eclipse.scmHandlersUi";
+  
+  public static final String EXTENSION_PROJECT_CONFIGURATORS = "org.maven.ide.eclipse.projectConfigurators";
 
   private static final String ELEMENT_INDEX = "index";
 
@@ -77,6 +81,8 @@ public class ExtensionReader {
   private static final String ATTR_URL = "url";
   
   private static final String ATTR_DESCRIPTION = "description";
+
+  private static final String ELEMENT_CONFIGURATOR = "configurator";
 
   /**
    * @param configFile previously saved indexes configuration
@@ -254,5 +260,28 @@ public class ExtensionReader {
     return null;
   }
 
+  public static void readProjectConfiguratorExtensions() {
+    IExtensionRegistry registry = Platform.getExtensionRegistry();
+    IExtensionPoint configuratorsExtensionPoint = registry.getExtensionPoint(EXTENSION_PROJECT_CONFIGURATORS);
+    if(configuratorsExtensionPoint != null) {
+      IExtension[] configuratorExtensions = configuratorsExtensionPoint.getExtensions();
+      for(int i = 0; i < configuratorExtensions.length; i++ ) {
+        IExtension extension = configuratorExtensions[i];
+        IConfigurationElement[] elements = extension.getConfigurationElements();
+        for(int j = 0; j < elements.length; j++ ) {
+          IConfigurationElement element = elements[j];
+          if(element.getName().equals(ELEMENT_CONFIGURATOR)) {
+            try {
+              Object o = element.createExecutableExtension(AbstractProjectConfigurator.ATTR_CLASS);
+              ProjectConfiguratorFacotry.addProjectConfigurator((AbstractProjectConfigurator) o);
+            } catch(CoreException ex) {
+              MavenPlugin.log(ex);
+            }
+          }
+        }
+      }
+    }
+  }
+  
 }
 

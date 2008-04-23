@@ -18,6 +18,8 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.embedder.MavenEmbedder;
+import org.apache.maven.execution.MavenExecutionResult;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.container.MavenClasspathContainer;
@@ -39,7 +41,8 @@ public class MavenProjectManager {
 
   private IndexManager indexManager;
 
-  public MavenProjectManager(MavenProjectManagerImpl manager, IndexManager indexManager, MavenProjectManagerRefreshJob mavenBackgroundJob) {
+  public MavenProjectManager(MavenProjectManagerImpl manager, IndexManager indexManager,
+      MavenProjectManagerRefreshJob mavenBackgroundJob) {
     this.manager = manager;
     this.indexManager = indexManager;
     this.mavenBackgroundJob = mavenBackgroundJob;
@@ -199,6 +202,11 @@ public class MavenProjectManager {
    */
   public MavenProjectFacade[] getProjects() {
     return manager.getProjects();
+  }
+  
+  public MavenExecutionResult execute(MavenEmbedder embedder, IFile pomFile,
+      ResolverConfiguration resolverConfiguration, MavenRunnable runnable, IProgressMonitor monitor) {
+    return manager.execute(embedder, pomFile, resolverConfiguration, runnable, monitor);
   }
 
 }

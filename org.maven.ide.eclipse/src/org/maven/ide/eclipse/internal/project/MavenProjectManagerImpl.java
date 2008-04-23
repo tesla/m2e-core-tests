@@ -71,6 +71,7 @@ import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
 import org.maven.ide.eclipse.project.IMavenProjectVisitor;
 import org.maven.ide.eclipse.project.MavenProjectChangedEvent;
 import org.maven.ide.eclipse.project.MavenProjectFacade;
+import org.maven.ide.eclipse.project.MavenRunnable;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 
@@ -355,7 +356,7 @@ public class MavenProjectManagerImpl {
         while(!updateRequest.isEmpty()) {
           IFile pom = updateRequest.pop();
           monitor.subTask(pom.getFullPath().toString());
-
+          
           if (!pom.isAccessible() || !pom.getProject().hasNature(MavenPlugin.NATURE_ID)) {
             updateRequest.forcePomFiles(remove(pom));
             continue;
@@ -927,7 +928,7 @@ public class MavenProjectManagerImpl {
     }
   }
   
-  MavenExecutionResult execute(MavenEmbedder embedder, IFile pomFile, ResolverConfiguration resolverConfiguration, MavenRunnable runnable, IProgressMonitor monitor) {
+  public MavenExecutionResult execute(MavenEmbedder embedder, IFile pomFile, ResolverConfiguration resolverConfiguration, MavenRunnable runnable, IProgressMonitor monitor) {
     File pom = pomFile.getLocation().toFile();
 
     MavenExecutionRequest request = embedderManager.createRequest(embedder);
@@ -1019,10 +1020,6 @@ public class MavenProjectManagerImpl {
     }
   }
 
-  interface MavenRunnable {
-    public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request);
-  }
-
   private static final class MavenExecutor implements MavenRunnable {
     private final List goals;
 
@@ -1041,7 +1038,7 @@ public class MavenProjectManagerImpl {
 
     MavenProjectReader(MavenUpdateRequest updateRequest) {
       this.updateRequest = updateRequest;
-  }
+    }
 
     public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request) {
       request.setOffline(updateRequest.isOffline());

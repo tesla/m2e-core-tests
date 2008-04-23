@@ -12,6 +12,7 @@
    <extension-point id="scmHandlers" name="SCM Handlers" schema="schema/scmHandlers.exsd"/>
    <extension-point id="scmHandlersUi" name="SCM Handlers UI" schema="schema/scmHandlersUi.exsd"/>
    <extension-point id="archetypeCatalogs" name="Maven Archetypes" schema="schema/archetypes.exsd"/>
+   <extension-point id="projectConfigurators" name="Project Configurators" schema="schema/projectConfigurators.exsd"/>
 
    <extension point="org.eclipse.core.resources.builders"
               id="maven2Builder"
@@ -702,6 +703,15 @@
             objectClass="org.eclipse.core.resources.IProject" 
             adaptable="true">
       </page>      
+   </extension>
+   <extension
+         point="org.maven.ide.eclipse.projectConfigurators">
+      <configurator
+            class="org.maven.ide.eclipse.internal.project.JavaProjectConfigurator"
+            id="org.maven.ide.eclipse.configurator.jdt"
+            name="JDT"
+            priority="10">
+      </configurator>
    </extension>
 
 </plugin>
