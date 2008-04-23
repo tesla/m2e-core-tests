@@ -74,7 +74,7 @@ public abstract class ScmHandler implements Comparable, IExecutableExtension {
       try {
         this.priority = Integer.parseInt(priority);
       } catch(Exception ex) {
-        MavenPlugin.log("Unable to load extension for " + handlerClass, ex);
+        MavenPlugin.log("Unable to parse priority for " + handlerClass, ex);
       }
     }
   }
