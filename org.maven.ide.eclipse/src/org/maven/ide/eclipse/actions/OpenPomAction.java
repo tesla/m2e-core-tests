@@ -327,7 +327,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
     }
 
     public IStorage getStorage() {
-      return new MavenStorage(name, content);
+      return new MavenStorage(name, path, content);
     }
 
     public ImageDescriptor getImageDescriptor() {
@@ -352,11 +352,13 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
 
   private static class MavenStorage implements IStorage {
     private String name;
-
+    private final String path;
     private final byte[] content;
 
-    public MavenStorage(String name, byte[] content) {
+
+    public MavenStorage(String name, String path, byte[] content) {
       this.name = name;
+      this.path = path;
       this.content = content;
     }
 
@@ -365,7 +367,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
     }
 
     public IPath getFullPath() {
-      return new Path(name);
+      return new Path(path);
     }
 
     public InputStream getContents() {
