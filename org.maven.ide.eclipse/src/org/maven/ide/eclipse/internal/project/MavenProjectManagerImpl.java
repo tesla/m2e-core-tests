@@ -1010,11 +1010,11 @@ public class MavenProjectManagerImpl {
    */
   static class Context {
     final WorkspaceState state;
-  
+
     final ResolverConfiguration resolverConfiguration;
-  
+
     final IFile pom;
-  
+
     Context(WorkspaceState state, ResolverConfiguration resolverConfiguration, IFile pom) {
       this.state = state;
       this.resolverConfiguration = resolverConfiguration;
@@ -1044,7 +1044,7 @@ public class MavenProjectManagerImpl {
 
     MavenProjectReader(MavenUpdateRequest updateRequest) {
       this.updateRequest = updateRequest;
-    }
+  }
 
     public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request) {
       request.setOffline(updateRequest.isOffline());

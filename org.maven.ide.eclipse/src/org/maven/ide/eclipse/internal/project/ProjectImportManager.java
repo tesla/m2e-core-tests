@@ -54,6 +54,7 @@ import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.internal.embedder.TransferListenerAdapter;
+import org.maven.ide.eclipse.project.AbstractProjectConfigurator;
 import org.maven.ide.eclipse.project.BuildPathManager;
 import org.maven.ide.eclipse.project.IProjectImportManager;
 import org.maven.ide.eclipse.project.LocalProjectScanner;
@@ -102,7 +103,7 @@ public class ProjectImportManager implements IProjectImportManager {
 
   public void importProjects(Collection projectInfos, ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException {
     try {
-      IMavenProjectConfigurator[] configurators = new IMavenProjectConfigurator[] {
+      AbstractProjectConfigurator[] configurators = new AbstractProjectConfigurator[] {
           javaConfigurator
       };
 

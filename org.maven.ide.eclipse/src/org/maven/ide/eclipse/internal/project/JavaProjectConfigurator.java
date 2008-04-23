@@ -58,13 +58,14 @@ import org.maven.ide.eclipse.MavenConsole;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;
+import org.maven.ide.eclipse.project.AbstractProjectConfigurator;
 import org.maven.ide.eclipse.project.BuildPathManager;
 import org.maven.ide.eclipse.project.IMavenProjectVisitor;
 import org.maven.ide.eclipse.project.MavenProjectFacade;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 import org.maven.ide.eclipse.util.Util;
 
-public class JavaProjectConfigurator implements IMavenProjectConfigurator {
+public class JavaProjectConfigurator extends AbstractProjectConfigurator {
 
   private static final List VERSIONS = Arrays.asList("1.1,1.2,1.3,1.4,1.5,1.6,1.7".split(","));
 

@@ -6,20 +6,21 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.internal.project;
+package org.maven.ide.eclipse.project;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.apache.maven.embedder.MavenEmbedder;
 
-import org.maven.ide.eclipse.project.MavenProjectFacade;
 
 /**
  * Used to configure maven projects.
  *
  * Work in progress.
+ * 
+ * @author Igor Fedorenko
  */
-public interface IMavenProjectConfigurator {
+public abstract class AbstractProjectConfigurator {
 
-  public void configure(MavenEmbedder embedder, MavenProjectFacade facade, IProgressMonitor monitor);
+  public abstract void configure(MavenEmbedder embedder, MavenProjectFacade facade, IProgressMonitor monitor);
 }
