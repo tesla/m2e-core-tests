@@ -57,7 +57,7 @@ public class UpdateSourcesAction implements IObjectActionDelegate {
             MavenProjectFacade projectFacade = plugin.getMavenProjectManager().create(p, monitor);
             if(projectFacade != null) {
               try {
-                plugin.getProjectImportManager().updateSourceFolders(p, //
+                plugin.getProjectImportManager().updateProjectConfiguration(p, //
                     projectFacade.getResolverConfiguration(), //
                     plugin.getMavenRuntimeManager().getGoalOnUpdate(), monitor);
               } catch(CoreException ex) {

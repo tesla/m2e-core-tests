@@ -134,7 +134,7 @@ public class ChangeNatureAction implements IObjectActionDelegate {
     protected IStatus run(IProgressMonitor monitor) {
       if(updateSourceFolders) {
         try {
-          importManager.updateSourceFolders(project, //
+          importManager.updateProjectConfiguration(project, //
               configuration, runtimeManager.getGoalOnUpdate(), monitor);
         } catch(CoreException ex) {
           return ex.getStatus();

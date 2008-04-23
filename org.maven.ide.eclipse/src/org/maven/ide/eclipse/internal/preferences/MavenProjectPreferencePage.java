@@ -176,7 +176,7 @@ public class MavenProjectPreferencePage extends PropertyPage {
               protected IStatus run(IProgressMonitor monitor) {
                 MavenPlugin plugin = MavenPlugin.getDefault();
                 try {
-                  plugin.getProjectImportManager().updateSourceFolders(project, configuration,
+                  plugin.getProjectImportManager().updateProjectConfiguration(project, configuration,
                       plugin.getMavenRuntimeManager().getGoalOnUpdate(), monitor);
                 } catch(CoreException ex) {
                   return ex.getStatus();

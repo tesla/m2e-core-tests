@@ -61,6 +61,7 @@ import org.maven.ide.eclipse.project.LocalProjectScanner;
 import org.maven.ide.eclipse.project.MavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectInfo;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
+import org.maven.ide.eclipse.project.ProjectConfigurationRequest;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 import org.maven.ide.eclipse.util.Util;
@@ -85,8 +86,6 @@ public class ProjectImportManager implements IProjectImportManager {
   final IndexManager indexManager;
 
   final MavenEmbedderManager embedderManager;
-
-  final JavaProjectConfigurator javaConfigurator;
   
   public ProjectImportManager(MavenModelManager modelManager, MavenConsole console, 
         MavenRuntimeManager runtimeManager, MavenProjectManagerImpl projectManager, 
@@ -98,8 +97,6 @@ public class ProjectImportManager implements IProjectImportManager {
     this.projectManager = projectManager;
     this.indexManager = indexManager;
     this.embedderManager = embedderManager;
-
-    this.javaConfigurator = new JavaProjectConfigurator();
   }
 
   public void importProjects(Collection projectInfos, ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException {
@@ -146,7 +143,8 @@ public class ProjectImportManager implements IProjectImportManager {
               if(monitor.isCanceled()) {
                 throw new OperationCanceledException();
               }
-              configurator.configure(embedder, facade, monitor);
+              ProjectConfigurationRequest request = new ProjectConfigurationRequest(facade, false /*projectImport*/);
+              configurator.configure(embedder, request, monitor);
             }
           }
         }
@@ -164,15 +162,27 @@ public class ProjectImportManager implements IProjectImportManager {
   public void configureProject(IProject project, ResolverConfiguration configuration, IProgressMonitor monitor)
       throws CoreException {
     enableMavenNature(project, configuration, monitor);
-    updateSourceFolders(project, configuration, runtimeManager.getGoalOnImport(), monitor);
+    updateProjectConfiguration(project, configuration, runtimeManager.getGoalOnImport(), monitor);
   }
 
-  public void updateSourceFolders(IProject project, ResolverConfiguration configuration, String goalToExecute, IProgressMonitor monitor) throws CoreException {
+  public void updateProjectConfiguration(IProject project, ResolverConfiguration configuration, String goalToExecute, IProgressMonitor monitor) throws CoreException {
     try {
       MavenEmbedder embedder = embedderManager.createEmbedder(EmbedderFactory.createExecutionCustomizer());
       try {
-        // XXX should iterate trough all available configurators
-        javaConfigurator.updateSourceFolders(embedder, project, configuration, runtimeManager.getGoalOnUpdate(), monitor);
+        IFile pom = project.getFile(MavenPlugin.POM_FILE_NAME);
+        if (pom.isAccessible()) {
+          // this is for unit tests only, production code should not need to load facade here
+          MavenProjectFacade facade = projectManager.create(pom, true, monitor);
+          ProjectConfigurationRequest request = new ProjectConfigurationRequest(project, facade.getPom(), facade.getMavenProject(), configuration, true);
+          Set configurators = ProjectConfiguratorFactory.getConfigurators();
+          for(Iterator cit = configurators.iterator(); cit.hasNext();) {
+            AbstractProjectConfigurator configurator = (AbstractProjectConfigurator) cit.next();
+            if(monitor.isCanceled()) {
+              throw new OperationCanceledException();
+            }
+            configurator.configure(embedder, request, monitor);
+          }
+        }
       } finally {
         embedder.stop();
       }

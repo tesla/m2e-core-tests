@@ -14,7 +14,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.apache.maven.embedder.MavenEmbedder;
 
-
 /**
  * Used to configure maven projects.
  *
@@ -36,7 +35,7 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
   private String id;
   private String name;
 
-  public abstract void configure(MavenEmbedder embedder, MavenProjectFacade facade, IProgressMonitor monitor);
+  public abstract void configure(MavenEmbedder embedder, ProjectConfigurationRequest request, IProgressMonitor monitor);
 
   public int getPriority() {
     return priority;

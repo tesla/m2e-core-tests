@@ -182,6 +182,15 @@ public class MavenProjectManagerImpl {
         MavenProject mavenProject = executionResult.getProject();
         if(mavenProject != null) {
           projectFacade = new MavenProjectFacade(this, pom, mavenProject, configuration);
+        } else {
+          if (executionResult.getExceptions() != null) {
+            for (Iterator it = executionResult.getExceptions().iterator(); it.hasNext(); ) {
+              Exception ex = (Exception) it.next();
+              String msg = "Failed to create Maven embedder";
+              console.logError(msg + "; " + ex.toString());
+              MavenPlugin.log(msg, ex);
+            }
+          }
         }
       } catch(MavenEmbedderException ex) {
         String msg = "Failed to create Maven embedder";

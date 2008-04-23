@@ -27,8 +27,8 @@ import org.apache.maven.project.MavenProject;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.project.AbstractProjectConfigurator;
-import org.maven.ide.eclipse.project.MavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenRunnable;
+import org.maven.ide.eclipse.project.ProjectConfigurationRequest;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 
 
@@ -44,20 +44,20 @@ public class MavenProjectConfigurator extends AbstractProjectConfigurator {
 
   List goals;
 
-  public void configure(MavenEmbedder embedder, MavenProjectFacade facade, IProgressMonitor monitor) {
+  public void configure(MavenEmbedder embedder, ProjectConfigurationRequest request, IProgressMonitor monitor) {
     if(pluginKey == null || goals == null) {
       return;
     }
 
-    MavenProject mavenProject = facade.getMavenProject();
+    MavenProject mavenProject = request.getMavenProject();
     Build build = mavenProject.getBuild();
     if(build != null) {
       Map pluginMap = build.getPluginsAsMap();
       Plugin plugin = (Plugin) pluginMap.get(pluginKey);
       if(plugin != null) {
 
-        IFile pomFile = facade.getPom();
-        ResolverConfiguration resolverConfiguration = facade.getResolverConfiguration();
+        IFile pomFile = request.getPom();
+        ResolverConfiguration resolverConfiguration = request.getResolverConfiguration();
         MavenPlugin.getDefault().getMavenProjectManager().execute(embedder, pomFile, resolverConfiguration, //
             new MavenRunnable() {
               public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request) {

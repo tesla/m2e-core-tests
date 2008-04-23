@@ -1015,6 +1015,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
         model.setGroupId("simple-project");
         model.setArtifactId("simple-project");
         model.setVersion("0.0.1-SNAPSHOT");
+        model.setModelVersion("4.0.0");
 
         String[] directories = {};
 

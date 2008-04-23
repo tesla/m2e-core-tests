@@ -38,7 +38,7 @@ public interface IProjectImportManager {
 
   void disableMavenNature(IProject project, IProgressMonitor monitor) throws CoreException;
 
-  void updateSourceFolders(IProject project, ResolverConfiguration configuration, String goalToExecute,
+  void updateProjectConfiguration(IProject project, ResolverConfiguration configuration, String goalToExecute,
       IProgressMonitor monitor) throws CoreException;
 
 }

@@ -11,14 +11,14 @@ package org.maven.ide.eclipse.configurators;
 import org.apache.maven.embedder.MavenEmbedder;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.maven.ide.eclipse.project.AbstractProjectConfigurator;
-import org.maven.ide.eclipse.project.MavenProjectFacade;
+import org.maven.ide.eclipse.project.ProjectConfigurationRequest;
 
 /**
  * @author Eugene Kuleshov
  */
 public class TestProjectConfigurator extends AbstractProjectConfigurator {
 
-  public void configure(MavenEmbedder embedder, MavenProjectFacade facade, IProgressMonitor monitor) {
+  public void configure(MavenEmbedder embedder, ProjectConfigurationRequest request, IProgressMonitor monitor) {
     // do nothing
   }
 
