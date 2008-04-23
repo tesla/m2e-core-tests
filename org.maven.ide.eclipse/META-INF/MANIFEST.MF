@@ -47,6 +47,7 @@ Export-Package: org.maven.ide.eclipse,
  org.maven.ide.eclipse.internal.launch;x-friends:="org.maven.ide.eclipse.tests",
  org.maven.ide.eclipse.internal.project;x-friends:="org.maven.ide.eclipse.tests",
  org.maven.ide.eclipse.project,
+ org.maven.ide.eclipse.project.configurator,
  org.maven.ide.eclipse.scm,
  org.maven.ide.eclipse.util,
  org.maven.ide.eclipse.wizards
