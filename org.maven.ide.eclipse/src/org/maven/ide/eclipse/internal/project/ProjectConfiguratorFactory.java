@@ -21,7 +21,7 @@ import org.maven.ide.eclipse.project.AbstractProjectConfigurator;
  *
  * @author Eugene Kuleshov
  */
-public class ProjectConfiguratorFacotry {
+public class ProjectConfiguratorFactory {
 
   private static Set configurators;
 

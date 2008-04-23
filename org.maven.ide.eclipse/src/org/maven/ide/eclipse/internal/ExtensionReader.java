@@ -32,7 +32,7 @@ import org.maven.ide.eclipse.embedder.ArchetypeManager;
 import org.maven.ide.eclipse.embedder.ArchetypeManager.ArchetypeCatalogFactory;
 import org.maven.ide.eclipse.index.IndexInfo;
 import org.maven.ide.eclipse.internal.index.IndexInfoWriter;
-import org.maven.ide.eclipse.internal.project.ProjectConfiguratorFacotry;
+import org.maven.ide.eclipse.internal.project.ProjectConfiguratorFactory;
 import org.maven.ide.eclipse.project.AbstractProjectConfigurator;
 import org.maven.ide.eclipse.scm.ScmHandler;
 import org.maven.ide.eclipse.scm.ScmHandlerFactory;
@@ -273,7 +273,7 @@ public class ExtensionReader {
           if(element.getName().equals(ELEMENT_CONFIGURATOR)) {
             try {
               Object o = element.createExecutableExtension(AbstractProjectConfigurator.ATTR_CLASS);
-              ProjectConfiguratorFacotry.addProjectConfigurator((AbstractProjectConfigurator) o);
+              ProjectConfiguratorFactory.addProjectConfigurator((AbstractProjectConfigurator) o);
             } catch(CoreException ex) {
               MavenPlugin.log(ex);
             }

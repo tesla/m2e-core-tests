@@ -140,7 +140,7 @@ public class ProjectImportManager implements IProjectImportManager {
           IProject project = (IProject) projects.get(projectInfo);
           MavenProjectFacade facade = projectManager.create(project, monitor);
           if (facade != null) {
-            Set configurators = ProjectConfiguratorFacotry.getConfigurators();
+            Set configurators = ProjectConfiguratorFactory.getConfigurators();
             for(Iterator cit = configurators.iterator(); cit.hasNext();) {
               AbstractProjectConfigurator configurator = (AbstractProjectConfigurator) cit.next();
               if(monitor.isCanceled()) {

@@ -12,17 +12,17 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.maven.ide.eclipse.internal.project.ProjectConfiguratorFacotry;
+import org.maven.ide.eclipse.internal.project.ProjectConfiguratorFactory;
 import org.maven.ide.eclipse.project.AbstractProjectConfigurator;
 
 
 /**
  * @author Eugene Kuleshov
  */
-public class ConfiguratorFactoryTest extends TestCase {
+public class ProjectConfiguratorFactoryTest extends TestCase {
 
   public void testConfiguratorFactory() throws Exception {
-    Set configurators = ProjectConfiguratorFacotry.getConfigurators();
+    Set configurators = ProjectConfiguratorFactory.getConfigurators();
     
     AbstractProjectConfigurator[] cc = (AbstractProjectConfigurator[]) configurators.toArray(new AbstractProjectConfigurator[configurators.size()]);
 
