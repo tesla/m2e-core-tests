@@ -163,10 +163,6 @@ public class MavenProjectManagerImpl {
    * workspace resolution is assumed to be enabled for the pom but the pom
    * will not be added to the cache.
    */
-//  private MavenProjectFacade create(IFile pom) {
-//    return create(pom, false, new NullProgressMonitor());
-//  }
-
   public MavenProjectFacade create(IFile pom, boolean load, IProgressMonitor monitor) {
     if(pom == null) {
       return null;
@@ -1044,7 +1040,7 @@ public class MavenProjectManagerImpl {
 
     MavenProjectReader(MavenUpdateRequest updateRequest) {
       this.updateRequest = updateRequest;
-  }
+    }
 
     public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request) {
       request.setOffline(updateRequest.isOffline());
