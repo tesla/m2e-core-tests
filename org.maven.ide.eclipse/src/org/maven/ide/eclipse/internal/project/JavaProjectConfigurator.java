@@ -58,14 +58,14 @@ import org.maven.ide.eclipse.MavenConsole;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;
-import org.maven.ide.eclipse.project.AbstractProjectConfigurator;
 import org.maven.ide.eclipse.project.BuildPathManager;
 import org.maven.ide.eclipse.project.IMavenProjectVisitor;
 import org.maven.ide.eclipse.project.MavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.MavenRunnable;
-import org.maven.ide.eclipse.project.ProjectConfigurationRequest;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
+import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
+import org.maven.ide.eclipse.project.configurator.ProjectConfigurationRequest;
 import org.maven.ide.eclipse.util.Util;
 
 

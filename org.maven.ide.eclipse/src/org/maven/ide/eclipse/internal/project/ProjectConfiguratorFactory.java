@@ -14,7 +14,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.maven.ide.eclipse.internal.ExtensionReader;
-import org.maven.ide.eclipse.project.AbstractProjectConfigurator;
+import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
 
 /**
  * ProjectConfigurator Facotry

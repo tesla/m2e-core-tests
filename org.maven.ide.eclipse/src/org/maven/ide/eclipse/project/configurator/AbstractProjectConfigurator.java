@@ -6,13 +6,14 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.project;
+package org.maven.ide.eclipse.project.configurator;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.apache.maven.embedder.MavenEmbedder;
+
 
 /**
  * Used to configure maven projects.

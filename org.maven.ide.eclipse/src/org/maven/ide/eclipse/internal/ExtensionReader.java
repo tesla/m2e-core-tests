@@ -33,7 +33,7 @@ import org.maven.ide.eclipse.embedder.ArchetypeManager.ArchetypeCatalogFactory;
 import org.maven.ide.eclipse.index.IndexInfo;
 import org.maven.ide.eclipse.internal.index.IndexInfoWriter;
 import org.maven.ide.eclipse.internal.project.ProjectConfiguratorFactory;
-import org.maven.ide.eclipse.project.AbstractProjectConfigurator;
+import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
 import org.maven.ide.eclipse.scm.ScmHandler;
 import org.maven.ide.eclipse.scm.ScmHandlerFactory;
 import org.maven.ide.eclipse.scm.ScmHandlerUi;

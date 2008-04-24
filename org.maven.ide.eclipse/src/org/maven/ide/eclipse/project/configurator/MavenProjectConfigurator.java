@@ -26,9 +26,7 @@ import org.apache.maven.model.Plugin;
 import org.apache.maven.project.MavenProject;
 
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.project.AbstractProjectConfigurator;
 import org.maven.ide.eclipse.project.MavenRunnable;
-import org.maven.ide.eclipse.project.ProjectConfigurationRequest;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 
 

@@ -62,7 +62,7 @@
                   Configurator implementation
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn="org.maven.ide.eclipse.project.AbstractProjectConfigurator:"/>
+                  <meta.attribute kind="java" basedOn="org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator:"/>
                </appinfo>
             </annotation>
          </attribute>

@@ -10,8 +10,8 @@ package org.maven.ide.eclipse.configurators;
 
 import org.apache.maven.embedder.MavenEmbedder;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.maven.ide.eclipse.project.AbstractProjectConfigurator;
-import org.maven.ide.eclipse.project.ProjectConfigurationRequest;
+import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
+import org.maven.ide.eclipse.project.configurator.ProjectConfigurationRequest;
 
 /**
  * @author Eugene Kuleshov

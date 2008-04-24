@@ -17,7 +17,7 @@ import junit.framework.TestCase;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.maven.ide.eclipse.internal.project.ProjectConfiguratorFactory;
-import org.maven.ide.eclipse.project.AbstractProjectConfigurator;
+import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
 import org.maven.ide.eclipse.project.configurator.MavenProjectConfigurator;
 
 

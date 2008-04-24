@@ -6,12 +6,15 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.project;
+package org.maven.ide.eclipse.project.configurator;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 
 import org.apache.maven.project.MavenProject;
+
+import org.maven.ide.eclipse.project.MavenProjectFacade;
+import org.maven.ide.eclipse.project.ResolverConfiguration;
 
 /**
  * ProjectConfigurationRequest
