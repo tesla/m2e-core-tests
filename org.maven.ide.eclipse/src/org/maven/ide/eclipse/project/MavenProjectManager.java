@@ -209,4 +209,9 @@ public class MavenProjectManager {
     return manager.execute(embedder, pomFile, resolverConfiguration, runnable, monitor);
   }
 
+  public MavenExecutionResult execute(MavenEmbedder embedder, File pomFile,
+      ResolverConfiguration resolverConfiguration, MavenRunnable runnable, IProgressMonitor monitor) {
+    return manager.execute(embedder, pomFile, resolverConfiguration, runnable, monitor);
+  }
+  
 }

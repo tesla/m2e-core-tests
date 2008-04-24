@@ -937,6 +937,19 @@ public class MavenProjectManagerImpl {
     }
   }
   
+  public MavenExecutionResult execute(MavenEmbedder embedder, File pom, ResolverConfiguration resolverConfiguration, MavenRunnable runnable, IProgressMonitor monitor) {
+    MavenExecutionRequest request = embedderManager.createRequest(embedder);
+    request.setPomFile(pom.getAbsolutePath());
+    request.setBaseDirectory(pom.getParentFile());
+    request.setTransferListener(new TransferListenerAdapter(monitor, console, indexManager));
+    request.setProfiles(resolverConfiguration.getActiveProfileList());
+    request.addActiveProfiles(resolverConfiguration.getActiveProfileList());
+    request.setRecursive(false);
+    request.setUseReactor(false);
+
+    return runnable.execute(embedder, request);
+  }
+  
   public MavenExecutionResult execute(MavenEmbedder embedder, IFile pomFile, ResolverConfiguration resolverConfiguration, MavenRunnable runnable, IProgressMonitor monitor) {
     File pom = pomFile.getLocation().toFile();
 
