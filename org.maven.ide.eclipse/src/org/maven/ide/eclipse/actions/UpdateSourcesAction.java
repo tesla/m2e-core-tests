@@ -9,14 +9,19 @@
 package org.maven.ide.eclipse.actions;
 
 import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -39,6 +44,7 @@ public class UpdateSourcesAction implements IObjectActionDelegate {
   }
 
   public void run(IAction action) {
+    final Set projects = new LinkedHashSet();
     IStructuredSelection structuredSelection = (IStructuredSelection) selection;
     for(Iterator it = structuredSelection.iterator(); it.hasNext();) {
       Object element = it.next();
@@ -50,26 +56,45 @@ public class UpdateSourcesAction implements IObjectActionDelegate {
       }
       
       if(project != null) {
-        final IProject p = project;
-        new Job("Updating " + project.getName() + " Sources") {
-          protected IStatus run(IProgressMonitor monitor) {
-            MavenPlugin plugin = MavenPlugin.getDefault();
-            MavenProjectFacade projectFacade = plugin.getMavenProjectManager().create(p, monitor);
-            if(projectFacade != null) {
-              try {
-                plugin.getProjectImportManager().updateProjectConfiguration(p, //
-                    projectFacade.getResolverConfiguration(), //
-                    plugin.getMavenRuntimeManager().getGoalOnUpdate(), monitor);
-              } catch(CoreException ex) {
-                return ex.getStatus();
-              }
-            }
-
-            return Status.OK_STATUS;
-          }
-        }.schedule();
+        projects.add(project);
       }
     }
+
+    final MavenPlugin plugin = MavenPlugin.getDefault();
+    WorkspaceJob job = new WorkspaceJob("Updating Maven Configuration") {
+      public IStatus runInWorkspace(IProgressMonitor monitor) {
+        monitor.beginTask(getName(), projects.size());
+        
+        MultiStatus status = null;
+        for (Iterator i = projects.iterator(); i.hasNext(); ) {
+          if (monitor.isCanceled()) {
+            throw new OperationCanceledException();
+          }
+
+          IProject p = (IProject) i.next();
+          monitor.subTask(p.getName());
+          MavenProjectFacade projectFacade = plugin.getMavenProjectManager().create(p, monitor);
+          if(projectFacade != null) {
+            try {
+              plugin.getProjectImportManager().updateProjectConfiguration(p, //
+                  projectFacade.getResolverConfiguration(), //
+                  plugin.getMavenRuntimeManager().getGoalOnUpdate(), //
+                  new SubProgressMonitor(monitor, 0));
+            } catch(CoreException ex) {
+              if (status == null) {
+                status = new MultiStatus(MavenPlugin.PLUGIN_ID, IStatus.ERROR, "Can't update maven configuration", null);
+              }
+              status.add(ex.getStatus());
+            }
+          }
+          monitor.worked(1);
+        }
+
+        return status != null? status: Status.OK_STATUS;
+      }
+    };
+    job.setRule(plugin.getProjectImportManager().getRule());
+    job.schedule();
   }
 
 }

@@ -9,11 +9,11 @@
 package org.maven.ide.eclipse.internal.preferences;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -172,9 +172,9 @@ public class MavenProjectPreferencePage extends PropertyPage {
           boolean res = MessageDialog.openQuestion(getShell(), "Maven Project Configuration", //
               "Maven project configuration has changed. Do you want to update source folders?");
           if(res) {
-            new Job("Updating " + project.getName() + " Sources") {
-              protected IStatus run(IProgressMonitor monitor) {
-                MavenPlugin plugin = MavenPlugin.getDefault();
+            final MavenPlugin plugin = MavenPlugin.getDefault();
+            WorkspaceJob job = new WorkspaceJob("Updating " + project.getName() + " Sources") {
+              public IStatus runInWorkspace(IProgressMonitor monitor) {
                 try {
                   plugin.getProjectImportManager().updateProjectConfiguration(project, configuration,
                       plugin.getMavenRuntimeManager().getGoalOnUpdate(), monitor);
@@ -183,7 +183,9 @@ public class MavenProjectPreferencePage extends PropertyPage {
                 }
                 return Status.OK_STATUS;
               }
-            }.schedule();
+            };
+            job.setRule(plugin.getProjectImportManager().getRule());
+            job.schedule();
           }
 //        }
 //      });

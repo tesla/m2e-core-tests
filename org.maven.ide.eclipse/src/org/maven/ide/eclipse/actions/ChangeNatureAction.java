@@ -9,14 +9,18 @@
 package org.maven.ide.eclipse.actions;
 
 import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -64,6 +68,7 @@ public class ChangeNatureAction implements IObjectActionDelegate {
   public void run(IAction action) {
     if(selection instanceof IStructuredSelection) {
       IStructuredSelection structuredSelection = (IStructuredSelection) selection;
+      Set projects = new LinkedHashSet();
       for(Iterator it = structuredSelection.iterator(); it.hasNext();) {
         Object element = it.next();
         IProject project = null;
@@ -73,79 +78,94 @@ public class ChangeNatureAction implements IObjectActionDelegate {
           project = (IProject) ((IAdaptable) element).getAdapter(IProject.class);
         }
         if(project != null) {
-          changeNature(project);
+          projects.add(project);
         }
       }
+
+      new UpdateJob(projects, option).schedule();
     }
   }
 
-  private void changeNature(final IProject project) {
-    MavenPlugin plugin = MavenPlugin.getDefault();
-    MavenProjectManager projectManager = plugin.getMavenProjectManager();
-    
-    final ResolverConfiguration configuration = projectManager.getResolverConfiguration(project);
-    
-    boolean updateSourceFolders = false;
+  static class UpdateJob extends WorkspaceJob {
+    private final Set projects;
+    private final int option;
 
-    switch(option) {
-      case ENABLE_WORKSPACE:
-        configuration.setResolveWorkspaceProjects(true);
-        break;
-      case DISABLE_WORKSPACE:
-        configuration.setResolveWorkspaceProjects(false);
-        break;
-      case ENABLE_MODULES:
-        configuration.setIncludeModules(true);
-        updateSourceFolders = true;
-        break;
-      case DISABLE_MODULES:
-        configuration.setIncludeModules(false);
-        updateSourceFolders = true;
-        break;
-    }
-
-    projectManager.setResolverConfiguration(project, configuration);
-    
-    new UpdateJob(project, updateSourceFolders, configuration, //
-        plugin.getMavenRuntimeManager(), //
-        plugin.getProjectImportManager(), //
-        projectManager).schedule();
-  }
-
-  static class UpdateJob extends Job {
-    private final IProject project;
-    private final boolean updateSourceFolders;
-    private final ResolverConfiguration configuration;
     private final MavenRuntimeManager runtimeManager;
     private final IProjectImportManager importManager;
     private final MavenProjectManager projectManager;
     
-    public UpdateJob(IProject project, boolean updateSourceFolders, ResolverConfiguration configuration, //
-        MavenRuntimeManager runtimeManager, IProjectImportManager importManager, MavenProjectManager projectManager) {
-      super("Updating " + project.getName() + " sources");
-      this.project = project;
-      this.updateSourceFolders = updateSourceFolders;
-      this.configuration = configuration;
-      this.runtimeManager = runtimeManager;
-      this.importManager = importManager;
-      this.projectManager = projectManager;
+    public UpdateJob(Set projects, int option) {
+      super("Changing nature");
+      this.projects = projects;
+      this.option = option;
+
+      MavenPlugin plugin = MavenPlugin.getDefault();
+      this.runtimeManager = plugin.getMavenRuntimeManager();
+      this.importManager = plugin.getProjectImportManager();
+      this.projectManager = plugin.getMavenProjectManager();
+
+      setRule(importManager.getRule());
     }
     
-    protected IStatus run(IProgressMonitor monitor) {
-      if(updateSourceFolders) {
+    public IStatus runInWorkspace(IProgressMonitor monitor) {
+      
+      MultiStatus status = null;
+      for (Iterator i = projects.iterator(); i.hasNext(); ) {
+        if (monitor.isCanceled()) {
+          throw new OperationCanceledException();
+        }
+
+        IProject project = (IProject) i.next();
+        monitor.subTask(project.getName());
+
         try {
-          importManager.updateProjectConfiguration(project, //
-              configuration, runtimeManager.getGoalOnUpdate(), monitor);
-        } catch(CoreException ex) {
-          return ex.getStatus();
+          changeNature(project, monitor);
+        } catch (CoreException ex) {
+          if (status == null) {
+            status = new MultiStatus(MavenPlugin.PLUGIN_ID, IStatus.ERROR, "Can't change nature", null);
+          }
+          status.add(ex.getStatus());
         }
       }
-      
+
       boolean offline = runtimeManager.isOffline();
       boolean updateSnapshots = false;
-      projectManager.refresh(new MavenUpdateRequest(project, offline, updateSnapshots));
+      projectManager.refresh(new MavenUpdateRequest((IProject[]) projects.toArray(new IProject[projects.size()]), offline, updateSnapshots));
       
-      return Status.OK_STATUS;
+      return status != null? status: Status.OK_STATUS;
+    }
+
+    private void changeNature(final IProject project, IProgressMonitor monitor) throws CoreException {
+      MavenPlugin plugin = MavenPlugin.getDefault();
+      MavenProjectManager projectManager = plugin.getMavenProjectManager();
+      
+      final ResolverConfiguration configuration = projectManager.getResolverConfiguration(project);
+
+      boolean updateSourceFolders = false;
+
+      switch(option) {
+        case ENABLE_WORKSPACE:
+          configuration.setResolveWorkspaceProjects(true);
+          break;
+        case DISABLE_WORKSPACE:
+          configuration.setResolveWorkspaceProjects(false);
+          break;
+        case ENABLE_MODULES:
+          configuration.setIncludeModules(true);
+          updateSourceFolders = true;
+          break;
+        case DISABLE_MODULES:
+          configuration.setIncludeModules(false);
+          updateSourceFolders = true;
+          break;
+      }
+
+      projectManager.setResolverConfiguration(project, configuration);
+      
+      if (updateSourceFolders) {
+        importManager.updateProjectConfiguration(project, //
+            configuration, runtimeManager.getGoalOnUpdate(), monitor);
+      }
     }
   }
 
