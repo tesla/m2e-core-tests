@@ -8,6 +8,7 @@
 
 package org.maven.ide.eclipse.project.configurator;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -36,7 +37,7 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
   private String id;
   private String name;
 
-  public abstract void configure(MavenEmbedder embedder, ProjectConfigurationRequest request, IProgressMonitor monitor);
+  public abstract void configure(MavenEmbedder embedder, ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException;
 
   public int getPriority() {
     return priority;

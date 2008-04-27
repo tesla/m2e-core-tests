@@ -79,7 +79,7 @@ public class UpdateSourcesAction implements IObjectActionDelegate {
               plugin.getProjectImportManager().updateProjectConfiguration(p, //
                   projectFacade.getResolverConfiguration(), //
                   plugin.getMavenRuntimeManager().getGoalOnUpdate(), //
-                  new SubProgressMonitor(monitor, 0));
+                  new SubProgressMonitor(monitor, 1));
             } catch(CoreException ex) {
               if (status == null) {
                 status = new MultiStatus(MavenPlugin.PLUGIN_ID, IStatus.ERROR, "Can't update maven configuration", null);
@@ -87,7 +87,6 @@ public class UpdateSourcesAction implements IObjectActionDelegate {
               status.add(ex.getStatus());
             }
           }
-          monitor.worked(1);
         }
 
         return status != null? status: Status.OK_STATUS;
