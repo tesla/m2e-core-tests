@@ -24,7 +24,7 @@
     <maven_embedder.version>2.1.0.20080413-2200</maven_embedder.version>
     <archetype_common.version>2.0.0.20080331-1600</archetype_common.version>
     <maven_scm.version>1.0.0.20080410-2200</maven_scm.version>
-    <dependency_tree.version>1.1.0.20080419-1900</dependency_tree.version>
+    <dependency_tree.version>1.2.0.20080424-1900</dependency_tree.version>
 
     <maven_model_edit.version>1.0.0.20080331-1600</maven_model_edit.version>
     <qname_version>1.0.0.20080331-1600</qname_version>
@@ -305,7 +305,7 @@
   
   <repositories>
     <repository>
-      <id>sonatype-eclipse</id>
+      <id>maven-eclipse</id>
       <url>http://repository.sonatype.org:8081/nexus/content/groups/maven-eclipse</url>
       <snapshots>
         <enabled>true</enabled>
@@ -317,7 +317,7 @@
 
     <!--
     <repository>
-      <id>sonatype-eclipse</id>
+      <id>maven-eclipse</id>
       <url>http://repository.sonatype.org:8081/nexus/content/repositories/eclipse</url>
       <snapshots>
         <enabled>false</enabled>
@@ -351,7 +351,7 @@
   
   <pluginRepositories>
     <pluginRepository>
-      <id>sonatype-eclipse</id>
+      <id>eclipse-snapshots</id>
       <url>http://repository.sonatype.org:8081/nexus/content/repositories/eclipse-snapshots</url>
       <snapshots>
         <enabled>true</enabled>
