@@ -18,7 +18,7 @@
   
   <name>Maven Integration for Eclipse Build</name>
 
-  <properties>
+  <propertsdfies>
     <m2eclipse.version>0.9.4-SNAPSHOT</m2eclipse.version>
     
     <maven_embedder.version>2.1.0.20080413-2200</maven_embedder.version>
