@@ -13,13 +13,13 @@
 
   <groupId>org.maven.ide.eclipse</groupId>
   <artifactId>parent</artifactId>
-  <version>0.9.3-SNAPSHOT</version>
+  <version>0.9.4-SNAPSHOT</version>
   <packaging>pom</packaging>
   
   <name>Maven Integration for Eclipse Build</name>
 
   <properties>
-    <m2eclipse.version>0.9.3-20080421-2200</m2eclipse.version>
+    <m2eclipse.version>0.9.4-SNAPSHOT</m2eclipse.version>
     
     <maven_embedder.version>2.1.0.20080413-2200</maven_embedder.version>
     <archetype_common.version>2.0.0.20080331-1600</archetype_common.version>
