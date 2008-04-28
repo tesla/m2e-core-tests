@@ -155,7 +155,7 @@ public class ProjectImportManager implements IProjectImportManager {
       projectManager.notifyProjectChangeListeners(monitor);
 
     } catch(MavenEmbedderException ex) {
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, ex.getMessage(), ex));
+      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, ex.getMessage(), ex));
     }
   }
 
@@ -187,7 +187,7 @@ public class ProjectImportManager implements IProjectImportManager {
         embedder.stop();
       }
     } catch (MavenEmbedderException ex) {
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, ex.getMessage(), ex));
+      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, ex.getMessage(), ex));
     }
   }
 
@@ -352,7 +352,7 @@ public class ProjectImportManager implements IProjectImportManager {
     if(cause != null) {
       String msg = "Unable to create project from archetype " + archetype.toString();
       MavenPlugin.log(msg, cause);
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, 0, msg, cause));
+      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, cause));
     }
     monitor.worked(1);
     
