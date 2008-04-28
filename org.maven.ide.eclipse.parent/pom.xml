@@ -18,7 +18,7 @@
   
   <name>Maven Integration for Eclipse Build</name>
 
-  <propertsdfies>
+  <properties>
     <m2eclipse.version>0.9.4-SNAPSHOT</m2eclipse.version>
     
     <maven_embedder.version>2.1.0.20080413-2200</maven_embedder.version>
@@ -375,7 +375,7 @@
     </repository>
     <snapshotRepository>
       <id>m2e-snapshots</id>
-      <url>${m2e.snapshots}</url>
+      <url>scp://localhost</url>
     </snapshotRepository>
     <site>
       <id>m2e-site</id>
