@@ -375,7 +375,7 @@
     </repository>
     <snapshotRepository>
       <id>m2e-snapshots</id>
-      <url>scp://localhost</url>
+      <url>${m2e.snapshots}</url>
     </snapshotRepository>
     <site>
       <id>m2e-site</id>
