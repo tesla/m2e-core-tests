@@ -20,7 +20,7 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.apache.maven.archetype.catalog.Archetype;
 import org.apache.maven.model.Model;
 
-public interface IProjectImportManager {
+public interface IProjectConfigurationManager {
   
   ISchedulingRule getRule();
 

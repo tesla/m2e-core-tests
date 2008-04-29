@@ -40,14 +40,15 @@ public class ProjectConfiguratorFactory {
   /**
    * ProjectConfigurator comparator
    */
-  public static class ProjectConfiguratorComparator implements Comparator {
+  private static class ProjectConfiguratorComparator implements Comparator {
+    ProjectConfiguratorComparator() {
+    }
     
     public int compare(Object o1, Object o2) {
       AbstractProjectConfigurator c1 = (AbstractProjectConfigurator) o1;
       AbstractProjectConfigurator c2 = (AbstractProjectConfigurator) o2;
       return c1.getPriority() - c2.getPriority();
     }
-    
   }
   
 }

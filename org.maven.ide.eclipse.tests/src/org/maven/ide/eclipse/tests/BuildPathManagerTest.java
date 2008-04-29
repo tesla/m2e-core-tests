@@ -34,7 +34,7 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.index.IndexInfo;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.project.BuildPathManager;
-import org.maven.ide.eclipse.project.IProjectImportManager;
+import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
@@ -53,7 +53,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     final IProject project2 = createProject("MNGECLIPSE-248child", "projects/MNGECLIPSE-248child/pom.xml");
 
     NullProgressMonitor monitor = new NullProgressMonitor();
-    IProjectImportManager importManager = MavenPlugin.getDefault().getProjectImportManager();
+    IProjectConfigurationManager importManager = MavenPlugin.getDefault().getProjectConfigurationManager();
 
     ResolverConfiguration configuration = new ResolverConfiguration();
     importManager.enableMavenNature(project1, configuration, monitor);
@@ -97,7 +97,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     final IProject project2 = createProject("MNGECLIPSE-248child", "projects/MNGECLIPSE-248child/pom.xml");
 
     NullProgressMonitor monitor = new NullProgressMonitor();
-    IProjectImportManager importManager = MavenPlugin.getDefault().getProjectImportManager();
+    IProjectConfigurationManager importManager = MavenPlugin.getDefault().getProjectConfigurationManager();
 
     ResolverConfiguration configuration = new ResolverConfiguration();
     configuration.setIncludeModules(false);
@@ -1023,9 +1023,9 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
         resolverConfiguration.setIncludeModules(modules);
         resolverConfiguration.setUseMavenOutputFolders(mavenFolders);
         
-        plugin.getProjectImportManager().createSimpleProject(project, null, model, directories, resolverConfiguration, monitor);
+        plugin.getProjectConfigurationManager().createSimpleProject(project, null, model, directories, resolverConfiguration, monitor);
       }
-    }, plugin.getProjectImportManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
+    }, plugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
 
     IJavaProject javaProject = JavaCore.create(project);
     assertEquals("ignore", javaProject.getOption(JavaCore.CORE_JAVA_BUILD_CLEAN_OUTPUT_FOLDER, false));

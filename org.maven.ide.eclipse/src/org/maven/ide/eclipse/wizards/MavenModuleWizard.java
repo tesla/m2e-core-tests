@@ -199,7 +199,7 @@ public class MavenModuleWizard extends Wizard implements INewWizard {
           // XXX respect parent's setting for separate projects for modules
           // XXX should run update sources on parent instead of creating new module project
 
-          plugin.getProjectImportManager().createSimpleProject(project, location.append(moduleName), model, folders,
+          plugin.getProjectConfigurationManager().createSimpleProject(project, location.append(moduleName), model, folders,
               configuration.getResolverConfiguration(), monitor);
 
           plugin.getMavenModelManager().addModule(parentPom, projectName);
@@ -216,7 +216,7 @@ public class MavenModuleWizard extends Wizard implements INewWizard {
       job = new WorkspaceJob(Messages.getString("wizard.project.job.creating", archetype.getArtifactId())) {
         public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
           MavenPlugin plugin = MavenPlugin.getDefault();
-          plugin.getProjectImportManager().createArchetypeProject(project, location, archetype, model.getGroupId(),
+          plugin.getProjectConfigurationManager().createArchetypeProject(project, location, archetype, model.getGroupId(),
               model.getArtifactId(), model.getVersion(), model.getPackaging(), configuration, monitor);
           plugin.getMavenModelManager().addModule(parentPom, moduleName);
           return Status.OK_STATUS;
@@ -237,7 +237,7 @@ public class MavenModuleWizard extends Wizard implements INewWizard {
         }
       }
     });
-    job.setRule(plugin.getProjectImportManager().getRule());
+    job.setRule(plugin.getProjectConfigurationManager().getRule());
     job.schedule();
 
     return true;

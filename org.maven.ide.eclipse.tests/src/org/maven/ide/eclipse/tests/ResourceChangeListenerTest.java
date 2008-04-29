@@ -21,7 +21,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.internal.project.ProjectImportManager;
+import org.maven.ide.eclipse.internal.project.ProjectConfigurationManager;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 
 
@@ -33,7 +33,7 @@ public class ResourceChangeListenerTest extends AsbtractMavenProjectTestCase {
     super.setUp();
     workspace.getRoot().getProject("resourcechange").delete(true, null);
     project = createProject("resourcechange", "projects/resourcechange/pom.xml");
-    ProjectImportManager importManager = (ProjectImportManager) MavenPlugin.getDefault().getProjectImportManager();
+    ProjectConfigurationManager importManager = (ProjectConfigurationManager) MavenPlugin.getDefault().getProjectConfigurationManager();
     importManager.configureProject(project, new ResolverConfiguration(), new NullProgressMonitor());
     waitForJobsToComplete();
   }

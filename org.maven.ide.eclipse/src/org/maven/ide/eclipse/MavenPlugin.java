@@ -68,9 +68,9 @@ import org.maven.ide.eclipse.internal.launch.WorkspaceStateWriter;
 import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerImpl;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerRefreshJob;
-import org.maven.ide.eclipse.internal.project.ProjectImportManager;
+import org.maven.ide.eclipse.internal.project.ProjectConfigurationManager;
 import org.maven.ide.eclipse.project.BuildPathManager;
-import org.maven.ide.eclipse.project.IProjectImportManager;
+import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
 
@@ -144,7 +144,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
   private MavenRuntimeManager runtimeManager;
   
-  private ProjectImportManager importManager;
+  private ProjectConfigurationManager configurationManager;
 
   private MavenProjectManagerRefreshJob mavenBackgroundJob;
 
@@ -221,7 +221,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     projectManager.addMavenProjectChangedListener(this.buildpathManager);
     projectManager.addDownloadSourceListener(this.buildpathManager);
 
-    this.importManager = new ProjectImportManager(modelManager, console, 
+    this.configurationManager = new ProjectConfigurationManager(modelManager, console, 
         runtimeManager, managerImpl, 
         indexManager, embedderManager);
 
@@ -311,7 +311,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
     this.embedderManager.shutdown();
 
-    this.importManager = null;
+    this.configurationManager = null;
 
     if(this.console != null) {
       this.console.shutdown();
@@ -519,7 +519,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     }
   }
 
-  public IProjectImportManager getProjectImportManager() {
-    return importManager;
+  public IProjectConfigurationManager getProjectConfigurationManager() {
+    return configurationManager;
   }
 }

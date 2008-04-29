@@ -120,7 +120,7 @@ public class EnableNatureAction implements IObjectActionDelegate, IExecutableExt
       configuration.setUseMavenOutputFolders(useMavenOutputFolders);
       configuration.setActiveProfiles("");
       
-      plugin.getProjectImportManager().enableMavenNature(project, //
+      plugin.getProjectConfigurationManager().enableMavenNature(project, //
           configuration, //
           new NullProgressMonitor());
       

@@ -191,7 +191,7 @@ public class MavenProjectWizard extends Wizard implements INewWizard {
       job = new WorkspaceJob(Messages.getString("wizard.project.job.creatingProject", projectName)) {
         public IStatus runInWorkspace(IProgressMonitor monitor) {
           try {
-            plugin.getProjectImportManager().createSimpleProject(project, location, model, folders, //
+            plugin.getProjectConfigurationManager().createSimpleProject(project, location, model, folders, //
                 configuration.getResolverConfiguration(), monitor);
             return Status.OK_STATUS;
           } catch(CoreException e) {
@@ -213,7 +213,7 @@ public class MavenProjectWizard extends Wizard implements INewWizard {
       job = new WorkspaceJob(Messages.getString("wizard.project.job.creating", archetype.getArtifactId())) {
         public IStatus runInWorkspace(IProgressMonitor monitor) {
           try {
-            plugin.getProjectImportManager().createArchetypeProject(project, location, archetype, //
+            plugin.getProjectConfigurationManager().createArchetypeProject(project, location, archetype, //
                 groupId, artifactId, version, javaPackage, configuration, monitor);
             return Status.OK_STATUS;
           } catch(CoreException e) {
@@ -238,7 +238,7 @@ public class MavenProjectWizard extends Wizard implements INewWizard {
         }
       }
     });
-    job.setRule(plugin.getProjectImportManager().getRule());
+    job.setRule(plugin.getProjectConfigurationManager().getRule());
     job.schedule();
 
     return true;

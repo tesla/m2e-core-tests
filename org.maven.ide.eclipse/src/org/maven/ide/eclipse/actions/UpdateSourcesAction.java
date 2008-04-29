@@ -76,7 +76,7 @@ public class UpdateSourcesAction implements IObjectActionDelegate {
           MavenProjectFacade projectFacade = plugin.getMavenProjectManager().create(p, monitor);
           if(projectFacade != null) {
             try {
-              plugin.getProjectImportManager().updateProjectConfiguration(p, //
+              plugin.getProjectConfigurationManager().updateProjectConfiguration(p, //
                   projectFacade.getResolverConfiguration(), //
                   plugin.getMavenRuntimeManager().getGoalOnUpdate(), //
                   new SubProgressMonitor(monitor, 1));
@@ -92,7 +92,7 @@ public class UpdateSourcesAction implements IObjectActionDelegate {
         return status != null? status: Status.OK_STATUS;
       }
     };
-    job.setRule(plugin.getProjectImportManager().getRule());
+    job.setRule(plugin.getProjectConfigurationManager().getRule());
     job.schedule();
   }
 

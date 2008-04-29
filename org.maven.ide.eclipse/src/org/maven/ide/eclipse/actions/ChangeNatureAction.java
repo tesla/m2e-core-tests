@@ -29,7 +29,7 @@ import org.eclipse.ui.IWorkbenchPart;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
-import org.maven.ide.eclipse.project.IProjectImportManager;
+import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
@@ -91,7 +91,7 @@ public class ChangeNatureAction implements IObjectActionDelegate {
     private final int option;
 
     private final MavenRuntimeManager runtimeManager;
-    private final IProjectImportManager importManager;
+    private final IProjectConfigurationManager importManager;
     private final MavenProjectManager projectManager;
     
     public UpdateJob(Set projects, int option) {
@@ -101,7 +101,7 @@ public class ChangeNatureAction implements IObjectActionDelegate {
 
       MavenPlugin plugin = MavenPlugin.getDefault();
       this.runtimeManager = plugin.getMavenRuntimeManager();
-      this.importManager = plugin.getProjectImportManager();
+      this.importManager = plugin.getProjectConfigurationManager();
       this.projectManager = plugin.getMavenProjectManager();
 
       setRule(importManager.getRule());

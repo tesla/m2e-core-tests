@@ -176,7 +176,7 @@ public class MavenProjectPreferencePage extends PropertyPage {
             WorkspaceJob job = new WorkspaceJob("Updating " + project.getName() + " Sources") {
               public IStatus runInWorkspace(IProgressMonitor monitor) {
                 try {
-                  plugin.getProjectImportManager().updateProjectConfiguration(project, configuration,
+                  plugin.getProjectConfigurationManager().updateProjectConfiguration(project, configuration,
                       plugin.getMavenRuntimeManager().getGoalOnUpdate(), monitor);
                 } catch(CoreException ex) {
                   return ex.getStatus();
@@ -184,7 +184,7 @@ public class MavenProjectPreferencePage extends PropertyPage {
                 return Status.OK_STATUS;
               }
             };
-            job.setRule(plugin.getProjectImportManager().getRule());
+            job.setRule(plugin.getProjectConfigurationManager().getRule());
             job.schedule();
           }
 //        }

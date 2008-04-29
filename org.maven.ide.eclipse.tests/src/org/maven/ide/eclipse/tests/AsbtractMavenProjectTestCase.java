@@ -49,7 +49,7 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.project.BuildPathManager;
-import org.maven.ide.eclipse.project.IProjectImportManager;
+import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.MavenProjectInfo;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
@@ -195,9 +195,9 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
 
     workspace.run(new IWorkspaceRunnable() {
       public void run(IProgressMonitor monitor) throws CoreException {
-        plugin.getProjectImportManager().importProjects(projectInfos, importConfiguration, monitor);
+        plugin.getProjectConfigurationManager().importProjects(projectInfos, importConfiguration, monitor);
       }
-    }, plugin.getProjectImportManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
+    }, plugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
 
     IProject[] projects = new IProject[projectInfos.size()];
     for (int i = 0; i < projectInfos.size(); i++) {
@@ -228,11 +228,11 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
     
     workspace.run(new IWorkspaceRunnable() {
       public void run(IProgressMonitor monitor) throws CoreException {
-        plugin.getProjectImportManager().importProjects(Collections.singleton(projectInfo), importConfiguration, monitor);
+        plugin.getProjectConfigurationManager().importProjects(Collections.singleton(projectInfo), importConfiguration, monitor);
         IProject project = workspace.getRoot().getProject(importConfiguration.getProjectName(projectInfo.getModel()));
         assertNotNull("Failed to import project " + projectInfo, project);
       }
-    }, plugin.getProjectImportManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
+    }, plugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
 
     return workspace.getRoot().getProject(projectName);
   }

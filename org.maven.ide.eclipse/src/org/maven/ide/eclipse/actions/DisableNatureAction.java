@@ -51,7 +51,7 @@ public class DisableNatureAction implements IObjectActionDelegate {
           MavenPlugin plugin = MavenPlugin.getDefault();
 
           try {
-            plugin.getProjectImportManager().disableMavenNature(project, new NullProgressMonitor());
+            plugin.getProjectConfigurationManager().disableMavenNature(project, new NullProgressMonitor());
 
             disableLaunchConfigurations(project);
           } catch(CoreException ex) {

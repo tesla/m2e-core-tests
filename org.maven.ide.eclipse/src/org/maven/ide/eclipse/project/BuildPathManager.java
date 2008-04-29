@@ -73,6 +73,9 @@ import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
+import org.maven.ide.eclipse.internal.project.ClasspathConfiguratorFactoryFactory;
+import org.maven.ide.eclipse.project.configurator.AbstractClasspathConfigurator;
+import org.maven.ide.eclipse.project.configurator.AbstractClasspathConfiguratorFactory;
 
 /**
  * This class is responsible for mapping Maven classpath to JDT and back.
@@ -220,7 +223,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     }
   }
 
-  private void updateClasspath(IProject project, IProgressMonitor monitor) {
+  public void updateClasspath(IProject project, IProgressMonitor monitor) {
     IJavaProject javaProject = JavaCore.create(project);
     if(javaProject != null) {
       try {
@@ -282,6 +285,16 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     } else {
       // ECLIPSE-33: test scope (already includes provided)
       scopeFilter = SCOPE_FILTER_TEST;
+    }
+
+    List configurators = new ArrayList();
+    Set factories = ClasspathConfiguratorFactoryFactory.getFactories();
+    for (Iterator it = factories.iterator(); it.hasNext(); ) {
+      AbstractClasspathConfiguratorFactory factory = (AbstractClasspathConfiguratorFactory) it.next();
+      AbstractClasspathConfigurator configurator = factory.createConfigurator(mavenProject);
+      if (configurator != null) {
+        configurators.add(configurator);
+      }
     }
 
     for(Iterator it = mavenProject.getMavenProject().getArtifacts().iterator(); it.hasNext();) {
@@ -352,6 +365,14 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
         if(javaDocUrl != null) {
           attributes.add(JavaCore.newClasspathAttribute(IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME,
               javaDocUrl));
+        }
+
+        for (Iterator ci = configurators.iterator(); ci.hasNext(); ) {
+          AbstractClasspathConfigurator cpc = (AbstractClasspathConfigurator) ci.next();
+          Set set = cpc.getAttributes(a, kind);
+          if (set != null) {
+            attributes.addAll(set);
+          }
         }
 
         entries.put(entryPath, JavaCore.newLibraryEntry(entryPath, //

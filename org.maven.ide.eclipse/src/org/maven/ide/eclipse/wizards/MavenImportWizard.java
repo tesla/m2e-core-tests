@@ -72,7 +72,7 @@ public class MavenImportWizard extends Wizard implements IImportWizard {
       public IStatus runInWorkspace(IProgressMonitor monitor) {
 
         try {
-          plugin.getProjectImportManager().importProjects(projects, importConfiguration, monitor);
+          plugin.getProjectConfigurationManager().importProjects(projects, importConfiguration, monitor);
         } catch(CoreException ex) {
           plugin.getConsole().logError("Projects imported with errors");
           return ex.getStatus();
@@ -81,7 +81,7 @@ public class MavenImportWizard extends Wizard implements IImportWizard {
         return Status.OK_STATUS;
       }
     };
-    job.setRule(plugin.getProjectImportManager().getRule());
+    job.setRule(plugin.getProjectConfigurationManager().getRule());
     job.schedule();
 
     return true;

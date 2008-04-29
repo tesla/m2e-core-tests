@@ -78,11 +78,14 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
   final MavenRuntimeManager runtimeManager;
 
   final MavenConsole console;
+  
+  final BuildPathManager buildPathManager;
 
   public JavaProjectConfigurator() {
     MavenPlugin plugin = MavenPlugin.getDefault();
     projectManager = plugin.getMavenProjectManager();
     runtimeManager = plugin.getMavenRuntimeManager();
+    buildPathManager = plugin.getBuildpathManager();
     console = plugin.getConsole();
   }
 
@@ -166,6 +169,8 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
       }
       javaProject.setRawClasspath((IClasspathEntry[]) entries.toArray(new IClasspathEntry[entries.size()]),
           classesFolder.getFullPath(), monitor);
+
+      buildPathManager.updateClasspath(project, monitor);
 
       long t2 = System.currentTimeMillis();
       console.logMessage("Updated source folders for project " + project.getName() + " " + (t2 - t1) / 1000 + "sec");

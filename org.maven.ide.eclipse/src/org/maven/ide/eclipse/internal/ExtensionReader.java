@@ -14,8 +14,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.osgi.framework.Bundle;
 
@@ -34,6 +36,7 @@ import org.maven.ide.eclipse.index.IndexInfo;
 import org.maven.ide.eclipse.internal.index.IndexInfoWriter;
 import org.maven.ide.eclipse.internal.project.ProjectConfiguratorFactory;
 import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
+import org.maven.ide.eclipse.project.configurator.AbstractClasspathConfiguratorFactory;
 import org.maven.ide.eclipse.scm.ScmHandler;
 import org.maven.ide.eclipse.scm.ScmHandlerFactory;
 import org.maven.ide.eclipse.scm.ScmHandlerUi;
@@ -55,6 +58,8 @@ public class ExtensionReader {
   public static final String EXTENSION_SCM_HANDLERS_UI = "org.maven.ide.eclipse.scmHandlersUi";
   
   public static final String EXTENSION_PROJECT_CONFIGURATORS = "org.maven.ide.eclipse.projectConfigurators";
+
+  public static final String EXTENSION_CLASSPATH_CONFIGURATOR_FACTORIES = "org.maven.ide.eclipse.classpathConfiguratorFactories";
 
   private static final String ELEMENT_INDEX = "index";
 
@@ -83,6 +88,8 @@ public class ExtensionReader {
   private static final String ATTR_DESCRIPTION = "description";
 
   private static final String ELEMENT_CONFIGURATOR = "configurator";
+
+  private static final String ELEMENT_CLASSPATH_CONFIGURATOR_FACTORY = "classpathConfiguratorFactory";
 
   /**
    * @param configFile previously saved indexes configuration
@@ -282,6 +289,32 @@ public class ExtensionReader {
       }
     }
   }
-  
+
+  public static Set readClasspathConfiguratorFactoryExtensions() {
+    Set factories = new HashSet();
+    
+    IExtensionRegistry registry = Platform.getExtensionRegistry();
+    IExtensionPoint configuratorsExtensionPoint = registry.getExtensionPoint(EXTENSION_CLASSPATH_CONFIGURATOR_FACTORIES);
+    if(configuratorsExtensionPoint != null) {
+      IExtension[] configuratorExtensions = configuratorsExtensionPoint.getExtensions();
+      for(int i = 0; i < configuratorExtensions.length; i++ ) {
+        IExtension extension = configuratorExtensions[i];
+        IConfigurationElement[] elements = extension.getConfigurationElements();
+        for(int j = 0; j < elements.length; j++ ) {
+          IConfigurationElement element = elements[j];
+          if(element.getName().equals(ELEMENT_CLASSPATH_CONFIGURATOR_FACTORY)) {
+            try {
+              factories.add(element.createExecutableExtension(AbstractClasspathConfiguratorFactory.ATTR_CLASS));
+            } catch(CoreException ex) {
+              MavenPlugin.log(ex);
+            }
+          }
+        }
+      }
+    }
+    
+    return factories;
+  }
+
 }
 
