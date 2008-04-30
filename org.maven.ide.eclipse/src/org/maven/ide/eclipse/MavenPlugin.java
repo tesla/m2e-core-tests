@@ -224,6 +224,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     this.configurationManager = new ProjectConfigurationManager(modelManager, console, 
         runtimeManager, managerImpl, 
         indexManager, embedderManager);
+    projectManager.addMavenProjectChangedListener(this.configurationManager);
 
     this.launchConfigurationListener = new MavenLaunchConfigurationListener();
     DebugPlugin.getDefault().getLaunchManager().addLaunchConfigurationListener(launchConfigurationListener);
@@ -305,6 +306,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
     this.projectManager.removeMavenProjectChangedListener(buildpathManager);
     this.projectManager.removeDownloadSourceListener(this.buildpathManager);
+    this.projectManager.removeMavenProjectChangedListener(this.configurationManager);
     this.projectManager = null;
 
     workspace.removeResourceChangeListener(this.buildpathManager);

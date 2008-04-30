@@ -55,8 +55,10 @@ import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.internal.embedder.TransferListenerAdapter;
 import org.maven.ide.eclipse.project.BuildPathManager;
+import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
 import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.LocalProjectScanner;
+import org.maven.ide.eclipse.project.MavenProjectChangedEvent;
 import org.maven.ide.eclipse.project.MavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectInfo;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
@@ -71,7 +73,7 @@ import org.maven.ide.eclipse.util.Util;
  *
  * @author igor
  */
-public class ProjectConfigurationManager implements IProjectConfigurationManager {
+public class ProjectConfigurationManager implements IProjectConfigurationManager, IMavenProjectChangedListener {
   
   static final QualifiedName QNAME = new QualifiedName(MavenPlugin.PLUGIN_ID, "ProjectImportManager");
 
@@ -482,6 +484,14 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     enableMavenNature(project, resolverConfiguration, monitor);
 
     return project;
+  }
+
+  public void mavenProjectChanged(MavenProjectChangedEvent[] events, IProgressMonitor monitor) {
+    Set configurators = ProjectConfiguratorFactory.getConfigurators();
+    for (Iterator it = configurators.iterator(); it.hasNext(); ) {
+      AbstractProjectConfigurator configurator = (AbstractProjectConfigurator) it.next();
+      configurator.mavenProjectChanged(events, monitor);
+    }
   }
 
 }

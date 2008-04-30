@@ -15,6 +15,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.apache.maven.embedder.MavenEmbedder;
 
+import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
+import org.maven.ide.eclipse.project.MavenProjectChangedEvent;
+
 
 /**
  * Used to configure maven projects.
@@ -23,7 +27,7 @@ import org.apache.maven.embedder.MavenEmbedder;
  * 
  * @author Igor Fedorenko
  */
-public abstract class AbstractProjectConfigurator implements IExecutableExtension {
+public abstract class AbstractProjectConfigurator implements IExecutableExtension, IMavenProjectChangedListener {
 
   public static final String ATTR_ID = "id";
   
@@ -38,6 +42,20 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
   private String name;
 
   public abstract void configure(MavenEmbedder embedder, ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException;
+
+  public void mavenProjectChanged(MavenProjectChangedEvent[] events, IProgressMonitor monitor) {
+    for (int i = 0; i < events.length; i++) {
+      try {
+        mavenProjectChanged(events[i], monitor);
+      } catch(CoreException ex) {
+        MavenPlugin.log(ex);
+      }
+    }
+  }
+
+  protected void mavenProjectChanged(MavenProjectChangedEvent event, IProgressMonitor monitor) throws CoreException {
+    // do nothing
+  }
 
   public int getPriority() {
     return priority;
