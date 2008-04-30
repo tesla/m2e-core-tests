@@ -96,12 +96,6 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
 
   public static final String TEST_TYPE = "test";
 
-  public static final String CLASSPATH_COMPONENT_DEPENDENCY = "org.eclipse.jst.component.dependency";
-
-  public static final String CLASSPATH_COMPONENT_NON_DEPENDENCY = "org.eclipse.jst.component.nondependency";
-
-  public static final String PACKAGING_WAR = "war";
-  
   public static final int CLASSPATH_TEST = 0;
 
   public static final int CLASSPATH_RUNTIME = 1;
@@ -244,22 +238,22 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
   private IClasspathEntry[] getClasspath(MavenProjectFacade projectFacade, final int kind, final Properties sourceAttachment) throws CoreException {
     IProject project = projectFacade.getProject();
 
-    // From MNGECLIPSE-105
-    // If the current project is a WAR project AND it has
-    // a dynamic web project nature, make sure that any workspace
-    // projects that it depends on are NOT included in any way
-    // in the container (neither as projects nor as artifacts).
-    // The idea is that the inclusion is controlled explicitly
-    // by a developer via WTP UI.
-    final boolean skipWorkspaceProjectsForWeb = PACKAGING_WAR.equals(projectFacade.getPackaging())
-        && hasDynamicWebProjectNature(project);
-
     // maps entry path to entry to avoid dups caused by different entry attributes
     final Map entries = new LinkedHashMap();
 
+    final List configurators = new ArrayList();
+    Set factories = ClasspathConfiguratorFactoryFactory.getFactories();
+    for (Iterator it = factories.iterator(); it.hasNext(); ) {
+      AbstractClasspathConfiguratorFactory factory = (AbstractClasspathConfiguratorFactory) it.next();
+      AbstractClasspathConfigurator configurator = factory.createConfigurator(projectFacade);
+      if (configurator != null) {
+        configurators.add(configurator);
+      }
+    }
+
     projectFacade.accept(new IMavenProjectVisitor() {
       public boolean visit(MavenProjectFacade mavenProject) {
-        addClasspathEntries(entries, mavenProject, kind, skipWorkspaceProjectsForWeb, sourceAttachment);
+        addClasspathEntries(entries, mavenProject, kind, sourceAttachment, configurators);
         return true; // continue traversal
       }
       
@@ -267,11 +261,17 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
       }
     }, IMavenProjectVisitor.NESTED_MODULES);
 
+    for (Iterator ci = configurators.iterator(); ci.hasNext(); ) {
+      AbstractClasspathConfigurator cpc = (AbstractClasspathConfigurator) ci.next();
+      cpc.configureClasspath(entries);
+    }
+
     return (IClasspathEntry[]) entries.values().toArray(new IClasspathEntry[entries.size()]);
   }
 
-  void addClasspathEntries(Map entries, MavenProjectFacade mavenProject, int kind, boolean skipWorkspaceProjectsForWeb, Properties sourceAttachment) {
+  void addClasspathEntries(Map entries, MavenProjectFacade mavenProject, int kind, Properties sourceAttachment, List configurators) {
     ArtifactFilter scopeFilter;
+
     if(CLASSPATH_RUNTIME == kind) {
       // ECLIPSE-33: runtime+provided scope
       // ECLIPSE-85: adding system scope
@@ -287,16 +287,6 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
       scopeFilter = SCOPE_FILTER_TEST;
     }
 
-    List configurators = new ArrayList();
-    Set factories = ClasspathConfiguratorFactoryFactory.getFactories();
-    for (Iterator it = factories.iterator(); it.hasNext(); ) {
-      AbstractClasspathConfiguratorFactory factory = (AbstractClasspathConfiguratorFactory) it.next();
-      AbstractClasspathConfigurator configurator = factory.createConfigurator(mavenProject);
-      if (configurator != null) {
-        configurators.add(configurator);
-      }
-    }
-
     for(Iterator it = mavenProject.getMavenProject().getArtifacts().iterator(); it.hasNext();) {
       Artifact a = (Artifact) it.next();
 
@@ -306,13 +296,6 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
 
       ArrayList attributes = new ArrayList();
 
-      String scope = a.getScope();
-      // Check the scope & set WTP non-dependency as appropriate
-      if(Artifact.SCOPE_PROVIDED.equals(scope) || Artifact.SCOPE_TEST.equals(scope)
-          || Artifact.SCOPE_SYSTEM.equals(scope)) {
-        attributes.add(JavaCore.newClasspathAttribute(CLASSPATH_COMPONENT_NON_DEPENDENCY, ""));
-      }
-
       // project
       MavenProjectFacade dependency = projectManager.getMavenProject(a);
       if (dependency != null && dependency.getProject().equals(mavenProject.getProject())) {
@@ -320,11 +303,6 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
       }
 
       if (dependency != null && dependency.getFullPath(a.getFile()) != null) {
-        if(skipWorkspaceProjectsForWeb) {
-          // From MNGECLIPSE-105
-          // Leave it out so that the user can handle it the WTP way
-          continue;
-        }
         entries.put(dependency.getFullPath(), JavaCore.newProjectEntry(dependency.getFullPath(), false));
         continue;
       }
@@ -381,19 +359,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
             false /*not exported*/));
       }
     }
-    
-  }
 
-  private boolean hasDynamicWebProjectNature(IProject project) {
-    try {
-      if(project.hasNature("org.eclipse.wst.common.modulecore.ModuleCoreNature")
-          || project.hasNature("org.eclipse.wst.common.project.facet.core.nature")) {
-        return true;
-      }
-    } catch(Exception e) {
-      console.logError("Unable to inspect nature: " + e);
-    }
-    return false;
   }
 
   public IClasspathEntry[] getClasspath(IProject project, int scope, IProgressMonitor monitor) throws CoreException {

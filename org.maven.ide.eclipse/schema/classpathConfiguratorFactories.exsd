@@ -57,11 +57,11 @@
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":org.maven.ide.eclipse.project.configurator.IClasspathConfiguratorFactory"/>
+                  <meta.attribute kind="java" basedOn="org.maven.ide.eclipse.project.configurator.AbstractClasspathConfiguratorFactory:"/>
                </appinfo>
             </annotation>
          </attribute>
-         <attribute name="priority" type="string" use="required">
+         <attribute name="priority" type="string">
             <annotation>
                <documentation>
                   
