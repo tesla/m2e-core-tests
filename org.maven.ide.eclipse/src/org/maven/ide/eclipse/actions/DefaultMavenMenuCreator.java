@@ -55,7 +55,7 @@ public class DefaultMavenMenuCreator extends AbstractMavenMenuCreator {
   
       addMenu(RefreshMavenModelsAction.ID, "Update Dependencies", new RefreshMavenModelsAction(), menu, "icons/update_dependencies.gif");
       addMenu(RefreshMavenModelsAction.ID_SNAPSHOTS, "Update Snapshots", new RefreshMavenModelsAction(true), menu);
-      addMenu(UpdateSourcesAction.ID, "Update Source Folders", new UpdateSourcesAction(), menu, "icons/update_source_folders.gif");
+      addMenu(UpdateSourcesAction.ID, "Update Project Configuration", new UpdateSourcesAction(), menu, "icons/update_source_folders.gif");
       addMenu(DownloadSourcesAction.ID, "Download Sources", new DownloadSourcesAction(), menu);
       new Separator().fill(menu, -1);
 
