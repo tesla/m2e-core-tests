@@ -53,6 +53,9 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
     }
   }
 
+  /**
+   * @throws CoreException  
+   */
   protected void mavenProjectChanged(MavenProjectChangedEvent event, IProgressMonitor monitor) throws CoreException {
     // do nothing
   }
