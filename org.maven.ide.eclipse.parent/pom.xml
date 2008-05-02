@@ -81,6 +81,7 @@
     <module>../org.maven.ide.eclipse.subclipse</module>
     <module>../org.maven.ide.eclipse.scm</module>
 
+    <module>../org.maven.ide.eclipse.ajdt</module>
     <module>../org.maven.ide.eclipse.wtp</module>
 
     <!-- 
