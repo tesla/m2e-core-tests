@@ -708,4 +708,28 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     a = (Artifact) mavenProject.getArtifacts().iterator().next();
     assertFalse(a.isResolved());
   }
+
+  public void testOptionalDependencies() throws Exception {
+    IProject p1 = createExisting("optionaldependency-p01");
+    IProject p2 = createExisting("optionaldependency-p02");
+    waitForJobsToComplete();
+
+    add(manager, new IProject[] {p1, p2});
+
+    IFile pom1 = p1.getFile("pom.xml");
+    IFile pom2 = p2.getFile("pom.xml");
+    MavenProject mavenProject = manager.create(pom2, false, null).getMavenProject();
+    Artifact[] a = (Artifact[]) mavenProject.getArtifacts().toArray(new Artifact[0]);
+    assertEquals(2, a.length);
+    assertEquals(pom1.getLocation().toFile().getCanonicalFile(), a[0].getFile().getCanonicalFile());
+    assertEquals("junit-3.8.1.jar", a[1].getFile().getName());
+
+    copyContent(p1, "pom-changed.xml", "pom.xml");
+    add(manager, new IProject[] {p1});
+
+    mavenProject = manager.create(pom2, false, null).getMavenProject();
+    a = (Artifact[]) mavenProject.getArtifacts().toArray(new Artifact[0]);
+    assertEquals(1, a.length);
+    assertEquals(pom1.getLocation().toFile().getCanonicalFile(), a[0].getFile().getCanonicalFile());
+  }
 }

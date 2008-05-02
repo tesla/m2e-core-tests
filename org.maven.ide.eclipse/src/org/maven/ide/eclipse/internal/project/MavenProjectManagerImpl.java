@@ -632,7 +632,8 @@ public class MavenProjectManagerImpl {
       Artifact beforeDependeny = (Artifact) beforeIt.next();
       Artifact afterDependeny = (Artifact) afterIt.next();
       if (!ArtifactKey.equals(beforeDependeny, afterDependeny)
-            || !equals(beforeDependeny.getFile(), afterDependeny.getFile())) 
+            || !equals(beforeDependeny.getFile(), afterDependeny.getFile())
+            || beforeDependeny.isOptional() != afterDependeny.isOptional()) 
       {
         return true;
       }
