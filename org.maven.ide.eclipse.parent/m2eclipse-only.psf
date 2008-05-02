@@ -3,6 +3,7 @@
 <provider id="org.tigris.subversion.subclipse.core.svnnature">
 <project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.components.archetype-common,org.maven.ide.components.archetype-common"/>
 <project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.components.maven-embedder,org.maven.ide.components.maven-embedder"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.components.dependency-tree,org.maven.ide.components.dependency-tree"/>
 <project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.components.maven-model-edit,org.maven.ide.components.maven-model-edit"/>
 <project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.components.maven-scm,org.maven.ide.components.maven-scm"/>
 <project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.components.nexus-indexer,org.maven.ide.components.nexus-indexer"/>
@@ -22,5 +23,7 @@
 <project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.subclipse.feature,org.maven.ide.eclipse.subclipse.feature"/>
 <project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.tests,org.maven.ide.eclipse.tests"/>
 <project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.update,org.maven.ide.eclipse.update"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.wtp,org.maven.ide.eclipse.wtp"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.ajdt,org.maven.ide.eclipse.ajdt"/>
 </provider>
 </psf>
