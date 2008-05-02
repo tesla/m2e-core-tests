@@ -15,8 +15,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 
 import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.execution.MavenExecutionRequest;
@@ -51,18 +54,31 @@ public class MavenProjectConfigurator extends AbstractProjectConfigurator {
     Build build = mavenProject.getBuild();
     if(build != null) {
       Map pluginMap = build.getPluginsAsMap();
-      Plugin plugin = (Plugin) pluginMap.get(pluginKey);
-      if(plugin != null) {
-
+      Plugin mavenPlugin = (Plugin) pluginMap.get(pluginKey);
+      if(mavenPlugin != null) {
         IFile pomFile = request.getPom();
         ResolverConfiguration resolverConfiguration = request.getResolverConfiguration();
-        MavenPlugin.getDefault().getMavenProjectManager().execute(embedder, pomFile, resolverConfiguration, //
-            new MavenRunnable() {
-              public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request) {
-                request.setGoals(goals);
-                return embedder.execute(request);
-              }
-            }, monitor);
+        MavenPlugin plugin = MavenPlugin.getDefault();
+        try {
+          plugin.getMavenProjectManager().execute(embedder, pomFile, resolverConfiguration, //
+              new MavenRunnable() {
+                public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request) {
+                  request.setGoals(goals);
+                  return embedder.execute(request);
+                }
+              }, monitor);
+          request.getProject().refreshLocal(IResource.DEPTH_INFINITE, monitor);
+        } catch(CoreException ex) {
+          IStatus status = ex.getStatus();
+          String msg = status.getMessage();
+          Throwable t = status.getException();
+          plugin.getConsole().logError(msg + (t==null ? "" : "; " + t.toString()));
+          MavenPlugin.log(ex);
+        } catch(Exception ex) {
+          String msg = ex.getMessage()==null ? ex.toString() : ex.getMessage();
+          plugin.getConsole().logError(msg);
+          MavenPlugin.log(msg, ex);
+        }
       }
     }
   }
