@@ -84,11 +84,16 @@
     <module>../org.maven.ide.eclipse.ajdt</module>
     <module>../org.maven.ide.eclipse.wtp</module>
 
+    <module>../org.maven.ide.eclipse.book</module>
+
     <!-- 
     <module>../org.maven.ide.eclipse.feature</module>
     <module>../org.maven.ide.eclipse.central.feature</module>
     <module>../org.maven.ide.eclipse.mylyn.feature</module>
     <module>../org.maven.ide.eclipse.subclipse.feature</module>
+    <module>../org.maven.ide.eclipse.ajdt.feature</module>
+    <module>../org.maven.ide.eclipse.wtp.feature</module>
+    <module>../org.maven.ide.eclipse.book.feature</module>
     -->
 
     <!--
