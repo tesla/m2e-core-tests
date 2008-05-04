@@ -21,6 +21,7 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -35,6 +36,8 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
     createExisting("cptest2", "projects/MNGECLIPSE-369/cptest2");
     createExisting("testlib", "projects/MNGECLIPSE-369/testlib");
     waitForJobsToComplete();
+
+    workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
 
     ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(cptest.getFile("TestApp.launch"));
 
@@ -123,6 +126,8 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
     IProject cptest = createExisting("runtimeclasspath-junit", "projects/runtimeclasspath/junit");
     waitForJobsToComplete();
 
+    workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+
     ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(cptest.getFile("runtimeclasspath-junit.launch"));
 
     MavenRuntimeClasspathProvider classpathProvider = new MavenRuntimeClasspathProvider();
@@ -142,6 +147,8 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
     IProject gensrc02 = createExisting("runtimeclasspath-gensrc02", "projects/runtimeclasspath/gensrc02");
     waitForJobsToComplete();
     
+    workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+
     ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(gensrc02.getFile("gensrc02-junit.launch"));
 
     MavenRuntimeClasspathProvider classpathProvider = new MavenRuntimeClasspathProvider();
@@ -236,6 +243,8 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
     
     waitForJobsToComplete();
 
+    workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+
     ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(project.getFile("SystemScope.launch"));
 
     MavenRuntimeClasspathProvider classpathProvider = new MavenRuntimeClasspathProvider();
@@ -284,6 +293,8 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
     IProject javaproject = createExisting("runtimeclasspath-javaproject", "projects/runtimeclasspath/javaproject");
     waitForJobsToComplete();
 
+    workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+    
     ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(project.getFile("runtimeclasspath-custombuildpath.launch"));
 
     MavenRuntimeClasspathProvider classpathProvider = new MavenRuntimeClasspathProvider();

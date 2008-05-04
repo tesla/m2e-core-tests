@@ -279,6 +279,8 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
 
     waitForJobsToComplete();
     
+    workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+    
     {
       IJavaProject javaProject = JavaCore.create(projects[0]);
       IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
@@ -861,7 +863,8 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
   }
 
   public void testDownloadSources_003_customRenoteRepository() throws Exception {
-    new File(repo, "downloadsources/downloadsources-t004/0.0.1/downloadsources-t004-0.0.1-sources.jar").delete();
+    File file = new File(repo, "downloadsources/downloadsources-t004/0.0.1/downloadsources-t004-0.0.1-sources.jar");
+    assertTrue(!file.exists() || file.delete());
 
     IProject project = createExisting("downloadsources-p003", "projects/downloadsources/p003");
     waitForJobsToComplete();
@@ -895,7 +898,8 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
   }
 
   public void testDownloadSources_004_testsClassifier() throws Exception {
-    new File(repo, "downloadsources/downloadsources-t005/0.0.1/downloadsources-t005-0.0.1-test-sources.jar").delete();
+    File file = new File(repo, "downloadsources/downloadsources-t005/0.0.1/downloadsources-t005-0.0.1-test-sources.jar");
+    assertTrue(!file.exists() || file.delete());
     
     IProject project = createExisting("downloadsources-p004", "projects/downloadsources/p004");
     waitForJobsToComplete();
@@ -917,7 +921,8 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
   }
 
   public void testDownloadSources_004_classifier() throws Exception {
-    new File(repo, "downloadsources/downloadsources-t006/0.0.1/downloadsources-t006-0.0.1-sources.jar").delete();
+    File file = new File(repo, "downloadsources/downloadsources-t006/0.0.1/downloadsources-t006-0.0.1-sources.jar");
+    assertTrue(!file.exists() || file.delete());
 
     IProject project = createExisting("downloadsources-p005", "projects/downloadsources/p005");
     waitForJobsToComplete();

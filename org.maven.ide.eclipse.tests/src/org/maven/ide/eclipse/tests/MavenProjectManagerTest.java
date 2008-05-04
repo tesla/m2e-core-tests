@@ -22,6 +22,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
@@ -579,6 +580,8 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     IProject p2 = createExisting("t013-p2");
     waitForJobsToComplete();
 
+    workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+    
     add(manager, new IProject[] {p2});
     IMarker[] markers = p2.findMarkers(null, true, IResource.DEPTH_INFINITE);
     assertEquals(toString(markers), 3, markers.length); // two come from java builder
@@ -621,7 +624,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     waitForJobsToComplete();
 
     File file = new File(repo, "junit/junit/3.8.1/junit-3.8.1.jar");
-    assertTrue(file.delete());
+    assertTrue(!file.exists() || file.delete());
 
     MavenUpdateRequest updateRequest = new MavenUpdateRequest(true /*offline*/, false /* updateSources */);
     updateRequest.addPomFile(p1);

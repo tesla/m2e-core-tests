@@ -30,9 +30,11 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -48,8 +50,9 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
+import org.maven.ide.eclipse.internal.project.MavenProjectManagerRefreshJob;
+import org.maven.ide.eclipse.internal.project.SchedulingRule;
 import org.maven.ide.eclipse.project.BuildPathManager;
-import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.MavenProjectInfo;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
@@ -63,19 +66,25 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
   
   protected MavenRuntimeManager runtimeManager;
 
+  protected MavenProjectManagerRefreshJob job;
+
   protected void setUp() throws Exception {
     super.setUp();
     workspace = ResourcesPlugin.getWorkspace();
+    IWorkspaceDescription description = workspace.getDescription();
+    description.setAutoBuilding(false);
+    workspace.setDescription(description);
 
     // lets not assume we've got subversion in the target platform 
     Hashtable options = JavaCore.getOptions();
     options.put(JavaCore.CORE_JAVA_BUILD_RESOURCE_COPY_FILTER, ".svn/");
     JavaCore.setOptions(options);
 
+    // early start does not seem to take place, lets force m2plugin activation
     MavenPlugin plugin = MavenPlugin.getDefault();
 
-    // early start does not seem to take place, lets force m2plugin activation
-    waitForJobsToComplete();
+    job = plugin.getProjectManagerRefreshJob();
+    job.sleep();
 
     File settings = new File("settings.xml").getCanonicalFile();
 
@@ -98,6 +107,10 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
     }, new NullProgressMonitor());
 
     waitForJobsToComplete();
+    job.wakeUp();
+    IWorkspaceDescription description = workspace.getDescription();
+    description.setAutoBuilding(true);
+    workspace.setDescription(description);
   }
 
   protected void deleteProject(String projectName) throws CoreException {
@@ -237,23 +250,46 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
     return workspace.getRoot().getProject(projectName);
   }
 
-  protected void waitForJobsToComplete() throws InterruptedException {
+  protected void waitForJobsToComplete() throws InterruptedException, CoreException {
+    /*
+     * First, we need to make surerefresh job gets all resource change events
+     * 
+     * Resource change events are delivered after WorkspaceJob#runInWorkspace returns
+     * and during IWorkspace#run. Each change notification is delivered by
+     * only one thread/jon, so we make sure no other workspaceJob is running then
+     * call IWorkspace#run from this thread. 
+     * 
+     * Unfortunately, this does not catch other jobs and threads that call IWorkspace#run
+     * so we have to hard-code workarounds
+     *  
+     * See http://www.eclipse.org/articles/Article-Resource-deltas/resource-deltas.html
+     */
     IJobManager jobManager = Job.getJobManager();
-    boolean running;
-    do {
-      running = false;
+    jobManager.suspend();
+    try {
       Job[] jobs = jobManager.find(null);
-      for(int i = 0; i < jobs.length; i++ ) {
-        Job job = jobs[i];
-        if(!job.isSystem()) {
-          while(job.getState() != Job.NONE) {
-            running = true;
-            job.join();
-            Thread.sleep(50L);
-          }
+      for (int i = 0; i < jobs.length; i++) {
+        if (jobs[i] instanceof WorkspaceJob 
+            || jobs[i].getClass().getName().endsWith("JREUpdateJob")) 
+        {
+          jobs[i].join();
         }
       }
-    } while (running);
+      workspace.run(new IWorkspaceRunnable() {
+        public void run(IProgressMonitor monitor) throws CoreException {
+        }
+      }, new SchedulingRule(false), 0, monitor);
+    } finally {
+      jobManager.resume();
+    }
+
+    /*
+     * Now we run background refresh job one time 
+     */
+    job.wakeUp();
+    job.schedule();
+    job.join();
+    job.sleep();
   }
 
   protected IClasspathEntry[] getMavenContainerEntries(IProject project) throws JavaModelException {
@@ -267,7 +303,7 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
     StringBuffer sb = new StringBuffer();
     for(int i = 0; i < markers.length; i++ ) {
       IMarker marker = markers[i];
-      try {
+      try { 
         sb.append(sep).append(marker.getType()+":"+marker.getAttribute(IMarker.MESSAGE));
       } catch(CoreException ex) {
         // ignore

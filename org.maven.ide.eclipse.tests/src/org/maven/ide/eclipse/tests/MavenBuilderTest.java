@@ -42,7 +42,7 @@ public class MavenBuilderTest extends AsbtractMavenProjectTestCase {
     workspace.getRoot().getFile(aPath).delete(true, new NullProgressMonitor());
     workspace.getRoot().getFile(bPath).delete(true, new NullProgressMonitor());
 
-    project.build(IncrementalProjectBuilder.CLEAN_BUILD, new NullProgressMonitor());
+    project.build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
     waitForJobsToComplete();
 
     Properties properties = loadProperties(aPath);
@@ -80,7 +80,7 @@ public class MavenBuilderTest extends AsbtractMavenProjectTestCase {
     workspace.getRoot().getFile(aPath).delete(true, new NullProgressMonitor());
     workspace.getRoot().getFile(bPath).delete(true, new NullProgressMonitor());
 
-    project.build(IncrementalProjectBuilder.CLEAN_BUILD, new NullProgressMonitor());
+    project.build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
     waitForJobsToComplete();
 
     Properties properties = loadProperties(aPath);
@@ -107,7 +107,7 @@ public class MavenBuilderTest extends AsbtractMavenProjectTestCase {
     workspace.getRoot().getFile(aPath).delete(true, new NullProgressMonitor());
     workspace.getRoot().getFile(bPath).delete(true, new NullProgressMonitor());
 
-    project.build(IncrementalProjectBuilder.CLEAN_BUILD, new NullProgressMonitor());
+    project.build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
     waitForJobsToComplete();
 
     Properties properties = loadProperties(aPath);
@@ -131,7 +131,7 @@ public class MavenBuilderTest extends AsbtractMavenProjectTestCase {
 
     workspace.getRoot().getFile(aPath).delete(true, new NullProgressMonitor());
 
-    project.build(IncrementalProjectBuilder.CLEAN_BUILD, new NullProgressMonitor());
+    project.build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
     waitForJobsToComplete();
 
     Properties properties = loadProperties(aPath);
@@ -151,6 +151,8 @@ public class MavenBuilderTest extends AsbtractMavenProjectTestCase {
 
     copyContent(project, "pom_changed.xml", "pom.xml");
     waitForJobsToComplete();
+
+    project.build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
 
     Properties properties = loadProperties(a.getFullPath());
     assertEquals("Unnamed - resourcefiltering:p005:jar:0.0.1-SNAPSHOT", properties.getProperty("a.name"));
