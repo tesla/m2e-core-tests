@@ -23,7 +23,7 @@ import org.maven.ide.eclipse.project.MavenProjectChangedEvent;
 /**
  * Used to configure maven projects.
  *
- * XXX investigate using existing maven infrastracuture to read plugin configuration
+ * XXX investigate using existing maven infrastructure to read plugin configuration
  * org.apache.maven.plugin.DefaultPluginManager.getConfiguredMojo(MavenSession, Xpp3Dom, MavenProject, boolean, MojoExecution, List) 
  * 
  * @author Igor Fedorenko

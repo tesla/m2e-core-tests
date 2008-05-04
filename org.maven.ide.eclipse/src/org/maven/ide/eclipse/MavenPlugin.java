@@ -464,7 +464,12 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   }
 
   public static void log(CoreException ex) {
-    log(ex.getStatus());
+    IStatus s = ex.getStatus();
+    if(s.getException()==null) {
+      log(new Status(s.getSeverity(), s.getPlugin(), s.getCode(), s.getMessage(), ex));
+    } else {
+      log(s);
+    }
   }
 
   public static void log(String msg, Throwable t) {

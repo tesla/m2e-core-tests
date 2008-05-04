@@ -67,17 +67,20 @@ public class MavenProjectConfigurator extends AbstractProjectConfigurator {
                   return embedder.execute(request);
                 }
               }, monitor);
+        } catch(Exception ex) {
+          String msg = ex.getMessage() == null ? ex.toString() : ex.getMessage();
+          plugin.getConsole().logError(msg);
+          MavenPlugin.log(msg, ex);
+        }
+
+        try {
           request.getProject().refreshLocal(IResource.DEPTH_INFINITE, monitor);
         } catch(CoreException ex) {
           IStatus status = ex.getStatus();
           String msg = status.getMessage();
           Throwable t = status.getException();
-          plugin.getConsole().logError(msg + (t==null ? "" : "; " + t.toString()));
+          plugin.getConsole().logError(msg + (t == null ? "" : "; " + t.toString()));
           MavenPlugin.log(ex);
-        } catch(Exception ex) {
-          String msg = ex.getMessage()==null ? ex.toString() : ex.getMessage();
-          plugin.getConsole().logError(msg);
-          MavenPlugin.log(msg, ex);
         }
       }
     }
