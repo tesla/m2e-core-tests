@@ -7,17 +7,24 @@
       <category name="Maven Integration"/>
    </feature>
    <feature url="features/org.maven.ide.eclipse.central.feature_0.9.1.qualifier.jar" id="org.maven.ide.eclipse.central.feature" version="0.9.1.qualifier">
-      <category name="Optional Components"/>
+      <category name="Maven Optional Components"/>
    </feature>
    <feature url="features/org.maven.ide.eclipse.mylyn.feature_0.9.1.qualifier.jar" id="org.maven.ide.eclipse.mylyn.feature" version="0.9.1.qualifier">
-      <category name="Optional Components"/>
+      <category name="Maven Optional Components"/>
    </feature>
    <feature url="features/org.maven.ide.eclipse.scm.feature_0.9.2.qualifier.jar" id="org.maven.ide.eclipse.scm.feature" version="0.9.2.qualifier">
-      <category name="Optional Components"/>
+      <category name="Maven Optional Components"/>
    </feature>
    <feature url="features/org.maven.ide.eclipse.subclipse.feature_0.9.2.qualifier.jar" id="org.maven.ide.eclipse.subclipse.feature" version="0.9.2.qualifier">
-      <category name="Optional Components"/>
+      <category name="Maven Optional Components"/>
+   </feature>
+   <feature url="features/org.maven.ide.eclipse.ajdt.feature_0.9.4.qualifier.jar" id="org.maven.ide.eclipse.ajdt.feature" version="0.9.4.qualifier">
+      <category name="Maven Project Configurators"/>
+   </feature>
+   <feature url="features/org.maven.ide.eclipse.wtp.feature_0.9.4.qualifier.jar" id="org.maven.ide.eclipse.wtp.feature" version="0.9.4.qualifier">
+      <category name="Maven Project Configurators"/>
    </feature>
    <category-def name="Maven Integration" label="Maven Integration"/>
-   <category-def name="Optional Components" label="Optional Components"/>
+   <category-def name="Maven Optional Components" label="Maven Optional Components"/>
+   <category-def name="Maven Project Configurators" label="Maven Project Configurators"/>
 </site>
