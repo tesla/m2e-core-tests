@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
@@ -59,6 +60,7 @@ import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
+import org.maven.ide.eclipse.project.MavenProjectFacade;
 import org.maven.ide.eclipse.util.SelectionUtil;
 
 
@@ -106,33 +108,20 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
    * @see org.eclipse.ui.actions.ActionDelegate#run(org.eclipse.jface.action.IAction)
    */
   public void run(IAction action) {
-    // TODO check if POM is actually in Eclipse workspace
+    // TODO check if POM is in Eclipse workspace
     
     if(selection!=null) {
       Object element = this.selection.getFirstElement();
       if(IndexManager.SEARCH_ARTIFACT.equals(type) && element !=null) {
-        // TODO open poms for linked projects inside "Maven Dependencies" container
-        IPackageFragmentRoot fragment = (IPackageFragmentRoot) SelectionUtil.getType(element, IPackageFragmentRoot.class);
-        if(fragment != null) {
-          IProject project = fragment.getJavaProject().getProject();
-          if(project.isAccessible() && fragment.isArchive()) {
-            try {
-              final Artifact a = MavenPlugin.getDefault().getBuildpathManager().findArtifact(project, fragment.getPath());
-              if(a!=null) {
-                new Job("Opening POM") {
-                  protected IStatus run(IProgressMonitor monitor) {
-                    openEditor(a.getGroupId(), a.getArtifactId(), a.getVersion());
-                    return Status.OK_STATUS;
-                  }
-                }.schedule();
-                return;
-              }
-            } catch(CoreException ex) {
-              MavenPlugin.log(ex);
-              MavenPlugin.getDefault().getConsole().logError("CAn't find artifact for " + fragment);
-              return;
+        final Artifact a = getArtifact(element);
+        if(a!=null) {
+          new Job("Opening POM") {
+            protected IStatus run(IProgressMonitor monitor) {
+              openEditor(a.getGroupId(), a.getArtifactId(), a.getVersion());
+              return Status.OK_STATUS;
             }
-          }
+          }.schedule();
+          return;
         }
       }
     }
@@ -162,6 +151,35 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
         }
       }.schedule();
     }
+  }
+
+  private Artifact getArtifact(Object element) {
+    MavenPlugin plugin = MavenPlugin.getDefault();
+    
+    // TODO open poms for linked projects inside "Maven Dependencies" container
+    IPackageFragmentRoot fragment = (IPackageFragmentRoot) SelectionUtil.getType(element, IPackageFragmentRoot.class);
+    if(fragment != null) {
+      IProject project = fragment.getJavaProject().getProject();
+      if(project.isAccessible() && fragment.isArchive()) {
+        try {
+          return plugin.getBuildpathManager().findArtifact(project, fragment.getPath());
+        } catch(CoreException ex) {
+          MavenPlugin.log(ex);
+          plugin.getConsole().logError("Can't find artifact for " + fragment);
+          return null;
+        }
+      }
+    }
+
+    IProject project = (IProject) SelectionUtil.getType(element, IProject.class);
+    if(project != null && project.isAccessible()) {
+      MavenProjectFacade projectFacade = plugin.getMavenProjectManager().create(project, new NullProgressMonitor());
+      if(projectFacade!=null) {
+        return projectFacade.getMavenProject().getArtifact();
+      }
+    }
+
+    return null;
   }
 
   public static void openEditor(IndexedArtifact ia, IndexedArtifactFile f) {
