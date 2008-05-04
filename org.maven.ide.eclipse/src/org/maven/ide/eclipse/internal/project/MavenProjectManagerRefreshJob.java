@@ -187,7 +187,10 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
         IResource resource = delta.getResource();
         if(resource instanceof IFile && MavenPlugin.POM_FILE_NAME.equals(resource.getName())) {
           // XXX ignore output folders
-          if(delta.getKind() == IResourceDelta.REMOVED || (delta.getFlags() & DELTA_FLAGS) != 0) {
+          if(delta.getKind() == IResourceDelta.REMOVED 
+              || delta.getKind() == IResourceDelta.ADDED
+              || (delta.getKind() == IResourceDelta.CHANGED && ((delta.getFlags() & DELTA_FLAGS) != 0))) 
+          {
             // XXX check for interesting resources
             refreshProjects.add(project);
           }

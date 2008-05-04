@@ -529,4 +529,9 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   public IProjectConfigurationManager getProjectConfigurationManager() {
     return configurationManager;
   }
+
+  /** for use by unit tests */
+  public MavenProjectManagerRefreshJob getProjectManagerRefreshJob() {
+    return mavenBackgroundJob;
+  }
 }
