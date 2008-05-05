@@ -24,3 +24,10 @@ Bundle-Vendor: Sonatype, Inc.
 Import-Package: javax.xml.namespace
 MavenArtifact-GroupId: org.maven.ide.eclipse
 MavenArtifact-ArtifactId: org.maven.ide.eclipse.test
+Export-Package: org.maven.ide.eclipse.archetype,
+ org.maven.ide.eclipse.configurators,
+ org.maven.ide.eclipse.embedder,
+ org.maven.ide.eclipse.index,
+ org.maven.ide.eclipse.scm,
+ org.maven.ide.eclipse.tests,
+ org.maven.ide.eclipse.util
