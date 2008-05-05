@@ -189,17 +189,22 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
   }
 
   protected IProject importProject(String pomName, ResolverConfiguration configuration) throws IOException, CoreException {
-    return importProjects(new String[] {pomName}, configuration)[0];
+    File pomFile = new File(pomName);
+    return importProjects(pomFile.getParentFile().getCanonicalPath(), new String[] {pomFile.getName()}, configuration)[0];
   }
 
-  protected IProject[] importProjects(String[] pomNames, ResolverConfiguration configuration) throws IOException, CoreException {
+  protected IProject[] importProjects(String basedir, String[] pomNames, ResolverConfiguration configuration) throws IOException, CoreException {
     final MavenPlugin plugin = MavenPlugin.getDefault();
     MavenModelManager mavenModelManager = plugin.getMavenModelManager();
     IWorkspaceRoot root = workspace.getRoot();
+    
+    File src = new File(basedir);
+    File dst = new File(root.getLocation().toFile(), src.getName());
+    copyDir(src, dst);
 
     final ArrayList projectInfos = new ArrayList();
     for (int i = 0; i < pomNames.length; i++) {
-      File pomFile = new File(pomNames[i]);
+      File pomFile = new File(dst, pomNames[i]);
       Model model = mavenModelManager.readMavenModel(pomFile);
       projectInfos.add(new MavenProjectInfo(pomNames[i], pomFile, model, null));
     }

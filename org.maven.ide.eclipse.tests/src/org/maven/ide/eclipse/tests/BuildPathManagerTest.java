@@ -135,13 +135,13 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     deleteProject("MNGECLIPSE-20-web");
 
     ResolverConfiguration configuration = new ResolverConfiguration();
-    IProject[] projects = importProjects(new String[] {
-        "projects/MNGECLIPSE-20/pom.xml", 
-        "projects/MNGECLIPSE-20/type/pom.xml",
-        "projects/MNGECLIPSE-20/app/pom.xml",
-        "projects/MNGECLIPSE-20/web/pom.xml", 
-        "projects/MNGECLIPSE-20/ejb/pom.xml", 
-        "projects/MNGECLIPSE-20/ear/pom.xml",
+    IProject[] projects = importProjects("projects/MNGECLIPSE-20", new String[] {
+        "pom.xml", 
+        "type/pom.xml",
+        "app/pom.xml",
+        "web/pom.xml", 
+        "ejb/pom.xml", 
+        "ear/pom.xml",
     }, configuration);
 
     waitForJobsToComplete();
@@ -270,12 +270,13 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     configuration.setUseMavenOutputFolders(false);
     configuration.setActiveProfiles("");
     
-    IProject[] projects = importProjects(new String[] {"projects/MNGECLIPSE-20/pom.xml", 
-        "projects/MNGECLIPSE-20/type/pom.xml", 
-        "projects/MNGECLIPSE-20/app/pom.xml", 
-        "projects/MNGECLIPSE-20/web/pom.xml", 
-        "projects/MNGECLIPSE-20/ejb/pom.xml", 
-        "projects/MNGECLIPSE-20/ear/pom.xml"}, configuration);
+    IProject[] projects = importProjects("projects/MNGECLIPSE-20", new String[] {
+        "pom.xml", 
+        "type/pom.xml", 
+        "app/pom.xml", 
+        "web/pom.xml", 
+        "ejb/pom.xml", 
+        "ear/pom.xml"}, configuration);
 
     waitForJobsToComplete();
     
@@ -641,12 +642,13 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
   public void testEmbedderException() throws Exception {
     deleteProject("MNGECLIPSE-157parent");
 
-    IProject[] projects = importProjects(new String[] {"projects/MNGECLIPSE-157parent/pom.xml",
-        "projects/MNGECLIPSE-157child/pom.xml"}, new ResolverConfiguration());
-    projects[1].build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
+    IProject project = importProject("projects/MNGECLIPSE-157parent/pom.xml", new ResolverConfiguration());
+    importProject("projects/MNGECLIPSE-157child/pom.xml", new ResolverConfiguration());
     waitForJobsToComplete();
 
-    IMarker[] markers = projects[1].findMarkers(null, true, IResource.DEPTH_INFINITE);
+    project.build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
+
+    IMarker[] markers = project.findMarkers(null, true, IResource.DEPTH_INFINITE);
     assertEquals(toString(markers), 1, markers.length);
     assertEquals(toString(markers), "pom.xml", markers[0].getResource().getFullPath().lastSegment());
   }
@@ -662,15 +664,15 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     configuration.setUseMavenOutputFolders(false);
     configuration.setActiveProfiles("");
 
-    IProject[] projects = importProjects(new String[] {"projects/dependencyorder/p1/pom.xml", 
-        "projects/dependencyorder/p2/pom.xml"}, configuration);
-    projects[0].build(IncrementalProjectBuilder.FULL_BUILD, null);
-    projects[1].build(IncrementalProjectBuilder.FULL_BUILD, null);
+    IProject project1 = importProject("projects/dependencyorder/p1/pom.xml", configuration); 
+    IProject project2 = importProject("projects/dependencyorder/p2/pom.xml", configuration);
+    project1.build(IncrementalProjectBuilder.FULL_BUILD, null);
+    project2.build(IncrementalProjectBuilder.FULL_BUILD, null);
     waitForJobsToComplete();
     
 //    MavenPlugin.getDefault().getBuildpathManager().updateClasspathContainer(p1, new NullProgressMonitor());
 
-    IJavaProject javaProject = JavaCore.create(projects[0]);
+    IJavaProject javaProject = JavaCore.create(project1);
     IClasspathContainer maven2ClasspathContainer = BuildPathManager.getMaven2ClasspathContainer(javaProject);
     IClasspathEntry[] cp = maven2ClasspathContainer.getClasspathEntries();
 
