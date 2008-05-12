@@ -212,18 +212,30 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
 
   private String getGoals(ILaunchConfiguration configuration) throws CoreException {
     String buildType = ExternalToolBuilder.getBuildType();
+    String key = MavenLaunchConstants.ATTR_GOALS;
     if(IExternalToolConstants.BUILD_TYPE_AUTO.equals(buildType)) {
-      return configuration.getAttribute(MavenLaunchConstants.ATTR_GOALS_AUTO_BUILD, "");
+      key = MavenLaunchConstants.ATTR_GOALS_AUTO_BUILD;
     } else if(IExternalToolConstants.BUILD_TYPE_CLEAN.equals(buildType)) {
-      return configuration.getAttribute(MavenLaunchConstants.ATTR_GOALS_CLEAN, "");
+      key = MavenLaunchConstants.ATTR_GOALS_CLEAN;
     } else if(IExternalToolConstants.BUILD_TYPE_FULL.equals(buildType)) {
-      return configuration.getAttribute(MavenLaunchConstants.ATTR_GOALS_AFTER_CLEAN, "");
+      key = MavenLaunchConstants.ATTR_GOALS_AFTER_CLEAN;
     } else if(IExternalToolConstants.BUILD_TYPE_INCREMENTAL.equals(buildType)) {
-      return configuration.getAttribute(MavenLaunchConstants.ATTR_GOALS_MANUAL_BUILD, "");
+      key = MavenLaunchConstants.ATTR_GOALS_MANUAL_BUILD;
     }
-    return configuration.getAttribute(MavenLaunchConstants.ATTR_GOALS, "");
+    String goals = configuration.getAttribute(key, "");
+    if(goals==null || goals.length()==0) {
+      // use default goals when "full build" returns nothing
+      goals = configuration.getAttribute(MavenLaunchConstants.ATTR_GOALS, "");
+    }
+    
+    MavenPlugin.getDefault().getConsole().logMessage("Build type " + buildType + " : " + goals);
+    return goals;
   }
 
+  public boolean buildForLaunch(ILaunchConfiguration configuration, String mode, IProgressMonitor monitor) {
+    return false;
+  }
+  
   /**
    * Construct string with properties to pass to JVM as system properties
    */
