@@ -110,9 +110,9 @@ public class NexusIndexManager extends IndexManager {
       indexInfo.setNew(!getIndexDirectoryFile(indexInfo).exists());
       
       Directory directory = getIndexDirectory(indexInfo);
-      indexer.addIndexingContext(indexName, indexName, indexInfo.getRepositoryDir(),
-          directory, indexInfo.getRepositoryUrl(), indexInfo.getIndexUpdateUrl(), //
-          indexInfo.isShort() ? NexusIndexer.MINIMAL_INDEX : NexusIndexer.FULL_INDEX);
+      indexer.addIndexingContext(indexName, indexName, indexInfo.getRepositoryDir(), directory, indexInfo
+          .getRepositoryUrl(), indexInfo.getIndexUpdateUrl(), //
+          (indexInfo.isShort() ? NexusIndexer.MINIMAL_INDEX : NexusIndexer.FULL_INDEX), false);
       addIndex(indexName, indexInfo);
       fireIndexAdded(indexInfo);
 
@@ -493,6 +493,20 @@ public class NexusIndexManager extends IndexManager {
     return indexTime;
   }
 
+  public IndexedArtifactGroup[] getGroups(String indexId) throws IOException {
+    IndexingContext context = getIndexingContext(indexId);
+    if(context != null) {
+      Set allGroups = indexer.getAllGroups(context);
+      IndexedArtifactGroup[] groups = new IndexedArtifactGroup[allGroups.size()];
+      int i = 0;
+      for(Iterator it = allGroups.iterator(); it.hasNext();) {
+        groups[i++ ] = new IndexedArtifactGroup(getIndexInfo(indexId), ((String) it.next()));
+      }
+      return groups;
+    }
+    return new IndexedArtifactGroup[0];
+  }
+  
   public IndexedArtifactGroup[] getRootGroups(String indexId) throws IOException {
     IndexingContext context = getIndexingContext(indexId);
     if(context != null) {

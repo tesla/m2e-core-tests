@@ -107,12 +107,17 @@ public class LegacyIndexManager extends IndexManager {
     return Collections.EMPTY_MAP;
   }
 
+  public IndexedArtifactGroup[] getGroups(String indexId) {
+    // not supported
+    return new IndexedArtifactGroup[0];
+  }
+  
   public IndexedArtifactGroup[] getRootGroups(String indexId) {
     // not supported
     return new IndexedArtifactGroup[0];
   }
 
-  public Date getIndexArchiveTime(InputStream is) throws IOException {
+  public Date getIndexArchiveTime(InputStream is) {
     // not supported
     return null;
   }

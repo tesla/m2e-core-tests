@@ -177,6 +177,8 @@ public abstract class IndexManager {
 
   public abstract IndexedArtifactFile getIndexedArtifactFile(String indexName, String documentKey) throws IOException;
   
+  public abstract IndexedArtifactGroup[] getGroups(String indexId) throws IOException;
+
   public abstract IndexedArtifactGroup[] getRootGroups(String indexId) throws IOException;
 
   public abstract Date reindex(String indexName, IProgressMonitor monitor) throws IOException;

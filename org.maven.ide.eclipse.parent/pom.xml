@@ -28,13 +28,13 @@
 
     <maven_model_edit.version>1.0.0.20080331-1600</maven_model_edit.version>
     <qname_version>1.0.0.20080331-1600</qname_version>
-    <nexus_indexer.version>1.0.0.20080331-1600</nexus_indexer.version>
+    <nexus_indexer.version>1.0.0.20080411-1500</nexus_indexer.version>
 
     <maven.version>2.1-SNAPSHOT</maven.version>
     <artifact.version>3.0-SNAPSHOT</artifact.version>
     <archetype.version>2.0-alpha-1</archetype.version>
     <maven_pom.version>1.0.0-SNAPSHOT</maven_pom.version>
-    <nexus.version>1.0.0-beta-1-20080331.202755-1</nexus.version>
+    <nexus.version>1.0-beta-3</nexus.version>
     
     <!--kill accidental deploys for now=-->
     <m2e.releases>http://localhost</m2e.releases>
@@ -163,11 +163,6 @@
         <groupId>org.maven.ide.components</groupId>
         <artifactId>org.maven.ide.components.qname</artifactId>
         <version>${qname.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.maven.ide.components</groupId>
-        <artifactId>org.maven.ide.components.nexus_indexer</artifactId>
-        <version>${nexus_indexer.version}</version>
       </dependency>
 
       <dependency>
