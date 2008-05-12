@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.apache.lucene.search.Query;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.RAMDirectory;
@@ -30,6 +31,8 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
 import org.apache.maven.artifact.repository.DefaultArtifactRepository;
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
+
+import org.sonatype.nexus.index.ArtifactInfo;
 
 import org.maven.ide.eclipse.MavenConsole;
 import org.maven.ide.eclipse.MavenPlugin;
@@ -44,6 +47,12 @@ public abstract class IndexManager {
 
   public static final int MIN_CLASS_QUERY_LENGTH = 6;
 
+  // index ids
+  
+  public static final String LOCAL_INDEX = "local";
+  
+  public static final String WORKSPACE_INDEX = "workspace";
+  
   // search keys 
   
   public static final String SEARCH_GROUP = "groupId";
@@ -62,9 +71,15 @@ public abstract class IndexManager {
   
   public static final String SEARCH_SHA1 = "sha1";
 
-  public static final String LOCAL_INDEX = "local";
+  // search terms
 
-  public static final String WORKSPACE_INDEX = "workspace";
+  public static final String FIELD_GROUP_ID = ArtifactInfo.GROUP_ID;
+
+  public static final String FIELD_ARTIFACT_ID = ArtifactInfo.ARTIFACT_ID;
+
+  public static final String FIELD_VERSION = ArtifactInfo.VERSION;
+
+  public static final String FIELD_PACKAGING = ArtifactInfo.PACKAGING;
 
   // availability flags
   
@@ -164,17 +179,41 @@ public abstract class IndexManager {
 
   /**
    * @param term - search term
-   * @param type - query type. Should be one of the SEARCH_* values.
+   * @param searchType - query type. Should be one of the SEARCH_* values.
    * 
    * @return Map&lt;String, IndexedArtifact&gt;
    */
-  public abstract Map search(String term, String type) throws IOException;
+  public abstract Map search(String term, String searchType) throws IOException;
 
   /**
    * @return Map&lt;String, IndexedArtifact&gt;
    */
   public abstract Map search(String indexName, String prefix, String searchGroup) throws IOException;
 
+  /**
+   * @param indexName name of the index to search or null to search in all indexes
+   * @param query Lucene query that could use combinations of fields 
+   *    {@link IndexManager#FIELD_GROUP_ID}, 
+   *    {@link IndexManager#FIELD_ARTIFACT_ID},
+   *    {@link IndexManager#FIELD_VERSION}, 
+   *    {@link IndexManager#FIELD_PACKAGING}
+   * 
+   * @return Map&lt;String, IndexedArtifact&gt;
+   */
+  public abstract Map search(String indexName, Query query) throws IOException;
+
+  /**
+   * Creates query for given field and expression
+   * 
+   * @param field One of 
+   *    {@link IndexManager#FIELD_GROUP_ID}, 
+   *    {@link IndexManager#FIELD_ARTIFACT_ID},
+   *    {@link IndexManager#FIELD_VERSION}, 
+   *    {@link IndexManager#FIELD_PACKAGING}
+   * @param expression search text   
+   */
+  public abstract Query createQuery(String field, String expression);
+  
   public abstract IndexedArtifactFile getIndexedArtifactFile(String indexName, String documentKey) throws IOException;
   
   public abstract IndexedArtifactGroup[] getGroups(String indexId) throws IOException;
@@ -304,5 +343,4 @@ public abstract class IndexManager {
     return key + ".pom";
   }
 
-    
 }

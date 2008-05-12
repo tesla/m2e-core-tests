@@ -165,6 +165,10 @@ public class NexusIndexManager extends IndexManager {
     }
     return null;
   }
+  
+  public Query createQuery(String field, String expression) {
+    return indexer.constructQuery(field, expression);
+  }
 
   public Map search(String term, String type) throws IOException {
     return search(null, term, type);
@@ -183,8 +187,10 @@ public class NexusIndexManager extends IndexManager {
 
     } else if(IndexManager.SEARCH_ARTIFACT.equals(type)) {
       BooleanQuery bq = new BooleanQuery();
-      bq.add(new WildcardQuery(new Term(ArtifactInfo.GROUP_ID, term + "*")), Occur.SHOULD);
-      bq.add(new WildcardQuery(new Term(ArtifactInfo.ARTIFACT_ID, term + "*")), Occur.SHOULD);
+      
+      
+      bq.add(indexer.constructQuery(ArtifactInfo.GROUP_ID, term), Occur.SHOULD);
+      bq.add(indexer.constructQuery(ArtifactInfo.ARTIFACT_ID, term), Occur.SHOULD);
       bq.add(new PrefixQuery(new Term(ArtifactInfo.MD5, term)), Occur.SHOULD);
       bq.add(new PrefixQuery(new Term(ArtifactInfo.SHA1, term)), Occur.SHOULD);
       query = bq;
@@ -280,8 +286,35 @@ public class NexusIndexManager extends IndexManager {
     }
 
     return result;
-
   }
+  
+  /**
+   * @return Map<String, IndexedArtifact>
+   */
+  public Map search(String indexName, Query query) throws IOException {
+    Map result = new TreeMap();
+    try {
+      IndexingContext context = getIndexingContext(indexName);
+      Collection artifacts;
+      if(context == null) {
+        artifacts = indexer.searchFlat(ArtifactInfo.VERSION_COMPARATOR, query);
+      } else {
+        artifacts = indexer.searchFlat(ArtifactInfo.VERSION_COMPARATOR, query, context);
+      }
+      
+      for(Iterator it = artifacts.iterator(); it.hasNext();) {
+        ArtifactInfo artifactInfo = (ArtifactInfo) it.next();
+        IndexedArtifactFile af = getIndexedArtifactFile(artifactInfo);
+        addArtifactFile(result, af, null, null, artifactInfo.packaging);
+      }
+      
+    } catch(IndexContextInInconsistentStateException ex) {
+      String msg = "Inconsistent index context state " + ex.getMessage();
+      console.logError(msg);
+      MavenPlugin.log(msg, ex);
+    }
+    return result;
+  }  
 
   private void addArtifactFile(Map result, IndexedArtifactFile af, String className, String packageName,
       String packaging) {

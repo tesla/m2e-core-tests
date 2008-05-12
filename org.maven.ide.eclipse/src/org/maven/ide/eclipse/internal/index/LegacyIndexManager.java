@@ -19,6 +19,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.search.Query;
 import org.apache.lucene.store.Directory;
 
 import org.maven.ide.eclipse.MavenPlugin;
@@ -103,6 +104,11 @@ public class LegacyIndexManager extends IndexManager {
   }
 
   public Map search(String indexName, String prefix, String searchGroup) {
+    // not supported
+    return Collections.EMPTY_MAP;
+  }
+  
+  public Map search(String indexName, Query query) {
     // not supported
     return Collections.EMPTY_MAP;
   }
@@ -205,6 +211,13 @@ public class LegacyIndexManager extends IndexManager {
    * @see org.maven.ide.eclipse.index.IndexManager#getIndexedArtifactFile(java.lang.String, java.lang.String)
    */
   public IndexedArtifactFile getIndexedArtifactFile(String indexName, String name) {
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see org.maven.ide.eclipse.index.IndexManager#createQuery(java.lang.String, java.lang.String)
+   */
+  public Query createQuery(String field, String expression) {
     return null;
   }
 

@@ -68,13 +68,8 @@ public class MavenPomSelectionComponent extends Composite {
 
   /**
    * One of 
-   *   {@link IndexManager#SEARCH_ARCHETYPE}, 
    *   {@link IndexManager#SEARCH_ARTIFACT}, 
    *   {@link IndexManager#SEARCH_CLASS_NAME}, 
-   *   {@link IndexManager#SEARCH_GROUP}, 
-   *   {@link IndexManager#SEARCH_MD5},
-   *   {@link IndexManager#SEARCH_PACKAGING}, 
-   *   {@link IndexManager#SEARCH_PLUGIN}
    */
   String queryType;
   
