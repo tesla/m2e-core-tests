@@ -36,11 +36,10 @@
     <maven_pom.version>1.0.0-SNAPSHOT</maven_pom.version>
     <nexus.version>1.0-beta-3</nexus.version>
     
-    <!--kill accidental deploys for now=-->
+    <!-- disable accidental deployment -->
     <m2e.releases>http://localhost</m2e.releases>
     <m2e.snapshots>http://localhost</m2e.snapshots>
-    <m2e.site>http://localhost</m2e.site>
-    
+    <m2e.site>http://localhost</m2e.site>    
   </properties>
 
   <organization>

@@ -3,22 +3,22 @@
    <description url="http://m2eclipse.sonatype.org/update/">
       Maven Integration
    </description>
-   <feature url="features/org.maven.ide.eclipse.feature_0.9.4.qualifier.jar" id="org.maven.ide.eclipse.feature" version="0.9.3.qualifier">
+   <feature url="features/org.maven.ide.eclipse.feature_0.9.4.qualifier.jar" id="org.maven.ide.eclipse.feature" version="0.9.4.qualifier">
       <category name="Maven Integration"/>
    </feature>
    <feature url="features/org.maven.ide.eclipse.book.feature_0.9.4.qualifier.jar" id="org.maven.ide.eclipse.book.feature" version="0.9.4.qualifier">
       <category name="Maven Integration"/>
    </feature>
-   <feature url="features/org.maven.ide.eclipse.central.feature_0.9.1.qualifier.jar" id="org.maven.ide.eclipse.central.feature" version="0.9.1.qualifier">
+   <feature url="features/org.maven.ide.eclipse.central.feature_0.9.4.qualifier.jar" id="org.maven.ide.eclipse.central.feature" version="0.9.4.qualifier">
       <category name="Maven Optional Components"/>
    </feature>
-   <feature url="features/org.maven.ide.eclipse.mylyn.feature_0.9.1.qualifier.jar" id="org.maven.ide.eclipse.mylyn.feature" version="0.9.1.qualifier">
+   <feature url="features/org.maven.ide.eclipse.mylyn.feature_0.9.4.qualifier.jar" id="org.maven.ide.eclipse.mylyn.feature" version="0.9.4.qualifier">
       <category name="Maven Optional Components"/>
    </feature>
-   <feature url="features/org.maven.ide.eclipse.scm.feature_0.9.2.qualifier.jar" id="org.maven.ide.eclipse.scm.feature" version="0.9.2.qualifier">
+   <feature url="features/org.maven.ide.eclipse.scm.feature_0.9.4.qualifier.jar" id="org.maven.ide.eclipse.scm.feature" version="0.9.4.qualifier">
       <category name="Maven Optional Components"/>
    </feature>
-   <feature url="features/org.maven.ide.eclipse.subclipse.feature_0.9.2.qualifier.jar" id="org.maven.ide.eclipse.subclipse.feature" version="0.9.2.qualifier">
+   <feature url="features/org.maven.ide.eclipse.subclipse.feature_0.9.4.qualifier.jar" id="org.maven.ide.eclipse.subclipse.feature" version="0.9.4.qualifier">
       <category name="Maven Optional Components"/>
    </feature>
    <feature url="features/org.maven.ide.eclipse.ajdt.feature_0.9.4.qualifier.jar" id="org.maven.ide.eclipse.ajdt.feature" version="0.9.4.qualifier">
@@ -30,5 +30,4 @@
    <category-def name="Maven Integration" label="Maven Integration"/>
    <category-def name="Maven Optional Components" label="Maven Optional Components"/>
    <category-def name="Maven Project Configurators" label="Maven Project Configurators"/>
-   <category-def name="Maven: The Definitive Guide book" label="Maven: The Definitive Guide book"/>
 </site>
