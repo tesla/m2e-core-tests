@@ -373,11 +373,11 @@
   
   <distributionManagement>
     <repository>
-      <id>m2e-releases</id>
+      <id>forge-releases</id>
       <url>${m2e.releases}</url>
     </repository>
     <snapshotRepository>
-      <id>m2e-snapshots</id>
+      <id>forge-snapshots</id>
       <url>${m2e.snapshots}</url>
     </snapshotRepository>
     <site>
