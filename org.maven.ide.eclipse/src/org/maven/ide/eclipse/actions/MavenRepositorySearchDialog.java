@@ -43,13 +43,8 @@ public class MavenRepositorySearchDialog extends AbstractMavenDialog {
 
   /**
    * One of 
-   *   {@link IndexManager#SEARCH_ARCHETYPE}, 
    *   {@link IndexManager#SEARCH_ARTIFACT}, 
    *   {@link IndexManager#SEARCH_CLASS_NAME}, 
-   *   {@link IndexManager#SEARCH_GROUP}, 
-   *   {@link IndexManager#SEARCH_MD5},
-   *   {@link IndexManager#SEARCH_PACKAGING}, 
-   *   {@link IndexManager#SEARCH_PLUGIN}
    */
   private String queryType;
 
@@ -67,13 +62,8 @@ public class MavenRepositorySearchDialog extends AbstractMavenDialog {
    * @param parent parent shell
    * @param title dialog title
    * @param queryType one of 
-   *   {@link IndexManager#SEARCH_ARCHETYPE}, 
    *   {@link IndexManager#SEARCH_ARTIFACT}, 
    *   {@link IndexManager#SEARCH_CLASS_NAME}, 
-   *   {@link IndexManager#SEARCH_GROUP}, 
-   *   {@link IndexManager#SEARCH_MD5},
-   *   {@link IndexManager#SEARCH_PACKAGING}, 
-   *   {@link IndexManager#SEARCH_PLUGIN}
    * @param artifacts Set&lt;Artifact&gt;
    */
   public MavenRepositorySearchDialog(Shell parent, String title, String queryType, Set artifacts) {
