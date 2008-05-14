@@ -40,7 +40,8 @@ public class ClasspathConfiguratorFactoryFactory {
       AbstractClasspathConfiguratorFactory c1 = (AbstractClasspathConfiguratorFactory) o1;
       AbstractClasspathConfiguratorFactory c2 = (AbstractClasspathConfiguratorFactory) o2;
 
-      return c1.getPriority() - c2.getPriority();
+      int res = c1.getPriority() - c2.getPriority();
+      return res==0 ? c1.getId().compareTo(c2.getId()) : res;
     }
     
   }

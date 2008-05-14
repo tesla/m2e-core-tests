@@ -47,7 +47,9 @@ public class ProjectConfiguratorFactory {
     public int compare(Object o1, Object o2) {
       AbstractProjectConfigurator c1 = (AbstractProjectConfigurator) o1;
       AbstractProjectConfigurator c2 = (AbstractProjectConfigurator) o2;
-      return c1.getPriority() - c2.getPriority();
+      
+      int res = c1.getPriority() - c2.getPriority();
+      return res==0 ? c1.getId().compareTo(c2.getId()) : res;
     }
   }
   
