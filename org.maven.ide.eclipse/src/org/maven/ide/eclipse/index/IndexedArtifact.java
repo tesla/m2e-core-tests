@@ -21,7 +21,7 @@ public class IndexedArtifact {
       IndexedArtifactFile f1 = (IndexedArtifactFile) o1;
       IndexedArtifactFile f2 = (IndexedArtifactFile) o2;
 
-      int r = -f1.version.compareTo(f2.version);
+      int r = -f1.artifactVersion.compareTo(f2.artifactVersion);
       if(r!=0) {
         return r;
       }

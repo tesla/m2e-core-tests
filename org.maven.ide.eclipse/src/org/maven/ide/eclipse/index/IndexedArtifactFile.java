@@ -11,6 +11,8 @@ package org.maven.ide.eclipse.index;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.model.Dependency;
 
 public class IndexedArtifactFile {
@@ -24,6 +26,8 @@ public class IndexedArtifactFile {
   public final String fname;
 
   public final String version;
+
+  public final ArtifactVersion artifactVersion;
 
   public final String classifier;
   
@@ -45,6 +49,7 @@ public class IndexedArtifactFile {
     this.group = group;
     this.artifact = artifact;
     this.version = version;
+    this.artifactVersion = new DefaultArtifactVersion(version);
     this.classifier = classifier;
     this.fname = fname;
     this.size = size;
