@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+  <extension-point id="searchEngine" name="Search Engine" schema="schema/searchEngine.exsd"/>
+  
+  <extension point="org.eclipse.core.runtime.contentTypes">
+    <content-type id="pomFile" name="Maven POM XML"
+          base-type="org.eclipse.core.runtime.xml"
+          priority="normal"
+          default-charset="UTF-8"
+          file-names="pom.xml">
+      <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber">
+        <parameter name="element" value="project" />
+      </describer>
+    </content-type>
+  </extension>
+
+  <extension point="org.eclipse.wst.sse.ui.editorConfiguration">
+    <sourceViewerConfiguration
+      class="org.maven.ide.eclipse.editor.xml.PomStructuredTextViewConfiguration"
+      target="org.maven.ide.eclipse.editor.xml.pomFile" />
+  </extension>
+
+  <extension  point="org.eclipse.ui.editors.templates">
+    <contextType name="Project"
+      class="org.maven.ide.eclipse.editor.xml.template.PomTemplateContextType"
+      id="org.maven.ide.eclipse.editor.xml.templates.contextType.project"/>
+    
+    <contextType name="Parent"
+      class="org.maven.ide.eclipse.editor.xml.template.PomTemplateContextType"
+      id="org.maven.ide.eclipse.editor.xml.templates.contextType.parent"/>
+    
+    <contextType name="Properties"
+      class="org.maven.ide.eclipse.editor.xml.template.PomTemplateContextType"
+      id="org.maven.ide.eclipse.editor.xml.templates.contextType.properties"/>
+    
+    <contextType name="Properties"
+      class="org.maven.ide.eclipse.editor.xml.template.PomTemplateContextType"
+      id="org.maven.ide.eclipse.editor.xml.templates.contextType.properties"/>
+    
+    <contextType name="Dependencies"
+      class="org.maven.ide.eclipse.editor.xml.template.PomTemplateContextType"
+      id="org.maven.ide.eclipse.editor.xml.templates.contextType.dependencies"/>
+    
+    <contextType name="Exclusions"
+      class="org.maven.ide.eclipse.editor.xml.template.PomTemplateContextType"
+      id="org.maven.ide.eclipse.editor.xml.templates.contextType.exclusions"/>
+    
+    <contextType name="Plugins"
+      class="org.maven.ide.eclipse.editor.xml.template.PomTemplateContextType"
+      id="org.maven.ide.eclipse.editor.xml.templates.contextType.plugins"/>
+    
+    <contextType name="Repositories"
+      class="org.maven.ide.eclipse.editor.xml.template.PomTemplateContextType"
+      id="org.maven.ide.eclipse.editor.xml.templates.contextType.repositories"/>
+    
+    <contextType name="Group Id"
+      class="org.eclipse.jface.text.templates.TemplateContextType"
+      id="org.maven.ide.eclipse.editor.xml.templates.contextType.groupId"/>
+    
+    <contextType name="Artifact Id"
+      class="org.eclipse.jface.text.templates.TemplateContextType"
+      id="org.maven.ide.eclipse.editor.xml.templates.contextType.artifactId"/>
+    
+    <contextType name="Version"
+      class="org.eclipse.jface.text.templates.TemplateContextType"
+      id="org.maven.ide.eclipse.editor.xml.templates.contextType.version"/>
+    
+    <contextType name="Classifier"
+      class="org.eclipse.jface.text.templates.TemplateContextType"
+      id="org.maven.ide.eclipse.editor.xml.templates.contextType.classifier"/>
+    
+    <contextType name="Type"
+      class="org.eclipse.jface.text.templates.TemplateContextType"
+      id="org.maven.ide.eclipse.editor.xml.templates.contextType.type"/>
+
+    <contextType name="Packaging"
+      class="org.eclipse.jface.text.templates.TemplateContextType"
+      id="org.maven.ide.eclipse.editor.xml.templates.contextType.packaging"/>
+
+    <template id="org.maven.ide.eclipse.editor.xml.templates.parent.skeleton"
+         contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.project"
+         name="New parent element" 
+         description="New parent element">
+      <pattern>&lt;parent&gt;
+    &lt;groupId&gt;${cursor}&lt;/groupId&gt;
+    &lt;artifactId&gt;&lt;/artifactId&gt;
+    &lt;version&gt;&lt;/version&gt;
+  &lt;/parent&gt;</pattern>
+    </template>
+
+    <template id="org.maven.ide.eclipse.editor.xml.templates.property.skeleton"
+         contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.properties"
+         name="New property element" 
+         description="New property element">
+      <pattern>&lt;${cursor}${name}&gt;${value}&lt;/${name}&gt;</pattern>
+    </template>
+
+    <template id="org.maven.ide.eclipse.editor.xml.templates.dependency.skeleton"
+         contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.dependencies"
+         name="New dependency element" 
+         description="New dependency element">
+      <pattern>&lt;dependency&gt;
+      &lt;groupId&gt;${cursor}&lt;/groupId&gt;
+      &lt;artifactId&gt;&lt;/artifactId&gt;
+      &lt;version&gt;&lt;/version&gt;
+    &lt;/dependency&gt;</pattern>
+    </template>
+
+    <template id="org.maven.ide.eclipse.editor.xml.templates.exclusion.skeleton"
+         contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.exclusions"
+         name="New exclusion element" 
+         description="New exclusion element">
+      <pattern>&lt;exclusion&gt;
+          &lt;groupId&gt;${cursor}&lt;/groupId&gt;
+          &lt;artifactId&gt;&lt;/artifactId&gt;
+        &lt;/exclusion&gt;</pattern>
+    </template>
+
+    <template id="org.maven.ide.eclipse.editor.xml.templates.plugin.skeleton"
+         contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.plugins"
+         name="New plugin element" 
+         description="New plugin element">
+      <pattern>&lt;plugin&gt;
+        &lt;groupId&gt;${cursor}&lt;/groupId&gt;
+        &lt;artifactId&gt;&lt;/artifactId&gt;
+        &lt;version&gt;&lt;/version&gt;
+        &lt;configuration&gt;
+        &lt;/configuration&gt;
+      &lt;/plugin&gt;</pattern>
+    </template>
+
+    <template id="org.maven.ide.eclipse.editor.xml.templates.plugin.javac"
+         contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.plugins"
+         name="Java complier plugin configuration" 
+         description="Java complier plugin configuration">
+      <pattern>&lt;plugin&gt;
+        &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+        &lt;artifactId&gt;maven-compiler-plugin&lt;/artifactId&gt;
+        &lt;configuration&gt;
+          &lt;source&gt;${cursor}1.4&lt;/source&gt;
+          &lt;target&gt;1.4&lt;/target&gt;
+        &lt;/configuration&gt;
+      &lt;/plugin&gt;</pattern>
+    </template>
+
+    <template id="org.maven.ide.eclipse.editor.xml.templates.plugin.aspectj"
+         contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.plugins"
+         name="AspectJ plugin configuration" 
+         description="AspectJ plugin configuration">
+      <pattern>&lt;plugin&gt;
+         &lt;groupId&gt;org.codehaus.mojo&lt;/groupId&gt;
+         &lt;artifactId&gt;aspectj-maven-plugin&lt;/artifactId&gt;
+         &lt;executions&gt;
+           &lt;execution&gt;
+             &lt;goals&gt;
+                &lt;goal&gt;compile&lt;/goal&gt;
+             &lt;/goals&gt;
+          &lt;/execution&gt;
+        &lt;/executions&gt;
+      &lt;/plugin&gt;</pattern>
+    </template>
+
+    <template id="org.maven.ide.eclipse.editor.xml.templates.repository.skeleton"
+         contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.repositories"
+         name="New repository element" 
+         description="New repository element">
+      <pattern>&lt;repository&gt;
+        &lt;id&gt;${cursor}&lt;/id&gt;
+        &lt;url&gt;&lt;/url&gt;
+        &lt;releases&gt;
+           &lt;enabled&gt;true&lt;/enabled&gt;
+        &lt;/releases&gt;
+        &lt;snapshots&gt;
+          &lt;enabled&gt;false&lt;/enabled&gt;
+        &lt;/snapshots&gt;        
+     &lt;/repository&gt;</pattern>
+    </template>
+  </extension>
+
+  <extension point="org.maven.ide.eclipse.editor.xml.searchEngine">
+    <search-engine class="org.maven.ide.eclipse.editor.xml.search.IndexManagerSearchEngine"/>
+  </extension>
+
+</plugin>
