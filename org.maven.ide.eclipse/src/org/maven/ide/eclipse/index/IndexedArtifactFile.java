@@ -70,7 +70,8 @@ public class IndexedArtifactFile {
     dependency.setGroupId(group);
     dependency.setVersion(version);
     dependency.setClassifier(classifier);
-    dependency.setType(type);
+    dependency.setType(type); // TODO: investigate difference between packaging and type
+    //http://docs.codehaus.org/display/MAVEN/Packaging+vs+Type+-+Derived+and+Attached+Artifacts
     return dependency;
   }
 }
