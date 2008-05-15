@@ -29,6 +29,8 @@ public class IndexedArtifactFile {
 
   public final ArtifactVersion artifactVersion;
 
+  public final String type;
+
   public final String classifier;
   
   public final long size;
@@ -43,13 +45,15 @@ public class IndexedArtifactFile {
 
   public final List goals;
 
-  public IndexedArtifactFile(String repository, String group, String artifact, String version, String classifier,
-      String fname, long size, Date date, int sourcesExists, int javadocExists, String prefix, List goals) {
+  public IndexedArtifactFile(String repository, String group, String artifact, String version, String type,
+      String classifier, String fname, long size, Date date, int sourcesExists, int javadocExists, String prefix,
+      List goals) {
     this.repository = repository;
     this.group = group;
     this.artifact = artifact;
     this.version = version;
     this.artifactVersion = new DefaultArtifactVersion(version);
+    this.type = type;
     this.classifier = classifier;
     this.fname = fname;
     this.size = size;
@@ -66,7 +70,7 @@ public class IndexedArtifactFile {
     dependency.setGroupId(group);
     dependency.setVersion(version);
     dependency.setClassifier(classifier);
-    dependency.setType("jar"); // TODO
+    dependency.setType(type);
     return dependency;
   }
 }

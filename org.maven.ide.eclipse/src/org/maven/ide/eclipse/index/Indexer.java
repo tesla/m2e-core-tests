@@ -510,7 +510,7 @@ public class Indexer {
 
     String classifier = null;  // not supported in old indexer
     
-    return new IndexedArtifactFile(repository, group, artifact, version, classifier, name, size, date, 0, 0, null, null);
+    return new IndexedArtifactFile(repository, group, artifact, version, null, classifier, name, size, date, 0, 0, null, null);
   }
 
 /*  

@@ -333,9 +333,10 @@ public class NexusIndexManager extends IndexManager {
     String repository = artifactInfo.repository;
     String version = artifactInfo.version;
     String classifier = artifactInfo.classifier;
+    String packaging = artifactInfo.packaging;
     String fname = artifactInfo.fname;
     if(fname == null) {
-      fname = artifactId + '-' + version + (classifier != null ? '-' + classifier : "") + ".jar";
+      fname = artifactId + '-' + version + (classifier != null ? '-' + classifier : "") + '.' + packaging;
     }
 
     long size = artifactInfo.size;
@@ -347,7 +348,7 @@ public class NexusIndexManager extends IndexManager {
     String prefix = artifactInfo.prefix;
     List goals = artifactInfo.goals;
     
-    return new IndexedArtifactFile(repository, groupId, artifactId, version, classifier, fname, size, date,
+    return new IndexedArtifactFile(repository, groupId, artifactId, version, packaging, classifier, fname, size, date,
         sourcesExists, javadocExists, prefix, goals);
   }
 
