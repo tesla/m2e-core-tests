@@ -33,16 +33,16 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
     this.sourceViewer = sourceViewer;
   }
 
-  @Override
-  protected void addTagNameProposals(ContentAssistRequest contentAssistRequest, int childPosition) {
-    String currentNodeName = getCurrentNode(contentAssistRequest).getNodeName();
-    PomTemplateContext context = PomTemplateContext.fromNodeName(currentNodeName);
-    if (context.isTemplate())
-    {
-      addTemplates(contentAssistRequest, context,-1);
-    }
-    super.addTagNameProposals(contentAssistRequest, childPosition);
-  }
+    //broken
+//  protected void addTagNameProposals(ContentAssistRequest contentAssistRequest, int childPosition) {
+//    String currentNodeName = getCurrentNode(contentAssistRequest).getNodeName();
+//    PomTemplateContext context = PomTemplateContext.fromNodeName(currentNodeName);
+//    if (context.isTemplate())
+//    {
+//      addTemplates(contentAssistRequest, context,-1);
+//    }
+//    super.addTagNameProposals(contentAssistRequest, childPosition);
+//  }
   
   @Override
   protected void addTagInsertionProposals(ContentAssistRequest contentAssistRequest, int childPosition) {
