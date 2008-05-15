@@ -30,18 +30,18 @@ public enum PomTemplateContext {
   
   private static final String PREFIX = MvnIndexPlugin.PLUGIN_ID + ".templates.contextType.";
   
-  private String contextTypeId;
+  private String idSuffix;
   
-  private PomTemplateContext(String contextTypeId) {
-    this.contextTypeId = PREFIX + contextTypeId;
+  private PomTemplateContext(String idSuffix) {
+    this.idSuffix =  idSuffix;
+  }
+  
+  protected String getIdSuffix() {
+    return idSuffix;
   }
 
   public String getContextTypeId() {
-    return contextTypeId;
-  }
-
-  public void setContextTypeId(String contextTypeId) {
-    this.contextTypeId = contextTypeId;
+    return PREFIX + idSuffix;
   }
 
   public static PomTemplateContext fromId(String contextTypeId) {
@@ -52,5 +52,16 @@ public enum PomTemplateContext {
     }
     return UNKNOWN;
   }
+  
+  public static PomTemplateContext fromNodeName(String idSuffix) {
+    for(PomTemplateContext context : values() ) {
+      if(context.getIdSuffix().equals(idSuffix)) {
+        return context;
+      }
+    }
+    return UNKNOWN;
+  }
+
+ 
   
 }

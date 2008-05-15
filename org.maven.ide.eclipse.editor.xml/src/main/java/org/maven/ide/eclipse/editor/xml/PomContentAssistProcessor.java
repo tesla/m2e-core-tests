@@ -36,30 +36,8 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
   @Override
   protected void addTagInsertionProposals(ContentAssistRequest contentAssistRequest, int childPosition) {
     String currentNodeName = getCurrentNode(contentAssistRequest).getNodeName();
-    if("project".equals(currentNodeName)) {
-      // TODO don't offer "parent" section if it is already present
-      addTemplates(contentAssistRequest, PomTemplateContext.PROJECT);
-    } else if("properties".equals(currentNodeName)) {
-      addTemplates(contentAssistRequest, PomTemplateContext.PROPERTIES);
-    } else if("dependencies".equals(currentNodeName)) {
-      addTemplates(contentAssistRequest, PomTemplateContext.DEPENDENCIES);
-    } else if("exclusions".equals(currentNodeName)) {
-      addTemplates(contentAssistRequest, PomTemplateContext.EXCLUSIONS);
-    } else if("plugins".equals(currentNodeName)) {
-      addTemplates(contentAssistRequest, PomTemplateContext.PLUGINS);
-    } else if("repositories".equals(currentNodeName)) {
-      addTemplates(contentAssistRequest, PomTemplateContext.REPOSITORIES);
-    } else if("groupId".equals(currentNodeName)) {
-      addTemplates(contentAssistRequest, PomTemplateContext.GROUP_ID);
-    } else if("artifactId".equals(currentNodeName)) {
-      addTemplates(contentAssistRequest, PomTemplateContext.ARTIFACT_ID);
-    } else if("version".equals(currentNodeName)) {
-      addTemplates(contentAssistRequest, PomTemplateContext.VERSION);
-    } else if("classifier".equals(currentNodeName)) {
-      addTemplates(contentAssistRequest, PomTemplateContext.CLASSIFIER);
-    } else if("type".equals(currentNodeName)) {
-      addTemplates(contentAssistRequest, PomTemplateContext.TYPE);
-    }
+    // TODO don't offer "parent" section if it is already present
+    addTemplates(contentAssistRequest, PomTemplateContext.fromNodeName(currentNodeName));
     super.addTagInsertionProposals(contentAssistRequest, childPosition);
   }
 
