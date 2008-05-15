@@ -113,7 +113,11 @@ public class MavenIndexesView extends ViewPart {
             return t1-t2;
           }
           return i1.getIndexName().compareTo(i2.getIndexName());
-        }
+        } else if(o1 instanceof IndexedArtifactFile && o2 instanceof IndexedArtifactFile) {
+          IndexedArtifactFile f1 = (IndexedArtifactFile) o1;
+          IndexedArtifactFile f2 = (IndexedArtifactFile) o2;
+          return f2.artifactVersion.compareTo(f1.artifactVersion);
+         }
         return super.compare(viewer, o1, o2);
       }
 
