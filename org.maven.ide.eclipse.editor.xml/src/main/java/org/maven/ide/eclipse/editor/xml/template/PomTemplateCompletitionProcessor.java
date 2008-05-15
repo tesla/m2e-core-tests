@@ -76,42 +76,41 @@ public class PomTemplateCompletitionProcessor extends TemplateCompletionProcesso
   @Override
   protected Template[] getTemplates(String contextTypeId) {
     List<Template> templates = new ArrayList<Template>();
-
-    switch(PomTemplateContext.fromId(contextTypeId)) {
-      case PROJECT:
-      case PARENT:
-      case PROPERTIES:
-      case DEPENDENCIES:
-      case EXCLUSIONS:
-      case PLUGINS:
-      case REPOSITORIES:
-        TemplateStore store = getTemplateStore();
-        if(store != null) {
-          return store.getTemplates(contextTypeId);
-        }
-        break;
-
-      case GROUP_ID:
-        for(String groupId : getSearchEngine().findGroupIds(prefix, getPackaging(), getContainingArtifact())) {
-          templates.add(new Template(groupId, groupId, contextTypeId, groupId, false));
-        }
-        break;
-        
-      case ARTIFACT_ID:
-        addArtifactIdTemplates(templates, contextTypeId);
-        break;
-
-      case VERSION:
-        addVersionTemplates(templates, contextTypeId);
-        break;
-        
-      case CLASSIFIER:
-        addClassifierTemplates(templates, contextTypeId);
-        break;
-
-      case TYPE:
-        addTypeTemplates(templates, contextTypeId);
-        break;
+    
+      
+    PomTemplateContext templateContext = PomTemplateContext.fromId(contextTypeId);
+    if (templateContext.isTemplate())
+    {
+      TemplateStore store = getTemplateStore();
+      if(store != null) {
+        return store.getTemplates(contextTypeId);
+      }
+    }
+    else
+    {
+      switch(templateContext) {
+        case GROUP_ID:
+          for(String groupId : getSearchEngine().findGroupIds(prefix, getPackaging(), getContainingArtifact())) {
+            templates.add(new Template(groupId, groupId, contextTypeId, groupId, false));
+          }
+          break;
+          
+        case ARTIFACT_ID:
+          addArtifactIdTemplates(templates, contextTypeId);
+          break;
+  
+        case VERSION:
+          addVersionTemplates(templates, contextTypeId);
+          break;
+          
+        case CLASSIFIER:
+          addClassifierTemplates(templates, contextTypeId);
+          break;
+  
+        case TYPE:
+          addTypeTemplates(templates, contextTypeId);
+          break;
+      }
     }
 
     return templates.toArray(new Template[templates.size()]);
