@@ -16,7 +16,7 @@
   <version>0.9.4-SNAPSHOT</version>
   <packaging>pom</packaging>
   
-  <name>Maven Integration for Eclipse Build</name>
+  <name>Maven Integration for Eclipse (parent)</name>
 
   <properties>
     <m2eclipse.version>0.9.4-SNAPSHOT</m2eclipse.version>
@@ -82,6 +82,11 @@
 
     <module>../org.maven.ide.eclipse.ajdt</module>
     <module>../org.maven.ide.eclipse.wtp</module>
+    <!--
+    <module>../org.maven.ide.eclipse.flex</module>
+    -->
+    
+    <module>../org.maven.ide.eclipse.editor.xml</module>
 
     <module>../org.maven.ide.eclipse.book</module>
 

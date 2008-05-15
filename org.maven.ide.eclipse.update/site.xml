@@ -27,6 +27,9 @@
    <feature url="features/org.maven.ide.eclipse.wtp.feature_0.9.4.qualifier.jar" id="org.maven.ide.eclipse.wtp.feature" version="0.9.4.qualifier">
       <category name="Maven Project Configurators"/>
    </feature>
+   <feature url="features/org.maven.ide.eclipse.editor.xml.feature_0.9.4.qualifier.jar" id="org.maven.ide.eclipse.editor.xml.feature" version="0.9.4.qualifier">
+      <category name="Maven Integration"/>
+   </feature>
    <category-def name="Maven Integration" label="Maven Integration"/>
    <category-def name="Maven Optional Components" label="Maven Optional Components"/>
    <category-def name="Maven Project Configurators" label="Maven Project Configurators"/>
