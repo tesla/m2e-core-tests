@@ -8,9 +8,6 @@
 
 package org.maven.ide.eclipse.editor.xml.template;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
@@ -24,15 +21,14 @@ import org.eclipse.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateCompletionProcessor;
 import org.eclipse.jface.text.templates.TemplateContextType;
-import org.eclipse.jface.text.templates.persistence.TemplateStore;
 import org.eclipse.swt.graphics.Image;
 
 import org.maven.ide.eclipse.editor.xml.MvnIndexPlugin;
 import org.maven.ide.eclipse.editor.xml.PomContentAssistProcessor;
 import org.maven.ide.eclipse.editor.xml.PomTemplateContext;
 import org.maven.ide.eclipse.editor.xml.search.ArtifactInfo;
+import org.maven.ide.eclipse.editor.xml.search.NodeInfo;
 import org.maven.ide.eclipse.editor.xml.search.Packaging;
-import org.maven.ide.eclipse.editor.xml.search.SearchEngine;
 
 
 /**
@@ -40,7 +36,7 @@ import org.maven.ide.eclipse.editor.xml.search.SearchEngine;
  * 
  * @author Lukas Krecan
  */
-public class PomTemplateCompletitionProcessor extends TemplateCompletionProcessor {
+public class PomTemplateCompletitionProcessor extends TemplateCompletionProcessor implements NodeInfo {
   private String contextTypeId = null;
 
   private Node currentNode;
@@ -55,9 +51,7 @@ public class PomTemplateCompletitionProcessor extends TemplateCompletionProcesso
     this.contextTypeId = contextTypeId;
   }
 
-  protected SearchEngine getSearchEngine() {
-    return MvnIndexPlugin.getDefault().getSearchEngine();
-  }
+
 
   @Override
   protected TemplateContextType getContextType(ITextViewer viewer, IRegion region) {
@@ -75,96 +69,15 @@ public class PomTemplateCompletitionProcessor extends TemplateCompletionProcesso
 
   @Override
   protected Template[] getTemplates(String contextTypeId) {
-    List<Template> templates = new ArrayList<Template>();
-    
-      
-    PomTemplateContext templateContext = PomTemplateContext.fromId(contextTypeId);
-    if (templateContext.isTemplate())
-    {
-      TemplateStore store = getTemplateStore();
-      if(store != null) {
-        return store.getTemplates(contextTypeId);
-      }
-    }
-    else
-    {
-      switch(templateContext) {
-        case GROUP_ID:
-          for(String groupId : getSearchEngine().findGroupIds(prefix, getPackaging(), getContainingArtifact())) {
-            templates.add(new Template(groupId, groupId, contextTypeId, groupId, false));
-          }
-          break;
-          
-        case ARTIFACT_ID:
-          addArtifactIdTemplates(templates, contextTypeId);
-          break;
+    return PomTemplateContext.fromId(contextTypeId).getTemplates(this);
+  }
+
   
-        case VERSION:
-          addVersionTemplates(templates, contextTypeId);
-          break;
-          
-        case CLASSIFIER:
-          addClassifierTemplates(templates, contextTypeId);
-          break;
-  
-        case TYPE:
-          addTypeTemplates(templates, contextTypeId);
-          break;
-      }
-    }
-
-    return templates.toArray(new Template[templates.size()]);
-  }
-
-  private void addTypeTemplates(List<Template> templates, String contextTypeId) {
-    String groupId = getGroupId();
-    String artifactId = getArtifactId();
-    String version = getVersion();
-    if(groupId != null && artifactId != null && version != null) {
-      for(String type : getSearchEngine().findTypes(groupId, artifactId, version, prefix, getPackaging())) {
-        templates.add(new Template(type, groupId + ":" + artifactId + ":" + version + ":" + type, //
-            contextTypeId, type, false));
-      }
-    }
-  }
-
-  private void addClassifierTemplates(List<Template> templates, String contextTypeId) {
-    String groupId = getGroupId();
-    String artifactId = getArtifactId();
-    String version = getVersion();
-    if(groupId != null && artifactId != null && version != null) {
-      for(String classifier : getSearchEngine().findClassifiers(groupId, artifactId, version, prefix, getPackaging())) {
-        templates.add(new Template(classifier, groupId + ":" + artifactId + ":" + version + ":" + classifier,
-            contextTypeId, classifier, false));
-      }
-    }
-  }
-
-  private void addVersionTemplates(List<Template> templates, String contextTypeId) {
-    String groupId = getGroupId();
-    String artifactId = getArtifactId();
-    if(groupId != null && artifactId != null) {
-      for(String version : getSearchEngine().findVersions(groupId, artifactId, prefix, getPackaging())) {
-        templates.add(new Template(version, groupId + ":" + artifactId + ":" + version, //
-            contextTypeId, version, false));
-      }
-    }
-  }
-
-  private void addArtifactIdTemplates(List<Template> templates, String contextTypeId) {
-    String groupId = getGroupId();
-    if(groupId != null) {
-      for(String artifactId : getSearchEngine().findArtifactIds(groupId, prefix, getPackaging(),
-          getContainingArtifact())) {
-        templates.add(new Template(artifactId, groupId + ":" + artifactId, contextTypeId, artifactId, false));
-      }
-    }
-  }
 
   /**
    * Returns containing artifactInfo for exclusions. Otherwise returns null.
    */
-  private ArtifactInfo getContainingArtifact() {
+  public ArtifactInfo getContainingArtifact() {
     if(isExclusion()) {
       Node node = currentNode.getParentNode().getParentNode();
       return getArtifactInfo(node);
@@ -180,7 +93,10 @@ public class PomTemplateCompletitionProcessor extends TemplateCompletionProcesso
         getSiblingTextValue(node, "classifier"), getSiblingTextValue(node, "type"));
   }
 
-  private Packaging getPackaging() {
+  /**
+   * Returns required packaging.
+   */
+  public Packaging getPackaging() {
     if(isPlugin()) {
       return Packaging.PLUGIN;
     } else if(isParent()) {
@@ -194,7 +110,7 @@ public class PomTemplateCompletitionProcessor extends TemplateCompletionProcesso
     return super.computeCompletionProposals(viewer, offset);
   }
 
-  private String getGroupId() {
+  public String getGroupId() {
     return getGroupId(currentNode);
   }
 
@@ -202,7 +118,7 @@ public class PomTemplateCompletitionProcessor extends TemplateCompletionProcesso
     return getSiblingTextValue(sibling, "groupId");
   }
 
-  private String getArtifactId() {
+  public String getArtifactId() {
     return getArtifactId(currentNode);
   }
 
@@ -210,7 +126,7 @@ public class PomTemplateCompletitionProcessor extends TemplateCompletionProcesso
     return getSiblingTextValue(sibling, "artifactId");
   }
 
-  private String getVersion() {
+  public String getVersion() {
     return getVersion(currentNode);
   }
 
@@ -299,12 +215,13 @@ public class PomTemplateCompletitionProcessor extends TemplateCompletionProcesso
     }
   }
 
-  private TemplateStore getTemplateStore() {
-    return MvnIndexPlugin.getDefault().getTemplateStore();
-  }
-
+  
   private ContextTypeRegistry getTemplateContextRegistry() {
     return MvnIndexPlugin.getDefault().getTemplateContextRegistry();
+  }
+
+  public String getPrefix() {
+    return prefix;
   }
 
 }
