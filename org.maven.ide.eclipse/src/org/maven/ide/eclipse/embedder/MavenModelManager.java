@@ -285,37 +285,37 @@ public class MavenModelManager {
       if(this.dependency.getClassifier() != null) {
         cursor.insertChars("      ");
         cursor.insertElementWithText("classifier", uri, this.dependency.getClassifier());
-        cursor.insertChars("\n    ");
+        cursor.insertChars("\n");
       }
   
       if(this.dependency.getVersion() != null) {
         cursor.insertChars("      ");
         cursor.insertElementWithText("version", uri, this.dependency.getVersion());
-        cursor.insertChars("\n    ");
+        cursor.insertChars("\n");
       }
   
       if(this.dependency.getType() != null && !"jar".equals(dependency.getType())) {
         cursor.insertChars("      ");
         cursor.insertElementWithText("type", uri, this.dependency.getType());
-        cursor.insertChars("\n    ");
+        cursor.insertChars("\n");
       }
   
       if(this.dependency.getScope() != null) {
         cursor.insertChars("      ");
         cursor.insertElementWithText("scope", uri, this.dependency.getScope());
-        cursor.insertChars("\n    ");
+        cursor.insertChars("\n");
       }
   
       if(this.dependency.getSystemPath() != null) {
         cursor.insertChars("      ");
         cursor.insertElementWithText("systemPath", uri, this.dependency.getSystemPath());
-        cursor.insertChars("\n    ");
+        cursor.insertChars("\n");
       }
   
       if(this.dependency.isOptional()) {
         cursor.insertChars("      ");
         cursor.insertElementWithText("optional", uri, "true");
-        cursor.insertChars("\n    ");
+        cursor.insertChars("\n");
       }
   
       if(this.dependency.getExclusions() != null) {
@@ -323,6 +323,7 @@ public class MavenModelManager {
   
       }
 
+      cursor.insertChars("    ");
       cursor.toNextToken();
       cursor.insertChars("\n  ");
       
