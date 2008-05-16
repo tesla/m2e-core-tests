@@ -16,7 +16,6 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.eclipse.wst.xml.ui.internal.contentassist.XMLContentAssistProcessor;
 
-import org.maven.ide.eclipse.editor.xml.template.PomTemplateCompletitionProcessor;
 
 
 /**

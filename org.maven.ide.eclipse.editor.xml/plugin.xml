@@ -27,35 +27,47 @@
 
   <extension  point="org.eclipse.ui.editors.templates">
     <contextType name="Project"
-      class="org.maven.ide.eclipse.editor.xml.template.PomTemplateContextType"
+      class="org.maven.ide.eclipse.editor.xml.PomTemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.project"/>
     
     <contextType name="Parent"
-      class="org.maven.ide.eclipse.editor.xml.template.PomTemplateContextType"
+      class="org.maven.ide.eclipse.editor.xml.PomTemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.parent"/>
     
     <contextType name="Properties"
-      class="org.maven.ide.eclipse.editor.xml.template.PomTemplateContextType"
+      class="org.maven.ide.eclipse.editor.xml.PomTemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.properties"/>
     
     <contextType name="Properties"
-      class="org.maven.ide.eclipse.editor.xml.template.PomTemplateContextType"
+      class="org.maven.ide.eclipse.editor.xml.PomTemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.properties"/>
     
     <contextType name="Dependencies"
-      class="org.maven.ide.eclipse.editor.xml.template.PomTemplateContextType"
+      class="org.maven.ide.eclipse.editor.xml.PomTemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.dependencies"/>
     
     <contextType name="Exclusions"
-      class="org.maven.ide.eclipse.editor.xml.template.PomTemplateContextType"
+      class="org.maven.ide.eclipse.editor.xml.PomTemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.exclusions"/>
     
     <contextType name="Plugins"
-      class="org.maven.ide.eclipse.editor.xml.template.PomTemplateContextType"
+      class="org.maven.ide.eclipse.editor.xml.PomTemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.plugins"/>
     
+    <contextType name="Executions"
+      class="org.maven.ide.eclipse.editor.xml.PomTemplateContextType"
+      id="org.maven.ide.eclipse.editor.xml.templates.contextType.executions"/>
+    
+    <contextType name="Execution"
+      class="org.maven.ide.eclipse.editor.xml.PomTemplateContextType"
+      id="org.maven.ide.eclipse.editor.xml.templates.contextType.execution"/>
+    
+    <contextType name="Profiles"
+      class="org.maven.ide.eclipse.editor.xml.PomTemplateContextType"
+      id="org.maven.ide.eclipse.editor.xml.templates.contextType.profiles"/>
+    
     <contextType name="Repositories"
-      class="org.maven.ide.eclipse.editor.xml.template.PomTemplateContextType"
+      class="org.maven.ide.eclipse.editor.xml.PomTemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.repositories"/>
     
     <contextType name="Group Id"
@@ -81,6 +93,10 @@
     <contextType name="Packaging"
       class="org.eclipse.jface.text.templates.TemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.packaging"/>
+
+    <contextType name="Phase"
+      class="org.eclipse.jface.text.templates.TemplateContextType"
+      id="org.maven.ide.eclipse.editor.xml.templates.contextType.phase"/>
 
     <template id="org.maven.ide.eclipse.editor.xml.templates.parent.skeleton"
          contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.project"
@@ -179,6 +195,33 @@
           &lt;enabled&gt;false&lt;/enabled&gt;
         &lt;/snapshots&gt;        
      &lt;/repository&gt;</pattern>
+    </template>
+    
+    <template id="org.maven.ide.eclipse.editor.xml.templates.execution.skeleton"
+         contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.executions"
+         name="execution" 
+         description="New execution element">
+      <pattern>&lt;execution&gt;
+            &lt;id&gt;${cursor}&lt;/id&gt;
+            &lt;phase&gt;${verify}&lt;/phase&gt;
+            &lt;goals&gt;
+              &lt;goal&gt;${run}&lt;/goal&gt;
+            &lt;/goals&gt;
+            &lt;inherited&gt;${false}&lt;/inherited&gt;
+            &lt;configuration&gt;
+            &lt;/configuration&gt;
+          &lt;/execution&gt;</pattern>
+    </template>
+    
+    <template id="org.maven.ide.eclipse.editor.xml.templates.profile.skeleton"
+         contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.profiles"
+         name="profile" 
+         description="New profile element">
+      <pattern>&lt;profile&gt;
+      &lt;id&gt;${cursor}${test}&lt;/id&gt;
+      &lt;activation&gt;
+      &lt;/activation&gt;
+    &lt;/profile&gt;</pattern>
     </template>
   </extension>
 

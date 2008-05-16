@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.editor.xml.template;
+package org.maven.ide.eclipse.editor.xml;
 
 import org.eclipse.jface.text.templates.GlobalTemplateVariables;
 import org.eclipse.jface.text.templates.TemplateContextType;

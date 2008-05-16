@@ -26,7 +26,6 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import org.maven.ide.eclipse.editor.xml.search.CompositeSearchEngine;
 import org.maven.ide.eclipse.editor.xml.search.SearchEngine;
-import org.maven.ide.eclipse.editor.xml.template.PomTemplateContextType;
 
 
 /**
