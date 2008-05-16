@@ -2,6 +2,10 @@
 <?eclipse version="3.2"?>
 <plugin>
   <extension-point id="searchEngine" name="Search Engine" schema="schema/searchEngine.exsd"/>
+
+  <extension point="org.maven.ide.eclipse.editor.xml.searchEngine">
+    <search-engine class="org.maven.ide.eclipse.editor.xml.search.IndexManagerSearchEngine"/>
+  </extension>
   
   <extension point="org.eclipse.core.runtime.contentTypes">
     <content-type id="pomFile" name="Maven POM XML"
@@ -80,7 +84,7 @@
 
     <template id="org.maven.ide.eclipse.editor.xml.templates.parent.skeleton"
          contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.project"
-         name="New parent element" 
+         name="parent" 
          description="New parent element">
       <pattern>&lt;parent&gt;
     &lt;groupId&gt;${cursor}&lt;/groupId&gt;
@@ -91,14 +95,14 @@
 
     <template id="org.maven.ide.eclipse.editor.xml.templates.property.skeleton"
          contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.properties"
-         name="New property element" 
+         name="property" 
          description="New property element">
       <pattern>&lt;${cursor}${name}&gt;${value}&lt;/${name}&gt;</pattern>
     </template>
 
     <template id="org.maven.ide.eclipse.editor.xml.templates.dependency.skeleton"
          contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.dependencies"
-         name="New dependency element" 
+         name="dependency" 
          description="New dependency element">
       <pattern>&lt;dependency&gt;
       &lt;groupId&gt;${cursor}&lt;/groupId&gt;
@@ -109,7 +113,7 @@
 
     <template id="org.maven.ide.eclipse.editor.xml.templates.exclusion.skeleton"
          contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.exclusions"
-         name="New exclusion element" 
+         name="exclusion" 
          description="New exclusion element">
       <pattern>&lt;exclusion&gt;
           &lt;groupId&gt;${cursor}&lt;/groupId&gt;
@@ -119,7 +123,7 @@
 
     <template id="org.maven.ide.eclipse.editor.xml.templates.plugin.skeleton"
          contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.plugins"
-         name="New plugin element" 
+         name="plugin" 
          description="New plugin element">
       <pattern>&lt;plugin&gt;
         &lt;groupId&gt;${cursor}&lt;/groupId&gt;
@@ -132,7 +136,7 @@
 
     <template id="org.maven.ide.eclipse.editor.xml.templates.plugin.javac"
          contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.plugins"
-         name="Java complier plugin configuration" 
+         name="javac plugin" 
          description="Java complier plugin configuration">
       <pattern>&lt;plugin&gt;
         &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
@@ -146,7 +150,7 @@
 
     <template id="org.maven.ide.eclipse.editor.xml.templates.plugin.aspectj"
          contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.plugins"
-         name="AspectJ plugin configuration" 
+         name="AspectJ plugin" 
          description="AspectJ plugin configuration">
       <pattern>&lt;plugin&gt;
          &lt;groupId&gt;org.codehaus.mojo&lt;/groupId&gt;
@@ -163,7 +167,7 @@
 
     <template id="org.maven.ide.eclipse.editor.xml.templates.repository.skeleton"
          contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.repositories"
-         name="New repository element" 
+         name="repository" 
          description="New repository element">
       <pattern>&lt;repository&gt;
         &lt;id&gt;${cursor}&lt;/id&gt;
@@ -178,8 +182,17 @@
     </template>
   </extension>
 
-  <extension point="org.maven.ide.eclipse.editor.xml.searchEngine">
-    <search-engine class="org.maven.ide.eclipse.editor.xml.search.IndexManagerSearchEngine"/>
+  <extension point="org.eclipse.ui.keywords">
+    <keyword id="org.maven.ide.eclipse.maven" label="maven"/>
+  </extension>
+
+  <extension point="org.eclipse.ui.preferencePages">
+    <page id="org.maven.ide.eclipse.editor.xml.preferences.PomTemplatesPreferencePage"
+          category="org.maven.ide.eclipse.preferences.Maven2PreferencePage"
+          class="org.maven.ide.eclipse.editor.xml.preferences.PomTemplatesPreferencePage"
+          name="Templates">
+       <keywordReference id="org.maven.ide.eclipse.maven"/>
+    </page>
   </extension>
 
 </plugin>

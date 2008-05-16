@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.text.templates.ContextTypeRegistry;
+import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.persistence.TemplateStore;
 import org.eclipse.ui.editors.text.templates.ContributionContextTypeRegistry;
 import org.eclipse.ui.editors.text.templates.ContributionTemplateStore;
@@ -25,6 +26,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import org.maven.ide.eclipse.editor.xml.search.CompositeSearchEngine;
 import org.maven.ide.eclipse.editor.xml.search.SearchEngine;
+import org.maven.ide.eclipse.editor.xml.template.PomTemplateContextType;
 
 
 /**
@@ -122,6 +124,16 @@ public class MvnIndexPlugin extends AbstractUIPlugin implements Log {
         registry.addContextType(contextType.getContextTypeId());
       }
       contextTypeRegistry = registry;
+    }
+    return contextTypeRegistry;
+  }
+
+  public ContextTypeRegistry getContextTypeRegistry() {
+    if(contextTypeRegistry == null) {
+      contextTypeRegistry = new ContributionContextTypeRegistry();
+      // TemplateContextType contextType = new TemplateContextType(CONTEXT_TYPE, "POM XML Editor");
+      PomTemplateContextType contextType = new PomTemplateContextType();
+      contextTypeRegistry.addContextType(contextType);
     }
     return contextTypeRegistry;
   }
