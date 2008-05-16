@@ -9,9 +9,8 @@
 package org.maven.ide.eclipse.editor.xml.search;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Map;
+import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -39,6 +38,7 @@ public class IndexManagerSearchEngine implements SearchEngine {
   public Collection<String> findGroupIds(String searchExpression, Packaging packaging, ArtifactInfo containingArtifact) {
     try {
       TreeSet<String> ids = new TreeSet<String>();
+      
       IndexManager indexManager = getIndexManager();
       if(packaging==Packaging.ALL) {
         Set<String> indexIds = indexManager.getIndexes().keySet();
@@ -49,15 +49,7 @@ public class IndexManagerSearchEngine implements SearchEngine {
           }
         }
       } else {
-        BooleanQuery query = new BooleanQuery();
-
-        query.add(new TermQuery(new Term(IndexManager.FIELD_PACKAGING, packaging.getText())), Occur.MUST);
-        
-        // TODO remove '-' workaround once Nexus indexer is fixed
-        // query.add(indexManager.createQuery(IndexManager.FIELD_GROUP_ID, searchExpression.replace('-', '*')), Occur.MUST);
-
-        Map<String, IndexedArtifact> result = indexManager.search(null, query);
-        for(IndexedArtifact artifact : result.values()) {
+        for(IndexedArtifact artifact : find(null, null, null, packaging)) {
           ids.add(artifact.group);
         }
       }
@@ -69,32 +61,11 @@ public class IndexManagerSearchEngine implements SearchEngine {
     }
   }
 
-  @SuppressWarnings("unchecked")
   public Collection<String> findArtifactIds(String groupId, String searchExpression, Packaging packaging, ArtifactInfo containingArtifact) {
-    //TODO add support for implicit groupIds in plugin dependencies "org.apache.maven.plugins", ...
+    // TODO add support for implicit groupIds in plugin dependencies "org.apache.maven.plugins", ...
     try {
-      IndexManager indexManager = getIndexManager();
-      
-      BooleanQuery query = new BooleanQuery();
-
-      if(packaging != Packaging.ALL) {
-        query.add(new TermQuery(new Term(IndexManager.FIELD_PACKAGING, packaging.getText())), Occur.MUST);
-      }
-      
-      // TODO remove '-' workaround once Nexus indexer is fixed
-      query.add(indexManager.createQuery(IndexManager.FIELD_GROUP_ID, groupId.replace('-', '*')), Occur.MUST);
-      
-      if(searchExpression.length()>0) {
-        // TODO remove '-' workaround once Nexus indexer is fixed
-        int lastDash = searchExpression.lastIndexOf('-');
-        String searchRange = lastDash==-1 ? searchExpression : searchExpression.substring(0, lastDash);
-        query.add(indexManager.createQuery(IndexManager.FIELD_ARTIFACT_ID, searchRange), Occur.SHOULD);
-      }
-
-      Collection<IndexedArtifact> values = indexManager.search(null, query).values();
-
       TreeSet<String> ids = new TreeSet<String>();
-      for(IndexedArtifact artifact : values) {
+      for(IndexedArtifact artifact : find(groupId, null, null, packaging)) {
         ids.add(artifact.artifact);
       }
       return subSet(ids, searchExpression);
@@ -106,24 +77,13 @@ public class IndexManagerSearchEngine implements SearchEngine {
   @SuppressWarnings("unchecked")
   public Collection<String> findVersions(String groupId, String artifactId, String searchExpression, Packaging packaging) {
     try {
-      IndexManager indexManager = getIndexManager();
-
-      BooleanQuery query = new BooleanQuery();
-
-      if(packaging != Packaging.ALL) {
-        query.add(new TermQuery(new Term(IndexManager.FIELD_PACKAGING, packaging.getText())), Occur.MUST);
+      Collection<IndexedArtifact> values = find(groupId, artifactId, null, packaging);
+      if(values.isEmpty()) {
+        return Collections.emptySet();
       }
-
-      // TODO remove '-' workaround once Nexus indexer is fixed
-      query.add(indexManager.createQuery(IndexManager.FIELD_GROUP_ID, groupId.replace('-', '*')), Occur.MUST);
-      
-      query.add(indexManager.createQuery(IndexManager.FIELD_ARTIFACT_ID, artifactId), Occur.MUST);
-
-      Map<String, IndexedArtifact> result = indexManager.search(null, query);
-      IndexedArtifact artifact = result.values().iterator().next();
-      Set<IndexedArtifactFile> files = artifact.files;
       
       TreeSet<String> ids = new TreeSet<String>();
+      Set<IndexedArtifactFile> files = values.iterator().next().files;
       for(IndexedArtifactFile artifactFile : files) {
         ids.add(artifactFile.version);
       }
@@ -133,14 +93,75 @@ public class IndexManagerSearchEngine implements SearchEngine {
     }
   }
   
-  public Collection<String> findClassifiers(String groupId, String artifactId, String version, String prefix, Packaging packaging) {
-    //TODO implement
-    return Arrays.asList("jdk14","jdk15");
+  @SuppressWarnings("unchecked")
+  public Collection<String> findClassifiers(String groupId, String artifactId, String version, //
+      String searchExpression, Packaging packaging) {
+    try {
+      Collection<IndexedArtifact> values = find(groupId, artifactId, null, packaging);
+      if(values.isEmpty()) {
+        return Collections.emptySet();
+      }
+      
+      TreeSet<String> ids = new TreeSet<String>();
+      Set<IndexedArtifactFile> files = values.iterator().next().files;
+      for(IndexedArtifactFile artifactFile : files) {
+        if(artifactFile.classifier!=null) {
+          ids.add(artifactFile.classifier);
+        }
+      }
+      return subSet(ids, searchExpression);
+    } catch(IOException ex) {
+      throw new SearchException("Unexpected exception when searching", ex);
+    }
   }
   
-  public Collection<String> findTypes(String groupId, String artifactId, String version, String prefix, Packaging packaging) {
-    //TODO implement
-    return Arrays.asList("jar","war");
+  @SuppressWarnings("unchecked")
+  public Collection<String> findTypes(String groupId, String artifactId, String version, //
+      String searchExpression, Packaging packaging) {
+    try {
+      Collection<IndexedArtifact> values = find(groupId, artifactId, null, packaging);
+      if(values.isEmpty()) {
+        return Collections.emptySet();
+      }
+      
+      TreeSet<String> ids = new TreeSet<String>();
+      Set<IndexedArtifactFile> files = values.iterator().next().files;
+      for(IndexedArtifactFile artifactFile : files) {
+        if(artifactFile.type!=null) {
+          ids.add(artifactFile.type);
+        }
+      }
+      return subSet(ids, searchExpression);
+    } catch(IOException ex) {
+      throw new SearchException("Unexpected exception when searching", ex);
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  private Collection<IndexedArtifact> find(String groupId, String artifactId, String version,
+      Packaging packaging) throws IOException {
+    IndexManager indexManager = getIndexManager();
+ 
+    BooleanQuery query = new BooleanQuery();
+ 
+    if(packaging != Packaging.ALL) {
+      query.add(new TermQuery(new Term(IndexManager.FIELD_PACKAGING, packaging.getText())), Occur.MUST);
+    }
+
+    if(groupId!=null) {
+      // TODO remove '-' workaround once Nexus indexer is fixed
+      query.add(indexManager.createQuery(IndexManager.FIELD_GROUP_ID, groupId.replace('-', '*')), Occur.MUST);
+    }
+
+    if(artifactId != null) {
+      query.add(indexManager.createQuery(IndexManager.FIELD_ARTIFACT_ID, artifactId), Occur.MUST);
+    }
+ 
+    if(version != null) {
+      query.add(indexManager.createQuery(IndexManager.FIELD_VERSION, version), Occur.MUST);
+    }
+ 
+    return indexManager.search(null, query).values();
   }
 
   private Collection<String> subSet(TreeSet<String> ids, String searchExpression) {
@@ -156,8 +177,4 @@ public class IndexManagerSearchEngine implements SearchEngine {
     return MavenPlugin.getDefault().getIndexManager();
   }
 
-
-
-
-  
 }
