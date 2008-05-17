@@ -299,7 +299,8 @@ public class MavenPomSelectionComponent extends Composite {
         return (a.className == null ? "" : a.className + "   " + a.packageName + "   ") + a.group + "   " + a.artifact;
       } else if(element instanceof IndexedArtifactFile) {
         IndexedArtifactFile f = (IndexedArtifactFile) element;
-        return f.version + " - " + f.fname + " - " + f.size + " - " + f.date + " [" + f.repository + "]";
+        long size_k = (f.size + 512)/1024;
+        return f.version + " - " + f.fname + " - " + size_k + "K - " + f.date + " [" + f.repository + "]";
       }
       return super.getText(element);
     }
