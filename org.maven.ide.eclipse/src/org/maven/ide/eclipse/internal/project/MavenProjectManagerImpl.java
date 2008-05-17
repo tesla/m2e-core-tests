@@ -896,7 +896,7 @@ public class MavenProjectManagerImpl {
         return new Path(artifact.getFile().getAbsolutePath());
       }
     } catch(AbstractArtifactResolutionException ex) {
-      String name = ex.getGroupId() + ":" + ex.getArtifactId() + "-" + ex.getVersion() + "." + ex.getType();
+      String name = ex.getGroupId() + ':' + ex.getArtifactId() + ':' + ex.getVersion();
       console.logError("Can't download " + type + " for artifact " + name);
       if(!isJavaSource && !isJavaDoc) {
         String msg = ex.getOriginalMessage()==null ? ex.toString() : ex.getOriginalMessage();
