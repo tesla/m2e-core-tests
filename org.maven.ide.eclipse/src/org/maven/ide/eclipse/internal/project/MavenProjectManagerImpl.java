@@ -356,13 +356,13 @@ public class MavenProjectManagerImpl {
     MavenEmbedder embedder = embedderManager.createEmbedder(EmbedderFactory.createWorkspaceCustomizer());
     try {
       for(Iterator it = updateRequests.iterator(); it.hasNext();) {
-        if(monitor.isCanceled()) {
-          throw new InterruptedException();
-        }
-
         DependencyResolutionContext updateRequest = (DependencyResolutionContext) it.next();
         
         while(!updateRequest.isEmpty()) {
+          if(monitor.isCanceled()) {
+            throw new InterruptedException();
+          }
+
           IFile pom = updateRequest.pop();
           monitor.subTask(pom.getFullPath().toString());
           
