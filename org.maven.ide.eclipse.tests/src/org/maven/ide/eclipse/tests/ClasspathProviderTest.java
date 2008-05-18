@@ -310,7 +310,7 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
     assertEquals("custom.jar", userClasspath[2].getPath().lastSegment());
   }
 
-  public void _testTestClassesDefaultClassifier() throws Exception {
+  public void testTestClassesDefaultClassifier() throws Exception {
     IProject p01 = createExisting("runtimeclasspath-testscope01", "projects/runtimeclasspath/testscope01");
     IProject p02 = createExisting("runtimeclasspath-testscope02", "projects/runtimeclasspath/testscope02");
     waitForJobsToComplete();
@@ -328,10 +328,10 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
     assertEquals(new Path("/runtimeclasspath-testscope02/target-eclipse/test-classes"), userClasspath[0].getPath());
     assertEquals(new Path("/runtimeclasspath-testscope02/target-eclipse/classes"), userClasspath[1].getPath());
     assertEquals(new Path("/runtimeclasspath-testscope01/target-eclipse/classes"), userClasspath[2].getPath());
-    assertEquals(new Path("/runtimeclasspath-testscope01/src/main/resources"), userClasspath[2].getPath());
+    assertEquals(new Path("/runtimeclasspath-testscope01/src/main/resources"), userClasspath[3].getPath());
   }
 
-  public void _testTestClassesTestsClassifier() throws Exception {
+  public void testTestClassesTestsClassifier() throws Exception {
     IProject p01 = createExisting("runtimeclasspath-testscope01", "projects/runtimeclasspath/testscope01");
     IProject p03 = createExisting("runtimeclasspath-testscope03", "projects/runtimeclasspath/testscope03");
     waitForJobsToComplete();

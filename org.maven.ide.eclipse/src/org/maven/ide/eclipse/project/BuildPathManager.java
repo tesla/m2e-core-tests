@@ -295,6 +295,12 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
       }
 
       ArrayList attributes = new ArrayList();
+      attributes.add(JavaCore.newClasspathAttribute(MavenPlugin.GROUP_ID_ATTRIBUTE, a.getGroupId()));
+      attributes.add(JavaCore.newClasspathAttribute(MavenPlugin.ARTIFACT_ID_ATTRIBUTE, a.getArtifactId()));
+      attributes.add(JavaCore.newClasspathAttribute(MavenPlugin.VERSION_ATTRIBUTE, a.getVersion()));
+      if (a.getClassifier() != null) {
+        attributes.add(JavaCore.newClasspathAttribute(MavenPlugin.CLASSIFIER_ATTRIBUTE, a.getClassifier()));
+      }
 
       // project
       MavenProjectFacade dependency = projectManager.getMavenProject(a);
@@ -303,7 +309,11 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
       }
 
       if (dependency != null && dependency.getFullPath(a.getFile()) != null) {
-        entries.put(dependency.getFullPath(), JavaCore.newProjectEntry(dependency.getFullPath(), false));
+        entries.put(dependency.getFullPath(), JavaCore.newProjectEntry(dependency.getFullPath(), 
+            new IAccessRule[0] /*accessRules*/,
+            true /*combineAccessRules*/,
+            (IClasspathAttribute[]) attributes.toArray(new IClasspathAttribute[attributes.size()]),
+            false /*isExported*/));
         continue;
       }
 
@@ -311,13 +321,6 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
       if(artifactFile != null) {
         String artifactLocation = artifactFile.getAbsolutePath();
         IPath entryPath = new Path(artifactLocation);
-
-        attributes.add(JavaCore.newClasspathAttribute(MavenPlugin.GROUP_ID_ATTRIBUTE, a.getGroupId()));
-        attributes.add(JavaCore.newClasspathAttribute(MavenPlugin.ARTIFACT_ID_ATTRIBUTE, a.getArtifactId()));
-        attributes.add(JavaCore.newClasspathAttribute(MavenPlugin.VERSION_ATTRIBUTE, a.getVersion()));
-        if (a.getClassifier() != null) {
-          attributes.add(JavaCore.newClasspathAttribute(MavenPlugin.CLASSIFIER_ATTRIBUTE, a.getClassifier()));
-        }
 
         String key = entryPath.toPortableString();
 

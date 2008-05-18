@@ -48,6 +48,8 @@ import org.maven.ide.eclipse.project.ResolverConfiguration;
 
 
 public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
+  
+  private static final String THIS_PROJECT_CLASSIFIER = "";
 
   private static final Path MAVEN2_CONTAINER_PATH = new Path(MavenPlugin.CONTAINER_ID);
   
@@ -93,7 +95,7 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
       } else if (entry.getType() == IRuntimeClasspathEntry.PROJECT) {
         IJavaProject javaProject = JavaRuntime.getJavaProject(configuration);
         if (javaProject.getPath().equals(entry.getPath())) {
-          addProjectEntries(all, entry.getPath(), scope, configuration);
+          addProjectEntries(all, entry.getPath(), scope, THIS_PROJECT_CLASSIFIER, configuration);
         } else {
           addStandardClasspathEntries(all, entry, configuration);
         }
@@ -123,7 +125,7 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
     for (int i = 0; i < cp.length; i++) {
       switch (cp[i].getEntryKind()) {
         case IClasspathEntry.CPE_PROJECT:
-          addProjectEntries(resolved, cp[i].getPath(), scope, configuration);
+          addProjectEntries(resolved, cp[i].getPath(), scope, getArtifactClassifier(cp[i]), configuration);
           break;
         case IClasspathEntry.CPE_LIBRARY:
           resolved.add(JavaRuntime.newArchiveRuntimeClasspathEntry(cp[i].getPath()));
@@ -174,7 +176,7 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
     }
   }
 
-  protected void addProjectEntries(Set resolved, IPath path, int scope, ILaunchConfiguration launchConfiguration) throws CoreException {
+  protected void addProjectEntries(Set resolved, IPath path, int scope, String classifier, ILaunchConfiguration launchConfiguration) throws CoreException {
     IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
     IProject project = root.getProject(path.segment(0));
 
@@ -235,16 +237,18 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
       switch (cp[i].getEntryKind()) {
         case IClasspathEntry.CPE_SOURCE:
           if (!projectResolved) {
-            if (BuildPathManager.CLASSPATH_TEST == scope) {
+            if (BuildPathManager.CLASSPATH_TEST == scope && isTestClassifier(classifier)) {
               // ECLIPSE-19: test classes resources come infront on the rest
               addFolders(resolved, project, allTestClasses);
               if (!configuration.shouldFilterResources()) {
                 addFolders(resolved, project, allTestResources);
               }
             }
-            addFolders(resolved, project, allClasses);
-            if (!configuration.shouldFilterResources()) {
-              addFolders(resolved, project, allResources);
+            if (isMainClassifier(classifier)) {
+              addFolders(resolved, project, allClasses);
+              if (!configuration.shouldFilterResources()) {
+                addFolders(resolved, project, allResources);
+              }
             }
             projectResolved = true;
           }
@@ -291,6 +295,17 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
     }
   }
 
+  private boolean isMainClassifier(String classifier) {
+    return THIS_PROJECT_CLASSIFIER == classifier // main project
+        || classifier == null; // default classifier
+  }
+
+  private boolean isTestClassifier(String classifier) {
+    return THIS_PROJECT_CLASSIFIER == classifier // main project
+        || "tests".equals(classifier) // tests classifier
+        || classifier != null; // unknown classifier
+  }
+
   private String getType(IClasspathEntry entry) {
     IClasspathAttribute[] attrs = entry.getExtraAttributes();
     for (int i = 0; i < attrs.length; i++) {
@@ -335,5 +350,15 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
     wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH_PROVIDER, (String) null);
     wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_SOURCE_PATH_PROVIDER, (String) null);
     wc.doSave();
+  }
+  
+  private static String getArtifactClassifier(IClasspathEntry entry) {
+    IClasspathAttribute[] attributes = entry.getExtraAttributes();
+    for(int j = 0; j < attributes.length; j++ ) {
+      if(MavenPlugin.CLASSIFIER_ATTRIBUTE.equals(attributes[j].getName())) {
+        return attributes[j].getValue();
+      }
+    }
+    return null;
   }
 }
