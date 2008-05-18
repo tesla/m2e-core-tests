@@ -11,6 +11,7 @@ package org.maven.ide.eclipse.tests;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -306,5 +308,47 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
     assertEquals(new Path("/runtimeclasspath-custombuildpath/target-eclipse/classes"), userClasspath[0].getPath());
     assertEquals(javaproject.getFullPath(), userClasspath[1].getPath());
     assertEquals("custom.jar", userClasspath[2].getPath().lastSegment());
+  }
+
+  public void _testTestClassesDefaultClassifier() throws Exception {
+    IProject p01 = createExisting("runtimeclasspath-testscope01", "projects/runtimeclasspath/testscope01");
+    IProject p02 = createExisting("runtimeclasspath-testscope02", "projects/runtimeclasspath/testscope02");
+    waitForJobsToComplete();
+
+    workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+
+    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(p02.getFile("T02.launch"));
+
+    MavenRuntimeClasspathProvider classpathProvider = new MavenRuntimeClasspathProvider();
+    IRuntimeClasspathEntry[] unresolvedClasspath = classpathProvider.computeUnresolvedClasspath(configuration);
+    IRuntimeClasspathEntry[] resolvedClasspath = classpathProvider.resolveClasspath(unresolvedClasspath, configuration);
+    IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
+
+    assertEquals(Arrays.asList(userClasspath).toString(), 4, userClasspath.length);
+    assertEquals(new Path("/runtimeclasspath-testscope02/target-eclipse/test-classes"), userClasspath[0].getPath());
+    assertEquals(new Path("/runtimeclasspath-testscope02/target-eclipse/classes"), userClasspath[1].getPath());
+    assertEquals(new Path("/runtimeclasspath-testscope01/target-eclipse/classes"), userClasspath[2].getPath());
+    assertEquals(new Path("/runtimeclasspath-testscope01/src/main/resources"), userClasspath[2].getPath());
+  }
+
+  public void _testTestClassesTestsClassifier() throws Exception {
+    IProject p01 = createExisting("runtimeclasspath-testscope01", "projects/runtimeclasspath/testscope01");
+    IProject p03 = createExisting("runtimeclasspath-testscope03", "projects/runtimeclasspath/testscope03");
+    waitForJobsToComplete();
+
+    workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+
+    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(p03.getFile("T03.launch"));
+
+    MavenRuntimeClasspathProvider classpathProvider = new MavenRuntimeClasspathProvider();
+    IRuntimeClasspathEntry[] unresolvedClasspath = classpathProvider.computeUnresolvedClasspath(configuration);
+    IRuntimeClasspathEntry[] resolvedClasspath = classpathProvider.resolveClasspath(unresolvedClasspath, configuration);
+    IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
+
+    assertEquals(Arrays.asList(userClasspath).toString(), 4, userClasspath.length);
+    assertEquals(new Path("/runtimeclasspath-testscope03/target-eclipse/test-classes"), userClasspath[0].getPath());
+    assertEquals(new Path("/runtimeclasspath-testscope03/target-eclipse/classes"), userClasspath[1].getPath());
+    assertEquals(new Path("/runtimeclasspath-testscope01/target-eclipse/test-classes"), userClasspath[2].getPath());
+    assertEquals(new Path("/runtimeclasspath-testscope01/src/test/resources"), userClasspath[3].getPath());
   }
 }
