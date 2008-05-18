@@ -126,6 +126,10 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
         // next, resolve maven dependencies for all projects
         DependencyResolutionContext resolutionContext = new DependencyResolutionContext(updateRequest);
         while(!resolutionContext.isEmpty()) {
+          if(monitor.isCanceled()) {
+            throw new OperationCanceledException();
+          }
+
           IFile pom = resolutionContext.pop();
           monitor.subTask(pom.getFullPath().toString());
 
@@ -135,6 +139,10 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
 
         // and finally, perform detailed project configuration
         for(Iterator it = projectInfos.iterator(); it.hasNext();) {
+          if(monitor.isCanceled()) {
+            throw new OperationCanceledException();
+          }
+
           MavenProjectInfo projectInfo = (MavenProjectInfo) it.next();
           IProject project = (IProject) projects.get(projectInfo);
           MavenProjectFacade facade = projectManager.create(project, monitor);
