@@ -29,6 +29,10 @@ public class MavenRuntimeManager {
   
   public static final String EMBEDDED = "EMBEDDED"; 
 
+  public static final String WORKSPACE = "WORKSPACE";
+
+  private static WorkspaceMavenRuntime WORKSPACE_MAVEN_RUNTIME = new WorkspaceMavenRuntime();
+
   private final IPreferenceStore preferenceStore;
 
   private Map runtimes = new LinkedHashMap();
@@ -53,7 +57,11 @@ public class MavenRuntimeManager {
   }
   
   public List getMavenRuntimes() {
-    return new ArrayList(runtimes.values());
+    ArrayList arrayList = new ArrayList(runtimes.values());
+    if (WORKSPACE_MAVEN_RUNTIME.isEnabled()) {
+      arrayList.add(WORKSPACE_MAVEN_RUNTIME);
+    }
+    return arrayList;
   }
   
   public void reset() {
