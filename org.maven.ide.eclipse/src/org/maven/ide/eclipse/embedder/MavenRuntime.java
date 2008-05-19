@@ -8,7 +8,9 @@
 
 package org.maven.ide.eclipse.embedder;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -17,7 +19,10 @@ import java.util.List;
 
 import org.osgi.framework.Bundle;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.codehaus.plexus.util.DirectoryScanner;
 
@@ -36,9 +41,9 @@ public abstract class MavenRuntime {
   
   public abstract String getMainTypeName();
 
-  public abstract String getOptions();
-  
-  public abstract String[] getClasspath();
+  public abstract String getOptions(File tpmfolder, String[] forcedComponents) throws CoreException;
+
+  public abstract String[] getClasspath(String[] forcedComponents);
   
   public abstract String getLocation();
   
@@ -69,11 +74,11 @@ public abstract class MavenRuntime {
       return MAVEN_EXECUTOR_CLASS;
     }
     
-    public String getOptions() {
+    public String getOptions(File tpmfolder, String[] forcedComponents) {
       return "";
     }
     
-    public String[] getClasspath() {
+    public String[] getClasspath(String[] forcedComponents) {
       if(CLASSPATH == null) {
         List cp = new ArrayList();
   
@@ -94,9 +99,15 @@ public abstract class MavenRuntime {
   
         CLASSPATH = (String[]) cp.toArray(new String[cp.size()]);
       }
+      if (forcedComponents != null && forcedComponents.length > 0) {
+        String[] cp = new String[CLASSPATH.length + forcedComponents.length];
+        System.arraycopy(forcedComponents, 0, cp, 0, forcedComponents.length);
+        System.arraycopy(CLASSPATH, 0, cp, forcedComponents.length, CLASSPATH.length);
+        return cp;
+      }
       return CLASSPATH;
     }
-    
+
     private Bundle findMavenEmbedderBundle() {
       Bundle[] bundles = MavenPlugin.getDefault().getBundleContext().getBundles();
       for(int i = 0; i < bundles.length; i++ ) {
@@ -150,17 +161,41 @@ public abstract class MavenRuntime {
     public String getMainTypeName() {
       return "org.codehaus.classworlds.Launcher";
     }
-    
-    public String getOptions() {
-      return " " + quote("-Dclassworlds.conf=" + location + File.separator + "bin" + File.separator + "m2.conf") //
-          + " " + quote("-Dmaven.home=" + location);
+
+    public String getOptions(File tpmfolder, String[] forcedComponents) throws CoreException {
+      String m2conf = location + File.separator + "bin" + File.separator + "m2.conf";
+      if (forcedComponents != null && forcedComponents.length > 0) {
+        try {
+          tpmfolder.mkdirs();
+          m2conf = new File(tpmfolder, "m2.conf").getCanonicalPath();
+          BufferedWriter out = new BufferedWriter(new FileWriter(m2conf));
+          try {
+            out.write("main is org.apache.maven.cli.MavenCli from plexus.core\n");
+            // we always set maven.home
+  //          out.write("set maven.home default ${user.home}/m2\n");
+            out.write("[plexus.core]\n");
+            for (int i = 0; i < forcedComponents.length; i++) {
+              out.write("load " + forcedComponents[i] + "\n");
+            }
+            out.write("load ${maven.home}/lib/*.jar\n");
+          } finally {
+            out.close();
+          }
+        } catch (IOException ex) {
+          throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, ex.getMessage(), ex));
+        }
+      }
+      StringBuffer sb = new StringBuffer();
+      sb.append(" ").append(quote("-Dclassworlds.conf=" + m2conf));
+      sb.append(" ").append(quote("-Dmaven.home=" + location));
+      return sb.toString();
     }
 
     private String quote(String string) {
       return string.indexOf(' ')>-1 ? "\"" + string + "\"" : string;
     }
 
-    public String[] getClasspath() {
+    public String[] getClasspath(String[] forcedComponents) {
       File mavenHome = new File(location);
 
       DirectoryScanner ds = new DirectoryScanner();

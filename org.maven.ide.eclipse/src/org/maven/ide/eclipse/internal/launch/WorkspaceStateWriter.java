@@ -9,19 +9,15 @@
 package org.maven.ide.eclipse.internal.launch;
 
 import java.io.BufferedOutputStream;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URL;
 import java.util.Properties;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.apache.maven.artifact.Artifact;
@@ -65,33 +61,21 @@ public class WorkspaceStateWriter implements IMavenProjectChangedListener {
         }
       }
 
-      File location = MavenPlugin.getDefault().getStateLocation().toFile();
-      OutputStream buf = new BufferedOutputStream(new FileOutputStream(new File(location, STATE_FILENAME)));
+      OutputStream buf = new BufferedOutputStream(new FileOutputStream(getStateFile()));
       try {
         state.store(buf, null);
       } finally {
         buf.close();
       }
       
-      write_m2conf(location);
     } catch(IOException ex) {
       MavenPlugin.log("Error writing workspace state file", ex);
     }
   }
 
-  // XXX this code does not belong here
-  private void write_m2conf(File location) throws IOException {
-    BufferedWriter out = new BufferedWriter(new FileWriter(new File(location, "m2.conf")));
-    try {
-      out.write("main is org.apache.maven.cli.MavenCli from plexus.core\n");
-      // we always set maven.home
-//      out.write("set maven.home default ${user.home}/m2\n");
-      out.write("[plexus.core]\n");
-      URL url = MavenPlugin.getDefault().getBundle().getEntry("org.maven.ide.eclipse.cliresolver.jar");
-      out.write("load " + FileLocator.toFileURL(url).toExternalForm() + "\n");
-      out.write("load ${maven.home}/lib/*.jar\n");
-    } finally {
-      out.close();
-    }
+  static File getStateFile() {
+    File location = MavenPlugin.getDefault().getStateLocation().toFile();
+    return new File(location, STATE_FILENAME);
   }
+
 }

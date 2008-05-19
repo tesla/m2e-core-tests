@@ -9,6 +9,8 @@
 package org.maven.ide.eclipse.internal.launch;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -18,6 +20,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
@@ -115,33 +118,12 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
     return getMavenRuntime(configuration).getMainTypeName();
   }
 
-  public String[] getClasspath(ILaunchConfiguration configuration) {
-    return getMavenRuntime(configuration).getClasspath();
-//    if(CLASSPATH == null) {
-//      List cp = new ArrayList();
-//
-//      Bundle bundle = findMavenEmbedderBundle();
-//
-//      Enumeration entries = bundle.findEntries("/", "*", true);
-//      while(entries.hasMoreElements()) {
-//        URL url = (URL) entries.nextElement();
-//        String path = url.getPath();
-//        if(path.endsWith(".jar") || path.endsWith("bin/")) {
-//          try {
-//            cp.add(FileLocator.toFileURL(url).getFile());
-//          } catch(IOException ex) {
-//            // TODO Auto-generated catch block
-//            Tracer.trace(this, "Error adding classpath entry", url.toString() + "; " + ex.getMessage());
-//            MavenPlugin.log("Error adding classpath entry " + url.toString(), ex);
-//          }
-//        }
-//      }
-//
-//      Tracer.trace(this, "classpath", cp);
-//
-//      CLASSPATH = (String[]) cp.toArray(new String[cp.size()]);
-//    }
-//    return CLASSPATH;
+  public String[] getClasspath(ILaunchConfiguration configuration) throws CoreException {
+    String[] forcedCompoStrings = null;
+    if (shouldResolveWorkspaceArtifacts(configuration)) {
+      forcedCompoStrings = new String[] {getCliResolver()};
+    }
+    return getMavenRuntime(configuration).getClasspath(forcedCompoStrings);
   }
   
   private MavenRuntime getMavenRuntime(ILaunchConfiguration configuration) {
@@ -193,21 +175,30 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
   }
 
   public String getVMArguments(ILaunchConfiguration configuration) throws CoreException {
-    boolean workspaceResolution = configuration.getAttribute(ATTR_WORKSPACE_RESOLUTION, false);
     StringBuffer sb = new StringBuffer();
-    if (workspaceResolution) {
-      File location = MavenPlugin.getDefault().getStateLocation().toFile();
-      File state = new File(location, WorkspaceStateWriter.STATE_FILENAME);
+    String[] forcedComponents = null;
+    if (shouldResolveWorkspaceArtifacts(configuration)) {
+      File state = WorkspaceStateWriter.getStateFile();
       sb.append("-Dm2eclipse.workspace.state=\"").append(state.getAbsolutePath()).append("\"");
-      sb.append(" -Dclassworlds.conf=").append(new File(location, "m2.conf").getAbsolutePath());
-      sb.append(super.getVMArguments(configuration));
-      sb.append(getMavenRuntime(configuration).getOptions());
-      sb.append(" -Dclassworlds.conf=").append(new File(location, "m2.conf").getAbsolutePath());
-    } else {
-      sb.append(super.getVMArguments(configuration));
-      sb.append(getMavenRuntime(configuration).getOptions());
+      forcedComponents = new String[] {getCliResolver()};
     }
+    sb.append(super.getVMArguments(configuration));
+    File state = MavenPlugin.getDefault().getStateLocation().toFile();
+    sb.append(getMavenRuntime(configuration).getOptions(new File(state, configuration.getName()), forcedComponents));
     return sb.toString();
+  }
+
+  private boolean shouldResolveWorkspaceArtifacts(ILaunchConfiguration configuration) throws CoreException {
+    return configuration.getAttribute(ATTR_WORKSPACE_RESOLUTION, false);
+  }
+
+  private String getCliResolver() throws CoreException {
+    URL url = MavenPlugin.getDefault().getBundle().getEntry("org.maven.ide.eclipse.cliresolver.jar");
+    try {
+      return FileLocator.toFileURL(url).toExternalForm();
+    } catch(IOException ex) {
+      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, ex.getMessage(), ex));
+    }
   }
 
   private String getGoals(ILaunchConfiguration configuration) throws CoreException {
