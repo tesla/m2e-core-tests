@@ -25,6 +25,7 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.container.MavenClasspathContainer;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
+import org.maven.ide.eclipse.internal.project.ArtifactKey;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerImpl;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerRefreshJob;
 
@@ -213,5 +214,9 @@ public class MavenProjectManager {
       ResolverConfiguration resolverConfiguration, MavenRunnable runnable, IProgressMonitor monitor) {
     return manager.execute(embedder, pomFile, resolverConfiguration, runnable, monitor);
   }
-  
+
+  public MavenProjectFacade getMavenProject(String groupId, String artifactId, String version) {
+    return manager.getMavenProject(new ArtifactKey(groupId, artifactId, version, null));
+  }
+
 }

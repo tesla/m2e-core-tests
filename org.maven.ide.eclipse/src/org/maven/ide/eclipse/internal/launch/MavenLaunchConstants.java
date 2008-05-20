@@ -35,4 +35,6 @@ public interface MavenLaunchConstants {
 
     public final String ATTR_RUNTIME = "M2_RUNTIME";
 
+    // hidden (for now) list of workspace components to be pushed into maven runtime
+    public final String ATTR_FORCED_COMPONENTS_LIST = "M2_FORCED_COMPONENTS_LIST";
 }

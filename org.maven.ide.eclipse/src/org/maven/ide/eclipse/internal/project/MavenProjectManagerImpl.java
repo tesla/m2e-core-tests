@@ -674,7 +674,11 @@ public class MavenProjectManagerImpl {
   }
 
   public MavenProjectFacade getMavenProject(Artifact artifact) {
-    return state.getMavenProject(artifact);
+    return state.getMavenProject(new ArtifactKey(artifact));
+  }
+
+  public MavenProjectFacade getMavenProject(ArtifactKey artifactKey) {
+    return state.getMavenProject(artifactKey);
   }
 
   public void downloadSources(List/*<DownloadSourceRequest>*/ downloadRequests, IProgressMonitor monitor) throws MavenEmbedderException, InterruptedException, CoreException {

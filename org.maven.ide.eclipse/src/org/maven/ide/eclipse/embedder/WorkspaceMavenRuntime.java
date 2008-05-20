@@ -14,10 +14,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.DefaultArtifact;
-import org.apache.maven.artifact.handler.DefaultArtifactHandler;
-import org.apache.maven.artifact.versioning.VersionRange;
+import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
+import org.apache.maven.artifact.resolver.ArtifactResolutionException;
+import org.apache.maven.embedder.MavenEmbedder;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.project.MavenProjectFacade;
@@ -31,32 +35,53 @@ import org.maven.ide.eclipse.project.MavenProjectManager;
 public class WorkspaceMavenRuntime extends MavenRuntime {
 
   public String[] getClasspath(String[] forcedComponents) {
-    MavenProjectFacade facade = getMavenDistributionArtifact();
-    Set artifacts = facade.getMavenProject().getArtifacts();
     List cp = new ArrayList();
-    if (forcedComponents != null) {
-      for (int i = 0; i < forcedComponents.length; i++) {
-        cp.add(forcedComponents[i]);
+    MavenProjectFacade maven = getMavenDistributionArtifact();
+    if (maven != null) {
+      Set artifacts = maven.getMavenProject().getArtifacts();
+      if (forcedComponents != null) {
+        for (int i = 0; i < forcedComponents.length; i++) {
+          cp.add(forcedComponents[i]);
+        }
       }
-    }
-    for (Iterator it = artifacts.iterator(); it.hasNext(); ) {
-      Artifact a = (Artifact) it.next();
-      cp.add(a.getFile().getAbsolutePath());
+
+      IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+      MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
+      MavenEmbedderManager embedderManager = MavenPlugin.getDefault().getMavenEmbedderManager();
+      MavenEmbedder embedder = embedderManager.getWorkspaceEmbedder();
+
+      
+      for (Iterator it = artifacts.iterator(); it.hasNext(); ) {
+        Artifact artifact = (Artifact) it.next();
+        
+        MavenProjectFacade facade = projectManager.getMavenProject(artifact);
+
+        File file = null;
+        if (facade != null) {
+          IFolder output = root.getFolder(facade.getOutputLocation());
+          if (output.isAccessible()) {
+            file = output.getLocation().toFile();
+          }
+        } else {
+          try {
+            embedder.resolve(artifact, new ArrayList(), embedder.getLocalRepository());
+          } catch(ArtifactResolutionException ex) {
+          } catch(ArtifactNotFoundException ex) {
+          }
+          file = artifact.getFile();
+        }
+        
+        if (file != null) {
+          cp.add(file.getAbsolutePath());
+        }
+      }
     }
     return (String[]) cp.toArray(new String[cp.size()]);
   }
 
   private MavenProjectFacade getMavenDistributionArtifact() {
     MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
-    Artifact artifact = new DefaultArtifact(
-        "org.apache.maven", 
-        "maven-distribution", 
-        VersionRange.createFromVersion("2.1-SNAPSHOT"), 
-        null /*scope*/, 
-        "jar" /*type*/, 
-        null /*classifier*/, 
-        new DefaultArtifactHandler());
-    return projectManager.getMavenProject(artifact);
+    return projectManager.getMavenProject("org.apache.maven", "maven-distribution", "2.1-SNAPSHOT");
   }
 
   public String getLocation() {
@@ -75,7 +100,7 @@ public class WorkspaceMavenRuntime extends MavenRuntime {
     return false;
   }
 
-  public boolean isEnabled() {
+  public boolean isAvailable() {
     return getMavenDistributionArtifact() != null;
   }
 

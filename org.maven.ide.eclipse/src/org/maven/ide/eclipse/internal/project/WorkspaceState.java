@@ -21,7 +21,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IPath;
 
-import org.apache.maven.artifact.Artifact;
 import org.apache.maven.project.MavenProject;
 
 import org.maven.ide.eclipse.project.MavenProjectFacade;
@@ -74,8 +73,8 @@ public class WorkspaceState {
     return (MavenProjectFacade) workspacePoms.get(pom.getFullPath());
   }
 
-  public synchronized MavenProjectFacade getMavenProject(Artifact artifact) {
-    IPath path = (IPath) workspaceArtifacts.get(new ArtifactKey(artifact));
+  public synchronized MavenProjectFacade getMavenProject(ArtifactKey artifactKey) {
+    IPath path = (IPath) workspaceArtifacts.get(artifactKey);
     if (path == null) {
       return null;
     }

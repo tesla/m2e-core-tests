@@ -15,7 +15,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.StringTokenizer;
 
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -44,10 +46,18 @@ import org.eclipse.jdt.launching.sourcelookup.JavaSourceLocator;
 import org.eclipse.ui.externaltools.internal.model.ExternalToolBuilder;
 import org.eclipse.ui.externaltools.internal.model.IExternalToolConstants;
 
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
+import org.apache.maven.artifact.resolver.ArtifactResolutionException;
+import org.apache.maven.embedder.MavenEmbedder;
+
 import org.maven.ide.eclipse.MavenConsole;
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
+import org.maven.ide.eclipse.project.MavenProjectFacade;
+import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.util.ITraceable;
 import org.maven.ide.eclipse.util.Util;
 
@@ -119,10 +129,7 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
   }
 
   public String[] getClasspath(ILaunchConfiguration configuration) throws CoreException {
-    String[] forcedCompoStrings = null;
-    if (shouldResolveWorkspaceArtifacts(configuration)) {
-      forcedCompoStrings = new String[] {getCliResolver()};
-    }
+    String[] forcedCompoStrings = getForcedComponents(configuration);
     return getMavenRuntime(configuration).getClasspath(forcedCompoStrings);
   }
   
@@ -176,14 +183,13 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
 
   public String getVMArguments(ILaunchConfiguration configuration) throws CoreException {
     StringBuffer sb = new StringBuffer();
-    String[] forcedComponents = null;
     if (shouldResolveWorkspaceArtifacts(configuration)) {
       File state = WorkspaceStateWriter.getStateFile();
       sb.append("-Dm2eclipse.workspace.state=\"").append(state.getAbsolutePath()).append("\"");
-      forcedComponents = new String[] {getCliResolver()};
     }
-    sb.append(super.getVMArguments(configuration));
+    sb.append(" ").append(super.getVMArguments(configuration));
     File state = MavenPlugin.getDefault().getStateLocation().toFile();
+    String[] forcedComponents = getForcedComponents(configuration);
     sb.append(getMavenRuntime(configuration).getOptions(new File(state, configuration.getName()), forcedComponents));
     return sb.toString();
   }
@@ -394,5 +400,55 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
       job.schedule();
     }
   }
-  
+
+  private String[] getForcedComponents(ILaunchConfiguration configuration) throws CoreException {
+    List components = new ArrayList();
+    if (shouldResolveWorkspaceArtifacts(configuration)) {
+      components.add(getCliResolver());
+    }
+    addUserComponents(configuration, components);
+    return (String[]) components.toArray(new String[components.size()]);
+  }
+
+  private void addUserComponents(ILaunchConfiguration configuration, List components) throws CoreException {
+    IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+    MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
+    MavenEmbedderManager embedderManager = MavenPlugin.getDefault().getMavenEmbedderManager();
+    MavenEmbedder embedder = embedderManager.getWorkspaceEmbedder();
+
+    List list = configuration.getAttribute(ATTR_FORCED_COMPONENTS_LIST, new ArrayList());
+    if (list != null) {
+      for (Iterator it = list.iterator(); it.hasNext(); ) {
+        String gav = (String) it.next();
+        // groupId:artifactId:version
+        StringTokenizer st = new StringTokenizer(gav, ":");
+        String groupId = st.nextToken();
+        String artifactId = st.nextToken();
+        String version = st.nextToken();
+
+        Artifact artifact = embedder.createArtifact(groupId, artifactId, version, null, "jar");
+
+        MavenProjectFacade facade = projectManager.getMavenProject(artifact);
+
+        File file = null;
+        if (facade != null) {
+          IFolder output = root.getFolder(facade.getOutputLocation());
+          if (output.isAccessible()) {
+            file = output.getLocation().toFile();
+          }
+        } else {
+          try {
+            embedder.resolve(artifact, new ArrayList(), embedder.getLocalRepository());
+          } catch(ArtifactResolutionException ex) {
+          } catch(ArtifactNotFoundException ex) {
+          }
+          file = artifact.getFile();
+        }
+        
+        if (file != null) {
+          components.add(file.getAbsolutePath());
+        }
+      }
+    }
+  }
 }

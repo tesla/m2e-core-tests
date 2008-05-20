@@ -58,12 +58,12 @@ public class MavenRuntimeManager {
   
   public List getMavenRuntimes() {
     ArrayList arrayList = new ArrayList(runtimes.values());
-    if (WORKSPACE_MAVEN_RUNTIME.isEnabled()) {
-      arrayList.add(WORKSPACE_MAVEN_RUNTIME);
+    if (!WORKSPACE_MAVEN_RUNTIME.isAvailable()) {
+      arrayList.remove(WORKSPACE_MAVEN_RUNTIME);
     }
     return arrayList;
   }
-  
+
   public void reset() {
     preferenceStore.setToDefault(MavenPreferenceConstants.P_RUNTIMES);
     preferenceStore.setToDefault(MavenPreferenceConstants.P_DEFAULT_RUNTIME);
@@ -79,6 +79,9 @@ public class MavenRuntimeManager {
   
   public void setRuntimes(List runtimes) {
     this.runtimes.clear();
+
+    this.runtimes.put(EMBEDDED, MavenRuntime.EMBEDDED);
+    this.runtimes.put(WORKSPACE, WORKSPACE_MAVEN_RUNTIME);
     for(Iterator it = runtimes.iterator(); it.hasNext();) {
       MavenRuntime runtime = (MavenRuntime) it.next();
       this.runtimes.put(runtime.getLocation(), runtime);
@@ -88,7 +91,7 @@ public class MavenRuntimeManager {
     String separator = "";
     for(Iterator it = runtimes.iterator(); it.hasNext();) {
       MavenRuntime runtime = (MavenRuntime) it.next();
-      if(runtime!=MavenRuntime.EMBEDDED) {
+      if(runtime!=MavenRuntime.EMBEDDED && runtime!=WORKSPACE_MAVEN_RUNTIME) {
         sb.append(separator).append(runtime.getLocation());
         separator = "|";
       }
@@ -99,7 +102,8 @@ public class MavenRuntimeManager {
   private void initRuntimes() {
     runtimes.clear();
     runtimes.put(EMBEDDED, MavenRuntime.EMBEDDED);
-    
+    runtimes.put(WORKSPACE, WORKSPACE_MAVEN_RUNTIME);
+
     defaultRuntime = null;
     
     String selected = preferenceStore.getString(MavenPreferenceConstants.P_DEFAULT_RUNTIME);
