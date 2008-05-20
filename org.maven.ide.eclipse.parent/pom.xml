@@ -34,7 +34,7 @@
     <artifact.version>3.0-SNAPSHOT</artifact.version>
     <archetype.version>2.0-alpha-1</archetype.version>
     <maven_pom.version>1.0.0-SNAPSHOT</maven_pom.version>
-    <nexus.version>1.0-beta-3.1</nexus.version>
+    <nexus.version>1.0-beta-3.1.1</nexus.version>
     
     <!-- disable accidental deployment -->
     <m2e.releases>http://localhost</m2e.releases>
