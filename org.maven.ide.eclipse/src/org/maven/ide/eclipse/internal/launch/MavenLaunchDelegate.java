@@ -9,7 +9,6 @@
 package org.maven.ide.eclipse.internal.launch;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -201,8 +200,9 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
   private String getCliResolver() throws CoreException {
     URL url = MavenPlugin.getDefault().getBundle().getEntry("org.maven.ide.eclipse.cliresolver.jar");
     try {
-      return FileLocator.toFileURL(url).toExternalForm();
-    } catch(IOException ex) {
+      URL fileURL = FileLocator.toFileURL(url);
+      return new File(fileURL.toURI()).getCanonicalPath();
+    } catch(Exception ex) {
       throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, ex.getMessage(), ex));
     }
   }

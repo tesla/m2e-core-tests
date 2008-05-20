@@ -50,10 +50,12 @@ public class WorkspaceMavenRuntime extends MavenRuntime {
       MavenEmbedderManager embedderManager = MavenPlugin.getDefault().getMavenEmbedderManager();
       MavenEmbedder embedder = embedderManager.getWorkspaceEmbedder();
 
-      
       for (Iterator it = artifacts.iterator(); it.hasNext(); ) {
         Artifact artifact = (Artifact) it.next();
-        
+        if (Artifact.SCOPE_TEST.equals(artifact.getScope())) {
+          continue;
+        }
+
         MavenProjectFacade facade = projectManager.getMavenProject(artifact);
 
         File file = null;
