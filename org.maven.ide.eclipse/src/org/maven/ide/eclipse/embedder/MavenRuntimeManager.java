@@ -68,10 +68,10 @@ public class MavenRuntimeManager {
 
     runtimes.add(MavenRuntime.EMBEDDED);
 
-    // XXX discover all runtimes available from the Workspace
-    if(MavenRuntime.WORKSPACE.isAvailable()) {
-      runtimes.add(MavenRuntime.WORKSPACE);
-    }
+//    // XXX discover all runtimes available from the Workspace
+//    if(MavenRuntime.WORKSPACE.isAvailable()) {
+//      runtimes.add(MavenRuntime.WORKSPACE);
+//    }
     
     for(Iterator it = this.runtimes.values().iterator(); it.hasNext();) {
       MavenRuntime runtime = (MavenRuntime) it.next();
