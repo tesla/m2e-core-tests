@@ -31,8 +31,6 @@ public class MavenRuntimeManager {
 
   public static final String WORKSPACE = "WORKSPACE";
 
-  private static WorkspaceMavenRuntime WORKSPACE_MAVEN_RUNTIME = new WorkspaceMavenRuntime();
-
   private final IPreferenceStore preferenceStore;
 
   private Map runtimes = new LinkedHashMap();
@@ -47,21 +45,41 @@ public class MavenRuntimeManager {
 
   public MavenRuntime getRuntime(String location) {
     if(location==null || location.length()==0 || DEFAULT.equals(location)) {
-      return defaultRuntime;
+      return getDefaultRuntime();
+    }
+    if(EMBEDDED.equals(location)) {
+      return MavenRuntime.EMBEDDED;
+    }
+    if(WORKSPACE.equals(location)) {
+      return MavenRuntime.WORKSPACE;
     }
     return (MavenRuntime) runtimes.get(location);
   }
   
   public MavenRuntime getDefaultRuntime() {
+    if(defaultRuntime==null || !defaultRuntime.isAvailable()) {
+      return MavenRuntime.EMBEDDED;
+    }
     return this.defaultRuntime;
   }
   
   public List getMavenRuntimes() {
-    ArrayList arrayList = new ArrayList(runtimes.values());
-    if (!WORKSPACE_MAVEN_RUNTIME.isAvailable()) {
-      arrayList.remove(WORKSPACE_MAVEN_RUNTIME);
+    ArrayList runtimes = new ArrayList();
+
+    runtimes.add(MavenRuntime.EMBEDDED);
+
+    // XXX discover all runtimes available from the Workspace
+    if(MavenRuntime.WORKSPACE.isAvailable()) {
+      runtimes.add(MavenRuntime.WORKSPACE);
     }
-    return arrayList;
+    
+    for(Iterator it = this.runtimes.values().iterator(); it.hasNext();) {
+      MavenRuntime runtime = (MavenRuntime) it.next();
+      if(runtime.isAvailable()) {
+        runtimes.add(runtime);
+      }
+    }
+    return runtimes;
   }
 
   public void reset() {
@@ -80,18 +98,12 @@ public class MavenRuntimeManager {
   public void setRuntimes(List runtimes) {
     this.runtimes.clear();
 
-    this.runtimes.put(EMBEDDED, MavenRuntime.EMBEDDED);
-    this.runtimes.put(WORKSPACE, WORKSPACE_MAVEN_RUNTIME);
-    for(Iterator it = runtimes.iterator(); it.hasNext();) {
-      MavenRuntime runtime = (MavenRuntime) it.next();
-      this.runtimes.put(runtime.getLocation(), runtime);
-    }
-
-    StringBuffer sb = new StringBuffer();
     String separator = "";
+    StringBuffer sb = new StringBuffer();
     for(Iterator it = runtimes.iterator(); it.hasNext();) {
       MavenRuntime runtime = (MavenRuntime) it.next();
-      if(runtime!=MavenRuntime.EMBEDDED && runtime!=WORKSPACE_MAVEN_RUNTIME) {
+      if(runtime.isEditable()) {
+        this.runtimes.put(runtime.getLocation(), runtime);
         sb.append(separator).append(runtime.getLocation());
         separator = "|";
       }
@@ -101,8 +113,6 @@ public class MavenRuntimeManager {
 
   private void initRuntimes() {
     runtimes.clear();
-    runtimes.put(EMBEDDED, MavenRuntime.EMBEDDED);
-    runtimes.put(WORKSPACE, WORKSPACE_MAVEN_RUNTIME);
 
     defaultRuntime = null;
     
