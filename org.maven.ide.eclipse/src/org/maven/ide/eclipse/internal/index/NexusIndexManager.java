@@ -47,6 +47,7 @@ import org.apache.maven.settings.Settings;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 
 import org.sonatype.nexus.artifact.Gav;
+import org.sonatype.nexus.artifact.GavCalculator;
 import org.sonatype.nexus.artifact.M2GavCalculator;
 import org.sonatype.nexus.index.ArtifactAvailablility;
 import org.sonatype.nexus.index.ArtifactContext;
@@ -84,6 +85,8 @@ public class NexusIndexManager extends IndexManager {
   private final IndexUpdater updater;
 
   private final MavenEmbedderManager embedderManager;
+  
+  private final GavCalculator gavCalculator = new M2GavCalculator();
 
   public NexusIndexManager(MavenEmbedderManager embedderManager, MavenConsole console, File stateDir)
       throws CoreException {
@@ -147,7 +150,7 @@ public class NexusIndexManager extends IndexManager {
   }
 
   public IndexedArtifactFile getIndexedArtifactFile(String indexName, String documentKey) throws IOException {
-    Gav gav = M2GavCalculator.calculate(documentKey);
+    Gav gav = gavCalculator.pathToGav(documentKey);
     
     String key = AbstractIndexCreator.getGAV(gav.getGroupId(), //
         gav.getArtifactId(), gav.getVersion(), gav.getClassifier());
@@ -420,7 +423,7 @@ public class NexusIndexManager extends IndexManager {
 
   private ArtifactContext getArtifactContext(File file, String documentKey, long size, long date, int sourceExists,
       int javadocExists, String repository) {
-    Gav gav = M2GavCalculator.calculate(documentKey);
+    Gav gav = gavCalculator.pathToGav(documentKey);
 
     String groupId = gav.getGroupId();
     String artifactId = gav.getArtifactId();
