@@ -15,6 +15,13 @@
    <extension-point id="projectConfigurators" name="Project Configurators" schema="schema/projectConfigurators.exsd"/>
    <extension-point id="classpathConfiguratorFactories" name="Classpath Configurator Factories" schema="schema/classpathConfiguratorFactories.exsd"/>
 
+   <extension point="org.eclipse.ui.intro.configExtension">
+      <configExtension configId="org.eclipse.ui.intro.universalConfig"
+                       content="intro/overview.xml"/>
+      <configExtension configId="org.eclipse.ui.intro.universalConfig"
+                       content="intro/whatsnew.xml"/>
+   </extension>
+   
    <extension point="org.eclipse.core.resources.builders"
               id="maven2Builder"
               name="%m2.builder.name">
