@@ -7,22 +7,17 @@
     <search-engine class="org.maven.ide.eclipse.editor.xml.search.IndexManagerSearchEngine"/>
   </extension>
   
-  <extension point="org.eclipse.core.runtime.contentTypes">
-    <content-type id="pomFile" name="Maven POM XML"
-          base-type="org.eclipse.core.runtime.xml"
-          priority="normal"
-          default-charset="UTF-8"
-          file-names="pom.xml">
-      <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber">
-        <parameter name="element" value="project" />
-      </describer>
-    </content-type>
-  </extension>
-
   <extension point="org.eclipse.wst.sse.ui.editorConfiguration">
     <sourceViewerConfiguration
-      class="org.maven.ide.eclipse.editor.xml.PomStructuredTextViewConfiguration"
-      target="org.maven.ide.eclipse.editor.xml.pomFile" />
+        class="org.maven.ide.eclipse.editor.xml.PomStructuredTextViewConfiguration"
+        target="org.maven.ide.eclipse.pomFile, org.eclipse.wst.xml.core.xmlsource, org.eclipse.core.runtime.xml"/>
+    <contentOutlineConfiguration
+        class="org.maven.ide.eclipse.editor.xml.PomContentOutlineConfiguration"
+        target="org.maven.ide.eclipse.pomFile, org.eclipse.wst.xml.core.xmlsource, org.eclipse.core.runtime.xml"/>
+    <provisionalConfiguration
+        type="org.eclipse.jface.text.quickassist.IQuickAssistProcessor"
+        class="org.maven.ide.eclipse.editor.xml.PomQuickAssistProcessor"
+        target="org.maven.ide.eclipse.pomFile"/>
   </extension>
 
   <extension  point="org.eclipse.ui.editors.templates">

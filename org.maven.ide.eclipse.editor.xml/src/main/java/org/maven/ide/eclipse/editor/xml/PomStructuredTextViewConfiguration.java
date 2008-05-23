@@ -9,21 +9,22 @@
 package org.maven.ide.eclipse.editor.xml;
 
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
+import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.wst.sse.core.text.IStructuredPartitions;
 import org.eclipse.wst.xml.core.text.IXMLPartitions;
 import org.eclipse.wst.xml.ui.StructuredTextViewerConfigurationXML;
 
 
+
 /**
  * @author Lukas Krecan
  */
 public class PomStructuredTextViewConfiguration extends StructuredTextViewerConfigurationXML {
+
   @Override
   public IContentAssistProcessor[] getContentAssistProcessors(ISourceViewer sourceViewer, String partitionType) {
-
     IContentAssistProcessor[] processors;
-
     if(partitionType == IStructuredPartitions.DEFAULT_PARTITION || partitionType == IXMLPartitions.XML_DEFAULT) {
       processors = new IContentAssistProcessor[] {new PomContentAssistProcessor(sourceViewer)};
     } else {
@@ -31,4 +32,20 @@ public class PomStructuredTextViewConfiguration extends StructuredTextViewerConf
     }
     return processors;
   }
+  
+  @Override
+  public IHyperlinkDetector[] getHyperlinkDetectors(ISourceViewer sourceViewer) {
+    IHyperlinkDetector[] detectors = super.getHyperlinkDetectors(sourceViewer);
+    if(detectors==null) {
+      detectors = new IHyperlinkDetector[0];
+    }
+
+    IHyperlinkDetector[] pomDetectors = new IHyperlinkDetector[detectors.length + 1];
+    pomDetectors[0] = new PomHyperlinkDetector();
+    System.arraycopy(detectors, 0, pomDetectors, 1, detectors.length);
+    
+    return pomDetectors;
+  }
+  
 }
+

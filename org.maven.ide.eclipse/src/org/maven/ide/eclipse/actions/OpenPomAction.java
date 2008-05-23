@@ -17,6 +17,7 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
@@ -27,7 +28,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.content.IContentType;
+import org.eclipse.core.runtime.content.IContentTypeManager;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jface.action.IAction;
@@ -39,6 +43,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorDescriptor;
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorRegistry;
 import org.eclipse.ui.IPathEditorInput;
 import org.eclipse.ui.IPersistableElement;
@@ -49,6 +54,7 @@ import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionDelegate;
+import org.eclipse.ui.part.FileEditorInput;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.AbstractArtifactResolutionException;
@@ -61,6 +67,7 @@ import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.project.MavenProjectFacade;
+import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.util.SelectionUtil;
 
 
@@ -231,25 +238,35 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
   }
 
   public static void openEditor(String groupId, String artifactId, String version) {
-    String name = groupId + ":" + artifactId + ":" + version;
+    final String name = groupId + ":" + artifactId + ":" + version + ".pom";
 
     try {
-      MavenEmbedderManager embedderManager = MavenPlugin.getDefault().getMavenEmbedderManager();
+      MavenPlugin plugin = MavenPlugin.getDefault();
+      
+      MavenProjectManager projectManager = plugin.getMavenProjectManager();
+      MavenProjectFacade projectFacade = projectManager.getMavenProject(groupId, artifactId, version);
+      if(projectFacade!=null) {
+        final IFile pomFile = projectFacade.getPom();
+        openEditor(new FileEditorInput(pomFile), name);
+        return;
+      }
+      
+      MavenEmbedderManager embedderManager = plugin.getMavenEmbedderManager();
       MavenEmbedder embedder = embedderManager.getWorkspaceEmbedder();
       Artifact artifact = embedder.createArtifact(groupId, artifactId, version, null, "pom");
 
-      IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
+      IndexManager indexManager = plugin.getIndexManager();
       List artifactRepositories = indexManager.getArtifactRepositories(null, null);
       
       embedder.resolve(artifact, artifactRepositories, embedder.getLocalRepository());
 
       File file = artifact.getFile();
       if(file == null) {
-        openDialog("Can't download " + name + "POM");
+        openDialog("Can't download " + name);
         return;
       }
 
-      openEditor(new MavenEditorStorageInput(name, name, file.getAbsolutePath(), readStream(new FileInputStream(file))), "pom.xml");
+      openEditor(new MavenEditorStorageInput(name, name, file.getAbsolutePath(), readStream(new FileInputStream(file))), name);
 
     } catch(AbstractArtifactResolutionException ex) {
       MavenPlugin.log("Can't resolve artifact " + name, ex);
@@ -261,11 +278,14 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
     }
   }
 
-  private static void openEditor(final MavenEditorStorageInput editorInput, final String name) {
+  private static void openEditor(final IEditorInput editorInput, final String name) {
     PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
       public void run() {
+        IContentTypeManager contentTypeManager = Platform.getContentTypeManager();
+        IContentType contentType = contentTypeManager.findContentTypeFor("pom.xml");
+
         IEditorRegistry editorRegistry = PlatformUI.getWorkbench().getEditorRegistry();
-        IEditorDescriptor editor = editorRegistry.getDefaultEditor(name);
+        IEditorDescriptor editor = editorRegistry.getDefaultEditor("pom.xml", contentType);
         IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
         if(window != null) {
           IWorkbenchPage page = window.getActivePage();
@@ -274,7 +294,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
               page.openEditor(editorInput, editor.getId());
             } catch(PartInitException ex) {
               MessageDialog.openInformation(Display.getDefault().getActiveShell(), //
-                  "Open Maven POM", "Can't open editor for " + editorInput.getToolTipText() + "\n" + ex.toString());
+                  "Open Maven POM", "Can't open editor for " + name + "\n" + ex.toString());
             }
           }
         }

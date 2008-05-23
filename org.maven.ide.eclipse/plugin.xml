@@ -22,6 +22,19 @@
                        content="intro/whatsnew.xml"/>
    </extension>
    
+   <extension point="org.eclipse.core.runtime.contentTypes">
+     <content-type id="pomFile" name="Maven POM XML"
+          base-type="org.eclipse.core.runtime.xml"
+          priority="high"
+          default-charset="UTF-8"
+          file-names="pom.xml"
+          file-extensions="pom, xml">
+       <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber">
+         <parameter name="element" value="project" />
+       </describer>
+     </content-type>
+   </extension>
+
    <extension point="org.eclipse.core.resources.builders"
               id="maven2Builder"
               name="%m2.builder.name">
