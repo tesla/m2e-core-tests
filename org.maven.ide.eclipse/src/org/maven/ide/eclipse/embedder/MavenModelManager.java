@@ -294,7 +294,9 @@ public class MavenModelManager {
         cursor.insertChars("\n");
       }
   
-      if(this.dependency.getType() != null && !"jar".equals(dependency.getType())) {
+      if(this.dependency.getType() != null //
+          && !"jar".equals(dependency.getType()) //
+          && !"null".equals(dependency.getType())) {  // guard against MNGECLIPSE-622
         cursor.insertChars("      ");
         cursor.insertElementWithText("type", uri, this.dependency.getType());
         cursor.insertChars("\n");
