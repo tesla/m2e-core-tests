@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.Properties;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -335,7 +336,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
    * Creates project structure using Archetype and then imports created project
    */
   public void createArchetypeProject(IProject project, IPath location, Archetype archetype, String groupId,
-      String artifactId, String version, String javaPackage, ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException {
+      String artifactId, String version, String javaPackage, Properties properties, ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException {
     monitor.beginTask("Creating project " + project.getName(), 2);
   
     monitor.subTask("Executing Archetype " + archetype.getGroupId() + ":" + archetype.getArtifactId());
@@ -355,6 +356,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
         .setVersion(version) //
         .setPackage(javaPackage) // the model does not have a package field
         .setLocalRepository(embedderManager.getWorkspaceEmbedder().getLocalRepository()) //
+        .setProperties(properties)
         .setOutputDirectory(location.toPortableString());
     
     ArchetypeGenerationResult result = embedderManager.getArchetyper().generateProjectFromArchetype(request);

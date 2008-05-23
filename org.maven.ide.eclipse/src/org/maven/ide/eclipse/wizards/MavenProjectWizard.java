@@ -9,6 +9,7 @@
 package org.maven.ide.eclipse.wizards;
 
 import java.util.Arrays;
+import java.util.Properties;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -24,7 +25,9 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -132,6 +135,13 @@ public class MavenProjectWizard extends Wizard implements INewWizard {
         getContainer().updateButtons();
       }
     });
+    
+    archetypePage.addArchetypeSelectionListener(new ISelectionChangedListener() {
+      public void selectionChanged(SelectionChangedEvent selectionchangedevent) {
+        parametersPage.setArchetype(archetypePage.getArchetype());
+        getContainer().updateButtons();
+      }
+    });
 
 //    locationPage.addProjectNameListener(new ModifyListener() {
 //      public void modifyText(ModifyEvent e) {
@@ -209,12 +219,13 @@ public class MavenProjectWizard extends Wizard implements INewWizard {
       final String artifactId = model.getArtifactId();
       final String version = model.getVersion();
       final String javaPackage = parametersPage.getJavaPackage();
+      final Properties properties = parametersPage.getProperties();
       
       job = new WorkspaceJob(Messages.getString("wizard.project.job.creating", archetype.getArtifactId())) {
         public IStatus runInWorkspace(IProgressMonitor monitor) {
           try {
             plugin.getProjectConfigurationManager().createArchetypeProject(project, location, archetype, //
-                groupId, artifactId, version, javaPackage, configuration, monitor);
+                groupId, artifactId, version, javaPackage, properties, configuration, monitor);
             return Status.OK_STATUS;
           } catch(CoreException e) {
             return e.getStatus();

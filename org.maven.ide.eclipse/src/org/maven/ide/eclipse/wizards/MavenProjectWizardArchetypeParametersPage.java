@@ -8,18 +8,33 @@
 
 package org.maven.ide.eclipse.wizards;
 
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Properties;
+
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
 
+import org.apache.maven.archetype.catalog.Archetype;
 import org.apache.maven.model.Model;
 
 import org.maven.ide.eclipse.Messages;
@@ -33,6 +48,7 @@ import org.maven.ide.eclipse.util.JavaUtil;
  */
 public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWizardPage {
 
+  Table propertiesTable;
   public static final String DEFAULT_VERSION = "0.0.1-SNAPSHOT";
 
   /** group id text field */
@@ -64,11 +80,11 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
   /** Creates page controls. */
   public void createControl(Composite parent) {
     Composite composite = new Composite(parent, SWT.NULL);
-    GridLayout gridLayout = new GridLayout();
-    gridLayout.numColumns = 2;
-    composite.setLayout(gridLayout);
+    composite.setLayout(new GridLayout(3, false));
 
     createArtifactGroup(composite);
+    createPropertiesGroup(composite);
+
     validate();
 
     createAdvancedSettings(composite, new GridData(SWT.FILL, SWT.TOP, false, false, 2, 1));
@@ -79,6 +95,7 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
     });
 
     setControl(composite);
+
   }
 
   private void createArtifactGroup(Composite parent) {
@@ -91,7 +108,7 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
     groupIdlabel.setText(Messages.getString("artifactComponent.groupId"));
 
     groupIdCombo = new Combo(parent, SWT.BORDER);
-    groupIdCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    groupIdCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
     addFieldWithHistory("groupId", groupIdCombo);
     groupIdCombo.addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent e) {
@@ -104,7 +121,7 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
     artifactIdLabel.setText(Messages.getString("artifactComponent.artifactId"));
 
     artifactIdCombo = new Combo(parent, SWT.BORDER);
-    artifactIdCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+    artifactIdCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
     addFieldWithHistory("artifactId", artifactIdCombo);
     artifactIdCombo.addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent e) {
@@ -117,7 +134,9 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
     versionLabel.setText(Messages.getString("artifactComponent.version"));
 
     versionCombo = new Combo(parent, SWT.BORDER);
-    versionCombo.setLayoutData(new GridData(150, SWT.DEFAULT));
+    GridData gd_versionCombo = new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1);
+    gd_versionCombo.widthHint = 150;
+    versionCombo.setLayoutData(gd_versionCombo);
     versionCombo.setText(DEFAULT_VERSION);
     addFieldWithHistory("version", versionCombo);
     versionCombo.addModifyListener(new ModifyListener() {
@@ -130,7 +149,7 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
     packageLabel.setText(Messages.getString("artifactComponent.package"));
 
     packageCombo = new Combo(parent, SWT.BORDER);
-    packageCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+    packageCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
     addFieldWithHistory("package", packageCombo);
     packageCombo.addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent e) {
@@ -138,6 +157,73 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
           packageCustomized = true;
         }
         validate();
+      }
+    });
+  }
+
+  private void createPropertiesGroup(Composite composite) {
+    Label propertiesLabel = new Label(composite, SWT.NONE);
+    propertiesLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 3, 1));
+    propertiesLabel.setText("Properties:");
+  
+    TableViewer propertiesViewer = new TableViewer(composite, SWT.BORDER);
+    propertiesTable = propertiesViewer.getTable();
+    propertiesTable.setLinesVisible(true);
+    propertiesTable.setHeaderVisible(true);
+    propertiesTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 2));
+
+    propertiesViewer.addDoubleClickListener(new IDoubleClickListener() {
+      public void doubleClick(DoubleClickEvent event) {
+        TableItem[] selection = propertiesTable.getSelection();
+        if(selection.length == 1) {
+          MavenPropertyDialog dialog = new MavenPropertyDialog(getShell(), //
+              Messages.getString("launch.propEditDialogTitle"), //$NON-NLS-1$
+              new String[] {selection[0].getText(0), selection[0].getText(1)}, false); 
+          int res = dialog.open();
+          if(res == IDialogConstants.OK_ID) {
+            String[] result = dialog.getNameValuePair();
+            TableItem[] item = propertiesTable.getSelection();
+            // we expect only one row selected
+            item[0].setText(0, result[0]);
+            item[0].setText(1, result[1]);
+          }
+        }
+      }
+    });
+    
+    TableColumn propertiesTableNameColumn = new TableColumn(propertiesTable, SWT.NONE);
+    propertiesTableNameColumn.setWidth(130);
+    propertiesTableNameColumn.setText("Name");
+  
+    TableColumn propertiesTableValueColumn = new TableColumn(propertiesTable, SWT.NONE);
+    propertiesTableValueColumn.setWidth(230);
+    propertiesTableValueColumn.setText("Value");
+  
+    Button addButton = new Button(composite, SWT.NONE);
+    addButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+    addButton.setText("&Add...");
+    addButton.addSelectionListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        MavenPropertyDialog dialog = new MavenPropertyDialog(getShell(), //
+            Messages.getString("launch.propAddDialogTitle"), new String[] {}, false); //$NON-NLS-1$
+        int res = dialog.open();
+        if(res == IDialogConstants.OK_ID) {
+          String[] result = dialog.getNameValuePair();
+          TableItem item = new TableItem(propertiesTable, SWT.NONE);
+          item.setText(0, result[0]);
+          item.setText(1, result[1]);
+        }
+      }
+    });
+  
+    Button removeButton = new Button(composite, SWT.NONE);
+    removeButton.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+    removeButton.setText("&Remove");
+    removeButton.addSelectionListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        if(propertiesTable.getSelectionCount() > 0) {
+          propertiesTable.remove(propertiesTable.getSelectionIndices());
+        }
       }
     });
   }
@@ -210,6 +296,24 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
     return null;
   }
 
+  public void setArchetype(Archetype archetype) {
+    propertiesTable.removeAll();
+    
+    if(archetype!=null) {
+      Properties properties = archetype.getProperties();
+      if(properties!=null) {
+        for(Iterator it = properties.entrySet().iterator(); it.hasNext();) {
+          Map.Entry e = (Map.Entry) it.next();
+          TableItem item = new TableItem(propertiesTable, SWT.NONE);
+          String key = (String) e.getKey();
+          String value = (String) e.getValue();
+          item.setText(0, key);
+          item.setText(1, value==null ? "" : value);
+        }
+      }
+    }
+  }
+  
   /**
    * Updates the properties when a project name is set on the first page of the wizard.
    */
@@ -290,5 +394,14 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
         packageCustomized = false;
       }
     }
+  }
+
+  public Properties getProperties() {
+    Properties properties = new Properties();
+    for(int i = 0; i < propertiesTable.getItemCount(); i++ ) {
+      TableItem item = propertiesTable.getItem(i);
+      properties.put(item.getText(0), item.getText(1));
+    }
+    return properties;
   }
 }

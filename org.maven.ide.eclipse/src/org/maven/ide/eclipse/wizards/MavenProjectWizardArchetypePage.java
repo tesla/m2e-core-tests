@@ -26,12 +26,14 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
@@ -367,6 +369,14 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
         }
       }
     });
+    
+    viewer.addOpenListener(new IOpenListener() {
+      public void open(OpenEvent openevent) {
+        if (canFlipToNextPage()) {
+          getContainer().showPage(getNextPage());
+        }
+      }
+    });
 
     Composite composite2 = new Composite(sashForm, SWT.NONE);
     GridLayout gridLayout2 = new GridLayout();
@@ -411,6 +421,10 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
         }
       }
     });
+  }
+
+  public void addArchetypeSelectionListener(ISelectionChangedListener listener) {
+    viewer.addSelectionChangedListener(listener);
   }
 
   public void dispose() {

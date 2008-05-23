@@ -9,6 +9,7 @@
 package org.maven.ide.eclipse.project;
 
 import java.util.Collection;
+import java.util.Properties;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
@@ -30,7 +31,7 @@ public interface IProjectConfigurationManager {
       ResolverConfiguration resolverConfiguration, IProgressMonitor monitor) throws CoreException;
 
   void createArchetypeProject(IProject project, IPath location, Archetype archetype, String groupId, String artifactId,
-      String version, String packaging, ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException;
+      String version, String packaging, Properties properties, ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException;
 
   Set collectProjects(Collection projects, boolean includeModules);
 

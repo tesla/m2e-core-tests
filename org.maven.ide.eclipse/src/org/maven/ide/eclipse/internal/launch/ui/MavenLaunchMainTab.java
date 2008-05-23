@@ -66,6 +66,7 @@ import org.maven.ide.eclipse.internal.launch.MavenLaunchConstants;
 import org.maven.ide.eclipse.util.ITraceable;
 import org.maven.ide.eclipse.util.Tracer;
 import org.maven.ide.eclipse.util.Util;
+import org.maven.ide.eclipse.wizards.MavenPropertyDialog;
 
 
 /**
@@ -411,11 +412,10 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
   }
 
   void addProperty() {
-    MavenPropertyAddDialog dialog = new MavenPropertyAddDialog(getShell(), Messages
-        .getString("launch.propAddDialogTitle"), new String[] {}); //$NON-NLS-1$
-    int buttonId = dialog.open();
-
-    if(buttonId == IDialogConstants.OK_ID) {
+    MavenPropertyDialog dialog = new MavenPropertyDialog(getShell(), //
+        Messages.getString("launch.propAddDialogTitle"), new String[] {}, true); //$NON-NLS-1$
+    int res = dialog.open();
+    if(res == IDialogConstants.OK_ID) {
       String[] result = dialog.getNameValuePair();
       TableItem item = new TableItem(propsTable, SWT.NONE);
       item.setText(0, result[0]);
@@ -425,11 +425,10 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
   }
 
   void editProperty(String name, String value) {
-    MavenPropertyAddDialog dialog = new MavenPropertyAddDialog(getShell(), Messages
-        .getString("launch.propEditDialogTitle"), new String[] {name, value}); //$NON-NLS-1$
-    int buttonId = dialog.open();
-
-    if(buttonId == IDialogConstants.OK_ID) {
+    MavenPropertyDialog dialog = new MavenPropertyDialog(getShell(), //
+        Messages.getString("launch.propEditDialogTitle"), new String[] {name, value}, true); //$NON-NLS-1$
+    int res = dialog.open();
+    if(res == IDialogConstants.OK_ID) {
       String[] result = dialog.getNameValuePair();
       TableItem[] item = propsTable.getSelection();
       // we expect only one row selected

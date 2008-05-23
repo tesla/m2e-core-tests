@@ -9,6 +9,7 @@
 package org.maven.ide.eclipse.wizards;
 
 import java.util.Arrays;
+import java.util.Properties;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -188,12 +189,9 @@ public class MavenModuleWizard extends Wizard implements INewWizard {
 
       final String[] folders = artifactPage.getFolders();
 
-
       job = new WorkspaceJob(Messages.getString("wizard.project.job.creatingProject", moduleName)) {
         public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
-
           String projectName = configuration.getProjectName(model);
-
           IProject project = configuration.getProject(ResourcesPlugin.getWorkspace().getRoot(), model);
 
           // XXX respect parent's setting for separate projects for modules
@@ -210,14 +208,15 @@ public class MavenModuleWizard extends Wizard implements INewWizard {
 
     } else {
       final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(moduleName);
-      final Model model = parametersPage.getModel();
       final Archetype archetype = archetypePage.getArchetype();
+      final Model model = parametersPage.getModel();
+      final Properties properties = parametersPage.getProperties();
 
       job = new WorkspaceJob(Messages.getString("wizard.project.job.creating", archetype.getArtifactId())) {
         public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
           MavenPlugin plugin = MavenPlugin.getDefault();
           plugin.getProjectConfigurationManager().createArchetypeProject(project, location, archetype, model.getGroupId(),
-              model.getArtifactId(), model.getVersion(), model.getPackaging(), configuration, monitor);
+              model.getArtifactId(), model.getVersion(), model.getPackaging(), properties, configuration, monitor);
           plugin.getMavenModelManager().addModule(parentPom, moduleName);
           return Status.OK_STATUS;
         }
