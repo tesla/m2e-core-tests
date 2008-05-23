@@ -115,7 +115,7 @@ public class MavenPomSelectionComponent extends Composite {
     searchResultsLabel.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, false, false));
     searchResultsLabel.setText("Search Results:");
 
-    Tree tree = new Tree(this, SWT.BORDER | SWT.MULTI);
+    Tree tree = new Tree(this, SWT.BORDER | SWT.SINGLE);
     tree.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, true));
 
     searchResultViewer = new TreeViewer(tree);
