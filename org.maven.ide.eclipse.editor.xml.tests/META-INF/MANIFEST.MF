@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Maven POM XML Editor Plug-in tests
+Bundle-SymbolicName: org.maven.ide.eclipse.editor.xml.tests
+Bundle-Version: 1.0.0
+Bundle-RequiredExecutionEnvironment: J2SE-1.5,
+ JavaSE-1.6
+Require-Bundle: org.maven.ide.components.maven_embedder,
+ org.maven.ide.eclipse,
+ org.maven.ide.eclipse.editor.xml
