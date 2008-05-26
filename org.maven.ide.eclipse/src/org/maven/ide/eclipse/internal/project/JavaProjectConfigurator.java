@@ -360,7 +360,9 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
     if(result.hasExceptions()) {
       for(Iterator it = result.getExceptions().iterator(); it.hasNext();) {
         Exception ex = (Exception) it.next();
-        console.logError("Build error for " + pomResource.getFullPath() + "; " + ex.toString());
+        String msg = "Build error for " + pomResource.getFullPath();
+        console.logError(msg + "; " + ex.toString());
+        MavenPlugin.log(msg, ex);
       }
     }
 
@@ -409,7 +411,9 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
           addDirs(project, configuration, sources, entries, mavenProject);
         }
       } catch(Exception ex2) {
-        console.logError("Unable to read project " + pomResource.getFullPath() + "; " + ex2.toString());
+        String msg = "Unable to read project " + pomResource.getFullPath();
+        console.logError(msg + "; " + ex2.toString());
+        MavenPlugin.log(msg, ex2);
         return null;
       }
     }
