@@ -33,6 +33,8 @@ public enum PomTemplateContext {
   
   UNKNOWN("unknown"), //
   
+  DOCUMENT("#document"), //
+  
   PROJECT("project"), //
   
   PARENT("parent"), //
