@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
@@ -67,19 +68,26 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
     for(int i = 0; i < locations.length; i++ ) {
       IProblemLocation location = locations[i];
       String[] arguments = location.getProblemArguments();
-      if(arguments == null) {
-        continue;
+      String name;
+      if(arguments != null) {
+        name = arguments[0];
+      } else {
+        ASTNode coveringNode = context.getCoveringNode();
+        if(coveringNode==null || coveringNode.getNodeType()!=ASTNode.SIMPLE_NAME) {
+          continue;
+        }
+        name = coveringNode.toString();
       }
       int id = location.getProblemId();
       switch(id) {
         case IProblem.UndefinedType:
         case IProblem.UndefinedName:
-          proposals.add(new OpenBuildPathCorrectionProposal(arguments[0], context, 0, true));
+          proposals.add(new OpenBuildPathCorrectionProposal(name, context, 0, true));
           break;
 
         case IProblem.IsClassPathCorrect:
         case IProblem.ImportNotFound:
-          proposals.add(new OpenBuildPathCorrectionProposal(arguments[0], context, 0, false));
+          proposals.add(new OpenBuildPathCorrectionProposal(name, context, 0, false));
           break;
       }
     }
