@@ -547,9 +547,18 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
     configuration.setAttribute(ATTR_WORKSPACE_RESOLUTION, this.enableWorkspaceResolution.getSelection());
     configuration.setAttribute(ATTR_DEBUG_OUTPUT, this.debugOutputButton.getSelection());
 
-    IStructuredSelection selection = (IStructuredSelection) runtimeComboViewer.getSelection();
-    MavenRuntime runtime = (MavenRuntime) selection.getFirstElement();
-    configuration.setAttribute(ATTR_RUNTIME, runtime.getLocation());
+    String selectedRuntimeLocation = null;
+    try {
+      selectedRuntimeLocation = configuration.getAttribute(ATTR_RUNTIME, (String) null);
+    } catch(CoreException ex) {
+      // ignore
+    }
+    if (!MavenRuntimeManager.WORKSPACE.equals(selectedRuntimeLocation)) {
+      // don't reset WORKSPACE runtime
+      IStructuredSelection selection = (IStructuredSelection) runtimeComboViewer.getSelection();
+      MavenRuntime runtime = (MavenRuntime) selection.getFirstElement();
+      configuration.setAttribute(ATTR_RUNTIME, runtime.getLocation());
+    }
 
     TableItem[] items = this.propsTable.getItems();
     // store as String in "param=value" format 
