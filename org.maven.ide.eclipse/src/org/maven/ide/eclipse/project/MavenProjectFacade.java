@@ -33,7 +33,6 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.embedder.MavenEmbedderException;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Dependency;
-import org.apache.maven.model.Resource;
 import org.apache.maven.project.MavenProject;
 
 import org.maven.ide.eclipse.MavenPlugin;
@@ -70,42 +69,22 @@ public class MavenProjectFacade {
    * Returns project relative paths of resource directories
    */
   public IPath[] getResourceLocations() {
-    return getResourceLocations(mavenProject.getResources());
-  }
-
-  private IPath[] getResourceLocations(List resources) {
-    LinkedHashSet locations = new LinkedHashSet();
-    for(Iterator it = resources.iterator(); it.hasNext();) {
-      Resource resource = (Resource) it.next();
-      locations.add(getProjectRelativePath(resource.getDirectory()));
-    }
-    return (IPath[]) locations.toArray(new IPath[locations.size()]);
+    return MavenProjectUtils.getResourceLocations(getProject(), mavenProject.getResources());
   }
 
   /**
    * Returns project relative paths of test resource directories
    */
   public IPath[] getTestResourceLocations() {
-    return getResourceLocations(mavenProject.getTestResources());
+    return MavenProjectUtils.getResourceLocations(getProject(), mavenProject.getTestResources());
   }
 
   public IPath[] getCompileSourceLocations() {
-    return getSourceLocations(mavenProject.getCompileSourceRoots());
-  }
-
-  private IPath[] getSourceLocations(List roots) {
-    LinkedHashSet locations = new LinkedHashSet();
-    for(Iterator i = roots.iterator(); i.hasNext();) {
-      IPath path = getProjectRelativePath((String) i.next());
-      if(path != null) {
-        locations.add(path);
-      }
-    }
-    return (IPath[]) locations.toArray(new IPath[locations.size()]);
+    return MavenProjectUtils.getSourceLocations(getProject(), mavenProject.getCompileSourceRoots());
   }
 
   public IPath[] getTestCompileSourceLocations() {
-    return getSourceLocations(mavenProject.getTestCompileSourceRoots());
+    return MavenProjectUtils.getSourceLocations(getProject(),mavenProject.getTestCompileSourceRoots());
   }
 
   /**
@@ -115,16 +94,7 @@ public class MavenProjectFacade {
    * @return IPath the full, absolute workspace path resourceLocation
    */
   public IPath getProjectRelativePath(String resourceLocation) {
-    if(resourceLocation == null) {
-      return null;
-    }
-    IPath projectLocation = getProject().getLocation();
-    IPath directory = Path.fromOSString(resourceLocation); // this is an absolute path!
-    if(!projectLocation.isPrefixOf(directory)) {
-      return null;
-    }
-
-    return directory.removeFirstSegments(projectLocation.segmentCount()).makeRelative().setDevice(null);
+    return MavenProjectUtils.getProjectRelativePath(getProject(), resourceLocation);
   }
 
   /**
@@ -205,25 +175,7 @@ public class MavenProjectFacade {
    * exist or is not a member of this project.
    */
   public IPath getFullPath(File file) {
-    IProject project = getProject();
-    if (project == null || file == null) {
-      return null;
-    }
-
-    IPath projectPath = project.getLocation();
-    if(projectPath == null) {
-      return null;
-    }
-    
-    IPath filePath = new Path(file.getAbsolutePath());
-    if (!projectPath.isPrefixOf(filePath)) {
-      return null;
-    }
-    IResource resource = project.findMember(filePath.removeFirstSegments(projectPath.segmentCount()));
-    if (resource == null) {
-      return null;
-    }
-    return resource.getFullPath();
+    return MavenProjectUtils.getFullPath(getProject(), file);
   }
 
   public void addDependency(IFile file, Dependency dependency) {
