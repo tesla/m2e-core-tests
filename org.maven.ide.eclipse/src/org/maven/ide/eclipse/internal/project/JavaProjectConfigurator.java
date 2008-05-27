@@ -223,8 +223,8 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
     addSourceDirs(project, sources, entries, mavenProject.getTestCompileSourceRoots(), testClasses.getFullPath(),
         BuildPathManager.TEST_TYPE);
 
-    addResourceDirs(project, sources, entries, mavenProject.getBuild().getResources());
-    addResourceDirs(project, sources, entries, mavenProject.getBuild().getTestResources());
+    addResourceDirs(project, sources, entries, mavenProject.getBuild().getResources(), classes.getFullPath());
+    addResourceDirs(project, sources, entries, mavenProject.getBuild().getTestResources(), testClasses.getFullPath());
 
     // HACK to support xmlbeans generated classes MNGECLIPSE-374
     File generatedClassesDir = new File(mavenProject.getBuild().getDirectory(), //
@@ -252,7 +252,7 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
     }
   }
 
-  private void addResourceDirs(IProject project, Set sources, Set entries, List resources) {
+  private void addResourceDirs(IProject project, Set sources, Set entries, List resources, IPath output) {
     for(Iterator it = resources.iterator(); it.hasNext();) {
       Resource resource = (Resource) it.next();
       File resourceDirectory = new File(resource.getDirectory());
@@ -278,7 +278,7 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
           console.logError("Skipping resource folder " + r.getFullPath());
         } else if(r != null && sources.add(r.getFullPath().toString())) {
           entries.add(JavaCore.newSourceEntry(r.getFullPath(), //
-              new IPath[] {new Path("**")} /*exclusion*/, r.getFullPath())); //, new IPath[] { new Path( "**"+"/.svn/"+"**")} ) );
+              new IPath[] {new Path("**")} /*exclusion*/, output)); //, new IPath[] { new Path( "**"+"/.svn/"+"**")} ) );
           console.logMessage("Adding resource folder " + r.getFullPath());
         }
       }
