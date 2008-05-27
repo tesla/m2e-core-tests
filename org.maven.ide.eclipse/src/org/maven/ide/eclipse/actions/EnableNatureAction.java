@@ -50,8 +50,6 @@ public class EnableNatureAction implements IObjectActionDelegate, IExecutableExt
   
   private boolean filterResources = false;
   
-  private boolean useMavenOutputFolders = false;
-
   private ISelection selection;
   
   public EnableNatureAction() {
@@ -117,7 +115,6 @@ public class EnableNatureAction implements IObjectActionDelegate, IExecutableExt
       configuration.setIncludeModules(includeModules);
       configuration.setResolveWorkspaceProjects(workspaceProjects);
       configuration.setFilterResources(filterResources);
-      configuration.setUseMavenOutputFolders(useMavenOutputFolders);
       configuration.setActiveProfiles("");
       
       plugin.getProjectConfigurationManager().enableMavenNature(project, //

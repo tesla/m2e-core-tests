@@ -157,10 +157,6 @@ public class MavenRuntimeManager {
     return preferenceStore.getBoolean(MavenPreferenceConstants.P_UPDATE_INDEXES);
   }
   
-  public String getDefaultOutputFolder() {
-    return preferenceStore.getString(MavenPreferenceConstants.P_OUTPUT_FOLDER);
-  }
-  
   public String getGoalOnImport() {
     return preferenceStore.getString(MavenPreferenceConstants.P_GOAL_ON_IMPORT);
   }

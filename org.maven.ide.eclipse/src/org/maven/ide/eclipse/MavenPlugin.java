@@ -106,8 +106,6 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
   public static final String FILTER_RESOURCES = "filterresources"; //$NON-NLS-1$
 
-  public static final String USE_MAVEN_OUPUT_FOLDERS = "mavenoutputfolders"; //$NON-NLS-1$
-
   // entry attributes
   public static final String GROUP_ID_ATTRIBUTE = "maven.groupId"; //$NON-NLS-1$
 
@@ -116,8 +114,6 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   public static final String VERSION_ATTRIBUTE = "maven.version"; //$NON-NLS-1$
 
   public static final String CLASSIFIER_ATTRIBUTE = "maven.classifier"; //$NON-NLS-1$
-
-  public static final String TYPE_ATTRIBUTE = "maven.type"; //$NON-NLS-1$
 
   public static final String JAVADOC_CLASSIFIER = "javadoc"; //$NON-NLS-1$
 

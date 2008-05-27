@@ -38,6 +38,7 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.StandardClasspathProvider;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.model.Build;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.project.BuildPathManager;
@@ -63,6 +64,8 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
     supportedTypes.add(MavenRuntimeClasspathProvider.JDT_JAVA_APPLICATION);
     supportedTypes.add(MavenRuntimeClasspathProvider.JDT_JUNIT_TEST);
   }
+
+  MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
 
   public IRuntimeClasspathEntry[] computeUnresolvedClasspath(final ILaunchConfiguration configuration) throws CoreException {
     boolean useDefault = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH, true);
@@ -148,21 +151,26 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
       }
 
       // ECLIPSE-33: applications from test sources should use test scope 
-      Set testSources = new HashSet();
+      final Set testSources = new HashSet();
       IJavaProject javaProject = JavaRuntime.getJavaProject(configuration);
-      IClasspathEntry[] cp = javaProject.getRawClasspath();
-      for(int i = 0; i < cp.length; i++ ) {
-        if(IClasspathEntry.CPE_SOURCE == cp[i].getEntryKind()) {
-          if (BuildPathManager.TEST_TYPE.equals(getType(cp[i]))) {
-            testSources.add(cp[i].getPath());
-          }
-        }
+      MavenProjectFacade facade = projectManager.create(javaProject.getProject(), new NullProgressMonitor());
+      if (facade == null) {
+        return BuildPathManager.CLASSPATH_RUNTIME;
       }
+      
+      facade.accept(new IMavenProjectVisitor() {
+        public boolean visit(MavenProjectFacade projectFacade) {
+          testSources.addAll(Arrays.asList(projectFacade.getTestCompileSourceLocations()));
+          return true; // keep visiting
+        }
+        public void visit(MavenProjectFacade projectFacade, Artifact artifact) {
+        }
+      }, IMavenProjectVisitor.NESTED_MODULES);
 
       for (int i = 0; i < resources.length; i++) {
         for (Iterator j = testSources.iterator(); j.hasNext(); ) {
           IPath testPath = (IPath) j.next();
-          if (testPath.isPrefixOf(resources[i].getFullPath())) {
+          if (testPath.isPrefixOf(resources[i].getProjectRelativePath())) {
             return BuildPathManager.CLASSPATH_TEST;
           }
         }
@@ -180,56 +188,36 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
     IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
     IProject project = root.getProject(path.segment(0));
 
-    MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
     MavenProjectFacade projectFacade = projectManager.create(project, new NullProgressMonitor());
     if(projectFacade == null) {
       return;
     }
-    
+
     ResolverConfiguration configuration = projectFacade.getResolverConfiguration();
     if (configuration == null) {
       return;
     }
 
     final Set allClasses = new LinkedHashSet();
-    final Set allResources = new LinkedHashSet();
     final Set allTestClasses = new LinkedHashSet();
-    final Set allTestResources = new LinkedHashSet();
-    
-    IJavaProject javaProject = JavaCore.create(project);
-    // JDT source->output mapping
-    IClasspathEntry[] cp = javaProject.getRawClasspath();
-    for(int i = 0; i < cp.length; i++ ) {
-      if(IClasspathEntry.CPE_SOURCE == cp[i].getEntryKind()) {
-        IPath outputLocation;
-        if (cp[i].getOutputLocation() != null) {
-          outputLocation = cp[i].getOutputLocation();
-        } else {
-          outputLocation = javaProject.getOutputLocation();
-        }
-        outputLocation = outputLocation.removeFirstSegments(1).makeRelative();
-        if (BuildPathManager.TEST_TYPE.equals(getType(cp[i]))) {
-          allTestClasses.add(outputLocation);
-        } else {
-          allClasses.add(outputLocation);
-        }
-      }
-    }
 
     projectFacade.accept(new IMavenProjectVisitor() {
       public boolean visit(MavenProjectFacade projectFacade) {
-        allResources.addAll(Arrays.asList(projectFacade.getResourceLocations()));
-        allTestResources.addAll(Arrays.asList(projectFacade.getTestResourceLocations()));
-        return true; // continue traversal
+        // add real resources output folders
+        Build build = projectFacade.getMavenProject().getBuild();
+        allClasses.add(projectFacade.getProjectRelativePath(build.getOutputDirectory()));
+        allTestClasses.add(projectFacade.getProjectRelativePath(build.getTestOutputDirectory()));
+
+        // continue traversal
+        return true; 
       }
 
       public void visit(MavenProjectFacade projectFacade, Artifact artifact) {
       }
     }, IMavenProjectVisitor.NESTED_MODULES);
 
-    // compensate for resources source entries 
-    allClasses.removeAll(allResources);
-    allClasses.removeAll(allTestResources);
+    IJavaProject javaProject = JavaCore.create(project);
+    IClasspathEntry[] cp = javaProject.getRawClasspath();
 
     boolean projectResolved = false;
     for (int i = 0; i < cp.length; i++) {
@@ -238,17 +226,11 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
         case IClasspathEntry.CPE_SOURCE:
           if (!projectResolved) {
             if (BuildPathManager.CLASSPATH_TEST == scope && isTestClassifier(classifier)) {
-              // ECLIPSE-19: test classes resources come infront on the rest
+              // ECLIPSE-19: test classes come infront on the rest
               addFolders(resolved, project, allTestClasses);
-              if (!configuration.shouldFilterResources()) {
-                addFolders(resolved, project, allTestResources);
-              }
             }
             if (isMainClassifier(classifier)) {
               addFolders(resolved, project, allClasses);
-              if (!configuration.shouldFilterResources()) {
-                addFolders(resolved, project, allResources);
-              }
             }
             projectResolved = true;
           }
@@ -304,16 +286,6 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
     return THIS_PROJECT_CLASSIFIER == classifier // main project
         || "tests".equals(classifier) // tests classifier
         || classifier != null; // unknown classifier
-  }
-
-  private String getType(IClasspathEntry entry) {
-    IClasspathAttribute[] attrs = entry.getExtraAttributes();
-    for (int i = 0; i < attrs.length; i++) {
-      if (MavenPlugin.TYPE_ATTRIBUTE.equals(attrs[i].getName())) {
-        return attrs[i].getValue();
-      }
-    }
-    return null;
   }
 
   private void addFolders(Set resolved, IProject project, Set folders) {

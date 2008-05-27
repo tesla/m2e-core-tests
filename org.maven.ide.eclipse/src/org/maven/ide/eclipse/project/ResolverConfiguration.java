@@ -19,13 +19,14 @@ import java.util.List;
 public class ResolverConfiguration {
 
   public static final String DEFAULT_FILTERING_GOALS = "process-resources resources:testResources";
+  public static final String DEFAULT_FULL_BUILD_GOALS = "process-test-resources";
 
   private boolean includeModules = false;
   private boolean resolveWorkspaceProjects = true;
   private String activeProfiles = "";
   private boolean filterResources = false;
-  private boolean useMavenOutputFolders = false;
   private String resourceFilteringGoals = DEFAULT_FILTERING_GOALS;
+  private String fullBuildGoals = DEFAULT_FULL_BUILD_GOALS;
 
 //  public ResolverConfiguration() {
 //  }
@@ -58,10 +59,6 @@ public class ResolverConfiguration {
     return this.filterResources;
   }
   
-  public boolean shouldUseMavenOutputFolders() {
-    return useMavenOutputFolders;
-  }
-
   public void setResolveWorkspaceProjects(boolean resolveWorkspaceProjects) {
     this.resolveWorkspaceProjects = resolveWorkspaceProjects;
   }
@@ -78,15 +75,19 @@ public class ResolverConfiguration {
     this.filterResources = filterResources;
   }
 
-  public void setUseMavenOutputFolders(boolean useMavenOutputFolders) {
-    this.useMavenOutputFolders = useMavenOutputFolders;
-  }
-
   public String getResourceFilteringGoals() {
     return resourceFilteringGoals;
   }
   
   public void setResourceFilteringGoals(String resourceFilteringGoals) {
     this.resourceFilteringGoals = resourceFilteringGoals;
+  }
+
+  public String getFullBuildGoals() {
+    return fullBuildGoals;
+  }
+
+  public void setFullBuildGoals(String fullBuildGoals) {
+    this.fullBuildGoals = fullBuildGoals;
   }
 }

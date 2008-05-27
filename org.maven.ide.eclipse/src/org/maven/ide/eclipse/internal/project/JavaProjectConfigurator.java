@@ -135,10 +135,6 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
         }
       }
 
-      if(configuration.shouldUseMavenOutputFolders()) {
-        javaProject.setOption(JavaCore.CORE_JAVA_BUILD_CLEAN_OUTPUT_FOLDER, "ignore");
-      }
-
       IClasspathEntry[] currentClasspath = javaProject.getRawClasspath();
       for(int i = 0; i < currentClasspath.length; i++ ) {
         // Delete all non container (e.g. JRE library) entries. See MNGECLIPSE-9 
@@ -151,17 +147,12 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
       }
 
       IContainer classesFolder;
-      if(configuration.shouldUseMavenOutputFolders()) {
-        if(mavenProject != null) {
-          String outputDirectory = toRelativeAndFixSeparator(project, //
-              mavenProject.getBuild().getOutputDirectory());
-          classesFolder = project.getFolder(outputDirectory);
-        } else {
-          classesFolder = project;
-        }
+      if(mavenProject != null) {
+        String outputDirectory = toRelativeAndFixSeparator(project, //
+            mavenProject.getBuild().getOutputDirectory());
+        classesFolder = project.getFolder(outputDirectory);
       } else {
-        IFolder outputFolder = project.getFolder(runtimeManager.getDefaultOutputFolder());
-        classesFolder = outputFolder.getFolder(BuildPathManager.CLASSES_FOLDERNAME);
+        classesFolder = project;
       }
 
       if(classesFolder instanceof IFolder) {
@@ -221,15 +212,9 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
     IFolder classes;
     IFolder testClasses;
 
-    if(resolverConfiguration.shouldUseMavenOutputFolders()) {
-      classes = project.getFolder(toRelativeAndFixSeparator(project, mavenProject.getBuild().getOutputDirectory()));
-      testClasses = project.getFolder(toRelativeAndFixSeparator(project, mavenProject.getBuild()
-          .getTestOutputDirectory()));
-    } else {
-      IFolder outputFolder = project.getFolder(runtimeManager.getDefaultOutputFolder());
-      classes = outputFolder.getFolder(BuildPathManager.CLASSES_FOLDERNAME);
-      testClasses = outputFolder.getFolder(BuildPathManager.TEST_CLASSES_FOLDERNAME);
-    }
+    classes = project.getFolder(toRelativeAndFixSeparator(project, mavenProject.getBuild().getOutputDirectory()));
+    testClasses = project.getFolder(toRelativeAndFixSeparator(project, mavenProject.getBuild()
+        .getTestOutputDirectory()));
 
     Util.createFolder(classes);
     Util.createFolder(testClasses);
@@ -260,10 +245,6 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
         if(r != null && sources.add(r.getFullPath().toString())) {
           console.logMessage("Adding source folder " + r.getFullPath());
           IClasspathAttribute[] attrs = new IClasspathAttribute[0];
-          if(scope != null) {
-            attrs = new IClasspathAttribute[1];
-            attrs[0] = JavaCore.newClasspathAttribute(MavenPlugin.TYPE_ATTRIBUTE, scope);
-          }
           entries.add(JavaCore.newSourceEntry(r.getFullPath(), //
               new IPath[0] /*inclusion*/, new IPath[0] /*exclusion*/, output, attrs));
         }

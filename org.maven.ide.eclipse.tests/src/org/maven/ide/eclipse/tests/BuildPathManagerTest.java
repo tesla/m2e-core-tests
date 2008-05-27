@@ -103,7 +103,6 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     configuration.setIncludeModules(false);
     configuration.setResolveWorkspaceProjects(false);
     configuration.setFilterResources(false);
-    configuration.setUseMavenOutputFolders(false);
     configuration.setActiveProfiles("");
     
     importManager.enableMavenNature(project1, configuration, monitor);
@@ -267,7 +266,6 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     configuration.setIncludeModules(false);
     configuration.setResolveWorkspaceProjects(false);
     configuration.setFilterResources(false);
-    configuration.setUseMavenOutputFolders(false);
     configuration.setActiveProfiles("");
     
     IProject[] projects = importProjects("projects/MNGECLIPSE-20", new String[] {
@@ -399,7 +397,6 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     configuration.setIncludeModules(true);
     configuration.setResolveWorkspaceProjects(true);
     configuration.setFilterResources(false);
-    configuration.setUseMavenOutputFolders(false);
     configuration.setActiveProfiles("");
     
     IProject project = importProject("projects/MNGECLIPSE-20/pom.xml", configuration);
@@ -416,9 +413,13 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
     assertEquals(Arrays.asList(rawClasspath).toString(), 7, rawClasspath.length);
     assertEquals("/MNGECLIPSE-20/type/src/main/java", rawClasspath[0].getPath().toString());
+    assertEquals("/MNGECLIPSE-20/type/target/classes", rawClasspath[0].getOutputLocation().toString());
     assertEquals("/MNGECLIPSE-20/app/src/main/java", rawClasspath[1].getPath().toString());
+    assertEquals("/MNGECLIPSE-20/app/target/classes", rawClasspath[1].getOutputLocation().toString());
     assertEquals("/MNGECLIPSE-20/web/src/main/java", rawClasspath[2].getPath().toString());
+    assertEquals("/MNGECLIPSE-20/web/target/classes", rawClasspath[2].getOutputLocation().toString());
     assertEquals("/MNGECLIPSE-20/ejb/src/main/java", rawClasspath[3].getPath().toString());
+    assertEquals("/MNGECLIPSE-20/ejb/target/classes", rawClasspath[3].getOutputLocation().toString());
     assertEquals("/MNGECLIPSE-20/ejb/src/main/resources", rawClasspath[4].getPath().toString());
     assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", rawClasspath[5].getPath().toString());
     assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[6].getPath().toString());
@@ -439,7 +440,6 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     configuration.setIncludeModules(true);
     configuration.setResolveWorkspaceProjects(false);
     configuration.setFilterResources(false);
-    configuration.setUseMavenOutputFolders(false);
     configuration.setActiveProfiles("");
 
     IProject project = importProject("projects/MNGECLIPSE-20/pom.xml", configuration);
@@ -480,7 +480,6 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     configuration.setIncludeModules(true);
     configuration.setResolveWorkspaceProjects(false);
     configuration.setFilterResources(false);
-    configuration.setUseMavenOutputFolders(false);
     configuration.setActiveProfiles("");
 
     IProject project = importProject("projects/MNGECLIPSE-20/pom.xml", configuration);
@@ -508,7 +507,6 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     configuration.setIncludeModules(false);
     configuration.setResolveWorkspaceProjects(true);
     configuration.setFilterResources(false);
-    configuration.setUseMavenOutputFolders(false);
     configuration.setActiveProfiles("jaxb1");
 
     IProject project = importProject("projects/MNGECLIPSE-353/pom.xml", configuration);
@@ -533,7 +531,6 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     configuration.setIncludeModules(false);
     configuration.setResolveWorkspaceProjects(true);
     configuration.setFilterResources(false);
-    configuration.setUseMavenOutputFolders(false);
     configuration.setActiveProfiles("jaxb20");
 
     IProject project = importProject("projects/MNGECLIPSE-353/pom.xml", configuration);
@@ -553,34 +550,10 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals(toString(markers), 0, markers.length);
   }
 
-  public void testProjectImport001_separateFolders() throws Exception {
-    deleteProject("projectimport-p001");
-
-    ResolverConfiguration configuration = new ResolverConfiguration();
-    configuration.setUseMavenOutputFolders(false);
-    IProject project = importProject("projectimport-p001", "projects/projectimport/p001", configuration);
-
-    waitForJobsToComplete();
-
-    IJavaProject javaProject = JavaCore.create(project);
-    
-    assertEquals(new Path("/projectimport-p001/target-eclipse/classes"), javaProject.getOutputLocation());
-    IClasspathEntry[] cp = javaProject.getRawClasspath();
-
-    assertEquals(4, cp.length);
-    assertEquals(new Path("/projectimport-p001/src/main/java"), cp[0].getPath());
-    assertEquals(new Path("/projectimport-p001/target-eclipse/classes"), cp[0].getOutputLocation());
-    assertEquals(0, getAttributeCount(cp[0], MavenPlugin.TYPE_ATTRIBUTE));
-    assertEquals(new Path("/projectimport-p001/src/test/java"), cp[1].getPath());
-    assertEquals(new Path("/projectimport-p001/target-eclipse/test-classes"), cp[1].getOutputLocation());
-    assertEquals(1, getAttributeCount(cp[1], MavenPlugin.TYPE_ATTRIBUTE));
-  }
-
   public void testProjectImport001_useMavenOutputFolders() throws Exception {
     deleteProject("projectimport-p001");
 
     ResolverConfiguration configuration = new ResolverConfiguration();
-    configuration.setUseMavenOutputFolders(true);
     IProject project = importProject("projectimport-p001", "projects/projectimport/p001", configuration);
 
     waitForJobsToComplete();
@@ -593,30 +566,8 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals(4, cp.length);
     assertEquals(new Path("/projectimport-p001/src/main/java"), cp[0].getPath());
     assertEquals(new Path("/projectimport-p001/target/classes"), cp[0].getOutputLocation());
-    assertEquals(0, getAttributeCount(cp[0], MavenPlugin.TYPE_ATTRIBUTE));
     assertEquals(new Path("/projectimport-p001/src/test/java"), cp[1].getPath());
     assertEquals(new Path("/projectimport-p001/target/test-classes"), cp[1].getOutputLocation());
-    assertEquals(1, getAttributeCount(cp[1], MavenPlugin.TYPE_ATTRIBUTE));
-  }
-
-  public void testProjectImport002_separateFolders() throws Exception {
-    deleteProject("projectimport-p002");
-
-    ResolverConfiguration configuration = new ResolverConfiguration();
-    configuration.setIncludeModules(true);
-    configuration.setUseMavenOutputFolders(false);
-    IProject project = importProject("projectimport-p002", "projects/projectimport/p002", configuration);
-
-    waitForJobsToComplete();
-
-    IJavaProject javaProject = JavaCore.create(project);
-
-    assertEquals(new Path("/projectimport-p002/target-eclipse/classes"), javaProject.getOutputLocation());
-    IClasspathEntry[] cp = javaProject.getRawClasspath();
-
-    assertEquals(3, cp.length);
-    assertEquals(new Path("/projectimport-p002/p002-m1/src/main/java"), cp[0].getPath());
-    assertEquals(new Path("/projectimport-p002/target-eclipse/classes"), cp[0].getOutputLocation());
   }
 
   public void testProjectImport002_useMavenOutputFolders() throws Exception {
@@ -624,7 +575,6 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
 
     ResolverConfiguration configuration = new ResolverConfiguration();
     configuration.setIncludeModules(true);
-    configuration.setUseMavenOutputFolders(true);
     IProject project = importProject("projectimport-p002", "projects/projectimport/p002", configuration);
 
     waitForJobsToComplete();
@@ -661,7 +611,6 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     configuration.setIncludeModules(false);
     configuration.setResolveWorkspaceProjects(true);
     configuration.setFilterResources(false);
-    configuration.setUseMavenOutputFolders(false);
     configuration.setActiveProfiles("");
 
     IProject project1 = importProject("projects/dependencyorder/p1/pom.xml", configuration); 
@@ -690,7 +639,6 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     configuration.setIncludeModules(false);
     configuration.setResolveWorkspaceProjects(true);
     configuration.setFilterResources(false);
-    configuration.setUseMavenOutputFolders(false);
     configuration.setActiveProfiles("");
 
     IProject p3 = importProject("projects/dependencyorder/p3/pom.xml", configuration);
@@ -1028,18 +976,15 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
 
         ResolverConfiguration resolverConfiguration = new ResolverConfiguration();
         resolverConfiguration.setIncludeModules(modules);
-        resolverConfiguration.setUseMavenOutputFolders(mavenFolders);
         
         plugin.getProjectConfigurationManager().createSimpleProject(project, null, model, directories, resolverConfiguration, monitor);
       }
     }, plugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
 
     IJavaProject javaProject = JavaCore.create(project);
-    assertEquals("ignore", javaProject.getOption(JavaCore.CORE_JAVA_BUILD_CLEAN_OUTPUT_FOLDER, false));
 
     ResolverConfiguration configuration = plugin.getMavenProjectManager().getResolverConfiguration(project);
     assertEquals(modules, configuration.shouldIncludeModules());
-    assertEquals(mavenFolders, configuration.shouldUseMavenOutputFolders());
   }
 
   public void test005_dependencyAvailableFromLocalRepoAndWorkspace() throws Exception {

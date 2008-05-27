@@ -9,22 +9,29 @@
 package org.maven.ide.eclipse.project;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
+
+import org.codehaus.plexus.util.StringUtils;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.embedder.MavenEmbedderException;
+import org.apache.maven.model.Build;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Resource;
 import org.apache.maven.project.MavenProject;
@@ -120,11 +127,17 @@ public class MavenProjectFacade {
     return directory.removeFirstSegments(projectLocation.segmentCount()).makeRelative().setDevice(null);
   }
 
+  /**
+   * Filters resources of this project. Does not recurse into nested modules.
+   */
   public void filterResources(IProgressMonitor monitor) throws CoreException {
     try {
-      manager.filterResources(this, monitor);
+      String goalsStr = resolverConfiguration.getResourceFilteringGoals();
+      List goals = Arrays.asList(StringUtils.split(goalsStr));
+      manager.execute(this, goals, false, monitor);
+      refreshBuildDirectory(monitor); // XXX only need to refresh classes and test-classes
     } catch(MavenEmbedderException ex) {
-      throw new RuntimeException(ex);
+      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, ex.getMessage(), ex));
     }
   }
 
@@ -284,4 +297,36 @@ public class MavenProjectFacade {
     timestamp[timestamp.length - 1] = pom.getLocalTimeStamp();
   }
 
+  /**
+   * Executes specified maven goals. 
+   * 
+   * Recurses into nested modules dependending on resolver configuration.
+   */
+  public void execute(List goals, IProgressMonitor monitor) throws CoreException {
+    try {
+      manager.execute(this, goals, true, monitor);
+      refreshBuildDirectory(monitor);
+    } catch(MavenEmbedderException ex) {
+      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, ex.getMessage(), ex));
+    }
+  }
+
+  private void refreshBuildDirectory(final IProgressMonitor monitor) throws CoreException {
+    accept(new IMavenProjectVisitor() {
+      public boolean visit(MavenProjectFacade projectFacade) throws CoreException {
+        Build build = projectFacade.getMavenProject().getBuild();
+        refreshFolder(projectFacade.getProjectRelativePath(build.getDirectory()), monitor);
+        return true; // keep visiting
+      }
+      public void visit(MavenProjectFacade projectFacade, Artifact artifact) {
+      }
+    }, IMavenProjectVisitor.NESTED_MODULES);
+  }
+
+  void refreshFolder(IPath path, IProgressMonitor monitor) throws CoreException {
+    IFolder folder = getProject().getFolder(path);
+    if (folder != null) {
+      folder.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+    }
+  }
 }

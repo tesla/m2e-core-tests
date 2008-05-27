@@ -47,10 +47,6 @@ public class ResolverConfigurationComponent extends ExpandableComposite {
 
   private ModifyListener modifyListener;
 
-  Button enableResourceFiltering;
-
-  Button useMavenOutputFolders;
-
   Button resolveWorkspaceProjects;
 
   Button projectsForModules;
@@ -86,24 +82,6 @@ public class ResolverConfigurationComponent extends ExpandableComposite {
     gridLayout.marginLeft = 11;
     gridLayout.numColumns = 2;
     advancedComposite.setLayout(gridLayout);
-
-    enableResourceFiltering = new Button(advancedComposite, SWT.CHECK);
-    enableResourceFiltering.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
-    enableResourceFiltering.setText(Messages.getString("resolverConfiguration.enableResourceFiltering"));
-    enableResourceFiltering.addSelectionListener(new SelectionAdapter() {
-      public void widgetSelected(SelectionEvent e) {
-        resolverConfiguration.setFilterResources(enableResourceFiltering.getSelection());
-      }
-    });
-
-    useMavenOutputFolders = new Button(advancedComposite, SWT.CHECK);
-    useMavenOutputFolders.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
-    useMavenOutputFolders.setText(Messages.getString("resolverConfiguration.useMavenOutputFolders"));
-    useMavenOutputFolders.addSelectionListener(new SelectionAdapter() {
-      public void widgetSelected(SelectionEvent e) {
-        resolverConfiguration.setUseMavenOutputFolders(useMavenOutputFolders.getSelection());
-      }
-    });
 
     resolveWorkspaceProjects = new Button(advancedComposite, SWT.CHECK);
     resolveWorkspaceProjects.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
@@ -155,8 +133,6 @@ public class ResolverConfigurationComponent extends ExpandableComposite {
   }
 
   public void loadData() {
-    enableResourceFiltering.setSelection(resolverConfiguration.shouldFilterResources());
-    useMavenOutputFolders.setSelection(resolverConfiguration.shouldUseMavenOutputFolders());
     resolveWorkspaceProjects.setSelection(resolverConfiguration.shouldResolveWorkspaceProjects());
     projectsForModules.setSelection(!resolverConfiguration.shouldIncludeModules());
     profiles.setText(resolverConfiguration.getActiveProfiles());

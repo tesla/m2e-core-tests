@@ -10,7 +10,6 @@ package org.maven.ide.eclipse.internal.project;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -23,9 +22,7 @@ import java.util.Set;
 import org.osgi.service.prefs.BackingStoreException;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.CoreException;
@@ -38,22 +35,16 @@ import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.codehaus.plexus.PlexusContainer;
-import org.codehaus.plexus.component.repository.ComponentDescriptor;
-import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.AbstractArtifactResolutionException;
-import org.apache.maven.artifact.resolver.ArtifactResolver;
-import org.apache.maven.embedder.ContainerCustomizer;
 import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.embedder.MavenEmbedderException;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.model.Model;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.path.PathTranslator;
 
 import org.maven.ide.eclipse.MavenConsole;
 import org.maven.ide.eclipse.MavenPlugin;
@@ -96,9 +87,9 @@ public class MavenProjectManagerImpl {
   private static final String P_VERSION = "version";
   private static final String P_INCLUDE_MODULES = "includeModules";
   private static final String P_RESOLVE_WORKSPACE_PROJECTS = "resolveWorkspaceProjects";
-  private static final String P_USE_MAVEN_FOLDERS = "useMavenFolders";
   private static final String P_FILTER_RESOURCES = "filterResources";
   private static final String P_RESOURCE_FILTER_GOALS = "resourceFilterGoals";
+  private static final String P_FULL_BUILD_GOALS = "fullBuildGoals";
   private static final String P_ACTIVE_PROFILES = "activeProfiles";
 
   private static final String VERSION = "1";
@@ -207,12 +198,12 @@ public class MavenProjectManagerImpl {
     if(projectNode != null) {
       projectNode.put(P_VERSION, VERSION);
       
-      projectNode.putBoolean(P_USE_MAVEN_FOLDERS, configuration.shouldUseMavenOutputFolders());
       projectNode.putBoolean(P_RESOLVE_WORKSPACE_PROJECTS, configuration.shouldResolveWorkspaceProjects());
       projectNode.putBoolean(P_INCLUDE_MODULES, configuration.shouldIncludeModules());
       projectNode.putBoolean(P_FILTER_RESOURCES, configuration.shouldFilterResources());
       
       projectNode.put(P_RESOURCE_FILTER_GOALS, configuration.getResourceFilteringGoals());
+      projectNode.put(P_FULL_BUILD_GOALS, configuration.getFullBuildGoals());
       projectNode.put(P_ACTIVE_PROFILES, configuration.getActiveProfiles());
       
       try {
@@ -239,12 +230,12 @@ public class MavenProjectManagerImpl {
     }
   
     ResolverConfiguration configuration = new ResolverConfiguration();
-    configuration.setUseMavenOutputFolders(projectNode.getBoolean(P_USE_MAVEN_FOLDERS, false));
     configuration.setResolveWorkspaceProjects(projectNode.getBoolean(P_RESOLVE_WORKSPACE_PROJECTS, false));
     configuration.setIncludeModules(projectNode.getBoolean(P_INCLUDE_MODULES, false));
     configuration.setFilterResources(projectNode.getBoolean(P_FILTER_RESOURCES, false));
     
     configuration.setResourceFilteringGoals(projectNode.get(P_RESOURCE_FILTER_GOALS, ResolverConfiguration.DEFAULT_FILTERING_GOALS));
+    configuration.setFullBuildGoals(projectNode.get(P_FULL_BUILD_GOALS, ResolverConfiguration.DEFAULT_FULL_BUILD_GOALS));
     configuration.setActiveProfiles(projectNode.get(P_ACTIVE_PROFILES, ""));
     return configuration;
   }
@@ -262,13 +253,10 @@ public class MavenProjectManagerImpl {
   
     boolean filterResources = containerPath.indexOf("/" + MavenPlugin.FILTER_RESOURCES) != -1;
   
-    boolean useMavenOutputFolders = containerPath.indexOf("/" + MavenPlugin.USE_MAVEN_OUPUT_FOLDERS) != -1;
-  
     ResolverConfiguration configuration = new ResolverConfiguration();
     configuration.setIncludeModules(includeModules);
     configuration.setResolveWorkspaceProjects(resolveWorkspaceProjects);
     configuration.setFilterResources(filterResources);
-    configuration.setUseMavenOutputFolders(useMavenOutputFolders);
     configuration.setActiveProfiles(getActiveProfiles(entry));
     return configuration;
   }
@@ -975,49 +963,6 @@ public class MavenProjectManagerImpl {
     }
   }
 
-  private static final ContainerCustomizer filterResourcesCustomizer =  new ContainerCustomizer() {
-    public void customize(PlexusContainer container) {
-      ComponentDescriptor resolverDescriptor = container.getComponentDescriptor(ArtifactResolver.ROLE);
-      resolverDescriptor.setImplementation(EclipseArtifactResolver.class.getName());
-
-      ComponentDescriptor translatorDescriptor = container.getComponentDescriptor(PathTranslator.ROLE);
-      translatorDescriptor.setImplementation(FilterResourcesPathTranslator.class.getName());
-    }
-  };
-
-  public void filterResources(MavenProjectFacade facade, IProgressMonitor monitor) throws MavenEmbedderException, CoreException {
-    MavenEmbedder embedder = embedderManager.createEmbedder(filterResourcesCustomizer);
-
-    try {
-      IFile pom = facade.getPom();
-      ResolverConfiguration resolverConfiguration = facade.getResolverConfiguration();
-      String goals = resolverConfiguration.getResourceFilteringGoals();
-      
-      execute(embedder, pom, resolverConfiguration, new MavenExecutor(Arrays.asList(StringUtils.split(goals))), monitor);
-
-      IProject project = pom.getProject();
-
-      IFolder output;
-      IFolder testOutput;
-
-      if (resolverConfiguration.shouldUseMavenOutputFolders()) {
-        IWorkspaceRoot root = pom.getWorkspace().getRoot();
-        output = root.getFolder(facade.getOutputLocation());
-        testOutput = root.getFolder(facade.getTestOutputLocation());
-      } else {
-        IFolder outputFolder = project.getFolder(runtimeManager.getDefaultOutputFolder());
-        output = outputFolder.getFolder(FilterResourcesPathTranslator.RESOURCES_FOLDERNAME);
-        testOutput = outputFolder.getFolder(FilterResourcesPathTranslator.TEST_RESOURCES_FOLDERNAME);
-      }
-      
-      output.refreshLocal(IResource.DEPTH_INFINITE, monitor);
-      testOutput.refreshLocal(IResource.DEPTH_INFINITE, monitor);
-
-    } finally {
-      embedder.stop();
-    }
-  }
-  
   public MavenProjectFacade[] getProjects() {
     return state.getProjects();
   }
@@ -1047,7 +992,7 @@ public class MavenProjectManagerImpl {
     }
   }
 
-  private static final class MavenExecutor implements MavenRunnable {
+  private static class MavenExecutor implements MavenRunnable {
     private final List goals;
 
     MavenExecutor(List goals) {
@@ -1071,6 +1016,24 @@ public class MavenProjectManagerImpl {
       request.setOffline(updateRequest.isOffline());
       request.setUpdateSnapshots(updateRequest.isUpdateSnapshots());
       return embedder.readProjectWithDependencies(request);
+    }
+  }
+
+  public void execute(MavenProjectFacade facade, List goals, final boolean recursive, IProgressMonitor monitor) throws MavenEmbedderException {
+    MavenEmbedder embedder = embedderManager.createEmbedder(EmbedderFactory.createWorkspaceCustomizer());
+    try {
+      IFile pom = facade.getPom();
+      final ResolverConfiguration resolverConfiguration = facade.getResolverConfiguration();
+      
+      execute(embedder, pom, resolverConfiguration, new MavenExecutor(goals) {
+        public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request) {
+          request.setRecursive(resolverConfiguration.shouldIncludeModules() && recursive);
+          return super.execute(embedder, request);
+        }
+      }, monitor);
+
+    } finally {
+      embedder.stop();
     }
   }
 

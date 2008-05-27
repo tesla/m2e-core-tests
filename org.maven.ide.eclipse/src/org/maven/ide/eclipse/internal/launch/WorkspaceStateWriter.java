@@ -46,18 +46,16 @@ public class WorkspaceStateWriter implements IMavenProjectChangedListener {
 
       for (int i = 0; i < projects.length; i++) {
         MavenProjectFacade facade = projects[i];
-        if (facade.getResolverConfiguration().shouldUseMavenOutputFolders()) {
-          Artifact artifact = facade.getMavenProject().getArtifact();
-          File pom = facade.getPom().getLocation().toFile();
-          if (pom.canRead()) {
-            String key = artifact.getGroupId() + ":" + artifact.getArtifactId() + ":pom:" + artifact.getBaseVersion();
-            state.put(key, pom.getCanonicalPath());
-          }
-          IResource outputLocation = root.findMember(facade.getOutputLocation());
-          if (!"pom".equals(artifact.getType()) && outputLocation != null && outputLocation.exists()) {
-            String key = artifact.getGroupId() + ":" + artifact.getArtifactId() + ":" + artifact.getType() + ":" + artifact.getBaseVersion();
-            state.put(key, outputLocation.getLocation().toFile().getCanonicalPath());
-          }
+        Artifact artifact = facade.getMavenProject().getArtifact();
+        File pom = facade.getPom().getLocation().toFile();
+        if (pom.canRead()) {
+          String key = artifact.getGroupId() + ":" + artifact.getArtifactId() + ":pom:" + artifact.getBaseVersion();
+          state.put(key, pom.getCanonicalPath());
+        }
+        IResource outputLocation = root.findMember(facade.getOutputLocation());
+        if (!"pom".equals(artifact.getType()) && outputLocation != null && outputLocation.exists()) {
+          String key = artifact.getGroupId() + ":" + artifact.getArtifactId() + ":" + artifact.getType() + ":" + artifact.getBaseVersion();
+          state.put(key, outputLocation.getLocation().toFile().getCanonicalPath());
         }
       }
 

@@ -16,8 +16,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -42,10 +40,8 @@ public class MavenProjectPreferencePage extends PropertyPage {
 
   public static final String ID = "org.maven.ide.eclipse.MavenProjectPreferencePage";
   
-  private Button useMavenOutputFoldersButton;
   private Button resolveWorspaceProjectsButton;
 	private Button includeModulesButton;
-	Button enableResourceFilteringButton;
 	
 	Text resourceFilteringGoalsText;
 	private Text activeProfilesText;
@@ -89,16 +85,6 @@ public class MavenProjectPreferencePage extends PropertyPage {
   	activeProfilesText = new Text(composite, SWT.BORDER);
   	activeProfilesText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
   	
-  	useMavenOutputFoldersButton = new Button(composite, SWT.CHECK);
-  	GridData gd_useMavenOutputFoldersButton = new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1);
-  	gd_useMavenOutputFoldersButton.verticalIndent = 15;
-  	useMavenOutputFoldersButton.setLayoutData(gd_useMavenOutputFoldersButton);
-  	useMavenOutputFoldersButton.setText("Use Maven &output folders");
-
-  	enableResourceFilteringButton = new Button(composite, SWT.CHECK);
-  	enableResourceFilteringButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-  	enableResourceFilteringButton.setText("Enable resource &filtering");
-  
   	final Label goalsLabel = new Label(composite, SWT.NONE);
   	GridData gd_goalsLabel = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
   	gd_goalsLabel.horizontalIndent = 12;
@@ -121,16 +107,6 @@ public class MavenProjectPreferencePage extends PropertyPage {
   	warningLabelData.horizontalIndent = 12;
   	warningLabel.setLayoutData(warningLabelData);
 
-  	enableResourceFilteringButton.addSelectionListener(new SelectionAdapter() {
-  	  public void widgetSelected(SelectionEvent e) {
-  	    boolean selected = enableResourceFilteringButton.getSelection();
-  	    goalsLabel.setEnabled(selected);
-  	    resourceFilteringGoalsText.setEnabled(selected);
-  	    selectGoalsButton.setEnabled(selected);
-  	    warningLabel.setEnabled(selected);
-  	  }
-  	});
-  	
     init(getResolverConfiguration());
     
   	return composite;
@@ -141,10 +117,8 @@ public class MavenProjectPreferencePage extends PropertyPage {
   }
   
   private void init(ResolverConfiguration configuration) {
-    useMavenOutputFoldersButton.setSelection(configuration.shouldUseMavenOutputFolders());
     resolveWorspaceProjectsButton.setSelection(configuration.shouldResolveWorkspaceProjects());
     includeModulesButton.setSelection(configuration.shouldIncludeModules());
-    enableResourceFilteringButton.setSelection(configuration.shouldFilterResources());
 
     resourceFilteringGoalsText.setText(configuration.getResourceFilteringGoals());
     activeProfilesText.setText(configuration.getActiveProfiles());
@@ -153,10 +127,8 @@ public class MavenProjectPreferencePage extends PropertyPage {
 	public boolean performOk() {
 	  final ResolverConfiguration configuration = getResolverConfiguration();
 
-	  configuration.setUseMavenOutputFolders(useMavenOutputFoldersButton.getSelection());
 	  configuration.setResolveWorkspaceProjects(resolveWorspaceProjectsButton.getSelection());
 	  configuration.setIncludeModules(includeModulesButton.getSelection());
-	  configuration.setFilterResources(enableResourceFilteringButton.getSelection());
 	  
 	  configuration.setResourceFilteringGoals(resourceFilteringGoalsText.getText());
 	  configuration.setActiveProfiles(activeProfilesText.getText());

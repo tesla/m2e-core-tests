@@ -15,6 +15,7 @@ import java.util.Properties;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.CoreException;
@@ -23,7 +24,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.internal.project.FilterResourcesPathTranslator;
 
 public class MavenBuilderTest extends AsbtractMavenProjectTestCase {
 
@@ -32,9 +32,8 @@ public class MavenBuilderTest extends AsbtractMavenProjectTestCase {
     IProject project = createExisting("resourcefiltering-p001", "projects/resourcefiltering/p001");
     waitForJobsToComplete();
 
-    IFolder outputFolder = project.getFolder(runtimeManager.getDefaultOutputFolder());
-    IPath resourcesPath = outputFolder.getFolder(FilterResourcesPathTranslator.RESOURCES_FOLDERNAME).getFullPath();
-    IPath testResourcesPath = outputFolder.getFolder(FilterResourcesPathTranslator.TEST_RESOURCES_FOLDERNAME).getFullPath();
+    IPath resourcesPath = project.getFolder("target/classes").getFullPath();
+    IPath testResourcesPath = project.getFolder("target/test-classes").getFullPath();
 
     IPath aPath = resourcesPath.append("a.properties");
     IPath bPath = testResourcesPath.append("b.properties");
@@ -70,9 +69,8 @@ public class MavenBuilderTest extends AsbtractMavenProjectTestCase {
     IProject project = createExisting("resourcefiltering-p002", "projects/resourcefiltering/p002");
     waitForJobsToComplete();
 
-    IFolder outputFolder = project.getFolder(runtimeManager.getDefaultOutputFolder());
-    IPath resourcesPath = outputFolder.getFolder(FilterResourcesPathTranslator.RESOURCES_FOLDERNAME).getFullPath();
-    IPath testResourcesPath = outputFolder.getFolder(FilterResourcesPathTranslator.TEST_RESOURCES_FOLDERNAME).getFullPath();
+    IPath resourcesPath = project.getFolder("target/classes").getFullPath();
+    IPath testResourcesPath = project.getFolder("target/test-classes").getFullPath();
 
     IPath aPath = resourcesPath.append("a.properties");
     IPath bPath = testResourcesPath.append("b.properties");
@@ -97,9 +95,8 @@ public class MavenBuilderTest extends AsbtractMavenProjectTestCase {
     IProject project = createExisting("resourcefiltering-p003", "projects/resourcefiltering/p003");
     waitForJobsToComplete();
 
-    IFolder outputFolder = project.getFolder(runtimeManager.getDefaultOutputFolder());
-    IPath resourcesPath = outputFolder.getFolder(FilterResourcesPathTranslator.RESOURCES_FOLDERNAME).getFullPath();
-    IPath testResourcesPath = outputFolder.getFolder(FilterResourcesPathTranslator.TEST_RESOURCES_FOLDERNAME).getFullPath();
+    IPath resourcesPath = project.getFolder("p003-m1/target/classes").getFullPath();
+    IPath testResourcesPath = project.getFolder("p003-m1/target/test-classes").getFullPath();
 
     IPath aPath = resourcesPath.append("a.properties");
     IPath bPath = testResourcesPath.append("b.properties");
@@ -167,7 +164,7 @@ public class MavenBuilderTest extends AsbtractMavenProjectTestCase {
     project.build(IncrementalProjectBuilder.CLEAN_BUILD, monitor);
     waitForJobsToComplete();
 
-    IFolder outputFolder = project.getFolder("target-eclipse/classes"); // XXX
+    IFolder outputFolder = project.getFolder("target/classes"); // XXX
     IFile a = outputFolder.getFile("application.properties");
     Properties properties = loadProperties(a.getFullPath());
     assertEquals("1.0-SNAPSHOT.${timestamp}", properties.getProperty("buildVersion"));
@@ -183,5 +180,21 @@ public class MavenBuilderTest extends AsbtractMavenProjectTestCase {
     properties = loadProperties(a.getFullPath());
     assertEquals("1.0-SNAPSHOT.123456789", properties.getProperty("buildVersion"));
 
+  }
+
+  public void test007_fullBuild() throws Exception {
+    deleteProject("resourcefiltering-p007");
+    IProject project = createExisting("resourcefiltering-p007", "projects/resourcefiltering/p007");
+    waitForJobsToComplete();
+
+    project.build(IncrementalProjectBuilder.CLEAN_BUILD, monitor);
+    waitForJobsToComplete();
+
+    IFolder outputFolder = project.getFolder("target/classes");
+    assertNull(outputFolder.findMember("META-INF/plexus/components.xml"));
+
+    project.build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
+    IResource componentsXML = outputFolder.findMember("META-INF/plexus/components.xml");
+    assertTrue(componentsXML.isAccessible());
   }
 }

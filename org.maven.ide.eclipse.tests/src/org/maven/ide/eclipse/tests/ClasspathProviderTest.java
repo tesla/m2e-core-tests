@@ -11,7 +11,6 @@ package org.maven.ide.eclipse.tests;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
@@ -23,7 +22,6 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -51,13 +49,11 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
     IRuntimeClasspathEntry[] resolvedClasspath = classpathProvider.resolveClasspath(unresolvedClasspath, configuration);
     IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
 
-    assertEquals(Arrays.asList(userClasspath).toString(), 6, userClasspath.length);
+    assertEquals(Arrays.asList(userClasspath).toString(), 4, userClasspath.length);
     assertEquals(new Path("/cptest/target/classes"), userClasspath[0].getPath());
-    assertEquals(new Path("/cptest/src/main/resources"), userClasspath[1].getPath());
-    assertEquals("testlib-2.0.jar", userClasspath[2].getPath().lastSegment());
-    assertEquals("commons-logging-1.0.2.jar", userClasspath[3].getPath().lastSegment());
-    assertEquals(new Path("/cptest2/target/classes"), userClasspath[4].getPath());
-    assertEquals(new Path("/cptest2/src/main/resources"), userClasspath[5].getPath());
+    assertEquals("testlib-2.0.jar", userClasspath[1].getPath().lastSegment());
+    assertEquals("commons-logging-1.0.2.jar", userClasspath[2].getPath().lastSegment());
+    assertEquals(new Path("/cptest2/target/classes"), userClasspath[3].getPath());
   }
 
   public void testSourcePath() throws Exception {
@@ -107,7 +103,7 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
     IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
 
     assertEquals(Arrays.asList(userClasspath).toString(), 1, userClasspath.length);
-    assertEquals(new Path("/runtimeclasspath-nofilterresources/src/main/resources"), userClasspath[0].getPath());
+    assertEquals(new Path("/runtimeclasspath-nofilterresources/target/classes"), userClasspath[0].getPath());
   }
 
   public void testNotMavenProject() throws Exception {
@@ -137,11 +133,9 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
     IRuntimeClasspathEntry[] resolvedClasspath = classpathProvider.resolveClasspath(unresolvedClasspath, configuration);
     IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
 
-    assertEquals(Arrays.asList(userClasspath).toString(), 5, userClasspath.length);
-    assertEquals(new Path("/runtimeclasspath-junit/target-eclipse/test-classes"), userClasspath[0].getPath());
-    assertEquals(new Path("/runtimeclasspath-junit/src/test/resources"), userClasspath[1].getPath());
-    assertEquals(new Path("/runtimeclasspath-junit/target-eclipse/classes"), userClasspath[2].getPath());
-    assertEquals(new Path("/runtimeclasspath-junit/src/main/resources"), userClasspath[3].getPath());
+    assertEquals(Arrays.asList(userClasspath).toString(), 3, userClasspath.length);
+    assertEquals(new Path("/runtimeclasspath-junit/target/test-classes"), userClasspath[0].getPath());
+    assertEquals(new Path("/runtimeclasspath-junit/target/classes"), userClasspath[1].getPath());
   }
   
   public void testGeneratedSources() throws Exception {
@@ -159,8 +153,8 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
     IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
 
     assertEquals(Arrays.asList(userClasspath).toString(), 3, userClasspath.length);
-    assertEquals(new Path("/runtimeclasspath-gensrc02/target-eclipse/test-classes"), userClasspath[0].getPath());
-    assertEquals(new Path("/runtimeclasspath-gensrc01/target-eclipse/classes"), userClasspath[1].getPath());
+    assertEquals(new Path("/runtimeclasspath-gensrc02/target/test-classes"), userClasspath[0].getPath());
+    assertEquals(new Path("/runtimeclasspath-gensrc01/target/classes"), userClasspath[1].getPath());
     assertEquals("junit-3.8.1.jar", userClasspath[2].getPath().lastSegment());
   }
 
@@ -175,10 +169,9 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
     IRuntimeClasspathEntry[] resolvedClasspath = classpathProvider.resolveClasspath(unresolvedClasspath, configuration);
     IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
 
-    assertEquals(Arrays.asList(userClasspath).toString(), 3, userClasspath.length);
-    assertEquals(new Path("/runtimeclasspath-providedscope/target-eclipse/classes"), userClasspath[0].getPath());
-    assertEquals(new Path("/runtimeclasspath-providedscope/src/main/resources"), userClasspath[1].getPath());
-    assertEquals("junit-3.8.1.jar", userClasspath[2].getPath().lastSegment());
+    assertEquals(Arrays.asList(userClasspath).toString(), 2, userClasspath.length);
+    assertEquals(new Path("/runtimeclasspath-providedscope/target/classes"), userClasspath[0].getPath());
+    assertEquals("junit-3.8.1.jar", userClasspath[1].getPath().lastSegment());
   }
 
   public void testProvidedScopeTestApp() throws Exception {
@@ -192,12 +185,10 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
     IRuntimeClasspathEntry[] resolvedClasspath = classpathProvider.resolveClasspath(unresolvedClasspath, configuration);
     IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
 
-    assertEquals(Arrays.asList(userClasspath).toString(), 5, userClasspath.length);
-    assertEquals(new Path("/runtimeclasspath-providedscope/target-eclipse/test-classes"), userClasspath[0].getPath());
-    assertEquals(new Path("/runtimeclasspath-providedscope/src/test/resources"), userClasspath[1].getPath());
-    assertEquals(new Path("/runtimeclasspath-providedscope/target-eclipse/classes"), userClasspath[2].getPath());
-    assertEquals(new Path("/runtimeclasspath-providedscope/src/main/resources"), userClasspath[3].getPath());
-    assertEquals("junit-3.8.1.jar", userClasspath[4].getPath().lastSegment());
+    assertEquals(Arrays.asList(userClasspath).toString(), 3, userClasspath.length);
+    assertEquals(new Path("/runtimeclasspath-providedscope/target/test-classes"), userClasspath[0].getPath());
+    assertEquals(new Path("/runtimeclasspath-providedscope/target/classes"), userClasspath[1].getPath());
+    assertEquals("junit-3.8.1.jar", userClasspath[2].getPath().lastSegment());
   }
 
 
@@ -212,12 +203,10 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
     IRuntimeClasspathEntry[] resolvedClasspath = classpathProvider.resolveClasspath(unresolvedClasspath, configuration);
     IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
 
-    assertEquals(Arrays.asList(userClasspath).toString(), 5, userClasspath.length);
-    assertEquals(new Path("/runtimeclasspath-providedscope/target-eclipse/test-classes"), userClasspath[0].getPath());
-    assertEquals(new Path("/runtimeclasspath-providedscope/src/test/resources"), userClasspath[1].getPath());
-    assertEquals(new Path("/runtimeclasspath-providedscope/target-eclipse/classes"), userClasspath[2].getPath());
-    assertEquals(new Path("/runtimeclasspath-providedscope/src/main/resources"), userClasspath[3].getPath());
-    assertEquals("junit-3.8.1.jar", userClasspath[4].getPath().lastSegment());
+    assertEquals(Arrays.asList(userClasspath).toString(), 3, userClasspath.length);
+    assertEquals(new Path("/runtimeclasspath-providedscope/target/test-classes"), userClasspath[0].getPath());
+    assertEquals(new Path("/runtimeclasspath-providedscope/target/classes"), userClasspath[1].getPath());
+    assertEquals("junit-3.8.1.jar", userClasspath[2].getPath().lastSegment());
   }
 
   public void testSystemScope() throws Exception {
@@ -255,7 +244,7 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
     IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
 
     assertEquals(Arrays.asList(userClasspath).toString(), 2, userClasspath.length);
-    assertEquals(new Path("/runtimeclasspath-systemscope/target-eclipse/classes"), userClasspath[0].getPath());
+    assertEquals(new Path("/runtimeclasspath-systemscope/target/classes"), userClasspath[0].getPath());
     assertEquals("log4j-1.2.13.jar", userClasspath[1].getPath().lastSegment());
   }
 
@@ -270,7 +259,7 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
     IRuntimeClasspathEntry[] resolvedClasspath = classpathProvider.resolveClasspath(unresolvedClasspath, configuration);
     IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
 
-    assertEquals(Arrays.asList(userClasspath).toString(), 2, userClasspath.length);
+    assertEquals(Arrays.asList(userClasspath).toString(), 1, userClasspath.length);
     assertEquals("custom.jar", userClasspath[0].getPath().lastSegment());
   }
 
@@ -286,8 +275,8 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
     IRuntimeClasspathEntry[] resolvedClasspath = classpathProvider.resolveClasspath(unresolvedClasspath, configuration);
     IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
 
-    assertEquals(Arrays.asList(userClasspath).toString(), 2, userClasspath.length);
-    assertEquals(javaproject.getFullPath(), userClasspath[1].getPath());
+    assertEquals(Arrays.asList(userClasspath).toString(), 1, userClasspath.length);
+    assertEquals(javaproject.getFullPath(), userClasspath[0].getPath());
   }
 
   public void testCustomBuildpath() throws Exception {
@@ -305,7 +294,7 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
     IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
 
     assertEquals(Arrays.asList(userClasspath).toString(), 3, userClasspath.length);
-    assertEquals(new Path("/runtimeclasspath-custombuildpath/target-eclipse/classes"), userClasspath[0].getPath());
+    assertEquals(new Path("/runtimeclasspath-custombuildpath/target/classes"), userClasspath[0].getPath());
     assertEquals(javaproject.getFullPath(), userClasspath[1].getPath());
     assertEquals("custom.jar", userClasspath[2].getPath().lastSegment());
   }
@@ -324,11 +313,10 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
     IRuntimeClasspathEntry[] resolvedClasspath = classpathProvider.resolveClasspath(unresolvedClasspath, configuration);
     IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
 
-    assertEquals(Arrays.asList(userClasspath).toString(), 4, userClasspath.length);
-    assertEquals(new Path("/runtimeclasspath-testscope02/target-eclipse/test-classes"), userClasspath[0].getPath());
-    assertEquals(new Path("/runtimeclasspath-testscope02/target-eclipse/classes"), userClasspath[1].getPath());
-    assertEquals(new Path("/runtimeclasspath-testscope01/target-eclipse/classes"), userClasspath[2].getPath());
-    assertEquals(new Path("/runtimeclasspath-testscope01/src/main/resources"), userClasspath[3].getPath());
+    assertEquals(Arrays.asList(userClasspath).toString(), 3, userClasspath.length);
+    assertEquals(new Path("/runtimeclasspath-testscope02/target/test-classes"), userClasspath[0].getPath());
+    assertEquals(new Path("/runtimeclasspath-testscope02/target/classes"), userClasspath[1].getPath());
+    assertEquals(new Path("/runtimeclasspath-testscope01/target/classes"), userClasspath[2].getPath());
   }
 
   public void testTestClassesTestsClassifier() throws Exception {
@@ -345,10 +333,9 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
     IRuntimeClasspathEntry[] resolvedClasspath = classpathProvider.resolveClasspath(unresolvedClasspath, configuration);
     IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
 
-    assertEquals(Arrays.asList(userClasspath).toString(), 4, userClasspath.length);
-    assertEquals(new Path("/runtimeclasspath-testscope03/target-eclipse/test-classes"), userClasspath[0].getPath());
-    assertEquals(new Path("/runtimeclasspath-testscope03/target-eclipse/classes"), userClasspath[1].getPath());
-    assertEquals(new Path("/runtimeclasspath-testscope01/target-eclipse/test-classes"), userClasspath[2].getPath());
-    assertEquals(new Path("/runtimeclasspath-testscope01/src/test/resources"), userClasspath[3].getPath());
+    assertEquals(Arrays.asList(userClasspath).toString(), 3, userClasspath.length);
+    assertEquals(new Path("/runtimeclasspath-testscope03/target/test-classes"), userClasspath[0].getPath());
+    assertEquals(new Path("/runtimeclasspath-testscope03/target/classes"), userClasspath[1].getPath());
+    assertEquals(new Path("/runtimeclasspath-testscope01/target/test-classes"), userClasspath[2].getPath());
   }
 }
