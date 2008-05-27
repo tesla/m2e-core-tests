@@ -115,6 +115,8 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
   public static final String CLASSIFIER_ATTRIBUTE = "maven.classifier"; //$NON-NLS-1$
 
+  public static final String SCOPE_ATTRIBUTE = "maven.scope"; //$NON-NLS-1$
+
   public static final String JAVADOC_CLASSIFIER = "javadoc"; //$NON-NLS-1$
 
   public static final String SOURCES_CLASSIFIER = "sources"; //$NON-NLS-1$

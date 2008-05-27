@@ -301,6 +301,9 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
       if (a.getClassifier() != null) {
         attributes.add(JavaCore.newClasspathAttribute(MavenPlugin.CLASSIFIER_ATTRIBUTE, a.getClassifier()));
       }
+      if (a.getScope() != null) {
+        attributes.add(JavaCore.newClasspathAttribute(MavenPlugin.SCOPE_ATTRIBUTE, a.getScope()));
+      }
 
       // project
       MavenProjectFacade dependency = projectManager.getMavenProject(a);
