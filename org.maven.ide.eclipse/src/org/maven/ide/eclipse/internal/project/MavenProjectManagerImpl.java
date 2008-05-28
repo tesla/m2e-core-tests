@@ -51,7 +51,6 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.container.MavenClasspathContainer;
 import org.maven.ide.eclipse.embedder.EmbedderFactory;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
-import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.internal.embedder.TransferListenerAdapter;
@@ -87,7 +86,6 @@ public class MavenProjectManagerImpl {
   private static final String P_VERSION = "version";
   private static final String P_INCLUDE_MODULES = "includeModules";
   private static final String P_RESOLVE_WORKSPACE_PROJECTS = "resolveWorkspaceProjects";
-  private static final String P_FILTER_RESOURCES = "filterResources";
   private static final String P_RESOURCE_FILTER_GOALS = "resourceFilterGoals";
   private static final String P_FULL_BUILD_GOALS = "fullBuildGoals";
   private static final String P_ACTIVE_PROFILES = "activeProfiles";
@@ -113,7 +111,6 @@ public class MavenProjectManagerImpl {
   private final MavenConsole console;
   private final IndexManager indexManager;
   private final MavenEmbedderManager embedderManager;
-  private final MavenRuntimeManager runtimeManager;
 
   private final MavenMarkerManager markerManager;
   
@@ -129,13 +126,11 @@ public class MavenProjectManagerImpl {
     return (Context) context.get();
   }
 
-  public MavenProjectManagerImpl(MavenConsole console, IndexManager indexManager, MavenEmbedderManager embedderManager,
-      MavenRuntimeManager runtimeManager) {
+  public MavenProjectManagerImpl(MavenConsole console, IndexManager indexManager, MavenEmbedderManager embedderManager) {
     this.console = console;
     this.indexManager = indexManager;
     this.embedderManager = embedderManager;
     this.markerManager = new MavenMarkerManager();
-    this.runtimeManager = runtimeManager;
     this.state = new WorkspaceState(null);
   }
 
@@ -200,7 +195,6 @@ public class MavenProjectManagerImpl {
       
       projectNode.putBoolean(P_RESOLVE_WORKSPACE_PROJECTS, configuration.shouldResolveWorkspaceProjects());
       projectNode.putBoolean(P_INCLUDE_MODULES, configuration.shouldIncludeModules());
-      projectNode.putBoolean(P_FILTER_RESOURCES, configuration.shouldFilterResources());
       
       projectNode.put(P_RESOURCE_FILTER_GOALS, configuration.getResourceFilteringGoals());
       projectNode.put(P_FULL_BUILD_GOALS, configuration.getFullBuildGoals());
@@ -232,7 +226,6 @@ public class MavenProjectManagerImpl {
     ResolverConfiguration configuration = new ResolverConfiguration();
     configuration.setResolveWorkspaceProjects(projectNode.getBoolean(P_RESOLVE_WORKSPACE_PROJECTS, false));
     configuration.setIncludeModules(projectNode.getBoolean(P_INCLUDE_MODULES, false));
-    configuration.setFilterResources(projectNode.getBoolean(P_FILTER_RESOURCES, false));
     
     configuration.setResourceFilteringGoals(projectNode.get(P_RESOURCE_FILTER_GOALS, ResolverConfiguration.DEFAULT_FILTERING_GOALS));
     configuration.setFullBuildGoals(projectNode.get(P_FULL_BUILD_GOALS, ResolverConfiguration.DEFAULT_FULL_BUILD_GOALS));
@@ -251,12 +244,11 @@ public class MavenProjectManagerImpl {
   
     boolean resolveWorkspaceProjects = containerPath.indexOf("/" + MavenPlugin.NO_WORKSPACE_PROJECTS) == -1;
   
-    boolean filterResources = containerPath.indexOf("/" + MavenPlugin.FILTER_RESOURCES) != -1;
+    // boolean filterResources = containerPath.indexOf("/" + MavenPlugin.FILTER_RESOURCES) != -1;
   
     ResolverConfiguration configuration = new ResolverConfiguration();
     configuration.setIncludeModules(includeModules);
     configuration.setResolveWorkspaceProjects(resolveWorkspaceProjects);
-    configuration.setFilterResources(filterResources);
     configuration.setActiveProfiles(getActiveProfiles(entry));
     return configuration;
   }

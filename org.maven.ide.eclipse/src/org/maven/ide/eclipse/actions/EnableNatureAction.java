@@ -48,8 +48,6 @@ public class EnableNatureAction implements IObjectActionDelegate, IExecutableExt
 
   private boolean workspaceProjects = true;
   
-  private boolean filterResources = false;
-  
   private ISelection selection;
   
   public EnableNatureAction() {
@@ -114,7 +112,6 @@ public class EnableNatureAction implements IObjectActionDelegate, IExecutableExt
       ResolverConfiguration configuration = new ResolverConfiguration();
       configuration.setIncludeModules(includeModules);
       configuration.setResolveWorkspaceProjects(workspaceProjects);
-      configuration.setFilterResources(filterResources);
       configuration.setActiveProfiles("");
       
       plugin.getProjectConfigurationManager().enableMavenNature(project, //

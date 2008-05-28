@@ -24,7 +24,6 @@ public class ResolverConfiguration {
   private boolean includeModules = false;
   private boolean resolveWorkspaceProjects = true;
   private String activeProfiles = "";
-  private boolean filterResources = false;
   private String resourceFilteringGoals = DEFAULT_FILTERING_GOALS;
   private String fullBuildGoals = DEFAULT_FULL_BUILD_GOALS;
 
@@ -55,10 +54,6 @@ public class ResolverConfiguration {
     return Arrays.asList(activeProfiles.split(",\\s\\|"));
   }
 
-  public boolean shouldFilterResources() {
-    return this.filterResources;
-  }
-  
   public void setResolveWorkspaceProjects(boolean resolveWorkspaceProjects) {
     this.resolveWorkspaceProjects = resolveWorkspaceProjects;
   }
@@ -71,10 +66,6 @@ public class ResolverConfiguration {
     this.activeProfiles = activeProfiles;
   }
   
-  public void setFilterResources(boolean filterResources) {
-    this.filterResources = filterResources;
-  }
-
   public String getResourceFilteringGoals() {
     return resourceFilteringGoals;
   }

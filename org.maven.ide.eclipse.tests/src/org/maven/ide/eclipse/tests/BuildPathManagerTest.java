@@ -102,7 +102,6 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     ResolverConfiguration configuration = new ResolverConfiguration();
     configuration.setIncludeModules(false);
     configuration.setResolveWorkspaceProjects(false);
-    configuration.setFilterResources(false);
     configuration.setActiveProfiles("");
     
     importManager.enableMavenNature(project1, configuration, monitor);
@@ -265,7 +264,6 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     ResolverConfiguration configuration = new ResolverConfiguration();
     configuration.setIncludeModules(false);
     configuration.setResolveWorkspaceProjects(false);
-    configuration.setFilterResources(false);
     configuration.setActiveProfiles("");
     
     IProject[] projects = importProjects("projects/MNGECLIPSE-20", new String[] {
@@ -397,7 +395,6 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     ResolverConfiguration configuration = new ResolverConfiguration();
     configuration.setIncludeModules(true);
     configuration.setResolveWorkspaceProjects(true);
-    configuration.setFilterResources(false);
     configuration.setActiveProfiles("");
     
     IProject project = importProject("projects/MNGECLIPSE-20/pom.xml", configuration);
@@ -440,7 +437,6 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     ResolverConfiguration configuration = new ResolverConfiguration();
     configuration.setIncludeModules(true);
     configuration.setResolveWorkspaceProjects(false);
-    configuration.setFilterResources(false);
     configuration.setActiveProfiles("");
 
     IProject project = importProject("projects/MNGECLIPSE-20/pom.xml", configuration);
@@ -480,7 +476,6 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     ResolverConfiguration configuration = new ResolverConfiguration();
     configuration.setIncludeModules(true);
     configuration.setResolveWorkspaceProjects(false);
-    configuration.setFilterResources(false);
     configuration.setActiveProfiles("");
 
     IProject project = importProject("projects/MNGECLIPSE-20/pom.xml", configuration);
@@ -507,7 +502,6 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     ResolverConfiguration configuration = new ResolverConfiguration();
     configuration.setIncludeModules(false);
     configuration.setResolveWorkspaceProjects(true);
-    configuration.setFilterResources(false);
     configuration.setActiveProfiles("jaxb1");
 
     IProject project = importProject("projects/MNGECLIPSE-353/pom.xml", configuration);
@@ -531,7 +525,6 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     ResolverConfiguration configuration = new ResolverConfiguration();
     configuration.setIncludeModules(false);
     configuration.setResolveWorkspaceProjects(true);
-    configuration.setFilterResources(false);
     configuration.setActiveProfiles("jaxb20");
 
     IProject project = importProject("projects/MNGECLIPSE-353/pom.xml", configuration);
@@ -611,7 +604,6 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     ResolverConfiguration configuration = new ResolverConfiguration();
     configuration.setIncludeModules(false);
     configuration.setResolveWorkspaceProjects(true);
-    configuration.setFilterResources(false);
     configuration.setActiveProfiles("");
 
     IProject project1 = importProject("projects/dependencyorder/p1/pom.xml", configuration); 
@@ -639,7 +631,6 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     ResolverConfiguration configuration = new ResolverConfiguration();
     configuration.setIncludeModules(false);
     configuration.setResolveWorkspaceProjects(true);
-    configuration.setFilterResources(false);
     configuration.setActiveProfiles("");
 
     IProject p3 = importProject("projects/dependencyorder/p3/pom.xml", configuration);
@@ -963,7 +954,6 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
 
     final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject( "simple-project" );
     final boolean modules = true;
-    final boolean mavenFolders = true;
 
     workspace.run(new IWorkspaceRunnable() {
       public void run(IProgressMonitor monitor) throws CoreException {

@@ -198,8 +198,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
     this.modelManager = new MavenModelManager(embedderManager, console);
 
-    MavenProjectManagerImpl managerImpl = new MavenProjectManagerImpl(console, indexManager, embedderManager,
-        runtimeManager);
+    MavenProjectManagerImpl managerImpl = new MavenProjectManagerImpl(console, indexManager, embedderManager);
 
     this.mavenBackgroundJob = new MavenProjectManagerRefreshJob(managerImpl);
 
