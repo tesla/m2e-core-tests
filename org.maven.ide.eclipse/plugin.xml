@@ -724,7 +724,9 @@
             class="org.maven.ide.eclipse.internal.preferences.MavenProjectPreferencePage"
             name="Maven"
             objectClass="org.eclipse.core.resources.IProject" 
-            adaptable="true"/>
+            adaptable="true">
+         <filter name="nature" value="org.maven.ide.eclipse.maven2Nature"/>
+      </page>           
    </extension>
    
    <extension point="org.maven.ide.eclipse.projectConfigurators">

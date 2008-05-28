@@ -43,7 +43,8 @@ public class MavenProjectPreferencePage extends PropertyPage {
   private Button resolveWorspaceProjectsButton;
 	private Button includeModulesButton;
 	
-	Text resourceFilteringGoalsText;
+	private Text goalsCleanText;
+	private Text goalsChangedText;
 	private Text activeProfilesText;
 
 	public MavenProjectPreferencePage() {
@@ -56,9 +57,47 @@ public class MavenProjectPreferencePage extends PropertyPage {
   	composite.setLayout(new GridLayout(2, false));
   	composite.setLayoutData(new GridData(GridData.FILL));
 
+  	Label profilesLabel = new Label(composite, SWT.NONE);
+  	profilesLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
+  	profilesLabel.setText("Active Maven &Profiles (comma separated):");
+
+  	activeProfilesText = new Text(composite, SWT.BORDER);
+  	activeProfilesText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+
+  	Label goalsCleanLabel = new Label(composite, SWT.NONE);
+  	goalsCleanLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+  	goalsCleanLabel.setText("Goals to invoke after project clea&n:");
+
+  	goalsCleanText = new Text(composite, SWT.BORDER);
+  	goalsCleanText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+
+  	Button selectGoalsCleanButton = new Button(composite, SWT.NONE);
+  	selectGoalsCleanButton.setLayoutData(new GridData());
+  	selectGoalsCleanButton.setText("&Select...");
+    selectGoalsCleanButton.addSelectionListener(new MavenGoalSelectionAdapter(goalsCleanText, getShell()));
+  	
+  	final Label goalsChangedLabel = new Label(composite, SWT.NONE);
+  	goalsChangedLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+  	goalsChangedLabel.setText("&Goals to invoke on resource changes:");
+    
+  	goalsChangedText = new Text(composite, SWT.SINGLE | SWT.BORDER);
+  	goalsChangedText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    
+  	final Button selectGoalsChangedButton = new Button(composite, SWT.NONE);
+  	selectGoalsChangedButton.setText("S&elect...");
+  	selectGoalsChangedButton.addSelectionListener(new MavenGoalSelectionAdapter(goalsChangedText, getShell()));
+
+  	final Label warningLabel = new Label(composite, SWT.NONE);
+  	warningLabel.setText("Note that these goals can affect incremental build performance");
+  	warningLabel.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_BLUE));
+  	GridData warningLabelData = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
+  	warningLabelData.horizontalIndent = 12;
+  	warningLabel.setLayoutData(warningLabelData);
+
   	resolveWorspaceProjectsButton = new Button(composite, SWT.CHECK);
-  	GridData gd_resolveWorspaceProjectsButton = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
-  	resolveWorspaceProjectsButton.setLayoutData(gd_resolveWorspaceProjectsButton);
+  	GridData resolveWorspaceProjectsButtonData = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
+  	resolveWorspaceProjectsButtonData.verticalIndent = 7;
+  	resolveWorspaceProjectsButton.setLayoutData(resolveWorspaceProjectsButtonData);
   	resolveWorspaceProjectsButton.setText("Resolve dependencies from &Workspace projects");
 
   	includeModulesButton = new Button(composite, SWT.CHECK);
@@ -76,37 +115,6 @@ public class MavenProjectPreferencePage extends PropertyPage {
         + "source folders from nested modules are added to the current "
         + "project build path (use \"Update Sources\" action)");
 
-  	Label profilesLabel = new Label(composite, SWT.NONE);
-  	GridData gd_profilesLabel = new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1);
-  	gd_profilesLabel.verticalIndent = 3;
-  	profilesLabel.setLayoutData(gd_profilesLabel);
-  	profilesLabel.setText("Active Maven &Profiles (comma separated):");
-
-  	activeProfilesText = new Text(composite, SWT.BORDER);
-  	activeProfilesText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-  	
-  	final Label goalsLabel = new Label(composite, SWT.NONE);
-  	GridData gd_goalsLabel = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
-  	gd_goalsLabel.horizontalIndent = 12;
-  	goalsLabel.setLayoutData(gd_goalsLabel);
-  	goalsLabel.setText("&Goals to invoke for resource filtering:");
-    
-  	resourceFilteringGoalsText = new Text(composite, SWT.SINGLE | SWT.BORDER);
-  	GridData gd_resourceFilteringGoalsText = new GridData(SWT.FILL, SWT.CENTER, true, false);
-  	gd_resourceFilteringGoalsText.horizontalIndent = 12;
-  	resourceFilteringGoalsText.setLayoutData(gd_resourceFilteringGoalsText);
-    
-  	final Button selectGoalsButton = new Button(composite, SWT.NONE);
-  	selectGoalsButton.setText("&Select...");
-    selectGoalsButton.addSelectionListener(new MavenGoalSelectionAdapter(resourceFilteringGoalsText, getShell()));
-
-  	final Label warningLabel = new Label(composite, SWT.NONE);
-  	warningLabel.setText("Note that these goals can affect build performance");
-  	warningLabel.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_BLUE));
-  	GridData warningLabelData = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
-  	warningLabelData.horizontalIndent = 12;
-  	warningLabel.setLayoutData(warningLabelData);
-
     init(getResolverConfiguration());
     
   	return composite;
@@ -120,29 +128,47 @@ public class MavenProjectPreferencePage extends PropertyPage {
     resolveWorspaceProjectsButton.setSelection(configuration.shouldResolveWorkspaceProjects());
     includeModulesButton.setSelection(configuration.shouldIncludeModules());
 
-    resourceFilteringGoalsText.setText(configuration.getResourceFilteringGoals());
+    goalsCleanText.setText(configuration.getFullBuildGoals());
+    goalsChangedText.setText(configuration.getResourceFilteringGoals());
     activeProfilesText.setText(configuration.getActiveProfiles());
   }
 
 	public boolean performOk() {
-	  final ResolverConfiguration configuration = getResolverConfiguration();
+	  final IProject project = getProject();
+	  try {
+	    if(!project.isAccessible() || !project.hasNature(MavenPlugin.NATURE_ID)) {
+	      return true;
+	    }
+	  } catch(CoreException ex) {
+	    MavenPlugin.log(ex);
+	    return false;
+	  }
 
+	  final ResolverConfiguration configuration = getResolverConfiguration();
+	  if(configuration.getActiveProfiles().equals(activeProfilesText.getText()) &&
+	      configuration.getFullBuildGoals().equals(goalsCleanText.getText()) &&
+	      configuration.getResourceFilteringGoals().equals(goalsChangedText.getText()) &&
+	      configuration.shouldIncludeModules()==includeModulesButton.getSelection() &&
+	      configuration.shouldResolveWorkspaceProjects()==resolveWorspaceProjectsButton.getSelection()) {
+	    return true;
+	  }
+	  
 	  configuration.setResolveWorkspaceProjects(resolveWorspaceProjectsButton.getSelection());
 	  configuration.setIncludeModules(includeModulesButton.getSelection());
 	  
-	  configuration.setResourceFilteringGoals(resourceFilteringGoalsText.getText());
+	  configuration.setFullBuildGoals(goalsCleanText.getText());
+	  configuration.setResourceFilteringGoals(goalsChangedText.getText());
 	  configuration.setActiveProfiles(activeProfilesText.getText());
 	  
 	  MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
     boolean isSet = projectManager.setResolverConfiguration(getProject(), configuration);
     if(isSet) {
-      final IProject project = getProject();
       
       // XXX this hack need to be replaced with a listener listening on java model or resource changes
 //      Display.getCurrent().asyncExec(new Runnable() {
 //        public void run() {
-          boolean res = MessageDialog.openQuestion(getShell(), "Maven Project Configuration", //
-              "Maven project configuration has changed. Do you want to update source folders?");
+          boolean res = MessageDialog.openQuestion(getShell(), "Maven Settings", //
+              "Maven settings has changed. Do you want to update project configuration?");
           if(res) {
             final MavenPlugin plugin = MavenPlugin.getDefault();
             WorkspaceJob job = new WorkspaceJob("Updating " + project.getName() + " Sources") {
