@@ -109,7 +109,7 @@ public class LocalProjectScanner extends AbstractProjectScanner {
         Profile profile = (Profile) it.next();
         for(Iterator ir = profile.getModules().iterator(); ir.hasNext();) {
           String module = (String) ir.next();
-          Set profiles = (HashSet) modules.get(module);
+          Set profiles = (Set) modules.get(module);
           if(profiles == null) {
             profiles = new HashSet();
             modules.put(module, profiles);
@@ -128,6 +128,12 @@ public class LocalProjectScanner extends AbstractProjectScanner {
           modulePom = modulePom.getCanonicalFile();
         } catch(IOException ex) {
         }
+        
+        // MNGECLIPSE-614 skip folders outside of baseFolderPath 
+        if(!isSubdir(baseFolderPath, modulePom.getParentFile())) {
+          continue;  
+        }
+        
         MavenProjectInfo moduleInfo = readMavenProjectInfo(baseFolderPath, modulePom, projectInfo);
         if(moduleInfo != null) {
           moduleInfo.addProfiles(profiles);
@@ -143,6 +149,21 @@ public class LocalProjectScanner extends AbstractProjectScanner {
     }
 
     return null;
+  }
+
+  private boolean isSubdir(String baseFolderPath, File folder) {
+    int n = baseFolderPath.length()-1;
+    if(baseFolderPath.charAt(n)=='\\' || baseFolderPath.charAt(n)=='/') {
+      baseFolderPath = baseFolderPath.substring(0, n);
+    }
+    
+    while(folder != null) {
+      if(baseFolderPath.equals(folder.getAbsolutePath())) {
+        return true;
+      }
+      folder = folder.getParentFile();
+    }
+    return false;
   }
 
   public String getDescription() {
