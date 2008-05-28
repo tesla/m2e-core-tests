@@ -148,6 +148,37 @@ public class ArchetypeManager {
     }
 
     public ArchetypeCatalog getArchetypeCatalog(MavenEmbedderManager manager) throws CoreException {
+//      ArchetypeCatalog catalog = new ArchetypeCatalog();
+//
+//      try {
+//        IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
+//        Map search = indexManager.search("maven-archetype", IndexManager.SEARCH_PACKAGING);
+//
+//        for(Iterator it = search.values().iterator(); it.hasNext();) {
+//          IndexedArtifact artifact = (IndexedArtifact) it.next();
+//
+//          for(Iterator it2 = artifact.files.iterator(); it2.hasNext();) {
+//            IndexedArtifactFile af = (IndexedArtifactFile) it2.next();
+//            Archetype archetype = new Archetype();
+//            archetype.setGroupId(af.group);
+//            archetype.setArtifactId(af.artifact);
+//            archetype.setVersion(af.version);
+//            // archetype.setDescription(af.description);
+//            IndexInfo indexInfo = indexManager.getIndexInfo(af.repository);
+//            if(indexInfo.getType()==IndexInfo.Type.REMOTE) {
+//              archetype.setRepository(indexInfo.getRepositoryUrl());
+//            }
+//            
+//            catalog.addArchetype(archetype);
+//          }
+//        }
+//        
+//      } catch(Exception ex) {
+//        MavenPlugin.log("Unable to retrieve archetypes", ex);
+//      }
+//
+//      return catalog;
+      
       PlexusContainer container = manager.getWorkspaceEmbedder().getPlexusContainer();
       try {
         ArchetypeDataSource source = (ArchetypeDataSource) container.lookup(ArchetypeDataSource.class, "nexus");
