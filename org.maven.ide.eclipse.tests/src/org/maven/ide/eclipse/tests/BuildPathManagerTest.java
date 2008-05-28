@@ -972,7 +972,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       }
     }, plugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
 
-    IJavaProject javaProject = JavaCore.create(project);
+    // IJavaProject javaProject = JavaCore.create(project);
 
     ResolverConfiguration configuration = plugin.getMavenProjectManager().getResolverConfiguration(project);
     assertEquals(modules, configuration.shouldIncludeModules());
@@ -1019,4 +1019,25 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     assertTrue(workspace.getRoot().getProject("p003").exists());
     assertTrue(workspace.getRoot().getProject("projectimport.p003-2.0").exists());
   }
+
+  public void testCompilerSettings() throws Exception {
+    deleteProject("MNGECLIPSE-639");
+
+    ResolverConfiguration configuration = new ResolverConfiguration();
+    ProjectImportConfiguration projectImportConfiguration = new ProjectImportConfiguration(configuration);
+    importProject("MNGECLIPSE-639", "projects/MNGECLIPSE-639", projectImportConfiguration);
+
+    waitForJobsToComplete();
+    
+    IProject project = workspace.getRoot().getProject("MNGECLIPSE-639");
+    assertTrue(project.exists());
+    
+    IMarker[] markers = project.findMarkers(null, true, IResource.DEPTH_INFINITE);
+    assertEquals(toString(markers), 0, markers.length);
+    
+    IJavaProject javaProject = JavaCore.create(project);
+    assertEquals("1.5", javaProject.getOption(JavaCore.COMPILER_SOURCE, true));
+    assertEquals("1.5", javaProject.getOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, true));
+  }
+  
 }

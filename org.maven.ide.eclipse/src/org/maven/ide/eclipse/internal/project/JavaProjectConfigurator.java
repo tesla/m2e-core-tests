@@ -50,6 +50,7 @@ import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.execution.ReactorManager;
 import org.apache.maven.model.Plugin;
+import org.apache.maven.model.PluginExecution;
 import org.apache.maven.model.PluginManagement;
 import org.apache.maven.model.Resource;
 import org.apache.maven.project.MavenProject;
@@ -71,8 +72,9 @@ import org.maven.ide.eclipse.util.Util;
 
 public class JavaProjectConfigurator extends AbstractProjectConfigurator {
   
-  private static final List VERSIONS = Arrays.asList("1.1,1.2,1.3,1.4,1.5,1.6,1.7".split(","));
-  
+  private static final List SOURCES = Arrays.asList("1.1,1.2,1.3,1.4,1.5,1.6,1.7".split(","));
+  private static final List TARGETS = Arrays.asList("1.1,1.2,1.3,1.4,jsr14,1.5,1.6,1.7".split(","));
+
   final MavenProjectManager projectManager;
 
   final MavenRuntimeManager runtimeManager;
@@ -122,7 +124,7 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
       IJavaProject javaProject = JavaCore.create(project);
 
       if(mavenProject != null) {
-        Map options = collectOptions(mavenProject);
+        Map options = collectOptions(mavenProject, configuration);
         setOption(javaProject, options, JavaCore.COMPILER_COMPLIANCE);
         setOption(javaProject, options, JavaCore.COMPILER_SOURCE);
         setOption(javaProject, options, JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM);
@@ -176,12 +178,13 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
     }
   }
 
-  private Map collectOptions(MavenProject mavenProject) {
+  private Map collectOptions(MavenProject mavenProject, ResolverConfiguration configuration) {
     Map options = new HashMap();
 
-    String source = getBuildOption(mavenProject, "maven-compiler-plugin", "source");
+    // XXX find best match when importing multimodule project 
+    String source = getBuildOption(mavenProject, "source", SOURCES);
     if(source != null) {
-      if(VERSIONS.contains(source)) {
+      if(SOURCES.contains(source)) {
         console.logMessage("Setting source compatibility: " + source);
         setVersion(options, JavaCore.COMPILER_SOURCE, source);
         setVersion(options, JavaCore.COMPILER_COMPLIANCE, source);
@@ -190,13 +193,14 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
       }
     }
 
-    String target = getBuildOption(mavenProject, "maven-compiler-plugin", "target");
+    // XXX find best match when importing multimodule project 
+    String target = getBuildOption(mavenProject, "target", TARGETS);
     if(target != null) {
       if("jsr14".equals(target)) {
         // see info about this at http://www.masutti.ch/eel/
-        console.logMessage("Setting target compatibility: jsr14");
+        console.logMessage("Setting target compatibility: jsr14 (1.4)");
         setVersion(options, JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, "1.4");
-      } else if(VERSIONS.contains(target)) {
+      } else if(TARGETS.contains(target)) {
         console.logMessage("Setting target compatibility: " + target);
         setVersion(options, JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, target);
       } else {
@@ -403,10 +407,10 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
   }
 
   private IClasspathEntry getJREContainer(String version) {
-    int n = VERSIONS.indexOf(version);
+    int n = SOURCES.indexOf(version);
     if(n > -1) {
       Map jreContainers = getJREContainers();
-      for(int i = n; i < VERSIONS.size(); i++ ) {
+      for(int i = n; i < SOURCES.size(); i++ ) {
         IClasspathEntry entry = (IClasspathEntry) jreContainers.get(version);
         if(entry != null) {
           console.logMessage("JRE compliant to " + version + ". " + entry);
@@ -450,9 +454,7 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
     if(current == null) {
       options.put(name, value);
     } else {
-      int oldIndex = VERSIONS.indexOf(current);
-      int newIndex = VERSIONS.indexOf(value.trim());
-      if(newIndex > oldIndex) {
+      if(!current.equals(value)) {
         options.put(name, value);
       }
     }
@@ -501,29 +503,51 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
     return null;
   }
 
-  private static String getBuildOption(MavenProject project, String artifactId, String optionName) {
-    String option = getBuildOption(project.getBuild().getPlugins(), artifactId, optionName);
-    if(option != null) {
-      return option;
+  private String getBuildOption(MavenProject project, String optionName, List values) {
+    LinkedHashSet options = new LinkedHashSet();
+    addBuildOptions(options, project.getBuild().getPluginsAsMap(), optionName);
+    if(options.isEmpty()) {
+      PluginManagement pluginManagement = project.getBuild().getPluginManagement();
+      if(pluginManagement != null) {
+        addBuildOptions(options, pluginManagement.getPluginsAsMap(), optionName);
+      }
     }
-    PluginManagement pluginManagement = project.getBuild().getPluginManagement();
-    if(pluginManagement != null) {
-      return getBuildOption(pluginManagement.getPlugins(), artifactId, optionName);
-    }
-    return null;
-  }
-
-  private static String getBuildOption(List plugins, String artifactId, String optionName) {
-    for(Iterator it = plugins.iterator(); it.hasNext();) {
-      Plugin plugin = (Plugin) it.next();
-      if(artifactId.equals(plugin.getArtifactId())) {
-        Xpp3Dom o = (Xpp3Dom) plugin.getConfiguration();
-        if(o != null && o.getChild(optionName) != null) {
-          return o.getChild(optionName).getValue();
+    
+    String option = null;
+    for(Iterator it = options.iterator(); it.hasNext();) {
+      String o = (String) it.next();
+      if(option==null) {
+        if(values.indexOf(o)>-1) {
+          option = o;
+        }
+      } else {
+        int n = values.indexOf(o);
+        if(n>values.indexOf(option)) {
+          option = o;
         }
       }
     }
-    return null;
+    return option;
   }
 
+  private void addBuildOptions(Set options, Map plugins, String optionName) {
+    Plugin plugin = (Plugin) plugins.get("org.apache.maven.plugins:maven-compiler-plugin");
+    if(plugin!=null) {
+      addOption(options, (Xpp3Dom) plugin.getConfiguration(), optionName);
+      List executions = plugin.getExecutions();
+      if(executions!=null) {
+        for(Iterator it = executions.iterator(); it.hasNext();) {
+          PluginExecution execution = (PluginExecution) it.next();
+          addOption(options, (Xpp3Dom) execution.getConfiguration(), optionName);
+        }
+      }
+    }
+  }
+
+  private void addOption(Set options, Xpp3Dom configuration, String optionName) {
+    if(configuration != null && configuration.getChild(optionName) != null) {
+      options.add(configuration.getChild(optionName).getValue().trim());
+    }
+  }
+  
 }
