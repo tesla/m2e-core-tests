@@ -27,7 +27,7 @@ public class IndexedArtifactFile {
 
   public final String version;
 
-  public final ArtifactVersion artifactVersion;
+  private ArtifactVersion artifactVersion;
 
   public final String type;
 
@@ -52,7 +52,6 @@ public class IndexedArtifactFile {
     this.group = group;
     this.artifact = artifact;
     this.version = version;
-    this.artifactVersion = new DefaultArtifactVersion(version);
     this.type = type;
     this.classifier = classifier;
     this.fname = fname;
@@ -73,5 +72,12 @@ public class IndexedArtifactFile {
     dependency.setType(type); // TODO: investigate difference between packaging and type
     //http://docs.codehaus.org/display/MAVEN/Packaging+vs+Type+-+Derived+and+Attached+Artifacts
     return dependency;
+  }
+
+  public ArtifactVersion getArtifactVersion() {
+    if (artifactVersion == null) {
+      artifactVersion = new DefaultArtifactVersion(version);
+    }
+    return artifactVersion;
   }
 }
