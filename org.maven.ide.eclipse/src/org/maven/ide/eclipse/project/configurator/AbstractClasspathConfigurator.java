@@ -8,8 +8,10 @@
 
 package org.maven.ide.eclipse.project.configurator;
 
-import java.util.Map;
 import java.util.Set;
+
+import org.eclipse.jdt.core.IClasspathAttribute;
+import org.eclipse.jdt.core.IClasspathEntry;
 
 import org.apache.maven.artifact.Artifact;
 
@@ -23,16 +25,16 @@ public class AbstractClasspathConfigurator {
   /**
    * @return Set<IClasspathAttribute> or null
    */
-  public Set getAttributes(Artifact artifact, int kind) {
+  public Set<IClasspathAttribute> getAttributes(Artifact artifact, int kind) {
     // no attributes added by defauilt
     return null;
   }
 
   /**
-   * @param entries Map<IPath, IClasspathEntry> maps entry path to IClasspathEntry
-   *    Map is ordered.
+   * @param entries Set<IClasspathEntry> may contain entries that only differ in 
+   *    extended attribute values
    */
-  public void configureClasspath(Map entries) {
+  public void configureClasspath(Set<IClasspathEntry> entries) {
     // TODO Auto-generated method configureClasspath
   }
 

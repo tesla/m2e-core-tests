@@ -338,4 +338,46 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
     assertEquals(new Path("/runtimeclasspath-testscope03/target/classes"), userClasspath[1].getPath());
     assertEquals(new Path("/runtimeclasspath-testscope01/target/test-classes"), userClasspath[2].getPath());
   }
+
+  public void testTestClassesDefaultAndTestsClassifier() throws Exception {
+    IProject p01 = createExisting("runtimeclasspath-testscope01", "projects/runtimeclasspath/testscope01");
+    IProject p04 = createExisting("runtimeclasspath-testscope04", "projects/runtimeclasspath/testscope04");
+    waitForJobsToComplete();
+
+    workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+
+    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(p04.getFile("T04.launch"));
+
+    MavenRuntimeClasspathProvider classpathProvider = new MavenRuntimeClasspathProvider();
+    IRuntimeClasspathEntry[] unresolvedClasspath = classpathProvider.computeUnresolvedClasspath(configuration);
+    IRuntimeClasspathEntry[] resolvedClasspath = classpathProvider.resolveClasspath(unresolvedClasspath, configuration);
+    IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
+
+    assertEquals(Arrays.asList(userClasspath).toString(), 4, userClasspath.length);
+    assertEquals(new Path("/runtimeclasspath-testscope04/target/test-classes"), userClasspath[0].getPath());
+    assertEquals(new Path("/runtimeclasspath-testscope04/target/classes"), userClasspath[1].getPath());
+    assertEquals(new Path("/runtimeclasspath-testscope01/target/classes"), userClasspath[2].getPath());
+    assertEquals(new Path("/runtimeclasspath-testscope01/target/test-classes"), userClasspath[3].getPath());
+  }
+
+  public void testTestClassesTestScopeAndTestType() throws Exception {
+    IProject p01 = createExisting("runtimeclasspath-testscope01", "projects/runtimeclasspath/testscope01");
+    IProject p05 = createExisting("runtimeclasspath-testscope05", "projects/runtimeclasspath/testscope05");
+    waitForJobsToComplete();
+
+    workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+
+    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(p05.getFile("T05.launch"));
+
+    MavenRuntimeClasspathProvider classpathProvider = new MavenRuntimeClasspathProvider();
+    IRuntimeClasspathEntry[] unresolvedClasspath = classpathProvider.computeUnresolvedClasspath(configuration);
+    IRuntimeClasspathEntry[] resolvedClasspath = classpathProvider.resolveClasspath(unresolvedClasspath, configuration);
+    IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
+
+    assertEquals(Arrays.asList(userClasspath).toString(), 4, userClasspath.length);
+    assertEquals(new Path("/runtimeclasspath-testscope05/target/test-classes"), userClasspath[0].getPath());
+    assertEquals(new Path("/runtimeclasspath-testscope05/target/classes"), userClasspath[1].getPath());
+    assertEquals(new Path("/runtimeclasspath-testscope01/target/classes"), userClasspath[2].getPath());
+    assertEquals(new Path("/runtimeclasspath-testscope01/target/test-classes"), userClasspath[3].getPath());
+  }
 }

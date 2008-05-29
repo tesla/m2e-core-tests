@@ -163,6 +163,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
      reconcile PackageExplorer with actual classpath
      See https://bugs.eclipse.org/bugs/show_bug.cgi?id=154071
    */
+  @SuppressWarnings("restriction")
   private void forcePackageExplorerRefresh(IJavaProject javaProject) {
     if(getJDTVersion().startsWith("3.3")) {
       DeltaProcessingState state = JavaModelManager.getJavaModelManager().deltaState;
@@ -205,7 +206,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
   }
 
   public void mavenProjectChanged(MavenProjectChangedEvent[] events, IProgressMonitor monitor) {
-    Set projects = new HashSet();
+    Set<IProject> projects = new HashSet<IProject>();
     monitor.setTaskName("Setting classpath containers");
     for (int i = 0; i < events.length; i++) {
       MavenProjectChangedEvent event = events[i];
@@ -235,16 +236,13 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     }
   }
 
-  private IClasspathEntry[] getClasspath(MavenProjectFacade projectFacade, final int kind, final Properties sourceAttachment) throws CoreException {
-    IProject project = projectFacade.getProject();
-
+  private IClasspathEntry[] getClasspath(MavenProjectFacade projectFacade, final int kind, final Properties sourceAttachment, boolean uniquePaths) throws CoreException {
     // maps entry path to entry to avoid dups caused by different entry attributes
-    final Map entries = new LinkedHashMap();
+    final Set<IClasspathEntry> entries = new LinkedHashSet<IClasspathEntry>();
 
-    final List configurators = new ArrayList();
-    Set factories = ClasspathConfiguratorFactoryFactory.getFactories();
-    for (Iterator it = factories.iterator(); it.hasNext(); ) {
-      AbstractClasspathConfiguratorFactory factory = (AbstractClasspathConfiguratorFactory) it.next();
+    final List<AbstractClasspathConfigurator> configurators = new ArrayList<AbstractClasspathConfigurator>();
+    Set<AbstractClasspathConfiguratorFactory> factories = ClasspathConfiguratorFactoryFactory.getFactories();
+    for (AbstractClasspathConfiguratorFactory factory : factories) {
       AbstractClasspathConfigurator configurator = factory.createConfigurator(projectFacade);
       if (configurator != null) {
         configurators.add(configurator);
@@ -261,15 +259,24 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
       }
     }, IMavenProjectVisitor.NESTED_MODULES);
 
-    for (Iterator ci = configurators.iterator(); ci.hasNext(); ) {
-      AbstractClasspathConfigurator cpc = (AbstractClasspathConfigurator) ci.next();
+    for (AbstractClasspathConfigurator cpc : configurators) {
       cpc.configureClasspath(entries);
     }
 
-    return (IClasspathEntry[]) entries.values().toArray(new IClasspathEntry[entries.size()]);
+    if (uniquePaths) {
+      Map<IPath, IClasspathEntry> paths = new LinkedHashMap<IPath, IClasspathEntry>();
+      for (IClasspathEntry entry : entries) {
+        if (!paths.containsKey(entry.getPath())) {
+          paths.put(entry.getPath(), entry);
+        }
+      }
+      return paths.values().toArray(new IClasspathEntry[paths.size()]);
+    }
+
+    return entries.toArray(new IClasspathEntry[entries.size()]);
   }
 
-  void addClasspathEntries(Map entries, MavenProjectFacade mavenProject, int kind, Properties sourceAttachment, List configurators) {
+  void addClasspathEntries(Set<IClasspathEntry> entries, MavenProjectFacade mavenProject, int kind, Properties sourceAttachment, List<AbstractClasspathConfigurator> configurators) {
     ArtifactFilter scopeFilter;
 
     if(CLASSPATH_RUNTIME == kind) {
@@ -287,14 +294,12 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
       scopeFilter = SCOPE_FILTER_TEST;
     }
 
-    for(Iterator it = mavenProject.getMavenProject().getArtifacts().iterator(); it.hasNext();) {
-      Artifact a = (Artifact) it.next();
-
+    for(Artifact a : (Set<Artifact>) mavenProject.getMavenProject().getArtifacts()) {
       if (!scopeFilter.include(a) || !a.getArtifactHandler().isAddedToClasspath()) {
         continue;
       }
 
-      ArrayList attributes = new ArrayList();
+      ArrayList<IClasspathAttribute> attributes = new ArrayList<IClasspathAttribute>();
       attributes.add(JavaCore.newClasspathAttribute(MavenPlugin.GROUP_ID_ATTRIBUTE, a.getGroupId()));
       attributes.add(JavaCore.newClasspathAttribute(MavenPlugin.ARTIFACT_ID_ATTRIBUTE, a.getArtifactId()));
       attributes.add(JavaCore.newClasspathAttribute(MavenPlugin.VERSION_ATTRIBUTE, a.getVersion()));
@@ -312,10 +317,10 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
       }
 
       if (dependency != null && dependency.getFullPath(a.getFile()) != null) {
-        entries.put(dependency.getFullPath(), JavaCore.newProjectEntry(dependency.getFullPath(), 
+        entries.add(JavaCore.newProjectEntry(dependency.getFullPath(), 
             new IAccessRule[0] /*accessRules*/,
             true /*combineAccessRules*/,
-            (IClasspathAttribute[]) attributes.toArray(new IClasspathAttribute[attributes.size()]),
+            attributes.toArray(new IClasspathAttribute[attributes.size()]),
             false /*isExported*/));
         continue;
       }
@@ -351,17 +356,17 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
               javaDocUrl));
         }
 
-        for (Iterator ci = configurators.iterator(); ci.hasNext(); ) {
-          AbstractClasspathConfigurator cpc = (AbstractClasspathConfigurator) ci.next();
-          Set set = cpc.getAttributes(a, kind);
+        for (Iterator<AbstractClasspathConfigurator> ci = configurators.iterator(); ci.hasNext(); ) {
+          AbstractClasspathConfigurator cpc = ci.next();
+          Set<IClasspathAttribute> set = cpc.getAttributes(a, kind);
           if (set != null) {
             attributes.addAll(set);
           }
         }
 
-        entries.put(entryPath, JavaCore.newLibraryEntry(entryPath, //
+        entries.add(JavaCore.newLibraryEntry(entryPath, //
             srcPath, srcRoot, new IAccessRule[0], //
-            (IClasspathAttribute[]) attributes.toArray(new IClasspathAttribute[attributes.size()]), // 
+            attributes.toArray(new IClasspathAttribute[attributes.size()]), // 
             false /*not exported*/));
       }
     }
@@ -369,6 +374,10 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
   }
 
   public IClasspathEntry[] getClasspath(IProject project, int scope, IProgressMonitor monitor) throws CoreException {
+    return getClasspath(project, scope, true, monitor);
+  }
+
+  public IClasspathEntry[] getClasspath(IProject project, int scope, boolean uniquePaths, IProgressMonitor monitor) throws CoreException {
     MavenProjectFacade facade = projectManager.create(project, monitor);
     if (facade == null) {
       return new IClasspathEntry[0];
@@ -384,7 +393,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
           is.close();
         }
       }
-      return getClasspath(facade, scope, props);
+      return getClasspath(facade, scope, props, uniquePaths);
     } catch (IOException e) {
       throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, "Can't save classpath container changes", e));
     }
@@ -590,7 +599,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
       }
     }
 
-    entries = getClasspath(facade, CLASSPATH_DEFAULT, null);
+    entries = getClasspath(facade, CLASSPATH_DEFAULT, null, true);
     for (int i = 0; i < entries.length; i++) {
       IClasspathEntry entry = entries[i];
       if (IClasspathEntry.CPE_LIBRARY == entry.getEntryKind()) {

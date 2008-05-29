@@ -23,11 +23,11 @@ import org.maven.ide.eclipse.project.configurator.AbstractClasspathConfiguratorF
  */
 public class ClasspathConfiguratorFactoryFactory {
 
-  private static Set factories;
+  private static Set<AbstractClasspathConfiguratorFactory> factories;
 
-  public static synchronized Set getFactories() {
+  public static synchronized Set<AbstractClasspathConfiguratorFactory> getFactories() {
     if(factories==null) {
-      Set tmp = new TreeSet(new FactoryComparator());
+      Set<AbstractClasspathConfiguratorFactory> tmp = new TreeSet<AbstractClasspathConfiguratorFactory>(new FactoryComparator());
       tmp.addAll(ExtensionReader.readClasspathConfiguratorFactoryExtensions());
       factories = Collections.unmodifiableSet(tmp);
     }
