@@ -11,6 +11,7 @@ package org.maven.ide.eclipse.internal.project;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
@@ -21,6 +22,7 @@ import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.resolver.DefaultArtifactResolver;
 
+import org.maven.ide.eclipse.project.MavenProjectFacade;
 
 
 public class EclipseArtifactResolver extends DefaultArtifactResolver {
@@ -50,11 +52,6 @@ public class EclipseArtifactResolver extends DefaultArtifactResolver {
       return false;
     }
 
-    // workaround for MNGECLIPSE-380
-    if("maven-plugin".equals(artifact.getType())) {
-      return false;
-    }
-
     // check in the workspace, note that workspace artifacts never have classifiers
     ArtifactKey key = new ArtifactKey(artifact.getGroupId(), artifact.getArtifactId(), artifact.getBaseVersion(), null); 
     IPath pomPath = context.state.getWorkspaceArtifact(key);
@@ -75,7 +72,17 @@ public class EclipseArtifactResolver extends DefaultArtifactResolver {
 
     if(context.resolverConfiguration.shouldResolveWorkspaceProjects()
         || (context.resolverConfiguration.shouldIncludeModules() && WorkspaceState.isSameProject(context.pom, pom))) {
-      artifact.setFile(pom.getLocation().toFile());
+
+      IPath file = pom.getLocation();
+      if (!"pom".equals(artifact.getType())) {
+        MavenProjectFacade facade = context.state.getProjectFacade(pom);
+        IFolder outputLocation = root.getFolder(facade.getOutputLocation());
+        if (outputLocation.exists()) {
+          file = outputLocation.getLocation();
+        }
+      }
+
+      artifact.setFile(file.toFile());
       artifact.setResolved(true);
 
       return true;

@@ -735,4 +735,23 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals(1, a.length);
     assertEquals(pom1.getLocation().toFile().getCanonicalFile(), a[0].getFile().getCanonicalFile());
   }
+
+  public void testExtensionPluginResolution() throws Exception {
+    IProject p1 = createExisting("MNGECLIPSE380-plugin", "resources/MNGECLIPSE380/plugin");
+    IProject p2 = createExisting("MNGECLIPSE380-project", "resources/MNGECLIPSE380/project");
+    waitForJobsToComplete();
+
+    p1.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+
+    add(manager, new IProject[] {p1, p2});
+
+    IFile pom2 = p2.getFile("pom.xml");
+    assertNotNull(manager.create(pom2, false, null));
+
+    remove(manager, p1);
+    assertNull(manager.create(pom2, false, null));
+
+    add(manager, new IProject[] {p1});
+    assertNotNull(manager.create(pom2, false, null));
+  }
 }

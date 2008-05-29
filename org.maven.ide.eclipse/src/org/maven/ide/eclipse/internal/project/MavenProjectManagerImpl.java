@@ -44,6 +44,7 @@ import org.apache.maven.embedder.MavenEmbedderException;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.model.Model;
+import org.apache.maven.model.Plugin;
 import org.apache.maven.project.MavenProject;
 
 import org.maven.ide.eclipse.MavenConsole;
@@ -531,6 +532,12 @@ public class MavenProjectManagerImpl {
     for (Iterator it = mavenProject.getArtifacts().iterator(); it.hasNext(); ) {
       Artifact artifact = (Artifact) it.next();
       state.addProjectDependency(pom, new ArtifactKey(artifact), workspace);
+    }
+    for (Plugin plugin : (List<Plugin>) mavenProject.getBuildPlugins()) {
+      if (plugin.isExtensions()) {
+        ArtifactKey artifactKey = new ArtifactKey(plugin.getGroupId(), plugin.getArtifactId(), plugin.getVersion(), null);
+        state.addProjectDependency(pom, artifactKey, workspace);
+      }
     }
   }
 
