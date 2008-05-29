@@ -561,7 +561,7 @@ public class NexusIndexManager extends IndexManager {
   // 
 
   private IndexingContext getIndexingContext(String indexName) {
-    return (IndexingContext) indexer.getIndexingContexts().get(indexName);
+    return indexer.getIndexingContexts().get(indexName);
   }
 
   
