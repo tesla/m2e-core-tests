@@ -120,7 +120,7 @@ public class MavenIndexesView extends ViewPart {
         } else if(o1 instanceof IndexedArtifactFile && o2 instanceof IndexedArtifactFile) {
           IndexedArtifactFile f1 = (IndexedArtifactFile) o1;
           IndexedArtifactFile f2 = (IndexedArtifactFile) o2;
-          return f2.artifactVersion.compareTo(f1.artifactVersion);
+          return f2.getArtifactVersion().compareTo(f1.getArtifactVersion());
          }
         return super.compare(viewer, o1, o2);
       }
