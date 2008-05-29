@@ -35,7 +35,6 @@
     
     <maven_scm.version>1.0.0.20080410-2200</maven_scm.version>
     <dependency_tree.version>1.2.0.20080424-1900</dependency_tree.version>
-    <qname_version>1.0.0.20080331-1600</qname_version>
     <artifact.version>3.0-SNAPSHOT</artifact.version>
 
     <!-- disable accidental deployment -->
@@ -69,7 +68,6 @@
   
   <modules>
     <module>../org.maven.ide.components.pom</module>
-    <module>../org.maven.ide.components.qname</module>
     <module>../org.maven.ide.components.maven-embedder</module>
     <module>../org.maven.ide.components.archetype-common</module>
     <module>../org.maven.ide.components.nexus-indexer</module>
@@ -163,12 +161,6 @@
         <groupId>org.maven.ide.components</groupId>
         <artifactId>org.maven.ide.components.maven_model_edit</artifactId>
         <version>${maven_model_edit.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.maven.ide.components</groupId>
-        <artifactId>org.maven.ide.components.qname</artifactId>
-        <version>${qname.version}</version>
       </dependency>
 
       <dependency>
