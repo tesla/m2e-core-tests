@@ -740,7 +740,7 @@
           name="maven-eclipse-plugin" priority="5"/>
       
       <configurator id="org.maven.ide.eclipse.configurator.mavenSysdeoTomcatPlugin"
-          class="org.maven.ide.eclipse.project.configurator.MavenProjectConfigurator:org.codehaus.mojo:sysdeo-tomcat-maven-plugin|sysdeo-tomcat:generate"
+          class="org.maven.ide.eclipse.project.configurator.MavenProjectConfigurator:org.codehaus.mojo:sysdeo-tomcat-maven-plugin|sysdeo-tomcat:m2eclipse"
           name="sysdeo-tomcat-maven-plugin" priority="50"/>
    
    </extension>
