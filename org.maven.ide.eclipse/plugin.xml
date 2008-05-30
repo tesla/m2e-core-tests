@@ -15,12 +15,6 @@
    <extension-point id="projectConfigurators" name="Project Configurators" schema="schema/projectConfigurators.exsd"/>
    <extension-point id="classpathConfiguratorFactories" name="Classpath Configurator Factories" schema="schema/classpathConfiguratorFactories.exsd"/>
 
-   <extension point="org.eclipse.core.runtime.applications" id="maven">
-      <application visible="true" cardinality="singleton-global" thread="main">
-        <run class="org.maven.ide.eclipse.Maven"/>
-      </application>
-   </extension>
-
    <extension point="org.eclipse.ui.intro.configExtension">
       <configExtension configId="org.eclipse.ui.intro.universalConfig"
                        content="intro/overview.xml"/>

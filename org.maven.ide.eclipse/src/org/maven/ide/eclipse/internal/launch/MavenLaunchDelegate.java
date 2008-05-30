@@ -200,7 +200,7 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
       URL fileURL = FileLocator.toFileURL(url);
       return new File(fileURL.toURI()).getCanonicalPath();
     } catch(Exception ex) {
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, ex.getMessage(), ex));
+      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, ex.getMessage(), ex));
     }
   }
 

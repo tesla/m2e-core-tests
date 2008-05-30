@@ -299,7 +299,7 @@ public abstract class MavenRuntime {
             out.close();
           }
         } catch (IOException ex) {
-          throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, ex.getMessage(), ex));
+          throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, ex.getMessage(), ex));
         }
       }
       StringBuffer sb = new StringBuffer();
