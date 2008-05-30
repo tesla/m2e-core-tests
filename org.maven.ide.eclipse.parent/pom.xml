@@ -21,21 +21,21 @@
   <properties>
     <m2eclipse.version>0.9.4-SNAPSHOT</m2eclipse.version>
     
-    <maven_embedder.version>2.1.0.20080413-2200</maven_embedder.version>
+    <maven_embedder.version>2.1.0.20080530-2300</maven_embedder.version>
     <maven.version>2.1-SNAPSHOT</maven.version>
+    <artifact.version>3.0-SNAPSHOT</artifact.version>
 
     <archetype_common.version>2.0.0.20080522-1230</archetype_common.version>
     <archetype.version>2.0-alpha-2</archetype.version>
 
-    <maven_model_edit.version>1.0.0.20080331-1600</maven_model_edit.version>
+    <maven_model_edit.version>1.0.0.20080530-2300</maven_model_edit.version>
     <maven_pom.version>1.0.0-SNAPSHOT</maven_pom.version>
 
-    <nexus_indexer.version>1.0.0.20080522-2330</nexus_indexer.version>
+    <nexus_indexer.version>1.0.0.20080530-2330</nexus_indexer.version>
     <nexus.version>1.0-beta-4-SNAPSHOT</nexus.version>
     
     <maven_scm.version>1.0.0.20080410-2200</maven_scm.version>
     <dependency_tree.version>1.2.0.20080424-1900</dependency_tree.version>
-    <artifact.version>3.0-SNAPSHOT</artifact.version>
 
     <!-- disable accidental deployment -->
     <m2e.releases>http://localhost</m2e.releases>
