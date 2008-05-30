@@ -33,7 +33,7 @@ public class MavenRuntimeManager {
 
   private final IPreferenceStore preferenceStore;
 
-  private Map runtimes = new LinkedHashMap();
+  private Map<String, MavenRuntime> runtimes = new LinkedHashMap<String, MavenRuntime>();
   
   private MavenRuntime defaultRuntime;
 
@@ -53,7 +53,7 @@ public class MavenRuntimeManager {
     if(WORKSPACE.equals(location)) {
       return MavenRuntime.WORKSPACE;
     }
-    return (MavenRuntime) runtimes.get(location);
+    return runtimes.get(location);
   }
   
   public MavenRuntime getDefaultRuntime() {
@@ -63,8 +63,8 @@ public class MavenRuntimeManager {
     return this.defaultRuntime;
   }
   
-  public List getMavenRuntimes() {
-    ArrayList runtimes = new ArrayList();
+  public List<MavenRuntime> getMavenRuntimes() {
+    ArrayList<MavenRuntime> runtimes = new ArrayList<MavenRuntime>();
 
     runtimes.add(MavenRuntime.EMBEDDED);
 
@@ -73,8 +73,8 @@ public class MavenRuntimeManager {
 //      runtimes.add(MavenRuntime.WORKSPACE);
 //    }
     
-    for(Iterator it = this.runtimes.values().iterator(); it.hasNext();) {
-      MavenRuntime runtime = (MavenRuntime) it.next();
+    for(Iterator<MavenRuntime> it = this.runtimes.values().iterator(); it.hasNext();) {
+      MavenRuntime runtime = it.next();
       if(runtime.isAvailable()) {
         runtimes.add(runtime);
       }
@@ -95,13 +95,12 @@ public class MavenRuntimeManager {
     preferenceStore.setValue(MavenPreferenceConstants.P_DEFAULT_RUNTIME, runtime.getLocation());
   }
   
-  public void setRuntimes(List runtimes) {
+  public void setRuntimes(List<MavenRuntime> runtimes) {
     this.runtimes.clear();
 
     String separator = "";
     StringBuffer sb = new StringBuffer();
-    for(Iterator it = runtimes.iterator(); it.hasNext();) {
-      MavenRuntime runtime = (MavenRuntime) it.next();
+    for(MavenRuntime runtime : runtimes) {
       if(runtime.isEditable()) {
         this.runtimes.put(runtime.getLocation(), runtime);
         sb.append(separator).append(runtime.getLocation());
@@ -165,10 +164,6 @@ public class MavenRuntimeManager {
     return preferenceStore.getString(MavenPreferenceConstants.P_GOAL_ON_UPDATE);
   }
   
-  public String getUserSettingsFile() {
-    return preferenceStore.getString(MavenPreferenceConstants.P_USER_SETTINGS_FILE);
-  }
-  
   public String getGlobalSettingsFile() {
     return preferenceStore.getString(MavenPreferenceConstants.P_GLOBAL_SETTINGS_FILE);
   }
@@ -204,10 +199,6 @@ public class MavenRuntimeManager {
   
   public void setGoalOnUpdate(String goalName) {
     preferenceStore.setValue(MavenPreferenceConstants.P_GOAL_ON_UPDATE, goalName);
-  }
-  
-  public void setUserSettingsFile(String fileName) {
-    preferenceStore.setValue(MavenPreferenceConstants.P_USER_SETTINGS_FILE, fileName);
   }
   
   public void setGlobalSettingsFile(String fileName) {

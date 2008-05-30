@@ -109,7 +109,10 @@ public class MavenArchetypesPreferencePage extends PreferencePage implements IWo
 
   protected Control createContents(Composite parent) {
     Composite composite = new Composite(parent, SWT.NONE);
-    composite.setLayout(new GridLayout(2, false));
+    GridLayout gridLayout = new GridLayout(2, false);
+    gridLayout.marginWidth = 0;
+    gridLayout.marginHeight = 0;
+    composite.setLayout(gridLayout);
 
     Link addRemoveOrLink = new Link(composite, SWT.NONE);
     GridData gd_addRemoveOrLink = new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1);

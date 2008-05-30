@@ -12,7 +12,6 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -107,7 +106,7 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
     IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
     IProject allProjects[] = root.getProjects();
 
-    List/*<JavaProjectSourceLocation>*/locations = new ArrayList();
+    List<JavaProjectSourceLocation> locations = new ArrayList<JavaProjectSourceLocation>();
 
     for(int i = 0; i < allProjects.length; i++ ) {
       IProject project = allProjects[i];
@@ -117,9 +116,7 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
       }
     }
 
-    JavaProjectSourceLocation[] locationArray = (JavaProjectSourceLocation[]) locations
-        .toArray(new JavaProjectSourceLocation[locations.size()]);
-    return new JavaSourceLocator(locationArray);
+    return new JavaSourceLocator(locations.toArray(new JavaProjectSourceLocation[locations.size()]));
   }
 
   public String getMainTypeName(ILaunchConfiguration configuration) {
@@ -240,13 +237,12 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
     StringBuffer sb = new StringBuffer();
 
     try {
-      List properties = configuration.getAttribute(ATTR_PROPERTIES, Collections.EMPTY_LIST);
-      for(Iterator it = properties.iterator(); it.hasNext();) {
-        String[] s = ((String) it.next()).split("=");
+      @SuppressWarnings("unchecked")
+      List<String> properties = configuration.getAttribute(ATTR_PROPERTIES, Collections.EMPTY_LIST);
+      for(String property : properties) {
+        String[] s = property.split("=");
         String n = s[0];
-        // substitute var if any
         String v = Util.substituteVar(s[1]);
-        // enclose in quotes if spaces
         if(v.indexOf(' ') >= 0) {
           v = '"' + v + '"';
         }
@@ -274,22 +270,18 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
    * Construct string with preferences to pass to JVM as system properties
    */
   private String getPreferences(ILaunchConfiguration configuration) throws CoreException {
+    MavenRuntimeManager runtimeManager = MavenPlugin.getDefault().getMavenRuntimeManager();
+    
     StringBuffer sb = new StringBuffer();
 
     sb.append(" -B");
 
-    MavenRuntimeManager runtimeManager = MavenPlugin.getDefault().getMavenRuntimeManager();
-
-    boolean debugOutput = configuration.getAttribute(MavenLaunchConstants.ATTR_DEBUG_OUTPUT, //
-        runtimeManager.isDebugOutput());
-    if(debugOutput) {
+    if(configuration.getAttribute(MavenLaunchConstants.ATTR_DEBUG_OUTPUT, runtimeManager.isDebugOutput())) {
       sb.append(" -X").append(" -e");
     }
     // sb.append(" -D").append(MavenPreferenceConstants.P_DEBUG_OUTPUT).append("=").append(debugOutput);
 
-    boolean offline = configuration.getAttribute(MavenLaunchConstants.ATTR_OFFLINE, //
-        runtimeManager.isOffline());
-    if(offline) {
+    if(configuration.getAttribute(MavenLaunchConstants.ATTR_OFFLINE, runtimeManager.isOffline())) {
       sb.append(" -o");
     }
     // sb.append(" -D").append(MavenPreferenceConstants.P_OFFLINE).append("=").append(offline);
@@ -304,8 +296,18 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
       sb.append(" -Dmaven.test.skip=true");
     }
     
-    // addSettings(sb, MavenPreferenceConstants.P_GLOBAL_SETTINGS_FILE, preferenceStore);
-    addSettings(sb, runtimeManager.getUserSettingsFile());
+    String settings = runtimeManager.getGlobalSettingsFile();
+    if(settings.trim().length()==0) {
+      settings = getMavenRuntime(configuration).getSettings();
+    }
+    if(settings != null && settings.trim().length() > 0) {
+      sb.append(" -s ");
+      if(settings.indexOf(' ') > -1) {
+        sb.append('\"').append(settings).append('\"');
+      } else {
+        sb.append(settings);
+      }
+    }
 
     // boolean b = preferenceStore.getBoolean(MavenPreferenceConstants.P_CHECK_LATEST_PLUGIN_VERSION);
     // sb.append(" -D").append(MavenPreferenceConstants.P_CHECK_LATEST_PLUGIN_VERSION).append("=").append(b);
@@ -313,11 +315,6 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
     // b = preferenceStore.getBoolean(MavenPreferenceConstants.P_UPDATE_SNAPSHOTS);
     // sb.append(" -D").append(MavenPreferenceConstants.P_UPDATE_SNAPSHOTS).append("=").append(b);
 
-    // String s = preferenceStore.getString(MavenPreferenceConstants.P_LOCAL_REPOSITORY_DIR);
-    // if(s != null && s.trim().length() > 0) {
-    //   sb.append(" -D").append(MavenPreferenceConstants.P_LOCAL_REPOSITORY_DIR).append("=\"").append(s).append('\"');
-    // }
-    
     // String s = preferenceStore.getString(MavenPreferenceConstants.P_GLOBAL_CHECKSUM_POLICY);
     // if(s != null && s.trim().length() > 0) {
     //   sb.append(" -D").append(MavenPreferenceConstants.P_GLOBAL_CHECKSUM_POLICY).append("=").append(s);
@@ -326,18 +323,6 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
     return sb.toString();
   }
 
-  private void addSettings(StringBuffer sb, String value) {
-    if(value != null && value.trim().length() > 0) {
-      sb.append(" -s ");
-      if(value.indexOf(' ') > -1) {
-        sb.append('\"').append(value).append('\"');
-      } else {
-        sb.append(value);
-      }
-    }
-  }
-
-  
   /**
    * Refreshes resources as specified by a launch configuration, when 
    * an associated process terminates.
@@ -402,52 +387,53 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
   }
 
   private String[] getForcedComponents(ILaunchConfiguration configuration) throws CoreException {
-    List components = new ArrayList();
+    List<String> components = new ArrayList<String>();
     if (shouldResolveWorkspaceArtifacts(configuration)) {
       components.add(getCliResolver());
     }
     addUserComponents(configuration, components);
-    return (String[]) components.toArray(new String[components.size()]);
+    return components.toArray(new String[components.size()]);
   }
 
-  private void addUserComponents(ILaunchConfiguration configuration, List components) throws CoreException {
+  private void addUserComponents(ILaunchConfiguration configuration, List<String> components) throws CoreException {
+    @SuppressWarnings("unchecked")
+    List<String> list = configuration.getAttribute(ATTR_FORCED_COMPONENTS_LIST, new ArrayList());
+    if(list == null) {
+      return;
+    }
+    
     IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
     MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
     MavenEmbedderManager embedderManager = MavenPlugin.getDefault().getMavenEmbedderManager();
     MavenEmbedder embedder = embedderManager.getWorkspaceEmbedder();
+    for(String gav : list) {
+      // groupId:artifactId:version
+      StringTokenizer st = new StringTokenizer(gav, ":");
+      String groupId = st.nextToken();
+      String artifactId = st.nextToken();
+      String version = st.nextToken();
 
-    List list = configuration.getAttribute(ATTR_FORCED_COMPONENTS_LIST, new ArrayList());
-    if (list != null) {
-      for (Iterator it = list.iterator(); it.hasNext(); ) {
-        String gav = (String) it.next();
-        // groupId:artifactId:version
-        StringTokenizer st = new StringTokenizer(gav, ":");
-        String groupId = st.nextToken();
-        String artifactId = st.nextToken();
-        String version = st.nextToken();
+      Artifact artifact = embedder.createArtifact(groupId, artifactId, version, null, "jar");
 
-        Artifact artifact = embedder.createArtifact(groupId, artifactId, version, null, "jar");
+      MavenProjectFacade facade = projectManager.getMavenProject(artifact);
 
-        MavenProjectFacade facade = projectManager.getMavenProject(artifact);
-
-        File file = null;
-        if (facade != null) {
-          IFolder output = root.getFolder(facade.getOutputLocation());
-          if (output.isAccessible()) {
-            file = output.getLocation().toFile();
-          }
-        } else {
-          try {
-            embedder.resolve(artifact, new ArrayList(), embedder.getLocalRepository());
-          } catch(ArtifactResolutionException ex) {
-          } catch(ArtifactNotFoundException ex) {
-          }
-          file = artifact.getFile();
+      File file = null;
+      if (facade != null) {
+        IFolder output = root.getFolder(facade.getOutputLocation());
+        if (output.isAccessible()) {
+          file = output.getLocation().toFile();
         }
-        
-        if (file != null) {
-          components.add(file.getAbsolutePath());
+      } else {
+        try {
+          embedder.resolve(artifact, Collections.EMPTY_LIST, embedder.getLocalRepository());
+        } catch(ArtifactResolutionException ex) {
+        } catch(ArtifactNotFoundException ex) {
         }
+        file = artifact.getFile();
+      }
+      
+      if (file != null) {
+        components.add(file.getAbsolutePath());
       }
     }
   }

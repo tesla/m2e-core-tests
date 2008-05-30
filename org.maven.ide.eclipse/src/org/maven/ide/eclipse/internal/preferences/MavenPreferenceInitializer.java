@@ -11,8 +11,6 @@ package org.maven.ide.eclipse.internal.preferences;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 
-import org.apache.maven.embedder.MavenEmbedder;
-
 import org.maven.ide.eclipse.MavenPlugin;
 
 
@@ -31,9 +29,6 @@ public class MavenPreferenceInitializer extends AbstractPreferenceInitializer {
   public void initializeDefaultPreferences() {
     IPreferenceStore store = MavenPlugin.getDefault().getPreferenceStore();
 
-    store.setDefault(MavenPreferenceConstants.P_USER_SETTINGS_FILE, //
-        MavenEmbedder.DEFAULT_USER_SETTINGS_FILE.getAbsolutePath());
-    
     store.setDefault(MavenPreferenceConstants.P_GLOBAL_SETTINGS_FILE, "");
 
     store.setDefault(MavenPreferenceConstants.P_DEBUG_OUTPUT, false);
@@ -43,8 +38,8 @@ public class MavenPreferenceInitializer extends AbstractPreferenceInitializer {
     store.setDefault(MavenPreferenceConstants.P_DOWNLOAD_SOURCES, false);
     store.setDefault(MavenPreferenceConstants.P_DOWNLOAD_JAVADOC, false);
 
-    store.setDefault(MavenPreferenceConstants.P_GOAL_ON_UPDATE, "process-resources"); // process-test-resources
-    store.setDefault(MavenPreferenceConstants.P_GOAL_ON_IMPORT, MavenPreferenceConstants.NO_GOAL); // process-test-resources
+    store.setDefault(MavenPreferenceConstants.P_GOAL_ON_UPDATE, MavenPreferenceConstants.DEFAULT_GOALS_ON_UPDATE);
+    store.setDefault(MavenPreferenceConstants.P_GOAL_ON_IMPORT, MavenPreferenceConstants.DEFAULT_GOALS_ON_IMPORT);
 
     // store.setDefault( MavenPreferenceConstants.P_GLOBAL_CHECKSUM_POLICY, ArtifactRepositoryPolicy.CHECKSUM_POLICY_WARN);
     // store.setDefault( MavenPreferenceConstants.P_UPDATE_SNAPSHOTS, false);

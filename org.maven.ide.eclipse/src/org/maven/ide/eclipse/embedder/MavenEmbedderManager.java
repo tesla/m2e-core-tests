@@ -48,10 +48,9 @@ public class MavenEmbedderManager {
   public synchronized MavenEmbedder createEmbedder(ContainerCustomizer customizer) throws MavenEmbedderException {
     boolean debug = runtimeManager.isDebugOutput();
     String globalSettings = runtimeManager.getGlobalSettingsFile();
-    String userSettings = runtimeManager.getUserSettingsFile();
 
     return EmbedderFactory.createMavenEmbedder(customizer,
-        new PluginConsoleMavenEmbeddedLogger(console, debug), globalSettings, userSettings);
+        new PluginConsoleMavenEmbeddedLogger(console, debug), globalSettings, null);
   }
 
   public synchronized MavenExecutionRequest createRequest(MavenEmbedder embedder) {

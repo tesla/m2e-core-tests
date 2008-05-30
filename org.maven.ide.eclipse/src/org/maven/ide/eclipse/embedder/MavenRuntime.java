@@ -14,8 +14,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -60,6 +60,8 @@ public abstract class MavenRuntime {
   public abstract String[] getClasspath(String[] forcedComponents);
   
   public abstract String getLocation();
+
+  public abstract String getSettings();
   
   public abstract boolean isAvailable();
   
@@ -83,6 +85,10 @@ public abstract class MavenRuntime {
       return MavenRuntimeManager.EMBEDDED;
     }
     
+    public String getSettings() {
+      return null;
+    }
+    
     public boolean isAvailable() {
       return true;
     }
@@ -97,13 +103,14 @@ public abstract class MavenRuntime {
     
     public String[] getClasspath(String[] forcedComponents) {
       if(CLASSPATH == null) {
-        List cp = new ArrayList();
+        List<String> cp = new ArrayList<String>();
   
         Bundle bundle = findMavenEmbedderBundle();
         
-        Enumeration entries = bundle.findEntries("/", "*", true);
+        @SuppressWarnings("unchecked")
+        Enumeration<URL> entries = bundle.findEntries("/", "*", true);
         while(entries.hasMoreElements()) {
-          URL url = (URL) entries.nextElement();
+          URL url = entries.nextElement();
           String path = url.getPath();
           if(path.endsWith(".jar") || path.endsWith("bin/")) {
             try {
@@ -114,7 +121,7 @@ public abstract class MavenRuntime {
           }
         }
   
-        CLASSPATH = (String[]) cp.toArray(new String[cp.size()]);
+        CLASSPATH = cp.toArray(new String[cp.size()]);
       }
       if (forcedComponents != null && forcedComponents.length > 0) {
         String[] cp = new String[CLASSPATH.length + forcedComponents.length];
@@ -155,6 +162,10 @@ public abstract class MavenRuntime {
     public String getLocation() {
       return MavenRuntimeManager.WORKSPACE;
     }
+    
+    public String getSettings() {
+      return null;
+    }
 
     public String getMainTypeName() {
       return "org.apache.maven.cli.MavenCli";
@@ -174,13 +185,12 @@ public abstract class MavenRuntime {
     }
 
     public String[] getClasspath(String[] forcedComponents) {
-      List cp = new ArrayList();
+      List<String> cp = new ArrayList<String>();
 
       MavenPlugin mavenPlugin = MavenPlugin.getDefault();
       MavenProjectManager projectManager = mavenPlugin.getMavenProjectManager();
       MavenProjectFacade maven = projectManager.getMavenProject("org.apache.maven", "maven-distribution", "2.1-SNAPSHOT");
       if (maven != null) {
-        Set artifacts = maven.getMavenProject().getArtifacts();
         if (forcedComponents != null) {
           for (int i = 0; i < forcedComponents.length; i++) {
             cp.add(forcedComponents[i]);
@@ -191,8 +201,9 @@ public abstract class MavenRuntime {
         MavenEmbedderManager embedderManager = mavenPlugin.getMavenEmbedderManager();
         MavenEmbedder embedder = embedderManager.getWorkspaceEmbedder();
 
-        for (Iterator it = artifacts.iterator(); it.hasNext(); ) {
-          Artifact artifact = (Artifact) it.next();
+        @SuppressWarnings("unchecked")
+        Set<Artifact> artifacts = maven.getMavenProject().getArtifacts();
+        for (Artifact artifact : artifacts) {
           if (Artifact.SCOPE_TEST.equals(artifact.getScope())) {
             continue;
           }
@@ -207,7 +218,7 @@ public abstract class MavenRuntime {
             }
           } else {
             try {
-              embedder.resolve(artifact, new ArrayList(), embedder.getLocalRepository());
+              embedder.resolve(artifact, Collections.EMPTY_LIST, embedder.getLocalRepository());
             } catch(ArtifactResolutionException ex) {
             } catch(ArtifactNotFoundException ex) {
             }
@@ -220,7 +231,7 @@ public abstract class MavenRuntime {
         }
       }
       
-      return (String[]) cp.toArray(new String[cp.size()]);
+      return cp.toArray(new String[cp.size()]);
     }
 
     public String toString() {
@@ -258,6 +269,10 @@ public abstract class MavenRuntime {
     
     public String getLocation() {
       return location;
+    }
+    
+    public String getSettings() {
+      return location + File.separator + "conf" + File.separator + "settings.xml";
     }
     
     public String getMainTypeName() {

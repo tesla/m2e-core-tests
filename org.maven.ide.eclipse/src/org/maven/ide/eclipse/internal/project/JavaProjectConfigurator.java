@@ -11,7 +11,6 @@ package org.maven.ide.eclipse.internal.project;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -58,7 +57,6 @@ import org.apache.maven.project.MavenProject;
 import org.maven.ide.eclipse.MavenConsole;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
-import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;
 import org.maven.ide.eclipse.project.BuildPathManager;
 import org.maven.ide.eclipse.project.IMavenProjectVisitor;
 import org.maven.ide.eclipse.project.MavenProjectFacade;
@@ -72,8 +70,8 @@ import org.maven.ide.eclipse.util.Util;
 
 public class JavaProjectConfigurator extends AbstractProjectConfigurator {
   
-  private static final List SOURCES = Arrays.asList("1.1,1.2,1.3,1.4,1.5,1.6,1.7".split(","));
-  private static final List TARGETS = Arrays.asList("1.1,1.2,1.3,1.4,jsr14,1.5,1.6,1.7".split(","));
+  private static final List<String> SOURCES = Arrays.asList("1.1,1.2,1.3,1.4,1.5,1.6,1.7".split(","));
+  private static final List<String> TARGETS = Arrays.asList("1.1,1.2,1.3,1.4,jsr14,1.5,1.6,1.7".split(","));
 
   final MavenProjectManager projectManager;
 
@@ -114,8 +112,8 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
 
     long t1 = System.currentTimeMillis();
     try {
-      Set sources = new LinkedHashSet();
-      Set entries = new LinkedHashSet();
+      Set<String> sources = new LinkedHashSet<String>();
+      Set<IClasspathEntry> entries = new LinkedHashSet<IClasspathEntry>();
 
       MavenProject mavenProject = collectSourceEntries(embedder, project, entries, sources, configuration,
           goalToExecute, monitor);
@@ -124,12 +122,12 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
       IJavaProject javaProject = JavaCore.create(project);
 
       if(mavenProject != null) {
-        Map options = collectOptions(mavenProject, configuration);
+        Map<String, String> options = collectOptions(mavenProject, configuration);
         setOption(javaProject, options, JavaCore.COMPILER_COMPLIANCE);
         setOption(javaProject, options, JavaCore.COMPILER_SOURCE);
         setOption(javaProject, options, JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM);
 
-        String source = (String) options.get(JavaCore.COMPILER_SOURCE);
+        String source = options.get(JavaCore.COMPILER_SOURCE);
         if(source == null) {
           entries.add(JavaRuntime.getDefaultJREContainerEntry());
         } else {
@@ -160,7 +158,7 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
       if(classesFolder instanceof IFolder) {
         Util.createFolder((IFolder) classesFolder);
       }
-      javaProject.setRawClasspath((IClasspathEntry[]) entries.toArray(new IClasspathEntry[entries.size()]),
+      javaProject.setRawClasspath(entries.toArray(new IClasspathEntry[entries.size()]),
           classesFolder.getFullPath(), monitor);
 
       buildPathManager.updateClasspath(project, monitor);
@@ -178,8 +176,8 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
     }
   }
 
-  private Map collectOptions(MavenProject mavenProject, ResolverConfiguration configuration) {
-    Map options = new HashMap();
+  private Map<String, String> collectOptions(MavenProject mavenProject, ResolverConfiguration configuration) {
+    Map<String, String> options = new HashMap<String, String>();
 
     // XXX find best match when importing multimodule project 
     String source = getBuildOption(mavenProject, "source", SOURCES);
@@ -211,7 +209,8 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
     return options;
   }
 
-  void addDirs(IProject project, ResolverConfiguration resolverConfiguration, Set sources, Set entries,
+  @SuppressWarnings("unchecked")
+  void addDirs(IProject project, ResolverConfiguration resolverConfiguration, Set<String> sources, Set<IClasspathEntry> entries,
       MavenProject mavenProject) throws CoreException {
     IFolder classes;
     IFolder testClasses;
@@ -240,10 +239,9 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
     }
   }
 
-  private void addSourceDirs(IProject project, Set sources, Set entries, List sourceRoots, IPath output,
+  private void addSourceDirs(IProject project, Set<String> sources, Set<IClasspathEntry> entries, List<String> sourceRoots, IPath output,
       String scope) {
-    for(Iterator it = sourceRoots.iterator(); it.hasNext();) {
-      String sourceRoot = (String) it.next();
+    for(String sourceRoot : sourceRoots) {
       if(new File(sourceRoot).isDirectory()) {
         IResource r = project.findMember(toRelativeAndFixSeparator(project, sourceRoot));
         if(r != null && sources.add(r.getFullPath().toString())) {
@@ -256,9 +254,8 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
     }
   }
 
-  private void addResourceDirs(IProject project, Set sources, Set entries, List resources, IPath output) {
-    for(Iterator it = resources.iterator(); it.hasNext();) {
-      Resource resource = (Resource) it.next();
+  private void addResourceDirs(IProject project, Set<String> sources, Set<IClasspathEntry> entries, List<Resource> resources, IPath output) {
+    for(Resource resource : resources) {
       File resourceDirectory = new File(resource.getDirectory());
       if(resourceDirectory.exists() && resourceDirectory.isDirectory()) {
         String relativePath = toRelativeAndFixSeparator(project, resource.getDirectory());
@@ -303,8 +300,8 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
   }
 
   private MavenProject generateSourceEntries(MavenEmbedder mavenEmbedder, final IProject project,
-      final Set entries, final Set sources, final ResolverConfiguration configuration,
-      final String goalToExecute, IProgressMonitor monitor) throws CoreException {
+      final Set<IClasspathEntry> entries, final Set<String> sources, final ResolverConfiguration configuration,
+      final String goalsToExecute, IProgressMonitor monitor) throws CoreException {
     IFile pomResource = project.getFile(MavenPlugin.POM_FILE_NAME);
 
     console.logMessage("Generating sources " + pomResource.getFullPath());
@@ -319,7 +316,7 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
           public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request) {
             request.setUseReactor(false);
             request.setRecursive(configuration.shouldIncludeModules());
-            request.setGoals(Collections.singletonList(goalToExecute));
+            request.setGoals(Arrays.asList(goalsToExecute.split(", ")));
             return embedder.execute(request);
           }
         }, monitor);
@@ -331,20 +328,24 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
     MavenProject mavenProject = result.getProject();
 
     ReactorManager reactorManager = result.getReactorManager();
-    if(reactorManager != null && reactorManager.getSortedProjects() != null) {
-      if(configuration.shouldIncludeModules()) {
-        for(Iterator it = reactorManager.getSortedProjects().iterator(); it.hasNext();) {
-          addDirs(project, configuration, sources, entries, (MavenProject) it.next());
+    if(reactorManager != null) {
+      @SuppressWarnings("unchecked")
+      List<MavenProject> projects = reactorManager.getSortedProjects();
+      if(projects != null) {
+        if(configuration.shouldIncludeModules()) {
+          for(MavenProject p : projects) {
+            addDirs(project, configuration, sources, entries, p);
+          }
+        } else {
+          addDirs(project, configuration, sources, entries, projects.iterator().next());
         }
-      } else {
-        addDirs(project, configuration, sources, entries, //
-            (MavenProject) reactorManager.getSortedProjects().iterator().next());
       }
     }
 
     if(result.hasExceptions()) {
-      for(Iterator it = result.getExceptions().iterator(); it.hasNext();) {
-        Exception ex = (Exception) it.next();
+      @SuppressWarnings("unchecked")
+      List<Exception> exceptions = result.getExceptions();
+      for(Exception ex : exceptions) {
         String msg = "Build error for " + pomResource.getFullPath();
         console.logError(msg + "; " + ex.toString());
         MavenPlugin.log(msg, ex);
@@ -355,8 +356,8 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
   }
 
   private MavenProject collectSourceEntries(MavenEmbedder mavenEmbedder, final IProject project,
-      final Set entries, final Set sources, final ResolverConfiguration configuration,
-      final String goalToExecute, IProgressMonitor monitor) throws CoreException {
+      final Set<IClasspathEntry> entries, final Set<String> sources, final ResolverConfiguration configuration,
+      final String goalsToExecute, IProgressMonitor monitor) throws CoreException {
 
     if(monitor.isCanceled()) {
       throw new OperationCanceledException();
@@ -366,8 +367,8 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
 
     MavenProject mavenProject = null;
 
-    if(!MavenPreferenceConstants.NO_GOAL.equals(goalToExecute)) {
-      mavenProject = generateSourceEntries(mavenEmbedder, project, entries, sources, configuration, goalToExecute,
+    if(goalsToExecute.trim().length() > 0) {
+      mavenProject = generateSourceEntries(mavenEmbedder, project, entries, sources, configuration, goalsToExecute,
           monitor);
     }
 
@@ -409,9 +410,9 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
   private IClasspathEntry getJREContainer(String version) {
     int n = SOURCES.indexOf(version);
     if(n > -1) {
-      Map jreContainers = getJREContainers();
+      Map<String, IClasspathEntry> jreContainers = getJREContainers();
       for(int i = n; i < SOURCES.size(); i++ ) {
-        IClasspathEntry entry = (IClasspathEntry) jreContainers.get(version);
+        IClasspathEntry entry = jreContainers.get(version);
         if(entry != null) {
           console.logMessage("JRE compliant to " + version + ". " + entry);
           return entry;
@@ -423,8 +424,8 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
     return entry;
   }
 
-  private Map getJREContainers() {
-    Map jreContainers = new HashMap();
+  private Map<String, IClasspathEntry> getJREContainers() {
+    Map<String, IClasspathEntry> jreContainers = new HashMap<String, IClasspathEntry>();
 
     jreContainers.put(getJREVersion(JavaRuntime.getDefaultVMInstall()), JavaRuntime.getDefaultJREContainerEntry());
 
@@ -446,11 +447,11 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
     return jreContainers;
   }
 
-  private static void setVersion(Map options, String name, String value) {
+  private static void setVersion(Map<String, String> options, String name, String value) {
     if(value == null) {
       return;
     }
-    String current = (String) options.get(name);
+    String current = options.get(name);
     if(current == null) {
       options.put(name, value);
     } else {
@@ -460,8 +461,8 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
     }
   }
 
-  private void setOption(IJavaProject javaProject, Map options, String name) {
-    String newValue = (String) options.get(name);
+  private void setOption(IJavaProject javaProject, Map<String, String> options, String name) {
+    String newValue = options.get(name);
     if(newValue == null) {
       newValue = (String) JavaCore.getDefaultOptions().get(name);
     }
@@ -503,8 +504,9 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
     return null;
   }
 
-  private String getBuildOption(MavenProject project, String optionName, List values) {
-    LinkedHashSet options = new LinkedHashSet();
+  @SuppressWarnings("unchecked")
+  private String getBuildOption(MavenProject project, String optionName, List<String> values) {
+    LinkedHashSet<String> options = new LinkedHashSet<String>();
     addBuildOptions(options, project.getBuild().getPluginsAsMap(), optionName);
     if(options.isEmpty()) {
       PluginManagement pluginManagement = project.getBuild().getPluginManagement();
@@ -514,8 +516,8 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
     }
     
     String option = null;
-    for(Iterator it = options.iterator(); it.hasNext();) {
-      String o = (String) it.next();
+    for(Iterator<String> it = options.iterator(); it.hasNext();) {
+      String o = it.next();
       if(option==null) {
         if(values.indexOf(o)>-1) {
           option = o;
@@ -530,21 +532,22 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
     return option;
   }
 
-  private void addBuildOptions(Set options, Map plugins, String optionName) {
-    Plugin plugin = (Plugin) plugins.get("org.apache.maven.plugins:maven-compiler-plugin");
+  private void addBuildOptions(Set<String> options, Map<String, Plugin> plugins, String optionName) {
+    Plugin plugin = plugins.get("org.apache.maven.plugins:maven-compiler-plugin");
     if(plugin!=null) {
       addOption(options, (Xpp3Dom) plugin.getConfiguration(), optionName);
-      List executions = plugin.getExecutions();
+
+      @SuppressWarnings("unchecked")
+      List<PluginExecution> executions = plugin.getExecutions();
       if(executions!=null) {
-        for(Iterator it = executions.iterator(); it.hasNext();) {
-          PluginExecution execution = (PluginExecution) it.next();
+        for(PluginExecution execution : executions) {
           addOption(options, (Xpp3Dom) execution.getConfiguration(), optionName);
         }
       }
     }
   }
 
-  private void addOption(Set options, Xpp3Dom configuration, String optionName) {
+  private void addOption(Set<String> options, Xpp3Dom configuration, String optionName) {
     if(configuration != null && configuration.getChild(optionName) != null) {
       options.add(configuration.getChild(optionName).getValue().trim());
     }

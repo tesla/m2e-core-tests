@@ -89,7 +89,7 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
     File settings = new File("settings.xml").getCanonicalFile();
 
     runtimeManager = plugin.getMavenRuntimeManager();
-    runtimeManager.setUserSettingsFile(settings.getAbsolutePath());
+    runtimeManager.setGlobalSettingsFile(settings.getAbsolutePath());
 
     repo = new File("localrepo").getCanonicalFile();
   }

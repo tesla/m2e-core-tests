@@ -44,16 +44,15 @@ public class MavenPreferenceConstants {
   public static final String P_GLOBAL_SETTINGS_FILE = PREFIX + "globalSettingsFile";
 
   /** String */
-  public static final String P_USER_SETTINGS_FILE = PREFIX + "userSettingsFile";
-
-  /** String */
   public static final String P_GOAL_ON_IMPORT = PREFIX + "goalOnImport";
 
   /** String */
   public static final String P_GOAL_ON_UPDATE = PREFIX + "goalOnUpdate";
 
-  public static final String NO_GOAL = "none";
+  public static final String DEFAULT_GOALS_ON_IMPORT = ""; 
 
+  public static final String DEFAULT_GOALS_ON_UPDATE = "process-resources"; 
+  
   /** String */
   public static final String P_OUTPUT_FOLDER = PREFIX + "outputFolder";
 
