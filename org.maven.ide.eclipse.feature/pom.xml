@@ -58,10 +58,6 @@
     </dependency>
     <dependency>
       <groupId>org.maven.ide.components</groupId>
-      <artifactId>org.maven.ide.components.qname</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.maven.ide.components</groupId>
       <artifactId>org.maven.ide.components.nexus_indexer</artifactId>
     </dependency>
   </dependencies>
