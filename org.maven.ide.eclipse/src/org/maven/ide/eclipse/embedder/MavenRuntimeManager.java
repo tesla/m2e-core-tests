@@ -164,8 +164,18 @@ public class MavenRuntimeManager {
     return preferenceStore.getString(MavenPreferenceConstants.P_GOAL_ON_UPDATE);
   }
   
+  public String getUserSettingsFile() {
+    return preferenceStore.getString(MavenPreferenceConstants.P_USER_SETTINGS_FILE);
+  }
+  
   public String getGlobalSettingsFile() {
-    return preferenceStore.getString(MavenPreferenceConstants.P_GLOBAL_SETTINGS_FILE);
+//    if(defaultRuntime.isEditable()) {
+//      return defaultRuntime.getSettings();  // settings for external Maven runtime
+//    }
+//    String globalSettings = preferenceStore.getString(MavenPreferenceConstants.P_GLOBAL_SETTINGS_FILE);
+//    return globalSettings.trim().length()==0 ? null : globalSettings;
+    
+    return defaultRuntime.getSettings();
   }
   
   
@@ -199,6 +209,10 @@ public class MavenRuntimeManager {
   
   public void setGoalOnUpdate(String goalName) {
     preferenceStore.setValue(MavenPreferenceConstants.P_GOAL_ON_UPDATE, goalName);
+  }
+  
+  public void setUserSettingsFile(String fileName) {
+    preferenceStore.setValue(MavenPreferenceConstants.P_USER_SETTINGS_FILE, fileName);
   }
   
   public void setGlobalSettingsFile(String fileName) {

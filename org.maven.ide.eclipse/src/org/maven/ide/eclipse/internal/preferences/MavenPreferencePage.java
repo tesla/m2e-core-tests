@@ -11,12 +11,8 @@ package org.maven.ide.eclipse.internal.preferences;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbench;
@@ -24,7 +20,6 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.Messages;
-import org.maven.ide.eclipse.index.IndexManager;
 
 
 public class MavenPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
@@ -107,31 +102,6 @@ public class MavenPreferencePage extends FieldEditorPreferencePage implements IW
         Messages.getString("preferences.goalOnUpdate"), "S&elect...", comboComposite)); //$NON-NLS-1$
 
     // addSeparator();
-    
-    GridData buttonsCompositeGridData = new GridData();
-    buttonsCompositeGridData.verticalIndent = 15;
-    buttonsCompositeGridData.horizontalSpan = 4;
-
-    Composite buttonsComposite = new Composite(getFieldEditorParent(), SWT.NONE);
-    buttonsComposite.setLayout(new RowLayout());
-    buttonsComposite.setLayoutData(buttonsCompositeGridData);
-
-    Button reindexButton = new Button(buttonsComposite, SWT.NONE);
-    reindexButton.setText(Messages.getString("preferences.reindexButton"));
-    reindexButton.addSelectionListener(new SelectionAdapter() {
-      public void widgetSelected(SelectionEvent e) {
-        plugin.getMavenEmbedderManager().invalidateMavenSettings();
-        plugin.getIndexManager().scheduleIndexUpdate(IndexManager.LOCAL_INDEX, true, 0L);
-      }
-    });
-
-    Button refreshButton = new Button(buttonsComposite, SWT.NONE);
-    refreshButton.setText(Messages.getString("preferences.refreshButton"));
-    refreshButton.addSelectionListener(new SelectionAdapter() {
-      public void widgetSelected(SelectionEvent e) {
-        plugin.getMavenEmbedderManager().invalidateMavenSettings();
-      }
-    });
   }
 
   private void addSeparator() {

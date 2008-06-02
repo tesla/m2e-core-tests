@@ -296,10 +296,10 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
       sb.append(" -Dmaven.test.skip=true");
     }
     
-    String settings = runtimeManager.getGlobalSettingsFile();
-    if(settings.trim().length()==0) {
-      settings = getMavenRuntime(configuration).getSettings();
-    }
+    String settings = runtimeManager.getUserSettingsFile();
+//    if(settings==null) {
+//      settings = getMavenRuntime(configuration).getSettings();
+//    }
     if(settings != null && settings.trim().length() > 0) {
       sb.append(" -s ");
       if(settings.indexOf(' ') > -1) {

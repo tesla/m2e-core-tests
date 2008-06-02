@@ -44,6 +44,9 @@ public class MavenPreferenceConstants {
   public static final String P_GLOBAL_SETTINGS_FILE = PREFIX + "globalSettingsFile";
 
   /** String */
+  public static final String P_USER_SETTINGS_FILE = PREFIX + "userSettingsFile";
+
+  /** String */
   public static final String P_GOAL_ON_IMPORT = PREFIX + "goalOnImport";
 
   /** String */
