@@ -39,10 +39,12 @@ import org.eclipse.ui.IWorkbench;
 import org.apache.maven.archetype.catalog.Archetype;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
+import org.apache.maven.model.Parent;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.Messages;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
+
 
 /**
  * A project wizard for creating a new Maven2 module project.
@@ -54,7 +56,7 @@ public class MavenModuleWizard extends Wizard implements INewWizard {
 
   /** The default wizard page image. */
   protected static final ImageDescriptor DEFAULT_PAGE_IMAGE = MavenPlugin.getImageDescriptor(DEFAULT_PAGE_IMAGE_NAME);
-  
+
   /** the current selection */
   private IStructuredSelection selection;
 
@@ -75,14 +77,21 @@ public class MavenModuleWizard extends Wizard implements INewWizard {
 
   /** The project configuration bean. */
   protected ProjectImportConfiguration configuration;
-  
+
+  private String moduleName;
+
+  protected boolean isEditor = false;
 
   /** Default constructor. Sets the title and image of the wizard. */
   public MavenModuleWizard() {
-    super();
-    setWindowTitle( Messages.getString( "wizard.module.title" ) );
-    setDefaultPageImageDescriptor( DEFAULT_PAGE_IMAGE );
-    setNeedsProgressMonitor( true );
+    setWindowTitle(Messages.getString("wizard.module.title"));
+    setDefaultPageImageDescriptor(DEFAULT_PAGE_IMAGE);
+    setNeedsProgressMonitor(true);
+  }
+
+  public MavenModuleWizard(boolean isEditor) {
+    this();
+    this.isEditor = isEditor;
   }
 
   /** Creates the pages. */
@@ -98,67 +107,80 @@ public class MavenModuleWizard extends Wizard implements INewWizard {
         Messages.getString("wizard.project.page.dependencies.description"));
     dependenciesPage.setDependencies(new Dependency[0]);
 
-    addPage( parentPage );
-    addPage( archetypePage );
-    addPage( parametersPage );
-    addPage( artifactPage );
-    addPage( dependenciesPage );
+    addPage(parentPage);
+    addPage(archetypePage);
+    addPage(parametersPage);
+    addPage(artifactPage);
+    addPage(dependenciesPage);
   }
-  
+
   /** Adds the listeners after the page controls are created. */
-  public void createPageControls( Composite pageContainer ) {
+  public void createPageControls(Composite pageContainer) {
     artifactPage.setParentReadonly(true);
     artifactPage.setTitle(Messages.getString("wizard.module.page.artifact.title"));
     archetypePage.setTitle(Messages.getString("wizard.module.page.archetype.title"));
     parametersPage.setTitle(Messages.getString("wizard.module.page.parameters.title"));
-    
-    super.createPageControls( pageContainer );
 
-    parametersPage.setArtifactIdEnabled( false );
-    
-    parentPage.addArchetypeSelectionListener( new SelectionAdapter() {
+    super.createPageControls(pageContainer);
+
+    parametersPage.setArtifactIdEnabled(false);
+
+    parentPage.addArchetypeSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
-        archetypePage.setUsed( ! parentPage.isSimpleProject() );
+        archetypePage.setUsed(!parentPage.isSimpleProject());
       }
-    } );
+    });
 
-    parentPage.addModuleNameListener( new ModifyListener() {
-      public void modifyText( ModifyEvent e ) {
-        parametersPage.setProjectName( parentPage.getModuleName() );
-        artifactPage.setProjectName( parentPage.getModuleName() );
+    parentPage.addModuleNameListener(new ModifyListener() {
+      public void modifyText(ModifyEvent e) {
+        parametersPage.setProjectName(parentPage.getModuleName());
+        artifactPage.setProjectName(parentPage.getModuleName());
       }
-    } );
+    });
 
-    parentPage.addParentProjectListener( new ModifyListener() {
-      public void modifyText( ModifyEvent e ) {
+    parentPage.addParentProjectListener(new ModifyListener() {
+      public void modifyText(ModifyEvent e) {
         copyParentValues();
       }
-    } );
+    });
 
-    if ( selection != null && selection.size() > 0 ) {
-      parentPage.setParent( selection.getFirstElement() );
+    if(selection != null && selection.size() > 0) {
+      parentPage.setParent(selection.getFirstElement());
       copyParentValues();
     }
   }
 
-
   /** Copies the parent project parameters to the artifact page. */
   protected void copyParentValues() {
     Model model = parentPage.getParentModel();
-    if ( model != null ) {
-      artifactPage.setParentProject(
-        model.getGroupId(), model.getArtifactId(), model.getVersion() );
-      parametersPage.setParentProject(
-          model.getGroupId(), model.getArtifactId(), model.getVersion() );
+    if(model != null) {
+      String groupId = model.getGroupId();
+
+      String artifactId = model.getArtifactId();
+      String version = model.getVersion();
+
+      if(groupId == null) {
+        Parent parent = model.getParent();
+        if(parent != null) {
+          groupId = parent.getGroupId();
+        }
+      }
+      if(artifactId == null) {
+        Parent parent = model.getParent();
+        if(parent != null) {
+          artifactId = parent.getArtifactId();
+        }
+      }
+
+      artifactPage.setParentProject(groupId, artifactId, version);
+      parametersPage.setParentProject(groupId, artifactId, version);
     }
   }
-  
-  
+
   /** Stores the current selection. */
-  public void init( IWorkbench workbench, IStructuredSelection selection ) {
+  public void init(IWorkbench workbench, IStructuredSelection selection) {
     this.selection = selection;
   }
-
 
   /** Performs the "finish" action. */
   public boolean performFinish() {
@@ -175,7 +197,7 @@ public class MavenModuleWizard extends Wizard implements INewWizard {
     // the default workspace location for a project, we have to pass null
     // instead of the actual location.
     final IPath location = parentPage.getParentContainer().getLocation();
-    
+
     final IFile parentPom = parentPage.getPom();
 
     Job job;
@@ -197,10 +219,10 @@ public class MavenModuleWizard extends Wizard implements INewWizard {
           // XXX respect parent's setting for separate projects for modules
           // XXX should run update sources on parent instead of creating new module project
 
-          plugin.getProjectConfigurationManager().createSimpleProject(project, location.append(moduleName), model, folders,
-              configuration.getResolverConfiguration(), monitor);
+          plugin.getProjectConfigurationManager().createSimpleProject(project, location.append(moduleName), model,
+              folders, configuration.getResolverConfiguration(), monitor);
 
-          plugin.getMavenModelManager().addModule(parentPom, projectName);
+          setModule(projectName);
 
           return Status.OK_STATUS;
         }
@@ -215,9 +237,12 @@ public class MavenModuleWizard extends Wizard implements INewWizard {
       job = new WorkspaceJob(Messages.getString("wizard.project.job.creating", archetype.getArtifactId())) {
         public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
           MavenPlugin plugin = MavenPlugin.getDefault();
-          plugin.getProjectConfigurationManager().createArchetypeProject(project, location, archetype, model.getGroupId(),
-              model.getArtifactId(), model.getVersion(), model.getPackaging(), properties, configuration, monitor);
-          plugin.getMavenModelManager().addModule(parentPom, moduleName);
+          plugin.getProjectConfigurationManager().createArchetypeProject(project, location, archetype,
+              model.getGroupId(), model.getArtifactId(), model.getVersion(), model.getPackaging(), properties,
+              configuration, monitor);
+
+          setModule(moduleName);
+
           return Status.OK_STATUS;
         }
       };
@@ -225,7 +250,12 @@ public class MavenModuleWizard extends Wizard implements INewWizard {
     job.addJobChangeListener(new JobChangeAdapter() {
       public void done(IJobChangeEvent event) {
         final IStatus result = event.getResult();
-        if(!result.isOK()) {
+        if(result.isOK()) {
+          if(!isEditor) {
+            plugin.getMavenModelManager().addModule(parentPom, moduleName);
+          }
+
+        } else {
           Display.getDefault().asyncExec(new Runnable() {
             public void run() {
               MessageDialog.openError(getShell(), //
@@ -239,6 +269,22 @@ public class MavenModuleWizard extends Wizard implements INewWizard {
     job.setRule(plugin.getProjectConfigurationManager().getRule());
     job.schedule();
 
+    if(isEditor) {
+      try {
+        job.join();
+      } catch(InterruptedException ex) {
+        // ignore
+      }
+    }
+
     return true;
+  }
+
+  void setModule(String moduleName) {
+    this.moduleName = moduleName;
+  }
+
+  public String getModuleName() {
+    return this.moduleName;
   }
 }
