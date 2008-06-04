@@ -155,7 +155,6 @@ public class MavenModuleWizard extends Wizard implements INewWizard {
     Model model = parentPage.getParentModel();
     if(model != null) {
       String groupId = model.getGroupId();
-
       String artifactId = model.getArtifactId();
       String version = model.getVersion();
 
@@ -165,10 +164,10 @@ public class MavenModuleWizard extends Wizard implements INewWizard {
           groupId = parent.getGroupId();
         }
       }
-      if(artifactId == null) {
+      if(version == null) {
         Parent parent = model.getParent();
         if(parent != null) {
-          artifactId = parent.getArtifactId();
+          version = parent.getVersion();
         }
       }
 
