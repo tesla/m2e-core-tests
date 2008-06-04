@@ -119,9 +119,10 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
           MavenProjectInfo projectInfo = (MavenProjectInfo) it.next();
 
           IProject project = create(projectInfo, configuration, monitor);
-
-          projects.put(projectInfo, project);
-          updateRequest.addPomFile(project);
+          if (project != null) {
+            projects.put(projectInfo, project);
+            updateRequest.addPomFile(project);
+          }
         }
 
         // next, resolve maven dependencies for all projects
