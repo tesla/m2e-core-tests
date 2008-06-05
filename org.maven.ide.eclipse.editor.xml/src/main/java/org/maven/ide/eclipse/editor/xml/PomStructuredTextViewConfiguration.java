@@ -10,12 +10,11 @@ package org.maven.ide.eclipse.editor.xml;
 
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
+import org.eclipse.jface.text.quickassist.IQuickAssistAssistant;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.wst.sse.core.text.IStructuredPartitions;
 import org.eclipse.wst.xml.core.text.IXMLPartitions;
 import org.eclipse.wst.xml.ui.StructuredTextViewerConfigurationXML;
-
-
 
 /**
  * @author Lukas Krecan
@@ -24,13 +23,10 @@ public class PomStructuredTextViewConfiguration extends StructuredTextViewerConf
 
   @Override
   public IContentAssistProcessor[] getContentAssistProcessors(ISourceViewer sourceViewer, String partitionType) {
-    IContentAssistProcessor[] processors;
     if(partitionType == IStructuredPartitions.DEFAULT_PARTITION || partitionType == IXMLPartitions.XML_DEFAULT) {
-      processors = new IContentAssistProcessor[] {new PomContentAssistProcessor(sourceViewer)};
-    } else {
-      processors = super.getContentAssistProcessors(sourceViewer, partitionType);
+      return new IContentAssistProcessor[] {new PomContentAssistProcessor(sourceViewer)};
     }
-    return processors;
+    return super.getContentAssistProcessors(sourceViewer, partitionType);
   }
   
   @Override
@@ -46,6 +42,11 @@ public class PomStructuredTextViewConfiguration extends StructuredTextViewerConf
     
     return pomDetectors;
   }
-  
+
+  public IQuickAssistAssistant getQuickAssistAssistant(ISourceViewer sourceViewer) {
+    // TODO Auto-generated method stub
+    return super.getQuickAssistAssistant(sourceViewer);
+  }
+
 }
 
