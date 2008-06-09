@@ -76,6 +76,8 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
 
   private List locations;
 
+  private IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
+
   protected MavenImportWizardPage(ProjectImportConfiguration importConfiguration) {
     super("MavenProjectImportWizardPage", importConfiguration);
     setTitle("Maven Projects");
@@ -334,12 +336,10 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
 
   boolean isWorkspaceFolder(MavenProjectInfo info) {
     if(info!=null) {
-      IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-  
       File pomFile = info.getPomFile();
       if(pomFile != null) {
         File parentFile = pomFile.getParentFile();
-        if(parentFile.getAbsolutePath().equals(root.getLocation().toFile().getAbsolutePath())) {
+        if(parentFile.getAbsolutePath().equals(workspaceRoot.getLocation().toFile().getAbsolutePath())) {
           return true;
         }
       }
@@ -357,10 +357,11 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
   }
 
   protected AbstractProjectScanner getProjectScanner() {
+    File root = workspaceRoot.getLocation().toFile();
     if(locations==null || locations.isEmpty()) {
-      return new LocalProjectScanner(rootDirectoryCombo.getText(), false);
+      return new LocalProjectScanner(root, rootDirectoryCombo.getText(), false);
     }
-    return new LocalProjectScanner(locations, getImportConfiguration().isNeedsRename());
+    return new LocalProjectScanner(root, locations, getImportConfiguration().isNeedsRename());
   }
 
   /**

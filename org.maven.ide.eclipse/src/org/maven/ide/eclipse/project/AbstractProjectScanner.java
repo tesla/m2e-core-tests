@@ -21,31 +21,31 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
  */
 public abstract class AbstractProjectScanner implements IRunnableWithProgress {
 
-  private final List projects = new ArrayList();
-  private final List errors = new ArrayList();
+  private final List<MavenProjectInfo> projects = new ArrayList<MavenProjectInfo>();
+  private final List<Exception> errors = new ArrayList<Exception>();
   
   /**
    * Returns <code>List</code> of {@link MavenProjectInfo}
    */
-  public List getProjects() {
+  public List<MavenProjectInfo> getProjects() {
     return projects;
   }
 
   /**
    * Returns <code>List</code> of <code>Exception</code>
    */
-  public List getErrors() {
+  public List<Exception> getErrors() {
     return this.errors;
   }
-  
+
   protected void addProject(MavenProjectInfo mavenProjectInfo) {
     projects.add(mavenProjectInfo);
   }
-  
+
   protected void addError(Exception exception) {
     errors.add(exception);
   }
-  
+
   public abstract String getDescription();
 
 }

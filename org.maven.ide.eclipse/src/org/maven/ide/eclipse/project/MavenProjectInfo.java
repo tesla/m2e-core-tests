@@ -34,7 +34,7 @@ public class MavenProjectInfo {
   /**
    * Map of MavenProjectInfo
    */
-  private final Map projects = new LinkedHashMap();
+  private final Map<String, MavenProjectInfo> projects = new LinkedHashMap<String, MavenProjectInfo>();
 
   private final Set profiles = new HashSet();
 
@@ -87,7 +87,7 @@ public class MavenProjectInfo {
 
   public void add(MavenProjectInfo info) {
     String key = info.getLabel();
-    MavenProjectInfo i = (MavenProjectInfo) projects.get(key);
+    MavenProjectInfo i = projects.get(key);
     if(i==null) {
       projects.put(key, info);
     } else {
@@ -123,7 +123,7 @@ public class MavenProjectInfo {
     this.model = model;
   }
   
-  public Collection getProjects() {
+  public Collection<MavenProjectInfo> getProjects() {
     return this.projects.values();
   }
  

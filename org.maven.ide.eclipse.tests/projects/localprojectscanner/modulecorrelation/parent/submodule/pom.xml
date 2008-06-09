@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <parent>
+    <groupId>deepnesting</groupId>
+    <artifactId>module</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <relativePath>../module</relativePath>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>deepnesting</groupId>
+  <artifactId>submodule</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+</project>

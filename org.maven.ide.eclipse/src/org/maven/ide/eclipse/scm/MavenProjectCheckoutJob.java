@@ -88,7 +88,9 @@ public abstract class MavenProjectCheckoutJob extends WorkspaceJob {
       operation.setMavenProjects(getProjects(monitor));
       operation.run(monitor);
 
-      LocalProjectScanner scanner = new LocalProjectScanner(operation.getLocations(), true);
+      IWorkspaceRoot workspace = ResourcesPlugin.getWorkspace().getRoot();
+
+      LocalProjectScanner scanner = new LocalProjectScanner(workspace.getLocation().toFile(), operation.getLocations(), true);
       scanner.run(monitor);
 
       MavenPlugin plugin = MavenPlugin.getDefault();
@@ -99,7 +101,6 @@ public abstract class MavenProjectCheckoutJob extends WorkspaceJob {
 
       if(checkoutAllProjects) {
         // check if there any project name conflicts 
-        IWorkspaceRoot workspace = ResourcesPlugin.getWorkspace().getRoot();
         for(Iterator it = projects.iterator(); it.hasNext();) {
           MavenProjectInfo projectInfo = (MavenProjectInfo) it.next();
           Model model = projectInfo.getModel();

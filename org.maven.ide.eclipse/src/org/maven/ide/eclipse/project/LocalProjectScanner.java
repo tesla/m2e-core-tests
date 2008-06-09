@@ -10,11 +10,11 @@ package org.maven.ide.eclipse.project;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,14 +33,18 @@ import org.maven.ide.eclipse.embedder.MavenModelManager;
  * @author Eugene Kuleshov
  */
 public class LocalProjectScanner extends AbstractProjectScanner {
-  private final Collection folders;
+  private final File workspaceRoot;
+  private final List<String> folders;
   private final boolean needsRename;
 
-  public LocalProjectScanner(String folder, boolean needsRename) {
-    this(Collections.singletonList(folder), needsRename);
+  private Set<File> scannedFolders = new HashSet<File>();
+
+  public LocalProjectScanner(File workspaceRoot, String folder, boolean needsRename) {
+    this(workspaceRoot, Collections.singletonList(folder), needsRename);
   }
 
-  public LocalProjectScanner(Collection folders, boolean needsRename) {
+  public LocalProjectScanner(File workspaceRoot, List<String> folders, boolean needsRename) {
+    this.workspaceRoot = workspaceRoot;
     this.folders = folders;
     this.needsRename = needsRename;
   }
@@ -49,55 +53,67 @@ public class LocalProjectScanner extends AbstractProjectScanner {
     monitor.beginTask("Scanning folders", IProgressMonitor.UNKNOWN);
     try {
       for(Iterator it = folders.iterator(); it.hasNext();) {
-        String folder = (String) it.next();
-        scanFolder(folder, folder, new SubProgressMonitor(monitor, IProgressMonitor.UNKNOWN));
+        File folder;
+        try {
+          folder = new File((String) it.next()).getCanonicalFile();
+          scanFolder(folder, new SubProgressMonitor(monitor, IProgressMonitor.UNKNOWN));
+        } catch(IOException ex) {
+          addError(ex);
+        }
       }
-      
     } finally {
       monitor.done();
     }
   }
 
-  private void scanFolder(String baseFolderPath, String folderPath, IProgressMonitor monitor) throws InterruptedException {
+  private void scanFolder(File baseDir, IProgressMonitor monitor) throws InterruptedException {
     if(monitor.isCanceled()) {
       throw new InterruptedException();
     }
 
-    monitor.subTask(folderPath);
+    monitor.subTask(baseDir.toString());
     monitor.worked(1);
 
-    File folderDir = new File(folderPath);
-    if(!folderDir.exists() || !folderDir.isDirectory()) {
+    if(!baseDir.exists() || !baseDir.isDirectory()) {
       return;
     }
 
-    File pomFile = new File(folderDir, MavenPlugin.POM_FILE_NAME);
-    MavenProjectInfo mavenProjectInfo = readMavenProjectInfo(baseFolderPath, pomFile, null);
-    if(mavenProjectInfo != null) {
-      mavenProjectInfo.setNeedsRename(needsRename && baseFolderPath == folderPath);
-      addProject(mavenProjectInfo);
+    MavenProjectInfo projectInfo = readMavenProjectInfo(baseDir, "", null);
+    if(projectInfo != null) {
+      addProject(projectInfo);
       return; // don't scan subfolders of the Maven project
     }
 
-    File[] files = folderDir.listFiles();
+    File[] files = baseDir.listFiles();
     for(int i = 0; i < files.length; i++ ) {
-      if(files[i].isDirectory()) {
-        scanFolder(baseFolderPath, files[i].getAbsolutePath(), monitor);
+      File file;
+      try {
+        file = files[i].getCanonicalFile();
+        if(file.isDirectory()) {
+          scanFolder(file, monitor);
+        }
+      } catch(IOException ex) {
+        addError(ex);
       }
     }
   }
 
-  private MavenProjectInfo readMavenProjectInfo(String baseFolderPath, File pomFile, MavenProjectInfo parentInfo) {
-    if(!pomFile.exists()) {
-      return null;
-    }
+  private MavenProjectInfo readMavenProjectInfo(File baseDir, String modulePath, MavenProjectInfo parentInfo) {
 
     MavenModelManager modelManager = MavenPlugin.getDefault().getMavenModelManager();
+
+    File pomFile = new File(baseDir, MavenPlugin.POM_FILE_NAME);
     try {
       Model model = modelManager.readMavenModel(pomFile);
-      String pomName = pomFile.getAbsolutePath().substring(baseFolderPath.length());
 
-      MavenProjectInfo projectInfo = new MavenProjectInfo(pomName, pomFile, model, parentInfo);
+      if (!scannedFolders.add(baseDir.getCanonicalFile())) {
+        return null; // we already know this project
+      }
+
+      String pomName = modulePath + "/" + MavenPlugin.POM_FILE_NAME;
+
+      MavenProjectInfo projectInfo = new MavenProjectInfo(pomName , pomFile, model, parentInfo);
+      projectInfo.setNeedsRename(getNeedsRename(projectInfo));
 
       Map modules = new LinkedHashMap();
       for(Iterator it = model.getModules().iterator(); it.hasNext();) {
@@ -118,23 +134,13 @@ public class LocalProjectScanner extends AbstractProjectScanner {
         }
       }
 
-      File baseDir = pomFile.getParentFile();
       for(Iterator it = modules.entrySet().iterator(); it.hasNext();) {
         Map.Entry e = (Map.Entry) it.next();
         String module = (String) e.getKey();
         Set profiles = (Set) e.getValue();
-        File modulePom = new File(baseDir, module + "/" + MavenPlugin.POM_FILE_NAME);
-        try {
-          modulePom = modulePom.getCanonicalFile();
-        } catch(IOException ex) {
-        }
-        
-        // MNGECLIPSE-614 skip folders outside of baseFolderPath 
-        if(!isSubdir(baseFolderPath, modulePom.getParentFile())) {
-          continue;  
-        }
-        
-        MavenProjectInfo moduleInfo = readMavenProjectInfo(baseFolderPath, modulePom, projectInfo);
+
+        File moduleBaseDir = new File(baseDir, module);
+        MavenProjectInfo moduleInfo = readMavenProjectInfo(moduleBaseDir, module, projectInfo);
         if(moduleInfo != null) {
           moduleInfo.addProfiles(profiles);
           projectInfo.add(moduleInfo);
@@ -146,28 +152,20 @@ public class LocalProjectScanner extends AbstractProjectScanner {
     } catch(CoreException ex) {
       addError(ex);
       MavenPlugin.getDefault().getConsole().logError("Unable to read model " + pomFile.getAbsolutePath());
+    } catch(IOException ex) {
+      addError(ex);
+      MavenPlugin.getDefault().getConsole().logError("Unable to read model " + pomFile.getAbsolutePath());
     }
 
     return null;
-  }
-
-  private boolean isSubdir(String baseFolderPath, File folder) {
-    int n = baseFolderPath.length()-1;
-    if(baseFolderPath.charAt(n)=='\\' || baseFolderPath.charAt(n)=='/') {
-      baseFolderPath = baseFolderPath.substring(0, n);
-    }
-    
-    while(folder != null) {
-      if(baseFolderPath.equals(folder.getAbsolutePath())) {
-        return true;
-      }
-      folder = folder.getParentFile();
-    }
-    return false;
   }
 
   public String getDescription() {
     return folders.toString();
   }
 
+  private boolean getNeedsRename(MavenProjectInfo mavenProjectInfo) throws IOException {
+    File cannonical = mavenProjectInfo.getPomFile().getParentFile().getCanonicalFile();
+    return needsRename && cannonical.equals(workspaceRoot.getCanonicalFile());
+  }
 }

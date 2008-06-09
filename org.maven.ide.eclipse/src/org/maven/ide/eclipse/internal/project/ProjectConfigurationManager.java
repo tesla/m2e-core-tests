@@ -339,11 +339,13 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
   public void createArchetypeProject(IProject project, IPath location, Archetype archetype, String groupId,
       String artifactId, String version, String javaPackage, Properties properties, ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException {
     monitor.beginTask("Creating project " + project.getName(), 2);
+
+    IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
   
     monitor.subTask("Executing Archetype " + archetype.getGroupId() + ":" + archetype.getArtifactId());
     if(location == null) {
       // if the project should be created in the workspace, figure out the path
-      location = ResourcesPlugin.getWorkspace().getRoot().getLocation();
+      location = workspaceRoot.getLocation();
     }
 
     ArchetypeGenerationRequest request = new ArchetypeGenerationRequest() //
@@ -372,7 +374,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     // XXX Archetyper don't allow to specify project folder
     String projectFolder = location.append(artifactId).toFile().getAbsolutePath();
     
-    LocalProjectScanner scanner = new LocalProjectScanner(projectFolder, true);
+    LocalProjectScanner scanner = new LocalProjectScanner(workspaceRoot.getLocation().toFile(), projectFolder, true);
     try {
       scanner.run(monitor);
     } catch (InterruptedException e) {
