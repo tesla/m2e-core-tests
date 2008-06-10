@@ -18,3 +18,4 @@ Require-Bundle: org.eclipse.core.runtime,
 Export-Package: org.maven.ide.eclipse.editor.xml,
  org.maven.ide.eclipse.editor.xml.search
 Bundle-ClassPath: .
+Bundle-Vendor: Sonatype, Inc.
