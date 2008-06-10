@@ -165,7 +165,7 @@ public class LocalProjectScanner extends AbstractProjectScanner {
   }
 
   private boolean getNeedsRename(MavenProjectInfo mavenProjectInfo) throws IOException {
-    File cannonical = mavenProjectInfo.getPomFile().getParentFile().getCanonicalFile();
+    File cannonical = mavenProjectInfo.getPomFile().getParentFile().getParentFile().getCanonicalFile();
     return needsRename && cannonical.equals(workspaceRoot.getCanonicalFile());
   }
 }

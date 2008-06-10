@@ -140,4 +140,17 @@ public class LocalProjectScannerTest extends TestCase {
 
     assertEquals(1, projects.size());
   }
+  
+  public void testRenameInWorkspace() throws Exception {
+    File baseDir = new File("projects/localprojectscanner/rename/mavenNNNNNNNN").getCanonicalFile();
+
+    LocalProjectScanner scanner = new LocalProjectScanner(baseDir.getParentFile().getCanonicalFile(), baseDir.getAbsolutePath(), true);
+    scanner.run(new NullProgressMonitor());
+
+    List<MavenProjectInfo> projects = scanner.getProjects();
+
+    MavenProjectInfo project = projects.get(0);
+    assertTrue(project.isNeedsRename());
+    
+  }
 }
