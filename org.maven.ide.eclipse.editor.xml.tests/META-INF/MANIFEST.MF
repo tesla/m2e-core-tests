@@ -7,4 +7,5 @@ Bundle-RequiredExecutionEnvironment: J2SE-1.5,
  JavaSE-1.6
 Require-Bundle: org.maven.ide.components.maven_embedder,
  org.maven.ide.eclipse,
- org.maven.ide.eclipse.editor.xml
+ org.maven.ide.eclipse.editor.xml,
+ org.junit4;bundle-version="4.3.1"
