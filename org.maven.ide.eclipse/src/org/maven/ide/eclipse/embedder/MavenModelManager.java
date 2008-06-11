@@ -9,37 +9,56 @@
 package org.maven.ide.eclipse.embedder;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Collections;
-import java.util.Map;
+import java.util.Iterator;
 
-import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
-import org.apache.xmlbeans.XmlCursor;
-import org.apache.xmlbeans.XmlException;
-import org.apache.xmlbeans.XmlOptions;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+
+import org.xml.sax.InputSource;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.common.util.URI;
+import org.eclipse.jem.util.emf.workbench.EMFWorkbenchContextBase;
+import org.eclipse.wst.common.internal.emf.resource.EMF2DOMRenderer;
 
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 import org.apache.maven.embedder.MavenEmbedder;
-import org.apache.maven.model.Dependency;
-import org.apache.maven.model.Model;
-import org.apache.maven.pom.x400.Build;
-import org.apache.maven.pom.x400.ProjectDocument;
-import org.apache.maven.pom.x400.Build.Plugins;
-import org.apache.maven.pom.x400.Model.Dependencies;
-import org.apache.maven.pom.x400.Model.Modules;
 
+import org.maven.ide.components.pom.Build;
+import org.maven.ide.components.pom.Configuration;
+import org.maven.ide.components.pom.Dependencies;
+import org.maven.ide.components.pom.Dependency;
+import org.maven.ide.components.pom.Exclusion;
+import org.maven.ide.components.pom.ExclusionsType;
+import org.maven.ide.components.pom.Model;
+import org.maven.ide.components.pom.Modules;
+import org.maven.ide.components.pom.Plugin;
+import org.maven.ide.components.pom.Plugins;
+import org.maven.ide.components.pom.PomFactory;
+import org.maven.ide.components.pom.util.PomResourceFactoryImpl;
+import org.maven.ide.components.pom.util.PomResourceImpl;
 import org.maven.ide.eclipse.MavenConsole;
 import org.maven.ide.eclipse.MavenPlugin;
 
@@ -49,20 +68,61 @@ import org.maven.ide.eclipse.MavenPlugin;
  * 
  * @author Eugene Kuleshov
  */
+@SuppressWarnings("restriction")
 public class MavenModelManager {
 
+  static final PomFactory POM_FACTORY = PomFactory.eINSTANCE;
+  
   private final MavenEmbedderManager embedderManager;
 
   private final MavenConsole console;
-
-  private XmlOptions xmlOptions;
 
   public MavenModelManager(MavenEmbedderManager embedderManager, MavenConsole console) {
     this.embedderManager = embedderManager;
     this.console = console;
   }
 
-  public Model readMavenModel(Reader reader) throws CoreException {
+  public PomResourceImpl loadResource(IFile pomFile) throws CoreException {
+    String path = pomFile.getFullPath().toOSString();
+    URI uri = URI.createPlatformResourceURI(path, true);
+
+    try {
+      PomResourceFactoryImpl factory = new PomResourceFactoryImpl();
+      PomResourceImpl resource = (PomResourceImpl) factory.createResource(uri);
+      
+      EMFWorkbenchContextBase contextBase = new EMFWorkbenchContextBase(pomFile.getProject());
+      contextBase.getResourceSet().getResources().add(resource);
+      
+      resource.load(Collections.EMPTY_MAP);
+      return resource;
+
+    } catch(IOException ex) {
+      String msg = "Can't load model " + pomFile;
+      MavenPlugin.log(msg, ex);
+      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
+    }
+  }
+
+  public Model loadModel(String pomFile) throws CoreException {
+    URI uri = URI.createFileURI(pomFile);
+
+    PomResourceFactoryImpl factory = new PomResourceFactoryImpl();
+    PomResourceImpl resource = (PomResourceImpl) factory.createResource(uri);
+
+    // disable SSE support for read-only external documents
+    resource.setRenderer(new EMF2DOMRenderer());
+
+    try {
+      resource.load(Collections.EMPTY_MAP);
+      return (Model) resource.getContents().get(0);
+    } catch(IOException ex) {
+      String msg = "Can't load model " + pomFile;
+      MavenPlugin.log(msg, ex);
+      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
+    }
+  }
+
+  public org.apache.maven.model.Model readMavenModel(Reader reader) throws CoreException {
     try {
       MavenEmbedder embedder = embedderManager.getWorkspaceEmbedder();
       return embedder.readModel(reader);
@@ -77,7 +137,7 @@ public class MavenModelManager {
     }
   }
 
-  public Model readMavenModel(File pomFile) throws CoreException {
+  public org.apache.maven.model.Model readMavenModel(File pomFile) throws CoreException {
     try {
       MavenEmbedder embedder = embedderManager.getWorkspaceEmbedder();
       return embedder.readModel(pomFile);
@@ -92,7 +152,7 @@ public class MavenModelManager {
     }
   }
 
-  public Model readMavenModel(IFile pomFile) throws CoreException {
+  public org.apache.maven.model.Model readMavenModel(IFile pomFile) throws CoreException {
     String name = pomFile.getProject().getName() + "/" + pomFile.getProjectRelativePath();
     try {
       MavenEmbedder embedder = embedderManager.getWorkspaceEmbedder();
@@ -108,7 +168,7 @@ public class MavenModelManager {
     }
   }
 
-  public void createMavenModel(IFile pomFile, Model model) throws CoreException {
+  public void createMavenModel(IFile pomFile, org.apache.maven.model.Model model) throws CoreException {
     String pomFileName = pomFile.getLocation().toString();
     if(pomFile.exists()) {
       String msg = "POM " + pomFileName + " already exists";
@@ -117,24 +177,50 @@ public class MavenModelManager {
     }
 
     try {
-      StringWriter w = new StringWriter();
+      StringWriter sw = new StringWriter();
 
       MavenEmbedder embedder = embedderManager.getWorkspaceEmbedder();
-      embedder.writeModel(w, model, true);
+      embedder.writeModel(sw, model, true);
 
-      String pom = w.toString();
-      
-      ProjectDocument projectDocument = ProjectDocument.Factory.parse(pom, getXmlOptions());
+      String pom = sw.toString();
 
-      new NamespaceAdder().update(projectDocument);
+      // XXX MNGECLIPSE-495
+      DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+      documentBuilderFactory.setNamespaceAware(false);
+      DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
       
-      XmlOptions options = new XmlOptions();
-      options.setSaveNamespacesFirst();
+      Document document = documentBuilder.parse(new InputSource(new StringReader(pom)));
+      Element documentElement = document.getDocumentElement();
+
+      NamedNodeMap attributes = document.getAttributes();
+
+      if(attributes == null || attributes.getNamedItem("xmlns") == null) {
+        Attr attr = document.createAttribute("xmlns");
+        attr.setTextContent("http://maven.apache.org/POM/4.0.0");
+        documentElement.setAttributeNode(attr);
+      }
+
+      if(attributes == null || attributes.getNamedItem("xmlns:xsi") == null) {
+        Attr attr = document.createAttribute("xmlns:xsi");
+        attr.setTextContent("http://www.w3.org/2001/XMLSchema-instance");
+        documentElement.setAttributeNode(attr);
+      }
+
+      if(attributes == null || attributes.getNamedItem("xsi:schemaLocation") == null) {
+        Attr attr = document.createAttributeNS("http://www.w3.org/2001/XMLSchema-instance", "xsi:schemaLocation");
+        attr.setTextContent("http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd");
+        documentElement.setAttributeNode(attr);
+      }
       
-      ByteArrayOutputStream bos = new ByteArrayOutputStream();
-      projectDocument.save(bos, options);
+      TransformerFactory transfac = TransformerFactory.newInstance();
+      Transformer trans = transfac.newTransformer();
+      trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
       
-      pomFile.create(new ByteArrayInputStream(bos.toByteArray()), true, null);
+      sw = new StringWriter();
+      trans.transform(new DOMSource(document), new StreamResult(sw));
+      pom = sw.toString();
+      
+      pomFile.create(new ByteArrayInputStream(pom.getBytes("UTF-8")), true, new NullProgressMonitor());
 
     } catch(Exception ex) {
       String msg = "Can't create model " + pomFileName + "; " + ex.toString();
@@ -143,52 +229,50 @@ public class MavenModelManager {
     }
   }
 
-  public ProjectDocument readProjectDocument(IFile pomFile) throws CoreException {
-    String name = pomFile.getProject().getName() + "/" + pomFile.getProjectRelativePath();
-    try {
-      return ProjectDocument.Factory.parse(pomFile.getLocation().toFile(), getXmlOptions());
-    } catch(XmlException ex) {
-      String msg = "Unable to parse " + name;
-      console.logError(msg + "; " + ex.toString());
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
-    } catch(IOException ex) {
-      String msg = "Unable to read " + name;
-      console.logError(msg + "; " + ex.toString());
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
-    }
-  }
-  
-  public ProjectDocument readProjectDocument(File pom) throws CoreException {
-    try {
-      return ProjectDocument.Factory.parse(pom, getXmlOptions());
-    } catch(XmlException ex) {
-      String msg = "Unable to parse " + pom.getAbsolutePath();
-      console.logError(msg + "; " + ex.toString());
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
-    } catch(IOException ex) {
-      String msg = "Unable to read " + pom.getAbsolutePath();
-      console.logError(msg + "; " + ex.toString());
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
-    }
-  }
-  
+//  public ProjectDocument readProjectDocument(IFile pomFile) throws CoreException {
+//    String name = pomFile.getProject().getName() + "/" + pomFile.getProjectRelativePath();
+//    try {
+//      return ProjectDocument.Factory.parse(pomFile.getLocation().toFile(), getXmlOptions());
+//    } catch(XmlException ex) {
+//      String msg = "Unable to parse " + name;
+//      console.logError(msg + "; " + ex.toString());
+//      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
+//    } catch(IOException ex) {
+//      String msg = "Unable to read " + name;
+//      console.logError(msg + "; " + ex.toString());
+//      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
+//    }
+//  }
+//
+//  public ProjectDocument readProjectDocument(File pom) throws CoreException {
+//    try {
+//      return ProjectDocument.Factory.parse(pom, getXmlOptions());
+//    } catch(XmlException ex) {
+//      String msg = "Unable to parse " + pom.getAbsolutePath();
+//      console.logError(msg + "; " + ex.toString());
+//      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
+//    } catch(IOException ex) {
+//      String msg = "Unable to read " + pom.getAbsolutePath();
+//      console.logError(msg + "; " + ex.toString());
+//      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
+//    }
+//  }
+
   public void updateProject(IFile pomFile, ProjectUpdater updater) {
     File pom = pomFile.getLocation().toFile();
     try {
-      ProjectDocument projectDocument = readProjectDocument(pom);
-      
-      updater.update(projectDocument);
+      PomResourceImpl resource = loadResource(pomFile);
+      updater.update(resource.getModel());
 
 //      XmlCursor cursor = projectDocument.newCursor();
 //      if (cursor.toFirstChild()) {
 //        cursor.setAttributeText(new QName("http://www.w3.org/2001/XMLSchema-instance","schemaLocation"), location);
 //      }      
 
-      ByteArrayOutputStream bos = new ByteArrayOutputStream();
-      projectDocument.save(bos, getXmlOptions());
+      resource.save(Collections.EMPTY_MAP);
 
-      pomFile.setContents(new ByteArrayInputStream(bos.toByteArray()), true, true, null);
-      pomFile.refreshLocal(IResource.DEPTH_ONE, null); // TODO ???
+      // pomFile.setContents(new ByteArrayInputStream(bos.toByteArray()), true, true, null);
+      // pomFile.refreshLocal(IResource.DEPTH_ONE, null); // TODO ???
 
     } catch(Exception ex) {
       String msg = "Unable to update " + pom;
@@ -197,18 +281,7 @@ public class MavenModelManager {
     }
   }
 
-  private XmlOptions getXmlOptions() {
-    if(xmlOptions==null) {
-      xmlOptions = new XmlOptions();
-  
-      Map ns = Collections.singletonMap("", ProjectDocument.type.getDocumentElementName().getNamespaceURI());
-      xmlOptions.setLoadSubstituteNamespaces(ns);
-      xmlOptions.setSaveImplicitNamespaces(ns);
-    }
-    return xmlOptions;
-  }
-
-  public void addDependency(IFile pomFile, final Dependency dependency) {
+  public void addDependency(IFile pomFile, org.apache.maven.model.Dependency dependency) {
     updateProject(pomFile, new DependencyAdder(dependency));
   }
 
@@ -216,165 +289,133 @@ public class MavenModelManager {
     updateProject(pomFile, new ModuleAdder(moduleName));
   }
 
-  
-  /**
-   * Project updater for adding Maven namespace declaration
-   */
-  public static class NamespaceAdder implements ProjectUpdater {
+//  /**
+//   * Project updater for adding Maven namespace declaration
+//   */
+//  public static class NamespaceAdder extends ProjectUpdater {
+//
+//    public void update(Model model) {
+//      DocumentRoot documentRoot = PomFactory.eINSTANCE.createDocumentRoot();
+//      EMap<String, String> prefixMap = documentRoot.getXMLNSPrefixMap();
+//      EMap<String, String> schemaLocation = documentRoot.getXSISchemaLocation();
+//
+//      // xmlns="http://maven.apache.org/POM/4.0.0" 
+//      // xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+//      // xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"      
+//      
+////      XmlCursor cursor = project.newCursor();
+////      cursor.toNextToken();
+////      if(!cursor.toFirstAttribute()) {
+////        cursor.toNextToken();
+////      }
+////
+////      String uri = ProjectDocument.type.getDocumentElementName().getNamespaceURI();
+////      cursor.insertNamespace("", uri);
+////      cursor.insertNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+////      cursor.insertAttributeWithValue( //
+////          new QName("http://www.w3.org/2001/XMLSchema-instance", "schemaLocation", "xsi"), uri
+////              + " http://maven.apache.org/maven-v4_0_0.xsd");
+//    }
+//
+//  }
 
-    public void update(ProjectDocument project) {
-      XmlCursor cursor = project.newCursor();
-      cursor.toNextToken();
-      if(!cursor.toFirstAttribute()) {
-        cursor.toNextToken();
-      }
-
-      String uri = ProjectDocument.type.getDocumentElementName().getNamespaceURI();
-      cursor.insertNamespace("", uri);
-      cursor.insertNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
-      cursor.insertAttributeWithValue( //
-          new QName("http://www.w3.org/2001/XMLSchema-instance", "schemaLocation",  "xsi"), 
-          uri + " http://maven.apache.org/maven-v4_0_0.xsd");
-    }
-    
-  }
-  
   /**
    * Project updater for adding dependencies
    */
-  public static class DependencyAdder implements ProjectUpdater {
-  
-    private final Dependency dependency;
+  public static class DependencyAdder extends ProjectUpdater {
 
-    public DependencyAdder(Dependency dependency) {
+    private final org.apache.maven.model.Dependency dependency;
+
+    public DependencyAdder(org.apache.maven.model.Dependency dependency) {
       this.dependency = dependency;
     }
 
-    public void update(ProjectDocument project) {
-      Dependencies dependencies = project.getProject().getDependencies();
-  
-      if(dependencies == null) {
-        dependencies = project.getProject().addNewDependencies();
-  
-        XmlCursor cursor = dependencies.newCursor();
-        cursor.insertChars("  ");
-        cursor.toEndToken();
-        cursor.insertChars("\n  ");
-        cursor.toNextToken();
-        cursor.insertChars("\n");
-        cursor.dispose();
+    public void update(org.maven.ide.components.pom.Model model) {
+      Dependencies dependencies = model.getDependencies();
+      if(dependencies==null) {
+        dependencies = POM_FACTORY.createDependencies();
+        model.setDependencies(dependencies);
       }
-  
-      String uri = ProjectDocument.type.getDocumentElementName().getNamespaceURI();
       
-      XmlCursor cursor = dependencies.newCursor();
-      cursor.toEndToken();
-  
-      cursor.insertChars("  ");
-      cursor.beginElement("dependency", uri);
-      cursor.insertChars("\n");
-  
-      cursor.insertChars("      ");
-      cursor.insertElementWithText("groupId", uri, this.dependency.getGroupId());
-      cursor.insertChars("\n");
-  
-      cursor.insertChars("      ");
-      cursor.insertElementWithText("artifactId", uri, this.dependency.getArtifactId());
-      cursor.insertChars("\n");
-  
+      Dependency dependency = POM_FACTORY.createDependency();
+      
+      dependency.setGroupId(this.dependency.getGroupId());
+      dependency.setArtifactId(this.dependency.getArtifactId());
+      
+      if(this.dependency.getVersion()!=null) {
+        dependency.setVersion(this.dependency.getVersion());
+      }
+      
       if(this.dependency.getClassifier() != null) {
-        cursor.insertChars("      ");
-        cursor.insertElementWithText("classifier", uri, this.dependency.getClassifier());
-        cursor.insertChars("\n");
+        dependency.setClassifier(this.dependency.getClassifier());
       }
-  
-      if(this.dependency.getVersion() != null) {
-        cursor.insertChars("      ");
-        cursor.insertElementWithText("version", uri, this.dependency.getVersion());
-        cursor.insertChars("\n");
-      }
-  
+      
       if(this.dependency.getType() != null //
-          && !"jar".equals(dependency.getType()) //
-          && !"null".equals(dependency.getType())) {  // guard against MNGECLIPSE-622
-        cursor.insertChars("      ");
-        cursor.insertElementWithText("type", uri, this.dependency.getType());
-        cursor.insertChars("\n");
+          && !"jar".equals(this.dependency.getType()) //
+          && !"null".equals(this.dependency.getType())) { // guard against MNGECLIPSE-622
+        dependency.setClassifier(this.dependency.getType());
       }
-  
+      
       if(this.dependency.getScope() != null) {
-        cursor.insertChars("      ");
-        cursor.insertElementWithText("scope", uri, this.dependency.getScope());
-        cursor.insertChars("\n");
+        dependency.setScope(this.dependency.getScope());
       }
-  
+      
       if(this.dependency.getSystemPath() != null) {
-        cursor.insertChars("      ");
-        cursor.insertElementWithText("systemPath", uri, this.dependency.getSystemPath());
-        cursor.insertChars("\n");
+        dependency.setSystemPath(this.dependency.getSystemPath());
       }
-  
+      
       if(this.dependency.isOptional()) {
-        cursor.insertChars("      ");
-        cursor.insertElementWithText("optional", uri, "true");
-        cursor.insertChars("\n");
-      }
-  
-      if(this.dependency.getExclusions() != null) {
-        // TODO support exclusions
-  
+        dependency.setOptional("true");
       }
 
-      cursor.insertChars("    ");
-      cursor.toNextToken();
-      cursor.insertChars("\n  ");
+      if(!this.dependency.getExclusions().isEmpty()) {
+        ExclusionsType exclusions = POM_FACTORY.createExclusionsType();
+        EList<Exclusion> exclusionList = exclusions.getExclusion();
+
+        @SuppressWarnings("unchecked")
+        Iterator<org.apache.maven.model.Exclusion> it = this.dependency.getExclusions().iterator();
+        while(it.hasNext()) {
+          org.apache.maven.model.Exclusion e = it.next();
+          Exclusion exclusion = POM_FACTORY.createExclusion();
+          exclusion.setGroupId(e.getGroupId());
+          exclusion.setArtifactId(e.getArtifactId());
+          exclusionList.add(exclusion);
+        }
+        
+        dependency.setExclusions(exclusions);
+      }
       
-      cursor.dispose();
+      dependencies.getDependency().add(dependency);
     }
   }
 
   /**
    * Project updater for adding modules
    */
-  public static class ModuleAdder implements ProjectUpdater {
-  
+  public static class ModuleAdder extends ProjectUpdater {
+
     private final String moduleName;
 
     public ModuleAdder(String moduleName) {
       this.moduleName = moduleName;
     }
 
-    public void update(ProjectDocument project) {
-      Modules modules = project.getProject().getModules();
-  
-      if(modules == null) {
-        modules = project.getProject().addNewModules();
-  
-        XmlCursor cursor = modules.newCursor();
-        cursor.insertChars("  ");
-        cursor.toEndToken();
-        cursor.insertChars("\n  ");
-        cursor.toNextToken();
-        cursor.insertChars("\n");
-        cursor.dispose();
+    public void update(Model model) {
+      Modules modules = model.getModules();
+      if(modules==null) {
+        modules = POM_FACTORY.createModules();
+        model.setModules(modules);
       }
-  
-      String uri = ProjectDocument.type.getDocumentElementName().getNamespaceURI();
-      
-      XmlCursor cursor = modules.newCursor();
-      cursor.toEndToken();
-      cursor.insertChars("  ");
-      cursor.insertElementWithText("module", uri, this.moduleName);
-      cursor.insertChars("\n  ");
-      cursor.dispose();
+
+      modules.getModule().add(moduleName);
     }
   }
 
   /**
    * Project updater for adding plugins
    */
-  public static class PluginAdder implements ProjectUpdater {
-  
+  public static class PluginAdder extends ProjectUpdater {
+
     private final String groupId;
     private final String artifactId;
     private final String version;
@@ -385,59 +426,35 @@ public class MavenModelManager {
       this.version = version;
     }
 
-    public void update(ProjectDocument project) {
-      Build build = project.getProject().getBuild();
-  
-      if(build == null) {
-        build = project.getProject().addNewBuild();
-  
-        XmlCursor cursor = build.newCursor();
-        cursor.insertChars("  ");
-        cursor.toEndToken();
-        cursor.insertChars("\n  ");
-        cursor.toNextToken();
-        cursor.insertChars("\n");
-        cursor.dispose();
-      }
-  
-      Plugins plugins = build.getPlugins();
-      if(plugins == null) {
-        plugins = build.addNewPlugins();
-        
-        XmlCursor cursor = plugins.newCursor();
-        cursor.insertChars("  ");
-        cursor.toEndToken();
-        cursor.insertChars("\n    ");
-        cursor.toNextToken();
-        cursor.insertChars("\n  ");
-        cursor.dispose();
+    public void update(Model model) {
+      Build build = model.getBuild();
+      if(build==null) {
+        build = POM_FACTORY.createBuild();
+        model.setBuild(build);
       }
 
-      String uri = ProjectDocument.type.getDocumentElementName().getNamespaceURI();
+      Plugins plugins = build.getPlugins();
+      if(plugins==null) {
+        plugins = POM_FACTORY.createPlugins();
+        build.setPlugins(plugins);
+      }
+
+      Plugin plugin = POM_FACTORY.createPlugin();
       
-      XmlCursor cursor = plugins.newCursor();
-      cursor.toEndToken();
-  
-      cursor.insertChars("  ");
-      cursor.beginElement("plugin", uri);
-  
       if(!"org.apache.maven.plugins".equals(this.groupId)) {
-        cursor.insertChars("\n        ");
-        cursor.insertElementWithText("groupId", uri, this.groupId);
-      }
-  
-      cursor.insertChars("\n        ");
-      cursor.insertElementWithText("artifactId", uri, this.artifactId);
-      
-      if(this.version!=null) {
-        cursor.insertChars("\n        ");
-        cursor.insertElementWithText("version", uri, this.version);
+        plugin.setGroupId(this.groupId);
       }
       
-      cursor.insertChars("\n      ");
-      cursor.toNextToken();
-      cursor.insertChars("\n    ");
-      cursor.dispose();
+      plugin.setArtifactId(this.artifactId);
+
+      if(this.version != null) {
+        plugin.setVersion(this.version);
+      }
+
+      Configuration configuration = POM_FACTORY.createConfiguration();
+      plugin.setConfiguration(configuration);
+      
+      plugins.getPlugin().add(plugin);
     }
   }
 

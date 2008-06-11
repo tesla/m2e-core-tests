@@ -8,15 +8,16 @@
 
 package org.maven.ide.eclipse.embedder;
 
-import org.apache.maven.pom.x400.ProjectDocument;
+import org.maven.ide.components.pom.Model;
 
 /**
  * Project updater
  *
  * @author Eugene Kuleshov
  */
-public interface ProjectUpdater {
+public abstract class ProjectUpdater {
 
-  void update(ProjectDocument project);
+  void update(Model model) {
+  }
 
 }

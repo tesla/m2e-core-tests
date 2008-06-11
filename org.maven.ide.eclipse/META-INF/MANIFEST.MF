@@ -28,6 +28,8 @@ Require-Bundle:
  org.eclipse.ui.externaltools,
  org.eclipse.ui.workbench.texteditor,
  org.eclipse.ltk.core.refactoring,
+ org.eclipse.emf.common,
+ org.eclipse.wst.common.emf,
  org.maven.ide.components.maven_embedder,
  org.maven.ide.components.archetype_common,
  org.maven.ide.components.nexus_indexer,
