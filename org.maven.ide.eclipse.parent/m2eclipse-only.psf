@@ -7,7 +7,6 @@
 <project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.components.maven-model-edit,org.maven.ide.components.maven-model-edit"/>
 <project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.components.maven-scm,org.maven.ide.components.maven-scm"/>
 <project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.components.nexus-indexer,org.maven.ide.components.nexus-indexer"/>
-<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.components.pom,org.maven.ide.components.pom"/>
 <project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse,org.maven.ide.eclipse"/>
 <project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.tests,org.maven.ide.eclipse.tests"/>
 <project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.feature,org.maven.ide.eclipse.feature"/>
@@ -27,6 +26,7 @@
 <project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.ajdt,org.maven.ide.eclipse.ajdt"/>
 <project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.ajdt.tests,org.maven.ide.eclipse.ajdt.tests"/>
 <project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.ajdt.feature,org.maven.ide.eclipse.ajdt.feature"/>
+<project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.editor,org.maven.ide.eclipse.editor"/>
 <project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.editor.xml,org.maven.ide.eclipse.editor.xml"/>
 <project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.editor.xml.feature,org.maven.ide.eclipse.editor.xml.feature"/>
 <project reference="0.9.3,http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.editor.xml.tests,org.maven.ide.eclipse.editor.xml.tests"/>
