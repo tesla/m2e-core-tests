@@ -1,0 +1,32 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Maven Integration for Eclipse (Editors)
+Bundle-SymbolicName: org.maven.ide.eclipse.editor;singleton:=true
+Bundle-Version: 0.9.4.qualifier
+Bundle-Activator: org.maven.ide.eclipse.editor.MavenEditorPlugin
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.core.resources,
+ org.eclipse.ui,
+ org.eclipse.ui.ide,
+ org.eclipse.ui.editors,
+ org.eclipse.ui.forms,
+ org.eclipse.ui.workbench,
+ org.eclipse.jface.text,
+ org.eclipse.jdt.core,
+ org.eclipse.draw2d,
+ org.eclipse.zest.core,
+ org.eclipse.zest.layouts,
+ org.eclipse.wst.sse.ui,
+ org.eclipse.wst.common.emf,
+ org.eclipse.wst.sse.core,
+ org.eclipse.wst.xml.core,
+ org.eclipse.emf.ecore.edit,
+ org.maven.ide.eclipse,
+ org.maven.ide.components.maven_embedder,
+ org.maven.ide.components.dependency_tree,
+ org.maven.ide.components.maven_model_edit
+Eclipse-LazyStart: true
+Bundle-RequiredExecutionEnvironment: J2SE-1.5,
+ JavaSE-1.6
+Bundle-Vendor: Sonatype, Inc.
+Bundle-ClassPath: .
