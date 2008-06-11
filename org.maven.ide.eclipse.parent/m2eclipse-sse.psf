@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<psf version="2.0">
+<provider id="org.eclipse.team.cvs.core.cvsnature">
+<project reference="1.0,:pserver:dev.eclipse.org:/cvsroot/webtools,common/plugins/org.eclipse.jem.util,org.eclipse.jem.util,R2_0_maintenance"/>
+<project reference="1.0,:pserver:dev.eclipse.org:/cvsroot/webtools,common/plugins/org.eclipse.wst.common.core,org.eclipse.wst.common.core,v200706120315"/>
+<project reference="1.0,:pserver:dev.eclipse.org:/cvsroot/webtools,common/plugins/org.eclipse.wst.common.emf,org.eclipse.wst.common.emf,R2_0_maintenance"/>
+<project reference="1.0,:pserver:dev.eclipse.org:/cvsroot/webtools,common/plugins/org.eclipse.wst.common.emfworkbench.integration,org.eclipse.wst.common.emfworkbench.integration,R2_0_maintenance"/>
+<project reference="1.0,:pserver:dev.eclipse.org:/cvsroot/webtools,common/plugins/org.eclipse.wst.common.environment,org.eclipse.wst.common.environment,R2_0_maintenance"/>
+<project reference="1.0,:pserver:dev.eclipse.org:/cvsroot/webtools,common/plugins/org.eclipse.wst.common.frameworks,org.eclipse.wst.common.frameworks,R2_0_maintenance"/>
+<project reference="1.0,:pserver:dev.eclipse.org:/cvsroot/webtools,common/plugins/org.eclipse.wst.common.frameworks.ui,org.eclipse.wst.common.frameworks.ui,R2_0_maintenance"/>
+<project reference="1.0,:pserver:dev.eclipse.org:/cvsroot/webtools,common/plugins/org.eclipse.wst.common.modulecore,org.eclipse.wst.common.modulecore,R2_0_maintenance"/>
+<project reference="1.0,:pserver:dev.eclipse.org:/cvsroot/webtools,common/plugins/org.eclipse.wst.common.project.facet.core,org.eclipse.wst.common.project.facet.core,R2_0_maintenance"/>
+<project reference="1.0,:pserver:dev.eclipse.org:/cvsroot/webtools,common/plugins/org.eclipse.wst.common.project.facet.ui,org.eclipse.wst.common.project.facet.ui,R2_0_maintenance"/>
+<project reference="1.0,:pserver:dev.eclipse.org:/cvsroot/webtools,common/plugins/org.eclipse.wst.common.ui,org.eclipse.wst.common.ui,R2_0_maintenance"/>
+<project reference="1.0,:pserver:dev.eclipse.org:/cvsroot/webtools,common/plugins/org.eclipse.wst.common.uriresolver,org.eclipse.wst.common.uriresolver,R2_0_maintenance"/>
+<project reference="1.0,:pserver:dev.eclipse.org:/cvsroot/webtools,common/plugins/org.eclipse.wst.internet.cache,org.eclipse.wst.internet.cache,R2_0_maintenance"/>
+<project reference="1.0,:pserver:dev.eclipse.org:/cvsroot/webtools,common/plugins/org.eclipse.wst.validation,org.eclipse.wst.validation,R2_0_maintenance"/>
+<project reference="1.0,:pserver:dev.eclipse.org:/cvsroot/webtools,sourceediting/plugins/org.eclipse.wst.sse.core,org.eclipse.wst.sse.core,R2_0_maintenance"/>
+<project reference="1.0,:pserver:dev.eclipse.org:/cvsroot/webtools,sourceediting/plugins/org.eclipse.wst.sse.ui,org.eclipse.wst.sse.ui,R2_0_maintenance"/>
+<project reference="1.0,:pserver:dev.eclipse.org:/cvsroot/webtools,sourceediting/plugins/org.eclipse.wst.xml.core,org.eclipse.wst.xml.core,R2_0_maintenance"/>
+<project reference="1.0,:pserver:dev.eclipse.org:/cvsroot/webtools,sourceediting/plugins/org.eclipse.wst.xml.ui,org.eclipse.wst.xml.ui,R2_0_maintenance"/>
+</provider>
+</psf>

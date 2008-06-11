@@ -13,18 +13,18 @@ import java.io.InputStream;
 
 import junit.framework.TestCase;
 
-import org.apache.maven.pom.Dependencies;
-import org.apache.maven.pom.Dependency;
-import org.apache.maven.pom.Model;
-import org.apache.maven.pom.Parent;
-import org.apache.maven.pom.PomFactory;
-import org.apache.maven.pom.util.PomResourceImpl;
 import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.maven.ide.components.pom.Dependencies;
+import org.maven.ide.components.pom.Dependency;
+import org.maven.ide.components.pom.Model;
+import org.maven.ide.components.pom.Parent;
+import org.maven.ide.components.pom.PomFactory;
+import org.maven.ide.components.pom.util.PomResourceImpl;
 
 
 public class MavenModelEditTest extends TestCase {

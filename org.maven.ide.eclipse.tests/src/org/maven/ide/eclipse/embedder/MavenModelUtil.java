@@ -14,8 +14,6 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.Collections;
 
-import org.apache.maven.pom.util.PomResourceFactoryImpl;
-import org.apache.maven.pom.util.PomResourceImpl;
 import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -28,6 +26,8 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.jem.util.emf.workbench.EMFWorkbenchContextBase;
+import org.maven.ide.components.pom.util.PomResourceFactoryImpl;
+import org.maven.ide.components.pom.util.PomResourceImpl;
 
 public class MavenModelUtil {
 

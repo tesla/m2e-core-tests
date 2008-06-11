@@ -14,7 +14,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.maven.ide.components.maven_embedder,
  org.maven.ide.components.maven_model_edit,
  org.maven.ide.components.archetype_common,
- org.maven.ide.components.pom,
  org.junit
 Eclipse-LazyStart: true
 Bundle-RequiredExecutionEnvironment: J2SE-1.4,
