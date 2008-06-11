@@ -8,38 +8,48 @@
 
 package org.maven.ide.eclipse.embedder;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.Collections;
-import java.util.Map;
-
-import javax.xml.namespace.QName;
 
 import junit.framework.TestCase;
 
 import org.apache.maven.model.Dependency;
-import org.apache.maven.pom.x400.ProjectDocument;
-import org.apache.xmlbeans.XmlCursor;
-import org.apache.xmlbeans.XmlException;
-import org.apache.xmlbeans.XmlObject;
-import org.apache.xmlbeans.XmlOptions;
-import org.apache.xmlbeans.XmlCursor.TokenType;
+import org.apache.maven.model.Model;
+import org.apache.maven.pom.util.PomResourceImpl;
+import org.codehaus.plexus.util.IOUtil;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.maven.ide.eclipse.MavenPlugin;
-import org.w3c.dom.Attr;
-import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-
 
 /**
  * @author Eugene Kuleshov
  */
 public class MavenModelManagerTest extends TestCase {
 
-  private static final String URI = ProjectDocument.type.getDocumentElementName().getNamespaceURI();
+  private static final String TEST_PROJECT_NAME = "editor-tests";
+  
+  private IProject project;
 
+  protected void setUp() throws Exception {
+    super.setUp();
+    
+    IWorkspace workspace = ResourcesPlugin.getWorkspace();
+    IWorkspaceRoot root = workspace.getRoot();
+    
+    project = root.getProject(TEST_PROJECT_NAME);
+    if(!project.exists()) {
+      project.create(new NullProgressMonitor());
+    }
+    if(!project.isOpen()) {
+      project.open(new NullProgressMonitor());
+    }
+  }
+  
   public void testAddingNewModule() throws Exception {
     String pom = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + // 
     		"<project>\n" + //
@@ -53,8 +63,8 @@ public class MavenModelManagerTest extends TestCase {
     		"  </modules>\n" + //
     		"</project>";
     
-    ProjectDocument document = getProjectDocument(pom);
-    new MavenModelManager.ModuleAdder("test").update(document);
+    PomResourceImpl resource = MavenModelUtil.createResource(project, "testAddingNewModule.xml", pom);
+    new MavenModelManager.ModuleAdder("test").update(resource.getModel());
     
     assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + // 
     		"<project>\n" + //
@@ -67,7 +77,7 @@ public class MavenModelManagerTest extends TestCase {
     		"    <module>maven-core</module>\n" + // 
     		"    <module>test</module>\n" + //
     		"  </modules>\n" + //
-    		"</project>", toString(document));
+    		"</project>", MavenModelUtil.toString(resource));
   }
 
   public void testAddingNewModule2() throws Exception {
@@ -82,8 +92,8 @@ public class MavenModelManagerTest extends TestCase {
     "  </modules>\n" + //
     "</project>";
     
-    ProjectDocument document = getProjectDocument(pom);
-    new MavenModelManager.ModuleAdder("test").update(document);
+    PomResourceImpl resource = MavenModelUtil.createResource(project, "testAddingNewModule2.xml", pom);
+    new MavenModelManager.ModuleAdder("test").update(resource.getModel());
     
     assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + // 
         "<project>\n" + //
@@ -95,7 +105,7 @@ public class MavenModelManagerTest extends TestCase {
         "  <modules>\n" + //
         "    <module>test</module>\n" + //
         "  </modules>\n" + //
-        "</project>", toString(document));
+        "</project>", MavenModelUtil.toString(resource));
   }
   
   public void testAddingModules() throws Exception {
@@ -108,8 +118,8 @@ public class MavenModelManagerTest extends TestCase {
         "  <packaging>jar</packaging>\n" + //
         "</project>";
 
-    ProjectDocument document = getProjectDocument(pom);
-    new MavenModelManager.ModuleAdder("test").update(document);
+    PomResourceImpl resource = MavenModelUtil.createResource(project, "testAddingModules.xml", pom);
+    new MavenModelManager.ModuleAdder("test").update(resource.getModel());
 
     assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + // 
         "<project>\n" + //
@@ -121,7 +131,7 @@ public class MavenModelManagerTest extends TestCase {
         "  <modules>\n" + //
         "    <module>test</module>\n" + //
         "  </modules>\n" + //
-        "</project>", toString(document));
+        "</project>", MavenModelUtil.toString(resource));
   }
   
   public void testAddingNewDependency() throws Exception {
@@ -146,8 +156,8 @@ public class MavenModelManagerTest extends TestCase {
     dependency.setArtifactId("spring");
     dependency.setVersion("2.5");
     
-    ProjectDocument document = getProjectDocument(pom);
-    new MavenModelManager.DependencyAdder(dependency).update(document);
+    PomResourceImpl resource = MavenModelUtil.createResource(project, "testAddingNewDependency.xml", pom);
+    new MavenModelManager.DependencyAdder(dependency).update(resource.getModel());
     
     assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + // 
         "<project>\n" + //
@@ -168,7 +178,7 @@ public class MavenModelManagerTest extends TestCase {
         "      <version>2.5</version>\n" + // 
         "    </dependency>\n" + // 
         "  </dependencies>\n" + //
-        "</project>", toString(document));
+        "</project>", MavenModelUtil.toString(resource));
   }
   
   public void testAddingDependencies() throws Exception {
@@ -186,8 +196,8 @@ public class MavenModelManagerTest extends TestCase {
     dependency.setArtifactId("spring");
     dependency.setVersion("2.5");
     
-    ProjectDocument document = getProjectDocument(pom);
-    new MavenModelManager.DependencyAdder(dependency).update(document);
+    PomResourceImpl resource = MavenModelUtil.createResource(project, "testAddingDependencies.xml", pom);
+    new MavenModelManager.DependencyAdder(dependency).update(resource.getModel());
     
     assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + // 
         "<project>\n" + //
@@ -203,7 +213,7 @@ public class MavenModelManagerTest extends TestCase {
         "      <version>2.5</version>\n" + // 
         "    </dependency>\n" + // 
         "  </dependencies>\n" + //
-        "</project>", toString(document));
+        "</project>", MavenModelUtil.toString(resource));
   }
   
   public void testAddingNewPlugin() throws Exception {
@@ -221,8 +231,8 @@ public class MavenModelManagerTest extends TestCase {
     dependency.setArtifactId("spring");
     dependency.setVersion("2.5");
     
-    ProjectDocument document = getProjectDocument(pom);
-    new MavenModelManager.PluginAdder("org.apache.maven.plugins", "maven-help-plugin", "2.0.2").update(document);
+    PomResourceImpl resource = MavenModelUtil.createResource(project, "testAddingDependencies.xml", pom);
+    new MavenModelManager.PluginAdder("org.apache.maven.plugins", "maven-help-plugin", "2.0.2").update(resource.getModel());
     
     assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + // 
         "<project>\n" + //
@@ -235,80 +245,104 @@ public class MavenModelManagerTest extends TestCase {
         "    <plugins>\n" + // 
         "      <plugin>\n" + // 
         "        <artifactId>maven-help-plugin</artifactId>\n" + // 
-        "        <version>2.0.2</version>\n" + // 
+        "        <version>2.0.2</version>\n" +  //
+        "        <configuration>\n" + // 
+        "        </configuration>\n" + // 
         "      </plugin>\n" + // 
         "    </plugins>\n" + // 
         "  </build>\n" + //
-        "</project>", toString(document));
+        "</project>", MavenModelUtil.toString(resource));
   }
   
+
   public void testCreateMavenModel() throws Exception {
 
-    testCreateMavenModel("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + // 
-        "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" " + //
+    testCreateMavenModel("<project xmlns=\"http://maven.apache.org/POM/4.0.0\" " + //
         "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " + // 
         "xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd\">\n" + // 
         "  <modelVersion>4.0.0</modelVersion>\n" + //
         "  <groupId>org.sonatype.projects</groupId>\n" + // 
         "  <artifactId>foo</artifactId>\n" + //
         "  <version>0.0.1-SNAPSHOT</version>\n" + // 
-        "</project>");
-    
-    testCreateMavenModel("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + // 
-        "<project>\n" + //
+        "</project>", "createMavenModel1.xml");
+
+    testCreateMavenModel("<project>\n" + //
         "  <modelVersion>4.0.0</modelVersion>\n" + // 
         "  <groupId>org.sonatype.projects</groupId>\n" + // 
         "  <artifactId>foo</artifactId>\n" + //
         "  <version>0.0.1-SNAPSHOT</version>\n" + // 
-        "</project>");
-    
+        "</project>", "createMavenModel2.xml");
+
   }
 
-  private void testCreateMavenModel(String pom) throws XmlException, IOException {
-    XmlOptions options = new XmlOptions();
+  private void testCreateMavenModel(String pom, String pomFileName) throws Exception {
+    MavenModelManager modelManager = MavenPlugin.getDefault().getMavenModelManager();
     
-    Map ns = Collections.singletonMap("", URI);
-    options.setLoadSubstituteNamespaces(ns);
-    options.setSaveNamespacesFirst();
+    Model model = modelManager.readMavenModel(new StringReader(pom));
+    
+    IFile pomFile = project.getFile(pomFileName);
+    modelManager.createMavenModel(pomFile, model);
 
-    ProjectDocument document = ProjectDocument.Factory.parse(pom, options);
+    InputStream is = pomFile.getContents();
+    StringWriter sw = new StringWriter();
+    IOUtil.copy(is, sw, "UTF-8");
 
-    new MavenModelManager.NamespaceAdder().update(document);
-    
-    ByteArrayOutputStream os = new ByteArrayOutputStream();
-    document.save(os, options);
-    
-    assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + 
-    		"<project xmlns=\"http://maven.apache.org/POM/4.0.0\" " +
-    		    "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " +
-    		    "xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd\">\n" + 
-    		"  <modelVersion>4.0.0</modelVersion>\n" + 
-    		"  <groupId>org.sonatype.projects</groupId>\n" + 
-    		"  <artifactId>foo</artifactId>\n" + 
-    		"  <version>0.0.1-SNAPSHOT</version>\n" + 
-    		"</project>", new String(os.toByteArray()).replaceAll("\r\n", "\n"));
+    assertEquals("<project xmlns=\"http://maven.apache.org/POM/4.0.0\" " //
+        + "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " //
+        + "xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd\">\n" //
+        + "  <modelVersion>4.0.0</modelVersion>\n" //
+        + "  <groupId>org.sonatype.projects</groupId>\n" //
+        + "  <artifactId>foo</artifactId>\n" //
+        + "  <version>0.0.1-SNAPSHOT</version>\n" //
+        + "</project>", //
+        sw.toString().replaceAll("\r\n", "\n"));
   }
+
   
-  private ProjectDocument getProjectDocument(String pom) throws XmlException {
-    XmlOptions options = new XmlOptions();
-    
-    Map ns = Collections.singletonMap("", URI);
-    options.setLoadSubstituteNamespaces(ns);
-    options.setSaveImplicitNamespaces(ns);
-    
-    return ProjectDocument.Factory.parse(pom, options);
-  }
+//private XMLResource getResource(String pom) throws IOException {
+//  // register PomPackage in standalone environment 
+//  PomPackage.eINSTANCE.getEFactoryInstance();
+//
+//  ReadableInputStream is = new URIConverter.ReadableInputStream(new StringReader(pom), "UTF-8");
+//  
+////  ResourceSet resourceSet = new ResourceSetImpl();
+////  XMLResource resource = (XMLResource) resourceSet.MavenModelUtil.createResource(project, URI.createURI("*.xml"));
+//
+//  // mainResource.setURI(uri);
+////  resource.load(is, resourceSet.getLoadOptions());    
+//  
+//  
+////  // String path = pomFile.getFullPath().toOSString();
+//  URI uri = URI.createPlatformResourceURI("/", true);
+//
+//  Map<Object, Object> loadOptions = new HashMap<Object, Object>();
+//  loadOptions.put(XMLResource.XML_NS, "http://maven.apache.org/POM/4.0.0");
+//  loadOptions.put(XMLResource.XML_SCHEMA_URI, "http://maven.apache.org/maven-v4_0_0.xsd");
+//  loadOptions.put(XMLResource.XML_NS, "http://maven.apache.org/maven-v4_0_0.xsd");
+//  
+//  ExtendedMetaData extendedMetaData = new BasicExtendedMetaData();
+//  extendedMetaData.setDocumentRoot(PomPackage.eINSTANCE.getDocumentRoot());
+//  extendedMetaData.setNamespace(PomPackage.eINSTANCE, null);
+//  
+//  EStructuralFeature f;
+//  
+//  loadOptions.put(XMLResource.OPTION_EXTENDED_META_DATA, extendedMetaData);
+//  
+//  XMLOptions xmlOptions = new XMLOptionsImpl();
+//  // xmlOptions.setProcessAnyXML(true);
+//  xmlOptions.setProcessSchemaLocations(true);
+//  
+//  xmlOptions.setExternalSchemaLocations(Collections.singletonMap("http://maven.apache.org/POM/4.0.0", URI.createURI("http://maven.apache.org/maven-v4_0_0.xsd")));
+//  
+//  loadOptions.put(XMLResource.OPTION_XML_OPTIONS, xmlOptions);    
+//  
+//  PomResourceFactoryImpl factory = new PomResourceFactoryImpl();
+//  PomResourceImpl resource = (PomResourceImpl) factory.MavenModelUtil.createResource(project, uri);
+//  resource.load(is, loadOptions);
+//  
+//  return resource;
+//}
 
-  private String toString(ProjectDocument document) throws IOException {
-    XmlOptions options = new XmlOptions();
-    options.setSaveImplicitNamespaces(Collections.singletonMap("", URI));
-    options.remove(XmlOptions.SAVE_NO_XML_DECL);
-    
-    ByteArrayOutputStream os = new ByteArrayOutputStream();
-    document.save(os, options);
-  
-    return new String(os.toByteArray(), "UTF-8").replaceAll("\r\n", "\n");
-  }
   
 }
 
