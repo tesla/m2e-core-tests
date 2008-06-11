@@ -318,9 +318,9 @@ public abstract class MavenRuntime {
       DirectoryScanner ds = new DirectoryScanner();
       ds.setBasedir(mavenHome);
       ds.setIncludes(new String[] {
-          "core/boot/classworlds-*.jar", // 2.0.4
-          "boot/classworlds-*.jar", // 2.0.7
-          "boot/plexus-classworlds-*.jar", // 2.1 as of 2008-03-27
+          "core/boot/classworlds*.jar", // 2.0.4
+          "boot/classworlds*.jar", // 2.0.7
+          "boot/plexus-classworlds*.jar", // 2.1 as of 2008-03-27
       });
       ds.scan();
       String[] includedFiles = ds.getIncludedFiles();
