@@ -37,6 +37,10 @@ public abstract class FormUtils {
     return s == null || s.length()==0;
   }
   
+  public static boolean isEmpty(Text t) {
+    return t == null || isEmpty(t.getText());
+  }
+  
   public static void setText(Text control, String text) {
     if(!control.getText().equals(text)) {
       control.setText(nvl(text));

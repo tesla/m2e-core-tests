@@ -10,6 +10,7 @@ package org.maven.ide.eclipse.editor.pom;
 
 import static org.maven.ide.eclipse.editor.pom.FormUtils.isEmpty;
 import static org.maven.ide.eclipse.editor.pom.FormUtils.nvl;
+import static org.maven.ide.eclipse.editor.pom.FormUtils.setText;
 
 import java.util.Collections;
 import java.util.List;
@@ -23,7 +24,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.common.notify.Notification;
-import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.edit.command.AddCommand;
 import org.eclipse.emf.edit.command.RemoveCommand;
@@ -36,6 +36,8 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -83,48 +85,49 @@ import org.maven.ide.eclipse.wizards.WidthGroup;
 public class OverviewPage extends MavenPomEditorPage {
 
   //controls
-  private Text parentRealtivePathText;
-  private Text artifactIdText;
-  private Text artifactVersionText;
-  private Text artifactGroupIdText;
-  private CCombo artifactPackagingCombo;
-  private Text parentVersionText;
-  private Text parentArtifactIdText;
-  private Text parentGroupIdText;
-  private Text projectUrlText;
-  private Text projectNameText;
-  private Text projectDescriptionText;
-  private Text inceptionYearText;
-  private Text organizationUrlText;
-  private Text organizationNameText;
-  private Text scmUrlText;
-  private Text scmDevConnectionText;
-  private Text scmConnectionText;
-  private Text scmTagText;
-  private Text issueManagementSystemText;
-  private Text issueManagementUrlText;
-  private Text ciManagementUrlText;
-  private Text ciManagementSystemText;
+  Text parentRealtivePathText;
+  Text artifactIdText;
+  Text artifactVersionText;
+  Text artifactGroupIdText;
+  CCombo artifactPackagingCombo;
+  Text parentVersionText;
+  Text parentArtifactIdText;
+  Text parentGroupIdText;
+  Text projectUrlText;
+  Text projectNameText;
+  Text projectDescriptionText;
+  Text inceptionYearText;
+  Text organizationUrlText;
+  Text organizationNameText;
+  Text scmUrlText;
+  Text scmDevConnectionText;
+  Text scmConnectionText;
+  Text scmTagText;
+  Text issueManagementSystemText;
+  Text issueManagementUrlText;
+  Text ciManagementUrlText;
+  Text ciManagementSystemText;
 
-  private ListEditorComposite<PropertyPair> propertiesEditor;
-  private ListEditorComposite<String> modulesEditor;
+  ListEditorComposite<PropertyPair> propertiesEditor;
+  ListEditorComposite<String> modulesEditor;
   
+  Section propertiesSection;
+  Section modulesSection;
+  Section parentSection;
+  Section projectSection;
+  Section organizationSection;
+  Section scmSection;
+  Section issueManagementSection;
+  Section ciManagementSection;
+
   //model
-  private CiManagement ciManagement;
-  private Scm scm;
-  private Parent parent;
-  private Organization organization;
-  private IssueManagement issueManagement;
-  private Modules modules;
-  private Properties properties;
-  private Section propertiesSection;
-  private Section modulesSection;
-  private Section parentSection;
-  private Section projectSection;
-  private Section organizationSection;
-  private Section scmSection;
-  private Section issueManagementSection;
-  private Section ciManagementSection;
+//  Properties properties;
+//  Modules modules;
+//  Parent parent;
+//  Organization organization;
+//  Scm scm;
+//  IssueManagement issueManagement;
+//  CiManagement ciManagement;
 
   public OverviewPage(MavenPomEditor pomEditor) {
     super(pomEditor, MavenPlugin.PLUGIN_ID + ".pom.overview", "Overview");
@@ -292,7 +295,7 @@ public class OverviewPage extends MavenPomEditorPage {
           if(af != null) {
             parentGroupIdText.setText(nvl(af.group));
             parentArtifactIdText.setText(nvl(af.artifact));
-            parentVersionText.setText(nvl(af.artifact));
+            parentVersionText.setText(nvl(af.version));
           }
         }
       }
@@ -614,168 +617,396 @@ public class OverviewPage extends MavenPomEditorPage {
     toolkit.paintBordersFor(ciManagementComposite);
   }
 
-  public void registerFormListeners() {
-    // form to model
-    setModifyListener(artifactGroupIdText, model, POM_PACKAGE.getModel_GroupId());
-    setModifyListener(artifactIdText, model, POM_PACKAGE.getModel_ArtifactId());
-    setModifyListener(artifactVersionText, model, POM_PACKAGE.getModel_ModelVersion());
+  private void registerFormListeners() {
+    setModifyListener(artifactGroupIdText, model, POM_PACKAGE.getModel_GroupId(), "");
+    setModifyListener(artifactIdText, model, POM_PACKAGE.getModel_ArtifactId(), "");
+    setModifyListener(artifactVersionText, model, POM_PACKAGE.getModel_ModelVersion(), "");
     setModifyListener(artifactPackagingCombo, model, POM_PACKAGE.getModel_Packaging(), "jar");
     
-    setModifyListener(parentGroupIdText, parent, POM_PACKAGE.getParent_GroupId());
-    setModifyListener(parentArtifactIdText, parent, POM_PACKAGE.getParent_ArtifactId());
-    setModifyListener(parentVersionText, parent, POM_PACKAGE.getParent_Version());
-    setModifyListener(parentRealtivePathText, parent, POM_PACKAGE.getParent_RelativePath());
-
-    setModifyListener(projectNameText, model, POM_PACKAGE.getModel_Name());
-    setModifyListener(projectDescriptionText, model, POM_PACKAGE.getModel_Description());
-    setModifyListener(projectUrlText, model, POM_PACKAGE.getModel_Url());
-    setModifyListener(inceptionYearText, model, POM_PACKAGE.getModel_InceptionYear());
-
-    setModifyListener(organizationNameText, organization, POM_PACKAGE.getOrganization_Name());
-    setModifyListener(organizationUrlText, organization, POM_PACKAGE.getOrganization_Url());
-
-    setModifyListener(scmUrlText, scm, POM_PACKAGE.getScm_Url());
-    setModifyListener(scmConnectionText, scm, POM_PACKAGE.getScm_Connection());
-    setModifyListener(scmDevConnectionText, scm, POM_PACKAGE.getScm_DeveloperConnection());
-    setModifyListener(scmTagText, scm, POM_PACKAGE.getScm_Tag());
-
-    setModifyListener(issueManagementUrlText, issueManagement, POM_PACKAGE.getIssueManagement_Url());
-    setModifyListener(issueManagementSystemText, issueManagement, POM_PACKAGE.getIssueManagement_Url());
+    setModifyListener(projectNameText, model, POM_PACKAGE.getModel_Name(), "");
+    setModifyListener(projectDescriptionText, model, POM_PACKAGE.getModel_Description(), "");
+    setModifyListener(projectUrlText, model, POM_PACKAGE.getModel_Url(), "");
+    setModifyListener(inceptionYearText, model, POM_PACKAGE.getModel_InceptionYear(), "");
     
-    setModifyListener(ciManagementUrlText, ciManagement, POM_PACKAGE.getCiManagement_Url());
-    setModifyListener(ciManagementSystemText, ciManagement, POM_PACKAGE.getCiManagement_System());
+    registerParentListener();
+    registerOrganizationListnener();
+    registerScmListnener();
+    registerIssueManagementListener();
+    registerCiManagementListnener();
   }
-    
+
+  private void registerParentListener() {
+    ModifyListener parentListener = new ModifyListener() {
+      public void modifyText(ModifyEvent e) {
+        EditingDomain editingDomain = getEditingDomain();
+        CompoundCommand compoundCommand = new CompoundCommand();
+  
+        Parent parent = model.getParent();
+        if(isEmpty(parentGroupIdText) && isEmpty(parentArtifactIdText) //
+            && isEmpty(parentVersionText) && isEmpty(parentVersionText)) {
+          // XXX this cause severe issues when last element is deleted in xml
+//          if(parent != null) {
+//            Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Parent(), null);
+//            compoundCommand.append(command);
+//          }
+        } else {
+          if(parent == null) {
+            parent = PomFactory.eINSTANCE.createParent();
+            Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Parent(),
+                parent);
+            compoundCommand.append(command);
+          }
+        }
+        
+        Text source = (Text) e.getSource();
+        if(parent != null) {
+          Object feature = null;
+          if(parentGroupIdText == source) {
+            feature = POM_PACKAGE.getParent_GroupId();
+          } else if(parentArtifactIdText == source) {
+            feature = POM_PACKAGE.getParent_ArtifactId();
+          } else if(parentVersionText == source) {
+            feature = POM_PACKAGE.getParent_Version();
+          } else if(parentRealtivePathText == source) {
+            feature = POM_PACKAGE.getParent_RelativePath();
+          }
+  
+          String text = source.getText().length() == 0 ? null : source.getText();
+          compoundCommand.append(SetCommand.create(editingDomain, parent, feature, text));
+        }
+  
+        editingDomain.getCommandStack().execute(compoundCommand);
+      }
+    };
+    parentGroupIdText.addModifyListener(parentListener);
+    parentArtifactIdText.addModifyListener(parentListener);
+    parentVersionText.addModifyListener(parentListener);
+    parentRealtivePathText.addModifyListener(parentListener);
+  }
+
+  private void registerOrganizationListnener() {
+    ModifyListener organizationListener = new ModifyListener() {
+      public void modifyText(ModifyEvent e) {
+        EditingDomain editingDomain = getEditingDomain();
+        CompoundCommand compoundCommand = new CompoundCommand();
+  
+        Organization organization = model.getOrganization();
+        if(isEmpty(organizationNameText) && isEmpty(organizationUrlText)) {
+          // XXX this cause severe issues when last element is deleted in xml
+//          if(organization != null) {
+//            Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Organization(), null);
+//            compoundCommand.append(command);
+//          }
+        } else {
+          if(organization == null) {
+            organization = PomFactory.eINSTANCE.createOrganization();
+            Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Organization(), //
+                organization);
+            compoundCommand.append(command);
+          }
+        }
+  
+        Text source = (Text) e.getSource();
+        if(organization != null) {
+          Object feature = null;
+          if(source == organizationNameText) {
+            feature = POM_PACKAGE.getOrganization_Name();
+          } else if(source == organizationUrlText) {
+            feature = POM_PACKAGE.getOrganization_Url();
+          }
+  
+          String text = source.getText().length() == 0 ? null : source.getText();
+          compoundCommand.append(SetCommand.create(editingDomain, organization, feature, text));
+        }
+  
+        editingDomain.getCommandStack().execute(compoundCommand);
+      }
+    };
+    organizationNameText.addModifyListener(organizationListener);
+    organizationUrlText.addModifyListener(organizationListener);
+  }
+
+  private void registerScmListnener() {
+      ModifyListener scmListener = new ModifyListener() {
+        public void modifyText(ModifyEvent e) {
+          EditingDomain editingDomain = getEditingDomain();
+          CompoundCommand compoundCommand = new CompoundCommand();
+  
+          Scm scm = model.getScm();
+          if(isEmpty(scmUrlText) || isEmpty(scmConnectionText) || isEmpty(scmDevConnectionText) || isEmpty(scmTagText)) {
+            // XXX this cause severe issues when last element is deleted in xml
+//            if(scm!=null) {
+//              Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Scm(), null);
+//              compoundCommand.append(command);
+//            }
+          } else {
+            if(scm==null) {
+              scm = PomFactory.eINSTANCE.createScm();
+              Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Scm(), scm);
+              compoundCommand.append(command);
+            }
+          }
+          
+          Text source = (Text) e.getSource();
+          if(scm != null) {
+            Object feature = null;
+            if(scmUrlText == source) {
+              feature = POM_PACKAGE.getScm_Url();
+            } else if(scmConnectionText == source) {
+              feature = POM_PACKAGE.getScm_Connection();
+            } else if(scmDevConnectionText == source) {
+              feature = POM_PACKAGE.getScm_DeveloperConnection();
+            } else if(scmTagText == source) {
+              feature = POM_PACKAGE.getScm_Tag();
+            }
+  
+            String text = source.getText().length() == 0 ? null : source.getText();
+            compoundCommand.append(SetCommand.create(editingDomain, scm, feature, text));
+          }
+  
+          editingDomain.getCommandStack().execute(compoundCommand);
+        }
+      };
+      scmUrlText.addModifyListener(scmListener);
+      scmConnectionText.addModifyListener(scmListener);
+      scmDevConnectionText.addModifyListener(scmListener);
+      scmTagText.addModifyListener(scmListener);
+  //    setModifyListener(scmUrlText, scm, POM_PACKAGE.getScm_Url(), "");
+  //    setModifyListener(scmConnectionText, scm, POM_PACKAGE.getScm_Connection(), "");
+  //    setModifyListener(scmDevConnectionText, scm, POM_PACKAGE.getScm_DeveloperConnection(), "");
+  //    setModifyListener(scmTagText, scm, POM_PACKAGE.getScm_Tag(), "");
+    }
+
+  private void registerIssueManagementListener() {
+      ModifyListener issueManagementListener = new ModifyListener() {
+        public void modifyText(ModifyEvent e) {
+          EditingDomain editingDomain = getEditingDomain();
+          CompoundCommand compoundCommand = new CompoundCommand();
+  
+          IssueManagement issueManagement = model.getIssueManagement();
+          if(isEmpty(issueManagementUrlText) || isEmpty(issueManagementSystemText)) {
+            // XXX this cause severe issues when last element is deleted in xml
+//            if(issueManagement!=null) {
+//              Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_IssueManagement(), null);
+//              compoundCommand.append(command);
+//            }
+          } else {
+            if(issueManagement==null) {
+              Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_IssueManagement(), //
+                  PomFactory.eINSTANCE.createIssueManagement());
+              compoundCommand.append(command);
+            }
+          }
+          
+          Text source = (Text) e.getSource();
+          if(issueManagement != null) {
+            Object feature = null;
+            if(issueManagementUrlText == source) {
+              feature = POM_PACKAGE.getIssueManagement_Url();
+            } else if(issueManagementSystemText == source) {
+              feature = POM_PACKAGE.getIssueManagement_System();
+            }
+  
+            String text = source.getText().length() == 0 ? null : source.getText();
+            compoundCommand.append(SetCommand.create(editingDomain, issueManagement, feature, text));
+          }        
+          
+          editingDomain.getCommandStack().execute(compoundCommand);
+        }
+      };
+      issueManagementUrlText.addModifyListener(issueManagementListener);
+      issueManagementSystemText.addModifyListener(issueManagementListener);
+  //    setModifyListener(issueManagementUrlText, issueManagement, POM_PACKAGE.getIssueManagement_Url(), "");
+  //    setModifyListener(issueManagementSystemText, issueManagement, POM_PACKAGE.getIssueManagement_Url(), "");
+    }
+
+  private void registerCiManagementListnener() {
+    ModifyListener ciManagementListener = new ModifyListener() {
+      public void modifyText(ModifyEvent e) {
+        EditingDomain editingDomain = getEditingDomain();
+        CompoundCommand compoundCommand = new CompoundCommand();
+        
+        CiManagement ciManagement = model.getCiManagement();
+        if(isEmpty(ciManagementUrlText) || isEmpty(ciManagementSystemText)) {
+          // XXX this cause severe issues when last element is deleted in xml
+//          if(ciManagement!=null) {
+//            Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_CiManagement(), null);
+//            compoundCommand.append(command);
+//          }
+        } else {
+          if(ciManagement==null) {
+            ciManagement = PomFactory.eINSTANCE.createCiManagement();
+            Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_CiManagement(), //
+                ciManagement);
+            compoundCommand.append(command);
+          }
+        }
+        
+        Text source = (Text) e.getSource();
+        if(ciManagement != null) {
+          Object feature = null;
+          if(ciManagementUrlText == source) {
+            feature = POM_PACKAGE.getCiManagement_Url();
+          } else if(ciManagementSystemText == source) {
+            feature = POM_PACKAGE.getCiManagement_System();
+          }
+
+          String text = source.getText().length() == 0 ? null : source.getText();
+          compoundCommand.append(SetCommand.create(editingDomain, ciManagement, feature, text));
+        }        
+        
+        editingDomain.getCommandStack().execute(compoundCommand);
+      }
+    };
+    ciManagementUrlText.addModifyListener(ciManagementListener);
+    ciManagementSystemText.addModifyListener(ciManagementListener);
+//    setModifyListener(ciManagementUrlText, ciManagement, POM_PACKAGE.getCiManagement_Url(), "");
+//    setModifyListener(ciManagementSystemText, ciManagement, POM_PACKAGE.getCiManagement_System(), "");
+  }
+
   public void updateView(Notification notification) {
     EObject object = (EObject) notification.getNotifier();
     if (object instanceof Model) {
       loadThis();
     }
 
+    // XXX event is not received when <parent> is deleted in XML
     if (object instanceof Parent) {
-      loadParent();
+      loadParent((Parent) object);
     }
 
+    // XXX event is not received when <organization> is deleted in XML
     if (object instanceof Organization) {
-      loadOrganization();
+      loadOrganization((Organization) object);
     }
 
+    // XXX event is not received when <scm> is deleted in XML
     if (object instanceof Scm) {
-      loadScm();
+      loadScm((Scm) object);
     }
 
+    // XXX event is not received when <ciManagement> is deleted in XML
     if (object instanceof CiManagement) {
-      loadCiManagement();
+      loadCiManagement((CiManagement) object);
     }
 
+    // XXX event is not received when <issueManagement> is deleted in XML
     if (object instanceof IssueManagement) {
-      loadIssueManagement();
+      loadIssueManagement((IssueManagement) object);
     }
     
+    // XXX event is not received when <modules> is deleted in XML
     if(object instanceof Modules) {
-      loadModules();
+      loadModules((Modules) object);
     }
     
+    // XXX event is not received when <properties> is deleted in XML
     if(object instanceof Properties) {
-      loadProperties();
+      loadProperties((Properties) object);
     }
   }
 
   public void loadData() {
-    loadThis();
-    loadParent();
-    loadOrganization();
-    loadScm();
-    loadIssueManagement();
-    loadCiManagement();
-    loadModules();
-    loadProperties();
-    registerFormListeners();
-  }
-
-  private void loadThis() {
-    artifactGroupIdText.setText(nvl(model.getGroupId()));
-    artifactIdText.setText(nvl(model.getArtifactId()));
-    artifactVersionText.setText(nvl(model.getVersion()));
-    artifactPackagingCombo.setText(nvl(model.getPackaging()));
+    Parent parent = model.getParent();
+    Organization organization = model.getOrganization();
+    Scm scm = model.getScm();
+    IssueManagement issueManagement = model.getIssueManagement();
+    CiManagement ciManagement = model.getCiManagement();
     
-    projectNameText.setText(nvl(model.getName()));
-    projectDescriptionText.setText(nvl(model.getDescription()));
-    projectUrlText.setText(nvl(model.getUrl()));
-    inceptionYearText.setText(nvl(model.getInceptionYear()));
+    loadThis();
+    loadParent(parent);
+    loadOrganization(organization);
+    loadScm(scm);
+    loadIssueManagement(issueManagement);
+    loadCiManagement(ciManagement);
+    loadModules(model.getModules());
+    loadProperties(model.getProperties());
+    registerFormListeners();
     
     projectSection.setExpanded(!isEmpty(model.getName()) || !isEmpty(model.getDescription())
         || !isEmpty(model.getUrl()) || !isEmpty(model.getInceptionYear()));
-  }
+    
+    parentSection.setExpanded(parent != null && !isEmpty(parent.getGroupId()));
 
-  private void loadProperties() {
-    properties = model.getProperties();
-    propertiesEditor.setInput(properties);
+    organizationSection.setExpanded(organization != null
+        && (!isEmpty(organization.getName()) || !isEmpty(organization.getUrl())));
+    
+    scmSection.setExpanded(scm != null
+        && (!isEmpty(scm.getUrl()) || !isEmpty(scm.getConnection()) || !isEmpty(scm.getDeveloperConnection())));
+    
+    ciManagementSection.setExpanded(ciManagement != null
+        && (!isEmpty(ciManagement.getSystem()) || !isEmpty(ciManagement.getUrl())));
+    
+    issueManagementSection.setExpanded(issueManagement != null
+        && (!isEmpty(issueManagement.getSystem()) || !isEmpty(issueManagement.getUrl())));
+
     propertiesSection.setExpanded(false);
+    
+    Modules modules = model.getModules();
+    modulesSection.setExpanded(modules !=null && modules.getModule().size()>0);
   }
-  
-  private void loadModules() {
-    modules = model.getModules();
-    modulesEditor.setInput(modules==null ? null : modules.getModule());
-    modulesSection.setExpanded(modules!=null && modules.getModule().size()>0);
+
+  private void loadThis() {
+    setText(artifactGroupIdText, model.getGroupId());
+    setText(artifactIdText, model.getArtifactId());
+    setText(artifactVersionText, model.getVersion());
+    setText(artifactPackagingCombo, model.getPackaging());
+    
+    setText(projectNameText, model.getName());
+    setText(projectDescriptionText, model.getDescription());
+    setText(projectUrlText, model.getUrl());
+    setText(inceptionYearText, model.getInceptionYear());
   }
-  
-  private void loadParent() {
-    parent = model.getParent();
+
+  private void loadParent(Parent parent) {
     if(parent!=null) {
-      parentGroupIdText.setText(nvl(parent.getGroupId()));
-      parentArtifactIdText.setText(nvl(parent.getArtifactId()));
-      parentVersionText.setText(nvl(parent.getVersion()));
-      parentRealtivePathText.setText(nvl(parent.getRelativePath()));
-      parentSection.setExpanded(!isEmpty(parent.getGroupId()));
+      setText(parentGroupIdText, parent.getGroupId());
+      setText(parentArtifactIdText, parent.getArtifactId());
+      setText(parentVersionText, parent.getVersion());
+      setText(parentRealtivePathText, parent.getRelativePath());
     } else {
-      parentSection.setExpanded(false);
+      setText(parentGroupIdText, "");
+      setText(parentArtifactIdText, "");
+      setText(parentVersionText, "");
+      setText(parentRealtivePathText, "");
     }
   }
-
-  private void loadOrganization() {
-    organization = model.getOrganization();
+  
+  private void loadProperties(Properties properties) {
+    propertiesEditor.setInput(properties);
+  }
+  
+  private void loadModules(Modules modules) {
+    modulesEditor.setInput(modules==null ? null : modules.getModule());
+  }
+  
+  private void loadOrganization(Organization organization) {
     if(organization!=null) {
-      organizationNameText.setText(nvl(organization.getName()));
-      organizationUrlText.setText(nvl(organization.getUrl()));
-      organizationSection.setExpanded(!isEmpty(organization.getName()) || !isEmpty(organization.getUrl()));
-    } else {
-      organizationSection.setExpanded(false);
+      setText(organizationNameText, organization.getName());
+      setText(organizationUrlText, organization.getUrl());
     }
   }
 
-  private void loadScm() {
-    scm = model.getScm();
+  private void loadScm(Scm scm) {
     if(scm!=null) {
-      scmUrlText.setText(nvl(scm.getUrl()));
-      scmConnectionText.setText(nvl(scm.getConnection()));
-      scmDevConnectionText.setText(nvl(scm.getDeveloperConnection()));
-      scmTagText.setText(nvl(scm.getTag()));
-      scmSection.setExpanded(!isEmpty(scm.getUrl()) || !isEmpty(scm.getConnection()) || !isEmpty(scm.getDeveloperConnection()));
-    } else {
-      scmSection.setExpanded(false);
+      setText(scmUrlText, scm.getUrl());
+      setText(scmConnectionText, scm.getConnection());
+      setText(scmDevConnectionText, scm.getDeveloperConnection());
+      setText(scmTagText, scm.getTag());
     }
   }
 
-  private void loadCiManagement() {
-    ciManagement = model.getCiManagement();
+  private void loadCiManagement(CiManagement ciManagement) {
     if(ciManagement!=null) {
-      ciManagementSystemText.setText(nvl(ciManagement.getSystem()));
-      ciManagementUrlText.setText(nvl(ciManagement.getUrl()));
-      ciManagementSection.setExpanded(!isEmpty(ciManagement.getSystem()) || !isEmpty(ciManagement.getUrl()));
-    } else {
-      ciManagementSection.setExpanded(false);
+      setText(ciManagementSystemText, ciManagement.getSystem());
+      setText(ciManagementUrlText, ciManagement.getUrl());
     }
   }
 
-  private void loadIssueManagement() {
-    issueManagement = model.getIssueManagement();
+  private void loadIssueManagement(IssueManagement issueManagement) {
     if(issueManagement!=null) {
-      issueManagementSystemText.setText(nvl(issueManagement.getSystem()));
-      issueManagementUrlText.setText(nvl(issueManagement.getUrl()));
-      issueManagementSection.setExpanded(!isEmpty(issueManagement.getSystem()) || !isEmpty(issueManagement.getUrl()));
-    } else {
-      issueManagementSection.setExpanded(false);
+      setText(issueManagementSystemText, issueManagement.getSystem());
+      setText(issueManagementUrlText, issueManagement.getUrl());
     }
   }
 

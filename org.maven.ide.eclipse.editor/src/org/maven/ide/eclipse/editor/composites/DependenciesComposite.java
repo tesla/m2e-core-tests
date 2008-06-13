@@ -583,13 +583,13 @@ public class DependenciesComposite extends Composite {
     exclusionsListEditor.setSelection(Collections.<Exclusion>emptyList());
     
     // set new listeners
-    parent.setModifyListener(groupIdText, dependency, POM_PACKAGE.getDependency_GroupId());
-    parent.setModifyListener(artifactIdText, dependency, POM_PACKAGE.getDependency_ArtifactId());
-    parent.setModifyListener(versionText, dependency, POM_PACKAGE.getDependency_Version());
-    parent.setModifyListener(classifierText, dependency, POM_PACKAGE.getDependency_Classifier());
+    parent.setModifyListener(groupIdText, dependency, POM_PACKAGE.getDependency_GroupId(), "");
+    parent.setModifyListener(artifactIdText, dependency, POM_PACKAGE.getDependency_ArtifactId(), "");
+    parent.setModifyListener(versionText, dependency, POM_PACKAGE.getDependency_Version(), "");
+    parent.setModifyListener(classifierText, dependency, POM_PACKAGE.getDependency_Classifier(), "");
     parent.setModifyListener(typeCombo, dependency, POM_PACKAGE.getDependency_Type(), "jar");
     parent.setModifyListener(scopeCombo, dependency, POM_PACKAGE.getDependency_Scope(), "compile");
-    parent.setModifyListener(systemPathText, dependency, POM_PACKAGE.getDependency_SystemPath());
+    parent.setModifyListener(systemPathText, dependency, POM_PACKAGE.getDependency_SystemPath(), "");
     parent.setModifyListener(optionalButton, dependency, POM_PACKAGE.getDependency_Optional(), false);
     // TODO exclusions listener
     
@@ -615,8 +615,8 @@ public class DependenciesComposite extends Composite {
     setText(exclusionGroupIdText, exclusion.getGroupId());
     setText(exclusionArtifactIdText, exclusion.getArtifactId());
     
-    parent.setModifyListener(exclusionGroupIdText, exclusion, POM_PACKAGE.getExclusion_GroupId());
-    parent.setModifyListener(exclusionArtifactIdText, exclusion, POM_PACKAGE.getExclusion_ArtifactId());
+    parent.setModifyListener(exclusionGroupIdText, exclusion, POM_PACKAGE.getExclusion_GroupId(), "");
+    parent.setModifyListener(exclusionArtifactIdText, exclusion, POM_PACKAGE.getExclusion_ArtifactId(), "");
     
     parent.registerListeners();
   }
@@ -645,6 +645,8 @@ public class DependenciesComposite extends Composite {
 
   public void updateView(MavenPomEditorPage editorPage, Notification notification) {
     EObject object = (EObject) notification.getNotifier();
+    
+    // XXX event is not received when <dependencies> is deleted in XML
     if(object instanceof Dependencies) {
     	// handle add/remove
     	Dependencies dependencies = (Dependencies) object;
@@ -663,6 +665,8 @@ public class DependenciesComposite extends Composite {
         updateDependencyDetails(selection.size()==1 ? selection.get(0) : null);
     	}
     }
+    
+    // XXX handle <dependencyManagement> changes
     
     if(object instanceof Dependency) {
       // handle modification

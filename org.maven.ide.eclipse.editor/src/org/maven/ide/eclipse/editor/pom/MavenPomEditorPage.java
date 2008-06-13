@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.command.Command;
+import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.notify.Notifier;
@@ -161,6 +162,9 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
           updateView(notification);
           break;
           
+        default:
+          break;
+          
         // case Notification.UNSET:
         // case Notification.ADD_MANY:
         // case Notification.REMOVE_MANY:
@@ -222,7 +226,7 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
     }
   }
 
-  public void setModifyListener(final Text textControl, EObject object, EStructuralFeature feature) {
+  public void setModifyListener(final Text textControl, EObject object, EStructuralFeature feature, String defaultValue) {
     List<ModifyListener> listeners = getModifyListeners(textControl);
     for(ModifyListener listener : listeners) {
       textControl.removeModifyListener(listener);
@@ -234,7 +238,7 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
       public void addModifyListener(ModifyListener listener) {
         textControl.addModifyListener(listener);
       }
-    }, object, feature, null);
+    }, object, feature, defaultValue);
     listeners.add(listener);
   }
 
@@ -262,17 +266,25 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
     getModifyListeners(control).add(listener);
   }
   
-  private ModifyListener addModifyListener(final TextAdapter adapter, final EObject object,
+  private ModifyListener addModifyListener(final TextAdapter adapter, final EObject owner,
       final EStructuralFeature feature, final String defaultValue) {
     ModifyListener listener = new ModifyListener() {
       public void modifyText(ModifyEvent e) {
+        EditingDomain editingDomain = getEditingDomain();
+        CompoundCommand compoundCommand = new CompoundCommand();
+        
+        EStructuralFeature feature2 = feature;
+        Object owner2 = owner;
+        
         Command command;
         if(defaultValue!=null && adapter.getText().equals(defaultValue)) {
-          command = SetCommand.create(getEditingDomain(), object, feature, null);
+          command = SetCommand.create(editingDomain, owner2, feature2, null);
         } else {
-          command = SetCommand.create(getEditingDomain(), object, feature, adapter.getText());
+          command = SetCommand.create(editingDomain, owner2, feature2, adapter.getText());
         }
-        getEditingDomain().getCommandStack().execute(command);
+        compoundCommand.append(command);
+        
+        editingDomain.getCommandStack().execute(compoundCommand);
       }
     };
     adapter.addModifyListener(listener);
