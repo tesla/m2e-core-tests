@@ -33,6 +33,22 @@ public abstract class FormUtils {
     return s == null ? "" : s;
   }
   
+  public static boolean isEmpty(String s) {
+    return s == null || s.length()==0;
+  }
+  
+  public static void setText(Text control, String text) {
+    if(!control.getText().equals(text)) {
+      control.setText(nvl(text));
+    }
+  }
+  
+  public static void setText(CCombo control, String text) {
+    if(!control.getText().equals(text)) {
+      control.setText(nvl(text));
+    }
+  }
+  
   public static void openHyperlink(String url) {
     if(url!=null && url.trim().length()>0) {
       url = url.trim();

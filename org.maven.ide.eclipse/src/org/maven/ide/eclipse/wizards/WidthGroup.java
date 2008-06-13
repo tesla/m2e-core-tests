@@ -9,7 +9,6 @@
 package org.maven.ide.eclipse.wizards;
 
 import java.util.HashSet;
-import java.util.Iterator;
 
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
@@ -23,20 +22,18 @@ import org.eclipse.swt.widgets.Control;
  */
 public class WidthGroup extends ControlAdapter {
 
-  private final HashSet controls = new HashSet();
+  private final HashSet<Control> controls = new HashSet<Control>();
 
   public void controlResized(ControlEvent e) {
     int maxWidth = 0;
-    for(Iterator it = this.controls.iterator(); it.hasNext();) {
-      Control c = (Control) it.next();
+    for(Control c : this.controls) {
       int width = c.getSize().x;
       if(width > maxWidth) {
         maxWidth = width;
       }
     }
     if(maxWidth > 0) {
-      for(Iterator it = this.controls.iterator(); it.hasNext();) {
-        Control c = (Control) it.next();
+      for(Control c : this.controls) {
         GridData gd = (GridData) c.getLayoutData();
         gd.widthHint = maxWidth;
         c.getParent().layout();

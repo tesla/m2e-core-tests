@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.notify.Notifier;
@@ -32,6 +33,8 @@ import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -160,7 +163,7 @@ public abstract class EMFEditorPage extends FormPage implements Adapter {
           
         // case Notification.UNSET:
         // case Notification.ADD_MANY:
-        //case Notification.REMOVE_MANY:
+        // case Notification.REMOVE_MANY:
       }
 
     } catch(Exception ex) {
@@ -192,22 +195,21 @@ public abstract class EMFEditorPage extends FormPage implements Adapter {
 
   public abstract void updateView(Notification notification);
 
-  protected void registerListeners() {
-    Iterator<?> it = model.eAllContents();
-    while (it.hasNext()) {
+  public void registerListeners() {
+    for(Iterator<?> it = model.eAllContents(); it.hasNext();) {
       Object next = it.next();
       if (next instanceof EObject) {
         EObject object = (EObject) next;
-        if (!object.eAdapters().contains(this))
+        if (!object.eAdapters().contains(this)) {
           object.eAdapters().add(this);
+        }
       }
     }
   }
 
-  protected void deRegisterListeners() {
+  public void deRegisterListeners() {
     if(model!=null) {
-      Iterator<?> it = model.eAllContents();
-      while(it.hasNext()) {
+      for(Iterator<?> it = model.eAllContents(); it.hasNext(); ) {
         Object next = it.next();
         if(next instanceof EObject) {
           EObject object = (EObject) next;
@@ -217,11 +219,10 @@ public abstract class EMFEditorPage extends FormPage implements Adapter {
     }
   }
 
-  public void setModifyListener(final Text textControl, final EObject object, final EStructuralFeature feature) {
+  public void setModifyListener(final Text textControl, EObject object, EStructuralFeature feature) {
     List<ModifyListener> listeners = getModifyListeners(textControl);
-    Iterator<ModifyListener> it = listeners.iterator();
-    while (it.hasNext()) {
-      textControl.removeModifyListener(it.next());
+    for(ModifyListener listener : listeners) {
+      textControl.removeModifyListener(listener);
     }
     ModifyListener listener = addModifyListener(new TextAdapter() {
       public String getText() {
@@ -230,12 +231,11 @@ public abstract class EMFEditorPage extends FormPage implements Adapter {
       public void addModifyListener(ModifyListener listener) {
         textControl.addModifyListener(listener);
       }
-    }, object, feature);
+    }, object, feature, null);
     listeners.add(listener);
   }
 
-  public void setModifyListener(final Combo control, final EObject object, final EStructuralFeature feature) {
-    List<ModifyListener> listeners = getModifyListeners(control);
+  public void setModifyListener(final Combo control, EObject object, EStructuralFeature feature) {
     ModifyListener listener = addModifyListener(new TextAdapter() {
       public String getText() {
         return control.getText();
@@ -243,12 +243,11 @@ public abstract class EMFEditorPage extends FormPage implements Adapter {
       public void addModifyListener(ModifyListener listener) {
         control.addModifyListener(listener);
       }
-    }, object, feature);
-    listeners.add(listener);
+    }, object, feature, null);
+    getModifyListeners(control).add(listener);
   }
 
-  public void setModifyListener(final CCombo control, final EObject object, final EStructuralFeature feature) {
-    List<ModifyListener> listeners = getModifyListeners(control);
+  public void setModifyListener(final CCombo control, EObject object, EStructuralFeature feature, String defaultValue) {
     ModifyListener listener = addModifyListener(new TextAdapter() {
       public String getText() {
         return control.getText();
@@ -256,34 +255,68 @@ public abstract class EMFEditorPage extends FormPage implements Adapter {
       public void addModifyListener(ModifyListener listener) {
         control.addModifyListener(listener);
       }
-    }, object, feature);
-    listeners.add(listener);
+    }, object, feature, defaultValue);
+    getModifyListeners(control).add(listener);
   }
   
-  private ModifyListener addModifyListener(final TextAdapter adapter, final EObject object, final EStructuralFeature feature) {
+  private ModifyListener addModifyListener(final TextAdapter adapter, final EObject object,
+      final EStructuralFeature feature, final String defaultValue) {
     ModifyListener listener = new ModifyListener() {
       public void modifyText(ModifyEvent e) {
-            getEditingDomain().getCommandStack().execute(SetCommand.create(getEditingDomain(), object, feature, adapter.getText()));
-          }
+        Command command;
+        if(defaultValue!=null && adapter.getText().equals(defaultValue)) {
+          command = SetCommand.create(getEditingDomain(), object, feature, null);
+        } else {
+          command = SetCommand.create(getEditingDomain(), object, feature, adapter.getText());
+        }
+        getEditingDomain().getCommandStack().execute(command);
+      }
     };
     adapter.addModifyListener(listener);
     return listener;
   }
   
-  public interface TextAdapter {
-    String getText();
-    void addModifyListener(ModifyListener listener);
-  }
+  public void setModifyListener(final Button control, final EObject object, final EStructuralFeature feature, final boolean defaultValue) {
+    class ButtonModifyListener extends SelectionAdapter implements ModifyListener {
+      public void widgetSelected(SelectionEvent e) {
+        boolean value = control.getSelection();
+        Command command = SetCommand.create(getEditingDomain(), object, feature, //
+            value==defaultValue ? null : value ? "true" : "false");
+        getEditingDomain().getCommandStack().execute(command);
+      }
 
-  public void addModifyListener(final Button control, final EObject object, final EStructuralFeature feature, final boolean deleteOthers) {
-    //TODO: button doesn't have ModifyListener...
+      public void modifyText(ModifyEvent e) {
+        widgetSelected(null);
+      }
+    };
+    
+    ButtonModifyListener listener = new ButtonModifyListener();
+    control.addSelectionListener(listener);
+    
+    getModifyListeners(control).add(listener);
   }
 
   public void removeNotifyListener(Text control) {
-    List<ModifyListener> listeners = getModifyListeners(control);
-    Iterator<ModifyListener> it = listeners.iterator();
-    while (it.hasNext()) {
-      control.removeModifyListener(it.next());
+    for(ModifyListener listener : getModifyListeners(control)) {
+      control.removeModifyListener(listener);
+    }
+  }
+
+  public void removeNotifyListener(CCombo control) {
+    for(ModifyListener listener : getModifyListeners(control)) {
+      control.removeModifyListener(listener);
+    }
+  }
+
+  public void removeNotifyListener(Combo control) {
+    for(ModifyListener listener : getModifyListeners(control)) {
+      control.removeModifyListener(listener);
+    }
+  }
+
+  public void removeNotifyListener(Button button) {
+    for(ModifyListener listener : getModifyListeners(button)) {
+      button.removeSelectionListener((SelectionAdapter) listener);
     }
   }
 
@@ -295,27 +328,7 @@ public abstract class EMFEditorPage extends FormPage implements Adapter {
     }
     return listeners;
   }
-
-  public void removeNotifyListener(CCombo control) {
-    List<ModifyListener> listeners = getModifyListeners(control);
-    Iterator<ModifyListener> it = listeners.iterator();
-    while (it.hasNext()) {
-      control.removeModifyListener(it.next());
-    }
-  }
-
-  public void removeNotifyListener(Combo control) {
-    List<ModifyListener> listeners = getModifyListeners(control);
-    Iterator<ModifyListener> it = listeners.iterator();
-    while (it.hasNext()) {
-      control.removeModifyListener(it.next());
-    }
-  }
-
-  public void removeNotifyListener(Button optionalButton) {
-    //TODO: button doesn't have ModifyListener...
-  }
-
+  
   public MavenProjectFacade findModuleProject(String moduleName) {
     IEditorInput editorInput = getEditorInput();
     if(editorInput instanceof IFileEditorInput) {
@@ -338,4 +351,13 @@ public abstract class EMFEditorPage extends FormPage implements Adapter {
     return null;
   }
   
+  /**
+   * Adapter for Text, Combo and CCombo widgets 
+   */
+  public interface TextAdapter {
+    String getText();
+    void addModifyListener(ModifyListener listener);
+  }
+  
 }
+

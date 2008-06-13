@@ -1,5 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2008 Sonatype, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *******************************************************************************/
+
 package org.maven.ide.eclipse.editor.pom;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -29,8 +38,9 @@ public class NotificationCommandStack extends BasicCommandStack {
     if (command instanceof CompoundCommand) {
       CompoundCommand compoundCommand = (CompoundCommand) command;
       Iterator<Command> commands = compoundCommand.getCommandList().iterator();
-      while (commands.hasNext())
+      while (commands.hasNext()) {
         processCommand(commands.next());
+      }
     }
     
     if (command instanceof AddCommand) {
@@ -47,14 +57,18 @@ public class NotificationCommandStack extends BasicCommandStack {
     }
 
     if (command instanceof RemoveCommand) {
-      RemoveCommand addCommand = (RemoveCommand) command;
-      Iterator<?> it = addCommand.getCollection().iterator();
-      while (it.hasNext()) {
-        Object next = it.next();
-        if (next instanceof EObject) {
-          EObject object = (EObject) next;
-          for (int i=0; i<pages.size(); i++)
-            object.eAdapters().remove(pages.get(i));
+      RemoveCommand removeCommand = (RemoveCommand) command;
+      Collection<?> collection = removeCommand.getCollection();
+      if(collection!=null) {
+        Iterator<?> it = collection.iterator();
+        while (it.hasNext()) {
+          Object next = it.next();
+          if (next instanceof EObject) {
+            EObject object = (EObject) next;
+            for (int i=0; i<pages.size(); i++) {
+              object.eAdapters().remove(pages.get(i));
+            }
+          }
         }
       }
     }
@@ -64,8 +78,9 @@ public class NotificationCommandStack extends BasicCommandStack {
     if (next instanceof EObject) {
       EObject object = (EObject) next;
       for (int i=0; i<pages.size(); i++)
-        if (!object.eAdapters().contains(pages.get(i)))
+        if (!object.eAdapters().contains(pages.get(i))) {
           object.eAdapters().add(pages.get(i));
+        }
     }
   }
   

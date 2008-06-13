@@ -8,9 +8,12 @@
 
 package org.maven.ide.eclipse.editor.pom;
 
+import static org.maven.ide.eclipse.editor.pom.FormUtils.isEmpty;
 import static org.maven.ide.eclipse.editor.pom.FormUtils.nvl;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.maven.project.MavenProject;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -46,6 +49,7 @@ import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.FileEditorInput;
 import org.maven.ide.components.pom.CiManagement;
+import org.maven.ide.components.pom.Dependency;
 import org.maven.ide.components.pom.IssueManagement;
 import org.maven.ide.components.pom.Model;
 import org.maven.ide.components.pom.Modules;
@@ -54,9 +58,12 @@ import org.maven.ide.components.pom.Parent;
 import org.maven.ide.components.pom.Properties;
 import org.maven.ide.components.pom.Scm;
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.actions.MavenRepositorySearchDialog;
 import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.editor.composites.ListEditorComposite;
 import org.maven.ide.eclipse.editor.composites.ListEditorContentProvider;
+import org.maven.ide.eclipse.index.IndexManager;
+import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.project.MavenProjectFacade;
 import org.maven.ide.eclipse.wizards.MavenModuleWizard;
 import org.maven.ide.eclipse.wizards.WidthGroup;
@@ -72,7 +79,7 @@ public class OverviewPage extends EMFEditorPage {
   private Text artifactIdText;
   private Text artifactVersionText;
   private Text artifactGroupIdText;
-  private CCombo artifactPackagingText;
+  private CCombo artifactPackagingCombo;
   private Text parentVersionText;
   private Text parentArtifactIdText;
   private Text parentGroupIdText;
@@ -102,6 +109,14 @@ public class OverviewPage extends EMFEditorPage {
   private IssueManagement issueManagement;
   private Modules modules;
   private Properties properties;
+  private Section propertiesSection;
+  private Section modulesSection;
+  private Section parentSection;
+  private Section projectSection;
+  private Section organizationSection;
+  private Section scmSection;
+  private Section issueManagementSection;
+  private Section ciManagementSection;
 
   public OverviewPage(MavenPomEditor pomEditor) {
     super(pomEditor, MavenPlugin.PLUGIN_ID + ".pom.overview", "Overview");
@@ -188,13 +203,22 @@ public class OverviewPage extends EMFEditorPage {
   
     Label packagingLabel = toolkit.createLabel(artifactComposite, "Packaging:", SWT.NONE);
   
-    artifactPackagingText = new CCombo(artifactComposite, SWT.FLAT);
-    artifactPackagingText.setData(FormToolkit.KEY_DRAW_BORDER, FormToolkit.TEXT_BORDER);
-    toolkit.adapt(artifactPackagingText, true, true);
+    artifactPackagingCombo = new CCombo(artifactComposite, SWT.FLAT);
+    
+    artifactPackagingCombo.add("jar");
+    artifactPackagingCombo.add("war");
+    artifactPackagingCombo.add("ear");
+    artifactPackagingCombo.add("pom");
+    artifactPackagingCombo.add("maven-plugin");
+    artifactPackagingCombo.add("osgi-bundle");
+    artifactPackagingCombo.add("eclipse-feature");
+    
+    toolkit.adapt(artifactPackagingCombo, true, true);
     GridData gd_packagingText = new GridData(SWT.LEFT, SWT.CENTER, true, false);
     gd_packagingText.widthHint = 120;
-    artifactPackagingText.setLayoutData(gd_packagingText);
-    toolkit.paintBordersFor(artifactPackagingText);
+    artifactPackagingCombo.setLayoutData(gd_packagingText);
+    artifactPackagingCombo.setData(FormToolkit.KEY_DRAW_BORDER, FormToolkit.TEXT_BORDER);
+    toolkit.paintBordersFor(artifactPackagingCombo);
     
     widthGroup.addControl(groupIdLabel);
     widthGroup.addControl(artifactIdLabel);
@@ -205,7 +229,7 @@ public class OverviewPage extends EMFEditorPage {
   }
 
   private void createParentsection(FormToolkit toolkit, Composite composite, WidthGroup widthGroup) {
-    Section parentSection = toolkit.createSection(composite, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
+    parentSection = toolkit.createSection(composite, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
     parentSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
     parentSection.setText("Parent");
   
@@ -248,11 +272,21 @@ public class OverviewPage extends EMFEditorPage {
     parentVersionTextData.widthHint = 200;
     parentVersionText.setLayoutData(parentVersionTextData);
   
-    Button browseButton = toolkit.createButton(parentComposite, "Select...", SWT.NONE);
-    browseButton.addSelectionListener(new SelectionAdapter() {
+    Button parentSelectButton = toolkit.createButton(parentComposite, "Select...", SWT.NONE);
+    parentSelectButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
-        
-        
+        // TODO calculate current list of artifacts for the project
+        Set<Dependency> artifacts = Collections.emptySet();
+        MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getEditorSite().getShell(),
+            "Add Dependency", IndexManager.SEARCH_ARTIFACT, artifacts);
+        if(dialog.open() == Window.OK) {
+          IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
+          if(af != null) {
+            parentGroupIdText.setText(nvl(af.group));
+            parentArtifactIdText.setText(nvl(af.artifact));
+            parentVersionText.setText(nvl(af.artifact));
+          }
+        }
       }
     });
 
@@ -270,7 +304,7 @@ public class OverviewPage extends EMFEditorPage {
   }
 
   private void createPropertiesSection(FormToolkit toolkit, Composite composite, WidthGroup widthGroup) {
-    Section propertiesSection = toolkit.createSection(composite, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
+    propertiesSection = toolkit.createSection(composite, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
     propertiesSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
     propertiesSection.setText("Properties");
     toolkit.paintBordersFor(propertiesSection);
@@ -283,7 +317,7 @@ public class OverviewPage extends EMFEditorPage {
   }
 
   private void createModulesSection(FormToolkit toolkit, Composite composite, WidthGroup widthGroup) {
-    Section modulesSection = toolkit.createSection(composite, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
+    modulesSection = toolkit.createSection(composite, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
     modulesSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     modulesSection.setText("Modules");
 
@@ -337,9 +371,8 @@ public class OverviewPage extends EMFEditorPage {
   // right side
 
   private void createProjectSection(FormToolkit toolkit, Composite composite, WidthGroup widthGroup) {
-    Section projectSection = toolkit.createSection(composite, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
-    GridData gd_projectSection = new GridData(SWT.FILL, SWT.TOP, true, false);
-    projectSection.setLayoutData(gd_projectSection);
+    projectSection = toolkit.createSection(composite, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
+    projectSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
     projectSection.setText("Project");
   
     Composite projectComposite = toolkit.createComposite(projectSection, SWT.NONE);
@@ -390,7 +423,7 @@ public class OverviewPage extends EMFEditorPage {
   }
 
   private void createOrganizationSection(FormToolkit toolkit, Composite composite, WidthGroup widthGroup) {
-    Section organizationSection = toolkit.createSection(composite, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
+    organizationSection = toolkit.createSection(composite, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
     organizationSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
     organizationSection.setText("Organization");
   
@@ -424,7 +457,7 @@ public class OverviewPage extends EMFEditorPage {
   }
 
   private void createScmSection(FormToolkit toolkit, Composite composite, WidthGroup widthGroup) {
-    Section scmSection = toolkit.createSection(composite, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
+    scmSection = toolkit.createSection(composite, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
     GridData gd_scmSection = new GridData(SWT.FILL, SWT.TOP, false, false);
     scmSection.setLayoutData(gd_scmSection);
     scmSection.setText("SCM");
@@ -475,9 +508,8 @@ public class OverviewPage extends EMFEditorPage {
   }
 
   private void createIssueManagementSection(FormToolkit toolkit, Composite composite, WidthGroup widthGroup) {
-    Section issueManagementSection = toolkit.createSection(composite, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
-    GridData gd_issueManagementSection = new GridData(SWT.FILL, SWT.TOP, false, false);
-    issueManagementSection.setLayoutData(gd_issueManagementSection);
+    issueManagementSection = toolkit.createSection(composite, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
+    issueManagementSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
     issueManagementSection.setText("Issue Management");
   
     Composite issueManagementComposite = toolkit.createComposite(issueManagementSection, SWT.NONE);
@@ -510,9 +542,8 @@ public class OverviewPage extends EMFEditorPage {
   }
 
   private void createCiManagementSection(FormToolkit toolkit, Composite composite, WidthGroup widthGroup) {
-    Section ciManagementSection = toolkit.createSection(composite, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
-    GridData gd_ciManagementSection = new GridData(SWT.FILL, SWT.TOP, false, false);
-    ciManagementSection.setLayoutData(gd_ciManagementSection);
+    ciManagementSection = toolkit.createSection(composite, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
+    ciManagementSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
     ciManagementSection.setText("Continuous Integration");
   
     Composite ciManagementComposite = toolkit.createComposite(ciManagementSection, SWT.NONE);
@@ -549,7 +580,7 @@ public class OverviewPage extends EMFEditorPage {
     setModifyListener(artifactGroupIdText, model, POM_PACKAGE.getModel_GroupId());
     setModifyListener(artifactIdText, model, POM_PACKAGE.getModel_ArtifactId());
     setModifyListener(artifactVersionText, model, POM_PACKAGE.getModel_ModelVersion());
-    setModifyListener(artifactPackagingText, model, POM_PACKAGE.getModel_Packaging());
+    setModifyListener(artifactPackagingCombo, model, POM_PACKAGE.getModel_Packaging(), "jar");
     
     setModifyListener(parentGroupIdText, parent, POM_PACKAGE.getParent_GroupId());
     setModifyListener(parentArtifactIdText, parent, POM_PACKAGE.getParent_ArtifactId());
@@ -626,21 +657,27 @@ public class OverviewPage extends EMFEditorPage {
     artifactGroupIdText.setText(nvl(model.getGroupId()));
     artifactIdText.setText(nvl(model.getArtifactId()));
     artifactVersionText.setText(nvl(model.getVersion()));
-    artifactPackagingText.setText(nvl(model.getPackaging()));
+    artifactPackagingCombo.setText(nvl(model.getPackaging()));
+    
     projectNameText.setText(nvl(model.getName()));
     projectDescriptionText.setText(nvl(model.getDescription()));
     projectUrlText.setText(nvl(model.getUrl()));
     inceptionYearText.setText(nvl(model.getInceptionYear()));
+    
+    projectSection.setExpanded(!isEmpty(model.getName()) || !isEmpty(model.getDescription())
+        || !isEmpty(model.getUrl()) || !isEmpty(model.getInceptionYear()));
   }
 
   private void loadProperties() {
     properties = model.getProperties();
     propertiesEditor.setInput(properties);
+    propertiesSection.setExpanded(false);
   }
   
   private void loadModules() {
     modules = model.getModules();
     modulesEditor.setInput(modules==null ? null : modules.getModule());
+    modulesSection.setExpanded(modules!=null && modules.getModule().size()>0);
   }
   
   private void loadParent() {
@@ -650,6 +687,9 @@ public class OverviewPage extends EMFEditorPage {
       parentArtifactIdText.setText(nvl(parent.getArtifactId()));
       parentVersionText.setText(nvl(parent.getVersion()));
       parentRealtivePathText.setText(nvl(parent.getRelativePath()));
+      parentSection.setExpanded(!isEmpty(parent.getGroupId()));
+    } else {
+      parentSection.setExpanded(false);
     }
   }
 
@@ -658,6 +698,9 @@ public class OverviewPage extends EMFEditorPage {
     if(organization!=null) {
       organizationNameText.setText(nvl(organization.getName()));
       organizationUrlText.setText(nvl(organization.getUrl()));
+      organizationSection.setExpanded(!isEmpty(organization.getName()) || !isEmpty(organization.getUrl()));
+    } else {
+      organizationSection.setExpanded(false);
     }
   }
 
@@ -668,6 +711,9 @@ public class OverviewPage extends EMFEditorPage {
       scmConnectionText.setText(nvl(scm.getConnection()));
       scmDevConnectionText.setText(nvl(scm.getDeveloperConnection()));
       scmTagText.setText(nvl(scm.getTag()));
+      scmSection.setExpanded(!isEmpty(scm.getUrl()) || !isEmpty(scm.getConnection()) || !isEmpty(scm.getDeveloperConnection()));
+    } else {
+      scmSection.setExpanded(false);
     }
   }
 
@@ -676,6 +722,9 @@ public class OverviewPage extends EMFEditorPage {
     if(ciManagement!=null) {
       ciManagementSystemText.setText(nvl(ciManagement.getSystem()));
       ciManagementUrlText.setText(nvl(ciManagement.getUrl()));
+      ciManagementSection.setExpanded(!isEmpty(ciManagement.getSystem()) || !isEmpty(ciManagement.getUrl()));
+    } else {
+      ciManagementSection.setExpanded(false);
     }
   }
 
@@ -684,6 +733,9 @@ public class OverviewPage extends EMFEditorPage {
     if(issueManagement!=null) {
       issueManagementSystemText.setText(nvl(issueManagement.getSystem()));
       issueManagementUrlText.setText(nvl(issueManagement.getUrl()));
+      issueManagementSection.setExpanded(!isEmpty(issueManagement.getSystem()) || !isEmpty(issueManagement.getUrl()));
+    } else {
+      issueManagementSection.setExpanded(false);
     }
   }
 

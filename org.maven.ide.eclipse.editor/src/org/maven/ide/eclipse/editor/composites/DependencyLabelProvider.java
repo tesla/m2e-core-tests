@@ -73,8 +73,8 @@ public class DependencyLabelProvider extends LabelProvider {
   private String getText(String groupId, String artifactId, String version, String classifier, String type, String scope) {
     StringBuilder sb = new StringBuilder();
 
-    sb.append(isEmpty(groupId) ? "[unknown]" : groupId);
-    sb.append(" : ").append(isEmpty(artifactId) ? "[unknown]" : artifactId);
+    sb.append(isEmpty(groupId) ? "?" : groupId);
+    sb.append(" : ").append(isEmpty(artifactId) ? "?" : artifactId);
 
     if(!isEmpty(version)) {
       sb.append(" : ").append(version);
