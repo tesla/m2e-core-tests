@@ -47,7 +47,7 @@ import org.maven.ide.eclipse.wizards.WidthGroup;
 /**
  * @author Eugene Kuleshov
  */
-public class TeamPage extends EMFEditorPage {
+public class TeamPage extends MavenPomEditorPage {
 
   // controls
   private ListEditorComposite<Developer> developersEditor;

@@ -15,9 +15,9 @@ import org.maven.ide.eclipse.project.MavenProjectFacade;
 
 public class ModulesLabelProvider extends StringLabelProvider {
   
-  private final EMFEditorPage editorPage;
+  private final MavenPomEditorPage editorPage;
 
-  public ModulesLabelProvider(EMFEditorPage editorPage) {
+  public ModulesLabelProvider(MavenPomEditorPage editorPage) {
     super(MavenEditorImages.IMG_JAR);
     this.editorPage = editorPage;
   }

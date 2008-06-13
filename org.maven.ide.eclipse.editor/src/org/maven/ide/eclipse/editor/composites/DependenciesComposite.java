@@ -50,7 +50,7 @@ import org.maven.ide.components.pom.Model;
 import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.PomPackage;
 import org.maven.ide.eclipse.actions.MavenRepositorySearchDialog;
-import org.maven.ide.eclipse.editor.pom.EMFEditorPage;
+import org.maven.ide.eclipse.editor.pom.MavenPomEditorPage;
 import org.maven.ide.eclipse.editor.pom.FormUtils;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
@@ -64,7 +64,7 @@ public class DependenciesComposite extends Composite {
 
   protected static PomPackage POM_PACKAGE = PomPackage.eINSTANCE;
   
-  protected EMFEditorPage parent; 
+  protected MavenPomEditorPage parent; 
   
   private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
 
@@ -621,7 +621,7 @@ public class DependenciesComposite extends Composite {
     parent.registerListeners();
   }
 
-  public void loadData(EMFEditorPage editorPage) {
+  public void loadData(MavenPomEditorPage editorPage) {
     parent = editorPage;
     model = editorPage.getModel();
     loadDependencies(model);
@@ -643,7 +643,7 @@ public class DependenciesComposite extends Composite {
     dependenciesListEditor.setInput(dependencies == null ? null : dependencies.getDependency());
   }
 
-  public void updateView(EMFEditorPage editorPage, Notification notification) {
+  public void updateView(MavenPomEditorPage editorPage, Notification notification) {
     EObject object = (EObject) notification.getNotifier();
     if(object instanceof Dependencies) {
     	// handle add/remove

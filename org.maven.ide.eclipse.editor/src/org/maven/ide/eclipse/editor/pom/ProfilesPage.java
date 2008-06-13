@@ -55,7 +55,7 @@ import org.maven.ide.eclipse.wizards.WidthGroup;
 /**
  * @author Eugene Kuleshov
  */
-public class ProfilesPage extends EMFEditorPage {
+public class ProfilesPage extends MavenPomEditorPage {
 
   // controls
   private Text profileIdText;

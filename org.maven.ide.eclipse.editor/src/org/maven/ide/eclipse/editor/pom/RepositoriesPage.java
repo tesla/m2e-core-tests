@@ -22,7 +22,7 @@ import org.maven.ide.eclipse.editor.composites.RepositoriesComposite;
 /**
  * @author Eugene Kuleshov
  */
-public class RepositoriesPage extends EMFEditorPage {
+public class RepositoriesPage extends MavenPomEditorPage {
 
   private RepositoriesComposite repositoriesComposite;
   

@@ -22,7 +22,7 @@ import org.maven.ide.eclipse.editor.composites.ReportingComposite;
 /**
  * @author Eugene Kuleshov
  */
-public class ReportingPage extends EMFEditorPage {
+public class ReportingPage extends MavenPomEditorPage {
 
   private ReportingComposite reportingComposite;
 

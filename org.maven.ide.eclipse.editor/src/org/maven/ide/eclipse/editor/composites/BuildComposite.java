@@ -32,7 +32,7 @@ import org.maven.ide.components.pom.Build;
 import org.maven.ide.components.pom.Model;
 import org.maven.ide.components.pom.Resource;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
-import org.maven.ide.eclipse.editor.pom.EMFEditorPage;
+import org.maven.ide.eclipse.editor.pom.MavenPomEditorPage;
 import org.maven.ide.eclipse.editor.pom.FormUtils;
 
 /**
@@ -232,7 +232,7 @@ public class BuildComposite extends Composite {
     // XXX add actions
   }
   
-  public void loadData(EMFEditorPage editorPage) {
+  public void loadData(MavenPomEditorPage editorPage) {
     model = editorPage.getModel();
     build = model.getBuild();
     loadBuild(build);
@@ -241,7 +241,7 @@ public class BuildComposite extends Composite {
     loadResourceDetails(null);
   }
 
-  public void updateView(EMFEditorPage editorPage, Notification notification) {
+  public void updateView(MavenPomEditorPage editorPage, Notification notification) {
     // XXX
   }
   

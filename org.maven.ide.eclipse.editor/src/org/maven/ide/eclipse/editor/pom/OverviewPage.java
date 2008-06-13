@@ -20,8 +20,15 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.emf.common.command.Command;
+import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.edit.command.AddCommand;
+import org.eclipse.emf.edit.command.RemoveCommand;
+import org.eclipse.emf.edit.command.SetCommand;
+import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -55,6 +62,7 @@ import org.maven.ide.components.pom.Model;
 import org.maven.ide.components.pom.Modules;
 import org.maven.ide.components.pom.Organization;
 import org.maven.ide.components.pom.Parent;
+import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.Properties;
 import org.maven.ide.components.pom.Scm;
 import org.maven.ide.eclipse.MavenPlugin;
@@ -72,7 +80,7 @@ import org.maven.ide.eclipse.wizards.WidthGroup;
 /**
  * @author Eugene Kuleshov
  */
-public class OverviewPage extends EMFEditorPage {
+public class OverviewPage extends MavenPomEditorPage {
 
   //controls
   private Text parentRealtivePathText;
@@ -314,6 +322,9 @@ public class OverviewPage extends EMFEditorPage {
     
     propertiesEditor.setContentProvider(new ListEditorContentProvider<PropertyPair>());
     propertiesEditor.setLabelProvider(new PropertyPairLabelProvider());
+
+    // XXX implement properties support
+    propertiesEditor.setEnabled(false);
   }
 
   private void createModulesSection(FormToolkit toolkit, Composite composite, WidthGroup widthGroup) {
@@ -350,9 +361,24 @@ public class OverviewPage extends EMFEditorPage {
           wizard.init(PlatformUI.getWorkbench(), new StructuredSelection(((FileEditorInput) editorInput).getFile()));
           WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), wizard);
           int res = dialog.open();
-          if(res==Window.OK) {
-            EList<String> moduleList = modules.getModule();
-            moduleList.add(wizard.getModuleName());
+          if(res == Window.OK) {
+            CompoundCommand compoundCommand = new CompoundCommand();
+            EditingDomain editingDomain = getEditingDomain();
+
+            Modules modules = model.getModules();
+            if(modules == null) {
+              modules = PomFactory.eINSTANCE.createModules();
+              Command addModules = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Modules(), modules);
+              compoundCommand.append(addModules);
+            }
+            
+            Command addModule = AddCommand.create(editingDomain, modules, POM_PACKAGE.getModules_Module(), wizard.getModuleName());
+            compoundCommand.append(addModule);
+            
+            // modules.getModule().add(wizard.getModuleName());
+
+            editingDomain.getCommandStack().execute(compoundCommand);
+            modulesEditor.setInput(modules == null ? null : modules.getModule());
           }
         }
       }
@@ -360,10 +386,23 @@ public class OverviewPage extends EMFEditorPage {
     
     modulesEditor.setRemoveListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
-        List<String> modules = modulesEditor.getSelection();
-        for(String module : modules) {
-          // XXX implement remove command
+        CompoundCommand compoundCommand = new CompoundCommand();
+        EditingDomain editingDomain = getEditingDomain();
+
+        int n = 0;
+        Modules modules = model.getModules();
+        for(String module : modulesEditor.getSelection()) {
+          Command removeCommand = RemoveCommand.create(editingDomain, modules, POM_PACKAGE.getModules_Module(), module);
+          compoundCommand.append(removeCommand);
+          n++ ;
         }
+        if(modules.getModule().size() - n == 0) {
+          Command removeModules = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Modules(), null);
+          compoundCommand.append(removeModules);
+        }
+
+        editingDomain.getCommandStack().execute(compoundCommand);
+        modulesEditor.setInput(modules == null ? null : modules.getModule());
       }
     });
   }
@@ -608,35 +647,36 @@ public class OverviewPage extends EMFEditorPage {
   }
     
   public void updateView(Notification notification) {
-    if (notification.getNotifier() instanceof Model) {
+    EObject object = (EObject) notification.getNotifier();
+    if (object instanceof Model) {
       loadThis();
     }
 
-    if (notification.getNotifier() instanceof Parent) {
+    if (object instanceof Parent) {
       loadParent();
     }
 
-    if (notification.getNotifier() instanceof Organization) {
+    if (object instanceof Organization) {
       loadOrganization();
     }
 
-    if (notification.getNotifier() instanceof Scm) {
+    if (object instanceof Scm) {
       loadScm();
     }
 
-    if (notification.getNotifier() instanceof CiManagement) {
+    if (object instanceof CiManagement) {
       loadCiManagement();
     }
 
-    if (notification.getNotifier() instanceof IssueManagement) {
+    if (object instanceof IssueManagement) {
       loadIssueManagement();
     }
     
-    if(notification.getNotifier() instanceof Modules) {
+    if(object instanceof Modules) {
       loadModules();
     }
     
-    if(notification.getNotifier() instanceof Properties) {
+    if(object instanceof Properties) {
       loadProperties();
     }
   }

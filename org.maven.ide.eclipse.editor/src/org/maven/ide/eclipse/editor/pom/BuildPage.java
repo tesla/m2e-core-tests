@@ -31,7 +31,7 @@ import org.maven.ide.eclipse.editor.composites.ListEditorContentProvider;
 /**
  * @author Eugene Kuleshov
  */
-public class BuildPage extends EMFEditorPage {
+public class BuildPage extends MavenPomEditorPage {
   
   // controls
   private Text sourceText;

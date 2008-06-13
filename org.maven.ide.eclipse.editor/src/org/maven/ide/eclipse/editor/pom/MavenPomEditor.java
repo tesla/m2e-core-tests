@@ -123,7 +123,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 
   DependencyGraphPage graphPage;
   
-  List<EMFEditorPage> pages = new ArrayList<EMFEditorPage>();
+  List<MavenPomEditorPage> pages = new ArrayList<MavenPomEditorPage>();
   
   private Model projectDocument;
 
@@ -175,7 +175,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     } catch(CoreException e) {
       MavenPlugin.log(e);
     }
-    Iterator<EMFEditorPage> it = pages.iterator();
+    Iterator<MavenPomEditorPage> it = pages.iterator();
     while (it.hasNext()) {
       it.next().reload();
     }
@@ -256,8 +256,8 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 
   private int addPomPage(IFormPage page) {
     try {
-      if (page instanceof EMFEditorPage)
-        pages.add((EMFEditorPage) page);
+      if (page instanceof MavenPomEditorPage)
+        pages.add((MavenPomEditorPage) page);
       return addPage(page);
     } catch (PartInitException ex) {
       MavenPlugin.log(ex);
@@ -328,7 +328,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 
     } finally {
       // set read-only for non-workspace resource
-      for(EMFEditorPage page : pages) {
+      for(MavenPomEditorPage page : pages) {
         page.setReadonly(true);
       }
       // TODO SSE editor page

@@ -22,9 +22,9 @@ import org.eclipse.emf.edit.command.SetCommand;
 
 public class NotificationCommandStack extends BasicCommandStack {
 
-  private List<EMFEditorPage> pages;
+  private List<MavenPomEditorPage> pages;
 
-  public NotificationCommandStack(List<EMFEditorPage> pages) {
+  public NotificationCommandStack(List<MavenPomEditorPage> pages) {
     this.pages = pages;
   }
   

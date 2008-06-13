@@ -34,7 +34,7 @@ import org.maven.ide.components.pom.ReportSetsType;
 import org.maven.ide.components.pom.Reporting;
 import org.maven.ide.components.pom.StringReports;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
-import org.maven.ide.eclipse.editor.pom.EMFEditorPage;
+import org.maven.ide.eclipse.editor.pom.MavenPomEditorPage;
 import org.maven.ide.eclipse.editor.pom.FormUtils;
 
 
@@ -322,7 +322,7 @@ public class ReportingComposite extends Composite {
     reportsEditor.setInput(reports==null ? null : reports.getReport());
   }
 
-  public void loadData(EMFEditorPage editorPage) {
+  public void loadData(MavenPomEditorPage editorPage) {
     Model model = editorPage.getModel();
     updateContent(model.getReporting());
   }

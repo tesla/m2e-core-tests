@@ -21,7 +21,7 @@ import org.maven.ide.eclipse.editor.composites.DependenciesComposite;
 /**
  * @author Eugene Kuleshov
  */
-public class DependenciesPage extends EMFEditorPage {
+public class DependenciesPage extends MavenPomEditorPage {
   
   private DependenciesComposite dependenciesComposite;
   
@@ -58,7 +58,9 @@ public class DependenciesPage extends EMFEditorPage {
   }
   
   public void updateView(Notification notification) {
-    dependenciesComposite.updateView(this, notification);
+    if(dependenciesComposite!=null) {
+      dependenciesComposite.updateView(this, notification);
+    }
   }
   
 }

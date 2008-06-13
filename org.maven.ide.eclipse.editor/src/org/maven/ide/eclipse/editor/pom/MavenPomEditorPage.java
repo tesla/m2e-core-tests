@@ -54,7 +54,7 @@ import org.maven.ide.eclipse.project.MavenProjectManager;
  * 
  * @author akraev
  */
-public abstract class EMFEditorPage extends FormPage implements Adapter {
+public abstract class MavenPomEditorPage extends FormPage implements Adapter {
 
   //parent editor
   protected final MavenPomEditor pomEditor;
@@ -78,7 +78,7 @@ public abstract class EMFEditorPage extends FormPage implements Adapter {
 
   protected static Map<Object, List<ModifyListener>> modifyListeners = new HashMap<Object, List<ModifyListener>>();
 
-  public EMFEditorPage(MavenPomEditor pomEditor, String id, String title) {
+  public MavenPomEditorPage(MavenPomEditor pomEditor, String id, String title) {
     super(pomEditor, id, title);
     this.pomEditor = pomEditor;
   }
@@ -172,6 +172,7 @@ public abstract class EMFEditorPage extends FormPage implements Adapter {
       updatingModel = false;
     }
     
+    registerListeners();
   }
 
   public void dispose() {
@@ -196,12 +197,14 @@ public abstract class EMFEditorPage extends FormPage implements Adapter {
   public abstract void updateView(Notification notification);
 
   public void registerListeners() {
-    for(Iterator<?> it = model.eAllContents(); it.hasNext();) {
-      Object next = it.next();
-      if (next instanceof EObject) {
-        EObject object = (EObject) next;
-        if (!object.eAdapters().contains(this)) {
-          object.eAdapters().add(this);
+    if(model!=null) {
+      for(Iterator<?> it = model.eAllContents(); it.hasNext();) {
+        Object next = it.next();
+        if (next instanceof EObject) {
+          EObject object = (EObject) next;
+          if (!object.eAdapters().contains(this)) {
+            object.eAdapters().add(this);
+          }
         }
       }
     }

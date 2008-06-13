@@ -40,7 +40,7 @@ import org.maven.ide.components.pom.PluginManagement;
 import org.maven.ide.components.pom.Plugins;
 import org.maven.ide.components.pom.StringGoals;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
-import org.maven.ide.eclipse.editor.pom.EMFEditorPage;
+import org.maven.ide.eclipse.editor.pom.MavenPomEditorPage;
 
 /**
  * @author Eugene Kuleshov
@@ -330,7 +330,7 @@ public class PluginsComposite extends Composite {
     }
   }
 
-  public void loadData(EMFEditorPage editorPage) {
+  public void loadData(MavenPomEditorPage editorPage) {
     model = editorPage.getModel();
     loadPlugins(model);
     loadPluginManagement(model);
@@ -361,7 +361,7 @@ public class PluginsComposite extends Composite {
     pluginManagementEditor.setInput(null);
   }
   
-  public void updateView(EMFEditorPage editorPage, Notification notification) {
+  public void updateView(MavenPomEditorPage editorPage, Notification notification) {
     EObject object = (EObject) notification.getNotifier();
     if(object instanceof Plugins || object instanceof Plugin) {
       loadPlugins(model);

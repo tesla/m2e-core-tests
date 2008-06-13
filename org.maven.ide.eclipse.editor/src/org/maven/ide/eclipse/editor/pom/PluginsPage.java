@@ -22,7 +22,7 @@ import org.maven.ide.eclipse.editor.composites.PluginsComposite;
 /**
  * @author Eugene Kuleshov
  */
-public class PluginsPage extends EMFEditorPage {
+public class PluginsPage extends MavenPomEditorPage {
 
   private PluginsComposite pluginsComposite;
   

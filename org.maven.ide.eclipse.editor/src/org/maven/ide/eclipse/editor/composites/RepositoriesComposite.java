@@ -42,7 +42,7 @@ import org.maven.ide.components.pom.Repositories;
 import org.maven.ide.components.pom.Repository;
 import org.maven.ide.components.pom.RepositoryPolicy;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
-import org.maven.ide.eclipse.editor.pom.EMFEditorPage;
+import org.maven.ide.eclipse.editor.pom.MavenPomEditorPage;
 import org.maven.ide.eclipse.editor.pom.FormUtils;
 
 /**
@@ -556,7 +556,7 @@ public class RepositoriesComposite extends Composite {
     // XXX register new listeners
   }
 
-  public void loadData(EMFEditorPage editorPage) {
+  public void loadData(MavenPomEditorPage editorPage) {
     model = editorPage.getModel();
     loadRepositories(model);
     loadPluginRepositories(model);
@@ -572,7 +572,7 @@ public class RepositoriesComposite extends Composite {
     pluginRepositoriesEditor.setInput(pluginRepositories==null ? null : pluginRepositories.getPluginRepository());
   }
 
-  public void updateView(EMFEditorPage editorPage, Notification notification) {
+  public void updateView(MavenPomEditorPage editorPage, Notification notification) {
     EObject object = (EObject) notification.getNotifier();
     if(object instanceof Repositories || object instanceof Repository || object instanceof PluginRepositories) {
       loadRepositories(model);
