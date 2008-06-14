@@ -14,8 +14,8 @@ import java.util.LinkedHashMap;
 public class IndexedArtifactGroup {
   public final IndexInfo info;
   public final String prefix;
-  public final LinkedHashMap nodes = new LinkedHashMap();
-  public final LinkedHashMap files = new LinkedHashMap();
+  public final LinkedHashMap<String, IndexedArtifactGroup> nodes = new LinkedHashMap<String, IndexedArtifactGroup>();
+  public final LinkedHashMap<String, IndexedArtifact> files = new LinkedHashMap<String, IndexedArtifact>();
 
   public IndexedArtifactGroup(IndexInfo info, String prefix) {
     this.info = info;

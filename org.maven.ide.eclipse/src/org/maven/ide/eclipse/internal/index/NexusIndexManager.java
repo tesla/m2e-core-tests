@@ -14,7 +14,6 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -173,14 +172,14 @@ public class NexusIndexManager extends IndexManager {
     return indexer.constructQuery(field, expression);
   }
 
-  public Map search(String term, String type) throws IOException {
+  public Map<String, IndexedArtifact> search(String term, String type) throws IOException {
     return search(null, term, type);
   }
 
   /**
    * @return Map<String, IndexedArtifact>
    */
-  public Map search(String indexName, String term, String type) throws IOException {
+  public Map<String, IndexedArtifact> search(String indexName, String term, String type) throws IOException {
     Query query;
     if(IndexManager.SEARCH_CLASS_NAME.equals(type)) {
       query = new WildcardQuery(new Term(ArtifactInfo.NAMES, term + "*"));
@@ -226,15 +225,15 @@ public class NexusIndexManager extends IndexManager {
       query = new WildcardQuery(new Term(ArtifactInfo.SHA1, term + "*"));
       
     } else {
-      return Collections.EMPTY_MAP;
+      return Collections.emptyMap();
 
     }
 
-    Map result = new TreeMap();
+    Map<String, IndexedArtifact> result = new TreeMap<String, IndexedArtifact>();
 
     try {
       IndexingContext context = getIndexingContext(indexName);
-      Collection artifacts;
+      Collection<ArtifactInfo> artifacts;
       if(context == null) {
         artifacts = indexer.searchFlat(ArtifactInfo.VERSION_COMPARATOR, query);
       } else {
@@ -254,8 +253,7 @@ public class NexusIndexManager extends IndexManager {
       String regex = "^(.*?" + term.replaceAll("\\*", ".+?") + ".*?)$";
       Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
 
-      for(Iterator it = artifacts.iterator(); it.hasNext();) {
-        ArtifactInfo artifactInfo = (ArtifactInfo) it.next();
+      for(ArtifactInfo artifactInfo : artifacts) {
         IndexedArtifactFile af = getIndexedArtifactFile(artifactInfo);
 
         if(!IndexManager.SEARCH_CLASS_NAME.equals(type) || term.length() < IndexManager.MIN_CLASS_QUERY_LENGTH) {
@@ -294,19 +292,18 @@ public class NexusIndexManager extends IndexManager {
   /**
    * @return Map<String, IndexedArtifact>
    */
-  public Map search(String indexName, Query query) throws IOException {
-    Map result = new TreeMap();
+  public Map<String, IndexedArtifact> search(String indexName, Query query) throws IOException {
+    Map<String, IndexedArtifact> result = new TreeMap<String, IndexedArtifact>();
     try {
       IndexingContext context = getIndexingContext(indexName);
-      Collection artifacts;
+      Collection<ArtifactInfo> artifacts;
       if(context == null) {
         artifacts = indexer.searchFlat(ArtifactInfo.VERSION_COMPARATOR, query);
       } else {
         artifacts = indexer.searchFlat(ArtifactInfo.VERSION_COMPARATOR, query, context);
       }
       
-      for(Iterator it = artifacts.iterator(); it.hasNext();) {
-        ArtifactInfo artifactInfo = (ArtifactInfo) it.next();
+      for(ArtifactInfo artifactInfo : artifacts) {
         IndexedArtifactFile af = getIndexedArtifactFile(artifactInfo);
         addArtifactFile(result, af, null, null, artifactInfo.packaging);
       }
@@ -319,10 +316,10 @@ public class NexusIndexManager extends IndexManager {
     return result;
   }  
 
-  private void addArtifactFile(Map result, IndexedArtifactFile af, String className, String packageName,
+  private void addArtifactFile(Map<String, IndexedArtifact> result, IndexedArtifactFile af, String className, String packageName,
       String packaging) {
     String key = className + " : " + packageName + " : " + af.group + " : " + af.artifact;
-    IndexedArtifact indexedArtifact = (IndexedArtifact) result.get(key);
+    IndexedArtifact indexedArtifact = result.get(key);
     if(indexedArtifact == null) {
       indexedArtifact = new IndexedArtifact(af.group, af.artifact, packageName, className, packaging);
       result.put(key, indexedArtifact);
@@ -349,7 +346,7 @@ public class NexusIndexManager extends IndexManager {
     int javadocExists = artifactInfo.javadocExists.ordinal();
 
     String prefix = artifactInfo.prefix;
-    List goals = artifactInfo.goals;
+    List<String> goals = artifactInfo.goals;
     
     return new IndexedArtifactFile(repository, groupId, artifactId, version, packaging, classifier, fname, size, date,
         sourcesExists, javadocExists, prefix, goals);
@@ -533,11 +530,11 @@ public class NexusIndexManager extends IndexManager {
   public IndexedArtifactGroup[] getGroups(String indexId) throws IOException {
     IndexingContext context = getIndexingContext(indexId);
     if(context != null) {
-      Set allGroups = indexer.getAllGroups(context);
+      Set<String> allGroups = indexer.getAllGroups(context);
       IndexedArtifactGroup[] groups = new IndexedArtifactGroup[allGroups.size()];
       int i = 0;
-      for(Iterator it = allGroups.iterator(); it.hasNext();) {
-        groups[i++ ] = new IndexedArtifactGroup(getIndexInfo(indexId), ((String) it.next()));
+      for(String group : allGroups) {
+        groups[i++ ] = new IndexedArtifactGroup(getIndexInfo(indexId), group);
       }
       return groups;
     }
@@ -547,11 +544,11 @@ public class NexusIndexManager extends IndexManager {
   public IndexedArtifactGroup[] getRootGroups(String indexId) throws IOException {
     IndexingContext context = getIndexingContext(indexId);
     if(context != null) {
-      Set rootGroups = indexer.getRootGroups(context);
+      Set<String> rootGroups = indexer.getRootGroups(context);
       IndexedArtifactGroup[] groups = new IndexedArtifactGroup[rootGroups.size()];
       int i = 0;
-      for(Iterator it = rootGroups.iterator(); it.hasNext();) {
-        groups[i++ ] = new IndexedArtifactGroup(getIndexInfo(indexId), ((String) it.next()));
+      for(String group : rootGroups) {
+        groups[i++ ] = new IndexedArtifactGroup(getIndexInfo(indexId), group);
       }
       return groups;
     }

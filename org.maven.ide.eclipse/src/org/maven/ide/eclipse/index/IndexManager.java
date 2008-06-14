@@ -28,6 +28,7 @@ import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.RAMDirectory;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
 import org.apache.maven.artifact.repository.DefaultArtifactRepository;
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
@@ -93,13 +94,13 @@ public abstract class IndexManager {
   
   protected final Directory workspaceIndexDirectory = new RAMDirectory();
   
-  private final ArrayList listeners = new ArrayList();
+  private final ArrayList<IndexListener> listeners = new ArrayList<IndexListener>();
   
   protected final MavenConsole console;
 
   protected final File baseIndexDir;
 
-  private final Map indexes = new LinkedHashMap();
+  private final Map<String, IndexInfo> indexes = new LinkedHashMap<String, IndexInfo>();
 
   private IndexUpdaterJob updaterJob;
 
@@ -115,9 +116,9 @@ public abstract class IndexManager {
   /**
    * @return map of <code>String</code> to <code>IndexInfo</code>
    */
-  public Map getIndexes() {
+  public Map<String, IndexInfo> getIndexes() {
     synchronized(indexes) {
-      return Collections.unmodifiableMap(new HashMap(indexes));
+      return Collections.unmodifiableMap(new HashMap<String, IndexInfo>(indexes));
     }
   }
   
@@ -135,7 +136,7 @@ public abstract class IndexManager {
 
   public IndexInfo getIndexInfo(String indexName) {
     synchronized(indexes) {
-      return (IndexInfo) indexes.get(indexName);
+      return indexes.get(indexName);
     }
   }
 
@@ -183,12 +184,12 @@ public abstract class IndexManager {
    * 
    * @return Map&lt;String, IndexedArtifact&gt;
    */
-  public abstract Map search(String term, String searchType) throws IOException;
+  public abstract Map<String, IndexedArtifact> search(String term, String searchType) throws IOException;
 
   /**
    * @return Map&lt;String, IndexedArtifact&gt;
    */
-  public abstract Map search(String indexName, String prefix, String searchGroup) throws IOException;
+  public abstract Map<String, IndexedArtifact> search(String indexName, String prefix, String searchGroup) throws IOException;
 
   /**
    * @param indexName name of the index to search or null to search in all indexes
@@ -200,7 +201,7 @@ public abstract class IndexManager {
    * 
    * @return Map&lt;String, IndexedArtifact&gt;
    */
-  public abstract Map search(String indexName, Query query) throws IOException;
+  public abstract Map<String, IndexedArtifact> search(String indexName, Query query) throws IOException;
 
   /**
    * Creates query for given field and expression
@@ -238,8 +239,7 @@ public abstract class IndexManager {
 
   public void fireIndexAdded(IndexInfo indexInfo) {
     synchronized(listeners) {
-      for(Iterator it = listeners.iterator(); it.hasNext();) {
-        IndexListener listener = (IndexListener) it.next();
+      for(IndexListener listener : listeners) {
         listener.indexAdded(indexInfo);
       }
     }
@@ -247,8 +247,7 @@ public abstract class IndexManager {
 
   public void fireIndexRemoved(IndexInfo indexInfo) {
     synchronized(listeners) {
-      for(Iterator it = listeners.iterator(); it.hasNext();) {
-        IndexListener listener = (IndexListener) it.next();
+      for(IndexListener listener : listeners) {
         listener.indexRemoved(indexInfo);
       }
     }
@@ -256,8 +255,7 @@ public abstract class IndexManager {
 
   public void fireIndexUpdated(IndexInfo indexInfo) {
     synchronized(listeners) {
-      for(Iterator it = listeners.iterator(); it.hasNext();) {
-        IndexListener listener = (IndexListener) it.next();
+      for(IndexListener listener : listeners) {
         listener.indexChanged(indexInfo);
       }
     }
@@ -265,8 +263,7 @@ public abstract class IndexManager {
 
   public IndexInfo getIndexInfoByUrl(String url) {
     synchronized(indexes) {
-      for(Iterator it = indexes.values().iterator(); it.hasNext();) {
-        IndexInfo info = (IndexInfo) it.next();
+      for(IndexInfo info : indexes.values()) {
         if(IndexInfo.Type.REMOTE.equals(info.getType()) && url.equals(info.getRepositoryUrl())) {
           return info;
         }
@@ -281,11 +278,7 @@ public abstract class IndexManager {
   
     try {
       IndexedArtifactGroup g = new IndexedArtifactGroup(group.info, group.prefix);
-  
-      Map results = search(indexName, prefix, IndexManager.SEARCH_GROUP);
-  
-      for(Iterator it = results.values().iterator(); it.hasNext();) {
-        IndexedArtifact a = (IndexedArtifact) it.next();
+      for(IndexedArtifact a : search(indexName, prefix, IndexManager.SEARCH_GROUP).values()) {
         String groupId = a.group;
         if(groupId.equals(prefix)) {
           g.files.put(a.artifact, a);
@@ -305,12 +298,12 @@ public abstract class IndexManager {
     }
   }
 
-  public List getArtifactRepositories(ArtifactRepositoryPolicy snapshotsPolicy, ArtifactRepositoryPolicy releasesPolicy) {
+  public List<ArtifactRepository> getArtifactRepositories(ArtifactRepositoryPolicy snapshotsPolicy, ArtifactRepositoryPolicy releasesPolicy) {
     DefaultRepositoryLayout layout = new DefaultRepositoryLayout();
     
-    List artifactRepositories = new ArrayList();
-    for(Iterator it = getIndexes().values().iterator(); it.hasNext();) {
-      IndexInfo info = (IndexInfo) it.next();
+    List<ArtifactRepository> artifactRepositories = new ArrayList<ArtifactRepository>();
+    for(Iterator<IndexInfo> it = getIndexes().values().iterator(); it.hasNext();) {
+      IndexInfo info = it.next();
       if(Type.REMOTE.equals(info.getType())) {
         artifactRepositories.add(new DefaultArtifactRepository( //
             info.getIndexName(), info.getRepositoryUrl(), layout, snapshotsPolicy, releasesPolicy));

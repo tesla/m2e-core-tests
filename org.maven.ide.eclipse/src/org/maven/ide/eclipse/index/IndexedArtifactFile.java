@@ -43,11 +43,11 @@ public class IndexedArtifactFile {
 
   public final String prefix;
 
-  public final List goals;
+  public final List<String> goals;
 
   public IndexedArtifactFile(String repository, String group, String artifact, String version, String type,
       String classifier, String fname, long size, Date date, int sourcesExists, int javadocExists, String prefix,
-      List goals) {
+      List<String> goals) {
     this.repository = repository;
     this.group = group;
     this.artifact = artifact;

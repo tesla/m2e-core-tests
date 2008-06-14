@@ -57,6 +57,7 @@ import org.eclipse.ui.actions.ActionDelegate;
 import org.eclipse.ui.part.FileEditorInput;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.AbstractArtifactResolutionException;
 import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.model.Dependency;
@@ -210,7 +211,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
       Artifact artifact = embedder.createArtifactWithClassifier(groupId, artifactId, version, "java-source", "sources");
 
       IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
-      List artifactRepositories = indexManager.getArtifactRepositories(null, null);
+      List<ArtifactRepository> artifactRepositories = indexManager.getArtifactRepositories(null, null);
       
       embedder.resolve(artifact, artifactRepositories, embedder.getLocalRepository());
 
@@ -256,7 +257,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
       Artifact artifact = embedder.createArtifact(groupId, artifactId, version, null, "pom");
 
       IndexManager indexManager = plugin.getIndexManager();
-      List artifactRepositories = indexManager.getArtifactRepositories(null, null);
+      List<ArtifactRepository> artifactRepositories = indexManager.getArtifactRepositories(null, null);
       
       embedder.resolve(artifact, artifactRepositories, embedder.getLocalRepository());
 
@@ -278,7 +279,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
     }
   }
 
-  private static void openEditor(final IEditorInput editorInput, final String name) {
+  public static void openEditor(final IEditorInput editorInput, final String name) {
     PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
       public void run() {
         IContentTypeManager contentTypeManager = Platform.getContentTypeManager();
@@ -333,7 +334,10 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
     }
   }
 
-  private static class MavenEditorStorageInput implements IStorageEditorInput, IPathEditorInput {
+  /**
+   * Storage editor input implementation for Maven poms
+   */
+  public static class MavenEditorStorageInput implements IStorageEditorInput, IPathEditorInput {
 
     private final String name;
 
@@ -376,6 +380,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
       return null;
     }
 
+    @SuppressWarnings("unchecked")
     public Object getAdapter(Class adapter) {
       return null;
     }
@@ -405,7 +410,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
     }
 
     public IPath getFullPath() {
-      return new Path(path);
+      return path==null ? null : new Path(path);
     }
 
     public InputStream getContents() {
@@ -416,6 +421,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
       return true;
     }
 
+    @SuppressWarnings("unchecked")
     public Object getAdapter(Class adapter) {
       return null;
     }
