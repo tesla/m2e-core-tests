@@ -45,9 +45,9 @@ public class ReportingPage extends MavenPomEditorPage {
     reportingComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     toolkit.adapt(reportingComposite);
 
-    toolkit.decorateFormHeading(form.getForm());
-
 //    form.pack();
+
+    super.createFormContent(managedForm);
   }
 
   public void loadData() {

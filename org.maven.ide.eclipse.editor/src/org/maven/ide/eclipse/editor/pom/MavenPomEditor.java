@@ -9,14 +9,16 @@
 package org.maven.ide.eclipse.editor.pom;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.maven.artifact.factory.ArtifactFactory;
@@ -42,12 +44,14 @@ import org.apache.maven.shared.dependency.tree.DependencyTreeBuilder;
 import org.apache.maven.shared.dependency.tree.DependencyTreeBuilderException;
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
+import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -175,9 +179,8 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     } catch(CoreException e) {
       MavenPlugin.log(e);
     }
-    Iterator<MavenPomEditorPage> it = pages.iterator();
-    while (it.hasNext()) {
-      it.next().reload();
+    for(MavenPomEditorPage page : pages) {
+      page.reload();
     }
   }
   
@@ -282,7 +285,29 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       
       } else if(input instanceof IStorageEditorInput) {
         IStorageEditorInput fileInput = (IStorageEditorInput) input;
-        projectDocument = loadModel(fileInput.getStorage().getFullPath().toOSString());
+        IPath fullPath = fileInput.getStorage().getFullPath();
+        File tempPomFile = null;
+        if(fullPath==null) {
+          InputStream is = null;
+          OutputStream os = null;
+          try {
+            tempPomFile = File.createTempFile("maven-pom", "pom");
+            os = new FileOutputStream(tempPomFile);
+            is = fileInput.getStorage().getContents();
+            IOUtil.copy(is, os);
+            projectDocument = loadModel(tempPomFile.getAbsolutePath());
+          } catch(IOException ex) {
+            MavenPlugin.log("Can't close stream", ex);
+          } finally {
+            IOUtil.close(is);
+            IOUtil.close(os);
+            if(tempPomFile!=null) {
+              tempPomFile.delete();
+            }
+          }
+        } else {
+          projectDocument = loadModel(fullPath.toOSString());
+        }
       
       } else if(input.getClass().getName().endsWith("FileStoreEditorInput")) {
         // since Eclipse 3.3
@@ -310,6 +335,31 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     public java.net.URI getURI();
   }
 
+//  private Model loadModel(InputStream is) {
+//    URI uri = URI.createFileURI("/");
+//    PomResourceFactoryImpl factory = new PomResourceFactoryImpl();
+//    resource = (PomResourceImpl) factory.createResource(uri);
+//    
+//    // disable SSE support for read-only external documents
+//    resource.setRenderer(new EMF2DOMRenderer());
+//    
+//    try {
+//      resource.load(is, Collections.EMPTY_MAP);
+//      return resource.getModel();
+//    
+//    } catch(IOException ex) {
+//      MavenPlugin.log("Can't load model from stream", ex);
+//      return null;
+//
+//    } finally {
+//      // set read-only for non-workspace resource
+//      for(MavenPomEditorPage page : pages) {
+//        page.setReadonly(true);
+//      }
+//      // TODO SSE editor page
+//    }
+//  }
+  
   private Model loadModel(String path) {
     URI uri = URI.createFileURI(path);
     PomResourceFactoryImpl factory = new PomResourceFactoryImpl();
@@ -414,7 +464,29 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   
       } else if(input instanceof IStorageEditorInput) {
         IStorageEditorInput storageInput = (IStorageEditorInput) input;
-        mavenProject = readMavenProject(storageInput.getStorage().getFullPath().toFile());
+        IPath path = storageInput.getStorage().getFullPath();
+        if(path==null) {
+          InputStream is = null;
+          FileOutputStream fos = null;
+          File tempPomFile = null;
+          try {
+            tempPomFile = File.createTempFile("maven-pom", "pom");
+            is = storageInput.getStorage().getContents();
+            fos = new FileOutputStream(tempPomFile);
+            IOUtil.copy(is, fos);
+            mavenProject = readMavenProject(tempPomFile);
+          } catch(Exception ex) {
+            MavenPlugin.log("Can't load POM", ex);
+          } finally {
+            IOUtil.close(is);
+            IOUtil.close(fos);
+            if(tempPomFile!=null) {
+              tempPomFile.delete();
+            }
+          }
+        } else {
+          mavenProject = readMavenProject(path.toFile());
+        }
       } else if(input instanceof IURIEditorInput) {
         IURIEditorInput uriInput = (IURIEditorInput) input;
         mavenProject = readMavenProject(new File(uriInput.getURI().getPath()));

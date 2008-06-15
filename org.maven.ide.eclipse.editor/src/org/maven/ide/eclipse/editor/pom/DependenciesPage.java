@@ -48,9 +48,9 @@ public class DependenciesPage extends MavenPomEditorPage {
     dependenciesComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     toolkit.adapt(dependenciesComposite);
     
-    toolkit.decorateFormHeading(form.getForm());
-    
 //    form.pack();
+
+    super.createFormContent(managedForm);
   }
 
   public void loadData() {

@@ -36,8 +36,6 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -146,10 +144,10 @@ public class OverviewPage extends MavenPomEditorPage {
 
     Composite leftComposite = toolkit.createComposite(body, SWT.NONE);
     leftComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-    GridLayout gridLayout_1 = new GridLayout();
-    gridLayout_1.marginWidth = 0;
-    gridLayout_1.marginHeight = 0;
-    leftComposite.setLayout(gridLayout_1);
+    GridLayout leftCompositeLayout = new GridLayout();
+    leftCompositeLayout.marginWidth = 0;
+    leftCompositeLayout.marginHeight = 0;
+    leftComposite.setLayout(leftCompositeLayout);
 
     WidthGroup leftWidthGroup = new WidthGroup();
     leftComposite.addControlListener(leftWidthGroup);
@@ -161,10 +159,10 @@ public class OverviewPage extends MavenPomEditorPage {
 
     Composite rightComposite = toolkit.createComposite(body, SWT.NONE);
     rightComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-    GridLayout gridLayout_2 = new GridLayout();
-    gridLayout_2.marginWidth = 0;
-    gridLayout_2.marginHeight = 0;
-    rightComposite.setLayout(gridLayout_2);
+    GridLayout rightCompositeLayout = new GridLayout();
+    rightCompositeLayout.marginWidth = 0;
+    rightCompositeLayout.marginHeight = 0;
+    rightComposite.setLayout(rightCompositeLayout);
 
     WidthGroup rightWidthGroup = new WidthGroup();
     rightComposite.addControlListener(rightWidthGroup);
@@ -178,7 +176,7 @@ public class OverviewPage extends MavenPomEditorPage {
     toolkit.paintBordersFor(leftComposite);
     toolkit.paintBordersFor(rightComposite);
     
-    toolkit.decorateFormHeading(form.getForm());
+    super.createFormContent(managedForm);
   }
   
   private void createArtifactSection(FormToolkit toolkit, Composite composite, WidthGroup widthGroup) {
@@ -617,253 +615,6 @@ public class OverviewPage extends MavenPomEditorPage {
     toolkit.paintBordersFor(ciManagementComposite);
   }
 
-  private void registerFormListeners() {
-    setModifyListener(artifactGroupIdText, model, POM_PACKAGE.getModel_GroupId(), "");
-    setModifyListener(artifactIdText, model, POM_PACKAGE.getModel_ArtifactId(), "");
-    setModifyListener(artifactVersionText, model, POM_PACKAGE.getModel_ModelVersion(), "");
-    setModifyListener(artifactPackagingCombo, model, POM_PACKAGE.getModel_Packaging(), "jar");
-    
-    setModifyListener(projectNameText, model, POM_PACKAGE.getModel_Name(), "");
-    setModifyListener(projectDescriptionText, model, POM_PACKAGE.getModel_Description(), "");
-    setModifyListener(projectUrlText, model, POM_PACKAGE.getModel_Url(), "");
-    setModifyListener(inceptionYearText, model, POM_PACKAGE.getModel_InceptionYear(), "");
-    
-    registerParentListener();
-    registerOrganizationListnener();
-    registerScmListnener();
-    registerIssueManagementListener();
-    registerCiManagementListnener();
-  }
-
-  private void registerParentListener() {
-    ModifyListener parentListener = new ModifyListener() {
-      public void modifyText(ModifyEvent e) {
-        EditingDomain editingDomain = getEditingDomain();
-        CompoundCommand compoundCommand = new CompoundCommand();
-  
-        Parent parent = model.getParent();
-        if(isEmpty(parentGroupIdText) && isEmpty(parentArtifactIdText) //
-            && isEmpty(parentVersionText) && isEmpty(parentVersionText)) {
-          // XXX this cause severe issues when last element is deleted in xml
-//          if(parent != null) {
-//            Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Parent(), null);
-//            compoundCommand.append(command);
-//          }
-        } else {
-          if(parent == null) {
-            parent = PomFactory.eINSTANCE.createParent();
-            Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Parent(),
-                parent);
-            compoundCommand.append(command);
-          }
-        }
-        
-        Text source = (Text) e.getSource();
-        if(parent != null) {
-          Object feature = null;
-          if(parentGroupIdText == source) {
-            feature = POM_PACKAGE.getParent_GroupId();
-          } else if(parentArtifactIdText == source) {
-            feature = POM_PACKAGE.getParent_ArtifactId();
-          } else if(parentVersionText == source) {
-            feature = POM_PACKAGE.getParent_Version();
-          } else if(parentRealtivePathText == source) {
-            feature = POM_PACKAGE.getParent_RelativePath();
-          }
-  
-          String text = source.getText().length() == 0 ? null : source.getText();
-          compoundCommand.append(SetCommand.create(editingDomain, parent, feature, text));
-        }
-  
-        editingDomain.getCommandStack().execute(compoundCommand);
-      }
-    };
-    parentGroupIdText.addModifyListener(parentListener);
-    parentArtifactIdText.addModifyListener(parentListener);
-    parentVersionText.addModifyListener(parentListener);
-    parentRealtivePathText.addModifyListener(parentListener);
-  }
-
-  private void registerOrganizationListnener() {
-    ModifyListener organizationListener = new ModifyListener() {
-      public void modifyText(ModifyEvent e) {
-        EditingDomain editingDomain = getEditingDomain();
-        CompoundCommand compoundCommand = new CompoundCommand();
-  
-        Organization organization = model.getOrganization();
-        if(isEmpty(organizationNameText) && isEmpty(organizationUrlText)) {
-          // XXX this cause severe issues when last element is deleted in xml
-//          if(organization != null) {
-//            Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Organization(), null);
-//            compoundCommand.append(command);
-//          }
-        } else {
-          if(organization == null) {
-            organization = PomFactory.eINSTANCE.createOrganization();
-            Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Organization(), //
-                organization);
-            compoundCommand.append(command);
-          }
-        }
-  
-        Text source = (Text) e.getSource();
-        if(organization != null) {
-          Object feature = null;
-          if(source == organizationNameText) {
-            feature = POM_PACKAGE.getOrganization_Name();
-          } else if(source == organizationUrlText) {
-            feature = POM_PACKAGE.getOrganization_Url();
-          }
-  
-          String text = source.getText().length() == 0 ? null : source.getText();
-          compoundCommand.append(SetCommand.create(editingDomain, organization, feature, text));
-        }
-  
-        editingDomain.getCommandStack().execute(compoundCommand);
-      }
-    };
-    organizationNameText.addModifyListener(organizationListener);
-    organizationUrlText.addModifyListener(organizationListener);
-  }
-
-  private void registerScmListnener() {
-      ModifyListener scmListener = new ModifyListener() {
-        public void modifyText(ModifyEvent e) {
-          EditingDomain editingDomain = getEditingDomain();
-          CompoundCommand compoundCommand = new CompoundCommand();
-  
-          Scm scm = model.getScm();
-          if(isEmpty(scmUrlText) || isEmpty(scmConnectionText) || isEmpty(scmDevConnectionText) || isEmpty(scmTagText)) {
-            // XXX this cause severe issues when last element is deleted in xml
-//            if(scm!=null) {
-//              Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Scm(), null);
-//              compoundCommand.append(command);
-//            }
-          } else {
-            if(scm==null) {
-              scm = PomFactory.eINSTANCE.createScm();
-              Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Scm(), scm);
-              compoundCommand.append(command);
-            }
-          }
-          
-          Text source = (Text) e.getSource();
-          if(scm != null) {
-            Object feature = null;
-            if(scmUrlText == source) {
-              feature = POM_PACKAGE.getScm_Url();
-            } else if(scmConnectionText == source) {
-              feature = POM_PACKAGE.getScm_Connection();
-            } else if(scmDevConnectionText == source) {
-              feature = POM_PACKAGE.getScm_DeveloperConnection();
-            } else if(scmTagText == source) {
-              feature = POM_PACKAGE.getScm_Tag();
-            }
-  
-            String text = source.getText().length() == 0 ? null : source.getText();
-            compoundCommand.append(SetCommand.create(editingDomain, scm, feature, text));
-          }
-  
-          editingDomain.getCommandStack().execute(compoundCommand);
-        }
-      };
-      scmUrlText.addModifyListener(scmListener);
-      scmConnectionText.addModifyListener(scmListener);
-      scmDevConnectionText.addModifyListener(scmListener);
-      scmTagText.addModifyListener(scmListener);
-  //    setModifyListener(scmUrlText, scm, POM_PACKAGE.getScm_Url(), "");
-  //    setModifyListener(scmConnectionText, scm, POM_PACKAGE.getScm_Connection(), "");
-  //    setModifyListener(scmDevConnectionText, scm, POM_PACKAGE.getScm_DeveloperConnection(), "");
-  //    setModifyListener(scmTagText, scm, POM_PACKAGE.getScm_Tag(), "");
-    }
-
-  private void registerIssueManagementListener() {
-      ModifyListener issueManagementListener = new ModifyListener() {
-        public void modifyText(ModifyEvent e) {
-          EditingDomain editingDomain = getEditingDomain();
-          CompoundCommand compoundCommand = new CompoundCommand();
-  
-          IssueManagement issueManagement = model.getIssueManagement();
-          if(isEmpty(issueManagementUrlText) || isEmpty(issueManagementSystemText)) {
-            // XXX this cause severe issues when last element is deleted in xml
-//            if(issueManagement!=null) {
-//              Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_IssueManagement(), null);
-//              compoundCommand.append(command);
-//            }
-          } else {
-            if(issueManagement==null) {
-              Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_IssueManagement(), //
-                  PomFactory.eINSTANCE.createIssueManagement());
-              compoundCommand.append(command);
-            }
-          }
-          
-          Text source = (Text) e.getSource();
-          if(issueManagement != null) {
-            Object feature = null;
-            if(issueManagementUrlText == source) {
-              feature = POM_PACKAGE.getIssueManagement_Url();
-            } else if(issueManagementSystemText == source) {
-              feature = POM_PACKAGE.getIssueManagement_System();
-            }
-  
-            String text = source.getText().length() == 0 ? null : source.getText();
-            compoundCommand.append(SetCommand.create(editingDomain, issueManagement, feature, text));
-          }        
-          
-          editingDomain.getCommandStack().execute(compoundCommand);
-        }
-      };
-      issueManagementUrlText.addModifyListener(issueManagementListener);
-      issueManagementSystemText.addModifyListener(issueManagementListener);
-  //    setModifyListener(issueManagementUrlText, issueManagement, POM_PACKAGE.getIssueManagement_Url(), "");
-  //    setModifyListener(issueManagementSystemText, issueManagement, POM_PACKAGE.getIssueManagement_Url(), "");
-    }
-
-  private void registerCiManagementListnener() {
-    ModifyListener ciManagementListener = new ModifyListener() {
-      public void modifyText(ModifyEvent e) {
-        EditingDomain editingDomain = getEditingDomain();
-        CompoundCommand compoundCommand = new CompoundCommand();
-        
-        CiManagement ciManagement = model.getCiManagement();
-        if(isEmpty(ciManagementUrlText) || isEmpty(ciManagementSystemText)) {
-          // XXX this cause severe issues when last element is deleted in xml
-//          if(ciManagement!=null) {
-//            Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_CiManagement(), null);
-//            compoundCommand.append(command);
-//          }
-        } else {
-          if(ciManagement==null) {
-            ciManagement = PomFactory.eINSTANCE.createCiManagement();
-            Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_CiManagement(), //
-                ciManagement);
-            compoundCommand.append(command);
-          }
-        }
-        
-        Text source = (Text) e.getSource();
-        if(ciManagement != null) {
-          Object feature = null;
-          if(ciManagementUrlText == source) {
-            feature = POM_PACKAGE.getCiManagement_Url();
-          } else if(ciManagementSystemText == source) {
-            feature = POM_PACKAGE.getCiManagement_System();
-          }
-
-          String text = source.getText().length() == 0 ? null : source.getText();
-          compoundCommand.append(SetCommand.create(editingDomain, ciManagement, feature, text));
-        }        
-        
-        editingDomain.getCommandStack().execute(compoundCommand);
-      }
-    };
-    ciManagementUrlText.addModifyListener(ciManagementListener);
-    ciManagementSystemText.addModifyListener(ciManagementListener);
-//    setModifyListener(ciManagementUrlText, ciManagement, POM_PACKAGE.getCiManagement_Url(), "");
-//    setModifyListener(ciManagementSystemText, ciManagement, POM_PACKAGE.getCiManagement_System(), "");
-  }
-
   public void updateView(Notification notification) {
     EObject object = (EObject) notification.getNotifier();
     if (object instanceof Model) {
@@ -921,6 +672,7 @@ public class OverviewPage extends MavenPomEditorPage {
     loadCiManagement(ciManagement);
     loadModules(model.getModules());
     loadProperties(model.getProperties());
+    
     registerFormListeners();
     
     projectSection.setExpanded(!isEmpty(model.getName()) || !isEmpty(model.getDescription())
@@ -1010,4 +762,149 @@ public class OverviewPage extends MavenPomEditorPage {
     }
   }
 
+  private void registerFormListeners() {
+    ValueProvider<Model> modelProvider = new ValueProvider.DefaultValueProvider<Model>(model);
+    setModifyListener(artifactGroupIdText, modelProvider, POM_PACKAGE.getModel_GroupId(), "");
+    setModifyListener(artifactIdText, modelProvider, POM_PACKAGE.getModel_ArtifactId(), "");
+    setModifyListener(artifactVersionText, modelProvider, POM_PACKAGE.getModel_ModelVersion(), "");
+    setModifyListener(artifactPackagingCombo, modelProvider, POM_PACKAGE.getModel_Packaging(), "jar");
+    
+    setModifyListener(projectNameText, modelProvider, POM_PACKAGE.getModel_Name(), "");
+    setModifyListener(projectDescriptionText, modelProvider, POM_PACKAGE.getModel_Description(), "");
+    setModifyListener(projectUrlText, modelProvider, POM_PACKAGE.getModel_Url(), "");
+    setModifyListener(inceptionYearText, modelProvider, POM_PACKAGE.getModel_InceptionYear(), "");
+
+    registerParentListener();
+    registerOrganizationListnener();
+    registerScmListnener();
+    registerIssueManagementListener();
+    registerCiManagementListnener();    
+  }
+
+  private void registerParentListener() {
+    ValueProvider<Parent> parentProvider = new ValueProvider.ParentValueProvider<Parent>(parentGroupIdText,
+        parentArtifactIdText, parentVersionText, parentRealtivePathText) {
+      public Parent getValue() {
+        return model.getParent();
+      }
+      public void create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+        compoundCommand.append(SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Parent(), //
+            PomFactory.eINSTANCE.createParent()));
+      }
+    };
+    setModifyListener(parentGroupIdText, parentProvider, POM_PACKAGE.getParent_GroupId(), "");
+    setModifyListener(parentArtifactIdText, parentProvider, POM_PACKAGE.getParent_ArtifactId(), "");
+    setModifyListener(parentVersionText, parentProvider, POM_PACKAGE.getParent_Version(), "");
+    setModifyListener(parentRealtivePathText, parentProvider, POM_PACKAGE.getParent_RelativePath(), "");
+  }
+
+  private void registerOrganizationListnener() {
+    ValueProvider<Organization> organizationProvider = new ValueProvider.ParentValueProvider<Organization>(
+        organizationNameText, organizationUrlText) {
+      public Organization getValue() {
+        return model.getOrganization();
+      }
+      public void create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+        compoundCommand.append(SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Organization(), //
+            PomFactory.eINSTANCE.createOrganization()));
+      }
+    };
+    setModifyListener(organizationNameText, organizationProvider, POM_PACKAGE.getOrganization_Name(), "");
+    setModifyListener(organizationUrlText, organizationProvider, POM_PACKAGE.getOrganization_Url(), "");
+  }
+
+  private void registerScmListnener() {
+    ValueProvider<Scm> scmProvider = new ValueProvider.ParentValueProvider<Scm>(scmUrlText, scmConnectionText,
+        scmDevConnectionText, scmTagText) {
+      public Scm getValue() {
+        return null;
+      }
+      public void create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+        compoundCommand.append(SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Scm(), //
+            PomFactory.eINSTANCE.createScm()));
+      }
+    };
+    setModifyListener(scmUrlText, scmProvider, POM_PACKAGE.getScm_Url(), "");
+    setModifyListener(scmConnectionText, scmProvider, POM_PACKAGE.getScm_Connection(), "");
+    setModifyListener(scmDevConnectionText, scmProvider, POM_PACKAGE.getScm_DeveloperConnection(), "");
+    setModifyListener(scmTagText, scmProvider, POM_PACKAGE.getScm_Tag(), "");
+
+//    ModifyListener scmListener = new ModifyListener() {
+//      public void modifyText(ModifyEvent e) {
+//        EditingDomain editingDomain = getEditingDomain();
+//        CompoundCommand compoundCommand = new CompoundCommand();
+//
+//        Scm scm = model.getScm();
+//        if(isEmpty(scmUrlText) || isEmpty(scmConnectionText) || isEmpty(scmDevConnectionText) || isEmpty(scmTagText)) {
+//          // XXX this cause severe issues when last element is deleted in xml
+//          //            if(scm!=null) {
+//          //              Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Scm(), null);
+//          //              compoundCommand.append(command);
+//          //            }
+//        } else {
+//          if(scm == null) {
+//            scm = PomFactory.eINSTANCE.createScm();
+//            Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Scm(), scm);
+//            compoundCommand.append(command);
+//          }
+//        }
+//
+//        Text source = (Text) e.getSource();
+//        if(scm != null) {
+//          Object feature = null;
+//          if(scmUrlText == source) {
+//            feature = POM_PACKAGE.getScm_Url();
+//          } else if(scmConnectionText == source) {
+//            feature = POM_PACKAGE.getScm_Connection();
+//          } else if(scmDevConnectionText == source) {
+//            feature = POM_PACKAGE.getScm_DeveloperConnection();
+//          } else if(scmTagText == source) {
+//            feature = POM_PACKAGE.getScm_Tag();
+//          }
+//
+//          String text = source.getText().length() == 0 ? null : source.getText();
+//          compoundCommand.append(SetCommand.create(editingDomain, scm, feature, text));
+//        }
+//
+//        editingDomain.getCommandStack().execute(compoundCommand);
+//      }
+//    };
+//    scmUrlText.addModifyListener(scmListener);
+//    scmConnectionText.addModifyListener(scmListener);
+//    scmDevConnectionText.addModifyListener(scmListener);
+//    scmTagText.addModifyListener(scmListener);
+  }
+
+  private void registerIssueManagementListener() {
+    ValueProvider<IssueManagement> issueManagementProvider = new ValueProvider.ParentValueProvider<IssueManagement>(
+        issueManagementUrlText, issueManagementSystemText) {
+      public IssueManagement getValue() {
+        return model.getIssueManagement();
+      }
+      public void create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+        compoundCommand.append(SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_IssueManagement(), //
+            PomFactory.eINSTANCE.createIssueManagement()));
+      }
+    };
+    setModifyListener(issueManagementUrlText, issueManagementProvider, POM_PACKAGE.getIssueManagement_Url(), "");
+    setModifyListener(issueManagementSystemText, issueManagementProvider, POM_PACKAGE.getIssueManagement_System(), "");
+  }
+  
+
+  private void registerCiManagementListnener() {
+    ValueProvider<CiManagement> ciManagementProvider = new ValueProvider.ParentValueProvider<CiManagement>(
+        ciManagementUrlText, ciManagementSystemText) {
+      public CiManagement getValue() {
+        return model.getCiManagement();
+      }
+      public void create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+        compoundCommand.append(SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_CiManagement(), //
+            PomFactory.eINSTANCE.createCiManagement()));
+      }
+    };
+    setModifyListener(ciManagementUrlText, ciManagementProvider, POM_PACKAGE.getCiManagement_Url(), "");
+    setModifyListener(ciManagementSystemText, ciManagementProvider, POM_PACKAGE.getCiManagement_System(), "");
+  }
+  
 }
+

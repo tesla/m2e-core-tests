@@ -50,9 +50,9 @@ public class RepositoriesPage extends MavenPomEditorPage {
     repositoriesComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     toolkit.adapt(repositoriesComposite);
     
-    toolkit.decorateFormHeading(form.getForm());
-    
     // form.pack();
+
+    super.createFormContent(managedForm);
   }
 
   public void loadData() {

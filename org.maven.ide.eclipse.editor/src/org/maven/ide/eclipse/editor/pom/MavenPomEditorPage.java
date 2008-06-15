@@ -8,12 +8,19 @@
 
 package org.maven.ide.eclipse.editor.pom;
 
+import static org.maven.ide.eclipse.editor.pom.FormUtils.isEmpty;
+
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.maven.embedder.MavenEmbedderException;
+import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
+import org.apache.maven.project.MavenProject;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -30,6 +37,8 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.edit.command.SetCommand;
 import org.eclipse.emf.edit.domain.EditingDomain;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.ModifyEvent;
@@ -42,10 +51,15 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.editor.FormPage;
+import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.maven.ide.components.pom.Model;
+import org.maven.ide.components.pom.Parent;
 import org.maven.ide.components.pom.PomPackage;
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.actions.OpenPomAction;
+import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.project.MavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 
@@ -53,7 +67,8 @@ import org.maven.ide.eclipse.project.MavenProjectManager;
 /**
  * This class provides basic page editor functionality (event listeners, readonly, etc)
  * 
- * @author akraev
+ * @author Anton Kraev
+ * @author Eugene Kuleshov
  */
 public abstract class MavenPomEditorPage extends FormPage implements Adapter {
 
@@ -84,6 +99,66 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
     this.pomEditor = pomEditor;
   }
 
+  protected void createFormContent(IManagedForm managedForm) {
+    ScrolledForm form = managedForm.getForm();
+    IToolBarManager toolBarManager = form.getToolBarManager();
+
+    toolBarManager.add(new Action("Open Parent POM", MavenEditorImages.PARENT_POM) {
+      public void run() {
+        // XXX listen to parent modification and accordingly enable/disable action
+        final Parent parent = model.getParent();
+        if(parent!=null && !isEmpty(parent.getGroupId()) && !isEmpty(parent.getArtifactId()) && !isEmpty(parent.getVersion())) {
+          new Job("Opening POM") {
+            protected IStatus run(IProgressMonitor arg0) {
+              OpenPomAction.openEditor(parent.getGroupId(), parent.getArtifactId(), parent.getVersion());
+              return Status.OK_STATUS;
+            }
+          }.schedule();
+        }
+      }
+    });
+    
+    toolBarManager.add(new Action("Show Effective POM", MavenEditorImages.EFFECTIVE_POM) {
+      public void run() {
+        try {
+          StringWriter sw = new StringWriter();
+          
+          MavenProject mavenProject = pomEditor.readMavenProject(false);
+          new MavenXpp3Writer().write(sw, mavenProject.getModel());
+          
+          String effectivePom = sw.toString();
+          // XXX workaround to make EMF recognize namespace
+          effectivePom = effectivePom.replaceAll("<project>", "<project xmlns=\"http://maven.apache.org/POM/4.0.0\"" + 
+          		" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" + 
+          		" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd\">");
+          
+          String name = pomEditor.getPartName() + " [effective]";
+          IEditorInput editorInput = new OpenPomAction.MavenEditorStorageInput(name, name, null, //
+              effectivePom.getBytes("UTF-8"));
+          OpenPomAction.openEditor(editorInput, name);
+          
+        } catch(CoreException ex) {
+          MavenPlugin.log(ex);
+        } catch(MavenEmbedderException ex) {
+          MavenPlugin.log("Unable to read Maven pom", ex);
+        } catch(IOException ex) {
+          MavenPlugin.log("Unable to create Effective POM", ex);
+        }
+      }
+    });
+    
+    toolBarManager.add(new Action("Refresh", MavenEditorImages.REFRESH) {
+      public void run() {
+        pomEditor.reload();
+      }
+    });
+    
+    form.updateToolBar();
+
+    // XXX use compatibility proxy to support Eclipse 3.2
+    managedForm.getToolkit().decorateFormHeading(form.getForm());
+  }
+  
   public void setReadonly(boolean readonly) {
     if(this.readonly != readonly) {
       this.readonly = readonly;
@@ -142,8 +217,9 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
   public void reload() {
     deRegisterListeners();
     dataLoaded = false;
-    if (isActive())
+    if (isActive()) {
       doLoadData(true);
+    }
   }
 
   public synchronized void notifyChanged(Notification notification) {
@@ -226,77 +302,87 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
     }
   }
 
-  public void setModifyListener(final Text textControl, EObject object, EStructuralFeature feature, String defaultValue) {
+  public <T> void setModifyListener(final Text textControl, ValueProvider<T> owner, EStructuralFeature feature,
+      String defaultValue) {
     List<ModifyListener> listeners = getModifyListeners(textControl);
     for(ModifyListener listener : listeners) {
       textControl.removeModifyListener(listener);
     }
-    ModifyListener listener = addModifyListener(new TextAdapter() {
+    ModifyListener listener = setModifyListener(new TextAdapter() {
       public String getText() {
         return textControl.getText();
       }
       public void addModifyListener(ModifyListener listener) {
         textControl.addModifyListener(listener);
       }
-    }, object, feature, defaultValue);
+    }, owner, feature, defaultValue);
     listeners.add(listener);
   }
 
-  public void setModifyListener(final Combo control, EObject object, EStructuralFeature feature) {
-    ModifyListener listener = addModifyListener(new TextAdapter() {
+  public <T> void setModifyListener(final Combo control, ValueProvider<T> owner, EStructuralFeature feature) {
+    ModifyListener listener = setModifyListener(new TextAdapter() {
       public String getText() {
         return control.getText();
       }
       public void addModifyListener(ModifyListener listener) {
         control.addModifyListener(listener);
       }
-    }, object, feature, null);
+    }, owner, feature, null);
     getModifyListeners(control).add(listener);
   }
 
-  public void setModifyListener(final CCombo control, EObject object, EStructuralFeature feature, String defaultValue) {
-    ModifyListener listener = addModifyListener(new TextAdapter() {
+  public <T> void setModifyListener(final CCombo control, ValueProvider<T> owner, EStructuralFeature feature,
+      String defaultValue) {
+    ModifyListener listener = setModifyListener(new TextAdapter() {
       public String getText() {
         return control.getText();
       }
       public void addModifyListener(ModifyListener listener) {
         control.addModifyListener(listener);
       }
-    }, object, feature, defaultValue);
+    }, owner, feature, defaultValue);
     getModifyListeners(control).add(listener);
   }
   
-  private ModifyListener addModifyListener(final TextAdapter adapter, final EObject owner,
+  private <T> ModifyListener setModifyListener(final TextAdapter adapter, final ValueProvider<T> provider,
       final EStructuralFeature feature, final String defaultValue) {
     ModifyListener listener = new ModifyListener() {
       public void modifyText(ModifyEvent e) {
-        EditingDomain editingDomain = getEditingDomain();
-        CompoundCommand compoundCommand = new CompoundCommand();
-        
-        EStructuralFeature feature2 = feature;
-        Object owner2 = owner;
+        T owner = provider.getValue();
+        if(owner==null && !provider.isEmpty()) {
+          CompoundCommand compoundCommand = new CompoundCommand();
+          provider.create(getEditingDomain(), compoundCommand);
+          getEditingDomain().getCommandStack().execute(compoundCommand);
+          owner = provider.getValue();
+        }
         
         Command command;
         if(defaultValue!=null && adapter.getText().equals(defaultValue)) {
-          command = SetCommand.create(editingDomain, owner2, feature2, null);
+          command = SetCommand.create(getEditingDomain(), owner, feature, null);
         } else {
-          command = SetCommand.create(editingDomain, owner2, feature2, adapter.getText());
+          command = SetCommand.create(getEditingDomain(), owner, feature, adapter.getText());
         }
-        compoundCommand.append(command);
-        
-        editingDomain.getCommandStack().execute(compoundCommand);
+        getEditingDomain().getCommandStack().execute(command);
       }
     };
     adapter.addModifyListener(listener);
     return listener;
   }
   
-  public void setModifyListener(final Button control, final EObject object, final EStructuralFeature feature, final boolean defaultValue) {
+  public <T> void setModifyListener(final Button control, final ValueProvider<T> provider, final EStructuralFeature feature, final String defaultValue) {
     class ButtonModifyListener extends SelectionAdapter implements ModifyListener {
       public void widgetSelected(SelectionEvent e) {
+        T owner = provider.getValue();
+        if(owner==null && !provider.isEmpty()) {
+          CompoundCommand compoundCommand = new CompoundCommand();
+          provider.create(getEditingDomain(), compoundCommand);
+          getEditingDomain().getCommandStack().execute(compoundCommand);
+          owner = provider.getValue();
+        }
+        
         boolean value = control.getSelection();
-        Command command = SetCommand.create(getEditingDomain(), object, feature, //
-            value==defaultValue ? null : value ? "true" : "false");
+        Command command = SetCommand.create(getEditingDomain(), owner, feature, //
+            defaultValue.equals(value) ? null : value ? "true" : "false");
         getEditingDomain().getCommandStack().execute(command);
       }
 

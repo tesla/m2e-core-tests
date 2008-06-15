@@ -52,6 +52,7 @@ import org.maven.ide.components.pom.PomPackage;
 import org.maven.ide.eclipse.actions.MavenRepositorySearchDialog;
 import org.maven.ide.eclipse.editor.pom.MavenPomEditorPage;
 import org.maven.ide.eclipse.editor.pom.FormUtils;
+import org.maven.ide.eclipse.editor.pom.ValueProvider;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.wizards.WidthGroup;
@@ -583,14 +584,15 @@ public class DependenciesComposite extends Composite {
     exclusionsListEditor.setSelection(Collections.<Exclusion>emptyList());
     
     // set new listeners
-    parent.setModifyListener(groupIdText, dependency, POM_PACKAGE.getDependency_GroupId(), "");
-    parent.setModifyListener(artifactIdText, dependency, POM_PACKAGE.getDependency_ArtifactId(), "");
-    parent.setModifyListener(versionText, dependency, POM_PACKAGE.getDependency_Version(), "");
-    parent.setModifyListener(classifierText, dependency, POM_PACKAGE.getDependency_Classifier(), "");
-    parent.setModifyListener(typeCombo, dependency, POM_PACKAGE.getDependency_Type(), "jar");
-    parent.setModifyListener(scopeCombo, dependency, POM_PACKAGE.getDependency_Scope(), "compile");
-    parent.setModifyListener(systemPathText, dependency, POM_PACKAGE.getDependency_SystemPath(), "");
-    parent.setModifyListener(optionalButton, dependency, POM_PACKAGE.getDependency_Optional(), false);
+    ValueProvider<Dependency> dependencyProvider = new ValueProvider.DefaultValueProvider<Dependency>(dependency); 
+    parent.setModifyListener(groupIdText, dependencyProvider, POM_PACKAGE.getDependency_GroupId(), "");
+    parent.setModifyListener(artifactIdText, dependencyProvider, POM_PACKAGE.getDependency_ArtifactId(), "");
+    parent.setModifyListener(versionText, dependencyProvider, POM_PACKAGE.getDependency_Version(), "");
+    parent.setModifyListener(classifierText, dependencyProvider, POM_PACKAGE.getDependency_Classifier(), "");
+    parent.setModifyListener(typeCombo, dependencyProvider, POM_PACKAGE.getDependency_Type(), "jar");
+    parent.setModifyListener(scopeCombo, dependencyProvider, POM_PACKAGE.getDependency_Scope(), "compile");
+    parent.setModifyListener(systemPathText, dependencyProvider, POM_PACKAGE.getDependency_SystemPath(), "");
+    parent.setModifyListener(optionalButton, dependencyProvider, POM_PACKAGE.getDependency_Optional(), "false");
     // TODO exclusions listener
     
     parent.registerListeners();
@@ -615,8 +617,9 @@ public class DependenciesComposite extends Composite {
     setText(exclusionGroupIdText, exclusion.getGroupId());
     setText(exclusionArtifactIdText, exclusion.getArtifactId());
     
-    parent.setModifyListener(exclusionGroupIdText, exclusion, POM_PACKAGE.getExclusion_GroupId(), "");
-    parent.setModifyListener(exclusionArtifactIdText, exclusion, POM_PACKAGE.getExclusion_ArtifactId(), "");
+    ValueProvider<Exclusion> exclusionProvider = new ValueProvider.DefaultValueProvider<Exclusion>(exclusion);
+    parent.setModifyListener(exclusionGroupIdText, exclusionProvider, POM_PACKAGE.getExclusion_GroupId(), "");
+    parent.setModifyListener(exclusionArtifactIdText, exclusionProvider, POM_PACKAGE.getExclusion_ArtifactId(), "");
     
     parent.registerListeners();
   }

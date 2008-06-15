@@ -70,6 +70,10 @@ public class MavenEditorImages {
 
   public static final ImageDescriptor FILTER = create("filter.gif");
 
+  public static final ImageDescriptor EFFECTIVE_POM = create("effective_pom.gif");
+  
+  public static final ImageDescriptor PARENT_POM = create("parent_pom.gif");
+
 
   private static ImageDescriptor create(String key) {
     try {

@@ -99,9 +99,9 @@ public class TeamPage extends MavenPomEditorPage {
 
     horizontalSash.setWeights(new int[] {1, 1});
 
-    toolkit.decorateFormHeading(form.getForm());
-
 //    form.pack();
+
+    super.createFormContent(managedForm);
   }
 
   private void createDevelopersSection(FormToolkit toolkit, SashForm verticalSash) {

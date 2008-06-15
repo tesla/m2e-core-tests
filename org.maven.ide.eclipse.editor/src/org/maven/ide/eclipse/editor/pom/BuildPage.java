@@ -68,9 +68,9 @@ public class BuildPage extends MavenPomEditorPage {
     buildComposite.setLayoutData(buildCompositeData);
     toolkit.adapt(buildComposite);
 
-    toolkit.decorateFormHeading(form.getForm());
-    
 //    form.pack();
+
+    super.createFormContent(managedForm);
   }
 
   private void createFoldersSection(Composite body, FormToolkit toolkit) {

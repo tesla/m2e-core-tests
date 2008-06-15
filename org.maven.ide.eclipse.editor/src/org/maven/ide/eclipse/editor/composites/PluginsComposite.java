@@ -8,6 +8,7 @@
 
 package org.maven.ide.eclipse.editor.composites;
 
+import static org.maven.ide.eclipse.editor.pom.FormUtils.isEmpty;
 import static org.maven.ide.eclipse.editor.pom.FormUtils.nvl;
 
 import java.util.List;
@@ -193,7 +194,7 @@ public class PluginsComposite extends Composite {
       public String getText(Object element) {
         if(element instanceof PluginExecution) {
           PluginExecution pluginExecution = (PluginExecution) element;
-          String label = pluginExecution.getId();
+          String label = isEmpty(pluginExecution.getId()) ? "?" : pluginExecution.getId();
           if(pluginExecution.getPhase()!=null) {
             label +=  " : " + pluginExecution.getPhase();
           }
@@ -379,7 +380,11 @@ public class PluginsComposite extends Composite {
     public String getText(Object element) {
       if(element instanceof Plugin) {
         Plugin plugin = (Plugin) element;
-        String label = plugin.getGroupId() + ": " + plugin.getArtifactId();
+        String label = ""; 
+        if(plugin.getGroupId()!=null) {
+          label += plugin.getGroupId() + " : ";
+        }
+        label += plugin.getArtifactId();
         String version = plugin.getVersion();
         if(version!=null && version.length()>0) {
           label += " : " + version;

@@ -118,9 +118,9 @@ public class ProfilesPage extends MavenPomEditorPage {
     createPluginsTab(toolkit, tabFolder);
     createReportsTab(toolkit, tabFolder);
 
-    toolkit.decorateFormHeading(form.getForm());
-    
 //    form.pack();
+
+    super.createFormContent(managedForm);
   }
 
   private void createProfilesSection(FormToolkit toolkit, Composite body) {

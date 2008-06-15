@@ -126,6 +126,7 @@ public class DependencyTreePage extends FormPage {
 
     createSearchBar(managedForm);
     
+    managedForm.getToolkit().decorateFormHeading(form.getForm());
     
     new Job("Loading pom.xml") {
       protected IStatus run(IProgressMonitor monitor) {
@@ -406,8 +407,6 @@ public class DependencyTreePage extends FormPage {
         // TODO
       }
     });
-    
-    managedForm.getToolkit().decorateFormHeading(form.getForm());
     
     form.updateToolBar();
   

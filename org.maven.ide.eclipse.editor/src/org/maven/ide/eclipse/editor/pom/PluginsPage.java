@@ -52,9 +52,9 @@ public class PluginsPage extends MavenPomEditorPage {
     pluginsComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     toolkit.adapt(pluginsComposite);
     
-    toolkit.decorateFormHeading(form.getForm());
-    
 //    form.pack();
+
+    super.createFormContent(managedForm);
   }
 
   public void loadData() {
