@@ -357,7 +357,7 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
         }
         
         Command command;
-        if(defaultValue!=null && adapter.getText().equals(defaultValue)) {
+        if(adapter.getText().equals(defaultValue) || isEmpty(adapter.getText())) {
           command = SetCommand.create(getEditingDomain(), owner, feature, null);
         } else {
           command = SetCommand.create(getEditingDomain(), owner, feature, adapter.getText());
@@ -369,31 +369,33 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
     return listener;
   }
   
-  public <T> void setModifyListener(final Button control, final ValueProvider<T> provider, final EStructuralFeature feature, final String defaultValue) {
+  public <T> void setModifyListener(final Button control, final ValueProvider<T> provider,
+      final EStructuralFeature feature, final String defaultValue) {
     class ButtonModifyListener extends SelectionAdapter implements ModifyListener {
       public void widgetSelected(SelectionEvent e) {
         T owner = provider.getValue();
-        if(owner==null && !provider.isEmpty()) {
+        if(owner == null && !provider.isEmpty()) {
           CompoundCommand compoundCommand = new CompoundCommand();
           provider.create(getEditingDomain(), compoundCommand);
           getEditingDomain().getCommandStack().execute(compoundCommand);
           owner = provider.getValue();
         }
-        
-        boolean value = control.getSelection();
+
+        String value = control.getSelection() ? "true" : "false";
         Command command = SetCommand.create(getEditingDomain(), owner, feature, //
-            defaultValue.equals(value) ? null : value ? "true" : "false");
+            defaultValue.equals(value) ? null : value);
         getEditingDomain().getCommandStack().execute(command);
       }
 
       public void modifyText(ModifyEvent e) {
         widgetSelected(null);
       }
-    };
-    
+    }
+    ;
+
     ButtonModifyListener listener = new ButtonModifyListener();
     control.addSelectionListener(listener);
-    
+
     getModifyListeners(control).add(listener);
   }
 

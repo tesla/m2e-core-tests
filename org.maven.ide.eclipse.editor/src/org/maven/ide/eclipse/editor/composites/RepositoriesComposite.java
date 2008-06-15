@@ -9,15 +9,18 @@
 package org.maven.ide.eclipse.editor.composites;
 
 import static org.maven.ide.eclipse.editor.pom.FormUtils.isEmpty;
-import static org.maven.ide.eclipse.editor.pom.FormUtils.nvl;
 import static org.maven.ide.eclipse.editor.pom.FormUtils.setText;
+import static org.maven.ide.eclipse.editor.pom.FormUtils.setButton;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.edit.command.AddCommand;
+import org.eclipse.emf.edit.command.RemoveCommand;
 import org.eclipse.emf.edit.command.SetCommand;
 import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -36,6 +39,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.forms.events.ExpansionAdapter;
+import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -56,6 +61,7 @@ import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.editor.pom.FormUtils;
 import org.maven.ide.eclipse.editor.pom.MavenPomEditorPage;
 import org.maven.ide.eclipse.editor.pom.ValueProvider;
+import org.maven.ide.eclipse.wizards.WidthGroup;
 
 /**
  * @author Eugene Kuleshov
@@ -80,10 +86,10 @@ public class RepositoriesComposite extends Composite {
   Section projectSiteSection;
   Section relocationSection;
   
-  Text idText;
-  Text nameText;
+  Text repositoryIdText;
+  Text repositoryNameText;
   Text repositoryUrlText;
-  CCombo layoutCombo;
+  CCombo repositoryLayoutCombo;
 
   Button releasesEnabledButton;
   CCombo releasesUpdatePolicyCombo;
@@ -119,12 +125,13 @@ public class RepositoriesComposite extends Composite {
   CCombo releaseRepositoryLayoutCombo;
   Button releaseRepositoryUniqueVersionButton;
   
+  WidthGroup leftWidthGroup = new WidthGroup();
+  WidthGroup rightWidthGroup = new WidthGroup();
+  
   // model
   
   private Model model;
-  
-//  private Repositories repositories;
-//  private PluginRepositories pluginRepositories;
+
   
   public RepositoriesComposite(Composite parent, int flags) {
     super(parent, flags);
@@ -142,7 +149,7 @@ public class RepositoriesComposite extends Composite {
     toolkit.adapt(verticalSash, true, true);
 
     createRepositoriesSection(verticalSash);
-    createRepositoryManagementSection(verticalSash);
+    createPluginRepositoriesSection(verticalSash);
 
     verticalSash.setWeights(new int[] {1, 1});
     
@@ -171,45 +178,70 @@ public class RepositoriesComposite extends Composite {
   }
 
   private void createRepositoriesSection(SashForm verticalSash) {
-  Section repositoriesSection = toolkit.createSection(verticalSash, Section.TITLE_BAR | Section.COMPACT);
-  repositoriesSection.setText("Repositories");
+    Section repositoriesSection = toolkit.createSection(verticalSash, Section.TITLE_BAR | Section.COMPACT);
+    repositoriesSection.setText("Repositories");
 
-  repositoriesEditor = new ListEditorComposite<Repository>(repositoriesSection, SWT.NONE);
-  
-  repositoriesEditor.setLabelProvider(new RepositoryLabelProvider());
-  repositoriesEditor.setContentProvider(new ListEditorContentProvider<Repository>());
-  
-  repositoriesEditor.setAddListener(new SelectionAdapter() {
-    public void widgetSelected(SelectionEvent e) {
-      Repositories repositories = model.getRepositories();
-      if(repositories==null) {
-        repositories = PomFactory.eINSTANCE.createRepositories();
-        model.setRepositories(repositories);
+    repositoriesEditor = new ListEditorComposite<Repository>(repositoriesSection, SWT.NONE);
+
+    repositoriesEditor.setLabelProvider(new RepositoryLabelProvider());
+    repositoriesEditor.setContentProvider(new ListEditorContentProvider<Repository>());
+
+    repositoriesEditor.setAddListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        CompoundCommand compoundCommand = new CompoundCommand();
+        EditingDomain editingDomain = parent.getEditingDomain();
+        
+        Repositories repositories = model.getRepositories();
+        if(repositories == null) {
+          repositories = PomFactory.eINSTANCE.createRepositories();
+          Command createCommand = SetCommand.create(editingDomain, model, 
+              POM_PACKAGE.getModel_Repositories(), repositories);
+          compoundCommand.append(createCommand);
+        }
+        
+        Repository repository = PomFactory.eINSTANCE.createRepository();
+        Command addCommand = AddCommand.create(editingDomain, repositories, 
+            POM_PACKAGE.getRepositories_Repository(), repository);
+        compoundCommand.append(addCommand);
+        
+        editingDomain.getCommandStack().execute(compoundCommand);
+        
+        repositoriesEditor.setSelection(Collections.singletonList(repository));
+        updateRepositoryDetailsSection(repository);
+        repositoryIdText.setFocus();
       }
-      repositories.getRepository().add(PomFactory.eINSTANCE.createRepository());
-      // XXX update details panel
-    }
-  });
-  
-  repositoriesEditor.setRemoveListener(new SelectionAdapter() {
-    public void widgetSelected(SelectionEvent e) {
-      // TODO Auto-generated method stub
-    }
-  });
-  
-  repositoriesEditor.addSelectionListener(new ISelectionChangedListener() {
-    public void selectionChanged(SelectionChangedEvent event) {
-      List<Repository> selection = repositoriesEditor.getSelection();
-      updateRepositoryDetailsSection(selection.size()==1 ? selection.get(0) : null);
-    }
-  });
-  
-  toolkit.paintBordersFor(repositoriesEditor);
-  toolkit.adapt(repositoriesEditor);
-  repositoriesSection.setClient(repositoriesEditor);
-}
+    });
 
-  private void createRepositoryManagementSection(SashForm verticalSash) {
+    repositoriesEditor.setRemoveListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        CompoundCommand compoundCommand = new CompoundCommand();
+        EditingDomain editingDomain = parent.getEditingDomain();
+
+        List<Repository> list = repositoriesEditor.getSelection();
+        for(Repository repository : list) {
+          Command removeCommand = RemoveCommand.create(editingDomain, model.getRepositories(), 
+              POM_PACKAGE.getRepositories_Repository(), repository);
+          compoundCommand.append(removeCommand);
+        }
+        
+        editingDomain.getCommandStack().execute(compoundCommand);
+        updateRepositoryDetailsSection(null);
+      }
+    });
+
+    repositoriesEditor.addSelectionListener(new ISelectionChangedListener() {
+      public void selectionChanged(SelectionChangedEvent event) {
+        List<Repository> selection = repositoriesEditor.getSelection();
+        updateRepositoryDetailsSection(selection.size() == 1 ? selection.get(0) : null);
+      }
+    });
+
+    toolkit.paintBordersFor(repositoriesEditor);
+    toolkit.adapt(repositoriesEditor);
+    repositoriesSection.setClient(repositoriesEditor);
+  }
+
+  private void createPluginRepositoriesSection(SashForm verticalSash) {
     Section pluginRepositoriesSection = toolkit.createSection(verticalSash, Section.TITLE_BAR | Section.COMPACT);
     pluginRepositoriesSection.setText("Plugin Repositories");
   
@@ -220,19 +252,44 @@ public class RepositoriesComposite extends Composite {
     
     pluginRepositoriesEditor.setAddListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
+        CompoundCommand compoundCommand = new CompoundCommand();
+        EditingDomain editingDomain = parent.getEditingDomain();
+        
         PluginRepositories pluginRepositories = model.getPluginRepositories();
-        if(pluginRepositories==null) {
+        if(pluginRepositories == null) {
           pluginRepositories = PomFactory.eINSTANCE.createPluginRepositories();
-          model.setPluginRepositories(pluginRepositories);
+          Command createCommand = SetCommand.create(editingDomain, model, 
+              POM_PACKAGE.getModel_PluginRepositories(), pluginRepositories);
+          compoundCommand.append(createCommand);
         }
-        pluginRepositories.getPluginRepository().add(PomFactory.eINSTANCE.createRepository());
-        // XXX update details panel
+        
+        Repository pluginRepository = PomFactory.eINSTANCE.createRepository();
+        Command addCommand = AddCommand.create(editingDomain, pluginRepositories, 
+            POM_PACKAGE.getPluginRepositories_PluginRepository(), pluginRepository);
+        compoundCommand.append(addCommand);
+        
+        editingDomain.getCommandStack().execute(compoundCommand);
+        
+        pluginRepositoriesEditor.setSelection(Collections.singletonList(pluginRepository));
+        updateRepositoryDetailsSection(pluginRepository);
+        repositoryIdText.setFocus();
       }
     });
     
     pluginRepositoriesEditor.setRemoveListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
-        // TODO Auto-generated method stub
+        CompoundCommand compoundCommand = new CompoundCommand();
+        EditingDomain editingDomain = parent.getEditingDomain();
+
+        List<Repository> list = pluginRepositoriesEditor.getSelection();
+        for(Repository repository : list) {
+          Command removeCommand = RemoveCommand.create(editingDomain, model.getPluginRepositories(), 
+              POM_PACKAGE.getPluginRepositories_PluginRepository(), repository);
+          compoundCommand.append(removeCommand);
+        }
+        
+        editingDomain.getCommandStack().execute(compoundCommand);
+        updateRepositoryDetailsSection(null);
       }
     });
     
@@ -260,14 +317,14 @@ public class RepositoriesComposite extends Composite {
     Label idLabel = new Label(repositoryDetailsComposite, SWT.NONE);
     idLabel.setText("Id:");
   
-    idText = toolkit.createText(repositoryDetailsComposite, "");
-    idText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    repositoryIdText = toolkit.createText(repositoryDetailsComposite, "");
+    repositoryIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
   
     Label nameLabel = new Label(repositoryDetailsComposite, SWT.NONE);
     nameLabel.setText("Name:");
   
-    nameText = toolkit.createText(repositoryDetailsComposite, "");
-    nameText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    repositoryNameText = toolkit.createText(repositoryDetailsComposite, "");
+    repositoryNameText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
   
     Hyperlink repositoryUrlHyperlink = toolkit.createHyperlink(repositoryDetailsComposite, "URL:", SWT.NONE);
     repositoryUrlHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
@@ -282,32 +339,41 @@ public class RepositoriesComposite extends Composite {
     Label layoutLabel = new Label(repositoryDetailsComposite, SWT.NONE);
     layoutLabel.setText("Layout:");
   
-    layoutCombo = new CCombo(repositoryDetailsComposite, SWT.FLAT);
-    layoutCombo.setData(FormToolkit.KEY_DRAW_BORDER, FormToolkit.TEXT_BORDER);
-    layoutCombo.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-    layoutCombo.setItems(new String[] {"default", "legacy"});
+    repositoryLayoutCombo = new CCombo(repositoryDetailsComposite, SWT.FLAT);
+    repositoryLayoutCombo.setData(FormToolkit.KEY_DRAW_BORDER, FormToolkit.TEXT_BORDER);
+    repositoryLayoutCombo.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+    repositoryLayoutCombo.setItems(new String[] {"default", "legacy"});
   
     Composite composite = new Composite(repositoryDetailsComposite, SWT.NONE);
     composite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
     toolkit.adapt(composite, true, true);
     toolkit.paintBordersFor(composite);
-    GridLayout gridLayout_22 = new GridLayout();
-    gridLayout_22.marginBottom = 2;
-    gridLayout_22.marginWidth = 2;
-    gridLayout_22.marginHeight = 0;
-    gridLayout_22.numColumns = 2;
-    composite.setLayout(gridLayout_22);
+    GridLayout compositeLayout = new GridLayout();
+    compositeLayout.marginBottom = 2;
+    compositeLayout.marginWidth = 2;
+    compositeLayout.marginHeight = 0;
+    compositeLayout.numColumns = 2;
+    composite.setLayout(compositeLayout);
   
     releasesEnabledButton = toolkit.createButton(composite, "Enable Releases", SWT.CHECK | SWT.FLAT);
-    GridData gd_releasesEnabledButton = new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1);
-    gd_releasesEnabledButton.verticalIndent = 5;
-    releasesEnabledButton.setLayoutData(gd_releasesEnabledButton);
+    GridData releasesEnabledButtonData = new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1);
+    releasesEnabledButtonData.verticalIndent = 5;
+    releasesEnabledButton.setLayoutData(releasesEnabledButtonData);
+    releasesEnabledButton.addSelectionListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        boolean isEnabled = releasesEnabledButton.getSelection();
+        releasesUpdatePolicyLabel.setEnabled(isEnabled);
+        releasesUpdatePolicyCombo.setEnabled(isEnabled);
+        releasesChecksumPolicyLabel.setEnabled(isEnabled);
+        releasesChecksumPolicyCombo.setEnabled(isEnabled);
+      }
+    });
   
     releasesUpdatePolicyLabel = new Label(composite, SWT.NONE);
     releasesUpdatePolicyLabel.setText("Update Policy:");
-    GridData gd_releasesUpdatePolicyLabel = new GridData();
-    gd_releasesUpdatePolicyLabel.horizontalIndent = 15;
-    releasesUpdatePolicyLabel.setLayoutData(gd_releasesUpdatePolicyLabel);
+    GridData releasesUpdatePolicyLabelData = new GridData();
+    releasesUpdatePolicyLabelData.horizontalIndent = 15;
+    releasesUpdatePolicyLabel.setLayoutData(releasesUpdatePolicyLabelData);
   
     releasesUpdatePolicyCombo = new CCombo(composite, SWT.FLAT);
     releasesUpdatePolicyCombo.setData(FormToolkit.KEY_DRAW_BORDER, FormToolkit.TEXT_BORDER);
@@ -317,9 +383,9 @@ public class RepositoriesComposite extends Composite {
   
     releasesChecksumPolicyLabel = new Label(composite, SWT.NONE);
     releasesChecksumPolicyLabel.setText("Checksum Policy:");
-    GridData gd_releasesChecksumPolicyLabel = new GridData();
-    gd_releasesChecksumPolicyLabel.horizontalIndent = 15;
-    releasesChecksumPolicyLabel.setLayoutData(gd_releasesChecksumPolicyLabel);
+    GridData releasesChecksumPolicyLabelData = new GridData();
+    releasesChecksumPolicyLabelData.horizontalIndent = 15;
+    releasesChecksumPolicyLabel.setLayoutData(releasesChecksumPolicyLabelData);
   
     releasesChecksumPolicyCombo = new CCombo(composite, SWT.READ_ONLY | SWT.FLAT);
     toolkit.adapt(releasesChecksumPolicyCombo, true, true);
@@ -328,15 +394,24 @@ public class RepositoriesComposite extends Composite {
     releasesChecksumPolicyCombo.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
   
     snapshotsEnabledButton = toolkit.createButton(composite, "Enable Snapshots", SWT.CHECK | SWT.FLAT);
-    GridData gd_snapshotsEnabledButton = new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1);
-    gd_snapshotsEnabledButton.verticalIndent = 5;
-    snapshotsEnabledButton.setLayoutData(gd_snapshotsEnabledButton);
+    GridData snapshotsEnabledButtonData = new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1);
+    snapshotsEnabledButtonData.verticalIndent = 5;
+    snapshotsEnabledButton.setLayoutData(snapshotsEnabledButtonData);
+    snapshotsEnabledButton.addSelectionListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        boolean isEnabled = releasesEnabledButton.getSelection();
+        snapshotsUpdatePolicyLabel.setEnabled(isEnabled);
+        snapshotsUpdatePolicyCombo.setEnabled(isEnabled);
+        snapshotsChecksumPolicyLabel.setEnabled(isEnabled);
+        snapshotsChecksumPolicyCombo.setEnabled(isEnabled);
+      }
+    });
   
     snapshotsUpdatePolicyLabel = new Label(composite, SWT.NONE);
     snapshotsUpdatePolicyLabel.setText("Update Policy:");
-    GridData gd_snapshotsUpdatePolicyLabel = new GridData();
-    gd_snapshotsUpdatePolicyLabel.horizontalIndent = 15;
-    snapshotsUpdatePolicyLabel.setLayoutData(gd_snapshotsUpdatePolicyLabel);
+    GridData snapshotsUpdatePolicyLabelData = new GridData();
+    snapshotsUpdatePolicyLabelData.horizontalIndent = 15;
+    snapshotsUpdatePolicyLabel.setLayoutData(snapshotsUpdatePolicyLabelData);
   
     snapshotsUpdatePolicyCombo = new CCombo(composite, SWT.FLAT);
     snapshotsUpdatePolicyCombo.setData(FormToolkit.KEY_DRAW_BORDER, FormToolkit.TEXT_BORDER);
@@ -370,44 +445,51 @@ public class RepositoriesComposite extends Composite {
     relocationComposite.setLayout(new GridLayout(2, false));
     toolkit.paintBordersFor(relocationComposite);
     relocationSection.setClient(relocationComposite);
+    relocationComposite.addControlListener(rightWidthGroup);
 
-    toolkit.createLabel(relocationComposite, "Group Id:", SWT.NONE);
+    Label relocationGroupIdLabel = toolkit.createLabel(relocationComposite, "Group Id:", SWT.NONE);
+    rightWidthGroup.addControl(relocationGroupIdLabel);
 
     relocationGroupIdText = toolkit.createText(relocationComposite, null, SWT.NONE);
     relocationGroupIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-    toolkit.createLabel(relocationComposite, "Artifact Id:", SWT.NONE);
+    Label relocationArtifactIdLabel = toolkit.createLabel(relocationComposite, "Artifact Id:", SWT.NONE);
+    rightWidthGroup.addControl(relocationArtifactIdLabel);
 
     relocationArtifactIdText = toolkit.createText(relocationComposite, null, SWT.NONE);
     relocationArtifactIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-    toolkit.createLabel(relocationComposite, "Version:", SWT.NONE);
+    Label relocationVersionLabel = toolkit.createLabel(relocationComposite, "Version:", SWT.NONE);
+    rightWidthGroup.addControl(relocationVersionLabel);
 
     relocationVersionText = toolkit.createText(relocationComposite, null, SWT.NONE);
     relocationVersionText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-    toolkit.createLabel(relocationComposite, "Message:", SWT.NONE);
+    Label relocationMessageLabel = toolkit.createLabel(relocationComposite, "Message:", SWT.NONE);
+    rightWidthGroup.addControl(relocationMessageLabel);
 
     relocationMessageText = toolkit.createText(relocationComposite, null, SWT.NONE);
     relocationMessageText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
   }
 
   private void createProjectSiteSection(SashForm sashForm) {
-    projectSiteSection = toolkit.createSection(sashForm, //
-        Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
+    projectSiteSection = toolkit.createSection(sashForm, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
     projectSiteSection.setText("Project Site");
 
     Composite projectSiteComposite = toolkit.createComposite(projectSiteSection, SWT.NONE);
     projectSiteComposite.setLayout(new GridLayout(2, false));
     toolkit.paintBordersFor(projectSiteComposite);
     projectSiteSection.setClient(projectSiteComposite);
+    projectSiteComposite.addControlListener(leftWidthGroup);
 
-    toolkit.createLabel(projectSiteComposite, "Id:", SWT.NONE);
+    Label siteIdLabel = toolkit.createLabel(projectSiteComposite, "Id:", SWT.NONE);
+    leftWidthGroup.addControl(siteIdLabel);
 
     projectSiteIdText = toolkit.createText(projectSiteComposite, null, SWT.NONE);
     projectSiteIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-    toolkit.createLabel(projectSiteComposite, "Name:", SWT.NONE);
+    Label siteNameLabel = toolkit.createLabel(projectSiteComposite, "Name:", SWT.NONE);
+    leftWidthGroup.addControl(siteNameLabel);
 
     projectSiteNameText = toolkit.createText(projectSiteComposite, null, SWT.NONE);
     projectSiteNameText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -418,6 +500,7 @@ public class RepositoriesComposite extends Composite {
         FormUtils.openHyperlink(projectSiteUrlText.getText());
       }
     });
+    leftWidthGroup.addControl(projectSiteUrlHyperlink);
 
     projectSiteUrlText = toolkit.createText(projectSiteComposite, null, SWT.NONE);
     projectSiteUrlText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -430,6 +513,7 @@ public class RepositoriesComposite extends Composite {
         FormUtils.openHyperlink(projectDownloadUrlText.getText());
       }
     });
+    leftWidthGroup.addControl(projectDownloadUrlHyperlink);
 
     projectDownloadUrlText = toolkit.createText(projectSiteComposite, null, SWT.NONE);
     projectDownloadUrlText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -444,14 +528,17 @@ public class RepositoriesComposite extends Composite {
     snapshotRepositoryComposite.setLayout(new GridLayout(2, false));
     toolkit.paintBordersFor(snapshotRepositoryComposite);
     snapshotRepositorySection.setClient(snapshotRepositoryComposite);
+    snapshotRepositoryComposite.addControlListener(rightWidthGroup);
 
-    toolkit.createLabel(snapshotRepositoryComposite, "Id:", SWT.NONE);
-
+    Label snapshotRepositoryIdLabel = toolkit.createLabel(snapshotRepositoryComposite, "Id:", SWT.NONE);
+    rightWidthGroup.addControl(snapshotRepositoryIdLabel);
+    
     snapshotRepositoryIdText = toolkit.createText(snapshotRepositoryComposite, null, SWT.NONE);
     snapshotRepositoryIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-    toolkit.createLabel(snapshotRepositoryComposite, "Name:", SWT.NONE);
-
+    Label snapshotRepositoryNameLabel = toolkit.createLabel(snapshotRepositoryComposite, "Name:", SWT.NONE);
+    rightWidthGroup.addControl(snapshotRepositoryNameLabel);
+    
     snapshotRepositoryNameText = toolkit.createText(snapshotRepositoryComposite, null, SWT.NONE);
     snapshotRepositoryNameText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
@@ -461,12 +548,14 @@ public class RepositoriesComposite extends Composite {
         FormUtils.openHyperlink(snapshotRepositoryUrlText.getText());
       }
     });
+    rightWidthGroup.addControl(snapshotRepositoryUrlHyperlink);
     
     snapshotRepositoryUrlText = toolkit.createText(snapshotRepositoryComposite, null, SWT.NONE);
     snapshotRepositoryUrlText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-    Label layoutLabel = toolkit.createLabel(snapshotRepositoryComposite, "Layout:", SWT.NONE);
-    layoutLabel.setLayoutData(new GridData());
+    Label snapshotRepositoryLayoutLabel = toolkit.createLabel(snapshotRepositoryComposite, "Layout:", SWT.NONE);
+    snapshotRepositoryLayoutLabel.setLayoutData(new GridData());
+    rightWidthGroup.addControl(snapshotRepositoryLayoutLabel);
 
     snapshotRepositoryLayoutCombo = new CCombo(snapshotRepositoryComposite, SWT.FLAT);
     snapshotRepositoryLayoutCombo.setItems(new String[] {"default", "legacy"});
@@ -489,30 +578,34 @@ public class RepositoriesComposite extends Composite {
     releaseDistributionRepositoryComposite.setLayout(new GridLayout(2, false));
     toolkit.paintBordersFor(releaseDistributionRepositoryComposite);
     releaseRepositorySection.setClient(releaseDistributionRepositoryComposite);
+    releaseDistributionRepositoryComposite.addControlListener(leftWidthGroup);
 
-    toolkit.createLabel(releaseDistributionRepositoryComposite, "Id:", SWT.NONE);
+    Label releaseRepositoryIdLabel = toolkit.createLabel(releaseDistributionRepositoryComposite, "Id:", SWT.NONE);
+    leftWidthGroup.addControl(releaseRepositoryIdLabel);
 
     releaseRepositoryIdText = toolkit.createText(releaseDistributionRepositoryComposite, null, SWT.NONE);
     releaseRepositoryIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-    toolkit.createLabel(releaseDistributionRepositoryComposite, "Name:", SWT.NONE);
+    Label releaseRepositoryNameLabel = toolkit.createLabel(releaseDistributionRepositoryComposite, "Name:", SWT.NONE);
+    leftWidthGroup.addControl(releaseRepositoryNameLabel);
 
     releaseRepositoryNameText = toolkit.createText(releaseDistributionRepositoryComposite, null, SWT.NONE);
     releaseRepositoryNameText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-    Hyperlink repositoryUrlHyperlink = toolkit
-        .createHyperlink(releaseDistributionRepositoryComposite, "URL:", SWT.NONE);
-    repositoryUrlHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
+    Hyperlink releaseRepositoryUrlHyperlink = toolkit.createHyperlink(releaseDistributionRepositoryComposite, "URL:", SWT.NONE);
+    releaseRepositoryUrlHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
       public void linkActivated(HyperlinkEvent e) {
         FormUtils.openHyperlink(releaseRepositoryUrlText.getText());
       }
     });
+    leftWidthGroup.addControl(releaseRepositoryUrlHyperlink);
 
     releaseRepositoryUrlText = toolkit.createText(releaseDistributionRepositoryComposite, null, SWT.NONE);
     releaseRepositoryUrlText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-    Label label = toolkit.createLabel(releaseDistributionRepositoryComposite, "Layout:", SWT.NONE);
-    label.setLayoutData(new GridData());
+    Label releaseRepositoryLayoutLabel = toolkit.createLabel(releaseDistributionRepositoryComposite, "Layout:", SWT.NONE);
+    releaseRepositoryLayoutLabel.setLayoutData(new GridData());
+    leftWidthGroup.addControl(releaseRepositoryLayoutLabel);
 
     releaseRepositoryLayoutCombo = new CCombo(releaseDistributionRepositoryComposite, SWT.FLAT);
     releaseRepositoryLayoutCombo.setItems(new String[] {"default", "legacy"});
@@ -544,42 +637,91 @@ public class RepositoriesComposite extends Composite {
     registerProjectListeners();
     registerRelocationListeners();
     
-    if(dm!=null && dm.getRepository()!=null) {
-      DeploymentRepository r = dm.getRepository();
-      releaseRepositorySection.setExpanded(!isEmpty(r.getId()) || !isEmpty(r.getName()) || !isEmpty(r.getUrl())
-          || !isEmpty(r.getLayout()) || !isEmpty(r.getUniqueVersion()));
+    if(dm!=null) {
+      boolean isRepositoriesExpanded = false;
+      
+      if(dm.getRepository()!=null){
+        DeploymentRepository r = dm.getRepository();
+        isRepositoriesExpanded |= !isEmpty(r.getId()) || !isEmpty(r.getName()) || !isEmpty(r.getUrl())
+            || !isEmpty(r.getLayout()) || !isEmpty(r.getUniqueVersion());
+      }
+      
+      if(dm.getSnapshotRepository()!=null){
+        DeploymentRepository r = dm.getSnapshotRepository();
+        isRepositoriesExpanded |= !isEmpty(r.getId()) || !isEmpty(r.getName()) || !isEmpty(r.getUrl())
+            || !isEmpty(r.getLayout()) || !isEmpty(r.getUniqueVersion());
+      }
+
+      releaseRepositorySection.setExpanded(isRepositoriesExpanded);
+      snapshotRepositorySection.setExpanded(isRepositoriesExpanded);
+      
+      boolean isSiteExpanded = false;
+      
+      Site s = dm.getSite();
+      if(s!=null) {
+        isSiteExpanded |= !isEmpty(s.getId()) || !isEmpty(s.getName()) || !isEmpty(s.getUrl())
+        || !isEmpty(dm.getDownloadUrl());
+      } else {
+        isSiteExpanded |= !isEmpty(dm.getDownloadUrl());
+      }
+      
+      if(dm.getRelocation()!=null) {
+        Relocation r = dm.getRelocation();
+        isSiteExpanded |= !isEmpty(r.getGroupId()) || !isEmpty(r.getArtifactId()) || !isEmpty(r.getVersion())
+        || !isEmpty(r.getMessage());
+      }
+      
+      projectSiteSection.setExpanded(isSiteExpanded);
+      relocationSection.setExpanded(isSiteExpanded);
       
     } else {
       releaseRepositorySection.setExpanded(false);
-    }
-    
-    if(dm!=null && dm.getSnapshotRepository()!=null) {
-      DeploymentRepository r = dm.getSnapshotRepository();
-      snapshotRepositorySection.setExpanded(!isEmpty(r.getId()) || !isEmpty(r.getName()) || !isEmpty(r.getUrl())
-          || !isEmpty(r.getLayout()) || !isEmpty(r.getUniqueVersion()));
-    } else {
       snapshotRepositorySection.setExpanded(false);
+      projectSiteSection.setExpanded(false);
+      relocationSection.setExpanded(false);
     }
     
-    if(dm!=null) {
-      Site s = dm.getSite();
-      if(s!=null) {
-        projectSiteSection.setExpanded(!isEmpty(s.getId()) || !isEmpty(s.getName()) || !isEmpty(s.getUrl())
-            || !isEmpty(dm.getDownloadUrl()));
-      } else {
-        projectSiteSection.setExpanded(!isEmpty(dm.getDownloadUrl()));
+    relocationSection.addExpansionListener(new ExpansionAdapter() {
+      boolean isExpanding = false;
+      public void expansionStateChanged(ExpansionEvent e) {
+        if(!isExpanding) {
+          isExpanding = true;
+          projectSiteSection.setExpanded(relocationSection.isExpanded());
+          isExpanding = false;
+        }
       }
-    } else {
-      projectSiteSection.setExpanded(false);
-    }
-
-    if(dm!=null && dm.getRelocation()!=null) {
-      Relocation r = dm.getRelocation();
-      releaseRepositorySection.setExpanded(!isEmpty(r.getGroupId()) || !isEmpty(r.getArtifactId())
-          || !isEmpty(r.getVersion()) || !isEmpty(r.getMessage()));
-    } else {
-      releaseRepositorySection.setExpanded(false);
-    }
+    });
+    projectSiteSection.addExpansionListener(new ExpansionAdapter() {
+      boolean isExpanding = false;
+      public void expansionStateChanged(ExpansionEvent e) {
+        if(!isExpanding) {
+          isExpanding = true;
+          relocationSection.setExpanded(projectSiteSection.isExpanded());
+          isExpanding = false;
+        }
+      }
+    });
+    
+    releaseRepositorySection.addExpansionListener(new ExpansionAdapter() {
+      boolean isExpanding = false;
+      public void expansionStateChanged(ExpansionEvent e) {
+        if(!isExpanding) {
+          isExpanding = true;
+          snapshotRepositorySection.setExpanded(releaseRepositorySection.isExpanded());
+          isExpanding = false;
+        }
+      }
+    });
+    snapshotRepositorySection.addExpansionListener(new ExpansionAdapter() {
+      boolean isExpanding = false;
+      public void expansionStateChanged(ExpansionEvent e) {
+        if(!isExpanding) {
+          isExpanding = true;
+          releaseRepositorySection.setExpanded(snapshotRepositorySection.isExpanded());
+          isExpanding = false;
+        }
+      }
+    });
   }
 
   private void registerReleaseRepositoryListeners() {
@@ -627,7 +769,7 @@ public class RepositoriesComposite extends Composite {
           Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_DistributionManagement(), dm);
           compoundCommand.append(command);
         }
-        DeploymentRepository r = dm.getRepository();
+        DeploymentRepository r = dm.getSnapshotRepository();
         if(r==null) {
           r = PomFactory.eINSTANCE.createDeploymentRepository();
           Command command = SetCommand.create(editingDomain, dm, POM_PACKAGE.getDistributionManagement_SnapshotRepository(), r);
@@ -715,41 +857,41 @@ public class RepositoriesComposite extends Composite {
   }
 
   private void loadReleaseDistributionRepository(DistributionManagement distributionManagement) {
-    DeploymentRepository repository = distributionManagement.getRepository();
+    DeploymentRepository repository = distributionManagement==null ? null : distributionManagement.getRepository();
     if(repository!=null) {
       setText(releaseRepositoryIdText, repository.getId());
       setText(releaseRepositoryNameText, repository.getName());
       setText(releaseRepositoryUrlText, repository.getUrl());
       setText(releaseRepositoryLayoutCombo, repository.getLayout());
-      releaseRepositoryUniqueVersionButton.setSelection("true".equals(repository.getUniqueVersion()));
+      setButton(releaseRepositoryUniqueVersionButton, "true".equals(repository.getUniqueVersion()));
     } else {
       setText(releaseRepositoryIdText, "");
       setText(releaseRepositoryNameText, "");
       setText(releaseRepositoryUrlText, "");
       setText(releaseRepositoryLayoutCombo, "");
-      releaseRepositoryUniqueVersionButton.setSelection(true); // default
+      setButton(releaseRepositoryUniqueVersionButton, true); // default
     }
   }
 
   private void loadSnapshotDistributionRepository(DistributionManagement distributionManagement) {
-    DeploymentRepository repository = distributionManagement.getSnapshotRepository();
+    DeploymentRepository repository = distributionManagement==null ? null : distributionManagement.getSnapshotRepository();
     if(repository!=null) {
       setText(snapshotRepositoryIdText, repository.getId());
       setText(snapshotRepositoryNameText, repository.getName());
       setText(snapshotRepositoryUrlText, repository.getUrl());
       setText(snapshotRepositoryLayoutCombo, repository.getLayout());
-      snapshotRepositoryUniqueVersionButton.setSelection("true".equals(repository.getUniqueVersion()));
+      setButton(snapshotRepositoryUniqueVersionButton, "true".equals(repository.getUniqueVersion()));
     } else {
       setText(snapshotRepositoryIdText, "");
       setText(snapshotRepositoryNameText, "");
       setText(snapshotRepositoryUrlText, "");
       setText(snapshotRepositoryLayoutCombo, "");
-      snapshotRepositoryUniqueVersionButton.setSelection(true); // default
+      setButton(snapshotRepositoryUniqueVersionButton, true); // default
     }
   }
 
   private void loadProjectSite(DistributionManagement distributionManagement) {
-    Site site = distributionManagement.getSite();
+    Site site = distributionManagement==null ? null : distributionManagement.getSite();
     if(site!=null) {
       setText(projectSiteIdText, site.getId());
       setText(projectSiteNameText, site.getName());
@@ -760,11 +902,11 @@ public class RepositoriesComposite extends Composite {
       setText(projectSiteUrlText, "");
     }
     
-    setText(projectDownloadUrlText, distributionManagement.getDownloadUrl());
+    setText(projectDownloadUrlText, distributionManagement==null ? null : distributionManagement.getDownloadUrl());
   }
 
   private void loadRelocation(DistributionManagement distributionManagement) {
-    Relocation relocation = distributionManagement.getRelocation();
+    Relocation relocation = distributionManagement==null ? null : distributionManagement.getRelocation();
     if(relocation!=null) {
       setText(relocationGroupIdText, relocation.getGroupId());
       setText(relocationArtifactIdText, relocation.getArtifactId());
@@ -820,24 +962,37 @@ public class RepositoriesComposite extends Composite {
     // XXX
   }
 
-  protected void updateRepositoryDetailsSection(Repository repository) {
-    // XXX unregister listeners
+  protected void updateRepositoryDetailsSection(final Repository repository) {
+    if(parent != null) {
+      parent.removeNotifyListener(repositoryIdText);
+      parent.removeNotifyListener(repositoryNameText);
+      parent.removeNotifyListener(repositoryUrlText);
+      parent.removeNotifyListener(repositoryLayoutCombo);
+      
+      parent.removeNotifyListener(releasesEnabledButton);
+      parent.removeNotifyListener(releasesChecksumPolicyCombo);
+      parent.removeNotifyListener(releasesUpdatePolicyCombo);
+      
+      parent.removeNotifyListener(snapshotsEnabledButton);
+      parent.removeNotifyListener(snapshotsChecksumPolicyCombo);
+      parent.removeNotifyListener(snapshotsUpdatePolicyCombo);
+    }
     
     if(repository==null) {
       FormUtils.setEnabled(repositoryDetailsSection, false);
   
-      idText.setText("");
-      nameText.setText("");
-      layoutCombo.setText("");
-      repositoryUrlText.setText("");
+      setText(repositoryIdText, "");
+      setText(repositoryNameText, "");
+      setText(repositoryLayoutCombo, "");
+      setText(repositoryUrlText, "");
       
-      releasesEnabledButton.setSelection(false);
-      releasesChecksumPolicyCombo.setText("");
-      releasesUpdatePolicyCombo.setText("");
+      setButton(releasesEnabledButton, false);
+      setText(releasesChecksumPolicyCombo, "");
+      setText(releasesUpdatePolicyCombo, "");
       
-      snapshotsEnabledButton.setSelection(false); 
-      snapshotsChecksumPolicyCombo.setText("");  // move into listener
-      snapshotsUpdatePolicyCombo.setText("");
+      setButton(snapshotsEnabledButton, false); 
+      setText(snapshotsChecksumPolicyCombo, "");  // move into listener
+      setText(snapshotsUpdatePolicyCombo, "");
       
       // XXX swap repository details panel
       
@@ -846,26 +1001,26 @@ public class RepositoriesComposite extends Composite {
   
     FormUtils.setEnabled(repositoryDetailsSection, true);
   
-    idText.setEnabled(true);
-    nameText.setEnabled(true);
-    layoutCombo.setEnabled(true);
+    repositoryIdText.setEnabled(true);
+    repositoryNameText.setEnabled(true);
+    repositoryLayoutCombo.setEnabled(true);
     repositoryUrlText.setEnabled(true);
     releasesEnabledButton.setEnabled(true);
     snapshotsEnabledButton.setEnabled(true); 
     
-    idText.setText(nvl(repository.getId()));
-    nameText.setText(nvl(repository.getName()));
-    layoutCombo.setText(nvl(repository.getLayout()));
-    repositoryUrlText.setText(nvl(repository.getUrl()));
+    setText(repositoryIdText, repository.getId());
+    setText(repositoryNameText, repository.getName());
+    setText(repositoryLayoutCombo, repository.getLayout());
+    setText(repositoryUrlText, repository.getUrl());
     
     {
       RepositoryPolicy releases = repository.getReleases();
       if(releases!=null) {
-        releasesEnabledButton.setSelection("true".equals(releases.getEnabled()));
-        releasesChecksumPolicyCombo.setText(nvl(releases.getChecksumPolicy()));
-        releasesUpdatePolicyCombo.setText(nvl(releases.getUpdatePolicy()));
+        setButton(releasesEnabledButton, "true".equals(releases.getEnabled()));
+        setText(releasesChecksumPolicyCombo, releases.getChecksumPolicy());
+        setText(releasesUpdatePolicyCombo, releases.getUpdatePolicy());
       } else {
-        releasesEnabledButton.setSelection(false);
+        setButton(releasesEnabledButton, false);
       }
       boolean isReleasesEnabled = releasesEnabledButton.getSelection();
       releasesChecksumPolicyCombo.setEnabled(isReleasesEnabled);
@@ -877,9 +1032,9 @@ public class RepositoriesComposite extends Composite {
     {
       RepositoryPolicy snapshots = repository.getSnapshots();
       if(snapshots!=null) {
-        snapshotsEnabledButton.setSelection("true".equals(snapshots.getEnabled()));
-        snapshotsChecksumPolicyCombo.setText(nvl(snapshots.getChecksumPolicy()));
-        snapshotsUpdatePolicyCombo.setText(nvl(snapshots.getUpdatePolicy()));
+        setButton(snapshotsEnabledButton, "true".equals(snapshots.getEnabled()));
+        setText(snapshotsChecksumPolicyCombo, snapshots.getChecksumPolicy());
+        setText(snapshotsUpdatePolicyCombo, snapshots.getUpdatePolicy());
       } else {
         snapshotsEnabledButton.setSelection(false);
       }
@@ -890,7 +1045,47 @@ public class RepositoriesComposite extends Composite {
       snapshotsUpdatePolicyLabel.setEnabled(isSnapshotsEnabled);
     }
   
-    // XXX register new listeners
+    ValueProvider<Repository> repositoryProvider = new ValueProvider.DefaultValueProvider<Repository>(repository); 
+    parent.setModifyListener(repositoryIdText, repositoryProvider, POM_PACKAGE.getRepository_Id(), "");
+    parent.setModifyListener(repositoryNameText, repositoryProvider, POM_PACKAGE.getRepository_Name(), "");
+    parent.setModifyListener(repositoryUrlText, repositoryProvider, POM_PACKAGE.getRepository_Url(), "");
+    parent.setModifyListener(repositoryLayoutCombo, repositoryProvider, POM_PACKAGE.getRepository_Layout(), "default");
+
+    ValueProvider<RepositoryPolicy> releasesProvider = new ValueProvider.ParentValueProvider<RepositoryPolicy>(
+        releasesEnabledButton, releasesChecksumPolicyCombo, releasesUpdatePolicyCombo) {
+      public RepositoryPolicy getValue() {
+        return repository.getReleases();
+      }
+      public void create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+        RepositoryPolicy policy = getValue();
+        if(policy == null) {
+          policy = PomFactory.eINSTANCE.createRepositoryPolicy();
+          Command command = SetCommand.create(editingDomain, repository, POM_PACKAGE.getRepository_Releases(), policy);
+          compoundCommand.append(command);
+        }
+      }
+    };
+    parent.setModifyListener(releasesEnabledButton, releasesProvider, POM_PACKAGE.getRepositoryPolicy_Enabled(), "true");
+    parent.setModifyListener(releasesChecksumPolicyCombo, releasesProvider, POM_PACKAGE.getRepositoryPolicy_ChecksumPolicy(), "");
+    parent.setModifyListener(releasesUpdatePolicyCombo, releasesProvider, POM_PACKAGE.getRepositoryPolicy_UpdatePolicy(), "");
+    
+    ValueProvider<RepositoryPolicy> snapshotsProvider = new ValueProvider.ParentValueProvider<RepositoryPolicy>(
+        snapshotsEnabledButton, snapshotsChecksumPolicyCombo, snapshotsUpdatePolicyCombo) {
+      public RepositoryPolicy getValue() {
+        return repository.getSnapshots();
+      }
+      public void create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+        RepositoryPolicy policy = getValue();
+        if(policy == null) {
+          policy = PomFactory.eINSTANCE.createRepositoryPolicy();
+          Command command = SetCommand.create(editingDomain, repository, POM_PACKAGE.getRepository_Snapshots(), policy);
+          compoundCommand.append(command);
+        }
+      }
+    };
+    parent.setModifyListener(snapshotsEnabledButton, snapshotsProvider, POM_PACKAGE.getRepositoryPolicy_Enabled(), "true");
+    parent.setModifyListener(snapshotsChecksumPolicyCombo, snapshotsProvider, POM_PACKAGE.getRepositoryPolicy_ChecksumPolicy(), "");
+    parent.setModifyListener(snapshotsUpdatePolicyCombo, snapshotsProvider, POM_PACKAGE.getRepositoryPolicy_UpdatePolicy(), "");
   }
 
   /**
@@ -901,7 +1096,7 @@ public class RepositoriesComposite extends Composite {
     public String getText(Object element) {
       if(element instanceof Repository) {
         Repository r = (Repository) element;
-        return r.getId() + " : " + r.getUrl();
+        return (isEmpty(r.getId()) ? "?" : r.getId()) + " : " + (isEmpty(r.getUrl()) ? "?" : r.getUrl());
       }
       return super.getText(element);
     }

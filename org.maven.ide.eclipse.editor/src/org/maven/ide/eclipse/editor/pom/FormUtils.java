@@ -53,6 +53,12 @@ public abstract class FormUtils {
     }
   }
   
+  public static void setButton(Button control, boolean selection) {
+    if(control.getSelection()!=selection) {
+      control.setSelection(selection);
+    }
+  }
+  
   public static void openHyperlink(String url) {
     if(url!=null && url.trim().length()>0) {
       url = url.trim();

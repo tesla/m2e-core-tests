@@ -60,20 +60,20 @@ public abstract class ValueProvider<T> {
     public final boolean isEmpty() {
       for(Control control : controls) {
         if(control instanceof Text) {
-          if(FormUtils.isEmpty(((Text) control).getText())) {
-            return true;
+          if(!FormUtils.isEmpty(((Text) control).getText())) {
+            return false;
           }
         } else if(control instanceof CCombo) {
-          if(FormUtils.isEmpty(((CCombo) control).getText())) {
-            return true;
+          if(!FormUtils.isEmpty(((CCombo) control).getText())) {
+            return false;
           }
         } else if(control instanceof Button) {
-          if(((Button) control).getSelection()) {
-            return true;
+          if(!((Button) control).getSelection()) {
+            return false;
           }
         }
       }
-      return false;
+      return true;
     }
   }
   
