@@ -19,7 +19,7 @@
   </parent>
 
   <artifactId>org.maven.ide.eclipse.tests</artifactId>
-  <packaging>osgi-bundle</packaging>
+  <packaging>eclipse-plugin</packaging>
 
   <name>Maven Integration for Eclipse JUnit Plug-in test</name>
 

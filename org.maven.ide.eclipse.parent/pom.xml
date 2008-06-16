@@ -67,12 +67,12 @@
   </scm>
   
   <modules>
-    <module>../org.maven.ide.components.pom</module>
     <module>../org.maven.ide.components.maven-embedder</module>
     <module>../org.maven.ide.components.archetype-common</module>
     <module>../org.maven.ide.components.nexus-indexer</module>
     <module>../org.maven.ide.components.maven-model-edit</module>
     <module>../org.maven.ide.components.maven-scm</module>
+    <module>../org.maven.ide.components.dependency-tree</module>
 
     <module>../org.maven.ide.eclipse</module>
     <module>../org.maven.ide.eclipse.central</module>
@@ -86,6 +86,7 @@
     <module>../org.maven.ide.eclipse.flex</module>
     -->
     
+    <module>../org.maven.ide.eclipse.editor</module>
     <module>../org.maven.ide.eclipse.editor.xml</module>
 
     <module>../org.maven.ide.eclipse.book</module>
@@ -289,22 +290,22 @@
         <plugin>
           <groupId>org.codehaus.tycho</groupId>
           <artifactId>maven-osgi-lifecycle-plugin</artifactId>
-          <version>1.0-SNAPSHOT</version>
+          <version>0.2.0-SNAPSHOT</version>
         </plugin>
         <plugin>
           <groupId>org.codehaus.tycho</groupId>
           <artifactId>maven-osgi-packaging-plugin</artifactId>
-          <version>1.0-SNAPSHOT</version>
+          <version>0.2.0-SNAPSHOT</version>
         </plugin>
         <plugin>
           <groupId>org.codehaus.tycho</groupId>
           <artifactId>maven-osgi-test-plugin</artifactId>
-          <version>1.0-SNAPSHOT</version>
+          <version>0.2.0-SNAPSHOT</version>
         </plugin>
         <plugin>
           <groupId>org.codehaus.tycho</groupId>
           <artifactId>maven-osgi-compiler-plugin</artifactId>
-          <version>1.0-SNAPSHOT</version>
+          <version>0.2.0-SNAPSHOT</version>
         </plugin>
       </plugins>
     </pluginManagement>

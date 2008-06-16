@@ -19,7 +19,7 @@
   </parent>
 
   <artifactId>org.maven.ide.eclipse.editor.xml.tests</artifactId>
-  <packaging>osgi-bundle</packaging>
+  <packaging>eclipse-plugin</packaging>
 
   <name>Maven POM XML Editor Plug-in tests</name>
 
