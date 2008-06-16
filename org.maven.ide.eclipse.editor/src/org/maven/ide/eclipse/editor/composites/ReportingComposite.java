@@ -26,6 +26,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.Section;
 import org.maven.ide.components.pom.Model;
 import org.maven.ide.components.pom.ReportPlugin;
@@ -57,7 +58,7 @@ public class ReportingComposite extends Composite {
 
   private Button pluginInheritedButton;
 
-  private Button pluginConfigureButton;
+  private Hyperlink pluginConfigureButton;
 
   private ListEditorComposite<ReportSet> reportSetsEditor;
 
@@ -168,12 +169,12 @@ public class ReportingComposite extends Composite {
     pluginDetailsSection.setClient(pluginDetailsComposite);
     toolkit.paintBordersFor(pluginDetailsComposite);
   
-    toolkit.createLabel(pluginDetailsComposite, "Group Id:", SWT.NONE);
+    toolkit.createLabel(pluginDetailsComposite, "Group Id:*", SWT.NONE);
   
     groupIdText = toolkit.createText(pluginDetailsComposite, null, SWT.NONE);
     groupIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
   
-    toolkit.createLabel(pluginDetailsComposite, "Artifact Id:", SWT.NONE);
+    toolkit.createLabel(pluginDetailsComposite, "Artifact Id:*", SWT.NONE);
   
     artifactIdText = toolkit.createText(pluginDetailsComposite, null, SWT.NONE);
     artifactIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -184,7 +185,7 @@ public class ReportingComposite extends Composite {
     versionText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
   
     Composite pluginConfigureComposite = toolkit.createComposite(pluginDetailsComposite, SWT.NONE);
-    GridData gd_pluginConfigureComposite = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
+    GridData gd_pluginConfigureComposite = new GridData(SWT.RIGHT, SWT.CENTER, false, false, 2, 1);
     pluginConfigureComposite.setLayoutData(gd_pluginConfigureComposite);
     GridLayout gridLayout_2 = new GridLayout(2, false);
     gridLayout_2.marginWidth = 0;
@@ -193,10 +194,10 @@ public class ReportingComposite extends Composite {
     toolkit.paintBordersFor(pluginConfigureComposite);
   
     pluginInheritedButton = toolkit.createButton(pluginConfigureComposite, "Inherited", SWT.CHECK);
-    pluginInheritedButton.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+    pluginInheritedButton.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
   
-    pluginConfigureButton = toolkit.createButton(pluginConfigureComposite, "Configure...", SWT.NONE);
-    pluginConfigureButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
+    pluginConfigureButton = toolkit.createHyperlink(pluginConfigureComposite, "Configure", SWT.NONE);
+    pluginConfigureButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
   
     Label reportSetsLabel = toolkit.createLabel(pluginDetailsComposite, "Report Sets:", SWT.NONE);
     reportSetsLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));

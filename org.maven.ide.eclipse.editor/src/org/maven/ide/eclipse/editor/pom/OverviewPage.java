@@ -198,7 +198,7 @@ public class OverviewPage extends MavenPomEditorPage {
     artifactGroupIdText = toolkit.createText(artifactComposite, null, SWT.NONE);
     artifactGroupIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
   
-    Label artifactIdLabel = toolkit.createLabel(artifactComposite, "Artifact Id:", SWT.NONE);
+    Label artifactIdLabel = toolkit.createLabel(artifactComposite, "Artifact Id:*", SWT.NONE);
   
     artifactIdText = toolkit.createText(artifactComposite, null, SWT.NONE);
     artifactIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -250,12 +250,12 @@ public class OverviewPage extends MavenPomEditorPage {
     parentComposite.setLayout(gridLayout);
     parentSection.setClient(parentComposite);
 
-    Label parentGroupIdLabel = toolkit.createLabel(parentComposite, "Group Id:", SWT.NONE);
+    Label parentGroupIdLabel = toolkit.createLabel(parentComposite, "Group Id:*", SWT.NONE);
   
     parentGroupIdText = toolkit.createText(parentComposite, null, SWT.NONE);
     parentGroupIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
   
-    Hyperlink parentArtifactIdLabel = toolkit.createHyperlink(parentComposite, "Artifact Id:", SWT.NONE);
+    Hyperlink parentArtifactIdLabel = toolkit.createHyperlink(parentComposite, "Artifact Id:*", SWT.NONE);
     parentArtifactIdLabel.addHyperlinkListener(new HyperlinkAdapter() {
       public void linkActivated(HyperlinkEvent e) {
         final String parentGroupId = parentGroupIdText.getText();
@@ -273,7 +273,7 @@ public class OverviewPage extends MavenPomEditorPage {
     parentArtifactIdText = toolkit.createText(parentComposite, null, SWT.NONE);
     parentArtifactIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
   
-    Label parentVersionLabel = toolkit.createLabel(parentComposite, "Version:", SWT.NONE);
+    Label parentVersionLabel = toolkit.createLabel(parentComposite, "Version:*", SWT.NONE);
     parentVersionLabel.setLayoutData(new GridData());
   
     parentVersionText = toolkit.createText(parentComposite, null, SWT.NONE);

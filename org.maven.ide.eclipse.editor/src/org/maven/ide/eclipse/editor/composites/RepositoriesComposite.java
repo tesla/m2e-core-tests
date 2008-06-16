@@ -315,7 +315,7 @@ public class RepositoriesComposite extends Composite {
     toolkit.paintBordersFor(repositoryDetailsComposite);
     
     Label idLabel = new Label(repositoryDetailsComposite, SWT.NONE);
-    idLabel.setText("Id:");
+    idLabel.setText("Id:*");
   
     repositoryIdText = toolkit.createText(repositoryDetailsComposite, "");
     repositoryIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -326,7 +326,7 @@ public class RepositoriesComposite extends Composite {
     repositoryNameText = toolkit.createText(repositoryDetailsComposite, "");
     repositoryNameText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
   
-    Hyperlink repositoryUrlHyperlink = toolkit.createHyperlink(repositoryDetailsComposite, "URL:", SWT.NONE);
+    Hyperlink repositoryUrlHyperlink = toolkit.createHyperlink(repositoryDetailsComposite, "URL:*", SWT.NONE);
     repositoryUrlHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
       public void linkActivated(HyperlinkEvent e) {
         FormUtils.openHyperlink(repositoryUrlText.getText());

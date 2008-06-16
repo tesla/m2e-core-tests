@@ -296,14 +296,14 @@ public class DependenciesComposite extends Composite {
     dependencyDetailsSection.setClient(dependencyComposite);
     dependencyComposite.addControlListener(detailsWidthGroup);
 
-    Label groupIdLabel = toolkit.createLabel(dependencyComposite, "Group Id:", SWT.NONE);
+    Label groupIdLabel = toolkit.createLabel(dependencyComposite, "Group Id:*", SWT.NONE);
     groupIdLabel.setLayoutData(new GridData());
     detailsWidthGroup.addControl(groupIdLabel);
 
     groupIdText = toolkit.createText(dependencyComposite, null, SWT.NONE);
     groupIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 
-    Label artifactIdLabel = toolkit.createLabel(dependencyComposite, "Artifact Id:", SWT.NONE);
+    Label artifactIdLabel = toolkit.createLabel(dependencyComposite, "Artifact Id:*", SWT.NONE);
     artifactIdLabel.setLayoutData(new GridData());
     detailsWidthGroup.addControl(artifactIdLabel);
 
@@ -496,7 +496,7 @@ public class DependenciesComposite extends Composite {
     exclusionDetailsSection.setClient(exclusionDetailsComposite);
     exclusionDetailsComposite.addControlListener(detailsWidthGroup);
     
-    Label exclusionGroupIdLabel = toolkit.createLabel(exclusionDetailsComposite, "Group Id:", SWT.NONE);
+    Label exclusionGroupIdLabel = toolkit.createLabel(exclusionDetailsComposite, "Group Id:*", SWT.NONE);
     exclusionGroupIdLabel.setLayoutData(new GridData());
     detailsWidthGroup.addControl(exclusionGroupIdLabel);
 
@@ -521,7 +521,7 @@ public class DependenciesComposite extends Composite {
       }
     });
 
-    Label exclusionArtifactIdLabel = toolkit.createLabel(exclusionDetailsComposite, "Artifact Id:", SWT.NONE);
+    Label exclusionArtifactIdLabel = toolkit.createLabel(exclusionDetailsComposite, "Artifact Id:*", SWT.NONE);
     exclusionArtifactIdLabel.setLayoutData(new GridData());
     detailsWidthGroup.addControl(exclusionArtifactIdLabel);
 
