@@ -84,7 +84,7 @@ public class ProfilesPage extends MavenPomEditorPage {
   
   
   public ProfilesPage(MavenPomEditor pomEditor) {
-    super(pomEditor, MavenPlugin.PLUGIN_ID + ".pom.profiles", "Profiles");
+    super(pomEditor, MavenPlugin.PLUGIN_ID + ".pom.profiles", "Profiles (work in progress)");
   }
 
   protected void createFormContent(IManagedForm managedForm) {

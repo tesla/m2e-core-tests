@@ -27,7 +27,7 @@ public class ReportingPage extends MavenPomEditorPage {
   private ReportingComposite reportingComposite;
 
   public ReportingPage(MavenPomEditor pomEditor) {
-    super(pomEditor, MavenPlugin.PLUGIN_ID + ".pom.reporting", "Reporting");
+    super(pomEditor, MavenPlugin.PLUGIN_ID + ".pom.reporting", "Reporting (work in progress)");
   }
 
   protected void createFormContent(IManagedForm managedForm) {

@@ -70,7 +70,7 @@ public class TeamPage extends MavenPomEditorPage {
   
 
   public TeamPage(MavenPomEditor pomEditor) {
-    super(pomEditor, MavenPlugin.PLUGIN_ID + ".pom.team", "Team");
+    super(pomEditor, MavenPlugin.PLUGIN_ID + ".pom.team", "Team (work in progress)");
   }
 
   protected void createFormContent(IManagedForm managedForm) {
