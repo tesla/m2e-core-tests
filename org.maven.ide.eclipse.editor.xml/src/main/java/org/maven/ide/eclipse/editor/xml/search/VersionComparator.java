@@ -8,6 +8,7 @@
 
 package org.maven.ide.eclipse.editor.xml.search;
 
+import java.math.BigInteger;
 import java.util.Comparator;
 import java.util.regex.Pattern;
 
@@ -40,11 +41,14 @@ public class VersionComparator implements Comparator<String> {
     int i = 0;
     for(; i < versionParts1.length && i < versionParts2.length; i++ ) {
       if(isNumeric(versionParts1[i]) && isNumeric(versionParts2[i])) {
-        int v1 = Integer.parseInt(versionParts1[i]);
-        int v2 = Integer.parseInt(versionParts2[i]);
-        if(v1 != v2) {
-          return v1 - v2;
-        } else {
+        BigInteger v1 = new BigInteger(versionParts1[i]);
+        BigInteger v2 = new BigInteger(versionParts2[i]);
+        if (!v1.equals(v2))
+        {
+          return v1.compareTo(v2);
+        }
+        else
+        {
           continue;
         }
       }
