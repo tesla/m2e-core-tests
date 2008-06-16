@@ -70,13 +70,13 @@ public class TeamPage extends MavenPomEditorPage {
   
 
   public TeamPage(MavenPomEditor pomEditor) {
-    super(pomEditor, MavenPlugin.PLUGIN_ID + ".pom.team", "Team (work in progress)");
+    super(pomEditor, MavenPlugin.PLUGIN_ID + ".pom.team", "Team");
   }
 
   protected void createFormContent(IManagedForm managedForm) {
     FormToolkit toolkit = managedForm.getToolkit();
     ScrolledForm form = managedForm.getForm();
-    form.setText("Team");
+    form.setText("Team (work in progress)");
 
     Composite body = form.getBody();
     toolkit.paintBordersFor(body);

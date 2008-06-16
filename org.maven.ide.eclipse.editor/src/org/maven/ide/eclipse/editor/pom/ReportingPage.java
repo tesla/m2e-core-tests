@@ -27,13 +27,13 @@ public class ReportingPage extends MavenPomEditorPage {
   private ReportingComposite reportingComposite;
 
   public ReportingPage(MavenPomEditor pomEditor) {
-    super(pomEditor, MavenPlugin.PLUGIN_ID + ".pom.reporting", "Reporting (work in progress)");
+    super(pomEditor, MavenPlugin.PLUGIN_ID + ".pom.reporting", "Reporting");
   }
 
   protected void createFormContent(IManagedForm managedForm) {
     FormToolkit toolkit = managedForm.getToolkit();
     ScrolledForm form = managedForm.getForm();
-    form.setText("Reporting");
+    form.setText("Reporting (work in progress)");
 
     Composite body = form.getBody();
     GridLayout gridLayout = new GridLayout(1, true);

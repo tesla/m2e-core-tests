@@ -84,13 +84,13 @@ public class ProfilesPage extends MavenPomEditorPage {
   
   
   public ProfilesPage(MavenPomEditor pomEditor) {
-    super(pomEditor, MavenPlugin.PLUGIN_ID + ".pom.profiles", "Profiles (work in progress)");
+    super(pomEditor, MavenPlugin.PLUGIN_ID + ".pom.profiles", "Profiles");
   }
 
   protected void createFormContent(IManagedForm managedForm) {
     FormToolkit toolkit = managedForm.getToolkit();
     ScrolledForm form = managedForm.getForm();
-    form.setText("Profiles");
+    form.setText("Profiles (work in progress)");
     // form.setExpandHorizontal(true);
     
     Composite body = form.getBody();

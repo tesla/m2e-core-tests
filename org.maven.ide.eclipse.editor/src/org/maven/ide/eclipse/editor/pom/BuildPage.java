@@ -44,13 +44,13 @@ public class BuildPage extends MavenPomEditorPage {
   private BuildComposite buildComposite;
   
   public BuildPage(MavenPomEditor pomEditor) {
-    super(pomEditor, MavenPlugin.PLUGIN_ID + ".pom.build", "Build (work in progress)");
+    super(pomEditor, MavenPlugin.PLUGIN_ID + ".pom.build", "Build");
   }
 
   protected void createFormContent(IManagedForm managedForm) {
     FormToolkit toolkit = managedForm.getToolkit();
     ScrolledForm form = managedForm.getForm();
-    form.setText("Overview");
+    form.setText("Build (work in progress)");
     // form.setExpandHorizontal(true);
     
     Composite body = form.getBody();
