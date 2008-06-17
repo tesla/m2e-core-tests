@@ -104,10 +104,10 @@ public abstract class FormUtils {
           ((Text) control).setEditable(!readonly);
         
         } else if(control instanceof Combo) {
-          ((CCombo) control).setEditable(!readonly);
-        
-        } else if(control instanceof Combo) {
           ((Combo) control).setEnabled(!readonly);
+        
+        } else if(control instanceof CCombo) {
+          ((CCombo) control).setEnabled(!readonly);
         
         } else if(control instanceof Button) {
           ((Button) control).setEnabled(!readonly);

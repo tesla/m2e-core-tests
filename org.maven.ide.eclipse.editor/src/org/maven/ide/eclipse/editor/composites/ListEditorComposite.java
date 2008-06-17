@@ -62,6 +62,7 @@ public class ListEditorComposite<T> extends Composite {
     
     addButton = toolkit.createButton(this, "Add...", SWT.FLAT);
     addButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+    addButton.setEnabled(false);
     
     removeButton = toolkit.createButton(this, "Delete", SWT.FLAT);
     removeButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, true));
@@ -98,6 +99,7 @@ public class ListEditorComposite<T> extends Composite {
   
   public void setAddListener(SelectionListener listener) {
     addButton.addSelectionListener(listener);
+    addButton.setEnabled(true);
   }
   
   public void setRemoveListener(SelectionListener listener) {

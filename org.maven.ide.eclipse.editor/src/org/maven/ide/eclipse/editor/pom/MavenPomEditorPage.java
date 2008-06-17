@@ -45,6 +45,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -72,22 +73,19 @@ import org.maven.ide.eclipse.project.MavenProjectManager;
  */
 public abstract class MavenPomEditorPage extends FormPage implements Adapter {
 
-  //parent editor
+  // parent editor
   protected final MavenPomEditor pomEditor;
 
-  //model
+  // model
   protected Model model;
 
-  //Notifier target
+  // Notifier target
   protected Notifier target;
 
-  //are we already updating model
+  // are we already updating model
   protected boolean updatingModel;
 
-  //whether view is readonly
-  protected boolean readonly;
-
-  //have we loaded data?
+  // have we loaded data?
   private boolean dataLoaded;
 
   protected static PomPackage POM_PACKAGE = PomPackage.eINSTANCE;
@@ -159,17 +157,13 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
     managedForm.getToolkit().decorateFormHeading(form.getForm());
   }
   
-  public void setReadonly(boolean readonly) {
-    if(this.readonly != readonly) {
-      this.readonly = readonly;
-      FormUtils.setReadonly((Composite) getPartControl(), readonly);
-    }
-  }
-
   public void setActive(boolean active) {
     super.setActive(active);
     doLoadData(active);
+
+    FormUtils.setReadonly((Composite) getPartControl(), pomEditor.isReadOnly());
   }
+  
 
   private void doLoadData(boolean active) {
     if(active && !dataLoaded) {
@@ -257,6 +251,22 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
 
   public void dispose() {
     deRegisterListeners();
+    
+    for(Map.Entry<Object, List<ModifyListener>> e : modifyListeners.entrySet()) {
+      Object control = e.getKey();
+      for(ModifyListener listener : e.getValue()) {
+        if(control instanceof Text) {
+          ((Text) control).removeModifyListener(listener);
+        } else if(control instanceof Combo) {
+          ((Combo) control).removeModifyListener(listener);
+        } else if(control instanceof CCombo) {
+          ((CCombo) control).removeModifyListener(listener);
+        } else if(control instanceof Combo) {
+          ((Button) control).removeSelectionListener((SelectionListener) listener);
+        }
+      }
+    }
+    
     super.dispose();
   }
 
@@ -320,6 +330,10 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
   }
 
   public <T> void setModifyListener(final Combo control, ValueProvider<T> owner, EStructuralFeature feature) {
+    List<ModifyListener> listeners = getModifyListeners(control);
+    for(ModifyListener listener : listeners) {
+      control.removeModifyListener(listener);
+    }
     ModifyListener listener = setModifyListener(new TextAdapter() {
       public String getText() {
         return control.getText();
@@ -328,11 +342,15 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
         control.addModifyListener(listener);
       }
     }, owner, feature, null);
-    getModifyListeners(control).add(listener);
+    listeners.add(listener);
   }
 
   public <T> void setModifyListener(final CCombo control, ValueProvider<T> owner, EStructuralFeature feature,
       String defaultValue) {
+    List<ModifyListener> listeners = getModifyListeners(control);
+    for(ModifyListener listener : listeners) {
+      control.removeModifyListener(listener);
+    }
     ModifyListener listener = setModifyListener(new TextAdapter() {
       public String getText() {
         return control.getText();
@@ -341,7 +359,7 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
         control.addModifyListener(listener);
       }
     }, owner, feature, defaultValue);
-    getModifyListeners(control).add(listener);
+    listeners.add(listener);
   }
   
   private <T> ModifyListener setModifyListener(final TextAdapter adapter, final ValueProvider<T> provider,
@@ -371,6 +389,11 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
   
   public <T> void setModifyListener(final Button control, final ValueProvider<T> provider,
       final EStructuralFeature feature, final String defaultValue) {
+    List<ModifyListener> listeners = getModifyListeners(control);
+    for(ModifyListener listener : listeners) {
+      control.removeSelectionListener((SelectionListener) listener);
+    }
+
     class ButtonModifyListener extends SelectionAdapter implements ModifyListener {
       public void widgetSelected(SelectionEvent e) {
         T owner = provider.getValue();
@@ -390,13 +413,12 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
       public void modifyText(ModifyEvent e) {
         widgetSelected(null);
       }
-    }
-    ;
+    };
 
     ButtonModifyListener listener = new ButtonModifyListener();
     control.addSelectionListener(listener);
 
-    getModifyListeners(control).add(listener);
+    listeners.add(listener);
   }
 
   public void removeNotifyListener(Text control) {

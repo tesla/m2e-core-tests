@@ -257,6 +257,10 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     }
   }
 
+  public boolean isReadOnly() {
+    return !(getEditorInput() instanceof IFileEditorInput);
+  }
+  
   private int addPomPage(IFormPage page) {
     try {
       if (page instanceof MavenPomEditorPage)
@@ -366,9 +370,9 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     resource = (PomResourceImpl) factory.createResource(uri);
     
     // disable SSE support for read-only external documents
-    EMF2DOMRenderer e2dRenderer = new EMF2DOMRenderer();
-    e2dRenderer.setValidating(false);
-    resource.setRenderer(e2dRenderer);
+    EMF2DOMRenderer renderer = new EMF2DOMRenderer();
+    renderer.setValidating(false);
+    resource.setRenderer(renderer);
     
     try {
       resource.load(Collections.EMPTY_MAP);
@@ -378,12 +382,6 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       MavenPlugin.log("Can't load model " + path, ex);
       return null;
 
-    } finally {
-      // set read-only for non-workspace resource
-      for(MavenPomEditorPage page : pages) {
-        page.setReadonly(true);
-      }
-      // TODO SSE editor page
     }
   }
 
@@ -673,5 +671,5 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   protected void pageChange(int newPageIndex) {
     super.pageChange(newPageIndex);
   }
-  
+
 }
