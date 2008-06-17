@@ -98,9 +98,9 @@ public class DependenciesComposite extends Composite {
   
   Model model;
   
-  DependencyManagement dependencyManagement;
-  
   Dependency currentDependency;
+
+  Exclusion currentExclusion;
   
 
   public DependenciesComposite(Composite composite, int flags) {
@@ -225,6 +225,7 @@ public class DependenciesComposite extends Composite {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = parent.getEditingDomain();
         
+        DependencyManagement dependencyManagement = model.getDependencyManagement();
         if(dependencyManagement == null) {
           dependencyManagement = PomFactory.eINSTANCE.createDependencyManagement();
           Command createDependencyManagement = SetCommand.create(editingDomain, model, 
@@ -530,6 +531,10 @@ public class DependenciesComposite extends Composite {
   }
 
   protected void updateDependencyDetails(Dependency dependency) {
+    if(dependency==currentDependency) {
+      return;
+    }
+    
     this.currentDependency = dependency;
     
     if(parent != null) {
@@ -599,6 +604,12 @@ public class DependenciesComposite extends Composite {
   }
 
   private void updateExclusionDetails(Exclusion exclusion) {
+    if(exclusion==currentExclusion) {
+      return;
+    }
+    
+    currentExclusion = exclusion;
+    
     if(parent != null) {
       parent.removeNotifyListener(exclusionGroupIdText);
       parent.removeNotifyListener(exclusionArtifactIdText);
@@ -632,7 +643,7 @@ public class DependenciesComposite extends Composite {
   }
 
   private void loadDependencyManagement(Model model) {
-    dependencyManagement = model.getDependencyManagement();
+    DependencyManagement dependencyManagement = model.getDependencyManagement();
     if(dependencyManagement != null) {
       Dependencies dependencies = dependencyManagement.getDependencies();
       dependencyManagementListEditor.setInput(dependencies == null ? null : dependencies.getDependency());

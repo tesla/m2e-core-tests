@@ -130,7 +130,8 @@ public class RepositoriesComposite extends Composite {
   
   // model
   
-  private Model model;
+  Model model;
+  Repository currentRepository;
 
   
   public RepositoriesComposite(Composite parent, int flags) {
@@ -963,6 +964,11 @@ public class RepositoriesComposite extends Composite {
   }
 
   protected void updateRepositoryDetailsSection(final Repository repository) {
+    if(currentRepository==repository) {
+      return;
+    }
+    currentRepository = repository;
+    
     if(parent != null) {
       parent.removeNotifyListener(repositoryIdText);
       parent.removeNotifyListener(repositoryNameText);
