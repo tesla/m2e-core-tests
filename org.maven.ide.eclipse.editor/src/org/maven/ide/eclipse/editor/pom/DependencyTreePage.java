@@ -207,7 +207,7 @@ public class DependencyTreePage extends FormPage {
     treeViewer.addOpenListener(new IOpenListener() {
       public void open(OpenEvent event) {
         IStructuredSelection selection = (IStructuredSelection) treeViewer.getSelection();
-        for(Iterator it = selection.iterator(); it.hasNext();) {
+        for(Iterator<?> it = selection.iterator(); it.hasNext();) {
           Object o = it.next();
           if(o instanceof DependencyNode) {
             Artifact a = ((DependencyNode) o).getArtifact();
@@ -320,7 +320,7 @@ public class DependencyTreePage extends FormPage {
     listViewer.addOpenListener(new IOpenListener() {
       public void open(OpenEvent event) {
         IStructuredSelection selection = (IStructuredSelection) listViewer.getSelection();
-        for(Iterator it = selection.iterator(); it.hasNext();) {
+        for(Iterator<?> it = selection.iterator(); it.hasNext();) {
           Object o = it.next();
           if(o instanceof Artifact) {
             Artifact a = (Artifact) o;
@@ -431,11 +431,13 @@ public class DependencyTreePage extends FormPage {
 
   protected void selectListElements(Matcher matcher) {
     ArrayList<Artifact> artifacts = new ArrayList<Artifact>();
-    @SuppressWarnings("unchecked")
-    Set<Artifact> projectArtifacts = mavenProject.getArtifacts();
-    for(Artifact a : projectArtifacts) {
-      if(matcher.isMatchingArtifact(a)) {
-        artifacts.add(a);
+    if(mavenProject!=null) {
+      @SuppressWarnings("unchecked")
+      Set<Artifact> projectArtifacts = mavenProject.getArtifacts();
+      for(Artifact a : projectArtifacts) {
+        if(matcher.isMatchingArtifact(a)) {
+          artifacts.add(a);
+        }
       }
     }
 
@@ -605,6 +607,7 @@ public class DependencyTreePage extends FormPage {
     public Object[] getChildren(Object element) {
       if(element instanceof DependencyNode) {
         DependencyNode node = (DependencyNode) element;
+        @SuppressWarnings("unchecked")
         List<DependencyNode> children = node.getChildren();
         return children.toArray(new DependencyNode[children.size()]);
       }
@@ -706,22 +709,22 @@ public class DependencyTreePage extends FormPage {
       return element.toString();
     }
   
-    private String getState(DependencyNode node) {
-      switch(node.getState()) {
-        case DependencyNode.INCLUDED:
-          return "included";
-        
-        case DependencyNode.OMITTED_FOR_CONFLICT:
-          return "conflict";
-          
-        case DependencyNode.OMITTED_FOR_CYCLE:
-          return "cycle";
-          
-        case DependencyNode.OMITTED_FOR_DUPLICATE:
-          return "duplicate";
-      }
-      return "?";
-    }
+//    private String getState(DependencyNode node) {
+//      switch(node.getState()) {
+//        case DependencyNode.INCLUDED:
+//          return "included";
+//        
+//        case DependencyNode.OMITTED_FOR_CONFLICT:
+//          return "conflict";
+//          
+//        case DependencyNode.OMITTED_FOR_CYCLE:
+//          return "cycle";
+//          
+//        case DependencyNode.OMITTED_FOR_DUPLICATE:
+//          return "duplicate";
+//      }
+//      return "?";
+//    }
   
     @Override
     public Image getImage(Object element) {
@@ -834,7 +837,7 @@ public class DependencyTreePage extends FormPage {
     protected final HashSet<String> artifactKeys = new HashSet<String>();
   
     public ArtifactMatcher(IStructuredSelection selection) {
-      for(Iterator it = selection.iterator(); it.hasNext();) {
+      for(Iterator<?> it = selection.iterator(); it.hasNext();) {
         addArtifactKey(it.next());
       }
     }
