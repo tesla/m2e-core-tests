@@ -258,12 +258,12 @@ public class OverviewPage extends MavenPomEditorPage {
     Hyperlink parentArtifactIdLabel = toolkit.createHyperlink(parentComposite, "Artifact Id:*", SWT.NONE);
     parentArtifactIdLabel.addHyperlinkListener(new HyperlinkAdapter() {
       public void linkActivated(HyperlinkEvent e) {
-        final String parentGroupId = parentGroupIdText.getText();
-        final String parentArtifactId = parentArtifactIdText.getText();
-        final String parentVersion = parentVersionText.getText();
-        new Job("Opening POM") {
+        final String groupId = parentGroupIdText.getText();
+        final String artifactId = parentArtifactIdText.getText();
+        final String version = parentVersionText.getText();
+        new Job("Opening " + groupId + ":" + artifactId + ":" + version) {
           protected IStatus run(IProgressMonitor arg0) {
-            OpenPomAction.openEditor(parentGroupId, parentArtifactId, parentVersion);
+            OpenPomAction.openEditor(groupId, artifactId, version);
             return Status.OK_STATUS;
           }
         }.schedule();

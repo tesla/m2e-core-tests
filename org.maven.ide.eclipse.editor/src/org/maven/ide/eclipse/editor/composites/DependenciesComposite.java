@@ -16,6 +16,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.common.notify.Notification;
@@ -39,7 +43,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.forms.events.HyperlinkAdapter;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.Section;
 import org.maven.ide.components.pom.Dependencies;
 import org.maven.ide.components.pom.Dependency;
@@ -50,6 +57,7 @@ import org.maven.ide.components.pom.Model;
 import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.PomPackage;
 import org.maven.ide.eclipse.actions.MavenRepositorySearchDialog;
+import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.editor.pom.MavenPomEditorPage;
 import org.maven.ide.eclipse.editor.pom.FormUtils;
 import org.maven.ide.eclipse.editor.pom.ValueProvider;
@@ -304,9 +312,23 @@ public class DependenciesComposite extends Composite {
     groupIdText = toolkit.createText(dependencyComposite, null, SWT.NONE);
     groupIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 
-    Label artifactIdLabel = toolkit.createLabel(dependencyComposite, "Artifact Id:*", SWT.NONE);
-    artifactIdLabel.setLayoutData(new GridData());
-    detailsWidthGroup.addControl(artifactIdLabel);
+    Hyperlink artifactIdHyperlink = toolkit.createHyperlink(dependencyComposite, "Artifact Id:*", SWT.NONE);
+    artifactIdHyperlink.setLayoutData(new GridData());
+    artifactIdHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
+      public void linkActivated(HyperlinkEvent e) {
+        final String groupId = groupIdText.getText();
+        final String artifactId = artifactIdText.getText();
+        final String version = versionText.getText();
+        new Job("Opening " + groupId + ":" + artifactId + ":" + version) {
+          protected IStatus run(IProgressMonitor arg0) {
+            OpenPomAction.openEditor(groupId, artifactId, version);
+            return Status.OK_STATUS;
+          }
+        }.schedule();
+      }
+    });
+    
+    detailsWidthGroup.addControl(artifactIdHyperlink);
 
     artifactIdText = toolkit.createText(dependencyComposite, null, SWT.NONE);
     artifactIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
@@ -531,7 +553,7 @@ public class DependenciesComposite extends Composite {
   }
 
   protected void updateDependencyDetails(Dependency dependency) {
-    if(dependency==currentDependency) {
+    if(dependency != null && dependency == currentDependency) {
       return;
     }
     

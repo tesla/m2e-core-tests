@@ -15,6 +15,10 @@ import static org.maven.ide.eclipse.editor.pom.FormUtils.setButton;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.common.notify.Notification;
@@ -57,6 +61,7 @@ import org.maven.ide.components.pom.Repositories;
 import org.maven.ide.components.pom.Repository;
 import org.maven.ide.components.pom.RepositoryPolicy;
 import org.maven.ide.components.pom.Site;
+import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.editor.pom.FormUtils;
 import org.maven.ide.eclipse.editor.pom.MavenPomEditorPage;
@@ -133,6 +138,14 @@ public class RepositoriesComposite extends Composite {
   Model model;
   Repository currentRepository;
 
+  private Composite projectSiteComposite;
+
+  private Composite releaseDistributionRepositoryComposite;
+
+  private Composite relocationComposite;
+
+  private Composite snapshotRepositoryComposite;
+
   
   public RepositoriesComposite(Composite parent, int flags) {
     super(parent, flags);
@@ -178,6 +191,16 @@ public class RepositoriesComposite extends Composite {
     projectSiteSash.setWeights(new int[] {1, 1});
   }
 
+  public void dispose() {
+    projectSiteComposite.removeControlListener(leftWidthGroup);
+    releaseDistributionRepositoryComposite.removeControlListener(leftWidthGroup);
+    
+    snapshotRepositoryComposite.removeControlListener(rightWidthGroup);
+    relocationComposite.removeControlListener(rightWidthGroup);
+    
+    super.dispose();
+  }
+  
   private void createRepositoriesSection(SashForm verticalSash) {
     Section repositoriesSection = toolkit.createSection(verticalSash, Section.TITLE_BAR | Section.COMPACT);
     repositoriesSection.setText("Repositories");
@@ -319,7 +342,9 @@ public class RepositoriesComposite extends Composite {
     idLabel.setText("Id:*");
   
     repositoryIdText = toolkit.createText(repositoryDetailsComposite, "");
-    repositoryIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    GridData gd_repositoryIdText = new GridData(SWT.FILL, SWT.CENTER, true, false);
+    gd_repositoryIdText.widthHint = 100;
+    repositoryIdText.setLayoutData(gd_repositoryIdText);
   
     Label nameLabel = new Label(repositoryDetailsComposite, SWT.NONE);
     nameLabel.setText("Name:");
@@ -335,7 +360,9 @@ public class RepositoriesComposite extends Composite {
     });
   
     repositoryUrlText = toolkit.createText(repositoryDetailsComposite, "");
-    repositoryUrlText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    GridData gd_repositoryUrlText = new GridData(SWT.FILL, SWT.CENTER, true, false);
+    gd_repositoryUrlText.widthHint = 100;
+    repositoryUrlText.setLayoutData(gd_repositoryUrlText);
   
     Label layoutLabel = new Label(repositoryDetailsComposite, SWT.NONE);
     layoutLabel.setText("Layout:");
@@ -442,7 +469,7 @@ public class RepositoriesComposite extends Composite {
     relocationSection = toolkit.createSection(sashForm, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
     relocationSection.setText("Relocation");
 
-    Composite relocationComposite = toolkit.createComposite(relocationSection, SWT.NONE);
+    relocationComposite = toolkit.createComposite(relocationSection, SWT.NONE);
     relocationComposite.setLayout(new GridLayout(2, false));
     toolkit.paintBordersFor(relocationComposite);
     relocationSection.setClient(relocationComposite);
@@ -452,32 +479,54 @@ public class RepositoriesComposite extends Composite {
     rightWidthGroup.addControl(relocationGroupIdLabel);
 
     relocationGroupIdText = toolkit.createText(relocationComposite, null, SWT.NONE);
-    relocationGroupIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    GridData gd_relocationGroupIdText = new GridData(SWT.FILL, SWT.CENTER, true, false);
+    gd_relocationGroupIdText.widthHint = 100;
+    relocationGroupIdText.setLayoutData(gd_relocationGroupIdText);
 
-    Label relocationArtifactIdLabel = toolkit.createLabel(relocationComposite, "Artifact Id:", SWT.NONE);
-    rightWidthGroup.addControl(relocationArtifactIdLabel);
+    Hyperlink relocationArtifactIdHyperlink = toolkit.createHyperlink(relocationComposite, "Artifact Id:", SWT.NONE);
+    relocationArtifactIdHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
+      public void linkActivated(HyperlinkEvent e) {
+        final String groupId = relocationGroupIdText.getText();
+        final String artifactId = relocationArtifactIdText.getText();
+        final String version = relocationVersionText.getText();
+        new Job("Opening " + groupId + ":" + artifactId + ":" + version) {
+          protected IStatus run(IProgressMonitor arg0) {
+            OpenPomAction.openEditor(groupId, artifactId, version);
+            return Status.OK_STATUS;
+          }
+        }.schedule();
+      }
+    });
+
+    rightWidthGroup.addControl(relocationArtifactIdHyperlink);
 
     relocationArtifactIdText = toolkit.createText(relocationComposite, null, SWT.NONE);
-    relocationArtifactIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    GridData gd_relocationArtifactIdText = new GridData(SWT.FILL, SWT.CENTER, true, false);
+    gd_relocationArtifactIdText.widthHint = 100;
+    relocationArtifactIdText.setLayoutData(gd_relocationArtifactIdText);
 
     Label relocationVersionLabel = toolkit.createLabel(relocationComposite, "Version:", SWT.NONE);
     rightWidthGroup.addControl(relocationVersionLabel);
 
     relocationVersionText = toolkit.createText(relocationComposite, null, SWT.NONE);
-    relocationVersionText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    GridData gd_relocationVersionText = new GridData(SWT.FILL, SWT.CENTER, true, false);
+    gd_relocationVersionText.widthHint = 100;
+    relocationVersionText.setLayoutData(gd_relocationVersionText);
 
     Label relocationMessageLabel = toolkit.createLabel(relocationComposite, "Message:", SWT.NONE);
     rightWidthGroup.addControl(relocationMessageLabel);
 
     relocationMessageText = toolkit.createText(relocationComposite, null, SWT.NONE);
-    relocationMessageText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    GridData gd_relocationMessageText = new GridData(SWT.FILL, SWT.CENTER, true, false);
+    gd_relocationMessageText.widthHint = 100;
+    relocationMessageText.setLayoutData(gd_relocationMessageText);
   }
 
   private void createProjectSiteSection(SashForm sashForm) {
     projectSiteSection = toolkit.createSection(sashForm, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
     projectSiteSection.setText("Project Site");
 
-    Composite projectSiteComposite = toolkit.createComposite(projectSiteSection, SWT.NONE);
+    projectSiteComposite = toolkit.createComposite(projectSiteSection, SWT.NONE);
     projectSiteComposite.setLayout(new GridLayout(2, false));
     toolkit.paintBordersFor(projectSiteComposite);
     projectSiteSection.setClient(projectSiteComposite);
@@ -487,13 +536,17 @@ public class RepositoriesComposite extends Composite {
     leftWidthGroup.addControl(siteIdLabel);
 
     projectSiteIdText = toolkit.createText(projectSiteComposite, null, SWT.NONE);
-    projectSiteIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    GridData gd_projectSiteIdText = new GridData(SWT.FILL, SWT.CENTER, true, false);
+    gd_projectSiteIdText.widthHint = 100;
+    projectSiteIdText.setLayoutData(gd_projectSiteIdText);
 
     Label siteNameLabel = toolkit.createLabel(projectSiteComposite, "Name:", SWT.NONE);
     leftWidthGroup.addControl(siteNameLabel);
 
     projectSiteNameText = toolkit.createText(projectSiteComposite, null, SWT.NONE);
-    projectSiteNameText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    GridData gd_projectSiteNameText = new GridData(SWT.FILL, SWT.CENTER, true, false);
+    gd_projectSiteNameText.widthHint = 100;
+    projectSiteNameText.setLayoutData(gd_projectSiteNameText);
 
     Hyperlink projectSiteUrlHyperlink = toolkit.createHyperlink(projectSiteComposite, "URL:", SWT.NONE);
     projectSiteUrlHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
@@ -504,7 +557,9 @@ public class RepositoriesComposite extends Composite {
     leftWidthGroup.addControl(projectSiteUrlHyperlink);
 
     projectSiteUrlText = toolkit.createText(projectSiteComposite, null, SWT.NONE);
-    projectSiteUrlText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    GridData gd_projectSiteUrlText = new GridData(SWT.FILL, SWT.CENTER, true, false);
+    gd_projectSiteUrlText.widthHint = 100;
+    projectSiteUrlText.setLayoutData(gd_projectSiteUrlText);
     sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
     toolkit.adapt(sashForm, true, true);
 
@@ -517,7 +572,9 @@ public class RepositoriesComposite extends Composite {
     leftWidthGroup.addControl(projectDownloadUrlHyperlink);
 
     projectDownloadUrlText = toolkit.createText(projectSiteComposite, null, SWT.NONE);
-    projectDownloadUrlText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    GridData gd_projectDownloadUrlText = new GridData(SWT.FILL, SWT.CENTER, true, false);
+    gd_projectDownloadUrlText.widthHint = 100;
+    projectDownloadUrlText.setLayoutData(gd_projectDownloadUrlText);
   }
 
   private void createSnapshotRepositorySection(SashForm distributionManagementSash) {
@@ -525,7 +582,7 @@ public class RepositoriesComposite extends Composite {
         Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
     snapshotRepositorySection.setText("Snapshots Distribution Repository");
 
-    Composite snapshotRepositoryComposite = toolkit.createComposite(snapshotRepositorySection, SWT.NONE);
+    snapshotRepositoryComposite = toolkit.createComposite(snapshotRepositorySection, SWT.NONE);
     snapshotRepositoryComposite.setLayout(new GridLayout(2, false));
     toolkit.paintBordersFor(snapshotRepositoryComposite);
     snapshotRepositorySection.setClient(snapshotRepositoryComposite);
@@ -535,13 +592,17 @@ public class RepositoriesComposite extends Composite {
     rightWidthGroup.addControl(snapshotRepositoryIdLabel);
     
     snapshotRepositoryIdText = toolkit.createText(snapshotRepositoryComposite, null, SWT.NONE);
-    snapshotRepositoryIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    GridData gd_snapshotRepositoryIdText = new GridData(SWT.FILL, SWT.CENTER, true, false);
+    gd_snapshotRepositoryIdText.widthHint = 100;
+    snapshotRepositoryIdText.setLayoutData(gd_snapshotRepositoryIdText);
 
     Label snapshotRepositoryNameLabel = toolkit.createLabel(snapshotRepositoryComposite, "Name:", SWT.NONE);
     rightWidthGroup.addControl(snapshotRepositoryNameLabel);
     
     snapshotRepositoryNameText = toolkit.createText(snapshotRepositoryComposite, null, SWT.NONE);
-    snapshotRepositoryNameText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    GridData gd_snapshotRepositoryNameText = new GridData(SWT.FILL, SWT.CENTER, true, false);
+    gd_snapshotRepositoryNameText.widthHint = 100;
+    snapshotRepositoryNameText.setLayoutData(gd_snapshotRepositoryNameText);
 
     Hyperlink snapshotRepositoryUrlHyperlink = toolkit.createHyperlink(snapshotRepositoryComposite, "URL:", SWT.NONE);
     snapshotRepositoryUrlHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
@@ -552,7 +613,9 @@ public class RepositoriesComposite extends Composite {
     rightWidthGroup.addControl(snapshotRepositoryUrlHyperlink);
     
     snapshotRepositoryUrlText = toolkit.createText(snapshotRepositoryComposite, null, SWT.NONE);
-    snapshotRepositoryUrlText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    GridData gd_snapshotRepositoryUrlText = new GridData(SWT.FILL, SWT.CENTER, true, false);
+    gd_snapshotRepositoryUrlText.widthHint = 100;
+    snapshotRepositoryUrlText.setLayoutData(gd_snapshotRepositoryUrlText);
 
     Label snapshotRepositoryLayoutLabel = toolkit.createLabel(snapshotRepositoryComposite, "Layout:", SWT.NONE);
     snapshotRepositoryLayoutLabel.setLayoutData(new GridData());
@@ -575,7 +638,7 @@ public class RepositoriesComposite extends Composite {
         Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
     releaseRepositorySection.setText("Release Distribution Repository");
 
-    Composite releaseDistributionRepositoryComposite = toolkit.createComposite(releaseRepositorySection, SWT.NONE);
+    releaseDistributionRepositoryComposite = toolkit.createComposite(releaseRepositorySection, SWT.NONE);
     releaseDistributionRepositoryComposite.setLayout(new GridLayout(2, false));
     toolkit.paintBordersFor(releaseDistributionRepositoryComposite);
     releaseRepositorySection.setClient(releaseDistributionRepositoryComposite);
@@ -585,13 +648,17 @@ public class RepositoriesComposite extends Composite {
     leftWidthGroup.addControl(releaseRepositoryIdLabel);
 
     releaseRepositoryIdText = toolkit.createText(releaseDistributionRepositoryComposite, null, SWT.NONE);
-    releaseRepositoryIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    GridData gd_releaseRepositoryIdText = new GridData(SWT.FILL, SWT.CENTER, true, false);
+    gd_releaseRepositoryIdText.widthHint = 100;
+    releaseRepositoryIdText.setLayoutData(gd_releaseRepositoryIdText);
 
     Label releaseRepositoryNameLabel = toolkit.createLabel(releaseDistributionRepositoryComposite, "Name:", SWT.NONE);
     leftWidthGroup.addControl(releaseRepositoryNameLabel);
 
     releaseRepositoryNameText = toolkit.createText(releaseDistributionRepositoryComposite, null, SWT.NONE);
-    releaseRepositoryNameText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    GridData gd_releaseRepositoryNameText = new GridData(SWT.FILL, SWT.CENTER, true, false);
+    gd_releaseRepositoryNameText.widthHint = 100;
+    releaseRepositoryNameText.setLayoutData(gd_releaseRepositoryNameText);
 
     Hyperlink releaseRepositoryUrlHyperlink = toolkit.createHyperlink(releaseDistributionRepositoryComposite, "URL:", SWT.NONE);
     releaseRepositoryUrlHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
@@ -602,7 +669,9 @@ public class RepositoriesComposite extends Composite {
     leftWidthGroup.addControl(releaseRepositoryUrlHyperlink);
 
     releaseRepositoryUrlText = toolkit.createText(releaseDistributionRepositoryComposite, null, SWT.NONE);
-    releaseRepositoryUrlText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    GridData gd_releaseRepositoryUrlText = new GridData(SWT.FILL, SWT.CENTER, true, false);
+    gd_releaseRepositoryUrlText.widthHint = 100;
+    releaseRepositoryUrlText.setLayoutData(gd_releaseRepositoryUrlText);
 
     Label releaseRepositoryLayoutLabel = toolkit.createLabel(releaseDistributionRepositoryComposite, "Layout:", SWT.NONE);
     releaseRepositoryLayoutLabel.setLayoutData(new GridData());
@@ -964,7 +1033,7 @@ public class RepositoriesComposite extends Composite {
   }
 
   protected void updateRepositoryDetailsSection(final Repository repository) {
-    if(currentRepository==repository) {
+    if(repository != null && currentRepository == repository) {
       return;
     }
     currentRepository = repository;

@@ -16,6 +16,10 @@ import static org.maven.ide.eclipse.editor.pom.FormUtils.setText;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.common.notify.Notification;
@@ -44,6 +48,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.forms.events.HyperlinkAdapter;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.Section;
@@ -59,6 +65,7 @@ import org.maven.ide.components.pom.Plugins;
 import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.PomPackage;
 import org.maven.ide.components.pom.StringGoals;
+import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.editor.pom.FormUtils;
 import org.maven.ide.eclipse.editor.pom.MavenPomEditorPage;
@@ -288,7 +295,21 @@ public class PluginsComposite extends Composite {
     groupIdText = toolkit.createText(pluginDetailsComposite, null, SWT.NONE);
     groupIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
   
-    toolkit.createLabel(pluginDetailsComposite, "Artifact Id:*", SWT.NONE);
+    Hyperlink artifactIdHyperlink = toolkit.createHyperlink(pluginDetailsComposite, "Artifact Id:*", SWT.NONE);
+    artifactIdHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
+      public void linkActivated(HyperlinkEvent e) {
+        final String groupId = groupIdText.getText();
+        final String artifactId = artifactIdText.getText();
+        final String version = versionText.getText();
+        new Job("Opening " + groupId + ":" + artifactId + ":" + version) {
+          protected IStatus run(IProgressMonitor arg0) {
+            OpenPomAction.openEditor(groupId, artifactId, version);
+            return Status.OK_STATUS;
+          }
+        }.schedule();
+      }
+    });
+    
   
     artifactIdText = toolkit.createText(pluginDetailsComposite, null, SWT.NONE);
     artifactIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
