@@ -79,7 +79,7 @@ public class ListEditorComposite<T> extends Composite {
   public void setLabelProvider(ILabelProvider labelProvider) {
     viewer.setLabelProvider(labelProvider);
   }
-
+  
   public void setContentProvider(ListEditorContentProvider<T> contentProvider) {
     viewer.setContentProvider(contentProvider);
   }
@@ -103,7 +103,11 @@ public class ListEditorComposite<T> extends Composite {
   public void setRemoveListener(SelectionListener listener) {
     removeButton.addSelectionListener(listener);
   }
-  
+
+  public TableViewer getViewer() {
+    return viewer;
+  }
+
   @SuppressWarnings("unchecked")
   public List<T> getSelection() {
     IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
