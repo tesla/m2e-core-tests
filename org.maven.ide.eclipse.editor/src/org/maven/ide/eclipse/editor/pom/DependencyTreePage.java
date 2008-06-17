@@ -89,7 +89,7 @@ public class DependencyTreePage extends FormPage {
   DependencyFilter searchFilter;
   ListSelectionFilter listSelectionFilter;
   
-  ArrayList<DependencyNode> dependencyNodes;
+  ArrayList<DependencyNode> dependencyNodes = new ArrayList<DependencyNode>();
 
   MavenProject mavenProject;
   
@@ -133,7 +133,6 @@ public class DependencyTreePage extends FormPage {
         try {
           final DependencyNode dependencyNode = pomEditor.readDependencies(false, monitor);
           
-          dependencyNodes = new ArrayList<DependencyNode>();
           dependencyNode.accept(new DependencyNodeVisitor() {
             public boolean visit(DependencyNode node) {
               dependencyNodes.add(node);
