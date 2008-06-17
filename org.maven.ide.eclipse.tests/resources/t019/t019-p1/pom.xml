@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>t019</groupId>
+  <artifactId>t019-${plainName}</artifactId>
+  <version>${plainVersion}-SNAPSHOT</version>
+  <description>${plainDescription}</description>
+  
+  <properties>
+    <plainVersion>1.0.0</plainVersion>
+    <plainName>p1</plainName>
+    <plainDescription>plain description</plainDescription>
+  </properties>
+</project>

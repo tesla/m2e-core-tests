@@ -754,4 +754,21 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     add(manager, new IProject[] {p1});
     assertNotNull(manager.create(pom2, false, null));
   }
+  
+  public void testPropertiesSubstitution() throws Exception {
+    IProject p1 = createExisting("t019-p1");
+    waitForJobsToComplete();
+
+    p1.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+
+    add(manager, new IProject[] {p1});
+    
+    MavenProjectFacade f1 = manager.create(p1, monitor);
+    MavenProject m1 = f1.getMavenProject();
+    
+    assertEquals("t019-p1", m1.getArtifactId());
+    assertEquals("1.0.0-SNAPSHOT", m1.getVersion());
+    assertEquals("plain description", m1.getDescription());
+    
+  }
 }
