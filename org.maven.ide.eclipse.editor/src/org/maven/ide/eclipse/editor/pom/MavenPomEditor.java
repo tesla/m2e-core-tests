@@ -366,7 +366,9 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     resource = (PomResourceImpl) factory.createResource(uri);
     
     // disable SSE support for read-only external documents
-    resource.setRenderer(new EMF2DOMRenderer());
+    EMF2DOMRenderer e2dRenderer = new EMF2DOMRenderer();
+    e2dRenderer.setValidating(false);
+    resource.setRenderer(e2dRenderer);
     
     try {
       resource.load(Collections.EMPTY_MAP);
