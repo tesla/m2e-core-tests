@@ -192,11 +192,11 @@ public class RepositoriesComposite extends Composite {
   }
 
   public void dispose() {
-    projectSiteComposite.removeControlListener(leftWidthGroup);
-    releaseDistributionRepositoryComposite.removeControlListener(leftWidthGroup);
+    // projectSiteComposite.removeControlListener(leftWidthGroup);
+    // releaseDistributionRepositoryComposite.removeControlListener(leftWidthGroup);
     
-    snapshotRepositoryComposite.removeControlListener(rightWidthGroup);
-    relocationComposite.removeControlListener(rightWidthGroup);
+    // snapshotRepositoryComposite.removeControlListener(rightWidthGroup);
+    // relocationComposite.removeControlListener(rightWidthGroup);
     
     super.dispose();
   }
@@ -210,48 +210,50 @@ public class RepositoriesComposite extends Composite {
     repositoriesEditor.setLabelProvider(new RepositoryLabelProvider());
     repositoriesEditor.setContentProvider(new ListEditorContentProvider<Repository>());
 
-    repositoriesEditor.setAddListener(new SelectionAdapter() {
-      public void widgetSelected(SelectionEvent e) {
-        CompoundCommand compoundCommand = new CompoundCommand();
-        EditingDomain editingDomain = parent.getEditingDomain();
-        
-        Repositories repositories = model.getRepositories();
-        if(repositories == null) {
-          repositories = PomFactory.eINSTANCE.createRepositories();
-          Command createCommand = SetCommand.create(editingDomain, model, 
-              POM_PACKAGE.getModel_Repositories(), repositories);
-          compoundCommand.append(createCommand);
-        }
-        
-        Repository repository = PomFactory.eINSTANCE.createRepository();
-        Command addCommand = AddCommand.create(editingDomain, repositories, 
-            POM_PACKAGE.getRepositories_Repository(), repository);
-        compoundCommand.append(addCommand);
-        
-        editingDomain.getCommandStack().execute(compoundCommand);
-        
-        repositoriesEditor.setSelection(Collections.singletonList(repository));
-        updateRepositoryDetailsSection(repository);
-        repositoryIdText.setFocus();
-      }
-    });
-
-    repositoriesEditor.setRemoveListener(new SelectionAdapter() {
-      public void widgetSelected(SelectionEvent e) {
-        CompoundCommand compoundCommand = new CompoundCommand();
-        EditingDomain editingDomain = parent.getEditingDomain();
-
-        List<Repository> list = repositoriesEditor.getSelection();
-        for(Repository repository : list) {
-          Command removeCommand = RemoveCommand.create(editingDomain, model.getRepositories(), 
+    if(!parent.isReadOnly()) {
+      repositoriesEditor.setAddListener(new SelectionAdapter() {
+        public void widgetSelected(SelectionEvent e) {
+          CompoundCommand compoundCommand = new CompoundCommand();
+          EditingDomain editingDomain = parent.getEditingDomain();
+          
+          Repositories repositories = model.getRepositories();
+          if(repositories == null) {
+            repositories = PomFactory.eINSTANCE.createRepositories();
+            Command createCommand = SetCommand.create(editingDomain, model, 
+                POM_PACKAGE.getModel_Repositories(), repositories);
+            compoundCommand.append(createCommand);
+          }
+          
+          Repository repository = PomFactory.eINSTANCE.createRepository();
+          Command addCommand = AddCommand.create(editingDomain, repositories, 
               POM_PACKAGE.getRepositories_Repository(), repository);
-          compoundCommand.append(removeCommand);
+          compoundCommand.append(addCommand);
+          
+          editingDomain.getCommandStack().execute(compoundCommand);
+          
+          repositoriesEditor.setSelection(Collections.singletonList(repository));
+          updateRepositoryDetailsSection(repository);
+          repositoryIdText.setFocus();
         }
-        
-        editingDomain.getCommandStack().execute(compoundCommand);
-        updateRepositoryDetailsSection(null);
-      }
-    });
+      });
+  
+      repositoriesEditor.setRemoveListener(new SelectionAdapter() {
+        public void widgetSelected(SelectionEvent e) {
+          CompoundCommand compoundCommand = new CompoundCommand();
+          EditingDomain editingDomain = parent.getEditingDomain();
+  
+          List<Repository> list = repositoriesEditor.getSelection();
+          for(Repository repository : list) {
+            Command removeCommand = RemoveCommand.create(editingDomain, model.getRepositories(), 
+                POM_PACKAGE.getRepositories_Repository(), repository);
+            compoundCommand.append(removeCommand);
+          }
+          
+          editingDomain.getCommandStack().execute(compoundCommand);
+          updateRepositoryDetailsSection(null);
+        }
+      });
+    }
 
     repositoriesEditor.addSelectionListener(new ISelectionChangedListener() {
       public void selectionChanged(SelectionChangedEvent event) {
@@ -274,48 +276,50 @@ public class RepositoriesComposite extends Composite {
     pluginRepositoriesEditor.setLabelProvider(new RepositoryLabelProvider());
     pluginRepositoriesEditor.setContentProvider(new ListEditorContentProvider<Repository>());
     
-    pluginRepositoriesEditor.setAddListener(new SelectionAdapter() {
-      public void widgetSelected(SelectionEvent e) {
-        CompoundCommand compoundCommand = new CompoundCommand();
-        EditingDomain editingDomain = parent.getEditingDomain();
-        
-        PluginRepositories pluginRepositories = model.getPluginRepositories();
-        if(pluginRepositories == null) {
-          pluginRepositories = PomFactory.eINSTANCE.createPluginRepositories();
-          Command createCommand = SetCommand.create(editingDomain, model, 
-              POM_PACKAGE.getModel_PluginRepositories(), pluginRepositories);
-          compoundCommand.append(createCommand);
+    if(!parent.isReadOnly()) {
+      pluginRepositoriesEditor.setAddListener(new SelectionAdapter() {
+        public void widgetSelected(SelectionEvent e) {
+          CompoundCommand compoundCommand = new CompoundCommand();
+          EditingDomain editingDomain = parent.getEditingDomain();
+          
+          PluginRepositories pluginRepositories = model.getPluginRepositories();
+          if(pluginRepositories == null) {
+            pluginRepositories = PomFactory.eINSTANCE.createPluginRepositories();
+            Command createCommand = SetCommand.create(editingDomain, model, 
+                POM_PACKAGE.getModel_PluginRepositories(), pluginRepositories);
+            compoundCommand.append(createCommand);
+          }
+          
+          Repository pluginRepository = PomFactory.eINSTANCE.createRepository();
+          Command addCommand = AddCommand.create(editingDomain, pluginRepositories, 
+              POM_PACKAGE.getPluginRepositories_PluginRepository(), pluginRepository);
+          compoundCommand.append(addCommand);
+          
+          editingDomain.getCommandStack().execute(compoundCommand);
+          
+          pluginRepositoriesEditor.setSelection(Collections.singletonList(pluginRepository));
+          updateRepositoryDetailsSection(pluginRepository);
+          repositoryIdText.setFocus();
         }
-        
-        Repository pluginRepository = PomFactory.eINSTANCE.createRepository();
-        Command addCommand = AddCommand.create(editingDomain, pluginRepositories, 
-            POM_PACKAGE.getPluginRepositories_PluginRepository(), pluginRepository);
-        compoundCommand.append(addCommand);
-        
-        editingDomain.getCommandStack().execute(compoundCommand);
-        
-        pluginRepositoriesEditor.setSelection(Collections.singletonList(pluginRepository));
-        updateRepositoryDetailsSection(pluginRepository);
-        repositoryIdText.setFocus();
-      }
-    });
-    
-    pluginRepositoriesEditor.setRemoveListener(new SelectionAdapter() {
-      public void widgetSelected(SelectionEvent e) {
-        CompoundCommand compoundCommand = new CompoundCommand();
-        EditingDomain editingDomain = parent.getEditingDomain();
-
-        List<Repository> list = pluginRepositoriesEditor.getSelection();
-        for(Repository repository : list) {
-          Command removeCommand = RemoveCommand.create(editingDomain, model.getPluginRepositories(), 
-              POM_PACKAGE.getPluginRepositories_PluginRepository(), repository);
-          compoundCommand.append(removeCommand);
+      });
+      
+      pluginRepositoriesEditor.setRemoveListener(new SelectionAdapter() {
+        public void widgetSelected(SelectionEvent e) {
+          CompoundCommand compoundCommand = new CompoundCommand();
+          EditingDomain editingDomain = parent.getEditingDomain();
+  
+          List<Repository> list = pluginRepositoriesEditor.getSelection();
+          for(Repository repository : list) {
+            Command removeCommand = RemoveCommand.create(editingDomain, model.getPluginRepositories(), 
+                POM_PACKAGE.getPluginRepositories_PluginRepository(), repository);
+            compoundCommand.append(removeCommand);
+          }
+          
+          editingDomain.getCommandStack().execute(compoundCommand);
+          updateRepositoryDetailsSection(null);
         }
-        
-        editingDomain.getCommandStack().execute(compoundCommand);
-        updateRepositoryDetailsSection(null);
-      }
-    });
+      });
+    }
     
     pluginRepositoriesEditor.addSelectionListener(new ISelectionChangedListener() {
       public void selectionChanged(SelectionChangedEvent event) {

@@ -161,9 +161,12 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
     super.setActive(active);
     doLoadData(active);
 
-    FormUtils.setReadonly((Composite) getPartControl(), pomEditor.isReadOnly());
+    FormUtils.setReadonly((Composite) getPartControl(), isReadOnly());
   }
-  
+
+  public boolean isReadOnly() {
+    return pomEditor.isReadOnly();
+  }
 
   private void doLoadData(boolean active) {
     if(active && !dataLoaded) {
@@ -256,13 +259,25 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
       Object control = e.getKey();
       for(ModifyListener listener : e.getValue()) {
         if(control instanceof Text) {
-          ((Text) control).removeModifyListener(listener);
+          Text textControl = (Text) control;
+          if(!textControl.isDisposed()) {
+            textControl.removeModifyListener(listener);
+          }
         } else if(control instanceof Combo) {
-          ((Combo) control).removeModifyListener(listener);
+          Combo comboControl = (Combo) control;
+          if(!comboControl.isDisposed()) {
+            comboControl.removeModifyListener(listener);
+          }
         } else if(control instanceof CCombo) {
-          ((CCombo) control).removeModifyListener(listener);
+          CCombo comboControl = (CCombo) control;
+          if(!comboControl.isDisposed()) {
+            comboControl.removeModifyListener(listener);
+          }
         } else if(control instanceof Combo) {
-          ((Button) control).removeSelectionListener((SelectionListener) listener);
+          Button buttonControl = (Button) control;
+          if(!buttonControl.isDisposed()) {
+            buttonControl.removeSelectionListener((SelectionListener) listener);
+          }
         }
       }
     }

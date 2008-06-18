@@ -12,6 +12,10 @@ import static org.maven.ide.eclipse.editor.pom.FormUtils.nvl;
 
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -25,18 +29,22 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.forms.events.HyperlinkAdapter;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.Section;
 import org.maven.ide.components.pom.Model;
+import org.maven.ide.components.pom.PomPackage;
 import org.maven.ide.components.pom.ReportPlugin;
 import org.maven.ide.components.pom.ReportSet;
 import org.maven.ide.components.pom.ReportSetsType;
 import org.maven.ide.components.pom.Reporting;
 import org.maven.ide.components.pom.StringReports;
+import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
-import org.maven.ide.eclipse.editor.pom.MavenPomEditorPage;
 import org.maven.ide.eclipse.editor.pom.FormUtils;
+import org.maven.ide.eclipse.editor.pom.MavenPomEditorPage;
 
 
 /**
@@ -44,6 +52,10 @@ import org.maven.ide.eclipse.editor.pom.FormUtils;
  */
 public class ReportingComposite extends Composite {
 
+  protected static PomPackage POM_PACKAGE = PomPackage.eINSTANCE;
+  
+  private MavenPomEditorPage parent;
+  
   private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
 
   private Text outputFolderText;
@@ -70,7 +82,7 @@ public class ReportingComposite extends Composite {
 
   private Button reportSetInheritedButton;
 
-  private Button reportSetConfigureButton;
+  private Hyperlink reportSetConfigureButton;
 
   private Section reportSetDetailsSection;
 
@@ -156,8 +168,11 @@ public class ReportingComposite extends Composite {
         updateReportPluginDetails(selection.size()==1 ? selection.get(0) : null);
       }
     });
-    
-    // XXX implement actions
+
+    if(!parent.isReadOnly()) {
+      // XXX implement actions
+      
+    }
   }
 
   private void createPluginDetailsSection(SashForm verticalSash) {
@@ -174,7 +189,20 @@ public class ReportingComposite extends Composite {
     groupIdText = toolkit.createText(pluginDetailsComposite, null, SWT.NONE);
     groupIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
   
-    toolkit.createLabel(pluginDetailsComposite, "Artifact Id:*", SWT.NONE);
+    Hyperlink artifactIdHyperlink = toolkit.createHyperlink(pluginDetailsComposite, "Artifact Id:*", SWT.NONE);
+    artifactIdHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
+      public void linkActivated(HyperlinkEvent e) {
+        final String groupId = groupIdText.getText();
+        final String artifactId = artifactIdText.getText();
+        final String version = versionText.getText();
+        new Job("Opening " + groupId + ":" + artifactId + ":" + version) {
+          protected IStatus run(IProgressMonitor arg0) {
+            OpenPomAction.openEditor(groupId, artifactId, version);
+            return Status.OK_STATUS;
+          }
+        }.schedule();
+      }
+    });
   
     artifactIdText = toolkit.createText(pluginDetailsComposite, null, SWT.NONE);
     artifactIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -196,7 +224,7 @@ public class ReportingComposite extends Composite {
     pluginInheritedButton = toolkit.createButton(pluginConfigureComposite, "Inherited", SWT.CHECK);
     pluginInheritedButton.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
   
-    pluginConfigureButton = toolkit.createHyperlink(pluginConfigureComposite, "Configure", SWT.NONE);
+    pluginConfigureButton = toolkit.createHyperlink(pluginConfigureComposite, "Configuration", SWT.NONE);
     pluginConfigureButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
   
     Label reportSetsLabel = toolkit.createLabel(pluginDetailsComposite, "Report Sets:", SWT.NONE);
@@ -229,6 +257,11 @@ public class ReportingComposite extends Composite {
         updateReportSetDetails(selection.size()==1 ? selection.get(0) : null);
       }
     });
+    
+    if(!parent.isReadOnly()) {
+      // XXX implement editor actions
+      
+    }
   }
 
   private void createReportSetDetails(SashForm verticalSash) {
@@ -246,7 +279,7 @@ public class ReportingComposite extends Composite {
     reportSetIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
     Composite reportSetConfigureComposite = toolkit.createComposite(reportSetDetailsComposite, SWT.NONE);
-    reportSetConfigureComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+    reportSetConfigureComposite.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false, 2, 1));
     GridLayout reportSetConfigureCompositeLayout = new GridLayout();
     reportSetConfigureCompositeLayout.numColumns = 2;
     reportSetConfigureCompositeLayout.marginWidth = 0;
@@ -255,9 +288,9 @@ public class ReportingComposite extends Composite {
     toolkit.paintBordersFor(reportSetConfigureComposite);
 
     reportSetInheritedButton = toolkit.createButton(reportSetConfigureComposite, "Inherited", SWT.CHECK);
-    reportSetInheritedButton.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+    reportSetInheritedButton.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 
-    reportSetConfigureButton = toolkit.createButton(reportSetConfigureComposite, "Configure...", SWT.NONE);
+    reportSetConfigureButton = toolkit.createHyperlink(reportSetConfigureComposite, "Configuration", SWT.NONE);
     reportSetConfigureButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
 
     Label reportsLabel = toolkit.createLabel(reportSetDetailsComposite, "Reports:", SWT.NONE);
@@ -271,7 +304,10 @@ public class ReportingComposite extends Composite {
     reportsEditor.setContentProvider(new ListEditorContentProvider<String>());
     reportsEditor.setLabelProvider(new StringLabelProvider(MavenEditorImages.IMG_REPORT));
 
-    // XXX implement actions
+    if(!parent.isReadOnly()) {
+      // XXX implement editor actions
+      
+    }
   }
 
   protected void updateReportPluginDetails(ReportPlugin reportPlugin) {

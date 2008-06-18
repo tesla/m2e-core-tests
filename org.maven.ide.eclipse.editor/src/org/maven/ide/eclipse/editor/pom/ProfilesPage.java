@@ -58,7 +58,6 @@ import org.maven.ide.eclipse.wizards.WidthGroup;
 public class ProfilesPage extends MavenPomEditorPage {
 
   // controls
-  private Text profileIdText;
   private Text activationFileMissingText;
   private Text activationFileExistText;
   private Text activationPropertyValueText;
@@ -73,7 +72,6 @@ public class ProfilesPage extends MavenPomEditorPage {
   private ListEditorComposite<String> modulesEditor;
   private Section modulesSection;
   private Section propertiesSection;
-  private Section profileDetailsSection;
   
   private BuildComposite buildTabComposite;
   private PluginsComposite pluginsTabComposite;
@@ -125,7 +123,7 @@ public class ProfilesPage extends MavenPomEditorPage {
 
   private void createProfilesSection(FormToolkit toolkit, Composite body) {
     Section profilesSection = toolkit.createSection(body, Section.TITLE_BAR);
-    profilesSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+    profilesSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 3));
     profilesSection.setText("Profiles");
     profilesEditor = new ListEditorComposite<Profile>(profilesSection, SWT.NONE);
     profilesSection.setClient(profilesEditor);
@@ -154,30 +152,25 @@ public class ProfilesPage extends MavenPomEditorPage {
       }
     });
   
-    // XXX implement actions
+    if(!isReadOnly()) {
+      // XXX implement actions
+    }
   }
 
   private void createProfileDetailsSection(FormToolkit toolkit, Composite body) {
-    profileDetailsSection = toolkit.createSection(body, Section.TITLE_BAR);
-    profileDetailsSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-    profileDetailsSection.setText("Profile Details");
-
-    Composite profileDetailsComposite = toolkit.createComposite(profileDetailsSection, SWT.NONE);
-    profileDetailsComposite.setLayout(new GridLayout(2, false));
-    toolkit.paintBordersFor(profileDetailsComposite);
-    profileDetailsSection.setClient(profileDetailsComposite);
-
-    toolkit.createLabel(profileDetailsComposite, "Profile Id:", SWT.NONE);
-
-    profileIdText = toolkit.createText(profileDetailsComposite, null, SWT.NONE);
-    profileIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
   }
 
   private void createPropertiesSection(FormToolkit toolkit, Composite body) {
-    propertiesSection = toolkit.createSection(body, Section.TITLE_BAR);
+    
+    if(!isReadOnly()) {
+      // XXX implement actions
+    }
+  }
+
+  private void createModulesSection(FormToolkit toolkit, Composite body) {
+    propertiesSection = toolkit.createSection(body, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
     propertiesSection.setText("Properties");
     GridData propertiesSectionData = new GridData(SWT.FILL, SWT.FILL, true, false);
-    propertiesSectionData.verticalIndent = 5;
     propertiesSection.setLayoutData(propertiesSectionData);
     
     propertiesEditor = new ListEditorComposite<PropertyPair>(propertiesSection, SWT.NONE);
@@ -189,13 +182,9 @@ public class ProfilesPage extends MavenPomEditorPage {
     propertiesEditor.setContentProvider(new ListEditorContentProvider<PropertyPair>());
     propertiesEditor.setLabelProvider(new StringLabelProvider(MavenEditorImages.IMG_PROPERTY));
     
-    // XXX implement actions
-  }
-
-  private void createModulesSection(FormToolkit toolkit, Composite body) {
-    modulesSection = toolkit.createSection(body, Section.TITLE_BAR);
-    GridData modulesSectionData = new GridData(SWT.FILL, SWT.FILL, true, false);
-    modulesSectionData.verticalIndent = 5;
+    FormUtils.setEnabled(propertiesSection, false);
+    modulesSection = toolkit.createSection(body, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
+    GridData modulesSectionData = new GridData(SWT.FILL, SWT.FILL, true, false, 1, 2);
     modulesSection.setLayoutData(modulesSectionData);
     modulesSection.setText("Modules");
 
@@ -208,16 +197,15 @@ public class ProfilesPage extends MavenPomEditorPage {
     modulesEditor.setContentProvider(new ListEditorContentProvider<String>());
     modulesEditor.setLabelProvider(new ModulesLabelProvider(this));
     
-    // XXX implement actions
+    if(!isReadOnly()) {
+      // XXX implement actions
+    }
   }
 
   protected void updateProfileDetails(Profile profile) {
     if(profile==null) {
-      FormUtils.setEnabled(profileDetailsSection, false);
       FormUtils.setEnabled(propertiesSection, false);
       FormUtils.setEnabled(modulesSection, false);
-      
-      profileIdText.setText("");
       
       propertiesEditor.setInput(null);
       modulesEditor.setInput(null);
@@ -226,11 +214,8 @@ public class ProfilesPage extends MavenPomEditorPage {
       return;
     }
 
-    FormUtils.setEnabled(profileDetailsSection, true);
     FormUtils.setEnabled(propertiesSection, true);
     FormUtils.setEnabled(modulesSection, true);
-    
-    profileIdText.setText(nvl(profile.getId()));
     
     modulesEditor.setInput(profile.getModules()==null ? null : profile.getModules().getModule());
     propertiesEditor.setInput(profile.getProperties());

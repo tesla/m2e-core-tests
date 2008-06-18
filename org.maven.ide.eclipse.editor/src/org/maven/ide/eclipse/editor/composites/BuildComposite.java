@@ -30,6 +30,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Section;
 import org.maven.ide.components.pom.Build;
 import org.maven.ide.components.pom.Model;
+import org.maven.ide.components.pom.PomPackage;
 import org.maven.ide.components.pom.Resource;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.editor.pom.MavenPomEditorPage;
@@ -40,6 +41,10 @@ import org.maven.ide.eclipse.editor.pom.FormUtils;
  */
 public class BuildComposite extends Composite {
 
+  protected static PomPackage POM_PACKAGE = PomPackage.eINSTANCE;
+  
+  private MavenPomEditorPage parent;
+  
   private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
   
   // controls
@@ -124,6 +129,11 @@ public class BuildComposite extends Composite {
 
     filtersEditor.setContentProvider(new ListEditorContentProvider<String>());
     filtersEditor.setLabelProvider(new StringLabelProvider(MavenEditorImages.IMG_FILTER));
+    
+    if(!parent.isReadOnly()) {
+      // XXX implement editor actions 
+      
+    }
 
     SashForm verticalSash = new SashForm(horizontalSash, SWT.VERTICAL);
     
@@ -171,6 +181,11 @@ public class BuildComposite extends Composite {
     resourceIncludesEditor.setContentProvider(new ListEditorContentProvider<String>());
     resourceIncludesEditor.setLabelProvider(new StringLabelProvider(MavenEditorImages.IMG_INCLUDE));
     
+    if(!parent.isReadOnly()) {
+      // XXX implement editor actions 
+      
+    }
+    
     Label excludesLabel = toolkit.createLabel(resourceDetailsComposite, "Excludes:", SWT.NONE);
     excludesLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
   
@@ -184,6 +199,11 @@ public class BuildComposite extends Composite {
     resourceExcludesEditor.setContentProvider(new ListEditorContentProvider<String>());
     resourceExcludesEditor.setLabelProvider(new StringLabelProvider(MavenEditorImages.IMG_EXCLUDE));
 
+    if(!parent.isReadOnly()) {
+      // XXX implement editor actions 
+      
+    }
+    
     horizontalSash.setWeights(new int[] {1, 1, 1});
   }
 
@@ -206,7 +226,10 @@ public class BuildComposite extends Composite {
       }
     });
     
-    // XXX add actions
+    if(!parent.isReadOnly()) {
+      // XXX implement editor actions 
+      
+    }
   }
 
   private void createTestResourcesSection(SashForm verticalSash) {
@@ -229,7 +252,10 @@ public class BuildComposite extends Composite {
       }
     });
     
-    // XXX add actions
+    if(!parent.isReadOnly()) {
+      // XXX implement editor actions 
+      
+    }
   }
   
   public void loadData(MavenPomEditorPage editorPage) {

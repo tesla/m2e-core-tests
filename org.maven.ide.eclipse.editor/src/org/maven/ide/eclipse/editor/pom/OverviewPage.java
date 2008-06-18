@@ -354,58 +354,60 @@ public class OverviewPage extends MavenPomEditorPage {
       }
     });
     
-    modulesEditor.setAddListener(new SelectionAdapter() {
-      public void widgetSelected(SelectionEvent e) {
-        IEditorInput editorInput = OverviewPage.this.pomEditor.getEditorInput();
-        if(editorInput instanceof FileEditorInput) {
-          MavenModuleWizard wizard = new MavenModuleWizard(true);
-          wizard.init(PlatformUI.getWorkbench(), new StructuredSelection(((FileEditorInput) editorInput).getFile()));
-          WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), wizard);
-          int res = dialog.open();
-          if(res == Window.OK) {
-            CompoundCommand compoundCommand = new CompoundCommand();
-            EditingDomain editingDomain = getEditingDomain();
-
-            Modules modules = model.getModules();
-            if(modules == null) {
-              modules = PomFactory.eINSTANCE.createModules();
-              Command addModules = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Modules(), modules);
-              compoundCommand.append(addModules);
+    if(!pomEditor.isReadOnly()) {
+      modulesEditor.setAddListener(new SelectionAdapter() {
+        public void widgetSelected(SelectionEvent e) {
+          IEditorInput editorInput = OverviewPage.this.pomEditor.getEditorInput();
+          if(editorInput instanceof FileEditorInput) {
+            MavenModuleWizard wizard = new MavenModuleWizard(true);
+            wizard.init(PlatformUI.getWorkbench(), new StructuredSelection(((FileEditorInput) editorInput).getFile()));
+            WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), wizard);
+            int res = dialog.open();
+            if(res == Window.OK) {
+              CompoundCommand compoundCommand = new CompoundCommand();
+              EditingDomain editingDomain = getEditingDomain();
+  
+              Modules modules = model.getModules();
+              if(modules == null) {
+                modules = PomFactory.eINSTANCE.createModules();
+                Command addModules = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Modules(), modules);
+                compoundCommand.append(addModules);
+              }
+              
+              Command addModule = AddCommand.create(editingDomain, modules, POM_PACKAGE.getModules_Module(), wizard.getModuleName());
+              compoundCommand.append(addModule);
+              
+              // modules.getModule().add(wizard.getModuleName());
+  
+              editingDomain.getCommandStack().execute(compoundCommand);
+              modulesEditor.setInput(modules == null ? null : modules.getModule());
             }
-            
-            Command addModule = AddCommand.create(editingDomain, modules, POM_PACKAGE.getModules_Module(), wizard.getModuleName());
-            compoundCommand.append(addModule);
-            
-            // modules.getModule().add(wizard.getModuleName());
-
-            editingDomain.getCommandStack().execute(compoundCommand);
-            modulesEditor.setInput(modules == null ? null : modules.getModule());
           }
         }
-      }
-    });
-    
-    modulesEditor.setRemoveListener(new SelectionAdapter() {
-      public void widgetSelected(SelectionEvent e) {
-        CompoundCommand compoundCommand = new CompoundCommand();
-        EditingDomain editingDomain = getEditingDomain();
-
-        int n = 0;
-        Modules modules = model.getModules();
-        for(String module : modulesEditor.getSelection()) {
-          Command removeCommand = RemoveCommand.create(editingDomain, modules, POM_PACKAGE.getModules_Module(), module);
-          compoundCommand.append(removeCommand);
-          n++ ;
+      });
+      
+      modulesEditor.setRemoveListener(new SelectionAdapter() {
+        public void widgetSelected(SelectionEvent e) {
+          CompoundCommand compoundCommand = new CompoundCommand();
+          EditingDomain editingDomain = getEditingDomain();
+  
+          int n = 0;
+          Modules modules = model.getModules();
+          for(String module : modulesEditor.getSelection()) {
+            Command removeCommand = RemoveCommand.create(editingDomain, modules, POM_PACKAGE.getModules_Module(), module);
+            compoundCommand.append(removeCommand);
+            n++ ;
+          }
+          if(modules.getModule().size() - n == 0) {
+            Command removeModules = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Modules(), null);
+            compoundCommand.append(removeModules);
+          }
+  
+          editingDomain.getCommandStack().execute(compoundCommand);
+          modulesEditor.setInput(modules == null ? null : modules.getModule());
         }
-        if(modules.getModule().size() - n == 0) {
-          Command removeModules = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Modules(), null);
-          compoundCommand.append(removeModules);
-        }
-
-        editingDomain.getCommandStack().execute(compoundCommand);
-        modulesEditor.setInput(modules == null ? null : modules.getModule());
-      }
-    });
+      });
+    }
   }
   
   // right side
