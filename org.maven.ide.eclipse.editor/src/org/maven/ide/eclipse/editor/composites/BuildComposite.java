@@ -156,7 +156,7 @@ public class BuildComposite extends Composite {
     resourceTargetPathText = toolkit.createText(resourceDetailsComposite, null, SWT.NONE);
     resourceTargetPathText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
   
-    resourceFilteringButton = toolkit.createButton(resourceDetailsComposite, "filtering", SWT.CHECK);
+    resourceFilteringButton = toolkit.createButton(resourceDetailsComposite, "Filtering", SWT.CHECK);
     resourceFilteringButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
   
     Label includesLabel = toolkit.createLabel(resourceDetailsComposite, "Includes:", SWT.NONE);
