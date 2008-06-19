@@ -83,9 +83,19 @@ public class BuildPage extends MavenPomEditorPage {
     body.setLayout(gridLayout);
     toolkit.paintBordersFor(body);
 
-    createFoldersSection(body, toolkit);
-    createExtensionsSection(body, toolkit);
-    createExtensionDetailsSection(body, toolkit);
+    SashForm buildSash = new SashForm(body, SWT.NONE);
+    buildSash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
+    GridLayout buildSashLayout = new GridLayout();
+    buildSashLayout.horizontalSpacing = 3;
+    buildSashLayout.marginWidth = 0;
+    buildSashLayout.marginHeight = 0;
+    buildSashLayout.numColumns = 3;
+    buildSash.setLayout(buildSashLayout);
+    toolkit.adapt(buildSash);
+    
+    createFoldersSection(buildSash, toolkit);
+    createExtensionsSection(buildSash, toolkit);
+    createExtensionDetailsSection(buildSash, toolkit);
 
     buildComposite = new BuildComposite(body, SWT.NONE);
     GridData buildCompositeData = new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1);
@@ -98,27 +108,16 @@ public class BuildPage extends MavenPomEditorPage {
     super.createFormContent(managedForm);
   }
 
-  private void createFoldersSection(Composite body, FormToolkit toolkit) {
-    SashForm buildSash = new SashForm(body, SWT.NONE);
-    // Composite composite_1 = new Composite(body, SWT.NONE);
-    buildSash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
-    GridLayout gridLayout_1 = new GridLayout();
-    gridLayout_1.horizontalSpacing = 3;
-    gridLayout_1.marginWidth = 0;
-    gridLayout_1.marginHeight = 0;
-    gridLayout_1.numColumns = 3;
-    buildSash.setLayout(gridLayout_1);
-    toolkit.adapt(buildSash);
-
+  private void createFoldersSection(Composite buildSash, FormToolkit toolkit) {
     Section foldersSection = toolkit.createSection(buildSash, Section.TITLE_BAR);
     foldersSection.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
     foldersSection.setText("Folders");
   
     Composite composite = toolkit.createComposite(foldersSection, SWT.NONE);
-    GridLayout gridLayout = new GridLayout(2, false);
-    gridLayout.marginWidth = 2;
-    gridLayout.marginHeight = 2;
-    composite.setLayout(gridLayout);
+    GridLayout compositeLayout = new GridLayout(2, false);
+    compositeLayout.marginWidth = 2;
+    compositeLayout.marginHeight = 2;
+    composite.setLayout(compositeLayout);
     toolkit.paintBordersFor(composite);
     foldersSection.setClient(composite);
   
@@ -146,6 +145,10 @@ public class BuildPage extends MavenPomEditorPage {
   
     scriptsSourceText = toolkit.createText(composite, null, SWT.NONE);
     scriptsSourceText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+
+  }
+
+  private void createExtensionsSection(Composite buildSash, FormToolkit toolkit) {
     Section extensionsSection = toolkit.createSection(buildSash, Section.TITLE_BAR);
     extensionsSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
     extensionsSection.setText("Extensions");
@@ -157,24 +160,27 @@ public class BuildPage extends MavenPomEditorPage {
     
     extensionsEditor.setContentProvider(new ListEditorContentProvider<Extension>());
     extensionsEditor.setLabelProvider(new DependencyLabelProvider());
+  }
+
+  private void createExtensionDetailsSection(Composite buildSash, FormToolkit toolkit) {
     Section extensionDetailsSection = toolkit.createSection(buildSash, Section.TITLE_BAR);
     extensionDetailsSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
     extensionDetailsSection.setText("Extension Details");
 
-    Composite composite_2 = toolkit.createComposite(extensionDetailsSection, SWT.NONE);
+    Composite extensionDetialsComposite = toolkit.createComposite(extensionDetailsSection, SWT.NONE);
     GridLayout gridLayout_2 = new GridLayout(2, false);
     gridLayout_2.marginWidth = 2;
     gridLayout_2.marginHeight = 2;
-    composite_2.setLayout(gridLayout_2);
-    toolkit.paintBordersFor(composite_2);
-    extensionDetailsSection.setClient(composite_2);
+    extensionDetialsComposite.setLayout(gridLayout_2);
+    toolkit.paintBordersFor(extensionDetialsComposite);
+    extensionDetailsSection.setClient(extensionDetialsComposite);
 
-    toolkit.createLabel(composite_2, "Group Id:*");
+    toolkit.createLabel(extensionDetialsComposite, "Group Id:*");
     
-    extensionGroupIdText = toolkit.createText(composite_2, null, SWT.FLAT);
+    extensionGroupIdText = toolkit.createText(extensionDetialsComposite, null, SWT.FLAT);
     extensionGroupIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
     
-    Hyperlink extensionArtifactIdHyperlink = toolkit.createHyperlink(composite_2, "Artifact Id:*", SWT.NONE);
+    Hyperlink extensionArtifactIdHyperlink = toolkit.createHyperlink(extensionDetialsComposite, "Artifact Id:*", SWT.NONE);
     extensionArtifactIdHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
       public void linkActivated(HyperlinkEvent e) {
         final String groupId = extensionGroupIdText.getText();
@@ -189,15 +195,15 @@ public class BuildPage extends MavenPomEditorPage {
       }
     });
     
-    extensionArtifactIdText = toolkit.createText(composite_2, null, SWT.FLAT);
+    extensionArtifactIdText = toolkit.createText(extensionDetialsComposite, null, SWT.FLAT);
     extensionArtifactIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
     
-    toolkit.createLabel(composite_2, "Version:");
+    toolkit.createLabel(extensionDetialsComposite, "Version:");
     
-    extensionVersionText = toolkit.createText(composite_2, null, SWT.FLAT);
+    extensionVersionText = toolkit.createText(extensionDetialsComposite, null, SWT.FLAT);
     extensionVersionText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-    extensionSelectButton = toolkit.createButton(composite_2, "Select...", SWT.FLAT);
+    extensionSelectButton = toolkit.createButton(extensionDetialsComposite, "Select...", SWT.FLAT);
     extensionSelectButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 2, 1));
     extensionSelectButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
@@ -215,12 +221,6 @@ public class BuildPage extends MavenPomEditorPage {
         }
       }
     });
-  }
-
-  private void createExtensionsSection(Composite body, FormToolkit toolkit) {
-  }
-
-  private void createExtensionDetailsSection(Composite body, FormToolkit toolkit) {
   }
   
   public void loadData() {
