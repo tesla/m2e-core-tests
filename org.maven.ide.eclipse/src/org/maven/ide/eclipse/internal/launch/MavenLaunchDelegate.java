@@ -32,15 +32,18 @@ import org.eclipse.debug.core.IDebugEventSetListener;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.model.IProcess;
-import org.eclipse.debug.core.model.ISourceLocator;
+import org.eclipse.debug.core.sourcelookup.AbstractSourceLookupDirector;
+import org.eclipse.debug.core.sourcelookup.ISourceLookupDirector;
+import org.eclipse.debug.core.sourcelookup.ISourceLookupParticipant;
 import org.eclipse.debug.ui.RefreshTab;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
 import org.eclipse.jdt.launching.IVMRunner;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
+import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.VMRunnerConfiguration;
-import org.eclipse.jdt.launching.sourcelookup.JavaProjectSourceLocation;
-import org.eclipse.jdt.launching.sourcelookup.JavaSourceLocator;
+import org.eclipse.jdt.launching.sourcelookup.containers.JavaSourceLookupParticipant;
 import org.eclipse.ui.externaltools.internal.model.ExternalToolBuilder;
 import org.eclipse.ui.externaltools.internal.model.IExternalToolConstants;
 
@@ -75,7 +78,8 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
     console.logMessage("" + getWorkingDirectory(configuration));
     console.logMessage(" mvn" + getProgramArguments(configuration));
     
-    launch.setSourceLocator(createSourceLocator());
+    ISourceLookupDirector sourceLocator = createSourceLocator(configuration);
+    launch.setSourceLocator(sourceLocator);
     
     super.launch(configuration, mode, launch, monitor);
   }
@@ -101,22 +105,30 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
   }
 
   // grab source locations from all open java projects
-  // TODO: refactor to use 3.0 interfaces
-  private ISourceLocator createSourceLocator() throws CoreException {
+  private ISourceLookupDirector createSourceLocator(ILaunchConfiguration configuration) throws CoreException {
+    ISourceLookupDirector sourceLocator = new AbstractSourceLookupDirector() {
+      public void initializeParticipants() {
+        addParticipants(new ISourceLookupParticipant[] {new JavaSourceLookupParticipant()});
+      }
+    };
+
     IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-    IProject allProjects[] = root.getProjects();
-
-    List<JavaProjectSourceLocation> locations = new ArrayList<JavaProjectSourceLocation>();
-
-    for(int i = 0; i < allProjects.length; i++ ) {
-      IProject project = allProjects[i];
-      if(project.isOpen() && project.hasNature("org.eclipse.jdt.core.javanature")) {
-        IJavaProject javaProject = JavaCore.create(project);
-        locations.add(new JavaProjectSourceLocation(javaProject));
+    IProject[] projects = root.getProjects();
+    List<IRuntimeClasspathEntry> entries = new ArrayList<IRuntimeClasspathEntry>();
+    IRuntimeClasspathEntry jreEntry = JavaRuntime.computeJREEntry(configuration);
+    if (jreEntry != null) {
+      entries.add(jreEntry);
+    }
+    for(IProject project : projects) {
+      IJavaProject javaProject = JavaCore.create(project);
+      if (javaProject != null) {
+        entries.add(JavaRuntime.newDefaultProjectClasspathEntry(javaProject));
       }
     }
-
-    return new JavaSourceLocator(locations.toArray(new JavaProjectSourceLocation[locations.size()]));
+    IRuntimeClasspathEntry[] resolved = JavaRuntime.resolveSourceLookupPath(entries.toArray(new IRuntimeClasspathEntry[entries.size()]), configuration);
+    sourceLocator.initializeDefaults(configuration);
+    sourceLocator.setSourceContainers(JavaRuntime.getSourceContainers(resolved));
+    return sourceLocator;
   }
 
   public String getMainTypeName(ILaunchConfiguration configuration) {
