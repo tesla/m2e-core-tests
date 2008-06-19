@@ -30,6 +30,9 @@
    <feature url="features/org.maven.ide.eclipse.editor.xml.feature_0.9.5.qualifier.jar" id="org.maven.ide.eclipse.editor.xml.feature" version="0.9.5.qualifier">
       <category name="Maven Integration"/>
    </feature>
+   <feature url="features/org.maven.ide.eclipse.editor.feature_0.9.5.qualifier.jar" id="org.maven.ide.eclipse.editor.feature" version="0.9.5.qualifier">
+      <category name="Maven Optional Components"/>
+   </feature>
    <category-def name="Maven Integration" label="Maven Integration"/>
    <category-def name="Maven Optional Components" label="Maven Optional Components"/>
    <category-def name="Maven Project Configurators" label="Maven Project Configurators"/>

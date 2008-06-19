@@ -14,7 +14,7 @@
   <version>${m2eclipse.version}</version>
   <packaging>eclipse-plugin</packaging>
   
-  <name>Maven POM XML Editor</name>
+  <name>Maven POM Editor</name>
 
   <build>
     <plugins>

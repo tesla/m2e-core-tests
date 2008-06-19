@@ -18,15 +18,13 @@
     <relativePath>../org.maven.ide.eclipse.parent</relativePath>
   </parent>
 
-  <artifactId>org.maven.ide.eclipse.wtp.feature</artifactId>
+  <artifactId>org.maven.ide.eclipse.editor.xml.feature</artifactId>
   <version>${m2eclipse.version}</version>
   <packaging>eclipse-feature</packaging>
 
-  <name>Maven Integration for WTP (Optional)</name>
+  <name>Maven POM XML Editor Feature (Optional)</name>
 
   <build>
-    <sourceDirectory>src</sourceDirectory>
-    
     <plugins>
       <plugin>
         <groupId>org.codehaus.tycho</groupId>
@@ -37,12 +35,5 @@
       </plugin>
     </plugins>
   </build>
-
-  <dependencies>
-    <dependency>
-      <groupId>org.maven.ide.eclipse</groupId>
-      <artifactId>org.maven.ide.eclipse.wtp</artifactId>
-    </dependency>
-  </dependencies>
 
 </project>
