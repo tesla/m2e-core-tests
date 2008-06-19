@@ -47,7 +47,7 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
   protected void addTagInsertionProposals(ContentAssistRequest contentAssistRequest, int childPosition) {
     String currentNodeName = getCurrentNode(contentAssistRequest).getNodeName();
     // TODO don't offer "parent" section if it is already present
-    addTemplates(contentAssistRequest, PomTemplateContext.fromNodeName(currentNodeName),0);
+    addTemplates(contentAssistRequest, PomTemplateContext.fromNodeName(currentNodeName));
     super.addTagInsertionProposals(contentAssistRequest, childPosition);
   }
 
@@ -59,12 +59,12 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
     return currentNode;
   }
 
-  private void addTemplates(ContentAssistRequest contentAssistRequest, PomTemplateContext context, int offset) {
+  private void addTemplates(ContentAssistRequest contentAssistRequest, PomTemplateContext context) {
     if(contentAssistRequest != null) {
       boolean useProposalList = !contentAssistRequest.shouldSeparate();
       pomTemplateCompletitionProcessor.setContextTypeId(context.getContextTypeId());
       ICompletionProposal[] proposals = pomTemplateCompletitionProcessor.computeCompletionProposals(sourceViewer,
-          contentAssistRequest.getReplacementBeginPosition() + offset, getCurrentNode(contentAssistRequest));
+          contentAssistRequest.getReplacementBeginPosition(), getCurrentNode(contentAssistRequest));
       for(ICompletionProposal element : proposals) {
         if(useProposalList) {
           contentAssistRequest.addProposal(element);
