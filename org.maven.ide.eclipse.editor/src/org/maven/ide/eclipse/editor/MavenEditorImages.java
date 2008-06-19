@@ -78,7 +78,10 @@ public class MavenEditorImages {
   private static ImageDescriptor create(String key) {
     try {
       ImageDescriptor imageDescriptor = createDescriptor(key);
-      getImageRegistry().put(key, imageDescriptor);
+      ImageRegistry imageRegistry = getImageRegistry();
+      if(imageRegistry!=null) {
+        imageRegistry.put(key, imageDescriptor);
+      }
       return imageDescriptor;
     } catch (Exception ex) {
       MavenPlugin.log(key, ex);
@@ -88,11 +91,13 @@ public class MavenEditorImages {
 
   private static Image createImage(String key) {
     create(key);
-    return getImageRegistry().get(key);
+    ImageRegistry imageRegistry = getImageRegistry();
+    return imageRegistry==null ? null : imageRegistry.get(key);
   }
 
   private static ImageRegistry getImageRegistry() {
-    return MavenEditorPlugin.getDefault().getImageRegistry();
+    MavenEditorPlugin plugin = MavenEditorPlugin.getDefault();
+    return plugin==null ? null : plugin.getImageRegistry();
   }
 
   private static ImageDescriptor createDescriptor(String image) {
