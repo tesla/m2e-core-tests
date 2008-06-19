@@ -347,6 +347,7 @@ public class TeamPage extends MavenPomEditorPage {
     }
 
     FormUtils.setEnabled(detailsComposite, true);
+    FormUtils.setReadonly(detailsComposite, isReadOnly());
 
     userIdText.setText(nvl(developer.getId()));
     userNameText.setText(nvl(developer.getName()));
@@ -380,6 +381,7 @@ public class TeamPage extends MavenPomEditorPage {
     }
 
     FormUtils.setEnabled(detailsComposite, true);
+    FormUtils.setReadonly(detailsComposite, isReadOnly());
 
     userIdLabel.setEnabled(false);
     userIdText.setEnabled(false);

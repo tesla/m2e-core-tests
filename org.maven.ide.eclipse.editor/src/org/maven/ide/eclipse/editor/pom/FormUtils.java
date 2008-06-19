@@ -60,7 +60,7 @@ public abstract class FormUtils {
   }
   
   public static void openHyperlink(String url) {
-    if(url!=null && url.trim().length()>0) {
+    if(!isEmpty(url) && (url.startsWith("http://") || url.startsWith("https://"))) {
       url = url.trim();
       try {
         IWorkbenchBrowserSupport browserSupport = PlatformUI.getWorkbench().getBrowserSupport();
@@ -76,23 +76,25 @@ public abstract class FormUtils {
   }
 
   public static void setEnabled(Composite composite, boolean enabled) {
-    composite.setEnabled(enabled);
-    for(Control control : composite.getChildren()) {
-      if(control instanceof Combo) {
-        control.setEnabled(enabled);
-      
-      } else if(control instanceof CCombo) {
-        control.setEnabled(enabled);
-      
-      } else if(control instanceof Hyperlink) {
-        control.setEnabled(enabled);
-      
-      } else if(control instanceof Composite) {
-        setEnabled((Composite) control, enabled);
-      
-      } else {
-        control.setEnabled(enabled);
-      
+    if(!composite.isDisposed()) {
+      composite.setEnabled(enabled);
+      for(Control control : composite.getChildren()) {
+        if(control instanceof Combo) {
+          control.setEnabled(enabled);
+        
+        } else if(control instanceof CCombo) {
+          control.setEnabled(enabled);
+        
+        } else if(control instanceof Hyperlink) {
+          control.setEnabled(enabled);
+        
+        } else if(control instanceof Composite) {
+          setEnabled((Composite) control, enabled);
+        
+        } else {
+          control.setEnabled(enabled);
+        
+        }
       }
     }
   }

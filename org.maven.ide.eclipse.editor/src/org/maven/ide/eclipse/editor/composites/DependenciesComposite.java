@@ -10,8 +10,8 @@ package org.maven.ide.eclipse.editor.composites;
 
 import static org.maven.ide.eclipse.editor.pom.FormUtils.nvl;
 import static org.maven.ide.eclipse.editor.pom.FormUtils.setText;
+import static org.maven.ide.eclipse.editor.pom.FormUtils.setButton;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -58,8 +58,8 @@ import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.PomPackage;
 import org.maven.ide.eclipse.actions.MavenRepositorySearchDialog;
 import org.maven.ide.eclipse.actions.OpenPomAction;
-import org.maven.ide.eclipse.editor.pom.MavenPomEditorPage;
 import org.maven.ide.eclipse.editor.pom.FormUtils;
+import org.maven.ide.eclipse.editor.pom.MavenPomEditorPage;
 import org.maven.ide.eclipse.editor.pom.ValueProvider;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
@@ -79,8 +79,8 @@ public class DependenciesComposite extends Composite {
 
   // controls
   
-  ListEditorComposite<Dependency> dependencyManagementListEditor;
-  ListEditorComposite<Dependency> dependenciesListEditor;
+  ListEditorComposite<Dependency> dependencyManagementEditor;
+  ListEditorComposite<Dependency> dependenciesEditor;
 
   Composite dependencyDetailsComposite;
 
@@ -96,12 +96,15 @@ public class DependenciesComposite extends Composite {
 
   Button optionalButton;
 
-  ListEditorComposite<Exclusion> exclusionsListEditor;
+  ListEditorComposite<Exclusion> exclusionsEditor;
 
   Section exclusionDetailsSection;
   Text exclusionArtifactIdText;
   Text exclusionGroupIdText;
 
+  Button dependencySelectButton;
+  Button exclusionSelectButton;
+  
   // model
   
   Model model;
@@ -109,6 +112,8 @@ public class DependenciesComposite extends Composite {
   Dependency currentDependency;
 
   Exclusion currentExclusion;
+
+  boolean changingSelection = false;
   
 
   public DependenciesComposite(Composite composite, int flags) {
@@ -158,65 +163,72 @@ public class DependenciesComposite extends Composite {
     dependenciesSection.marginWidth = 3;
     dependenciesSection.setText("Dependencies");
 
-    dependenciesListEditor = new ListEditorComposite<Dependency>(dependenciesSection, SWT.NONE);
-    dependenciesListEditor.setLabelProvider(new DependencyLabelProvider());
-    dependenciesListEditor.setContentProvider(new ListEditorContentProvider<Dependency>());
+    dependenciesEditor = new ListEditorComposite<Dependency>(dependenciesSection, SWT.NONE);
+    dependenciesEditor.setLabelProvider(new DependencyLabelProvider());
+    dependenciesEditor.setContentProvider(new ListEditorContentProvider<Dependency>());
 
-    if(!parent.isReadOnly()) {
-      dependenciesListEditor.setAddListener(new SelectionAdapter() {
-        public void widgetSelected(SelectionEvent e) {
-          CompoundCommand compoundCommand = new CompoundCommand();
-          EditingDomain editingDomain = parent.getEditingDomain();
-          
-          Dependencies dependencies = model.getDependencies();
-          if(dependencies == null) {
-            dependencies = PomFactory.eINSTANCE.createDependencies();
-            Command createDependenciesCommand = SetCommand.create(editingDomain, model, 
-                POM_PACKAGE.getModel_Dependencies(), dependencies);
-            compoundCommand.append(createDependenciesCommand);
-          }
-          
-          Dependency dependency = PomFactory.eINSTANCE.createDependency();
-          Command addDependencyCommand = AddCommand.create(editingDomain, dependencies, 
-              POM_PACKAGE.getDependencies_Dependency(), dependency);
-          compoundCommand.append(addDependencyCommand);
-          
-          editingDomain.getCommandStack().execute(compoundCommand);
-          
-          dependenciesListEditor.setSelection(Collections.singletonList(dependency));
-          updateDependencyDetails(dependency);
-          groupIdText.setFocus();
+    dependenciesEditor.setAddListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        CompoundCommand compoundCommand = new CompoundCommand();
+        EditingDomain editingDomain = parent.getEditingDomain();
+        
+        Dependencies dependencies = model.getDependencies();
+        if(dependencies == null) {
+          dependencies = PomFactory.eINSTANCE.createDependencies();
+          Command createDependenciesCommand = SetCommand.create(editingDomain, model, 
+              POM_PACKAGE.getModel_Dependencies(), dependencies);
+          compoundCommand.append(createDependenciesCommand);
         }
-      });
-  
-      dependenciesListEditor.setRemoveListener(new SelectionAdapter() {
-        public void widgetSelected(SelectionEvent e) {
-          CompoundCommand compoundCommand = new CompoundCommand();
-          EditingDomain editingDomain = parent.getEditingDomain();
-  
-          List<Dependency> dependencyList = dependenciesListEditor.getSelection();
-          for(Dependency dependency : dependencyList) {
-            Command removeCommand = RemoveCommand.create(editingDomain, model.getDependencies(), 
-          		  POM_PACKAGE.getDependencies_Dependency(), dependency);
-            compoundCommand.append(removeCommand);
-          }
-          
-          editingDomain.getCommandStack().execute(compoundCommand);
-          updateDependencyDetails(null);
-        }
-      });
-    }
-
-    dependenciesListEditor.addSelectionListener(new ISelectionChangedListener() {
-      public void selectionChanged(SelectionChangedEvent event) {
-        List<Dependency> dependencyList = dependenciesListEditor.getSelection();
-        updateDependencyDetails(dependencyList.size()==1 ? dependencyList.get(0) : null);
+        
+        Dependency dependency = PomFactory.eINSTANCE.createDependency();
+        Command addDependencyCommand = AddCommand.create(editingDomain, dependencies, 
+            POM_PACKAGE.getDependencies_Dependency(), dependency);
+        compoundCommand.append(addDependencyCommand);
+        
+        editingDomain.getCommandStack().execute(compoundCommand);
+        
+        dependenciesEditor.setSelection(Collections.singletonList(dependency));
+        updateDependencyDetails(dependency);
+        groupIdText.setFocus();
       }
     });
 
-    dependenciesSection.setClient(dependenciesListEditor);
-    toolkit.adapt(dependenciesListEditor);
-    toolkit.paintBordersFor(dependenciesListEditor);
+    dependenciesEditor.setRemoveListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        CompoundCommand compoundCommand = new CompoundCommand();
+        EditingDomain editingDomain = parent.getEditingDomain();
+
+        List<Dependency> dependencyList = dependenciesEditor.getSelection();
+        for(Dependency dependency : dependencyList) {
+          Command removeCommand = RemoveCommand.create(editingDomain, model.getDependencies(), 
+        		  POM_PACKAGE.getDependencies_Dependency(), dependency);
+          compoundCommand.append(removeCommand);
+        }
+        
+        editingDomain.getCommandStack().execute(compoundCommand);
+        updateDependencyDetails(null);
+      }
+    });
+
+    dependenciesEditor.addSelectionListener(new ISelectionChangedListener() {
+      public void selectionChanged(SelectionChangedEvent event) {
+        List<Dependency> list = dependenciesEditor.getSelection();
+        updateDependencyDetails(list.size()==1 ? list.get(0) : null);
+        
+        if(!list.isEmpty()) {
+          changingSelection = true;
+          try {
+            dependencyManagementEditor.setSelection(Collections.<Dependency>emptyList());
+          } finally {
+            changingSelection = false;
+          }
+        }
+      }
+    });
+
+    dependenciesSection.setClient(dependenciesEditor);
+    toolkit.adapt(dependenciesEditor);
+    toolkit.paintBordersFor(dependenciesEditor);
   }
 
   private void createDependencyManagementSection(SashForm verticalSash) {
@@ -224,74 +236,81 @@ public class DependenciesComposite extends Composite {
     dependencyManagementSection.marginWidth = 3;
     dependencyManagementSection.setText("Dependency Management");
 
-    dependencyManagementListEditor = new ListEditorComposite<Dependency>(dependencyManagementSection, SWT.NONE);
-    dependencyManagementSection.setClient(dependencyManagementListEditor);
+    dependencyManagementEditor = new ListEditorComposite<Dependency>(dependencyManagementSection, SWT.NONE);
+    dependencyManagementSection.setClient(dependencyManagementEditor);
 
-    dependencyManagementListEditor.setLabelProvider(new DependencyLabelProvider());
-    dependencyManagementListEditor.setContentProvider(new ListEditorContentProvider<Dependency>());
+    dependencyManagementEditor.setLabelProvider(new DependencyLabelProvider());
+    dependencyManagementEditor.setContentProvider(new ListEditorContentProvider<Dependency>());
 
-    if(!parent.isReadOnly()) {
-      dependencyManagementListEditor.setAddListener(new SelectionAdapter() {
-        public void widgetSelected(SelectionEvent e) {
-          CompoundCommand compoundCommand = new CompoundCommand();
-          EditingDomain editingDomain = parent.getEditingDomain();
-          
-          DependencyManagement dependencyManagement = model.getDependencyManagement();
-          if(dependencyManagement == null) {
-            dependencyManagement = PomFactory.eINSTANCE.createDependencyManagement();
-            Command createDependencyManagement = SetCommand.create(editingDomain, model, 
-                POM_PACKAGE.getModel_DependencyManagement(), dependencyManagement);
-            compoundCommand.append(createDependencyManagement);
-          }
-          
-          Dependencies dependencies = dependencyManagement.getDependencies();
-          if(dependencies == null) {
-            dependencies = PomFactory.eINSTANCE.createDependencies();
-            Command createDependency = SetCommand.create(editingDomain, dependencyManagement, 
-                POM_PACKAGE.getDependencyManagement_Dependencies(), dependencies);
-            compoundCommand.append(createDependency);
-          }
-  
-          Dependency dependency = PomFactory.eINSTANCE.createDependency();
-          Command addDependencyCommand = AddCommand.create(editingDomain, dependencies, 
+    dependencyManagementEditor.setAddListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        CompoundCommand compoundCommand = new CompoundCommand();
+        EditingDomain editingDomain = parent.getEditingDomain();
+        
+        DependencyManagement dependencyManagement = model.getDependencyManagement();
+        if(dependencyManagement == null) {
+          dependencyManagement = PomFactory.eINSTANCE.createDependencyManagement();
+          Command createDependencyManagement = SetCommand.create(editingDomain, model, 
+              POM_PACKAGE.getModel_DependencyManagement(), dependencyManagement);
+          compoundCommand.append(createDependencyManagement);
+        }
+        
+        Dependencies dependencies = dependencyManagement.getDependencies();
+        if(dependencies == null) {
+          dependencies = PomFactory.eINSTANCE.createDependencies();
+          Command createDependency = SetCommand.create(editingDomain, dependencyManagement, 
+              POM_PACKAGE.getDependencyManagement_Dependencies(), dependencies);
+          compoundCommand.append(createDependency);
+        }
+ 
+        Dependency dependency = PomFactory.eINSTANCE.createDependency();
+        Command addDependencyCommand = AddCommand.create(editingDomain, dependencies, 
+            POM_PACKAGE.getDependencies_Dependency(), dependency);
+        compoundCommand.append(addDependencyCommand);
+        
+        editingDomain.getCommandStack().execute(compoundCommand);
+        
+        dependencyManagementEditor.setSelection(Collections.singletonList(dependency));
+        updateDependencyDetails(dependency);
+        groupIdText.setFocus();
+      }
+    });
+ 
+    dependencyManagementEditor.setRemoveListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        CompoundCommand compoundCommand = new CompoundCommand();
+        EditingDomain editingDomain = parent.getEditingDomain();
+ 
+        List<Dependency> dependencyList = dependencyManagementEditor.getSelection();
+        for(Dependency dependency : dependencyList) {
+          Command removeCommand = RemoveCommand.create(editingDomain, model.getDependencyManagement().getDependencies(), 
               POM_PACKAGE.getDependencies_Dependency(), dependency);
-          compoundCommand.append(addDependencyCommand);
-          
-          editingDomain.getCommandStack().execute(compoundCommand);
-          
-          dependencyManagementListEditor.setSelection(Collections.singletonList(dependency));
-          updateDependencyDetails(dependency);
-          groupIdText.setFocus();
+          compoundCommand.append(removeCommand);
         }
-      });
-  
-      dependencyManagementListEditor.setRemoveListener(new SelectionAdapter() {
-        public void widgetSelected(SelectionEvent e) {
-          CompoundCommand compoundCommand = new CompoundCommand();
-          EditingDomain editingDomain = parent.getEditingDomain();
-  
-          List<Dependency> dependencyList = dependencyManagementListEditor.getSelection();
-          for(Dependency dependency : dependencyList) {
-            Command removeCommand = RemoveCommand.create(editingDomain, model.getDependencyManagement().getDependencies(), 
-                POM_PACKAGE.getDependencies_Dependency(), dependency);
-            compoundCommand.append(removeCommand);
-          }
-          
-          editingDomain.getCommandStack().execute(compoundCommand);
-          updateDependencyDetails(null);
-        }
-      });
-    }
-
-    dependencyManagementListEditor.addSelectionListener(new ISelectionChangedListener() {
-      public void selectionChanged(SelectionChangedEvent event) {
-        List<Dependency> dependencyList = dependencyManagementListEditor.getSelection();
-        updateDependencyDetails(dependencyList.size()==1 ? dependencyList.get(0) : null);
+        
+        editingDomain.getCommandStack().execute(compoundCommand);
+        updateDependencyDetails(null);
       }
     });
 
-    toolkit.adapt(dependencyManagementListEditor);
-    toolkit.paintBordersFor(dependencyManagementListEditor);
+    dependencyManagementEditor.addSelectionListener(new ISelectionChangedListener() {
+      public void selectionChanged(SelectionChangedEvent event) {
+        List<Dependency> list = dependencyManagementEditor.getSelection();
+        updateDependencyDetails(list.size()==1 ? list.get(0) : null);
+        
+        if(!list.isEmpty()) {
+          changingSelection = true;
+          try {
+            dependenciesEditor.setSelection(Collections.<Dependency>emptyList());
+          } finally {
+            changingSelection = false;
+          }
+        }
+      }
+    });
+
+    toolkit.adapt(dependencyManagementEditor);
+    toolkit.paintBordersFor(dependencyManagementEditor);
   }
 
   private void createDependencyDetails(FormToolkit toolkit, Composite dependencyDetailsComposite) {
@@ -346,7 +365,7 @@ public class DependenciesComposite extends Composite {
     gd_versionText.widthHint = 200;
     versionText.setLayoutData(gd_versionText);
 
-    Button dependencySelectButton = toolkit.createButton(dependencyComposite, "Select...", SWT.NONE);
+    dependencySelectButton = toolkit.createButton(dependencyComposite, "Select...", SWT.NONE);
     dependencySelectButton.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 2));
     dependencySelectButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
@@ -440,75 +459,73 @@ public class DependenciesComposite extends Composite {
     exclusionsSection.setText("Exclusions");
     exclusionsSection.marginWidth = 3;
 
-    exclusionsListEditor = new ListEditorComposite<Exclusion>(exclusionsSection, SWT.NONE);
-    exclusionsSection.setClient(exclusionsListEditor);
-    toolkit.adapt(exclusionsListEditor);
+    exclusionsEditor = new ListEditorComposite<Exclusion>(exclusionsSection, SWT.NONE);
+    exclusionsSection.setClient(exclusionsEditor);
+    toolkit.adapt(exclusionsEditor);
 
-    exclusionsListEditor.setContentProvider(new ListEditorContentProvider<Exclusion>());
-    exclusionsListEditor.setLabelProvider(new DependencyLabelProvider());
+    exclusionsEditor.setContentProvider(new ListEditorContentProvider<Exclusion>());
+    exclusionsEditor.setLabelProvider(new DependencyLabelProvider());
     
-    exclusionsListEditor.addSelectionListener(new ISelectionChangedListener() {
+    exclusionsEditor.addSelectionListener(new ISelectionChangedListener() {
       public void selectionChanged(SelectionChangedEvent event) {
-        List<Exclusion> selection = exclusionsListEditor.getSelection();
+        List<Exclusion> selection = exclusionsEditor.getSelection();
         updateExclusionDetails(selection.size()==1 ? selection.get(0) : null);
       }
     });
 
-    if(!parent.isReadOnly()) {
-      exclusionsListEditor.setAddListener(new SelectionAdapter() {
-        public void widgetSelected(SelectionEvent e) {
-          CompoundCommand compoundCommand = new CompoundCommand();
-          EditingDomain editingDomain = parent.getEditingDomain();
-  
-          ExclusionsType exclusions = currentDependency.getExclusions();
-          if(exclusions==null) {
-            exclusions = PomFactory.eINSTANCE.createExclusionsType();
-            Command setExclusionsCommand = SetCommand.create(editingDomain, currentDependency, 
-                POM_PACKAGE.getDependency_Exclusions(), exclusions);
-            compoundCommand.append(setExclusionsCommand);
-  //          currentDependency.setExclusions(exclusions);
-          }
-          
-          Exclusion exclusion = PomFactory.eINSTANCE.createExclusion();
-          Command addCommand = AddCommand.create(editingDomain, exclusions, 
+    exclusionsEditor.setAddListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        CompoundCommand compoundCommand = new CompoundCommand();
+        EditingDomain editingDomain = parent.getEditingDomain();
+ 
+        ExclusionsType exclusions = currentDependency.getExclusions();
+        if(exclusions==null) {
+          exclusions = PomFactory.eINSTANCE.createExclusionsType();
+          Command setExclusionsCommand = SetCommand.create(editingDomain, currentDependency, 
+              POM_PACKAGE.getDependency_Exclusions(), exclusions);
+          compoundCommand.append(setExclusionsCommand);
+ //          currentDependency.setExclusions(exclusions);
+        }
+        
+        Exclusion exclusion = PomFactory.eINSTANCE.createExclusion();
+        Command addCommand = AddCommand.create(editingDomain, exclusions, 
+            POM_PACKAGE.getExclusion(), exclusion);
+        compoundCommand.append(addCommand);
+ //        exclusions.getExclusion().add(exclusion);
+        
+        editingDomain.getCommandStack().execute(compoundCommand);
+ //        updateExclusionDetails(exclusion);
+        
+        exclusionsEditor.setSelection(Collections.singletonList(exclusion));
+        updateExclusionDetails(exclusion);
+        exclusionGroupIdText.setFocus();
+      }
+    });
+ 
+    exclusionsEditor.setRemoveListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        CompoundCommand compoundCommand = new CompoundCommand();
+        EditingDomain editingDomain = parent.getEditingDomain();
+ 
+        ExclusionsType exclusions = currentDependency.getExclusions();
+        int n = 0;
+        for(Exclusion exclusion : exclusionsEditor.getSelection()) {
+          Command removeCommand = RemoveCommand.create(editingDomain, exclusions, 
               POM_PACKAGE.getExclusion(), exclusion);
-          compoundCommand.append(addCommand);
-  //        exclusions.getExclusion().add(exclusion);
-          
-          editingDomain.getCommandStack().execute(compoundCommand);
-  //        updateExclusionDetails(exclusion);
-          
-          exclusionsListEditor.setSelection(Collections.singletonList(exclusion));
-          updateExclusionDetails(exclusion);
-          exclusionGroupIdText.setFocus();
+          compoundCommand.append(removeCommand);
+          n++;
         }
-      });
-  
-      exclusionsListEditor.setRemoveListener(new SelectionAdapter() {
-        public void widgetSelected(SelectionEvent e) {
-          CompoundCommand compoundCommand = new CompoundCommand();
-          EditingDomain editingDomain = parent.getEditingDomain();
-  
-          ExclusionsType exclusions = currentDependency.getExclusions();
-          int n = 0;
-          for(Exclusion exclusion : exclusionsListEditor.getSelection()) {
-            Command removeCommand = RemoveCommand.create(editingDomain, exclusions, 
-                POM_PACKAGE.getExclusion(), exclusion);
-            compoundCommand.append(removeCommand);
-            n++;
-          }
-          if(exclusions.getExclusion().size()-n==0) {
-            Command removeExclusions = SetCommand.create(editingDomain, currentDependency, 
-                POM_PACKAGE.getDependency_Exclusions(), null);
-            compoundCommand.append(removeExclusions);
-            // currentDependency.setExclusions(exclusions);
-          }
-          
-          editingDomain.getCommandStack().execute(compoundCommand);
-          updateExclusionDetails(null);
+        if(exclusions.getExclusion().size()-n==0) {
+          Command removeExclusions = SetCommand.create(editingDomain, currentDependency, 
+              POM_PACKAGE.getDependency_Exclusions(), null);
+          compoundCommand.append(removeExclusions);
+          // currentDependency.setExclusions(exclusions);
         }
-      });
-    }
+        
+        editingDomain.getCommandStack().execute(compoundCommand);
+        updateExclusionDetails(null);
+      }
+    });
   }
 
   private void createExclusionDetailsSection(FormToolkit toolkit, Composite dependencyDetailsComposite) {
@@ -532,7 +549,7 @@ public class DependenciesComposite extends Composite {
     exclusionGroupIdText = toolkit.createText(exclusionDetailsComposite, null, SWT.NONE);
     exclusionGroupIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-    Button exclusionSelectButton = toolkit.createButton(exclusionDetailsComposite, "Select...", SWT.NONE);
+    exclusionSelectButton = toolkit.createButton(exclusionDetailsComposite, "Select...", SWT.NONE);
     exclusionSelectButton.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 2));
     exclusionSelectButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
@@ -559,9 +576,12 @@ public class DependenciesComposite extends Composite {
   }
 
   protected void updateDependencyDetails(Dependency dependency) {
-    if(dependency != null && dependency == currentDependency) {
+    if(changingSelection) {
       return;
     }
+//    if(dependency != null && dependency == currentDependency) {
+//      return;
+//    }
     
     this.currentDependency = dependency;
     
@@ -580,18 +600,18 @@ public class DependenciesComposite extends Composite {
     if(parent == null || dependency == null) {
       FormUtils.setEnabled(dependencyDetailsComposite, false);
 
-      groupIdText.setText("");
-      artifactIdText.setText("");
-      versionText.setText("");
-      classifierText.setText("");
-      typeCombo.setText("");
-      scopeCombo.setText("");
-      systemPathText.setText("");
+      setText(groupIdText, "");
+      setText(artifactIdText, "");
+      setText(versionText, "");
+      setText(classifierText, "");
+      setText(typeCombo, "");
+      setText(scopeCombo, "");
+      setText(systemPathText, "");
 
-      optionalButton.setSelection(false);
+      setButton(optionalButton, false);
 
-      exclusionsListEditor.setSelection(Collections.<Exclusion>emptyList());
-      exclusionsListEditor.setInput(null);
+      exclusionsEditor.setSelection(Collections.<Exclusion>emptyList());
+      exclusionsEditor.setInput(null);
       
       updateExclusionDetails(null);
       
@@ -599,6 +619,7 @@ public class DependenciesComposite extends Composite {
     }
 
     FormUtils.setEnabled(dependencyDetailsComposite, true);
+    FormUtils.setReadonly(dependencyDetailsComposite, parent.isReadOnly());
 
     setText(groupIdText, dependency.getGroupId());
     setText(artifactIdText, dependency.getArtifactId());
@@ -613,8 +634,8 @@ public class DependenciesComposite extends Composite {
     }
 
     ExclusionsType exclusions = dependency.getExclusions();
-    exclusionsListEditor.setInput(exclusions == null ? null : exclusions.getExclusion());
-    exclusionsListEditor.setSelection(Collections.<Exclusion>emptyList());
+    exclusionsEditor.setInput(exclusions == null ? null : exclusions.getExclusion());
+    exclusionsEditor.setSelection(Collections.<Exclusion>emptyList());
     
     // set new listeners
     ValueProvider<Dependency> dependencyProvider = new ValueProvider.DefaultValueProvider<Dependency>(dependency); 
@@ -629,12 +650,14 @@ public class DependenciesComposite extends Composite {
     // TODO exclusions listener
     
     parent.registerListeners();
+    
+    updateExclusionDetails(null);
   }
 
   private void updateExclusionDetails(Exclusion exclusion) {
-    if(exclusion==currentExclusion) {
-      return;
-    }
+//    if(exclusion!=null && exclusion==currentExclusion) {
+//      return;
+//    }
     
     currentExclusion = exclusion;
     
@@ -652,6 +675,7 @@ public class DependenciesComposite extends Composite {
     }
     
     FormUtils.setEnabled(exclusionDetailsSection, true);
+    FormUtils.setReadonly(exclusionDetailsSection, parent.isReadOnly());
     
     setText(exclusionGroupIdText, exclusion.getGroupId());
     setText(exclusionArtifactIdText, exclusion.getArtifactId());
@@ -668,21 +692,32 @@ public class DependenciesComposite extends Composite {
     model = editorPage.getModel();
     loadDependencies(model);
     loadDependencyManagement(model);
+    
+    dependenciesEditor.setReadOnly(parent.isReadOnly());
+    dependencyManagementEditor.setReadOnly(parent.isReadOnly());
+
+    updateDependencyDetails(null);
+    
+    // exclusionsEditor.setReadOnly(parent.isReadOnly());
   }
 
   private void loadDependencyManagement(Model model) {
     DependencyManagement dependencyManagement = model.getDependencyManagement();
+    changingSelection = true;
     if(dependencyManagement != null) {
       Dependencies dependencies = dependencyManagement.getDependencies();
-      dependencyManagementListEditor.setInput(dependencies == null ? null : dependencies.getDependency());
+      dependencyManagementEditor.setInput(dependencies == null ? null : dependencies.getDependency());
     } else {
-      dependencyManagementListEditor.setInput(null);
+      dependencyManagementEditor.setInput(null);
     }
+    changingSelection = false;
   }
 
   private void loadDependencies(Model model) {
     Dependencies dependencies = model.getDependencies();
-    dependenciesListEditor.setInput(dependencies == null ? null : dependencies.getDependency());
+    changingSelection = true;
+    dependenciesEditor.setInput(dependencies == null ? null : dependencies.getDependency());
+    changingSelection = false;
   }
 
   public void updateView(MavenPomEditorPage editorPage, Notification notification) {
@@ -690,59 +725,64 @@ public class DependenciesComposite extends Composite {
     
     // XXX event is not received when <dependencies> is deleted in XML
     if(object instanceof Dependencies) {
-    	// handle add/remove
-    	Dependencies dependencies = (Dependencies) object;
-    	if (model.getDependencies() == dependencies) {
-    	  // dependencies updated
- 	      List<Dependency> selection = getUpdatedSelection(dependencies, dependenciesListEditor.getSelection());
- 	      loadDependencies(model);
- 	      dependenciesListEditor.setSelection(selection);
-        updateDependencyDetails(selection.size()==1 ? selection.get(0) : null);
-    	} else {
-    		// dependencyManagement updated
-        List<Dependency> selection = dependencyManagementListEditor.getSelection();
-        getUpdatedSelection(dependencies, selection);
-        loadDependencyManagement(model);
-        dependencyManagementListEditor.setSelection(selection);
-        updateDependencyDetails(selection.size()==1 ? selection.get(0) : null);
-    	}
+//    	// handle add/remove
+//    	Dependencies dependencies = (Dependencies) object;
+//    	if (model.getDependencies() == dependencies) {
+//    	  // dependencies updated
+// 	      List<Dependency> selection = getUpdatedSelection(dependencies, dependenciesEditor.getSelection());
+// 	      loadDependencies(model);
+// 	      dependenciesEditor.setSelection(selection);
+//        updateDependencyDetails(selection.size()==1 ? selection.get(0) : null);
+//    	} else {
+//    		// dependencyManagement updated
+//        List<Dependency> selection = dependencyManagementEditor.getSelection();
+//        getUpdatedSelection(dependencies, selection);
+//        loadDependencyManagement(model);
+//        dependencyManagementEditor.setSelection(selection);
+//        updateDependencyDetails(selection.size()==1 ? selection.get(0) : null);
+//    	}
+      dependenciesEditor.refresh();
+      dependencyManagementEditor.refresh();
     }
     
-    // XXX handle <dependencyManagement> changes
+    if(object instanceof DependencyManagement) {
+      dependencyManagementEditor.refresh();
+    }
     
     if(object instanceof Dependency) {
-      // handle modification
-    	if (object == currentDependency) {
+      dependenciesEditor.refresh();
+      dependencyManagementEditor.refresh();
+      
+      if(object==currentDependency) {
         updateDependencyDetails((Dependency) object);
       }
-    	
-      loadDependencies(model);
-      loadDependencyManagement(model);
     }
     
     ExclusionsType exclusions = currentDependency==null ? null : currentDependency.getExclusions();
     if(object instanceof ExclusionsType) {
+      exclusionsEditor.refresh();
       if(exclusions == object) {
-        exclusionsListEditor.setInput(exclusions==null ? null : exclusions.getExclusion());
+        updateDependencyDetails(currentDependency);
       }
-      updateDependencyDetails(currentDependency);
     }
     
     if(object instanceof Exclusion) {
-      updateExclusionDetails((Exclusion) object);
-      exclusionsListEditor.setInput(exclusions==null ? null : exclusions.getExclusion());
+      exclusionsEditor.refresh();
+      if(currentExclusion == object) {
+        updateExclusionDetails((Exclusion) object);
+      }
     }
   }
 
-  private List<Dependency> getUpdatedSelection(Dependencies dependencies, List<Dependency> selection) {
-    List<Dependency> newSelection = new ArrayList<Dependency>();
-    for(Dependency dependency : selection) {
-      if (dependencies.getDependency().contains(dependency)) {
-        newSelection.add(dependency);
-      }
-    }
-    return newSelection;
-  }
+//  private List<Dependency> getUpdatedSelection(Dependencies dependencies, List<Dependency> selection) {
+//    List<Dependency> newSelection = new ArrayList<Dependency>();
+//    for(Dependency dependency : selection) {
+//      if (dependencies.getDependency().contains(dependency)) {
+//        newSelection.add(dependency);
+//      }
+//    }
+//    return newSelection;
+//  }
 
 //  private List<Exclusion> getUpdatedSelection(ExclusionsType exclusions, List<Exclusion> selection) {
 //    List<Exclusion> newSelection = new ArrayList<Exclusion>();

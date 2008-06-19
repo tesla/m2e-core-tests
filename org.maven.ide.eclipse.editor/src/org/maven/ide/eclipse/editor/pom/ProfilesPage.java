@@ -152,19 +152,18 @@ public class ProfilesPage extends MavenPomEditorPage {
       }
     });
   
-    if(!isReadOnly()) {
-      // XXX implement actions
-    }
+    // XXX implement actions
+
+    profilesEditor.setReadOnly(pomEditor.isReadOnly());
   }
 
   private void createProfileDetailsSection(FormToolkit toolkit, Composite body) {
   }
 
   private void createPropertiesSection(FormToolkit toolkit, Composite body) {
-    
-    if(!isReadOnly()) {
-      // XXX implement actions
-    }
+    // XXX implement actions
+
+    propertiesEditor.setReadOnly(pomEditor.isReadOnly());
   }
 
   private void createModulesSection(FormToolkit toolkit, Composite body) {
@@ -197,9 +196,9 @@ public class ProfilesPage extends MavenPomEditorPage {
     modulesEditor.setContentProvider(new ListEditorContentProvider<String>());
     modulesEditor.setLabelProvider(new ModulesLabelProvider(this));
     
-    if(!isReadOnly()) {
-      // XXX implement actions
-    }
+    // XXX implement actions
+
+    modulesEditor.setReadOnly(pomEditor.isReadOnly());
   }
 
   protected void updateProfileDetails(Profile profile) {
@@ -217,6 +216,9 @@ public class ProfilesPage extends MavenPomEditorPage {
     FormUtils.setEnabled(propertiesSection, true);
     FormUtils.setEnabled(modulesSection, true);
     
+    FormUtils.setReadonly(propertiesSection, isReadOnly());
+    FormUtils.setReadonly(modulesSection, isReadOnly());
+    
     modulesEditor.setInput(profile.getModules()==null ? null : profile.getModules().getModule());
     propertiesEditor.setInput(profile.getProperties());
 
@@ -224,12 +226,12 @@ public class ProfilesPage extends MavenPomEditorPage {
   }
 
   private void updateProfileTabs(Profile profile) {
-    updateActivationTab(profile.getActivation()==null ? null : profile.getActivation());
-    updateDependenciesTab(profile.getDependencies()==null ? null : profile.getDependencies());
-    updateRepositoriesTab(profile.getRepositories()==null ? null : profile.getRepositories());
-    updateBuildTab(profile.getBuild()==null ? null : profile.getBuild());
-    updatePluginsTab(profile.getBuild()==null ? null : profile.getBuild());
-    updateReportsTab(profile.getReporting()==null ? null : profile.getReporting());
+    updateActivationTab(profile==null || profile.getActivation()==null ? null : profile.getActivation());
+    updateDependenciesTab(profile==null || profile.getDependencies()==null ? null : profile.getDependencies());
+    updateRepositoriesTab(profile==null || profile.getRepositories()==null ? null : profile.getRepositories());
+    updateBuildTab(profile==null || profile.getBuild()==null ? null : profile.getBuild());
+    updatePluginsTab(profile==null || profile.getBuild()==null ? null : profile.getBuild());
+    updateReportsTab(profile==null || profile.getReporting()==null ? null : profile.getReporting());
   }
 
   private void updateActivationTab(Activation activation) {

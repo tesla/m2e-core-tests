@@ -438,25 +438,33 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
 
   public void removeNotifyListener(Text control) {
     for(ModifyListener listener : getModifyListeners(control)) {
-      control.removeModifyListener(listener);
+      if(!control.isDisposed()) {
+        control.removeModifyListener(listener);
+      }
     }
   }
 
   public void removeNotifyListener(CCombo control) {
     for(ModifyListener listener : getModifyListeners(control)) {
-      control.removeModifyListener(listener);
+      if(!control.isDisposed()) {
+        control.removeModifyListener(listener);
+      }
     }
   }
 
   public void removeNotifyListener(Combo control) {
     for(ModifyListener listener : getModifyListeners(control)) {
-      control.removeModifyListener(listener);
+      if(!control.isDisposed()) {
+        control.removeModifyListener(listener);
+      }
     }
   }
 
   public void removeNotifyListener(Button button) {
     for(ModifyListener listener : getModifyListeners(button)) {
-      button.removeSelectionListener((SelectionAdapter) listener);
+      if(!button.isDisposed()) {
+        button.removeSelectionListener((SelectionAdapter) listener);
+      }
     }
   }
 

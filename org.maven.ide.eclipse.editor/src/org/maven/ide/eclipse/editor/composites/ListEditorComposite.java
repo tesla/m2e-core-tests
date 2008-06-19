@@ -11,12 +11,14 @@ package org.maven.ide.eclipse.editor.composites;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionListener;
@@ -34,10 +36,12 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
  */
 public class ListEditorComposite<T> extends Composite {
 
-  private TableViewer viewer;
+  TableViewer viewer;
   
-  private Button addButton;
-  private Button removeButton;
+  Button addButton;
+  Button removeButton;
+
+  boolean readOnly = false;
 
   public ListEditorComposite(Composite parent, int style) {
     super(parent, style);
@@ -49,12 +53,18 @@ public class ListEditorComposite<T> extends Composite {
     gridLayout.marginHeight = 1;
     setLayout(gridLayout);
 
-    Table table = toolkit.createTable(this, SWT.FLAT | SWT.MULTI | style); 
+    Table table = toolkit.createTable(this, SWT.FLAT | SWT.MULTI | style);
+    
+    TableLayout tableLayout = new TableLayout();
+    tableLayout.addColumnData(new ColumnWeightData(100, 200, true));
+    table.setLayout(tableLayout);
+    
     viewer = new TableViewer(table);
     
     GridData viewerData = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 2);
-    viewerData.widthHint = 150;
-    viewerData.heightHint = 53;
+    viewerData.widthHint = 100;
+    viewerData.heightHint = 50;
+    viewerData.minimumHeight = 50;
     table.setLayoutData(viewerData);
     
     viewer.setData(FormToolkit.KEY_DRAW_BORDER, Boolean.TRUE);
@@ -70,7 +80,7 @@ public class ListEditorComposite<T> extends Composite {
     
     viewer.addSelectionChangedListener(new ISelectionChangedListener() {
       public void selectionChanged(SelectionChangedEvent event) {
-        removeButton.setEnabled(!viewer.getSelection().isEmpty());
+        removeButton.setEnabled(!readOnly && !viewer.getSelection().isEmpty());
       }
     });
     
@@ -87,6 +97,7 @@ public class ListEditorComposite<T> extends Composite {
 
   public void setInput(Object input) {
     viewer.setInput(input);
+    viewer.setSelection(new StructuredSelection());
   }
   
   public void setOpenListener(IOpenListener listener) {
@@ -118,6 +129,18 @@ public class ListEditorComposite<T> extends Composite {
 
   public void setSelection(List<T> selection) {
     viewer.setSelection(new StructuredSelection(selection));
+  }
+
+  public void setReadOnly(boolean readOnly) {
+    this.readOnly = readOnly;
+    addButton.setEnabled(!readOnly);
+    removeButton.setEnabled(false);
+  }
+  
+  public void refresh() {
+    if(!viewer.getTable().isDisposed()) {
+      viewer.refresh(true);
+    }
   }
 
 }

@@ -62,15 +62,11 @@ public class BuildComposite extends Composite {
   private ListEditorComposite<String> resourceIncludesEditor;
   private ListEditorComposite<String> resourceExcludesEditor;
 
+  private Button resourceFilteringButton;
+  private Section resourceDetailsSection;
+  
   // model
   private Model model;
-
-
-  private Build build;
-
-  private Button resourceFilteringButton;
-
-  private Section resourceDetailsSection;
 
   
   public BuildComposite(Composite parent, int flags) {
@@ -130,11 +126,6 @@ public class BuildComposite extends Composite {
     filtersEditor.setContentProvider(new ListEditorContentProvider<String>());
     filtersEditor.setLabelProvider(new StringLabelProvider(MavenEditorImages.IMG_FILTER));
     
-    if(!parent.isReadOnly()) {
-      // XXX implement editor actions 
-      
-    }
-
     SashForm verticalSash = new SashForm(horizontalSash, SWT.VERTICAL);
     
     createResourceSection(verticalSash);
@@ -181,10 +172,7 @@ public class BuildComposite extends Composite {
     resourceIncludesEditor.setContentProvider(new ListEditorContentProvider<String>());
     resourceIncludesEditor.setLabelProvider(new StringLabelProvider(MavenEditorImages.IMG_INCLUDE));
     
-    if(!parent.isReadOnly()) {
-      // XXX implement editor actions 
-      
-    }
+    // XXX implement editor actions 
     
     Label excludesLabel = toolkit.createLabel(resourceDetailsComposite, "Excludes:", SWT.NONE);
     excludesLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
@@ -199,10 +187,7 @@ public class BuildComposite extends Composite {
     resourceExcludesEditor.setContentProvider(new ListEditorContentProvider<String>());
     resourceExcludesEditor.setLabelProvider(new StringLabelProvider(MavenEditorImages.IMG_EXCLUDE));
 
-    if(!parent.isReadOnly()) {
-      // XXX implement editor actions 
-      
-    }
+    // XXX implement editor actions 
     
     horizontalSash.setWeights(new int[] {1, 1, 1});
   }
@@ -226,10 +211,7 @@ public class BuildComposite extends Composite {
       }
     });
     
-    if(!parent.isReadOnly()) {
-      // XXX implement editor actions 
-      
-    }
+    // XXX implement editor actions 
   }
 
   private void createTestResourcesSection(SashForm verticalSash) {
@@ -252,19 +234,25 @@ public class BuildComposite extends Composite {
       }
     });
     
-    if(!parent.isReadOnly()) {
-      // XXX implement editor actions 
-      
-    }
+    // XXX implement editor actions 
   }
   
   public void loadData(MavenPomEditorPage editorPage) {
+    parent = editorPage;
     model = editorPage.getModel();
-    build = model.getBuild();
+    
+    Build build = model.getBuild();
     loadBuild(build);
     loadResources(build);
     loadTestResources(build);
     loadResourceDetails(null);
+    
+    filtersEditor.setReadOnly(parent.isReadOnly());    
+    resourcesEditor.setReadOnly(parent.isReadOnly());    
+    testResourcesEditor.setReadOnly(parent.isReadOnly());
+    
+    resourceIncludesEditor.setReadOnly(parent.isReadOnly());
+    resourceExcludesEditor.setReadOnly(parent.isReadOnly());
   }
 
   public void updateView(MavenPomEditorPage editorPage, Notification notification) {
@@ -312,6 +300,7 @@ public class BuildComposite extends Composite {
     }
 
     FormUtils.setEnabled(resourceDetailsSection, true);
+    FormUtils.setReadonly(resourceDetailsSection, parent.isReadOnly());
     
     resourceDirectoryText.setText(nvl(resource.getDirectory()));
     resourceTargetPathText.setText(nvl(resource.getTargetPath()));

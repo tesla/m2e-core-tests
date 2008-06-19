@@ -60,7 +60,6 @@ public class ReportingComposite extends Composite {
 
   private Text outputFolderText;
 
-  private Text reportSetIdText;
 
   private Text groupIdText;
 
@@ -169,10 +168,7 @@ public class ReportingComposite extends Composite {
       }
     });
 
-    if(!parent.isReadOnly()) {
-      // XXX implement actions
-      
-    }
+    // XXX implement actions
   }
 
   private void createPluginDetailsSection(SashForm verticalSash) {
@@ -258,10 +254,7 @@ public class ReportingComposite extends Composite {
       }
     });
     
-    if(!parent.isReadOnly()) {
-      // XXX implement editor actions
-      
-    }
+    // XXX implement editor actions
   }
 
   private void createReportSetDetails(SashForm verticalSash) {
@@ -269,17 +262,12 @@ public class ReportingComposite extends Composite {
     reportSetDetailsSection.setText("Report Set Details");
 
     Composite reportSetDetailsComposite = toolkit.createComposite(reportSetDetailsSection, SWT.NONE);
-    reportSetDetailsComposite.setLayout(new GridLayout(2, false));
+    reportSetDetailsComposite.setLayout(new GridLayout(1, false));
     reportSetDetailsSection.setClient(reportSetDetailsComposite);
     toolkit.paintBordersFor(reportSetDetailsComposite);
 
-    toolkit.createLabel(reportSetDetailsComposite, "Id:", SWT.NONE);
-
-    reportSetIdText = toolkit.createText(reportSetDetailsComposite, null, SWT.NONE);
-    reportSetIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-
     Composite reportSetConfigureComposite = toolkit.createComposite(reportSetDetailsComposite, SWT.NONE);
-    reportSetConfigureComposite.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false, 2, 1));
+    reportSetConfigureComposite.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
     GridLayout reportSetConfigureCompositeLayout = new GridLayout();
     reportSetConfigureCompositeLayout.numColumns = 2;
     reportSetConfigureCompositeLayout.marginWidth = 0;
@@ -294,20 +282,17 @@ public class ReportingComposite extends Composite {
     reportSetConfigureButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
 
     Label reportsLabel = toolkit.createLabel(reportSetDetailsComposite, "Reports:", SWT.NONE);
-    reportsLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
+    reportsLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 
     reportsEditor = new ListEditorComposite<String>(reportSetDetailsComposite, SWT.NONE);
-    reportsEditor.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true, 2, 1));
+    reportsEditor.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     toolkit.paintBordersFor(reportsEditor);
     toolkit.adapt(reportsEditor);
     
     reportsEditor.setContentProvider(new ListEditorContentProvider<String>());
     reportsEditor.setLabelProvider(new StringLabelProvider(MavenEditorImages.IMG_REPORT));
 
-    if(!parent.isReadOnly()) {
-      // XXX implement editor actions
-      
-    }
+    // XXX implement editor actions
   }
 
   protected void updateReportPluginDetails(ReportPlugin reportPlugin) {
@@ -328,6 +313,7 @@ public class ReportingComposite extends Composite {
     }
     
     FormUtils.setEnabled(pluginDetailsSection, true);
+    FormUtils.setReadonly(pluginDetailsSection, parent.isReadOnly());
     
     groupIdText.setText(nvl(reportPlugin.getGroupId()));
     artifactIdText.setText(nvl(reportPlugin.getArtifactId()));
@@ -344,19 +330,22 @@ public class ReportingComposite extends Composite {
   protected void updateReportSetDetails(ReportSet reportSet) {
     if(reportSet==null) {
       FormUtils.setEnabled(reportSetDetailsSection, false);
-      reportSetIdText.setText("");
       reportSetInheritedButton.setSelection(false);
       reportsEditor.setInput(null);
       return;
     }
 
     FormUtils.setEnabled(reportSetDetailsSection, true);
+    FormUtils.setReadonly(reportSetDetailsSection, parent.isReadOnly());
     
-    reportSetIdText.setText(nvl(reportSet.getId()));
     reportSetInheritedButton.setSelection("true".equals(reportSet.getInherited()));
     
     StringReports reports = reportSet.getReports();
     reportsEditor.setInput(reports==null ? null : reports.getReport());
+    
+    reportPluginsEditor.setReadOnly(parent.isReadOnly());
+    reportSetsEditor.setReadOnly(parent.isReadOnly());
+    reportsEditor.setReadOnly(parent.isReadOnly());
   }
 
   public void loadData(MavenPomEditorPage editorPage) {
