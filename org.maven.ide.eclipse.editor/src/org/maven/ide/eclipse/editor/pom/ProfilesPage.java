@@ -19,6 +19,9 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -104,10 +107,21 @@ public class ProfilesPage extends MavenPomEditorPage {
     createPropertiesSection(toolkit, body);
 
     CTabFolder tabFolder = new CTabFolder(body, SWT.FLAT | SWT.MULTI);
-    GridData gd_tabFolder = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1);
-    gd_tabFolder.verticalIndent = 5;
-    tabFolder.setLayoutData(gd_tabFolder);
+    GridData tabFolderData = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1);
+    tabFolderData.verticalIndent = 5;
+    tabFolder.setLayoutData(tabFolderData);
     toolkit.adapt(tabFolder, true, true);
+    
+    toolkit.getColors().initializeSectionToolBarColors();
+    Color selectedColor = toolkit.getColors().getColor("org.eclipse.ui.forms.TB_BG");
+    tabFolder.setSelectionBackground(new Color[] {selectedColor, toolkit.getColors().getBackground()}, //
+        new int[] {100}, true);
+
+    tabFolder.addSelectionListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        // updateTabSelection();
+      }
+    });
 
     createActivationTab(tabFolder, toolkit);
     createDependenciesTab(tabFolder, toolkit);
