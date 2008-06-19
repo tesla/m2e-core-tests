@@ -126,7 +126,9 @@ public class DependencyTreePage extends FormPage {
 
     createSearchBar(managedForm);
     
-    managedForm.getToolkit().decorateFormHeading(form.getForm());
+    // compatibility proxy to support Eclipse 3.2
+    FormUtils.proxy(managedForm.getToolkit(), //
+        FormUtils.FormTooliktStub.class).decorateFormHeading(form.getForm());
     
     new Job("Loading pom.xml") {
       protected IStatus run(IProgressMonitor monitor) {

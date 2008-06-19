@@ -13,9 +13,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -315,26 +312,19 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       
       } else if(input.getClass().getName().endsWith("FileStoreEditorInput")) {
         // since Eclipse 3.3
-        java.net.URI uri = proxy(input, C.class).getURI();
+        java.net.URI uri = FormUtils.proxy(input, C.class).getURI();
         projectDocument = loadModel(uri.getPath());
       }
     }
 
     return projectDocument;
   }
-  
-  @SuppressWarnings("unchecked")
-  private <T> T proxy(final Object o, Class<T> type) {
-    return (T) Proxy.newProxyInstance(type.getClassLoader(), //
-        new Class[] { type }, // 
-        new InvocationHandler() {
-          public Object invoke(Object proxy, Method m, Object[] args) throws Throwable {
-            Method mm = o.getClass().getMethod(m.getName(), m.getParameterTypes());
-            return mm.invoke(o, args);
-          }
-        });
-  }
 
+  /**
+   * Stub interface for FileStoreEditorInput
+   * 
+   * @see FormUtils#proxy(Object, Class)
+   */
   public static interface C {
     public java.net.URI getURI();
   }

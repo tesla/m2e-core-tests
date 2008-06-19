@@ -8,6 +8,9 @@
 
 package org.maven.ide.eclipse.editor.pom;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -21,6 +24,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
+import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.maven.ide.eclipse.MavenPlugin;
 
@@ -29,6 +33,28 @@ import org.maven.ide.eclipse.MavenPlugin;
  */
 public abstract class FormUtils {
 
+  /**
+   * Proxy factory for compatibility stubs
+   */
+  @SuppressWarnings("unchecked")
+  public static <T> T proxy(final Object o, Class<T> type) {
+    return (T) Proxy.newProxyInstance(type.getClassLoader(), //
+        new Class[] { type }, // 
+        new InvocationHandler() {
+          public Object invoke(Object proxy, Method m, Object[] args) throws Throwable {
+            Method mm = o.getClass().getMethod(m.getName(), m.getParameterTypes());
+            return mm.invoke(o, args);
+          }
+        });
+  }
+
+  /**
+   * Stub interface for API added to FormToolikt in Eclipse 3.3
+   */
+  public interface FormTooliktStub {
+    public void decorateFormHeading(Form form);
+  }
+  
   public static String nvl(String s) {
     return s == null ? "" : s;
   }

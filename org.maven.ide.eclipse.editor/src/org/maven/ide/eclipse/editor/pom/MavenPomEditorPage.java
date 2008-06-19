@@ -153,8 +153,9 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
     
     form.updateToolBar();
 
-    // XXX use compatibility proxy to support Eclipse 3.2
-    managedForm.getToolkit().decorateFormHeading(form.getForm());
+    // compatibility proxy to support Eclipse 3.2
+    FormUtils.proxy(managedForm.getToolkit(), //
+        FormUtils.FormTooliktStub.class).decorateFormHeading(form.getForm());
   }
   
   public void setActive(boolean active) {

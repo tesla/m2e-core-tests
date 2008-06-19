@@ -205,7 +205,9 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
     createActions();
     initPopupMenu();
 
-    managedForm.getToolkit().decorateFormHeading(form.getForm());
+    // compatibility proxy to support Eclipse 3.2
+    FormUtils.proxy(managedForm.getToolkit(), //
+        FormUtils.FormTooliktStub.class).decorateFormHeading(form.getForm());
     
     form.updateToolBar();
 
