@@ -8,10 +8,9 @@
 
 package org.maven.ide.eclipse.editor.pom;
 
-import static org.maven.ide.eclipse.editor.pom.FormUtils.nvl;
 import static org.maven.ide.eclipse.editor.pom.FormUtils.isEmpty;
-import static org.maven.ide.eclipse.editor.pom.FormUtils.setText;
 import static org.maven.ide.eclipse.editor.pom.FormUtils.setButton;
+import static org.maven.ide.eclipse.editor.pom.FormUtils.setText;
 
 import java.util.Collections;
 import java.util.List;
@@ -19,6 +18,7 @@ import java.util.List;
 import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.common.notify.Notification;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.edit.command.AddCommand;
 import org.eclipse.emf.edit.command.RemoveCommand;
 import org.eclipse.emf.edit.command.SetCommand;
@@ -38,6 +38,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.IManagedForm;
@@ -48,14 +49,11 @@ import org.maven.ide.components.pom.Activation;
 import org.maven.ide.components.pom.ActivationFile;
 import org.maven.ide.components.pom.ActivationOS;
 import org.maven.ide.components.pom.ActivationProperty;
-import org.maven.ide.components.pom.BuildBase;
 import org.maven.ide.components.pom.Dependencies;
-import org.maven.ide.components.pom.Modules;
+import org.maven.ide.components.pom.DependencyManagement;
 import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.Profile;
 import org.maven.ide.components.pom.ProfilesType;
-import org.maven.ide.components.pom.Reporting;
-import org.maven.ide.components.pom.Repositories;
 import org.maven.ide.components.pom.StringModules;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
@@ -75,6 +73,7 @@ import org.maven.ide.eclipse.wizards.WidthGroup;
 public class ProfilesPage extends MavenPomEditorPage {
 
   // controls
+  Button activeByDefaultbutton;
   Text activationFileMissingText;
   Text activationFileExistText;
   Text activationPropertyValueText;
@@ -90,16 +89,19 @@ public class ProfilesPage extends MavenPomEditorPage {
   Section modulesSection;
   Section propertiesSection;
   
-  BuildComposite buildTabComposite;
-  PluginsComposite pluginsTabComposite;
-  DependenciesComposite dependenciesTabComposite;
-  RepositoriesComposite repositoriesTabComposite;
-  ReportingComposite reportingTabComposite;
-  Button activeByDefaultbutton;
+  CTabFolder tabFolder;
+  BuildComposite buildComposite;
+  PluginsComposite pluginsComposite;
+  DependenciesComposite dependenciesComposite;
+  RepositoriesComposite repositoriesComposite;
+  ReportingComposite reportingComposite;
+
+  Color defaultForegroundColor;
+  Color defaultSelectionColor;
+  Color disabledTabColor = Display.getDefault().getSystemColor(SWT.COLOR_GRAY);
   
-  private Profile currentProfile;
-  private CTabFolder tabFolder;
-  
+  // model
+  Profile currentProfile;
   
   public ProfilesPage(MavenPomEditor pomEditor) {
     super(pomEditor, MavenPlugin.PLUGIN_ID + ".pom.profiles", "Profiles");
@@ -132,6 +134,8 @@ public class ProfilesPage extends MavenPomEditorPage {
     Color selectedColor = toolkit.getColors().getColor("org.eclipse.ui.forms.TB_BG");
     tabFolder.setSelectionBackground(new Color[] {selectedColor, toolkit.getColors().getBackground()}, //
         new int[] {100}, true);
+    defaultForegroundColor = tabFolder.getForeground();
+    defaultSelectionColor = tabFolder.getSelectionForeground();
 
     tabFolder.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
@@ -372,87 +376,218 @@ public class ProfilesPage extends MavenPomEditorPage {
   private void updateProfileTabs(Profile profile) {
     if(profile==null) {
       FormUtils.setEnabled(tabFolder, false);
-      updateActivationTab(null);
-      updateDependenciesTab(null);
-      updateRepositoriesTab(null);
-      updateBuildTab(null);
-      updatePluginsTab(null);
-      updateReportsTab(null);
-      
+      tabFolder.setForeground(disabledTabColor);
+      tabFolder.setSelectionForeground(disabledTabColor);
     } else {
       FormUtils.setEnabled(tabFolder, true);
       FormUtils.setReadonly(tabFolder, isReadOnly());
-    
-      updateActivationTab(profile.getActivation()==null ? null : profile.getActivation());
-      updateDependenciesTab(profile.getDependencies()==null ? null : profile.getDependencies());
-      updateRepositoriesTab(profile.getRepositories()==null ? null : profile.getRepositories());
-      updateBuildTab(profile.getBuild()==null ? null : profile.getBuild());
-      updatePluginsTab(profile.getBuild()==null ? null : profile.getBuild());
-      updateReportsTab(profile.getReporting()==null ? null : profile.getReporting());
+      tabFolder.setForeground(defaultForegroundColor);
+      tabFolder.setSelectionForeground(defaultSelectionColor);
     }
+    
+    updateActivationTab();
+    updateDependenciesTab();
+    updateRepositoriesTab();
+    updateBuildTab();
+    updatePluginsTab();
+    updateReportsTab();
   }
 
-  private void updateActivationTab(Activation activation) {
-    if(activation==null) {
-      return;
-    }
-    
-    activeByDefaultbutton.setSelection("true".equals(activation.getActiveByDefault()));
-    activationJdkText.setText(nvl(activation.getJdk()));
-    
-    ActivationProperty property = activation.getProperty();
-    if(property==null) {
-      activationPropertyNameText.setText("");
-      activationPropertyValueText.setText("");
+  private void updateActivationTab() {
+    removeNotifyListener(activeByDefaultbutton);
+    removeNotifyListener(activationJdkText);
+    removeNotifyListener(activationPropertyNameText);
+    removeNotifyListener(activationPropertyValueText);
+    removeNotifyListener(activationFileExistText);
+    removeNotifyListener(activationFileMissingText);
+    removeNotifyListener(activationOsArchitectureText);
+    removeNotifyListener(activationOsFamilyText);
+    removeNotifyListener(activationOsNameText);
+    removeNotifyListener(activationOsVersionText);
+
+    Activation activation = currentProfile == null ? null : currentProfile.getActivation();
+    if(activation == null) {
+      setButton(activeByDefaultbutton, false);
+      setText(activationJdkText, "");
+
+      setText(activationPropertyNameText, "");
+      setText(activationPropertyValueText, "");
+
+      setText(activationFileExistText, "");
+      setText(activationFileMissingText, "");
+
+      setText(activationOsArchitectureText, "");
+      setText(activationOsFamilyText, "");
+      setText(activationOsNameText, "");
+      setText(activationOsVersionText, "");
+      
     } else {
-      activationPropertyNameText.setText(nvl(property.getName()));
-      activationPropertyValueText.setText(nvl(property.getValue()));
+      setButton(activeByDefaultbutton, "true".equals(activation.getActiveByDefault()));
+      setText(activationJdkText, activation.getJdk());
+      
+      ActivationProperty property = activation.getProperty();
+      if(property==null) {
+        setText(activationPropertyNameText, "");
+        setText(activationPropertyValueText, "");
+      } else {
+        setText(activationPropertyNameText, property.getName());
+        setText(activationPropertyValueText, property.getValue());
+      }
+      
+      ActivationFile file = activation.getFile();
+      if(file==null) {
+        setText(activationFileExistText, "");
+        setText(activationFileMissingText, "");
+      } else {
+        setText(activationFileExistText, file.getExists());
+        setText(activationFileMissingText, file.getMissing());
+      }
+      
+      ActivationOS os = activation.getOs();
+      if(os==null) {
+        setText(activationOsArchitectureText, "");
+        setText(activationOsFamilyText, "");
+        setText(activationOsNameText, "");
+        setText(activationOsVersionText, "");
+      } else {
+        setText(activationOsArchitectureText, os.getArch());
+        setText(activationOsFamilyText, os.getFamily());
+        setText(activationOsNameText, os.getName());
+        setText(activationOsVersionText, os.getVersion());
+      }
     }
     
-    ActivationFile file = activation.getFile();
-    if(file==null) {
-      activationFileExistText.setText("");
-      activationFileMissingText.setText("");
-    } else {
-      activationFileExistText.setText(nvl(file.getExists()));
-      activationFileMissingText.setText(nvl(file.getMissing()));
-    }
+    ValueProvider<Activation> activationProvider = new ValueProvider<Activation>() {
+      public Activation getValue() {
+        return currentProfile.getActivation();
+      }
+      public Activation create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+        return createActivation(editingDomain, compoundCommand);
+      }
+    };
+    setModifyListener(activeByDefaultbutton, activationProvider, POM_PACKAGE.getActivation_ActiveByDefault(), "false");
+    setModifyListener(activationJdkText, activationProvider, POM_PACKAGE.getActivation_Jdk(), "");
     
-    ActivationOS os = activation.getOs();
-    if(os==null) {
-      activationOsArchitectureText.setText("");
-      activationOsFamilyText.setText("");
-      activationOsNameText.setText("");
-      activationOsVersionText.setText("");
-    } else {
-      activationOsArchitectureText.setText(nvl(os.getArch()));
-      activationOsFamilyText.setText(nvl(os.getFamily()));
-      activationOsNameText.setText(nvl(os.getName()));
-      activationOsVersionText.setText(nvl(os.getVersion()));
+    ValueProvider<ActivationProperty> activationPropertyProvider = new ValueProvider<ActivationProperty>() {
+      public ActivationProperty getValue() {
+        Activation activation = currentProfile.getActivation();
+        return activation==null ? null : activation.getProperty();
+      }
+      public ActivationProperty create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+        Activation activation = createActivation(editingDomain, compoundCommand);
+        ActivationProperty activationProperty = activation.getProperty();
+        if(activationProperty == null) {
+          activationProperty = PomFactory.eINSTANCE.createActivationProperty();
+          compoundCommand.append(SetCommand.create(editingDomain, activation, POM_PACKAGE.getActivation_Property(),
+              activationProperty));
+        }
+        return activationProperty;
+      }
+    };
+    setModifyListener(activationPropertyNameText, activationPropertyProvider, POM_PACKAGE.getActivationProperty_Name(), "");
+    setModifyListener(activationPropertyValueText, activationPropertyProvider, POM_PACKAGE.getActivationProperty_Value(), "");
+    
+    ValueProvider<ActivationFile> activationFileProvider = new ValueProvider<ActivationFile>() {
+      public ActivationFile getValue() {
+        Activation activation = currentProfile.getActivation();
+        return activation==null ? null : activation.getFile();
+      }
+      public ActivationFile create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+        Activation activation = createActivation(editingDomain, compoundCommand);
+        ActivationFile activationFile = activation.getFile();
+        if(activationFile == null) {
+          activationFile = PomFactory.eINSTANCE.createActivationFile();
+          compoundCommand.append(SetCommand.create(editingDomain, activation, POM_PACKAGE.getActivation_File(),
+              activationFile));
+        }
+        return activationFile;
+      }
+    };
+    setModifyListener(activationFileExistText, activationFileProvider, POM_PACKAGE.getActivationFile_Exists(), "");
+    setModifyListener(activationFileMissingText, activationFileProvider, POM_PACKAGE.getActivationFile_Missing(), "");
+    
+    ValueProvider<ActivationOS> activationOsProvider = new ValueProvider<ActivationOS>() {
+      public ActivationOS getValue() {
+        Activation activation = currentProfile.getActivation();
+        return activation==null ? null : activation.getOs();
+      }
+      public ActivationOS create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+        Activation activation = createActivation(editingDomain, compoundCommand);
+        ActivationOS activationOS = activation.getOs();
+        if(activationOS == null) {
+          activationOS = PomFactory.eINSTANCE.createActivationOS();
+          compoundCommand.append(SetCommand.create(editingDomain, activation, POM_PACKAGE.getActivation_Os(),
+              activationOS));
+        }
+        return activationOS;
+      }
+    };
+    setModifyListener(activationOsArchitectureText, activationOsProvider, POM_PACKAGE.getActivationOS_Arch(), "");
+    setModifyListener(activationOsFamilyText, activationOsProvider, POM_PACKAGE.getActivationOS_Family(), "");
+    setModifyListener(activationOsNameText, activationOsProvider, POM_PACKAGE.getActivationOS_Name(), "");
+    setModifyListener(activationOsVersionText, activationOsProvider, POM_PACKAGE.getActivationOS_Version(), "");
+    
+    registerListeners();
+  }
+
+  Activation createActivation(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+    Activation activation = currentProfile.getActivation();
+    if(activation == null) {
+      activation = PomFactory.eINSTANCE.createActivation();
+      compoundCommand.append(SetCommand.create(editingDomain, currentProfile, POM_PACKAGE.getProfile_Activation(),
+          activation));
     }
+    return activation;
   }
   
-  private void updateDependenciesTab(Dependencies dependencies) {
-    // XXX need to pass Dependencies
-    // dependenciesTabComposite.loadData(this);
+  private void updateDependenciesTab() {
+    ValueProvider<Dependencies> dependenciesProvider = new ValueProvider<Dependencies>() {
+      public Dependencies getValue() {
+        return currentProfile==null ? null : currentProfile.getDependencies();
+      }
+
+      public Dependencies create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+        Dependencies dependencies = PomFactory.eINSTANCE.createDependencies();
+        Command createDependenciesCommand = SetCommand.create(editingDomain, currentProfile,
+            POM_PACKAGE.getProfile_Dependencies(), dependencies);
+        compoundCommand.append(createDependenciesCommand);
+        return dependencies;
+      }
+    };
+
+    ValueProvider<DependencyManagement> dependencyManagementProvider = new ValueProvider<DependencyManagement>() {
+      public DependencyManagement getValue() {
+        return currentProfile==null ? null : currentProfile.getDependencyManagement();
+      }
+
+      public DependencyManagement create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+        DependencyManagement dependencyManagement = PomFactory.eINSTANCE.createDependencyManagement();
+        Command createDependenciesCommand = SetCommand.create(editingDomain, currentProfile,
+            POM_PACKAGE.getProfile_DependencyManagement(), dependencyManagement);
+        compoundCommand.append(createDependenciesCommand);
+        return dependencyManagement;
+      }
+    };
+
+    dependenciesComposite.loadData(this, dependenciesProvider, dependencyManagementProvider);
   }
 
-  private void updateRepositoriesTab(Repositories repositories) {
+  private void updateRepositoriesTab() {
     // TODO Auto-generated method stub
     
   }
 
-  private void updateBuildTab(BuildBase buildBase) {
+  private void updateBuildTab() {
     // TODO Auto-generated method stub
     
   }
 
-  private void updatePluginsTab(BuildBase buildBase) {
+  private void updatePluginsTab() {
     // TODO Auto-generated method stub
     
   }
 
-  private void updateReportsTab(Reporting reporting) {
+  private void updateReportsTab() {
     // TODO Auto-generated method stub
     
   }
@@ -461,45 +596,45 @@ public class ProfilesPage extends MavenPomEditorPage {
     CTabItem buildTabItem = new CTabItem(tabFolder, SWT.NONE);
     buildTabItem.setText("Build");
   
-    buildTabComposite = new BuildComposite(tabFolder, SWT.NONE);
-    buildTabItem.setControl(buildTabComposite);
-    toolkit.adapt(buildTabComposite);
+    buildComposite = new BuildComposite(tabFolder, SWT.NONE);
+    buildTabItem.setControl(buildComposite);
+    toolkit.adapt(buildComposite);
   }
 
   private void createPluginsTab(FormToolkit toolkit, CTabFolder tabFolder) {
     CTabItem pluginsTabItem = new CTabItem(tabFolder, SWT.NONE);
     pluginsTabItem.setText("Plugins");
 
-    pluginsTabComposite = new PluginsComposite(tabFolder, SWT.NONE);
-    pluginsTabItem.setControl(pluginsTabComposite);
-    toolkit.adapt(pluginsTabComposite);
+    pluginsComposite = new PluginsComposite(tabFolder, SWT.NONE);
+    pluginsTabItem.setControl(pluginsComposite);
+    toolkit.adapt(pluginsComposite);
   }
 
   private void createDependenciesTab(CTabFolder tabFolder, FormToolkit toolkit) {
     CTabItem dependenciesTabItem = new CTabItem(tabFolder, SWT.NONE);
     dependenciesTabItem.setText("Dependencies");
   
-    dependenciesTabComposite = new DependenciesComposite(tabFolder, SWT.NONE);
-    dependenciesTabItem.setControl(dependenciesTabComposite);
-    toolkit.adapt(dependenciesTabComposite);
+    dependenciesComposite = new DependenciesComposite(tabFolder, SWT.NONE);
+    dependenciesTabItem.setControl(dependenciesComposite);
+    toolkit.adapt(dependenciesComposite);
   }
 
   private void createRepositoriesTab(FormToolkit toolkit, CTabFolder tabFolder) {
     CTabItem repositoriesTabItem = new CTabItem(tabFolder, SWT.NONE);
     repositoriesTabItem.setText("Repositories");
 
-    repositoriesTabComposite = new RepositoriesComposite(tabFolder, SWT.NONE);
-    repositoriesTabItem.setControl(repositoriesTabComposite);
-    toolkit.adapt(repositoriesTabComposite);
+    repositoriesComposite = new RepositoriesComposite(tabFolder, SWT.NONE);
+    repositoriesTabItem.setControl(repositoriesComposite);
+    toolkit.adapt(repositoriesComposite);
   }
 
   private void createReportsTab(FormToolkit toolkit, CTabFolder tabFolder) {
     CTabItem reportingTabItem = new CTabItem(tabFolder, SWT.NONE);
     reportingTabItem.setText("Reporting");
 
-    reportingTabComposite = new ReportingComposite(tabFolder, SWT.NONE);
-    toolkit.adapt(reportingTabComposite);
-    reportingTabItem.setControl(reportingTabComposite);
+    reportingComposite = new ReportingComposite(tabFolder, SWT.NONE);
+    toolkit.adapt(reportingComposite);
+    reportingTabItem.setControl(reportingComposite);
   }
 
   private void createActivationTab(CTabFolder tabFolder, FormToolkit toolkit) {
@@ -646,9 +781,27 @@ public class ProfilesPage extends MavenPomEditorPage {
     if(object instanceof StringModules) {
       modulesEditor.refresh();
     }
+
+    if(object instanceof Activation) {
+      EObject container = ((Activation) object).eContainer();
+      if(container==currentProfile) {
+        updateActivationTab();
+      }
+    }
     
-    // XXX handle other notification types
+    if(object instanceof ActivationFile || object instanceof ActivationOS || object instanceof ActivationProperty) {
+      Activation activation = (Activation) ((EObject) object).eContainer();
+      EObject container = activation.eContainer();
+      if(container == currentProfile) {
+        updateActivationTab();
+      }
+    }
     
+    dependenciesComposite.updateView(this, notification);
+    repositoriesComposite.updateView(this, notification);
+    buildComposite.updateView(this, notification);
+    pluginsComposite.updateView(this, notification);
+    reportingComposite.updateView(this, notification);
   }
 
 }
