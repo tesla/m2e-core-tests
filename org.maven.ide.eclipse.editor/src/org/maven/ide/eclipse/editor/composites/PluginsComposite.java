@@ -535,14 +535,13 @@ public class PluginsComposite extends Composite {
           compoundCommand.append(command);
         }
         
-        // XXX use command stack
- //        String goal = "?";
- //        Command command = AddCommand.create(editingDomain, goals, POM_PACKAGE.getGoals_Any(), goal);
- //        compoundCommand.append(command);
+        String goal = "?";
+        Command command = AddCommand.create(editingDomain, goals, POM_PACKAGE.getStringGoals_Goal(), goal);
+        compoundCommand.append(command);
         
         editingDomain.getCommandStack().execute(compoundCommand);
         
-        goals.getGoal().add("?");
+        goalsEditor.setSelection(Collections.singletonList(goal));
       }
     });
     
@@ -553,11 +552,9 @@ public class PluginsComposite extends Composite {
  
         List<String> list = goalsEditor.getSelection();
         for(String goal : list) {
-          // XXX use command stack
- //          Command removeCommand = RemoveCommand.create(editingDomain, //
- //              currentPluginExecution.getGoals(), POM_PACKAGE.getGoals_Any(), goal);
- //          compoundCommand.append(removeCommand);
-          currentPluginExecution.getGoals().getGoal().remove(goal);
+          Command removeCommand = RemoveCommand.create(editingDomain, //
+              currentPluginExecution.getGoals(), POM_PACKAGE.getStringGoals_Goal(), goal);
+          compoundCommand.append(removeCommand);
         }
         
         editingDomain.getCommandStack().execute(compoundCommand);
@@ -576,13 +573,12 @@ public class PluginsComposite extends Composite {
       public void modify(Object element, String property, Object value) {
         int n = goalsEditor.getViewer().getTable().getSelectionIndex();
         
-        // XXX use command stack
-//        EditingDomain editingDomain = parent.getEditingDomain();
-//        Command command = SetCommand.create(editingDomain, //
-//            currentPluginExecution.getGoals(), POM_PACKAGE.getGoals(), value, n);
-//        editingDomain.getCommandStack().execute(command);
+        EditingDomain editingDomain = parent.getEditingDomain();
+        Command command = SetCommand.create(editingDomain, //
+            currentPluginExecution.getGoals(), POM_PACKAGE.getStringGoals_Goal(), value, n);
+        editingDomain.getCommandStack().execute(command);
 
-        currentPluginExecution.getGoals().getGoal().set(n, (String) value);
+        // currentPluginExecution.getGoals().getGoal().set(n, (String) value);
         goalsEditor.update();
       }
     });
