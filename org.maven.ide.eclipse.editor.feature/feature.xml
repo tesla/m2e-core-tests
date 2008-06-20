@@ -6,7 +6,7 @@
       provider-name="Sonatype, Inc."
       plugin="org.maven.ide.eclipse">
 
-   <description url="http://m2eclipse.codehaus.org/">
+   <description url="http://m2eclipse.sonatype.org/">
       [Enter Feature Description here.]
    </description>
 
