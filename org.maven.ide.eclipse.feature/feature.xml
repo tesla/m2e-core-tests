@@ -7,7 +7,7 @@
       plugin="org.maven.ide.eclipse">
    <install-handler/>
 
-   <description url="http://m2eclipse.codehaus.org/">
+   <description url="http://m2eclipse.sonatype.org/">
       Maven integration. Launching Maven from Eclipse, dependency management and search.
    </description>
 
