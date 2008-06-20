@@ -33,6 +33,20 @@
    <feature url="features/org.maven.ide.eclipse.editor.feature_0.9.5.qualifier.jar" id="org.maven.ide.eclipse.editor.feature" version="0.9.5.qualifier">
       <category name="Maven Optional Components"/>
    </feature>
+   
+   <feature id="org.eclipse.draw2d.sdk" version="3.4.0.v20080115-677-8082A5655G3B9B8x422_274A" 
+            url="http://download.eclipse.org/tools/gef/updates/milestones/features/org.eclipse.draw2d.sdk_3.4.0.v20080115-677-8082A5655G3B9B8x422_274A.jar">
+      <category name="Maven Optional Components"/>
+   </feature>
+   <feature id="org.eclipse.zest" version="1.0.0.v20080115-53-8xB4CE899O274A" 
+            url="http://download.eclipse.org/tools/gef/updates/milestones/features/org.eclipse.zest_1.0.0.v20080115-53-8xB4CE899O274A.jar">
+      <category name="Maven Optional Components"/>
+   </feature>
+   
+   <archive path="plugins/org.eclipse.zest.core_1.0.0.v20080115.jar" url="http://download.eclipse.org/tools/gef/updates/milestones/plugins/org.eclipse.zest.core_1.0.0.v20080115.jar"/>
+   <archive path="plugins/org.eclipse.zest.layouts_1.0.0.v20080226.jar" url="http://download.eclipse.org/tools/gef/updates/milestones/plugins/org.eclipse.zest.core_1.0.0.v20080115.jar"/>
+   <archive path="plugins/org.eclipse.draw2d_3.4.0.v20080529.jar" url="http://download.eclipse.org/tools/gef/updates/milestones/plugins/org.eclipse.draw2d_3.4.0.v20080529.jar"/>
+   
    <category-def name="Maven Integration" label="Maven Integration"/>
    <category-def name="Maven Optional Components" label="Maven Optional Components"/>
    <category-def name="Maven Project Configurators" label="Maven Project Configurators"/>
