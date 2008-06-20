@@ -9,15 +9,27 @@
 package org.maven.ide.eclipse.editor.composites;
 
 import static org.maven.ide.eclipse.editor.pom.FormUtils.nvl;
+import static org.maven.ide.eclipse.editor.pom.FormUtils.setButton;
+import static org.maven.ide.eclipse.editor.pom.FormUtils.setText;
 
+import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.emf.common.command.Command;
+import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.common.notify.Notification;
+import org.eclipse.emf.edit.command.AddCommand;
+import org.eclipse.emf.edit.command.RemoveCommand;
+import org.eclipse.emf.edit.command.SetCommand;
+import org.eclipse.emf.edit.domain.EditingDomain;
+import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -29,12 +41,19 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Section;
 import org.maven.ide.components.pom.Build;
+import org.maven.ide.components.pom.ExcludesType;
+import org.maven.ide.components.pom.Filters;
+import org.maven.ide.components.pom.IncludesType;
 import org.maven.ide.components.pom.Model;
+import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.PomPackage;
 import org.maven.ide.components.pom.Resource;
+import org.maven.ide.components.pom.Resources;
+import org.maven.ide.components.pom.TestResources;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
-import org.maven.ide.eclipse.editor.pom.MavenPomEditorPage;
 import org.maven.ide.eclipse.editor.pom.FormUtils;
+import org.maven.ide.eclipse.editor.pom.MavenPomEditorPage;
+import org.maven.ide.eclipse.editor.pom.ValueProvider;
 
 /**
  * @author Eugene Kuleshov
@@ -67,6 +86,10 @@ public class BuildComposite extends Composite {
   
   // model
   private Model model;
+
+  private Resource currentResource;
+
+  private boolean changingSelection = false;
 
   
   public BuildComposite(Composite parent, int flags) {
@@ -126,13 +149,87 @@ public class BuildComposite extends Composite {
     filtersEditor.setContentProvider(new ListEditorContentProvider<String>());
     filtersEditor.setLabelProvider(new StringLabelProvider(MavenEditorImages.IMG_FILTER));
     
-    SashForm verticalSash = new SashForm(horizontalSash, SWT.VERTICAL);
+    filtersEditor.setAddListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        CompoundCommand compoundCommand = new CompoundCommand();
+        EditingDomain editingDomain = parent.getEditingDomain();
+        
+        Build build = model.getBuild();
+        if(build == null) {
+          build = PomFactory.eINSTANCE.createBuild();
+          Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Build(), build);
+          compoundCommand.append(command);
+        }
+        
+        Filters filters = build.getFilters();
+        if(filters==null) {
+          filters = PomFactory.eINSTANCE.createFilters();
+          Command command = SetCommand.create(editingDomain, build, POM_PACKAGE.getBuild_Filters(), filters);
+          compoundCommand.append(command);
+        }
+        
+        String filter = "?";
+        Command addCommand = AddCommand.create(editingDomain, filters, POM_PACKAGE.getFilters_Filter(), filter);
+        compoundCommand.append(addCommand);
+        
+        editingDomain.getCommandStack().execute(compoundCommand);
+        filtersEditor.setSelection(Collections.singletonList(filter));
+      }
+    });
     
+    filtersEditor.setRemoveListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        CompoundCommand compoundCommand = new CompoundCommand();
+        EditingDomain editingDomain = parent.getEditingDomain();
+ 
+        List<String> selection = filtersEditor.getSelection();
+        for(String filter : selection) {
+          Command removeCommand = RemoveCommand.create(editingDomain, model.getBuild().getFilters(), //
+              POM_PACKAGE.getFilters_Filter(), filter);
+          compoundCommand.append(removeCommand);
+        }
+        
+        editingDomain.getCommandStack().execute(compoundCommand);
+      }
+    });
+    
+    filtersEditor.setCellModifier(new ICellModifier() {
+      public boolean canModify(Object element, String property) {
+        return true;
+      }
+ 
+      public Object getValue(Object element, String property) {
+        return element;
+      }
+ 
+      public void modify(Object element, String property, Object value) {
+        int n = filtersEditor.getViewer().getTable().getSelectionIndex();
+        Filters filters = model.getBuild().getFilters();
+        if(!value.equals(filters.getFilter().get(n))) {
+          EditingDomain editingDomain = parent.getEditingDomain();
+          Command command = SetCommand.create(editingDomain, filters, //
+              POM_PACKAGE.getFilters_Filter(), value, n);
+          editingDomain.getCommandStack().execute(command);
+          filtersEditor.refresh();
+        }
+      }
+    });
+    
+    ///
+    
+    SashForm verticalSash = new SashForm(horizontalSash, SWT.VERTICAL);
+
     createResourceSection(verticalSash);
     createTestResourcesSection(verticalSash);
-    
-    verticalSash.setWeights(new int[] {1, 1 });
-    
+
+    verticalSash.setWeights(new int[] {1, 1});
+
+    createResourceDetailsSection(horizontalSash);
+
+    horizontalSash.setWeights(new int[] {1, 1, 1});
+  }
+
+  private void createResourceDetailsSection(SashForm horizontalSash) {
     resourceDetailsSection = toolkit.createSection(horizontalSash, Section.TITLE_BAR);
     resourceDetailsSection.setText("Resource Details");
   
@@ -172,7 +269,64 @@ public class BuildComposite extends Composite {
     resourceIncludesEditor.setContentProvider(new ListEditorContentProvider<String>());
     resourceIncludesEditor.setLabelProvider(new StringLabelProvider(MavenEditorImages.IMG_INCLUDE));
     
-    // XXX implement editor actions 
+    resourceIncludesEditor.setAddListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        CompoundCommand compoundCommand = new CompoundCommand();
+        EditingDomain editingDomain = parent.getEditingDomain();
+
+        IncludesType includes = currentResource.getIncludes();
+        if(includes == null) {
+          includes = PomFactory.eINSTANCE.createIncludesType();
+          Command command = SetCommand.create(editingDomain, currentResource, POM_PACKAGE.getResource_Includes(), includes);
+          compoundCommand.append(command);
+        }
+
+        String include = "?";
+        Command addCommand = AddCommand.create(editingDomain, includes, POM_PACKAGE.getIncludesType_Include(), include);
+        compoundCommand.append(addCommand);
+        
+        editingDomain.getCommandStack().execute(compoundCommand);
+        resourceIncludesEditor.setSelection(Collections.singletonList(include));
+      }
+    });
+    
+    resourceIncludesEditor.setRemoveListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        CompoundCommand compoundCommand = new CompoundCommand();
+        EditingDomain editingDomain = parent.getEditingDomain();
+ 
+        List<String> selection = resourceIncludesEditor.getSelection();
+        for(String include : selection) {
+          Command removeCommand = RemoveCommand.create(editingDomain, currentResource.getIncludes(), //
+              POM_PACKAGE.getIncludesType_Include(), include);
+          compoundCommand.append(removeCommand);
+        }
+        
+        editingDomain.getCommandStack().execute(compoundCommand);
+      }
+    });
+    
+    resourceIncludesEditor.setCellModifier(new ICellModifier() {
+      public boolean canModify(Object element, String property) {
+        return true;
+      }
+ 
+      public Object getValue(Object element, String property) {
+        return element;
+      }
+ 
+      public void modify(Object element, String property, Object value) {
+        int n = resourceIncludesEditor.getViewer().getTable().getSelectionIndex();
+        IncludesType includes = currentResource.getIncludes();
+        if(!value.equals(includes.getInclude().get(n))) {
+          EditingDomain editingDomain = parent.getEditingDomain();
+          Command command = SetCommand.create(editingDomain, includes, //
+              POM_PACKAGE.getIncludesType_Include(), value, n);
+          editingDomain.getCommandStack().execute(command);
+          resourceIncludesEditor.refresh();
+        }
+      }
+    });
     
     Label excludesLabel = toolkit.createLabel(resourceDetailsComposite, "Excludes:", SWT.NONE);
     excludesLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
@@ -186,10 +340,66 @@ public class BuildComposite extends Composite {
     
     resourceExcludesEditor.setContentProvider(new ListEditorContentProvider<String>());
     resourceExcludesEditor.setLabelProvider(new StringLabelProvider(MavenEditorImages.IMG_EXCLUDE));
-
-    // XXX implement editor actions 
     
-    horizontalSash.setWeights(new int[] {1, 1, 1});
+    resourceExcludesEditor.setAddListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        CompoundCommand compoundCommand = new CompoundCommand();
+        EditingDomain editingDomain = parent.getEditingDomain();
+
+        ExcludesType excludes = currentResource.getExcludes();
+        if(excludes == null) {
+          excludes = PomFactory.eINSTANCE.createExcludesType();
+          Command command = SetCommand.create(editingDomain, currentResource, POM_PACKAGE.getResource_Excludes(), excludes);
+          compoundCommand.append(command);
+        }
+
+        String exclude = "?";
+        Command addCommand = AddCommand.create(editingDomain, excludes, POM_PACKAGE.getExcludesType_Exclude(), exclude);
+        compoundCommand.append(addCommand);
+        
+        editingDomain.getCommandStack().execute(compoundCommand);
+        resourceExcludesEditor.setSelection(Collections.singletonList(exclude));
+      }
+    });
+    
+    resourceExcludesEditor.setRemoveListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        CompoundCommand compoundCommand = new CompoundCommand();
+        EditingDomain editingDomain = parent.getEditingDomain();
+ 
+        List<String> selection = resourceExcludesEditor.getSelection();
+        for(String exclude : selection) {
+          Command removeCommand = RemoveCommand.create(editingDomain, currentResource.getExcludes(), //
+              POM_PACKAGE.getExcludesType_Exclude(), exclude);
+          compoundCommand.append(removeCommand);
+        }
+        
+        editingDomain.getCommandStack().execute(compoundCommand);
+      }
+    });
+    
+    resourceExcludesEditor.setCellModifier(new ICellModifier() {
+      public boolean canModify(Object element, String property) {
+        return true;
+      }
+ 
+      public Object getValue(Object element, String property) {
+        return element;
+      }
+ 
+      public void modify(Object element, String property, Object value) {
+        int n = resourceExcludesEditor.getViewer().getTable().getSelectionIndex();
+        ExcludesType excludes = currentResource.getExcludes();
+        if(!value.equals(excludes.getExclude().get(n))) {
+          EditingDomain editingDomain = parent.getEditingDomain();
+          Command command = SetCommand.create(editingDomain, excludes, //
+              POM_PACKAGE.getExcludesType_Exclude(), value, n);
+          editingDomain.getCommandStack().execute(command);
+          resourceExcludesEditor.refresh();
+        }
+      }
+    });
+    
   }
 
   private void createResourceSection(SashForm verticalSash) {
@@ -208,10 +418,61 @@ public class BuildComposite extends Composite {
       public void selectionChanged(SelectionChangedEvent event) {
         List<Resource> selection = resourcesEditor.getSelection();
         loadResourceDetails(selection.size()==1 ? selection.get(0) : null);
+        
+        if(!selection.isEmpty()) {
+          changingSelection = true;
+          try {
+            testResourcesEditor.setSelection(Collections.<Resource>emptyList());
+          } finally {
+            changingSelection = false;
+          }
+        }
       }
     });
     
-    // XXX implement editor actions 
+    resourcesEditor.setAddListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        CompoundCommand compoundCommand = new CompoundCommand();
+        EditingDomain editingDomain = parent.getEditingDomain();
+        
+        Build build = model.getBuild();
+        if(build == null) {
+          build = PomFactory.eINSTANCE.createBuild();
+          Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Build(), build);
+          compoundCommand.append(command);
+        }
+        
+        Resources resources = build.getResources();
+        if(resources==null) {
+          resources = PomFactory.eINSTANCE.createResources();
+          Command command = SetCommand.create(editingDomain, build, POM_PACKAGE.getBuild_Resources(), resources);
+          compoundCommand.append(command);
+        }
+        
+        Resource resource = PomFactory.eINSTANCE.createResource();        
+        Command addCommand = AddCommand.create(editingDomain, resources, POM_PACKAGE.getResources_Resource(), resource);
+        compoundCommand.append(addCommand);
+        
+        editingDomain.getCommandStack().execute(compoundCommand);
+        resourcesEditor.setSelection(Collections.singletonList(resource));
+      }
+    });
+    
+    resourcesEditor.setRemoveListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        CompoundCommand compoundCommand = new CompoundCommand();
+        EditingDomain editingDomain = parent.getEditingDomain();
+ 
+        List<Resource> selection = resourcesEditor.getSelection();
+        for(Resource resource : selection) {
+          Command removeCommand = RemoveCommand.create(editingDomain, model.getBuild().getResources(), //
+              POM_PACKAGE.getResources_Resource(), resource);
+          compoundCommand.append(removeCommand);
+        }
+        
+        editingDomain.getCommandStack().execute(compoundCommand);
+      }
+    });
   }
 
   private void createTestResourcesSection(SashForm verticalSash) {
@@ -231,10 +492,61 @@ public class BuildComposite extends Composite {
       public void selectionChanged(SelectionChangedEvent event) {
         List<Resource> selection = testResourcesEditor.getSelection();
         loadResourceDetails(selection.size()==1 ? selection.get(0) : null);
+        
+        if(!selection.isEmpty()) {
+          changingSelection = true;
+          try {
+            resourcesEditor.setSelection(Collections.<Resource>emptyList());
+          } finally {
+            changingSelection = false;
+          }
+        }
       }
     });
     
-    // XXX implement editor actions 
+    testResourcesEditor.setAddListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        CompoundCommand compoundCommand = new CompoundCommand();
+        EditingDomain editingDomain = parent.getEditingDomain();
+        
+        Build build = model.getBuild();
+        if(build == null) {
+          build = PomFactory.eINSTANCE.createBuild();
+          Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Build(), build);
+          compoundCommand.append(command);
+        }
+        
+        Resources resources = build.getResources();
+        if(resources==null) {
+          resources = PomFactory.eINSTANCE.createResources();
+          Command command = SetCommand.create(editingDomain, build, POM_PACKAGE.getBuild_TestResources(), resources);
+          compoundCommand.append(command);
+        }
+        
+        Resource resource = PomFactory.eINSTANCE.createResource();        
+        Command addCommand = AddCommand.create(editingDomain, resources, POM_PACKAGE.getTestResources_TestResource(), resource);
+        compoundCommand.append(addCommand);
+        
+        editingDomain.getCommandStack().execute(compoundCommand);
+        resourcesEditor.setSelection(Collections.singletonList(resource));
+      }
+    });
+    
+    testResourcesEditor.setRemoveListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        CompoundCommand compoundCommand = new CompoundCommand();
+        EditingDomain editingDomain = parent.getEditingDomain();
+ 
+        List<Resource> selection = testResourcesEditor.getSelection();
+        for(Resource resource : selection) {
+          Command removeCommand = RemoveCommand.create(editingDomain, model.getBuild().getTestResources(), //
+              POM_PACKAGE.getTestResources_TestResource(), resource);
+          compoundCommand.append(removeCommand);
+        }
+        
+        editingDomain.getCommandStack().execute(compoundCommand);
+      }
+    });
   }
   
   public void loadData(MavenPomEditorPage editorPage) {
@@ -256,7 +568,37 @@ public class BuildComposite extends Composite {
   }
 
   public void updateView(MavenPomEditorPage editorPage, Notification notification) {
-    // XXX
+    Object object = notification.getNotifier();
+    
+    if(object instanceof Filters) {
+      filtersEditor.refresh();
+    }
+    
+    if(object instanceof Resources) {
+      resourcesEditor.refresh();
+    }
+    
+    if(object instanceof TestResources) {
+      testResourcesEditor.refresh();
+    }
+    
+    if(object instanceof Resource) {
+      resourcesEditor.refresh();
+      testResourcesEditor.refresh();
+      if(object==currentResource) {
+        loadResourceDetails(currentResource);
+      }
+    }
+    
+    if(object instanceof IncludesType) {
+      resourceIncludesEditor.refresh();
+    }
+
+    if(object instanceof ExcludesType) {
+      resourceExcludesEditor.refresh();
+    }
+
+    // XXX handle other notification types
   }
   
   private void loadBuild(Build build) {
@@ -285,13 +627,24 @@ public class BuildComposite extends Composite {
   }
 
   private void loadResourceDetails(Resource resource) {
+    if(changingSelection) {
+      return;
+    }
+    
+    currentResource = resource;
+    
+    if(parent!=null) {
+      parent.removeNotifyListener(resourceDirectoryText);
+      parent.removeNotifyListener(resourceTargetPathText);
+      parent.removeNotifyListener(resourceFilteringButton);
+    }
+    
     if(resource == null) {
       FormUtils.setEnabled(resourceDetailsSection, false);
       
-      resourceDirectoryText.setText("");
-      resourceTargetPathText.setText("");
-      
-      resourceFilteringButton.setSelection(false);
+      setText(resourceDirectoryText, "");
+      setText(resourceTargetPathText, "");
+      setButton(resourceFilteringButton, false);
       
       resourceIncludesEditor.setInput(null);
       resourceExcludesEditor.setInput(null);
@@ -302,13 +655,19 @@ public class BuildComposite extends Composite {
     FormUtils.setEnabled(resourceDetailsSection, true);
     FormUtils.setReadonly(resourceDetailsSection, parent.isReadOnly());
     
-    resourceDirectoryText.setText(nvl(resource.getDirectory()));
-    resourceTargetPathText.setText(nvl(resource.getTargetPath()));
-    
-    resourceFilteringButton.setSelection("true".equals(resource.getFiltering()));
+    setText(resourceDirectoryText, resource.getDirectory());
+    setText(resourceTargetPathText, resource.getTargetPath());
+    setButton(resourceFilteringButton, "true".equals(resource.getFiltering()));
     
     resourceIncludesEditor.setInput(resource.getIncludes()==null ? null : resource.getIncludes().getInclude());
     resourceExcludesEditor.setInput(resource.getExcludes()==null ? null : resource.getExcludes().getExclude());
+    
+    ValueProvider<Resource> provider = new ValueProvider.DefaultValueProvider<Resource>(resource);
+    parent.setModifyListener(resourceDirectoryText, provider, POM_PACKAGE.getResource_Directory(), "");
+    parent.setModifyListener(resourceTargetPathText, provider, POM_PACKAGE.getResource_TargetPath(), "");
+    parent.setModifyListener(resourceFilteringButton, provider, POM_PACKAGE.getResource_Filtering(), "false");
+    
+    parent.registerListeners();
   }
 
   /**

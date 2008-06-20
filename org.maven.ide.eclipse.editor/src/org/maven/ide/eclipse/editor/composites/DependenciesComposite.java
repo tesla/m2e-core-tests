@@ -212,10 +212,10 @@ public class DependenciesComposite extends Composite {
 
     dependenciesEditor.addSelectionListener(new ISelectionChangedListener() {
       public void selectionChanged(SelectionChangedEvent event) {
-        List<Dependency> list = dependenciesEditor.getSelection();
-        updateDependencyDetails(list.size()==1 ? list.get(0) : null);
+        List<Dependency> selection = dependenciesEditor.getSelection();
+        updateDependencyDetails(selection.size()==1 ? selection.get(0) : null);
         
-        if(!list.isEmpty()) {
+        if(!selection.isEmpty()) {
           changingSelection = true;
           try {
             dependencyManagementEditor.setSelection(Collections.<Dependency>emptyList());
@@ -295,10 +295,10 @@ public class DependenciesComposite extends Composite {
 
     dependencyManagementEditor.addSelectionListener(new ISelectionChangedListener() {
       public void selectionChanged(SelectionChangedEvent event) {
-        List<Dependency> list = dependencyManagementEditor.getSelection();
-        updateDependencyDetails(list.size()==1 ? list.get(0) : null);
+        List<Dependency> selection = dependencyManagementEditor.getSelection();
+        updateDependencyDetails(selection.size()==1 ? selection.get(0) : null);
         
-        if(!list.isEmpty()) {
+        if(!selection.isEmpty()) {
           changingSelection = true;
           try {
             dependenciesEditor.setSelection(Collections.<Dependency>emptyList());

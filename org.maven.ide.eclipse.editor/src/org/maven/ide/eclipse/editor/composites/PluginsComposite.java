@@ -29,13 +29,10 @@ import org.eclipse.emf.edit.command.AddCommand;
 import org.eclipse.emf.edit.command.RemoveCommand;
 import org.eclipse.emf.edit.command.SetCommand;
 import org.eclipse.emf.edit.domain.EditingDomain;
-import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
@@ -567,26 +564,7 @@ public class PluginsComposite extends Composite {
       }
     });
     
-    final TableViewer goalsViewer = goalsEditor.getViewer();
-    goalsViewer.setColumnProperties(new String[] {"goals"});
-    
-    final TextCellEditor editor = new TextCellEditor(goalsViewer.getTable());
-    // ((Text) editor.getControl()).setTextLimit(200);
-    // ((Text) editor.getControl()).setLayoutData(new ColumnWeightData(1, 200, true));
-    
- //    editor.addListener(new ICellEditorListener() {
- //      public void applyEditorValue() {
- //        
- //      }
- //
- //      public void cancelEditor() {
- //      }
- //
- //      public void editorValueChanged(boolean oldValidState, boolean newValidState) {
- //      }
- //    });
-    goalsViewer.setCellEditors(new CellEditor[] {editor});
-    goalsViewer.setCellModifier(new ICellModifier() {
+    goalsEditor.setCellModifier(new ICellModifier() {
       public boolean canModify(Object element, String property) {
         return true;
       }
@@ -596,13 +574,14 @@ public class PluginsComposite extends Composite {
       }
  
       public void modify(Object element, String property, Object value) {
-        int n = goalsViewer.getTable().getSelectionIndex();
+        int n = goalsEditor.getViewer().getTable().getSelectionIndex();
         
         // XXX use command stack
- //        EditingDomain editingDomain = parent.getEditingDomain();
- //        Command command = SetCommand.create(editingDomain, //
- //            currentPluginExecution.getGoals(), POM_PACKAGE.getGoals(), value, n);
- //        editingDomain.getCommandStack().execute(command);
+//        EditingDomain editingDomain = parent.getEditingDomain();
+//        Command command = SetCommand.create(editingDomain, //
+//            currentPluginExecution.getGoals(), POM_PACKAGE.getGoals(), value, n);
+//        editingDomain.getCommandStack().execute(command);
+
         currentPluginExecution.getGoals().getGoal().set(n, (String) value);
         goalsEditor.update();
       }
@@ -623,9 +602,9 @@ public class PluginsComposite extends Composite {
     executionConfigurePluginButton.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 
     pluginDependenciesSection = toolkit.createSection(detailsComposite, Section.TITLE_BAR);
-    GridData gd_pluginDependenciesSection = new GridData(SWT.FILL, SWT.FILL, true, true);
-    gd_pluginDependenciesSection.minimumHeight = 50;
-    pluginDependenciesSection.setLayoutData(gd_pluginDependenciesSection);
+    GridData pluginDependenciesSectionData = new GridData(SWT.FILL, SWT.FILL, true, true);
+    pluginDependenciesSectionData.minimumHeight = 50;
+    pluginDependenciesSection.setLayoutData(pluginDependenciesSectionData);
     pluginDependenciesSection.setText("Dependencies");
 
     pluginDependenciesEditor = new ListEditorComposite<Dependency>(pluginDependenciesSection, SWT.NONE);

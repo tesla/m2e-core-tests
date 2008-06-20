@@ -11,7 +11,9 @@ package org.maven.ide.eclipse.editor.composites;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -20,6 +22,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -141,6 +144,14 @@ public class ListEditorComposite<T> extends Composite {
     if(!viewer.getTable().isDisposed()) {
       viewer.refresh(true);
     }
+  }
+
+  public void setCellModifier(ICellModifier cellModifier) {
+    viewer.setColumnProperties(new String[] {"?"});
+    
+    TextCellEditor editor = new TextCellEditor(viewer.getTable());
+    viewer.setCellEditors(new CellEditor[] {editor});
+    viewer.setCellModifier(cellModifier);
   }
 
 }

@@ -68,19 +68,19 @@ public abstract class FormUtils {
   }
   
   public static void setText(Text control, String text) {
-    if(!control.getText().equals(text)) {
+    if(!control.isDisposed() && !control.getText().equals(text)) {
       control.setText(nvl(text));
     }
   }
   
   public static void setText(CCombo control, String text) {
-    if(!control.getText().equals(text)) {
+    if(!control.isDisposed() && !control.getText().equals(text)) {
       control.setText(nvl(text));
     }
   }
   
   public static void setButton(Button control, boolean selection) {
-    if(control.getSelection()!=selection) {
+    if(!control.isDisposed() && control.getSelection()!=selection) {
       control.setSelection(selection);
     }
   }
