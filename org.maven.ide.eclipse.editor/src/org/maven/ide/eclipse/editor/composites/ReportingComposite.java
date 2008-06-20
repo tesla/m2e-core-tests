@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -378,6 +379,11 @@ public class ReportingComposite extends Composite {
       reportPluginsEditor.setInput(reporting.getPlugins()==null ? null : reporting.getPlugins().getPlugin());
     }
     updateReportPluginDetails(null);
+  }
+
+  public void updateView(MavenPomEditorPage editorPage, Notification notification) {
+    // XXX implement notification andling
+  
   }
   
 }

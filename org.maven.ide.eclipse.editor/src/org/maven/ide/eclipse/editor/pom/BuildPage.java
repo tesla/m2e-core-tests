@@ -336,13 +336,14 @@ public class BuildPage extends MavenPomEditorPage {
       public Build getValue() {
         return model.getBuild();
       }
-      public void create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+      public Build create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
         Build build = model.getBuild();
         if(build==null) {
           build = PomFactory.eINSTANCE.createBuild();
           Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Build(), build);
           compoundCommand.append(command);
         }
+        return build;
       }
     };
     setModifyListener(sourceText, modelProvider, POM_PACKAGE.getBuild_SourceDirectory(), "");

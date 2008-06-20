@@ -24,7 +24,8 @@ public abstract class ValueProvider<T> {
 
   public abstract T getValue();
   
-  public void create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+  public T create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+    return null;
   }
 
   public boolean isEmpty() {

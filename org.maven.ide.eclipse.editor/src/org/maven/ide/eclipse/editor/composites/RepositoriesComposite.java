@@ -820,7 +820,7 @@ public class RepositoriesComposite extends Composite {
         DistributionManagement dm = model.getDistributionManagement();
         return dm==null ? null : dm.getRepository();
       }
-      public void create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+      public DeploymentRepository create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
         DistributionManagement dm = model.getDistributionManagement();
         if(dm==null) {
           dm = PomFactory.eINSTANCE.createDistributionManagement();
@@ -833,6 +833,7 @@ public class RepositoriesComposite extends Composite {
           Command command = SetCommand.create(editingDomain, dm, POM_PACKAGE.getDistributionManagement_Repository(), r);
           compoundCommand.append(command);
         }
+        return r;
       }
     };
     parent.setModifyListener(releaseRepositoryIdText, repositoryProvider, POM_PACKAGE.getDeploymentRepository_Id(), "");
@@ -850,7 +851,7 @@ public class RepositoriesComposite extends Composite {
         DistributionManagement dm = model.getDistributionManagement();
         return dm==null ? null : dm.getSnapshotRepository();
       }
-      public void create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+      public DeploymentRepository create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
         DistributionManagement dm = model.getDistributionManagement();
         if(dm==null) {
           dm = PomFactory.eINSTANCE.createDistributionManagement();
@@ -863,6 +864,7 @@ public class RepositoriesComposite extends Composite {
           Command command = SetCommand.create(editingDomain, dm, POM_PACKAGE.getDistributionManagement_SnapshotRepository(), r);
           compoundCommand.append(command);
         }
+        return r;
       }
     };
     parent.setModifyListener(snapshotRepositoryIdText, repositoryProvider, POM_PACKAGE.getDeploymentRepository_Id(), "");
@@ -878,13 +880,14 @@ public class RepositoriesComposite extends Composite {
       public DistributionManagement getValue() {
         return model.getDistributionManagement();
       }
-      public void create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+      public DistributionManagement create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
         DistributionManagement dm = model.getDistributionManagement();
         if(dm==null) {
           dm = PomFactory.eINSTANCE.createDistributionManagement();
           Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_DistributionManagement(), dm);
           compoundCommand.append(command);
         }
+        return dm;
       }
     };
     parent.setModifyListener(projectDownloadUrlText, dmProvider, POM_PACKAGE.getDistributionManagement_DownloadUrl(), "");
@@ -895,7 +898,7 @@ public class RepositoriesComposite extends Composite {
         DistributionManagement dm = model.getDistributionManagement();
         return dm==null ? null : dm.getSite();
       }
-      public void create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+      public Site create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
         DistributionManagement dm = model.getDistributionManagement();
         if(dm==null) {
           dm = PomFactory.eINSTANCE.createDistributionManagement();
@@ -908,6 +911,7 @@ public class RepositoriesComposite extends Composite {
           Command command = SetCommand.create(editingDomain, dm, POM_PACKAGE.getDistributionManagement_Site(), s);
           compoundCommand.append(command);
         }
+        return s;
       }
     };
     parent.setModifyListener(projectSiteIdText, siteProvider, POM_PACKAGE.getSite_Id(), "");
@@ -922,7 +926,7 @@ public class RepositoriesComposite extends Composite {
         DistributionManagement dm = model.getDistributionManagement();
         return dm==null ? null : dm.getRelocation();
       }
-      public void create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+      public Relocation create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
         DistributionManagement dm = model.getDistributionManagement();
         if(dm==null) {
           dm = PomFactory.eINSTANCE.createDistributionManagement();
@@ -935,7 +939,7 @@ public class RepositoriesComposite extends Composite {
           Command command = SetCommand.create(editingDomain, dm, POM_PACKAGE.getDistributionManagement_Relocation(), r);
           compoundCommand.append(command);
         }
-        super.create(editingDomain, compoundCommand);
+        return r;
       }
     };
     parent.setModifyListener(relocationGroupIdText, relocationProvider, POM_PACKAGE.getRelocation_GroupId(), "");
@@ -1168,13 +1172,14 @@ public class RepositoriesComposite extends Composite {
       public RepositoryPolicy getValue() {
         return repository.getReleases();
       }
-      public void create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+      public RepositoryPolicy create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
         RepositoryPolicy policy = getValue();
         if(policy == null) {
           policy = PomFactory.eINSTANCE.createRepositoryPolicy();
           Command command = SetCommand.create(editingDomain, repository, POM_PACKAGE.getRepository_Releases(), policy);
           compoundCommand.append(command);
         }
+        return policy;
       }
     };
     parent.setModifyListener(releasesEnabledButton, releasesProvider, POM_PACKAGE.getRepositoryPolicy_Enabled(), "true");
@@ -1186,13 +1191,14 @@ public class RepositoriesComposite extends Composite {
       public RepositoryPolicy getValue() {
         return repository.getSnapshots();
       }
-      public void create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+      public RepositoryPolicy create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
         RepositoryPolicy policy = getValue();
         if(policy == null) {
           policy = PomFactory.eINSTANCE.createRepositoryPolicy();
           Command command = SetCommand.create(editingDomain, repository, POM_PACKAGE.getRepository_Snapshots(), policy);
           compoundCommand.append(command);
         }
+        return policy;
       }
     };
     parent.setModifyListener(snapshotsEnabledButton, snapshotsProvider, POM_PACKAGE.getRepositoryPolicy_Enabled(), "true");

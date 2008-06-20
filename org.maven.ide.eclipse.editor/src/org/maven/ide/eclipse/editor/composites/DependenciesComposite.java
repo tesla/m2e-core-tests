@@ -9,8 +9,8 @@
 package org.maven.ide.eclipse.editor.composites;
 
 import static org.maven.ide.eclipse.editor.pom.FormUtils.nvl;
-import static org.maven.ide.eclipse.editor.pom.FormUtils.setText;
 import static org.maven.ide.eclipse.editor.pom.FormUtils.setButton;
+import static org.maven.ide.eclipse.editor.pom.FormUtils.setText;
 
 import java.util.Collections;
 import java.util.List;
@@ -53,7 +53,6 @@ import org.maven.ide.components.pom.Dependency;
 import org.maven.ide.components.pom.DependencyManagement;
 import org.maven.ide.components.pom.Exclusion;
 import org.maven.ide.components.pom.ExclusionsType;
-import org.maven.ide.components.pom.Model;
 import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.PomPackage;
 import org.maven.ide.eclipse.actions.MavenRepositorySearchDialog;
@@ -107,13 +106,15 @@ public class DependenciesComposite extends Composite {
   
   // model
   
-  Model model;
-  
   Dependency currentDependency;
 
   Exclusion currentExclusion;
 
   boolean changingSelection = false;
+
+  private ValueProvider<Dependencies> dependenciesProvider;
+
+  private ValueProvider<DependencyManagement> dependencyManagementProvider;
   
 
   public DependenciesComposite(Composite composite, int flags) {
@@ -172,12 +173,9 @@ public class DependenciesComposite extends Composite {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = parent.getEditingDomain();
         
-        Dependencies dependencies = model.getDependencies();
+        Dependencies dependencies = dependenciesProvider.getValue();
         if(dependencies == null) {
-          dependencies = PomFactory.eINSTANCE.createDependencies();
-          Command createDependenciesCommand = SetCommand.create(editingDomain, model, 
-              POM_PACKAGE.getModel_Dependencies(), dependencies);
-          compoundCommand.append(createDependenciesCommand);
+          dependencies = dependenciesProvider.create(editingDomain, compoundCommand);
         }
         
         Dependency dependency = PomFactory.eINSTANCE.createDependency();
@@ -200,7 +198,7 @@ public class DependenciesComposite extends Composite {
 
         List<Dependency> dependencyList = dependenciesEditor.getSelection();
         for(Dependency dependency : dependencyList) {
-          Command removeCommand = RemoveCommand.create(editingDomain, model.getDependencies(), 
+          Command removeCommand = RemoveCommand.create(editingDomain, dependenciesProvider.getValue(), 
         		  POM_PACKAGE.getDependencies_Dependency(), dependency);
           compoundCommand.append(removeCommand);
         }
@@ -247,12 +245,13 @@ public class DependenciesComposite extends Composite {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = parent.getEditingDomain();
         
-        DependencyManagement dependencyManagement = model.getDependencyManagement();
+        DependencyManagement dependencyManagement = dependencyManagementProvider.getValue();
         if(dependencyManagement == null) {
-          dependencyManagement = PomFactory.eINSTANCE.createDependencyManagement();
-          Command createDependencyManagement = SetCommand.create(editingDomain, model, 
-              POM_PACKAGE.getModel_DependencyManagement(), dependencyManagement);
-          compoundCommand.append(createDependencyManagement);
+          dependencyManagement = dependencyManagementProvider.create(editingDomain, compoundCommand);
+//          dependencyManagement = PomFactory.eINSTANCE.createDependencyManagement();
+//          Command createDependencyManagement = SetCommand.create(editingDomain, model, 
+//              POM_PACKAGE.getModel_DependencyManagement(), dependencyManagement);
+//          compoundCommand.append(createDependencyManagement);
         }
         
         Dependencies dependencies = dependencyManagement.getDependencies();
@@ -283,7 +282,8 @@ public class DependenciesComposite extends Composite {
  
         List<Dependency> dependencyList = dependencyManagementEditor.getSelection();
         for(Dependency dependency : dependencyList) {
-          Command removeCommand = RemoveCommand.create(editingDomain, model.getDependencyManagement().getDependencies(), 
+          Command removeCommand = RemoveCommand.create(editingDomain, //
+              dependencyManagementProvider.getValue().getDependencies(), //
               POM_PACKAGE.getDependencies_Dependency(), dependency);
           compoundCommand.append(removeCommand);
         }
@@ -687,11 +687,12 @@ public class DependenciesComposite extends Composite {
     parent.registerListeners();
   }
 
-  public void loadData(MavenPomEditorPage editorPage) {
-    parent = editorPage;
-    model = editorPage.getModel();
-    loadDependencies(model);
-    loadDependencyManagement(model);
+  public void loadData(MavenPomEditorPage editorPage, ValueProvider<Dependencies> dependenciesProvider, ValueProvider<DependencyManagement> dependencyManagementProvider) {
+    this.parent = editorPage;
+    this.dependenciesProvider = dependenciesProvider;
+    this.dependencyManagementProvider = dependencyManagementProvider;
+    loadDependencies();
+    loadDependencyManagement();
     
     dependenciesEditor.setReadOnly(parent.isReadOnly());
     dependencyManagementEditor.setReadOnly(parent.isReadOnly());
@@ -701,8 +702,8 @@ public class DependenciesComposite extends Composite {
     // exclusionsEditor.setReadOnly(parent.isReadOnly());
   }
 
-  private void loadDependencyManagement(Model model) {
-    DependencyManagement dependencyManagement = model.getDependencyManagement();
+  private void loadDependencyManagement() {
+    DependencyManagement dependencyManagement = dependencyManagementProvider.getValue();
     changingSelection = true;
     if(dependencyManagement != null) {
       Dependencies dependencies = dependencyManagement.getDependencies();
@@ -713,8 +714,8 @@ public class DependenciesComposite extends Composite {
     changingSelection = false;
   }
 
-  private void loadDependencies(Model model) {
-    Dependencies dependencies = model.getDependencies();
+  private void loadDependencies() {
+    Dependencies dependencies = dependenciesProvider.getValue();
     changingSelection = true;
     dependenciesEditor.setInput(dependencies == null ? null : dependencies.getDependency());
     changingSelection = false;

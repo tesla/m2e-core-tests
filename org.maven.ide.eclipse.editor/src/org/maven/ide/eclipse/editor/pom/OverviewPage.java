@@ -791,9 +791,10 @@ public class OverviewPage extends MavenPomEditorPage {
       public Parent getValue() {
         return model.getParent();
       }
-      public void create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
-        compoundCommand.append(SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Parent(), //
-            PomFactory.eINSTANCE.createParent()));
+      public Parent create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+        Parent parent = PomFactory.eINSTANCE.createParent();
+        compoundCommand.append(SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Parent(), parent));
+        return parent;
       }
     };
     setModifyListener(parentGroupIdText, parentProvider, POM_PACKAGE.getParent_GroupId(), "");
@@ -808,9 +809,11 @@ public class OverviewPage extends MavenPomEditorPage {
       public Organization getValue() {
         return model.getOrganization();
       }
-      public void create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+      public Organization create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+        Organization organization = PomFactory.eINSTANCE.createOrganization();
         compoundCommand.append(SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Organization(), //
-            PomFactory.eINSTANCE.createOrganization()));
+            organization));
+        return organization;
       }
     };
     setModifyListener(organizationNameText, organizationProvider, POM_PACKAGE.getOrganization_Name(), "");
@@ -823,9 +826,10 @@ public class OverviewPage extends MavenPomEditorPage {
       public Scm getValue() {
         return null;
       }
-      public void create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
-        compoundCommand.append(SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Scm(), //
-            PomFactory.eINSTANCE.createScm()));
+      public Scm create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+        Scm scm = PomFactory.eINSTANCE.createScm();
+        compoundCommand.append(SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Scm(), scm));
+        return scm;
       }
     };
     setModifyListener(scmUrlText, scmProvider, POM_PACKAGE.getScm_Url(), "");
@@ -885,9 +889,11 @@ public class OverviewPage extends MavenPomEditorPage {
       public IssueManagement getValue() {
         return model.getIssueManagement();
       }
-      public void create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+      public IssueManagement create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+        IssueManagement issueManagement = PomFactory.eINSTANCE.createIssueManagement();
         compoundCommand.append(SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_IssueManagement(), //
-            PomFactory.eINSTANCE.createIssueManagement()));
+            issueManagement));
+        return issueManagement;
       }
     };
     setModifyListener(issueManagementUrlText, issueManagementProvider, POM_PACKAGE.getIssueManagement_Url(), "");
@@ -901,9 +907,11 @@ public class OverviewPage extends MavenPomEditorPage {
       public CiManagement getValue() {
         return model.getCiManagement();
       }
-      public void create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+      public CiManagement create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+        CiManagement ciManagement = PomFactory.eINSTANCE.createCiManagement();
         compoundCommand.append(SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_CiManagement(), //
-            PomFactory.eINSTANCE.createCiManagement()));
+            ciManagement));
+        return ciManagement;
       }
     };
     setModifyListener(ciManagementUrlText, ciManagementProvider, POM_PACKAGE.getCiManagement_Url(), "");
