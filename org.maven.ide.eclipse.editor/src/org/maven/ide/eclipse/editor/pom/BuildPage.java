@@ -432,7 +432,9 @@ public class BuildPage extends MavenPomEditorPage {
       }
     }
 
-    buildComposite.updateView(this, notification);
+    if(buildComposite!=null) {
+      buildComposite.updateView(this, notification);
+    }
   }
 }
 

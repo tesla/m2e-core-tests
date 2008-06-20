@@ -9,10 +9,21 @@
 package org.maven.ide.eclipse.editor.pom;
 
 import static org.maven.ide.eclipse.editor.pom.FormUtils.nvl;
+import static org.maven.ide.eclipse.editor.pom.FormUtils.isEmpty;
+import static org.maven.ide.eclipse.editor.pom.FormUtils.setText;
+import static org.maven.ide.eclipse.editor.pom.FormUtils.setButton;
 
+import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.emf.common.command.Command;
+import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.common.notify.Notification;
+import org.eclipse.emf.edit.command.AddCommand;
+import org.eclipse.emf.edit.command.RemoveCommand;
+import org.eclipse.emf.edit.command.SetCommand;
+import org.eclipse.emf.edit.domain.EditingDomain;
+import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -39,10 +50,13 @@ import org.maven.ide.components.pom.ActivationOS;
 import org.maven.ide.components.pom.ActivationProperty;
 import org.maven.ide.components.pom.BuildBase;
 import org.maven.ide.components.pom.Dependencies;
+import org.maven.ide.components.pom.Modules;
+import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.Profile;
 import org.maven.ide.components.pom.ProfilesType;
 import org.maven.ide.components.pom.Reporting;
 import org.maven.ide.components.pom.Repositories;
+import org.maven.ide.components.pom.StringModules;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.editor.composites.BuildComposite;
@@ -61,27 +75,30 @@ import org.maven.ide.eclipse.wizards.WidthGroup;
 public class ProfilesPage extends MavenPomEditorPage {
 
   // controls
-  private Text activationFileMissingText;
-  private Text activationFileExistText;
-  private Text activationPropertyValueText;
-  private Text activationPropertyNameText;
-  private Text activationOsVersionText;
-  private Text activationOsArchitectureText;
-  private Text activationOsFamilyText;
-  private Text activationOsNameText;
-  private Text activationJdkText;
-  private ListEditorComposite<Profile> profilesEditor;
-  private ListEditorComposite<PropertyPair> propertiesEditor;
-  private ListEditorComposite<String> modulesEditor;
-  private Section modulesSection;
-  private Section propertiesSection;
+  Text activationFileMissingText;
+  Text activationFileExistText;
+  Text activationPropertyValueText;
+  Text activationPropertyNameText;
+  Text activationOsVersionText;
+  Text activationOsArchitectureText;
+  Text activationOsFamilyText;
+  Text activationOsNameText;
+  Text activationJdkText;
+  ListEditorComposite<Profile> profilesEditor;
+  ListEditorComposite<PropertyPair> propertiesEditor;
+  ListEditorComposite<String> modulesEditor;
+  Section modulesSection;
+  Section propertiesSection;
   
-  private BuildComposite buildTabComposite;
-  private PluginsComposite pluginsTabComposite;
-  private DependenciesComposite dependenciesTabComposite;
-  private RepositoriesComposite repositoriesTabComposite;
-  private ReportingComposite reportingTabComposite;
-  private Button activeByDefaultbutton;
+  BuildComposite buildTabComposite;
+  PluginsComposite pluginsTabComposite;
+  DependenciesComposite dependenciesTabComposite;
+  RepositoriesComposite repositoriesTabComposite;
+  ReportingComposite reportingTabComposite;
+  Button activeByDefaultbutton;
+  
+  private Profile currentProfile;
+  private CTabFolder tabFolder;
   
   
   public ProfilesPage(MavenPomEditor pomEditor) {
@@ -102,11 +119,10 @@ public class ProfilesPage extends MavenPomEditorPage {
   
     createProfilesSection(toolkit, body);
 
-    createProfileDetailsSection(toolkit, body);
     createModulesSection(toolkit, body);
     createPropertiesSection(toolkit, body);
 
-    CTabFolder tabFolder = new CTabFolder(body, SWT.FLAT | SWT.MULTI);
+    tabFolder = new CTabFolder(body, SWT.FLAT | SWT.MULTI);
     GridData tabFolderData = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1);
     tabFolderData.verticalIndent = 5;
     tabFolder.setLayoutData(tabFolderData);
@@ -151,7 +167,7 @@ public class ProfilesPage extends MavenPomEditorPage {
       public String getText(Object element) {
         if(element instanceof Profile) {
           String profileId = ((Profile) element).getId();
-          return profileId==null || profileId.length()==0 ? "[unknown]" : profileId;
+          return isEmpty(profileId) ? "?" : profileId;
         }
         return super.getText(element);
       }
@@ -168,25 +184,75 @@ public class ProfilesPage extends MavenPomEditorPage {
       }
     });
   
-    // XXX implement actions
+    profilesEditor.setAddListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        CompoundCommand compoundCommand = new CompoundCommand();
+        EditingDomain editingDomain = getEditingDomain();
+        
+        ProfilesType profiles = model.getProfiles();
+        if(profiles == null) {
+          profiles = PomFactory.eINSTANCE.createProfilesType();
+          Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Profiles(), profiles);
+          compoundCommand.append(command);
+        }
+
+        Profile profile = PomFactory.eINSTANCE.createProfile();
+        Command addCommand = AddCommand.create(editingDomain, profiles, POM_PACKAGE.getProfilesType_Profile(), profile);
+        compoundCommand.append(addCommand);
+        
+        editingDomain.getCommandStack().execute(compoundCommand);
+        profilesEditor.setSelection(Collections.singletonList(profile));
+      }
+    });
+    
+    profilesEditor.setRemoveListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        CompoundCommand compoundCommand = new CompoundCommand();
+        EditingDomain editingDomain = getEditingDomain();
+ 
+        List<Profile> selection = profilesEditor.getSelection();
+        for(Profile filter : selection) {
+          Command removeCommand = RemoveCommand.create(editingDomain, model.getProfiles(), //
+              POM_PACKAGE.getProfilesType_Profile(), filter);
+          compoundCommand.append(removeCommand);
+        }
+        
+        editingDomain.getCommandStack().execute(compoundCommand);
+      }
+    });
+    
+    profilesEditor.setCellModifier(new ICellModifier() {
+      public boolean canModify(Object element, String property) {
+        return true;
+      }
+      public Object getValue(Object element, String property) {
+        if(element instanceof Profile) {
+          String id = ((Profile) element).getId();
+          return isEmpty(id) ? "" : id;
+        }
+        return "";
+      }
+
+      public void modify(Object element, String property, Object value) {
+        int n = profilesEditor.getViewer().getTable().getSelectionIndex();
+        Profile profile = model.getProfiles().getProfile().get(n);
+        if(!value.equals(profile.getId())) {
+          EditingDomain editingDomain = getEditingDomain();
+          Command command = SetCommand.create(editingDomain, profile, POM_PACKAGE.getProfile_Id(), value);
+          editingDomain.getCommandStack().execute(command);
+          profilesEditor.refresh();
+        }
+      }
+    });
+    
 
     profilesEditor.setReadOnly(pomEditor.isReadOnly());
   }
 
-  private void createProfileDetailsSection(FormToolkit toolkit, Composite body) {
-  }
-
   private void createPropertiesSection(FormToolkit toolkit, Composite body) {
-    // XXX implement actions
-
-    propertiesEditor.setReadOnly(pomEditor.isReadOnly());
-  }
-
-  private void createModulesSection(FormToolkit toolkit, Composite body) {
     propertiesSection = toolkit.createSection(body, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
     propertiesSection.setText("Properties");
-    GridData propertiesSectionData = new GridData(SWT.FILL, SWT.FILL, true, false);
-    propertiesSection.setLayoutData(propertiesSectionData);
+    propertiesSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
     
     propertiesEditor = new ListEditorComposite<PropertyPair>(propertiesSection, SWT.NONE);
     propertiesEditor.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -197,10 +263,15 @@ public class ProfilesPage extends MavenPomEditorPage {
     propertiesEditor.setContentProvider(new ListEditorContentProvider<PropertyPair>());
     propertiesEditor.setLabelProvider(new StringLabelProvider(MavenEditorImages.IMG_PROPERTY));
     
+    // XXX implement properties actions
+
+    // propertiesEditor.setReadOnly(pomEditor.isReadOnly());
     FormUtils.setEnabled(propertiesSection, false);
+  }
+
+  private void createModulesSection(FormToolkit toolkit, Composite body) {
     modulesSection = toolkit.createSection(body, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
-    GridData modulesSectionData = new GridData(SWT.FILL, SWT.FILL, true, false, 1, 2);
-    modulesSection.setLayoutData(modulesSectionData);
+    modulesSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 2));
     modulesSection.setText("Modules");
 
     modulesEditor = new ListEditorComposite<String>(modulesSection, SWT.NONE);
@@ -212,12 +283,69 @@ public class ProfilesPage extends MavenPomEditorPage {
     modulesEditor.setContentProvider(new ListEditorContentProvider<String>());
     modulesEditor.setLabelProvider(new ModulesLabelProvider(this));
     
-    // XXX implement actions
+    modulesEditor.setAddListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        CompoundCommand compoundCommand = new CompoundCommand();
+        EditingDomain editingDomain = getEditingDomain();
+        
+        StringModules modules = currentProfile.getModules();
+        if(modules == null) {
+          modules = PomFactory.eINSTANCE.createStringModules();
+          Command command = SetCommand.create(editingDomain, currentProfile, POM_PACKAGE.getProfile_Modules(), modules);
+          compoundCommand.append(command);
+        }
 
-    modulesEditor.setReadOnly(pomEditor.isReadOnly());
+        String module = "?";
+        Command addCommand = AddCommand.create(editingDomain, modules, POM_PACKAGE.getStringModules_Module(), module);
+        compoundCommand.append(addCommand);
+        
+        editingDomain.getCommandStack().execute(compoundCommand);
+        modulesEditor.setSelection(Collections.singletonList(module));
+      }
+    });
+    
+    modulesEditor.setRemoveListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        CompoundCommand compoundCommand = new CompoundCommand();
+        EditingDomain editingDomain = getEditingDomain();
+ 
+        List<String> selection = modulesEditor.getSelection();
+        for(String module : selection) {
+          Command removeCommand = RemoveCommand.create(editingDomain, currentProfile.getModules(), //
+              POM_PACKAGE.getStringModules_Module(), module);
+          compoundCommand.append(removeCommand);
+        }
+        
+        editingDomain.getCommandStack().execute(compoundCommand);
+      }
+    });
+    
+    modulesEditor.setCellModifier(new ICellModifier() {
+      public boolean canModify(Object element, String property) {
+        return true;
+      }
+
+      public Object getValue(Object element, String property) {
+        return element;
+      }
+
+      public void modify(Object element, String property, Object value) {
+        int n = modulesEditor.getViewer().getTable().getSelectionIndex();
+        StringModules modules = currentProfile.getModules();
+        String module = modules.getModule().get(n);
+        if(!value.equals(module)) {
+          EditingDomain editingDomain = getEditingDomain();
+          Command command = SetCommand.create(editingDomain, modules, POM_PACKAGE.getStringModules_Module(), value, n);
+          editingDomain.getCommandStack().execute(command);
+          modulesEditor.refresh();
+        }
+      }
+    });
   }
 
   protected void updateProfileDetails(Profile profile) {
+    currentProfile = profile;
+    
     if(profile==null) {
       FormUtils.setEnabled(propertiesSection, false);
       FormUtils.setEnabled(modulesSection, false);
@@ -242,12 +370,26 @@ public class ProfilesPage extends MavenPomEditorPage {
   }
 
   private void updateProfileTabs(Profile profile) {
-    updateActivationTab(profile==null || profile.getActivation()==null ? null : profile.getActivation());
-    updateDependenciesTab(profile==null || profile.getDependencies()==null ? null : profile.getDependencies());
-    updateRepositoriesTab(profile==null || profile.getRepositories()==null ? null : profile.getRepositories());
-    updateBuildTab(profile==null || profile.getBuild()==null ? null : profile.getBuild());
-    updatePluginsTab(profile==null || profile.getBuild()==null ? null : profile.getBuild());
-    updateReportsTab(profile==null || profile.getReporting()==null ? null : profile.getReporting());
+    if(profile==null) {
+      FormUtils.setEnabled(tabFolder, false);
+      updateActivationTab(null);
+      updateDependenciesTab(null);
+      updateRepositoriesTab(null);
+      updateBuildTab(null);
+      updatePluginsTab(null);
+      updateReportsTab(null);
+      
+    } else {
+      FormUtils.setEnabled(tabFolder, true);
+      FormUtils.setReadonly(tabFolder, isReadOnly());
+    
+      updateActivationTab(profile.getActivation()==null ? null : profile.getActivation());
+      updateDependenciesTab(profile.getDependencies()==null ? null : profile.getDependencies());
+      updateRepositoriesTab(profile.getRepositories()==null ? null : profile.getRepositories());
+      updateBuildTab(profile.getBuild()==null ? null : profile.getBuild());
+      updatePluginsTab(profile.getBuild()==null ? null : profile.getBuild());
+      updateReportsTab(profile.getReporting()==null ? null : profile.getReporting());
+    }
   }
 
   private void updateActivationTab(Activation activation) {
@@ -488,7 +630,24 @@ public class ProfilesPage extends MavenPomEditorPage {
   }
 
   public void updateView(Notification notification) {
-    // TODO Auto-generated method stub
+    Object object = notification.getNotifier();
+    
+    if(object instanceof ProfilesType) {
+      profilesEditor.refresh();
+    }
+    
+    if(object instanceof Profile) {
+      profilesEditor.refresh();
+      if(currentProfile == object) {
+        updateProfileDetails(currentProfile);
+      }
+    }
+    
+    if(object instanceof StringModules) {
+      modulesEditor.refresh();
+    }
+    
+    // XXX handle other notification types
     
   }
 
