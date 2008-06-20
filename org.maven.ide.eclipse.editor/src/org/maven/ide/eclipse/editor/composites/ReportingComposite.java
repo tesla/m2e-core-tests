@@ -27,7 +27,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
@@ -101,19 +100,28 @@ public class ReportingComposite extends Composite {
 
     createContentSection(horizontalSash);
 
-    SashForm verticalSash = new SashForm(horizontalSash, SWT.VERTICAL);
-    toolkit.adapt(verticalSash, true, true);
-
+    Composite verticalSash = toolkit.createComposite(horizontalSash);
+    GridLayout reportingPluginDetailsLayout = new GridLayout();
+    reportingPluginDetailsLayout.marginWidth = 0;
+    reportingPluginDetailsLayout.marginHeight = 0;
+    verticalSash.setLayout(reportingPluginDetailsLayout);
+    
     createPluginDetailsSection(verticalSash);
     createReportSetDetails(verticalSash);
-    
-    verticalSash.setWeights(new int[] {215, 170});
 
     horizontalSash.setWeights(new int[] {1, 1});
   }
 
   private void createContentSection(SashForm horizontalSash) {
-    Section contentSection = toolkit.createSection(horizontalSash, Section.TITLE_BAR);
+
+    Composite composite_1 = toolkit.createComposite(horizontalSash, SWT.NONE);
+    GridLayout gridLayout = new GridLayout();
+    gridLayout.marginWidth = 0;
+    gridLayout.marginHeight = 0;
+    composite_1.setLayout(gridLayout);
+    toolkit.paintBordersFor(composite_1);
+    Section contentSection = toolkit.createSection(composite_1, Section.TITLE_BAR);
+    contentSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
     contentSection.setText("Content");
   
     Composite composite = toolkit.createComposite(contentSection, SWT.NONE);
@@ -127,13 +135,14 @@ public class ReportingComposite extends Composite {
     outputFolderText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
   
     excludeDefaultsButton = toolkit.createButton(composite, "Exclude Defaults", SWT.CHECK);
-    excludeDefaultsButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
+    excludeDefaultsButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 2, 1));
+
+    Section reportingPluginsSection = toolkit.createSection(composite_1, Section.TITLE_BAR);
+    reportingPluginsSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
+    reportingPluginsSection.setText("Reporting Plugins");
   
-    Label label = toolkit.createLabel(composite, "Plugins:", SWT.NONE);
-    label.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
-  
-    reportPluginsEditor = new ListEditorComposite<ReportPlugin>(composite, SWT.NONE);
-    reportPluginsEditor.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true, 2, 1));
+    reportPluginsEditor = new ListEditorComposite<ReportPlugin>(reportingPluginsSection, SWT.NONE);
+    reportingPluginsSection.setClient(reportPluginsEditor);
     toolkit.paintBordersFor(reportPluginsEditor);
     toolkit.adapt(reportPluginsEditor);
     
@@ -171,12 +180,21 @@ public class ReportingComposite extends Composite {
     // XXX implement actions
   }
 
-  private void createPluginDetailsSection(SashForm verticalSash) {
+  private void createPluginDetailsSection(Composite verticalSash) {
+    
+    // XXX implement editor actions
+  }
+
+  private void createReportSetDetails(Composite verticalSash) {
     pluginDetailsSection = toolkit.createSection(verticalSash, Section.TITLE_BAR);
-    pluginDetailsSection.setText("Plugin Details");
+    pluginDetailsSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+    pluginDetailsSection.setText("Reporting Plugin Details");
   
     Composite pluginDetailsComposite = toolkit.createComposite(pluginDetailsSection, SWT.NONE);
-    pluginDetailsComposite.setLayout(new GridLayout(2, false));
+    GridLayout gridLayout_1 = new GridLayout(2, false);
+    gridLayout_1.marginWidth = 2;
+    gridLayout_1.marginHeight = 2;
+    pluginDetailsComposite.setLayout(gridLayout_1);
     pluginDetailsSection.setClient(pluginDetailsComposite);
     toolkit.paintBordersFor(pluginDetailsComposite);
   
@@ -218,16 +236,16 @@ public class ReportingComposite extends Composite {
     toolkit.paintBordersFor(pluginConfigureComposite);
   
     pluginInheritedButton = toolkit.createButton(pluginConfigureComposite, "Inherited", SWT.CHECK);
-    pluginInheritedButton.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+    pluginInheritedButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
   
     pluginConfigureButton = toolkit.createHyperlink(pluginConfigureComposite, "Configuration", SWT.NONE);
     pluginConfigureButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+    Section reportSetsSection = toolkit.createSection(verticalSash, Section.TITLE_BAR);
+    reportSetsSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+    reportSetsSection.setText("Report Sets");
   
-    Label reportSetsLabel = toolkit.createLabel(pluginDetailsComposite, "Report Sets:", SWT.NONE);
-    reportSetsLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
-  
-    reportSetsEditor = new ListEditorComposite<ReportSet>(pluginDetailsComposite, SWT.NONE);
-    reportSetsEditor.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true, 2, 1));
+    reportSetsEditor = new ListEditorComposite<ReportSet>(reportSetsSection, SWT.NONE);
+    reportSetsSection.setClient(reportSetsEditor);
     toolkit.paintBordersFor(reportSetsEditor);
     toolkit.adapt(reportSetsEditor);
   
@@ -253,18 +271,25 @@ public class ReportingComposite extends Composite {
         updateReportSetDetails(selection.size()==1 ? selection.get(0) : null);
       }
     });
-    
-    // XXX implement editor actions
-  }
-
-  private void createReportSetDetails(SashForm verticalSash) {
     reportSetDetailsSection = toolkit.createSection(verticalSash, Section.TITLE_BAR);
-    reportSetDetailsSection.setText("Report Set Details");
+    reportSetDetailsSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+    reportSetDetailsSection.setText("Report Set Reports");
 
     Composite reportSetDetailsComposite = toolkit.createComposite(reportSetDetailsSection, SWT.NONE);
-    reportSetDetailsComposite.setLayout(new GridLayout(1, false));
+    GridLayout gridLayout = new GridLayout(1, false);
+    gridLayout.marginWidth = 1;
+    gridLayout.marginHeight = 1;
+    reportSetDetailsComposite.setLayout(gridLayout);
     reportSetDetailsSection.setClient(reportSetDetailsComposite);
     toolkit.paintBordersFor(reportSetDetailsComposite);
+
+    reportsEditor = new ListEditorComposite<String>(reportSetDetailsComposite, SWT.NONE);
+    reportsEditor.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+    toolkit.paintBordersFor(reportsEditor);
+    toolkit.adapt(reportsEditor);
+    
+    reportsEditor.setContentProvider(new ListEditorContentProvider<String>());
+    reportsEditor.setLabelProvider(new StringLabelProvider(MavenEditorImages.IMG_REPORT));
 
     Composite reportSetConfigureComposite = toolkit.createComposite(reportSetDetailsComposite, SWT.NONE);
     reportSetConfigureComposite.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
@@ -276,21 +301,10 @@ public class ReportingComposite extends Composite {
     toolkit.paintBordersFor(reportSetConfigureComposite);
 
     reportSetInheritedButton = toolkit.createButton(reportSetConfigureComposite, "Inherited", SWT.CHECK);
-    reportSetInheritedButton.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+    reportSetInheritedButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
     reportSetConfigureButton = toolkit.createHyperlink(reportSetConfigureComposite, "Configuration", SWT.NONE);
     reportSetConfigureButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
-
-    Label reportsLabel = toolkit.createLabel(reportSetDetailsComposite, "Reports:", SWT.NONE);
-    reportsLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-
-    reportsEditor = new ListEditorComposite<String>(reportSetDetailsComposite, SWT.NONE);
-    reportsEditor.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-    toolkit.paintBordersFor(reportsEditor);
-    toolkit.adapt(reportsEditor);
-    
-    reportsEditor.setContentProvider(new ListEditorContentProvider<String>());
-    reportsEditor.setLabelProvider(new StringLabelProvider(MavenEditorImages.IMG_REPORT));
 
     // XXX implement editor actions
   }
