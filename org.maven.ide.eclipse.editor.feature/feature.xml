@@ -35,9 +35,6 @@ http://www.eclipse.org/legal/epl-v10.html
       <import plugin="org.eclipse.ui.workbench"/>
       <import plugin="org.eclipse.jface.text"/>
       <import plugin="org.eclipse.jdt.core"/>
-      <import plugin="org.eclipse.draw2d"/>
-      <import plugin="org.eclipse.zest.core"/>
-      <import plugin="org.eclipse.zest.layouts"/>
       <import plugin="org.eclipse.wst.sse.ui"/>
       <import plugin="org.eclipse.wst.common.emf"/>
       <import plugin="org.eclipse.wst.sse.core"/>
@@ -60,5 +57,26 @@ http://www.eclipse.org/legal/epl-v10.html
          download-size="0"
          install-size="0"
          version="0.0.0"/>
+
+   <plugin
+         id="org.eclipse.draw2d"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.zest.core"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.zest.layouts"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
 
 </feature>
