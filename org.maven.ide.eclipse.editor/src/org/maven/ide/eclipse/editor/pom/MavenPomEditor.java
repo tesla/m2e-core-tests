@@ -53,9 +53,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.AdapterFactory;
 import org.eclipse.emf.common.notify.impl.AdapterFactoryImpl;
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.edit.domain.AdapterFactoryEditingDomain;
 import org.eclipse.emf.edit.domain.EditingDomain;
@@ -80,8 +82,10 @@ import org.eclipse.wst.common.internal.emf.resource.EMF2DOMRenderer;
 import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
+import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
+import org.eclipse.wst.xml.core.internal.emf2xml.EMF2DOMSSEAdapter;
 import org.eclipse.wst.xml.core.internal.emf2xml.EMF2DOMSSERenderer;
 import org.maven.ide.components.pom.Model;
 import org.maven.ide.components.pom.util.PomResourceFactoryImpl;
@@ -124,13 +128,13 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 
   DependencyGraphPage graphPage;
   
+  StructuredTextEditor sourcePage;
+  
   List<MavenPomEditorPage> pages = new ArrayList<MavenPomEditorPage>();
   
   private Model projectDocument;
 
   private DependencyNode rootNode;
-
-  private StructuredTextEditor textEditor;
 
   private PomResourceImpl resource;
 
@@ -212,23 +216,20 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     graphPage = new DependencyGraphPage(this);
     addPomPage(graphPage);
     
-    // sourcePage = new SourcePage(this);
-    // addPomPage(sourcePage);
-    
-    textEditor = new StructuredTextEditor();
-    textEditor.setEditorPart(this);
+    sourcePage = new StructuredTextEditor();
+    sourcePage.setEditorPart(this);
 
     try {
-      int sourcePageIndex = addPage(textEditor, getEditorInput());
+      int sourcePageIndex = addPage(sourcePage, getEditorInput());
       setPageText(sourcePageIndex, "pom.xml");
-      textEditor.update();
+      sourcePage.update();
       try {
         readProjectDocument();
       } catch(CoreException e) {
         MavenPlugin.log(e);
       }
       
-      IDocument doc = textEditor.getDocumentProvider().getDocument(getEditorInput());
+      IDocument doc = sourcePage.getDocumentProvider().getDocument(getEditorInput());
       if (doc instanceof IStructuredDocument) {
         List<AdapterFactoryImpl> factories = new ArrayList<AdapterFactoryImpl>();
         factories.add(new ResourceItemProviderAdapterFactory());
@@ -260,8 +261,9 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   
   private int addPomPage(IFormPage page) {
     try {
-      if (page instanceof MavenPomEditorPage)
+      if (page instanceof MavenPomEditorPage) {
         pages.add((MavenPomEditorPage) page);
+      }
       return addPage(page);
     } catch (PartInitException ex) {
       MavenPlugin.log(ex);
@@ -623,7 +625,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   public void doSave(IProgressMonitor monitor) {
     new UIJob("Saving") {
       public IStatus runInUIThread(IProgressMonitor monitor) {
-        textEditor.doSave(monitor);
+        sourcePage.doSave(monitor);
         return Status.OK_STATUS;
       }
     }.schedule();
@@ -658,8 +660,19 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     super.init(site, editorInput);
   }
 
-  protected void pageChange(int newPageIndex) {
-    super.pageChange(newPageIndex);
+  public void showInSourceEditor(EObject element) {
+    for(Adapter adapter : element.eAdapters()) {
+      if(adapter instanceof EMF2DOMSSEAdapter) {
+        EMF2DOMSSEAdapter a = (EMF2DOMSSEAdapter) adapter;
+        if(a.getNode() instanceof IndexedRegion) {
+          IndexedRegion region = (IndexedRegion) a.getNode();
+          int start = region.getStartOffset();
+          int lenght = region.getLength();
+          setActiveEditor(sourcePage);
+          sourcePage.selectAndReveal(start, lenght);
+        }
+      }
+    }
   }
 
 }

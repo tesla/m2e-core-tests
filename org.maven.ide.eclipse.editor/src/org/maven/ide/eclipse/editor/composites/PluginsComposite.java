@@ -85,7 +85,7 @@ public class PluginsComposite extends Composite {
   // controls
   CCombo executionPhaseCombo;
   Text executionIdText;
-  Hyperlink executionConfigurePluginButton;
+  Hyperlink pluginExecutionConfigurationHyperlink;
   Button executionInheritedButton;
   FormToolkit toolkit = new FormToolkit(Display.getCurrent());
   
@@ -99,7 +99,7 @@ public class PluginsComposite extends Composite {
   Button pluginExtensionsButton;
   Button pluginInheritedButton;
 
-  Hyperlink configurePluginButton;
+  Hyperlink pluginConfigurationHyperlink;
   ListEditorComposite<Dependency> pluginDependenciesEditor;
   Plugins plugins;
   PluginManagement pluginManagement;
@@ -174,7 +174,7 @@ public class PluginsComposite extends Composite {
         Plugins plugins = build.getPlugins();
         if(plugins==null) {
           plugins = PomFactory.eINSTANCE.createPlugins();
-          Command command = SetCommand.create(editingDomain, build, POM_PACKAGE.getBuild_Plugins(), plugins);
+          Command command = SetCommand.create(editingDomain, build, POM_PACKAGE.getBuildBase_Plugins(), plugins);
           compoundCommand.append(command);
         }
         
@@ -245,7 +245,7 @@ public class PluginsComposite extends Composite {
         PluginManagement pluginManagement = build.getPluginManagement();
         if(pluginManagement == null) {
           pluginManagement = PomFactory.eINSTANCE.createPluginManagement();
-          Command command = SetCommand.create(editingDomain, build, POM_PACKAGE.getBuild_PluginManagement(),
+          Command command = SetCommand.create(editingDomain, build, POM_PACKAGE.getBuildBase_PluginManagement(),
               pluginManagement);
           compoundCommand.append(command);
         }
@@ -378,8 +378,14 @@ public class PluginsComposite extends Composite {
     pluginInheritedButton = toolkit.createButton(composite, "Inherited", SWT.CHECK);
     pluginInheritedButton.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
   
-    configurePluginButton = toolkit.createHyperlink(composite, "Configuration", SWT.NONE);
-    configurePluginButton.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+    pluginConfigurationHyperlink = toolkit.createHyperlink(composite, "Configuration", SWT.NONE);
+    pluginConfigurationHyperlink.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+    pluginConfigurationHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
+      public void linkActivated(HyperlinkEvent e) {
+        EObject element = currentPlugin.getConfiguration();
+        parent.getPomEditor().showInSourceEditor(element==null ? currentPlugin : element);
+      }
+    });
 
     pluginExecutionsSection = toolkit.createSection(detailsComposite, Section.TITLE_BAR);
     GridData gd_pluginExecutionsSection = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -594,8 +600,14 @@ public class PluginsComposite extends Composite {
     executionInheritedButton = toolkit.createButton(executionConfigureComposite, "Inherited", SWT.CHECK);
     executionInheritedButton.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 
-    executionConfigurePluginButton = toolkit.createHyperlink(executionConfigureComposite, "Configuration", SWT.NONE);
-    executionConfigurePluginButton.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+    pluginExecutionConfigurationHyperlink = toolkit.createHyperlink(executionConfigureComposite, "Configuration", SWT.NONE);
+    pluginExecutionConfigurationHyperlink.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+    pluginExecutionConfigurationHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
+      public void linkActivated(HyperlinkEvent e) {
+        EObject element = currentPluginExecution.getConfiguration();
+        parent.getPomEditor().showInSourceEditor(element==null ? currentPluginExecution : element);
+      }
+    });
 
     pluginDependenciesSection = toolkit.createSection(detailsComposite, Section.TITLE_BAR);
     GridData pluginDependenciesSectionData = new GridData(SWT.FILL, SWT.FILL, true, true);

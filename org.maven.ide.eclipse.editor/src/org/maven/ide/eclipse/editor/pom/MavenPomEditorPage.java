@@ -96,6 +96,10 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
     super(pomEditor, id, title);
     this.pomEditor = pomEditor;
   }
+  
+  public MavenPomEditor getPomEditor() {
+    return pomEditor;
+  }
 
   protected void createFormContent(IManagedForm managedForm) {
     ScrolledForm form = managedForm.getForm();
