@@ -49,6 +49,7 @@ import org.maven.ide.components.pom.Activation;
 import org.maven.ide.components.pom.ActivationFile;
 import org.maven.ide.components.pom.ActivationOS;
 import org.maven.ide.components.pom.ActivationProperty;
+import org.maven.ide.components.pom.BuildBase;
 import org.maven.ide.components.pom.Dependencies;
 import org.maven.ide.components.pom.DependencyManagement;
 import org.maven.ide.components.pom.DistributionManagement;
@@ -620,8 +621,19 @@ public class ProfilesPage extends MavenPomEditorPage {
   }
 
   private void updateBuildTab() {
-    // TODO Auto-generated method stub
-    
+    ValueProvider<BuildBase> buildProvider = new ValueProvider<BuildBase>() {
+      public BuildBase getValue() {
+        return currentProfile == null ? null : currentProfile.getBuild();
+      }
+      
+      public BuildBase create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+        BuildBase buildBase = PomFactory.eINSTANCE.createBuildBase();
+        Command command = SetCommand.create(editingDomain, currentProfile, POM_PACKAGE.getProfile_Build(), buildBase);
+        compoundCommand.append(command);
+        return buildBase;
+      }
+    };
+    buildComposite.loadData(this, buildProvider);
   }
 
   private void updatePluginsTab() {

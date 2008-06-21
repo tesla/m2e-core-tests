@@ -49,6 +49,7 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.Section;
 import org.maven.ide.components.pom.Build;
+import org.maven.ide.components.pom.BuildBase;
 import org.maven.ide.components.pom.Dependency;
 import org.maven.ide.components.pom.Extension;
 import org.maven.ide.components.pom.ExtensionsType;
@@ -330,7 +331,8 @@ public class BuildPage extends MavenPomEditorPage {
   }
   
   public void loadData() {
-    loadBuild(model.getBuild());
+    loadBuild();
+    loadBuildBase();
     
     ValueProvider<Build> modelProvider = new ValueProvider.ParentValueProvider<Build>(sourceText, outputText, testSourceText, testOutputText, scriptsSourceText) {
       public Build getValue() {
@@ -389,7 +391,8 @@ public class BuildPage extends MavenPomEditorPage {
     registerListeners();
   }
 
-  private void loadBuild(Build build) {
+  private void loadBuild() {
+    Build build = model.getBuild();
     if(build==null) {
       FormUtils.setEnabled(foldersSection, false);
       FormUtils.setEnabled(extensionsSection, false);
@@ -413,13 +416,31 @@ public class BuildPage extends MavenPomEditorPage {
       extensionsEditor.setInput(build.getExtensions() == null ? null : build.getExtensions().getExtension());
     }
       
-    buildComposite.loadData(this);
+    loadBuildBase();
+  }
+
+  private void loadBuildBase() {
+    ValueProvider<BuildBase> buildProvider = new ValueProvider<BuildBase>() {
+      public Build getValue() {
+        return model.getBuild();
+      }
+      public Build create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+        Build build = PomFactory.eINSTANCE.createBuild();
+        Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Build(), build);
+        compoundCommand.append(command);
+        return build;
+      }
+    };
+    buildComposite.loadData(this, buildProvider);
   }
 
   public void updateView(Notification notification) {
     EObject object = (EObject) notification.getNotifier();
     if (object instanceof Build) {
-      loadBuild((Build) object);
+      loadBuild();
+    }
+    if (object instanceof BuildBase) {
+      loadBuildBase();
     }
 
     if (object instanceof ExtensionsType) {
