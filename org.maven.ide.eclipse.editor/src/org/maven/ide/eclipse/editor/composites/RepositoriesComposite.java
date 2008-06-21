@@ -9,8 +9,8 @@
 package org.maven.ide.eclipse.editor.composites;
 
 import static org.maven.ide.eclipse.editor.pom.FormUtils.isEmpty;
-import static org.maven.ide.eclipse.editor.pom.FormUtils.setText;
 import static org.maven.ide.eclipse.editor.pom.FormUtils.setButton;
+import static org.maven.ide.eclipse.editor.pom.FormUtils.setText;
 
 import java.util.Collections;
 import java.util.List;
@@ -52,7 +52,6 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.Section;
 import org.maven.ide.components.pom.DeploymentRepository;
 import org.maven.ide.components.pom.DistributionManagement;
-import org.maven.ide.components.pom.Model;
 import org.maven.ide.components.pom.PluginRepositories;
 import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.PomPackage;
@@ -142,8 +141,14 @@ public class RepositoriesComposite extends Composite {
   
   // model
   
-  Model model;
+  // Model model;
   Repository currentRepository;
+
+  private ValueProvider<Repositories> repositoriesProvider;
+
+  private ValueProvider<PluginRepositories> pluginRepositoriesProvider;
+
+  private ValueProvider<DistributionManagement> distributionManagementProvider;
 
   
   public RepositoriesComposite(Composite parent, int flags) {
@@ -227,12 +232,9 @@ public class RepositoriesComposite extends Composite {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = parent.getEditingDomain();
         
-        Repositories repositories = model.getRepositories();
+        Repositories repositories = repositoriesProvider.getValue();
         if(repositories == null) {
-          repositories = PomFactory.eINSTANCE.createRepositories();
-          Command createCommand = SetCommand.create(editingDomain, model, 
-              POM_PACKAGE.getModel_Repositories(), repositories);
-          compoundCommand.append(createCommand);
+          repositories = repositoriesProvider.create(editingDomain, compoundCommand);
         }
         
         Repository repository = PomFactory.eINSTANCE.createRepository();
@@ -255,7 +257,7 @@ public class RepositoriesComposite extends Composite {
  
         List<Repository> list = repositoriesEditor.getSelection();
         for(Repository repository : list) {
-          Command removeCommand = RemoveCommand.create(editingDomain, model.getRepositories(), 
+          Command removeCommand = RemoveCommand.create(editingDomain, repositoriesProvider.getValue(), 
               POM_PACKAGE.getRepositories_Repository(), repository);
           compoundCommand.append(removeCommand);
         }
@@ -297,12 +299,9 @@ public class RepositoriesComposite extends Composite {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = parent.getEditingDomain();
         
-        PluginRepositories pluginRepositories = model.getPluginRepositories();
+        PluginRepositories pluginRepositories = pluginRepositoriesProvider.getValue();
         if(pluginRepositories == null) {
-          pluginRepositories = PomFactory.eINSTANCE.createPluginRepositories();
-          Command createCommand = SetCommand.create(editingDomain, model, 
-              POM_PACKAGE.getModel_PluginRepositories(), pluginRepositories);
-          compoundCommand.append(createCommand);
+          pluginRepositories = pluginRepositoriesProvider.create(editingDomain, compoundCommand);
         }
         
         Repository pluginRepository = PomFactory.eINSTANCE.createRepository();
@@ -325,7 +324,7 @@ public class RepositoriesComposite extends Composite {
  
         List<Repository> list = pluginRepositoriesEditor.getSelection();
         for(Repository repository : list) {
-          Command removeCommand = RemoveCommand.create(editingDomain, model.getPluginRepositories(), 
+          Command removeCommand = RemoveCommand.create(editingDomain, pluginRepositoriesProvider.getValue(), 
               POM_PACKAGE.getPluginRepositories_PluginRepository(), repository);
           compoundCommand.append(removeCommand);
         }
@@ -700,18 +699,21 @@ public class RepositoriesComposite extends Composite {
     releaseRepositoryUniqueVersionButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
   }
 
-  public void loadData(MavenPomEditorPage editorPage) {
-    parent = editorPage;
-    model = editorPage.getModel();
+  public void loadData(MavenPomEditorPage editorPage, ValueProvider<Repositories> repositoriesProvider,
+      ValueProvider<PluginRepositories> pluginRepositoriesProvider,
+      ValueProvider<DistributionManagement> distributionManagementProvider) {
+    this.parent = editorPage;
+    this.repositoriesProvider = repositoriesProvider;
+    this.pluginRepositoriesProvider = pluginRepositoriesProvider;
+    this.distributionManagementProvider = distributionManagementProvider;
     
-    loadRepositories(model.getRepositories());
-    loadPluginRepositories(model.getPluginRepositories());
+    loadRepositories();
+    loadPluginRepositories();
     
-    DistributionManagement dm = model.getDistributionManagement();
-    loadReleaseDistributionRepository(dm);
-    loadSnapshotDistributionRepository(dm);
-    loadProjectSite(dm);
-    loadRelocation(dm);
+    loadReleaseDistributionRepository();
+    loadSnapshotDistributionRepository();
+    loadProjectSite();
+    loadRelocation();
     
     registerReleaseRepositoryListeners();
     registerSnapshotRepositoryListeners();
@@ -721,10 +723,11 @@ public class RepositoriesComposite extends Composite {
     repositoriesEditor.setReadOnly(parent.isReadOnly());
     pluginRepositoriesEditor.setReadOnly(parent.isReadOnly());
     
-    expandSections(dm);
+    expandSections();
   }
 
-  private void expandSections(DistributionManagement dm) {
+  private void expandSections() {
+    DistributionManagement dm = distributionManagementProvider.getValue();
     if(dm!=null) {
       boolean isRepositoriesExpanded = false;
       
@@ -817,16 +820,11 @@ public class RepositoriesComposite extends Composite {
         releaseRepositoryIdText, releaseRepositoryNameText, releaseRepositoryUrlText, releaseRepositoryLayoutCombo,
         releaseRepositoryUniqueVersionButton) {
       public DeploymentRepository getValue() {
-        DistributionManagement dm = model.getDistributionManagement();
+        DistributionManagement dm = distributionManagementProvider.getValue();
         return dm==null ? null : dm.getRepository();
       }
       public DeploymentRepository create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
-        DistributionManagement dm = model.getDistributionManagement();
-        if(dm==null) {
-          dm = PomFactory.eINSTANCE.createDistributionManagement();
-          Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_DistributionManagement(), dm);
-          compoundCommand.append(command);
-        }
+        DistributionManagement dm = createDistributionManagement(editingDomain, compoundCommand);
         DeploymentRepository r = dm.getRepository();
         if(r==null) {
           r = PomFactory.eINSTANCE.createDeploymentRepository();
@@ -848,16 +846,11 @@ public class RepositoriesComposite extends Composite {
         snapshotRepositoryIdText, snapshotRepositoryNameText, snapshotRepositoryUrlText, snapshotRepositoryLayoutCombo,
         snapshotRepositoryUniqueVersionButton) {
       public DeploymentRepository getValue() {
-        DistributionManagement dm = model.getDistributionManagement();
+        DistributionManagement dm = distributionManagementProvider.getValue();
         return dm==null ? null : dm.getSnapshotRepository();
       }
       public DeploymentRepository create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
-        DistributionManagement dm = model.getDistributionManagement();
-        if(dm==null) {
-          dm = PomFactory.eINSTANCE.createDistributionManagement();
-          Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_DistributionManagement(), dm);
-          compoundCommand.append(command);
-        }
+        DistributionManagement dm = createDistributionManagement(editingDomain, compoundCommand);
         DeploymentRepository r = dm.getSnapshotRepository();
         if(r==null) {
           r = PomFactory.eINSTANCE.createDeploymentRepository();
@@ -878,16 +871,10 @@ public class RepositoriesComposite extends Composite {
     ValueProvider<DistributionManagement> dmProvider = new ValueProvider.ParentValueProvider<DistributionManagement>(
         projectDownloadUrlText) {
       public DistributionManagement getValue() {
-        return model.getDistributionManagement();
+        return distributionManagementProvider.getValue();
       }
       public DistributionManagement create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
-        DistributionManagement dm = model.getDistributionManagement();
-        if(dm==null) {
-          dm = PomFactory.eINSTANCE.createDistributionManagement();
-          Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_DistributionManagement(), dm);
-          compoundCommand.append(command);
-        }
-        return dm;
+        return createDistributionManagement(editingDomain, compoundCommand);
       }
     };
     parent.setModifyListener(projectDownloadUrlText, dmProvider, POM_PACKAGE.getDistributionManagement_DownloadUrl(), "");
@@ -895,16 +882,11 @@ public class RepositoriesComposite extends Composite {
     ValueProvider<Site> siteProvider = new ValueProvider.ParentValueProvider<Site>(
         projectSiteIdText, projectSiteNameText, projectSiteUrlText) {
       public Site getValue() {
-        DistributionManagement dm = model.getDistributionManagement();
+        DistributionManagement dm = distributionManagementProvider.getValue();
         return dm==null ? null : dm.getSite();
       }
       public Site create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
-        DistributionManagement dm = model.getDistributionManagement();
-        if(dm==null) {
-          dm = PomFactory.eINSTANCE.createDistributionManagement();
-          Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_DistributionManagement(), dm);
-          compoundCommand.append(command);
-        }
+        DistributionManagement dm = createDistributionManagement(editingDomain, compoundCommand);
         Site s = dm.getSite();
         if(s==null) {
           s = PomFactory.eINSTANCE.createSite();
@@ -923,16 +905,11 @@ public class RepositoriesComposite extends Composite {
     ValueProvider<Relocation> relocationProvider = new ValueProvider.ParentValueProvider<Relocation>(
         relocationGroupIdText, relocationArtifactIdText, relocationVersionText, relocationMessageText) {
       public Relocation getValue() {
-        DistributionManagement dm = model.getDistributionManagement();
+        DistributionManagement dm = distributionManagementProvider.getValue();
         return dm==null ? null : dm.getRelocation();
       }
       public Relocation create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
-        DistributionManagement dm = model.getDistributionManagement();
-        if(dm==null) {
-          dm = PomFactory.eINSTANCE.createDistributionManagement();
-          Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_DistributionManagement(), dm);
-          compoundCommand.append(command);
-        }
+        DistributionManagement dm = createDistributionManagement(editingDomain, compoundCommand);
         Relocation r = dm.getRelocation();
         if(r==null) {
           r = PomFactory.eINSTANCE.createRelocation();
@@ -948,9 +925,10 @@ public class RepositoriesComposite extends Composite {
     parent.setModifyListener(relocationMessageText, relocationProvider, POM_PACKAGE.getRelocation_Message(), "");
   }
 
-  private void loadReleaseDistributionRepository(DistributionManagement distributionManagement) {
-    DeploymentRepository repository = distributionManagement==null ? null : distributionManagement.getRepository();
-    if(repository!=null) {
+  private void loadReleaseDistributionRepository() {
+    DistributionManagement dm = distributionManagementProvider.getValue();
+    DeploymentRepository repository = dm == null ? null : dm.getRepository();
+    if(repository != null) {
       setText(releaseRepositoryIdText, repository.getId());
       setText(releaseRepositoryNameText, repository.getName());
       setText(releaseRepositoryUrlText, repository.getUrl());
@@ -965,8 +943,9 @@ public class RepositoriesComposite extends Composite {
     }
   }
 
-  private void loadSnapshotDistributionRepository(DistributionManagement distributionManagement) {
-    DeploymentRepository repository = distributionManagement==null ? null : distributionManagement.getSnapshotRepository();
+  private void loadSnapshotDistributionRepository() {
+    DistributionManagement dm = distributionManagementProvider.getValue();
+    DeploymentRepository repository = dm == null ? null : dm.getSnapshotRepository();
     if(repository!=null) {
       setText(snapshotRepositoryIdText, repository.getId());
       setText(snapshotRepositoryNameText, repository.getName());
@@ -982,9 +961,10 @@ public class RepositoriesComposite extends Composite {
     }
   }
 
-  private void loadProjectSite(DistributionManagement distributionManagement) {
-    Site site = distributionManagement==null ? null : distributionManagement.getSite();
-    if(site!=null) {
+  private void loadProjectSite() {
+    DistributionManagement dm = distributionManagementProvider.getValue();
+    Site site = dm == null ? null : dm.getSite();
+    if(site != null) {
       setText(projectSiteIdText, site.getId());
       setText(projectSiteNameText, site.getName());
       setText(projectSiteUrlText, site.getUrl());
@@ -994,12 +974,13 @@ public class RepositoriesComposite extends Composite {
       setText(projectSiteUrlText, "");
     }
     
-    setText(projectDownloadUrlText, distributionManagement==null ? null : distributionManagement.getDownloadUrl());
+    setText(projectDownloadUrlText, dm==null ? null : dm.getDownloadUrl());
   }
 
-  private void loadRelocation(DistributionManagement distributionManagement) {
-    Relocation relocation = distributionManagement==null ? null : distributionManagement.getRelocation();
-    if(relocation!=null) {
+  private void loadRelocation() {
+    DistributionManagement dm = distributionManagementProvider.getValue();
+    Relocation relocation = dm == null ? null : dm.getRelocation();
+    if(relocation != null) {
       setText(relocationGroupIdText, relocation.getGroupId());
       setText(relocationArtifactIdText, relocation.getArtifactId());
       setText(relocationVersionText, relocation.getVersion());
@@ -1012,16 +993,18 @@ public class RepositoriesComposite extends Composite {
     }
   }
 
-  private void loadRepositories(Repositories repositories) {
-    repositoriesEditor.setInput(repositories==null ? null : repositories.getRepository());
+  private void loadRepositories() {
+    Repositories repositories = repositoriesProvider.getValue();
+    repositoriesEditor.setInput(repositories == null ? null : repositories.getRepository());
     repositoriesEditor.setReadOnly(parent.isReadOnly());
     changingSelection = true;
     updateRepositoryDetailsSection(null);
     changingSelection = false;
   }
   
-  private void loadPluginRepositories(PluginRepositories pluginRepositories) {
-    pluginRepositoriesEditor.setInput(pluginRepositories==null ? null : pluginRepositories.getPluginRepository());
+  private void loadPluginRepositories() {
+    PluginRepositories pluginRepositories = pluginRepositoriesProvider.getValue();
+    pluginRepositoriesEditor.setInput(pluginRepositories == null ? null : pluginRepositories.getPluginRepository());
     pluginRepositoriesEditor.setReadOnly(parent.isReadOnly());
     changingSelection = true;
     updateRepositoryDetailsSection(null);
@@ -1047,23 +1030,31 @@ public class RepositoriesComposite extends Composite {
     }
     
     if(object instanceof DistributionManagement) {
-      loadProjectSite((DistributionManagement) object);
-      loadRelocation((DistributionManagement) object);
-      loadReleaseDistributionRepository((DistributionManagement) object);
-      loadSnapshotDistributionRepository((DistributionManagement) object);
+      if(object==distributionManagementProvider.getValue()) {
+        loadProjectSite();
+        loadRelocation();
+        loadReleaseDistributionRepository();
+        loadSnapshotDistributionRepository();
+      }
     }
     
     if(object instanceof Site) {
-      loadProjectSite(model.getDistributionManagement());
+      if(((EObject) object).eContainer() == distributionManagementProvider.getValue()) {
+        loadProjectSite();
+      }
     }
 
     if(object instanceof Relocation) {
-      loadRelocation(model.getDistributionManagement());
+      if(((EObject) object).eContainer() == distributionManagementProvider.getValue()) {
+        loadRelocation();
+      }
     }    
     
     if(object instanceof DeploymentRepository) {
-      loadReleaseDistributionRepository(model.getDistributionManagement());
-      loadSnapshotDistributionRepository(model.getDistributionManagement());
+      if(((EObject) object).eContainer() == distributionManagementProvider.getValue()) {
+        loadReleaseDistributionRepository();
+        loadSnapshotDistributionRepository();
+      }
     }    
     
     // XXX
@@ -1204,6 +1195,14 @@ public class RepositoriesComposite extends Composite {
     parent.setModifyListener(snapshotsEnabledButton, snapshotsProvider, POM_PACKAGE.getRepositoryPolicy_Enabled(), "true");
     parent.setModifyListener(snapshotsChecksumPolicyCombo, snapshotsProvider, POM_PACKAGE.getRepositoryPolicy_ChecksumPolicy(), "");
     parent.setModifyListener(snapshotsUpdatePolicyCombo, snapshotsProvider, POM_PACKAGE.getRepositoryPolicy_UpdatePolicy(), "");
+  }
+
+  DistributionManagement createDistributionManagement(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+    DistributionManagement dm = distributionManagementProvider.getValue();
+    if(dm == null) {
+      dm = distributionManagementProvider.create(editingDomain, compoundCommand);
+    }
+    return dm;
   }
 
   /**

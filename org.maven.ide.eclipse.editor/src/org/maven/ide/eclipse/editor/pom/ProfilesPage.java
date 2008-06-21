@@ -51,9 +51,12 @@ import org.maven.ide.components.pom.ActivationOS;
 import org.maven.ide.components.pom.ActivationProperty;
 import org.maven.ide.components.pom.Dependencies;
 import org.maven.ide.components.pom.DependencyManagement;
+import org.maven.ide.components.pom.DistributionManagement;
+import org.maven.ide.components.pom.PluginRepositories;
 import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.Profile;
 import org.maven.ide.components.pom.ProfilesType;
+import org.maven.ide.components.pom.Repositories;
 import org.maven.ide.components.pom.StringModules;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
@@ -548,9 +551,9 @@ public class ProfilesPage extends MavenPomEditorPage {
 
       public Dependencies create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
         Dependencies dependencies = PomFactory.eINSTANCE.createDependencies();
-        Command createDependenciesCommand = SetCommand.create(editingDomain, currentProfile,
+        Command command = SetCommand.create(editingDomain, currentProfile,
             POM_PACKAGE.getProfile_Dependencies(), dependencies);
-        compoundCommand.append(createDependenciesCommand);
+        compoundCommand.append(command);
         return dependencies;
       }
     };
@@ -562,9 +565,9 @@ public class ProfilesPage extends MavenPomEditorPage {
 
       public DependencyManagement create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
         DependencyManagement dependencyManagement = PomFactory.eINSTANCE.createDependencyManagement();
-        Command createDependenciesCommand = SetCommand.create(editingDomain, currentProfile,
+        Command command = SetCommand.create(editingDomain, currentProfile,
             POM_PACKAGE.getProfile_DependencyManagement(), dependencyManagement);
-        compoundCommand.append(createDependenciesCommand);
+        compoundCommand.append(command);
         return dependencyManagement;
       }
     };
@@ -573,8 +576,47 @@ public class ProfilesPage extends MavenPomEditorPage {
   }
 
   private void updateRepositoriesTab() {
-    // TODO Auto-generated method stub
-    
+    ValueProvider<Repositories> repositoriesProvider = new ValueProvider<Repositories>() {
+      public Repositories getValue() {
+        return currentProfile==null ? null : currentProfile.getRepositories();
+      }
+      public Repositories create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+        Repositories repositories = PomFactory.eINSTANCE.createRepositories();
+        Command command = SetCommand.create(editingDomain, currentProfile, POM_PACKAGE.getProfile_Repositories(),
+            repositories);
+        compoundCommand.append(command);
+        return repositories;
+      }
+    };
+
+    ValueProvider<PluginRepositories> pluginRepositoriesProvider = new ValueProvider<PluginRepositories>() {
+      public PluginRepositories getValue() {
+        return currentProfile==null ? null : currentProfile.getPluginRepositories();
+      }
+      public PluginRepositories create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+        PluginRepositories pluginRepositories = PomFactory.eINSTANCE.createPluginRepositories();
+        Command command = SetCommand.create(editingDomain, currentProfile, POM_PACKAGE.getProfile_PluginRepositories(),
+            pluginRepositories);
+        compoundCommand.append(command);
+        return pluginRepositories;
+      }
+    };
+
+    ValueProvider<DistributionManagement> dmProvider = new ValueProvider<DistributionManagement>() {
+      public DistributionManagement getValue() {
+        return currentProfile==null ? null : currentProfile.getDistributionManagement();
+      }
+
+      public DistributionManagement create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+        DistributionManagement dm = PomFactory.eINSTANCE.createDistributionManagement();
+        Command command = SetCommand.create(editingDomain, currentProfile, //
+            POM_PACKAGE.getProfile_DistributionManagement(), dm);
+        compoundCommand.append(command);
+        return dm;
+      }
+    };
+
+    repositoriesComposite.loadData(this, repositoriesProvider, pluginRepositoriesProvider, dmProvider);
   }
 
   private void updateBuildTab() {
