@@ -35,6 +35,9 @@
             <goals>
               <goal>update-site</goal>
             </goals>
+            <configuration>
+              <inlineArchives>false</inlineArchives>
+            </configuration>
           </execution>
         </executions>
       </plugin>

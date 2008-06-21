@@ -62,21 +62,21 @@ http://www.eclipse.org/legal/epl-v10.html
          id="org.eclipse.draw2d"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="3.4.0.v20080529"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.zest.core"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.0.0.v20080115"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.zest.layouts"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.0.0.v20080226"
          unpack="false"/>
 
 </feature>
