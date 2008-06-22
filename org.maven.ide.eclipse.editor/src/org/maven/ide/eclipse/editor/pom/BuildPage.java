@@ -392,7 +392,7 @@ public class BuildPage extends MavenPomEditorPage {
   }
 
   private void loadBuild() {
-    Build build = model.getBuild();
+    Build build = model == null ? null : model.getBuild();
     if(build==null) {
       FormUtils.setEnabled(foldersSection, false);
       FormUtils.setEnabled(extensionsSection, false);

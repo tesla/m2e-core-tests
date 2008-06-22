@@ -102,7 +102,7 @@ public abstract class FormUtils {
   }
 
   public static void setEnabled(Composite composite, boolean enabled) {
-    if(!composite.isDisposed()) {
+    if(composite!=null && !composite.isDisposed()) {
       composite.setEnabled(enabled);
       for(Control control : composite.getChildren()) {
         if(control instanceof Combo) {
