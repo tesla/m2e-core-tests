@@ -52,11 +52,9 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.Section;
-import org.maven.ide.components.pom.Build;
 import org.maven.ide.components.pom.Dependencies;
 import org.maven.ide.components.pom.Dependency;
 import org.maven.ide.components.pom.ExecutionsType;
-import org.maven.ide.components.pom.Model;
 import org.maven.ide.components.pom.Plugin;
 import org.maven.ide.components.pom.PluginExecution;
 import org.maven.ide.components.pom.PluginManagement;
@@ -101,8 +99,6 @@ public class PluginsComposite extends Composite {
 
   Hyperlink pluginConfigurationHyperlink;
   ListEditorComposite<Dependency> pluginDependenciesEditor;
-  Plugins plugins;
-  PluginManagement pluginManagement;
   ListEditorComposite<String> goalsEditor;
   ListEditorComposite<PluginExecution> pluginExecutionsEditor;
 
@@ -113,12 +109,15 @@ public class PluginsComposite extends Composite {
   Button pluginSelectButton;
   
   // model
-  Model model;
   Plugin currentPlugin;
   PluginExecution currentPluginExecution;
 
-  boolean changingSelection = false;
+  ValueProvider<Plugins> pluginsProvider;
 
+  ValueProvider<PluginManagement> pluginManagementProvider;
+
+  boolean changingSelection = false;
+  
   
   public PluginsComposite(Composite composite, int style) {
     super(composite, style);
@@ -164,18 +163,9 @@ public class PluginsComposite extends Composite {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = parent.getEditingDomain();
         
-        Build build = model.getBuild();
-        if(build==null) {
-          build = PomFactory.eINSTANCE.createBuild();
-          Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Build(), build);
-          compoundCommand.append(command);
-        }
-        
-        Plugins plugins = build.getPlugins();
+        Plugins plugins = pluginsProvider.getValue();
         if(plugins==null) {
-          plugins = PomFactory.eINSTANCE.createPlugins();
-          Command command = SetCommand.create(editingDomain, build, POM_PACKAGE.getBuildBase_Plugins(), plugins);
-          compoundCommand.append(command);
+          plugins = pluginsProvider.create(editingDomain, compoundCommand);
         }
         
         Plugin plugin = PomFactory.eINSTANCE.createPlugin();
@@ -197,7 +187,7 @@ public class PluginsComposite extends Composite {
  
         List<Plugin> list = pluginsEditor.getSelection();
         for(Plugin plugin : list) {
-          Command removeCommand = RemoveCommand.create(editingDomain, model.getBuild().getPlugins(), 
+          Command removeCommand = RemoveCommand.create(editingDomain, pluginsProvider.getValue(), //
               POM_PACKAGE.getPlugins_Plugin(), plugin);
           compoundCommand.append(removeCommand);
         }
@@ -234,20 +224,10 @@ public class PluginsComposite extends Composite {
       public void widgetSelected(SelectionEvent e) {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = parent.getEditingDomain();
-        
-        Build build = model.getBuild();
-        if(build == null) {
-          build = PomFactory.eINSTANCE.createBuild();
-          Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Build(), build);
-          compoundCommand.append(command);
-        }
-        
-        PluginManagement pluginManagement = build.getPluginManagement();
+
+        PluginManagement pluginManagement = pluginManagementProvider.getValue();
         if(pluginManagement == null) {
-          pluginManagement = PomFactory.eINSTANCE.createPluginManagement();
-          Command command = SetCommand.create(editingDomain, build, POM_PACKAGE.getBuildBase_PluginManagement(),
-              pluginManagement);
-          compoundCommand.append(command);
+          pluginManagement = pluginManagementProvider.create(editingDomain, compoundCommand);
         }
         
         Plugins plugins = pluginManagement.getPlugins();
@@ -278,7 +258,7 @@ public class PluginsComposite extends Composite {
         List<Plugin> list = pluginManagementEditor.getSelection();
         for(Plugin plugin : list) {
           Command removeCommand = RemoveCommand.create(editingDomain, //
-              model.getBuild().getPluginManagement().getPlugins(), POM_PACKAGE.getPlugins_Plugin(), plugin);
+              pluginManagementProvider.getValue().getPlugins(), POM_PACKAGE.getPlugins_Plugin(), plugin);
           compoundCommand.append(removeCommand);
         }
         
@@ -738,11 +718,13 @@ public class PluginsComposite extends Composite {
     parent.setModifyListener(executionInheritedButton, provider, POM_PACKAGE.getPluginExecution_Inherited(), "true");
   }
 
-  public void loadData(MavenPomEditorPage editorPage) {
-    parent = editorPage;
-    model = editorPage.getModel();
-    loadPlugins(model);
-    loadPluginManagement(model);
+  public void loadData(MavenPomEditorPage editorPage, ValueProvider<Plugins> pluginsProvider,
+      ValueProvider<PluginManagement> pluginManagementProvider) {
+    this.parent = editorPage;
+    this.pluginsProvider = pluginsProvider;
+    this.pluginManagementProvider = pluginManagementProvider;
+    loadPlugins();
+    loadPluginManagement();
     
     updatePluginDetails(null);
     
@@ -754,34 +736,18 @@ public class PluginsComposite extends Composite {
 //    pluginDependenciesEditor.setReadOnly(parent.isReadOnly());
   }
 
-  private void loadPlugins(Model model) {
-    Build build = model.getBuild();
-    if(build!=null) {
-      plugins = build.getPlugins();
-      pluginsEditor.setInput(plugins==null ? null : plugins.getPlugin());
-      return;
-    }
-    plugins = null;
-
+  private void loadPlugins() {
     changingSelection = true;
-    pluginsEditor.setInput(null);
+    Plugins plugins = pluginsProvider.getValue();
+    pluginsEditor.setInput(plugins==null ? null : plugins.getPlugin());
     changingSelection = false;
   }
 
-  private void loadPluginManagement(Model model2) {
-    Build build = model.getBuild();
-    if(build!=null) {
-      pluginManagement = build.getPluginManagement();
-      if(pluginManagement!=null) {
-        Plugins plugins = pluginManagement.getPlugins();
-        pluginManagementEditor.setInput(plugins==null ? null : plugins.getPlugin());
-        return;
-      }
-    }
-    pluginManagement = null;
-
+  private void loadPluginManagement() {
     changingSelection = true;
-    pluginManagementEditor.setInput(null);
+    PluginManagement pluginManagement = pluginManagementProvider.getValue();
+    Plugins plugins = pluginManagement == null ? null : pluginManagement.getPlugins();
+    pluginManagementEditor.setInput(plugins == null ? null : plugins.getPlugin());
     changingSelection = false;
   }
   

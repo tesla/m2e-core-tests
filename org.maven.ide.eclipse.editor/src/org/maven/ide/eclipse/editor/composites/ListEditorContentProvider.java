@@ -33,6 +33,5 @@ public class ListEditorContentProvider<T> implements IStructuredContentProvider 
   
   public void dispose() {
   }
-  
 
 }

@@ -53,7 +53,9 @@ import org.maven.ide.components.pom.BuildBase;
 import org.maven.ide.components.pom.Dependencies;
 import org.maven.ide.components.pom.DependencyManagement;
 import org.maven.ide.components.pom.DistributionManagement;
+import org.maven.ide.components.pom.PluginManagement;
 import org.maven.ide.components.pom.PluginRepositories;
+import org.maven.ide.components.pom.Plugins;
 import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.Profile;
 import org.maven.ide.components.pom.ProfilesType;
@@ -637,8 +639,55 @@ public class ProfilesPage extends MavenPomEditorPage {
   }
 
   private void updatePluginsTab() {
-    // TODO Auto-generated method stub
+    ValueProvider<Plugins> pluginsProvider = new ValueProvider<Plugins>() {
+      public Plugins getValue() {
+        BuildBase build = currentProfile == null ? null : currentProfile.getBuild();
+        return build == null ? null : build.getPlugins();
+      }
+      
+      public Plugins create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+        BuildBase build = currentProfile.getBuild();
+        if(build==null) {
+          build = PomFactory.eINSTANCE.createBuild();
+          Command command = SetCommand.create(editingDomain, currentProfile, POM_PACKAGE.getProfile_Build(), build);
+          compoundCommand.append(command);
+        }
+        
+        Plugins plugins = build.getPlugins();
+        if(plugins==null) {
+          plugins = PomFactory.eINSTANCE.createPlugins();
+          Command command = SetCommand.create(editingDomain, build, POM_PACKAGE.getBuildBase_Plugins(), plugins);
+          compoundCommand.append(command);
+        }
+        return plugins;
+      }
+    };
     
+    ValueProvider<PluginManagement> pluginManagementProvider = new ValueProvider<PluginManagement>() {
+      public PluginManagement getValue() {
+        BuildBase build = currentProfile == null ? null : currentProfile.getBuild();
+        return build == null ? null : build.getPluginManagement();
+      }
+      
+      public PluginManagement create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+        BuildBase build = currentProfile.getBuild();
+        if(build==null) {
+          build = PomFactory.eINSTANCE.createBuild();
+          Command command = SetCommand.create(editingDomain, currentProfile, POM_PACKAGE.getProfile_Build(), build);
+          compoundCommand.append(command);
+        }
+        
+        PluginManagement management = build.getPluginManagement();
+        if(management==null) {
+          management = PomFactory.eINSTANCE.createPluginManagement();
+          Command command = SetCommand.create(editingDomain, build, POM_PACKAGE.getBuildBase_PluginManagement(), management);
+          compoundCommand.append(command);
+        }
+        return management;
+      }
+    };
+    
+    pluginsComposite.loadData(this, pluginsProvider, pluginManagementProvider);
   }
 
   private void updateReportsTab() {

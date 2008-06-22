@@ -8,7 +8,11 @@
 
 package org.maven.ide.eclipse.editor.pom;
 
+import org.eclipse.emf.common.command.Command;
+import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.common.notify.Notification;
+import org.eclipse.emf.edit.command.SetCommand;
+import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -16,6 +20,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
+import org.maven.ide.components.pom.Build;
+import org.maven.ide.components.pom.PluginManagement;
+import org.maven.ide.components.pom.Plugins;
+import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.editor.composites.PluginsComposite;
 
@@ -58,7 +66,55 @@ public class PluginsPage extends MavenPomEditorPage {
   }
 
   public void loadData() {
-    pluginsComposite.loadData(this);
+    ValueProvider<Plugins> pluginsProvider = new ValueProvider<Plugins>() {
+      public Plugins getValue() {
+        Build build = model.getBuild();
+        return build==null ? null : build.getPlugins();
+      }
+      
+      public Plugins create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+        Build build = model.getBuild();
+        if(build==null) {
+          build = PomFactory.eINSTANCE.createBuild();
+          Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Build(), build);
+          compoundCommand.append(command);
+        }
+        
+        Plugins plugins = build.getPlugins();
+        if(plugins==null) {
+          plugins = PomFactory.eINSTANCE.createPlugins();
+          Command command = SetCommand.create(editingDomain, build, POM_PACKAGE.getBuildBase_Plugins(), plugins);
+          compoundCommand.append(command);
+        }
+        return plugins;
+      }
+    };
+    
+    ValueProvider<PluginManagement> pluginManagementProvider = new ValueProvider<PluginManagement>() {
+      public PluginManagement getValue() {
+        Build build = model.getBuild();
+        return build==null ? null : build.getPluginManagement();
+      }
+      
+      public PluginManagement create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+        Build build = model.getBuild();
+        if(build==null) {
+          build = PomFactory.eINSTANCE.createBuild();
+          Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Build(), build);
+          compoundCommand.append(command);
+        }
+        
+        PluginManagement management = build.getPluginManagement();
+        if(management==null) {
+          management = PomFactory.eINSTANCE.createPluginManagement();
+          Command command = SetCommand.create(editingDomain, build, POM_PACKAGE.getBuildBase_PluginManagement(), management);
+          compoundCommand.append(command);
+        }
+        return management;
+      }
+    };
+    
+    pluginsComposite.loadData(this, pluginsProvider, pluginManagementProvider);
   }
   
   public void updateView(Notification notification) {
