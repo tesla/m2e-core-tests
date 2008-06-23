@@ -29,6 +29,9 @@ import org.eclipse.emf.edit.command.AddCommand;
 import org.eclipse.emf.edit.command.RemoveCommand;
 import org.eclipse.emf.edit.command.SetCommand;
 import org.eclipse.emf.edit.domain.EditingDomain;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -68,6 +71,7 @@ import org.maven.ide.components.pom.Scm;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.MavenRepositorySearchDialog;
 import org.maven.ide.eclipse.actions.OpenPomAction;
+import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.editor.composites.ListEditorComposite;
 import org.maven.ide.eclipse.editor.composites.ListEditorContentProvider;
 import org.maven.ide.eclipse.index.IndexManager;
@@ -117,6 +121,7 @@ public class OverviewPage extends MavenPomEditorPage {
   Section scmSection;
   Section issueManagementSection;
   Section ciManagementSection;
+  private Action newModuleProjectAction;
 
   //model
 //  Properties properties;
@@ -325,11 +330,13 @@ public class OverviewPage extends MavenPomEditorPage {
     propertiesEditor.setLabelProvider(new PropertyPairLabelProvider());
 
     // XXX implement properties support
-    propertiesEditor.setReadOnly(true);
     // propertiesEditor.setReadOnly(pomEditor.isReadOnly());
+    propertiesEditor.setReadOnly(true);
   }
 
   private void createModulesSection(FormToolkit toolkit, Composite composite, WidthGroup widthGroup) {
+    // XXX should disable Modules actions based on artifact packaging and only add modules when packaging is "pom"
+
     modulesSection = toolkit.createSection(composite, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
     modulesSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     modulesSection.setText("Modules");
@@ -357,32 +364,7 @@ public class OverviewPage extends MavenPomEditorPage {
     
     modulesEditor.setAddListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
-        IEditorInput editorInput = OverviewPage.this.pomEditor.getEditorInput();
-        if(editorInput instanceof FileEditorInput) {
-          MavenModuleWizard wizard = new MavenModuleWizard(true);
-          wizard.init(PlatformUI.getWorkbench(), new StructuredSelection(((FileEditorInput) editorInput).getFile()));
-          WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), wizard);
-          int res = dialog.open();
-          if(res == Window.OK) {
-            CompoundCommand compoundCommand = new CompoundCommand();
-            EditingDomain editingDomain = getEditingDomain();
-
-            Modules modules = model.getModules();
-            if(modules == null) {
-              modules = PomFactory.eINSTANCE.createModules();
-              Command addModules = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Modules(), modules);
-              compoundCommand.append(addModules);
-            }
-            
-            Command addModule = AddCommand.create(editingDomain, modules, POM_PACKAGE.getModules_Module(), wizard.getModuleName());
-            compoundCommand.append(addModule);
-            
-            // modules.getModule().add(wizard.getModuleName());
-
-            editingDomain.getCommandStack().execute(compoundCommand);
-            modulesEditor.setInput(modules == null ? null : modules.getModule());
-          }
-        }
+        createNewModule("?");
       }
     });
       
@@ -404,9 +386,57 @@ public class OverviewPage extends MavenPomEditorPage {
         }
 
         editingDomain.getCommandStack().execute(compoundCommand);
-        modulesEditor.setInput(modules == null ? null : modules.getModule());
+        // modulesEditor.refresh();
       }
     });
+  
+    modulesEditor.setCellModifier(new ICellModifier() {
+      public boolean canModify(Object element, String property) {
+        return true;
+      }
+ 
+      public Object getValue(Object element, String property) {
+        return element;
+      }
+ 
+      public void modify(Object element, String property, Object value) {
+        EditingDomain editingDomain = getEditingDomain();
+        Command command = SetCommand.create(editingDomain, model.getModules(), //
+            POM_PACKAGE.getModules_Module(), value, //
+            modulesEditor.getViewer().getTable().getSelectionIndex());
+        editingDomain.getCommandStack().execute(command);
+        // modulesEditor.refresh();
+      }
+    });
+    
+    // XXX fix action icon
+    newModuleProjectAction = new Action("Create new module project", MavenEditorImages.SHOW_GROUP) {
+      public void run() {
+        IEditorInput editorInput = OverviewPage.this.pomEditor.getEditorInput();
+        if(editorInput instanceof FileEditorInput) {
+          MavenModuleWizard wizard = new MavenModuleWizard(true);
+          wizard.init(PlatformUI.getWorkbench(), new StructuredSelection(((FileEditorInput) editorInput).getFile()));
+          WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), wizard);
+          int res = dialog.open();
+          if(res == Window.OK) {
+            createNewModule(wizard.getModuleName());
+          }
+        }
+      }
+    };
+
+    ToolBarManager modulesToolBarManager = new ToolBarManager(SWT.FLAT);
+    modulesToolBarManager.add(newModuleProjectAction);
+    
+    Composite toolbarComposite = toolkit.createComposite(modulesSection);
+    GridLayout toolbarLayout = new GridLayout(1, true);
+    toolbarLayout.marginHeight = 0;
+    toolbarLayout.marginWidth = 0;
+    toolbarComposite.setLayout(toolbarLayout);
+    toolbarComposite.setBackground(null);
+ 
+    modulesToolBarManager.createControl(toolbarComposite);
+    modulesSection.setTextClient(toolbarComposite);
     
     modulesEditor.setReadOnly(pomEditor.isReadOnly());
   }
@@ -622,6 +652,7 @@ public class OverviewPage extends MavenPomEditorPage {
     EObject object = (EObject) notification.getNotifier();
     if (object instanceof Model) {
       loadThis();
+      modulesEditor.refresh();
     }
 
     // XXX event is not received when <parent> is deleted in XML
@@ -651,7 +682,8 @@ public class OverviewPage extends MavenPomEditorPage {
     
     // XXX event is not received when <modules> is deleted in XML
     if(object instanceof Modules) {
-      loadModules((Modules) object);
+      modulesEditor.refresh();
+      // loadModules((Modules) object);
     }
     
     // XXX event is not received when <properties> is deleted in XML
@@ -733,6 +765,8 @@ public class OverviewPage extends MavenPomEditorPage {
   
   private void loadModules(Modules modules) {
     modulesEditor.setInput(modules==null ? null : modules.getModule());
+    modulesEditor.setReadOnly(isReadOnly());
+    newModuleProjectAction.setEnabled(!isReadOnly());
   }
   
   private void loadOrganization(Organization organization) {
@@ -915,6 +949,24 @@ public class OverviewPage extends MavenPomEditorPage {
     };
     setModifyListener(ciManagementUrlText, ciManagementProvider, POM_PACKAGE.getCiManagement_Url(), "");
     setModifyListener(ciManagementSystemText, ciManagementProvider, POM_PACKAGE.getCiManagement_System(), "");
+  }
+
+  protected void createNewModule(String moduleName) {
+    CompoundCommand compoundCommand = new CompoundCommand();
+    EditingDomain editingDomain = getEditingDomain();
+
+    Modules modules = model.getModules();
+    if(modules == null) {
+      modules = PomFactory.eINSTANCE.createModules();
+      Command addModules = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Modules(), modules);
+      compoundCommand.append(addModules);
+    }
+    
+    Command addModule = AddCommand.create(editingDomain, modules, POM_PACKAGE.getModules_Module(), moduleName);
+    compoundCommand.append(addModule);
+    
+    editingDomain.getCommandStack().execute(compoundCommand);
+    modulesEditor.setInput(model.getModules()==null ? null : model.getModules().getModule());
   }
   
 }
