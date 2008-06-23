@@ -325,9 +325,8 @@ public class OverviewPage extends MavenPomEditorPage {
     propertiesEditor.setLabelProvider(new PropertyPairLabelProvider());
 
     // XXX implement properties support
-    propertiesEditor.setEnabled(false);
-    
-    propertiesEditor.setReadOnly(pomEditor.isReadOnly());
+    propertiesEditor.setReadOnly(true);
+    // propertiesEditor.setReadOnly(pomEditor.isReadOnly());
   }
 
   private void createModulesSection(FormToolkit toolkit, Composite composite, WidthGroup widthGroup) {
@@ -657,7 +656,7 @@ public class OverviewPage extends MavenPomEditorPage {
     
     // XXX event is not received when <properties> is deleted in XML
     if(object instanceof Properties) {
-      loadProperties((Properties) object);
+      loadProperties();
     }
   }
 
@@ -675,7 +674,7 @@ public class OverviewPage extends MavenPomEditorPage {
     loadIssueManagement(issueManagement);
     loadCiManagement(ciManagement);
     loadModules(model.getModules());
-    loadProperties(model.getProperties());
+    loadProperties();
     
     registerFormListeners();
     
@@ -728,8 +727,8 @@ public class OverviewPage extends MavenPomEditorPage {
     }
   }
   
-  private void loadProperties(Properties properties) {
-    propertiesEditor.setInput(properties);
+  private void loadProperties() {
+    propertiesEditor.setInput(pomEditor.getProperties(model));
   }
   
   private void loadModules(Modules modules) {

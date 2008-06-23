@@ -274,9 +274,8 @@ public class ProfilesPage extends MavenPomEditorPage {
     propertiesEditor.setLabelProvider(new StringLabelProvider(MavenEditorImages.IMG_PROPERTY));
     
     // XXX implement properties actions
-
     // propertiesEditor.setReadOnly(pomEditor.isReadOnly());
-    FormUtils.setEnabled(propertiesSection, false);
+    propertiesEditor.setReadOnly(true);
   }
 
   private void createModulesSection(FormToolkit toolkit, Composite body) {
@@ -374,7 +373,8 @@ public class ProfilesPage extends MavenPomEditorPage {
     FormUtils.setReadonly(modulesSection, isReadOnly());
     
     modulesEditor.setInput(profile.getModules()==null ? null : profile.getModules().getModule());
-    propertiesEditor.setInput(profile.getProperties());
+    
+    propertiesEditor.setInput(pomEditor.getProperties(profile));
 
     updateProfileTabs(profile);
   }

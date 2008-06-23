@@ -56,6 +56,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.AdapterFactory;
 import org.eclipse.emf.common.notify.impl.AdapterFactoryImpl;
+import org.eclipse.emf.common.util.BasicEList;
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -82,11 +84,11 @@ import org.eclipse.wst.common.internal.emf.resource.EMF2DOMRenderer;
 import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
-import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
 import org.eclipse.wst.xml.core.internal.emf2xml.EMF2DOMSSEAdapter;
 import org.eclipse.wst.xml.core.internal.emf2xml.EMF2DOMSSERenderer;
+import org.eclipse.wst.xml.core.internal.provisional.document.IDOMElement;
 import org.maven.ide.components.pom.Model;
 import org.maven.ide.components.pom.util.PomResourceFactoryImpl;
 import org.maven.ide.components.pom.util.PomResourceImpl;
@@ -99,6 +101,9 @@ import org.maven.ide.eclipse.project.MavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.MavenRunnable;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * Maven POM editor
@@ -660,19 +665,61 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     super.init(site, editorInput);
   }
 
-  public void showInSourceEditor(EObject element) {
-    for(Adapter adapter : element.eAdapters()) {
-      if(adapter instanceof EMF2DOMSSEAdapter) {
-        EMF2DOMSSEAdapter a = (EMF2DOMSSEAdapter) adapter;
-        if(a.getNode() instanceof IndexedRegion) {
-          IndexedRegion region = (IndexedRegion) a.getNode();
-          int start = region.getStartOffset();
-          int lenght = region.getLength();
-          setActiveEditor(sourcePage);
-          sourcePage.selectAndReveal(start, lenght);
-        }
-      }
+  public void showInSourceEditor(EObject o) {
+    IDOMElement element = getElement(o);
+    if(element!=null) {
+      int start = element.getStartOffset();
+      int lenght = element.getLength();
+      setActiveEditor(sourcePage);
+      sourcePage.selectAndReveal(start, lenght);
     }
   }
 
+  public IDOMElement getElement(EObject o) {
+    for(Adapter adapter : o.eAdapters()) {
+      if(adapter instanceof EMF2DOMSSEAdapter) {
+        EMF2DOMSSEAdapter a = (EMF2DOMSSEAdapter) adapter;
+        if(a.getNode() instanceof IDOMElement) {
+          return (IDOMElement) a.getNode();
+        }
+      }
+    }
+    return null;
+  }
+
+  // XXX move to model and translators
+  public EList<PropertyPair> getProperties(EObject o) {
+    IDOMElement node = getElement(o);
+    if(node!=null) {
+      NodeList elements = node.getElementsByTagName("properties");
+      if(elements!=null && elements.getLength()>0) {
+        Node propertiesNode = elements.item(0);
+        NodeList propertiesElements = propertiesNode.getChildNodes();
+        
+        EList<PropertyPair> properties = new BasicEList<PropertyPair>();
+        for(int i = 0; i < propertiesElements.getLength(); i++ ) {
+          Node item = propertiesElements.item(i);
+          if(item instanceof Element) {
+            String nodetext = getNodeText(item);
+            
+            properties.add(new PropertyPair(item.getNodeName(), nodetext));
+          }
+        }
+        return properties;
+      }
+    }
+    return null;
+  }
+  
+  private String getNodeText(Node node) {
+    NodeList childNodes = node.getChildNodes();
+    for(int i = 0; i < childNodes.getLength(); i++ ) {
+      Node childNode = childNodes.item(i);
+      if(childNode.getNodeType()==Node.TEXT_NODE) {
+        return childNode.getNodeValue();
+      }
+    }
+    return null;
+  }
+  
 }

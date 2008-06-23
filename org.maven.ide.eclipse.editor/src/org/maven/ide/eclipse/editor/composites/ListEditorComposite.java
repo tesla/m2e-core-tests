@@ -11,6 +11,7 @@ package org.maven.ide.eclipse.editor.composites;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ICellModifier;
@@ -98,7 +99,7 @@ public class ListEditorComposite<T> extends Composite {
     viewer.setContentProvider(contentProvider);
   }
 
-  public void setInput(Object input) {
+  public void setInput(EList<T> input) {
     viewer.setInput(input);
     viewer.setSelection(new StructuredSelection());
   }
