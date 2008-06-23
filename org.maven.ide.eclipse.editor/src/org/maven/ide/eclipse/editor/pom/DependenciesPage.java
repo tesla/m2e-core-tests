@@ -93,7 +93,7 @@ public class DependenciesPage extends MavenPomEditorPage {
   }
   
   public void updateView(Notification notification) {
-    if(dependenciesComposite!=null) {
+    if(isActive()) {
       dependenciesComposite.updateView(this, notification);
     }
   }

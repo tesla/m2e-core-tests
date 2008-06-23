@@ -55,8 +55,9 @@ public class ReportingPage extends MavenPomEditorPage {
   }
 
   public void updateView(Notification notification) {
-    // TODO Auto-generated method stub
-    
+    if(isActive()) {
+      reportingComposite.updateView(this, notification);
+    }
   }
 
 }

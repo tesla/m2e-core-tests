@@ -324,6 +324,10 @@ public class TeamPage extends MavenPomEditorPage {
   }
 
   public void updateView(Notification notification) {
+    if(!isActive()) {
+      return;
+    }
+    
     // TODO Auto-generated method stub
 
   }

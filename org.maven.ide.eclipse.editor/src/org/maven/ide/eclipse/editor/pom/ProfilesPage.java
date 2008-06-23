@@ -868,6 +868,10 @@ public class ProfilesPage extends MavenPomEditorPage {
   }
 
   public void updateView(Notification notification) {
+    if(!isActive()) {
+      return;
+    }
+    
     Object object = notification.getNotifier();
     
     if(object instanceof ProfilesType) {

@@ -107,7 +107,7 @@ public class RepositoriesPage extends MavenPomEditorPage {
   }
   
   public void updateView(Notification notification) {
-    if(repositoriesComposite!=null) {
+    if(isActive()) {
       repositoriesComposite.updateView(this, notification);
     }
   }
