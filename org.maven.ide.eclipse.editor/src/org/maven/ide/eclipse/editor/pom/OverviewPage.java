@@ -439,6 +439,7 @@ public class OverviewPage extends MavenPomEditorPage {
     modulesSection.setTextClient(toolbarComposite);
     
     modulesEditor.setReadOnly(pomEditor.isReadOnly());
+    newModuleProjectAction.setEnabled(!pomEditor.isReadOnly());
   }
   
   // right side

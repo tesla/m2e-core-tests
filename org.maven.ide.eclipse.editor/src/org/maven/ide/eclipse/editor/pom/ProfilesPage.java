@@ -561,17 +561,30 @@ public class ProfilesPage extends MavenPomEditorPage {
       }
     };
 
-    ValueProvider<DependencyManagement> dependencyManagementProvider = new ValueProvider<DependencyManagement>() {
-      public DependencyManagement getValue() {
-        return currentProfile==null ? null : currentProfile.getDependencyManagement();
+    ValueProvider<Dependencies> dependencyManagementProvider = new ValueProvider<Dependencies>() {
+      public Dependencies getValue() {
+        DependencyManagement management = currentProfile == null ? null : currentProfile.getDependencyManagement();
+        return management == null ? null : management.getDependencies();
       }
 
-      public DependencyManagement create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
-        DependencyManagement dependencyManagement = PomFactory.eINSTANCE.createDependencyManagement();
-        Command command = SetCommand.create(editingDomain, currentProfile,
-            POM_PACKAGE.getProfile_DependencyManagement(), dependencyManagement);
-        compoundCommand.append(command);
-        return dependencyManagement;
+      public Dependencies create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+        DependencyManagement management = currentProfile.getDependencyManagement();
+        if(management == null) {
+          management = PomFactory.eINSTANCE.createDependencyManagement();
+          Command command = SetCommand.create(editingDomain, currentProfile, //
+              POM_PACKAGE.getProfile_DependencyManagement(), management);
+          compoundCommand.append(command);
+        }
+
+        Dependencies dependencies = management.getDependencies();
+        if(dependencies == null) {
+          dependencies = PomFactory.eINSTANCE.createDependencies();
+          Command createDependency = SetCommand.create(editingDomain, management, //
+              POM_PACKAGE.getDependencyManagement_Dependencies(), dependencies);
+          compoundCommand.append(createDependency);
+        }
+
+        return dependencies;
       }
     };
 
