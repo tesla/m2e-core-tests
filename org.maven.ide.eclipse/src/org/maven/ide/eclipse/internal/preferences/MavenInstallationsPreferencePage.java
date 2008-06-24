@@ -592,8 +592,6 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
 
   static class RuntimesLabelProvider implements ITableLabelProvider, IColorProvider {
     
-    private Color disabledColor = Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GRAY);
-
     public String getColumnText(Object element, int columnIndex) {
       MavenRuntime runtime = (MavenRuntime) element;
       return runtime.toString();
@@ -609,11 +607,13 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
 
     public Color getForeground(Object element) {
       MavenRuntime runtime = (MavenRuntime) element;
-      return !runtime.isEditable() ? disabledColor : null;
+      if(!runtime.isEditable()) {
+        return Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GRAY);
+      }
+      return null;
     }
     
     public void dispose() {
-      disabledColor.dispose();
     }
 
     public boolean isLabelProperty(Object element, String property) {
