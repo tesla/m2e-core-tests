@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.common.notify.Notification;
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.edit.command.AddCommand;
 import org.eclipse.emf.edit.command.RemoveCommand;
@@ -689,7 +690,7 @@ public class OverviewPage extends MavenPomEditorPage {
     
     // XXX event is not received when <properties> is deleted in XML
     if(object instanceof Properties) {
-      loadProperties();
+      loadProperties(pomEditor.getProperties(model));
     }
   }
 
@@ -707,7 +708,9 @@ public class OverviewPage extends MavenPomEditorPage {
     loadIssueManagement(issueManagement);
     loadCiManagement(ciManagement);
     loadModules(model.getModules());
-    loadProperties();
+    
+    EList<PropertyPair> properties = pomEditor.getProperties(model);
+    loadProperties(properties);
     
     registerFormListeners();
     
@@ -728,10 +731,10 @@ public class OverviewPage extends MavenPomEditorPage {
     issueManagementSection.setExpanded(issueManagement != null
         && (!isEmpty(issueManagement.getSystem()) || !isEmpty(issueManagement.getUrl())));
 
-    propertiesSection.setExpanded(false);
+    propertiesSection.setExpanded(properties != null && !properties.isEmpty());
     
-    Modules modules = model.getModules();
-    modulesSection.setExpanded(modules !=null && modules.getModule().size()>0);
+    // Modules modules = model.getModules();
+    // modulesSection.setExpanded(modules !=null && modules.getModule().size()>0);
   }
 
   private void loadThis() {
@@ -760,8 +763,8 @@ public class OverviewPage extends MavenPomEditorPage {
     }
   }
   
-  private void loadProperties() {
-    propertiesEditor.setInput(pomEditor.getProperties(model));
+  private void loadProperties(EList<PropertyPair> properties) {
+    propertiesEditor.setInput(properties);
   }
   
   private void loadModules(Modules modules) {
