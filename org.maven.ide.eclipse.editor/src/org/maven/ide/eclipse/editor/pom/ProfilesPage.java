@@ -15,6 +15,7 @@ import static org.maven.ide.eclipse.editor.pom.FormUtils.setText;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.maven.project.MavenProject;
 import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.common.notify.Notification;
@@ -23,10 +24,18 @@ import org.eclipse.emf.edit.command.AddCommand;
 import org.eclipse.emf.edit.command.RemoveCommand;
 import org.eclipse.emf.edit.command.SetCommand;
 import org.eclipse.emf.edit.domain.EditingDomain;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.viewers.ICellModifier;
+import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
@@ -41,10 +50,13 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.Section;
+import org.eclipse.ui.part.FileEditorInput;
 import org.maven.ide.components.pom.Activation;
 import org.maven.ide.components.pom.ActivationFile;
 import org.maven.ide.components.pom.ActivationOS;
@@ -62,6 +74,7 @@ import org.maven.ide.components.pom.ProfilesType;
 import org.maven.ide.components.pom.Repositories;
 import org.maven.ide.components.pom.StringModules;
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.editor.composites.BuildComposite;
 import org.maven.ide.eclipse.editor.composites.DependenciesComposite;
@@ -71,6 +84,8 @@ import org.maven.ide.eclipse.editor.composites.PluginsComposite;
 import org.maven.ide.eclipse.editor.composites.ReportingComposite;
 import org.maven.ide.eclipse.editor.composites.RepositoriesComposite;
 import org.maven.ide.eclipse.editor.composites.StringLabelProvider;
+import org.maven.ide.eclipse.project.MavenProjectFacade;
+import org.maven.ide.eclipse.wizards.MavenModuleWizard;
 import org.maven.ide.eclipse.wizards.WidthGroup;
 
 /**
@@ -108,6 +123,7 @@ public class ProfilesPage extends MavenPomEditorPage {
   
   // model
   Profile currentProfile;
+  private IAction newModuleProjectAction;
   
   public ProfilesPage(MavenPomEditor pomEditor) {
     super(pomEditor, MavenPlugin.PLUGIN_ID + ".pom.profiles", "Profiles");
@@ -165,7 +181,7 @@ public class ProfilesPage extends MavenPomEditorPage {
 
   private void createProfilesSection(FormToolkit toolkit, Composite body) {
     Section profilesSection = toolkit.createSection(body, Section.TITLE_BAR);
-    profilesSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 3));
+    profilesSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 3));
     profilesSection.setText("Profiles");
     profilesEditor = new ListEditorComposite<Profile>(profilesSection, SWT.NONE);
     profilesSection.setClient(profilesEditor);
@@ -271,7 +287,7 @@ public class ProfilesPage extends MavenPomEditorPage {
     toolkit.adapt(propertiesEditor);
     
     propertiesEditor.setContentProvider(new ListEditorContentProvider<PropertyPair>());
-    propertiesEditor.setLabelProvider(new StringLabelProvider(MavenEditorImages.IMG_PROPERTY));
+    propertiesEditor.setLabelProvider(new PropertyPairLabelProvider());
     
     // XXX implement properties actions
     // propertiesEditor.setReadOnly(pomEditor.isReadOnly());
@@ -292,24 +308,22 @@ public class ProfilesPage extends MavenPomEditorPage {
     modulesEditor.setContentProvider(new ListEditorContentProvider<String>());
     modulesEditor.setLabelProvider(new ModulesLabelProvider(this));
     
+    modulesEditor.setOpenListener(new IOpenListener() {
+      public void open(OpenEvent openevent) {
+        List<String> selection = modulesEditor.getSelection();
+        for(String module : selection) {
+          MavenProjectFacade projectFacade = findModuleProject(module);
+          if(projectFacade!=null) {
+            MavenProject mavenProject = projectFacade.getMavenProject();
+            OpenPomAction.openEditor(mavenProject.getGroupId(), mavenProject.getArtifactId(), mavenProject.getVersion());
+          }
+        }
+      }
+    });
+    
     modulesEditor.setAddListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
-        CompoundCommand compoundCommand = new CompoundCommand();
-        EditingDomain editingDomain = getEditingDomain();
-        
-        StringModules modules = currentProfile.getModules();
-        if(modules == null) {
-          modules = PomFactory.eINSTANCE.createStringModules();
-          Command command = SetCommand.create(editingDomain, currentProfile, POM_PACKAGE.getProfile_Modules(), modules);
-          compoundCommand.append(command);
-        }
-
-        String module = "?";
-        Command addCommand = AddCommand.create(editingDomain, modules, POM_PACKAGE.getStringModules_Module(), module);
-        compoundCommand.append(addCommand);
-        
-        editingDomain.getCommandStack().execute(compoundCommand);
-        modulesEditor.setSelection(Collections.singletonList(module));
+        createNewModule("?");
       }
     });
     
@@ -350,6 +364,38 @@ public class ProfilesPage extends MavenPomEditorPage {
         }
       }
     });
+    
+    newModuleProjectAction = new Action("New module project", MavenEditorImages.ADD_MODULE) {
+      public void run() {
+        IEditorInput editorInput = pomEditor.getEditorInput();
+        if(editorInput instanceof FileEditorInput) {
+          MavenModuleWizard wizard = new MavenModuleWizard(true);
+          wizard.init(PlatformUI.getWorkbench(), new StructuredSelection(((FileEditorInput) editorInput).getFile()));
+          WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), wizard);
+          int res = dialog.open();
+          if(res == Window.OK) {
+            createNewModule(wizard.getModuleName());
+          }
+        }
+      }
+    };
+
+    ToolBarManager modulesToolBarManager = new ToolBarManager(SWT.FLAT);
+    modulesToolBarManager.add(newModuleProjectAction);
+    
+    Composite toolbarComposite = toolkit.createComposite(modulesSection);
+    GridLayout toolbarLayout = new GridLayout(1, true);
+    toolbarLayout.marginHeight = 0;
+    toolbarLayout.marginWidth = 0;
+    toolbarComposite.setLayout(toolbarLayout);
+    toolbarComposite.setBackground(null);
+ 
+    modulesToolBarManager.createControl(toolbarComposite);
+    modulesSection.setTextClient(toolbarComposite);
+    
+    modulesEditor.setReadOnly(pomEditor.isReadOnly());
+    newModuleProjectAction.setEnabled(!pomEditor.isReadOnly());
+    
   }
 
   protected void updateProfileDetails(Profile profile) {
@@ -359,6 +405,7 @@ public class ProfilesPage extends MavenPomEditorPage {
       FormUtils.setEnabled(propertiesSection, false);
       FormUtils.setEnabled(modulesSection, false);
       
+      propertiesEditor.setReadOnly(true);
       propertiesEditor.setInput(null);
       modulesEditor.setInput(null);
       updateProfileTabs(profile);
@@ -373,8 +420,11 @@ public class ProfilesPage extends MavenPomEditorPage {
     FormUtils.setReadonly(modulesSection, isReadOnly());
     
     modulesEditor.setInput(profile.getModules()==null ? null : profile.getModules().getModule());
+    modulesEditor.setReadOnly(isReadOnly());
     
     propertiesEditor.setInput(pomEditor.getProperties(profile));
+    // XXX implement properties actions
+    propertiesEditor.setReadOnly(true);
 
     updateProfileTabs(profile);
   }
@@ -933,6 +983,24 @@ public class ProfilesPage extends MavenPomEditorPage {
     buildComposite.updateView(this, notification);
     pluginsComposite.updateView(this, notification);
     reportingComposite.updateView(this, notification);
+  }
+
+  void createNewModule(String moduleName) {
+    CompoundCommand compoundCommand = new CompoundCommand();
+    EditingDomain editingDomain = getEditingDomain();
+    
+    StringModules modules = currentProfile.getModules();
+    if(modules == null) {
+      modules = PomFactory.eINSTANCE.createStringModules();
+      Command command = SetCommand.create(editingDomain, currentProfile, POM_PACKAGE.getProfile_Modules(), modules);
+      compoundCommand.append(command);
+    }
+
+    Command addCommand = AddCommand.create(editingDomain, modules, POM_PACKAGE.getStringModules_Module(), moduleName);
+    compoundCommand.append(addCommand);
+    
+    editingDomain.getCommandStack().execute(compoundCommand);
+    modulesEditor.setSelection(Collections.singletonList(moduleName));
   }
 
 }
