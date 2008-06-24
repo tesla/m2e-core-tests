@@ -132,7 +132,7 @@ public class ListEditorComposite<T> extends Composite {
   }
 
   public void setSelection(List<T> selection) {
-    viewer.setSelection(new StructuredSelection(selection));
+    viewer.setSelection(new StructuredSelection(selection), true);
   }
 
   public void setReadOnly(boolean readOnly) {

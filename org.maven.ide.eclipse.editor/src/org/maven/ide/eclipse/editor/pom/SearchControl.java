@@ -28,7 +28,7 @@ import org.maven.ide.eclipse.editor.MavenEditorImages;
 /**
  * @author Eugene Kuleshov
  */
-class SearchControl extends ControlContribution {
+public class SearchControl extends ControlContribution {
   private final IManagedForm managedForm;
   private Text searchText;
 

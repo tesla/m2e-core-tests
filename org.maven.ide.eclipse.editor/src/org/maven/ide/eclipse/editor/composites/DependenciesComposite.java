@@ -12,6 +12,7 @@ import static org.maven.ide.eclipse.editor.pom.FormUtils.nvl;
 import static org.maven.ide.eclipse.editor.pom.FormUtils.setButton;
 import static org.maven.ide.eclipse.editor.pom.FormUtils.setText;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -29,13 +30,19 @@ import org.eclipse.emf.edit.command.RemoveCommand;
 import org.eclipse.emf.edit.command.SetCommand;
 import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -62,6 +69,8 @@ import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.editor.pom.FormUtils;
 import org.maven.ide.eclipse.editor.pom.MavenPomEditorPage;
+import org.maven.ide.eclipse.editor.pom.SearchControl;
+import org.maven.ide.eclipse.editor.pom.SearchMatcher;
 import org.maven.ide.eclipse.editor.pom.ValueProvider;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
@@ -108,9 +117,12 @@ public class DependenciesComposite extends Composite {
   Button exclusionSelectButton;
   
   Action selectDependencyAction;
-  
-  Action addDependencyAction;
-  Action addDependencyManagementAction;
+  Action dependencyAddAction;
+  Action dependencyManagementAddAction;
+
+  SearchControl searchControl;
+  SearchMatcher searchMatcher;
+  DependencyFilter searchFilter;
   
   // model
   
@@ -123,6 +135,8 @@ public class DependenciesComposite extends Composite {
   ValueProvider<Dependencies> dependenciesProvider;
 
   ValueProvider<Dependencies> dependencyManagementProvider;
+
+
 
 
   public DependenciesComposite(Composite composite, int flags) {
@@ -173,7 +187,8 @@ public class DependenciesComposite extends Composite {
     dependenciesSection.setText("Dependencies");
 
     dependenciesEditor = new ListEditorComposite<Dependency>(dependenciesSection, SWT.NONE);
-    dependenciesEditor.setLabelProvider(new DependencyLabelProvider());
+    final DependencyLabelProvider labelProvider = new DependencyLabelProvider();
+    dependenciesEditor.setLabelProvider(labelProvider);
     dependenciesEditor.setContentProvider(new ListEditorContentProvider<Dependency>());
 
     dependenciesEditor.setAddListener(new SelectionAdapter() {
@@ -223,9 +238,8 @@ public class DependenciesComposite extends Composite {
     toolkit.adapt(dependenciesEditor);
     toolkit.paintBordersFor(dependenciesEditor);
     
-    
     // XXX fix action icon
-    addDependencyAction = new Action("Add Dependency", MavenEditorImages.SHOW_GROUP) {
+    dependencyAddAction = new Action("Add Dependency", MavenEditorImages.SHOW_GROUP) {
       public void run() {
         // TODO calculate current list of artifacts for the project
         Set<Dependency> artifacts = Collections.emptySet();
@@ -244,10 +258,36 @@ public class DependenciesComposite extends Composite {
         }
       }
     };
-    addDependencyAction.setEnabled(false);
+    dependencyAddAction.setEnabled(false);
 
     ToolBarManager modulesToolBarManager = new ToolBarManager(SWT.FLAT);
-    modulesToolBarManager.add(addDependencyAction);
+    modulesToolBarManager.add(dependencyAddAction);
+    modulesToolBarManager.add(new Separator());
+    
+    modulesToolBarManager.add(new Action("Show GroupId", MavenEditorImages.SHOW_GROUP) {
+      {
+        setChecked(true);
+      }
+      public int getStyle() {
+        return AS_CHECK_BOX;
+      }
+      public void run() {
+        TableViewer viewer = dependenciesEditor.getViewer();
+        labelProvider.setShowGroupId(isChecked());
+        viewer.refresh();
+      }
+    });
+    
+    modulesToolBarManager.add(new Action("Filter", MavenEditorImages.FILTER) {
+      public int getStyle() {
+        return AS_CHECK_BOX;
+      }
+      public void run() {
+        TableViewer viewer = dependenciesEditor.getViewer();
+        viewer.setFilters(isChecked() ? new ViewerFilter[] {searchFilter} : new ViewerFilter[0]);
+        viewer.refresh();
+      }
+    });
     
     Composite toolbarComposite = toolkit.createComposite(dependenciesSection);
     GridLayout toolbarLayout = new GridLayout(1, true);
@@ -268,7 +308,8 @@ public class DependenciesComposite extends Composite {
     dependencyManagementEditor = new ListEditorComposite<Dependency>(dependencyManagementSection, SWT.NONE);
     dependencyManagementSection.setClient(dependencyManagementEditor);
 
-    dependencyManagementEditor.setLabelProvider(new DependencyLabelProvider());
+    final DependencyLabelProvider labelProvider = new DependencyLabelProvider();
+    dependencyManagementEditor.setLabelProvider(labelProvider);
     dependencyManagementEditor.setContentProvider(new ListEditorContentProvider<Dependency>());
 
     dependencyManagementEditor.setAddListener(new SelectionAdapter() {
@@ -318,7 +359,7 @@ public class DependenciesComposite extends Composite {
     toolkit.paintBordersFor(dependencyManagementEditor);
     
     // XXX fix action icon
-    addDependencyManagementAction = new Action("Add Dependency", MavenEditorImages.SHOW_GROUP) {
+    dependencyManagementAddAction = new Action("Add Dependency", MavenEditorImages.SHOW_GROUP) {
       public void run() {
         // TODO calculate current list of artifacts for the project
         Set<Dependency> artifacts = Collections.emptySet();
@@ -337,10 +378,36 @@ public class DependenciesComposite extends Composite {
         }
       }
     };
-    addDependencyManagementAction.setEnabled(false);
+    dependencyManagementAddAction.setEnabled(false);
 
     ToolBarManager modulesToolBarManager = new ToolBarManager(SWT.FLAT);
-    modulesToolBarManager.add(addDependencyManagementAction);
+    modulesToolBarManager.add(dependencyManagementAddAction);
+    modulesToolBarManager.add(new Separator());
+
+    modulesToolBarManager.add(new Action("Show GroupId", MavenEditorImages.SHOW_GROUP) {
+      {
+        setChecked(true);
+      }
+      public int getStyle() {
+        return AS_CHECK_BOX;
+      }
+      public void run() {
+        TableViewer viewer = dependencyManagementEditor.getViewer();
+        labelProvider.setShowGroupId(isChecked());
+        viewer.refresh();
+      }
+    });
+    
+    modulesToolBarManager.add(new Action("Filter", MavenEditorImages.FILTER) {
+      public int getStyle() {
+        return AS_CHECK_BOX;
+      }
+      public void run() {
+        TableViewer viewer = dependencyManagementEditor.getViewer();
+        viewer.setFilters(isChecked() ? new ViewerFilter[] {searchFilter} : new ViewerFilter[0]);
+        viewer.refresh();
+      }
+    });
     
     Composite toolbarComposite = toolkit.createComposite(dependencyManagementSection);
     GridLayout toolbarLayout = new GridLayout(1, true);
@@ -658,7 +725,7 @@ public class DependenciesComposite extends Composite {
     
     this.currentDependency = dependency;
     
-    selectDependencyAction.setEnabled(dependency!=null);
+    selectDependencyAction.setEnabled(dependency!=null && !parent.isReadOnly());
     
     if(parent != null) {
       parent.removeNotifyListener(groupIdText);
@@ -780,9 +847,13 @@ public class DependenciesComposite extends Composite {
     dependenciesEditor.setReadOnly(parent.isReadOnly());
     dependencyManagementEditor.setReadOnly(parent.isReadOnly());
     
-    addDependencyAction.setEnabled(!parent.isReadOnly());
-    addDependencyManagementAction.setEnabled(!parent.isReadOnly());
+    dependencyAddAction.setEnabled(!parent.isReadOnly());
+    dependencyManagementAddAction.setEnabled(!parent.isReadOnly());
 
+    if(searchControl!=null) {
+      searchControl.getSearchText().setEditable(true);
+    }
+    
     updateDependencyDetails(null);
     
     // exclusionsEditor.setReadOnly(parent.isReadOnly());
@@ -868,6 +939,62 @@ public class DependenciesComposite extends Composite {
     
     return dependency;
   }
+
+  public void setSearchControl(SearchControl searchControl) {
+    if(this.searchControl!=null) {
+      return;
+    }
+    
+    this.searchMatcher = new SearchMatcher(searchControl);
+    this.searchFilter = new DependencyFilter(searchMatcher);
+    this.searchControl = searchControl;
+    this.searchControl.getSearchText().addModifyListener(new ModifyListener() {
+      public void modifyText(ModifyEvent e) {
+        changingSelection = true;
+        selectDepenendencies(dependenciesEditor, dependenciesProvider);
+        selectDepenendencies(dependencyManagementEditor, dependencyManagementProvider);
+        changingSelection = false;
+        
+        dependenciesEditor.refresh();
+        dependencyManagementEditor.refresh();
+
+        updateDependencyDetails(null);
+      }
+
+      private void selectDepenendencies(ListEditorComposite<Dependency> editor,
+          ValueProvider<Dependencies> provider) {
+        List<Dependency> dependencies = new ArrayList<Dependency>();
+        Dependencies value = provider.getValue();
+        if(value!=null) {
+          for(Dependency d : value.getDependency()) {
+            if(searchMatcher.isMatchingArtifact(d.getGroupId(), d.getArtifactId())) {
+              dependencies.add(d);
+            }
+          }
+        }
+        editor.setSelection(dependencies);
+      }
+    });
+  }
+  
+  public static class DependencyFilter extends ViewerFilter {
+    private SearchMatcher searchMatcher;
+
+    public DependencyFilter(SearchMatcher searchMatcher) {
+      this.searchMatcher = searchMatcher;
+    }
+
+    public boolean select(Viewer viewer, Object parentElement, Object element) {
+      if(element instanceof Dependency) {
+        Dependency d = (Dependency) element;
+        return searchMatcher.isMatchingArtifact(d.getGroupId(), d.getArtifactId());
+      }
+      return false;
+    }
+  }
+
+  
+  
 
 //  private List<Dependency> getUpdatedSelection(Dependencies dependencies, List<Dependency> selection) {
 //    List<Dependency> newSelection = new ArrayList<Dependency>();

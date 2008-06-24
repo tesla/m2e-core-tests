@@ -13,6 +13,8 @@ import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.edit.command.SetCommand;
 import org.eclipse.emf.edit.domain.EditingDomain;
+import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -31,6 +33,7 @@ import org.maven.ide.eclipse.editor.composites.DependenciesComposite;
 public class DependenciesPage extends MavenPomEditorPage {
   
   private DependenciesComposite dependenciesComposite;
+  private SearchControl searchControl;
   
   public DependenciesPage(MavenPomEditor pomEditor) {
     super(pomEditor, MavenPlugin.PLUGIN_ID + ".pom.dependencies", "Dependencies");
@@ -41,6 +44,14 @@ public class DependenciesPage extends MavenPomEditorPage {
       dependenciesComposite.dispose();
     }
     super.dispose();
+  }
+
+  public void setActive(boolean active) {
+    super.setActive(active);
+    if(active) {
+      dependenciesComposite.setSearchControl(searchControl);
+      searchControl.getSearchText().setEditable(true);
+    }
   }
   
   protected void createFormContent(IManagedForm managedForm) {
@@ -54,6 +65,14 @@ public class DependenciesPage extends MavenPomEditorPage {
     dependenciesComposite = new DependenciesComposite(form.getBody(), SWT.NONE);
     dependenciesComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     toolkit.adapt(dependenciesComposite);
+
+    searchControl = new SearchControl("Find", managedForm);
+    
+    IToolBarManager pageToolBarManager = form.getForm().getToolBarManager();
+    pageToolBarManager.add(searchControl);
+    pageToolBarManager.add(new Separator());
+    
+    form.updateToolBar();
     
 //    form.pack();
 
