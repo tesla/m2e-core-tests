@@ -27,6 +27,9 @@ import org.eclipse.emf.edit.command.AddCommand;
 import org.eclipse.emf.edit.command.RemoveCommand;
 import org.eclipse.emf.edit.command.SetCommand;
 import org.eclipse.emf.edit.domain.EditingDomain;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.window.Window;
@@ -57,6 +60,7 @@ import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.MavenRepositorySearchDialog;
 import org.maven.ide.eclipse.actions.OpenPomAction;
+import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.editor.composites.BuildComposite;
 import org.maven.ide.eclipse.editor.composites.DependencyLabelProvider;
 import org.maven.ide.eclipse.editor.composites.ListEditorComposite;
@@ -88,6 +92,8 @@ public class BuildPage extends MavenPomEditorPage {
   
   Extension currentExtension;
   protected boolean expandingTopSections;
+  private Action extensionSelectAction;
+  private Action extensionAddAction;
   
   
   public BuildPage(MavenPomEditor pomEditor) {
@@ -200,8 +206,9 @@ public class BuildPage extends MavenPomEditorPage {
     toolkit.adapt(extensionsEditor);
     extensionsSection.setClient(extensionsEditor);
     
+    final DependencyLabelProvider labelProvider = new DependencyLabelProvider();
+    extensionsEditor.setLabelProvider(labelProvider);
     extensionsEditor.setContentProvider(new ListEditorContentProvider<Extension>());
-    extensionsEditor.setLabelProvider(new DependencyLabelProvider());
     
     extensionsEditor.addSelectionListener(new ISelectionChangedListener() {
       public void selectionChanged(SelectionChangedEvent event) {
@@ -212,32 +219,7 @@ public class BuildPage extends MavenPomEditorPage {
     
     extensionsEditor.setAddListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
-        CompoundCommand compoundCommand = new CompoundCommand();
-        EditingDomain editingDomain = getEditingDomain();
-        
-        Build build = model.getBuild();
-        if(build == null) {
-          build = PomFactory.eINSTANCE.createBuild();
-          Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Build(), build);
-          compoundCommand.append(command);
-        }
-        
-        ExtensionsType extensions = build.getExtensions();
-        if(extensions==null) {
-          extensions = PomFactory.eINSTANCE.createExtensionsType();
-          Command command = SetCommand.create(editingDomain, build, POM_PACKAGE.getBuild_Extensions(), extensions);
-          compoundCommand.append(command);
-        }
-        
-        Extension extension = PomFactory.eINSTANCE.createExtension();
-        Command addCommand = AddCommand.create(editingDomain, extensions, //
-            POM_PACKAGE.getExtensionsType_Extension(), extension);
-        compoundCommand.append(addCommand);
-        
-        editingDomain.getCommandStack().execute(compoundCommand);
-        
-        extensionsEditor.setSelection(Collections.singletonList(extension));
-        extensionGroupIdText.setFocus();
+        createExtension(null, null, null);
       }
     });
     
@@ -257,6 +239,49 @@ public class BuildPage extends MavenPomEditorPage {
         updateExtensionDetails(null);
       }
     });
+    
+    extensionAddAction = new Action("Add Extension", MavenEditorImages.ADD_ARTIFACT) {
+      public void run() {
+        // XXX calculate list available extensions
+        Set<Dependency> artifacts = Collections.emptySet();
+        MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getEditorSite().getShell(), //
+            "Add Extension", IndexManager.SEARCH_ARTIFACT, artifacts);
+        if(dialog.open() == Window.OK) {
+          IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
+          if(af != null) {
+            createExtension(af.group, af.artifact, af.version);
+          }
+        }
+      }
+    };
+    extensionAddAction.setEnabled(false);
+
+    ToolBarManager toolBarManager = new ToolBarManager(SWT.FLAT);
+    toolBarManager.add(extensionAddAction);
+    toolBarManager.add(new Separator());
+    
+    toolBarManager.add(new Action("Show GroupId", MavenEditorImages.SHOW_GROUP) {
+      {
+        setChecked(true);
+      }
+      public int getStyle() {
+        return AS_CHECK_BOX;
+      }
+      public void run() {
+        labelProvider.setShowGroupId(isChecked());
+        extensionsEditor.getViewer().refresh();
+      }
+    });
+    
+    Composite toolbarComposite = toolkit.createComposite(extensionsSection);
+    GridLayout toolbarLayout = new GridLayout(1, true);
+    toolbarLayout.marginHeight = 0;
+    toolbarLayout.marginWidth = 0;
+    toolbarComposite.setLayout(toolbarLayout);
+    toolbarComposite.setBackground(null);
+ 
+    toolBarManager.createControl(toolbarComposite);
+    extensionsSection.setTextClient(toolbarComposite);
   }
 
   private void createExtensionDetailsSection(Composite buildSash, FormToolkit toolkit) {
@@ -310,14 +335,31 @@ public class BuildPage extends MavenPomEditorPage {
     extensionVersionText = toolkit.createText(extensionDetialsComposite, null, SWT.FLAT);
     extensionVersionText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-    extensionSelectButton = toolkit.createButton(extensionDetialsComposite, "Select...", SWT.FLAT);
-    extensionSelectButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 2, 1));
-    extensionSelectButton.addSelectionListener(new SelectionAdapter() {
-      public void widgetSelected(SelectionEvent e) {
-        // TODO calculate current list of artifacts for the project
+//    extensionSelectButton = toolkit.createButton(extensionDetialsComposite, "Select...", SWT.FLAT);
+//    extensionSelectButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 2, 1));
+//    extensionSelectButton.addSelectionListener(new SelectionAdapter() {
+//      public void widgetSelected(SelectionEvent e) {
+//        // TODO calculate current list of artifacts for the project
+//        Set<Dependency> artifacts = Collections.emptySet();
+//        MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getEditorSite().getShell(), //
+//            "Add Dependency", IndexManager.SEARCH_ARTIFACT, artifacts);
+//        if(dialog.open() == Window.OK) {
+//          IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
+//          if(af != null) {
+//            extensionGroupIdText.setText(nvl(af.group));
+//            extensionArtifactIdText.setText(nvl(af.artifact));
+//            extensionVersionText.setText(nvl(af.version));
+//          }
+//        }
+//      }
+//    });
+    
+    extensionSelectAction = new Action("Select Extension", MavenEditorImages.SELECT_ARTIFACT) {
+      public void run() {
+        // XXX calculate list available extensions
         Set<Dependency> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getEditorSite().getShell(), //
-            "Add Dependency", IndexManager.SEARCH_ARTIFACT, artifacts);
+            "Select Extension", IndexManager.SEARCH_ARTIFACT, artifacts);
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {
@@ -327,7 +369,21 @@ public class BuildPage extends MavenPomEditorPage {
           }
         }
       }
-    });
+    };
+    extensionSelectAction.setEnabled(false);
+
+    ToolBarManager toolBarManager = new ToolBarManager(SWT.FLAT);
+    toolBarManager.add(extensionSelectAction);
+    
+    Composite toolbarComposite = toolkit.createComposite(extensionDetailsSection);
+    GridLayout toolbarLayout = new GridLayout(1, true);
+    toolbarLayout.marginHeight = 0;
+    toolbarLayout.marginWidth = 0;
+    toolbarComposite.setLayout(toolbarLayout);
+    toolbarComposite.setBackground(null);
+ 
+    toolBarManager.createControl(toolbarComposite);
+    extensionDetailsSection.setTextClient(toolbarComposite);
   }
   
   public void loadData() {
@@ -368,6 +424,7 @@ public class BuildPage extends MavenPomEditorPage {
     
     if(extension==null) {
       FormUtils.setEnabled(extensionDetailsSection, false);
+      extensionSelectAction.setEnabled(false);
 
       setText(extensionGroupIdText, "");
       setText(extensionArtifactIdText, "");
@@ -378,6 +435,7 @@ public class BuildPage extends MavenPomEditorPage {
 
     FormUtils.setEnabled(extensionDetailsSection, true);
     FormUtils.setReadonly(extensionDetailsSection, isReadOnly());
+    extensionSelectAction.setEnabled(!isReadOnly());
     
     setText(extensionGroupIdText, extension.getGroupId());
     setText(extensionArtifactIdText, extension.getArtifactId());
@@ -415,6 +473,8 @@ public class BuildPage extends MavenPomEditorPage {
       
       extensionsEditor.setInput(build.getExtensions() == null ? null : build.getExtensions().getExtension());
     }
+    
+    extensionAddAction.setEnabled(!isReadOnly());
       
     loadBuildBase();
   }
@@ -461,6 +521,39 @@ public class BuildPage extends MavenPomEditorPage {
     if(buildComposite!=null) {
       buildComposite.updateView(this, notification);
     }
+  }
+
+  void createExtension(String groupId, String artifactId, String version) {
+    CompoundCommand compoundCommand = new CompoundCommand();
+    EditingDomain editingDomain = getEditingDomain();
+    
+    Build build = model.getBuild();
+    if(build == null) {
+      build = PomFactory.eINSTANCE.createBuild();
+      Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Build(), build);
+      compoundCommand.append(command);
+    }
+    
+    ExtensionsType extensions = build.getExtensions();
+    if(extensions==null) {
+      extensions = PomFactory.eINSTANCE.createExtensionsType();
+      Command command = SetCommand.create(editingDomain, build, POM_PACKAGE.getBuild_Extensions(), extensions);
+      compoundCommand.append(command);
+    }
+    
+    Extension extension = PomFactory.eINSTANCE.createExtension();
+    extension.setGroupId(groupId);
+    extension.setArtifactId(artifactId);
+    extension.setVersion(version);
+    
+    Command addCommand = AddCommand.create(editingDomain, extensions, //
+        POM_PACKAGE.getExtensionsType_Extension(), extension);
+    compoundCommand.append(addCommand);
+    
+    editingDomain.getCommandStack().execute(compoundCommand);
+    
+    extensionsEditor.setSelection(Collections.singletonList(extension));
+    extensionGroupIdText.setFocus();
   }
 }
 

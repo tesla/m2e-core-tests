@@ -276,9 +276,8 @@ public class DependenciesComposite extends Composite {
         return AS_CHECK_BOX;
       }
       public void run() {
-        TableViewer viewer = dependenciesEditor.getViewer();
         labelProvider.setShowGroupId(isChecked());
-        viewer.refresh();
+        dependenciesEditor.getViewer().refresh();
       }
     });
     
@@ -395,9 +394,8 @@ public class DependenciesComposite extends Composite {
         return AS_CHECK_BOX;
       }
       public void run() {
-        TableViewer viewer = dependencyManagementEditor.getViewer();
         labelProvider.setShowGroupId(isChecked());
-        viewer.refresh();
+        dependencyManagementEditor.getViewer().refresh();
       }
     });
     
