@@ -67,11 +67,20 @@ public class MavenEditorImages {
   public static final ImageDescriptor SHOW_GROUP = create("group.gif");
 
   // XXX fix icon
-  public static final ImageDescriptor SELECT_ARTIFACT = create("group.gif");
+  public static final ImageDescriptor ADD_MODULE = create("group.gif");
 
   // XXX fix icon
   public static final ImageDescriptor ADD_ARTIFACT = create("group.gif");
-
+  
+  // XXX fix icon
+  public static final ImageDescriptor SELECT_ARTIFACT = create("group.gif");
+  
+  // XXX fix icon
+  public static final ImageDescriptor SELECT_PLUGIN = create("group.gif");
+  
+  // XXX fix icon
+  public static final ImageDescriptor ADD_PLUGIN = create("group.gif");
+  
   public static final ImageDescriptor SORT = create("sort.gif");
 
   public static final ImageDescriptor FILTER = create("filter.gif");

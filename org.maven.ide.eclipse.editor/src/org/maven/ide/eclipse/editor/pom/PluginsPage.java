@@ -13,6 +13,8 @@ import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.edit.command.SetCommand;
 import org.eclipse.emf.edit.domain.EditingDomain;
+import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -33,6 +35,7 @@ import org.maven.ide.eclipse.editor.composites.PluginsComposite;
 public class PluginsPage extends MavenPomEditorPage {
 
   private PluginsComposite pluginsComposite;
+  private SearchControl searchControl;
   
   public PluginsPage(MavenPomEditor pomEditor) {
     super(pomEditor, MavenPlugin.PLUGIN_ID + ".pom.plugins", "Plugins");
@@ -45,6 +48,14 @@ public class PluginsPage extends MavenPomEditorPage {
     super.dispose();
   }
 
+  public void setActive(boolean active) {
+    super.setActive(active);
+    if(active) {
+      pluginsComposite.setSearchControl(searchControl);
+      searchControl.getSearchText().setEditable(true);
+    }
+  }
+  
   protected void createFormContent(IManagedForm managedForm) {
     FormToolkit toolkit = managedForm.getToolkit();
     ScrolledForm form = managedForm.getForm();
@@ -59,6 +70,14 @@ public class PluginsPage extends MavenPomEditorPage {
     pluginsComposite = new PluginsComposite(body, SWT.NONE);
     pluginsComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     toolkit.adapt(pluginsComposite);
+    
+    searchControl = new SearchControl("Find", managedForm);
+    
+    IToolBarManager pageToolBarManager = form.getForm().getToolBarManager();
+    pageToolBarManager.add(searchControl);
+    pageToolBarManager.add(new Separator());
+    
+    form.updateToolBar();
     
 //    form.pack();
 
@@ -90,27 +109,38 @@ public class PluginsPage extends MavenPomEditorPage {
       }
     };
     
-    ValueProvider<PluginManagement> pluginManagementProvider = new ValueProvider<PluginManagement>() {
-      public PluginManagement getValue() {
+    ValueProvider<Plugins> pluginManagementProvider = new ValueProvider<Plugins>() {
+      public Plugins getValue() {
         Build build = model.getBuild();
-        return build==null ? null : build.getPluginManagement();
+        PluginManagement management = build == null ? null : build.getPluginManagement();
+        return management == null ? null : management.getPlugins();
       }
       
-      public PluginManagement create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+      public Plugins create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
         Build build = model.getBuild();
-        if(build==null) {
+        if(build == null) {
           build = PomFactory.eINSTANCE.createBuild();
           Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Build(), build);
           compoundCommand.append(command);
         }
-        
+
         PluginManagement management = build.getPluginManagement();
-        if(management==null) {
+        if(management == null) {
           management = PomFactory.eINSTANCE.createPluginManagement();
-          Command command = SetCommand.create(editingDomain, build, POM_PACKAGE.getBuildBase_PluginManagement(), management);
+          Command command = SetCommand.create(editingDomain, build, //
+              POM_PACKAGE.getBuildBase_PluginManagement(), management);
           compoundCommand.append(command);
         }
-        return management;
+        
+        Plugins plugins = management.getPlugins();
+        if(plugins==null) {
+          plugins = PomFactory.eINSTANCE.createPlugins();
+          Command command = SetCommand.create(editingDomain, management, //
+              POM_PACKAGE.getPluginManagement_Plugins(), plugins);
+          compoundCommand.append(command);
+        }
+        
+        return plugins;
       }
     };
     

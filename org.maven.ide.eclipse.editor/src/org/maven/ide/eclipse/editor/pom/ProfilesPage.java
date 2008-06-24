@@ -657,17 +657,17 @@ public class ProfilesPage extends MavenPomEditorPage {
         BuildBase build = currentProfile == null ? null : currentProfile.getBuild();
         return build == null ? null : build.getPlugins();
       }
-      
+
       public Plugins create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
         BuildBase build = currentProfile.getBuild();
-        if(build==null) {
+        if(build == null) {
           build = PomFactory.eINSTANCE.createBuild();
           Command command = SetCommand.create(editingDomain, currentProfile, POM_PACKAGE.getProfile_Build(), build);
           compoundCommand.append(command);
         }
-        
+
         Plugins plugins = build.getPlugins();
-        if(plugins==null) {
+        if(plugins == null) {
           plugins = PomFactory.eINSTANCE.createPlugins();
           Command command = SetCommand.create(editingDomain, build, POM_PACKAGE.getBuildBase_Plugins(), plugins);
           compoundCommand.append(command);
@@ -675,28 +675,39 @@ public class ProfilesPage extends MavenPomEditorPage {
         return plugins;
       }
     };
-    
-    ValueProvider<PluginManagement> pluginManagementProvider = new ValueProvider<PluginManagement>() {
-      public PluginManagement getValue() {
+
+    ValueProvider<Plugins> pluginManagementProvider = new ValueProvider<Plugins>() {
+      public Plugins getValue() {
         BuildBase build = currentProfile == null ? null : currentProfile.getBuild();
-        return build == null ? null : build.getPluginManagement();
+        PluginManagement management = build == null ? null : build.getPluginManagement();
+        return management == null ? null : management.getPlugins();
       }
-      
-      public PluginManagement create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+
+      public Plugins create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
         BuildBase build = currentProfile.getBuild();
-        if(build==null) {
+        if(build == null) {
           build = PomFactory.eINSTANCE.createBuild();
           Command command = SetCommand.create(editingDomain, currentProfile, POM_PACKAGE.getProfile_Build(), build);
           compoundCommand.append(command);
         }
-        
+
         PluginManagement management = build.getPluginManagement();
-        if(management==null) {
+        if(management == null) {
           management = PomFactory.eINSTANCE.createPluginManagement();
-          Command command = SetCommand.create(editingDomain, build, POM_PACKAGE.getBuildBase_PluginManagement(), management);
+          Command command = SetCommand.create(editingDomain, build, //
+              POM_PACKAGE.getBuildBase_PluginManagement(), management);
           compoundCommand.append(command);
         }
-        return management;
+
+        Plugins plugins = management.getPlugins();
+        if(plugins == null) {
+          plugins = PomFactory.eINSTANCE.createPlugins();
+          Command command = SetCommand.create(editingDomain, management, //
+              POM_PACKAGE.getPluginManagement_Plugins(), plugins);
+          compoundCommand.append(command);
+        }
+
+        return plugins;
       }
     };
     
