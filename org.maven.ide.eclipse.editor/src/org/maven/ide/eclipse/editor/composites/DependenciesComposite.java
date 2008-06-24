@@ -1000,9 +1000,6 @@ public class DependenciesComposite extends Composite {
         selectDepenendencies(dependencyManagementEditor, dependencyManagementProvider);
         changingSelection = false;
         
-        dependenciesEditor.refresh();
-        dependencyManagementEditor.refresh();
-
         updateDependencyDetails(null);
       }
 
@@ -1018,6 +1015,7 @@ public class DependenciesComposite extends Composite {
           }
         }
         editor.setSelection(dependencies);
+        editor.refresh();
       }
     });
   }

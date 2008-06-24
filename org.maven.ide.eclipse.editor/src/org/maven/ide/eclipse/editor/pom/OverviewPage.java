@@ -320,7 +320,7 @@ public class OverviewPage extends MavenPomEditorPage {
 
   private void createPropertiesSection(FormToolkit toolkit, Composite composite, WidthGroup widthGroup) {
     propertiesSection = toolkit.createSection(composite, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
-    propertiesSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+    propertiesSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     propertiesSection.setText("Properties");
     toolkit.paintBordersFor(propertiesSection);
 
@@ -410,8 +410,7 @@ public class OverviewPage extends MavenPomEditorPage {
       }
     });
     
-    // XXX fix action icon
-    newModuleProjectAction = new Action("Create new module project", MavenEditorImages.SHOW_GROUP) {
+    newModuleProjectAction = new Action("Create new module project", MavenEditorImages.ADD_MODULE) {
       public void run() {
         IEditorInput editorInput = OverviewPage.this.pomEditor.getEditorInput();
         if(editorInput instanceof FileEditorInput) {
