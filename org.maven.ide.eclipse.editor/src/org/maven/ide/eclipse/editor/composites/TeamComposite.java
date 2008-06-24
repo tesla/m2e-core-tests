@@ -21,6 +21,7 @@ import org.eclipse.emf.edit.command.AddCommand;
 import org.eclipse.emf.edit.command.RemoveCommand;
 import org.eclipse.emf.edit.command.SetCommand;
 import org.eclipse.emf.edit.domain.EditingDomain;
+import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
@@ -43,7 +44,6 @@ import org.maven.ide.components.pom.Contributor;
 import org.maven.ide.components.pom.ContributorsType;
 import org.maven.ide.components.pom.Developer;
 import org.maven.ide.components.pom.DevelopersType;
-import org.maven.ide.components.pom.Modules;
 import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.PomPackage;
 import org.maven.ide.components.pom.Properties;
@@ -423,11 +423,28 @@ public class TeamComposite extends Composite {
       }
     });
 
-    // XXX implement actions
+    rolesEditor.setCellModifier(new ICellModifier() {
+      public boolean canModify(Object element, String property) {
+        return true;
+      }
+ 
+      public Object getValue(Object element, String property) {
+        return element;
+      }
+ 
+      public void modify(Object element, String property, Object value) {
+        EditingDomain editingDomain = parent.getEditingDomain();
+        Command command = SetCommand.create(editingDomain, getRoles(),
+            POM_PACKAGE.getRoles_Role(), value,
+            rolesEditor.getViewer().getTable().getSelectionIndex());
+        editingDomain.getCommandStack().execute(command);
+      }
+    });
+
   }
 
-  private void createPropertiesSection(FormToolkit toolkit, Composite parent) {
-    Section propertiesSection = toolkit.createSection(parent, Section.TITLE_BAR);
+  private void createPropertiesSection(FormToolkit toolkit, Composite composite) {
+    Section propertiesSection = toolkit.createSection(composite, Section.TITLE_BAR);
     propertiesSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
     propertiesSection.setText("Properties");
 
@@ -438,8 +455,6 @@ public class TeamComposite extends Composite {
 
     propertiesEditor.setContentProvider(new ListEditorContentProvider<PropertyPair>());
     propertiesEditor.setLabelProvider(new PropertyPairLabelProvider());
-
-    // XXX implement actions
   }
 
   public void loadContributors() {
@@ -494,17 +509,17 @@ public class TeamComposite extends Composite {
     FormUtils.setReadonly(detailsComposite, parent.isReadOnly());
 
     Roles roles = null;
-    Properties properties = null;
+//    Properties properties = null;
     if(eo instanceof Contributor) {
       Contributor contributor = (Contributor) eo;
       updateContributorDetails(contributor);
       roles = contributor.getRoles();
-      properties = contributor.getProperties();
+//      properties = contributor.getProperties();
     } else if(eo instanceof Developer) {
       Developer developer = (Developer) eo;
       updateDeveloperDetails(developer);
       roles = developer.getRoles();
-      properties = developer.getProperties();
+//      properties = developer.getProperties();
     }
 
     parent.registerListeners();
@@ -558,26 +573,8 @@ public class TeamComposite extends Composite {
   public void updateView(MavenPomEditorPage editorPage, Notification notification) {
     EObject object = (EObject) notification.getNotifier();
 
-    // XXX event is not received when <dependencies> is deleted in XML
     if(object instanceof DevelopersType) {
-//      // handle add/remove
-//      Dependencies dependencies = (Dependencies) object;
-//      if (model.getDependencies() == dependencies) {
-//        // dependencies updated
-//        List<Dependency> selection = getUpdatedSelection(dependencies, dependenciesEditor.getSelection());
-//        loadDependencies(model);
-//        dependenciesEditor.setSelection(selection);
-//        updateDependencyDetails(selection.size()==1 ? selection.get(0) : null);
-//      } else {
-//        // dependencyManagement updated
-//        List<Dependency> selection = dependencyManagementEditor.getSelection();
-//        getUpdatedSelection(dependencies, selection);
-//        loadDependencyManagement(model);
-//        dependencyManagementEditor.setSelection(selection);
-//        updateDependencyDetails(selection.size()==1 ? selection.get(0) : null);
-//      }
       developersEditor.refresh();
-//      contributorsEditor.refresh();
     } else if(object instanceof ContributorsType) {
       contributorsEditor.refresh();
     } else if(object instanceof Contributor) {
@@ -597,22 +594,6 @@ public class TeamComposite extends Composite {
         updateRoles((Roles) object);
       }
     }
-/*    
-    ExclusionsType exclusions = currentDependency==null ? null : currentDependency.getExclusions();
-    if(object instanceof ExclusionsType) {
-      exclusionsEditor.refresh();
-      if(exclusions == object) {
-        updateDependencyDetails(currentDependency);
-      }
-    }
-    
-    if(object instanceof Exclusion) {
-      exclusionsEditor.refresh();
-      if(currentExclusion == object) {
-        updateExclusionDetails((Exclusion) object);
-      }
-    }
-*/
   }
 
   public void loadData(MavenPomEditorPage editorPage, ValueProvider<DevelopersType> developersProvider,
@@ -643,5 +624,16 @@ public class TeamComposite extends Composite {
   
   protected void updateRoles(Roles roles) {
     rolesEditor.setInput(roles == null ? null : roles.getRole());
+  }
+
+  protected Properties getProperties() {
+    if(currentSelection != null) {
+      if(currentSelection instanceof Contributor) {
+        return ((Contributor) currentSelection).getProperties();
+      } else if(currentSelection instanceof Developer) {
+        return ((Developer) currentSelection).getProperties();
+      }
+    }
+    return null;
   }
 }
