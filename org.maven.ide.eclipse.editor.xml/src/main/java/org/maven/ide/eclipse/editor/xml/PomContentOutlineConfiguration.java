@@ -72,8 +72,11 @@ public class PomContentOutlineConfiguration extends XMLContentOutlineConfigurati
         } else if("mailingList".equals(nodeName)) {
           return getLabel(text, node, "name");
           
-        } else if("developers".equals(nodeName)) {
+        } else if("developer".equals(nodeName)) {
           return getLabel(text, node, "id", "name", "email");
+          
+        } else if("contributor".equals(nodeName)) {
+          return getLabel(text, node, "name", "email");
           
         } else if("plugin".equals(nodeName)) {
           return getLabel(text, node, "groupId", "artifactId", "version");
