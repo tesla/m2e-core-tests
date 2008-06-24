@@ -64,22 +64,17 @@ public class MavenEditorImages {
 
   public static final ImageDescriptor EXPAND_ALL = create("expandall.gif");
 
-  public static final ImageDescriptor SHOW_GROUP = create("group.gif");
+  public static final ImageDescriptor SHOW_GROUP = create("show_group.gif");
 
-  // XXX fix icon
-  public static final ImageDescriptor ADD_MODULE = create("group.gif");
+  public static final ImageDescriptor ADD_MODULE = create("new_project.gif");
 
-  // XXX fix icon
-  public static final ImageDescriptor ADD_ARTIFACT = create("group.gif");
+  public static final ImageDescriptor ADD_ARTIFACT = create("new_jar.gif");
   
-  // XXX fix icon
-  public static final ImageDescriptor SELECT_ARTIFACT = create("group.gif");
+  public static final ImageDescriptor SELECT_ARTIFACT = create("select_jar.gif");
   
-  // XXX fix icon
-  public static final ImageDescriptor SELECT_PLUGIN = create("group.gif");
+  public static final ImageDescriptor ADD_PLUGIN = create("new_plugin.gif");
   
-  // XXX fix icon
-  public static final ImageDescriptor ADD_PLUGIN = create("group.gif");
+  public static final ImageDescriptor SELECT_PLUGIN = create("select_plugin.gif");
   
   public static final ImageDescriptor SORT = create("sort.gif");
 

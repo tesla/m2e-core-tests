@@ -116,13 +116,16 @@ public class DependenciesComposite extends Composite {
   Button dependencySelectButton;
   Button exclusionSelectButton;
   
-  Action selectDependencyAction;
   Action dependencyAddAction;
   Action dependencyManagementAddAction;
+  Action dependencySelectAction;
 
   SearchControl searchControl;
   SearchMatcher searchMatcher;
   DependencyFilter searchFilter;
+  
+  Action exclusionSelectAction;
+  Action exclusionAddAction;
   
   // model
   
@@ -135,12 +138,6 @@ public class DependenciesComposite extends Composite {
   ValueProvider<Dependencies> dependenciesProvider;
 
   ValueProvider<Dependencies> dependencyManagementProvider;
-
-  private Action exclusionSelectAction;
-
-  private Action exclusionAddAction;
-
-
 
 
   public DependenciesComposite(Composite composite, int flags) {
@@ -428,7 +425,7 @@ public class DependenciesComposite extends Composite {
     dependencyDetailsSection.marginWidth = 3;
     
     // XXX fix action icon
-    selectDependencyAction = new Action("Select Dependency", MavenEditorImages.SHOW_GROUP) {
+    dependencySelectAction = new Action("Select Dependency", MavenEditorImages.SELECT_ARTIFACT) {
       public void run() {
         // TODO calculate current list of artifacts for the project
         Set<Dependency> artifacts = Collections.emptySet();
@@ -445,10 +442,10 @@ public class DependenciesComposite extends Composite {
         }
       }
     };
-    selectDependencyAction.setEnabled(false);
+    dependencySelectAction.setEnabled(false);
 
     ToolBarManager toolBarManager = new ToolBarManager(SWT.FLAT);
-    toolBarManager.add(selectDependencyAction);
+    toolBarManager.add(dependencySelectAction);
     
     Composite toolbarComposite = toolkit.createComposite(dependencyDetailsSection);
     GridLayout toolbarLayout = new GridLayout(1, true);
@@ -769,7 +766,7 @@ public class DependenciesComposite extends Composite {
     
     this.currentDependency = dependency;
     
-    selectDependencyAction.setEnabled(dependency!=null && !parent.isReadOnly());
+    dependencySelectAction.setEnabled(dependency!=null && !parent.isReadOnly());
     exclusionAddAction.setEnabled(dependency!=null && !parent.isReadOnly());
     
     if(parent != null) {
