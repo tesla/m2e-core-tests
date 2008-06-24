@@ -9,7 +9,6 @@
 package org.maven.ide.eclipse.editor.pom;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.shared.dependency.tree.DependencyNode;
@@ -197,8 +196,8 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
 
     toolBarManager.add(new Action("Refresh", MavenEditorImages.REFRESH) {
       public void run() {
-        viewer.getGraphControl().applyLayout();
-        // graphViewer.setInput(graph);
+        // viewer.getGraphControl().applyLayout();
+        updateGraphAsync(true);
       }
     });
     
@@ -223,12 +222,11 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
       }
     });
     
-    
     updateGraphAsync(false);
   }
 
   private void selectElements() {
-    ArrayList elements = new ArrayList();
+    ArrayList<Artifact> elements = new ArrayList<Artifact>();
     String text = searchControl.getSearchText().getText();
     if(text.length()>0) {
       Object[] nodeElements = viewer.getNodeElements();
@@ -247,13 +245,11 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
       public void run() {
         IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
         if(!selection.isEmpty()) {
-          for(Iterator it = selection.iterator(); it.hasNext();) {
-            Object o = (Object) it.next();
+          for(Object o : selection.toList()) {
             if(o instanceof Artifact) {
               Artifact a = (Artifact) o;
               OpenPomAction.openEditor(a.getGroupId(), a.getArtifactId(), a.getVersion());
             }
-            
           }
         }
       }
@@ -412,7 +408,7 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
     showSystemScopeAction.setChecked(showSystemScopeAction==action);
   }
 
-  private void updateGraphAsync(final boolean force) {
+  void updateGraphAsync(final boolean force) {
     new Job("Loading pom.xml") {
       protected IStatus run(IProgressMonitor monitor) {
         try {

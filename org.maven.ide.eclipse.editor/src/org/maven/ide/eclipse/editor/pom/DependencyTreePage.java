@@ -31,6 +31,7 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -52,12 +53,14 @@ import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.forms.IManagedForm;
@@ -130,10 +133,14 @@ public class DependencyTreePage extends FormPage {
     FormUtils.proxy(managedForm.getToolkit(), //
         FormUtils.FormTooliktStub.class).decorateFormHeading(form.getForm());
     
+    loadData(false);
+  }
+
+  void loadData(final boolean force) {
     new Job("Loading pom.xml") {
       protected IStatus run(IProgressMonitor monitor) {
         try {
-          final DependencyNode dependencyNode = pomEditor.readDependencies(false, monitor);
+          final DependencyNode dependencyNode = pomEditor.readDependencies(force, monitor);
           
           dependencyNode.accept(new DependencyNodeVisitor() {
             public boolean visit(DependencyNode node) {
@@ -190,7 +197,7 @@ public class DependencyTreePage extends FormPage {
     treeViewer = new TreeViewer(tree);
     treeViewer.setData(FormToolkit.KEY_DRAW_BORDER, Boolean.TRUE);
     
-    final DependencyTreeLabelProvider2 treeLabelProvider = new DependencyTreeLabelProvider2();
+    DependencyTreeLabelProvider2 treeLabelProvider = new DependencyTreeLabelProvider2();
     treeViewer.setContentProvider(new DependencyTreeContentProvider2());
     treeViewer.setLabelProvider(treeLabelProvider);
     
@@ -239,16 +246,6 @@ public class DependencyTreePage extends FormPage {
     
     hiearchyToolBarManager.add(new Separator());
       
-    hiearchyToolBarManager.add(new Action("Show GroupId", MavenEditorImages.SHOW_GROUP) {
-      public int getStyle() {
-        return AS_CHECK_BOX;
-      }
-      public void run() {
-        treeLabelProvider.setShowGroupId(isChecked());
-        treeViewer.refresh();
-      }
-    });
-    
     hiearchyToolBarManager.add(new Action("Sort", MavenEditorImages.SORT) {
       public int getStyle() {
         return AS_CHECK_BOX;
@@ -259,6 +256,16 @@ public class DependencyTreePage extends FormPage {
         } else {
           treeViewer.setComparator(null);
         }
+      }
+    });
+    
+    hiearchyToolBarManager.add(new Action("Show GroupId", MavenEditorImages.SHOW_GROUP) {
+      public int getStyle() {
+        return AS_CHECK_BOX;
+      }
+      public void run() {
+        treeLabelProvider.setShowGroupId(isChecked());
+        treeViewer.refresh();
       }
     });
     
@@ -339,16 +346,6 @@ public class DependencyTreePage extends FormPage {
       FormToolkit formToolkit) {
     ToolBarManager listToolBarManager = new ToolBarManager(SWT.FLAT);
     
-    listToolBarManager.add(new Action("Show GroupId", MavenEditorImages.SHOW_GROUP) {
-      public int getStyle() {
-        return AS_CHECK_BOX;
-      }
-      public void run() {
-        listLabelProvider.setShowGroupId(isChecked());
-        listViewer.refresh();
-      }
-    });
-    
     listToolBarManager.add(new Action("Sort", MavenEditorImages.SORT) {
       {
         setChecked(true);
@@ -362,6 +359,16 @@ public class DependencyTreePage extends FormPage {
         } else {
           listViewer.setComparator(null);
         }
+      }
+    });
+    
+    listToolBarManager.add(new Action("Show GroupId", MavenEditorImages.SHOW_GROUP) {
+      public int getStyle() {
+        return AS_CHECK_BOX;
+      }
+      public void run() {
+        listLabelProvider.setShowGroupId(isChecked());
+        listViewer.refresh();
       }
     });
     
@@ -405,7 +412,7 @@ public class DependencyTreePage extends FormPage {
     pageToolBarManager.add(new Separator());
     pageToolBarManager.add(new Action("Refresh", MavenEditorImages.REFRESH) {
       public void run() {
-        // TODO
+        loadData(true);
       }
     });
     
@@ -436,7 +443,7 @@ public class DependencyTreePage extends FormPage {
       @SuppressWarnings("unchecked")
       Set<Artifact> projectArtifacts = mavenProject.getArtifacts();
       for(Artifact a : projectArtifacts) {
-        if(matcher.isMatchingArtifact(a)) {
+        if(matcher.isMatchingArtifact(a.getGroupId(), a.getArtifactId())) {
           artifacts.add(a);
         }
       }
@@ -450,7 +457,7 @@ public class DependencyTreePage extends FormPage {
     ArrayList<DependencyNode> nodes = new ArrayList<DependencyNode>();
     for(DependencyNode node : dependencyNodes) {
       Artifact a = node.getArtifact();
-      if(matcher.isMatchingArtifact(a)) {
+      if(matcher.isMatchingArtifact(a.getGroupId(), a.getGroupId())) {
         nodes.add(node);
       }
     }
@@ -472,12 +479,14 @@ public class DependencyTreePage extends FormPage {
       if(matcher!=null && !matcher.isEmpty()) {
         // matcher = new TextMatcher(searchControl.getSearchText().getText());
         if(element instanceof Artifact) {
-          return matcher.isMatchingArtifact((Artifact) element);
+          Artifact a = (Artifact) element;
+          return matcher.isMatchingArtifact(a.getGroupId(), a.getArtifactId());
 
         } else if(element instanceof DependencyNode) {
           DependencyNode node = (DependencyNode) element;
           node.getArtifact();
-          if(matcher.isMatchingArtifact(node.getArtifact())) {
+          Artifact a = node.getArtifact();
+          if(matcher.isMatchingArtifact(a.getGroupId(), a.getArtifactId())) {
             return true;
           }
           
@@ -486,7 +495,8 @@ public class DependencyTreePage extends FormPage {
 
             public boolean visit(DependencyNode node) {
               node.getArtifact();
-              if(matcher.isMatchingArtifact(node.getArtifact())) {
+              Artifact a = node.getArtifact();
+              if(matcher.isMatchingArtifact(a.getGroupId(), a.getArtifactId())) {
                 foundMatch = true;
                 return false;
               }
@@ -639,7 +649,7 @@ public class DependencyTreePage extends FormPage {
     
   }
 
-  final class DependencyTreeLabelProvider2 extends LabelProvider {
+  final class DependencyTreeLabelProvider2 extends LabelProvider implements IColorProvider {
     
     private boolean showGroupId = false;
 
@@ -647,6 +657,27 @@ public class DependencyTreePage extends FormPage {
       this.showGroupId = showGroupId;
     }
 
+    // IColorProvider
+    
+    public Color getForeground(Object element) {
+      if(element instanceof DependencyNode) {
+        DependencyNode node = (DependencyNode) element;
+        Artifact a = node.getState() == DependencyNode.OMITTED_FOR_CONFLICT ? node.getRelatedArtifact() //
+            : node.getArtifact();
+        String scope = a.getScope();
+        if(scope != null && !"compile".equals(scope)) {
+          return Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
+        }
+      }
+      return null;
+    }
+    
+    public Color getBackground(Object element) {
+      return null;
+    }
+    
+    // LabelProvider
+    
     @Override
     public String getText(Object element) {
       if(element instanceof DependencyNode) {
@@ -740,13 +771,32 @@ public class DependencyTreePage extends FormPage {
     }
   }
 
-  public class DependencyListLabelProvider extends LabelProvider {
+  public class DependencyListLabelProvider extends LabelProvider implements IColorProvider {
 
     private boolean showGroupId = false;
 
     public void setShowGroupId(boolean showGroupId) {
       this.showGroupId = showGroupId;
     }
+    
+    // IColorProvider
+    
+    public Color getForeground(Object element) {
+      if(element instanceof Artifact) {
+        Artifact a = (Artifact) element;
+        String scope = a.getScope();
+        if(scope != null && !"compile".equals(scope)) {
+          return Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
+        }
+      }
+      return null;
+    }
+    
+    public Color getBackground(Object element) {
+      return null;
+    }
+    
+    // LabelProvider
     
     @Override
     public String getText(Object element) {
@@ -806,33 +856,6 @@ public class DependencyTreePage extends FormPage {
     
   }
 
-  abstract static class Matcher {
-  
-    abstract boolean isMatchingArtifact(Artifact a);
-
-    abstract public boolean isEmpty();
-    
-  }
-
-  public static class SearchMatcher extends Matcher {
-  
-    private final SearchControl searchControl;
-
-    public SearchMatcher(SearchControl searchControl) {
-      this.searchControl = searchControl;
-    }
-  
-    public boolean isMatchingArtifact(Artifact a) {
-      String text = searchControl.getSearchText().getText();
-      return a.getGroupId().indexOf(text)>-1 || a.getArtifactId().indexOf(text)>-1;
-    }
-    
-    public boolean isEmpty() {
-      return searchControl.getSearchText().getText() == null //
-          || searchControl.getSearchText().getText().trim().length() == 0;
-    }
-  }
-
   public static class ArtifactMatcher extends Matcher {
   
     protected final HashSet<String> artifactKeys = new HashSet<String>();
@@ -847,20 +870,21 @@ public class DependencyTreePage extends FormPage {
       return artifactKeys.isEmpty();
     }
 
-    public boolean isMatchingArtifact(Artifact a) {
-      return artifactKeys.contains(getKey(a));
-    }
-    
-    protected String getKey(Artifact a) {
-      return a.getGroupId() + ":" + a.getArtifactId();
+    public boolean isMatchingArtifact(String groupId, String artifactId) {
+      return artifactKeys.contains(getKey(groupId, artifactId));
     }
     
     protected void addArtifactKey(Object o) {
       if(o instanceof Artifact) {
-        artifactKeys.add(getKey((Artifact) o));
+        Artifact a = (Artifact) o;
+        artifactKeys.add(getKey(a.getGroupId(), a.getArtifactId()));
       }
     }
     
+    protected String getKey(String groupId, String artifactId) {
+      return groupId + ":" + artifactId;
+    }
+
   }
 
   public static class DependencyNodeMatcher extends ArtifactMatcher {
@@ -872,7 +896,8 @@ public class DependencyTreePage extends FormPage {
     @Override
     protected void addArtifactKey(Object o) {
       if(o instanceof DependencyNode) {
-        artifactKeys.add(getKey(((DependencyNode) o).getArtifact()));
+        Artifact a = ((DependencyNode) o).getArtifact();
+        artifactKeys.add(getKey(a.getGroupId(), a.getArtifactId()));
       }
     }
 
