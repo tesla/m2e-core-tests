@@ -8,8 +8,12 @@
 
 package org.maven.ide.eclipse.editor.composites;
 
+import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 import org.maven.ide.components.pom.Dependency;
 import org.maven.ide.components.pom.Exclusion;
 import org.maven.ide.components.pom.Extension;
@@ -24,8 +28,33 @@ import org.maven.ide.eclipse.project.MavenProjectManager;
  * 
  * @author Eugene Kuleshov
  */
-public class DependencyLabelProvider extends LabelProvider {
+public class DependencyLabelProvider extends LabelProvider implements IColorProvider {
 
+  private boolean showGroupId = true;
+
+  public void setShowGroupId(boolean showGroupId) {
+    this.showGroupId = showGroupId;
+  }
+
+  // IColorProvider
+  
+  public Color getForeground(Object element) {
+    if(element instanceof Dependency) {
+      Dependency dependency = (Dependency) element;
+      String scope = dependency.getScope();
+      if(scope != null && !"compile".equals(scope)) {
+        return Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
+      }
+    }
+    return null;
+  }
+  
+  public Color getBackground(Object element) {
+    return null;
+  }
+
+  // LabelProvider
+  
   @Override
   public String getText(Object element) {
     if(element instanceof Dependency) {
@@ -73,8 +102,10 @@ public class DependencyLabelProvider extends LabelProvider {
   private String getText(String groupId, String artifactId, String version, String classifier, String type, String scope) {
     StringBuilder sb = new StringBuilder();
 
-    sb.append(isEmpty(groupId) ? "?" : groupId);
-    sb.append(" : ").append(isEmpty(artifactId) ? "?" : artifactId);
+    if(showGroupId) {
+      sb.append(isEmpty(groupId) ? "?" : groupId).append(" : ");
+    }
+    sb.append(isEmpty(artifactId) ? "?" : artifactId);
 
     if(!isEmpty(version)) {
       sb.append(" : ").append(version);
@@ -98,4 +129,5 @@ public class DependencyLabelProvider extends LabelProvider {
   private boolean isEmpty(String s) {
     return s == null || s.trim().length() == 0;
   }
+
 }
