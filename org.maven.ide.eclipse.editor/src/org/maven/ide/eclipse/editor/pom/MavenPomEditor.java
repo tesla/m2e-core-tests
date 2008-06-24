@@ -336,31 +336,6 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     public java.net.URI getURI();
   }
 
-//  private Model loadModel(InputStream is) {
-//    URI uri = URI.createFileURI("/");
-//    PomResourceFactoryImpl factory = new PomResourceFactoryImpl();
-//    resource = (PomResourceImpl) factory.createResource(uri);
-//    
-//    // disable SSE support for read-only external documents
-//    resource.setRenderer(new EMF2DOMRenderer());
-//    
-//    try {
-//      resource.load(is, Collections.EMPTY_MAP);
-//      return resource.getModel();
-//    
-//    } catch(IOException ex) {
-//      MavenPlugin.log("Can't load model from stream", ex);
-//      return null;
-//
-//    } finally {
-//      // set read-only for non-workspace resource
-//      for(MavenPomEditorPage page : pages) {
-//        page.setReadonly(true);
-//      }
-//      // TODO SSE editor page
-//    }
-//  }
-  
   private Model loadModel(String path) {
     URI uri = URI.createFileURI(path);
     PomResourceFactoryImpl factory = new PomResourceFactoryImpl();
