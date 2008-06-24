@@ -509,23 +509,22 @@ public class TeamComposite extends Composite {
     FormUtils.setReadonly(detailsComposite, parent.isReadOnly());
 
     Roles roles = null;
-//    Properties properties = null;
     if(eo instanceof Contributor) {
       Contributor contributor = (Contributor) eo;
       updateContributorDetails(contributor);
       roles = contributor.getRoles();
-//      properties = contributor.getProperties();
     } else if(eo instanceof Developer) {
       Developer developer = (Developer) eo;
       updateDeveloperDetails(developer);
       roles = developer.getRoles();
-//      properties = developer.getProperties();
     }
 
     parent.registerListeners();
 
     updateRoles(roles);
-//    propertiesEditor.setInput(properties == null ? null : properties.getAny());
+
+    propertiesEditor.setInput(parent.getPomEditor().getProperties(eo));
+    propertiesEditor.setReadOnly(true);
   }
 
   protected void updateContributorDetails(Contributor contributor) {
