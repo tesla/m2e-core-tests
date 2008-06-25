@@ -8,7 +8,11 @@
 
 package org.maven.ide.eclipse.editor.pom;
 
+import org.eclipse.emf.common.command.Command;
+import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.common.notify.Notification;
+import org.eclipse.emf.edit.command.SetCommand;
+import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -16,8 +20,12 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
+import org.maven.ide.components.pom.DevelopersType;
+import org.maven.ide.components.pom.PomFactory;
+import org.maven.ide.components.pom.Reporting;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.editor.composites.ReportingComposite;
+
 
 /**
  * @author Eugene Kuleshov
@@ -51,7 +59,20 @@ public class ReportingPage extends MavenPomEditorPage {
   }
 
   public void loadData() {
-    reportingComposite.loadData(this);
+    ValueProvider<Reporting> reportingProvider = new ValueProvider<Reporting>() {
+      public Reporting getValue() {
+        return model.getReporting();
+      }
+
+      public Reporting create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+        Reporting reporting = PomFactory.eINSTANCE.createReporting();
+        Command createReportingCommand = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Reporting(),
+            reporting);
+        compoundCommand.append(createReportingCommand);
+        return reporting;
+      }
+    };
+    reportingComposite.loadData(this, reportingProvider);
   }
 
   public void updateView(Notification notification) {

@@ -8,7 +8,6 @@
 
 package org.maven.ide.eclipse.editor.composites;
 
-import static org.maven.ide.eclipse.editor.pom.FormUtils.nvl;
 import static org.maven.ide.eclipse.editor.pom.FormUtils.setText;
 
 import java.util.Collections;
@@ -46,7 +45,6 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.Section;
-import org.maven.ide.components.pom.Model;
 import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.PomPackage;
 import org.maven.ide.components.pom.ReportPlugin;
@@ -71,6 +69,8 @@ public class ReportingComposite extends Composite {
   protected static PomPackage POM_PACKAGE = PomPackage.eINSTANCE;
 
   private MavenPomEditorPage parent;
+  
+  private ValueProvider<Reporting> reportingProvider;
 
   private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
 
@@ -205,12 +205,9 @@ public class ReportingComposite extends Composite {
 
         boolean reportsCreated = false;
 
-        Model model = parent.getModel();
-        Reporting reporting = model.getReporting();
+        Reporting reporting = reportingProvider.getValue();
         if(reporting == null) {
-          reporting = PomFactory.eINSTANCE.createReporting();
-          Command addReporting = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Reporting(), reporting);
-          compoundCommand.append(addReporting);
+          reporting = reportingProvider.create(editingDomain, compoundCommand);
           reportsCreated = true;
         }
 
@@ -244,8 +241,7 @@ public class ReportingComposite extends Composite {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = parent.getEditingDomain();
 
-        Model model = parent.getModel();
-        Reporting reporting = model.getReporting();
+        Reporting reporting = reportingProvider.getValue();
         ReportPlugins reportPlugins = reporting == null ? null : reporting.getPlugins();
         if(reportPlugins != null) {
           List<ReportPlugin> pluginList = reportPluginsEditor.getSelection();
@@ -633,21 +629,25 @@ public class ReportingComposite extends Composite {
     reportsEditor.setInput(reports == null ? null : reports.getReport());
   }
 
-  public void loadData(MavenPomEditorPage editorPage) {
+  public void loadData(MavenPomEditorPage editorPage,ValueProvider<Reporting> reportingProvider) {
     parent = editorPage;
-    Model model = editorPage.getModel();
-    updateContent(model.getReporting());
+    this.reportingProvider = reportingProvider;
+    updateContent(reportingProvider.getValue());
   }
 
   private void updateContent(Reporting reporting) {
     if(reporting == null) {
-      outputFolderText.setText("");
+      setText(outputFolderText,"");
       excludeDefaultsButton.setSelection(false);
       reportPluginsEditor.setInput(null);
     } else {
-      outputFolderText.setText(nvl(reporting.getOutputDirectory()));
-      excludeDefaultsButton.setSelection("true".equals(reporting.getExcludeDefaults()));
+      setText(outputFolderText,reporting.getOutputDirectory());
+      excludeDefaultsButton.setSelection(Boolean.parseBoolean(reporting.getExcludeDefaults()));
       reportPluginsEditor.setInput(reporting.getPlugins() == null ? null : reporting.getPlugins().getPlugin());
+      
+      parent.setModifyListener(outputFolderText, reportingProvider, POM_PACKAGE.getReporting_OutputDirectory(), "");
+      parent.setModifyListener(excludeDefaultsButton, reportingProvider, POM_PACKAGE.getReporting_ExcludeDefaults(), "");
+      parent.registerListeners();
     }
     updateReportPluginDetails(null);
   }
