@@ -84,7 +84,7 @@ public class ListEditorComposite<T> extends Composite {
     
     viewer.addSelectionChangedListener(new ISelectionChangedListener() {
       public void selectionChanged(SelectionChangedEvent event) {
-        removeButton.setEnabled(!readOnly && !viewer.getSelection().isEmpty());
+        updateRemoveButton();
       }
     });
     
@@ -138,7 +138,7 @@ public class ListEditorComposite<T> extends Composite {
   public void setReadOnly(boolean readOnly) {
     this.readOnly = readOnly;
     addButton.setEnabled(!readOnly);
-    removeButton.setEnabled(!readOnly);
+    updateRemoveButton();
   }
   
   public void refresh() {
@@ -155,5 +155,9 @@ public class ListEditorComposite<T> extends Composite {
     viewer.setCellModifier(cellModifier);
   }
 
+
+  private void updateRemoveButton() {
+    removeButton.setEnabled(!readOnly && !viewer.getSelection().isEmpty());
+  }
 }
 
