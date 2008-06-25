@@ -26,6 +26,7 @@ import org.eclipse.emf.edit.command.AddCommand;
 import org.eclipse.emf.edit.command.RemoveCommand;
 import org.eclipse.emf.edit.command.SetCommand;
 import org.eclipse.emf.edit.domain.EditingDomain;
+import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -102,6 +103,8 @@ public class ReportingComposite extends Composite {
   private Button excludeDefaultsButton;
 
   private ReportPlugin currentReportPlugin = null;
+
+  private ReportSet currentReportSet = null;
 
   public ReportingComposite(Composite parent, int style) {
     super(parent, style);
@@ -360,6 +363,84 @@ public class ReportingComposite extends Composite {
         updateReportSetDetails(selection.size() == 1 ? selection.get(0) : null);
       }
     });
+
+    reportSetsEditor.setAddListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        if(currentReportPlugin == null) {
+          return;
+        }
+
+        CompoundCommand compoundCommand = new CompoundCommand();
+        EditingDomain editingDomain = parent.getEditingDomain();
+
+        boolean reportSetsCreated = false;
+
+        ReportSetsType reportSets = currentReportPlugin.getReportSets();
+        if(reportSets == null) {
+          reportSets = PomFactory.eINSTANCE.createReportSetsType();
+          Command addReportSets = SetCommand.create(editingDomain, currentReportPlugin, POM_PACKAGE
+              .getReportPlugin_ReportSets(), reportSets);
+          compoundCommand.append(addReportSets);
+          reportSetsCreated = true;
+        }
+
+        ReportSet reportSet = PomFactory.eINSTANCE.createReportSet();
+        Command addReportSet = AddCommand.create(editingDomain, reportSets, POM_PACKAGE.getReportSetsType_ReportSet(),
+            reportSet);
+        compoundCommand.append(addReportSet);
+        editingDomain.getCommandStack().execute(compoundCommand);
+
+        if(reportSetsCreated) {
+          updateReportPluginDetails(currentReportPlugin);
+        }
+        reportSetsEditor.setSelection(Collections.singletonList(reportSet));
+      }
+    });
+
+    reportSetsEditor.setRemoveListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        if(currentReportPlugin == null) {
+          return;
+        }
+
+        CompoundCommand compoundCommand = new CompoundCommand();
+        EditingDomain editingDomain = parent.getEditingDomain();
+
+        ReportSetsType reportSets = currentReportPlugin.getReportSets();
+        if(reportSets != null) {
+          List<ReportSet> reportSetList = reportSetsEditor.getSelection();
+          for(ReportSet reportSet : reportSetList) {
+            Command removeCommand = RemoveCommand.create(editingDomain, reportSets, POM_PACKAGE
+                .getReportSetsType_ReportSet(), reportSet);
+            compoundCommand.append(removeCommand);
+          }
+
+          editingDomain.getCommandStack().execute(compoundCommand);
+          updateReportPluginDetails(currentReportPlugin);
+        }
+      }
+    });
+
+    reportSetsEditor.setCellModifier(new ICellModifier() {
+      public boolean canModify(Object element, String property) {
+        return true;
+      }
+
+      public Object getValue(Object element, String property) {
+        if(element instanceof ReportSet) {
+          String id = ((ReportSet) element).getId();
+          return id == null ? "" : id;
+        }
+        return element;
+      }
+
+      public void modify(Object element, String property, Object value) {
+        EditingDomain editingDomain = parent.getEditingDomain();
+        Command command = SetCommand.create(editingDomain, currentReportSet, POM_PACKAGE.getReportSet_Id(), value);
+        editingDomain.getCommandStack().execute(command);
+      }
+    });
+
     reportSetDetailsSection = toolkit.createSection(verticalSash, Section.TITLE_BAR);
     reportSetDetailsSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     reportSetDetailsSection.setText("Report Set Reports");
@@ -394,6 +475,14 @@ public class ReportingComposite extends Composite {
 
     reportSetConfigureButton = toolkit.createHyperlink(reportSetConfigureComposite, "Configuration", SWT.NONE);
     reportSetConfigureButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
+    reportSetConfigureButton.addHyperlinkListener(new HyperlinkAdapter() {
+      public void linkActivated(HyperlinkEvent e) {
+        if(currentReportSet != null) {
+          EObject element = currentReportSet.getConfiguration();
+          parent.getPomEditor().showInSourceEditor(element == null ? currentReportSet : element);
+        }
+      }
+    });
 
     // XXX implement editor actions
   }
@@ -447,7 +536,13 @@ public class ReportingComposite extends Composite {
   }
 
   protected void updateReportSetDetails(ReportSet reportSet) {
-    if(reportSet == null) {
+    if(parent != null) {
+      parent.removeNotifyListener(reportSetInheritedButton);
+    }
+
+    currentReportSet = reportSet;
+
+    if(reportSet == null || parent == null) {
       FormUtils.setEnabled(reportSetDetailsSection, false);
       reportSetInheritedButton.setSelection(false);
       reportsEditor.setInput(null);
@@ -457,14 +552,13 @@ public class ReportingComposite extends Composite {
     FormUtils.setEnabled(reportSetDetailsSection, true);
     FormUtils.setReadonly(reportSetDetailsSection, parent.isReadOnly());
 
-    reportSetInheritedButton.setSelection("true".equals(reportSet.getInherited()));
+    reportSetInheritedButton.setSelection(Boolean.parseBoolean(reportSet.getInherited()));
+    ValueProvider<ReportSet> provider = new ValueProvider.DefaultValueProvider<ReportSet>(reportSet);
+    parent.setModifyListener(reportSetInheritedButton, provider, POM_PACKAGE.getReportSet_Inherited(), "false");
+    parent.registerListeners();
 
     StringReports reports = reportSet.getReports();
     reportsEditor.setInput(reports == null ? null : reports.getReport());
-
-    reportPluginsEditor.setReadOnly(parent.isReadOnly());
-    reportSetsEditor.setReadOnly(parent.isReadOnly());
-    reportsEditor.setReadOnly(parent.isReadOnly());
   }
 
   public void loadData(MavenPomEditorPage editorPage) {
@@ -496,6 +590,8 @@ public class ReportingComposite extends Composite {
       if(object == currentReportPlugin) {
         updateReportPluginDetails((ReportPlugin) object);
       }
+    } else if(object instanceof ReportSetsType || object instanceof ReportSet) {
+      reportSetsEditor.refresh();
     }
   }
 

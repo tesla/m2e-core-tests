@@ -138,7 +138,7 @@ public class ListEditorComposite<T> extends Composite {
   public void setReadOnly(boolean readOnly) {
     this.readOnly = readOnly;
     addButton.setEnabled(!readOnly);
-    removeButton.setEnabled(false);
+    removeButton.setEnabled(!readOnly);
   }
   
   public void refresh() {
