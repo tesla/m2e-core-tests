@@ -23,6 +23,10 @@ import java.util.Hashtable;
 
 import junit.framework.TestCase;
 
+import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.embedder.ContainerCustomizer;
+import org.apache.maven.embedder.MavenEmbedder;
+import org.apache.maven.embedder.MavenEmbedderConsoleLogger;
 import org.apache.maven.model.Model;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -48,6 +52,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.embedder.EmbedderFactory;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerRefreshJob;
@@ -88,10 +93,22 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
 
     File settings = new File("settings.xml").getCanonicalFile();
 
-    runtimeManager = plugin.getMavenRuntimeManager();
-    runtimeManager.setUserSettingsFile(settings.getAbsolutePath());
+    if (settings.canRead()) {
+      runtimeManager = plugin.getMavenRuntimeManager();
+      runtimeManager.setUserSettingsFile(settings.getAbsolutePath());
+    }
 
-    repo = new File("localrepo").getCanonicalFile();
+    ContainerCustomizer customizer = EmbedderFactory.createExecutionCustomizer();
+    MavenEmbedder embedder = EmbedderFactory.createMavenEmbedder(customizer,
+        new MavenEmbedderConsoleLogger(), 
+        runtimeManager.getUserSettingsFile(), null);
+    
+    ArtifactRepository localRepository = embedder.getLocalRepository();
+    if(localRepository != null) {
+      repo =  new File(localRepository.getBasedir());
+    } else {
+      fail("Cannot determine local repository path");
+    }
   }
 
   protected void tearDown() throws Exception {

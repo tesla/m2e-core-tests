@@ -166,7 +166,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       assertEquals(0, classpathEntries.length);
 
       IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
-      assertEquals(3, rawClasspath.length);
+      assertEquals(4, rawClasspath.length);
       assertEquals("/MNGECLIPSE-20-type/src/main/java", rawClasspath[0].getPath().toString());
       assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", rawClasspath[1].getPath().toString());
       assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[2].getPath().toString());
@@ -185,7 +185,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       assertEquals("junit-3.8.1.jar", classpathEntries[2].getPath().lastSegment());
 
       IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
-      assertEquals(3, rawClasspath.length);
+      assertEquals(4, rawClasspath.length);
       assertEquals("/MNGECLIPSE-20-app/src/main/java", rawClasspath[0].getPath().toString());
       assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", rawClasspath[1].getPath().toString());
       assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[2].getPath().toString());
@@ -198,13 +198,11 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       IJavaProject javaProject = JavaCore.create(projects[3]);
       IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
           .getClasspathEntries();
-      assertEquals(3, classpathEntries.length);
-      assertEquals(Arrays.asList(classpathEntries).toString(), "MNGECLIPSE-20-app", classpathEntries[0].getPath().lastSegment());
-      assertEquals("MNGECLIPSE-20-type", classpathEntries[1].getPath().lastSegment());
-      assertEquals("log4j-1.2.13.jar", classpathEntries[2].getPath().lastSegment());
+      assertEquals(1, classpathEntries.length);
+      assertEquals("log4j-1.2.13.jar", classpathEntries[0].getPath().lastSegment());
 
       IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
-      assertEquals(3, rawClasspath.length);
+      assertEquals(5, rawClasspath.length);
       assertEquals("/MNGECLIPSE-20-web/src/main/java", rawClasspath[0].getPath().toString());
       assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", rawClasspath[1].getPath().toString());
       assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[2].getPath().toString());
@@ -300,10 +298,11 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       assertEquals(0, classpathEntries.length);
 
       IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
-      assertEquals(3, rawClasspath.length);
+      assertEquals(4, rawClasspath.length);
       assertEquals("/MNGECLIPSE-20-type/src/main/java", rawClasspath[0].getPath().toString());
       assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", rawClasspath[1].getPath().toString());
-      assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[2].getPath().toString());
+      assertEquals("org.eclipse.jst.j2ee.internal.module.container", rawClasspath[2].getPath().toString());
+      assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[3].getPath().toString());
 
       IMarker[] markers = projects[1].findMarkers(null, true, IResource.DEPTH_INFINITE);
       assertEquals(toString(markers), 0, markers.length);
@@ -319,10 +318,11 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       assertEquals("junit-3.8.1.jar", classpathEntries[2].getPath().lastSegment());
 
       IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
-      assertEquals(3, rawClasspath.length);
+      assertEquals(4, rawClasspath.length);
       assertEquals("/MNGECLIPSE-20-app/src/main/java", rawClasspath[0].getPath().toString());
       assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", rawClasspath[1].getPath().toString());
-      assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[2].getPath().toString());
+      assertEquals("org.eclipse.jst.j2ee.internal.module.container", rawClasspath[2].getPath().toString());
+      assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[3].getPath().toString());
 
       IMarker[] markers = projects[2].findMarkers(null, true, IResource.DEPTH_INFINITE);
       assertEquals(toString(markers), 3, markers.length);
@@ -338,10 +338,12 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       assertEquals("MNGECLIPSE-20-type-0.0.1-SNAPSHOT.jar", classpathEntries[1].getPath().lastSegment());
 
       IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
-      assertEquals(3, rawClasspath.length);
+      assertEquals(5, rawClasspath.length);
       assertEquals("/MNGECLIPSE-20-web/src/main/java", rawClasspath[0].getPath().toString());
       assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", rawClasspath[1].getPath().toString());
-      assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[2].getPath().toString());
+      assertEquals("org.eclipse.jst.j2ee.internal.web.container", rawClasspath[2].getPath().toString());
+      assertEquals("org.eclipse.jst.j2ee.internal.module.container", rawClasspath[3].getPath().toString());
+      assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[4].getPath().toString());
 
       IMarker[] markers = projects[3].findMarkers(null, true, IResource.DEPTH_INFINITE);
       assertEquals(toString(markers), 4, markers.length);

@@ -31,15 +31,18 @@ public class ProjectConfiguratorFactoryTest extends TestCase {
     
     AbstractProjectConfigurator[] cc = (AbstractProjectConfigurator[]) configurators.toArray(new AbstractProjectConfigurator[configurators.size()]);
 
-    assertEquals(5, cc.length);
+    assertEquals(7, cc.length);
 
     assertConfigurator(cc[0], "org.maven.ide.eclipse.configurator.mavenEclipsePlugin", "maven-eclipse-plugin", 5);
     assertConfigurator(cc[1], "org.maven.ide.eclipse.configurator.jdt", "JDT", 10);
     assertConfigurator(cc[2], "org.maven.ide.eclipse.configurator.mavenSysdeoTomcatPlugin", "sysdeo-tomcat-maven-plugin", 50);
-    assertConfigurator(cc[3], "org.maven.ide.eclipse.configurator.test", "TEST", 1000);
+    assertConfigurator(cc[3], "org.maven.ide.eclipse.configuration.wtp.configurator", "WTP", 100);
+    assertConfigurator(cc[4], "org.maven.ide.eclipse.ajdt", "AJDT", 101);
+    assertConfigurator(cc[5], "org.maven.ide.eclipse.configurator.test", "TEST", 1000);
+    assertConfigurator(cc[6], "org.maven.ide.eclipse.configurator.testMaven", "TestMaven", 1001);
 
     {
-      MavenProjectConfigurator configurator = (MavenProjectConfigurator) cc[4];
+      MavenProjectConfigurator configurator = (MavenProjectConfigurator) cc[6];
       assertConfigurator(configurator, "org.maven.ide.eclipse.configurator.testMaven", "TestMaven", 1001);
       assertEquals("group:artifact", configurator.getPluginKey());
       assertEquals(2, configurator.getGoals().size());
