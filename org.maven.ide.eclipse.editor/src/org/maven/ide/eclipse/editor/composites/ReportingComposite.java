@@ -461,6 +461,78 @@ public class ReportingComposite extends Composite {
     reportsEditor.setContentProvider(new ListEditorContentProvider<String>());
     reportsEditor.setLabelProvider(new StringLabelProvider(MavenEditorImages.IMG_REPORT));
 
+    reportsEditor.setAddListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        if(currentReportSet == null) {
+          return;
+        }
+
+        CompoundCommand compoundCommand = new CompoundCommand();
+        EditingDomain editingDomain = parent.getEditingDomain();
+
+        boolean reportsCreated = false;
+
+        StringReports reports = currentReportSet.getReports();
+        if(reports == null) {
+          reports = PomFactory.eINSTANCE.createStringReports();
+          Command addReports = SetCommand.create(editingDomain, currentReportSet, POM_PACKAGE.getReportSet_Reports(),
+              reports);
+          compoundCommand.append(addReports);
+          reportsCreated = true;
+        }
+
+        Command addReport = AddCommand.create(editingDomain, reports, POM_PACKAGE.getStringReports_Report(), "?");
+        compoundCommand.append(addReport);
+        editingDomain.getCommandStack().execute(compoundCommand);
+
+        if(reportsCreated) {
+          reportsEditor.setInput(reports == null ? null : reports.getReport());
+        } else {
+          reportsEditor.refresh();
+        }
+      }
+    });
+
+    reportsEditor.setRemoveListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        if(currentReportSet == null) {
+          return;
+        }
+
+        CompoundCommand compoundCommand = new CompoundCommand();
+        EditingDomain editingDomain = parent.getEditingDomain();
+
+        StringReports reports = currentReportSet.getReports();
+        if(reports != null) {
+          List<String> reportList = reportsEditor.getSelection();
+          for(String report : reportList) {
+            Command removeCommand = RemoveCommand.create(editingDomain, reports, POM_PACKAGE.getStringReports_Report(),
+                report);
+            compoundCommand.append(removeCommand);
+          }
+
+          editingDomain.getCommandStack().execute(compoundCommand);
+        }
+      }
+    });
+
+    reportsEditor.setCellModifier(new ICellModifier() {
+      public boolean canModify(Object element, String property) {
+        return true;
+      }
+
+      public Object getValue(Object element, String property) {
+        return element;
+      }
+
+      public void modify(Object element, String property, Object value) {
+        EditingDomain editingDomain = parent.getEditingDomain();
+        Command command = SetCommand.create(editingDomain, currentReportSet.getReports(), POM_PACKAGE
+            .getStringReports_Report(), value, reportsEditor.getViewer().getTable().getSelectionIndex());
+        editingDomain.getCommandStack().execute(command);
+      }
+    });
+
     Composite reportSetConfigureComposite = toolkit.createComposite(reportSetDetailsComposite, SWT.NONE);
     reportSetConfigureComposite.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
     GridLayout reportSetConfigureCompositeLayout = new GridLayout();
@@ -592,6 +664,8 @@ public class ReportingComposite extends Composite {
       }
     } else if(object instanceof ReportSetsType || object instanceof ReportSet) {
       reportSetsEditor.refresh();
+    } else if(object instanceof StringReports) {
+      reportsEditor.refresh();
     }
   }
 
