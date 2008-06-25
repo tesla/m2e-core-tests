@@ -527,7 +527,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
   }
 
   private MavenProject[] getAllMavenProjects(MavenProjectFacade facade) throws CoreException {
-    final ArrayList projects = new ArrayList();
+    final ArrayList<MavenProject> projects = new ArrayList<MavenProject>();
     facade.accept(new IMavenProjectVisitor() {
       public boolean visit(MavenProjectFacade mavenProject) {
         projects.add(mavenProject.getMavenProject());
@@ -536,7 +536,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
       public void visit(MavenProjectFacade mavenProject, Artifact artifact) {
       }
     }, IMavenProjectVisitor.NESTED_MODULES);
-    return (MavenProject[]) projects.toArray(new MavenProject[projects.size()]);
+    return projects.toArray(new MavenProject[projects.size()]);
   }
 
   public void test012_downloadExternalDependency() throws Exception {

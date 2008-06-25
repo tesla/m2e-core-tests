@@ -356,7 +356,7 @@ public class MavenModelManager {
         dependency.setClassifier(this.dependency.getType());
       }
       
-      if(this.dependency.getScope() != null) {
+      if(this.dependency.getScope() != null && !"compile".equals(this.dependency.getScope())) {
         dependency.setScope(this.dependency.getScope());
       }
       

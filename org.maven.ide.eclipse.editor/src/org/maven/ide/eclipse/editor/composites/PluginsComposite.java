@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.maven.artifact.Artifact;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -221,7 +222,7 @@ public class PluginsComposite extends Composite {
     pluginAddAction = new Action("Add Plugin", MavenEditorImages.ADD_PLUGIN) {
       public void run() {
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            "Add Plugin", IndexManager.SEARCH_PLUGIN, Collections.<Dependency>emptySet());
+            "Add Plugin", IndexManager.SEARCH_PLUGIN, Collections.<Artifact>emptySet());
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {
@@ -323,7 +324,7 @@ public class PluginsComposite extends Composite {
     pluginManagementAddAction = new Action("Add Plugin", MavenEditorImages.ADD_PLUGIN) {
       public void run() {
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            "Add Plugin", IndexManager.SEARCH_PLUGIN, Collections.<Dependency>emptySet());
+            "Add Plugin", IndexManager.SEARCH_PLUGIN, Collections.<Artifact>emptySet());
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {
@@ -444,7 +445,7 @@ public class PluginsComposite extends Composite {
       pluginSelectAction = new Action("Select Plugin", MavenEditorImages.SELECT_PLUGIN) {
         public void run() {
           MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-              "Select Plugin", IndexManager.SEARCH_PLUGIN, Collections.<Dependency>emptySet());
+              "Select Plugin", IndexManager.SEARCH_PLUGIN, Collections.<Artifact>emptySet());
           if(dialog.open() == Window.OK) {
             IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
             if(af != null) {

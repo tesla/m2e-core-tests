@@ -23,15 +23,15 @@ import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
  */
 public class ProjectConfiguratorFactory {
 
-  private static Set configurators;
+  private static Set<AbstractProjectConfigurator> configurators;
 
   public static void addProjectConfigurator(AbstractProjectConfigurator configurator) {
     configurators.add(configurator);
   }
   
-  public static synchronized Set getConfigurators() {
+  public static synchronized Set<AbstractProjectConfigurator> getConfigurators() {
     if(configurators==null) {
-      configurators = new TreeSet(new ProjectConfiguratorComparator());
+      configurators = new TreeSet<AbstractProjectConfigurator>(new ProjectConfiguratorComparator());
       ExtensionReader.readProjectConfiguratorExtensions();
     }
     return Collections.unmodifiableSet(configurators);
@@ -40,14 +40,11 @@ public class ProjectConfiguratorFactory {
   /**
    * ProjectConfigurator comparator
    */
-  private static class ProjectConfiguratorComparator implements Comparator {
+  private static class ProjectConfiguratorComparator implements Comparator<AbstractProjectConfigurator> {
     ProjectConfiguratorComparator() {
     }
     
-    public int compare(Object o1, Object o2) {
-      AbstractProjectConfigurator c1 = (AbstractProjectConfigurator) o1;
-      AbstractProjectConfigurator c2 = (AbstractProjectConfigurator) o2;
-      
+    public int compare(AbstractProjectConfigurator c1, AbstractProjectConfigurator c2) {
       int res = c1.getPriority() - c2.getPriority();
       return res==0 ? c1.getId().compareTo(c2.getId()) : res;
     }

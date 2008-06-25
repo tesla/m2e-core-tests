@@ -10,7 +10,6 @@ package org.maven.ide.eclipse.wizards;
 
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -61,10 +60,7 @@ public class MavenPomSelectionComponent extends Composite {
 
   TreeViewer searchResultViewer = null;
 
-  /**
-   * Set&lt;Artifact&gt;
-   */
-  Set artifacts;
+  Set<Artifact> artifacts;
 
   /**
    * One of 
@@ -81,23 +77,25 @@ public class MavenPomSelectionComponent extends Composite {
 
   private ISelectionChangedListener selectionListener;
 
-  HashSet artifactKeys = new HashSet();
-  
+  HashSet<String> artifactKeys = new HashSet<String>();
+
   public MavenPomSelectionComponent(Composite parent, int style) {
     super(parent, style);
-    
     createSearchComposite();
   }
-
+  
   private void createSearchComposite() {
-    setLayout(new GridLayout(1, false));
+    GridLayout gridLayout = new GridLayout(2, false);
+    gridLayout.marginWidth = 0;
+    gridLayout.marginHeight = 0;
+    setLayout(gridLayout);
     
     Label searchTextlabel = new Label(this, SWT.NONE);
     searchTextlabel.setText("Query:");
-    searchTextlabel.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, true, false));
+    searchTextlabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 
     searchText = new Text(this, SWT.BORDER);
-    searchText.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, true, false));
+    searchText.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));
     searchText.addKeyListener(new KeyAdapter() {
       public void keyPressed(KeyEvent e) {
         if(e.keyCode == SWT.ARROW_DOWN) {
@@ -112,11 +110,11 @@ public class MavenPomSelectionComponent extends Composite {
     });
 
     Label searchResultsLabel = new Label(this, SWT.NONE);
-    searchResultsLabel.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, false, false));
+    searchResultsLabel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));
     searchResultsLabel.setText("Search Results:");
 
     Tree tree = new Tree(this, SWT.BORDER | SWT.SINGLE);
-    tree.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, true));
+    tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 
     searchResultViewer = new TreeViewer(tree);
   }
@@ -126,7 +124,7 @@ public class MavenPomSelectionComponent extends Composite {
   // this.queryType = queryType;
   // this.artifacts = artifacts;
   
-  public void init(String queryText, String queryType, Set artifacts) {
+  public void init(String queryText, String queryType, Set<Artifact> artifacts) {
     this.queryText = queryText;
     this.queryType = queryType;
     this.artifacts = artifacts;
@@ -136,8 +134,7 @@ public class MavenPomSelectionComponent extends Composite {
     }
     
     if(artifacts!=null) {
-      for(Iterator it = artifacts.iterator(); it.hasNext();) {
-        Artifact a = (Artifact) it.next();
+      for(Artifact a : artifacts) {
         artifactKeys.add(a.getGroupId() + ":" + a.getArtifactId());
         artifactKeys.add(a.getGroupId() + ":" + a.getArtifactId() + ":" + a.getVersion());
       }
@@ -184,7 +181,7 @@ public class MavenPomSelectionComponent extends Composite {
       selectionListener.selectionChanged(new SelectionChangedEvent(searchResultViewer, searchResultViewer.getSelection()));
     }
   }
-
+  
   public IndexedArtifact getIndexedArtifact() {
     IStructuredSelection selection = (IStructuredSelection) searchResultViewer.getSelection();
     Object element = selection.getFirstElement();
@@ -257,23 +254,23 @@ public class MavenPomSelectionComponent extends Composite {
         try {
           // Map res = indexer.search(indexManager.getIndexes(), activeQuery, field);
           // Map res = indexManager.search(activeQuery, IndexManager.SEARCH_PACKAGING);
-          Map res = indexManager.search(activeQuery, field);
+          Map<String, IndexedArtifact> res = indexManager.search(activeQuery, field);
           if(IndexManager.SEARCH_CLASS_NAME.equals(field) && activeQuery.length() < IndexManager.MIN_CLASS_QUERY_LENGTH) {
-            setResult(IStatus.WARNING, "Query '" + activeQuery + "' is too short", Collections.EMPTY_MAP);
+            setResult(IStatus.WARNING, "Query '" + activeQuery + "' is too short", Collections.<String, IndexedArtifact>emptyMap());
           } else {
             setResult(IStatus.OK, "Results for '" + activeQuery + "' (" + res.size() + ")", res);
           }
         } catch(final RuntimeException ex) {
-          setResult(IStatus.ERROR, "Search error: " + ex.toString(), Collections.EMPTY_MAP);
+          setResult(IStatus.ERROR, "Search error: " + ex.toString(), Collections.<String, IndexedArtifact>emptyMap());
         } catch(final Exception ex) {
-          setResult(IStatus.ERROR, "Search error: " + ex.getMessage(), Collections.EMPTY_MAP);
+          setResult(IStatus.ERROR, "Search error: " + ex.getMessage(), Collections.<String, IndexedArtifact>emptyMap());
         }
       }
       isRunning = false;
       return Status.OK_STATUS;
     }
 
-    private void setResult(final int severity, final String message, final Map result) {
+    private void setResult(final int severity, final String message, final Map<String, IndexedArtifact> result) {
       Display.getDefault().syncExec(new Runnable() {
         public void run() {
           setStatus(severity, message);
@@ -285,10 +282,10 @@ public class MavenPomSelectionComponent extends Composite {
   }
 
   public static class SearchResultLabelProvider extends LabelProvider implements IColorProvider {
-    private final Set artifactKeys;
+    private final Set<String> artifactKeys;
     private final String queryType;
 
-    public SearchResultLabelProvider(Set artifactKeys, String queryType) {
+    public SearchResultLabelProvider(Set<String> artifactKeys, String queryType) {
       this.artifactKeys = artifactKeys;
       this.queryType = queryType;
     }
@@ -358,7 +355,7 @@ public class MavenPomSelectionComponent extends Composite {
 
     public Object[] getElements(Object inputElement) {
       if(inputElement instanceof Map) {
-        return ((Map) inputElement).values().toArray();
+        return ((Map<?, ?>) inputElement).values().toArray();
       }
       return EMPTY;
     }

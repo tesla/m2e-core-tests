@@ -10,7 +10,6 @@ package org.maven.ide.eclipse.actions;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -64,7 +63,7 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
   }
 
   public IJavaCompletionProposal[] getAssists(IInvocationContext context, IProblemLocation[] locations) {
-    List proposals = new ArrayList();
+    List<IJavaCompletionProposal> proposals = new ArrayList<IJavaCompletionProposal>();
     for(int i = 0; i < locations.length; i++ ) {
       IProblemLocation location = locations[i];
       String[] arguments = location.getProblemArguments();
@@ -91,7 +90,7 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
           break;
       }
     }
-    return (IJavaCompletionProposal[]) proposals.toArray(new IJavaCompletionProposal[proposals.size()]);
+    return proposals.toArray(new IJavaCompletionProposal[proposals.size()]);
 
     /*
     if (coveringNode == null) {
@@ -164,7 +163,7 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
       MavenModelManager modelManager = plugin.getMavenModelManager();
 
       IFile pomFile = projectPom;
-      Set artifacts = Collections.EMPTY_SET;
+      Set<Artifact> artifacts = Collections.emptySet();
 
       if(hasMavenNature) {
         MavenProjectFacade projectFacade = projectManager.create(projectPom, false, new NullProgressMonitor());
@@ -178,7 +177,7 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
           MavenProjectFacade facade = getModuleFacade(resource, projectFacade);
           if(facade != null) {
             pomFile = facade.getPom();
-            artifacts = facade.getMavenProject().getArtifacts();
+            artifacts = facade.getMavenProjectArtifacts();
 
           } else {
             MessageDialog.openError(Display.getCurrent().getActiveShell(), "Add Dependency",
@@ -197,7 +196,7 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
           pomFile = findModulePom(resource, pomFile, modelManager);
           MavenProjectFacade facade = projectManager.create(pomFile, true, new NullProgressMonitor());
           if(facade != null) {
-            artifacts = facade.getMavenProject().getArtifacts();
+            artifacts = facade.getMavenProjectArtifacts();
           }
         } catch(CoreException ex) {
           String msg = "Unable to locate Maven project";
@@ -260,9 +259,10 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
       CompilationUnit ast = context.getASTRoot();
       try {
         int startPosition;
-        List imports = ast.imports();
+        @SuppressWarnings("unchecked")
+        List<ImportDeclaration> imports = ast.imports();
         if(!imports.isEmpty()) {
-          ImportDeclaration importDeclaration = (ImportDeclaration) imports.get(imports.size() - 1);
+          ImportDeclaration importDeclaration = imports.get(imports.size() - 1);
           startPosition = importDeclaration.getStartPosition() + importDeclaration.getLength();
         } else {
           PackageDeclaration packageDeclaration = ast.getPackage();
@@ -285,11 +285,11 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
       }
     }
 
+    @SuppressWarnings("unchecked")
     private IFile findModulePom(IResource resource, IFile pomFile, MavenModelManager modelManager) throws CoreException {
       Model model = modelManager.readMavenModel(pomFile);
 
-      for(Iterator moduleIterator = model.getModules().iterator(); moduleIterator.hasNext();) {
-        String module = (String) moduleIterator.next();
+      for(String module : (List<String>) model.getModules()) {
         IFile modulePom = pomFile.getParent().getFile(new Path(module).append(MavenPlugin.POM_FILE_NAME));
         if(modulePom.exists() && modulePom.isAccessible()) {
           IPath modulePath = modulePom.getLocation();
@@ -300,10 +300,8 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
         }
       }
 
-      for(Iterator it = model.getProfiles().iterator(); it.hasNext();) {
-        Profile profile = (Profile) it.next();
-        for(Iterator moduleIterator = profile.getModules().iterator(); moduleIterator.hasNext();) {
-          String module = (String) moduleIterator.next();
+      for(Profile profile : (List<Profile>) model.getProfiles()) {
+        for(String module : (List<String>) profile.getModules()) {
           IFile modulePom = pomFile.getParent().getFile(new Path(module).append(MavenPlugin.POM_FILE_NAME));
           IPath modulePath = modulePom.getLocation();
           if(modulePath.matchingFirstSegments(resource.getLocation()) == modulePath.segmentCount()) {

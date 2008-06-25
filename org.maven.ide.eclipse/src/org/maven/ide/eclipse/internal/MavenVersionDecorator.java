@@ -35,7 +35,7 @@ import org.maven.ide.eclipse.project.MavenProjectManager;
  */
 public class MavenVersionDecorator implements ILabelDecorator {
 
-  private Map listeners = new HashMap();
+  private Map<ILabelProviderListener, IMavenProjectChangedListener> listeners = new HashMap<ILabelProviderListener, IMavenProjectChangedListener>();
 
   public Image decorateImage(Image image, Object element) {
     return null;
@@ -69,7 +69,7 @@ public class MavenVersionDecorator implements ILabelDecorator {
   public void addListener(final ILabelProviderListener listener) {
     IMavenProjectChangedListener projectChangeListener = new IMavenProjectChangedListener() {
       public void mavenProjectChanged(MavenProjectChangedEvent[] events, IProgressMonitor monitor) {
-        ArrayList pomList = new ArrayList();
+        ArrayList<IResource> pomList = new ArrayList<IResource>();
         for(int i = 0; i < events.length; i++ ) {
           // pomList.add(events[i].getSource());
           if(events[i]!=null && events[i].getMavenProject()!=null) {
@@ -84,14 +84,14 @@ public class MavenVersionDecorator implements ILabelDecorator {
       }
     };
     
-    listeners .put(listener, projectChangeListener);
+    listeners.put(listener, projectChangeListener);
     
     MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
     projectManager.addMavenProjectChangedListener(projectChangeListener);
   }
   
   public void removeListener(ILabelProviderListener listener) {
-    IMavenProjectChangedListener projectChangeListener = (IMavenProjectChangedListener) listeners.get(listener);
+    IMavenProjectChangedListener projectChangeListener = listeners.get(listener);
     if(projectChangeListener!=null) {
       MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
       projectManager.removeMavenProjectChangedListener(projectChangeListener);

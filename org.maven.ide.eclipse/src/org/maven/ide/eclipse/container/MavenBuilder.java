@@ -10,7 +10,6 @@ package org.maven.ide.eclipse.container;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +27,6 @@ import org.codehaus.plexus.util.StringUtils;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Resource;
-import org.apache.maven.project.MavenProject;
 
 import org.maven.ide.eclipse.MavenConsole;
 import org.maven.ide.eclipse.MavenPlugin;
@@ -54,6 +52,7 @@ public class MavenBuilder extends IncrementalProjectBuilder {
    * @see org.eclipse.core.internal.events.InternalBuilder#build(int,
    *      java.util.Map, org.eclipse.core.runtime.IProgressMonitor)
    */
+  @SuppressWarnings("unchecked")
   protected IProject[] build(int kind, Map args, IProgressMonitor monitor) throws CoreException {
     IProject project = getProject();
     if(project.hasNature(MavenPlugin.NATURE_ID)) {
@@ -101,18 +100,15 @@ public class MavenBuilder extends IncrementalProjectBuilder {
   }
 
   boolean hasChangedResources(MavenProjectFacade facade, IResourceDelta delta, boolean filteredOnly) {
-    MavenProject mavenProject = facade.getMavenProject();
-    Set folders = new HashSet();
-
-    folders.addAll(getResourceFolders(facade, mavenProject.getBuild().getResources(), filteredOnly));
-    folders.addAll(getResourceFolders(facade, mavenProject.getBuild().getTestResources(), filteredOnly));
+    Set<IPath> folders = new HashSet<IPath>();
+    folders.addAll(getResourceFolders(facade, facade.getMavenProjectBuildResources(), filteredOnly));
+    folders.addAll(getResourceFolders(facade, facade.getMavenProjectBuildTestResources(), filteredOnly));
 
     if (delta == null) {
       return !folders.isEmpty();
     }
 
-    for (Iterator i = folders.iterator(); i.hasNext(); ) {
-      IPath folderPath = (IPath) i.next();
+    for(IPath folderPath : folders) {
       IResourceDelta member = delta.findMember(folderPath);
       // XXX deal with member kind/flags
       if (member != null) {
@@ -123,10 +119,9 @@ public class MavenBuilder extends IncrementalProjectBuilder {
     return false;
   }
 
-  private Set getResourceFolders(MavenProjectFacade facade, List resources, boolean filteredOnly) {
-    Set folders = new LinkedHashSet();
-    for (Iterator it = resources.iterator(); it.hasNext(); ) {
-      Resource resource = (Resource) it.next();
+  private Set<IPath> getResourceFolders(MavenProjectFacade facade, List<Resource> resources, boolean filteredOnly) {
+    Set<IPath> folders = new LinkedHashSet<IPath>();
+    for(Resource resource : resources) {
       if (!filteredOnly || resource.isFiltering()) {
         folders.add(facade.getProjectRelativePath(resource.getDirectory()));
       }
@@ -136,7 +131,7 @@ public class MavenBuilder extends IncrementalProjectBuilder {
 
   private void executePostBuild(MavenProjectFacade mavenProject, IProgressMonitor monitor) throws CoreException {
     String goalsStr = mavenProject.getResolverConfiguration().getFullBuildGoals();
-    List goals = Arrays.asList(StringUtils.split(goalsStr));
+    List<String> goals = Arrays.asList(StringUtils.split(goalsStr));
     mavenProject.execute(goals, monitor);
   }
 }

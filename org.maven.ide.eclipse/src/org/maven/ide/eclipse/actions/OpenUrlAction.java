@@ -37,6 +37,7 @@ import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.model.CiManagement;
 import org.apache.maven.model.IssueManagement;
@@ -209,7 +210,7 @@ public class OpenUrlAction extends ActionDelegate implements IWorkbenchWindowAct
 
     // XXX this should also use repositories declared in settings.xml
     IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
-    List artifactRepositories = indexManager.getArtifactRepositories(null, null);
+    List<ArtifactRepository> artifactRepositories = indexManager.getArtifactRepositories(null, null);
 
     embedder.resolve(a, artifactRepositories, embedder.getLocalRepository());
 

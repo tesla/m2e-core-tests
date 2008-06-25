@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.project.MavenProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -60,7 +61,6 @@ import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.FileEditorInput;
 import org.maven.ide.components.pom.CiManagement;
-import org.maven.ide.components.pom.Dependency;
 import org.maven.ide.components.pom.IssueManagement;
 import org.maven.ide.components.pom.Model;
 import org.maven.ide.components.pom.Modules;
@@ -291,7 +291,7 @@ public class OverviewPage extends MavenPomEditorPage {
     parentSelectButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         // TODO calculate current list of artifacts for the project
-        Set<Dependency> artifacts = Collections.emptySet();
+        Set<Artifact> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getEditorSite().getShell(),
             "Add Dependency", IndexManager.SEARCH_ARTIFACT, artifacts);
         if(dialog.open() == Window.OK) {

@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.maven.artifact.Artifact;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -53,7 +54,6 @@ import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.Section;
 import org.maven.ide.components.pom.Build;
 import org.maven.ide.components.pom.BuildBase;
-import org.maven.ide.components.pom.Dependency;
 import org.maven.ide.components.pom.Extension;
 import org.maven.ide.components.pom.ExtensionsType;
 import org.maven.ide.components.pom.PomFactory;
@@ -243,7 +243,7 @@ public class BuildPage extends MavenPomEditorPage {
     extensionAddAction = new Action("Add Extension", MavenEditorImages.ADD_ARTIFACT) {
       public void run() {
         // XXX calculate list available extensions
-        Set<Dependency> artifacts = Collections.emptySet();
+        Set<Artifact> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getEditorSite().getShell(), //
             "Add Extension", IndexManager.SEARCH_ARTIFACT, artifacts);
         if(dialog.open() == Window.OK) {
@@ -357,7 +357,7 @@ public class BuildPage extends MavenPomEditorPage {
     extensionSelectAction = new Action("Select Extension", MavenEditorImages.SELECT_ARTIFACT) {
       public void run() {
         // XXX calculate list available extensions
-        Set<Dependency> artifacts = Collections.emptySet();
+        Set<Artifact> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getEditorSite().getShell(), //
             "Select Extension", IndexManager.SEARCH_ARTIFACT, artifacts);
         if(dialog.open() == Window.OK) {

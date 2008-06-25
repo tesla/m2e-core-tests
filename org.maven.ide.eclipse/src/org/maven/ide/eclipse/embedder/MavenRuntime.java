@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Set;
 
 import org.osgi.framework.Bundle;
 
@@ -201,9 +200,7 @@ public abstract class MavenRuntime {
         MavenEmbedderManager embedderManager = mavenPlugin.getMavenEmbedderManager();
         MavenEmbedder embedder = embedderManager.getWorkspaceEmbedder();
 
-        @SuppressWarnings("unchecked")
-        Set<Artifact> artifacts = maven.getMavenProject().getArtifacts();
-        for (Artifact artifact : artifacts) {
+        for (Artifact artifact : maven.getMavenProjectArtifacts()) {
           if (Artifact.SCOPE_TEST.equals(artifact.getScope())) {
             continue;
           }

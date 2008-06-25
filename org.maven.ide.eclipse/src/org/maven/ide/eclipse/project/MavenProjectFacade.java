@@ -10,7 +10,6 @@ package org.maven.ide.eclipse.project;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -32,7 +31,7 @@ import org.codehaus.plexus.util.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.embedder.MavenEmbedderException;
 import org.apache.maven.model.Build;
-import org.apache.maven.model.Dependency;
+import org.apache.maven.model.Resource;
 import org.apache.maven.project.MavenProject;
 
 import org.maven.ide.eclipse.MavenPlugin;
@@ -103,7 +102,7 @@ public class MavenProjectFacade {
   public void filterResources(IProgressMonitor monitor) throws CoreException {
     try {
       String goalsStr = resolverConfiguration.getResourceFilteringGoals();
-      List goals = Arrays.asList(StringUtils.split(goalsStr));
+      List<String> goals = Arrays.asList(StringUtils.split(goalsStr));
       manager.execute(this, goals, false, monitor);
       refreshBuildDirectory(monitor); // XXX only need to refresh classes and test-classes
     } catch(MavenEmbedderException ex) {
@@ -137,24 +136,23 @@ public class MavenProjectFacade {
     return mavenProject;
   }
 
-  public Set getTestArtifacts() {
-    Set result = new LinkedHashSet();
-    addExternalArtifacts(result, mavenProject.getTestArtifacts());
+  public Set<Artifact> getTestArtifacts() {
+    Set<Artifact> result = new LinkedHashSet<Artifact>();
+    addExternalArtifacts(result, getMavenProjectTestArtifacts());
     return result;
   }
 
-  private void addExternalArtifacts(Set result, List artifacts) {
-    for(Iterator it = artifacts.iterator(); it.hasNext();) {
-      Artifact artifact = (Artifact) it.next();
+  private void addExternalArtifacts(Set<Artifact> result, List<Artifact> artifacts) {
+    for(Artifact artifact : artifacts) {
       if(getFullPath(artifact.getFile()) == null) {
         result.add(artifact);
       }
     }
   }
 
-  public Set getRuntimeArtifacts() {
-    Set result = new LinkedHashSet();
-    addExternalArtifacts(result, mavenProject.getRuntimeArtifacts());
+  public Set<Artifact> getRuntimeArtifacts() {
+    Set<Artifact> result = new LinkedHashSet<Artifact>();
+    addExternalArtifacts(result, getMavenProjectRuntimeArtifacts());
     return result;
   }
 
@@ -178,11 +176,6 @@ public class MavenProjectFacade {
     return MavenProjectUtils.getFullPath(getProject(), file);
   }
 
-  public void addDependency(IFile file, Dependency dependency) {
-    // TODO Auto-generated method addDependency
-    throw new UnsupportedOperationException("To be implemented");
-  }
-
   /**
    * Visits trough Maven project artifacts and modules
    * 
@@ -192,17 +185,15 @@ public class MavenProjectFacade {
    */
   public void accept(IMavenProjectVisitor visitor, int flags) throws CoreException {
     if(visitor.visit(this)) {
-      MavenProject mavenProject = getMavenProject();
-      for(Iterator it = mavenProject.getArtifacts().iterator(); it.hasNext();) {
-        visitor.visit(this, (Artifact) it.next());
+      for(Artifact artifact : getMavenProjectArtifacts()) {
+        visitor.visit(this, artifact);
       }
 
       if((flags & IMavenProjectVisitor.FORCE_MODULES) > 0 //
           || ((flags & IMavenProjectVisitor.NESTED_MODULES) > 0 //
               && resolverConfiguration.shouldIncludeModules())) {
         IFile pom = getPom();
-        for(Iterator it = mavenProject.getModules().iterator(); it.hasNext();) {
-          String moduleName = (String) it.next();
+        for(String moduleName : getMavenProjectModules()) {
           IFile modulePom = pom.getParent().getFile(new Path(moduleName).append(MavenPlugin.POM_FILE_NAME));
           MavenProjectFacade moduleFacade = manager.create(modulePom, false, null);
           if(moduleFacade == null && ((flags & IMavenProjectVisitor.LOAD) > 0)) {
@@ -216,6 +207,36 @@ public class MavenProjectFacade {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  public List<String> getMavenProjectModules() {
+    return mavenProject.getModules();
+  }
+  
+  @SuppressWarnings("unchecked")
+  public Set<Artifact> getMavenProjectArtifacts() {
+    return mavenProject.getArtifacts();
+  }
+
+  @SuppressWarnings("unchecked")
+  public List<Artifact> getMavenProjectRuntimeArtifacts() {
+    return mavenProject.getRuntimeArtifacts();
+  }
+
+  @SuppressWarnings("unchecked")
+  public List<Artifact> getMavenProjectTestArtifacts() {
+    return mavenProject.getTestArtifacts();
+  }
+  
+  @SuppressWarnings("unchecked")
+  public List<Resource> getMavenProjectBuildResources() {
+    return mavenProject.getBuild().getResources();
+  }
+  
+  @SuppressWarnings("unchecked")
+  public List<Resource> getMavenProjectBuildTestResources() {
+    return mavenProject.getBuild().getTestResources();
+  }
+  
   public ResolverConfiguration getResolverConfiguration() {
     return resolverConfiguration;
   }
@@ -254,7 +275,7 @@ public class MavenProjectFacade {
    * 
    * Recurses into nested modules dependending on resolver configuration.
    */
-  public void execute(List goals, IProgressMonitor monitor) throws CoreException {
+  public void execute(List<String> goals, IProgressMonitor monitor) throws CoreException {
     try {
       manager.execute(this, goals, true, monitor);
       refreshBuildDirectory(monitor);
@@ -281,4 +302,5 @@ public class MavenProjectFacade {
       folder.refreshLocal(IResource.DEPTH_INFINITE, monitor);
     }
   }
+
 }

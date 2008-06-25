@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.maven.artifact.Artifact;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -243,7 +244,7 @@ public class DependenciesComposite extends Composite {
     dependencyAddAction = new Action("Add Dependency", MavenEditorImages.ADD_ARTIFACT) {
       public void run() {
         // TODO calculate current list of artifacts for the project
-        Set<Dependency> artifacts = Collections.emptySet();
+        Set<Artifact> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
             "Add Dependency", IndexManager.SEARCH_ARTIFACT, artifacts);
         if(dialog.open() == Window.OK) {
@@ -361,7 +362,7 @@ public class DependenciesComposite extends Composite {
     dependencyManagementAddAction = new Action("Add Dependency", MavenEditorImages.ADD_ARTIFACT) {
       public void run() {
         // TODO calculate current list of artifacts for the project
-        Set<Dependency> artifacts = Collections.emptySet();
+        Set<Artifact> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
             "Add Dependency", IndexManager.SEARCH_ARTIFACT, artifacts);
         if(dialog.open() == Window.OK) {
@@ -428,7 +429,7 @@ public class DependenciesComposite extends Composite {
     dependencySelectAction = new Action("Select Dependency", MavenEditorImages.SELECT_ARTIFACT) {
       public void run() {
         // TODO calculate current list of artifacts for the project
-        Set<Dependency> artifacts = Collections.emptySet();
+        Set<Artifact> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
             "Add Dependency", IndexManager.SEARCH_ARTIFACT, artifacts);
         if(dialog.open() == Window.OK) {
@@ -649,7 +650,7 @@ public class DependenciesComposite extends Composite {
     exclusionAddAction = new Action("Add Exclusion", MavenEditorImages.ADD_ARTIFACT) {
       public void run() {
         // XXX calculate list available for exclusion
-        Set<Dependency> artifacts = Collections.emptySet();
+        Set<Artifact> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
             "Add Exclusion", IndexManager.SEARCH_ARTIFACT, artifacts);
         if(dialog.open() == Window.OK) {
@@ -728,7 +729,7 @@ public class DependenciesComposite extends Composite {
     exclusionSelectAction = new Action("Select Exclusion", MavenEditorImages.SELECT_ARTIFACT) {
       public void run() {
         // XXX calculate list available for exclusion
-        Set<Dependency> artifacts = Collections.emptySet();
+        Set<Artifact> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
             "Add Dependency", IndexManager.SEARCH_ARTIFACT, artifacts);
         if(dialog.open() == Window.OK) {

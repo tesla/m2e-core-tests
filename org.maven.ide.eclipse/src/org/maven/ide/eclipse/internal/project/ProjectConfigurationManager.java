@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -102,21 +101,19 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     this.embedderManager = embedderManager;
   }
 
-  public void importProjects(Collection projectInfos, ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException {
+  public void importProjects(Collection<MavenProjectInfo> projectInfos, ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException {
     try {
       MavenEmbedder embedder = embedderManager.createEmbedder(EmbedderFactory.createWorkspaceCustomizer());
       try {
         MavenUpdateRequest updateRequest = new MavenUpdateRequest(false, false);
 
-        IdentityHashMap/*<MavenProjectInfo, IProject>*/ projects = new IdentityHashMap/*<MavenProjectInfo, IProject>*/();
+        IdentityHashMap<MavenProjectInfo, IProject> projects = new IdentityHashMap<MavenProjectInfo, IProject>();
 
         // first, create all projects with basic configuration
-        for(Iterator it = projectInfos.iterator(); it.hasNext();) {
+        for(MavenProjectInfo projectInfo : projectInfos) {
           if(monitor.isCanceled()) {
             throw new OperationCanceledException();
           }
-
-          MavenProjectInfo projectInfo = (MavenProjectInfo) it.next();
 
           IProject project = create(projectInfo, configuration, monitor);
           if (project != null) {
@@ -140,18 +137,15 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
         }
 
         // and finally, perform detailed project configuration
-        for(Iterator it = projectInfos.iterator(); it.hasNext();) {
+        for(MavenProjectInfo projectInfo : projectInfos) {
           if(monitor.isCanceled()) {
             throw new OperationCanceledException();
           }
 
-          MavenProjectInfo projectInfo = (MavenProjectInfo) it.next();
-          IProject project = (IProject) projects.get(projectInfo);
+          IProject project = projects.get(projectInfo);
           MavenProjectFacade facade = projectManager.create(project, monitor);
           if (facade != null) {
-            Set configurators = ProjectConfiguratorFactory.getConfigurators();
-            for(Iterator cit = configurators.iterator(); cit.hasNext();) {
-              AbstractProjectConfigurator configurator = (AbstractProjectConfigurator) cit.next();
+            for(AbstractProjectConfigurator configurator : ProjectConfiguratorFactory.getConfigurators()) {
               if(monitor.isCanceled()) {
                 throw new OperationCanceledException();
               }
@@ -186,9 +180,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
           // this is for unit tests only, production code should not need to load facade here
           MavenProjectFacade facade = projectManager.create(pom, true, monitor);
           ProjectConfigurationRequest request = new ProjectConfigurationRequest(project, facade.getPom(), facade.getMavenProject(), configuration, true);
-          Set configurators = ProjectConfiguratorFactory.getConfigurators();
-          for(Iterator cit = configurators.iterator(); cit.hasNext();) {
-            AbstractProjectConfigurator configurator = (AbstractProjectConfigurator) cit.next();
+          for(AbstractProjectConfigurator configurator : ProjectConfiguratorFactory.getConfigurators()) {
             if(monitor.isCanceled()) {
               throw new OperationCanceledException();
             }
@@ -207,39 +199,33 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
       throws CoreException {
     monitor.subTask("Enable Maven nature");
 
-    ArrayList newNatures = new ArrayList();
+    ArrayList<String> newNatures = new ArrayList<String>();
     newNatures.add(JavaCore.NATURE_ID);
     newNatures.add(MavenPlugin.NATURE_ID);
 
     IProjectDescription description = project.getDescription();
-    String[] natures = description.getNatureIds();
-    for(int i = 0; i < natures.length; ++i) {
-      String id = natures[i];
-      if(!MavenPlugin.NATURE_ID.equals(id) && !JavaCore.NATURE_ID.equals(natures[i])) {
-        newNatures.add(natures[i]);
+    for(String natureId : description.getNatureIds()) {
+      if(!MavenPlugin.NATURE_ID.equals(natureId) && !JavaCore.NATURE_ID.equals(natureId)) {
+        newNatures.add(natureId);
       }
     }
-    description.setNatureIds((String[]) newNatures.toArray(new String[newNatures.size()]));
+    description.setNatureIds(newNatures.toArray(new String[newNatures.size()]));
     project.setDescription(description, monitor);
     
     projectManager.setResolverConfiguration(project, configuration);
 
     IJavaProject javaProject = JavaCore.create(project);
     if(javaProject != null) {
-      Set containerEntrySet = new LinkedHashSet();
+      Set<String> containerEntrySet = new LinkedHashSet<String>();
       IClasspathContainer container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
       if(container != null) {
-        IClasspathEntry[] entries = container.getClasspathEntries();
-        for(int i = 0; i < entries.length; i++ ) {
-          containerEntrySet.add(entries[i].getPath().toString());
+        for(IClasspathEntry entry : container.getClasspathEntries()) {
+          containerEntrySet.add(entry.getPath().toString());
         }
       }
 
-      // remove classpath container from JavaProject
-      IClasspathEntry[] entries = javaProject.getRawClasspath();
-      ArrayList newEntries = new ArrayList();
-      for(int i = 0; i < entries.length; i++ ) {
-        IClasspathEntry entry = entries[i];
+      ArrayList<IClasspathEntry> newEntries = new ArrayList<IClasspathEntry>();
+      for(IClasspathEntry entry : javaProject.getRawClasspath()) {
         if(!BuildPathManager.isMaven2ClasspathContainer(entry.getPath()) && !containerEntrySet.contains(entry.getPath().toString())) {
           newEntries.add(entry);
         }
@@ -247,8 +233,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
 
       newEntries.add(createContainerEntry(configuration));
 
-      javaProject.setRawClasspath((IClasspathEntry[]) newEntries.toArray(new IClasspathEntry[newEntries.size()]),
-          monitor);
+      javaProject.setRawClasspath(newEntries.toArray(new IClasspathEntry[newEntries.size()]), monitor);
     }
   }
 
@@ -258,28 +243,25 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     project.deleteMarkers(MavenPlugin.MARKER_ID, true, IResource.DEPTH_INFINITE);
 
     IProjectDescription description = project.getDescription();
-    String[] natures = description.getNatureIds();
-    ArrayList newNatures = new ArrayList();
-    for(int i = 0; i < natures.length; ++i) {
-      if(!MavenPlugin.NATURE_ID.equals(natures[i])) {
-        newNatures.add(natures[i]);
+    ArrayList<String> newNatures = new ArrayList<String>();
+    for(String natureId : description.getNatureIds()) {
+      if(!MavenPlugin.NATURE_ID.equals(natureId)) {
+        newNatures.add(natureId);
       }
     }
-    description.setNatureIds((String[]) newNatures.toArray(new String[newNatures.size()]));
+    description.setNatureIds(newNatures.toArray(new String[newNatures.size()]));
     project.setDescription(description, null);
 
     IJavaProject javaProject = JavaCore.create(project);
     if(javaProject != null) {
       // remove classpatch container from JavaProject
-      IClasspathEntry[] entries = javaProject.getRawClasspath();
-      ArrayList newEntries = new ArrayList();
-      for(int i = 0; i < entries.length; i++ ) {
-        if(!BuildPathManager.isMaven2ClasspathContainer(entries[i].getPath())) {
-          newEntries.add(entries[i]);
+      ArrayList<IClasspathEntry> newEntries = new ArrayList<IClasspathEntry>();
+      for(IClasspathEntry entry : javaProject.getRawClasspath()) {
+        if(!BuildPathManager.isMaven2ClasspathContainer(entry.getPath())) {
+          newEntries.add(entry);
         }
       }
-      javaProject.setRawClasspath((IClasspathEntry[]) newEntries.toArray(new IClasspathEntry[newEntries.size()]),
-          null);
+      javaProject.setRawClasspath(newEntries.toArray(new IClasspathEntry[newEntries.size()]), null);
     }
 
   }
@@ -381,7 +363,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
       throw new CoreException(Status.CANCEL_STATUS);
     }
 
-    Set projectSet = collectProjects(scanner.getProjects(), configuration.getResolverConfiguration().shouldIncludeModules());
+    Set<MavenProjectInfo> projectSet = collectProjects(scanner.getProjects(), configuration.getResolverConfiguration().shouldIncludeModules());
     
     importProjects(projectSet, configuration, monitor);
 
@@ -396,15 +378,14 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
    * 
    * @return flattened collection of {@link MavenProjectInfo}
    */
-  public Set collectProjects(Collection projects, boolean includeModules) {
-    Set projectSet = collectProjects(projects);
+  public Set<MavenProjectInfo> collectProjects(Collection<MavenProjectInfo> projects, boolean includeModules) {
+    Set<MavenProjectInfo> projectSet = collectProjects(projects);
     if(!includeModules) {
       return projectSet;
     }
     
-    Set parentProjects = new HashSet();
-    for(Iterator it = projectSet.iterator(); it.hasNext();) {
-      MavenProjectInfo projectInfo = (MavenProjectInfo) it.next();
+    Set<MavenProjectInfo> parentProjects = new HashSet<MavenProjectInfo>();
+    for(MavenProjectInfo projectInfo : projectSet) {
       MavenProjectInfo parent = projectInfo.getParent();
       if(parent==null || !projectSet.contains(parent)) {
         parentProjects.add(projectInfo);
@@ -413,12 +394,11 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     return parentProjects;
   }
 
-  private Set collectProjects(Collection projects) {
-    return new LinkedHashSet() {
+  private Set<MavenProjectInfo> collectProjects(Collection<MavenProjectInfo> projects) {
+    return new LinkedHashSet<MavenProjectInfo>() {
       private static final long serialVersionUID = 1L;
-      public Set collectProjects(Collection projects) {
-        for(Iterator it = projects.iterator(); it.hasNext();) {
-          MavenProjectInfo projectInfo = (MavenProjectInfo) it.next();
+      public Set<MavenProjectInfo> collectProjects(Collection<MavenProjectInfo> projects) {
+        for(MavenProjectInfo projectInfo : projects) {
           add(projectInfo);
           collectProjects(projectInfo.getProjects());
         }
@@ -500,9 +480,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
   }
 
   public void mavenProjectChanged(MavenProjectChangedEvent[] events, IProgressMonitor monitor) {
-    Set configurators = ProjectConfiguratorFactory.getConfigurators();
-    for (Iterator it = configurators.iterator(); it.hasNext(); ) {
-      AbstractProjectConfigurator configurator = (AbstractProjectConfigurator) it.next();
+    for(AbstractProjectConfigurator configurator : ProjectConfiguratorFactory.getConfigurators()) {
       configurator.mavenProjectChanged(events, monitor);
     }
   }

@@ -82,6 +82,7 @@ import org.maven.ide.eclipse.project.configurator.AbstractClasspathConfiguratorF
  * 
  * XXX take project import code into a separate class (ProjectImportManager?)
  */
+@SuppressWarnings("restriction")
 public class BuildPathManager implements IMavenProjectChangedListener, IDownloadSourceListener, IResourceChangeListener {
 
   private static final String PROPERTY_SRC_ROOT = ".srcRoot";
@@ -163,7 +164,6 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
      reconcile PackageExplorer with actual classpath
      See https://bugs.eclipse.org/bugs/show_bug.cgi?id=154071
    */
-  @SuppressWarnings("restriction")
   private void forcePackageExplorerRefresh(IJavaProject javaProject) {
     if(getJDTVersion().startsWith("3.3")) {
       DeltaProcessingState state = JavaModelManager.getJavaModelManager().deltaState;
@@ -294,7 +294,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
       scopeFilter = SCOPE_FILTER_TEST;
     }
 
-    for(Artifact a : (Set<Artifact>) mavenProject.getMavenProject().getArtifacts()) {
+    for(Artifact a : mavenProject.getMavenProjectArtifacts()) {
       if (!scopeFilter.include(a) || !a.getArtifactHandler().isAddedToClasspath()) {
         continue;
       }
@@ -411,32 +411,28 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
    * given path.
    */
   public void downloadSources(IProject project, IPath path) throws CoreException {
-    Set artifacts = findArtifacts(project, path);
-    for (Iterator it = artifacts.iterator(); it.hasNext(); ) {
-      Artifact artifact = (Artifact) it.next();
+    for(Artifact artifact : findArtifacts(project, path)) {
       projectManager.downloadSources(project, path, artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion(), artifact.getClassifier());
     }
   }
 
   public Artifact findArtifact(IProject project, IPath path) throws CoreException {
     if (path != null) {
-      Set artifacts = findArtifacts(project, path);
+      Set<Artifact> artifacts = findArtifacts(project, path);
       // it is not possible to have more than one classpath entry with the same path
       if (artifacts.size() > 0) {
-        return (Artifact) artifacts.iterator().next();
+        return artifacts.iterator().next();
       }
     }
     return null;
   }
 
-  private Set findArtifacts(IProject project, IPath path) throws CoreException {
-    ArrayList entries = findClasspathEntries(project, path);
+  private Set<Artifact> findArtifacts(IProject project, IPath path) throws CoreException {
+    ArrayList<IClasspathEntry> entries = findClasspathEntries(project, path);
 
-    Set artifacts = new LinkedHashSet();
+    Set<Artifact> artifacts = new LinkedHashSet<Artifact>();
 
-    for(Iterator it = entries.iterator(); it.hasNext();) {
-      IClasspathEntry entry = (IClasspathEntry) it.next();
-
+    for(IClasspathEntry entry : entries) {
       Artifact artifact = findArtifactByArtifactKey(entry);
 
       if(artifact == null) {
@@ -493,9 +489,9 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
       String sha1 = digester.calc(file);
       console.logMessage("Artifact digest " + sha1 + " for " + entry.getPath());
 
-      Map result = indexManager.search(sha1, IndexManager.SEARCH_SHA1);
+      Map<String, IndexedArtifact> result = indexManager.search(sha1, IndexManager.SEARCH_SHA1);
       if(result.size()==1) {
-        IndexedArtifact ia = (IndexedArtifact) result.values().iterator().next();
+        IndexedArtifact ia = result.values().iterator().next();
         IndexedArtifactFile iaf = (IndexedArtifactFile) ia.files.iterator().next();
         return embedderManager.getWorkspaceEmbedder().createArtifact(iaf.group, iaf.artifact, iaf.version, null, "jar");
       }
@@ -510,8 +506,8 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
   }
 
   // TODO should it be just one entry?
-  private ArrayList findClasspathEntries(IProject project, IPath path) throws JavaModelException {
-    ArrayList entries = new ArrayList();
+  private ArrayList<IClasspathEntry> findClasspathEntries(IProject project, IPath path) throws JavaModelException {
+    ArrayList<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
 
     IJavaProject javaProject = JavaCore.create(project);
     addEntries(entries, javaProject.getRawClasspath(), path);
@@ -523,9 +519,8 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     return entries;
   }
 
-  private void addEntries(Collection collection, IClasspathEntry[] entries, IPath path) {
-    for(int i = 0; i < entries.length; i++ ) {
-      IClasspathEntry entry = entries[i];
+  private void addEntries(Collection<IClasspathEntry> collection, IClasspathEntry[] entries, IPath path) {
+    for(IClasspathEntry entry : entries) {
       if(entry.getEntryKind()==IClasspathEntry.CPE_LIBRARY && (path==null || path.equals(entry.getPath()))) {
         collection.add(entry);
       }
@@ -546,10 +541,10 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
       IPath path = event.getPath();
 
       IClasspathEntry[] cp = javaProject.getRawClasspath();
-      for (int i = 0; i < cp.length; i++) {
-        if (IClasspathEntry.CPE_LIBRARY == cp[i].getEntryKind() && path.equals(cp[i].getPath())) {
+      for(IClasspathEntry entry : cp) {
+        if (IClasspathEntry.CPE_LIBRARY == entry.getEntryKind() && path.equals(entry.getPath())) {
 
-          List attributes = new ArrayList(Arrays.asList(cp[i].getExtraAttributes()));
+          List<IClasspathAttribute> attributes = new ArrayList<IClasspathAttribute>(Arrays.asList(entry.getExtraAttributes()));
           IPath srcPath = event.getSourcePath();
 
           if(srcPath == null) {
@@ -561,10 +556,9 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
             }
           }
 
-          cp[i] = JavaCore.newLibraryEntry(cp[i].getPath(), //
-              srcPath, null, cp[i].getAccessRules(), //
-              (IClasspathAttribute[]) attributes.toArray(new IClasspathAttribute[attributes.size()]), // 
-              cp[i].isExported());
+          entry = JavaCore.newLibraryEntry(entry.getPath(), srcPath, null, entry.getAccessRules(), //
+              attributes.toArray(new IClasspathAttribute[attributes.size()]), // 
+              entry.isExported());
         }
       }
 

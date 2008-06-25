@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.AbstractArtifactResolutionException;
 import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.embedder.MavenEmbedderException;
@@ -115,16 +116,16 @@ public class MavenProjectManagerImpl {
 
   private final MavenMarkerManager markerManager;
   
-  private final Set/*<IMavenProjectChangedListener>*/ projectChangeListeners = new LinkedHashSet/*<IMavenProjectChangedListener>*/();
-  private final Map/*<IFile, MavenProjectChangedEvent>*/ projectChangeEvents = new LinkedHashMap/*<IFile, MavenProjectChangedEvent>*/();
+  private final Set<IMavenProjectChangedListener> projectChangeListeners = new LinkedHashSet<IMavenProjectChangedListener>();
+  private final Map<IFile, MavenProjectChangedEvent> projectChangeEvents = new LinkedHashMap<IFile, MavenProjectChangedEvent>();
 
-  private final Set/*<IDownloadSourceListener>*/ downloadSourceListeners = new LinkedHashSet/*<IDownloadSourceListener>*/();
-  private final Map/*<IProject, DownloadSourceEvent>*/ downloadSourceEvents = new LinkedHashMap/*<IProject, DownloadSourceEvent>*/();
+  private final Set<IDownloadSourceListener> downloadSourceListeners = new LinkedHashSet<IDownloadSourceListener>();
+  private final Map<IProject, DownloadSourceEvent> downloadSourceEvents = new LinkedHashMap<IProject, DownloadSourceEvent>();
 
-  private static final ThreadLocal/*<Context>*/ context = new ThreadLocal/*<Context>*/();
+  private static final ThreadLocal<Context> context = new ThreadLocal<Context>();
   
   static Context getContext() {
-    return (Context) context.get();
+    return context.get();
   }
 
   public MavenProjectManagerImpl(MavenConsole console, IndexManager indexManager, MavenEmbedderManager embedderManager) {
@@ -170,9 +171,9 @@ public class MavenProjectManagerImpl {
         if(mavenProject != null) {
           projectFacade = new MavenProjectFacade(this, pom, mavenProject, configuration);
         } else {
-          if (executionResult.getExceptions() != null) {
-            for (Iterator it = executionResult.getExceptions().iterator(); it.hasNext(); ) {
-              Exception ex = (Exception) it.next();
+          List<Exception> exceptions = executionResult.getExceptions();
+          if (exceptions != null) {
+            for(Exception ex : exceptions) {
               String msg = "Failed to create Maven embedder";
               console.logError(msg + "; " + ex.toString());
               MavenPlugin.log(msg, ex);
@@ -280,10 +281,10 @@ public class MavenProjectManagerImpl {
    * 
    * @return a {@link Set} of {@link IFile} affected poms
    */
-  public Set/*<IFile>*/ remove(Set/*<IFile>*/ poms, boolean force) {
-    Set pomSet = new LinkedHashSet();
-    for (Iterator it = poms.iterator(); it.hasNext(); ) {
-      IFile pom = (IFile) it.next();
+  public Set<IFile> remove(Set<IFile> poms, boolean force) {
+    Set<IFile> pomSet = new LinkedHashSet<IFile>();
+    for (Iterator<IFile> it = poms.iterator(); it.hasNext(); ) {
+      IFile pom = it.next();
       MavenProjectFacade facade = state.getProjectFacade(pom);
       if (force || facade == null || facade.isStale()) {
         pomSet.addAll(remove(pom));
@@ -299,15 +300,15 @@ public class MavenProjectManagerImpl {
    * 
    * @return a {@link Set} of {@link IFile} affected poms
    */
-  public Set/*<IFile>*/ remove(IFile pom) {
+  public Set/*<IFile>*/<IFile> remove(IFile pom) {
     MavenProjectFacade facade = state.getProjectFacade(pom);
     MavenProject mavenProject = facade != null ? facade.getMavenProject() : null;
 
     if (mavenProject == null) {
-      return Collections.EMPTY_SET;
+      return Collections.emptySet();
     }
 
-    Set pomSet = new LinkedHashSet();
+    Set<IFile> pomSet = new LinkedHashSet<IFile>();
 
     pomSet.addAll(state.getDependents(pom, mavenProject, false));
     state.removeProject(pom, mavenProject);
@@ -333,12 +334,10 @@ public class MavenProjectManagerImpl {
    * @param updateRequests a set of {@link MavenUpdateRequest}
    * @param monitor progress monitor
    */
-  public void refresh(Set/*<DependencyResolutionContext>*/ updateRequests, IProgressMonitor monitor) throws CoreException, MavenEmbedderException, InterruptedException {
+  public void refresh(Set<DependencyResolutionContext> updateRequests, IProgressMonitor monitor) throws CoreException, MavenEmbedderException, InterruptedException {
     MavenEmbedder embedder = embedderManager.createEmbedder(EmbedderFactory.createWorkspaceCustomizer());
     try {
-      for(Iterator it = updateRequests.iterator(); it.hasNext();) {
-        DependencyResolutionContext updateRequest = (DependencyResolutionContext) it.next();
-        
+      for(DependencyResolutionContext updateRequest : updateRequests) {
         while(!updateRequest.isEmpty()) {
           if(monitor.isCanceled()) {
             throw new InterruptedException();
@@ -449,14 +448,15 @@ public class MavenProjectManagerImpl {
     addToIndex(mavenProject);
   }
 
-  private Set/*<IFile>*/ refreshNestedModules(IFile pom, MavenProject mavenProject) {
+  private Set<IFile> refreshNestedModules(IFile pom, MavenProject mavenProject) {
     if (mavenProject == null) {
-      return Collections.EMPTY_SET;
+      return Collections.emptySet();
     }
     
-    Set pomSet = new LinkedHashSet();
-    for (Iterator i = mavenProject.getModules().iterator(); i.hasNext(); ) {
-      IFile modulePom = getModulePom(pom, (String) i.next());
+    Set<IFile> pomSet = new LinkedHashSet<IFile>();
+    List<String> modules = mavenProject.getModules();
+    for(String module : modules) {
+      IFile modulePom = getModulePom(pom, module);
       if (modulePom != null) {
         pomSet.add(modulePom);
       }
@@ -464,14 +464,15 @@ public class MavenProjectManagerImpl {
     return pomSet;
   }
 
-  private Set/*<IFile>*/ removeNestedModules(IFile pom, MavenProject mavenProject) {
+  private Set<IFile> removeNestedModules(IFile pom, MavenProject mavenProject) {
     if (mavenProject == null) {
-      return Collections.EMPTY_SET;
+      return Collections.emptySet();
     }
     
-    Set pomSet = new LinkedHashSet();
-    for (Iterator i = mavenProject.getModules().iterator(); i.hasNext(); ) {
-      IFile modulePom = getModulePom(pom, (String) i.next());
+    Set<IFile> pomSet = new LinkedHashSet<IFile>();
+    List<String> modules = mavenProject.getModules();
+    for(String module : modules) {
+      IFile modulePom = getModulePom(pom, module);
       if (modulePom != null) {
         pomSet.addAll(remove(modulePom));
       }
@@ -483,16 +484,16 @@ public class MavenProjectManagerImpl {
    * Returns Set<IFile> of nested module POMs that are present in oldMavenProject
    * but not in mavenProjec.
    */
-  private Set/*<IFile>*/ getRemovedNestedModules(IFile pom, MavenProject oldMavenProject, MavenProject mavenProject) {
-    List modules = mavenProject != null? mavenProject.getModules(): null;
+  private Set<IFile> getRemovedNestedModules(IFile pom, MavenProject oldMavenProject, MavenProject mavenProject) {
+    List<String> modules = mavenProject != null ? mavenProject.getModules() : null;
 
-    Set result = new LinkedHashSet();
+    Set<IFile> result = new LinkedHashSet<IFile>();
 
     if (oldMavenProject != null) {
-      for (Iterator i = oldMavenProject.getModules().iterator(); i.hasNext(); ) {
-        String moduleName = (String) i.next();
-        if (modules != null && !modules.contains(moduleName)) {
-          IFile modulePOM = getModulePom(pom, moduleName);
+      List<String> oldModules = oldMavenProject.getModules();
+      for(String oldModule : oldModules) {
+        if (modules != null && !modules.contains(oldModule)) {
+          IFile modulePOM = getModulePom(pom, oldModule);
           if (modulePOM != null) {
             result.add(modulePOM);
           }
@@ -507,14 +508,14 @@ public class MavenProjectManagerImpl {
     return pom.getParent().getFile(new Path(moduleName).append(MavenPlugin.POM_FILE_NAME));
   }
 
-  private Set/*<IFile>*/ refreshWorkspaceModules(IFile pom, MavenProject mavenProject) {
+  private Set<IFile> refreshWorkspaceModules(IFile pom, MavenProject mavenProject) {
     if (mavenProject == null) {
-      return Collections.EMPTY_SET;
+      return Collections.emptySet();
     }
 
     Set modules = state.removeWorkspaceModules(pom, mavenProject);
 
-    Set pomSet = new LinkedHashSet();
+    Set<IFile> pomSet = new LinkedHashSet<IFile>();
     if (modules != null) {
       IWorkspaceRoot root = pom.getWorkspace().getRoot();
       for (Iterator it = modules.iterator(); it.hasNext(); ) {
@@ -556,7 +557,7 @@ public class MavenProjectManagerImpl {
   }
 
   private void addProjectChangeEvent(IFile pom, int kind, int flags, MavenProjectFacade oldMavenProject, MavenProjectFacade mavenProject) {
-    MavenProjectChangedEvent event = (MavenProjectChangedEvent) projectChangeEvents.get(pom);
+    MavenProjectChangedEvent event = projectChangeEvents.get(pom);
     if (event == null) {
       event = new MavenProjectChangedEvent(pom, kind, flags, oldMavenProject, mavenProject);
       projectChangeEvents.put(pom, event);
@@ -571,10 +572,9 @@ public class MavenProjectManagerImpl {
 
   private void addMissingProjectDependencies(IFile pom, MavenExecutionResult result) {
     // kinda hack, but this is the only way I can get info about missing parent artifacts
-    List exceptions = result.getExceptions();
+    List<Throwable> exceptions = result.getExceptions();
     if (exceptions != null) {
-      for (Iterator it = exceptions.iterator(); it.hasNext(); ) {
-        Throwable t = (Throwable) it.next();
+      for(Throwable t : exceptions) {
         while (t != null && !(t instanceof AbstractArtifactResolutionException)) {
           t = t.getCause();
         }
@@ -613,11 +613,11 @@ public class MavenProjectManagerImpl {
       return true;
     }
 
-    Iterator beforeIt = before.getArtifacts().iterator();
-    Iterator afterIt = after.getArtifacts().iterator();
+    Iterator<Artifact> beforeIt = before.getArtifacts().iterator();
+    Iterator<Artifact> afterIt = after.getArtifacts().iterator();
     while (beforeIt.hasNext()) {
-      Artifact beforeDependeny = (Artifact) beforeIt.next();
-      Artifact afterDependeny = (Artifact) afterIt.next();
+      Artifact beforeDependeny = beforeIt.next();
+      Artifact afterDependeny = afterIt.next();
       if (!ArtifactKey.equals(beforeDependeny, afterDependeny)
             || !equals(beforeDependeny.getFile(), afterDependeny.getFile())
             || beforeDependeny.isOptional() != afterDependeny.isOptional()) 
@@ -647,11 +647,11 @@ public class MavenProjectManagerImpl {
 
   public void notifyProjectChangeListeners(IProgressMonitor monitor) {
     if (projectChangeEvents.size() > 0) {
-      Collection eventCollection = this.projectChangeEvents.values();
-      MavenProjectChangedEvent[] events = (MavenProjectChangedEvent[]) eventCollection.toArray(new MavenProjectChangedEvent[eventCollection.size()]);
+      Collection<MavenProjectChangedEvent> eventCollection = this.projectChangeEvents.values();
+      MavenProjectChangedEvent[] events = eventCollection.toArray(new MavenProjectChangedEvent[eventCollection.size()]);
       IMavenProjectChangedListener[] listeners;
       synchronized (this.projectChangeListeners) {
-        listeners = (IMavenProjectChangedListener[]) this.projectChangeListeners.toArray(new IMavenProjectChangedListener[this.projectChangeListeners.size()]);
+        listeners = this.projectChangeListeners.toArray(new IMavenProjectChangedListener[this.projectChangeListeners.size()]);
       }
       this.projectChangeEvents.clear();
       for (int i = 0; i < listeners.length; i++) {
@@ -668,21 +668,19 @@ public class MavenProjectManagerImpl {
     return state.getMavenProject(artifactKey);
   }
 
-  public void downloadSources(List/*<DownloadSourceRequest>*/ downloadRequests, IProgressMonitor monitor) throws MavenEmbedderException, InterruptedException, CoreException {
+  public void downloadSources(List<DownloadSourceRequest> downloadRequests, IProgressMonitor monitor) throws MavenEmbedderException, InterruptedException, CoreException {
     MavenEmbedder embedder = embedderManager.createEmbedder(EmbedderFactory.createWorkspaceCustomizer());
     try {
-      for (Iterator requestIterator = downloadRequests.iterator(); requestIterator.hasNext(); ) {
+      for(DownloadSourceRequest request : downloadRequests) {
         if(monitor.isCanceled()) {
           throw new InterruptedException();
         }
-
-        DownloadSourceRequest request = (DownloadSourceRequest) requestIterator.next();
 
         final ArtifactKey key = request.getArtifactKey();
         MavenProjectFacade projectFacade = create(request.getProject(), monitor);
 
         Artifact artifact = null;
-        List remoteRepositories = null;
+        List<ArtifactRepository> remoteRepositories = null;
 
         if(projectFacade != null) {
           // for maven projects find actual artifact and MavenProject corresponding to the artifactKey
@@ -778,11 +776,11 @@ public class MavenProjectManagerImpl {
     if (downloadSourceEvents.size() > 0) {
       IDownloadSourceListener[] listeners;
       synchronized (this.downloadSourceListeners) {
-        listeners = (IDownloadSourceListener[]) this.downloadSourceListeners.toArray(new IDownloadSourceListener[this.downloadSourceListeners.size()]);
+        listeners = this.downloadSourceListeners.toArray(new IDownloadSourceListener[this.downloadSourceListeners.size()]);
       }
       for (int i = 0; i < listeners.length; i++) {
-        for (Iterator eventsIter = downloadSourceEvents.values().iterator(); eventsIter.hasNext(); ) {
-          DownloadSourceEvent event = (DownloadSourceEvent) eventsIter.next();
+        for (Iterator<DownloadSourceEvent> eventsIter = downloadSourceEvents.values().iterator(); eventsIter.hasNext(); ) {
+          DownloadSourceEvent event = eventsIter.next();
           try {
             listeners[i].sourcesDownloaded(event, monitor);
           } catch(CoreException ex) {
@@ -992,9 +990,9 @@ public class MavenProjectManagerImpl {
   }
 
   private static class MavenExecutor implements MavenRunnable {
-    private final List goals;
+    private final List<String> goals;
 
-    MavenExecutor(List goals) {
+    MavenExecutor(List<String> goals) {
       this.goals = goals;
     }
 
@@ -1018,7 +1016,7 @@ public class MavenProjectManagerImpl {
     }
   }
 
-  public void execute(MavenProjectFacade facade, List goals, final boolean recursive, IProgressMonitor monitor) throws MavenEmbedderException {
+  public void execute(MavenProjectFacade facade, List<String> goals, final boolean recursive, IProgressMonitor monitor) throws MavenEmbedderException {
     MavenEmbedder embedder = embedderManager.createEmbedder(EmbedderFactory.createWorkspaceCustomizer());
     try {
       IFile pom = facade.getPom();

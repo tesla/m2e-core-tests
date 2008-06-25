@@ -25,7 +25,7 @@ public interface IProjectConfigurationManager {
   
   ISchedulingRule getRule();
 
-  void importProjects(Collection/*<MavenProjectInfo>*/ projects, ProjectImportConfiguration importConfiguration, IProgressMonitor monitor) throws CoreException;
+  void importProjects(Collection<MavenProjectInfo> projects, ProjectImportConfiguration importConfiguration, IProgressMonitor monitor) throws CoreException;
 
   void createSimpleProject(IProject project, IPath append, Model model, String[] folders,
       ResolverConfiguration resolverConfiguration, IProgressMonitor monitor) throws CoreException;
@@ -33,7 +33,7 @@ public interface IProjectConfigurationManager {
   void createArchetypeProject(IProject project, IPath location, Archetype archetype, String groupId, String artifactId,
       String version, String packaging, Properties properties, ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException;
 
-  Set collectProjects(Collection projects, boolean includeModules);
+  Set<MavenProjectInfo> collectProjects(Collection<MavenProjectInfo> projects, boolean includeModules);
 
   void enableMavenNature(IProject project, ResolverConfiguration configuration, IProgressMonitor monitor) throws CoreException;
 
