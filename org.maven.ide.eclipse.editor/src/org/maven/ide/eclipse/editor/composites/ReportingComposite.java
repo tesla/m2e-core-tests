@@ -247,8 +247,8 @@ public class ReportingComposite extends Composite {
         if(reportPlugins != null) {
           List<ReportPlugin> pluginList = reportPluginsEditor.getSelection();
           for(ReportPlugin reportPlugin : pluginList) {
-            Command removeCommand = RemoveCommand.create(editingDomain, reportPlugins, POM_PACKAGE.getPlugins_Plugin(),
-                reportPlugin);
+            Command removeCommand = RemoveCommand.create(editingDomain, reportPlugins, POM_PACKAGE
+                .getReportPlugins_Plugin(), reportPlugin);
             compoundCommand.append(removeCommand);
           }
 
@@ -319,6 +319,15 @@ public class ReportingComposite extends Composite {
 
     pluginConfigureButton = toolkit.createHyperlink(pluginConfigureComposite, "Configuration", SWT.NONE);
     pluginConfigureButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+    pluginConfigureButton.addHyperlinkListener(new HyperlinkAdapter() {
+      public void linkActivated(HyperlinkEvent e) {
+        if(currentReportPlugin != null) {
+          EObject element = currentReportPlugin.getConfiguration();
+          parent.getPomEditor().showInSourceEditor(element == null ? currentReportPlugin : element);
+        }
+      }
+    });
+
     Section reportSetsSection = toolkit.createSection(verticalSash, Section.TITLE_BAR);
     reportSetsSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     reportSetsSection.setText("Report Sets");
@@ -396,6 +405,7 @@ public class ReportingComposite extends Composite {
       parent.removeNotifyListener(groupIdText);
       parent.removeNotifyListener(artifactIdText);
       parent.removeNotifyListener(versionText);
+      parent.removeNotifyListener(pluginInheritedButton);
     }
 
     if(parent == null || reportPlugin == null) {
@@ -421,13 +431,14 @@ public class ReportingComposite extends Composite {
     setText(artifactIdText, reportPlugin.getArtifactId());
     setText(versionText, reportPlugin.getVersion());
 
+    pluginInheritedButton.setSelection(Boolean.parseBoolean(reportPlugin.getInherited()));
+
     ValueProvider<ReportPlugin> provider = new ValueProvider.DefaultValueProvider<ReportPlugin>(reportPlugin);
     parent.setModifyListener(groupIdText, provider, POM_PACKAGE.getReportPlugin_GroupId(), "");
     parent.setModifyListener(artifactIdText, provider, POM_PACKAGE.getReportPlugin_ArtifactId(), "");
     parent.setModifyListener(versionText, provider, POM_PACKAGE.getReportPlugin_Version(), "");
+    parent.setModifyListener(pluginInheritedButton, provider, POM_PACKAGE.getReportPlugin_Inherited(), "false");
     parent.registerListeners();
-
-    pluginInheritedButton.setSelection("true".equals(reportPlugin.getInherited()));
 
     ReportSetsType reportSets = reportPlugin.getReportSets();
     reportSetsEditor.setInput(reportSets == null ? null : reportSets.getReportSet());
