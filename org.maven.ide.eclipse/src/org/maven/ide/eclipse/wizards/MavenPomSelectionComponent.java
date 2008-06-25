@@ -199,7 +199,7 @@ public class MavenPomSelectionComponent extends Composite {
 
   IndexedArtifactFile getSelectedIndexedArtifactFile(Object element) {
     if(element instanceof IndexedArtifact) {
-      return (IndexedArtifactFile) ((IndexedArtifact) element).files.iterator().next();
+      return ((IndexedArtifact) element).files.iterator().next();
     }
     return (IndexedArtifactFile) element;
   }

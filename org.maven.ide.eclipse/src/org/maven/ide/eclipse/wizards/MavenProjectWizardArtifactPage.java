@@ -23,6 +23,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Model;
 
 import org.maven.ide.eclipse.Messages;
@@ -142,7 +143,7 @@ public class MavenProjectWizardArtifactPage extends AbstractMavenWizardPage {
     parentComponent.addBrowseButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            "Select Parent Artifact", IndexManager.SEARCH_ARTIFACT, Collections.EMPTY_SET);
+            "Select Parent Artifact", IndexManager.SEARCH_ARTIFACT, Collections.<Artifact>emptySet());
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile indexedArtifactFile = (IndexedArtifactFile) dialog.getFirstResult();
           if(indexedArtifactFile != null) {

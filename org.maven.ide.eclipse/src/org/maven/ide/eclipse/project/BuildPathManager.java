@@ -492,7 +492,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
       Map<String, IndexedArtifact> result = indexManager.search(sha1, IndexManager.SEARCH_SHA1);
       if(result.size()==1) {
         IndexedArtifact ia = result.values().iterator().next();
-        IndexedArtifactFile iaf = (IndexedArtifactFile) ia.files.iterator().next();
+        IndexedArtifactFile iaf = ia.files.iterator().next();
         return embedderManager.getWorkspaceEmbedder().createArtifact(iaf.group, iaf.artifact, iaf.version, null, "jar");
       }
       

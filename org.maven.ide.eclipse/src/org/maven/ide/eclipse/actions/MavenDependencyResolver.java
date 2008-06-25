@@ -43,6 +43,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
 
@@ -211,13 +212,16 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
       Shell shell = workbench.getDisplay().getActiveShell();
 
       MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(shell, //
-          "Search in Maven repositories", IndexManager.SEARCH_CLASS_NAME, artifacts);
+          "Search in Maven repositories", IndexManager.SEARCH_CLASS_NAME, artifacts, true);
       dialog.setQuery(query);
 
       if(dialog.open() == Window.OK) {
         IndexedArtifactFile iaf = dialog.getSelectedIndexedArtifactFile();
 
-        modelManager.addDependency(pomFile, iaf.getDependency());
+        Dependency dependency = iaf.getDependency();
+        dependency.setScope(dialog.getSelectedScope());
+        
+        modelManager.addDependency(pomFile, dependency);
 
         // add import for selected class
         if(addImport) {

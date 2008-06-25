@@ -26,6 +26,9 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.model.Dependency;
+
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.index.IndexManager;
@@ -57,27 +60,17 @@ public class AddDependencyAction implements IObjectActionDelegate {
 
     MavenPlugin plugin = MavenPlugin.getDefault();
     
-    Set artifacts = Collections.EMPTY_SET;
-    try {
-      MavenProjectManager projectManager = plugin.getMavenProjectManager();
-      MavenProjectFacade projectFacade = projectManager.create(file, true, new NullProgressMonitor());
-      if(projectFacade!=null) {
-        artifacts = projectFacade.getMavenProject().getArtifacts();
-      }
-    } catch(Exception ex) {
-      String msg = "Can't read Maven project";
-      MavenPlugin.log(msg, ex);
-      plugin.getConsole().logError(msg + "; " + ex.toString());
-    }
-
     MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-        "Add Dependency", IndexManager.SEARCH_ARTIFACT, artifacts);
+        "Add Dependency", IndexManager.SEARCH_ARTIFACT, getArtifacts(file, plugin), true);
     if(dialog.open() == Window.OK) {
       IndexedArtifactFile indexedArtifactFile = (IndexedArtifactFile) dialog.getFirstResult();
       if(indexedArtifactFile != null) {
         try {
           MavenModelManager modelManager = plugin.getMavenModelManager();
-          modelManager.addDependency(file, indexedArtifactFile.getDependency());
+          Dependency dependency = indexedArtifactFile.getDependency();
+          String selectedScope = dialog.getSelectedScope();
+          dependency.setScope(selectedScope);
+          modelManager.addDependency(file, dependency);
         } catch(Exception ex) {
           String msg = "Can't add dependency to " + file;
           MavenPlugin.log(msg, ex);
@@ -85,6 +78,21 @@ public class AddDependencyAction implements IObjectActionDelegate {
         }
       }
     }
+  }
+
+  private Set<Artifact> getArtifacts(IFile file, MavenPlugin plugin) {
+    try {
+      MavenProjectManager projectManager = plugin.getMavenProjectManager();
+      MavenProjectFacade projectFacade = projectManager.create(file, true, new NullProgressMonitor());
+      if(projectFacade!=null) {
+        return projectFacade.getMavenProjectArtifacts();
+      }
+    } catch(Exception ex) {
+      String msg = "Can't read Maven project";
+      MavenPlugin.log(msg, ex);
+      plugin.getConsole().logError(msg + "; " + ex.toString());
+    }
+    return Collections.emptySet();
   }
 
   public void setActivePart(IAction action, IWorkbenchPart targetPart) {

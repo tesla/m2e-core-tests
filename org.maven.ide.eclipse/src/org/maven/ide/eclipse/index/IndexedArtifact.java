@@ -12,16 +12,18 @@ import java.util.Comparator;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.maven.artifact.versioning.ArtifactVersion;
+
 
 public class IndexedArtifact {
 
-  public static final Comparator FILE_INFO_COMPARATOR = new Comparator() {
+  public static final Comparator<IndexedArtifactFile> FILE_INFO_COMPARATOR = new Comparator<IndexedArtifactFile>() {
 
-    public int compare(Object o1, Object o2) {
-      IndexedArtifactFile f1 = (IndexedArtifactFile) o1;
-      IndexedArtifactFile f2 = (IndexedArtifactFile) o2;
-
-      int r = -f1.getArtifactVersion().compareTo(f2.getArtifactVersion());
+    @SuppressWarnings("unchecked")
+    public int compare(IndexedArtifactFile f1, IndexedArtifactFile f2) {
+      ArtifactVersion v1 = f1.getArtifactVersion();
+      ArtifactVersion v2 = f2.getArtifactVersion();
+      int r = -v1.compareTo(v2);
       if(r!=0) {
         return r;
       }
@@ -52,7 +54,7 @@ public class IndexedArtifact {
   /**
    * Set<IndexedArtifactFile>
    */
-  public final Set files = new TreeSet(FILE_INFO_COMPARATOR);
+  public final Set<IndexedArtifactFile> files = new TreeSet<IndexedArtifactFile>(FILE_INFO_COMPARATOR);
 
   public IndexedArtifact(String group, String artifact, String packageName, String className, String packaging) {
     this.group = group;

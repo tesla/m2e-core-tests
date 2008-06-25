@@ -174,7 +174,7 @@ public class MavenGoalSelectionDialog extends ElementTreeSelectionDialog {
         TreeMap map = new TreeMap();
         for(Iterator it = result.values().iterator(); it.hasNext();) {
           IndexedArtifact a = (IndexedArtifact) it.next();
-          IndexedArtifactFile f = (IndexedArtifactFile) a.files.iterator().next();
+          IndexedArtifactFile f = a.files.iterator().next();
           if(f.prefix != null && f.prefix.length()>0 && f.goals != null) {
             List goals = new ArrayList();
             for(Iterator git = f.goals.iterator(); git.hasNext();) {

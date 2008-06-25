@@ -246,12 +246,12 @@ public class DependenciesComposite extends Composite {
         // TODO calculate current list of artifacts for the project
         Set<Artifact> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            "Add Dependency", IndexManager.SEARCH_ARTIFACT, artifacts);
+            "Add Dependency", IndexManager.SEARCH_ARTIFACT, artifacts, true);
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {
             Dependency dependency = createDependency(dependenciesProvider, //
-                af.group, af.artifact, af.version, af.classifier, af.type, null);
+                af.group, af.artifact, af.version, af.classifier, af.type, dialog.getSelectedScope());
             dependenciesEditor.setInput(dependenciesProvider.getValue().getDependency());
             dependenciesEditor.setSelection(Collections.singletonList(dependency));
             updateDependencyDetails(dependency);
@@ -364,12 +364,12 @@ public class DependenciesComposite extends Composite {
         // TODO calculate current list of artifacts for the project
         Set<Artifact> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            "Add Dependency", IndexManager.SEARCH_ARTIFACT, artifacts);
+            "Add Dependency", IndexManager.SEARCH_ARTIFACT, artifacts, true);
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {
             Dependency dependency = createDependency(dependencyManagementProvider, //
-                af.group, af.artifact, af.version, af.classifier, af.type, null);
+                af.group, af.artifact, af.version, af.classifier, af.type, dialog.getSelectedScope());
             dependencyManagementEditor.setInput(dependencyManagementProvider.getValue().getDependency());
             dependencyManagementEditor.setSelection(Collections.singletonList(dependency));
             updateDependencyDetails(dependency);
@@ -431,7 +431,7 @@ public class DependenciesComposite extends Composite {
         // TODO calculate current list of artifacts for the project
         Set<Artifact> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            "Add Dependency", IndexManager.SEARCH_ARTIFACT, artifacts);
+            "Add Dependency", IndexManager.SEARCH_ARTIFACT, artifacts, true);
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {
@@ -439,6 +439,7 @@ public class DependenciesComposite extends Composite {
             artifactIdText.setText(nvl(af.artifact));
             versionText.setText(nvl(af.version));
             typeCombo.setText(nvl(af.type));
+            scopeCombo.setText(nvl(dialog.getSelectedScope()));
           }
         }
       }

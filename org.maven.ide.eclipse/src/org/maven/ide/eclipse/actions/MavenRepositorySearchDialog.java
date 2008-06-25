@@ -18,9 +18,14 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+
+import org.apache.maven.artifact.Artifact;
 
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
@@ -36,17 +41,16 @@ import org.maven.ide.eclipse.wizards.MavenPomSelectionComponent;
 public class MavenRepositorySearchDialog extends AbstractMavenDialog {
   private static final String DIALOG_SETTINGS = MavenRepositorySearchDialog.class.getName();
 
-  /**
-   * Set&lt;Artifact&gt;
-   */
-  private Set artifacts;
+  private final boolean showScope;
+  
+  private final Set<Artifact> artifacts;
 
   /**
    * One of 
    *   {@link IndexManager#SEARCH_ARTIFACT}, 
    *   {@link IndexManager#SEARCH_CLASS_NAME}, 
    */
-  private String queryType;
+  private final String queryType;
 
   private String queryText;
 
@@ -55,7 +59,11 @@ public class MavenRepositorySearchDialog extends AbstractMavenDialog {
   private IndexedArtifact selectedIndexedArtifact;
 
   private IndexedArtifactFile selectedIndexedArtifactFile;
-  
+
+  private String selectedScope;
+
+  private Combo scopeCombo;
+
   /**
    * Create repository search dialog
    * 
@@ -66,10 +74,15 @@ public class MavenRepositorySearchDialog extends AbstractMavenDialog {
    *   {@link IndexManager#SEARCH_CLASS_NAME}, 
    * @param artifacts Set&lt;Artifact&gt;
    */
-  public MavenRepositorySearchDialog(Shell parent, String title, String queryType, Set artifacts) {
+  public MavenRepositorySearchDialog(Shell parent, String title, String queryType, Set<Artifact> artifacts) {
+    this(parent, title, queryType, artifacts, false);
+  }
+
+  public MavenRepositorySearchDialog(Shell parent, String title, String queryType, Set<Artifact> artifacts, boolean showScope) {
     super(parent, DIALOG_SETTINGS);
     this.artifacts = artifacts;
     this.queryType = queryType;
+    this.showScope = showScope;
 
     setShellStyle(getShellStyle() | SWT.RESIZE);
     setStatusLineAboveButtons(true);
@@ -82,7 +95,7 @@ public class MavenRepositorySearchDialog extends AbstractMavenDialog {
 
   protected Control createDialogArea(Composite parent) {
     readSettings();
-
+    
     Composite composite = (Composite) super.createDialogArea(parent);
 
     pomSelectionComponent = new MavenPomSelectionComponent(composite, SWT.NONE);
@@ -104,6 +117,23 @@ public class MavenRepositorySearchDialog extends AbstractMavenDialog {
     return composite;
   }
   
+  protected void createButtonsForButtonBar(Composite parent) {
+    if(showScope) {
+      ((GridLayout) parent.getLayout()).numColumns += 2;
+      
+      Label scopeLabel = new Label(parent, SWT.NONE);
+      scopeLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+      scopeLabel.setText("Scope:");
+  
+      scopeCombo = new Combo(parent, SWT.BORDER | SWT.READ_ONLY);
+      scopeCombo.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+      scopeCombo.setItems(new String[] {"compile", "test", "runtime", "provided", "sytem", "import"});
+      scopeCombo.setText("compile");
+    }
+    
+    super.createButtonsForButtonBar(parent);
+  }
+  
   void okPressedDelegate() {
     okPressed();
   }
@@ -115,6 +145,7 @@ public class MavenRepositorySearchDialog extends AbstractMavenDialog {
   protected void computeResult() {
     selectedIndexedArtifact = pomSelectionComponent.getIndexedArtifact();
     selectedIndexedArtifactFile = pomSelectionComponent.getIndexedArtifactFile();
+    selectedScope = scopeCombo.getText();
     setResult(Collections.singletonList(selectedIndexedArtifactFile));
   }
   
@@ -125,5 +156,9 @@ public class MavenRepositorySearchDialog extends AbstractMavenDialog {
   public IndexedArtifactFile getSelectedIndexedArtifactFile() {
     return this.selectedIndexedArtifactFile;
   }
+  
+  public String getSelectedScope() {
+    return this.selectedScope;
+  } 
   
 }

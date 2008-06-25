@@ -11,7 +11,6 @@ package org.maven.ide.eclipse.wizards;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -39,6 +38,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Label;
 
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Dependency;
 
 import org.maven.ide.eclipse.Messages;
@@ -71,7 +71,7 @@ public class MavenDependenciesWizardPage extends AbstractMavenWizardPage {
   /**
    * Listeners notified about all changes
    */
-  private List listeners = new ArrayList();
+  private List<ISelectionChangedListener> listeners = new ArrayList<ISelectionChangedListener>();
 
   private Button checkOutAllButton;
 
@@ -202,22 +202,21 @@ public class MavenDependenciesWizardPage extends AbstractMavenWizardPage {
     addDependencyButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            "Add Dependency", IndexManager.SEARCH_ARTIFACT, Collections.EMPTY_SET);
+            "Add Dependency", IndexManager.SEARCH_ARTIFACT, Collections.<Artifact>emptySet(), true);
         if(dialog.open() == Window.OK) {
           Object result = dialog.getFirstResult();
           if(result instanceof IndexedArtifactFile) {
-            dependencyViewer.add(((IndexedArtifactFile) result).getDependency());
+            Dependency dependency = ((IndexedArtifactFile) result).getDependency();
+            dependency.setScope(dialog.getSelectedScope());
+            dependencyViewer.add(dependency);
             notifyListeners();
           } else if(result instanceof IndexedArtifact) {
             // If we have an ArtifactInfo, we add the first FileInfo it contains
             // which corresponds to the latest version of the artifact.
-            Set files = ((IndexedArtifact) result).files;
+            Set<IndexedArtifactFile> files = ((IndexedArtifact) result).files;
             if(files != null && !files.isEmpty()) {
-              Object file = files.iterator().next();
-              if(file instanceof IndexedArtifactFile) {
-                dependencyViewer.add(((IndexedArtifactFile) file).getDependency());
-                notifyListeners();
-              }
+              dependencyViewer.add(files.iterator().next().getDependency());
+              notifyListeners();
             }
           }
         }
@@ -296,8 +295,7 @@ public class MavenDependenciesWizardPage extends AbstractMavenWizardPage {
    */
   protected void notifyListeners() {
     SelectionChangedEvent event = new SelectionChangedEvent(dependencyViewer, dependencyViewer.getSelection());
-    for(Iterator it = listeners.iterator(); it.hasNext();) {
-      ISelectionChangedListener listener = (ISelectionChangedListener) it.next();
+    for(ISelectionChangedListener listener : listeners) {
       listener.selectionChanged(event);
     }
   }
@@ -313,14 +311,14 @@ public class MavenDependenciesWizardPage extends AbstractMavenWizardPage {
    *         <code>null</code>.
    */
   public Dependency[] getDependencies() {
-    List dependencies = new ArrayList();
+    List<Dependency> dependencies = new ArrayList<Dependency>();
     for(int i = 0; i < dependencyViewer.getTable().getItemCount(); i++ ) {
       Object element = dependencyViewer.getElementAt(i);
       if(element instanceof Dependency) {
-        dependencies.add(element);
+        dependencies.add((Dependency) element);
       }
     }
-    return (Dependency[]) dependencies.toArray(new Dependency[dependencies.size()]);
+    return dependencies.toArray(new Dependency[dependencies.size()]);
   }
   
 //  public IndexedArtifactFile[] getIndexedArtifactFiles() {
