@@ -9,19 +9,30 @@
 package org.maven.ide.eclipse.editor.composites;
 
 import static org.maven.ide.eclipse.editor.pom.FormUtils.nvl;
+import static org.maven.ide.eclipse.editor.pom.FormUtils.setText;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.emf.common.command.Command;
+import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.common.notify.Notification;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.edit.command.AddCommand;
+import org.eclipse.emf.edit.command.RemoveCommand;
+import org.eclipse.emf.edit.command.SetCommand;
+import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -35,8 +46,10 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.Section;
 import org.maven.ide.components.pom.Model;
+import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.PomPackage;
 import org.maven.ide.components.pom.ReportPlugin;
+import org.maven.ide.components.pom.ReportPlugins;
 import org.maven.ide.components.pom.ReportSet;
 import org.maven.ide.components.pom.ReportSetsType;
 import org.maven.ide.components.pom.Reporting;
@@ -45,21 +58,22 @@ import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.editor.pom.FormUtils;
 import org.maven.ide.eclipse.editor.pom.MavenPomEditorPage;
+import org.maven.ide.eclipse.editor.pom.ValueProvider;
 
 
 /**
  * @author Eugene Kuleshov
+ * @author Dmitry Platonoff
  */
 public class ReportingComposite extends Composite {
 
   protected static PomPackage POM_PACKAGE = PomPackage.eINSTANCE;
-  
+
   private MavenPomEditorPage parent;
-  
+
   private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
 
   private Text outputFolderText;
-
 
   private Text groupIdText;
 
@@ -87,6 +101,8 @@ public class ReportingComposite extends Composite {
 
   private Button excludeDefaultsButton;
 
+  private ReportPlugin currentReportPlugin = null;
+
   public ReportingComposite(Composite parent, int style) {
     super(parent, style);
 
@@ -106,7 +122,7 @@ public class ReportingComposite extends Composite {
     reportingPluginDetailsLayout.marginWidth = 0;
     reportingPluginDetailsLayout.marginHeight = 0;
     verticalSash.setLayout(reportingPluginDetailsLayout);
-    
+
     createPluginDetailsSection(verticalSash);
     createReportSetDetails(verticalSash);
 
@@ -124,29 +140,29 @@ public class ReportingComposite extends Composite {
     Section contentSection = toolkit.createSection(composite_1, Section.TITLE_BAR);
     contentSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
     contentSection.setText("Content");
-  
+
     Composite composite = toolkit.createComposite(contentSection, SWT.NONE);
     composite.setLayout(new GridLayout(2, false));
     contentSection.setClient(composite);
     toolkit.paintBordersFor(composite);
-  
+
     toolkit.createLabel(composite, "Output Folder:", SWT.NONE);
-  
+
     outputFolderText = toolkit.createText(composite, null, SWT.NONE);
     outputFolderText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-  
+
     excludeDefaultsButton = toolkit.createButton(composite, "Exclude Defaults", SWT.CHECK);
     excludeDefaultsButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 2, 1));
 
     Section reportingPluginsSection = toolkit.createSection(composite_1, Section.TITLE_BAR);
     reportingPluginsSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
     reportingPluginsSection.setText("Reporting Plugins");
-  
+
     reportPluginsEditor = new ListEditorComposite<ReportPlugin>(reportingPluginsSection, SWT.NONE);
     reportingPluginsSection.setClient(reportPluginsEditor);
     toolkit.paintBordersFor(reportPluginsEditor);
     toolkit.adapt(reportPluginsEditor);
-    
+
     reportPluginsEditor.setContentProvider(new ListEditorContentProvider<ReportPlugin>());
     reportPluginsEditor.setLabelProvider(new LabelProvider() {
       public String getText(Object element) {
@@ -157,32 +173,94 @@ public class ReportingComposite extends Composite {
           String artifactId = reportPlugin.getArtifactId();
           String version = reportPlugin.getVersion();
 
-          String label = groupId==null ? "[unknown]" : groupId;
-          label += " : " + (artifactId==null ? "[unknown]" : artifactId);
-          if(version!=null) {
+          String label = groupId == null ? "[unknown]" : groupId;
+          label += " : " + (artifactId == null ? "[unknown]" : artifactId);
+          if(version != null) {
             label += " : " + version;
           }
           return label;
         }
         return super.getText(element);
       }
+
       public Image getImage(Object element) {
         return MavenEditorImages.IMG_PLUGIN;
       }
     });
-    
+
     reportPluginsEditor.addSelectionListener(new ISelectionChangedListener() {
       public void selectionChanged(SelectionChangedEvent event) {
         List<ReportPlugin> selection = reportPluginsEditor.getSelection();
-        updateReportPluginDetails(selection.size()==1 ? selection.get(0) : null);
+        updateReportPluginDetails(selection.size() == 1 ? selection.get(0) : null);
       }
     });
 
-    // XXX implement actions
+    reportPluginsEditor.setAddListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        CompoundCommand compoundCommand = new CompoundCommand();
+        EditingDomain editingDomain = parent.getEditingDomain();
+
+        boolean reportsCreated = false;
+
+        Model model = parent.getModel();
+        Reporting reporting = model.getReporting();
+        if(reporting == null) {
+          reporting = PomFactory.eINSTANCE.createReporting();
+          Command addReporting = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Reporting(), reporting);
+          compoundCommand.append(addReporting);
+          reportsCreated = true;
+        }
+
+        ReportPlugins reportPlugins = reporting.getPlugins();
+        if(reportPlugins == null) {
+          reportPlugins = PomFactory.eINSTANCE.createReportPlugins();
+          Command addReportPlugins = SetCommand.create(editingDomain, reporting, POM_PACKAGE.getReporting_Plugins(),
+              reportPlugins);
+          compoundCommand.append(addReportPlugins);
+          reportsCreated = true;
+        }
+
+        ReportPlugin reportPlugin = PomFactory.eINSTANCE.createReportPlugin();
+        Command addReportPlugin = AddCommand.create(editingDomain, reportPlugins,
+            POM_PACKAGE.getReportPlugins_Plugin(), reportPlugin);
+        compoundCommand.append(addReportPlugin);
+        editingDomain.getCommandStack().execute(compoundCommand);
+
+        if(reportsCreated) {
+          updateContent(reporting);
+        } else {
+          updateReportPluginDetails(reportPlugin);
+        }
+        reportPluginsEditor.setSelection(Collections.singletonList(reportPlugin));
+        groupIdText.setFocus();
+      }
+    });
+
+    reportPluginsEditor.setRemoveListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        CompoundCommand compoundCommand = new CompoundCommand();
+        EditingDomain editingDomain = parent.getEditingDomain();
+
+        Model model = parent.getModel();
+        Reporting reporting = model.getReporting();
+        ReportPlugins reportPlugins = reporting == null ? null : reporting.getPlugins();
+        if(reportPlugins != null) {
+          List<ReportPlugin> pluginList = reportPluginsEditor.getSelection();
+          for(ReportPlugin reportPlugin : pluginList) {
+            Command removeCommand = RemoveCommand.create(editingDomain, reportPlugins, POM_PACKAGE.getPlugins_Plugin(),
+                reportPlugin);
+            compoundCommand.append(removeCommand);
+          }
+
+          editingDomain.getCommandStack().execute(compoundCommand);
+          updateContent(reporting);
+        }
+      }
+    });
   }
 
   private void createPluginDetailsSection(Composite verticalSash) {
-    
+
     // XXX implement editor actions
   }
 
@@ -190,7 +268,7 @@ public class ReportingComposite extends Composite {
     pluginDetailsSection = toolkit.createSection(verticalSash, Section.TITLE_BAR);
     pluginDetailsSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
     pluginDetailsSection.setText("Reporting Plugin Details");
-  
+
     Composite pluginDetailsComposite = toolkit.createComposite(pluginDetailsSection, SWT.NONE);
     GridLayout gridLayout_1 = new GridLayout(2, false);
     gridLayout_1.marginWidth = 2;
@@ -198,12 +276,12 @@ public class ReportingComposite extends Composite {
     pluginDetailsComposite.setLayout(gridLayout_1);
     pluginDetailsSection.setClient(pluginDetailsComposite);
     toolkit.paintBordersFor(pluginDetailsComposite);
-  
+
     toolkit.createLabel(pluginDetailsComposite, "Group Id:*", SWT.NONE);
-  
+
     groupIdText = toolkit.createText(pluginDetailsComposite, null, SWT.NONE);
     groupIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-  
+
     Hyperlink artifactIdHyperlink = toolkit.createHyperlink(pluginDetailsComposite, "Artifact Id:*", SWT.NONE);
     artifactIdHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
       public void linkActivated(HyperlinkEvent e) {
@@ -218,15 +296,15 @@ public class ReportingComposite extends Composite {
         }.schedule();
       }
     });
-  
+
     artifactIdText = toolkit.createText(pluginDetailsComposite, null, SWT.NONE);
     artifactIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-  
+
     toolkit.createLabel(pluginDetailsComposite, "Version:", SWT.NONE);
-  
+
     versionText = toolkit.createText(pluginDetailsComposite, null, SWT.NONE);
     versionText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-  
+
     Composite pluginConfigureComposite = toolkit.createComposite(pluginDetailsComposite, SWT.NONE);
     GridData gd_pluginConfigureComposite = new GridData(SWT.RIGHT, SWT.CENTER, false, false, 2, 1);
     pluginConfigureComposite.setLayoutData(gd_pluginConfigureComposite);
@@ -235,41 +313,42 @@ public class ReportingComposite extends Composite {
     gridLayout_2.marginHeight = 0;
     pluginConfigureComposite.setLayout(gridLayout_2);
     toolkit.paintBordersFor(pluginConfigureComposite);
-  
+
     pluginInheritedButton = toolkit.createButton(pluginConfigureComposite, "Inherited", SWT.CHECK);
     pluginInheritedButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-  
+
     pluginConfigureButton = toolkit.createHyperlink(pluginConfigureComposite, "Configuration", SWT.NONE);
     pluginConfigureButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
     Section reportSetsSection = toolkit.createSection(verticalSash, Section.TITLE_BAR);
     reportSetsSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     reportSetsSection.setText("Report Sets");
-  
+
     reportSetsEditor = new ListEditorComposite<ReportSet>(reportSetsSection, SWT.NONE);
     reportSetsSection.setClient(reportSetsEditor);
     toolkit.paintBordersFor(reportSetsEditor);
     toolkit.adapt(reportSetsEditor);
-  
+
     reportSetsEditor.setContentProvider(new ListEditorContentProvider<ReportSet>());
     reportSetsEditor.setLabelProvider(new LabelProvider() {
       public String getText(Object element) {
         if(element instanceof ReportSet) {
           ReportSet reportSet = (ReportSet) element;
           String id = reportSet.getId();
-          return id==null || id.length()==0 ? "[unknown]" : id;
+          return id == null || id.length() == 0 ? "[unknown]" : id;
         }
         return "";
       }
+
       public Image getImage(Object element) {
         // TODO add icon for report set
         return null;
       }
     });
-    
+
     reportSetsEditor.addSelectionListener(new ISelectionChangedListener() {
       public void selectionChanged(SelectionChangedEvent event) {
         List<ReportSet> selection = reportSetsEditor.getSelection();
-        updateReportSetDetails(selection.size()==1 ? selection.get(0) : null);
+        updateReportSetDetails(selection.size() == 1 ? selection.get(0) : null);
       }
     });
     reportSetDetailsSection = toolkit.createSection(verticalSash, Section.TITLE_BAR);
@@ -288,7 +367,7 @@ public class ReportingComposite extends Composite {
     reportsEditor.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     toolkit.paintBordersFor(reportsEditor);
     toolkit.adapt(reportsEditor);
-    
+
     reportsEditor.setContentProvider(new ListEditorContentProvider<String>());
     reportsEditor.setLabelProvider(new StringLabelProvider(MavenEditorImages.IMG_REPORT));
 
@@ -311,39 +390,53 @@ public class ReportingComposite extends Composite {
   }
 
   protected void updateReportPluginDetails(ReportPlugin reportPlugin) {
-    if(reportPlugin==null) {
+    currentReportPlugin = reportPlugin;
+
+    if(parent != null) {
+      parent.removeNotifyListener(groupIdText);
+      parent.removeNotifyListener(artifactIdText);
+      parent.removeNotifyListener(versionText);
+    }
+
+    if(parent == null || reportPlugin == null) {
       FormUtils.setEnabled(pluginDetailsSection, false);
-      
-      groupIdText.setText("");
-      artifactIdText.setText("");
-      versionText.setText("");
+
+      setText(groupIdText, "");
+      setText(artifactIdText, "");
+      setText(versionText, "");
 
       pluginInheritedButton.setSelection(false);
 
       reportSetsEditor.setInput(null);
-      
+
       updateReportSetDetails(null);
-      
+
       return;
     }
-    
+
     FormUtils.setEnabled(pluginDetailsSection, true);
     FormUtils.setReadonly(pluginDetailsSection, parent.isReadOnly());
-    
-    groupIdText.setText(nvl(reportPlugin.getGroupId()));
-    artifactIdText.setText(nvl(reportPlugin.getArtifactId()));
-    versionText.setText(nvl(reportPlugin.getVersion()));
+
+    setText(groupIdText, reportPlugin.getGroupId());
+    setText(artifactIdText, reportPlugin.getArtifactId());
+    setText(versionText, reportPlugin.getVersion());
+
+    ValueProvider<ReportPlugin> provider = new ValueProvider.DefaultValueProvider<ReportPlugin>(reportPlugin);
+    parent.setModifyListener(groupIdText, provider, POM_PACKAGE.getReportPlugin_GroupId(), "");
+    parent.setModifyListener(artifactIdText, provider, POM_PACKAGE.getReportPlugin_ArtifactId(), "");
+    parent.setModifyListener(versionText, provider, POM_PACKAGE.getReportPlugin_Version(), "");
+    parent.registerListeners();
 
     pluginInheritedButton.setSelection("true".equals(reportPlugin.getInherited()));
 
     ReportSetsType reportSets = reportPlugin.getReportSets();
     reportSetsEditor.setInput(reportSets == null ? null : reportSets.getReportSet());
-    
+
     updateReportSetDetails(null);
   }
 
   protected void updateReportSetDetails(ReportSet reportSet) {
-    if(reportSet==null) {
+    if(reportSet == null) {
       FormUtils.setEnabled(reportSetDetailsSection, false);
       reportSetInheritedButton.setSelection(false);
       reportsEditor.setInput(null);
@@ -352,38 +445,47 @@ public class ReportingComposite extends Composite {
 
     FormUtils.setEnabled(reportSetDetailsSection, true);
     FormUtils.setReadonly(reportSetDetailsSection, parent.isReadOnly());
-    
+
     reportSetInheritedButton.setSelection("true".equals(reportSet.getInherited()));
-    
+
     StringReports reports = reportSet.getReports();
-    reportsEditor.setInput(reports==null ? null : reports.getReport());
-    
+    reportsEditor.setInput(reports == null ? null : reports.getReport());
+
     reportPluginsEditor.setReadOnly(parent.isReadOnly());
     reportSetsEditor.setReadOnly(parent.isReadOnly());
     reportsEditor.setReadOnly(parent.isReadOnly());
   }
 
   public void loadData(MavenPomEditorPage editorPage) {
+    parent = editorPage;
     Model model = editorPage.getModel();
     updateContent(model.getReporting());
   }
 
   private void updateContent(Reporting reporting) {
-    if(reporting==null) {
+    if(reporting == null) {
       outputFolderText.setText("");
       excludeDefaultsButton.setSelection(false);
       reportPluginsEditor.setInput(null);
     } else {
       outputFolderText.setText(nvl(reporting.getOutputDirectory()));
       excludeDefaultsButton.setSelection("true".equals(reporting.getExcludeDefaults()));
-      reportPluginsEditor.setInput(reporting.getPlugins()==null ? null : reporting.getPlugins().getPlugin());
+      reportPluginsEditor.setInput(reporting.getPlugins() == null ? null : reporting.getPlugins().getPlugin());
     }
     updateReportPluginDetails(null);
   }
 
   public void updateView(MavenPomEditorPage editorPage, Notification notification) {
-    // XXX implement notification andling
-  
+    EObject object = (EObject) notification.getNotifier();
+
+    if(object instanceof Reporting || object instanceof ReportPlugins) {
+      reportPluginsEditor.refresh();
+    } else if(object instanceof ReportPlugin) {
+      reportPluginsEditor.refresh();
+      if(object == currentReportPlugin) {
+        updateReportPluginDetails((ReportPlugin) object);
+      }
+    }
   }
-  
+
 }

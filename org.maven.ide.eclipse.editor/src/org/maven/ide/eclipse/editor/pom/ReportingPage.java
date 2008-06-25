@@ -33,7 +33,7 @@ public class ReportingPage extends MavenPomEditorPage {
   protected void createFormContent(IManagedForm managedForm) {
     FormToolkit toolkit = managedForm.getToolkit();
     ScrolledForm form = managedForm.getForm();
-    form.setText("Reporting (work in progress)");
+    form.setText("Reporting");
 
     Composite body = form.getBody();
     GridLayout gridLayout = new GridLayout(1, true);
