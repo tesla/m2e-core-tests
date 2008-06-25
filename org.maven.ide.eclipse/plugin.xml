@@ -744,5 +744,19 @@
           name="sysdeo-tomcat-maven-plugin" priority="50"/>
    
    </extension>
+   
+   <!--
+   <extension point="org.eclipse.search.searchPages">
+      <page id="org.maven.ide.eclipse.MavenSearchPage"
+            class="org.maven.ide.eclipse.internal.ui.search.MavenSearchPage"
+            enabled="true"
+            label="Maven Search"/>
+   </extension>
+   <extension point="org.eclipse.search.searchResultViewPages">
+      <viewPage id="org.maven.ide.eclipse.MavenSearchResultPage"
+            class="org.maven.ide.eclipse.internal.ui.search.MavenSearchResultPage"
+            searchResultClass="org.maven.ide.eclipse.internal.ui.search.MavenSearchResult"/>
+   </extension>
+   -->
 
 </plugin>

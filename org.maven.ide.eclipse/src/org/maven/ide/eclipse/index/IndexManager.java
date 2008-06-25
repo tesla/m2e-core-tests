@@ -82,6 +82,10 @@ public abstract class IndexManager {
 
   public static final String FIELD_PACKAGING = ArtifactInfo.PACKAGING;
 
+  public static final String FIELD_SHA1 = ArtifactInfo.SHA1;
+
+  public static final String FIELD_NAMES = ArtifactInfo.NAMES;
+
   // availability flags
   
   public static int PRESENT = 1;
