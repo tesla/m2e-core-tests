@@ -401,6 +401,7 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
           command = SetCommand.create(getEditingDomain(), owner, feature, adapter.getText());
         }
         getEditingDomain().getCommandStack().execute(command);
+        registerListeners();
       }
     };
     adapter.addModifyListener(listener);
@@ -428,6 +429,7 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
         Command command = SetCommand.create(getEditingDomain(), owner, feature, //
             defaultValue.equals(value) ? null : value);
         getEditingDomain().getCommandStack().execute(command);
+        registerListeners();
       }
 
       public void modifyText(ModifyEvent e) {

@@ -215,11 +215,13 @@ public class ProfilesPage extends MavenPomEditorPage {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = getEditingDomain();
         
+        boolean created = false;
         ProfilesType profiles = model.getProfiles();
         if(profiles == null) {
           profiles = PomFactory.eINSTANCE.createProfilesType();
           Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Profiles(), profiles);
           compoundCommand.append(command);
+          created = true;
         }
 
         Profile profile = PomFactory.eINSTANCE.createProfile();
@@ -227,6 +229,10 @@ public class ProfilesPage extends MavenPomEditorPage {
         compoundCommand.append(addCommand);
         
         editingDomain.getCommandStack().execute(compoundCommand);
+        
+        if(created) {
+          profilesEditor.setInput(profiles.getProfile());
+        }
         profilesEditor.setSelection(Collections.singletonList(profile));
       }
     });
@@ -1005,17 +1011,23 @@ public class ProfilesPage extends MavenPomEditorPage {
     CompoundCommand compoundCommand = new CompoundCommand();
     EditingDomain editingDomain = getEditingDomain();
     
+    boolean created = false;
     StringModules modules = currentProfile.getModules();
     if(modules == null) {
       modules = PomFactory.eINSTANCE.createStringModules();
       Command command = SetCommand.create(editingDomain, currentProfile, POM_PACKAGE.getProfile_Modules(), modules);
       compoundCommand.append(command);
+      created = true;
     }
 
     Command addCommand = AddCommand.create(editingDomain, modules, POM_PACKAGE.getStringModules_Module(), moduleName);
     compoundCommand.append(addCommand);
     
     editingDomain.getCommandStack().execute(compoundCommand);
+
+    if(created) {
+      modulesEditor.setInput(modules.getModule());
+    }
     modulesEditor.setSelection(Collections.singletonList(moduleName));
   }
 

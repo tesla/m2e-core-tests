@@ -410,26 +410,6 @@ public class BuildPage extends MavenPomEditorPage {
     loadBuild();
     loadBuildBase();
     
-    ValueProvider<Build> modelProvider = new ValueProvider.ParentValueProvider<Build>(sourceText, outputText, testSourceText, testOutputText, scriptsSourceText) {
-      public Build getValue() {
-        return model.getBuild();
-      }
-      public Build create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
-        Build build = model.getBuild();
-        if(build==null) {
-          build = PomFactory.eINSTANCE.createBuild();
-          Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Build(), build);
-          compoundCommand.append(command);
-        }
-        return build;
-      }
-    };
-    setModifyListener(sourceText, modelProvider, POM_PACKAGE.getBuild_SourceDirectory(), "");
-    setModifyListener(outputText, modelProvider, POM_PACKAGE.getBuild_OutputDirectory(), "");
-    setModifyListener(testSourceText, modelProvider, POM_PACKAGE.getBuild_TestSourceDirectory(), "");
-    setModifyListener(testOutputText, modelProvider, POM_PACKAGE.getBuild_TestOutputDirectory(), "");
-    setModifyListener(scriptsSourceText, modelProvider, POM_PACKAGE.getBuild_ScriptSourceDirectory(), "");
-    
     extensionsEditor.setReadOnly(isReadOnly());
 
     updateExtensionDetails(null);
@@ -472,12 +452,14 @@ public class BuildPage extends MavenPomEditorPage {
   }
 
   private void loadBuild() {
+    removeNotifyListener(sourceText);
+    removeNotifyListener(outputText);
+    removeNotifyListener(testSourceText);
+    removeNotifyListener(testOutputText);
+    removeNotifyListener(scriptsSourceText);
+    
     Build build = model == null ? null : model.getBuild();
     if(build==null) {
-      FormUtils.setEnabled(foldersSection, false);
-      FormUtils.setEnabled(extensionsSection, false);
-      FormUtils.setEnabled(extensionDetailsSection, false);
-      
       setText(sourceText, "");
       setText(outputText, "");
       setText(testSourceText, "");
@@ -496,8 +478,32 @@ public class BuildPage extends MavenPomEditorPage {
       extensionsEditor.setInput(build.getExtensions() == null ? null : build.getExtensions().getExtension());
     }
     
+    FormUtils.setReadonly(foldersSection, isReadOnly());
+    FormUtils.setReadonly(extensionsSection, isReadOnly());
     extensionAddAction.setEnabled(!isReadOnly());
+    
+    updateExtensionDetails(null);
       
+    ValueProvider<Build> modelProvider = new ValueProvider.ParentValueProvider<Build>(sourceText, outputText, testSourceText, testOutputText, scriptsSourceText) {
+      public Build getValue() {
+        return model.getBuild();
+      }
+      public Build create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+        Build build = model.getBuild();
+        if(build==null) {
+          build = PomFactory.eINSTANCE.createBuild();
+          Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Build(), build);
+          compoundCommand.append(command);
+        }
+        return build;
+      }
+    };
+    setModifyListener(sourceText, modelProvider, POM_PACKAGE.getBuild_SourceDirectory(), "");
+    setModifyListener(outputText, modelProvider, POM_PACKAGE.getBuild_OutputDirectory(), "");
+    setModifyListener(testSourceText, modelProvider, POM_PACKAGE.getBuild_TestSourceDirectory(), "");
+    setModifyListener(testOutputText, modelProvider, POM_PACKAGE.getBuild_TestOutputDirectory(), "");
+    setModifyListener(scriptsSourceText, modelProvider, POM_PACKAGE.getBuild_ScriptSourceDirectory(), "");
+
     loadBuildBase();
   }
 
@@ -556,11 +562,13 @@ public class BuildPage extends MavenPomEditorPage {
       compoundCommand.append(command);
     }
     
+    boolean created = false;
     ExtensionsType extensions = build.getExtensions();
     if(extensions==null) {
       extensions = PomFactory.eINSTANCE.createExtensionsType();
       Command command = SetCommand.create(editingDomain, build, POM_PACKAGE.getBuild_Extensions(), extensions);
       compoundCommand.append(command);
+      created = true;
     }
     
     Extension extension = PomFactory.eINSTANCE.createExtension();
@@ -574,6 +582,9 @@ public class BuildPage extends MavenPomEditorPage {
     
     editingDomain.getCommandStack().execute(compoundCommand);
     
+    if(created) {
+      extensionsEditor.setInput(extensions.getExtension());
+    }
     extensionsEditor.setSelection(Collections.singletonList(extension));
     extensionGroupIdText.setFocus();
   }

@@ -152,12 +152,14 @@ public class BuildComposite extends Composite {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = parent.getEditingDomain();
         
+        boolean created = false;
         BuildBase build = createBuildBase(compoundCommand, editingDomain);
         Filters filters = build.getFilters();
         if(filters==null) {
           filters = PomFactory.eINSTANCE.createFilters();
           Command command = SetCommand.create(editingDomain, build, POM_PACKAGE.getBuildBase_Filters(), filters);
           compoundCommand.append(command);
+          created = true;
         }
         
         String filter = "?";
@@ -165,6 +167,10 @@ public class BuildComposite extends Composite {
         compoundCommand.append(addCommand);
         
         editingDomain.getCommandStack().execute(compoundCommand);
+        
+        if(created) {
+          filtersEditor.setInput(filters.getFilter());
+        }
         filtersEditor.setSelection(Collections.singletonList(filter));
       }
     });
@@ -266,11 +272,13 @@ public class BuildComposite extends Composite {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = parent.getEditingDomain();
 
+        boolean created = false;
         IncludesType includes = currentResource.getIncludes();
         if(includes == null) {
           includes = PomFactory.eINSTANCE.createIncludesType();
           Command command = SetCommand.create(editingDomain, currentResource, POM_PACKAGE.getResource_Includes(), includes);
           compoundCommand.append(command);
+          created = true;
         }
 
         String include = "?";
@@ -278,6 +286,9 @@ public class BuildComposite extends Composite {
         compoundCommand.append(addCommand);
         
         editingDomain.getCommandStack().execute(compoundCommand);
+        if(created) {
+          resourceIncludesEditor.setInput(includes.getInclude());
+        }
         resourceIncludesEditor.setSelection(Collections.singletonList(include));
       }
     });
@@ -338,11 +349,13 @@ public class BuildComposite extends Composite {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = parent.getEditingDomain();
 
+        boolean created = false;
         ExcludesType excludes = currentResource.getExcludes();
         if(excludes == null) {
           excludes = PomFactory.eINSTANCE.createExcludesType();
           Command command = SetCommand.create(editingDomain, currentResource, POM_PACKAGE.getResource_Excludes(), excludes);
           compoundCommand.append(command);
+          created = true;
         }
 
         String exclude = "?";
@@ -350,6 +363,10 @@ public class BuildComposite extends Composite {
         compoundCommand.append(addCommand);
         
         editingDomain.getCommandStack().execute(compoundCommand);
+        
+        if(created) {
+          resourceExcludesEditor.setInput(excludes.getExclude());
+        }
         resourceExcludesEditor.setSelection(Collections.singletonList(exclude));
       }
     });
@@ -427,12 +444,14 @@ public class BuildComposite extends Composite {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = parent.getEditingDomain();
         
+        boolean created = false;
         BuildBase build = createBuildBase(compoundCommand, editingDomain);
         Resources resources = build.getResources();
         if(resources==null) {
           resources = PomFactory.eINSTANCE.createResources();
           Command command = SetCommand.create(editingDomain, build, POM_PACKAGE.getBuildBase_Resources(), resources);
           compoundCommand.append(command);
+          created = true;
         }
         
         Resource resource = PomFactory.eINSTANCE.createResource();        
@@ -440,6 +459,10 @@ public class BuildComposite extends Composite {
         compoundCommand.append(addCommand);
         
         editingDomain.getCommandStack().execute(compoundCommand);
+        
+        if(created) {
+          resourcesEditor.setInput(resources.getResource());
+        }
         resourcesEditor.setSelection(Collections.singletonList(resource));
         resourceDirectoryText.setFocus();
       }
@@ -496,12 +519,14 @@ public class BuildComposite extends Composite {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = parent.getEditingDomain();
         
+        boolean created = false;
         BuildBase build = createBuildBase(compoundCommand, editingDomain);
         TestResources testResources = build.getTestResources();
         if(testResources==null) {
           testResources = PomFactory.eINSTANCE.createTestResources();
           Command command = SetCommand.create(editingDomain, build, POM_PACKAGE.getBuildBase_TestResources(), testResources);
           compoundCommand.append(command);
+          created = true;
         }
         
         Resource resource = PomFactory.eINSTANCE.createResource();        
@@ -509,6 +534,10 @@ public class BuildComposite extends Composite {
         compoundCommand.append(addCommand);
         
         editingDomain.getCommandStack().execute(compoundCommand);
+        
+        if(created) {
+          testResourcesEditor.setInput(testResources.getTestResource());
+        }
         testResourcesEditor.setSelection(Collections.singletonList(resource));
         resourceDirectoryText.setFocus();
       }

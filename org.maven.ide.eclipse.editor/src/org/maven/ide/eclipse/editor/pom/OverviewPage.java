@@ -88,14 +88,16 @@ import org.maven.ide.eclipse.wizards.WidthGroup;
 public class OverviewPage extends MavenPomEditorPage {
 
   //controls
-  Text parentRealtivePathText;
   Text artifactIdText;
   Text artifactVersionText;
   Text artifactGroupIdText;
   CCombo artifactPackagingCombo;
+  
   Text parentVersionText;
   Text parentArtifactIdText;
   Text parentGroupIdText;
+  Text parentRealtivePathText;
+
   Text projectUrlText;
   Text projectNameText;
   Text projectDescriptionText;
@@ -711,8 +713,6 @@ public class OverviewPage extends MavenPomEditorPage {
     EList<PropertyPair> properties = pomEditor.getProperties(model);
     loadProperties(properties);
     
-    registerFormListeners();
-    
     projectSection.setExpanded(!isEmpty(model.getName()) || !isEmpty(model.getDescription())
         || !isEmpty(model.getUrl()) || !isEmpty(model.getInceptionYear()));
     
@@ -737,6 +737,16 @@ public class OverviewPage extends MavenPomEditorPage {
   }
 
   private void loadThis() {
+    removeNotifyListener(artifactGroupIdText);
+    removeNotifyListener(artifactIdText);
+    removeNotifyListener(artifactVersionText);
+    removeNotifyListener(artifactPackagingCombo);
+
+    removeNotifyListener(projectNameText);
+    removeNotifyListener(projectDescriptionText);
+    removeNotifyListener(projectUrlText);
+    removeNotifyListener(inceptionYearText);
+    
     setText(artifactGroupIdText, model.getGroupId());
     setText(artifactIdText, model.getArtifactId());
     setText(artifactVersionText, model.getVersion());
@@ -746,9 +756,25 @@ public class OverviewPage extends MavenPomEditorPage {
     setText(projectDescriptionText, model.getDescription());
     setText(projectUrlText, model.getUrl());
     setText(inceptionYearText, model.getInceptionYear());
+
+    ValueProvider<Model> modelProvider = new ValueProvider.DefaultValueProvider<Model>(model);
+    setModifyListener(artifactGroupIdText, modelProvider, POM_PACKAGE.getModel_GroupId(), "");
+    setModifyListener(artifactIdText, modelProvider, POM_PACKAGE.getModel_ArtifactId(), "");
+    setModifyListener(artifactVersionText, modelProvider, POM_PACKAGE.getModel_ModelVersion(), "");
+    setModifyListener(artifactPackagingCombo, modelProvider, POM_PACKAGE.getModel_Packaging(), "jar");
+    
+    setModifyListener(projectNameText, modelProvider, POM_PACKAGE.getModel_Name(), "");
+    setModifyListener(projectDescriptionText, modelProvider, POM_PACKAGE.getModel_Description(), "");
+    setModifyListener(projectUrlText, modelProvider, POM_PACKAGE.getModel_Url(), "");
+    setModifyListener(inceptionYearText, modelProvider, POM_PACKAGE.getModel_InceptionYear(), "");
   }
 
   private void loadParent(Parent parent) {
+    removeNotifyListener(parentGroupIdText);
+    removeNotifyListener(parentArtifactIdText);
+    removeNotifyListener(parentVersionText);
+    removeNotifyListener(parentRealtivePathText);
+
     if(parent!=null) {
       setText(parentGroupIdText, parent.getGroupId());
       setText(parentArtifactIdText, parent.getArtifactId());
@@ -760,68 +786,7 @@ public class OverviewPage extends MavenPomEditorPage {
       setText(parentVersionText, "");
       setText(parentRealtivePathText, "");
     }
-  }
-  
-  private void loadProperties(EList<PropertyPair> properties) {
-    propertiesEditor.setInput(properties);
-  }
-  
-  private void loadModules(Modules modules) {
-    modulesEditor.setInput(modules==null ? null : modules.getModule());
-    modulesEditor.setReadOnly(isReadOnly());
-    newModuleProjectAction.setEnabled(!isReadOnly());
-  }
-  
-  private void loadOrganization(Organization organization) {
-    if(organization!=null) {
-      setText(organizationNameText, organization.getName());
-      setText(organizationUrlText, organization.getUrl());
-    }
-  }
-
-  private void loadScm(Scm scm) {
-    if(scm!=null) {
-      setText(scmUrlText, scm.getUrl());
-      setText(scmConnectionText, scm.getConnection());
-      setText(scmDevConnectionText, scm.getDeveloperConnection());
-      setText(scmTagText, scm.getTag());
-    }
-  }
-
-  private void loadCiManagement(CiManagement ciManagement) {
-    if(ciManagement!=null) {
-      setText(ciManagementSystemText, ciManagement.getSystem());
-      setText(ciManagementUrlText, ciManagement.getUrl());
-    }
-  }
-
-  private void loadIssueManagement(IssueManagement issueManagement) {
-    if(issueManagement!=null) {
-      setText(issueManagementSystemText, issueManagement.getSystem());
-      setText(issueManagementUrlText, issueManagement.getUrl());
-    }
-  }
-
-  private void registerFormListeners() {
-    ValueProvider<Model> modelProvider = new ValueProvider.DefaultValueProvider<Model>(model);
-    setModifyListener(artifactGroupIdText, modelProvider, POM_PACKAGE.getModel_GroupId(), "");
-    setModifyListener(artifactIdText, modelProvider, POM_PACKAGE.getModel_ArtifactId(), "");
-    setModifyListener(artifactVersionText, modelProvider, POM_PACKAGE.getModel_ModelVersion(), "");
-    setModifyListener(artifactPackagingCombo, modelProvider, POM_PACKAGE.getModel_Packaging(), "jar");
     
-    setModifyListener(projectNameText, modelProvider, POM_PACKAGE.getModel_Name(), "");
-    setModifyListener(projectDescriptionText, modelProvider, POM_PACKAGE.getModel_Description(), "");
-    setModifyListener(projectUrlText, modelProvider, POM_PACKAGE.getModel_Url(), "");
-    setModifyListener(inceptionYearText, modelProvider, POM_PACKAGE.getModel_InceptionYear(), "");
-
-    registerParentListener();
-    registerOrganizationListnener();
-    registerScmListnener();
-    registerIssueManagementListener();
-    registerCiManagementListnener();    
-  }
-
-  private void registerParentListener() {
     ValueProvider<Parent> parentProvider = new ValueProvider.ParentValueProvider<Parent>(parentGroupIdText,
         parentArtifactIdText, parentVersionText, parentRealtivePathText) {
       public Parent getValue() {
@@ -838,8 +803,31 @@ public class OverviewPage extends MavenPomEditorPage {
     setModifyListener(parentVersionText, parentProvider, POM_PACKAGE.getParent_Version(), "");
     setModifyListener(parentRealtivePathText, parentProvider, POM_PACKAGE.getParent_RelativePath(), "");
   }
+  
+  private void loadProperties(EList<PropertyPair> properties) {
+    propertiesEditor.setInput(properties);
+    // XXX implement properties editing
+    propertiesEditor.setReadOnly(true);  
+  }
+  
+  private void loadModules(Modules modules) {
+    modulesEditor.setInput(modules==null ? null : modules.getModule());
+    modulesEditor.setReadOnly(isReadOnly());
+    newModuleProjectAction.setEnabled(!isReadOnly());
+  }
+  
+  private void loadOrganization(Organization organization) {
+    removeNotifyListener(organizationNameText);
+    removeNotifyListener(organizationUrlText);
 
-  private void registerOrganizationListnener() {
+    if(organization==null) {
+      setText(organizationNameText, "");
+      setText(organizationUrlText, "");
+    } else {
+      setText(organizationNameText, organization.getName());
+      setText(organizationUrlText, organization.getUrl());
+    }
+    
     ValueProvider<Organization> organizationProvider = new ValueProvider.ParentValueProvider<Organization>(
         organizationNameText, organizationUrlText) {
       public Organization getValue() {
@@ -856,7 +844,19 @@ public class OverviewPage extends MavenPomEditorPage {
     setModifyListener(organizationUrlText, organizationProvider, POM_PACKAGE.getOrganization_Url(), "");
   }
 
-  private void registerScmListnener() {
+  private void loadScm(Scm scm) {
+    if(scm==null) {
+      setText(scmUrlText, "");
+      setText(scmConnectionText, "");
+      setText(scmDevConnectionText, "");
+      setText(scmTagText, "");
+    } else {
+      setText(scmUrlText, scm.getUrl());
+      setText(scmConnectionText, scm.getConnection());
+      setText(scmDevConnectionText, scm.getDeveloperConnection());
+      setText(scmTagText, scm.getTag());
+    }
+    
     ValueProvider<Scm> scmProvider = new ValueProvider.ParentValueProvider<Scm>(scmUrlText, scmConnectionText,
         scmDevConnectionText, scmTagText) {
       public Scm getValue() {
@@ -872,72 +872,20 @@ public class OverviewPage extends MavenPomEditorPage {
     setModifyListener(scmConnectionText, scmProvider, POM_PACKAGE.getScm_Connection(), "");
     setModifyListener(scmDevConnectionText, scmProvider, POM_PACKAGE.getScm_DeveloperConnection(), "");
     setModifyListener(scmTagText, scmProvider, POM_PACKAGE.getScm_Tag(), "");
-
-//    ModifyListener scmListener = new ModifyListener() {
-//      public void modifyText(ModifyEvent e) {
-//        EditingDomain editingDomain = getEditingDomain();
-//        CompoundCommand compoundCommand = new CompoundCommand();
-//
-//        Scm scm = model.getScm();
-//        if(isEmpty(scmUrlText) || isEmpty(scmConnectionText) || isEmpty(scmDevConnectionText) || isEmpty(scmTagText)) {
-//          // XXX this cause severe issues when last element is deleted in xml
-//          //            if(scm!=null) {
-//          //              Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Scm(), null);
-//          //              compoundCommand.append(command);
-//          //            }
-//        } else {
-//          if(scm == null) {
-//            scm = PomFactory.eINSTANCE.createScm();
-//            Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Scm(), scm);
-//            compoundCommand.append(command);
-//          }
-//        }
-//
-//        Text source = (Text) e.getSource();
-//        if(scm != null) {
-//          Object feature = null;
-//          if(scmUrlText == source) {
-//            feature = POM_PACKAGE.getScm_Url();
-//          } else if(scmConnectionText == source) {
-//            feature = POM_PACKAGE.getScm_Connection();
-//          } else if(scmDevConnectionText == source) {
-//            feature = POM_PACKAGE.getScm_DeveloperConnection();
-//          } else if(scmTagText == source) {
-//            feature = POM_PACKAGE.getScm_Tag();
-//          }
-//
-//          String text = source.getText().length() == 0 ? null : source.getText();
-//          compoundCommand.append(SetCommand.create(editingDomain, scm, feature, text));
-//        }
-//
-//        editingDomain.getCommandStack().execute(compoundCommand);
-//      }
-//    };
-//    scmUrlText.addModifyListener(scmListener);
-//    scmConnectionText.addModifyListener(scmListener);
-//    scmDevConnectionText.addModifyListener(scmListener);
-//    scmTagText.addModifyListener(scmListener);
   }
 
-  private void registerIssueManagementListener() {
-    ValueProvider<IssueManagement> issueManagementProvider = new ValueProvider.ParentValueProvider<IssueManagement>(
-        issueManagementUrlText, issueManagementSystemText) {
-      public IssueManagement getValue() {
-        return model.getIssueManagement();
-      }
-      public IssueManagement create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
-        IssueManagement issueManagement = PomFactory.eINSTANCE.createIssueManagement();
-        compoundCommand.append(SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_IssueManagement(), //
-            issueManagement));
-        return issueManagement;
-      }
-    };
-    setModifyListener(issueManagementUrlText, issueManagementProvider, POM_PACKAGE.getIssueManagement_Url(), "");
-    setModifyListener(issueManagementSystemText, issueManagementProvider, POM_PACKAGE.getIssueManagement_System(), "");
-  }
-  
+  private void loadCiManagement(CiManagement ciManagement) {
+    removeNotifyListener(ciManagementUrlText);
+    removeNotifyListener(ciManagementSystemText);
 
-  private void registerCiManagementListnener() {
+    if(ciManagement==null) {
+      setText(ciManagementSystemText, "");
+      setText(ciManagementUrlText, "");
+    } else {
+      setText(ciManagementSystemText, ciManagement.getSystem());
+      setText(ciManagementUrlText, ciManagement.getUrl());
+    }
+    
     ValueProvider<CiManagement> ciManagementProvider = new ValueProvider.ParentValueProvider<CiManagement>(
         ciManagementUrlText, ciManagementSystemText) {
       public CiManagement getValue() {
@@ -952,6 +900,34 @@ public class OverviewPage extends MavenPomEditorPage {
     };
     setModifyListener(ciManagementUrlText, ciManagementProvider, POM_PACKAGE.getCiManagement_Url(), "");
     setModifyListener(ciManagementSystemText, ciManagementProvider, POM_PACKAGE.getCiManagement_System(), "");
+  }
+
+  private void loadIssueManagement(IssueManagement issueManagement) {
+    removeNotifyListener(issueManagementUrlText);
+    removeNotifyListener(issueManagementSystemText);
+
+    if(issueManagement==null) {
+      setText(issueManagementSystemText, "");
+      setText(issueManagementUrlText, "");
+    } else {
+      setText(issueManagementSystemText, issueManagement.getSystem());
+      setText(issueManagementUrlText, issueManagement.getUrl());
+    }
+    
+    ValueProvider<IssueManagement> issueManagementProvider = new ValueProvider.ParentValueProvider<IssueManagement>(
+        issueManagementUrlText, issueManagementSystemText) {
+      public IssueManagement getValue() {
+        return model.getIssueManagement();
+      }
+      public IssueManagement create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+        IssueManagement issueManagement = PomFactory.eINSTANCE.createIssueManagement();
+        compoundCommand.append(SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_IssueManagement(), //
+            issueManagement));
+        return issueManagement;
+      }
+    };
+    setModifyListener(issueManagementUrlText, issueManagementProvider, POM_PACKAGE.getIssueManagement_Url(), "");
+    setModifyListener(issueManagementSystemText, issueManagementProvider, POM_PACKAGE.getIssueManagement_System(), "");
   }
 
   protected void createNewModule(String moduleName) {
