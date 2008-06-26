@@ -60,7 +60,7 @@ public class DefaultMavenMenuCreator extends AbstractMavenMenuCreator {
       new Separator().fill(menu, -1);
 
       // addMenu(OpenPomAction.ID, "Open POM", new OpenPomAction(), menu);
-      addMenu(OpenUrlAction.ID_PROJECT, "Open Project Page", new OpenUrlAction(OpenUrlAction.ID_PROJECT), menu);
+      addMenu(OpenUrlAction.ID_PROJECT, "Open Project Page", new OpenUrlAction(OpenUrlAction.ID_PROJECT), menu, "icons/web.gif");
       addMenu(OpenUrlAction.ID_ISSUES, "Open Issue Tracker", new OpenUrlAction(OpenUrlAction.ID_ISSUES), menu);
       addMenu(OpenUrlAction.ID_SCM, "Open Source Control", new OpenUrlAction(OpenUrlAction.ID_SCM), menu);
       addMenu(OpenUrlAction.ID_CI, "Open Continuous Integration", new OpenUrlAction(OpenUrlAction.ID_CI), menu);
@@ -103,7 +103,7 @@ public class DefaultMavenMenuCreator extends AbstractMavenMenuCreator {
     if(selectionType == SelectionUtil.JAR_FILE) {
       addMenu(DownloadSourcesAction.ID, "Download Sources", new DownloadSourcesAction(), menu);
       addMenu(OpenPomAction.ID, "Open POM", new OpenPomAction(), menu);
-      addMenu(OpenUrlAction.ID_PROJECT, "Open Project Page", new OpenUrlAction(OpenUrlAction.ID_PROJECT), menu);
+      addMenu(OpenUrlAction.ID_PROJECT, "Open Project Page", new OpenUrlAction(OpenUrlAction.ID_PROJECT), menu, "icons/web.gif");
       addMenu(OpenUrlAction.ID_ISSUES, "Open Issue Tracker", new OpenUrlAction(OpenUrlAction.ID_ISSUES), menu);
       addMenu(OpenUrlAction.ID_SCM, "Open Source Control", new OpenUrlAction(OpenUrlAction.ID_SCM), menu);
       addMenu(OpenUrlAction.ID_CI, "Open Continuous Integration", new OpenUrlAction(OpenUrlAction.ID_CI), menu);
