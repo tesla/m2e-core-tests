@@ -15,7 +15,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -62,8 +61,8 @@ public class IndexInfoWriter {
 
   private static final String UPDATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss Z";
 
-  public Collection readIndexInfo(InputStream is) throws IOException {
-    Collection indexes = new ArrayList();
+  public Collection<IndexInfo> readIndexInfo(InputStream is) throws IOException {
+    Collection<IndexInfo> indexes = new ArrayList<IndexInfo>();
     try {
       SAXParserFactory parserFactory = SAXParserFactory.newInstance();
       SAXParser parser = parserFactory.newSAXParser();
@@ -80,7 +79,7 @@ public class IndexInfoWriter {
     return indexes;
   }
 
-  public void writeIndexInfo(final Collection indexes, OutputStream os) throws IOException {
+  public void writeIndexInfo(final Collection<IndexInfo> indexes, OutputStream os) throws IOException {
     try {
       Transformer transformer = TransformerFactory.newInstance().newTransformer();
       transformer.transform(new SAXSource(new XMLIndexInfoWriter(indexes), new InputSource()), new StreamResult(os));
@@ -96,9 +95,9 @@ public class IndexInfoWriter {
 
   static class XMLIndexInfoWriter extends XMLFilterImpl {
 
-    private final Collection indexes;
+    private final Collection<IndexInfo> indexes;
 
-    public XMLIndexInfoWriter(Collection indexes) {
+    public XMLIndexInfoWriter(Collection<IndexInfo> indexes) {
       this.indexes = indexes;
     }
 
@@ -107,22 +106,21 @@ public class IndexInfoWriter {
       handler.startDocument();
       handler.startElement(null, ELEMENT_INDEXES, ELEMENT_INDEXES, new AttributesImpl());
 
-      for(Iterator it = this.indexes.iterator(); it.hasNext();) {
-        IndexInfo info = (IndexInfo) it.next();
-        if(IndexInfo.Type.REMOTE.equals(info.getType())) {
+      for(IndexInfo indexInfo : this.indexes) {
+        if(IndexInfo.Type.REMOTE.equals(indexInfo.getType())) {
           AttributesImpl indexAttrs = new AttributesImpl();
-          indexAttrs.addAttribute(null, ATT_INDEX_NAME, ATT_INDEX_NAME, null, info.getIndexName());
-          if(info.getRepositoryUrl()!=null) {
-            indexAttrs.addAttribute(null, ATT_REPOSITORY_URL, ATT_REPOSITORY_URL, null, info.getRepositoryUrl());
+          indexAttrs.addAttribute(null, ATT_INDEX_NAME, ATT_INDEX_NAME, null, indexInfo.getIndexName());
+          if(indexInfo.getRepositoryUrl()!=null) {
+            indexAttrs.addAttribute(null, ATT_REPOSITORY_URL, ATT_REPOSITORY_URL, null, indexInfo.getRepositoryUrl());
           }
-          if(info.getIndexUpdateUrl()!=null) {
-            indexAttrs.addAttribute(null, ATT_UPDATE_URL, ATT_UPDATE_URL, null, info.getIndexUpdateUrl());
+          if(indexInfo.getIndexUpdateUrl()!=null) {
+            indexAttrs.addAttribute(null, ATT_UPDATE_URL, ATT_UPDATE_URL, null, indexInfo.getIndexUpdateUrl());
           }
-          indexAttrs.addAttribute(null, ATT_IS_SHORT, ATT_IS_SHORT, null, Boolean.toString(info.isShort()));
+          indexAttrs.addAttribute(null, ATT_IS_SHORT, ATT_IS_SHORT, null, Boolean.toString(indexInfo.isShort()));
           
-          if(info.getUpdateTime()!=null) {
+          if(indexInfo.getUpdateTime()!=null) {
             indexAttrs.addAttribute(null, ATT_UPDATE_TIME, ATT_UPDATE_TIME, null, //
-                new SimpleDateFormat(UPDATE_TIME_FORMAT).format(info.getUpdateTime()));
+                new SimpleDateFormat(UPDATE_TIME_FORMAT).format(indexInfo.getUpdateTime()));
           }
 
           handler.startElement(null, ELEMENT_INDEX, ELEMENT_INDEX, indexAttrs);
@@ -137,9 +135,9 @@ public class IndexInfoWriter {
 
   static class IndexInfoContentHandler extends DefaultHandler {
 
-    private Collection indexes;
+    private Collection<IndexInfo> indexes;
 
-    public IndexInfoContentHandler(Collection indexes) {
+    public IndexInfoContentHandler(Collection<IndexInfo> indexes) {
       this.indexes = indexes;
     }
 

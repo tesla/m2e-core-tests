@@ -29,7 +29,7 @@ public class DownloadSourcesAction implements IObjectActionDelegate {
   private IStructuredSelection selection;
 
   public void run(IAction action) {
-    for(Iterator it = selection.iterator(); it.hasNext();) {
+    for(Iterator<?> it = selection.iterator(); it.hasNext();) {
       Object element = it.next();
       try {
         if(element instanceof IProject) {

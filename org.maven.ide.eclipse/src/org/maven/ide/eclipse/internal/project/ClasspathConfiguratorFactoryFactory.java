@@ -34,12 +34,9 @@ public class ClasspathConfiguratorFactoryFactory {
     return factories;
   }
 
-  static class FactoryComparator implements Comparator {
+  static class FactoryComparator implements Comparator<AbstractClasspathConfiguratorFactory> {
 
-    public int compare(Object o1, Object o2) {
-      AbstractClasspathConfiguratorFactory c1 = (AbstractClasspathConfiguratorFactory) o1;
-      AbstractClasspathConfiguratorFactory c2 = (AbstractClasspathConfiguratorFactory) o2;
-
+    public int compare(AbstractClasspathConfiguratorFactory c1, AbstractClasspathConfiguratorFactory c2) {
       int res = c1.getPriority() - c2.getPriority();
       return res==0 ? c1.getId().compareTo(c2.getId()) : res;
     }

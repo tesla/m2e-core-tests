@@ -29,7 +29,7 @@ public class MavenUpdateRequest {
   /**
    * Set of {@link IFile}
    */
-  private final Set pomFiles = new LinkedHashSet();
+  private final Set<IFile> pomFiles = new LinkedHashSet<IFile>();
 
   public MavenUpdateRequest(boolean offline, boolean updateSnapshots) {
     this.offline = offline;
@@ -57,7 +57,7 @@ public class MavenUpdateRequest {
     return this.updateSnapshots;
   }
 
-  public void addPomFiles(Set pomFiles) {
+  public void addPomFiles(Set<IFile> pomFiles) {
     this.pomFiles.addAll(pomFiles);
   }
 
@@ -76,7 +76,7 @@ public class MavenUpdateRequest {
   /**
    * Returns Set of {@link IFile}
    */
-  public Set getPomFiles() {
+  public Set<IFile> getPomFiles() {
     return this.pomFiles;
   }
 

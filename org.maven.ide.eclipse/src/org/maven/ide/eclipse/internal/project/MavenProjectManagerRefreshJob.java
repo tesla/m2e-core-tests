@@ -36,9 +36,9 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
 
   private final MavenProjectManagerImpl manager;
 
-  private final List refreshQueue = new ArrayList();
+  private final List<Command> refreshQueue = new ArrayList<Command>();
 
-  private final List downloadSourcesQueue = new ArrayList();
+  private final List<Command> downloadSourcesQueue = new ArrayList<Command>();
 
   private static final int DELTA_FLAGS = IResourceDelta.CONTENT | IResourceDelta.MOVED_FROM | IResourceDelta.MOVED_TO
       | IResourceDelta.COPIED_FROM | IResourceDelta.REPLACED;
@@ -102,20 +102,20 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
     return Status.OK_STATUS;
   }
 
-  private void executeCommands(List queue, CommandContext context, IProgressMonitor monitor)
+  private void executeCommands(List<Command> queue, CommandContext context, IProgressMonitor monitor)
       throws InterruptedException {
     Command[] commands;
     synchronized(queue) {
-      commands = (Command[]) queue.toArray(new Command[queue.size()]);
+      commands = queue.toArray(new Command[queue.size()]);
       queue.clear();
     }
 
     if(commands.length > 0) {
-      for(int i = 0; i < commands.length; i++ ) {
+      for(Command command : commands) {
         if(monitor.isCanceled()) {
           throw new InterruptedException();
         }
-        commands[i].execute(context, monitor);
+        command.execute(context, monitor);
       }
     }
   }
@@ -138,8 +138,8 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
       // if (IResourceChangeEvent.POST_CHANGE == type)
       IResourceDelta delta = event.getDelta(); // workspace delta
       IResourceDelta[] projectDeltas = delta.getAffectedChildren();
-      Set removeProjects = new LinkedHashSet();
-      Set refreshProjects = new LinkedHashSet();
+      Set<IProject> removeProjects = new LinkedHashSet<IProject>();
+      Set<IProject> refreshProjects = new LinkedHashSet<IProject>();
       for(int i = 0; i < projectDeltas.length; i++ ) {
         try {
           projectChanged(projectDeltas[i], removeProjects, refreshProjects);
@@ -149,13 +149,13 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
       }
       
       if(!removeProjects.isEmpty()) {
-        IProject[] projects = (IProject[]) removeProjects.toArray(new IProject[removeProjects.size()]);
+        IProject[] projects = removeProjects.toArray(new IProject[removeProjects.size()]);
         MavenUpdateRequest updateRequest = new MavenUpdateRequest(projects, offline, updateSnapshots);
         updateRequest.setForce(false);
         queue(refreshQueue, new RemoveCommand(updateRequest));
       }
       if(!refreshProjects.isEmpty()) {
-        IProject[] projects = (IProject[]) refreshProjects.toArray(new IProject[refreshProjects.size()]);
+        IProject[] projects = refreshProjects.toArray(new IProject[refreshProjects.size()]);
         MavenUpdateRequest updateRequest = new MavenUpdateRequest(projects, offline, updateSnapshots);
         updateRequest.setForce(false);
         queue(refreshQueue, new RefreshCommand(updateRequest));
@@ -169,7 +169,7 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
     }
   }
 
-  private void projectChanged(IResourceDelta delta, Set removeProjects, final Set refreshProjects)
+  private void projectChanged(IResourceDelta delta, Set<IProject> removeProjects, final Set<IProject> refreshProjects)
       throws CoreException {
     final IProject project = (IProject) delta.getResource();
 
@@ -200,7 +200,7 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
     });
   }
 
-  private void queue(List queue, Command command) {
+  private void queue(List<Command> queue, Command command) {
     synchronized(queue) {
       queue.add(command);
     }
@@ -210,14 +210,14 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
 
     public final MavenProjectManagerImpl manager;
 
-    public final List downloadSources = new ArrayList();
+    public final List<DownloadSourceRequest> downloadSources = new ArrayList<DownloadSourceRequest>();
 
     public int sourcesCount = 0;
 
     /**
      * Set of <code>MavenUpdateRequest</code>
      */
-    public Set updateRequests = new LinkedHashSet();
+    public Set<DependencyResolutionContext> updateRequests = new LinkedHashSet<DependencyResolutionContext>();
 
     CommandContext(MavenProjectManagerImpl manager) {
       this.manager = manager;

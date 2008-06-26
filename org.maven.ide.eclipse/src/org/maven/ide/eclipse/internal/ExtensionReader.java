@@ -95,7 +95,7 @@ public class ExtensionReader {
    * @param configFile previously saved indexes configuration
    * @return collection of {@link IndexInfo} loaded from given config
    */
-  public static Collection readIndexInfoConfig(File configFile) {
+  public static Collection<IndexInfo> readIndexInfoConfig(File configFile) {
     if(configFile != null && configFile.exists()) {
       FileInputStream is = null;
       try {
@@ -115,27 +115,26 @@ public class ExtensionReader {
       }
     }
 
-    return Collections.EMPTY_LIST;
+    return Collections.emptyList();
   }
 
   /**
    * @param configFile previously saved indexes configuration
    * @return collection of {@link IndexInfo} from the extension points
    */
-  public static Map readIndexInfoExtensions() {
-    Map indexes = new LinkedHashMap();
+  public static Map<String, IndexInfo> readIndexInfoExtensions() {
+    Map<String, IndexInfo> indexes = new LinkedHashMap<String, IndexInfo>();
 
     IExtensionRegistry registry = Platform.getExtensionRegistry();
     IExtensionPoint indexesExtensionPoint = registry.getExtensionPoint(EXTENSION_INDEXES);
     if(indexesExtensionPoint != null) {
       IExtension[] indexesExtensions = indexesExtensionPoint.getExtensions();
-      for(int i = 0; i < indexesExtensions.length; i++ ) {
-        IExtension extension = indexesExtensions[i];
+      for(IExtension extension : indexesExtensions) {
         IContributor contributor = extension.getContributor();
         IConfigurationElement[] elements = extension.getConfigurationElements();
-        for(int j = 0; j < elements.length; j++ ) {
-          if(elements[j].getName().equals(ELEMENT_INDEX)) {
-            IndexInfo indexInfo = readIndexElement(elements[j], contributor);
+        for(IConfigurationElement element : elements) {
+          if(element.getName().equals(ELEMENT_INDEX)) {
+            IndexInfo indexInfo = readIndexElement(element, contributor);
             indexes.put(indexInfo.getIndexName(), indexInfo);
           }
         }
@@ -179,11 +178,9 @@ public class ExtensionReader {
     IExtensionPoint scmHandlersExtensionPoint = registry.getExtensionPoint(EXTENSION_SCM_HANDLERS);
     if(scmHandlersExtensionPoint != null) {
       IExtension[] scmHandlersExtensions = scmHandlersExtensionPoint.getExtensions();
-      for(int i = 0; i < scmHandlersExtensions.length; i++ ) {
-        IExtension extension = scmHandlersExtensions[i];
+      for(IExtension extension : scmHandlersExtensions) {
         IConfigurationElement[] elements = extension.getConfigurationElements();
-        for(int j = 0; j < elements.length; j++ ) {
-          IConfigurationElement element = elements[j];
+        for(IConfigurationElement element : elements) {
           if(element.getName().equals(ELEMENT_SCM_HANDLER)) {
             try {
               ScmHandler handler = (ScmHandler) element.createExecutableExtension(ScmHandler.ATTR_CLASS);
@@ -202,11 +199,9 @@ public class ExtensionReader {
     IExtensionPoint scmHandlersUiExtensionPoint = registry.getExtensionPoint(EXTENSION_SCM_HANDLERS_UI);
     if(scmHandlersUiExtensionPoint != null) {
       IExtension[] scmHandlersUiExtensions = scmHandlersUiExtensionPoint.getExtensions();
-      for(int i = 0; i < scmHandlersUiExtensions.length; i++ ) {
-        IExtension extension = scmHandlersUiExtensions[i];
+      for(IExtension extension : scmHandlersUiExtensions) {
         IConfigurationElement[] elements = extension.getConfigurationElements();
-        for(int j = 0; j < elements.length; j++ ) {
-          IConfigurationElement element = elements[j];
+        for(IConfigurationElement element : elements) {
           if(element.getName().equals(ELEMENT_SCM_HANDLER_UI)) {
             try {
               ScmHandlerUi handlerUi = (ScmHandlerUi) element.createExecutableExtension(ScmHandlerUi.ATTR_CLASS);
@@ -226,12 +221,10 @@ public class ExtensionReader {
     IExtensionPoint archetypesExtensionPoint = registry.getExtensionPoint(EXTENSION_ARCHETYPES);
     if(archetypesExtensionPoint != null) {
       IExtension[] archetypesExtensions = archetypesExtensionPoint.getExtensions();
-      for(int i = 0; i < archetypesExtensions.length; i++ ) {
-        IExtension extension = archetypesExtensions[i];
+      for(IExtension extension : archetypesExtensions) {
         IConfigurationElement[] elements = extension.getConfigurationElements();
         IContributor contributor = extension.getContributor();
-        for(int j = 0; j < elements.length; j++ ) {
-          IConfigurationElement element = elements[j];
+        for(IConfigurationElement element : elements) {
           ArchetypeCatalogFactory factory = readArchetypeCatalogs(element, contributor);
           archetypeManager.addArchetypeCatalogFactory(factory);
         }
@@ -272,11 +265,9 @@ public class ExtensionReader {
     IExtensionPoint configuratorsExtensionPoint = registry.getExtensionPoint(EXTENSION_PROJECT_CONFIGURATORS);
     if(configuratorsExtensionPoint != null) {
       IExtension[] configuratorExtensions = configuratorsExtensionPoint.getExtensions();
-      for(int i = 0; i < configuratorExtensions.length; i++ ) {
-        IExtension extension = configuratorExtensions[i];
+      for(IExtension extension : configuratorExtensions) {
         IConfigurationElement[] elements = extension.getConfigurationElements();
-        for(int j = 0; j < elements.length; j++ ) {
-          IConfigurationElement element = elements[j];
+        for(IConfigurationElement element : elements) {
           if(element.getName().equals(ELEMENT_CONFIGURATOR)) {
             try {
               Object o = element.createExecutableExtension(AbstractProjectConfigurator.ATTR_CLASS);
@@ -290,21 +281,20 @@ public class ExtensionReader {
     }
   }
 
-  public static Set readClasspathConfiguratorFactoryExtensions() {
-    Set factories = new HashSet();
+  public static Set<AbstractClasspathConfiguratorFactory> readClasspathConfiguratorFactoryExtensions() {
+    Set<AbstractClasspathConfiguratorFactory> factories = new HashSet<AbstractClasspathConfiguratorFactory>();
     
     IExtensionRegistry registry = Platform.getExtensionRegistry();
     IExtensionPoint configuratorsExtensionPoint = registry.getExtensionPoint(EXTENSION_CLASSPATH_CONFIGURATOR_FACTORIES);
     if(configuratorsExtensionPoint != null) {
       IExtension[] configuratorExtensions = configuratorsExtensionPoint.getExtensions();
-      for(int i = 0; i < configuratorExtensions.length; i++ ) {
-        IExtension extension = configuratorExtensions[i];
+      for(IExtension extension : configuratorExtensions) {
         IConfigurationElement[] elements = extension.getConfigurationElements();
-        for(int j = 0; j < elements.length; j++ ) {
-          IConfigurationElement element = elements[j];
+        for(IConfigurationElement element : elements) {
           if(element.getName().equals(ELEMENT_CLASSPATH_CONFIGURATOR_FACTORY)) {
             try {
-              factories.add(element.createExecutableExtension(AbstractClasspathConfiguratorFactory.ATTR_CLASS));
+              factories.add((AbstractClasspathConfiguratorFactory) //
+                  element.createExecutableExtension(AbstractClasspathConfiguratorFactory.ATTR_CLASS));
             } catch(CoreException ex) {
               MavenPlugin.log(ex);
             }
