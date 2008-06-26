@@ -67,6 +67,7 @@ import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.PomPackage;
 import org.maven.ide.eclipse.actions.MavenRepositorySearchDialog;
 import org.maven.ide.eclipse.actions.OpenPomAction;
+import org.maven.ide.eclipse.actions.OpenUrlAction;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.editor.pom.FormUtils;
 import org.maven.ide.eclipse.editor.pom.MavenPomEditorPage;
@@ -127,6 +128,7 @@ public class DependenciesComposite extends Composite {
   
   Action exclusionSelectAction;
   Action exclusionAddAction;
+  Action openWebPageAction;
   
   // model
   
@@ -425,7 +427,6 @@ public class DependenciesComposite extends Composite {
     dependencyDetailsSection.setText("Dependency Details");
     dependencyDetailsSection.marginWidth = 3;
     
-    // XXX fix action icon
     dependencySelectAction = new Action("Select Dependency", MavenEditorImages.SELECT_ARTIFACT) {
       public void run() {
         // TODO calculate current list of artifacts for the project
@@ -446,8 +447,26 @@ public class DependenciesComposite extends Composite {
     };
     dependencySelectAction.setEnabled(false);
 
+    openWebPageAction = new Action("Open Web Page", MavenEditorImages.WEB_PAGE) {
+      public void run() {
+        final String groupId = groupIdText.getText();
+        final String artifactId = artifactIdText.getText();
+        final String version = versionText.getText();
+        new Job("Opening " + groupId + ":" + artifactId + ":" + version) {
+          protected IStatus run(IProgressMonitor arg0) {
+            OpenUrlAction.openBrowser(OpenUrlAction.ID_PROJECT, groupId, artifactId, version);
+            return Status.OK_STATUS;
+          }
+        }.schedule();
+        
+      }      
+    };
+    openWebPageAction.setEnabled(false);
+    
     ToolBarManager toolBarManager = new ToolBarManager(SWT.FLAT);
     toolBarManager.add(dependencySelectAction);
+    toolBarManager.add(new Separator());
+    toolBarManager.add(openWebPageAction);
     
     Composite toolbarComposite = toolkit.createComposite(dependencyDetailsSection);
     GridLayout toolbarLayout = new GridLayout(1, true);
@@ -768,6 +787,7 @@ public class DependenciesComposite extends Composite {
     
     this.currentDependency = dependency;
     
+    openWebPageAction.setEnabled(dependency!=null);
     dependencySelectAction.setEnabled(dependency!=null && !parent.isReadOnly());
     exclusionAddAction.setEnabled(dependency!=null && !parent.isReadOnly());
     

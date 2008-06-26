@@ -73,6 +73,7 @@ import org.maven.ide.components.pom.PomPackage;
 import org.maven.ide.components.pom.StringGoals;
 import org.maven.ide.eclipse.actions.MavenRepositorySearchDialog;
 import org.maven.ide.eclipse.actions.OpenPomAction;
+import org.maven.ide.eclipse.actions.OpenUrlAction;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.editor.pom.FormUtils;
 import org.maven.ide.eclipse.editor.pom.MavenPomEditorPage;
@@ -125,6 +126,8 @@ public class PluginsComposite extends Composite {
   
   Action pluginManagementAddAction;
   
+  Action openWebPageAction;
+
   ViewerFilter searchFilter;
   
   SearchControl searchControl;
@@ -458,8 +461,26 @@ public class PluginsComposite extends Composite {
       };
       pluginSelectAction.setEnabled(false);
   
+      openWebPageAction = new Action("Open Web Page", MavenEditorImages.WEB_PAGE) {
+        public void run() {
+          final String groupId = groupIdText.getText();
+          final String artifactId = artifactIdText.getText();
+          final String version = versionText.getText();
+          new Job("Opening " + groupId + ":" + artifactId + ":" + version) {
+            protected IStatus run(IProgressMonitor arg0) {
+              OpenUrlAction.openBrowser(OpenUrlAction.ID_PROJECT, groupId, artifactId, version);
+              return Status.OK_STATUS;
+            }
+          }.schedule();
+          
+        }      
+      };
+      openWebPageAction.setEnabled(false);
+      
       ToolBarManager toolBarManager = new ToolBarManager(SWT.FLAT);
       toolBarManager.add(pluginSelectAction);
+      toolBarManager.add(new Separator());
+      toolBarManager.add(openWebPageAction);
       
       Composite toolbarComposite = toolkit.createComposite(pluginDetailsSection);
       GridLayout toolbarLayout = new GridLayout(1, true);
@@ -759,6 +780,7 @@ public class PluginsComposite extends Composite {
       FormUtils.setEnabled(pluginExecutionsSection, false);
       FormUtils.setEnabled(pluginDependenciesSection, false);
       pluginSelectAction.setEnabled(false);
+      openWebPageAction.setEnabled(false);
     
       setText(groupIdText, "");
       setText(artifactIdText, "");
@@ -779,6 +801,7 @@ public class PluginsComposite extends Composite {
     FormUtils.setReadonly(pluginDetailsSection, parent.isReadOnly());
     FormUtils.setReadonly(pluginExecutionsSection, parent.isReadOnly());
     pluginSelectAction.setEnabled(!parent.isReadOnly());
+    openWebPageAction.setEnabled(true);
 
     // XXX implement dependency editing
     FormUtils.setReadonly(pluginDependenciesSection, true);

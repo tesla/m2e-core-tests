@@ -84,6 +84,8 @@ public class MavenEditorImages {
   
   public static final ImageDescriptor PARENT_POM = create("parent_pom.gif");
 
+  public static final ImageDescriptor WEB_PAGE = create("web.gif");
+
 
   private static ImageDescriptor create(String key) {
     try {

@@ -8,11 +8,15 @@
 
 package org.maven.ide.eclipse.editor.composites;
 
+import static org.maven.ide.eclipse.editor.pom.FormUtils.nvl;
 import static org.maven.ide.eclipse.editor.pom.FormUtils.setText;
+import static org.maven.ide.eclipse.editor.pom.FormUtils.setButton;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.maven.artifact.Artifact;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -25,12 +29,20 @@ import org.eclipse.emf.edit.command.AddCommand;
 import org.eclipse.emf.edit.command.RemoveCommand;
 import org.eclipse.emf.edit.command.SetCommand;
 import org.eclipse.emf.edit.domain.EditingDomain;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
@@ -53,11 +65,18 @@ import org.maven.ide.components.pom.ReportSet;
 import org.maven.ide.components.pom.ReportSetsType;
 import org.maven.ide.components.pom.Reporting;
 import org.maven.ide.components.pom.StringReports;
+import org.maven.ide.eclipse.actions.MavenRepositorySearchDialog;
 import org.maven.ide.eclipse.actions.OpenPomAction;
+import org.maven.ide.eclipse.actions.OpenUrlAction;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
+import org.maven.ide.eclipse.editor.composites.PluginsComposite.PluginFilter;
 import org.maven.ide.eclipse.editor.pom.FormUtils;
 import org.maven.ide.eclipse.editor.pom.MavenPomEditorPage;
+import org.maven.ide.eclipse.editor.pom.SearchControl;
+import org.maven.ide.eclipse.editor.pom.SearchMatcher;
 import org.maven.ide.eclipse.editor.pom.ValueProvider;
+import org.maven.ide.eclipse.index.IndexManager;
+import org.maven.ide.eclipse.index.IndexedArtifactFile;
 
 
 /**
@@ -68,44 +87,61 @@ public class ReportingComposite extends Composite {
 
   protected static PomPackage POM_PACKAGE = PomPackage.eINSTANCE;
 
-  private MavenPomEditorPage parent;
+  FormToolkit toolkit = new FormToolkit(Display.getCurrent());
   
-  private ValueProvider<Reporting> reportingProvider;
+  MavenPomEditorPage parent;
+  
+  Text outputFolderText;
 
-  private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
+  Text groupIdText;
 
-  private Text outputFolderText;
+  Text artifactIdText;
 
-  private Text groupIdText;
+  Text versionText;
 
-  private Text artifactIdText;
+  Button pluginInheritedButton;
 
-  private Text versionText;
+  Hyperlink pluginConfigureButton;
 
-  private Button pluginInheritedButton;
+  ListEditorComposite<ReportSet> reportSetsEditor;
 
-  private Hyperlink pluginConfigureButton;
+  ListEditorComposite<String> reportsEditor;
 
-  private ListEditorComposite<ReportSet> reportSetsEditor;
+  ListEditorComposite<ReportPlugin> reportPluginsEditor;
 
-  private ListEditorComposite<String> reportsEditor;
+  Section pluginDetailsSection;
 
-  private ListEditorComposite<ReportPlugin> reportPluginsEditor;
+  Button reportSetInheritedButton;
 
-  private Section pluginDetailsSection;
+  Hyperlink reportSetConfigureButton;
 
-  private Button reportSetInheritedButton;
+  Button excludeDefaultsButton;
+  
+  Section reportSetDetailsSection;
 
-  private Hyperlink reportSetConfigureButton;
+  Section reportSetsSection;
+  
+  Action openWebPageAction;
+  
+  Action reportPluginAddAction;
 
-  private Section reportSetDetailsSection;
+  Action reportPluginSelectAction;
+  
+  ViewerFilter searchFilter;
+  
+  SearchControl searchControl;
+  
+  SearchMatcher searchMatcher;
+  
+  // model
+  
+  ValueProvider<Reporting> reportingProvider;
+  
+  ReportPlugin currentReportPlugin = null;
+  
+  ReportSet currentReportSet = null;
 
-  private Button excludeDefaultsButton;
-
-  private ReportPlugin currentReportPlugin = null;
-
-  private ReportSet currentReportSet = null;
-
+  
   public ReportingComposite(Composite parent, int style) {
     super(parent, style);
 
@@ -133,13 +169,13 @@ public class ReportingComposite extends Composite {
   }
 
   private void createContentSection(SashForm horizontalSash) {
-
     Composite composite_1 = toolkit.createComposite(horizontalSash, SWT.NONE);
     GridLayout gridLayout = new GridLayout();
     gridLayout.marginWidth = 0;
     gridLayout.marginHeight = 0;
     composite_1.setLayout(gridLayout);
     toolkit.paintBordersFor(composite_1);
+    
     Section contentSection = toolkit.createSection(composite_1, Section.TITLE_BAR);
     contentSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
     contentSection.setText("Content");
@@ -166,30 +202,9 @@ public class ReportingComposite extends Composite {
     toolkit.paintBordersFor(reportPluginsEditor);
     toolkit.adapt(reportPluginsEditor);
 
+    final ReportPluginsLabelProvider labelProvider = new ReportPluginsLabelProvider();
+    reportPluginsEditor.setLabelProvider(labelProvider);
     reportPluginsEditor.setContentProvider(new ListEditorContentProvider<ReportPlugin>());
-    reportPluginsEditor.setLabelProvider(new LabelProvider() {
-      public String getText(Object element) {
-        if(element instanceof ReportPlugin) {
-          ReportPlugin reportPlugin = (ReportPlugin) element;
-
-          String groupId = reportPlugin.getGroupId();
-          String artifactId = reportPlugin.getArtifactId();
-          String version = reportPlugin.getVersion();
-
-          String label = groupId == null ? "[unknown]" : groupId;
-          label += " : " + (artifactId == null ? "[unknown]" : artifactId);
-          if(version != null) {
-            label += " : " + version;
-          }
-          return label;
-        }
-        return super.getText(element);
-      }
-
-      public Image getImage(Object element) {
-        return MavenEditorImages.IMG_PLUGIN;
-      }
-    });
 
     reportPluginsEditor.addSelectionListener(new ISelectionChangedListener() {
       public void selectionChanged(SelectionChangedEvent event) {
@@ -200,39 +215,7 @@ public class ReportingComposite extends Composite {
 
     reportPluginsEditor.setAddListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
-        CompoundCommand compoundCommand = new CompoundCommand();
-        EditingDomain editingDomain = parent.getEditingDomain();
-
-        boolean reportsCreated = false;
-
-        Reporting reporting = reportingProvider.getValue();
-        if(reporting == null) {
-          reporting = reportingProvider.create(editingDomain, compoundCommand);
-          reportsCreated = true;
-        }
-
-        ReportPlugins reportPlugins = reporting.getPlugins();
-        if(reportPlugins == null) {
-          reportPlugins = PomFactory.eINSTANCE.createReportPlugins();
-          Command addReportPlugins = SetCommand.create(editingDomain, reporting, POM_PACKAGE.getReporting_Plugins(),
-              reportPlugins);
-          compoundCommand.append(addReportPlugins);
-          reportsCreated = true;
-        }
-
-        ReportPlugin reportPlugin = PomFactory.eINSTANCE.createReportPlugin();
-        Command addReportPlugin = AddCommand.create(editingDomain, reportPlugins,
-            POM_PACKAGE.getReportPlugins_Plugin(), reportPlugin);
-        compoundCommand.append(addReportPlugin);
-        editingDomain.getCommandStack().execute(compoundCommand);
-
-        if(reportsCreated) {
-          updateContent(reporting);
-        } else {
-          updateReportPluginDetails(reportPlugin);
-        }
-        reportPluginsEditor.setSelection(Collections.singletonList(reportPlugin));
-        groupIdText.setFocus();
+        createReportingPlugin(null, null, null);
       }
     });
 
@@ -256,14 +239,62 @@ public class ReportingComposite extends Composite {
         }
       }
     });
+    
+    reportPluginAddAction = new Action("Add Report Plugin", MavenEditorImages.ADD_PLUGIN) {
+      public void run() {
+        MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
+            "Add Plugin", IndexManager.SEARCH_PLUGIN, Collections.<Artifact>emptySet());
+        if(dialog.open() == Window.OK) {
+          IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
+          if(af != null) {
+            createReportingPlugin(af.group, af.artifact, af.version);
+          }
+        }
+      }
+    };
+    reportPluginAddAction.setEnabled(false);
+
+    ToolBarManager toolBarManager = new ToolBarManager(SWT.FLAT);
+    toolBarManager.add(reportPluginAddAction);
+    toolBarManager.add(new Separator());
+    
+    toolBarManager.add(new Action("Show GroupId", MavenEditorImages.SHOW_GROUP) {
+      {
+        setChecked(true);
+      }
+      public int getStyle() {
+        return AS_CHECK_BOX;
+      }
+      public void run() {
+        labelProvider.setShowGroupId(isChecked());
+        reportPluginsEditor.getViewer().refresh();
+      }
+    });
+    
+    toolBarManager.add(new Action("Filter", MavenEditorImages.FILTER) {
+      public int getStyle() {
+        return AS_CHECK_BOX;
+      }
+      public void run() {
+        TableViewer viewer = reportPluginsEditor.getViewer();
+        viewer.setFilters(isChecked() ? new ViewerFilter[] {searchFilter} : new ViewerFilter[0]);
+        viewer.refresh();
+      }
+    });
+    
+    Composite toolbarComposite = toolkit.createComposite(reportingPluginsSection);
+    GridLayout toolbarLayout = new GridLayout(1, true);
+    toolbarLayout.marginHeight = 0;
+    toolbarLayout.marginWidth = 0;
+    toolbarComposite.setLayout(toolbarLayout);
+    toolbarComposite.setBackground(null);
+ 
+    toolBarManager.createControl(toolbarComposite);
+    reportingPluginsSection.setTextClient(toolbarComposite);
+    
   }
 
   private void createPluginDetailsSection(Composite verticalSash) {
-
-    // XXX implement editor actions
-  }
-
-  private void createReportSetDetails(Composite verticalSash) {
     pluginDetailsSection = toolkit.createSection(verticalSash, Section.TITLE_BAR);
     pluginDetailsSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
     pluginDetailsSection.setText("Reporting Plugin Details");
@@ -326,8 +357,58 @@ public class ReportingComposite extends Composite {
         }
       }
     });
+    
+    openWebPageAction = new Action("Open Web Page", MavenEditorImages.WEB_PAGE) {
+      public void run() {
+        final String groupId = groupIdText.getText();
+        final String artifactId = artifactIdText.getText();
+        final String version = versionText.getText();
+        new Job("Opening " + groupId + ":" + artifactId + ":" + version) {
+          protected IStatus run(IProgressMonitor arg0) {
+            OpenUrlAction.openBrowser(OpenUrlAction.ID_PROJECT, groupId, artifactId, version);
+            return Status.OK_STATUS;
+          }
+        }.schedule();
+        
+      }      
+    };
+    openWebPageAction.setEnabled(false);
+    
+    reportPluginSelectAction = new Action("Select Reporting Plugin", MavenEditorImages.SELECT_PLUGIN) {
+      public void run() {
+        MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
+            "Select Plugin", IndexManager.SEARCH_PLUGIN, Collections.<Artifact>emptySet());
+        if(dialog.open() == Window.OK) {
+          IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
+          if(af != null) {
+            groupIdText.setText(nvl(af.group));
+            artifactIdText.setText(nvl(af.artifact));
+            versionText.setText(nvl(af.version));
+          }
+        }
+      }
+    };
+    reportPluginSelectAction.setEnabled(false);
 
-    Section reportSetsSection = toolkit.createSection(verticalSash, Section.TITLE_BAR);
+    ToolBarManager toolBarManager = new ToolBarManager(SWT.FLAT);
+    toolBarManager.add(reportPluginSelectAction);
+    toolBarManager.add(new Separator());
+    toolBarManager.add(openWebPageAction);
+    
+    Composite toolbarComposite = toolkit.createComposite(pluginDetailsSection);
+    GridLayout toolbarLayout = new GridLayout(1, true);
+    toolbarLayout.marginHeight = 0;
+    toolbarLayout.marginWidth = 0;
+    toolbarComposite.setLayout(toolbarLayout);
+    toolbarComposite.setBackground(null);
+ 
+    toolBarManager.createControl(toolbarComposite);
+    pluginDetailsSection.setTextClient(toolbarComposite);
+    
+  }
+
+  private void createReportSetDetails(Composite verticalSash) {
+    reportSetsSection = toolkit.createSection(verticalSash, Section.TITLE_BAR);
     reportSetsSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     reportSetsSection.setText("Report Sets");
 
@@ -342,7 +423,7 @@ public class ReportingComposite extends Composite {
         if(element instanceof ReportSet) {
           ReportSet reportSet = (ReportSet) element;
           String id = reportSet.getId();
-          return id == null || id.length() == 0 ? "[unknown]" : id;
+          return id == null || id.length() == 0 ? "?" : id;
         }
         return "";
       }
@@ -567,6 +648,9 @@ public class ReportingComposite extends Composite {
 
     if(parent == null || reportPlugin == null) {
       FormUtils.setEnabled(pluginDetailsSection, false);
+      FormUtils.setEnabled(reportSetsSection, false);
+      reportPluginSelectAction.setEnabled(false);
+      openWebPageAction.setEnabled(false);
 
       setText(groupIdText, "");
       setText(artifactIdText, "");
@@ -582,7 +666,11 @@ public class ReportingComposite extends Composite {
     }
 
     FormUtils.setEnabled(pluginDetailsSection, true);
+    FormUtils.setEnabled(reportSetsSection, true);
     FormUtils.setReadonly(pluginDetailsSection, parent.isReadOnly());
+    FormUtils.setReadonly(reportSetsSection, parent.isReadOnly());
+    reportPluginSelectAction.setEnabled(!parent.isReadOnly());
+    openWebPageAction.setEnabled(true);
 
     setText(groupIdText, reportPlugin.getGroupId());
     setText(artifactIdText, reportPlugin.getArtifactId());
@@ -629,26 +717,37 @@ public class ReportingComposite extends Composite {
     reportsEditor.setInput(reports == null ? null : reports.getReport());
   }
 
-  public void loadData(MavenPomEditorPage editorPage,ValueProvider<Reporting> reportingProvider) {
-    parent = editorPage;
+  public void loadData(MavenPomEditorPage editorPage, ValueProvider<Reporting> reportingProvider) {
+    this.parent = editorPage;
     this.reportingProvider = reportingProvider;
+    
+    reportPluginAddAction.setEnabled(!parent.getPomEditor().isReadOnly());
+
     updateContent(reportingProvider.getValue());
   }
 
   private void updateContent(Reporting reporting) {
+    if(parent != null) {
+      parent.removeNotifyListener(outputFolderText);
+      parent.removeNotifyListener(excludeDefaultsButton);
+    }
+    
     if(reporting == null) {
       setText(outputFolderText,"");
-      excludeDefaultsButton.setSelection(false);
+      setButton(excludeDefaultsButton, false);
+      
       reportPluginsEditor.setInput(null);
     } else {
       setText(outputFolderText,reporting.getOutputDirectory());
-      excludeDefaultsButton.setSelection(Boolean.parseBoolean(reporting.getExcludeDefaults()));
+      setButton(excludeDefaultsButton, "true".equals(reporting.getExcludeDefaults()));
+
       reportPluginsEditor.setInput(reporting.getPlugins() == null ? null : reporting.getPlugins().getPlugin());
       
       parent.setModifyListener(outputFolderText, reportingProvider, POM_PACKAGE.getReporting_OutputDirectory(), "");
-      parent.setModifyListener(excludeDefaultsButton, reportingProvider, POM_PACKAGE.getReporting_ExcludeDefaults(), "");
+      parent.setModifyListener(excludeDefaultsButton, reportingProvider, POM_PACKAGE.getReporting_ExcludeDefaults(), "false");
       parent.registerListeners();
     }
+    
     updateReportPluginDetails(null);
   }
 
@@ -669,4 +768,117 @@ public class ReportingComposite extends Composite {
     }
   }
 
+  void createReportingPlugin(String groupId, String artifactId, String version) {
+    CompoundCommand compoundCommand = new CompoundCommand();
+    EditingDomain editingDomain = parent.getEditingDomain();
+
+    boolean reportsCreated = false;
+
+    Reporting reporting = reportingProvider.getValue();
+    if(reporting == null) {
+      reporting = reportingProvider.create(editingDomain, compoundCommand);
+      reportsCreated = true;
+    }
+
+    ReportPlugins reportPlugins = reporting.getPlugins();
+    if(reportPlugins == null) {
+      reportPlugins = PomFactory.eINSTANCE.createReportPlugins();
+      Command addReportPlugins = SetCommand.create(editingDomain, reporting, POM_PACKAGE.getReporting_Plugins(),
+          reportPlugins);
+      compoundCommand.append(addReportPlugins);
+      reportsCreated = true;
+    }
+
+    ReportPlugin reportPlugin = PomFactory.eINSTANCE.createReportPlugin();
+    reportPlugin.setGroupId(groupId);
+    reportPlugin.setArtifactId(artifactId);
+    reportPlugin.setVersion(version);
+    
+    Command addReportPlugin = AddCommand.create(editingDomain, reportPlugins,
+        POM_PACKAGE.getReportPlugins_Plugin(), reportPlugin);
+    compoundCommand.append(addReportPlugin);
+    
+    editingDomain.getCommandStack().execute(compoundCommand);
+
+    if(reportsCreated) {
+      updateContent(reporting);
+    } else {
+      updateReportPluginDetails(reportPlugin);
+    }
+    reportPluginsEditor.setSelection(Collections.singletonList(reportPlugin));
+    groupIdText.setFocus();
+  }
+
+  public void setSearchControl(SearchControl searchControl) {
+    if(this.searchControl!=null) {
+      return;
+    }
+    
+    this.searchMatcher = new SearchMatcher(searchControl);
+    this.searchFilter = new PluginFilter(searchMatcher);
+    this.searchControl = searchControl;
+    this.searchControl.getSearchText().addModifyListener(new ModifyListener() {
+      public void modifyText(ModifyEvent e) {
+        selectPlugins(reportPluginsEditor, reportingProvider);
+        updateReportPluginDetails(null);
+      }
+
+      private void selectPlugins(ListEditorComposite<ReportPlugin> editor, ValueProvider<Reporting> provider) {
+        List<ReportPlugin> plugins = new ArrayList<ReportPlugin>();
+        Reporting value = provider.getValue();
+        if(value != null) {
+          ReportPlugins reportPlugins = value.getPlugins();
+          if(reportPlugins!=null) {
+            for(ReportPlugin p : reportPlugins.getPlugin()) {
+              if(searchMatcher.isMatchingArtifact(p.getGroupId(), p.getArtifactId())) {
+                plugins.add(p);
+              }
+            }
+          }
+        }
+        editor.setSelection(plugins);
+        editor.refresh();
+      }
+    });
+  }
+  
+  final class ReportPluginsLabelProvider extends LabelProvider {
+  
+    private boolean showGroupId = true;
+
+    public void setShowGroupId(boolean showGroupId) {
+      this.showGroupId = showGroupId;
+    }
+    
+    public String getText(Object element) {
+      if(element instanceof ReportPlugin) {
+        ReportPlugin reportPlugin = (ReportPlugin) element;
+
+        String groupId = reportPlugin.getGroupId();
+        String artifactId = reportPlugin.getArtifactId();
+        String version = reportPlugin.getVersion();
+
+        String label = "";
+        
+        if(showGroupId) {
+          label = (groupId == null ? "?" : groupId) + " : ";
+        }
+        
+        label += artifactId == null ? "?" : artifactId;
+        
+        if(version != null) {
+          label += " : " + version;
+        }
+        
+        return label;
+      }
+      return super.getText(element);
+    }
+
+    public Image getImage(Object element) {
+      return MavenEditorImages.IMG_PLUGIN;
+    }
+
+  }
+  
 }

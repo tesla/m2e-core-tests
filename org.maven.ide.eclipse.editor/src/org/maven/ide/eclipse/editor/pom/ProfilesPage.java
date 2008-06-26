@@ -83,7 +83,6 @@ import org.maven.ide.eclipse.editor.composites.ListEditorContentProvider;
 import org.maven.ide.eclipse.editor.composites.PluginsComposite;
 import org.maven.ide.eclipse.editor.composites.ReportingComposite;
 import org.maven.ide.eclipse.editor.composites.RepositoriesComposite;
-import org.maven.ide.eclipse.editor.composites.StringLabelProvider;
 import org.maven.ide.eclipse.project.MavenProjectFacade;
 import org.maven.ide.eclipse.wizards.MavenModuleWizard;
 import org.maven.ide.eclipse.wizards.WidthGroup;

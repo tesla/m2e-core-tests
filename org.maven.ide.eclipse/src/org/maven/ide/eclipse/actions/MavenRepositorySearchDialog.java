@@ -145,7 +145,7 @@ public class MavenRepositorySearchDialog extends AbstractMavenDialog {
   protected void computeResult() {
     selectedIndexedArtifact = pomSelectionComponent.getIndexedArtifact();
     selectedIndexedArtifactFile = pomSelectionComponent.getIndexedArtifactFile();
-    selectedScope = scopeCombo.getText();
+    selectedScope = scopeCombo == null ? null : scopeCombo.getText();
     setResult(Collections.singletonList(selectedIndexedArtifactFile));
   }
   

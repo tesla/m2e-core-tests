@@ -68,10 +68,10 @@ public class OpenUrlAction extends ActionDelegate implements IWorkbenchWindowAct
 
   private IStructuredSelection selection;
 
-  private final String id;
+  final String actionId;
 
   public OpenUrlAction(String id) {
-    this.id = id;
+    this.actionId = id;
   }
 
   /* (non-Javadoc)
@@ -95,7 +95,7 @@ public class OpenUrlAction extends ActionDelegate implements IWorkbenchWindowAct
       if(a != null) {
         new Job("Opening Browser") {
           protected IStatus run(IProgressMonitor monitor) {
-            openBrowser(a);
+            openBrowser(actionId, a.getGroupId(), a.getArtifactId(), a.getVersion());
             return Status.OK_STATUS;
           }
           
@@ -134,10 +134,10 @@ public class OpenUrlAction extends ActionDelegate implements IWorkbenchWindowAct
     return null;
   }
 
-  void openBrowser(Artifact a) {
+  public static void openBrowser(String actionId, String groupId, String artifactId, String version) {
     try {
-      MavenProject mavenProject = getMavenProject(a.getGroupId(), a.getArtifactId(), a.getVersion());
-      final String url = getUrl(mavenProject);
+      MavenProject mavenProject = getMavenProject(groupId, artifactId, version);
+      final String url = getUrl(actionId, mavenProject);
       if(url!=null) {
         PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
           public void run() {
@@ -159,14 +159,14 @@ public class OpenUrlAction extends ActionDelegate implements IWorkbenchWindowAct
     }
   }
 
-  private String getUrl(MavenProject mavenProject) {
+  private static String getUrl(String actionId, MavenProject mavenProject) {
     String url = null;
-    if(ID_PROJECT.equals(id)) {
+    if(ID_PROJECT.equals(actionId)) {
       url = mavenProject.getUrl();
       if(url == null) {
         openDialog("Project does't specify project URL");
       }
-    } else if(ID_ISSUES.equals(id)) {
+    } else if(ID_ISSUES.equals(actionId)) {
       IssueManagement issueManagement = mavenProject.getIssueManagement();
       if(issueManagement != null) {
         url = issueManagement.getUrl();
@@ -174,7 +174,7 @@ public class OpenUrlAction extends ActionDelegate implements IWorkbenchWindowAct
       if(url == null) {
         openDialog("Project does't specify issue management URL");
       }
-    } else if(ID_SCM.equals(id)) {
+    } else if(ID_SCM.equals(actionId)) {
       Scm scm = mavenProject.getScm();
       if(scm != null) {
         url = scm.getUrl();
@@ -182,7 +182,7 @@ public class OpenUrlAction extends ActionDelegate implements IWorkbenchWindowAct
       if(url == null) {
         openDialog("Project does't specify SCM URL");
       }
-    } else if(ID_CI.equals(id)) {
+    } else if(ID_CI.equals(actionId)) {
       CiManagement ciManagement = mavenProject.getCiManagement();
       if(ciManagement != null) {
         url = ciManagement.getUrl();
@@ -194,7 +194,7 @@ public class OpenUrlAction extends ActionDelegate implements IWorkbenchWindowAct
     return url;
   }
 
-  private MavenProject getMavenProject(String groupId, String artifactId, String version) throws Exception {
+  private static MavenProject getMavenProject(String groupId, String artifactId, String version) throws Exception {
     String name = groupId + ":" + artifactId + ":" + version;
 
     MavenPlugin plugin = MavenPlugin.getDefault();

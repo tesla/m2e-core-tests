@@ -142,7 +142,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
     }
     
     Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-    MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(shell, title, type, Collections.EMPTY_SET);
+    MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(shell, title, type, Collections.<Artifact>emptySet());
     if(dialog.open() == Window.OK) {
       final IndexedArtifactFile iaf = (IndexedArtifactFile) dialog.getFirstResult();
       final IndexedArtifact indexedArtifact = dialog.getSelectedIndexedArtifact();

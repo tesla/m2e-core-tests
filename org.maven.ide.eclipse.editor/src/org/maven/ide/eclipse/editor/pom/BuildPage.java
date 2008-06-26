@@ -60,6 +60,7 @@ import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.MavenRepositorySearchDialog;
 import org.maven.ide.eclipse.actions.OpenPomAction;
+import org.maven.ide.eclipse.actions.OpenUrlAction;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.editor.composites.BuildComposite;
 import org.maven.ide.eclipse.editor.composites.DependencyLabelProvider;
@@ -94,6 +95,7 @@ public class BuildPage extends MavenPomEditorPage {
   protected boolean expandingTopSections;
   private Action extensionSelectAction;
   private Action extensionAddAction;
+  private Action openWebPageAction;
   
   
   public BuildPage(MavenPomEditor pomEditor) {
@@ -372,8 +374,26 @@ public class BuildPage extends MavenPomEditorPage {
     };
     extensionSelectAction.setEnabled(false);
 
+    openWebPageAction = new Action("Open Web Page", MavenEditorImages.WEB_PAGE) {
+      public void run() {
+        final String groupId = extensionGroupIdText.getText();
+        final String artifactId = extensionArtifactIdText.getText();
+        final String version = extensionVersionText.getText();
+        new Job("Opening " + groupId + ":" + artifactId + ":" + version) {
+          protected IStatus run(IProgressMonitor arg0) {
+            OpenUrlAction.openBrowser(OpenUrlAction.ID_PROJECT, groupId, artifactId, version);
+            return Status.OK_STATUS;
+          }
+        }.schedule();
+        
+      }      
+    };
+    openWebPageAction.setEnabled(false);
+    
     ToolBarManager toolBarManager = new ToolBarManager(SWT.FLAT);
     toolBarManager.add(extensionSelectAction);
+    toolBarManager.add(new Separator());
+    toolBarManager.add(openWebPageAction);
     
     Composite toolbarComposite = toolkit.createComposite(extensionDetailsSection);
     GridLayout toolbarLayout = new GridLayout(1, true);
@@ -425,6 +445,7 @@ public class BuildPage extends MavenPomEditorPage {
     if(extension==null) {
       FormUtils.setEnabled(extensionDetailsSection, false);
       extensionSelectAction.setEnabled(false);
+      openWebPageAction.setEnabled(false);
 
       setText(extensionGroupIdText, "");
       setText(extensionArtifactIdText, "");
@@ -436,6 +457,7 @@ public class BuildPage extends MavenPomEditorPage {
     FormUtils.setEnabled(extensionDetailsSection, true);
     FormUtils.setReadonly(extensionDetailsSection, isReadOnly());
     extensionSelectAction.setEnabled(!isReadOnly());
+    openWebPageAction.setEnabled(true);
     
     setText(extensionGroupIdText, extension.getGroupId());
     setText(extensionArtifactIdText, extension.getArtifactId());
