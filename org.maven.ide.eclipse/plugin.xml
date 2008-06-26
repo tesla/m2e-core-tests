@@ -745,6 +745,11 @@
    
    </extension>
    
+   <extension point="org.eclipse.jdt.core.classpathVariableInitializer">
+      <classpathVariableInitializer variable="M2_REPO" readOnly="true"
+          class="org.maven.ide.eclipse.container.MavenClasspathVariableInitializer"/>
+   </extension>
+   
    <!--
    <extension point="org.eclipse.search.searchPages">
       <page id="org.maven.ide.eclipse.MavenSearchPage"

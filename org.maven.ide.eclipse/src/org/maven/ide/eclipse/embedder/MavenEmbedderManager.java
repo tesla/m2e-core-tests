@@ -9,6 +9,8 @@
 package org.maven.ide.eclipse.embedder;
 
 import java.io.File;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -39,6 +41,7 @@ public class MavenEmbedderManager {
 
   private MavenEmbedder workspaceEmbedder;
 
+  private List<AbstractMavenEmbedderListener> listeners = new CopyOnWriteArrayList<AbstractMavenEmbedderListener>(); 
   
   public MavenEmbedderManager(MavenConsole console, MavenRuntimeManager runtimeManager) {
     this.console = console;
@@ -65,6 +68,11 @@ public class MavenEmbedderManager {
     if(this.workspaceEmbedder==null) {
       try {
         this.workspaceEmbedder = createEmbedder(EmbedderFactory.createExecutionCustomizer());
+        
+        for(AbstractMavenEmbedderListener listener : listeners) {
+          listener.workspaceEmbedderCreated();
+        }
+        
       } catch(MavenEmbedderException ex) {
         String msg = "Can't create workspace embedder";
         console.logError(msg + "; " + ex.getMessage());
@@ -76,6 +84,10 @@ public class MavenEmbedderManager {
 
   public void invalidateMavenSettings() {
     shutdown();
+    
+    for(AbstractMavenEmbedderListener listener : listeners) {
+      listener.workspaceEmbedderInvalidated();
+    }
   }
 
   public void shutdown() {
@@ -87,6 +99,10 @@ public class MavenEmbedderManager {
         console.logError("Error on stopping project embedder "+ex.getMessage());
       }
       workspaceEmbedder = null;
+
+      for(AbstractMavenEmbedderListener listener : listeners) {
+        listener.workspaceEmbedderDestroyed();
+      }
     }
   }
   
@@ -122,5 +138,13 @@ public class MavenEmbedderManager {
       throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
     }
   }
+  
+  public void addListener(AbstractMavenEmbedderListener listener) {
+    listeners.add(listener);
+  }
 
+  public void removeListener(AbstractMavenEmbedderListener listener) {
+    listeners.remove(listener);
+  }
+  
 }

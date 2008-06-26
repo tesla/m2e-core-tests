@@ -16,7 +16,6 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -52,6 +51,8 @@ import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
+import org.maven.ide.eclipse.container.MavenClasspathVariableInitializer;
+import org.maven.ide.eclipse.embedder.AbstractMavenEmbedderListener;
 import org.maven.ide.eclipse.embedder.ArchetypeManager;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
@@ -121,6 +122,8 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
   public static final String SOURCES_CLASSIFIER = "sources"; //$NON-NLS-1$
 
+  public static final String M2_REPO = "M2_REPO"; //$NON-NLS-1$
+
   // The shared instance
   private static MavenPlugin plugin;
 
@@ -130,7 +133,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
   private IndexManager indexManager;
 
-  private MavenEmbedderManager embedderManager;
+  MavenEmbedderManager embedderManager;
 
   private BuildPathManager buildpathManager;
 
@@ -169,6 +172,11 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     this.runtimeManager = new MavenRuntimeManager(getPreferenceStore());
 
     this.embedderManager = new MavenEmbedderManager(console, runtimeManager);
+    this.embedderManager.addListener(new AbstractMavenEmbedderListener() {
+      public void workspaceEmbedderInvalidated() {
+        MavenClasspathVariableInitializer.init();
+      }
+    });
 
     File stateLocationDir = getStateLocation().toFile();
     
@@ -194,7 +202,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     this.indexManager.addIndex(new IndexInfo(IndexManager.LOCAL_INDEX, //
         embedderManager.getLocalRepositoryDir(), null, IndexInfo.Type.LOCAL, false), false);
 
-    Set indexes = loadIndexConfiguration(new File(stateLocationDir, PREFS_INDEXES));
+    Set<IndexInfo> indexes = loadIndexConfiguration(new File(stateLocationDir, PREFS_INDEXES));
 
     this.modelManager = new MavenModelManager(embedderManager, console);
 
@@ -231,9 +239,8 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     checkJdk();
   }
 
-  private void initializeIndexes(Set indexes, boolean updateIndexesOnStartup) {
-    for(Iterator it = indexes.iterator(); it.hasNext();) {
-      IndexInfo indexInfo = (IndexInfo) it.next();
+  private void initializeIndexes(Set<IndexInfo> indexes, boolean updateIndexesOnStartup) {
+    for(IndexInfo indexInfo : indexes) {
       if(IndexInfo.Type.LOCAL.equals(indexInfo.getType())) {
         if(indexInfo.isNew()) {
           indexManager.scheduleIndexUpdate(indexInfo.getIndexName(), false, 4000L);
@@ -246,17 +253,15 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     }
   }
 
-  private Set loadIndexConfiguration(File configFile) throws IOException {
-    LinkedHashSet indexes = new LinkedHashSet();
+  private Set<IndexInfo> loadIndexConfiguration(File configFile) throws IOException {
+    LinkedHashSet<IndexInfo> indexes = new LinkedHashSet<IndexInfo>();
     indexes.addAll(ExtensionReader.readIndexInfoConfig(configFile));
 
-    Map extensionIndexes = ExtensionReader.readIndexInfoExtensions();
+    Map<String, IndexInfo> extensionIndexes = ExtensionReader.readIndexInfoExtensions();
     indexes.addAll(extensionIndexes.values());
 
-    for(Iterator it = indexes.iterator(); it.hasNext();) {
-      IndexInfo indexInfo = (IndexInfo) it.next();
-
-      IndexInfo extensionInfo = (IndexInfo) extensionIndexes.get(indexInfo.getIndexName());
+    for(IndexInfo indexInfo : indexes) {
+      IndexInfo extensionInfo = extensionIndexes.get(indexInfo.getIndexName());
       if(extensionInfo != null) {
         URL archiveUrl = extensionInfo.getArchiveUrl();
         indexInfo.setArchiveUrl(archiveUrl);

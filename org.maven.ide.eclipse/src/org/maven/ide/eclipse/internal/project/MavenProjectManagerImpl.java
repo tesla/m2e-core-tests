@@ -712,10 +712,16 @@ public class MavenProjectManagerImpl {
             remoteRepositories = pv.mavenProject.getMavenProject().getRemoteArtifactRepositories();
           }
 
-        } else {
-          // not a maven project
-          artifact = embedder.createArtifact(key.getGroupId(), key.getArtifactId(), key.getVersion(), null, ARTIFACT_TYPE_JAR);
+        }
+        
+        if(remoteRepositories == null) {
           remoteRepositories = indexManager.getArtifactRepositories(null, null);
+        }
+
+        if(artifact == null) {
+          // not a Maven managed artifact
+          artifact = embedder.createArtifact(key.getGroupId(), key.getArtifactId(), key.getVersion(), null,
+              ARTIFACT_TYPE_JAR);
           try {
             embedder.resolve(artifact, remoteRepositories, embedder.getLocalRepository());
           } catch(Exception ex) {

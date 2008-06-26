@@ -532,18 +532,18 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     IJavaProject javaProject = JavaCore.create(project);
 
     MavenProjectFacade mavenProject = projectManager.create(project, monitor);
-
     if (mavenProject != null) {
-      // maven project, refresh classpath container
+      // Maven project, refresh classpath container
       updateClasspath(project, monitor);
-    } else {
-      // non-maven project, modify specific classpath entry
-      IPath path = event.getPath();
-
+    }
+    
+    IPath path = event.getPath();
+    if(path != null) {
+      // non-Maven jar, modify specific classpath entry
       IClasspathEntry[] cp = javaProject.getRawClasspath();
-      for(IClasspathEntry entry : cp) {
+      for(int i = 0; i < cp.length; i++ ) {
+        IClasspathEntry entry = cp[i];
         if (IClasspathEntry.CPE_LIBRARY == entry.getEntryKind() && path.equals(entry.getPath())) {
-
           List<IClasspathAttribute> attributes = new ArrayList<IClasspathAttribute>(Arrays.asList(entry.getExtraAttributes()));
           IPath srcPath = event.getSourcePath();
 
@@ -556,7 +556,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
             }
           }
 
-          entry = JavaCore.newLibraryEntry(entry.getPath(), srcPath, null, entry.getAccessRules(), //
+          cp[i] = JavaCore.newLibraryEntry(entry.getPath(), srcPath, null, entry.getAccessRules(), //
               attributes.toArray(new IClasspathAttribute[attributes.size()]), // 
               entry.isExported());
         }
@@ -564,7 +564,6 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
 
       javaProject.setRawClasspath(cp, monitor);
     }
-
   }
   
   public void updateClasspathContainer(IJavaProject project, IClasspathContainer containerSuggestion) throws CoreException {
