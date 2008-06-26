@@ -735,18 +735,16 @@ public class ReportingComposite extends Composite {
     if(reporting == null) {
       setText(outputFolderText,"");
       setButton(excludeDefaultsButton, false);
-      
       reportPluginsEditor.setInput(null);
     } else {
       setText(outputFolderText,reporting.getOutputDirectory());
       setButton(excludeDefaultsButton, "true".equals(reporting.getExcludeDefaults()));
-
       reportPluginsEditor.setInput(reporting.getPlugins() == null ? null : reporting.getPlugins().getPlugin());
-      
-      parent.setModifyListener(outputFolderText, reportingProvider, POM_PACKAGE.getReporting_OutputDirectory(), "");
-      parent.setModifyListener(excludeDefaultsButton, reportingProvider, POM_PACKAGE.getReporting_ExcludeDefaults(), "false");
-      parent.registerListeners();
     }
+    
+    parent.setModifyListener(outputFolderText, reportingProvider, POM_PACKAGE.getReporting_OutputDirectory(), "");
+    parent.setModifyListener(excludeDefaultsButton, reportingProvider, POM_PACKAGE.getReporting_ExcludeDefaults(), "false");
+    parent.registerListeners();
     
     updateReportPluginDetails(null);
   }
