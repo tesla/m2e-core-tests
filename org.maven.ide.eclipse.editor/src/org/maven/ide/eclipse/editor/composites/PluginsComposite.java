@@ -947,8 +947,10 @@ public class PluginsComposite extends Composite {
     EditingDomain editingDomain = parent.getEditingDomain();
     
     Plugins plugins = provider.getValue();
+    boolean pluginsCreated = false;
     if(plugins==null) {
       plugins = pluginsProvider.create(editingDomain, compoundCommand);
+      pluginsCreated = true;
     }
     
     Plugin plugin = PomFactory.eINSTANCE.createPlugin();
@@ -961,6 +963,9 @@ public class PluginsComposite extends Composite {
     
     editingDomain.getCommandStack().execute(compoundCommand);
     
+    if(pluginsCreated){
+//      editor.setInput(plugins.getPlugin());
+    }
     editor.setSelection(Collections.singletonList(plugin));
     updatePluginDetails(plugin);
     groupIdText.setFocus();
