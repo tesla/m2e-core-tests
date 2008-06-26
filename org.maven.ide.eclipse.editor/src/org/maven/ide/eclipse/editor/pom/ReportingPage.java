@@ -13,6 +13,8 @@ import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.edit.command.SetCommand;
 import org.eclipse.emf.edit.domain.EditingDomain;
+import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -20,7 +22,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
-import org.maven.ide.components.pom.DevelopersType;
 import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.Reporting;
 import org.maven.ide.eclipse.MavenPlugin;
@@ -33,11 +34,21 @@ import org.maven.ide.eclipse.editor.composites.ReportingComposite;
 public class ReportingPage extends MavenPomEditorPage {
 
   private ReportingComposite reportingComposite;
+  
+  private SearchControl searchControl;
 
   public ReportingPage(MavenPomEditor pomEditor) {
     super(pomEditor, MavenPlugin.PLUGIN_ID + ".pom.reporting", "Reporting");
   }
 
+  public void setActive(boolean active) {
+    super.setActive(active);
+    if(active) {
+      reportingComposite.setSearchControl(searchControl);
+      searchControl.getSearchText().setEditable(true);
+    }
+  }
+  
   protected void createFormContent(IManagedForm managedForm) {
     FormToolkit toolkit = managedForm.getToolkit();
     ScrolledForm form = managedForm.getForm();
@@ -53,6 +64,14 @@ public class ReportingPage extends MavenPomEditorPage {
     reportingComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     toolkit.adapt(reportingComposite);
 
+    searchControl = new SearchControl("Find", managedForm);
+    
+    IToolBarManager pageToolBarManager = form.getForm().getToolBarManager();
+    pageToolBarManager.add(searchControl);
+    pageToolBarManager.add(new Separator());
+    
+    form.updateToolBar();
+    
 //    form.pack();
 
     super.createFormContent(managedForm);
