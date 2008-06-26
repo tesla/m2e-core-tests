@@ -949,7 +949,7 @@ public class PluginsComposite extends Composite {
     Plugins plugins = provider.getValue();
     boolean pluginsCreated = false;
     if(plugins==null) {
-      plugins = pluginsProvider.create(editingDomain, compoundCommand);
+      plugins = provider.create(editingDomain, compoundCommand);
       pluginsCreated = true;
     }
     
@@ -964,7 +964,7 @@ public class PluginsComposite extends Composite {
     editingDomain.getCommandStack().execute(compoundCommand);
     
     if(pluginsCreated){
-//      editor.setInput(plugins.getPlugin());
+      editor.setInput(plugins.getPlugin());
     }
     editor.setSelection(Collections.singletonList(plugin));
     updatePluginDetails(plugin);
