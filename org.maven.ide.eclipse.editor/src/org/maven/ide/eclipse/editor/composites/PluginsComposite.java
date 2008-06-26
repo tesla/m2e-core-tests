@@ -261,6 +261,9 @@ public class PluginsComposite extends Composite {
         TableViewer viewer = pluginsEditor.getViewer();
         viewer.setFilters(isChecked() ? new ViewerFilter[] {searchFilter} : new ViewerFilter[0]);
         viewer.refresh();
+        if(isChecked()) {
+          searchControl.getSearchText().setFocus();
+        }
       }
     });
     
@@ -363,6 +366,9 @@ public class PluginsComposite extends Composite {
         TableViewer viewer = pluginManagementEditor.getViewer();
         viewer.setFilters(isChecked() ? new ViewerFilter[] {searchFilter} : new ViewerFilter[0]);
         viewer.refresh();
+        if(isChecked()) {
+          searchControl.getSearchText().setFocus();
+        }
       }
     });
     

@@ -279,6 +279,9 @@ public class ReportingComposite extends Composite {
         TableViewer viewer = reportPluginsEditor.getViewer();
         viewer.setFilters(isChecked() ? new ViewerFilter[] {searchFilter} : new ViewerFilter[0]);
         viewer.refresh();
+        if(isChecked()) {
+          searchControl.getSearchText().setFocus();
+        }
       }
     });
     

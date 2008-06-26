@@ -289,6 +289,9 @@ public class DependenciesComposite extends Composite {
         TableViewer viewer = dependenciesEditor.getViewer();
         viewer.setFilters(isChecked() ? new ViewerFilter[] {searchFilter} : new ViewerFilter[0]);
         viewer.refresh();
+        if(isChecked()) {
+          searchControl.getSearchText().setFocus();
+        }
       }
     });
     
@@ -407,6 +410,9 @@ public class DependenciesComposite extends Composite {
         TableViewer viewer = dependencyManagementEditor.getViewer();
         viewer.setFilters(isChecked() ? new ViewerFilter[] {searchFilter} : new ViewerFilter[0]);
         viewer.refresh();
+        if(isChecked()) {
+          searchControl.getSearchText().setFocus();
+        }
       }
     });
     
