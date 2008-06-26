@@ -42,8 +42,12 @@ public abstract class FormUtils {
         new Class[] { type }, // 
         new InvocationHandler() {
           public Object invoke(Object proxy, Method m, Object[] args) throws Throwable {
-            Method mm = o.getClass().getMethod(m.getName(), m.getParameterTypes());
-            return mm.invoke(o, args);
+            try {
+              Method mm = o.getClass().getMethod(m.getName(), m.getParameterTypes());
+              return mm.invoke(o, args);
+            } catch (final NoSuchMethodException e) {
+              return null;
+            }
           }
         });
   }
