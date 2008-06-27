@@ -642,10 +642,7 @@ public class DependenciesComposite extends Composite {
 
     exclusionsEditor.setAddListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
-        Exclusion exclusion = createExclusion(null, null);        
-        exclusionsEditor.setSelection(Collections.singletonList(exclusion));
-        updateExclusionDetails(exclusion);
-        exclusionGroupIdText.setFocus();
+        createExclusion(null, null);        
       }
     });
  
@@ -682,10 +679,7 @@ public class DependenciesComposite extends Composite {
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {
-            Exclusion exclusion = createExclusion(af.group, af.artifact);        
-            exclusionsEditor.setSelection(Collections.singletonList(exclusion));
-            updateExclusionDetails(exclusion);
-            exclusionGroupIdText.setFocus();
+            createExclusion(af.group, af.artifact);        
           }
         }
       }
@@ -1045,16 +1039,18 @@ public class DependenciesComposite extends Composite {
     });
   }
   
-  private Exclusion createExclusion(String groupId, String artifactId) {
+  private void createExclusion(String groupId, String artifactId) {
     CompoundCommand compoundCommand = new CompoundCommand();
     EditingDomain editingDomain = parent.getEditingDomain();
- 
+
+    boolean created = false;
     ExclusionsType exclusions = currentDependency.getExclusions();
     if(exclusions==null) {
       exclusions = PomFactory.eINSTANCE.createExclusionsType();
       Command setExclusionsCommand = SetCommand.create(editingDomain, currentDependency, 
           POM_PACKAGE.getDependency_Exclusions(), exclusions);
       compoundCommand.append(setExclusionsCommand);
+      created = true;
     }
     
     Exclusion exclusion = PomFactory.eINSTANCE.createExclusion();
@@ -1066,7 +1062,13 @@ public class DependenciesComposite extends Composite {
     compoundCommand.append(addCommand);
     
     editingDomain.getCommandStack().execute(compoundCommand);
-    return exclusion;
+
+    if(created) {
+      exclusionsEditor.setInput(exclusions.getExclusion());
+    }
+    exclusionsEditor.setSelection(Collections.singletonList(exclusion));
+    updateExclusionDetails(exclusion);
+    exclusionGroupIdText.setFocus();
   }
 
   public static class DependencyFilter extends ViewerFilter {
