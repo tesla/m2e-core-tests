@@ -46,6 +46,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -293,15 +294,16 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       
       } else if(input instanceof IStorageEditorInput) {
         IStorageEditorInput fileInput = (IStorageEditorInput) input;
-        IPath fullPath = fileInput.getStorage().getFullPath();
-        File tempPomFile = null;
-        if(fullPath==null) {
+        IStorage storage = fileInput.getStorage();
+        IPath path = storage.getFullPath();
+        if(path == null || path.toString().startsWith("http") || path.toString().startsWith("svn")) {
+          File tempPomFile = null;
           InputStream is = null;
           OutputStream os = null;
           try {
-            tempPomFile = File.createTempFile("maven-pom", "pom");
+            tempPomFile = File.createTempFile("maven-pom", ".pom");
             os = new FileOutputStream(tempPomFile);
-            is = fileInput.getStorage().getContents();
+            is = storage.getContents();
             IOUtil.copy(is, os);
             projectDocument = loadModel(tempPomFile.getAbsolutePath());
           } catch(IOException ex) {
@@ -314,7 +316,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
             }
           }
         } else {
-          projectDocument = loadModel(fullPath.toOSString());
+          projectDocument = loadModel(path.toOSString());
         }
       
       } else if(input.getClass().getName().endsWith("FileStoreEditorInput")) {
@@ -436,14 +438,15 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   
       } else if(input instanceof IStorageEditorInput) {
         IStorageEditorInput storageInput = (IStorageEditorInput) input;
-        IPath path = storageInput.getStorage().getFullPath();
-        if(path==null) {
+        IStorage storage = storageInput.getStorage();
+        IPath path = storage.getFullPath();
+        if(path == null || path.toString().startsWith("http") || path.toString().startsWith("svn")) {
           InputStream is = null;
           FileOutputStream fos = null;
           File tempPomFile = null;
           try {
             tempPomFile = File.createTempFile("maven-pom", "pom");
-            is = storageInput.getStorage().getContents();
+            is = storage.getContents();
             fos = new FileOutputStream(tempPomFile);
             IOUtil.copy(is, fos);
             mavenProject = readMavenProject(tempPomFile);
@@ -452,7 +455,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
           } finally {
             IOUtil.close(is);
             IOUtil.close(fos);
-            if(tempPomFile!=null) {
+            if(tempPomFile != null) {
               tempPomFile.delete();
             }
           }
