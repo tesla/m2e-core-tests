@@ -180,19 +180,21 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
         protected IStatus run(IProgressMonitor monitor) {
           try {
             model = pomEditor.readProjectDocument();
-            getPartControl().getDisplay().asyncExec(new Runnable() {
-              public void run() {
-                updatingModel = true;
-                try {
-                  loadData();
-                  registerListeners();
-                } catch(Throwable e) {
-                  MavenPlugin.log("Error loading data", e);
-                } finally {
-                  updatingModel = false;
+            if(model != null) {
+              getPartControl().getDisplay().asyncExec(new Runnable() {
+                public void run() {
+                  updatingModel = true;
+                  try {
+                    loadData();
+                    registerListeners();
+                  } catch(Throwable e) {
+                    MavenPlugin.log("Error loading data", e);
+                  } finally {
+                    updatingModel = false;
+                  }
                 }
-              }
-            });
+              });
+            }
           } catch(final CoreException ex) {
             MavenPlugin.log(ex);
             getPartControl().getDisplay().asyncExec(new Runnable() {

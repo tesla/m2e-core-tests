@@ -293,10 +293,10 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
         projectDocument = resource.getModel();
       
       } else if(input instanceof IStorageEditorInput) {
-        IStorageEditorInput fileInput = (IStorageEditorInput) input;
-        IStorage storage = fileInput.getStorage();
+        IStorageEditorInput storageInput = (IStorageEditorInput) input;
+        IStorage storage = storageInput.getStorage();
         IPath path = storage.getFullPath();
-        if(path == null || path.toString().startsWith("http") || path.toString().startsWith("svn")) {
+        if(path == null || !new File(path.toOSString()).exists()) {
           File tempPomFile = null;
           InputStream is = null;
           OutputStream os = null;
@@ -440,7 +440,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
         IStorageEditorInput storageInput = (IStorageEditorInput) input;
         IStorage storage = storageInput.getStorage();
         IPath path = storage.getFullPath();
-        if(path == null || path.toString().startsWith("http") || path.toString().startsWith("svn")) {
+        if(path == null || !new File(path.toOSString()).exists()) {
           InputStream is = null;
           FileOutputStream fos = null;
           File tempPomFile = null;
