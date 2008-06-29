@@ -22,7 +22,6 @@ import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.execution.MavenExecutionResult;
 
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.container.MavenClasspathContainer;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.internal.project.ArtifactKey;
@@ -160,13 +159,7 @@ public class MavenProjectManager {
    */
   public String getJavaDocUrl(Artifact artifact) {
     IPath javadocPath = getArtifactPath(artifact, MavenProjectManagerImpl.ARTIFACT_TYPE_JAVADOC);
-
-    String javadocUrl = null;
-    if(javadocPath != null) {
-      javadocUrl = MavenClasspathContainer.getJavaDocUrl(javadocPath.toString());
-    }
-
-    return javadocUrl;
+    return javadocPath == null ? null : manager.getJavaDocUrl(javadocPath.toString());
   }
   
   /**

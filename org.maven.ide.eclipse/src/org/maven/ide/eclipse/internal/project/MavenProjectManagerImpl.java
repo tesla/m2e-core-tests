@@ -10,14 +10,19 @@ package org.maven.ide.eclipse.internal.project;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import org.osgi.service.prefs.BackingStoreException;
 
@@ -50,7 +55,6 @@ import org.apache.maven.project.MavenProject;
 
 import org.maven.ide.eclipse.MavenConsole;
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.container.MavenClasspathContainer;
 import org.maven.ide.eclipse.embedder.EmbedderFactory;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.index.IndexManager;
@@ -76,6 +80,7 @@ import org.maven.ide.eclipse.project.ResolverConfiguration;
  */
 public class MavenProjectManagerImpl {
 
+  static final String ARTIFACT_TYPE_POM = "pom";
   static final String ARTIFACT_TYPE_JAR = "jar";
   public static final String ARTIFACT_TYPE_JAVA_SOURCE = "java-source";
   public static final String ARTIFACT_TYPE_JAVADOC = "javadoc";
@@ -711,7 +716,6 @@ public class MavenProjectManagerImpl {
           if (pv.mavenProject != null) {
             remoteRepositories = pv.mavenProject.getMavenProject().getRemoteArtifactRepositories();
           }
-
         }
         
         if(remoteRepositories == null) {
@@ -721,7 +725,7 @@ public class MavenProjectManagerImpl {
         if(artifact == null) {
           // not a Maven managed artifact
           artifact = embedder.createArtifact(key.getGroupId(), key.getArtifactId(), key.getVersion(), null,
-              ARTIFACT_TYPE_JAR);
+              ARTIFACT_TYPE_POM);
           try {
             embedder.resolve(artifact, remoteRepositories, embedder.getLocalRepository());
           } catch(Exception ex) {
@@ -739,7 +743,7 @@ public class MavenProjectManagerImpl {
             IPath javadocPath = materializeArtifactPath(embedder, remoteRepositories, artifact,
                 ARTIFACT_TYPE_JAVADOC, monitor);
             if (javadocPath != null) {
-              javadocUrl = MavenClasspathContainer.getJavaDocUrl(javadocPath.toString());
+              javadocUrl = getJavaDocUrl(javadocPath.toString());
             } else {
               // guess the javadoc url from the project url in the artifact's pom.xml
               String artifactLocation = artifact.getFile().getAbsolutePath();
@@ -1038,6 +1042,43 @@ public class MavenProjectManagerImpl {
     } finally {
       embedder.stop();
     }
+  }
+
+  public String getJavaDocUrl(String fileName) {
+    try {
+      URL fileUrl = new File(fileName).toURL();
+      return "jar:"+fileUrl.toExternalForm()+"!/"+MavenProjectManagerImpl.getJavaDocPathInArchive(fileName);
+    } catch(MalformedURLException ex) {
+      return null;
+    }
+  }
+
+  private static String getJavaDocPathInArchive(String name) {
+    long l1 = System.currentTimeMillis();
+    ZipFile jarFile = null;
+    try {
+      jarFile = new ZipFile(name);
+      String marker = "package-list";
+      for(Enumeration en = jarFile.entries(); en.hasMoreElements();) {
+        ZipEntry entry = (ZipEntry) en.nextElement();
+        String entryName = entry.getName();
+        if(entryName.endsWith(marker)) {
+          return entry.getName().substring(0, entryName.length()-marker.length());
+        }
+      }
+    } catch(IOException ex) {
+      // ignore
+    } finally {
+      long l2 = System.currentTimeMillis();
+      MavenPlugin.getDefault().getConsole().logMessage("Scanned javadoc " + name + " " + (l2-l1)/1000f);
+      try {
+        if(jarFile!=null) jarFile.close();
+      } catch(IOException ex) {
+        //
+      }
+    }
+    
+    return "";
   }
 
 }

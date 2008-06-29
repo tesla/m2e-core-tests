@@ -8,14 +8,7 @@
 
 package org.maven.ide.eclipse.container;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Enumeration;
 import java.util.Set;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -45,8 +38,8 @@ public class MavenClasspathContainer implements IClasspathContainer {
     this.entries = entries;
   }
   
-  public MavenClasspathContainer(IPath path, Set entrySet) {
-    this(path, (IClasspathEntry[]) entrySet.toArray(new IClasspathEntry[entrySet.size()]));
+  public MavenClasspathContainer(IPath path, Set<IClasspathEntry> entrySet) {
+    this(path, entrySet.toArray(new IClasspathEntry[entrySet.size()]));
   }
 
   public synchronized IClasspathEntry[] getClasspathEntries() {
@@ -63,43 +56,6 @@ public class MavenClasspathContainer implements IClasspathContainer {
 
   public IPath getPath() {
     return path; 
-  }
-
-  public static String getJavaDocUrl(String fileName) {
-    try {
-      URL fileUrl = new File(fileName).toURL();
-      return "jar:"+fileUrl.toExternalForm()+"!/"+MavenClasspathContainer.getJavaDocPathInArchive(fileName);
-    } catch(MalformedURLException ex) {
-      return null;
-    }
-  }
-  
-  private static String getJavaDocPathInArchive(String name) {
-    long l1 = System.currentTimeMillis();
-    ZipFile jarFile = null;
-    try {
-      jarFile = new ZipFile(name);
-      String marker = "package-list";
-      for(Enumeration en = jarFile.entries(); en.hasMoreElements();) {
-        ZipEntry entry = (ZipEntry) en.nextElement();
-        String entryName = entry.getName();
-        if(entryName.endsWith(marker)) {
-          return entry.getName().substring(0, entryName.length()-marker.length());
-        }
-      }
-    } catch(IOException ex) {
-      // ignore
-    } finally {
-      long l2 = System.currentTimeMillis();
-      MavenPlugin.getDefault().getConsole().logMessage("Scanned javadoc " + name + " " + (l2-l1)/1000f);
-      try {
-        if(jarFile!=null) jarFile.close();
-      } catch(IOException ex) {
-        //
-      }
-    }
-    
-    return "";
   }
   
 }
