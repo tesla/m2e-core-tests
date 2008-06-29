@@ -47,7 +47,6 @@ import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.zest.core.viewers.AbstractZoomableViewer;
 import org.eclipse.zest.core.viewers.GraphViewer;
 import org.eclipse.zest.core.viewers.IZoomableWorkbenchPart;
-import org.eclipse.zest.core.viewers.ZoomContributionViewItem;
 import org.eclipse.zest.core.widgets.Graph;
 import org.eclipse.zest.core.widgets.ZestStyles;
 import org.eclipse.zest.layouts.LayoutAlgorithm;
@@ -96,7 +95,7 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
 
   private DependencyGraphContentProvider graphContentProvider;
 
-  private ZoomContributionViewItem zoomContributionItem;
+//  private ZoomContributionViewItem zoomContributionItem;
 
   private SearchControl searchControl;
 
@@ -384,7 +383,7 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
   }
 
   private void initPopupMenu() {
-    zoomContributionItem = new ZoomContributionViewItem(this);
+//    zoomContributionItem = new ZoomContributionViewItem(this);
 
     MenuManager menuMgr = new MenuManager("#PopupMenu");
     menuMgr.setRemoveAllWhenShown(true);
@@ -474,8 +473,9 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
     manager.add(new Separator());
     manager.add(showLegendAction);
     
-    manager.add(new Separator());
-    manager.add(zoomContributionItem);
+    // XXX disabled zoom control until Zest menu bug is fixed 
+    // manager.add(new Separator());
+    // manager.add(zoomContributionItem);
   }
 
 /*  
