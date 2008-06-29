@@ -91,7 +91,7 @@ public class MavenPomSelectionComponent extends Composite {
     setLayout(gridLayout);
     
     Label searchTextlabel = new Label(this, SWT.NONE);
-    searchTextlabel.setText("Query:");
+    searchTextlabel.setText("&Enter groupId, artifactId or sha1 prefix or pattern (*):");
     searchTextlabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 
     searchText = new Text(this, SWT.BORDER);
@@ -111,7 +111,7 @@ public class MavenPomSelectionComponent extends Composite {
 
     Label searchResultsLabel = new Label(this, SWT.NONE);
     searchResultsLabel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));
-    searchResultsLabel.setText("Search Results:");
+    searchResultsLabel.setText("&Search Results:");
 
     Tree tree = new Tree(this, SWT.BORDER | SWT.SINGLE);
     tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
@@ -205,7 +205,7 @@ public class MavenPomSelectionComponent extends Composite {
   }
 
   void scheduleSearch(String query) {
-    if(query != null && query.length() > 0) {
+    if(query != null && query.length() > 2) {
       if(searchJob == null) {
         IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
         searchJob = new SearchJob(queryType, indexManager);
@@ -213,7 +213,7 @@ public class MavenPomSelectionComponent extends Composite {
 
       searchJob.setQuery(query.toLowerCase());
       if(!searchJob.isRunning()) {
-        searchJob.schedule();
+        searchJob.schedule(150L);
       }
     }
   }
@@ -252,6 +252,7 @@ public class MavenPomSelectionComponent extends Composite {
         String activeQuery = query;
         query = null;
         try {
+          setResult(IStatus.OK, "Searching \'" + activeQuery.toLowerCase() + "\'...", null);
           // Map res = indexer.search(indexManager.getIndexes(), activeQuery, field);
           // Map res = indexManager.search(activeQuery, IndexManager.SEARCH_PACKAGING);
           Map<String, IndexedArtifact> res = indexManager.search(activeQuery, field);
@@ -274,7 +275,9 @@ public class MavenPomSelectionComponent extends Composite {
       Display.getDefault().syncExec(new Runnable() {
         public void run() {
           setStatus(severity, message);
-          searchResultViewer.setInput(result);
+          if(result != null) {
+            searchResultViewer.setInput(result);
+          }
         }
       });
     }
