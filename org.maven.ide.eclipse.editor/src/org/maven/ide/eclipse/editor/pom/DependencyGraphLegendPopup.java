@@ -18,6 +18,10 @@ import org.eclipse.draw2d.PolylineConnection;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.jface.dialogs.PopupDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.FocusAdapter;
+import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -30,7 +34,7 @@ import org.eclipse.zest.core.widgets.ZestStyles;
 /**
  * @author Eugene Kuleshov
  */
-public class DependencyGraphLegendPopup extends PopupDialog {
+public class DependencyGraphLegendPopup extends PopupDialog implements DisposeListener {
 
   private final Color colorTestRel = new Color(null, 192, 192, 192);
   private final Color colorRel = new Color(null, 150, 150, 255);
@@ -42,22 +46,23 @@ public class DependencyGraphLegendPopup extends PopupDialog {
 
   private final Color highlighted = new Color(null, 127, 0, 0);
   
-	public DependencyGraphLegendPopup(Shell parent) {
+	@SuppressWarnings("deprecation")
+  public DependencyGraphLegendPopup(Shell parent) {
 		// super(parent, PopupDialog.INFOPOPUP_SHELLSTYLE | SWT.ON_TOP, true, false, false, false, null, "UI Legend");
-		super(parent, SWT.NONE, true, false, false, false, null, "UI Legend");
+		super(parent, SWT.NONE, true, false, false, false, null, "UI Legend (Esc to close)");
 	}
 
-//	@Override
-//	protected Control createContents(Composite parent) {
-//		getShell().setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY));
-//		return createDialogArea(parent);
-//	}
-
+	// DisposeListener
+	
+  public void widgetDisposed(DisposeEvent e) {
+    close();
+  }
+  
+	
 	@Override
 	public int open() {
 		int open = super.open();
-//		getShell().setLocation(getShell().getLocation().x, getShell().getLocation().y+20);
-		getShell().setFocus();
+		getShell().addDisposeListener(this);
 		return open;
 	}
 
@@ -197,10 +202,15 @@ public class DependencyGraphLegendPopup extends PopupDialog {
       n2.setLocation(220, 260);
     }
     
+    g.addFocusListener(new FocusAdapter() {
+      public void focusLost(FocusEvent e) {
+        close();
+      }
+    });
+    
 		return parent;
 	}
 
-	
   private static final class DepenencyConnection extends GraphConnection {
     private org.eclipse.draw2d.Label label;
     private PolylineConnection connectionFigure;
@@ -286,5 +296,5 @@ public class DependencyGraphLegendPopup extends PopupDialog {
       connectionFigure.setTargetDecoration(decoration);
     }
   }
-	
+
 }
