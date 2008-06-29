@@ -55,7 +55,7 @@ import org.maven.ide.eclipse.project.ProjectImportConfiguration;
  */
 public class MavenDependenciesWizardPage extends AbstractMavenWizardPage {
 
-  private boolean showLocation = false;
+  boolean showLocation = false;
   
   /** 
    * Viewer containing dependencies
@@ -202,7 +202,7 @@ public class MavenDependenciesWizardPage extends AbstractMavenWizardPage {
     addDependencyButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            "Add Dependency", IndexManager.SEARCH_ARTIFACT, Collections.<Artifact>emptySet(), true);
+            "Add Dependency", IndexManager.SEARCH_ARTIFACT, Collections.<Artifact>emptySet(), !showLocation);
         if(dialog.open() == Window.OK) {
           Object result = dialog.getFirstResult();
           if(result instanceof IndexedArtifactFile) {
