@@ -40,7 +40,6 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -74,32 +73,37 @@ import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.project.MavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 
+
 /**
  * @author Eugene Kuleshov
  */
 public class DependencyTreePage extends FormPage {
-  
+
   protected static final Object[] EMPTY = new Object[0];
 
   private final MavenPomEditor pomEditor;
-  
+
   TreeViewer treeViewer;
-  
+
   TableViewer listViewer;
 
   SearchControl searchControl;
+
   SearchMatcher searchMatcher;
+
   DependencyFilter searchFilter;
+
   ListSelectionFilter listSelectionFilter;
-  
+
   ArrayList<DependencyNode> dependencyNodes = new ArrayList<DependencyNode>();
 
+  Color searchHighlightColor;
+
   MavenProject mavenProject;
-  
+
   boolean isSettingSelection = false;
 
   private Action hierarchyFilterAction;
-
 
   public DependencyTreePage(MavenPomEditor pomEditor) {
     super(pomEditor, MavenPlugin.PLUGIN_ID + ".pom.dependencyTree", "Dependency Tree");
@@ -108,12 +112,14 @@ public class DependencyTreePage extends FormPage {
 
   protected void createFormContent(IManagedForm managedForm) {
     FormToolkit formToolkit = managedForm.getToolkit();
-    
+
+    searchHighlightColor = new Color(Display.getDefault(), 242, 218, 170);
+
     ScrolledForm form = managedForm.getForm();
     form.setText("Dependency Tree");
     form.setExpandHorizontal(true);
     form.setExpandVertical(true);
-    
+
     Composite body = form.getBody();
     body.setLayout(new FillLayout());
 
@@ -122,17 +128,17 @@ public class DependencyTreePage extends FormPage {
     formToolkit.adapt(sashForm, true, true);
 
     createHierarchySection(sashForm, formToolkit);
-    
+
     createListSection(sashForm, formToolkit);
-    
+
     sashForm.setWeights(new int[] {1, 1});
 
     createSearchBar(managedForm);
-    
+
     // compatibility proxy to support Eclipse 3.2
     FormUtils.proxy(managedForm.getToolkit(), //
         FormUtils.FormTooliktStub.class).decorateFormHeading(form.getForm());
-    
+
     loadData(false);
   }
 
@@ -141,20 +147,20 @@ public class DependencyTreePage extends FormPage {
       protected IStatus run(IProgressMonitor monitor) {
         try {
           final DependencyNode dependencyNode = pomEditor.readDependencies(force, monitor);
-          
+
           dependencyNode.accept(new DependencyNodeVisitor() {
             public boolean visit(DependencyNode node) {
               dependencyNodes.add(node);
               return true;
             }
-            
+
             public boolean endVisit(DependencyNode dependencynode) {
               return true;
             }
           });
-          
+
           mavenProject = pomEditor.readMavenProject(false);
-          
+
           getPartControl().getDisplay().asyncExec(new Runnable() {
             public void run() {
               treeViewer.setInput(dependencyNode);
@@ -175,14 +181,13 @@ public class DependencyTreePage extends FormPage {
             }
           });
         }
-        
+
         return Status.OK_STATUS;
       }
     }.schedule();
   }
 
-  private void createHierarchySection(Composite sashForm,
-      FormToolkit formToolkit) {
+  private void createHierarchySection(Composite sashForm, FormToolkit formToolkit) {
     Composite hierarchyComposite = formToolkit.createComposite(sashForm, SWT.NONE);
     hierarchyComposite.setLayout(new GridLayout());
 
@@ -190,17 +195,17 @@ public class DependencyTreePage extends FormPage {
     hierarchySection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     hierarchySection.setText("Dependencies Hierarchy");
     formToolkit.paintBordersFor(hierarchySection);
- 
+
     Tree tree = formToolkit.createTree(hierarchySection, SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI);
     hierarchySection.setClient(tree);
-    
+
     treeViewer = new TreeViewer(tree);
     treeViewer.setData(FormToolkit.KEY_DRAW_BORDER, Boolean.TRUE);
-    
+
     DependencyTreeLabelProvider2 treeLabelProvider = new DependencyTreeLabelProvider2();
     treeViewer.setContentProvider(new DependencyTreeContentProvider2());
     treeViewer.setLabelProvider(treeLabelProvider);
-    
+
     treeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
       public void selectionChanged(SelectionChangedEvent event) {
         if(!isSettingSelection) {
@@ -211,7 +216,7 @@ public class DependencyTreePage extends FormPage {
         }
       }
     });
-    
+
     treeViewer.addOpenListener(new IOpenListener() {
       public void open(OpenEvent event) {
         IStructuredSelection selection = (IStructuredSelection) treeViewer.getSelection();
@@ -224,55 +229,58 @@ public class DependencyTreePage extends FormPage {
         }
       }
     });
- 
+
     createHierarchyToolbar(hierarchySection, treeLabelProvider, formToolkit);
   }
 
   private void createHierarchyToolbar(Section hierarchySection, final DependencyTreeLabelProvider2 treeLabelProvider,
       FormToolkit formToolkit) {
     ToolBarManager hiearchyToolBarManager = new ToolBarManager(SWT.FLAT);
-    
+
     hiearchyToolBarManager.add(new Action("Collapse All", MavenEditorImages.COLLAPSE_ALL) {
       public void run() {
         treeViewer.collapseAll();
       }
     });
- 
+
     hiearchyToolBarManager.add(new Action("Expand All", MavenEditorImages.EXPAND_ALL) {
       public void run() {
         treeViewer.expandAll();
       }
     });
-    
+
     hiearchyToolBarManager.add(new Separator());
-      
+
     hiearchyToolBarManager.add(new Action("Sort", MavenEditorImages.SORT) {
       public int getStyle() {
         return AS_CHECK_BOX;
       }
+
       public void run() {
-        if(treeViewer.getComparator()==null) {
+        if(treeViewer.getComparator() == null) {
           treeViewer.setComparator(new ViewerComparator());
         } else {
           treeViewer.setComparator(null);
         }
       }
     });
-    
+
     hiearchyToolBarManager.add(new Action("Show GroupId", MavenEditorImages.SHOW_GROUP) {
       public int getStyle() {
         return AS_CHECK_BOX;
       }
+
       public void run() {
         treeLabelProvider.setShowGroupId(isChecked());
         treeViewer.refresh();
       }
     });
-    
+
     hierarchyFilterAction = new Action("Filter", MavenEditorImages.FILTER) {
       public int getStyle() {
         return AS_CHECK_BOX;
       }
+
       public void run() {
         if(isChecked()) {
           treeViewer.setFilters(new ViewerFilter[] {searchFilter, listSelectionFilter});
@@ -285,7 +293,7 @@ public class DependencyTreePage extends FormPage {
     };
     hierarchyFilterAction.setChecked(true);
     hiearchyToolBarManager.add(hierarchyFilterAction);
-    
+
     Composite toolbarComposite = formToolkit.createComposite(hierarchySection);
     toolbarComposite.setBackground(null);
     RowLayout rowLayout = new RowLayout();
@@ -295,7 +303,7 @@ public class DependencyTreePage extends FormPage {
     rowLayout.marginTop = 0;
     rowLayout.marginBottom = 0;
     toolbarComposite.setLayout(rowLayout);
- 
+
     hiearchyToolBarManager.createControl(toolbarComposite);
     hierarchySection.setTextClient(toolbarComposite);
   }
@@ -303,14 +311,14 @@ public class DependencyTreePage extends FormPage {
   private void createListSection(SashForm sashForm, FormToolkit formToolkit) {
     Composite listComposite = formToolkit.createComposite(sashForm, SWT.NONE);
     listComposite.setLayout(new GridLayout());
- 
+
     Section listSection = formToolkit.createSection(listComposite, Section.TITLE_BAR);
     listSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     listSection.setText("Resolved Dependencies");
     formToolkit.paintBordersFor(listSection);
- 
+
     final DependencyListLabelProvider listLabelProvider = new DependencyListLabelProvider();
-    
+
     Table table = formToolkit.createTable(listSection, SWT.FLAT | SWT.MULTI);
     listSection.setClient(table);
 
@@ -319,12 +327,12 @@ public class DependencyTreePage extends FormPage {
     listViewer.setData(FormToolkit.KEY_DRAW_BORDER, Boolean.TRUE);
     listViewer.setContentProvider(new DependencyListContentProvider());
     listViewer.setLabelProvider(listLabelProvider);
-    listViewer.setComparator(new ViewerComparator());  // by default is sorted
-    
+    listViewer.setComparator(new ViewerComparator()); // by default is sorted
+
     listSelectionFilter = new ListSelectionFilter();
     listViewer.addSelectionChangedListener(listSelectionFilter);
     listViewer.getTable().addFocusListener(listSelectionFilter);
- 
+
     listViewer.addOpenListener(new IOpenListener() {
       public void open(OpenEvent event) {
         IStructuredSelection selection = (IStructuredSelection) listViewer.getSelection();
@@ -337,54 +345,58 @@ public class DependencyTreePage extends FormPage {
         }
       }
     });
-    
+
     createListToolbar(listSection, listLabelProvider, formToolkit);
-    
+
   }
 
   private void createListToolbar(Section listSection, final DependencyListLabelProvider listLabelProvider,
       FormToolkit formToolkit) {
     ToolBarManager listToolBarManager = new ToolBarManager(SWT.FLAT);
-    
+
     listToolBarManager.add(new Action("Sort", MavenEditorImages.SORT) {
       {
         setChecked(true);
       }
+
       public int getStyle() {
         return AS_CHECK_BOX;
       }
+
       public void run() {
-        if(listViewer.getComparator()==null) {
+        if(listViewer.getComparator() == null) {
           listViewer.setComparator(new ViewerComparator());
         } else {
           listViewer.setComparator(null);
         }
       }
     });
-    
+
     listToolBarManager.add(new Action("Show GroupId", MavenEditorImages.SHOW_GROUP) {
       public int getStyle() {
         return AS_CHECK_BOX;
       }
+
       public void run() {
         listLabelProvider.setShowGroupId(isChecked());
         listViewer.refresh();
       }
     });
-    
+
     listToolBarManager.add(new Action("Filter", MavenEditorImages.FILTER) {
       public int getStyle() {
         return AS_CHECK_BOX;
       }
+
       public void run() {
-        if(listViewer.getFilters()==null || listViewer.getFilters().length==0) {
+        if(listViewer.getFilters() == null || listViewer.getFilters().length == 0) {
           listViewer.addFilter(searchFilter);
         } else {
           listViewer.removeFilter(searchFilter);
         }
       }
     });
-    
+
     Composite toolbarComposite = formToolkit.createComposite(listSection);
     toolbarComposite.setBackground(null);
     RowLayout rowLayout = new RowLayout();
@@ -394,19 +406,19 @@ public class DependencyTreePage extends FormPage {
     rowLayout.marginTop = 0;
     rowLayout.marginBottom = 0;
     toolbarComposite.setLayout(rowLayout);
- 
+
     listToolBarManager.createControl(toolbarComposite);
     listSection.setTextClient(toolbarComposite);
   }
-  
+
   private void createSearchBar(IManagedForm managedForm) {
     searchControl = new SearchControl("Find", managedForm);
     searchMatcher = new SearchMatcher(searchControl);
     searchFilter = new DependencyFilter(new SearchMatcher(searchControl));
-    treeViewer.addFilter(searchFilter);  // by default is filtered
+    treeViewer.addFilter(searchFilter); // by default is filtered
 
     ScrolledForm form = managedForm.getForm();
-    
+
     IToolBarManager pageToolBarManager = form.getForm().getToolBarManager();
     pageToolBarManager.add(searchControl);
     pageToolBarManager.add(new Separator());
@@ -415,9 +427,9 @@ public class DependencyTreePage extends FormPage {
         loadData(true);
       }
     });
-    
+
     form.updateToolBar();
-  
+
     searchControl.getSearchText().addFocusListener(new FocusAdapter() {
       public void focusGained(FocusEvent e) {
         isSettingSelection = true;
@@ -426,7 +438,7 @@ public class DependencyTreePage extends FormPage {
         isSettingSelection = false;
       }
     });
-  
+
     searchControl.getSearchText().addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent e) {
         isSettingSelection = true;
@@ -438,45 +450,48 @@ public class DependencyTreePage extends FormPage {
   }
 
   protected void selectListElements(Matcher matcher) {
-    ArrayList<Artifact> artifacts = new ArrayList<Artifact>();
-    if(mavenProject!=null) {
+    DependencyListLabelProvider listLabelProvider = (DependencyListLabelProvider) listViewer.getLabelProvider();
+    listLabelProvider.setMatcher(matcher);
+    listViewer.refresh();
+
+    if(!matcher.isEmpty() && mavenProject != null) {
       @SuppressWarnings("unchecked")
       Set<Artifact> projectArtifacts = mavenProject.getArtifacts();
       for(Artifact a : projectArtifacts) {
         if(matcher.isMatchingArtifact(a.getGroupId(), a.getArtifactId())) {
-          artifacts.add(a);
+          listViewer.reveal(a);
+          break;
         }
       }
     }
-
-    listViewer.refresh();
-    listViewer.setSelection(new StructuredSelection(artifacts), true);
   }
 
   private void selectTreeElements(Matcher matcher) {
-    ArrayList<DependencyNode> nodes = new ArrayList<DependencyNode>();
-    for(DependencyNode node : dependencyNodes) {
-      Artifact a = node.getArtifact();
-      if(matcher.isMatchingArtifact(a.getGroupId(), a.getGroupId())) {
-        nodes.add(node);
-      }
-    }
-
+    DependencyTreeLabelProvider2 treeLabelProvider = (DependencyTreeLabelProvider2) treeViewer.getLabelProvider();
+    treeLabelProvider.setMatcher(matcher);
     treeViewer.refresh();
     treeViewer.expandAll();
-    treeViewer.setSelection(new StructuredSelection(nodes), true);
-  }
 
+    if(!matcher.isEmpty()) {
+      for(DependencyNode node : dependencyNodes) {
+        Artifact a = node.getArtifact();
+        if(matcher.isMatchingArtifact(a.getGroupId(), a.getGroupId())) {
+          treeViewer.reveal(node);
+          break;
+        }
+      }
+    }
+  }
 
   static class DependencyFilter extends ViewerFilter {
     protected Matcher matcher;
-    
+
     public DependencyFilter(Matcher matcher) {
       this.matcher = matcher;
     }
 
     public boolean select(Viewer viewer, Object parentElement, Object element) {
-      if(matcher!=null && !matcher.isEmpty()) {
+      if(matcher != null && !matcher.isEmpty()) {
         // matcher = new TextMatcher(searchControl.getSearchText().getText());
         if(element instanceof Artifact) {
           Artifact a = (Artifact) element;
@@ -489,7 +504,7 @@ public class DependencyTreePage extends FormPage {
           if(matcher.isMatchingArtifact(a.getGroupId(), a.getArtifactId())) {
             return true;
           }
-          
+
           class ChildMatcher implements DependencyNodeVisitor {
             protected boolean foundMatch = false;
 
@@ -502,11 +517,12 @@ public class DependencyTreePage extends FormPage {
               }
               return true;
             }
-            
+
             public boolean endVisit(DependencyNode node) {
               return true;
             }
-          };
+          }
+          ;
 
           ChildMatcher childMatcher = new ChildMatcher();
           node.accept(childMatcher);
@@ -515,17 +531,17 @@ public class DependencyTreePage extends FormPage {
       }
       return true;
     }
-    
+
   }
-  
+
   class ListSelectionFilter extends DependencyFilter implements ISelectionChangedListener, FocusListener {
-    
+
     public ListSelectionFilter() {
-      super(null);  // no filter by default
+      super(null); // no filter by default
     }
-    
+
     // ISelectionChangedListener
-    
+
     public void selectionChanged(SelectionChangedEvent event) {
       if(!isSettingSelection) {
         isSettingSelection = true;
@@ -535,86 +551,85 @@ public class DependencyTreePage extends FormPage {
         isSettingSelection = false;
       }
     }
-    
+
     // FocusListener
-    
+
     public void focusGained(FocusEvent e) {
       if(hierarchyFilterAction.isChecked()) {
         treeViewer.addFilter(this);
       }
     }
-    
+
     public void focusLost(FocusEvent e) {
       treeViewer.removeFilter(this);
       matcher = null;
     }
   }
-  
 
   static class DependencyTreeContentProvider implements ITreeContentProvider {
-    
+
     public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
     }
-  
+
     public Object[] getElements(Object element) {
       return getChildren(element);
     }
-  
+
     public Object[] getChildren(Object parent) {
       if(parent instanceof MetadataTreeNode) {
         MetadataTreeNode[] children = ((MetadataTreeNode) parent).getChildren();
-        if (children != null) {
+        if(children != null) {
           return children;
         }
       }
       return EMPTY;
     }
-  
+
     public boolean hasChildren(Object element) {
       if(element instanceof MetadataTreeNode) {
-        return ((MetadataTreeNode) element).hasChildren(); 
+        return ((MetadataTreeNode) element).hasChildren();
       }
       return false;
     }
-  
+
     public Object getParent(Object element) {
       if(element instanceof MetadataTreeNode) {
-        return ((MetadataTreeNode) element).getParent(); 
+        return ((MetadataTreeNode) element).getParent();
       }
       return null;
     }
-  
+
     public void dispose() {
     }
   }
 
   static class DependencyTreeLabelProvider extends LabelProvider {
-    
+
     public String getText(Object element) {
       if(element instanceof MetadataTreeNode) {
         MetadataTreeNode node = (MetadataTreeNode) element;
         ArtifactMetadata md = node.getMd();
         String label = md.getGroupId() + " : " + md.getArtifactId() + " : " + md.getVersion();
-        
-        if(md.getClassifier()!=null) {
+
+        if(md.getClassifier() != null) {
           label += " - " + md.getClassifier();
         }
-        
+
         label += " [" + md.getScope() + "]";
-        
-        return label; 
+
+        return label;
       }
       return element.toString();
     }
-  
+
   }
 
   final class DependencyTreeContentProvider2 implements ITreeContentProvider {
-  
+
     public Object[] getElements(Object input) {
       return getChildren(input);
     }
-    
+
     public Object[] getChildren(Object element) {
       if(element instanceof DependencyNode) {
         DependencyNode node = (DependencyNode) element;
@@ -624,7 +639,7 @@ public class DependencyTreePage extends FormPage {
       }
       return new Object[0];
     }
-  
+
     public Object getParent(Object element) {
 //      if(element instanceof DependencyNode) {
 //        DependencyNode node = (DependencyNode) element;
@@ -632,7 +647,7 @@ public class DependencyTreePage extends FormPage {
 //      }
       return null;
     }
-  
+
     public boolean hasChildren(Object element) {
       if(element instanceof DependencyNode) {
         DependencyNode node = (DependencyNode) element;
@@ -640,25 +655,31 @@ public class DependencyTreePage extends FormPage {
       }
       return false;
     }
-  
+
     public void dispose() {
     }
-  
+
     public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
     }
-    
+
   }
 
   final class DependencyTreeLabelProvider2 extends LabelProvider implements IColorProvider {
-    
+
     private boolean showGroupId = false;
+
+    private Matcher matcher = null;
+
+    public void setMatcher(Matcher matcher) {
+      this.matcher = matcher;
+    }
 
     public void setShowGroupId(boolean showGroupId) {
       this.showGroupId = showGroupId;
     }
 
     // IColorProvider
-    
+
     public Color getForeground(Object element) {
       if(element instanceof DependencyNode) {
         DependencyNode node = (DependencyNode) element;
@@ -671,35 +692,41 @@ public class DependencyTreePage extends FormPage {
       }
       return null;
     }
-    
+
     public Color getBackground(Object element) {
+      if(matcher != null && !matcher.isEmpty() && element instanceof DependencyNode) {
+        Artifact a = ((DependencyNode) element).getArtifact();
+        if(matcher.isMatchingArtifact(a.getGroupId(), a.getArtifactId())) {
+          return searchHighlightColor;
+        }
+      }
       return null;
     }
-    
+
     // LabelProvider
-    
+
     @Override
     public String getText(Object element) {
       if(element instanceof DependencyNode) {
         DependencyNode node = (DependencyNode) element;
-        
+
         Artifact a = node.getState() == DependencyNode.OMITTED_FOR_CONFLICT ? node.getRelatedArtifact() //
             : node.getArtifact();
-  
+
         String label = "";
-        
+
         if(showGroupId) {
           label += a.getGroupId() + " : ";
         }
-        
+
         label += a.getArtifactId() + " : ";
-  
+
         if(a.getVersion() != null || a.getBaseVersion() != null) {
           label += a.getBaseVersion() == null ? a.getVersion() : a.getBaseVersion();
         } else {
           label += a.getVersionRange().toString();
         }
-        
+
         switch(node.getState()) {
           case DependencyNode.INCLUDED:
           case DependencyNode.OMITTED_FOR_CYCLE:
@@ -709,38 +736,38 @@ public class DependencyTreePage extends FormPage {
             }
             if(node.getVersionSelectedFromRange() != null) {
               label += " (from " + node.getVersionSelectedFromRange().toString() //
-              + " available " + node.getAvailableVersions().toString() + ")";
+                  + " available " + node.getAvailableVersions().toString() + ")";
             }
             break;
-  
+
           case DependencyNode.OMITTED_FOR_CONFLICT:
             label += " (conflicted " + node.getArtifact().getVersion() + ")";
             break;
         }
-  
+
         if(a.getClassifier() != null) {
           label += " - " + a.getClassifier();
         }
-  
+
         label += " [" + (a.getScope() == null ? "compile" : a.getScope()) + "]";
-  
+
         if(node.getPremanagedScope() != null) {
           label += " (from " + node.getPremanagedScope() + ")";
         }
-  
+
         if(node.getOriginalScope() != null) {
           label += " (from " + node.getOriginalScope() + ")";
         }
-  
+
         if(node.getFailedUpdateScope() != null) {
           label += " (not updated from " + node.getFailedUpdateScope() + ")";
         }
-        
-        return label; 
+
+        return label;
       }
       return element.toString();
     }
-  
+
 //    private String getState(DependencyNode node) {
 //      switch(node.getState()) {
 //        case DependencyNode.INCLUDED:
@@ -757,7 +784,7 @@ public class DependencyTreePage extends FormPage {
 //      }
 //      return "?";
 //    }
-  
+
     @Override
     public Image getImage(Object element) {
       if(element instanceof DependencyNode) {
@@ -775,12 +802,18 @@ public class DependencyTreePage extends FormPage {
 
     private boolean showGroupId = false;
 
+    private Matcher matcher = null;
+
+    public void setMatcher(Matcher matcher) {
+      this.matcher = matcher;
+    }
+
     public void setShowGroupId(boolean showGroupId) {
       this.showGroupId = showGroupId;
     }
-    
+
     // IColorProvider
-    
+
     public Color getForeground(Object element) {
       if(element instanceof Artifact) {
         Artifact a = (Artifact) element;
@@ -791,38 +824,44 @@ public class DependencyTreePage extends FormPage {
       }
       return null;
     }
-    
+
     public Color getBackground(Object element) {
+      if(matcher != null && !matcher.isEmpty() && element instanceof Artifact) {
+        Artifact a = (Artifact) element;
+        if(matcher.isMatchingArtifact(a.getGroupId(), a.getArtifactId())) {
+          return searchHighlightColor;
+        }
+      }
       return null;
     }
-    
+
     // LabelProvider
-    
+
     @Override
     public String getText(Object element) {
       if(element instanceof Artifact) {
         Artifact a = (Artifact) element;
         String label = "";
-        
+
         if(showGroupId) {
           label += a.getGroupId() + " : ";
         }
-        
+
         label += a.getArtifactId() + " : " + a.getVersion();
-        
-        if(a.getClassifier()!=null) {
+
+        if(a.getClassifier() != null) {
           label += " - " + a.getClassifier();
         }
-        
-        if(a.getScope()!=null) {
+
+        if(a.getScope() != null) {
           label += " [" + a.getScope() + "]";
         }
-        
+
         return label;
       }
       return super.getText(element);
     }
-    
+
     @Override
     public Image getImage(Object element) {
       if(element instanceof Artifact) {
@@ -833,11 +872,11 @@ public class DependencyTreePage extends FormPage {
       }
       return null;
     }
-  
+
   }
 
   public class DependencyListContentProvider implements IStructuredContentProvider {
-  
+
     @SuppressWarnings("unchecked")
     public Object[] getElements(Object input) {
       if(input instanceof MavenProject) {
@@ -847,25 +886,25 @@ public class DependencyTreePage extends FormPage {
       }
       return null;
     }
-    
+
     public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
     }
-  
+
     public void dispose() {
     }
-    
+
   }
 
   public static class ArtifactMatcher extends Matcher {
-  
+
     protected final HashSet<String> artifactKeys = new HashSet<String>();
-  
+
     public ArtifactMatcher(IStructuredSelection selection) {
       for(Iterator<?> it = selection.iterator(); it.hasNext();) {
         addArtifactKey(it.next());
       }
     }
-    
+
     public boolean isEmpty() {
       return artifactKeys.isEmpty();
     }
@@ -873,14 +912,14 @@ public class DependencyTreePage extends FormPage {
     public boolean isMatchingArtifact(String groupId, String artifactId) {
       return artifactKeys.contains(getKey(groupId, artifactId));
     }
-    
+
     protected void addArtifactKey(Object o) {
       if(o instanceof Artifact) {
         Artifact a = (Artifact) o;
         artifactKeys.add(getKey(a.getGroupId(), a.getArtifactId()));
       }
     }
-    
+
     protected String getKey(String groupId, String artifactId) {
       return groupId + ":" + artifactId;
     }
@@ -902,5 +941,10 @@ public class DependencyTreePage extends FormPage {
     }
 
   }
-  
+
+  @Override
+  public void dispose() {
+    searchHighlightColor.dispose();
+    super.dispose();
+  }
 }
