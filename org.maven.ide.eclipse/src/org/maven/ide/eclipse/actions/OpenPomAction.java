@@ -165,7 +165,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
     MavenPlugin plugin = MavenPlugin.getDefault();
     
     // TODO open poms for linked projects inside "Maven Dependencies" container
-    IPackageFragmentRoot fragment = (IPackageFragmentRoot) SelectionUtil.getType(element, IPackageFragmentRoot.class);
+    IPackageFragmentRoot fragment = SelectionUtil.getType(element, IPackageFragmentRoot.class);
     if(fragment != null) {
       IProject project = fragment.getJavaProject().getProject();
       if(project.isAccessible() && fragment.isArchive()) {
@@ -179,7 +179,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
       }
     }
 
-    IProject project = (IProject) SelectionUtil.getType(element, IProject.class);
+    IProject project = SelectionUtil.getType(element, IProject.class);
     if(project != null && project.isAccessible()) {
       MavenProjectFacade projectFacade = plugin.getMavenProjectManager().create(project, new NullProgressMonitor());
       if(projectFacade!=null) {

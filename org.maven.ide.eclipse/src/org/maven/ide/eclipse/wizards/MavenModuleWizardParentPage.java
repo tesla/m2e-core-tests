@@ -188,9 +188,9 @@ public class MavenModuleWizardParentPage extends AbstractMavenWizardPage {
     int type = SelectionUtil.getElementType(parentObject);
 
     if(SelectionUtil.POM_FILE == type) {
-      pom = (IFile) SelectionUtil.getType(parentObject, IFile.class);
+      pom = SelectionUtil.getType(parentObject, IFile.class);
     } else if(SelectionUtil.PROJECT_WITH_NATURE == type) {
-      IProject project = (IProject) SelectionUtil.getType(parentObject, IProject.class);
+      IProject project = SelectionUtil.getType(parentObject, IProject.class);
       pom = project.getFile(MavenPlugin.POM_FILE_NAME);
     } else if(parentObject instanceof IContainer) {
       pom = ((IContainer) parentObject).getFile(new Path(MavenPlugin.POM_FILE_NAME));

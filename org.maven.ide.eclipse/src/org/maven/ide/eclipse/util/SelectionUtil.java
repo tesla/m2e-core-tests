@@ -39,7 +39,7 @@ public class SelectionUtil {
   /** Checks which type the given selection belongs to. */
   public static int getSelectionType(IStructuredSelection selection) {
     int type = UNSUPPORTED;
-    for(Iterator it = selection.iterator(); it.hasNext();) {
+    for(Iterator<?> it = selection.iterator(); it.hasNext();) {
       int elementType = getElementType(it.next());
       if(elementType == UNSUPPORTED) {
         return UNSUPPORTED;
@@ -51,7 +51,7 @@ public class SelectionUtil {
 
   /** Checks which type the given element belongs to. */
   public static int getElementType(Object element) {
-    IProject project = (IProject) getType(element, IProject.class);
+    IProject project = getType(element, IProject.class);
     if(project != null) {
       try {
         if(project.hasNature(MavenPlugin.NATURE_ID)) {
@@ -63,14 +63,14 @@ public class SelectionUtil {
       }
     }
 
-    IFile file = (IFile) getType(element, IFile.class);
+    IFile file = getType(element, IFile.class);
     if(file != null) {
       if(MavenPlugin.POM_FILE_NAME.equals(file.getFullPath().lastSegment())) {
         return POM_FILE;
       }
     }
 
-    IPackageFragmentRoot fragment = (IPackageFragmentRoot) getType(element, IPackageFragmentRoot.class);
+    IPackageFragmentRoot fragment = getType(element, IPackageFragmentRoot.class);
     if(fragment != null) {
       if(/*fragment.isExternal() && */fragment.isArchive()) {
         return JAR_FILE;
@@ -83,12 +83,13 @@ public class SelectionUtil {
   /**
    * Checks if the object belongs to a given type and returns it or a suitable adapter.
    */
-  public static Object getType(Object element, Class type) {
+  @SuppressWarnings("unchecked")
+  public static <T> T getType(Object element, Class<T> type) {
     if(type.isInstance(element)) {
-      return element;
+      return (T) element;
     } else if(element instanceof IAdaptable) {
-      return ((IAdaptable) element).getAdapter(type);
+      return (T) ((IAdaptable) element).getAdapter(type);
     }
-    return Platform.getAdapterManager().getAdapter(element, type);
+    return (T) Platform.getAdapterManager().getAdapter(element, type);
   }
 }

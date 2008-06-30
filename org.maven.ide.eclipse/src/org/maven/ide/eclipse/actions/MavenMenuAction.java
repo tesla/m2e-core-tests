@@ -9,7 +9,6 @@
 package org.maven.ide.eclipse.actions;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
@@ -38,7 +37,7 @@ public class MavenMenuAction implements IObjectActionDelegate, IMenuCreator {
 
   IAction delegateAction;
   
-  static ArrayList creators = new ArrayList();
+  static ArrayList<AbstractMavenMenuCreator> creators = new ArrayList<AbstractMavenMenuCreator>();
   
   static {
     creators.add(new DefaultMavenMenuCreator());
@@ -68,8 +67,7 @@ public class MavenMenuAction implements IObjectActionDelegate, IMenuCreator {
       
       action.setEnabled(!selection.isEmpty());
       
-      for(Iterator it = creators.iterator(); it.hasNext();) {
-        AbstractMavenMenuCreator creator = (AbstractMavenMenuCreator) it.next();
+      for(AbstractMavenMenuCreator creator : creators) {
         creator.selectionChanged(action, selection);
       }
     }
@@ -101,8 +99,7 @@ public class MavenMenuAction implements IObjectActionDelegate, IMenuCreator {
           for(int i = 0; i < items.length; i++ ) {
             items[i].dispose();
           }
-          for(Iterator it = creators.iterator(); it.hasNext();) {
-            AbstractMavenMenuCreator creator = (AbstractMavenMenuCreator) it.next();
+          for(AbstractMavenMenuCreator creator : creators) {
             creator.createMenu(m);
           }
           fillMenu = false;
