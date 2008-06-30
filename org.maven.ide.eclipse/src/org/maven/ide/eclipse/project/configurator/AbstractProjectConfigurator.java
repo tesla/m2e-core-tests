@@ -42,9 +42,32 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
   private String id;
   private String name;
 
+  /**
+   * Configures Eclipse project passed in ProjectConfigurationRequest, using information
+   * from Maven project and other configuration request parameters
+   * 
+   * <p><i>Should be implemented by subclass</i> 
+   * 
+   * @param embedder a Maven embedder instance that can be reused in current project configuration session
+   * @param request a project configuration request
+   * @param monitor a progress monitor
+   */
   public abstract void configure(MavenEmbedder embedder, ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException;
 
-  public void mavenProjectChanged(MavenProjectChangedEvent[] events, IProgressMonitor monitor) {
+  /**
+   * Updates project configuration according project changes. 
+   * 
+   * <p><i>Can be overwritten by subclass</i>
+   * 
+   * @param event a project change event
+   * @param monitor a progress monitor
+   */
+  protected void mavenProjectChanged(MavenProjectChangedEvent event, IProgressMonitor monitor) throws CoreException {
+  }
+
+  // IMavenProjectChangedListener
+  
+  public final void mavenProjectChanged(MavenProjectChangedEvent[] events, IProgressMonitor monitor) {
     for (int i = 0; i < events.length; i++) {
       try {
         mavenProjectChanged(events[i], monitor);
@@ -52,13 +75,6 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
         MavenPlugin.log(ex);
       }
     }
-  }
-
-  /**
-   * @throws CoreException  
-   */
-  protected void mavenProjectChanged(MavenProjectChangedEvent event, IProgressMonitor monitor) throws CoreException {
-    // do nothing
   }
 
   public int getPriority() {
