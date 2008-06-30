@@ -105,6 +105,7 @@ public class DependencyGraphLegendPopup extends PopupDialog implements DisposeLi
       }
 	  };
     g.setConnectionStyle(ZestStyles.CONNECTIONS_DIRECTED );
+    g.setEnabled(false);
    
     {
       GraphNode n1 = new GraphNode(g, SWT.NONE, " compile scope dependency ");
