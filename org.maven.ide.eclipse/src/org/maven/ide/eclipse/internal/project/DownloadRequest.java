@@ -12,15 +12,19 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 
 
-class DownloadSourceRequest {
+class DownloadRequest {
   final IProject project;
   final IPath path;
   final ArtifactKey artifactKey;
+  final boolean downloadSources;
+  final boolean downloadJavaDoc;
 
-  public DownloadSourceRequest(IProject project, IPath path, ArtifactKey artifactKey) {
+  public DownloadRequest(IProject project, IPath path, ArtifactKey artifactKey, boolean downloadSources, boolean downloadJavaDoc) {
     this.project = project;
     this.path = path;
     this.artifactKey = artifactKey;
+    this.downloadSources = downloadSources;
+    this.downloadJavaDoc = downloadJavaDoc;
   }
 
   public ArtifactKey getArtifactKey() {
@@ -34,4 +38,13 @@ class DownloadSourceRequest {
   public IPath getPath() {
     return path;
   }
+  
+  public boolean isDownloadSources() {
+    return this.downloadSources;
+  }
+  
+  public boolean isDownloadJavaDoc() {
+    return this.downloadJavaDoc;
+  }
+  
 }

@@ -214,7 +214,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     workspace.addResourceChangeListener(mavenBackgroundJob, IResourceChangeEvent.POST_CHANGE
         | IResourceChangeEvent.PRE_CLOSE | IResourceChangeEvent.PRE_DELETE);
 
-    this.projectManager = new MavenProjectManager(managerImpl, indexManager, mavenBackgroundJob);
+    this.projectManager = new MavenProjectManager(managerImpl, mavenBackgroundJob);
     this.projectManager.addMavenProjectChangedListener(new WorkspaceStateWriter());
     this.projectManager.refresh(new MavenUpdateRequest(workspace.getRoot().getProjects(), //
         true /*offline*/, false /* updateSnapshots */));

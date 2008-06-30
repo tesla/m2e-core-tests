@@ -21,9 +21,6 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.execution.MavenExecutionResult;
 
-import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.index.IndexManager;
-import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.internal.project.ArtifactKey;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerImpl;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerRefreshJob;
@@ -39,12 +36,8 @@ public class MavenProjectManager {
 
   private MavenProjectManagerRefreshJob mavenBackgroundJob;
 
-  private IndexManager indexManager;
-
-  public MavenProjectManager(MavenProjectManagerImpl manager, IndexManager indexManager,
-      MavenProjectManagerRefreshJob mavenBackgroundJob) {
+  public MavenProjectManager(MavenProjectManagerImpl manager, MavenProjectManagerRefreshJob mavenBackgroundJob) {
     this.manager = manager;
-    this.indexManager = indexManager;
     this.mavenBackgroundJob = mavenBackgroundJob;
   }
 
@@ -93,9 +86,16 @@ public class MavenProjectManager {
   
   // Downloading sources
 
+  /**
+   * Schedule background download of the sources and javadocs. Registered <code>IDownloadSourceListener</code>s will be
+   * notified about download completion.
+   * 
+   * @see MavenProjectManager#addDownloadSourceListener(IDownloadSourceListener)
+   */
   public void downloadSources(IProject project, IPath path, String groupId, String artifactId, String version,
-      String classifier) {
-    mavenBackgroundJob.downloadSources(project, path, groupId, artifactId, version, classifier);
+      String classifier, boolean downloadSources, boolean downloadJavaDoc) {
+    mavenBackgroundJob.downloadSources(project, path, groupId, artifactId, version, classifier, //
+        downloadSources, downloadJavaDoc);
   }
 
   public void addDownloadSourceListener(IDownloadSourceListener listener) {
@@ -107,59 +107,18 @@ public class MavenProjectManager {
   }
 
   /**
-   * If sources artifact is available in the local repo, return IPath of this artifact. Otherwise, if automatic source
-   * download is enabled in the preferences, the method will do the following If sources artifact is available in any
-   * remote repo, schedule background download of the sources and return null. DownloadSourceListeners will be notified
-   * upon download completion. Otherwise, if javadoc artifact is not available from the local repo but is available from
-   * any remote repo, schedule background download of javadoc and return null. DownloadSourceListeners will be notified
-   * upon download completion. Otherwise, return null.
+   * Returns sources artifact path in the local Maven repository or null if artifact is not present locally. 
    */
-  public IPath getSourcePath(IProject project, IPath path, Artifact artifact, boolean forceDownload) {
-    IPath srcPath = getArtifactPath(artifact, MavenProjectManagerImpl.ARTIFACT_TYPE_JAVA_SOURCE);
-
-    if(srcPath != null) {
-      return srcPath;
-    }
-
-    if(!forceDownload) {
-      return null;
-    }
-
-    IndexedArtifactFile af;
-    try {
-      af = indexManager.getIndexedArtifactFile(IndexManager.LOCAL_INDEX, indexManager.getDocumentKey(artifact));
-    } catch(Exception ex) {
-      MavenPlugin.log(ex.getMessage(), ex);
-      return null;
-    }
-
-    if(af == null) {
-      return null;
-    }
-
-    // download if sources artifact is available from a remote repo
-    boolean shouldDownload = af.sourcesExists != IndexManager.NOT_AVAILABLE;
-
-    // download if javadoc is not available in the local repo
-    // but is available from a remote repo
-    if(getArtifactPath(artifact, MavenProjectManagerImpl.ARTIFACT_TYPE_JAVADOC) == null) {
-      shouldDownload |= af.javadocExists != IndexManager.NOT_AVAILABLE;
-    }
-
-    if(shouldDownload) {
-      downloadSources(project, path, artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion(), artifact
-          .getClassifier());
-    }
-
-    return null;
+  public IPath getSourcePath(Artifact artifact) {
+    return getArtifactPath(artifact, MavenProjectManagerImpl.ARTIFACT_TYPE_JAVA_SOURCE);
   }
 
   /**
-   * If javadoc artifact is available in the local repo, return URL of this artifact. Otherwise, return null
+   * Returns URL of the artifact if javadoc artifact is available in the local Maven repository. Otherwise, return null
    */
   public String getJavaDocUrl(Artifact artifact) {
-    IPath javadocPath = getArtifactPath(artifact, MavenProjectManagerImpl.ARTIFACT_TYPE_JAVADOC);
-    return javadocPath == null ? null : manager.getJavaDocUrl(javadocPath.toString());
+    IPath javaDocPath = getArtifactPath(artifact, MavenProjectManagerImpl.ARTIFACT_TYPE_JAVADOC);
+    return javaDocPath == null ? null : manager.getJavaDocUrl(javaDocPath.toString());
   }
   
   /**

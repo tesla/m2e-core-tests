@@ -54,8 +54,10 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
     schedule(1000L);
   }
 
-  public void downloadSources(IProject project, IPath path, String groupId, String artifactId, String version, String classifier) {
-    queue(downloadSourcesQueue, new DownloadSourcesCommand(project, path, new ArtifactKey(groupId, artifactId, version, classifier)));
+  public void downloadSources(IProject project, IPath path, String groupId, String artifactId, String version,
+      String classifier, boolean downloadSources, boolean downloadJavaDoc) {
+    queue(downloadSourcesQueue, new DownloadSourcesCommand(project, path, //
+        new ArtifactKey(groupId, artifactId, version, classifier), downloadSources, downloadJavaDoc));
     schedule(1000L);
   }
   
@@ -80,9 +82,9 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
       // download sources
       executeCommands(downloadSourcesQueue, context, monitor);
 
-      if(context.downloadSources.size() > 0) {
+      if(context.downloadRequests.size() > 0) {
         monitor.subTask("Downloading sources");
-        manager.downloadSources(context.downloadSources, monitor);
+        manager.downloadSources(context.downloadRequests, monitor);
       }
 
     } catch(InterruptedException ex) {
@@ -210,7 +212,7 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
 
     public final MavenProjectManagerImpl manager;
 
-    public final List<DownloadSourceRequest> downloadSources = new ArrayList<DownloadSourceRequest>();
+    public final List<DownloadRequest> downloadRequests = new ArrayList<DownloadRequest>();
 
     public int sourcesCount = 0;
 
@@ -278,15 +280,20 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
     private final IProject project;
     private final IPath path;
     private final ArtifactKey artifactKey;
+    private final boolean downloadSources;
+    private final boolean downloadJavaDoc;
 
-    DownloadSourcesCommand(IProject project, IPath path, ArtifactKey artifactKey) {
+    DownloadSourcesCommand(IProject project, IPath path, ArtifactKey artifactKey, //
+        boolean downloadSources, boolean downloadJavaDoc) {
       this.project = project;
       this.path = path;
       this.artifactKey = artifactKey;
+      this.downloadSources = downloadSources;
+      this.downloadJavaDoc = downloadJavaDoc;
     }
 
     void execute(CommandContext context, IProgressMonitor monitor) {
-      context.downloadSources.add(new DownloadSourceRequest(project, path, artifactKey));
+      context.downloadRequests.add(new DownloadRequest(project, path, artifactKey, downloadSources, downloadJavaDoc));
       context.sourcesCount++ ;
     }
 

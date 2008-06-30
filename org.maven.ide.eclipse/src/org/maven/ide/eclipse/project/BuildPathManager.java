@@ -332,7 +332,8 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
 
         String key = entryPath.toPortableString();
 
-        IPath srcPath = null, srcRoot = null;
+        IPath srcPath = null; 
+        IPath srcRoot = null;
         if (sourceAttachment != null && sourceAttachment.containsKey(key + PROPERTY_SRC_PATH)) {
           srcPath = Path.fromPortableString((String) sourceAttachment.get(key + PROPERTY_SRC_PATH));
           if (sourceAttachment.containsKey(key + PROPERTY_SRC_ROOT)) {
@@ -340,7 +341,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
           }
         }
         if (srcPath == null) {
-          srcPath = projectManager.getSourcePath(mavenProject.getProject(), null, a, runtimeManager.isDownloadSources());
+          srcPath = projectManager.getSourcePath(a);
         }
 
         // configure javadocs if available
@@ -355,6 +356,10 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
           attributes.add(JavaCore.newClasspathAttribute(IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME,
               javaDocUrl));
         }
+        
+        boolean downloadSources = srcPath==null && runtimeManager.isDownloadSources();
+        boolean downloadJavaDoc = javaDocUrl==null && runtimeManager.isDownloadJavadoc();
+        downloadSources(mavenProject.getProject(), a, downloadSources, downloadJavaDoc);
 
         for (Iterator<AbstractClasspathConfigurator> ci = configurators.iterator(); ci.hasNext(); ) {
           AbstractClasspathConfigurator cpc = ci.next();
@@ -370,9 +375,28 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
             false /*not exported*/));
       }
     }
-
   }
 
+  private void downloadSources(IProject project, Artifact artifact, boolean downloadSources, boolean downloadJavaDoc) {
+    if(downloadSources || downloadJavaDoc) {
+      try {
+        IndexedArtifactFile af = indexManager.getIndexedArtifactFile(IndexManager.LOCAL_INDEX, //
+            indexManager.getDocumentKey(artifact));
+        if(af != null) {
+          // download if sources and javadoc artifact is available from remote repositories
+          boolean shouldDownloadSources = downloadSources && af.sourcesExists != IndexManager.NOT_AVAILABLE;
+          boolean shouldDownloadJavaDoc = downloadJavaDoc && af.javadocExists != IndexManager.NOT_AVAILABLE;
+          if(shouldDownloadSources || shouldDownloadJavaDoc) {
+            projectManager.downloadSources(project, null, artifact.getGroupId(), artifact.getArtifactId(), //
+                artifact.getVersion(), artifact.getClassifier(), shouldDownloadSources, shouldDownloadJavaDoc);
+          }
+        }
+      } catch(Exception ex) {
+        MavenPlugin.log(ex.getMessage(), ex);
+      }
+    }
+  }
+  
   public IClasspathEntry[] getClasspath(IProject project, int scope, IProgressMonitor monitor) throws CoreException {
     return getClasspath(project, scope, true, monitor);
   }
@@ -395,7 +419,8 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
       }
       return getClasspath(facade, scope, props, uniquePaths);
     } catch (IOException e) {
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, "Can't save classpath container changes", e));
+      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, //
+          "Can't save classpath container changes", e));
     }
   }
 
@@ -404,29 +429,35 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
   }
 
   /**
-   * Downloads sources for the given project using background job.
+   * Downloads artifact sources using background job.
    * 
    * If path is null, downloads sources for all classpath entries of the project,
    * otherwise downloads sources for the first classpath entry with the
    * given path.
    */
   public void downloadSources(IProject project, IPath path) throws CoreException {
+    download(project, path, true, false);
+  }
+
+  /**
+   * Downloads artifact JavaDocs using background job.
+   * 
+   * If path is null, downloads sources for all classpath entries of the project,
+   * otherwise downloads sources for the first classpath entry with the
+   * given path.
+   */
+  public void downloadJavaDoc(IProject project, IPath path) throws CoreException {
+    download(project, path, false, true);
+  }
+
+  private void download(IProject project, IPath path, boolean downloadSources, boolean downloadJavaDoc)
+      throws CoreException {
     for(Artifact artifact : findArtifacts(project, path)) {
-      projectManager.downloadSources(project, path, artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion(), artifact.getClassifier());
+      projectManager.downloadSources(project, path, artifact.getGroupId(), artifact.getArtifactId(), //
+          artifact.getVersion(), artifact.getClassifier(), downloadSources, downloadJavaDoc);
     }
   }
-
-  public Artifact findArtifact(IProject project, IPath path) throws CoreException {
-    if (path != null) {
-      Set<Artifact> artifacts = findArtifacts(project, path);
-      // it is not possible to have more than one classpath entry with the same path
-      if (artifacts.size() > 0) {
-        return artifacts.iterator().next();
-      }
-    }
-    return null;
-  }
-
+  
   private Set<Artifact> findArtifacts(IProject project, IPath path) throws CoreException {
     ArrayList<IClasspathEntry> entries = findClasspathEntries(project, path);
 
@@ -452,6 +483,17 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     return artifacts;
   }
 
+  public Artifact findArtifact(IProject project, IPath path) throws CoreException {
+    if (path != null) {
+      Set<Artifact> artifacts = findArtifacts(project, path);
+      // it is not possible to have more than one classpath entry with the same path
+      if (artifacts.size() > 0) {
+        return artifacts.iterator().next();
+      }
+    }
+    return null;
+  }
+  
   private Artifact findArtifactByArtifactKey(IClasspathEntry entry) {
     IClasspathAttribute[] attributes = entry.getExtraAttributes();
     String groupId = null;

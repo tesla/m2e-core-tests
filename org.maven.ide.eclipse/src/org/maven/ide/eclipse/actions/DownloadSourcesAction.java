@@ -12,6 +12,7 @@ import java.util.Iterator;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
@@ -20,28 +21,49 @@ import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.project.BuildPathManager;
 
 
 public class DownloadSourcesAction implements IObjectActionDelegate {
 
-  static final String ID = "org.maven.ide.eclipse.downloadSourcesAction";
+  public static final String ID_SOURCES = "org.maven.ide.eclipse.downloadSourcesAction";
+
+  public static final String ID_JAVADOC = "org.maven.ide.eclipse.downloadJavaDocAction";
 
   private IStructuredSelection selection;
 
+  private final String id;
+  
+  public DownloadSourcesAction(String id) {
+    this.id = id;
+  }
+
   public void run(IAction action) {
+    BuildPathManager buildpathManager = MavenPlugin.getDefault().getBuildpathManager();
     for(Iterator<?> it = selection.iterator(); it.hasNext();) {
       Object element = it.next();
       try {
+        IProject currentProject = null;
+        IPath currentPath = null;
         if(element instanceof IProject) {
           IProject project = (IProject) element;
           if(project.isAccessible() && project.hasNature(MavenPlugin.NATURE_ID)) {
-            MavenPlugin.getDefault().getBuildpathManager().downloadSources(project, null);
+            currentProject = project;
           }
         } else if(element instanceof IPackageFragmentRoot) {
           IPackageFragmentRoot fragment = (IPackageFragmentRoot) element;
           IProject project = fragment.getJavaProject().getProject();
           if(project.isAccessible() && fragment.isArchive()) {
-            MavenPlugin.getDefault().getBuildpathManager().downloadSources(project, fragment.getPath());
+            currentProject = project;
+            currentPath = fragment.getPath();
+          }
+        }
+        
+        if(currentProject!=null) {
+          if(isDownloadSources()) {
+            buildpathManager.downloadSources(currentProject, currentPath);
+          } else {
+            buildpathManager.downloadJavaDoc(currentProject, currentPath);
           }
         }
       } catch(CoreException ex) {
@@ -61,4 +83,8 @@ public class DownloadSourcesAction implements IObjectActionDelegate {
   public void setActivePart(IAction action, IWorkbenchPart targetPart) {
   }
 
+  private boolean isDownloadSources() {
+    return ID_SOURCES.equals(id);
+  }
+  
 }

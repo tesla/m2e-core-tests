@@ -786,7 +786,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals(1, cp.length);
     assertNull(cp[0].getSourceAttachmentPath()); 
 
-    MavenPlugin.getDefault().getBuildpathManager().downloadSources(project, null);
+    MavenPlugin.getDefault().getBuildpathManager().downloadJavaDoc(project, null);
     waitForJobsToComplete();
 
     container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
@@ -795,7 +795,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     assertNull(cp[0].getSourceAttachmentPath()); // sanity check
     assertEquals("" + cp[0], 1, getAttributeCount(cp[0], IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME));
     
-    MavenPlugin.getDefault().getBuildpathManager().downloadSources(project, null);
+    MavenPlugin.getDefault().getBuildpathManager().downloadJavaDoc(project, null);
     waitForJobsToComplete();
 
     container = BuildPathManager.getMaven2ClasspathContainer(javaProject);

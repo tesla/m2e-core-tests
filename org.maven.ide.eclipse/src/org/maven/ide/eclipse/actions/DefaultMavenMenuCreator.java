@@ -56,7 +56,8 @@ public class DefaultMavenMenuCreator extends AbstractMavenMenuCreator {
       addMenu(RefreshMavenModelsAction.ID, "Update Dependencies", new RefreshMavenModelsAction(), menu, "icons/update_dependencies.gif");
       addMenu(RefreshMavenModelsAction.ID_SNAPSHOTS, "Update Snapshots", new RefreshMavenModelsAction(true), menu);
       addMenu(UpdateSourcesAction.ID, "Update Project Configuration", new UpdateSourcesAction(), menu, "icons/update_source_folders.gif");
-      addMenu(DownloadSourcesAction.ID, "Download Sources", new DownloadSourcesAction(), menu);
+      addMenu(DownloadSourcesAction.ID_SOURCES, "Download Sources", new DownloadSourcesAction(DownloadSourcesAction.ID_SOURCES), menu);
+      addMenu(DownloadSourcesAction.ID_JAVADOC, "Download JavaDoc", new DownloadSourcesAction(DownloadSourcesAction.ID_JAVADOC), menu);
       new Separator().fill(menu, -1);
 
       // addMenu(OpenPomAction.ID, "Open POM", new OpenPomAction(), menu);
@@ -69,7 +70,7 @@ public class DefaultMavenMenuCreator extends AbstractMavenMenuCreator {
       boolean enableWorkspaceResolution = true;
       boolean enableNestedModules = true;
       if(selection.size() == 1) {
-        IProject project = (IProject) SelectionUtil.getType(selection.getFirstElement(), IProject.class);
+        IProject project = SelectionUtil.getType(selection.getFirstElement(), IProject.class);
         if(project!=null) {
           MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
           MavenProjectFacade projectFacade = projectManager.create(project, new NullProgressMonitor());
@@ -101,7 +102,8 @@ public class DefaultMavenMenuCreator extends AbstractMavenMenuCreator {
     }
   
     if(selectionType == SelectionUtil.JAR_FILE) {
-      addMenu(DownloadSourcesAction.ID, "Download Sources", new DownloadSourcesAction(), menu);
+      addMenu(DownloadSourcesAction.ID_SOURCES, "Download Sources", new DownloadSourcesAction(DownloadSourcesAction.ID_SOURCES), menu);
+      addMenu(DownloadSourcesAction.ID_JAVADOC, "Download JavaDoc", new DownloadSourcesAction(DownloadSourcesAction.ID_JAVADOC), menu);
       addMenu(OpenPomAction.ID, "Open POM", new OpenPomAction(), menu);
       addMenu(OpenUrlAction.ID_PROJECT, "Open Project Page", new OpenUrlAction(OpenUrlAction.ID_PROJECT), menu, "icons/web.gif");
       addMenu(OpenUrlAction.ID_ISSUES, "Open Issue Tracker", new OpenUrlAction(OpenUrlAction.ID_ISSUES), menu);

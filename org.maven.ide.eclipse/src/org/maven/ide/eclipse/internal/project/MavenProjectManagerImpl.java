@@ -40,8 +40,6 @@ import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.AbstractArtifactResolutionException;
@@ -49,7 +47,6 @@ import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.embedder.MavenEmbedderException;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionResult;
-import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.project.MavenProject;
 
@@ -673,10 +670,10 @@ public class MavenProjectManagerImpl {
     return state.getMavenProject(artifactKey);
   }
 
-  public void downloadSources(List<DownloadSourceRequest> downloadRequests, IProgressMonitor monitor) throws MavenEmbedderException, InterruptedException, CoreException {
+  public void downloadSources(List<DownloadRequest> downloadRequests, IProgressMonitor monitor) throws MavenEmbedderException, InterruptedException, CoreException {
     MavenEmbedder embedder = embedderManager.createEmbedder(EmbedderFactory.createWorkspaceCustomizer());
     try {
-      for(DownloadSourceRequest request : downloadRequests) {
+      for(DownloadRequest request : downloadRequests) {
         if(monitor.isCanceled()) {
           throw new InterruptedException();
         }
@@ -736,11 +733,15 @@ public class MavenProjectManagerImpl {
 
         if (artifact != null && remoteRepositories != null) {
           monitor.subTask(artifact.getId());
-          IPath srcPath = materializeArtifactPath(embedder, remoteRepositories, artifact, 
+          IPath srcPath = null;
+          if(request.isDownloadSources()) {
+            srcPath = materializeArtifactPath(embedder, remoteRepositories, artifact, //
                 ARTIFACT_TYPE_JAVA_SOURCE, monitor);
+          }
+          
           String javadocUrl = null;
-          if(srcPath == null) {
-            IPath javadocPath = materializeArtifactPath(embedder, remoteRepositories, artifact,
+          if(request.isDownloadJavaDoc()) {
+            IPath javadocPath = materializeArtifactPath(embedder, remoteRepositories, artifact, //
                 ARTIFACT_TYPE_JAVADOC, monitor);
             if (javadocPath != null) {
               javadocUrl = getJavaDocUrl(javadocPath.toString());
@@ -749,31 +750,28 @@ public class MavenProjectManagerImpl {
               String artifactLocation = artifact.getFile().getAbsolutePath();
               File file = new File(artifactLocation.substring(0, artifactLocation.length() - 4) + ".pom");
               if(file.exists()) {
-                Model model;
                 try {
-                  model = embedder.readModel(file);
-                } catch(XmlPullParserException ex) {
-                  throw new MavenEmbedderException(ex);
-                } catch(IOException ex) {
-                  throw new MavenEmbedderException(ex);
-                }
-                String url = model.getUrl();
-                if(url != null) {
-                  url = url.trim();
-                  if(url.length() > 0) {
-                    if(!url.endsWith("/"))
-                      url += "/";
-                    javadocUrl =  url + "apidocs/"; // assuming project is using maven-generated site
+                  MavenProject mavenProject = embedder.readProject(file);
+                  String url = mavenProject.getUrl();
+                  if(url != null) {
+                    url = url.trim();
+                    if(url.length() > 0) {
+                      if(!url.endsWith("/"))
+                        url += "/";
+                      javadocUrl =  url + "apidocs/"; // assuming project is using maven-generated site
+                    }
                   }
+                } catch(Exception ex) {
+                  MavenPlugin.log("Can't read Maven project from " + file, ex);
                 }
               }
             }
           }
+          
           if(srcPath != null || javadocUrl != null) {
             addDownloadSourceEvent(request.getProject(), request.getPath(), srcPath, javadocUrl);
           }
         }
-
       }
     } finally {
       embedder.stop();
@@ -1047,20 +1045,20 @@ public class MavenProjectManagerImpl {
   public String getJavaDocUrl(String fileName) {
     try {
       URL fileUrl = new File(fileName).toURL();
-      return "jar:"+fileUrl.toExternalForm()+"!/"+MavenProjectManagerImpl.getJavaDocPathInArchive(fileName);
+      return "jar:" + fileUrl.toExternalForm() + "!/" + getJavaDocPathInArchive(fileName);
     } catch(MalformedURLException ex) {
       return null;
     }
   }
 
-  private static String getJavaDocPathInArchive(String name) {
+  private String getJavaDocPathInArchive(String name) {
     long l1 = System.currentTimeMillis();
     ZipFile jarFile = null;
     try {
       jarFile = new ZipFile(name);
       String marker = "package-list";
-      for(Enumeration en = jarFile.entries(); en.hasMoreElements();) {
-        ZipEntry entry = (ZipEntry) en.nextElement();
+      for(Enumeration<? extends ZipEntry> en = jarFile.entries(); en.hasMoreElements();) {
+        ZipEntry entry = en.nextElement();
         String entryName = entry.getName();
         if(entryName.endsWith(marker)) {
           return entry.getName().substring(0, entryName.length()-marker.length());
