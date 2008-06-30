@@ -336,52 +336,58 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
 
   public <T> void setModifyListener(final Text textControl, ValueProvider<T> owner, EStructuralFeature feature,
       String defaultValue) {
-    List<ModifyListener> listeners = getModifyListeners(textControl);
-    for(ModifyListener listener : listeners) {
-      textControl.removeModifyListener(listener);
+    if(textControl!=null && !textControl.isDisposed()) {
+      List<ModifyListener> listeners = getModifyListeners(textControl);
+      for(ModifyListener listener : listeners) {
+        textControl.removeModifyListener(listener);
+      }
+      ModifyListener listener = setModifyListener(new TextAdapter() {
+        public String getText() {
+          return textControl.getText();
+        }
+        public void addModifyListener(ModifyListener listener) {
+          textControl.addModifyListener(listener);
+        }
+      }, owner, feature, defaultValue);
+      listeners.add(listener);
     }
-    ModifyListener listener = setModifyListener(new TextAdapter() {
-      public String getText() {
-        return textControl.getText();
-      }
-      public void addModifyListener(ModifyListener listener) {
-        textControl.addModifyListener(listener);
-      }
-    }, owner, feature, defaultValue);
-    listeners.add(listener);
   }
 
   public <T> void setModifyListener(final Combo control, ValueProvider<T> owner, EStructuralFeature feature) {
-    List<ModifyListener> listeners = getModifyListeners(control);
-    for(ModifyListener listener : listeners) {
-      control.removeModifyListener(listener);
+    if(control!=null && !control.isDisposed()) {
+      List<ModifyListener> listeners = getModifyListeners(control);
+      for(ModifyListener listener : listeners) {
+        control.removeModifyListener(listener);
+      }
+      ModifyListener listener = setModifyListener(new TextAdapter() {
+        public String getText() {
+          return control.getText();
+        }
+        public void addModifyListener(ModifyListener listener) {
+          control.addModifyListener(listener);
+        }
+      }, owner, feature, null);
+      listeners.add(listener);
     }
-    ModifyListener listener = setModifyListener(new TextAdapter() {
-      public String getText() {
-        return control.getText();
-      }
-      public void addModifyListener(ModifyListener listener) {
-        control.addModifyListener(listener);
-      }
-    }, owner, feature, null);
-    listeners.add(listener);
   }
 
   public <T> void setModifyListener(final CCombo control, ValueProvider<T> owner, EStructuralFeature feature,
       String defaultValue) {
-    List<ModifyListener> listeners = getModifyListeners(control);
-    for(ModifyListener listener : listeners) {
-      control.removeModifyListener(listener);
+    if(control!=null && !control.isDisposed()) {
+      List<ModifyListener> listeners = getModifyListeners(control);
+      for(ModifyListener listener : listeners) {
+        control.removeModifyListener(listener);
+      }
+      ModifyListener listener = setModifyListener(new TextAdapter() {
+        public String getText() {
+          return control.getText();
+        }
+        public void addModifyListener(ModifyListener listener) {
+          control.addModifyListener(listener);
+        }
+      }, owner, feature, defaultValue);
+      listeners.add(listener);
     }
-    ModifyListener listener = setModifyListener(new TextAdapter() {
-      public String getText() {
-        return control.getText();
-      }
-      public void addModifyListener(ModifyListener listener) {
-        control.addModifyListener(listener);
-      }
-    }, owner, feature, defaultValue);
-    listeners.add(listener);
   }
   
   private <T> ModifyListener setModifyListener(final TextAdapter adapter, final ValueProvider<T> provider,
@@ -412,37 +418,39 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
   
   public <T> void setModifyListener(final Button control, final ValueProvider<T> provider,
       final EStructuralFeature feature, final String defaultValue) {
-    List<ModifyListener> listeners = getModifyListeners(control);
-    for(ModifyListener listener : listeners) {
-      control.removeSelectionListener((SelectionListener) listener);
-    }
-
-    class ButtonModifyListener extends SelectionAdapter implements ModifyListener {
-      public void widgetSelected(SelectionEvent e) {
-        T owner = provider.getValue();
-        if(owner == null && !provider.isEmpty()) {
-          CompoundCommand compoundCommand = new CompoundCommand();
-          provider.create(getEditingDomain(), compoundCommand);
-          getEditingDomain().getCommandStack().execute(compoundCommand);
-          owner = provider.getValue();
+    if(control!=null && !control.isDisposed()) {
+      List<ModifyListener> listeners = getModifyListeners(control);
+      for(ModifyListener listener : listeners) {
+        control.removeSelectionListener((SelectionListener) listener);
+      }
+  
+      class ButtonModifyListener extends SelectionAdapter implements ModifyListener {
+        public void widgetSelected(SelectionEvent e) {
+          T owner = provider.getValue();
+          if(owner == null && !provider.isEmpty()) {
+            CompoundCommand compoundCommand = new CompoundCommand();
+            provider.create(getEditingDomain(), compoundCommand);
+            getEditingDomain().getCommandStack().execute(compoundCommand);
+            owner = provider.getValue();
+          }
+  
+          String value = control.getSelection() ? "true" : "false";
+          Command command = SetCommand.create(getEditingDomain(), owner, feature, //
+              defaultValue.equals(value) ? null : value);
+          getEditingDomain().getCommandStack().execute(command);
+          registerListeners();
         }
-
-        String value = control.getSelection() ? "true" : "false";
-        Command command = SetCommand.create(getEditingDomain(), owner, feature, //
-            defaultValue.equals(value) ? null : value);
-        getEditingDomain().getCommandStack().execute(command);
-        registerListeners();
-      }
-
-      public void modifyText(ModifyEvent e) {
-        widgetSelected(null);
-      }
-    };
-
-    ButtonModifyListener listener = new ButtonModifyListener();
-    control.addSelectionListener(listener);
-
-    listeners.add(listener);
+  
+        public void modifyText(ModifyEvent e) {
+          widgetSelected(null);
+        }
+      };
+  
+      ButtonModifyListener listener = new ButtonModifyListener();
+      control.addSelectionListener(listener);
+  
+      listeners.add(listener);
+    }
   }
 
   public void removeNotifyListener(Text control) {
