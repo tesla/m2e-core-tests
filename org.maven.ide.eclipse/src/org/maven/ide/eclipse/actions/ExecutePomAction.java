@@ -27,7 +27,6 @@ import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.DebugUITools;
-import org.eclipse.debug.ui.ILaunchGroup;
 import org.eclipse.debug.ui.ILaunchShortcut;
 import org.eclipse.debug.ui.RefreshTab;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -42,6 +41,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
+
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.internal.launch.MavenLaunchConstants;
 import org.maven.ide.eclipse.internal.launch.ui.MavenLaunchMainTab;
@@ -115,6 +115,7 @@ public class ExecutePomAction implements ILaunchShortcut, IExecutableExtension, 
     }
   }
 
+  @SuppressWarnings("deprecation")
   private void launch(IContainer basecon, String mode) {
     if(basecon == null) {
       return;
@@ -144,7 +145,7 @@ public class ExecutePomAction implements ILaunchShortcut, IExecutableExtension, 
       Tracer.trace(this, "Opening dialog for launch configuration", launchConfiguration.getName());
       DebugUITools.saveBeforeLaunch();
       Shell shell = MavenPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow().getShell();
-      ILaunchGroup group = DebugUITools.getLaunchGroup(launchConfiguration, mode);
+      // ILaunchGroup group = DebugUITools.getLaunchGroup(launchConfiguration, mode);
       DebugUITools.openLaunchConfigurationDialog(shell, launchConfiguration,
           MavenLaunchMainTab.ID_EXTERNAL_TOOLS_LAUNCH_GROUP, null);
     } else {

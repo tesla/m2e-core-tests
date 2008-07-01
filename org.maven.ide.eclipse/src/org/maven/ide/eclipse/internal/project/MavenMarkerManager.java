@@ -8,7 +8,6 @@
 
 package org.maven.ide.eclipse.internal.project;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -33,9 +32,10 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.Messages;
 
 public class MavenMarkerManager {
+  @SuppressWarnings("unchecked")
   void addMarkers(IFile pomFile, MavenExecutionResult result) {
-    for(Iterator it = result.getExceptions().iterator(); it.hasNext();) {
-      Exception ex = (Exception) it.next();
+    List<Exception> exceptions = result.getExceptions();
+    for(Exception ex : exceptions) {
       if(ex instanceof ExtensionScanningException) {
         if(ex.getCause() instanceof ProjectBuildingException) {
           handleProjectBuildingException(pomFile, (ProjectBuildingException) ex.getCause());
@@ -107,8 +107,9 @@ public class MavenMarkerManager {
       if(validationResult == null) {
         addMarker(pomFile, msg, 1, IMarker.SEVERITY_ERROR); //$NON-NLS-1$
       } else {
-        for(Iterator it = validationResult.getMessages().iterator(); it.hasNext();) {
-          String message = (String) it.next();
+        @SuppressWarnings("unchecked")
+        List<String> messages = validationResult.getMessages();
+        for(String message : messages) {
           addMarker(pomFile, message, 1, IMarker.SEVERITY_ERROR); //$NON-NLS-1$
 //          console.logError("  " + message);
         }
@@ -154,10 +155,9 @@ public class MavenMarkerManager {
     return msg;
   }
 
-  private void addErrorMarkers(IFile pomFile, String msg, List exceptions) {
+  private void addErrorMarkers(IFile pomFile, String msg, List<? extends Exception> exceptions) {
     if(exceptions != null) {
-      for(Iterator it = exceptions.iterator(); it.hasNext();) {
-        Exception ex = (Exception) it.next();
+      for(Exception ex : exceptions) {
         if(ex instanceof AbstractArtifactResolutionException) {
           AbstractArtifactResolutionException rex = (AbstractArtifactResolutionException) ex;
           String errorMessage = getArtifactId(rex) + " " + getErrorMessage(ex);
@@ -179,15 +179,17 @@ public class MavenMarkerManager {
   }
 
   private void addMissingArtifactMarkers(IFile pomFile, MavenProject mavenProject) {
-    Set directDependencies = mavenProject.getDependencyArtifacts();
-    for (Iterator it = mavenProject.getArtifacts().iterator(); it.hasNext(); ) {
-      Artifact dependency = (Artifact) it.next();
-      if (!dependency.isResolved()) {
+    @SuppressWarnings("unchecked")
+    Set<Artifact> directDependencies = mavenProject.getDependencyArtifacts();
+    @SuppressWarnings("unchecked")
+    Set<Artifact> artifacts = mavenProject.getArtifacts();
+    for(Artifact artifact : artifacts) {
+      if (!artifact.isResolved()) {
         String errorMessage;
-        if (directDependencies.contains(dependency)) {
-          errorMessage = "Missing artifact " + dependency.toString();
+        if (directDependencies.contains(artifact)) {
+          errorMessage = "Missing artifact " + artifact.toString();
         } else {
-          errorMessage = "Missing indirectly referenced artifact " + dependency.toString();
+          errorMessage = "Missing indirectly referenced artifact " + artifact.toString();
         }
         addMarker(pomFile, errorMessage, 1, IMarker.SEVERITY_ERROR);
       }

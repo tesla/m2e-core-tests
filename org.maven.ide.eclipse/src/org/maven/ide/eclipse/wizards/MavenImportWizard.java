@@ -23,6 +23,7 @@ import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.project.MavenProjectInfo;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 
 
@@ -37,14 +38,14 @@ public class MavenImportWizard extends Wizard implements IImportWizard {
   
   private MavenImportWizardPage page;
 
-  private List locations;
+  private List<String> locations;
   
   public MavenImportWizard() {
     importConfiguration = new ProjectImportConfiguration();
     setNeedsProgressMonitor(true);
   }
 
-  public MavenImportWizard(ProjectImportConfiguration importConfiguration, List locations) {
+  public MavenImportWizard(ProjectImportConfiguration importConfiguration, List<String> locations) {
     this.importConfiguration = importConfiguration;
     this.locations = locations;
     setNeedsProgressMonitor(true);
@@ -64,7 +65,7 @@ public class MavenImportWizard extends Wizard implements IImportWizard {
       return false;
     }
 
-    final Collection projects = page.getProjects();
+    final Collection<MavenProjectInfo> projects = page.getProjects();
 
     final MavenPlugin plugin = MavenPlugin.getDefault();
 

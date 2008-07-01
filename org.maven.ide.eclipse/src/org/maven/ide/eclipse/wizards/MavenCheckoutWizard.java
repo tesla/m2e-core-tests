@@ -11,7 +11,6 @@ package org.maven.ide.eclipse.wizards;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 
 import org.eclipse.core.runtime.IAdapterManager;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -25,7 +24,6 @@ import org.eclipse.ui.IWorkbench;
 import org.apache.maven.model.Scm;
 
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.project.MavenProjectInfo;
 import org.maven.ide.eclipse.project.MavenProjectScmInfo;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.scm.MavenProjectCheckoutJob;
@@ -60,15 +58,15 @@ public class MavenCheckoutWizard extends Wizard implements IImportWizard, INewWi
   }
 
   public void init(IWorkbench workbench, IStructuredSelection selection) {
-    ArrayList urls = new ArrayList();
+    ArrayList<ScmUrl> urls = new ArrayList<ScmUrl>();
     IAdapterManager adapterManager = Platform.getAdapterManager();
-    for(Iterator it = selection.iterator(); it.hasNext();) {
+    for(Iterator<?> it = selection.iterator(); it.hasNext();) {
       ScmUrl url = (ScmUrl) adapterManager.getAdapter(it.next(), ScmUrl.class);
       if(url!=null) {
         urls.add(url);
       }
     }
-    setUrls((ScmUrl[]) urls.toArray(new ScmUrl[urls.size()]));
+    setUrls(urls.toArray(new ScmUrl[urls.size()]));
   }
   
   private void setUrls(ScmUrl[] urls) {
@@ -129,7 +127,7 @@ public class MavenCheckoutWizard extends Wizard implements IImportWizard, INewWi
 
     Scm[] scms = locationPage.getScms();
     
-    final List mavenProjects = new ArrayList();
+    final Collection<MavenProjectScmInfo> mavenProjects = new ArrayList<MavenProjectScmInfo>();
     for(int i = 0; i < scms.length; i++ ) {
       String url = scms[i].getConnection();
       String revision = scms[i].getTag();
@@ -140,13 +138,13 @@ public class MavenCheckoutWizard extends Wizard implements IImportWizard, INewWi
       
       int n = url.lastIndexOf("/");
       String label = (n == -1 ? url : url.substring(n)) + "/" + MavenPlugin.POM_FILE_NAME;
-      MavenProjectInfo projectInfo = new MavenProjectScmInfo(label, null, //
+      MavenProjectScmInfo projectInfo = new MavenProjectScmInfo(label, null, //
           null, revision, url, url);
       mavenProjects.add(projectInfo);
     }
 
     MavenProjectCheckoutJob job = new MavenProjectCheckoutJob(importConfiguration, checkoutAllProjects) {
-      protected Collection getProjects(IProgressMonitor monitor) {
+      protected Collection<MavenProjectScmInfo> getProjects(IProgressMonitor monitor) {
         return mavenProjects;
       }
     };

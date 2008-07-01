@@ -24,7 +24,7 @@ import org.maven.ide.eclipse.project.MavenProjectScmInfo;
  *
  * @author Eugene Kuleshov
  */
-public abstract class ScmHandler implements Comparable, IExecutableExtension {
+public abstract class ScmHandler implements Comparable<ScmHandler>, IExecutableExtension {
 
   public static final String ATTR_CLASS = "class";
   public static final String ATTR_TYPE = "type";
@@ -49,7 +49,7 @@ public abstract class ScmHandler implements Comparable, IExecutableExtension {
    *  
    * @see http://maven.apache.org/scm/scm-url-format.html
    */
-  public InputStream open(String url, String revision) throws CoreException {
+  public InputStream open(String url, String revision) {
     return null;
   }
   
@@ -81,9 +81,9 @@ public abstract class ScmHandler implements Comparable, IExecutableExtension {
   
   // Comparable
   
-  public int compareTo(Object o) {
-    if(o instanceof ScmHandler) {
-      ScmHandler handler = (ScmHandler) o;
+  public int compareTo(ScmHandler o) {
+    if(o != null) {
+      ScmHandler handler = o;
       int res = getType().compareTo(handler.getType());
       if(res==0) {
         res = getPriority() - handler.getPriority();

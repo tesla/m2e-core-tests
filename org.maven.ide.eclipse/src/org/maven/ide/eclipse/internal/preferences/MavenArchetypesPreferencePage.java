@@ -57,7 +57,7 @@ public class MavenArchetypesPreferencePage extends PreferencePage implements IWo
   ArchetypeManager archetypeManager;
   TableViewer archetypesViewer;
 
-  List archetypeCatalogs;
+  List<ArchetypeCatalogFactory> archetypeCatalogs;
   
   public MavenArchetypesPreferencePage() {
     setTitle("Maven Archetype Catalogs");
@@ -66,8 +66,8 @@ public class MavenArchetypesPreferencePage extends PreferencePage implements IWo
   }
   
   protected void performDefaults() {
-    for(Iterator it = archetypeCatalogs.iterator(); it.hasNext();) {
-      ArchetypeCatalogFactory factory = (ArchetypeCatalogFactory) it.next();
+    for(Iterator<ArchetypeCatalogFactory> it = archetypeCatalogs.iterator(); it.hasNext();) {
+      ArchetypeCatalogFactory factory = it.next();
       if(factory.isEditable()) {
         it.remove();
       }
@@ -80,15 +80,13 @@ public class MavenArchetypesPreferencePage extends PreferencePage implements IWo
   }
 
   public boolean performOk() {
-    Collection catalogs = archetypeManager.getArchetypeCatalogs();
-    for(Iterator it = catalogs.iterator(); it.hasNext();) {
-      ArchetypeCatalogFactory factory = (ArchetypeCatalogFactory) it.next();
+    Collection<ArchetypeCatalogFactory> catalogs = archetypeManager.getArchetypeCatalogs();
+    for(ArchetypeCatalogFactory factory : catalogs) {
       if(factory.isEditable()) {
         archetypeManager.removeArchetypeCatalogFactory(factory.getId());
       }
     }
-    for(Iterator it = archetypeCatalogs.iterator(); it.hasNext();) {
-      ArchetypeCatalogFactory factory = (ArchetypeCatalogFactory) it.next();
+    for(ArchetypeCatalogFactory factory : archetypeCatalogs) {
       if(factory.isEditable()) {
         archetypeManager.addArchetypeCatalogFactory(factory);
       }
@@ -141,7 +139,7 @@ public class MavenArchetypesPreferencePage extends PreferencePage implements IWo
 
       public Object[] getElements(Object input) {
         if(input instanceof Collection) {
-          return ((Collection) input).toArray();
+          return ((Collection<?>) input).toArray();
         }
         return new Object[0];
       }
@@ -247,7 +245,7 @@ public class MavenArchetypesPreferencePage extends PreferencePage implements IWo
       }
     });
     
-    archetypeCatalogs = new ArrayList(archetypeManager.getArchetypeCatalogs());
+    archetypeCatalogs = new ArrayList<ArchetypeCatalogFactory>(archetypeManager.getArchetypeCatalogs());
     archetypesViewer.setInput(archetypeCatalogs);
     archetypesViewer.refresh();  // should listen on property changes instead?
     

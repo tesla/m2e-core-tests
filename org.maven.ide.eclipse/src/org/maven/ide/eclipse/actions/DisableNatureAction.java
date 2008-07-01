@@ -39,7 +39,7 @@ public class DisableNatureAction implements IObjectActionDelegate {
   public void run(IAction action) {
     if(selection instanceof IStructuredSelection) {
       IStructuredSelection structuredSelection = (IStructuredSelection) selection;
-      for(Iterator it = structuredSelection.iterator(); it.hasNext();) {
+      for(Iterator<?> it = structuredSelection.iterator(); it.hasNext();) {
         Object element = it.next();
         IProject project = null;
         if(element instanceof IProject) {

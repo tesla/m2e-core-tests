@@ -67,6 +67,7 @@ public class MavenProjectFacade {
   /**
    * Returns project relative paths of resource directories
    */
+  @SuppressWarnings("unchecked")
   public IPath[] getResourceLocations() {
     return MavenProjectUtils.getResourceLocations(getProject(), mavenProject.getResources());
   }
@@ -74,14 +75,17 @@ public class MavenProjectFacade {
   /**
    * Returns project relative paths of test resource directories
    */
+  @SuppressWarnings("unchecked")
   public IPath[] getTestResourceLocations() {
     return MavenProjectUtils.getResourceLocations(getProject(), mavenProject.getTestResources());
   }
 
+  @SuppressWarnings("unchecked")
   public IPath[] getCompileSourceLocations() {
     return MavenProjectUtils.getSourceLocations(getProject(), mavenProject.getCompileSourceRoots());
   }
 
+  @SuppressWarnings("unchecked")
   public IPath[] getTestCompileSourceLocations() {
     return MavenProjectUtils.getSourceLocations(getProject(),mavenProject.getTestCompileSourceRoots());
   }

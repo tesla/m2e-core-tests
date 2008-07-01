@@ -22,6 +22,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 
 
+@SuppressWarnings("restriction")
 public class MavenJRETab extends JavaJRETab {
 
   private VMArgumentsBlock vmArgumentsBlock = new VMArgumentsBlock();
@@ -127,6 +128,7 @@ public class MavenJRETab extends JavaJRETab {
     return defaultVMInstall;
   }
 
+  @SuppressWarnings("deprecation")
   private void setDefaultVMInstallAttributes(IVMInstall defaultVMInstall, ILaunchConfigurationWorkingCopy config) {
     String vmName = defaultVMInstall.getName();
     String vmTypeID = defaultVMInstall.getVMInstallType().getId();

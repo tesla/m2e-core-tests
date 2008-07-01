@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -25,6 +24,7 @@ import org.apache.lucene.store.Directory;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.index.IndexInfo;
 import org.maven.ide.eclipse.index.IndexManager;
+import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.index.IndexedArtifactGroup;
 import org.maven.ide.eclipse.index.Indexer;
@@ -98,19 +98,19 @@ public class LegacyIndexManager extends IndexManager {
     }
   }
 
-  public Map search(String query, String field) throws IOException {
+  public Map<String, IndexedArtifact> search(String query, String field) throws IOException {
     Indexer indexer = new Indexer();
     return indexer.search(getIndexDirs(), query, field);
   }
 
-  public Map search(String indexName, String prefix, String searchGroup) {
+  public Map<String, IndexedArtifact> search(String indexName, String prefix, String searchGroup) {
     // not supported
-    return Collections.EMPTY_MAP;
+    return Collections.emptyMap();
   }
   
-  public Map search(String indexName, Query query) {
+  public Map<String, IndexedArtifact> search(String indexName, Query query) {
     // not supported
-    return Collections.EMPTY_MAP;
+    return Collections.emptyMap();
   }
 
   public IndexedArtifactGroup[] getGroups(String indexId) {
@@ -166,11 +166,10 @@ public class LegacyIndexManager extends IndexManager {
   }
 
   private Directory[] getIndexDirs() {
-    Map indexMap = getIndexes();
+    Map<String, IndexInfo> indexMap = getIndexes();
     Directory[] indexDirs = new Directory[indexMap.size()];
     int i = 0;
-    for(Iterator it = indexMap.values().iterator(); it.hasNext();) {
-      IndexInfo indexInfo = (IndexInfo) it.next();
+    for(IndexInfo indexInfo : indexMap.values()) {
       try {
         indexDirs[i++ ] = getIndexDirectory(indexInfo);
       } catch(IOException ex) {

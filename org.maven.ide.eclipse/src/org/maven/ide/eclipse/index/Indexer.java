@@ -14,11 +14,14 @@ import java.text.ParseException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.Map.Entry;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.DateTools;
@@ -35,9 +38,6 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 
 /**
  * Indexer utility for prototyping purposes
@@ -69,9 +69,9 @@ public class Indexer {
    * @param field {@link IndexManager#SEARCH_ARTIFACT} or {@link IndexManager#SEARCH_CLASS_NAME}
    * @return Map<String, IndexedArtifact>
    */
-  public Map search(Directory[] indexes, String query, String quertType) throws IOException {
+  public Map<String, IndexedArtifact> search(Directory[] indexes, String query, String quertType) throws IOException {
     if(query == null || query.length() == 0) {
-      return Collections.EMPTY_MAP;
+      return Collections.emptyMap();
     }
 
     String field = IndexManager.SEARCH_CLASS_NAME.equals(quertType) ? NAMES : JAR_NAME;
@@ -103,7 +103,7 @@ public class Indexer {
       Hits hits = searcher.search(q);
 
       if(hits == null || hits.length() == 0) {
-        return Collections.EMPTY_MAP;
+        return Collections.emptyMap();
       }
       return sortResults(query, field, hits);
 
@@ -118,8 +118,8 @@ public class Indexer {
     }
   }
 
-  private Map sortResults(String query, String field, Hits hits) throws IOException {
-    TreeMap res = new TreeMap();
+  private Map<String, IndexedArtifact> sortResults(String query, String field, Hits hits) throws IOException {
+    TreeMap<String, IndexedArtifact> res = new TreeMap<String, IndexedArtifact>();
     for(int i = 0; i < hits.length(); i++ ) {
       Document doc = hits.doc(i);
       IndexedArtifactFile indexedArtifactFile = getIndexedArtifactFile(doc);
@@ -173,11 +173,11 @@ public class Indexer {
     return res;
   }
 
-  private void addFile(TreeMap res, IndexedArtifactFile indexedArtifactFile, String className, String packageName) {
+  private void addFile(TreeMap<String, IndexedArtifact> res, IndexedArtifactFile indexedArtifactFile, String className, String packageName) {
     // String key = group + " : "+artifact + " : " + className+" : "+packageName;
     String key = className + " : " + packageName + " : " + indexedArtifactFile.group + " : "
         + indexedArtifactFile.artifact;
-    IndexedArtifact info = (IndexedArtifact) res.get(key);
+    IndexedArtifact info = res.get(key);
     if(info == null) {
       info = new IndexedArtifact(indexedArtifactFile.group, indexedArtifactFile.artifact, packageName, className, null);
       res.put(key, info);
@@ -222,10 +222,8 @@ public class Indexer {
       String query = args[1];
       String indexPath = args.length == 2 ? "index" : args[2];
 
-      Map res = indexer.search(new Directory[] {FSDirectory.getDirectory(indexPath)}, query, JAR_NAME);
-
-      for(Iterator it = res.entrySet().iterator(); it.hasNext();) {
-        Map.Entry e = (Map.Entry) it.next();
+      Map<String, IndexedArtifact> res = indexer.search(new Directory[] {FSDirectory.getDirectory(indexPath)}, query, JAR_NAME);
+      for(Entry<String, IndexedArtifact> e : res.entrySet()) {
         System.err.println(e);
       }
     }
@@ -437,8 +435,8 @@ public class Indexer {
       jar = new ZipFile(jarFile);
 
       StringBuffer sb = new StringBuffer();
-      for(Enumeration en = jar.entries(); en.hasMoreElements();) {
-        ZipEntry e = (ZipEntry) en.nextElement();
+      for(Enumeration<? extends ZipEntry> en = jar.entries(); en.hasMoreElements();) {
+        ZipEntry e = en.nextElement();
         String name = e.getName();
         if(name.endsWith(".class")) {
           totalClasses++ ;

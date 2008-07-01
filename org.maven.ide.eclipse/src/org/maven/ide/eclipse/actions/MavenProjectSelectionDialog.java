@@ -82,6 +82,10 @@ public class MavenProjectSelectionDialog extends AbstractMavenDialog {
 
     return composite;
   }
+  
+  protected void okPressed() {
+    super.okPressed();
+  }
 
 
   /** The content provider class. */
@@ -92,16 +96,14 @@ public class MavenProjectSelectionDialog extends AbstractMavenDialog {
       if ( parent instanceof IWorkspace ) {
         IProject[] projects = ( ( IWorkspace ) parent ).getRoot().getProjects();
 
-        List children = new ArrayList();
-        for ( int i = 0; i < projects.length; i++) {
+        List<IProject> children = new ArrayList<IProject>();
+        for(IProject project : projects) {
           try {
-            if ( projects[i].isOpen() &&
-                projects[i].hasNature( MavenPlugin.NATURE_ID ) ) {
-              children.add( projects[i] );
+            if(project.isOpen() && project.hasNature(MavenPlugin.NATURE_ID)) {
+              children.add(project);
             }
-          }
-          catch ( CoreException e ) {
-            MavenPlugin.log( "Error checking project: " + e.getMessage(), e );
+          } catch(CoreException e) {
+            MavenPlugin.log("Error checking project: " + e.getMessage(), e);
           }
         }
         return children.toArray();
@@ -110,7 +112,7 @@ public class MavenProjectSelectionDialog extends AbstractMavenDialog {
         IContainer container = ( IContainer ) parent;
         if ( container.isAccessible() ) {
           try {
-            List children = new ArrayList();
+            List<IResource> children = new ArrayList<IResource>();
             IResource[] members = container.members();
             for ( int i = 0; i < members.length; i++ ) {
               if ( members[i] instanceof IContainer &&

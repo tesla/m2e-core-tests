@@ -70,7 +70,7 @@ public class MavenProjectWizardArtifactPage extends AbstractMavenWizardPage {
   private static final ProjectFolder[] POM_DIRS = {SITE};
 
   /** special directory sets, default is JAR_DIRS */
-  private static final Map directorySets = new HashMap();
+  private static final Map<String, ProjectFolder[]> directorySets = new HashMap<String, ProjectFolder[]>();
   static {
     directorySets.put(MavenArtifactComponent.WAR, WAR_DIRS);
     directorySets.put(MavenArtifactComponent.POM, POM_DIRS);
@@ -192,7 +192,7 @@ public class MavenProjectWizardArtifactPage extends AbstractMavenWizardPage {
 
   /** Returns the list of directories for the currently selected packaging. */
   private ProjectFolder[] getProjectFolders() {
-    ProjectFolder[] folders = (ProjectFolder[]) directorySets.get(artifactComponent.getPackaging());
+    ProjectFolder[] folders = directorySets.get(artifactComponent.getPackaging());
     return folders == null ? JAR_DIRS : folders;
   }
 

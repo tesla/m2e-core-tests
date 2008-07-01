@@ -44,9 +44,9 @@ public class UpdateSourcesAction implements IObjectActionDelegate {
   }
 
   public void run(IAction action) {
-    final Set projects = new LinkedHashSet();
+    final Set<IProject> projects = new LinkedHashSet<IProject>();
     IStructuredSelection structuredSelection = (IStructuredSelection) selection;
-    for(Iterator it = structuredSelection.iterator(); it.hasNext();) {
+    for(Iterator<?> it = structuredSelection.iterator(); it.hasNext();) {
       Object element = it.next();
       IProject project = null;
       if(element instanceof IProject) {
@@ -66,17 +66,16 @@ public class UpdateSourcesAction implements IObjectActionDelegate {
         monitor.beginTask(getName(), projects.size());
         
         MultiStatus status = null;
-        for (Iterator i = projects.iterator(); i.hasNext(); ) {
+        for(IProject project : projects) {
           if (monitor.isCanceled()) {
             throw new OperationCanceledException();
           }
 
-          IProject p = (IProject) i.next();
-          monitor.subTask(p.getName());
-          MavenProjectFacade projectFacade = plugin.getMavenProjectManager().create(p, monitor);
+          monitor.subTask(project.getName());
+          MavenProjectFacade projectFacade = plugin.getMavenProjectManager().create(project, monitor);
           if(projectFacade != null) {
             try {
-              plugin.getProjectConfigurationManager().updateProjectConfiguration(p, //
+              plugin.getProjectConfigurationManager().updateProjectConfiguration(project, //
                   projectFacade.getResolverConfiguration(), //
                   plugin.getMavenRuntimeManager().getGoalOnUpdate(), //
                   new SubProgressMonitor(monitor, 1));

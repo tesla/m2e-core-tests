@@ -22,7 +22,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -250,20 +249,18 @@ public class ProjectsImportPage extends WizardPage implements IOverwriteQuery {
           monitor.beginTask("Searching for projects", 100);
           File directory = new File(path);
           selectedProjects = new ProjectRecord[0];
-          Collection files = new ArrayList();
+          Collection<File> files = new ArrayList<File>();
           monitor.worked(10);
 
           if(directory.isDirectory()) {
             if(!collectProjectFilesFromDirectory(files, directory, null, monitor)) {
               return;
             }
-            Iterator filesIterator = files.iterator();
             selectedProjects = new ProjectRecord[files.size()];
             int index = 0;
             monitor.worked(50);
             monitor.subTask("Processing results");
-            while(filesIterator.hasNext()) {
-              File file = (File) filesIterator.next();
+            for(File file : files) {
               selectedProjects[index] = new ProjectRecord(file);
               index++ ;
             }
@@ -299,7 +296,7 @@ public class ProjectsImportPage extends WizardPage implements IOverwriteQuery {
    * @param monitor The monitor to report to
    * @return boolean <code>true</code> if the operation was completed.
    */
-  boolean collectProjectFilesFromDirectory(Collection files, File directory, Set directoriesVisited,
+  boolean collectProjectFilesFromDirectory(Collection<File> files, File directory, Set<String> directoriesVisited,
       IProgressMonitor monitor) {
 
     if(monitor.isCanceled()) {
@@ -312,7 +309,7 @@ public class ProjectsImportPage extends WizardPage implements IOverwriteQuery {
 
     // Initialize recursion guard for recursive symbolic links
     if(directoriesVisited == null) {
-      directoriesVisited = new HashSet();
+      directoriesVisited = new HashSet<String>();
       try {
         directoriesVisited.add(directory.getCanonicalPath());
       } catch(IOException exception) {
@@ -435,6 +432,7 @@ public class ProjectsImportPage extends WizardPage implements IOverwriteQuery {
     try {
       monitor.beginTask("Creating Projects", 100);
       
+      @SuppressWarnings("deprecation")
       IPath projectPath = record.description.getLocation();
       if(projectPath!=null) {
         MavenConsole console = MavenPlugin.getDefault().getConsole();
@@ -535,13 +533,13 @@ public class ProjectsImportPage extends WizardPage implements IOverwriteQuery {
    * @return ProjectRecord[] array of projects that can be imported into the workspace
    */
   public ProjectRecord[] getValidProjects() {
-    List validProjects = new ArrayList();
-    for(int i = 0; i < selectedProjects.length; i++ ) {
-      if(!isProjectInWorkspace(selectedProjects[i].getProjectName())) {
-        validProjects.add(selectedProjects[i]);
+    List<ProjectRecord> validProjects = new ArrayList<ProjectRecord>();
+    for(ProjectRecord projectRecord : selectedProjects) {
+      if(!isProjectInWorkspace(projectRecord.getProjectName())) {
+        validProjects.add(projectRecord);
       }
     }
-    return (ProjectRecord[]) validProjects.toArray(new ProjectRecord[validProjects.size()]);
+    return validProjects.toArray(new ProjectRecord[validProjects.size()]);
   }
 
   /**

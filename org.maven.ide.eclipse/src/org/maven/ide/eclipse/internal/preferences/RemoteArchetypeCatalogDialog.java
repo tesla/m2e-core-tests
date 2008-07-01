@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import org.apache.maven.archetype.catalog.Archetype;
 import org.apache.maven.archetype.catalog.ArchetypeCatalog;
 
 import org.maven.ide.eclipse.MavenPlugin;
@@ -178,7 +179,8 @@ public class RemoteArchetypeCatalogDialog extends TitleAreaDialog {
               status = ex.getStatus();
             } finally {
               final IStatus s = status;
-              final List archetypes = catalog==null ? Collections.EMPTY_LIST : catalog.getArchetypes();
+              @SuppressWarnings("unchecked")
+              final List<Archetype> archetypes = catalog==null ? Collections.emptyList() : catalog.getArchetypes();
               getShell().getDisplay().asyncExec(new Runnable() {
                 public void run() {
                   verifyButton.setEnabled(true);
@@ -206,6 +208,10 @@ public class RemoteArchetypeCatalogDialog extends TitleAreaDialog {
     super.createButtonsForButtonBar(composite);  // cancel button
     
     return composite;
+  }
+  
+  protected Button getButton(int id) {
+    return super.getButton(id);
   }
   
   private String[] getSavedValues(String key) {
@@ -240,7 +246,7 @@ public class RemoteArchetypeCatalogDialog extends TitleAreaDialog {
   }
 
   private void saveValue(String key, String value) {
-    List dirs = new ArrayList();
+    List<String> dirs = new ArrayList<String>();
     dirs.addAll(Arrays.asList(getSavedValues(key)));
 
     dirs.remove(value);
@@ -250,7 +256,7 @@ public class RemoteArchetypeCatalogDialog extends TitleAreaDialog {
       dirs = dirs.subList(0, MAX_HISTORY);
     }
 
-    dialogSettings.put(key, (String[]) dirs.toArray(new String[dirs.size()]));
+    dialogSettings.put(key, dirs.toArray(new String[dirs.size()]));
   }
 
   void update() {

@@ -16,6 +16,7 @@ import org.eclipse.ui.model.IWorkbenchAdapter;
 /**
  * @author Eugene Kuleshov
  */
+@SuppressWarnings("unchecked")
 public class MavenAdapterFactory implements IAdapterFactory {
 
   private static final Class[] ADAPTER_TYPES = new Class[] { IActionFilter.class };

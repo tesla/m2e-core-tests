@@ -36,11 +36,11 @@ public class IndexUnpackerJob extends Job {
   /**
    * <code>Collection</code> of <code>IndexInfo</code>s to unpack 
    */
-  private final Collection extensionIndexes;
+  private final Collection<IndexInfo> extensionIndexes;
   
   private boolean overwrite;
 
-  public IndexUnpackerJob(IndexManager indexManager, Collection extensionIndexes) {
+  public IndexUnpackerJob(IndexManager indexManager, Collection<IndexInfo> extensionIndexes) {
     super("Unpacking indexes");
     this.indexManager = indexManager;
     this.extensionIndexes = extensionIndexes;
@@ -53,8 +53,8 @@ public class IndexUnpackerJob extends Job {
   }
 
   protected IStatus run(IProgressMonitor monitor) {
-    for(Iterator it = extensionIndexes.iterator(); it.hasNext();) {
-      IndexInfo extensionIndexInfo = (IndexInfo) it.next();
+    for(Iterator<IndexInfo> it = extensionIndexes.iterator(); it.hasNext();) {
+      IndexInfo extensionIndexInfo = it.next();
       String indexName = extensionIndexInfo.getIndexName();
       
       monitor.setTaskName(indexName);

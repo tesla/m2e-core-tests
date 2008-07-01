@@ -165,6 +165,14 @@ public class GoalsFieldEditor extends FieldEditor {
 		return goalsText;
 	}
 	
+	protected void setPresentsDefaultValue(boolean booleanValue) {
+	  super.setPresentsDefaultValue(booleanValue);
+	}
+	
+	protected void fireValueChanged(String property, Object oldValue, Object newValue) {
+	  super.fireValueChanged(property, oldValue, newValue);
+	}
+	
 //	/*
 //	 * Given the name (label) of an entry, return the corresponding value.
 //	 */

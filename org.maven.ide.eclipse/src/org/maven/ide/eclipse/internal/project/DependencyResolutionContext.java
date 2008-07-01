@@ -26,21 +26,21 @@ public class DependencyResolutionContext {
   private final MavenUpdateRequest request;
 
   /** Set of all pom files to resolve */
-  private final Set/*<IFile>*/ pomFiles = new LinkedHashSet/*<IFile>*/();
+  private final Set<IFile> pomFiles = new LinkedHashSet<IFile>();
 
   /** Set of pom files to resolve regardless of their isStale() state */
-  private final Set/*<IFile>*/ forcedPomFiles = new HashSet/*<IFile>*/();
+  private final Set<IFile> forcedPomFiles = new HashSet<IFile>();
 
   public DependencyResolutionContext(MavenUpdateRequest request) {
     this.request = request;
-    pomFiles.addAll(request.getPomFiles());
+    this.pomFiles.addAll(request.getPomFiles());
   }
 
   public boolean isEmpty() {
     return pomFiles.isEmpty();
   }
 
-  public void forcePomFiles(Set pomFiles) {
+  public void forcePomFiles(Set<IFile> pomFiles) {
     this.pomFiles.addAll(pomFiles);
     this.forcedPomFiles.addAll(pomFiles);
   }
@@ -54,8 +54,8 @@ public class DependencyResolutionContext {
   }
 
   public IFile pop() {
-    Iterator i = pomFiles.iterator();
-    IFile pom = (IFile) i.next();
+    Iterator<IFile> i = pomFiles.iterator();
+    IFile pom = i.next();
     i.remove();
     return pom;
   }

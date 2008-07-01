@@ -11,7 +11,6 @@ package org.maven.ide.eclipse.internal.launch.ui;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -50,6 +49,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
@@ -75,6 +75,7 @@ import org.maven.ide.eclipse.wizards.MavenPropertyDialog;
  * @author Dmitri Maximovich
  * @author Eugene Kuleshov
  */
+@SuppressWarnings("restriction")
 public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implements MavenLaunchConstants, ITraceable {
 
   private static final boolean TRACE_ENABLED = Boolean.valueOf(Platform.getDebugOption("org.maven.ide.eclipse/launcher")).booleanValue();
@@ -374,7 +375,7 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
       runtimeComboViewer.setContentProvider(new IStructuredContentProvider() {
 
         public Object[] getElements(Object input) {
-          return ((List) input).toArray();
+          return ((List<?>) input).toArray();
         }
 
         public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
@@ -409,6 +410,10 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
         runtimeComboViewer.setSelection(new StructuredSelection(runtimeManager.getDefaultRuntime()));
       }
     });
+  }
+  
+  protected Shell getShell() {
+    return super.getShell();
   }
 
   void addProperty() {
@@ -472,18 +477,19 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
     
     try {
       propsTable.removeAll();
-      List properties = configuration.getAttribute(ATTR_PROPERTIES, Collections.EMPTY_LIST);
-      for(Iterator iter = properties.iterator(); iter.hasNext();) {
-        String s = (String) iter.next();
+      
+      @SuppressWarnings("unchecked")
+      List<String> properties = configuration.getAttribute(ATTR_PROPERTIES, Collections.EMPTY_LIST);
+      for(String property : properties) {
         try {
-          String[] ss = s.split("="); //$NON-NLS-1$
+          String[] ss = property.split("="); //$NON-NLS-1$
           TableItem item = new TableItem(propsTable, SWT.NONE);
           item.setText(0, ss[0]);
           if(ss.length > 1) {
             item.setText(1, ss[1]);
           }
         } catch(Exception e) {
-          String msg = "Error parsing argument: " + s; //$NON-NLS-1$
+          String msg = "Error parsing argument: " + property; //$NON-NLS-1$
           MavenPlugin.log(msg, e);
         }
       }
@@ -560,12 +566,11 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
       configuration.setAttribute(ATTR_RUNTIME, runtime.getLocation());
     }
 
-    TableItem[] items = this.propsTable.getItems();
     // store as String in "param=value" format 
-    List properties = new ArrayList();
-    for(int i = 0; i < items.length; i++ ) {
-      String p = items[i].getText(0);
-      String v = items[i].getText(1);
+    List<String> properties = new ArrayList<String>();
+    for(TableItem item : this.propsTable.getItems()) {
+      String p = item.getText(0);
+      String v = item.getText(1);
       if(p != null && p.trim().length() > 0) {
         String prop = p.trim() + "=" + (v == null ? "" : v); //$NON-NLS-1$ //$NON-NLS-2$
         properties.add(prop);

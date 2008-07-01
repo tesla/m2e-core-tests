@@ -19,15 +19,15 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
  *
  * @author Eugene Kuleshov
  */
-public abstract class AbstractProjectScanner implements IRunnableWithProgress {
+public abstract class AbstractProjectScanner<T extends MavenProjectInfo> implements IRunnableWithProgress {
 
-  private final List<MavenProjectInfo> projects = new ArrayList<MavenProjectInfo>();
+  private final List<T> projects = new ArrayList<T>();
   private final List<Exception> errors = new ArrayList<Exception>();
   
   /**
    * Returns <code>List</code> of {@link MavenProjectInfo}
    */
-  public List<MavenProjectInfo> getProjects() {
+  public List<T> getProjects() {
     return projects;
   }
 
@@ -38,7 +38,7 @@ public abstract class AbstractProjectScanner implements IRunnableWithProgress {
     return this.errors;
   }
 
-  protected void addProject(MavenProjectInfo mavenProjectInfo) {
+  protected void addProject(T mavenProjectInfo) {
     projects.add(mavenProjectInfo);
   }
 

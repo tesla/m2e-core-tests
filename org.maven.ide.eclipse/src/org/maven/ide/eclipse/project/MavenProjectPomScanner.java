@@ -11,7 +11,6 @@ package org.maven.ide.eclipse.project;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -40,7 +39,7 @@ import org.maven.ide.eclipse.index.IndexManager;
  *
  * @author Eugene Kuleshov
  */
-public class MavenProjectPomScanner extends AbstractProjectScanner {
+public class MavenProjectPomScanner<T> extends AbstractProjectScanner<MavenProjectScmInfo> {
 
   private final boolean developer;
   
@@ -149,6 +148,7 @@ public class MavenProjectPomScanner extends AbstractProjectScanner {
     }    
   }
 
+  @SuppressWarnings("unchecked")
   private Scm resolveScm(MavenEmbedder embedder, Model model) throws ArtifactResolutionException,
       ArtifactNotFoundException, XmlPullParserException, IOException {
     Scm scm = model.getScm();
@@ -171,15 +171,14 @@ public class MavenProjectPomScanner extends AbstractProjectScanner {
       return null;
     }
     
-    Set modules = new HashSet(parentModel.getModules());
-    for(Iterator it = parentModel.getProfiles().iterator(); it.hasNext();) {
-      Profile profile = (Profile) it.next();
+    Set<String> modules = new HashSet<String>(parentModel.getModules());
+    List<Profile> parentModelProfiles = parentModel.getProfiles();
+    for(Profile profile : parentModelProfiles) {
       modules.addAll(profile.getModules());
     }
     
     String artifactId = model.getArtifactId();
-    for(Iterator it = modules.iterator(); it.hasNext();) {
-      String module = (String) it.next();
+    for(String module : modules) {
       if(module.equals(artifactId) || module.endsWith("/" + artifactId)) {
         if(parentScm.getConnection()!=null) {
           parentScm.setConnection(parentScm.getConnection() + "/" + module);
@@ -200,9 +199,7 @@ public class MavenProjectPomScanner extends AbstractProjectScanner {
       throws ArtifactResolutionException, ArtifactNotFoundException, XmlPullParserException, IOException {
     Artifact artifact = embedder.createArtifact(groupId, artifactId, version, null, "pom");
     
-    List remoteRepositories = indexManager.getArtifactRepositories(null, null);
-    
-    embedder.resolve(artifact, remoteRepositories, embedder.getLocalRepository());
+    embedder.resolve(artifact, indexManager.getArtifactRepositories(null, null), embedder.getLocalRepository());
     
     File file = artifact.getFile();
     if(file == null) {

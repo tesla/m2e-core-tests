@@ -173,6 +173,7 @@ public class MavenProjectManagerImpl {
         if(mavenProject != null) {
           projectFacade = new MavenProjectFacade(this, pom, mavenProject, configuration);
         } else {
+          @SuppressWarnings("unchecked")
           List<Exception> exceptions = executionResult.getExceptions();
           if (exceptions != null) {
             for(Exception ex : exceptions) {
@@ -456,8 +457,7 @@ public class MavenProjectManagerImpl {
     }
     
     Set<IFile> pomSet = new LinkedHashSet<IFile>();
-    List<String> modules = mavenProject.getModules();
-    for(String module : modules) {
+    for(String module : getMavenProjectModules(mavenProject)) {
       IFile modulePom = getModulePom(pom, module);
       if (modulePom != null) {
         pomSet.add(modulePom);
@@ -472,8 +472,7 @@ public class MavenProjectManagerImpl {
     }
     
     Set<IFile> pomSet = new LinkedHashSet<IFile>();
-    List<String> modules = mavenProject.getModules();
-    for(String module : modules) {
+    for(String module : getMavenProjectModules(mavenProject)) {
       IFile modulePom = getModulePom(pom, module);
       if (modulePom != null) {
         pomSet.addAll(remove(modulePom));
@@ -482,23 +481,25 @@ public class MavenProjectManagerImpl {
     return pomSet;
   }
 
+  @SuppressWarnings("unchecked")
+  private List<String> getMavenProjectModules(MavenProject mavenProject) {
+    return mavenProject == null ? Collections.emptyList() : mavenProject.getModules();
+  }
+
   /**
    * Returns Set<IFile> of nested module POMs that are present in oldMavenProject
    * but not in mavenProjec.
    */
   private Set<IFile> getRemovedNestedModules(IFile pom, MavenProject oldMavenProject, MavenProject mavenProject) {
-    List<String> modules = mavenProject != null ? mavenProject.getModules() : null;
-
     Set<IFile> result = new LinkedHashSet<IFile>();
 
-    if (oldMavenProject != null) {
-      List<String> oldModules = oldMavenProject.getModules();
-      for(String oldModule : oldModules) {
-        if (modules != null && !modules.contains(oldModule)) {
-          IFile modulePOM = getModulePom(pom, oldModule);
-          if (modulePOM != null) {
-            result.add(modulePOM);
-          }
+    List<String> modules = getMavenProjectModules(mavenProject);
+    List<String> oldModules = getMavenProjectModules(oldMavenProject);
+    for(String oldModule : oldModules) {
+      if (!modules.contains(oldModule)) {
+        IFile modulePOM = getModulePom(pom, oldModule);
+        if (modulePOM != null) {
+          result.add(modulePOM);
         }
       }
     }
@@ -515,13 +516,11 @@ public class MavenProjectManagerImpl {
       return Collections.emptySet();
     }
 
-    Set modules = state.removeWorkspaceModules(pom, mavenProject);
-
     Set<IFile> pomSet = new LinkedHashSet<IFile>();
+    Set<IPath> modules = state.removeWorkspaceModules(pom, mavenProject);
     if (modules != null) {
       IWorkspaceRoot root = pom.getWorkspace().getRoot();
-      for (Iterator it = modules.iterator(); it.hasNext(); ) {
-        IPath modulePath = (IPath) it.next();
+      for(IPath modulePath : modules) {
         IFile module = root.getFile(modulePath);
         if (module != null) {
           pomSet.add(module);
@@ -531,9 +530,9 @@ public class MavenProjectManagerImpl {
     return pomSet;
   }
 
+  @SuppressWarnings("unchecked")
   private void addProjectDependencies(IFile pom, MavenProject mavenProject, boolean workspace) {
-    for (Iterator it = mavenProject.getArtifacts().iterator(); it.hasNext(); ) {
-      Artifact artifact = (Artifact) it.next();
+    for(Artifact artifact : (Set<Artifact>) mavenProject.getArtifacts()) {
       state.addProjectDependency(pom, new ArtifactKey(artifact), workspace);
     }
     for (Plugin plugin : (List<Plugin>) mavenProject.getBuildPlugins()) {
@@ -574,6 +573,7 @@ public class MavenProjectManagerImpl {
 
   private void addMissingProjectDependencies(IFile pom, MavenExecutionResult result) {
     // kinda hack, but this is the only way I can get info about missing parent artifacts
+    @SuppressWarnings("unchecked")
     List<Throwable> exceptions = result.getExceptions();
     if (exceptions != null) {
       for(Throwable t : exceptions) {
@@ -615,7 +615,9 @@ public class MavenProjectManagerImpl {
       return true;
     }
 
+    @SuppressWarnings("unchecked")
     Iterator<Artifact> beforeIt = before.getArtifacts().iterator();
+    @SuppressWarnings("unchecked")
     Iterator<Artifact> afterIt = after.getArtifacts().iterator();
     while (beforeIt.hasNext()) {
       Artifact beforeDependeny = beforeIt.next();
@@ -710,8 +712,11 @@ public class MavenProjectManagerImpl {
 
           artifact = pv.artifact;
 
-          if (pv.mavenProject != null) {
-            remoteRepositories = pv.mavenProject.getMavenProject().getRemoteArtifactRepositories();
+          MavenProjectFacade facade = pv.mavenProject;
+          if (facade != null) {
+            @SuppressWarnings("unchecked")
+            List<ArtifactRepository> mavenProjectRepositoreis = facade.getMavenProject().getRemoteArtifactRepositories();
+            remoteRepositories = mavenProjectRepositoreis;
           }
         }
         
@@ -830,7 +835,8 @@ public class MavenProjectManagerImpl {
     }
   }
 
-  private IPath materializeArtifactPath(MavenEmbedder embedder, List remoteRepositories, Artifact base, String type, IProgressMonitor monitor) {
+  private IPath materializeArtifactPath(MavenEmbedder embedder, List<ArtifactRepository> remoteRepositories,
+      Artifact base, String type, IProgressMonitor monitor) {
     File baseFile = base.getFile();
     if(baseFile == null) {
       console.logError("Missing artifact file for " + base.getId());

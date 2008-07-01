@@ -11,6 +11,7 @@ package org.maven.ide.eclipse.wizards;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -80,7 +81,9 @@ public class MavenPomWizard extends Wizard implements INewWizard {
   public boolean performFinish() {
     final String projectName = artifactPage.getProject();
     final Model model = artifactPage.getModel();
-    model.getDependencies().addAll(Arrays.asList(dependenciesPage.getDependencies()));
+    @SuppressWarnings("unchecked")
+    List<Dependency> modelDependencies = model.getDependencies();
+    modelDependencies.addAll(Arrays.asList(dependenciesPage.getDependencies()));
 
     IRunnableWithProgress op = new IRunnableWithProgress() {
       public void run(IProgressMonitor monitor) throws InvocationTargetException {

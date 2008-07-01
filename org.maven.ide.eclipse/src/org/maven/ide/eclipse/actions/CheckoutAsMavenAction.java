@@ -55,8 +55,8 @@ public class CheckoutAsMavenAction implements IObjectActionDelegate {
   public void run(IAction action) {
     ScmUrl[] urls = new ScmUrl[selection.size()];
     int i = 0;
-    for(Iterator it = selection.iterator(); it.hasNext();) {
-      urls[i++] = ((ScmUrl) it.next()); 
+    for(Iterator<?> it = selection.iterator(); it.hasNext();) {
+      urls[i++] = (ScmUrl) it.next(); 
     }
     
     MavenCheckoutWizard wizard = new MavenCheckoutWizard(urls);

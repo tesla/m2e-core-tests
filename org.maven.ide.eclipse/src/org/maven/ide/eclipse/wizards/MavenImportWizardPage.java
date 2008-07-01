@@ -13,7 +13,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -74,7 +73,7 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
 
   protected CheckboxTreeViewer projectTreeViewer;
 
-  private List locations;
+  private List<String> locations;
 
   private IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
 
@@ -85,7 +84,7 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
     setPageComplete(false);
   }
 
-  public void setLocations(List locations) {
+  public void setLocations(List<String> locations) {
     this.locations = locations;
   }
   
@@ -165,7 +164,8 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
 
       public Object[] getElements(Object element) {
         if(element instanceof List) {
-          List projects = (List) element;
+          @SuppressWarnings("unchecked")
+          List<MavenProjectInfo> projects = (List<MavenProjectInfo>) element;
           return projects.toArray(new MavenProjectInfo[projects.size()]);
         }
         return EMPTY;
@@ -173,11 +173,12 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
 
       public Object[] getChildren(Object parentElement) {
         if(parentElement instanceof List) {
-          List projects = (List) parentElement;
+          @SuppressWarnings("unchecked")
+          List<MavenProjectInfo> projects = (List<MavenProjectInfo>) parentElement;
           return projects.toArray(new MavenProjectInfo[projects.size()]);
         } else if(parentElement instanceof MavenProjectInfo) {
           MavenProjectInfo mavenProjectInfo = (MavenProjectInfo) parentElement;
-          Collection projects = mavenProjectInfo.getProjects();
+          Collection<MavenProjectInfo> projects = mavenProjectInfo.getProjects();
           return projects.toArray(new MavenProjectInfo[projects.size()]);
         }
         return EMPTY;
@@ -189,7 +190,7 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
 
       public boolean hasChildren(Object parentElement) {
         if(parentElement instanceof List) {
-          List projects = (List) parentElement;
+          List<?> projects = (List<?>) parentElement;
           return !projects.isEmpty();
         } else if(parentElement instanceof MavenProjectInfo) {
           MavenProjectInfo mavenProjectInfo = (MavenProjectInfo) parentElement;
@@ -258,7 +259,7 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
   }
 
   protected void scanProjects() {
-    AbstractProjectScanner projectScanner = getProjectScanner();
+    AbstractProjectScanner<MavenProjectInfo> projectScanner = getProjectScanner();
     try {
       getWizard().getContainer().run(true, true, projectScanner);
 
@@ -270,12 +271,11 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
       setPageComplete(checkedElements != null && checkedElements.length > 0);
       setErrorMessage(null);
 
-      List errors = projectScanner.getErrors();
+      List<Exception> errors = projectScanner.getErrors();
       if(!errors.isEmpty()) {
         StringBuffer sb = new StringBuffer(Messages.getString("wizard.import.page.scanningErrors", errors.size()));
         int n = 1;
-        for(Iterator it = errors.iterator(); it.hasNext();) {
-          Exception ex = (Exception) it.next();
+        for(Exception ex : errors) {
           if(ex instanceof CoreException) {
             String msg = ((CoreException) ex).getStatus().getMessage();
             sb.append("\n  ").append(n).append(" ").append(msg.trim());
@@ -312,10 +312,11 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
   }
 
   void setAllChecked(boolean state) {
-    List input = (List) projectTreeViewer.getInput();
+    @SuppressWarnings("unchecked")
+    List<MavenProjectInfo> input = (List<MavenProjectInfo>) projectTreeViewer.getInput();
     if(input!=null) {
-      for(Iterator it = input.iterator(); it.hasNext(); ) {
-        projectTreeViewer.setSubtreeChecked(it.next(), state);
+      for(MavenProjectInfo mavenProjectInfo : input) {
+        projectTreeViewer.setSubtreeChecked(mavenProjectInfo, state);
       }
       updateCheckedState();
     }
@@ -356,7 +357,7 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
     return false;
   }
 
-  protected AbstractProjectScanner getProjectScanner() {
+  protected AbstractProjectScanner<MavenProjectInfo> getProjectScanner() {
     File root = workspaceRoot.getLocation().toFile();
     if(locations==null || locations.isEmpty()) {
       return new LocalProjectScanner(root, rootDirectoryCombo.getText(), false);
@@ -367,21 +368,23 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
   /**
    * @return collection of <code>MavenProjectInfo</code>
    */
-  public Collection getProjects() {
-    List checkedProjects = Arrays.asList(projectTreeViewer.getCheckedElements());
+  public Collection<MavenProjectInfo> getProjects() {
+    List<MavenProjectInfo> checkedProjects = Arrays.asList((MavenProjectInfo[]) projectTreeViewer.getCheckedElements());
 
     if(!getImportConfiguration().getResolverConfiguration().shouldIncludeModules()) {
       return checkedProjects;
     }
 
-    List mavenProjects = new ArrayList();
-    collectProjects(mavenProjects, new LinkedHashSet(checkedProjects), (List) projectTreeViewer.getInput());
+    List<MavenProjectInfo> mavenProjects = new ArrayList<MavenProjectInfo>();
+    @SuppressWarnings("unchecked")
+    List<MavenProjectInfo> sourceProjects = (List<MavenProjectInfo>) projectTreeViewer.getInput();
+    collectProjects(mavenProjects, new LinkedHashSet<MavenProjectInfo>(checkedProjects), sourceProjects);
     return mavenProjects;
   }
 
-  private void collectProjects(List mavenProjects, Set checkedProjects, Collection childProjects) {
-    for(Iterator it = childProjects.iterator(); it.hasNext();) {
-      MavenProjectInfo projectInfo = (MavenProjectInfo) it.next();
+  private void collectProjects(List<MavenProjectInfo> mavenProjects, Set<MavenProjectInfo> checkedProjects,
+      Collection<MavenProjectInfo> childProjects) {
+    for(MavenProjectInfo projectInfo : childProjects) {
       if(checkedProjects.contains(projectInfo)) {
         mavenProjects.add(projectInfo);
       } else {

@@ -27,14 +27,14 @@ import org.maven.ide.eclipse.project.MavenProjectFacade;
 
 public class EclipseArtifactResolver extends DefaultArtifactResolver {
 
-  public void resolve(Artifact artifact, List remoteRepositories, ArtifactRepository localRepository)
+  public void resolve(Artifact artifact, List<ArtifactRepository> remoteRepositories, ArtifactRepository localRepository)
       throws ArtifactResolutionException, ArtifactNotFoundException {
     if(!resolveAsEclipseProject(artifact)) {
       super.resolve(artifact, remoteRepositories, localRepository);
     }
   }
 
-  public void resolveAlways(Artifact artifact, List remoteRepositories, ArtifactRepository localRepository)
+  public void resolveAlways(Artifact artifact, List<ArtifactRepository > remoteRepositories, ArtifactRepository localRepository)
       throws ArtifactResolutionException, ArtifactNotFoundException {
     if(!resolveAsEclipseProject(artifact)) {
       super.resolveAlways(artifact, remoteRepositories, localRepository);

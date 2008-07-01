@@ -12,7 +12,6 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -31,30 +30,28 @@ import org.maven.ide.eclipse.project.MavenProjectScmInfo;
  */
 public class MavenCheckoutOperation implements IRunnableWithProgress {
 
-  private Collection mavenProjects;
+  private Collection<MavenProjectScmInfo> mavenProjects;
   
   private File location;
 
-  private List locations = new ArrayList();
+  private List<String> locations = new ArrayList<String>();
   
   public void run(IProgressMonitor monitor) throws InterruptedException, InvocationTargetException {
-    List flatProjects = new ArrayList();
+    List<MavenProjectScmInfo> flatProjects = new ArrayList<MavenProjectScmInfo>();
 
     // sort nested projects
-    for(Iterator it = mavenProjects.iterator(); it.hasNext();) {
+    for(MavenProjectScmInfo info : mavenProjects) {
       if(monitor.isCanceled()) {
         throw new InterruptedException();
       }
 
-      MavenProjectScmInfo info = (MavenProjectScmInfo) it.next();
       String folderUrl = info.getFolderUrl();
       
       monitor.setTaskName("Scanning " + info.getLabel() + " " + info.getFolderUrl());
 
       // XXX check if projects already exist
       boolean isNestedPath = false;
-      for(Iterator it2 = mavenProjects.iterator(); it2.hasNext();) {
-        MavenProjectScmInfo info2 = (MavenProjectScmInfo) it2.next();
+      for(MavenProjectScmInfo info2 : mavenProjects) {
         if(info != info2) {
           String path = info2.getFolderUrl().toString();
           if(folderUrl.startsWith(path + "/")) {
@@ -68,12 +65,11 @@ public class MavenCheckoutOperation implements IRunnableWithProgress {
       }
     }
 
-    for(Iterator it = flatProjects.iterator(); it.hasNext();) {
+    for(MavenProjectScmInfo info : flatProjects) {
       if(monitor.isCanceled()) {
         throw new InterruptedException();
       }
       
-      MavenProjectScmInfo info = (MavenProjectScmInfo) it.next();
       monitor.setTaskName("Checking out " + info.getLabel() + " " + info.getFolderUrl());
       
       try {
@@ -170,21 +166,21 @@ public class MavenCheckoutOperation implements IRunnableWithProgress {
   /**
    * @param mavenProjects a collection of {@link MavenProjectScmInfo}
    */
-  public void setMavenProjects(Collection mavenProjects) {
+  public void setMavenProjects(Collection<MavenProjectScmInfo> mavenProjects) {
     this.mavenProjects = mavenProjects;
   }
 
   /**
    * @return Returns collection of {@link MavenProjectScmInfo}
    */
-  public Collection getMavenProjects() {
+  public Collection<MavenProjectScmInfo> getMavenProjects() {
     return this.mavenProjects;
   }
   
   /**
    * @return Returns list of <code>String</code> paths for the checked out locations
    */
-  public List getLocations() {
+  public List<String> getLocations() {
     return this.locations;
   }
   

@@ -44,7 +44,7 @@ import org.maven.ide.eclipse.internal.embedder.ArchetypeCatalogsWriter;
  */
 public class ArchetypeManager {
 
-  private final Map catalogs = new LinkedHashMap();
+  private final Map<String, ArchetypeCatalogFactory> catalogs = new LinkedHashMap<String, ArchetypeCatalogFactory>();
 
   private final File configFile;
   
@@ -58,8 +58,8 @@ public class ArchetypeManager {
   /**
    * @return Collection of ArchetypeCatalogFactory
    */
-  public Collection getArchetypeCatalogs() {
-    return new ArrayList(catalogs.values());
+  public Collection<ArchetypeCatalogFactory> getArchetypeCatalogs() {
+    return new ArrayList<ArchetypeCatalogFactory>(catalogs.values());
   }
 
   public void addArchetypeCatalogFactory(ArchetypeCatalogFactory factory) {
@@ -73,7 +73,7 @@ public class ArchetypeManager {
   }
   
   public ArchetypeCatalogFactory getArchetypeCatalogFactory(String catalogId) {
-    return (ArchetypeCatalogFactory) catalogs.get(catalogId);
+    return catalogs.get(catalogId);
   }
   
   public void readCatalogs() throws IOException {
@@ -81,9 +81,9 @@ public class ArchetypeManager {
       InputStream is = null;
       try {
         is = new FileInputStream(configFile);
-        Collection catalogs = writer.readArchetypeCatalogs(is);
-        for(Iterator it = catalogs.iterator(); it.hasNext();) {
-          addArchetypeCatalogFactory((ArchetypeCatalogFactory) it.next());
+        Collection<ArchetypeCatalogFactory> catalogs = writer.readArchetypeCatalogs(is);
+        for(Iterator<ArchetypeCatalogFactory> it = catalogs.iterator(); it.hasNext();) {
+          addArchetypeCatalogFactory(it.next());
         }
       } finally {
         IOUtil.close(is);

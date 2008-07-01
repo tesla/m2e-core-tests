@@ -9,6 +9,7 @@
 package org.maven.ide.eclipse.wizards;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 import org.eclipse.core.resources.IProject;
@@ -194,7 +195,9 @@ public class MavenProjectWizard extends Wizard implements INewWizard {
     final MavenPlugin plugin = MavenPlugin.getDefault();
 
     if(locationPage.isSimpleProject()) {
-      model.getDependencies().addAll(Arrays.asList(dependenciesPage.getDependencies()));
+      @SuppressWarnings("unchecked")
+      List<Dependency> modelDependencies = model.getDependencies();
+      modelDependencies.addAll(Arrays.asList(dependenciesPage.getDependencies()));
 
       final String[] folders = artifactPage.getFolders();
 

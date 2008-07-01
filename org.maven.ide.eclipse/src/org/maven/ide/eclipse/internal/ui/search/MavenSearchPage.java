@@ -20,7 +20,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.Table;
 
 /**
@@ -38,7 +37,7 @@ public class MavenSearchPage extends DialogPage implements ISearchPage {
   private Combo artifactIdText;
   private Combo groupIdText;
   
-  private ISearchPageContainer container;
+  // private ISearchPageContainer container;
 
   public MavenSearchPage() {
   }
@@ -52,7 +51,7 @@ public class MavenSearchPage extends DialogPage implements ISearchPage {
   }
 
   public void setContainer(ISearchPageContainer container) {
-    this.container = container;
+    // this.container = container;
   }
   
   public boolean performAction() {
@@ -61,8 +60,6 @@ public class MavenSearchPage extends DialogPage implements ISearchPage {
   }
 
   public void createControl(Composite parent) {
-    Layout parentLayout = parent.getLayout();
-    
     Composite composite = new Composite(parent, SWT.NONE);
     composite.setLayout(new GridLayout(3, false));
     composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));

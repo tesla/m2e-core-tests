@@ -326,7 +326,7 @@ public class MavenCheckoutLocationPage extends AbstractMavenWizardPage {
    */
   public void dispose() {
     if(dialogSettings != null && scmUrlCombo!=null) {
-      Set history = new LinkedHashSet(MAX_HISTORY);
+      Set<String> history = new LinkedHashSet<String>(MAX_HISTORY);
       
       String lastValue = scmUrlCombo.getText();
       if ( lastValue!=null && lastValue.trim().length() > 0 ) {
@@ -338,7 +338,7 @@ public class MavenCheckoutLocationPage extends AbstractMavenWizardPage {
         history.add(items[j]);
       }
       
-      dialogSettings.put("scmUrl", (String[]) history.toArray(new String[history.size()]));
+      dialogSettings.put("scmUrl", history.toArray(new String[history.size()]));
     }
     
     super.dispose();

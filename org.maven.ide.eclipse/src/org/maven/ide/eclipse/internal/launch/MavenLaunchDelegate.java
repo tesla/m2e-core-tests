@@ -63,6 +63,7 @@ import org.maven.ide.eclipse.util.ITraceable;
 import org.maven.ide.eclipse.util.Util;
 
 
+@SuppressWarnings("restriction")
 public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaunchConstants, ITraceable {
 
   private static final boolean TRACE_ENABLED = Boolean.valueOf(

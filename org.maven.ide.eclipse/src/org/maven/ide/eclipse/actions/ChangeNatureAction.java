@@ -68,8 +68,8 @@ public class ChangeNatureAction implements IObjectActionDelegate {
   public void run(IAction action) {
     if(selection instanceof IStructuredSelection) {
       IStructuredSelection structuredSelection = (IStructuredSelection) selection;
-      Set projects = new LinkedHashSet();
-      for(Iterator it = structuredSelection.iterator(); it.hasNext();) {
+      Set<IProject> projects = new LinkedHashSet<IProject>();
+      for(Iterator<?> it = structuredSelection.iterator(); it.hasNext();) {
         Object element = it.next();
         IProject project = null;
         if(element instanceof IProject) {
@@ -87,14 +87,14 @@ public class ChangeNatureAction implements IObjectActionDelegate {
   }
 
   static class UpdateJob extends WorkspaceJob {
-    private final Set projects;
+    private final Set<IProject> projects;
     private final int option;
 
     private final MavenRuntimeManager runtimeManager;
     private final IProjectConfigurationManager importManager;
     private final MavenProjectManager projectManager;
     
-    public UpdateJob(Set projects, int option) {
+    public UpdateJob(Set<IProject> projects, int option) {
       super("Changing nature");
       this.projects = projects;
       this.option = option;
@@ -110,12 +110,11 @@ public class ChangeNatureAction implements IObjectActionDelegate {
     public IStatus runInWorkspace(IProgressMonitor monitor) {
       
       MultiStatus status = null;
-      for (Iterator i = projects.iterator(); i.hasNext(); ) {
+      for(IProject project : projects) {
         if (monitor.isCanceled()) {
           throw new OperationCanceledException();
         }
 
-        IProject project = (IProject) i.next();
         monitor.subTask(project.getName());
 
         try {
@@ -130,7 +129,7 @@ public class ChangeNatureAction implements IObjectActionDelegate {
 
       boolean offline = runtimeManager.isOffline();
       boolean updateSnapshots = false;
-      projectManager.refresh(new MavenUpdateRequest((IProject[]) projects.toArray(new IProject[projects.size()]), offline, updateSnapshots));
+      projectManager.refresh(new MavenUpdateRequest(projects.toArray(new IProject[projects.size()]), offline, updateSnapshots));
       
       return status != null? status: Status.OK_STATUS;
     }

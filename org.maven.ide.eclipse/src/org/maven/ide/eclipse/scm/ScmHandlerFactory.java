@@ -29,22 +29,22 @@ import org.maven.ide.eclipse.internal.ExtensionReader;
  */
 public class ScmHandlerFactory {
 
-  private static Map scms;
+  private static Map<String, List<ScmHandler>> scms;
 
-  private static Map scmUis;
+  private static Map<String, ScmHandlerUi> scmUis;
 
   public static synchronized void addScmHandlerUi(ScmHandlerUi handlerUi) {
     getScmUis().put(handlerUi.getType(), handlerUi);
   }
 
   public static synchronized ScmHandlerUi getHandlerUiByType(String type) {
-    return type == null ? null : (ScmHandlerUi) getScmUis().get(type);
+    return type == null ? null : getScmUis().get(type);
   }
 
   public static synchronized void addScmHandler(ScmHandler handler) {
-    List handlers = (List) getScms().get(handler.getType());
+    List<ScmHandler> handlers = getScms().get(handler.getType());
     if(handlers == null) {
-      handlers = new ArrayList();
+      handlers = new ArrayList<ScmHandler>();
       getScms().put(handler.getType(), handlers);
     }
     handlers.add(handler);
@@ -52,8 +52,8 @@ public class ScmHandlerFactory {
   }
 
   public static synchronized String[] getTypes() {
-    Map scms = getScms();
-    return (String[]) scms.keySet().toArray(new String[scms.size()]);
+    Map<String, List<ScmHandler>> scms = getScms();
+    return scms.keySet().toArray(new String[scms.size()]);
   }
 
   public static synchronized ScmHandler getHandler(String url) throws CoreException {
@@ -62,11 +62,11 @@ public class ScmHandlerFactory {
   }
 
   public static synchronized ScmHandler getHandlerByType(String type) {
-    List handlers = (List) getScms().get(type);
+    List<ScmHandler> handlers = getScms().get(type);
     if(handlers == null) {
       return null;
     }
-    return (ScmHandler) handlers.get(0);
+    return handlers.get(0);
   }
 
   public static synchronized String getType(String url) throws CoreException {
@@ -80,17 +80,17 @@ public class ScmHandlerFactory {
     return url.substring(4, n);
   }
 
-  private static Map getScms() {
+  private static Map<String, List<ScmHandler>> getScms() {
     if(scms == null) {
-      scms = new TreeMap();
+      scms = new TreeMap<String, List<ScmHandler>>();
       ExtensionReader.readScmHandlerExtensions();
     }
     return scms;
   }
 
-  private static Map getScmUis() {
+  private static Map<String, ScmHandlerUi> getScmUis() {
     if(scmUis == null) {
-      scmUis = new TreeMap();
+      scmUis = new TreeMap<String, ScmHandlerUi>();
       ExtensionReader.readScmHandlerUiExtensions();
     }
     return scmUis;

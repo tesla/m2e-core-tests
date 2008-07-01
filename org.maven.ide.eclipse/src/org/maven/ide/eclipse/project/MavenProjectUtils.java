@@ -9,7 +9,6 @@
 package org.maven.ide.eclipse.project;
 
 import java.io.File;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 
@@ -28,7 +27,6 @@ import org.apache.maven.model.Resource;
 public class MavenProjectUtils {
 
   private MavenProjectUtils() {
-    
   }
 
   /**
@@ -50,24 +48,23 @@ public class MavenProjectUtils {
     return directory.removeFirstSegments(projectLocation.segmentCount()).makeRelative().setDevice(null);
   }
 
-  public static IPath[] getResourceLocations(IProject project, List/*<Resource>*/ resources) {
-    LinkedHashSet locations = new LinkedHashSet();
-    for(Iterator it = resources.iterator(); it.hasNext();) {
-      Resource resource = (Resource) it.next();
+  public static IPath[] getResourceLocations(IProject project, List<Resource> resources) {
+    LinkedHashSet<IPath> locations = new LinkedHashSet<IPath>();
+    for(Resource resource : resources) {
       locations.add(getProjectRelativePath(project, resource.getDirectory()));
     }
-    return (IPath[]) locations.toArray(new IPath[locations.size()]);
+    return locations.toArray(new IPath[locations.size()]);
   }
 
-  public static IPath[] getSourceLocations(IProject project, List/*<String>*/ roots) {
-    LinkedHashSet locations = new LinkedHashSet();
-    for(Iterator i = roots.iterator(); i.hasNext();) {
-      IPath path = getProjectRelativePath(project, (String) i.next());
+  public static IPath[] getSourceLocations(IProject project, List<String> roots) {
+    LinkedHashSet<IPath> locations = new LinkedHashSet<IPath>();
+    for(String root : roots) {
+      IPath path = getProjectRelativePath(project, root);
       if(path != null) {
         locations.add(path);
       }
     }
-    return (IPath[]) locations.toArray(new IPath[locations.size()]);
+    return locations.toArray(new IPath[locations.size()]);
   }
 
   /**

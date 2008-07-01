@@ -14,7 +14,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -41,6 +40,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.KeyAdapter;
@@ -67,6 +67,7 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.apache.maven.archetype.catalog.Archetype;
 import org.apache.maven.archetype.catalog.ArchetypeCatalog;
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.DefaultArtifactRepository;
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
@@ -90,12 +91,9 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
 
   private static final String KEY_CATALOG = "catalog";
 
-  public static final Comparator ARCHETYPE_COMPARATOR = new Comparator() {
+  public static final Comparator<Archetype> ARCHETYPE_COMPARATOR = new Comparator<Archetype>() {
 
-    public int compare(Object o1, Object o2) {
-      Archetype a1 = (Archetype) o1;
-      Archetype a2 = (Archetype) o2;
-
+    public int compare(Archetype a1, Archetype a2) {
       String g1 = a1.getGroupId();
       String g2 = a2.getGroupId();
       int res = g1.compareTo(g2);
@@ -135,9 +133,9 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
   Button addArchetypeButton;
   
   /** the list of available archetypes */
-  Collection archetypes;
+  Collection<Archetype> archetypes;
 
-  Collection lastVersionArchetypes;
+  Collection<Archetype> lastVersionArchetypes;
 
   /** a flag indicating if the archetype selection is actually used in the wizard */
   private boolean isUsed = true;
@@ -187,7 +185,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
     catalogsComboViewer.setContentProvider(new IStructuredContentProvider() {
       public Object[] getElements(Object input) {
         if(input instanceof Collection) {
-          return ((Collection) input).toArray();
+          return ((Collection<?>) input).toArray();
         }
         return new Object[0];
       }
@@ -325,7 +323,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
 
     viewer.setSorter(new ViewerSorter() {
       public int compare(Viewer viewer, Object e1, Object e2) {
-        return ARCHETYPE_COMPARATOR.compare(e1, e2);
+        return ARCHETYPE_COMPARATOR.compare((Archetype) e1, (Archetype) e2);
       }
     });
 
@@ -335,7 +333,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
     viewer.setContentProvider(new IStructuredContentProvider() {
       public Object[] getElements(Object inputElement) {
         if(inputElement instanceof Collection) {
-          return ((Collection) inputElement).toArray();
+          return ((Collection<?>) inputElement).toArray();
         }
         return new Object[0];
       }
@@ -422,6 +420,10 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
       }
     });
   }
+  
+  protected IWizardContainer getContainer() {
+    return super.getContainer();
+  }
 
   public void addArchetypeSelectionListener(ISelectionChangedListener listener) {
     viewer.addSelectionChangedListener(listener);
@@ -439,8 +441,11 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
     Job job = new Job(Messages.getString("wizard.project.page.archetype.retrievingArchetypes")) {
       protected IStatus run(IProgressMonitor monitor) {
         try {
-          archetypes = new TreeSet(ARCHETYPE_COMPARATOR);
-          archetypes.addAll(getArchetypeCatalog().getArchetypes());
+          archetypes = new TreeSet<Archetype>(ARCHETYPE_COMPARATOR);
+
+          @SuppressWarnings("unchecked")
+          List<Archetype> catalogArchetypes = getArchetypeCatalog().getArchetypes();
+          archetypes.addAll(catalogArchetypes);
 
           if(archetypes != null) {
             Display.getDefault().asyncExec(new Runnable() {
@@ -460,14 +465,12 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
     job.schedule();
   }
 
-  public Set filterVersions(Collection archetypes) {
-    HashMap filteredArchetypes = new HashMap();
+  public Set<Archetype> filterVersions(Collection<Archetype> archetypes) {
+    HashMap<String, Archetype> filteredArchetypes = new HashMap<String, Archetype>();
 
-    for(Iterator it = archetypes.iterator(); it.hasNext();) {
-      Archetype currentArchetype = (Archetype) it.next();
-
+    for(Archetype currentArchetype : archetypes) {
       String key = getArchetypeKey(currentArchetype);
-      Archetype archetype = (Archetype) filteredArchetypes.get(key);
+      Archetype archetype = filteredArchetypes.get(key);
       if(archetype == null) {
         filteredArchetypes.put(key, currentArchetype);
       } else {
@@ -479,11 +482,8 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
       }
     }
 
-    TreeSet result = new TreeSet(new Comparator() {
-      public int compare(Object o1, Object o2) {
-        Archetype a1 = (Archetype) o1;
-        Archetype a2 = (Archetype) o2;
-
+    TreeSet<Archetype> result = new TreeSet<Archetype>(new Comparator<Archetype>() {
+      public int compare(Archetype a1, Archetype a2) {
         String k1 = a1.getGroupId() + ":" + a1.getArtifactId() + ":" + a1.getVersion();
         String k2 = a2.getGroupId() + ":" + a2.getArtifactId() + ":" + a2.getVersion();
         return k1.compareTo(k2);
@@ -591,8 +591,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
   
   /** Locates an archetype with given ids. */
   protected Archetype findArchetype(String groupId, String artifactId, String version) {
-    for(Iterator it = archetypes.iterator(); it.hasNext();) {
-      Archetype archetype = (Archetype) it.next();
+    for(Archetype archetype : archetypes) {
       if(archetype.getGroupId().equals(groupId) && archetype.getArtifactId().equals(artifactId)) {
         if(version == null || version.equals(archetype.getVersion())) {
           return archetype;
@@ -609,7 +608,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
 
     final MavenPlugin plugin = MavenPlugin.getDefault();
     
-    final List remoteRepositories;
+    final List<? extends ArtifactRepository> remoteRepositories;
     if(repositoryUrl.length()==0) {
       remoteRepositories = plugin.getIndexManager().getArtifactRepositories(null, null);
     } else {

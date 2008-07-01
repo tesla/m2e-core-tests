@@ -43,7 +43,7 @@ public class MavenProjectConfigurator extends AbstractProjectConfigurator {
 
   String pluginKey;
 
-  List goals;
+  List<String> goals;
 
   public void configure(MavenEmbedder embedder, ProjectConfigurationRequest request, IProgressMonitor monitor) {
     if(pluginKey == null || goals == null) {
@@ -53,8 +53,9 @@ public class MavenProjectConfigurator extends AbstractProjectConfigurator {
     MavenProject mavenProject = request.getMavenProject();
     Build build = mavenProject.getBuild();
     if(build != null) {
-      Map pluginMap = build.getPluginsAsMap();
-      Plugin mavenPlugin = (Plugin) pluginMap.get(pluginKey);
+      @SuppressWarnings("unchecked")
+      Map<String, Plugin> pluginMap = build.getPluginsAsMap();
+      Plugin mavenPlugin = pluginMap.get(pluginKey);
       if(mavenPlugin != null) {
         IFile pomFile = request.getPom();
         ResolverConfiguration resolverConfiguration = request.getResolverConfiguration();
@@ -90,7 +91,7 @@ public class MavenProjectConfigurator extends AbstractProjectConfigurator {
     return this.pluginKey;
   }
 
-  public List getGoals() {
+  public List<String> getGoals() {
     return this.goals;
   }
 

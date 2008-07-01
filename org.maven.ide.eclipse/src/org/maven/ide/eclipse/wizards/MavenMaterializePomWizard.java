@@ -9,8 +9,8 @@
 package org.maven.ide.eclipse.wizards;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -29,6 +29,7 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.project.BuildPathManager;
 import org.maven.ide.eclipse.project.MavenProjectPomScanner;
+import org.maven.ide.eclipse.project.MavenProjectScmInfo;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.scm.MavenProjectCheckoutJob;
 
@@ -62,10 +63,10 @@ public class MavenMaterializePomWizard extends Wizard implements IImportWizard, 
   }
 
   public void init(IWorkbench workbench, IStructuredSelection selection) {
-    ArrayList dependencies = new ArrayList();
+    ArrayList<Dependency> dependencies = new ArrayList<Dependency>();
 
     BuildPathManager buildpathManager = MavenPlugin.getDefault().getBuildpathManager();
-    for(Iterator it = selection.iterator(); it.hasNext();) {
+    for(Iterator<?> it = selection.iterator(); it.hasNext();) {
       Object element = it.next();
       try {
         if(element instanceof IPackageFragmentRoot) {
@@ -93,7 +94,7 @@ public class MavenMaterializePomWizard extends Wizard implements IImportWizard, 
       }
     }
     
-    setDependencies((Dependency[]) dependencies.toArray(new Dependency[dependencies.size()]));
+    setDependencies(dependencies.toArray(new Dependency[dependencies.size()]));
   }
 
   public void addPages() {
@@ -134,9 +135,9 @@ public class MavenMaterializePomWizard extends Wizard implements IImportWizard, 
     final boolean developer = selectionPage.isDeveloperConnection();
     
     MavenProjectCheckoutJob job = new MavenProjectCheckoutJob(importConfiguration, checkoutAllProjects) {
-      protected Collection getProjects(IProgressMonitor monitor) throws InterruptedException {
+      protected List<MavenProjectScmInfo> getProjects(IProgressMonitor monitor) throws InterruptedException {
         MavenPlugin plugin = MavenPlugin.getDefault();
-        MavenProjectPomScanner scanner = new MavenProjectPomScanner(developer, dependencies, //
+        MavenProjectPomScanner<MavenProjectScmInfo> scanner = new MavenProjectPomScanner<MavenProjectScmInfo>(developer, dependencies, //
             plugin.getMavenModelManager(), plugin.getMavenEmbedderManager(), //
             plugin.getIndexManager(), plugin.getConsole());
         scanner.run(monitor);

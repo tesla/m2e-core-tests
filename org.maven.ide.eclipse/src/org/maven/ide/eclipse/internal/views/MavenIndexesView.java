@@ -103,6 +103,7 @@ public class MavenIndexesView extends ViewPart {
     viewer.setContentProvider(new ViewContentProvider());
     viewer.setLabelProvider(new ViewLabelProvider());
     viewer.setSorter(new ViewerSorter() {
+      @SuppressWarnings("unchecked")
       public int compare(Viewer viewer, Object o1, Object o2) {
         if(o1 instanceof IndexInfo && o2 instanceof IndexInfo) {
           IndexInfo i1 = (IndexInfo) o1;
@@ -485,7 +486,7 @@ public class MavenIndexesView extends ViewPart {
 
     public Object[] getElements(Object parent) {
       if(parent.equals(getViewSite())) {
-        Map indexes = indexManager.getIndexes();
+        Map<String, IndexInfo> indexes = indexManager.getIndexes();
         return indexes.values().toArray(new IndexInfo[indexes.size()]);
       }
       return getChildren(parent);
@@ -528,13 +529,13 @@ public class MavenIndexesView extends ViewPart {
       } else if(parent instanceof IndexedArtifactGroup) {
         IndexedArtifactGroup g = indexManager.resolveGroup((IndexedArtifactGroup) parent);
 
-        ArrayList results = new ArrayList();
+        ArrayList<Object> results = new ArrayList<Object>();
         results.addAll(g.nodes.values()); // IndexedArtifactGroup
         results.addAll(g.files.values()); // IndexedArtifact
         return results.toArray(new Object[results.size()]);
 
       } else if(parent instanceof IndexedArtifact) {
-        Set files = ((IndexedArtifact) parent).files;
+        Set<IndexedArtifactFile> files = ((IndexedArtifact) parent).files;
         return files.toArray(new IndexedArtifactFile[files.size()]);
       }
 

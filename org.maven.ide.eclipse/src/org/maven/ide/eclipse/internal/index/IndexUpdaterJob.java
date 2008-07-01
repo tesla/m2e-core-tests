@@ -28,7 +28,7 @@ public class IndexUpdaterJob extends Job {
   
   private final MavenConsole console;
 
-  private final Stack updateQueue = new Stack(); 
+  private final Stack<IndexCommand> updateQueue = new Stack<IndexCommand>(); 
   
   public IndexUpdaterJob(IndexManager indexManager, MavenConsole console) {
     super("Updating indexes");
@@ -53,7 +53,7 @@ public class IndexUpdaterJob extends Job {
     monitor.beginTask(getName(), IProgressMonitor.UNKNOWN);
     
     while(!updateQueue.isEmpty()) {
-      IndexCommand command = (IndexCommand) updateQueue.pop();
+      IndexCommand command = updateQueue.pop();
       command.run(indexManager, console, monitor);
     }
     

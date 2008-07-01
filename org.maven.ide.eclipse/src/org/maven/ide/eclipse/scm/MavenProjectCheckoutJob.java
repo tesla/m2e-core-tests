@@ -12,7 +12,6 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -47,6 +46,7 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.project.LocalProjectScanner;
 import org.maven.ide.eclipse.project.MavenProjectInfo;
+import org.maven.ide.eclipse.project.MavenProjectScmInfo;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.wizards.MavenImportWizard;
 import org.maven.ide.eclipse.wizards.ProjectsImportWizard;
@@ -64,7 +64,7 @@ public abstract class MavenProjectCheckoutJob extends WorkspaceJob {
   
   boolean checkoutAllProjects;
 
-  Collection projects;
+  Collection<MavenProjectInfo> projects;
 
   public MavenProjectCheckoutJob(ProjectImportConfiguration importConfiguration, boolean checkoutAllProjects) {
     super("Checking out Maven projects");
@@ -78,7 +78,7 @@ public abstract class MavenProjectCheckoutJob extends WorkspaceJob {
     operation.setLocation(location);
   }
   
-  protected abstract Collection getProjects(IProgressMonitor monitor) throws InterruptedException;
+  protected abstract Collection<MavenProjectScmInfo> getProjects(IProgressMonitor monitor) throws InterruptedException;
   
   
   // WorkspaceJob
@@ -101,8 +101,7 @@ public abstract class MavenProjectCheckoutJob extends WorkspaceJob {
 
       if(checkoutAllProjects) {
         // check if there any project name conflicts 
-        for(Iterator it = projects.iterator(); it.hasNext();) {
-          MavenProjectInfo projectInfo = (MavenProjectInfo) it.next();
+        for(MavenProjectInfo projectInfo : projects) {
           Model model = projectInfo.getModel();
           if(model == null) {
             model = modelManager.readMavenModel(projectInfo.getPomFile());
@@ -149,9 +148,9 @@ public abstract class MavenProjectCheckoutJob extends WorkspaceJob {
       if(projects.isEmpty()) {
         MavenPlugin.getDefault().getConsole().logMessage("No Maven projects to import");
         
-        final List locations = operation.getLocations();
+        final List<String> locations = operation.getLocations();
         if(locations.size()==1) {
-          final String location = (String) locations.get(0);
+          final String location = locations.get(0);
           
           DirectoryScanner projectScanner = new DirectoryScanner();
           projectScanner.setBasedir(location);
@@ -167,7 +166,7 @@ public abstract class MavenProjectCheckoutJob extends WorkspaceJob {
                     "No Maven projects found, but there is Eclipse projects configuration avaialble.\n" +
                     "Do you want to select and import Eclipse projects?");
                 if(res) {
-                  IWizard wizard = new ProjectsImportWizard(((String) locations.get(0)));
+                  IWizard wizard = new ProjectsImportWizard(locations.get(0));
                   WizardDialog dialog = new WizardDialog(Display.getDefault().getActiveShell(), wizard);
                   dialog.open();
                 } else {
@@ -207,7 +206,7 @@ public abstract class MavenProjectCheckoutJob extends WorkspaceJob {
         final MavenPlugin plugin = MavenPlugin.getDefault();
         WorkspaceJob job = new WorkspaceJob("Importing Maven projects") {
           public IStatus runInWorkspace(IProgressMonitor monitor) {
-            Set projectSet = plugin.getProjectConfigurationManager().collectProjects(projects, //
+            Set<MavenProjectInfo> projectSet = plugin.getProjectConfigurationManager().collectProjects(projects, //
                 configuration.getResolverConfiguration().shouldIncludeModules());
 
             try {
@@ -226,7 +225,7 @@ public abstract class MavenProjectCheckoutJob extends WorkspaceJob {
       } else {
         Display.getDefault().asyncExec(new Runnable() {
           public void run() {
-            List locations = operation.getLocations();
+            List<String> locations = operation.getLocations();
             MavenImportWizard wizard = new MavenImportWizard(configuration, locations);
             WizardDialog dialog = new WizardDialog(Display.getDefault().getActiveShell(), wizard);
             int res = dialog.open();
@@ -238,10 +237,9 @@ public abstract class MavenProjectCheckoutJob extends WorkspaceJob {
       }
     }
 
-    protected void cleanup(List locations) {
+    protected void cleanup(List<String> locations) {
       MavenConsole console = MavenPlugin.getDefault().getConsole();
-      for(Iterator it = locations.iterator(); it.hasNext();) {
-        String location = (String) it.next();
+      for(String location : locations) {
         try {
           FileUtils.deleteDirectory(location);
         } catch(IOException ex) {

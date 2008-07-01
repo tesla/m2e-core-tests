@@ -153,15 +153,16 @@ public class MavenGoalSelectionDialog extends ElementTreeSelectionDialog {
   static class GoalsContentProvider implements ITreeContentProvider {
     private static Object[] EMPTY = new Object[0];
 
-    private final List groups = new ArrayList();
+    private final List<Group> groups = new ArrayList<Group>();
 
     public GoalsContentProvider() {
       MavenEmbedderManager embedderManager = MavenPlugin.getDefault().getMavenEmbedderManager();
       try {
-        List entries = new ArrayList();
-        List phases = embedderManager.getWorkspaceEmbedder().getLifecyclePhases();
+        List<Entry> entries = new ArrayList<Entry>();
+        @SuppressWarnings("unchecked")
+        List<String> phases = embedderManager.getWorkspaceEmbedder().getLifecyclePhases();
         for(int i = 0; i < phases.size(); i++ ) {
-          entries.add(new Entry((String) phases.get(i), null, null));
+          entries.add(new Entry(phases.get(i), null, null));
         }
         groups.add(new Group(Messages.getString("launch.goalsDialog.lifecyclePhases"), null, null, entries)); //$NON-NLS-1$
       } catch(Exception e) {
@@ -170,15 +171,13 @@ public class MavenGoalSelectionDialog extends ElementTreeSelectionDialog {
 
       IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
       try {
-        Map result = indexManager.search("*", IndexManager.SEARCH_PLUGIN);
-        TreeMap map = new TreeMap();
-        for(Iterator it = result.values().iterator(); it.hasNext();) {
-          IndexedArtifact a = (IndexedArtifact) it.next();
+        Map<String, IndexedArtifact> result = indexManager.search("*", IndexManager.SEARCH_PLUGIN);
+        TreeMap<String, Group> map = new TreeMap<String, Group>();
+        for(IndexedArtifact a : result.values()) {
           IndexedArtifactFile f = a.files.iterator().next();
           if(f.prefix != null && f.prefix.length()>0 && f.goals != null) {
-            List goals = new ArrayList();
-            for(Iterator git = f.goals.iterator(); git.hasNext();) {
-              String goal = (String) git.next();
+            List<Entry> goals = new ArrayList<Entry>();
+            for(String goal : f.goals) {
               if(goal.length()>0) {
                 goals.add(new Entry(goal, f.prefix, f));
               }
@@ -256,8 +255,8 @@ public class MavenGoalSelectionDialog extends ElementTreeSelectionDialog {
         if(g.name.indexOf(filter) > -1) {
           return true;
         }
-        for(Iterator it = g.entries.iterator(); it.hasNext();) {
-          Entry e = (Entry) it.next();
+        for(Iterator<Entry> it = g.entries.iterator(); it.hasNext();) {
+          Entry e = it.next();
           if(e.name.indexOf(filter) > -1) {
             return true;
           }
@@ -302,9 +301,9 @@ public class MavenGoalSelectionDialog extends ElementTreeSelectionDialog {
     public final String groupId;
     public final String artifactId;
 
-    public final List entries;
+    public final List<Entry> entries;
 
-    public Group(String name, String groupId, String artifactId, List entries) {
+    public Group(String name, String groupId, String artifactId, List<Entry> entries) {
       this.name = name;
       this.groupId = groupId;
       this.artifactId = artifactId;

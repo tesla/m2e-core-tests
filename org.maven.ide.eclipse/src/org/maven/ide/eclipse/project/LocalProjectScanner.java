@@ -12,7 +12,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +31,7 @@ import org.maven.ide.eclipse.embedder.MavenModelManager;
 /**
  * @author Eugene Kuleshov
  */
-public class LocalProjectScanner extends AbstractProjectScanner {
+public class LocalProjectScanner extends AbstractProjectScanner<MavenProjectInfo> {
   private final File workspaceRoot;
   private final List<String> folders;
   private final boolean needsRename;
@@ -52,10 +51,9 @@ public class LocalProjectScanner extends AbstractProjectScanner {
   public void run(IProgressMonitor monitor) throws InterruptedException {
     monitor.beginTask("Scanning folders", IProgressMonitor.UNKNOWN);
     try {
-      for(Iterator it = folders.iterator(); it.hasNext();) {
-        File folder;
+      for(String folderName : folders) {
         try {
-          folder = new File((String) it.next()).getCanonicalFile();
+          File folder = new File(folderName).getCanonicalFile();
           scanFolder(folder, new SubProgressMonitor(monitor, IProgressMonitor.UNKNOWN));
         } catch(IOException ex) {
           addError(ex);
@@ -98,8 +96,8 @@ public class LocalProjectScanner extends AbstractProjectScanner {
     }
   }
 
+  @SuppressWarnings("unchecked")
   private MavenProjectInfo readMavenProjectInfo(File baseDir, String modulePath, MavenProjectInfo parentInfo) {
-
     MavenModelManager modelManager = MavenPlugin.getDefault().getMavenModelManager();
 
     File pomFile = new File(baseDir, MavenPlugin.POM_FILE_NAME);
@@ -115,29 +113,25 @@ public class LocalProjectScanner extends AbstractProjectScanner {
       MavenProjectInfo projectInfo = new MavenProjectInfo(pomName , pomFile, model, parentInfo);
       projectInfo.setNeedsRename(getNeedsRename(projectInfo));
 
-      Map modules = new LinkedHashMap();
-      for(Iterator it = model.getModules().iterator(); it.hasNext();) {
-        String module = (String) it.next();
-        modules.put(module, new HashSet());
+      Map<String, Set<String>> modules = new LinkedHashMap<String, Set<String>>();
+      for(String module : (List<String>) model.getModules()) {
+        modules.put(module, new HashSet<String>());
       }
 
-      for(Iterator it = model.getProfiles().iterator(); it.hasNext();) {
-        Profile profile = (Profile) it.next();
-        for(Iterator ir = profile.getModules().iterator(); ir.hasNext();) {
-          String module = (String) ir.next();
-          Set profiles = (Set) modules.get(module);
+      for(Profile profile : (List<Profile>) model.getProfiles()) {
+        for(String module : (List<String>) profile.getModules()) {
+          Set<String> profiles = modules.get(module);
           if(profiles == null) {
-            profiles = new HashSet();
+            profiles = new HashSet<String>();
             modules.put(module, profiles);
           }
           profiles.add(profile.getId());
         }
       }
 
-      for(Iterator it = modules.entrySet().iterator(); it.hasNext();) {
-        Map.Entry e = (Map.Entry) it.next();
-        String module = (String) e.getKey();
-        Set profiles = (Set) e.getValue();
+      for(Map.Entry<String, Set<String>> e : modules.entrySet()) {
+        String module = e.getKey();
+        Set<String> profiles = e.getValue();
 
         File moduleBaseDir = new File(baseDir, module);
         MavenProjectInfo moduleInfo = readMavenProjectInfo(moduleBaseDir, module, projectInfo);

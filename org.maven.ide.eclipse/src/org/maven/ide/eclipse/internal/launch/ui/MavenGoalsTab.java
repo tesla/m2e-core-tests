@@ -34,21 +34,20 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.internal.launch.MavenLaunchConstants;
 
 
+@SuppressWarnings("restriction")
 public class MavenGoalsTab extends AbstractLaunchConfigurationTab {
 
-  private ILaunchConfiguration configuration;
+  Button autoBuildGoals;
+  Button manualBuildGoals;
+  Button duringCleanGoals;
+  Button afterCleanGoals;
 
-  private Button autoBuildGoals;
-  private Button manualBuildGoals;
-  private Button duringCleanGoals;
-  private Button afterCleanGoals;
+  Text autoBuildGoalsText;
+  Text manualBuildGoalsText;
+  Text duringCleanGoalsText;
+  Text afterCleanGoalsText;
 
-  private Text autoBuildGoalsText;
-  private Text manualBuildGoalsText;
-  private Text duringCleanGoalsText;
-  private Text afterCleanGoalsText;
-
-  private Map attributeToGoals = new HashMap();
+  private Map<String, String> attributeToGoals = new HashMap<String, String>();
 
 
   private SelectionListener selectionListener = new SelectionAdapter() {
@@ -75,7 +74,11 @@ public class MavenGoalsTab extends AbstractLaunchConfigurationTab {
       updateLaunchConfigurationDialog();
     }
   };
-
+  
+  @Override
+  protected void updateLaunchConfigurationDialog() {
+    super.updateLaunchConfigurationDialog();
+  }
 
   protected void createTargetsComponent(Composite parent) {
     Label afterCleanGoalsLabel = new Label(parent, SWT.NONE);
@@ -118,8 +121,7 @@ public class MavenGoalsTab extends AbstractLaunchConfigurationTab {
       return;
     }
     
-    Object[] targetsSelected = dialog.getResult();
-
+//    Object[] targetsSelected = dialog.getResult();
 //    if(targetsSelected == null) {//default
 //      text.setEnabled(true);
 //      attributeToGoals.remove(attribute);
@@ -159,7 +161,7 @@ public class MavenGoalsTab extends AbstractLaunchConfigurationTab {
   }
 
   public void initializeFrom(ILaunchConfiguration configuration) {
-    this.configuration = configuration;
+    // this.configuration = configuration;
 
     try {
       String autoTargets = configuration.getAttribute(MavenLaunchConstants.ATTR_GOALS_AUTO_BUILD, "");
@@ -192,13 +194,13 @@ public class MavenGoalsTab extends AbstractLaunchConfigurationTab {
     }
     configuration.setAttribute(IExternalToolConstants.ATTR_RUN_BUILD_KINDS, buffer.toString());
 
-    String targets = (String) attributeToGoals.get(MavenLaunchConstants.ATTR_GOALS_AFTER_CLEAN);
+    String targets = attributeToGoals.get(MavenLaunchConstants.ATTR_GOALS_AFTER_CLEAN);
     configuration.setAttribute(MavenLaunchConstants.ATTR_GOALS_AFTER_CLEAN, targets);
-    targets = (String) attributeToGoals.get(MavenLaunchConstants.ATTR_GOALS_AUTO_BUILD);
+    targets = attributeToGoals.get(MavenLaunchConstants.ATTR_GOALS_AUTO_BUILD);
     configuration.setAttribute(MavenLaunchConstants.ATTR_GOALS_AUTO_BUILD, targets);
-    targets = (String) attributeToGoals.get(MavenLaunchConstants.ATTR_GOALS_MANUAL_BUILD);
+    targets = attributeToGoals.get(MavenLaunchConstants.ATTR_GOALS_MANUAL_BUILD);
     configuration.setAttribute(MavenLaunchConstants.ATTR_GOALS_MANUAL_BUILD, targets);
-    targets = (String) attributeToGoals.get(MavenLaunchConstants.ATTR_GOALS_CLEAN);
+    targets = attributeToGoals.get(MavenLaunchConstants.ATTR_GOALS_CLEAN);
     configuration.setAttribute(MavenLaunchConstants.ATTR_GOALS_CLEAN, targets);
 
     // configuration.setAttribute(MavenLaunchConstants.ATTR_GOALS_UPDATED, true);

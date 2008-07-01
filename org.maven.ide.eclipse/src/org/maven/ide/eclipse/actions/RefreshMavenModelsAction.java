@@ -60,15 +60,15 @@ public class RefreshMavenModelsAction implements IWorkbenchWindowActionDelegate,
     projects = null;
     
     if(selection instanceof IStructuredSelection) {
-      ArrayList projectList = new ArrayList(); 
-      for(Iterator it = ((IStructuredSelection) selection).iterator(); it.hasNext();) {
+      ArrayList<IProject> projectList = new ArrayList<IProject>(); 
+      for(Iterator<?> it = ((IStructuredSelection) selection).iterator(); it.hasNext();) {
         Object o = it.next();
         if(o instanceof IProject) {
-          projectList.add(o);
+          projectList.add((IProject) o);
         }
       }
       if(projectList.size()>0) {
-        projects = (IProject[]) projectList.toArray(new IProject[projectList.size()]);
+        projects = projectList.toArray(new IProject[projectList.size()]);
       }
     }
   }

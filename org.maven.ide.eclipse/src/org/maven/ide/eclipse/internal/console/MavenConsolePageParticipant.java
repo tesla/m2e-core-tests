@@ -41,6 +41,7 @@ public class MavenConsolePageParticipant implements IConsolePageParticipant {
   public void deactivated() {
   }
 
+  @SuppressWarnings("unchecked")
   public Object getAdapter(Class adapter) {
     return null;
   }

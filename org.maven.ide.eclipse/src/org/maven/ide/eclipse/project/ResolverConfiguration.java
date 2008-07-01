@@ -50,7 +50,7 @@ public class ResolverConfiguration {
     return this.activeProfiles;
   }
   
-  public List getActiveProfileList() {
+  public List<String> getActiveProfileList() {
     return Arrays.asList(activeProfiles.split(",\\s\\|"));
   }
 

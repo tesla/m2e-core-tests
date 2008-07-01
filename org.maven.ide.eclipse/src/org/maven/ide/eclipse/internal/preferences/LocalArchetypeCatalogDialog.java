@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import org.apache.maven.archetype.catalog.Archetype;
 import org.apache.maven.archetype.catalog.ArchetypeCatalog;
 
 import org.maven.ide.eclipse.MavenPlugin;
@@ -179,7 +180,7 @@ public class LocalArchetypeCatalogDialog extends TitleAreaDialog {
   }
 
   private void saveValue(String key, String value) {
-    List dirs = new ArrayList();
+    List<String> dirs = new ArrayList<String>();
     dirs.addAll(Arrays.asList(getSavedValues(key)));
 
     dirs.remove(value);
@@ -189,7 +190,7 @@ public class LocalArchetypeCatalogDialog extends TitleAreaDialog {
       dirs = dirs.subList(0, MAX_HISTORY);
     }
 
-    dialogSettings.put(key, (String[]) dirs.toArray(new String[dirs.size()]));
+    dialogSettings.put(key, dirs.toArray(new String[dirs.size()]));
   }
 
   void update() {
@@ -217,7 +218,8 @@ public class LocalArchetypeCatalogDialog extends TitleAreaDialog {
     MavenEmbedderManager embedderManager = MavenPlugin.getDefault().getMavenEmbedderManager();
     try {
       ArchetypeCatalog archetypeCatalog = factory.getArchetypeCatalog(embedderManager);
-      List archetypes = archetypeCatalog.getArchetypes();
+      @SuppressWarnings("unchecked")
+      List<Archetype> archetypes = archetypeCatalog.getArchetypes();
       if(archetypes==null || archetypes.size()==0) {
         setMessage("Archetype catalog is empty", IStatus.WARNING);
       }

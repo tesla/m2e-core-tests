@@ -10,7 +10,6 @@ package org.maven.ide.eclipse.wizards;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +47,7 @@ public abstract class AbstractMavenWizardPage extends WizardPage {
   protected IDialogSettings dialogSettings;
 
   /** the Map of field ids to List of comboboxes that share the same history */
-  private Map fieldsWithHistory;
+  private Map<String, List<Combo>> fieldsWithHistory;
 
   private boolean isHistoryLoaded = false;
 
@@ -64,7 +63,7 @@ public abstract class AbstractMavenWizardPage extends WizardPage {
     super(pageName);
     this.importConfiguration = importConfiguration;
 
-    fieldsWithHistory = new HashMap();
+    fieldsWithHistory = new HashMap<String, List<Combo>>();
     
     initDialogSettings();
   }
@@ -120,13 +119,11 @@ public abstract class AbstractMavenWizardPage extends WizardPage {
 
   /** Loads the input history from the dialog settings. */
   private void loadInputHistory() {
-    for(Iterator i = fieldsWithHistory.entrySet().iterator(); i.hasNext();) {
-      Map.Entry e = (Map.Entry) i.next();
-      String id = (String) e.getKey();
+    for(Map.Entry<String, List<Combo>> e : fieldsWithHistory.entrySet()) {
+      String id = e.getKey();
       String[] items = dialogSettings.getArray(id);
       if(items != null) {
-        for(Iterator it = ((List) e.getValue()).iterator(); it.hasNext();) {
-          Combo combo = (Combo) it.next();
+        for(Combo combo : e.getValue()) {
           String text = combo.getText();
           combo.setItems(items);
           if (text.length() > 0) {
@@ -140,37 +137,34 @@ public abstract class AbstractMavenWizardPage extends WizardPage {
 
   /** Saves the input history into the dialog settings. */
   private void saveInputHistory() {
-    for(Iterator i = fieldsWithHistory.entrySet().iterator(); i.hasNext();) {
-      Map.Entry e = (Map.Entry) i.next();
-      String id = (String) e.getKey();
+    for(Map.Entry<String, List<Combo>> e : fieldsWithHistory.entrySet()) {
+      String id = e.getKey();
       
-      Set history = new LinkedHashSet(MAX_HISTORY);
+      Set<String> history = new LinkedHashSet<String>(MAX_HISTORY);
       
-      for(Iterator it = ((List) e.getValue()).iterator(); it.hasNext();) {
-        Combo combo = (Combo) it.next();
-        
+      for(Combo combo : e.getValue()) {
         String lastValue = combo.getText();
         if ( lastValue!=null && lastValue.trim().length() > 0 ) {
           history.add(lastValue);
         }
       }
 
-      Combo combo = (Combo) ((List) e.getValue()).iterator().next();
+      Combo combo = e.getValue().iterator().next();
       String[] items = combo.getItems();
       for(int j = 0; j < items.length && history.size() < MAX_HISTORY; j++ ) {
         history.add(items[j]);
       }
       
-      dialogSettings.put(id, (String[]) history.toArray(new String[history.size()]));
+      dialogSettings.put(id, history.toArray(new String[history.size()]));
     }
   }
 
   /** Adds an input control to the list of fields to save. */
   protected void addFieldWithHistory(String id, Combo combo) {
     if(combo!=null) {
-      List combos = (List) fieldsWithHistory.get(id);
+      List<Combo> combos = fieldsWithHistory.get(id);
       if(combos==null) {
-        combos = new ArrayList();
+        combos = new ArrayList<Combo>();
         fieldsWithHistory.put(id, combos);
       }
       combos.add(combo);

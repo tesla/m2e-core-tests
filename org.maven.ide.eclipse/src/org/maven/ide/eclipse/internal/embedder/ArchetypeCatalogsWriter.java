@@ -13,7 +13,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -61,8 +60,8 @@ public class ArchetypeCatalogsWriter {
   private static final String TYPE_REMOTE = "remote";
 
   
-  public Collection readArchetypeCatalogs(InputStream is) throws IOException {
-    Collection catalogs = new ArrayList();
+  public Collection<ArchetypeCatalogFactory> readArchetypeCatalogs(InputStream is) throws IOException {
+    Collection<ArchetypeCatalogFactory> catalogs = new ArrayList<ArchetypeCatalogFactory>();
     try {
       SAXParserFactory parserFactory = SAXParserFactory.newInstance();
       SAXParser parser = parserFactory.newSAXParser();
@@ -79,7 +78,7 @@ public class ArchetypeCatalogsWriter {
     return catalogs;
   }
 
-  public void writeArchetypeCatalogs(final Collection catalogs, OutputStream os) throws IOException {
+  public void writeArchetypeCatalogs(final Collection<ArchetypeCatalogFactory> catalogs, OutputStream os) throws IOException {
     try {
       Transformer transformer = TransformerFactory.newInstance().newTransformer();
       transformer.transform(new SAXSource(new XMLArchetypeCatalogsWriter(catalogs), new InputSource()), new StreamResult(os));
@@ -95,9 +94,9 @@ public class ArchetypeCatalogsWriter {
 
   static class XMLArchetypeCatalogsWriter extends XMLFilterImpl {
 
-    private final Collection catalogs;
+    private final Collection<ArchetypeCatalogFactory> catalogs;
 
-    public XMLArchetypeCatalogsWriter(Collection catalogs) {
+    public XMLArchetypeCatalogsWriter(Collection<ArchetypeCatalogFactory> catalogs) {
       this.catalogs = catalogs;
     }
 
@@ -106,8 +105,7 @@ public class ArchetypeCatalogsWriter {
       handler.startDocument();
       handler.startElement(null, ELEMENT_CATALOGS, ELEMENT_CATALOGS, new AttributesImpl());
 
-      for(Iterator it = this.catalogs.iterator(); it.hasNext();) {
-        ArchetypeCatalogFactory factory = (ArchetypeCatalogFactory) it.next();
+      for(ArchetypeCatalogFactory factory : this.catalogs) {
         if(factory.isEditable()) {
           if(factory instanceof LocalCatalogFactory) {
             AttributesImpl attrs = new AttributesImpl();
@@ -132,9 +130,9 @@ public class ArchetypeCatalogsWriter {
 
   static class ArchetypeCatalogsContentHandler extends DefaultHandler {
 
-    private Collection catalogs;
+    private Collection<ArchetypeCatalogFactory> catalogs;
 
-    public ArchetypeCatalogsContentHandler(Collection catalogs) {
+    public ArchetypeCatalogsContentHandler(Collection<ArchetypeCatalogFactory> catalogs) {
       this.catalogs = catalogs;
     }
 

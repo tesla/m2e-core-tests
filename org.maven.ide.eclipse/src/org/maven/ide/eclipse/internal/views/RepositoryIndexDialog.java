@@ -222,7 +222,7 @@ public class RepositoryIndexDialog extends TitleAreaDialog {
   }
 
   private void saveValue(String key, String value) {
-    List dirs = new ArrayList();
+    List<String> dirs = new ArrayList<String>();
     dirs.addAll(Arrays.asList(getSavedValues(key)));
 
     dirs.remove(value);
@@ -232,7 +232,7 @@ public class RepositoryIndexDialog extends TitleAreaDialog {
       dirs = dirs.subList(0, MAX_HISTORY);
     }
 
-    dialogSettings.put(key, (String[]) dirs.toArray(new String[dirs.size()]));
+    dialogSettings.put(key, dirs.toArray(new String[dirs.size()]));
   }
 
   void update() {

@@ -269,6 +269,7 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
 
     String packageName = packageCombo.getText();
     if(packageName.trim().length() != 0) {
+      @SuppressWarnings("deprecation")
       IStatus status = JavaConventions.validatePackageName(packageName);
       if(!status.isOK()) {
         setErrorMessage(status.getMessage());
@@ -302,8 +303,8 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
     if(archetype!=null) {
       Properties properties = archetype.getProperties();
       if(properties!=null) {
-        for(Iterator it = properties.entrySet().iterator(); it.hasNext();) {
-          Map.Entry e = (Map.Entry) it.next();
+        for(Iterator<Map.Entry<Object, Object>> it = properties.entrySet().iterator(); it.hasNext();) {
+          Map.Entry<?, ?> e = it.next();
           TableItem item = new TableItem(propertiesTable, SWT.NONE);
           String key = (String) e.getKey();
           String value = (String) e.getValue();

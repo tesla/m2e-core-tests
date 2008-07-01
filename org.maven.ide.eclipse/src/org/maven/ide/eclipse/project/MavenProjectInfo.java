@@ -36,7 +36,7 @@ public class MavenProjectInfo {
    */
   private final Map<String, MavenProjectInfo> projects = new LinkedHashMap<String, MavenProjectInfo>();
 
-  private final Set profiles = new HashSet();
+  private final Set<String> profiles = new HashSet<String>();
 
   private boolean needsRename;
 
@@ -52,8 +52,7 @@ public class MavenProjectInfo {
     File oldDir = this.pomFile.getParentFile();
     File newDir = pomFile.getParentFile();
     
-    for(Iterator it = projects.values().iterator(); it.hasNext();) {
-      MavenProjectInfo projectInfo = (MavenProjectInfo) it.next();
+    for(MavenProjectInfo projectInfo : projects.values()) {
       File childPom = projectInfo.getPomFile();
       if(isSubDir(oldDir, childPom.getParentFile())) {
         String oldPath = oldDir.getAbsolutePath();
@@ -91,8 +90,8 @@ public class MavenProjectInfo {
     if(i==null) {
       projects.put(key, info);
     } else {
-      for(Iterator it = info.getProfiles().iterator(); it.hasNext();) {
-        i.addProfile((String) it.next());
+      for(Iterator<String> it = info.getProfiles().iterator(); it.hasNext();) {
+        i.addProfile(it.next());
       }
     }
   }
@@ -103,7 +102,7 @@ public class MavenProjectInfo {
     }
   }
   
-  public void addProfiles(Collection profiles) {
+  public void addProfiles(Collection<String> profiles) {
     this.profiles.addAll(profiles);
   }
   
@@ -131,7 +130,7 @@ public class MavenProjectInfo {
     return this.parent;
   }
   
-  public Set getProfiles() {
+  public Set<String> getProfiles() {
     return this.profiles;
   }
   
