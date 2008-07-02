@@ -750,6 +750,7 @@
           class="org.maven.ide.eclipse.container.MavenClasspathVariableInitializer"/>
    </extension>
 
+   <!--
    <extension
          point="org.eclipse.jdt.ui.queryParticipants">
       <queryParticipant
@@ -759,6 +760,7 @@
             nature="org.eclipse.jdt.core.javanature">
       </queryParticipant>
    </extension>
+   -->
    
    <!--
    <extension point="org.eclipse.search.searchPages">
