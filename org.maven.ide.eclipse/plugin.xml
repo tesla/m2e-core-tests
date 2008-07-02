@@ -749,6 +749,16 @@
       <classpathVariableInitializer variable="M2_REPO" readOnly="true"
           class="org.maven.ide.eclipse.container.MavenClasspathVariableInitializer"/>
    </extension>
+
+   <extension
+         point="org.eclipse.jdt.ui.queryParticipants">
+      <queryParticipant
+            class="org.maven.ide.eclipse.internal.index.MavenQueryParticipant"
+            id="org.maven.ide.eclipse.MavenQueryParticipantJava"
+            name="Maven Respository Search"
+            nature="org.eclipse.jdt.core.javanature">
+      </queryParticipant>
+   </extension>
    
    <!--
    <extension point="org.eclipse.search.searchPages">
