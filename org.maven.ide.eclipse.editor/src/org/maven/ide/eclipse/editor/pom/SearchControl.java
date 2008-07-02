@@ -25,11 +25,13 @@ import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
 
+
 /**
  * @author Eugene Kuleshov
  */
 public class SearchControl extends ControlContribution {
   private final IManagedForm managedForm;
+
   private Text searchText;
 
   public SearchControl(String id, IManagedForm managedForm) {
@@ -40,8 +42,14 @@ public class SearchControl extends ControlContribution {
   public Text getSearchText() {
     return searchText;
   }
-  
+
   protected Control createControl(Composite parent) {
+    if(parent instanceof ToolBar) {
+      // the FormHeading class sets the toolbar cursor to hand for some reason,
+      // we change it back so the input control can use a proper I-beam cursor
+      parent.setCursor(null);
+    }
+
     FormToolkit toolkit = managedForm.getToolkit();
     Composite composite = toolkit.createComposite(parent);
 
@@ -71,7 +79,7 @@ public class SearchControl extends ControlContribution {
         searchText.setText("");
       }
     });
-    
+
     searchText.addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent e) {
         clearToolItem.setEnabled(searchText.getText().length() > 0);
@@ -82,5 +90,5 @@ public class SearchControl extends ControlContribution {
 
     return composite;
   }
-  
+
 }
