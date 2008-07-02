@@ -192,6 +192,7 @@ public class DependencyTreePage extends FormPage {
     hierarchyComposite.setLayout(new GridLayout());
 
     Section hierarchySection = formToolkit.createSection(hierarchyComposite, Section.TITLE_BAR);
+    hierarchySection.marginHeight = 1;
     hierarchySection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     hierarchySection.setText("Dependencies Hierarchy");
     formToolkit.paintBordersFor(hierarchySection);
@@ -313,6 +314,7 @@ public class DependencyTreePage extends FormPage {
     listComposite.setLayout(new GridLayout());
 
     Section listSection = formToolkit.createSection(listComposite, Section.TITLE_BAR);
+    listSection.marginHeight = 1;
     listSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     listSection.setText("Resolved Dependencies");
     formToolkit.paintBordersFor(listSection);
