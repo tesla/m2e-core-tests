@@ -11,7 +11,6 @@ package org.maven.ide.eclipse.wizards;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -369,7 +368,10 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
    * @return collection of <code>MavenProjectInfo</code>
    */
   public Collection<MavenProjectInfo> getProjects() {
-    List<MavenProjectInfo> checkedProjects = Arrays.asList((MavenProjectInfo[]) projectTreeViewer.getCheckedElements());
+    Collection<MavenProjectInfo> checkedProjects = new ArrayList<MavenProjectInfo>();
+    for(Object o : projectTreeViewer.getCheckedElements()) {
+      checkedProjects.add((MavenProjectInfo) o);
+    }
 
     if(!getImportConfiguration().getResolverConfiguration().shouldIncludeModules()) {
       return checkedProjects;
