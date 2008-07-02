@@ -49,7 +49,7 @@ public abstract class ScmHandler implements Comparable<ScmHandler>, IExecutableE
    *  
    * @see http://maven.apache.org/scm/scm-url-format.html
    */
-  public InputStream open(String url, String revision) {
+  public InputStream open(String url, String revision) throws CoreException {
     return null;
   }
   
