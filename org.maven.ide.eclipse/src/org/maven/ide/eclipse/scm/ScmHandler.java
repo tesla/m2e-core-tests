@@ -45,7 +45,9 @@ public abstract class ScmHandler implements Comparable<ScmHandler>, IExecutableE
    * Opens resource from SCM
    * 
    * @param url an url in maven-scm format for the resource to open
-   * @param revision a resource revision to open 
+   * @param revision a resource revision to open
+   *  
+   * @throws CoreException when selected resource can't be open
    *  
    * @see http://maven.apache.org/scm/scm-url-format.html
    */
