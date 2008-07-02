@@ -276,7 +276,7 @@ public class DependencyTreePage extends FormPage {
       }
     });
 
-    hierarchyFilterAction = new Action("Filter", MavenEditorImages.FILTER) {
+    hierarchyFilterAction = new Action("Filter Search Results", MavenEditorImages.FILTER) {
       public int getStyle() {
         return AS_CHECK_BOX;
       }
@@ -383,7 +383,7 @@ public class DependencyTreePage extends FormPage {
       }
     });
 
-    listToolBarManager.add(new Action("Filter", MavenEditorImages.FILTER) {
+    listToolBarManager.add(new Action("Filter Search Results", MavenEditorImages.FILTER) {
       public int getStyle() {
         return AS_CHECK_BOX;
       }
