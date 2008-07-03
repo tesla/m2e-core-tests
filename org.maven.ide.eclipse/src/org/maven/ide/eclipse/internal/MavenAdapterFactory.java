@@ -8,10 +8,12 @@
 
 package org.maven.ide.eclipse.internal;
 
-import org.eclipse.core.runtime.IAdaptable;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+
 import org.eclipse.core.runtime.IAdapterFactory;
 import org.eclipse.ui.IActionFilter;
-import org.eclipse.ui.model.IWorkbenchAdapter;
 
 /**
  * @author Eugene Kuleshov
@@ -27,18 +29,34 @@ public class MavenAdapterFactory implements IAdapterFactory {
 
   public Object getAdapter(final Object adaptable, Class adapterType) {
     return new IActionFilter() {
-        public boolean testAttribute(Object target, String name, String value) {
-          IWorkbenchAdapter wa = (IWorkbenchAdapter) ((IAdaptable) adaptable).getAdapter(IWorkbenchAdapter.class);
-          if(wa!=null) {
-            if("label".equals(name)) {
-              String label = wa.getLabel(adaptable);
-              return value.equals(label);
-            }
-          }
-            
-          return false;
-        }
-      };
-  }
+      public boolean testAttribute(Object target, String name, String value) {
+        return "label".equals(name) //
+            && value.equals(getStub(adaptable, LabelProviderStub.class).getLabel());
+      }
 
+      private <T> T getStub(final Object o, Class<T> type) {
+        // can't use IWorkbenchAdapter here because it can cause recursion
+        return (T) Proxy.newProxyInstance(getClass().getClassLoader(), new Class[] {type}, //
+            new InvocationHandler() {
+              public Object invoke(Object proxy, Method m, Object[] args) throws Throwable {
+                try {
+                  Method method = o.getClass().getDeclaredMethod(m.getName(), m.getParameterTypes());
+                  return method.invoke(o, args);
+                } catch(Exception ex) {
+                  return null;
+                }
+              }
+            });
+      }
+    };
+  }
+  
+  /**
+   * A stub interface to access org.eclipse.jdt.internal.ui.packageview.ClassPathContainer#getLabel() 
+   */
+  public interface LabelProviderStub {
+    public String getLabel();
+  }
+  
 }
+
