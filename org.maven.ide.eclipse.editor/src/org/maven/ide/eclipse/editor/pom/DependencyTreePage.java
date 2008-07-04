@@ -95,6 +95,8 @@ public class DependencyTreePage extends FormPage {
 
   ListSelectionFilter listSelectionFilter;
 
+  ViewerFilter currentFilter;
+
   ArrayList<DependencyNode> dependencyNodes = new ArrayList<DependencyNode>();
 
   Color searchHighlightColor;
@@ -284,7 +286,8 @@ public class DependencyTreePage extends FormPage {
 
       public void run() {
         if(isChecked()) {
-          treeViewer.setFilters(new ViewerFilter[] {searchFilter, listSelectionFilter});
+          setTreeFilter(currentFilter, true);
+//          treeViewer.setFilters(new ViewerFilter[] {searchFilter, listSelectionFilter});
         } else {
           treeViewer.setFilters(new ViewerFilter[0]);
         }
@@ -437,6 +440,7 @@ public class DependencyTreePage extends FormPage {
         isSettingSelection = true;
         selectListElements(searchMatcher);
         selectTreeElements(searchMatcher);
+        setTreeFilter(searchFilter, false);
         isSettingSelection = false;
       }
     });
@@ -446,9 +450,17 @@ public class DependencyTreePage extends FormPage {
         isSettingSelection = true;
         selectListElements(searchMatcher);
         selectTreeElements(searchMatcher);
+        setTreeFilter(searchFilter, false);
         isSettingSelection = false;
       }
     });
+  }
+
+  protected void setTreeFilter(ViewerFilter filter, boolean force) {
+    currentFilter = filter;
+    if(filter != null && (force || (treeViewer.getFilters().length > 0 && treeViewer.getFilters()[0] != filter))) {
+      treeViewer.setFilters(new ViewerFilter[] {filter});
+    }
   }
 
   protected void selectListElements(Matcher matcher) {
@@ -550,6 +562,7 @@ public class DependencyTreePage extends FormPage {
         IStructuredSelection selection = (IStructuredSelection) listViewer.getSelection();
         matcher = new ArtifactMatcher(selection);
         selectTreeElements(matcher);
+        setTreeFilter(this, false);
         isSettingSelection = false;
       }
     }
@@ -558,12 +571,13 @@ public class DependencyTreePage extends FormPage {
 
     public void focusGained(FocusEvent e) {
       if(hierarchyFilterAction.isChecked()) {
-        treeViewer.addFilter(this);
+        setTreeFilter(this, false);
+//        treeViewer.addFilter(this);
       }
     }
 
     public void focusLost(FocusEvent e) {
-      treeViewer.removeFilter(this);
+//      treeViewer.removeFilter(this);
       matcher = null;
     }
   }
