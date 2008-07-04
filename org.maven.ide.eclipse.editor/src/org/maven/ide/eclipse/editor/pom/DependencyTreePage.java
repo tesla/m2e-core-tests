@@ -946,7 +946,9 @@ public class DependencyTreePage extends FormPage {
 
   @Override
   public void dispose() {
-    searchHighlightColor.dispose();
+    if(searchHighlightColor!=null) {
+      searchHighlightColor.dispose();
+    }
     super.dispose();
   }
 }
