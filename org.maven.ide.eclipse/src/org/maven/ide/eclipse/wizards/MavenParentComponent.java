@@ -34,19 +34,19 @@ import org.maven.ide.eclipse.Messages;
 public class MavenParentComponent extends Composite {
 
   /** parent artifact id input field */
-  private Combo artifactIdCombo;
+  private Combo parentArtifactIdCombo;
 
   /** parent group id input field */
-  private Combo groupIdCombo;
+  private Combo parentGroupIdCombo;
 
   /** parent version input field */
-  private Combo versionCombo;
+  private Combo parentVersionCombo;
 
   /** the "clear parent section" button */
-  private Button clearButton;
+  private Button parentClearButton;
 
   /** the "browse..." button */
-  private Button browseButton;
+  private Button parentBrowseButton;
 
   private Label groupIdLabel;
 
@@ -76,25 +76,28 @@ public class MavenParentComponent extends Composite {
     groupIdLabel = new Label(group, SWT.NONE);
     groupIdLabel.setText(Messages.getString("wizard.project.page.artifact.parent.groupId"));
 
-    groupIdCombo = new Combo(group, SWT.NONE);
-    groupIdCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-    groupIdCombo.setEnabled(!readonly);
+    parentGroupIdCombo = new Combo(group, SWT.NONE);
+    parentGroupIdCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+    parentGroupIdCombo.setData("name", "parentGroupIdCombo");
+    parentGroupIdCombo.setEnabled(!readonly);
 
     artifactIdLabel = new Label(group, SWT.NONE);
     artifactIdLabel.setText(Messages.getString("wizard.project.page.artifact.parent.artifactId"));
 
-    artifactIdCombo = new Combo(group, SWT.NONE);
-    artifactIdCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-    artifactIdCombo.setEnabled(!readonly);
+    parentArtifactIdCombo = new Combo(group, SWT.NONE);
+    parentArtifactIdCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+    parentArtifactIdCombo.setData("name", "parentArtifactIdCombo");
+    parentArtifactIdCombo.setEnabled(!readonly);
 
     versionLabel = new Label(group, SWT.NONE);
     versionLabel.setText(Messages.getString("wizard.project.page.artifact.parent.version"));
 
-    versionCombo = new Combo(group, SWT.NONE);
+    parentVersionCombo = new Combo(group, SWT.NONE);
     GridData gd_versionCombo = new GridData(SWT.LEFT, SWT.CENTER, true, false);
     gd_versionCombo.widthHint = 150;
-    versionCombo.setLayoutData(gd_versionCombo);
-    versionCombo.setEnabled(!readonly);
+    parentVersionCombo.setLayoutData(gd_versionCombo);
+    parentVersionCombo.setEnabled(!readonly);
+    parentVersionCombo.setData("name", "parentVersionCombo");
 
     if(!readonly) {
       Composite buttonPanel = new Composite(group, SWT.NONE);
@@ -107,12 +110,14 @@ public class MavenParentComponent extends Composite {
       buttonPanel.setLayout(rowLayout);
       buttonPanel.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 
-      browseButton = new Button(buttonPanel, SWT.NONE);
-      browseButton.setText(Messages.getString("wizard.project.page.artifact.parent.browse"));
+      parentBrowseButton = new Button(buttonPanel, SWT.NONE);
+      parentBrowseButton.setText(Messages.getString("wizard.project.page.artifact.parent.browse"));
+      parentBrowseButton.setData("name", "parentBrowseButton");
 
-      clearButton = new Button(buttonPanel, SWT.NONE);
-      clearButton.setText(Messages.getString("wizard.project.page.artifact.parent.clear"));
-      clearButton.addSelectionListener(new SelectionAdapter() {
+      parentClearButton = new Button(buttonPanel, SWT.NONE);
+      parentClearButton.setText(Messages.getString("wizard.project.page.artifact.parent.clear"));
+      parentClearButton.setData("name", "parentClearButton");
+      parentClearButton.addSelectionListener(new SelectionAdapter() {
         public void widgetSelected(SelectionEvent e) {
           setValues("", "", "");
         }
@@ -121,15 +126,15 @@ public class MavenParentComponent extends Composite {
   }
   
   public Combo getGroupIdCombo() {
-    return groupIdCombo;
+    return parentGroupIdCombo;
   }
 
   public Combo getArtifactIdCombo() {
-    return this.artifactIdCombo;
+    return this.parentArtifactIdCombo;
   }
   
   public Combo getVersionCombo() {
-    return this.versionCombo;
+    return this.parentVersionCombo;
   }
   
   public void setWidthGroup(WidthGroup widthGroup) {
@@ -140,54 +145,54 @@ public class MavenParentComponent extends Composite {
 
   /** Adds modify listener to the input controls. */
   public void addModifyListener(ModifyListener listener) {
-    artifactIdCombo.addModifyListener(listener);
-    groupIdCombo.addModifyListener(listener);
-    versionCombo.addModifyListener(listener);
+    parentArtifactIdCombo.addModifyListener(listener);
+    parentGroupIdCombo.addModifyListener(listener);
+    parentVersionCombo.addModifyListener(listener);
   }
 
   /** Removes the listener from the input controls. */
   public void removeModifyListener(ModifyListener listener) {
-    artifactIdCombo.removeModifyListener(listener);
-    groupIdCombo.removeModifyListener(listener);
-    versionCombo.removeModifyListener(listener);
+    parentArtifactIdCombo.removeModifyListener(listener);
+    parentGroupIdCombo.removeModifyListener(listener);
+    parentVersionCombo.removeModifyListener(listener);
   }
 
   /** Adds selection listener to the "browse" button. */
   public void addBrowseButtonListener(SelectionListener listener) {
-    if(browseButton != null) {
-      browseButton.addSelectionListener(listener);
+    if(parentBrowseButton != null) {
+      parentBrowseButton.addSelectionListener(listener);
     }
   }
 
   /** Removes the selection listener from the "browse" button. */
   public void removeBrowseButtonListener(SelectionListener listener) {
-    if(browseButton != null) {
-      browseButton.removeSelectionListener(listener);
+    if(parentBrowseButton != null) {
+      parentBrowseButton.removeSelectionListener(listener);
     }
   }
 
   /** Enables the "clear" button. */
   public void setClearButtonEnabled(boolean enabled) {
-    if(clearButton != null) {
-      clearButton.setEnabled(enabled);
+    if(parentClearButton != null) {
+      parentClearButton.setEnabled(enabled);
     }
   }
 
   /** Sets the parent group values. */
   public void setValues(String groupId, String artifactId, String version) {
-    groupIdCombo.setText(groupId==null ? "" : groupId);
-    artifactIdCombo.setText(artifactId==null ? "" : artifactId);
-    versionCombo.setText(version==null ? "" : version);
+    parentGroupIdCombo.setText(groupId==null ? "" : groupId);
+    parentArtifactIdCombo.setText(artifactId==null ? "" : artifactId);
+    parentVersionCombo.setText(version==null ? "" : version);
   }
 
   /** Updates a Maven model. */
   public void updateModel(Model model) {
-    String groupId = groupIdCombo.getText().trim();
+    String groupId = parentGroupIdCombo.getText().trim();
     if(groupId.length() > 0) {
       Parent parent = new Parent();
       parent.setGroupId(groupId);
-      parent.setArtifactId(artifactIdCombo.getText().trim());
-      parent.setVersion(versionCombo.getText().trim());
+      parent.setArtifactId(parentArtifactIdCombo.getText().trim());
+      parent.setVersion(parentVersionCombo.getText().trim());
       model.setParent(parent);
     }
   }
@@ -197,13 +202,13 @@ public class MavenParentComponent extends Composite {
    */
   public boolean validate() {
     int parentCheck = 0;
-    if(groupIdCombo.getText().trim().length() > 0) {
+    if(parentGroupIdCombo.getText().trim().length() > 0) {
       parentCheck++ ;
     }
-    if(artifactIdCombo.getText().trim().length() > 0) {
+    if(parentArtifactIdCombo.getText().trim().length() > 0) {
       parentCheck++ ;
     }
-    if(versionCombo.getText().trim().length() > 0) {
+    if(parentVersionCombo.getText().trim().length() > 0) {
       parentCheck++ ;
     }
 

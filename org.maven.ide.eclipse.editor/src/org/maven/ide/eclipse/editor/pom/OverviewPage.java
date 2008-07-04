@@ -49,6 +49,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.PlatformUI;
@@ -96,7 +97,7 @@ public class OverviewPage extends MavenPomEditorPage {
   Text parentVersionText;
   Text parentArtifactIdText;
   Text parentGroupIdText;
-  Text parentRealtivePathText;
+  Text parentRelativePathText;
 
   Text projectUrlText;
   Text projectNameText;
@@ -204,11 +205,13 @@ public class OverviewPage extends MavenPomEditorPage {
     Label groupIdLabel = toolkit.createLabel(artifactComposite, "Group Id:", SWT.NONE);
   
     artifactGroupIdText = toolkit.createText(artifactComposite, null, SWT.NONE);
+    artifactGroupIdText.setData("name", "groupId");
     artifactGroupIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
   
     Label artifactIdLabel = toolkit.createLabel(artifactComposite, "Artifact Id:*", SWT.NONE);
   
     artifactIdText = toolkit.createText(artifactComposite, null, SWT.NONE);
+    artifactIdText.setData("name", "artifactId");
     artifactIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
   
     Label versionLabel = toolkit.createLabel(artifactComposite, "Version:", SWT.NONE);
@@ -217,6 +220,7 @@ public class OverviewPage extends MavenPomEditorPage {
     GridData gd_versionText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_versionText.widthHint = 200;
     artifactVersionText.setLayoutData(gd_versionText);
+    artifactVersionText.setData("name", "version");
   
     Label packagingLabel = toolkit.createLabel(artifactComposite, "Packaging:", SWT.NONE);
   
@@ -235,6 +239,7 @@ public class OverviewPage extends MavenPomEditorPage {
     gd_packagingText.widthHint = 120;
     artifactPackagingCombo.setLayoutData(gd_packagingText);
     artifactPackagingCombo.setData(FormToolkit.KEY_DRAW_BORDER, FormToolkit.TEXT_BORDER);
+    artifactPackagingCombo.setData("name", "packaging");
     toolkit.paintBordersFor(artifactPackagingCombo);
     
     widthGroup.addControl(groupIdLabel);
@@ -262,6 +267,7 @@ public class OverviewPage extends MavenPomEditorPage {
   
     parentGroupIdText = toolkit.createText(parentComposite, null, SWT.NONE);
     parentGroupIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+    parentGroupIdText.setData("name", "parentGroupId");
   
     Hyperlink parentArtifactIdLabel = toolkit.createHyperlink(parentComposite, "Artifact Id:*", SWT.NONE);
     parentArtifactIdLabel.addHyperlinkListener(new HyperlinkAdapter() {
@@ -280,6 +286,7 @@ public class OverviewPage extends MavenPomEditorPage {
   
     parentArtifactIdText = toolkit.createText(parentComposite, null, SWT.NONE);
     parentArtifactIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+    parentArtifactIdText.setData("name", "parentArtifactId");
   
     Label parentVersionLabel = toolkit.createLabel(parentComposite, "Version:*", SWT.NONE);
     parentVersionLabel.setLayoutData(new GridData());
@@ -288,6 +295,7 @@ public class OverviewPage extends MavenPomEditorPage {
     GridData parentVersionTextData = new GridData(SWT.LEFT, SWT.CENTER, true, false);
     parentVersionTextData.widthHint = 200;
     parentVersionText.setLayoutData(parentVersionTextData);
+    parentVersionText.setData("name", "parentVersion");
   
     Button parentSelectButton = toolkit.createButton(parentComposite, "Select...", SWT.NONE);
     parentSelectButton.addSelectionListener(new SelectionAdapter() {
@@ -309,8 +317,9 @@ public class OverviewPage extends MavenPomEditorPage {
 
     Label parentRealtivePathLabel = toolkit.createLabel(parentComposite, "Relative Path:", SWT.NONE);
 
-    parentRealtivePathText = toolkit.createText(parentComposite, null, SWT.NONE);
-    parentRealtivePathText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+    parentRelativePathText = toolkit.createText(parentComposite, null, SWT.NONE);
+    parentRelativePathText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+    parentRelativePathText.setData("name", "parentRelativePath");
     
     widthGroup.addControl(parentGroupIdLabel);
     widthGroup.addControl(parentArtifactIdLabel);
@@ -328,6 +337,7 @@ public class OverviewPage extends MavenPomEditorPage {
 
     propertiesEditor = new ListEditorComposite<PropertyPair>(propertiesSection, SWT.NONE);
     propertiesSection.setClient(propertiesEditor);
+    propertiesEditor.getViewer().getTable().setData("name", "properties");
     
     propertiesEditor.setContentProvider(new ListEditorContentProvider<PropertyPair>());
     propertiesEditor.setLabelProvider(new PropertyPairLabelProvider());
@@ -345,6 +355,7 @@ public class OverviewPage extends MavenPomEditorPage {
     modulesSection.setText("Modules");
 
     modulesEditor = new ListEditorComposite<String>(modulesSection, SWT.NONE);
+    modulesEditor.getViewer().getTable().setData("name", "modulesEditor");
     toolkit.paintBordersFor(modulesEditor);
     toolkit.adapt(modulesEditor);
     modulesSection.setClient(modulesEditor);
@@ -461,6 +472,7 @@ public class OverviewPage extends MavenPomEditorPage {
     GridData gd_projectNameText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_projectNameText.widthHint = 150;
     projectNameText.setLayoutData(gd_projectNameText);
+    projectNameText.setData("name", "projectName");
   
     Hyperlink urlLabel = toolkit.createHyperlink(projectComposite, "URL:", SWT.NONE);
     urlLabel.addHyperlinkListener(new HyperlinkAdapter() {
@@ -473,6 +485,7 @@ public class OverviewPage extends MavenPomEditorPage {
     GridData gd_projectUrlText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_projectUrlText.widthHint = 150;
     projectUrlText.setLayoutData(gd_projectUrlText);
+    projectUrlText.setData("name", "projectUrl");
   
     Label descriptionLabel = toolkit.createLabel(projectComposite, "Description:", SWT.NONE);
     descriptionLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
@@ -482,6 +495,7 @@ public class OverviewPage extends MavenPomEditorPage {
     gd_descriptionText.widthHint = 150;
     gd_descriptionText.heightHint = 55;
     projectDescriptionText.setLayoutData(gd_descriptionText);
+    projectDescriptionText.setData("name", "projectDescription");
   
     Label inceptionYearLabel = toolkit.createLabel(projectComposite, "Inception:", SWT.NONE);
   
@@ -489,6 +503,7 @@ public class OverviewPage extends MavenPomEditorPage {
     GridData gd_inceptionYearText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_inceptionYearText.widthHint = 150;
     inceptionYearText.setLayoutData(gd_inceptionYearText);
+    inceptionYearText.setData("name", "projectInceptionYear");
     
     widthGroup.addControl(nameLabel);
     widthGroup.addControl(urlLabel);
@@ -513,7 +528,8 @@ public class OverviewPage extends MavenPomEditorPage {
     GridData gd_organizationNameText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_organizationNameText.widthHint = 150;
     organizationNameText.setLayoutData(gd_organizationNameText);
-  
+    organizationNameText.setData("name", "organizationName");
+
     Hyperlink organizationUrlLabel = toolkit.createHyperlink(organizationComposite, "URL:", SWT.NONE);
     organizationUrlLabel.addHyperlinkListener(new HyperlinkAdapter() {
       public void linkActivated(HyperlinkEvent e) {
@@ -525,6 +541,7 @@ public class OverviewPage extends MavenPomEditorPage {
     GridData gd_organizationUrlText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_organizationUrlText.widthHint = 150;
     organizationUrlText.setLayoutData(gd_organizationUrlText);
+    organizationUrlText.setData("name", "organizationUrl");
     
     widthGroup.addControl(organizationNameLabel);
     widthGroup.addControl(organizationUrlLabel);
@@ -553,6 +570,7 @@ public class OverviewPage extends MavenPomEditorPage {
     GridData gd_scmUrlText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_scmUrlText.widthHint = 150;
     scmUrlText.setLayoutData(gd_scmUrlText);
+    scmUrlText.setData("name", "scmUrl");
   
     Label scmConnectionLabel = toolkit.createLabel(scmComposite, "Connection:", SWT.NONE);
   
@@ -560,6 +578,7 @@ public class OverviewPage extends MavenPomEditorPage {
     GridData gd_scmConnectionText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_scmConnectionText.widthHint = 150;
     scmConnectionText.setLayoutData(gd_scmConnectionText);
+    scmConnectionText.setData("name", "scmConnection");
   
     Label scmDevConnectionLabel = toolkit.createLabel(scmComposite, "Developer:", SWT.NONE);
   
@@ -567,6 +586,7 @@ public class OverviewPage extends MavenPomEditorPage {
     GridData gd_scmDevConnectionText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_scmDevConnectionText.widthHint = 150;
     scmDevConnectionText.setLayoutData(gd_scmDevConnectionText);
+    scmDevConnectionText.setData("name", "scmDevConnection");
   
     Label scmTagLabel = toolkit.createLabel(scmComposite, "Tag:", SWT.NONE);
   
@@ -574,6 +594,7 @@ public class OverviewPage extends MavenPomEditorPage {
     GridData gd_scmTagText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_scmTagText.widthHint = 150;
     scmTagText.setLayoutData(gd_scmTagText);
+    scmTagText.setData("name", "scmTag");
     
     widthGroup.addControl(scmUrlLabel);
     widthGroup.addControl(scmConnectionLabel);
@@ -598,6 +619,7 @@ public class OverviewPage extends MavenPomEditorPage {
     GridData gd_issueManagementSystemText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_issueManagementSystemText.widthHint = 150;
     issueManagementSystemText.setLayoutData(gd_issueManagementSystemText);
+    issueManagementSystemText.setData("name", "issueManagementSystem");
   
     Hyperlink issueManagementUrlLabel = toolkit.createHyperlink(issueManagementComposite, "URL:", SWT.NONE);
     issueManagementUrlLabel.addHyperlinkListener(new HyperlinkAdapter() {
@@ -610,6 +632,7 @@ public class OverviewPage extends MavenPomEditorPage {
     GridData gd_issueManagementUrlText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_issueManagementUrlText.widthHint = 150;
     issueManagementUrlText.setLayoutData(gd_issueManagementUrlText);
+    issueManagementUrlText.setData("name", "issueManagementUrl");
     
     widthGroup.addControl(issueManagementSystemLabel);
     widthGroup.addControl(issueManagementUrlLabel);
@@ -632,6 +655,7 @@ public class OverviewPage extends MavenPomEditorPage {
     GridData gd_ciManagementSystemText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_ciManagementSystemText.widthHint = 150;
     ciManagementSystemText.setLayoutData(gd_ciManagementSystemText);
+    ciManagementSystemText.setData("name", "ciManagementSystem");
   
     Hyperlink ciManagementUrlLabel = toolkit.createHyperlink(ciManagementComposite, "URL:", SWT.NONE);
     ciManagementUrlLabel.addHyperlinkListener(new HyperlinkAdapter() {
@@ -644,6 +668,7 @@ public class OverviewPage extends MavenPomEditorPage {
     GridData gd_ciManagementUrlText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_ciManagementUrlText.widthHint = 150;
     ciManagementUrlText.setLayoutData(gd_ciManagementUrlText);
+    ciManagementUrlText.setData("name", "ciManagementUrl");
     
     widthGroup.addControl(ciManagementSystemLabel);
     widthGroup.addControl(ciManagementUrlLabel);
@@ -773,22 +798,22 @@ public class OverviewPage extends MavenPomEditorPage {
     removeNotifyListener(parentGroupIdText);
     removeNotifyListener(parentArtifactIdText);
     removeNotifyListener(parentVersionText);
-    removeNotifyListener(parentRealtivePathText);
+    removeNotifyListener(parentRelativePathText);
 
     if(parent!=null) {
       setText(parentGroupIdText, parent.getGroupId());
       setText(parentArtifactIdText, parent.getArtifactId());
       setText(parentVersionText, parent.getVersion());
-      setText(parentRealtivePathText, parent.getRelativePath());
+      setText(parentRelativePathText, parent.getRelativePath());
     } else {
       setText(parentGroupIdText, "");
       setText(parentArtifactIdText, "");
       setText(parentVersionText, "");
-      setText(parentRealtivePathText, "");
+      setText(parentRelativePathText, "");
     }
     
     ValueProvider<Parent> parentProvider = new ValueProvider.ParentValueProvider<Parent>(parentGroupIdText,
-        parentArtifactIdText, parentVersionText, parentRealtivePathText) {
+        parentArtifactIdText, parentVersionText, parentRelativePathText) {
       public Parent getValue() {
         return model.getParent();
       }
@@ -801,7 +826,7 @@ public class OverviewPage extends MavenPomEditorPage {
     setModifyListener(parentGroupIdText, parentProvider, POM_PACKAGE.getParent_GroupId(), "");
     setModifyListener(parentArtifactIdText, parentProvider, POM_PACKAGE.getParent_ArtifactId(), "");
     setModifyListener(parentVersionText, parentProvider, POM_PACKAGE.getParent_Version(), "");
-    setModifyListener(parentRealtivePathText, parentProvider, POM_PACKAGE.getParent_RelativePath(), "");
+    setModifyListener(parentRelativePathText, parentProvider, POM_PACKAGE.getParent_RelativePath(), "");
   }
   
   private void loadProperties(EList<PropertyPair> properties) {

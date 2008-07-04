@@ -94,12 +94,14 @@ public class MavenArtifactComponent extends Composite {
 
     groupIdCombo = new Combo(artifactGroup, SWT.BORDER);
     groupIdCombo.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false));
+    groupIdCombo.setData("name", "groupIdCombo");
 
     artifactIdLabel = new Label(artifactGroup, SWT.NONE);
     artifactIdLabel.setText(Messages.getString("artifactComponent.artifactId"));
 
     artifactIdCombo = new Combo(artifactGroup, SWT.BORDER);
     artifactIdCombo.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, false, false));
+    artifactIdCombo.setData("name", "artifactIdCombo");
 
     versionLabel = new Label(artifactGroup, SWT.NONE);
     versionLabel.setText(Messages.getString("artifactComponent.version"));
@@ -107,6 +109,7 @@ public class MavenArtifactComponent extends Composite {
     versionCombo = new Combo(artifactGroup, SWT.BORDER);
     versionCombo.setLayoutData(new GridData(150, SWT.DEFAULT));
     versionCombo.setText(DEFAULT_VERSION);
+    versionCombo.setData("name", "versionCombo");
 
     packagingLabel = new Label(artifactGroup, SWT.NONE);
     packagingLabel.setText(Messages.getString("artifactComponent.packaging"));
@@ -115,6 +118,7 @@ public class MavenArtifactComponent extends Composite {
     packagingCombo.setItems(PACKAGING_OPTIONS);
     packagingCombo.setText(DEFAULT_PACKAGING);
     packagingCombo.setLayoutData(new GridData(50, SWT.DEFAULT));
+    packagingCombo.setData("name", "packagingCombo");
 
     nameLabel = new Label(artifactGroup, SWT.NONE);
     nameLabel.setLayoutData(new GridData());
@@ -122,6 +126,7 @@ public class MavenArtifactComponent extends Composite {
 
     nameCombo = new Combo(artifactGroup, SWT.BORDER);
     nameCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    nameCombo.setData("name", "nameCombo");
 
     descriptionLabel = new Label(artifactGroup, SWT.NONE);
     descriptionLabel.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false));
@@ -131,6 +136,7 @@ public class MavenArtifactComponent extends Composite {
     GridData gd_descriptionText = new GridData(SWT.FILL, SWT.FILL, false, true);
     gd_descriptionText.minimumHeight = 20;
     descriptionText.setLayoutData(gd_descriptionText);
+    descriptionText.setData("name", "descriptionText");
   }
 
   public void setModifyingListener(ModifyListener modifyingListener) {

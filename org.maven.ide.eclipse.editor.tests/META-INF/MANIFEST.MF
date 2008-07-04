@@ -1,0 +1,33 @@
+Bundle-ManifestVersion: 2
+Bundle-RequiredExecutionEnvironment: J2SE-1.5,JavaSE-1.6
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.core.resources,
+ org.eclipse.jdt.core,
+ org.eclipse.debug.core,
+ org.eclipse.jdt.launching,
+ org.eclipse.jface,
+ org.eclipse.ui,
+ org.maven.ide.eclipse,
+ org.maven.ide.components.maven_embedder,
+ org.maven.ide.components.maven_model_edit,
+ org.maven.ide.components.archetype_common,
+ org.junit,
+ com.windowtester.runtime,
+ com.windowtester.swt.runtime,
+ com.windowtester.swing.runtime,
+ com.instantiations.eclipse.debug,
+ com.instantiations.common.core,
+ com.instantiations.eclipse.util,
+ org.eclipse.swt,
+ org.maven.ide.eclipse.editor,
+ org.maven.ide.eclipse.editor.xml,
+ org.eclipse.ui.forms
+Bundle-Name: Maven Integration Tests Plug-in
+Bundle-Version: 0.9.5.qualifier
+MavenArtifact-ArtifactId: org.maven.ide.eclipse.test
+Bundle-Vendor: Sonatype, Inc.
+Bundle-SymbolicName: org.maven.ide.eclipse.editor.tests;singleton:=true
+Bundle-ClassPath: .
+MavenArtifact-GroupId: org.maven.ide.eclipse
+Manifest-Version: 1.0
+Eclipse-LazyStart: true

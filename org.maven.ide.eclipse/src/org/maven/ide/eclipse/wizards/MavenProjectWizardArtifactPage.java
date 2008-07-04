@@ -177,6 +177,11 @@ public class MavenProjectWizardArtifactPage extends AbstractMavenWizardPage {
     setControl(container);
   }
 
+  public void setVisible(boolean visible) {
+    super.setVisible(visible);
+    artifactComponent.getGroupIdCombo().setFocus();
+  }
+  
   /**
    * Returns the Maven2 model containing the artifact information provided by the user.
    * 
