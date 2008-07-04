@@ -53,6 +53,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -80,6 +81,7 @@ import org.maven.ide.eclipse.editor.pom.MavenPomEditorPage;
 import org.maven.ide.eclipse.editor.pom.SearchControl;
 import org.maven.ide.eclipse.editor.pom.SearchMatcher;
 import org.maven.ide.eclipse.editor.pom.ValueProvider;
+import org.maven.ide.eclipse.editor.xml.search.Packaging;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 
@@ -406,7 +408,11 @@ public class PluginsComposite extends Composite {
       toolkit.createLabel(pluginDetailsComposite, "Group Id:*", SWT.NONE);
     
       groupIdText = toolkit.createText(pluginDetailsComposite, null, SWT.NONE);
-      groupIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+      GridData gd_groupIdText = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
+      gd_groupIdText.horizontalIndent = 4;
+      groupIdText.setLayoutData(gd_groupIdText);
+      groupIdText.setData("name", "groupIdText");
+      FormUtils.addGroupIdProposal(groupIdText, Packaging.PLUGIN);
     
       Hyperlink artifactIdHyperlink = toolkit.createHyperlink(pluginDetailsComposite, "Artifact Id:*", SWT.NONE);
       artifactIdHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
@@ -424,15 +430,22 @@ public class PluginsComposite extends Composite {
       });
     
       artifactIdText = toolkit.createText(pluginDetailsComposite, null, SWT.NONE);
-      artifactIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+      GridData gd_artifactIdText = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
+      gd_artifactIdText.horizontalIndent = 4;
+      artifactIdText.setLayoutData(gd_artifactIdText);
+      artifactIdText.setData("name", "artifactIdText");
+      FormUtils.addArtifactIdProposal(groupIdText, artifactIdText, Packaging.PLUGIN);
     
       Label label = toolkit.createLabel(pluginDetailsComposite, "Version:", SWT.NONE);
       label.setLayoutData(new GridData());
     
       versionText = toolkit.createText(pluginDetailsComposite, null, SWT.NONE);
       GridData versionTextData = new GridData(SWT.LEFT, SWT.CENTER, true, false);
+      versionTextData.horizontalIndent = 4;
       versionTextData.widthHint = 200;
       versionText.setLayoutData(versionTextData);
+      versionText.setData("name", "versionText");
+      FormUtils.addVersionProposal(groupIdText, artifactIdText, versionText, Packaging.PLUGIN);
   
   //    pluginSelectButton = toolkit.createButton(pluginDetailsComposite, "Select...", SWT.NONE);
   //    pluginSelectButton.addSelectionListener(new SelectionAdapter() {
@@ -521,6 +534,7 @@ public class PluginsComposite extends Composite {
           parent.getPomEditor().showInSourceEditor(element==null ? currentPlugin : element);
         }
       });
+      pluginDetailsComposite.setTabList(new Control[] {groupIdText, artifactIdText, versionText, composite});
   
       pluginExecutionsSection = toolkit.createSection(detailsComposite, Section.TITLE_BAR);
       GridData gd_pluginExecutionsSection = new GridData(SWT.FILL, SWT.FILL, true, true);

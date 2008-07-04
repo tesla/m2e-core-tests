@@ -40,6 +40,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -514,6 +515,7 @@ public class RepositoriesComposite extends Composite {
     snapshotsChecksumPolicyCombo.setLayoutData(new GridData());
     toolkit.adapt(snapshotsChecksumPolicyCombo, true, true);
     toolkit.paintBordersFor(snapshotsChecksumPolicyCombo);
+    repositoryDetailsComposite.setTabList(new Control[] {repositoryIdText, repositoryNameText, repositoryUrlText, repositoryLayoutCombo, composite});
 
     updateRepositoryDetailsSection(null);
   }
@@ -573,6 +575,7 @@ public class RepositoriesComposite extends Composite {
     GridData gd_relocationMessageText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_relocationMessageText.widthHint = 100;
     relocationMessageText.setLayoutData(gd_relocationMessageText);
+    relocationComposite.setTabList(new Control[] {relocationGroupIdText, relocationArtifactIdText, relocationVersionText, relocationMessageText});
   }
 
   private void createProjectSiteSection(SashForm sashForm) {
@@ -628,6 +631,7 @@ public class RepositoriesComposite extends Composite {
     GridData gd_projectDownloadUrlText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_projectDownloadUrlText.widthHint = 100;
     projectDownloadUrlText.setLayoutData(gd_projectDownloadUrlText);
+    projectSiteComposite.setTabList(new Control[] {projectSiteIdText, projectSiteNameText, projectSiteUrlText, projectDownloadUrlText});
   }
 
   private void createSnapshotRepositorySection(SashForm distributionManagementSash) {
@@ -684,6 +688,7 @@ public class RepositoriesComposite extends Composite {
     snapshotRepositoryUniqueVersionButton = toolkit.createButton(snapshotRepositoryComposite, //
         "Unique Version", SWT.CHECK);
     snapshotRepositoryUniqueVersionButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+    snapshotRepositoryComposite.setTabList(new Control[] {snapshotRepositoryIdText, snapshotRepositoryNameText, snapshotRepositoryUrlText, snapshotRepositoryLayoutCombo, snapshotRepositoryUniqueVersionButton});
   }
 
   private void createReleaseRepositorySection(SashForm distributionManagementSash) {
@@ -742,6 +747,7 @@ public class RepositoriesComposite extends Composite {
     releaseRepositoryUniqueVersionButton = toolkit.createButton(releaseDistributionRepositoryComposite,
         "Unique Version", SWT.CHECK);
     releaseRepositoryUniqueVersionButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+    releaseDistributionRepositoryComposite.setTabList(new Control[] {releaseRepositoryIdText, releaseRepositoryNameText, releaseRepositoryUrlText, releaseRepositoryLayoutCombo, releaseRepositoryUniqueVersionButton});
   }
 
   public void loadData(MavenPomEditorPage editorPage, ValueProvider<Repositories> repositoriesProvider,

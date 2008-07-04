@@ -235,6 +235,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
         MavenPlugin.log(e);
       }
       
+      // TODO activate xml source page is model is empty or have errors
       IDocument doc = sourcePage.getDocumentProvider().getDocument(getEditorInput());
       if (doc instanceof IStructuredDocument) {
         List<AdapterFactoryImpl> factories = new ArrayList<AdapterFactoryImpl>();

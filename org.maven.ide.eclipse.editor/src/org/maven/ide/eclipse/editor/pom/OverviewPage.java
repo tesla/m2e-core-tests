@@ -45,11 +45,10 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.PlatformUI;
@@ -76,6 +75,7 @@ import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.editor.composites.ListEditorComposite;
 import org.maven.ide.eclipse.editor.composites.ListEditorContentProvider;
+import org.maven.ide.eclipse.editor.xml.search.Packaging;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.project.MavenProjectFacade;
@@ -125,9 +125,11 @@ public class OverviewPage extends MavenPomEditorPage {
   Section scmSection;
   Section issueManagementSection;
   Section ciManagementSection;
-  private Action newModuleProjectAction;
 
-  //model
+  private Action newModuleProjectAction;
+  private Action parentSelectAction;
+
+  // model
 //  Properties properties;
 //  Modules modules;
 //  Parent parent;
@@ -206,18 +208,24 @@ public class OverviewPage extends MavenPomEditorPage {
   
     artifactGroupIdText = toolkit.createText(artifactComposite, null, SWT.NONE);
     artifactGroupIdText.setData("name", "groupId");
-    artifactGroupIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    GridData gd_artifactGroupIdText = new GridData(SWT.FILL, SWT.CENTER, true, false);
+    gd_artifactGroupIdText.horizontalIndent = 4;
+    artifactGroupIdText.setLayoutData(gd_artifactGroupIdText);
+    FormUtils.addGroupIdProposal(artifactGroupIdText, Packaging.ALL);
   
     Label artifactIdLabel = toolkit.createLabel(artifactComposite, "Artifact Id:*", SWT.NONE);
   
     artifactIdText = toolkit.createText(artifactComposite, null, SWT.NONE);
     artifactIdText.setData("name", "artifactId");
-    artifactIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    GridData gd_artifactIdText = new GridData(SWT.FILL, SWT.CENTER, true, false);
+    gd_artifactIdText.horizontalIndent = 4;
+    artifactIdText.setLayoutData(gd_artifactIdText);
   
     Label versionLabel = toolkit.createLabel(artifactComposite, "Version:", SWT.NONE);
   
     artifactVersionText = toolkit.createText(artifactComposite, null, SWT.NONE);
     GridData gd_versionText = new GridData(SWT.FILL, SWT.CENTER, true, false);
+    gd_versionText.horizontalIndent = 4;
     gd_versionText.widthHint = 200;
     artifactVersionText.setLayoutData(gd_versionText);
     artifactVersionText.setData("name", "version");
@@ -236,6 +244,7 @@ public class OverviewPage extends MavenPomEditorPage {
     
     toolkit.adapt(artifactPackagingCombo, true, true);
     GridData gd_packagingText = new GridData(SWT.LEFT, SWT.CENTER, true, false);
+    gd_packagingText.horizontalIndent = 4;
     gd_packagingText.widthHint = 120;
     artifactPackagingCombo.setLayoutData(gd_packagingText);
     artifactPackagingCombo.setData(FormToolkit.KEY_DRAW_BORDER, FormToolkit.TEXT_BORDER);
@@ -255,8 +264,39 @@ public class OverviewPage extends MavenPomEditorPage {
     parentSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
     parentSection.setText("Parent");
   
+    parentSelectAction = new Action("Select Parent", MavenEditorImages.SELECT_ARTIFACT) {
+      public void run() {
+        // TODO calculate current list of artifacts for the project
+        Set<Artifact> artifacts = Collections.emptySet();
+        MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getEditorSite().getShell(), //
+            "Add Dependency", IndexManager.SEARCH_ARTIFACT, artifacts, true);
+        if(dialog.open() == Window.OK) {
+          IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
+          if(af != null) {
+            parentGroupIdText.setText(nvl(af.group));
+            parentArtifactIdText.setText(nvl(af.artifact));
+            parentVersionText.setText(nvl(af.version));
+          }
+        }
+      }
+    };
+    parentSelectAction.setEnabled(false);
+
+    ToolBarManager toolBarManager = new ToolBarManager(SWT.FLAT);
+    toolBarManager.add(parentSelectAction);
+    
+    Composite toolbarComposite = toolkit.createComposite(parentSection);
+    GridLayout toolbarLayout = new GridLayout(1, true);
+    toolbarLayout.marginHeight = 0;
+    toolbarLayout.marginWidth = 0;
+    toolbarComposite.setLayout(toolbarLayout);
+    toolbarComposite.setBackground(null);
+ 
+    toolBarManager.createControl(toolbarComposite);
+    parentSection.setTextClient(toolbarComposite);    
+    
     Composite parentComposite = toolkit.createComposite(parentSection, SWT.NONE);
-    GridLayout gridLayout = new GridLayout(3, false);
+    GridLayout gridLayout = new GridLayout(2, false);
     gridLayout.marginBottom = 5;
     gridLayout.marginWidth = 1;
     gridLayout.marginHeight = 2;
@@ -266,9 +306,12 @@ public class OverviewPage extends MavenPomEditorPage {
     Label parentGroupIdLabel = toolkit.createLabel(parentComposite, "Group Id:*", SWT.NONE);
   
     parentGroupIdText = toolkit.createText(parentComposite, null, SWT.NONE);
-    parentGroupIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+    GridData gd_parentGroupIdText = new GridData(SWT.FILL, SWT.CENTER, true, false);
+    gd_parentGroupIdText.horizontalIndent = 4;
+    parentGroupIdText.setLayoutData(gd_parentGroupIdText);
     parentGroupIdText.setData("name", "parentGroupId");
-  
+    FormUtils.addGroupIdProposal(parentGroupIdText, Packaging.POM);
+    
     Hyperlink parentArtifactIdLabel = toolkit.createHyperlink(parentComposite, "Artifact Id:*", SWT.NONE);
     parentArtifactIdLabel.addHyperlinkListener(new HyperlinkAdapter() {
       public void linkActivated(HyperlinkEvent e) {
@@ -285,40 +328,47 @@ public class OverviewPage extends MavenPomEditorPage {
     });
   
     parentArtifactIdText = toolkit.createText(parentComposite, null, SWT.NONE);
-    parentArtifactIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+    GridData gd_parentArtifactIdText = new GridData(SWT.FILL, SWT.CENTER, true, false);
+    gd_parentArtifactIdText.horizontalIndent = 4;
+    parentArtifactIdText.setLayoutData(gd_parentArtifactIdText);
     parentArtifactIdText.setData("name", "parentArtifactId");
+    FormUtils.addArtifactIdProposal(parentGroupIdText, parentArtifactIdText, Packaging.POM);
   
     Label parentVersionLabel = toolkit.createLabel(parentComposite, "Version:*", SWT.NONE);
     parentVersionLabel.setLayoutData(new GridData());
   
     parentVersionText = toolkit.createText(parentComposite, null, SWT.NONE);
     GridData parentVersionTextData = new GridData(SWT.LEFT, SWT.CENTER, true, false);
+    parentVersionTextData.horizontalIndent = 4;
     parentVersionTextData.widthHint = 200;
     parentVersionText.setLayoutData(parentVersionTextData);
     parentVersionText.setData("name", "parentVersion");
+    FormUtils.addVersionProposal(parentGroupIdText, parentArtifactIdText, parentVersionText, Packaging.POM);
   
-    Button parentSelectButton = toolkit.createButton(parentComposite, "Select...", SWT.NONE);
-    parentSelectButton.addSelectionListener(new SelectionAdapter() {
-      public void widgetSelected(SelectionEvent e) {
-        // TODO calculate current list of artifacts for the project
-        Set<Artifact> artifacts = Collections.emptySet();
-        MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getEditorSite().getShell(),
-            "Add Dependency", IndexManager.SEARCH_ARTIFACT, artifacts);
-        if(dialog.open() == Window.OK) {
-          IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
-          if(af != null) {
-            parentGroupIdText.setText(nvl(af.group));
-            parentArtifactIdText.setText(nvl(af.artifact));
-            parentVersionText.setText(nvl(af.version));
-          }
-        }
-      }
-    });
+//    Button parentSelectButton = toolkit.createButton(parentComposite, "Select...", SWT.NONE);
+//    parentSelectButton.addSelectionListener(new SelectionAdapter() {
+//      public void widgetSelected(SelectionEvent e) {
+//        // TODO calculate current list of artifacts for the project
+//        Set<Artifact> artifacts = Collections.emptySet();
+//        MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getEditorSite().getShell(),
+//            "Add Dependency", IndexManager.SEARCH_ARTIFACT, artifacts);
+//        if(dialog.open() == Window.OK) {
+//          IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
+//          if(af != null) {
+//            parentGroupIdText.setText(nvl(af.group));
+//            parentArtifactIdText.setText(nvl(af.artifact));
+//            parentVersionText.setText(nvl(af.version));
+//          }
+//        }
+//      }
+//    });
 
     Label parentRealtivePathLabel = toolkit.createLabel(parentComposite, "Relative Path:", SWT.NONE);
 
     parentRelativePathText = toolkit.createText(parentComposite, null, SWT.NONE);
-    parentRelativePathText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+    GridData gd_parentRelativePathText = new GridData(SWT.FILL, SWT.CENTER, true, false);
+    gd_parentRelativePathText.horizontalIndent = 4;
+    parentRelativePathText.setLayoutData(gd_parentRelativePathText);
     parentRelativePathText.setData("name", "parentRelativePath");
     
     widthGroup.addControl(parentGroupIdLabel);
@@ -327,6 +377,7 @@ public class OverviewPage extends MavenPomEditorPage {
     widthGroup.addControl(parentRealtivePathLabel);
     
     toolkit.paintBordersFor(parentComposite);
+    parentComposite.setTabList(new Control[] {parentGroupIdText, parentArtifactIdText, parentVersionText, parentRelativePathText});
   }
 
   private void createPropertiesSection(FormToolkit toolkit, Composite composite, WidthGroup widthGroup) {
@@ -511,6 +562,7 @@ public class OverviewPage extends MavenPomEditorPage {
     widthGroup.addControl(inceptionYearLabel);
     
     toolkit.paintBordersFor(projectComposite);
+    projectComposite.setTabList(new Control[] {projectNameText, projectUrlText, projectDescriptionText, inceptionYearText});
   }
 
   private void createOrganizationSection(FormToolkit toolkit, Composite composite, WidthGroup widthGroup) {
@@ -547,6 +599,7 @@ public class OverviewPage extends MavenPomEditorPage {
     widthGroup.addControl(organizationUrlLabel);
     
     toolkit.paintBordersFor(organizationComposite);
+    organizationComposite.setTabList(new Control[] {organizationNameText, organizationUrlText});
   }
 
   private void createScmSection(FormToolkit toolkit, Composite composite, WidthGroup widthGroup) {
@@ -638,6 +691,7 @@ public class OverviewPage extends MavenPomEditorPage {
     widthGroup.addControl(issueManagementUrlLabel);
     
     toolkit.paintBordersFor(issueManagementComposite);
+    issueManagementComposite.setTabList(new Control[] {issueManagementSystemText, issueManagementUrlText});
   }
 
   private void createCiManagementSection(FormToolkit toolkit, Composite composite, WidthGroup widthGroup) {
@@ -674,6 +728,7 @@ public class OverviewPage extends MavenPomEditorPage {
     widthGroup.addControl(ciManagementUrlLabel);
     
     toolkit.paintBordersFor(ciManagementComposite);
+    ciManagementComposite.setTabList(new Control[] {ciManagementSystemText, ciManagementUrlText});
   }
 
   public void updateView(Notification notification) {
@@ -811,6 +866,12 @@ public class OverviewPage extends MavenPomEditorPage {
       setText(parentVersionText, "");
       setText(parentRelativePathText, "");
     }
+    
+    parentGroupIdText.setEditable(!isReadOnly());
+    parentArtifactIdText.setEditable(!isReadOnly());
+    parentVersionText.setEditable(!isReadOnly());
+    parentRelativePathText.setEditable(!isReadOnly());
+    parentSelectAction.setEnabled(!isReadOnly());
     
     ValueProvider<Parent> parentProvider = new ValueProvider.ParentValueProvider<Parent>(parentGroupIdText,
         parentArtifactIdText, parentVersionText, parentRelativePathText) {

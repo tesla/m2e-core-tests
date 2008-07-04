@@ -42,6 +42,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.events.ExpansionAdapter;
@@ -66,6 +67,7 @@ import org.maven.ide.eclipse.editor.composites.BuildComposite;
 import org.maven.ide.eclipse.editor.composites.DependencyLabelProvider;
 import org.maven.ide.eclipse.editor.composites.ListEditorComposite;
 import org.maven.ide.eclipse.editor.composites.ListEditorContentProvider;
+import org.maven.ide.eclipse.editor.xml.search.Packaging;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 
@@ -313,6 +315,8 @@ public class BuildPage extends MavenPomEditorPage {
     
     extensionGroupIdText = toolkit.createText(extensionDetialsComposite, null, SWT.FLAT);
     extensionGroupIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+    extensionGroupIdText.setData("name", "extensionGroupIdText");
+    FormUtils.addGroupIdProposal(extensionGroupIdText, Packaging.ALL);
     
     Hyperlink extensionArtifactIdHyperlink = toolkit.createHyperlink(extensionDetialsComposite, "Artifact Id:*", SWT.NONE);
     extensionArtifactIdHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
@@ -331,11 +335,16 @@ public class BuildPage extends MavenPomEditorPage {
     
     extensionArtifactIdText = toolkit.createText(extensionDetialsComposite, null, SWT.FLAT);
     extensionArtifactIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+    extensionArtifactIdText.setData("name", "extensionArtifactIdText");
+    FormUtils.addArtifactIdProposal(extensionGroupIdText, extensionArtifactIdText, Packaging.ALL);
     
     toolkit.createLabel(extensionDetialsComposite, "Version:");
     
     extensionVersionText = toolkit.createText(extensionDetialsComposite, null, SWT.FLAT);
     extensionVersionText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    extensionVersionText.setData("name", "extensionVersionText");
+    FormUtils.addVersionProposal(extensionGroupIdText, extensionArtifactIdText, extensionVersionText, Packaging.ALL);
+    extensionDetialsComposite.setTabList(new Control[] {extensionGroupIdText, extensionArtifactIdText, extensionVersionText});
 
 //    extensionSelectButton = toolkit.createButton(extensionDetialsComposite, "Select...", SWT.FLAT);
 //    extensionSelectButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 2, 1));

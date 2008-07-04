@@ -50,6 +50,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -74,6 +75,7 @@ import org.maven.ide.eclipse.editor.pom.MavenPomEditorPage;
 import org.maven.ide.eclipse.editor.pom.SearchControl;
 import org.maven.ide.eclipse.editor.pom.SearchMatcher;
 import org.maven.ide.eclipse.editor.pom.ValueProvider;
+import org.maven.ide.eclipse.editor.xml.search.Packaging;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.wizards.WidthGroup;
@@ -106,6 +108,7 @@ public class DependenciesComposite extends Composite {
   CCombo scopeCombo;
   CCombo typeCombo;
   Text systemPathText;
+  Button selectSystemPathButton;
 
   Button optionalButton;
 
@@ -498,7 +501,10 @@ public class DependenciesComposite extends Composite {
     detailsWidthGroup.addControl(groupIdLabel);
 
     groupIdText = toolkit.createText(dependencyComposite, null, SWT.NONE);
-    groupIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+    GridData gd_groupIdText = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
+    gd_groupIdText.horizontalIndent = 4;
+    groupIdText.setLayoutData(gd_groupIdText);
+    FormUtils.addGroupIdProposal(groupIdText, Packaging.ALL);
 
     Hyperlink artifactIdHyperlink = toolkit.createHyperlink(dependencyComposite, "Artifact Id:*", SWT.NONE);
     artifactIdHyperlink.setLayoutData(new GridData());
@@ -519,16 +525,21 @@ public class DependenciesComposite extends Composite {
     detailsWidthGroup.addControl(artifactIdHyperlink);
 
     artifactIdText = toolkit.createText(dependencyComposite, null, SWT.NONE);
-    artifactIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+    GridData gd_artifactIdText = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
+    gd_artifactIdText.horizontalIndent = 4;
+    artifactIdText.setLayoutData(gd_artifactIdText);
+    FormUtils.addArtifactIdProposal(groupIdText, artifactIdText, Packaging.ALL);
 
     Label versionLabel = toolkit.createLabel(dependencyComposite, "Version:", SWT.NONE);
     versionLabel.setLayoutData(new GridData());
     detailsWidthGroup.addControl(versionLabel);
 
     versionText = toolkit.createText(dependencyComposite, null, SWT.NONE);
-    GridData gd_versionText = new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1);
-    gd_versionText.widthHint = 200;
-    versionText.setLayoutData(gd_versionText);
+    GridData versionTextData = new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1);
+    versionTextData.horizontalIndent = 4;
+    versionTextData.widthHint = 200;
+    versionText.setLayoutData(versionTextData);
+    FormUtils.addVersionProposal(groupIdText, artifactIdText, versionText, Packaging.ALL);
 
 //    dependencySelectButton = toolkit.createButton(dependencyComposite, "Select...", SWT.NONE);
 //    dependencySelectButton.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 2));
@@ -556,14 +567,17 @@ public class DependenciesComposite extends Composite {
 
     classifierText = toolkit.createText(dependencyComposite, null, SWT.NONE);
     GridData gd_classifierText = new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1);
+    gd_classifierText.horizontalIndent = 4;
     gd_classifierText.widthHint = 200;
     classifierText.setLayoutData(gd_classifierText);
-
+    FormUtils.addClassifierProposal(groupIdText, artifactIdText, versionText, classifierText, Packaging.ALL);
+    
     Label typeLabel = toolkit.createLabel(dependencyComposite, "Type:", SWT.NONE);
     typeLabel.setLayoutData(new GridData());
     detailsWidthGroup.addControl(typeLabel);
 
     typeCombo = new CCombo(dependencyComposite, SWT.FLAT);
+    FormUtils.addTypeProposal(groupIdText, artifactIdText, versionText, typeCombo, Packaging.ALL);
     
     // TODO retrieve artifact type from selected dependency 
     typeCombo.add("jar");
@@ -580,6 +594,7 @@ public class DependenciesComposite extends Composite {
     typeCombo.add("pom");
     
     GridData gd_typeText = new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1);
+    gd_typeText.horizontalIndent = 4;
     gd_typeText.widthHint = 120;
     typeCombo.setLayoutData(gd_typeText);
     typeCombo.setData(FormToolkit.KEY_DRAW_BORDER, FormToolkit.TEXT_BORDER);
@@ -599,6 +614,7 @@ public class DependenciesComposite extends Composite {
     scopeCombo.add("import"); 
     
     GridData gd_scopeText = new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1);
+    gd_scopeText.horizontalIndent = 4;
     gd_scopeText.widthHint = 120;
     scopeCombo.setLayoutData(gd_scopeText);
     scopeCombo.setData(FormToolkit.KEY_DRAW_BORDER, FormToolkit.TEXT_BORDER);
@@ -610,14 +626,19 @@ public class DependenciesComposite extends Composite {
 
     systemPathText = toolkit.createText(dependencyComposite, null, SWT.NONE);
     GridData gd_systemPathText = new GridData(SWT.FILL, SWT.CENTER, true, false);
+    gd_systemPathText.horizontalIndent = 4;
     gd_systemPathText.widthHint = 200;
     systemPathText.setLayoutData(gd_systemPathText);
 
-    toolkit.createButton(dependencyComposite, "Select...", SWT.NONE);
+    selectSystemPathButton = toolkit.createButton(dependencyComposite, "Select...", SWT.NONE);
     new Label(dependencyComposite, SWT.NONE);
 
     optionalButton = toolkit.createButton(dependencyComposite, "Optional", SWT.CHECK);
-    optionalButton.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 2, 1));
+    GridData gd_optionalButton = new GridData(SWT.LEFT, SWT.TOP, false, false, 2, 1);
+    gd_optionalButton.horizontalIndent = 4;
+    optionalButton.setLayoutData(gd_optionalButton);
+    dependencyComposite.setTabList(new Control[] {groupIdText, artifactIdText, versionText, classifierText, typeCombo,
+        scopeCombo, systemPathText, selectSystemPathButton, optionalButton});
   }
 
   private void createExclusionsSection(FormToolkit toolkit, Composite composite) {
@@ -719,7 +740,11 @@ public class DependenciesComposite extends Composite {
     detailsWidthGroup.addControl(exclusionGroupIdLabel);
 
     exclusionGroupIdText = toolkit.createText(exclusionDetailsComposite, null, SWT.NONE);
-    exclusionGroupIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    GridData gd_exclusionGroupIdText = new GridData(SWT.FILL, SWT.CENTER, true, false);
+    gd_exclusionGroupIdText.horizontalIndent = 4;
+    exclusionGroupIdText.setLayoutData(gd_exclusionGroupIdText);
+    // TODO handle ArtifactInfo
+    FormUtils.addGroupIdProposal(exclusionGroupIdText, Packaging.ALL);
 
 //    exclusionSelectButton = toolkit.createButton(exclusionDetailsComposite, "Select...", SWT.NONE);
 //    exclusionSelectButton.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 2));
@@ -744,7 +769,11 @@ public class DependenciesComposite extends Composite {
     detailsWidthGroup.addControl(exclusionArtifactIdLabel);
 
     exclusionArtifactIdText = toolkit.createText(exclusionDetailsComposite, null, SWT.NONE);
-    exclusionArtifactIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    GridData gd_exclusionArtifactIdText = new GridData(SWT.FILL, SWT.CENTER, true, false);
+    gd_exclusionArtifactIdText.horizontalIndent = 4;
+    exclusionArtifactIdText.setLayoutData(gd_exclusionArtifactIdText);
+    // TODO handle ArtifactInfo
+    FormUtils.addArtifactIdProposal(exclusionGroupIdText, exclusionArtifactIdText, Packaging.ALL);
     
     exclusionSelectAction = new Action("Select Exclusion", MavenEditorImages.SELECT_ARTIFACT) {
       public void run() {

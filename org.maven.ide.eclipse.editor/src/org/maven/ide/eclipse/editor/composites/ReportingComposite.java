@@ -50,6 +50,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
@@ -75,6 +76,7 @@ import org.maven.ide.eclipse.editor.pom.MavenPomEditorPage;
 import org.maven.ide.eclipse.editor.pom.SearchControl;
 import org.maven.ide.eclipse.editor.pom.SearchMatcher;
 import org.maven.ide.eclipse.editor.pom.ValueProvider;
+import org.maven.ide.eclipse.editor.xml.search.Packaging;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 
@@ -313,8 +315,12 @@ public class ReportingComposite extends Composite {
     toolkit.createLabel(pluginDetailsComposite, "Group Id:*", SWT.NONE);
 
     groupIdText = toolkit.createText(pluginDetailsComposite, null, SWT.NONE);
-    groupIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-
+    GridData gd_groupIdText = new GridData(SWT.FILL, SWT.CENTER, true, false);
+    gd_groupIdText.horizontalIndent = 4;
+    groupIdText.setLayoutData(gd_groupIdText);
+    groupIdText.setData("name", "groupIdText");
+    FormUtils.addGroupIdProposal(groupIdText, Packaging.ALL);
+    
     Hyperlink artifactIdHyperlink = toolkit.createHyperlink(pluginDetailsComposite, "Artifact Id:*", SWT.NONE);
     artifactIdHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
       public void linkActivated(HyperlinkEvent e) {
@@ -331,20 +337,28 @@ public class ReportingComposite extends Composite {
     });
 
     artifactIdText = toolkit.createText(pluginDetailsComposite, null, SWT.NONE);
-    artifactIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    GridData gd_artifactIdText = new GridData(SWT.FILL, SWT.CENTER, true, false);
+    gd_artifactIdText.horizontalIndent = 4;
+    artifactIdText.setLayoutData(gd_artifactIdText);
+    artifactIdText.setData("name", "artifactIdText");
+    FormUtils.addArtifactIdProposal(groupIdText, artifactIdText, Packaging.ALL);
 
     toolkit.createLabel(pluginDetailsComposite, "Version:", SWT.NONE);
 
     versionText = toolkit.createText(pluginDetailsComposite, null, SWT.NONE);
-    versionText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    GridData gd_versionText = new GridData(SWT.FILL, SWT.CENTER, true, false);
+    gd_versionText.horizontalIndent = 4;
+    versionText.setLayoutData(gd_versionText);
+    versionText.setData("name", "versionText");
+    FormUtils.addVersionProposal(groupIdText, artifactIdText, versionText, Packaging.ALL);
 
     Composite pluginConfigureComposite = toolkit.createComposite(pluginDetailsComposite, SWT.NONE);
-    GridData gd_pluginConfigureComposite = new GridData(SWT.RIGHT, SWT.CENTER, false, false, 2, 1);
-    pluginConfigureComposite.setLayoutData(gd_pluginConfigureComposite);
-    GridLayout gridLayout_2 = new GridLayout(2, false);
-    gridLayout_2.marginWidth = 0;
-    gridLayout_2.marginHeight = 0;
-    pluginConfigureComposite.setLayout(gridLayout_2);
+    GridData pluginConfigureCompositeData = new GridData(SWT.RIGHT, SWT.CENTER, false, false, 2, 1);
+    pluginConfigureComposite.setLayoutData(pluginConfigureCompositeData);
+    GridLayout pluginConfigureCompositeLayout = new GridLayout(2, false);
+    pluginConfigureCompositeLayout.marginWidth = 0;
+    pluginConfigureCompositeLayout.marginHeight = 0;
+    pluginConfigureComposite.setLayout(pluginConfigureCompositeLayout);
     toolkit.paintBordersFor(pluginConfigureComposite);
 
     pluginInheritedButton = toolkit.createButton(pluginConfigureComposite, "Inherited", SWT.CHECK);
@@ -360,6 +374,7 @@ public class ReportingComposite extends Composite {
         }
       }
     });
+    pluginDetailsComposite.setTabList(new Control[] {groupIdText, artifactIdText, versionText, pluginConfigureComposite});
     
     openWebPageAction = new Action("Open Web Page", MavenEditorImages.WEB_PAGE) {
       public void run() {

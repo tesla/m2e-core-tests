@@ -32,6 +32,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -365,7 +366,9 @@ public class TeamComposite extends Composite {
     widthGroup.addControl(organizationNameLabel);
     widthGroup.addControl(organizationUrlLabel);
     userDetailsComposite.addControlListener(widthGroup);
+    userDetailsComposite.setTabList(new Control[] {userIdText, userNameText, userEmailText, userUrlText, userTimezoneText});
     organizationComposite.addControlListener(widthGroup);
+    organizationComposite.setTabList(new Control[] {organizationNameText, organizationUrlText});
 
     createRolesSection(toolkit, detailsComposite);
     createPropertiesSection(toolkit, detailsComposite);
