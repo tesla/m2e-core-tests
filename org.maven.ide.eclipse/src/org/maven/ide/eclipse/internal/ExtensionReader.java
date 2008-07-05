@@ -37,8 +37,6 @@ import org.maven.ide.eclipse.index.IndexInfo;
 import org.maven.ide.eclipse.internal.index.IndexInfoWriter;
 import org.maven.ide.eclipse.project.configurator.AbstractClasspathConfiguratorFactory;
 import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
-import org.maven.ide.eclipse.scm.ScmHandler;
-import org.maven.ide.eclipse.scm.ScmHandlerUi;
 
 
 /**
@@ -52,10 +50,6 @@ public class ExtensionReader {
   
   public static final String EXTENSION_INDEXES = "org.maven.ide.eclipse.indexes";
 
-  public static final String EXTENSION_SCM_HANDLERS = "org.maven.ide.eclipse.scmHandlers";
-  
-  public static final String EXTENSION_SCM_HANDLERS_UI = "org.maven.ide.eclipse.scmHandlersUi";
-  
   public static final String EXTENSION_PROJECT_CONFIGURATORS = "org.maven.ide.eclipse.projectConfigurators";
 
   public static final String EXTENSION_CLASSPATH_CONFIGURATOR_FACTORIES = "org.maven.ide.eclipse.classpathConfiguratorFactories";
@@ -71,10 +65,6 @@ public class ExtensionReader {
   private static final String ATTR_UPDATE_URL = "updateUrl";
 
   private static final String ATTR_IS_SHORT = "isShort";
-
-  private static final String ELEMENT_SCM_HANDLER = "handler";
-
-  private static final String ELEMENT_SCM_HANDLER_UI = "handlerUi";
 
   private static final String ELEMENT_LOCAL_ARCHETYPE = "local";
 
@@ -169,54 +159,6 @@ public class ExtensionReader {
     return indexInfo;
   }
 
-  /**
-   * Read SCM extension points 
-   * @return 
-   */
-  public static List<ScmHandler> readScmHandlerExtensions() {
-    List<ScmHandler> scmHandlers = new ArrayList<ScmHandler>();
-    IExtensionRegistry registry = Platform.getExtensionRegistry();
-    IExtensionPoint scmHandlersExtensionPoint = registry.getExtensionPoint(EXTENSION_SCM_HANDLERS);
-    if(scmHandlersExtensionPoint != null) {
-      IExtension[] scmHandlersExtensions = scmHandlersExtensionPoint.getExtensions();
-      for(IExtension extension : scmHandlersExtensions) {
-        IConfigurationElement[] elements = extension.getConfigurationElements();
-        for(IConfigurationElement element : elements) {
-          if(element.getName().equals(ELEMENT_SCM_HANDLER)) {
-            try {
-              scmHandlers.add((ScmHandler) element.createExecutableExtension(ScmHandler.ATTR_CLASS));
-            } catch(CoreException ex) {
-              MavenPlugin.log(ex);
-            }
-          }
-        }
-      }
-    }
-    return scmHandlers;
-  }
-  
-  public static List<ScmHandlerUi> readScmHandlerUiExtensions() {
-    ArrayList<ScmHandlerUi> scmHandlerUis = new ArrayList<ScmHandlerUi>();
-    IExtensionRegistry registry = Platform.getExtensionRegistry();
-    IExtensionPoint scmHandlersUiExtensionPoint = registry.getExtensionPoint(EXTENSION_SCM_HANDLERS_UI);
-    if(scmHandlersUiExtensionPoint != null) {
-      IExtension[] scmHandlersUiExtensions = scmHandlersUiExtensionPoint.getExtensions();
-      for(IExtension extension : scmHandlersUiExtensions) {
-        IConfigurationElement[] elements = extension.getConfigurationElements();
-        for(IConfigurationElement element : elements) {
-          if(element.getName().equals(ELEMENT_SCM_HANDLER_UI)) {
-            try {
-              scmHandlerUis.add((ScmHandlerUi) element.createExecutableExtension(ScmHandlerUi.ATTR_CLASS));
-            } catch(CoreException ex) {
-              MavenPlugin.log(ex);
-            }
-          }
-        }
-      }
-    }
-    return scmHandlerUis;
-  }
-  
   public static List<ArchetypeCatalogFactory> readArchetypeExtensions() {
     List<ArchetypeCatalogFactory> archetypeCatalogs = new ArrayList<ArchetypeCatalogFactory>();
     

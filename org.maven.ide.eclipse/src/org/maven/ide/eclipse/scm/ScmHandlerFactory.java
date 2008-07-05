@@ -15,11 +15,15 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.internal.ExtensionReader;
 
 
 /**
@@ -29,6 +33,14 @@ import org.maven.ide.eclipse.internal.ExtensionReader;
  */
 public class ScmHandlerFactory {
 
+  public static final String EXTENSION_SCM_HANDLERS = "org.maven.ide.eclipse.scmHandlers";
+  
+  public static final String EXTENSION_SCM_HANDLERS_UI = "org.maven.ide.eclipse.scmHandlersUi";
+  
+  private static final String ELEMENT_SCM_HANDLER = "handler";
+
+  private static final String ELEMENT_SCM_HANDLER_UI = "handlerUi";
+  
   private static volatile Map<String, List<ScmHandler>> scms;
 
   private static volatile Map<String, ScmHandlerUi> scmUis;
@@ -83,7 +95,7 @@ public class ScmHandlerFactory {
   private static Map<String, List<ScmHandler>> getScms() {
     if(scms == null) {
       scms = new TreeMap<String, List<ScmHandler>>();
-      for(ScmHandler scmHandler : ExtensionReader.readScmHandlerExtensions()) {
+      for(ScmHandler scmHandler : readScmHanderExtensions()) {
         addScmHandler(scmHandler);
       }
     }
@@ -93,12 +105,56 @@ public class ScmHandlerFactory {
   private static Map<String, ScmHandlerUi> getScmUis() {
     if(scmUis == null) {
       scmUis = new TreeMap<String, ScmHandlerUi>();
-      List<ScmHandlerUi> scmHandlerUis = ExtensionReader.readScmHandlerUiExtensions();
+      List<ScmHandlerUi> scmHandlerUis = readScmHandlerUiExtensions();
       for(ScmHandlerUi scmHandlerUi : scmHandlerUis) {
         addScmHandlerUi(scmHandlerUi);
       }
     }
     return scmUis;
+  }
+
+  private static List<ScmHandler> readScmHanderExtensions() {
+    List<ScmHandler> scmHandlers = new ArrayList<ScmHandler>();
+    IExtensionRegistry registry = Platform.getExtensionRegistry();
+    IExtensionPoint scmHandlersExtensionPoint = registry.getExtensionPoint(EXTENSION_SCM_HANDLERS);
+    if(scmHandlersExtensionPoint != null) {
+      IExtension[] scmHandlersExtensions = scmHandlersExtensionPoint.getExtensions();
+      for(IExtension extension : scmHandlersExtensions) {
+        IConfigurationElement[] elements = extension.getConfigurationElements();
+        for(IConfigurationElement element : elements) {
+          if(element.getName().equals(ELEMENT_SCM_HANDLER)) {
+            try {
+              scmHandlers.add((ScmHandler) element.createExecutableExtension(ScmHandler.ATTR_CLASS));
+            } catch(CoreException ex) {
+              MavenPlugin.log(ex);
+            }
+          }
+        }
+      }
+    }
+    return scmHandlers;
+  }
+  
+  private static List<ScmHandlerUi> readScmHandlerUiExtensions() {
+    ArrayList<ScmHandlerUi> scmHandlerUis = new ArrayList<ScmHandlerUi>();
+    IExtensionRegistry registry = Platform.getExtensionRegistry();
+    IExtensionPoint scmHandlersUiExtensionPoint = registry.getExtensionPoint(EXTENSION_SCM_HANDLERS_UI);
+    if(scmHandlersUiExtensionPoint != null) {
+      IExtension[] scmHandlersUiExtensions = scmHandlersUiExtensionPoint.getExtensions();
+      for(IExtension extension : scmHandlersUiExtensions) {
+        IConfigurationElement[] elements = extension.getConfigurationElements();
+        for(IConfigurationElement element : elements) {
+          if(element.getName().equals(ELEMENT_SCM_HANDLER_UI)) {
+            try {
+              scmHandlerUis.add((ScmHandlerUi) element.createExecutableExtension(ScmHandlerUi.ATTR_CLASS));
+            } catch(CoreException ex) {
+              MavenPlugin.log(ex);
+            }
+          }
+        }
+      }
+    }
+    return scmHandlerUis;
   }
 
 }
