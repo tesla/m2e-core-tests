@@ -88,8 +88,9 @@ public class MavenModelManagerTest extends AsbtractMavenProjectTestCase {
       MavenModelManager modelManager = plugin.getMavenModelManager();
       Model model = modelManager.readMavenModel(pomFile);
       assertEquals("JT400", model.getName());
-      List licenses = model.getLicenses();
-      License license = (License) licenses.get(0);
+      @SuppressWarnings("unchecked")
+      List<License> licenses = model.getLicenses();
+      License license = licenses.get(0);
       assertEquals("IBM Public License Version 1.0", license.getName());
     }
     
@@ -97,8 +98,9 @@ public class MavenModelManagerTest extends AsbtractMavenProjectTestCase {
       MavenEmbedder embedder = plugin.getMavenEmbedderManager().getWorkspaceEmbedder();
       MavenProject project = embedder.readProject(pomFile);
       assertEquals("JT400", project.getName());
-      List licenses = project.getLicenses();
-      License license = (License) licenses.get(0);
+      @SuppressWarnings("unchecked")
+      List<License> licenses = project.getLicenses();
+      License license = licenses.get(0);
       assertEquals("IBM Public License Version 1.0", license.getName());
     }
   }

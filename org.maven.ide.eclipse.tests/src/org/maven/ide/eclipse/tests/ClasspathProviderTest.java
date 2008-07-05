@@ -82,13 +82,13 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
   }
 
   IRuntimeClasspathEntry[] getUserClasspathEntries(IRuntimeClasspathEntry[] entries) {
-    ArrayList result = new ArrayList();
-    for (int i = 0; i < entries.length; i++) {
-      if (IRuntimeClasspathEntry.USER_CLASSES == entries[i].getClasspathProperty()) {
-        result.add(entries[i]);
+    ArrayList<IRuntimeClasspathEntry> result = new ArrayList<IRuntimeClasspathEntry>();
+    for(IRuntimeClasspathEntry entry : entries) {
+      if (IRuntimeClasspathEntry.USER_CLASSES == entry.getClasspathProperty()) {
+        result.add(entry);
       }
     }
-    return (IRuntimeClasspathEntry[]) result.toArray(new IRuntimeClasspathEntry[result.size()]);
+    return result.toArray(new IRuntimeClasspathEntry[result.size()]);
   }
 
   public void testNoFilterResources() throws Exception {
@@ -300,7 +300,7 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
   }
 
   public void testTestClassesDefaultClassifier() throws Exception {
-    IProject p01 = createExisting("runtimeclasspath-testscope01", "projects/runtimeclasspath/testscope01");
+    createExisting("runtimeclasspath-testscope01", "projects/runtimeclasspath/testscope01");
     IProject p02 = createExisting("runtimeclasspath-testscope02", "projects/runtimeclasspath/testscope02");
     waitForJobsToComplete();
 
@@ -320,7 +320,7 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
   }
 
   public void testTestClassesTestsClassifier() throws Exception {
-    IProject p01 = createExisting("runtimeclasspath-testscope01", "projects/runtimeclasspath/testscope01");
+    createExisting("runtimeclasspath-testscope01", "projects/runtimeclasspath/testscope01");
     IProject p03 = createExisting("runtimeclasspath-testscope03", "projects/runtimeclasspath/testscope03");
     waitForJobsToComplete();
 
@@ -340,7 +340,7 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
   }
 
   public void testTestClassesDefaultAndTestsClassifier() throws Exception {
-    IProject p01 = createExisting("runtimeclasspath-testscope01", "projects/runtimeclasspath/testscope01");
+    createExisting("runtimeclasspath-testscope01", "projects/runtimeclasspath/testscope01");
     IProject p04 = createExisting("runtimeclasspath-testscope04", "projects/runtimeclasspath/testscope04");
     waitForJobsToComplete();
 
@@ -361,7 +361,7 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
   }
 
   public void testTestClassesTestScopeAndTestType() throws Exception {
-    IProject p01 = createExisting("runtimeclasspath-testscope01", "projects/runtimeclasspath/testscope01");
+    createExisting("runtimeclasspath-testscope01", "projects/runtimeclasspath/testscope01");
     IProject p05 = createExisting("runtimeclasspath-testscope05", "projects/runtimeclasspath/testscope05");
     waitForJobsToComplete();
 

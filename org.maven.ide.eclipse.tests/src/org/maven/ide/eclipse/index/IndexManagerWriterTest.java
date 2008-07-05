@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.maven.ide.eclipse.internal.index.IndexInfoWriter;
@@ -25,7 +24,7 @@ public class IndexManagerWriterTest extends TestCase {
 
   public void testReadWriteIndexInfo() throws IOException {
     
-    Collection indexes = new ArrayList();
+    Collection<IndexInfo> indexes = new ArrayList<IndexInfo>();
 
     IndexInfo indexJavaNet = new IndexInfo("java.net", null, //
         "http://download.java.net/maven/2/", IndexInfo.Type.REMOTE, false);
@@ -44,17 +43,16 @@ public class IndexManagerWriterTest extends TestCase {
     IndexInfoWriter writer = new IndexInfoWriter();
     writer.writeIndexInfo(indexes, bos);
     
-    Collection readIndexes = writer.readIndexInfo(new ByteArrayInputStream(bos.toByteArray()));
-    Map readIndexMap = new HashMap();
-    for(Iterator it = readIndexes.iterator(); it.hasNext();) {
-      IndexInfo info = (IndexInfo) it.next();
+    Map<String, IndexInfo> readIndexMap = new HashMap<String, IndexInfo>();
+    Collection<IndexInfo> readIndexes = writer.readIndexInfo(new ByteArrayInputStream(bos.toByteArray()));
+    for(IndexInfo info : readIndexes) {
       readIndexMap.put(info.getIndexName(), info);
     }
     
     assertEquals(indexes.size(), readIndexes.size());
-    assertEquals(indexJavaNet, (IndexInfo) readIndexMap.get("java.net"));
-    assertEquals(indexCodehaus, (IndexInfo) readIndexMap.get("codehaus"));
-    assertEquals(indexCodehausSnapshots, (IndexInfo) readIndexMap.get("codehaus.snapshots"));
+    assertEquals(indexJavaNet, readIndexMap.get("java.net"));
+    assertEquals(indexCodehaus, readIndexMap.get("codehaus"));
+    assertEquals(indexCodehausSnapshots, readIndexMap.get("codehaus.snapshots"));
   }
 
   public void assertEquals(IndexInfo i1, IndexInfo i2) {

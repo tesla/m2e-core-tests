@@ -68,11 +68,11 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
 
   protected static final Object[] EMPTY = new Object[0];
 
-  private final MavenPomEditor pomEditor;
+  final MavenPomEditor pomEditor;
   
   GraphViewer viewer;
 
-  private IAction openAction;
+  IAction openAction;
   private IAction selectAllAction;
 
   private IAction showVersionAction;
@@ -93,7 +93,7 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
 
   DependencyGraphLabelProvider graphLabelProvider;
 
-  private DependencyGraphContentProvider graphContentProvider;
+  DependencyGraphContentProvider graphContentProvider;
 
 //  private ZoomContributionViewItem zoomContributionItem;
 
@@ -224,7 +224,7 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
     updateGraphAsync(false);
   }
 
-  private void selectElements() {
+  void selectElements() {
     ArrayList<Artifact> elements = new ArrayList<Artifact>();
     String text = searchControl.getSearchText().getText();
     if(text.length()>0) {
@@ -430,7 +430,7 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
     }.schedule();
   }
 
-  private void updateGraph(DependencyNode node) {
+  void updateGraph(DependencyNode node) {
     // MetadataGraph graph = scope==null && result!=null ? result.getGraph() : result.getGraph(scope);
     // MetadataGraph graph = result.getGraph(ArtifactScopeEnum.DEFAULT_SCOPE);
     // MetadataGraph graph = result.getGraph(MetadataResolutionRequestTypeEnum.versionedGraph);

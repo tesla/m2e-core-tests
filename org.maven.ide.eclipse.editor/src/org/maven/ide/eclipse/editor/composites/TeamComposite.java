@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.Section;
@@ -67,42 +68,45 @@ public class TeamComposite extends Composite {
 
   private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
 
-  protected MavenPomEditorPage parent;
-
-  ValueProvider<DevelopersType> developersProvider;
-
-  ValueProvider<ContributorsType> contributorsProvider;
-
-  EObject currentSelection;
-
-  boolean changingSelection = false;
+  MavenPomEditorPage parent;
 
   // controls
-  private ListEditorComposite<Developer> developersEditor;
 
-  private ListEditorComposite<Contributor> contributorsEditor;
+  ValueProvider<DevelopersType> developersProvider;
+  
+  ValueProvider<ContributorsType> contributorsProvider;
+  
+  ListEditorComposite<Developer> developersEditor;
 
-  private Composite detailsComposite;
+  ListEditorComposite<Contributor> contributorsEditor;
 
-  private Text userIdText;
+  Composite detailsComposite;
 
-  private Text userNameText;
+  Text userIdText;
 
-  private Text userEmailText;
+  Text userNameText;
 
-  private Text userUrlText;
+  Text userEmailText;
 
-  private CCombo userTimezoneText;
+  Text userUrlText;
 
-  private Text organizationNameText;
+  CCombo userTimezoneText;
 
-  private Text organizationUrlText;
+  Text organizationNameText;
 
-  private ListEditorComposite<PropertyPair> propertiesEditor;
+  Text organizationUrlText;
 
-  private ListEditorComposite<String> rolesEditor;
+  ListEditorComposite<PropertyPair> propertiesEditor;
 
-  private Label userIdLabel;
+  ListEditorComposite<String> rolesEditor;
+
+  Label userIdLabel;
+
+  // model
+  EObject currentSelection;
+  
+  boolean changingSelection = false;
+  
 
   public TeamComposite(Composite composite, int flags) {
     super(composite, flags);
@@ -135,7 +139,7 @@ public class TeamComposite extends Composite {
   }
 
   private void createDevelopersSection(FormToolkit toolkit, SashForm verticalSash) {
-    Section developersSection = toolkit.createSection(verticalSash, Section.TITLE_BAR);
+    Section developersSection = toolkit.createSection(verticalSash, ExpandableComposite.TITLE_BAR);
     developersSection.setText("Developers");
 
     developersEditor = new ListEditorComposite<Developer>(developersSection, SWT.NONE);
@@ -210,7 +214,7 @@ public class TeamComposite extends Composite {
   }
 
   private void createContributorsSection(FormToolkit toolkit, SashForm verticalSash) {
-    Section contributorsSection = toolkit.createSection(verticalSash, Section.TITLE_BAR);
+    Section contributorsSection = toolkit.createSection(verticalSash, ExpandableComposite.TITLE_BAR);
     contributorsSection.setText("Contributors");
 
     contributorsEditor = new ListEditorComposite<Contributor>(contributorsSection, SWT.NONE);
@@ -292,7 +296,7 @@ public class TeamComposite extends Composite {
     detailsComposite.setLayout(detailsCompositeGridLayout);
     toolkit.paintBordersFor(detailsComposite);
 
-    Section userDetailsSection = toolkit.createSection(detailsComposite, Section.TITLE_BAR);
+    Section userDetailsSection = toolkit.createSection(detailsComposite, ExpandableComposite.TITLE_BAR);
     GridData gd_userDetailsSection = new GridData(SWT.FILL, SWT.CENTER, true, false);
     userDetailsSection.setLayoutData(gd_userDetailsSection);
     userDetailsSection.setText("Details");
@@ -333,7 +337,7 @@ public class TeamComposite extends Composite {
     userTimezoneText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
     userTimezoneText.setData(FormToolkit.KEY_DRAW_BORDER, FormToolkit.TEXT_BORDER);
 
-    Section organizationSection = toolkit.createSection(detailsComposite, Section.TITLE_BAR);
+    Section organizationSection = toolkit.createSection(detailsComposite, ExpandableComposite.TITLE_BAR);
     organizationSection.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
     organizationSection.setText("Organization");
 
@@ -375,7 +379,7 @@ public class TeamComposite extends Composite {
   }
 
   private void createRolesSection(FormToolkit toolkit, Composite detailsComposite) {
-    Section rolesSection = toolkit.createSection(detailsComposite, Section.TITLE_BAR);
+    Section rolesSection = toolkit.createSection(detailsComposite, ExpandableComposite.TITLE_BAR);
     rolesSection.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
     rolesSection.setText("Roles");
 
@@ -447,7 +451,7 @@ public class TeamComposite extends Composite {
   }
 
   private void createPropertiesSection(FormToolkit toolkit, Composite composite) {
-    Section propertiesSection = toolkit.createSection(composite, Section.TITLE_BAR);
+    Section propertiesSection = toolkit.createSection(composite, ExpandableComposite.TITLE_BAR);
     propertiesSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
     propertiesSection.setText("Properties");
 
@@ -467,7 +471,7 @@ public class TeamComposite extends Composite {
     changingSelection = false;
   }
 
-  private void loadDevelopers() {
+  void loadDevelopers() {
     DevelopersType developers = developersProvider.getValue();
     changingSelection = true;
     developersEditor.setInput(developers == null ? null : developers.getDeveloper());
@@ -561,8 +565,7 @@ public class TeamComposite extends Composite {
     setText(organizationNameText, developer.getOrganization());
     setText(organizationUrlText, developer.getOrganizationUrl());
 
-    ValueProvider<Developer> developerProvider = new ValueProvider.DefaultValueProvider<Developer>(
-        (Developer) developer);
+    ValueProvider<Developer> developerProvider = new ValueProvider.DefaultValueProvider<Developer>(developer);
     parent.setModifyListener(userIdText, developerProvider, POM_PACKAGE.getDeveloper_Id(), "");
     parent.setModifyListener(userNameText, developerProvider, POM_PACKAGE.getDeveloper_Name(), "");
     parent.setModifyListener(userEmailText, developerProvider, POM_PACKAGE.getDeveloper_Email(), "");

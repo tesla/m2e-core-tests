@@ -49,6 +49,7 @@ import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
@@ -142,7 +143,8 @@ public class BuildPage extends MavenPomEditorPage {
   }
 
   private void createFoldersSection(Composite buildSash, FormToolkit toolkit) {
-    foldersSection = toolkit.createSection(buildSash, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
+    foldersSection = toolkit.createSection(buildSash, //
+        ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
     foldersSection.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
     foldersSection.setText("Folders");
     foldersSection.addExpansionListener(new ExpansionAdapter() {
@@ -191,7 +193,8 @@ public class BuildPage extends MavenPomEditorPage {
   }
 
   private void createExtensionsSection(Composite buildSash, FormToolkit toolkit) {
-    extensionsSection = toolkit.createSection(buildSash, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
+    extensionsSection = toolkit.createSection(buildSash, //
+        ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
     extensionsSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
     extensionsSection.setText("Extensions");
     extensionsSection.addExpansionListener(new ExpansionAdapter() {
@@ -289,7 +292,8 @@ public class BuildPage extends MavenPomEditorPage {
   }
 
   private void createExtensionDetailsSection(Composite buildSash, FormToolkit toolkit) {
-    extensionDetailsSection = toolkit.createSection(buildSash, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
+    extensionDetailsSection = toolkit.createSection(buildSash, //
+        ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
     extensionDetailsSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
     extensionDetailsSection.setText("Extension Details");
     extensionDetailsSection.addExpansionListener(new ExpansionAdapter() {
@@ -424,7 +428,7 @@ public class BuildPage extends MavenPomEditorPage {
     updateExtensionDetails(null);
   }
   
-  private void updateExtensionDetails(Extension extension) {
+  void updateExtensionDetails(Extension extension) {
     currentExtension = extension;
     
     removeNotifyListener(extensionGroupIdText);

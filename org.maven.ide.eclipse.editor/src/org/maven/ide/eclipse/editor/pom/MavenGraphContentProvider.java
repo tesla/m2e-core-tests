@@ -10,87 +10,82 @@ package org.maven.ide.eclipse.editor.pom;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.maven.artifact.resolver.metadata.MetadataGraph;
+import org.apache.maven.artifact.resolver.metadata.MetadataGraphEdge;
 import org.apache.maven.artifact.resolver.metadata.MetadataGraphVertex;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.zest.core.viewers.IGraphEntityContentProvider;
 
+
 /**
-   * Graph Content provider 
-   */
-  public class MavenGraphContentProvider implements 
-      IGraphEntityContentProvider {
-    // IGraphContentProvider {
-    // IGraphEntityRelationshipContentProvider {
+ * Graph Content provider
+ */
+public class MavenGraphContentProvider implements IGraphEntityContentProvider {
+  // IGraphContentProvider {
+  // IGraphEntityRelationshipContentProvider {
 
-    private MetadataGraph graph;
+  private MetadataGraph graph;
 
-    private Map connections;
-    
-    
-    public MetadataGraph getGraph() {
-      return graph;
-    }
-    
-    // IContentProvider
+  private Map<MetadataGraphVertex, Set<MetadataGraphVertex>> connections;
 
-    public void dispose() {
-    }
+  public MetadataGraph getGraph() {
+    return graph;
+  }
 
-    public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-      this.graph = (MetadataGraph) newInput;
-      this.connections = new HashMap();
-    }
+  // IContentProvider
 
-    // IStructuredContentProvider
+  public void dispose() {
+  }
 
-    // should return all edges
-    public Object[] getElements(Object inputElement) {
-      if (inputElement instanceof MetadataGraph) {
-        MetadataGraph graph = (MetadataGraph) inputElement;
+  public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+    this.graph = (MetadataGraph) newInput;
+    this.connections = new HashMap<MetadataGraphVertex, Set<MetadataGraphVertex>>();
+  }
 
-        // MetadataGraphVertex entry = graph.getEntry();
-        // init(graph, entry);
-        
-        TreeSet vertices = graph.getVertices();
-        for (Iterator it = vertices.iterator(); it.hasNext();) {
-          MetadataGraphVertex v1 = (MetadataGraphVertex) it.next();
+  // IStructuredContentProvider
+
+  // should return all edges
+  public Object[] getElements(Object inputElement) {
+    if(inputElement instanceof MetadataGraph) {
+      MetadataGraph graph = (MetadataGraph) inputElement;
+
+      // MetadataGraphVertex entry = graph.getEntry();
+      // init(graph, entry);
+
+      TreeSet<MetadataGraphVertex> vertices = graph.getVertices();
+      for(MetadataGraphVertex v1 : vertices) {
 //          init(graph, v1);
-          
-          for (Iterator it2 = vertices.iterator(); it2.hasNext();) {
-            MetadataGraphVertex v2 = (MetadataGraphVertex) it2.next();
 
-            if (v1 != v2) {
-              List edges = graph.getEdgesBetween(v1, v2);
-              
-              if (edges != null && !edges.isEmpty()) {
+        for(MetadataGraphVertex v2 : vertices) {
+          if(v1 != v2) {
+            List<MetadataGraphEdge> edges = graph.getEdgesBetween(v1, v2);
+            if(edges != null && !edges.isEmpty()) {
 //                if (edges.size() > 1) {
 //                  // why do we have more then one edge?
 //                  System.err.println(v1 + " : " + v2 + " : " + edges);
 //                }
-                
-                Set dests = (Set) connections.get(v1);
-                if (dests == null) {
-                  dests = new HashSet();
-                  connections.put(v1, dests);
-                }
-                dests.add(v2);
+
+              Set<MetadataGraphVertex> dests = connections.get(v1);
+              if(dests == null) {
+                dests = new HashSet<MetadataGraphVertex>();
+                connections.put(v1, dests);
               }
+              dests.add(v2);
             }
           }
         }
-        
-        return vertices.toArray(new MetadataGraphVertex[vertices.size()]);
       }
 
-      return DependencyGraphPage.EMPTY;
+      return vertices.toArray(new MetadataGraphVertex[vertices.size()]);
     }
+
+    return DependencyGraphPage.EMPTY;
+  }
 
 //    private void init(MetadataGraph graph, MetadataGraphVertex v) {
 //      List<MetadataGraphEdge> incidentEdges = graph.getIncidentEdges(v);
@@ -120,46 +115,46 @@ import org.eclipse.zest.core.viewers.IGraphEntityContentProvider;
 //      }
 //    }
 
-    // IGraphEntityContentProvider
+  // IGraphEntityContentProvider
 
-    public Object[] getConnectedTo(Object element) {
-      if (element instanceof MetadataGraphVertex) {
+  public Object[] getConnectedTo(Object element) {
+    if(element instanceof MetadataGraphVertex) {
 //        HashSet<MetadataGraphVertex> v = new HashSet<MetadataGraphVertex>();
 //        Set<MetadataGraphVertex> t = targets.get(element);
 //        if (t != null) {
 //          v.addAll(t);
 //        }
 //        return v.toArray(new MetadataGraphVertex[v.size()]);
-        Set nodes = (Set) connections.get(element);
-        if(nodes!=null) {
-          return nodes.toArray(new MetadataGraphVertex[nodes.size()]);
-        }
+      Set<MetadataGraphVertex> nodes = connections.get(element);
+      if(nodes != null) {
+        return nodes.toArray(new MetadataGraphVertex[nodes.size()]);
       }
-      return DependencyGraphPage.EMPTY;
     }
-
-    // IGraphContentProvider
-
-    // public Object getDestination(Object rel) {
-    //   if(rel instanceof MetadataGraphEdge) {
-    //     return destinations.get(rel);
-    //   }
-    //   return null;
-    // }
-    //  
-    // public Object getSource(Object rel) {
-    //   if(rel instanceof MetadataGraphVertex) {
-    //     return sources.get(rel);
-    //   }
-    //   return null;
-    // }
-
-    // IGraphEntityRelationshipContentProvider
-
-    // public Object[] getRelationships(Object source, Object dest) {
-    //   return null;
-    // }
-
-    // ISelectionChangedListener
-
+    return DependencyGraphPage.EMPTY;
   }
+
+  // IGraphContentProvider
+
+  // public Object getDestination(Object rel) {
+  //   if(rel instanceof MetadataGraphEdge) {
+  //     return destinations.get(rel);
+  //   }
+  //   return null;
+  // }
+  //  
+  // public Object getSource(Object rel) {
+  //   if(rel instanceof MetadataGraphVertex) {
+  //     return sources.get(rel);
+  //   }
+  //   return null;
+  // }
+
+  // IGraphEntityRelationshipContentProvider
+
+  // public Object[] getRelationships(Object source, Object dest) {
+  //   return null;
+  // }
+
+  // ISelectionChangedListener
+
+}

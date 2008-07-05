@@ -27,9 +27,9 @@ import org.maven.ide.eclipse.project.configurator.MavenProjectConfigurator;
 public class ProjectConfiguratorFactoryTest extends TestCase {
 
   public void testConfiguratorFactory() throws Exception {
-    Set configurators = ProjectConfiguratorFactory.getConfigurators();
+    Set<AbstractProjectConfigurator> configurators = ProjectConfiguratorFactory.getConfigurators();
     
-    AbstractProjectConfigurator[] cc = (AbstractProjectConfigurator[]) configurators.toArray(new AbstractProjectConfigurator[configurators.size()]);
+    AbstractProjectConfigurator[] cc = configurators.toArray(new AbstractProjectConfigurator[configurators.size()]);
 
     assertEquals(7, cc.length);
 

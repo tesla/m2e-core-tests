@@ -28,10 +28,10 @@ public class DependencyGraphContentProvider implements IGraphContentProvider {
   // IGraphEntityContentProvider {
   // IGraphEntityRelationshipContentProvider {
 
-  private Set<DependencyNode> nodes;
-  private HashMap<Artifact, Set<DependencyNode>> artifacts;
+  Set<DependencyNode> nodes;
+  HashMap<Artifact, Set<DependencyNode>> artifacts;
   
-  private boolean showResolved = true;
+  boolean showResolved = true;
 
   // IContentProvider
 
@@ -77,7 +77,7 @@ public class DependencyGraphContentProvider implements IGraphContentProvider {
             artifact = node.getArtifact();
           }
           
-          Set<DependencyNode> connections = (Set<DependencyNode>) artifacts.get(artifact);
+          Set<DependencyNode> connections = artifacts.get(artifact);
           if(connections==null) {
             connections = new HashSet<DependencyNode>();
             artifacts.put(artifact, connections);
@@ -146,7 +146,7 @@ public class DependencyGraphContentProvider implements IGraphContentProvider {
   }
 
   @SuppressWarnings("unchecked")
-  private List<DependencyNode> getChildren(DependencyNode node) {
+  List<DependencyNode> getChildren(DependencyNode node) {
     return node.getChildren();
   }
   

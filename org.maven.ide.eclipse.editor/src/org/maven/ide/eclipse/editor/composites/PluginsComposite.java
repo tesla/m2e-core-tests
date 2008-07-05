@@ -59,6 +59,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.Section;
@@ -92,7 +93,7 @@ public class PluginsComposite extends Composite {
 
   protected static PomPackage POM_PACKAGE = PomPackage.eINSTANCE;
   
-  private MavenPomEditorPage parent;
+  MavenPomEditorPage parent;
   
   // controls
   CCombo executionPhaseCombo;
@@ -176,7 +177,7 @@ public class PluginsComposite extends Composite {
   }
 
   private void createPluginsSection(SashForm verticalSashForm) {
-    Section pluginsSection = toolkit.createSection(verticalSashForm, Section.TITLE_BAR | Section.COMPACT);
+    Section pluginsSection = toolkit.createSection(verticalSashForm, ExpandableComposite.TITLE_BAR | ExpandableComposite.COMPACT);
     pluginsSection.setText("Plugins");
   
     pluginsEditor = new ListEditorComposite<Plugin>(pluginsSection, SWT.NONE);
@@ -281,7 +282,7 @@ public class PluginsComposite extends Composite {
   }
 
   private void createPluginManagementSection(SashForm verticalSashForm) {
-    Section pluginManagementSection = toolkit.createSection(verticalSashForm, Section.TITLE_BAR);
+    Section pluginManagementSection = toolkit.createSection(verticalSashForm, ExpandableComposite.TITLE_BAR);
     pluginManagementSection.setText("Plugin Management");
   
     pluginManagementEditor = new ListEditorComposite<Plugin>(pluginManagementSection, SWT.NONE);
@@ -393,7 +394,7 @@ public class PluginsComposite extends Composite {
       detailsComposite.setLayout(detailsCompositeLayout);
       toolkit.paintBordersFor(detailsComposite);
       
-      pluginDetailsSection = toolkit.createSection(detailsComposite, Section.TITLE_BAR);
+      pluginDetailsSection = toolkit.createSection(detailsComposite, ExpandableComposite.TITLE_BAR);
       pluginDetailsSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
       pluginDetailsSection.setText("Plugin Details");
     
@@ -536,7 +537,7 @@ public class PluginsComposite extends Composite {
       });
       pluginDetailsComposite.setTabList(new Control[] {groupIdText, artifactIdText, versionText, composite});
   
-      pluginExecutionsSection = toolkit.createSection(detailsComposite, Section.TITLE_BAR);
+      pluginExecutionsSection = toolkit.createSection(detailsComposite, ExpandableComposite.TITLE_BAR);
       GridData gd_pluginExecutionsSection = new GridData(SWT.FILL, SWT.FILL, true, true);
       gd_pluginExecutionsSection.minimumHeight = 50;
       pluginExecutionsSection.setLayoutData(gd_pluginExecutionsSection);
@@ -612,7 +613,7 @@ public class PluginsComposite extends Composite {
         }
       });
       
-      pluginExecutionSection = toolkit.createSection(detailsComposite, Section.TITLE_BAR);
+      pluginExecutionSection = toolkit.createSection(detailsComposite, ExpandableComposite.TITLE_BAR);
       GridData gd_pluginExecutionSection = new GridData(SWT.FILL, SWT.CENTER, true, false);
       gd_pluginExecutionSection.minimumHeight = 50;
       pluginExecutionSection.setLayoutData(gd_pluginExecutionSection);
@@ -758,7 +759,7 @@ public class PluginsComposite extends Composite {
         }
       });
   
-      pluginDependenciesSection = toolkit.createSection(detailsComposite, Section.TITLE_BAR);
+      pluginDependenciesSection = toolkit.createSection(detailsComposite, ExpandableComposite.TITLE_BAR);
       GridData pluginDependenciesSectionData = new GridData(SWT.FILL, SWT.FILL, true, true);
       pluginDependenciesSectionData.minimumHeight = 50;
       pluginDependenciesSection.setLayoutData(pluginDependenciesSectionData);
@@ -778,7 +779,7 @@ public class PluginsComposite extends Composite {
       FormUtils.setEnabled(pluginDependenciesEditor, false);
     }
 
-  private void updatePluginDetails(Plugin plugin) {
+  void updatePluginDetails(Plugin plugin) {
     if(changingSelection) {
       return;
     }
@@ -851,7 +852,7 @@ public class PluginsComposite extends Composite {
     parent.setModifyListener(pluginExtensionsButton, provider, POM_PACKAGE.getPlugin_Extensions(), "false");
   }
 
-  private void updatePluginExecution(PluginExecution pluginExecution) {
+  void updatePluginExecution(PluginExecution pluginExecution) {
 //    if(pluginExecution!=null && currentPluginExecution==pluginExecution) {
 //      return;
 //    }
@@ -994,7 +995,7 @@ public class PluginsComposite extends Composite {
   /**
    * Plugin label provider
    */
-  private static final class PluginLabelProvider extends LabelProvider {
+  static final class PluginLabelProvider extends LabelProvider {
 
     private boolean showGroupId = true;
 

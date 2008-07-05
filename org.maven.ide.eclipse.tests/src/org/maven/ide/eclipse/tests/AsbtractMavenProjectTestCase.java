@@ -28,6 +28,7 @@ import org.apache.maven.embedder.ContainerCustomizer;
 import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.embedder.MavenEmbedderConsoleLogger;
 import org.apache.maven.model.Model;
+import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -73,6 +74,7 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
 
   protected MavenProjectManagerRefreshJob job;
 
+  @SuppressWarnings("unchecked")
   protected void setUp() throws Exception {
     super.setUp();
     workspace = ResourcesPlugin.getWorkspace();
@@ -81,7 +83,7 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
     workspace.setDescription(description);
 
     // lets not assume we've got subversion in the target platform 
-    Hashtable options = JavaCore.getOptions();
+    Hashtable<String, String> options = JavaCore.getOptions();
     options.put(JavaCore.CORE_JAVA_BUILD_RESOURCE_COPY_FILTER, ".svn/");
     JavaCore.setOptions(options);
 
@@ -171,11 +173,7 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
           } catch(FileNotFoundException ex) {
             throw new CoreException(new Status(IStatus.ERROR, "", 0, ex.toString(), ex));
           } finally {
-            try {
-              is.close();
-            } catch(IOException ex) {
-              // ignore
-            }
+            IOUtil.close(is);
           }
         }
       }
@@ -219,11 +217,11 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
     File dst = new File(root.getLocation().toFile(), src.getName());
     copyDir(src, dst);
 
-    final ArrayList projectInfos = new ArrayList();
-    for (int i = 0; i < pomNames.length; i++) {
-      File pomFile = new File(dst, pomNames[i]);
+    final ArrayList<MavenProjectInfo> projectInfos = new ArrayList<MavenProjectInfo>();
+    for(String pomName : pomNames) {
+      File pomFile = new File(dst, pomName);
       Model model = mavenModelManager.readMavenModel(pomFile);
-      projectInfos.add(new MavenProjectInfo(pomNames[i], pomFile, model, null));
+      projectInfos.add(new MavenProjectInfo(pomName, pomFile, model, null));
     }
 
     final ProjectImportConfiguration importConfiguration = new ProjectImportConfiguration(configuration);
@@ -236,7 +234,7 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
 
     IProject[] projects = new IProject[projectInfos.size()];
     for (int i = 0; i < projectInfos.size(); i++) {
-      MavenProjectInfo projectInfo = (MavenProjectInfo) projectInfos.get(i);
+      MavenProjectInfo projectInfo = projectInfos.get(i);
       IProject project = importConfiguration.getProject(root, projectInfo.getModel());
       projects[i] = project;
       assertNotNull("Failed to import project " + projectInfos, project);

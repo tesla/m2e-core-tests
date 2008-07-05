@@ -53,6 +53,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.IManagedForm;
+import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.Section;
@@ -180,7 +181,7 @@ public class ProfilesPage extends MavenPomEditorPage {
   }
 
   private void createProfilesSection(FormToolkit toolkit, Composite body) {
-    Section profilesSection = toolkit.createSection(body, Section.TITLE_BAR);
+    Section profilesSection = toolkit.createSection(body, ExpandableComposite.TITLE_BAR);
     profilesSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 3));
     profilesSection.setText("Profiles");
     profilesEditor = new ListEditorComposite<Profile>(profilesSection, SWT.NONE);
@@ -282,7 +283,8 @@ public class ProfilesPage extends MavenPomEditorPage {
   }
 
   private void createPropertiesSection(FormToolkit toolkit, Composite body) {
-    propertiesSection = toolkit.createSection(body, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
+    propertiesSection = toolkit.createSection(body, //
+        ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
     propertiesSection.setText("Properties");
     propertiesSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
     
@@ -301,7 +303,8 @@ public class ProfilesPage extends MavenPomEditorPage {
   }
 
   private void createModulesSection(FormToolkit toolkit, Composite body) {
-    modulesSection = toolkit.createSection(body, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
+    modulesSection = toolkit.createSection(body, //
+        ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
     modulesSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 2));
     modulesSection.setText("Modules");
 
@@ -851,7 +854,7 @@ public class ProfilesPage extends MavenPomEditorPage {
     activeByDefaultbutton = toolkit.createButton(activationComposite, "Active by default", SWT.CHECK);
     activeByDefaultbutton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
 
-    Section propertySection = toolkit.createSection(activationComposite, Section.TITLE_BAR);
+    Section propertySection = toolkit.createSection(activationComposite, ExpandableComposite.TITLE_BAR);
     propertySection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
     propertySection.setText("Property");
 
@@ -873,7 +876,7 @@ public class ProfilesPage extends MavenPomEditorPage {
     activationPropertyValueText = toolkit.createText(propertyComposite, null, SWT.NONE);
     activationPropertyValueText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-    Section osSection = toolkit.createSection(activationComposite, Section.TITLE_BAR);
+    Section osSection = toolkit.createSection(activationComposite, ExpandableComposite.TITLE_BAR);
     osSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 3));
     osSection.setText("OS");
 
@@ -906,7 +909,7 @@ public class ProfilesPage extends MavenPomEditorPage {
     activationOsVersionText = toolkit.createText(osComposite, null, SWT.NONE);
     activationOsVersionText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-    Section fileSection = toolkit.createSection(activationComposite, Section.TITLE_BAR);
+    Section fileSection = toolkit.createSection(activationComposite, ExpandableComposite.TITLE_BAR);
     GridData fileGridData = new GridData(SWT.FILL, SWT.TOP, false, false);
     fileGridData.verticalIndent = 5;
     fileSection.setLayoutData(fileGridData);
@@ -931,7 +934,7 @@ public class ProfilesPage extends MavenPomEditorPage {
     activationFileMissingText = toolkit.createText(fileComposite, null, SWT.NONE);
     activationFileMissingText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
     
-    Section jdkSection = toolkit.createSection(activationComposite, Section.TITLE_BAR);
+    Section jdkSection = toolkit.createSection(activationComposite, ExpandableComposite.TITLE_BAR);
     jdkSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
     jdkSection.setText("JDK");
 

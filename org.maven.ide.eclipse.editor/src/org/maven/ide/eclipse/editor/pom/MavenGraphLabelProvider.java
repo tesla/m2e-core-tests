@@ -9,7 +9,6 @@
 package org.maven.ide.eclipse.editor.pom;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -39,7 +38,7 @@ public class MavenGraphLabelProvider implements ILabelProvider,
     private final GraphViewer viewer;
     private final MavenGraphContentProvider contentProvider;
 
-    private Set selectedConnections;
+    private Set<EntityConnectionData> selectedConnections;
     
     // private final Color colorTestBackground =
     // Display.getCurrent().getSystemColor(SWT.COLOR_GRAY);
@@ -121,8 +120,7 @@ public class MavenGraphLabelProvider implements ILabelProvider,
     
     public void selectionChanged(SelectionChangedEvent event) {
       if(selectedConnections!=null) {
-        for(Iterator it = selectedConnections.iterator(); it.hasNext();) {
-          EntityConnectionData data = (EntityConnectionData) it.next();
+        for(EntityConnectionData data : selectedConnections) {
           viewer.unReveal(data);
         }
         selectedConnections = null;
@@ -130,26 +128,21 @@ public class MavenGraphLabelProvider implements ILabelProvider,
       
       ISelection selection = event.getSelection();
       if (!selection.isEmpty() && selection instanceof IStructuredSelection) {
-        selectedConnections = new HashSet();
-        List list = ((IStructuredSelection) selection).toList();
-        for(Iterator it = list.iterator(); it.hasNext();) {
-          Object o = it.next();
+        selectedConnections = new HashSet<EntityConnectionData>();
+        for(Object o : ((IStructuredSelection) selection).toList()) {
           if(o instanceof MetadataGraphVertex) {
             MetadataGraphVertex v = (MetadataGraphVertex) o;
             Object[] s = contentProvider.getConnectedTo(v);
-            if(s!=null) {
-              for(int i = 0; i < s.length; i++ ) {
-                MetadataGraphVertex vertex = (MetadataGraphVertex) s[i];
-                EntityConnectionData data1 = new EntityConnectionData(v, vertex);
-                viewer.reveal(data1);
-                selectedConnections.add(data1);
-              }
+            for(Object element : s) {
+              MetadataGraphVertex vertex = (MetadataGraphVertex) element;
+              EntityConnectionData data1 = new EntityConnectionData(v, vertex);
+              viewer.reveal(data1);
+              selectedConnections.add(data1);
             }
             
-            List incidentEdges = contentProvider.getGraph().getIncidentEdges(v);
+            List<MetadataGraphEdge> incidentEdges = contentProvider.getGraph().getIncidentEdges(v);
             if(incidentEdges!=null) {
-              for(Iterator iterator = incidentEdges.iterator(); iterator.hasNext();) {
-                MetadataGraphEdge edge = (MetadataGraphEdge) iterator.next();
+              for(MetadataGraphEdge edge : incidentEdges) {
                 EntityConnectionData data = new EntityConnectionData(edge.getSource(), v);
                 viewer.reveal(data);
                 selectedConnections.add(data);
@@ -159,9 +152,8 @@ public class MavenGraphLabelProvider implements ILabelProvider,
         }
       }
       
-      Object[] connections = viewer.getConnectionElements();
-      for (int i = 0; i < connections.length; i++) {
-        viewer.update(connections[i], null);
+      for(Object connection : viewer.getConnectionElements()) {
+        viewer.update(connection, null);
       }
     }
 

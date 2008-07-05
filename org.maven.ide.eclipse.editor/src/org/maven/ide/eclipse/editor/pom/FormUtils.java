@@ -247,7 +247,7 @@ public abstract class FormUtils {
     adapter.setPopupSize(new Point(250, 120));
   }
 
-  private static SearchEngine getSearchEngine() {
+  static SearchEngine getSearchEngine() {
     return MvnIndexPlugin.getDefault().getSearchEngine();
   }
 

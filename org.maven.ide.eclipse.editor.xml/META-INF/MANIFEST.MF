@@ -19,3 +19,5 @@ Export-Package: org.maven.ide.eclipse.editor.xml,
  org.maven.ide.eclipse.editor.xml.search
 Bundle-ClassPath: .
 Bundle-Vendor: Sonatype, Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5,
+ JavaSE-1.6

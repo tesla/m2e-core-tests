@@ -208,7 +208,6 @@
 
    <extension point="org.eclipse.debug.ui.launchShortcuts">
       <shortcut id="org.maven.ide.eclipse.pomFileAction"
-                category="org.maven.ide.eclipse"
                 class="org.maven.ide.eclipse.actions.ExecutePomAction"
                 icon="icons/m2.gif"
                 label="%m2.popup.pomFile.label"
@@ -230,7 +229,6 @@
        </contextualLaunch>
      </shortcut>
      <shortcut id="org.maven.ide.eclipse.pomFileActionWithDialog"
-               category="org.maven.ide.eclipse"
                class="org.maven.ide.eclipse.actions.ExecutePomAction:WITH_DIALOG"
                icon="icons/m2.gif"
                label="%m2.popup.pomFileWithDialog.label"
@@ -252,7 +250,6 @@
         </contextualLaunch>
      </shortcut>
      <shortcut id="org.maven.ide.eclipse.actions.LifeCycleInstall"
-               category="org.maven.ide.eclipse"
                class="org.maven.ide.eclipse.actions.ExecutePomAction:install"
                icon="icons/m2.gif"
                label="%m2.popup.lifecycle.install"
@@ -274,7 +271,6 @@
         </contextualLaunch>
      </shortcut>
      <shortcut id="org.maven.ide.eclipse.actions.LifeCyclePackage"
-               category="org.maven.ide.eclipse"
                class="org.maven.ide.eclipse.actions.ExecutePomAction:package"
                icon="icons/m2.gif"
                label="%m2.popup.lifecycle.package"
@@ -296,7 +292,6 @@
         </contextualLaunch>
      </shortcut>
      <shortcut id="org.maven.ide.eclipse.actions.LifeCycleSource"
-               category="org.maven.ide.eclipse"
                class="org.maven.ide.eclipse.actions.ExecutePomAction:source:jar"
                icon="icons/m2.gif"
                label="%m2.popup.lifecycle.source"
@@ -318,7 +313,6 @@
         </contextualLaunch>
      </shortcut>
      <shortcut id="org.maven.ide.eclipse.actions.LifeCycleTest"
-               category="org.maven.ide.eclipse"
                class="org.maven.ide.eclipse.actions.ExecutePomAction:test"
                icon="icons/m2.gif"
                label="%m2.popup.lifecycle.test"
@@ -340,7 +334,6 @@
         </contextualLaunch>
      </shortcut>
      <shortcut id="org.maven.ide.eclipse.actions.LifeCycleGenerateSources"
-           category="org.maven.ide.eclipse"
            class="org.maven.ide.eclipse.actions.ExecutePomAction:generate-sources"
            icon="icons/m2.gif"
            label="%m2.popup.lifecycle.generate-sources"
@@ -362,7 +355,6 @@
         </contextualLaunch>
      </shortcut>
      <shortcut id="org.maven.ide.eclipse.actions.LifeCycleAssembly"
-           category="org.maven.ide.eclipse"
            class="org.maven.ide.eclipse.actions.ExecutePomAction:assembly:assembly"
            icon="icons/m2.gif"
            label="%m2.popup.lifecycle.assembly"
@@ -384,7 +376,6 @@
         </contextualLaunch>
      </shortcut>
      <shortcut id="org.maven.ide.eclipse.actions.LifeCycleClean"
-               category="org.maven.ide.eclipse"
                class="org.maven.ide.eclipse.actions.ExecutePomAction:clean"
                icon="icons/m2.gif"
                label="%m2.popup.lifecycle.clean"
@@ -439,7 +430,7 @@
 
   <extension point="org.eclipse.ui.bindings">
     <key sequence="M3+M2+X M"
-         contextId="org.eclipse.ui.globalScope"
+         contextId="org.eclipse.ui.contexts.window"
          commandId="org.maven.ide.eclipse.pomFileAction.run"
          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
     <key sequence="M2+M3+P"

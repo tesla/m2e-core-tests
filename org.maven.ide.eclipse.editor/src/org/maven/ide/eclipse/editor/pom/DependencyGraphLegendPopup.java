@@ -212,14 +212,14 @@ public class DependencyGraphLegendPopup extends PopupDialog implements DisposeLi
 		return parent;
 	}
 
-  private static final class DepenencyConnection extends GraphConnection {
+  static final class DepenencyConnection extends GraphConnection {
     private org.eclipse.draw2d.Label label;
     private PolylineConnection connectionFigure;
     private Color lineColor;
     private int connectionStyle;
     private int lineWidth;
 
-    private DepenencyConnection(Graph g, int style, GraphNode source, GraphNode destination) {
+    DepenencyConnection(Graph g, int style, GraphNode source, GraphNode destination) {
       super(g, style, source, destination);
     }
 

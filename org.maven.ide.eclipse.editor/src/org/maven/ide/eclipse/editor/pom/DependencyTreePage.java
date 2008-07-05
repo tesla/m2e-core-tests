@@ -64,6 +64,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.editor.FormPage;
+import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.Section;
@@ -81,7 +82,7 @@ public class DependencyTreePage extends FormPage {
 
   protected static final Object[] EMPTY = new Object[0];
 
-  private final MavenPomEditor pomEditor;
+  final MavenPomEditor pomEditor;
 
   TreeViewer treeViewer;
 
@@ -105,7 +106,7 @@ public class DependencyTreePage extends FormPage {
 
   boolean isSettingSelection = false;
 
-  private Action hierarchyFilterAction;
+  Action hierarchyFilterAction;
 
   public DependencyTreePage(MavenPomEditor pomEditor) {
     super(pomEditor, MavenPlugin.PLUGIN_ID + ".pom.dependencyTree", "Dependency Tree");
@@ -193,7 +194,7 @@ public class DependencyTreePage extends FormPage {
     Composite hierarchyComposite = formToolkit.createComposite(sashForm, SWT.NONE);
     hierarchyComposite.setLayout(new GridLayout());
 
-    Section hierarchySection = formToolkit.createSection(hierarchyComposite, Section.TITLE_BAR);
+    Section hierarchySection = formToolkit.createSection(hierarchyComposite, ExpandableComposite.TITLE_BAR);
     hierarchySection.marginHeight = 1;
     hierarchySection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     hierarchySection.setText("Dependencies Hierarchy");
@@ -316,7 +317,7 @@ public class DependencyTreePage extends FormPage {
     Composite listComposite = formToolkit.createComposite(sashForm, SWT.NONE);
     listComposite.setLayout(new GridLayout());
 
-    Section listSection = formToolkit.createSection(listComposite, Section.TITLE_BAR);
+    Section listSection = formToolkit.createSection(listComposite, ExpandableComposite.TITLE_BAR);
     listSection.marginHeight = 1;
     listSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     listSection.setText("Resolved Dependencies");
@@ -480,7 +481,7 @@ public class DependencyTreePage extends FormPage {
     }
   }
 
-  private void selectTreeElements(Matcher matcher) {
+  void selectTreeElements(Matcher matcher) {
     DependencyTreeLabelProvider2 treeLabelProvider = (DependencyTreeLabelProvider2) treeViewer.getLabelProvider();
     treeLabelProvider.setMatcher(matcher);
     treeViewer.refresh();

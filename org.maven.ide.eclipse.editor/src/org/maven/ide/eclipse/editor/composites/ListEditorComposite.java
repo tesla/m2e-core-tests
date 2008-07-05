@@ -160,7 +160,7 @@ public class ListEditorComposite<T> extends Composite {
     viewer.setCellModifier(cellModifier);
   }
 
-  private void updateRemoveButton() {
+  void updateRemoveButton() {
     removeButton.setEnabled(!readOnly && !viewer.getSelection().isEmpty());
   }
 }

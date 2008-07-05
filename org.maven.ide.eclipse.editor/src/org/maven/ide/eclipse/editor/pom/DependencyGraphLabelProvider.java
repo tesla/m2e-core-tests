@@ -9,8 +9,6 @@
 package org.maven.ide.eclipse.editor.pom;
 
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
@@ -143,9 +141,7 @@ public class DependencyGraphLabelProvider implements ILabelProvider, IEntityStyl
     ISelection selection = event.getSelection();
     if(!selection.isEmpty() && selection instanceof IStructuredSelection) {
       selectedConnections = new HashSet<DependencyNode>();
-      List list = ((IStructuredSelection) selection).toList();
-      for(Iterator it = list.iterator(); it.hasNext();) {
-        Object o = it.next();
+      for(Object o : ((IStructuredSelection) selection).toList()) {
         if(o instanceof Artifact) {
           Artifact a = (Artifact) o;
           for(DependencyNode node : contentProvider.getConnections(a)) {

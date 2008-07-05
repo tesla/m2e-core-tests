@@ -32,7 +32,7 @@ import org.maven.ide.eclipse.editor.MavenEditorImages;
 public class SearchControl extends ControlContribution {
   private final IManagedForm managedForm;
 
-  private Text searchText;
+  Text searchText;
 
   public SearchControl(String id, IManagedForm managedForm) {
     super(id);

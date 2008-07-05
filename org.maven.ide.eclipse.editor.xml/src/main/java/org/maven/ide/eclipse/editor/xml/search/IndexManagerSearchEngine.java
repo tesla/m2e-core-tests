@@ -34,7 +34,6 @@ import org.maven.ide.eclipse.index.IndexedArtifactGroup;
  */
 public class IndexManagerSearchEngine implements SearchEngine {
 
-  @SuppressWarnings("unchecked")
   public Collection<String> findGroupIds(String searchExpression, Packaging packaging, ArtifactInfo containingArtifact) {
     try {
       TreeSet<String> ids = new TreeSet<String>();
@@ -74,7 +73,6 @@ public class IndexManagerSearchEngine implements SearchEngine {
     }
   }
 
-  @SuppressWarnings("unchecked")
   public Collection<String> findVersions(String groupId, String artifactId, String searchExpression, Packaging packaging) {
     try {
       Collection<IndexedArtifact> values = find(groupId, artifactId, null, packaging);
@@ -93,7 +91,6 @@ public class IndexManagerSearchEngine implements SearchEngine {
     }
   }
   
-  @SuppressWarnings("unchecked")
   public Collection<String> findClassifiers(String groupId, String artifactId, String version, //
       String searchExpression, Packaging packaging) {
     try {
@@ -115,7 +112,6 @@ public class IndexManagerSearchEngine implements SearchEngine {
     }
   }
   
-  @SuppressWarnings("unchecked")
   public Collection<String> findTypes(String groupId, String artifactId, String version, //
       String searchExpression, Packaging packaging) {
     try {
@@ -137,7 +133,6 @@ public class IndexManagerSearchEngine implements SearchEngine {
     }
   }
 
-  @SuppressWarnings("unchecked")
   private Collection<IndexedArtifact> find(String groupId, String artifactId, String version,
       Packaging packaging) throws IOException {
     IndexManager indexManager = getIndexManager();

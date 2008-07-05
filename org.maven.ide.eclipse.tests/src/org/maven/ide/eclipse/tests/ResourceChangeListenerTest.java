@@ -17,6 +17,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -27,7 +28,7 @@ import org.maven.ide.eclipse.project.ResolverConfiguration;
 
 public class ResourceChangeListenerTest extends AsbtractMavenProjectTestCase {
   
-  private IProject project;
+  IProject project;
 
   protected void setUp() throws Exception {
     super.setUp();
@@ -76,7 +77,7 @@ public class ResourceChangeListenerTest extends AsbtractMavenProjectTestCase {
           IFile pom001 = project.getFile("pom001.xml");
           pom001.create(contents, true, monitor);
         } catch(Exception e) {
-          throw new CoreException(new Status(Status.ERROR, MavenPlugin.PLUGIN_ID, 0, e.getMessage(), e));
+          throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, 0, e.getMessage(), e));
         }
       }
     }, null);
@@ -104,7 +105,7 @@ public class ResourceChangeListenerTest extends AsbtractMavenProjectTestCase {
           IFile pom001 = project.getFile("pom001.xml");
           pom001.create(contents, true, monitor);
         } catch(Exception e) {
-          throw new CoreException(new Status(Status.ERROR, MavenPlugin.PLUGIN_ID, 0, e.getMessage(), e));
+          throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, 0, e.getMessage(), e));
         }
       }
     }, null);

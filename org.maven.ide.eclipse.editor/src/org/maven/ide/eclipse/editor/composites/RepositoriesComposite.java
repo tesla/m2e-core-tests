@@ -48,6 +48,7 @@ import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.Section;
@@ -179,11 +180,11 @@ public class RepositoriesComposite extends Composite {
   // Model model;
   Repository currentRepository;
 
-  private ValueProvider<Repositories> repositoriesProvider;
+  ValueProvider<Repositories> repositoriesProvider;
 
-  private ValueProvider<PluginRepositories> pluginRepositoriesProvider;
+  ValueProvider<PluginRepositories> pluginRepositoriesProvider;
 
-  private ValueProvider<DistributionManagement> distributionManagementProvider;
+  ValueProvider<DistributionManagement> distributionManagementProvider;
 
   public RepositoriesComposite(Composite parent, int flags) {
     super(parent, flags);
@@ -240,7 +241,7 @@ public class RepositoriesComposite extends Composite {
   }
 
   private void createRepositoriesSection(SashForm verticalSash) {
-    Section repositoriesSection = toolkit.createSection(verticalSash, Section.TITLE_BAR | Section.COMPACT);
+    Section repositoriesSection = toolkit.createSection(verticalSash, ExpandableComposite.TITLE_BAR | ExpandableComposite.COMPACT);
     repositoriesSection.setText("Repositories");
 
     repositoriesEditor = new ListEditorComposite<Repository>(repositoriesSection, SWT.NONE);
@@ -312,7 +313,7 @@ public class RepositoriesComposite extends Composite {
   }
 
   private void createPluginRepositoriesSection(SashForm verticalSash) {
-    Section pluginRepositoriesSection = toolkit.createSection(verticalSash, Section.TITLE_BAR | Section.COMPACT);
+    Section pluginRepositoriesSection = toolkit.createSection(verticalSash, ExpandableComposite.TITLE_BAR | ExpandableComposite.COMPACT);
     pluginRepositoriesSection.setText("Plugin Repositories");
 
     pluginRepositoriesEditor = new ListEditorComposite<Repository>(pluginRepositoriesSection, SWT.NONE);
@@ -384,7 +385,7 @@ public class RepositoriesComposite extends Composite {
   }
 
   private void createRepositoryDetailsSection(Composite parent) {
-    repositoryDetailsSection = toolkit.createSection(parent, Section.TITLE_BAR);
+    repositoryDetailsSection = toolkit.createSection(parent, ExpandableComposite.TITLE_BAR);
     repositoryDetailsSection.setText("Repository Details");
 
     Composite repositoryDetailsComposite = toolkit.createComposite(repositoryDetailsSection);
@@ -521,7 +522,7 @@ public class RepositoriesComposite extends Composite {
   }
 
   private void createRelocationSection(SashForm sashForm) {
-    relocationSection = toolkit.createSection(sashForm, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
+    relocationSection = toolkit.createSection(sashForm, ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
     relocationSection.setText("Relocation");
 
     relocationComposite = toolkit.createComposite(relocationSection, SWT.NONE);
@@ -579,7 +580,7 @@ public class RepositoriesComposite extends Composite {
   }
 
   private void createProjectSiteSection(SashForm sashForm) {
-    projectSiteSection = toolkit.createSection(sashForm, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
+    projectSiteSection = toolkit.createSection(sashForm, ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
     projectSiteSection.setText("Project Site");
 
     projectSiteComposite = toolkit.createComposite(projectSiteSection, SWT.NONE);
@@ -636,7 +637,7 @@ public class RepositoriesComposite extends Composite {
 
   private void createSnapshotRepositorySection(SashForm distributionManagementSash) {
     snapshotRepositorySection = toolkit.createSection(distributionManagementSash, //
-        Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
+        ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
     snapshotRepositorySection.setText("Snapshots Distribution Repository");
 
     snapshotRepositoryComposite = toolkit.createComposite(snapshotRepositorySection, SWT.NONE);
@@ -693,7 +694,7 @@ public class RepositoriesComposite extends Composite {
 
   private void createReleaseRepositorySection(SashForm distributionManagementSash) {
     releaseRepositorySection = toolkit.createSection(distributionManagementSash, //
-        Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
+        ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
     releaseRepositorySection.setText("Release Distribution Repository");
 
     releaseDistributionRepositoryComposite = toolkit.createComposite(releaseRepositorySection, SWT.NONE);
@@ -1110,19 +1111,19 @@ public class RepositoriesComposite extends Composite {
     }
 
     if(object instanceof Site) {
-      if(((EObject) object).eContainer() == distributionManagementProvider.getValue()) {
+      if(object.eContainer() == distributionManagementProvider.getValue()) {
         loadProjectSite();
       }
     }
 
     if(object instanceof Relocation) {
-      if(((EObject) object).eContainer() == distributionManagementProvider.getValue()) {
+      if(object.eContainer() == distributionManagementProvider.getValue()) {
         loadRelocation();
       }
     }
 
     if(object instanceof DeploymentRepository) {
-      if(((EObject) object).eContainer() == distributionManagementProvider.getValue()) {
+      if(object.eContainer() == distributionManagementProvider.getValue()) {
         loadReleaseDistributionRepository();
         loadSnapshotDistributionRepository();
       }

@@ -55,6 +55,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.Section;
@@ -178,7 +179,7 @@ public class ReportingComposite extends Composite {
     composite_1.setLayout(gridLayout);
     toolkit.paintBordersFor(composite_1);
     
-    Section contentSection = toolkit.createSection(composite_1, Section.TITLE_BAR);
+    Section contentSection = toolkit.createSection(composite_1, ExpandableComposite.TITLE_BAR);
     contentSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
     contentSection.setText("Content");
 
@@ -195,7 +196,7 @@ public class ReportingComposite extends Composite {
     excludeDefaultsButton = toolkit.createButton(composite, "Exclude Defaults", SWT.CHECK);
     excludeDefaultsButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 2, 1));
 
-    Section reportingPluginsSection = toolkit.createSection(composite_1, Section.TITLE_BAR);
+    Section reportingPluginsSection = toolkit.createSection(composite_1, ExpandableComposite.TITLE_BAR);
     reportingPluginsSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
     reportingPluginsSection.setText("Reporting Plugins");
 
@@ -300,7 +301,7 @@ public class ReportingComposite extends Composite {
   }
 
   private void createPluginDetailsSection(Composite verticalSash) {
-    pluginDetailsSection = toolkit.createSection(verticalSash, Section.TITLE_BAR);
+    pluginDetailsSection = toolkit.createSection(verticalSash, ExpandableComposite.TITLE_BAR);
     pluginDetailsSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
     pluginDetailsSection.setText("Reporting Plugin Details");
 
@@ -426,7 +427,7 @@ public class ReportingComposite extends Composite {
   }
 
   private void createReportSetDetails(Composite verticalSash) {
-    reportSetsSection = toolkit.createSection(verticalSash, Section.TITLE_BAR);
+    reportSetsSection = toolkit.createSection(verticalSash, ExpandableComposite.TITLE_BAR);
     reportSetsSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     reportSetsSection.setText("Report Sets");
 
@@ -536,7 +537,7 @@ public class ReportingComposite extends Composite {
       }
     });
 
-    reportSetDetailsSection = toolkit.createSection(verticalSash, Section.TITLE_BAR);
+    reportSetDetailsSection = toolkit.createSection(verticalSash, ExpandableComposite.TITLE_BAR);
     reportSetDetailsSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     reportSetDetailsSection.setText("Report Set Reports");
 
@@ -744,7 +745,7 @@ public class ReportingComposite extends Composite {
     updateContent(reportingProvider.getValue());
   }
 
-  private void updateContent(Reporting reporting) {
+  void updateContent(Reporting reporting) {
     if(parent != null) {
       parent.removeNotifyListener(outputFolderText);
       parent.removeNotifyListener(excludeDefaultsButton);

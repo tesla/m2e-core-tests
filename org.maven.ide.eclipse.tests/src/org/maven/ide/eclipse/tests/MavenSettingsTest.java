@@ -93,10 +93,12 @@ public class MavenSettingsTest extends TestCase {
     
     Settings settings = embedder.getSettings();
     
-    List profiles = settings.getProfiles();
-    Profile profile = (Profile) profiles.get(0);
-    List repositories = profile.getRepositories();
-    Repository repository = (Repository) repositories.get(0);
+    @SuppressWarnings("unchecked")
+    List<Profile> profiles = settings.getProfiles();
+    Profile profile = profiles.get(0);
+    @SuppressWarnings("unchecked")
+    List<Repository> repositories = profile.getRepositories();
+    Repository repository = repositories.get(0);
     assertEquals("http://archiva.someserver.de/repository/releases", repository.getUrl());
   }
   
@@ -107,7 +109,7 @@ public class MavenSettingsTest extends TestCase {
     
     String userSettings = settingsFile.getAbsolutePath();
     
-    return EmbedderFactory.createMavenEmbedder(customizer, null, null, userSettings);
+    return EmbedderFactory.createMavenEmbedder(customizer, logger, null, userSettings);
   }
   
   private boolean isWindows() {

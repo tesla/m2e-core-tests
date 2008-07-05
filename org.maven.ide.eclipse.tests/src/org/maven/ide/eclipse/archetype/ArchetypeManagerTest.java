@@ -33,7 +33,7 @@ public class ArchetypeManagerTest extends TestCase {
     ArchetypeCatalogFactory internalCatalog = archetypeManager.getArchetypeCatalogFactory(InternalCatalogFactory.ID);
     assertNotNull(internalCatalog);
 
-    Collection catalogs = archetypeManager.getArchetypeCatalogs();
+    Collection<ArchetypeCatalogFactory> catalogs = archetypeManager.getArchetypeCatalogs();
     assertEquals("" + catalogs.toString(), 5, catalogs.size());
   }
 

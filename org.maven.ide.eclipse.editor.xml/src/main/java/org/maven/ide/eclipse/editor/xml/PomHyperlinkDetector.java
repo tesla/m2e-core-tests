@@ -67,8 +67,8 @@ final class PomHyperlinkDetector implements IHyperlinkDetector {
     IHyperlink pomHyperlink = new IHyperlink() {
 
       public IRegion getHyperlinkRegion() {
-        int start = text.substring(0, offset).lastIndexOf('>');
-        int end = text.indexOf("</", start);
+        // int start = text.substring(0, offset).lastIndexOf('>');
+        // int end = text.indexOf("</", start);
         return region;
       }
 
@@ -121,13 +121,13 @@ final class PomHyperlinkDetector implements IHyperlinkDetector {
     return text.substring(start, end + endTag.length());
   }
   
-  private int findChar(String text, char c, int offset, int step) {
-    for(int pos = offset; pos>=0 && pos<text.length(); pos += step) {
-      if(text.charAt(pos)==c) {
-        return pos;
-      }
-    }
-    return -1;
-  }
+//  private int findChar(String text, char c, int offset, int step) {
+//    for(int pos = offset; pos>=0 && pos<text.length(); pos += step) {
+//      if(text.charAt(pos)==c) {
+//        return pos;
+//      }
+//    }
+//    return -1;
+//  }
   
 }

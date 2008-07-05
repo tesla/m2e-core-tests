@@ -55,6 +55,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
@@ -191,7 +192,7 @@ public class OverviewPage extends MavenPomEditorPage {
   }
   
   private void createArtifactSection(FormToolkit toolkit, Composite composite, WidthGroup widthGroup) {
-    Section artifactSection = toolkit.createSection(composite, Section.TITLE_BAR);
+    Section artifactSection = toolkit.createSection(composite, ExpandableComposite.TITLE_BAR);
     artifactSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
     artifactSection.setText("Artifact");
   
@@ -260,7 +261,8 @@ public class OverviewPage extends MavenPomEditorPage {
   }
 
   private void createParentsection(FormToolkit toolkit, Composite composite, WidthGroup widthGroup) {
-    parentSection = toolkit.createSection(composite, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
+    parentSection = toolkit.createSection(composite, //
+        ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
     parentSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
     parentSection.setText("Parent");
   
@@ -381,7 +383,8 @@ public class OverviewPage extends MavenPomEditorPage {
   }
 
   private void createPropertiesSection(FormToolkit toolkit, Composite composite, WidthGroup widthGroup) {
-    propertiesSection = toolkit.createSection(composite, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
+    propertiesSection = toolkit.createSection(composite, //
+        ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
     propertiesSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
     propertiesSection.setText("Properties");
     toolkit.paintBordersFor(propertiesSection);
@@ -401,7 +404,8 @@ public class OverviewPage extends MavenPomEditorPage {
   private void createModulesSection(FormToolkit toolkit, Composite composite, WidthGroup widthGroup) {
     // XXX should disable Modules actions based on artifact packaging and only add modules when packaging is "pom"
 
-    modulesSection = toolkit.createSection(composite, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
+    modulesSection = toolkit.createSection(composite, //
+        ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
     modulesSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     modulesSection.setText("Modules");
 
@@ -509,7 +513,8 @@ public class OverviewPage extends MavenPomEditorPage {
   // right side
 
   private void createProjectSection(FormToolkit toolkit, Composite composite, WidthGroup widthGroup) {
-    projectSection = toolkit.createSection(composite, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
+    projectSection = toolkit.createSection(composite, //
+        ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
     projectSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
     projectSection.setText("Project");
   
@@ -566,7 +571,8 @@ public class OverviewPage extends MavenPomEditorPage {
   }
 
   private void createOrganizationSection(FormToolkit toolkit, Composite composite, WidthGroup widthGroup) {
-    organizationSection = toolkit.createSection(composite, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
+    organizationSection = toolkit.createSection(composite, //
+        ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
     organizationSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
     organizationSection.setText("Organization");
   
@@ -603,7 +609,8 @@ public class OverviewPage extends MavenPomEditorPage {
   }
 
   private void createScmSection(FormToolkit toolkit, Composite composite, WidthGroup widthGroup) {
-    scmSection = toolkit.createSection(composite, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
+    scmSection = toolkit.createSection(composite, //
+        ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
     GridData gd_scmSection = new GridData(SWT.FILL, SWT.TOP, false, false);
     scmSection.setLayoutData(gd_scmSection);
     scmSection.setText("SCM");
@@ -658,7 +665,8 @@ public class OverviewPage extends MavenPomEditorPage {
   }
 
   private void createIssueManagementSection(FormToolkit toolkit, Composite composite, WidthGroup widthGroup) {
-    issueManagementSection = toolkit.createSection(composite, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
+    issueManagementSection = toolkit.createSection(composite, //
+        ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
     issueManagementSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
     issueManagementSection.setText("Issue Management");
   
@@ -695,7 +703,8 @@ public class OverviewPage extends MavenPomEditorPage {
   }
 
   private void createCiManagementSection(FormToolkit toolkit, Composite composite, WidthGroup widthGroup) {
-    ciManagementSection = toolkit.createSection(composite, Section.TITLE_BAR | Section.EXPANDED | Section.TWISTIE);
+    ciManagementSection = toolkit.createSection(composite, //
+        ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
     ciManagementSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
     ciManagementSection.setText("Continuous Integration");
   

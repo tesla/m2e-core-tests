@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Section;
 import org.maven.ide.components.pom.BuildBase;
@@ -60,34 +61,34 @@ public class BuildComposite extends Composite {
 
   protected static PomPackage POM_PACKAGE = PomPackage.eINSTANCE;
   
-  private MavenPomEditorPage parent;
-  
   private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
   
+  MavenPomEditorPage parent;
+  
   // controls
-  private Text defaultGoalText;
-  private Text directoryText;
-  private Text finalNameText;
+  Text defaultGoalText;
+  Text directoryText;
+  Text finalNameText;
 
-  private ListEditorComposite<String> filtersEditor;
+  ListEditorComposite<String> filtersEditor;
 
-  private ListEditorComposite<Resource> resourcesEditor;
-  private ListEditorComposite<Resource> testResourcesEditor;
+  ListEditorComposite<Resource> resourcesEditor;
+  ListEditorComposite<Resource> testResourcesEditor;
 
-  private Text resourceDirectoryText;
-  private Text resourceTargetPathText;
-  private ListEditorComposite<String> resourceIncludesEditor;
-  private ListEditorComposite<String> resourceExcludesEditor;
+  Text resourceDirectoryText;
+  Text resourceTargetPathText;
+  ListEditorComposite<String> resourceIncludesEditor;
+  ListEditorComposite<String> resourceExcludesEditor;
 
-  private Button resourceFilteringButton;
-  private Section resourceDetailsSection;
+  Button resourceFilteringButton;
+  Section resourceDetailsSection;
   
   // model
-  private Resource currentResource;
+  Resource currentResource;
 
-  private boolean changingSelection = false;
+  boolean changingSelection = false;
 
-  private ValueProvider<BuildBase> buildProvider;
+  ValueProvider<BuildBase> buildProvider;
 
   
   public BuildComposite(Composite parent, int flags) {
@@ -108,7 +109,7 @@ public class BuildComposite extends Composite {
     toolkit.adapt(horizontalSash);
     horizontalSash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     
-    Section buildSection = toolkit.createSection(horizontalSash, Section.TITLE_BAR);
+    Section buildSection = toolkit.createSection(horizontalSash, ExpandableComposite.TITLE_BAR);
     buildSection.setText("Build");
   
     Composite composite = toolkit.createComposite(buildSection, SWT.NONE);
@@ -228,7 +229,7 @@ public class BuildComposite extends Composite {
   }
 
   private void createResourceDetailsSection(SashForm horizontalSash) {
-    resourceDetailsSection = toolkit.createSection(horizontalSash, Section.TITLE_BAR);
+    resourceDetailsSection = toolkit.createSection(horizontalSash, ExpandableComposite.TITLE_BAR);
     resourceDetailsSection.setText("Resource Details");
   
     Composite resourceDetailsComposite = toolkit.createComposite(resourceDetailsSection, SWT.NONE);
@@ -412,7 +413,7 @@ public class BuildComposite extends Composite {
   }
 
   private void createResourceSection(SashForm verticalSash) {
-    Section resourcesSection = toolkit.createSection(verticalSash, Section.TITLE_BAR);
+    Section resourcesSection = toolkit.createSection(verticalSash, ExpandableComposite.TITLE_BAR);
     resourcesSection.setText("Resources");
   
     resourcesEditor = new ListEditorComposite<Resource>(resourcesSection, SWT.NONE);
@@ -486,7 +487,7 @@ public class BuildComposite extends Composite {
   }
 
   private void createTestResourcesSection(SashForm verticalSash) {
-    Section testResourcesSection = toolkit.createSection(verticalSash, Section.TITLE_BAR);
+    Section testResourcesSection = toolkit.createSection(verticalSash, ExpandableComposite.TITLE_BAR);
     testResourcesSection.setText("Test Resources");
     toolkit.adapt(verticalSash, true, true);
     
@@ -654,7 +655,7 @@ public class BuildComposite extends Composite {
         || build.getTestResources() == null ? null : build.getTestResources().getTestResource());
   }
 
-  private void loadResourceDetails(Resource resource) {
+  void loadResourceDetails(Resource resource) {
     if(changingSelection) {
       return;
     }

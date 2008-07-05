@@ -56,6 +56,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.Section;
@@ -190,7 +191,7 @@ public class DependenciesComposite extends Composite {
   }
 
   private void createDependenciesSection(SashForm verticalSash) {
-    Section dependenciesSection = toolkit.createSection(verticalSash, Section.TITLE_BAR);
+    Section dependenciesSection = toolkit.createSection(verticalSash, ExpandableComposite.TITLE_BAR);
     dependenciesSection.marginWidth = 3;
     dependenciesSection.setText("Dependencies");
 
@@ -310,7 +311,7 @@ public class DependenciesComposite extends Composite {
   }
 
   private void createDependencyManagementSection(SashForm verticalSash) {
-    Section dependencyManagementSection = toolkit.createSection(verticalSash, Section.TITLE_BAR);
+    Section dependencyManagementSection = toolkit.createSection(verticalSash, ExpandableComposite.TITLE_BAR);
     dependencyManagementSection.marginWidth = 3;
     dependencyManagementSection.setText("Dependency Management");
 
@@ -431,7 +432,7 @@ public class DependenciesComposite extends Composite {
   }
 
   private void createDependencyDetails(FormToolkit toolkit, Composite dependencyDetailsComposite) {
-    Section dependencyDetailsSection = toolkit.createSection(dependencyDetailsComposite, Section.TITLE_BAR);
+    Section dependencyDetailsSection = toolkit.createSection(dependencyDetailsComposite, ExpandableComposite.TITLE_BAR);
     dependencyDetailsSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
     dependencyDetailsSection.setText("Dependency Details");
     dependencyDetailsSection.marginWidth = 3;
@@ -642,7 +643,7 @@ public class DependenciesComposite extends Composite {
   }
 
   private void createExclusionsSection(FormToolkit toolkit, Composite composite) {
-    Section exclusionsSection = toolkit.createSection(composite, Section.TITLE_BAR);
+    Section exclusionsSection = toolkit.createSection(composite, ExpandableComposite.TITLE_BAR);
     exclusionsSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     exclusionsSection.setText("Exclusions");
     exclusionsSection.marginWidth = 3;
@@ -722,7 +723,7 @@ public class DependenciesComposite extends Composite {
   }
 
   private void createExclusionDetailsSection(FormToolkit toolkit, Composite dependencyDetailsComposite) {
-    exclusionDetailsSection = toolkit.createSection(dependencyDetailsComposite, Section.TITLE_BAR);
+    exclusionDetailsSection = toolkit.createSection(dependencyDetailsComposite, ExpandableComposite.TITLE_BAR);
     exclusionDetailsSection.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
     exclusionDetailsSection.setText("Exclusion Details");
 
@@ -887,7 +888,7 @@ public class DependenciesComposite extends Composite {
     updateExclusionDetails(null);
   }
 
-  private void updateExclusionDetails(Exclusion exclusion) {
+  void updateExclusionDetails(Exclusion exclusion) {
 //    if(exclusion!=null && exclusion==currentExclusion) {
 //      return;
 //    }
@@ -1006,7 +1007,7 @@ public class DependenciesComposite extends Composite {
     }
   }
 
-  private Dependency createDependency(ValueProvider<Dependencies> provider, //
+  Dependency createDependency(ValueProvider<Dependencies> provider, //
       String groupId, String artifactId, String version, String classifier, String type, String scope) {
     CompoundCommand compoundCommand = new CompoundCommand();
     EditingDomain editingDomain = parent.getEditingDomain();
@@ -1068,7 +1069,7 @@ public class DependenciesComposite extends Composite {
     });
   }
   
-  private void createExclusion(String groupId, String artifactId) {
+  void createExclusion(String groupId, String artifactId) {
     CompoundCommand compoundCommand = new CompoundCommand();
     EditingDomain editingDomain = parent.getEditingDomain();
 

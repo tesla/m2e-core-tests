@@ -11,6 +11,7 @@ package org.maven.ide.eclipse.editor;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.maven.ide.eclipse.MavenPlugin;
 
 /**
@@ -113,7 +114,7 @@ public class MavenEditorImages {
   }
 
   private static ImageDescriptor createDescriptor(String image) {
-    return MavenEditorPlugin.imageDescriptorFromPlugin(MavenEditorPlugin.PLUGIN_ID, "icons/" + image);
+    return AbstractUIPlugin.imageDescriptorFromPlugin(MavenEditorPlugin.PLUGIN_ID, "icons/" + image);
   }
   
 }
