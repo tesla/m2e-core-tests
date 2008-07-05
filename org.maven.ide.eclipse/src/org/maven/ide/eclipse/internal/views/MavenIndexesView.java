@@ -581,7 +581,7 @@ public class MavenIndexesView extends ViewPart {
 
   }
 
-  class ViewLabelProvider extends LabelProvider {
+  static class ViewLabelProvider extends LabelProvider {
 
     public String getText(Object obj) {
       if(obj instanceof IndexInfo) {
@@ -644,6 +644,6 @@ public class MavenIndexesView extends ViewPart {
 
   }
 
-  class NameSorter extends ViewerSorter {
+  static class NameSorter extends ViewerSorter {
   }
 }

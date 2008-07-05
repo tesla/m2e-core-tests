@@ -87,11 +87,15 @@ public class IndexUnpackerJob extends Job {
         if(replace) {
           File index = new File(indexManager.getBaseIndexDir(), indexName);
           if(!index.exists()) {
-            index.mkdirs();
+            if(!index.mkdirs()) {
+              MavenPlugin.log("Can't create index folder " + index.getAbsolutePath(), null);
+            }
           } else {
             File[] files = index.listFiles();
             for(int j = 0; j < files.length; j++ ) {
-              files[j].delete();
+              if(!files[j].delete()) {
+                MavenPlugin.log("Can't delete " + files[j].getAbsolutePath(), null);
+              }
             }
           }
           

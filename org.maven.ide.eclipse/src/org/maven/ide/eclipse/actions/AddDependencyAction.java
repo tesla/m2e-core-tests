@@ -35,6 +35,7 @@ import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.project.MavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
+import org.maven.ide.eclipse.wizards.MavenRepositorySearchDialog;
 
 
 public class AddDependencyAction implements IObjectActionDelegate {
@@ -47,13 +48,10 @@ public class AddDependencyAction implements IObjectActionDelegate {
   public void run(IAction action) {
     Object o = selection.iterator().next();
     IFile file;
-    IProject project;
     if(o instanceof IProject) {
-      project = (IProject) o;
-      file = project.getFile(MavenPlugin.POM_FILE_NAME);
+      file = ((IProject) o).getFile(MavenPlugin.POM_FILE_NAME);
     } else if(o instanceof IFile) {
       file = (IFile) o;
-      project = file.getProject();
     } else {
       return;
     }

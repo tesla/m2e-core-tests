@@ -75,10 +75,10 @@ import org.apache.maven.embedder.MavenEmbedder;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.Messages;
+import org.maven.ide.eclipse.embedder.ArchetypeCatalogFactory;
 import org.maven.ide.eclipse.embedder.ArchetypeManager;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
-import org.maven.ide.eclipse.embedder.ArchetypeManager.ArchetypeCatalogFactory;
-import org.maven.ide.eclipse.embedder.ArchetypeManager.NexusIndexerCatalogFactory;
+import org.maven.ide.eclipse.embedder.ArchetypeCatalogFactory.NexusIndexerCatalogFactory;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 
@@ -199,8 +199,8 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
     
     catalogsComboViewer.setLabelProvider(new LabelProvider() {
       public String getText(Object element) {
-        if(element instanceof ArchetypeManager.ArchetypeCatalogFactory) {
-          return ((ArchetypeManager.ArchetypeCatalogFactory) element).getDescription();
+        if(element instanceof ArchetypeCatalogFactory) {
+          return ((ArchetypeCatalogFactory) element).getDescription();
         }
         return super.getText(element);
       }
@@ -441,19 +441,17 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
     Job job = new Job(Messages.getString("wizard.project.page.archetype.retrievingArchetypes")) {
       protected IStatus run(IProgressMonitor monitor) {
         try {
-          archetypes = new TreeSet<Archetype>(ARCHETYPE_COMPARATOR);
-
           @SuppressWarnings("unchecked")
           List<Archetype> catalogArchetypes = getArchetypeCatalog().getArchetypes();
+
+          archetypes = new TreeSet<Archetype>(ARCHETYPE_COMPARATOR);
           archetypes.addAll(catalogArchetypes);
 
-          if(archetypes != null) {
-            Display.getDefault().asyncExec(new Runnable() {
-              public void run() {
-                updateViewer(groupId, artifactId, version);
-              }
-            });
-          }
+          Display.getDefault().asyncExec(new Runnable() {
+            public void run() {
+              updateViewer(groupId, artifactId, version);
+            }
+          });
 
         } catch(CoreException e) {
           // ignore
@@ -694,7 +692,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
   /**
    * ArchetypeLabelProvider
    */
-  protected class ArchetypeLabelProvider extends LabelProvider implements ITableLabelProvider {
+  protected static class ArchetypeLabelProvider extends LabelProvider implements ITableLabelProvider {
     /** Returns the element text */
     public String getColumnText(Object element, int columnIndex) {
       if(element instanceof Archetype) {

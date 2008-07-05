@@ -67,7 +67,6 @@ import org.maven.ide.components.pom.ReportSet;
 import org.maven.ide.components.pom.ReportSetsType;
 import org.maven.ide.components.pom.Reporting;
 import org.maven.ide.components.pom.StringReports;
-import org.maven.ide.eclipse.actions.MavenRepositorySearchDialog;
 import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.actions.OpenUrlAction;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
@@ -80,6 +79,7 @@ import org.maven.ide.eclipse.editor.pom.ValueProvider;
 import org.maven.ide.eclipse.editor.xml.search.Packaging;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
+import org.maven.ide.eclipse.wizards.MavenRepositorySearchDialog;
 
 
 /**

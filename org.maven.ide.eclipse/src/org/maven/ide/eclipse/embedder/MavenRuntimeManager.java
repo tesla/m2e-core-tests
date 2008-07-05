@@ -35,6 +35,10 @@ public class MavenRuntimeManager {
 
   private Map<String, MavenRuntime> runtimes = new LinkedHashMap<String, MavenRuntime>();
   
+  private MavenRuntime embeddedRuntime;
+  
+  private MavenRuntime workspaceRuntime;
+  
   private MavenRuntime defaultRuntime;
 
   
@@ -43,30 +47,38 @@ public class MavenRuntimeManager {
     initRuntimes();
   }
 
+  public void setEmbeddedRuntime(MavenRuntime embeddedRuntime) {
+    this.embeddedRuntime = embeddedRuntime;
+  }
+
+  public void setWorkspaceRuntime(MavenRuntime workspaceRuntime) {
+    this.workspaceRuntime = workspaceRuntime;
+  }
+  
+  public MavenRuntime getDefaultRuntime() {
+    if(defaultRuntime == null || !defaultRuntime.isAvailable()) {
+      return embeddedRuntime;
+    }
+    return this.defaultRuntime;
+  }
+  
   public MavenRuntime getRuntime(String location) {
     if(location==null || location.length()==0 || DEFAULT.equals(location)) {
       return getDefaultRuntime();
     }
     if(EMBEDDED.equals(location)) {
-      return MavenRuntime.EMBEDDED;
+      return embeddedRuntime;
     }
     if(WORKSPACE.equals(location)) {
-      return MavenRuntime.WORKSPACE;
+      return workspaceRuntime;
     }
     return runtimes.get(location);
-  }
-  
-  public MavenRuntime getDefaultRuntime() {
-    if(defaultRuntime==null || !defaultRuntime.isAvailable()) {
-      return MavenRuntime.EMBEDDED;
-    }
-    return this.defaultRuntime;
   }
   
   public List<MavenRuntime> getMavenRuntimes() {
     ArrayList<MavenRuntime> runtimes = new ArrayList<MavenRuntime>();
 
-    runtimes.add(MavenRuntime.EMBEDDED);
+    runtimes.add(embeddedRuntime);
 
 //    // XXX discover all runtimes available from the Workspace
 //    if(MavenRuntime.WORKSPACE.isAvailable()) {
@@ -128,11 +140,18 @@ public class MavenRuntimeManager {
         }
       }
     }
-    
-    if(defaultRuntime==null) {
-      defaultRuntime = MavenRuntime.EMBEDDED;
-    }
   }
+
+  public String getGlobalSettingsFile() {
+//  if(defaultRuntime.isEditable()) {
+//    return defaultRuntime.getSettings();  // settings for external Maven runtime
+//  }
+//  String globalSettings = preferenceStore.getString(MavenPreferenceConstants.P_GLOBAL_SETTINGS_FILE);
+//  return globalSettings.trim().length()==0 ? null : globalSettings;
+
+    return defaultRuntime == null ? null : defaultRuntime.getSettings();
+  }
+  
   
   // Maven preferences
   
@@ -148,7 +167,7 @@ public class MavenRuntimeManager {
     return preferenceStore.getBoolean(MavenPreferenceConstants.P_DOWNLOAD_SOURCES);
   }
   
-  public boolean isDownloadJavadoc() {
+  public boolean isDownloadJavaDoc() {
     return preferenceStore.getBoolean(MavenPreferenceConstants.P_DOWNLOAD_JAVADOC);
   }
   
@@ -167,17 +186,6 @@ public class MavenRuntimeManager {
   public String getUserSettingsFile() {
     return preferenceStore.getString(MavenPreferenceConstants.P_USER_SETTINGS_FILE);
   }
-  
-  public String getGlobalSettingsFile() {
-//    if(defaultRuntime.isEditable()) {
-//      return defaultRuntime.getSettings();  // settings for external Maven runtime
-//    }
-//    String globalSettings = preferenceStore.getString(MavenPreferenceConstants.P_GLOBAL_SETTINGS_FILE);
-//    return globalSettings.trim().length()==0 ? null : globalSettings;
-    
-    return defaultRuntime.getSettings();
-  }
-  
   
   public void setOffline(boolean offline) {
     preferenceStore.setValue(MavenPreferenceConstants.P_OFFLINE, offline);
@@ -218,5 +226,5 @@ public class MavenRuntimeManager {
   public void setGlobalSettingsFile(String fileName) {
     preferenceStore.setValue(MavenPreferenceConstants.P_GLOBAL_SETTINGS_FILE, fileName);
   }
-  
+
 }

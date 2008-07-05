@@ -12,10 +12,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -30,15 +32,12 @@ import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.embedder.ArchetypeManager;
-import org.maven.ide.eclipse.embedder.ArchetypeManager.ArchetypeCatalogFactory;
+import org.maven.ide.eclipse.embedder.ArchetypeCatalogFactory;
 import org.maven.ide.eclipse.index.IndexInfo;
 import org.maven.ide.eclipse.internal.index.IndexInfoWriter;
-import org.maven.ide.eclipse.internal.project.ProjectConfiguratorFactory;
-import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
 import org.maven.ide.eclipse.project.configurator.AbstractClasspathConfiguratorFactory;
+import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
 import org.maven.ide.eclipse.scm.ScmHandler;
-import org.maven.ide.eclipse.scm.ScmHandlerFactory;
 import org.maven.ide.eclipse.scm.ScmHandlerUi;
 
 
@@ -172,8 +171,10 @@ public class ExtensionReader {
 
   /**
    * Read SCM extension points 
+   * @return 
    */
-  public static void readScmHandlerExtensions() {
+  public static List<ScmHandler> readScmHandlerExtensions() {
+    List<ScmHandler> scmHandlers = new ArrayList<ScmHandler>();
     IExtensionRegistry registry = Platform.getExtensionRegistry();
     IExtensionPoint scmHandlersExtensionPoint = registry.getExtensionPoint(EXTENSION_SCM_HANDLERS);
     if(scmHandlersExtensionPoint != null) {
@@ -183,8 +184,7 @@ public class ExtensionReader {
         for(IConfigurationElement element : elements) {
           if(element.getName().equals(ELEMENT_SCM_HANDLER)) {
             try {
-              ScmHandler handler = (ScmHandler) element.createExecutableExtension(ScmHandler.ATTR_CLASS);
-              ScmHandlerFactory.addScmHandler(handler);
+              scmHandlers.add((ScmHandler) element.createExecutableExtension(ScmHandler.ATTR_CLASS));
             } catch(CoreException ex) {
               MavenPlugin.log(ex);
             }
@@ -192,9 +192,11 @@ public class ExtensionReader {
         }
       }
     }
+    return scmHandlers;
   }
   
-  public static void readScmHandlerUiExtensions() {
+  public static List<ScmHandlerUi> readScmHandlerUiExtensions() {
+    ArrayList<ScmHandlerUi> scmHandlerUis = new ArrayList<ScmHandlerUi>();
     IExtensionRegistry registry = Platform.getExtensionRegistry();
     IExtensionPoint scmHandlersUiExtensionPoint = registry.getExtensionPoint(EXTENSION_SCM_HANDLERS_UI);
     if(scmHandlersUiExtensionPoint != null) {
@@ -204,8 +206,7 @@ public class ExtensionReader {
         for(IConfigurationElement element : elements) {
           if(element.getName().equals(ELEMENT_SCM_HANDLER_UI)) {
             try {
-              ScmHandlerUi handlerUi = (ScmHandlerUi) element.createExecutableExtension(ScmHandlerUi.ATTR_CLASS);
-              ScmHandlerFactory.addScmHandlerUi(handlerUi);
+              scmHandlerUis.add((ScmHandlerUi) element.createExecutableExtension(ScmHandlerUi.ATTR_CLASS));
             } catch(CoreException ex) {
               MavenPlugin.log(ex);
             }
@@ -213,11 +214,13 @@ public class ExtensionReader {
         }
       }
     }
+    return scmHandlerUis;
   }
   
-  public static void readArchetypeExtensions(ArchetypeManager archetypeManager) {
-    IExtensionRegistry registry = Platform.getExtensionRegistry();
+  public static List<ArchetypeCatalogFactory> readArchetypeExtensions() {
+    List<ArchetypeCatalogFactory> archetypeCatalogs = new ArrayList<ArchetypeCatalogFactory>();
     
+    IExtensionRegistry registry = Platform.getExtensionRegistry();
     IExtensionPoint archetypesExtensionPoint = registry.getExtensionPoint(EXTENSION_ARCHETYPES);
     if(archetypesExtensionPoint != null) {
       IExtension[] archetypesExtensions = archetypesExtensionPoint.getExtensions();
@@ -226,10 +229,12 @@ public class ExtensionReader {
         IContributor contributor = extension.getContributor();
         for(IConfigurationElement element : elements) {
           ArchetypeCatalogFactory factory = readArchetypeCatalogs(element, contributor);
-          archetypeManager.addArchetypeCatalogFactory(factory);
+          // archetypeManager.addArchetypeCatalogFactory(factory);
+          archetypeCatalogs.add(factory);
         }
       }
     }
+    return archetypeCatalogs;
   }
 
   private static ArchetypeCatalogFactory readArchetypeCatalogs(IConfigurationElement element, IContributor contributor) {
@@ -245,7 +250,7 @@ public class ExtensionReader {
             String description = element.getAttribute(ATTR_DESCRIPTION);
             String url = catalogUrl.toString();
             // XXX ARCHETYPE-161: RemoteCatalogArchetypeDataSource don't allow to download arbitrary urls
-            return new ArchetypeManager.RemoteCatalogFactory(url.substring(0, url.lastIndexOf("/")), description, false);
+            return new ArchetypeCatalogFactory.RemoteCatalogFactory(url.substring(0, url.lastIndexOf("/")), description, false);
           }
         }
         MavenPlugin.log("Unable to find Archetype catalog " + name + " in " + contributor.getName(), null);
@@ -254,13 +259,15 @@ public class ExtensionReader {
       String url = element.getAttribute(ATTR_URL);
       if(url!=null) {
         String description = element.getAttribute(ATTR_DESCRIPTION);
-        return new ArchetypeManager.RemoteCatalogFactory(url, description, false);
+        return new ArchetypeCatalogFactory.RemoteCatalogFactory(url, description, false);
       }
     }
     return null;
   }
 
-  public static void readProjectConfiguratorExtensions() {
+  public static List<AbstractProjectConfigurator> readProjectConfiguratorExtensions() {
+    ArrayList<AbstractProjectConfigurator> projectConfigurators = new ArrayList<AbstractProjectConfigurator>();
+    
     IExtensionRegistry registry = Platform.getExtensionRegistry();
     IExtensionPoint configuratorsExtensionPoint = registry.getExtensionPoint(EXTENSION_PROJECT_CONFIGURATORS);
     if(configuratorsExtensionPoint != null) {
@@ -271,7 +278,7 @@ public class ExtensionReader {
           if(element.getName().equals(ELEMENT_CONFIGURATOR)) {
             try {
               Object o = element.createExecutableExtension(AbstractProjectConfigurator.ATTR_CLASS);
-              ProjectConfiguratorFactory.addProjectConfigurator((AbstractProjectConfigurator) o);
+              projectConfigurators.add((AbstractProjectConfigurator) o);
             } catch(CoreException ex) {
               MavenPlugin.log(ex);
             }
@@ -279,6 +286,8 @@ public class ExtensionReader {
         }
       }
     }
+    
+    return projectConfigurators;
   }
 
   public static Set<AbstractClasspathConfiguratorFactory> readClasspathConfiguratorFactoryExtensions() {

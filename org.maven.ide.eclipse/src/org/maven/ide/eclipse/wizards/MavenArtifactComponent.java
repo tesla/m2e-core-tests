@@ -35,7 +35,7 @@ public class MavenArtifactComponent extends Composite {
 
   public static final String POM = "pom";
 
-  public static final String[] PACKAGING_OPTIONS = {JAR, WAR, EAR, RAR, POM};
+  static final String[] PACKAGING_OPTIONS = {JAR, WAR, EAR, RAR, POM};
 
   public static final String DEFAULT_PACKAGING = JAR;
 

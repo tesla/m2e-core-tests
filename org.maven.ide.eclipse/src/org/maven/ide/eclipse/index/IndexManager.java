@@ -11,6 +11,7 @@ package org.maven.ide.eclipse.index;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -19,8 +20,12 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 
 import org.apache.lucene.search.Query;
 import org.apache.lucene.store.Directory;
@@ -38,7 +43,6 @@ import org.sonatype.nexus.index.ArtifactInfo;
 import org.maven.ide.eclipse.MavenConsole;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.index.IndexInfo.Type;
-import org.maven.ide.eclipse.internal.index.IndexUpdaterJob;
 
 
 /**
@@ -88,11 +92,11 @@ public abstract class IndexManager {
 
   // availability flags
   
-  public static int PRESENT = 1;
+  public static final int PRESENT = 1;
   
-  public static int NOT_PRESENT = 0;
+  public static final int NOT_PRESENT = 0;
   
-  public static int NOT_AVAILABLE = 2;
+  public static final int NOT_AVAILABLE = 2;
   
   // local state
   
@@ -169,7 +173,15 @@ public abstract class IndexManager {
       if(updaterJob == null) {
         updaterJob = new IndexUpdaterJob(this, console);
       }
-      updaterJob.scheduleUpdate(indexInfo, force, delay);
+      
+      if(IndexInfo.Type.LOCAL.equals(indexInfo.getType())) {
+        updaterJob.addCommand(new ReindexCommand(indexInfo));
+        
+      } else if(IndexInfo.Type.REMOTE.equals(indexInfo.getType())) {
+        updaterJob.addCommand(new UpdateCommand(indexInfo, force));
+        updaterJob.addCommand(new UnpackCommand(indexInfo, force));
+      }
+      updaterJob.schedule(delay);
     }
   }
 
@@ -340,4 +352,176 @@ public abstract class IndexManager {
     return key + ".pom";
   }
 
+  
+  /**
+   * Abstract index command
+   */
+  abstract static class IndexCommand {
+    
+    protected IndexInfo info;
+    
+    abstract void run(IndexManager indexManager, MavenConsole console, IProgressMonitor monitor);
+    
+  }
+
+  /**
+   * Reindex command
+   */
+  static class ReindexCommand extends IndexCommand {
+
+    ReindexCommand(IndexInfo indexInfo) {
+      this.info = indexInfo;
+    }
+
+    public void run(IndexManager indexManager, MavenConsole console, IProgressMonitor monitor) {
+      monitor.setTaskName("Reindexing local repository");
+      try {
+        indexManager.reindex(info.getIndexName(), monitor);
+        console.logMessage("Updated local repository index");
+      } catch(IOException ex) {
+        console.logError("Unable to reindex local repository");
+      }
+    }
+  }
+
+  /**
+   * Update command
+   */
+  static class UpdateCommand extends IndexCommand {
+    private final boolean force;
+
+    UpdateCommand(IndexInfo info, boolean force) {
+      this.info = info;
+      this.force = force;
+    }
+
+    public void run(IndexManager indexManager, MavenConsole console, IProgressMonitor monitor) {
+      monitor.setTaskName("Updating index " + info.getIndexName());
+      try {
+        Date indexTime = indexManager.fetchAndUpdateIndex(info.getIndexName(), force, monitor);
+        if(indexTime==null) {
+          console.logMessage("No index update available for " + info.getIndexName());
+        } else {
+          console.logMessage("Updated index for " + info.getIndexName() + " " + indexTime);
+        }
+      } catch(IOException ex) {
+        String msg = "Unable to update index for " + info.getIndexName() + " " + info.getRepositoryUrl();
+        MavenPlugin.log(msg, ex);
+        console.logError(msg);
+      }
+    }
+  }
+
+  /**
+   * Unpack command
+   */
+  static class UnpackCommand extends IndexCommand {
+
+    private final boolean force;
+
+    UnpackCommand(IndexInfo info, boolean force) {
+      this.info = info;
+      this.force = force;
+    }
+    
+    public void run(IndexManager indexManager, MavenConsole console, IProgressMonitor monitor) {
+      URL indexArchive = info.getArchiveUrl();
+      if(indexArchive==null) {
+        return;
+      }
+
+      String indexName = info.getIndexName();
+      monitor.setTaskName("Unpacking " + indexName);
+      
+      Date archiveIndexTime = null;
+      if(info.isNew() && info.getArchiveUrl()!=null) {
+        try {
+          archiveIndexTime = indexManager.getIndexArchiveTime(indexArchive.openStream());
+        } catch(IOException ex) {
+          MavenPlugin.log("Unable to read creation time for index " + indexName, ex);
+        }
+      }
+      
+      boolean replace = force || info.isNew();
+      if(!replace) {
+        if(archiveIndexTime!=null) {
+          Date currentIndexTime = info.getUpdateTime();
+          replace = currentIndexTime==null || archiveIndexTime.after(currentIndexTime);
+        }
+      }
+
+      if(replace) {
+        File index = new File(indexManager.getBaseIndexDir(), indexName);
+        if(!index.exists()) {
+          if(!index.mkdirs()) {
+            MavenPlugin.log("Can't create index folder " + index.getAbsolutePath(), null);
+          }
+        } else {
+          File[] files = index.listFiles();
+          for(int j = 0; j < files.length; j++ ) {
+            if(!files[j].delete()) {
+              MavenPlugin.log("Can't delete " + files[j].getAbsolutePath(), null);
+            }
+          }
+        }
+        
+        InputStream is = null;
+        try {
+          is = indexArchive.openStream();
+          indexManager.replaceIndex(indexName, is);
+
+          console.logMessage("Unpacked index for " + info.getIndexName() + " " + archiveIndexTime);
+          
+          // XXX update index and repository urls
+          // indexManager.removeIndex(indexName, false);
+          // indexManager.addIndex(extensionIndexInfo, false);
+          
+        } catch(Exception ex) {
+          MavenPlugin.log("Unable to unpack index " + indexName, ex);
+        } finally {
+          try {
+            if(is != null) {
+              is.close();
+            }
+          } catch(IOException ex) {
+            MavenPlugin.log("Unable to close stream", ex);
+          }
+        }
+      }
+    }
+    
+  }
+
+  static class IndexUpdaterJob extends Job {
+
+    private final IndexManager indexManager;
+    
+    private final MavenConsole console;
+
+    private final Stack<IndexCommand> updateQueue = new Stack<IndexCommand>(); 
+    
+    public IndexUpdaterJob(IndexManager indexManager, MavenConsole console) {
+      super("Updating indexes");
+      this.indexManager = indexManager;
+      this.console = console;
+    }
+
+    public void addCommand(IndexCommand indexCommand) {
+      updateQueue.add(indexCommand);
+    }
+    
+    protected IStatus run(IProgressMonitor monitor) {
+      monitor.beginTask(getName(), IProgressMonitor.UNKNOWN);
+      
+      while(!updateQueue.isEmpty()) {
+        IndexCommand command = updateQueue.pop();
+        command.run(indexManager, console, monitor);
+      }
+      
+      monitor.done();
+      
+      return Status.OK_STATUS;
+    }
+    
+  }  
 }

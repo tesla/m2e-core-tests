@@ -623,7 +623,7 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
   }
 
   
-  private final class GoalsFocusListener extends FocusAdapter {
+  private static final class GoalsFocusListener extends FocusAdapter {
     private Text text;
 
     public GoalsFocusListener(Text text) {

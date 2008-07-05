@@ -67,6 +67,8 @@ import org.maven.ide.eclipse.MavenPlugin;
  * Model manager used to read and and modify Maven models
  * 
  * @author Eugene Kuleshov
+ * 
+ * XXX fix circular dependency
  */
 @SuppressWarnings("restriction")
 public class MavenModelManager {
@@ -222,6 +224,10 @@ public class MavenModelManager {
       
       pomFile.create(new ByteArrayInputStream(pom.getBytes("UTF-8")), true, new NullProgressMonitor());
 
+    } catch(RuntimeException ex) {
+      String msg = "Can't create model " + pomFileName + "; " + ex.toString();
+      console.logError(msg);
+      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
     } catch(Exception ex) {
       String msg = "Can't create model " + pomFileName + "; " + ex.toString();
       console.logError(msg);

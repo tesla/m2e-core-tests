@@ -42,6 +42,8 @@ public class MavenAdapterFactory implements IAdapterFactory {
                 try {
                   Method method = o.getClass().getDeclaredMethod(m.getName(), m.getParameterTypes());
                   return method.invoke(o, args);
+                } catch(RuntimeException ex) {
+                  return null;
                 } catch(Exception ex) {
                   return null;
                 }

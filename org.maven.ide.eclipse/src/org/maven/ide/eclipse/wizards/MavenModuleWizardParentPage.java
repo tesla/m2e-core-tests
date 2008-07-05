@@ -36,7 +36,6 @@ import org.apache.maven.model.Model;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.Messages;
-import org.maven.ide.eclipse.actions.MavenProjectSelectionDialog;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.util.SelectionUtil;
 

@@ -92,11 +92,11 @@ public class IndexInfo {
   }
 
   public Date getUpdateTime() {
-    return this.updateTime;    
+    return updateTime == null ? null : new Date(updateTime.getTime());
   }
   
   public void setUpdateTime(Date updateTime) {
-    this.updateTime = updateTime;
+    this.updateTime = updateTime == null ? null : new Date(updateTime.getTime());
   }
   
   public boolean equals(Object obj) {
@@ -115,11 +115,11 @@ public class IndexInfo {
    * Repository index type
    */
   public static class Type {
-    public static Type REMOTE = new Type("remote");
+    public static final Type REMOTE = new Type("remote");
 
-    public static Type LOCAL = new Type("local");
+    public static final Type LOCAL = new Type("local");
 
-    public static Type WORKSPACE = new Type("workspace");
+    public static final Type WORKSPACE = new Type("workspace");
 
     private final String type;
 

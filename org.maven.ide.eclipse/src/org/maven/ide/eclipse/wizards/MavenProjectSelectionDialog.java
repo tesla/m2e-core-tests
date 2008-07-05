@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.actions;
+package org.maven.ide.eclipse.wizards;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -89,7 +89,7 @@ public class MavenProjectSelectionDialog extends AbstractMavenDialog {
 
 
   /** The content provider class. */
-  protected class MavenContainerContentProvider implements ITreeContentProvider {
+  protected static class MavenContainerContentProvider implements ITreeContentProvider {
 
     /** Returns the children of the parent node. */
     public Object[] getChildren( Object parent ) {

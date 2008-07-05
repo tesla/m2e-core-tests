@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -104,11 +105,10 @@ public class MavenProjectManagerImpl {
    * Note that path of pom.xml varies for nested projects and pom.xml
    * are treated separately.
    */
-  public static final IPath[] METADATA_PATH = {
-    new Path(".project"),
-    new Path(".classpath"),
-    new Path(".settings/org.maven.ide.eclipse.prefs") // dirty hack!
-  };
+  public static final List<? extends IPath> METADATA_PATH = Arrays.asList( //
+      new Path(".project"), //
+      new Path(".classpath"), //
+      new Path(".settings/org.maven.ide.eclipse.prefs")); // dirty hack!
 
   private final WorkspaceState state;
 
@@ -379,15 +379,15 @@ public class MavenProjectManagerImpl {
 
     MavenProject mavenProject = null;
     MavenExecutionResult result = null;
-    if (pom.isAccessible() && resolverConfiguration != null) {
+    if (pom.isAccessible()) {
       result = execute(embedder, pom, resolverConfiguration, new MavenProjectReader(updateRequest.getRequest()), monitor);
       mavenProject = result.getProject();
       markerManager.addMarkers(pom, result);
     }
 
-    if (resolverConfiguration == null || mavenProject == null) {
+    if (mavenProject == null) {
       updateRequest.forcePomFiles(remove(pom));
-      if (result != null && resolverConfiguration != null && resolverConfiguration.shouldResolveWorkspaceProjects()) {
+      if (result != null && resolverConfiguration.shouldResolveWorkspaceProjects()) {
         // this only really add missing parent
         addMissingProjectDependencies(pom, result);
       }
@@ -577,11 +577,15 @@ public class MavenProjectManagerImpl {
     List<Throwable> exceptions = result.getExceptions();
     if (exceptions != null) {
       for(Throwable t : exceptions) {
-        while (t != null && !(t instanceof AbstractArtifactResolutionException)) {
+        AbstractArtifactResolutionException re = null;
+        while (t != null) {
+          if(t instanceof AbstractArtifactResolutionException) {
+            re = (AbstractArtifactResolutionException) t;
+            break;
+          }
           t = t.getCause();
         }
-        if (t instanceof AbstractArtifactResolutionException) {
-          AbstractArtifactResolutionException re = (AbstractArtifactResolutionException) t;
+        if(re != null) {
           ArtifactKey dependencyKey = new ArtifactKey(re.getGroupId(), re.getArtifactId(), re.getVersion(), null);
           state.addProjectDependency(pom, dependencyKey, true);
         }

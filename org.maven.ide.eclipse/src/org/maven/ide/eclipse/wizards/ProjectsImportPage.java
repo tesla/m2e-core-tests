@@ -449,7 +449,9 @@ public class ProjectsImportPage extends WizardPage implements IOverwriteQuery {
           if(!projectPath.equals(root.getLocation().append(projectName))) {
             File projectDir = projectPath.toFile();
             File newProject = new File(projectDir.getParent(), projectName);
-            projectDir.renameTo(newProject);
+            if(!projectDir.renameTo(newProject)) {
+              MavenPlugin.log("Can't rename " + projectDir + " to " + newProject, null);
+            }
             record.description.setLocation(null);
           }
         }
@@ -570,10 +572,6 @@ public class ProjectsImportPage extends WizardPage implements IOverwriteQuery {
     File projectFile;
   
     String projectName;
-  
-    Object parent;
-  
-    int level;
   
     IProjectDescription description;
   

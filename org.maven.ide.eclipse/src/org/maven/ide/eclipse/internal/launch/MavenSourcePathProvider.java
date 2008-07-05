@@ -27,16 +27,12 @@ public class MavenSourcePathProvider extends MavenRuntimeClasspathProvider {
 
   public IRuntimeClasspathEntry[] computeUnresolvedClasspath(ILaunchConfiguration configuration) throws CoreException {
     boolean useDefault = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_SOURCE_PATH, true);
-    IRuntimeClasspathEntry[] entries = null;
-    if (useDefault) {
+    if(useDefault) {
       // the default source lookup path is the same as the classpath
-      entries = super.computeUnresolvedClasspath(configuration);
-    } else {
-      // recover persisted source path
-      entries = recoverRuntimePath(configuration, IJavaLaunchConfigurationConstants.ATTR_SOURCE_PATH);
+      return super.computeUnresolvedClasspath(configuration);
     }
-    return entries;
-
+    // recover persisted source path
+    return recoverRuntimePath(configuration, IJavaLaunchConfigurationConstants.ATTR_SOURCE_PATH);
   }
 
   protected void addProjectEntries(Set<IRuntimeClasspathEntry> resolved, IPath path, int scope, String classifier, ILaunchConfiguration launchConfiguration) {

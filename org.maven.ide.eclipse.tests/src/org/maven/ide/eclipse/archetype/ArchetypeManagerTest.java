@@ -13,10 +13,10 @@ import java.util.Collection;
 import junit.framework.TestCase;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.embedder.ArchetypeCatalogFactory;
 import org.maven.ide.eclipse.embedder.ArchetypeManager;
-import org.maven.ide.eclipse.embedder.ArchetypeManager.ArchetypeCatalogFactory;
-import org.maven.ide.eclipse.embedder.ArchetypeManager.NexusIndexerCatalogFactory;
-import org.maven.ide.eclipse.embedder.ArchetypeManager.InternalCatalogFactory;
+import org.maven.ide.eclipse.embedder.ArchetypeCatalogFactory.NexusIndexerCatalogFactory;
+import org.maven.ide.eclipse.embedder.ArchetypeCatalogFactory.InternalCatalogFactory;
 
 
 /**

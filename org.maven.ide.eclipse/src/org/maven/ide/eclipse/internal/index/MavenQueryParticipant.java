@@ -34,11 +34,11 @@ import org.eclipse.swt.widgets.Shell;
 import org.apache.maven.artifact.Artifact;
 
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.actions.MavenRepositorySearchDialog;
 import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
+import org.maven.ide.eclipse.wizards.MavenRepositorySearchDialog;
 
 
 /**

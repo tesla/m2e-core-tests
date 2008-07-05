@@ -8,17 +8,15 @@
 
 package org.maven.ide.eclipse.project;
 
-import java.util.EventObject;
-
 import org.eclipse.core.resources.IFile;
 
-public class MavenProjectChangedEvent extends EventObject {
+public class MavenProjectChangedEvent {
 
-  private static final long serialVersionUID = 4608412231315260328L;
+  private final IFile source;
+  
+  private final int kind;
 
-  private int kind;
-
-  private int flags;
+  private final int flags;
 
   public static final int KIND_ADDED = 1;
 
@@ -39,7 +37,7 @@ public class MavenProjectChangedEvent extends EventObject {
   private final MavenProjectFacade mavenProject;
 
   public MavenProjectChangedEvent(IFile source, int kind, int flags, MavenProjectFacade oldMavenProject, MavenProjectFacade mavenProject) {
-    super(source);
+    this.source = source;
     this.kind = kind;
     this.flags = flags;
     this.oldMavenProject = oldMavenProject;
@@ -60,5 +58,9 @@ public class MavenProjectChangedEvent extends EventObject {
 
   public MavenProjectFacade getOldMavenProject() {
     return oldMavenProject;
+  }
+
+  public IFile getSource() {
+    return source;
   }
 }

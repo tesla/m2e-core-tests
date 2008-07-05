@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.embedder.MavenEmbedder;
@@ -80,7 +81,7 @@ public class MavenProjectPomScanner<T> extends AbstractProjectScanner<MavenProje
       Dependency d = dependencies[i];
       
       try {
-        Model model = resolveModel(embedder, d.getGroupId(), d.getArtifactId(), d.getVersion());
+        Model model = resolveModel(embedder, d.getGroupId(), d.getArtifactId(), d.getVersion(), monitor);
         if(model==null) {
           String msg = "Can't resolve " + d.getArtifactId();
           console.logError(msg);
@@ -88,7 +89,7 @@ public class MavenProjectPomScanner<T> extends AbstractProjectScanner<MavenProje
           continue;
         }
         
-        Scm scm = resolveScm(embedder, model);
+        Scm scm = resolveScm(embedder, model, monitor);
         if(scm==null) {
           String msg = "No SCM info for " + d.getArtifactId();
           console.logError(msg);
@@ -149,7 +150,7 @@ public class MavenProjectPomScanner<T> extends AbstractProjectScanner<MavenProje
   }
 
   @SuppressWarnings("unchecked")
-  private Scm resolveScm(MavenEmbedder embedder, Model model) throws ArtifactResolutionException,
+  private Scm resolveScm(MavenEmbedder embedder, Model model, IProgressMonitor monitor) throws ArtifactResolutionException,
       ArtifactNotFoundException, XmlPullParserException, IOException {
     Scm scm = model.getScm();
     if(scm != null) {
@@ -161,12 +162,12 @@ public class MavenProjectPomScanner<T> extends AbstractProjectScanner<MavenProje
       return null;
     }
 
-    Model parentModel = resolveModel(embedder, parent.getGroupId(), parent.getArtifactId(), parent.getVersion());
+    Model parentModel = resolveModel(embedder, parent.getGroupId(), parent.getArtifactId(), parent.getVersion(), monitor);
     if(parentModel==null) {
       return null;
     }
     
-    Scm parentScm = resolveScm(embedder, parentModel);
+    Scm parentScm = resolveScm(embedder, parentModel, monitor);
     if(parentScm==null) {
       return null;
     }
@@ -177,6 +178,7 @@ public class MavenProjectPomScanner<T> extends AbstractProjectScanner<MavenProje
       modules.addAll(profile.getModules());
     }
     
+    // heuristics for matching module names to artifactId
     String artifactId = model.getArtifactId();
     for(String module : modules) {
       if(module.equals(artifactId) || module.endsWith("/" + artifactId)) {
@@ -195,11 +197,17 @@ public class MavenProjectPomScanner<T> extends AbstractProjectScanner<MavenProje
     return parentScm;
   }
 
-  private Model resolveModel(MavenEmbedder embedder, String groupId, String artifactId, String version)
+  private Model resolveModel(MavenEmbedder embedder, String groupId, String artifactId, String version, IProgressMonitor monitor)
       throws ArtifactResolutionException, ArtifactNotFoundException, XmlPullParserException, IOException {
+    monitor.subTask("Resolving artifact " + groupId + ":" + artifactId + ":" + version);
+
     Artifact artifact = embedder.createArtifact(groupId, artifactId, version, null, "pom");
     
-    embedder.resolve(artifact, indexManager.getArtifactRepositories(null, null), embedder.getLocalRepository());
+    ArtifactRepositoryPolicy policy = new ArtifactRepositoryPolicy();
+    policy.setUpdatePolicy(ArtifactRepositoryPolicy.UPDATE_POLICY_NEVER);
+    policy.setChecksumPolicy(ArtifactRepositoryPolicy.CHECKSUM_POLICY_IGNORE);
+    policy.setEnabled(true);
+    embedder.resolve(artifact, indexManager.getArtifactRepositories(policy, policy), embedder.getLocalRepository());
     
     File file = artifact.getFile();
     if(file == null) {
@@ -209,6 +217,7 @@ public class MavenProjectPomScanner<T> extends AbstractProjectScanner<MavenProje
     // XXX this fail on reading extensions
     // MavenProject project = embedder.readProject(file);
     
+    monitor.subTask("Reading model " + groupId + ":" + artifactId + ":" + version);
     return embedder.readModel(file);
   }
   

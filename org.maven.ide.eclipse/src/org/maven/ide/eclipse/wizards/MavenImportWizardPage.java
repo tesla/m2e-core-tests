@@ -51,8 +51,10 @@ import org.eclipse.swt.widgets.Tree;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 
+import org.maven.ide.eclipse.MavenConsole;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.Messages;
+import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.project.AbstractProjectScanner;
 import org.maven.ide.eclipse.project.LocalProjectScanner;
 import org.maven.ide.eclipse.project.MavenProjectInfo;
@@ -358,10 +360,13 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
 
   protected AbstractProjectScanner<MavenProjectInfo> getProjectScanner() {
     File root = workspaceRoot.getLocation().toFile();
-    if(locations==null || locations.isEmpty()) {
-      return new LocalProjectScanner(root, rootDirectoryCombo.getText(), false);
+    MavenPlugin mavenPlugin = MavenPlugin.getDefault();
+    MavenModelManager modelManager = mavenPlugin.getMavenModelManager();
+    MavenConsole console = mavenPlugin.getConsole();
+    if(locations == null || locations.isEmpty()) {
+      return new LocalProjectScanner(root, rootDirectoryCombo.getText(), false, modelManager, console);
     }
-    return new LocalProjectScanner(root, locations, getImportConfiguration().isNeedsRename());
+    return new LocalProjectScanner(root, locations, getImportConfiguration().isNeedsRename(), modelManager, console);
   }
 
   /**

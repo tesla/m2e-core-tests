@@ -33,9 +33,9 @@ import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.XMLFilterImpl;
 
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.embedder.ArchetypeManager.ArchetypeCatalogFactory;
-import org.maven.ide.eclipse.embedder.ArchetypeManager.LocalCatalogFactory;
-import org.maven.ide.eclipse.embedder.ArchetypeManager.RemoteCatalogFactory;
+import org.maven.ide.eclipse.embedder.ArchetypeCatalogFactory;
+import org.maven.ide.eclipse.embedder.ArchetypeCatalogFactory.LocalCatalogFactory;
+import org.maven.ide.eclipse.embedder.ArchetypeCatalogFactory.RemoteCatalogFactory;
 
 
 /**

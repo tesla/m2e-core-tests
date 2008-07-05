@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.scm;
+package org.maven.ide.eclipse.wizards;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,8 +48,7 @@ import org.maven.ide.eclipse.project.LocalProjectScanner;
 import org.maven.ide.eclipse.project.MavenProjectInfo;
 import org.maven.ide.eclipse.project.MavenProjectScmInfo;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
-import org.maven.ide.eclipse.wizards.MavenImportWizard;
-import org.maven.ide.eclipse.wizards.ProjectsImportWizard;
+import org.maven.ide.eclipse.scm.MavenCheckoutOperation;
 
 
 /**
@@ -90,11 +89,13 @@ public abstract class MavenProjectCheckoutJob extends WorkspaceJob {
 
       IWorkspaceRoot workspace = ResourcesPlugin.getWorkspace().getRoot();
 
-      LocalProjectScanner scanner = new LocalProjectScanner(workspace.getLocation().toFile(), operation.getLocations(), true);
-      scanner.run(monitor);
-
       MavenPlugin plugin = MavenPlugin.getDefault();
       MavenModelManager modelManager = plugin.getMavenModelManager();
+      
+      LocalProjectScanner scanner = new LocalProjectScanner(workspace.getLocation().toFile(), operation.getLocations(),
+          true, modelManager, plugin.getConsole());
+      scanner.run(monitor);
+
 
       boolean includeModules = configuration.getResolverConfiguration().shouldIncludeModules();
       this.projects = plugin.getProjectConfigurationManager().collectProjects(scanner.getProjects(), includeModules);

@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
 
+import org.maven.ide.eclipse.MavenConsole;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 
@@ -37,15 +38,21 @@ public class LocalProjectScanner extends AbstractProjectScanner<MavenProjectInfo
   private final boolean needsRename;
 
   private Set<File> scannedFolders = new HashSet<File>();
+  private final MavenConsole console;
+  private final MavenModelManager modelManager;
 
-  public LocalProjectScanner(File workspaceRoot, String folder, boolean needsRename) {
-    this(workspaceRoot, Collections.singletonList(folder), needsRename);
+  public LocalProjectScanner(File workspaceRoot, String folder, boolean needsRename, MavenModelManager modelManager,
+      MavenConsole console) {
+    this(workspaceRoot, Collections.singletonList(folder), needsRename, modelManager, console);
   }
 
-  public LocalProjectScanner(File workspaceRoot, List<String> folders, boolean needsRename) {
+  public LocalProjectScanner(File workspaceRoot, List<String> folders, boolean needsRename,
+      MavenModelManager modelManager, MavenConsole console) {
     this.workspaceRoot = workspaceRoot;
     this.folders = folders;
     this.needsRename = needsRename;
+    this.modelManager = modelManager;
+    this.console = console;
   }
 
   public void run(IProgressMonitor monitor) throws InterruptedException {
@@ -98,8 +105,6 @@ public class LocalProjectScanner extends AbstractProjectScanner<MavenProjectInfo
 
   @SuppressWarnings("unchecked")
   private MavenProjectInfo readMavenProjectInfo(File baseDir, String modulePath, MavenProjectInfo parentInfo) {
-    MavenModelManager modelManager = MavenPlugin.getDefault().getMavenModelManager();
-
     File pomFile = new File(baseDir, MavenPlugin.POM_FILE_NAME);
     try {
       Model model = modelManager.readMavenModel(pomFile);
@@ -145,10 +150,10 @@ public class LocalProjectScanner extends AbstractProjectScanner<MavenProjectInfo
 
     } catch(CoreException ex) {
       addError(ex);
-      MavenPlugin.getDefault().getConsole().logError("Unable to read model " + pomFile.getAbsolutePath());
+      console.logError("Unable to read model " + pomFile.getAbsolutePath());
     } catch(IOException ex) {
       addError(ex);
-      MavenPlugin.getDefault().getConsole().logError("Unable to read model " + pomFile.getAbsolutePath());
+      console.logError("Unable to read model " + pomFile.getAbsolutePath());
     }
 
     return null;

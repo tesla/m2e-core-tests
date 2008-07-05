@@ -53,7 +53,7 @@ public class MavenProjectFacade {
 
   private ResolverConfiguration resolverConfiguration;
 
-  private final long[] timestamp = new long[MavenProjectManagerImpl.METADATA_PATH.length + 1];
+  private final long[] timestamp = new long[MavenProjectManagerImpl.METADATA_PATH.size() + 1];
 
   public MavenProjectFacade(MavenProjectManagerImpl manager, IFile pom, MavenProject mavenProject,
       ResolverConfiguration resolverConfiguration) {
@@ -253,23 +253,24 @@ public class MavenProjectFacade {
    * @return true if maven project needs to be re-read from disk  
    */
   public boolean isStale() {
-    IPath[] metadata = MavenProjectManagerImpl.METADATA_PATH;
     IProject project = getProject();
-    for (int i = 0; i < metadata.length; i++) {
-      IFile file = project.getFile(metadata[i]);
+    int i = 0;
+    for(IPath path : MavenProjectManagerImpl.METADATA_PATH) {
+      IFile file = project.getFile(path);
       if (timestamp[i] != file.getLocalTimeStamp()) {
         return true;
       }
+      i++;
     }
     return timestamp[timestamp.length - 1] != pom.getLocalTimeStamp();
   }
 
   private void updateTimestamp() {
-    IPath[] metadata = MavenProjectManagerImpl.METADATA_PATH;
     IProject project = getProject();
-    for (int i = 0; i < metadata.length; i++) {
-      IFile file = project.getFile(metadata[i]);
-      timestamp[i] = file.getLocalTimeStamp(); 
+    int i = 0;
+    for(IPath path : MavenProjectManagerImpl.METADATA_PATH) {
+      timestamp[i] = project.getFile(path).getLocalTimeStamp(); 
+      i++;
     }
     timestamp[timestamp.length - 1] = pom.getLocalTimeStamp();
   }

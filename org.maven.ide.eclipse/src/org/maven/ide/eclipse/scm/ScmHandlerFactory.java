@@ -29,9 +29,9 @@ import org.maven.ide.eclipse.internal.ExtensionReader;
  */
 public class ScmHandlerFactory {
 
-  private static Map<String, List<ScmHandler>> scms;
+  private static volatile Map<String, List<ScmHandler>> scms;
 
-  private static Map<String, ScmHandlerUi> scmUis;
+  private static volatile Map<String, ScmHandlerUi> scmUis;
 
   public static synchronized void addScmHandlerUi(ScmHandlerUi handlerUi) {
     getScmUis().put(handlerUi.getType(), handlerUi);
@@ -83,7 +83,9 @@ public class ScmHandlerFactory {
   private static Map<String, List<ScmHandler>> getScms() {
     if(scms == null) {
       scms = new TreeMap<String, List<ScmHandler>>();
-      ExtensionReader.readScmHandlerExtensions();
+      for(ScmHandler scmHandler : ExtensionReader.readScmHandlerExtensions()) {
+        addScmHandler(scmHandler);
+      }
     }
     return scms;
   }
@@ -91,7 +93,10 @@ public class ScmHandlerFactory {
   private static Map<String, ScmHandlerUi> getScmUis() {
     if(scmUis == null) {
       scmUis = new TreeMap<String, ScmHandlerUi>();
-      ExtensionReader.readScmHandlerUiExtensions();
+      List<ScmHandlerUi> scmHandlerUis = ExtensionReader.readScmHandlerUiExtensions();
+      for(ScmHandlerUi scmHandlerUi : scmHandlerUis) {
+        addScmHandlerUi(scmHandlerUi);
+      }
     }
     return scmUis;
   }

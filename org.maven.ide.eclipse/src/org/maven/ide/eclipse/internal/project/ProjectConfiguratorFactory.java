@@ -8,6 +8,7 @@
 
 package org.maven.ide.eclipse.internal.project;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Set;
@@ -30,9 +31,9 @@ public class ProjectConfiguratorFactory {
   }
   
   public static synchronized Set<AbstractProjectConfigurator> getConfigurators() {
-    if(configurators==null) {
+    if(configurators == null) {
       configurators = new TreeSet<AbstractProjectConfigurator>(new ProjectConfiguratorComparator());
-      ExtensionReader.readProjectConfiguratorExtensions();
+      configurators.addAll(ExtensionReader.readProjectConfiguratorExtensions());
     }
     return Collections.unmodifiableSet(configurators);
   }
@@ -40,10 +41,9 @@ public class ProjectConfiguratorFactory {
   /**
    * ProjectConfigurator comparator
    */
-  private static class ProjectConfiguratorComparator implements Comparator<AbstractProjectConfigurator> {
-    ProjectConfiguratorComparator() {
-    }
-    
+  static class ProjectConfiguratorComparator implements Comparator<AbstractProjectConfigurator>, Serializable {
+    private static final long serialVersionUID = 1L;
+
     public int compare(AbstractProjectConfigurator c1, AbstractProjectConfigurator c2) {
       int res = c1.getPriority() - c2.getPriority();
       return res==0 ? c1.getId().compareTo(c2.getId()) : res;

@@ -71,7 +71,6 @@ import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.Properties;
 import org.maven.ide.components.pom.Scm;
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.actions.MavenRepositorySearchDialog;
 import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.editor.composites.ListEditorComposite;
@@ -81,6 +80,7 @@ import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.project.MavenProjectFacade;
 import org.maven.ide.eclipse.wizards.MavenModuleWizard;
+import org.maven.ide.eclipse.wizards.MavenRepositorySearchDialog;
 import org.maven.ide.eclipse.wizards.WidthGroup;
 
 

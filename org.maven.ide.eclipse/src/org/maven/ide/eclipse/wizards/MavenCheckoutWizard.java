@@ -26,7 +26,6 @@ import org.apache.maven.model.Scm;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.project.MavenProjectScmInfo;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
-import org.maven.ide.eclipse.scm.MavenProjectCheckoutJob;
 import org.maven.ide.eclipse.scm.ScmUrl;
 
 

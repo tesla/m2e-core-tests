@@ -12,32 +12,16 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.List;
 
-import org.osgi.framework.Bundle;
 
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.codehaus.plexus.util.DirectoryScanner;
 
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
-import org.apache.maven.artifact.resolver.ArtifactResolutionException;
-import org.apache.maven.embedder.MavenEmbedder;
 
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.project.MavenProjectFacade;
-import org.maven.ide.eclipse.project.MavenProjectManager;
 
 /**
  * Maven runtime
@@ -45,10 +29,6 @@ import org.maven.ide.eclipse.project.MavenProjectManager;
  * @author Eugene Kuleshov
  */
 public abstract class MavenRuntime {
-  
-  public static final MavenRuntime EMBEDDED = new MavenEmbeddedRuntime();
-  
-  public static final MavenRuntime WORKSPACE = new MavenWorkspaceRuntime();
   
   public abstract boolean isEditable();
   
@@ -68,173 +48,6 @@ public abstract class MavenRuntime {
     return new MavenExternalRuntime(location);
   }
   
-  
-  /**
-   * Embedded Maven runtime
-   */
-  static final class MavenEmbeddedRuntime extends MavenRuntime {
-    private static final String MAVEN_EXECUTOR_CLASS = org.apache.maven.cli.MavenCli.class.getName();
-    private static String[] CLASSPATH;
-    
-    public boolean isEditable() {
-      return false;
-    }
-    
-    public String getLocation() {
-      return MavenRuntimeManager.EMBEDDED;
-    }
-    
-    public String getSettings() {
-      return null;
-    }
-    
-    public boolean isAvailable() {
-      return true;
-    }
-    
-    public String getMainTypeName() {
-      return MAVEN_EXECUTOR_CLASS;
-    }
-    
-    public String getOptions(File tpmfolder, String[] forcedComponents) {
-      return "";
-    }
-    
-    public String[] getClasspath(String[] forcedComponents) {
-      if(CLASSPATH == null) {
-        List<String> cp = new ArrayList<String>();
-  
-        Bundle bundle = findMavenEmbedderBundle();
-        
-        @SuppressWarnings("unchecked")
-        Enumeration<URL> entries = bundle.findEntries("/", "*", true);
-        while(entries.hasMoreElements()) {
-          URL url = entries.nextElement();
-          String path = url.getPath();
-          if(path.endsWith(".jar") || path.endsWith("bin/")) {
-            try {
-              cp.add(FileLocator.toFileURL(url).getFile());
-            } catch(IOException ex) {
-              MavenPlugin.log("Error adding classpath entry " + url.toString(), ex);
-            }
-          }
-        }
-  
-        CLASSPATH = cp.toArray(new String[cp.size()]);
-      }
-      if (forcedComponents != null && forcedComponents.length > 0) {
-        String[] cp = new String[CLASSPATH.length + forcedComponents.length];
-        System.arraycopy(forcedComponents, 0, cp, 0, forcedComponents.length);
-        System.arraycopy(CLASSPATH, 0, cp, forcedComponents.length, CLASSPATH.length);
-        return cp;
-      }
-      return CLASSPATH;
-    }
-
-    private Bundle findMavenEmbedderBundle() {
-      Bundle[] bundles = MavenPlugin.getDefault().getBundleContext().getBundles();
-      for(int i = 0; i < bundles.length; i++ ) {
-        Bundle bundle = bundles[i];
-        if("org.maven.ide.components.maven_embedder".equals(bundle.getSymbolicName())) {
-          return bundle;
-        }
-      }
-  
-      return null;
-    }
-    
-    public boolean equals(Object o) {
-      return o==this;
-    }
-    
-    public String toString() {
-      return "Embedded";
-    }
-    
-  }
-
-  /**
-   * Maven 2.1-SNAPSHOT runtime loaded from the Eclipse Workspace
-   */
-  static class MavenWorkspaceRuntime extends MavenRuntime {
-
-    public String getLocation() {
-      return MavenRuntimeManager.WORKSPACE;
-    }
-    
-    public String getSettings() {
-      return null;
-    }
-
-    public String getMainTypeName() {
-      return "org.apache.maven.cli.MavenCli";
-    }
-
-    public String getOptions(File tpmfolder, String[] forcedComponents) {
-      return "";
-    }
-
-    public boolean isEditable() {
-      return false;
-    }
-
-    public boolean isAvailable() {
-      MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
-      return projectManager.getMavenProject("org.apache.maven", "maven-distribution", "2.1-SNAPSHOT") != null;
-    }
-
-    public String[] getClasspath(String[] forcedComponents) {
-      List<String> cp = new ArrayList<String>();
-
-      MavenPlugin mavenPlugin = MavenPlugin.getDefault();
-      MavenProjectManager projectManager = mavenPlugin.getMavenProjectManager();
-      MavenProjectFacade maven = projectManager.getMavenProject("org.apache.maven", "maven-distribution", "2.1-SNAPSHOT");
-      if (maven != null) {
-        if (forcedComponents != null) {
-          for (int i = 0; i < forcedComponents.length; i++) {
-            cp.add(forcedComponents[i]);
-          }
-        }
-
-        IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-        MavenEmbedderManager embedderManager = mavenPlugin.getMavenEmbedderManager();
-        MavenEmbedder embedder = embedderManager.getWorkspaceEmbedder();
-
-        for (Artifact artifact : maven.getMavenProjectArtifacts()) {
-          if (Artifact.SCOPE_TEST.equals(artifact.getScope())) {
-            continue;
-          }
-
-          MavenProjectFacade facade = projectManager.getMavenProject(artifact);
-
-          File file = null;
-          if (facade != null) {
-            IFolder output = root.getFolder(facade.getOutputLocation());
-            if (output.isAccessible()) {
-              file = output.getLocation().toFile();
-            }
-          } else {
-            try {
-              embedder.resolve(artifact, Collections.EMPTY_LIST, embedder.getLocalRepository());
-            } catch(ArtifactResolutionException ex) {
-            } catch(ArtifactNotFoundException ex) {
-            }
-            file = artifact.getFile();
-          }
-          
-          if (file != null) {
-            cp.add(file.getAbsolutePath());
-          }
-        }
-      }
-      
-      return cp.toArray(new String[cp.size()]);
-    }
-
-    public String toString() {
-      return "Workspace";
-    }
-  }
   
   /**
    * Maven external runtime using ClassWorlds launcher
@@ -280,7 +93,11 @@ public abstract class MavenRuntime {
       String m2conf = location + File.separator + "bin" + File.separator + "m2.conf";
       if (forcedComponents != null && forcedComponents.length > 0) {
         try {
-          tpmfolder.mkdirs();
+          boolean created = tpmfolder.mkdirs();
+          if(!created) {
+            throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1,
+                "Can't create temporary folder " + tpmfolder, null));
+          }
           m2conf = new File(tpmfolder, "m2.conf").getCanonicalPath();
           BufferedWriter out = new BufferedWriter(new FileWriter(m2conf));
           try {
@@ -335,6 +152,10 @@ public abstract class MavenRuntime {
         return location.equals(((MavenExternalRuntime) o).location);
       }
       return false;
+    }
+    
+    public int hashCode() {
+      return location.hashCode();
     }
     
     public String toString() {

@@ -8,6 +8,7 @@
 
 package org.maven.ide.eclipse.internal.project;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Set;
@@ -34,7 +35,8 @@ public class ClasspathConfiguratorFactoryFactory {
     return factories;
   }
 
-  static class FactoryComparator implements Comparator<AbstractClasspathConfiguratorFactory> {
+  static class FactoryComparator implements Comparator<AbstractClasspathConfiguratorFactory>, Serializable {
+    private static final long serialVersionUID = 1L;
 
     public int compare(AbstractClasspathConfiguratorFactory c1, AbstractClasspathConfiguratorFactory c2) {
       int res = c1.getPriority() - c2.getPriority();

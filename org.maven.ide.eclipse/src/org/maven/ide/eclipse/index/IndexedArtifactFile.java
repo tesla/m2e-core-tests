@@ -56,7 +56,7 @@ public class IndexedArtifactFile {
     this.classifier = classifier;
     this.fname = fname;
     this.size = size;
-    this.date = date;
+    this.date = date == null ? null : new Date(date.getTime());
     this.sourcesExists = sourcesExists;
     this.javadocExists = javadocExists;
     this.prefix = prefix;

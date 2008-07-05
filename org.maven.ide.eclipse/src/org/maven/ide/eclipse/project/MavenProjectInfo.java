@@ -135,10 +135,10 @@ public class MavenProjectInfo {
   }
   
   public boolean equals(Object obj) {
-    if(obj.getClass()==MavenProjectInfo.class) {
+    if(obj instanceof MavenProjectInfo) {
       MavenProjectInfo info = (MavenProjectInfo) obj;
-      if(pomFile==null) {
-        return info.getPomFile()==null;
+      if(pomFile == null) {
+        return info.getPomFile() == null;
       }
       return pomFile.equals(info.getPomFile());
     }

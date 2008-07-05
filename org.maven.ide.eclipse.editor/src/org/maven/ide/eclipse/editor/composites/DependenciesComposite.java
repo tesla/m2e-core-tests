@@ -67,7 +67,6 @@ import org.maven.ide.components.pom.Exclusion;
 import org.maven.ide.components.pom.ExclusionsType;
 import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.PomPackage;
-import org.maven.ide.eclipse.actions.MavenRepositorySearchDialog;
 import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.actions.OpenUrlAction;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
@@ -79,6 +78,7 @@ import org.maven.ide.eclipse.editor.pom.ValueProvider;
 import org.maven.ide.eclipse.editor.xml.search.Packaging;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
+import org.maven.ide.eclipse.wizards.MavenRepositorySearchDialog;
 import org.maven.ide.eclipse.wizards.WidthGroup;
 
 

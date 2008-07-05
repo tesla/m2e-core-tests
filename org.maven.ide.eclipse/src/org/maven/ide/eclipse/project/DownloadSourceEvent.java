@@ -8,20 +8,18 @@
 
 package org.maven.ide.eclipse.project;
 
-import java.util.EventObject;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 
-public class DownloadSourceEvent extends EventObject {
+public class DownloadSourceEvent {
 
-  private static final long serialVersionUID = 4784772736826193323L;
+  private final IProject source;
   private final IPath path;
   private final IPath srcPath;
   private final String javadocUrl;
 
   public DownloadSourceEvent(IProject source, IPath path, IPath srcPath, String javadocUrl) {
-    super(source);
+    this.source = source;
     this.path = path;
     this.srcPath = srcPath;
     this.javadocUrl = javadocUrl;
@@ -40,6 +38,10 @@ public class DownloadSourceEvent extends EventObject {
 
   public String getJavadocUrl() {
     return javadocUrl;
+  }
+
+  public IProject getSource() {
+    return source;
   }
   
 }

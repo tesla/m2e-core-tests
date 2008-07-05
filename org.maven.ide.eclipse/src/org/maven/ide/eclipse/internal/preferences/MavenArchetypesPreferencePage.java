@@ -41,10 +41,10 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.embedder.ArchetypeCatalogFactory;
 import org.maven.ide.eclipse.embedder.ArchetypeManager;
-import org.maven.ide.eclipse.embedder.ArchetypeManager.ArchetypeCatalogFactory;
-import org.maven.ide.eclipse.embedder.ArchetypeManager.LocalCatalogFactory;
-import org.maven.ide.eclipse.embedder.ArchetypeManager.RemoteCatalogFactory;
+import org.maven.ide.eclipse.embedder.ArchetypeCatalogFactory.LocalCatalogFactory;
+import org.maven.ide.eclipse.embedder.ArchetypeCatalogFactory.RemoteCatalogFactory;
 
 
 /**
@@ -264,9 +264,9 @@ public class MavenArchetypesPreferencePage extends PreferencePage implements IWo
 
     public String getColumnText(Object element, int columnIndex) {
       ArchetypeCatalogFactory factory = (ArchetypeCatalogFactory) element;
-      if(factory instanceof ArchetypeManager.LocalCatalogFactory) {
+      if(factory instanceof LocalCatalogFactory) {
         return "Local: " + factory.getDescription();
-      } else if(factory instanceof ArchetypeManager.RemoteCatalogFactory) {
+      } else if(factory instanceof RemoteCatalogFactory) {
         if(factory.isEditable()) {
           return "Remote: " + factory.getDescription();
         }

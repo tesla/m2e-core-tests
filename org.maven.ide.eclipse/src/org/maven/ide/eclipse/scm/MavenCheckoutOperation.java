@@ -53,7 +53,7 @@ public class MavenCheckoutOperation implements IRunnableWithProgress {
       boolean isNestedPath = false;
       for(MavenProjectScmInfo info2 : mavenProjects) {
         if(info != info2) {
-          String path = info2.getFolderUrl().toString();
+          String path = info2.getFolderUrl();
           if(folderUrl.startsWith(path + "/")) {
             isNestedPath = true;
             break;

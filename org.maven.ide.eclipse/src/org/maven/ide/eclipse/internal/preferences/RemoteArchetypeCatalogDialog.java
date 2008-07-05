@@ -41,9 +41,9 @@ import org.apache.maven.archetype.catalog.Archetype;
 import org.apache.maven.archetype.catalog.ArchetypeCatalog;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.embedder.ArchetypeCatalogFactory;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
-import org.maven.ide.eclipse.embedder.ArchetypeManager.ArchetypeCatalogFactory;
-import org.maven.ide.eclipse.embedder.ArchetypeManager.RemoteCatalogFactory;
+import org.maven.ide.eclipse.embedder.ArchetypeCatalogFactory.RemoteCatalogFactory;
 
 /**
  * Remote Archetype catalog dialog

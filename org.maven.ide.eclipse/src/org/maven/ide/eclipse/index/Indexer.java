@@ -450,9 +450,10 @@ public class Indexer {
       }
       return sb.toString();
 
+    } catch(RuntimeException e) {
+      return null;
+    
     } catch(Exception e) {
-      // System.err.println( "Error for file "+jarFile.getAbsolutePath());
-      // System.err.println( "  "+e.getMessage());
       return null;
 
     } finally {
@@ -499,7 +500,7 @@ public class Indexer {
       return null;
     }
 
-    Date date = null;
+    Date date;
     try {
       date = DateTools.stringToDate(doc.get(JAR_DATE));
     } catch(ParseException ex) {

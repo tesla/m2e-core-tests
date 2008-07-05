@@ -33,14 +33,18 @@ import org.maven.ide.eclipse.project.MavenProjectManager;
  */
 public class WorkspaceStateWriter implements IMavenProjectChangedListener {
 
-  public static final String STATE_FILENAME = "workspacestate.properties";
+  private MavenProjectManager projectManager;
 
+  public WorkspaceStateWriter(MavenProjectManager projectManager) {
+    this.projectManager = projectManager;
+  }
+  
   public void mavenProjectChanged(MavenProjectChangedEvent[] events, IProgressMonitor monitor) {
     try {
       Properties state = new Properties();
 
-      MavenProjectManager mpm = MavenPlugin.getDefault().getMavenProjectManager();
-      MavenProjectFacade[] projects = mpm.getProjects();
+      projectManager = MavenPlugin.getDefault().getMavenProjectManager();
+      MavenProjectFacade[] projects = projectManager.getProjects();
 
       IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 
@@ -59,7 +63,7 @@ public class WorkspaceStateWriter implements IMavenProjectChangedListener {
         }
       }
 
-      OutputStream buf = new BufferedOutputStream(new FileOutputStream(getStateFile()));
+      OutputStream buf = new BufferedOutputStream(new FileOutputStream(projectManager.getWorkspaceStateFile()));
       try {
         state.store(buf, null);
       } finally {
@@ -69,11 +73,6 @@ public class WorkspaceStateWriter implements IMavenProjectChangedListener {
     } catch(IOException ex) {
       MavenPlugin.log("Error writing workspace state file", ex);
     }
-  }
-
-  static File getStateFile() {
-    File location = MavenPlugin.getDefault().getStateLocation().toFile();
-    return new File(location, STATE_FILENAME);
   }
 
 }

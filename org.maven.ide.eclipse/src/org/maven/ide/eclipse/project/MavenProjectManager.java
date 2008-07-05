@@ -32,13 +32,18 @@ import org.maven.ide.eclipse.internal.project.MavenProjectManagerRefreshJob;
  */
 public class MavenProjectManager {
 
-  private MavenProjectManagerImpl manager;
+  public static final String STATE_FILENAME = "workspacestate.properties";
+  
+  private final MavenProjectManagerImpl manager;
 
-  private MavenProjectManagerRefreshJob mavenBackgroundJob;
+  private final MavenProjectManagerRefreshJob mavenBackgroundJob;
 
-  public MavenProjectManager(MavenProjectManagerImpl manager, MavenProjectManagerRefreshJob mavenBackgroundJob) {
+  private final File workspaceStateFile;
+
+  public MavenProjectManager(MavenProjectManagerImpl manager, MavenProjectManagerRefreshJob mavenBackgroundJob, File stateLocation) {
     this.manager = manager;
     this.mavenBackgroundJob = mavenBackgroundJob;
+    this.workspaceStateFile = new File(stateLocation, STATE_FILENAME);
   }
 
   // Maven projects    
@@ -169,6 +174,10 @@ public class MavenProjectManager {
 
   public MavenProjectFacade getMavenProject(String groupId, String artifactId, String version) {
     return manager.getMavenProject(new ArtifactKey(groupId, artifactId, version, null));
+  }
+
+  public File getWorkspaceStateFile() {
+    return workspaceStateFile;
   }
 
 }

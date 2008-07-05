@@ -33,8 +33,6 @@ public class MavenMenuAction implements IObjectActionDelegate, IMenuCreator {
 
   boolean fillMenu;
 
-  IStructuredSelection selection;
-
   IAction delegateAction;
   
   static ArrayList<AbstractMavenMenuCreator> creators = new ArrayList<AbstractMavenMenuCreator>();
@@ -57,7 +55,7 @@ public class MavenMenuAction implements IObjectActionDelegate, IMenuCreator {
 
   public void selectionChanged(IAction action, ISelection selection) {
     if(selection instanceof IStructuredSelection) {
-      this.selection = (IStructuredSelection) selection;
+      // this.selection = (IStructuredSelection) selection;
       this.fillMenu = true;
 
       if(delegateAction != action) {

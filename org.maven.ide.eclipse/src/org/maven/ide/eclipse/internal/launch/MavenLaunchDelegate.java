@@ -165,10 +165,6 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
 //    return null;
 //  }
 
-  public File getWorkingDirectory(ILaunchConfiguration configuration) throws CoreException {
-    return super.getWorkingDirectory(configuration);
-  }
-
   public String getProgramArguments(ILaunchConfiguration configuration) throws CoreException {
 //    String pomDirName = configuration.getAttribute(ATTR_POM_DIR, (String) null);
 //    pomDirName = VariablesPlugin.getDefault().getStringVariableManager().performStringSubstitution(pomDirName);
@@ -193,7 +189,7 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
   public String getVMArguments(ILaunchConfiguration configuration) throws CoreException {
     StringBuffer sb = new StringBuffer();
     if (shouldResolveWorkspaceArtifacts(configuration)) {
-      File state = WorkspaceStateWriter.getStateFile();
+      File state = MavenPlugin.getDefault().getMavenProjectManager().getWorkspaceStateFile();
       sb.append("-Dm2eclipse.workspace.state=\"").append(state.getAbsolutePath()).append("\"");
     }
     sb.append(" ").append(super.getVMArguments(configuration));
@@ -342,7 +338,7 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
    * 
    * Adapted from org.eclipse.ui.externaltools.internal.program.launchConfigurations.BackgroundResourceRefresher
    */
-  public class BackgroundResourceRefresher implements IDebugEventSetListener  {
+  public static class BackgroundResourceRefresher implements IDebugEventSetListener  {
     final ILaunchConfiguration configuration;
     final IProcess process;
     
@@ -440,7 +436,9 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
         try {
           embedder.resolve(artifact, Collections.EMPTY_LIST, embedder.getLocalRepository());
         } catch(ArtifactResolutionException ex) {
+          MavenPlugin.log("Artifact resolution error " + artifact, ex);
         } catch(ArtifactNotFoundException ex) {
+          MavenPlugin.log("Artifact not found " + artifact, ex);
         }
         file = artifact.getFile();
       }

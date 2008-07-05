@@ -60,8 +60,6 @@ public class MavenPomSelectionComponent extends Composite {
 
   TreeViewer searchResultViewer = null;
 
-  Set<Artifact> artifacts;
-
   /**
    * One of 
    *   {@link IndexManager#SEARCH_ARTIFACT}, 
@@ -69,8 +67,6 @@ public class MavenPomSelectionComponent extends Composite {
    */
   String queryType;
   
-  String queryText;
-
   SearchJob searchJob;
 
   private IStatus status;
@@ -125,9 +121,7 @@ public class MavenPomSelectionComponent extends Composite {
   // this.artifacts = artifacts;
   
   public void init(String queryText, String queryType, Set<Artifact> artifacts) {
-    this.queryText = queryText;
     this.queryType = queryType;
-    this.artifacts = artifacts;
     
     if(queryText != null) {
       searchText.setText(queryText);

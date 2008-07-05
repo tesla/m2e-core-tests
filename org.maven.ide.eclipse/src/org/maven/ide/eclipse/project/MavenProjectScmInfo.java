@@ -41,7 +41,7 @@ public class MavenProjectScmInfo extends MavenProjectInfo {
   }
 
   public boolean equals(Object obj) {
-    if(obj.getClass()==MavenProjectScmInfo.class) {
+    if(obj instanceof MavenProjectScmInfo) {
       MavenProjectScmInfo info = (MavenProjectScmInfo) obj;
       return folderUrl.equals(info.getFolderUrl());
     }

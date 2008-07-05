@@ -175,10 +175,8 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
       throws CoreException {
     final IProject project = (IProject) delta.getResource();
 
-    // refresh projects if metadata changes
-    IPath[] metadata = MavenProjectManagerImpl.METADATA_PATH;
-    for (int i = 0; i < metadata.length; i++) {
-      if (delta.findMember(metadata[i]) != null) {
+    for(IPath path : MavenProjectManagerImpl.METADATA_PATH) {
+      if (delta.findMember(path) != null) {
         removeProjects.add(project);
         return;
       }

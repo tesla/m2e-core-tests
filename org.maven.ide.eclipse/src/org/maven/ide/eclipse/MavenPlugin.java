@@ -53,6 +53,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import org.maven.ide.eclipse.container.MavenClasspathVariableInitializer;
 import org.maven.ide.eclipse.embedder.AbstractMavenEmbedderListener;
+import org.maven.ide.eclipse.embedder.ArchetypeCatalogFactory;
 import org.maven.ide.eclipse.embedder.ArchetypeManager;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
@@ -62,6 +63,8 @@ import org.maven.ide.eclipse.index.IndexListener;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.internal.ExtensionReader;
 import org.maven.ide.eclipse.internal.console.MavenConsoleImpl;
+import org.maven.ide.eclipse.internal.embedder.MavenEmbeddedRuntime;
+import org.maven.ide.eclipse.internal.embedder.MavenWorkspaceRuntime;
 import org.maven.ide.eclipse.internal.index.IndexInfoWriter;
 import org.maven.ide.eclipse.internal.index.NexusIndexManager;
 import org.maven.ide.eclipse.internal.launch.MavenLaunchConfigurationListener;
@@ -150,7 +153,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   private MavenProjectManagerRefreshJob mavenBackgroundJob;
 
   private ArchetypeManager archetypeManager;
-  
+
 
   public MavenPlugin() {
     plugin = this;
@@ -170,7 +173,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     }
 
     this.runtimeManager = new MavenRuntimeManager(getPreferenceStore());
-
+    
     this.embedderManager = new MavenEmbedderManager(console, runtimeManager);
     this.embedderManager.addListener(new AbstractMavenEmbedderListener() {
       public void workspaceEmbedderInvalidated() {
@@ -178,13 +181,17 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
       }
     });
 
+    this.runtimeManager.setEmbeddedRuntime(new MavenEmbeddedRuntime(getBundleContext()));
+    
     File stateLocationDir = getStateLocation().toFile();
     
     this.archetypeManager = new ArchetypeManager(new File(stateLocationDir, PREFS_ARCHETYPES));
-    this.archetypeManager.addArchetypeCatalogFactory(new ArchetypeManager.NexusIndexerCatalogFactory());
-    this.archetypeManager.addArchetypeCatalogFactory(new ArchetypeManager.InternalCatalogFactory());
-    this.archetypeManager.addArchetypeCatalogFactory(new ArchetypeManager.DefaultLocalCatalogFactory());
-    ExtensionReader.readArchetypeExtensions(archetypeManager);
+    this.archetypeManager.addArchetypeCatalogFactory(new ArchetypeCatalogFactory.NexusIndexerCatalogFactory());
+    this.archetypeManager.addArchetypeCatalogFactory(new ArchetypeCatalogFactory.InternalCatalogFactory());
+    this.archetypeManager.addArchetypeCatalogFactory(new ArchetypeCatalogFactory.DefaultLocalCatalogFactory());
+    for(ArchetypeCatalogFactory archetypeCatalogFactory : ExtensionReader.readArchetypeExtensions()) {
+      archetypeManager.addArchetypeCatalogFactory(archetypeCatalogFactory);
+    }
     try {
       this.archetypeManager.readCatalogs();
     } catch (Exception ex) {
@@ -214,11 +221,13 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     workspace.addResourceChangeListener(mavenBackgroundJob, IResourceChangeEvent.POST_CHANGE
         | IResourceChangeEvent.PRE_CLOSE | IResourceChangeEvent.PRE_DELETE);
 
-    this.projectManager = new MavenProjectManager(managerImpl, mavenBackgroundJob);
-    this.projectManager.addMavenProjectChangedListener(new WorkspaceStateWriter());
+    this.projectManager = new MavenProjectManager(managerImpl, mavenBackgroundJob, stateLocationDir);
+    this.projectManager.addMavenProjectChangedListener(new WorkspaceStateWriter(projectManager));
     this.projectManager.refresh(new MavenUpdateRequest(workspace.getRoot().getProjects(), //
         true /*offline*/, false /* updateSnapshots */));
 
+    this.runtimeManager.setWorkspaceRuntime(new MavenWorkspaceRuntime(projectManager, embedderManager));
+    
     this.buildpathManager = new BuildPathManager(embedderManager, console, projectManager, indexManager, modelManager,
         runtimeManager);
     workspace.addResourceChangeListener(buildpathManager, IResourceChangeEvent.PRE_DELETE);

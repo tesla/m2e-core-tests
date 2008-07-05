@@ -95,4 +95,36 @@ public abstract class ScmHandler implements Comparable<ScmHandler>, IExecutableE
     return -1;
   }
 
+  public int hashCode() {
+    final int prime = 31;
+    int result = prime + this.priority;
+    return prime * result + ((this.type == null) ? 0 : this.type.hashCode());
+  }
+
+  public boolean equals(Object obj) {
+    if(this == obj) {
+      return true;
+    }
+    if(obj == null) {
+      return false;
+    }
+    if(getClass() != obj.getClass()) {
+      return false;
+    }
+    ScmHandler other = (ScmHandler) obj;
+    if(this.priority != other.priority) {
+      return false;
+    }
+    if(this.type == null) {
+      if(other.type != null) {
+        return false;
+      }
+    } else if(!this.type.equals(other.type)) {
+      return false;
+    }
+    return true;
+  }
+  
+  
+
 }

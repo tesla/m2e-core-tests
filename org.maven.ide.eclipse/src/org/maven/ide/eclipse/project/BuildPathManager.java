@@ -210,7 +210,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     monitor.setTaskName("Setting classpath containers");
     for (int i = 0; i < events.length; i++) {
       MavenProjectChangedEvent event = events[i];
-      IFile pom = (IFile) event.getSource();
+      IFile pom = event.getSource();
       IProject project = pom.getProject();
       if (project.isAccessible() && projects.add(project)) {
         updateClasspath(project, monitor);
@@ -358,7 +358,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
         }
         
         boolean downloadSources = srcPath==null && runtimeManager.isDownloadSources();
-        boolean downloadJavaDoc = javaDocUrl==null && runtimeManager.isDownloadJavadoc();
+        boolean downloadJavaDoc = javaDocUrl==null && runtimeManager.isDownloadJavaDoc();
         downloadSources(mavenProject.getProject(), a, downloadSources, downloadJavaDoc);
 
         for (Iterator<AbstractClasspathConfigurator> ci = configurators.iterator(); ci.hasNext(); ) {
@@ -570,7 +570,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
   }
 
   public void sourcesDownloaded(DownloadSourceEvent event, IProgressMonitor monitor) throws CoreException {
-    IProject project = (IProject) event.getSource();
+    IProject project = event.getSource();
     IJavaProject javaProject = JavaCore.create(project);
 
     MavenProjectFacade mavenProject = projectManager.create(project, monitor);
@@ -687,7 +687,10 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
   public void resourceChanged(IResourceChangeEvent event) {
     int type = event.getType();
     if(IResourceChangeEvent.PRE_DELETE == type) {
-      getSourceAttachmentPropertiesFile((IProject) event.getResource()).delete();
+      File file = getSourceAttachmentPropertiesFile((IProject) event.getResource());
+      if(!file.delete()) {
+        MavenPlugin.log("Can't delete " + file.getAbsolutePath(), null);
+      }
     }
   }
 

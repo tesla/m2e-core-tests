@@ -55,6 +55,7 @@ import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.project.IMavenProjectVisitor;
 import org.maven.ide.eclipse.project.MavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
+import org.maven.ide.eclipse.wizards.MavenRepositorySearchDialog;
 
 
 public class MavenDependencyResolver implements IQuickAssistProcessor {

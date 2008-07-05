@@ -191,6 +191,7 @@ public class LegacyIndexManager extends IndexManager {
       try {
         reader = IndexReader.open(indexDir);
         return true;
+      } catch(RuntimeException ex) {
       } catch(Exception ex) {
         // ignore
       } finally {

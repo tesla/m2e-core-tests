@@ -31,7 +31,6 @@ import org.maven.ide.eclipse.project.BuildPathManager;
 import org.maven.ide.eclipse.project.MavenProjectPomScanner;
 import org.maven.ide.eclipse.project.MavenProjectScmInfo;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
-import org.maven.ide.eclipse.scm.MavenProjectCheckoutJob;
 
 
 /**

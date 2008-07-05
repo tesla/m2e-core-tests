@@ -49,6 +49,8 @@ import org.maven.ide.eclipse.project.ResolverConfiguration;
 
 public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
   
+  private static final String TESTS_PROJECT_CLASSIFIER = "tests";
+
   private static final String THIS_PROJECT_CLASSIFIER = "";
 
   private static final Path MAVEN2_CONTAINER_PATH = new Path(MavenPlugin.CONTAINER_ID);
@@ -276,13 +278,13 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
   }
 
   private boolean isMainClassifier(String classifier) {
-    return THIS_PROJECT_CLASSIFIER == classifier // main project
+    return THIS_PROJECT_CLASSIFIER.equals(classifier) // main project
         || classifier == null; // default classifier
   }
 
   private boolean isTestClassifier(String classifier) {
-    return THIS_PROJECT_CLASSIFIER == classifier // main project
-        || "tests".equals(classifier) // tests classifier
+    return THIS_PROJECT_CLASSIFIER.equals(classifier) // main project
+        || TESTS_PROJECT_CLASSIFIER.equals(classifier) // tests classifier
         || classifier != null; // unknown classifier
   }
 

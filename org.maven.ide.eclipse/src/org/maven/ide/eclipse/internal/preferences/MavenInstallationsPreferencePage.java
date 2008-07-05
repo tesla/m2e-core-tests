@@ -267,7 +267,7 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
         runtimesViewer.refresh();
         
         if(runtimesViewer.getSelection().isEmpty()) {
-          defaultRuntime = MavenRuntime.EMBEDDED;
+          defaultRuntime = runtimeManager.getRuntime(MavenRuntimeManager.EMBEDDED);
           runtimesViewer.setChecked(defaultRuntime, true);
         }
       }

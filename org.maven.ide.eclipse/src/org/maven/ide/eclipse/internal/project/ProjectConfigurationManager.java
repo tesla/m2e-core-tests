@@ -356,7 +356,9 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     // XXX Archetyper don't allow to specify project folder
     String projectFolder = location.append(artifactId).toFile().getAbsolutePath();
     
-    LocalProjectScanner scanner = new LocalProjectScanner(workspaceRoot.getLocation().toFile(), projectFolder, true);
+    MavenPlugin mavenPlugin = MavenPlugin.getDefault();
+    LocalProjectScanner scanner = new LocalProjectScanner(workspaceRoot.getLocation().toFile(), projectFolder, true,
+        mavenPlugin.getMavenModelManager(), mavenPlugin.getConsole());
     try {
       scanner.run(monitor);
     } catch (InterruptedException e) {

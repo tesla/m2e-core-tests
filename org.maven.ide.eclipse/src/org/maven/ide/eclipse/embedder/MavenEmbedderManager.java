@@ -118,9 +118,12 @@ public class MavenEmbedderManager {
   //    }
     
     if(!localRepositoryDir.exists()) {
-      localRepositoryDir.mkdirs();
+      boolean created = localRepositoryDir.mkdirs();
+      if(!created) {
+        console.logError("Can'c create local Maven repository folder " + localRepository);
+      }
     }
-    if(!localRepositoryDir.isDirectory()) {
+    if(localRepositoryDir.exists() && !localRepositoryDir.isDirectory()) {
       console.logError("Local repository "+localRepository+" is not a directory");
     }
     

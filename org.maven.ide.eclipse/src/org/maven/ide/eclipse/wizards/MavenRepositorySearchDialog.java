@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.actions;
+package org.maven.ide.eclipse.wizards;
 
 import java.util.Collections;
 import java.util.Set;
@@ -30,7 +30,6 @@ import org.apache.maven.artifact.Artifact;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
-import org.maven.ide.eclipse.wizards.MavenPomSelectionComponent;
 
 
 /**
