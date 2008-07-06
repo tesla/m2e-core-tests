@@ -75,8 +75,8 @@ import org.maven.ide.components.pom.ProfilesType;
 import org.maven.ide.components.pom.Reporting;
 import org.maven.ide.components.pom.Repositories;
 import org.maven.ide.components.pom.StringModules;
-import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.OpenPomAction;
+import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.editor.composites.BuildComposite;
 import org.maven.ide.eclipse.editor.composites.DependenciesComposite;
@@ -127,7 +127,7 @@ public class ProfilesPage extends MavenPomEditorPage {
   private IAction newModuleProjectAction;
   
   public ProfilesPage(MavenPomEditor pomEditor) {
-    super(pomEditor, MavenPlugin.PLUGIN_ID + ".pom.profiles", "Profiles");
+    super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.profiles", "Profiles");
   }
 
   protected void createFormContent(IManagedForm managedForm) {

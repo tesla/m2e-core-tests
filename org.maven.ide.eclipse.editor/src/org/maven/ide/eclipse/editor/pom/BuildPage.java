@@ -59,9 +59,9 @@ import org.maven.ide.components.pom.BuildBase;
 import org.maven.ide.components.pom.Extension;
 import org.maven.ide.components.pom.ExtensionsType;
 import org.maven.ide.components.pom.PomFactory;
-import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.actions.OpenUrlAction;
+import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.editor.composites.BuildComposite;
 import org.maven.ide.eclipse.editor.composites.DependencyLabelProvider;
@@ -102,7 +102,7 @@ public class BuildPage extends MavenPomEditorPage {
   
   
   public BuildPage(MavenPomEditor pomEditor) {
-    super(pomEditor, MavenPlugin.PLUGIN_ID + ".pom.build", "Build");
+    super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.build", "Build");
   }
 
   protected void createFormContent(IManagedForm managedForm) {

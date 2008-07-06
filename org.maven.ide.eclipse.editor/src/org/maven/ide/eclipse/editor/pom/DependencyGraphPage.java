@@ -55,8 +55,8 @@ import org.eclipse.zest.layouts.algorithms.CompositeLayoutAlgorithm;
 import org.eclipse.zest.layouts.algorithms.DirectedGraphLayoutAlgorithm;
 import org.eclipse.zest.layouts.algorithms.HorizontalShift;
 import org.eclipse.zest.layouts.algorithms.RadialLayoutAlgorithm;
-import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.OpenPomAction;
+import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
 
 /**
@@ -101,7 +101,7 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
 
 
   public DependencyGraphPage(MavenPomEditor pomEditor) {
-    super(pomEditor, MavenPlugin.PLUGIN_ID + ".dependency.graph", "Dependency Graph");
+    super(pomEditor, IMavenConstants.PLUGIN_ID + ".dependency.graph", "Dependency Graph");
     this.pomEditor = pomEditor;
   }
   

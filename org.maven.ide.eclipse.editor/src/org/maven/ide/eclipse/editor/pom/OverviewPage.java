@@ -70,8 +70,8 @@ import org.maven.ide.components.pom.Parent;
 import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.Properties;
 import org.maven.ide.components.pom.Scm;
-import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.OpenPomAction;
+import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.editor.composites.ListEditorComposite;
 import org.maven.ide.eclipse.editor.composites.ListEditorContentProvider;
@@ -140,7 +140,7 @@ public class OverviewPage extends MavenPomEditorPage {
 //  CiManagement ciManagement;
 
   public OverviewPage(MavenPomEditor pomEditor) {
-    super(pomEditor, MavenPlugin.PLUGIN_ID + ".pom.overview", "Overview");
+    super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.overview", "Overview");
   }
 
   protected void createFormContent(IManagedForm managedForm) {
