@@ -43,6 +43,7 @@ import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IStorage;
@@ -67,17 +68,22 @@ import org.eclipse.emf.edit.provider.ComposedAdapterFactory;
 import org.eclipse.emf.edit.provider.ReflectiveItemProviderAdapterFactory;
 import org.eclipse.emf.edit.provider.resource.ResourceItemProviderAdapterFactory;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.search.ui.text.ISearchEditorAccess;
+import org.eclipse.search.ui.text.Match;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IShowEditorInput;
 import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.IURIEditorInput;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.editor.FormEditor;
 import org.eclipse.ui.forms.editor.IFormPage;
+import org.eclipse.ui.ide.IGotoMarker;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.progress.UIJob;
 import org.eclipse.wst.common.internal.emf.resource.EMF2DOMRenderer;
@@ -112,7 +118,7 @@ import org.w3c.dom.NodeList;
  * @author Eugene Kuleshov
  */
 @SuppressWarnings("restriction")
-public class MavenPomEditor extends FormEditor implements IResourceChangeListener {
+public class MavenPomEditor extends FormEditor implements IResourceChangeListener, IShowEditorInput, IGotoMarker, ISearchEditorAccess {
 
   OverviewPage overviewPage;
   
@@ -153,6 +159,8 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   private AdapterFactory adapterFactory;
 
   private AdapterFactoryEditingDomain editingDomain;
+  
+  private int sourcePageIndex;
   
   public MavenPomEditor() {
     ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
@@ -226,7 +234,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     sourcePage.setEditorPart(this);
 
     try {
-      int sourcePageIndex = addPage(sourcePage, getEditorInput());
+      sourcePageIndex = addPage(sourcePage, getEditorInput());
       setPageText(sourcePageIndex, "pom.xml");
       sourcePage.update();
       try {
@@ -694,6 +702,31 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       }
     }
     return null;
+  }
+  
+  // IShowEditorInput
+  
+  public void showEditorInput(IEditorInput editorInput) {
+    // could activate different tabs based on the editor input
+  }  
+
+  // IGotoMarker
+  
+  public void gotoMarker(IMarker marker) {
+    // TODO use selection to activate corresponding form page elements
+    setActivePage(sourcePageIndex);
+    IGotoMarker adapter = (IGotoMarker) sourcePage.getAdapter(IGotoMarker.class);
+    adapter.gotoMarker(marker);
+  }
+
+  // ISearchEditorAccess
+  
+  public IDocument getDocument(Match match) {
+    return sourcePage.getDocumentProvider().getDocument(getEditorInput());
+  }
+  
+  public IAnnotationModel getAnnotationModel(Match match) {
+    return sourcePage.getDocumentProvider().getAnnotationModel(getEditorInput());
   }
   
 }
