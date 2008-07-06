@@ -271,7 +271,7 @@ public class OverviewPage extends MavenPomEditorPage {
         // TODO calculate current list of artifacts for the project
         Set<Artifact> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getEditorSite().getShell(), //
-            "Add Dependency", IndexManager.SEARCH_ARTIFACT, artifacts, true);
+            "Add Dependency", IndexManager.SEARCH_ARTIFACT, artifacts, false);
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {
@@ -849,7 +849,7 @@ public class OverviewPage extends MavenPomEditorPage {
     ValueProvider<Model> modelProvider = new ValueProvider.DefaultValueProvider<Model>(model);
     setModifyListener(artifactGroupIdText, modelProvider, POM_PACKAGE.getModel_GroupId(), "");
     setModifyListener(artifactIdText, modelProvider, POM_PACKAGE.getModel_ArtifactId(), "");
-    setModifyListener(artifactVersionText, modelProvider, POM_PACKAGE.getModel_ModelVersion(), "");
+    setModifyListener(artifactVersionText, modelProvider, POM_PACKAGE.getModel_Version(), "");
     setModifyListener(artifactPackagingCombo, modelProvider, POM_PACKAGE.getModel_Packaging(), "jar");
     
     setModifyListener(projectNameText, modelProvider, POM_PACKAGE.getModel_Name(), "");
