@@ -60,6 +60,7 @@ import org.maven.ide.components.pom.Parent;
 import org.maven.ide.components.pom.PomPackage;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.OpenPomAction;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.project.MavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
@@ -140,11 +141,11 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
           OpenPomAction.openEditor(editorInput, name);
           
         } catch(CoreException ex) {
-          MavenPlugin.log(ex);
+          MavenLogger.log(ex);
         } catch(MavenEmbedderException ex) {
-          MavenPlugin.log("Unable to read Maven pom", ex);
+          MavenLogger.log("Unable to read Maven pom", ex);
         } catch(IOException ex) {
-          MavenPlugin.log("Unable to create Effective POM", ex);
+          MavenLogger.log("Unable to create Effective POM", ex);
         }
       }
     });
@@ -188,7 +189,7 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
                     loadData();
                     registerListeners();
                   } catch(Throwable e) {
-                    MavenPlugin.log("Error loading data", e);
+                    MavenLogger.log("Error loading data", e);
                   } finally {
                     updatingModel = false;
                   }
@@ -196,7 +197,7 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
               });
             }
           } catch(final CoreException ex) {
-            MavenPlugin.log(ex);
+            MavenLogger.log(ex);
             getPartControl().getDisplay().asyncExec(new Runnable() {
               public void run() {
                 getManagedForm().getForm().setMessage(ex.getMessage(), IMessageProvider.ERROR);
@@ -251,7 +252,7 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
       }
 
     } catch(Exception ex) {
-      MavenPlugin.log("Can't update view", ex);
+      MavenLogger.log("Can't update view", ex);
     } finally {
       updatingModel = false;
     }

@@ -28,7 +28,7 @@ import org.apache.maven.model.Build;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.project.MavenProject;
 
-import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.project.MavenRunnable;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 
@@ -59,9 +59,9 @@ public class MavenProjectConfigurator extends AbstractProjectConfigurator {
       if(mavenPlugin != null) {
         IFile pomFile = request.getPom();
         ResolverConfiguration resolverConfiguration = request.getResolverConfiguration();
-        MavenPlugin plugin = MavenPlugin.getDefault();
+        // MavenPlugin plugin = MavenPlugin.getDefault();
         try {
-          plugin.getMavenProjectManager().execute(embedder, pomFile, resolverConfiguration, //
+          projectManager.execute(embedder, pomFile, resolverConfiguration, //
               new MavenRunnable() {
                 public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request) {
                   request.setGoals(goals);
@@ -70,8 +70,8 @@ public class MavenProjectConfigurator extends AbstractProjectConfigurator {
               }, monitor);
         } catch(Exception ex) {
           String msg = ex.getMessage() == null ? ex.toString() : ex.getMessage();
-          plugin.getConsole().logError(msg);
-          MavenPlugin.log(msg, ex);
+          console.logError(msg);
+          MavenLogger.log(msg, ex);
         }
 
         try {
@@ -80,8 +80,8 @@ public class MavenProjectConfigurator extends AbstractProjectConfigurator {
           IStatus status = ex.getStatus();
           String msg = status.getMessage();
           Throwable t = status.getException();
-          plugin.getConsole().logError(msg + (t == null ? "" : "; " + t.toString()));
-          MavenPlugin.log(ex);
+          console.logError(msg + (t == null ? "" : "; " + t.toString()));
+          MavenLogger.log(ex);
         }
       }
     }
@@ -108,7 +108,7 @@ public class MavenProjectConfigurator extends AbstractProjectConfigurator {
         return;
       }
     }
-    MavenPlugin.log("Unable to parse configuration for project configurator " + getId() + "; " + data, null);
+    MavenLogger.log("Unable to parse configuration for project configurator " + getId() + "; " + data, null);
   }
 
 }

@@ -23,7 +23,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
-import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
 
 public class MavenBuilderTest extends AsbtractMavenProjectTestCase {
 
@@ -170,7 +170,7 @@ public class MavenBuilderTest extends AsbtractMavenProjectTestCase {
     assertEquals("1.0-SNAPSHOT.${timestamp}", properties.getProperty("buildVersion"));
 
     IScopeContext projectScope = new ProjectScope(project);
-    IEclipsePreferences projectNode = projectScope.getNode(MavenPlugin.PLUGIN_ID);
+    IEclipsePreferences projectNode = projectScope.getNode(IMavenConstants.PLUGIN_ID);
     // MavenPreferenceConstants.P_GOAL_ON_RESOURCE_FILTER stupid classpath access restrictions!!!
     projectNode.put("eclipse.m2.goalOnResourceFilter", "process-resources resources:testResources");
 

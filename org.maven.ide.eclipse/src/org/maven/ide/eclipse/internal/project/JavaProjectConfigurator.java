@@ -54,13 +54,11 @@ import org.apache.maven.model.PluginManagement;
 import org.apache.maven.model.Resource;
 import org.apache.maven.project.MavenProject;
 
-import org.maven.ide.eclipse.MavenConsole;
-import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
+import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.project.BuildPathManager;
 import org.maven.ide.eclipse.project.IMavenProjectVisitor;
 import org.maven.ide.eclipse.project.MavenProjectFacade;
-import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.MavenRunnable;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
@@ -73,27 +71,9 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
   private static final List<String> SOURCES = Arrays.asList("1.1,1.2,1.3,1.4,1.5,1.6,1.7".split(","));
   private static final List<String> TARGETS = Arrays.asList("1.1,1.2,1.3,1.4,jsr14,1.5,1.6,1.7".split(","));
 
-  final MavenProjectManager projectManager;
-
-  final MavenRuntimeManager runtimeManager;
-
-  final MavenConsole console;
-  
-  final BuildPathManager buildPathManager;
-
-  public JavaProjectConfigurator() {
-    MavenPlugin plugin = MavenPlugin.getDefault();
-    projectManager = plugin.getMavenProjectManager();
-    runtimeManager = plugin.getMavenRuntimeManager();
-    buildPathManager = plugin.getBuildpathManager();
-    console = plugin.getConsole();
-  }
-
   public void configure(MavenEmbedder embedder, ProjectConfigurationRequest request, IProgressMonitor monitor) {
     IProject project = request.getProject();
     ResolverConfiguration configuration = request.getResolverConfiguration();
-
-    MavenRuntimeManager runtimeManager = MavenPlugin.getDefault().getMavenRuntimeManager();
 
     String goalOnImport = "";
     if (request.isProjectConfigure()) {
@@ -169,7 +149,7 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
     } catch(Exception ex) {
       String msg = "Unable to update source folders " + project.getName() + "; " + ex.toString();
       console.logMessage(msg);
-      MavenPlugin.log(msg, ex);
+      MavenLogger.log(msg, ex);
 
     } finally {
       monitor.done();
@@ -302,7 +282,7 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
   private MavenProject generateSourceEntries(MavenEmbedder mavenEmbedder, final IProject project,
       final Set<IClasspathEntry> entries, final Set<String> sources, final ResolverConfiguration configuration,
       final String goalsToExecute, IProgressMonitor monitor) throws CoreException {
-    IFile pomResource = project.getFile(MavenPlugin.POM_FILE_NAME);
+    IFile pomResource = project.getFile(IMavenConstants.POM_FILE_NAME);
 
     console.logMessage("Generating sources " + pomResource.getFullPath());
 
@@ -348,7 +328,7 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
       for(Exception ex : exceptions) {
         String msg = "Build error for " + pomResource.getFullPath();
         console.logError(msg + "; " + ex.toString());
-        MavenPlugin.log(msg, ex);
+        MavenLogger.log(msg, ex);
       }
     }
 
@@ -363,7 +343,7 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
       throw new OperationCanceledException();
     }
 
-    IFile pomResource = project.getFile(MavenPlugin.POM_FILE_NAME);
+    IFile pomResource = project.getFile(IMavenConstants.POM_FILE_NAME);
 
     MavenProject mavenProject = null;
 
@@ -399,7 +379,7 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
       } catch(Exception ex2) {
         String msg = "Unable to read project " + pomResource.getFullPath();
         console.logError(msg + "; " + ex2.toString());
-        MavenPlugin.log(msg, ex2);
+        MavenLogger.log(msg, ex2);
         return null;
       }
     }

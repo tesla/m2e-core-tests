@@ -34,7 +34,7 @@ import org.apache.maven.model.Build;
 import org.apache.maven.model.Resource;
 import org.apache.maven.project.MavenProject;
 
-import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerImpl;
 
 
@@ -110,7 +110,7 @@ public class MavenProjectFacade {
       manager.execute(this, goals, false, monitor);
       refreshBuildDirectory(monitor); // XXX only need to refresh classes and test-classes
     } catch(MavenEmbedderException ex) {
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, ex.getMessage(), ex));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, ex.getMessage(), ex));
     }
   }
 
@@ -198,7 +198,7 @@ public class MavenProjectFacade {
               && resolverConfiguration.shouldIncludeModules())) {
         IFile pom = getPom();
         for(String moduleName : getMavenProjectModules()) {
-          IFile modulePom = pom.getParent().getFile(new Path(moduleName).append(MavenPlugin.POM_FILE_NAME));
+          IFile modulePom = pom.getParent().getFile(new Path(moduleName).append(IMavenConstants.POM_FILE_NAME));
           MavenProjectFacade moduleFacade = manager.create(modulePom, false, null);
           if(moduleFacade == null && ((flags & IMavenProjectVisitor.LOAD) > 0)) {
             moduleFacade = manager.create(modulePom, true, new NullProgressMonitor());
@@ -285,7 +285,7 @@ public class MavenProjectFacade {
       manager.execute(this, goals, true, monitor);
       refreshBuildDirectory(monitor);
     } catch(MavenEmbedderException ex) {
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, ex.getMessage(), ex));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, ex.getMessage(), ex));
     }
   }
 

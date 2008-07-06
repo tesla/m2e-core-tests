@@ -21,7 +21,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
-import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.index.IndexInfo;
 import org.maven.ide.eclipse.index.IndexManager;
 
@@ -73,7 +73,7 @@ public class IndexUnpackerJob extends Job {
           extensionIndexTime = indexManager.getIndexArchiveTime(indexArchive.openStream());
           extensionIndexInfo.setUpdateTime(extensionIndexTime);
         } catch(IOException ex) {
-          MavenPlugin.log("Unable to read creation time for index " + indexName, ex);
+          MavenLogger.log("Unable to read creation time for index " + indexName, ex);
         }
         
         boolean replace = overwrite || indexInfo.isNew();
@@ -88,13 +88,13 @@ public class IndexUnpackerJob extends Job {
           File index = new File(indexManager.getBaseIndexDir(), indexName);
           if(!index.exists()) {
             if(!index.mkdirs()) {
-              MavenPlugin.log("Can't create index folder " + index.getAbsolutePath(), null);
+              MavenLogger.log("Can't create index folder " + index.getAbsolutePath(), null);
             }
           } else {
             File[] files = index.listFiles();
             for(int j = 0; j < files.length; j++ ) {
               if(!files[j].delete()) {
-                MavenPlugin.log("Can't delete " + files[j].getAbsolutePath(), null);
+                MavenLogger.log("Can't delete " + files[j].getAbsolutePath(), null);
               }
             }
           }
@@ -109,7 +109,7 @@ public class IndexUnpackerJob extends Job {
             indexManager.addIndex(extensionIndexInfo, false);
             
           } catch(Exception ex) {
-            MavenPlugin.log("Unable to unpack index " + indexName, ex);
+            MavenLogger.log("Unable to unpack index " + indexName, ex);
           } finally {
             close(is);
           }
@@ -125,7 +125,7 @@ public class IndexUnpackerJob extends Job {
         is.close();
       }
     } catch(IOException ex) {
-      MavenPlugin.log("Unable to close stream", ex);
+      MavenLogger.log("Unable to close stream", ex);
     }
   }
 

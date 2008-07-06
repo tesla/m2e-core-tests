@@ -42,7 +42,7 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.Messages;
+import org.maven.ide.eclipse.core.Messages;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 
 

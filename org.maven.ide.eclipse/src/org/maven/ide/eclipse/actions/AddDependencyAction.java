@@ -30,6 +30,8 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Dependency;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
@@ -49,7 +51,7 @@ public class AddDependencyAction implements IObjectActionDelegate {
     Object o = selection.iterator().next();
     IFile file;
     if(o instanceof IProject) {
-      file = ((IProject) o).getFile(MavenPlugin.POM_FILE_NAME);
+      file = ((IProject) o).getFile(IMavenConstants.POM_FILE_NAME);
     } else if(o instanceof IFile) {
       file = (IFile) o;
     } else {
@@ -71,7 +73,7 @@ public class AddDependencyAction implements IObjectActionDelegate {
           modelManager.addDependency(file, dependency);
         } catch(Exception ex) {
           String msg = "Can't add dependency to " + file;
-          MavenPlugin.log(msg, ex);
+          MavenLogger.log(msg, ex);
           MessageDialog.openError(Display.getCurrent().getActiveShell(), "Add Dependency", msg);
         }
       }
@@ -87,7 +89,7 @@ public class AddDependencyAction implements IObjectActionDelegate {
       }
     } catch(Exception ex) {
       String msg = "Can't read Maven project";
-      MavenPlugin.log(msg, ex);
+      MavenLogger.log(msg, ex);
       plugin.getConsole().logError(msg + "; " + ex.toString());
     }
     return Collections.emptySet();

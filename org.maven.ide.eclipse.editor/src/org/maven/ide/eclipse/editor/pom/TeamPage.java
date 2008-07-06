@@ -22,7 +22,7 @@ import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.maven.ide.components.pom.ContributorsType;
 import org.maven.ide.components.pom.DevelopersType;
 import org.maven.ide.components.pom.PomFactory;
-import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.editor.composites.TeamComposite;
 
 
@@ -34,7 +34,7 @@ public class TeamPage extends MavenPomEditorPage {
   private TeamComposite teamComposite;
   
   public TeamPage(MavenPomEditor pomEditor) {
-    super(pomEditor, MavenPlugin.PLUGIN_ID + ".pom.team", "Team");
+    super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.team", "Team");
   }
 
   public void dispose() {

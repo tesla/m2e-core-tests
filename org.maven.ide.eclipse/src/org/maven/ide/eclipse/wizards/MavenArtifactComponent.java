@@ -20,7 +20,7 @@ import org.eclipse.swt.widgets.Text;
 
 import org.apache.maven.model.Model;
 
-import org.maven.ide.eclipse.Messages;
+import org.maven.ide.eclipse.core.Messages;
 
 
 public class MavenArtifactComponent extends Composite {

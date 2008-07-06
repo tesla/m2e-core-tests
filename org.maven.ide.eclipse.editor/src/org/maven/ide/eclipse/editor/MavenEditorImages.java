@@ -12,7 +12,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.MavenLogger;
 
 /**
  * @author Eugene Kuleshov
@@ -97,7 +97,7 @@ public class MavenEditorImages {
       }
       return imageDescriptor;
     } catch (Exception ex) {
-      MavenPlugin.log(key, ex);
+      MavenLogger.log(key, ex);
       return null;
     }
   }

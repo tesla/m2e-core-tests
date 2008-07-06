@@ -29,7 +29,8 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
 
-import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
 
 public class MavenProjectManagerRefreshJob extends Job implements IResourceChangeListener, IPreferenceChangeListener {
@@ -91,10 +92,10 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
       return Status.CANCEL_STATUS;
       
     } catch(CoreException ex) {
-      MavenPlugin.log(ex);
+      MavenLogger.log(ex);
       
     } catch(Exception ex) {
-      MavenPlugin.log(ex.getMessage(), ex);
+      MavenLogger.log(ex.getMessage(), ex);
       
     } finally {
       monitor.done();
@@ -146,7 +147,7 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
         try {
           projectChanged(projectDeltas[i], removeProjects, refreshProjects);
         } catch(CoreException ex) {
-          MavenPlugin.log(ex);
+          MavenLogger.log(ex);
         }
       }
       
@@ -185,7 +186,7 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
     delta.accept(new IResourceDeltaVisitor() {
       public boolean visit(IResourceDelta delta) {
         IResource resource = delta.getResource();
-        if(resource instanceof IFile && MavenPlugin.POM_FILE_NAME.equals(resource.getName())) {
+        if(resource instanceof IFile && IMavenConstants.POM_FILE_NAME.equals(resource.getName())) {
           // XXX ignore output folders
           if(delta.getKind() == IResourceDelta.REMOVED 
               || delta.getKind() == IResourceDelta.ADDED

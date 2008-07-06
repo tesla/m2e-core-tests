@@ -41,7 +41,7 @@ import org.eclipse.swt.widgets.Label;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Dependency;
 
-import org.maven.ide.eclipse.Messages;
+import org.maven.ide.eclipse.core.Messages;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;

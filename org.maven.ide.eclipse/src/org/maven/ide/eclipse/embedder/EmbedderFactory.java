@@ -39,64 +39,78 @@ public class EmbedderFactory {
 
   public static MavenEmbedder createMavenEmbedder(ContainerCustomizer customizer, MavenEmbedderLogger logger,
       String globalSettings, String userSettings) throws MavenEmbedderException {
+    Configuration configuration = new DefaultConfiguration();
+    
+    if(globalSettings != null) {
+      configuration.setGlobalSettingsFile(new File(globalSettings));
+    }
+    
+    if(userSettings != null) {
+      configuration.setUserSettingsFile(new File(userSettings));
+    }
+    
+    configuration.setMavenEmbedderLogger(logger);
+    
+    configuration.setConfigurationCustomizer(customizer);
+    
+    return createMavenEmbedder(configuration, null);
+  }
+
+  public static MavenEmbedder createMavenEmbedder(Configuration configuration, ClassLoader classLoader)
+      throws MavenEmbedderException {
     ClassLoader orig = Thread.currentThread().getContextClassLoader();
-    ClassLoader loader = MavenEmbedder.class.getClassLoader();
     try {
-      Thread.currentThread().setContextClassLoader(loader);
-      return createMavenEmbedder(customizer, logger, globalSettings, userSettings, loader);
+      if(classLoader == null) {
+        classLoader = MavenEmbedder.class.getClassLoader();
+      }
+      configuration.setClassLoader(classLoader);
+      verifySettings(configuration);
+      return new MavenEmbedder(configuration);
     } finally {
       Thread.currentThread().setContextClassLoader(orig);
     }
   }
 
-  public static MavenEmbedder createMavenEmbedder(ContainerCustomizer customizer, MavenEmbedderLogger logger,
-      String globalSettings, String userSettings, ClassLoader loader) throws MavenEmbedderException {
-    Configuration configuration = new DefaultConfiguration();
-
-    configuration.setMavenEmbedderLogger(logger);
-    configuration.setClassLoader(loader);
-    configuration.setConfigurationCustomizer(customizer);
-
-    File userSettingsFile;
-    if(userSettings!=null && userSettings.length()>0) {
-      userSettingsFile = new File(userSettings);
-    } else {
+  private static void verifySettings(Configuration configuration) {
+    MavenEmbedderLogger logger = configuration.getMavenEmbedderLogger();
+ 
+    File userSettingsFile = configuration.getUserSettingsFile();
+    if(userSettingsFile==null) {
       userSettingsFile = MavenEmbedder.DEFAULT_USER_SETTINGS_FILE;
     }
     ConfigurationValidationResult userResult = validateConfiguration(userSettingsFile, logger);
     if(userSettingsFile.exists()) {
-      if(userResult.isValid()) {
-        configuration.setUserSettingsFile(userSettingsFile);
-      } else {
-        logger.error("Invalid user settings " + userSettingsFile);
+      if(!userResult.isValid()) {
+        logger.error("Invalid user settings " + userSettingsFile.getAbsolutePath());
         if(userResult.getUserSettingsException() != null) {
           logger.error(userResult.getUserSettingsException().getMessage());
+          configuration.setUserSettingsFile(null);
         }
       }
     } else {
-      logger.info("User settings file does not exist " + userSettingsFile);
+      logger.info("User settings file does not exist " + userSettingsFile.getAbsolutePath());
+      configuration.setUserSettingsFile(null);
     }
-
-    if(globalSettings != null && globalSettings.length() > 0) {
-      File globalSettingsFile = new File(globalSettings);
+ 
+    File globalSettingsFile = configuration.getUserSettingsFile();
+    if(globalSettingsFile != null) {
       if(globalSettingsFile.exists()) {
         ConfigurationValidationResult globalResult = validateConfiguration(globalSettingsFile, logger);
-        if(globalResult.isValid()) {
-          configuration.setGlobalSettingsFile(globalSettingsFile);
-        } else {
-          logger.error("Invalid global settings " + globalSettings);
+        if(!globalResult.isValid()) {
+          logger.error("Invalid global settings " + globalSettingsFile.getAbsolutePath());
           if(globalResult.getUserSettingsException() != null) {
             logger.error(globalResult.getUserSettingsException().getMessage());
           }
+          configuration.setGlobalSettingsFile(null);
         }
       } else {
-        logger.info("Global settings file does not exist " + userSettingsFile);
+        logger.info("Global settings file does not exist " + globalSettingsFile.getAbsolutePath());
+        configuration.setGlobalSettingsFile(null);
       }
     }
-
-    return new MavenEmbedder(configuration);
   }
 
+  
   public static ConfigurationValidationResult validateConfiguration(File file, MavenEmbedderLogger logger) {
     Configuration configuration = new DefaultConfiguration();
     configuration.setMavenEmbedderLogger(logger);

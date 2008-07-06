@@ -32,7 +32,7 @@ import org.xml.sax.helpers.AttributesImpl;
 import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.XMLFilterImpl;
 
-import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArchetypeCatalogFactory;
 import org.maven.ide.eclipse.embedder.ArchetypeCatalogFactory.LocalCatalogFactory;
 import org.maven.ide.eclipse.embedder.ArchetypeCatalogFactory.RemoteCatalogFactory;
@@ -68,11 +68,11 @@ public class ArchetypeCatalogsWriter {
       parser.parse(is, new ArchetypeCatalogsContentHandler(catalogs));
     } catch(SAXException ex) {
       String msg = "Unable to parse Archetype catalogs list";
-      MavenPlugin.log(msg, ex);
+      MavenLogger.log(msg, ex);
       throw new IOException(msg + "; " + ex.getMessage());
     } catch(ParserConfigurationException ex) {
       String msg = "Unable to parse Archetype catalogs list";
-      MavenPlugin.log(msg, ex);
+      MavenLogger.log(msg, ex);
       throw new IOException(msg + "; " + ex.getMessage());
     }
     return catalogs;

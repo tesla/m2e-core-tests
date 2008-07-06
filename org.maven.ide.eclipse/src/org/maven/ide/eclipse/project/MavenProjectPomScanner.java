@@ -29,8 +29,9 @@ import org.apache.maven.model.Parent;
 import org.apache.maven.model.Profile;
 import org.apache.maven.model.Scm;
 
-import org.maven.ide.eclipse.MavenConsole;
-import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.core.MavenConsole;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.index.IndexManager;
@@ -136,7 +137,7 @@ public class MavenProjectPomScanner<T> extends AbstractProjectScanner<MavenProje
         }
         
         int n = connection.lastIndexOf("/");
-        String label = (n == -1 ? connection : connection.substring(n)) + "/" + MavenPlugin.POM_FILE_NAME;
+        String label = (n == -1 ? connection : connection.substring(n)) + "/" + IMavenConstants.POM_FILE_NAME;
         
         addProject(new MavenProjectScmInfo(label, model, null, tag, connection, connection));
 
@@ -144,7 +145,7 @@ public class MavenProjectPomScanner<T> extends AbstractProjectScanner<MavenProje
         addError(ex);
         String msg = "Error reading " + d.getArtifactId();
         console.logError(msg);
-        MavenPlugin.log(msg, ex);
+        MavenLogger.log(msg, ex);
       }
     }    
   }

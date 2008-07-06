@@ -28,8 +28,9 @@ import org.codehaus.plexus.util.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Resource;
 
-import org.maven.ide.eclipse.MavenConsole;
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.project.IMavenProjectVisitor;
 import org.maven.ide.eclipse.project.MavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
@@ -55,8 +56,8 @@ public class MavenBuilder extends IncrementalProjectBuilder {
   @SuppressWarnings("unchecked")
   protected IProject[] build(int kind, Map args, IProgressMonitor monitor) throws CoreException {
     IProject project = getProject();
-    if(project.hasNature(MavenPlugin.NATURE_ID)) {
-      IFile pomResource = project.getFile(MavenPlugin.POM_FILE_NAME);
+    if(project.hasNature(IMavenConstants.NATURE_ID)) {
+      IFile pomResource = project.getFile(IMavenConstants.POM_FILE_NAME);
       if(pomResource == null) {
         console.logError("Project " + project.getName() + " does not have pom.xml");
         return null;

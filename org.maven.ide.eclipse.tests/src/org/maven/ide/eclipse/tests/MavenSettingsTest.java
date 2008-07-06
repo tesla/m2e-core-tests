@@ -80,6 +80,8 @@ public class MavenSettingsTest extends TestCase {
     String localRepositoryDir = embedder.getLocalRepository().getBasedir();
     assertEquals(expectedLocalRepositoryDir, localRepositoryDir);
     
+    settingsWithEnv.delete();
+    
 //    List mirrors = settings.getMirrors();
 //    Mirror mirror = (Mirror) mirrors.get(0);
 //    assertEquals("????", mirror.getUrl());

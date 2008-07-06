@@ -59,8 +59,9 @@ import org.maven.ide.components.pom.Plugins;
 import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.util.PomResourceFactoryImpl;
 import org.maven.ide.components.pom.util.PomResourceImpl;
-import org.maven.ide.eclipse.MavenConsole;
-import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.core.MavenConsole;
+import org.maven.ide.eclipse.core.MavenLogger;
 
 
 /**
@@ -100,8 +101,8 @@ public class MavenModelManager {
 
     } catch(IOException ex) {
       String msg = "Can't load model " + pomFile;
-      MavenPlugin.log(msg, ex);
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
+      MavenLogger.log(msg, ex);
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
     }
   }
 
@@ -119,8 +120,8 @@ public class MavenModelManager {
       return (Model) resource.getContents().get(0);
     } catch(IOException ex) {
       String msg = "Can't load model " + pomFile;
-      MavenPlugin.log(msg, ex);
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
+      MavenLogger.log(msg, ex);
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
     }
   }
 
@@ -131,11 +132,11 @@ public class MavenModelManager {
     } catch(XmlPullParserException ex) {
       String msg = "Model parsing error; " + ex.toString();
       console.logError(msg);
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
     } catch(IOException ex) {
       String msg = "Can't read model; " + ex.toString();
       console.logError(msg);
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
     }
   }
 
@@ -146,11 +147,11 @@ public class MavenModelManager {
     } catch(XmlPullParserException ex) {
       String msg = "Parsing error " + pomFile.getAbsolutePath() + "; " + ex.toString();
       console.logError(msg);
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
     } catch(IOException ex) {
       String msg = "Can't read model " + pomFile.getAbsolutePath() + "; " + ex.toString();
       console.logError(msg);
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
     }
   }
 
@@ -162,11 +163,11 @@ public class MavenModelManager {
     } catch(XmlPullParserException ex) {
       String msg = "Parsing error " + name + "; " + ex.getMessage();
       console.logError(msg);
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
     } catch(IOException ex) {
       String msg = "Can't read model " + name + "; " + ex.toString();
       console.logError(msg);
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
     }
   }
 
@@ -175,7 +176,7 @@ public class MavenModelManager {
     if(pomFile.exists()) {
       String msg = "POM " + pomFileName + " already exists";
       console.logError(msg);
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, null));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, null));
     }
 
     try {
@@ -227,11 +228,11 @@ public class MavenModelManager {
     } catch(RuntimeException ex) {
       String msg = "Can't create model " + pomFileName + "; " + ex.toString();
       console.logError(msg);
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
     } catch(Exception ex) {
       String msg = "Can't create model " + pomFileName + "; " + ex.toString();
       console.logError(msg);
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
     }
   }
 
@@ -283,7 +284,7 @@ public class MavenModelManager {
     } catch(Exception ex) {
       String msg = "Unable to update " + pom;
       console.logError(msg + "; " + ex.getMessage());
-      MavenPlugin.log(msg, ex);
+      MavenLogger.log(msg, ex);
     }
   }
 

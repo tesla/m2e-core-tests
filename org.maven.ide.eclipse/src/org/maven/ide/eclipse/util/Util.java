@@ -12,7 +12,8 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.variables.VariablesPlugin;
-import org.maven.ide.eclipse.MavenPlugin;
+
+import org.maven.ide.eclipse.core.MavenLogger;
 
 
 /**
@@ -53,7 +54,7 @@ public class Util {
     try {
       return VariablesPlugin.getDefault().getStringVariableManager().performStringSubstitution(s);
     } catch(CoreException e) {
-      MavenPlugin.log(e);
+      MavenLogger.log(e);
       return null;
     }
   }

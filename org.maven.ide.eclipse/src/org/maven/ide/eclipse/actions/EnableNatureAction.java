@@ -31,6 +31,8 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPart;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.internal.launch.MavenRuntimeClasspathProvider;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 import org.maven.ide.eclipse.wizards.MavenPomWizard;
@@ -58,9 +60,9 @@ public class EnableNatureAction implements IObjectActionDelegate, IExecutableExt
   }
 
   public void setInitializationData(IConfigurationElement config, String propertyName, Object data) {
-    if(MavenPlugin.INCLUDE_MODULES.equals(data)) {
+    if(IMavenConstants.INCLUDE_MODULES.equals(data)) {
       this.includeModules = true;
-    } else if(MavenPlugin.NO_WORKSPACE_PROJECTS.equals(data)) {
+    } else if(IMavenConstants.NO_WORKSPACE_PROJECTS.equals(data)) {
       this.workspaceProjects = false;
     }
   }
@@ -93,7 +95,7 @@ public class EnableNatureAction implements IObjectActionDelegate, IExecutableExt
   private void enableNature(IProject project, boolean isSingle) {
     try {
       MavenPlugin plugin = MavenPlugin.getDefault();
-      IFile pom = project.getFile(MavenPlugin.POM_FILE_NAME);
+      IFile pom = project.getFile(IMavenConstants.POM_FILE_NAME);
       if(isSingle && !pom.exists()) {
         IWorkbench workbench = plugin.getWorkbench();
 
@@ -121,7 +123,7 @@ public class EnableNatureAction implements IObjectActionDelegate, IExecutableExt
       enableLaunchLonfigurations(project);
 
     } catch(CoreException ex) {
-      MavenPlugin.log(ex);
+      MavenLogger.log(ex);
     }
   }
 

@@ -9,13 +9,17 @@
 package org.maven.ide.eclipse.internal.project;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashSet;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -46,13 +50,15 @@ import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.embedder.MavenEmbedderException;
 import org.apache.maven.model.Model;
 
-import org.maven.ide.eclipse.MavenConsole;
-import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.core.MavenConsole;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.EmbedderFactory;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.index.IndexManager;
+import org.maven.ide.eclipse.internal.ExtensionReader;
 import org.maven.ide.eclipse.internal.embedder.TransferListenerAdapter;
 import org.maven.ide.eclipse.project.BuildPathManager;
 import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
@@ -61,6 +67,7 @@ import org.maven.ide.eclipse.project.LocalProjectScanner;
 import org.maven.ide.eclipse.project.MavenProjectChangedEvent;
 import org.maven.ide.eclipse.project.MavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectInfo;
+import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
@@ -69,13 +76,13 @@ import org.maven.ide.eclipse.project.configurator.ProjectConfigurationRequest;
 import org.maven.ide.eclipse.util.Util;
 
 /**
- * MavenProjectImporter
+ * ProjectConfiguration Manager
  *
  * @author igor
  */
 public class ProjectConfigurationManager implements IProjectConfigurationManager, IMavenProjectChangedListener {
   
-  static final QualifiedName QNAME = new QualifiedName(MavenPlugin.PLUGIN_ID, "ProjectImportManager");
+  static final QualifiedName QNAME = new QualifiedName(IMavenConstants.PLUGIN_ID, "ProjectImportManager");
 
   final MavenModelManager modelManager;
 
@@ -83,22 +90,31 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
 
   final MavenRuntimeManager runtimeManager;
 
-  final MavenProjectManagerImpl projectManager;
+  final MavenProjectManager projectManager;
+  
+  final MavenProjectManagerImpl projectManagerImpl;
 
   final IndexManager indexManager;
 
   final MavenEmbedderManager embedderManager;
+
+  final MavenModelManager mavenModelManager;
+
+  private Set<AbstractProjectConfigurator> configurators;
   
-  public ProjectConfigurationManager(MavenModelManager modelManager, MavenConsole console, 
-        MavenRuntimeManager runtimeManager, MavenProjectManagerImpl projectManager, 
-        IndexManager indexManager, MavenEmbedderManager embedderManager) 
-  {
+  
+  public ProjectConfigurationManager(MavenModelManager modelManager, MavenConsole console,
+      MavenRuntimeManager runtimeManager, MavenProjectManager projectManager,
+      MavenProjectManagerImpl projectManagerImpl, IndexManager indexManager, MavenEmbedderManager embedderManager,
+      MavenModelManager mavenModelManager) {
     this.modelManager = modelManager;
     this.console = console;
     this.runtimeManager = runtimeManager;
     this.projectManager = projectManager;
+    this.projectManagerImpl = projectManagerImpl;
     this.indexManager = indexManager;
     this.embedderManager = embedderManager;
+    this.mavenModelManager = mavenModelManager;
   }
 
   public void importProjects(Collection<MavenProjectInfo> projectInfos, ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException {
@@ -132,7 +148,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
           IFile pom = resolutionContext.pop();
           monitor.subTask(pom.getFullPath().toString());
 
-          projectManager.refresh(embedder, pom, resolutionContext, monitor);
+          projectManagerImpl.refresh(embedder, pom, resolutionContext, monitor);
           monitor.worked(1);
         }
 
@@ -143,9 +159,9 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
           }
 
           IProject project = projects.get(projectInfo);
-          MavenProjectFacade facade = projectManager.create(project, monitor);
+          MavenProjectFacade facade = projectManagerImpl.create(project, monitor);
           if (facade != null) {
-            for(AbstractProjectConfigurator configurator : ProjectConfiguratorFactory.getConfigurators()) {
+            for(AbstractProjectConfigurator configurator : getConfigurators()) {
               if(monitor.isCanceled()) {
                 throw new OperationCanceledException();
               }
@@ -158,10 +174,10 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
         embedder.stop();
       }
 
-      projectManager.notifyProjectChangeListeners(monitor);
+      projectManagerImpl.notifyProjectChangeListeners(monitor);
 
     } catch(MavenEmbedderException ex) {
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, ex.getMessage(), ex));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, ex.getMessage(), ex));
     }
   }
 
@@ -175,12 +191,13 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     try {
       MavenEmbedder embedder = embedderManager.createEmbedder(EmbedderFactory.createExecutionCustomizer());
       try {
-        IFile pom = project.getFile(MavenPlugin.POM_FILE_NAME);
+        IFile pom = project.getFile(IMavenConstants.POM_FILE_NAME);
         if (pom.isAccessible()) {
           // this is for unit tests only, production code should not need to load facade here
-          MavenProjectFacade facade = projectManager.create(pom, true, monitor);
+          MavenProjectFacade facade = projectManagerImpl.create(pom, true, monitor);
           ProjectConfigurationRequest request = new ProjectConfigurationRequest(project, facade.getPom(), facade.getMavenProject(), configuration, true);
-          for(AbstractProjectConfigurator configurator : ProjectConfiguratorFactory.getConfigurators()) {
+          
+          for(AbstractProjectConfigurator configurator : getConfigurators()) {
             if(monitor.isCanceled()) {
               throw new OperationCanceledException();
             }
@@ -191,7 +208,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
         embedder.stop();
       }
     } catch (MavenEmbedderException ex) {
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, ex.getMessage(), ex));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, ex.getMessage(), ex));
     }
   }
 
@@ -201,18 +218,18 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
 
     ArrayList<String> newNatures = new ArrayList<String>();
     newNatures.add(JavaCore.NATURE_ID);
-    newNatures.add(MavenPlugin.NATURE_ID);
+    newNatures.add(IMavenConstants.NATURE_ID);
 
     IProjectDescription description = project.getDescription();
     for(String natureId : description.getNatureIds()) {
-      if(!MavenPlugin.NATURE_ID.equals(natureId) && !JavaCore.NATURE_ID.equals(natureId)) {
+      if(!IMavenConstants.NATURE_ID.equals(natureId) && !JavaCore.NATURE_ID.equals(natureId)) {
         newNatures.add(natureId);
       }
     }
     description.setNatureIds(newNatures.toArray(new String[newNatures.size()]));
     project.setDescription(description, monitor);
     
-    projectManager.setResolverConfiguration(project, configuration);
+    projectManagerImpl.setResolverConfiguration(project, configuration);
 
     IJavaProject javaProject = JavaCore.create(project);
     if(javaProject != null) {
@@ -240,12 +257,12 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
   public void disableMavenNature(IProject project, IProgressMonitor monitor) throws CoreException {
     monitor.subTask("Disable Maven nature");
 
-    project.deleteMarkers(MavenPlugin.MARKER_ID, true, IResource.DEPTH_INFINITE);
+    project.deleteMarkers(IMavenConstants.MARKER_ID, true, IResource.DEPTH_INFINITE);
 
     IProjectDescription description = project.getDescription();
     ArrayList<String> newNatures = new ArrayList<String>();
     for(String natureId : description.getNatureIds()) {
-      if(!MavenPlugin.NATURE_ID.equals(natureId)) {
+      if(!IMavenConstants.NATURE_ID.equals(natureId)) {
         newNatures.add(natureId);
       }
     }
@@ -267,7 +284,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
   }
 
   private static IClasspathEntry createContainerEntry(ResolverConfiguration configuration) {
-    IPath newPath = new Path(MavenPlugin.CONTAINER_ID);
+    IPath newPath = new Path(IMavenConstants.CONTAINER_ID);
 
     return JavaCore.newContainerEntry(newPath);
   }
@@ -299,7 +316,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     monitor.worked(1);
 
     monitor.subTask("Creating the POM file...");
-    IFile pomFile = project.getFile(MavenPlugin.POM_FILE_NAME);    
+    IFile pomFile = project.getFile(IMavenConstants.POM_FILE_NAME);    
     modelManager.createMavenModel(pomFile, model);
     monitor.worked(1);
 
@@ -348,17 +365,16 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     Exception cause = result.getCause();
     if(cause != null) {
       String msg = "Unable to create project from archetype " + archetype.toString();
-      MavenPlugin.log(msg, cause);
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, cause));
+      MavenLogger.log(msg, cause);
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, cause));
     }
     monitor.worked(1);
     
     // XXX Archetyper don't allow to specify project folder
     String projectFolder = location.append(artifactId).toFile().getAbsolutePath();
     
-    MavenPlugin mavenPlugin = MavenPlugin.getDefault();
     LocalProjectScanner scanner = new LocalProjectScanner(workspaceRoot.getLocation().toFile(), projectFolder, true,
-        mavenPlugin.getMavenModelManager(), mavenPlugin.getConsole());
+        mavenModelManager, console);
     try {
       scanner.run(monitor);
     } catch (InterruptedException e) {
@@ -444,9 +460,9 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
       File newProject = new File(projectDir.getParent(), projectName);
       boolean renamed = projectDir.renameTo(newProject);
       if(!renamed) {
-        throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, "Can't rename " + projectDir.getAbsolutePath(), null));
+        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Can't rename " + projectDir.getAbsolutePath(), null));
       }
-      projectInfo.setPomFile(new File(newProject, MavenPlugin.POM_FILE_NAME));
+      projectInfo.setPomFile(new File(newProject, IMavenConstants.POM_FILE_NAME));
       projectDir = newProject;
     }
 
@@ -457,9 +473,9 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
         File newProject = new File(projectDir.getParent(), projectName);
         boolean renamed = projectDir.renameTo(newProject);
         if(!renamed) {
-          throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, "Can't rename " + projectDir.getAbsolutePath(), null));
+          throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Can't rename " + projectDir.getAbsolutePath(), null));
         }
-        projectInfo.setPomFile(new File(newProject, MavenPlugin.POM_FILE_NAME));
+        projectInfo.setPomFile(new File(newProject, IMavenConstants.POM_FILE_NAME));
       }
       project.create(monitor);
     } else {
@@ -473,7 +489,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     }
 
     ResolverConfiguration resolverConfiguration = configuration.getResolverConfiguration();
-    projectManager.setResolverConfiguration(project, resolverConfiguration);
+    projectManagerImpl.setResolverConfiguration(project, resolverConfiguration);
 
     // XXX split maven and java nature configuration
     enableMavenNature(project, resolverConfiguration, monitor);
@@ -482,9 +498,40 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
   }
 
   public void mavenProjectChanged(MavenProjectChangedEvent[] events, IProgressMonitor monitor) {
-    for(AbstractProjectConfigurator configurator : ProjectConfiguratorFactory.getConfigurators()) {
+    for(AbstractProjectConfigurator configurator : getConfigurators()) {
       configurator.mavenProjectChanged(events, monitor);
     }
   }
 
+  public void addProjectConfigurator(AbstractProjectConfigurator configurator) {
+    configurators.add(configurator);
+  }
+  
+  public synchronized Set<AbstractProjectConfigurator> getConfigurators() {
+    if(configurators == null) {
+      configurators = new TreeSet<AbstractProjectConfigurator>(new ProjectConfiguratorComparator());
+      for(AbstractProjectConfigurator projectConfigurator : ExtensionReader.readProjectConfiguratorExtensions()) {
+        projectConfigurator.setProjectManager(projectManager);
+        projectConfigurator.setRuntimeManager(runtimeManager);
+        projectConfigurator.setBuildPathManager(null);
+        projectConfigurator.setConsole(console);
+        
+        configurators.add(projectConfigurator);
+      }
+    }
+    return Collections.unmodifiableSet(configurators);
+  }
+  
+  /**
+   * ProjectConfigurator comparator
+   */
+  static class ProjectConfiguratorComparator implements Comparator<AbstractProjectConfigurator>, Serializable {
+    private static final long serialVersionUID = 1L;
+
+    public int compare(AbstractProjectConfigurator c1, AbstractProjectConfigurator c2) {
+      int res = c1.getPriority() - c2.getPriority();
+      return res==0 ? c1.getId().compareTo(c2.getId()) : res;
+    }
+  }
+  
 }

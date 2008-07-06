@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.Locale;
 
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -27,20 +28,20 @@ import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 
-import org.maven.ide.eclipse.MavenConsole;
-import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.util.ITraceable;
 import org.maven.ide.eclipse.util.Tracer;
 
 
 /**
- * Maven2 plugin Console
- *
+ * Maven Console implementation
+ * 
  * @author Dmitri Maximovich
  */
 public class MavenConsoleImpl extends MessageConsole implements MavenConsole, IPropertyChangeListener, ITraceable {
-  
-  private static final boolean TRACE_ENABLED = Boolean.valueOf(Platform.getDebugOption("org.maven.ide.eclipse/console")).booleanValue();
+
+  private static final boolean TRACE_ENABLED = Boolean
+      .valueOf(Platform.getDebugOption("org.maven.ide.eclipse/console")).booleanValue();
 
   private boolean initialized = false;
 
@@ -51,7 +52,9 @@ public class MavenConsoleImpl extends MessageConsole implements MavenConsole, IP
 
   // created colors for each line type - must be disposed at shutdown
   private Color commandColor;
+
   private Color messageColor;
+
   private Color errorColor;
 
   // streams for each command type - each stream has its own color
@@ -65,9 +68,9 @@ public class MavenConsoleImpl extends MessageConsole implements MavenConsole, IP
     return TRACE_ENABLED;
   }
 
-  public MavenConsoleImpl() {
+  public MavenConsoleImpl(ImageDescriptor imageDescriptor) {
     // TODO extract constants
-    super("Maven Console", MavenPlugin.getImageDescriptor("icons/m2.gif")); //$NON-NLS-1$
+    super("Maven Console", imageDescriptor);
     this.document = new ConsoleDocument();
   }
 
@@ -76,7 +79,7 @@ public class MavenConsoleImpl extends MessageConsole implements MavenConsole, IP
     super.init();
 
     //  Ensure that initialization occurs in the UI thread
-    final Display display = MavenPlugin.getDefault().getWorkbench().getDisplay();
+    final Display display = PlatformUI.getWorkbench().getDisplay();
     display.asyncExec(new Runnable() {
       public void run() {
         JFaceResources.getFontRegistry().addListener(MavenConsoleImpl.this);
@@ -108,7 +111,7 @@ public class MavenConsoleImpl extends MessageConsole implements MavenConsole, IP
 
         // install font
         setFont(JFaceResources.getFontRegistry().get("pref_console_font"));
-        
+
         initialized = true;
       }
     }
@@ -127,7 +130,7 @@ public class MavenConsoleImpl extends MessageConsole implements MavenConsole, IP
   }
 
   private void appendLine(int type, String line) {
-    showConsole();
+    show(false);
     synchronized(document) {
       if(visible) {
         switch(type) {
@@ -147,23 +150,41 @@ public class MavenConsoleImpl extends MessageConsole implements MavenConsole, IP
     }
   }
 
-  private void showConsole() {
-    show(false);
-  }
-
   /**
    * Show the console.
+   * 
    * @param showNoMatterWhat ignore preferences if <code>true</code>
    */
   public void show(boolean showNoMatterWhat) {
     if(showNoMatterWhat /*|| showOnMessage*/) {
-      if(!visible)
-        MavenConsoleFactory.showConsole();
-      else
+      if(!visible) {
+        showConsole();
+      } else {
         ConsolePlugin.getDefault().getConsoleManager().showConsoleView(this);
+      }
     }
-
   }
+  
+  public void showConsole() {
+    boolean exists = false;
+    IConsoleManager manager = ConsolePlugin.getDefault().getConsoleManager();
+    for(IConsole element : manager.getConsoles()) {
+      if(this == element) {
+        exists = true;
+      }
+    }
+    if(!exists) {
+      manager.addConsoles(new IConsole[] {this});
+    }
+    manager.showConsoleView(this);
+  }
+  
+  public void closeConsole() {
+    IConsoleManager manager = ConsolePlugin.getDefault().getConsoleManager();
+    manager.removeConsoles(new IConsole[] {this});
+    ConsolePlugin.getDefault().getConsoleManager().addConsoleListener(this.newLifecycle());
+  }
+  
 
   public void propertyChange(PropertyChangeEvent event) {
     // font changed
@@ -181,7 +202,7 @@ public class MavenConsoleImpl extends MessageConsole implements MavenConsole, IP
 //  }
 
   private void bringConsoleToFront() {
-    if (PlatformUI.isWorkbenchRunning()) {
+    if(PlatformUI.isWorkbenchRunning()) {
       IConsoleManager manager = ConsolePlugin.getDefault().getConsoleManager();
       if(!visible) {
         manager.addConsoles(new IConsole[] {this});
@@ -220,9 +241,8 @@ public class MavenConsoleImpl extends MessageConsole implements MavenConsole, IP
     return DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.LONG, Locale.getDefault());
   }
 
-  
   // MavenConsole
-  
+
   public void logMessage(String message) {
     appendLine(ConsoleDocument.MESSAGE, getDateFormat().format(new Date()) + ": " + message); //$NON-NLS-1$
   }
@@ -231,18 +251,17 @@ public class MavenConsoleImpl extends MessageConsole implements MavenConsole, IP
     bringConsoleToFront();
     appendLine(ConsoleDocument.ERROR, getDateFormat().format(new Date()) + ": " + message); //$NON-NLS-1$
   }
-  
+
   public IConsoleListener newLifecycle() {
     return new MavenConsoleLifecycle();
   }
 
-  
   /**
-   * Used to notify this console of lifecycle methods <code>init()</code>
-   * and <code>dispose()</code>.
+   * Used to notify this console of lifecycle methods <code>init()</code> and <code>dispose()</code>.
    */
   public class MavenConsoleLifecycle implements org.eclipse.ui.console.IConsoleListener, ITraceable {
-    private final boolean TRACE_ENABLED = Boolean.valueOf(Platform.getDebugOption("org.maven.ide.eclipse/console")).booleanValue();
+    private final boolean TRACE_ENABLED = Boolean.valueOf(Platform.getDebugOption("org.maven.ide.eclipse/console"))
+        .booleanValue();
 
     public boolean isTraceEnabled() {
       return TRACE_ENABLED;

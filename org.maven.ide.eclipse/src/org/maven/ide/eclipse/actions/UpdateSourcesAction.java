@@ -29,6 +29,7 @@ import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.project.MavenProjectFacade;
 
 
@@ -81,7 +82,7 @@ public class UpdateSourcesAction implements IObjectActionDelegate {
                   new SubProgressMonitor(monitor, 1));
             } catch(CoreException ex) {
               if (status == null) {
-                status = new MultiStatus(MavenPlugin.PLUGIN_ID, IStatus.ERROR, "Can't update maven configuration", null);
+                status = new MultiStatus(IMavenConstants.PLUGIN_ID, IStatus.ERROR, "Can't update maven configuration", null);
               }
               status.add(ex.getStatus());
             }

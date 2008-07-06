@@ -22,8 +22,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
-import org.maven.ide.eclipse.internal.preferences.MavenProjectPreferencePage;
 import org.maven.ide.eclipse.project.BuildPathManager;
+import org.maven.ide.eclipse.ui.internal.preferences.MavenProjectPreferencePage;
 
 
 /**

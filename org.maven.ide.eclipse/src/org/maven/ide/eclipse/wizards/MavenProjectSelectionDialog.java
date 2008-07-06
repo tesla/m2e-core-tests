@@ -31,8 +31,9 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
-import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.Messages;
+import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.core.Messages;
 
 /**
  * A simple dialog allowing the selection of
@@ -99,11 +100,11 @@ public class MavenProjectSelectionDialog extends AbstractMavenDialog {
         List<IProject> children = new ArrayList<IProject>();
         for(IProject project : projects) {
           try {
-            if(project.isOpen() && project.hasNature(MavenPlugin.NATURE_ID)) {
+            if(project.isOpen() && project.hasNature(IMavenConstants.NATURE_ID)) {
               children.add(project);
             }
           } catch(CoreException e) {
-            MavenPlugin.log("Error checking project: " + e.getMessage(), e);
+            MavenLogger.log("Error checking project: " + e.getMessage(), e);
           }
         }
         return children.toArray();
@@ -117,14 +118,14 @@ public class MavenProjectSelectionDialog extends AbstractMavenDialog {
             for ( int i = 0; i < members.length; i++ ) {
               if ( members[i] instanceof IContainer &&
                   ( ( IContainer ) members[i] ).exists(
-                    new Path( MavenPlugin.POM_FILE_NAME ) ) ) {
+                    new Path( IMavenConstants.POM_FILE_NAME ) ) ) {
                 children.add( members[i] );
               }
             }
             return children.toArray();
           }
           catch (CoreException e) {
-            MavenPlugin.log( "Error checking container: " + e.getMessage(), e );
+            MavenLogger.log( "Error checking container: " + e.getMessage(), e );
           }
         }
       }

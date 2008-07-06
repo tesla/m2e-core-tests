@@ -13,7 +13,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
-import org.maven.ide.eclipse.MavenPlugin;
+
+import org.maven.ide.eclipse.core.IMavenConstants;
 
 /**
  * Helper IPropertyTester implementation to check if receiver can be launched with Maven.
@@ -28,17 +29,17 @@ public class MavenPropertyTester extends PropertyTester {
     
     IProject projectAdapter = (IProject) adaptable.getAdapter(IProject.class);
     if(projectAdapter!=null) {
-      return projectAdapter.getFile(MavenPlugin.POM_FILE_NAME).exists();
+      return projectAdapter.getFile(IMavenConstants.POM_FILE_NAME).exists();
     }
     
     IFolder folderAdapter = (IFolder) adaptable.getAdapter(IFolder.class);
     if(folderAdapter!=null) {
-      return folderAdapter.getFile(MavenPlugin.POM_FILE_NAME).exists();
+      return folderAdapter.getFile(IMavenConstants.POM_FILE_NAME).exists();
     }
 
     IFile fileAdapter = (IFile) adaptable.getAdapter(IFile.class);
     if(fileAdapter!=null) {
-      return fileAdapter.exists() && MavenPlugin.POM_FILE_NAME.equals(fileAdapter.getName());
+      return fileAdapter.exists() && IMavenConstants.POM_FILE_NAME.equals(fileAdapter.getName());
     }
     
     return false;

@@ -53,6 +53,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.embedder.EmbedderFactory;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
@@ -253,7 +254,7 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
     File dir = new File(workspace.getRoot().getLocation().toFile(), projectName);
     copyDir(new File(projectLocation), dir);
 
-    File pomFile = new File(dir, MavenPlugin.POM_FILE_NAME);
+    File pomFile = new File(dir, IMavenConstants.POM_FILE_NAME);
     Model model = MavenPlugin.getDefault().getMavenModelManager().readMavenModel(pomFile);
     final MavenProjectInfo projectInfo = new MavenProjectInfo(projectName, pomFile, model, null);
 

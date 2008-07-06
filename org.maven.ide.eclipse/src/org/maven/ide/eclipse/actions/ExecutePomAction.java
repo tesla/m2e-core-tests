@@ -43,8 +43,10 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.internal.launch.MavenLaunchConstants;
-import org.maven.ide.eclipse.internal.launch.ui.MavenLaunchMainTab;
+import org.maven.ide.eclipse.ui.internal.launch.MavenLaunchMainTab;
 import org.maven.ide.eclipse.util.ITraceable;
 import org.maven.ide.eclipse.util.Tracer;
 import org.maven.ide.eclipse.util.Util;
@@ -137,7 +139,7 @@ public class ExecutePomAction implements ILaunchShortcut, IExecutableExtension, 
         String goals = launchConfiguration.getAttribute(MavenLaunchConstants.ATTR_GOALS, (String) null);
         openDialog = goals == null || goals.trim().length() == 0;
       } catch(CoreException ex) {
-        MavenPlugin.log(ex);
+        MavenLogger.log(ex);
       }
     }
 
@@ -165,11 +167,11 @@ public class ExecutePomAction implements ILaunchShortcut, IExecutableExtension, 
         // see if pom.xml exists
         if(origDir.getType() == IResource.FOLDER) {
           IFolder fold = (IFolder) origDir;
-          if(fold.findMember(MavenPlugin.POM_FILE_NAME) != null) {
+          if(fold.findMember(IMavenConstants.POM_FILE_NAME) != null) {
             return fold;
           }
         } else if(origDir.getType() == IResource.FILE) {
-          if(((IFile) origDir).getName().equals(MavenPlugin.POM_FILE_NAME)) {
+          if(((IFile) origDir).getName().equals(IMavenConstants.POM_FILE_NAME)) {
             return origDir.getParent();
           }
         }

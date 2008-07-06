@@ -70,6 +70,7 @@ import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.Section;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.OpenPomAction;
+import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.project.MavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
@@ -109,7 +110,7 @@ public class DependencyTreePage extends FormPage {
   Action hierarchyFilterAction;
 
   public DependencyTreePage(MavenPomEditor pomEditor) {
-    super(pomEditor, MavenPlugin.PLUGIN_ID + ".pom.dependencyTree", "Dependency Tree");
+    super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.dependencyTree", "Dependency Tree");
     this.pomEditor = pomEditor;
   }
 

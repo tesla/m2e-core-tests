@@ -45,6 +45,7 @@ import org.apache.maven.model.Scm;
 import org.apache.maven.project.MavenProject;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.project.MavenProjectFacade;
@@ -116,7 +117,7 @@ public class OpenUrlAction extends ActionDelegate implements IWorkbenchWindowAct
         try {
           return plugin.getBuildpathManager().findArtifact(project, fragment.getPath());
         } catch(CoreException ex) {
-          MavenPlugin.log(ex);
+          MavenLogger.log(ex);
           plugin.getConsole().logError("Can't find artifact for " + fragment);
           return null;
         }
@@ -147,15 +148,15 @@ public class OpenUrlAction extends ActionDelegate implements IWorkbenchWindowAct
                   | IWorkbenchBrowserSupport.LOCATION_BAR, url, url, url);
               browser.openURL(new URL(url));
             } catch(PartInitException ex) {
-              MavenPlugin.log(ex);
+              MavenLogger.log(ex);
             } catch(MalformedURLException ex) {
-              MavenPlugin.log("Malformed url " + url, ex);
+              MavenLogger.log("Malformed url " + url, ex);
             }
           }
         });
       }
     } catch(Exception ex) {
-      MavenPlugin.log("Can't open URL", ex);
+      MavenLogger.log("Can't open URL", ex);
     }
   }
 

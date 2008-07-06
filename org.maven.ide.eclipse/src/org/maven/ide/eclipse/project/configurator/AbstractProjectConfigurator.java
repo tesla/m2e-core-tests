@@ -15,9 +15,13 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.apache.maven.embedder.MavenEmbedder;
 
-import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.MavenConsole;
+import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
+import org.maven.ide.eclipse.project.BuildPathManager;
 import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
 import org.maven.ide.eclipse.project.MavenProjectChangedEvent;
+import org.maven.ide.eclipse.project.MavenProjectManager;
 
 
 /**
@@ -42,6 +46,28 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
   private String id;
   private String name;
 
+  protected MavenProjectManager projectManager;
+  protected MavenRuntimeManager runtimeManager;
+  protected BuildPathManager buildPathManager;
+  protected MavenConsole console;
+
+  public void setBuildPathManager(BuildPathManager buildPathManager) {
+    this.buildPathManager = buildPathManager;
+  }
+  
+  public void setProjectManager(MavenProjectManager projectManager) {
+    this.projectManager = projectManager;
+  }
+  
+  public void setRuntimeManager(MavenRuntimeManager runtimeManager) {
+    this.runtimeManager = runtimeManager;
+  }
+  
+  public void setConsole(MavenConsole console) {
+    this.console = console;
+  }
+  
+  
   /**
    * Configures Eclipse project passed in ProjectConfigurationRequest, using information
    * from Maven project and other configuration request parameters
@@ -73,7 +99,7 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
       try {
         mavenProjectChanged(events[i], monitor);
       } catch(CoreException ex) {
-        MavenPlugin.log(ex);
+        MavenLogger.log(ex);
       }
     }
   }

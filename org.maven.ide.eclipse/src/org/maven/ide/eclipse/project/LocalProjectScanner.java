@@ -24,8 +24,8 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
 
-import org.maven.ide.eclipse.MavenConsole;
-import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 
 
@@ -105,7 +105,7 @@ public class LocalProjectScanner extends AbstractProjectScanner<MavenProjectInfo
 
   @SuppressWarnings("unchecked")
   private MavenProjectInfo readMavenProjectInfo(File baseDir, String modulePath, MavenProjectInfo parentInfo) {
-    File pomFile = new File(baseDir, MavenPlugin.POM_FILE_NAME);
+    File pomFile = new File(baseDir, IMavenConstants.POM_FILE_NAME);
     try {
       Model model = modelManager.readMavenModel(pomFile);
 
@@ -113,7 +113,7 @@ public class LocalProjectScanner extends AbstractProjectScanner<MavenProjectInfo
         return null; // we already know this project
       }
 
-      String pomName = modulePath + "/" + MavenPlugin.POM_FILE_NAME;
+      String pomName = modulePath + "/" + IMavenConstants.POM_FILE_NAME;
 
       MavenProjectInfo projectInfo = new MavenProjectInfo(pomName , pomFile, model, parentInfo);
       projectInfo.setNeedsRename(getNeedsRename(projectInfo));

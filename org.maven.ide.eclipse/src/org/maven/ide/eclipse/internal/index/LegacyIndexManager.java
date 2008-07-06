@@ -21,14 +21,14 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.store.Directory;
 
-import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.MavenConsole;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.index.IndexInfo;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.index.IndexedArtifactGroup;
 import org.maven.ide.eclipse.index.Indexer;
-import org.maven.ide.eclipse.internal.console.MavenConsoleImpl;
 
 
 /**
@@ -38,7 +38,7 @@ import org.maven.ide.eclipse.internal.console.MavenConsoleImpl;
  */
 public class LegacyIndexManager extends IndexManager {
 
-  public LegacyIndexManager(File stateDir, MavenConsoleImpl console) {
+  public LegacyIndexManager(File stateDir, MavenConsole console) {
     super(console, stateDir, "index");
   }
 
@@ -56,7 +56,7 @@ public class LegacyIndexManager extends IndexManager {
       } catch(IOException ex) {
         String msg = "Unable to create index " + indexInfo.getIndexName();
         console.logError(msg + "; " + ex.getMessage());
-        MavenPlugin.log(msg, ex);
+        MavenLogger.log(msg, ex);
       }
     }
   }
@@ -78,7 +78,7 @@ public class LegacyIndexManager extends IndexManager {
     } catch(IOException ex) {
       String msg = "Unable add " + name;
       console.logError(msg + "; " + ex.getMessage());
-      MavenPlugin.log(msg, ex);
+      MavenLogger.log(msg, ex);
     }
   }
 
@@ -94,7 +94,7 @@ public class LegacyIndexManager extends IndexManager {
     } catch(IOException ex) {
       String msg = "Unable to remove " + name;
       console.logError(msg + "; " + ex.getMessage());
-      MavenPlugin.log(msg, ex);
+      MavenLogger.log(msg, ex);
     }
   }
 

@@ -36,7 +36,7 @@ import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
 import org.apache.maven.model.Model;
 
-import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.MavenLogger;
 
 
 /**
@@ -147,7 +147,7 @@ public class MavenPomWizardPage extends AbstractMavenWizardPage {
     try {
       projects = javaModel.getJavaProjects();
     } catch(JavaModelException e) {
-      MavenPlugin.log(e);
+      MavenLogger.log(e);
       projects = new IJavaProject[0];
     }
 

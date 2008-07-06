@@ -13,7 +13,8 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
-import org.maven.ide.eclipse.MavenPlugin;
+
+import org.maven.ide.eclipse.core.IMavenConstants;
 
 
 public class MavenNature implements IProjectNature {
@@ -29,7 +30,7 @@ public class MavenNature implements IProjectNature {
     ICommand[] commands = desc.getBuildSpec();
 
     for( int i = 0; i < commands.length; ++i) {
-      if( commands[ i].getBuilderName().equals( MavenPlugin.BUILDER_ID)) {
+      if( commands[ i].getBuilderName().equals( IMavenConstants.BUILDER_ID)) {
         return;
       }
     }
@@ -37,7 +38,7 @@ public class MavenNature implements IProjectNature {
     ICommand[] newCommands = new ICommand[ commands.length + 1];
     System.arraycopy( commands, 0, newCommands, 0, commands.length);
     ICommand command = desc.newCommand();
-    command.setBuilderName( MavenPlugin.BUILDER_ID);
+    command.setBuilderName( IMavenConstants.BUILDER_ID);
     newCommands[ commands.length ] = command;
     desc.setBuildSpec( newCommands);
     project.setDescription( desc, null);
@@ -52,7 +53,7 @@ public class MavenNature implements IProjectNature {
     IProjectDescription description = getProject().getDescription();
     ICommand[] commands = description.getBuildSpec();
     for( int i = 0; i < commands.length; ++i) {
-      if( commands[ i].getBuilderName().equals( MavenPlugin.BUILDER_ID)) {
+      if( commands[ i].getBuilderName().equals( IMavenConstants.BUILDER_ID)) {
         ICommand[] newCommands = new ICommand[ commands.length - 1];
         System.arraycopy( commands, 0, newCommands, 0, i);
         System.arraycopy( commands, i + 1, newCommands, i, commands.length - i - 1);

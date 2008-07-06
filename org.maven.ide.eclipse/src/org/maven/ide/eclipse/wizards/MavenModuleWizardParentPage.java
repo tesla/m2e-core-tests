@@ -35,7 +35,9 @@ import org.eclipse.swt.widgets.Text;
 import org.apache.maven.model.Model;
 
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.Messages;
+import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.core.Messages;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.util.SelectionUtil;
 
@@ -190,9 +192,9 @@ public class MavenModuleWizardParentPage extends AbstractMavenWizardPage {
       pom = SelectionUtil.getType(parentObject, IFile.class);
     } else if(SelectionUtil.PROJECT_WITH_NATURE == type) {
       IProject project = SelectionUtil.getType(parentObject, IProject.class);
-      pom = project.getFile(MavenPlugin.POM_FILE_NAME);
+      pom = project.getFile(IMavenConstants.POM_FILE_NAME);
     } else if(parentObject instanceof IContainer) {
-      pom = ((IContainer) parentObject).getFile(new Path(MavenPlugin.POM_FILE_NAME));
+      pom = ((IContainer) parentObject).getFile(new Path(IMavenConstants.POM_FILE_NAME));
     }
 
     if(pom != null && pom.exists()) {
@@ -204,7 +206,7 @@ public class MavenModuleWizardParentPage extends AbstractMavenWizardPage {
         parentModel = plugin.getMavenModelManager().readMavenModel(pom);
         parentProjectText.setText(parentModel.getArtifactId());
       } catch(CoreException e) {
-        MavenPlugin.log("Error loading POM: " + e.getMessage(), e);
+        MavenLogger.log("Error loading POM: " + e.getMessage(), e);
       }
     }
   }

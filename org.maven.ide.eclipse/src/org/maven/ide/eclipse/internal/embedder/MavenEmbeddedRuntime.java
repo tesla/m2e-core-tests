@@ -20,7 +20,7 @@ import org.osgi.framework.BundleContext;
 
 import org.eclipse.core.runtime.FileLocator;
 
-import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 
@@ -77,7 +77,7 @@ public class MavenEmbeddedRuntime extends MavenRuntime {
           try {
             cp.add(FileLocator.toFileURL(url).getFile());
           } catch(IOException ex) {
-            MavenPlugin.log("Error adding classpath entry " + url.toString(), ex);
+            MavenLogger.log("Error adding classpath entry " + url.toString(), ex);
           }
         }
       }

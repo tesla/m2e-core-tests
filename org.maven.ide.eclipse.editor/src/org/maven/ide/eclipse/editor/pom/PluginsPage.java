@@ -26,7 +26,7 @@ import org.maven.ide.components.pom.Build;
 import org.maven.ide.components.pom.PluginManagement;
 import org.maven.ide.components.pom.Plugins;
 import org.maven.ide.components.pom.PomFactory;
-import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.editor.composites.PluginsComposite;
 
 /**
@@ -38,7 +38,7 @@ public class PluginsPage extends MavenPomEditorPage {
   private SearchControl searchControl;
   
   public PluginsPage(MavenPomEditor pomEditor) {
-    super(pomEditor, MavenPlugin.PLUGIN_ID + ".pom.plugins", "Plugins");
+    super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.plugins", "Plugins");
   }
   
   public void dispose() {

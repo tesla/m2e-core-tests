@@ -16,7 +16,7 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.eclipse.core.runtime.IConfigurationElement;
-import org.maven.ide.eclipse.internal.project.ProjectConfiguratorFactory;
+import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
 import org.maven.ide.eclipse.project.configurator.MavenProjectConfigurator;
 
@@ -27,7 +27,7 @@ import org.maven.ide.eclipse.project.configurator.MavenProjectConfigurator;
 public class ProjectConfiguratorFactoryTest extends TestCase {
 
   public void testConfiguratorFactory() throws Exception {
-    Set<AbstractProjectConfigurator> configurators = ProjectConfiguratorFactory.getConfigurators();
+    Set<AbstractProjectConfigurator> configurators = MavenPlugin.getDefault().getProjectConfigurationManager().getConfigurators();
     
     AbstractProjectConfigurator[] cc = configurators.toArray(new AbstractProjectConfigurator[configurators.size()]);
 

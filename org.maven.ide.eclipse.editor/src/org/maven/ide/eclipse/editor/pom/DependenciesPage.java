@@ -24,7 +24,7 @@ import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.maven.ide.components.pom.Dependencies;
 import org.maven.ide.components.pom.DependencyManagement;
 import org.maven.ide.components.pom.PomFactory;
-import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.editor.composites.DependenciesComposite;
 
 /**
@@ -36,7 +36,7 @@ public class DependenciesPage extends MavenPomEditorPage {
   private SearchControl searchControl;
   
   public DependenciesPage(MavenPomEditor pomEditor) {
-    super(pomEditor, MavenPlugin.PLUGIN_ID + ".pom.dependencies", "Dependencies");
+    super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.dependencies", "Dependencies");
   }
 
   public void dispose() {

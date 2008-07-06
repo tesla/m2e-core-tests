@@ -41,8 +41,10 @@ import org.codehaus.plexus.util.FileUtils;
 
 import org.apache.maven.model.Model;
 
-import org.maven.ide.eclipse.MavenConsole;
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.core.MavenConsole;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.project.LocalProjectScanner;
 import org.maven.ide.eclipse.project.MavenProjectInfo;
@@ -128,7 +130,7 @@ public abstract class MavenProjectCheckoutJob extends WorkspaceJob {
       if(cause instanceof CoreException) {
         return ((CoreException) cause).getStatus();
       }
-      return new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, 0, cause.toString(), cause);
+      return new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, 0, cause.toString(), cause);
     }
   }
 
@@ -246,7 +248,7 @@ public abstract class MavenProjectCheckoutJob extends WorkspaceJob {
         } catch(IOException ex) {
           String msg = "Can't delete " + location;
           console.logError(msg + "; " + (ex.getMessage()==null ? ex.toString() : ex.getMessage()));
-          MavenPlugin.log(msg, ex);
+          MavenLogger.log(msg, ex);
         }
       }
     }

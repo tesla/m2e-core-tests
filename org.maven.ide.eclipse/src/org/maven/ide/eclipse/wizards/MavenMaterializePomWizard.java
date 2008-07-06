@@ -26,6 +26,7 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Dependency;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.project.BuildPathManager;
 import org.maven.ide.eclipse.project.MavenProjectPomScanner;
@@ -89,7 +90,7 @@ public class MavenMaterializePomWizard extends Wizard implements IImportWizard, 
           
         }
       } catch(CoreException ex) {
-        MavenPlugin.log(ex);
+        MavenLogger.log(ex);
       }
     }
     

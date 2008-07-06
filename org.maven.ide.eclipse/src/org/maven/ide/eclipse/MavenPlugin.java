@@ -25,7 +25,6 @@ import org.osgi.framework.BundleContext;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
@@ -51,7 +50,9 @@ import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
-import org.maven.ide.eclipse.container.MavenClasspathVariableInitializer;
+import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.core.MavenConsole;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.AbstractMavenEmbedderListener;
 import org.maven.ide.eclipse.embedder.ArchetypeCatalogFactory;
 import org.maven.ide.eclipse.embedder.ArchetypeManager;
@@ -67,12 +68,12 @@ import org.maven.ide.eclipse.internal.embedder.MavenEmbeddedRuntime;
 import org.maven.ide.eclipse.internal.embedder.MavenWorkspaceRuntime;
 import org.maven.ide.eclipse.internal.index.IndexInfoWriter;
 import org.maven.ide.eclipse.internal.index.NexusIndexManager;
-import org.maven.ide.eclipse.internal.launch.MavenLaunchConfigurationListener;
-import org.maven.ide.eclipse.internal.launch.WorkspaceStateWriter;
 import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;
+import org.maven.ide.eclipse.internal.project.MavenLaunchConfigurationListener;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerImpl;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerRefreshJob;
 import org.maven.ide.eclipse.internal.project.ProjectConfigurationManager;
+import org.maven.ide.eclipse.internal.project.WorkspaceStateWriter;
 import org.maven.ide.eclipse.project.BuildPathManager;
 import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.MavenProjectManager;
@@ -84,49 +85,11 @@ import org.maven.ide.eclipse.project.MavenUpdateRequest;
  */
 public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
-  public static final String PLUGIN_ID = MavenPlugin.class.getPackage().getName();
-
-  public static final String NATURE_ID = PLUGIN_ID + ".maven2Nature"; //$NON-NLS-1$
-
-  public static final String BUILDER_ID = PLUGIN_ID + ".maven2Builder"; //$NON-NLS-1$
-
-  public static final String MARKER_ID = PLUGIN_ID + ".maven2Problem"; //$NON-NLS-1$
-
-  public static final String POM_FILE_NAME = "pom.xml"; //$NON-NLS-1$
-
   // preferences
   private static final String PREFS_INDEXES = "indexInfo.xml";
   
   private static final String PREFS_ARCHETYPES = "archetypesInfo.xml";
   
-  // container settings
-  public static final String CONTAINER_ID = PLUGIN_ID + ".MAVEN2_CLASSPATH_CONTAINER"; //$NON-NLS-1$
-
-  public static final String INCLUDE_MODULES = "modules"; //$NON-NLS-1$
-
-  public static final String NO_WORKSPACE_PROJECTS = "noworkspace"; //$NON-NLS-1$
-
-  public static final String ACTIVE_PROFILES = "profiles"; //$NON-NLS-1$
-
-  public static final String FILTER_RESOURCES = "filterresources"; //$NON-NLS-1$
-
-  // entry attributes
-  public static final String GROUP_ID_ATTRIBUTE = "maven.groupId"; //$NON-NLS-1$
-
-  public static final String ARTIFACT_ID_ATTRIBUTE = "maven.artifactId"; //$NON-NLS-1$
-
-  public static final String VERSION_ATTRIBUTE = "maven.version"; //$NON-NLS-1$
-
-  public static final String CLASSIFIER_ATTRIBUTE = "maven.classifier"; //$NON-NLS-1$
-
-  public static final String SCOPE_ATTRIBUTE = "maven.scope"; //$NON-NLS-1$
-
-  public static final String JAVADOC_CLASSIFIER = "javadoc"; //$NON-NLS-1$
-
-  public static final String SOURCES_CLASSIFIER = "sources"; //$NON-NLS-1$
-
-  public static final String M2_REPO = "M2_REPO"; //$NON-NLS-1$
-
   // The shared instance
   private static MavenPlugin plugin;
 
@@ -138,7 +101,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
   MavenEmbedderManager embedderManager;
 
-  private BuildPathManager buildpathManager;
+  BuildPathManager buildpathManager;
 
   private MavenLaunchConfigurationListener launchConfigurationListener;
 
@@ -166,20 +129,17 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     super.start(context);
     this.bundleContext = context;
 
+    MavenLogger.setLog(getLog());
+    
     try {
-      this.console = new MavenConsoleImpl();
+      this.console = new MavenConsoleImpl(MavenPlugin.getImageDescriptor("icons/m2.gif")); //$NON-NLS-1$
     } catch(RuntimeException ex) {
-      log(new Status(IStatus.ERROR, PLUGIN_ID, -1, "Unable to start console: " + ex.toString(), ex));
+      MavenLogger.log(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Unable to start console: " + ex.toString(), ex));
     }
 
     this.runtimeManager = new MavenRuntimeManager(getPreferenceStore());
     
     this.embedderManager = new MavenEmbedderManager(console, runtimeManager);
-    this.embedderManager.addListener(new AbstractMavenEmbedderListener() {
-      public void workspaceEmbedderInvalidated() {
-        MavenClasspathVariableInitializer.init();
-      }
-    });
 
     this.runtimeManager.setEmbeddedRuntime(new MavenEmbeddedRuntime(getBundleContext()));
     
@@ -197,7 +157,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     } catch (Exception ex) {
       String msg = "Can't read archetype catalog configuration";
       this.console.logError(msg + "; " + ex.getMessage());
-      log(msg, ex);
+      MavenLogger.log(msg, ex);
     }
     
     // this.indexManager = new LegacyIndexManager(getStateLocation().toFile(), console);
@@ -229,15 +189,21 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     this.runtimeManager.setWorkspaceRuntime(new MavenWorkspaceRuntime(projectManager, embedderManager));
     
     this.buildpathManager = new BuildPathManager(embedderManager, console, projectManager, indexManager, modelManager,
-        runtimeManager);
+        runtimeManager, bundleContext, stateLocationDir);
     workspace.addResourceChangeListener(buildpathManager, IResourceChangeEvent.PRE_DELETE);
 
     projectManager.addMavenProjectChangedListener(this.buildpathManager);
     projectManager.addDownloadSourceListener(this.buildpathManager);
+    
+    this.embedderManager.addListener(new AbstractMavenEmbedderListener() {
+      public void workspaceEmbedderInvalidated() {
+        buildpathManager.setupVariables();
+      }
+    });
 
     this.configurationManager = new ProjectConfigurationManager(modelManager, console, 
-        runtimeManager, managerImpl, 
-        indexManager, embedderManager);
+        runtimeManager, projectManager, managerImpl, 
+        indexManager, embedderManager, modelManager);
     projectManager.addMavenProjectChangedListener(this.configurationManager);
 
     this.launchConfigurationListener = new MavenLaunchConfigurationListener();
@@ -386,9 +352,9 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
                         .openURL(new URL(
                             "http://help.eclipse.org/help33/index.jsp?topic=/org.eclipse.platform.doc.user/tasks/running_eclipse.htm"));
                   } catch(MalformedURLException ex) {
-                    log("Malformed URL", ex);
+                    MavenLogger.log("Malformed URL", ex);
                   } catch(PartInitException ex) {
-                    log(ex);
+                    MavenLogger.log(ex);
                   }
                 } else {
                   PreferencesUtil.createPreferenceDialogOn(getShell(),
@@ -460,37 +426,29 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     ImageRegistry registry = getDefault().getImageRegistry();
     Image image = registry.get(path);
     if(image == null) {
-      registry.put(path, imageDescriptorFromPlugin(PLUGIN_ID, path));
+      registry.put(path, imageDescriptorFromPlugin(IMavenConstants.PLUGIN_ID, path));
       image = registry.get(path);
     }
     return image;
   }
 
   public static ImageDescriptor getImageDescriptor(String path) {
-    return imageDescriptorFromPlugin(PLUGIN_ID, path);
-  }
-
-  public static void log(IStatus status) {
-    getDefault().getLog().log(status);
-  }
-
-  public static void log(CoreException ex) {
-    IStatus s = ex.getStatus();
-    if(s.getException()==null) {
-      log(new Status(s.getSeverity(), s.getPlugin(), s.getCode(), s.getMessage(), ex));
-    } else {
-      log(s);
-    }
-  }
-
-  public static void log(String msg, Throwable t) {
-    log(new Status(IStatus.ERROR, PLUGIN_ID, 0, msg, t));
+    return imageDescriptorFromPlugin(IMavenConstants.PLUGIN_ID, path);
   }
 
   public BundleContext getBundleContext() {
     return this.bundleContext;
   }
 
+  public IProjectConfigurationManager getProjectConfigurationManager() {
+    return configurationManager;
+  }
+
+  /** for use by unit tests */
+  public MavenProjectManagerRefreshJob getProjectManagerRefreshJob() {
+    return mavenBackgroundJob;
+  }
+  
   /**
    * IndexManagerWriterListener
    */
@@ -524,25 +482,17 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
         os = new FileOutputStream(configFile);
         writer.writeIndexInfo(indexManager.getIndexes().values(), os);
       } catch(IOException ex) {
-        log("Unable to write index info", ex);
+        MavenLogger.log("Unable to write index info", ex);
       } finally {
         if(os != null) {
           try {
             os.close();
           } catch(IOException ex) {
-            log("Unable to close stream for index configuration", ex);
+            MavenLogger.log("Unable to close stream for index configuration", ex);
           }
         }
       }
     }
   }
 
-  public IProjectConfigurationManager getProjectConfigurationManager() {
-    return configurationManager;
-  }
-
-  /** for use by unit tests */
-  public MavenProjectManagerRefreshJob getProjectManagerRefreshJob() {
-    return mavenBackgroundJob;
-  }
 }

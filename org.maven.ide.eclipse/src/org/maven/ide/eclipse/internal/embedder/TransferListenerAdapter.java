@@ -20,7 +20,7 @@ import org.apache.maven.wagon.events.TransferListener;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 
-import org.maven.ide.eclipse.MavenConsole;
+import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.index.IndexManager;
 
 

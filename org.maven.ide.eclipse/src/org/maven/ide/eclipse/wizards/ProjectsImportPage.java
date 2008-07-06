@@ -65,8 +65,10 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.dialogs.IOverwriteQuery;
 
-import org.maven.ide.eclipse.MavenConsole;
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.core.MavenConsole;
+import org.maven.ide.eclipse.core.MavenLogger;
 
 
 /**
@@ -272,7 +274,7 @@ public class ProjectsImportPage extends WizardPage implements IOverwriteQuery {
 
       });
     } catch(InvocationTargetException e) {
-      MavenPlugin.log(e.getMessage(), e);
+      MavenLogger.log(e.getMessage(), e);
     } catch(InterruptedException e) {
       // Nothing to do if the user interrupts.
     }
@@ -313,7 +315,7 @@ public class ProjectsImportPage extends WizardPage implements IOverwriteQuery {
       try {
         directoriesVisited.add(directory.getCanonicalPath());
       } catch(IOException exception) {
-        MavenPlugin.log(exception.toString(), exception);
+        MavenLogger.log(exception.toString(), exception);
       }
     }
 
@@ -340,7 +342,7 @@ public class ProjectsImportPage extends WizardPage implements IOverwriteQuery {
               continue;
             }
           } catch(IOException exception) {
-            MavenPlugin.log(exception.toString(), exception);
+            MavenLogger.log(exception.toString(), exception);
           }
           collectProjectFilesFromDirectory(files, contents[i], directoriesVisited, monitor);
         }
@@ -387,7 +389,7 @@ public class ProjectsImportPage extends WizardPage implements IOverwriteQuery {
       if(t instanceof CoreException) {
         status = ((CoreException) t).getStatus();
       } else {
-        status = new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, 1, message, t);
+        status = new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, 1, message, t);
       }
       ErrorDialog.openError(getShell(), message, null, status);
       return false;
@@ -450,7 +452,7 @@ public class ProjectsImportPage extends WizardPage implements IOverwriteQuery {
             File projectDir = projectPath.toFile();
             File newProject = new File(projectDir.getParent(), projectName);
             if(!projectDir.renameTo(newProject)) {
-              MavenPlugin.log("Can't rename " + projectDir + " to " + newProject, null);
+              MavenLogger.log("Can't rename " + projectDir + " to " + newProject, null);
             }
             record.description.setLocation(null);
           }

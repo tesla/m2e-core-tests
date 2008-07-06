@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.project.MavenProjectScmInfo;
 
 
@@ -89,7 +90,7 @@ public class MavenCheckoutOperation implements IRunnableWithProgress {
       } catch(CoreException ex) {
         String msg = "Checkout error; " + (ex.getMessage() == null ? ex.toString() : ex.getMessage());
         MavenPlugin.getDefault().getConsole().logError(msg);
-        MavenPlugin.log(msg, ex);
+        MavenLogger.log(msg, ex);
         throw new InvocationTargetException(ex);
       }
     }

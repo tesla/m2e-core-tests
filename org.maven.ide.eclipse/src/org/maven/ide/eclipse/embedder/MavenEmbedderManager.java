@@ -20,14 +20,16 @@ import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 
 import org.apache.maven.archetype.Archetype;
+import org.apache.maven.embedder.Configuration;
 import org.apache.maven.embedder.ContainerCustomizer;
+import org.apache.maven.embedder.DefaultConfiguration;
 import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.embedder.MavenEmbedderException;
 import org.apache.maven.execution.MavenExecutionRequest;
 
-import org.maven.ide.eclipse.MavenConsole;
-import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.internal.embedder.PluginConsoleMavenEmbeddedLogger;
+import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.core.MavenConsole;
+import org.maven.ide.eclipse.core.MavenLogger;
 
 
 /**
@@ -48,13 +50,31 @@ public class MavenEmbedderManager {
     this.runtimeManager = runtimeManager;
   }
   
-  public synchronized MavenEmbedder createEmbedder(ContainerCustomizer customizer) throws MavenEmbedderException {
+  public Configuration createDefaultConfiguration(ContainerCustomizer customizer) {
+    DefaultConfiguration configuration = new DefaultConfiguration();
+
     boolean debug = runtimeManager.isDebugOutput();
     String userSettings = runtimeManager.getUserSettingsFile();
     String globalSettings = runtimeManager.getGlobalSettingsFile();
 
-    return EmbedderFactory.createMavenEmbedder(customizer,
-        new PluginConsoleMavenEmbeddedLogger(console, debug), globalSettings, userSettings);
+    configuration.setMavenEmbedderLogger(new PluginConsoleMavenEmbeddedLogger(console, debug));
+
+    if(userSettings != null) {
+      configuration.setUserSettingsFile(new File(userSettings));
+    }
+
+    if(globalSettings != null) {
+      configuration.setGlobalSettingsFile(new File(globalSettings));
+    }
+    
+    configuration.setConfigurationCustomizer(customizer);
+    
+    return configuration;
+  }
+  
+  public synchronized MavenEmbedder createEmbedder(ContainerCustomizer customizer) throws MavenEmbedderException {
+    Configuration configuration = createDefaultConfiguration(customizer);
+    return EmbedderFactory.createMavenEmbedder(configuration, null);
   }
 
   public synchronized MavenExecutionRequest createRequest(MavenEmbedder embedder) {
@@ -76,7 +96,7 @@ public class MavenEmbedderManager {
       } catch(MavenEmbedderException ex) {
         String msg = "Can't create workspace embedder";
         console.logError(msg + "; " + ex.getMessage());
-        MavenPlugin.log(msg, ex);
+        MavenLogger.log(msg, ex);
       } 
     }
     return this.workspaceEmbedder;
@@ -137,8 +157,8 @@ public class MavenEmbedderManager {
       return (Archetype) container.lookup(Archetype.class);
     } catch(ComponentLookupException ex) {
       String msg = "Error looking up the archetyper: " + ex.getMessage();
-      MavenPlugin.log(msg, ex);
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
+      MavenLogger.log(msg, ex);
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
     }
   }
   

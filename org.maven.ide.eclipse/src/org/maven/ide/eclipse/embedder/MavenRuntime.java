@@ -21,7 +21,7 @@ import org.eclipse.core.runtime.Status;
 import org.codehaus.plexus.util.DirectoryScanner;
 
 
-import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
 
 /**
  * Maven runtime
@@ -95,7 +95,7 @@ public abstract class MavenRuntime {
         try {
           boolean created = tpmfolder.mkdirs();
           if(!created) {
-            throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1,
+            throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
                 "Can't create temporary folder " + tpmfolder, null));
           }
           m2conf = new File(tpmfolder, "m2.conf").getCanonicalPath();
@@ -113,7 +113,7 @@ public abstract class MavenRuntime {
             out.close();
           }
         } catch (IOException ex) {
-          throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, ex.getMessage(), ex));
+          throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, ex.getMessage(), ex));
         }
       }
       StringBuffer sb = new StringBuffer();

@@ -25,7 +25,7 @@ import org.eclipse.swt.widgets.Label;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 
-import org.maven.ide.eclipse.Messages;
+import org.maven.ide.eclipse.core.Messages;
 
 
 /**

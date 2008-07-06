@@ -51,8 +51,9 @@ import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.project.MavenProject;
 
-import org.maven.ide.eclipse.MavenConsole;
-import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.core.MavenConsole;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.EmbedderFactory;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.index.IndexManager;
@@ -134,7 +135,7 @@ public class MavenProjectManagerImpl {
     this.console = console;
     this.indexManager = indexManager;
     this.embedderManager = embedderManager;
-    this.markerManager = new MavenMarkerManager();
+    this.markerManager = new MavenMarkerManager(console);
     this.state = new WorkspaceState(null);
   }
 
@@ -179,14 +180,14 @@ public class MavenProjectManagerImpl {
             for(Exception ex : exceptions) {
               String msg = "Failed to create Maven embedder";
               console.logError(msg + "; " + ex.toString());
-              MavenPlugin.log(msg, ex);
+              MavenLogger.log(msg, ex);
             }
           }
         }
       } catch(MavenEmbedderException ex) {
         String msg = "Failed to create Maven embedder";
         console.logError(msg + "; " + ex.toString());
-        MavenPlugin.log(msg, ex);
+        MavenLogger.log(msg, ex);
       }
     }
     return projectFacade;
@@ -194,7 +195,7 @@ public class MavenProjectManagerImpl {
 
   public boolean saveResolverConfiguration(IProject project, ResolverConfiguration configuration) {
     IScopeContext projectScope = new ProjectScope(project);
-    IEclipsePreferences projectNode = projectScope.getNode(MavenPlugin.PLUGIN_ID);
+    IEclipsePreferences projectNode = projectScope.getNode(IMavenConstants.PLUGIN_ID);
     if(projectNode != null) {
       projectNode.put(P_VERSION, VERSION);
       
@@ -209,7 +210,7 @@ public class MavenProjectManagerImpl {
         projectNode.flush();
         return true;
       } catch(BackingStoreException ex) {
-        MavenPlugin.log("Failed to save resolver configuration", ex);
+        MavenLogger.log("Failed to save resolver configuration", ex);
       }
     }
     
@@ -218,7 +219,7 @@ public class MavenProjectManagerImpl {
 
   public ResolverConfiguration readResolverConfiguration(IProject project) {
     IScopeContext projectScope = new ProjectScope(project);
-    IEclipsePreferences projectNode = projectScope.getNode(MavenPlugin.PLUGIN_ID);
+    IEclipsePreferences projectNode = projectScope.getNode(IMavenConstants.PLUGIN_ID);
     if(projectNode==null) {
       return new ResolverConfiguration();
     }
@@ -245,9 +246,9 @@ public class MavenProjectManagerImpl {
   
     String containerPath = entry.getPath().toString();
   
-    boolean includeModules = containerPath.indexOf("/" + MavenPlugin.INCLUDE_MODULES) > -1;
+    boolean includeModules = containerPath.indexOf("/" + IMavenConstants.INCLUDE_MODULES) > -1;
   
-    boolean resolveWorkspaceProjects = containerPath.indexOf("/" + MavenPlugin.NO_WORKSPACE_PROJECTS) == -1;
+    boolean resolveWorkspaceProjects = containerPath.indexOf("/" + IMavenConstants.NO_WORKSPACE_PROJECTS) == -1;
   
     // boolean filterResources = containerPath.indexOf("/" + MavenPlugin.FILTER_RESOURCES) != -1;
   
@@ -260,7 +261,7 @@ public class MavenProjectManagerImpl {
 
   private String getActiveProfiles(IClasspathEntry entry) {
     String path = entry.getPath().toString();
-    String prefix = "/" + MavenPlugin.ACTIVE_PROFILES + "[";
+    String prefix = "/" + IMavenConstants.ACTIVE_PROFILES + "[";
     int n = path.indexOf(prefix);
     if(n == -1) {
       return "";
@@ -274,7 +275,7 @@ public class MavenProjectManagerImpl {
       // XXX sensible handling
       return null;
     }
-    return project.getFile(MavenPlugin.POM_FILE_NAME);
+    return project.getFile(IMavenConstants.POM_FILE_NAME);
   }
 
   /**
@@ -349,7 +350,7 @@ public class MavenProjectManagerImpl {
           IFile pom = updateRequest.pop();
           monitor.subTask(pom.getFullPath().toString());
           
-          if (!pom.isAccessible() || !pom.getProject().hasNature(MavenPlugin.NATURE_ID)) {
+          if (!pom.isAccessible() || !pom.getProject().hasNature(IMavenConstants.NATURE_ID)) {
             updateRequest.forcePomFiles(remove(pom));
             continue;
           }
@@ -508,7 +509,7 @@ public class MavenProjectManagerImpl {
   }
 
   public IFile getModulePom(IFile pom, String moduleName) {
-    return pom.getParent().getFile(new Path(moduleName).append(MavenPlugin.POM_FILE_NAME));
+    return pom.getParent().getFile(new Path(moduleName).append(IMavenConstants.POM_FILE_NAME));
   }
 
   private Set<IFile> refreshWorkspaceModules(IFile pom, MavenProject mavenProject) {
@@ -735,7 +736,7 @@ public class MavenProjectManagerImpl {
           try {
             embedder.resolve(artifact, remoteRepositories, embedder.getLocalRepository());
           } catch(Exception ex) {
-            MavenPlugin.log("Can not resolve artifact for classpath entry of non-maven project", ex);
+            MavenLogger.log("Can not resolve artifact for classpath entry of non-maven project", ex);
             continue;
           }
         }
@@ -771,7 +772,7 @@ public class MavenProjectManagerImpl {
                     }
                   }
                 } catch(Exception ex) {
-                  MavenPlugin.log("Can't read Maven project from " + file, ex);
+                  MavenLogger.log("Can't read Maven project from " + file, ex);
                 }
               }
             }
@@ -801,7 +802,7 @@ public class MavenProjectManagerImpl {
           try {
             listeners[i].sourcesDownloaded(event, monitor);
           } catch(CoreException ex) {
-            MavenPlugin.log(ex);
+            MavenLogger.log(ex);
           }
         }
       }
@@ -889,7 +890,7 @@ public class MavenProjectManagerImpl {
         // XXX lets hide all indexer exceptions for now
         String msg = ex.getMessage()==null ? ex.toString() : ex.getMessage();
         console.logError("Error: " + msg);
-        MavenPlugin.log(msg, ex);
+        MavenLogger.log(msg, ex);
       }
     }
 
@@ -908,7 +909,7 @@ public class MavenProjectManagerImpl {
       if(!isJavaSource && !isJavaDoc) {
         String msg = ex.getOriginalMessage()==null ? ex.toString() : ex.getOriginalMessage();
         console.logError("Error: " + msg);
-        MavenPlugin.log(msg, ex);
+        MavenLogger.log(msg, ex);
       }
 
       updateIndex(IndexManager.NOT_AVAILABLE, isJavaSource, isJavaDoc, af, baseFile, base);
@@ -940,7 +941,7 @@ public class MavenProjectManagerImpl {
       try {
         embedder.stop();
       } catch(MavenEmbedderException ex) {
-        MavenPlugin.log("Failed to stop Maven embedder", ex);
+        MavenLogger.log("Failed to stop Maven embedder", ex);
       }
     }
   }
@@ -1078,7 +1079,7 @@ public class MavenProjectManagerImpl {
       // ignore
     } finally {
       long l2 = System.currentTimeMillis();
-      MavenPlugin.getDefault().getConsole().logMessage("Scanned javadoc " + name + " " + (l2-l1)/1000f);
+      console.logMessage("Scanned javadoc " + name + " " + (l2-l1)/1000f);
       try {
         if(jarFile!=null) jarFile.close();
       } catch(IOException ex) {

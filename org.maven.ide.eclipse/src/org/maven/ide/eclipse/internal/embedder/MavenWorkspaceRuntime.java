@@ -22,7 +22,7 @@ import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.embedder.MavenEmbedder;
 
-import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
@@ -63,7 +63,6 @@ public class MavenWorkspaceRuntime extends MavenRuntime {
   }
 
   public boolean isAvailable() {
-    MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
     return projectManager.getMavenProject("org.apache.maven", "maven-distribution", "2.1-SNAPSHOT") != null;
   }
 
@@ -98,9 +97,9 @@ public class MavenWorkspaceRuntime extends MavenRuntime {
           try {
             embedder.resolve(artifact, Collections.EMPTY_LIST, embedder.getLocalRepository());
           } catch(ArtifactResolutionException ex) {
-            MavenPlugin.log("Artifact resolution error " + artifact, ex);
+            MavenLogger.log("Artifact resolution error " + artifact, ex);
           } catch(ArtifactNotFoundException ex) {
-            MavenPlugin.log("Artifact not found " + artifact, ex);
+            MavenLogger.log("Artifact not found " + artifact, ex);
           }
           file = artifact.getFile();
         }

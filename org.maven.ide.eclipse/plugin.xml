@@ -77,7 +77,7 @@
                 adaptable="true"
                 label="%m2.decorator.version.name"
                 lightweight="false"
-                class="org.maven.ide.eclipse.internal.MavenVersionDecorator"
+                class="org.maven.ide.eclipse.ui.internal.MavenVersionDecorator"
                 state="false">
        <description>%m2.decorator.version.description</description>
        <enablement>
@@ -92,7 +92,7 @@
 
   <extension point="org.eclipse.core.runtime.adapters">
     <factory adaptableType="org.eclipse.core.runtime.IAdaptable"
-             class="org.maven.ide.eclipse.internal.MavenAdapterFactory">
+             class="org.maven.ide.eclipse.ui.internal.MavenAdapterFactory">
        <adapter type="org.eclipse.ui.IActionFilter"/>
     </factory>
   </extension>
@@ -468,19 +468,19 @@
 
    <extension point="org.eclipse.ui.preferencePages">
       <page id="org.maven.ide.eclipse.preferences.Maven2PreferencePage"
-            class="org.maven.ide.eclipse.internal.preferences.MavenPreferencePage"
+            class="org.maven.ide.eclipse.ui.internal.preferences.MavenPreferencePage"
             name="%m2.preferences.page.name">
          <keywordReference id="org.maven.ide.eclipse.maven"/>
       </page>
       <page id="org.maven.ide.eclipse.preferences.MavenInstallationsPreferencePage"
             category="org.maven.ide.eclipse.preferences.Maven2PreferencePage"
-            class="org.maven.ide.eclipse.internal.preferences.MavenInstallationsPreferencePage"
+            class="org.maven.ide.eclipse.ui.internal.preferences.MavenInstallationsPreferencePage"
             name="Installations">
          <keywordReference id="org.maven.ide.eclipse.maven"/>
       </page>
       <page id="org.maven.ide.eclipse.preferences.MavenArchetypesPreferencePage"
             category="org.maven.ide.eclipse.preferences.Maven2PreferencePage"
-            class="org.maven.ide.eclipse.internal.preferences.MavenArchetypesPreferencePage"
+            class="org.maven.ide.eclipse.ui.internal.preferences.MavenArchetypesPreferencePage"
             name="Archetypes">
          <keywordReference id="org.maven.ide.eclipse.maven"/>
       </page>
@@ -511,10 +511,10 @@
    <extension point="org.eclipse.debug.ui.launchConfigurationTabGroups">
       <launchConfigurationTabGroup id="org.maven.ide.eclipse.LaunchConfigurationTabGroup"
             type="org.maven.ide.eclipse.Maven2LaunchConfigurationType"
-            class="org.maven.ide.eclipse.internal.launch.ui.MavenLaunchConfigurationTabGroup"/>
+            class="org.maven.ide.eclipse.ui.internal.launch.MavenLaunchConfigurationTabGroup"/>
       <launchConfigurationTabGroup id="org.maven.ide.eclipse.BuilderConfigurationTabGroup"
             type="org.maven.ide.eclipse.Maven2BuilderConfigurationType"
-            class="org.maven.ide.eclipse.internal.launch.ui.MavenBuilderConfigurationTabGroup"/>
+            class="org.maven.ide.eclipse.ui.internal.launch.MavenBuilderConfigurationTabGroup"/>
    </extension>
 
    <!-- Maven launcher configuration type image -->
@@ -613,12 +613,12 @@
 
    <extension point="org.eclipse.ui.console.consoleFactories">
       <consoleFactory label="Maven Console" icon="icons/m2.gif"
-            class="org.maven.ide.eclipse.internal.console.MavenConsoleFactory"/>
+            class="org.maven.ide.eclipse.ui.internal.MavenConsoleFactory"/>
    </extension>
    
    <extension point="org.eclipse.ui.console.consolePageParticipants">
       <consolePageParticipant
-            class="org.maven.ide.eclipse.internal.console.MavenConsolePageParticipant"
+            class="org.maven.ide.eclipse.ui.internal.MavenConsolePageParticipant"
             id="org.maven.ide.eclipse.launch.console.Maven2ConsolePageParticipant">
          <enablement>
             <instanceof value="org.maven.ide.eclipse.internal.console.MavenConsoleImpl"/>
@@ -687,7 +687,7 @@
                 name="Maven"/>
       <view id="org.maven.ide.eclipse.views.MavenIndexesView"
             category="org.maven.ide.eclipse.views.indexes"
-            class="org.maven.ide.eclipse.internal.views.MavenIndexesView"
+            class="org.maven.ide.eclipse.ui.internal.views.MavenIndexesView"
             icon="icons/maven_indexes.gif"
             name="Maven Indexes"/>
    </extension>
@@ -712,7 +712,7 @@
    
    <extension point="org.eclipse.ui.propertyPages">
       <page id="org.maven.ide.eclipse.MavenProjectPreferencePage"
-            class="org.maven.ide.eclipse.internal.preferences.MavenProjectPreferencePage"
+            class="org.maven.ide.eclipse.ui.internal.preferences.MavenProjectPreferencePage"
             name="Maven"
             objectClass="org.eclipse.core.resources.IProject" 
             adaptable="true">
@@ -745,7 +745,7 @@
    <extension
          point="org.eclipse.jdt.ui.queryParticipants">
       <queryParticipant
-            class="org.maven.ide.eclipse.internal.index.MavenQueryParticipant"
+            class="org.maven.ide.eclipse.ui.internal.search.MavenQueryParticipant"
             id="org.maven.ide.eclipse.MavenQueryParticipantJava"
             name="Maven Respository Search"
             nature="org.eclipse.jdt.core.javanature">
@@ -756,14 +756,14 @@
    <!--
    <extension point="org.eclipse.search.searchPages">
       <page id="org.maven.ide.eclipse.MavenSearchPage"
-            class="org.maven.ide.eclipse.internal.ui.search.MavenSearchPage"
+            class="org.maven.ide.eclipse.ui.internal.search.MavenSearchPage"
             enabled="true"
             label="Maven Search"/>
    </extension>
    <extension point="org.eclipse.search.searchResultViewPages">
       <viewPage id="org.maven.ide.eclipse.MavenSearchResultPage"
-            class="org.maven.ide.eclipse.internal.ui.search.MavenSearchResultPage"
-            searchResultClass="org.maven.ide.eclipse.internal.ui.search.MavenSearchResult"/>
+            class="org.maven.ide.eclipse.ui.internal.search.MavenSearchResultPage"
+            searchResultClass="org.maven.ide.eclipse.ui.internal.search.MavenSearchResult"/>
    </extension>
    -->
 

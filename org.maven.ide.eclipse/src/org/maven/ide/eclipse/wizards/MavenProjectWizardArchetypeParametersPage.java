@@ -37,7 +37,7 @@ import org.eclipse.swt.widgets.TableItem;
 import org.apache.maven.archetype.catalog.Archetype;
 import org.apache.maven.model.Model;
 
-import org.maven.ide.eclipse.Messages;
+import org.maven.ide.eclipse.core.Messages;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.util.JavaUtil;
 

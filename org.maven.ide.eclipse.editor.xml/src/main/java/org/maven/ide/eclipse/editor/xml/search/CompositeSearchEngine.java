@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.maven.ide.eclipse.editor.xml.Log;
+import org.maven.ide.eclipse.core.MavenLogger;
 
 
 /**
@@ -27,8 +27,6 @@ public class CompositeSearchEngine implements SearchEngine {
   private static final VersionComparator VERSION_COMPARATOR = new VersionComparator();
 
   private List<SearchEngine> components = new ArrayList<SearchEngine>();
-
-  private Log log = Log.NULL_LOG;
 
   /**
    * Callback to be called for every component.
@@ -55,7 +53,7 @@ public class CompositeSearchEngine implements SearchEngine {
       try {
         result.addAll(callback.search(component));
       } catch(Exception e) {
-        log.logError("Error when searching", e);
+        MavenLogger.log("Error when searching", e);
       }
     }
     return result;
@@ -105,15 +103,5 @@ public class CompositeSearchEngine implements SearchEngine {
   public void addSearchEngine(SearchEngine component) {
     components.add(component);
   }
-
-  public Log getLog() {
-    return log;
-  }
-
-  public void setLog(Log log) {
-    this.log = log;
-  }
-
-
 
 }

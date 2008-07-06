@@ -23,7 +23,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 
-import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.core.MavenLogger;
 
 
 /**
@@ -83,11 +84,11 @@ public class ScmHandlerFactory {
 
   public static synchronized String getType(String url) throws CoreException {
     if(!url.startsWith("scm:")) {
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, "Invalid SCM url " + url, null));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Invalid SCM url " + url, null));
     }
     int n = url.indexOf(":", 4);
     if(n == -1) {
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, "Invalid SCM url " + url, null));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Invalid SCM url " + url, null));
     }
     return url.substring(4, n);
   }
@@ -126,7 +127,7 @@ public class ScmHandlerFactory {
             try {
               scmHandlers.add((ScmHandler) element.createExecutableExtension(ScmHandler.ATTR_CLASS));
             } catch(CoreException ex) {
-              MavenPlugin.log(ex);
+              MavenLogger.log(ex);
             }
           }
         }
@@ -148,7 +149,7 @@ public class ScmHandlerFactory {
             try {
               scmHandlerUis.add((ScmHandlerUi) element.createExecutableExtension(ScmHandlerUi.ATTR_CLASS));
             } catch(CoreException ex) {
-              MavenPlugin.log(ex);
+              MavenLogger.log(ex);
             }
           }
         }

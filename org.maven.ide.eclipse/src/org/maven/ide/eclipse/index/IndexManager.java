@@ -40,8 +40,8 @@ import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 
 import org.sonatype.nexus.index.ArtifactInfo;
 
-import org.maven.ide.eclipse.MavenConsole;
-import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.MavenConsole;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.index.IndexInfo.Type;
 
 
@@ -309,7 +309,7 @@ public abstract class IndexManager {
       return g;
   
     } catch(IOException ex) {
-      MavenPlugin.log("Can't retrieve groups for " + indexName + ":" + prefix, ex);
+      MavenLogger.log("Can't retrieve groups for " + indexName + ":" + prefix, ex);
       return group;
     }
   }
@@ -406,7 +406,7 @@ public abstract class IndexManager {
         }
       } catch(IOException ex) {
         String msg = "Unable to update index for " + info.getIndexName() + " " + info.getRepositoryUrl();
-        MavenPlugin.log(msg, ex);
+        MavenLogger.log(msg, ex);
         console.logError(msg);
       }
     }
@@ -438,7 +438,7 @@ public abstract class IndexManager {
         try {
           archiveIndexTime = indexManager.getIndexArchiveTime(indexArchive.openStream());
         } catch(IOException ex) {
-          MavenPlugin.log("Unable to read creation time for index " + indexName, ex);
+          MavenLogger.log("Unable to read creation time for index " + indexName, ex);
         }
       }
       
@@ -454,13 +454,13 @@ public abstract class IndexManager {
         File index = new File(indexManager.getBaseIndexDir(), indexName);
         if(!index.exists()) {
           if(!index.mkdirs()) {
-            MavenPlugin.log("Can't create index folder " + index.getAbsolutePath(), null);
+            MavenLogger.log("Can't create index folder " + index.getAbsolutePath(), null);
           }
         } else {
           File[] files = index.listFiles();
           for(int j = 0; j < files.length; j++ ) {
             if(!files[j].delete()) {
-              MavenPlugin.log("Can't delete " + files[j].getAbsolutePath(), null);
+              MavenLogger.log("Can't delete " + files[j].getAbsolutePath(), null);
             }
           }
         }
@@ -477,14 +477,14 @@ public abstract class IndexManager {
           // indexManager.addIndex(extensionIndexInfo, false);
           
         } catch(Exception ex) {
-          MavenPlugin.log("Unable to unpack index " + indexName, ex);
+          MavenLogger.log("Unable to unpack index " + indexName, ex);
         } finally {
           try {
             if(is != null) {
               is.close();
             }
           } catch(IOException ex) {
-            MavenPlugin.log("Unable to close stream", ex);
+            MavenLogger.log("Unable to close stream", ex);
           }
         }
       }

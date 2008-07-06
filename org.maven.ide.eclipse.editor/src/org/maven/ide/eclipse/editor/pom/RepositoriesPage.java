@@ -24,7 +24,7 @@ import org.maven.ide.components.pom.DistributionManagement;
 import org.maven.ide.components.pom.PluginRepositories;
 import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.Repositories;
-import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.editor.composites.RepositoriesComposite;
 
 /**
@@ -35,7 +35,7 @@ public class RepositoriesPage extends MavenPomEditorPage {
   private RepositoriesComposite repositoriesComposite;
   
   public RepositoriesPage(MavenPomEditor pomEditor) {
-    super(pomEditor, MavenPlugin.PLUGIN_ID + ".pom.repositories", "Repositories");
+    super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.repositories", "Repositories");
   }
   
   public void dispose() {

@@ -45,6 +45,7 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.apache.maven.artifact.Artifact;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
@@ -170,7 +171,7 @@ public class MavenPomSelectionComponent extends Composite {
   }
 
   void setStatus(int severity, String message) {
-    this.status = new Status(severity, MavenPlugin.PLUGIN_ID, 0, message, null);
+    this.status = new Status(severity, IMavenConstants.PLUGIN_ID, 0, message, null);
     if(selectionListener!=null) {
       selectionListener.selectionChanged(new SelectionChangedEvent(searchResultViewer, searchResultViewer.getSelection()));
     }

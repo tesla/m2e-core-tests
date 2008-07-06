@@ -40,6 +40,8 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 
 
@@ -121,15 +123,15 @@ public class MavenPomWizard extends Wizard implements INewWizard {
     IResource resource = root.findMember(new Path(projectName));
     if(!resource.exists() || (resource.getType() & IResource.FOLDER | IResource.PROJECT) == 0) {
       // TODO show warning popup
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1,
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
           ("Folder \"" + projectName + "\" does not exist."), null));
     }
 
     IContainer container = (IContainer) resource;
-    final IFile file = container.getFile(new Path(MavenPlugin.POM_FILE_NAME));
+    final IFile file = container.getFile(new Path(IMavenConstants.POM_FILE_NAME));
     if(file.exists()) {
       // TODO show warning popup
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, "POM already exists", null));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "POM already exists", null));
     }
 
     final File pom = file.getLocation().toFile();
@@ -149,7 +151,7 @@ public class MavenPomWizard extends Wizard implements INewWizard {
       });
 
     } catch(Exception ex) {
-      MavenPlugin.log("Unable to create POM " + pom + "; " + ex.getMessage(), ex);
+      MavenLogger.log("Unable to create POM " + pom + "; " + ex.getMessage(), ex);
 
     }
   }

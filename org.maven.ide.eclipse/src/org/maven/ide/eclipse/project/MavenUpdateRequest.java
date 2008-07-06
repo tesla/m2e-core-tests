@@ -14,7 +14,7 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 
-import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
 
 /**
  * Maven project update request
@@ -66,7 +66,7 @@ public class MavenUpdateRequest {
   }
   
   public void addPomFile(IProject project) {
-    pomFiles.add(project.getFile(MavenPlugin.POM_FILE_NAME));
+    pomFiles.add(project.getFile(IMavenConstants.POM_FILE_NAME));
   }
 
   public void removePomFile(IFile pomFile) {

@@ -21,7 +21,8 @@ import org.apache.maven.archetype.catalog.ArchetypeCatalog;
 import org.apache.maven.archetype.source.ArchetypeDataSource;
 import org.apache.maven.archetype.source.ArchetypeDataSourceException;
 
-import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.core.MavenLogger;
 
 /**
  * Abstract ArchetypeCatalog factory
@@ -106,12 +107,12 @@ public abstract class ArchetypeCatalogFactory {
         return source.getArchetypeCatalog(new Properties());
       } catch(ComponentLookupException ex) {
         String msg = "Error looking up archetype data; " + ex.getMessage();
-        MavenPlugin.log(msg, ex);
-        throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
+        MavenLogger.log(msg, ex);
+        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
       } catch(ArchetypeDataSourceException ex) {
         String msg = "Error looking up archetype catalog; " + ex.getMessage();
-        MavenPlugin.log(msg, ex);
-        throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
+        MavenLogger.log(msg, ex);
+        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
       }
     }
 

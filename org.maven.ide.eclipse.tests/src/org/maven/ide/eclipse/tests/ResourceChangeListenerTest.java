@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.internal.project.ProjectConfigurationManager;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 
@@ -47,7 +48,7 @@ public class ResourceChangeListenerTest extends AsbtractMavenProjectTestCase {
   public void testMarkerOnlyChange() throws Exception {
     // modify
     IFile pom = project.getFile("pom.xml");
-    pom.createMarker(MavenPlugin.MARKER_ID);
+    pom.createMarker(IMavenConstants.MARKER_ID);
     waitForJobsToComplete();
 
     // ideally, I need to test that the container did not refresh
@@ -77,7 +78,7 @@ public class ResourceChangeListenerTest extends AsbtractMavenProjectTestCase {
           IFile pom001 = project.getFile("pom001.xml");
           pom001.create(contents, true, monitor);
         } catch(Exception e) {
-          throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, 0, e.getMessage(), e));
+          throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, 0, e.getMessage(), e));
         }
       }
     }, null);
@@ -105,7 +106,7 @@ public class ResourceChangeListenerTest extends AsbtractMavenProjectTestCase {
           IFile pom001 = project.getFile("pom001.xml");
           pom001.create(contents, true, monitor);
         } catch(Exception e) {
-          throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, 0, e.getMessage(), e));
+          throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, 0, e.getMessage(), e));
         }
       }
     }, null);

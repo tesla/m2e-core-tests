@@ -48,6 +48,8 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
@@ -144,7 +146,7 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
         return;
       }
 
-      IFile projectPom = javaProject.getProject().getFile(new Path(MavenPlugin.POM_FILE_NAME));
+      IFile projectPom = javaProject.getProject().getFile(new Path(IMavenConstants.POM_FILE_NAME));
       if(projectPom == null || !projectPom.isAccessible()) {
         MessageDialog.openError(Display.getCurrent().getActiveShell(), "Add Dependency",
             "Project does not have pom.xml");
@@ -153,7 +155,7 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
 
       boolean hasMavenNature = false;
       try {
-        hasMavenNature = javaProject.getProject().hasNature(MavenPlugin.NATURE_ID);
+        hasMavenNature = javaProject.getProject().hasNature(IMavenConstants.NATURE_ID);
       } catch(CoreException ex1) {
         MessageDialog.openError(Display.getCurrent().getActiveShell(), "Add Dependency", //
             "Unable to read project natures");
@@ -188,7 +190,7 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
           }
         } catch(Exception ex) {
           String msg = "Unable to locate Maven project";
-          MavenPlugin.log(msg, ex);
+          MavenLogger.log(msg, ex);
           MessageDialog.openError(Display.getCurrent().getActiveShell(), "Add Dependency",
               "Unable to locate pom.xml for " + cu.getPath().toString());
           return;
@@ -202,7 +204,7 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
           }
         } catch(CoreException ex) {
           String msg = "Unable to locate Maven project";
-          MavenPlugin.log(msg, ex);
+          MavenLogger.log(msg, ex);
           MessageDialog.openError(Display.getCurrent().getActiveShell(), "Add Dependency",
               "Unable to locate pom.xml for " + cu.getPath().toString());
           return;
@@ -283,7 +285,7 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
         edit.apply(document, TextEdit.CREATE_UNDO);
         return true;
       } catch(Exception ex) {
-        MavenPlugin.log("Unable to update imports", ex);
+        MavenLogger.log("Unable to update imports", ex);
         MessageDialog.openError(Display.getCurrent().getActiveShell(), "Add Dependency",
             "Unable to add import statement for " + className);
         return false;
@@ -295,7 +297,7 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
       Model model = modelManager.readMavenModel(pomFile);
 
       for(String module : (List<String>) model.getModules()) {
-        IFile modulePom = pomFile.getParent().getFile(new Path(module).append(MavenPlugin.POM_FILE_NAME));
+        IFile modulePom = pomFile.getParent().getFile(new Path(module).append(IMavenConstants.POM_FILE_NAME));
         if(modulePom.exists() && modulePom.isAccessible()) {
           IPath modulePath = modulePom.getLocation();
           if(modulePath.matchingFirstSegments(resource.getLocation()) == modulePath.segmentCount() - 1) {
@@ -307,7 +309,7 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
 
       for(Profile profile : (List<Profile>) model.getProfiles()) {
         for(String module : (List<String>) profile.getModules()) {
-          IFile modulePom = pomFile.getParent().getFile(new Path(module).append(MavenPlugin.POM_FILE_NAME));
+          IFile modulePom = pomFile.getParent().getFile(new Path(module).append(IMavenConstants.POM_FILE_NAME));
           IPath modulePath = modulePom.getLocation();
           if(modulePath.matchingFirstSegments(resource.getLocation()) == modulePath.segmentCount()) {
             IFile nestedModulePom = findModulePom(resource, modulePom, modelManager);

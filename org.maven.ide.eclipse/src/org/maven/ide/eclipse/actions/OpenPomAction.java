@@ -63,6 +63,7 @@ import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.model.Dependency;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
@@ -173,7 +174,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
         try {
           return plugin.getBuildpathManager().findArtifact(project, fragment.getPath());
         } catch(CoreException ex) {
-          MavenPlugin.log(ex);
+          MavenLogger.log(ex);
           plugin.getConsole().logError("Can't find artifact for " + fragment);
           return null;
         }
@@ -230,11 +231,11 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
       openEditor(new MavenEditorStorageInput(name + ".java", tooltip, url, buff), name + ".java");
 
     } catch(AbstractArtifactResolutionException ex) {
-      MavenPlugin.log("Can't resolve artifact " + name, ex);
+      MavenLogger.log("Can't resolve artifact " + name, ex);
       openDialog("Can't resolve artifact " + name + "\n" + ex.toString());
 
     } catch(IOException ex) {
-      MavenPlugin.log("Can't open editor for " + name, ex);
+      MavenLogger.log("Can't open editor for " + name, ex);
       openDialog("Can't open editor for " + name + "\n" + ex.toString());
     }
   }
@@ -271,11 +272,11 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
       openEditor(new MavenEditorStorageInput(name, name, file.getAbsolutePath(), readStream(new FileInputStream(file))), name);
 
     } catch(AbstractArtifactResolutionException ex) {
-      MavenPlugin.log("Can't resolve artifact " + name, ex);
+      MavenLogger.log("Can't resolve artifact " + name, ex);
       openDialog("Can't resolve artifact " + name + "\n" + ex.toString());
 
     } catch(IOException ex) {
-      MavenPlugin.log("Can't open pom file for " + name, ex);
+      MavenLogger.log("Can't open pom file for " + name, ex);
       openDialog("Can't open pom file for " + name + "\n" + ex.toString());
     }
   }

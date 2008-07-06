@@ -20,6 +20,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerImpl;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
@@ -54,7 +55,7 @@ public class MavenModelManagerTest extends AsbtractMavenProjectTestCase {
   
   public void testReadMavenProjectWithWebdavExtension() throws Exception {
     IProject project = createExisting("MNGECLIPSE-418a", "projects/poms/MNGECLIPSE-418a");
-    IFile pomFile = project.getFile(MavenPlugin.POM_FILE_NAME);
+    IFile pomFile = project.getFile(IMavenConstants.POM_FILE_NAME);
     
     MavenUpdateRequest updateRequest = new MavenUpdateRequest(false, false);
     MavenExecutionResult result = manager.readProjectWithDependencies(pomFile, resolverConfiguration, updateRequest,
@@ -68,7 +69,7 @@ public class MavenModelManagerTest extends AsbtractMavenProjectTestCase {
 
   public void testReadMavenProjectWithSshExtension() throws Exception {
     IProject project = createExisting("MNGECLIPSE-418b", "projects/poms/MNGECLIPSE-418b");
-    IFile pomFile = project.getFile(MavenPlugin.POM_FILE_NAME);
+    IFile pomFile = project.getFile(IMavenConstants.POM_FILE_NAME);
 
     MavenUpdateRequest updateRequest = new MavenUpdateRequest(false, false);
     MavenExecutionResult result = manager.readProjectWithDependencies(pomFile, resolverConfiguration, updateRequest,

@@ -31,7 +31,7 @@ import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 
-import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArchetypeCatalogFactory;
 import org.maven.ide.eclipse.index.IndexInfo;
 import org.maven.ide.eclipse.internal.index.IndexInfoWriter;
@@ -92,13 +92,13 @@ public class ExtensionReader {
         IndexInfoWriter writer = new IndexInfoWriter();
         return writer.readIndexInfo(is);
       } catch(IOException ex) {
-        MavenPlugin.log("Unable to read index configuration", ex);
+        MavenLogger.log("Unable to read index configuration", ex);
       } finally {
         if(is != null) {
           try {
             is.close();
           } catch(IOException ex) {
-            MavenPlugin.log("Unable to close index config stream", ex);
+            MavenLogger.log("Unable to close index config stream", ex);
           }
         }
       }
@@ -152,7 +152,7 @@ public class ExtensionReader {
         indexInfo.setArchiveUrl(archiveUrl);
       }
       if(archiveUrl == null) {
-        MavenPlugin.log("Unable to find index archive " + archive + " in " + contributor.getName(), null);
+        MavenLogger.log("Unable to find index archive " + archive + " in " + contributor.getName(), null);
       }
     }
 
@@ -195,7 +195,7 @@ public class ExtensionReader {
             return new ArchetypeCatalogFactory.RemoteCatalogFactory(url.substring(0, url.lastIndexOf("/")), description, false);
           }
         }
-        MavenPlugin.log("Unable to find Archetype catalog " + name + " in " + contributor.getName(), null);
+        MavenLogger.log("Unable to find Archetype catalog " + name + " in " + contributor.getName(), null);
       }
     } else if(ELEMENT_REMOTE_ARCHETYPE.equals(element.getName())) {
       String url = element.getAttribute(ATTR_URL);
@@ -222,7 +222,7 @@ public class ExtensionReader {
               Object o = element.createExecutableExtension(AbstractProjectConfigurator.ATTR_CLASS);
               projectConfigurators.add((AbstractProjectConfigurator) o);
             } catch(CoreException ex) {
-              MavenPlugin.log(ex);
+              MavenLogger.log(ex);
             }
           }
         }
@@ -247,7 +247,7 @@ public class ExtensionReader {
               factories.add((AbstractClasspathConfiguratorFactory) //
                   element.createExecutableExtension(AbstractClasspathConfiguratorFactory.ATTR_CLASS));
             } catch(CoreException ex) {
-              MavenPlugin.log(ex);
+              MavenLogger.log(ex);
             }
           }
         }

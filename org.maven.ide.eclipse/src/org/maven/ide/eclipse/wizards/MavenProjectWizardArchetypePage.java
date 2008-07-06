@@ -74,7 +74,8 @@ import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.embedder.MavenEmbedder;
 
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.Messages;
+import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.core.Messages;
 import org.maven.ide.eclipse.embedder.ArchetypeCatalogFactory;
 import org.maven.ide.eclipse.embedder.ArchetypeManager;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
@@ -664,7 +665,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
             
           } catch(final Exception ex) {
             final String msg = "Can't resolve Archetype " + archetypeName;
-            MavenPlugin.log(msg, ex);
+            MavenLogger.log(msg, ex);
             getShell().getDisplay().asyncExec(new Runnable() {
               public void run() {
                 setErrorMessage(msg + "\n" + ex.toString());
@@ -683,7 +684,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
       
     } catch(InvocationTargetException ex) {
       String msg = "Can't resolve Archetype " + archetypeName;
-      MavenPlugin.log(msg, ex);
+      MavenLogger.log(msg, ex);
       setErrorMessage(msg + "\n" + ex.toString());
       
     }

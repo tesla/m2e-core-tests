@@ -15,8 +15,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
-import org.maven.ide.eclipse.MavenConsole;
-import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.index.IndexManager;
 
 
@@ -47,7 +47,7 @@ public class IndexerJob extends Job {
       return Status.OK_STATUS;
     } catch(IOException ex) {
       console.logError("Unable to reindex local repository");
-      return new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, "Indexing error", ex);
+      return new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Indexing error", ex);
     } finally {
       monitor.done();
     }

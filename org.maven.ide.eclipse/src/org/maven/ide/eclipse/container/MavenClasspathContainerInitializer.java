@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.project.BuildPathManager;
 
 
@@ -27,18 +28,20 @@ import org.maven.ide.eclipse.project.BuildPathManager;
  * @author Eugene Kuleshov
  */
 public class MavenClasspathContainerInitializer extends ClasspathContainerInitializer {
-  
-  public void initialize(IPath containerPath, final IJavaProject project) {
+
+  public void initialize(IPath containerPath, IJavaProject project) {
     if(BuildPathManager.isMaven2ClasspathContainer(containerPath)) {
       try {
         IClasspathContainer container = JavaCore.getClasspathContainer(containerPath, project);
-        if (container != null) {
-          MavenClasspathContainer mavenContainer = new MavenClasspathContainer(containerPath, container.getClasspathEntries());
+        if(container != null) {
+          IClasspathContainer mavenContainer = MavenPlugin.getDefault().getBuildpathManager().createClassPathContainer(
+              containerPath, //
+              container.getClasspathEntries());
           JavaCore.setClasspathContainer(containerPath, new IJavaProject[] {project},
               new IClasspathContainer[] {mavenContainer}, new NullProgressMonitor());
         }
       } catch(JavaModelException ex) {
-        MavenPlugin.log("Exception initializing classpath container " + containerPath.toString(), ex);
+        MavenLogger.log("Exception initializing classpath container " + containerPath.toString(), ex);
         return;
       }
     }
@@ -48,11 +51,9 @@ public class MavenClasspathContainerInitializer extends ClasspathContainerInitia
     return true;
   }
 
-  public void requestClasspathContainerUpdate(IPath containerPath, final IJavaProject project,
-      final IClasspathContainer containerSuggestion) throws CoreException 
-  {
+  public void requestClasspathContainerUpdate(IPath containerPath, IJavaProject project,
+      IClasspathContainer containerSuggestion) throws CoreException {
     MavenPlugin.getDefault().getBuildpathManager().updateClasspathContainer(project, containerSuggestion);
   }
 
 }
-

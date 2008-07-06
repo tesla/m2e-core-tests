@@ -52,8 +52,10 @@ import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.embedder.MavenEmbedder;
 
-import org.maven.ide.eclipse.MavenConsole;
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.core.MavenConsole;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
@@ -148,7 +150,7 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
       String location = configuration.getAttribute(MavenLaunchConstants.ATTR_RUNTIME, "");
       return runtimeManager.getRuntime(location);
     } catch(CoreException ex) {
-      MavenPlugin.log(ex);
+      MavenLogger.log(ex);
       return runtimeManager.getDefaultRuntime();
     }
   }
@@ -209,7 +211,7 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
       URL fileURL = FileLocator.toFileURL(url);
       return new File(fileURL.toURI()).getCanonicalPath();
     } catch(Exception ex) {
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, ex.getMessage(), ex));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, ex.getMessage(), ex));
     }
   }
 
@@ -259,7 +261,7 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
       }
     } catch(CoreException e) {
       String msg = "Exception while getting configuration attribute " + ATTR_PROPERTIES;
-      MavenPlugin.log(msg, e);
+      MavenLogger.log(msg, e);
     }
 
     try {
@@ -269,7 +271,7 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
       }
     } catch(CoreException ex) {
       String msg = "Exception while getting configuration attribute " + ATTR_PROFILES;
-      MavenPlugin.log(msg, ex);
+      MavenLogger.log(msg, ex);
     }
 
     return sb.toString();
@@ -386,7 +388,7 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
             RefreshTab.refreshResources(configuration, monitor);
             return Status.OK_STATUS;
           } catch (CoreException e) {
-            MavenPlugin.log(e);
+            MavenLogger.log(e);
             return e.getStatus();
           } 
         }
@@ -436,9 +438,9 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
         try {
           embedder.resolve(artifact, Collections.EMPTY_LIST, embedder.getLocalRepository());
         } catch(ArtifactResolutionException ex) {
-          MavenPlugin.log("Artifact resolution error " + artifact, ex);
+          MavenLogger.log("Artifact resolution error " + artifact, ex);
         } catch(ArtifactNotFoundException ex) {
-          MavenPlugin.log("Artifact not found " + artifact, ex);
+          MavenLogger.log("Artifact not found " + artifact, ex);
         }
         file = artifact.getFile();
       }

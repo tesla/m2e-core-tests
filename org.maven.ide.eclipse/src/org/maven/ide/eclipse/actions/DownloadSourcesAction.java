@@ -21,6 +21,8 @@ import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.project.BuildPathManager;
 
 
@@ -47,7 +49,7 @@ public class DownloadSourcesAction implements IObjectActionDelegate {
         IPath currentPath = null;
         if(element instanceof IProject) {
           IProject project = (IProject) element;
-          if(project.isAccessible() && project.hasNature(MavenPlugin.NATURE_ID)) {
+          if(project.isAccessible() && project.hasNature(IMavenConstants.NATURE_ID)) {
             currentProject = project;
           }
         } else if(element instanceof IPackageFragmentRoot) {
@@ -67,7 +69,7 @@ public class DownloadSourcesAction implements IObjectActionDelegate {
           }
         }
       } catch(CoreException ex) {
-        MavenPlugin.log(ex);
+        MavenLogger.log(ex);
       }
     }
   }

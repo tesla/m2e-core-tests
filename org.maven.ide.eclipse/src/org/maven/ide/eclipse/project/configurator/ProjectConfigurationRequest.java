@@ -22,7 +22,6 @@ import org.maven.ide.eclipse.project.ResolverConfiguration;
  * @author igor
  */
 public class ProjectConfigurationRequest {
-
   private final IProject project;
   private final IFile pom;
   private final ResolverConfiguration resolverConfiguration;

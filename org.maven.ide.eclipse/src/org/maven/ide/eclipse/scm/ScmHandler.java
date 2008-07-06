@@ -16,7 +16,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.project.MavenProjectScmInfo;
 
 /**
@@ -76,7 +76,7 @@ public abstract class ScmHandler implements Comparable<ScmHandler>, IExecutableE
       try {
         this.priority = Integer.parseInt(priority);
       } catch(Exception ex) {
-        MavenPlugin.log("Unable to parse priority for " + handlerClass, ex);
+        MavenLogger.log("Unable to parse priority for " + handlerClass, ex);
       }
     }
   }

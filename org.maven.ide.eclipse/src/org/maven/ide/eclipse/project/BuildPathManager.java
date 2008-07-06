@@ -29,12 +29,16 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceDescription;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -64,9 +68,9 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.artifact.resolver.filter.ScopeArtifactFilter;
 
-import org.maven.ide.eclipse.MavenConsole;
-import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.container.MavenClasspathContainer;
+import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.core.MavenConsole;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
@@ -117,20 +121,27 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
   
   final MavenRuntimeManager runtimeManager;
   
+  final BundleContext bundleContext;
+  
+  final File stateLocationDir;
+
   private String jdtVersion;
+
 
   public BuildPathManager(MavenEmbedderManager embedderManager, MavenConsole console,
       MavenProjectManager projectManager, IndexManager indexManager, MavenModelManager modelManager,
-      MavenRuntimeManager runtimeManager) {
+      MavenRuntimeManager runtimeManager, BundleContext bundleContext, File stateLocationDir) {
     this.embedderManager = embedderManager;
     this.console = console;
     this.projectManager = projectManager;
     this.indexManager = indexManager;
     this.runtimeManager = runtimeManager;
+    this.bundleContext = bundleContext;
+    this.stateLocationDir = stateLocationDir;
   }
 
   public static IClasspathEntry getDefaultContainerEntry() {
-    return JavaCore.newContainerEntry(new Path(MavenPlugin.CONTAINER_ID));
+    return JavaCore.newContainerEntry(new Path(IMavenConstants.CONTAINER_ID));
   }
 
   public static IClasspathEntry getMavenContainerEntry(IJavaProject javaProject) {
@@ -183,7 +194,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
   // XXX should inject version instead of looking it up 
   private synchronized String getJDTVersion() {
     if(jdtVersion==null) {
-      Bundle[] bundles = MavenPlugin.getDefault().getBundleContext().getBundles();
+      Bundle[] bundles = bundleContext.getBundles();
       for(int i = 0; i < bundles.length; i++ ) {
         if(JavaCore.PLUGIN_ID.equals(bundles[i].getSymbolicName())) {
           jdtVersion = (String) bundles[i].getHeaders().get(Constants.BUNDLE_VERSION);
@@ -223,7 +234,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     if(javaProject != null) {
       try {
         IClasspathEntry containerEntry = getMavenContainerEntry(javaProject);
-        IPath path = containerEntry != null ? containerEntry.getPath() : new Path(MavenPlugin.CONTAINER_ID);
+        IPath path = containerEntry != null ? containerEntry.getPath() : new Path(IMavenConstants.CONTAINER_ID);
         IClasspathEntry[] classpath = getClasspath(project, monitor);
         IClasspathContainer container = new MavenClasspathContainer(path, classpath);
         JavaCore.setClasspathContainer(container.getPath(), new IJavaProject[] {javaProject},
@@ -231,7 +242,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
         forcePackageExplorerRefresh(javaProject);
       } catch(CoreException ex) {
         // TODO Auto-generated catch block
-        MavenPlugin.log(ex);
+        MavenLogger.log(ex);
       }
     }
   }
@@ -300,14 +311,14 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
       }
 
       ArrayList<IClasspathAttribute> attributes = new ArrayList<IClasspathAttribute>();
-      attributes.add(JavaCore.newClasspathAttribute(MavenPlugin.GROUP_ID_ATTRIBUTE, a.getGroupId()));
-      attributes.add(JavaCore.newClasspathAttribute(MavenPlugin.ARTIFACT_ID_ATTRIBUTE, a.getArtifactId()));
-      attributes.add(JavaCore.newClasspathAttribute(MavenPlugin.VERSION_ATTRIBUTE, a.getVersion()));
+      attributes.add(JavaCore.newClasspathAttribute(IMavenConstants.GROUP_ID_ATTRIBUTE, a.getGroupId()));
+      attributes.add(JavaCore.newClasspathAttribute(IMavenConstants.ARTIFACT_ID_ATTRIBUTE, a.getArtifactId()));
+      attributes.add(JavaCore.newClasspathAttribute(IMavenConstants.VERSION_ATTRIBUTE, a.getVersion()));
       if (a.getClassifier() != null) {
-        attributes.add(JavaCore.newClasspathAttribute(MavenPlugin.CLASSIFIER_ATTRIBUTE, a.getClassifier()));
+        attributes.add(JavaCore.newClasspathAttribute(IMavenConstants.CLASSIFIER_ATTRIBUTE, a.getClassifier()));
       }
       if (a.getScope() != null) {
-        attributes.add(JavaCore.newClasspathAttribute(MavenPlugin.SCOPE_ATTRIBUTE, a.getScope()));
+        attributes.add(JavaCore.newClasspathAttribute(IMavenConstants.SCOPE_ATTRIBUTE, a.getScope()));
       }
 
       // project
@@ -392,7 +403,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
           }
         }
       } catch(Exception ex) {
-        MavenPlugin.log(ex.getMessage(), ex);
+        MavenLogger.log(ex.getMessage(), ex);
       }
     }
   }
@@ -419,7 +430,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
       }
       return getClasspath(facade, scope, props, uniquePaths);
     } catch (IOException e) {
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, //
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, //
           "Can't save classpath container changes", e));
     }
   }
@@ -501,13 +512,13 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     String version = null;
     String classifier = null;
     for(int j = 0; j < attributes.length; j++ ) {
-      if(MavenPlugin.GROUP_ID_ATTRIBUTE.equals(attributes[j].getName())) {
+      if(IMavenConstants.GROUP_ID_ATTRIBUTE.equals(attributes[j].getName())) {
         groupId = attributes[j].getValue();
-      } else if(MavenPlugin.ARTIFACT_ID_ATTRIBUTE.equals(attributes[j].getName())) {
+      } else if(IMavenConstants.ARTIFACT_ID_ATTRIBUTE.equals(attributes[j].getName())) {
         artifactId = attributes[j].getValue();
-      } else if(MavenPlugin.VERSION_ATTRIBUTE.equals(attributes[j].getName())) {
+      } else if(IMavenConstants.VERSION_ATTRIBUTE.equals(attributes[j].getName())) {
         version = attributes[j].getValue();
-      } else if(MavenPlugin.CLASSIFIER_ATTRIBUTE.equals(attributes[j].getName())) {
+      } else if(IMavenConstants.CLASSIFIER_ATTRIBUTE.equals(attributes[j].getName())) {
         classifier = attributes[j].getValue();
       }
     }
@@ -539,9 +550,9 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
       }
       
     } catch(IOException ex) {
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, 0, "Search error", ex));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, 0, "Search error", ex));
     } catch(DigesterException ex) {
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, 0, "MD5 calculation error", ex));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, 0, "MD5 calculation error", ex));
     }
     
     return null;
@@ -609,7 +620,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
   }
   
   public void updateClasspathContainer(IJavaProject project, IClasspathContainer containerSuggestion) throws CoreException {
-    IFile pom = project.getProject().getFile(MavenPlugin.POM_FILE_NAME);
+    IFile pom = project.getProject().getFile(IMavenConstants.POM_FILE_NAME);
     MavenProjectFacade facade = projectManager.create(pom, false, null);
     if (facade == null) {
       return;
@@ -660,7 +671,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
         os.close();
       }
     } catch (IOException e) {
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, "Can't save classpath container changes", e));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Can't save classpath container changes", e));
     }
 
     updateClasspath(project.getProject(), new NullProgressMonitor());
@@ -680,7 +691,6 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
 
   /** public for unit tests only */
   public File getSourceAttachmentPropertiesFile(IProject project) {
-    File stateLocationDir = MavenPlugin.getDefault().getStateLocation().toFile();
     return new File(stateLocationDir, project.getName() + ".sources");
   }
 
@@ -689,14 +699,89 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     if(IResourceChangeEvent.PRE_DELETE == type) {
       File file = getSourceAttachmentPropertiesFile((IProject) event.getResource());
       if(!file.delete()) {
-        MavenPlugin.log("Can't delete " + file.getAbsolutePath(), null);
+        MavenLogger.log("Can't delete " + file.getAbsolutePath(), null);
       }
     }
   }
 
-  public static boolean isMaven2ClasspathContainer(IPath containerPath) {
-    return containerPath != null && containerPath.segmentCount() > 0
-        && MavenPlugin.CONTAINER_ID.equals(containerPath.segment(0));
+  public void setupVariables() {
+    File localRepositoryDir = embedderManager.getLocalRepositoryDir();
+  
+    IWorkspace workspace = ResourcesPlugin.getWorkspace();
+    IWorkspaceDescription wsDescription = workspace.getDescription();        
+    boolean autobuild = wsDescription.isAutoBuilding();
+  
+    try {
+      setAutobuild(workspace, false);
+      JavaCore.setClasspathVariable(IMavenConstants.M2_REPO, //
+          new Path(localRepositoryDir.getAbsolutePath()), //
+          new NullProgressMonitor());
+    } catch(CoreException ex) {
+      MavenLogger.log(ex);
+    } finally {
+      try {
+        setAutobuild(workspace, autobuild);
+      } catch (CoreException ex2) {
+        MavenLogger.log(ex2);
+      }
+    }
+  
   }
 
+  private boolean setAutobuild(IWorkspace workspace, boolean newState) throws CoreException {
+    IWorkspaceDescription description = workspace.getDescription();
+    boolean oldState = description.isAutoBuilding();
+    if(oldState != newState) {
+      description.setAutoBuilding(newState);
+      workspace.setDescription(description);
+    }
+    return oldState;
+  }
+  
+  public static boolean isMaven2ClasspathContainer(IPath containerPath) {
+    return containerPath != null && containerPath.segmentCount() > 0
+        && IMavenConstants.CONTAINER_ID.equals(containerPath.segment(0));
+  }
+
+  public IClasspathContainer createClassPathContainer(IPath containerPath, IClasspathEntry[] classpathEntries) {
+    return new MavenClasspathContainer(containerPath, classpathEntries);
+  }
+
+  
+  private static class MavenClasspathContainer implements IClasspathContainer {
+    private final IClasspathEntry[] entries;
+    private final IPath path;
+
+    public MavenClasspathContainer() {
+      this.path = new Path(IMavenConstants.CONTAINER_ID);
+      this.entries = new IClasspathEntry[0];
+    }
+    
+    public MavenClasspathContainer(IPath path, IClasspathEntry[] entries) {
+      this.path = path;
+      this.entries = entries;
+    }
+    
+    public MavenClasspathContainer(IPath path, Set<IClasspathEntry> entrySet) {
+      this(path, entrySet.toArray(new IClasspathEntry[entrySet.size()]));
+    }
+
+    public synchronized IClasspathEntry[] getClasspathEntries() {
+      return entries;
+    }
+
+    public String getDescription() {
+      return "Maven Dependencies";  // TODO move to properties
+    }
+
+    public int getKind() {
+      return IClasspathContainer.K_APPLICATION;
+    }
+
+    public IPath getPath() {
+      return path; 
+    }
+    
+  }
+  
 }

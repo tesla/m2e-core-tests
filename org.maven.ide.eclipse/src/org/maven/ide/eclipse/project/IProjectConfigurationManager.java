@@ -21,6 +21,8 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.apache.maven.archetype.catalog.Archetype;
 import org.apache.maven.model.Model;
 
+import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
+
 public interface IProjectConfigurationManager {
   
   ISchedulingRule getRule();
@@ -41,5 +43,7 @@ public interface IProjectConfigurationManager {
 
   void updateProjectConfiguration(IProject project, ResolverConfiguration configuration, String goalToExecute,
       IProgressMonitor monitor) throws CoreException;
+
+  Set<AbstractProjectConfigurator> getConfigurators();
 
 }

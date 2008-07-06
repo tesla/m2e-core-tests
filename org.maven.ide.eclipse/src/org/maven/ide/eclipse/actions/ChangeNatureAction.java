@@ -28,6 +28,7 @@ import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.MavenProjectManager;
@@ -121,7 +122,7 @@ public class ChangeNatureAction implements IObjectActionDelegate {
           changeNature(project, monitor);
         } catch (CoreException ex) {
           if (status == null) {
-            status = new MultiStatus(MavenPlugin.PLUGIN_ID, IStatus.ERROR, "Can't change nature", null);
+            status = new MultiStatus(IMavenConstants.PLUGIN_ID, IStatus.ERROR, "Can't change nature", null);
           }
           status.add(ex.getStatus());
         }

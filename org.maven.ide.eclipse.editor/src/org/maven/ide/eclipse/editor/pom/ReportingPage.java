@@ -24,7 +24,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.Reporting;
-import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.editor.composites.ReportingComposite;
 
 
@@ -38,7 +38,7 @@ public class ReportingPage extends MavenPomEditorPage {
   private SearchControl searchControl;
 
   public ReportingPage(MavenPomEditor pomEditor) {
-    super(pomEditor, MavenPlugin.PLUGIN_ID + ".pom.reporting", "Reporting");
+    super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.reporting", "Reporting");
   }
 
   public void setActive(boolean active) {

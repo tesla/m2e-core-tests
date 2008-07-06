@@ -23,7 +23,7 @@ import org.eclipse.ui.IWorkbench;
 
 import org.apache.maven.model.Scm;
 
-import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.project.MavenProjectScmInfo;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.scm.ScmUrl;
@@ -136,7 +136,7 @@ public class MavenCheckoutWizard extends Wizard implements IImportWizard, INewWi
       }
       
       int n = url.lastIndexOf("/");
-      String label = (n == -1 ? url : url.substring(n)) + "/" + MavenPlugin.POM_FILE_NAME;
+      String label = (n == -1 ? url : url.substring(n)) + "/" + IMavenConstants.POM_FILE_NAME;
       MavenProjectScmInfo projectInfo = new MavenProjectScmInfo(label, null, //
           null, revision, url, url);
       mavenProjects.add(projectInfo);

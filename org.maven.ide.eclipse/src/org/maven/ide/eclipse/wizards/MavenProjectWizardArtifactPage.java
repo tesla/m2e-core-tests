@@ -26,7 +26,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Model;
 
-import org.maven.ide.eclipse.Messages;
+import org.maven.ide.eclipse.core.Messages;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;

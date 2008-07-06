@@ -38,7 +38,7 @@ import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.Hyperlink;
-import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.editor.xml.MvnIndexPlugin;
 import org.maven.ide.eclipse.editor.xml.search.Packaging;
 import org.maven.ide.eclipse.editor.xml.search.SearchEngine;
@@ -113,9 +113,9 @@ public abstract class FormUtils {
             | IWorkbenchBrowserSupport.LOCATION_BAR, url, url, url);
         browser.openURL(new URL(url));
       } catch(PartInitException ex) {
-        MavenPlugin.log(ex);
+        MavenLogger.log(ex);
       } catch(MalformedURLException ex) {
-        MavenPlugin.log("Malformed url " + url, ex);
+        MavenLogger.log("Malformed url " + url, ex);
       }
     }
   }

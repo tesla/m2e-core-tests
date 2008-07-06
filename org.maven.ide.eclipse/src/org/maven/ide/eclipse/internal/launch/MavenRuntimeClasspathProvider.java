@@ -40,6 +40,7 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Build;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.project.BuildPathManager;
 import org.maven.ide.eclipse.project.IMavenProjectVisitor;
 import org.maven.ide.eclipse.project.MavenProjectFacade;
@@ -53,7 +54,7 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
 
   private static final String THIS_PROJECT_CLASSIFIER = "";
 
-  private static final Path MAVEN2_CONTAINER_PATH = new Path(MavenPlugin.CONTAINER_ID);
+  private static final Path MAVEN2_CONTAINER_PATH = new Path(IMavenConstants.CONTAINER_ID);
   
   public static final String JDT_JUNIT_TEST = "org.eclipse.jdt.junit.launchconfig";
 
@@ -180,7 +181,7 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
     } else if (JDT_JUNIT_TEST.equals(typeid)) {
       return BuildPathManager.CLASSPATH_TEST;
     } else {
-      throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, 0, "Unsupported launch configuratio type " + typeid, null));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, 0, "Unsupported launch configuratio type " + typeid, null));
     }
   }
 
@@ -326,7 +327,7 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
   private static String getArtifactClassifier(IClasspathEntry entry) {
     IClasspathAttribute[] attributes = entry.getExtraAttributes();
     for(int j = 0; j < attributes.length; j++ ) {
-      if(MavenPlugin.CLASSIFIER_ATTRIBUTE.equals(attributes[j].getName())) {
+      if(IMavenConstants.CLASSIFIER_ATTRIBUTE.equals(attributes[j].getName())) {
         return attributes[j].getValue();
       }
     }

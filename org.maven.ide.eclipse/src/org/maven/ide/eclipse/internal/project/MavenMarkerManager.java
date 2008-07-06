@@ -28,10 +28,18 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.validation.ModelValidationResult;
 
-import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.Messages;
+import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.core.MavenConsole;
+import org.maven.ide.eclipse.core.Messages;
 
 public class MavenMarkerManager {
+  
+  private final MavenConsole console;
+
+  public MavenMarkerManager(MavenConsole console) {
+    this.console = console;
+  }
+  
   @SuppressWarnings("unchecked")
   void addMarkers(IFile pomFile, MavenExecutionResult result) {
     List<Exception> exceptions = result.getExceptions();
@@ -76,10 +84,10 @@ public class MavenMarkerManager {
     }
   }
 
-  static void addMarker(IResource resource, String message, int lineNumber, int severity) {
+  void addMarker(IResource resource, String message, int lineNumber, int severity) {
     try {
       if(resource.isAccessible()) {
-        IMarker marker = resource.createMarker(MavenPlugin.MARKER_ID);
+        IMarker marker = resource.createMarker(IMavenConstants.MARKER_ID);
         marker.setAttribute(IMarker.MESSAGE, message);
         marker.setAttribute(IMarker.SEVERITY, severity);
         if(lineNumber == -1) {
@@ -88,7 +96,7 @@ public class MavenMarkerManager {
         marker.setAttribute(IMarker.LINE_NUMBER, lineNumber);
       }
     } catch(CoreException ex) {
-      MavenPlugin.getDefault().getConsole().logError("Unable to add marker; " + ex.toString());
+      console.logError("Unable to add marker; " + ex.toString());
     }
   }
 
@@ -174,7 +182,7 @@ public class MavenMarkerManager {
 
   void deleteMarkers(IFile pom) throws CoreException {
     if (pom != null && pom.exists()) {
-      pom.deleteMarkers(MavenPlugin.MARKER_ID, true, IResource.DEPTH_INFINITE);
+      pom.deleteMarkers(IMavenConstants.MARKER_ID, true, IResource.DEPTH_INFINITE);
     }
   }
 

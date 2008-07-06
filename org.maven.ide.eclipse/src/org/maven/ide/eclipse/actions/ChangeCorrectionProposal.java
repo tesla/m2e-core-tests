@@ -29,7 +29,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.ui.IEditorPart;
 
-import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
 
 
 //import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -110,7 +110,7 @@ public abstract class ChangeCorrectionProposal implements IJavaCompletionProposa
         change.initializeValidationData(new NullProgressMonitor());
         RefactoringStatus valid = change.isValid(new NullProgressMonitor());
         if(valid.hasFatalError()) {
-          IStatus status = new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, IStatus.ERROR, valid
+          IStatus status = new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, IStatus.ERROR, valid
               .getMessageMatchingSeverity(RefactoringStatus.FATAL), null);
           throw new CoreException(status);
         }

@@ -16,13 +16,13 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.jface.text.templates.persistence.TemplateStore;
 import org.eclipse.ui.editors.text.templates.ContributionContextTypeRegistry;
 import org.eclipse.ui.editors.text.templates.ContributionTemplateStore;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.editor.xml.search.CompositeSearchEngine;
 import org.maven.ide.eclipse.editor.xml.search.SearchEngine;
 
@@ -30,7 +30,7 @@ import org.maven.ide.eclipse.editor.xml.search.SearchEngine;
 /**
  * @author Lukas Krecan
  */
-public class MvnIndexPlugin extends AbstractUIPlugin implements Log {
+public class MvnIndexPlugin extends AbstractUIPlugin {
   public static final String PLUGIN_ID = "org.maven.ide.eclipse.editor.xml";
 
   private static MvnIndexPlugin defaultInstance;
@@ -66,7 +66,7 @@ public class MvnIndexPlugin extends AbstractUIPlugin implements Log {
           try {
             searchEngine.addSearchEngine((SearchEngine) configElement.createExecutableExtension("class"));
           } catch(CoreException e) {
-            logError("Error when initializing extension", e);
+            MavenLogger.log("Error when initializing extension", e);
           }
         }
       }
@@ -77,18 +77,18 @@ public class MvnIndexPlugin extends AbstractUIPlugin implements Log {
     return defaultInstance;
   }
 
-  public void logError(String message, Throwable e) {
-    getLog().log(new Status(Status.ERROR, PLUGIN_ID, 0, message, e));
-  }
-
-  public void logWarn(String message, Throwable e) {
-    getLog().log(new Status(Status.WARNING, PLUGIN_ID, 0, message, e));
-  }
-
-  public void log(Throwable e) {
-    getLog().log(new Status(Status.ERROR, PLUGIN_ID, 0, "MvnIndex plugin error", e));
-  }
-
+//  public void logError(String message, Throwable e) {
+//    getLog().log(new Status(Status.ERROR, PLUGIN_ID, 0, message, e));
+//  }
+//
+//  public void logWarn(String message, Throwable e) {
+//    getLog().log(new Status(Status.WARNING, PLUGIN_ID, 0, message, e));
+//  }
+//
+//  public void log(Throwable e) {
+//    getLog().log(new Status(Status.ERROR, PLUGIN_ID, 0, "MvnIndex plugin error", e));
+//  }
+//
   public SearchEngine getSearchEngine() {
     return searchEngine;
   }
@@ -103,8 +103,8 @@ public class MvnIndexPlugin extends AbstractUIPlugin implements Log {
       templateStore = new ContributionTemplateStore(getTemplateContextRegistry(), getPreferenceStore(), TEMPLATES_KEY);
       try {
         templateStore.load();
-      } catch(IOException e) {
-        log(e);
+      } catch(IOException ex) {
+        MavenLogger.log("Unable to load pom templates", ex);
       }
     }
     return templateStore;

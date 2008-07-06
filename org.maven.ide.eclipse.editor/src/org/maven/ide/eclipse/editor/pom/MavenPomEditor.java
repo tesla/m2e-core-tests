@@ -43,7 +43,6 @@ import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IStorage;
@@ -94,6 +93,7 @@ import org.maven.ide.components.pom.Model;
 import org.maven.ide.components.pom.util.PomResourceFactoryImpl;
 import org.maven.ide.components.pom.util.PomResourceImpl;
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.editor.MavenEditorPlugin;
 import org.maven.ide.eclipse.embedder.EmbedderFactory;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
@@ -184,7 +184,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     try {
       readProjectDocument();
     } catch(CoreException e) {
-      MavenPlugin.log(e);
+      MavenLogger.log(e);
     }
     for(MavenPomEditorPage page : pages) {
       page.reload();
@@ -232,7 +232,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       try {
         readProjectDocument();
       } catch(CoreException e) {
-        MavenPlugin.log(e);
+        MavenLogger.log(e);
       }
       
       // TODO activate xml source page is model is empty or have errors
@@ -258,7 +258,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
         }
       }
     } catch(PartInitException ex) {
-      MavenPlugin.log(ex);
+      MavenLogger.log(ex);
     }
   }
 
@@ -273,7 +273,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       }
       return addPage(page);
     } catch (PartInitException ex) {
-      MavenPlugin.log(ex);
+      MavenLogger.log(ex);
       return -1;
     }
   }
@@ -308,7 +308,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
             IOUtil.copy(is, os);
             projectDocument = loadModel(tempPomFile.getAbsolutePath());
           } catch(IOException ex) {
-            MavenPlugin.log("Can't close stream", ex);
+            MavenLogger.log("Can't close stream", ex);
           } finally {
             IOUtil.close(is);
             IOUtil.close(os);
@@ -354,7 +354,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       return resource.getModel();
     
     } catch(IOException ex) {
-      MavenPlugin.log("Can't load model " + path, ex);
+      MavenLogger.log("Can't load model " + path, ex);
       return null;
 
     }
@@ -405,17 +405,17 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
         
       } catch(MavenEmbedderException ex) {
         String msg = "Can't create Maven embedder";
-        MavenPlugin.log(msg, ex);
+        MavenLogger.log(msg, ex);
         throw new CoreException(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, msg, ex));
         
       } catch(ComponentLookupException ex) {
         String msg = "Component lookup error";
-        MavenPlugin.log(msg, ex);
+        MavenLogger.log(msg, ex);
         throw new CoreException(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, msg, ex));
         
       } catch(DependencyTreeBuilderException ex) {
         String msg = "Project read error";
-        MavenPlugin.log(msg, ex);
+        MavenLogger.log(msg, ex);
         throw new CoreException(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, msg, ex));
         
       }
@@ -452,7 +452,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
             IOUtil.copy(is, fos);
             mavenProject = readMavenProject(tempPomFile);
           } catch(Exception ex) {
-            MavenPlugin.log("Can't load POM", ex);
+            MavenLogger.log("Can't load POM", ex);
           } finally {
             IOUtil.close(is);
             IOUtil.close(fos);
@@ -554,32 +554,32 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 
     } catch (MavenEmbedderException ex) {
       String msg = "Can't create Maven embedder";
-      MavenPlugin.log(msg, ex);
+      MavenLogger.log(msg, ex);
       throw new CoreException(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, msg, ex));
 
     } catch (MetadataResolutionException ex) {
       String msg = "Metadata resolution error";
-      MavenPlugin.log(msg, ex);
+      MavenLogger.log(msg, ex);
       throw new CoreException(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, msg, ex));
 
     } catch (ComponentLookupException ex) {
       String msg = "Metadata resolver error";
-      MavenPlugin.log(msg, ex);
+      MavenLogger.log(msg, ex);
       throw new CoreException(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, msg, ex));
 
     } catch (ProjectBuildingException ex) {
       String msg = "Metadata resolver error";
-      MavenPlugin.log(msg, ex);
+      MavenLogger.log(msg, ex);
       throw new CoreException(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, msg, ex));
 
     } catch (ExtensionScanningException ex) {
       String msg = "Metadata resolver error";
-      MavenPlugin.log(msg, ex);
+      MavenLogger.log(msg, ex);
       throw new CoreException(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, msg, ex));
 
     } catch (MavenExecutionException ex) {
       String msg = "Metadata resolver error";
-      MavenPlugin.log(msg, ex);
+      MavenLogger.log(msg, ex);
       throw new CoreException(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, msg, ex));
 
     } finally {
@@ -587,7 +587,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
         try {
           embedder.stop();
         } catch (MavenEmbedderException ex) {
-          MavenPlugin.log("Can't stop Maven Embedder", ex);
+          MavenLogger.log("Can't stop Maven Embedder", ex);
         }
       }
     }
@@ -626,11 +626,6 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
    */
   public boolean isSaveAsAllowed() {
     return false;
-  }
-
-  public void gotoMarker(IMarker marker) {
-    // setActivePage(0);
-    // IDE.gotoMarker(getEditor(0), marker);
   }
 
   public void init(IEditorSite site, IEditorInput editorInput) throws PartInitException {
@@ -702,3 +697,4 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   }
   
 }
+

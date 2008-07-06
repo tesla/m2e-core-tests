@@ -10,7 +10,7 @@ package org.maven.ide.eclipse.internal.embedder;
 
 import org.apache.maven.monitor.event.EventMonitor;
 
-import org.maven.ide.eclipse.MavenConsole;
+import org.maven.ide.eclipse.core.MavenConsole;
 
 
 public class PluginConsoleEventMonitor implements EventMonitor {

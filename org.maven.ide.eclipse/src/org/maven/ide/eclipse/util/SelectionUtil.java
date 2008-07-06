@@ -18,7 +18,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
-import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
 
 
 /**
@@ -54,7 +54,7 @@ public class SelectionUtil {
     IProject project = getType(element, IProject.class);
     if(project != null) {
       try {
-        if(project.hasNature(MavenPlugin.NATURE_ID)) {
+        if(project.hasNature(IMavenConstants.NATURE_ID)) {
           return PROJECT_WITH_NATURE;
         }
         return PROJECT_WITHOUT_NATURE;
@@ -65,7 +65,7 @@ public class SelectionUtil {
 
     IFile file = getType(element, IFile.class);
     if(file != null) {
-      if(MavenPlugin.POM_FILE_NAME.equals(file.getFullPath().lastSegment())) {
+      if(IMavenConstants.POM_FILE_NAME.equals(file.getFullPath().lastSegment())) {
         return POM_FILE;
       }
     }

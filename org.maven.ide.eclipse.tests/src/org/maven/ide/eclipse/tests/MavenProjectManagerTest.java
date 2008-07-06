@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.internal.project.DependencyResolutionContext;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerImpl;
 import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
@@ -83,7 +84,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
   private void add(MavenProjectManagerImpl manager, IProject[] projects) throws Exception {
     MavenUpdateRequest updateRequest = new MavenUpdateRequest(false /*offline*/, false /* updateSnapshots*/);
     for (int i = 0; i < projects.length; i++) {
-      updateRequest.addPomFile(projects[i].getFile(MavenPlugin.POM_FILE_NAME));
+      updateRequest.addPomFile(projects[i].getFile(IMavenConstants.POM_FILE_NAME));
     }
     
     manager.refresh(Collections.singleton(new DependencyResolutionContext(updateRequest)), monitor);
@@ -93,7 +94,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
   private void remove(MavenProjectManagerImpl manager, IProject project) throws Exception {
     DependencyResolutionContext updateRequest = new DependencyResolutionContext(new MavenUpdateRequest(true /*offline*/, false /* updateSnapshots*/));
 
-    updateRequest.forcePomFiles(manager.remove(project.getFile(MavenPlugin.POM_FILE_NAME)));
+    updateRequest.forcePomFiles(manager.remove(project.getFile(IMavenConstants.POM_FILE_NAME)));
     manager.refresh(Collections.singleton(updateRequest), monitor);
 //    manager.notifyListeners(monitor);
   }
@@ -118,7 +119,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
 
     add(manager, new IProject[] {p1});
 
-    IFile pom = p1.getFile(MavenPlugin.POM_FILE_NAME);
+    IFile pom = p1.getFile(IMavenConstants.POM_FILE_NAME);
 
     MavenProjectFacade f1 = manager.create(pom, false, null);
     assertEquals(p1.getFullPath(), f1.getFullPath());
@@ -182,7 +183,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
 
     assertNotNull(manager.create(p1, monitor));
 
-    p1.getFile(MavenPlugin.POM_FILE_NAME).delete(true, monitor);
+    p1.getFile(IMavenConstants.POM_FILE_NAME).delete(true, monitor);
     waitForJobsToComplete();
 
     add(manager, new IProject[] {p1});
@@ -200,7 +201,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
 
     assertEquals(1, events.size());
     MavenProjectChangedEvent event = events.get(0);
-    assertEquals(p1.getFile(MavenPlugin.POM_FILE_NAME), event.getSource());
+    assertEquals(p1.getFile(IMavenConstants.POM_FILE_NAME), event.getSource());
     assertEquals(MavenProjectChangedEvent.KIND_ADDED, event.getKind());
 
     events.clear();
@@ -212,7 +213,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
 
     assertEquals(1, events.size());
     event = events.get(0);
-    assertEquals(p1.getFile(MavenPlugin.POM_FILE_NAME), event.getSource());
+    assertEquals(p1.getFile(IMavenConstants.POM_FILE_NAME), event.getSource());
     assertEquals(MavenProjectChangedEvent.KIND_CHANGED, event.getKind());
     assertEquals(MavenProjectChangedEvent.FLAG_NONE, event.getFlags());
     assertNotNull(event.getOldMavenProject());
@@ -250,7 +251,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals(1, artifacts.size());
     Artifact a1 = artifacts.iterator().next();
     assertEquals(true, a1.isResolved());
-    assertEquals(p2.getFile(MavenPlugin.POM_FILE_NAME).getLocation().toFile(), a1.getFile());
+    assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME).getLocation().toFile(), a1.getFile());
 
     MavenProjectFacade f2 = manager.create(p2, monitor);
     assertNotNull(f2);
@@ -276,7 +277,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
       assertEquals(1, artifacts.size());
       Artifact a = artifacts.iterator().next();
       assertEquals(true, a.isResolved());
-      assertEquals(p2.getFile(MavenPlugin.POM_FILE_NAME).getLocation().toFile(), a.getFile());
+      assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME).getLocation().toFile(), a.getFile());
     }
 
     p2.delete(false, true, monitor);
@@ -289,10 +290,11 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
       assertEquals(1, artifacts1.size());
       Artifact a = artifacts1.iterator().next();
       assertEquals(true, a.isResolved());
-      assertTrue(a.getFile().getAbsolutePath().startsWith(repo.getAbsolutePath()));
+      // assertTrue(a.getFile().getAbsolutePath().startsWith(repo.getAbsolutePath()));
+      assertStartWith(repo.getAbsolutePath(), a.getFile().getAbsolutePath());
     }
   }
-
+  
   public void test005_snapshotAvailableFromLocalRepoAndWorkspace() throws Exception {
     IProject p1 = createExisting("t005-p3");
     waitForJobsToComplete();
@@ -304,7 +306,8 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
       assertEquals(1, artifacts.size());
       Artifact a = artifacts.iterator().next();
       assertEquals(true, a.isResolved());
-      assertTrue(a.getFile().getAbsolutePath().startsWith(repo.getAbsolutePath()));
+      // assertTrue(a.getFile().getAbsolutePath().startsWith(repo.getAbsolutePath()));
+      assertStartWith(repo.getAbsolutePath(), a.getFile().getAbsolutePath());
     }
 
     IProject p2 = createExisting("t005-p4");
@@ -317,7 +320,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
       assertEquals(1, artifacts.size());
       Artifact a = artifacts.iterator().next();
       assertEquals(true, a.isResolved());
-      assertEquals(p2.getFile(MavenPlugin.POM_FILE_NAME).getLocation().toFile(), a.getFile());
+      assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME).getLocation().toFile(), a.getFile());
     }
   }
 
@@ -329,14 +332,15 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     add(manager, new IProject[] {p1, p2});
 
     MavenProjectFacade f1 = manager.create(p1, monitor);
-    assertEquals(p2.getFile(MavenPlugin.POM_FILE_NAME).getLocation().toFile(), f1.getMavenProject().getParent().getFile());
+    assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME).getLocation().toFile(), f1.getMavenProject().getParent().getFile());
 
     p2.delete(false, true, monitor);
 
     remove(manager, p2);
 
     f1 = manager.create(p1, monitor);
-    assertTrue(f1.getMavenProject().getParent().getFile().getAbsolutePath().startsWith(repo.getAbsolutePath()));
+    // assertTrue(f1.getMavenProject().getParent().getFile().getAbsolutePath().startsWith(repo.getAbsolutePath()));
+    assertStartWith(repo.getAbsolutePath(), f1.getMavenProject().getParent().getFile().getAbsolutePath());
   }
 
   public void test007_staleDependencies() throws Exception {
@@ -367,7 +371,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
 
     assertEquals(1, events.size());
     MavenProjectChangedEvent event = events.get(0);
-    assertEquals(p2.getFile(MavenPlugin.POM_FILE_NAME), event.getSource());
+    assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME), event.getSource());
     assertEquals(MavenProjectChangedEvent.KIND_REMOVED, event.getKind());
   }
 
@@ -397,7 +401,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
 
     assertEquals(1, events.size());
     MavenProjectChangedEvent event = events.get(0);
-    assertEquals(p2.getFile(MavenPlugin.POM_FILE_NAME), event.getSource());
+    assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME), event.getSource());
     assertEquals(MavenProjectChangedEvent.KIND_ADDED, event.getKind());
   }
 
@@ -415,12 +419,14 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
   
       assertEquals(2, f1.getMavenProjectArtifacts().size());
       Artifact[] a1 = f1.getMavenProjectArtifacts().toArray(new Artifact[f1.getMavenProjectArtifacts().size()]);
-      assertTrue(a1[0].getFile().getAbsolutePath().startsWith(workspace.getRoot().getLocation().toFile().getAbsolutePath()));
+      // assertTrue(a1[0].getFile().getAbsolutePath().startsWith(workspace.getRoot().getLocation().toFile().getAbsolutePath()));
+      assertStartWith(workspace.getRoot().getLocation().toFile().getAbsolutePath(), a1[0].getFile().getAbsolutePath());
       assertEquals(p2.getFile("pom.xml").getLocation().toFile(), a1[1].getFile());
   
       assertEquals(1, f2.getMavenProjectArtifacts().size());
       Artifact a2 = f2.getMavenProjectArtifacts().iterator().next();
-      assertTrue(a2.getFile().getAbsolutePath().startsWith(repo.getAbsolutePath()));
+      // assertTrue(a2.getFile().getAbsolutePath().startsWith(repo.getAbsolutePath()));
+      assertStartWith(repo.getAbsolutePath(), a2.getFile().getAbsolutePath());
     }
 
     this.events.clear();
@@ -433,18 +439,20 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
   
       assertEquals(2, f1.getMavenProjectArtifacts().size());
       Artifact[] a1 = f1.getMavenProjectArtifacts().toArray(new Artifact[f1.getMavenProjectArtifacts().size()]);
-      assertTrue(a1[0].getFile().getAbsolutePath().startsWith(repo.getAbsolutePath()));
+      // assertTrue(a1[0].getFile().getAbsolutePath().startsWith(repo.getAbsolutePath()));
+      assertStartWith(repo.getAbsolutePath(), a1[0].getFile().getAbsolutePath());
       assertEquals(p2.getFile("pom.xml").getLocation().toFile(), a1[1].getFile());
   
       assertEquals(1, f2.getMavenProjectArtifacts().size());
       Artifact a2 = f1.getMavenProjectArtifacts().iterator().next();
-      assertTrue(a2.getFile().getAbsolutePath().startsWith(repo.getAbsolutePath()));
+      // assertTrue(a2.getFile().getAbsolutePath().startsWith(repo.getAbsolutePath()));
+      assertStartWith(repo.getAbsolutePath(), a2.getFile().getAbsolutePath());
     }
 
     MavenProjectChangedEvent[] events = getEvents();
     assertEquals(2, events.length);
-    assertEquals(p3.getFile(MavenPlugin.POM_FILE_NAME), events[0].getSource());
-    assertEquals(p1.getFile(MavenPlugin.POM_FILE_NAME), events[1].getSource());
+    assertEquals(p3.getFile(IMavenConstants.POM_FILE_NAME), events[0].getSource());
+    assertEquals(p1.getFile(IMavenConstants.POM_FILE_NAME), events[1].getSource());
 
     this.events.clear();
     remove(manager, p2);
@@ -455,14 +463,15 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
       assertNull(manager.create(p3, monitor));
   
       Artifact[] a1 = f1.getMavenProjectArtifacts().toArray(new Artifact[f1.getMavenProjectArtifacts().size()]);
-      assertTrue(a1[0].getFile().getAbsolutePath().startsWith(repo.getAbsolutePath()));
+      // assertTrue(a1[0].getFile().getAbsolutePath().startsWith(repo.getAbsolutePath()));
+      assertStartWith(repo.getAbsolutePath(), a1[0].getFile().getAbsolutePath());
       assertEquals(false, a1[1].isResolved());
     }
 
     events = getEvents();
     assertEquals(2, events.length);
-    assertEquals(p2.getFile(MavenPlugin.POM_FILE_NAME), events[0].getSource());
-    assertEquals(p1.getFile(MavenPlugin.POM_FILE_NAME), events[1].getSource());
+    assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME), events[0].getSource());
+    assertEquals(p1.getFile(IMavenConstants.POM_FILE_NAME), events[1].getSource());
   }
 
   public void test010_projectWithNestedModules() throws Exception {
@@ -693,7 +702,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     MavenProject mavenProject = manager.create(pom, false, null).getMavenProject();
     Artifact a = (Artifact) mavenProject.getArtifacts().iterator().next();
     assertTrue(a.isResolved());
-    assertEquals(p4.getFile(MavenPlugin.POM_FILE_NAME).getLocation().toFile().getAbsoluteFile(), 
+    assertEquals(p4.getFile(IMavenConstants.POM_FILE_NAME).getLocation().toFile().getAbsoluteFile(), 
         a.getFile().getAbsoluteFile());
 
     copyContent(p1, "pom_changed.xml", "pom.xml");
@@ -718,7 +727,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     MavenProject mavenProject = manager.create(pom, false, null).getMavenProject();
     Artifact a = (Artifact) mavenProject.getArtifacts().iterator().next();
     assertTrue(a.isResolved());
-    assertEquals(p4.getFile(MavenPlugin.POM_FILE_NAME).getLocation().toFile().getAbsoluteFile(), 
+    assertEquals(p4.getFile(IMavenConstants.POM_FILE_NAME).getLocation().toFile().getAbsoluteFile(), 
         a.getFile().getAbsoluteFile());
 
     copyContent(p2, "pom_changed.xml", "pom.xml");
@@ -792,6 +801,10 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals("t019-p1", m1.getArtifactId());
     assertEquals("1.0.0-SNAPSHOT", m1.getVersion());
     assertEquals("plain description", m1.getDescription());
-    
   }
+  
+  private void assertStartWith(String expected, String actual) {
+    assertTrue("Expected to start with " + expected + " but got " + actual, actual.startsWith(expected));
+  }
+  
 }

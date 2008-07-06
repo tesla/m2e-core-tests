@@ -34,7 +34,7 @@ import org.xml.sax.helpers.AttributesImpl;
 import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.XMLFilterImpl;
 
-import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.index.IndexInfo;
 
 
@@ -69,11 +69,11 @@ public class IndexInfoWriter {
       parser.parse(is, new IndexInfoContentHandler(indexes));
     } catch(SAXException ex) {
       String msg = "Unable to parse index configuration";
-      MavenPlugin.log(msg, ex);
+      MavenLogger.log(msg, ex);
       throw new IOException(msg + "; " + ex.getMessage());
     } catch(ParserConfigurationException ex) {
       String msg = "Unable to parse index configuration";
-      MavenPlugin.log(msg, ex);
+      MavenLogger.log(msg, ex);
       throw new IOException(msg + "; " + ex.getMessage());
     }
     return indexes;

@@ -24,6 +24,7 @@ import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.internal.launch.MavenRuntimeClasspathProvider;
 
 
@@ -55,7 +56,7 @@ public class DisableNatureAction implements IObjectActionDelegate {
 
             disableLaunchConfigurations(project);
           } catch(CoreException ex) {
-            MavenPlugin.log(ex);
+            MavenLogger.log(ex);
           }
         }
       }

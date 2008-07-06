@@ -63,8 +63,9 @@ import org.sonatype.nexus.index.locator.PomLocator;
 import org.sonatype.nexus.index.scan.ScanningResult;
 import org.sonatype.nexus.index.updater.IndexUpdater;
 
-import org.maven.ide.eclipse.MavenConsole;
-import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.core.MavenConsole;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.index.IndexInfo;
 import org.maven.ide.eclipse.index.IndexManager;
@@ -97,7 +98,7 @@ public class NexusIndexManager extends IndexManager {
       indexer = (NexusIndexer) plexus.lookup(NexusIndexer.class);
       updater = (IndexUpdater) plexus.lookup(IndexUpdater.class);
     } catch(ComponentLookupException ex) {
-      Status status = new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, 0, ex.toString(), ex);
+      Status status = new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, 0, ex.toString(), ex);
       throw new CoreException(status);
     }
   }
@@ -122,13 +123,13 @@ public class NexusIndexManager extends IndexManager {
       // XXX how to recover from this?
       String msg = "Error on adding indexing context " + indexName;
       console.logError(msg + "; " + ex.getMessage());
-      MavenPlugin.log(msg, ex);
+      MavenLogger.log(msg, ex);
 
     } catch(UnsupportedExistingLuceneIndexException ex) {
       // XXX how to recover from this?
       String msg = "Unsupported existing index " + indexName;
       console.logError(msg + "; " + ex.getMessage());
-      MavenPlugin.log(msg, ex);
+      MavenLogger.log(msg, ex);
 
     }
   }
@@ -143,7 +144,7 @@ public class NexusIndexManager extends IndexManager {
       } catch(IOException ex) {
         String msg = "Error on removing indexing context " + indexName;
         console.logError(msg + "; " + ex.getMessage());
-        MavenPlugin.log(msg, ex);
+        MavenLogger.log(msg, ex);
       }
     }
   }
@@ -163,7 +164,7 @@ public class NexusIndexManager extends IndexManager {
     } catch(IndexContextInInconsistentStateException ex) {
       String msg = "Inconsistent index context state " + ex.getMessage();
       console.logError(msg);
-      MavenPlugin.log(msg, ex);
+      MavenLogger.log(msg, ex);
     }
     return null;
   }
@@ -283,7 +284,7 @@ public class NexusIndexManager extends IndexManager {
     } catch(IndexContextInInconsistentStateException ex) {
       String msg = "Inconsistent index context state " + ex.getMessage();
       console.logError(msg);
-      MavenPlugin.log(msg, ex);
+      MavenLogger.log(msg, ex);
     }
 
     return result;
@@ -311,7 +312,7 @@ public class NexusIndexManager extends IndexManager {
     } catch(IndexContextInInconsistentStateException ex) {
       String msg = "Inconsistent index context state " + ex.getMessage();
       console.logError(msg);
-      MavenPlugin.log(msg, ex);
+      MavenLogger.log(msg, ex);
     }
     return result;
   }  
@@ -395,7 +396,7 @@ public class NexusIndexManager extends IndexManager {
     } catch(Exception ex) {
       String msg = "Unable to add " + documentKey;
       console.logError(msg + "; " + ex.getMessage());
-      MavenPlugin.log(msg, ex);
+      MavenLogger.log(msg, ex);
     }
   }
 
@@ -414,7 +415,7 @@ public class NexusIndexManager extends IndexManager {
     } catch(Exception ex) {
       String msg = "Unable to remove " + documentKey;
       console.logError(msg + "; " + ex.getMessage());
-      MavenPlugin.log(msg, ex);
+      MavenLogger.log(msg, ex);
     }
   }
 

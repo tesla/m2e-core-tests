@@ -51,9 +51,10 @@ import org.eclipse.swt.widgets.Tree;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 
-import org.maven.ide.eclipse.MavenConsole;
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.Messages;
+import org.maven.ide.eclipse.core.MavenConsole;
+import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.core.Messages;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.project.AbstractProjectScanner;
 import org.maven.ide.eclipse.project.LocalProjectScanner;
@@ -299,11 +300,11 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
       String msg;
       if(e instanceof CoreException) {
         msg = e.getMessage();
-        MavenPlugin.log(msg, e);
+        MavenLogger.log(msg, e);
       } else {
         msg = "Scanning error " + projectScanner.getDescription() + "; " + e.toString();
         MavenPlugin.getDefault().getConsole().logError(msg);
-        MavenPlugin.log(msg, e);
+        MavenLogger.log(msg, e);
       }
       projectTreeViewer.setInput(null);
       setPageComplete(false);
