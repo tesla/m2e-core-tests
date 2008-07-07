@@ -42,7 +42,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
@@ -469,14 +468,15 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
   void initLocalRepository() {
     // XXX this is quite slow. is there a faster way?
     final String globalSettings = globalSettingsText.getText().trim();
-    final Shell shell = getShell();
     new Job("Reading local repository") {
       protected IStatus run(IProgressMonitor monitor) {
         String settings = globalSettings.length()==0 ? defaultRuntime.getSettings() : globalSettings;
         final File localRepository = getLocalRepository(settings);
-        shell.getDisplay().asyncExec(new Runnable() {
+        Display.getDefault().asyncExec(new Runnable() {
           public void run() {
-            localRepositoryText.setText(localRepository==null ? "" : localRepository.getAbsolutePath());
+            if(!localRepositoryText.isDisposed()) {
+              localRepositoryText.setText(localRepository==null ? "" : localRepository.getAbsolutePath());
+            }
           }
         });
         return Status.OK_STATUS;

@@ -9,7 +9,6 @@
 package org.maven.ide.eclipse.embedder;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,13 +79,11 @@ public class MavenRuntimeManager {
 
     runtimes.add(embeddedRuntime);
 
-//    // XXX discover all runtimes available from the Workspace
-//    if(MavenRuntime.WORKSPACE.isAvailable()) {
-//      runtimes.add(MavenRuntime.WORKSPACE);
-//    }
+    if(workspaceRuntime.isAvailable()) {
+      runtimes.add(workspaceRuntime);
+    }
     
-    for(Iterator<MavenRuntime> it = this.runtimes.values().iterator(); it.hasNext();) {
-      MavenRuntime runtime = it.next();
+    for(MavenRuntime runtime : this.runtimes.values()) {
       if(runtime.isAvailable()) {
         runtimes.add(runtime);
       }
