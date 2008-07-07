@@ -114,14 +114,14 @@ public class DependencyGraphLegendPopup extends PopupDialog implements DisposeLi
     }
     
     {
-      GraphNode n1 = new GraphNode(g, SWT.NONE, " non-compile scope depenendency ");
+      GraphNode n1 = new GraphNode(g, SWT.NONE, " non-compile scope dependency ");
       n1.setLocation(10, 40);
       n1.setSize(240, 25);
       n1.setBackgroundColor(colorTestBackground);
     }
     
     {
-      GraphNode n1 = new GraphNode(g, SWT.NONE, " selected depenendency ");
+      GraphNode n1 = new GraphNode(g, SWT.NONE, " selected dependency ");
       n1.setLocation(10, 70);
       n1.setSize(240, 25);
       n1.setBackgroundColor(colorSelectedBackground);
@@ -138,7 +138,7 @@ public class DependencyGraphLegendPopup extends PopupDialog implements DisposeLi
       GraphNode n1 = new GraphNode(g, SWT.NONE, "    ");
       GraphNode n2 = new GraphNode(g, SWT.NONE, "    ");
       
-      DepenencyConnection c1 = new DepenencyConnection(g, SWT.NONE, n1, n2);
+      DependencyConnection c1 = new DependencyConnection(g, SWT.NONE, n1, n2);
       c1.setText("compile scope");
       c1.setConnectionStyle(ZestStyles.CONNECTIONS_DIRECTED | ZestStyles.CONNECTIONS_SOLID);
       
@@ -151,7 +151,7 @@ public class DependencyGraphLegendPopup extends PopupDialog implements DisposeLi
       GraphNode n2 = new GraphNode(g, SWT.NONE, "    ");
       n2.setBackgroundColor(colorTestBackground);
       
-      GraphConnection c1 = new DepenencyConnection(g, SWT.NONE, n1, n2);
+      GraphConnection c1 = new DependencyConnection(g, SWT.NONE, n1, n2);
       c1.setText("non-compile scope");
       c1.setConnectionStyle(ZestStyles.CONNECTIONS_DIRECTED | ZestStyles.CONNECTIONS_DOT);
       c1.setLineColor(colorTestRel);
@@ -164,7 +164,7 @@ public class DependencyGraphLegendPopup extends PopupDialog implements DisposeLi
       GraphNode n1 = new GraphNode(g, SWT.NONE, "    ");
       GraphNode n2 = new GraphNode(g, SWT.NONE, "    ");
       
-      GraphConnection c1 = new DepenencyConnection(g, SWT.NONE, n1, n2);
+      GraphConnection c1 = new DependencyConnection(g, SWT.NONE, n1, n2);
       c1.setText("resolved conflict");
       c1.setConnectionStyle(ZestStyles.CONNECTIONS_DIRECTED | ZestStyles.CONNECTIONS_SOLID);
       c1.setLineColor(colorRelResolved);
@@ -178,7 +178,7 @@ public class DependencyGraphLegendPopup extends PopupDialog implements DisposeLi
       GraphNode n2 = new GraphNode(g, SWT.NONE, "    ");
       n2.setBackgroundColor(colorSelectedBackground);
       
-      GraphConnection c1 = new DepenencyConnection(g, SWT.NONE, n1, n2);
+      GraphConnection c1 = new DependencyConnection(g, SWT.NONE, n1, n2);
       c1.setText("referenced from selected");
       c1.setConnectionStyle(ZestStyles.CONNECTIONS_DIRECTED | ZestStyles.CONNECTIONS_SOLID);
       c1.setLineColor(highlighted);
@@ -193,7 +193,7 @@ public class DependencyGraphLegendPopup extends PopupDialog implements DisposeLi
       GraphNode n2 = new GraphNode(g, SWT.NONE, "    ");
       n2.setBackgroundColor(colorSelectedTestBackground);
       
-      GraphConnection c1 = new DepenencyConnection(g, SWT.NONE, n1, n2);
+      GraphConnection c1 = new DependencyConnection(g, SWT.NONE, n1, n2);
       c1.setText("referenced from non-compile");
       c1.setConnectionStyle(ZestStyles.CONNECTIONS_DIRECTED | ZestStyles.CONNECTIONS_DOT);
       c1.setLineColor(highlighted);
@@ -212,14 +212,14 @@ public class DependencyGraphLegendPopup extends PopupDialog implements DisposeLi
 		return parent;
 	}
 
-  static final class DepenencyConnection extends GraphConnection {
+  static final class DependencyConnection extends GraphConnection {
     private org.eclipse.draw2d.Label label;
     private PolylineConnection connectionFigure;
     private Color lineColor;
     private int connectionStyle;
     private int lineWidth;
 
-    DepenencyConnection(Graph g, int style, GraphNode source, GraphNode destination) {
+    DependencyConnection(Graph g, int style, GraphNode source, GraphNode destination) {
       super(g, style, source, destination);
     }
 
