@@ -8,13 +8,18 @@
 
 package org.maven.ide.eclipse.wizards;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.TableViewer;
@@ -34,10 +39,21 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 
+import org.codehaus.plexus.PlexusContainer;
+import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
+
 import org.apache.maven.archetype.catalog.Archetype;
+import org.apache.maven.archetype.common.ArchetypeArtifactManager;
+import org.apache.maven.archetype.exception.UnknownArchetype;
+import org.apache.maven.archetype.metadata.ArchetypeDescriptor;
+import org.apache.maven.archetype.metadata.RequiredProperty;
+import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.model.Model;
 
-import org.maven.ide.eclipse.core.Messages;
+import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.Messages;
+import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.util.JavaUtil;
 
@@ -49,6 +65,7 @@ import org.maven.ide.eclipse.util.JavaUtil;
 public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWizardPage {
 
   Table propertiesTable;
+
   public static final String DEFAULT_VERSION = "0.0.1-SNAPSHOT";
 
   /** group id text field */
@@ -65,6 +82,12 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
 
   private boolean isUsed;
 
+  protected List<RequiredProperty> requiredProperties;
+
+  protected Archetype archetype;
+  
+  protected boolean archetypeChanged = false;
+  
   /** shows if the package has been customized by the user */
   protected boolean packageCustomized = false;
 
@@ -75,6 +98,8 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
     setTitle(Messages.getString("wizard.project.page.maven2.title"));
     setDescription(Messages.getString("wizard.project.page.maven2.archetype.parameters.description"));
     setPageComplete(false);
+
+    requiredProperties = new ArrayList<RequiredProperty>();
   }
 
   /** Creates page controls. */
@@ -165,7 +190,7 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
     Label propertiesLabel = new Label(composite, SWT.NONE);
     propertiesLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 3, 1));
     propertiesLabel.setText("Properties:");
-  
+
     TableViewer propertiesViewer = new TableViewer(composite, SWT.BORDER);
     propertiesTable = propertiesViewer.getTable();
     propertiesTable.setLinesVisible(true);
@@ -178,7 +203,7 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
         if(selection.length == 1) {
           MavenPropertyDialog dialog = new MavenPropertyDialog(getShell(), //
               Messages.getString("launch.propEditDialogTitle"), //$NON-NLS-1$
-              new String[] {selection[0].getText(0), selection[0].getText(1)}, false); 
+              new String[] {selection[0].getText(0), selection[0].getText(1)}, false);
           int res = dialog.open();
           if(res == IDialogConstants.OK_ID) {
             String[] result = dialog.getNameValuePair();
@@ -190,15 +215,15 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
         }
       }
     });
-    
+
     TableColumn propertiesTableNameColumn = new TableColumn(propertiesTable, SWT.NONE);
     propertiesTableNameColumn.setWidth(130);
     propertiesTableNameColumn.setText("Name");
-  
+
     TableColumn propertiesTableValueColumn = new TableColumn(propertiesTable, SWT.NONE);
     propertiesTableValueColumn.setWidth(230);
     propertiesTableValueColumn.setText("Value");
-  
+
     Button addButton = new Button(composite, SWT.NONE);
     addButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
     addButton.setText("&Add...");
@@ -215,7 +240,7 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
         }
       }
     });
-  
+
     Button removeButton = new Button(composite, SWT.NONE);
     removeButton.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
     removeButton.setText("&Remove");
@@ -299,22 +324,89 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
 
   public void setArchetype(Archetype archetype) {
     propertiesTable.removeAll();
-    
-    if(archetype!=null) {
+
+    if(archetype != null && ! archetype.equals(this.archetype)) {
+      this.archetype = archetype;
+      requiredProperties.clear();
+      archetypeChanged = true;
+
       Properties properties = archetype.getProperties();
-      if(properties!=null) {
+      if(properties != null) {
         for(Iterator<Map.Entry<Object, Object>> it = properties.entrySet().iterator(); it.hasNext();) {
           Map.Entry<?, ?> e = it.next();
-          TableItem item = new TableItem(propertiesTable, SWT.NONE);
-          String key = (String) e.getKey();
-          String value = (String) e.getValue();
-          item.setText(0, key);
-          item.setText(1, value==null ? "" : value);
+          addTableItem((String) e.getKey(), (String) e.getValue());
         }
       }
     }
   }
-  
+
+  /**
+   * @param archetype
+   */
+  void loadArchetypeDescriptor() {
+    final String groupId = archetype.getGroupId();
+    final String artifactId = archetype.getArtifactId();
+    final String version = archetype.getVersion();
+    final String archetypeName = groupId + ":" + artifactId + ":" + version;
+
+    try {
+      getContainer().run(false, true, new IRunnableWithProgress() {
+        public void run(IProgressMonitor monitor) {
+          monitor.beginTask("Downloading Archetype " + archetypeName, IProgressMonitor.UNKNOWN);
+          try {
+            MavenEmbedderManager embedderMgr = MavenPlugin.getDefault().getMavenEmbedderManager();
+            MavenEmbedder embedder = embedderMgr.getWorkspaceEmbedder();
+
+            PlexusContainer plexusContainer = embedder.getPlexusContainer();
+            ArchetypeArtifactManager aaMgr = (ArchetypeArtifactManager) plexusContainer
+                .lookup(org.apache.maven.archetype.common.ArchetypeArtifactManager.class);
+            ArtifactRepository localRepository = embedder.getLocalRepository();
+
+            List<ArtifactRepository> repositories = new ArrayList<ArtifactRepository>();
+            repositories.addAll(MavenPlugin.getDefault().getIndexManager().getArtifactRepositories(null, null));
+
+            if(aaMgr.isFileSetArchetype(groupId, artifactId, version, null, localRepository, repositories)) {
+              ArchetypeDescriptor descriptor = aaMgr.getFileSetArchetypeDescriptor(groupId, artifactId, version,
+                  null, localRepository, repositories);
+              List<?> properties = descriptor.getRequiredProperties();
+              if(properties != null) {
+                for(Object o : properties) {
+                  if(o instanceof RequiredProperty) {
+                    RequiredProperty rp = (RequiredProperty)o;
+                    requiredProperties.add(rp);
+                    addTableItem(rp.getKey(), rp.getDefaultValue());
+                  }
+                }
+              }
+            }
+          } catch(ComponentLookupException e) {
+            MavenPlugin.log("Error downloading archetype " + archetypeName, e);
+          } catch(UnknownArchetype e) {
+            MavenPlugin.log("Error downloading archetype " + archetypeName, e);
+          } finally {
+            monitor.done();
+          }
+        }
+      });
+    } catch(InterruptedException ex) {
+      // ignore
+    } catch(InvocationTargetException ex) {
+      String msg = "Error downloading archetype " + archetypeName;
+      MavenPlugin.log(msg, ex);
+      setErrorMessage(msg + "\n" + ex.toString());
+    }
+  }
+
+  /**
+   * @param key
+   * @param value
+   */
+  void addTableItem(String key, String value) {
+    TableItem item = new TableItem(propertiesTable, SWT.NONE);
+    item.setText(0, key);
+    item.setText(1, value == null ? "" : value);
+  }
+
   /**
    * Updates the properties when a project name is set on the first page of the wizard.
    */
@@ -393,6 +485,11 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
         groupIdCombo.setText(groupIdCombo.getItem(0));
         packageCombo.setText(getDefaultJavaPackage());
         packageCustomized = false;
+      }
+      
+      if ( archetypeChanged && archetype != null) {
+        archetypeChanged = false;
+        loadArchetypeDescriptor();
       }
     }
   }
