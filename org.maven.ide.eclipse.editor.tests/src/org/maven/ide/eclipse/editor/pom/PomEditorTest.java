@@ -63,7 +63,8 @@ public class PomEditorTest extends UITestCaseSWT {
 
     ui.click(2, new TreeItemLocator("test-pom/pom.xml", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
 
-    ui.click(new MenuItemLocator("Window/Navigation/Maximize Active View or Editor"));
+    // ui.click(new MenuItemLocator("Window/Navigation/Maximize Active View or Editor"));
+    ui.keyClick(SWT.CTRL, 'm');
     
     ui.click(new CTabItemLocator("pom.xml"));
     
@@ -74,6 +75,7 @@ public class PomEditorTest extends UITestCaseSWT {
     ui.enterText("test-pom");
     ui.keyClick(WT.TAB);
     ui.enterText("test-pom1");
+    ui.keyClick(SWT.ALT, 'a');  // "replace all"
     ui.close(new SWTWidgetLocator(Shell.class, "Find/Replace"));
     ui.wait(new ShellDisposedCondition("Find/Replace"));
     
