@@ -51,7 +51,7 @@ public class ResolverConfiguration {
   }
   
   public List<String> getActiveProfileList() {
-    return Arrays.asList(activeProfiles.split(",\\s\\|"));
+    return Arrays.asList(activeProfiles.split("[,\\s\\|]"));
   }
 
   public void setResolveWorkspaceProjects(boolean resolveWorkspaceProjects) {
