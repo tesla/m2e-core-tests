@@ -12,9 +12,9 @@ package org.maven.ide.eclipse.internal.preferences;
 /**
  * Maven preferences constants 
  */
-public class MavenPreferenceConstants {
+public interface MavenPreferenceConstants {
   
-  private static final String PREFIX = "eclipse.m2.";
+  static final String PREFIX = "eclipse.m2.";
 
   /** String */
   // public static final String P_LOCAL_REPOSITORY_DIR = PREFIX+"localRepositoryDirectory";
