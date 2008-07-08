@@ -20,13 +20,12 @@ import java.util.Set;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.JavaConventions;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.ComboBoxCellEditor;
+import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -71,6 +70,14 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
 
   Table propertiesTable;
 
+  final public static String KEY_PROPERTY = "key";
+
+  final public static int KEY_INDEX = 0;
+
+  final public static String VALUE_PROPERTY = "value";
+
+  final public static int VALUE_INDEX = 1;
+
   public static final String DEFAULT_VERSION = "0.0.1-SNAPSHOT";
 
   /** group id text field */
@@ -91,9 +98,13 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
 
   protected Set<String> requiredProperties;
 
+//  protected Set<String> optionalProperties;
+
   protected Archetype archetype;
 
   protected boolean archetypeChanged = false;
+
+  protected ComboBoxCellEditor propertyKeyEditor;
 
   /** shows if the package has been customized by the user */
   protected boolean packageCustomized = false;
@@ -107,6 +118,7 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
     setPageComplete(false);
 
     requiredProperties = new HashSet<String>();
+//    optionalProperties = new HashSet<String>();
   }
 
   /** Creates page controls. */
@@ -198,31 +210,11 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
     propertiesLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 3, 1));
     propertiesLabel.setText("Properties:");
 
-    final TableViewer propertiesViewer = new TableViewer(composite, SWT.BORDER);
+    final TableViewer propertiesViewer = new TableViewer(composite, SWT.BORDER | SWT.FULL_SELECTION);
     propertiesTable = propertiesViewer.getTable();
     propertiesTable.setLinesVisible(true);
     propertiesTable.setHeaderVisible(true);
     propertiesTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 2));
-
-    propertiesViewer.addDoubleClickListener(new IDoubleClickListener() {
-      public void doubleClick(DoubleClickEvent event) {
-        TableItem[] selection = propertiesTable.getSelection();
-        if(selection.length == 1) {
-          MavenPropertyDialog dialog = new MavenPropertyDialog(getShell(), //
-              Messages.getString("launch.propEditDialogTitle"), //$NON-NLS-1$
-              new String[] {selection[0].getText(0), selection[0].getText(1)}, false);
-          int res = dialog.open();
-          if(res == IDialogConstants.OK_ID) {
-            String[] result = dialog.getNameValuePair();
-            TableItem[] item = propertiesTable.getSelection();
-            // we expect only one row selected
-            item[0].setText(0, result[0]);
-            item[0].setText(1, result[1]);
-            validate();
-          }
-        }
-      }
-    });
 
     TableColumn propertiesTableNameColumn = new TableColumn(propertiesTable, SWT.NONE);
     propertiesTableNameColumn.setWidth(130);
@@ -232,21 +224,40 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
     propertiesTableValueColumn.setWidth(230);
     propertiesTableValueColumn.setText("Value");
 
+    propertiesViewer.setColumnProperties(new String[] {KEY_PROPERTY, VALUE_PROPERTY});
+
+//    propertyKeyEditor = new ComboBoxCellEditor(propertiesTable, new String[] {"aaa", "bbb", "ccc"}, SWT.FLAT);
+//    propertyKeyEditor.setActivationStyle(ComboBoxCellEditor.DROP_DOWN_ON_KEY_ACTIVATION
+//        | ComboBoxCellEditor.DROP_DOWN_ON_MOUSE_ACTIVATION | ComboBoxCellEditor.DROP_DOWN_ON_PROGRAMMATIC_ACTIVATION
+//        | ComboBoxCellEditor.DROP_DOWN_ON_TRAVERSE_ACTIVATION);
+    CellEditor[] editors = new CellEditor[] {new TextCellEditor(propertiesTable, SWT.NONE), new TextCellEditor(propertiesTable, SWT.NONE)};
+    propertiesViewer.setCellEditors(editors);
+    propertiesViewer.setCellModifier(new ICellModifier() {
+      public boolean canModify(Object element, String property) {
+        return true;
+      }
+
+      public void modify(Object element, String property, Object value) {
+        if(element instanceof TableItem) {
+          ((TableItem) element).setText(getTextIndex(property), String.valueOf(value));
+          validate();
+        }
+      }
+
+      public Object getValue(Object element, String property) {
+        if(element instanceof TableItem) {
+          return ((TableItem) element).getText(getTextIndex(property));
+        }
+        return null;
+      }
+    });
+
     Button addButton = new Button(composite, SWT.NONE);
     addButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
     addButton.setText("&Add...");
     addButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
-        MavenPropertyDialog dialog = new MavenPropertyDialog(getShell(), //
-            Messages.getString("launch.propAddDialogTitle"), new String[] {}, false); //$NON-NLS-1$
-        int res = dialog.open();
-        if(res == IDialogConstants.OK_ID) {
-          String[] result = dialog.getNameValuePair();
-          TableItem item = new TableItem(propertiesTable, SWT.NONE);
-          item.setText(0, result[0]);
-          item.setText(1, result[1]);
-          validate();
-        }
+        propertiesViewer.editElement(addTableItem("?", "?"), KEY_INDEX);
       }
     });
 
@@ -257,16 +268,8 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
       public void widgetSelected(SelectionEvent e) {
         if(propertiesTable.getSelectionCount() > 0) {
           propertiesTable.remove(propertiesTable.getSelectionIndices());
+          removeButton.setEnabled(propertiesTable.getItemCount() > 0);
           validate();
-        }
-      }
-    });
-
-    propertiesViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-      public void selectionChanged(SelectionChangedEvent event) {
-        TableItem[] selection = propertiesTable.getSelection();
-        if(selection.length == 1) {
-          removeButton.setEnabled(!requiredProperties.contains(selection[0].getText(0)));
         }
       }
     });
@@ -361,13 +364,16 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
       this.archetype = archetype;
       propertiesTable.removeAll();
       requiredProperties.clear();
+//      optionalProperties.clear();
       archetypeChanged = true;
 
       Properties properties = archetype.getProperties();
       if(properties != null) {
         for(Iterator<Map.Entry<Object, Object>> it = properties.entrySet().iterator(); it.hasNext();) {
           Map.Entry<?, ?> e = it.next();
-          addTableItem((String) e.getKey(), (String) e.getValue());
+          String key = (String) e.getKey();
+          addTableItem(key, (String) e.getValue());
+//          optionalProperties.add(key);
         }
       }
     }
@@ -431,10 +437,12 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
    * @param key
    * @param value
    */
-  void addTableItem(String key, String value) {
+  TableItem addTableItem(String key, String value) {
     TableItem item = new TableItem(propertiesTable, SWT.NONE);
-    item.setText(0, key);
-    item.setText(1, value == null ? "" : value);
+    item.setData(item);
+    item.setText(KEY_INDEX, key);
+    item.setText(VALUE_INDEX, value == null ? "" : value);
+    return item;
   }
 
   /**
@@ -522,6 +530,12 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
         loadArchetypeDescriptor();
         validate();
       }
+
+//      int n = requiredProperties.size() + optionalProperties.size();
+//      List<String> propertyKeys = new ArrayList<String>(n);
+//      propertyKeys.addAll(requiredProperties);
+//      propertyKeys.addAll(optionalProperties);
+//      propertyKeyEditor.setItems(propertyKeys.toArray(new String[n]));
     }
   }
 
@@ -529,8 +543,12 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
     Properties properties = new Properties();
     for(int i = 0; i < propertiesTable.getItemCount(); i++ ) {
       TableItem item = propertiesTable.getItem(i);
-      properties.put(item.getText(0), item.getText(1));
+      properties.put(item.getText(KEY_INDEX), item.getText(VALUE_INDEX));
     }
     return properties;
+  }
+
+  public int getTextIndex(String property) {
+    return KEY_PROPERTY.equals(property) ? KEY_INDEX : VALUE_INDEX;
   }
 }
