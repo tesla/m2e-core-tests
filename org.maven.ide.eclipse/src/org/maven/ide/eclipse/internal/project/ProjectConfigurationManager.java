@@ -94,6 +94,8 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
   
   final MavenProjectManagerImpl projectManagerImpl;
 
+  final BuildPathManager buildpathManager;
+  
   final IndexManager indexManager;
 
   final MavenEmbedderManager embedderManager;
@@ -101,15 +103,16 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
   final MavenModelManager mavenModelManager;
 
   private Set<AbstractProjectConfigurator> configurators;
-  
+
   
   public ProjectConfigurationManager(MavenModelManager modelManager, MavenConsole console,
       MavenRuntimeManager runtimeManager, MavenProjectManager projectManager,
       MavenProjectManagerImpl projectManagerImpl, IndexManager indexManager, MavenEmbedderManager embedderManager,
-      MavenModelManager mavenModelManager) {
+      MavenModelManager mavenModelManager, BuildPathManager buildpathManager) {
     this.modelManager = modelManager;
     this.console = console;
     this.runtimeManager = runtimeManager;
+    this.buildpathManager = buildpathManager;
     this.projectManager = projectManager;
     this.projectManagerImpl = projectManagerImpl;
     this.indexManager = indexManager;
@@ -513,7 +516,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
       for(AbstractProjectConfigurator projectConfigurator : ExtensionReader.readProjectConfiguratorExtensions()) {
         projectConfigurator.setProjectManager(projectManager);
         projectConfigurator.setRuntimeManager(runtimeManager);
-        projectConfigurator.setBuildPathManager(null);
+        projectConfigurator.setBuildPathManager(buildpathManager);
         projectConfigurator.setConsole(console);
         
         configurators.add(projectConfigurator);

@@ -203,7 +203,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
     this.configurationManager = new ProjectConfigurationManager(modelManager, console, 
         runtimeManager, projectManager, managerImpl, 
-        indexManager, embedderManager, modelManager);
+        indexManager, embedderManager, modelManager, buildpathManager);
     projectManager.addMavenProjectChangedListener(this.configurationManager);
 
     this.launchConfigurationListener = new MavenLaunchConfigurationListener();
