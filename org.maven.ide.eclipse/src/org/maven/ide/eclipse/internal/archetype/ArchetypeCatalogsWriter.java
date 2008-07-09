@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.internal.embedder;
+package org.maven.ide.eclipse.internal.archetype;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -18,7 +18,7 @@ import org.maven.ide.eclipse.core.Messages;
 import org.maven.ide.eclipse.project.MavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
-import org.maven.ide.eclipse.util.SelectionUtil;
+import org.maven.ide.eclipse.ui.internal.util.SelectionUtil;
 
 /**
  * Default Maven menu creator

@@ -16,12 +16,13 @@ import junit.framework.TestCase;
 
 import org.apache.maven.embedder.ContainerCustomizer;
 import org.apache.maven.embedder.MavenEmbedder;
+import org.apache.maven.embedder.MavenEmbedderConsoleLogger;
 import org.apache.maven.embedder.MavenEmbedderException;
+import org.apache.maven.embedder.MavenEmbedderLogger;
 import org.apache.maven.settings.Profile;
 import org.apache.maven.settings.Repository;
 import org.apache.maven.settings.Settings;
 import org.maven.ide.eclipse.embedder.EmbedderFactory;
-import org.maven.ide.eclipse.internal.embedder.ConsoleMavenEmbeddedLogger;
 
 
 /**
@@ -107,7 +108,8 @@ public class MavenSettingsTest extends TestCase {
   private MavenEmbedder getEmbedder(File settingsFile) throws MavenEmbedderException {
     ContainerCustomizer customizer = EmbedderFactory.createExecutionCustomizer();
     
-    ConsoleMavenEmbeddedLogger logger = new ConsoleMavenEmbeddedLogger(true);
+    MavenEmbedderConsoleLogger logger = new MavenEmbedderConsoleLogger();
+    logger.setThreshold(MavenEmbedderLogger.LEVEL_DEBUG);
     
     String userSettings = settingsFile.getAbsolutePath();
     

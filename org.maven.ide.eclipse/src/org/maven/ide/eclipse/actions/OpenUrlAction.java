@@ -49,7 +49,7 @@ import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.project.MavenProjectFacade;
-import org.maven.ide.eclipse.util.SelectionUtil;
+import org.maven.ide.eclipse.ui.internal.util.SelectionUtil;
 
 
 /**

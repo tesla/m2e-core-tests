@@ -39,7 +39,7 @@ import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.core.Messages;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
-import org.maven.ide.eclipse.util.SelectionUtil;
+import org.maven.ide.eclipse.ui.internal.util.SelectionUtil;
 
 
 /**

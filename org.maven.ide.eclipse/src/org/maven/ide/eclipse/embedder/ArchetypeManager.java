@@ -22,7 +22,7 @@ import java.util.Map;
 
 import org.codehaus.plexus.util.IOUtil;
 
-import org.maven.ide.eclipse.internal.embedder.ArchetypeCatalogsWriter;
+import org.maven.ide.eclipse.internal.archetype.ArchetypeCatalogsWriter;
 
 
 /**
