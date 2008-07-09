@@ -206,15 +206,15 @@ public abstract class FormUtils {
     });
   }
 
-  public static void addTypeProposal(final Text groupIdText, final Text artifactIdText, final Text versionText,
-      final CCombo typeCombo, final Packaging packaging) {
-    addCompletionProposal(typeCombo, new Searcher() {
-      public Collection<String> search() {
-        return getSearchEngine().findTypes(groupIdText.getText(), //
-            artifactIdText.getText(), versionText.getText(), typeCombo.getText(), packaging);
-      }
-    });
-  }
+//  public static void addTypeProposal(final Text groupIdText, final Text artifactIdText, final Text versionText,
+//      final CCombo typeCombo, final Packaging packaging) {
+//    addCompletionProposal(typeCombo, new Searcher() {
+//      public Collection<String> search() {
+//        return getSearchEngine().findTypes(groupIdText.getText(), //
+//            artifactIdText.getText(), versionText.getText(), typeCombo.getText(), packaging);
+//      }
+//    });
+//  }
 
   public static void addCompletionProposal(final Control control, final Searcher searcher) {
     FieldDecoration fieldDecoration = FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_CONTENT_PROPOSAL);

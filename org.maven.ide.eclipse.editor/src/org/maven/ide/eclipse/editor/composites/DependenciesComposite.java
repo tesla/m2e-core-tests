@@ -578,7 +578,7 @@ public class DependenciesComposite extends Composite {
     detailsWidthGroup.addControl(typeLabel);
 
     typeCombo = new CCombo(dependencyComposite, SWT.FLAT);
-    FormUtils.addTypeProposal(groupIdText, artifactIdText, versionText, typeCombo, Packaging.ALL);
+    // FormUtils.addTypeProposal(groupIdText, artifactIdText, versionText, typeCombo, Packaging.ALL);
     
     // TODO retrieve artifact type from selected dependency 
     typeCombo.add("jar");
