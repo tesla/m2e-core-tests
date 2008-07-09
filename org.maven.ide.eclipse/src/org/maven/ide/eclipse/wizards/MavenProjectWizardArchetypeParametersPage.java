@@ -54,11 +54,11 @@ import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.model.Model;
 
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.components.TextComboBoxCellEditor;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.core.Messages;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
+import org.maven.ide.eclipse.ui.internal.components.TextComboBoxCellEditor;
 import org.maven.ide.eclipse.util.JavaUtil;
 
 
