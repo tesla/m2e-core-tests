@@ -16,7 +16,6 @@ import java.util.List;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.variables.VariablesPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -64,8 +63,6 @@ import org.maven.ide.eclipse.core.Messages;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.internal.launch.MavenLaunchConstants;
-import org.maven.ide.eclipse.util.ITraceable;
-import org.maven.ide.eclipse.util.Tracer;
 import org.maven.ide.eclipse.util.Util;
 import org.maven.ide.eclipse.wizards.MavenPropertyDialog;
 
@@ -77,9 +74,7 @@ import org.maven.ide.eclipse.wizards.MavenPropertyDialog;
  * @author Eugene Kuleshov
  */
 @SuppressWarnings("restriction")
-public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implements MavenLaunchConstants, ITraceable {
-
-  private static final boolean TRACE_ENABLED = Boolean.valueOf(Platform.getDebugOption("org.maven.ide.eclipse/launcher")).booleanValue();
+public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implements MavenLaunchConstants {
 
   public static final String ID_EXTERNAL_TOOLS_LAUNCH_GROUP = "org.eclipse.ui.externaltools.launchGroup"; //$NON-NLS-1$
 
@@ -110,10 +105,6 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
 
   public MavenLaunchMainTab(boolean isBuilder) {
     this.isBuilder = isBuilder;
-  }
-
-  public boolean isTraceEnabled() {
-    return TRACE_ENABLED;
   }
 
   public Image getImage() {
@@ -575,7 +566,6 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
       if(p != null && p.trim().length() > 0) {
         String prop = p.trim() + "=" + (v == null ? "" : v); //$NON-NLS-1$ //$NON-NLS-2$
         properties.add(prop);
-        Tracer.trace(this, "property", prop);
       }
     }
     configuration.setAttribute(ATTR_PROPERTIES, properties);

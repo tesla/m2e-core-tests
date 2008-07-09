@@ -19,7 +19,6 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -47,8 +46,6 @@ import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.internal.launch.MavenLaunchConstants;
 import org.maven.ide.eclipse.ui.internal.launch.MavenLaunchMainTab;
-import org.maven.ide.eclipse.util.ITraceable;
-import org.maven.ide.eclipse.util.Tracer;
 import org.maven.ide.eclipse.util.Util;
 
 
@@ -58,17 +55,11 @@ import org.maven.ide.eclipse.util.Util;
  * @author Dmitri Maximovich
  * @author Eugene Kuleshov
  */
-public class ExecutePomAction implements ILaunchShortcut, IExecutableExtension, ITraceable {
-  private static final boolean TRACE_ENABLED = Boolean
-      .valueOf(Platform.getDebugOption("org.maven.ide.eclipse/actions")).booleanValue();
+public class ExecutePomAction implements ILaunchShortcut, IExecutableExtension {
 
   private boolean showDialog = false;
 
   private String goalName = null;
-
-  public boolean isTraceEnabled() {
-    return TRACE_ENABLED;
-  }
 
   public void setInitializationData(IConfigurationElement config, String propertyName, Object data) {
     if("WITH_DIALOG".equals(data)) {
@@ -125,8 +116,6 @@ public class ExecutePomAction implements ILaunchShortcut, IExecutableExtension, 
     
     IContainer basedir = findPomXmlBasedir(basecon);
 
-    Tracer.trace(this, "Launching", basedir);
-
     ILaunchConfiguration launchConfiguration = getLaunchConfiguration(basedir);
     if(launchConfiguration == null) {
       return;
@@ -144,14 +133,12 @@ public class ExecutePomAction implements ILaunchShortcut, IExecutableExtension, 
     }
 
     if(openDialog) {
-      Tracer.trace(this, "Opening dialog for launch configuration", launchConfiguration.getName());
       DebugUITools.saveBeforeLaunch();
       Shell shell = MavenPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow().getShell();
       // ILaunchGroup group = DebugUITools.getLaunchGroup(launchConfiguration, mode);
       DebugUITools.openLaunchConfigurationDialog(shell, launchConfiguration,
           MavenLaunchMainTab.ID_EXTERNAL_TOOLS_LAUNCH_GROUP, null);
     } else {
-      Tracer.trace(this, "Launch configuration", launchConfiguration.getName());
       DebugUITools.launch(launchConfiguration, mode);
     }
   }
@@ -203,7 +190,7 @@ public class ExecutePomAction implements ILaunchShortcut, IExecutableExtension, 
 
       return workingCopy;
     } catch(CoreException ex) {
-      Tracer.trace(this, "Error creating new launch configuration", "", ex);
+      MavenLogger.log(ex);
     }
     return null;
   }
@@ -253,32 +240,26 @@ public class ExecutePomAction implements ILaunchShortcut, IExecutableExtension, 
         }
         for(int i = 0; i < launchConfigurations.length; i++ ) {
           ILaunchConfiguration cfg = launchConfigurations[i];
-          Tracer.trace(this, "Processing existing launch configuration", cfg.getName());
           // don't forget to substitute variables
           String workDir = Util.substituteVar(cfg.getAttribute(MavenLaunchConstants.ATTR_POM_DIR, (String) null));
           if(workDir == null) {
-            Tracer.trace(this, "Launch configuration doesn't have workdir!");
             continue;
           }
-          Tracer.trace(this, "Workdir", workDir);
           IPath workPath = new Path(workDir);
           if(basedirLocation.equals(workPath)) {
-            Tracer.trace(this, "Found matching existing configuration", cfg.getName());
+            MavenPlugin.getDefault().getConsole().logMessage("Using existing launch configuration");
             return cfg;
           }
         }
-      } catch(CoreException e) {
-        Tracer.trace(this, "Error scanning existing launch configurations", "", e);
+      } catch(CoreException ex) {
+        MavenLogger.log(ex);
       }
-
-      Tracer.trace(this, "No existing configurations found, creating new");
     }
 
-    Tracer.trace(this, "No existing configurations found, creating new");
+    MavenPlugin.getDefault().getConsole().logMessage("Creating new launch configuration");
 
     String newName = launchManager.generateUniqueLaunchConfigurationNameFrom(basedirLocation.lastSegment());
     try {
-      Tracer.trace(this, "New configuration name", newName);
       ILaunchConfigurationWorkingCopy workingCopy = launchConfigurationType.newInstance(null, newName);
       workingCopy.setAttribute(MavenLaunchConstants.ATTR_POM_DIR, basedirLocation.toString());
 
@@ -287,11 +268,9 @@ public class ExecutePomAction implements ILaunchShortcut, IExecutableExtension, 
       // maintab.setDefaults(workingCopy);
       // maintab.dispose();
 
-      ILaunchConfiguration newConfiguration = workingCopy.doSave();
-      return newConfiguration;
-    } catch(Exception e) {
-      String msg = "Error creating new launch configuration";
-      Tracer.trace(this, msg, newName, e);
+      return workingCopy.doSave();
+    } catch(Exception ex) {
+      MavenLogger.log("Error creating new launch configuration", ex);
     }
     return null;
   }

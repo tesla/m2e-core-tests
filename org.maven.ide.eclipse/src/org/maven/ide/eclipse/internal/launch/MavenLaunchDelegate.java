@@ -23,7 +23,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.DebugEvent;
@@ -61,19 +60,11 @@ import org.maven.ide.eclipse.embedder.MavenRuntime;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.project.MavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
-import org.maven.ide.eclipse.util.ITraceable;
 import org.maven.ide.eclipse.util.Util;
 
 
 @SuppressWarnings("restriction")
-public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaunchConstants, ITraceable {
-
-  private static final boolean TRACE_ENABLED = Boolean.valueOf(
-      Platform.getDebugOption("org.maven.ide.eclipse/launcher")).booleanValue();
-
-  public boolean isTraceEnabled() {
-    return TRACE_ENABLED;
-  }
+public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaunchConstants {
 
   public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor)
       throws CoreException {

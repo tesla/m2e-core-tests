@@ -12,7 +12,6 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -29,8 +28,6 @@ import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 
 import org.maven.ide.eclipse.core.MavenConsole;
-import org.maven.ide.eclipse.util.ITraceable;
-import org.maven.ide.eclipse.util.Tracer;
 
 
 /**
@@ -38,10 +35,7 @@ import org.maven.ide.eclipse.util.Tracer;
  * 
  * @author Dmitri Maximovich
  */
-public class MavenConsoleImpl extends MessageConsole implements MavenConsole, IPropertyChangeListener, ITraceable {
-
-  private static final boolean TRACE_ENABLED = Boolean
-      .valueOf(Platform.getDebugOption("org.maven.ide.eclipse/console")).booleanValue();
+public class MavenConsoleImpl extends MessageConsole implements MavenConsole, IPropertyChangeListener {
 
   private boolean initialized = false;
 
@@ -64,10 +58,6 @@ public class MavenConsoleImpl extends MessageConsole implements MavenConsole, IP
 
   private MessageConsoleStream errorStream;
 
-  public boolean isTraceEnabled() {
-    return TRACE_ENABLED;
-  }
-
   public MavenConsoleImpl(ImageDescriptor imageDescriptor) {
     // TODO extract constants
     super("Maven Console", imageDescriptor);
@@ -75,7 +65,6 @@ public class MavenConsoleImpl extends MessageConsole implements MavenConsole, IP
   }
 
   protected void init() {
-    Tracer.trace(this, "init()");
     super.init();
 
     //  Ensure that initialization occurs in the UI thread
@@ -259,16 +248,9 @@ public class MavenConsoleImpl extends MessageConsole implements MavenConsole, IP
   /**
    * Used to notify this console of lifecycle methods <code>init()</code> and <code>dispose()</code>.
    */
-  public class MavenConsoleLifecycle implements org.eclipse.ui.console.IConsoleListener, ITraceable {
-    private final boolean TRACE_ENABLED = Boolean.valueOf(Platform.getDebugOption("org.maven.ide.eclipse/console"))
-        .booleanValue();
-
-    public boolean isTraceEnabled() {
-      return TRACE_ENABLED;
-    }
+  public class MavenConsoleLifecycle implements org.eclipse.ui.console.IConsoleListener {
 
     public void consolesAdded(IConsole[] consoles) {
-      Tracer.trace(this, "consolesAdded()");
       for(int i = 0; i < consoles.length; i++ ) {
         IConsole console = consoles[i];
         if(console == MavenConsoleImpl.this) {
@@ -279,7 +261,6 @@ public class MavenConsoleImpl extends MessageConsole implements MavenConsole, IP
     }
 
     public void consolesRemoved(IConsole[] consoles) {
-      Tracer.trace(this, "consolesRemoved()");
       for(int i = 0; i < consoles.length; i++ ) {
         IConsole console = consoles[i];
         if(console == MavenConsoleImpl.this) {
