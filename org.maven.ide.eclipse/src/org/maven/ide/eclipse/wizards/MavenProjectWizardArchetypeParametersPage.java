@@ -22,7 +22,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.CellEditor;
-import org.eclipse.jface.viewers.ComboBoxCellEditor;
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TextCellEditor;
@@ -55,6 +54,7 @@ import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.model.Model;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.components.TextComboBoxCellEditor;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.core.Messages;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
@@ -69,6 +69,8 @@ import org.maven.ide.eclipse.util.JavaUtil;
 public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWizardPage {
 
   Table propertiesTable;
+
+  TableViewer propertiesViewer;
 
   final public static String KEY_PROPERTY = "key";
 
@@ -98,13 +100,11 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
 
   protected Set<String> requiredProperties;
 
-//  protected Set<String> optionalProperties;
+  protected Set<String> optionalProperties;
 
   protected Archetype archetype;
 
   protected boolean archetypeChanged = false;
-
-  protected ComboBoxCellEditor propertyKeyEditor;
 
   /** shows if the package has been customized by the user */
   protected boolean packageCustomized = false;
@@ -118,7 +118,7 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
     setPageComplete(false);
 
     requiredProperties = new HashSet<String>();
-//    optionalProperties = new HashSet<String>();
+    optionalProperties = new HashSet<String>();
   }
 
   /** Creates page controls. */
@@ -210,7 +210,7 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
     propertiesLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 3, 1));
     propertiesLabel.setText("Properties:");
 
-    final TableViewer propertiesViewer = new TableViewer(composite, SWT.BORDER | SWT.FULL_SELECTION);
+    propertiesViewer = new TableViewer(composite, SWT.BORDER | SWT.FULL_SELECTION);
     propertiesTable = propertiesViewer.getTable();
     propertiesTable.setLinesVisible(true);
     propertiesTable.setHeaderVisible(true);
@@ -226,12 +226,8 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
 
     propertiesViewer.setColumnProperties(new String[] {KEY_PROPERTY, VALUE_PROPERTY});
 
-//    propertyKeyEditor = new ComboBoxCellEditor(propertiesTable, new String[] {"aaa", "bbb", "ccc"}, SWT.FLAT);
-//    propertyKeyEditor.setActivationStyle(ComboBoxCellEditor.DROP_DOWN_ON_KEY_ACTIVATION
-//        | ComboBoxCellEditor.DROP_DOWN_ON_MOUSE_ACTIVATION | ComboBoxCellEditor.DROP_DOWN_ON_PROGRAMMATIC_ACTIVATION
-//        | ComboBoxCellEditor.DROP_DOWN_ON_TRAVERSE_ACTIVATION);
-    CellEditor[] editors = new CellEditor[] {new TextCellEditor(propertiesTable, SWT.NONE), new TextCellEditor(propertiesTable, SWT.NONE)};
-    propertiesViewer.setCellEditors(editors);
+    propertiesViewer.setCellEditors(new CellEditor[] {new TextCellEditor(propertiesTable, SWT.NONE),
+        new TextCellEditor(propertiesTable, SWT.NONE)});
     propertiesViewer.setCellModifier(new ICellModifier() {
       public boolean canModify(Object element, String property) {
         return true;
@@ -364,7 +360,7 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
       this.archetype = archetype;
       propertiesTable.removeAll();
       requiredProperties.clear();
-//      optionalProperties.clear();
+      optionalProperties.clear();
       archetypeChanged = true;
 
       Properties properties = archetype.getProperties();
@@ -373,7 +369,7 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
           Map.Entry<?, ?> e = it.next();
           String key = (String) e.getKey();
           addTableItem(key, (String) e.getValue());
-//          optionalProperties.add(key);
+          optionalProperties.add(key);
         }
       }
     }
@@ -531,11 +527,7 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
         validate();
       }
 
-//      int n = requiredProperties.size() + optionalProperties.size();
-//      List<String> propertyKeys = new ArrayList<String>(n);
-//      propertyKeys.addAll(requiredProperties);
-//      propertyKeys.addAll(optionalProperties);
-//      propertyKeyEditor.setItems(propertyKeys.toArray(new String[n]));
+      updatePropertyEditors();
     }
   }
 
@@ -550,5 +542,36 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
 
   public int getTextIndex(String property) {
     return KEY_PROPERTY.equals(property) ? KEY_INDEX : VALUE_INDEX;
+  }
+
+  public void updatePropertyEditors() {
+    CellEditor[] ce = propertiesViewer.getCellEditors();
+
+    int n = requiredProperties.size() + optionalProperties.size();
+    if(n == 0) {
+      if(ce[KEY_INDEX] instanceof TextComboBoxCellEditor) {
+        // if there was a combo editor previously defined, and the current
+        // archetype has no properties, replace it with a plain text editor
+        ce[KEY_INDEX].dispose();
+        ce[KEY_INDEX] = new TextCellEditor(propertiesTable, SWT.FLAT);
+      }
+    } else {
+      TextComboBoxCellEditor comboEditor = null;
+      // if there was a plain text editor previously defined, and the current
+      // archetype has properties, replace it with a combo editor
+      if(ce[KEY_INDEX] instanceof TextComboBoxCellEditor) {
+        comboEditor = (TextComboBoxCellEditor) ce[KEY_INDEX];
+      } else {
+        ce[KEY_INDEX].dispose();
+        comboEditor = new TextComboBoxCellEditor(propertiesTable, SWT.FLAT);
+        ce[KEY_INDEX] = comboEditor;
+      }
+
+      // populate the property name selection
+      List<String> propertyKeys = new ArrayList<String>(n);
+      propertyKeys.addAll(requiredProperties);
+      propertyKeys.addAll(optionalProperties);
+      comboEditor.setItems(propertyKeys.toArray(new String[n]));
+    }
   }
 }
