@@ -9,17 +9,14 @@
 package org.maven.ide.eclipse.internal.project;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.jar.Attributes;
-import java.util.jar.JarFile;
-import java.util.jar.Manifest;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -36,10 +33,9 @@ import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.launching.IVMInstall;
-import org.eclipse.jdt.launching.IVMInstallType;
 import org.eclipse.jdt.launching.JavaRuntime;
-import org.eclipse.jdt.launching.LibraryLocation;
+import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
+import org.eclipse.jdt.launching.environments.IExecutionEnvironmentsManager;
 
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 
@@ -70,6 +66,17 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
   
   private static final List<String> SOURCES = Arrays.asList("1.1,1.2,1.3,1.4,1.5,1.6,1.7".split(","));
   private static final List<String> TARGETS = Arrays.asList("1.1,1.2,1.3,1.4,jsr14,1.5,1.6,1.7".split(","));
+  private static final LinkedHashMap<String, String> ENVIRONMENTS = new LinkedHashMap<String, String>();
+  static {
+    ENVIRONMENTS.put("1.1", "JRE-1.1");
+    ENVIRONMENTS.put("1.2", "J2SE-1.2");
+    ENVIRONMENTS.put("1.3", "J2SE-1.3");
+    ENVIRONMENTS.put("1.4", "J2SE-1.4");
+    ENVIRONMENTS.put("1.5", "J2SE-1.5");
+    ENVIRONMENTS.put("jsr14", "J2SE-1.5");
+    ENVIRONMENTS.put("1.6", "JavaSE-1.6");
+    ENVIRONMENTS.put("1.7", "JavaSE-1.7");
+  }
 
   public void configure(MavenEmbedder embedder, ProjectConfigurationRequest request, IProgressMonitor monitor) {
     IProject project = request.getProject();
@@ -159,7 +166,7 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
   private Map<String, String> collectOptions(MavenProject mavenProject, ResolverConfiguration configuration) {
     Map<String, String> options = new HashMap<String, String>();
 
-    // XXX find best match when importing multimodule project 
+    // XXX find best match when importing multi-module project 
     String source = getBuildOption(mavenProject, "source", SOURCES);
     if(source != null) {
       if(SOURCES.contains(source)) {
@@ -171,7 +178,7 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
       }
     }
 
-    // XXX find best match when importing multimodule project 
+    // XXX find best match when importing multi-module project 
     String target = getBuildOption(mavenProject, "target", TARGETS);
     if(target != null) {
       if("jsr14".equals(target)) {
@@ -388,44 +395,46 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
   }
 
   private IClasspathEntry getJREContainer(String version) {
-    int n = SOURCES.indexOf(version);
-    if(n > -1) {
-      Map<String, IClasspathEntry> jreContainers = getJREContainers();
-      for(int i = n; i < SOURCES.size(); i++ ) {
-        IClasspathEntry entry = jreContainers.get(version);
-        if(entry != null) {
-          console.logMessage("JRE compliant to " + version + ". " + entry);
-          return entry;
-        }
-      }
+    IExecutionEnvironment executionEnvironment = getExecutionEnvironment(ENVIRONMENTS.get(version));
+    if(executionEnvironment == null) {
+      return JavaRuntime.getDefaultJREContainerEntry();
     }
-    IClasspathEntry entry = JavaRuntime.getDefaultJREContainerEntry();
-    console.logMessage("No JRE compliant to " + version + ". Using default JRE container " + entry);
-    return entry;
+    IPath containerPath = JavaRuntime.newJREContainerPath(executionEnvironment);
+    return JavaCore.newContainerEntry(containerPath);
   }
 
-  private Map<String, IClasspathEntry> getJREContainers() {
-    Map<String, IClasspathEntry> jreContainers = new HashMap<String, IClasspathEntry>();
-
-    jreContainers.put(getJREVersion(JavaRuntime.getDefaultVMInstall()), JavaRuntime.getDefaultJREContainerEntry());
-
-    IVMInstallType[] installTypes = JavaRuntime.getVMInstallTypes();
-    for(int i = 0; i < installTypes.length; i++ ) {
-      IVMInstall[] installs = installTypes[i].getVMInstalls();
-      for(int j = 0; j < installs.length; j++ ) {
-        IVMInstall install = installs[j];
-        String version = getJREVersion(install);
-        if(!jreContainers.containsKey(version)) {
-          // in Eclipse 3.2 one could use JavaRuntime.newJREContainerPath(install)
-          IPath jreContainerPath = new Path(JavaRuntime.JRE_CONTAINER).append(install.getVMInstallType().getId())
-              .append(install.getName());
-          jreContainers.put(version, JavaCore.newContainerEntry(jreContainerPath));
-        }
+  private IExecutionEnvironment getExecutionEnvironment(String environmentId) {
+    IExecutionEnvironmentsManager manager = JavaRuntime.getExecutionEnvironmentsManager();
+    for(IExecutionEnvironment environment : manager.getExecutionEnvironments()) {
+      if(environment.getId().equals(environmentId)) {
+        return environment;
       }
     }
-
-    return jreContainers;
+    return null;
   }
+
+//  private Map<String, IClasspathEntry> getJREContainers() {
+//    Map<String, IClasspathEntry> jreContainers = new HashMap<String, IClasspathEntry>();
+//
+//    jreContainers.put(getJREVersion(JavaRuntime.getDefaultVMInstall()), JavaRuntime.getDefaultJREContainerEntry());
+//
+//    IVMInstallType[] installTypes = JavaRuntime.getVMInstallTypes();
+//    for(int i = 0; i < installTypes.length; i++ ) {
+//      IVMInstall[] installs = installTypes[i].getVMInstalls();
+//      for(int j = 0; j < installs.length; j++ ) {
+//        IVMInstall install = installs[j];
+//        String version = getJREVersion(install);
+//        if(!jreContainers.containsKey(version)) {
+//          // in Eclipse 3.2 one could use JavaRuntime.newJREContainerPath(install)
+//          IPath jreContainerPath = new Path(JavaRuntime.JRE_CONTAINER).append(install.getVMInstallType().getId())
+//              .append(install.getName());
+//          jreContainers.put(version, JavaCore.newContainerEntry(jreContainerPath));
+//        }
+//      }
+//    }
+//
+//    return jreContainers;
+//  }
 
   private static void setVersion(Map<String, String> options, String name, String value) {
     if(value == null) {
@@ -453,36 +462,36 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
     }
   }
 
-  private String getJREVersion(IVMInstall install) {
-    LibraryLocation[] libraryLocations = JavaRuntime.getLibraryLocations(install);
-    if(libraryLocations != null) {
-      for(int k = 0; k < libraryLocations.length; k++ ) {
-        IPath path = libraryLocations[k].getSystemLibraryPath();
-        String jarName = path.lastSegment();
-        // MNGECLIPSE-478 handle Sun and Apple JRE
-        if("rt.jar".equals(jarName) || "classes.jar".equals(jarName)) {
-          JarFile jarFile = null;
-          try {
-            jarFile = new JarFile(path.toFile());
-            Manifest manifest = jarFile.getManifest();
-            Attributes attributes = manifest.getMainAttributes();
-            return attributes.getValue(Attributes.Name.SPECIFICATION_VERSION);
-          } catch(Exception ex) {
-            console.logError("Unable to read " + path + " " + ex.getMessage());
-          } finally {
-            if(jarFile != null) {
-              try {
-                jarFile.close();
-              } catch(IOException ex) {
-                console.logError("Unable to close " + path + " " + ex.getMessage());
-              }
-            }
-          }
-        }
-      }
-    }
-    return null;
-  }
+//  private String getJREVersion(IVMInstall install) {
+//    LibraryLocation[] libraryLocations = JavaRuntime.getLibraryLocations(install);
+//    if(libraryLocations != null) {
+//      for(int k = 0; k < libraryLocations.length; k++ ) {
+//        IPath path = libraryLocations[k].getSystemLibraryPath();
+//        String jarName = path.lastSegment();
+//        // MNGECLIPSE-478 handle Sun and Apple JRE
+//        if("rt.jar".equals(jarName) || "classes.jar".equals(jarName)) {
+//          JarFile jarFile = null;
+//          try {
+//            jarFile = new JarFile(path.toFile());
+//            Manifest manifest = jarFile.getManifest();
+//            Attributes attributes = manifest.getMainAttributes();
+//            return attributes.getValue(Attributes.Name.SPECIFICATION_VERSION);
+//          } catch(Exception ex) {
+//            console.logError("Unable to read " + path + " " + ex.getMessage());
+//          } finally {
+//            if(jarFile != null) {
+//              try {
+//                jarFile.close();
+//              } catch(IOException ex) {
+//                console.logError("Unable to close " + path + " " + ex.getMessage());
+//              }
+//            }
+//          }
+//        }
+//      }
+//    }
+//    return null;
+//  }
 
   @SuppressWarnings("unchecked")
   private String getBuildOption(MavenProject project, String optionName, List<String> values) {

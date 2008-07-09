@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.launching.JavaRuntime;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.index.IndexInfo;
 import org.maven.ide.eclipse.index.IndexManager;
@@ -1022,16 +1023,16 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     assertTrue(workspace.getRoot().getProject("projectimport.p003-2.0").exists());
   }
 
-  public void testCompilerSettings() throws Exception {
-    deleteProject("MNGECLIPSE-639");
+  public void testCompilerSettingsJsr14() throws Exception {
+    deleteProject("compilerSettingsJsr14");
 
     ResolverConfiguration configuration = new ResolverConfiguration();
     ProjectImportConfiguration projectImportConfiguration = new ProjectImportConfiguration(configuration);
-    importProject("MNGECLIPSE-639", "projects/MNGECLIPSE-639", projectImportConfiguration);
+    importProject("compilerSettingsJsr14", "projects/compilerSettingsJsr14", projectImportConfiguration);
 
     waitForJobsToComplete();
     
-    IProject project = workspace.getRoot().getProject("MNGECLIPSE-639");
+    IProject project = workspace.getRoot().getProject("compilerSettingsJsr14");
     assertTrue(project.exists());
     
     IMarker[] markers = project.findMarkers(null, true, IResource.DEPTH_INFINITE);
@@ -1040,6 +1041,43 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     IJavaProject javaProject = JavaCore.create(project);
     assertEquals("1.5", javaProject.getOption(JavaCore.COMPILER_SOURCE, true));
     assertEquals("1.5", javaProject.getOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, true));
+    
+    IClasspathEntry jreEntry = getJreContainer(javaProject.getRawClasspath());
+    assertEquals("J2SE-1.5", JavaRuntime.getExecutionEnvironmentId(jreEntry.getPath()));
+  }
+  
+  public void testCompilerSettings14() throws Exception {
+    deleteProject("compilerSettings14");
+
+    ResolverConfiguration configuration = new ResolverConfiguration();
+    ProjectImportConfiguration projectImportConfiguration = new ProjectImportConfiguration(configuration);
+    importProject("compilerSettings14", "projects/compilerSettings14", projectImportConfiguration);
+
+    waitForJobsToComplete();
+    
+    IProject project = workspace.getRoot().getProject("compilerSettings14");
+    assertTrue(project.exists());
+    
+    // Build path specifies execution environment J2SE-1.4. 
+    // There are no JREs in the workspace strictly compatible with this environment.
+    IMarker[] markers = project.findMarkers(null, true, IResource.DEPTH_INFINITE);
+    assertEquals(toString(markers), 1, markers.length);
+    
+    IJavaProject javaProject = JavaCore.create(project);
+    assertEquals("1.4", javaProject.getOption(JavaCore.COMPILER_SOURCE, true));
+    assertEquals("1.4", javaProject.getOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, true));
+    
+    IClasspathEntry jreEntry = getJreContainer(javaProject.getRawClasspath());
+    assertEquals("J2SE-1.4", JavaRuntime.getExecutionEnvironmentId(jreEntry.getPath()));
+  }
+
+  private IClasspathEntry getJreContainer(IClasspathEntry[] entries) {
+    for(IClasspathEntry entry : entries) {
+      if(JavaRuntime.newDefaultJREContainerPath().isPrefixOf(entry.getPath())) {
+        return entry;
+      }
+    }
+    return null;
   }
   
 }
