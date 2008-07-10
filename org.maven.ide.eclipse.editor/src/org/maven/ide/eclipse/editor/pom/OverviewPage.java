@@ -955,7 +955,7 @@ public class OverviewPage extends MavenPomEditorPage {
     ValueProvider<Scm> scmProvider = new ValueProvider.ParentValueProvider<Scm>(scmUrlText, scmConnectionText,
         scmDevConnectionText, scmTagText) {
       public Scm getValue() {
-        return null;
+        return model.getScm();
       }
       public Scm create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
         Scm scm = PomFactory.eINSTANCE.createScm();

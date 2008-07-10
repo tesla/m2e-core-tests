@@ -64,14 +64,19 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.edit.domain.AdapterFactoryEditingDomain;
 import org.eclipse.emf.edit.domain.EditingDomain;
+import org.eclipse.emf.edit.domain.IEditingDomainProvider;
 import org.eclipse.emf.edit.provider.ComposedAdapterFactory;
 import org.eclipse.emf.edit.provider.ReflectiveItemProviderAdapterFactory;
 import org.eclipse.emf.edit.provider.resource.ResourceItemProviderAdapterFactory;
+import org.eclipse.emf.edit.ui.action.EditingDomainActionBarContributor;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.search.ui.text.ISearchEditorAccess;
 import org.eclipse.search.ui.text.Match;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
@@ -118,7 +123,7 @@ import org.w3c.dom.NodeList;
  * @author Eugene Kuleshov
  */
 @SuppressWarnings("restriction")
-public class MavenPomEditor extends FormEditor implements IResourceChangeListener, IShowEditorInput, IGotoMarker, ISearchEditorAccess {
+public class MavenPomEditor extends FormEditor implements IResourceChangeListener, IShowEditorInput, IGotoMarker, ISearchEditorAccess, IEditingDomainProvider {
 
   OverviewPage overviewPage;
   
@@ -161,6 +166,8 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   private AdapterFactoryEditingDomain editingDomain;
   
   private int sourcePageIndex;
+
+  private NotificationCommandStack commandStack;
   
   public MavenPomEditor() {
     ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
@@ -250,9 +257,10 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
         factories.add(new ResourceItemProviderAdapterFactory());
         factories.add(new ReflectiveItemProviderAdapterFactory());
   
+        commandStack = new NotificationCommandStack(this);
         adapterFactory = new ComposedAdapterFactory(factories);
         editingDomain = new AdapterFactoryEditingDomain(adapterFactory, //
-            new NotificationCommandStack(pages), new HashMap<Resource, Boolean>());
+            commandStack, new HashMap<Resource, Boolean>());
         
         IModelManager modelManager = StructuredModelManager.getModelManager();
         structuredModel = modelManager.getExistingModelForEdit(doc);
@@ -729,5 +737,24 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     return sourcePage.getDocumentProvider().getAnnotationModel(getEditorInput());
   }
   
+  public boolean isDirty() {
+    return commandStack.isSaveNeeded();
+  }
+
+  public List<MavenPomEditorPage> getPages() {
+    return pages;
+  }
+  
+  /*public void menuAboutToShow(IMenuManager menuManager) {
+    ((IMenuListener)getEditorSite().getActionBarContributor()).menuAboutToShow(menuManager);
+  }
+
+  public EditingDomainActionBarContributor getActionBarContributor() {
+    return (EditingDomainActionBarContributor)getEditorSite().getActionBarContributor();
+  }
+
+  public IActionBars getActionBars() {
+    return getActionBarContributor().getActionBars();
+  }*/
 }
 

@@ -22,16 +22,20 @@ import org.eclipse.emf.edit.command.SetCommand;
 
 public class NotificationCommandStack extends BasicCommandStack {
 
+  private MavenPomEditor editor;
   private List<MavenPomEditorPage> pages;
+  private boolean isDirty = false;
 
-  public NotificationCommandStack(List<MavenPomEditorPage> pages) {
-    this.pages = pages;
+  public NotificationCommandStack(MavenPomEditor editor) {
+    this.editor = editor;
+    this.pages = editor.getPages();
   }
   
   @Override
   public void execute(Command command) {
     super.execute(command);
     processCommand(command);
+    fireDirty();
   }
 
   private void processCommand(Command command) {
@@ -86,14 +90,21 @@ public class NotificationCommandStack extends BasicCommandStack {
   
   @Override
   public void redo() {
-    // TODO Auto-generated method stub
     super.redo();
+    fireDirty();
+  }
+
+  private void fireDirty() {
+    if (isDirty != isSaveNeeded()) {
+      editor.editorDirtyStateChanged();
+    }
+    isDirty = isSaveNeeded();
   }
 
   @Override
   public void undo() {
-    // TODO Auto-generated method stub
     super.undo();
+    fireDirty();
   }
 
 }

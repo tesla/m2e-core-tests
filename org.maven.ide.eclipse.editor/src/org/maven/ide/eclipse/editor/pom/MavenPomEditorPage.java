@@ -311,6 +311,7 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
 
   public void registerListeners() {
     if(model!=null) {
+      model.eAdapters().add(this);
       for(Iterator<?> it = model.eAllContents(); it.hasNext();) {
         Object next = it.next();
         if (next instanceof EObject) {
@@ -325,6 +326,7 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
 
   public void deRegisterListeners() {
     if(model!=null) {
+      model.eAdapters().remove(this);
       for(Iterator<?> it = model.eAllContents(); it.hasNext(); ) {
         Object next = it.next();
         if(next instanceof EObject) {

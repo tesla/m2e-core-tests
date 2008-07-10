@@ -10,12 +10,14 @@
 <plugin>
 
   <extension point="org.eclipse.ui.editors">
-    <editor id="org.maven.ide.eclipse.editor.MavenPomEditor"
-            class="org.maven.ide.eclipse.editor.pom.MavenPomEditor"
-            extensions="pom, xml" filenames="pom.xml"
-            icon="icons/editor-pom.gif"
-            name="Maven POM Editor">
-       <!-- contributorClass="org.maven.ide.eclipse.editor.pom.MavenPomEditorContributor" -->
+    <editor
+          class="org.maven.ide.eclipse.editor.pom.MavenPomEditor"
+          contributorClass="org.eclipse.emf.edit.ui.action.EditingDomainActionBarContributor"
+          extensions="pom, xml"
+          filenames="pom.xml"
+          icon="icons/editor-pom.gif"
+          id="org.maven.ide.eclipse.editor.MavenPomEditor"
+          name="Maven POM Editor">
        <contentTypeBinding contentTypeId="org.maven.ide.eclipse.pomFile"/> 
     </editor>
   </extension>
