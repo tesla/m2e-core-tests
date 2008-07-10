@@ -96,7 +96,7 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
 
   protected Button removeButton;
 
-  private boolean isUsed;
+  private boolean isUsed = true;
 
   protected Set<String> requiredProperties;
 
