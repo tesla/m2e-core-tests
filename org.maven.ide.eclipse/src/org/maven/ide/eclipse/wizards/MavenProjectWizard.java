@@ -42,6 +42,7 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.Messages;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 
@@ -189,6 +190,14 @@ public class MavenProjectWizard extends Wizard implements INewWizard {
     final IPath location = locationPage.isInWorkspace() ? null : locationPage.getLocationPath();
     final IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
     final IProject project = configuration.getProject(root, model);
+    
+    boolean pomExists = ( locationPage.isInWorkspace() ?
+        root.getLocation().append(project.getName()) : location ).append(IMavenConstants.POM_FILE_NAME).toFile().exists();
+    if ( pomExists ) {
+      MessageDialog.openError(getShell(), Messages.getString("wizard.project.job.failed", projectName), Messages.getString("wizard.project.error.pomAlreadyExists"));
+      return false;
+    }
+        
 
     final Job job;
     
