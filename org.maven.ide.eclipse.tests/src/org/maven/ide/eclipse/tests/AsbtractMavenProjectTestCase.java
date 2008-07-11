@@ -94,10 +94,10 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
     job = plugin.getProjectManagerRefreshJob();
     job.sleep();
 
-    File settings = new File("settings.xml").getCanonicalFile();
+    runtimeManager = plugin.getMavenRuntimeManager();
 
+    File settings = new File("settings.xml").getCanonicalFile();
     if (settings.canRead()) {
-      runtimeManager = plugin.getMavenRuntimeManager();
       runtimeManager.setUserSettingsFile(settings.getAbsolutePath());
     }
 
