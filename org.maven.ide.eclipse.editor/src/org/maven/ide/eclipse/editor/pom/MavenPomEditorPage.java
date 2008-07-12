@@ -311,7 +311,8 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
 
   public void registerListeners() {
     if(model!=null) {
-      model.eAdapters().add(this);
+      if(!model.eAdapters().contains(this))
+        model.eAdapters().add(this);
       for(Iterator<?> it = model.eAllContents(); it.hasNext();) {
         Object next = it.next();
         if (next instanceof EObject) {
@@ -344,6 +345,7 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
       for(ModifyListener listener : listeners) {
         textControl.removeModifyListener(listener);
       }
+      listeners.clear();
       ModifyListener listener = setModifyListener(new TextAdapter() {
         public String getText() {
           return textControl.getText();
@@ -362,6 +364,7 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
       for(ModifyListener listener : listeners) {
         control.removeModifyListener(listener);
       }
+      listeners.clear();
       ModifyListener listener = setModifyListener(new TextAdapter() {
         public String getText() {
           return control.getText();
@@ -381,6 +384,7 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
       for(ModifyListener listener : listeners) {
         control.removeModifyListener(listener);
       }
+      listeners.clear();
       ModifyListener listener = setModifyListener(new TextAdapter() {
         public String getText() {
           return control.getText();
@@ -427,6 +431,8 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
         control.removeSelectionListener((SelectionListener) listener);
       }
   
+      listeners.clear();
+
       class ButtonModifyListener extends SelectionAdapter implements ModifyListener {
         public void widgetSelected(SelectionEvent e) {
           T owner = provider.getValue();
@@ -457,15 +463,18 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
   }
 
   public void removeNotifyListener(Text control) {
-    for(ModifyListener listener : getModifyListeners(control)) {
+    List<ModifyListener> listeners = getModifyListeners(control);
+    for(ModifyListener listener : listeners) {
       if(!control.isDisposed()) {
         control.removeModifyListener(listener);
       }
     }
+    listeners.clear();
   }
 
   public void removeNotifyListener(CCombo control) {
-    for(ModifyListener listener : getModifyListeners(control)) {
+    List<ModifyListener> listeners = getModifyListeners(control);
+    for(ModifyListener listener : listeners) {
       if(!control.isDisposed()) {
         control.removeModifyListener(listener);
       }
@@ -473,19 +482,23 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
   }
 
   public void removeNotifyListener(Combo control) {
-    for(ModifyListener listener : getModifyListeners(control)) {
+    List<ModifyListener> listeners = getModifyListeners(control);
+    for(ModifyListener listener : listeners) {
       if(!control.isDisposed()) {
         control.removeModifyListener(listener);
       }
     }
+    listeners.clear();
   }
 
   public void removeNotifyListener(Button button) {
-    for(ModifyListener listener : getModifyListeners(button)) {
+    List<ModifyListener> listeners = getModifyListeners(button);
+    for(ModifyListener listener : listeners) {
       if(!button.isDisposed()) {
         button.removeSelectionListener((SelectionAdapter) listener);
       }
     }
+    listeners.clear();
   }
 
   private List<ModifyListener> getModifyListeners(Object control) {
