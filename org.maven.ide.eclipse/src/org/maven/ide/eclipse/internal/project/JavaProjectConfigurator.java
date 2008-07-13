@@ -78,6 +78,7 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
     ENVIRONMENTS.put("1.7", "JavaSE-1.7");
   }
 
+  // XXX make sure to configure only Java projects
   public void configure(MavenEmbedder embedder, ProjectConfigurationRequest request, IProgressMonitor monitor) {
     IProject project = request.getProject();
     ResolverConfiguration configuration = request.getResolverConfiguration();
@@ -94,7 +95,7 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
   
   private void updateSourceFolders(MavenEmbedder embedder, IProject project, ResolverConfiguration configuration,
       String goalToExecute, IProgressMonitor monitor) {
-    monitor.beginTask("Updating sources " + project.getName(), IProgressMonitor.UNKNOWN);
+    // monitor.beginTask("Updating sources " + project.getName(), IProgressMonitor.UNKNOWN);
     monitor.setTaskName("Updating sources " + project.getName());
 
     long t1 = System.currentTimeMillis();
@@ -159,7 +160,7 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
       MavenLogger.log(msg, ex);
 
     } finally {
-      monitor.done();
+      // monitor.done();
     }
   }
 
