@@ -7,7 +7,7 @@
       plugin="org.maven.ide.eclipse">
 
    <description url="http://m2eclipse.sonatype.org/">
-      Project configuration for Flex Builder 3
+      Maven POM XML Editor
    </description>
 
    <copyright url="http://sonatype.com/">
