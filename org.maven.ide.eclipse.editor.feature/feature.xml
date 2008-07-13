@@ -7,7 +7,7 @@
       plugin="org.maven.ide.eclipse">
 
    <description url="http://m2eclipse.sonatype.org/">
-      [Enter Feature Description here.]
+      Maven POM Editor
    </description>
 
    <copyright url="http://www.example.com/copyright">
