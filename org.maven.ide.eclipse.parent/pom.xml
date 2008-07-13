@@ -28,7 +28,7 @@
     <archetype_common.version>2.0.0.20080522-1230</archetype_common.version>
     <archetype.version>2.0-alpha-2</archetype.version>
 
-    <maven_model_edit.version>1.0.0.20080530-2300</maven_model_edit.version>
+    <maven_model_edit.version>1.0.0.20080708-1032</maven_model_edit.version>
     <maven_pom.version>1.0.0-SNAPSHOT</maven_pom.version>
 
     <nexus_indexer.version>1.0.0.20080530-2330</nexus_indexer.version>
