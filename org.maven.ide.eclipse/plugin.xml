@@ -48,9 +48,6 @@
       <runtime>
          <run class="org.maven.ide.eclipse.container.MavenNature"/>
       </runtime>
-      <!--
-      <requires-nature id="org.eclipse.jdt.core.javanature"/>
-      -->
       <builder id="org.maven.ide.eclipse.maven2Builder"/>
    </extension>
 

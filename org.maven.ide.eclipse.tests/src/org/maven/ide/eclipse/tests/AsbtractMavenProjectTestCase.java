@@ -75,6 +75,8 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
 
   protected MavenProjectManagerRefreshJob job;
 
+  protected MavenPlugin plugin;
+
   @SuppressWarnings("unchecked")
   protected void setUp() throws Exception {
     super.setUp();
@@ -88,8 +90,7 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
     options.put(JavaCore.CORE_JAVA_BUILD_RESOURCE_COPY_FILTER, ".svn/");
     JavaCore.setOptions(options);
 
-    // early start does not seem to take place, lets force m2plugin activation
-    MavenPlugin plugin = MavenPlugin.getDefault();
+    plugin = MavenPlugin.getDefault();
 
     job = plugin.getProjectManagerRefreshJob();
     job.sleep();

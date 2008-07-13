@@ -21,6 +21,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -42,6 +43,7 @@ import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.apache.maven.archetype.ArchetypeGenerationRequest;
 import org.apache.maven.archetype.ArchetypeGenerationResult;
@@ -164,13 +166,8 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
           IProject project = projects.get(projectInfo);
           MavenProjectFacade facade = projectManagerImpl.create(project, monitor);
           if (facade != null) {
-            for(AbstractProjectConfigurator configurator : getConfigurators()) {
-              if(monitor.isCanceled()) {
-                throw new OperationCanceledException();
-              }
-              ProjectConfigurationRequest request = new ProjectConfigurationRequest(facade, false /*projectImport*/);
-              configurator.configure(embedder, request, monitor);
-            }
+            ProjectConfigurationRequest request = new ProjectConfigurationRequest(facade, false /*updateSources*/);
+            updateProjectConfiguration(embedder, request, monitor);
           }
         }
       } finally {
@@ -184,12 +181,6 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     }
   }
 
-  public void configureProject(IProject project, ResolverConfiguration configuration, IProgressMonitor monitor)
-      throws CoreException {
-    enableMavenNature(project, configuration, monitor);
-    updateProjectConfiguration(project, configuration, runtimeManager.getGoalOnImport(), monitor);
-  }
-
   public void updateProjectConfiguration(IProject project, ResolverConfiguration configuration, String goalToExecute, IProgressMonitor monitor) throws CoreException {
     try {
       MavenEmbedder embedder = embedderManager.createEmbedder(EmbedderFactory.createExecutionCustomizer());
@@ -199,13 +190,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
           // this is for unit tests only, production code should not need to load facade here
           MavenProjectFacade facade = projectManagerImpl.create(pom, true, monitor);
           ProjectConfigurationRequest request = new ProjectConfigurationRequest(project, facade.getPom(), facade.getMavenProject(), configuration, true);
-          
-          for(AbstractProjectConfigurator configurator : getConfigurators()) {
-            if(monitor.isCanceled()) {
-              throw new OperationCanceledException();
-            }
-            configurator.configure(embedder, request, monitor);
-          }
+          updateProjectConfiguration(embedder, request, monitor);
         }
       } finally {
         embedder.stop();
@@ -215,48 +200,98 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     }
   }
 
+  private void updateProjectConfiguration(MavenEmbedder embedder, ProjectConfigurationRequest request,
+      IProgressMonitor monitor) throws CoreException {
+    for(AbstractProjectConfigurator configurator : getConfigurators()) {
+      if(monitor.isCanceled()) {
+        throw new OperationCanceledException();
+      }
+      configurator.configure(embedder, request, monitor);
+    }
+    
+    IProject project = request.getProject();
+    IProjectDescription description = project.getDescription();
+
+    addMavenNature(description);
+    
+    // ensure Maven builder is always the last one
+    ICommand mavenBuilder = null;
+    ArrayList<ICommand> newSpec = new ArrayList<ICommand>();
+    for(ICommand command : description.getBuildSpec()) {
+      if(IMavenConstants.BUILDER_ID.equals(command.getBuilderName())) {
+        mavenBuilder = command;
+      } else {
+        newSpec.add(command);
+      }
+    }
+    if(mavenBuilder == null) {
+      mavenBuilder = description.newCommand();
+      mavenBuilder.setBuilderName(IMavenConstants.BUILDER_ID);
+    }
+    newSpec.add(mavenBuilder);
+    description.setBuildSpec(newSpec.toArray(new ICommand[newSpec.size()]));
+    
+    project.setDescription(description, monitor);
+  }
+  
   public void enableMavenNature(IProject project, ResolverConfiguration configuration, IProgressMonitor monitor)
       throws CoreException {
     monitor.subTask("Enable Maven nature");
+    projectManagerImpl.setResolverConfiguration(project, configuration);
 
+    IProjectDescription description = project.getDescription();
+    addMavenNature(description);
+    project.setDescription(description, monitor);
+    
+    addMavenClasspathContainer(project, configuration, monitor);
+  }
+
+  // XXX move Java nature configuration to JavaProjectConfigurator
+  private void addMavenNature(IProjectDescription description) {
     ArrayList<String> newNatures = new ArrayList<String>();
     newNatures.add(JavaCore.NATURE_ID);
     newNatures.add(IMavenConstants.NATURE_ID);
-
-    IProjectDescription description = project.getDescription();
     for(String natureId : description.getNatureIds()) {
       if(!IMavenConstants.NATURE_ID.equals(natureId) && !JavaCore.NATURE_ID.equals(natureId)) {
         newNatures.add(natureId);
       }
     }
     description.setNatureIds(newNatures.toArray(new String[newNatures.size()]));
-    project.setDescription(description, monitor);
-    
-    projectManagerImpl.setResolverConfiguration(project, configuration);
-
-    IJavaProject javaProject = JavaCore.create(project);
-    if(javaProject != null) {
-      Set<String> containerEntrySet = new LinkedHashSet<String>();
-      IClasspathContainer container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
-      if(container != null) {
-        for(IClasspathEntry entry : container.getClasspathEntries()) {
-          containerEntrySet.add(entry.getPath().toString());
-        }
-      }
-
-      ArrayList<IClasspathEntry> newEntries = new ArrayList<IClasspathEntry>();
-      for(IClasspathEntry entry : javaProject.getRawClasspath()) {
-        if(!BuildPathManager.isMaven2ClasspathContainer(entry.getPath()) && !containerEntrySet.contains(entry.getPath().toString())) {
-          newEntries.add(entry);
-        }
-      }
-
-      newEntries.add(createContainerEntry(configuration));
-
-      javaProject.setRawClasspath(newEntries.toArray(new IClasspathEntry[newEntries.size()]), monitor);
-    }
   }
 
+  // XXX move into JavaProjectConfigurator 
+  private void addMavenClasspathContainer(IProject project, //
+      ResolverConfiguration configuration, IProgressMonitor monitor) {
+    monitor.setTaskName("Setting classpath container " + project.getName());
+    try {
+      IJavaProject javaProject = JavaCore.create(project);
+      if(javaProject != null) {
+        Set<String> containerEntrySet = new LinkedHashSet<String>();
+        IClasspathContainer container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
+        if(container != null) {
+          for(IClasspathEntry entry : container.getClasspathEntries()) {
+            containerEntrySet.add(entry.getPath().toString());
+          }
+        }
+  
+        ArrayList<IClasspathEntry> newEntries = new ArrayList<IClasspathEntry>();
+        for(IClasspathEntry entry : javaProject.getRawClasspath()) {
+          if(!BuildPathManager.isMaven2ClasspathContainer(entry.getPath()) && !containerEntrySet.contains(entry.getPath().toString())) {
+            newEntries.add(entry);
+          }
+        }
+  
+        newEntries.add(JavaCore.newContainerEntry(new Path(IMavenConstants.CONTAINER_ID)));
+  
+        javaProject.setRawClasspath(newEntries.toArray(new IClasspathEntry[newEntries.size()]), monitor);
+      }
+    } catch(CoreException ex) {
+      String msg = "Unable to set classpaht container " + project.getName();
+      console.logMessage(msg + "; " + ex.toString());
+      MavenLogger.log(msg, ex);
+    }
+  }
+  
   public void disableMavenNature(IProject project, IProgressMonitor monitor) throws CoreException {
     monitor.subTask("Disable Maven nature");
 
@@ -272,6 +307,11 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     description.setNatureIds(newNatures.toArray(new String[newNatures.size()]));
     project.setDescription(description, null);
 
+    removeMavenClasspathContainer(project);
+  }
+
+  // XXX move to JavaProjectConfigurator
+  private void removeMavenClasspathContainer(IProject project) throws JavaModelException {
     IJavaProject javaProject = JavaCore.create(project);
     if(javaProject != null) {
       // remove classpatch container from JavaProject
@@ -283,14 +323,8 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
       }
       javaProject.setRawClasspath(newEntries.toArray(new IClasspathEntry[newEntries.size()]), null);
     }
-
   }
 
-  private static IClasspathEntry createContainerEntry(ResolverConfiguration configuration) {
-    IPath newPath = new Path(IMavenConstants.CONTAINER_ID);
-
-    return JavaCore.newContainerEntry(newPath);
-  }
   // project creation
 
   /**
@@ -330,7 +364,8 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     monitor.worked(1);
 
     monitor.subTask("Configuring project...");
-    configureProject(project, resolverConfiguration, monitor);
+    enableMavenNature(project, resolverConfiguration, monitor);
+    updateProjectConfiguration(project, resolverConfiguration, runtimeManager.getGoalOnImport(), monitor);
 
     monitor.worked(1);
   }
@@ -492,9 +527,6 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     }
 
     ResolverConfiguration resolverConfiguration = configuration.getResolverConfiguration();
-    projectManagerImpl.setResolverConfiguration(project, resolverConfiguration);
-
-    // XXX split maven and java nature configuration
     enableMavenNature(project, resolverConfiguration, monitor);
 
     return project;

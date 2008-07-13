@@ -12,8 +12,10 @@ import java.io.File;
 import java.util.Arrays;
 
 import org.apache.maven.model.Model;
+import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRunnable;
@@ -32,6 +34,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.index.IndexInfo;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.project.BuildPathManager;
@@ -54,13 +57,13 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     final IProject project2 = createProject("MNGECLIPSE-248child", "projects/MNGECLIPSE-248child/pom.xml");
 
     NullProgressMonitor monitor = new NullProgressMonitor();
-    IProjectConfigurationManager importManager = MavenPlugin.getDefault().getProjectConfigurationManager();
+    IProjectConfigurationManager configurationManager = MavenPlugin.getDefault().getProjectConfigurationManager();
 
     ResolverConfiguration configuration = new ResolverConfiguration();
-    importManager.enableMavenNature(project1, configuration, monitor);
+    configurationManager.enableMavenNature(project1, configuration, monitor);
 //    buildpathManager.updateSourceFolders(project1, monitor);
 
-    importManager.enableMavenNature(project2, configuration, monitor);
+    configurationManager.enableMavenNature(project2, configuration, monitor);
 //    buildpathManager.updateSourceFolders(project2, monitor);
 
 //    waitForJob("Initializing " + project1.getProject().getName());
@@ -1078,6 +1081,60 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       }
     }
     return null;
+  }
+
+  public void testMavenBuilderOrder() throws Exception {
+    IProject project = createExisting("builderOrder", "projects/builderOrder");
+    IProjectDescription description = project.getDescription();
+
+    ICommand[] buildSpec = description.getBuildSpec();
+    ICommand javaBuilder = buildSpec[0];
+    ICommand mavenBuilder = buildSpec[1];
+    
+    verifyNaturesAndBuilders(project);
+    
+    ResolverConfiguration configuration = new ResolverConfiguration();
+    String goalToExecute = "";
+    
+    IProjectConfigurationManager configurationManager = plugin.getProjectConfigurationManager();
+    
+    configurationManager.updateProjectConfiguration(project, configuration, goalToExecute, monitor);
+    verifyNaturesAndBuilders(project);
+
+    description.setNatureIds(new String[] {JavaCore.NATURE_ID});
+    description.setBuildSpec(new ICommand[] {javaBuilder});
+    project.setDescription(description, monitor);
+    configurationManager.updateProjectConfiguration(project, configuration, goalToExecute, monitor);
+    verifyNaturesAndBuilders(project);
+    
+    description.setNatureIds(new String[] {});
+    description.setBuildSpec(new ICommand[] {mavenBuilder, javaBuilder});
+    project.setDescription(description, monitor);
+    configurationManager.updateProjectConfiguration(project, configuration, goalToExecute, monitor);
+    verifyNaturesAndBuilders(project);
+    
+    description.setNatureIds(new String[] {IMavenConstants.NATURE_ID, JavaCore.NATURE_ID});
+    description.setBuildSpec(new ICommand[] {mavenBuilder, javaBuilder});
+    project.setDescription(description, monitor);
+    configurationManager.updateProjectConfiguration(project, configuration, goalToExecute, monitor);
+    verifyNaturesAndBuilders(project);
+  }
+
+  private void verifyNaturesAndBuilders(IProject project) throws CoreException {
+    IProjectDescription description = project.getDescription();
+    {
+      String[] natureIds = description.getNatureIds();
+      assertEquals(2, natureIds.length);
+      assertEquals(JavaCore.NATURE_ID, natureIds[0]);
+      assertEquals(IMavenConstants.NATURE_ID, natureIds[1]);
+    }
+
+    {
+      ICommand[] buildSpec = description.getBuildSpec();
+      assertEquals(2, buildSpec.length);
+      assertEquals(JavaCore.BUILDER_ID, buildSpec[0].getBuilderName());
+      assertEquals(IMavenConstants.BUILDER_ID, buildSpec[1].getBuilderName());
+    }
   }
   
 }

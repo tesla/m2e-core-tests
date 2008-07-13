@@ -18,12 +18,11 @@ import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
-import org.maven.ide.eclipse.internal.project.ProjectConfigurationManager;
+import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 
 
@@ -35,8 +34,12 @@ public class ResourceChangeListenerTest extends AsbtractMavenProjectTestCase {
     super.setUp();
     workspace.getRoot().getProject("resourcechange").delete(true, null);
     project = createProject("resourcechange", "projects/resourcechange/pom.xml");
-    ProjectConfigurationManager importManager = (ProjectConfigurationManager) MavenPlugin.getDefault().getProjectConfigurationManager();
-    importManager.configureProject(project, new ResolverConfiguration(), new NullProgressMonitor());
+    
+    IProjectConfigurationManager configurationManager = MavenPlugin.getDefault().getProjectConfigurationManager();
+    ResolverConfiguration configuration = new ResolverConfiguration();
+    configurationManager.enableMavenNature(project, configuration, monitor);
+    configurationManager.updateProjectConfiguration(project, configuration, runtimeManager.getGoalOnImport(), monitor);
+    
     waitForJobsToComplete();
   }
 
