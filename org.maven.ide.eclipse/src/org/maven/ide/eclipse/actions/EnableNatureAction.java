@@ -34,6 +34,7 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.internal.launch.MavenRuntimeClasspathProvider;
+import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 import org.maven.ide.eclipse.wizards.MavenPomWizard;
 
@@ -97,6 +98,7 @@ public class EnableNatureAction implements IObjectActionDelegate, IExecutableExt
       MavenPlugin plugin = MavenPlugin.getDefault();
       IFile pom = project.getFile(IMavenConstants.POM_FILE_NAME);
       if(isSingle && !pom.exists()) {
+        // XXX move into AbstractProjectConfigurator and use Eclipse project settings
         IWorkbench workbench = plugin.getWorkbench();
 
         MavenPomWizard wizard = new MavenPomWizard();
@@ -116,9 +118,16 @@ public class EnableNatureAction implements IObjectActionDelegate, IExecutableExt
       configuration.setResolveWorkspaceProjects(workspaceProjects);
       configuration.setActiveProfiles("");
       
-      plugin.getProjectConfigurationManager().enableMavenNature(project, //
-          configuration, //
-          new NullProgressMonitor());
+      boolean hasMavenNature = project.hasNature(IMavenConstants.NATURE_ID);
+      
+      IProjectConfigurationManager configurationManager = plugin.getProjectConfigurationManager();
+      
+      configurationManager.enableMavenNature(project, configuration, new NullProgressMonitor());
+      
+      if(!hasMavenNature) {
+        configurationManager.updateProjectConfiguration(project, configuration, //
+            plugin.getMavenRuntimeManager().getGoalOnUpdate(), new NullProgressMonitor());
+      }
       
       enableLaunchLonfigurations(project);
 
