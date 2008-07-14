@@ -59,7 +59,7 @@ public class WorkspaceState {
   /**
    * Maps full pom IPath to MavenProjectFacade
    */
-  private final Map<IPath, MavenProjectFacade> workspacePoms = new HashMap/*<IPath, MavenProjectFacade>*/<IPath, MavenProjectFacade>();
+  private final Map<IPath, MavenProjectFacade> workspacePoms = new HashMap<IPath, MavenProjectFacade>();
 
   /**
    * @param state
@@ -102,7 +102,7 @@ public class WorkspaceState {
     ArtifactKey parentArtifactKey = new ArtifactKey(mavenProject.getParentArtifact());
     Set<IPath> children = workspaceModules.get(parentArtifactKey);
     if (children == null) {
-      children = new HashSet/*<IPath>*/<IPath>();
+      children = new HashSet<IPath>();
       workspaceModules.put(parentArtifactKey, children);
     }
     children.add(pom.getFullPath());
@@ -132,7 +132,7 @@ public class WorkspaceState {
     }
   }
 
-  private void removeDependents(IFile pom, Map/*<ArtifactKey, Set<IPath>>*/<ArtifactKey, Set<IPath>> dependencies) {
+  private void removeDependents(IFile pom, Map<ArtifactKey, Set<IPath>> dependencies) {
     // XXX may not be fast enough
     for(Set<IPath> dependents : dependencies.values()) {
       dependents.remove(pom.getFullPath());

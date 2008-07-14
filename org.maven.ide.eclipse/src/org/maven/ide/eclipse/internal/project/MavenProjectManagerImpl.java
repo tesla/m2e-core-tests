@@ -304,7 +304,7 @@ public class MavenProjectManagerImpl {
    * 
    * @return a {@link Set} of {@link IFile} affected poms
    */
-  public Set/*<IFile>*/<IFile> remove(IFile pom) {
+  public Set<IFile> remove(IFile pom) {
     MavenProjectFacade facade = state.getProjectFacade(pom);
     MavenProject mavenProject = facade != null ? facade.getMavenProject() : null;
 
