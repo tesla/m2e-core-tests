@@ -27,7 +27,7 @@ import org.maven.ide.eclipse.internal.project.MavenProjectManagerRefreshJob;
 
 
 /**
- * This class keeps track of all maven projects present in the workspace and provides mapping between Maven artifacts
+ * This class keeps track of all Maven projects present in the workspace and provides mapping between Maven artifacts
  * and Workspace projects.
  */
 public class MavenProjectManager {
@@ -139,13 +139,9 @@ public class MavenProjectManager {
 
     String classifier = manager.getClassifier(type, artifact.getClassifier());
 
-    StringBuffer filename = new StringBuffer();
-    filename.append(artifact.getArtifactId());
-    filename.append("-").append(artifact.getVersion());
-    filename.append("-").append(classifier);
-    filename.append(".jar");
+    String filename = artifact.getArtifactId() + '-' + artifact.getVersion() + '-' + classifier + ".jar";
     
-    File file = new File(artifactFile.getParent(), filename.toString());
+    File file = new File(artifactFile.getParent(), filename);
 
     if(file.exists()) {
       // workaround to not download already existing archive
