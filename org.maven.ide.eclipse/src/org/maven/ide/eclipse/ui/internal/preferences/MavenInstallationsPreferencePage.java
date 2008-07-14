@@ -485,7 +485,6 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
       private File getLocalRepository(String globalSettings) {
         MavenEmbedder embedder = null;
         try {
-          
           ContainerCustomizer customizer = EmbedderFactory.createExecutionCustomizer();
           Configuration configuration = embedderManager.createDefaultConfiguration(customizer);
           if(globalSettings!=null) {

@@ -14,6 +14,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.apache.maven.embedder.Configuration;
 import org.apache.maven.embedder.ContainerCustomizer;
 import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.embedder.MavenEmbedderConsoleLogger;
@@ -22,7 +23,9 @@ import org.apache.maven.embedder.MavenEmbedderLogger;
 import org.apache.maven.settings.Profile;
 import org.apache.maven.settings.Repository;
 import org.apache.maven.settings.Settings;
+import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.embedder.EmbedderFactory;
+import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 
 
 /**
@@ -30,16 +33,12 @@ import org.maven.ide.eclipse.embedder.EmbedderFactory;
  */
 public class MavenSettingsTest extends TestCase {
 
-  protected void setUp() throws Exception {
-    super.setUp();
-  }
-  
   public void testReadSettingsEnvVar() throws Exception {
     File settingsWithEnv = File.createTempFile("settings", "withEnv.xml");
     settingsWithEnv.deleteOnExit();
     
     FileWriter fw = new FileWriter(settingsWithEnv);
-    if(isWindows()) {
+    if(System.getProperty("os.name", "").toLowerCase().indexOf("windows")>-1) {
       fw.write("<settings>\n" +
           "  <localRepository>${env.USERNAME}/m2.repository</localRepository>\n" +
           "  <mirrors>\n" + 
@@ -105,6 +104,60 @@ public class MavenSettingsTest extends TestCase {
     assertEquals("http://archiva.someserver.de/repository/releases", repository.getUrl());
   }
   
+  public void testDefaultLocalRepositoryFromUserSettings() throws Exception {
+    MavenEmbedderManager embedderManager = MavenPlugin.getDefault().getMavenEmbedderManager();
+    ContainerCustomizer customizer = EmbedderFactory.createExecutionCustomizer();
+    Configuration configuration = embedderManager.createDefaultConfiguration(customizer);
+    // if(globalSettings!=null) {
+    //   configuration.setGlobalSettingsFile(new File(globalSettings));
+    // }
+    configuration.setUserSettingsFile(null);
+    
+    MavenEmbedder embedder = EmbedderFactory.createMavenEmbedder(configuration, null);
+    
+    assertEquals(MavenEmbedder.DEFAULT_USER_SETTINGS_FILE, embedder.getConfiguration().getUserSettingsFile());
+    
+    String localRepository = embedder.getLocalRepository().getBasedir();
+    assertEquals(System.getProperty("user.home").replace('\\', '/') + "/.m2/repository", //
+        localRepository.replace('\\', '/'));
+  }
+  
+  public void testCustomLocalRepositoryFromUserSettings() throws Exception {
+    File localrepoDir = new File("localrepo");
+
+    File userSettings = File.createTempFile("settings", "withEnv.xml");
+    userSettings.deleteOnExit();
+    
+    FileWriter fw = new FileWriter(userSettings);
+    fw.write("<settings>\n" +
+        "  <localRepository>" + localrepoDir.getAbsolutePath() + "</localRepository>\n" +
+        "  <mirrors>\n" + 
+        "    <mirror>\n" + 
+        "      <id>localhost mirror</id>\n" + 
+        "      <name>My Local Repository</name>\n" + 
+        "      <url>${localRepository}</url>\n" + 
+        "      <mirrorOf>localhost</mirrorOf>\n" + 
+        "    </mirror>\n" +
+        "  </mirrors>\n" + 
+    "</settings>");
+    fw.flush();
+    fw.close();    
+    
+    MavenEmbedderManager embedderManager = MavenPlugin.getDefault().getMavenEmbedderManager();
+    ContainerCustomizer customizer = EmbedderFactory.createExecutionCustomizer();
+    Configuration configuration = embedderManager.createDefaultConfiguration(customizer);
+    // if(globalSettings!=null) {
+    //   configuration.setGlobalSettingsFile(new File(globalSettings));
+    // }
+    configuration.setUserSettingsFile(userSettings);
+    
+    MavenEmbedder embedder = EmbedderFactory.createMavenEmbedder(configuration, null);
+    
+    assertEquals(userSettings, embedder.getConfiguration().getUserSettingsFile());
+    
+    assertEquals(localrepoDir.getAbsolutePath(), embedder.getLocalRepository().getBasedir());
+  }
+  
   private MavenEmbedder getEmbedder(File settingsFile) throws MavenEmbedderException {
     ContainerCustomizer customizer = EmbedderFactory.createExecutionCustomizer();
     
@@ -114,11 +167,6 @@ public class MavenSettingsTest extends TestCase {
     String userSettings = settingsFile.getAbsolutePath();
     
     return EmbedderFactory.createMavenEmbedder(customizer, logger, null, userSettings);
-  }
-  
-  private boolean isWindows() {
-    String osName = System.getProperty("os.name", "").toLowerCase();
-    return osName.indexOf("windows")>-1;
   }
   
 }
