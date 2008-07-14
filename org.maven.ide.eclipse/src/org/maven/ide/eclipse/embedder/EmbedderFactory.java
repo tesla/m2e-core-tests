@@ -77,6 +77,7 @@ public class EmbedderFactory {
     File userSettingsFile = configuration.getUserSettingsFile();
     if(userSettingsFile==null) {
       userSettingsFile = MavenEmbedder.DEFAULT_USER_SETTINGS_FILE;
+      configuration.setUserSettingsFile(userSettingsFile);
     }
     ConfigurationValidationResult userResult = validateConfiguration(userSettingsFile, logger);
     if(userSettingsFile.exists()) {
