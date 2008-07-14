@@ -93,6 +93,7 @@ import org.eclipse.wst.sse.core.internal.provisional.IModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
+import org.eclipse.wst.xml.core.internal.document.ElementImpl;
 import org.eclipse.wst.xml.core.internal.emf2xml.EMF2DOMSSEAdapter;
 import org.eclipse.wst.xml.core.internal.emf2xml.EMF2DOMSSERenderer;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMElement;
@@ -163,7 +164,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   
   private int sourcePageIndex;
 
-  private NotificationCommandStack commandStack;
+  NotificationCommandStack commandStack;
   
   public MavenPomEditor() {
     ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
@@ -622,6 +623,8 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     new UIJob("Saving") {
       public IStatus runInUIThread(IProgressMonitor monitor) {
         sourcePage.doSave(monitor);
+        commandStack.saveIsDone();
+        editorDirtyStateChanged();
         return Status.OK_STATUS;
       }
     }.schedule();
@@ -668,6 +671,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
         if(a.getNode() instanceof IDOMElement) {
           return (IDOMElement) a.getNode();
         }
+        break;
       }
     }
     return null;
@@ -694,7 +698,38 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
         return properties;
       }
     }
-    return null;
+    return new BasicEList<PropertyPair>();
+  }
+  
+  public void setElement(EObject o, IDOMElement element) {
+    for(Adapter adapter : o.eAdapters()) {
+      if(adapter instanceof EMF2DOMSSEAdapter) {
+        EMF2DOMSSEAdapter a = (EMF2DOMSSEAdapter) adapter;
+        a.setNode(element);
+        break;
+      }
+    }
+  }
+
+  public void setProperties(EObject o, EList<PropertyPair> properties) {
+    ElementImpl node = (ElementImpl) getElement(o);
+    if(node!=null) {
+      EList<Adapter> adapters = new BasicEList<Adapter>(o.eAdapters());
+      o.eAdapters().clear();
+      NodeList old = node.getElementsByTagName("properties");
+      if (old != null && old.getLength() > 0) {
+        node.removeChild(old.item(0));
+      }
+      Node elements = node.getOwnerDocument().createElement("properties");
+      node.appendChild(elements);
+      o.eAdapters().addAll(adapters);
+      for (PropertyPair p: properties) {
+        Node prop = node.getOwnerDocument().createElement(p.getKey());
+        elements.appendChild(prop);
+        prop.setTextContent(p.getValue());
+      }
+    }
+    setElement(o, node);
   }
   
   private String getNodeText(Node node) {
