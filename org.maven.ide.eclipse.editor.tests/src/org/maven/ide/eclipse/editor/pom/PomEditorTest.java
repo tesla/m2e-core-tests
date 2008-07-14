@@ -116,7 +116,11 @@ public class PomEditorTest extends UITestCaseSWT {
     super.oneTimeTearDown();
 
     // ui.keyClick(SWT.CTRL | SWT.SHIFT, 's');  // save all to prevent "Save" confirmation dialog
-    getActivePage().closeAllEditors(false);
+    Display.getDefault().syncExec(new Runnable() {
+      public void run() {
+        getActivePage().closeAllEditors(false);
+      }
+    });
   }
 
   public void testUpdatingArtifactIdInXmlPropagatedToForm() throws Exception {

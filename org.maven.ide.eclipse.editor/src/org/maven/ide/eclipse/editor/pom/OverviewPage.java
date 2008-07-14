@@ -745,40 +745,42 @@ public class OverviewPage extends MavenPomEditorPage {
     if (object instanceof Model) {
       loadThis();
       modulesEditor.refresh();
+      propertiesEditor.refresh();
+
+      // XXX this fixes the issue with not updating child sections, but then there are lost field updates
+//      Model model = (Model) object;
+//      loadParent(model.getParent());
+//      loadOrganization(model.getOrganization());
+//      loadScm(model.getScm());
+//      loadCiManagement(model.getCiManagement());
+//      loadIssueManagement(model.getIssueManagement());
     }
 
-    // XXX event is not received when <parent> is deleted in XML
     if (object instanceof Parent) {
       loadParent((Parent) object);
     }
 
-    // XXX event is not received when <organization> is deleted in XML
     if (object instanceof Organization) {
       loadOrganization((Organization) object);
     }
 
-    // XXX event is not received when <scm> is deleted in XML
     if (object instanceof Scm) {
       loadScm((Scm) object);
     }
 
-    // XXX event is not received when <ciManagement> is deleted in XML
     if (object instanceof CiManagement) {
       loadCiManagement((CiManagement) object);
     }
 
-    // XXX event is not received when <issueManagement> is deleted in XML
     if (object instanceof IssueManagement) {
       loadIssueManagement((IssueManagement) object);
     }
     
-    // XXX event is not received when <modules> is deleted in XML
     if(object instanceof Modules) {
       modulesEditor.refresh();
       // loadModules((Modules) object);
     }
     
-    // XXX event is not received when <properties> is deleted in XML
     if(object instanceof Properties) {
       loadProperties(pomEditor.getProperties(model));
     }
@@ -805,7 +807,9 @@ public class OverviewPage extends MavenPomEditorPage {
     projectSection.setExpanded(!isEmpty(model.getName()) || !isEmpty(model.getDescription())
         || !isEmpty(model.getUrl()) || !isEmpty(model.getInceptionYear()));
     
-    parentSection.setExpanded(parent != null && !isEmpty(parent.getGroupId()));
+    parentSection.setExpanded(parent != null //
+        && (!isEmpty(parent.getGroupId()) || !isEmpty(parent.getArtifactId()) //
+            || !isEmpty(parent.getVersion()) || !isEmpty(parent.getRelativePath())));
 
     organizationSection.setExpanded(organization != null
         && (!isEmpty(organization.getName()) || !isEmpty(organization.getUrl())));
@@ -876,10 +880,10 @@ public class OverviewPage extends MavenPomEditorPage {
       setText(parentRelativePathText, "");
     }
     
-    parentGroupIdText.setEditable(!isReadOnly());
-    parentArtifactIdText.setEditable(!isReadOnly());
-    parentVersionText.setEditable(!isReadOnly());
-    parentRelativePathText.setEditable(!isReadOnly());
+//    parentGroupIdText.setEditable(!isReadOnly());
+//    parentArtifactIdText.setEditable(!isReadOnly());
+//    parentVersionText.setEditable(!isReadOnly());
+//    parentRelativePathText.setEditable(!isReadOnly());
     parentSelectAction.setEnabled(!isReadOnly());
     
     ValueProvider<Parent> parentProvider = new ValueProvider.ParentValueProvider<Parent>(parentGroupIdText,

@@ -232,6 +232,11 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
       return;
     }
     
+//    if(!isActive()) {
+//      dataLoaded = false;
+//      return;
+//    }
+    
     updatingModel = true;
     try {
       switch(notification.getEventType()) {
@@ -479,6 +484,7 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
         control.removeModifyListener(listener);
       }
     }
+    listeners.clear();
   }
 
   public void removeNotifyListener(Combo control) {
