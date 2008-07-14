@@ -16,11 +16,14 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -43,12 +46,19 @@ public class MavenPropertyDialog extends Dialog {
   private String name;
   
   private String value;
+
+  private VerifyListener verifyListener;
   
   public MavenPropertyDialog(Shell shell, String title, String[] initialValues, boolean variables) {
     super(shell);
     this.title = title;
     this.initialValues = initialValues;
     this.variables = variables;
+  }
+
+  public MavenPropertyDialog(Shell shell, String title, String[] initialValues, boolean variables, VerifyListener nameVerifyListener) {
+    this(shell, title, initialValues, variables);
+    this.verifyListener = nameVerifyListener;
   }
 
   /* (non-Javadoc)
@@ -170,7 +180,16 @@ public class MavenPropertyDialog extends Dialog {
   protected void updateButtons() {
     String name = nameText.getText().trim();
     String value = valueText.getText().trim();
-    getButton(IDialogConstants.OK_ID).setEnabled((name.length() > 0) && (value.length() > 0));
+    //verify name
+    Event e = new Event();
+    e.widget = nameText;
+    VerifyEvent ev = new VerifyEvent(e);
+    ev.doit = true;
+    if (verifyListener != null) {
+      ev.text = name;
+      verifyListener.verifyText(ev);
+    }
+    getButton(IDialogConstants.OK_ID).setEnabled((name.length() > 0) && (value.length() > 0) && ev.doit);
   }
 
   /**
