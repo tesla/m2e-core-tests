@@ -147,6 +147,14 @@ public class DependencyTreePage extends FormPage {
   }
 
   void loadData(final boolean force) {
+    // form.setMessage() forces the panel layout, which messes up the viewers
+    // (e.g. long entries in the tree cause it to expand horizontally so much
+    // doesn't fit into the editor anymore). Clearing the input in the viewers
+    // helps to ensure they won't change the size when the message is set.
+    treeViewer.setInput(null);
+    listViewer.setInput(null);
+    getManagedForm().getForm().setMessage("Loading pom.xml...", IMessageProvider.NONE);
+
     new Job("Loading pom.xml") {
       protected IStatus run(IProgressMonitor monitor) {
         try {
@@ -167,6 +175,7 @@ public class DependencyTreePage extends FormPage {
 
           getPartControl().getDisplay().asyncExec(new Runnable() {
             public void run() {
+              getManagedForm().getForm().setMessage(null, IMessageProvider.NONE);
               treeViewer.setInput(dependencyNode);
               treeViewer.expandAll();
               listViewer.setInput(mavenProject);
@@ -962,7 +971,7 @@ public class DependencyTreePage extends FormPage {
 
   @Override
   public void dispose() {
-    if(searchHighlightColor!=null) {
+    if(searchHighlightColor != null) {
       searchHighlightColor.dispose();
     }
     super.dispose();
