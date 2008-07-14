@@ -110,7 +110,7 @@ public class DependencyTreePage extends FormPage {
   Action hierarchyFilterAction;
 
   public DependencyTreePage(MavenPomEditor pomEditor) {
-    super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.dependencyTree", "Dependency Tree");
+    super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.dependencyTree", "Dependency Hierarchy");
     this.pomEditor = pomEditor;
   }
 
@@ -120,7 +120,7 @@ public class DependencyTreePage extends FormPage {
     searchHighlightColor = new Color(Display.getDefault(), 242, 218, 170);
 
     ScrolledForm form = managedForm.getForm();
-    form.setText("Dependency Tree");
+    form.setText("Dependency Hierarchy");
     form.setExpandHorizontal(true);
     form.setExpandVertical(true);
 
@@ -153,7 +153,7 @@ public class DependencyTreePage extends FormPage {
     // helps to ensure they won't change the size when the message is set.
     treeViewer.setInput(null);
     listViewer.setInput(null);
-    getManagedForm().getForm().setMessage("Loading pom.xml...", IMessageProvider.NONE);
+    getManagedForm().getForm().setMessage("Resolving dependencies...", IMessageProvider.WARNING);
 
     new Job("Loading pom.xml") {
       protected IStatus run(IProgressMonitor monitor) {
@@ -207,7 +207,7 @@ public class DependencyTreePage extends FormPage {
     Section hierarchySection = formToolkit.createSection(hierarchyComposite, ExpandableComposite.TITLE_BAR);
     hierarchySection.marginHeight = 1;
     hierarchySection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-    hierarchySection.setText("Dependencies Hierarchy");
+    hierarchySection.setText("Dependency Hierarchy");
     formToolkit.paintBordersFor(hierarchySection);
 
     Tree tree = formToolkit.createTree(hierarchySection, SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI);

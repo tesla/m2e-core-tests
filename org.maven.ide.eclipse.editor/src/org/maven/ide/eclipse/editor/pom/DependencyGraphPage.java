@@ -408,7 +408,7 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
   }
 
   void updateGraphAsync(final boolean force) {
-    getManagedForm().getForm().setMessage("Loading pom.xml...", IMessageProvider.NONE);
+    getManagedForm().getForm().setMessage("Resolving dependencies...", IMessageProvider.WARNING);
 
     new Job("Loading pom.xml") {
       protected IStatus run(IProgressMonitor monitor) {
