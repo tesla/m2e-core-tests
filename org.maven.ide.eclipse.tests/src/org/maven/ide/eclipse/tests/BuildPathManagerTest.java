@@ -11,7 +11,10 @@ package org.maven.ide.eclipse.tests;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
 
+import org.apache.maven.archetype.catalog.Archetype;
 import org.apache.maven.model.Model;
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IMarker;
@@ -1146,18 +1149,18 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     File tmp = File.createTempFile("m2eclipse", "test");
     tmp.delete(); //deleting a tmp file so we can use the name for a folder
 
-    final String projectName1 = "external-project-1";
+    final String projectName1 = "external-simple-project-1";
     IProject project1 = createSimpleProject(projectName1, new Path(tmp.getAbsolutePath()).append(projectName1), modules);
     ResolverConfiguration configuration = plugin.getMavenProjectManager().getResolverConfiguration(project1);
     assertEquals(modules, configuration.shouldIncludeModules());
 
-    final String projectName2 = "external-project-2";
+    final String projectName2 = "external-simple-project-2";
     File existingFolder = new File(tmp, projectName2);
     existingFolder.mkdirs();
     new File(existingFolder, IMavenConstants.POM_FILE_NAME).createNewFile();
     try {
       createSimpleProject(projectName2, new Path(tmp.getAbsolutePath()).append(projectName2), modules);
-      assertTrue("Project creation should fail if the POM exists in the target folder", false);
+      fail("Project creation should fail if the POM exists in the target folder");
     } catch(CoreException e) {
       final String msg = IMavenConstants.POM_FILE_NAME + " already exists";
       assertTrue("Project creation should throw a \"" + msg + "\" exception if the POM exists in the target folder", e
@@ -1165,6 +1168,80 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     }
 
     tmp.delete();
+  }
+
+  public void testArchetypeProject() throws CoreException {
+    MavenPlugin plugin = MavenPlugin.getDefault();
+    boolean modules = true;
+    Archetype quickStart = findQuickStartArchetype();
+
+    IProject project = createArchetypeProject("archetype-project", null, quickStart, modules);
+
+    ResolverConfiguration configuration = plugin.getMavenProjectManager().getResolverConfiguration(project);
+    assertEquals(modules, configuration.shouldIncludeModules());
+  }
+
+  public void testArchetypeProjectInExternalLocation() throws CoreException, IOException {
+    final MavenPlugin plugin = MavenPlugin.getDefault();
+    final boolean modules = true;
+    Archetype quickStart = findQuickStartArchetype();
+
+    File tmp = File.createTempFile("m2eclipse", "test");
+    tmp.delete(); //deleting a tmp file so we can use the name for a folder
+
+    final String projectName1 = "external-archetype-project-1";
+    IProject project1 = createArchetypeProject(projectName1, new Path(tmp.getAbsolutePath()).append(projectName1),
+        quickStart, modules);
+    ResolverConfiguration configuration = plugin.getMavenProjectManager().getResolverConfiguration(project1);
+    assertEquals(modules, configuration.shouldIncludeModules());
+
+    final String projectName2 = "external-archetype-project-2";
+    File existingFolder = new File(tmp, projectName2);
+    existingFolder.mkdirs();
+    new File(existingFolder, IMavenConstants.POM_FILE_NAME).createNewFile();
+    try {
+      createArchetypeProject(projectName2, new Path(tmp.getAbsolutePath()).append(projectName2), quickStart, modules);
+      fail("Project creation should fail if the POM exists in the target folder");
+    } catch(CoreException e) {
+      // this is supposed to happen
+    }
+
+    tmp.delete();
+  }
+
+  private Archetype findQuickStartArchetype() throws CoreException {
+    final MavenPlugin plugin = MavenPlugin.getDefault();
+
+    @SuppressWarnings("unchecked")
+    List<Archetype> archetypes = plugin.getArchetypeManager().getArchetypeCatalogFactory("internal")
+        .getArchetypeCatalog(plugin.getMavenEmbedderManager()).getArchetypes();
+    for(Archetype archetype : archetypes) {
+      if("org.apache.maven.archetypes".equals(archetype.getGroupId())
+          && "maven-archetype-quickstart".equals(archetype.getArtifactId()) && "1.0".equals(archetype.getVersion())) {
+        return archetype;
+      }
+    }
+
+    fail("maven-archetype-quickstart archetype not found in the internal catalog");
+    return null;
+  }
+
+  private IProject createArchetypeProject(final String projectName, final IPath location, final Archetype archetype,
+      final boolean modules) throws CoreException {
+    final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+
+    workspace.run(new IWorkspaceRunnable() {
+      public void run(IProgressMonitor monitor) throws CoreException {
+        ResolverConfiguration resolverConfiguration = new ResolverConfiguration();
+        resolverConfiguration.setIncludeModules(modules);
+        ProjectImportConfiguration pic = new ProjectImportConfiguration(resolverConfiguration);
+
+        plugin.getProjectConfigurationManager().createArchetypeProject(project, location, archetype, //
+            projectName, projectName, "0.0.1-SNAPSHOT", "jar", new Properties(), pic, monitor);
+      }
+    }, plugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
+
+    return project;
   }
 
 }
