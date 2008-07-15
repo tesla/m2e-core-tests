@@ -95,9 +95,7 @@ public class ReportingPage extends MavenPomEditorPage {
   }
 
   public void updateView(Notification notification) {
-    if(isActive()) {
-      reportingComposite.updateView(this, notification);
-    }
+    reportingComposite.updateView(this, notification);
   }
 
 }

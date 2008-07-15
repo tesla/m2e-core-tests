@@ -94,10 +94,6 @@ public class TeamPage extends MavenPomEditorPage {
   }
   
   public void updateView(Notification notification) {
-    if(!isActive()) {
-      return;
-    }
-
     if(teamComposite!=null) {
       teamComposite.updateView(this, notification);
     }

@@ -148,9 +148,7 @@ public class PluginsPage extends MavenPomEditorPage {
   }
   
   public void updateView(Notification notification) {
-    if(isActive()) {
-      pluginsComposite.updateView(this, notification);
-    }
+    pluginsComposite.updateView(this, notification);
   }
   
 }

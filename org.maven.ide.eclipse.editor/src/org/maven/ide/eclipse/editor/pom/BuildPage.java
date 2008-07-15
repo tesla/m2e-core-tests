@@ -536,10 +536,6 @@ public class BuildPage extends MavenPomEditorPage {
   }
 
   public void updateView(Notification notification) {
-    if(!isActive()) {
-      return;
-    }
-    
     EObject object = (EObject) notification.getNotifier();
     if (object instanceof Build) {
       loadBuild();
