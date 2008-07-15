@@ -69,7 +69,7 @@ public class MavenBuilder extends IncrementalProjectBuilder {
         return null;
       }
 
-      if (FULL_BUILD == kind) {
+      if (FULL_BUILD == kind || CLEAN_BUILD == kind) {
         executePostBuild(mavenProject, monitor);
       } else {
         // if( kind == AUTO_BUILD || kind == INCREMENTAL_BUILD ) {

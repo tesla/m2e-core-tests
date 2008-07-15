@@ -48,6 +48,8 @@ import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.embedder.MavenEmbedderException;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionResult;
+import org.apache.maven.model.Model;
+import org.apache.maven.model.Parent;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.project.MavenProject;
 
@@ -309,6 +311,7 @@ public class MavenProjectManagerImpl {
     MavenProject mavenProject = facade != null ? facade.getMavenProject() : null;
 
     if (mavenProject == null) {
+      state.removePom(pom);
       return Collections.emptySet();
     }
 
@@ -392,6 +395,19 @@ public class MavenProjectManagerImpl {
         // this only really add missing parent
         addMissingProjectDependencies(pom, result);
       }
+      try {
+        // MNGECLIPSE-605 embedder is not able to resolve the project due to missing configuration in the parent
+        Model model = embedder.readModel(pom.getLocation().toFile());
+        if (model != null && model.getParent() != null) {
+          Parent parent = model.getParent();
+          if (parent.getGroupId() != null && parent.getArtifactId() != null && parent.getVersion() != null) {
+            ArtifactKey parentKey = new ArtifactKey(parent.getGroupId(), parent.getArtifactId(), parent.getVersion(), null);
+            state.addWorkspaceModule(pom, parentKey);
+          }
+        }
+      } catch(Exception ex) {
+        // we've tried out best, but there is nothing we can do
+      }
       return;
     }
 
@@ -428,7 +444,7 @@ public class MavenProjectManagerImpl {
     }
     MavenProject parentProject = mavenProject.getParent();
     if (parentProject != null) {
-      state.addWorkspaceModules(pom, mavenProject);
+      state.addWorkspaceModule(pom, mavenProject);
       if (resolverConfiguration.shouldResolveWorkspaceProjects()) {
         state.addProjectDependency(pom, new ArtifactKey(mavenProject.getParentArtifact()), true);
       }

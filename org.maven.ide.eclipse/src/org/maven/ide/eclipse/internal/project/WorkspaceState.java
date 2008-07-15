@@ -98,8 +98,12 @@ public class WorkspaceState {
     dependentProjects.add(pom.getFullPath());
   }
 
-  public synchronized void addWorkspaceModules(IFile pom, MavenProject mavenProject) {
+  public void addWorkspaceModule(IFile pom, MavenProject mavenProject) {
     ArtifactKey parentArtifactKey = new ArtifactKey(mavenProject.getParentArtifact());
+    addWorkspaceModule(pom, parentArtifactKey);
+  }
+
+  public synchronized void addWorkspaceModule(IFile pom, ArtifactKey parentArtifactKey) {
     Set<IPath> children = workspaceModules.get(parentArtifactKey);
     if (children == null) {
       children = new HashSet<IPath>();
@@ -118,18 +122,25 @@ public class WorkspaceState {
   }
 
   public synchronized void removeProject(IFile pom, MavenProject mavenProject) {
-    // Remove the project from workspaceDependents and inprojectDependenys maps
-    removeDependents(pom, workspaceDependencies);
-    removeDependents(pom, inprojectDependencies);
-
-    // Remove the project from workspaceProjects map
-    workspacePoms.remove(pom.getFullPath());
+    removePom(pom);
 
     // Remove the project from workspaceArtifacts map
     if (mavenProject != null) {
       ArtifactKey artifactKey = new ArtifactKey(mavenProject.getArtifact());
       workspaceArtifacts.remove(artifactKey);
     }
+  }
+
+  public synchronized void removePom(IFile pom) {
+    // Remove the project from workspaceDependents and inprojectDependenys maps
+    removeDependents(pom, workspaceDependencies);
+    removeDependents(pom, inprojectDependencies);
+    
+    // Remove the project from workspaceModules map
+    removeDependents(pom, workspaceModules);
+
+    // Remove the project from workspaceProjects map
+    workspacePoms.remove(pom.getFullPath());
   }
 
   private void removeDependents(IFile pom, Map<ArtifactKey, Set<IPath>> dependencies) {

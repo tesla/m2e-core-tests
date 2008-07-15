@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
@@ -405,6 +406,29 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals(MavenProjectChangedEvent.KIND_ADDED, event.getKind());
   }
 
+  public void test008_staleMissingParent2() throws Exception {
+    IProject p1 = createExisting("t008-p1");
+    IProject p2 = createExisting("t008-p2");
+    waitForJobsToComplete();
+
+    // p1 does not have parent
+    add(manager, new IProject[] {p1});
+
+    // update p1 to have p3 parent
+    InputStream contents = p1.getFile("pom_updated.xml").getContents();
+    p1.getFile("pom.xml").setContents(contents, IResource.FORCE, monitor);
+    contents.close();
+    add(manager, new IProject[] {p1});
+
+    events.clear();
+    add(manager, new IProject[] {p2});
+
+    assertEquals(1, events.size());
+    MavenProjectChangedEvent event = events.get(0);
+    assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME), event.getSource());
+    assertEquals(MavenProjectChangedEvent.KIND_ADDED, event.getKind());
+  }
+  
   public void test009_noworkspaceResolution() throws Exception {
     IProject p1 = createExisting("t009-p1");
     IProject p2 = createExisting("t009-p2");
@@ -811,5 +835,24 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
   private void assertStartWith(String expected, String actual) {
     assertTrue("Expected to start with " + expected + " but got " + actual, actual.startsWith(expected));
   }
-  
+
+  public void test020_moduleWithPomErrors() throws Exception {
+    IProject p1 = createExisting("t020-p1");
+    IProject p1m1 = createExisting("t020-p1-m1");
+    waitForJobsToComplete();
+
+    add(manager, new IProject[] {p1, p1m1});
+
+    InputStream contents = p1.getFile("pom_updated.xml").getContents();
+    p1.getFile("pom.xml").setContents(contents, IResource.FORCE, monitor);
+    contents.close();
+
+    add(manager, new IProject[] {p1});
+
+    IFile pom11 = p1m1.getFile("pom.xml");
+    MavenProjectFacade f11 = manager.create(pom11, false, null);
+
+    List<Artifact> a = new ArrayList<Artifact>(f11.getMavenProject().getArtifacts());
+    assertEquals("3.8.1", a.get(0).getVersion());
+  }
 }
