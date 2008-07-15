@@ -9,6 +9,7 @@
 package org.maven.ide.eclipse.tests;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 
 import org.apache.maven.model.Model;
@@ -78,8 +79,8 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     waitForJobsToComplete();
 
     IMarker[] markers1 = project1.findMarkers(null, true, IResource.DEPTH_INFINITE);
-    assertTrue("Unexpected markers " + Arrays.asList(markers1), markers1.length==0);
-    
+    assertTrue("Unexpected markers " + Arrays.asList(markers1), markers1.length == 0);
+
     IClasspathEntry[] project1entries = getMavenContainerEntries(project1);
     assertEquals(1, project1entries.length);
     assertEquals(IClasspathEntry.CPE_LIBRARY, project1entries[0].getEntryKind());
@@ -107,7 +108,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     configuration.setIncludeModules(false);
     configuration.setResolveWorkspaceProjects(false);
     configuration.setActiveProfiles("");
-    
+
     importManager.enableMavenNature(project1, configuration, monitor);
     importManager.enableMavenNature(project2, configuration, monitor);
 //    buildpathManager.updateSourceFolders(project1, monitor);
@@ -137,17 +138,11 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     deleteProject("MNGECLIPSE-20-web");
 
     ResolverConfiguration configuration = new ResolverConfiguration();
-    IProject[] projects = importProjects("projects/MNGECLIPSE-20", new String[] {
-        "pom.xml", 
-        "type/pom.xml",
-        "app/pom.xml",
-        "web/pom.xml", 
-        "ejb/pom.xml", 
-        "ear/pom.xml",
-    }, configuration);
+    IProject[] projects = importProjects("projects/MNGECLIPSE-20", new String[] {"pom.xml", "type/pom.xml",
+        "app/pom.xml", "web/pom.xml", "ejb/pom.xml", "ear/pom.xml",}, configuration);
 
     waitForJobsToComplete();
-    
+
     {
       IJavaProject javaProject = JavaCore.create(projects[0]);
       IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
@@ -267,19 +262,14 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     configuration.setIncludeModules(false);
     configuration.setResolveWorkspaceProjects(false);
     configuration.setActiveProfiles("");
-    
-    IProject[] projects = importProjects("projects/MNGECLIPSE-20", new String[] {
-        "pom.xml", 
-        "type/pom.xml", 
-        "app/pom.xml", 
-        "web/pom.xml", 
-        "ejb/pom.xml", 
-        "ear/pom.xml"}, configuration);
+
+    IProject[] projects = importProjects("projects/MNGECLIPSE-20", new String[] {"pom.xml", "type/pom.xml",
+        "app/pom.xml", "web/pom.xml", "ejb/pom.xml", "ear/pom.xml"}, configuration);
 
     waitForJobsToComplete();
-    
+
     workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
-    
+
     {
       IJavaProject javaProject = JavaCore.create(projects[0]);
       IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
@@ -402,11 +392,11 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     configuration.setIncludeModules(true);
     configuration.setResolveWorkspaceProjects(true);
     configuration.setActiveProfiles("");
-    
+
     IProject project = importProject("projects/MNGECLIPSE-20/pom.xml", configuration);
 
     waitForJobsToComplete();
-    
+
     IJavaProject javaProject = JavaCore.create(project);
     IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
         .getClasspathEntries();
@@ -448,7 +438,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     IProject project = importProject("projects/MNGECLIPSE-20/pom.xml", configuration);
 
     waitForJobsToComplete();
-    
+
     IJavaProject javaProject = JavaCore.create(project);
     IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
         .getClasspathEntries();
@@ -464,8 +454,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals("/MNGECLIPSE-20/ejb/src/main/java", rawClasspath[3].getPath().toString());
     assertEquals("/MNGECLIPSE-20/ejb/src/main/resources", rawClasspath[4].getPath().toString());
     assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", rawClasspath[5].getPath().toString());
-    assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[6].getPath()
-        .toString());
+    assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[6].getPath().toString());
 
     IMarker[] markers = project.findMarkers(null, true, IResource.DEPTH_INFINITE);
     assertEquals(toString(markers), 0, markers.length);
@@ -487,7 +476,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     IProject project = importProject("projects/MNGECLIPSE-20/pom.xml", configuration);
 
     waitForJobsToComplete();
-    
+
 //    BuildPathManager buildpathManager = MavenPlugin.getDefault().getBuildpathManager();
 //    buildpathManager.updateClasspathContainer(project, new NullProgressMonitor());
 
@@ -504,7 +493,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
 
   public void testProjectImportWithProfile1() throws Exception {
     deleteProject("MNGECLIPSE-353");
-    
+
     ResolverConfiguration configuration = new ResolverConfiguration();
     configuration.setIncludeModules(false);
     configuration.setResolveWorkspaceProjects(true);
@@ -513,7 +502,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     IProject project = importProject("projects/MNGECLIPSE-353/pom.xml", configuration);
 
     waitForJobsToComplete();
-    
+
     IJavaProject javaProject = JavaCore.create(project);
     IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
         .getClasspathEntries();
@@ -536,7 +525,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     IProject project = importProject("projects/MNGECLIPSE-353/pom.xml", configuration);
 
     waitForJobsToComplete();
-    
+
     IJavaProject javaProject = JavaCore.create(project);
     IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
         .getClasspathEntries();
@@ -545,7 +534,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals("jaxb-api-2.0.jar", classpathEntries[1].getPath().lastSegment());
     assertEquals("jsr173_api-1.0.jar", classpathEntries[2].getPath().lastSegment());
     assertEquals("activation-1.1.jar", classpathEntries[3].getPath().lastSegment());
-    
+
     IMarker[] markers = project.findMarkers(null, true, IResource.DEPTH_INFINITE);
     assertEquals(toString(markers), 0, markers.length);
   }
@@ -559,7 +548,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     waitForJobsToComplete();
 
     IJavaProject javaProject = JavaCore.create(project);
-    
+
     assertEquals(new Path("/projectimport-p001/target/classes"), javaProject.getOutputLocation());
     IClasspathEntry[] cp = javaProject.getRawClasspath();
 
@@ -606,18 +595,18 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
   public void testClasspathOrderWorkspace001() throws Exception {
     deleteProject("p1");
     deleteProject("p2");
-    
+
     ResolverConfiguration configuration = new ResolverConfiguration();
     configuration.setIncludeModules(false);
     configuration.setResolveWorkspaceProjects(true);
     configuration.setActiveProfiles("");
 
-    IProject project1 = importProject("projects/dependencyorder/p1/pom.xml", configuration); 
+    IProject project1 = importProject("projects/dependencyorder/p1/pom.xml", configuration);
     IProject project2 = importProject("projects/dependencyorder/p2/pom.xml", configuration);
     project1.build(IncrementalProjectBuilder.FULL_BUILD, null);
     project2.build(IncrementalProjectBuilder.FULL_BUILD, null);
     waitForJobsToComplete();
-    
+
 //    MavenPlugin.getDefault().getBuildpathManager().updateClasspathContainer(p1, new NullProgressMonitor());
 
     IJavaProject javaProject = JavaCore.create(project1);
@@ -626,14 +615,14 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
 
     // order according to mvn -X
     assertEquals(3, cp.length);
-    assertEquals(new Path("/p2"),  cp[0].getPath());
-    assertEquals("junit-4.0.jar",  cp[1].getPath().lastSegment());
-    assertEquals("easymock-1.0.jar",  cp[2].getPath().lastSegment());
+    assertEquals(new Path("/p2"), cp[0].getPath());
+    assertEquals("junit-4.0.jar", cp[1].getPath().lastSegment());
+    assertEquals("easymock-1.0.jar", cp[2].getPath().lastSegment());
   }
 
   public void testClasspathOrderWorkspace003() throws Exception {
     deleteProject("p3");
-    
+
     ResolverConfiguration configuration = new ResolverConfiguration();
     configuration.setIncludeModules(false);
     configuration.setResolveWorkspaceProjects(true);
@@ -649,12 +638,12 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
 
     // order according to mvn -X. note that maven 2.0.7 and 2.1-SNAPSHOT produce different order 
     assertEquals(6, cp.length);
-    assertEquals("junit-3.8.1.jar",  cp[0].getPath().lastSegment());
-    assertEquals("commons-digester-1.6.jar",  cp[1].getPath().lastSegment());
-    assertEquals("commons-beanutils-1.6.jar",  cp[2].getPath().lastSegment());
-    assertEquals("commons-logging-1.0.jar",  cp[3].getPath().lastSegment());
-    assertEquals("commons-collections-2.1.jar",  cp[4].getPath().lastSegment());
-    assertEquals("xml-apis-1.0.b2.jar",  cp[5].getPath().lastSegment());
+    assertEquals("junit-3.8.1.jar", cp[0].getPath().lastSegment());
+    assertEquals("commons-digester-1.6.jar", cp[1].getPath().lastSegment());
+    assertEquals("commons-beanutils-1.6.jar", cp[2].getPath().lastSegment());
+    assertEquals("commons-logging-1.0.jar", cp[3].getPath().lastSegment());
+    assertEquals("commons-collections-2.1.jar", cp[4].getPath().lastSegment());
+    assertEquals("xml-apis-1.0.b2.jar", cp[5].getPath().lastSegment());
   }
 
   public void testDownloadSources_001_basic() throws Exception {
@@ -686,7 +675,8 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       // cleanup
       new File(repo, "downloadsources/downloadsources-t001/0.0.1/downloadsources-t001-0.0.1-sources.jar").delete();
       new File(repo, "downloadsources/downloadsources-t002/0.0.1/downloadsources-t002-0.0.1-sources.jar").delete();
-      MavenPlugin.getDefault().getMavenProjectManager().refresh(new MavenUpdateRequest(new IProject[] {project}, false /*offline*/, false));
+      MavenPlugin.getDefault().getMavenProjectManager().refresh(
+          new MavenUpdateRequest(new IProject[] {project}, false /*offline*/, false));
       waitForJobsToComplete();
     }
 
@@ -698,12 +688,13 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals(2, cp.length);
     assertEquals("downloadsources-t001-0.0.1-sources.jar", cp[0].getSourceAttachmentPath().lastSegment());
     assertNull(cp[1].getSourceAttachmentPath());
-  
+
     {
       // cleanup
       new File(repo, "downloadsources/downloadsources-t001/0.0.1/downloadsources-t001-0.0.1-sources.jar").delete();
       new File(repo, "downloadsources/downloadsources-t002/0.0.1/downloadsources-t002-0.0.1-sources.jar").delete();
-      MavenPlugin.getDefault().getMavenProjectManager().refresh(new MavenUpdateRequest(new IProject[] {project}, false /*offline*/, false));
+      MavenPlugin.getDefault().getMavenProjectManager().refresh(
+          new MavenUpdateRequest(new IProject[] {project}, false /*offline*/, false));
       waitForJobsToComplete();
     }
 
@@ -724,17 +715,18 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
 
     IProject project = createExisting("downloadsources-p001", "projects/downloadsources/p001");
     waitForJobsToComplete();
-    
+
     IJavaProject javaProject = JavaCore.create(project);
     final IClasspathContainer container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
-    
+
     IPath entryPath = container.getClasspathEntries()[0].getPath();
 
     IPath srcPath = new Path("/a");
     IPath srcRoot = new Path("/b");
     String javaDocUrl = "c";
 
-    IClasspathAttribute attribute = JavaCore.newClasspathAttribute(IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME, javaDocUrl);
+    IClasspathAttribute attribute = JavaCore.newClasspathAttribute(IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME,
+        javaDocUrl);
 
     final IClasspathEntry entry = JavaCore.newLibraryEntry(entryPath, //
         srcPath, srcRoot, new IAccessRule[0], //
@@ -742,17 +734,20 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
         false /*not exported*/);
 
     BuildPathManager buildpathManager = MavenPlugin.getDefault().getBuildpathManager();
-    
+
     IClasspathContainer containerSuggestion = new IClasspathContainer() {
       public IClasspathEntry[] getClasspathEntries() {
         return new IClasspathEntry[] {entry};
       }
+
       public String getDescription() {
         return container.getDescription();
       }
+
       public int getKind() {
         return container.getKind();
       }
+
       public IPath getPath() {
         return container.getPath();
       }
@@ -788,7 +783,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     IClasspathContainer container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
     IClasspathEntry[] cp = container.getClasspathEntries();
     assertEquals(1, cp.length);
-    assertNull(cp[0].getSourceAttachmentPath()); 
+    assertNull(cp[0].getSourceAttachmentPath());
 
     MavenPlugin.getDefault().getBuildpathManager().downloadJavaDoc(project, null);
     waitForJobsToComplete();
@@ -798,7 +793,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals(1, cp.length);
     assertNull(cp[0].getSourceAttachmentPath()); // sanity check
     assertEquals("" + cp[0], 1, getAttributeCount(cp[0], IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME));
-    
+
     MavenPlugin.getDefault().getBuildpathManager().downloadJavaDoc(project, null);
     waitForJobsToComplete();
 
@@ -822,7 +817,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     IClasspathContainer container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
     IClasspathEntry[] cp = container.getClasspathEntries();
     assertEquals(1, cp.length);
-    assertNull(cp[0].getSourceAttachmentPath()); 
+    assertNull(cp[0].getSourceAttachmentPath());
 
     MavenPlugin.getDefault().getBuildpathManager().downloadSources(project, cp[0].getPath());
     waitForJobsToComplete();
@@ -831,15 +826,15 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
     cp = container.getClasspathEntries();
     assertEquals(1, cp.length);
-    assertEquals("downloadsources-t004-0.0.1-sources.jar", cp[0].getSourceAttachmentPath().lastSegment()); 
+    assertEquals("downloadsources-t004-0.0.1-sources.jar", cp[0].getSourceAttachmentPath().lastSegment());
   }
 
   private static int getAttributeCount(IClasspathEntry entry, String name) {
     IClasspathAttribute[] attrs = entry.getExtraAttributes();
     int count = 0;
-    for (int i = 0; i < attrs.length; i++) {
-      if (name.equals(attrs[i].getName())) {
-        count++;
+    for(int i = 0; i < attrs.length; i++ ) {
+      if(name.equals(attrs[i].getName())) {
+        count++ ;
       }
     }
     return count;
@@ -848,7 +843,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
   public void testDownloadSources_004_testsClassifier() throws Exception {
     File file = new File(repo, "downloadsources/downloadsources-t005/0.0.1/downloadsources-t005-0.0.1-test-sources.jar");
     assertTrue(!file.exists() || file.delete());
-    
+
     IProject project = createExisting("downloadsources-p004", "projects/downloadsources/p004");
     waitForJobsToComplete();
 
@@ -905,7 +900,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
 
     File junitJar = new File("remoterepo/junit/junit/3.8.1/junit-3.8.1.jar");
     Path junitPath = new Path(junitJar.getAbsolutePath());
-    
+
     IJavaProject javaProject = JavaCore.create(project);
     IClasspathEntry[] origCp = javaProject.getRawClasspath();
     IClasspathEntry[] cp = new IClasspathEntry[origCp.length + 2];
@@ -913,7 +908,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
 
     cp[cp.length - 2] = JavaCore.newLibraryEntry(log4jPath, null, null, true);
     cp[cp.length - 1] = JavaCore.newLibraryEntry(junitPath, null, null, false);
-    
+
     javaProject.setRawClasspath(cp, monitor);
 
     MavenPlugin.getDefault().getBuildpathManager().downloadSources(project, log4jPath);
@@ -927,7 +922,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
 
     MavenPlugin.getDefault().getBuildpathManager().downloadSources(project, junitPath);
     waitForJobsToComplete();
-    
+
     assertEquals(junitPath, cp[cp.length - 1].getPath());
     assertEquals("junit-3.8.1-sources.jar", cp[cp.length - 1].getSourceAttachmentPath().lastSegment());
     assertEquals(false, cp[cp.length - 1].isExported());
@@ -947,7 +942,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
 
     createExisting("classifiers-p2", "projects/classifiers/classifiers-p2");
     waitForJobsToComplete();
-  
+
     container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
     cp = container.getClasspathEntries();
 
@@ -958,25 +953,8 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
   public void testCreateSimpleProject() throws CoreException {
     final MavenPlugin plugin = MavenPlugin.getDefault();
 
-    final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject( "simple-project" );
     final boolean modules = true;
-
-    workspace.run(new IWorkspaceRunnable() {
-      public void run(IProgressMonitor monitor) throws CoreException {
-        Model model = new Model();
-        model.setGroupId("simple-project");
-        model.setArtifactId("simple-project");
-        model.setVersion("0.0.1-SNAPSHOT");
-        model.setModelVersion("4.0.0");
-
-        String[] directories = {};
-
-        ResolverConfiguration resolverConfiguration = new ResolverConfiguration();
-        resolverConfiguration.setIncludeModules(modules);
-        
-        plugin.getProjectConfigurationManager().createSimpleProject(project, null, model, directories, resolverConfiguration, monitor);
-      }
-    }, plugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
+    IProject project = createSimpleProject("simple-project", null, modules);
 
     // IJavaProject javaProject = JavaCore.create(project);
 
@@ -1002,26 +980,25 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
 
     p2.open(monitor);
     waitForJobsToComplete();
-  
+
     cp = getMavenContainerEntries(p1);
     assertEquals(1, cp.length);
     assertEquals(p2.getFullPath(), cp[0].getPath());
   }
 
-  
   public void testProjectNameTemplate() throws Exception {
     deleteProject("p003");
     deleteProject("projectimport.p003-2.0");
-    
+
     ResolverConfiguration configuration = new ResolverConfiguration();
     ProjectImportConfiguration projectImportConfiguration = new ProjectImportConfiguration(configuration);
     importProject("p003version1", "projects/projectimport/p003version1", projectImportConfiguration);
-    
+
     projectImportConfiguration.setProjectNameTemplate("[groupId].[artifactId]-[version]");
     importProject("p003version2", "projects/projectimport/p003version2", projectImportConfiguration);
-    
+
     waitForJobsToComplete();
-    
+
     assertTrue(workspace.getRoot().getProject("p003").exists());
     assertTrue(workspace.getRoot().getProject("projectimport.p003-2.0").exists());
   }
@@ -1034,21 +1011,21 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     importProject("compilerSettingsJsr14", "projects/compilerSettingsJsr14", projectImportConfiguration);
 
     waitForJobsToComplete();
-    
+
     IProject project = workspace.getRoot().getProject("compilerSettingsJsr14");
     assertTrue(project.exists());
-    
+
     IMarker[] markers = project.findMarkers(null, true, IResource.DEPTH_INFINITE);
     assertEquals(toString(markers), 0, markers.length);
-    
+
     IJavaProject javaProject = JavaCore.create(project);
     assertEquals("1.5", javaProject.getOption(JavaCore.COMPILER_SOURCE, true));
     assertEquals("1.5", javaProject.getOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, true));
-    
+
     IClasspathEntry jreEntry = getJreContainer(javaProject.getRawClasspath());
     assertEquals("J2SE-1.5", JavaRuntime.getExecutionEnvironmentId(jreEntry.getPath()));
   }
-  
+
   public void testCompilerSettings14() throws Exception {
     deleteProject("compilerSettings14");
 
@@ -1057,19 +1034,19 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     importProject("compilerSettings14", "projects/compilerSettings14", projectImportConfiguration);
 
     waitForJobsToComplete();
-    
+
     IProject project = workspace.getRoot().getProject("compilerSettings14");
     assertTrue(project.exists());
-    
+
     // Build path specifies execution environment J2SE-1.4. 
     // There are no JREs in the workspace strictly compatible with this environment.
     IMarker[] markers = project.findMarkers(null, true, IResource.DEPTH_INFINITE);
     assertEquals(toString(markers), 1, markers.length);
-    
+
     IJavaProject javaProject = JavaCore.create(project);
     assertEquals("1.4", javaProject.getOption(JavaCore.COMPILER_SOURCE, true));
     assertEquals("1.4", javaProject.getOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, true));
-    
+
     IClasspathEntry jreEntry = getJreContainer(javaProject.getRawClasspath());
     assertEquals("J2SE-1.4", JavaRuntime.getExecutionEnvironmentId(jreEntry.getPath()));
   }
@@ -1090,14 +1067,14 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     ICommand[] buildSpec = description.getBuildSpec();
     ICommand javaBuilder = buildSpec[0];
     ICommand mavenBuilder = buildSpec[1];
-    
+
     verifyNaturesAndBuilders(project);
-    
+
     ResolverConfiguration configuration = new ResolverConfiguration();
     String goalToExecute = "";
-    
+
     IProjectConfigurationManager configurationManager = plugin.getProjectConfigurationManager();
-    
+
     configurationManager.updateProjectConfiguration(project, configuration, goalToExecute, monitor);
     verifyNaturesAndBuilders(project);
 
@@ -1106,13 +1083,13 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     project.setDescription(description, monitor);
     configurationManager.updateProjectConfiguration(project, configuration, goalToExecute, monitor);
     verifyNaturesAndBuilders(project);
-    
+
     description.setNatureIds(new String[] {});
     description.setBuildSpec(new ICommand[] {mavenBuilder, javaBuilder});
     project.setDescription(description, monitor);
     configurationManager.updateProjectConfiguration(project, configuration, goalToExecute, monitor);
     verifyNaturesAndBuilders(project);
-    
+
     description.setNatureIds(new String[] {IMavenConstants.NATURE_ID, JavaCore.NATURE_ID});
     description.setBuildSpec(new ICommand[] {mavenBuilder, javaBuilder});
     project.setDescription(description, monitor);
@@ -1136,5 +1113,58 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       assertEquals(IMavenConstants.BUILDER_ID, buildSpec[1].getBuilderName());
     }
   }
-  
+
+  private IProject createSimpleProject(final String projectName, final IPath location, final boolean modules)
+      throws CoreException {
+    final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+
+    workspace.run(new IWorkspaceRunnable() {
+      public void run(IProgressMonitor monitor) throws CoreException {
+        Model model = new Model();
+        model.setGroupId(projectName);
+        model.setArtifactId(projectName);
+        model.setVersion("0.0.1-SNAPSHOT");
+        model.setModelVersion("4.0.0");
+
+        String[] directories = {};
+
+        ResolverConfiguration resolverConfiguration = new ResolverConfiguration();
+        resolverConfiguration.setIncludeModules(modules);
+
+        plugin.getProjectConfigurationManager().createSimpleProject(project, location, model, directories,
+            resolverConfiguration, monitor);
+      }
+    }, plugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
+
+    return project;
+  }
+
+  public void testSimpleProjectInExternalLocation() throws CoreException, IOException {
+    final MavenPlugin plugin = MavenPlugin.getDefault();
+    final boolean modules = true;
+
+    File tmp = File.createTempFile("m2eclipse", "test");
+    tmp.delete(); //deleting a tmp file so we can use the name for a folder
+
+    final String projectName1 = "external-project-1";
+    IProject project1 = createSimpleProject(projectName1, new Path(tmp.getAbsolutePath()).append(projectName1), modules);
+    ResolverConfiguration configuration = plugin.getMavenProjectManager().getResolverConfiguration(project1);
+    assertEquals(modules, configuration.shouldIncludeModules());
+
+    final String projectName2 = "external-project-2";
+    File existingFolder = new File(tmp, projectName2);
+    existingFolder.mkdirs();
+    new File(existingFolder, IMavenConstants.POM_FILE_NAME).createNewFile();
+    try {
+      createSimpleProject(projectName2, new Path(tmp.getAbsolutePath()).append(projectName2), modules);
+      assertTrue("Project creation should fail if the POM exists in the target folder", false);
+    } catch(CoreException e) {
+      final String msg = IMavenConstants.POM_FILE_NAME + " already exists";
+      assertTrue("Project creation should throw a \"" + msg + "\" exception if the POM exists in the target folder", e
+          .getMessage().indexOf(msg) > 0);
+    }
+
+    tmp.delete();
+  }
+
 }
