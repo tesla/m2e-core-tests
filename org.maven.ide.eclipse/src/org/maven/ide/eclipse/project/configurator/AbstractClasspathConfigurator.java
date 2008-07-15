@@ -31,11 +31,14 @@ public class AbstractClasspathConfigurator {
   }
 
   /**
+   * Returns project classpath. Default implementation simply return parameter.
+   * 
    * @param entries Set<IClasspathEntry> may contain entries that only differ in 
    *    extended attribute values
+   * @return Set<IClasspathEntry> classpath entries 
    */
-  public void configureClasspath(Set<IClasspathEntry> entries) {
-    // TODO Auto-generated method configureClasspath
+  public Set<IClasspathEntry> configureClasspath(Set<IClasspathEntry> entries) {
+    return entries;
   }
 
 }

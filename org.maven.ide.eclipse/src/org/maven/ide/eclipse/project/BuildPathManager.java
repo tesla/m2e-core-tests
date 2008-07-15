@@ -270,13 +270,14 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
       }
     }, IMavenProjectVisitor.NESTED_MODULES);
 
+    Set<IClasspathEntry> cp = entries;
     for (AbstractClasspathConfigurator cpc : configurators) {
-      cpc.configureClasspath(entries);
+      cp = cpc.configureClasspath(cp);
     }
 
     if (uniquePaths) {
       Map<IPath, IClasspathEntry> paths = new LinkedHashMap<IPath, IClasspathEntry>();
-      for (IClasspathEntry entry : entries) {
+      for (IClasspathEntry entry : cp) {
         if (!paths.containsKey(entry.getPath())) {
           paths.put(entry.getPath(), entry);
         }
@@ -284,7 +285,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
       return paths.values().toArray(new IClasspathEntry[paths.size()]);
     }
 
-    return entries.toArray(new IClasspathEntry[entries.size()]);
+    return cp.toArray(new IClasspathEntry[cp.size()]);
   }
 
   void addClasspathEntries(Set<IClasspathEntry> entries, MavenProjectFacade mavenProject, int kind, Properties sourceAttachment, List<AbstractClasspathConfigurator> configurators) {
