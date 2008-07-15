@@ -28,6 +28,9 @@ import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
  * Embedded Maven runtime
  */
 public class MavenEmbeddedRuntime extends MavenRuntime {
+
+  private static final String MAVEN_MAVEN_EMBEDDER_BUNDLE_ID = "org.maven.ide.components.maven_embedder";
+
   private static final String MAVEN_EXECUTOR_CLASS = org.apache.maven.cli.MavenCli.class.getName();
   
   private static String[] CLASSPATH;
@@ -94,19 +97,23 @@ public class MavenEmbeddedRuntime extends MavenRuntime {
   }
 
   private Bundle findMavenEmbedderBundle() {
+    Bundle bundle = null;
     Bundle[] bundles = bundleContext.getBundles();
     for(int i = 0; i < bundles.length; i++ ) {
-      Bundle bundle = bundles[i];
-      if("org.maven.ide.components.maven_embedder".equals(bundle.getSymbolicName())) {
-        return bundle;
+      if(MAVEN_MAVEN_EMBEDDER_BUNDLE_ID.equals(bundles[i].getSymbolicName())) {
+        bundle = bundles[i];
+        break;
       }
     }
-
-    return null;
+    return bundle;
   }
   
   public boolean equals(Object o) {
     return o==this;
+  }
+  
+  public int hashCode() {
+    return 1568475786;  // "EMBEDDED".hashCode() 
   }
   
   public String toString() {

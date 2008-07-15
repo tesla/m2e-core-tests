@@ -127,24 +127,25 @@ public abstract class MavenRuntime {
     }
 
     public String[] getClasspath(String[] forcedComponents) {
-      File mavenHome = new File(location);
-
-      DirectoryScanner ds = new DirectoryScanner();
-      ds.setBasedir(mavenHome);
-      ds.setIncludes(new String[] {
-          "core/boot/classworlds*.jar", // 2.0.4
-          "boot/classworlds*.jar", // 2.0.7
-          "boot/plexus-classworlds*.jar", // 2.1 as of 2008-03-27
-      });
-      ds.scan();
-      String[] includedFiles = ds.getIncludedFiles();
-
-      if (includedFiles.length != 1) {
-        // XXX show error dialog and fail launch
-        return new String[0];
+      if(isAvailable()) {
+        File mavenHome = new File(location);
+        DirectoryScanner ds = new DirectoryScanner();
+        ds.setBasedir(mavenHome);
+        ds.setIncludes(new String[] {
+            "core/boot/classworlds*.jar", // 2.0.4
+            "boot/classworlds*.jar", // 2.0.7
+            "boot/plexus-classworlds*.jar", // 2.1 as of 2008-03-27
+        });
+        ds.scan();
+        String[] includedFiles = ds.getIncludedFiles();
+  
+        if (includedFiles.length == 1) {
+          return new String[] {new File(mavenHome, includedFiles[0]).getAbsolutePath()};
+        }
       }
 
-      return new String[] {new File(mavenHome, includedFiles[0]).getAbsolutePath()};
+      // XXX show error dialog and fail launch
+      return new String[0];
     }
 
     public boolean equals(Object o) {

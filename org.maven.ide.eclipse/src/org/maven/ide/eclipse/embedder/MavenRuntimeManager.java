@@ -100,8 +100,12 @@ public class MavenRuntimeManager {
   
   public void setDefaultRuntime(MavenRuntime runtime) {
     this.defaultRuntime = runtime;
-    
-    preferenceStore.setValue(MavenPreferenceConstants.P_DEFAULT_RUNTIME, runtime.getLocation());
+
+    if(runtime == null) {
+      preferenceStore.setToDefault(MavenPreferenceConstants.P_DEFAULT_RUNTIME);
+    } else {
+      preferenceStore.setValue(MavenPreferenceConstants.P_DEFAULT_RUNTIME, runtime.getLocation());
+    }
   }
   
   public void setRuntimes(List<MavenRuntime> runtimes) {

@@ -8,6 +8,7 @@
 
 package org.maven.ide.eclipse.internal.console;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -24,10 +25,11 @@ import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleListener;
 import org.eclipse.ui.console.IConsoleManager;
-import org.eclipse.ui.console.MessageConsole;
-import org.eclipse.ui.console.MessageConsoleStream;
+import org.eclipse.ui.console.IOConsole;
+import org.eclipse.ui.console.IOConsoleOutputStream;
 
 import org.maven.ide.eclipse.core.MavenConsole;
+import org.maven.ide.eclipse.core.MavenLogger;
 
 
 /**
@@ -35,7 +37,7 @@ import org.maven.ide.eclipse.core.MavenConsole;
  * 
  * @author Dmitri Maximovich
  */
-public class MavenConsoleImpl extends MessageConsole implements MavenConsole, IPropertyChangeListener {
+public class MavenConsoleImpl extends IOConsole implements MavenConsole, IPropertyChangeListener {
 
   private boolean initialized = false;
 
@@ -52,11 +54,11 @@ public class MavenConsoleImpl extends MessageConsole implements MavenConsole, IP
   private Color errorColor;
 
   // streams for each command type - each stream has its own color
-  private MessageConsoleStream commandStream;
+  private IOConsoleOutputStream commandStream;
 
-  private MessageConsoleStream messageStream;
+  private IOConsoleOutputStream messageStream;
 
-  private MessageConsoleStream errorStream;
+  private IOConsoleOutputStream errorStream;
 
   public MavenConsoleImpl(ImageDescriptor imageDescriptor) {
     // TODO extract constants
@@ -84,9 +86,9 @@ public class MavenConsoleImpl extends MessageConsole implements MavenConsole, IP
   void initializeStreams(Display display) {
     synchronized(document) {
       if(!initialized) {
-        commandStream = newMessageStream();
-        errorStream = newMessageStream();
-        messageStream = newMessageStream();
+        commandStream = newOutputStream();
+        errorStream = newOutputStream();
+        messageStream = newOutputStream();
 
         // TODO convert this to use themes
         // install colors
@@ -122,16 +124,23 @@ public class MavenConsoleImpl extends MessageConsole implements MavenConsole, IP
     show(false);
     synchronized(document) {
       if(visible) {
-        switch(type) {
-          case ConsoleDocument.COMMAND:
-            commandStream.println(line);
-            break;
-          case ConsoleDocument.MESSAGE:
-            messageStream.println(line); //$NON-NLS-1$
-            break;
-          case ConsoleDocument.ERROR:
-            errorStream.println(line); //$NON-NLS-1$
-            break;
+        try {
+          switch(type) {
+            case ConsoleDocument.COMMAND:
+              commandStream.write(line);
+              commandStream.write('\n');
+              break;
+            case ConsoleDocument.MESSAGE:
+              messageStream.write(line);
+              messageStream.write('\n');
+              break;
+            case ConsoleDocument.ERROR:
+              errorStream.write(line);
+              errorStream.write('\n');
+              break;
+          }
+        } catch(IOException ex) {
+          MavenLogger.log("Console error", ex);
         }
       } else {
         document.appendConsoleLine(type, line);

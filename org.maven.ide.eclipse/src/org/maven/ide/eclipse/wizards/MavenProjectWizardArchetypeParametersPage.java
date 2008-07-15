@@ -59,7 +59,6 @@ import org.maven.ide.eclipse.core.Messages;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.ui.internal.components.TextComboBoxCellEditor;
-import org.maven.ide.eclipse.util.JavaUtil;
 
 
 /**
@@ -68,6 +67,10 @@ import org.maven.ide.eclipse.util.JavaUtil;
  */
 public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWizardPage {
 
+  public static final String DEFAULT_VERSION = "0.0.1-SNAPSHOT";
+  
+  public static final String DEFAULT_PACKAGE = "foo";
+  
   Table propertiesTable;
 
   TableViewer propertiesViewer;
@@ -79,8 +82,6 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
   final public static String VALUE_PROPERTY = "value";
 
   final public static int VALUE_INDEX = 1;
-
-  public static final String DEFAULT_VERSION = "0.0.1-SNAPSHOT";
 
   /** group id text field */
   protected Combo groupIdCombo;
@@ -487,7 +488,7 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
 
   /** Returns the default package name. */
   protected String getDefaultJavaPackage() {
-    return JavaUtil.getDefaultJavaPackage(groupIdCombo.getText().trim(), artifactIdCombo.getText().trim());
+    return MavenProjectWizardArchetypeParametersPage.getDefaultJavaPackage(groupIdCombo.getText().trim(), artifactIdCombo.getText().trim());
   }
 
   /** Creates the Model object. */
@@ -573,5 +574,45 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
       propertyKeys.addAll(optionalProperties);
       comboEditor.setItems(propertyKeys.toArray(new String[n]));
     }
+  }
+
+  public static String getDefaultJavaPackage(String groupId, String artifactId) {
+    StringBuffer sb = new StringBuffer(groupId);
+    
+    if(sb.length()>0 && artifactId.length()>0) {
+      sb.append('.');
+    }
+    
+    sb.append(artifactId);
+    
+    if(sb.length()==0) {
+      sb.append(DEFAULT_PACKAGE);
+    }
+  
+    boolean isFirst = true;
+    StringBuffer pkg = new StringBuffer();
+    for(int i = 0; i < sb.length(); i++ ) {
+      char c = sb.charAt(i);
+      if(c=='-') {
+        pkg.append('_');
+        isFirst = false;
+      } else {
+        if(isFirst) {
+          if(Character.isJavaIdentifierStart(c)) {
+            pkg.append(c);
+            isFirst = false;
+          }
+        } else {
+          if(c=='.') {
+            pkg.append('.');
+            isFirst = true;
+          } else if(Character.isJavaIdentifierPart(c)) {
+            pkg.append(c);
+          }
+        }
+      }
+    }
+    
+    return pkg.toString();
   }
 }

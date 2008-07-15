@@ -8,6 +8,8 @@
 
 package org.maven.ide.eclipse.util;
 
+import org.maven.ide.eclipse.wizards.MavenProjectWizardArchetypeParametersPage;
+
 import junit.framework.TestCase;
 
 /**
@@ -16,12 +18,12 @@ import junit.framework.TestCase;
 public class JavaUtilTest extends TestCase {
 
   public void testGetDefaultJavaPackage() {
-    assertEquals(JavaUtil.DEFAULT_PACKAGE, JavaUtil.getDefaultJavaPackage("", ""));
-    assertEquals("aaa.bbb", JavaUtil.getDefaultJavaPackage("aaa", "bbb"));
-    assertEquals("aaa.bbb.ccc.ddd", JavaUtil.getDefaultJavaPackage("aaa.bbb.ccc", "ddd"));
-    assertEquals("aaa.bbb1", JavaUtil.getDefaultJavaPackage("aaa", "bbb1"));
-    assertEquals("aaa.bbb", JavaUtil.getDefaultJavaPackage("aaa", "1bbb"));
-    assertEquals("aaa.a_b", JavaUtil.getDefaultJavaPackage("aaa", "a-b"));
+    assertEquals("foo", MavenProjectWizardArchetypeParametersPage.getDefaultJavaPackage("", ""));
+    assertEquals("aaa.bbb", MavenProjectWizardArchetypeParametersPage.getDefaultJavaPackage("aaa", "bbb"));
+    assertEquals("aaa.bbb.ccc.ddd", MavenProjectWizardArchetypeParametersPage.getDefaultJavaPackage("aaa.bbb.ccc", "ddd"));
+    assertEquals("aaa.bbb1", MavenProjectWizardArchetypeParametersPage.getDefaultJavaPackage("aaa", "bbb1"));
+    assertEquals("aaa.bbb", MavenProjectWizardArchetypeParametersPage.getDefaultJavaPackage("aaa", "1bbb"));
+    assertEquals("aaa.a_b", MavenProjectWizardArchetypeParametersPage.getDefaultJavaPackage("aaa", "a-b"));
   }
 
 }
