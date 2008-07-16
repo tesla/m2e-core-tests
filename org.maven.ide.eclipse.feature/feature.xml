@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.maven.ide.eclipse.feature"
-      label="Maven Integration for Eclipse"
+      label="Maven Integration for Eclipse (Required)"
       version="0.9.5.qualifier"
       provider-name="Sonatype, Inc."
       plugin="org.maven.ide.eclipse">
@@ -30,6 +30,7 @@ http://www.eclipse.org/legal/epl-v10.html
       <import feature="org.eclipse.platform" version="3.1.0" match="greaterOrEqual"/>
       <import feature="org.eclipse.jdt" version="3.1.0" match="greaterOrEqual"/>
       <import feature="org.eclipse.rcp" version="3.1.0" match="greaterOrEqual"/>
+      <import feature="org.maven.ide.components.maven_embedder.feature" version="2.1.0" match="greaterOrEqual"/>
    </requires>
 
    <plugin
@@ -41,12 +42,6 @@ http://www.eclipse.org/legal/epl-v10.html
 
    <plugin
          id="org.maven.ide.components.archetype_common"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.maven.ide.components.maven_embedder"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
