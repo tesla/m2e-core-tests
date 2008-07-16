@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.maven.ide.eclipse.editor.feature"
-      label="Maven POM Editor (Optional)"
+      label="Maven POM Editor (Incubation, Optional)"
       version="0.9.5.qualifier"
       provider-name="Sonatype, Inc."
       plugin="org.maven.ide.eclipse">
