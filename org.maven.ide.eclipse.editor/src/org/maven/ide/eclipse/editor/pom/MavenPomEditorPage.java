@@ -123,30 +123,36 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
     
     toolBarManager.add(new Action("Show Effective POM", MavenEditorImages.EFFECTIVE_POM) {
       public void run() {
-        try {
-          StringWriter sw = new StringWriter();
-          
-          MavenProject mavenProject = pomEditor.readMavenProject(false);
-          new MavenXpp3Writer().write(sw, mavenProject.getModel());
-          
-          String effectivePom = sw.toString();
-          // XXX workaround to make EMF recognize namespace
-          effectivePom = effectivePom.replaceAll("<project>", "<project xmlns=\"http://maven.apache.org/POM/4.0.0\"" + 
-          		" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" + 
-          		" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd\">");
-          
-          String name = pomEditor.getPartName() + " [effective]";
-          IEditorInput editorInput = new OpenPomAction.MavenEditorStorageInput(name, name, null, //
-              effectivePom.getBytes("UTF-8"));
-          OpenPomAction.openEditor(editorInput, name);
-          
-        } catch(CoreException ex) {
-          MavenLogger.log(ex);
-        } catch(MavenEmbedderException ex) {
-          MavenLogger.log("Unable to read Maven pom", ex);
-        } catch(IOException ex) {
-          MavenLogger.log("Unable to create Effective POM", ex);
-        }
+        new Job("Opening Effective POM") {
+          protected IStatus run(IProgressMonitor monitor) {
+            try {
+              StringWriter sw = new StringWriter();
+              
+              MavenProject mavenProject = pomEditor.readMavenProject(false);
+              new MavenXpp3Writer().write(sw, mavenProject.getModel());
+              
+              String effectivePom = sw.toString();
+              
+              // XXX workaround to make EMF recognize namespace (may not be needed anymore)
+//              effectivePom = effectivePom.replaceAll("<project>", "<project xmlns=\"http://maven.apache.org/POM/4.0.0\"" + 
+//                  " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" + 
+//                  " xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd\">");
+              
+              String name = pomEditor.getPartName() + " [effective]";
+              IEditorInput editorInput = new OpenPomAction.MavenEditorStorageInput(name, name, null, //
+                  effectivePom.getBytes("UTF-8"));
+              OpenPomAction.openEditor(editorInput, name);
+              
+            } catch(CoreException ex) {
+              MavenLogger.log(ex);
+            } catch(MavenEmbedderException ex) {
+              MavenLogger.log("Unable to read Maven pom", ex);
+            } catch(IOException ex) {
+              MavenLogger.log("Unable to create Effective POM", ex);
+            }
+            return Status.OK_STATUS;
+          }
+        }.schedule();
       }
     });
     
