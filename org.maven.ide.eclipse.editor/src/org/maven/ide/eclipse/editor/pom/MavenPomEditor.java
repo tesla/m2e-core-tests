@@ -57,7 +57,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.AdapterFactory;
 import org.eclipse.emf.common.notify.impl.AdapterFactoryImpl;
@@ -164,9 +163,9 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 
   private MavenProject mavenProject;
 
-  private AdapterFactory adapterFactory;
+  AdapterFactory adapterFactory;
 
-  private AdapterFactoryEditingDomain editingDomain;
+  AdapterFactoryEditingDomain editingDomain;
   
   private int sourcePageIndex;
 
@@ -217,19 +216,14 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
           public void run() {
             if(MessageDialog.openQuestion(getSite().getShell(), "File Changed",
                 "File has been changes externally. Do you want to replace editor content with these changes?")) {
-              new Job("Reloading model") {
-                protected IStatus run(IProgressMonitor monitor) {
-                  try {
-                    structuredModel.reload(pomFile.getContents());
-                    reload();
-                  } catch(CoreException e) {
-                    MavenLogger.log(e);
-                  } catch(Exception e) {
-                    MavenLogger.log("Can't load model", e);
-                  }
-                  return Status.OK_STATUS;
-                }
-              }.schedule();
+              try {
+                structuredModel.reload(pomFile.getContents()); // need to be done in UI thread
+                reload();
+              } catch(CoreException e) {
+                MavenLogger.log(e);
+              } catch(Exception e) {
+                MavenLogger.log("Can't load model", e);
+              }
             }
           }
         });
@@ -303,7 +297,24 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     graphPage = new DependencyGraphPage(this);
     addPomPage(graphPage);
     
-    sourcePage = new StructuredTextEditor();
+    sourcePage = new StructuredTextEditor() {
+      public void doSave(IProgressMonitor monitor) {
+        // always save using form editor
+        ResourcesPlugin.getWorkspace().removeResourceChangeListener(MavenPomEditor.this);
+        try {
+          super.doSave(monitor);
+        } finally {
+          ResourcesPlugin.getWorkspace().addResourceChangeListener(MavenPomEditor.this);
+        }
+        
+        commandStack.saveIsDone();
+        editorDirtyStateChanged();
+        
+        commandStack = new NotificationCommandStack(MavenPomEditor.this);
+        editingDomain = new AdapterFactoryEditingDomain(adapterFactory, //
+            commandStack, new HashMap<Resource, Boolean>());
+      }
+    };
     sourcePage.setEditorPart(this);
 
     try {
@@ -323,8 +334,8 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
         factories.add(new ResourceItemProviderAdapterFactory());
         factories.add(new ReflectiveItemProviderAdapterFactory());
   
-        commandStack = new NotificationCommandStack(this);
         adapterFactory = new ComposedAdapterFactory(factories);
+        commandStack = new NotificationCommandStack(this);
         editingDomain = new AdapterFactoryEditingDomain(adapterFactory, //
             commandStack, new HashMap<Resource, Boolean>());
 
@@ -699,16 +710,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   public void doSave(IProgressMonitor monitor) {
     new UIJob("Saving") {
       public IStatus runInUIThread(IProgressMonitor monitor) {
-        ResourcesPlugin.getWorkspace().removeResourceChangeListener(MavenPomEditor.this);
-        try {
-          sourcePage.doSave(monitor);
-        } finally {
-          ResourcesPlugin.getWorkspace().addResourceChangeListener(MavenPomEditor.this);
-        }
-        
-        commandStack.saveIsDone();
-        editorDirtyStateChanged();
-        
+        sourcePage.doSave(monitor);
         return Status.OK_STATUS;
       }
     }.schedule();
