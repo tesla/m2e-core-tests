@@ -188,6 +188,8 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
           try {
             model = pomEditor.readProjectDocument();
             if(model != null) {
+              if (getPartControl() == null)
+                return Status.OK_STATUS;
               getPartControl().getDisplay().asyncExec(new Runnable() {
                 public void run() {
                   updatingModel = true;
@@ -228,20 +230,13 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
   public void reload() {
     deRegisterListeners();
     dataLoaded = false;
-    if (isActive()) {
-      doLoadData(true);
-    }
+    doLoadData(true);
   }
 
   public synchronized void notifyChanged(Notification notification) {
     if(updatingModel) {
       return;
     }
-    
-//    if(!isActive()) {
-//      dataLoaded = false;
-//      return;
-//    }
     
     updatingModel = true;
     try {

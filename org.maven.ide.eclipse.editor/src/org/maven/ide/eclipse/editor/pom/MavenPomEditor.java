@@ -44,8 +44,11 @@ import org.codehaus.plexus.component.repository.exception.ComponentLookupExcepti
 import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -54,6 +57,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.emf.common.command.Command;
+import org.eclipse.emf.common.command.CommandStack;
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.AdapterFactory;
 import org.eclipse.emf.common.notify.impl.AdapterFactoryImpl;
@@ -68,6 +73,7 @@ import org.eclipse.emf.edit.domain.IEditingDomainProvider;
 import org.eclipse.emf.edit.provider.ComposedAdapterFactory;
 import org.eclipse.emf.edit.provider.ReflectiveItemProviderAdapterFactory;
 import org.eclipse.emf.edit.provider.resource.ResourceItemProviderAdapterFactory;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.search.ui.text.ISearchEditorAccess;
@@ -118,6 +124,7 @@ import org.w3c.dom.NodeList;
  * Maven POM editor
  * 
  * @author Eugene Kuleshov
+ * @author Anton Kraev
  */
 @SuppressWarnings("restriction")
 public class MavenPomEditor extends FormEditor implements IResourceChangeListener, IShowEditorInput, IGotoMarker, ISearchEditorAccess, IEditingDomainProvider {
@@ -165,9 +172,13 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   private int sourcePageIndex;
 
   NotificationCommandStack commandStack;
-  
+
+  private IModelManager modelManager;
+
+  private IFile pomFile;
+
   public MavenPomEditor() {
-    ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
+    modelManager = StructuredModelManager.getModelManager();
   }
 
   // IResourceChangeListener
@@ -176,6 +187,48 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
    * Closes all project files on project close.
    */
   public void resourceChanged(final IResourceChangeEvent event) {
+    IResourceDelta delta = event.getDelta();
+    try {
+      class ResourceDeltaVisitor implements IResourceDeltaVisitor {
+        public boolean visit(IResourceDelta delta) {
+          if(delta.getFlags() != IResourceDelta.MARKERS && delta.getResource().getType() == IResource.FILE) {
+            if((delta.getKind() & (IResourceDelta.CHANGED | IResourceDelta.REMOVED)) != 0) {
+              URI id = URI.createURI(delta.getFullPath().toString());
+              if(modelManager.getExistingModelForEdit(id.toString()) != null) {
+                if((delta.getKind() & IResourceDelta.REMOVED) != 0) {
+                  //XXX: remove is not implemented
+                  //modelManager.removeModel();
+                } else {
+                  getContainer().getDisplay().asyncExec(new Runnable() {
+                    public void run() {
+                      try {
+                        if(MessageDialog.openQuestion(getSite().getShell(), "File Conflict",
+                            "File has been changes externally. Do you wish to discard this editor's changes?")) {
+                          structuredModel.reload(pomFile.getContents());
+                          reload();
+                        }
+                      } catch(Exception e) {
+                        MavenLogger.log(e);
+                      }
+                    }
+                  });
+                }
+              }
+            }
+          }
+
+          return true;
+        }
+      }
+
+      ResourceDeltaVisitor visitor = new ResourceDeltaVisitor();
+      delta.accept(visitor);
+    }
+
+    catch(Exception exception) {
+      MavenLogger.log(exception);
+    }
+
     if(event.getType() == IResourceChangeEvent.PRE_CLOSE) {
       Display.getDefault().asyncExec(new Runnable() {
         public void run() {
@@ -258,8 +311,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
         adapterFactory = new ComposedAdapterFactory(factories);
         editingDomain = new AdapterFactoryEditingDomain(adapterFactory, //
             commandStack, new HashMap<Resource, Boolean>());
-        
-        IModelManager modelManager = StructuredModelManager.getModelManager();
+
         structuredModel = modelManager.getExistingModelForEdit(doc);
         if(structuredModel == null) {
           structuredModel = modelManager.getModelForEdit((IStructuredDocument) doc);
@@ -300,7 +352,9 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     if(projectDocument==null) {
       IEditorInput input = getEditorInput();
       if(input instanceof IFileEditorInput) {
-        IFile pomFile = ((IFileEditorInput) input).getFile();
+        pomFile = ((IFileEditorInput) input).getFile();
+        pomFile.refreshLocal(1, null);
+        ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
 
         MavenModelManager modelManager = MavenPlugin.getDefault().getMavenModelManager();
         PomResourceImpl resource = modelManager.loadResource(pomFile);
@@ -445,11 +499,13 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       IEditorInput input = getEditorInput();
       if(input instanceof IFileEditorInput) {
         IFileEditorInput fileInput = (IFileEditorInput) input;
-        IFile pomfile = fileInput.getFile();
-        
-        MavenProjectFacade projectFacade = projectManager.create(pomfile, true, new NullProgressMonitor());
-        mavenProject = projectFacade.getMavenProject(); 
-  
+        pomFile = fileInput.getFile();
+        pomFile.refreshLocal(1, null);
+        ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
+
+        MavenProjectFacade projectFacade = projectManager.create(pomFile, true, new NullProgressMonitor());
+        mavenProject = projectFacade.getMavenProject();
+
       } else if(input instanceof IStorageEditorInput) {
         IStorageEditorInput storageInput = (IStorageEditorInput) input;
         IStorage storage = storageInput.getStorage();
@@ -608,6 +664,11 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   }
   
   public void dispose() {
+    try {
+      structuredModel.reload(pomFile.getContents());
+    } catch(Exception e) {
+      MavenLogger.log(e);
+    }
     ResourcesPlugin.getWorkspace().removeResourceChangeListener(this);
     structuredModel.removeModelStateListener(renderer);
     structuredModel.removeModelLifecycleListener(renderer);
