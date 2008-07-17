@@ -53,10 +53,13 @@ public class CheckoutAsMavenAction implements IObjectActionDelegate {
    * @see org.eclipse.ui.actions.ActionDelegate#run(org.eclipse.jface.action.IAction)
    */
   public void run(IAction action) {
-    ScmUrl[] urls = new ScmUrl[selection.size()];
-    int i = 0;
-    for(Iterator<?> it = selection.iterator(); it.hasNext();) {
-      urls[i++] = (ScmUrl) it.next(); 
+    ScmUrl[] urls = null;
+    if(selection != null) {
+      urls = new ScmUrl[selection.size()];
+      int i = 0;
+      for(Iterator<?> it = selection.iterator(); it.hasNext();) {
+        urls[i++] = (ScmUrl) it.next();
+      }
     }
     
     MavenCheckoutWizard wizard = new MavenCheckoutWizard(urls);
