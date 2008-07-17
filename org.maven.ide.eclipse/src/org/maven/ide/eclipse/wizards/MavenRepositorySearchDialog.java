@@ -104,7 +104,9 @@ public class MavenRepositorySearchDialog extends AbstractMavenDialog {
     
     pomSelectionComponent.addDoubleClickListener(new IDoubleClickListener() {
       public void doubleClick(DoubleClickEvent event) {
-        okPressedDelegate();
+        if (!pomSelectionComponent.getStatus().matches(IStatus.ERROR)) {
+          okPressedDelegate();
+        }
       }
     });
     pomSelectionComponent.addSelectionChangedListener(new ISelectionChangedListener() {
