@@ -208,7 +208,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
                           reload();
                         }
                       } catch(Exception e) {
-                        MavenLogger.log(e);
+                        MavenLogger.log("Cannot reload", e);
                       }
                     }
                   });
@@ -226,7 +226,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     }
 
     catch(Exception exception) {
-      MavenLogger.log(exception);
+      MavenLogger.log("Cannot reload", exception);
     }
 
     if(event.getType() == IResourceChangeEvent.PRE_CLOSE) {
@@ -667,7 +667,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     try {
       structuredModel.reload(pomFile.getContents());
     } catch(Exception e) {
-      MavenLogger.log(e);
+      MavenLogger.log("Cannot reload", e);
     }
     ResourcesPlugin.getWorkspace().removeResourceChangeListener(this);
     structuredModel.removeModelStateListener(renderer);
