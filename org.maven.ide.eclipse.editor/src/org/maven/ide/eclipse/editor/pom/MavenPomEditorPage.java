@@ -246,7 +246,8 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
         case Notification.MOVE:
         case Notification.REMOVE:
         case Notification.SET:
-          updateView(notification);
+          if (getManagedForm() != null)
+            updateView(notification);
           break;
           
         default:
