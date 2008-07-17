@@ -57,8 +57,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.emf.common.command.Command;
-import org.eclipse.emf.common.command.CommandStack;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.AdapterFactory;
 import org.eclipse.emf.common.notify.impl.AdapterFactoryImpl;
@@ -159,7 +158,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 
   private PomResourceImpl resource;
 
-  private IStructuredModel structuredModel;
+  IStructuredModel structuredModel;
 
   private EMF2DOMSSERenderer renderer;
 
@@ -173,9 +172,9 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 
   NotificationCommandStack commandStack;
 
-  private IModelManager modelManager;
+  IModelManager modelManager;
 
-  private IFile pomFile;
+  IFile pomFile;
 
   public MavenPomEditor() {
     modelManager = StructuredModelManager.getModelManager();
@@ -187,46 +186,57 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
    * Closes all project files on project close.
    */
   public void resourceChanged(final IResourceChangeEvent event) {
-    IResourceDelta delta = event.getDelta();
-    try {
-      class ResourceDeltaVisitor implements IResourceDeltaVisitor {
-        public boolean visit(IResourceDelta delta) {
-          if(delta.getFlags() != IResourceDelta.MARKERS && delta.getResource().getType() == IResource.FILE) {
-            if((delta.getKind() & (IResourceDelta.CHANGED | IResourceDelta.REMOVED)) != 0) {
-              URI id = URI.createURI(delta.getFullPath().toString());
-              if(modelManager.getExistingModelForEdit(id.toString()) != null) {
-                if((delta.getKind() & IResourceDelta.REMOVED) != 0) {
-                  //XXX: remove is not implemented
-                  //modelManager.removeModel();
-                } else {
-                  getContainer().getDisplay().asyncExec(new Runnable() {
-                    public void run() {
-                      try {
-                        if(MessageDialog.openQuestion(getSite().getShell(), "File Conflict",
-                            "File has been changes externally. Do you wish to discard this editor's changes?")) {
-                          structuredModel.reload(pomFile.getContents());
-                          reload();
-                        }
-                      } catch(Exception e) {
-                        MavenLogger.log("Cannot reload", e);
-                      }
-                    }
-                  });
-                }
+    
+    class ResourceDeltaVisitor implements IResourceDeltaVisitor {
+      public boolean changed = false;
+      
+      public boolean visit(IResourceDelta delta) {
+        if(delta.getFlags() != IResourceDelta.MARKERS && delta.getResource().getType() == IResource.FILE) {
+          if((delta.getKind() & (IResourceDelta.CHANGED | IResourceDelta.REMOVED)) != 0) {
+            URI id = URI.createURI(delta.getFullPath().toString());
+            if(modelManager.getExistingModelForEdit(id.toString()) != null) {
+              if((delta.getKind() & IResourceDelta.REMOVED) != 0) {
+                // XXX remove is not implemented
+                // modelManager.removeModel();
+              } else {
+                changed = true;
               }
             }
           }
-
-          return true;
         }
+        return true;
       }
-
-      ResourceDeltaVisitor visitor = new ResourceDeltaVisitor();
-      delta.accept(visitor);
     }
 
-    catch(Exception exception) {
-      MavenLogger.log("Cannot reload", exception);
+    try {
+      ResourceDeltaVisitor visitor = new ResourceDeltaVisitor();
+      event.getDelta().accept(visitor);
+      
+      if(visitor.changed) {
+        getContainer().getDisplay().asyncExec(new Runnable() {
+          public void run() {
+            if(MessageDialog.openQuestion(getSite().getShell(), "File Changed",
+                "File has been changes externally. Do you want to replace editor content with these changes?")) {
+              new Job("") {
+                protected IStatus run(IProgressMonitor monitor) {
+                  try {
+                    structuredModel.reload(pomFile.getContents());
+                    reload();
+                  } catch(CoreException e) {
+                    MavenLogger.log(e);
+                  } catch(Exception e) {
+                    MavenLogger.log("Can't load model", e);
+                  }
+                  return Status.OK_STATUS;
+                }
+              };
+            }
+          }
+        });
+      }
+      
+    } catch(CoreException ex) {
+      MavenLogger.log(ex);
     }
 
     if(event.getType() == IResourceChangeEvent.PRE_CLOSE) {
@@ -667,7 +677,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     try {
       structuredModel.reload(pomFile.getContents());
     } catch(Exception e) {
-      MavenLogger.log("Cannot reload", e);
+      MavenLogger.log("Can't reload model", e);
     }
     ResourcesPlugin.getWorkspace().removeResourceChangeListener(this);
     structuredModel.removeModelStateListener(renderer);
