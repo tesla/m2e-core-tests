@@ -229,7 +229,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
                   }
                   return Status.OK_STATUS;
                 }
-              }.run(null);
+              }.schedule();
             }
           }
         });
