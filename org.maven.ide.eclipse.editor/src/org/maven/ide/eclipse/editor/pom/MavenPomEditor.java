@@ -229,7 +229,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
                   }
                   return Status.OK_STATUS;
                 }
-              };
+              }.run(null);
             }
           }
         });
@@ -264,6 +264,8 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     for(MavenPomEditorPage page : pages) {
       page.reload();
     }
+    commandStack.flush();
+    editorDirtyStateChanged();
   }
   
   protected void addPages() {
@@ -693,7 +695,9 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   public void doSave(IProgressMonitor monitor) {
     new UIJob("Saving") {
       public IStatus runInUIThread(IProgressMonitor monitor) {
+        ResourcesPlugin.getWorkspace().removeResourceChangeListener(MavenPomEditor.this);
         sourcePage.doSave(monitor);
+        ResourcesPlugin.getWorkspace().addResourceChangeListener(MavenPomEditor.this);
         commandStack.saveIsDone();
         editorDirtyStateChanged();
         return Status.OK_STATUS;
