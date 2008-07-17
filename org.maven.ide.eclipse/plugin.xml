@@ -764,4 +764,10 @@
    </extension>
    -->
 
+   <extension point="org.eclipse.debug.ui.consoleLineTrackers">
+      <consoleLineTracker id="org.maven.ide.eclipse.console.MavenConsoleLineTracker"
+            class="org.maven.ide.eclipse.internal.launch.MavenConsoleLineTracker"
+            processType="java"/>
+   </extension>
+
 </plugin>
