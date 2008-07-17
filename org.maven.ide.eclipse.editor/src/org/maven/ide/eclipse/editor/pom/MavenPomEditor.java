@@ -217,7 +217,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
           public void run() {
             if(MessageDialog.openQuestion(getSite().getShell(), "File Changed",
                 "File has been changes externally. Do you want to replace editor content with these changes?")) {
-              new Job("") {
+              new Job("Reloading model") {
                 protected IStatus run(IProgressMonitor monitor) {
                   try {
                     structuredModel.reload(pomFile.getContents());
@@ -265,7 +265,11 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       page.reload();
     }
     commandStack.flush();
-    editorDirtyStateChanged();
+    getContainer().getDisplay().asyncExec(new Runnable() {
+      public void run() {
+        editorDirtyStateChanged();
+      }
+    });
   }
   
   protected void addPages() {
@@ -696,10 +700,15 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     new UIJob("Saving") {
       public IStatus runInUIThread(IProgressMonitor monitor) {
         ResourcesPlugin.getWorkspace().removeResourceChangeListener(MavenPomEditor.this);
-        sourcePage.doSave(monitor);
-        ResourcesPlugin.getWorkspace().addResourceChangeListener(MavenPomEditor.this);
+        try {
+          sourcePage.doSave(monitor);
+        } finally {
+          ResourcesPlugin.getWorkspace().addResourceChangeListener(MavenPomEditor.this);
+        }
+        
         commandStack.saveIsDone();
         editorDirtyStateChanged();
+        
         return Status.OK_STATUS;
       }
     }.schedule();
