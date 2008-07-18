@@ -691,10 +691,12 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   }
   
   public void dispose() {
-    try {
-      structuredModel.reload(pomFile.getContents());
-    } catch(Exception e) {
-      MavenLogger.log("Can't reload model", e);
+    if(pomFile != null) {
+      try {
+        structuredModel.reload(pomFile.getContents());
+      } catch(Exception e) {
+        MavenLogger.log("Can't reload model", e);
+      }
     }
     ResourcesPlugin.getWorkspace().removeResourceChangeListener(this);
     structuredModel.removeModelStateListener(renderer);
