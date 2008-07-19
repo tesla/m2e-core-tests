@@ -316,7 +316,7 @@ public class MavenGoalSelectionDialog extends ElementTreeSelectionDialog {
   /**
    * Entry
    */
-  static class Entry {
+  public static class Entry {
     public final String prefix;
 
     public final String name;

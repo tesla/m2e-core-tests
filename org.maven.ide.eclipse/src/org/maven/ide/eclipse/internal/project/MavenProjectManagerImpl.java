@@ -41,9 +41,14 @@ import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.codehaus.plexus.PlexusContainer;
+import org.codehaus.plexus.component.repository.ComponentDescriptor;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.AbstractArtifactResolutionException;
+import org.apache.maven.artifact.resolver.ArtifactResolver;
+import org.apache.maven.embedder.ContainerCustomizer;
 import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.embedder.MavenEmbedderException;
 import org.apache.maven.execution.MavenExecutionRequest;
@@ -56,7 +61,6 @@ import org.apache.maven.project.MavenProject;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
-import org.maven.ide.eclipse.embedder.EmbedderFactory;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
@@ -342,7 +346,7 @@ public class MavenProjectManagerImpl {
    * @param monitor progress monitor
    */
   public void refresh(Set<DependencyResolutionContext> updateRequests, IProgressMonitor monitor) throws CoreException, MavenEmbedderException, InterruptedException {
-    MavenEmbedder embedder = embedderManager.createEmbedder(EmbedderFactory.createWorkspaceCustomizer());
+    MavenEmbedder embedder = createWorkspaceEmbedder();
     try {
       for(DependencyResolutionContext updateRequest : updateRequests) {
         while(!updateRequest.isEmpty()) {
@@ -689,12 +693,12 @@ public class MavenProjectManagerImpl {
     return state.getMavenProject(new ArtifactKey(artifact));
   }
 
-  public MavenProjectFacade getMavenProject(ArtifactKey artifactKey) {
-    return state.getMavenProject(artifactKey);
+  public MavenProjectFacade getMavenProject(String groupId, String artifactId, String version, String classifier) {
+    return state.getMavenProject(new ArtifactKey(groupId, artifactId, version, classifier));
   }
 
   public void downloadSources(List<DownloadRequest> downloadRequests, IProgressMonitor monitor) throws MavenEmbedderException, InterruptedException, CoreException {
-    MavenEmbedder embedder = embedderManager.createEmbedder(EmbedderFactory.createWorkspaceCustomizer());
+    MavenEmbedder embedder = createWorkspaceEmbedder();
     try {
       for(DownloadRequest request : downloadRequests) {
         if(monitor.isCanceled()) {
@@ -950,7 +954,7 @@ public class MavenProjectManagerImpl {
   }
 
   public MavenExecutionResult readProjectWithDependencies(IFile pomFile, ResolverConfiguration resolverConfiguration, MavenUpdateRequest updateRequest, IProgressMonitor monitor) throws MavenEmbedderException {
-    MavenEmbedder embedder = embedderManager.createEmbedder(EmbedderFactory.createWorkspaceCustomizer());
+    MavenEmbedder embedder = createWorkspaceEmbedder();
     try {
       return execute(embedder, pomFile, resolverConfiguration, new MavenProjectReader(updateRequest), monitor);
     } finally {
@@ -1052,7 +1056,7 @@ public class MavenProjectManagerImpl {
   }
 
   public void execute(MavenProjectFacade facade, List<String> goals, final boolean recursive, IProgressMonitor monitor) throws MavenEmbedderException {
-    MavenEmbedder embedder = embedderManager.createEmbedder(EmbedderFactory.createWorkspaceCustomizer());
+    MavenEmbedder embedder = createWorkspaceEmbedder();
     try {
       IFile pom = facade.getPom();
       final ResolverConfiguration resolverConfiguration = facade.getResolverConfiguration();
@@ -1106,4 +1110,41 @@ public class MavenProjectManagerImpl {
     return "";
   }
 
+  public MavenEmbedder createWorkspaceEmbedder() throws MavenEmbedderException {
+    return embedderManager.createEmbedder(createWorkspaceCustomizer());
+  }
+
+  private ContainerCustomizer createWorkspaceCustomizer() {
+    return new ContainerCustomizer() {
+      public void customize(PlexusContainer container) {
+        ComponentDescriptor resolverDescriptor = container.getComponentDescriptor(ArtifactResolver.ROLE);
+        resolverDescriptor.setImplementation(EclipseArtifactResolver.class.getName());
+
+        // desc = plexusContainer.getComponentDescriptor(ArtifactFactory.ROLE);
+        // desc.setImplementation(org.maven.ide.eclipse.embedder.EclipseArtifactFactory.class.getName());
+
+        // Used for building hierarchy of dependencies
+        // desc = container.getComponentDescriptor(ResolutionListener.ROLE);
+        // if(desc == null) {
+        //   desc = new ComponentDescriptor();
+        //   desc.setRole(ResolutionListener.ROLE);
+        //   container.addComponentDescriptor(desc);
+        // }
+        // desc.setImplementation(EclipseResolutionListener.class.getName());
+
+        // Custom artifact resolver for resolving artifacts from Eclipse Worspace
+//        if(resolveWorkspaceProjects) {
+//          ComponentDescriptor resolverDescriptor = container.getComponentDescriptor(ArtifactResolver.ROLE);
+//          // ComponentRequirement requirement = new ComponentRequirement();
+//          // requirement.setRole(ResolutionListener.ROLE);
+//          // desc.addRequirement(requirement);
+//          resolverDescriptor.setImplementation(EclipseArtifactResolver.class.getName());
+//        }
+        
+//          desc = container.getComponentDescriptor(WagonManager.ROLE);
+//          desc.setImplementation(EclipseWagonManager.class.getName());
+      }
+    };
+  }
+  
 }

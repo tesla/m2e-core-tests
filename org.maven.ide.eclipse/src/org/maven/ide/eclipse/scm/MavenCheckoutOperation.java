@@ -19,7 +19,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
-import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.project.MavenProjectScmInfo;
 
@@ -31,12 +31,20 @@ import org.maven.ide.eclipse.project.MavenProjectScmInfo;
  */
 public class MavenCheckoutOperation implements IRunnableWithProgress {
 
-  private Collection<MavenProjectScmInfo> mavenProjects;
+  private final MavenConsole console;
   
-  private File location;
+  private final File location;
+  
+  private final Collection<MavenProjectScmInfo> mavenProjects;
+  
+  private final List<String> locations = new ArrayList<String>();
 
-  private List<String> locations = new ArrayList<String>();
-  
+  public MavenCheckoutOperation(File location, Collection<MavenProjectScmInfo> mavenProjects, MavenConsole console) {
+    this.location = location;
+    this.mavenProjects = mavenProjects;
+    this.console = console;
+  }
+
   public void run(IProgressMonitor monitor) throws InterruptedException, InvocationTargetException {
     List<MavenProjectScmInfo> flatProjects = new ArrayList<MavenProjectScmInfo>();
 
@@ -81,7 +89,7 @@ public class MavenCheckoutOperation implements IRunnableWithProgress {
         ScmHandler handler = ScmHandlerFactory.getHandler(info.getFolderUrl());
         if(handler == null) {
           String msg = "SCM provider is not available for " + info.getFolderUrl();
-          MavenPlugin.getDefault().getConsole().logError(msg);
+          console.logError(msg);
         } else {
           handler.checkoutProject(info, location, monitor);
           locations.add(location.getAbsolutePath());
@@ -89,7 +97,7 @@ public class MavenCheckoutOperation implements IRunnableWithProgress {
         
       } catch(CoreException ex) {
         String msg = "Checkout error; " + (ex.getMessage() == null ? ex.toString() : ex.getMessage());
-        MavenPlugin.getDefault().getConsole().logError(msg);
+        console.logError(msg);
         MavenLogger.log(msg, ex);
         throw new InvocationTargetException(ex);
       }
@@ -158,17 +166,6 @@ public class MavenCheckoutOperation implements IRunnableWithProgress {
       }
       suffix++;
     }
-  }
-
-  public void setLocation(File location) {
-    this.location = location;
-  }
-
-  /**
-   * @param mavenProjects a collection of {@link MavenProjectScmInfo}
-   */
-  public void setMavenProjects(Collection<MavenProjectScmInfo> mavenProjects) {
-    this.mavenProjects = mavenProjects;
   }
 
   /**

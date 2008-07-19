@@ -124,7 +124,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
 
   public void importProjects(Collection<MavenProjectInfo> projectInfos, ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException {
     try {
-      MavenEmbedder embedder = embedderManager.createEmbedder(EmbedderFactory.createWorkspaceCustomizer());
+      MavenEmbedder embedder = projectManagerImpl.createWorkspaceEmbedder();
       try {
         MavenUpdateRequest updateRequest = new MavenUpdateRequest(false, false);
 

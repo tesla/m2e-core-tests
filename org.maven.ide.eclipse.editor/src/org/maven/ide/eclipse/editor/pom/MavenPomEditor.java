@@ -107,8 +107,6 @@ import org.maven.ide.components.pom.util.PomResourceImpl;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.editor.MavenEditorPlugin;
-import org.maven.ide.eclipse.embedder.EmbedderFactory;
-import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.project.MavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
@@ -462,27 +460,30 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
         monitor.setTaskName("Reading project");
         MavenProject mavenProject = readMavenProject(force);
     
-        MavenEmbedderManager embedderManager = plugin.getMavenEmbedderManager();
-        MavenEmbedder embedder = embedderManager.createEmbedder(EmbedderFactory.createWorkspaceCustomizer());
-        
-        monitor.setTaskName("Building dependency tree");
-        PlexusContainer plexus = embedder.getPlexusContainer();
-    
-        ArtifactFactory artifactFactory = (ArtifactFactory) plexus.lookup(ArtifactFactory.class);
-        ArtifactMetadataSource artifactMetadataSource = (ArtifactMetadataSource) plexus.lookup(ArtifactMetadataSource.class);
-    
-        ArtifactCollector artifactCollector = (ArtifactCollector) plexus.lookup(ArtifactCollector.class);
-    
-        // ArtifactFilter artifactFilter = new ScopeArtifactFilter( scope );
-        ArtifactFilter artifactFilter = null;
-    
-        ArtifactRepository localRepository = embedder.getLocalRepository();
-        
-        DependencyTreeBuilder builder = (DependencyTreeBuilder) plexus.lookup(DependencyTreeBuilder.ROLE);
-        
-        rootNode = builder.buildDependencyTree(mavenProject,
-            localRepository, artifactFactory, artifactMetadataSource,
-            artifactFilter, artifactCollector);
+        MavenProjectManager mavenProjectManager = plugin.getMavenProjectManager();
+        MavenEmbedder embedder = mavenProjectManager.createWorkspaceEmbedder();
+        try {
+          monitor.setTaskName("Building dependency tree");
+          PlexusContainer plexus = embedder.getPlexusContainer();
+      
+          ArtifactFactory artifactFactory = (ArtifactFactory) plexus.lookup(ArtifactFactory.class);
+          ArtifactMetadataSource artifactMetadataSource = (ArtifactMetadataSource) plexus.lookup(ArtifactMetadataSource.class);
+      
+          ArtifactCollector artifactCollector = (ArtifactCollector) plexus.lookup(ArtifactCollector.class);
+      
+          // ArtifactFilter artifactFilter = new ScopeArtifactFilter( scope );
+          ArtifactFilter artifactFilter = null;
+      
+          ArtifactRepository localRepository = embedder.getLocalRepository();
+          
+          DependencyTreeBuilder builder = (DependencyTreeBuilder) plexus.lookup(DependencyTreeBuilder.ROLE);
+          
+          rootNode = builder.buildDependencyTree(mavenProject,
+              localRepository, artifactFactory, artifactMetadataSource,
+              artifactFilter, artifactCollector);
+        } finally {
+          embedder.stop();
+        }
     
   //       DependencyNodeVisitor visitor = new DependencyNodeVisitor() {
   //         public boolean visit(DependencyNode dependencynode) {
@@ -569,25 +570,29 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 
   private MavenProject readMavenProject(File pomFile) throws MavenEmbedderException {
     MavenPlugin plugin = MavenPlugin.getDefault();
-    MavenEmbedderManager embedderManager = plugin.getMavenEmbedderManager();
-    MavenEmbedder embedder = embedderManager.createEmbedder(EmbedderFactory.createWorkspaceCustomizer());
-    ResolverConfiguration resolverConfiguration = new ResolverConfiguration();
-    IProgressMonitor monitor = new NullProgressMonitor();
-    
-    MavenProjectManager projectManager = plugin.getMavenProjectManager();
-    MavenExecutionResult result = projectManager.execute(embedder, pomFile, resolverConfiguration, new MavenRunnable() {
-      public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request) {
-        request.setOffline(false);
-        request.setUpdateSnapshots(false);
-        return embedder.readProjectWithDependencies(request);
-      }
-    }, monitor);
-    
-    // XXX handle project read errors
-    // result.getExceptions();
-    // result.getArtifactResolutionResult();
-    
-    return result.getProject();
+    MavenProjectManager mavenProjectManager = plugin.getMavenProjectManager();
+    MavenEmbedder embedder = mavenProjectManager.createWorkspaceEmbedder();
+    try {
+      ResolverConfiguration resolverConfiguration = new ResolverConfiguration();
+      IProgressMonitor monitor = new NullProgressMonitor();
+      
+      MavenProjectManager projectManager = plugin.getMavenProjectManager();
+      MavenExecutionResult result = projectManager.execute(embedder, pomFile, resolverConfiguration, new MavenRunnable() {
+        public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request) {
+          request.setOffline(false);
+          request.setUpdateSnapshots(false);
+          return embedder.readProjectWithDependencies(request);
+        }
+      }, monitor);
+      
+      // XXX handle project read errors
+      // result.getExceptions();
+      // result.getArtifactResolutionResult();
+      
+      return result.getProject();
+    } finally {
+      embedder.stop();
+    }
   }
 
   public MetadataResolutionResult readDependencyMetadata(IFile pomFile, IProgressMonitor monitor) throws CoreException {
@@ -597,8 +602,8 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 
     MavenEmbedder embedder = null;
     try {
-      MavenEmbedderManager embedderManager = plugin.getMavenEmbedderManager();
-      embedder = embedderManager.createEmbedder(EmbedderFactory.createWorkspaceCustomizer());
+      MavenProjectManager mavenProjectManager = plugin.getMavenProjectManager();
+      embedder = mavenProjectManager.createWorkspaceEmbedder();
 
       monitor.setTaskName("Reading project");
       monitor.subTask("Reading project");

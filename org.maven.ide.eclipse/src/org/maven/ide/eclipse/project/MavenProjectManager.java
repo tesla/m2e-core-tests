@@ -19,9 +19,9 @@ import org.eclipse.core.runtime.Path;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.embedder.MavenEmbedder;
+import org.apache.maven.embedder.MavenEmbedderException;
 import org.apache.maven.execution.MavenExecutionResult;
 
-import org.maven.ide.eclipse.internal.project.ArtifactKey;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerImpl;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerRefreshJob;
 
@@ -169,7 +169,11 @@ public class MavenProjectManager {
   }
 
   public MavenProjectFacade getMavenProject(String groupId, String artifactId, String version) {
-    return manager.getMavenProject(new ArtifactKey(groupId, artifactId, version, null));
+    return manager.getMavenProject(groupId, artifactId, version, null);
+  }
+  
+  public MavenEmbedder createWorkspaceEmbedder() throws MavenEmbedderException {
+    return manager.createWorkspaceEmbedder();
   }
 
   public File getWorkspaceStateFile() {

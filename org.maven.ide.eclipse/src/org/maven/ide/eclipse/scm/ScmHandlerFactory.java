@@ -19,11 +19,8 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Status;
 
-import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
 
 
@@ -70,7 +67,7 @@ public class ScmHandlerFactory {
   }
 
   public static synchronized ScmHandler getHandler(String url) throws CoreException {
-    String type = getType(url);
+    String type = ScmUrl.getType(url);
     return getHandlerByType(type);
   }
 
@@ -80,17 +77,6 @@ public class ScmHandlerFactory {
       return null;
     }
     return handlers.get(0);
-  }
-
-  public static synchronized String getType(String url) throws CoreException {
-    if(!url.startsWith("scm:")) {
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Invalid SCM url " + url, null));
-    }
-    int n = url.indexOf(":", 4);
-    if(n == -1) {
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Invalid SCM url " + url, null));
-    }
-    return url.substring(4, n);
   }
 
   private static Map<String, List<ScmHandler>> getScms() {

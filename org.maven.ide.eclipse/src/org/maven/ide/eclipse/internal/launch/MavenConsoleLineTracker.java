@@ -32,7 +32,7 @@ import org.codehaus.plexus.util.DirectoryScanner;
 
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
-import org.maven.ide.eclipse.ui.internal.preferences.MavenFileEditorInput;
+import org.maven.ide.eclipse.ui.internal.editors.MavenFileEditorInput;
 
 
 /**

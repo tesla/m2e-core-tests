@@ -31,7 +31,6 @@ import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
-import org.maven.ide.eclipse.ui.internal.launch.MavenGoalSelectionAdapter;
 
 /**
  * Maven project preference page

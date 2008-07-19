@@ -11,6 +11,7 @@ package org.maven.ide.eclipse.wizards;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -59,13 +60,16 @@ import org.maven.ide.eclipse.scm.MavenCheckoutOperation;
  * @author Eugene Kuleshov
  */
 public abstract class MavenProjectCheckoutJob extends WorkspaceJob {
-  final MavenCheckoutOperation operation = new MavenCheckoutOperation();
 
   final ProjectImportConfiguration configuration;
   
   boolean checkoutAllProjects;
 
   Collection<MavenProjectInfo> projects;
+
+  File location;
+  
+  List<String> collectedLocations = new ArrayList<String>();
 
   public MavenProjectCheckoutJob(ProjectImportConfiguration importConfiguration, boolean checkoutAllProjects) {
     super("Checking out Maven projects");
@@ -76,7 +80,7 @@ public abstract class MavenProjectCheckoutJob extends WorkspaceJob {
   }
   
   public void setLocation(File location) {
-    operation.setLocation(location);
+    this.location = location;
   }
   
   protected abstract Collection<MavenProjectScmInfo> getProjects(IProgressMonitor monitor) throws InterruptedException;
@@ -86,18 +90,20 @@ public abstract class MavenProjectCheckoutJob extends WorkspaceJob {
   
   public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
     try {
-      operation.setMavenProjects(getProjects(monitor));
+      MavenPlugin plugin = MavenPlugin.getDefault();
+      MavenConsole console = plugin.getConsole();
+
+      MavenCheckoutOperation operation = new MavenCheckoutOperation(location, getProjects(monitor), console);
       operation.run(monitor);
+      collectedLocations.addAll(operation.getLocations());
 
       IWorkspaceRoot workspace = ResourcesPlugin.getWorkspace().getRoot();
 
-      MavenPlugin plugin = MavenPlugin.getDefault();
       MavenModelManager modelManager = plugin.getMavenModelManager();
       
       LocalProjectScanner scanner = new LocalProjectScanner(workspace.getLocation().toFile(), operation.getLocations(),
-          true, modelManager, plugin.getConsole());
+          true, modelManager, console);
       scanner.run(monitor);
-
 
       boolean includeModules = configuration.getResolverConfiguration().shouldIncludeModules();
       this.projects = plugin.getProjectConfigurationManager().collectProjects(scanner.getProjects(), includeModules);
@@ -151,9 +157,8 @@ public abstract class MavenProjectCheckoutJob extends WorkspaceJob {
       if(projects.isEmpty()) {
         MavenPlugin.getDefault().getConsole().logMessage("No Maven projects to import");
         
-        final List<String> locations = operation.getLocations();
-        if(locations.size()==1) {
-          final String location = locations.get(0);
+        if(collectedLocations.size()==1) {
+          final String location = collectedLocations.get(0);
           
           DirectoryScanner projectScanner = new DirectoryScanner();
           projectScanner.setBasedir(location);
@@ -169,11 +174,11 @@ public abstract class MavenProjectCheckoutJob extends WorkspaceJob {
                     "No Maven projects found, but there is Eclipse projects configuration avaialble.\n" +
                     "Do you want to select and import Eclipse projects?");
                 if(res) {
-                  IWizard wizard = new ProjectsImportWizard(locations.get(0));
+                  IWizard wizard = new ProjectsImportWizard(collectedLocations.get(0));
                   WizardDialog dialog = new WizardDialog(Display.getDefault().getActiveShell(), wizard);
                   dialog.open();
                 } else {
-                  cleanup(locations);
+                  cleanup(collectedLocations);
                 }
               }
             });
@@ -193,14 +198,14 @@ public abstract class MavenProjectCheckoutJob extends WorkspaceJob {
                 NewProjectAction newProjectAction = new NewProjectAction(PlatformUI.getWorkbench().getActiveWorkbenchWindow());
                 newProjectAction.run();
               } else {
-                cleanup(locations);
+                cleanup(collectedLocations);
               }
             }
           });
           return;
         }
 
-        cleanup(locations);
+        cleanup(collectedLocations);
       }
       
       configuration.setNeedsRename(true);
@@ -228,12 +233,11 @@ public abstract class MavenProjectCheckoutJob extends WorkspaceJob {
       } else {
         Display.getDefault().asyncExec(new Runnable() {
           public void run() {
-            List<String> locations = operation.getLocations();
-            MavenImportWizard wizard = new MavenImportWizard(configuration, locations);
+            MavenImportWizard wizard = new MavenImportWizard(configuration, collectedLocations);
             WizardDialog dialog = new WizardDialog(Display.getDefault().getActiveShell(), wizard);
             int res = dialog.open();
             if(res == Window.CANCEL) {
-              cleanup(locations);
+              cleanup(collectedLocations);
             }
           }
         });

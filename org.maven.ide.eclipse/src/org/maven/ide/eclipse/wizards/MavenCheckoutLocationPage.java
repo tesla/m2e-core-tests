@@ -114,7 +114,7 @@ public class MavenCheckoutLocationPage extends AbstractMavenWizardPage {
       
       if(scmUrls!=null && scmUrls.length == 1) {
         try {
-          scmType = ScmHandlerFactory.getType(scmUrls[0].getUrl());
+          scmType = ScmUrl.getType(scmUrls[0].getUrl());
         } catch(CoreException ex) {
         }
       }
@@ -148,7 +148,7 @@ public class MavenCheckoutLocationPage extends AbstractMavenWizardPage {
           final String url = scmUrlCombo.getText();
           if(url.startsWith("scm:")) {
             try {
-              final String type = ScmHandlerFactory.getType(url);
+              final String type = ScmUrl.getType(url);
               scmTypeCombo.setText(type);
               scmType = type;
               Display.getDefault().asyncExec(new Runnable() {

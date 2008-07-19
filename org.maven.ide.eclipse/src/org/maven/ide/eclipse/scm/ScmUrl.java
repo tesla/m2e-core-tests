@@ -9,6 +9,10 @@
 package org.maven.ide.eclipse.scm;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
+import org.maven.ide.eclipse.core.IMavenConstants;
 
 /**
  * An SCM URL wrapper used to adapt 3rd party resources:
@@ -56,12 +60,23 @@ public class ScmUrl {
    */
   public String getProviderUrl() {
     try {
-      String type = ScmHandlerFactory.getType(scmUrl);
+      String type = ScmUrl.getType(scmUrl);
       return scmUrl.substring(type.length() + 5);
       
     } catch(CoreException ex) {
       return null;
     }
+  }
+
+  public static synchronized String getType(String url) throws CoreException {
+    if(!url.startsWith("scm:")) {
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Invalid SCM url " + url, null));
+    }
+    int n = url.indexOf(":", 4);
+    if(n == -1) {
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Invalid SCM url " + url, null));
+    }
+    return url.substring(4, n);
   }
 
 }

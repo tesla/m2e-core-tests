@@ -20,7 +20,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Text;
 
-import org.maven.ide.eclipse.ui.internal.launch.MavenGoalSelectionAdapter;
 
 /**
  * A field editor for a combo box that allows the drop-down selection of one of

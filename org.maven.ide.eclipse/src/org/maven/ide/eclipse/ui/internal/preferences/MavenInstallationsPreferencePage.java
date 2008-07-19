@@ -72,6 +72,7 @@ import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.index.IndexManager;
+import org.maven.ide.eclipse.ui.internal.editors.MavenFileEditorInput;
 
 
 /**

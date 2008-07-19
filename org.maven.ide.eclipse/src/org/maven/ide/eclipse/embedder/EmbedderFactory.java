@@ -11,9 +11,7 @@ package org.maven.ide.eclipse.embedder;
 import java.io.File;
 
 import org.codehaus.plexus.PlexusContainer;
-import org.codehaus.plexus.component.repository.ComponentDescriptor;
 
-import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.embedder.Configuration;
 import org.apache.maven.embedder.ConfigurationValidationResult;
 import org.apache.maven.embedder.ContainerCustomizer;
@@ -24,7 +22,6 @@ import org.apache.maven.embedder.MavenEmbedderLogger;
 import org.apache.maven.execution.DefaultMavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionRequest;
 
-import org.maven.ide.eclipse.internal.project.EclipseArtifactResolver;
 
 
 /**
@@ -117,39 +114,6 @@ public class EmbedderFactory {
     configuration.setMavenEmbedderLogger(logger);
     configuration.setUserSettingsFile(file);
     return MavenEmbedder.validateConfiguration(configuration);
-  }
-
-  public static ContainerCustomizer createWorkspaceCustomizer() {
-    return new ContainerCustomizer() {
-      public void customize(PlexusContainer container) {
-        ComponentDescriptor resolverDescriptor = container.getComponentDescriptor(ArtifactResolver.ROLE);
-        resolverDescriptor.setImplementation(EclipseArtifactResolver.class.getName());
-
-        // desc = plexusContainer.getComponentDescriptor(ArtifactFactory.ROLE);
-        // desc.setImplementation(org.maven.ide.eclipse.embedder.EclipseArtifactFactory.class.getName());
-
-        // Used for building hierarchy of dependencies
-        // desc = container.getComponentDescriptor(ResolutionListener.ROLE);
-        // if(desc == null) {
-        //   desc = new ComponentDescriptor();
-        //   desc.setRole(ResolutionListener.ROLE);
-        //   container.addComponentDescriptor(desc);
-        // }
-        // desc.setImplementation(EclipseResolutionListener.class.getName());
-
-        // Custom artifact resolver for resolving artifacts from Eclipse Worspace
-//        if(resolveWorkspaceProjects) {
-//          ComponentDescriptor resolverDescriptor = container.getComponentDescriptor(ArtifactResolver.ROLE);
-//          // ComponentRequirement requirement = new ComponentRequirement();
-//          // requirement.setRole(ResolutionListener.ROLE);
-//          // desc.addRequirement(requirement);
-//          resolverDescriptor.setImplementation(EclipseArtifactResolver.class.getName());
-//        }
-        
-//          desc = container.getComponentDescriptor(WagonManager.ROLE);
-//          desc.setImplementation(EclipseWagonManager.class.getName());
-      }
-    };
   }
 
   public static ContainerCustomizer createExecutionCustomizer() {

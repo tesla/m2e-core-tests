@@ -6,13 +6,15 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.ui.internal.launch;
+package org.maven.ide.eclipse.ui.internal.preferences;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+
+import org.maven.ide.eclipse.ui.internal.launch.MavenGoalSelectionDialog;
 
 public class MavenGoalSelectionAdapter extends SelectionAdapter {
     private Shell shell;

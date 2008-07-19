@@ -69,7 +69,6 @@ import org.maven.ide.eclipse.internal.embedder.MavenWorkspaceRuntime;
 import org.maven.ide.eclipse.internal.index.IndexInfoWriter;
 import org.maven.ide.eclipse.internal.index.NexusIndexManager;
 import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;
-import org.maven.ide.eclipse.internal.project.MavenLaunchConfigurationListener;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerImpl;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerRefreshJob;
 import org.maven.ide.eclipse.internal.project.ProjectConfigurationManager;
@@ -78,6 +77,7 @@ import org.maven.ide.eclipse.project.BuildPathManager;
 import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
+import org.maven.ide.eclipse.ui.internal.launch.MavenLaunchConfigurationListener;
 
 
 /**
