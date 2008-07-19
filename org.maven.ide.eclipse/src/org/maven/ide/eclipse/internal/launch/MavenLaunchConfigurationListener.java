@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.ui.internal.launch;
+package org.maven.ide.eclipse.internal.launch;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -17,7 +17,6 @@ import org.eclipse.jdt.launching.JavaRuntime;
 
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
-import org.maven.ide.eclipse.internal.launch.MavenRuntimeClasspathProvider;
 
 public class MavenLaunchConfigurationListener implements ILaunchConfigurationListener {
 

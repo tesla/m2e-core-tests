@@ -31,8 +31,8 @@ import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 
+import org.maven.ide.eclipse.archetype.ArchetypeCatalogFactory;
 import org.maven.ide.eclipse.core.MavenLogger;
-import org.maven.ide.eclipse.embedder.ArchetypeCatalogFactory;
 import org.maven.ide.eclipse.index.IndexInfo;
 import org.maven.ide.eclipse.internal.index.IndexInfoWriter;
 import org.maven.ide.eclipse.project.configurator.AbstractClasspathConfiguratorFactory;

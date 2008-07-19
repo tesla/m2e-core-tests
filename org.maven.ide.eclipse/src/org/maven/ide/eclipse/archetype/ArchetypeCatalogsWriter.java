@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.internal.archetype;
+package org.maven.ide.eclipse.archetype;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,10 +32,9 @@ import org.xml.sax.helpers.AttributesImpl;
 import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.XMLFilterImpl;
 
+import org.maven.ide.eclipse.archetype.ArchetypeCatalogFactory.LocalCatalogFactory;
+import org.maven.ide.eclipse.archetype.ArchetypeCatalogFactory.RemoteCatalogFactory;
 import org.maven.ide.eclipse.core.MavenLogger;
-import org.maven.ide.eclipse.embedder.ArchetypeCatalogFactory;
-import org.maven.ide.eclipse.embedder.ArchetypeCatalogFactory.LocalCatalogFactory;
-import org.maven.ide.eclipse.embedder.ArchetypeCatalogFactory.RemoteCatalogFactory;
 
 
 /**

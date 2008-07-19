@@ -50,12 +50,12 @@ import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
+import org.maven.ide.eclipse.archetype.ArchetypeCatalogFactory;
+import org.maven.ide.eclipse.archetype.ArchetypeManager;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.AbstractMavenEmbedderListener;
-import org.maven.ide.eclipse.embedder.ArchetypeCatalogFactory;
-import org.maven.ide.eclipse.embedder.ArchetypeManager;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
@@ -68,6 +68,7 @@ import org.maven.ide.eclipse.internal.embedder.MavenEmbeddedRuntime;
 import org.maven.ide.eclipse.internal.embedder.MavenWorkspaceRuntime;
 import org.maven.ide.eclipse.internal.index.IndexInfoWriter;
 import org.maven.ide.eclipse.internal.index.NexusIndexManager;
+import org.maven.ide.eclipse.internal.launch.MavenLaunchConfigurationListener;
 import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerImpl;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerRefreshJob;
@@ -77,7 +78,6 @@ import org.maven.ide.eclipse.project.BuildPathManager;
 import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
-import org.maven.ide.eclipse.ui.internal.launch.MavenLaunchConfigurationListener;
 
 
 /**

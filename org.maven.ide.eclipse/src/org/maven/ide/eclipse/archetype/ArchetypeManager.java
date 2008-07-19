@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.embedder;
+package org.maven.ide.eclipse.archetype;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,7 +22,6 @@ import java.util.Map;
 
 import org.codehaus.plexus.util.IOUtil;
 
-import org.maven.ide.eclipse.internal.archetype.ArchetypeCatalogsWriter;
 
 
 /**

@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.embedder;
+package org.maven.ide.eclipse.archetype;
 
 import java.util.Properties;
 
@@ -23,6 +23,7 @@ import org.apache.maven.archetype.source.ArchetypeDataSourceException;
 
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 
 /**
  * Abstract ArchetypeCatalog factory

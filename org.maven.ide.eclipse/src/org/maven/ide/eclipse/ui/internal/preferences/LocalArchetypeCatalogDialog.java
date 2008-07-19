@@ -39,9 +39,9 @@ import org.apache.maven.archetype.catalog.Archetype;
 import org.apache.maven.archetype.catalog.ArchetypeCatalog;
 
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.embedder.ArchetypeCatalogFactory;
+import org.maven.ide.eclipse.archetype.ArchetypeCatalogFactory;
+import org.maven.ide.eclipse.archetype.ArchetypeCatalogFactory.LocalCatalogFactory;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
-import org.maven.ide.eclipse.embedder.ArchetypeCatalogFactory.LocalCatalogFactory;
 
 /**
  * Local Archetype catalog dialog

@@ -74,12 +74,12 @@ import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.embedder.MavenEmbedder;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.archetype.ArchetypeCatalogFactory;
+import org.maven.ide.eclipse.archetype.ArchetypeManager;
+import org.maven.ide.eclipse.archetype.ArchetypeCatalogFactory.NexusIndexerCatalogFactory;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.core.Messages;
-import org.maven.ide.eclipse.embedder.ArchetypeCatalogFactory;
-import org.maven.ide.eclipse.embedder.ArchetypeManager;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
-import org.maven.ide.eclipse.embedder.ArchetypeCatalogFactory.NexusIndexerCatalogFactory;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 
