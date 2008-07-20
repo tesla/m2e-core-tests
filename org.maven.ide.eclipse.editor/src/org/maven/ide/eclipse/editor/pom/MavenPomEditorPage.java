@@ -28,7 +28,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.emf.common.command.AbstractCommand;
 import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.common.notify.Adapter;
@@ -50,7 +49,6 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
@@ -248,20 +246,8 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
         case Notification.MOVE:
         case Notification.REMOVE:
         case Notification.SET:
-          if (getManagedForm() != null) {
-            // dummy command to track dirty editor status 
-            getEditingDomain().getCommandStack().execute(new AbstractCommand() {
-              public void execute() {
-              }
-              public void redo() {
-              }
-              public boolean canExecute() {
-                return true;
-              }
-            });
-            
+          if (getManagedForm() != null)
             updateView(notification);
-          }
           break;
           
         default:

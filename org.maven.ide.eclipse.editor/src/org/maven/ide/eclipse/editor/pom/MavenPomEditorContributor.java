@@ -8,14 +8,10 @@
 
 package org.maven.ide.eclipse.editor.pom;
 
-import org.eclipse.jface.action.*;
-import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IWorkbenchActionConstants;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
-import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.ide.IDEActionFactory;
 import org.eclipse.ui.part.MultiPageEditorActionBarContributor;
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -28,73 +24,53 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
  * editors in the multi-page editor.
  */
 public class MavenPomEditorContributor extends MultiPageEditorActionBarContributor {
-  private IEditorPart activeEditorPart;
-  private Action openParentPomAction;
-
-  public MavenPomEditorContributor() {
-    createActions();
-  }
+  private ITextEditor sourceEditorPart;
 
   /**
    * Returns the action registered with the given text editor.
    * 
    * @return IAction or null if editor is null.
    */
-  protected IAction getAction(ITextEditor editor, String actionId) {
-    return editor == null ? null : editor.getAction(actionId);
+  protected IAction getAction(String actionId) {
+    return sourceEditorPart.getAction(actionId);
   }
 
   public void setActivePage(IEditorPart part) {
-    if (activeEditorPart == part) {
-      return;
+    //set the text editor
+    if (part instanceof ITextEditor && sourceEditorPart == null) {
+      sourceEditorPart = (ITextEditor) part;
     }
-
-    activeEditorPart = part;
 
     IActionBars actionBars = getActionBars();
     if (actionBars != null) {
-      ITextEditor editor = part instanceof ITextEditor ? (ITextEditor) part : null;
-
-      actionBars.setGlobalActionHandler(ActionFactory.DELETE.getId(), //
-          getAction(editor, ITextEditorActionConstants.DELETE));
+      actionBars.clearGlobalActionHandlers();
+      
+      //undo/redo always enabled
       actionBars.setGlobalActionHandler(ActionFactory.UNDO.getId(), //
-          getAction(editor, ITextEditorActionConstants.UNDO));
+          getAction(ITextEditorActionConstants.UNDO));
       actionBars.setGlobalActionHandler(ActionFactory.REDO.getId(), //
-          getAction(editor, ITextEditorActionConstants.REDO));
-      actionBars.setGlobalActionHandler(ActionFactory.CUT.getId(), //
-          getAction(editor, ITextEditorActionConstants.CUT));
-      actionBars.setGlobalActionHandler(ActionFactory.COPY.getId(), //
-          getAction(editor, ITextEditorActionConstants.COPY));
-      actionBars.setGlobalActionHandler(ActionFactory.PASTE.getId(), //
-          getAction(editor, ITextEditorActionConstants.PASTE));
-      actionBars.setGlobalActionHandler(ActionFactory.SELECT_ALL.getId(), //
-          getAction(editor, ITextEditorActionConstants.SELECT_ALL));
-      actionBars.setGlobalActionHandler(ActionFactory.FIND.getId(), //
-          getAction(editor, ITextEditorActionConstants.FIND));
-      actionBars.setGlobalActionHandler(IDEActionFactory.BOOKMARK.getId(), //
-          getAction(editor, IDEActionFactory.BOOKMARK.getId()));
+          getAction(ITextEditorActionConstants.REDO));
+
+      //all other action, for text editor only (FormPage doesn't provide for these actions...)
+      if (part instanceof ITextEditor) {
+        actionBars.setGlobalActionHandler(ActionFactory.DELETE.getId(), //
+            getAction(ITextEditorActionConstants.DELETE));
+        actionBars.setGlobalActionHandler(ActionFactory.CUT.getId(), //
+            getAction(ITextEditorActionConstants.CUT));
+        actionBars.setGlobalActionHandler(ActionFactory.COPY.getId(), //
+            getAction(ITextEditorActionConstants.COPY));
+        actionBars.setGlobalActionHandler(ActionFactory.PASTE.getId(), //
+            getAction(ITextEditorActionConstants.PASTE));
+        actionBars.setGlobalActionHandler(ActionFactory.SELECT_ALL.getId(), //
+            getAction(ITextEditorActionConstants.SELECT_ALL));
+        actionBars.setGlobalActionHandler(ActionFactory.FIND.getId(), //
+            getAction(ITextEditorActionConstants.FIND));
+        actionBars.setGlobalActionHandler(IDEActionFactory.BOOKMARK.getId(), //
+            getAction(IDEActionFactory.BOOKMARK.getId()));
+      }
+
       
       actionBars.updateActionBars();
     }
-  }
-
-  private void createActions() {
-    openParentPomAction = new Action("Open Parent POM", PlatformUI.getWorkbench() //
-        .getSharedImages().getImageDescriptor(IDE.SharedImages.IMG_OBJS_TASK_TSK)) {
-      public void run() {
-        MessageDialog.openInformation(null, "Graph Plug-in", "Sample Action Executed");
-      }
-    };
-  }
-
-  public void contributeToMenu(IMenuManager manager) {
-    IMenuManager menu = new MenuManager("Editor &Menu");
-    manager.prependToGroup(IWorkbenchActionConstants.MB_ADDITIONS, menu);
-    menu.add(openParentPomAction);
-  }
-
-  public void contributeToToolBar(IToolBarManager manager) {
-    manager.add(new Separator());
-    manager.add(openParentPomAction);
   }
 }

@@ -77,6 +77,7 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.search.ui.text.ISearchEditorAccess;
 import org.eclipse.search.ui.text.Match;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
@@ -90,6 +91,7 @@ import org.eclipse.ui.forms.editor.FormEditor;
 import org.eclipse.ui.forms.editor.IFormPage;
 import org.eclipse.ui.ide.IGotoMarker;
 import org.eclipse.ui.part.FileEditorInput;
+import org.eclipse.ui.part.MultiPageEditorActionBarContributor;
 import org.eclipse.ui.progress.UIJob;
 import org.eclipse.wst.common.internal.emf.resource.EMF2DOMRenderer;
 import org.eclipse.wst.sse.core.StructuredModelManager;
@@ -224,6 +226,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
               }
             }
           }
+
         });
       }
       
@@ -256,14 +259,18 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     for(MavenPomEditorPage page : pages) {
       page.reload();
     }
-    commandStack.flush();
+    flushCommandStack();
+  }
+  
+  private void flushCommandStack() {
+    sourcePage.getModel().getUndoManager().getCommandStack().flush();
     getContainer().getDisplay().asyncExec(new Runnable() {
       public void run() {
         editorDirtyStateChanged();
       }
     });
   }
-  
+
   protected void addPages() {
     overviewPage = new OverviewPage(this);
     addPomPage(overviewPage);
@@ -296,21 +303,30 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     addPomPage(graphPage);
     
     sourcePage = new StructuredTextEditor() {
+      private boolean dirty = false;
+      
       public void doSave(IProgressMonitor monitor) {
-        // always save using form editor
+        // always save text editor
         ResourcesPlugin.getWorkspace().removeResourceChangeListener(MavenPomEditor.this);
         try {
           super.doSave(monitor);
+          flushCommandStack();
         } finally {
           ResourcesPlugin.getWorkspace().addResourceChangeListener(MavenPomEditor.this);
         }
-        
-        commandStack.saveIsDone();
-        editorDirtyStateChanged();
-        
-        commandStack = new NotificationCommandStack(MavenPomEditor.this);
-        editingDomain = new AdapterFactoryEditingDomain(adapterFactory, //
-            commandStack, new HashMap<Resource, Boolean>());
+      }
+      
+      public boolean isDirty() {
+        //Eclipse bugzilla entries: 213109, 138100, 191754
+        //WTP SSE editor has problems with dirty
+        //use command stack dirtiness instead
+        boolean dirty = getModel().getUndoManager().getCommandStack().canUndo();
+        //manually update editor dirty indicator
+        if (this.dirty != dirty) {
+          this.dirty = dirty;
+          MavenPomEditor.this.editorDirtyStateChanged();
+        }
+        return dirty;
       }
     };
     sourcePage.setEditorPart(this);
@@ -319,6 +335,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       sourcePageIndex = addPage(sourcePage, getEditorInput());
       setPageText(sourcePageIndex, "pom.xml");
       sourcePage.update();
+      flushCommandStack();
       try {
         readProjectDocument();
       } catch(CoreException e) {
@@ -327,6 +344,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       
       // TODO activate xml source page is model is empty or have errors
       IDocument doc = sourcePage.getDocumentProvider().getDocument(getEditorInput());
+      setSSEActionBarContributor();
       if (doc instanceof IStructuredDocument) {
         List<AdapterFactoryImpl> factories = new ArrayList<AdapterFactoryImpl>();
         factories.add(new ResourceItemProviderAdapterFactory());
@@ -696,6 +714,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   }
   
   public void dispose() {
+    flushCommandStack();
     if(pomFile != null) {
       try {
         structuredModel.reload(pomFile.getContents());
@@ -862,23 +881,23 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   }
   
   public boolean isDirty() {
-    return commandStack.isSaveNeeded();
+    return sourcePage.isDirty();
   }
 
   public List<MavenPomEditorPage> getPages() {
     return pages;
   }
   
-  /*public void menuAboutToShow(IMenuManager menuManager) {
-    ((IMenuListener)getEditorSite().getActionBarContributor()).menuAboutToShow(menuManager);
+  private void setSSEActionBarContributor() {
+    // this is to enable undo/redo actions from sourcePage for all pages
+    IEditorActionBarContributor contributor = getEditorSite()
+        .getActionBarContributor();
+    if (contributor != null
+        && contributor instanceof MultiPageEditorActionBarContributor) {
+      ((MultiPageEditorActionBarContributor) contributor)
+          .setActivePage(sourcePage);
+    }
   }
 
-  public EditingDomainActionBarContributor getActionBarContributor() {
-    return (EditingDomainActionBarContributor)getEditorSite().getActionBarContributor();
-  }
-
-  public IActionBars getActionBars() {
-    return getActionBarContributor().getActionBars();
-  }*/
 }
 

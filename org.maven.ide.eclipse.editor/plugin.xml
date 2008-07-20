@@ -12,7 +12,7 @@
   <extension point="org.eclipse.ui.editors">
     <editor
           class="org.maven.ide.eclipse.editor.pom.MavenPomEditor"
-          contributorClass="org.eclipse.emf.edit.ui.action.EditingDomainActionBarContributor"
+          contributorClass="org.maven.ide.eclipse.editor.pom.MavenPomEditorContributor"
           icon="icons/editor-pom.gif"
           id="org.maven.ide.eclipse.editor.MavenPomEditor"
           name="Maven POM Editor">
