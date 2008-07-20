@@ -25,13 +25,11 @@
    <extension point="org.eclipse.core.runtime.contentTypes">
      <content-type id="pomFile" name="Maven POM XML"
           base-type="org.eclipse.core.runtime.xml"
-          priority="high"
+          priority="normal"
           default-charset="UTF-8"
           file-names="pom.xml"
-          file-extensions="pom, xml">
-       <describer class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber">
-         <parameter name="element" value="project" />
-       </describer>
+          file-extensions="pom,xml">
+       <describer class="org.maven.ide.eclipse.internal.content.PomFileContentDescriber"/>
      </content-type>
    </extension>
 
