@@ -8,6 +8,13 @@
 
 package org.maven.ide.eclipse.editor.pom;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.Writer;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -40,20 +47,27 @@ import com.windowtester.runtime.condition.HasTextCondition;
 import com.windowtester.runtime.swt.UITestCaseSWT;
 import com.windowtester.runtime.swt.condition.shell.ShellDisposedCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellShowingCondition;
+import com.windowtester.runtime.swt.internal.condition.eclipse.DirtyEditorCondition;
 import com.windowtester.runtime.swt.locator.ButtonLocator;
 import com.windowtester.runtime.swt.locator.CTabItemLocator;
+import com.windowtester.runtime.swt.locator.LabeledLabelLocator;
 import com.windowtester.runtime.swt.locator.NamedWidgetLocator;
 import com.windowtester.runtime.swt.locator.SWTWidgetLocator;
+import com.windowtester.runtime.swt.locator.TreeItemLocator;
 import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
 
 
 /**
  * @author Eugene Kuleshov
  * @author Anton Kraev
+ *
+ * Warning: order of tests is significant, i.e, you cannot just comment out a failed test, further test will not work
  */
 public class PomEditorTest extends UITestCaseSWT {
 
-  private static final String POM_XML_TAB = "pom.xml";
+  private static final String TEST_POM_POM_XML = "test-pom/pom.xml";
+
+private static final String POM_XML_TAB = "pom.xml";
 
   private static final String OVERVIEW_TAB = "Overview";
 
@@ -95,22 +109,27 @@ public class PomEditorTest extends UITestCaseSWT {
     // open pom editor
     // ui.click(2, new TreeItemLocator("test-pom/pom.xml", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
     
-    IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-    IFile file = root.getFile(new Path("test-pom/pom.xml"));
-    
-    final IEditorInput editorInput = new FileEditorInput(file);
-    Display.getDefault().syncExec(new Runnable() {
-      public void run() {
-        try {
-          getActivePage().openEditor(editorInput, "org.maven.ide.eclipse.editor.MavenPomEditor", true);
-        } catch(PartInitException ex) {
-          throw new RuntimeException(ex);
-        }
-      }
-    });
+    openPomFile();
     
     ui.keyClick(SWT.CTRL, 'm');
   }
+
+	private String openPomFile() {
+		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+	    IFile file = root.getFile(new Path(TEST_POM_POM_XML));
+	    
+	    final IEditorInput editorInput = new FileEditorInput(file);
+	    Display.getDefault().syncExec(new Runnable() {
+	      public void run() {
+	        try {
+	          getActivePage().openEditor(editorInput, "org.maven.ide.eclipse.editor.MavenPomEditor", true);
+	        } catch(PartInitException ex) {
+	          throw new RuntimeException(ex);
+	        }
+	      }
+	    });
+	    return file.getLocation().toOSString();
+	}
   
   protected void oneTimeTearDown() throws Exception {
     super.oneTimeTearDown();
@@ -154,6 +173,107 @@ public class PomEditorTest extends UITestCaseSWT {
 
     ui.click(new CTabItemLocator(OVERVIEW_TAB));
     testTextValue("scmUrl", "");
+  }
+  
+  public void testExternalModificationEditorClean() throws Exception {
+	  //save editor
+	  ui.keyClick(SWT.CTRL, 's');
+	  Thread.sleep(2000);
+	  
+	  //externally replace file contents
+      IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+      IFile file = root.getFile(new Path(TEST_POM_POM_XML));
+	  File f = new File(file.getLocation().toOSString());
+	  String text = getContents(f);
+	  setContents(f, text.replace("parent3", "parent4"));
+	  
+	  //reload the file
+      ui.keyClick(SWT.CTRL, 'm');
+      ui.click(new CTabItemLocator("Package Explorer"));
+	  ui.contextClick(new TreeItemLocator(TEST_POM_POM_XML, new ViewLocator(
+				"org.eclipse.jdt.ui.PackageExplorer")), "Refresh");
+	  ui.wait(new ShellShowingCondition("File Changed"));
+	  ui.keyClick('y');
+      testTextValue("parentArtifactId", "parent4");
+  }
+
+  public void testExternalModificationEditorDirty() throws Exception {
+  	  //make editor dirty
+      ui.click(new CTabItemLocator(TEST_POM_POM_XML));
+      ui.keyClick(SWT.CTRL, 'm');
+	  ui.click(new CTabItemLocator(POM_XML_TAB));
+	  replaceText("parent4", "parent5");
+	  ui.click(new CTabItemLocator(OVERVIEW_TAB));
+      ui.keyClick(SWT.CTRL, 'm');
+	  
+	  //externally replace file contents
+      IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+      IFile file = root.getFile(new Path(TEST_POM_POM_XML));
+	  File f = new File(file.getLocation().toOSString());
+	  String text = getContents(f);
+	  setContents(f, text.replace("parent4", "parent6"));
+	  
+	  //reload the file
+      ui.click(new CTabItemLocator("Package Explorer"));
+	  ui.contextClick(new TreeItemLocator(TEST_POM_POM_XML, new ViewLocator(
+				"org.eclipse.jdt.ui.PackageExplorer")), "Refresh");
+	  ui.wait(new ShellShowingCondition("File Changed"));
+	  ui.keyClick('y');
+      testTextValue("parentArtifactId", "parent6");
+  }
+  
+  public void testNewEditorIsClean() throws Exception {
+      //close/open the file 
+      ui.close(new CTabItemLocator(TEST_POM_POM_XML));
+	  ui.click(2, new TreeItemLocator(TEST_POM_POM_XML, new ViewLocator(
+				"org.eclipse.jdt.ui.PackageExplorer")));
+
+      //test the editor is clean
+      isEditorClean();
+  }
+
+  public void testAfterUndoEditorIsClean() throws Exception {
+      //make a change 
+      ui.click(new CTabItemLocator(TEST_POM_POM_XML));
+      ui.keyClick(SWT.CTRL, 'm');
+	  ui.click(new CTabItemLocator(POM_XML_TAB));
+	  replaceText("parent6", "parent7");
+	  ui.click(new CTabItemLocator(OVERVIEW_TAB));
+      //undo it 
+      ui.keyClick(SWT.CTRL, 'z');
+      
+      //test the editor is clean
+      isEditorClean();
+  }
+
+private void isEditorClean() throws WaitTimedOutException {
+	ui.assertThat(new DirtyEditorCondition() {
+
+		@Override
+		public boolean test() {
+			return !super.test();
+		}
+      
+      });
+}
+
+  private String getContents(File aFile) throws Exception {
+	    StringBuilder contents = new StringBuilder();
+	    
+	      BufferedReader input =  new BufferedReader(new FileReader(aFile));
+	      String line = null; //not declared within while loop
+	      while (( line = input.readLine()) != null){
+	        contents.append(line);
+	        contents.append(System.getProperty("line.separator"));
+	      }
+	    return contents.toString();
+	  }
+
+  static public void setContents(File aFile, String aContents) throws Exception {
+	  Writer output = new BufferedWriter(new FileWriter(aFile));
+	  output.write( aContents );
+	  output.flush();
+	  output.close();
   }
 
   private void setSelection(String startMarker, String endMarker) throws WaitTimedOutException, WidgetSearchException {
