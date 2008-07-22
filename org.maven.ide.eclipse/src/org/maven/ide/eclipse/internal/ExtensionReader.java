@@ -32,9 +32,13 @@ import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 
 import org.maven.ide.eclipse.archetype.ArchetypeCatalogFactory;
+import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.index.IndexInfo;
 import org.maven.ide.eclipse.internal.index.IndexInfoWriter;
+import org.maven.ide.eclipse.project.BuildPathManager;
+import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.configurator.AbstractClasspathConfiguratorFactory;
 import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
 
@@ -207,7 +211,8 @@ public class ExtensionReader {
     return null;
   }
 
-  public static List<AbstractProjectConfigurator> readProjectConfiguratorExtensions() {
+  public static List<AbstractProjectConfigurator> readProjectConfiguratorExtensions(MavenProjectManager projectManager,
+      MavenRuntimeManager runtimeManager, BuildPathManager buildpathManager, MavenConsole console) {
     ArrayList<AbstractProjectConfigurator> projectConfigurators = new ArrayList<AbstractProjectConfigurator>();
     
     IExtensionRegistry registry = Platform.getExtensionRegistry();
@@ -220,7 +225,14 @@ public class ExtensionReader {
           if(element.getName().equals(ELEMENT_CONFIGURATOR)) {
             try {
               Object o = element.createExecutableExtension(AbstractProjectConfigurator.ATTR_CLASS);
-              projectConfigurators.add((AbstractProjectConfigurator) o);
+
+              AbstractProjectConfigurator projectConfigurator = (AbstractProjectConfigurator) o;
+              projectConfigurator.setProjectManager(projectManager);
+              projectConfigurator.setRuntimeManager(runtimeManager);
+              projectConfigurator.setBuildPathManager(buildpathManager);
+              projectConfigurator.setConsole(console);
+              
+              projectConfigurators.add(projectConfigurator);
             } catch(CoreException ex) {
               MavenLogger.log(ex);
             }

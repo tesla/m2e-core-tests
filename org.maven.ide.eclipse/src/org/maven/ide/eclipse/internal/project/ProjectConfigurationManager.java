@@ -545,14 +545,8 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
   public synchronized Set<AbstractProjectConfigurator> getConfigurators() {
     if(configurators == null) {
       configurators = new TreeSet<AbstractProjectConfigurator>(new ProjectConfiguratorComparator());
-      for(AbstractProjectConfigurator projectConfigurator : ExtensionReader.readProjectConfiguratorExtensions()) {
-        projectConfigurator.setProjectManager(projectManager);
-        projectConfigurator.setRuntimeManager(runtimeManager);
-        projectConfigurator.setBuildPathManager(buildpathManager);
-        projectConfigurator.setConsole(console);
-        
-        configurators.add(projectConfigurator);
-      }
+      configurators.addAll(ExtensionReader.readProjectConfiguratorExtensions(projectManager, runtimeManager,
+          buildpathManager, console));
     }
     return Collections.unmodifiableSet(configurators);
   }

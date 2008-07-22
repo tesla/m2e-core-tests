@@ -863,7 +863,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     IFile pom11 = p1m1.getFile("pom.xml");
     IMavenProjectFacade f11 = manager.create(pom11, false, null);
 
-    List<Artifact> a = new ArrayList<Artifact>(f11.getMavenProject(monitor).getArtifacts());
-    assertEquals("3.8.1", a.get(0).getVersion());
+    Artifact a = (Artifact) f11.getMavenProject(monitor).getArtifacts().iterator().next();
+    assertEquals("3.8.1", a.getVersion());
   }
 }

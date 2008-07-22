@@ -19,6 +19,8 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -27,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -79,7 +82,7 @@ import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
-import org.maven.ide.eclipse.internal.project.ClasspathConfiguratorFactoryFactory;
+import org.maven.ide.eclipse.internal.ExtensionReader;
 import org.maven.ide.eclipse.project.configurator.AbstractClasspathConfigurator;
 import org.maven.ide.eclipse.project.configurator.AbstractClasspathConfiguratorFactory;
 
@@ -129,6 +132,8 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
 
   private String jdtVersion;
 
+  private Set<AbstractClasspathConfiguratorFactory> factories;
+  
 
   public BuildPathManager(MavenEmbedderManager embedderManager, MavenConsole console,
       MavenProjectManager projectManager, IndexManager indexManager, MavenModelManager modelManager,
@@ -254,7 +259,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     final Set<IClasspathEntry> entries = new LinkedHashSet<IClasspathEntry>();
 
     final List<AbstractClasspathConfigurator> configurators = new ArrayList<AbstractClasspathConfigurator>();
-    Set<AbstractClasspathConfiguratorFactory> factories = ClasspathConfiguratorFactoryFactory.getFactories();
+    Set<AbstractClasspathConfiguratorFactory> factories = getClasspathConfiguratorFactories();
     for (AbstractClasspathConfiguratorFactory factory : factories) {
       AbstractClasspathConfigurator configurator = factory.createConfigurator(projectFacade, monitor);
       if (configurator != null) {
@@ -286,6 +291,23 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
 
     return cp.toArray(new IClasspathEntry[cp.size()]);
   }
+  
+  private synchronized Set<AbstractClasspathConfiguratorFactory> getClasspathConfiguratorFactories() {
+    if(factories==null) {
+      Set<AbstractClasspathConfiguratorFactory> tmp = new TreeSet<AbstractClasspathConfiguratorFactory>( //
+          new Comparator<AbstractClasspathConfiguratorFactory>() {
+            public int compare(AbstractClasspathConfiguratorFactory c1, AbstractClasspathConfiguratorFactory c2) {
+              int res = c1.getPriority() - c2.getPriority();
+              return res == 0 ? c1.getId().compareTo(c2.getId()) : res;
+            }
+          });
+      tmp.addAll(ExtensionReader.readClasspathConfiguratorFactoryExtensions());
+      factories = Collections.unmodifiableSet(tmp);
+    }
+    return factories;
+  }
+
+  
 
   void addClasspathEntries(Set<IClasspathEntry> entries, IMavenProjectFacade facade, int kind, Properties sourceAttachment, List<AbstractClasspathConfigurator> configurators, IProgressMonitor monitor) throws CoreException {
     ArtifactFilter scopeFilter;
