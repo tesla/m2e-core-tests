@@ -241,7 +241,7 @@ public abstract class FormUtils {
     }
 
     ContentProposalAdapter adapter = new ContentProposalAdapter(control, contentAdapter, //
-        proposalProvider, KeyStroke.getInstance(SWT.CTRL, ' '), null);
+        proposalProvider, KeyStroke.getInstance(SWT.MOD1, ' '), null);
     adapter.setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_REPLACE);
     adapter.setPopupSize(new Point(250, 120));
     adapter.setPopupSize(new Point(250, 120));

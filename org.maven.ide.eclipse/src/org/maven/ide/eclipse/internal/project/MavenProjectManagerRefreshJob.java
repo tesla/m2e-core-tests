@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChange
 
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
 
 public class MavenProjectManagerRefreshJob extends Job implements IResourceChangeListener, IPreferenceChangeListener {

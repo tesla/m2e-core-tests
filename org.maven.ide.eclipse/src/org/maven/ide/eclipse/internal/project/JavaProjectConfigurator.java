@@ -39,7 +39,6 @@ import org.eclipse.jdt.launching.environments.IExecutionEnvironmentsManager;
 
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 
-import org.apache.maven.artifact.Artifact;
 import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionResult;
@@ -53,8 +52,8 @@ import org.apache.maven.project.MavenProject;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.project.BuildPathManager;
+import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.IMavenProjectVisitor;
-import org.maven.ide.eclipse.project.MavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenRunnable;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
@@ -345,7 +344,7 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
 
   private MavenProject collectSourceEntries(MavenEmbedder mavenEmbedder, final IProject project,
       final Set<IClasspathEntry> entries, final Set<String> sources, final ResolverConfiguration configuration,
-      final String goalsToExecute, IProgressMonitor monitor) throws CoreException {
+      final String goalsToExecute, final IProgressMonitor monitor) throws CoreException {
 
     if(monitor.isCanceled()) {
       throw new OperationCanceledException();
@@ -361,19 +360,16 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
     }
 
     if(mavenProject == null) {
-      MavenProjectFacade facade = projectManager.create(pomResource, false, monitor);
+      IMavenProjectFacade facade = projectManager.create(pomResource, false, monitor);
 
       if(facade == null) {
         return null;
       }
 
       facade.accept(new IMavenProjectVisitor() {
-        public boolean visit(MavenProjectFacade projectFacade) throws CoreException {
-          addDirs(project, configuration, sources, entries, projectFacade.getMavenProject());
+        public boolean visit(IMavenProjectFacade projectFacade) throws CoreException {
+          addDirs(project, configuration, sources, entries, projectFacade.getMavenProject(monitor));
           return true;
-        }
-
-        public void visit(MavenProjectFacade projectFacade, Artifact artifact) {
         }
       }, IMavenProjectVisitor.NESTED_MODULES);
     }

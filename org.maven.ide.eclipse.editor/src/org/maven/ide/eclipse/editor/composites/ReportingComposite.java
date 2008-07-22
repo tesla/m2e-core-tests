@@ -9,14 +9,13 @@
 package org.maven.ide.eclipse.editor.composites;
 
 import static org.maven.ide.eclipse.editor.pom.FormUtils.nvl;
-import static org.maven.ide.eclipse.editor.pom.FormUtils.setText;
 import static org.maven.ide.eclipse.editor.pom.FormUtils.setButton;
+import static org.maven.ide.eclipse.editor.pom.FormUtils.setText;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.maven.artifact.Artifact;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -77,6 +76,7 @@ import org.maven.ide.eclipse.editor.pom.SearchControl;
 import org.maven.ide.eclipse.editor.pom.SearchMatcher;
 import org.maven.ide.eclipse.editor.pom.ValueProvider;
 import org.maven.ide.eclipse.editor.xml.search.Packaging;
+import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.wizards.MavenRepositorySearchDialog;
@@ -246,7 +246,7 @@ public class ReportingComposite extends Composite {
     reportPluginAddAction = new Action("Add Report Plugin", MavenEditorImages.ADD_PLUGIN) {
       public void run() {
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            "Add Plugin", IndexManager.SEARCH_PLUGIN, Collections.<Artifact>emptySet());
+            "Add Plugin", IndexManager.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {
@@ -383,8 +383,8 @@ public class ReportingComposite extends Composite {
         final String artifactId = artifactIdText.getText();
         final String version = versionText.getText();
         new Job("Opening " + groupId + ":" + artifactId + ":" + version) {
-          protected IStatus run(IProgressMonitor arg0) {
-            OpenUrlAction.openBrowser(OpenUrlAction.ID_PROJECT, groupId, artifactId, version);
+          protected IStatus run(IProgressMonitor monitor) {
+            OpenUrlAction.openBrowser(OpenUrlAction.ID_PROJECT, groupId, artifactId, version, monitor);
             return Status.OK_STATUS;
           }
         }.schedule();
@@ -396,7 +396,7 @@ public class ReportingComposite extends Composite {
     reportPluginSelectAction = new Action("Select Reporting Plugin", MavenEditorImages.SELECT_PLUGIN) {
       public void run() {
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            "Select Plugin", IndexManager.SEARCH_PLUGIN, Collections.<Artifact>emptySet());
+            "Select Plugin", IndexManager.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {

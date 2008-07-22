@@ -13,7 +13,6 @@ import org.eclipse.core.resources.IProject;
 
 import org.apache.maven.project.MavenProject;
 
-import org.maven.ide.eclipse.project.MavenProjectFacade;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 
 /**
@@ -27,14 +26,6 @@ public class ProjectConfigurationRequest {
   private final ResolverConfiguration resolverConfiguration;
   private final MavenProject mavenProject;
   private final boolean updateSources;
-
-  public ProjectConfigurationRequest(MavenProjectFacade facade, boolean updateSources) {
-    this.project = facade.getProject();
-    this.mavenProject = facade.getMavenProject();
-    this.resolverConfiguration = facade.getResolverConfiguration();
-    this.updateSources = updateSources;
-    this.pom = facade.getPom();
-  }
 
   public ProjectConfigurationRequest(IProject project, IFile pom, MavenProject mavenProject, ResolverConfiguration configuration, boolean updateSources) {
     this.project = project;

@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -61,6 +62,7 @@ import org.apache.maven.project.MavenProject;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
@@ -69,9 +71,10 @@ import org.maven.ide.eclipse.project.BuildPathManager;
 import org.maven.ide.eclipse.project.DownloadSourceEvent;
 import org.maven.ide.eclipse.project.IDownloadSourceListener;
 import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
+import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.IMavenProjectVisitor;
+import org.maven.ide.eclipse.project.IMavenProjectVisitor2;
 import org.maven.ide.eclipse.project.MavenProjectChangedEvent;
-import org.maven.ide.eclipse.project.MavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenRunnable;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
@@ -117,6 +120,12 @@ public class MavenProjectManagerImpl {
       new Path(".classpath"), //
       new Path(".settings/org.maven.ide.eclipse.prefs")); // dirty hack!
 
+  private static final ThreadLocal<Context> context = new ThreadLocal<Context>();
+  
+  static Context getContext() {
+    return context.get();
+  }
+
   private final WorkspaceState state;
 
   private final MavenConsole console;
@@ -124,27 +133,32 @@ public class MavenProjectManagerImpl {
   private final MavenEmbedderManager embedderManager;
 
   private final MavenMarkerManager markerManager;
-  
+
+  private final WorkspaceStateReader stateReader;
+
   private final Set<IMavenProjectChangedListener> projectChangeListeners = new LinkedHashSet<IMavenProjectChangedListener>();
   private final Map<IFile, MavenProjectChangedEvent> projectChangeEvents = new LinkedHashMap<IFile, MavenProjectChangedEvent>();
 
   private final Set<IDownloadSourceListener> downloadSourceListeners = new LinkedHashSet<IDownloadSourceListener>();
   private final Map<IProject, DownloadSourceEvent> downloadSourceEvents = new LinkedHashMap<IProject, DownloadSourceEvent>();
 
-  private static final ThreadLocal<Context> context = new ThreadLocal<Context>();
-  
-  static Context getContext() {
-    return context.get();
-  }
-
-  public MavenProjectManagerImpl(MavenConsole console, IndexManager indexManager, MavenEmbedderManager embedderManager) {
+  public MavenProjectManagerImpl(MavenConsole console, IndexManager indexManager, MavenEmbedderManager embedderManager,
+      File stateLocationDir, boolean readState) {
     this.console = console;
     this.indexManager = indexManager;
     this.embedderManager = embedderManager;
     this.markerManager = new MavenMarkerManager(console);
-    this.state = new WorkspaceState(null);
-  }
 
+    this.stateReader = new WorkspaceStateReader(stateLocationDir);
+
+    WorkspaceState state = readState && stateReader != null ? stateReader.readWorkspaceState(this) : null;
+    this.state = state == null ? new WorkspaceState() : state;
+
+    for (MavenProjectFacade facade : this.state.getProjects()) {
+      addToIndex(facade);
+    }
+  }
+  
   /**
    * Creates or returns cached MavenProjectFacade for the given project.
    * 
@@ -312,7 +326,7 @@ public class MavenProjectManagerImpl {
    */
   public Set<IFile> remove(IFile pom) {
     MavenProjectFacade facade = state.getProjectFacade(pom);
-    MavenProject mavenProject = facade != null ? facade.getMavenProject() : null;
+    ArtifactKey mavenProject = facade != null ? facade.getArtifactKey() : null;
 
     if (mavenProject == null) {
       state.removePom(pom);
@@ -323,14 +337,14 @@ public class MavenProjectManagerImpl {
 
     pomSet.addAll(state.getDependents(pom, mavenProject, false));
     state.removeProject(pom, mavenProject);
-    removeFromIndex(mavenProject);
+    removeFromIndex(facade);
     addProjectChangeEvent(pom, MavenProjectChangedEvent.KIND_REMOVED, MavenProjectChangedEvent.FLAG_NONE, facade, null);
 
     // XXX this will likely NOT work for closed/removed projects, need to move to IResourceChangeEventListener
     if(facade!=null) {
       ResolverConfiguration resolverConfiguration = facade.getResolverConfiguration();
       if (resolverConfiguration != null && resolverConfiguration.shouldIncludeModules()) {
-        pomSet.addAll(removeNestedModules(pom, mavenProject));
+        pomSet.addAll(removeNestedModules(pom, facade.getMavenProjectModules()));
       }
     }
 
@@ -415,27 +429,36 @@ public class MavenProjectManagerImpl {
       return;
     }
 
-    MavenProject oldMavenProject = oldFacade != null? oldFacade.getMavenProject() : null;
+    ArtifactKey projectKey = new ArtifactKey(mavenProject.getArtifact());
+
+    MavenProject oldMavenProject = null;
+    ArtifactKey oldProjectKey = null;
+    List<String> oldModules = new ArrayList<String>();
+    if (oldFacade != null) {
+      oldProjectKey = oldFacade.getArtifactKey();
+      oldMavenProject = oldFacade.getMavenProject();
+      oldModules = oldFacade.getMavenProjectModules();
+    }
 
     boolean dependencyChanged = hasDependencyChange(oldMavenProject, mavenProject);
 
     // refresh modules
     if (resolverConfiguration.shouldIncludeModules()) {
-      updateRequest.forcePomFiles(remove(getRemovedNestedModules(pom, oldMavenProject, mavenProject), true));
+      updateRequest.forcePomFiles(remove(getRemovedNestedModules(pom, oldModules, getMavenProjectModules(mavenProject)), true));
       updateRequest.forcePomFiles(refreshNestedModules(pom, mavenProject));
     } else {
-      updateRequest.forcePomFiles(refreshWorkspaceModules(pom, oldMavenProject));
-      updateRequest.forcePomFiles(refreshWorkspaceModules(pom, mavenProject));
+      updateRequest.forcePomFiles(refreshWorkspaceModules(pom, oldProjectKey));
+      updateRequest.forcePomFiles(refreshWorkspaceModules(pom, projectKey));
     }
 
     // refresh dependents
     if (dependencyChanged) {
-      updateRequest.forcePomFiles(state.getDependents(pom, oldMavenProject, resolverConfiguration.shouldIncludeModules()));
-      updateRequest.forcePomFiles(state.getDependents(pom, mavenProject, resolverConfiguration.shouldIncludeModules()));
+      updateRequest.forcePomFiles(state.getDependents(pom, oldProjectKey, resolverConfiguration.shouldIncludeModules()));
+      updateRequest.forcePomFiles(state.getDependents(pom, projectKey, resolverConfiguration.shouldIncludeModules()));
     }
 
     // cleanup old project and old dependencies
-    state.removeProject(pom, oldMavenProject);
+    state.removeProject(pom, oldProjectKey);
 
     // create new project and new dependencies
     MavenProjectFacade facade = new MavenProjectFacade(this, pom, mavenProject, resolverConfiguration);
@@ -457,7 +480,7 @@ public class MavenProjectManagerImpl {
     // send appropriate event
     int kind;
     int flags = MavenProjectChangedEvent.FLAG_NONE;
-    if (oldMavenProject == null) {
+    if (oldFacade == null) {
       kind = MavenProjectChangedEvent.KIND_ADDED;
     } else {
       kind = MavenProjectChangedEvent.KIND_CHANGED;
@@ -468,8 +491,8 @@ public class MavenProjectManagerImpl {
     addProjectChangeEvent(pom, kind, flags, oldFacade, facade);
 
     // update index
-    removeFromIndex(oldMavenProject);
-    addToIndex(mavenProject);
+    removeFromIndex(oldFacade);
+    addToIndex(facade);
   }
 
   private Set<IFile> refreshNestedModules(IFile pom, MavenProject mavenProject) {
@@ -487,13 +510,13 @@ public class MavenProjectManagerImpl {
     return pomSet;
   }
 
-  private Set<IFile> removeNestedModules(IFile pom, MavenProject mavenProject) {
-    if (mavenProject == null) {
+  private Set<IFile> removeNestedModules(IFile pom, List<String> modules) {
+    if (modules == null || modules.isEmpty()) {
       return Collections.emptySet();
     }
-    
+
     Set<IFile> pomSet = new LinkedHashSet<IFile>();
-    for(String module : getMavenProjectModules(mavenProject)) {
+    for(String module : modules) {
       IFile modulePom = getModulePom(pom, module);
       if (modulePom != null) {
         pomSet.addAll(remove(modulePom));
@@ -511,11 +534,9 @@ public class MavenProjectManagerImpl {
    * Returns Set<IFile> of nested module POMs that are present in oldMavenProject
    * but not in mavenProjec.
    */
-  private Set<IFile> getRemovedNestedModules(IFile pom, MavenProject oldMavenProject, MavenProject mavenProject) {
+  private Set<IFile> getRemovedNestedModules(IFile pom, List<String> oldModules, List<String> modules) {
     Set<IFile> result = new LinkedHashSet<IFile>();
 
-    List<String> modules = getMavenProjectModules(mavenProject);
-    List<String> oldModules = getMavenProjectModules(oldMavenProject);
     for(String oldModule : oldModules) {
       if (!modules.contains(oldModule)) {
         IFile modulePOM = getModulePom(pom, oldModule);
@@ -532,7 +553,7 @@ public class MavenProjectManagerImpl {
     return pom.getParent().getFile(new Path(moduleName).append(IMavenConstants.POM_FILE_NAME));
   }
 
-  private Set<IFile> refreshWorkspaceModules(IFile pom, MavenProject mavenProject) {
+  private Set<IFile> refreshWorkspaceModules(IFile pom, ArtifactKey mavenProject) {
     if (mavenProject == null) {
       return Collections.emptySet();
     }
@@ -564,17 +585,17 @@ public class MavenProjectManagerImpl {
     }
   }
 
-  private void addToIndex(MavenProject mavenProject) {
+  private void addToIndex(MavenProjectFacade mavenProject) {
     if (mavenProject != null) {
-      indexManager.addDocument(IndexManager.WORKSPACE_INDEX, mavenProject.getFile().getAbsoluteFile(), //
-          indexManager.getDocumentKey(mavenProject.getArtifact()), -1, -1, null, IndexManager.NOT_PRESENT, IndexManager.NOT_PRESENT);
+      indexManager.addDocument(IndexManager.WORKSPACE_INDEX, mavenProject.getPomFile(), //
+          indexManager.getDocumentKey(mavenProject.getArtifactKey()), -1, -1, null, IndexManager.NOT_PRESENT, IndexManager.NOT_PRESENT);
     }
   }
   
-  private void removeFromIndex(MavenProject mavenProject) {
+  private void removeFromIndex(MavenProjectFacade mavenProject) {
     if (mavenProject != null) {
       indexManager.removeDocument(IndexManager.WORKSPACE_INDEX, //
-          mavenProject.getFile().getAbsoluteFile(), indexManager.getDocumentKey(mavenProject.getArtifact()));
+          mavenProject.getPomFile(), indexManager.getDocumentKey(mavenProject.getArtifactKey()));
     }
   }
 
@@ -587,7 +608,7 @@ public class MavenProjectManagerImpl {
     }
 
     // merge events
-    MavenProjectFacade old = event.getOldMavenProject() != null? event.getOldMavenProject(): oldMavenProject; 
+    IMavenProjectFacade old = event.getOldMavenProject() != null? event.getOldMavenProject(): oldMavenProject; 
     event = new MavenProjectChangedEvent(pom, event.getKind(), event.getFlags() | flags, old, mavenProject);
     projectChangeEvents.put(pom, event);
   }
@@ -676,6 +697,8 @@ public class MavenProjectManagerImpl {
 
   public void notifyProjectChangeListeners(IProgressMonitor monitor) {
     if (projectChangeEvents.size() > 0) {
+      stateReader.writeWorkspaceState(state); // TODO create a listener
+
       Collection<MavenProjectChangedEvent> eventCollection = this.projectChangeEvents.values();
       MavenProjectChangedEvent[] events = eventCollection.toArray(new MavenProjectChangedEvent[eventCollection.size()]);
       IMavenProjectChangedListener[] listeners;
@@ -689,12 +712,8 @@ public class MavenProjectManagerImpl {
     }
   }
 
-  public MavenProjectFacade getMavenProject(Artifact artifact) {
-    return state.getMavenProject(new ArtifactKey(artifact));
-  }
-
-  public MavenProjectFacade getMavenProject(String groupId, String artifactId, String version, String classifier) {
-    return state.getMavenProject(new ArtifactKey(groupId, artifactId, version, classifier));
+  public MavenProjectFacade getMavenProject(String groupId, String artifactId, String version) {
+    return state.getMavenProject(groupId, artifactId, version);
   }
 
   public void downloadSources(List<DownloadRequest> downloadRequests, IProgressMonitor monitor) throws MavenEmbedderException, InterruptedException, CoreException {
@@ -715,15 +734,15 @@ public class MavenProjectManagerImpl {
           // for maven projects find actual artifact and MavenProject corresponding to the artifactKey
 
           // XXX ugly, need to find a better way
-          class MavenProjectVisitor implements IMavenProjectVisitor {
-            MavenProjectFacade mavenProject = null;
+          class MavenProjectVisitor implements IMavenProjectVisitor2 {
+            IMavenProjectFacade mavenProject = null;
             Artifact artifact = null;
 
-            public boolean visit(MavenProjectFacade mavenProject) {
+            public boolean visit(IMavenProjectFacade mavenProject) {
               return this.mavenProject == null;
             }
 
-            public void visit(MavenProjectFacade mavenProject, Artifact artifact) {
+            public void visit(IMavenProjectFacade mavenProject, Artifact artifact) {
               ArtifactKey otherKey = new ArtifactKey(artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion(), artifact.getClassifier());
               if(key.equals(otherKey)) {
                 this.mavenProject = mavenProject;
@@ -733,14 +752,14 @@ public class MavenProjectManagerImpl {
           };
 
           MavenProjectVisitor pv = new MavenProjectVisitor(); 
-          projectFacade.accept(pv, IMavenProjectVisitor.NESTED_MODULES);
+          projectFacade.accept(pv, IMavenProjectVisitor.NESTED_MODULES, monitor);
 
           artifact = pv.artifact;
 
-          MavenProjectFacade facade = pv.mavenProject;
+          IMavenProjectFacade facade = pv.mavenProject;
           if (facade != null) {
             @SuppressWarnings("unchecked")
-            List<ArtifactRepository> mavenProjectRepositoreis = facade.getMavenProject().getRemoteArtifactRepositories();
+            List<ArtifactRepository> mavenProjectRepositoreis = facade.getMavenProject(monitor).getRemoteArtifactRepositories();
             remoteRepositories = mavenProjectRepositoreis;
           }
         }
@@ -899,7 +918,7 @@ public class MavenProjectManagerImpl {
     IndexedArtifactFile af = null;
     if(isJavaSource || isJavaDoc) {
       try {
-        af = indexManager.getIndexedArtifactFile(IndexManager.LOCAL_INDEX, indexManager.getDocumentKey(base));
+        af = indexManager.getIndexedArtifactFile(IndexManager.LOCAL_INDEX, indexManager.getDocumentKey(new ArtifactKey(base)));
         if(isJavaSource && af != null && af.sourcesExists == IndexManager.NOT_AVAILABLE) {
           return null; // sources are not available in any remote repository
         }
@@ -948,7 +967,7 @@ public class MavenProjectManagerImpl {
       int javadocExists = isJavaDoc ? exist : (af != null ? af.javadocExists : IndexManager.NOT_PRESENT);
       
       // XXX add test to make sure update don't erase class names
-      indexManager.addDocument(IndexManager.LOCAL_INDEX, null, indexManager.getDocumentKey(artifact), //
+      indexManager.addDocument(IndexManager.LOCAL_INDEX, null, indexManager.getDocumentKey(new ArtifactKey(artifact)), //
           artifactFile.length(), artifactFile.lastModified(), artifactFile, sourcesExists, javadocExists);
     }
   }
@@ -999,7 +1018,7 @@ public class MavenProjectManagerImpl {
     }
   }
 
-  public MavenProjectFacade[] getProjects() {
+  public IMavenProjectFacade[] getProjects() {
     return state.getProjects();
   }
 

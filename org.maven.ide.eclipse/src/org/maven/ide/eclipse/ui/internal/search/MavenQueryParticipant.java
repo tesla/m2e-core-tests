@@ -31,11 +31,10 @@ import org.eclipse.search.ui.text.Match;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import org.apache.maven.artifact.Artifact;
-
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
@@ -81,7 +80,7 @@ public class MavenQueryParticipant implements IQueryParticipant, IJavaSearchCons
           public void run() {
             MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(new Shell(Display.getCurrent()), //
                 "Open Type from Maven", 
-                IndexManager.SEARCH_CLASS_NAME, Collections.<Artifact>emptySet());
+                IndexManager.SEARCH_CLASS_NAME, Collections.<ArtifactKey>emptySet());
             dialog.setQuery(className);
             if(dialog.open() == Window.OK) {
               final IndexedArtifact ia = dialog.getSelectedIndexedArtifact();

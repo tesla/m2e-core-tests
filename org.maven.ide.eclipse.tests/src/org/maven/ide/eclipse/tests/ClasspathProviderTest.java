@@ -62,6 +62,8 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
     createExisting("testlib", "projects/MNGECLIPSE-369/testlib");
     waitForJobsToComplete();
 
+    workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+
     ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(cptest.getFile("TestApp.launch"));
     MavenSourcePathProvider classpathProvider = new MavenSourcePathProvider();
     IRuntimeClasspathEntry[] unresolvedClasspath = classpathProvider.computeUnresolvedClasspath(configuration);

@@ -10,7 +10,11 @@ package org.maven.ide.eclipse.container;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IJavaProject;
@@ -18,6 +22,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.project.BuildPathManager;
 
@@ -51,9 +56,19 @@ public class MavenClasspathContainerInitializer extends ClasspathContainerInitia
     return true;
   }
 
-  public void requestClasspathContainerUpdate(IPath containerPath, IJavaProject project,
-      IClasspathContainer containerSuggestion) throws CoreException {
-    MavenPlugin.getDefault().getBuildpathManager().updateClasspathContainer(project, containerSuggestion);
+  public void requestClasspathContainerUpdate(IPath containerPath, final IJavaProject project, final IClasspathContainer containerSuggestion) {
+    // one job per request. assumption that users are not going to change hudreds of conatainers simultaneously.
+    new Job("Persist classpath container changes") {
+      protected IStatus run(IProgressMonitor monitor) {
+        try {
+          MavenPlugin.getDefault().getBuildpathManager().updateClasspathContainer(project, containerSuggestion, monitor);
+        } catch(CoreException ex) {
+          MavenLogger.log(ex);
+          return new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, 0, "Can't persist classpath container", ex);
+        }
+        return Status.OK_STATUS;
+      }
+    }.schedule();
   }
 
 }

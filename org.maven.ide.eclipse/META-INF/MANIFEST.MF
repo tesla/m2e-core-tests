@@ -41,6 +41,7 @@ Bundle-RequiredExecutionEnvironment: J2SE-1.5,
  JavaSE-1.6
 Export-Package: org.maven.ide.eclipse,
  org.maven.ide.eclipse.actions,
+ org.maven.ide.eclipse.archetype,
  org.maven.ide.eclipse.core,
  org.maven.ide.eclipse.embedder,
  org.maven.ide.eclipse.index,

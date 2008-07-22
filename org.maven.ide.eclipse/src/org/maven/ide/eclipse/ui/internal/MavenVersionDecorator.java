@@ -22,12 +22,11 @@ import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import org.eclipse.swt.graphics.Image;
 
-import org.apache.maven.project.MavenProject;
-
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
+import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectChangedEvent;
-import org.maven.ide.eclipse.project.MavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 
 /**
@@ -46,9 +45,9 @@ public class MavenVersionDecorator implements ILabelDecorator {
       IProject project = ((IResource) element).getProject();
       if(project!=null) {
         MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
-        MavenProjectFacade facade = projectManager.create(project, new NullProgressMonitor());
+        IMavenProjectFacade facade = projectManager.create(project, new NullProgressMonitor());
         if(facade!=null) {
-          MavenProject mavenProject = facade.getMavenProject();
+          ArtifactKey mavenProject = facade.getArtifactKey();
           if(mavenProject!=null) {
             int n = text.indexOf(' ');
             if(n==-1) {

@@ -30,7 +30,7 @@ import org.eclipse.ui.IWorkbenchPart;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
-import org.maven.ide.eclipse.project.MavenProjectFacade;
+import org.maven.ide.eclipse.project.IMavenProjectFacade;
 
 
 public class UpdateSourcesAction implements IObjectActionDelegate {
@@ -73,7 +73,7 @@ public class UpdateSourcesAction implements IObjectActionDelegate {
           }
 
           monitor.subTask(project.getName());
-          MavenProjectFacade projectFacade = plugin.getMavenProjectManager().create(project, monitor);
+          IMavenProjectFacade projectFacade = plugin.getMavenProjectManager().create(project, monitor);
           if(projectFacade != null) {
             try {
               plugin.getProjectConfigurationManager().updateProjectConfiguration(project, //

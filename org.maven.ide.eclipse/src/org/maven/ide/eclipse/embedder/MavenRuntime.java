@@ -36,7 +36,7 @@ public abstract class MavenRuntime {
 
   public abstract String getOptions(File tpmfolder, String[] forcedComponents) throws CoreException;
 
-  public abstract String[] getClasspath(String[] forcedComponents);
+  public abstract String[] getClasspath(String[] forcedComponents) throws CoreException;
   
   public abstract String getLocation();
 

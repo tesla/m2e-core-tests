@@ -32,7 +32,6 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.RAMDirectory;
 
-import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
 import org.apache.maven.artifact.repository.DefaultArtifactRepository;
@@ -42,6 +41,7 @@ import org.sonatype.nexus.index.ArtifactInfo;
 
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.index.IndexInfo.Type;
 
 
@@ -328,7 +328,7 @@ public abstract class IndexManager {
     return artifactRepositories;
   }
 
-  public String getDocumentKey(Artifact artifact) {
+  public String getDocumentKey(ArtifactKey artifact) {
     String groupId = artifact.getGroupId();
     if(groupId == null) {
       groupId = "[inherited]";

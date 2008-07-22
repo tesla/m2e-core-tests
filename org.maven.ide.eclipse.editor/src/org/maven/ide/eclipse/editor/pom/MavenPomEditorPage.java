@@ -62,7 +62,7 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
-import org.maven.ide.eclipse.project.MavenProjectFacade;
+import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 
 
@@ -128,7 +128,7 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
             try {
               StringWriter sw = new StringWriter();
               
-              MavenProject mavenProject = pomEditor.readMavenProject(false);
+              MavenProject mavenProject = pomEditor.readMavenProject(false, monitor);
               new MavenXpp3Writer().write(sw, mavenProject.getModel());
               
               String effectivePom = sw.toString();
@@ -230,8 +230,8 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
   public void reload() {
     deRegisterListeners();
     dataLoaded = false;
-    doLoadData(true);
-  }
+      doLoadData(true);
+    }
 
   public synchronized void notifyChanged(Notification notification) {
     if(updatingModel) {
@@ -247,7 +247,7 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
         case Notification.REMOVE:
         case Notification.SET:
           if (getManagedForm() != null)
-            updateView(notification);
+          updateView(notification);
           break;
           
         default:
@@ -518,7 +518,7 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
     return listeners;
   }
   
-  public MavenProjectFacade findModuleProject(String moduleName) {
+  public IMavenProjectFacade findModuleProject(String moduleName) {
     IEditorInput editorInput = getEditorInput();
     if(editorInput instanceof IFileEditorInput) {
       // XXX is there a better way to get edited file?
@@ -528,10 +528,10 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
     return null;
   }
 
-  private MavenProjectFacade findModuleProject(IFile pomFile, String module) {
+  private IMavenProjectFacade findModuleProject(IFile pomFile, String module) {
     IPath modulePath = pomFile.getParent().getLocation().append(module).append("pom.xml");
     MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
-    MavenProjectFacade[] facades = projectManager.getProjects();
+    IMavenProjectFacade[] facades = projectManager.getProjects();
     for(int i = 0; i < facades.length; i++ ) {
       if(facades[i].getPom().getLocation().equals(modulePath)) {
         return facades[i];

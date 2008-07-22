@@ -64,11 +64,12 @@ import org.apache.maven.model.Dependency;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
-import org.maven.ide.eclipse.project.MavenProjectFacade;
+import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.ui.internal.util.SelectionUtil;
 import org.maven.ide.eclipse.wizards.MavenRepositorySearchDialog;
@@ -123,7 +124,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
     if(selection!=null) {
       Object element = this.selection.getFirstElement();
       if(IndexManager.SEARCH_ARTIFACT.equals(type) && element !=null) {
-        final Artifact a = getArtifact(element);
+        final ArtifactKey a = getArtifact(element);
         if(a!=null) {
           new Job("Opening POM") {
             protected IStatus run(IProgressMonitor monitor) {
@@ -144,7 +145,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
     }
     
     Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-    MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(shell, title, type, Collections.<Artifact>emptySet());
+    MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(shell, title, type, Collections.<ArtifactKey>emptySet());
     if(dialog.open() == Window.OK) {
       final IndexedArtifactFile iaf = (IndexedArtifactFile) dialog.getFirstResult();
       final IndexedArtifact indexedArtifact = dialog.getSelectedIndexedArtifact();
@@ -163,7 +164,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
     }
   }
 
-  private Artifact getArtifact(Object element) {
+  private ArtifactKey getArtifact(Object element) {
     MavenPlugin plugin = MavenPlugin.getDefault();
     
     // TODO open poms for linked projects inside "Maven Dependencies" container
@@ -183,9 +184,9 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
 
     IProject project = SelectionUtil.getType(element, IProject.class);
     if(project != null && project.isAccessible()) {
-      MavenProjectFacade projectFacade = plugin.getMavenProjectManager().create(project, new NullProgressMonitor());
+      IMavenProjectFacade projectFacade = plugin.getMavenProjectManager().create(project, new NullProgressMonitor());
       if(projectFacade!=null) {
-        return projectFacade.getMavenProject().getArtifact();
+        return projectFacade.getArtifactKey();
       }
     }
 
@@ -247,7 +248,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
       MavenPlugin plugin = MavenPlugin.getDefault();
       
       MavenProjectManager projectManager = plugin.getMavenProjectManager();
-      MavenProjectFacade projectFacade = projectManager.getMavenProject(groupId, artifactId, version);
+      IMavenProjectFacade projectFacade = projectManager.getMavenProject(groupId, artifactId, version);
       if(projectFacade!=null) {
         final IFile pomFile = projectFacade.getPom();
         openEditor(new FileEditorInput(pomFile), name);

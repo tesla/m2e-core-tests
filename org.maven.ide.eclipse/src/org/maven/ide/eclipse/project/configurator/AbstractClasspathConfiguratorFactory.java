@@ -8,10 +8,12 @@
 
 package org.maven.ide.eclipse.project.configurator;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
+import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.maven.ide.eclipse.project.MavenProjectFacade;
+import org.maven.ide.eclipse.project.IMavenProjectFacade;
 
 /**
  * AbstractClasspathConfiguratorFactory
@@ -37,7 +39,7 @@ public abstract class AbstractClasspathConfiguratorFactory implements IExecutabl
     return priority;
   }
 
-  public abstract AbstractClasspathConfigurator createConfigurator(MavenProjectFacade mavenProject);
+  public abstract AbstractClasspathConfigurator createConfigurator(IMavenProjectFacade mavenProject, IProgressMonitor monitor) throws CoreException;
 
   // IExecutableExtension  
   

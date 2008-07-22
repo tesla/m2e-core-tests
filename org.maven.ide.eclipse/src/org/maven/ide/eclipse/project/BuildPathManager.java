@@ -67,10 +67,12 @@ import org.codehaus.plexus.digest.Sha1Digester;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.artifact.resolver.filter.ScopeArtifactFilter;
+import org.apache.maven.project.MavenProject;
 
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
@@ -247,26 +249,23 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     }
   }
 
-  private IClasspathEntry[] getClasspath(MavenProjectFacade projectFacade, final int kind, final Properties sourceAttachment, boolean uniquePaths) throws CoreException {
+  private IClasspathEntry[] getClasspath(IMavenProjectFacade projectFacade, final int kind, final Properties sourceAttachment, boolean uniquePaths, final IProgressMonitor monitor) throws CoreException {
     // maps entry path to entry to avoid dups caused by different entry attributes
     final Set<IClasspathEntry> entries = new LinkedHashSet<IClasspathEntry>();
 
     final List<AbstractClasspathConfigurator> configurators = new ArrayList<AbstractClasspathConfigurator>();
     Set<AbstractClasspathConfiguratorFactory> factories = ClasspathConfiguratorFactoryFactory.getFactories();
     for (AbstractClasspathConfiguratorFactory factory : factories) {
-      AbstractClasspathConfigurator configurator = factory.createConfigurator(projectFacade);
+      AbstractClasspathConfigurator configurator = factory.createConfigurator(projectFacade, monitor);
       if (configurator != null) {
         configurators.add(configurator);
       }
     }
 
     projectFacade.accept(new IMavenProjectVisitor() {
-      public boolean visit(MavenProjectFacade mavenProject) {
-        addClasspathEntries(entries, mavenProject, kind, sourceAttachment, configurators);
+      public boolean visit(IMavenProjectFacade mavenProject) throws CoreException {
+        addClasspathEntries(entries, mavenProject, kind, sourceAttachment, configurators, monitor);
         return true; // continue traversal
-      }
-      
-      public void visit(MavenProjectFacade mavenProject, Artifact artifact) {
       }
     }, IMavenProjectVisitor.NESTED_MODULES);
 
@@ -288,7 +287,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     return cp.toArray(new IClasspathEntry[cp.size()]);
   }
 
-  void addClasspathEntries(Set<IClasspathEntry> entries, MavenProjectFacade mavenProject, int kind, Properties sourceAttachment, List<AbstractClasspathConfigurator> configurators) {
+  void addClasspathEntries(Set<IClasspathEntry> entries, IMavenProjectFacade facade, int kind, Properties sourceAttachment, List<AbstractClasspathConfigurator> configurators, IProgressMonitor monitor) throws CoreException {
     ArtifactFilter scopeFilter;
 
     if(CLASSPATH_RUNTIME == kind) {
@@ -305,8 +304,11 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
       // ECLIPSE-33: test scope (already includes provided)
       scopeFilter = SCOPE_FILTER_TEST;
     }
-
-    for(Artifact a : mavenProject.getMavenProjectArtifacts()) {
+    
+    MavenProject mavenProject = facade.getMavenProject(monitor);
+    @SuppressWarnings("unchecked")
+    Set<Artifact> artifacts = mavenProject.getArtifacts();
+    for(Artifact a : artifacts) {
       if (!scopeFilter.include(a) || !a.getArtifactHandler().isAddedToClasspath()) {
         continue;
       }
@@ -323,8 +325,8 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
       }
 
       // project
-      MavenProjectFacade dependency = projectManager.getMavenProject(a);
-      if (dependency != null && dependency.getProject().equals(mavenProject.getProject())) {
+      IMavenProjectFacade dependency = projectManager.getMavenProject(a.getGroupId(), a.getArtifactId(), a.getVersion());
+      if (dependency != null && dependency.getProject().equals(facade.getProject())) {
         continue;
       }
 
@@ -371,7 +373,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
         
         boolean downloadSources = srcPath==null && runtimeManager.isDownloadSources();
         boolean downloadJavaDoc = javaDocUrl==null && runtimeManager.isDownloadJavaDoc();
-        downloadSources(mavenProject.getProject(), a, downloadSources, downloadJavaDoc);
+        downloadSources(facade.getProject(), a, downloadSources, downloadJavaDoc);
 
         for (Iterator<AbstractClasspathConfigurator> ci = configurators.iterator(); ci.hasNext(); ) {
           AbstractClasspathConfigurator cpc = ci.next();
@@ -393,7 +395,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     if(downloadSources || downloadJavaDoc) {
       try {
         IndexedArtifactFile af = indexManager.getIndexedArtifactFile(IndexManager.LOCAL_INDEX, //
-            indexManager.getDocumentKey(artifact));
+            indexManager.getDocumentKey(new ArtifactKey(artifact)));
         if(af != null) {
           // download if sources and javadoc artifact is available from remote repositories
           boolean shouldDownloadSources = downloadSources && af.sourcesExists != IndexManager.NOT_AVAILABLE;
@@ -414,7 +416,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
   }
 
   public IClasspathEntry[] getClasspath(IProject project, int scope, boolean uniquePaths, IProgressMonitor monitor) throws CoreException {
-    MavenProjectFacade facade = projectManager.create(project, monitor);
+    IMavenProjectFacade facade = projectManager.create(project, monitor);
     if (facade == null) {
       return new IClasspathEntry[0];
     }
@@ -429,7 +431,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
           is.close();
         }
       }
-      return getClasspath(facade, scope, props, uniquePaths);
+      return getClasspath(facade, scope, props, uniquePaths, monitor);
     } catch (IOException e) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, //
           "Can't save classpath container changes", e));
@@ -464,19 +466,19 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
 
   private void download(IProject project, IPath path, boolean downloadSources, boolean downloadJavaDoc)
       throws CoreException {
-    for(Artifact artifact : findArtifacts(project, path)) {
+    for(ArtifactKey artifact : findArtifacts(project, path)) {
       projectManager.downloadSources(project, path, artifact.getGroupId(), artifact.getArtifactId(), //
           artifact.getVersion(), artifact.getClassifier(), downloadSources, downloadJavaDoc);
     }
   }
   
-  private Set<Artifact> findArtifacts(IProject project, IPath path) throws CoreException {
+  private Set<ArtifactKey> findArtifacts(IProject project, IPath path) throws CoreException {
     ArrayList<IClasspathEntry> entries = findClasspathEntries(project, path);
 
-    Set<Artifact> artifacts = new LinkedHashSet<Artifact>();
+    Set<ArtifactKey> artifacts = new LinkedHashSet<ArtifactKey>();
 
     for(IClasspathEntry entry : entries) {
-      Artifact artifact = findArtifactByArtifactKey(entry);
+      ArtifactKey artifact = findArtifactByArtifactKey(entry);
 
       if(artifact == null) {
         artifact = findArtifactInIndex(project, entry);
@@ -495,9 +497,9 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     return artifacts;
   }
 
-  public Artifact findArtifact(IProject project, IPath path) throws CoreException {
+  public ArtifactKey findArtifact(IProject project, IPath path) throws CoreException {
     if (path != null) {
-      Set<Artifact> artifacts = findArtifacts(project, path);
+      Set<ArtifactKey> artifacts = findArtifacts(project, path);
       // it is not possible to have more than one classpath entry with the same path
       if (artifacts.size() > 0) {
         return artifacts.iterator().next();
@@ -506,7 +508,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     return null;
   }
   
-  private Artifact findArtifactByArtifactKey(IClasspathEntry entry) {
+  private ArtifactKey findArtifactByArtifactKey(IClasspathEntry entry) {
     IClasspathAttribute[] attributes = entry.getExtraAttributes();
     String groupId = null;
     String artifactId = null;
@@ -525,15 +527,12 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     }
 
     if(groupId != null && artifactId != null && version != null) {
-      if (classifier != null) {
-        return embedderManager.getWorkspaceEmbedder().createArtifactWithClassifier(groupId, artifactId, version, "jar", classifier);
-      } 
-      return embedderManager.getWorkspaceEmbedder().createArtifact(groupId, artifactId, version, null, "jar");
+      return new ArtifactKey(groupId, artifactId, version, classifier);
     }
     return null;
   }
 
-  private Artifact findArtifactInIndex(IProject project, IClasspathEntry entry) throws CoreException {
+  private ArtifactKey findArtifactInIndex(IProject project, IClasspathEntry entry) throws CoreException {
     // calculate md5
     try {
       IFile jarFile = project.getWorkspace().getRoot().getFile(entry.getPath());
@@ -547,7 +546,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
       if(result.size()==1) {
         IndexedArtifact ia = result.values().iterator().next();
         IndexedArtifactFile iaf = ia.files.iterator().next();
-        return embedderManager.getWorkspaceEmbedder().createArtifact(iaf.group, iaf.artifact, iaf.version, null, "jar");
+        return new ArtifactKey(iaf.group, iaf.artifact, iaf.version, null);
       }
       
     } catch(IOException ex) {
@@ -585,7 +584,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     IProject project = event.getSource();
     IJavaProject javaProject = JavaCore.create(project);
 
-    MavenProjectFacade mavenProject = projectManager.create(project, monitor);
+    IMavenProjectFacade mavenProject = projectManager.create(project, monitor);
     if (mavenProject != null) {
       // Maven project, refresh classpath container
       updateClasspath(project, monitor);
@@ -619,14 +618,18 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
       javaProject.setRawClasspath(cp, monitor);
     }
   }
-  
-  public void updateClasspathContainer(IJavaProject project, IClasspathContainer containerSuggestion) throws CoreException {
+
+  /**
+   * Extracts and persists custom source/javadoc attachment info
+   */
+  public void updateClasspathContainer(IJavaProject project, IClasspathContainer containerSuggestion, IProgressMonitor monitor) throws CoreException {
     IFile pom = project.getProject().getFile(IMavenConstants.POM_FILE_NAME);
-    MavenProjectFacade facade = projectManager.create(pom, false, null);
+    IMavenProjectFacade facade = projectManager.create(pom, false, null);
     if (facade == null) {
       return;
     }
 
+    // collect all source/javadoc attachement
     Properties props = new Properties();
     IClasspathEntry[] entries = containerSuggestion.getClasspathEntries();
     for (int i = 0; i < entries.length; i++) {
@@ -646,7 +649,8 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
       }
     }
 
-    entries = getClasspath(facade, CLASSPATH_DEFAULT, null, true);
+    // eliminate all "standard" source/javadoc attachement we get from local repo
+    entries = getClasspath(facade, CLASSPATH_DEFAULT, null, true, monitor);
     for (int i = 0; i < entries.length; i++) {
       IClasspathEntry entry = entries[i];
       if (IClasspathEntry.CPE_LIBRARY == entry.getEntryKind()) {
@@ -662,8 +666,8 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
       }
     }
 
+    // persist custom source/javadoc attachement info
     File file = getSourceAttachmentPropertiesFile(project.getProject());
-
     try {
       OutputStream os = new BufferedOutputStream(new FileOutputStream(file));
       try {
@@ -675,7 +679,8 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Can't save classpath container changes", e));
     }
 
-    updateClasspath(project.getProject(), new NullProgressMonitor());
+    // update classpath container. suboptimal as this will re-calculate classpath
+    updateClasspath(project.getProject(), monitor);
   }
 
   /** public for unit tests only */

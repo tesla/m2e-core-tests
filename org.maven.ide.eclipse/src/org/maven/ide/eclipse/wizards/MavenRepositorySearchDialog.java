@@ -25,8 +25,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
-import org.apache.maven.artifact.Artifact;
-
+import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
@@ -42,7 +41,7 @@ public class MavenRepositorySearchDialog extends AbstractMavenDialog {
 
   private final boolean showScope;
   
-  private final Set<Artifact> artifacts;
+  private final Set<ArtifactKey> artifacts;
 
   /**
    * One of 
@@ -73,11 +72,11 @@ public class MavenRepositorySearchDialog extends AbstractMavenDialog {
    *   {@link IndexManager#SEARCH_CLASS_NAME}, 
    * @param artifacts Set&lt;Artifact&gt;
    */
-  public MavenRepositorySearchDialog(Shell parent, String title, String queryType, Set<Artifact> artifacts) {
+  public MavenRepositorySearchDialog(Shell parent, String title, String queryType, Set<ArtifactKey> artifacts) {
     this(parent, title, queryType, artifacts, false);
   }
 
-  public MavenRepositorySearchDialog(Shell parent, String title, String queryType, Set<Artifact> artifacts, boolean showScope) {
+  public MavenRepositorySearchDialog(Shell parent, String title, String queryType, Set<ArtifactKey> artifacts, boolean showScope) {
     super(parent, DIALOG_SETTINGS);
     this.artifacts = artifacts;
     this.queryType = queryType;

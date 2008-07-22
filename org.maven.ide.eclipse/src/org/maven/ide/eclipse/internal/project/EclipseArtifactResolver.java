@@ -22,7 +22,8 @@ import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.resolver.DefaultArtifactResolver;
 
-import org.maven.ide.eclipse.project.MavenProjectFacade;
+import org.maven.ide.eclipse.embedder.ArtifactKey;
+
 
 
 public class EclipseArtifactResolver extends DefaultArtifactResolver {

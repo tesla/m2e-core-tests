@@ -8,6 +8,7 @@
 
 package org.maven.ide.eclipse.project;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
@@ -16,7 +17,8 @@ import java.util.List;
  *
  * @author Eugene Kuleshov
  */
-public class ResolverConfiguration {
+public class ResolverConfiguration implements Serializable {
+  private static final long serialVersionUID = 1258510761534886581L;
 
   public static final String DEFAULT_FILTERING_GOALS = "process-resources resources:testResources";
   public static final String DEFAULT_FULL_BUILD_GOALS = "process-test-resources";

@@ -67,6 +67,10 @@ public class MavenPreferencePage extends FieldEditorPreferencePage implements IW
         "Download repository index updates on startup", //
         getFieldEditorParent()));
     
+    addField(new BooleanFieldEditor(MavenPreferenceConstants.P_UPDATE_PROJECTS, //
+        "Update Maven projects on startup", //
+        getFieldEditorParent()));
+    
     /*
      * public static final String CHECKSUM_POLICY_FAIL = "fail"; 
      * public static final String CHECKSUM_POLICY_WARN = "warn"; 

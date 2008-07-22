@@ -176,6 +176,10 @@ public class MavenRuntimeManager {
     return preferenceStore.getBoolean(MavenPreferenceConstants.P_UPDATE_INDEXES);
   }
   
+  public boolean isUpdateProjectsOnStartup() {
+    return preferenceStore.getBoolean(MavenPreferenceConstants.P_UPDATE_PROJECTS);
+  }
+  
   public String getGoalOnImport() {
     return preferenceStore.getString(MavenPreferenceConstants.P_GOAL_ON_IMPORT);
   }
@@ -206,6 +210,10 @@ public class MavenRuntimeManager {
   
   public void setUpdateIndexesOnStartup(boolean updateIndexesOnStartup) {
     preferenceStore.setValue(MavenPreferenceConstants.P_UPDATE_INDEXES, updateIndexesOnStartup);
+  }
+  
+  public void setUpdateProjectsOnStartup(boolean updateProjectsOnStartup) {
+    preferenceStore.setValue(MavenPreferenceConstants.P_UPDATE_PROJECTS, updateProjectsOnStartup);
   }
   
   public void setDefaultOutputFolder(String name) {

@@ -25,14 +25,14 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.codehaus.plexus.util.StringUtils;
 
-import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Resource;
+import org.apache.maven.project.MavenProject;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
+import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.IMavenProjectVisitor;
-import org.maven.ide.eclipse.project.MavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 
 
@@ -63,7 +63,7 @@ public class MavenBuilder extends IncrementalProjectBuilder {
         return null;
       }
 
-      MavenProjectFacade mavenProject = projectManager.create(getProject(), monitor);
+      IMavenProjectFacade mavenProject = projectManager.create(getProject(), monitor);
       if (mavenProject == null) {
         // XXX is this really possible? should we warn the user?
         return null;
@@ -82,28 +82,32 @@ public class MavenBuilder extends IncrementalProjectBuilder {
   /**
    * 
    */
-  private void processResources(MavenProjectFacade mavenProject, final IProgressMonitor monitor) throws CoreException {
+  private void processResources(IMavenProjectFacade mavenProject, final IProgressMonitor monitor) throws CoreException {
     final IResourceDelta delta = getDelta(mavenProject.getProject());
 
     mavenProject.accept(new IMavenProjectVisitor() {
-      public boolean visit(MavenProjectFacade projectFacade) throws CoreException {
-        if (hasChangedResources(projectFacade, delta, true)) {
+      public boolean visit(IMavenProjectFacade projectFacade) throws CoreException {
+        if (hasChangedResources(projectFacade, delta, true, monitor)) {
           projectFacade.filterResources(monitor);
-        } else if (hasChangedResources(projectFacade, delta, false)) {
+        } else if (hasChangedResources(projectFacade, delta, false, monitor)) {
           // XXX optimize! no filtering, just copy the changed resources
           projectFacade.filterResources(monitor);
         }
         return true;
       }
-      public void visit(MavenProjectFacade projectFacade, Artifact artifact) {
-      }
     }, IMavenProjectVisitor.NESTED_MODULES);
   }
 
-  boolean hasChangedResources(MavenProjectFacade facade, IResourceDelta delta, boolean filteredOnly) {
+  boolean hasChangedResources(IMavenProjectFacade facade, IResourceDelta delta, boolean filteredOnly, IProgressMonitor monitor) throws CoreException {
+    MavenProject mavenProject = facade.getMavenProject(monitor);
+    @SuppressWarnings("unchecked")
+    List<Resource> resources = mavenProject.getBuild().getResources();
+    @SuppressWarnings("unchecked")
+    List<Resource> testResources = mavenProject.getBuild().getTestResources();
+    
     Set<IPath> folders = new HashSet<IPath>();
-    folders.addAll(getResourceFolders(facade, facade.getMavenProjectBuildResources(), filteredOnly));
-    folders.addAll(getResourceFolders(facade, facade.getMavenProjectBuildTestResources(), filteredOnly));
+    folders.addAll(getResourceFolders(facade, resources, filteredOnly));
+    folders.addAll(getResourceFolders(facade, testResources, filteredOnly));
 
     if (delta == null) {
       return !folders.isEmpty();
@@ -120,7 +124,7 @@ public class MavenBuilder extends IncrementalProjectBuilder {
     return false;
   }
 
-  private Set<IPath> getResourceFolders(MavenProjectFacade facade, List<Resource> resources, boolean filteredOnly) {
+  private Set<IPath> getResourceFolders(IMavenProjectFacade facade, List<Resource> resources, boolean filteredOnly) {
     Set<IPath> folders = new LinkedHashSet<IPath>();
     for(Resource resource : resources) {
       if (!filteredOnly || resource.isFiltering()) {
@@ -130,7 +134,7 @@ public class MavenBuilder extends IncrementalProjectBuilder {
     return folders;
   }
 
-  private void executePostBuild(MavenProjectFacade mavenProject, IProgressMonitor monitor) throws CoreException {
+  private void executePostBuild(IMavenProjectFacade mavenProject, IProgressMonitor monitor) throws CoreException {
     String goalsStr = mavenProject.getResolverConfiguration().getFullBuildGoals();
     List<String> goals = Arrays.asList(StringUtils.split(goalsStr));
     mavenProject.execute(goals, monitor);

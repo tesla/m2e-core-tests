@@ -22,11 +22,11 @@ import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 
-import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Dependency;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.project.BuildPathManager;
 import org.maven.ide.eclipse.project.MavenProjectPomScanner;
@@ -45,6 +45,7 @@ public class MavenMaterializePomWizard extends Wizard implements IImportWizard, 
   
   MavenDependenciesWizardPage selectionPage;
   
+  // TODO replace with ArtifactKey
   private Dependency[] dependencies;
 
 
@@ -73,15 +74,13 @@ public class MavenMaterializePomWizard extends Wizard implements IImportWizard, 
           IPackageFragmentRoot fragment = (IPackageFragmentRoot) element;
           IProject project = fragment.getJavaProject().getProject();
           if(project.isAccessible() && fragment.isArchive()) {
-            Artifact a = buildpathManager.findArtifact(project, fragment.getPath());
+            ArtifactKey a = buildpathManager.findArtifact(project, fragment.getPath());
             if(a!=null) {
               Dependency d = new Dependency();
               d.setGroupId(a.getGroupId());
               d.setArtifactId(a.getArtifactId());
               d.setVersion(a.getVersion());
               d.setClassifier(a.getClassifier());
-              d.setType(a.getType());
-              d.setScope(a.getScope());
               dependencies.add(d);
             }
           }

@@ -85,7 +85,8 @@ import org.maven.ide.eclipse.editor.composites.ListEditorContentProvider;
 import org.maven.ide.eclipse.editor.composites.PluginsComposite;
 import org.maven.ide.eclipse.editor.composites.ReportingComposite;
 import org.maven.ide.eclipse.editor.composites.RepositoriesComposite;
-import org.maven.ide.eclipse.project.MavenProjectFacade;
+import org.maven.ide.eclipse.embedder.ArtifactKey;
+import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.wizards.MavenModuleWizard;
 import org.maven.ide.eclipse.wizards.WidthGroup;
 
@@ -321,9 +322,9 @@ public class ProfilesPage extends MavenPomEditorPage {
       public void open(OpenEvent openevent) {
         List<String> selection = modulesEditor.getSelection();
         for(String module : selection) {
-          MavenProjectFacade projectFacade = findModuleProject(module);
+          IMavenProjectFacade projectFacade = findModuleProject(module);
           if(projectFacade!=null) {
-            MavenProject mavenProject = projectFacade.getMavenProject();
+            ArtifactKey mavenProject = projectFacade.getArtifactKey();
             OpenPomAction.openEditor(mavenProject.getGroupId(), mavenProject.getArtifactId(), mavenProject.getVersion());
           }
         }

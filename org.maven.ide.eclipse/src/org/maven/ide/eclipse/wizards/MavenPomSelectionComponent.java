@@ -42,10 +42,9 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
-import org.apache.maven.artifact.Artifact;
-
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
@@ -121,7 +120,7 @@ public class MavenPomSelectionComponent extends Composite {
   // this.queryType = queryType;
   // this.artifacts = artifacts;
   
-  public void init(String queryText, String queryType, Set<Artifact> artifacts) {
+  public void init(String queryText, String queryType, Set<ArtifactKey> artifacts) {
     this.queryType = queryType;
     
     if(queryText != null) {
@@ -129,7 +128,7 @@ public class MavenPomSelectionComponent extends Composite {
     }
     
     if(artifacts!=null) {
-      for(Artifact a : artifacts) {
+      for(ArtifactKey a : artifacts) {
         artifactKeys.add(a.getGroupId() + ":" + a.getArtifactId());
         artifactKeys.add(a.getGroupId() + ":" + a.getArtifactId() + ":" + a.getVersion());
       }

@@ -65,20 +65,16 @@ public class MavenProjectManager {
    * load the pom if the pom is not found in the cache. In the latter case, workspace resolution is assumed to be
    * enabled for the pom but the pom will not be added to the cache.
    */
-  public MavenProjectFacade create(IFile pom, boolean load, IProgressMonitor monitor) {
+  public IMavenProjectFacade create(IFile pom, boolean load, IProgressMonitor monitor) {
     return manager.create(pom, load, monitor);
   }
 
-  public MavenProjectFacade create(IProject project, IProgressMonitor monitor) {
+  public IMavenProjectFacade create(IProject project, IProgressMonitor monitor) {
     return manager.create(project, monitor);
   }
 
-  public MavenProjectFacade getMavenProject(Artifact artifact) {
-    return manager.getMavenProject(artifact);
-  }
-  
   public ResolverConfiguration getResolverConfiguration(IProject project) {
-    MavenProjectFacade projectFacade = create(project, new NullProgressMonitor());
+    IMavenProjectFacade projectFacade = create(project, new NullProgressMonitor());
     if(projectFacade!=null) {
       return projectFacade.getResolverConfiguration();
     }
@@ -154,7 +150,7 @@ public class MavenProjectManager {
   /**
    * @return MavenProjectFacade[] all maven projects which exist under workspace root 
    */
-  public MavenProjectFacade[] getProjects() {
+  public IMavenProjectFacade[] getProjects() {
     return manager.getProjects();
   }
   
@@ -168,8 +164,8 @@ public class MavenProjectManager {
     return manager.execute(embedder, pomFile, resolverConfiguration, runnable, monitor);
   }
 
-  public MavenProjectFacade getMavenProject(String groupId, String artifactId, String version) {
-    return manager.getMavenProject(groupId, artifactId, version, null);
+  public IMavenProjectFacade getMavenProject(String groupId, String artifactId, String version) {
+    return manager.getMavenProject(groupId, artifactId, version);
   }
   
   public MavenEmbedder createWorkspaceEmbedder() throws MavenEmbedderException {

@@ -26,16 +26,17 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 
-import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Dependency;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.embedder.ArtifactKey;
+import org.maven.ide.eclipse.embedder.ArtifactRef;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
-import org.maven.ide.eclipse.project.MavenProjectFacade;
+import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.wizards.MavenRepositorySearchDialog;
 
@@ -80,12 +81,12 @@ public class AddDependencyAction implements IObjectActionDelegate {
     }
   }
 
-  private Set<Artifact> getArtifacts(IFile file, MavenPlugin plugin) {
+  private Set<ArtifactKey> getArtifacts(IFile file, MavenPlugin plugin) {
     try {
       MavenProjectManager projectManager = plugin.getMavenProjectManager();
-      MavenProjectFacade projectFacade = projectManager.create(file, true, new NullProgressMonitor());
+      IMavenProjectFacade projectFacade = projectManager.create(file, true, new NullProgressMonitor());
       if(projectFacade!=null) {
-        return projectFacade.getMavenProjectArtifacts();
+        return ArtifactRef.toArtifactKey(projectFacade.getMavenProjectArtifacts());
       }
     } catch(Exception ex) {
       String msg = "Can't read Maven project";

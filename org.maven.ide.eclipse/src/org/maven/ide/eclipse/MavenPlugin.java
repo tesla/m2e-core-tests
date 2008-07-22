@@ -117,6 +117,8 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
   private ArchetypeManager archetypeManager;
 
+  private MavenProjectManagerImpl managerImpl;
+
 
   public MavenPlugin() {
     plugin = this;
@@ -173,20 +175,25 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
     this.modelManager = new MavenModelManager(embedderManager, console);
 
-    MavenProjectManagerImpl managerImpl = new MavenProjectManagerImpl(console, indexManager, embedderManager);
+    IWorkspace workspace = ResourcesPlugin.getWorkspace();
+    boolean updateProjectsOnStartup = runtimeManager.isUpdateProjectsOnStartup();
+    
+    this.managerImpl = new MavenProjectManagerImpl(console, indexManager, embedderManager,
+        stateLocationDir, !updateProjectsOnStartup /* readState */);
 
     this.mavenBackgroundJob = new MavenProjectManagerRefreshJob(managerImpl);
 
-    IWorkspace workspace = ResourcesPlugin.getWorkspace();
     workspace.addResourceChangeListener(mavenBackgroundJob, IResourceChangeEvent.POST_CHANGE
         | IResourceChangeEvent.PRE_CLOSE | IResourceChangeEvent.PRE_DELETE);
 
     this.projectManager = new MavenProjectManager(managerImpl, mavenBackgroundJob, stateLocationDir);
     this.projectManager.addMavenProjectChangedListener(new WorkspaceStateWriter(projectManager));
-    this.projectManager.refresh(new MavenUpdateRequest(workspace.getRoot().getProjects(), //
-        true /*offline*/, false /* updateSnapshots */));
+    if(updateProjectsOnStartup || managerImpl.getProjects().length == 0) {
+      this.projectManager.refresh(new MavenUpdateRequest(workspace.getRoot().getProjects(), //
+          true /*offline*/, false /* updateSnapshots */));
+    }
 
-    this.runtimeManager.setWorkspaceRuntime(new MavenWorkspaceRuntime(projectManager, embedderManager));
+    this.runtimeManager.setWorkspaceRuntime(new MavenWorkspaceRuntime(projectManager));
     
     this.buildpathManager = new BuildPathManager(embedderManager, console, projectManager, indexManager, modelManager,
         runtimeManager, bundleContext, stateLocationDir);
@@ -270,7 +277,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     super.stop(context);
 
     DebugPlugin.getDefault().getLaunchManager().removeLaunchConfigurationListener(launchConfigurationListener);
-
+    
     this.mavenBackgroundJob.cancel();
     try {
       this.mavenBackgroundJob.join();

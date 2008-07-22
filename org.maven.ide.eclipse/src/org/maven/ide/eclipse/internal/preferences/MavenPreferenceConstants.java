@@ -71,4 +71,7 @@ public interface MavenPreferenceConstants {
   /** boolean */
   public static final String P_UPDATE_INDEXES = PREFIX + "updateIndexes";
 
+  /** boolean */
+  public static final String P_UPDATE_PROJECTS = PREFIX + "updateProjects";
+  
 }

@@ -31,7 +31,7 @@ import org.eclipse.zest.core.viewers.IEntityStyleProvider;
 import org.eclipse.zest.core.widgets.ZestStyles;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
-import org.maven.ide.eclipse.project.MavenProjectFacade;
+import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 
 
@@ -208,7 +208,7 @@ public class DependencyGraphLabelProvider implements ILabelProvider, IEntityStyl
     if(showIcon && element instanceof Artifact) {
       Artifact artifact = (Artifact) element;
       MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
-      MavenProjectFacade projectFacade = projectManager.getMavenProject(artifact);
+      IMavenProjectFacade projectFacade = projectManager.getMavenProject(artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion());
       return projectFacade == null ? MavenEditorImages.IMG_JAR : MavenEditorImages.IMG_PROJECT;
     }
     return null;

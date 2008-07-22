@@ -18,14 +18,15 @@ import java.util.Properties;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.apache.maven.artifact.Artifact;
 
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
+import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectChangedEvent;
-import org.maven.ide.eclipse.project.MavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 
 /**
@@ -44,17 +45,21 @@ public class WorkspaceStateWriter implements IMavenProjectChangedListener {
       Properties state = new Properties();
 
       IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-      for(MavenProjectFacade projectFacade : projectManager.getProjects()) {
-        Artifact artifact = projectFacade.getMavenProject().getArtifact();
-        File pom = projectFacade.getPom().getLocation().toFile();
-        if (pom.canRead()) {
-          String key = artifact.getGroupId() + ":" + artifact.getArtifactId() + ":pom:" + artifact.getBaseVersion();
-          state.put(key, pom.getCanonicalPath());
-        }
-        IResource outputLocation = root.findMember(projectFacade.getOutputLocation());
-        if (!"pom".equals(artifact.getType()) && outputLocation != null && outputLocation.exists()) {
-          String key = artifact.getGroupId() + ":" + artifact.getArtifactId() + ":" + artifact.getType() + ":" + artifact.getBaseVersion();
-          state.put(key, outputLocation.getLocation().toFile().getCanonicalPath());
+      for(IMavenProjectFacade projectFacade : projectManager.getProjects()) {
+        try {
+          Artifact artifact = projectFacade.getMavenProject(monitor).getArtifact();
+          File pom = projectFacade.getPom().getLocation().toFile();
+          if (pom.canRead()) {
+            String key = artifact.getGroupId() + ":" + artifact.getArtifactId() + ":pom:" + artifact.getBaseVersion();
+            state.put(key, pom.getCanonicalPath());
+          }
+          IResource outputLocation = root.findMember(projectFacade.getOutputLocation());
+          if (!"pom".equals(artifact.getType()) && outputLocation != null && outputLocation.exists()) {
+            String key = artifact.getGroupId() + ":" + artifact.getArtifactId() + ":" + artifact.getType() + ":" + artifact.getBaseVersion();
+            state.put(key, outputLocation.getLocation().toFile().getCanonicalPath());
+          }
+        } catch (CoreException ex) {
+          MavenLogger.log("Error writing workspace state file", ex);
         }
       }
 

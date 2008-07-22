@@ -20,6 +20,7 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
@@ -36,14 +37,13 @@ import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.StandardClasspathProvider;
 
-import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Build;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.project.BuildPathManager;
+import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.IMavenProjectVisitor;
-import org.maven.ide.eclipse.project.MavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 
@@ -92,15 +92,17 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
   {
     int scope = getArtifactScope(configuration);
 
+    IProgressMonitor monitor = new NullProgressMonitor(); // XXX
+
     Set<IRuntimeClasspathEntry> all = new LinkedHashSet<IRuntimeClasspathEntry>(entries.length);
     for (int i = 0; i < entries.length; i++) {
       IRuntimeClasspathEntry entry = entries[i];
       if (MAVEN2_CONTAINER_PATH.equals(entry.getPath()) && entry.getType() == IRuntimeClasspathEntry.CONTAINER) {
-        addMavenClasspathEntries(all, entry, configuration, scope);
+        addMavenClasspathEntries(all, entry, configuration, scope, monitor);
       } else if (entry.getType() == IRuntimeClasspathEntry.PROJECT) {
         IJavaProject javaProject = JavaRuntime.getJavaProject(configuration);
         if (javaProject.getPath().equals(entry.getPath())) {
-          addProjectEntries(all, entry.getPath(), scope, THIS_PROJECT_CLASSIFIER, configuration);
+          addProjectEntries(all, entry.getPath(), scope, THIS_PROJECT_CLASSIFIER, configuration, monitor);
         } else {
           addStandardClasspathEntries(all, entry, configuration);
         }
@@ -121,7 +123,7 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
   }
 
   private void addMavenClasspathEntries(Set<IRuntimeClasspathEntry> resolved, IRuntimeClasspathEntry runtimeClasspathEntry,
-      ILaunchConfiguration configuration, int scope) throws CoreException 
+      ILaunchConfiguration configuration, int scope, IProgressMonitor monitor) throws CoreException 
   {
     IJavaProject javaProject = JavaRuntime.getJavaProject(configuration);
     MavenPlugin plugin = MavenPlugin.getDefault();
@@ -130,7 +132,7 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
     for (int i = 0; i < cp.length; i++) {
       switch (cp[i].getEntryKind()) {
         case IClasspathEntry.CPE_PROJECT:
-          addProjectEntries(resolved, cp[i].getPath(), scope, getArtifactClassifier(cp[i]), configuration);
+          addProjectEntries(resolved, cp[i].getPath(), scope, getArtifactClassifier(cp[i]), configuration, monitor);
           break;
         case IClasspathEntry.CPE_LIBRARY:
           resolved.add(JavaRuntime.newArchiveRuntimeClasspathEntry(cp[i].getPath()));
@@ -155,17 +157,15 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
       // ECLIPSE-33: applications from test sources should use test scope 
       final Set<IPath> testSources = new HashSet<IPath>();
       IJavaProject javaProject = JavaRuntime.getJavaProject(configuration);
-      MavenProjectFacade facade = projectManager.create(javaProject.getProject(), new NullProgressMonitor());
+      IMavenProjectFacade facade = projectManager.create(javaProject.getProject(), new NullProgressMonitor());
       if (facade == null) {
         return BuildPathManager.CLASSPATH_RUNTIME;
       }
       
       facade.accept(new IMavenProjectVisitor() {
-        public boolean visit(MavenProjectFacade projectFacade) {
+        public boolean visit(IMavenProjectFacade projectFacade) {
           testSources.addAll(Arrays.asList(projectFacade.getTestCompileSourceLocations()));
           return true; // keep visiting
-        }
-        public void visit(MavenProjectFacade projectFacade, Artifact artifact) {
         }
       }, IMavenProjectVisitor.NESTED_MODULES);
 
@@ -185,11 +185,11 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
     }
   }
 
-  protected void addProjectEntries(Set<IRuntimeClasspathEntry> resolved, IPath path, int scope, String classifier, ILaunchConfiguration launchConfiguration) throws CoreException {
+  protected void addProjectEntries(Set<IRuntimeClasspathEntry> resolved, IPath path, int scope, String classifier, ILaunchConfiguration launchConfiguration, final IProgressMonitor monitor) throws CoreException {
     IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
     IProject project = root.getProject(path.segment(0));
 
-    MavenProjectFacade projectFacade = projectManager.create(project, new NullProgressMonitor());
+    IMavenProjectFacade projectFacade = projectManager.create(project, monitor);
     if(projectFacade == null) {
       return;
     }
@@ -203,17 +203,14 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
     final Set<IPath> allTestClasses = new LinkedHashSet<IPath>();
 
     projectFacade.accept(new IMavenProjectVisitor() {
-      public boolean visit(MavenProjectFacade projectFacade) {
+      public boolean visit(IMavenProjectFacade projectFacade) throws CoreException {
         // add real resources output folders
-        Build build = projectFacade.getMavenProject().getBuild();
+        Build build = projectFacade.getMavenProject(monitor).getBuild();
         allClasses.add(projectFacade.getProjectRelativePath(build.getOutputDirectory()));
         allTestClasses.add(projectFacade.getProjectRelativePath(build.getTestOutputDirectory()));
 
         // continue traversal
         return true; 
-      }
-
-      public void visit(MavenProjectFacade projectFacade, Artifact artifact) {
       }
     }, IMavenProjectVisitor.NESTED_MODULES);
 

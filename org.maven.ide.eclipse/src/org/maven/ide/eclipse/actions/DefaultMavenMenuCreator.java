@@ -15,7 +15,7 @@ import org.eclipse.swt.widgets.Menu;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.Messages;
-import org.maven.ide.eclipse.project.MavenProjectFacade;
+import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 import org.maven.ide.eclipse.ui.internal.util.SelectionUtil;
@@ -73,7 +73,7 @@ public class DefaultMavenMenuCreator extends AbstractMavenMenuCreator {
         IProject project = SelectionUtil.getType(selection.getFirstElement(), IProject.class);
         if(project!=null) {
           MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
-          MavenProjectFacade projectFacade = projectManager.create(project, new NullProgressMonitor());
+          IMavenProjectFacade projectFacade = projectManager.create(project, new NullProgressMonitor());
           if(projectFacade!=null) {
             ResolverConfiguration configuration = projectFacade.getResolverConfiguration();
             enableWorkspaceResolution = !configuration.shouldResolveWorkspaceProjects();

@@ -46,9 +46,10 @@ import org.apache.maven.project.MavenProject;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.index.IndexManager;
-import org.maven.ide.eclipse.project.MavenProjectFacade;
+import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.ui.internal.util.SelectionUtil;
 
 
@@ -92,11 +93,11 @@ public class OpenUrlAction extends ActionDelegate implements IWorkbenchWindowAct
   public void run(IAction action) {
     if(selection != null) {
       Object element = this.selection.getFirstElement();
-      final Artifact a = getArtifact(element);
+      final ArtifactKey a = getArtifact(element);
       if(a != null) {
         new Job("Opening Browser") {
           protected IStatus run(IProgressMonitor monitor) {
-            openBrowser(actionId, a.getGroupId(), a.getArtifactId(), a.getVersion());
+            openBrowser(actionId, a.getGroupId(), a.getArtifactId(), a.getVersion(), monitor);
             return Status.OK_STATUS;
           }
           
@@ -107,7 +108,7 @@ public class OpenUrlAction extends ActionDelegate implements IWorkbenchWindowAct
 
   }
 
-  private Artifact getArtifact(Object element) {
+  private ArtifactKey getArtifact(Object element) {
     MavenPlugin plugin = MavenPlugin.getDefault();
 
     IPackageFragmentRoot fragment = SelectionUtil.getType(element, IPackageFragmentRoot.class);
@@ -126,18 +127,18 @@ public class OpenUrlAction extends ActionDelegate implements IWorkbenchWindowAct
 
     IProject project = SelectionUtil.getType(element, IProject.class);
     if(project != null && project.isAccessible()) {
-      MavenProjectFacade projectFacade = plugin.getMavenProjectManager().create(project, new NullProgressMonitor());
+      IMavenProjectFacade projectFacade = plugin.getMavenProjectManager().create(project, new NullProgressMonitor());
       if(projectFacade!=null) {
-        return projectFacade.getMavenProject().getArtifact();
+        return projectFacade.getArtifactKey();
       }
     }
     
     return null;
   }
 
-  public static void openBrowser(String actionId, String groupId, String artifactId, String version) {
+  public static void openBrowser(String actionId, String groupId, String artifactId, String version, IProgressMonitor monitor) {
     try {
-      MavenProject mavenProject = getMavenProject(groupId, artifactId, version);
+      MavenProject mavenProject = getMavenProject(groupId, artifactId, version, monitor);
       final String url = getUrl(actionId, mavenProject);
       if(url!=null) {
         PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
@@ -195,7 +196,7 @@ public class OpenUrlAction extends ActionDelegate implements IWorkbenchWindowAct
     return url;
   }
 
-  private static MavenProject getMavenProject(String groupId, String artifactId, String version) throws Exception {
+  private static MavenProject getMavenProject(String groupId, String artifactId, String version, IProgressMonitor monitor) throws Exception {
     String name = groupId + ":" + artifactId + ":" + version;
 
     MavenPlugin plugin = MavenPlugin.getDefault();
@@ -204,9 +205,9 @@ public class OpenUrlAction extends ActionDelegate implements IWorkbenchWindowAct
     
     Artifact a = embedder.createArtifact(groupId, artifactId, version, null, "pom");
     
-    MavenProjectFacade projectFacade = plugin.getMavenProjectManager().getMavenProject(a);
+    IMavenProjectFacade projectFacade = plugin.getMavenProjectManager().getMavenProject(a.getGroupId(), a.getArtifactId(), a.getVersion());
     if(projectFacade != null) {
-      return projectFacade.getMavenProject();
+      return projectFacade.getMavenProject(monitor);
     }
 
     // XXX this should also use repositories declared in settings.xml

@@ -42,7 +42,6 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 
-import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
@@ -50,12 +49,14 @@ import org.apache.maven.model.Profile;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.embedder.ArtifactKey;
+import org.maven.ide.eclipse.embedder.ArtifactRef;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
+import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.IMavenProjectVisitor;
-import org.maven.ide.eclipse.project.MavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.wizards.MavenRepositorySearchDialog;
 
@@ -167,10 +168,10 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
       MavenModelManager modelManager = plugin.getMavenModelManager();
 
       IFile pomFile = projectPom;
-      Set<Artifact> artifacts = Collections.emptySet();
+      Set<ArtifactKey> artifacts = Collections.emptySet();
 
       if(hasMavenNature) {
-        MavenProjectFacade projectFacade = projectManager.create(projectPom, false, new NullProgressMonitor());
+        IMavenProjectFacade projectFacade = projectManager.create(projectPom, false, new NullProgressMonitor());
         if(projectFacade == null) {
           MessageDialog.openError(Display.getCurrent().getActiveShell(), "Add Dependency", //
               "Unable to read Maven project");
@@ -178,10 +179,10 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
         }
 
         try {
-          MavenProjectFacade facade = getModuleFacade(resource, projectFacade);
+          IMavenProjectFacade facade = getModuleFacade(resource, projectFacade);
           if(facade != null) {
             pomFile = facade.getPom();
-            artifacts = facade.getMavenProjectArtifacts();
+            artifacts = ArtifactRef.toArtifactKey(facade.getMavenProjectArtifacts());
 
           } else {
             MessageDialog.openError(Display.getCurrent().getActiveShell(), "Add Dependency",
@@ -198,9 +199,9 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
       } else {
         try {
           pomFile = findModulePom(resource, pomFile, modelManager);
-          MavenProjectFacade facade = projectManager.create(pomFile, true, new NullProgressMonitor());
+          IMavenProjectFacade facade = projectManager.create(pomFile, true, new NullProgressMonitor());
           if(facade != null) {
-            artifacts = facade.getMavenProjectArtifacts();
+            artifacts = ArtifactRef.toArtifactKey(facade.getMavenProjectArtifacts());
           }
         } catch(CoreException ex) {
           String msg = "Unable to locate Maven project";
@@ -213,7 +214,7 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
 
       IWorkbench workbench = plugin.getWorkbench();
       Shell shell = workbench.getDisplay().getActiveShell();
-
+      
       MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(shell, //
           "Search in Maven repositories", IndexManager.SEARCH_CLASS_NAME, artifacts, true);
       dialog.setQuery(query);
@@ -321,13 +322,13 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
       return null;
     }
 
-    private MavenProjectFacade getModuleFacade(IResource resource, MavenProjectFacade projectFacade) throws CoreException {
+    private IMavenProjectFacade getModuleFacade(IResource resource, IMavenProjectFacade projectFacade) throws CoreException {
       final IPath resourcePath = resource.getLocation();
 
       class ModulePomLocator implements IMavenProjectVisitor {
-        MavenProjectFacade facade;
+        IMavenProjectFacade facade;
 
-        public boolean visit(MavenProjectFacade projectFacade) {
+        public boolean visit(IMavenProjectFacade projectFacade) {
           if(facade == null) {
             facade = projectFacade;
           }
@@ -338,9 +339,6 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
             facade = projectFacade;
           }
           return true;
-        }
-
-        public void visit(MavenProjectFacade mavenProject, Artifact artifact) {
         }
       }
 

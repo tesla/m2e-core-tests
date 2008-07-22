@@ -22,11 +22,10 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 
-import org.apache.maven.artifact.Artifact;
-
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
@@ -52,7 +51,7 @@ public class AddPluginAction implements IObjectActionDelegate {
     }
 
     MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-        "Add Plugin", IndexManager.SEARCH_PLUGIN, Collections.<Artifact>emptySet());
+        "Add Plugin", IndexManager.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
     if(dialog.open() == Window.OK) {
       final IndexedArtifactFile indexedArtifactFile = (IndexedArtifactFile) dialog.getFirstResult();
       if(indexedArtifactFile != null) {

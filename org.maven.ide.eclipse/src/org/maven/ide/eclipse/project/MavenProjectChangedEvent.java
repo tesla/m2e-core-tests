@@ -32,11 +32,11 @@ public class MavenProjectChangedEvent {
 
   public static final int FLAG_ENTRY_SOURCES = 3;
 
-  private final MavenProjectFacade oldMavenProject;
+  private final IMavenProjectFacade oldMavenProject;
 
-  private final MavenProjectFacade mavenProject;
+  private final IMavenProjectFacade mavenProject;
 
-  public MavenProjectChangedEvent(IFile source, int kind, int flags, MavenProjectFacade oldMavenProject, MavenProjectFacade mavenProject) {
+  public MavenProjectChangedEvent(IFile source, int kind, int flags, IMavenProjectFacade oldMavenProject, IMavenProjectFacade mavenProject) {
     this.source = source;
     this.kind = kind;
     this.flags = flags;
@@ -52,11 +52,11 @@ public class MavenProjectChangedEvent {
     return flags;
   }
 
-  public MavenProjectFacade getMavenProject() {
+  public IMavenProjectFacade getMavenProject() {
     return mavenProject;
   }
 
-  public MavenProjectFacade getOldMavenProject() {
+  public IMavenProjectFacade getOldMavenProject() {
     return oldMavenProject;
   }
 

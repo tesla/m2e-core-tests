@@ -64,10 +64,10 @@ import org.maven.ide.eclipse.internal.ExtensionReader;
 import org.maven.ide.eclipse.internal.embedder.TransferListenerAdapter;
 import org.maven.ide.eclipse.project.BuildPathManager;
 import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
+import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.LocalProjectScanner;
 import org.maven.ide.eclipse.project.MavenProjectChangedEvent;
-import org.maven.ide.eclipse.project.MavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectInfo;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
@@ -164,9 +164,9 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
           }
 
           IProject project = projects.get(projectInfo);
-          MavenProjectFacade facade = projectManagerImpl.create(project, monitor);
+          IMavenProjectFacade facade = projectManagerImpl.create(project, monitor);
           if (facade != null) {
-            ProjectConfigurationRequest request = new ProjectConfigurationRequest(facade, false /*updateSources*/);
+            ProjectConfigurationRequest request = new ProjectConfigurationRequest(facade.getProject(), facade.getPom(), facade.getMavenProject(monitor), facade.getResolverConfiguration(), false /*updateSources*/);
             updateProjectConfiguration(embedder, request, monitor);
           }
         }
@@ -188,8 +188,8 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
         IFile pom = project.getFile(IMavenConstants.POM_FILE_NAME);
         if (pom.isAccessible()) {
           // this is for unit tests only, production code should not need to load facade here
-          MavenProjectFacade facade = projectManagerImpl.create(pom, true, monitor);
-          ProjectConfigurationRequest request = new ProjectConfigurationRequest(project, facade.getPom(), facade.getMavenProject(), configuration, true);
+          IMavenProjectFacade facade = projectManagerImpl.create(pom, true, monitor);
+          ProjectConfigurationRequest request = new ProjectConfigurationRequest(project, facade.getPom(), facade.getMavenProject(monitor), configuration, true);
           updateProjectConfiguration(embedder, request, monitor);
         }
       } finally {

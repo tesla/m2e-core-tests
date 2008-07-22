@@ -16,8 +16,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.project.MavenProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -76,9 +74,10 @@ import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.editor.composites.ListEditorComposite;
 import org.maven.ide.eclipse.editor.composites.ListEditorContentProvider;
 import org.maven.ide.eclipse.editor.xml.search.Packaging;
+import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
-import org.maven.ide.eclipse.project.MavenProjectFacade;
+import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.wizards.MavenModuleWizard;
 import org.maven.ide.eclipse.wizards.MavenRepositorySearchDialog;
 import org.maven.ide.eclipse.wizards.WidthGroup;
@@ -269,7 +268,7 @@ public class OverviewPage extends MavenPomEditorPage {
     parentSelectAction = new Action("Select Parent", MavenEditorImages.SELECT_ARTIFACT) {
       public void run() {
         // TODO calculate current list of artifacts for the project
-        Set<Artifact> artifacts = Collections.emptySet();
+        Set<ArtifactKey> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getEditorSite().getShell(), //
             "Add Dependency", IndexManager.SEARCH_ARTIFACT, artifacts, false);
         if(dialog.open() == Window.OK) {
@@ -422,9 +421,9 @@ public class OverviewPage extends MavenPomEditorPage {
       public void open(OpenEvent openevent) {
         List<String> selection = modulesEditor.getSelection();
         for(String module : selection) {
-          MavenProjectFacade projectFacade = findModuleProject(module);
+          IMavenProjectFacade projectFacade = findModuleProject(module);
           if(projectFacade!=null) {
-            MavenProject mavenProject = projectFacade.getMavenProject();
+            ArtifactKey mavenProject = projectFacade.getArtifactKey();
             OpenPomAction.openEditor(mavenProject.getGroupId(), mavenProject.getArtifactId(), mavenProject.getVersion());
           }
         }

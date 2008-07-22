@@ -58,7 +58,7 @@ import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
-import org.maven.ide.eclipse.project.MavenProjectFacade;
+import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.util.Util;
 
@@ -415,9 +415,7 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
       String artifactId = st.nextToken();
       String version = st.nextToken();
 
-      Artifact artifact = embedder.createArtifact(groupId, artifactId, version, null, "jar");
-
-      MavenProjectFacade facade = projectManager.getMavenProject(artifact);
+      IMavenProjectFacade facade = projectManager.getMavenProject(groupId, artifactId, version);
 
       File file = null;
       if (facade != null) {
@@ -426,6 +424,7 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
           file = output.getLocation().toFile();
         }
       } else {
+        Artifact artifact = embedder.createArtifact(groupId, artifactId, version, null, "jar");
         try {
           embedder.resolve(artifact, Collections.EMPTY_LIST, embedder.getLocalRepository());
         } catch(ArtifactResolutionException ex) {

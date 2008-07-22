@@ -19,7 +19,7 @@ import org.maven.ide.components.pom.Exclusion;
 import org.maven.ide.components.pom.Extension;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
-import org.maven.ide.eclipse.project.MavenProjectFacade;
+import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 
 
@@ -91,7 +91,7 @@ public class DependencyLabelProvider extends LabelProvider implements IColorProv
     // XXX need to resolve actual dependencies (i.e. inheritance, dependency management or properties)
     if(groupId != null && artifactId != null && version != null) {
       MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
-      MavenProjectFacade projectFacade = projectManager.getMavenProject(groupId, artifactId, version);
+      IMavenProjectFacade projectFacade = projectManager.getMavenProject(groupId, artifactId, version);
       if(projectFacade != null) {
         return MavenEditorImages.IMG_PROJECT;
       }

@@ -17,7 +17,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.maven.artifact.Artifact;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -76,6 +75,7 @@ import org.maven.ide.eclipse.editor.pom.SearchControl;
 import org.maven.ide.eclipse.editor.pom.SearchMatcher;
 import org.maven.ide.eclipse.editor.pom.ValueProvider;
 import org.maven.ide.eclipse.editor.xml.search.Packaging;
+import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.wizards.MavenRepositorySearchDialog;
@@ -250,7 +250,7 @@ public class DependenciesComposite extends Composite {
     dependencyAddAction = new Action("Add Dependency", MavenEditorImages.ADD_ARTIFACT) {
       public void run() {
         // TODO calculate current list of artifacts for the project
-        Set<Artifact> artifacts = Collections.emptySet();
+        Set<ArtifactKey> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
             "Add Dependency", IndexManager.SEARCH_ARTIFACT, artifacts, true);
         if(dialog.open() == Window.OK) {
@@ -371,7 +371,7 @@ public class DependenciesComposite extends Composite {
     dependencyManagementAddAction = new Action("Add Dependency", MavenEditorImages.ADD_ARTIFACT) {
       public void run() {
         // TODO calculate current list of artifacts for the project
-        Set<Artifact> artifacts = Collections.emptySet();
+        Set<ArtifactKey> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
             "Add Dependency", IndexManager.SEARCH_ARTIFACT, artifacts, true);
         if(dialog.open() == Window.OK) {
@@ -440,7 +440,7 @@ public class DependenciesComposite extends Composite {
     dependencySelectAction = new Action("Select Dependency", MavenEditorImages.SELECT_ARTIFACT) {
       public void run() {
         // TODO calculate current list of artifacts for the project
-        Set<Artifact> artifacts = Collections.emptySet();
+        Set<ArtifactKey> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
             "Add Dependency", IndexManager.SEARCH_ARTIFACT, artifacts, true);
         if(dialog.open() == Window.OK) {
@@ -463,8 +463,8 @@ public class DependenciesComposite extends Composite {
         final String artifactId = artifactIdText.getText();
         final String version = versionText.getText();
         new Job("Opening " + groupId + ":" + artifactId + ":" + version) {
-          protected IStatus run(IProgressMonitor arg0) {
-            OpenUrlAction.openBrowser(OpenUrlAction.ID_PROJECT, groupId, artifactId, version);
+          protected IStatus run(IProgressMonitor monitor) {
+            OpenUrlAction.openBrowser(OpenUrlAction.ID_PROJECT, groupId, artifactId, version, monitor);
             return Status.OK_STATUS;
           }
         }.schedule();
@@ -695,7 +695,7 @@ public class DependenciesComposite extends Composite {
     exclusionAddAction = new Action("Add Exclusion", MavenEditorImages.ADD_ARTIFACT) {
       public void run() {
         // XXX calculate list available for exclusion
-        Set<Artifact> artifacts = Collections.emptySet();
+        Set<ArtifactKey> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
             "Add Exclusion", IndexManager.SEARCH_ARTIFACT, artifacts);
         if(dialog.open() == Window.OK) {
@@ -779,7 +779,7 @@ public class DependenciesComposite extends Composite {
     exclusionSelectAction = new Action("Select Exclusion", MavenEditorImages.SELECT_ARTIFACT) {
       public void run() {
         // XXX calculate list available for exclusion
-        Set<Artifact> artifacts = Collections.emptySet();
+        Set<ArtifactKey> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
             "Add Dependency", IndexManager.SEARCH_ARTIFACT, artifacts);
         if(dialog.open() == Window.OK) {

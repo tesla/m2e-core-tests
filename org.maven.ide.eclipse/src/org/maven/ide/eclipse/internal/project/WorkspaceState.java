@@ -8,6 +8,7 @@
 
 package org.maven.ide.eclipse.internal.project;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,14 +23,17 @@ import org.eclipse.core.runtime.IPath;
 
 import org.apache.maven.project.MavenProject;
 
-import org.maven.ide.eclipse.project.MavenProjectFacade;
+import org.maven.ide.eclipse.embedder.ArtifactKey;
 
 /**
- * WorkspaceState
+ * Workspace state
  *
- * @author igor
+ * @author Igor Fedorenko
  */
-public class WorkspaceState {
+public class WorkspaceState implements Serializable {
+  
+  private static final long serialVersionUID = -8747318065115176241L;
+
   /**
    * Map<ArtifactKey, IPath> 
    * Maps ArtifactKey to full workspace IPath of the POM file that defines this artifact. 
@@ -61,19 +65,12 @@ public class WorkspaceState {
    */
   private final Map<IPath, MavenProjectFacade> workspacePoms = new HashMap<IPath, MavenProjectFacade>();
 
-  /**
-   * @param state
-   */
-  public WorkspaceState(WorkspaceState state) {
-    // TODO Auto-generated constructor stub
-  }
-
   public synchronized MavenProjectFacade getProjectFacade(IFile pom) {
     return workspacePoms.get(pom.getFullPath());
   }
 
-  public synchronized MavenProjectFacade getMavenProject(ArtifactKey artifactKey) {
-    IPath path = workspaceArtifacts.get(artifactKey);
+  public synchronized MavenProjectFacade getMavenProject(String groupId, String artifactId, String version) {
+    IPath path = workspaceArtifacts.get(new ArtifactKey(groupId, artifactId, version, null));
     if (path == null) {
       return null;
     }
@@ -117,17 +114,15 @@ public class WorkspaceState {
     workspacePoms.put(pom.getFullPath(), facade);
 
     // Add the project to workspaceArtifacts map
-    ArtifactKey artifactKey = new ArtifactKey(facade.getMavenProject().getArtifact());
-    workspaceArtifacts.put(artifactKey, pom.getFullPath());
+    workspaceArtifacts.put(facade.getArtifactKey(), pom.getFullPath());
   }
 
-  public synchronized void removeProject(IFile pom, MavenProject mavenProject) {
+  public synchronized void removeProject(IFile pom, ArtifactKey mavenProject) {
     removePom(pom);
 
     // Remove the project from workspaceArtifacts map
     if (mavenProject != null) {
-      ArtifactKey artifactKey = new ArtifactKey(mavenProject.getArtifact());
-      workspaceArtifacts.remove(artifactKey);
+      workspaceArtifacts.remove(mavenProject);
     }
   }
 
@@ -150,18 +145,16 @@ public class WorkspaceState {
     }
   }
 
-  private static final Set<IFile> EMPTY_IFILE_SET = Collections.emptySet();
-
-  private Set<IFile> getDependents(IFile pom, MavenProject mavenProject, Map<ArtifactKey, Set<IPath>> dependencies) {
+  private Set<IFile> getDependents(IFile pom, ArtifactKey mavenProject, Map<ArtifactKey, Set<IPath>> dependencies) {
     if (mavenProject == null) {
-      return EMPTY_IFILE_SET;
+      return Collections.emptySet();
     }
 
     IWorkspaceRoot root = pom.getWorkspace().getRoot();
     // Map dependencies = workspace ? workspaceDependencies : inprojectDependencies;
-    Set<IPath> dependents = dependencies.get(new ArtifactKey(mavenProject.getArtifact()));
+    Set<IPath> dependents = dependencies.get(mavenProject);
     if (dependents == null) {
-      return EMPTY_IFILE_SET;
+      return Collections.emptySet();
     }
 
     Set<IFile> pomSet = new LinkedHashSet<IFile>();
@@ -177,7 +170,7 @@ public class WorkspaceState {
     return pomSet;
   }
 
-  public synchronized Set<IFile> getDependents(IFile pom, MavenProject mavenProject, boolean includeNestedModules) {
+  public synchronized Set<IFile> getDependents(IFile pom, ArtifactKey mavenProject, boolean includeNestedModules) {
     Set<IFile> dependents = new HashSet<IFile>();
     dependents.addAll(getDependents(pom, mavenProject, workspaceDependencies));
     if (includeNestedModules) {
@@ -193,8 +186,8 @@ public class WorkspaceState {
     return r1.getProject().equals(r2.getProject());
   }
 
-  public synchronized Set<IPath> removeWorkspaceModules(IFile pom, MavenProject mavenProject) {
-    return workspaceModules.remove(new ArtifactKey(mavenProject.getArtifact()));
+  public synchronized Set<IPath> removeWorkspaceModules(IFile pom, ArtifactKey mavenProject) {
+    return workspaceModules.remove(mavenProject);
   }
 
 }

@@ -79,6 +79,7 @@ import org.maven.ide.eclipse.archetype.ArchetypeManager;
 import org.maven.ide.eclipse.archetype.ArchetypeCatalogFactory.NexusIndexerCatalogFactory;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.core.Messages;
+import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
@@ -654,7 +655,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
               monitor.subTask("indexing...");
               IndexManager indexManager = plugin.getIndexManager();
               indexManager.addDocument(IndexManager.LOCAL_INDEX, jarFile, //
-                  indexManager.getDocumentKey(pomArtifact), jarFile.length(), jarFile.lastModified(), jarFile, //
+                  indexManager.getDocumentKey(new ArtifactKey(pomArtifact)), jarFile.length(), jarFile.lastModified(), jarFile, //
                   IndexManager.NOT_PRESENT, IndexManager.NOT_PRESENT);
               
               loadArchetypes(archetypeGroupId, archetypeArtifactId, archetypeVersion);

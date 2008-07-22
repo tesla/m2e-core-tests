@@ -11,6 +11,8 @@ package org.maven.ide.eclipse.internal.project;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 
+import org.maven.ide.eclipse.embedder.ArtifactKey;
+
 
 class DownloadRequest {
   final IProject project;

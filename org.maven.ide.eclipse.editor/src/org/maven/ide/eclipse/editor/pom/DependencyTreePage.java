@@ -72,7 +72,7 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
-import org.maven.ide.eclipse.project.MavenProjectFacade;
+import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 
 
@@ -171,7 +171,7 @@ public class DependencyTreePage extends FormPage {
             }
           });
 
-          mavenProject = pomEditor.readMavenProject(false);
+          mavenProject = pomEditor.readMavenProject(false, monitor);
 
           getPartControl().getDisplay().asyncExec(new Runnable() {
             public void run() {
@@ -818,7 +818,7 @@ public class DependencyTreePage extends FormPage {
         DependencyNode node = (DependencyNode) element;
         Artifact artifact = node.getArtifact();
         MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
-        MavenProjectFacade projectFacade = projectManager.getMavenProject(artifact);
+        IMavenProjectFacade projectFacade = projectManager.getMavenProject(artifact.getGroupId(), artifact.getGroupId(), artifact.getVersion());
         return projectFacade == null ? MavenEditorImages.IMG_JAR : MavenEditorImages.IMG_PROJECT;
       }
       return null;
@@ -894,7 +894,7 @@ public class DependencyTreePage extends FormPage {
       if(element instanceof Artifact) {
         Artifact a = (Artifact) element;
         MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
-        MavenProjectFacade projectFacade = projectManager.getMavenProject(a);
+        IMavenProjectFacade projectFacade = projectManager.getMavenProject(a.getGroupId(), a.getArtifactId(), a.getVersion());
         return projectFacade == null ? MavenEditorImages.IMG_JAR : MavenEditorImages.IMG_PROJECT;
       }
       return null;

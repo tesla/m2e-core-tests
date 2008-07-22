@@ -110,7 +110,7 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.editor.MavenEditorPlugin;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
-import org.maven.ide.eclipse.project.MavenProjectFacade;
+import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.MavenRunnable;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
@@ -170,7 +170,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   private int sourcePageIndex;
 
   NotificationCommandStack commandStack;
-
+  
   IModelManager modelManager;
 
   IFile pomFile;
@@ -354,7 +354,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
         commandStack = new NotificationCommandStack(this);
         editingDomain = new AdapterFactoryEditingDomain(adapterFactory, //
             commandStack, new HashMap<Resource, Boolean>());
-
+        
         structuredModel = modelManager.getExistingModelForEdit(doc);
         if(structuredModel == null) {
           structuredModel = modelManager.getModelForEdit((IStructuredDocument) doc);
@@ -476,7 +476,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   
       try {
         monitor.setTaskName("Reading project");
-        MavenProject mavenProject = readMavenProject(force);
+        MavenProject mavenProject = readMavenProject(force, monitor);
     
         MavenProjectManager mavenProjectManager = plugin.getMavenProjectManager();
         MavenEmbedder embedder = mavenProjectManager.createWorkspaceEmbedder();
@@ -537,7 +537,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     return rootNode;
   }
   
-  public MavenProject readMavenProject(boolean force) throws MavenEmbedderException, CoreException {
+  public MavenProject readMavenProject(boolean force, IProgressMonitor monitor) throws MavenEmbedderException, CoreException {
     if(force || mavenProject==null) {
       MavenPlugin plugin = MavenPlugin.getDefault();
       MavenProjectManager projectManager = plugin.getMavenProjectManager();
@@ -549,8 +549,8 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
         pomFile.refreshLocal(1, null);
         ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
 
-        MavenProjectFacade projectFacade = projectManager.create(pomFile, true, new NullProgressMonitor());
-        mavenProject = projectFacade.getMavenProject();
+        IMavenProjectFacade projectFacade = projectManager.create(pomFile, true, monitor);
+        mavenProject = projectFacade.getMavenProject(monitor); 
 
       } else if(input instanceof IStorageEditorInput) {
         IStorageEditorInput storageInput = (IStorageEditorInput) input;

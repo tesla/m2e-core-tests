@@ -6,12 +6,16 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.internal.project;
+package org.maven.ide.eclipse.embedder;
+
+import java.io.Serializable;
+import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
 
-public class ArtifactKey {
-
+public class ArtifactKey implements Serializable {
+  private static final long serialVersionUID = -8984509272834024387L;
+  
   private final String groupId;
   private final String artifactId;
   private final String version;
@@ -90,5 +94,10 @@ public class ArtifactKey {
 
   public String getClassifier() {
     return classifier;
+  }
+
+  public static ArtifactKey fromArtifact(Set<Artifact> artifacts) {
+    // TODO Auto-generated method fromArtifact
+    return null;
   }
 }

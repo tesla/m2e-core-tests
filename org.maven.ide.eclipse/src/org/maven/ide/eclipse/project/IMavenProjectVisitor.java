@@ -10,9 +10,6 @@ package org.maven.ide.eclipse.project;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.apache.maven.artifact.Artifact;
-
-
 /**
  * This interface is implemented by clients that visit MavenProject tree.
  */
@@ -32,7 +29,7 @@ public interface IMavenProjectVisitor {
    * @param projectFacade a facade for visited Maven project
    * @return true if nested artifacts and modules should be visited
    */
-  public boolean visit(MavenProjectFacade projectFacade) throws CoreException;
+  public boolean visit(IMavenProjectFacade projectFacade) throws CoreException;
 
   /**
    * Visit Maven project dependency/artifact
@@ -40,6 +37,6 @@ public interface IMavenProjectVisitor {
    * @param projectFacade a facade for visited Maven project
    * @param artifact an artifact for project dependency
    */
-  public void visit(MavenProjectFacade projectFacade, Artifact artifact);
+//  public void visit(IMavenProjectFacade projectFacade, Artifact artifact);
 
 }

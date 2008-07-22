@@ -15,7 +15,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.maven.artifact.Artifact;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -68,6 +67,7 @@ import org.maven.ide.eclipse.editor.composites.DependencyLabelProvider;
 import org.maven.ide.eclipse.editor.composites.ListEditorComposite;
 import org.maven.ide.eclipse.editor.composites.ListEditorContentProvider;
 import org.maven.ide.eclipse.editor.xml.search.Packaging;
+import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.wizards.MavenRepositorySearchDialog;
@@ -250,7 +250,7 @@ public class BuildPage extends MavenPomEditorPage {
     extensionAddAction = new Action("Add Extension", MavenEditorImages.ADD_ARTIFACT) {
       public void run() {
         // XXX calculate list available extensions
-        Set<Artifact> artifacts = Collections.emptySet();
+        Set<ArtifactKey> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getEditorSite().getShell(), //
             "Add Extension", IndexManager.SEARCH_ARTIFACT, artifacts);
         if(dialog.open() == Window.OK) {
@@ -372,7 +372,7 @@ public class BuildPage extends MavenPomEditorPage {
     extensionSelectAction = new Action("Select Extension", MavenEditorImages.SELECT_ARTIFACT) {
       public void run() {
         // XXX calculate list available extensions
-        Set<Artifact> artifacts = Collections.emptySet();
+        Set<ArtifactKey> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getEditorSite().getShell(), //
             "Select Extension", IndexManager.SEARCH_ARTIFACT, artifacts);
         if(dialog.open() == Window.OK) {
@@ -393,8 +393,8 @@ public class BuildPage extends MavenPomEditorPage {
         final String artifactId = extensionArtifactIdText.getText();
         final String version = extensionVersionText.getText();
         new Job("Opening " + groupId + ":" + artifactId + ":" + version) {
-          protected IStatus run(IProgressMonitor arg0) {
-            OpenUrlAction.openBrowser(OpenUrlAction.ID_PROJECT, groupId, artifactId, version);
+          protected IStatus run(IProgressMonitor monitor) {
+            OpenUrlAction.openBrowser(OpenUrlAction.ID_PROJECT, groupId, artifactId, version, monitor);
             return Status.OK_STATUS;
           }
         }.schedule();

@@ -755,7 +755,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
         return container.getPath();
       }
     };
-    buildpathManager.updateClasspathContainer(javaProject, containerSuggestion);
+    buildpathManager.updateClasspathContainer(javaProject, containerSuggestion, monitor);
     waitForJobsToComplete();
 
     // check custom source/javadoc

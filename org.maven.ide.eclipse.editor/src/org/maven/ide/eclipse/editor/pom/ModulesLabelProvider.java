@@ -11,7 +11,7 @@ package org.maven.ide.eclipse.editor.pom;
 import org.eclipse.swt.graphics.Image;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.editor.composites.StringLabelProvider;
-import org.maven.ide.eclipse.project.MavenProjectFacade;
+import org.maven.ide.eclipse.project.IMavenProjectFacade;
 
 public class ModulesLabelProvider extends StringLabelProvider {
   
@@ -26,7 +26,7 @@ public class ModulesLabelProvider extends StringLabelProvider {
   public Image getImage(Object element) {
     if(element instanceof String) {
       String moduleName = (String) element;
-      MavenProjectFacade projectFacade = editorPage.findModuleProject(moduleName);
+      IMavenProjectFacade projectFacade = editorPage.findModuleProject(moduleName);
       if(projectFacade!=null) {
         return MavenEditorImages.IMG_PROJECT;
       }
