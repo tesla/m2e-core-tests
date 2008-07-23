@@ -745,14 +745,6 @@ public class OverviewPage extends MavenPomEditorPage {
       loadThis();
       modulesEditor.refresh();
       propertiesEditor.refresh();
-
-      // XXX this fixes the issue with not updating child sections, but then there are lost field updates
-//      Model model = (Model) object;
-//      loadParent(model.getParent());
-//      loadOrganization(model.getOrganization());
-//      loadScm(model.getScm());
-//      loadCiManagement(model.getCiManagement());
-//      loadIssueManagement(model.getIssueManagement());
     }
 
     if (object instanceof Parent) {
@@ -764,7 +756,7 @@ public class OverviewPage extends MavenPomEditorPage {
     }
 
     if (object instanceof Scm) {
-      loadScm((Scm) object);
+      loadScm((Scm) notification.getNewValue());
     }
 
     if (object instanceof CiManagement) {
