@@ -36,6 +36,7 @@ class TextContentDescriber implements ITextContentDescriber {
    *  (non-Javadoc)
    * @see org.eclipse.core.runtime.content.ITextContentDescriber#describe(java.io.Reader, org.eclipse.core.runtime.content.IContentDescription)
    */
+  @SuppressWarnings("unused")
   public int describe(Reader contents, IContentDescription description) throws IOException {
     // we want to be pretty loose on detecting the text content type  
     return INDETERMINATE;
