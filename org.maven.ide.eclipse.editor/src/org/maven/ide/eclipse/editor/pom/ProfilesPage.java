@@ -15,7 +15,6 @@ import static org.maven.ide.eclipse.editor.pom.FormUtils.setText;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.maven.project.MavenProject;
 import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.common.notify.Notification;
@@ -977,7 +976,7 @@ public class ProfilesPage extends MavenPomEditorPage {
     if(object instanceof Profile) {
       profilesEditor.refresh();
       if(currentProfile == object) {
-        updateProfileDetails(currentProfile);
+        updateProfileDetails((Profile) getFromNotification(notification));
       }
     }
     

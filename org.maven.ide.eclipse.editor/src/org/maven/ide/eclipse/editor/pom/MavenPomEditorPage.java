@@ -33,6 +33,7 @@ import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.notify.Notifier;
+import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.edit.command.SetCommand;
@@ -539,7 +540,18 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
     }
     return null;
   }
-  
+  /*
+   * returns added/removed/updated EObject from notification (convenience method for detail forms)
+   */
+  public static Object getFromNotification(Notification notification) {
+    //for structuralFeatures, return new value (for insert/delete)
+    if (notification.getFeature() != null && !(notification.getFeature() instanceof EAttribute))
+      return notification.getNewValue();
+    //for attributes, return the notifier as it contains all new attributes (attribute modified)
+    else
+        return notification.getNotifier();
+  }
+
   /**
    * Adapter for Text, Combo and CCombo widgets 
    */

@@ -129,15 +129,6 @@ public class OverviewPage extends MavenPomEditorPage {
   private Action newModuleProjectAction;
   private Action parentSelectAction;
 
-  // model
-//  Properties properties;
-//  Modules modules;
-//  Parent parent;
-//  Organization organization;
-//  Scm scm;
-//  IssueManagement issueManagement;
-//  CiManagement ciManagement;
-
   public OverviewPage(MavenPomEditor pomEditor) {
     super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.overview", "Overview");
   }
@@ -748,28 +739,27 @@ public class OverviewPage extends MavenPomEditorPage {
     }
 
     if (object instanceof Parent) {
-      loadParent((Parent) object);
+      loadParent((Parent) getFromNotification(notification));
     }
 
     if (object instanceof Organization) {
-      loadOrganization((Organization) object);
+      loadOrganization((Organization) getFromNotification(notification));
     }
 
     if (object instanceof Scm) {
-      loadScm((Scm) notification.getNewValue());
+      loadScm((Scm) getFromNotification(notification));
     }
 
     if (object instanceof CiManagement) {
-      loadCiManagement((CiManagement) object);
+      loadCiManagement((CiManagement) getFromNotification(notification));
     }
 
     if (object instanceof IssueManagement) {
-      loadIssueManagement((IssueManagement) object);
+      loadIssueManagement((IssueManagement) getFromNotification(notification));
     }
     
     if(object instanceof Modules) {
       modulesEditor.refresh();
-      // loadModules((Modules) object);
     }
     
     if(object instanceof Properties) {

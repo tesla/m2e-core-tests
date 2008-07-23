@@ -586,17 +586,17 @@ public class TeamComposite extends Composite {
       contributorsEditor.refresh();
 
       if(object == currentSelection) {
-        updateDetails(object);
+        updateDetails((EObject) MavenPomEditorPage.getFromNotification(notification));
       }
     } else if(object instanceof Developer) {
       developersEditor.refresh();
 
       if(object == currentSelection) {
-        updateDetails(object);
+        updateDetails((EObject) MavenPomEditorPage.getFromNotification(notification));
       }
     } else if(object instanceof Roles) {
       if(object == getRoles()) {
-        updateRoles((Roles) object);
+        updateRoles((Roles) MavenPomEditorPage.getFromNotification(notification));
       }
     }
   }

@@ -602,7 +602,7 @@ public class BuildComposite extends Composite {
       resourcesEditor.refresh();
       testResourcesEditor.refresh();
       if(object==currentResource) {
-        loadResourceDetails(currentResource);
+        loadResourceDetails((Resource) MavenPomEditorPage.getFromNotification(notification));
       }
     }
     

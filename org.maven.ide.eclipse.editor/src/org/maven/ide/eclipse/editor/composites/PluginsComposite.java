@@ -942,7 +942,7 @@ public class PluginsComposite extends Composite {
       pluginsEditor.refresh();
       pluginManagementEditor.refresh();
       if(object==currentPlugin) {
-        updatePluginDetails(currentPlugin);
+        updatePluginDetails((Plugin) MavenPomEditorPage.getFromNotification(notification));
       }
     }
     
@@ -954,7 +954,7 @@ public class PluginsComposite extends Composite {
     if(object instanceof PluginExecution) {
       pluginExecutionsEditor.refresh();
       if(currentPluginExecution==object) {
-        updatePluginExecution(currentPluginExecution);
+        updatePluginExecution((PluginExecution) MavenPomEditorPage.getFromNotification(notification));
       }
     }
     

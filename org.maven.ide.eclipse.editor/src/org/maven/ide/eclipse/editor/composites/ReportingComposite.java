@@ -776,7 +776,7 @@ public class ReportingComposite extends Composite {
     } else if(object instanceof ReportPlugin) {
       reportPluginsEditor.refresh();
       if(object == currentReportPlugin) {
-        updateReportPluginDetails((ReportPlugin) object);
+        updateReportPluginDetails((ReportPlugin) MavenPomEditorPage.getFromNotification(notification));
       }
     } else if(object instanceof ReportSetsType || object instanceof ReportSet) {
       reportSetsEditor.refresh();
