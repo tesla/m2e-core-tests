@@ -14,16 +14,16 @@ import java.io.Reader;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.eclipse.core.internal.content.XMLContentDescriber;
 import org.eclipse.core.runtime.content.IContentDescription;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 
 /**
- * A content describer for POM files. Written after <a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.ant.core/src/org/eclipse/ant/internal/core/contentDescriber//AntBuildfileContentDescriber.java"
- * >/AntBuildfileContentDescriber.java</a>
+ * A content describer for POM files.
  * 
+ * @see org.eclipse.ant.internal.core.contentDescriber.AntBuildfileContentDescriber
+ * @author Herve Boutemy
  * @since 0.9.6
  */
 public final class PomFileContentDescriber extends XMLContentDescriber {
