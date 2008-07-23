@@ -40,6 +40,53 @@ public class PomContentOutlineConfiguration extends XMLContentOutlineConfigurati
     }
   
     public Image getImage(Object element) {
+      Node node = (Node) element;
+      String namespace = node.getNamespaceURI();
+      String nodeName = node.getNodeName();
+      
+      if(node.getNodeType()==Node.COMMENT_NODE) {
+        return labelProvider.getImage(element);
+      }
+      
+      if("http://maven.apache.org/POM/4.0.0".equals(namespace)) {
+        if("parent".equals(nodeName)) {
+          return MvnImages.IMG_JAR;
+        
+        } else if("dependency".equals(nodeName)) {
+          return MvnImages.IMG_JAR;
+        
+        } else if("exclusion".equals(nodeName)) {
+          return MvnImages.IMG_JAR;
+        
+        } else if("module".equals(nodeName)) {
+          // TODO show folder if module is in the workspace
+          return MvnImages.IMG_JAR;
+          
+        } else if("repository".equals(nodeName) || "pluginRepository".equals(nodeName)
+            || "snapshotRepository".equals(nodeName) || "site".equals(nodeName)) {
+          return MvnImages.IMG_REPOSITORY;
+          
+        } else if("profile".equals(nodeName)) {
+          return MvnImages.IMG_PROFILE;
+          
+        } else if("developer".equals(nodeName) || "contributor".equals(nodeName)) {
+          return MvnImages.IMG_PERSON;
+          
+        } else if("plugin".equals(nodeName)) {
+          return MvnImages.IMG_PLUGIN;
+        
+        } else if("execution".equals(nodeName)) {
+          return MvnImages.IMG_EXECUTION;
+          
+        } else if("goal".equals(nodeName)) {
+          return MvnImages.IMG_GOAL;
+          
+        // } else if("mailingList".equals(nodeName)) {
+        //   return MvnImages.IMG_MAIL;
+        
+        }
+      }
+      
       return labelProvider.getImage(element);
     }
   
