@@ -65,7 +65,6 @@
   <scm>
     <connection>scm:svn:http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.parent</connection>
     <developerConnection>scm:svn:https://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.parent</developerConnection>
-    <url></url>
   </scm>
   
   <modules>
@@ -81,6 +80,7 @@
     <module>../org.maven.ide.eclipse.mylyn</module>
     <module>../org.maven.ide.eclipse.subclipse</module>
     <module>../org.maven.ide.eclipse.scm</module>
+    <module>../org.maven.ide.eclipse.cvs</module>
 
     <module>../org.maven.ide.eclipse.ajdt</module>
     <module>../org.maven.ide.eclipse.wtp</module>
@@ -308,7 +308,7 @@
   <repositories>
     <repository>
       <id>maven-eclipse</id>
-      <url>http://repository.sonatype.org:8081/nexus/content/groups/maven-eclipse</url>
+      <url>http://repository.sonatype.org/nexus/content/groups/maven-eclipse</url>
       <snapshots>
         <enabled>true</enabled>
       </snapshots>
@@ -319,7 +319,7 @@
 
     <repository>
       <id>maven-eclipse</id>
-      <url>http://repository.sonatype.org:8081/nexus/content/groups/maven-eclipse</url>
+      <url>http://repository.sonatype.org/nexus/content/groups/maven-eclipse</url>
       <snapshots>
         <enabled>true</enabled>
       </snapshots>
@@ -332,7 +332,7 @@
   <pluginRepositories>
     <pluginRepository>
       <id>eclipse-snapshots</id>
-      <url>http://repository.sonatype.org:8081/nexus/content/repositories/eclipse-snapshots</url>
+      <url>http://repository.sonatype.org/nexus/content/repositories/eclipse-snapshots</url>
       <snapshots>
         <enabled>true</enabled>
       </snapshots>
