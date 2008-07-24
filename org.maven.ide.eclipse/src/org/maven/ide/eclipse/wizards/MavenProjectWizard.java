@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Properties;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
@@ -187,8 +188,10 @@ public class MavenProjectWizard extends Wizard implements INewWizard {
       return false;
     }
 
+    IWorkspace workspace = ResourcesPlugin.getWorkspace();
+    
     final IPath location = locationPage.isInWorkspace() ? null : locationPage.getLocationPath();
-    final IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+    final IWorkspaceRoot root = workspace.getRoot();
     final IProject project = configuration.getProject(root, model);
     
     boolean pomExists = ( locationPage.isInWorkspace() ?
@@ -261,10 +264,55 @@ public class MavenProjectWizard extends Wizard implements INewWizard {
         }
       }
     });
+    
+
     job.setRule(plugin.getProjectConfigurationManager().getRule());
     job.schedule();
+
+//    ProjectListener listener = new ProjectListener();
+//    workspace.addResourceChangeListener(listener, IResourceChangeEvent.POST_CHANGE);
+//    try {
+//      job.setRule(plugin.getProjectConfigurationManager().getRule());
+//      job.schedule();
+//      
+//      // MNGECLIPSE-766 wait until new project is created
+//      while(listener.getNewProject() == null && (job.getState() & (Job.WAITING | Job.RUNNING)) > 0) {
+//        try {
+//          Thread.sleep(100L);
+//        } catch (InterruptedException ex) {
+//          // ignore
+//        }
+//      }
+//      
+//    } finally {
+//      workspace.removeResourceChangeListener(listener);
+//    }
 
     return true;
   }
 
+  
+//  static class ProjectListener implements IResourceChangeListener {
+//    private IProject newProject = null;
+//    
+//    public void resourceChanged(IResourceChangeEvent event) {
+//      IResourceDelta root = event.getDelta();
+//      IResourceDelta[] projectDeltas = root.getAffectedChildren();
+//      for (int i = 0; i < projectDeltas.length; i++) {              
+//        IResourceDelta delta = projectDeltas[i];
+//        IResource resource = delta.getResource();
+//        if (delta.getKind() == IResourceDelta.ADDED) {
+//          newProject = (IProject)resource;
+//        }
+//      }
+//    }
+//    /**
+//     * Gets the newProject.
+//     * @return Returns a IProject
+//     */
+//    public IProject getNewProject() {
+//      return newProject;
+//    }
+//  }
+  
 }
