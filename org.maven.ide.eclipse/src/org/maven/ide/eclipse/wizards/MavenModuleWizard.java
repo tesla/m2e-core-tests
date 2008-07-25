@@ -231,17 +231,22 @@ public class MavenModuleWizard extends Wizard implements INewWizard {
       };
 
     } else {
+      Model model = parametersPage.getModel();
+      
       final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(moduleName);
       final Archetype archetype = archetypePage.getArchetype();
-      final Model model = parametersPage.getModel();
+      
+      final String groupId = model.getGroupId();
+      final String artifactId = model.getArtifactId();
+      final String version = model.getVersion();
+      final String javaPackage = parametersPage.getJavaPackage();
       final Properties properties = parametersPage.getProperties();
 
       job = new WorkspaceJob(Messages.getString("wizard.project.job.creating", archetype.getArtifactId())) {
         public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
           MavenPlugin plugin = MavenPlugin.getDefault();
-          plugin.getProjectConfigurationManager().createArchetypeProject(project, location, archetype,
-              model.getGroupId(), model.getArtifactId(), model.getVersion(), model.getPackaging(), properties,
-              configuration, monitor);
+          plugin.getProjectConfigurationManager().createArchetypeProject(project, location, archetype, //
+              groupId, artifactId, version, javaPackage, properties, configuration, monitor);
 
           setModule(moduleName);
 
