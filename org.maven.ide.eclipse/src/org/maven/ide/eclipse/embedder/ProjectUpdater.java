@@ -17,6 +17,6 @@ import org.maven.ide.components.pom.Model;
  */
 public abstract class ProjectUpdater {
 
-  abstract void update(Model model);
+  public abstract void update(Model model);
 
 }
