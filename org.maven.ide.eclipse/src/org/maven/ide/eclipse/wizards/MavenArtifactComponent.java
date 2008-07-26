@@ -213,13 +213,20 @@ public class MavenArtifactComponent extends Composite {
 
   public Model getModel() {
     Model model = new Model();
-    model.setName(getModelName());
     model.setModelVersion("4.0.0");
+    
     model.setGroupId(getGroupId());
     model.setArtifactId(getArtifactId());
     model.setVersion(getVersion());
     model.setPackaging(getPackaging());
-    model.setDescription(getDescription());
+    
+    if(getModelName().length()>0) {
+      model.setName(getModelName());
+    }
+    if(getDescription().length()>0) {
+      model.setDescription(getDescription());
+    }
+    
     return model;
   }
 

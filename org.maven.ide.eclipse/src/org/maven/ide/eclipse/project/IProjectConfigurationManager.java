@@ -29,7 +29,7 @@ public interface IProjectConfigurationManager {
 
   void importProjects(Collection<MavenProjectInfo> projects, ProjectImportConfiguration importConfiguration, IProgressMonitor monitor) throws CoreException;
 
-  void createSimpleProject(IProject project, IPath append, Model model, String[] folders,
+  void createSimpleProject(IProject project, IPath location, Model model, String[] folders,
       ResolverConfiguration resolverConfiguration, IProgressMonitor monitor) throws CoreException;
 
   void createArchetypeProject(IProject project, IPath location, Archetype archetype, String groupId, String artifactId,
