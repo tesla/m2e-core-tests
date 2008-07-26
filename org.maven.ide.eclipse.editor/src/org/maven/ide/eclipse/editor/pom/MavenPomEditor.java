@@ -44,7 +44,6 @@ import org.codehaus.plexus.component.repository.exception.ComponentLookupExcepti
 import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
@@ -71,26 +70,30 @@ import org.eclipse.emf.edit.domain.IEditingDomainProvider;
 import org.eclipse.emf.edit.provider.ComposedAdapterFactory;
 import org.eclipse.emf.edit.provider.ReflectiveItemProviderAdapterFactory;
 import org.eclipse.emf.edit.provider.resource.ResourceItemProviderAdapterFactory;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ITextListener;
+import org.eclipse.jface.text.TextEvent;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.search.ui.text.ISearchEditorAccess;
 import org.eclipse.search.ui.text.Match;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IPartListener;
+import org.eclipse.ui.IPartService;
 import org.eclipse.ui.IShowEditorInput;
 import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.IURIEditorInput;
-import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWindowListener;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.editor.FormEditor;
 import org.eclipse.ui.forms.editor.IFormPage;
 import org.eclipse.ui.ide.IGotoMarker;
-import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.MultiPageEditorActionBarContributor;
 import org.eclipse.ui.progress.UIJob;
 import org.eclipse.wst.common.internal.emf.resource.EMF2DOMRenderer;
@@ -118,6 +121,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+
 /**
  * Maven POM editor
  * 
@@ -125,12 +129,13 @@ import org.w3c.dom.NodeList;
  * @author Anton Kraev
  */
 @SuppressWarnings("restriction")
-public class MavenPomEditor extends FormEditor implements IResourceChangeListener, IShowEditorInput, IGotoMarker, ISearchEditorAccess, IEditingDomainProvider {
+public class MavenPomEditor extends FormEditor implements IResourceChangeListener, IShowEditorInput, IGotoMarker,
+    ISearchEditorAccess, IEditingDomainProvider {
 
   OverviewPage overviewPage;
-  
+
   DependenciesPage dependenciesPage;
-  
+
   RepositoriesPage repositoriesPage;
 
   BuildPage buildPage;
@@ -142,15 +147,15 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   ProfilesPage profilesPage;
 
   TeamPage teamPage;
-  
+
   DependencyTreePage dependencyTreePage;
 
   DependencyGraphPage graphPage;
-  
+
   StructuredTextEditor sourcePage;
-  
+
   List<MavenPomEditorPage> pages = new ArrayList<MavenPomEditorPage>();
-  
+
   private Model projectDocument;
 
   private DependencyNode rootNode;
@@ -166,14 +171,16 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   AdapterFactory adapterFactory;
 
   AdapterFactoryEditingDomain editingDomain;
-  
+
   private int sourcePageIndex;
 
   NotificationCommandStack commandStack;
-  
+
   IModelManager modelManager;
 
   IFile pomFile;
+
+  private MavenPomActivationListener activationListener;
 
   public MavenPomEditor() {
     modelManager = StructuredModelManager.getModelManager();
@@ -185,67 +192,47 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
    * Closes all project files on project close.
    */
   public void resourceChanged(final IResourceChangeEvent event) {
-    
-    class ResourceDeltaVisitor implements IResourceDeltaVisitor {
-      public boolean changed = false;
-      
-      public boolean visit(IResourceDelta delta) {
-        if(delta.getFlags() != IResourceDelta.MARKERS && delta.getResource().getType() == IResource.FILE) {
-          if((delta.getKind() & (IResourceDelta.CHANGED | IResourceDelta.REMOVED)) != 0) {
-            URI id = URI.createURI(delta.getFullPath().toString());
-            if(modelManager.getExistingModelForEdit(id.toString()) != null) {
-              if((delta.getKind() & IResourceDelta.REMOVED) != 0) {
-                // XXX remove is not implemented
-                // modelManager.removeModel();
-              } else {
-                changed = true;
-              }
-            }
+    if(pomFile == null) {
+      return;
+    }
+
+    if(event.getType() == IResourceChangeEvent.PRE_CLOSE || event.getType() == IResourceChangeEvent.PRE_DELETE) {
+      if(pomFile.getProject().equals(event.getResource())) {
+        Display.getDefault().asyncExec(new Runnable() {
+          public void run() {
+            close(true);
           }
+        });
+      }
+      return;
+    }
+
+    class ResourceDeltaVisitor implements IResourceDeltaVisitor {
+      boolean removed = false;
+
+      public boolean visit(IResourceDelta delta) throws CoreException {
+        if(delta.getResource() == pomFile //
+            && (delta.getKind() & (IResourceDelta.REMOVED)) != 0) {
+          removed = true;
+          return false;
         }
         return true;
       }
-    }
 
+    }
+    ;
     try {
       ResourceDeltaVisitor visitor = new ResourceDeltaVisitor();
       event.getDelta().accept(visitor);
-      
-      if(visitor.changed) {
-        getContainer().getDisplay().asyncExec(new Runnable() {
+      if(visitor.removed) {
+        Display.getDefault().asyncExec(new Runnable() {
           public void run() {
-            if(MessageDialog.openQuestion(getSite().getShell(), "File Changed",
-                "File has been changes externally. Do you want to replace editor content with these changes?")) {
-              try {
-                structuredModel.reload(pomFile.getContents()); // need to be done in UI thread
-                reload();
-              } catch(CoreException e) {
-                MavenLogger.log(e);
-              } catch(Exception e) {
-                MavenLogger.log("Can't load model", e);
-              }
-            }
+            close(true);
           }
-
         });
       }
-      
     } catch(CoreException ex) {
       MavenLogger.log(ex);
-    }
-
-    if(event.getType() == IResourceChangeEvent.PRE_CLOSE) {
-      Display.getDefault().asyncExec(new Runnable() {
-        public void run() {
-          IWorkbenchPage[] pages = getSite().getWorkbenchWindow().getPages();
-          for(int i = 0; i < pages.length; i++ ) {
-            if(((FileEditorInput) getEditorInput()).getFile().getProject().equals(event.getResource())) {
-              IEditorPart editorPart = pages[i].findEditor(getEditorInput());
-              pages[i].closeEditor(editorPart, true);
-            }
-          }
-        }
-      });
     }
   }
 
@@ -261,8 +248,8 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     }
     flushCommandStack();
   }
-  
-  private void flushCommandStack() {
+
+  void flushCommandStack() {
     sourcePage.getModel().getUndoManager().getCommandStack().flush();
     getContainer().getDisplay().asyncExec(new Runnable() {
       public void run() {
@@ -274,37 +261,37 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   protected void addPages() {
     overviewPage = new OverviewPage(this);
     addPomPage(overviewPage);
-    
+
     dependenciesPage = new DependenciesPage(this);
     addPomPage(dependenciesPage);
-    
+
     repositoriesPage = new RepositoriesPage(this);
     addPomPage(repositoriesPage);
 
     buildPage = new BuildPage(this);
     addPomPage(buildPage);
-    
+
     pluginsPage = new PluginsPage(this);
     addPomPage(pluginsPage);
-    
+
     reportingPage = new ReportingPage(this);
     addPomPage(reportingPage);
-    
+
     profilesPage = new ProfilesPage(this);
     addPomPage(profilesPage);
 
     teamPage = new TeamPage(this);
     addPomPage(teamPage);
-    
+
     dependencyTreePage = new DependencyTreePage(this);
     addPomPage(dependencyTreePage);
-    
+
     graphPage = new DependencyGraphPage(this);
     addPomPage(graphPage);
-    
+
     sourcePage = new StructuredTextEditor() {
       private boolean dirty = false;
-      
+
       public void doSave(IProgressMonitor monitor) {
         // always save text editor
         ResourcesPlugin.getWorkspace().removeResourceChangeListener(MavenPomEditor.this);
@@ -315,14 +302,18 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
           ResourcesPlugin.getWorkspace().addResourceChangeListener(MavenPomEditor.this);
         }
       }
-      
+
       public boolean isDirty() {
-        //Eclipse bugzilla entries: 213109, 138100, 191754
-        //WTP SSE editor has problems with dirty
-        //use command stack dirtiness instead
+        if(getModel()==null) {
+          return false;
+        }
+        
+        // Eclipse bugzilla entries: 213109, 138100, 191754
+        // WTP SSE editor has problems with dirty
+        // use command stack dirtiness instead
         boolean dirty = getModel().getUndoManager().getCommandStack().canUndo();
-        //manually update editor dirty indicator
-        if (this.dirty != dirty) {
+        // manually update editor dirty indicator
+        if(this.dirty != dirty) {
           this.dirty = dirty;
           MavenPomEditor.this.editorDirtyStateChanged();
         }
@@ -341,25 +332,26 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       } catch(CoreException e) {
         MavenLogger.log(e);
       }
+
+      // TODO activate xml source page if model is empty or have errors
       
-      // TODO activate xml source page is model is empty or have errors
       IDocument doc = sourcePage.getDocumentProvider().getDocument(getEditorInput());
       setSSEActionBarContributor();
-      if (doc instanceof IStructuredDocument) {
+      if(doc instanceof IStructuredDocument) {
         List<AdapterFactoryImpl> factories = new ArrayList<AdapterFactoryImpl>();
         factories.add(new ResourceItemProviderAdapterFactory());
         factories.add(new ReflectiveItemProviderAdapterFactory());
-  
+
         adapterFactory = new ComposedAdapterFactory(factories);
         commandStack = new NotificationCommandStack(this);
         editingDomain = new AdapterFactoryEditingDomain(adapterFactory, //
             commandStack, new HashMap<Resource, Boolean>());
-        
+
         structuredModel = modelManager.getExistingModelForEdit(doc);
         if(structuredModel == null) {
           structuredModel = modelManager.getModelForEdit((IStructuredDocument) doc);
         }
-        if(resource!=null && resource.getRenderer() instanceof EMF2DOMSSERenderer) {
+        if(resource != null && resource.getRenderer() instanceof EMF2DOMSSERenderer) {
           renderer = (EMF2DOMSSERenderer) resource.getRenderer();
           structuredModel.addModelStateListener(renderer);
           structuredModel.addModelLifecycleListener(renderer);
@@ -373,26 +365,26 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   public boolean isReadOnly() {
     return !(getEditorInput() instanceof IFileEditorInput);
   }
-  
+
   private int addPomPage(IFormPage page) {
     try {
-      if (page instanceof MavenPomEditorPage) {
+      if(page instanceof MavenPomEditorPage) {
         pages.add((MavenPomEditorPage) page);
       }
       return addPage(page);
-    } catch (PartInitException ex) {
+    } catch(PartInitException ex) {
       MavenLogger.log(ex);
       return -1;
     }
   }
-  
+
   public EditingDomain getEditingDomain() {
     return editingDomain;
   }
-  
+
   // XXX move to MavenModelManager (CommandStack and EditorDomain too)
   public synchronized Model readProjectDocument() throws CoreException {
-    if(projectDocument==null) {
+    if(projectDocument == null) {
       IEditorInput input = getEditorInput();
       if(input instanceof IFileEditorInput) {
         pomFile = ((IFileEditorInput) input).getFile();
@@ -402,7 +394,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
         MavenModelManager modelManager = MavenPlugin.getDefault().getMavenModelManager();
         PomResourceImpl resource = modelManager.loadResource(pomFile);
         projectDocument = resource.getModel();
-      
+
       } else if(input instanceof IStorageEditorInput) {
         IStorageEditorInput storageInput = (IStorageEditorInput) input;
         IStorage storage = storageInput.getStorage();
@@ -422,14 +414,14 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
           } finally {
             IOUtil.close(is);
             IOUtil.close(os);
-            if(tempPomFile!=null) {
+            if(tempPomFile != null) {
               tempPomFile.delete();
             }
           }
         } else {
           projectDocument = loadModel(path.toOSString());
         }
-      
+
       } else if(input.getClass().getName().endsWith("FileStoreEditorInput")) {
         // since Eclipse 3.3
         java.net.URI uri = FormUtils.proxy(input, C.class).getURI();
@@ -453,16 +445,16 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     URI uri = URI.createFileURI(path);
     PomResourceFactoryImpl factory = new PomResourceFactoryImpl();
     resource = (PomResourceImpl) factory.createResource(uri);
-    
+
     // disable SSE support for read-only external documents
     EMF2DOMRenderer renderer = new EMF2DOMRenderer();
     renderer.setValidating(false);
     resource.setRenderer(renderer);
-    
+
     try {
       resource.load(Collections.EMPTY_MAP);
       return resource.getModel();
-    
+
     } catch(IOException ex) {
       MavenLogger.log("Can't load model " + path, ex);
       return null;
@@ -471,77 +463,65 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   }
 
   public synchronized DependencyNode readDependencies(boolean force, IProgressMonitor monitor) throws CoreException {
-    if(force || rootNode==null) {
+    if(force || rootNode == null) {
       MavenPlugin plugin = MavenPlugin.getDefault();
-  
+
       try {
         monitor.setTaskName("Reading project");
         MavenProject mavenProject = readMavenProject(force, monitor);
-    
+
         MavenProjectManager mavenProjectManager = plugin.getMavenProjectManager();
         MavenEmbedder embedder = mavenProjectManager.createWorkspaceEmbedder();
         try {
           monitor.setTaskName("Building dependency tree");
           PlexusContainer plexus = embedder.getPlexusContainer();
-      
+
           ArtifactFactory artifactFactory = (ArtifactFactory) plexus.lookup(ArtifactFactory.class);
-          ArtifactMetadataSource artifactMetadataSource = (ArtifactMetadataSource) plexus.lookup(ArtifactMetadataSource.class);
-      
+          ArtifactMetadataSource artifactMetadataSource = //
+          (ArtifactMetadataSource) plexus.lookup(ArtifactMetadataSource.class);
+
           ArtifactCollector artifactCollector = (ArtifactCollector) plexus.lookup(ArtifactCollector.class);
-      
+
           // ArtifactFilter artifactFilter = new ScopeArtifactFilter( scope );
           ArtifactFilter artifactFilter = null;
-      
+
           ArtifactRepository localRepository = embedder.getLocalRepository();
-          
+
           DependencyTreeBuilder builder = (DependencyTreeBuilder) plexus.lookup(DependencyTreeBuilder.ROLE);
-          
-          rootNode = builder.buildDependencyTree(mavenProject,
-              localRepository, artifactFactory, artifactMetadataSource,
-              artifactFilter, artifactCollector);
+
+          rootNode = builder.buildDependencyTree(mavenProject, localRepository, artifactFactory,
+              artifactMetadataSource, artifactFilter, artifactCollector);
         } finally {
           embedder.stop();
         }
-    
-  //       DependencyNodeVisitor visitor = new DependencyNodeVisitor() {
-  //         public boolean visit(DependencyNode dependencynode) {
-  //           return true;
-  //         }
-  //         public boolean endVisit(DependencyNode dependencynode) {
-  //           return true;
-  //         }
-  //       };
-  //  
-  //      // TODO remove the need for this when the serializer can calculate last nodes from visitor calls only
-  //      visitor = new BuildingDependencyNodeVisitor(visitor);
-  //      rootNode.accept(visitor);
-        
+
       } catch(MavenEmbedderException ex) {
         String msg = "Can't create Maven embedder";
         MavenLogger.log(msg, ex);
         throw new CoreException(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, msg, ex));
-        
+
       } catch(ComponentLookupException ex) {
         String msg = "Component lookup error";
         MavenLogger.log(msg, ex);
         throw new CoreException(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, msg, ex));
-        
+
       } catch(DependencyTreeBuilderException ex) {
         String msg = "Project read error";
         MavenLogger.log(msg, ex);
         throw new CoreException(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, msg, ex));
-        
+
       }
     }
-    
+
     return rootNode;
   }
-  
-  public MavenProject readMavenProject(boolean force, IProgressMonitor monitor) throws MavenEmbedderException, CoreException {
-    if(force || mavenProject==null) {
+
+  public MavenProject readMavenProject(boolean force, IProgressMonitor monitor) throws MavenEmbedderException,
+      CoreException {
+    if(force || mavenProject == null) {
       MavenPlugin plugin = MavenPlugin.getDefault();
       MavenProjectManager projectManager = plugin.getMavenProjectManager();
-      
+
       IEditorInput input = getEditorInput();
       if(input instanceof IFileEditorInput) {
         IFileEditorInput fileInput = (IFileEditorInput) input;
@@ -550,7 +530,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
         ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
 
         IMavenProjectFacade projectFacade = projectManager.create(pomFile, true, monitor);
-        mavenProject = projectFacade.getMavenProject(monitor); 
+        mavenProject = projectFacade.getMavenProject(monitor);
 
       } else if(input instanceof IStorageEditorInput) {
         IStorageEditorInput storageInput = (IStorageEditorInput) input;
@@ -593,20 +573,21 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     try {
       ResolverConfiguration resolverConfiguration = new ResolverConfiguration();
       IProgressMonitor monitor = new NullProgressMonitor();
-      
+
       MavenProjectManager projectManager = plugin.getMavenProjectManager();
-      MavenExecutionResult result = projectManager.execute(embedder, pomFile, resolverConfiguration, new MavenRunnable() {
-        public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request) {
-          request.setOffline(false);
-          request.setUpdateSnapshots(false);
-          return embedder.readProjectWithDependencies(request);
-        }
-      }, monitor);
-      
+      MavenExecutionResult result = projectManager.execute(embedder, pomFile, resolverConfiguration,
+          new MavenRunnable() {
+            public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request) {
+              request.setOffline(false);
+              request.setUpdateSnapshots(false);
+              return embedder.readProjectWithDependencies(request);
+            }
+          }, monitor);
+
       // XXX handle project read errors
       // result.getExceptions();
       // result.getArtifactResolutionResult();
-      
+
       return result.getProject();
     } finally {
       embedder.stop();
@@ -615,7 +596,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 
   public MetadataResolutionResult readDependencyMetadata(IFile pomFile, IProgressMonitor monitor) throws CoreException {
     File pom = pomFile.getLocation().toFile();
-    
+
     MavenPlugin plugin = MavenPlugin.getDefault();
 
     MavenEmbedder embedder = null;
@@ -643,10 +624,10 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       // MavenProject project = result.getProject();
 
       MavenProject project = embedder.readProject(pom);
-      if (project == null) {
+      if(project == null) {
         return null;
       }
-      
+
       ArtifactRepository localRepository = embedder.getLocalRepository();
 
       @SuppressWarnings("unchecked")
@@ -656,82 +637,87 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 
       MetadataResolver resolver = (MetadataResolver) plexus.lookup(MetadataResolver.ROLE, "default");
 
-      ArtifactMetadata query = new ArtifactMetadata(project.getGroupId(),
-          project.getArtifactId(), project.getVersion());
+      ArtifactMetadata query = new ArtifactMetadata(project.getGroupId(), project.getArtifactId(), project.getVersion());
 
       monitor.subTask("Building dependency graph...");
       MetadataResolutionResult result = resolver.resolveMetadata( //
           new MetadataResolutionRequest(query, localRepository, remoteRepositories));
 
-      if (result == null) {
+      if(result == null) {
         return null;
       }
-      
+
       monitor.subTask("Building dependency tree");
       result.initTreeProcessing(plexus);
       return result;
 
-    } catch (MavenEmbedderException ex) {
+    } catch(MavenEmbedderException ex) {
       String msg = "Can't create Maven embedder";
       MavenLogger.log(msg, ex);
       throw new CoreException(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, msg, ex));
 
-    } catch (MetadataResolutionException ex) {
+    } catch(MetadataResolutionException ex) {
       String msg = "Metadata resolution error";
       MavenLogger.log(msg, ex);
       throw new CoreException(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, msg, ex));
 
-    } catch (ComponentLookupException ex) {
+    } catch(ComponentLookupException ex) {
       String msg = "Metadata resolver error";
       MavenLogger.log(msg, ex);
       throw new CoreException(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, msg, ex));
 
-    } catch (ProjectBuildingException ex) {
+    } catch(ProjectBuildingException ex) {
       String msg = "Metadata resolver error";
       MavenLogger.log(msg, ex);
       throw new CoreException(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, msg, ex));
 
-    } catch (ExtensionScanningException ex) {
+    } catch(ExtensionScanningException ex) {
       String msg = "Metadata resolver error";
       MavenLogger.log(msg, ex);
       throw new CoreException(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, msg, ex));
 
-    } catch (MavenExecutionException ex) {
+    } catch(MavenExecutionException ex) {
       String msg = "Metadata resolver error";
       MavenLogger.log(msg, ex);
       throw new CoreException(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, msg, ex));
 
     } finally {
-      if (embedder != null) {
+      if(embedder != null) {
         try {
           embedder.stop();
-        } catch (MavenEmbedderException ex) {
+        } catch(MavenEmbedderException ex) {
           MavenLogger.log("Can't stop Maven Embedder", ex);
         }
       }
     }
-    
+
   }
-  
+
   public void dispose() {
     sourcePage.getModel().getUndoManager().getCommandStack().flush();
-    if(pomFile != null) {
+    if(pomFile != null && pomFile.isAccessible() && pomFile.isSynchronized(1)) {
       try {
         structuredModel.reload(pomFile.getContents());
       } catch(Exception e) {
-        MavenLogger.log("Can't reload model", e);
+        MavenLogger.log("Can't update model " + pomFile.getLocation().toPortableString(), e);
       }
     }
+
+    if(activationListener != null) {
+      activationListener.dispose();
+      activationListener = null;
+    }
+
     ResourcesPlugin.getWorkspace().removeResourceChangeListener(this);
+    
     structuredModel.removeModelStateListener(renderer);
     structuredModel.removeModelLifecycleListener(renderer);
+    
     super.dispose();
   }
 
   /**
-   * Saves structured editor
-   * 
-   * XXX form model need to be synchronized
+   * Saves structured editor XXX form model need to be synchronized
    */
   public void doSave(IProgressMonitor monitor) {
     new UIJob("Saving") {
@@ -748,6 +734,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     // setPageText(0, editor.getTitle());
     // setInput(editor.getEditorInput());
   }
+
   /*
    * (non-Javadoc) Method declared on IEditorPart.
    */
@@ -762,13 +749,15 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 
     setPartName(editorInput.getToolTipText());
     // setContentDescription(name);
-    
+
     super.init(site, editorInput);
+
+    activationListener = new MavenPomActivationListener(site.getWorkbenchWindow().getPartService());
   }
 
   public void showInSourceEditor(EObject o) {
     IDOMElement element = getElement(o);
-    if(element!=null) {
+    if(element != null) {
       int start = element.getStartOffset();
       int lenght = element.getLength();
       setActiveEditor(sourcePage);
@@ -792,18 +781,18 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   // XXX move to model and translators
   public EList<PropertyPair> getProperties(EObject o) {
     IDOMElement node = getElement(o);
-    if(node!=null) {
+    if(node != null) {
       NodeList elements = node.getElementsByTagName("properties");
-      if(elements!=null && elements.getLength()>0) {
+      if(elements != null && elements.getLength() > 0) {
         Node propertiesNode = elements.item(0);
         NodeList propertiesElements = propertiesNode.getChildNodes();
-        
+
         EList<PropertyPair> properties = new BasicEList<PropertyPair>();
         for(int i = 0; i < propertiesElements.getLength(); i++ ) {
           Node item = propertiesElements.item(i);
           if(item instanceof Element) {
             String nodetext = getNodeText(item);
-            
+
             properties.add(new PropertyPair(item.getNodeName(), nodetext));
           }
         }
@@ -812,7 +801,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     }
     return new BasicEList<PropertyPair>();
   }
-  
+
   public void setElement(EObject o, IDOMElement element) {
     for(Adapter adapter : o.eAdapters()) {
       if(adapter instanceof EMF2DOMSSEAdapter) {
@@ -825,17 +814,17 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 
   public void setProperties(EObject o, EList<PropertyPair> properties) {
     ElementImpl node = (ElementImpl) getElement(o);
-    if(node!=null) {
+    if(node != null) {
       EList<Adapter> adapters = new BasicEList<Adapter>(o.eAdapters());
       o.eAdapters().clear();
       NodeList old = node.getElementsByTagName("properties");
-      if (old != null && old.getLength() > 0) {
+      if(old != null && old.getLength() > 0) {
         node.removeChild(old.item(0));
       }
       Node elements = node.getOwnerDocument().createElement("properties");
       node.appendChild(elements);
       o.eAdapters().addAll(adapters);
-      for (PropertyPair p: properties) {
+      for(PropertyPair p : properties) {
         Node prop = node.getOwnerDocument().createElement(p.getKey());
         elements.appendChild(prop);
         prop.setTextContent(p.getValue());
@@ -843,26 +832,26 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     }
     setElement(o, node);
   }
-  
+
   private String getNodeText(Node node) {
     NodeList childNodes = node.getChildNodes();
     for(int i = 0; i < childNodes.getLength(); i++ ) {
       Node childNode = childNodes.item(i);
-      if(childNode.getNodeType()==Node.TEXT_NODE) {
+      if(childNode.getNodeType() == Node.TEXT_NODE) {
         return childNode.getNodeValue();
       }
     }
     return null;
   }
-  
+
   // IShowEditorInput
-  
+
   public void showEditorInput(IEditorInput editorInput) {
     // could activate different tabs based on the editor input
-  }  
+  }
 
   // IGotoMarker
-  
+
   public void gotoMarker(IMarker marker) {
     // TODO use selection to activate corresponding form page elements
     setActivePage(sourcePageIndex);
@@ -871,15 +860,15 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   }
 
   // ISearchEditorAccess
-  
+
   public IDocument getDocument(Match match) {
     return sourcePage.getDocumentProvider().getDocument(getEditorInput());
   }
-  
+
   public IAnnotationModel getAnnotationModel(Match match) {
     return sourcePage.getDocumentProvider().getAnnotationModel(getEditorInput());
   }
-  
+
   public boolean isDirty() {
     return sourcePage.isDirty();
   }
@@ -887,17 +876,127 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   public List<MavenPomEditorPage> getPages() {
     return pages;
   }
-  
+
   private void setSSEActionBarContributor() {
     // this is to enable undo/redo actions from sourcePage for all pages
-    IEditorActionBarContributor contributor = getEditorSite()
-        .getActionBarContributor();
-    if (contributor != null
-        && contributor instanceof MultiPageEditorActionBarContributor) {
-      ((MultiPageEditorActionBarContributor) contributor)
-          .setActivePage(sourcePage);
+    IEditorActionBarContributor contributor = getEditorSite().getActionBarContributor();
+    if(contributor != null && contributor instanceof MultiPageEditorActionBarContributor) {
+      ((MultiPageEditorActionBarContributor) contributor).setActivePage(sourcePage);
     }
   }
 
-}
+  
+  /**
+   * Adapted from <code>org.eclipse.ui.texteditor.AbstractTextEditor.ActivationListener</code>
+   */
+  class MavenPomActivationListener implements IPartListener, IWindowListener {
 
+    private IWorkbenchPart activePart;
+
+    private boolean isHandlingActivation = false;
+
+    private IPartService partService;
+
+    public MavenPomActivationListener(IPartService partService) {
+      this.partService = partService;
+      this.partService.addPartListener(this);
+      PlatformUI.getWorkbench().addWindowListener(this);
+    }
+
+    public void dispose() {
+      partService.removePartListener(this);
+      PlatformUI.getWorkbench().removeWindowListener(this);
+      partService = null;
+    }
+
+    // IPartListener
+
+    public void partActivated(IWorkbenchPart part) {
+      activePart = part;
+      handleActivation();
+    }
+
+    public void partBroughtToTop(IWorkbenchPart part) {
+    }
+
+    public void partClosed(IWorkbenchPart part) {
+    }
+
+    public void partDeactivated(IWorkbenchPart part) {
+      activePart = null;
+    }
+
+    public void partOpened(IWorkbenchPart part) {
+    }
+
+    // IWindowListener
+
+    public void windowActivated(IWorkbenchWindow window) {
+      if(window == getEditorSite().getWorkbenchWindow()) {
+        /*
+         * Workaround for problem described in
+         * http://dev.eclipse.org/bugs/show_bug.cgi?id=11731
+         * Will be removed when SWT has solved the problem.
+         */
+        window.getShell().getDisplay().asyncExec(new Runnable() {
+          public void run() {
+            handleActivation();
+          }
+        });
+      }
+    }
+
+    public void windowDeactivated(IWorkbenchWindow window) {
+    }
+
+    public void windowClosed(IWorkbenchWindow window) {
+    }
+
+    public void windowOpened(IWorkbenchWindow window) {
+    }
+
+    /**
+     * Handles the activation triggering a element state check in the editor.
+     */
+    void handleActivation() {
+      if(isHandlingActivation) {
+        return;
+      }
+
+      if(activePart == MavenPomEditor.this) {
+        isHandlingActivation = true;
+        try {
+          final boolean[] changed = new boolean[] {false};
+          ITextListener listener = new ITextListener() {
+            public void textChanged(TextEvent event) {
+              changed[0] = true;
+            }
+          };
+          
+          sourcePage.getTextViewer().addTextListener(listener);
+          try {
+            sourcePage.safelySanityCheckState(getEditorInput());
+          } finally {
+            sourcePage.getTextViewer().removeTextListener(listener);
+          }
+          
+          if(changed[0]) {
+            try {
+              structuredModel.reload(pomFile.getContents()); // need to be done in UI thread
+              reload();
+            } catch(CoreException e) {
+              MavenLogger.log(e);
+            } catch(Exception e) {
+              MavenLogger.log("Can't load model", e);
+            }
+          }
+          
+        } finally {
+          isHandlingActivation = false;
+        }
+      }
+    }
+
+  }
+
+}

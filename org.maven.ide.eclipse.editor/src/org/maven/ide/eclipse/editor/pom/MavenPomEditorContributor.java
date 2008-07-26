@@ -26,6 +26,46 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 public class MavenPomEditorContributor extends MultiPageEditorActionBarContributor {
   private ITextEditor sourceEditorPart;
 
+  public void setActivePage(IEditorPart part) {
+    //set the text editor
+    if (part instanceof ITextEditor && sourceEditorPart == null) {
+      sourceEditorPart = (ITextEditor) part;
+    }
+
+    if(sourceEditorPart !=null) {
+      IActionBars actionBars = getActionBars();
+      if (actionBars != null) {
+        actionBars.clearGlobalActionHandlers();
+        
+        //undo/redo always enabled
+        actionBars.setGlobalActionHandler(ActionFactory.UNDO.getId(), //
+            getAction(ITextEditorActionConstants.UNDO));
+        actionBars.setGlobalActionHandler(ActionFactory.REDO.getId(), //
+            getAction(ITextEditorActionConstants.REDO));
+  
+        //all other action, for text editor only (FormPage doesn't provide for these actions...)
+        if (part instanceof ITextEditor) {
+          actionBars.setGlobalActionHandler(ActionFactory.DELETE.getId(), //
+              getAction(ITextEditorActionConstants.DELETE));
+          actionBars.setGlobalActionHandler(ActionFactory.CUT.getId(), //
+              getAction(ITextEditorActionConstants.CUT));
+          actionBars.setGlobalActionHandler(ActionFactory.COPY.getId(), //
+              getAction(ITextEditorActionConstants.COPY));
+          actionBars.setGlobalActionHandler(ActionFactory.PASTE.getId(), //
+              getAction(ITextEditorActionConstants.PASTE));
+          actionBars.setGlobalActionHandler(ActionFactory.SELECT_ALL.getId(), //
+              getAction(ITextEditorActionConstants.SELECT_ALL));
+          actionBars.setGlobalActionHandler(ActionFactory.FIND.getId(), //
+              getAction(ITextEditorActionConstants.FIND));
+          actionBars.setGlobalActionHandler(IDEActionFactory.BOOKMARK.getId(), //
+              getAction(IDEActionFactory.BOOKMARK.getId()));
+        }
+        
+        actionBars.updateActionBars();
+      }
+    }
+  }
+  
   /**
    * Returns the action registered with the given text editor.
    * 
@@ -34,43 +74,5 @@ public class MavenPomEditorContributor extends MultiPageEditorActionBarContribut
   protected IAction getAction(String actionId) {
     return sourceEditorPart.getAction(actionId);
   }
-
-  public void setActivePage(IEditorPart part) {
-    //set the text editor
-    if (part instanceof ITextEditor && sourceEditorPart == null) {
-      sourceEditorPart = (ITextEditor) part;
-    }
-
-    IActionBars actionBars = getActionBars();
-    if (actionBars != null) {
-      actionBars.clearGlobalActionHandlers();
-      
-      //undo/redo always enabled
-      actionBars.setGlobalActionHandler(ActionFactory.UNDO.getId(), //
-          getAction(ITextEditorActionConstants.UNDO));
-      actionBars.setGlobalActionHandler(ActionFactory.REDO.getId(), //
-          getAction(ITextEditorActionConstants.REDO));
-
-      //all other action, for text editor only (FormPage doesn't provide for these actions...)
-      if (part instanceof ITextEditor) {
-        actionBars.setGlobalActionHandler(ActionFactory.DELETE.getId(), //
-            getAction(ITextEditorActionConstants.DELETE));
-        actionBars.setGlobalActionHandler(ActionFactory.CUT.getId(), //
-            getAction(ITextEditorActionConstants.CUT));
-        actionBars.setGlobalActionHandler(ActionFactory.COPY.getId(), //
-            getAction(ITextEditorActionConstants.COPY));
-        actionBars.setGlobalActionHandler(ActionFactory.PASTE.getId(), //
-            getAction(ITextEditorActionConstants.PASTE));
-        actionBars.setGlobalActionHandler(ActionFactory.SELECT_ALL.getId(), //
-            getAction(ITextEditorActionConstants.SELECT_ALL));
-        actionBars.setGlobalActionHandler(ActionFactory.FIND.getId(), //
-            getAction(ITextEditorActionConstants.FIND));
-        actionBars.setGlobalActionHandler(IDEActionFactory.BOOKMARK.getId(), //
-            getAction(IDEActionFactory.BOOKMARK.getId()));
-      }
-
-      
-      actionBars.updateActionBars();
-    }
-  }
+  
 }
