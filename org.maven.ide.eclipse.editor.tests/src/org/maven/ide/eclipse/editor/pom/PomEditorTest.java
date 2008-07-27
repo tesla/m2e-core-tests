@@ -250,7 +250,7 @@ public class PomEditorTest extends UITestCaseSWT {
       ui.keyClick(SWT.CTRL, 'm');
       ui.click(new CTabItemLocator(TAB_POM_XML_TAB));
       String editorText = getEditorText();
-      assertTrue(editorText, editorText.contains("<artifactId>parent4</artifactId>"));
+      assertTrue(editorText, editorText.contains("<artifactId>parent6</artifactId>"));
     } finally {
       ui.keyClick(SWT.CTRL, 'm');
     }
