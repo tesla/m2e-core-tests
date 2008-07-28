@@ -8,6 +8,8 @@
 
 package org.maven.ide.eclipse.actions;
 
+import java.util.ArrayList;
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -20,12 +22,12 @@ import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.DebugUITools;
+import org.eclipse.debug.ui.IDebugModelPresentation;
 import org.eclipse.debug.ui.ILaunchShortcut;
 import org.eclipse.debug.ui.RefreshTab;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -34,12 +36,17 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.window.Window;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
@@ -116,7 +123,7 @@ public class ExecutePomAction implements ILaunchShortcut, IExecutableExtension {
     
     IContainer basedir = findPomXmlBasedir(basecon);
 
-    ILaunchConfiguration launchConfiguration = getLaunchConfiguration(basedir);
+    ILaunchConfiguration launchConfiguration = getLaunchConfiguration(basedir, mode);
     if(launchConfiguration == null) {
       return;
     }
@@ -134,13 +141,16 @@ public class ExecutePomAction implements ILaunchShortcut, IExecutableExtension {
 
     if(openDialog) {
       DebugUITools.saveBeforeLaunch();
-      Shell shell = MavenPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow().getShell();
       // ILaunchGroup group = DebugUITools.getLaunchGroup(launchConfiguration, mode);
-      DebugUITools.openLaunchConfigurationDialog(shell, launchConfiguration,
+      DebugUITools.openLaunchConfigurationDialog(getShell(), launchConfiguration,
           MavenLaunchMainTab.ID_EXTERNAL_TOOLS_LAUNCH_GROUP, null);
     } else {
       DebugUITools.launch(launchConfiguration, mode);
     }
+  }
+
+  private Shell getShell() {
+    return MavenPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow().getShell();
   }
 
   private IContainer findPomXmlBasedir(IContainer origDir) {
@@ -211,7 +221,7 @@ public class ExecutePomAction implements ILaunchShortcut, IExecutableExtension {
     return null;
   }
 
-  private ILaunchConfiguration getLaunchConfiguration(IContainer basedir) {
+  private ILaunchConfiguration getLaunchConfiguration(IContainer basedir, String mode) {
     if(goalName != null) {
       return createLaunchConfiguration(basedir, goalName);
     }
@@ -224,33 +234,87 @@ public class ExecutePomAction implements ILaunchShortcut, IExecutableExtension {
     IPath basedirLocation = basedir.getLocation();
     if(!showDialog) {
       try {
-        ILaunch[] launches = launchManager.getLaunches();
-        ILaunchConfiguration[] launchConfigurations = null;
+//        ILaunch[] launches = launchManager.getLaunches();
+//        ILaunchConfiguration[] launchConfigurations = null;
+//        if(launches.length > 0) {
+//          for(int i = 0; i < launches.length; i++ ) {
+//            ILaunchConfiguration config = launches[i].getLaunchConfiguration();
+//            if(config != null && launchConfigurationType.equals(config.getType())) {
+//              launchConfigurations = new ILaunchConfiguration[] {config};
+//            }
+//          }
+//        }
+//        if(launchConfigurations == null) {
+//          launchConfigurations = launchManager.getLaunchConfigurations(launchConfigurationType);
+//        }
 
-        if(launches.length > 0) {
-          for(int i = 0; i < launches.length; i++ ) {
-            ILaunchConfiguration config = launches[i].getLaunchConfiguration();
-            if(config != null && launchConfigurationType.equals(config.getType())) {
-              launchConfigurations = new ILaunchConfiguration[] {config};
-            }
-          }
-        }
-        if(launchConfigurations == null) {
-          launchConfigurations = launchManager.getLaunchConfigurations(launchConfigurationType);
-        }
-        for(int i = 0; i < launchConfigurations.length; i++ ) {
-          ILaunchConfiguration cfg = launchConfigurations[i];
-          // don't forget to substitute variables
-          String workDir = Util.substituteVar(cfg.getAttribute(MavenLaunchConstants.ATTR_POM_DIR, (String) null));
+        ILaunchConfiguration[] launchConfigurations = launchManager.getLaunchConfigurations(launchConfigurationType);
+        ArrayList<ILaunchConfiguration> matchingConfigs = new ArrayList<ILaunchConfiguration>();
+        for(ILaunchConfiguration configuration : launchConfigurations) {
+          // substitute variables
+          String workDir = Util.substituteVar(configuration.getAttribute(MavenLaunchConstants.ATTR_POM_DIR, (String) null));
           if(workDir == null) {
             continue;
           }
           IPath workPath = new Path(workDir);
           if(basedirLocation.equals(workPath)) {
-            MavenPlugin.getDefault().getConsole().logMessage("Using existing launch configuration");
-            return cfg;
+            matchingConfigs.add(configuration);
           }
         }
+        
+        if(matchingConfigs.size()==1) {
+          MavenPlugin.getDefault().getConsole().logMessage("Using existing launch configuration");
+          return matchingConfigs.get(0);
+        } else if(matchingConfigs.size()>1) {
+          final IDebugModelPresentation labelProvider = DebugUITools.newDebugModelPresentation();
+          ElementListSelectionDialog dialog = new ElementListSelectionDialog(getShell(), // 
+              new ILabelProvider() {
+                public Image getImage(Object element) {
+                  return labelProvider.getImage(element);
+                }
+
+                public String getText(Object element) {
+                  if(element instanceof ILaunchConfiguration) {
+                    ILaunchConfiguration configuration = (ILaunchConfiguration) element;
+                    try {
+                      return labelProvider.getText(element) + " : "
+                          + configuration.getAttribute(MavenLaunchConstants.ATTR_GOALS, "");
+                    } catch(CoreException ex) {
+                      // ignore
+                    }
+                  }
+                  return labelProvider.getText(element);
+                }
+
+                public boolean isLabelProperty(Object element, String property) {
+                  return labelProvider.isLabelProperty(element, property);
+                }
+
+                public void addListener(ILabelProviderListener listener) {
+                  labelProvider.addListener(listener);
+                }
+
+                public void removeListener(ILabelProviderListener listener) {
+                  labelProvider.removeListener(listener);
+                }
+
+                public void dispose() {
+                  labelProvider.dispose();
+                }
+              });
+          dialog.setElements(matchingConfigs.toArray(new ILaunchConfiguration[matchingConfigs.size()]));
+          dialog.setTitle("Select Configuration");
+          if (mode.equals(ILaunchManager.DEBUG_MODE)) {
+            dialog.setMessage("Select a launch configuration to debug:");
+          } else {
+            dialog.setMessage("Select a launch configuration to run:");
+          }
+          dialog.setMultipleSelection(false);
+          int result = dialog.open();
+          labelProvider.dispose();
+          return result == Window.OK ? (ILaunchConfiguration) dialog.getFirstResult() : null;
+        }
+        
       } catch(CoreException ex) {
         MavenLogger.log(ex);
       }
