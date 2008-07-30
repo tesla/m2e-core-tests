@@ -208,13 +208,12 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
 
     Util.createFolder(classes, true);
     Util.createFolder(testClasses, true);
-
     
     addSourceDirs(project, sources, entries, mavenProject.getCompileSourceRoots(), classes.getFullPath(), null);
+    addResourceDirs(project, sources, entries, mavenProject.getBuild().getResources(), classes.getFullPath());
+
     addSourceDirs(project, sources, entries, mavenProject.getTestCompileSourceRoots(), testClasses.getFullPath(),
         BuildPathManager.TEST_TYPE);
-
-    addResourceDirs(project, sources, entries, mavenProject.getBuild().getResources(), classes.getFullPath());
     addResourceDirs(project, sources, entries, mavenProject.getBuild().getTestResources(), testClasses.getFullPath());
 
     // HACK to support xmlbeans generated classes MNGECLIPSE-374
