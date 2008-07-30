@@ -46,20 +46,20 @@ public class MavenModuleFilter extends ViewerFilter {
           }
           
           IMavenProjectFacade projectFacade = projectManager.create(project, null);
-          
-          // XXX implement corner cases
-          // modules have ".." in the path
-          // modules have more then one segment in the path
-          // modules not imported in workspace
-          
-          MavenProject mavenProject = projectFacade.getMavenProject(null);
-          IPath folderPath = folder.getFullPath();
-          
-          // workspace-relative path sans project name
-          String folderName = folderPath.removeFirstSegments(1).toPortableString();
-          
-          if(mavenProject.getModules().contains(folderName)) {
-            return false;
+          if(projectFacade != null) {
+            // XXX implement corner cases
+            // modules have ".." in the path
+            // modules have more then one segment in the path
+            // modules not imported in workspace
+            MavenProject mavenProject = projectFacade.getMavenProject(null);
+            IPath folderPath = folder.getFullPath();
+
+            // workspace-relative path sans project name
+            String folderName = folderPath.removeFirstSegments(1).toPortableString();
+
+            if(mavenProject.getModules().contains(folderName)) {
+              return false;
+            }
           }
         }
       } catch(CoreException ex) {
