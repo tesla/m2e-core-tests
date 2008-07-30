@@ -286,10 +286,9 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
     PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
       public void run() {
         IContentTypeManager contentTypeManager = Platform.getContentTypeManager();
-        IContentType contentType = contentTypeManager.findContentTypeFor("pom.xml");
-
+        IContentType contentType = contentTypeManager.findContentTypeFor(name);
         IEditorRegistry editorRegistry = PlatformUI.getWorkbench().getEditorRegistry();
-        IEditorDescriptor editor = editorRegistry.getDefaultEditor("pom.xml", contentType);
+        IEditorDescriptor editor = editorRegistry.getDefaultEditor(name, contentType);
         IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
         if(window != null) {
           IWorkbenchPage page = window.getActivePage();
