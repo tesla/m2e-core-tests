@@ -726,7 +726,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     int type = event.getType();
     if(IResourceChangeEvent.PRE_DELETE == type) {
       File file = getSourceAttachmentPropertiesFile((IProject) event.getResource());
-      if(!file.delete()) {
+      if(file.exists() && !file.delete()) {
         MavenLogger.log("Can't delete " + file.getAbsolutePath(), null);
       }
     }
