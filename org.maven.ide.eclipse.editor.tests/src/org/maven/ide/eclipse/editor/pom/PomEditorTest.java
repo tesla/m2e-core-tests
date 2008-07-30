@@ -30,6 +30,7 @@ import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
@@ -43,6 +44,8 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.forms.widgets.Section;
+import org.eclipse.ui.forms.widgets.Twistie;
 import org.eclipse.ui.part.FileEditorInput;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.project.IProjectConfigurationManager;
@@ -56,6 +59,7 @@ import com.windowtester.runtime.condition.HasTextCondition;
 import com.windowtester.runtime.condition.IConditionMonitor;
 import com.windowtester.runtime.condition.IHandler;
 import com.windowtester.runtime.locator.WidgetReference;
+import com.windowtester.runtime.locator.XYLocator;
 import com.windowtester.runtime.swt.UITestCaseSWT;
 import com.windowtester.runtime.swt.condition.shell.ShellDisposedCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellShowingCondition;
@@ -162,6 +166,16 @@ public class PomEditorTest extends UITestCaseSWT {
     ui.click(new CTabItemLocator(TAB_OVERVIEW));
     assertTextValue("parentArtifactId", "parent3");
   }
+
+  public void testNewSectionCreation() throws Exception {
+	    ui.click(new SWTWidgetLocator(Label.class, "Organization"));
+		ui.click(new NamedWidgetLocator("organizationName"));
+		ui.enterText("orgfoo");
+		ui.click(new CTabItemLocator(TAB_POM_XML_TAB));
+	    replaceText("orgfoo", "orgfoo1");
+	    ui.click(new CTabItemLocator(TAB_OVERVIEW));
+	    assertTextValue("organizationName", "orgfoo1");
+}
 
   public void testDeletingScmSectionInXmlPropagatedToForm() throws Exception {
     ui.click(new CTabItemLocator(TAB_OVERVIEW));
