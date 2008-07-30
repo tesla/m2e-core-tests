@@ -143,7 +143,7 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
       }
 
       if(classesFolder instanceof IFolder) {
-        Util.createFolder((IFolder) classesFolder);
+        Util.createFolder((IFolder) classesFolder, true);
       }
       javaProject.setRawClasspath(entries.toArray(new IClasspathEntry[entries.size()]),
           classesFolder.getFullPath(), monitor);
@@ -206,9 +206,10 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
     testClasses = project.getFolder(toRelativeAndFixSeparator(project, mavenProject.getBuild()
         .getTestOutputDirectory()));
 
-    Util.createFolder(classes);
-    Util.createFolder(testClasses);
+    Util.createFolder(classes, true);
+    Util.createFolder(testClasses, true);
 
+    
     addSourceDirs(project, sources, entries, mavenProject.getCompileSourceRoots(), classes.getFullPath(), null);
     addSourceDirs(project, sources, entries, mavenProject.getTestCompileSourceRoots(), testClasses.getFullPath(),
         BuildPathManager.TEST_TYPE);
@@ -361,7 +362,6 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
 
     if(mavenProject == null) {
       IMavenProjectFacade facade = projectManager.create(pomResource, false, monitor);
-
       if(facade == null) {
         return null;
       }
@@ -385,6 +385,18 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
         console.logError(msg + "; " + ex2.toString());
         MavenLogger.log(msg, ex2);
         return null;
+      }
+    }
+    
+    if(mavenProject != null && !configuration.shouldIncludeModules()) {
+      @SuppressWarnings("unchecked")
+      List<String> modules = mavenProject.getModules();
+      for(String module : modules) {
+        IFolder moduleDir = project.getFolder(module);
+        if(moduleDir.isAccessible()) {
+          // TODO don't set derived on modules that are not in Eclipse workspace
+          moduleDir.setDerived(true);
+        }
       }
     }
 

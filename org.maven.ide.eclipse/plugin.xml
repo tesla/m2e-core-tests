@@ -767,5 +767,14 @@
             class="org.maven.ide.eclipse.internal.launch.MavenConsoleLineTracker"
             processType="java"/>
    </extension>
+   
+   <extension point="org.eclipse.jdt.ui.javaElementFilters">
+      <filter id="org.maven.ide.eclipse.MavenModuleFilter"
+          targetId="org.eclipse.jdt.ui.PackageExplorer"
+          class="org.maven.ide.eclipse.ui.internal.filter.MavenModuleFilter"
+          description="Filters module folders from the Maven projects"
+          name="Maven modules filter"
+          enabled="false"/>
+   </extension>
 
 </plugin>

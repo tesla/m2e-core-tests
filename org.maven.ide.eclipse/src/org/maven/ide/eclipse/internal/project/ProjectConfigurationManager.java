@@ -359,7 +359,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
 
     monitor.subTask("Creating project folders...");
     for(int i = 0; i < directories.length; i++ ) {
-      Util.createFolder(project.getFolder(directories[i]));
+      Util.createFolder(project.getFolder(directories[i]), false);
     }
     monitor.worked(1);
 

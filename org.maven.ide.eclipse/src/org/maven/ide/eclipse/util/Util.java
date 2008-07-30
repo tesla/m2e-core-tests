@@ -28,19 +28,30 @@ public class Util {
    * folders.
    *
    * @param folder  The folder to create.
+   * @param derived true if folder should be marked as derived
    *
    * @throws CoreException if creating the given <code>folder</code> or any of
    *                       its parents fails.
    */
-  public static void createFolder(IFolder folder) throws CoreException {
+  public static void createFolder(IFolder folder, boolean derived) throws CoreException {
     // Recurse until we find a parent folder which already exists.
     if(!folder.exists()) {
       IContainer parent = folder.getParent();
       // First, make sure that all parent folders exist.
       if(parent instanceof IFolder) {
-        createFolder((IFolder) parent);
+        createFolder((IFolder) parent, false);
       }
       folder.create(false, true, null);
+    }
+    
+    if(folder.isAccessible() && derived) {
+      folder.setDerived(true);
+    }
+  }
+  
+  public static void setDerived(IFolder folder, boolean derived) throws CoreException {
+    if(folder.isAccessible()) {
+      folder.setDerived(derived);
     }
   }
 
