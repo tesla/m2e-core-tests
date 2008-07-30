@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
+import java.util.Properties;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -133,6 +134,11 @@ public class LegacyIndexManager extends IndexManager {
     return null;
   }
 
+  public Properties fetchIndexProperties(String repositoryUrl, String indexUpdateUrl, IProgressMonitor monitor) {
+    // not supported
+    return null;
+  }
+  
   public Date replaceIndex(String indexName, InputStream is) {
     // not supported
     return null;

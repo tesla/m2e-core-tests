@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
@@ -54,6 +55,7 @@ import org.sonatype.nexus.index.ArtifactInfo;
 import org.sonatype.nexus.index.ArtifactScanningListener;
 import org.sonatype.nexus.index.IndexUtils;
 import org.sonatype.nexus.index.NexusIndexer;
+import org.sonatype.nexus.index.context.DefaultIndexingContext;
 import org.sonatype.nexus.index.context.IndexContextInInconsistentStateException;
 import org.sonatype.nexus.index.context.IndexingContext;
 import org.sonatype.nexus.index.context.UnsupportedExistingLuceneIndexException;
@@ -459,23 +461,11 @@ public class NexusIndexManager extends IndexManager {
   }
 
   
-  public Date fetchAndUpdateIndex(String indexName, boolean force, final IProgressMonitor monitor) throws IOException {
+  public Date fetchAndUpdateIndex(String indexName, boolean force, IProgressMonitor monitor) throws IOException {
     IndexingContext context = getIndexingContext(indexName);
     if(context != null) {
-      Settings settings = embedderManager.getWorkspaceEmbedder().getSettings();
-      Proxy proxy = settings.getActiveProxy();
-      ProxyInfo proxyInfo = null;
-      if(proxy != null) {
-        proxyInfo = new ProxyInfo();
-        proxyInfo.setHost(proxy.getHost());
-        proxyInfo.setPort(proxy.getPort());
-        proxyInfo.setNonProxyHosts(proxy.getNonProxyHosts());
-        proxyInfo.setUserName(proxy.getUsername());
-        proxyInfo.setPassword(proxy.getPassword());
-      }
-
       try {
-        Date indexTime = updater.fetchAndUpdateIndex(context, new TransferListenerAdapter(monitor, console, null), proxyInfo);
+        Date indexTime = updater.fetchAndUpdateIndex(context, new TransferListenerAdapter(monitor, console, null), getProxyInfo());
         if(indexTime!=null) {
           IndexInfo indexInfo = getIndexInfo(indexName);
           indexInfo.setUpdateTime(indexTime);
@@ -489,6 +479,32 @@ public class NexusIndexManager extends IndexManager {
     return null;
   }
 
+  public Properties fetchIndexProperties(final String repositoryUrl, final String indexUpdateUrl,
+      IProgressMonitor monitor) throws IOException {
+    try {
+      IndexingContext context = new DefaultIndexingContext("inknown", "unknown", null, new RAMDirectory(), repositoryUrl, indexUpdateUrl, null, false);
+      return updater.fetchIndexProperties(context, new TransferListenerAdapter(monitor, console, null), getProxyInfo());
+    } catch(UnsupportedExistingLuceneIndexException ex) {
+      throw new IOException(ex.getMessage());
+    }
+  }
+
+  private ProxyInfo getProxyInfo() {
+    Settings settings = embedderManager.getWorkspaceEmbedder().getSettings();
+    Proxy proxy = settings.getActiveProxy();
+    ProxyInfo proxyInfo = null;
+    if(proxy != null) {
+      proxyInfo = new ProxyInfo();
+      proxyInfo.setHost(proxy.getHost());
+      proxyInfo.setPort(proxy.getPort());
+      proxyInfo.setNonProxyHosts(proxy.getNonProxyHosts());
+      proxyInfo.setUserName(proxy.getUsername());
+      proxyInfo.setPassword(proxy.getPassword());
+    }
+    return proxyInfo;
+  }
+  
+  
   public Date mergeIndex(String indexName, InputStream is) throws IOException {
     Date indexTime = null;
 

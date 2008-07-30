@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Stack;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -38,6 +39,7 @@ import org.apache.maven.artifact.repository.DefaultArtifactRepository;
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 
 import org.sonatype.nexus.index.ArtifactInfo;
+import org.sonatype.nexus.index.context.IndexingContext;
 
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
@@ -89,7 +91,15 @@ public abstract class IndexManager {
   public static final String FIELD_SHA1 = ArtifactInfo.SHA1;
 
   public static final String FIELD_NAMES = ArtifactInfo.NAMES;
+  
+  // index properties
+  
+  public static final String INDEX_ID = IndexingContext.INDEX_ID;
 
+  public static final String INDEX_TIMESTAMP = IndexingContext.INDEX_TIMESTAMP;
+
+  public static final String INDEX_TIME_FORMAT = IndexingContext.INDEX_TIME_FORMAT;
+  
   // availability flags
   
   public static final int PRESENT = 1;
@@ -241,6 +251,9 @@ public abstract class IndexManager {
 
   public abstract Date fetchAndUpdateIndex(String indexName, boolean force, IProgressMonitor monitor) throws IOException;
 
+  public abstract Properties fetchIndexProperties(String repositoryUrl, String indexUpdateUrl, IProgressMonitor monitor)
+      throws IOException;
+  
   public abstract Date replaceIndex(String indexName, InputStream is) throws IOException;
 
   public abstract Date mergeIndex(String indexName, InputStream is) throws IOException;
