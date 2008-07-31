@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (c) 2007, 2008 Sonatype, Inc.
+  All rights reserved. This program and the accompanying materials
+  are made available under the terms of the Eclipse Public License v1.0
+  which accompanies this distribution, and is available at
+  http://www.eclipse.org/legal/epl-v10.html
+-->
+<?eclipse version="3.2"?>
+<plugin>
+   <extension point="org.eclipse.jdt.core.classpathContainerInitializer"
+              id="maven2ClasspathContainer"
+              name="%m2.classpath-container.name">
+      <classpathContainerInitializer
+            class="org.maven.ide.eclipse.internal.jdt.MavenClasspathContainerInitializer"
+            id="org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER"/>
+   </extension>
+   
+   <extension point="org.eclipse.jdt.launching.classpathProviders">
+      <classpathProvider 
+          id="org.maven.ide.eclipse.launchconfig.classpathProvider"
+          class="org.maven.ide.eclipse.internal.jdt.launch.MavenRuntimeClasspathProvider"/>
+      <classpathProvider 
+          id="org.maven.ide.eclipse.launchconfig.sourcepathProvider"
+          class="org.maven.ide.eclipse.internal.jdt.launch.MavenSourcePathProvider"/>
+   </extension>
+
+   <extension point="org.maven.ide.eclipse.projectConfigurators">
+      <configurator id="org.maven.ide.eclipse.configurator.jdt"
+          class="org.maven.ide.eclipse.internal.jdt.JavaProjectConfigurator"
+          name="JDT" priority="10"/>
+   </extension>
+   
+   <extension point="org.eclipse.jdt.core.classpathVariableInitializer">
+      <classpathVariableInitializer variable="M2_REPO" readOnly="true"
+          class="org.maven.ide.eclipse.internal.jdt.MavenClasspathVariableInitializer"/>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.adapters">
+      <factory
+            adaptableType="org.eclipse.jdt.core.IPackageFragmentRoot"
+            class="org.maven.ide.eclipse.internal.jdt.JavaElementsAdaptor">
+         <adapter
+               type="org.maven.ide.eclipse.embedder.ArtifactKey">
+         </adapter>
+      </factory>
+      <factory
+            adaptableType="org.eclipse.jdt.core.IJavaProject"
+            class="org.maven.ide.eclipse.internal.jdt.JavaElementsAdaptor">
+         <adapter
+               type="org.maven.ide.eclipse.embedder.ArtifactKey">
+         </adapter>
+      </factory>
+   </extension>
+   <extension
+         point="org.maven.ide.eclipse.m2MenuItems">
+      <menuItem
+            class="org.maven.ide.eclipse.internal.jdt.actions.DownloadSourcesAction"
+            menuItemId="org.maven.ide.eclipse.downloadSourcesAction">
+      </menuItem>
+      <menuItem
+            class="org.maven.ide.eclipse.internal.jdt.actions.DownloadSourcesAction"
+            menuItemId="org.maven.ide.eclipse.downloadJavaDocAction">
+      </menuItem>
+   </extension>
+
+</plugin>
