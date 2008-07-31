@@ -30,6 +30,7 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -45,7 +46,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.ui.IWorkingSet;
-import org.eclipse.ui.PlatformUI;
 
 import org.apache.maven.archetype.ArchetypeGenerationRequest;
 import org.apache.maven.archetype.ArchetypeGenerationResult;
@@ -145,7 +145,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
             
             IWorkingSet workingSet = configuration.getWorkingSet();
             if(workingSet != null) {
-              PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(project, new IWorkingSet[] {workingSet});
+              addToWorkingSet(project, workingSet);              
             }
           }
         }
@@ -185,6 +185,18 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
 
     } catch(MavenEmbedderException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, ex.getMessage(), ex));
+    }
+  }
+
+  // PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(project, new IWorkingSet[] {workingSet});
+  private void addToWorkingSet(IProject project, IWorkingSet workingSet) {
+    IAdaptable[] elements = workingSet.adaptElements(new IAdaptable[] {project});
+    if(elements.length == 1) {
+      IAdaptable[] oldElements = workingSet.getElements();
+      IAdaptable[] newElements = new IAdaptable[oldElements.length + 1];
+      System.arraycopy(oldElements, 0, newElements, 0, oldElements.length);
+      newElements[oldElements.length] = elements[0];
+      workingSet.setElements(newElements);
     }
   }
 
@@ -362,7 +374,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     
     IWorkingSet workingSet = configuration.getWorkingSet();
     if(workingSet != null) {
-      PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(project, new IWorkingSet[] {workingSet});
+      addToWorkingSet(project, workingSet);
     }
     monitor.worked(1);
 
