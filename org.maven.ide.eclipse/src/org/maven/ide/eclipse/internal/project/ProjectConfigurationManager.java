@@ -44,6 +44,8 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.PlatformUI;
 
 import org.apache.maven.archetype.ArchetypeGenerationRequest;
 import org.apache.maven.archetype.ArchetypeGenerationResult;
@@ -140,6 +142,11 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
           if (project != null) {
             projects.put(projectInfo, project);
             updateRequest.addPomFile(project);
+            
+            IWorkingSet workingSet = configuration.getWorkingSet();
+            if(workingSet != null) {
+              PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(project, new IWorkingSet[] {workingSet});
+            }
           }
         }
 
@@ -333,6 +340,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
    * The following steps are executed in the given order:
    * <ul>
    * <li>Creates the workspace project</li>
+   * <li>Adds project to working set</li>
    * <li>Creates the required folders</li>
    * <li>Creates the POM</li>
    * <li>Configures project</li>
@@ -341,15 +349,21 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
    */
   // XXX should use Maven plugin configurations instead of manually specifying folders
   public void createSimpleProject(IProject project, IPath location, Model model, String[] directories,
-      ResolverConfiguration resolverConfiguration, IProgressMonitor monitor) throws CoreException {
+      ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException {
     String projectName = project.getName();
-    monitor.beginTask("Creating project " + projectName, 4);
+    monitor.beginTask("Creating project " + projectName, 5);
 
     monitor.subTask("Creating workspace project...");
     IProjectDescription description = ResourcesPlugin.getWorkspace().newProjectDescription(projectName);
     description.setLocation(location);
     project.create(description, monitor);
     project.open(monitor);
+    monitor.worked(1);
+    
+    IWorkingSet workingSet = configuration.getWorkingSet();
+    if(workingSet != null) {
+      PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(project, new IWorkingSet[] {workingSet});
+    }
     monitor.worked(1);
 
     monitor.subTask("Creating the POM file...");
@@ -364,9 +378,8 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     monitor.worked(1);
 
     monitor.subTask("Configuring project...");
-    enableMavenNature(project, resolverConfiguration, monitor);
-    updateProjectConfiguration(project, resolverConfiguration, runtimeManager.getGoalOnImport(), monitor);
-
+    enableMavenNature(project, configuration.getResolverConfiguration(), monitor);
+    updateProjectConfiguration(project, configuration.getResolverConfiguration(), runtimeManager.getGoalOnImport(), monitor);
     monitor.worked(1);
   }
   

@@ -107,6 +107,7 @@ public class MavenModuleWizard extends Wizard implements INewWizard {
         Messages.getString("wizard.project.page.dependencies.title"), //
         Messages.getString("wizard.project.page.dependencies.description"));
     dependenciesPage.setDependencies(new Dependency[0]);
+    dependenciesPage.setShowScope(true);
 
     addPage(parentPage);
     addPage(archetypePage);
@@ -222,7 +223,7 @@ public class MavenModuleWizard extends Wizard implements INewWizard {
           // XXX should run update sources on parent instead of creating new module project
 
           plugin.getProjectConfigurationManager().createSimpleProject(project, location.append(moduleName), model,
-              folders, configuration.getResolverConfiguration(), monitor);
+              folders, configuration, monitor);
 
           setModule(projectName);
 

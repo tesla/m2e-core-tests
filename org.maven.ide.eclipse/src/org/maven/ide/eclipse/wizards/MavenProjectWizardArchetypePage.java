@@ -162,7 +162,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
 
     createViewer(composite);
 
-    createAdvancedSettings(composite, new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));
+    createAdvancedSettings(composite, new GridData(SWT.FILL, SWT.TOP, true, false, 3, 1));
 
     // loadArchetypes("org.apache.maven.archetypes", "maven-archetype-quickstart", "1.0");
 

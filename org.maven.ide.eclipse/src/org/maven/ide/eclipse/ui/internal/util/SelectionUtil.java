@@ -12,11 +12,17 @@ import java.util.Iterator;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.IWorkingSetManager;
+import org.eclipse.ui.PlatformUI;
 
 import org.maven.ide.eclipse.core.IMavenConstants;
 
@@ -92,4 +98,70 @@ public class SelectionUtil {
     }
     return (T) Platform.getAdapterManager().getAdapter(element, type);
   }
+
+  public static IPath getSelectedLocation(IStructuredSelection selection) {
+    Object element = selection.getFirstElement();
+    {
+      IResource resource = getType(element, IResource.class);
+      if(resource!=null) {
+        return resource.getProject().getProject().getLocation();
+      }
+    }
+    
+    IPackageFragmentRoot fragment = getType(element, IPackageFragmentRoot.class);
+    if(fragment != null) {
+      IJavaProject javaProject = fragment.getJavaProject();
+      if(javaProject != null) {
+        IResource resource = getType(javaProject, IResource.class);
+        if(resource != null) {
+          return resource.getProject().getProject().getLocation();
+        }
+      }
+    }
+    
+    return null; 
+  }
+
+  public static IWorkingSet getSelectedWorkingSet(IStructuredSelection selection) {
+    Object element = selection.getFirstElement();
+    {
+      IWorkingSet workingSet = getType(element, IWorkingSet.class);
+      if(workingSet != null) {
+        return workingSet;
+      }
+    }
+    {
+      IResource resource = getType(element, IResource.class);
+      if(resource != null) {
+        return getWorkingSet(resource.getProject());
+      }
+    }
+    
+    IPackageFragmentRoot fragment = getType(element, IPackageFragmentRoot.class);
+    if(fragment != null) {
+      IJavaProject javaProject = fragment.getJavaProject();
+      if(javaProject != null) {
+        IResource resource = getType(javaProject, IResource.class);
+        if(resource != null) {
+          return getWorkingSet(resource.getProject());
+        }
+
+      }
+    }
+
+    return null;
+  }
+
+  private static IWorkingSet getWorkingSet(Object element) {
+    IWorkingSetManager workingSetManager = PlatformUI.getWorkbench().getWorkingSetManager();
+    for(IWorkingSet workingSet : workingSetManager.getWorkingSets()) {
+      for(IAdaptable adaptable : workingSet.getElements()) {
+        if(adaptable.getAdapter(IResource.class) == element) {
+          return workingSet;
+        }
+      }
+    }
+    return null;
+  }
+
 }

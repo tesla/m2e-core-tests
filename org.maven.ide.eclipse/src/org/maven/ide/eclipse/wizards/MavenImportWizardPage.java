@@ -79,6 +79,8 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
 
   private IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
 
+  private WorkingSetGroup workingSetGroup;
+
   protected MavenImportWizardPage(ProjectImportConfiguration importConfiguration) {
     super("MavenProjectImportWizardPage", importConfiguration);
     setTitle("Maven Projects");
@@ -248,6 +250,8 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
       }
     });
 
+    this.workingSetGroup = new WorkingSetGroup(composite, getImportConfiguration(), getShell());
+    
     createAdvancedSettings(composite, new GridData(SWT.FILL, SWT.TOP, false, false, 3, 1));
     resolverConfigurationComponent.template.addModifyListener(new ModifyListener(){
       public void modifyText(ModifyEvent arg0) {
@@ -260,6 +264,11 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
     }
   }
 
+  public void dispose() {
+    super.dispose();
+    workingSetGroup.dispose();
+  }
+  
   protected void scanProjects() {
     AbstractProjectScanner<MavenProjectInfo> projectScanner = getProjectScanner();
     try {

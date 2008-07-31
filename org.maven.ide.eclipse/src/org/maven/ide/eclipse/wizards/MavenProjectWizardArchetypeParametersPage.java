@@ -132,7 +132,7 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
 
     validate();
 
-    createAdvancedSettings(composite, new GridData(SWT.FILL, SWT.TOP, false, false, 2, 1));
+    createAdvancedSettings(composite, new GridData(SWT.FILL, SWT.TOP, false, false, 3, 1));
     resolverConfigurationComponent.setModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent e) {
         validate();

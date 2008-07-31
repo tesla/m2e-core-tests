@@ -1131,11 +1131,11 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
 
         String[] directories = {};
 
-        ResolverConfiguration resolverConfiguration = new ResolverConfiguration();
-        resolverConfiguration.setIncludeModules(modules);
+        ProjectImportConfiguration config = new ProjectImportConfiguration();
+        config.getResolverConfiguration().setIncludeModules(modules);
 
         plugin.getProjectConfigurationManager().createSimpleProject(project, location, model, directories,
-            resolverConfiguration, monitor);
+            config, monitor);
       }
     }, plugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
 

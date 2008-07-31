@@ -8,13 +8,11 @@
 
 package org.maven.ide.eclipse.wizards;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.ui.ISharedImages;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -33,9 +31,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Label;
 
 import org.apache.maven.model.Dependency;
@@ -54,17 +50,11 @@ import org.maven.ide.eclipse.project.ProjectImportConfiguration;
  */
 public class MavenDependenciesWizardPage extends AbstractMavenWizardPage {
 
-  boolean showLocation = false;
-  
   /** 
    * Viewer containing dependencies
    */
   TableViewer dependencyViewer;
   
-  Combo locationCombo;
-  Label locationLabel;
-  Button useDefaultWorkspaceLocationButton;
-
   private Dependency[] dependencies;
   
   /**
@@ -75,6 +65,8 @@ public class MavenDependenciesWizardPage extends AbstractMavenWizardPage {
   private Button checkOutAllButton;
 
   private Button useDeveloperConnectionButton;
+
+  boolean showScope = false;
 
   public MavenDependenciesWizardPage() {
     this(null, Messages.getString("wizard.project.page.dependencies.title"), //
@@ -88,8 +80,8 @@ public class MavenDependenciesWizardPage extends AbstractMavenWizardPage {
     setPageComplete(true);
   }
 
-  public void showLocation(boolean showLocation) {
-    this.showLocation = showLocation;
+  public void setShowScope(boolean showScope) {
+    this.showScope = showScope;
   }
   
   public void setDependencies(Dependency[] dependencies) {
@@ -109,76 +101,11 @@ public class MavenDependenciesWizardPage extends AbstractMavenWizardPage {
       createArtifacts(composite);
     }
     
-    if(showLocation) {
-      createLocationControls(composite);
-    }
-    
-    GridData advancedSettingsData = new GridData(SWT.FILL, SWT.TOP, false, false, 2, 1);
-    advancedSettingsData.verticalIndent = 10;
-    createAdvancedSettings(composite, advancedSettingsData);
+    createAdvancedSettings(composite, new GridData(SWT.FILL, SWT.TOP, false, false, 3, 1));
 
     setControl(composite);
 
     updatePage();
-  }
-
-  private void createLocationControls(Composite composite) {
-    checkOutAllButton = new Button(composite, SWT.CHECK);
-    checkOutAllButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 3, 1));
-    checkOutAllButton.setText("Check out &All projects");
-
-    useDeveloperConnectionButton = new Button(composite, SWT.CHECK);
-    useDeveloperConnectionButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 3, 1));
-    useDeveloperConnectionButton.setText("Use &developer connection");
-
-    Label separatorLabel = new Label(composite, SWT.HORIZONTAL | SWT.SEPARATOR);
-    GridData labelData = new GridData(SWT.FILL, SWT.CENTER, false, false, 4, 1);
-    labelData.verticalIndent = 7;
-    separatorLabel.setLayoutData(labelData);
-
-    useDefaultWorkspaceLocationButton = new Button(composite, SWT.CHECK);
-    useDefaultWorkspaceLocationButton.setText("Use default &Workspace location");
-    GridData useDefaultWorkspaceLocationButtonData = new GridData(SWT.LEFT, SWT.CENTER, false, false, 3, 1);
-    useDefaultWorkspaceLocationButton.setLayoutData(useDefaultWorkspaceLocationButtonData);
-    useDefaultWorkspaceLocationButton.setSelection(true);
-    useDefaultWorkspaceLocationButton.addSelectionListener(new SelectionAdapter() {
-      public void widgetSelected(SelectionEvent e) {
-        updatePage();
-      }
-    });
-
-    locationLabel = new Label(composite, SWT.NONE);
-    GridData locationLabelData = new GridData();
-    locationLabelData.horizontalIndent = 10;
-    locationLabel.setLayoutData(locationLabelData);
-    locationLabel.setText("&Location:");
-
-    locationCombo = new Combo(composite, SWT.NONE);
-    locationCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-    addFieldWithHistory("location", locationCombo);
-
-    Button locationBrowseButton = new Button(composite, SWT.NONE);
-    locationBrowseButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-    locationBrowseButton.setText("&Browse...");
-    locationBrowseButton.addSelectionListener(new SelectionAdapter() {
-      public void widgetSelected(SelectionEvent e) {
-        DirectoryDialog dialog = new DirectoryDialog(getShell());
-        dialog.setText("Select Location");
-        
-        String path = locationCombo.getText();
-        if(path.length()==0) {
-          path = ResourcesPlugin.getWorkspace().getRoot().getLocation().toPortableString();
-        }
-        dialog.setFilterPath(path);
-
-        String selectedDir = dialog.open();
-        if(selectedDir != null) {
-          locationCombo.setText(selectedDir);
-          useDefaultWorkspaceLocationButton.setSelection(false);
-          updatePage();
-        }
-      }
-    });
   }
 
   private void createArtifacts(Composite composite) {
@@ -201,7 +128,7 @@ public class MavenDependenciesWizardPage extends AbstractMavenWizardPage {
     addDependencyButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            "Add Dependency", IndexManager.SEARCH_ARTIFACT, Collections.<ArtifactKey>emptySet(), !showLocation);
+            "Add Dependency", IndexManager.SEARCH_ARTIFACT, Collections.<ArtifactKey>emptySet(), showScope);
         if(dialog.open() == Window.OK) {
           Object result = dialog.getFirstResult();
           if(result instanceof IndexedArtifactFile) {
@@ -250,23 +177,11 @@ public class MavenDependenciesWizardPage extends AbstractMavenWizardPage {
   }
 
   void updatePage() {
-    if(showLocation) {
-      boolean defaultWorkspaceLocation = isDefaultWorkspaceLocation();
-      locationLabel.setEnabled(!defaultWorkspaceLocation);
-      locationCombo.setEnabled(!defaultWorkspaceLocation);
-    }
-
     setPageComplete(isPageValid());
   }
 
   private boolean isPageValid() {
     setErrorMessage(null);
-    if(showLocation && !isDefaultWorkspaceLocation()) {
-      if(locationCombo.getText().trim().length()==0) {
-        setErrorMessage("Location fied is required");
-        return false;
-      }
-    }
     return true;
   }
   
@@ -276,17 +191,6 @@ public class MavenDependenciesWizardPage extends AbstractMavenWizardPage {
   
   public boolean isDeveloperConnection() {
     return this.useDeveloperConnectionButton.getSelection();
-  }
-  
-  public boolean isDefaultWorkspaceLocation() {
-    return useDefaultWorkspaceLocationButton.getSelection();
-  }
-
-  public File getLocation() {
-    if(isDefaultWorkspaceLocation()) {
-      return ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile();
-    }
-    return new File(locationCombo.getText());
   }
   
   /**
@@ -320,17 +224,6 @@ public class MavenDependenciesWizardPage extends AbstractMavenWizardPage {
     return dependencies.toArray(new Dependency[dependencies.size()]);
   }
   
-//  public IndexedArtifactFile[] getIndexedArtifactFiles() {
-//    List artifactFiles = new ArrayList();
-//    for(int i = 0; i < artifactViewer.getTable().getItemCount(); i++ ) {
-//      Object element = artifactViewer.getElementAt(i);
-//      if(element instanceof IndexedArtifactFile) {
-//        artifactFiles.add(element);
-//      }
-//    }
-//    return (IndexedArtifactFile[]) artifactFiles.toArray(new IndexedArtifactFile[artifactFiles.size()]);
-//  }
-
 
   /**
    * Simple <code>LabelProvider</code> attached to the dependency viewer.

@@ -27,6 +27,7 @@ import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.project.MavenProjectScmInfo;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.scm.ScmUrl;
+import org.maven.ide.eclipse.ui.internal.util.SelectionUtil;
 
 
 /**
@@ -42,7 +43,11 @@ public class MavenCheckoutWizard extends Wizard implements IImportWizard, INewWi
 
   private String parentUrl;
   
-  private MavenCheckoutLocationPage locationPage;
+  private MavenCheckoutLocationPage scheckoutPage;
+
+  private MavenProjectWizardLocationPage locationPage;
+  
+  private IStructuredSelection selection;
 
   
   public MavenCheckoutWizard() {
@@ -57,6 +62,10 @@ public class MavenCheckoutWizard extends Wizard implements IImportWizard, INewWi
   }
 
   public void init(IWorkbench workbench, IStructuredSelection selection) {
+    this.selection = selection;
+    
+    importConfiguration.setWorkingSet(SelectionUtil.getSelectedWorkingSet(selection));
+    
     ArrayList<ScmUrl> urls = new ArrayList<ScmUrl>();
     IAdapterManager adapterManager = Platform.getAdapterManager();
     for(Iterator<?> it = selection.iterator(); it.hasNext();) {
@@ -91,9 +100,16 @@ public class MavenCheckoutWizard extends Wizard implements IImportWizard, INewWi
   }
   
   public void addPages() {
-    locationPage = new MavenCheckoutLocationPage(importConfiguration);
-    locationPage.setUrls(urls);
-    locationPage.setParent(parentUrl);
+    scheckoutPage = new MavenCheckoutLocationPage(importConfiguration);
+    scheckoutPage.setUrls(urls);
+    scheckoutPage.setParent(parentUrl);
+    
+    locationPage = new MavenProjectWizardLocationPage(importConfiguration, //
+        "Select Project Location",
+        "Select project location and working set");
+    locationPage.setLocationPath(SelectionUtil.getSelectedLocation(selection));
+    
+    addPage(scheckoutPage);
     addPage(locationPage);
   }
   
@@ -111,7 +127,7 @@ public class MavenCheckoutWizard extends Wizard implements IImportWizard, INewWi
 //  }
 
   public boolean canFinish() {
-    if(locationPage.isCheckoutAllProjects() && locationPage.isPageComplete()) {
+    if(scheckoutPage.isCheckoutAllProjects() && scheckoutPage.isPageComplete()) {
       return true;
     }
     return super.canFinish();
@@ -122,9 +138,9 @@ public class MavenCheckoutWizard extends Wizard implements IImportWizard, INewWi
       return false;
     }
 
-    final boolean checkoutAllProjects = locationPage.isCheckoutAllProjects();
+    final boolean checkoutAllProjects = scheckoutPage.isCheckoutAllProjects();
 
-    Scm[] scms = locationPage.getScms();
+    Scm[] scms = scheckoutPage.getScms();
     
     final Collection<MavenProjectScmInfo> mavenProjects = new ArrayList<MavenProjectScmInfo>();
     for(int i = 0; i < scms.length; i++ ) {
@@ -148,8 +164,8 @@ public class MavenCheckoutWizard extends Wizard implements IImportWizard, INewWi
       }
     };
 
-    if(!locationPage.isDefaultWorkspaceLocation()) {
-      job.setLocation(locationPage.getLocation());
+    if(!locationPage.isInWorkspace()) {
+      job.setLocation(locationPage.getLocationPath().toFile());
     }
     
     job.schedule();

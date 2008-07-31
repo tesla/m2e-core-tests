@@ -9,10 +9,12 @@
 package org.maven.ide.eclipse.wizards;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -25,6 +27,7 @@ import org.eclipse.ui.IWorkbench;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.project.MavenProjectInfo;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
+import org.maven.ide.eclipse.ui.internal.util.SelectionUtil;
 
 
 /**
@@ -52,6 +55,14 @@ public class MavenImportWizard extends Wizard implements IImportWizard {
   }
   
   public void init(IWorkbench workbench, IStructuredSelection selection) {
+    if(locations == null || locations.isEmpty()) {
+      IPath location = SelectionUtil.getSelectedLocation(selection);
+      if(location != null) {
+        locations = Collections.singletonList(location.toOSString());
+      }
+    }
+    
+    importConfiguration.setWorkingSet(SelectionUtil.getSelectedWorkingSet(selection));
   }
 
   public void addPages() {

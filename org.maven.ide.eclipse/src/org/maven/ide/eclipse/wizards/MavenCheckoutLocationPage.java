@@ -8,11 +8,9 @@
 
 package org.maven.ide.eclipse.wizards;
 
-import java.io.File;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.swt.SWT;
@@ -26,7 +24,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
@@ -65,12 +62,6 @@ public class MavenCheckoutLocationPage extends AbstractMavenWizardPage {
   
   private Button checkoutAllProjectsButton;
   
-  Button useDefaultWorkspaceLocationButton;
-  
-  Label locationLabel;
-  
-  Combo locationCombo;
-
   protected MavenCheckoutLocationPage(ProjectImportConfiguration projectImportConfiguration) {
     super("MavenCheckoutLocationPage", projectImportConfiguration);
     setTitle("Target Location");
@@ -235,61 +226,6 @@ public class MavenCheckoutLocationPage extends AbstractMavenWizardPage {
       }
     });
 
-    Label separatorLabel = new Label(composite, SWT.HORIZONTAL | SWT.SEPARATOR);
-    GridData labelData = new GridData(SWT.FILL, SWT.CENTER, false, false, 5, 1);
-    labelData.verticalIndent = 7;
-    separatorLabel.setLayoutData(labelData);
-
-    useDefaultWorkspaceLocationButton = new Button(composite, SWT.CHECK);
-    GridData useDefaultWorkspaceLocationButtonData = new GridData(SWT.LEFT, SWT.CENTER, false, false, 5, 1);
-    useDefaultWorkspaceLocationButtonData.verticalIndent = 15;
-    useDefaultWorkspaceLocationButton.setLayoutData(useDefaultWorkspaceLocationButtonData);
-    useDefaultWorkspaceLocationButton.setText("Use &default Workspace location");
-    useDefaultWorkspaceLocationButton.addSelectionListener(selectionAdapter);
-    useDefaultWorkspaceLocationButton.setSelection(true);
-
-    locationLabel = new Label(composite, SWT.NONE);
-    GridData locationLabelData = new GridData();
-    locationLabelData.horizontalIndent = 10;
-    locationLabel.setLayoutData(locationLabelData);
-    locationLabel.setText("&Location:");
-
-    locationCombo = new Combo(composite, SWT.NONE);
-    GridData locationComboData = new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1);
-    locationComboData.verticalIndent = 3;
-    locationCombo.setLayoutData(locationComboData);
-    addFieldWithHistory("location", locationCombo);
-    locationCombo.addModifyListener(new ModifyListener() {
-      public void modifyText(ModifyEvent e) {
-        updatePage();
-      }
-    });
-
-    Button locationBrowseButton = new Button(composite, SWT.NONE);
-    GridData locationBrowseButtonData = new GridData();
-    locationBrowseButtonData.verticalIndent = 3;
-    locationBrowseButton.setLayoutData(locationBrowseButtonData);
-    locationBrowseButton.setText("Brows&e...");
-    locationBrowseButton.addSelectionListener(new SelectionAdapter() {
-      public void widgetSelected(SelectionEvent e) {
-        DirectoryDialog dialog = new DirectoryDialog(getShell());
-        dialog.setText("Select Location");
-        
-        String path = locationCombo.getText();
-        if(path.length()==0) {
-          path = ResourcesPlugin.getWorkspace().getRoot().getLocation().toPortableString();
-        }
-        dialog.setFilterPath(path);
-        
-        String selectedDir = dialog.open();
-        if(selectedDir != null) {
-          locationCombo.setText(selectedDir);
-          useDefaultWorkspaceLocationButton.setSelection(false);
-          updatePage();
-        }
-      }
-    });
-
     GridData advancedSettingsData = new GridData(SWT.FILL, SWT.TOP, true, false, 5, 1);
     advancedSettingsData.verticalIndent = 10;
     createAdvancedSettings(composite, advancedSettingsData);
@@ -367,10 +303,6 @@ public class MavenCheckoutLocationPage extends AbstractMavenWizardPage {
     revisionLabel.setEnabled(!isHeadRevision);
     revisionText.setEnabled(!isHeadRevision);
     
-    boolean defaultWorkspaceLocation = isDefaultWorkspaceLocation();
-    locationLabel.setEnabled(!defaultWorkspaceLocation);
-    locationCombo.setEnabled(!defaultWorkspaceLocation);
-    
     setPageComplete(isPageValid());
   }
 
@@ -411,28 +343,9 @@ public class MavenCheckoutLocationPage extends AbstractMavenWizardPage {
       }      
     }
     
-    if(!isDefaultWorkspaceLocation()) {
-      if(locationCombo.getText().trim().length()==0) {
-        setErrorMessage("Location fied is required");
-        return false;
-      }
-    }
-    
     return true;
   }
   
-//  public boolean canFlipToNextPage() {
-//    return !isCheckoutAllProjects();
-//  }
-//
-//  public IWizardPage getNextPage() {
-//    if(isCheckoutAllProjects()) {
-//      return null;
-//    } else {
-//      return super.getNextPage();
-//    }
-//  }
-
   public void setParent(String parentUrl) {
     this.scmParentUrl = parentUrl;
   }
@@ -459,17 +372,6 @@ public class MavenCheckoutLocationPage extends AbstractMavenWizardPage {
       scms[i] = scm;
     }
     return scms;
-  }
-  
-  public boolean isDefaultWorkspaceLocation() {
-    return useDefaultWorkspaceLocationButton.getSelection();
-  }
-  
-  public File getLocation() {
-    if(isDefaultWorkspaceLocation()) {
-      return ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile();
-    }
-    return new File(locationCombo.getText());
   }
   
   public boolean isCheckoutAllProjects() {

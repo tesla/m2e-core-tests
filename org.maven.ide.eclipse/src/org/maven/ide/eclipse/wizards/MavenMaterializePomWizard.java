@@ -32,6 +32,7 @@ import org.maven.ide.eclipse.project.BuildPathManager;
 import org.maven.ide.eclipse.project.MavenProjectPomScanner;
 import org.maven.ide.eclipse.project.MavenProjectScmInfo;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
+import org.maven.ide.eclipse.ui.internal.util.SelectionUtil;
 
 
 /**
@@ -47,6 +48,10 @@ public class MavenMaterializePomWizard extends Wizard implements IImportWizard, 
   
   // TODO replace with ArtifactKey
   private Dependency[] dependencies;
+
+  private MavenProjectWizardLocationPage locationPage;
+
+  private IStructuredSelection selection;
 
 
   public MavenMaterializePomWizard() {
@@ -64,6 +69,10 @@ public class MavenMaterializePomWizard extends Wizard implements IImportWizard, 
   }
 
   public void init(IWorkbench workbench, IStructuredSelection selection) {
+    this.selection = selection;
+    
+    importConfiguration.setWorkingSet(SelectionUtil.getSelectedWorkingSet(selection));
+    
     ArrayList<Dependency> dependencies = new ArrayList<Dependency>();
 
     BuildPathManager buildpathManager = MavenPlugin.getDefault().getBuildpathManager();
@@ -100,26 +109,18 @@ public class MavenMaterializePomWizard extends Wizard implements IImportWizard, 
     selectionPage = new MavenDependenciesWizardPage(importConfiguration, //
         "Select Maven projects", //
         "Select Maven artifacts to import");
-    selectionPage.showLocation(true);
     selectionPage.setDependencies(dependencies);
+    
+    locationPage = new MavenProjectWizardLocationPage(importConfiguration, //
+        "Select project location", 
+        "Select project location and working set");
+    locationPage.setLocationPath(SelectionUtil.getSelectedLocation(selection));
+    
     addPage(selectionPage);
+    addPage(locationPage);
   }
   
-  /** Adds the listeners after the page controls are created. */
-//  public void createPageControls(Composite pageContainer) {
-//    super.createPageControls(pageContainer);
-//
-//    selectionPage.addListener(new ISelectionChangedListener() {
-//      public void selectionChanged(SelectionChangedEvent event) {
-//        projectsPage.setDependencies(selectionPage.getDependencies());
-//      }
-//    });
-//  }
-
   public boolean canFinish() {
-//    if(locationPage.isCheckoutAllProjects() && locationPage.isPageComplete()) {
-//      return true;
-//    }
     return super.canFinish();
   }
 
@@ -146,8 +147,8 @@ public class MavenMaterializePomWizard extends Wizard implements IImportWizard, 
       }
     };
     
-    if(!selectionPage.isDefaultWorkspaceLocation()) {
-      job.setLocation(selectionPage.getLocation());
+    if(!locationPage.isInWorkspace()) {
+      job.setLocation(locationPage.getLocationPath().toFile());
     }
     
     job.schedule();

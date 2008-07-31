@@ -30,11 +30,16 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 
@@ -46,6 +51,7 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.Messages;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
+import org.maven.ide.eclipse.ui.internal.util.SelectionUtil;
 
 
 /**
@@ -93,6 +99,10 @@ public class MavenProjectWizard extends Wizard implements INewWizard {
 
   ProjectImportConfiguration configuration;
 
+  protected Button simpleProject;
+
+  private IStructuredSelection selection;
+
   /**
    * Default constructor. Sets the title and image of the wizard.
    */
@@ -104,20 +114,48 @@ public class MavenProjectWizard extends Wizard implements INewWizard {
   }
   
   public void init(IWorkbench workbench, IStructuredSelection selection) {
-    // do nothing
+    this.selection = selection;
   }
 
   public void addPages() {
     configuration = new ProjectImportConfiguration();
-
-    locationPage = new MavenProjectWizardLocationPage(configuration);
+    configuration.setWorkingSet(SelectionUtil.getSelectedWorkingSet(selection));
+    
+    locationPage = new MavenProjectWizardLocationPage(configuration, //
+        Messages.getString("wizard.project.page.project.title"), //
+        Messages.getString("wizard.project.page.project.description")) {
+      
+      protected void createAdditionalControls(Composite container) {
+        simpleProject = new Button(container, SWT.CHECK);
+        simpleProject.setText(Messages.getString("wizard.project.page.project.simpleProject"));
+        simpleProject.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 3, 1));
+        simpleProject.addSelectionListener(new SelectionAdapter() {
+          public void widgetSelected(SelectionEvent e) {
+            validate();
+          }
+        });
+        
+        Label label = new Label(container, SWT.NONE);
+        GridData labelData = new GridData(SWT.FILL, SWT.TOP, false, false, 3, 1);
+        labelData.heightHint = 10;
+        label.setLayoutData(labelData);
+      }
+      
+      /** Skips the archetype selection page if the user chooses a simple project. */
+      public IWizardPage getNextPage() {
+        return getPage(simpleProject.getSelection() ? "MavenProjectWizardArtifactPage" : "MavenProjectWizardArchetypePage");
+      }
+    };
+    locationPage.setLocationPath(SelectionUtil.getSelectedLocation(selection));
+    
     archetypePage = new MavenProjectWizardArchetypePage(configuration);
     parametersPage = new MavenProjectWizardArchetypeParametersPage(configuration);
     artifactPage = new MavenProjectWizardArtifactPage(configuration);
-    dependenciesPage = new MavenDependenciesWizardPage(configuration, Messages
-        .getString("wizard.project.page.dependencies.title"), Messages
-        .getString("wizard.project.page.dependencies.description"));
+    dependenciesPage = new MavenDependenciesWizardPage(configuration, //
+        Messages.getString("wizard.project.page.dependencies.title"), //
+        Messages.getString("wizard.project.page.dependencies.description"));
     dependenciesPage.setDependencies(new Dependency[0]);
+    dependenciesPage.setShowScope(true);
 
     addPage(locationPage);
     addPage(archetypePage);
@@ -130,11 +168,12 @@ public class MavenProjectWizard extends Wizard implements INewWizard {
   public void createPageControls(Composite pageContainer) {
     super.createPageControls(pageContainer);
 
-    locationPage.addArchetypeSelectionListener(new SelectionAdapter() {
+    simpleProject.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
-        archetypePage.setUsed(!locationPage.isSimpleProject());
-        parametersPage.setUsed(!locationPage.isSimpleProject());
-        artifactPage.setUsed(locationPage.isSimpleProject());
+        boolean isSimpleproject = simpleProject.getSelection();
+        archetypePage.setUsed(!isSimpleproject);
+        parametersPage.setUsed(!isSimpleproject);
+        artifactPage.setUsed(isSimpleproject);
         getContainer().updateButtons();
       }
     });
@@ -156,7 +195,7 @@ public class MavenProjectWizard extends Wizard implements INewWizard {
 
   /** Returns the model. */
   public Model getModel() {
-    if(locationPage.isSimpleProject()) {
+    if(simpleProject.getSelection()) {
       return artifactPage.getModel();
     }
     return parametersPage.getModel();
@@ -200,13 +239,12 @@ public class MavenProjectWizard extends Wizard implements INewWizard {
       MessageDialog.openError(getShell(), Messages.getString("wizard.project.job.failed", projectName), Messages.getString("wizard.project.error.pomAlreadyExists"));
       return false;
     }
-        
 
     final Job job;
     
     final MavenPlugin plugin = MavenPlugin.getDefault();
 
-    if(locationPage.isSimpleProject()) {
+    if(simpleProject.getSelection()) {
       @SuppressWarnings("unchecked")
       List<Dependency> modelDependencies = model.getDependencies();
       modelDependencies.addAll(Arrays.asList(dependenciesPage.getDependencies()));
@@ -217,7 +255,7 @@ public class MavenProjectWizard extends Wizard implements INewWizard {
         public IStatus runInWorkspace(IProgressMonitor monitor) {
           try {
             plugin.getProjectConfigurationManager().createSimpleProject(project, location, model, folders, //
-                configuration.getResolverConfiguration(), monitor);
+                configuration, monitor);
             return Status.OK_STATUS;
           } catch(CoreException e) {
             return e.getStatus();

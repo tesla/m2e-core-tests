@@ -23,21 +23,25 @@ import org.apache.maven.model.Model;
 
 import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
 
+
 public interface IProjectConfigurationManager {
-  
+
   ISchedulingRule getRule();
 
-  void importProjects(Collection<MavenProjectInfo> projects, ProjectImportConfiguration importConfiguration, IProgressMonitor monitor) throws CoreException;
+  void importProjects(Collection<MavenProjectInfo> projects, //
+      ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException;
 
   void createSimpleProject(IProject project, IPath location, Model model, String[] folders,
-      ResolverConfiguration resolverConfiguration, IProgressMonitor monitor) throws CoreException;
+      ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException;
 
-  void createArchetypeProject(IProject project, IPath location, Archetype archetype, String groupId, String artifactId,
-      String version, String packaging, Properties properties, ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException;
+  void createArchetypeProject(IProject project, IPath location, Archetype archetype, //
+      String groupId, String artifactId, String version, String javaPackage, Properties properties, //
+      ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException;
 
   Set<MavenProjectInfo> collectProjects(Collection<MavenProjectInfo> projects, boolean includeModules);
 
-  void enableMavenNature(IProject project, ResolverConfiguration configuration, IProgressMonitor monitor) throws CoreException;
+  void enableMavenNature(IProject project, ResolverConfiguration configuration, IProgressMonitor monitor)
+      throws CoreException;
 
   void disableMavenNature(IProject project, IProgressMonitor monitor) throws CoreException;
 

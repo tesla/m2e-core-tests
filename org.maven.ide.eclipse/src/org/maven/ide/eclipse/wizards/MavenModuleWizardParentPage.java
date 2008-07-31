@@ -83,11 +83,25 @@ public class MavenModuleWizardParentPage extends AbstractMavenWizardPage {
     Composite container = new Composite(parent, SWT.NULL);
     container.setLayout(new GridLayout(3, false));
 
+    simpleProject = new Button(container, SWT.CHECK);
+    simpleProject.setText(Messages.getString("wizard.project.page.project.simpleProject"));
+    simpleProject.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 3, 1));
+    simpleProject.addSelectionListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        validate();
+      }
+    });
+
     Label nameLabel = new Label(container, SWT.NONE);
+    GridData gd_nameLabel = new GridData();
+    gd_nameLabel.verticalIndent = 10;
+    nameLabel.setLayoutData(gd_nameLabel);
     nameLabel.setText(Messages.getString("wizard.module.page.parent.moduleName"));
 
     moduleNameCombo = new Combo(container, SWT.BORDER);
-    moduleNameCombo.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));
+    GridData gd_moduleNameCombo = new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1);
+    gd_moduleNameCombo.verticalIndent = 10;
+    moduleNameCombo.setLayoutData(gd_moduleNameCombo);
     moduleNameCombo.addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent e) {
         validate();
@@ -111,15 +125,6 @@ public class MavenModuleWizardParentPage extends AbstractMavenWizardPage {
           setParent(dialog.getFirstResult());
           validate();
         }
-      }
-    });
-
-    simpleProject = new Button(container, SWT.CHECK);
-    simpleProject.setText(Messages.getString("wizard.project.page.project.simpleProject"));
-    simpleProject.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 3, 1));
-    simpleProject.addSelectionListener(new SelectionAdapter() {
-      public void widgetSelected(SelectionEvent e) {
-        validate();
       }
     });
 

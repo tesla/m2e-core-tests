@@ -75,17 +75,17 @@ public abstract class AbstractMavenWizardPage extends WizardPage {
   /** Creates an advanced settings panel. */
   protected void createAdvancedSettings(Composite composite, GridData gridData) {
     if(importConfiguration != null) {
+//      Label separator = new Label(composite, SWT.HORIZONTAL | SWT.SEPARATOR);
+//      GridData separatorData = new GridData(SWT.FILL, SWT.TOP, false, false, gridData.horizontalSpan, 1);
+//      separatorData.verticalIndent = 7;
+//      separator.setLayoutData(separatorData);
+      gridData.verticalIndent = 7;
+
       resolverConfigurationComponent = new ResolverConfigurationComponent(composite, importConfiguration, true);
       resolverConfigurationComponent.setLayoutData(gridData);
       addFieldWithHistory("projectNameTemplate", resolverConfigurationComponent.template);
     }
   }
-
-//  /** Returns the resolver configuration based on the advanced settings. */
-//  public ResolverConfiguration getResolverConfiguration() {
-//    return resolverConfiguration == null ? new ResolverConfiguration() : //
-//        resolverConfigurationComponent.getResolverConfiguration();
-//  }
 
   /** Loads the advanced settings data when the page is displayed. */
   public void setVisible(boolean visible) {

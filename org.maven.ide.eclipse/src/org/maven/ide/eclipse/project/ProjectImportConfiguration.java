@@ -15,6 +15,7 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.ui.IWorkingSet;
 
 import org.apache.maven.model.Model;
 
@@ -40,6 +41,8 @@ public class ProjectImportConfiguration {
   private String projectNameTemplate = "";
   
   private boolean needsRename;
+
+  private IWorkingSet workingSet;
 
   /** Creates a new configuration. */
   public ProjectImportConfiguration(ResolverConfiguration resolverConfiguration) {
@@ -72,6 +75,14 @@ public class ProjectImportConfiguration {
   
   public boolean isNeedsRename() {
     return this.needsRename;
+  }
+  
+  public void setWorkingSet(IWorkingSet workingSet) {
+    this.workingSet = workingSet;
+  }
+  
+  public IWorkingSet getWorkingSet() {
+    return this.workingSet;
   }
   
   /** Calculates the project name for the given model. */

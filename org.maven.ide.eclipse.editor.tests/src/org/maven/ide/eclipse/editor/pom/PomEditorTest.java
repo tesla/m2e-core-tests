@@ -30,7 +30,6 @@ import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
@@ -44,12 +43,10 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.forms.widgets.Section;
-import org.eclipse.ui.forms.widgets.Twistie;
 import org.eclipse.ui.part.FileEditorInput;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.project.IProjectConfigurationManager;
-import org.maven.ide.eclipse.project.ResolverConfiguration;
+import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 
 import com.windowtester.runtime.IUIContext;
 import com.windowtester.runtime.WT;
@@ -59,7 +56,6 @@ import com.windowtester.runtime.condition.HasTextCondition;
 import com.windowtester.runtime.condition.IConditionMonitor;
 import com.windowtester.runtime.condition.IHandler;
 import com.windowtester.runtime.locator.WidgetReference;
-import com.windowtester.runtime.locator.XYLocator;
 import com.windowtester.runtime.swt.UITestCaseSWT;
 import com.windowtester.runtime.swt.condition.shell.ShellDisposedCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellShowingCondition;
@@ -327,7 +323,7 @@ public class PomEditorTest extends UITestCaseSWT {
     model.setVersion("1.0.0");
     
     String[] folders = new String[0];
-    ResolverConfiguration config = new ResolverConfiguration();
+    ProjectImportConfiguration config = new ProjectImportConfiguration();
     
     IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("test-pom");
     IPath location = null;

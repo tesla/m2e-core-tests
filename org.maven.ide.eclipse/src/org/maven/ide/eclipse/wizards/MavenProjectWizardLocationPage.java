@@ -14,13 +14,11 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -34,34 +32,43 @@ import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 
 
 /**
- * Wizard page responsible for gathering project information. This wizard page gathers information about the project to
- * create. The user must specify a project name and a location at which the project is to be created. Input validation
- * is performed in order to make sure that all the project information is valid before letting the wizard continue.
+ * Wizard page used to specify project location and working set.
  */
 public class MavenProjectWizardLocationPage extends AbstractMavenWizardPage {
 
+  Button useDefaultWorkspaceLocationButton;
   Label locationLabel;
   Combo locationCombo;
-  Button useDefaultWorkspaceLocationButton;
-  boolean initialized = false;
-  
-//  /** Component to choose at which location to create the project. */
-//  private MavenLocationComponent locationComponent;
 
-  /** the "create simple project" checkbox */
-  private Button simpleProject;
+  boolean initialized = false;
+  private WorkingSetGroup workingSetGroup;
+
+  private IPath location;
 
   /**
-   * Default constructor. Sets the title and description of this wizard page and marks it as not being complete as user
-   * input is required for continuing.
+   * Creates Maven project location page.
+   * 
+   * @param title location page title text
+   * @param description location page description text
    */
-  public MavenProjectWizardLocationPage(ProjectImportConfiguration projectImportConfiguration) {
-    super("MavenProjectWizardLocationPage", projectImportConfiguration);
+  public MavenProjectWizardLocationPage(ProjectImportConfiguration configuration, String title, String description) {
+    super("MavenProjectWizardLocationPage", configuration);
+    setTitle(title);
+    setDescription(description);
+    setPageComplete(false);
+    
+  }
+
+  /**
+   * Creates Maven project location page.
+   */
+  public MavenProjectWizardLocationPage(ProjectImportConfiguration configuration, boolean showSimpleProject) {
+    super("MavenProjectWizardLocationPage", configuration);
     setTitle(Messages.getString("wizard.project.page.project.title"));
     setDescription(Messages.getString("wizard.project.page.project.description"));
     setPageComplete(false);
   }
-
+  
   /**
    * {@inheritDoc} This wizard page contains a component to query the project name and a
    * <code>MavenLocationComponent</code> which allows to specify whether the project should be created in the
@@ -71,15 +78,8 @@ public class MavenProjectWizardLocationPage extends AbstractMavenWizardPage {
     Composite container = new Composite(parent, SWT.NULL);
     container.setLayout(new GridLayout(3, false));
 
-    simpleProject = new Button(container, SWT.CHECK);
-    simpleProject.setText(Messages.getString("wizard.project.page.project.simpleProject"));
-    simpleProject.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 3, 1));
-    simpleProject.addSelectionListener(new SelectionAdapter() {
-      public void widgetSelected(SelectionEvent e) {
-        validate();
-      }
-    });
-
+    createAdditionalControls(container);
+    
 //    // project name
 //    GridData gridData = new GridData();
 //    Label label = new Label(container, SWT.NULL);
@@ -98,7 +98,6 @@ public class MavenProjectWizardLocationPage extends AbstractMavenWizardPage {
 
     useDefaultWorkspaceLocationButton = new Button(container, SWT.CHECK);
     GridData useDefaultWorkspaceLocationButtonData = new GridData(SWT.LEFT, SWT.CENTER, false, false, 3, 1);
-    useDefaultWorkspaceLocationButtonData.verticalIndent = 15;
     useDefaultWorkspaceLocationButton.setLayoutData(useDefaultWorkspaceLocationButtonData);
     useDefaultWorkspaceLocationButton.setText("Use default &Workspace location");
     useDefaultWorkspaceLocationButton.addSelectionListener(new SelectionAdapter() {
@@ -119,7 +118,6 @@ public class MavenProjectWizardLocationPage extends AbstractMavenWizardPage {
     
     locationCombo = new Combo(container, SWT.NONE);
     GridData locationComboData = new GridData(SWT.FILL, SWT.CENTER, true, false);
-    locationComboData.verticalIndent = 3;
     locationCombo.setLayoutData(locationComboData);
     locationCombo.addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent e) {
@@ -130,8 +128,7 @@ public class MavenProjectWizardLocationPage extends AbstractMavenWizardPage {
     addFieldWithHistory("location", locationCombo);
     
     Button locationBrowseButton = new Button(container, SWT.NONE);
-    GridData locationBrowseButtonData = new GridData();
-    locationBrowseButtonData.verticalIndent = 3;
+    GridData locationBrowseButtonData = new GridData(SWT.FILL, SWT.CENTER, false, false);
     locationBrowseButton.setLayoutData(locationBrowseButtonData);
     locationBrowseButton.setText("Brows&e...");
     locationBrowseButton.addSelectionListener(new SelectionAdapter() {
@@ -154,26 +151,33 @@ public class MavenProjectWizardLocationPage extends AbstractMavenWizardPage {
       }
     });
 
-    createAdvancedSettings(container, new GridData(SWT.FILL, SWT.TOP, true, false, 3, 1));
+    this.workingSetGroup = new WorkingSetGroup(container, getImportConfiguration(), getShell());
 
+    if(location==null || Platform.getLocation().equals(location)) {
+//      useDefaultWorkspaceLocationButton.setSelection(true);
+    } else {
+//      useDefaultWorkspaceLocationButton.setSelection(false);
+//      locationLabel.setEnabled(true);
+//      locationCombo.setEnabled(true);
+      locationCombo.setText(location.toOSString());
+    }
+    
+    createAdvancedSettings(container, new GridData(SWT.FILL, SWT.TOP, true, false, 3, 1));
+    
     setControl(container);
   }
 
   /**
-   * Returns the name of the project to create as provided by the user. Note that any leading and trailing white space
-   * is preserved.
-   * 
-   * @return The name of the project to create. Is never <code>null</code>.
+   * Create additional controls
    */
-//  public String getProjectName() {
-//    return projectNameText.getText();
-//  }
-
-  /** Returns "true" if the user chose not to use archetypes. */
-  public boolean isSimpleProject() {
-    return simpleProject.getSelection();
+  protected void createAdditionalControls(Composite container) {
   }
 
+  public void dispose() {
+    super.dispose();
+    workingSetGroup.dispose();
+  }
+  
   /**
    * Returns whether the user has chosen to create the project in the workspace or at an external location.
    * 
@@ -192,23 +196,15 @@ public class MavenProjectWizardLocationPage extends AbstractMavenWizardPage {
    */
   public IPath getLocationPath() {
     if(isInWorkspace()) {
-      return Platform.getLocation();
+      return ResourcesPlugin.getWorkspace().getRoot().getLocation();
     }
     return Path.fromOSString(locationCombo.getText().trim());
   }
-
-  /**
-   * Creates a project resource handle for the currently chosen project name. Note that this method does not create the
-   * actual project resource; this should be done once the new project wizard has finished.
-   * 
-   * @return The resource handle for the project.
-   * @see #getProjectName()
-   * @see org.eclipse.core.resources.IWorkspaceRoot#getProject(java.lang.String)
-   */
-//  public IProject getProjectHandle() {
-//    return ResourcesPlugin.getWorkspace().getRoot().getProject(getProjectName());
-//  }
-
+  
+  public void setLocationPath(IPath location) {
+    this.location = location;
+  }
+  
   /** {@inheritDoc} */
   public void setVisible(boolean visible) {
     super.setVisible(visible);
@@ -313,26 +309,4 @@ public class MavenProjectWizardLocationPage extends AbstractMavenWizardPage {
     setMessage(null);
   }
 
-  /** Skips the archetype selection page if the user chooses a simple project. */
-  public IWizardPage getNextPage() {
-    return getWizard().getPage(
-        isSimpleProject() ? "MavenProjectWizardArtifactPage" : "MavenProjectWizardArchetypePage");
-  }
-
-//  /** Offers a listener hookup to the pages watching the project name field. */
-//  public void addProjectNameListener(ModifyListener modifyListener) {
-//    projectNameText.addModifyListener(modifyListener);
-//  }
-
-
-  /** Offers a listener hookup to the pages watching the archetype switch. */
-  public void addArchetypeSelectionListener( SelectionListener selectionListener) {
-    simpleProject.addSelectionListener( selectionListener );
-  }
-
-
-  /** Removes a listener hookup to the pages watching the project name field. */
-  public void removeArchetypeSelectionListener( SelectionListener selectionListener) {
-    simpleProject.removeSelectionListener( selectionListener );
-  }
 }
