@@ -2,7 +2,7 @@
 <feature
       id="org.maven.ide.eclipse.editor.feature"
       label="Maven POM Editor (Incubation, Optional)"
-      version="0.9.5.qualifier"
+      version="0.9.6.qualifier"
       provider-name="Sonatype, Inc."
       plugin="org.maven.ide.eclipse">
 
@@ -40,9 +40,17 @@ http://www.eclipse.org/legal/epl-v10.html
       <import plugin="org.eclipse.wst.sse.core"/>
       <import plugin="org.eclipse.wst.xml.core"/>
       <import plugin="org.eclipse.emf.ecore.edit"/>
+      <import plugin="org.eclipse.search"/>
+      <import plugin="org.eclipse.draw2d"/>
+      <import plugin="org.eclipse.zest.core"/>
+      <import plugin="org.eclipse.zest.layouts"/>
+      <import plugin="org.eclipse.swt"/>
+      <import plugin="org.eclipse.jface"/>
+      <import plugin="com.ibm.icu"/>
       <import plugin="org.maven.ide.eclipse"/>
       <import plugin="org.maven.ide.components.maven_embedder"/>
       <import plugin="org.maven.ide.components.maven_model_edit"/>
+      <import plugin="org.maven.ide.eclipse.editor.xml"/>
    </requires>
 
    <plugin
