@@ -2,7 +2,7 @@
 <feature
       id="org.maven.ide.eclipse.feature"
       label="Maven Integration for Eclipse (Required)"
-      version="0.9.5.qualifier"
+      version="0.9.6.qualifier"
       provider-name="Sonatype, Inc."
       plugin="org.maven.ide.eclipse">
    <install-handler/>
@@ -27,9 +27,19 @@ http://www.eclipse.org/legal/epl-v10.html
    </url>
 
    <requires>
-      <import feature="org.eclipse.platform" version="3.1.0" match="greaterOrEqual"/>
-      <import feature="org.eclipse.jdt" version="3.1.0" match="greaterOrEqual"/>
-      <import feature="org.eclipse.rcp" version="3.1.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.emf.ecore"/>
+      <import plugin="org.eclipse.emf.ecore.xmi"/>
+      <import plugin="org.eclipse.emf.edit"/>
+      <import plugin="org.eclipse.emf.ecore.edit"/>
+      
+      <import plugin="org.eclipse.wst.common.emf"/>
+      <import plugin="org.eclipse.wst.sse.core"/>
+      <import plugin="org.eclipse.wst.xml.core"/>
+      <import plugin="org.eclipse.jem.util"/>
+      
+      <import feature="org.eclipse.platform" version="3.2.0" match="greaterOrEqual"/>
+      <import feature="org.eclipse.rcp" version="3.2.0" match="greaterOrEqual"/>
+      <import feature="org.eclipse.jdt" version="3.2.0" match="greaterOrEqual"/>
       <import feature="org.maven.ide.components.maven_embedder.feature" version="2.1.0" match="greaterOrEqual"/>
    </requires>
 

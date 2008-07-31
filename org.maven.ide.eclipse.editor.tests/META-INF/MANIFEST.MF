@@ -25,7 +25,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.maven.ide.eclipse.editor.xml,
  org.eclipse.ui.forms
 Bundle-Name: Maven Integration Tests Plug-in
-Bundle-Version: 0.9.5.qualifier
+Bundle-Version: 0.9.6.qualifier
 MavenArtifact-ArtifactId: org.maven.ide.eclipse.test
 Bundle-Vendor: Sonatype, Inc.
 Bundle-SymbolicName: org.maven.ide.eclipse.editor.tests;singleton:=true
