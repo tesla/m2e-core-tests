@@ -96,11 +96,11 @@ public class SelectionUtil {
     } else if(element instanceof IAdaptable) {
       return (T) ((IAdaptable) element).getAdapter(type);
     }
-    return (T) Platform.getAdapterManager().getAdapter(element, type);
+    return element == null ? null : (T) Platform.getAdapterManager().getAdapter(element, type);
   }
 
   public static IPath getSelectedLocation(IStructuredSelection selection) {
-    Object element = selection.getFirstElement();
+    Object element = selection == null ? null : selection.getFirstElement();
     {
       IResource resource = getType(element, IResource.class);
       if(resource!=null) {
@@ -123,7 +123,7 @@ public class SelectionUtil {
   }
 
   public static IWorkingSet getSelectedWorkingSet(IStructuredSelection selection) {
-    Object element = selection.getFirstElement();
+    Object element = selection == null ? null : selection.getFirstElement();
     {
       IWorkingSet workingSet = getType(element, IWorkingSet.class);
       if(workingSet != null) {
