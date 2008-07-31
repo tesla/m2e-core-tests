@@ -18,22 +18,18 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IStorage;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.core.runtime.content.IContentTypeManager;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -165,32 +161,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
   }
 
   private ArtifactKey getArtifact(Object element) {
-    MavenPlugin plugin = MavenPlugin.getDefault();
-    
-    // TODO open poms for linked projects inside "Maven Dependencies" container
-    IPackageFragmentRoot fragment = SelectionUtil.getType(element, IPackageFragmentRoot.class);
-    if(fragment != null) {
-      IProject project = fragment.getJavaProject().getProject();
-      if(project.isAccessible() && fragment.isArchive()) {
-        try {
-          return plugin.getBuildpathManager().findArtifact(project, fragment.getPath());
-        } catch(CoreException ex) {
-          MavenLogger.log(ex);
-          plugin.getConsole().logError("Can't find artifact for " + fragment);
-          return null;
-        }
-      }
-    }
-
-    IProject project = SelectionUtil.getType(element, IProject.class);
-    if(project != null && project.isAccessible()) {
-      IMavenProjectFacade projectFacade = plugin.getMavenProjectManager().create(project, new NullProgressMonitor());
-      if(projectFacade!=null) {
-        return projectFacade.getArtifactKey();
-      }
-    }
-
-    return null;
+    return SelectionUtil.getType(element, ArtifactKey.class);
   }
 
   public static void openEditor(IndexedArtifact ia, IndexedArtifactFile f) {

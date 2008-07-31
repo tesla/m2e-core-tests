@@ -17,9 +17,6 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.ILaunch;
-import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -33,7 +30,6 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
-import org.maven.ide.eclipse.internal.launch.MavenRuntimeClasspathProvider;
 import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 import org.maven.ide.eclipse.wizards.MavenPomWizard;
@@ -128,23 +124,9 @@ public class EnableNatureAction implements IObjectActionDelegate, IExecutableExt
         configurationManager.updateProjectConfiguration(project, configuration, //
             plugin.getMavenRuntimeManager().getGoalOnUpdate(), new NullProgressMonitor());
       }
-      
-      enableLaunchLonfigurations(project);
 
     } catch(CoreException ex) {
       MavenLogger.log(ex);
-    }
-  }
-
-  // TODO request user confirmation
-  // TODO launch configs won't be updated if dependency management is changed externally 
-  private void enableLaunchLonfigurations(IProject project) throws CoreException {
-    ILaunch[] launches = DebugPlugin.getDefault().getLaunchManager().getLaunches();
-    for(int i = 0; i < launches.length; i++ ) {
-      ILaunchConfiguration config = launches[i].getLaunchConfiguration();
-      if(config != null && MavenRuntimeClasspathProvider.isSupportedType(config.getType().getIdentifier())) {
-        MavenRuntimeClasspathProvider.enable(config);
-      }
     }
   }
 

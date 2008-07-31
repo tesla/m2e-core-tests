@@ -8,6 +8,8 @@
 
 package org.maven.ide.eclipse.project.configurator;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
@@ -18,7 +20,6 @@ import org.apache.maven.embedder.MavenEmbedder;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
-import org.maven.ide.eclipse.project.BuildPathManager;
 import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
 import org.maven.ide.eclipse.project.MavenProjectChangedEvent;
 import org.maven.ide.eclipse.project.MavenProjectManager;
@@ -48,12 +49,8 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
 
   protected MavenProjectManager projectManager;
   protected MavenRuntimeManager runtimeManager;
-  protected BuildPathManager buildPathManager;
   protected MavenConsole console;
 
-  public void setBuildPathManager(BuildPathManager buildPathManager) {
-    this.buildPathManager = buildPathManager;
-  }
   
   public void setProjectManager(MavenProjectManager projectManager) {
     this.projectManager = projectManager;
@@ -128,4 +125,17 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
       priority = Integer.MAX_VALUE;
     }
   }
+
+  protected void addNature(IProject project, String natureId, IProgressMonitor monitor) throws CoreException {
+    if (!project.hasNature(natureId)) {
+      IProjectDescription description = project.getDescription();
+      String[] prevNatures = description.getNatureIds();
+      String[] newNatures = new String[prevNatures.length + 1];
+      System.arraycopy(prevNatures, 0, newNatures, 1, prevNatures.length);
+      newNatures[0] = natureId;
+      description.setNatureIds(newNatures);
+      project.setDescription(description, monitor);
+    }
+  }
+
 }

@@ -14,9 +14,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.ILaunch;
-import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -25,7 +22,6 @@ import org.eclipse.ui.IWorkbenchPart;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
-import org.maven.ide.eclipse.internal.launch.MavenRuntimeClasspathProvider;
 
 
 public class DisableNatureAction implements IObjectActionDelegate {
@@ -54,23 +50,10 @@ public class DisableNatureAction implements IObjectActionDelegate {
           try {
             plugin.getProjectConfigurationManager().disableMavenNature(project, new NullProgressMonitor());
 
-            disableLaunchConfigurations(project);
           } catch(CoreException ex) {
             MavenLogger.log(ex);
           }
         }
-      }
-    }
-  }
-
-  // TODO request user confirmation
-  // TODO launch configs won't be updated if dependency management is changed externally 
-  private void disableLaunchConfigurations(IProject project) throws CoreException {
-    ILaunch[] launches = DebugPlugin.getDefault().getLaunchManager().getLaunches();
-    for(int i = 0; i < launches.length; i++ ) {
-      ILaunchConfiguration config = launches[i].getLaunchConfiguration();
-      if(config != null && MavenRuntimeClasspathProvider.isSupportedType(config.getType().getIdentifier())) {
-        MavenRuntimeClasspathProvider.disable(config);
       }
     }
   }

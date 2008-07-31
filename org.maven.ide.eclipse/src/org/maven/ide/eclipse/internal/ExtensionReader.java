@@ -15,6 +15,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -37,7 +38,6 @@ import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.index.IndexInfo;
 import org.maven.ide.eclipse.internal.index.IndexInfoWriter;
-import org.maven.ide.eclipse.project.BuildPathManager;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.configurator.AbstractClasspathConfiguratorFactory;
 import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
@@ -57,6 +57,8 @@ public class ExtensionReader {
   public static final String EXTENSION_PROJECT_CONFIGURATORS = "org.maven.ide.eclipse.projectConfigurators";
 
   public static final String EXTENSION_CLASSPATH_CONFIGURATOR_FACTORIES = "org.maven.ide.eclipse.classpathConfiguratorFactories";
+
+  public static final String EXTENSION_M2_MENU_ITEMS = "org.maven.ide.eclipse.m2MenuItems";
 
   private static final String ELEMENT_INDEX = "index";
 
@@ -212,7 +214,7 @@ public class ExtensionReader {
   }
 
   public static List<AbstractProjectConfigurator> readProjectConfiguratorExtensions(MavenProjectManager projectManager,
-      MavenRuntimeManager runtimeManager, BuildPathManager buildpathManager, MavenConsole console) {
+      MavenRuntimeManager runtimeManager, MavenConsole console) {
     ArrayList<AbstractProjectConfigurator> projectConfigurators = new ArrayList<AbstractProjectConfigurator>();
     
     IExtensionRegistry registry = Platform.getExtensionRegistry();
@@ -229,7 +231,6 @@ public class ExtensionReader {
               AbstractProjectConfigurator projectConfigurator = (AbstractProjectConfigurator) o;
               projectConfigurator.setProjectManager(projectManager);
               projectConfigurator.setRuntimeManager(runtimeManager);
-              projectConfigurator.setBuildPathManager(buildpathManager);
               projectConfigurator.setConsole(console);
               
               projectConfigurators.add(projectConfigurator);
@@ -269,5 +270,13 @@ public class ExtensionReader {
     return factories;
   }
 
+  public static Map<String, IConfigurationElement> getM2MenuItems() {
+    Map<String, IConfigurationElement> result = new HashMap<String, IConfigurationElement>();
+    IExtensionRegistry registry = Platform.getExtensionRegistry();
+    for (IConfigurationElement element : registry.getConfigurationElementsFor(EXTENSION_M2_MENU_ITEMS)) {
+      result.put(element.getAttribute("menuItemId"), element);
+    }
+    return result;
+  }
 }
 

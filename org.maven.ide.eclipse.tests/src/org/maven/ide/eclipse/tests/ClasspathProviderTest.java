@@ -26,8 +26,8 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
-import org.maven.ide.eclipse.internal.launch.MavenRuntimeClasspathProvider;
-import org.maven.ide.eclipse.internal.launch.MavenSourcePathProvider;
+import org.maven.ide.eclipse.internal.jdt.launch.MavenRuntimeClasspathProvider;
+import org.maven.ide.eclipse.internal.jdt.launch.MavenSourcePathProvider;
 
 public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
 

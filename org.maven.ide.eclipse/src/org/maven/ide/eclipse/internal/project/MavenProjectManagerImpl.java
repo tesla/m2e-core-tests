@@ -39,8 +39,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.JavaCore;
 
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.component.repository.ComponentDescriptor;
@@ -67,7 +65,6 @@ import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.internal.embedder.TransferListenerAdapter;
-import org.maven.ide.eclipse.project.BuildPathManager;
 import org.maven.ide.eclipse.project.DownloadSourceEvent;
 import org.maven.ide.eclipse.project.IDownloadSourceListener;
 import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
@@ -246,7 +243,7 @@ public class MavenProjectManagerImpl {
     
     String version = projectNode.get(P_VERSION, null);
     if(version == null) {  // migrate from old config
-      return getResolverConfiguration(BuildPathManager.getMavenContainerEntry(JavaCore.create(project)));
+      return LegacyBuildPathManager.getResolverConfiguration(project);
     }
   
     ResolverConfiguration configuration = new ResolverConfiguration();
@@ -257,37 +254,6 @@ public class MavenProjectManagerImpl {
     configuration.setFullBuildGoals(projectNode.get(P_FULL_BUILD_GOALS, ResolverConfiguration.DEFAULT_FULL_BUILD_GOALS));
     configuration.setActiveProfiles(projectNode.get(P_ACTIVE_PROFILES, ""));
     return configuration;
-  }
-
-  private ResolverConfiguration getResolverConfiguration(IClasspathEntry entry) {
-    if(entry == null) {
-      return new ResolverConfiguration();
-    }
-  
-    String containerPath = entry.getPath().toString();
-  
-    boolean includeModules = containerPath.indexOf("/" + IMavenConstants.INCLUDE_MODULES) > -1;
-  
-    boolean resolveWorkspaceProjects = containerPath.indexOf("/" + IMavenConstants.NO_WORKSPACE_PROJECTS) == -1;
-  
-    // boolean filterResources = containerPath.indexOf("/" + MavenPlugin.FILTER_RESOURCES) != -1;
-  
-    ResolverConfiguration configuration = new ResolverConfiguration();
-    configuration.setIncludeModules(includeModules);
-    configuration.setResolveWorkspaceProjects(resolveWorkspaceProjects);
-    configuration.setActiveProfiles(getActiveProfiles(entry));
-    return configuration;
-  }
-
-  private String getActiveProfiles(IClasspathEntry entry) {
-    String path = entry.getPath().toString();
-    String prefix = "/" + IMavenConstants.ACTIVE_PROFILES + "[";
-    int n = path.indexOf(prefix);
-    if(n == -1) {
-      return "";
-    }
-  
-    return path.substring(n + prefix.length(), path.indexOf("]", n));
   }
 
   IFile getPom(IProject project) {

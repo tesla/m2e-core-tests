@@ -41,7 +41,8 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.index.IndexInfo;
 import org.maven.ide.eclipse.index.IndexManager;
-import org.maven.ide.eclipse.project.BuildPathManager;
+import org.maven.ide.eclipse.jdt.BuildPathManager;
+import org.maven.ide.eclipse.jdt.MavenJdtPlugin;
 import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
@@ -666,7 +667,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     assertNull(cp[1].getSourceAttachmentPath());
 
     // test project
-    MavenPlugin.getDefault().getBuildpathManager().downloadSources(project, null);
+    getBuildPathManager().downloadSources(project, null);
     waitForJobsToComplete();
     container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
     cp = container.getClasspathEntries();
@@ -684,7 +685,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     }
 
     // test one entry
-    MavenPlugin.getDefault().getBuildpathManager().downloadSources(project, cp[0].getPath());
+    getBuildPathManager().downloadSources(project, cp[0].getPath());
     waitForJobsToComplete();
     container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
     cp = container.getClasspathEntries();
@@ -702,8 +703,8 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     }
 
     // test two entries
-    MavenPlugin.getDefault().getBuildpathManager().downloadSources(project, cp[0].getPath());
-    MavenPlugin.getDefault().getBuildpathManager().downloadSources(project, cp[1].getPath());
+    getBuildPathManager().downloadSources(project, cp[0].getPath());
+    getBuildPathManager().downloadSources(project, cp[1].getPath());
     waitForJobsToComplete();
     container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
     cp = container.getClasspathEntries();
@@ -736,7 +737,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
         new IClasspathAttribute[] {attribute}, // 
         false /*not exported*/);
 
-    BuildPathManager buildpathManager = MavenPlugin.getDefault().getBuildpathManager();
+    BuildPathManager buildpathManager = getBuildPathManager();
 
     IClasspathContainer containerSuggestion = new IClasspathContainer() {
       public IClasspathEntry[] getClasspathEntries() {
@@ -788,7 +789,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals(1, cp.length);
     assertNull(cp[0].getSourceAttachmentPath());
 
-    MavenPlugin.getDefault().getBuildpathManager().downloadJavaDoc(project, null);
+    getBuildPathManager().downloadJavaDoc(project, null);
     waitForJobsToComplete();
 
     container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
@@ -797,7 +798,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     assertNull(cp[0].getSourceAttachmentPath()); // sanity check
     assertEquals("" + cp[0], 1, getAttributeCount(cp[0], IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME));
 
-    MavenPlugin.getDefault().getBuildpathManager().downloadJavaDoc(project, null);
+    getBuildPathManager().downloadJavaDoc(project, null);
     waitForJobsToComplete();
 
     container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
@@ -822,7 +823,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals(1, cp.length);
     assertNull(cp[0].getSourceAttachmentPath());
 
-    MavenPlugin.getDefault().getBuildpathManager().downloadSources(project, cp[0].getPath());
+    getBuildPathManager().downloadSources(project, cp[0].getPath());
     waitForJobsToComplete();
 
     javaProject = JavaCore.create(project);
@@ -857,7 +858,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     // sanity check
     assertEquals("downloadsources-t005-0.0.1-tests.jar", cp[1].getPath().lastSegment());
 
-    MavenPlugin.getDefault().getBuildpathManager().downloadSources(project, cp[1].getPath());
+    getBuildPathManager().downloadSources(project, cp[1].getPath());
     waitForJobsToComplete();
     container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
     cp = container.getClasspathEntries();
@@ -880,7 +881,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     // sanity check
     assertEquals("downloadsources-t006-0.0.1-jdk14.jar", cp[0].getPath().lastSegment());
 
-    MavenPlugin.getDefault().getBuildpathManager().downloadSources(project, cp[0].getPath());
+    getBuildPathManager().downloadSources(project, cp[0].getPath());
     waitForJobsToComplete();
     container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
     cp = container.getClasspathEntries();
@@ -914,7 +915,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
 
     javaProject.setRawClasspath(cp, monitor);
 
-    MavenPlugin.getDefault().getBuildpathManager().downloadSources(project, log4jPath);
+    getBuildPathManager().downloadSources(project, log4jPath);
     waitForJobsToComplete();
 
     cp = javaProject.getRawClasspath();
@@ -923,12 +924,16 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals("log4j-1.2.13-sources.jar", cp[cp.length - 2].getSourceAttachmentPath().lastSegment());
     assertEquals(true, cp[cp.length - 2].isExported());
 
-    MavenPlugin.getDefault().getBuildpathManager().downloadSources(project, junitPath);
+    getBuildPathManager().downloadSources(project, junitPath);
     waitForJobsToComplete();
 
     assertEquals(junitPath, cp[cp.length - 1].getPath());
     assertEquals("junit-3.8.1-sources.jar", cp[cp.length - 1].getSourceAttachmentPath().lastSegment());
     assertEquals(false, cp[cp.length - 1].isExported());
+  }
+
+  private BuildPathManager getBuildPathManager() {
+    return MavenJdtPlugin.getDefault().getBuildpathManager();
   }
 
   public void testClassifiers() throws Exception {
@@ -1084,31 +1089,31 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     description.setNatureIds(new String[] {JavaCore.NATURE_ID});
     description.setBuildSpec(new ICommand[] {javaBuilder});
     project.setDescription(description, monitor);
-    configurationManager.updateProjectConfiguration(project, configuration, goalToExecute, monitor);
+    // can't update configuration of non-maven project
+    configurationManager.enableMavenNature(project, configuration, monitor); 
     verifyNaturesAndBuilders(project);
 
     description.setNatureIds(new String[] {});
     description.setBuildSpec(new ICommand[] {mavenBuilder, javaBuilder});
     project.setDescription(description, monitor);
-    configurationManager.updateProjectConfiguration(project, configuration, goalToExecute, monitor);
+    // can't update configuration of non-maven project
+    configurationManager.enableMavenNature(project, configuration, monitor); 
     verifyNaturesAndBuilders(project);
 
     description.setNatureIds(new String[] {IMavenConstants.NATURE_ID, JavaCore.NATURE_ID});
     description.setBuildSpec(new ICommand[] {mavenBuilder, javaBuilder});
     project.setDescription(description, monitor);
-    configurationManager.updateProjectConfiguration(project, configuration, goalToExecute, monitor);
+    // can't update configuration of non-maven project
+    configurationManager.enableMavenNature(project, configuration, monitor);
     verifyNaturesAndBuilders(project);
   }
 
   private void verifyNaturesAndBuilders(IProject project) throws CoreException {
-    IProjectDescription description = project.getDescription();
-    {
-      String[] natureIds = description.getNatureIds();
-      assertEquals(2, natureIds.length);
-      assertEquals(JavaCore.NATURE_ID, natureIds[0]);
-      assertEquals(IMavenConstants.NATURE_ID, natureIds[1]);
-    }
+    
+    assertTrue(project.hasNature(JavaCore.NATURE_ID));
+    assertTrue(project.hasNature(IMavenConstants.NATURE_ID));
 
+    IProjectDescription description = project.getDescription();
     {
       ICommand[] buildSpec = description.getBuildSpec();
       assertEquals(2, buildSpec.length);

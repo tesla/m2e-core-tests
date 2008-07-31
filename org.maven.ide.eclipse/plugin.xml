@@ -14,6 +14,7 @@
    <extension-point id="archetypeCatalogs" name="Maven Archetypes" schema="schema/archetypes.exsd"/>
    <extension-point id="projectConfigurators" name="Project Configurators" schema="schema/projectConfigurators.exsd"/>
    <extension-point id="classpathConfiguratorFactories" name="Classpath Configurator Factories" schema="schema/classpathConfiguratorFactories.exsd"/>
+   <extension-point id="m2MenuItems" name="m2 menu items" schema="schema/m2MenuItems.exsd"/>
 
    <extension point="org.eclipse.ui.intro.configExtension">
       <configExtension configId="org.eclipse.ui.intro.universalConfig"
@@ -89,6 +90,13 @@
     <factory adaptableType="org.eclipse.core.runtime.IAdaptable"
              class="org.maven.ide.eclipse.ui.internal.MavenAdapterFactory">
        <adapter type="org.eclipse.ui.IActionFilter"/>
+    </factory>
+    <factory
+          adaptableType="org.eclipse.core.resources.IProject"
+          class="org.maven.ide.eclipse.internal.project.ProjectAdaptor">
+       <adapter
+             type="org.maven.ide.eclipse.embedder.ArtifactKey">
+       </adapter>
     </factory>
   </extension>
 
@@ -440,21 +448,13 @@
       <persistent value="false"/>
    </extension>
    
-   <extension point="org.eclipse.jdt.core.classpathContainerInitializer"
-              id="maven2ClasspathContainer"
-              name="%m2.classpath-container.name">
-      <classpathContainerInitializer
-            class="org.maven.ide.eclipse.container.MavenClasspathContainerInitializer"
-            id="org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER"/>
-   </extension>
-   
    <extension point="org.eclipse.jdt.ui.classpathContainerPage"
           id="maven2ClasspathContainerPage"
           name="%m2.classpath-container.page.name">
       <classpathContainerPage
           id="org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER"
           name="%m2.classpath-container.page.dependencies.name"
-          class="org.maven.ide.eclipse.container.MavenClasspathContainerPage"/>
+          class="org.maven.ide.eclipse.internal.jdt.MavenClasspathContainerPage"/>
    </extension>
    
    <extension point="org.eclipse.ui.keywords">
@@ -627,15 +627,6 @@
             name="org.maven.ide.eclipse.actions.Maven2DependencyResolver"
             id="org.maven.ide.eclipse.quickAssistProcessor"/>
    </extension>
-   
-   <extension point="org.eclipse.jdt.launching.classpathProviders">
-      <classpathProvider 
-          id="org.maven.ide.eclipse.launchconfig.classpathProvider"
-          class="org.maven.ide.eclipse.internal.launch.MavenRuntimeClasspathProvider"/>
-      <classpathProvider 
-          id="org.maven.ide.eclipse.launchconfig.sourcepathProvider"
-          class="org.maven.ide.eclipse.internal.launch.MavenSourcePathProvider"/>
-   </extension>
 
    <extension point="org.eclipse.ui.actionSets">
      <actionSet id="org.maven.ide.eclipse.ui.navigation"
@@ -716,11 +707,6 @@
    </extension>
    
    <extension point="org.maven.ide.eclipse.projectConfigurators">
-      
-      <configurator id="org.maven.ide.eclipse.configurator.jdt"
-          class="org.maven.ide.eclipse.internal.project.JavaProjectConfigurator"
-          name="JDT" priority="10"/>
-      
       <configurator id="org.maven.ide.eclipse.configurator.mavenEclipsePlugin"
           class="org.maven.ide.eclipse.project.configurator.MavenProjectConfigurator:org.apache.maven.plugins:maven-eclipse-plugin|eclipse:m2eclipse"
           name="maven-eclipse-plugin" priority="5"/>
@@ -729,11 +715,6 @@
           class="org.maven.ide.eclipse.project.configurator.MavenProjectConfigurator:org.codehaus.mojo:sysdeo-tomcat-maven-plugin|sysdeo-tomcat:m2eclipse"
           name="sysdeo-tomcat-maven-plugin" priority="50"/>
    
-   </extension>
-   
-   <extension point="org.eclipse.jdt.core.classpathVariableInitializer">
-      <classpathVariableInitializer variable="M2_REPO" readOnly="true"
-          class="org.maven.ide.eclipse.container.MavenClasspathVariableInitializer"/>
    </extension>
 
    <!--

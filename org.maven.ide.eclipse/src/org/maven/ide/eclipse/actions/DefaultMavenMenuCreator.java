@@ -8,13 +8,20 @@
 
 package org.maven.ide.eclipse.actions;
 
+import java.util.Map;
+
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.ui.IActionDelegate;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.core.Messages;
+import org.maven.ide.eclipse.internal.ExtensionReader;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
@@ -26,6 +33,29 @@ import org.maven.ide.eclipse.ui.internal.util.SelectionUtil;
  * @author Eugene Kuleshov
  */
 public class DefaultMavenMenuCreator extends AbstractMavenMenuCreator {
+
+  private static final String ID_SOURCES = "org.maven.ide.eclipse.downloadSourcesAction";
+
+  private static final String ID_JAVADOC = "org.maven.ide.eclipse.downloadJavaDocAction";
+  
+  private static Map<String, IConfigurationElement> menuItems;
+
+  private static synchronized IActionDelegate createExtentionMenuItem(String id) {
+    if (menuItems == null) {
+      menuItems = ExtensionReader.getM2MenuItems();
+    }
+    
+    IConfigurationElement element = menuItems.get(id);
+    if (element != null) {
+      try {
+        return (IActionDelegate) element.createExecutableExtension("class");
+      } catch(CoreException ex) {
+        MavenLogger.log("Could not create m2 menu item", ex);
+      }
+    }
+    
+    return null;
+  }
 
   protected void createMenu(Menu menu) {
     int selectionType = SelectionUtil.getSelectionType(selection);
@@ -56,8 +86,8 @@ public class DefaultMavenMenuCreator extends AbstractMavenMenuCreator {
       addMenu(RefreshMavenModelsAction.ID, "Update Dependencies", new RefreshMavenModelsAction(), menu, "icons/update_dependencies.gif");
       addMenu(RefreshMavenModelsAction.ID_SNAPSHOTS, "Update Snapshots", new RefreshMavenModelsAction(true), menu);
       addMenu(UpdateSourcesAction.ID, "Update Project Configuration", new UpdateSourcesAction(), menu, "icons/update_source_folders.gif");
-      addMenu(DownloadSourcesAction.ID_SOURCES, "Download Sources", new DownloadSourcesAction(DownloadSourcesAction.ID_SOURCES), menu);
-      addMenu(DownloadSourcesAction.ID_JAVADOC, "Download JavaDoc", new DownloadSourcesAction(DownloadSourcesAction.ID_JAVADOC), menu);
+      addMenu(ID_SOURCES, "Download Sources", createExtentionMenuItem(ID_SOURCES), menu);
+      addMenu(ID_JAVADOC, "Download JavaDoc", createExtentionMenuItem(ID_JAVADOC), menu);
       new Separator().fill(menu, -1);
 
       // addMenu(OpenPomAction.ID, "Open POM", new OpenPomAction(), menu);
@@ -102,8 +132,8 @@ public class DefaultMavenMenuCreator extends AbstractMavenMenuCreator {
     }
   
     if(selectionType == SelectionUtil.JAR_FILE) {
-      addMenu(DownloadSourcesAction.ID_SOURCES, "Download Sources", new DownloadSourcesAction(DownloadSourcesAction.ID_SOURCES), menu);
-      addMenu(DownloadSourcesAction.ID_JAVADOC, "Download JavaDoc", new DownloadSourcesAction(DownloadSourcesAction.ID_JAVADOC), menu);
+      addMenu(ID_SOURCES, "Download Sources", createExtentionMenuItem(ID_SOURCES), menu);
+      addMenu(ID_JAVADOC, "Download JavaDoc", createExtentionMenuItem(ID_JAVADOC), menu);
       addMenu(OpenPomAction.ID, "Open POM", new OpenPomAction(), menu);
       addMenu(OpenUrlAction.ID_PROJECT, "Open Project Page", new OpenUrlAction(OpenUrlAction.ID_PROJECT), menu, "icons/web.gif");
       addMenu(OpenUrlAction.ID_ISSUES, "Open Issue Tracker", new OpenUrlAction(OpenUrlAction.ID_ISSUES), menu);
