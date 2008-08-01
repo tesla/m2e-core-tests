@@ -22,12 +22,18 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
+import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.internal.jdt.launch.MavenRuntimeClasspathProvider;
 import org.maven.ide.eclipse.internal.jdt.launch.MavenSourcePathProvider;
+import org.maven.ide.eclipse.project.IProjectConfigurationManager;
+import org.maven.ide.eclipse.project.ResolverConfiguration;
 
 public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
 
@@ -381,5 +387,42 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
     assertEquals(new Path("/runtimeclasspath-testscope05/target/classes"), userClasspath[1].getPath());
     assertEquals(new Path("/runtimeclasspath-testscope01/target/classes"), userClasspath[2].getPath());
     assertEquals(new Path("/runtimeclasspath-testscope01/target/test-classes"), userClasspath[3].getPath());
+  }
+  
+  public void testLaunchConfigListener() throws Exception {
+    IProject p01 = createExisting("runtimeclasspath-configlistener01", "projects/runtimeclasspath/configlistener01");
+    IProject p02 = createExisting("runtimeclasspath-configlistener02", "projects/runtimeclasspath/configlistener02");
+    waitForJobsToComplete();
+
+    assertTrue(hasMavenClasspathProvider(p01, "runtimeclasspath-configlistener01.launch"));
+    assertTrue(hasMavenClasspathProvider(p02, "runtimeclasspath-configlistener02.launch"));
+
+    IProjectConfigurationManager configurationManager = MavenPlugin.getDefault().getProjectConfigurationManager();
+
+    configurationManager.disableMavenNature(p01, monitor);
+    waitForJobsToComplete();
+
+    assertFalse(hasMavenClasspathProvider(p01, "runtimeclasspath-configlistener01.launch"));
+    assertTrue(hasMavenClasspathProvider(p02, "runtimeclasspath-configlistener02.launch"));
+
+    configurationManager.enableMavenNature(p01, new ResolverConfiguration(), monitor);
+    waitForJobsToComplete();
+
+    assertTrue(hasMavenClasspathProvider(p01, "runtimeclasspath-configlistener01.launch"));
+    assertTrue(hasMavenClasspathProvider(p02, "runtimeclasspath-configlistener02.launch"));
+
+    p01.close(monitor);
+    waitForJobsToComplete();
+
+    //assertTrue(hasMavenClasspathProvider(p01, "runtimeclasspath-configlistener01.launch"));
+    assertTrue(hasMavenClasspathProvider(p02, "runtimeclasspath-configlistener02.launch"));
+  }
+
+  private static boolean hasMavenClasspathProvider(IProject project, String file) throws CoreException {
+    ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
+    ILaunchConfiguration configuration = launchManager.getLaunchConfiguration(project.getFile(file));
+    
+    String provider = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH_PROVIDER, (String) null);
+    return MavenRuntimeClasspathProvider.MAVEN_CLASSPATH_PROVIDER.equals(provider);
   }
 }
