@@ -523,17 +523,6 @@
             configTypeID="org.maven.ide.eclipse.Maven2BuilderConfigurationType"
             id="org.maven.ide.eclipse.launch.Maven2BuilderConfigurationTypeImage"/>
    </extension>
-
-
-   <!-- need an entire index
-   <extension
-         point="org.eclipse.jdt.ui.quickAssistProcessors">
-      <quickAssistProcessor
-            class="org.maven.ide.eclipse.assist.Maven2DependencyResolver"
-            name="org.maven.ide.eclipse.assist.Maven2DependencyResolver"
-            id="org.maven.ide.eclipse.quickAssistProcessor"/>
-   </extension>
-   -->
    
    <extension point="org.eclipse.ui.newWizards">
       <category id="org.maven.ide.eclipse" name="%m2.wizard.name"/>
@@ -619,13 +608,6 @@
             <instanceof value="org.maven.ide.eclipse.internal.console.MavenConsoleImpl"/>
          </enablement>
       </consolePageParticipant>
-   </extension>
-   
-   <extension point="org.eclipse.jdt.ui.quickAssistProcessors">
-      <quickAssistProcessor
-            class="org.maven.ide.eclipse.actions.MavenDependencyResolver"
-            name="org.maven.ide.eclipse.actions.Maven2DependencyResolver"
-            id="org.maven.ide.eclipse.quickAssistProcessor"/>
    </extension>
 
    <extension point="org.eclipse.ui.actionSets">
