@@ -26,7 +26,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
@@ -44,6 +43,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
+import org.eclipse.wst.sse.ui.StructuredTextEditor;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
@@ -171,19 +171,33 @@ public class PomEditorTest extends UITestCaseSWT {
 	    replaceText("orgfoo", "orgfoo1");
 	    ui.click(new CTabItemLocator(TAB_OVERVIEW));
 	    assertTextValue("organizationName", "orgfoo1");
-}
+	    
+  }
+
+  public void testUndoRedo() throws Exception {
+	    //test undo
+	    ui.keyClick(SWT.CTRL, 'z');
+	    assertTextValue("organizationName", "orgfoo");
+	    //test redo
+	    ui.keyClick(SWT.CTRL, 'y');
+	    assertTextValue("organizationName", "orgfoo1");
+  }
 
   public void testDeletingScmSectionInXmlPropagatedToForm() throws Exception {
     ui.click(new CTabItemLocator(TAB_OVERVIEW));
     ui.click(new SWTWidgetLocator(Label.class, "SCM"));
     setTextValue("scmUrl", "http://svn.sonatype.org/m2eclipse");
-
+    assertTextValue("scmUrl", "http://svn.sonatype.org/m2eclipse");
     ui.click(new CTabItemLocator(TAB_POM_XML_TAB));
-    setSelection("<scm>", "</scm>");
-    ui.keyClick(SWT.BS);
-
+    delete("<scm>", "</scm>");
     ui.click(new CTabItemLocator(TAB_OVERVIEW));
     assertTextValue("scmUrl", "");
+    ui.click(new CTabItemLocator(TAB_POM_XML_TAB));
+    delete("<organization>", "</organization>");
+    ui.click(new CTabItemLocator(TAB_OVERVIEW));
+    assertTextValue("organizationName", "");
+    setTextValue("scmUrl", "http://svn.sonatype.org/m2eclipse");
+    assertTextValue("scmUrl", "http://svn.sonatype.org/m2eclipse");
   }
 
   public void testExternalModificationEditorClean() throws Exception {
@@ -366,20 +380,20 @@ public class PomEditorTest extends UITestCaseSWT {
     output.close();
   }
 
-  private void setSelection(String startMarker, String endMarker) throws WaitTimedOutException, WidgetSearchException {
-    // read text directly instead of using "Find" dialog
-    findText(startMarker);
-    final int offset1 = getSelection().getOffset();
-    // Display.getDefault().syncExec(null);
-
-    findText(endMarker);
-    final int offset2 = getSelection().getOffset();
-
-    Display.getDefault().syncExec(new Runnable() {
-      public void run() {
-        getSelectionProvider().setSelection(new TextSelection(offset1, offset2 - offset1 + 6));
-      }
-    });
+  private void delete(String startMarker, final String endMarker) throws WaitTimedOutException, WidgetSearchException {
+	    IWorkbenchPage activePage = getActivePage();
+	    final MavenPomEditor editor = (MavenPomEditor) activePage.getActiveEditor();
+	    final StructuredTextEditor[] sse = new StructuredTextEditor[1];
+	    Display.getDefault().syncExec(new Runnable() {
+	      public void run() {
+	        sse[0] = (StructuredTextEditor) editor.getActiveEditor();
+	      }
+	    });
+	    String text = sse[0].getModel().getStructuredDocument().get();
+	    int pos1 = text.indexOf(startMarker); 
+	    int pos2 = text.indexOf(endMarker);
+	    text = text.substring(0, pos1) + text.substring(pos2 + endMarker.length());
+	    sse[0].getModel().getStructuredDocument().set(text);
   }
 
   private void assertTextValue(String id, String value) {
@@ -402,27 +416,6 @@ public class PomEditorTest extends UITestCaseSWT {
     ui.keyClick(SWT.ALT, 'a'); // "replace all"
     ui.close(new SWTWidgetLocator(Shell.class, "Find/Replace"));
     ui.wait(new ShellDisposedCondition("Find/Replace"));
-  }
-
-  private void findText(String src) throws WaitTimedOutException, WidgetSearchException {
-    ui.keyClick(SWT.CTRL, 'f');
-    ui.wait(new ShellShowingCondition("Find/Replace"));
-
-    ui.enterText(src);
-    ui.keyClick(WT.TAB);
-    ui.keyClick(SWT.ALT, 'n'); // "find"
-    ui.close(new SWTWidgetLocator(Shell.class, "Find/Replace"));
-    ui.wait(new ShellDisposedCondition("Find/Replace"));
-  }
-
-  private ITextSelection getSelection() {
-    final ITextSelection[] selection = new ITextSelection[1];
-    Display.getDefault().syncExec(new Runnable() {
-      public void run() {
-        selection[0] = (ITextSelection) getSelectionProvider().getSelection();
-      }
-    });
-    return selection[0];
   }
 
   ISelectionProvider getSelectionProvider() {
