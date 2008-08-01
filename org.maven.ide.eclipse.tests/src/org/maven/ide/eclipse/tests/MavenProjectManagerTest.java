@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -125,6 +126,21 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals("t000", f1.getMavenProject(monitor).getGroupId());
     assertEquals("t000-p1", f1.getMavenProject(monitor).getArtifactId());
     assertEquals("0.0.1-SNAPSHOT", f1.getMavenProject(monitor).getVersion());
+  }
+
+  public void test000_eventMerge() throws Exception {
+    IProject p1 = createExisting("t000-p1");
+    waitForJobsToComplete();
+
+    add(manager, new IProject[] {p1});
+    events.clear();
+
+    // this emulates project refresh 
+    manager.remove(p1.getFile("pom.xml"));
+    add(manager, new IProject[] {p1});
+
+    assertEquals(1, events.size());
+    assertEquals(MavenProjectChangedEvent.KIND_CHANGED, events.get(0).getKind());
   }
 
   public void test000_pom_simple() throws Exception {

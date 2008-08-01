@@ -97,6 +97,34 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals(IClasspathEntry.CPE_LIBRARY, project2entries[1].getEntryKind());
     assertEquals("junit-4.1.jar", project2entries[1].getPath().lastSegment());
   }
+  
+  public void testDisableMavenNature() throws Exception {
+    deleteProject("disablemaven-p001");
+    IProject p = createExisting("disablemaven-p001", "projects/disablemaven/p001");
+    waitForJobsToComplete();
+    
+    assertTrue(p.hasNature(IMavenConstants.NATURE_ID));
+    assertTrue(p.hasNature(JavaCore.NATURE_ID));
+    assertNotNull(BuildPathManager.getMaven2ClasspathContainer(JavaCore.create(p)));
+    
+    IProjectConfigurationManager configurationManager = MavenPlugin.getDefault().getProjectConfigurationManager();
+    configurationManager.disableMavenNature(p, monitor);
+    waitForJobsToComplete();
+
+    assertFalse(p.hasNature(IMavenConstants.NATURE_ID));
+    assertFalse(hasBuilder(p, IMavenConstants.BUILDER_ID));
+    assertTrue(p.hasNature(JavaCore.NATURE_ID));
+    assertNull(BuildPathManager.getMaven2ClasspathContainer(JavaCore.create(p)));
+  }
+
+  private boolean hasBuilder(IProject p, String builderId) throws CoreException {
+    for (ICommand command : p.getDescription().getBuildSpec()) {
+      if (builderId.equals(command.getBuilderName())) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   public void testEnableMavenNatureWithNoWorkspace() throws Exception {
     deleteProject("MNGECLIPSE-248parent");
