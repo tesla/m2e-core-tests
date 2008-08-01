@@ -48,11 +48,11 @@
 
    <extension point="org.eclipse.core.runtime.adapters">
       <factory adaptableType="org.eclipse.jdt.core.IPackageFragmentRoot"
-               class="org.maven.ide.eclipse.jdt.internal.JavaElementsAdaptor">
+               class="org.maven.ide.eclipse.jdt.internal.JavaElementsAdapterFactory">
          <adapter type="org.maven.ide.eclipse.embedder.ArtifactKey"/>
       </factory>
       <factory adaptableType="org.eclipse.jdt.core.IJavaProject"
-               class="org.maven.ide.eclipse.jdt.internal.JavaElementsAdaptor">
+               class="org.maven.ide.eclipse.jdt.internal.JavaElementsAdapterFactory">
          <adapter type="org.maven.ide.eclipse.embedder.ArtifactKey"/>
       </factory>
    </extension>

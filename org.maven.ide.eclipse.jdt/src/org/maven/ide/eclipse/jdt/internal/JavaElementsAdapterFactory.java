@@ -19,9 +19,15 @@ import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.jdt.MavenJdtPlugin;
 
-public class JavaElementsAdaptor implements IAdapterFactory {
+/**
+ * Adapter factory for Java elements
+ *
+ * @author Igor Fedorenko
+ */
+@SuppressWarnings("unchecked")
+public class JavaElementsAdapterFactory implements IAdapterFactory {
 
-	private static final Class[] ADAPTER_LIST = new Class[] { ArtifactKey.class };
+  private static final Class[] ADAPTER_LIST = new Class[] { ArtifactKey.class };
 
 	public Object getAdapter(Object adaptableObject, Class adapterType) {
 		if (!ArtifactKey.class.equals(adapterType)) {
