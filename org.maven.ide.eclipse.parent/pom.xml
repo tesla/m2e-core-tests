@@ -49,7 +49,7 @@
     <name>Sonatype, Inc.</name>
     <url>http://www.sonatype.com</url>
   </organization>
-
+  
   <licenses>
     <license>
       <name>Eclipse Public License - v 1.0</name>
@@ -67,6 +67,11 @@
     <developerConnection>scm:svn:https://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.parent</developerConnection>
   </scm>
   
+  <ciManagement>
+  	<system>Hudson</system>
+  	<url>https://ci.sonatype.org/job/m2eclipse-with-e33/</url>
+  </ciManagement>
+
   <modules>
     <module>../org.maven.ide.components.maven-embedder</module>
     <module>../org.maven.ide.components.archetype-common</module>
