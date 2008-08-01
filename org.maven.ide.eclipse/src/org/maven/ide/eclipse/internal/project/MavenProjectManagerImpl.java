@@ -574,8 +574,16 @@ public class MavenProjectManagerImpl {
     }
 
     // merge events
-    IMavenProjectFacade old = event.getOldMavenProject() != null? event.getOldMavenProject(): oldMavenProject; 
-    event = new MavenProjectChangedEvent(pom, event.getKind(), event.getFlags() | flags, old, mavenProject);
+    IMavenProjectFacade old = event.getOldMavenProject() != null? event.getOldMavenProject(): oldMavenProject;
+    int mergedKind;
+    if (MavenProjectChangedEvent.KIND_REMOVED == kind) {
+      mergedKind = MavenProjectChangedEvent.KIND_REMOVED;
+    } else if (event.getKind() == kind) {
+      mergedKind = kind;
+    } else {
+      mergedKind = MavenProjectChangedEvent.KIND_CHANGED;
+    }
+    event = new MavenProjectChangedEvent(pom, mergedKind, event.getFlags() | flags, old, mavenProject);
     projectChangeEvents.put(pom, event);
   }
 

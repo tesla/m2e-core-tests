@@ -78,6 +78,17 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
   public abstract void configure(MavenEmbedder embedder, ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException;
 
   /**
+   * Removes Maven specific configuration from the project passed in ProjectConfigurationRequest
+   * 
+   * @param embedder a Maven embedder instance that can be reused in current project configuration session
+   * @param request a project un-configuration request
+   * @param monitor a progress monitor
+   */
+  @SuppressWarnings("unused")
+  public void unconfigure(MavenEmbedder embedder, ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException {
+  }
+
+  /**
    * Updates project configuration according project changes. 
    * 
    * <p><i>Can be overwritten by subclass</i>

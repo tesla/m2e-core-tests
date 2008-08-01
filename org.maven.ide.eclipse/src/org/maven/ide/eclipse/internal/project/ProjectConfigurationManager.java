@@ -47,6 +47,7 @@ import org.apache.maven.archetype.catalog.Archetype;
 import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.embedder.MavenEmbedderException;
 import org.apache.maven.model.Model;
+import org.apache.maven.project.MavenProject;
 
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
@@ -143,8 +144,6 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
         embedder.stop();
       }
 
-      projectManagerImpl.notifyProjectChangeListeners(monitor);
-
     } catch(MavenEmbedderException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, ex.getMessage(), ex));
     }
@@ -153,36 +152,40 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
   private void configureNewMavenProject(MavenEmbedder embedder, ArrayList<IProject> projects, IProgressMonitor monitor)
       throws CoreException {
 
-    // first, resolve maven dependencies for all projects
-    MavenUpdateRequest updateRequest = new MavenUpdateRequest(false, false);
-    for (IProject project : projects) {
-      updateRequest.addPomFile(project);
-    }
-
-    DependencyResolutionContext resolutionContext = new DependencyResolutionContext(updateRequest);
-    while(!resolutionContext.isEmpty()) {
-      if(monitor.isCanceled()) {
-        throw new OperationCanceledException();
+    try {
+      // first, resolve maven dependencies for all projects
+      MavenUpdateRequest updateRequest = new MavenUpdateRequest(false, false);
+      for (IProject project : projects) {
+        updateRequest.addPomFile(project);
       }
-
-      IFile pom = resolutionContext.pop();
-      monitor.subTask(pom.getFullPath().toString());
-
-      projectManagerImpl.refresh(embedder, pom, resolutionContext, monitor);
-      monitor.worked(1);
-    }
-
-    // then, perform detailed project configuration
-    for(IProject project : projects) {
-      if(monitor.isCanceled()) {
-        throw new OperationCanceledException();
+  
+      DependencyResolutionContext resolutionContext = new DependencyResolutionContext(updateRequest);
+      while(!resolutionContext.isEmpty()) {
+        if(monitor.isCanceled()) {
+          throw new OperationCanceledException();
+        }
+  
+        IFile pom = resolutionContext.pop();
+        monitor.subTask(pom.getFullPath().toString());
+  
+        projectManagerImpl.refresh(embedder, pom, resolutionContext, monitor);
+        monitor.worked(1);
       }
-
-      IMavenProjectFacade facade = projectManagerImpl.create(project, monitor);
-      if (facade != null) {
-        ProjectConfigurationRequest request = new ProjectConfigurationRequest(facade.getProject(), facade.getPom(), facade.getMavenProject(monitor), facade.getResolverConfiguration(), false /*updateSources*/);
-        updateProjectConfiguration(embedder, request, monitor);
+  
+      // then, perform detailed project configuration
+      for(IProject project : projects) {
+        if(monitor.isCanceled()) {
+          throw new OperationCanceledException();
+        }
+  
+        IMavenProjectFacade facade = projectManagerImpl.create(project, monitor);
+        if (facade != null) {
+          ProjectConfigurationRequest request = new ProjectConfigurationRequest(facade.getProject(), facade.getPom(), facade.getMavenProject(monitor), facade.getResolverConfiguration(), false /*updateSources*/);
+          updateProjectConfiguration(embedder, request, monitor);
+        }
       }
+    } finally {
+      projectManagerImpl.notifyProjectChangeListeners(monitor);
     }
   }
 
@@ -299,17 +302,46 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
   public void disableMavenNature(IProject project, IProgressMonitor monitor) throws CoreException {
     monitor.subTask("Disable Maven nature");
 
-    project.deleteMarkers(IMavenConstants.MARKER_ID, true, IResource.DEPTH_INFINITE);
+    try {
+      MavenEmbedder embedder = projectManagerImpl.createWorkspaceEmbedder();
+      try {
+        IFile pom = project.getFile(IMavenConstants.POM_FILE_NAME);
+        IMavenProjectFacade facade = projectManager.create(project, monitor);
+        MavenProject mavenProject = facade != null? facade.getMavenProject(monitor): null;
+        ResolverConfiguration resolverConfiguration = facade != null? facade.getResolverConfiguration(): null;
+        ProjectConfigurationRequest request = new ProjectConfigurationRequest(project, pom, mavenProject, resolverConfiguration, false);
+        for(AbstractProjectConfigurator configurator : getConfigurators()) {
+          if(monitor.isCanceled()) {
+            throw new OperationCanceledException();
+          }
+          configurator.unconfigure(embedder, request, monitor);
+        }
 
-    IProjectDescription description = project.getDescription();
-    ArrayList<String> newNatures = new ArrayList<String>();
-    for(String natureId : description.getNatureIds()) {
-      if(!IMavenConstants.NATURE_ID.equals(natureId)) {
-        newNatures.add(natureId);
+        project.deleteMarkers(IMavenConstants.MARKER_ID, true, IResource.DEPTH_INFINITE);
+
+        IProjectDescription description = project.getDescription();
+        ArrayList<String> newNatures = new ArrayList<String>();
+        for(String natureId : description.getNatureIds()) {
+          if(!IMavenConstants.NATURE_ID.equals(natureId)) {
+            newNatures.add(natureId);
+          }
+        }
+        description.setNatureIds(newNatures.toArray(new String[newNatures.size()]));
+        ArrayList<ICommand> newCommands = new ArrayList<ICommand>();
+        for (ICommand command : description.getBuildSpec()) {
+          if (!IMavenConstants.BUILDER_ID.equals(command.getBuilderName())) {
+            newCommands.add(command);
+          }
+        }
+        description.setBuildSpec(newCommands.toArray(new ICommand[newCommands.size()]));
+        project.setDescription(description, null);
+
+      } finally {
+        embedder.stop();
       }
+    } catch(MavenEmbedderException ex) {
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, ex.getMessage(), ex));
     }
-    description.setNatureIds(newNatures.toArray(new String[newNatures.size()]));
-    project.setDescription(description, null);
   }
 
   // project creation
