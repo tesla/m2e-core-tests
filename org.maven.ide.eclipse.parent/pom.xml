@@ -76,6 +76,7 @@
     <module>../org.maven.ide.components.dependency-tree</module>
 
     <module>../org.maven.ide.eclipse</module>
+    <module>../org.maven.ide.eclipse.jdt</module>
     <module>../org.maven.ide.eclipse.central</module>
     <module>../org.maven.ide.eclipse.mylyn</module>
     <module>../org.maven.ide.eclipse.subclipse</module>
