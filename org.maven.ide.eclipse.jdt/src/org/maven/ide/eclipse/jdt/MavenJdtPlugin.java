@@ -26,7 +26,7 @@ import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.index.IndexManager;
-import org.maven.ide.eclipse.internal.jdt.launch.MavenLaunchConfigurationListener;
+import org.maven.ide.eclipse.jdt.internal.launch.MavenLaunchConfigurationListener;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 
 

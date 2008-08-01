@@ -30,8 +30,8 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.internal.jdt.launch.MavenRuntimeClasspathProvider;
-import org.maven.ide.eclipse.internal.jdt.launch.MavenSourcePathProvider;
+import org.maven.ide.eclipse.jdt.internal.launch.MavenRuntimeClasspathProvider;
+import org.maven.ide.eclipse.jdt.internal.launch.MavenSourcePathProvider;
 import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 

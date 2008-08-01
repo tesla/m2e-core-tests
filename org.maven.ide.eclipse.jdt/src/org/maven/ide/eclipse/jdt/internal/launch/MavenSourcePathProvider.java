@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.internal.jdt.launch;
+package org.maven.ide.eclipse.jdt.internal.launch;
 
 import java.util.Set;
 

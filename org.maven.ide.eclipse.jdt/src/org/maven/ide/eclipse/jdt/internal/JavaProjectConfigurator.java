@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.internal.jdt;
+package org.maven.ide.eclipse.jdt.internal;
 
 import java.io.File;
 import java.util.ArrayList;

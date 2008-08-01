@@ -14,7 +14,7 @@
               name="%m2.classpath-container.name">
       <classpathContainerInitializer
             id="org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER"
-            class="org.maven.ide.eclipse.internal.jdt.MavenClasspathContainerInitializer"/>
+            class="org.maven.ide.eclipse.jdt.internal.MavenClasspathContainerInitializer"/>
    </extension>
    
    <extension point="org.eclipse.jdt.ui.classpathContainerPage"
@@ -29,44 +29,44 @@
    <extension point="org.eclipse.jdt.launching.classpathProviders">
       <classpathProvider 
           id="org.maven.ide.eclipse.launchconfig.classpathProvider"
-          class="org.maven.ide.eclipse.internal.jdt.launch.MavenRuntimeClasspathProvider"/>
+          class="org.maven.ide.eclipse.jdt.internal.launch.MavenRuntimeClasspathProvider"/>
       <classpathProvider 
           id="org.maven.ide.eclipse.launchconfig.sourcepathProvider"
-          class="org.maven.ide.eclipse.internal.jdt.launch.MavenSourcePathProvider"/>
+          class="org.maven.ide.eclipse.jdt.internal.launch.MavenSourcePathProvider"/>
    </extension>
 
    <extension point="org.maven.ide.eclipse.projectConfigurators">
       <configurator id="org.maven.ide.eclipse.configurator.jdt"
-          class="org.maven.ide.eclipse.internal.jdt.JavaProjectConfigurator"
+          class="org.maven.ide.eclipse.jdt.internal.JavaProjectConfigurator"
           name="JDT" priority="10"/>
    </extension>
    
    <extension point="org.eclipse.jdt.core.classpathVariableInitializer">
       <classpathVariableInitializer variable="M2_REPO" readOnly="true"
-          class="org.maven.ide.eclipse.internal.jdt.MavenClasspathVariableInitializer"/>
+          class="org.maven.ide.eclipse.jdt.internal.MavenClasspathVariableInitializer"/>
    </extension>
 
    <extension point="org.eclipse.core.runtime.adapters">
       <factory adaptableType="org.eclipse.jdt.core.IPackageFragmentRoot"
-               class="org.maven.ide.eclipse.internal.jdt.JavaElementsAdaptor">
+               class="org.maven.ide.eclipse.jdt.internal.JavaElementsAdaptor">
          <adapter type="org.maven.ide.eclipse.embedder.ArtifactKey"/>
       </factory>
       <factory adaptableType="org.eclipse.jdt.core.IJavaProject"
-               class="org.maven.ide.eclipse.internal.jdt.JavaElementsAdaptor">
+               class="org.maven.ide.eclipse.jdt.internal.JavaElementsAdaptor">
          <adapter type="org.maven.ide.eclipse.embedder.ArtifactKey"/>
       </factory>
    </extension>
 
    <extension point="org.maven.ide.eclipse.m2menu">
       <menuItem id="org.maven.ide.eclipse.downloadSourcesAction"
-                class="org.maven.ide.eclipse.internal.jdt.actions.DownloadSourcesAction"/>
+                class="org.maven.ide.eclipse.jdt.internal.actions.DownloadSourcesAction"/>
       <menuItem id="org.maven.ide.eclipse.downloadJavaDocAction"
-                class="org.maven.ide.eclipse.internal.jdt.actions.DownloadSourcesAction"/>
+                class="org.maven.ide.eclipse.jdt.internal.actions.DownloadSourcesAction"/>
    </extension>
 
    <extension point="org.eclipse.jdt.ui.quickAssistProcessors">
       <quickAssistProcessor
-            class="org.maven.ide.eclipse.internal.jdt.actions.MavenDependencyResolver"
+            class="org.maven.ide.eclipse.jdt.internal.actions.MavenDependencyResolver"
             name="org.maven.ide.eclipse.actions.Maven2DependencyResolver"
             id="org.maven.ide.eclipse.quickAssistProcessor"/>
    </extension>

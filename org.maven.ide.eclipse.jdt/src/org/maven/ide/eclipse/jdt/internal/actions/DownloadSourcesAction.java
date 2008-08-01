@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.internal.jdt.actions;
+package org.maven.ide.eclipse.jdt.internal.actions;
 
 import java.util.Iterator;
 
