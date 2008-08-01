@@ -1,8 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Jdt
+Bundle-Name: Maven Integration for Eclipse JDT
 Bundle-SymbolicName: org.maven.ide.eclipse.jdt;singleton:=true
-Bundle-Version: 1.0.0
+Bundle-Version: 0.9.6.qualifier
 Export-Package: org.maven.ide.eclipse.internal.jdt.launch;x-friends:="org.maven.ide.eclipse.tests",
  org.maven.ide.eclipse.jdt
 Require-Bundle: org.eclipse.core.resources,
@@ -20,3 +20,4 @@ Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.maven.ide.eclipse.jdt.MavenJdtPlugin
 Bundle-RequiredExecutionEnvironment: J2SE-1.5,
  JavaSE-1.6
+Bundle-Vendor: Sonatype, Inc.
