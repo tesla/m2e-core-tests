@@ -3,10 +3,10 @@
 <schema targetNamespace="org.maven.ide.eclipse" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appinfo>
-         <meta.schema plugin="org.maven.ide.eclipse" id="m2MenuItem" name="m2 menu item"/>
+         <meta.schema plugin="org.maven.ide.eclipse" id="m2menu" name="m2 menu item"/>
       </appinfo>
       <documentation>
-         [Enter description of this extension point.]
+         Extension point used to add additional entries to the Maven popup menu
       </documentation>
    </annotation>
 
@@ -48,18 +48,23 @@
    </element>
 
    <element name="menuItem">
+      <annotation>
+         <documentation>
+            Decription of the menu item to be added to Maven popup menu
+         </documentation>
+      </annotation>
       <complexType>
-         <attribute name="menuItemId" type="string" use="required">
+         <attribute name="id" type="string" use="required">
             <annotation>
                <documentation>
-                  
+                  Menu item id
                </documentation>
             </annotation>
          </attribute>
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
-                  
+                  An action delegate class implementing action for this menu item
                </documentation>
                <appinfo>
                   <meta.attribute kind="java" basedOn=":org.eclipse.ui.IActionDelegate"/>
@@ -74,7 +79,7 @@
          <meta.section type="since"/>
       </appinfo>
       <documentation>
-         [Enter the first release in which this extension point appears.]
+         0.9.6
       </documentation>
    </annotation>
 
@@ -105,5 +110,17 @@
       </documentation>
    </annotation>
 
+   <annotation>
+      <appinfo>
+         <meta.section type="copyright"/>
+      </appinfo>
+      <documentation>
+         Copyright (c) 2007, 2008 Sonatype, Inc.
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Eclipse Public License v1.0
+which accompanies this distribution, and is available at
+http://www.eclipse.org/legal/epl-v10.html
+      </documentation>
+   </annotation>
 
 </schema>
