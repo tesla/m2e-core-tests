@@ -8,36 +8,50 @@
 
 package org.maven.ide.eclipse.internal.project;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdapterFactory;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 
 
 /**
- * Adapts IProject to ArtifactKey
+ * Adapter factory for ArtifactKey
  * 
  * @author Igor Fedorenko
  */
 @SuppressWarnings("unchecked")
-public class ProjectAdaptor implements IAdapterFactory {
+public class ArtifactKeyAdapterFactory implements IAdapterFactory {
 
   private static final Class[] ADAPTER_LIST = new Class[] {ArtifactKey.class,};
 
-  public Object getAdapter(Object adaptableObject, Class adapterType) {
-    if(ArtifactKey.class.equals(adapterType)) {
-      IProject project = (IProject) adaptableObject;
-      MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
-      IMavenProjectFacade projectFacade = projectManager.create(project,
-          new NullProgressMonitor());
-      if(projectFacade != null) {
-        return projectFacade.getArtifactKey();
+  public Object getAdapter(Object adaptable, Class adapterType) {
+    if(!ArtifactKey.class.equals(adapterType)) {
+      return null;
+    }
+
+    MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
+    if(adaptable instanceof IProject) {
+      IProject project = (IProject) adaptable;
+      IMavenProjectFacade facade = projectManager.create(project, new NullProgressMonitor());
+      if(facade != null) {
+        return facade.getArtifactKey();
+      }
+    } else if(adaptable instanceof IFile) {
+      IFile file = (IFile) adaptable;
+      if(IMavenConstants.POM_FILE_NAME.equals(file.getName())) {
+        IMavenProjectFacade facade = projectManager.create(file, true, new NullProgressMonitor());
+        if(facade != null) {
+          return facade.getArtifactKey();
+        }
       }
     }
+
     return null;
   }
 

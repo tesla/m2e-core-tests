@@ -9,22 +9,32 @@
 package org.maven.ide.eclipse.actions;
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IActionDelegate;
 
 import org.maven.ide.eclipse.MavenPlugin;
 
+
 /**
- * Abstract Maven menu creator
- *
+ * Abstract Maven menu creator can be used to contribute custom entries to the Maven popup menu.
+ * <p>
+ * Custom items can be added to one of the standard groups {@link #NEW}, {@link #OPEN}, {@link #UPDATE}, {@link #NATURE}
+ * or {@link #IMPORT}.
+ * 
+ * @see org.maven.ide.eclipse.m2menu extension point
+ * 
  * @author Eugene Kuleshov
  */
 public abstract class AbstractMavenMenuCreator {
-
+  public static final String NEW = "new";
+  public static final String OPEN = "open";
+  public static final String UPDATE = "update";
+  public static final String NATURE = "nature";
+  public static final String IMPORT = "import";
+  
   protected IStructuredSelection selection;
 
   public void selectionChanged(IAction action, ISelection selection) {
@@ -33,31 +43,29 @@ public abstract class AbstractMavenMenuCreator {
     }
   }
 
-  protected abstract void createMenu(Menu menu);
+  /**
+   * Creates menu items in given menu manager.
+   */
+  public abstract void createMenu(IMenuManager mgr);
 
-  protected IAction addMenu(String id, String text, IActionDelegate actionDelegate, Menu menu) {
-    return addMenu(id, text, actionDelegate, menu, null);
-  }
-
-  protected IAction addMenu(String id, String text, IActionDelegate actionDelegate, Menu menu, int style) {
-    ActionProxy action = new ActionProxy(id, text, actionDelegate, style);
-    return addMenu(action, menu, null);
+  /**
+   * A helper method to create IAction instance from given IActionDelegate. 
+   */
+  protected IAction getAction(IActionDelegate delegate, String id, String text) {
+    return getAction(delegate, id, text, null);
   }
   
-  protected IAction addMenu(String id, String text, IActionDelegate actionDelegate, Menu menu, String image) {
-    ActionProxy action = new ActionProxy(id, text, actionDelegate);
-    return addMenu(action, menu, image);
-  }
-
-  private IAction addMenu(ActionProxy action, Menu menu, String image) {
+  /**
+   * A helper method to create IAction instance from given IActionDelegate. 
+   */
+  protected IAction getAction(IActionDelegate delegate, String id, String text, String image) {
+    ActionProxy action = new ActionProxy(id, text, delegate);
     if(image!=null) {
       action.setImageDescriptor(MavenPlugin.getImageDescriptor(image));
     }
-    ActionContributionItem item = new ActionContributionItem(action);
-    item.fill(menu, -1);
-    
     return action;
   }
+
 
   class ActionProxy extends Action {
     private IActionDelegate action;

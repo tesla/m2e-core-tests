@@ -38,13 +38,13 @@ import org.maven.ide.eclipse.project.ResolverConfiguration;
 
 public class ChangeNatureAction implements IObjectActionDelegate {
 
-  static final String ID_ENABLE_WORKSPACE = "org.maven.ide.eclipse.enableWorkspaceResolutionAction";
+  public static final String ID_ENABLE_WORKSPACE = "org.maven.ide.eclipse.enableWorkspaceResolutionAction";
   
-  static final String ID_ENABLE_MODULES = "org.maven.ide.eclipse.enableModulesAction";
+  public static final String ID_ENABLE_MODULES = "org.maven.ide.eclipse.enableModulesAction";
   
-  static final String ID_DISABLE_WORKSPACE = "org.maven.ide.eclipse.disableWorkspaceResolutionAction";
+  public static final String ID_DISABLE_WORKSPACE = "org.maven.ide.eclipse.disableWorkspaceResolutionAction";
   
-  static final String ID_DISABLE_MODULES = "org.maven.ide.eclipse.disableModulesAction";
+  public static final String ID_DISABLE_MODULES = "org.maven.ide.eclipse.disableModulesAction";
 
   public static final int ENABLE_WORKSPACE = 1;
   public static final int DISABLE_WORKSPACE = 2;

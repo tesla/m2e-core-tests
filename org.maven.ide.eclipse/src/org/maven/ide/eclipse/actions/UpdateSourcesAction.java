@@ -35,7 +35,7 @@ import org.maven.ide.eclipse.project.IMavenProjectFacade;
 
 public class UpdateSourcesAction implements IObjectActionDelegate {
   private ISelection selection;
-  static final String ID = "org.maven.ide.eclipse.updateSourcesAction";
+  public static final String ID = "org.maven.ide.eclipse.updateSourcesAction";
 
   public void setActivePart(IAction action, IWorkbenchPart targetPart) {
   }

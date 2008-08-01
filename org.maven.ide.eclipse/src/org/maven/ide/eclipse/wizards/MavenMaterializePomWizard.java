@@ -23,12 +23,12 @@ import org.eclipse.ui.IWorkbench;
 import org.apache.maven.model.Dependency;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.actions.SelectionUtil;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.project.MavenProjectPomScanner;
 import org.maven.ide.eclipse.project.MavenProjectScmInfo;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
-import org.maven.ide.eclipse.ui.internal.util.SelectionUtil;
 
 
 /**

@@ -12,8 +12,6 @@ import java.util.Iterator;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jface.action.IAction;
@@ -28,18 +26,20 @@ import org.maven.ide.eclipse.jdt.BuildPathManager;
 import org.maven.ide.eclipse.jdt.MavenJdtPlugin;
 
 
-public class DownloadSourcesAction implements IObjectActionDelegate, IExecutableExtension {
-
-  private static final String ATTR_MENU_ITEM_ID = "id";
+public class DownloadSourcesAction implements IObjectActionDelegate {
 
   public static final String ID_SOURCES = "org.maven.ide.eclipse.downloadSourcesAction";
 
   public static final String ID_JAVADOC = "org.maven.ide.eclipse.downloadJavaDocAction";
-
+  
   private IStructuredSelection selection;
 
   private String id;
   
+  public DownloadSourcesAction(String id) {
+    this.id = id;
+  }
+
   public void run(IAction action) {
     BuildPathManager buildpathManager = MavenJdtPlugin.getDefault().getBuildpathManager();
     for(Iterator<?> it = selection.iterator(); it.hasNext();) {
@@ -89,8 +89,4 @@ public class DownloadSourcesAction implements IObjectActionDelegate, IExecutable
     return ID_SOURCES.equals(id);
   }
 
-  public void setInitializationData(IConfigurationElement config, String propertyName, Object data) {
-    id = config.getAttribute(ATTR_MENU_ITEM_ID);
-  }
-  
 }

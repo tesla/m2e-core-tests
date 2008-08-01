@@ -24,7 +24,7 @@ import org.maven.ide.eclipse.wizards.MavenMaterializePomWizard;
 
 public class MaterializeAction implements IObjectActionDelegate {
 
-  static final String ID = "org.maven.ide.eclipse.materializeAction";
+  public static final String ID = "org.maven.ide.eclipse.materializeAction";
 
   private IStructuredSelection selection;
 

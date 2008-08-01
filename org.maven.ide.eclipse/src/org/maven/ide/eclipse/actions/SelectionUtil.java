@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.ui.internal.util;
+package org.maven.ide.eclipse.actions;
 
 import java.util.Iterator;
 
@@ -45,12 +45,14 @@ public class SelectionUtil {
   /** Checks which type the given selection belongs to. */
   public static int getSelectionType(IStructuredSelection selection) {
     int type = UNSUPPORTED;
-    for(Iterator<?> it = selection.iterator(); it.hasNext();) {
-      int elementType = getElementType(it.next());
-      if(elementType == UNSUPPORTED) {
-        return UNSUPPORTED;
+    if(selection != null) {
+      for(Iterator<?> it = selection.iterator(); it.hasNext();) {
+        int elementType = getElementType(it.next());
+        if(elementType == UNSUPPORTED) {
+          return UNSUPPORTED;
+        }
+        type |= elementType;
       }
-      type |= elementType;
     }
     return type;
   }

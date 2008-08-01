@@ -67,7 +67,6 @@ import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
-import org.maven.ide.eclipse.ui.internal.util.SelectionUtil;
 import org.maven.ide.eclipse.wizards.MavenRepositorySearchDialog;
 
 

@@ -25,9 +25,9 @@ import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.actions.SelectionUtil;
 import org.maven.ide.eclipse.project.MavenProjectInfo;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
-import org.maven.ide.eclipse.ui.internal.util.SelectionUtil;
 
 
 /**

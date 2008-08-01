@@ -58,10 +58,7 @@
    </extension>
 
    <extension point="org.maven.ide.eclipse.m2menu">
-      <menuItem id="org.maven.ide.eclipse.downloadSourcesAction"
-                class="org.maven.ide.eclipse.jdt.internal.actions.DownloadSourcesAction"/>
-      <menuItem id="org.maven.ide.eclipse.downloadJavaDocAction"
-                class="org.maven.ide.eclipse.jdt.internal.actions.DownloadSourcesAction"/>
+      <factory class="org.maven.ide.eclipse.jdt.internal.ui.MavenJdtMenuCreator"/>
    </extension>
 
    <extension point="org.eclipse.jdt.ui.quickAssistProcessors">

@@ -46,7 +46,7 @@ public class AddDependencyAction implements IObjectActionDelegate {
 
   private IWorkbenchPart targetPart;
 
-  static final String ID = "org.maven.ide.eclipse.addDependencyAction";
+  public static final String ID = "org.maven.ide.eclipse.addDependencyAction";
 
   public void run(IAction action) {
     Object o = selection.iterator().next();

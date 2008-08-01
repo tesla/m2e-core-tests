@@ -48,10 +48,10 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.actions.SelectionUtil;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.Messages;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
-import org.maven.ide.eclipse.ui.internal.util.SelectionUtil;
 
 
 /**

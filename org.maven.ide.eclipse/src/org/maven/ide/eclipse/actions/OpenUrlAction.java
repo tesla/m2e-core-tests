@@ -46,7 +46,6 @@ import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
-import org.maven.ide.eclipse.ui.internal.util.SelectionUtil;
 
 
 /**

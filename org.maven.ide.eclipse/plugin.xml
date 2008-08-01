@@ -91,12 +91,9 @@
              class="org.maven.ide.eclipse.ui.internal.MavenAdapterFactory">
        <adapter type="org.eclipse.ui.IActionFilter"/>
     </factory>
-    <factory
-          adaptableType="org.eclipse.core.resources.IProject"
-          class="org.maven.ide.eclipse.internal.project.ProjectAdaptor">
-       <adapter
-             type="org.maven.ide.eclipse.embedder.ArtifactKey">
-       </adapter>
+    <factory adaptableType="org.eclipse.core.resources.IResource"
+             class="org.maven.ide.eclipse.internal.project.ArtifactKeyAdapterFactory">
+       <adapter type="org.maven.ide.eclipse.embedder.ArtifactKey"/>
     </factory>
   </extension>
 
@@ -125,7 +122,7 @@
                           objectClass="org.eclipse.core.resources.IProject"
                           adaptable="true">
          <action id="org.maven.ide.eclipse.projectMenu.action"
-                 class="org.maven.ide.eclipse.actions.MavenMenuAction"
+                 class="org.maven.ide.eclipse.internal.actions.MavenMenuAction"
                  label="%m2.popup.project.label"
                  style="pulldown"
                  menubarPath="additions"
@@ -143,7 +140,7 @@
                           objectClass="org.eclipse.core.resources.IProject"
                           adaptable="true">
          <action id="org.maven.ide.eclipse.projectMenu.action"
-                 class="org.maven.ide.eclipse.actions.MavenMenuAction"
+                 class="org.maven.ide.eclipse.internal.actions.MavenMenuAction"
                  label="%m2.popup.project.label"
                  style="pulldown"
                  menubarPath="additions"
@@ -163,7 +160,7 @@
                           objectClass="org.eclipse.core.resources.IFile"
                           adaptable="true">
          <action id="org.maven.ide.eclipse.fileMenu.action"
-                 class="org.maven.ide.eclipse.actions.MavenMenuAction"
+                 class="org.maven.ide.eclipse.internal.actions.MavenMenuAction"
                  label="%m2.popup.project.label"
                  style="pulldown"
                  menubarPath="additions"
@@ -177,7 +174,7 @@
       <objectContribution id="org.maven.ide.eclipse.classpathMenu" adaptable="true"
              objectClass="org.eclipse.jdt.core.IPackageFragmentRoot">
          <action id="org.maven.ide.eclipse.classpathMenu.action"
-                 class="org.maven.ide.eclipse.actions.MavenMenuAction"
+                 class="org.maven.ide.eclipse.internal.actions.MavenMenuAction"
                  label="%m2.popup.project.label"
                  style="pulldown"
                  menubarPath="additions"

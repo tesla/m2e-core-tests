@@ -25,7 +25,7 @@ import org.maven.ide.eclipse.core.MavenLogger;
 
 
 public class DisableNatureAction implements IObjectActionDelegate {
-  static final String ID = "org.maven.ide.eclipse.disableAction";
+  public static final String ID = "org.maven.ide.eclipse.disableAction";
 
   private ISelection selection;
 

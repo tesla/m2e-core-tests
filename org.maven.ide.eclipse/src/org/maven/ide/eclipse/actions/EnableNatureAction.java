@@ -37,7 +37,7 @@ import org.maven.ide.eclipse.wizards.MavenPomWizard;
 
 public class EnableNatureAction implements IObjectActionDelegate, IExecutableExtension {
 
-  static final String ID = "org.maven.ide.eclipse.enableNatureAction";
+  public static final String ID = "org.maven.ide.eclipse.enableNatureAction";
 
   static final String ID_WORKSPACE = "org.maven.ide.eclipse.enableWorkspaceResolutionAction";
   

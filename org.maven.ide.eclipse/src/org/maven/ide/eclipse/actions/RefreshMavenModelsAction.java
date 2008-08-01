@@ -28,9 +28,9 @@ import org.maven.ide.eclipse.project.MavenUpdateRequest;
 
 public class RefreshMavenModelsAction implements IWorkbenchWindowActionDelegate, IExecutableExtension {
 
-  static final String ID = "org.maven.ide.eclipse.refreshMavenModelsAction";
+  public static final String ID = "org.maven.ide.eclipse.refreshMavenModelsAction";
 
-  static final String ID_SNAPSHOTS = "org.maven.ide.eclipse.refreshMavenSnapshotsAction";
+  public static final String ID_SNAPSHOTS = "org.maven.ide.eclipse.refreshMavenSnapshotsAction";
   
   private IProject[] projects;
 
