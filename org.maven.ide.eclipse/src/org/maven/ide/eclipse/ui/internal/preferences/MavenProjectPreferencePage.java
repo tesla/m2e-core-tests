@@ -39,8 +39,6 @@ import org.maven.ide.eclipse.project.ResolverConfiguration;
  */
 public class MavenProjectPreferencePage extends PropertyPage {
 
-  public static final String ID = "org.maven.ide.eclipse.MavenProjectPreferencePage";
-  
   private Button resolveWorspaceProjectsButton;
 	private Button includeModulesButton;
 	

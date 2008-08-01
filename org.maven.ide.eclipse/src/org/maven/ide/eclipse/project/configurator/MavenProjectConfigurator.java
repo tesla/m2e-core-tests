@@ -45,7 +45,7 @@ public class MavenProjectConfigurator extends AbstractProjectConfigurator {
 
   List<String> goals;
 
-  public void configure(MavenEmbedder embedder, ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException {
+  public void configure(MavenEmbedder embedder, ProjectConfigurationRequest request, IProgressMonitor monitor) {
     if(pluginKey == null || goals == null) {
       return;
     }

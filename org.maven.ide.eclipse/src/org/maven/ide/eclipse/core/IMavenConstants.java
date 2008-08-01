@@ -25,6 +25,8 @@ public interface IMavenConstants {
 
   public static final String POM_FILE_NAME = "pom.xml"; //$NON-NLS-1$
 
+  public static final String PREFERENCE_PAGE_ID = PLUGIN_ID + ".MavenProjectPreferencePage";
+  
   // container settings
   public static final String CONTAINER_ID = PLUGIN_ID + ".MAVEN2_CLASSPATH_CONTAINER"; //$NON-NLS-1$
 

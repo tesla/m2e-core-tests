@@ -30,6 +30,8 @@ import org.maven.ide.eclipse.jdt.MavenJdtPlugin;
 
 public class DownloadSourcesAction implements IObjectActionDelegate, IExecutableExtension {
 
+  private static final String ATTR_MENU_ITEM_ID = "id";
+
   public static final String ID_SOURCES = "org.maven.ide.eclipse.downloadSourcesAction";
 
   public static final String ID_JAVADOC = "org.maven.ide.eclipse.downloadJavaDocAction";
@@ -88,7 +90,7 @@ public class DownloadSourcesAction implements IObjectActionDelegate, IExecutable
   }
 
   public void setInitializationData(IConfigurationElement config, String propertyName, Object data) {
-    id = config.getAttribute("menuItemId");
+    id = config.getAttribute(ATTR_MENU_ITEM_ID);
   }
   
 }

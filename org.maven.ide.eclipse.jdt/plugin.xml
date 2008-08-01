@@ -8,12 +8,22 @@
 -->
 <?eclipse version="3.2"?>
 <plugin>
+
    <extension point="org.eclipse.jdt.core.classpathContainerInitializer"
               id="maven2ClasspathContainer"
               name="%m2.classpath-container.name">
       <classpathContainerInitializer
-            class="org.maven.ide.eclipse.internal.jdt.MavenClasspathContainerInitializer"
-            id="org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER"/>
+            id="org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER"
+            class="org.maven.ide.eclipse.internal.jdt.MavenClasspathContainerInitializer"/>
+   </extension>
+   
+   <extension point="org.eclipse.jdt.ui.classpathContainerPage"
+          id="maven2ClasspathContainerPage"
+          name="%m2.classpath-container.page.name">
+      <classpathContainerPage
+          id="org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER"
+          name="%m2.classpath-container.page.dependencies.name"
+          class="org.maven.ide.eclipse.jdt.internal.ui.MavenClasspathContainerPage"/>
    </extension>
    
    <extension point="org.eclipse.jdt.launching.classpathProviders">
@@ -35,33 +45,23 @@
       <classpathVariableInitializer variable="M2_REPO" readOnly="true"
           class="org.maven.ide.eclipse.internal.jdt.MavenClasspathVariableInitializer"/>
    </extension>
-   <extension
-         point="org.eclipse.core.runtime.adapters">
-      <factory
-            adaptableType="org.eclipse.jdt.core.IPackageFragmentRoot"
-            class="org.maven.ide.eclipse.internal.jdt.JavaElementsAdaptor">
-         <adapter
-               type="org.maven.ide.eclipse.embedder.ArtifactKey">
-         </adapter>
+
+   <extension point="org.eclipse.core.runtime.adapters">
+      <factory adaptableType="org.eclipse.jdt.core.IPackageFragmentRoot"
+               class="org.maven.ide.eclipse.internal.jdt.JavaElementsAdaptor">
+         <adapter type="org.maven.ide.eclipse.embedder.ArtifactKey"/>
       </factory>
-      <factory
-            adaptableType="org.eclipse.jdt.core.IJavaProject"
-            class="org.maven.ide.eclipse.internal.jdt.JavaElementsAdaptor">
-         <adapter
-               type="org.maven.ide.eclipse.embedder.ArtifactKey">
-         </adapter>
+      <factory adaptableType="org.eclipse.jdt.core.IJavaProject"
+               class="org.maven.ide.eclipse.internal.jdt.JavaElementsAdaptor">
+         <adapter type="org.maven.ide.eclipse.embedder.ArtifactKey"/>
       </factory>
    </extension>
-   <extension
-         point="org.maven.ide.eclipse.m2MenuItems">
-      <menuItem
-            class="org.maven.ide.eclipse.internal.jdt.actions.DownloadSourcesAction"
-            menuItemId="org.maven.ide.eclipse.downloadSourcesAction">
-      </menuItem>
-      <menuItem
-            class="org.maven.ide.eclipse.internal.jdt.actions.DownloadSourcesAction"
-            menuItemId="org.maven.ide.eclipse.downloadJavaDocAction">
-      </menuItem>
+
+   <extension point="org.maven.ide.eclipse.m2menu">
+      <menuItem id="org.maven.ide.eclipse.downloadSourcesAction"
+                class="org.maven.ide.eclipse.internal.jdt.actions.DownloadSourcesAction"/>
+      <menuItem id="org.maven.ide.eclipse.downloadJavaDocAction"
+                class="org.maven.ide.eclipse.internal.jdt.actions.DownloadSourcesAction"/>
    </extension>
 
    <extension point="org.eclipse.jdt.ui.quickAssistProcessors">
@@ -74,8 +74,7 @@
    <extension point="org.eclipse.ui.perspectiveExtensions">
       <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaPerspective">
          <newWizardShortcut id="org.maven.ide.eclipse.wizards.Maven2ProjectWizard"/>
-         <view id="org.maven.ide.eclipse.views.MavenIndexesView"
-               relationship="fast"/>
+         <view id="org.maven.ide.eclipse.views.MavenIndexesView" relationship="fast"/>
       </perspectiveExtension>
    </extension>
 

@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.internal.jdt;
+package org.maven.ide.eclipse.jdt.internal.ui;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -22,7 +22,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
-import org.maven.ide.eclipse.ui.internal.preferences.MavenProjectPreferencePage;
+import org.maven.ide.eclipse.core.IMavenConstants;
 
 
 /**
@@ -76,7 +76,7 @@ public class MavenClasspathContainerPage extends WizardPage implements IClasspat
         // container.openPage(MavenProjectPreferencePage.ID, javaProject.getProject());
         
         PreferencesUtil.createPropertyDialogOn(getShell(), javaProject.getProject(), //
-            MavenProjectPreferencePage.ID, new String[] {MavenProjectPreferencePage.ID}, null).open();
+            IMavenConstants.PREFERENCE_PAGE_ID, new String[] {IMavenConstants.PREFERENCE_PAGE_ID}, null).open();
       }
     });
   }

@@ -21,12 +21,11 @@ import org.maven.ide.eclipse.project.ResolverConfiguration;
 
 /**
  * LegacyBuildPathManager provides data compatibility for projects created using
- * older versions of m2e. It will be removed during codebase migrtion to 
+ * older versions of m2e. It will be removed during codebase migration to 
  * eclipse.org and corresponding package name change.
  *
- * @author igor
+ * @author Igor Fedorenko
  */
-@Deprecated
 public class LegacyBuildPathManager {
 
   private static boolean isMaven2ClasspathContainer(IPath containerPath) {

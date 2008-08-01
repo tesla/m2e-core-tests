@@ -14,7 +14,7 @@
    <extension-point id="archetypeCatalogs" name="Maven Archetypes" schema="schema/archetypes.exsd"/>
    <extension-point id="projectConfigurators" name="Project Configurators" schema="schema/projectConfigurators.exsd"/>
    <extension-point id="classpathConfiguratorFactories" name="Classpath Configurator Factories" schema="schema/classpathConfiguratorFactories.exsd"/>
-   <extension-point id="m2MenuItems" name="m2 menu items" schema="schema/m2MenuItems.exsd"/>
+   <extension-point id="m2menu" name="m2 menu items" schema="schema/m2menu.exsd"/>
 
    <extension point="org.eclipse.ui.intro.configExtension">
       <configExtension configId="org.eclipse.ui.intro.universalConfig"
@@ -448,15 +448,6 @@
       <persistent value="false"/>
    </extension>
    
-   <extension point="org.eclipse.jdt.ui.classpathContainerPage"
-          id="maven2ClasspathContainerPage"
-          name="%m2.classpath-container.page.name">
-      <classpathContainerPage
-          id="org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER"
-          name="%m2.classpath-container.page.dependencies.name"
-          class="org.maven.ide.eclipse.internal.jdt.MavenClasspathContainerPage"/>
-   </extension>
-   
    <extension point="org.eclipse.ui.keywords">
       <keyword id="org.maven.ide.eclipse.maven" label="maven"/>
    </extension>
@@ -523,7 +514,7 @@
             configTypeID="org.maven.ide.eclipse.Maven2BuilderConfigurationType"
             id="org.maven.ide.eclipse.launch.Maven2BuilderConfigurationTypeImage"/>
    </extension>
-   
+
    <extension point="org.eclipse.ui.newWizards">
       <category id="org.maven.ide.eclipse" name="%m2.wizard.name"/>
 
@@ -609,7 +600,7 @@
          </enablement>
       </consolePageParticipant>
    </extension>
-
+   
    <extension point="org.eclipse.ui.actionSets">
      <actionSet id="org.maven.ide.eclipse.ui.navigation"
                 label="Maven Navigation" visible="true">
@@ -661,20 +652,13 @@
    </extension>
    
    <extension point="org.eclipse.ui.perspectiveExtensions">
-      <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaPerspective">
-         <newWizardShortcut id="org.maven.ide.eclipse.wizards.Maven2ProjectWizard"/>
-         <view id="org.maven.ide.eclipse.views.MavenIndexesView"
-               relationship="fast"/>
-      </perspectiveExtension>
       <perspectiveExtension targetID="org.eclipse.debug.ui.DebugPerspective">
          <newWizardShortcut id="org.maven.ide.eclipse.wizards.Maven2ProjectWizard"/>
-         <view id="org.maven.ide.eclipse.views.MavenIndexesView"
-               relationship="fast"/>
+         <view id="org.maven.ide.eclipse.views.MavenIndexesView" relationship="fast"/>
       </perspectiveExtension>
       <perspectiveExtension targetID="org.eclipse.ui.resourcePerspective">
          <newWizardShortcut id="org.maven.ide.eclipse.wizards.Maven2ProjectWizard"/>
-         <view id="org.maven.ide.eclipse.views.MavenIndexesView"
-               relationship="fast"/>
+         <view id="org.maven.ide.eclipse.views.MavenIndexesView" relationship="fast"/>
       </perspectiveExtension>
    </extension>
    
