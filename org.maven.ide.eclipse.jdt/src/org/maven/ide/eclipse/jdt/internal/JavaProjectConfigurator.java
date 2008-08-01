@@ -595,6 +595,11 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
     }
   }
   
+  public void unconfigure(MavenEmbedder embedder, ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException {
+    super.unconfigure(embedder, request, monitor);
+    removeMavenClasspathContainer(request.getProject());
+  }
+  
   private void removeMavenClasspathContainer(IProject project) throws JavaModelException {
     IJavaProject javaProject = JavaCore.create(project);
     if(javaProject != null) {
