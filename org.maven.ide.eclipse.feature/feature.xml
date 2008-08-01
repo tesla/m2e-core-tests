@@ -31,12 +31,10 @@ http://www.eclipse.org/legal/epl-v10.html
       <import plugin="org.eclipse.emf.ecore.xmi"/>
       <import plugin="org.eclipse.emf.edit"/>
       <import plugin="org.eclipse.emf.ecore.edit"/>
-      
       <import plugin="org.eclipse.wst.common.emf"/>
       <import plugin="org.eclipse.wst.sse.core"/>
       <import plugin="org.eclipse.wst.xml.core"/>
       <import plugin="org.eclipse.jem.util"/>
-      
       <import feature="org.eclipse.platform" version="3.2.0" match="greaterOrEqual"/>
       <import feature="org.eclipse.rcp" version="3.2.0" match="greaterOrEqual"/>
       <import feature="org.eclipse.jdt" version="3.2.0" match="greaterOrEqual"/>
@@ -64,6 +62,13 @@ http://www.eclipse.org/legal/epl-v10.html
 
    <plugin
          id="org.maven.ide.components.maven_model_edit"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.maven.ide.eclipse.jdt"
          download-size="0"
          install-size="0"
          version="0.0.0"
