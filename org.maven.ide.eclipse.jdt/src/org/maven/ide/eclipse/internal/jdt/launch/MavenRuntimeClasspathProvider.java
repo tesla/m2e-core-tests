@@ -28,9 +28,9 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -55,6 +55,10 @@ import org.maven.ide.eclipse.project.ResolverConfiguration;
 
 public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
   
+  public static final String MAVEN_SOURCEPATH_PROVIDER = "org.maven.ide.eclipse.launchconfig.sourcepathProvider";
+
+  public static final String MAVEN_CLASSPATH_PROVIDER = "org.maven.ide.eclipse.launchconfig.classpathProvider";
+
   private static final String TESTS_PROJECT_CLASSIFIER = "tests";
 
   private static final String THIS_PROJECT_CLASSIFIER = "";
@@ -315,8 +319,8 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
   }
 
   private static void enable(ILaunchConfigurationWorkingCopy wc) {
-    wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH_PROVIDER, "org.maven.ide.eclipse.launchconfig.classpathProvider");
-    wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_SOURCE_PATH_PROVIDER, "org.maven.ide.eclipse.launchconfig.sourcepathProvider");
+    wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH_PROVIDER, MAVEN_CLASSPATH_PROVIDER);
+    wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_SOURCE_PATH_PROVIDER, MAVEN_SOURCEPATH_PROVIDER);
   }
 
   public static void disable(ILaunchConfiguration config) throws CoreException {
@@ -350,17 +354,12 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
 
   private static List<ILaunchConfiguration> getLaunchConfiguration(IProject project) throws CoreException {
     ArrayList<ILaunchConfiguration> result = new ArrayList<ILaunchConfiguration>();
-    ILaunch[] launches = DebugPlugin.getDefault().getLaunchManager().getLaunches();
-    for(int i = 0; i < launches.length; i++ ) {
-      ILaunchConfiguration config = launches[i].getLaunchConfiguration();
-      IResource[] resources = config.getMappedResources();
-      if (resources != null) {
-        for (IResource resource : resources) {
-          if (resource.getProject().equals(project)) {
-            result.add(config);
-            break;
-          }
-        }
+    ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
+    ILaunchConfiguration[] configurations = launchManager.getLaunchConfigurations();
+    for(ILaunchConfiguration config : configurations) {
+      String projectName = config.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, (String) null);
+      if (project.getName().equals(projectName)) {
+          result.add(config);
       }
     }
     return result;

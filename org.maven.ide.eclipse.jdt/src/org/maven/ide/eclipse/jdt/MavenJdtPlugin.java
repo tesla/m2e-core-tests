@@ -69,6 +69,7 @@ public class MavenJdtPlugin implements BundleActivator {
 
     this.launchConfigurationListener = new MavenLaunchConfigurationListener();
     DebugPlugin.getDefault().getLaunchManager().addLaunchConfigurationListener(launchConfigurationListener);
+    projectManager.addMavenProjectChangedListener(launchConfigurationListener);
 
   }
 
@@ -83,7 +84,10 @@ public class MavenJdtPlugin implements BundleActivator {
     workspace.removeResourceChangeListener(this.buildpathManager);
 
     DebugPlugin.getDefault().getLaunchManager().removeLaunchConfigurationListener(launchConfigurationListener);
+    projectManager.removeMavenProjectChangedListener(launchConfigurationListener);
 
+    this.buildpathManager = null;
+    this.launchConfigurationListener = null;
   }
 
   public static MavenJdtPlugin getDefault() {
