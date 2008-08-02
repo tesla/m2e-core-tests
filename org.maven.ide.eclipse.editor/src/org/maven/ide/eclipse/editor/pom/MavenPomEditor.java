@@ -112,6 +112,7 @@ import org.maven.ide.components.pom.util.PomResourceImpl;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.editor.MavenEditorPlugin;
+import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
@@ -883,6 +884,11 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     if(contributor != null && contributor instanceof MultiPageEditorActionBarContributor) {
       ((MultiPageEditorActionBarContributor) contributor).setActivePage(sourcePage);
     }
+  }
+  
+  public void showDependencyHierarchy(ArtifactKey artifactKey) {
+    setActivePage(dependencyTreePage.getId());
+    dependencyTreePage.selectDepedency(artifactKey);
   }
 
   

@@ -87,6 +87,8 @@ public class MavenEditorImages {
 
   public static final ImageDescriptor WEB_PAGE = create("web.gif");
 
+  public static final ImageDescriptor HIERARCHY = create("hierarchy.gif");
+  
 
   private static ImageDescriptor create(String key) {
     try {

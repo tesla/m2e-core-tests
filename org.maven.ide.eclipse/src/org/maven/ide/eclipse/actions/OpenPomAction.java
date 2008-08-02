@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorRegistry;
 import org.eclipse.ui.IPathEditorInput;
 import org.eclipse.ui.IPersistableElement;
@@ -119,7 +120,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
     if(selection!=null) {
       Object element = this.selection.getFirstElement();
       if(IndexManager.SEARCH_ARTIFACT.equals(type) && element !=null) {
-        final ArtifactKey a = getArtifact(element);
+        final ArtifactKey a = SelectionUtil.getType(element, ArtifactKey.class);
         if(a!=null) {
           new Job("Opening POM") {
             protected IStatus run(IProgressMonitor monitor) {
@@ -157,10 +158,6 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
         }
       }.schedule();
     }
-  }
-
-  private ArtifactKey getArtifact(Object element) {
-    return SelectionUtil.getType(element, ArtifactKey.class);
   }
 
   public static void openEditor(IndexedArtifact ia, IndexedArtifactFile f) {
@@ -211,7 +208,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
     }
   }
 
-  public static void openEditor(String groupId, String artifactId, String version) {
+  public static IEditorPart openEditor(String groupId, String artifactId, String version) {
     final String name = groupId + ":" + artifactId + ":" + version + ".pom";
 
     try {
@@ -221,8 +218,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
       IMavenProjectFacade projectFacade = projectManager.getMavenProject(groupId, artifactId, version);
       if(projectFacade!=null) {
         final IFile pomFile = projectFacade.getPom();
-        openEditor(new FileEditorInput(pomFile), name);
-        return;
+        return openEditor(new FileEditorInput(pomFile), name);
       }
       
       MavenEmbedderManager embedderManager = plugin.getMavenEmbedderManager();
@@ -235,12 +231,11 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
       embedder.resolve(artifact, artifactRepositories, embedder.getLocalRepository());
 
       File file = artifact.getFile();
-      if(file == null) {
-        openDialog("Can't download " + name);
-        return;
+      if(file != null) {
+        return openEditor(new MavenEditorStorageInput(name, name, file.getAbsolutePath(), readStream(new FileInputStream(file))), name);
       }
 
-      openEditor(new MavenEditorStorageInput(name, name, file.getAbsolutePath(), readStream(new FileInputStream(file))), name);
+      openDialog("Can't download " + name);
 
     } catch(AbstractArtifactResolutionException ex) {
       MavenLogger.log("Can't resolve artifact " + name, ex);
@@ -250,10 +245,13 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
       MavenLogger.log("Can't open pom file for " + name, ex);
       openDialog("Can't open pom file for " + name + "\n" + ex.toString());
     }
+    
+    return null;
   }
 
-  public static void openEditor(final IEditorInput editorInput, final String name) {
-    PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+  public static IEditorPart openEditor(final IEditorInput editorInput, final String name) {
+    final IEditorPart[] part = new IEditorPart[1];
+    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
       public void run() {
         IContentTypeManager contentTypeManager = Platform.getContentTypeManager();
         IContentType contentType = contentTypeManager.findContentTypeFor(name);
@@ -264,7 +262,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
           IWorkbenchPage page = window.getActivePage();
           if(page != null) {
             try {
-              page.openEditor(editorInput, editor.getId());
+              part[0] = page.openEditor(editorInput, editor.getId());
             } catch(PartInitException ex) {
               MessageDialog.openInformation(Display.getDefault().getActiveShell(), //
                   "Open Maven POM", "Can't open editor for " + name + "\n" + ex.toString());
@@ -273,6 +271,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
         }
       }
     });
+    return part[0];
   }
 
   private static void openDialog(final String msg) {

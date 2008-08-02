@@ -11,6 +11,7 @@ package org.maven.ide.eclipse.actions;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IActionDelegate;
@@ -52,20 +53,23 @@ public abstract class AbstractMavenMenuCreator {
    * A helper method to create IAction instance from given IActionDelegate. 
    */
   protected IAction getAction(IActionDelegate delegate, String id, String text) {
-    return getAction(delegate, id, text, null);
+    return getAction(delegate, id, text, (ImageDescriptor) null);
   }
   
   /**
    * A helper method to create IAction instance from given IActionDelegate. 
    */
   protected IAction getAction(IActionDelegate delegate, String id, String text, String image) {
+    return getAction(delegate, id, text, MavenPlugin.getImageDescriptor(image));
+  }
+
+  protected IAction getAction(IActionDelegate delegate, String id, String text, ImageDescriptor image) {
     ActionProxy action = new ActionProxy(id, text, delegate);
     if(image!=null) {
-      action.setImageDescriptor(MavenPlugin.getImageDescriptor(image));
+      action.setImageDescriptor(image);
     }
     return action;
   }
-
 
   class ActionProxy extends Action {
     private IActionDelegate action;

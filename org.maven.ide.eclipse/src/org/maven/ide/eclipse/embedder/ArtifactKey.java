@@ -9,7 +9,6 @@
 package org.maven.ide.eclipse.embedder;
 
 import java.io.Serializable;
-import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
 
@@ -96,8 +95,4 @@ public class ArtifactKey implements Serializable {
     return classifier;
   }
 
-  public static ArtifactKey fromArtifact(Set<Artifact> artifacts) {
-    // TODO Auto-generated method fromArtifact
-    return null;
-  }
 }

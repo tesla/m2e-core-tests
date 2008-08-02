@@ -40,6 +40,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -72,6 +73,7 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
+import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 
@@ -108,6 +110,8 @@ public class DependencyTreePage extends FormPage {
   boolean isSettingSelection = false;
 
   Action hierarchyFilterAction;
+
+  private Job dataLoadingJob;
 
   public DependencyTreePage(MavenPomEditor pomEditor) {
     super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.dependencyTree", "Dependency Hierarchy");
@@ -155,7 +159,7 @@ public class DependencyTreePage extends FormPage {
     listViewer.setInput(null);
     getManagedForm().getForm().setMessage("Resolving dependencies...", IMessageProvider.WARNING);
 
-    new Job("Loading pom.xml") {
+    dataLoadingJob = new Job("Loading pom.xml") {
       protected IStatus run(IProgressMonitor monitor) {
         try {
           final DependencyNode dependencyNode = pomEditor.readDependencies(force, monitor);
@@ -173,7 +177,7 @@ public class DependencyTreePage extends FormPage {
 
           mavenProject = pomEditor.readMavenProject(false, monitor);
 
-          getPartControl().getDisplay().asyncExec(new Runnable() {
+          getPartControl().getDisplay().syncExec(new Runnable() {
             public void run() {
               getManagedForm().getForm().setMessage(null, IMessageProvider.NONE);
               treeViewer.setInput(dependencyNode);
@@ -197,7 +201,8 @@ public class DependencyTreePage extends FormPage {
 
         return Status.OK_STATUS;
       }
-    }.schedule();
+    };
+    dataLoadingJob.schedule();
   }
 
   private void createHierarchySection(Composite sashForm, FormToolkit formToolkit) {
@@ -976,4 +981,34 @@ public class DependencyTreePage extends FormPage {
     }
     super.dispose();
   }
+  
+  public void selectDepedency(ArtifactKey artifactKey) {
+    if(dataLoadingJob!=null && dataLoadingJob.getState()==Job.RUNNING) {
+      try {
+        dataLoadingJob.join();
+      } catch(InterruptedException ex) {
+        // ignore
+      }
+    }
+
+    if(mavenProject!=null) {
+      Artifact artifact = getArtifact(artifactKey);
+      if(artifact!=null) {
+        listViewer.getTable().setFocus();
+        listViewer.setSelection(new StructuredSelection(artifact), true);
+      }
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  private Artifact getArtifact(ArtifactKey artifactKey) {
+    Set<Artifact> artifacts = mavenProject.getArtifacts();
+    for(Artifact artifact : artifacts) {
+      if(artifactKey.equals(new ArtifactKey(artifact))) {
+        return artifact;
+      }
+    }
+    return null;
+  }
+  
 }

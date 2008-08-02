@@ -20,4 +20,8 @@
     </editor>
   </extension>
 
+  <extension point="org.maven.ide.eclipse.m2menu">
+     <factory class="org.maven.ide.eclipse.editor.internal.actions.PomEditorMenuCreator"/>
+  </extension>
+
 </plugin>
