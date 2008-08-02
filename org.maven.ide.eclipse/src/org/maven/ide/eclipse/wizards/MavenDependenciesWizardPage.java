@@ -62,10 +62,6 @@ public class MavenDependenciesWizardPage extends AbstractMavenWizardPage {
    */
   private List<ISelectionChangedListener> listeners = new ArrayList<ISelectionChangedListener>();
 
-  private Button checkOutAllButton;
-
-  private Button useDeveloperConnectionButton;
-
   boolean showScope = false;
 
   public MavenDependenciesWizardPage() {
@@ -183,14 +179,6 @@ public class MavenDependenciesWizardPage extends AbstractMavenWizardPage {
   private boolean isPageValid() {
     setErrorMessage(null);
     return true;
-  }
-  
-  public boolean isCheckoutAllProjects() {
-    return checkOutAllButton.getSelection();
-  }
-  
-  public boolean isDeveloperConnection() {
-    return this.useDeveloperConnectionButton.getSelection();
   }
   
   /**

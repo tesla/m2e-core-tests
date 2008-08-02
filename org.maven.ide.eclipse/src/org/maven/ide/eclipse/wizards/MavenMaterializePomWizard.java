@@ -16,6 +16,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
@@ -42,10 +46,14 @@ public class MavenMaterializePomWizard extends Wizard implements IImportWizard, 
   
   MavenDependenciesWizardPage selectionPage;
   
+  MavenProjectWizardLocationPage locationPage;
+  
+  Button checkOutAllButton;
+  
+  Button useDeveloperConnectionButton;
+  
   // TODO replace with ArtifactKey
   private Dependency[] dependencies;
-
-  private MavenProjectWizardLocationPage locationPage;
 
   private IStructuredSelection selection;
 
@@ -93,8 +101,20 @@ public class MavenMaterializePomWizard extends Wizard implements IImportWizard, 
 
   public void addPages() {
     selectionPage = new MavenDependenciesWizardPage(importConfiguration, //
-        "Select Maven projects", //
-        "Select Maven artifacts to import");
+        "Select Maven artifacts", //
+        "Select Maven artifacts to import") {
+      protected void createAdvancedSettings(Composite composite, GridData gridData) {
+        checkOutAllButton = new Button(composite, SWT.CHECK);
+        checkOutAllButton.setText("&Check out All projects");
+        checkOutAllButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 3, 1));
+        
+        useDeveloperConnectionButton = new Button(composite, SWT.CHECK);
+        useDeveloperConnectionButton.setText("Use &Developer connection");
+        useDeveloperConnectionButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 3, 1));
+        
+        super.createAdvancedSettings(composite, gridData);
+      }
+    };
     selectionPage.setDependencies(dependencies);
     
     locationPage = new MavenProjectWizardLocationPage(importConfiguration, //
@@ -117,8 +137,8 @@ public class MavenMaterializePomWizard extends Wizard implements IImportWizard, 
 
     final Dependency[] dependencies = selectionPage.getDependencies();
     
-    final boolean checkoutAllProjects = selectionPage.isCheckoutAllProjects();
-    final boolean developer = selectionPage.isDeveloperConnection();
+    final boolean checkoutAllProjects = checkOutAllButton.getSelection();
+    final boolean developer = useDeveloperConnectionButton.getSelection();
     
     MavenProjectCheckoutJob job = new MavenProjectCheckoutJob(importConfiguration, checkoutAllProjects) {
       protected List<MavenProjectScmInfo> getProjects(IProgressMonitor monitor) throws InterruptedException {
