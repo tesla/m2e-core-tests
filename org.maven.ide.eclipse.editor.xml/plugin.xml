@@ -61,6 +61,14 @@
       class="org.maven.ide.eclipse.editor.xml.PomTemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.plugins"/>
     
+    <contextType name="Plugin"
+      class="org.maven.ide.eclipse.editor.xml.PomTemplateContextType"
+      id="org.maven.ide.eclipse.editor.xml.templates.contextType.plugin"/>
+    
+    <contextType name="Configuration"
+      class="org.maven.ide.eclipse.editor.xml.PomTemplateContextType"
+      id="org.maven.ide.eclipse.editor.xml.templates.contextType.configuration"/>
+    
     <contextType name="Executions"
       class="org.maven.ide.eclipse.editor.xml.PomTemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.executions"/>

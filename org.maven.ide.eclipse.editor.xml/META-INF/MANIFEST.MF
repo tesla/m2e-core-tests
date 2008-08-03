@@ -14,7 +14,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.wst.sse.core,
  org.eclipse.wst.xml.core,
  org.maven.ide.eclipse,
- org.maven.ide.components.nexus_indexer
+ org.maven.ide.components.nexus_indexer,
+ org.maven.ide.components.maven_embedder
 Export-Package: org.maven.ide.eclipse.editor.xml,
  org.maven.ide.eclipse.editor.xml.search
 Bundle-ClassPath: .

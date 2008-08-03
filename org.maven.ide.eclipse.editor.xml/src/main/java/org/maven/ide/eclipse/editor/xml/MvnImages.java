@@ -48,6 +48,8 @@ public class MvnImages {
   public static final Image IMG_REPORT = createImage("report_obj.gif");
 
   public static final Image IMG_PROFILE = createImage("profile_obj.gif");
+
+  public static final Image IMG_PARAMETER = createImage("parameter_obj.gif");
   
 
   private static ImageDescriptor create(String key) {

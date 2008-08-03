@@ -8,10 +8,29 @@
 
 package org.maven.ide.eclipse.editor.xml;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.resolver.AbstractArtifactResolutionException;
+import org.apache.maven.embedder.MavenEmbedder;
+import org.apache.maven.plugin.descriptor.MojoDescriptor;
+import org.apache.maven.plugin.descriptor.Parameter;
+import org.apache.maven.plugin.descriptor.PluginDescriptor;
+import org.apache.maven.plugin.descriptor.PluginDescriptorBuilder;
+import org.codehaus.plexus.util.IOUtil;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
@@ -19,6 +38,9 @@ import org.w3c.dom.Text;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.persistence.TemplateStore;
 
+import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.MavenConsole;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.editor.xml.search.ArtifactInfo;
 import org.maven.ide.eclipse.editor.xml.search.Packaging;
 import org.maven.ide.eclipse.editor.xml.search.SearchEngine;
@@ -28,6 +50,7 @@ import org.maven.ide.eclipse.editor.xml.search.SearchEngine;
  * Context types.
  * 
  * @author Lukas Krecan
+ * @author Eugene Kuleshov
  */
 public enum PomTemplateContext {
   
@@ -47,29 +70,145 @@ public enum PomTemplateContext {
   
   PLUGINS("plugins"), //
 
+  PLUGIN("plugin"), //
+
   EXECUTIONS("executions"), //
   
   PROFILES("profiles"), //
   
   REPOSITORIES("repositories"), //
   
+  CONFIGURATION("configuration") {
+    private final Map<String, PluginDescriptor> descriptors = new HashMap<String, PluginDescriptor>();
+
+    @Override
+    protected void addTemplates(Collection<Template> proposals, Node node, String prefix) {
+      String groupId = getGroupId(node);
+      if(groupId==null) {
+        groupId = "org.apache.maven.plugins";  // TODO support other default groups
+      }
+      String artifactId = getArtifactId(node);
+      String version = getVersion(node);
+      if(version==null) {
+        Collection<String> versions = getSearchEngine().findVersions(groupId, artifactId, "", Packaging.PLUGIN);
+        if(versions.isEmpty()) {
+          return;
+        }
+        version = versions.iterator().next();
+      }
+      
+      PluginDescriptor descriptor = getPluginDescriptor(groupId, artifactId, version);
+
+      HashSet<String> params = new HashSet<String>();
+      
+      @SuppressWarnings("unchecked")
+      List<MojoDescriptor> mojos = descriptor.getMojos();
+      for(MojoDescriptor mojo : mojos) {
+        @SuppressWarnings("unchecked")
+        List<Parameter> parameters = (List<Parameter>) mojo.getParameters();
+        for(Parameter parameter : parameters) {
+          boolean editable = parameter.isEditable();
+          if(editable) {
+            String name = parameter.getName();
+            if(!params.contains(name)) {
+              params.add(name);
+              
+              String text = "<b>required:</b> " + parameter.isRequired() + "<br>" //
+                  + "<b>type:</b> " + parameter.getType() + "<br>";
+              
+              String expression = parameter.getExpression();
+              if(expression!=null) {
+                text += "expression: " + expression + "<br>";
+              }
+              
+              String defaultValue = parameter.getDefaultValue();
+              if(defaultValue!=null) {
+                text += "default: " + defaultValue + "<br>";
+              }
+              
+              text += "<br>" + parameter.getDescription();
+              
+              proposals.add(new Template(name, text, getContextTypeId(), //
+                  "<" + name + ">${cursor}</" + name + ">", false));
+            }
+          }
+        }
+      }
+    }
+
+    private PluginDescriptor getPluginDescriptor(String groupId, String artifactId, String version) {
+      String name = groupId + ":" + artifactId + ":" + version;
+      PluginDescriptor descriptor = descriptors.get(name);
+      if(descriptor!=null) {
+        return descriptor;
+      }
+      
+      MavenPlugin plugin = MavenPlugin.getDefault();
+      MavenEmbedder embedder = plugin.getMavenEmbedderManager().getWorkspaceEmbedder();
+
+      Artifact artifact = embedder.createArtifact(groupId, artifactId, version, null, "jar");
+      MavenConsole console = plugin.getConsole();
+      try {
+        embedder.resolve(artifact, Collections.emptyList(), embedder.getLocalRepository());
+        File file = artifact.getFile();
+        if(file == null) {
+          String msg = "Can't resolve plugin " + name;
+          console.logError(msg);
+        } else {
+          InputStream is = null;
+          ZipFile zf = null;
+          try {
+            zf = new ZipFile(file);
+            ZipEntry entry = zf.getEntry("META-INF/maven/plugin.xml");
+            if(entry != null) {
+              is = zf.getInputStream(entry);
+              PluginDescriptorBuilder builder = new PluginDescriptorBuilder();
+              descriptor = builder.build(new InputStreamReader(is));
+              descriptors.put(name, descriptor);
+              return descriptor;
+            }
+
+          } catch(Exception ex) {
+            String msg = "Can't read configuration for " + name;
+            console.logError(msg);
+            MavenLogger.log(msg, ex);
+
+          } finally {
+            IOUtil.close(is);
+            try {
+              zf.close();
+            } catch(IOException ex) {
+              // ignore
+            }
+          }
+        }
+
+      } catch(AbstractArtifactResolutionException ex) {
+        String msg = "Can't resolve plugin " + name;
+        console.logError(msg);
+        MavenLogger.log(msg, ex);
+      }
+      return null;
+    }
+  },
+  
   GROUP_ID("groupId") {
     @Override
-    public void addTemplates(Collection<Template> templates, Node node, String prefix) {
+    public void addTemplates(Collection<Template> proposals, Node node, String prefix) {
       for(String groupId : getSearchEngine().findGroupIds(prefix, getPackaging(node), getContainingArtifact(node))) {
-        templates.add(new Template(groupId, groupId, getContextTypeId(), groupId, false));
+        proposals.add(new Template(groupId, groupId, getContextTypeId(), groupId, false));
       }
     }
   },
 
   ARTIFACT_ID("artifactId") {
     @Override
-    public void addTemplates(Collection<Template> templates, Node node, String prefix) {
+    public void addTemplates(Collection<Template> proposals, Node node, String prefix) {
       String groupId = getGroupId(node);
       if(groupId != null) {
         for(String artifactId : getSearchEngine().findArtifactIds(groupId, prefix, getPackaging(node),
             getContainingArtifact(node))) {
-          templates.add(new Template(artifactId, groupId + ":" + artifactId, getContextTypeId(), artifactId, false));
+          proposals.add(new Template(artifactId, groupId + ":" + artifactId, getContextTypeId(), artifactId, false));
         }
       }
     }
@@ -77,12 +216,12 @@ public enum PomTemplateContext {
 
   VERSION("version") {
     @Override
-    public void addTemplates(Collection<Template> templates, Node node, String prefix) {
+    public void addTemplates(Collection<Template> proposals, Node node, String prefix) {
       String groupId = getGroupId(node);
       String artifactId = getArtifactId(node);
       if(groupId != null && artifactId != null) {
         for(String version : getSearchEngine().findVersions(groupId, artifactId, prefix, getPackaging(node))) {
-          templates.add(new Template(version, groupId + ":" + artifactId + ":" + version, //
+          proposals.add(new Template(version, groupId + ":" + artifactId + ":" + version, //
               getContextTypeId(), version, false));
         }
       }
@@ -91,14 +230,14 @@ public enum PomTemplateContext {
 
   CLASSIFIER("classifier") {
     @Override
-    public void addTemplates(Collection<Template> templates, Node node, String prefix) {
+    public void addTemplates(Collection<Template> proposals, Node node, String prefix) {
       String groupId = getGroupId(node);
       String artifactId = getArtifactId(node);
       String version = getVersion(node);
       if(groupId != null && artifactId != null && version != null) {
         for(String classifier : getSearchEngine().findClassifiers(groupId, artifactId, version, prefix,
             getPackaging(node))) {
-          templates.add(new Template(classifier, groupId + ":" + artifactId + ":" + version + ":" + classifier,
+          proposals.add(new Template(classifier, groupId + ":" + artifactId + ":" + version + ":" + classifier,
               getContextTypeId(), classifier, false));
         }
       }
@@ -107,13 +246,13 @@ public enum PomTemplateContext {
 
   TYPE("type") {
     @Override
-    public void addTemplates(Collection<Template> templates, Node node, String prefix) {
+    public void addTemplates(Collection<Template> proposals, Node node, String prefix) {
       String groupId = getGroupId(node);
       String artifactId = getArtifactId(node);
       String version = getVersion(node);
       if(groupId != null && artifactId != null && version != null) {
         for(String type : getSearchEngine().findTypes(groupId, artifactId, version, prefix, getPackaging(node))) {
-          templates.add(new Template(type, groupId + ":" + artifactId + ":" + version + ":" + type, //
+          proposals.add(new Template(type, groupId + ":" + artifactId + ":" + version + ":" + type, //
               getContextTypeId(), type, false));
         }
       }
@@ -122,43 +261,43 @@ public enum PomTemplateContext {
   
   PHASE("phase") {
     @Override
-    public void addTemplates(Collection<Template> templates, Node node, String prefix) {
+    public void addTemplates(Collection<Template> proposals, Node node, String prefix) {
       // TODO the following list should be derived from the packaging handler (the actual lifecycle)
       
       // Clean Lifecycle
-      add(templates, "pre-clean", "Executes processes needed prior to the actual project cleaning");
-      add(templates, "clean", "Removes all files generated by the previous build");
-      add(templates, "post-clean", "Executes processes needed to finalize the project cleaning");
+      add(proposals, "pre-clean", "Executes processes needed prior to the actual project cleaning");
+      add(proposals, "clean", "Removes all files generated by the previous build");
+      add(proposals, "post-clean", "Executes processes needed to finalize the project cleaning");
       
       // Default Lifecycle
-      add(templates, "validate", "Validate the project is correct and all necessary information is available");
-      add(templates, "generate-sources", "Generate any source code for inclusion in compilation");
-      add(templates, "process-sources", "Process the source code, for example to filter any values");
-      add(templates, "generate-resources", "Generate resources for inclusion in the package");
-      add(templates, "process-resources", "Copy and process the resources into the destination directory, ready for packaging");
-      add(templates, "compile", "Compile the source code of the project");
-      add(templates, "process-classes", "Post-process the generated files from compilation, for example to do bytecode enhancement on Java classes");
-      add(templates, "generate-test-sources", "Generate any test source code for inclusion in compilation");
-      add(templates, "process-test-sources", "Process the test source code, for example to filter any values");
-      add(templates, "generate-test-resources", "Create resources for testing");
-      add(templates, "process-test-resources", "Copy and process the resources into the test destination directory");
-      add(templates, "test-compile", "Compile the test source code into the test destination directory");
-      add(templates, "process-test-classes", "Post-process the generated files from test compilation, for example to do bytecode enhancement on Java classes. For Maven 2.0.5 and above");
-      add(templates, "test", "Run tests using a suitable unit testing framework. These tests should not require the code be packaged or deployed");
-      add(templates, "prepare-package", "Perform any operations necessary to prepare a package before the actual packaging. This often results in an unpacked, processed version of the package. (Maven 2.1 and above)");
-      add(templates, "package", "Take the compiled code and package it in its distributable format, such as a JAR");
-      add(templates, "pre-integration-test", "Perform actions required before integration tests are executed. This may involve things such as setting up the required environment");
-      add(templates, "integration-test", "Process and deploy the package if necessary into an environment where integration tests can be run");
-      add(templates, "post-integration-test", "Perform actions required after integration tests have been executed. This may including cleaning up the environment");
-      add(templates, "verify", "Run any checks to verify the package is valid and meets quality criteria");
-      add(templates, "install", "Install the package into the local repository, for use as a dependency in other projects locally");
-      add(templates, "deploy", "Done in an integration or release environment, copies the final package to the remote repository for sharing with other developers and projects");
+      add(proposals, "validate", "Validate the project is correct and all necessary information is available");
+      add(proposals, "generate-sources", "Generate any source code for inclusion in compilation");
+      add(proposals, "process-sources", "Process the source code, for example to filter any values");
+      add(proposals, "generate-resources", "Generate resources for inclusion in the package");
+      add(proposals, "process-resources", "Copy and process the resources into the destination directory, ready for packaging");
+      add(proposals, "compile", "Compile the source code of the project");
+      add(proposals, "process-classes", "Post-process the generated files from compilation, for example to do bytecode enhancement on Java classes");
+      add(proposals, "generate-test-sources", "Generate any test source code for inclusion in compilation");
+      add(proposals, "process-test-sources", "Process the test source code, for example to filter any values");
+      add(proposals, "generate-test-resources", "Create resources for testing");
+      add(proposals, "process-test-resources", "Copy and process the resources into the test destination directory");
+      add(proposals, "test-compile", "Compile the test source code into the test destination directory");
+      add(proposals, "process-test-classes", "Post-process the generated files from test compilation, for example to do bytecode enhancement on Java classes. For Maven 2.0.5 and above");
+      add(proposals, "test", "Run tests using a suitable unit testing framework. These tests should not require the code be packaged or deployed");
+      add(proposals, "prepare-package", "Perform any operations necessary to prepare a package before the actual packaging. This often results in an unpacked, processed version of the package. (Maven 2.1 and above)");
+      add(proposals, "package", "Take the compiled code and package it in its distributable format, such as a JAR");
+      add(proposals, "pre-integration-test", "Perform actions required before integration tests are executed. This may involve things such as setting up the required environment");
+      add(proposals, "integration-test", "Process and deploy the package if necessary into an environment where integration tests can be run");
+      add(proposals, "post-integration-test", "Perform actions required after integration tests have been executed. This may including cleaning up the environment");
+      add(proposals, "verify", "Run any checks to verify the package is valid and meets quality criteria");
+      add(proposals, "install", "Install the package into the local repository, for use as a dependency in other projects locally");
+      add(proposals, "deploy", "Done in an integration or release environment, copies the final package to the remote repository for sharing with other developers and projects");
       
       // Site Lifecycle
-      add(templates, "pre-site", "Executes processes needed prior to the actual project site generation");
-      add(templates, "site", "Generates the project's site documentation");
-      add(templates, "post-site", "Executes processes needed to finalize the site generation, and to prepare for site deployment");
-      add(templates, "site-deploy", "Deploys the generated site documentation to the specified web server");
+      add(proposals, "pre-site", "Executes processes needed prior to the actual project site generation");
+      add(proposals, "site", "Generates the project's site documentation");
+      add(proposals, "post-site", "Executes processes needed to finalize the site generation, and to prepare for site deployment");
+      add(proposals, "site-deploy", "Deploys the generated site documentation to the specified web server");
     }
 
     private boolean add(Collection<Template> templates, String name, String description) {
@@ -180,14 +319,16 @@ public enum PomTemplateContext {
   public Template[] getTemplates(Node node, String prefix) {
     Collection<Template> templates = new ArrayList<Template>();
     addTemplates(templates, node, prefix);
+    
+    TemplateStore store = MvnIndexPlugin.getDefault().getTemplateStore();
+    if(store != null) {
+      templates.addAll(Arrays.asList(store.getTemplates(getContextTypeId())));
+    }
+    
     return templates.toArray(new Template[templates.size()]);
   }
   
   protected void addTemplates(Collection<Template> templates, Node currentNode, String prefix) {
-    TemplateStore store = getTemplateStore();
-    if(store != null) {
-      templates.addAll(Arrays.asList(store.getTemplates(getContextTypeId())));
-    }
   }
 
   protected String getNodeName() {
@@ -214,10 +355,6 @@ public enum PomTemplateContext {
       }
     }
     return UNKNOWN;
-  }
-
-  private static TemplateStore getTemplateStore() {
-    return MvnIndexPlugin.getDefault().getTemplateStore();
   }
 
   private static SearchEngine getSearchEngine() {
