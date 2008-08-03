@@ -126,7 +126,8 @@ public enum PomTemplateContext {
                 text += "default: " + defaultValue + "<br>";
               }
               
-              text += "<br>" + parameter.getDescription();
+              String desc = parameter.getDescription().trim();
+              text += desc.startsWith("<p>") ? desc : "<br>" + desc;
               
               proposals.add(new Template(name, text, getContextTypeId(), //
                   "<" + name + ">${cursor}</" + name + ">", false));
