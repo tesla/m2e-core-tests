@@ -74,5 +74,15 @@
          <view id="org.maven.ide.eclipse.views.MavenIndexesView" relationship="fast"/>
       </perspectiveExtension>
    </extension>
+   
+   <extension
+         point="org.eclipse.jdt.core.compilationParticipant">
+      <compilationParticipant
+            class="org.maven.ide.eclipse.jdt.internal.JDTCompilationParticipant"
+            createsProblems="false"
+            id="org.maven.ide.eclipse.compilationParticipant"
+            modifiesEnvironment="false">
+      </compilationParticipant>
+   </extension>
 
 </plugin>

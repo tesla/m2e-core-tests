@@ -18,6 +18,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ProjectScope;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -196,5 +197,21 @@ public class MavenBuilderTest extends AsbtractMavenProjectTestCase {
     project.build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
     IResource componentsXML = outputFolder.findMember("META-INF/plexus/components.xml");
     assertTrue(componentsXML.isAccessible());
+  }
+
+  public void test008_classpathChange() throws Exception {
+    deleteProject("resourcefiltering-p008");
+    IProject project = createExisting("resourcefiltering-p008", "projects/resourcefiltering/p008");
+    waitForJobsToComplete();
+
+    project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+    waitForJobsToComplete();
+
+    IFile aFile = project.getFile("target/classes/a.properties");
+    assertTrue(aFile.isAccessible());
+
+    copyContent(project, "pom-changed.xml", "pom.xml"); // waits for jobs to complete
+    project.build(IncrementalProjectBuilder.AUTO_BUILD, monitor);
+    assertTrue(aFile.isAccessible());
   }
 }

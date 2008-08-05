@@ -43,11 +43,16 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IAccessRule;
@@ -82,7 +87,6 @@ import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
-import org.maven.ide.eclipse.internal.ExtensionReader;
 import org.maven.ide.eclipse.project.DownloadSourceEvent;
 import org.maven.ide.eclipse.project.IDownloadSourceListener;
 import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
@@ -90,8 +94,6 @@ import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.IMavenProjectVisitor;
 import org.maven.ide.eclipse.project.MavenProjectChangedEvent;
 import org.maven.ide.eclipse.project.MavenProjectManager;
-import org.maven.ide.eclipse.project.configurator.AbstractClasspathConfigurator;
-import org.maven.ide.eclipse.project.configurator.AbstractClasspathConfiguratorFactory;
 
 /**
  * This class is responsible for mapping Maven classpath to JDT and back.
@@ -122,7 +124,11 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
   
   static final ArtifactFilter SCOPE_FILTER_RUNTIME = new ScopeArtifactFilter(Artifact.SCOPE_RUNTIME); 
   static final ArtifactFilter SCOPE_FILTER_TEST = new ScopeArtifactFilter(Artifact.SCOPE_TEST);
-  
+
+  private static final String EXTENSION_CLASSPATH_CONFIGURATOR_FACTORIES = "org.maven.ide.eclipse.classpathConfiguratorFactories";
+
+  private static final String ELEMENT_CLASSPATH_CONFIGURATOR_FACTORY = "classpathConfiguratorFactory";
+
   final MavenEmbedderManager embedderManager;
 
   final MavenConsole console;
@@ -308,13 +314,36 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
               return res == 0 ? c1.getId().compareTo(c2.getId()) : res;
             }
           });
-      tmp.addAll(ExtensionReader.readClasspathConfiguratorFactoryExtensions());
+      tmp.addAll(readClasspathConfiguratorFactoryExtensions());
       factories = Collections.unmodifiableSet(tmp);
     }
     return factories;
   }
 
-  
+  private static Set<AbstractClasspathConfiguratorFactory> readClasspathConfiguratorFactoryExtensions() {
+    Set<AbstractClasspathConfiguratorFactory> factories = new HashSet<AbstractClasspathConfiguratorFactory>();
+    
+    IExtensionRegistry registry = Platform.getExtensionRegistry();
+    IExtensionPoint configuratorsExtensionPoint = registry.getExtensionPoint(EXTENSION_CLASSPATH_CONFIGURATOR_FACTORIES);
+    if(configuratorsExtensionPoint != null) {
+      IExtension[] configuratorExtensions = configuratorsExtensionPoint.getExtensions();
+      for(IExtension extension : configuratorExtensions) {
+        IConfigurationElement[] elements = extension.getConfigurationElements();
+        for(IConfigurationElement element : elements) {
+          if(element.getName().equals(ELEMENT_CLASSPATH_CONFIGURATOR_FACTORY)) {
+            try {
+              factories.add((AbstractClasspathConfiguratorFactory) //
+                  element.createExecutableExtension(AbstractClasspathConfiguratorFactory.ATTR_CLASS));
+            } catch(CoreException ex) {
+              MavenLogger.log(ex);
+            }
+          }
+        }
+      }
+    }
+    
+    return factories;
+  }
 
   void addClasspathEntries(Set<IClasspathEntry> entries, IMavenProjectFacade facade, int kind, Properties sourceAttachment, List<AbstractClasspathConfigurator> configurators, IProgressMonitor monitor) throws CoreException {
     ArtifactFilter scopeFilter;

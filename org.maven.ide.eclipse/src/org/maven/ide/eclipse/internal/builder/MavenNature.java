@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.container;
+package org.maven.ide.eclipse.internal.builder;
 
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IProject;
@@ -29,19 +29,19 @@ public class MavenNature implements IProjectNature {
     IProjectDescription desc = project.getDescription();
     ICommand[] commands = desc.getBuildSpec();
 
-    for( int i = 0; i < commands.length; ++i) {
-      if( commands[ i].getBuilderName().equals( IMavenConstants.BUILDER_ID)) {
+    for(int i = 0; i < commands.length; ++i) {
+      if(commands[i].getBuilderName().equals(IMavenConstants.BUILDER_ID)) {
         return;
       }
     }
 
-    ICommand[] newCommands = new ICommand[ commands.length + 1];
-    System.arraycopy( commands, 0, newCommands, 0, commands.length);
+    ICommand[] newCommands = new ICommand[commands.length + 1];
+    System.arraycopy(commands, 0, newCommands, 0, commands.length);
     ICommand command = desc.newCommand();
-    command.setBuilderName( IMavenConstants.BUILDER_ID);
-    newCommands[ commands.length ] = command;
-    desc.setBuildSpec( newCommands);
-    project.setDescription( desc, null);
+    command.setBuilderName(IMavenConstants.BUILDER_ID);
+    newCommands[commands.length] = command;
+    desc.setBuildSpec(newCommands);
+    project.setDescription(desc, null);
   }
 
   /*
@@ -52,12 +52,12 @@ public class MavenNature implements IProjectNature {
   public void deconfigure() throws CoreException {
     IProjectDescription description = getProject().getDescription();
     ICommand[] commands = description.getBuildSpec();
-    for( int i = 0; i < commands.length; ++i) {
-      if( commands[ i].getBuilderName().equals( IMavenConstants.BUILDER_ID)) {
-        ICommand[] newCommands = new ICommand[ commands.length - 1];
-        System.arraycopy( commands, 0, newCommands, 0, i);
-        System.arraycopy( commands, i + 1, newCommands, i, commands.length - i - 1);
-        description.setBuildSpec( newCommands);
+    for(int i = 0; i < commands.length; ++i) {
+      if(commands[i].getBuilderName().equals(IMavenConstants.BUILDER_ID)) {
+        ICommand[] newCommands = new ICommand[commands.length - 1];
+        System.arraycopy(commands, 0, newCommands, 0, i);
+        System.arraycopy(commands, i + 1, newCommands, i, commands.length - i - 1);
+        description.setBuildSpec(newCommands);
         return;
       }
     }
@@ -77,9 +77,8 @@ public class MavenNature implements IProjectNature {
    * 
    * @see org.eclipse.core.resources.IProjectNature#setProject(org.eclipse.core.resources.IProject)
    */
-  public void setProject( IProject project) {
+  public void setProject(IProject project) {
     this.project = project;
   }
 
 }
-

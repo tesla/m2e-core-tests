@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.project.configurator;
+package org.maven.ide.eclipse.jdt;
 
 import java.util.Set;
 

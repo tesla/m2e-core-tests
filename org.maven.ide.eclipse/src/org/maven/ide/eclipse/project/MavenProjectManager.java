@@ -12,6 +12,7 @@ import java.io.File;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -22,6 +23,7 @@ import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.embedder.MavenEmbedderException;
 import org.apache.maven.execution.MavenExecutionResult;
 
+import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerImpl;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerRefreshJob;
 
@@ -176,4 +178,20 @@ public class MavenProjectManager {
     return workspaceStateFile;
   }
 
+  /**
+   * Request full maven build for a project.
+   * 
+   * This call only has effect for projects that have maven nature and
+   * Maven builder configured. 
+   * 
+   * This call does not trigger the build. Instead next time Maven builder
+   * processes the project it will use goals to execute during clean
+   * build regardless of the build type requested.
+   * 
+   * The main purpose of this call is to allow coordination between multiple
+   * builders configured for the same project. 
+   */
+  public void requestFullMavenBuild(IProject project) throws CoreException {
+    project.setSessionProperty(IMavenConstants.FULL_MAVEN_BUILD, Boolean.TRUE);
+  }
 }

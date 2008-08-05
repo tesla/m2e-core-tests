@@ -8,6 +8,8 @@
 
 package org.maven.ide.eclipse.core;
 
+import org.eclipse.core.runtime.QualifiedName;
+
 /**
  * Maven Constants
  * 
@@ -55,4 +57,9 @@ public interface IMavenConstants {
 
   public static final String M2_REPO = "M2_REPO"; //$NON-NLS-1$
 
+  /** 
+   * Session property key used to indicate that full maven build was requested for a project.
+   * It is not intended to be used by clients directly.
+   */
+  public static final QualifiedName FULL_MAVEN_BUILD = new QualifiedName(PLUGIN_ID, "fullBuild");
 }

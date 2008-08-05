@@ -38,14 +38,14 @@
               id="maven2Builder"
               name="%m2.builder.name">
       <builder hasNature="true" isConfigurable="false">
-         <run class="org.maven.ide.eclipse.container.MavenBuilder"/>
+         <run class="org.maven.ide.eclipse.internal.builder.MavenBuilder"/>
       </builder>
    </extension>
    <extension point="org.eclipse.core.resources.natures"
          id="maven2Nature"
          name="%m2.nature.name">
       <runtime>
-         <run class="org.maven.ide.eclipse.container.MavenNature"/>
+         <run class="org.maven.ide.eclipse.internal.builder.MavenNature"/>
       </runtime>
       <builder id="org.maven.ide.eclipse.maven2Builder"/>
    </extension>

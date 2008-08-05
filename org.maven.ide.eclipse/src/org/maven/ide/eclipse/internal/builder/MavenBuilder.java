@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.container;
+package org.maven.ide.eclipse.internal.builder;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -69,8 +69,12 @@ public class MavenBuilder extends IncrementalProjectBuilder {
         return null;
       }
 
-      if (FULL_BUILD == kind || CLEAN_BUILD == kind) {
-        executePostBuild(mavenProject, monitor);
+      if (FULL_BUILD == kind || CLEAN_BUILD == kind || getRequireFullBuild(getProject())) {
+        try {
+          executePostBuild(mavenProject, monitor);
+        } finally {
+          resetRequireFullBuild(getProject());
+        }
       } else {
         // if( kind == AUTO_BUILD || kind == INCREMENTAL_BUILD ) {
         processResources(mavenProject, monitor);
@@ -79,9 +83,14 @@ public class MavenBuilder extends IncrementalProjectBuilder {
     return null;
   }
 
-  /**
-   * 
-   */
+  private void resetRequireFullBuild(IProject project) throws CoreException {
+    project.setSessionProperty(IMavenConstants.FULL_MAVEN_BUILD, null);
+  }
+
+  private boolean getRequireFullBuild(IProject project) throws CoreException {
+    return project.getSessionProperty(IMavenConstants.FULL_MAVEN_BUILD) != null;
+  }
+
   private void processResources(IMavenProjectFacade mavenProject, final IProgressMonitor monitor) throws CoreException {
     final IResourceDelta delta = getDelta(mavenProject.getProject());
 
