@@ -25,7 +25,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
@@ -313,6 +312,27 @@ public class PomEditorTest extends UITestCaseSWT {
 
     // test the editor is clean
     ui.assertThat(new NotCondition(new DirtyEditorCondition()));
+  }
+
+  public void testEmptyFile() throws Exception {
+	    ui.keyClick(SWT.CTRL, 'm');
+		ui.contextClick(new TreeItemLocator("test-pom", new ViewLocator(
+				"org.eclipse.jdt.ui.PackageExplorer")), "New/File");
+		ui.wait(new ShellShowingCondition("New File"));
+		ui.enterText("test.pom");
+		ui.click(new ButtonLocator("&Finish"));
+		ui.wait(new ShellDisposedCondition("Progress Information"));
+		ui.wait(new ShellDisposedCondition("New File"));
+	    ui.keyClick(SWT.CTRL, 'm');
+	    assertTextValue("artifactId", "");
+	    setTextValue("artifactId", "artf1");
+	    ui.click(new CTabItemLocator(TAB_POM_XML_TAB));
+	    replaceText("artf1", "artf2");
+	    ui.click(new CTabItemLocator(TAB_OVERVIEW));
+	    assertTextValue("artifactId", "artf2");
+	    ui.keyClick(SWT.CTRL, 's');
+	    ui.keyClick(SWT.CTRL, 'm');
+		ui.close(new CTabItemLocator("test-pom/test.pom"));
   }
 
   private void createTestProject() throws CoreException {
