@@ -316,6 +316,8 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
         // manually update editor dirty indicator
         if(this.dirty != dirty) {
           this.dirty = dirty;
+          //force actions update
+          updatePropertyDependentActions();
           MavenPomEditor.this.editorDirtyStateChanged();
         }
         return dirty;
