@@ -34,8 +34,8 @@ public class MavenJdtPlugin implements BundleActivator {
 
   private static MavenJdtPlugin instance;
 
-  private MavenLaunchConfigurationListener launchConfigurationListener;
-  private BuildPathManager buildpathManager;
+  MavenLaunchConfigurationListener launchConfigurationListener;
+  BuildPathManager buildpathManager;
   
   public MavenJdtPlugin() {
     instance = this;

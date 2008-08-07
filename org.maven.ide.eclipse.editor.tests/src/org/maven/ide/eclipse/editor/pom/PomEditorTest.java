@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
@@ -75,7 +76,6 @@ import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
  * @author Eugene Kuleshov
  * @author Anton Kraev 
  */
-
 public class PomEditorTest extends UITestCaseSWT {
 
   private static final String FIND_REPLACE = "Find/Replace";
@@ -453,7 +453,7 @@ public class PomEditorTest extends UITestCaseSWT {
     output.close();
   }
 
-  private void delete(String startMarker, final String endMarker) throws WaitTimedOutException, WidgetSearchException {
+  private void delete(String startMarker, final String endMarker) throws WaitTimedOutException {
 	    IWorkbenchPage activePage = getActivePage();
 	    final MavenPomEditor editor = (MavenPomEditor) activePage.getActiveEditor();
 	    final StructuredTextEditor[] sse = new StructuredTextEditor[1];
@@ -462,11 +462,14 @@ public class PomEditorTest extends UITestCaseSWT {
 	        sse[0] = (StructuredTextEditor) editor.getActiveEditor();
 	      }
 	    });
-	    String text = sse[0].getModel().getStructuredDocument().get();
+	    
+	    @SuppressWarnings("restriction")
+	    IDocument structuredDocument = sse[0].getModel().getStructuredDocument();
+      String text = structuredDocument.get();
 	    int pos1 = text.indexOf(startMarker); 
 	    int pos2 = text.indexOf(endMarker);
 	    text = text.substring(0, pos1) + text.substring(pos2 + endMarker.length());
-	    sse[0].getModel().getStructuredDocument().set(text);
+	    structuredDocument.set(text);
   }
 
   private void assertTextValue(String id, String value) {
