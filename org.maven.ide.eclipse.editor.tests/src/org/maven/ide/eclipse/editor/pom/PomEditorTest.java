@@ -37,6 +37,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IPerspectiveRegistry;
+import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -126,12 +127,20 @@ public class PomEditorTest extends UITestCaseSWT {
     IPerspectiveDescriptor perspective = perspectiveRegistry
         .findPerspectiveWithId("org.eclipse.jdt.ui.JavaPerspective");
     getActivePage().setPerspective(perspective);
-		ui.close(new CTabItemLocator("Outline"));
+    //close unnecessary tabs (different versions have different defaults in java perspective)
+    closeTab("org.eclipse.ui.views.TaskList", "Task List");
+    closeTab("org.eclipse.ui.views.ContentOutline", "Outline");
 
     createTestProject();
     
     openPomFile();
   }
+
+	private void closeTab(String id, String title) throws Exception {
+    IViewPart view = getActivePage().findView(id);
+    if (view != null)
+      ui.close(new CTabItemLocator(title));
+	}
 
   public void testUpdatingArtifactIdInXmlPropagatedToForm() throws Exception {
     ui.click(new CTabItemLocator(TAB_POM_XML_TAB));
