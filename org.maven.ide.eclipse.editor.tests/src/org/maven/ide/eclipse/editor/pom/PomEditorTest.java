@@ -360,7 +360,7 @@ public class PomEditorTest extends UITestCaseSWT {
 				"org.eclipse.jdt.ui.PackageExplorer")), "Delete");
 		ui.wait(new ShellDisposedCondition("Progress Information"));
 		ui.wait(new ShellShowingCondition("Confirm Delete"));
-		ui.click(new ButtonLocator("OK"));
+		ui.keyClick(WT.CR);
 		IFile file = root.getFile(new Path(name));
 		ui.wait(new FileExistsCondition(file, false));
 	}
