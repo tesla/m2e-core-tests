@@ -56,6 +56,7 @@ import com.windowtester.runtime.condition.IConditionMonitor;
 import com.windowtester.runtime.condition.IHandler;
 import com.windowtester.runtime.locator.WidgetReference;
 import com.windowtester.runtime.swt.UITestCaseSWT;
+import com.windowtester.runtime.swt.condition.eclipse.FileExistsCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellDisposedCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellShowingCondition;
 import com.windowtester.runtime.swt.internal.condition.NotCondition;
@@ -335,7 +336,36 @@ public class PomEditorTest extends UITestCaseSWT {
 		ui.close(new CTabItemLocator("test-pom/test.pom"));
   }
 
-  private void createTestProject() throws CoreException {
+	//MNGECLIPSE-834
+	public void testDiscardedFileDeletion() throws Exception {
+		String name = "test-pom/another.pom";
+		ui.contextClick(new TreeItemLocator("test-pom", new ViewLocator(
+				"org.eclipse.jdt.ui.PackageExplorer")), "New/File");
+		ui.wait(new ShellShowingCondition("New File"));
+		ui.enterText("another.pom");
+		ui.keyClick(WT.CR);
+		ui.wait(new ShellDisposedCondition("Progress Information"));
+		ui.wait(new ShellDisposedCondition("New File"));
+		ui.keyClick(SWT.CTRL, 's');
+		ui.close(new CTabItemLocator(name));
+		ui.click(2, new TreeItemLocator("test-pom/another.pom", new ViewLocator(
+				"org.eclipse.jdt.ui.PackageExplorer")));
+		ui.click(new NamedWidgetLocator("groupId"));
+		ui.enterText("1");
+		ui.close(new CTabItemLocator("*" + name));
+		ui.wait(new ShellDisposedCondition("Progress Information"));
+		ui.wait(new ShellShowingCondition("Save Resource"));
+		ui.click(new ButtonLocator("&No"));
+		ui.contextClick(new TreeItemLocator(name, new ViewLocator(
+				"org.eclipse.jdt.ui.PackageExplorer")), "Delete");
+		ui.wait(new ShellDisposedCondition("Progress Information"));
+		ui.wait(new ShellShowingCondition("Confirm Delete"));
+		ui.click(new ButtonLocator("OK"));
+		IFile file = root.getFile(new Path(name));
+		ui.wait(new FileExistsCondition(file, false));
+	}
+
+	private void createTestProject() throws CoreException {
     // create new project with POM using new project wizard
     // ui.contextClick(new SWTWidgetLocator(Tree.class, new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")),
     //      "Ne&w/Maven Project");

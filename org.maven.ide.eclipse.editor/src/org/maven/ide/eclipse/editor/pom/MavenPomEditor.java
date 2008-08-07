@@ -695,14 +695,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   }
 
   public void dispose() {
-    sourcePage.getModel().getUndoManager().getCommandStack().flush();
-    if(pomFile != null && pomFile.isAccessible() && pomFile.isSynchronized(1)) {
-      try {
-        structuredModel.reload(pomFile.getContents());
-      } catch(Exception e) {
-        MavenLogger.log("Can't update model " + pomFile.getLocation().toPortableString(), e);
-      }
-    }
+    sourcePage.getModel().releaseFromEdit();
 
     if(activationListener != null) {
       activationListener.dispose();
