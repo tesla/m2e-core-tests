@@ -440,11 +440,13 @@ public class TeamComposite extends Composite {
       }
  
       public void modify(Object element, String property, Object value) {
-        EditingDomain editingDomain = parent.getEditingDomain();
-        Command command = SetCommand.create(editingDomain, getRoles(),
-            POM_PACKAGE.getRoles_Role(), value,
-            rolesEditor.getViewer().getTable().getSelectionIndex());
-        editingDomain.getCommandStack().execute(command);
+        int n = rolesEditor.getViewer().getTable().getSelectionIndex();
+        if(!value.equals(getRoles().getRole().get(n))) {
+          EditingDomain editingDomain = parent.getEditingDomain();
+          Command command = SetCommand.create(editingDomain, getRoles(),
+              POM_PACKAGE.getRoles_Role(), value, n);
+          editingDomain.getCommandStack().execute(command);
+        }
       }
     });
 

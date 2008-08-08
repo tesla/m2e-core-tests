@@ -728,14 +728,16 @@ public class PluginsComposite extends Composite {
    
         public void modify(Object element, String property, Object value) {
           int n = goalsEditor.getViewer().getTable().getSelectionIndex();
-          
-          EditingDomain editingDomain = parent.getEditingDomain();
-          Command command = SetCommand.create(editingDomain, //
-              currentPluginExecution.getGoals(), POM_PACKAGE.getStringGoals_Goal(), value, n);
-          editingDomain.getCommandStack().execute(command);
-  
-          // currentPluginExecution.getGoals().getGoal().set(n, (String) value);
-          goalsEditor.update();
+          StringGoals goals = currentPluginExecution.getGoals();
+          if(!value.equals(goals.getGoal().get(n))) {
+            EditingDomain editingDomain = parent.getEditingDomain();
+            Command command = SetCommand.create(editingDomain, goals, //
+                POM_PACKAGE.getStringGoals_Goal(), value, n);
+            editingDomain.getCommandStack().execute(command);
+    
+            // currentPluginExecution.getGoals().getGoal().set(n, (String) value);
+            goalsEditor.update();
+          }
         }
       });
   

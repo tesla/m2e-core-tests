@@ -57,6 +57,7 @@ import com.windowtester.runtime.WidgetSearchException;
 import com.windowtester.runtime.condition.HasTextCondition;
 import com.windowtester.runtime.condition.IConditionMonitor;
 import com.windowtester.runtime.condition.IHandler;
+import com.windowtester.runtime.locator.IWidgetLocator;
 import com.windowtester.runtime.locator.WidgetReference;
 import com.windowtester.runtime.swt.UITestCaseSWT;
 import com.windowtester.runtime.swt.condition.eclipse.FileExistsCondition;
@@ -68,6 +69,7 @@ import com.windowtester.runtime.swt.locator.ButtonLocator;
 import com.windowtester.runtime.swt.locator.CTabItemLocator;
 import com.windowtester.runtime.swt.locator.NamedWidgetLocator;
 import com.windowtester.runtime.swt.locator.SWTWidgetLocator;
+import com.windowtester.runtime.swt.locator.TableItemLocator;
 import com.windowtester.runtime.swt.locator.TreeItemLocator;
 import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
 
@@ -127,39 +129,35 @@ public class PomEditorTest extends UITestCaseSWT {
     IPerspectiveDescriptor perspective = perspectiveRegistry
         .findPerspectiveWithId("org.eclipse.jdt.ui.JavaPerspective");
     getActivePage().setPerspective(perspective);
-    //close unnecessary tabs (different versions have different defaults in java perspective)
+
+    // close unnecessary tabs (different versions have different defaults in java perspective)
     closeTab("org.eclipse.mylyn.tasks.ui.views.tasks", "Task List");
     closeTab("org.eclipse.ui.views.ContentOutline", "Outline");
 
     createTestProject();
     
-    openPomFile();
   }
 
-	private void closeTab(String id, String title) throws Exception {
-    IViewPart view = getActivePage().findView(id);
-    if (view != null)
-      ui.close(new CTabItemLocator(title));
-	}
+	public void testUpdatingArtifactIdInXmlPropagatedToForm() throws Exception {
+	  openPomFile();
 
-  public void testUpdatingArtifactIdInXmlPropagatedToForm() throws Exception {
-    ui.click(new CTabItemLocator(TAB_POM_XML_TAB));
+	  selectEditorTab(TAB_POM_XML_TAB);
     replaceText("test-pom", "test-pom1");
 
-    ui.click(new CTabItemLocator(TAB_OVERVIEW));
+    selectEditorTab(TAB_OVERVIEW);
     assertTextValue("artifactId", "test-pom1");
   }
 
   public void testFormToXmlAndXmlToFormInParentArtifactId() throws Exception {
     // test FORM->XML and XML->FORM update of parentArtifactId
-    ui.click(new CTabItemLocator(TAB_OVERVIEW));
+    selectEditorTab(TAB_OVERVIEW);
     ui.click(new SWTWidgetLocator(Label.class, "Parent"));
     setTextValue("parentArtifactId", "parent2");
 
-    ui.click(new CTabItemLocator(TAB_POM_XML_TAB));
+    selectEditorTab(TAB_POM_XML_TAB);
     replaceText("parent2", "parent3");
     
-    ui.click(new CTabItemLocator(TAB_OVERVIEW));
+    selectEditorTab(TAB_OVERVIEW);
     assertTextValue("parentArtifactId", "parent3");
   }
 
@@ -167,9 +165,9 @@ public class PomEditorTest extends UITestCaseSWT {
     ui.click(new SWTWidgetLocator(Label.class, "Organization"));
 		ui.click(new NamedWidgetLocator("organizationName"));
 		ui.enterText("orgfoo");
-		ui.click(new CTabItemLocator(TAB_POM_XML_TAB));
+		selectEditorTab(TAB_POM_XML_TAB);
     replaceText("orgfoo", "orgfoo1");
-    ui.click(new CTabItemLocator(TAB_OVERVIEW));
+    selectEditorTab(TAB_OVERVIEW);
     assertTextValue("organizationName", "orgfoo1");
   }
 
@@ -183,17 +181,17 @@ public class PomEditorTest extends UITestCaseSWT {
   }
 
   public void testDeletingScmSectionInXmlPropagatedToForm() throws Exception {
-    ui.click(new CTabItemLocator(TAB_OVERVIEW));
+    selectEditorTab(TAB_OVERVIEW);
     ui.click(new SWTWidgetLocator(Label.class, "SCM"));
     setTextValue("scmUrl", "http://svn.sonatype.org/m2eclipse");
     assertTextValue("scmUrl", "http://svn.sonatype.org/m2eclipse");
-    ui.click(new CTabItemLocator(TAB_POM_XML_TAB));
+    selectEditorTab(TAB_POM_XML_TAB);
     delete("<scm>", "</scm>");
-    ui.click(new CTabItemLocator(TAB_OVERVIEW));
+    selectEditorTab(TAB_OVERVIEW);
     assertTextValue("scmUrl", "");
-    ui.click(new CTabItemLocator(TAB_POM_XML_TAB));
+    selectEditorTab(TAB_POM_XML_TAB);
     delete("<organization>", "</organization>");
-    ui.click(new CTabItemLocator(TAB_OVERVIEW));
+    selectEditorTab(TAB_OVERVIEW);
     assertTextValue("organizationName", "");
     setTextValue("scmUrl", "http://svn.sonatype.org/m2eclipse");
     assertTextValue("scmUrl", "http://svn.sonatype.org/m2eclipse");
@@ -222,7 +220,7 @@ public class PomEditorTest extends UITestCaseSWT {
     assertTextValue("parentArtifactId", "parent4");
 
     // verify that value changed in xml and in the form
-    ui.click(new CTabItemLocator(TAB_POM_XML_TAB));
+    selectEditorTab(TAB_POM_XML_TAB);
     String editorText = getEditorText();
     assertTrue(editorText, editorText.contains("<artifactId>parent4</artifactId>"));
     
@@ -238,9 +236,9 @@ public class PomEditorTest extends UITestCaseSWT {
   public void testExternalModificationEditorDirty() throws Exception {
     // make editor dirty
     ui.click(new CTabItemLocator(TEST_POM_POM_XML));
-    ui.click(new CTabItemLocator(TAB_POM_XML_TAB));
+    selectEditorTab(TAB_POM_XML_TAB);
     replaceText("parent4", "parent5");
-    ui.click(new CTabItemLocator(TAB_OVERVIEW));
+    selectEditorTab(TAB_OVERVIEW);
 
     // externally replace file contents
     IFile file = root.getFile(new Path(TEST_POM_POM_XML));
@@ -261,7 +259,7 @@ public class PomEditorTest extends UITestCaseSWT {
     assertTextValue("parentArtifactId", "parent6");
     
     // verify that value changed in xml and in the form
-    ui.click(new CTabItemLocator(TAB_POM_XML_TAB));
+    selectEditorTab(TAB_POM_XML_TAB);
     String editorText = getEditorText();
     assertTrue(editorText, editorText.contains("<artifactId>parent6</artifactId>"));
 
@@ -290,9 +288,9 @@ public class PomEditorTest extends UITestCaseSWT {
   public void testAfterUndoEditorIsClean() throws Exception {
     // make a change 
     ui.click(new CTabItemLocator(TEST_POM_POM_XML));
-    ui.click(new CTabItemLocator(TAB_POM_XML_TAB));
+    selectEditorTab(TAB_POM_XML_TAB);
     replaceText("parent6", "parent7");
-    ui.click(new CTabItemLocator(TAB_OVERVIEW));
+    selectEditorTab(TAB_OVERVIEW);
     // undo change
     ui.keyClick(SWT.CTRL, 'z');
 
@@ -310,9 +308,9 @@ public class PomEditorTest extends UITestCaseSWT {
 		ui.wait(new ShellDisposedCondition("New File"));
 	  assertTextValue("artifactId", "");
 	  setTextValue("artifactId", "artf1");
-	  ui.click(new CTabItemLocator(TAB_POM_XML_TAB));
+	  selectEditorTab(TAB_POM_XML_TAB);
 	  replaceText("artf1", "artf2");
-	  ui.click(new CTabItemLocator(TAB_OVERVIEW));
+	  selectEditorTab(TAB_OVERVIEW);
 	  assertTextValue("artifactId", "artf2");
 	  ui.keyClick(SWT.CTRL, 's');
 		ui.close(new CTabItemLocator(PROJECT_NAME + "/test.pom"));
@@ -347,13 +345,6 @@ public class PomEditorTest extends UITestCaseSWT {
 		ui.wait(new FileExistsCondition(file, false));
 	}
 	
-	class NonDirtyEditorCondition extends DirtyEditorCondition {
-		@Override
-		public boolean test() {
-			return !super.test();
-		}
-	}
-
 	//MNGECLIPSE-833
 	public void testSaveAfterPaste() throws Exception {
 		String name = PROJECT_NAME + "/another.pom";
@@ -363,18 +354,56 @@ public class PomEditorTest extends UITestCaseSWT {
 		ui.wait(new ShellDisposedCondition("Progress Information"));
 		ui.click(2, new TreeItemLocator(PROJECT_NAME + "/another.pom", new ViewLocator(
 		"org.eclipse.jdt.ui.PackageExplorer")));
-	  ui.click(new CTabItemLocator(TAB_POM_XML_TAB));
-		ui.wait(new NonDirtyEditorCondition());
+	  selectEditorTab(TAB_POM_XML_TAB);
+		ui.wait(new NotCondition(new DirtyEditorCondition()));
 		findText("</project>");
 		ui.keyClick(WT.ARROW_LEFT);
 		putIntoClipboard("<properties><sample>sample</sample></properties>");
 		ui.keyClick(SWT.CTRL, 'v');
 		ui.wait(new DirtyEditorCondition());
 		ui.keyClick(SWT.CTRL, 's');
-		ui.wait(new NonDirtyEditorCondition());
+		ui.wait(new NotCondition(new DirtyEditorCondition()));
 	}
 
-	private void putIntoClipboard(String str) throws Exception {
+	// MNGECLIPSE-835
+  public void testModulesEditorActivation() throws Exception {
+    openPomFile();
+    
+    selectEditorTab(TAB_OVERVIEW);
+  
+    ui.click(new ButtonLocator("Add..."));
+    ui.click(new TableItemLocator("?"));
+    ui.enterText("foo1");
+    ui.keyClick(WT.CR);
+    ui.keyClick(WT.CR);
+    
+    ui.click(new ButtonLocator("Add..."));
+    ui.click(new TableItemLocator("?"));
+    ui.enterText("foo2");
+    ui.keyClick(WT.CR);
+    ui.keyClick(WT.CR);
+  
+    // save
+    ui.keyClick(SWT.CTRL, 's');
+    
+    ui.click(new TableItemLocator("foo1"));
+    ui.click(new TableItemLocator("foo2"));
+
+    try {
+      // test the editor is clean
+      ui.assertThat(new NotCondition(new DirtyEditorCondition()));
+    } finally {
+      ui.keyClick(SWT.CTRL, 's');
+    }
+  }
+
+  private void closeTab(String id, String title) throws Exception {
+    IViewPart view = getActivePage().findView(id);
+    if (view != null)
+      ui.close(new CTabItemLocator(title));
+  }
+
+  private void putIntoClipboard(String str) throws Exception {
 		ui.contextClick(new TreeItemLocator(PROJECT_NAME, new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")), "New/File");
 		ui.wait(new ShellShowingCondition("New File"));
 		ui.enterText("t.txt");
@@ -415,6 +444,13 @@ public class PomEditorTest extends UITestCaseSWT {
     IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(PROJECT_NAME);
     IPath location = null;
     configurationManager.createSimpleProject(project, location, model, folders, config, new NullProgressMonitor());
+  }
+
+  private void selectEditorTab(String name) throws WidgetSearchException {
+    // need to maximize editor to make it work on small window sizes
+    ui.keyClick(SWT.CTRL, 'm');
+    ui.click(new CTabItemLocator(name));
+    ui.keyClick(SWT.CTRL, 'm');
   }
 
   private String openPomFile() {

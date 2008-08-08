@@ -459,12 +459,15 @@ public class OverviewPage extends MavenPomEditorPage {
       }
  
       public void modify(Object element, String property, Object value) {
-        EditingDomain editingDomain = getEditingDomain();
-        Command command = SetCommand.create(editingDomain, model.getModules(), //
-            POM_PACKAGE.getModules_Module(), value, //
-            modulesEditor.getViewer().getTable().getSelectionIndex());
-        editingDomain.getCommandStack().execute(command);
-        // modulesEditor.refresh();
+        int n = modulesEditor.getViewer().getTable().getSelectionIndex();
+        Modules modules = model.getModules();
+        if(!value.equals(modules.getModule().get(n))) {
+          EditingDomain editingDomain = getEditingDomain();
+          Command command = SetCommand.create(editingDomain, modules, //
+              POM_PACKAGE.getModules_Module(), value, n);
+          editingDomain.getCommandStack().execute(command);
+          // modulesEditor.refresh();
+        }
       }
     });
     

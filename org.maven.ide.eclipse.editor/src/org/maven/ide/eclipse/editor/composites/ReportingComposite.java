@@ -532,8 +532,10 @@ public class ReportingComposite extends Composite {
 
       public void modify(Object element, String property, Object value) {
         EditingDomain editingDomain = parent.getEditingDomain();
-        Command command = SetCommand.create(editingDomain, currentReportSet, POM_PACKAGE.getReportSet_Id(), value);
-        editingDomain.getCommandStack().execute(command);
+        if(!value.equals(currentReportSet.getId())) {
+          Command command = SetCommand.create(editingDomain, currentReportSet, POM_PACKAGE.getReportSet_Id(), value);
+          editingDomain.getCommandStack().execute(command);
+        }
       }
     });
 

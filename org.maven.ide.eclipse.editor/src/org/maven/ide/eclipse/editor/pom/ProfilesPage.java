@@ -364,8 +364,7 @@ public class ProfilesPage extends MavenPomEditorPage {
       public void modify(Object element, String property, Object value) {
         int n = modulesEditor.getViewer().getTable().getSelectionIndex();
         StringModules modules = currentProfile.getModules();
-        String module = modules.getModule().get(n);
-        if(!value.equals(module)) {
+        if(!value.equals(modules.getModule().get(n))) {
           EditingDomain editingDomain = getEditingDomain();
           Command command = SetCommand.create(editingDomain, modules, POM_PACKAGE.getStringModules_Module(), value, n);
           editingDomain.getCommandStack().execute(command);
