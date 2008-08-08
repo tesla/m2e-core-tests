@@ -128,7 +128,7 @@ public class PomEditorTest extends UITestCaseSWT {
         .findPerspectiveWithId("org.eclipse.jdt.ui.JavaPerspective");
     getActivePage().setPerspective(perspective);
     //close unnecessary tabs (different versions have different defaults in java perspective)
-    closeTab("org.eclipse.ui.views.TaskList", "Task List");
+    closeTab("org.eclipse.mylyn.tasks.ui.views.tasks", "Task List");
     closeTab("org.eclipse.ui.views.ContentOutline", "Outline");
 
     createTestProject();
