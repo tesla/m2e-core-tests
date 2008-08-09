@@ -34,6 +34,7 @@ import org.apache.maven.model.Scm;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.scm.ScmHandlerFactory;
 import org.maven.ide.eclipse.scm.ScmHandlerUi;
+import org.maven.ide.eclipse.scm.ScmTag;
 import org.maven.ide.eclipse.scm.ScmUrl;
 
 
@@ -116,52 +117,6 @@ public class MavenCheckoutLocationPage extends AbstractMavenWizardPage {
       scmUrlBrowseButton = new Button(composite, SWT.NONE);
       scmUrlBrowseButton.setLayoutData(new GridData());
       scmUrlBrowseButton.setText("&Browse...");
-      scmUrlBrowseButton.addSelectionListener(new SelectionAdapter() {
-        public void widgetSelected(SelectionEvent e) {
-          ScmHandlerUi handlerUi = ScmHandlerFactory.getHandlerUiByType(scmType);
-          // XXX should use null if there is no scmUrl selected
-          ScmUrl currentUrl = scmUrls==null || scmUrls.length==0 ? new ScmUrl("scm:" + scmType + ":") : scmUrls[0];
-          ScmUrl scmUrl = handlerUi.selectUrl(getShell(), currentUrl);
-          if(scmUrl!=null) {
-            scmUrlCombo.setText(scmUrl.getProviderUrl());
-            if(scmUrls==null) {
-              scmUrls = new ScmUrl[1];
-            }
-            scmUrls[0] = scmUrl;
-            scmParentUrl = scmUrl.getUrl();
-            updatePage();
-          }
-        }
-      });
-      
-      scmUrlCombo.addModifyListener(new ModifyListener() {
-        public void modifyText(ModifyEvent e) {
-          final String url = scmUrlCombo.getText();
-          if(url.startsWith("scm:")) {
-            try {
-              final String type = ScmUrl.getType(url);
-              scmTypeCombo.setText(type);
-              scmType = type;
-              Display.getDefault().asyncExec(new Runnable() {
-                public void run() {
-                  scmUrlCombo.setText(url.substring(type.length() + 5));
-                }
-              });
-            } catch(CoreException ex) {
-            }
-            return;
-          }
-          
-          if(scmUrls==null) {
-            scmUrls = new ScmUrl[1];
-          }
-          
-          ScmUrl scmUrl = new ScmUrl("scm:" + scmType + ":" + url);
-          scmUrls[0] = scmUrl;
-          scmParentUrl = scmUrl.getUrl();
-          updatePage();
-        }
-      });
     }
 
     headRevisionButton = new Button(composite, SWT.CHECK);
@@ -184,6 +139,13 @@ public class MavenCheckoutLocationPage extends AbstractMavenWizardPage {
     revisionTextData.widthHint = 115;
     revisionTextData.verticalIndent = 3;
     revisionText.setLayoutData(revisionTextData);
+    
+    ScmTag tag = scmUrls[0].getTag();
+    if(tag!=null) {
+      headRevisionButton.setSelection(false);
+      revisionText.setText(tag.getName());
+    }
+    
     revisionText.addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent e) {
         updatePage();
@@ -233,6 +195,55 @@ public class MavenCheckoutLocationPage extends AbstractMavenWizardPage {
     if(scmUrls!=null && scmUrls.length == 1) {
       scmTypeCombo.setText(scmType == null ? "" : scmType);
       scmUrlCombo.setText(scmUrls[0].getProviderUrl());
+    }
+
+    if(scmUrls == null || scmUrls.length < 2) {
+      scmUrlBrowseButton.addSelectionListener(new SelectionAdapter() {
+        public void widgetSelected(SelectionEvent e) {
+          ScmHandlerUi handlerUi = ScmHandlerFactory.getHandlerUiByType(scmType);
+          // XXX should use null if there is no scmUrl selected
+          ScmUrl currentUrl = scmUrls==null || scmUrls.length==0 ? new ScmUrl("scm:" + scmType + ":") : scmUrls[0];
+          ScmUrl scmUrl = handlerUi.selectUrl(getShell(), currentUrl);
+          if(scmUrl!=null) {
+            scmUrlCombo.setText(scmUrl.getProviderUrl());
+            if(scmUrls==null) {
+              scmUrls = new ScmUrl[1];
+            }
+            scmUrls[0] = scmUrl;
+            scmParentUrl = scmUrl.getUrl();
+            updatePage();
+          }
+        }
+      });
+      
+      scmUrlCombo.addModifyListener(new ModifyListener() {
+        public void modifyText(ModifyEvent e) {
+          final String url = scmUrlCombo.getText();
+          if(url.startsWith("scm:")) {
+            try {
+              final String type = ScmUrl.getType(url);
+              scmTypeCombo.setText(type);
+              scmType = type;
+              Display.getDefault().asyncExec(new Runnable() {
+                public void run() {
+                  scmUrlCombo.setText(url.substring(type.length() + 5));
+                }
+              });
+            } catch(CoreException ex) {
+            }
+            return;
+          }
+          
+          if(scmUrls==null) {
+            scmUrls = new ScmUrl[1];
+          }
+          
+          ScmUrl scmUrl = new ScmUrl("scm:" + scmType + ":" + url);
+          scmUrls[0] = scmUrl;
+          scmParentUrl = scmUrl.getUrl();
+          updatePage();
+        }
+      });
     }
     
     updatePage();

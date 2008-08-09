@@ -29,16 +29,22 @@ import org.maven.ide.eclipse.core.IMavenConstants;
 public class ScmUrl {
   private final String scmUrl;
   private final String scmParentUrl;
+  private final ScmTag tag;
 
   public ScmUrl(String scmUrl) {
     this(scmUrl, null);
   }
   
   public ScmUrl(String scmUrl, String scmParentUrl) {
-    this.scmUrl = scmUrl;
-    this.scmParentUrl = scmParentUrl;
+    this(scmUrl, null, null);
   }
 
+  public ScmUrl(String scmUrl, String scmParentUrl, ScmTag tag) {
+    this.scmUrl = scmUrl;
+    this.scmParentUrl = scmParentUrl;
+    this.tag = tag;
+  }
+  
   /**
    * Return SCM url
    */
@@ -51,6 +57,13 @@ public class ScmUrl {
    */
   public String getParentUrl() {
     return scmParentUrl;
+  }
+  
+  /**
+   * Return SCM tag
+   */
+  public ScmTag getTag() {
+    return this.tag;
   }
   
   /**
