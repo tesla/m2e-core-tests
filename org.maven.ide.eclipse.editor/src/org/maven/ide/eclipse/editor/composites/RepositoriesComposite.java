@@ -1096,8 +1096,10 @@ public class RepositoriesComposite extends Composite {
     if(object instanceof Repository) {
       repositoriesEditor.refresh();
       pluginRepositoriesEditor.refresh();
-      if(currentRepository == object) {
-        updateRepositoryDetailsSection((Repository) MavenPomEditorPage.getFromNotification(notification));
+      
+      Object notificationObject = MavenPomEditorPage.getFromNotification(notification);
+      if(currentRepository == object && (notificationObject == null || notificationObject instanceof Repository)) {
+        updateRepositoryDetailsSection((Repository) notificationObject);
       }
     }
 

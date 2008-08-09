@@ -546,12 +546,13 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
    * returns added/removed/updated EObject from notification (convenience method for detail forms)
    */
   public static Object getFromNotification(Notification notification) {
-    //for structuralFeatures, return new value (for insert/delete)
-    if (notification.getFeature() != null && !(notification.getFeature() instanceof EAttribute))
+    if(notification.getFeature() != null && !(notification.getFeature() instanceof EAttribute)) {
+      // for structuralFeatures, return new value (for insert/delete)
       return notification.getNewValue();
-    //for attributes, return the notifier as it contains all new attributes (attribute modified)
-    else
-        return notification.getNotifier();
+    } else {
+      // for attributes, return the notifier as it contains all new attributes (attribute modified)
+      return notification.getNotifier();
+    }
   }
 
   /**

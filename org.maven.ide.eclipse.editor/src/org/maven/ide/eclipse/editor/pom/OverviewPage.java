@@ -741,24 +741,27 @@ public class OverviewPage extends MavenPomEditorPage {
       propertiesEditor.refresh();
     }
 
-    if (object instanceof Parent) {
-      loadParent((Parent) getFromNotification(notification));
+    Object notificationObject = getFromNotification(notification);
+    
+    if(object instanceof Parent && (notificationObject == null || notificationObject instanceof Parent)) {
+      loadParent((Parent) notificationObject);
     }
 
-    if (object instanceof Organization) {
-      loadOrganization((Organization) getFromNotification(notification));
+    if(object instanceof Organization && (notificationObject == null || notificationObject instanceof Organization)) {
+      loadOrganization((Organization) notificationObject);
     }
 
-    if (object instanceof Scm) {
-      loadScm((Scm) getFromNotification(notification));
+    if(object instanceof Scm && (notificationObject == null || notificationObject instanceof Scm)) {
+      loadScm((Scm) notificationObject);
     }
 
-    if (object instanceof CiManagement) {
-      loadCiManagement((CiManagement) getFromNotification(notification));
+    if(object instanceof CiManagement && (notificationObject == null || notificationObject instanceof CiManagement)) {
+      loadCiManagement((CiManagement) notificationObject);
     }
 
-    if (object instanceof IssueManagement) {
-      loadIssueManagement((IssueManagement) getFromNotification(notification));
+    if(object instanceof IssueManagement
+        && (notificationObject == null || notificationObject instanceof IssueManagement)) {
+      loadIssueManagement((IssueManagement) notificationObject);
     }
     
     if(object instanceof Modules) {

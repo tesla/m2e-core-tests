@@ -974,8 +974,9 @@ public class ProfilesPage extends MavenPomEditorPage {
     
     if(object instanceof Profile) {
       profilesEditor.refresh();
-      if(currentProfile == object) {
-        updateProfileDetails((Profile) getFromNotification(notification));
+      Object notificationObject = getFromNotification(notification);
+      if(currentProfile == object && (notificationObject == null || notificationObject instanceof Profile)) {
+        updateProfileDetails((Profile) notificationObject);
       }
     }
     

@@ -601,8 +601,11 @@ public class BuildComposite extends Composite {
     if(object instanceof Resource) {
       resourcesEditor.refresh();
       testResourcesEditor.refresh();
-      if(object==currentResource) {
-        loadResourceDetails((Resource) MavenPomEditorPage.getFromNotification(notification));
+      if(object == currentResource) {
+        Object notificationObject = MavenPomEditorPage.getFromNotification(notification);
+        if(notificationObject == null || notificationObject instanceof Resource) {
+          loadResourceDetails((Resource) notificationObject);
+        }
       }
     }
     

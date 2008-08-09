@@ -584,21 +584,24 @@ public class TeamComposite extends Composite {
       developersEditor.refresh();
     } else if(object instanceof ContributorsType) {
       contributorsEditor.refresh();
-    } else if(object instanceof Contributor) {
-      contributorsEditor.refresh();
+    } else {
+      Object notificationObject = MavenPomEditorPage.getFromNotification(notification);
+      if(object instanceof Contributor) {
+        contributorsEditor.refresh();
 
-      if(object == currentSelection) {
-        updateDetails((EObject) MavenPomEditorPage.getFromNotification(notification));
-      }
-    } else if(object instanceof Developer) {
-      developersEditor.refresh();
+        if(object == currentSelection && (notificationObject == null || notificationObject instanceof EObject)) {
+          updateDetails((EObject) notificationObject);
+        }
+      } else if(object instanceof Developer) {
+        developersEditor.refresh();
 
-      if(object == currentSelection) {
-        updateDetails((EObject) MavenPomEditorPage.getFromNotification(notification));
-      }
-    } else if(object instanceof Roles) {
-      if(object == getRoles()) {
-        updateRoles((Roles) MavenPomEditorPage.getFromNotification(notification));
+        if(object == currentSelection && (notificationObject == null || notificationObject instanceof EObject)) {
+          updateDetails((EObject) notificationObject);
+        }
+      } else if(object instanceof Roles) {
+        if(object == getRoles() && (notificationObject == null || notificationObject instanceof Roles)) {
+          updateRoles((Roles) notificationObject);
+        }
       }
     }
   }

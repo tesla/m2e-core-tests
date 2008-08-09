@@ -982,12 +982,13 @@ public class DependenciesComposite extends Composite {
       dependencyManagementEditor.refresh();
     }
     
+    Object notificationObject = MavenPomEditorPage.getFromNotification(notification);
     if(object instanceof Dependency) {
       dependenciesEditor.refresh();
       dependencyManagementEditor.refresh();
       
-      if(object==currentDependency) {
-        updateDependencyDetails((Dependency) MavenPomEditorPage.getFromNotification(notification));
+      if(object == currentDependency && (notificationObject == null || notificationObject instanceof Dependency)) {
+        updateDependencyDetails((Dependency) notificationObject);
       }
     }
     
@@ -1001,8 +1002,8 @@ public class DependenciesComposite extends Composite {
     
     if(object instanceof Exclusion) {
       exclusionsEditor.refresh();
-      if(currentExclusion == object) {
-        updateExclusionDetails((Exclusion) MavenPomEditorPage.getFromNotification(notification));
+      if(currentExclusion == object && (notificationObject == null || notificationObject instanceof Exclusion)) {
+        updateExclusionDetails((Exclusion) notificationObject);
       }
     }
   }

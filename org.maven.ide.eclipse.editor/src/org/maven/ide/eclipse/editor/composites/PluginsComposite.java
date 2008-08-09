@@ -931,6 +931,8 @@ public class PluginsComposite extends Composite {
   
   public void updateView(MavenPomEditorPage editorPage, Notification notification) {
     EObject object = (EObject) notification.getNotifier();
+    Object notificationObject = MavenPomEditorPage.getFromNotification(notification);
+    
     if(object instanceof Plugins) {
       pluginsEditor.refresh();
       pluginManagementEditor.refresh();
@@ -943,8 +945,8 @@ public class PluginsComposite extends Composite {
     if(object instanceof Plugin) {
       pluginsEditor.refresh();
       pluginManagementEditor.refresh();
-      if(object==currentPlugin) {
-        updatePluginDetails((Plugin) MavenPomEditorPage.getFromNotification(notification));
+      if(object == currentPlugin && (notificationObject == null || notificationObject instanceof Plugin)) {
+        updatePluginDetails((Plugin) notificationObject);
       }
     }
     
@@ -955,8 +957,9 @@ public class PluginsComposite extends Composite {
     
     if(object instanceof PluginExecution) {
       pluginExecutionsEditor.refresh();
-      if(currentPluginExecution==object) {
-        updatePluginExecution((PluginExecution) MavenPomEditorPage.getFromNotification(notification));
+      if(currentPluginExecution == object
+          && (notificationObject == null || notificationObject instanceof PluginExecution)) {
+        updatePluginExecution((PluginExecution) notificationObject);
       }
     }
     
