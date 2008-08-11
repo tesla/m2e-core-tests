@@ -33,17 +33,18 @@ public class NotificationCommandStack extends BasicCommandStack {
   
   @Override
   public void execute(Command command) {
+    processCommand(command, false);
     super.execute(command);
-    processCommand(command);
+    processCommand(command, true);
     fireDirty();
   }
 
-  private void processCommand(Command command) {
+  private void processCommand(Command command, boolean add) {
     if (command instanceof CompoundCommand) {
       CompoundCommand compoundCommand = (CompoundCommand) command;
       Iterator<Command> commands = compoundCommand.getCommandList().iterator();
       while (commands.hasNext()) {
-        processCommand(commands.next());
+        processCommand(commands.next(), add);
       }
     }
     
@@ -51,13 +52,13 @@ public class NotificationCommandStack extends BasicCommandStack {
       AddCommand addCommand = (AddCommand) command;
       Iterator<?> it = addCommand.getCollection().iterator();
       while (it.hasNext()) {
-        addListeners(it.next());
+        processListeners(it.next(), add);
       }
     }
 
     if (command instanceof SetCommand) {
       SetCommand setCommand = (SetCommand) command;
-      addListeners(setCommand.getValue());
+      processListeners(setCommand.getValue(), add);
     }
 
     if (command instanceof RemoveCommand) {
@@ -78,13 +79,17 @@ public class NotificationCommandStack extends BasicCommandStack {
     }
   }
 
-  private void addListeners(Object next) {
+  private void processListeners(Object next, boolean add) {
     if (next instanceof EObject) {
       EObject object = (EObject) next;
-      for (int i=0; i<pages.size(); i++)
-        if (!object.eAdapters().contains(pages.get(i))) {
-          object.eAdapters().add(pages.get(i));
+      for (int i=0; i<pages.size(); i++) {
+        if (add) {
+          if (!object.eAdapters().contains(pages.get(i)))
+            object.eAdapters().add(pages.get(i));
+        } else {
+          object.eAdapters().remove(pages.get(i));
         }
+      }
     }
   }
   
