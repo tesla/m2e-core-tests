@@ -9,6 +9,7 @@
 package org.maven.ide.eclipse.internal.launch;
 
 import java.io.File;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -200,7 +201,9 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
     URL url = MavenPlugin.getDefault().getBundle().getEntry("org.maven.ide.eclipse.cliresolver.jar");
     try {
       URL fileURL = FileLocator.toFileURL(url);
-      return new File(fileURL.toURI()).getCanonicalPath();
+      // MNGECLIPSE-804 workaround for spaces in the original path
+      URI fileURI = new URI(fileURL.getProtocol(), fileURL.getHost(), fileURL.getPath(), fileURL.getQuery());
+      return new File(fileURI).getCanonicalPath();
     } catch(Exception ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, ex.getMessage(), ex));
     }

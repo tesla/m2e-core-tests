@@ -89,16 +89,17 @@ public abstract class MavenRuntime {
       return "org.codehaus.classworlds.Launcher";
     }
 
-    public String getOptions(File tpmfolder, String[] forcedComponents) throws CoreException {
+    public String getOptions(File tmpfolder, String[] forcedComponents) throws CoreException {
       String m2conf = location + File.separator + "bin" + File.separator + "m2.conf";
       if (forcedComponents != null && forcedComponents.length > 0) {
         try {
-          boolean created = tpmfolder.mkdirs();
-          if(!created) {
-            throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
-                "Can't create temporary folder " + tpmfolder, null));
+          if(!tmpfolder.exists()) {
+            if(!tmpfolder.mkdirs()) {
+              throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
+                  "Can't create temporary folder " + tmpfolder, null));
+            }
           }
-          m2conf = new File(tpmfolder, "m2.conf").getCanonicalPath();
+          m2conf = new File(tmpfolder, "m2.conf").getCanonicalPath();
           BufferedWriter out = new BufferedWriter(new FileWriter(m2conf));
           try {
             out.write("main is org.apache.maven.cli.MavenCli from plexus.core\n");
