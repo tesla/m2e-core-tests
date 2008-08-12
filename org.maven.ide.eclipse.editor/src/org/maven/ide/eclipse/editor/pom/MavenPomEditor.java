@@ -56,6 +56,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.emf.common.command.CommandStack;
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.AdapterFactory;
 import org.eclipse.emf.common.notify.impl.AdapterFactoryImpl;
@@ -101,6 +102,7 @@ import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
+import org.eclipse.wst.sse.core.internal.undo.IStructuredTextUndoManager;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
 import org.eclipse.wst.xml.core.internal.document.ElementImpl;
 import org.eclipse.wst.xml.core.internal.emf2xml.EMF2DOMSSEAdapter;
@@ -251,7 +253,8 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   }
 
   void flushCommandStack() {
-    sourcePage.getModel().getUndoManager().getCommandStack().flush();
+    structuredModel.getUndoManager().getCommandStack().flush();
+    
     getContainer().getDisplay().asyncExec(new Runnable() {
       public void run() {
         editorDirtyStateChanged();
@@ -305,14 +308,24 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       }
 
       public boolean isDirty() {
-        if(getModel()==null) {
+        if(structuredModel == null) {
           return false;
         }
-        
+
         // Eclipse bugzilla entries: 213109, 138100, 191754
         // WTP SSE editor has problems with dirty
         // use command stack dirtiness instead
-        boolean dirty = getModel().getUndoManager().getCommandStack().canUndo();
+        IStructuredTextUndoManager undoManager = structuredModel.getUndoManager();
+        if(undoManager == null) {
+          return false;
+        }
+
+        CommandStack commandStack = undoManager.getCommandStack();
+        if(commandStack == null) {
+          return false;
+        }
+        
+        boolean dirty = commandStack.canUndo();
         // manually update editor dirty indicator
         if(this.dirty != dirty) {
           this.dirty = dirty;
@@ -329,6 +342,13 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       sourcePageIndex = addPage(sourcePage, getEditorInput());
       setPageText(sourcePageIndex, "pom.xml");
       sourcePage.update();
+      
+      IDocument doc = sourcePage.getDocumentProvider().getDocument(getEditorInput());
+      structuredModel = modelManager.getExistingModelForEdit(doc);
+      if(structuredModel == null) {
+        structuredModel = modelManager.getModelForEdit((IStructuredDocument) doc);
+      }
+      
       flushCommandStack();
       try {
         readProjectDocument();
@@ -338,7 +358,6 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 
       // TODO activate xml source page if model is empty or have errors
       
-      IDocument doc = sourcePage.getDocumentProvider().getDocument(getEditorInput());
       setSSEActionBarContributor();
       if(doc instanceof IStructuredDocument) {
         List<AdapterFactoryImpl> factories = new ArrayList<AdapterFactoryImpl>();
@@ -350,10 +369,6 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
         editingDomain = new AdapterFactoryEditingDomain(adapterFactory, //
             commandStack, new HashMap<Resource, Boolean>());
 
-        structuredModel = modelManager.getExistingModelForEdit(doc);
-        if(structuredModel == null) {
-          structuredModel = modelManager.getModelForEdit((IStructuredDocument) doc);
-        }
         if(resource != null && resource.getRenderer() instanceof EMF2DOMSSERenderer) {
           renderer = (EMF2DOMSSERenderer) resource.getRenderer();
           structuredModel.addModelStateListener(renderer);
@@ -697,7 +712,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   }
 
   public void dispose() {
-    sourcePage.getModel().releaseFromEdit();
+    structuredModel.releaseFromEdit();
 
     if(activationListener != null) {
       activationListener.dispose();
