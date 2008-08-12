@@ -42,6 +42,8 @@ public class MavenImportWizard extends Wizard implements IImportWizard {
   private MavenImportWizardPage page;
 
   private List<String> locations;
+
+  private boolean showLocation = true;
   
   public MavenImportWizard() {
     importConfiguration = new ProjectImportConfiguration();
@@ -51,6 +53,7 @@ public class MavenImportWizard extends Wizard implements IImportWizard {
   public MavenImportWizard(ProjectImportConfiguration importConfiguration, List<String> locations) {
     this.importConfiguration = importConfiguration;
     this.locations = locations;
+    this.showLocation = false;
     setNeedsProgressMonitor(true);
   }
   
@@ -68,6 +71,7 @@ public class MavenImportWizard extends Wizard implements IImportWizard {
   public void addPages() {
     page = new MavenImportWizardPage(importConfiguration);
     page.setLocations(locations);
+    page.setShowLocation(showLocation);
     addPage(page);
   }
 

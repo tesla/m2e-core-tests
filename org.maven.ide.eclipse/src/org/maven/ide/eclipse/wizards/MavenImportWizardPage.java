@@ -81,6 +81,8 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
 
   private WorkingSetGroup workingSetGroup;
 
+  private boolean showLocation = true;
+
   protected MavenImportWizardPage(ProjectImportConfiguration importConfiguration) {
     super("MavenProjectImportWizardPage", importConfiguration);
     setTitle("Maven Projects");
@@ -88,16 +90,20 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
     setPageComplete(false);
   }
 
+  public void setShowLocation(boolean showLocation) {
+    this.showLocation = showLocation;
+  }
+
   public void setLocations(List<String> locations) {
     this.locations = locations;
   }
   
   public void createControl(Composite parent) {
-    final Composite composite = new Composite(parent, SWT.NONE);
+    Composite composite = new Composite(parent, SWT.NONE);
     composite.setLayout(new GridLayout(3, false));
     setControl(composite);
 
-    if(locations==null || locations.isEmpty()) {
+    if(showLocation || locations==null || locations.isEmpty()) {
       final Label selectRootDirectoryLabel = new Label(composite, SWT.NONE);
       selectRootDirectoryLabel.setLayoutData(new GridData());
       selectRootDirectoryLabel.setText(Messages.getString("wizard.import.page.root"));
@@ -119,6 +125,10 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
       });
       rootDirectoryCombo.setFocus();
       addFieldWithHistory("rootDirectory", rootDirectoryCombo);
+      
+      if(locations!=null && locations.size()==1) {
+        rootDirectoryCombo.setText(locations.get(0));
+      }
 
       final Button browseButton = new Button(composite, SWT.NONE);
       browseButton.setText(Messages.getString("wizard.import.page.browse"));
