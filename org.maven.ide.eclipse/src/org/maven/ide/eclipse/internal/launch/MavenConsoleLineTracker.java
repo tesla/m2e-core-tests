@@ -55,7 +55,7 @@ public class MavenConsoleLineTracker implements IConsoleLineTracker {
     ILaunch launch = process.getLaunch();
     ILaunchConfiguration launchConfiguration = launch.getLaunchConfiguration();
 
-    if(isMavenProcess(launchConfiguration)) {
+    if(launchConfiguration!=null && isMavenProcess(launchConfiguration)) {
       try {
         int offset = line.getOffset();
         int length = line.getLength();
