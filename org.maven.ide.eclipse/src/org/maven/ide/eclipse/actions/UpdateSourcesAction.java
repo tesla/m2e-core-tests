@@ -27,9 +27,11 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkingSet;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 
 
@@ -46,18 +48,29 @@ public class UpdateSourcesAction implements IObjectActionDelegate {
 
   public void run(IAction action) {
     final Set<IProject> projects = new LinkedHashSet<IProject>();
+    
     IStructuredSelection structuredSelection = (IStructuredSelection) selection;
     for(Iterator<?> it = structuredSelection.iterator(); it.hasNext();) {
       Object element = it.next();
-      IProject project = null;
       if(element instanceof IProject) {
-        project = (IProject) element;
+        projects.add((IProject) element);
+      } else if(element instanceof IWorkingSet) {
+        IWorkingSet workingSet = (IWorkingSet) element;
+        for(IAdaptable adaptable : workingSet.getElements()) {
+          IProject project = (IProject) adaptable.getAdapter(IProject.class);
+          try {
+            if(project!=null && project.isAccessible() && project.hasNature(IMavenConstants.NATURE_ID)) {
+              projects.add(project);
+            }
+          } catch(CoreException ex) {
+            MavenLogger.log(ex);
+          }
+        }
       } else if(element instanceof IAdaptable) {
-        project = (IProject) ((IAdaptable) element).getAdapter(IProject.class);
-      }
-      
-      if(project != null) {
-        projects.add(project);
+        IProject project = (IProject) ((IAdaptable) element).getAdapter(IProject.class);
+        if(project!=null) {
+          projects.add(project);
+        }
       }
     }
 

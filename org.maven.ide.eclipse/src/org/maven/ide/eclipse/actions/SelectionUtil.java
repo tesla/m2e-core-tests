@@ -42,6 +42,8 @@ public class SelectionUtil {
 
   public static final int JAR_FILE = 8;
 
+  public static final int WORKING_SET = 16;
+
   /** Checks which type the given selection belongs to. */
   public static int getSelectionType(IStructuredSelection selection) {
     int type = UNSUPPORTED;
@@ -85,6 +87,11 @@ public class SelectionUtil {
       }
     }
 
+    IWorkingSet workingSet = getType(element, IWorkingSet.class);
+    if(workingSet!=null) {
+      return WORKING_SET;
+    }
+    
     return UNSUPPORTED;
   }
 

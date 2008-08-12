@@ -187,6 +187,17 @@
          -->
       </objectContribution>
       
+      <objectContribution id="org.maven.ide.eclipse.classpathMenu" adaptable="true"
+             objectClass="org.eclipse.ui.IWorkingSet">
+         <action id="org.maven.ide.eclipse.classpathMenu.action"
+                 class="org.maven.ide.eclipse.internal.actions.MavenMenuAction"
+                 label="%m2.popup.project.label"
+                 style="pulldown"
+                 menubarPath="additions"
+                 enablesFor="+"
+                 icon="icons/m2.gif"/>
+      </objectContribution>
+      
       <objectContribution id="org.maven.ide.eclipse.scmUrl"
           objectClass="org.maven.ide.eclipse.scm.ScmUrl"
           adaptable="true">

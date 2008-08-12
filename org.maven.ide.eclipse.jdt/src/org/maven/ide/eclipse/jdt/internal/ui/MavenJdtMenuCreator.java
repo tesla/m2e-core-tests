@@ -68,6 +68,13 @@ public class MavenJdtMenuCreator extends AbstractMavenMenuCreator {
           MaterializeAction.ID, //
           selection.size() == 1 ? "Import Project" : "Import Projects", "icons/import_m2_project.gif"));
     }
+    
+    if(selectionType == SelectionUtil.WORKING_SET) {
+      mgr.appendToGroup(UPDATE, getAction(new DownloadSourcesAction(ID_SOURCES), //
+          DownloadSourcesAction.ID_SOURCES, "Download Sources"));
+      mgr.appendToGroup(UPDATE, getAction(new DownloadSourcesAction(ID_JAVADOC), //
+          DownloadSourcesAction.ID_JAVADOC, "Download JavaDoc"));
+    }
   }
 
 }

@@ -130,6 +130,15 @@ public class DefaultMavenMenuCreator extends AbstractMavenMenuCreator {
       mgr.appendToGroup(NATURE, getAction(new DisableNatureAction(), //
           DisableNatureAction.ID, "Disable Dependency Management"));
     }
+    
+    if(selectionType == SelectionUtil.WORKING_SET) {
+      mgr.appendToGroup(UPDATE, getAction(new RefreshMavenModelsAction(), RefreshMavenModelsAction.ID,
+          "Update Dependencies", "icons/update_dependencies.gif"));
+      mgr.appendToGroup(UPDATE, getAction(new RefreshMavenModelsAction(true), RefreshMavenModelsAction.ID_SNAPSHOTS,
+          "Update Snapshots"));
+      mgr.appendToGroup(UPDATE, getAction(new UpdateSourcesAction(), //
+          UpdateSourcesAction.ID, "Update Project Configuration", "icons/update_source_folders.gif"));
+    }
   }
 
 }
