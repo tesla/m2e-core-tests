@@ -104,6 +104,7 @@ import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
 import org.eclipse.wst.sse.core.internal.undo.IStructuredTextUndoManager;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
+import org.eclipse.wst.sse.ui.internal.StructuredTextViewer;
 import org.eclipse.wst.xml.core.internal.document.ElementImpl;
 import org.eclipse.wst.xml.core.internal.emf2xml.EMF2DOMSSEAdapter;
 import org.eclipse.wst.xml.core.internal.emf2xml.EMF2DOMSSERenderer;
@@ -1015,4 +1016,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 
   }
 
+  public StructuredTextViewer getViewer() {
+    return sourcePage.getTextViewer();
+  }
 }

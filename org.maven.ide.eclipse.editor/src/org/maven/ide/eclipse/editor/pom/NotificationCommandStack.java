@@ -34,7 +34,9 @@ public class NotificationCommandStack extends BasicCommandStack {
   @Override
   public void execute(Command command) {
     processCommand(command, false);
+    editor.getViewer().getUndoManager().beginCompoundChange();
     super.execute(command);
+    editor.getViewer().getUndoManager().endCompoundChange();
     processCommand(command, true);
     fireDirty();
   }
