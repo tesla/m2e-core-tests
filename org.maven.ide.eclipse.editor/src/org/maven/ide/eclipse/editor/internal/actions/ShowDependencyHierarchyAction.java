@@ -9,11 +9,16 @@
 package org.maven.ide.eclipse.editor.internal.actions;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.actions.ActionDelegate;
 import org.maven.ide.eclipse.MavenPlugin;
@@ -55,14 +60,24 @@ public class ShowDependencyHierarchyAction extends ActionDelegate {
           if(projectFacade == null) {
             plugin.getConsole().logMessage("Unable to get Maven project for " + project.getName());
           } else {
-            ArtifactKey artifactKey = SelectionUtil.getType(element, ArtifactKey.class);
+            final ArtifactKey artifactKey = SelectionUtil.getType(element, ArtifactKey.class);
             if(artifactKey != null) {
-              ArtifactKey projectKey = projectFacade.getArtifactKey();
-              IEditorPart editor = OpenPomAction.openEditor(projectKey.getGroupId(), //
-                  projectKey.getArtifactId(), projectKey.getVersion());
-              if(editor instanceof MavenPomEditor) {
-                ((MavenPomEditor) editor).showDependencyHierarchy(artifactKey);
-              }
+              final ArtifactKey projectKey = projectFacade.getArtifactKey();
+              new Job("Opening POM editor") {
+                protected IStatus run(IProgressMonitor monitor) {
+                  final IEditorPart editor = OpenPomAction.openEditor(projectKey.getGroupId(), //
+                      projectKey.getArtifactId(), projectKey.getVersion());
+                  if(editor instanceof MavenPomEditor) {
+//                    ((MavenPomEditor) editor).showDependencyHierarchy(artifactKey);
+                    Display.getDefault().asyncExec(new Runnable() {
+                      public void run() {
+                        ((MavenPomEditor) editor).showDependencyHierarchy(artifactKey);
+                      }
+                    });
+                  }
+                  return Status.OK_STATUS;
+                }
+              }.schedule();
             }
           }
         }

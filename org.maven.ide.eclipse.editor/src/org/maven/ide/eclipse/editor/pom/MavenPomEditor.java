@@ -54,6 +54,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.common.command.CommandStack;
@@ -564,8 +565,11 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
             fos = new FileOutputStream(tempPomFile);
             IOUtil.copy(is, fos);
             mavenProject = readMavenProject(tempPomFile);
-          } catch(Exception ex) {
+          } catch(IOException ex) {
             MavenLogger.log("Can't load POM", ex);
+            throw new CoreException(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1,
+                "Can't load Maven project", ex));
+            
           } finally {
             IOUtil.close(is);
             IOUtil.close(fos);
@@ -584,7 +588,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     return mavenProject;
   }
 
-  private MavenProject readMavenProject(File pomFile) throws MavenEmbedderException {
+  private MavenProject readMavenProject(File pomFile) throws MavenEmbedderException, CoreException {
     MavenPlugin plugin = MavenPlugin.getDefault();
     MavenProjectManager mavenProjectManager = plugin.getMavenProjectManager();
     MavenEmbedder embedder = mavenProjectManager.createWorkspaceEmbedder();
@@ -602,11 +606,26 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
             }
           }, monitor);
 
-      // XXX handle project read errors
-      // result.getExceptions();
-      // result.getArtifactResolutionResult();
+      MavenProject project = result.getProject();
+      if(project!=null) {
+        return project;
+      }
+      
+      if(result.hasExceptions()) {
+        List<IStatus> statuses = new ArrayList<IStatus>();
+        @SuppressWarnings("unchecked")
+        List<Throwable> exceptions = result.getExceptions();
+        for(Throwable e : exceptions) {
+          statuses.add(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, e.getMessage(), e));
+        }
+        
+        throw new CoreException(new MultiStatus(MavenEditorPlugin.PLUGIN_ID, IStatus.ERROR, //
+            statuses.toArray(new IStatus[statuses.size()]), "Can't read Maven project", null));
+      }
+      
+      throw new CoreException(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, //
+          "Can't read Maven project", null));
 
-      return result.getProject();
     } finally {
       embedder.stop();
     }

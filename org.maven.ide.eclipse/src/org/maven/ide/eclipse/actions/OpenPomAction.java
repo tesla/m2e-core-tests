@@ -232,7 +232,8 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
 
       File file = artifact.getFile();
       if(file != null) {
-        return openEditor(new MavenEditorStorageInput(name, name, file.getAbsolutePath(), readStream(new FileInputStream(file))), name);
+        return openEditor(new MavenEditorStorageInput(name, name, file.getAbsolutePath(),
+            readStream(new FileInputStream(file))), name);
       }
 
       openDialog("Can't download " + name);
@@ -265,7 +266,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
               part[0] = page.openEditor(editorInput, editor.getId());
             } catch(PartInitException ex) {
               MessageDialog.openInformation(Display.getDefault().getActiveShell(), //
-                  "Open Maven POM", "Can't open editor for " + name + "\n" + ex.toString());
+                  "Open Maven POM", "Can't open editor for " + editorInput.getName() + "\n" + ex.toString());
             }
           }
         }

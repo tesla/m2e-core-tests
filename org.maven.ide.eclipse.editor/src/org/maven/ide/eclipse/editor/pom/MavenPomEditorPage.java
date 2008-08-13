@@ -142,7 +142,7 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
               String name = pomEditor.getPartName() + " [effective]";
               IEditorInput editorInput = new OpenPomAction.MavenEditorStorageInput(name, name, null, //
                   effectivePom.getBytes("UTF-8"));
-              OpenPomAction.openEditor(editorInput, name);
+              OpenPomAction.openEditor(editorInput, "pom.xml");
               
             } catch(CoreException ex) {
               MavenLogger.log(ex);
@@ -184,27 +184,26 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
   private void doLoadData(boolean active) {
     if(active && !dataLoaded) {
       dataLoaded = true;
-      new Job("Loading pom.xml") {
-        protected IStatus run(IProgressMonitor monitor) {
+//      new Job("Loading pom.xml") {
+//        protected IStatus run(IProgressMonitor monitor) {
           try {
             model = pomEditor.readProjectDocument();
             if(model != null) {
-              if (getPartControl() == null) {
-                return Status.OK_STATUS;
-              }
-              getPartControl().getDisplay().asyncExec(new Runnable() {
-                public void run() {
-                  updatingModel = true;
-                  try {
-                    loadData();
-                    registerListeners();
-                  } catch(Throwable e) {
-                    MavenLogger.log("Error loading data", e);
-                  } finally {
-                    updatingModel = false;
+              if (getPartControl() != null) {
+                getPartControl().getDisplay().asyncExec(new Runnable() {
+                  public void run() {
+                    updatingModel = true;
+                    try {
+                      loadData();
+                      registerListeners();
+                    } catch(Throwable e) {
+                      MavenLogger.log("Error loading data", e);
+                    } finally {
+                      updatingModel = false;
+                    }
                   }
-                }
-              });
+                });
+              }
             }
           } catch(final CoreException ex) {
             MavenLogger.log(ex);
@@ -215,9 +214,9 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
             });
           }
 
-          return Status.OK_STATUS;
-        }
-      }.schedule();
+//          return Status.OK_STATUS;
+//        }
+//      }.schedule();
     }
   }
 

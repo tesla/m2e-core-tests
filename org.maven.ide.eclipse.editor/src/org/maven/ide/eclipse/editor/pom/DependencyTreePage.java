@@ -72,6 +72,7 @@ import org.eclipse.ui.forms.widgets.Section;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
@@ -186,12 +187,14 @@ public class DependencyTreePage extends FormPage {
             }
           });
         } catch(final CoreException ex) {
+          MavenLogger.log(ex);
           getPartControl().getDisplay().asyncExec(new Runnable() {
             public void run() {
               getManagedForm().getForm().setMessage(ex.getMessage(), IMessageProvider.ERROR);
             }
           });
         } catch(final MavenEmbedderException ex) {
+          MavenLogger.log("Can't load dependency hierarchy", ex);
           getPartControl().getDisplay().asyncExec(new Runnable() {
             public void run() {
               getManagedForm().getForm().setMessage(ex.getMessage(), IMessageProvider.ERROR);
