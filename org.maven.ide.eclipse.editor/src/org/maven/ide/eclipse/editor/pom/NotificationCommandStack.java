@@ -19,7 +19,11 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.edit.command.AddCommand;
 import org.eclipse.emf.edit.command.RemoveCommand;
 import org.eclipse.emf.edit.command.SetCommand;
+import org.eclipse.jface.text.IUndoManager;
 
+/**
+ * @author Anton Kraev
+ */
 public class NotificationCommandStack extends BasicCommandStack {
 
   private MavenPomEditor editor;
@@ -34,9 +38,15 @@ public class NotificationCommandStack extends BasicCommandStack {
   @Override
   public void execute(Command command) {
     processCommand(command, false);
-    editor.getViewer().getUndoManager().beginCompoundChange();
-    super.execute(command);
-    editor.getViewer().getUndoManager().endCompoundChange();
+    
+    IUndoManager undoManager = editor.getSourcePage().getTextViewer().getUndoManager();
+    undoManager.beginCompoundChange();
+    try {
+      super.execute(command);
+    } finally {
+      undoManager.endCompoundChange();
+    }
+    
     processCommand(command, true);
     fireDirty();
   }
