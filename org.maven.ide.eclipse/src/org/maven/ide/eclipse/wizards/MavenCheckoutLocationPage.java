@@ -140,10 +140,12 @@ public class MavenCheckoutLocationPage extends AbstractMavenWizardPage {
     revisionTextData.verticalIndent = 3;
     revisionText.setLayoutData(revisionTextData);
     
-    ScmTag tag = scmUrls[0].getTag();
-    if(tag!=null) {
-      headRevisionButton.setSelection(false);
-      revisionText.setText(tag.getName());
+    if(scmUrls != null) {
+      ScmTag tag = scmUrls[0].getTag();
+      if(tag!=null) {
+        headRevisionButton.setSelection(false);
+        revisionText.setText(tag.getName());
+      }
     }
     
     revisionText.addModifyListener(new ModifyListener() {
