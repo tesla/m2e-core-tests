@@ -38,7 +38,7 @@ public class Util {
     if(!folder.exists()) {
       IContainer parent = folder.getParent();
       // First, make sure that all parent folders exist.
-      if(parent instanceof IFolder) {
+      if(parent != null && !parent.exists()) {
         createFolder((IFolder) parent, false);
       }
       folder.create(false, true, null);

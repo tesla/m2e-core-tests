@@ -712,9 +712,8 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
 
     {
       IMavenProjectFacade f1 = manager.create(p1, monitor);
-      IMavenProjectFacade[] mavenProjects = getAllMavenProjects(f1);
-      Artifact[] a1 = mavenProjects[0].getMavenProjectArtifacts().toArray(new Artifact[mavenProjects[0].getMavenProjectArtifacts().size()]);
-      assertEquals(false, a1[0].isResolved());
+      List<Artifact> a1 = new ArrayList<Artifact>(getMavenProjectArtifacts(f1));
+      assertEquals(false, a1.get(0).isResolved());
     }
 
     add(manager, new IProject[] {p1});
@@ -722,9 +721,8 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
 
     {
       IMavenProjectFacade f1 = manager.create(p1, monitor);
-      IMavenProjectFacade[] mavenProjects = getAllMavenProjects(f1);
-      Artifact[] a1 = mavenProjects[0].getMavenProjectArtifacts().toArray(new Artifact[mavenProjects[0].getMavenProjectArtifacts().size()]);
-      assertEquals(true, a1[0].isResolved());
+      List<Artifact> a1 = new ArrayList<Artifact>(getMavenProjectArtifacts(f1));
+      assertEquals(true, a1.get(0).isResolved());
     }
   }
 

@@ -28,6 +28,7 @@ import org.apache.maven.embedder.ContainerCustomizer;
 import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.embedder.MavenEmbedderConsoleLogger;
 import org.apache.maven.model.Model;
+import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -357,8 +358,15 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
       }
     });
   }
-
+  
   public static void copyDir(File src, File dst, FileFilter filter) throws IOException {
+    copyDir(src, dst, filter, true);
+  }
+
+  private static void copyDir(File src, File dst, FileFilter filter, boolean deleteDst) throws IOException {
+    if (deleteDst) {
+      FileUtils.deleteDirectory(dst);
+    }
     dst.mkdirs();
     File[] files = src.listFiles(filter);
     if (files != null) {
@@ -367,7 +375,7 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
         if (file.canRead()) {
           File dstChild = new File(dst, file.getName());
           if (file.isDirectory()) {
-            copyDir(file, dstChild, filter);
+            copyDir(file, dstChild, filter, false);
           } else {
             copyFile(file, dstChild);
           }

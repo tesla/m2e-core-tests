@@ -198,7 +198,8 @@ public class MavenBuilderTest extends AsbtractMavenProjectTestCase {
     assertTrue(componentsXML.isAccessible());
   }
 
-  public void test008_classpathChange() throws Exception {
+  // the test is disabled due to http://jira.codehaus.org/browse/MNGECLIPSE-839
+  public void _test008_classpathChange() throws Exception {
     deleteProject("resourcefiltering-p008");
     IProject project = createExisting("resourcefiltering-p008", "projects/resourcefiltering/p008");
     waitForJobsToComplete();

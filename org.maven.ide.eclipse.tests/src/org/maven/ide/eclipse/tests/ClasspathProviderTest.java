@@ -147,12 +147,36 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
   }
   
   public void testGeneratedSources() throws Exception {
-    createExisting("runtimeclasspath-gensrc01", "projects/runtimeclasspath/gensrc01");
-    IProject gensrc02 = createExisting("runtimeclasspath-gensrc02", "projects/runtimeclasspath/gensrc02");
-    waitForJobsToComplete();
     
-    workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+    String origGoalsOnImport = plugin.getMavenRuntimeManager().getGoalOnImport();
+    plugin.getMavenRuntimeManager().setGoalOnImport("process-test-resources");
+    
+    try {
+      IProject gensrc01 = importProject("runtimeclasspath-gensrc01", "projects/runtimeclasspath/gensrc01", new ResolverConfiguration());
+      IProject gensrc02 = importProject("runtimeclasspath-gensrc02", "projects/runtimeclasspath/gensrc02", new ResolverConfiguration());
+      waitForJobsToComplete();
+      
+      workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+      waitForJobsToComplete();
+  
+      assertGeneratedSources(gensrc02);
+      
+      // lets close/reopen the projects to make sure we don't loose generated sources
+      gensrc01.close(monitor);
+      gensrc02.close(monitor);
+      waitForJobsToComplete();
+      
+      gensrc01.open(monitor);
+      gensrc02.open(monitor);
+      waitForJobsToComplete();
+  
+      assertGeneratedSources(gensrc02);
+    } finally {
+      plugin.getMavenRuntimeManager().setGoalOnImport(origGoalsOnImport);
+    }
+  }
 
+  private void assertGeneratedSources(IProject gensrc02) throws CoreException {
     ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(gensrc02.getFile("gensrc02-junit.launch"));
 
     MavenRuntimeClasspathProvider classpathProvider = new MavenRuntimeClasspathProvider();
@@ -160,10 +184,11 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
     IRuntimeClasspathEntry[] resolvedClasspath = classpathProvider.resolveClasspath(unresolvedClasspath, configuration);
     IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
 
-    assertEquals(Arrays.asList(userClasspath).toString(), 3, userClasspath.length);
+    assertEquals(Arrays.asList(userClasspath).toString(), 4, userClasspath.length);
     assertEquals(new Path("/runtimeclasspath-gensrc02/target/test-classes"), userClasspath[0].getPath());
-    assertEquals(new Path("/runtimeclasspath-gensrc01/target/classes"), userClasspath[1].getPath());
-    assertEquals("junit-3.8.1.jar", userClasspath[2].getPath().lastSegment());
+    assertEquals(new Path("/runtimeclasspath-gensrc02/target/classes"), userClasspath[1].getPath()); // seems to be there even 
+    assertEquals(new Path("/runtimeclasspath-gensrc01/target/classes"), userClasspath[2].getPath());
+    assertEquals("junit-3.8.1.jar", userClasspath[3].getPath().lastSegment());
   }
 
   public void testProvidedScopeApp() throws Exception {
