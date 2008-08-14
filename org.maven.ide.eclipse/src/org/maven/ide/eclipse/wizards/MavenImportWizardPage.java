@@ -291,6 +291,7 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
       Object[] checkedElements = projectTreeViewer.getCheckedElements();
       setPageComplete(checkedElements != null && checkedElements.length > 0);
       setErrorMessage(null);
+      setMessage(null);
 
       List<Exception> errors = projectScanner.getErrors();
       if(!errors.isEmpty()) {
@@ -383,7 +384,7 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
     MavenPlugin mavenPlugin = MavenPlugin.getDefault();
     MavenModelManager modelManager = mavenPlugin.getMavenModelManager();
     MavenConsole console = mavenPlugin.getConsole();
-    if(locations == null || locations.isEmpty()) {
+    if(showLocation || locations == null || locations.isEmpty()) {
       return new LocalProjectScanner(root, rootDirectoryCombo.getText(), false, modelManager, console);
     }
     return new LocalProjectScanner(root, locations, getImportConfiguration().isNeedsRename(), modelManager, console);
