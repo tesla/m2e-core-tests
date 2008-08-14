@@ -295,10 +295,23 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     configuration.setResolveWorkspaceProjects(false);
     configuration.setActiveProfiles("");
 
-    IProject[] projects = importProjects("projects/MNGECLIPSE-20", new String[] {"pom.xml", "type/pom.xml",
-        "app/pom.xml", "web/pom.xml", "ejb/pom.xml", "ear/pom.xml"}, configuration);
+    IProject[] projects = importProjects("projects/MNGECLIPSE-20", 
+        new String[] {
+            "pom.xml", 
+            "type/pom.xml",
+            "app/pom.xml", 
+            "web/pom.xml", 
+            "ejb/pom.xml", 
+            "ear/pom.xml"}, 
+        configuration);
 
     waitForJobsToComplete();
+
+    IResource res1 = projects[0].getFolder("ejb/target");
+    IResource res2 = projects[4].getFolder("target");
+
+    assertTrue(res1.exists());
+    assertTrue(res2.exists());
 
     workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
 
