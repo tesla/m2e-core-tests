@@ -109,9 +109,7 @@
     <module>../org.maven.ide.eclipse.book.feature</module>
     -->
 
-    <!--
-    <module>org.maven.ide.eclipse.tests</module>
-    -->
+    <module>../org.maven.ide.eclipse.tests</module>
 
     <module>../org.maven.ide.eclipse.update</module>
   </modules>
@@ -307,6 +305,18 @@
           <artifactId>maven-osgi-compiler-plugin</artifactId>
           <version>${tycho.version}</version>
         </plugin>
+        <plugin>
+          <groupId>org.codehaus.tycho</groupId>
+          <artifactId>maven-osgi-test-plugin</artifactId>
+          <version>${tycho.version}</version>
+          <configuration>
+            <useUIHarness>true</useUIHarness>
+            <includes>
+              <include>**/*Test.java</include>
+            </includes>
+            <argLine>-Xmx512m</argLine>
+          </configuration>
+        </plugin>
       </plugins>
     </pluginManagement>
   </build>
@@ -459,6 +469,12 @@
           </dependency>
         </dependencies>
       </dependencyManagement>
+    </profile>
+    <profile>
+      <id>sun-jvm</id>
+      <properties>
+        <MaxPermSize>-XX:MaxPermSize=256m</MaxPermSize>
+      </properties>
     </profile>
   </profiles>
 </project>
