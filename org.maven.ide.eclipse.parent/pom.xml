@@ -110,6 +110,12 @@
     -->
 
     <module>../org.maven.ide.eclipse.tests</module>
+    <module>../org.maven.ide.eclipse.ajdt.tests</module>
+    <module>../org.maven.ide.eclipse.wtp.tests</module>
+    <!--
+    <module>../org.maven.ide.eclipse.editor.xml.tests</module>
+    <module>../org.maven.ide.eclipse.editor.tests</module>
+    -->
 
     <module>../org.maven.ide.eclipse.update</module>
   </modules>
