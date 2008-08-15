@@ -1,0 +1,9 @@
+# Debugging options for the org.maven.ide.eclipse.jdt plugin.
+
+# Turn on debugging for the org.maven.ide.eclipse.jdt plugin.
+org.maven.ide.eclipse.jdt/debug=false
+
+
+# Maven compilation participant
+org.maven.ide.eclipse.jdt/debug/compilationParticipant=false
+

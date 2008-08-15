@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 //import org.apache.maven.artifact.Artifact;
+import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.project.MavenProject;
 
 import org.maven.ide.eclipse.embedder.ArtifactKey;
@@ -48,9 +49,9 @@ public interface IMavenProjectFacade {
   IPath[] getTestCompileSourceLocations();
 
   /**
-   * Returns project resource for given filesystem location or null the location is outside of project.
+   * Returns project resource for given file system location or null the location is outside of project.
    * 
-   * @param resourceLocation absolute filesystem location
+   * @param resourceLocation absolute file system location
    * @return IPath the full, absolute workspace path resourceLocation
    */
   IPath getProjectRelativePath(String resourceLocation);
@@ -58,7 +59,7 @@ public interface IMavenProjectFacade {
   /**
    * Filters resources of this project. Does not recurse into nested modules.
    */
-  void filterResources(IProgressMonitor monitor) throws CoreException;
+  MavenExecutionResult filterResources(IProgressMonitor monitor) throws CoreException;
 
   /**
    * Returns the full, absolute path of this project maven build output directory relative to the workspace or null if
@@ -116,9 +117,11 @@ public interface IMavenProjectFacade {
   /**
    * Executes specified maven goals. 
    * 
-   * Recurses into nested modules dependending on resolver configuration.
+   * Recurses into nested modules depending on resolver configuration.
+   * 
+   * @return execution result 
    */
-  void execute(List<String> goals, IProgressMonitor monitor) throws CoreException;
+  MavenExecutionResult execute(List<String> goals, IProgressMonitor monitor) throws CoreException;
 
   ArtifactKey getArtifactKey();
 

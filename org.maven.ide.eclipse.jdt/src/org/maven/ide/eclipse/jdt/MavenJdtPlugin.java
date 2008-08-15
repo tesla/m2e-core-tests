@@ -32,6 +32,8 @@ import org.maven.ide.eclipse.project.MavenProjectManager;
 
 public class MavenJdtPlugin implements BundleActivator {
 
+  public static String PLUGIN_ID = "org.maven.ide.eclipse.jdt";
+  
   private static MavenJdtPlugin instance;
 
   MavenLaunchConfigurationListener launchConfigurationListener;

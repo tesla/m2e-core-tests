@@ -9,6 +9,7 @@
 package org.maven.ide.eclipse.internal.builder;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -22,15 +23,18 @@ import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 
 import org.codehaus.plexus.util.StringUtils;
 
+import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.model.Resource;
 import org.apache.maven.project.MavenProject;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.IMavenProjectVisitor;
 import org.maven.ide.eclipse.project.MavenProjectManager;
@@ -38,6 +42,9 @@ import org.maven.ide.eclipse.project.MavenProjectManager;
 
 public class MavenBuilder extends IncrementalProjectBuilder {
 
+  public static boolean DEBUG = MavenPlugin.getDefault().isDebugging()
+      & Boolean.parseBoolean(Platform.getDebugOption(IMavenConstants.PLUGIN_ID + "/debug/builder"));
+  
   private final MavenConsole console;
   private MavenProjectManager projectManager;
 
@@ -69,6 +76,12 @@ public class MavenBuilder extends IncrementalProjectBuilder {
         return null;
       }
 
+      if(DEBUG) {
+        System.out.println("\nStarting Maven build for " + project.getName() //$NON-NLS-1$
+            + " kind:" + kind + " requestedFullBuild:" + getRequireFullBuild(project) //$NON-NLS-1$
+            + " @ " + new Date(System.currentTimeMillis())); //$NON-NLS-1$
+      }
+      
       if (FULL_BUILD == kind || CLEAN_BUILD == kind || getRequireFullBuild(getProject())) {
         try {
           executePostBuild(mavenProject, monitor);
@@ -88,19 +101,24 @@ public class MavenBuilder extends IncrementalProjectBuilder {
   }
 
   private boolean getRequireFullBuild(IProject project) throws CoreException {
-    return false; // project.getSessionProperty(IMavenConstants.FULL_MAVEN_BUILD) != null;
+    // return false;
+    return project.getSessionProperty(IMavenConstants.FULL_MAVEN_BUILD) != null;
   }
 
-  private void processResources(IMavenProjectFacade mavenProject, final IProgressMonitor monitor) throws CoreException {
-    final IResourceDelta delta = getDelta(mavenProject.getProject());
+  private void processResources(IMavenProjectFacade projectFacade, final IProgressMonitor monitor) throws CoreException {
+    final IResourceDelta delta = getDelta(projectFacade.getProject());
 
-    mavenProject.accept(new IMavenProjectVisitor() {
+    projectFacade.accept(new IMavenProjectVisitor() {
       public boolean visit(IMavenProjectFacade projectFacade) throws CoreException {
+        MavenExecutionResult result = null;
         if (hasChangedResources(projectFacade, delta, true, monitor)) {
-          projectFacade.filterResources(monitor);
+          result = projectFacade.filterResources(monitor);
         } else if (hasChangedResources(projectFacade, delta, false, monitor)) {
           // XXX optimize! no filtering, just copy the changed resources
-          projectFacade.filterResources(monitor);
+          result = projectFacade.filterResources(monitor);
+        }
+        if(result!=null) {
+          logErrors(result, projectFacade.getProject().getName());
         }
         return true;
       }
@@ -126,6 +144,9 @@ public class MavenBuilder extends IncrementalProjectBuilder {
       IResourceDelta member = delta.findMember(folderPath);
       // XXX deal with member kind/flags
       if (member != null) {
+        if(DEBUG) {
+          System.out.println("  found changed folder " + folderPath); //$NON-NLS-1$
+        }
         return true;
       }
     }
@@ -137,15 +158,42 @@ public class MavenBuilder extends IncrementalProjectBuilder {
     Set<IPath> folders = new LinkedHashSet<IPath>();
     for(Resource resource : resources) {
       if (!filteredOnly || resource.isFiltering()) {
+        if(DEBUG) {
+          System.out.println("  included folder " + resource.getDirectory()); //$NON-NLS-1$
+        }
         folders.add(facade.getProjectRelativePath(resource.getDirectory()));
       }
     }
     return folders;
   }
 
-  private void executePostBuild(IMavenProjectFacade mavenProject, IProgressMonitor monitor) throws CoreException {
-    String goalsStr = mavenProject.getResolverConfiguration().getFullBuildGoals();
+  private void executePostBuild(IMavenProjectFacade projectFacade, IProgressMonitor monitor) throws CoreException {
+    String goalsStr = projectFacade.getResolverConfiguration().getFullBuildGoals();
     List<String> goals = Arrays.asList(StringUtils.split(goalsStr));
-    mavenProject.execute(goals, monitor);
+    MavenExecutionResult result = projectFacade.execute(goals, monitor);
+    logErrors(result, projectFacade.getProject().getName());
   }
+  
+  void logErrors(MavenExecutionResult result, String projectNname) {
+    if(result.hasExceptions()) {
+      String msg = "Build errors for " + projectNname;
+      @SuppressWarnings("unchecked")
+      List<Exception> exceptions = result.getExceptions();
+      for(Exception ex : exceptions) {
+        console.logError(msg + "; " + ex.toString());
+        MavenLogger.log(msg, ex);
+      }
+      
+      // XXX add error markers
+    }
+
+    // TODO log artifact resolution errors 
+    // ArtifactResolutionResult resolutionResult = result.getArtifactResolutionResult();
+    // resolutionResult.getCircularDependencyExceptions();
+    // resolutionResult.getErrorArtifactExceptions();
+    // resolutionResult.getMetadataResolutionExceptions();
+    // resolutionResult.getVersionRangeViolations();
+  }
+  
 }
+

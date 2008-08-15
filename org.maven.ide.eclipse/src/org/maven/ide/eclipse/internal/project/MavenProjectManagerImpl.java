@@ -37,6 +37,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 
@@ -57,6 +58,7 @@ import org.apache.maven.model.Parent;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.project.MavenProject;
 
+import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
@@ -84,6 +86,9 @@ import org.maven.ide.eclipse.project.ResolverConfiguration;
  * XXX downloadSources does not belong here
  */
 public class MavenProjectManagerImpl {
+
+  public static boolean DEBUG = MavenPlugin.getDefault().isDebugging()
+      & Boolean.parseBoolean(Platform.getDebugOption(IMavenConstants.PLUGIN_ID + "/debug/projectManager"));
 
   static final String ARTIFACT_TYPE_POM = "pom";
   static final String ARTIFACT_TYPE_JAR = "jar";
@@ -1048,15 +1053,21 @@ public class MavenProjectManagerImpl {
     }
   }
 
-  public void execute(MavenProjectFacade facade, List<String> goals, final boolean recursive, IProgressMonitor monitor) throws MavenEmbedderException {
+  public MavenExecutionResult execute(MavenProjectFacade facade, List<String> goals, final boolean recursive, IProgressMonitor monitor) throws MavenEmbedderException {
     MavenEmbedder embedder = createWorkspaceEmbedder();
     try {
       IFile pom = facade.getPom();
       final ResolverConfiguration resolverConfiguration = facade.getResolverConfiguration();
       
-      execute(embedder, pom, resolverConfiguration, new MavenExecutor(goals) {
+      if(DEBUG) {
+        System.out.println("  executing Maven for " + facade.getProject()  //$NON-NLS-1$
+            + " goals:" + goals.toString() 
+            + " recursive:" + recursive);  //$NON-NLS-1$
+      }
+      
+      return execute(embedder, pom, resolverConfiguration, new MavenExecutor(goals) {
         public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request) {
-          request.setRecursive(resolverConfiguration.shouldIncludeModules() && recursive);
+          request.setRecursive(recursive);
           return super.execute(embedder, request);
         }
       }, monitor);

@@ -8,16 +8,23 @@
 
 package org.maven.ide.eclipse.jdt.internal;
 
+import java.util.Date;
+
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.compiler.CompilationParticipant;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.jdt.MavenJdtPlugin;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 
 
 public class JDTCompilationParticipant extends CompilationParticipant {
+  
+  public static boolean DEBUG = MavenPlugin.getDefault().isDebugging()
+      & Boolean.parseBoolean(Platform.getDebugOption(MavenJdtPlugin.PLUGIN_ID + "/debug/compilationParticipant"));
   
   private final MavenProjectManager mavenProjectManager;
 
@@ -27,6 +34,11 @@ public class JDTCompilationParticipant extends CompilationParticipant {
   
   @Override
   public synchronized void cleanStarting(IJavaProject project) {
+    if(DEBUG) {
+      System.out.println("\nRequested clean for " + project.getProject() //$NON-NLS-1$
+          + " @ " + new Date(System.currentTimeMillis())); //$NON-NLS-1$
+    }
+    
     super.cleanStarting(project);
 
     try {

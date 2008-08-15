@@ -1,3 +1,16 @@
+# Debugging options for the org.maven.ide.eclipse plugin.
+
+# Turn on debugging for the org.maven.ide.eclipse plugin.
+org.maven.ide.eclipse/debug=false
+
+# Maven builder
+org.maven.ide.eclipse/debug/builder=false
+
+# Maven project facade
+org.maven.ide.eclipse/debug/projectManager=false
+
+
+# legacy options
 
 # plugin 
 org.maven.ide.eclipse/plugin=false
@@ -10,3 +23,4 @@ org.maven.ide.eclipse/actions=false
 
 # console activity
 org.maven.ide.eclipse/console=false
+

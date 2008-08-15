@@ -343,10 +343,10 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
     }
 
     if(result.hasExceptions()) {
+      String msg = "Build error for " + pomResource.getFullPath();
       @SuppressWarnings("unchecked")
       List<Exception> exceptions = result.getExceptions();
       for(Exception ex : exceptions) {
-        String msg = "Build error for " + pomResource.getFullPath();
         console.logError(msg + "; " + ex.toString());
         MavenLogger.log(msg, ex);
       }

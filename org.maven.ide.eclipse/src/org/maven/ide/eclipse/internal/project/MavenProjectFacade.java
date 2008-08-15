@@ -133,9 +133,9 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
   }
 
   /**
-   * Returns project resource for given filesystem location or null the location is outside of project.
+   * Returns project resource for given file system location or null the location is outside of project.
    * 
-   * @param resourceLocation absolute filesystem location
+   * @param resourceLocation absolute file system location
    * @return IPath the full, absolute workspace path resourceLocation
    */
   public IPath getProjectRelativePath(String resourceLocation) {
@@ -144,13 +144,15 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
 
   /**
    * Filters resources of this project. Does not recurse into nested modules.
+   * @return 
    */
-  public void filterResources(IProgressMonitor monitor) throws CoreException {
+  public MavenExecutionResult filterResources(IProgressMonitor monitor) throws CoreException {
     try {
       String goalsStr = resolverConfiguration.getResourceFilteringGoals();
       List<String> goals = Arrays.asList(StringUtils.split(goalsStr));
-      manager.execute(this, goals, false, monitor);
+      MavenExecutionResult result = manager.execute(this, goals, false /* non-recursive*/, monitor);
       refreshBuildDirectory(monitor); // XXX only need to refresh classes and test-classes
+      return result;
     } catch(MavenEmbedderException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, ex.getMessage(), ex));
     }
@@ -315,12 +317,15 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
   /**
    * Executes specified maven goals. 
    * 
-   * Recurses into nested modules dependending on resolver configuration.
+   * Recurses into nested modules depending on resolver configuration.
+   * 
+   * @return execution result 
    */
-  public void execute(List<String> goals, IProgressMonitor monitor) throws CoreException {
+  public MavenExecutionResult execute(List<String> goals, IProgressMonitor monitor) throws CoreException {
     try {
-      manager.execute(this, goals, true, monitor);
+      MavenExecutionResult result = manager.execute(this, goals, resolverConfiguration.shouldIncludeModules(), monitor);
       refreshBuildDirectory(monitor);
+      return result;
     } catch(MavenEmbedderException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, ex.getMessage(), ex));
     }
