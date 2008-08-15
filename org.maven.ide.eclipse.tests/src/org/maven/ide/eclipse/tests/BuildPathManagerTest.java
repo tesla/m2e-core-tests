@@ -330,8 +330,9 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", rawClasspath[0].getPath().toString());
       assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[1].getPath().toString());
 
-      IMarker[] markers = projects[0].findMarkers(null, true, IResource.DEPTH_INFINITE);
-      assertEquals(toString(markers), 0, markers.length);
+      // IMarker[] markers = projects[0].findMarkers(null, true, IResource.DEPTH_INFINITE);
+      List<IMarker> markers = findErrorMarkers(projects[0]);
+      assertEquals(markers.toString(), 0, markers.size());
     }
 
     {
@@ -347,8 +348,9 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", rawClasspath[1].getPath().toString());
       assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[2].getPath().toString());
 
-      IMarker[] markers = projects[1].findMarkers(null, true, IResource.DEPTH_INFINITE);
-      assertEquals(toString(markers), 0, markers.length);
+      // IMarker[] markers = projects[1].findMarkers(null, true, IResource.DEPTH_INFINITE);
+      List<IMarker> markers = findErrorMarkers(projects[1]);
+      assertEquals(markers.toString(), 0, markers.size());
     }
 
     {
@@ -367,8 +369,9 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", rawClasspath[1].getPath().toString());
       assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[2].getPath().toString());
 
-      IMarker[] markers = projects[2].findMarkers(null, true, IResource.DEPTH_INFINITE);
-      assertEquals(toString(markers), 3, markers.length);
+      // IMarker[] markers = projects[2].findMarkers(null, true, IResource.DEPTH_INFINITE);
+      List<IMarker> markers = findErrorMarkers(projects[2]);
+      assertEquals(markers.toString(), 3, markers.size());
     }
 
     {
@@ -389,8 +392,9 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       assertEquals("org.eclipse.jst.j2ee.internal.web.container", rawClasspath[3].getPath().toString());
       assertEquals("org.eclipse.jst.j2ee.internal.module.container", rawClasspath[4].getPath().toString());
 
-      IMarker[] markers = projects[3].findMarkers(null, true, IResource.DEPTH_INFINITE);
-      assertEquals(toString(markers), 5, markers.length);
+      // IMarker[] markers = projects[3].findMarkers(null, true, IResource.DEPTH_INFINITE);
+      List<IMarker> markers = findErrorMarkers(projects[3]);
+      assertEquals(markers.toString(), 4, markers.size());
     }
 
     {
@@ -410,8 +414,9 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", rawClasspath[2].getPath().toString());
       assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[3].getPath().toString());
 
-      IMarker[] markers = projects[4].findMarkers(null, true, IResource.DEPTH_INFINITE);
-      assertEquals(toString(markers), 4, markers.length);
+      // IMarker[] markers = projects[4].findMarkers(null, true, IResource.DEPTH_INFINITE);
+      List<IMarker> markers = findErrorMarkers(projects[4]);
+      assertEquals(markers.toString(), 4, markers.size());
     }
 
     {
@@ -427,8 +432,9 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", rawClasspath[0].getPath().toString());
       assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[1].getPath().toString());
 
-      IMarker[] markers = projects[5].findMarkers(null, true, IResource.DEPTH_INFINITE);
-      assertEquals(toString(markers), 4, markers.length);
+      // IMarker[] markers = projects[5].findMarkers(null, true, IResource.DEPTH_INFINITE);
+      List<IMarker> markers = findErrorMarkers(projects[4]);
+      assertEquals(markers.toString(), 4, markers.size());
     }
   }
 
