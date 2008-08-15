@@ -306,7 +306,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
         configuration);
 
     waitForJobsToComplete();
-    
+
     projects[0].refreshLocal(IResource.DEPTH_INFINITE, monitor);
 
     IResource res1 = projects[0].getFolder("ejb/target");
@@ -334,13 +334,13 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
 
     {
       // type
-      IJavaProject javaProject = JavaCore.create(projects[1]); 
+      IJavaProject javaProject = JavaCore.create(projects[1]);
       IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
           .getClasspathEntries();
       assertEquals(0, classpathEntries.length);
 
       IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
-      assertEquals(3, rawClasspath.length);
+      assertEquals(Arrays.toString(rawClasspath), 3, rawClasspath.length);
       assertEquals("/MNGECLIPSE-20-type/src/main/java", rawClasspath[0].getPath().toString());
       assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", rawClasspath[1].getPath().toString());
       assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[2].getPath().toString());
@@ -351,7 +351,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
 
     {
       // app
-      IJavaProject javaProject = JavaCore.create(projects[2]); 
+      IJavaProject javaProject = JavaCore.create(projects[2]);
       IClasspathEntry[] classpathEntries = BuildPathManager.getMaven2ClasspathContainer(javaProject)
           .getClasspathEntries();
       assertEquals(3, classpathEntries.length);
