@@ -10,6 +10,7 @@ package org.maven.ide.eclipse.tests;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
@@ -1090,8 +1091,9 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     IProject project = workspace.getRoot().getProject("compilerSettingsJsr14");
     assertTrue(project.exists());
 
-    IMarker[] markers = project.findMarkers(null, true, IResource.DEPTH_INFINITE);
-    assertEquals(toString(markers), 0, markers.length);
+    // IMarker[] markers = project.findMarkers(null, true, IResource.DEPTH_INFINITE);
+    List<IMarker> errorMarkers = findErrorMarkers(project);
+    assertEquals(errorMarkers.toString(), 0, errorMarkers.size());
 
     IJavaProject javaProject = JavaCore.create(project);
     assertEquals("1.5", javaProject.getOption(JavaCore.COMPILER_SOURCE, true));
@@ -1323,4 +1325,15 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     return project;
   }
 
+  private List<IMarker> findErrorMarkers(IProject project) throws CoreException {
+    ArrayList<IMarker> errors = new ArrayList<IMarker>();
+    for(IMarker marker : project.findMarkers(null /* all markers */, true /* subtypes */, IResource.DEPTH_INFINITE)) {
+      int severity = marker.getAttribute(IMarker.SEVERITY, 0);
+      if(severity==IMarker.SEVERITY_ERROR) {
+        errors.add(marker);
+      }
+    }
+    return errors;
+  }
+  
 }
