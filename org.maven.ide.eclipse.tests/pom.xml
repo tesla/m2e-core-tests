@@ -21,7 +21,7 @@
   <artifactId>org.maven.ide.eclipse.tests</artifactId>
   <packaging>eclipse-test-plugin</packaging>
 
-  <name>Maven Integration for Eclipse JUnit Plug-in tests</name>
+  <name>Maven Integration for Eclipse tests</name>
 
   <build>
     <sourceDirectory>src</sourceDirectory>
