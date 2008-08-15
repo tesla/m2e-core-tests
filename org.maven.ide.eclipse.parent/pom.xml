@@ -314,7 +314,7 @@
             <includes>
               <include>**/*Test.java</include>
             </includes>
-            <argLine>-Xmx512m</argLine>
+            <argLine>${test.vmargs}</argLine>
           </configuration>
         </plugin>
       </plugins>
@@ -472,8 +472,14 @@
     </profile>
     <profile>
       <id>sun-jvm</id>
+      <activation>
+        <property>
+          <name>java.vendor.url</name>
+          <value>http://java.sun.com/</value>
+        </property>
+      </activation>
       <properties>
-        <MaxPermSize>-XX:MaxPermSize=256m</MaxPermSize>
+        <test.vmargs>-Xmx512m -XX:MaxPermSize=256m</test.vmargs>
       </properties>
     </profile>
   </profiles>
