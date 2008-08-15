@@ -379,12 +379,12 @@
       <id>sun-jvm</id>
       <activation>
         <property>
-          <name>java.vendor</name>
-          <value>Sun Microsystems Inc.</value>
+          <name>java.vendor.url</name>   
+          <value>http://java.sun.com/</value>          
         </property>
       </activation>
       <properties>
-        <tycho.test.jvmArgs>-XX:MaxPermSize=256m -Xmx512m</tycho.test.jvmArgs>
+        <tycho.test.jvmArgs>-Xmx512m -XX:MaxPermSize=256m</tycho.test.jvmArgs>
       </properties>
     </profile>
     
