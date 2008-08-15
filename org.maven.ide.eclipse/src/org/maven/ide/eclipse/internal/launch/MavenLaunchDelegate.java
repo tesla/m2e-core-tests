@@ -291,13 +291,15 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
     }
     // sb.append(" -D").append(MavenPreferenceConstants.P_OFFLINE).append("=").append(offline);
 
-    boolean updateSnapshots = configuration.getAttribute(MavenLaunchConstants.ATTR_UPDATE_SNAPSHOTS, false);
-    if(updateSnapshots) {
+    if(configuration.getAttribute(MavenLaunchConstants.ATTR_UPDATE_SNAPSHOTS, false)) {
       sb.append(" -U");
     }
     
-    boolean skipTests = configuration.getAttribute(MavenLaunchConstants.ATTR_SKIP_TESTS, false);
-    if(skipTests) {
+    if(configuration.getAttribute(MavenLaunchConstants.ATTR_NON_RECURSIVE, false)) {
+      sb.append(" -N");
+    }
+    
+    if(configuration.getAttribute(MavenLaunchConstants.ATTR_SKIP_TESTS, false)) {
       sb.append(" -Dmaven.test.skip=true");
     }
     

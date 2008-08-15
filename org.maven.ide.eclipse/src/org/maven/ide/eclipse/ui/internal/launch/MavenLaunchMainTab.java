@@ -46,7 +46,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
@@ -99,9 +98,12 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
 
   private Button skipTestsButton;
   
+  private Button nonRecursiveButton;
+  
   private Button enableWorkspaceResolution;
 
   ComboViewer runtimeComboViewer;
+
 
   public MavenLaunchMainTab(boolean isBuilder) {
     this.isBuilder = isBuilder;
@@ -116,7 +118,7 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
     setControl(mainComposite);
     //PlatformUI.getWorkbench().getHelpSystem().setHelp(mainComposite, IAntUIHelpContextIds.ANT_MAIN_TAB);
     GridLayout layout = new GridLayout();
-    layout.numColumns = 4;
+    layout.numColumns = 5;
     GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
     mainComposite.setLayout(layout);
     mainComposite.setLayoutData(gridData);
@@ -136,19 +138,17 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
       }
     }
     Listener modyfyingListener = new Listener();
-    
-    // pom file 
-    final Group pomGroup = new Group(mainComposite, SWT.NONE);
-    pomGroup.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
-    pomGroup.setText(Messages.getString("launch.pomGroup")); //$NON-NLS-1$
-    pomGroup.setLayout(new GridLayout());
 
-    this.pomDirNameText = new Text(pomGroup, SWT.BORDER);
-    this.pomDirNameText.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false));
+    Label label = new Label(mainComposite, SWT.NONE);
+    label.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 5, 1));
+    label.setText(Messages.getString("launch.pomGroup"));
+
+    this.pomDirNameText = new Text(mainComposite, SWT.BORDER);
+    this.pomDirNameText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 5, 1));
     this.pomDirNameText.addModifyListener(modyfyingListener);
 
-    final Composite pomDirButtonsComposite = new Composite(pomGroup, SWT.NONE);
-    pomDirButtonsComposite.setLayoutData(new GridData(GridData.END, GridData.CENTER, false, false));
+    final Composite pomDirButtonsComposite = new Composite(mainComposite, SWT.NONE);
+    pomDirButtonsComposite.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 5, 1));
     final GridLayout pomDirButtonsGridLayout = new GridLayout();
     pomDirButtonsGridLayout.marginWidth = 0;
     pomDirButtonsGridLayout.marginHeight = 0;
@@ -202,25 +202,34 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
         }
       }
     });
+    
+    // pom file 
 
     // goals
-    
+
     if(isBuilder) {
       Label autoBuildGoalsLabel = new Label(mainComposite, SWT.NONE);
+      GridData gd_autoBuildGoalsLabel = new GridData();
+      gd_autoBuildGoalsLabel.verticalIndent = 7;
+      autoBuildGoalsLabel.setLayoutData(gd_autoBuildGoalsLabel);
       autoBuildGoalsLabel.setText("Auto &Build Goals:");
       goalsAutoBuildText = new Text(mainComposite, SWT.BORDER);
-      goalsAutoBuildText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+      GridData gd_goalsAutoBuildText = new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1);
+      gd_goalsAutoBuildText.verticalIndent = 7;
+      goalsAutoBuildText.setLayoutData(gd_goalsAutoBuildText);
       goalsAutoBuildText.addModifyListener(modyfyingListener);
       goalsAutoBuildText.addFocusListener(new GoalsFocusListener(goalsAutoBuildText));
       Button goalsAutoBuildButton = new Button(mainComposite, SWT.NONE);
-      goalsAutoBuildButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+      GridData gd_goalsAutoBuildButton = new GridData(SWT.FILL, SWT.CENTER, false, false);
+      gd_goalsAutoBuildButton.verticalIndent = 7;
+      goalsAutoBuildButton.setLayoutData(gd_goalsAutoBuildButton);
       goalsAutoBuildButton.setText("&Select...");
       goalsAutoBuildButton.addSelectionListener(new GoalSelectionAdapter(goalsAutoBuildText));
 
       Label manualBuildGoalsLabel = new Label(mainComposite, SWT.NONE);
       manualBuildGoalsLabel.setText("Ma&nual Build Goals:");
       goalsManualBuildText = new Text(mainComposite, SWT.BORDER);
-      goalsManualBuildText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+      goalsManualBuildText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
       goalsManualBuildText.addModifyListener(modyfyingListener);
       goalsManualBuildText.addFocusListener(new GoalsFocusListener(goalsManualBuildText));
       Button goalsManualBuildButton = new Button(mainComposite, SWT.NONE);
@@ -231,7 +240,7 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
       Label cleanBuildGoalsLabel = new Label(mainComposite, SWT.NONE);
       cleanBuildGoalsLabel.setText("&During a Clean Goals:");
       goalsCleanText = new Text(mainComposite, SWT.BORDER);
-      goalsCleanText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+      goalsCleanText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
       goalsCleanText.addModifyListener(modyfyingListener);
       goalsCleanText.addFocusListener(new GoalsFocusListener(goalsCleanText));
       Button goalsCleanButton = new Button(mainComposite, SWT.NONE);
@@ -242,7 +251,7 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
       Label afterCleanGoalsLabel = new Label(mainComposite, SWT.NONE);
       afterCleanGoalsLabel.setText("A&fter a Clean Goals:");
       goalsAfterCleanText = new Text(mainComposite, SWT.BORDER);
-      goalsAfterCleanText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+      goalsAfterCleanText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
       goalsAfterCleanText.addModifyListener(modyfyingListener);
       goalsAfterCleanText.addFocusListener(new GoalsFocusListener(goalsAfterCleanText));
       Button goalsAfterCleanButton = new Button(mainComposite, SWT.NONE);
@@ -252,14 +261,21 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
       
     } else {
       Label goalsLabel = new Label(mainComposite, SWT.NONE);
+      GridData gd_goalsLabel = new GridData();
+      gd_goalsLabel.verticalIndent = 7;
+      goalsLabel.setLayoutData(gd_goalsLabel);
       goalsLabel.setText(Messages.getString("launch.goalsLabel")); //$NON-NLS-1$
       goalsText = new Text(mainComposite, SWT.BORDER);
-      goalsText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+      GridData gd_goalsText = new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1);
+      gd_goalsText.verticalIndent = 7;
+      goalsText.setLayoutData(gd_goalsText);
       goalsText.addModifyListener(modyfyingListener);
       goalsText.addFocusListener(new GoalsFocusListener(goalsText));
 
       Button selectGoalsButton = new Button(mainComposite, SWT.NONE);
-      selectGoalsButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+      GridData gd_selectGoalsButton = new GridData(SWT.FILL, SWT.CENTER, false, false);
+      gd_selectGoalsButton.verticalIndent = 7;
+      selectGoalsButton.setLayoutData(gd_selectGoalsButton);
       selectGoalsButton.setText(Messages.getString("launch.goals")); //$NON-NLS-1$
       selectGoalsButton.addSelectionListener(new GoalSelectionAdapter(goalsText));
     }
@@ -269,40 +285,54 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
     // profilesLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
     profilesText = new Text(mainComposite, SWT.BORDER);
-    profilesText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
+    profilesText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
     profilesText.addModifyListener(modyfyingListener);
     new Label(mainComposite, SWT.NONE);
 
     offlineButton = new Button(mainComposite, SWT.CHECK);
+    offlineButton.setToolTipText("-o");
     GridData gd_offlineButton = new GridData();
     offlineButton.setLayoutData(gd_offlineButton);
     offlineButton.setText("&Offline");
     offlineButton.addSelectionListener(modyfyingListener);
 
     updateSnapshotsButton = new Button(mainComposite, SWT.CHECK);
+    updateSnapshotsButton.setToolTipText("-U");
     updateSnapshotsButton.addSelectionListener(modyfyingListener);
-    GridData gd_updateSnapshotsButton = new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1);
+    GridData gd_updateSnapshotsButton = new GridData(SWT.LEFT, SWT.CENTER, false, false, 3, 1);
     gd_updateSnapshotsButton.horizontalIndent = 10;
     updateSnapshotsButton.setLayoutData(gd_updateSnapshotsButton);
     updateSnapshotsButton.setText("&Update Snapshots");
     new Label(mainComposite, SWT.NONE);
 
     debugOutputButton = new Button(mainComposite, SWT.CHECK);
+    debugOutputButton.setToolTipText("-X -e");
     debugOutputButton.addSelectionListener(modyfyingListener);
     debugOutputButton.setLayoutData(new GridData());
     debugOutputButton.setText("Debu&g Output");
 
     skipTestsButton = new Button(mainComposite, SWT.CHECK);
+    skipTestsButton.setToolTipText("-Dmaven.test.skip=true");
     skipTestsButton.addSelectionListener(modyfyingListener);
-    GridData gd_skipTestsButton = new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1);
+    GridData gd_skipTestsButton = new GridData();
     gd_skipTestsButton.horizontalIndent = 10;
     skipTestsButton.setLayoutData(gd_skipTestsButton);
     skipTestsButton.setText("S&kip Tests");
+
+    nonRecursiveButton = new Button(mainComposite, SWT.CHECK);
+    GridData gd_nonrecursiveButton = new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1);
+    gd_nonrecursiveButton.horizontalIndent = 10;
+    nonRecursiveButton.setLayoutData(gd_nonrecursiveButton);
+    nonRecursiveButton.setText("Non-recursive");
+    nonRecursiveButton.setToolTipText("-N");
+    nonRecursiveButton.setData("name", "nonRecursiveButton");
+    nonRecursiveButton.addSelectionListener(modyfyingListener);
+
     new Label(mainComposite, SWT.NONE);
 
     enableWorkspaceResolution = new Button(mainComposite, SWT.CHECK);
     enableWorkspaceResolution.addSelectionListener(modyfyingListener);
-    enableWorkspaceResolution.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 3, 1));
+    enableWorkspaceResolution.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 4, 1));
     enableWorkspaceResolution.setText("Resolve Workspace artifacts");
 
     TableViewer tableViewer = new TableViewer(mainComposite, SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
@@ -317,7 +347,7 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
     
     this.propsTable = tableViewer.getTable();
     //this.tProps.setItemCount(10);
-    this.propsTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 2));
+    this.propsTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4, 2));
     this.propsTable.setLinesVisible(true);
     this.propsTable.setHeaderVisible(true);
 
@@ -352,7 +382,7 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
 
     {
       Composite composite = new Composite(mainComposite, SWT.NONE);
-      composite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 3, 1));
+      composite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 4, 1));
       GridLayout gridLayout = new GridLayout(2, false);
       gridLayout.marginWidth = 0;
       gridLayout.marginHeight = 0;
@@ -461,6 +491,7 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
 
     this.updateSnapshotsButton.setSelection(getAttribute(configuration, ATTR_UPDATE_SNAPSHOTS, false));
     this.skipTestsButton.setSelection(getAttribute(configuration, ATTR_SKIP_TESTS, false));
+    this.nonRecursiveButton.setSelection(getAttribute(configuration, ATTR_NON_RECURSIVE, false));
     this.enableWorkspaceResolution.setSelection(getAttribute(configuration, ATTR_WORKSPACE_RESOLUTION, false));
 
     String location = getAttribute(configuration, ATTR_RUNTIME, "");
@@ -542,6 +573,7 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
     configuration.setAttribute(ATTR_OFFLINE, this.offlineButton.getSelection());
     configuration.setAttribute(ATTR_UPDATE_SNAPSHOTS, this.updateSnapshotsButton.getSelection());
     configuration.setAttribute(ATTR_SKIP_TESTS, this.skipTestsButton.getSelection());
+    configuration.setAttribute(ATTR_NON_RECURSIVE, this.nonRecursiveButton.getSelection());
     configuration.setAttribute(ATTR_WORKSPACE_RESOLUTION, this.enableWorkspaceResolution.getSelection());
     configuration.setAttribute(ATTR_DEBUG_OUTPUT, this.debugOutputButton.getSelection());
 
