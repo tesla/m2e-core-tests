@@ -11,6 +11,7 @@ package org.maven.ide.eclipse.configurators;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Arrays;
 import java.util.Set;
 
 import junit.framework.TestCase;
@@ -31,7 +32,7 @@ public class ProjectConfiguratorFactoryTest extends TestCase {
     
     AbstractProjectConfigurator[] cc = configurators.toArray(new AbstractProjectConfigurator[configurators.size()]);
 
-    assertEquals(7, cc.length);
+    assertEquals(Arrays.toString(cc), 7, cc.length);
 
     assertConfigurator(cc[0], "org.maven.ide.eclipse.configurator.mavenEclipsePlugin", "maven-eclipse-plugin", 5);
     assertConfigurator(cc[1], "org.maven.ide.eclipse.configurator.jdt", "JDT", 10);

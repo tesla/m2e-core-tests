@@ -197,7 +197,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       assertEquals(0, classpathEntries.length);
 
       IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
-      assertEquals(4, rawClasspath.length);
+      assertEquals(Arrays.toString(rawClasspath), 4, rawClasspath.length);
       assertEquals("/MNGECLIPSE-20-type/src/main/java", rawClasspath[0].getPath().toString());
       assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", rawClasspath[1].getPath().toString());
       assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[2].getPath().toString());
@@ -380,7 +380,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
       assertEquals("MNGECLIPSE-20-type-0.0.1-SNAPSHOT.jar", classpathEntries[1].getPath().lastSegment());
 
       IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
-      assertEquals(5, rawClasspath.length);
+      assertEquals(Arrays.toString(rawClasspath), 5, rawClasspath.length);
       assertEquals("/MNGECLIPSE-20-web/src/main/java", rawClasspath[0].getPath().toString());
       assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", rawClasspath[1].getPath().toString());
       assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[2].getPath().toString());
