@@ -42,7 +42,8 @@
     <m2e.snapshots>http://localhost</m2e.snapshots>
     <m2e.site>http://localhost</m2e.site>
 
-    <tycho.version>0.3.0-SNAPSHOT</tycho.version>    
+    <tycho.version>0.3.0-SNAPSHOT</tycho.version>  
+    <tycho.test.jvmArgs>-Xmx512m</tycho.test.jvmArgs>  
   </properties>
 
   <organization>
@@ -314,7 +315,7 @@
             <includes>
               <include>**/*Test.java</include>
             </includes>
-            <argLine>${test.vmargs}</argLine>
+            <argLine>${tycho.test.jvmArgs}</argLine>
           </configuration>
         </plugin>
       </plugins>
@@ -374,6 +375,19 @@
   </distributionManagement>
 
   <profiles>
+    <profile>
+      <id>sun-jvm</id>
+      <activation>
+        <property>
+          <name>java.vendor</name>
+          <value>Sun Microsystems Inc.</value>
+        </property>
+      </activation>
+      <properties>
+        <tycho.test.jvmArgs>-XX:MaxPermSize=256m -Xmx512m</tycho.test.jvmArgs>
+      </properties>
+    </profile>
+    
     <profile>
       <id>e34-p2</id>
       <repositories>
@@ -469,18 +483,6 @@
           </dependency>
         </dependencies>
       </dependencyManagement>
-    </profile>
-    <profile>
-      <id>sun-jvm</id>
-      <activation>
-        <property>
-          <name>java.vendor.url</name>
-          <value>http://java.sun.com/</value>
-        </property>
-      </activation>
-      <properties>
-        <test.vmargs>-Xmx512m -XX:MaxPermSize=256m</test.vmargs>
-      </properties>
     </profile>
   </profiles>
 </project>
