@@ -391,7 +391,6 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
 
     monitor.subTask("Configuring project...");
     enableMavenNature(project, configuration.getResolverConfiguration(), monitor);
-    updateProjectConfiguration(project, configuration.getResolverConfiguration(), runtimeManager.getGoalOnImport(), monitor);
     monitor.worked(1);
   }
   

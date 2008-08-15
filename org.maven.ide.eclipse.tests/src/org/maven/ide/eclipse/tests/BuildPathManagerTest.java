@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.maven.archetype.catalog.Archetype;
+import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IMarker;
@@ -1010,10 +1011,30 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     final boolean modules = true;
     IProject project = createSimpleProject("simple-project", null, modules);
 
-    // IJavaProject javaProject = JavaCore.create(project);
-
     ResolverConfiguration configuration = plugin.getMavenProjectManager().getResolverConfiguration(project);
     assertEquals(modules, configuration.shouldIncludeModules());
+    
+    IJavaProject javaProject = JavaCore.create(project);
+
+    IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
+    assertEquals(Arrays.toString(rawClasspath), 6, rawClasspath.length);
+    assertEquals("/simple-project/src/main/java", rawClasspath[0].getPath().toString());
+    assertEquals("/simple-project/src/main/resources", rawClasspath[1].getPath().toString());
+    assertEquals("/simple-project/src/test/java", rawClasspath[2].getPath().toString());
+    assertEquals("/simple-project/src/test/resources", rawClasspath[3].getPath().toString());
+    assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", rawClasspath[4].getPath().toString());
+    assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[5].getPath().toString());
+   
+    IClasspathEntry[] entries = getMavenContainerEntries(project);
+    assertEquals(Arrays.toString(entries), 1, entries.length);
+    assertEquals(IClasspathEntry.CPE_LIBRARY, entries[0].getEntryKind());
+    assertEquals("junit-3.8.1.jar", entries[0].getPath().lastSegment());
+    
+    assertTrue(project.getFile("pom.xml").exists());
+    assertTrue(project.getFolder("src/main/java").exists());
+    assertTrue(project.getFolder("src/test/java").exists());
+    assertTrue(project.getFolder("src/main/resources").exists());
+    assertTrue(project.getFolder("src/test/resources").exists());
   }
 
   public void test005_dependencyAvailableFromLocalRepoAndWorkspace() throws Exception {
@@ -1179,8 +1200,15 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
         model.setArtifactId(projectName);
         model.setVersion("0.0.1-SNAPSHOT");
         model.setModelVersion("4.0.0");
+        
+        Dependency dependency = new Dependency();
+        dependency.setGroupId("junit");
+        dependency.setArtifactId("junit");
+        dependency.setVersion("3.8.1");
+        
+        model.addDependency(dependency);
 
-        String[] directories = {};
+        String[] directories = {"src/main/java", "src/test/java", "src/main/resources", "src/test/resources"};
 
         ProjectImportConfiguration config = new ProjectImportConfiguration();
         config.getResolverConfiguration().setIncludeModules(modules);
