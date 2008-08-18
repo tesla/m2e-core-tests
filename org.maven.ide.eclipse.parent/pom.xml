@@ -389,7 +389,7 @@
         </property>
       </activation>
       <properties>
-        <tycho.test.jvmArgs>-Xmx512m -XX:MaxPermSize=256m</tycho.test.jvmArgs>
+        <tycho.test.jvmArgs>-Xmx800m -XX:MaxPermSize=256m</tycho.test.jvmArgs>
       </properties>
     </profile>
 
