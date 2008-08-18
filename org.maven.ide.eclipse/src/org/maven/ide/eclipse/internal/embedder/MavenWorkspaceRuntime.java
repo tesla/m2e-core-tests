@@ -34,7 +34,7 @@ import org.maven.ide.eclipse.project.MavenProjectManager;
  */
 public class MavenWorkspaceRuntime extends MavenRuntime {
 
-  private static final ArtifactKey MAVEN_DISTRIBUTION = new ArtifactKey("org.apache.maven", "maven-distribution", "2.1-SNAPSHOT", null);
+  private static final ArtifactKey MAVEN_DISTRIBUTION = new ArtifactKey("org.apache.maven", "maven-distribution", "3.0-SNAPSHOT", null);
 
   private MavenProjectManager projectManager;
 
