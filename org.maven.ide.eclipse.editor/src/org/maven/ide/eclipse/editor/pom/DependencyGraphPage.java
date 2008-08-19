@@ -18,7 +18,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuCreator;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
@@ -39,6 +41,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.forms.IManagedForm;
@@ -65,6 +68,8 @@ import org.maven.ide.eclipse.editor.MavenEditorImages;
  * @author Eugene Kuleshov
  */
 public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchPart {
+
+  private static final String DEPENDENCY_GRAPH = "Dependency Graph";
 
   protected static final Object[] EMPTY = new Object[0];
 
@@ -99,9 +104,10 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
 
   private SearchControl searchControl;
 
+  String currentScope = Artifact.SCOPE_TEST;
 
   public DependencyGraphPage(MavenPomEditor pomEditor) {
-    super(pomEditor, IMavenConstants.PLUGIN_ID + ".dependency.graph", "Dependency Graph");
+    super(pomEditor, IMavenConstants.PLUGIN_ID + ".dependency.graph", DEPENDENCY_GRAPH);
     this.pomEditor = pomEditor;
   }
   
@@ -111,7 +117,7 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
 
   protected void createFormContent(final IManagedForm managedForm) {
     ScrolledForm form = managedForm.getForm();
-    form.setText("Dependency Graph");
+    form.setText(formatFormTitle());
     form.setExpandHorizontal(true);
     form.setExpandVertical(true);
 
@@ -191,12 +197,54 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
     
     toolBarManager.add(searchControl);
 
+    class ScopeDropdown extends Action implements IMenuCreator {
+      private Menu menu;
+
+      public ScopeDropdown() {
+        setText("Scope");
+        setImageDescriptor(MavenEditorImages.SCOPE);
+        setMenuCreator(this);
+      }
+      
+      public Menu getMenu(Menu parent) {
+        return null;
+      }
+
+      public Menu getMenu(Control parent) {
+        if (menu != null) {
+          menu.dispose();
+        }
+        
+        menu = new Menu(parent);
+        addToMenu(menu, "all (test)", Artifact.SCOPE_TEST, currentScope);
+        addToMenu(menu, "compile", Artifact.SCOPE_COMPILE, currentScope);
+        addToMenu(menu, "runtime", Artifact.SCOPE_RUNTIME, currentScope);
+        addToMenu(menu, "provided", Artifact.SCOPE_PROVIDED, currentScope);
+        addToMenu(menu, "system", Artifact.SCOPE_SYSTEM, currentScope);
+        return menu;
+      }
+      
+      protected void addToMenu(Menu parent, String text, String scope, String currentScope) {
+        ScopeAction action = new ScopeAction(text, scope);
+        action.setChecked(scope.equals(currentScope));
+        new ActionContributionItem(action).fill(parent, -1);
+      }
+      
+      public void dispose() {
+        if (menu != null)  {
+          menu.dispose();
+          menu = null;
+        }
+      }
+    }
+    toolBarManager.add(new ScopeDropdown());
+    
     toolBarManager.add(new Separator());
 
     toolBarManager.add(new Action("Refresh", MavenEditorImages.REFRESH) {
       public void run() {
         // viewer.getGraphControl().applyLayout();
-        updateGraphAsync(true);
+        updateGraphAsync(true, currentScope);
       }
     });
     
@@ -221,7 +269,11 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
       }
     });
     
-    updateGraphAsync(false);
+    updateGraphAsync(false, currentScope);
+  }
+
+  String formatFormTitle() {
+    return DEPENDENCY_GRAPH + " [" + currentScope + "]";
   }
 
   void selectElements() {
@@ -293,7 +345,7 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
     showResolvedAction = new Action("Show Resolved", SWT.CHECK) {
       public void run() {
         graphContentProvider.setShowResolved(isChecked());
-        updateGraphAsync(false);
+        updateGraphAsync(false, currentScope);
       }
     };
     showResolvedAction.setChecked(true);
@@ -407,13 +459,13 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
     showSystemScopeAction.setChecked(showSystemScopeAction==action);
   }
 
-  void updateGraphAsync(final boolean force) {
+  void updateGraphAsync(final boolean force, final String scope) {
     getManagedForm().getForm().setMessage("Resolving dependencies...", IMessageProvider.WARNING);
 
     new Job("Loading pom.xml") {
       protected IStatus run(IProgressMonitor monitor) {
         try {
-          final DependencyNode dependencyNode = pomEditor.readDependencies(force, monitor);
+          final DependencyNode dependencyNode = pomEditor.readDependencies(force, monitor, scope);
           getPartControl().getDisplay().asyncExec(new Runnable() {
             public void run() {
               getManagedForm().getForm().setMessage(null, IMessageProvider.NONE);
@@ -553,5 +605,24 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
 
   }
 */
+ 
+  public class ScopeAction extends Action {
+
+    private final String scope;
+
+    public ScopeAction(String text, String scope) {
+      super(text, IAction.AS_RADIO_BUTTON);
+      this.scope = scope;
+    }
+
+    public void run() {
+      if(isChecked()) {
+        currentScope = scope;
+        IManagedForm managedForm = DependencyGraphPage.this.getManagedForm();
+        managedForm.getForm().setText(formatFormTitle());
+        updateGraphAsync(false, scope);
+      }
+    }
+  }
   
 }

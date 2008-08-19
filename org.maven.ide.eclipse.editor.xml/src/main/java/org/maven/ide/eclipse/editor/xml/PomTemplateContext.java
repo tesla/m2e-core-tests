@@ -260,6 +260,8 @@ public enum PomTemplateContext {
     }
   },
   
+  SYSTEM_PATH("systemPath"),
+  
   PHASE("phase") {
     @Override
     public void addTemplates(Collection<Template> proposals, Node node, String prefix) {

@@ -56,6 +56,8 @@ public class MavenEditorImages {
   public static final Image IMG_REPORT = createImage("report_obj.gif");
 
   public static final Image IMG_PROFILE = createImage("profile_obj.gif");
+
+  public static final Image IMG_SCOPE = createImage("scope_obj.gif");
   
   // image descriptors
   
@@ -88,6 +90,8 @@ public class MavenEditorImages {
   public static final ImageDescriptor WEB_PAGE = create("web.gif");
 
   public static final ImageDescriptor HIERARCHY = create("hierarchy.gif");
+
+  public static final ImageDescriptor SCOPE = create("scope.gif");
   
 
   private static ImageDescriptor create(String key) {

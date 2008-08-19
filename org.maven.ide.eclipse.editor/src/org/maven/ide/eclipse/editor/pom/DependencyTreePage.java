@@ -27,6 +27,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.ActionContributionItem;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuCreator;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
@@ -60,7 +63,9 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.forms.IManagedForm;
@@ -83,6 +88,8 @@ import org.maven.ide.eclipse.project.MavenProjectManager;
  * @author Eugene Kuleshov
  */
 public class DependencyTreePage extends FormPage {
+
+  private static final String DEPENDENCY_HIERARCHY = "Dependency Hierarchy";
 
   protected static final Object[] EMPTY = new Object[0];
 
@@ -114,8 +121,10 @@ public class DependencyTreePage extends FormPage {
 
   private Job dataLoadingJob;
 
+  String currentScope = Artifact.SCOPE_TEST;
+
   public DependencyTreePage(MavenPomEditor pomEditor) {
-    super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.dependencyTree", "Dependency Hierarchy");
+    super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.dependencyTree", DEPENDENCY_HIERARCHY);
     this.pomEditor = pomEditor;
   }
 
@@ -125,7 +134,7 @@ public class DependencyTreePage extends FormPage {
     searchHighlightColor = new Color(Display.getDefault(), 242, 218, 170);
 
     ScrolledForm form = managedForm.getForm();
-    form.setText("Dependency Hierarchy");
+    form.setText(formatFormTitle());
     form.setExpandHorizontal(true);
     form.setExpandVertical(true);
 
@@ -151,6 +160,10 @@ public class DependencyTreePage extends FormPage {
     loadData(false);
   }
 
+  String formatFormTitle() {
+    return DEPENDENCY_HIERARCHY + " [" + currentScope + "]";
+  }
+
   void loadData(final boolean force) {
     // form.setMessage() forces the panel layout, which messes up the viewers
     // (e.g. long entries in the tree cause it to expand horizontally so much
@@ -163,7 +176,7 @@ public class DependencyTreePage extends FormPage {
     dataLoadingJob = new Job("Loading pom.xml") {
       protected IStatus run(IProgressMonitor monitor) {
         try {
-          final DependencyNode dependencyNode = pomEditor.readDependencies(force, monitor);
+          final DependencyNode dependencyNode = pomEditor.readDependencies(force, monitor, currentScope);
 
           dependencyNode.accept(new DependencyNodeVisitor() {
             public boolean visit(DependencyNode node) {
@@ -215,7 +228,7 @@ public class DependencyTreePage extends FormPage {
     Section hierarchySection = formToolkit.createSection(hierarchyComposite, ExpandableComposite.TITLE_BAR);
     hierarchySection.marginHeight = 1;
     hierarchySection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-    hierarchySection.setText("Dependency Hierarchy");
+    hierarchySection.setText(DEPENDENCY_HIERARCHY);
     formToolkit.paintBordersFor(hierarchySection);
 
     Tree tree = formToolkit.createTree(hierarchySection, SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI);
@@ -443,10 +456,53 @@ public class DependencyTreePage extends FormPage {
 
     ScrolledForm form = managedForm.getForm();
 
-    IToolBarManager pageToolBarManager = form.getForm().getToolBarManager();
-    pageToolBarManager.add(searchControl);
-    pageToolBarManager.add(new Separator());
-    pageToolBarManager.add(new Action("Refresh", MavenEditorImages.REFRESH) {
+    IToolBarManager toolBarManager = form.getForm().getToolBarManager();
+    toolBarManager.add(searchControl);
+    
+    class ScopeDropdown extends Action implements IMenuCreator {
+      private Menu menu;
+
+      public ScopeDropdown() {
+        setText("Scope");
+        setImageDescriptor(MavenEditorImages.SCOPE);
+        setMenuCreator(this);
+      }
+      
+      public Menu getMenu(Menu parent) {
+        return null;
+      }
+
+      public Menu getMenu(Control parent) {
+        if (menu != null) {
+          menu.dispose();
+        }
+        
+        menu = new Menu(parent);
+        addToMenu(menu, "all (test)", Artifact.SCOPE_TEST, currentScope);
+        addToMenu(menu, "compile", Artifact.SCOPE_COMPILE, currentScope);
+        addToMenu(menu, "runtime", Artifact.SCOPE_RUNTIME, currentScope);
+        addToMenu(menu, "provided", Artifact.SCOPE_PROVIDED, currentScope);
+        addToMenu(menu, "system", Artifact.SCOPE_SYSTEM, currentScope);
+        return menu;
+      }
+      
+      protected void addToMenu(Menu parent, String text, String scope, String currentScope) {
+        ScopeAction action = new ScopeAction(text, scope);
+        action.setChecked(scope.equals(currentScope));
+        new ActionContributionItem(action).fill(parent, -1);
+      }
+      
+      public void dispose() {
+        if (menu != null)  {
+          menu.dispose();
+          menu = null;
+        }
+      }
+    }
+    toolBarManager.add(new ScopeDropdown());
+    
+    toolBarManager.add(new Separator());
+    toolBarManager.add(new Action("Refresh", MavenEditorImages.REFRESH) {
       public void run() {
         loadData(true);
       }
@@ -916,7 +972,22 @@ public class DependencyTreePage extends FormPage {
     public Object[] getElements(Object input) {
       if(input instanceof MavenProject) {
         MavenProject project = (MavenProject) input;
-        Set<Artifact> artifacts = project.getArtifacts();
+        List<Artifact> artifacts = new ArrayList<Artifact>();
+        if(Artifact.SCOPE_COMPILE.equals(currentScope)) {
+          artifacts = project.getCompileArtifacts();
+        } else if(Artifact.SCOPE_TEST.equals(currentScope)) {
+          artifacts = project.getTestArtifacts();
+        } else if(Artifact.SCOPE_RUNTIME.equals(currentScope)) {
+          artifacts = project.getRuntimeArtifacts();
+        } else if(Artifact.SCOPE_SYSTEM.equals(currentScope)) {
+          artifacts = project.getSystemArtifacts();
+        } else if(Artifact.SCOPE_PROVIDED.equals(currentScope)) {
+          for(Artifact artifact : (Set<Artifact>) project.getArtifacts()) {
+            if(Artifact.SCOPE_PROVIDED.equals(artifact.getScope())) {
+              artifacts.add(artifact);
+            }
+          }
+        }
         return artifacts.toArray(new Artifact[artifacts.size()]);
       }
       return null;
@@ -1012,6 +1083,26 @@ public class DependencyTreePage extends FormPage {
       }
     }
     return null;
+  }
+  
+
+  public class ScopeAction extends Action {
+
+    private final String scope;
+
+    public ScopeAction(String text, String scope) {
+      super(text, IAction.AS_RADIO_BUTTON);
+      this.scope = scope;
+    }
+
+    public void run() {
+      if(isChecked()) {
+        currentScope = scope;
+        IManagedForm managedForm = DependencyTreePage.this.getManagedForm();
+        managedForm.getForm().setText(formatFormTitle());
+        loadData(false);
+      }
+    }
   }
   
 }

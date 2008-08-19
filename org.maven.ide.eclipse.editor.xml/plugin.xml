@@ -105,6 +105,10 @@
       class="org.eclipse.jface.text.templates.TemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.type"/>
 
+    <contextType name="SystemPath"
+      class="org.eclipse.jface.text.templates.TemplateContextType"
+      id="org.maven.ide.eclipse.editor.xml.templates.contextType.systemPath"/>
+
     <contextType name="Packaging"
       class="org.eclipse.jface.text.templates.TemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.packaging"/>
@@ -246,6 +250,37 @@
       &lt;activation&gt;
       &lt;/activation&gt;
     &lt;/profile&gt;</pattern>
+    </template>
+    
+    <template id="org.maven.ide.eclipse.editor.xml.templates.profile.tools.jar"
+         contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.profiles"
+         name="tools.jar" 
+         description="Profile for tools.jar">
+      <pattern>&lt;profile&gt;
+      &lt;id&gt;tools.jar&lt;/id&gt;
+      &lt;activation&gt;
+        &lt;property&gt;
+          &lt;name&gt;java.vendor&lt;/name&gt;
+          &lt;value&gt;Sun Microsystems Inc.&lt;/value&gt;
+       &lt;/property&gt;
+     &lt;/activation&gt;
+      &lt;dependencies&gt;
+        &lt;dependency&gt;
+          &lt;groupId&gt;com.sun&lt;/groupId&gt;
+          &lt;artifactId&gt;tools&lt;/artifactId&gt;
+          &lt;version&gt;1.4.2&lt;/version&gt;
+          &lt;scope&gt;system&lt;/scope&gt;
+          &lt;systemPath&gt;$${java.home}/../lib/tools.jar&lt;/systemPath&gt;
+       &lt;/dependency&gt;
+     &lt;/dependencies&gt;
+   &lt;/profile&gt;</pattern>
+    </template>
+    
+    <template id="org.maven.ide.eclipse.editor.xml.templates.systemPath.tools.jar"
+         contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.systemPath"
+         name="tools.jar" 
+         description="Path to the tools.jar">
+      <pattern>$${java.home}/../lib/tools.jar</pattern>
     </template>
   </extension>
 

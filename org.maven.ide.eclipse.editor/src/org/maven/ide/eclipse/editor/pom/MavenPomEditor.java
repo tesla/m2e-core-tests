@@ -17,12 +17,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactCollector;
-import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.artifact.resolver.metadata.ArtifactMetadata;
 import org.apache.maven.artifact.resolver.metadata.MetadataResolutionException;
 import org.apache.maven.artifact.resolver.metadata.MetadataResolutionRequest;
@@ -39,6 +40,9 @@ import org.apache.maven.reactor.MavenExecutionException;
 import org.apache.maven.shared.dependency.tree.DependencyNode;
 import org.apache.maven.shared.dependency.tree.DependencyTreeBuilder;
 import org.apache.maven.shared.dependency.tree.DependencyTreeBuilderException;
+import org.apache.maven.shared.dependency.tree.filter.ArtifactDependencyNodeFilter;
+import org.apache.maven.shared.dependency.tree.traversal.BuildingDependencyNodeVisitor;
+import org.apache.maven.shared.dependency.tree.traversal.FilteringDependencyNodeVisitor;
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.util.IOUtil;
@@ -162,7 +166,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 
   private Model projectDocument;
 
-  private DependencyNode rootNode;
+  private Map<String,DependencyNode> rootNode = new HashMap<String, DependencyNode>();
 
   private PomResourceImpl resource;
 
@@ -481,8 +485,20 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     }
   }
 
-  public synchronized DependencyNode readDependencies(boolean force, IProgressMonitor monitor) throws CoreException {
-    if(force || rootNode == null) {
+  /**
+   * @param force
+   * @param monitor
+   * @param scope one of 
+   *   {@link Artifact#SCOPE_COMPILE}, 
+   *   {@link Artifact#SCOPE_TEST}, 
+   *   {@link Artifact#SCOPE_SYSTEM}, 
+   *   {@link Artifact#SCOPE_PROVIDED}, 
+   *   {@link Artifact#SCOPE_RUNTIME}
+   *   
+   * @return dependency node
+   */
+  public synchronized DependencyNode readDependencies(boolean force, IProgressMonitor monitor, String scope) throws CoreException {
+    if(force || !rootNode.containsKey(scope)) {
       MavenPlugin plugin = MavenPlugin.getDefault();
 
       try {
@@ -501,15 +517,18 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 
           ArtifactCollector artifactCollector = (ArtifactCollector) plexus.lookup(ArtifactCollector.class);
 
-          // ArtifactFilter artifactFilter = new ScopeArtifactFilter( scope );
-          ArtifactFilter artifactFilter = null;
-
           ArtifactRepository localRepository = embedder.getLocalRepository();
 
           DependencyTreeBuilder builder = (DependencyTreeBuilder) plexus.lookup(DependencyTreeBuilder.ROLE);
-
-          rootNode = builder.buildDependencyTree(mavenProject, localRepository, artifactFactory,
-              artifactMetadataSource, artifactFilter, artifactCollector);
+          DependencyNode node = builder.buildDependencyTree(mavenProject, localRepository, artifactFactory,
+              artifactMetadataSource, null, artifactCollector);
+          
+          BuildingDependencyNodeVisitor visitor = new BuildingDependencyNodeVisitor(); 
+          node.accept(new FilteringDependencyNodeVisitor(visitor,
+              new ArtifactDependencyNodeFilter(new ScopeArtifactFilter(scope))));
+//          node.accept(visitor);
+          
+          rootNode.put(scope, visitor.getDependencyTree());
         } finally {
           embedder.stop();
         }
@@ -532,7 +551,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       }
     }
 
-    return rootNode;
+    return rootNode.get(scope);
   }
 
   public MavenProject readMavenProject(boolean force, IProgressMonitor monitor) throws MavenEmbedderException,
