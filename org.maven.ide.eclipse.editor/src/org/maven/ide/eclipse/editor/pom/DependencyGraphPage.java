@@ -252,8 +252,7 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
     initPopupMenu();
 
     // compatibility proxy to support Eclipse 3.2
-    FormUtils.proxy(managedForm.getToolkit(), //
-        FormUtils.FormTooliktStub.class).decorateFormHeading(form.getForm());
+    FormUtils.decorateHeader(managedForm.getToolkit(), form.getForm());
     
     form.updateToolBar();
 
@@ -460,7 +459,7 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
   }
 
   void updateGraphAsync(final boolean force, final String scope) {
-    getManagedForm().getForm().setMessage("Resolving dependencies...", IMessageProvider.WARNING);
+    FormUtils.setMessage(getManagedForm().getForm(), "Resolving dependencies...", IMessageProvider.WARNING);
 
     new Job("Loading pom.xml") {
       protected IStatus run(IProgressMonitor monitor) {
@@ -468,14 +467,14 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
           final DependencyNode dependencyNode = pomEditor.readDependencies(force, monitor, scope);
           getPartControl().getDisplay().asyncExec(new Runnable() {
             public void run() {
-              getManagedForm().getForm().setMessage(null, IMessageProvider.NONE);
+              FormUtils.setMessage(getManagedForm().getForm(), null, IMessageProvider.NONE);
               updateGraph(dependencyNode);
             }
           });
         } catch(final CoreException ex) {
           getPartControl().getDisplay().asyncExec(new Runnable() {
             public void run() {
-              getManagedForm().getForm().setMessage(ex.getMessage(), IMessageProvider.ERROR);
+              FormUtils.setMessage(getManagedForm().getForm(), ex.getMessage(), IMessageProvider.ERROR);
             }
           });
         }

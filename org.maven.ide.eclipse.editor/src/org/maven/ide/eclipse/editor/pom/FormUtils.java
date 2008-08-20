@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.eclipse.jface.bindings.keys.KeyStroke;
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.fieldassist.ContentProposalAdapter;
 import org.eclipse.jface.fieldassist.FieldDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
@@ -37,7 +38,9 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import org.eclipse.ui.forms.widgets.Form;
+import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.editor.xml.MvnIndexPlugin;
 import org.maven.ide.eclipse.editor.xml.search.Packaging;
@@ -67,13 +70,33 @@ public abstract class FormUtils {
         });
   }
 
+  public static void decorateHeader(FormToolkit toolkit, Form form) {
+    proxy(toolkit, FormTooliktStub.class).decorateFormHeading(form);
+  }
+  
   /**
    * Stub interface for API added to FormToolikt in Eclipse 3.3
    */
-  public interface FormTooliktStub {
+  private interface FormTooliktStub {
     public void decorateFormHeading(Form form);
   }
 
+  public static void setMessage(ScrolledForm form, String message, int severity) {
+    proxy(form, FormStub.class).setMessage(message, severity);
+  }
+  
+  /**
+   * Stub interface for API added to Form in Eclipse 3.3
+   */
+  private interface FormStub {
+    /**
+     * @param message test of the message
+     * @param severity one of {@link IMessageProvider#ERROR}, {@link IMessageProvider#WARNING} or
+     *          {@link IMessageProvider#INFORMATION}
+     */
+    public void setMessage(String message, int severity);
+  }
+  
   public static String nvl(String s) {
     return s == null ? "" : s;
   }

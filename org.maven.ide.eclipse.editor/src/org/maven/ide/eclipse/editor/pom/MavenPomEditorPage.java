@@ -166,8 +166,7 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
     form.updateToolBar();
 
     // compatibility proxy to support Eclipse 3.2
-    FormUtils.proxy(managedForm.getToolkit(), //
-        FormUtils.FormTooliktStub.class).decorateFormHeading(form.getForm());
+    FormUtils.decorateHeader(managedForm.getToolkit(), form.getForm());
   }
   
   public void setActive(boolean active) {
@@ -209,7 +208,7 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
             MavenLogger.log(ex);
             getPartControl().getDisplay().asyncExec(new Runnable() {
               public void run() {
-                getManagedForm().getForm().setMessage(ex.getMessage(), IMessageProvider.ERROR);
+                FormUtils.setMessage(getManagedForm().getForm(), ex.getMessage(), IMessageProvider.ERROR);
               }
             });
           }

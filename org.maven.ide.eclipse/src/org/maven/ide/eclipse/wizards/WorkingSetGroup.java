@@ -15,6 +15,7 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jface.resource.DeviceResourceException;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.resource.LocalResourceManager;
@@ -113,9 +114,13 @@ public class WorkingSetGroup {
 
       public Image getImage(Object element) {
         if(element instanceof IWorkingSet) {
-          ImageDescriptor imageDescriptor = ((IWorkingSet) element).getImageDescriptor();
+          ImageDescriptor imageDescriptor = ((IWorkingSet) element).getImage();
           if(imageDescriptor!=null) {
-            return (Image) images.get(imageDescriptor);
+            try {
+              return (Image) images.create(imageDescriptor);
+            } catch(DeviceResourceException ex) {
+              return null;
+            }
           }
         }
         return super.getImage(element);

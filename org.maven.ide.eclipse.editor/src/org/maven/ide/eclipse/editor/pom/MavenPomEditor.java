@@ -91,7 +91,6 @@ import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IPartService;
 import org.eclipse.ui.IShowEditorInput;
 import org.eclipse.ui.IStorageEditorInput;
-import org.eclipse.ui.IURIEditorInput;
 import org.eclipse.ui.IWindowListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -446,9 +445,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
         }
 
       } else if(input.getClass().getName().endsWith("FileStoreEditorInput")) {
-        // since Eclipse 3.3
-        java.net.URI uri = FormUtils.proxy(input, C.class).getURI();
-        projectDocument = loadModel(uri.getPath());
+        projectDocument = loadModel(FormUtils.proxy(input, C.class).getURI().getPath());
       }
     }
 
@@ -599,9 +596,11 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
         } else {
           mavenProject = readMavenProject(path.toFile());
         }
-      } else if(input instanceof IURIEditorInput) {
-        IURIEditorInput uriInput = (IURIEditorInput) input;
-        mavenProject = readMavenProject(new File(uriInput.getURI().getPath()));
+//      } else if(input instanceof IURIEditorInput) {
+//        IURIEditorInput uriInput = (IURIEditorInput) input;
+//        mavenProject = readMavenProject(new File(uriInput.getURI().getPath()));
+      } else if(input.getClass().getName().endsWith("FileStoreEditorInput")) {
+        mavenProject = readMavenProject(new File(FormUtils.proxy(input, C.class).getURI().getPath()));
       }
     }
     return mavenProject;
@@ -809,7 +808,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     if(element != null) {
       int start = element.getStartOffset();
       int lenght = element.getLength();
-      setActiveEditor(sourcePage);
+      setActivePage(sourcePageIndex);
       sourcePage.selectAndReveal(start, lenght);
     }
   }

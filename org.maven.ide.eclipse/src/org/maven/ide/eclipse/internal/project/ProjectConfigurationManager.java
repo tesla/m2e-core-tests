@@ -191,14 +191,14 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
 
   // PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(project, new IWorkingSet[] {workingSet});
   private void addToWorkingSet(IProject project, IWorkingSet workingSet) {
-    IAdaptable[] elements = workingSet.adaptElements(new IAdaptable[] {project});
-    if(elements.length == 1) {
+    // IAdaptable[] elements = workingSet.adaptElements(new IAdaptable[] {project});
+    // if(elements.length == 1) {
       IAdaptable[] oldElements = workingSet.getElements();
       IAdaptable[] newElements = new IAdaptable[oldElements.length + 1];
       System.arraycopy(oldElements, 0, newElements, 0, oldElements.length);
-      newElements[oldElements.length] = elements[0];
+      newElements[oldElements.length] = project;
       workingSet.setElements(newElements);
-    }
+    // }
   }
 
   public void updateProjectConfiguration(IProject project, ResolverConfiguration configuration, String goalToExecute, IProgressMonitor monitor) throws CoreException {

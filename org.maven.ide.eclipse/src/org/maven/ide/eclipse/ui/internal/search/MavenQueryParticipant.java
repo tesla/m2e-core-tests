@@ -50,7 +50,7 @@ import org.maven.ide.eclipse.wizards.MavenRepositorySearchDialog;
 public class MavenQueryParticipant implements IQueryParticipant, IJavaSearchConstants {
 
   private static final int TYPES = TYPE | CLASS | INTERFACE | ENUM | ANNOTATION_TYPE | CLASS_AND_ENUM
-      | CLASS_AND_INTERFACE | INTERFACE_AND_ANNOTATION;
+      | CLASS_AND_INTERFACE /* | INTERFACE_AND_ANNOTATION */;
 
   public int estimateTicks(QuerySpecification specification) {
     return 1000;

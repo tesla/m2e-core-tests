@@ -154,8 +154,7 @@ public class DependencyTreePage extends FormPage {
     createSearchBar(managedForm);
 
     // compatibility proxy to support Eclipse 3.2
-    FormUtils.proxy(managedForm.getToolkit(), //
-        FormUtils.FormTooliktStub.class).decorateFormHeading(form.getForm());
+    FormUtils.decorateHeader(managedForm.getToolkit(), form.getForm());
 
     loadData(false);
   }
@@ -171,7 +170,7 @@ public class DependencyTreePage extends FormPage {
     // helps to ensure they won't change the size when the message is set.
     treeViewer.setInput(null);
     listViewer.setInput(null);
-    getManagedForm().getForm().setMessage("Resolving dependencies...", IMessageProvider.WARNING);
+    FormUtils.setMessage(getManagedForm().getForm(), "Resolving dependencies...", IMessageProvider.WARNING);
 
     dataLoadingJob = new Job("Loading pom.xml") {
       protected IStatus run(IProgressMonitor monitor) {
@@ -193,7 +192,7 @@ public class DependencyTreePage extends FormPage {
 
           getPartControl().getDisplay().syncExec(new Runnable() {
             public void run() {
-              getManagedForm().getForm().setMessage(null, IMessageProvider.NONE);
+              FormUtils.setMessage(getManagedForm().getForm(), null, IMessageProvider.NONE);
               treeViewer.setInput(dependencyNode);
               treeViewer.expandAll();
               listViewer.setInput(mavenProject);
@@ -203,14 +202,14 @@ public class DependencyTreePage extends FormPage {
           MavenLogger.log(ex);
           getPartControl().getDisplay().asyncExec(new Runnable() {
             public void run() {
-              getManagedForm().getForm().setMessage(ex.getMessage(), IMessageProvider.ERROR);
+              FormUtils.setMessage(getManagedForm().getForm(), ex.getMessage(), IMessageProvider.ERROR);
             }
           });
         } catch(final MavenEmbedderException ex) {
           MavenLogger.log("Can't load dependency hierarchy", ex);
           getPartControl().getDisplay().asyncExec(new Runnable() {
             public void run() {
-              getManagedForm().getForm().setMessage(ex.getMessage(), IMessageProvider.ERROR);
+              FormUtils.setMessage(getManagedForm().getForm(), ex.getMessage(), IMessageProvider.ERROR);
             }
           });
         }
@@ -321,7 +320,7 @@ public class DependencyTreePage extends FormPage {
           setTreeFilter(currentFilter, true);
 //          treeViewer.setFilters(new ViewerFilter[] {searchFilter, listSelectionFilter});
         } else {
-          treeViewer.setFilters(new ViewerFilter[0]);
+          treeViewer.removeFilter(searchFilter);
         }
         treeViewer.refresh();
         treeViewer.expandAll();
@@ -534,7 +533,7 @@ public class DependencyTreePage extends FormPage {
   protected void setTreeFilter(ViewerFilter filter, boolean force) {
     currentFilter = filter;
     if(filter != null && (force || (treeViewer.getFilters().length > 0 && treeViewer.getFilters()[0] != filter))) {
-      treeViewer.setFilters(new ViewerFilter[] {filter});
+      treeViewer.addFilter(filter);
     }
   }
 
