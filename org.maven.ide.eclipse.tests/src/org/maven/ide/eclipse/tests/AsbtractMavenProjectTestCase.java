@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Hashtable;
+import java.util.List;
 
 import junit.framework.TestCase;
 
@@ -397,4 +398,16 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
     out.close();
     in.close();
   }
+  
+  protected List<IMarker> findErrorMarkers(IProject project) throws CoreException {
+    ArrayList<IMarker> errors = new ArrayList<IMarker>();
+    for(IMarker marker : project.findMarkers(null /* all markers */, true /* subtypes */, IResource.DEPTH_INFINITE)) {
+      int severity = marker.getAttribute(IMarker.SEVERITY, 0);
+      if(severity==IMarker.SEVERITY_ERROR) {
+        errors.add(marker);
+      }
+    }
+    return errors;
+  }
+  
 }

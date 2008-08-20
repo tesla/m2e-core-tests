@@ -11,7 +11,7 @@ package org.maven.ide.eclipse.configurators;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Set;
 
 import junit.framework.TestCase;
@@ -30,21 +30,26 @@ public class ProjectConfiguratorFactoryTest extends TestCase {
   public void testConfiguratorFactory() throws Exception {
     Set<AbstractProjectConfigurator> configurators = MavenPlugin.getDefault().getProjectConfigurationManager().getConfigurators();
     
-    AbstractProjectConfigurator[] cc = configurators.toArray(new AbstractProjectConfigurator[configurators.size()]);
+    HashMap<String, AbstractProjectConfigurator> map = new HashMap<String, AbstractProjectConfigurator>();
+    for(AbstractProjectConfigurator configurator : configurators) {
+      map.put(configurator.getId(), configurator);
+    }
 
-    assertEquals(Arrays.toString(cc), 7, cc.length);
+    assertEquals("Not unique configurator ids " + configurators, configurators.size(), map.size());
 
-    assertConfigurator(cc[0], "org.maven.ide.eclipse.configurator.mavenEclipsePlugin", "maven-eclipse-plugin", 5);
-    assertConfigurator(cc[1], "org.maven.ide.eclipse.configurator.jdt", "JDT", 10);
-    assertConfigurator(cc[2], "org.maven.ide.eclipse.configurator.mavenSysdeoTomcatPlugin", "sysdeo-tomcat-maven-plugin", 50);
-    assertConfigurator(cc[3], "org.maven.ide.eclipse.configuration.wtp.configurator", "WTP", 100);
-    assertConfigurator(cc[4], "org.maven.ide.eclipse.ajdt", "AJDT", 101);
-    assertConfigurator(cc[5], "org.maven.ide.eclipse.configurator.test", "TEST", 1000);
-    assertConfigurator(cc[6], "org.maven.ide.eclipse.configurator.testMaven", "TestMaven", 1001);
+    assertConfigurator(map, "org.maven.ide.eclipse.configurator.mavenEclipsePlugin", "maven-eclipse-plugin", 5);
+    assertConfigurator(map, "org.maven.ide.eclipse.configurator.jdt", "JDT", 10);
+    assertConfigurator(map, "org.maven.ide.eclipse.configurator.mavenSysdeoTomcatPlugin", "sysdeo-tomcat-maven-plugin", 50);
+    
+    // assertConfigurator(cc[3], "org.maven.ide.eclipse.configuration.wtp.configurator", "WTP", 100);
+    // assertConfigurator(cc[4], "org.maven.ide.eclipse.ajdt", "AJDT", 101);
+    
+    assertConfigurator(map, "org.maven.ide.eclipse.configurator.test", "TEST", 1000);
+    assertConfigurator(map, "org.maven.ide.eclipse.configurator.testMaven", "TestMaven", 1001);
 
     {
-      MavenProjectConfigurator configurator = (MavenProjectConfigurator) cc[6];
-      assertConfigurator(configurator, "org.maven.ide.eclipse.configurator.testMaven", "TestMaven", 1001);
+      MavenProjectConfigurator configurator = (MavenProjectConfigurator) map
+          .get("org.maven.ide.eclipse.configurator.testMaven");
       assertEquals("group:artifact", configurator.getPluginKey());
       assertEquals(2, configurator.getGoals().size());
       assertEquals("goal1", configurator.getGoals().get(0));
@@ -52,7 +57,9 @@ public class ProjectConfiguratorFactoryTest extends TestCase {
     }
   }
 
-  private void assertConfigurator(AbstractProjectConfigurator c, String id, String name, int priority) {
+  private void assertConfigurator(HashMap<String, AbstractProjectConfigurator> map, String id, String name, int priority) {
+    AbstractProjectConfigurator c = map.get(id);
+    assertNotNull(c);
     assertEquals(id, c.getId());
     assertEquals(name, c.getName());
     assertEquals(priority, c.getPriority());

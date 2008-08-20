@@ -95,6 +95,9 @@ public class MavenProjectConfigurator extends AbstractProjectConfigurator {
     return this.goals;
   }
 
+  // IExecutableExtension  
+
+  @Override
   public void setInitializationData(IConfigurationElement config, String propertyName, Object data) {
     super.setInitializationData(config, propertyName, data);
 
@@ -111,4 +114,9 @@ public class MavenProjectConfigurator extends AbstractProjectConfigurator {
     MavenLogger.log("Unable to parse configuration for project configurator " + getId() + "; " + data, null);
   }
 
+  @Override
+  public String toString() {
+    return super.toString() + " " + pluginKey + goals;
+  }
+  
 }
