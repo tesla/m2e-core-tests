@@ -43,29 +43,30 @@ public class DownloadSourcesAction implements IObjectActionDelegate {
   }
 
   public void run(IAction action) {
-    BuildPathManager buildpathManager = MavenJdtPlugin.getDefault().getBuildpathManager();
-    for(Iterator<?> it = selection.iterator(); it.hasNext();) {
-      Object element = it.next();
-      try {
-        if(element instanceof IProject) {
-          IProject project = (IProject) element;
-          download(buildpathManager, project, null);
-        } else if(element instanceof IPackageFragmentRoot) {
-          IPackageFragmentRoot fragment = (IPackageFragmentRoot) element;
-          IProject project = fragment.getJavaProject().getProject();
-          if(project.isAccessible() && fragment.isArchive()) {
-            download(buildpathManager, project, fragment.getPath());
-          }
-        } else if(element instanceof IWorkingSet) {
-          IWorkingSet workingSet = (IWorkingSet) element;
-          for(IAdaptable adaptable : workingSet.getElements()) {
-            IProject project = (IProject) adaptable.getAdapter(IProject.class);
+    if(selection != null) {
+      BuildPathManager buildpathManager = MavenJdtPlugin.getDefault().getBuildpathManager();
+      for(Iterator<?> it = selection.iterator(); it.hasNext();) {
+        Object element = it.next();
+        try {
+          if(element instanceof IProject) {
+            IProject project = (IProject) element;
             download(buildpathManager, project, null);
+          } else if(element instanceof IPackageFragmentRoot) {
+            IPackageFragmentRoot fragment = (IPackageFragmentRoot) element;
+            IProject project = fragment.getJavaProject().getProject();
+            if(project.isAccessible() && fragment.isArchive()) {
+              download(buildpathManager, project, fragment.getPath());
+            }
+          } else if(element instanceof IWorkingSet) {
+            IWorkingSet workingSet = (IWorkingSet) element;
+            for(IAdaptable adaptable : workingSet.getElements()) {
+              IProject project = (IProject) adaptable.getAdapter(IProject.class);
+              download(buildpathManager, project, null);
+            }
           }
+        } catch(CoreException ex) {
+          MavenLogger.log(ex);
         }
-        
-      } catch(CoreException ex) {
-        MavenLogger.log(ex);
       }
     }
   }

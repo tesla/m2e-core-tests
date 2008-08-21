@@ -64,7 +64,7 @@ public class RefreshMavenModelsAction implements IWorkbenchWindowActionDelegate,
     MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
 
     IProject[] projects = getProjects();
-    if(projects != null && projects.length > 0) {
+    if(projects.length > 0) {
       projectManager.refresh(new MavenUpdateRequest(projects, offline, updateSnapshots));
     } else {
       projectManager.refresh(new MavenUpdateRequest(ResourcesPlugin.getWorkspace().getRoot().getProjects(), //
@@ -87,21 +87,23 @@ public class RefreshMavenModelsAction implements IWorkbenchWindowActionDelegate,
   }
 
   private IProject[] getProjects() {
-    ArrayList<IProject> projectList = new ArrayList<IProject>(); 
-    for(Iterator<?> it = selection.iterator(); it.hasNext();) {
-      Object o = it.next();
-      if(o instanceof IProject) {
-        projectList.add((IProject) o);
-      } else if(o instanceof IWorkingSet) {
-        IWorkingSet workingSet = (IWorkingSet) o;
-        for(IAdaptable adaptable : workingSet.getElements()) {
-          IProject project = (IProject) adaptable.getAdapter(IProject.class);
-          try {
-            if(project!=null && project.isAccessible() && project.hasNature(IMavenConstants.NATURE_ID)) {
-              projectList.add(project);
+    ArrayList<IProject> projectList = new ArrayList<IProject>();
+    if(selection != null) {
+      for(Iterator<?> it = selection.iterator(); it.hasNext();) {
+        Object o = it.next();
+        if(o instanceof IProject) {
+          projectList.add((IProject) o);
+        } else if(o instanceof IWorkingSet) {
+          IWorkingSet workingSet = (IWorkingSet) o;
+          for(IAdaptable adaptable : workingSet.getElements()) {
+            IProject project = (IProject) adaptable.getAdapter(IProject.class);
+            try {
+              if(project != null && project.isAccessible() && project.hasNature(IMavenConstants.NATURE_ID)) {
+                projectList.add(project);
+              }
+            } catch(CoreException ex) {
+              MavenLogger.log(ex);
             }
-          } catch(CoreException ex) {
-            MavenLogger.log(ex);
           }
         }
       }

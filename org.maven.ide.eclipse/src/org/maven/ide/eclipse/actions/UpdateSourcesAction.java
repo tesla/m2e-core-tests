@@ -36,44 +36,24 @@ import org.maven.ide.eclipse.project.IMavenProjectFacade;
 
 
 public class UpdateSourcesAction implements IObjectActionDelegate {
-  private ISelection selection;
+  
   public static final String ID = "org.maven.ide.eclipse.updateSourcesAction";
+  
+  private IStructuredSelection selection;
 
   public void setActivePart(IAction action, IWorkbenchPart targetPart) {
   }
 
   public void selectionChanged(IAction action, ISelection selection) {
-    this.selection = selection;
+    if(selection instanceof IStructuredSelection) {
+      this.selection = (IStructuredSelection) selection;
+    } else {
+      this.selection = null;
+    }
   }
 
   public void run(IAction action) {
-    final Set<IProject> projects = new LinkedHashSet<IProject>();
-    
-    IStructuredSelection structuredSelection = (IStructuredSelection) selection;
-    for(Iterator<?> it = structuredSelection.iterator(); it.hasNext();) {
-      Object element = it.next();
-      if(element instanceof IProject) {
-        projects.add((IProject) element);
-      } else if(element instanceof IWorkingSet) {
-        IWorkingSet workingSet = (IWorkingSet) element;
-        for(IAdaptable adaptable : workingSet.getElements()) {
-          IProject project = (IProject) adaptable.getAdapter(IProject.class);
-          try {
-            if(project!=null && project.isAccessible() && project.hasNature(IMavenConstants.NATURE_ID)) {
-              projects.add(project);
-            }
-          } catch(CoreException ex) {
-            MavenLogger.log(ex);
-          }
-        }
-      } else if(element instanceof IAdaptable) {
-        IProject project = (IProject) ((IAdaptable) element).getAdapter(IProject.class);
-        if(project!=null) {
-          projects.add(project);
-        }
-      }
-    }
-
+    final Set<IProject> projects = getProjects();
     final MavenPlugin plugin = MavenPlugin.getDefault();
     WorkspaceJob job = new WorkspaceJob("Updating Maven Configuration") {
       public IStatus runInWorkspace(IProgressMonitor monitor) {
@@ -107,6 +87,36 @@ public class UpdateSourcesAction implements IObjectActionDelegate {
     };
     job.setRule(plugin.getProjectConfigurationManager().getRule());
     job.schedule();
+  }
+
+  private Set<IProject> getProjects() {
+    Set<IProject> projects = new LinkedHashSet<IProject>();
+    if(selection != null) {
+      for(Iterator<?> it = selection.iterator(); it.hasNext();) {
+        Object element = it.next();
+        if(element instanceof IProject) {
+          projects.add((IProject) element);
+        } else if(element instanceof IWorkingSet) {
+          IWorkingSet workingSet = (IWorkingSet) element;
+          for(IAdaptable adaptable : workingSet.getElements()) {
+            IProject project = (IProject) adaptable.getAdapter(IProject.class);
+            try {
+              if(project != null && project.isAccessible() && project.hasNature(IMavenConstants.NATURE_ID)) {
+                projects.add(project);
+              }
+            } catch(CoreException ex) {
+              MavenLogger.log(ex);
+            }
+          }
+        } else if(element instanceof IAdaptable) {
+          IProject project = (IProject) ((IAdaptable) element).getAdapter(IProject.class);
+          if(project != null) {
+            projects.add(project);
+          }
+        }
+      }
+    }
+    return projects;
   }
 
 }
