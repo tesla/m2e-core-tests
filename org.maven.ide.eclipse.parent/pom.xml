@@ -104,7 +104,6 @@
     <module>../org.maven.ide.eclipse.wtp.tests</module>
     <module>../org.maven.ide.eclipse.book</module>
 
-    <!-- 
     <module>../org.maven.ide.eclipse.feature</module>
     <module>../org.maven.ide.eclipse.central.feature</module>
     <module>../org.maven.ide.eclipse.mylyn.feature</module>
@@ -112,7 +111,6 @@
     <module>../org.maven.ide.eclipse.ajdt.feature</module>
     <module>../org.maven.ide.eclipse.wtp.feature</module>
     <module>../org.maven.ide.eclipse.book.feature</module>
-    -->
 
     <module>../org.maven.ide.eclipse.update</module>
   </modules>
@@ -287,6 +285,28 @@
         <artifactId>maven-release-plugin</artifactId>
         <configuration>
           <tagBase>https://svn.sonatype.org/m2eclipse/tags</tagBase>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>buildnumber-maven-plugin</artifactId>
+        <version>1.0-beta-1</version>
+        <executions>
+          <execution>
+            <phase>validate</phase>        
+            <goals>
+              <goal>create</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <doCheck>false</doCheck>
+          <doUpdate>false</doUpdate>
+          <format>{0,date,yyyyMMdd-HHmm}</format>
+          <items>
+            <item>timestamp</item>
+          </items>
         </configuration>
       </plugin>
     </plugins>
