@@ -127,7 +127,7 @@ public class MavenRepositorySearchDialog extends AbstractMavenDialog {
   
       scopeCombo = new Combo(parent, SWT.BORDER | SWT.READ_ONLY);
       scopeCombo.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-      scopeCombo.setItems(new String[] {"compile", "test", "runtime", "provided", "sytem", "import"});
+      scopeCombo.setItems(new String[] {"compile", "test", "runtime", "provided", "system", "import"});
       scopeCombo.setText("compile");
     }
     
