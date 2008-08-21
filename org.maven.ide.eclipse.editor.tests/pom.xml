@@ -19,33 +19,12 @@
   </parent>
 
   <artifactId>org.maven.ide.eclipse.editor.tests</artifactId>
-  <packaging>eclipse-plugin</packaging>
+  <packaging>eclipse-test-plugin</packaging>
 
   <name>Maven Integration for Eclipse POM Editor tests</name>
 
   <build>
     <sourceDirectory>src</sourceDirectory>
-    
-    <plugins>
-      <plugin>
-        <groupId>org.codehaus.tycho</groupId>
-        <artifactId>maven-osgi-compiler-plugin</artifactId>
-        <version>1.0-SNAPSHOT</version>
-        <configuration>
-          <source>1.5</source>
-          <target>1.5</target>
-        </configuration>
-      </plugin>
-      
-      <plugin>
-        <groupId>org.codehaus.tycho</groupId>
-        <artifactId>maven-osgi-test-plugin</artifactId>
-        <version>1.0-SNAPSHOT</version>
-        <configuration>
-          <testClassesDirectory>${project.build.outputDirectory}</testClassesDirectory>
-        </configuration>
-      </plugin>
-    </plugins>
   </build>
   
 </project>
