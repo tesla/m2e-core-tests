@@ -93,7 +93,9 @@ public class WorkspaceStateReader {
           return super.replaceObject(o);
         }
       };
-      os.writeObject(state);
+      synchronized(state) {  // see MNGECLIPSE-860
+        os.writeObject(state);
+      }
     } catch(IOException ex) {
       MavenLogger.log("Can't write workspace state", ex);
     } finally {
