@@ -86,28 +86,22 @@
 
     <module>../org.maven.ide.eclipse</module>
     <module>../org.maven.ide.eclipse.jdt</module>
-    
     <module>../org.maven.ide.eclipse.central</module>
     <module>../org.maven.ide.eclipse.mylyn</module>
     <module>../org.maven.ide.eclipse.subclipse</module>
     <module>../org.maven.ide.eclipse.scm</module>
     <module>../org.maven.ide.eclipse.cvs</module>
-
     <module>../org.maven.ide.eclipse.tests</module>
-
     <module>../org.maven.ide.eclipse.editor.xml</module>
     <module>../org.maven.ide.eclipse.editor</module>
-    <module>../org.maven.ide.eclipse.editor.tests</module>
     <!--
     <module>../org.maven.ide.eclipse.editor.xml.tests</module>
     -->
 
     <module>../org.maven.ide.eclipse.ajdt</module>
     <module>../org.maven.ide.eclipse.ajdt.tests</module>
-
     <module>../org.maven.ide.eclipse.wtp</module>
     <module>../org.maven.ide.eclipse.wtp.tests</module>
-
     <module>../org.maven.ide.eclipse.book</module>
 
     <!-- 
@@ -388,6 +382,13 @@
   </distributionManagement>
 
   <profiles>
+    <profile>
+      <id>ui-tests</id>
+      <modules>
+        <module>../org.maven.ide.eclipse.editor.tests</module>
+      </modules>
+    </profile>
+
     <profile>
       <id>sun-jvm</id>
       <activation>
