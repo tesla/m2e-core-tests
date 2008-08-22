@@ -105,7 +105,7 @@
     <module>../org.maven.ide.eclipse.book</module>
 
     <!-- features -->
-    <module>../org.maven.ide.components.maven-embedder.feature</module>
+    <module>../org.maven.ide.components.maven_embedder.feature</module>
     <module>../org.maven.ide.eclipse.feature</module>
     <module>../org.maven.ide.eclipse.editor.feature</module>
     <module>../org.maven.ide.eclipse.editor.xml.feature</module>
