@@ -43,7 +43,7 @@ public class MavenModelManagerTest extends AsbtractMavenProjectTestCase {
     
     plugin = MavenPlugin.getDefault();
     manager = new MavenProjectManagerImpl(plugin.getConsole(), plugin.getIndexManager(), //
-        plugin.getMavenEmbedderManager(), null, false);
+        plugin.getMavenEmbedderManager(), null, false, plugin.getMavenRuntimeManager());
   }
   
   protected void tearDown() throws Exception {

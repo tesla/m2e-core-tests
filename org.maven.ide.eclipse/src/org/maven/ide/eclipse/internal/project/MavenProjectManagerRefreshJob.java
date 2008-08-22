@@ -32,22 +32,26 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChange
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
+import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
 
 public class MavenProjectManagerRefreshJob extends Job implements IResourceChangeListener, IPreferenceChangeListener {
 
-  private final MavenProjectManagerImpl manager;
-
+  private static final int DELTA_FLAGS = IResourceDelta.CONTENT | IResourceDelta.MOVED_FROM | IResourceDelta.MOVED_TO
+  | IResourceDelta.COPIED_FROM | IResourceDelta.REPLACED;
+  
   private final List<Command> refreshQueue = new ArrayList<Command>();
 
   private final List<Command> downloadSourcesQueue = new ArrayList<Command>();
 
-  private static final int DELTA_FLAGS = IResourceDelta.CONTENT | IResourceDelta.MOVED_FROM | IResourceDelta.MOVED_TO
-      | IResourceDelta.COPIED_FROM | IResourceDelta.REPLACED;
-
-  public MavenProjectManagerRefreshJob(MavenProjectManagerImpl manager) {
+  private final MavenProjectManagerImpl manager;
+  
+  private final MavenRuntimeManager runtimeManager;
+  
+  public MavenProjectManagerRefreshJob(MavenProjectManagerImpl manager, MavenRuntimeManager runtimeManager) {
     super("Updating Maven Dependencies");
     this.manager = manager;
+    this.runtimeManager = runtimeManager;
     setRule(new SchedulingRule(true));
   }
   
@@ -128,8 +132,7 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
   // IResourceChangeListener
   
   public void resourceChanged(IResourceChangeEvent event) {
-    // XXX should respect the global settings
-    boolean offline = false;  
+    boolean offline = runtimeManager.isOffline();  
     boolean updateSnapshots = false;
 
     int type = event.getType();
@@ -303,8 +306,7 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
   }
 
   public void preferenceChange(PreferenceChangeEvent event) {
-    // XXX should respect the global settings
-    boolean offline = false;  
+    boolean offline = runtimeManager.isOffline();  
     boolean updateSnapshots = false;
 
     if (event.getSource() instanceof IProject) {

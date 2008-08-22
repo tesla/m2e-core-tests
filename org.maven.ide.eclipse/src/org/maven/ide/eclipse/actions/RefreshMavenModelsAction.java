@@ -62,14 +62,7 @@ public class RefreshMavenModelsAction implements IWorkbenchWindowActionDelegate,
   
   public void run(IAction action) {
     MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
-
-    IProject[] projects = getProjects();
-    if(projects.length > 0) {
-      projectManager.refresh(new MavenUpdateRequest(projects, offline, updateSnapshots));
-    } else {
-      projectManager.refresh(new MavenUpdateRequest(ResourcesPlugin.getWorkspace().getRoot().getProjects(), //
-          offline, updateSnapshots));
-    }
+    projectManager.refresh(new MavenUpdateRequest(getProjects(), offline, updateSnapshots));
   }
 
   public void selectionChanged(IAction action, ISelection selection) {
@@ -107,6 +100,9 @@ public class RefreshMavenModelsAction implements IWorkbenchWindowActionDelegate,
           }
         }
       }
+    }
+    if(projectList.isEmpty()) {
+      return ResourcesPlugin.getWorkspace().getRoot().getProjects();
     }
     return projectList.toArray(new IProject[projectList.size()]);
   }

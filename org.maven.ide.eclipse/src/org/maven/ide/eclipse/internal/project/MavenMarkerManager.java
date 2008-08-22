@@ -31,12 +31,15 @@ import org.apache.maven.project.validation.ModelValidationResult;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.Messages;
+import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 
 public class MavenMarkerManager {
   
+  private final MavenRuntimeManager runtimeManager;
   private final MavenConsole console;
 
-  public MavenMarkerManager(MavenConsole console) {
+  public MavenMarkerManager(MavenRuntimeManager runtimeManager, MavenConsole console) {
+    this.runtimeManager = runtimeManager;
     this.console = console;
   }
   
@@ -199,7 +202,13 @@ public class MavenMarkerManager {
         } else {
           errorMessage = "Missing indirectly referenced artifact " + artifact.toString();
         }
+        
+        if(runtimeManager.isOffline()) {
+          errorMessage = "Offline / " + errorMessage; 
+        }
+        
         addMarker(pomFile, errorMessage, 1, IMarker.SEVERITY_ERROR);
+        console.logError(errorMessage);
       }
     }
   }

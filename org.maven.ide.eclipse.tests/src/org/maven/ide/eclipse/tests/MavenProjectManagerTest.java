@@ -57,7 +57,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     super.setUp();
 
     manager = new MavenProjectManagerImpl(plugin.getConsole(), plugin.getIndexManager(), //
-        plugin.getMavenEmbedderManager(), null, false);
+        plugin.getMavenEmbedderManager(), null, false, plugin.getMavenRuntimeManager());
     
     events = new ArrayList<MavenProjectChangedEvent>();
     manager.addMavenProjectChangedListener(listener);

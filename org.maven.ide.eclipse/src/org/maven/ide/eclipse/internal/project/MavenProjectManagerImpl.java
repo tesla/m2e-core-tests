@@ -64,6 +64,7 @@ import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
+import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.internal.embedder.TransferListenerAdapter;
@@ -145,11 +146,11 @@ public class MavenProjectManagerImpl {
   private final Map<IProject, DownloadSourceEvent> downloadSourceEvents = new LinkedHashMap<IProject, DownloadSourceEvent>();
 
   public MavenProjectManagerImpl(MavenConsole console, IndexManager indexManager, MavenEmbedderManager embedderManager,
-      File stateLocationDir, boolean readState) {
+      File stateLocationDir, boolean readState, MavenRuntimeManager runtimeManager) {
     this.console = console;
     this.indexManager = indexManager;
     this.embedderManager = embedderManager;
-    this.markerManager = new MavenMarkerManager(console);
+    this.markerManager = new MavenMarkerManager(runtimeManager, console);
 
     this.stateReader = new WorkspaceStateReader(stateLocationDir);
 

@@ -109,7 +109,6 @@ public class ChangeNatureAction implements IObjectActionDelegate {
     }
     
     public IStatus runInWorkspace(IProgressMonitor monitor) {
-      
       MultiStatus status = null;
       for(IProject project : projects) {
         if (monitor.isCanceled()) {
@@ -130,7 +129,8 @@ public class ChangeNatureAction implements IObjectActionDelegate {
 
       boolean offline = runtimeManager.isOffline();
       boolean updateSnapshots = false;
-      projectManager.refresh(new MavenUpdateRequest(projects.toArray(new IProject[projects.size()]), offline, updateSnapshots));
+      projectManager.refresh(new MavenUpdateRequest(projects.toArray(new IProject[projects.size()]), //
+          offline, updateSnapshots));
       
       return status != null? status: Status.OK_STATUS;
     }

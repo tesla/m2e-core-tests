@@ -171,9 +171,9 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     boolean updateProjectsOnStartup = runtimeManager.isUpdateProjectsOnStartup();
     
     this.managerImpl = new MavenProjectManagerImpl(console, indexManager, embedderManager,
-        stateLocationDir, !updateProjectsOnStartup /* readState */);
+        stateLocationDir, !updateProjectsOnStartup /* readState */, runtimeManager);
 
-    this.mavenBackgroundJob = new MavenProjectManagerRefreshJob(managerImpl);
+    this.mavenBackgroundJob = new MavenProjectManagerRefreshJob(managerImpl, runtimeManager);
 
     workspace.addResourceChangeListener(mavenBackgroundJob, IResourceChangeEvent.POST_CHANGE
         | IResourceChangeEvent.PRE_CLOSE | IResourceChangeEvent.PRE_DELETE);
