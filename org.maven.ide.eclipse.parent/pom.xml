@@ -289,25 +289,17 @@
       </plugin>
 
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>buildnumber-maven-plugin</artifactId>
-        <version>1.0-beta-1</version>
+        <groupId>org.codehaus.tycho</groupId>
+        <artifactId>maven-osgi-packaging-plugin</artifactId>
         <executions>
           <execution>
+            <id>timestamp</id>
             <phase>validate</phase>        
             <goals>
-              <goal>create</goal>
+              <goal>timestamp</goal>
             </goals>
           </execution>
         </executions>
-        <configuration>
-          <doCheck>false</doCheck>
-          <doUpdate>false</doUpdate>
-          <format>{0,date,yyyyMMdd-HHmm}</format>
-          <items>
-            <item>timestamp</item>
-          </items>
-        </configuration>
       </plugin>
     </plugins>
 
