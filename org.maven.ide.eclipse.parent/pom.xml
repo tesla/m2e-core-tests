@@ -104,13 +104,21 @@
     <module>../org.maven.ide.eclipse.wtp.tests</module>
     <module>../org.maven.ide.eclipse.book</module>
 
+    <!-- features -->
+    <module>../org.maven.ide.components.maven-embedder.feature</module>
     <module>../org.maven.ide.eclipse.feature</module>
+    <module>../org.maven.ide.eclipse.editor.feature</module>
+    <module>../org.maven.ide.eclipse.editor.xml.feature</module>
+    <module>../org.maven.ide.eclipse.wtp.feature</module>
+    <module>../org.maven.ide.eclipse.ajdt.feature</module>
+
+    <module>../org.maven.ide.eclipse.scm.feature</module>
+    <module>../org.maven.ide.eclipse.cvs.feature</module>
+    <module>../org.maven.ide.eclipse.subclipse.feature</module>
+
+    <module>../org.maven.ide.eclipse.book.feature</module>
     <module>../org.maven.ide.eclipse.central.feature</module>
     <module>../org.maven.ide.eclipse.mylyn.feature</module>
-    <module>../org.maven.ide.eclipse.subclipse.feature</module>
-    <module>../org.maven.ide.eclipse.ajdt.feature</module>
-    <module>../org.maven.ide.eclipse.wtp.feature</module>
-    <module>../org.maven.ide.eclipse.book.feature</module>
 
     <module>../org.maven.ide.eclipse.update</module>
   </modules>
