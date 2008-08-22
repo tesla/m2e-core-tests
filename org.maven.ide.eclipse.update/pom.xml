@@ -19,29 +19,8 @@
   </parent>
 
   <artifactId>org.maven.ide.eclipse.update</artifactId>
+  <packaging>eclipse-update-site</packaging>
 
   <name>Maven Integration for Eclipse Update Site</name>
-
-  <build>
-    <sourceDirectory>src</sourceDirectory>
-    
-    <plugins>
-      <plugin>
-        <groupId>org.codehaus.tycho</groupId>
-        <artifactId>maven-osgi-packaging-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>update-site</goal>
-            </goals>
-            <configuration>
-              <inlineArchives>false</inlineArchives>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
 
 </project>
