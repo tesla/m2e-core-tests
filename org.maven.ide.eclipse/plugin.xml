@@ -187,9 +187,9 @@
          -->
       </objectContribution>
       
-      <objectContribution id="org.maven.ide.eclipse.classpathMenu" adaptable="true"
+      <objectContribution id="org.maven.ide.eclipse.workingSetMenu" adaptable="true"
              objectClass="org.eclipse.ui.IWorkingSet">
-         <action id="org.maven.ide.eclipse.classpathMenu.action"
+         <action id="org.maven.ide.eclipse.workingSetMenu.action"
                  class="org.maven.ide.eclipse.internal.actions.MavenMenuAction"
                  label="%m2.popup.project.label"
                  style="pulldown"
