@@ -371,6 +371,12 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
         continue;
       }
 
+      // project
+      IMavenProjectFacade dependency = projectManager.getMavenProject(a.getGroupId(), a.getArtifactId(), a.getVersion());
+      if (dependency != null && dependency.getProject().equals(facade.getProject())) {
+        continue;
+      }
+
       ArrayList<IClasspathAttribute> attributes = new ArrayList<IClasspathAttribute>();
       attributes.add(JavaCore.newClasspathAttribute(IMavenConstants.GROUP_ID_ATTRIBUTE, a.getGroupId()));
       attributes.add(JavaCore.newClasspathAttribute(IMavenConstants.ARTIFACT_ID_ATTRIBUTE, a.getArtifactId()));
@@ -382,10 +388,12 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
         attributes.add(JavaCore.newClasspathAttribute(IMavenConstants.SCOPE_ATTRIBUTE, a.getScope()));
       }
 
-      // project
-      IMavenProjectFacade dependency = projectManager.getMavenProject(a.getGroupId(), a.getArtifactId(), a.getVersion());
-      if (dependency != null && dependency.getProject().equals(facade.getProject())) {
-        continue;
+      for (Iterator<AbstractClasspathConfigurator> ci = configurators.iterator(); ci.hasNext(); ) {
+        AbstractClasspathConfigurator cpc = ci.next();
+        Set<IClasspathAttribute> set = cpc.getAttributes(a, kind);
+        if (set != null) {
+          attributes.addAll(set);
+        }
       }
 
       if (dependency != null && dependency.getFullPath(a.getFile()) != null) {
@@ -432,14 +440,6 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
         boolean downloadSources = srcPath==null && runtimeManager.isDownloadSources();
         boolean downloadJavaDoc = javaDocUrl==null && runtimeManager.isDownloadJavaDoc();
         downloadSources(facade.getProject(), a, downloadSources, downloadJavaDoc);
-
-        for (Iterator<AbstractClasspathConfigurator> ci = configurators.iterator(); ci.hasNext(); ) {
-          AbstractClasspathConfigurator cpc = ci.next();
-          Set<IClasspathAttribute> set = cpc.getAttributes(a, kind);
-          if (set != null) {
-            attributes.addAll(set);
-          }
-        }
 
         entries.add(JavaCore.newLibraryEntry(entryPath, //
             srcPath, srcRoot, new IAccessRule[0], //
