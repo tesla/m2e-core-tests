@@ -87,6 +87,8 @@ import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
+import org.maven.ide.eclipse.jdt.internal.MavenClasspathContainer;
+import org.maven.ide.eclipse.jdt.internal.MavenClasspathContainerSaveHelper;
 import org.maven.ide.eclipse.project.DownloadSourceEvent;
 import org.maven.ide.eclipse.project.IDownloadSourceListener;
 import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
@@ -260,13 +262,59 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
         JavaCore.setClasspathContainer(container.getPath(), new IJavaProject[] {javaProject},
             new IClasspathContainer[] {container}, monitor);
         forcePackageExplorerRefresh(javaProject);
+        saveContainerState(project, container);
       } catch(CoreException ex) {
-        // TODO Auto-generated catch block
         MavenLogger.log(ex);
       }
     }
   }
 
+  private void saveContainerState(IProject project, IClasspathContainer container) {
+    File containerStateFile = getContainerStateFile(project);
+    FileOutputStream is = null;
+    try {
+      is = new FileOutputStream(containerStateFile);
+      new MavenClasspathContainerSaveHelper().writeContainer(container, is);
+    } catch(IOException ex) {
+      MavenLogger.log("Can't save classpath container state for " + project.getName(), ex);
+    } finally {
+      if(is != null) {
+        try {
+          is.close();
+        } catch(IOException ex) {
+          MavenLogger.log("Can't close output stream for " + containerStateFile.getAbsolutePath(), ex);
+        }
+      }
+    }
+  }
+
+  public IClasspathContainer getSavedContainer(IProject project) throws CoreException {
+    File containerStateFile = getContainerStateFile(project);
+    if(!containerStateFile.exists()) {
+      return null;
+    }
+    
+    FileInputStream is = null;
+    try {
+      is = new FileInputStream(containerStateFile);
+      return new MavenClasspathContainerSaveHelper().readContainer(is);
+    } catch(IOException ex) {
+      throw new CoreException(new Status(IStatus.ERROR, MavenJdtPlugin.PLUGIN_ID, -1, //
+          "Can't read classpath container state for " + project.getName(), ex));
+    } catch(ClassNotFoundException ex) {
+      throw new CoreException(new Status(IStatus.ERROR, MavenJdtPlugin.PLUGIN_ID, -1, //
+          "Can't read classpath container state for " + project.getName(), ex));
+    } finally {
+      if(is != null) {
+        try {
+          is.close();
+        } catch(IOException ex) {
+          MavenLogger.log("Can't close output stream for " + containerStateFile.getAbsolutePath(), ex);
+        }
+      }
+    }
+  }
+  
   private IClasspathEntry[] getClasspath(IMavenProjectFacade projectFacade, final int kind, final Properties sourceAttachment, boolean uniquePaths, final IProgressMonitor monitor) throws CoreException {
     // maps entry path to entry to avoid dups caused by different entry attributes
     final Set<IClasspathEntry> entries = new LinkedHashSet<IClasspathEntry>();
@@ -758,12 +806,24 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     return new File(stateLocationDir, project.getName() + ".sources");
   }
 
+  /** public for unit tests only */
+  public File getContainerStateFile(IProject project) {
+    return new File(stateLocationDir, project.getName() + ".container");
+  }
+  
   public void resourceChanged(IResourceChangeEvent event) {
     int type = event.getType();
     if(IResourceChangeEvent.PRE_DELETE == type) {
-      File file = getSourceAttachmentPropertiesFile((IProject) event.getResource());
-      if(file.exists() && !file.delete()) {
-        MavenLogger.log("Can't delete " + file.getAbsolutePath(), null);
+      // remove custom source and javadoc configuration
+      File attachmentProperties = getSourceAttachmentPropertiesFile((IProject) event.getResource());
+      if(attachmentProperties.exists() && !attachmentProperties.delete()) {
+        MavenLogger.log("Can't delete " + attachmentProperties.getAbsolutePath(), null);
+      }
+      
+      // remove classpath container state
+      File containerState = getContainerStateFile((IProject) event.getResource());
+      if(containerState.exists() && !containerState.delete()) {
+        MavenLogger.log("Can't delete " + containerState.getAbsolutePath(), null);
       }
     }
   }
@@ -805,47 +865,6 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
   public static boolean isMaven2ClasspathContainer(IPath containerPath) {
     return containerPath != null && containerPath.segmentCount() > 0
         && IMavenConstants.CONTAINER_ID.equals(containerPath.segment(0));
-  }
-
-  public IClasspathContainer createClassPathContainer(IPath containerPath, IClasspathEntry[] classpathEntries) {
-    return new MavenClasspathContainer(containerPath, classpathEntries);
-  }
-
-  
-  private static class MavenClasspathContainer implements IClasspathContainer {
-    private final IClasspathEntry[] entries;
-    private final IPath path;
-
-    public MavenClasspathContainer() {
-      this.path = new Path(IMavenConstants.CONTAINER_ID);
-      this.entries = new IClasspathEntry[0];
-    }
-    
-    public MavenClasspathContainer(IPath path, IClasspathEntry[] entries) {
-      this.path = path;
-      this.entries = entries;
-    }
-    
-    public MavenClasspathContainer(IPath path, Set<IClasspathEntry> entrySet) {
-      this(path, entrySet.toArray(new IClasspathEntry[entrySet.size()]));
-    }
-
-    public synchronized IClasspathEntry[] getClasspathEntries() {
-      return entries;
-    }
-
-    public String getDescription() {
-      return "Maven Dependencies";  // TODO move to properties
-    }
-
-    public int getKind() {
-      return IClasspathContainer.K_APPLICATION;
-    }
-
-    public IPath getPath() {
-      return path; 
-    }
-    
   }
   
 }

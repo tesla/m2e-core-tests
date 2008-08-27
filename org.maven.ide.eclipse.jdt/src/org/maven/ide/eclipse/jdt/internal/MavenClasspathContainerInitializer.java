@@ -19,11 +19,13 @@ import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
+
+import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.jdt.BuildPathManager;
 import org.maven.ide.eclipse.jdt.MavenJdtPlugin;
+import org.maven.ide.eclipse.project.MavenUpdateRequest;
 
 
 /**
@@ -36,18 +38,19 @@ public class MavenClasspathContainerInitializer extends ClasspathContainerInitia
   public void initialize(IPath containerPath, IJavaProject project) {
     if(BuildPathManager.isMaven2ClasspathContainer(containerPath)) {
       try {
-        IClasspathContainer container = JavaCore.getClasspathContainer(containerPath, project);
-        if(container != null) {
-          IClasspathContainer mavenContainer = MavenJdtPlugin.getDefault().getBuildpathManager().createClassPathContainer(
-              containerPath, //
-              container.getClasspathEntries());
+        IClasspathContainer mavenContainer = getBuildPathManager().getSavedContainer(project.getProject());
+        if(mavenContainer != null) {
           JavaCore.setClasspathContainer(containerPath, new IJavaProject[] {project},
               new IClasspathContainer[] {mavenContainer}, new NullProgressMonitor());
+          return;
         }
-      } catch(JavaModelException ex) {
+      } catch(CoreException ex) {
         MavenLogger.log("Exception initializing classpath container " + containerPath.toString(), ex);
-        return;
       }
+
+      // force refresh if can't read persisted state
+      MavenUpdateRequest request = new MavenUpdateRequest(project.getProject(), true, false);
+      MavenPlugin.getDefault().getMavenProjectManager().refresh(request);
     }
   }
 
@@ -55,12 +58,13 @@ public class MavenClasspathContainerInitializer extends ClasspathContainerInitia
     return true;
   }
 
-  public void requestClasspathContainerUpdate(IPath containerPath, final IJavaProject project, final IClasspathContainer containerSuggestion) {
-    // one job per request. assumption that users are not going to change hudreds of conatainers simultaneously.
+  public void requestClasspathContainerUpdate(IPath containerPath, final IJavaProject project,
+      final IClasspathContainer containerSuggestion) {
+    // one job per request. assumption that users are not going to change hundreds of containers simultaneously.
     new Job("Persist classpath container changes") {
       protected IStatus run(IProgressMonitor monitor) {
         try {
-          MavenJdtPlugin.getDefault().getBuildpathManager().updateClasspathContainer(project, containerSuggestion, monitor);
+          getBuildPathManager().updateClasspathContainer(project, containerSuggestion, monitor);
         } catch(CoreException ex) {
           MavenLogger.log(ex);
           return new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, 0, "Can't persist classpath container", ex);
@@ -68,6 +72,10 @@ public class MavenClasspathContainerInitializer extends ClasspathContainerInitia
         return Status.OK_STATUS;
       }
     }.schedule();
+  }
+
+  BuildPathManager getBuildPathManager() {
+    return MavenJdtPlugin.getDefault().getBuildpathManager();
   }
 
 }
