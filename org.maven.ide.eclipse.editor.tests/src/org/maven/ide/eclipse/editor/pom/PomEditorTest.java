@@ -305,6 +305,9 @@ public class PomEditorTest extends UITestCaseSWT {
     // test the editor is dirty
     ui.assertThat(new DirtyEditorCondition());
 
+    //test the value
+    assertTextValue("parentArtifactId", "parent6");
+
     //save file
     ui.keyClick(SWT.CTRL, 's');
   }
