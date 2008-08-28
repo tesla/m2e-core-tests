@@ -285,6 +285,30 @@ public class PomEditorTest extends UITestCaseSWT {
     ui.assertThat(new NotCondition(new DirtyEditorCondition()));
   }
 
+  //MNGECLIPSE-874
+  public void testUndoAfterSave() throws Exception {
+    // make a change 
+    ui.click(new CTabItemLocator(TEST_POM_POM_XML));
+    selectEditorTab(TAB_POM_XML_TAB);
+    replaceText("parent6", "parent7");
+    selectEditorTab(TAB_OVERVIEW);
+    
+    //save file
+    ui.keyClick(SWT.CTRL, 's');
+
+    // test the editor is clean
+    ui.assertThat(new NotCondition(new DirtyEditorCondition()));
+
+    // undo change
+    ui.keyClick(SWT.CTRL, 'z');
+
+    // test the editor is dirty
+    ui.assertThat(new DirtyEditorCondition());
+
+    //save file
+    ui.keyClick(SWT.CTRL, 's');
+  }
+
   public void testAfterUndoEditorIsClean() throws Exception {
     // make a change 
     ui.click(new CTabItemLocator(TEST_POM_POM_XML));

@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EventObject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,7 +62,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.emf.common.command.CommandStack;
+import org.eclipse.emf.common.command.BasicCommandStack;
+import org.eclipse.emf.common.command.CommandStackListener;
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.AdapterFactory;
 import org.eclipse.emf.common.notify.impl.AdapterFactoryImpl;
@@ -189,6 +191,12 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 
   private MavenPomActivationListener activationListener;
 
+  private boolean dirty;
+
+  private CommandStackListener commandStackListener;
+
+  private BasicCommandStack sseCommandStack;
+
   public MavenPomEditor() {
     modelManager = StructuredModelManager.getModelManager();
   }
@@ -257,8 +265,9 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   }
 
   void flushCommandStack() {
-    structuredModel.getUndoManager().getCommandStack().flush();
-    
+    dirty = false;
+    if (sseCommandStack != null)
+      sseCommandStack.saveIsDone();
     getContainer().getDisplay().asyncExec(new Runnable() {
       public void run() {
         editorDirtyStateChanged();
@@ -298,8 +307,6 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     addPomPage(graphPage);
 
     sourcePage = new StructuredTextEditor() {
-      private boolean dirty = false;
-
       public void doSave(IProgressMonitor monitor) {
         // always save text editor
         ResourcesPlugin.getWorkspace().removeResourceChangeListener(MavenPomEditor.this);
@@ -311,31 +318,11 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
         }
       }
 
+      private boolean oldDirty;
       public boolean isDirty() {
-        if(structuredModel == null) {
-          return false;
-        }
-
-        // Eclipse bugzilla entries: 213109, 138100, 191754
-        // WTP SSE editor has problems with dirty
-        // use command stack dirtiness instead
-        IStructuredTextUndoManager undoManager = structuredModel.getUndoManager();
-        if(undoManager == null) {
-          return false;
-        }
-
-        CommandStack commandStack = undoManager.getCommandStack();
-        if(commandStack == null) {
-          return false;
-        }
-        
-        boolean dirty = commandStack.canUndo();
-        // manually update editor dirty indicator
-        if(this.dirty != dirty) {
-          this.dirty = dirty;
-          //force actions update
+        if (oldDirty != dirty) {
+          oldDirty = dirty; 
           updatePropertyDependentActions();
-          MavenPomEditor.this.editorDirtyStateChanged();
         }
         return dirty;
       }
@@ -351,6 +338,23 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       structuredModel = modelManager.getExistingModelForEdit(doc);
       if(structuredModel == null) {
         structuredModel = modelManager.getModelForEdit((IStructuredDocument) doc);
+      }
+
+      commandStackListener = new CommandStackListener() {
+        public void commandStackChanged(EventObject event) {
+          boolean oldDirty = dirty;          
+          dirty = sseCommandStack.isSaveNeeded();
+          if (dirty != oldDirty)
+            MavenPomEditor.this.editorDirtyStateChanged();
+        }
+      };
+      
+      IStructuredTextUndoManager undoManager = structuredModel.getUndoManager();
+      if(undoManager != null) {
+        sseCommandStack = (BasicCommandStack) undoManager.getCommandStack();
+        if(sseCommandStack != null) {
+          sseCommandStack.addCommandStackListener(commandStackListener);
+        }
       }
       
       flushCommandStack();
@@ -750,6 +754,8 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 
   public void dispose() {
     structuredModel.releaseFromEdit();
+    if (sseCommandStack != null)
+      sseCommandStack.removeCommandStackListener(commandStackListener);
 
     if(activationListener != null) {
       activationListener.dispose();
