@@ -100,7 +100,7 @@ public class MavenBuilder extends IncrementalProjectBuilder {
     project.setSessionProperty(IMavenConstants.FULL_MAVEN_BUILD, null);
   }
 
-  private boolean getRequireFullBuild(IProject project) throws CoreException {
+  private boolean getRequireFullBuild(IProject project) {
     return false;
     // return project.getSessionProperty(IMavenConstants.FULL_MAVEN_BUILD) != null;
   }

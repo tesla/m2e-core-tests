@@ -112,6 +112,7 @@ public class WorkingSetGroup {
     workingsetComboViewer.setLabelProvider(new LabelProvider() {
       private ResourceManager images = new LocalResourceManager(JFaceResources.getResources());
 
+      @SuppressWarnings("deprecation")
       public Image getImage(Object element) {
         if(element instanceof IWorkingSet) {
           ImageDescriptor imageDescriptor = ((IWorkingSet) element).getImage();

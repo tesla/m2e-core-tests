@@ -191,11 +191,11 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 
   private MavenPomActivationListener activationListener;
 
-  private boolean dirty;
+  boolean dirty;
 
   private CommandStackListener commandStackListener;
 
-  private BasicCommandStack sseCommandStack;
+  BasicCommandStack sseCommandStack;
 
   public MavenPomEditor() {
     modelManager = StructuredModelManager.getModelManager();
