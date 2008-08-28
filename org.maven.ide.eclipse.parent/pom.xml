@@ -138,6 +138,11 @@
       </dependency>
       <dependency>
         <groupId>org.maven.ide.eclipse</groupId>
+        <artifactId>org.maven.ide.eclipse.mylyn3</artifactId>
+        <version>${m2eclipse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.maven.ide.eclipse</groupId>
         <artifactId>org.maven.ide.eclipse.subclipse</artifactId>
         <version>${m2eclipse.version}</version>
       </dependency>
