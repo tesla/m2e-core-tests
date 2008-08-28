@@ -1,10 +1,13 @@
 package org.maven.ide.eclipse.ui.internal.preferences;
 
 import java.io.File;
+import java.lang.reflect.Constructor;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -46,6 +49,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorDescriptor;
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPropertyListener;
 import org.eclipse.ui.IWorkbench;
@@ -72,7 +76,6 @@ import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.index.IndexManager;
-import org.maven.ide.eclipse.ui.internal.editors.MavenFileEditorInput;
 
 
 /**
@@ -562,6 +565,7 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
     return true;
   }
 
+  @SuppressWarnings("unchecked")
   void openEditor(final String fileName) {
     // XXX create new settings.xml if does not exist
     
@@ -571,8 +575,26 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
     
     IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor("settings.xml");
     
+    File file = new File(fileName);
+    IEditorInput input = null;
     try {
-      final IEditorPart editor = IDE.openEditor(page, new MavenFileEditorInput(fileName), desc.getId());
+      //class implementing editor input for external file has been renamed in eclipse 3.3, hence reflection
+      Class javaInput = null;
+      try {
+        javaInput = Class.forName("org.eclipse.ui.internal.editors.text.JavaFileEditorInput");
+        Constructor cons = javaInput.getConstructor(new Class[] {File.class});
+        input = (IEditorInput) cons.newInstance(new Object[] {file});
+      } catch (Exception e) {
+        try {
+          IFileStore fileStore= EFS.getLocalFileSystem().fromLocalFile(file);
+          Class storeInput = Class.forName("org.eclipse.ui.ide.FileStoreEditorInput");
+          Constructor cons = storeInput.getConstructor(new Class[] {IFileStore.class});
+          input = (IEditorInput) cons.newInstance(new Object[] {fileStore});
+        } catch (Exception ex) {
+          //ignore...
+        }
+      }
+      final IEditorPart editor = IDE.openEditor(page, input, desc.getId());
       editor.addPropertyListener(new IPropertyListener() {
         public void propertyChanged(Object source, int propId) {
           if(!editor.isDirty()) {
