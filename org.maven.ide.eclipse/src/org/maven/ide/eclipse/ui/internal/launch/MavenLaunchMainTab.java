@@ -432,6 +432,12 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
         runtimeComboViewer.setSelection(new StructuredSelection(runtimeManager.getDefaultRuntime()));
       }
     });
+    
+    if(isBuilder) {
+      goalsAutoBuildText.setFocus();
+    } else {
+      goalsText.setFocus();
+    }
   }
   
   protected Shell getShell() {
