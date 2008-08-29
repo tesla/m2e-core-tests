@@ -368,12 +368,6 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
 
     globalSettingsText = new Text(composite, SWT.READ_ONLY | SWT.BORDER);
     globalSettingsText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-    globalSettingsText.addModifyListener(new ModifyListener() {
-      public void modifyText(ModifyEvent modifyevent) {
-        initLocalRepository();
-        checkSettings();
-      }
-    });
 
 //    globalSettingsBrowseButton = new Button(composite, SWT.NONE);
 //    globalSettingsBrowseButton.setText("&Browse...");
@@ -464,18 +458,32 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
     userSettingsText.setText(userSettings==null ? "" : userSettings);
     
     checkSettings();
-    // initLocalRepository();
+    initLocalRepository();
+
+    globalSettingsText.addModifyListener(new ModifyListener() {
+      public void modifyText(ModifyEvent modifyevent) {
+        initLocalRepository();
+        checkSettings();
+      }
+    });
+    userSettingsText.addModifyListener(new ModifyListener() {
+      public void modifyText(ModifyEvent modifyevent) {
+        initLocalRepository();
+        checkSettings();
+      }
+    });
     
     return composite;
   }
   
   void initLocalRepository() {
-    // XXX this is quite slow. is there a faster way?
-    final String globalSettings = globalSettingsText.getText().trim();
-    new Job("Reading local repository") {
+    // TODO this is quite slow. is there a faster way?
+    final String userSettings = userSettingsText.getText().trim();
+    final String globalSettings = globalSettingsText.getText().trim().length() == 0 ? defaultRuntime.getSettings()
+        : globalSettingsText.getText().trim();
+    new Job("Reading local repository location") {
       protected IStatus run(IProgressMonitor monitor) {
-        String settings = globalSettings.length()==0 ? defaultRuntime.getSettings() : globalSettings;
-        final File localRepository = getLocalRepository(settings);
+        final File localRepository = getLocalRepository(globalSettings, userSettings);
         Display.getDefault().asyncExec(new Runnable() {
           public void run() {
             if(!localRepositoryText.isDisposed()) {
@@ -486,7 +494,7 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
         return Status.OK_STATUS;
       }
       
-      private File getLocalRepository(String globalSettings) {
+      private File getLocalRepository(String globalSettings, String userSettings) {
         MavenEmbedder embedder = null;
         try {
           ContainerCustomizer customizer = EmbedderFactory.createExecutionCustomizer();
@@ -494,7 +502,9 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
           if(globalSettings!=null) {
             configuration.setGlobalSettingsFile(new File(globalSettings));
           }
-          configuration.setUserSettingsFile(null);
+          if(userSettings!=null) {
+            configuration.setUserSettingsFile(new File(userSettings));
+          }
           
           embedder = EmbedderFactory.createMavenEmbedder(configuration, null);
           
