@@ -95,7 +95,6 @@
     
     <module>../org.maven.ide.eclipse.editor.xml</module>
     <module>../org.maven.ide.eclipse.editor</module>
-    <module>../org.maven.ide.eclipse.editor.tests</module>
     <!--
     <module>../org.maven.ide.eclipse.editor.xml.tests</module>
     -->
@@ -328,11 +327,6 @@
         <plugin>
           <groupId>org.codehaus.tycho</groupId>
           <artifactId>maven-osgi-packaging-plugin</artifactId>
-          <version>${tycho.version}</version>
-        </plugin>
-        <plugin>
-          <groupId>org.codehaus.tycho</groupId>
-          <artifactId>maven-osgi-test-plugin</artifactId>
           <version>${tycho.version}</version>
         </plugin>
         <plugin>
