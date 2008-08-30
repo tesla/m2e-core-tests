@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.JavaConventions;
@@ -416,6 +417,8 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
             MavenLogger.log("Error downloading archetype " + archetypeName, e);
           } catch(UnknownArchetype e) {
             MavenLogger.log("Error downloading archetype " + archetypeName, e);
+          } catch(CoreException ex) {
+            MavenLogger.log(ex);
           } finally {
             monitor.done();
           }

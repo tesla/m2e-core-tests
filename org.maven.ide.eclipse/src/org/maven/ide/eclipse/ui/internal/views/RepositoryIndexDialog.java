@@ -8,7 +8,6 @@
 
 package org.maven.ide.eclipse.ui.internal.views;
 
-import java.io.IOException;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -18,6 +17,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -176,15 +176,14 @@ public class RepositoryIndexDialog extends TitleAreaDialog {
                   }
                 });
               }
-            } catch(final IOException ex) {
-              final String msg = "Can't retrieve Repository Id";
-              MavenLogger.log(msg, ex);
+            } catch(final CoreException ex) {
+              MavenLogger.log(ex);
               Display.getDefault().asyncExec(new Runnable() {
                 public void run() {
-                  setErrorMessage(msg + ";\n" + ex.getMessage());
+                  IStatus status = ex.getStatus();
+                  setErrorMessage(status.getMessage() + ";\n" + status.getException().getMessage());
                 }
               });
-              
             }
             return Status.OK_STATUS;
           }

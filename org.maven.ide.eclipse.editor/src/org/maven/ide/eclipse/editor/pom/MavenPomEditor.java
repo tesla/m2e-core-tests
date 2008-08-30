@@ -710,11 +710,6 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       result.initTreeProcessing(plexus);
       return result;
 
-    } catch(MavenEmbedderException ex) {
-      String msg = "Can't create Maven embedder";
-      MavenLogger.log(msg, ex);
-      throw new CoreException(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, msg, ex));
-
     } catch(MetadataResolutionException ex) {
       String msg = "Metadata resolution error";
       MavenLogger.log(msg, ex);

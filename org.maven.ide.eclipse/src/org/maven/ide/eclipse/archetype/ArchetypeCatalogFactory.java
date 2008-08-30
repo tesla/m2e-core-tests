@@ -14,9 +14,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
-import org.codehaus.plexus.PlexusContainer;
-import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
-
+import org.apache.maven.archetype.Archetype;
 import org.apache.maven.archetype.catalog.ArchetypeCatalog;
 import org.apache.maven.archetype.source.ArchetypeDataSource;
 import org.apache.maven.archetype.source.ArchetypeDataSourceException;
@@ -58,8 +56,12 @@ public abstract class ArchetypeCatalogFactory {
   public String toString() {
     return getId();
   }
-
   
+  protected Archetype getArchetyper(MavenEmbedderManager manager) throws CoreException {
+    return manager.getComponent(Archetype.class, null);
+  }
+  
+
   /**
    * Factory for Nexus Indexer ArchetypeCatalog
    */
@@ -102,14 +104,9 @@ public abstract class ArchetypeCatalogFactory {
 //
 //      return catalog;
       
-      PlexusContainer container = manager.getWorkspaceEmbedder().getPlexusContainer();
       try {
-        ArchetypeDataSource source = (ArchetypeDataSource) container.lookup(ArchetypeDataSource.class, "nexus");
+        ArchetypeDataSource source = manager.getComponent(ArchetypeDataSource.class, "nexus");
         return source.getArchetypeCatalog(new Properties());
-      } catch(ComponentLookupException ex) {
-        String msg = "Error looking up archetype data; " + ex.getMessage();
-        MavenLogger.log(msg, ex);
-        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
       } catch(ArchetypeDataSourceException ex) {
         String msg = "Error looking up archetype catalog; " + ex.getMessage();
         MavenLogger.log(msg, ex);
@@ -130,7 +127,7 @@ public abstract class ArchetypeCatalogFactory {
     }
 
     public ArchetypeCatalog getArchetypeCatalog(MavenEmbedderManager manager) throws CoreException {
-      return manager.getArchetyper().getInternalCatalog();
+      return getArchetyper(manager).getInternalCatalog();
     }
   }
 
@@ -145,7 +142,7 @@ public abstract class ArchetypeCatalogFactory {
     }
     
     public ArchetypeCatalog getArchetypeCatalog(MavenEmbedderManager manager) throws CoreException {
-      return manager.getArchetyper().getDefaultLocalCatalog();
+      return getArchetyper(manager).getDefaultLocalCatalog();
     }
   }
   
@@ -159,7 +156,7 @@ public abstract class ArchetypeCatalogFactory {
     }
 
     public ArchetypeCatalog getArchetypeCatalog(MavenEmbedderManager manager) throws CoreException {
-      return manager.getArchetyper().getLocalCatalog(getId());
+      return getArchetyper(manager).getLocalCatalog(getId());
     }
   }
 
@@ -173,7 +170,7 @@ public abstract class ArchetypeCatalogFactory {
     }
 
     public ArchetypeCatalog getArchetypeCatalog(MavenEmbedderManager manager) throws CoreException {
-      return manager.getArchetyper().getRemoteCatalog(getId());
+      return getArchetyper(manager).getRemoteCatalog(getId());
     }
   }
   

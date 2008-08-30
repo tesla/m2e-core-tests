@@ -25,6 +25,7 @@ import org.osgi.framework.BundleContext;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -160,14 +161,17 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     this.indexManager.addIndex(new IndexInfo(IndexManager.WORKSPACE_INDEX, //
         null, null, IndexInfo.Type.WORKSPACE, false), false);
 
-    this.indexManager.addIndex(new IndexInfo(IndexManager.LOCAL_INDEX, //
-        embedderManager.getLocalRepositoryDir(), null, IndexInfo.Type.LOCAL, false), false);
+    try {
+      this.indexManager.addIndex(new IndexInfo(IndexManager.LOCAL_INDEX, //
+          embedderManager.getLocalRepositoryDir(), null, IndexInfo.Type.LOCAL, false), false);
+    } catch(CoreException ex) {
+      MavenLogger.log(ex);
+    }
 
     Set<IndexInfo> indexes = loadIndexConfiguration(new File(stateLocationDir, PREFS_INDEXES));
 
     this.modelManager = new MavenModelManager(embedderManager, console);
 
-    IWorkspace workspace = ResourcesPlugin.getWorkspace();
     boolean updateProjectsOnStartup = runtimeManager.isUpdateProjectsOnStartup();
     
     this.managerImpl = new MavenProjectManagerImpl(console, indexManager, embedderManager,
@@ -175,6 +179,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
     this.mavenBackgroundJob = new MavenProjectManagerRefreshJob(managerImpl, runtimeManager);
 
+    IWorkspace workspace = ResourcesPlugin.getWorkspace();
     workspace.addResourceChangeListener(mavenBackgroundJob, IResourceChangeEvent.POST_CHANGE
         | IResourceChangeEvent.PRE_CLOSE | IResourceChangeEvent.PRE_DELETE);
 

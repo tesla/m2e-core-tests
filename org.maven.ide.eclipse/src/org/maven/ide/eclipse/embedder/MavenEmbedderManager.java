@@ -19,7 +19,6 @@ import org.eclipse.core.runtime.Status;
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 
-import org.apache.maven.archetype.Archetype;
 import org.apache.maven.embedder.Configuration;
 import org.apache.maven.embedder.ContainerCustomizer;
 import org.apache.maven.embedder.DefaultConfiguration;
@@ -72,9 +71,13 @@ public class MavenEmbedderManager {
     return configuration;
   }
   
-  public synchronized MavenEmbedder createEmbedder(ContainerCustomizer customizer) throws MavenEmbedderException {
-    Configuration configuration = createDefaultConfiguration(customizer);
-    return EmbedderFactory.createMavenEmbedder(configuration, null);
+  public synchronized MavenEmbedder createEmbedder(ContainerCustomizer customizer) throws CoreException {
+    try {
+      Configuration configuration = createDefaultConfiguration(customizer);
+      return EmbedderFactory.createMavenEmbedder(configuration, null);
+    } catch(MavenEmbedderException ex) {
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Error creating Maven Embedder", ex));
+    }
   }
 
   public synchronized MavenExecutionRequest createRequest(MavenEmbedder embedder) {
@@ -84,20 +87,13 @@ public class MavenEmbedderManager {
     return EmbedderFactory.createMavenExecutionRequest(embedder, offline, debug);
   }
   
-  public MavenEmbedder getWorkspaceEmbedder() {
+  public MavenEmbedder getWorkspaceEmbedder() throws CoreException {
     if(this.workspaceEmbedder==null) {
-      try {
-        this.workspaceEmbedder = createEmbedder(EmbedderFactory.createExecutionCustomizer());
-        
-        for(AbstractMavenEmbedderListener listener : listeners) {
-          listener.workspaceEmbedderCreated();
-        }
-        
-      } catch(MavenEmbedderException ex) {
-        String msg = "Can't create workspace embedder";
-        console.logError(msg + "; " + ex.getMessage());
-        MavenLogger.log(msg, ex);
-      } 
+      this.workspaceEmbedder = createEmbedder(EmbedderFactory.createExecutionCustomizer());
+      
+      for(AbstractMavenEmbedderListener listener : listeners) {
+        listener.workspaceEmbedderCreated();
+      }
     }
     return this.workspaceEmbedder;
   }
@@ -127,7 +123,7 @@ public class MavenEmbedderManager {
   }
   
 
-  public File getLocalRepositoryDir() {
+  public File getLocalRepositoryDir() throws CoreException {
     String localRepository = getWorkspaceEmbedder().getLocalRepository().getBasedir();
     
     File localRepositoryDir = new File(localRepository);
@@ -150,13 +146,13 @@ public class MavenEmbedderManager {
     return localRepositoryDir;
   }
 
-  public Archetype getArchetyper() throws CoreException {
-    PlexusContainer container = getWorkspaceEmbedder().getPlexusContainer();
-
+  @SuppressWarnings("unchecked")
+  public <T> T getComponent(Class<T> c, String name) throws CoreException {
     try {
-      return (Archetype) container.lookup(Archetype.class);
+      PlexusContainer container = getWorkspaceEmbedder().getPlexusContainer();
+      return (T) (name == null ? container.lookup(c) : container.lookup(c, name));
     } catch(ComponentLookupException ex) {
-      String msg = "Error looking up the archetyper: " + ex.getMessage();
+      String msg = "Error looking up " + c.getName() + "; " + ex.getMessage();
       MavenLogger.log(msg, ex);
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
     }

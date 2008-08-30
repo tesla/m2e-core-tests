@@ -655,8 +655,6 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
         return new ArtifactKey(iaf.group, iaf.artifact, iaf.version, null);
       }
       
-    } catch(IOException ex) {
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, 0, "Search error", ex));
     } catch(DigesterException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, 0, "MD5 calculation error", ex));
     }
@@ -829,13 +827,13 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
   }
 
   public void setupVariables() {
-    File localRepositoryDir = embedderManager.getLocalRepositoryDir();
-  
     IWorkspace workspace = ResourcesPlugin.getWorkspace();
     IWorkspaceDescription wsDescription = workspace.getDescription();        
     boolean autobuild = wsDescription.isAutoBuilding();
-  
+    
     try {
+      File localRepositoryDir = embedderManager.getLocalRepositoryDir();
+      
       setAutobuild(workspace, false);
       JavaCore.setClasspathVariable(IMavenConstants.M2_REPO, //
           new Path(localRepositoryDir.getAbsolutePath()), //

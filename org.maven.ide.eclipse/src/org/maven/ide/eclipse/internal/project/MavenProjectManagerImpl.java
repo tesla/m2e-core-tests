@@ -35,6 +35,7 @@ import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
@@ -207,10 +208,10 @@ public class MavenProjectManagerImpl {
             }
           }
         }
-      } catch(MavenEmbedderException ex) {
-        String msg = "Failed to create Maven embedder";
-        console.logError(msg + "; " + ex.toString());
-        MavenLogger.log(msg, ex);
+      } catch(CoreException ex) {
+        IStatus status = ex.getStatus();
+        console.logError(status.getMessage() + "; " + status.getException());
+        MavenLogger.log(ex);
       }
     }
     return projectFacade;
@@ -952,7 +953,8 @@ public class MavenProjectManagerImpl {
     }
   }
 
-  public MavenExecutionResult readProjectWithDependencies(IFile pomFile, ResolverConfiguration resolverConfiguration, MavenUpdateRequest updateRequest, IProgressMonitor monitor) throws MavenEmbedderException {
+  public MavenExecutionResult readProjectWithDependencies(IFile pomFile, ResolverConfiguration resolverConfiguration,
+      MavenUpdateRequest updateRequest, IProgressMonitor monitor) throws CoreException {
     MavenEmbedder embedder = createWorkspaceEmbedder();
     try {
       return execute(embedder, pomFile, resolverConfiguration, new MavenProjectReader(updateRequest), monitor);
@@ -1054,7 +1056,8 @@ public class MavenProjectManagerImpl {
     }
   }
 
-  public MavenExecutionResult execute(MavenProjectFacade facade, List<String> goals, final boolean recursive, IProgressMonitor monitor) throws MavenEmbedderException {
+  public MavenExecutionResult execute(MavenProjectFacade facade, List<String> goals, final boolean recursive,
+      IProgressMonitor monitor) throws CoreException {
     MavenEmbedder embedder = createWorkspaceEmbedder();
     try {
       IFile pom = facade.getPom();
@@ -1074,7 +1077,11 @@ public class MavenProjectManagerImpl {
       }, monitor);
 
     } finally {
-      embedder.stop();
+      try {
+        embedder.stop();
+      } catch(MavenEmbedderException ex) {
+        MavenLogger.log("Error stopping Maven Embedder", ex);
+      }
     }
   }
 
@@ -1115,7 +1122,7 @@ public class MavenProjectManagerImpl {
     return "";
   }
 
-  public MavenEmbedder createWorkspaceEmbedder() throws MavenEmbedderException {
+  public MavenEmbedder createWorkspaceEmbedder() throws CoreException {
     return embedderManager.createEmbedder(createWorkspaceCustomizer());
   }
 

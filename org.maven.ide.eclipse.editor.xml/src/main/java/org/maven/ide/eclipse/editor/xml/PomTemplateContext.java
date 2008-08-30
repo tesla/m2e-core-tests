@@ -35,6 +35,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.persistence.TemplateStore;
 
@@ -145,11 +147,11 @@ public enum PomTemplateContext {
       }
       
       MavenPlugin plugin = MavenPlugin.getDefault();
-      MavenEmbedder embedder = plugin.getMavenEmbedderManager().getWorkspaceEmbedder();
-
-      Artifact artifact = embedder.createArtifact(groupId, artifactId, version, null, "jar");
       MavenConsole console = plugin.getConsole();
       try {
+        MavenEmbedder embedder = plugin.getMavenEmbedderManager().getWorkspaceEmbedder();
+        
+        Artifact artifact = embedder.createArtifact(groupId, artifactId, version, null, "jar");
         embedder.resolve(artifact, Collections.emptyList(), embedder.getLocalRepository());
         File file = artifact.getFile();
         if(file == null) {
@@ -188,6 +190,10 @@ public enum PomTemplateContext {
         String msg = "Can't resolve plugin " + name;
         console.logError(msg);
         MavenLogger.log(msg, ex);
+      } catch(CoreException ex) {
+        IStatus status = ex.getStatus();
+        console.logError(status.getMessage() + "; " + status.getException().getMessage());
+        MavenLogger.log(ex);
       }
       return null;
     }

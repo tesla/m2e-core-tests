@@ -72,8 +72,6 @@ public class MavenProjectPomScanner<T> extends AbstractProjectScanner<MavenProje
   }
   
   public void run(IProgressMonitor monitor) throws InterruptedException {
-    MavenEmbedder embedder = embedderManager.getWorkspaceEmbedder();
-
     for(int i = 0; i < dependencies.length; i++ ) {
       if(monitor.isCanceled()) {
         throw new InterruptedException();
@@ -82,6 +80,7 @@ public class MavenProjectPomScanner<T> extends AbstractProjectScanner<MavenProje
       Dependency d = dependencies[i];
       
       try {
+        MavenEmbedder embedder = embedderManager.getWorkspaceEmbedder();
         Model model = resolveModel(embedder, d.getGroupId(), d.getArtifactId(), d.getVersion(), monitor);
         if(model==null) {
           String msg = "Can't resolve " + d.getArtifactId();

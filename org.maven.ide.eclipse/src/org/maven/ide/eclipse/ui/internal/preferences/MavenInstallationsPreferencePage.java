@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -91,8 +92,6 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
   
   final MavenEmbedderManager embedderManager;
   
-  final File localRepositoryDir;
-  
   MavenRuntime defaultRuntime;
   List<MavenRuntime> runtimes;
   
@@ -109,7 +108,6 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
     mavenPlugin = MavenPlugin.getDefault();
     runtimeManager = mavenPlugin.getMavenRuntimeManager();
     embedderManager = mavenPlugin.getMavenEmbedderManager();
-    localRepositoryDir = embedderManager.getLocalRepositoryDir();
   }
 
   public void init(IWorkbench workbench) {
@@ -129,21 +127,40 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
 
   public boolean performOk() {
     boolean isOk = checkSettings() && super.performOk();
-    if(isOk) {
-      runtimeManager.setRuntimes(runtimes);
-      runtimeManager.setDefaultRuntime(defaultRuntime);
-      
-      runtimeManager.setUserSettingsFile(userSettingsText.getText());
-      // runtimeManager.setGlobalSettingsFile(globalSettingsText.getText());
-
-      embedderManager.invalidateMavenSettings();
-      
-      File newRepositoryDir = embedderManager.getLocalRepositoryDir();
-      if(!newRepositoryDir.equals(localRepositoryDir)) {
-        mavenPlugin.getIndexManager().scheduleIndexUpdate(IndexManager.LOCAL_INDEX, true, 0L);
-      }
+    if(!isOk) {
+      return false;
     }
-    return isOk;
+    
+    final String userSettings = userSettingsText.getText();
+    
+    new Job("Invalidating Maven settings") {
+      protected IStatus run(IProgressMonitor monitor) {
+        try {
+          final File localRepositoryDir = embedderManager.getLocalRepositoryDir();
+          
+          runtimeManager.setRuntimes(runtimes);
+          runtimeManager.setDefaultRuntime(defaultRuntime);
+          
+          runtimeManager.setUserSettingsFile(userSettings);
+          // runtimeManager.setGlobalSettingsFile(globalSettingsText.getText());
+          
+          mavenPlugin.getMavenEmbedderManager().invalidateMavenSettings();
+          
+          File newRepositoryDir = embedderManager.getLocalRepositoryDir();
+          if(!newRepositoryDir.equals(localRepositoryDir)) {
+            mavenPlugin.getIndexManager().scheduleIndexUpdate(IndexManager.LOCAL_INDEX, true, 0L);
+          }
+        } catch(CoreException ex) {
+          MavenLogger.log(ex);
+          IStatus status = ex.getStatus();
+          Throwable t = status.getException();
+          setErrorMessage(status.getMessage() + "; " + t.getMessage() == null ? t.toString() : t.getMessage());
+        }
+        return Status.OK_STATUS;
+      }
+    }.schedule();
+    
+    return true;
   }
   
   protected Control createContents(Composite parent) {
@@ -431,7 +448,7 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
       public void widgetSelected(SelectionEvent e) {
         initLocalRepository();
         checkSettings();
-        mavenPlugin.getMavenEmbedderManager().invalidateMavenSettings();
+        invalidateMavenSettings(false);
       }
     });
 
@@ -439,8 +456,7 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
     reindexButton.setText(Messages.getString("preferences.reindexButton"));
     reindexButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
-        embedderManager.invalidateMavenSettings();
-        mavenPlugin.getIndexManager().scheduleIndexUpdate(IndexManager.LOCAL_INDEX, true, 0L);
+        invalidateMavenSettings(true);
       }
     });
     
@@ -512,9 +528,20 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
           if(localRepository != null) {
             return new File(localRepository.getBasedir());
           }
+          Display.getDefault().asyncExec(new Runnable() {
+            public void run() {
+              setErrorMessage(null);
+            }
+          });
           
-        } catch(MavenEmbedderException ex) {
+        } catch(final MavenEmbedderException ex) {
           MavenLogger.log("Can't create Maven embedder", ex);
+          Display.getDefault().asyncExec(new Runnable() {
+            public void run() {
+              setErrorMessage(ex.getMessage());
+            }
+          });
+          
         } finally {
           try {
             if(embedder!=null) {
@@ -609,7 +636,7 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
         public void propertyChanged(Object source, int propId) {
           if(!editor.isDirty()) {
             mavenPlugin.getConsole().logMessage("Refreshing settings " + fileName);
-            embedderManager.invalidateMavenSettings();
+            invalidateMavenSettings(false);
           }
         }
       });
@@ -622,6 +649,18 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
   MavenRuntime getSelectedRuntime() {
     IStructuredSelection selection = (IStructuredSelection) runtimesViewer.getSelection();
     return (MavenRuntime) selection.getFirstElement();
+  }
+
+  void invalidateMavenSettings(final boolean reindex) {
+    new Job("Invalidating Maven settings") {
+      protected IStatus run(IProgressMonitor monitor) {
+        mavenPlugin.getMavenEmbedderManager().invalidateMavenSettings();
+        if(reindex) {
+          mavenPlugin.getIndexManager().scheduleIndexUpdate(IndexManager.LOCAL_INDEX, true, 0L);
+        }
+        return Status.OK_STATUS;
+      }
+    }.schedule();
   }
 
 

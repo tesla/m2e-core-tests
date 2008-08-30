@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IStorage;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IPath;
@@ -199,12 +200,16 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
       openEditor(new MavenEditorStorageInput(name + ".java", tooltip, url, buff), name + ".java");
 
     } catch(AbstractArtifactResolutionException ex) {
-      MavenLogger.log("Can't resolve artifact " + name, ex);
-      openDialog("Can't resolve artifact " + name + "\n" + ex.toString());
-
+      String msg = "Can't resolve artifact " + name;
+      MavenLogger.log(msg, ex);
+      openDialog(msg + "\n" + ex.toString());
     } catch(IOException ex) {
-      MavenLogger.log("Can't open editor for " + name, ex);
-      openDialog("Can't open editor for " + name + "\n" + ex.toString());
+      String msg = "Can't open editor for " + name;
+      MavenLogger.log(msg, ex);
+      openDialog(msg + "\n" + ex.toString());
+    } catch(CoreException ex) {
+      MavenLogger.log(ex);
+      openDialog(ex.getMessage() + "\n" + ex.toString());
     }
   }
 
@@ -241,10 +246,12 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
     } catch(AbstractArtifactResolutionException ex) {
       MavenLogger.log("Can't resolve artifact " + name, ex);
       openDialog("Can't resolve artifact " + name + "\n" + ex.toString());
-
     } catch(IOException ex) {
       MavenLogger.log("Can't open pom file for " + name, ex);
       openDialog("Can't open pom file for " + name + "\n" + ex.toString());
+    } catch(CoreException ex) {
+      MavenLogger.log(ex);
+      openDialog(ex.getMessage() + "\n" + ex.toString());
     }
     
     return null;

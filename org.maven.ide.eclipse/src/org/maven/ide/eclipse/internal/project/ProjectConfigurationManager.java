@@ -398,7 +398,8 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
    * Creates project structure using Archetype and then imports created project
    */
   public void createArchetypeProject(IProject project, IPath location, Archetype archetype, String groupId,
-      String artifactId, String version, String javaPackage, Properties properties, ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException {
+      String artifactId, String version, String javaPackage, Properties properties,
+      ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException {
     monitor.beginTask("Creating project " + project.getName(), 2);
 
     IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
@@ -409,45 +410,49 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
       location = workspaceRoot.getLocation();
     }
 
-    ArchetypeGenerationRequest request = new ArchetypeGenerationRequest() //
-        .setTransferListener(new TransferListenerAdapter(new NullProgressMonitor(), console, indexManager)) //
-        .setArchetypeGroupId(archetype.getGroupId()) //
-        .setArchetypeArtifactId(archetype.getArtifactId()) //
-        .setArchetypeVersion(archetype.getVersion()) //
-        .setArchetypeRepository(archetype.getRepository()) //
-        .setGroupId(groupId) //
-        .setArtifactId(artifactId) //
-        .setVersion(version) //
-        .setPackage(javaPackage) // the model does not have a package field
-        .setLocalRepository(embedderManager.getWorkspaceEmbedder().getLocalRepository()) //
-        .setProperties(properties)
-        .setOutputDirectory(location.toPortableString());
-    
-    ArchetypeGenerationResult result = embedderManager.getArchetyper().generateProjectFromArchetype(request);
-    Exception cause = result.getCause();
-    if(cause != null) {
-      String msg = "Unable to create project from archetype " + archetype.toString();
-      MavenLogger.log(msg, cause);
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, cause));
-    }
-    monitor.worked(1);
-    
-    // XXX Archetyper don't allow to specify project folder
-    String projectFolder = location.append(artifactId).toFile().getAbsolutePath();
-    
-    LocalProjectScanner scanner = new LocalProjectScanner(workspaceRoot.getLocation().toFile(), projectFolder, true,
-        mavenModelManager, console);
     try {
+      ArchetypeGenerationRequest request = new ArchetypeGenerationRequest() //
+          .setTransferListener(new TransferListenerAdapter(new NullProgressMonitor(), console, indexManager)) //
+          .setArchetypeGroupId(archetype.getGroupId()) //
+          .setArchetypeArtifactId(archetype.getArtifactId()) //
+          .setArchetypeVersion(archetype.getVersion()) //
+          .setArchetypeRepository(archetype.getRepository()) //
+          .setGroupId(groupId) //
+          .setArtifactId(artifactId) //
+          .setVersion(version) //
+          .setPackage(javaPackage) // the model does not have a package field
+          .setLocalRepository(embedderManager.getWorkspaceEmbedder().getLocalRepository()) //
+          .setProperties(properties).setOutputDirectory(location.toPortableString());
+
+      ArchetypeGenerationResult result = getArchetyper().generateProjectFromArchetype(request);
+      Exception cause = result.getCause();
+      if(cause != null) {
+        String msg = "Unable to create project from archetype " + archetype.toString();
+        MavenLogger.log(msg, cause);
+        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, cause));
+      }
+      monitor.worked(1);
+
+      // XXX Archetyper don't allow to specify project folder
+      String projectFolder = location.append(artifactId).toFile().getAbsolutePath();
+
+      LocalProjectScanner scanner = new LocalProjectScanner(workspaceRoot.getLocation().toFile(), //
+          projectFolder, true, mavenModelManager, console);
       scanner.run(monitor);
+      
+      Set<MavenProjectInfo> projectSet = collectProjects(scanner.getProjects(), //
+          configuration.getResolverConfiguration().shouldIncludeModules());
+      
+      importProjects(projectSet, configuration, monitor);
+      
+      monitor.worked(1);
     } catch (InterruptedException e) {
       throw new CoreException(Status.CANCEL_STATUS);
     }
+  }
 
-    Set<MavenProjectInfo> projectSet = collectProjects(scanner.getProjects(), configuration.getResolverConfiguration().shouldIncludeModules());
-    
-    importProjects(projectSet, configuration, monitor);
-
-    monitor.worked(1);
+  private org.apache.maven.archetype.Archetype getArchetyper() throws CoreException {
+    return embedderManager.getComponent(org.apache.maven.archetype.Archetype.class, null);
   }
 
   /**

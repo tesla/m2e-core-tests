@@ -19,6 +19,8 @@ import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.BooleanClause.Occur;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
@@ -52,11 +54,11 @@ public class IndexManagerSearchEngine implements SearchEngine {
           ids.add(artifact.group);
         }
       }
-      
       return subSet(ids, searchExpression);
-      
     } catch(IOException e) {
       throw new SearchException("Unexpected exception when searching", e);
+    } catch(CoreException ex) {
+      throw new SearchException(ex.getMessage(), ex.getStatus().getException());
     }
   }
 
@@ -70,6 +72,8 @@ public class IndexManagerSearchEngine implements SearchEngine {
       return subSet(ids, searchExpression);
     } catch(IOException e) {
       throw new SearchException("Unexpected exception when searching", e);
+    } catch(CoreException ex) {
+      throw new SearchException(ex.getMessage(), ex.getStatus().getException());
     }
   }
 
@@ -88,6 +92,8 @@ public class IndexManagerSearchEngine implements SearchEngine {
       return subSet(ids, searchExpression);
     } catch(IOException ex) {
       throw new SearchException("Unexpected exception when searching", ex);
+    } catch(CoreException ex) {
+      throw new SearchException(ex.getMessage(), ex.getStatus().getException());
     }
   }
   
@@ -109,6 +115,8 @@ public class IndexManagerSearchEngine implements SearchEngine {
       return subSet(ids, searchExpression);
     } catch(IOException ex) {
       throw new SearchException("Unexpected exception when searching", ex);
+    } catch(CoreException ex) {
+      throw new SearchException(ex.getMessage(), ex.getStatus().getException());
     }
   }
   
@@ -130,11 +138,13 @@ public class IndexManagerSearchEngine implements SearchEngine {
       return subSet(ids, searchExpression);
     } catch(IOException ex) {
       throw new SearchException("Unexpected exception when searching", ex);
+    } catch(CoreException ex) {
+      throw new SearchException(ex.getMessage(), ex.getStatus().getException());
     }
   }
 
   private Collection<IndexedArtifact> find(String groupId, String artifactId, String version,
-      Packaging packaging) throws IOException {
+      Packaging packaging) throws IOException, CoreException {
     IndexManager indexManager = getIndexManager();
  
     BooleanQuery query = new BooleanQuery();

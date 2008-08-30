@@ -8,8 +8,7 @@
 
 package org.maven.ide.eclipse.internal.index;
 
-import java.io.IOException;
-
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -45,7 +44,7 @@ public class IndexerJob extends Job {
       indexManager.reindex(indexName, monitor);
       console.logMessage("Updated index " + indexName);
       return Status.OK_STATUS;
-    } catch(IOException ex) {
+    } catch(CoreException ex) {
       console.logError("Unable to reindex local repository");
       return new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Indexing error", ex);
     } finally {

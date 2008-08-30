@@ -622,11 +622,11 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
           monitor.beginTask("Downloading Archetype " + archetypeName, IProgressMonitor.UNKNOWN);
 
           MavenEmbedderManager embedderManager = plugin.getMavenEmbedderManager();
-          MavenEmbedder embedder = embedderManager.getWorkspaceEmbedder();
-          Artifact pomArtifact = embedder.createArtifact(archetypeGroupId, archetypeArtifactId, archetypeVersion, null, "pom");
-          Artifact jarArtifact = embedder.createArtifact(archetypeGroupId, archetypeArtifactId, archetypeVersion, null, "jar");
-          
           try {
+            MavenEmbedder embedder = embedderManager.getWorkspaceEmbedder();
+            Artifact pomArtifact = embedder.createArtifact(archetypeGroupId, archetypeArtifactId, archetypeVersion, null, "pom");
+            Artifact jarArtifact = embedder.createArtifact(archetypeGroupId, archetypeArtifactId, archetypeVersion, null, "jar");
+
             monitor.subTask("resolving POM...");
             embedder.resolve(pomArtifact, remoteRepositories, embedder.getLocalRepository());
             monitor.worked(1);

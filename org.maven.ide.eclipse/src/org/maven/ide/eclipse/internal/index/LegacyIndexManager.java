@@ -16,12 +16,16 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.store.Directory;
 
+import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.index.IndexInfo;
@@ -99,9 +103,13 @@ public class LegacyIndexManager extends IndexManager {
     }
   }
 
-  public Map<String, IndexedArtifact> search(String query, String field) throws IOException {
-    Indexer indexer = new Indexer();
-    return indexer.search(getIndexDirs(), query, field);
+  public Map<String, IndexedArtifact> search(String query, String field) throws CoreException {
+    try {
+      Indexer indexer = new Indexer();
+      return indexer.search(getIndexDirs(), query, field);
+    } catch(IOException ex) {
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Search error", ex));
+    }
   }
 
   public Map<String, IndexedArtifact> search(String indexName, String prefix, String searchGroup) {
@@ -149,7 +157,7 @@ public class LegacyIndexManager extends IndexManager {
     return null;
   }
 
-  public Date reindex(String indexName, IProgressMonitor monitor) throws IOException {
+  public Date reindex(String indexName, IProgressMonitor monitor) throws CoreException {
     IndexInfo indexInfo = getIndexInfo(indexName);
     if(indexInfo == null) {
       return null;
@@ -162,11 +170,15 @@ public class LegacyIndexManager extends IndexManager {
 //    }
 
     if(indexInfo.getRepositoryDir() != null) {
-      String repositoryPath = indexInfo.getRepositoryDir().getAbsolutePath();
-      Directory indexDir = getIndexDirectory(indexInfo);
+      try {
+        String repositoryPath = indexInfo.getRepositoryDir().getAbsolutePath();
+        Directory indexDir = getIndexDirectory(indexInfo);
 
-      Indexer indexer = new Indexer();
-      indexer.reindex(indexDir, repositoryPath, indexName, monitor);
+        Indexer indexer = new Indexer();
+        indexer.reindex(indexDir, repositoryPath, indexName, monitor);
+      } catch(IOException ex) {
+        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Reindexing error", ex));
+      }
     }
     return null;
   }

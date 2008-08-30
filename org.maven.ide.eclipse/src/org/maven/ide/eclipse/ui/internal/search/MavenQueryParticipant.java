@@ -8,10 +8,10 @@
 
 package org.maven.ide.eclipse.ui.internal.search;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -120,8 +120,8 @@ public class MavenQueryParticipant implements IQueryParticipant, IJavaSearchCons
           for(IndexedArtifact ia : result.values()) {
             requestor.reportMatch(new Match(ia, 0, 0));
           }
-        } catch(IOException ex) {
-          MavenLogger.log("Search error", ex);
+        } catch(CoreException ex) {
+          MavenLogger.log(ex);
         }
       }
     }

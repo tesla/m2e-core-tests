@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Stack;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -110,7 +111,7 @@ public abstract class IndexManager {
   
   // local state
   
-  protected final Directory workspaceIndexDirectory = new RAMDirectory();
+  protected Directory workspaceIndexDirectory = new RAMDirectory();
   
   private final ArrayList<IndexListener> listeners = new ArrayList<IndexListener>();
   
@@ -210,12 +211,12 @@ public abstract class IndexManager {
    * 
    * @return Map&lt;String, IndexedArtifact&gt;
    */
-  public abstract Map<String, IndexedArtifact> search(String term, String searchType) throws IOException;
+  public abstract Map<String, IndexedArtifact> search(String term, String searchType) throws CoreException;
 
   /**
    * @return Map&lt;String, IndexedArtifact&gt;
    */
-  public abstract Map<String, IndexedArtifact> search(String indexName, String prefix, String searchGroup) throws IOException;
+  public abstract Map<String, IndexedArtifact> search(String indexName, String prefix, String searchGroup) throws CoreException;
 
   /**
    * @param indexName name of the index to search or null to search in all indexes
@@ -227,7 +228,7 @@ public abstract class IndexManager {
    * 
    * @return Map&lt;String, IndexedArtifact&gt;
    */
-  public abstract Map<String, IndexedArtifact> search(String indexName, Query query) throws IOException;
+  public abstract Map<String, IndexedArtifact> search(String indexName, Query query) throws CoreException;
 
   /**
    * Creates query for given field and expression
@@ -239,24 +240,24 @@ public abstract class IndexManager {
    *    {@link IndexManager#FIELD_PACKAGING}
    * @param expression search text   
    */
-  public abstract Query createQuery(String field, String expression);
+  public abstract Query createQuery(String field, String expression) throws CoreException;
   
-  public abstract IndexedArtifactFile getIndexedArtifactFile(String indexName, String documentKey) throws IOException;
+  public abstract IndexedArtifactFile getIndexedArtifactFile(String indexName, String documentKey) throws CoreException;
   
-  public abstract IndexedArtifactGroup[] getGroups(String indexId) throws IOException;
+  public abstract IndexedArtifactGroup[] getGroups(String indexId) throws CoreException;
 
-  public abstract IndexedArtifactGroup[] getRootGroups(String indexId) throws IOException;
+  public abstract IndexedArtifactGroup[] getRootGroups(String indexId) throws CoreException;
 
-  public abstract Date reindex(String indexName, IProgressMonitor monitor) throws IOException;
+  public abstract Date reindex(String indexName, IProgressMonitor monitor) throws CoreException;
 
-  public abstract Date fetchAndUpdateIndex(String indexName, boolean force, IProgressMonitor monitor) throws IOException;
+  public abstract Date fetchAndUpdateIndex(String indexName, boolean force, IProgressMonitor monitor) throws CoreException;
 
   public abstract Properties fetchIndexProperties(String repositoryUrl, String indexUpdateUrl, IProgressMonitor monitor)
-      throws IOException;
+      throws CoreException;
   
-  public abstract Date replaceIndex(String indexName, InputStream is) throws IOException;
+  public abstract Date replaceIndex(String indexName, InputStream is) throws CoreException;
 
-  public abstract Date mergeIndex(String indexName, InputStream is) throws IOException;
+  public abstract Date mergeIndex(String indexName, InputStream is) throws CoreException;
 
   public abstract Date getIndexArchiveTime(InputStream is) throws IOException;
 
@@ -321,7 +322,7 @@ public abstract class IndexManager {
   
       return g;
   
-    } catch(IOException ex) {
+    } catch(CoreException ex) {
       MavenLogger.log("Can't retrieve groups for " + indexName + ":" + prefix, ex);
       return group;
     }
@@ -391,7 +392,7 @@ public abstract class IndexManager {
       try {
         indexManager.reindex(info.getIndexName(), monitor);
         console.logMessage("Updated local repository index");
-      } catch(IOException ex) {
+      } catch(CoreException ex) {
         console.logError("Unable to reindex local repository");
       }
     }
@@ -417,7 +418,7 @@ public abstract class IndexManager {
         } else {
           console.logMessage("Updated index for " + info.getIndexName() + " " + indexTime);
         }
-      } catch(IOException ex) {
+      } catch(CoreException ex) {
         String msg = "Unable to update index for " + info.getIndexName() + " " + info.getRepositoryUrl();
         MavenLogger.log(msg, ex);
         console.logError(msg);

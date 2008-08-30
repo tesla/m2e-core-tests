@@ -8,13 +8,13 @@
 
 package org.maven.ide.eclipse.ui.internal.launch;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -190,8 +190,8 @@ public class MavenGoalSelectionDialog extends ElementTreeSelectionDialog {
           }
         }
         groups.addAll(map.values());
-      } catch(IOException e) {
-        MavenLogger.log("Unable to get plugin list", e);
+      } catch(CoreException e) {
+        MavenLogger.log(e);
       }
     }
 

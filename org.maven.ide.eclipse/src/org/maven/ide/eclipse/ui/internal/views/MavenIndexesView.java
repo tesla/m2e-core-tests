@@ -8,12 +8,12 @@
 
 package org.maven.ide.eclipse.ui.internal.views;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
@@ -522,8 +522,8 @@ public class MavenIndexesView extends ViewPart {
         String indexName = ((IndexInfo) parent).getIndexName();
         try {
           return indexManager.getRootGroups(indexName);
-        } catch(IOException ex) {
-          MavenLogger.log("Can't retrieve root groups for " + indexName, ex);
+        } catch(CoreException ex) {
+          MavenLogger.log(ex);
           return new Object[0];
         }
 

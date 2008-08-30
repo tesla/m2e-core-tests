@@ -412,7 +412,6 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
     IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
     MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
     MavenEmbedderManager embedderManager = MavenPlugin.getDefault().getMavenEmbedderManager();
-    MavenEmbedder embedder = embedderManager.getWorkspaceEmbedder();
     for(String gav : list) {
       // groupId:artifactId:version
       StringTokenizer st = new StringTokenizer(gav, ":");
@@ -429,15 +428,17 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
           file = output.getLocation().toFile();
         }
       } else {
-        Artifact artifact = embedder.createArtifact(groupId, artifactId, version, null, "jar");
+        String name = groupId + ":" + artifactId + ":" + version;
         try {
+          MavenEmbedder embedder = embedderManager.getWorkspaceEmbedder();
+          Artifact artifact = embedder.createArtifact(groupId, artifactId, version, null, "jar");
           embedder.resolve(artifact, Collections.EMPTY_LIST, embedder.getLocalRepository());
+          file = artifact.getFile();
         } catch(ArtifactResolutionException ex) {
-          MavenLogger.log("Artifact resolution error " + artifact, ex);
+          MavenLogger.log("Artifact resolution error " + name, ex);
         } catch(ArtifactNotFoundException ex) {
-          MavenLogger.log("Artifact not found " + artifact, ex);
+          MavenLogger.log("Artifact not found " + name, ex);
         }
-        file = artifact.getFile();
       }
       
       if (file != null) {

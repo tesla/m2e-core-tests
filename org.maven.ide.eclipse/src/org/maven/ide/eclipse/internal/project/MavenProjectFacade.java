@@ -30,7 +30,6 @@ import org.eclipse.core.runtime.Status;
 import org.codehaus.plexus.util.StringUtils;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.embedder.MavenEmbedderException;
 import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.model.Build;
 import org.apache.maven.project.MavenProject;
@@ -147,15 +146,11 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
    * @return 
    */
   public MavenExecutionResult filterResources(IProgressMonitor monitor) throws CoreException {
-    try {
-      String goalsStr = resolverConfiguration.getResourceFilteringGoals();
-      List<String> goals = Arrays.asList(StringUtils.split(goalsStr));
-      MavenExecutionResult result = manager.execute(this, goals, false /* non-recursive*/, monitor);
-      refreshBuildDirectory(monitor); // XXX only need to refresh classes and test-classes
-      return result;
-    } catch(MavenEmbedderException ex) {
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, ex.getMessage(), ex));
-    }
+    String goalsStr = resolverConfiguration.getResourceFilteringGoals();
+    List<String> goals = Arrays.asList(StringUtils.split(goalsStr));
+    MavenExecutionResult result = manager.execute(this, goals, false /* non-recursive*/, monitor);
+    refreshBuildDirectory(monitor); // XXX only need to refresh classes and test-classes
+    return result;
   }
 
   /**
@@ -183,22 +178,18 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
    */
   public MavenProject getMavenProject(IProgressMonitor monitor) throws CoreException {
     if (mavenProject == null) {
-      try {
-        MavenExecutionResult result = manager.readProjectWithDependencies(pom, resolverConfiguration, //
-            new MavenUpdateRequest(true /* offline */, false /* updateSnapshots */),
-            monitor);
-        mavenProject = result.getProject();
-        if (mavenProject == null) {
-          MultiStatus status = new MultiStatus(IMavenConstants.PLUGIN_ID, 0, "Could not read maven project", null);
-          @SuppressWarnings("unchecked")
-          List<Exception> exceptions = result.getExceptions();
-          for (Exception e : exceptions) {
-            status.add(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, 0, e.getMessage(), e));
-          }
-          throw new CoreException(status);
+      MavenExecutionResult result = manager.readProjectWithDependencies(pom, resolverConfiguration, //
+          new MavenUpdateRequest(true /* offline */, false /* updateSnapshots */),
+          monitor);
+      mavenProject = result.getProject();
+      if (mavenProject == null) {
+        MultiStatus status = new MultiStatus(IMavenConstants.PLUGIN_ID, 0, "Could not read maven project", null);
+        @SuppressWarnings("unchecked")
+        List<Exception> exceptions = result.getExceptions();
+        for (Exception e : exceptions) {
+          status.add(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, 0, e.getMessage(), e));
         }
-      } catch (MavenEmbedderException e) {
-        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, 0, "Could not read maven project", e));
+        throw new CoreException(status);
       }
     }
     return mavenProject;
@@ -322,13 +313,9 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
    * @return execution result 
    */
   public MavenExecutionResult execute(List<String> goals, IProgressMonitor monitor) throws CoreException {
-    try {
-      MavenExecutionResult result = manager.execute(this, goals, resolverConfiguration.shouldIncludeModules(), monitor);
-      refreshBuildDirectory(monitor);
-      return result;
-    } catch(MavenEmbedderException ex) {
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, ex.getMessage(), ex));
-    }
+    MavenExecutionResult result = manager.execute(this, goals, resolverConfiguration.shouldIncludeModules(), monitor);
+    refreshBuildDirectory(monitor);
+    return result;
   }
 
   private void refreshBuildDirectory(final IProgressMonitor monitor) throws CoreException {

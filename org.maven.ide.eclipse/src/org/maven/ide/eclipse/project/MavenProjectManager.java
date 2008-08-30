@@ -20,7 +20,6 @@ import org.eclipse.core.runtime.Path;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.embedder.MavenEmbedder;
-import org.apache.maven.embedder.MavenEmbedderException;
 import org.apache.maven.execution.MavenExecutionResult;
 
 import org.maven.ide.eclipse.core.IMavenConstants;
@@ -170,7 +169,7 @@ public class MavenProjectManager {
     return manager.getMavenProject(groupId, artifactId, version);
   }
   
-  public MavenEmbedder createWorkspaceEmbedder() throws MavenEmbedderException {
+  public MavenEmbedder createWorkspaceEmbedder() throws CoreException {
     return manager.createWorkspaceEmbedder();
   }
 
