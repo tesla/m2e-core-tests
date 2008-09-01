@@ -16,7 +16,7 @@ import org.eclipse.core.runtime.Status;
 
 /**
  * Maven Logger
- *
+ * 
  * @author Eugene Kuleshov
  */
 public class MavenLogger {
@@ -26,15 +26,21 @@ public class MavenLogger {
   public static void setLog(ILog log) {
     LOG = log;
   }
-  
+
   public static void log(IStatus status) {
     LOG.log(status);
   }
 
   public static void log(CoreException ex) {
     IStatus s = ex.getStatus();
-    if(s.getException()==null) {
-      log(new Status(s.getSeverity(), s.getPlugin(), s.getCode(), s.getMessage(), ex));
+    if(s.getException() == null) {
+      int n = s.getSeverity();
+      log(new Status(n == IStatus.CANCEL || n == IStatus.ERROR || n == IStatus.INFO //
+          || n == IStatus.WARNING || n == IStatus.OK ? n : IStatus.ERROR, //
+          s.getPlugin() == null ? IMavenConstants.PLUGIN_ID : s.getPlugin(), //
+          s.getCode(), //
+          s.getMessage() == null ? s.toString() : s.getMessage(), //
+          ex));
     } else {
       log(s);
     }
