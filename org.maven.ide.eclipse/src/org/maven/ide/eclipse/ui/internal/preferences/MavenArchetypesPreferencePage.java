@@ -290,7 +290,6 @@ public class MavenArchetypesPreferencePage extends PreferencePage implements IWo
     }
     
     public void dispose() {
-      disabledColor.dispose();
     }
 
     public boolean isLabelProperty(Object element, String property) {
