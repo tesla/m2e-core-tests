@@ -67,8 +67,6 @@ import org.maven.ide.eclipse.util.Util;
 
 public class JavaProjectConfigurator extends AbstractProjectConfigurator {
   
-  private final BuildPathManager buildPathManager;
-  
   private static final List<String> SOURCES = Arrays.asList("1.1,1.2,1.3,1.4,1.5,1.6,1.7".split(","));
   private static final List<String> TARGETS = Arrays.asList("1.1,1.2,1.3,1.4,jsr14,1.5,1.6,1.7".split(","));
   private static final LinkedHashMap<String, String> ENVIRONMENTS = new LinkedHashMap<String, String>();
@@ -81,10 +79,6 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
     ENVIRONMENTS.put("jsr14", "J2SE-1.5");
     ENVIRONMENTS.put("1.6", "JavaSE-1.6");
     ENVIRONMENTS.put("1.7", "JavaSE-1.7");
-  }
-
-  public JavaProjectConfigurator() {
-    buildPathManager = MavenJdtPlugin.getDefault().getBuildpathManager();
   }
 
   // XXX make sure to configure only Java projects
@@ -161,7 +155,7 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
       javaProject.setRawClasspath(entries.toArray(new IClasspathEntry[entries.size()]),
           classesFolder.getFullPath(), monitor);
 
-      buildPathManager.updateClasspath(project, monitor);
+      MavenJdtPlugin.getDefault().getBuildpathManager().updateClasspath(project, monitor);
 
       long t2 = System.currentTimeMillis();
       console.logMessage("Updated source folders for project " + project.getName() + " " + (t2 - t1) / 1000 + "sec");
