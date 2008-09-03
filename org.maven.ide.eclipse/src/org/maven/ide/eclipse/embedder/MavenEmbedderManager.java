@@ -58,11 +58,11 @@ public class MavenEmbedderManager {
 
     configuration.setMavenEmbedderLogger(new PluginConsoleMavenEmbeddedLogger(console, debug));
 
-    if(userSettings != null) {
+    if(userSettings != null && userSettings.length() > 0) {
       configuration.setUserSettingsFile(new File(userSettings));
     }
 
-    if(globalSettings != null) {
+    if(globalSettings != null && globalSettings.length() > 0) {
       configuration.setGlobalSettingsFile(new File(globalSettings));
     }
     
