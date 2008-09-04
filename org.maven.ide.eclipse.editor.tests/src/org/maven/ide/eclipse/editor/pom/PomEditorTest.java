@@ -50,6 +50,7 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 
+import com.windowtester.finder.swt.ShellFinder;
 import com.windowtester.runtime.IUIContext;
 import com.windowtester.runtime.WT;
 import com.windowtester.runtime.WaitTimedOutException;
@@ -97,6 +98,8 @@ public class PomEditorTest extends UITestCaseSWT {
 
   protected void setUp() throws Exception {
     super.setUp();
+    
+    ShellFinder.bringRootToFront(Display.getDefault());
     
     workspace = ResourcesPlugin.getWorkspace();
     root = workspace.getRoot();
