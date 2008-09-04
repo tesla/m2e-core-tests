@@ -45,14 +45,12 @@ import org.eclipse.ui.IWorkbenchPreferenceConstants;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.ide.IGotoMarker;
 import org.eclipse.ui.internal.IPreferenceConstants;
 import org.eclipse.ui.internal.WorkbenchPlugin;
 import org.eclipse.ui.internal.util.PrefUtil;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 
@@ -64,6 +62,7 @@ import com.windowtester.runtime.WidgetSearchException;
 import com.windowtester.runtime.condition.HasTextCondition;
 import com.windowtester.runtime.condition.IConditionMonitor;
 import com.windowtester.runtime.condition.IHandler;
+import com.windowtester.runtime.locator.IWidgetLocator;
 import com.windowtester.runtime.locator.WidgetReference;
 import com.windowtester.runtime.swt.UITestCaseSWT;
 import com.windowtester.runtime.swt.condition.eclipse.FileExistsCondition;
@@ -78,6 +77,7 @@ import com.windowtester.runtime.swt.locator.NamedWidgetLocator;
 import com.windowtester.runtime.swt.locator.SWTWidgetLocator;
 import com.windowtester.runtime.swt.locator.TableItemLocator;
 import com.windowtester.runtime.swt.locator.TreeItemLocator;
+import com.windowtester.runtime.swt.locator.eclipse.PullDownMenuItemLocator;
 import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
 
 
@@ -159,12 +159,12 @@ public class PomEditorTest extends UITestCaseSWT {
 	public void testUpdatingArtifactIdInXmlPropagatedToForm() throws Exception {
 	  openPomFile();
 
-	  selectEditorTab(TAB_POM_XML_TAB, false);
+	  selectEditorTab(TAB_POM_XML_TAB, TAB_OVERVIEW);
 	  
     replaceText("test-pom", "test-pom1");
     ui.keyClick(SWT.CTRL, 'm');  // restore
     
-    selectEditorTab(TAB_OVERVIEW);
+    selectEditorTab(TAB_OVERVIEW, TAB_POM_XML_TAB);
     assertTextValue("artifactId", "test-pom1");
   }
 
@@ -498,14 +498,33 @@ public class PomEditorTest extends UITestCaseSWT {
 	  selectEditorTab(name, true);
 	}
 	
-  private void selectEditorTab(String name, boolean restore) throws WidgetSearchException {
+	private void selectEditorTab(String name, boolean restore) throws WidgetSearchException {
     // need to maximize editor to make it work on small window sizes
     ui.click(new MenuItemLocator("Window/Navigation/Maximize Active View or Editor"));
-    // ui.keyClick(SWT.CTRL, 'm');
     ui.click(new CTabItemLocator(name));
+    
     // ui.keyClick(SWT.CTRL, 'm');
     if(restore) {
       ui.click(new MenuItemLocator("Window/Navigation/Maximize Active View or Editor"));
+    }
+	}
+	
+  private void selectEditorTab(String name, String baseName) throws WidgetSearchException {
+    final CTabItemLocator tabItemLocator = new CTabItemLocator(name);
+    final IWidgetLocator[] item = new IWidgetLocator[1];
+    Display.getDefault().syncExec(new Runnable() {
+      public void run() {
+        IWidgetLocator[] items = tabItemLocator.findAll(ui);
+        if(items!=null && items.length>0) {
+          item[0] = items[0];
+        }
+      }
+    });
+
+    if(item[0]!=null) { 
+      ui.click(tabItemLocator);
+    } else {
+      ui.click(new PullDownMenuItemLocator(name, new CTabItemLocator(baseName)));
     }
   }
 
