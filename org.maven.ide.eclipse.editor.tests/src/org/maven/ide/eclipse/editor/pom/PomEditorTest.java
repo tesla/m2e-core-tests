@@ -71,6 +71,7 @@ import com.windowtester.runtime.swt.internal.condition.NotCondition;
 import com.windowtester.runtime.swt.internal.condition.eclipse.DirtyEditorCondition;
 import com.windowtester.runtime.swt.locator.ButtonLocator;
 import com.windowtester.runtime.swt.locator.CTabItemLocator;
+import com.windowtester.runtime.swt.locator.MenuItemLocator;
 import com.windowtester.runtime.swt.locator.NamedWidgetLocator;
 import com.windowtester.runtime.swt.locator.SWTWidgetLocator;
 import com.windowtester.runtime.swt.locator.TableItemLocator;
@@ -106,7 +107,7 @@ public class PomEditorTest extends UITestCaseSWT {
     WorkbenchPlugin.getDefault().getPreferenceStore().setValue(IPreferenceConstants.RUN_IN_BACKGROUND, true);
     PrefUtil.getAPIPreferenceStore().setValue(IWorkbenchPreferenceConstants.ENABLE_ANIMATIONS, false);
     
-    ShellFinder.bringRootToFront(Display.getDefault());
+    ShellFinder.bringRootToFront(getActivePage().getWorkbenchWindow().getShell().getDisplay());
     
     workspace = ResourcesPlugin.getWorkspace();
     
@@ -125,7 +126,7 @@ public class PomEditorTest extends UITestCaseSWT {
   protected void oneTimeSetup() throws Exception {
     super.oneTimeSetup();
 
-    ShellFinder.bringRootToFront(Display.getDefault());
+    ShellFinder.bringRootToFront(getActivePage().getWorkbenchWindow().getShell().getDisplay());
     
     ui = getUI();
 
@@ -156,9 +157,10 @@ public class PomEditorTest extends UITestCaseSWT {
 	public void testUpdatingArtifactIdInXmlPropagatedToForm() throws Exception {
 	  openPomFile();
 
-	  selectEditorTab(TAB_POM_XML_TAB);
+	  selectEditorTab(TAB_POM_XML_TAB, false);
     replaceText("test-pom", "test-pom1");
-
+    ui.keyClick(SWT.CTRL, 'm');  // restore
+    
     selectEditorTab(TAB_OVERVIEW);
     assertTextValue("artifactId", "test-pom1");
   }
@@ -489,11 +491,17 @@ public class PomEditorTest extends UITestCaseSWT {
     configurationManager.createSimpleProject(project, location, model, folders, config, new NullProgressMonitor());
   }
 
-  private void selectEditorTab(String name) throws WidgetSearchException {
+	private void selectEditorTab(String name) throws WidgetSearchException {
+	  selectEditorTab(name, true);
+	}
+	
+  private void selectEditorTab(String name, boolean restore) throws WidgetSearchException {
     // need to maximize editor to make it work on small window sizes
-    ui.keyClick(SWT.CTRL, 'm');
+    ui.click(new MenuItemLocator("Window/Navigation/Maximize Active View or Editor"));
+    // ui.keyClick(SWT.CTRL, 'm');
     ui.click(new CTabItemLocator(name));
-    ui.keyClick(SWT.CTRL, 'm');
+    // ui.keyClick(SWT.CTRL, 'm');
+    ui.click(new MenuItemLocator("Window/Navigation/Maximize Active View or Editor"));
   }
 
   private String openPomFile() {
