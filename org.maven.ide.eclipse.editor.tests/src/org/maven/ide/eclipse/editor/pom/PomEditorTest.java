@@ -41,9 +41,13 @@ import org.eclipse.ui.IPerspectiveRegistry;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPreferenceConstants;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.internal.IPreferenceConstants;
+import org.eclipse.ui.internal.WorkbenchPlugin;
+import org.eclipse.ui.internal.util.PrefUtil;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
 import org.maven.ide.eclipse.MavenPlugin;
@@ -99,14 +103,21 @@ public class PomEditorTest extends UITestCaseSWT {
   protected void setUp() throws Exception {
     super.setUp();
     
+    WorkbenchPlugin.getDefault().getPreferenceStore().setValue(IPreferenceConstants.RUN_IN_BACKGROUND, true);
+    PrefUtil.getAPIPreferenceStore().setValue(IWorkbenchPreferenceConstants.ENABLE_ANIMATIONS, false);
+    
     ShellFinder.bringRootToFront(Display.getDefault());
     
     workspace = ResourcesPlugin.getWorkspace();
+    
     root = workspace.getRoot();
     ui = getUI();
     
+    if("Welcome".equals(getActivePage().getActivePart().getTitle())) {
+      ui.close(new CTabItemLocator("Welcome"));
+    }
+    
     // close unnecessary tabs (different versions have different defaults in java perspective)
-    closeTab("org.eclipse.ui.internal.introview", "Welcome");
     closeTab("org.eclipse.mylyn.tasks.ui.views.tasks", "Task List");
     closeTab("org.eclipse.ui.views.ContentOutline", "Outline");
   }
