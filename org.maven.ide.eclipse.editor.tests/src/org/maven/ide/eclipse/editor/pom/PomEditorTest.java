@@ -109,6 +109,8 @@ public class PomEditorTest extends UITestCaseSWT {
   protected void oneTimeSetup() throws Exception {
     super.oneTimeSetup();
 
+    ShellFinder.bringRootToFront(Display.getDefault());
+    
     ui = getUI();
 
     if("Welcome".equals(getActivePage().getActivePart().getTitle())) {
