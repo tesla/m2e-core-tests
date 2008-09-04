@@ -45,12 +45,14 @@ import org.eclipse.ui.IWorkbenchPreferenceConstants;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.ide.IGotoMarker;
 import org.eclipse.ui.internal.IPreferenceConstants;
 import org.eclipse.ui.internal.WorkbenchPlugin;
 import org.eclipse.ui.internal.util.PrefUtil;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 
@@ -158,6 +160,7 @@ public class PomEditorTest extends UITestCaseSWT {
 	  openPomFile();
 
 	  selectEditorTab(TAB_POM_XML_TAB, false);
+	  
     replaceText("test-pom", "test-pom1");
     ui.keyClick(SWT.CTRL, 'm');  // restore
     
@@ -501,7 +504,9 @@ public class PomEditorTest extends UITestCaseSWT {
     // ui.keyClick(SWT.CTRL, 'm');
     ui.click(new CTabItemLocator(name));
     // ui.keyClick(SWT.CTRL, 'm');
-    ui.click(new MenuItemLocator("Window/Navigation/Maximize Active View or Editor"));
+    if(restore) {
+      ui.click(new MenuItemLocator("Window/Navigation/Maximize Active View or Editor"));
+    }
   }
 
   private String openPomFile() {
