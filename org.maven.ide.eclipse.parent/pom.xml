@@ -359,18 +359,7 @@
   <repositories>
     <repository>
       <id>maven-eclipse</id>
-      <url>http://repository.sonatype.org/nexus/content/groups/maven-eclipse</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-    </repository>
-
-    <repository>
-      <id>maven-eclipse</id>
-      <url>http://repository.sonatype.org/nexus/content/groups/maven-eclipse</url>
+      <url>http://repository.sonatype.org/content/groups/maven-eclipse</url>
       <snapshots>
         <enabled>true</enabled>
       </snapshots>
@@ -383,7 +372,7 @@
   <pluginRepositories>
     <pluginRepository>
       <id>eclipse-snapshots</id>
-      <url>http://repository.sonatype.org/nexus/content/repositories/eclipse-snapshots</url>
+      <url>http://repository.sonatype.org/content/repositories/eclipse-snapshots</url>
       <snapshots>
         <enabled>true</enabled>
       </snapshots>
