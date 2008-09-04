@@ -21,8 +21,24 @@
 
   <name>Maven Integration for Eclipse POM Editor tests</name>
 
+  <properties>
+    <org.maven.ide.eclipse.editor.tests.skip>true</org.maven.ide.eclipse.editor.tests.skip>
+  </properties>
+
   <build>
     <sourceDirectory>src</sourceDirectory>
+    
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.tycho</groupId>
+        <artifactId>maven-osgi-test-plugin</artifactId>
+        <configuration>
+          <!-- kill test JVM it tests take more than 20 minutes to finish -->
+          <forkedProcessTimeoutInSeconds>1200</forkedProcessTimeoutInSeconds>
+          <skip>${org.maven.ide.eclipse.editor.tests.skip}</skip>
+        </configuration>
+      </plugin>
+    </plugins>    
   </build>
 
 </project>

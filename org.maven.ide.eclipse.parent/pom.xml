@@ -98,6 +98,7 @@
     
     <module>../org.maven.ide.eclipse.editor.xml</module>
     <module>../org.maven.ide.eclipse.editor</module>
+    <module>../org.maven.ide.eclipse.editor.tests</module>
     <!--
     <module>../org.maven.ide.eclipse.editor.xml.tests</module>
     -->
@@ -408,13 +409,6 @@
   </distributionManagement>
 
   <profiles>
-    <profile>
-      <id>ui-tests</id>
-      <modules>
-        <module>../org.maven.ide.eclipse.editor.tests</module>
-      </modules>
-    </profile>
-
     <profile>
       <id>sun-jvm</id>
       <activation>

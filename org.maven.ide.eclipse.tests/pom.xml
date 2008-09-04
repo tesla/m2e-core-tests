@@ -21,6 +21,10 @@
 
   <name>Maven Integration for Eclipse tests</name>
 
+  <properties>
+    <org.maven.ide.eclipse.tests.skip>false</org.maven.ide.eclipse.tests.skip>
+  </properties>
+
   <build>
     <sourceDirectory>src</sourceDirectory>
     <resources>
@@ -31,6 +35,16 @@
         </excludes>
       </resource>
     </resources>
+
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.tycho</groupId>
+        <artifactId>maven-osgi-test-plugin</artifactId>
+        <configuration>
+          <skip>${org.maven.ide.eclipse.tests.skip}</skip>
+        </configuration>
+      </plugin>
+    </plugins>    
   </build>
 
 </project>
