@@ -43,7 +43,7 @@
     <m2e.site>http://localhost</m2e.site>
 
     <!--
-    Use implicit ${tych-version} property to make sure
+    Use implicit ${tycho-version} property to make sure
     tycho plugins version matches version of tycho distribution.
      
     <tycho.version>0.3.0-SNAPSHOT</tycho.version>
@@ -350,7 +350,7 @@
             </includes>
             <argLine>${tycho.test.jvmArgs}</argLine>
             <!-- kill test JVM it tests take more than 10 minutes (600 seconds) to finisg -->
-            <forkedProcessTimeoutInSeconds>600</forkedProcessTimeoutInSeconds>
+            <forkedProcessTimeoutInSeconds>900</forkedProcessTimeoutInSeconds>
           </configuration>
         </plugin>
       </plugins>

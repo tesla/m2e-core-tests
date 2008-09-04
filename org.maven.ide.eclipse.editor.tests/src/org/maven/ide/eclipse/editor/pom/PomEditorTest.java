@@ -104,6 +104,11 @@ public class PomEditorTest extends UITestCaseSWT {
     workspace = ResourcesPlugin.getWorkspace();
     root = workspace.getRoot();
     ui = getUI();
+    
+    // close unnecessary tabs (different versions have different defaults in java perspective)
+    closeTab("org.eclipse.ui.internal.introview", "Welcome");
+    closeTab("org.eclipse.mylyn.tasks.ui.views.tasks", "Task List");
+    closeTab("org.eclipse.ui.views.ContentOutline", "Outline");
   }
 
   protected void oneTimeSetup() throws Exception {
@@ -134,12 +139,7 @@ public class PomEditorTest extends UITestCaseSWT {
         .findPerspectiveWithId("org.eclipse.jdt.ui.JavaPerspective");
     getActivePage().setPerspective(perspective);
 
-    // close unnecessary tabs (different versions have different defaults in java perspective)
-    closeTab("org.eclipse.mylyn.tasks.ui.views.tasks", "Task List");
-    closeTab("org.eclipse.ui.views.ContentOutline", "Outline");
-
     createTestProject();
-    
   }
 
 	public void testUpdatingArtifactIdInXmlPropagatedToForm() throws Exception {
@@ -430,8 +430,9 @@ public class PomEditorTest extends UITestCaseSWT {
 
   private void closeTab(String id, String title) throws Exception {
     IViewPart view = getActivePage().findView(id);
-    if (view != null)
+    if (view != null) {
       ui.close(new CTabItemLocator(title));
+    }
   }
 
   private void putIntoClipboard(String str) throws Exception {
