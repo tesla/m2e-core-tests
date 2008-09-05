@@ -80,6 +80,7 @@ import com.windowtester.runtime.swt.locator.SWTWidgetLocator;
 import com.windowtester.runtime.swt.locator.TableItemLocator;
 import com.windowtester.runtime.swt.locator.TreeItemLocator;
 import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
+import com.windowtester.runtime.util.ScreenCapture;
 
 
 /**
@@ -590,6 +591,7 @@ public class PomEditorTest extends UITestCaseSWT {
   private void replaceText(String src, String target) throws WaitTimedOutException, WidgetSearchException {
     ui.keyClick(SWT.CTRL, 'f');
     ui.wait(new ShellShowingCondition(FIND_REPLACE));
+    ScreenCapture.createScreenCapture();
 
     ui.enterText(src);
     ui.keyClick(WT.TAB);
@@ -597,6 +599,7 @@ public class PomEditorTest extends UITestCaseSWT {
     ui.keyClick(SWT.ALT, 'a'); // "replace all"
     ui.close(new SWTWidgetLocator(Shell.class, FIND_REPLACE));
     ui.wait(new ShellDisposedCondition(FIND_REPLACE));
+    ScreenCapture.createScreenCapture();
   }
 
   private void findText(String src) throws WaitTimedOutException, WidgetSearchException {
