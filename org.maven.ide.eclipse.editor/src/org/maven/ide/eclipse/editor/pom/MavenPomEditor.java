@@ -1056,5 +1056,13 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   public StructuredTextEditor getSourcePage() {
     return sourcePage;
   }
+
+  @Override
+  public IFormPage setActivePage(String pageId) {
+    if(pageId == null) {
+      setActivePage(sourcePageIndex);
+    }
+    return super.setActivePage(pageId);
+  }
   
 }

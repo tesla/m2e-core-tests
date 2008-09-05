@@ -30,6 +30,9 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
@@ -51,6 +54,7 @@ import org.eclipse.ui.internal.util.PrefUtil;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 
@@ -62,7 +66,6 @@ import com.windowtester.runtime.WidgetSearchException;
 import com.windowtester.runtime.condition.HasTextCondition;
 import com.windowtester.runtime.condition.IConditionMonitor;
 import com.windowtester.runtime.condition.IHandler;
-import com.windowtester.runtime.locator.IWidgetLocator;
 import com.windowtester.runtime.locator.WidgetReference;
 import com.windowtester.runtime.swt.UITestCaseSWT;
 import com.windowtester.runtime.swt.condition.eclipse.FileExistsCondition;
@@ -72,12 +75,10 @@ import com.windowtester.runtime.swt.internal.condition.NotCondition;
 import com.windowtester.runtime.swt.internal.condition.eclipse.DirtyEditorCondition;
 import com.windowtester.runtime.swt.locator.ButtonLocator;
 import com.windowtester.runtime.swt.locator.CTabItemLocator;
-import com.windowtester.runtime.swt.locator.MenuItemLocator;
 import com.windowtester.runtime.swt.locator.NamedWidgetLocator;
 import com.windowtester.runtime.swt.locator.SWTWidgetLocator;
 import com.windowtester.runtime.swt.locator.TableItemLocator;
 import com.windowtester.runtime.swt.locator.TreeItemLocator;
-import com.windowtester.runtime.swt.locator.eclipse.PullDownMenuItemLocator;
 import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
 
 
@@ -89,11 +90,19 @@ public class PomEditorTest extends UITestCaseSWT {
 
   private static final String FIND_REPLACE = "Find/Replace";
 
-	private static final String TEST_POM_POM_XML = "test-pom/pom.xml";
-
-  private static final String TAB_POM_XML_TAB = "pom.xml";
-
-  private static final String TAB_OVERVIEW = "Overview";
+	static final String TEST_POM_POM_XML = "test-pom/pom.xml";
+	
+  static final String TAB_POM_XML = null;  // "pom.xml";
+  static final String TAB_OVERVIEW = IMavenConstants.PLUGIN_ID + ".pom.overview"; // "Overview";
+  static final String TAB_DEPENDENCIES = IMavenConstants.PLUGIN_ID + ".pom.dependencies";
+  static final String TAB_REPOSITORIES = IMavenConstants.PLUGIN_ID + ".pom.repositories";
+  static final String TAB_BUILD = IMavenConstants.PLUGIN_ID + ".pom.build";
+  static final String TAB_PLUGINS = IMavenConstants.PLUGIN_ID + ".pom.plugins";
+  static final String TAB_REPORTING = IMavenConstants.PLUGIN_ID + ".pom.reporting";
+  static final String TAB_PROFILES = IMavenConstants.PLUGIN_ID + ".pom.profiles";
+  static final String TAB_TEAM = IMavenConstants.PLUGIN_ID + ".pom.team";
+  static final String TAB_DEPENDENCY_TREE = IMavenConstants.PLUGIN_ID + ".pom.dependencyTree";
+  static final String TAB_DEPENDENCY_GRAPH = IMavenConstants.PLUGIN_ID + ".pom.dependencyGraph";
   
   private static final String PROJECT_NAME = "test-pom";
 
@@ -121,8 +130,8 @@ public class PomEditorTest extends UITestCaseSWT {
     }
     
     // close unnecessary tabs (different versions have different defaults in java perspective)
-    closeTab("org.eclipse.mylyn.tasks.ui.views.tasks", "Task List");
-    closeTab("org.eclipse.ui.views.ContentOutline", "Outline");
+    // closeView("org.eclipse.mylyn.tasks.ui.views.tasks", "Task List");
+    // closeView("org.eclipse.ui.views.ContentOutline", "Outline");
   }
 
   protected void oneTimeSetup() throws Exception {
@@ -159,12 +168,11 @@ public class PomEditorTest extends UITestCaseSWT {
 	public void testUpdatingArtifactIdInXmlPropagatedToForm() throws Exception {
 	  openPomFile();
 
-	  selectEditorTab(TAB_POM_XML_TAB, TAB_OVERVIEW);
+	  selectEditorTab(TAB_POM_XML);
 	  
     replaceText("test-pom", "test-pom1");
-    ui.keyClick(SWT.CTRL, 'm');  // restore
     
-    selectEditorTab(TAB_OVERVIEW, TAB_POM_XML_TAB);
+    selectEditorTab(TAB_OVERVIEW);
     assertTextValue("artifactId", "test-pom1");
   }
 
@@ -174,7 +182,7 @@ public class PomEditorTest extends UITestCaseSWT {
     ui.click(new SWTWidgetLocator(Label.class, "Parent"));
     setTextValue("parentArtifactId", "parent2");
 
-    selectEditorTab(TAB_POM_XML_TAB);
+    selectEditorTab(TAB_POM_XML);
     replaceText("parent2", "parent3");
     
     selectEditorTab(TAB_OVERVIEW);
@@ -185,7 +193,7 @@ public class PomEditorTest extends UITestCaseSWT {
     ui.click(new SWTWidgetLocator(Label.class, "Organization"));
 		ui.click(new NamedWidgetLocator("organizationName"));
 		ui.enterText("orgfoo");
-		selectEditorTab(TAB_POM_XML_TAB);
+		selectEditorTab(TAB_POM_XML);
     replaceText("orgfoo", "orgfoo1");
     selectEditorTab(TAB_OVERVIEW);
     assertTextValue("organizationName", "orgfoo1");
@@ -205,11 +213,11 @@ public class PomEditorTest extends UITestCaseSWT {
     ui.click(new SWTWidgetLocator(Label.class, "SCM"));
     setTextValue("scmUrl", "http://svn.sonatype.org/m2eclipse");
     assertTextValue("scmUrl", "http://svn.sonatype.org/m2eclipse");
-    selectEditorTab(TAB_POM_XML_TAB);
+    selectEditorTab(TAB_POM_XML);
     delete("<scm>", "</scm>");
     selectEditorTab(TAB_OVERVIEW);
     assertTextValue("scmUrl", "");
-    selectEditorTab(TAB_POM_XML_TAB);
+    selectEditorTab(TAB_POM_XML);
     delete("<organization>", "</organization>");
     selectEditorTab(TAB_OVERVIEW);
     assertTextValue("organizationName", "");
@@ -240,7 +248,7 @@ public class PomEditorTest extends UITestCaseSWT {
     assertTextValue("parentArtifactId", "parent4");
 
     // verify that value changed in xml and in the form
-    selectEditorTab(TAB_POM_XML_TAB);
+    selectEditorTab(TAB_POM_XML);
     String editorText = getEditorText();
     assertTrue(editorText, editorText.contains("<artifactId>parent4</artifactId>"));
     
@@ -256,7 +264,7 @@ public class PomEditorTest extends UITestCaseSWT {
   public void testExternalModificationEditorDirty() throws Exception {
     // make editor dirty
     ui.click(new CTabItemLocator(TEST_POM_POM_XML));
-    selectEditorTab(TAB_POM_XML_TAB);
+    selectEditorTab(TAB_POM_XML);
     replaceText("parent4", "parent5");
     selectEditorTab(TAB_OVERVIEW);
 
@@ -279,7 +287,7 @@ public class PomEditorTest extends UITestCaseSWT {
     assertTextValue("parentArtifactId", "parent6");
     
     // verify that value changed in xml and in the form
-    selectEditorTab(TAB_POM_XML_TAB);
+    selectEditorTab(TAB_POM_XML);
     String editorText = getEditorText();
     assertTrue(editorText, editorText.contains("<artifactId>parent6</artifactId>"));
 
@@ -309,7 +317,7 @@ public class PomEditorTest extends UITestCaseSWT {
   public void testUndoAfterSave() throws Exception {
     // make a change 
     ui.click(new CTabItemLocator(TEST_POM_POM_XML));
-    selectEditorTab(TAB_POM_XML_TAB);
+    selectEditorTab(TAB_POM_XML);
     replaceText("parent6", "parent7");
     selectEditorTab(TAB_OVERVIEW);
     
@@ -335,7 +343,7 @@ public class PomEditorTest extends UITestCaseSWT {
   public void testAfterUndoEditorIsClean() throws Exception {
     // make a change 
     ui.click(new CTabItemLocator(TEST_POM_POM_XML));
-    selectEditorTab(TAB_POM_XML_TAB);
+    selectEditorTab(TAB_POM_XML);
     replaceText("parent6", "parent7");
     selectEditorTab(TAB_OVERVIEW);
     // undo change
@@ -355,7 +363,7 @@ public class PomEditorTest extends UITestCaseSWT {
 		ui.wait(new ShellDisposedCondition("New File"));
 	  assertTextValue("artifactId", "");
 	  setTextValue("artifactId", "artf1");
-	  selectEditorTab(TAB_POM_XML_TAB);
+	  selectEditorTab(TAB_POM_XML);
 	  replaceText("artf1", "artf2");
 	  selectEditorTab(TAB_OVERVIEW);
 	  assertTextValue("artifactId", "artf2");
@@ -401,11 +409,14 @@ public class PomEditorTest extends UITestCaseSWT {
 		ui.wait(new ShellDisposedCondition("Progress Information"));
 		ui.click(2, new TreeItemLocator(PROJECT_NAME + "/another.pom", new ViewLocator(
 		"org.eclipse.jdt.ui.PackageExplorer")));
-	  selectEditorTab(TAB_POM_XML_TAB);
+	  selectEditorTab(TAB_POM_XML);
 		ui.wait(new NotCondition(new DirtyEditorCondition()));
 		findText("</project>");
 		ui.keyClick(WT.ARROW_LEFT);
+		
 		putIntoClipboard("<properties><sample>sample</sample></properties>");
+		
+		
 		ui.keyClick(SWT.CTRL, 'v');
 		ui.wait(new DirtyEditorCondition());
 		ui.keyClick(SWT.CTRL, 's');
@@ -444,25 +455,34 @@ public class PomEditorTest extends UITestCaseSWT {
     }
   }
 
-  private void closeTab(String id, String title) throws Exception {
+  private void closeView(String id, String title) throws Exception {
     IViewPart view = getActivePage().findView(id);
     if (view != null) {
       ui.close(new CTabItemLocator(title));
     }
   }
 
-  private void putIntoClipboard(String str) throws Exception {
-		ui.contextClick(new TreeItemLocator(PROJECT_NAME, new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")), "New/File");
-		ui.wait(new ShellShowingCondition("New File"));
-		ui.enterText("t.txt");
-		ui.keyClick(WT.CR);
-		ui.wait(new ShellDisposedCondition("Progress Information"));
-		ui.wait(new ShellDisposedCondition("New File"));
-		ui.enterText(str);
-		ui.keyClick(SWT.CTRL, 'a');
-		ui.keyClick(SWT.CTRL, 'c');
-		ui.keyClick(SWT.CTRL, 'z');
-		ui.close(new CTabItemLocator("t.txt"));
+  private void putIntoClipboard(final String str) throws Exception {
+//		ui.contextClick(new TreeItemLocator(PROJECT_NAME, new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")), "New/File");
+//		ui.wait(new ShellShowingCondition("New File"));
+//		ui.enterText("t.txt");
+//		ui.keyClick(WT.CR);
+//		ui.wait(new ShellDisposedCondition("Progress Information"));
+//		ui.wait(new ShellDisposedCondition("New File"));
+//		ui.enterText(str);
+//		ui.keyClick(SWT.CTRL, 'a');
+//		ui.keyClick(SWT.CTRL, 'c');
+//		ui.keyClick(SWT.CTRL, 'z');
+//		ui.close(new CTabItemLocator("t.txt"));
+    
+    Display.getDefault().syncExec(new Runnable() {
+      public void run() {
+        Clipboard clipboard = new Clipboard(Display.getDefault());
+        TextTransfer transfer = TextTransfer.getInstance();
+        clipboard.setContents(new String[] {str}, new Transfer[] {transfer});
+        clipboard.dispose();
+      }
+    });
 	}
 	
 	private void createTestProject() throws CoreException {
@@ -494,40 +514,15 @@ public class PomEditorTest extends UITestCaseSWT {
     configurationManager.createSimpleProject(project, location, model, folders, config, new NullProgressMonitor());
   }
 
-	private void selectEditorTab(String name) throws WidgetSearchException {
-	  selectEditorTab(name, true);
-	}
-	
-	private void selectEditorTab(String name, boolean restore) throws WidgetSearchException {
-    // need to maximize editor to make it work on small window sizes
-    ui.click(new MenuItemLocator("Window/Navigation/Maximize Active View or Editor"));
-    ui.click(new CTabItemLocator(name));
-    
-    // ui.keyClick(SWT.CTRL, 'm');
-    if(restore) {
-      ui.click(new MenuItemLocator("Window/Navigation/Maximize Active View or Editor"));
-    }
-	}
-	
-  private void selectEditorTab(String name, String baseName) throws WidgetSearchException {
-    final CTabItemLocator tabItemLocator = new CTabItemLocator(name);
-    final IWidgetLocator[] item = new IWidgetLocator[1];
+	private void selectEditorTab(final String id) {
+	  final MavenPomEditor editor = (MavenPomEditor) getActivePage().getActiveEditor();
     Display.getDefault().syncExec(new Runnable() {
       public void run() {
-        IWidgetLocator[] items = tabItemLocator.findAll(ui);
-        if(items!=null && items.length>0) {
-          item[0] = items[0];
-        }
+        editor.setActivePage(id);
       }
     });
-
-    if(item[0]!=null) { 
-      ui.click(tabItemLocator);
-    } else {
-      ui.click(new PullDownMenuItemLocator(name, new CTabItemLocator(baseName)));
-    }
-  }
-
+	}
+	
   private String openPomFile() {
     IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
     IFile file = root.getFile(new Path(TEST_POM_POM_XML));
@@ -565,8 +560,7 @@ public class PomEditorTest extends UITestCaseSWT {
   }
 
   private void delete(String startMarker, final String endMarker) throws WaitTimedOutException {
-	    IWorkbenchPage activePage = getActivePage();
-	    final MavenPomEditor editor = (MavenPomEditor) activePage.getActiveEditor();
+	    final MavenPomEditor editor = (MavenPomEditor) getActivePage().getActiveEditor();
 	    final StructuredTextEditor[] sse = new StructuredTextEditor[1];
 	    Display.getDefault().syncExec(new Runnable() {
 	      public void run() {
@@ -619,8 +613,7 @@ public class PomEditorTest extends UITestCaseSWT {
   }
 
   private IEditorSite getEditorSite() {
-    IWorkbenchPage activePage = getActivePage();
-    IEditorPart editor = activePage.getActiveEditor();
+    IEditorPart editor = getActivePage().getActiveEditor();
     IEditorSite editorSite = editor.getEditorSite();
     return editorSite;
   }
