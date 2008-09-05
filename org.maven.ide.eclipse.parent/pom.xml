@@ -13,7 +13,7 @@
   <artifactId>parent</artifactId>
   <version>0.9.6-SNAPSHOT</version>
   <packaging>pom</packaging>
-
+  
   <name>Maven Integration for Eclipse (parent)</name>
   <description>Maven Integration for Eclipse provides tight integration for Maven into the IDE</description>
   <url>http://m2eclipse.codehaus.org/</url>
@@ -21,7 +21,7 @@
 
   <properties>
     <m2eclipse.version>0.9.6-SNAPSHOT</m2eclipse.version>
-
+    
     <maven_embedder.version>2.1.0.20080530-2300</maven_embedder.version>
     <maven.version>2.1-SNAPSHOT</maven.version>
     <artifact.version>3.0-alpha-2-SNAPSHOT</artifact.version>
@@ -34,7 +34,7 @@
 
     <nexus_indexer.version>1.0.0.20080530-2330</nexus_indexer.version>
     <nexus.version>1.0-beta-4-SNAPSHOT</nexus.version>
-
+    
     <maven_scm.version>1.0.0.20080602-2350</maven_scm.version>
     <dependency_tree.version>1.2.0.20080424-1900</dependency_tree.version>
 
@@ -46,7 +46,7 @@
     <!--
     Use implicit ${tycho-version} property to make sure
     tycho plugins version matches version of tycho distribution.
-
+     
     <tycho.version>0.3.0-SNAPSHOT</tycho.version>
      -->
   </properties>
@@ -55,27 +55,27 @@
     <name>Sonatype, Inc.</name>
     <url>http://www.sonatype.com</url>
   </organization>
-
+  
   <licenses>
     <license>
       <name>Eclipse Public License - v 1.0</name>
       <url>http://www.eclipse.org/legal/epl-v10.html</url>
     </license>
   </licenses>
-
+  
   <issueManagement>
     <url>http://jira.codehaus.org/browse/MNGECLIPSE</url>
     <system>JIRA</system>
   </issueManagement>
-
+  
   <scm>
     <connection>scm:svn:http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.parent</connection>
     <developerConnection>scm:svn:https://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.parent</developerConnection>
   </scm>
-
+  
   <ciManagement>
-    <system>Hudson</system>
-    <url>https://ci.sonatype.org/job/m2eclipse-with-e33/</url>
+  	<system>Hudson</system>
+  	<url>https://ci.sonatype.org/job/m2eclipse-with-e33/</url>
   </ciManagement>
 
   <modules>
@@ -98,11 +98,11 @@
     <module>../org.maven.ide.eclipse.scm</module>
     <module>../org.maven.ide.eclipse.cvs</module>
     <module>../org.maven.ide.eclipse.tests</module>
-
+    
     <module>../org.maven.ide.eclipse.editor.xml</module>
     <module>../org.maven.ide.eclipse.editor</module>
-    <!--
     <module>../org.maven.ide.eclipse.editor.tests</module>
+    <!--
     <module>../org.maven.ide.eclipse.editor.xml.tests</module>
     -->
 
@@ -130,7 +130,7 @@
 
     <module>../org.maven.ide.eclipse.update</module>
   </modules>
-
+  
   <dependencyManagement>
     <dependencies>
       <!-- m2eclipse -->
@@ -164,7 +164,7 @@
         <artifactId>org.maven.ide.eclipse.cliresolver</artifactId>
         <version>${m2eclipse.version}</version>
       </dependency>
-
+      
       <!--  components -->
       <dependency>
         <groupId>org.maven.ide.components</groupId>
@@ -212,7 +212,7 @@
         <artifactId>plexus-container-default</artifactId>
         <version>1.0-alpha-44</version>
       </dependency>
-
+      
       <dependency>
         <groupId>org.apache.maven</groupId>
         <artifactId>maven-embedder</artifactId>
@@ -228,7 +228,7 @@
           </exclusion>
         </exclusions>
       </dependency>
-
+      
       <dependency>
         <groupId>org.apache.maven.archetype</groupId>
         <artifactId>archetype-common</artifactId>
@@ -248,7 +248,7 @@
           </exclusion>
         </exclusions>
       </dependency>
-
+      
       <!-- copy and paste from maven-archetype, is there a better way? -->
       <dependency>
         <groupId>org.apache.maven</groupId>
@@ -290,7 +290,7 @@
           </exclusion>
         </exclusions>
       </dependency>
-
+      
       <dependency>
         <groupId>org.apache.maven.artifact</groupId>
         <artifactId>maven-artifact</artifactId>
@@ -315,7 +315,7 @@
         <executions>
           <execution>
             <id>timestamp</id>
-            <phase>validate</phase>
+            <phase>validate</phase>        
             <goals>
               <goal>timestamp</goal>
             </goals>
@@ -358,7 +358,7 @@
       </plugins>
     </pluginManagement>
   </build>
-
+  
   <repositories>
     <repository>
       <id>maven-eclipse</id>
@@ -371,7 +371,7 @@
       </releases>
     </repository>
   </repositories>
-
+  
   <pluginRepositories>
     <pluginRepository>
       <id>eclipse-snapshots</id>
@@ -384,7 +384,7 @@
       </releases>
     </pluginRepository>
   </pluginRepositories>
-
+  
   <distributionManagement>
     <repository>
       <id>forge-releases</id>
@@ -405,8 +405,8 @@
       <id>sun-jvm</id>
       <activation>
         <property>
-          <name>java.vendor.url</name>
-          <value>http://java.sun.com/</value>
+          <name>java.vendor.url</name>   
+          <value>http://java.sun.com/</value>          
         </property>
       </activation>
       <properties>
@@ -511,13 +511,19 @@
       </dependencyManagement>
     </profile>
   </profiles>
-
+  
   <developers>
     <developer>
+    	<id>eu</id>
       <name>Eugene Kuleshov</name>
+      <organization>Sonatype Inc.</organization>
+      <timezone>-5</timezone>
     </developer>
     <developer>
+    	<id>jvanzyl</id>
       <name>Jason van Zyl</name>
+      <organization>Sonatype Inc.</organization>
+      <timezone>-8</timezone>
     </developer>
     <developer>
       <id>vsiveton</id>
@@ -525,6 +531,25 @@
       <email>vsiveton@apache.org</email>
       <organization>ASF</organization>
       <timezone>-5</timezone>
+    </developer>
+    <developer>
+    	<id>ifedorenko</id>
+    	<name>Igor Fedorenko</name>
+    	<organization>Sonatype Inc.</organization>
+    	<timezone>-5</timezone>
+    </developer>
+    <developer>
+    	<id>akraev</id>
+    	<name>Anton Kraev</name>
+    	<timezone>-5</timezone>
+    </developer>
+    <developer>
+    	<id>hboutemy</id>
+    	<name>Hervé Boutemy</name>
+    </developer>
+    <developer>
+    	<id>krel</id>
+    	<name>Lukáš Křečan</name>
     </developer>
   </developers>
 
@@ -551,5 +576,5 @@
       <archive>http://archive.m2eclipse.codehaus.org/scm</archive>
     </mailingList>
   </mailingLists>
-
+  
 </project>
