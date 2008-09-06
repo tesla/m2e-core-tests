@@ -81,6 +81,10 @@ import com.windowtester.runtime.swt.locator.TableItemLocator;
 import com.windowtester.runtime.swt.locator.TreeItemLocator;
 import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
 import com.windowtester.runtime.util.ScreenCapture;
+import com.windowtester.runtime.locator.XYLocator;
+import com.windowtester.runtime.swt.locator.LabeledLocator;
+import org.eclipse.swt.widgets.Button;
+import com.windowtester.runtime.swt.locator.MenuItemLocator;
 
 
 /**
@@ -599,7 +603,10 @@ public class PomEditorTest extends UITestCaseSWT {
     ui.enterText(target);
     ScreenCapture.createScreenCapture();
     
-    ui.keyClick(SWT.ALT, 'a'); // "replace all"
+    // ui.keyClick(SWT.ALT, 'a'); // "replace all"
+    ui.click(new ButtonLocator("Replace &All"));
+    ScreenCapture.createScreenCapture();
+    
     ui.close(new SWTWidgetLocator(Shell.class, FIND_REPLACE));
     ui.wait(new ShellDisposedCondition(FIND_REPLACE));
     ScreenCapture.createScreenCapture();
