@@ -255,6 +255,7 @@ public class OverviewPage extends MavenPomEditorPage {
         ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
     parentSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
     parentSection.setText("Parent");
+    parentSection.setData("name", "parentSection");
   
     parentSelectAction = new Action("Select Parent", MavenEditorImages.SELECT_ARTIFACT) {
       public void run() {
@@ -377,6 +378,8 @@ public class OverviewPage extends MavenPomEditorPage {
         ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
     propertiesSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
     propertiesSection.setText("Properties");
+    propertiesSection.setText("Properties");
+    propertiesSection.setData("name", "propertiesSection");
     toolkit.paintBordersFor(propertiesSection);
 
     propertiesEditor = new ListEditorComposite<PropertyPair>(propertiesSection, SWT.NONE);
@@ -398,6 +401,7 @@ public class OverviewPage extends MavenPomEditorPage {
         ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
     modulesSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     modulesSection.setText("Modules");
+    modulesSection.setData("name", "modeulesSection");
 
     modulesEditor = new ListEditorComposite<String>(modulesSection, SWT.NONE);
     modulesEditor.getViewer().getTable().setData("name", "modulesEditor");
@@ -510,6 +514,7 @@ public class OverviewPage extends MavenPomEditorPage {
         ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
     projectSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
     projectSection.setText("Project");
+    projectSection.setData("name", "projectSection");
   
     Composite projectComposite = toolkit.createComposite(projectSection, SWT.NONE);
     projectComposite.setLayout(new GridLayout(2, false));
@@ -568,6 +573,7 @@ public class OverviewPage extends MavenPomEditorPage {
         ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
     organizationSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
     organizationSection.setText("Organization");
+    organizationSection.setData("name", "organizationSection");
   
     Composite organizationComposite = toolkit.createComposite(organizationSection, SWT.NONE);
     organizationComposite.setLayout(new GridLayout(2, false));
@@ -607,6 +613,7 @@ public class OverviewPage extends MavenPomEditorPage {
     GridData gd_scmSection = new GridData(SWT.FILL, SWT.TOP, false, false);
     scmSection.setLayoutData(gd_scmSection);
     scmSection.setText("SCM");
+    scmSection.setData("name", "scmSection");
   
     Composite scmComposite = toolkit.createComposite(scmSection, SWT.NONE);
     scmComposite.setLayout(new GridLayout(2, false));
@@ -662,6 +669,7 @@ public class OverviewPage extends MavenPomEditorPage {
         ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
     issueManagementSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
     issueManagementSection.setText("Issue Management");
+    issueManagementSection.setData("name", "issueManagementSection");
   
     Composite issueManagementComposite = toolkit.createComposite(issueManagementSection, SWT.NONE);
     issueManagementComposite.setLayout(new GridLayout(2, false));
@@ -700,6 +708,7 @@ public class OverviewPage extends MavenPomEditorPage {
         ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
     ciManagementSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
     ciManagementSection.setText("Continuous Integration");
+    ciManagementSection.setData("name", "continuousIntegrationSection");
   
     Composite ciManagementComposite = toolkit.createComposite(ciManagementSection, SWT.NONE);
     ciManagementComposite.setLayout(new GridLayout(2, false));
