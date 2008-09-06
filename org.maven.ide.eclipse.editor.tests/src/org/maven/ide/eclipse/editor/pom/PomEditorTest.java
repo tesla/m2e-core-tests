@@ -36,6 +36,7 @@ import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IPerspectiveDescriptor;
@@ -45,11 +46,13 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPreferenceConstants;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.internal.IPreferenceConstants;
 import org.eclipse.ui.internal.WorkbenchPlugin;
 import org.eclipse.ui.internal.util.PrefUtil;
+import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
@@ -599,23 +602,21 @@ public class PomEditorTest extends UITestCaseSWT {
 	}
 	
   private void openPomFile(String name) throws Exception {
-    ui.click(2, new TreeItemLocator(name, new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
+    // ui.click(2, new TreeItemLocator(name, new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
     
-//    IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-//    IFile file = root.getFile(new Path(name));
-//
-//    final IEditorInput editorInput = new FileEditorInput(file);
-//    Display.getDefault().syncExec(new Runnable() {
-//      public void run() {
-//        try {
-//          getActivePage().openEditor(editorInput, "org.maven.ide.eclipse.editor.MavenPomEditor", true);
-//        } catch(PartInitException ex) {
-//          throw new RuntimeException(ex);
-//        }
-//      }
-//    });
-//    
-//    return file.getLocation().toOSString();
+    IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+    IFile file = root.getFile(new Path(name));
+
+    final IEditorInput editorInput = new FileEditorInput(file);
+    Display.getDefault().syncExec(new Runnable() {
+      public void run() {
+        try {
+          getActivePage().openEditor(editorInput, "org.maven.ide.eclipse.editor.MavenPomEditor", true);
+        } catch(PartInitException ex) {
+          throw new RuntimeException(ex);
+        }
+      }
+    });
   }
 
   private String getContents(File aFile) throws Exception {
