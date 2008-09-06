@@ -38,6 +38,22 @@
           <skip>${org.maven.ide.eclipse.editor.tests.skip}</skip>
         </configuration>
       </plugin>
+      
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>wintest</directory>
+              <followSymlinks>false</followSymlinks>
+              <includes>
+                <include>**/*.png</include>
+              </includes>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
+      
     </plugins>    
   </build>
 
