@@ -247,6 +247,8 @@ public class PomEditorTest extends UITestCaseSWT {
 
     selectEditorTab(TAB_OVERVIEW);
     ui.click(new SWTWidgetLocator(Label.class, "SCM"));
+    ScreenCapture.createScreenCapture();
+    
     setTextValue("scmUrl", "http://svn.sonatype.org/m2eclipse");
     assertTextValue("scmUrl", "http://svn.sonatype.org/m2eclipse");
     selectEditorTab(TAB_POM_XML);
@@ -442,8 +444,8 @@ public class PomEditorTest extends UITestCaseSWT {
 		ui.keyClick(SWT.CTRL, 's');
 		ui.close(new CTabItemLocator(name));
 		
-		ui.click(2, new TreeItemLocator(PROJECT_NAME + "/another.pom", new ViewLocator(
-				"org.eclipse.jdt.ui.PackageExplorer")));
+		// ui.click(2, new TreeItemLocator(name, new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
+		openPomFile(name);
 		
 		ui.click(new NamedWidgetLocator("groupId"));
 		ui.enterText("1");
@@ -662,8 +664,11 @@ public class PomEditorTest extends UITestCaseSWT {
 
   private void setTextValue(String id, String value) throws WidgetSearchException {
     ui.setFocus(new NamedWidgetLocator(id));
+    ScreenCapture.createScreenCapture();
     ui.keyClick(SWT.CTRL, 'a');
+    ScreenCapture.createScreenCapture();
     ui.enterText(value);
+    ScreenCapture.createScreenCapture();
   }
 
   private void replaceText(String src, String target) throws WaitTimedOutException, WidgetSearchException {
