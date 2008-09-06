@@ -207,7 +207,6 @@ public class PomEditorTest extends UITestCaseSWT {
     openPomFile(TEST_POM_POM_XML);
     ScreenCapture.createScreenCapture();
 
-    ui.keyClick(SWT.CTRL, 'm');
     ScreenCapture.createScreenCapture();
     
     SWTWidgetLocator organizationLocator = new NamedWidgetLocator("organizationSection");
@@ -221,11 +220,11 @@ public class PomEditorTest extends UITestCaseSWT {
     ui.click(new NamedWidgetLocator("organizationName"));
     ScreenCapture.createScreenCapture();
     
-		ui.enterText("orgfoo");
-    ui.keyClick(SWT.CTRL, 'm');
+		ui.enterText("org.foo");
+    ScreenCapture.createScreenCapture();
 		
 		selectEditorTab(TAB_POM_XML);
-    replaceText("orgfoo", "orgfoo1");
+    replaceText("org.foo", "orgfoo1");
     
     selectEditorTab(TAB_OVERVIEW);
     assertTextValue("organizationName", "orgfoo1");
@@ -250,6 +249,7 @@ public class PomEditorTest extends UITestCaseSWT {
     ScreenCapture.createScreenCapture();
     
     setTextValue("scmUrl", "http://svn.sonatype.org/m2eclipse");
+    ScreenCapture.createScreenCapture();
     assertTextValue("scmUrl", "http://svn.sonatype.org/m2eclipse");
     selectEditorTab(TAB_POM_XML);
     delete("<scm>", "</scm>");
@@ -454,8 +454,10 @@ public class PomEditorTest extends UITestCaseSWT {
 		ui.wait(new ShellShowingCondition("Save Resource"));
 		ui.click(new ButtonLocator("&No"));
 		
-		ui.contextClick(new TreeItemLocator(name, new ViewLocator(
-				"org.eclipse.jdt.ui.PackageExplorer")), "Delete");
+		ui.click(new TreeItemLocator(PROJECT_NAME, new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
+		    
+		ui.contextClick(new TreeItemLocator(name, //
+        new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")), "Delete");
 		ui.wait(new ShellDisposedCondition("Progress Information"));
 		ui.wait(new ShellShowingCondition("Confirm Delete"));
 		ui.keyClick(WT.CR);
@@ -466,7 +468,7 @@ public class PomEditorTest extends UITestCaseSWT {
 	
 	// MNGECLIPSE-833
 	public void testSaveAfterPaste() throws Exception {
-		String name = PROJECT_NAME + "/another.pom";
+		String name = PROJECT_NAME + "/another2.pom";
 		String str = "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" " //
         + "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " //
         + "xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd\">" //
