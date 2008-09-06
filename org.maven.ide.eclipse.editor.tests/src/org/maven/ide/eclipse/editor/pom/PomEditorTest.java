@@ -48,6 +48,7 @@ import org.eclipse.ui.IWorkbenchPreferenceConstants;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.internal.IPreferenceConstants;
 import org.eclipse.ui.internal.WorkbenchPlugin;
 import org.eclipse.ui.internal.util.PrefUtil;
@@ -66,6 +67,7 @@ import com.windowtester.runtime.WidgetSearchException;
 import com.windowtester.runtime.condition.HasTextCondition;
 import com.windowtester.runtime.condition.IConditionMonitor;
 import com.windowtester.runtime.condition.IHandler;
+import com.windowtester.runtime.locator.IWidgetLocator;
 import com.windowtester.runtime.locator.WidgetReference;
 import com.windowtester.runtime.swt.UITestCaseSWT;
 import com.windowtester.runtime.swt.condition.eclipse.FileExistsCondition;
@@ -193,14 +195,22 @@ public class PomEditorTest extends UITestCaseSWT {
 
   public void testNewSectionCreation() throws Exception {
     openPomFile(TEST_POM_POM_XML, true);
+    ScreenCapture.createScreenCapture();
 
-    ScreenCapture.createScreenCapture();
     ui.keyClick(SWT.CTRL, 'm');
-    ui.click(new SWTWidgetLocator(Label.class, "Organization"));
-    ui.click(new SWTWidgetLocator(Label.class, "Organization"));
     ScreenCapture.createScreenCapture();
-		ui.click(new NamedWidgetLocator("organizationName"));
+    
+    SWTWidgetLocator organizationLocator = new SWTWidgetLocator(Label.class, "Organization");
+    WidgetReference organizationReference = (WidgetReference) ui.find(organizationLocator);
+    Section organizationSection = (Section) organizationReference.getWidget();
+    if(!organizationSection.isExpanded()) {
+      ui.click(organizationLocator);
+    }
     ScreenCapture.createScreenCapture();
+		
+    ui.click(new NamedWidgetLocator("organizationName"));
+    ScreenCapture.createScreenCapture();
+    
 		ui.enterText("orgfoo");
     ui.keyClick(SWT.CTRL, 'm');
 		
