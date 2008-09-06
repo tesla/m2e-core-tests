@@ -1064,5 +1064,15 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     }
     return super.setActivePage(pageId);
   }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public Object getAdapter(Class adapter) {
+    Object result = super.getAdapter(adapter);
+    if(result != null && Display.getCurrent() == null) {
+      return result; 
+    }
+    return sourcePage.getAdapter(adapter);
+  }
   
 }

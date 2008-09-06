@@ -23,9 +23,13 @@ public class MvnImages {
   
   public static final Image IMG_JAR = createImage("jar_obj.gif"); 
 
+  public static final Image IMG_JARS = createImage("jars_obj.gif"); 
+
   public static final Image IMG_REPOSITORY = createImage("repository_obj.gif"); 
   
   public static final Image IMG_PLUGIN = createImage("plugin_obj.gif"); 
+
+  public static final Image IMG_PLUGINS = createImage("plugins_obj.gif"); 
 
   public static final Image IMG_EXECUTION = createImage("execution_obj.gif");
   
@@ -33,7 +37,9 @@ public class MvnImages {
 
   public static final Image IMG_FILTER = createImage("filter_obj.gif"); 
 
-  public static final Image IMG_RESOURCE = createImage("resource_obj.gif"); 
+  public static final Image IMG_RESOURCE = createImage("resource_obj.gif");
+  
+  public static final Image IMG_RESOURCES = createImage("resources_obj.gif"); 
 
   public static final Image IMG_INCLUDE = createImage("include_obj.gif"); 
   
@@ -45,11 +51,19 @@ public class MvnImages {
   
   public static final Image IMG_PROPERTY = createImage("property_obj.gif");
 
+  public static final Image IMG_PROPERTIES = createImage("properties_obj.gif");
+
   public static final Image IMG_REPORT = createImage("report_obj.gif");
 
   public static final Image IMG_PROFILE = createImage("profile_obj.gif");
 
+  public static final Image IMG_PROFILES = createImage("profiles_obj.gif");
+
   public static final Image IMG_PARAMETER = createImage("parameter_obj.gif");
+
+  public static final Image IMG_BUILD = createImage("build_obj.gif");
+  
+  public static final Image IMG_ELEMENT = createImage("element_obj.gif");
   
 
   private static ImageDescriptor create(String key) {

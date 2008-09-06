@@ -52,25 +52,34 @@ public class PomContentOutlineConfiguration extends XMLContentOutlineConfigurati
         if("parent".equals(nodeName)) {
           return MvnImages.IMG_JAR;
         
-        } else if("dependency".equals(nodeName)) {
-          return MvnImages.IMG_JAR;
-        
-        } else if("exclusion".equals(nodeName)) {
-          return MvnImages.IMG_JAR;
-        
-        } else if("module".equals(nodeName)) {
+        } else if("dependencies".equals(nodeName) //
+            || "exclusions".equals(nodeName) //
+            || "extensions".equals(nodeName) //
+            || "modules".equals(nodeName)) {
+          return MvnImages.IMG_JARS;
+          
+        } else if("dependency".equals(nodeName) //
+            || "exclusion".equals(nodeName) //
+            || "extension".equals(nodeName) //
+            || "module".equals(nodeName)) {
           // TODO show folder if module is in the workspace
           return MvnImages.IMG_JAR;
-          
+        
         } else if("repository".equals(nodeName) || "pluginRepository".equals(nodeName)
             || "snapshotRepository".equals(nodeName) || "site".equals(nodeName)) {
           return MvnImages.IMG_REPOSITORY;
+          
+        } else if("profiles".equals(nodeName)) {
+          return MvnImages.IMG_PROFILES;
           
         } else if("profile".equals(nodeName)) {
           return MvnImages.IMG_PROFILE;
           
         } else if("developer".equals(nodeName) || "contributor".equals(nodeName)) {
           return MvnImages.IMG_PERSON;
+          
+        } else if("plugins".equals(nodeName)) {
+          return MvnImages.IMG_PLUGINS;
           
         } else if("plugin".equals(nodeName)) {
           return MvnImages.IMG_PLUGIN;
@@ -81,10 +90,41 @@ public class PomContentOutlineConfiguration extends XMLContentOutlineConfigurati
         } else if("goal".equals(nodeName)) {
           return MvnImages.IMG_GOAL;
           
+        } else if("resources".equals(nodeName) //
+            || "testResources".equals(nodeName)) {
+          return MvnImages.IMG_RESOURCES;
+          
+        } else if("resource".equals(nodeName) //
+            || "testResource".equals(nodeName)) {
+          return MvnImages.IMG_RESOURCE;
+          
+        } else if("filter".equals(nodeName)) {
+          return MvnImages.IMG_FILTER;
+          
+        } else if("include".equals(nodeName)) {
+          return MvnImages.IMG_INCLUDE;
+          
+        } else if("exclude".equals(nodeName)) {
+          return MvnImages.IMG_EXCLUDE;
+          
+        } else if("build".equals(nodeName)) {
+          return MvnImages.IMG_BUILD;
+          
+        } else if("reporting".equals(nodeName)) {
+          return MvnImages.IMG_REPORT;
+          
+        } else if("properties".equals(nodeName)) {
+          return MvnImages.IMG_PROPERTIES;
+          
+        } else if("properties".equals(node.getParentNode().getNodeName())) {
+          return MvnImages.IMG_PROPERTY;
+
         // } else if("mailingList".equals(nodeName)) {
         //   return MvnImages.IMG_MAIL;
         
         }
+        
+        return MvnImages.IMG_ELEMENT;
       }
       
       return labelProvider.getImage(element);
@@ -111,6 +151,9 @@ public class PomContentOutlineConfiguration extends XMLContentOutlineConfigurati
         } else if("exclusion".equals(nodeName)) {
           return getLabel(text, node, "groupId", "artifactId");
         
+        } else if("extension".equals(nodeName)) {
+          return getLabel(text, node, "groupId", "artifactId", "version");
+          
         } else if("repository".equals(nodeName) || "pluginRepository".equals(nodeName)
             || "snapshotRepository".equals(nodeName) || "site".equals(nodeName) || "profile".equals(nodeName)
             || "execution".equals(nodeName)) {
@@ -128,6 +171,15 @@ public class PomContentOutlineConfiguration extends XMLContentOutlineConfigurati
         } else if("plugin".equals(nodeName)) {
           return getLabel(text, node, "groupId", "artifactId", "version");
         
+        } else if("resource".equals(nodeName) || "testResource".equals(nodeName)) {
+          return getLabel(text, node, "directory", "targetPath");
+          
+        } else if("reportSet".equals(nodeName)) {
+          return getLabel(text, node, "id");
+          
+        } else if("execution".equals(nodeName)) {
+          return getLabel(text, node, "id");
+          
         }
         
         NodeList childNodes = node.getChildNodes();
