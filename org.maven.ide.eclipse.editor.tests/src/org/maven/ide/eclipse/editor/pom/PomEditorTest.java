@@ -195,11 +195,16 @@ public class PomEditorTest extends UITestCaseSWT {
   }
 
   public void testNewSectionCreation() throws Exception {
+    ScreenCapture.createScreenCapture();
     ui.click(new SWTWidgetLocator(Label.class, "Organization"));
+    ScreenCapture.createScreenCapture();
 		ui.click(new NamedWidgetLocator("organizationName"));
+    ScreenCapture.createScreenCapture();
 		ui.enterText("orgfoo");
+		
 		selectEditorTab(TAB_POM_XML);
     replaceText("orgfoo", "orgfoo1");
+    
     selectEditorTab(TAB_OVERVIEW);
     assertTextValue("organizationName", "orgfoo1");
   }
@@ -601,15 +606,13 @@ public class PomEditorTest extends UITestCaseSWT {
     ScreenCapture.createScreenCapture();
     
     ui.enterText(target);
-    ScreenCapture.createScreenCapture();
     
     // ui.keyClick(SWT.ALT, 'a'); // "replace all"
     ui.click(new ButtonLocator("Replace &All"));
-    ScreenCapture.createScreenCapture();
     
     ui.close(new SWTWidgetLocator(Shell.class, FIND_REPLACE));
     ui.wait(new ShellDisposedCondition(FIND_REPLACE));
-    ScreenCapture.createScreenCapture();
+    // ScreenCapture.createScreenCapture();
   }
 
   private void findText(String src) throws WaitTimedOutException, WidgetSearchException {
