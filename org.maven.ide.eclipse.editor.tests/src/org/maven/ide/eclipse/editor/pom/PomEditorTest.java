@@ -135,8 +135,8 @@ public class PomEditorTest extends UITestCaseSWT {
     }
     
     // close unnecessary tabs (different versions have different defaults in java perspective)
-    // closeView("org.eclipse.mylyn.tasks.ui.views.tasks", "Task List");
-    // closeView("org.eclipse.ui.views.ContentOutline", "Outline");
+    closeView("org.eclipse.mylyn.tasks.ui.views.tasks", "Task List");
+    closeView("org.eclipse.ui.views.ContentOutline", "Outline");
   }
 
   protected void oneTimeSetup() throws Exception {
@@ -196,11 +196,13 @@ public class PomEditorTest extends UITestCaseSWT {
 
   public void testNewSectionCreation() throws Exception {
     ScreenCapture.createScreenCapture();
+    ui.keyClick(SWT.CTRL, 'm');
     ui.click(new SWTWidgetLocator(Label.class, "Organization"));
     ScreenCapture.createScreenCapture();
 		ui.click(new NamedWidgetLocator("organizationName"));
     ScreenCapture.createScreenCapture();
 		ui.enterText("orgfoo");
+    ui.keyClick(SWT.CTRL, 'm');
 		
 		selectEditorTab(TAB_POM_XML);
     replaceText("orgfoo", "orgfoo1");
