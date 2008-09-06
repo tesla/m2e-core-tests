@@ -591,11 +591,14 @@ public class PomEditorTest extends UITestCaseSWT {
   private void replaceText(String src, String target) throws WaitTimedOutException, WidgetSearchException {
     ui.keyClick(SWT.CTRL, 'f');
     ui.wait(new ShellShowingCondition(FIND_REPLACE));
-    ScreenCapture.createScreenCapture();
 
     ui.enterText(src);
     ui.keyClick(WT.TAB);
+    ScreenCapture.createScreenCapture();
+    
     ui.enterText(target);
+    ScreenCapture.createScreenCapture();
+    
     ui.keyClick(SWT.ALT, 'a'); // "replace all"
     ui.close(new SWTWidgetLocator(Shell.class, FIND_REPLACE));
     ui.wait(new ShellDisposedCondition(FIND_REPLACE));
