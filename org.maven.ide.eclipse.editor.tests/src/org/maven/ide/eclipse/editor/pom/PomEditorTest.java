@@ -507,6 +507,11 @@ public class PomEditorTest extends UITestCaseSWT {
   public void testModulesEditorActivation() throws Exception {
     openPomFile(TEST_POM_POM_XML);
     
+    ui.keyClick(SWT.CTRL, 'm');
+    
+    ui.click(new SWTWidgetLocator(Label.class, "Parent"));
+    ui.click(new SWTWidgetLocator(Label.class, "Properties"));
+    
     selectEditorTab(TAB_OVERVIEW);
     ScreenCapture.createScreenCapture();
   
@@ -530,12 +535,10 @@ public class PomEditorTest extends UITestCaseSWT {
     ui.click(new TableItemLocator("foo1"));
     ui.click(new TableItemLocator("foo2"));
 
-    try {
-      // test the editor is clean
-      ui.assertThat(new NotCondition(new DirtyEditorCondition()));
-    } finally {
-      ui.keyClick(SWT.CTRL, 's');
-    }
+    ui.keyClick(SWT.CTRL, 'm');
+    
+    // test the editor is clean
+    ui.assertThat(new NotCondition(new DirtyEditorCondition()));
   }
 
   private void closeView(String id, String title) throws Exception {
