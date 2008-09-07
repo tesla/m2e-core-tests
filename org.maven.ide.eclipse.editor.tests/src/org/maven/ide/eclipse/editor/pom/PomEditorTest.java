@@ -260,8 +260,8 @@ public class PomEditorTest extends UITestCaseSWT {
     delete("<organization>", "</organization>");
     selectEditorTab(TAB_OVERVIEW);
     assertTextValue("organizationName", "");
-    setTextValue("scmUrl", "http://m2eclipse");
-    assertTextValue("scmUrl", "http://m2eclipse");
+    setTextValue("scmUrl", "http://m2eclipse.codehaus.org");
+    assertTextValue("scmUrl", "http://m2eclipse.codehaus.org");
   }
 
   public void testExternalModificationEditorClean() throws Exception {
