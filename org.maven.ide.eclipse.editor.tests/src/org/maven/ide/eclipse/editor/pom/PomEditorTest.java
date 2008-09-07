@@ -248,9 +248,10 @@ public class PomEditorTest extends UITestCaseSWT {
     ui.click(new SWTWidgetLocator(Label.class, "SCM"));
     ScreenCapture.createScreenCapture();
     
-    setTextValue("scmUrl", "http://svn.sonatype.org/m2eclipse");
+    // XXX can't use "." in the url due to issue on Linux in WindowTester
+    setTextValue("scmUrl", "http://m2eclipse");
     ScreenCapture.createScreenCapture();
-    assertTextValue("scmUrl", "http://svn.sonatype.org/m2eclipse");
+    assertTextValue("scmUrl", "http://m2eclipse");
     selectEditorTab(TAB_POM_XML);
     delete("<scm>", "</scm>");
     selectEditorTab(TAB_OVERVIEW);
@@ -259,8 +260,8 @@ public class PomEditorTest extends UITestCaseSWT {
     delete("<organization>", "</organization>");
     selectEditorTab(TAB_OVERVIEW);
     assertTextValue("organizationName", "");
-    setTextValue("scmUrl", "http://svn.sonatype.org/m2eclipse");
-    assertTextValue("scmUrl", "http://svn.sonatype.org/m2eclipse");
+    setTextValue("scmUrl", "http://m2eclipse");
+    assertTextValue("scmUrl", "http://m2eclipse");
   }
 
   public void testExternalModificationEditorClean() throws Exception {
