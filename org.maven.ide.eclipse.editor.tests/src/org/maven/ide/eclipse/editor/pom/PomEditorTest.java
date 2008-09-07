@@ -220,11 +220,11 @@ public class PomEditorTest extends UITestCaseSWT {
     ui.click(new NamedWidgetLocator("organizationName"));
     ScreenCapture.createScreenCapture();
     
-		ui.enterText("org.foo");
+		ui.enterText("orgfoo");
     ScreenCapture.createScreenCapture();
 		
 		selectEditorTab(TAB_POM_XML);
-    replaceText("org.foo", "orgfoo1");
+    replaceText("orgfoo", "orgfoo1");
     
     selectEditorTab(TAB_OVERVIEW);
     assertTextValue("organizationName", "orgfoo1");
@@ -454,10 +454,14 @@ public class PomEditorTest extends UITestCaseSWT {
 		ui.wait(new ShellShowingCondition("Save Resource"));
 		ui.click(new ButtonLocator("&No"));
 		
+    ScreenCapture.createScreenCapture();
+    
 		ui.click(new TreeItemLocator(PROJECT_NAME, new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
+    ScreenCapture.createScreenCapture();
 		    
 		ui.contextClick(new TreeItemLocator(name, //
         new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")), "Delete");
+    ScreenCapture.createScreenCapture();
 		ui.wait(new ShellDisposedCondition("Progress Information"));
 		ui.wait(new ShellShowingCondition("Confirm Delete"));
 		ui.keyClick(WT.CR);
@@ -503,9 +507,12 @@ public class PomEditorTest extends UITestCaseSWT {
     openPomFile(TEST_POM_POM_XML);
     
     selectEditorTab(TAB_OVERVIEW);
+    ScreenCapture.createScreenCapture();
   
     ui.click(new ButtonLocator("Add..."));
+    ScreenCapture.createScreenCapture();
     ui.click(new TableItemLocator("?"));
+    ScreenCapture.createScreenCapture();
     ui.enterText("foo1");
     ui.keyClick(WT.CR);
     ui.keyClick(WT.CR);
