@@ -596,13 +596,14 @@ public class PomEditorTest extends UITestCaseSWT {
     ui.wait(new ShellDisposedCondition("Progress Information"));
   }
 	
-	private void selectEditorTab(final String id) {
+	private void selectEditorTab(final String id) throws Exception {
 	  final MavenPomEditor editor = (MavenPomEditor) getActivePage().getActiveEditor();
     Display.getDefault().syncExec(new Runnable() {
       public void run() {
         editor.setActivePage(id);
       }
     });
+    Thread.sleep(1000L);
 	}
 	
   private void openPomFile(String name) throws Exception {
