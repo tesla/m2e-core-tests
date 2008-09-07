@@ -220,11 +220,11 @@ public class PomEditorTest extends UITestCaseSWT {
     ui.click(new NamedWidgetLocator("organizationName"));
     ScreenCapture.createScreenCapture();
     
-		ui.enterText("orgfoo");
+		ui.enterText("org.foo");
     ScreenCapture.createScreenCapture();
 		
 		selectEditorTab(TAB_POM_XML);
-    replaceText("orgfoo", "orgfoo1");
+    replaceText("org.foo", "orgfoo1");
     
     selectEditorTab(TAB_OVERVIEW);
     assertTextValue("organizationName", "orgfoo1");
@@ -233,10 +233,18 @@ public class PomEditorTest extends UITestCaseSWT {
   public void testUndoRedo() throws Exception {
     openPomFile(TEST_POM_POM_XML);
 
-    //test undo
+    ui.click(new NamedWidgetLocator("organizationName"));
+    ui.keyClick(SWT.CTRL, 'a');
+    ui.enterText("orgfoo");
+    ui.click(new NamedWidgetLocator("organizationUrl"));
+    ui.click(new NamedWidgetLocator("organizationName"));
+    ui.keyClick(SWT.CTRL, 'a');
+    ui.enterText("orgfoo1");
+    
+    // test undo
 	  ui.keyClick(SWT.CTRL, 'z');
 	  assertTextValue("organizationName", "orgfoo");
-	  //test redo
+	  // test redo
 	  ui.keyClick(SWT.CTRL, 'y');
 	  assertTextValue("organizationName", "orgfoo1");
   }
@@ -260,8 +268,8 @@ public class PomEditorTest extends UITestCaseSWT {
     delete("<organization>", "</organization>");
     selectEditorTab(TAB_OVERVIEW);
     assertTextValue("organizationName", "");
-    setTextValue("scmUrl", "http://m2eclipse.codehaus.org");
-    assertTextValue("scmUrl", "http://m2eclipse.codehaus.org");
+    setTextValue("scmUrl", "http://m2eclipse");
+    assertTextValue("scmUrl", "http://m2eclipse");
   }
 
   public void testExternalModificationEditorClean() throws Exception {
@@ -510,7 +518,7 @@ public class PomEditorTest extends UITestCaseSWT {
     ui.keyClick(SWT.CTRL, 'm');
     
     ui.click(new SWTWidgetLocator(Label.class, "Parent"));
-    ui.click(new SWTWidgetLocator(Label.class, "Properties"));
+    // ui.click(new SWTWidgetLocator(Label.class, "Properties"));
     
     selectEditorTab(TAB_OVERVIEW);
     ScreenCapture.createScreenCapture();
