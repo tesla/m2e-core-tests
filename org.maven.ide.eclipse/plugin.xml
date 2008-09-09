@@ -22,7 +22,7 @@
       <configExtension configId="org.eclipse.ui.intro.universalConfig"
                        content="intro/whatsnew.xml"/>
    </extension>
-   
+
    <extension point="org.eclipse.core.runtime.contentTypes">
      <content-type id="pomFile" name="Maven POM XML"
           base-type="org.eclipse.core.runtime.xml"
@@ -68,7 +68,7 @@
           </or>
        </enablement>
      </decorator>
-     
+
      <decorator id="org.maven.ide.eclipse.mavenVersionDecorator"
                 adaptable="true"
                 label="%m2.decorator.version.name"
@@ -83,7 +83,7 @@
           </or>
        </enablement>
      </decorator>
-     
+
    </extension>
 
   <extension point="org.eclipse.core.runtime.adapters">
@@ -111,11 +111,11 @@
               <objectState name="open" value="true"/>
               <objectClass name="org.eclipse.core.resources.IProject"/>
             </and>
-          </enablement>     
+          </enablement>
         </action>
      </actionSet>
    </extension>
-   -->  
+   -->
 
    <extension point="org.eclipse.ui.popupMenus">
       <objectContribution id="org.maven.ide.eclipse.projectMenu"
@@ -135,7 +135,7 @@
            </and>
          </visibility>
       </objectContribution>
-      
+
       <objectContribution id="org.maven.ide.eclipse.projectMenu"
                           objectClass="org.eclipse.core.resources.IProject"
                           adaptable="true">
@@ -152,11 +152,11 @@
              <not>
                <objectState name="nature" value="org.maven.ide.eclipse.maven2Nature"/>
              </not>
-           </and>  
+           </and>
          </visibility>
       </objectContribution>
 
-      <objectContribution id="org.maven.ide.eclipse.fileMenu" 
+      <objectContribution id="org.maven.ide.eclipse.fileMenu"
                           objectClass="org.eclipse.core.resources.IFile"
                           adaptable="true">
          <action id="org.maven.ide.eclipse.fileMenu.action"
@@ -168,9 +168,9 @@
                  icon="icons/m2.gif"/>
          <visibility>
             <objectState name="name" value="pom.xml"/>
-         </visibility>  
+         </visibility>
       </objectContribution>
-            
+
       <objectContribution id="org.maven.ide.eclipse.classpathMenu" adaptable="true"
              objectClass="org.eclipse.jdt.core.IPackageFragmentRoot">
          <action id="org.maven.ide.eclipse.classpathMenu.action"
@@ -183,10 +183,10 @@
          <!--
          <visibility>
             <objectState name="name" value="pom.xml"/>
-         </visibility>  
+         </visibility>
          -->
       </objectContribution>
-      
+
       <objectContribution id="org.maven.ide.eclipse.workingSetMenu" adaptable="true"
              objectClass="org.eclipse.ui.IWorkingSet">
          <action id="org.maven.ide.eclipse.workingSetMenu.action"
@@ -197,7 +197,7 @@
                  enablesFor="+"
                  icon="icons/m2.gif"/>
       </objectContribution>
-      
+
       <objectContribution id="org.maven.ide.eclipse.scmUrl"
           objectClass="org.maven.ide.eclipse.scm.ScmUrl"
           adaptable="true">
@@ -430,7 +430,7 @@
              name="%m2.shortcut.description.generate-sources"
              description="%m2.shortcut.description.generate-sources"
              categoryId="org.eclipse.debug.ui.category.run"/>
-             
+
     <command id="org.maven.ide.eclipse.ui.command.openPom"
              categoryId="org.eclipse.ui.category.navigate"
              name="%m2.shortcut.open.pom"/>
@@ -455,7 +455,7 @@
       <super type="org.eclipse.core.resources.problemmarker"/>
       <persistent value="false"/>
    </extension>
-   
+
    <extension point="org.eclipse.ui.keywords">
       <keyword id="org.maven.ide.eclipse.maven" label="maven"/>
    </extension>
@@ -479,11 +479,11 @@
          <keywordReference id="org.maven.ide.eclipse.maven"/>
       </page>
    </extension>
-   
+
    <extension point="org.eclipse.core.runtime.preferences">
       <initializer class="org.maven.ide.eclipse.internal.preferences.MavenPreferenceInitializer"/>
    </extension>
-   
+
    <!-- m2 LaunchGroup -->
    <extension point="org.eclipse.debug.core.launchConfigurationTypes">
    <!-- careful when changing id, it's used to locate launch configuration from the java code! -->
@@ -552,7 +552,7 @@
               project="true">
          <description>%m2.wizard.module.description</description>
       </wizard>
-    
+
       <wizard id="org.maven.ide.eclipse.wizards.MavenCheckoutWizard"
               name="Checkout Maven Projects from SCM"
               class="org.maven.ide.eclipse.wizards.MavenCheckoutWizard"
@@ -564,10 +564,10 @@
          -->
       </wizard>
    </extension>
-   
+
    <extension point="org.eclipse.ui.importWizards">
      <category id="org.eclipse.ui.Basic" name="General"/>
-     
+
      <wizard id="org.maven.ide.eclipse.wizards.Maven2ImportWizard"
              class="org.maven.ide.eclipse.wizards.MavenImportWizard"
              icon="icons/import_m2_project.gif"
@@ -575,14 +575,14 @@
              name="%m2.wizard.import.name">
         <description>%m2.wizard.import.description</description>
      </wizard>
-     
+
      <wizard id="org.maven.ide.eclipse.wizards.MavenPomCheckoutWizard"
              class="org.maven.ide.eclipse.wizards.MavenMaterializePomWizard"
              name="%m2.wizard.materialize.name"
              icon="icons/import_m2_project.gif">
        <description>%m2.wizard.materialize.description</description>
      </wizard>
-     
+
      <wizard id="org.maven.ide.eclipse.wizards.MavenCheckoutWizard"
              class="org.maven.ide.eclipse.wizards.MavenCheckoutWizard"
              name="Check out Maven Projects from SCM"
@@ -598,7 +598,7 @@
       <consoleFactory label="Maven Console" icon="icons/m2.gif"
             class="org.maven.ide.eclipse.ui.internal.MavenConsoleFactory"/>
    </extension>
-   
+
    <extension point="org.eclipse.ui.console.consolePageParticipants">
       <consolePageParticipant
             class="org.maven.ide.eclipse.ui.internal.MavenConsolePageParticipant"
@@ -608,7 +608,7 @@
          </enablement>
       </consolePageParticipant>
    </extension>
-   
+
    <extension point="org.eclipse.ui.actionSets">
      <actionSet id="org.maven.ide.eclipse.ui.navigation"
                 label="Maven Navigation" visible="true">
@@ -648,7 +648,7 @@
         </action>
      </actionSet>
    </extension>
-   
+
    <extension point="org.eclipse.ui.views">
       <category id="org.maven.ide.eclipse.views.indexes"
                 name="Maven"/>
@@ -658,7 +658,7 @@
             icon="icons/maven_indexes.gif"
             name="Maven Indexes"/>
    </extension>
-   
+
    <extension point="org.eclipse.ui.perspectiveExtensions">
       <perspectiveExtension targetID="org.eclipse.debug.ui.DebugPerspective">
          <newWizardShortcut id="org.maven.ide.eclipse.wizards.Maven2ProjectWizard"/>
@@ -669,26 +669,26 @@
          <view id="org.maven.ide.eclipse.views.MavenIndexesView" relationship="fast"/>
       </perspectiveExtension>
    </extension>
-   
+
    <extension point="org.eclipse.ui.propertyPages">
       <page id="org.maven.ide.eclipse.MavenProjectPreferencePage"
             class="org.maven.ide.eclipse.ui.internal.preferences.MavenProjectPreferencePage"
             name="Maven"
-            objectClass="org.eclipse.core.resources.IProject" 
+            objectClass="org.eclipse.core.resources.IProject"
             adaptable="true">
          <filter name="nature" value="org.maven.ide.eclipse.maven2Nature"/>
-      </page>           
+      </page>
    </extension>
-   
+
    <extension point="org.maven.ide.eclipse.projectConfigurators">
       <configurator id="org.maven.ide.eclipse.configurator.mavenEclipsePlugin"
           class="org.maven.ide.eclipse.project.configurator.MavenProjectConfigurator:org.apache.maven.plugins:maven-eclipse-plugin|eclipse:m2eclipse"
           name="maven-eclipse-plugin" priority="5"/>
-      
+
       <configurator id="org.maven.ide.eclipse.configurator.mavenSysdeoTomcatPlugin"
           class="org.maven.ide.eclipse.project.configurator.MavenProjectConfigurator:org.codehaus.mojo:sysdeo-tomcat-maven-plugin|sysdeo-tomcat:m2eclipse"
           name="sysdeo-tomcat-maven-plugin" priority="50"/>
-   
+
    </extension>
 
    <!--
@@ -702,7 +702,7 @@
       </queryParticipant>
    </extension>
    -->
-   
+
    <!--
    <extension point="org.eclipse.search.searchPages">
       <page id="org.maven.ide.eclipse.MavenSearchPage"
@@ -722,7 +722,7 @@
             class="org.maven.ide.eclipse.internal.launch.MavenConsoleLineTracker"
             processType="java"/>
    </extension>
-   
+
    <extension point="org.eclipse.jdt.ui.javaElementFilters">
       <filter id="org.maven.ide.eclipse.MavenModuleFilter"
           targetId="org.eclipse.jdt.ui.PackageExplorer"
