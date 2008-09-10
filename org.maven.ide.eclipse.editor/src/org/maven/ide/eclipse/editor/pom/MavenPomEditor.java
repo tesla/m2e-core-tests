@@ -67,8 +67,6 @@ import org.eclipse.emf.common.command.CommandStackListener;
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.AdapterFactory;
 import org.eclipse.emf.common.notify.impl.AdapterFactoryImpl;
-import org.eclipse.emf.common.util.BasicEList;
-import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -110,7 +108,6 @@ import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
 import org.eclipse.wst.sse.core.internal.undo.IStructuredTextUndoManager;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
-import org.eclipse.wst.xml.core.internal.document.ElementImpl;
 import org.eclipse.wst.xml.core.internal.emf2xml.EMF2DOMSSEAdapter;
 import org.eclipse.wst.xml.core.internal.emf2xml.EMF2DOMSSERenderer;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMElement;
@@ -126,9 +123,6 @@ import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.MavenRunnable;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 
 /**
@@ -822,72 +816,6 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
           return (IDOMElement) a.getNode();
         }
         break;
-      }
-    }
-    return null;
-  }
-
-  // XXX move to model and translators
-  public EList<PropertyPair> getProperties(EObject o) {
-    IDOMElement node = getElement(o);
-    if(node != null) {
-      NodeList elements = node.getElementsByTagName("properties");
-      if(elements != null && elements.getLength() > 0) {
-        Node propertiesNode = elements.item(0);
-        NodeList propertiesElements = propertiesNode.getChildNodes();
-
-        EList<PropertyPair> properties = new BasicEList<PropertyPair>();
-        for(int i = 0; i < propertiesElements.getLength(); i++ ) {
-          Node item = propertiesElements.item(i);
-          if(item instanceof Element) {
-            String nodetext = getNodeText(item);
-
-            properties.add(new PropertyPair(item.getNodeName(), nodetext));
-          }
-        }
-        return properties;
-      }
-    }
-    return new BasicEList<PropertyPair>();
-  }
-
-  public void setElement(EObject o, IDOMElement element) {
-    for(Adapter adapter : o.eAdapters()) {
-      if(adapter instanceof EMF2DOMSSEAdapter) {
-        EMF2DOMSSEAdapter a = (EMF2DOMSSEAdapter) adapter;
-        a.setNode(element);
-        break;
-      }
-    }
-  }
-
-  public void setProperties(EObject o, EList<PropertyPair> properties) {
-    ElementImpl node = (ElementImpl) getElement(o);
-    if(node != null) {
-      EList<Adapter> adapters = new BasicEList<Adapter>(o.eAdapters());
-      o.eAdapters().clear();
-      NodeList old = node.getElementsByTagName("properties");
-      if(old != null && old.getLength() > 0) {
-        node.removeChild(old.item(0));
-      }
-      Node elements = node.getOwnerDocument().createElement("properties");
-      node.appendChild(elements);
-      o.eAdapters().addAll(adapters);
-      for(PropertyPair p : properties) {
-        Node prop = node.getOwnerDocument().createElement(p.getKey());
-        elements.appendChild(prop);
-        prop.setTextContent(p.getValue());
-      }
-    }
-    setElement(o, node);
-  }
-
-  private String getNodeText(Node node) {
-    NodeList childNodes = node.getChildNodes();
-    for(int i = 0; i < childNodes.getLength(); i++ ) {
-      Node childNode = childNodes.item(i);
-      if(childNode.getNodeType() == Node.TEXT_NODE) {
-        return childNode.getNodeValue();
       }
     }
     return null;

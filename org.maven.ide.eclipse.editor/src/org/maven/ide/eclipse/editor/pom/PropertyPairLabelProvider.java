@@ -10,6 +10,7 @@ package org.maven.ide.eclipse.editor.pom;
 
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
+import org.maven.ide.components.pom.PropertyPair;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
 
 /**

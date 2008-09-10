@@ -23,7 +23,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.common.notify.Notification;
-import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.edit.command.AddCommand;
 import org.eclipse.emf.edit.command.RemoveCommand;
@@ -114,10 +113,9 @@ public class OverviewPage extends MavenPomEditorPage {
   Text ciManagementUrlText;
   Text ciManagementSystemText;
 
-  ListEditorComposite<PropertyPair> propertiesEditor;
   ListEditorComposite<String> modulesEditor;
   
-  Section propertiesSection;
+  PropertiesSection propertiesSection;
   Section modulesSection;
   Section parentSection;
   Section projectSection;
@@ -374,24 +372,7 @@ public class OverviewPage extends MavenPomEditorPage {
   }
 
   private void createPropertiesSection(FormToolkit toolkit, Composite composite, WidthGroup widthGroup) {
-    propertiesSection = toolkit.createSection(composite, //
-        ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
-    propertiesSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-    propertiesSection.setText("Properties");
-    propertiesSection.setText("Properties");
-    propertiesSection.setData("name", "propertiesSection");
-    toolkit.paintBordersFor(propertiesSection);
-
-    propertiesEditor = new ListEditorComposite<PropertyPair>(propertiesSection, SWT.NONE);
-    propertiesSection.setClient(propertiesEditor);
-    propertiesEditor.getViewer().getTable().setData("name", "properties");
-    
-    propertiesEditor.setContentProvider(new ListEditorContentProvider<PropertyPair>());
-    propertiesEditor.setLabelProvider(new PropertyPairLabelProvider());
-
-    // XXX implement properties support
-    // propertiesEditor.setReadOnly(pomEditor.isReadOnly());
-    propertiesEditor.setReadOnly(true);
+    propertiesSection = new PropertiesSection(toolkit, composite, getEditingDomain());
   }
 
   private void createModulesSection(FormToolkit toolkit, Composite composite, WidthGroup widthGroup) {
@@ -747,7 +728,7 @@ public class OverviewPage extends MavenPomEditorPage {
     if (object instanceof Model) {
       loadThis();
       modulesEditor.refresh();
-      propertiesEditor.refresh();
+      propertiesSection.refresh();
     }
 
     Object notificationObject = getFromNotification(notification);
@@ -778,7 +759,7 @@ public class OverviewPage extends MavenPomEditorPage {
     }
     
     if(object instanceof Properties) {
-      loadProperties(pomEditor.getProperties(model));
+      propertiesSection.setModel(model, POM_PACKAGE.getModel_Properties());
     }
   }
 
@@ -796,9 +777,7 @@ public class OverviewPage extends MavenPomEditorPage {
     loadIssueManagement(issueManagement);
     loadCiManagement(ciManagement);
     loadModules(model.getModules());
-    
-    EList<PropertyPair> properties = pomEditor.getProperties(model);
-    loadProperties(properties);
+    propertiesSection.setModel(model, POM_PACKAGE.getModel_Properties());
     
     projectSection.setExpanded(!isEmpty(model.getName()) || !isEmpty(model.getDescription())
         || !isEmpty(model.getUrl()) || !isEmpty(model.getInceptionYear()));
@@ -819,7 +798,7 @@ public class OverviewPage extends MavenPomEditorPage {
     issueManagementSection.setExpanded(issueManagement != null
         && (!isEmpty(issueManagement.getSystem()) || !isEmpty(issueManagement.getUrl())));
 
-    propertiesSection.setExpanded(properties != null && !properties.isEmpty());
+    propertiesSection.getSection().setExpanded(model.getProperties() != null && !model.getProperties().getProperty().isEmpty());
     
     // Modules modules = model.getModules();
     // modulesSection.setExpanded(modules !=null && modules.getModule().size()>0);
@@ -897,12 +876,6 @@ public class OverviewPage extends MavenPomEditorPage {
     setModifyListener(parentArtifactIdText, parentProvider, POM_PACKAGE.getParent_ArtifactId(), "");
     setModifyListener(parentVersionText, parentProvider, POM_PACKAGE.getParent_Version(), "");
     setModifyListener(parentRelativePathText, parentProvider, POM_PACKAGE.getParent_RelativePath(), "");
-  }
-  
-  private void loadProperties(EList<PropertyPair> properties) {
-    propertiesEditor.setInput(properties);
-    // XXX implement properties editing
-    propertiesEditor.setReadOnly(true);  
   }
   
   private void loadModules(Modules modules) {
@@ -1042,6 +1015,5 @@ public class OverviewPage extends MavenPomEditorPage {
     editingDomain.getCommandStack().execute(compoundCommand);
     modulesEditor.setInput(model.getModules()==null ? null : model.getModules().getModule());
   }
-  
 }
 

@@ -14,6 +14,7 @@ import java.util.List;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ICellModifier;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -162,5 +163,9 @@ public class ListEditorComposite<T> extends Composite {
 
   void updateRemoveButton() {
     removeButton.setEnabled(!readOnly && !viewer.getSelection().isEmpty());
+  }
+
+  public void setDoubleClickListener(IDoubleClickListener listener) {
+    viewer.addDoubleClickListener(listener);
   }
 }

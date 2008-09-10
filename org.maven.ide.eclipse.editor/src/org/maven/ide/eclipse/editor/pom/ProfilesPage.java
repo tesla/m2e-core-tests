@@ -71,6 +71,7 @@ import org.maven.ide.components.pom.Plugins;
 import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.Profile;
 import org.maven.ide.components.pom.ProfilesType;
+import org.maven.ide.components.pom.PropertyPair;
 import org.maven.ide.components.pom.Reporting;
 import org.maven.ide.components.pom.Repositories;
 import org.maven.ide.components.pom.StringModules;
@@ -106,10 +107,9 @@ public class ProfilesPage extends MavenPomEditorPage {
   Text activationOsNameText;
   Text activationJdkText;
   ListEditorComposite<Profile> profilesEditor;
-  ListEditorComposite<PropertyPair> propertiesEditor;
   ListEditorComposite<String> modulesEditor;
   Section modulesSection;
-  Section propertiesSection;
+  PropertiesSection propertiesSection;
   
   CTabFolder tabFolder;
   BuildComposite buildComposite;
@@ -283,23 +283,7 @@ public class ProfilesPage extends MavenPomEditorPage {
   }
 
   private void createPropertiesSection(FormToolkit toolkit, Composite body) {
-    propertiesSection = toolkit.createSection(body, //
-        ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
-    propertiesSection.setText("Properties");
-    propertiesSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    
-    propertiesEditor = new ListEditorComposite<PropertyPair>(propertiesSection, SWT.NONE);
-    propertiesEditor.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-    propertiesSection.setClient(propertiesEditor);
-    toolkit.paintBordersFor(propertiesEditor);
-    toolkit.adapt(propertiesEditor);
-    
-    propertiesEditor.setContentProvider(new ListEditorContentProvider<PropertyPair>());
-    propertiesEditor.setLabelProvider(new PropertyPairLabelProvider());
-    
-    // XXX implement properties actions
-    // propertiesEditor.setReadOnly(pomEditor.isReadOnly());
-    propertiesEditor.setReadOnly(true);
+    propertiesSection = new PropertiesSection(toolkit, body, getEditingDomain());
   }
 
   private void createModulesSection(FormToolkit toolkit, Composite body) {
@@ -410,29 +394,24 @@ public class ProfilesPage extends MavenPomEditorPage {
     currentProfile = profile;
     
     if(profile==null) {
-      FormUtils.setEnabled(propertiesSection, false);
+      FormUtils.setEnabled(propertiesSection.getSection(), false);
       FormUtils.setEnabled(modulesSection, false);
-      
-      propertiesEditor.setReadOnly(true);
-      propertiesEditor.setInput(null);
       modulesEditor.setInput(null);
       updateProfileTabs(profile);
       
       return;
     }
 
-    FormUtils.setEnabled(propertiesSection, true);
+    FormUtils.setEnabled(propertiesSection.getSection(), true);
     FormUtils.setEnabled(modulesSection, true);
     
-    FormUtils.setReadonly(propertiesSection, isReadOnly());
+    FormUtils.setReadonly(propertiesSection.getSection(), isReadOnly());
     FormUtils.setReadonly(modulesSection, isReadOnly());
     
     modulesEditor.setInput(profile.getModules()==null ? null : profile.getModules().getModule());
     modulesEditor.setReadOnly(isReadOnly());
-    
-    propertiesEditor.setInput(pomEditor.getProperties(profile));
-    // XXX implement properties actions
-    propertiesEditor.setReadOnly(true);
+
+    propertiesSection.setModel(profile, POM_PACKAGE.getProfile_Properties());
 
     updateProfileTabs(profile);
   }

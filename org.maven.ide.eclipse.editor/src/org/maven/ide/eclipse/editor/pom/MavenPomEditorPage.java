@@ -247,8 +247,9 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
         case Notification.MOVE:
         case Notification.REMOVE:
         case Notification.SET:
+        case Notification.ADD_MANY: //this is for properties (clear/addAll is used for any properties update)
           if (getManagedForm() != null)
-          updateView(notification);
+            updateView(notification);
           break;
           
         default:
@@ -319,17 +320,19 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
 
   public void registerListeners() {
     if(model!=null) {
-      if(!model.eAdapters().contains(this))
-        model.eAdapters().add(this);
+      doRegister(model);
+      
       for(Iterator<?> it = model.eAllContents(); it.hasNext();) {
         Object next = it.next();
-        if (next instanceof EObject) {
-          EObject object = (EObject) next;
-          if (!object.eAdapters().contains(this)) {
-            object.eAdapters().add(this);
-          }
-        }
+        if (next instanceof EObject)
+          doRegister((EObject) next);
       }
+    }
+  }
+
+  private void doRegister(EObject object) {
+    if (!object.eAdapters().contains(this)) {
+      object.eAdapters().add(this);
     }
   }
 
@@ -562,4 +565,3 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
   }
   
 }
-

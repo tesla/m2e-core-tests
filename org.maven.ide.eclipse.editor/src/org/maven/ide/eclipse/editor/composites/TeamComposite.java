@@ -53,8 +53,7 @@ import org.maven.ide.components.pom.Roles;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.editor.pom.FormUtils;
 import org.maven.ide.eclipse.editor.pom.MavenPomEditorPage;
-import org.maven.ide.eclipse.editor.pom.PropertyPair;
-import org.maven.ide.eclipse.editor.pom.PropertyPairLabelProvider;
+import org.maven.ide.eclipse.editor.pom.PropertiesSection;
 import org.maven.ide.eclipse.editor.pom.ValueProvider;
 import org.maven.ide.eclipse.wizards.WidthGroup;
 
@@ -96,8 +95,6 @@ public class TeamComposite extends Composite {
 
   Text organizationUrlText;
 
-  ListEditorComposite<PropertyPair> propertiesEditor;
-
   ListEditorComposite<String> rolesEditor;
 
   Label userIdLabel;
@@ -106,7 +103,8 @@ public class TeamComposite extends Composite {
   EObject currentSelection;
   
   boolean changingSelection = false;
-  
+
+  private PropertiesSection propertiesSection;
 
   public TeamComposite(Composite composite, int flags) {
     super(composite, flags);
@@ -453,17 +451,7 @@ public class TeamComposite extends Composite {
   }
 
   private void createPropertiesSection(FormToolkit toolkit, Composite composite) {
-    Section propertiesSection = toolkit.createSection(composite, ExpandableComposite.TITLE_BAR);
-    propertiesSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
-    propertiesSection.setText("Properties");
-
-    propertiesEditor = new ListEditorComposite<PropertyPair>(propertiesSection, SWT.NONE);
-    toolkit.paintBordersFor(propertiesEditor);
-    toolkit.adapt(propertiesEditor);
-    propertiesSection.setClient(propertiesEditor);
-
-    propertiesEditor.setContentProvider(new ListEditorContentProvider<PropertyPair>());
-    propertiesEditor.setLabelProvider(new PropertyPairLabelProvider());
+    propertiesSection = new PropertiesSection(toolkit, composite, parent.getEditingDomain());
   }
 
   public void loadContributors() {
@@ -522,18 +510,17 @@ public class TeamComposite extends Composite {
       Contributor contributor = (Contributor) eo;
       updateContributorDetails(contributor);
       roles = contributor.getRoles();
+      propertiesSection.setModel(contributor, POM_PACKAGE.getContributor_Properties());
     } else if(eo instanceof Developer) {
       Developer developer = (Developer) eo;
       updateDeveloperDetails(developer);
       roles = developer.getRoles();
+      propertiesSection.setModel(developer, POM_PACKAGE.getDeveloper_Properties());
     }
 
     parent.registerListeners();
 
     updateRoles(roles);
-
-    propertiesEditor.setInput(parent.getPomEditor().getProperties(eo));
-    propertiesEditor.setReadOnly(true);
   }
 
   protected void updateContributorDetails(Contributor contributor) {
