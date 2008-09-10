@@ -743,11 +743,14 @@ public class PomEditorTest extends UITestCaseSWT {
       public void run() {
         try {
           IWidgetLocator[] loc = ui.findAll(new SWTWidgetLocator(StyledText.class));
-          //use first styled text (maven console is second one)
-          WidgetReference ref = (WidgetReference) ui.find(loc[0]);
-          texts[0] = ((StyledText) ref.getWidget()).getText();
+          for (int i=0; i<loc.length; i++) {
+            WidgetReference ref = (WidgetReference) ui.find(loc[i]);
+            texts[0] = ((StyledText) ref.getWidget()).getText();
+            if (texts[0].contains("<project"))
+              break;
+          }
         } catch(WidgetSearchException ex) {
-          // ignore
+          ex.printStackTrace();
           ex.printStackTrace();
         }
       }
