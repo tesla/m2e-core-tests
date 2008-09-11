@@ -8,6 +8,7 @@
 -->
 <?eclipse version="3.2"?>
 <plugin>
+   <extension-point id="pageFactories" name="Maven POM editor page factory" schema="schema/pageFactories.exsd"/>
 
   <extension point="org.eclipse.ui.editors">
     <editor

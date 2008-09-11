@@ -56,11 +56,16 @@ import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.common.command.BasicCommandStack;
 import org.eclipse.emf.common.command.CommandStackListener;
@@ -134,6 +139,10 @@ import org.maven.ide.eclipse.project.ResolverConfiguration;
 @SuppressWarnings("restriction")
 public class MavenPomEditor extends FormEditor implements IResourceChangeListener, IShowEditorInput, IGotoMarker,
     ISearchEditorAccess, IEditingDomainProvider {
+
+  private static final String EXTENSION_FACTORIES = MavenEditorPlugin.PLUGIN_ID + ".pageFactories";
+
+  private static final String ELEMENT_PAGE = "factory";
 
   OverviewPage overviewPage;
 
@@ -300,6 +309,33 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     graphPage = new DependencyGraphPage(this);
     addPomPage(graphPage);
 
+    addSourcePage();
+    
+    addEditorPageExtensions();
+  }
+
+  private void addEditorPageExtensions() {
+    IExtensionRegistry registry = Platform.getExtensionRegistry();
+    IExtensionPoint indexesExtensionPoint = registry.getExtensionPoint(EXTENSION_FACTORIES);
+    if(indexesExtensionPoint != null) {
+      IExtension[] indexesExtensions = indexesExtensionPoint.getExtensions();
+      for(IExtension extension : indexesExtensions) {
+        for(IConfigurationElement element : extension.getConfigurationElements()) {
+          if(element.getName().equals(ELEMENT_PAGE)) {
+            try {
+              MavenPomEditorPageFactory factory;
+              factory = (MavenPomEditorPageFactory) element.createExecutableExtension("class");
+              factory.addPages(this);
+            } catch(CoreException ex) {
+              MavenLogger.log(ex);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private void addSourcePage() {
     sourcePage = new StructuredTextEditor() {
       public void doSave(IProgressMonitor monitor) {
         // always save text editor

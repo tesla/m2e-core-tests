@@ -240,7 +240,7 @@ public class MavenProjectWizardLocationPage extends AbstractMavenWizardPage {
    * @see org.eclipse.jface.wizard.WizardPage#setErrorMessage(java.lang.String)
    * @see org.eclipse.jface.wizard.WizardPage#setPageComplete(boolean)
    */
-  void validate() {
+  protected void validate() {
     if (!initialized) {
       return;
     }
