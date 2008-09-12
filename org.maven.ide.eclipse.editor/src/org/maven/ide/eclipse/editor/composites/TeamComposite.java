@@ -106,9 +106,9 @@ public class TeamComposite extends Composite {
 
   private PropertiesSection propertiesSection;
 
-  public TeamComposite(Composite composite, int flags) {
+  public TeamComposite(MavenPomEditorPage editorPage, Composite composite, int flags) {
     super(composite, flags);
-
+    this.parent = editorPage;
     createComposite();
   }
 
@@ -564,7 +564,7 @@ public class TeamComposite extends Composite {
     parent.setModifyListener(organizationUrlText, developerProvider, POM_PACKAGE.getDeveloper_OrganizationUrl(), "");
   }
 
-  public void updateView(MavenPomEditorPage editorPage, Notification notification) {
+  public void updateView(Notification notification) {
     EObject object = (EObject) notification.getNotifier();
 
     if(object instanceof DevelopersType) {
@@ -593,10 +593,8 @@ public class TeamComposite extends Composite {
     }
   }
 
-  public void loadData(MavenPomEditorPage editorPage, ValueProvider<DevelopersType> developersProvider,
+  public void loadData(ValueProvider<DevelopersType> developersProvider,
       ValueProvider<ContributorsType> contributorsProvider) {
-    parent = editorPage;
-
     this.developersProvider = developersProvider;
     this.contributorsProvider = contributorsProvider;
     loadDevelopers();

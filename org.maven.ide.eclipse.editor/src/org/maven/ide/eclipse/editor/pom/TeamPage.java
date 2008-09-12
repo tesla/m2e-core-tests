@@ -52,7 +52,7 @@ public class TeamPage extends MavenPomEditorPage {
     
     form.getBody().setLayout(new GridLayout(1, true));
 
-    teamComposite = new TeamComposite(form.getBody(), SWT.NONE);
+    teamComposite = new TeamComposite(this, form.getBody(), SWT.NONE);
     teamComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     toolkit.adapt(teamComposite);
     
@@ -90,12 +90,12 @@ public class TeamPage extends MavenPomEditorPage {
       }
     };
 
-    teamComposite.loadData(this, developersProvider, contributorsProvider);
+    teamComposite.loadData(developersProvider, contributorsProvider);
   }
   
   public void updateView(Notification notification) {
     if(teamComposite!=null) {
-      teamComposite.updateView(this, notification);
+      teamComposite.updateView(notification);
     }
   }
 }
