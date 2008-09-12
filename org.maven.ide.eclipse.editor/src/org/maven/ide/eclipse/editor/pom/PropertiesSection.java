@@ -133,17 +133,14 @@ public class PropertiesSection {
     if(res == IDialogConstants.OK_ID) {
       Properties props = getProperties();
       int pos = props.getProperty().indexOf(pp);
-      deleteProperties(list);
       CompoundCommand compoundCommand = new CompoundCommand();
+      Command deleteProperties = RemoveCommand.create(editingDomain, props, POM_PACKAGE.getProperties_Property(), pp);
+      compoundCommand.append(deleteProperties);
+      pp = PomFactory.eINSTANCE.createPropertyPair();
       addProperty(dialog, compoundCommand, props, pp, pos);
-      addNotifyCommand(compoundCommand);
       editingDomain.getCommandStack().execute(compoundCommand);
-      propertiesEditor.setInput(getProperties().getProperty());
+      propertiesEditor.setInput(props.getProperty());
     }
-  }
-
-  private void addNotifyCommand(CompoundCommand compoundCommand) {
-    compoundCommand.append(new SetCommand(editingDomain, model, feature, getProperties()));
   }
 
   private void createNewProperty() {
@@ -168,7 +165,6 @@ public class PropertiesSection {
         compoundCommand.append(addProperties);
       }
 
-      addNotifyCommand(compoundCommand);
       editingDomain.getCommandStack().execute(compoundCommand);
       propertiesEditor.setInput(properties.getProperty());
     }
@@ -179,18 +175,14 @@ public class PropertiesSection {
     String[] result = dialog.getNameValuePair();
     pair.setKey(result[0]);
     pair.setValue(result[1]);
-    Command addProperty = null;
-    addProperty = AddCommand.create(editingDomain, properties, POM_PACKAGE.getProperties_Property(), pair, pos);
+    Command addProperty = AddCommand.create(editingDomain, properties, POM_PACKAGE.getProperties_Property(), pair, pos);
     compoundCommand.append(addProperty);
   }
   
   private void deleteProperties(List<PropertyPair> selection) {
     Properties properties = getProperties();
-    CompoundCommand compoundCommand = new CompoundCommand();
     Command deleteProperties = RemoveCommand.create(editingDomain, properties, POM_PACKAGE.getProperties_Property(), selection);
-    compoundCommand.append(deleteProperties);
-    addNotifyCommand(compoundCommand);
-    editingDomain.getCommandStack().execute(compoundCommand);
+    editingDomain.getCommandStack().execute(deleteProperties);
     propertiesEditor.setInput(properties.getProperty());
   }
 
