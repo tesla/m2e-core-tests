@@ -382,7 +382,7 @@ public class OverviewPage extends MavenPomEditorPage {
         ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
     modulesSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     modulesSection.setText("Modules");
-    modulesSection.setData("name", "modeulesSection");
+    modulesSection.setData("name", "modulesSection");
 
     modulesEditor = new ListEditorComposite<String>(modulesSection, SWT.NONE);
     modulesEditor.getViewer().getTable().setData("name", "modulesEditor");
