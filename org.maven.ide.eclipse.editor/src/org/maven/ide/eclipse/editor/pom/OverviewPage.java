@@ -758,7 +758,7 @@ public class OverviewPage extends MavenPomEditorPage {
       modulesEditor.refresh();
     }
     
-    if(object instanceof Properties) {
+    if(notificationObject instanceof Properties) {
       propertiesSection.setModel(model, POM_PACKAGE.getModel_Properties());
     }
   }

@@ -149,23 +149,18 @@ public class PropertiesSection {
         "Add property", new String[] {"", ""}, allowVariables, listener); //$NON-NLS-1$
     int res = dialog.open();
     if(res == IDialogConstants.OK_ID) {
-      CompoundCommand compoundCommand = new CompoundCommand();
       Properties properties = getProperties();
-      boolean createdProperties = false;
+      CompoundCommand compoundCommand = new CompoundCommand();
       if(properties == null) {
         properties = PomFactory.eINSTANCE.createProperties();
-        createdProperties = true;
+        Command set = SetCommand.create(editingDomain, model, feature, properties);
+        compoundCommand.append(set);
       }
       
-      PropertyPair pair = PomFactory.eINSTANCE.createPropertyPair();
-      addProperty(dialog, compoundCommand, properties, pair, properties.getProperty().size());
-      
-      if (createdProperties) {
-        Command addProperties = SetCommand.create(editingDomain, model, feature, properties);
-        compoundCommand.append(addProperties);
-      }
-
+      PropertyPair pp = PomFactory.eINSTANCE.createPropertyPair();
+      addProperty(dialog, compoundCommand, properties, pp, properties.getProperty().size());
       editingDomain.getCommandStack().execute(compoundCommand);
+      
       propertiesEditor.setInput(properties.getProperty());
     }
   }
