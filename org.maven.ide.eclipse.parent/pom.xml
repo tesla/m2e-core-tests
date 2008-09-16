@@ -35,7 +35,8 @@
     <nexus_indexer.version>1.0.0.20080530-2330</nexus_indexer.version>
     <nexus.version>1.0-beta-4-SNAPSHOT</nexus.version>
     
-    <doxia_converter.version>1.0.0-SNAPSHOT</doxia_converter.version>
+    <doxia_converter.version>1.0.0.20080916-1500</doxia_converter.version>
+    <doxia.version>1.0-SNAPSHOT</doxia.version>
         
     <maven_scm.version>1.0.0.20080602-2350</maven_scm.version>
     <dependency_tree.version>1.2.0.20080424-1900</dependency_tree.version>
