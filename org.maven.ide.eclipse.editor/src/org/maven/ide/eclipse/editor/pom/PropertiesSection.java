@@ -131,15 +131,20 @@ public class PropertiesSection {
         "Edit property", new String[] {pp.getKey(), pp.getValue()}, allowVariables, listener); //$NON-NLS-1$
     int res = dialog.open();
     if(res == IDialogConstants.OK_ID) {
-      Properties props = getProperties();
-      int pos = props.getProperty().indexOf(pp);
+      String[] result = dialog.getNameValuePair();
+      String key = result[0];
+      String value = result[1];
       CompoundCommand compoundCommand = new CompoundCommand();
-      Command deleteProperties = RemoveCommand.create(editingDomain, props, POM_PACKAGE.getProperties_Property(), pp);
-      compoundCommand.append(deleteProperties);
-      pp = PomFactory.eINSTANCE.createPropertyPair();
-      addProperty(dialog, compoundCommand, props, pp, pos);
+      if (!key.equals(pp.getKey())) {
+        Command setCommand = SetCommand.create(editingDomain, pp, POM_PACKAGE.getPropertyPair_Key(), key);
+        compoundCommand.append(setCommand);
+      }
+      if (!value.equals(pp.getValue())) {
+        Command setCommand = SetCommand.create(editingDomain, pp, POM_PACKAGE.getPropertyPair_Value(), value);
+        compoundCommand.append(setCommand);
+      }
       editingDomain.getCommandStack().execute(compoundCommand);
-      propertiesEditor.setInput(props.getProperty());
+      propertiesEditor.setInput(getProperties().getProperty());
     }
   }
 
