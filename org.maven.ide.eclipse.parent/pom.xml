@@ -357,7 +357,11 @@
             <includes>
               <include>**/*Test.java</include>
             </includes>
+            <!-- 
+              does not work due to regression in Tycho  
             <argLine>${tycho.test.jvmArgs}</argLine>
+            -->
+            <argLine>-Xmx800m -XX:MaxPermSize=256m</argLine>
             <!-- kill test JVM it tests take more than 10 minutes (600 seconds) to finisg -->
             <forkedProcessTimeoutInSeconds>900</forkedProcessTimeoutInSeconds>
           </configuration>
