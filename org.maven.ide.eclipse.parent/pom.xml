@@ -35,6 +35,8 @@
     <nexus_indexer.version>1.0.0.20080530-2330</nexus_indexer.version>
     <nexus.version>1.0-beta-4-SNAPSHOT</nexus.version>
     
+    <doxia_converter.version>1.0.0-SNAPSHOT</doxia_converter.version>
+        
     <maven_scm.version>1.0.0.20080602-2350</maven_scm.version>
     <dependency_tree.version>1.2.0.20080424-1900</dependency_tree.version>
 
@@ -48,7 +50,7 @@
     tycho plugins version matches version of tycho distribution.
      
     <tycho.version>0.3.0-SNAPSHOT</tycho.version>
-     -->
+    -->
   </properties>
 
   <organization>
@@ -85,6 +87,7 @@
     <module>../org.maven.ide.components.maven-model-edit</module>
     <module>../org.maven.ide.components.maven-scm</module>
     <module>../org.maven.ide.components.dependency-tree</module>
+    <module>../org.maven.ide.components.doxia-converter</module>
 
     <!--
     <module>../org.maven.ide.eclipse.cliresolver</module>
@@ -111,6 +114,7 @@
     <module>../org.maven.ide.eclipse.wtp</module>
     <module>../org.maven.ide.eclipse.wtp.tests</module>
     <module>../org.maven.ide.eclipse.book</module>
+    <module>../org.maven.doxia.ide.eclipse</module>
 
     <!-- features -->
     <module>../org.maven.ide.components.maven_embedder.feature</module>
@@ -127,6 +131,8 @@
     <module>../org.maven.ide.eclipse.book.feature</module>
     <module>../org.maven.ide.eclipse.central.feature</module>
     <module>../org.maven.ide.eclipse.mylyn3.feature</module>
+
+    <module>../org.maven.ide.eclipse.doxia.feature</module>
 
     <module>../org.maven.ide.eclipse.update</module>
   </modules>
