@@ -40,7 +40,7 @@
    <feature url="features/org.maven.ide.eclipse.cvs.feature_0.9.7.qualifier.jar" id="org.maven.ide.eclipse.cvs.feature" version="0.9.7.qualifier">
       <category name="Maven Optional Components"/>
    </feature>
-   <feature url="features/org.maven.doxia.ide.eclipse.feature_0.9.7.qualifier.jar" id="org.maven.doxia.ide.eclipse.feature" version="0.9.7.qualifier">
+   <feature url="features/org.maven.ide.eclipse.doxia.feature_0.9.7.qualifier.jar" id="org.maven.ide.eclipse.doxia.feature" version="0.9.7.qualifier">
       <category name="Maven Optional Components"/>
    </feature>
    
