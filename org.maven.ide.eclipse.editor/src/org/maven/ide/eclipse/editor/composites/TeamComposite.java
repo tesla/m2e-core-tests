@@ -576,15 +576,13 @@ public class TeamComposite extends Composite {
       if(object instanceof Contributor) {
         contributorsEditor.refresh();
 
-        if(object == currentSelection && (notificationObject == null || notificationObject instanceof EObject)) {
-          updateDetails((EObject) notificationObject);
-        }
+        if(object == currentSelection)
+          updateDetails(object);
       } else if(object instanceof Developer) {
         developersEditor.refresh();
 
-        if(object == currentSelection && (notificationObject == null || notificationObject instanceof EObject)) {
-          updateDetails((EObject) notificationObject);
-        }
+        if(object == currentSelection)
+          updateDetails(object);
       } else if(object instanceof Roles) {
         if(object == getRoles() && (notificationObject == null || notificationObject instanceof Roles)) {
           updateRoles((Roles) notificationObject);

@@ -953,10 +953,8 @@ public class ProfilesPage extends MavenPomEditorPage {
     
     if(object instanceof Profile) {
       profilesEditor.refresh();
-      Object notificationObject = getFromNotification(notification);
-      if(currentProfile == object && (notificationObject == null || notificationObject instanceof Profile)) {
-        updateProfileDetails((Profile) notificationObject);
-      }
+      if(currentProfile == object)
+        updateProfileDetails((Profile) object);
     }
     
     if(object instanceof StringModules) {
