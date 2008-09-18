@@ -2,11 +2,11 @@ package org.maven.ide.eclipse.editor.pom;
 
 import java.util.List;
 
-import org.apache.xerces.util.XMLChar;
 import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.xml.type.internal.DataValue.XMLChar;
 import org.eclipse.emf.edit.command.AddCommand;
 import org.eclipse.emf.edit.command.RemoveCommand;
 import org.eclipse.emf.edit.command.SetCommand;
