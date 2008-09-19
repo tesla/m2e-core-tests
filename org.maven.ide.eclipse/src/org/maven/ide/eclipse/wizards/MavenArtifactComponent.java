@@ -35,7 +35,10 @@ public class MavenArtifactComponent extends Composite {
 
   public static final String POM = "pom";
 
-  static final String[] PACKAGING_OPTIONS = {JAR, WAR, EAR, RAR, POM};
+  // MNGECLIPSE-688 add EJB Support
+  public static final String EJB = "ejb";
+
+  static final String[] PACKAGING_OPTIONS = {JAR, WAR, EJB, EAR, RAR, POM};
 
   public static final String DEFAULT_PACKAGING = JAR;
 

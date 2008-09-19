@@ -66,6 +66,8 @@ public class MavenProjectWizardArtifactPage extends AbstractMavenWizardPage {
 
   private static final ProjectFolder[] WAR_DIRS = {JAVA, JAVA_TEST, RESOURCES, RESOURCES_TEST, WEBAPP};
 
+  private static final ProjectFolder[] EAR_DIRS = {RESOURCES, RESOURCES_TEST};//MNGECLIPSE-688 add EAR Support
+
   private static final ProjectFolder[] POM_DIRS = {SITE};
 
   /** special directory sets, default is JAR_DIRS */
@@ -73,6 +75,7 @@ public class MavenProjectWizardArtifactPage extends AbstractMavenWizardPage {
   static {
     directorySets.put(MavenArtifactComponent.WAR, WAR_DIRS);
     directorySets.put(MavenArtifactComponent.POM, POM_DIRS);
+    directorySets.put(MavenArtifactComponent.EAR, EAR_DIRS); // MNGECLIPSE-688 add EAR Support
   }
 
   /** parent property panel */
