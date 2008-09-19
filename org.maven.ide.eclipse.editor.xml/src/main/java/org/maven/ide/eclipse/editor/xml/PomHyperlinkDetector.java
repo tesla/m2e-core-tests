@@ -21,14 +21,19 @@ import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 
 import org.maven.ide.eclipse.actions.OpenPomAction;
 
-final class PomHyperlinkDetector implements IHyperlinkDetector {
+
+/**
+ * @author Eugene Kuleshov
+ */
+class PomHyperlinkDetector implements IHyperlinkDetector {
+
   public IHyperlink[] detectHyperlinks(ITextViewer textViewer, final IRegion region, boolean canShowMultipleHyperlinks) {
-    if (region == null || textViewer == null) {
+    if(region == null || textViewer == null) {
       return null;
     }
 
     IDocument document = textViewer.getDocument();
-    if (document == null) {
+    if(document == null) {
       return null;
     }
 
@@ -37,33 +42,36 @@ final class PomHyperlinkDetector implements IHyperlinkDetector {
     try {
       lineInfo = document.getLineInformationOfOffset(region.getOffset());
       line = document.get(lineInfo.getOffset(), lineInfo.getLength());
-    } catch (BadLocationException ex) {
+    } catch(BadLocationException ex) {
       return null;
     }
 
-    if (line.length() == 0) {
+    if(line.length() == 0) {
       return null;
     }
 
     final int offset = region.getOffset();
-    
+
     final String text = document.get();
-    
+
     String fragment = getFragment(text, offset, "<dependency>", "</dependency>");
-    if(fragment==null) {
+    if(fragment == null) {
       fragment = getFragment(text, offset, "<dependencyManagement>", "</dependencyManagement>");
-      if(fragment==null) {
+      if(fragment == null) {
         fragment = getFragment(text, offset, "<parent>", "</parent>");
-        if(fragment==null) {
-          return null;
+        if(fragment == null) {
+          fragment = getFragment(text, offset, "<plugin>", "</plugin>");
+          if(fragment == null) {
+            return null;
+          }
         }
       }
     }
-    
+
     final String groupId = getValue(fragment, "<groupId>", "</groupId>");
     final String artifactId = getValue(fragment, "<artifactId>", "</artifactId>");
     final String version = getValue(fragment, "<version>", "</version>");
-    
+
     IHyperlink pomHyperlink = new IHyperlink() {
 
       public IRegion getHyperlinkRegion() {
@@ -88,39 +96,39 @@ final class PomHyperlinkDetector implements IHyperlinkDetector {
           }
         }.schedule();
       }
-      
+
     };
-    
-    return new IHyperlink[] { pomHyperlink };
+
+    return new IHyperlink[] {pomHyperlink};
   }
-  
+
   private String getValue(String dependency, String startTag, String endTag) {
     int start = dependency.indexOf(startTag);
-    if(start==-1) {
+    if(start == -1) {
       return null;
     }
     int end = dependency.indexOf(endTag);
-    if(end==-1) {
+    if(end == -1) {
       return null;
     }
-    
+
     return dependency.substring(start + startTag.length(), end).trim();
   }
 
   private String getFragment(String text, int offset, String startTag, String endTag) {
     int start = text.substring(0, offset).lastIndexOf(startTag);
-    if(start==-1) {
+    if(start == -1) {
       return null;
     }
 
     int end = text.indexOf(endTag, start);
-    if(end==-1 || end<=offset) {
+    if(end == -1 || end <= offset) {
       return null;
     }
-    
+
     return text.substring(start, end + endTag.length());
   }
-  
+
 //  private int findChar(String text, char c, int offset, int step) {
 //    for(int pos = offset; pos>=0 && pos<text.length(); pos += step) {
 //      if(text.charAt(pos)==c) {
@@ -129,5 +137,5 @@ final class PomHyperlinkDetector implements IHyperlinkDetector {
 //    }
 //    return -1;
 //  }
-  
+
 }
