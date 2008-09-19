@@ -186,6 +186,7 @@
         &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
         &lt;artifactId&gt;maven-compiler-plugin&lt;/artifactId&gt;
         &lt;configuration&gt;
+          &lt;!-- http://maven.apache.org/plugins/maven-compiler-plugin/ --&gt;
           &lt;source&gt;${cursor}1.4&lt;/source&gt;
           &lt;target&gt;1.4&lt;/target&gt;
         &lt;/configuration&gt;
@@ -199,6 +200,7 @@
       <pattern>&lt;plugin&gt;
          &lt;groupId&gt;org.codehaus.mojo&lt;/groupId&gt;
          &lt;artifactId&gt;aspectj-maven-plugin&lt;/artifactId&gt;
+         &lt;!-- http://mojo.codehaus.org/aspectj-maven-plugin/ --&gt;
          &lt;executions&gt;
            &lt;execution&gt;
              &lt;goals&gt;
@@ -206,6 +208,94 @@
              &lt;/goals&gt;
           &lt;/execution&gt;
         &lt;/executions&gt;
+      &lt;/plugin&gt;</pattern>
+    </template>
+
+    <template id="org.maven.ide.eclipse.editor.xml.templates.plugin.war"
+         contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.plugins"
+         name="war plugin" 
+         description="WAR plugin configuration">
+      <pattern>&lt;plugin&gt;
+        &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+        &lt;artifactId&gt;maven-war-plugin&lt;/artifactId&gt;
+        &lt;version&gt;2.0.1&lt;/version&gt;
+        &lt;configuration&gt;
+          &lt;!-- http://maven.apache.org/plugins/maven-war-plugin/ --&gt;
+          &lt;webResources&gt;
+            &lt;resource&gt;
+              &lt;directory&gt;src/main/webapp&lt;/directory&gt;
+              &lt;filtering&gt;false&lt;/filtering&gt;
+            &lt;/resource&gt;
+          &lt;/webResources&gt;
+        &lt;/configuration&gt;
+      &lt;/plugin&gt;</pattern>
+    </template>
+
+    <template id="org.maven.ide.eclipse.editor.xml.templates.plugin.ejb"
+         contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.plugins"
+         name="ejb plugin" 
+         description="EJB plugin configuration">
+      <pattern>&lt;plugin&gt;
+        &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+        &lt;artifactId&gt;maven-ejb-plugin&lt;/artifactId&gt;
+        &lt;version&gt;2.1&lt;/version&gt;
+        &lt;configuration&gt;
+          &lt;!-- http://maven.apache.org/plugins/maven-ejb-plugin/ --&gt;
+          &lt;ejbVersion&gt;3.0&lt;/ejbVersion&gt;
+        &lt;/configuration&gt;
+      &lt;/plugin&gt;</pattern>
+    </template>
+
+    <template id="org.maven.ide.eclipse.editor.xml.templates.plugin.ear"
+         contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.plugins"
+         name="ear plugin" 
+         description="EAR plugin configuration">
+      <pattern>&lt;plugin&gt;
+        &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+        &lt;artifactId&gt;maven-ear-plugin&lt;/artifactId&gt;
+        &lt;version&gt;2.3.1&lt;/version&gt;
+        &lt;configuration&gt;
+          &lt;!-- http://maven.apache.org/plugins/maven-ear-plugin/ --&gt;
+          &lt;version&gt;5&lt;/version&gt;
+          &lt;generateApplicationXml&gt;true&lt;/generateApplicationXml&gt;
+          &lt;!-- 
+          &lt;applicationXml&gt;EarContent/META-INF/application.xml&lt;/applicationXml&gt;
+          &lt;modules&gt;
+            &lt;ejbModule&gt;
+              &lt;groupId&gt;org.foo2&lt;/groupId&gt;
+              &lt;artifactId&gt;test-ejb&lt;/artifactId&gt;
+            &lt;/ejbModule&gt;
+            &lt;webModule&gt;
+              &lt;groupId&gt;org.foo2&lt;/groupId&gt;
+              &lt;artifactId&gt;test-war&lt;/artifactId&gt;
+            &lt;/webModule&gt;
+            &lt;jarModule&gt;
+              &lt;groupId&gt;org.foo2&lt;/groupId&gt;
+              &lt;artifactId&gt;test-jar&lt;/artifactId&gt;
+            &lt;/jarModule&gt;
+          &lt;/modules&gt;
+          --&gt;
+        &lt;/configuration&gt;
+      &lt;/plugin&gt;</pattern>
+    </template>
+    
+    <template id="org.maven.ide.eclipse.editor.xml.templates.plugin.jetty"
+         contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.plugins"
+         name="jetty plugin" 
+         description="Jetty plugin configuration">
+      <pattern>&lt;plugin&gt;
+        &lt;groupId&gt;org.mortbay.jetty&lt;/groupId&gt;
+        &lt;artifactId&gt;maven-jetty-plugin&lt;/artifactId&gt;
+        &lt;configuration&gt;
+          &lt;!-- http://docs.codehaus.org/display/JETTY/Maven+Jetty+Plugin --&gt;
+          &lt;scanIntervalSeconds&gt;10&lt;/scanIntervalSeconds&gt;
+          &lt;connectors&gt;
+            &lt;connector implementation=&quot;org.mortbay.jetty.nio.SelectChannelConnector&quot;&gt;
+              &lt;port&gt;8080&lt;/port&gt;
+              &lt;maxIdleTime&gt;60000&lt;/maxIdleTime&gt;
+            &lt;/connector&gt;
+          &lt;/connectors&gt;
+        &lt;/configuration&gt;
       &lt;/plugin&gt;</pattern>
     </template>
 
