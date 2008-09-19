@@ -15,7 +15,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -24,6 +23,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.AbstractArtifactResolutionException;
 import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.plugin.descriptor.MojoDescriptor;
@@ -46,6 +46,7 @@ import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.editor.xml.search.ArtifactInfo;
 import org.maven.ide.eclipse.editor.xml.search.Packaging;
 import org.maven.ide.eclipse.editor.xml.search.SearchEngine;
+import org.maven.ide.eclipse.index.IndexManager;
 
 
 /**
@@ -100,39 +101,39 @@ public enum PomTemplateContext {
       }
       
       PluginDescriptor descriptor = getPluginDescriptor(groupId, artifactId, version);
-
-      HashSet<String> params = new HashSet<String>();
-      
-      @SuppressWarnings("unchecked")
-      List<MojoDescriptor> mojos = descriptor.getMojos();
-      for(MojoDescriptor mojo : mojos) {
+      if(descriptor!=null) {
         @SuppressWarnings("unchecked")
-        List<Parameter> parameters = (List<Parameter>) mojo.getParameters();
-        for(Parameter parameter : parameters) {
-          boolean editable = parameter.isEditable();
-          if(editable) {
-            String name = parameter.getName();
-            if(!params.contains(name)) {
-              params.add(name);
-              
-              String text = "<b>required:</b> " + parameter.isRequired() + "<br>" //
-                  + "<b>type:</b> " + parameter.getType() + "<br>";
-              
-              String expression = parameter.getExpression();
-              if(expression!=null) {
-                text += "expression: " + expression + "<br>";
+        List<MojoDescriptor> mojos = descriptor.getMojos();
+        HashSet<String> params = new HashSet<String>();
+        for(MojoDescriptor mojo : mojos) {
+          @SuppressWarnings("unchecked")
+          List<Parameter> parameters = (List<Parameter>) mojo.getParameters();
+          for(Parameter parameter : parameters) {
+            boolean editable = parameter.isEditable();
+            if(editable) {
+              String name = parameter.getName();
+              if(!params.contains(name)) {
+                params.add(name);
+                
+                String text = "<b>required:</b> " + parameter.isRequired() + "<br>" //
+                    + "<b>type:</b> " + parameter.getType() + "<br>";
+                
+                String expression = parameter.getExpression();
+                if(expression!=null) {
+                  text += "expression: " + expression + "<br>";
+                }
+                
+                String defaultValue = parameter.getDefaultValue();
+                if(defaultValue!=null) {
+                  text += "default: " + defaultValue + "<br>";
+                }
+                
+                String desc = parameter.getDescription().trim();
+                text += desc.startsWith("<p>") ? desc : "<br>" + desc;
+                
+                proposals.add(new Template(name, text, getContextTypeId(), //
+                    "<" + name + ">${cursor}</" + name + ">", false));
               }
-              
-              String defaultValue = parameter.getDefaultValue();
-              if(defaultValue!=null) {
-                text += "default: " + defaultValue + "<br>";
-              }
-              
-              String desc = parameter.getDescription().trim();
-              text += desc.startsWith("<p>") ? desc : "<br>" + desc;
-              
-              proposals.add(new Template(name, text, getContextTypeId(), //
-                  "<" + name + ">${cursor}</" + name + ">", false));
             }
           }
         }
@@ -151,8 +152,12 @@ public enum PomTemplateContext {
       try {
         MavenEmbedder embedder = plugin.getMavenEmbedderManager().getWorkspaceEmbedder();
         
-        Artifact artifact = embedder.createArtifact(groupId, artifactId, version, null, "jar");
-        embedder.resolve(artifact, Collections.emptyList(), embedder.getLocalRepository());
+        Artifact artifact = embedder.createArtifact(groupId, artifactId, version, null, "maven-plugin");
+        
+        IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
+        List<ArtifactRepository> repositories = indexManager.getArtifactRepositories(null, null);
+        
+        embedder.resolve(artifact, repositories, embedder.getLocalRepository());
         File file = artifact.getFile();
         if(file == null) {
           String msg = "Can't resolve plugin " + name;
