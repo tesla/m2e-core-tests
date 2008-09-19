@@ -126,7 +126,7 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
     return sourceLocator;
   }
 
-  public String getMainTypeName(ILaunchConfiguration configuration) {
+  public String getMainTypeName(ILaunchConfiguration configuration) throws CoreException {
     // return MAVEN_EXECUTOR_CLASS;
     return getMavenRuntime(configuration).getMainTypeName();
   }
@@ -136,15 +136,19 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
     return getMavenRuntime(configuration).getClasspath(forcedCompoStrings);
   }
   
-  private MavenRuntime getMavenRuntime(ILaunchConfiguration configuration) {
+  private MavenRuntime getMavenRuntime(ILaunchConfiguration configuration) throws CoreException {
     MavenRuntimeManager runtimeManager = MavenPlugin.getDefault().getMavenRuntimeManager();
-    try {
-      String location = configuration.getAttribute(MavenLaunchConstants.ATTR_RUNTIME, "");
-      return runtimeManager.getRuntime(location);
-    } catch(CoreException ex) {
-      MavenLogger.log(ex);
-      return runtimeManager.getDefaultRuntime();
+    String location = getMavenRuntimeLocation(configuration);
+    MavenRuntime runtime = runtimeManager.getRuntime(location);
+    if(runtime==null) {
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, //
+          "Can't find Maven installation " + location, null));
     }
+    return runtime;
+  }
+
+  private String getMavenRuntimeLocation(ILaunchConfiguration configuration) throws CoreException {
+    return configuration.getAttribute(MavenLaunchConstants.ATTR_RUNTIME, "");
   }
 
 //  private Bundle findMavenEmbedderBundle() {
