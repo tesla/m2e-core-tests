@@ -60,13 +60,15 @@ public class MavenProjectWizardArtifactPage extends AbstractMavenWizardPage {
 
   private static final ProjectFolder WEBAPP = new ProjectFolder("src/main/webapp", null);
 
+  private static final ProjectFolder EAR = new ProjectFolder("src/main/application", null);
+  
   private static final ProjectFolder SITE = new ProjectFolder("src/site", null);
 
   private static final ProjectFolder[] JAR_DIRS = {JAVA, JAVA_TEST, RESOURCES, RESOURCES_TEST};
 
   private static final ProjectFolder[] WAR_DIRS = {JAVA, JAVA_TEST, RESOURCES, RESOURCES_TEST, WEBAPP};
 
-  private static final ProjectFolder[] EAR_DIRS = {RESOURCES, RESOURCES_TEST};//MNGECLIPSE-688 add EAR Support
+  private static final ProjectFolder[] EAR_DIRS = {EAR};  // MNGECLIPSE-688 add EAR Support
 
   private static final ProjectFolder[] POM_DIRS = {SITE};
 
