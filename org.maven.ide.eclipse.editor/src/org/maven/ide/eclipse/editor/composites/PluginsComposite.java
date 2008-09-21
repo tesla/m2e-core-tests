@@ -972,6 +972,7 @@ public class PluginsComposite extends Composite {
     }
     
     if(object instanceof StringGoals) {
+      goalsEditor.setInput(((StringGoals) object).getGoal());
       goalsEditor.refresh();
     }
   }
