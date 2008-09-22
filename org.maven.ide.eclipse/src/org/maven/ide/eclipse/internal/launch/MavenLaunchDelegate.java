@@ -31,6 +31,7 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.IDebugEventSetListener;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.sourcelookup.AbstractSourceLookupDirector;
 import org.eclipse.debug.core.sourcelookup.ISourceLookupDirector;
@@ -73,8 +74,10 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
     console.logMessage("" + getWorkingDirectory(configuration));
     console.logMessage(" mvn" + getProgramArguments(configuration));
     
-    ISourceLookupDirector sourceLocator = createSourceLocator(configuration);
-    launch.setSourceLocator(sourceLocator);
+    if(ILaunchManager.DEBUG_MODE.equals(mode)) {
+      ISourceLookupDirector sourceLocator = createSourceLocator(configuration);
+      launch.setSourceLocator(sourceLocator);
+    }
     
     super.launch(configuration, mode, launch, monitor);
   }
@@ -106,6 +109,7 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
         addParticipants(new ISourceLookupParticipant[] {new JavaSourceLookupParticipant()});
       }
     };
+    sourceLocator.initializeDefaults(configuration);
 
     IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
     IProject[] projects = root.getProjects();
@@ -120,9 +124,14 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
         entries.add(JavaRuntime.newDefaultProjectClasspathEntry(javaProject));
       }
     }
-    IRuntimeClasspathEntry[] resolved = JavaRuntime.resolveSourceLookupPath(entries.toArray(new IRuntimeClasspathEntry[entries.size()]), configuration);
-    sourceLocator.initializeDefaults(configuration);
-    sourceLocator.setSourceContainers(JavaRuntime.getSourceContainers(resolved));
+    
+    try {
+      IRuntimeClasspathEntry[] resolved = JavaRuntime.resolveSourceLookupPath(entries.toArray(new IRuntimeClasspathEntry[entries.size()]), configuration);
+      sourceLocator.setSourceContainers(JavaRuntime.getSourceContainers(resolved));
+    } catch(CoreException ex) {
+      MavenLogger.log(ex);
+    }
+    
     return sourceLocator;
   }
 
