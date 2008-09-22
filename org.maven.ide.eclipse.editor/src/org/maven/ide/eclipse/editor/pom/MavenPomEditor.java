@@ -176,7 +176,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 
   IStructuredModel structuredModel;
 
-  private EMF2DOMSSERenderer renderer;
+  EMF2DOMSSERenderer renderer;
 
   private MavenProject mavenProject;
 
@@ -192,11 +192,11 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 
   IFile pomFile;
 
-  private MavenPomActivationListener activationListener;
+  MavenPomActivationListener activationListener;
 
   boolean dirty;
 
-  private CommandStackListener commandStackListener;
+  CommandStackListener commandStackListener;
 
   BasicCommandStack sseCommandStack;
 
@@ -271,11 +271,12 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     dirty = false;
     if (sseCommandStack != null)
       sseCommandStack.saveIsDone();
-    getContainer().getDisplay().asyncExec(new Runnable() {
-      public void run() {
-        editorDirtyStateChanged();
-      }
-    });
+    if (getContainer() != null && !getContainer().isDisposed())
+      getContainer().getDisplay().asyncExec(new Runnable() {
+        public void run() {
+          editorDirtyStateChanged();
+        }
+      });
   }
 
   protected void addPages() {
@@ -778,21 +779,27 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   }
 
   public void dispose() {
-    structuredModel.releaseFromEdit();
-    if (sseCommandStack != null)
-      sseCommandStack.removeCommandStackListener(commandStackListener);
+    new UIJob("Disposing") {
+      @SuppressWarnings("synthetic-access")
+      public IStatus runInUIThread(IProgressMonitor monitor) {
+        structuredModel.releaseFromEdit();
+        if (sseCommandStack != null)
+          sseCommandStack.removeCommandStackListener(commandStackListener);
 
-    if(activationListener != null) {
-      activationListener.dispose();
-      activationListener = null;
-    }
+        if(activationListener != null) {
+          activationListener.dispose();
+          activationListener = null;
+        }
 
-    ResourcesPlugin.getWorkspace().removeResourceChangeListener(this);
-    
-    structuredModel.removeModelStateListener(renderer);
-    structuredModel.removeModelLifecycleListener(renderer);
-    
-    super.dispose();
+        ResourcesPlugin.getWorkspace().removeResourceChangeListener(MavenPomEditor.this);
+        
+        structuredModel.removeModelStateListener(renderer);
+        structuredModel.removeModelLifecycleListener(renderer);
+        
+        MavenPomEditor.super.dispose();
+        return Status.OK_STATUS;
+      }
+    }.schedule();
   }
 
   /**

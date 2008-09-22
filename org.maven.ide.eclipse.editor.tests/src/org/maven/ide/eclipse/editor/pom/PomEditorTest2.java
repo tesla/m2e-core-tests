@@ -1,6 +1,7 @@
 package org.maven.ide.eclipse.editor.pom;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.ui.forms.widgets.Form;
 
 import com.windowtester.runtime.WT;
 import com.windowtester.runtime.WaitTimedOutException;
@@ -8,8 +9,9 @@ import com.windowtester.runtime.WidgetSearchException;
 import com.windowtester.runtime.swt.condition.shell.ShellDisposedCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellShowingCondition;
 import com.windowtester.runtime.swt.locator.ButtonLocator;
+import com.windowtester.runtime.swt.locator.CTabItemLocator;
+import com.windowtester.runtime.swt.locator.SWTWidgetLocator;
 import com.windowtester.runtime.swt.locator.TableItemLocator;
-import com.windowtester.runtime.util.ScreenCapture;
 
 public class PomEditorTest2 extends PomEditorTestBase {
 
@@ -86,6 +88,25 @@ public class PomEditorTest2 extends PomEditorTestBase {
     ui.wait(new ShellDisposedCondition("Edit property"));
   }
 
+  ///MNGECLIPSE-912
+  public void testCloseAllAndSave() throws Exception {
+    openPomFile(TEST_POM_POM_XML);
+    
+    ui.click(new CTabItemLocator(TEST_POM_POM_XML));
+    selectEditorTab(TAB_POM_XML);
+    replaceText("org.foo", "org.foo1");
+    selectEditorTab(TAB_OVERVIEW);
+    ui.contextClick(new CTabItemLocator("*" + TEST_POM_POM_XML), "Close &All");
+    ui.wait(new ShellDisposedCondition("Progress Information"));
+    ui.wait(new ShellShowingCondition("Save Resource"));
+    ui.click(new ButtonLocator("&Yes"));
+    ui.wait(new ShellDisposedCondition("Save Resource"));
+
+    openPomFile(TEST_POM_POM_XML);
+    selectEditorTab(TAB_OVERVIEW);
+    assertTextValue("groupId", "org.foo1");
+  }
+  
   private void addProperty(String name, String value) throws WidgetSearchException, WaitTimedOutException {
     ui.click(new ButtonLocator("Add..."));
     ui.wait(new ShellShowingCondition("Add property"));
