@@ -106,8 +106,6 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
 
   Text localRepositoryText;
 
-  Button globalSettingsOpenButton;
-
   public MavenInstallationsPreferencePage() {
     setTitle("Maven Installations");
 
@@ -316,11 +314,9 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
 
         if(!defaultRuntime.isEditable()) {
           globalSettingsText.setText("");
-          globalSettingsOpenButton.setEnabled(false);
         } else {
           String globalSettings = defaultRuntime.getSettings();
           globalSettingsText.setText(globalSettings == null ? "" : globalSettings);
-          globalSettingsOpenButton.setEnabled(true);
         }
         initLocalRepository();
       }
@@ -346,7 +342,11 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
     userSettingsLink.setLayoutData(gd_userSettingsLabel);
     userSettingsLink.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
-        openEditor(getUserSettings());
+        String userSettings = getUserSettings();
+        if(userSettings.length() == 0) {
+          userSettings = MavenEmbedder.DEFAULT_USER_SETTINGS_FILE.getAbsolutePath();
+        }
+        openEditor(userSettings);
       }
     });
 
