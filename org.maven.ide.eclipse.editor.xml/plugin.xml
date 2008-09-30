@@ -221,12 +221,15 @@
         &lt;version&gt;2.0.1&lt;/version&gt;
         &lt;configuration&gt;
           &lt;!-- http://maven.apache.org/plugins/maven-war-plugin/ --&gt;
+          &lt;warSourceDirectory&gt;src/main/webapp&lt;/warSourceDirectory&gt;
+          &lt;!--
           &lt;webResources&gt;
             &lt;resource&gt;
-              &lt;directory&gt;src/main/webapp&lt;/directory&gt;
+              &lt;directory&gt;src/main/webapp2&lt;/directory&gt;
               &lt;filtering&gt;false&lt;/filtering&gt;
             &lt;/resource&gt;
           &lt;/webResources&gt;
+          --&gt;
         &lt;/configuration&gt;
       &lt;/plugin&gt;</pattern>
     </template>
