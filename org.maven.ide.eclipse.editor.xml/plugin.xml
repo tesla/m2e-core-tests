@@ -260,9 +260,10 @@
         &lt;configuration&gt;
           &lt;!-- http://maven.apache.org/plugins/maven-ear-plugin/ --&gt;
           &lt;version&gt;5&lt;/version&gt;
-          &lt;generateApplicationXml&gt;true&lt;/generateApplicationXml&gt;
           &lt;!-- 
+          &lt;earSourceDirectory&gt;EarContent&lt;/earSourceDirectory&gt;
           &lt;applicationXml&gt;EarContent/META-INF/application.xml&lt;/applicationXml&gt;
+          &lt;generateApplicationXml&gt;true&lt;/generateApplicationXml&gt;
           &lt;modules&gt;
             &lt;ejbModule&gt;
               &lt;groupId&gt;org.foo2&lt;/groupId&gt;
