@@ -70,7 +70,7 @@ http://www.eclipse.org/legal/epl-v10.html
          id="org.eclipse.draw2d"
          download-size="0"
          install-size="0"
-         version="3.4.0.v20080529"
+         version="3.4.1.v20080910-1351"
          unpack="false"/>
 
    <plugin
