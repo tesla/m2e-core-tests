@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.progress.IProgressConstants;
 
 import org.apache.maven.archetype.catalog.Archetype;
 import org.apache.maven.model.Dependency;
@@ -43,6 +44,7 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.actions.OpenMavenConsoleAction;
 import org.maven.ide.eclipse.core.Messages;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 
@@ -216,6 +218,7 @@ public class MavenModuleWizard extends Wizard implements INewWizard {
 
       job = new WorkspaceJob(Messages.getString("wizard.project.job.creatingProject", moduleName)) {
         public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
+          setProperty(IProgressConstants.ACTION_PROPERTY, new OpenMavenConsoleAction());
           String projectName = configuration.getProjectName(model);
           IProject project = configuration.getProject(ResourcesPlugin.getWorkspace().getRoot(), model);
 
@@ -245,6 +248,7 @@ public class MavenModuleWizard extends Wizard implements INewWizard {
 
       job = new WorkspaceJob(Messages.getString("wizard.project.job.creating", archetype.getArtifactId())) {
         public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
+          setProperty(IProgressConstants.ACTION_PROPERTY, new OpenMavenConsoleAction());
           MavenPlugin plugin = MavenPlugin.getDefault();
           plugin.getProjectConfigurationManager().createArchetypeProject(project, location, archetype, //
               groupId, artifactId, version, javaPackage, properties, configuration, monitor);

@@ -23,8 +23,10 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.progress.IProgressConstants;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.actions.OpenMavenConsoleAction;
 import org.maven.ide.eclipse.actions.SelectionUtil;
 import org.maven.ide.eclipse.project.MavenProjectInfo;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
@@ -86,7 +88,7 @@ public class MavenImportWizard extends Wizard implements IImportWizard {
 
     Job job = new WorkspaceJob("Importing Maven projects") {
       public IStatus runInWorkspace(IProgressMonitor monitor) {
-
+        setProperty(IProgressConstants.ACTION_PROPERTY, new OpenMavenConsoleAction());
         try {
           plugin.getProjectConfigurationManager().importProjects(projects, importConfiguration, monitor);
         } catch(CoreException ex) {

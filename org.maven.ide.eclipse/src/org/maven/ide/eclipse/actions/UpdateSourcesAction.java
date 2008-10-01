@@ -28,6 +28,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.progress.IProgressConstants;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
@@ -57,6 +58,7 @@ public class UpdateSourcesAction implements IObjectActionDelegate {
     final MavenPlugin plugin = MavenPlugin.getDefault();
     WorkspaceJob job = new WorkspaceJob("Updating Maven Configuration") {
       public IStatus runInWorkspace(IProgressMonitor monitor) {
+        setProperty(IProgressConstants.ACTION_PROPERTY, new OpenMavenConsoleAction());
         monitor.beginTask(getName(), projects.size());
         
         MultiStatus status = null;

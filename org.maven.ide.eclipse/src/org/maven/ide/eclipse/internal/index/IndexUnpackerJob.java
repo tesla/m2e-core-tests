@@ -20,7 +20,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.ui.progress.IProgressConstants;
 
+import org.maven.ide.eclipse.actions.OpenMavenConsoleAction;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.index.IndexInfo;
 import org.maven.ide.eclipse.index.IndexManager;
@@ -46,6 +48,7 @@ public class IndexUnpackerJob extends Job {
     this.extensionIndexes = extensionIndexes;
 
     setPriority(Job.LONG);
+    setProperty(IProgressConstants.ACTION_PROPERTY, new OpenMavenConsoleAction());
   }
   
   public void setOverwrite(boolean overwrite) {

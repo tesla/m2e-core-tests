@@ -13,7 +13,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.ui.progress.IProgressConstants;
 
+import org.maven.ide.eclipse.actions.OpenMavenConsoleAction;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.index.IndexManager;
@@ -36,6 +38,7 @@ public class IndexerJob extends Job {
     this.indexManager = indexManager;
     this.console = console;
     setPriority(Job.LONG);
+    setProperty(IProgressConstants.ACTION_PROPERTY, new OpenMavenConsoleAction());
   }
 
   protected IStatus run(IProgressMonitor monitor) {

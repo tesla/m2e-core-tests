@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.ui.progress.IProgressConstants;
 
 import org.apache.lucene.search.Query;
 import org.apache.lucene.store.Directory;
@@ -42,6 +43,7 @@ import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.sonatype.nexus.index.ArtifactInfo;
 import org.sonatype.nexus.index.context.IndexingContext;
 
+import org.maven.ide.eclipse.actions.OpenMavenConsoleAction;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
@@ -518,6 +520,7 @@ public abstract class IndexManager {
       super("Updating indexes");
       this.indexManager = indexManager;
       this.console = console;
+      setProperty(IProgressConstants.ACTION_PROPERTY, new OpenMavenConsoleAction());
     }
 
     public void addCommand(IndexCommand indexCommand) {

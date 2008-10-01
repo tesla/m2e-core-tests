@@ -36,6 +36,7 @@ import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.NewProjectAction;
+import org.eclipse.ui.progress.IProgressConstants;
 
 import org.codehaus.plexus.util.DirectoryScanner;
 import org.codehaus.plexus.util.FileUtils;
@@ -43,6 +44,7 @@ import org.codehaus.plexus.util.FileUtils;
 import org.apache.maven.model.Model;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.actions.OpenMavenConsoleAction;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
@@ -76,6 +78,7 @@ public abstract class MavenProjectCheckoutJob extends WorkspaceJob {
     this.configuration = importConfiguration;
     this.checkoutAllProjects = checkoutAllProjects;
 
+    setProperty(IProgressConstants.ACTION_PROPERTY, new OpenMavenConsoleAction());
     addJobChangeListener(new CheckoutJobChangeListener());
   }
   

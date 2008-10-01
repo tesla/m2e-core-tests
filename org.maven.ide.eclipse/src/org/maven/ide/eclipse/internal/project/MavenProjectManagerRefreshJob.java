@@ -28,7 +28,9 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
+import org.eclipse.ui.progress.IProgressConstants;
 
+import org.maven.ide.eclipse.actions.OpenMavenConsoleAction;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
@@ -53,6 +55,7 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
     this.manager = manager;
     this.runtimeManager = runtimeManager;
     setRule(new SchedulingRule(true));
+    setProperty(IProgressConstants.ACTION_PROPERTY, new OpenMavenConsoleAction());
   }
   
   public void refresh(MavenUpdateRequest updateRequest) {
