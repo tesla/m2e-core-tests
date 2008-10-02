@@ -363,7 +363,7 @@
             -->
             <argLine>-Xmx800m -XX:MaxPermSize=256m</argLine>
             <!-- kill test JVM it tests take more than 10 minutes (600 seconds) to finisg -->
-            <forkedProcessTimeoutInSeconds>3600</forkedProcessTimeoutInSeconds>
+            <forkedProcessTimeoutInSeconds>7200</forkedProcessTimeoutInSeconds>
           </configuration>
         </plugin>
       </plugins>
