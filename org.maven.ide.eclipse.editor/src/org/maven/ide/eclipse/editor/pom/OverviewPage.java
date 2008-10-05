@@ -225,6 +225,7 @@ public class OverviewPage extends MavenPomEditorPage {
     
     artifactPackagingCombo.add("jar");
     artifactPackagingCombo.add("war");
+    artifactPackagingCombo.add("ejb"); //MNGECLIPSE-688 : add EAR & EJB Support
     artifactPackagingCombo.add("ear");
     artifactPackagingCombo.add("pom");
     artifactPackagingCombo.add("maven-plugin");
