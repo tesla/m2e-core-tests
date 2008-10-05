@@ -35,8 +35,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.eclipse.wst.xml.ui.internal.contentassist.XMLContentAssistProcessor;
 
-
-
 /**
  * @author Lukas Krecan
  * @author Eugene Kuleshov
@@ -110,7 +108,6 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
 
     // name of the selection variables {line, word}_selection 
     context.setVariable("selection", selection.getText()); //$NON-NLS-1$
-
 
     PomTemplateContext templateContext = PomTemplateContext.fromId(contextTypeId);
     Image image = null;

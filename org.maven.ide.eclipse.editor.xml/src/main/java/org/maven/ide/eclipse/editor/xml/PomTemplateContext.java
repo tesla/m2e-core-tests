@@ -207,8 +207,9 @@ public enum PomTemplateContext {
   GROUP_ID("groupId") {
     @Override
     public void addTemplates(Collection<Template> proposals, Node node, String prefix) {
+      String contextTypeId = getContextTypeId();
       for(String groupId : getSearchEngine().findGroupIds(prefix, getPackaging(node), getContainingArtifact(node))) {
-        proposals.add(new Template(groupId, groupId, getContextTypeId(), groupId, false));
+        add(proposals, contextTypeId, groupId);
       }
     }
   },
@@ -218,9 +219,10 @@ public enum PomTemplateContext {
     public void addTemplates(Collection<Template> proposals, Node node, String prefix) {
       String groupId = getGroupId(node);
       if(groupId != null) {
+        String contextTypeId = getContextTypeId();
         for(String artifactId : getSearchEngine().findArtifactIds(groupId, prefix, getPackaging(node),
             getContainingArtifact(node))) {
-          proposals.add(new Template(artifactId, groupId + ":" + artifactId, getContextTypeId(), artifactId, false));
+          add(proposals, contextTypeId, artifactId, groupId + ":" + artifactId);
         }
       }
     }
@@ -232,9 +234,9 @@ public enum PomTemplateContext {
       String groupId = getGroupId(node);
       String artifactId = getArtifactId(node);
       if(groupId != null && artifactId != null) {
+        String contextTypeId = getContextTypeId();
         for(String version : getSearchEngine().findVersions(groupId, artifactId, prefix, getPackaging(node))) {
-          proposals.add(new Template(version, groupId + ":" + artifactId + ":" + version, //
-              getContextTypeId(), version, false));
+          add(proposals, contextTypeId, version, groupId + ":" + artifactId + ":" + version);
         }
       }
     }
@@ -247,10 +249,10 @@ public enum PomTemplateContext {
       String artifactId = getArtifactId(node);
       String version = getVersion(node);
       if(groupId != null && artifactId != null && version != null) {
+        String contextTypeId = getContextTypeId();
         for(String classifier : getSearchEngine().findClassifiers(groupId, artifactId, version, prefix,
             getPackaging(node))) {
-          proposals.add(new Template(classifier, groupId + ":" + artifactId + ":" + version + ":" + classifier,
-              getContextTypeId(), classifier, false));
+          add(proposals, contextTypeId, classifier, groupId + ":" + artifactId + ":" + version + ":" + classifier);
         }
       }
     }
@@ -262,13 +264,43 @@ public enum PomTemplateContext {
       String groupId = getGroupId(node);
       String artifactId = getArtifactId(node);
       String version = getVersion(node);
+      String contextTypeId = getContextTypeId();
       if(groupId != null && artifactId != null && version != null) {
         for(String type : getSearchEngine().findTypes(groupId, artifactId, version, prefix, getPackaging(node))) {
-          proposals.add(new Template(type, groupId + ":" + artifactId + ":" + version + ":" + type, //
-              getContextTypeId(), type, false));
+          add(proposals, contextTypeId, type, groupId + ":" + artifactId + ":" + version + ":" + type);
         }
       }
     }
+  },
+  
+  PACKAGING("packaging") {
+    public void addTemplates(Collection<Template> proposals, Node node, String prefix) {
+      String contextTypeId = getContextTypeId();
+      // TODO only show "pom" packaging in root section
+      add(proposals, contextTypeId, "pom");
+      add(proposals, contextTypeId, "jar");
+      add(proposals, contextTypeId, "war");
+      add(proposals, contextTypeId, "ear");
+      add(proposals, contextTypeId, "ejb");
+      add(proposals, contextTypeId, "eclipse-plugin");
+      add(proposals, contextTypeId, "eclipse-feature");
+      add(proposals, contextTypeId, "eclipse-update-site");
+      add(proposals, contextTypeId, "maven-plugin");
+      add(proposals, contextTypeId, "maven-archetype");
+    }
+  },
+  
+  SCOPE("scope") {
+    public void addTemplates(Collection<Template> proposals, Node node, String prefix) {
+      String contextTypeId = getContextTypeId();
+      add(proposals, contextTypeId, "compile");
+      add(proposals, contextTypeId, "test");
+      add(proposals, contextTypeId, "provided");
+      add(proposals, contextTypeId, "runtime");
+      add(proposals, contextTypeId, "system");
+      // TODO only show "import" scope in <dependencyManagement>
+      add(proposals, contextTypeId, "import");
+    }    
   },
   
   SYSTEM_PATH("systemPath"),
@@ -312,10 +344,6 @@ public enum PomTemplateContext {
       add(proposals, "site", "Generates the project's site documentation");
       add(proposals, "post-site", "Executes processes needed to finalize the site generation, and to prepare for site deployment");
       add(proposals, "site-deploy", "Deploys the generated site documentation to the specified web server");
-    }
-
-    private boolean add(Collection<Template> templates, String name, String description) {
-      return templates.add(new Template(name, description, getContextTypeId(), name, false));
     }
   };
 
@@ -477,4 +505,12 @@ public enum PomTemplateContext {
     return nodeList != null && nodeList.getLength() == 1;
   }
 
+  private static void add(Collection<Template> proposals, String contextTypeId, String name) {
+    add(proposals, contextTypeId, name, name);
+  }    
+  
+  private static void add(Collection<Template> proposals, String contextTypeId, String name, String description) {
+    proposals.add(new Template(name, description, contextTypeId, name, false));
+  }    
+  
 }
