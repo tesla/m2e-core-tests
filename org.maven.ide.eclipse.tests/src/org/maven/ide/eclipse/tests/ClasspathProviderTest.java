@@ -15,11 +15,13 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
@@ -45,6 +47,9 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
 
     workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
 
+    List<IMarker> errorMarkers = findErrorMarkers(cptest);
+    assertEquals(toString(errorMarkers.toArray(new IMarker[errorMarkers.size()])), 0, errorMarkers.size());
+    
     ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(cptest.getFile("TestApp.launch"));
 
     MavenRuntimeClasspathProvider classpathProvider = new MavenRuntimeClasspathProvider();
