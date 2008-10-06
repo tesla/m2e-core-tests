@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Properties;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -48,7 +49,8 @@ public class WorkspaceStateWriter implements IMavenProjectChangedListener {
       for(IMavenProjectFacade projectFacade : projectManager.getProjects()) {
         try {
           Artifact artifact = projectFacade.getMavenProject(monitor).getArtifact();
-          File pom = projectFacade.getPom().getLocation().toFile();
+          IFile pomFile = projectFacade.getPom();
+          File pom = pomFile.getLocation().toFile();
           if (pom.canRead()) {
             String key = artifact.getGroupId() + ":" + artifact.getArtifactId() + ":pom:" + artifact.getBaseVersion();
             state.put(key, pom.getCanonicalPath());
