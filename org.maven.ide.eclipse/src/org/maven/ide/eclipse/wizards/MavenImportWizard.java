@@ -50,6 +50,7 @@ public class MavenImportWizard extends Wizard implements IImportWizard {
   public MavenImportWizard() {
     importConfiguration = new ProjectImportConfiguration();
     setNeedsProgressMonitor(true);
+    setWindowTitle("Import Maven projects");
   }
 
   public MavenImportWizard(ProjectImportConfiguration importConfiguration, List<String> locations) {

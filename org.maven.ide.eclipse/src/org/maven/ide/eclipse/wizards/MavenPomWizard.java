@@ -61,6 +61,7 @@ public class MavenPomWizard extends Wizard implements INewWizard {
   public MavenPomWizard() {
     super();
     setNeedsProgressMonitor(true);
+    setWindowTitle("Maven POM wizard");
   }
 
   /**
