@@ -330,7 +330,7 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
 
   void refreshFolder(IPath path, IProgressMonitor monitor) throws CoreException {
     IFolder folder = getProject().getFolder(path);
-    if (folder != null) {
+    if(folder != null && folder.isAccessible()) {
       folder.refreshLocal(IResource.DEPTH_INFINITE, monitor);
     }
   }
