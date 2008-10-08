@@ -11,13 +11,14 @@ package org.maven.ide.eclipse.jdt;
 
 import java.io.File;
 
-import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenConsole;
@@ -30,7 +31,7 @@ import org.maven.ide.eclipse.jdt.internal.launch.MavenLaunchConfigurationListene
 import org.maven.ide.eclipse.project.MavenProjectManager;
 
 
-public class MavenJdtPlugin implements BundleActivator {
+public class MavenJdtPlugin extends AbstractUIPlugin {
 
   public static String PLUGIN_ID = "org.maven.ide.eclipse.jdt";
   
@@ -41,9 +42,19 @@ public class MavenJdtPlugin implements BundleActivator {
   
   public MavenJdtPlugin() {
     instance = this;
+
+    if(Boolean.parseBoolean(Platform.getDebugOption(PLUGIN_ID + "/debug/initialization"))) {
+      System.err.println("### executing constructor " + PLUGIN_ID); //$NON-NLS-1$
+      new Throwable().printStackTrace();
+    }
   }
 
   public void start(BundleContext bundleContext) throws Exception {
+    if(Boolean.parseBoolean(Platform.getDebugOption(PLUGIN_ID + "/debug/initialization"))) {
+      System.err.println("### executing start() " + PLUGIN_ID); //$NON-NLS-1$
+      new Throwable().printStackTrace();
+    }
+    
     IWorkspace workspace = ResourcesPlugin.getWorkspace();
     MavenPlugin mavenPlugin = MavenPlugin.getDefault();
 
@@ -72,7 +83,6 @@ public class MavenJdtPlugin implements BundleActivator {
     this.launchConfigurationListener = new MavenLaunchConfigurationListener();
     DebugPlugin.getDefault().getLaunchManager().addLaunchConfigurationListener(launchConfigurationListener);
     projectManager.addMavenProjectChangedListener(launchConfigurationListener);
-
   }
 
   public void stop(BundleContext context) throws Exception {

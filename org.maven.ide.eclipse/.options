@@ -3,6 +3,9 @@
 # Turn on debugging for the org.maven.ide.eclipse plugin.
 org.maven.ide.eclipse/debug=false
 
+# Plugin initialization
+org.maven.ide.eclipse/debug/initialization=false
+
 # Maven builder
 org.maven.ide.eclipse/debug/builder=false
 

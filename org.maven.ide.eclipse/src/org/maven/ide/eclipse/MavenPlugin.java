@@ -27,6 +27,7 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -115,6 +116,11 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
   public MavenPlugin() {
     plugin = this;
+
+    if(Boolean.parseBoolean(Platform.getDebugOption(IMavenConstants.PLUGIN_ID + "/debug/initialization"))) {
+      System.err.println("### executing constructor " + IMavenConstants.PLUGIN_ID); //$NON-NLS-1$
+      new Throwable().printStackTrace();
+    }
   }
 
   /**
@@ -122,6 +128,12 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
    */
   public void start(final BundleContext context) throws Exception {
     super.start(context);
+    
+    if(Boolean.parseBoolean(Platform.getDebugOption(IMavenConstants.PLUGIN_ID + "/debug/initialization"))) {
+      System.err.println("### executing start() " + IMavenConstants.PLUGIN_ID); //$NON-NLS-1$
+      new Throwable().printStackTrace();
+    }
+    
     this.bundleContext = context;
 
     MavenLogger.setLog(getLog());

@@ -3,6 +3,8 @@
 # Turn on debugging for the org.maven.ide.eclipse.jdt plugin.
 org.maven.ide.eclipse.jdt/debug=false
 
+# Plugin initialization
+org.maven.ide.eclipse.jdt/debug/initialization=false
 
 # Maven compilation participant
 org.maven.ide.eclipse.jdt/debug/compilationParticipant=false
