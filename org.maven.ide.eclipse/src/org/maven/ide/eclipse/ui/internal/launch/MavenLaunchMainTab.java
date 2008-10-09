@@ -583,18 +583,9 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
     configuration.setAttribute(ATTR_WORKSPACE_RESOLUTION, this.enableWorkspaceResolution.getSelection());
     configuration.setAttribute(ATTR_DEBUG_OUTPUT, this.debugOutputButton.getSelection());
 
-    String selectedRuntimeLocation = null;
-    try {
-      selectedRuntimeLocation = configuration.getAttribute(ATTR_RUNTIME, (String) null);
-    } catch(CoreException ex) {
-      // ignore
-    }
-    if (!MavenRuntimeManager.WORKSPACE.equals(selectedRuntimeLocation)) {
-      // don't reset WORKSPACE runtime
-      IStructuredSelection selection = (IStructuredSelection) runtimeComboViewer.getSelection();
-      MavenRuntime runtime = (MavenRuntime) selection.getFirstElement();
-      configuration.setAttribute(ATTR_RUNTIME, runtime.getLocation());
-    }
+    IStructuredSelection selection = (IStructuredSelection) runtimeComboViewer.getSelection();
+    MavenRuntime runtime = (MavenRuntime) selection.getFirstElement();
+    configuration.setAttribute(ATTR_RUNTIME, runtime.getLocation());
 
     // store as String in "param=value" format 
     List<String> properties = new ArrayList<String>();
