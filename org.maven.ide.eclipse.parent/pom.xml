@@ -95,6 +95,7 @@
     -->
 
     <module>../org.maven.ide.eclipse</module>
+    <module>../org.maven.ide.eclipse.launching</module>
     <module>../org.maven.ide.eclipse.jdt</module>
     <module>../org.maven.ide.eclipse.central</module>
     <module>../org.maven.ide.eclipse.mylyn3</module>

@@ -250,7 +250,8 @@ public class MavenProjectManagerImpl {
     
     String version = projectNode.get(P_VERSION, null);
     if(version == null) {  // migrate from old config
-      return LegacyBuildPathManager.getResolverConfiguration(project);
+      // return LegacyBuildPathManager.getResolverConfiguration(project);
+      return new ResolverConfiguration();
     }
   
     ResolverConfiguration configuration = new ResolverConfiguration();

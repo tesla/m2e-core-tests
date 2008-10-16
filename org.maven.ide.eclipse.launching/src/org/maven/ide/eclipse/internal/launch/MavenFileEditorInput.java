@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.ui.internal.editors;
+package org.maven.ide.eclipse.internal.launch;
 
 import java.io.File;
 import java.io.FileInputStream;

@@ -12,12 +12,6 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jdt.core.IJavaModel;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
@@ -32,11 +26,9 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.dialogs.ElementListSelectionDialog;
+import org.eclipse.ui.dialogs.ContainerSelectionDialog;
 
 import org.apache.maven.model.Model;
-
-import org.maven.ide.eclipse.core.MavenLogger;
 
 
 /**
@@ -132,42 +124,43 @@ public class MavenPomWizardPage extends AbstractMavenWizardPage {
    * Uses the standard container selection dialog to choose the new value for the container field.
    */
   void handleBrowse() {
-//    ContainerSelectionDialog dialog = new ContainerSelectionDialog( getShell(), 
-//        ResourcesPlugin.getWorkspace().getRoot(), false, "Select project");
-//    if( dialog.open()==Window.OK) {
-//      Object[] result = dialog.getResult();
-//      if( result.length==1) {
-//        projectText.setText( ( ( Path) result[ 0]).toString());
-//      }
-//    }
-
-    IJavaModel javaModel = JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
-
-    IJavaProject[] projects;
-    try {
-      projects = javaModel.getJavaProjects();
-    } catch(JavaModelException e) {
-      MavenLogger.log(e);
-      projects = new IJavaProject[0];
-    }
-
-    ILabelProvider labelProvider = new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
-    ElementListSelectionDialog dialog = new ElementListSelectionDialog(getShell(), labelProvider);
-    dialog.setTitle("Select Project");
-    dialog.setMessage("Choose project where POM will be created");
-    dialog.setElements(projects);
-
-    String projectName = getProject();
-    if(projectName != null && projectName.length() > 0) {
-      IJavaProject javaProject = javaModel.getJavaProject(projectName);
-      if(javaProject != null) {
-        dialog.setInitialSelections(new Object[] {javaProject});
+    ContainerSelectionDialog dialog = new ContainerSelectionDialog(getShell(),
+        ResourcesPlugin.getWorkspace().getRoot(), false, "Select project");
+    dialog.showClosedProjects(false);
+    if(dialog.open() == Window.OK) {
+      Object[] result = dialog.getResult();
+      if(result.length == 1) {
+        projectText.setText(((Path) result[0]).toString());
       }
     }
 
-    if(dialog.open() == Window.OK) {
-      projectText.setText(((IJavaProject) dialog.getFirstResult()).getProject().getFullPath().toString());
-    }
+//    IJavaModel javaModel = JavaCore.create();
+//
+//    IJavaProject[] projects;
+//    try {
+//      projects = javaModel.getJavaProjects();
+//    } catch(JavaModelException e) {
+//      MavenLogger.log(e);
+//      projects = new IJavaProject[0];
+//    }
+//
+//    ILabelProvider labelProvider = new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
+//    ElementListSelectionDialog dialog = new ElementListSelectionDialog(getShell(), labelProvider);
+//    dialog.setTitle("Select Project");
+//    dialog.setMessage("Choose project where POM will be created");
+//    dialog.setElements(projects);
+//
+//    String projectName = getProject();
+//    if(projectName != null && projectName.length() > 0) {
+//      IJavaProject javaProject = javaModel.getJavaProject(projectName);
+//      if(javaProject != null) {
+//        dialog.setInitialSelections(new Object[] {javaProject});
+//      }
+//    }
+//
+//    if(dialog.open() == Window.OK) {
+//      projectText.setText(((IJavaProject) dialog.getFirstResult()).getProject().getFullPath().toString());
+//    }
   }
 
   /**

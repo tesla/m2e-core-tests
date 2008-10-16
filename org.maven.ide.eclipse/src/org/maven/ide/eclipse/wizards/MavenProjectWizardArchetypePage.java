@@ -73,6 +73,7 @@ import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.embedder.MavenEmbedder;
 
+import org.maven.ide.eclipse.MavenImages;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.archetype.ArchetypeCatalogFactory;
 import org.maven.ide.eclipse.archetype.ArchetypeManager;
@@ -271,8 +272,8 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
 
     final ToolItem clearToolItem = new ToolItem(toolBar, SWT.PUSH);
     clearToolItem.setEnabled(false);
-    clearToolItem.setImage(MavenPlugin.getImage("icons/clear.gif"));
-    clearToolItem.setDisabledImage(MavenPlugin.getImage("icons/clear_disabled.gif"));
+    clearToolItem.setImage(MavenImages.IMG_CLEAR);
+    clearToolItem.setDisabledImage(MavenImages.IMG_CLEAR_DISABLED);
     clearToolItem.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         filterText.setText("");
@@ -411,7 +412,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
     addArchetypeButton.setText("&Add Archetype...");
     addArchetypeButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
-        CustomArchetypeDialog dialog = new CustomArchetypeDialog(getShell(), "Add Archetype", "icons/new_m2_project.gif");
+        CustomArchetypeDialog dialog = new CustomArchetypeDialog(getShell(), "Add Archetype");
         if(dialog.open()==Window.OK) {
           String archetypeGroupId = dialog.getArchetypeGroupId();
           String archetypeArtifactId = dialog.getArchetypeArtifactId();

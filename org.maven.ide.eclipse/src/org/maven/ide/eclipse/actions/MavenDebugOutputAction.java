@@ -13,6 +13,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
+import org.maven.ide.eclipse.MavenImages;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;
 
@@ -32,7 +33,7 @@ public class MavenDebugOutputAction extends Action {
 
   public MavenDebugOutputAction() {
     setToolTipText("Debug Output");
-    setImageDescriptor(MavenPlugin.getImageDescriptor("icons/debug.gif"));
+    setImageDescriptor(MavenImages.DEBUG);
     
     getPreferenceStore().addPropertyChangeListener(listener);
     setChecked(isDebug());

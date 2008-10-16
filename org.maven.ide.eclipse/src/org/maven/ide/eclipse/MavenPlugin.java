@@ -139,7 +139,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     MavenLogger.setLog(getLog());
     
     try {
-      this.console = new MavenConsoleImpl(MavenPlugin.getImageDescriptor("icons/m2.gif")); //$NON-NLS-1$
+      this.console = new MavenConsoleImpl(MavenImages.M2); //$NON-NLS-1$
     } catch(RuntimeException ex) {
       MavenLogger.log(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Unable to start console: " + ex.toString(), ex));
     }

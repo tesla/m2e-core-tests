@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.internal.actions;
+package org.maven.ide.eclipse.actions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,8 +33,8 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 
-import org.maven.ide.eclipse.actions.AbstractMavenMenuCreator;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.internal.actions.DefaultMavenMenuCreator;
 
 
 /**

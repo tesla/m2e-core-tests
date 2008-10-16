@@ -26,7 +26,6 @@ import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -48,6 +47,7 @@ import org.apache.maven.archetype.catalog.Archetype;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 
+import org.maven.ide.eclipse.MavenImages;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.OpenMavenConsoleAction;
 import org.maven.ide.eclipse.actions.SelectionUtil;
@@ -78,11 +78,6 @@ import org.maven.ide.eclipse.project.ProjectImportConfiguration;
  * </p>
  */
 public class MavenProjectWizard extends Wizard implements INewWizard {
-  /** The name of the default wizard page image. */
-  private static final String DEFAULT_PAGE_IMAGE_NAME = "icons/new_m2_project_wizard.gif";
-
-  /** The default wizard page image. */
-  private static final ImageDescriptor DEFAULT_PAGE_IMAGE = MavenPlugin.getImageDescriptor(DEFAULT_PAGE_IMAGE_NAME);
 
   /** The wizard page for gathering general project information. */
   protected MavenProjectWizardLocationPage locationPage;
@@ -111,7 +106,7 @@ public class MavenProjectWizard extends Wizard implements INewWizard {
   public MavenProjectWizard() {
     super();
     setWindowTitle(Messages.getString("wizard.project.title"));
-    setDefaultPageImageDescriptor(DEFAULT_PAGE_IMAGE);
+    setDefaultPageImageDescriptor(MavenImages.WIZ_NEW_PROJECT);
     setNeedsProgressMonitor(true);
   }
   

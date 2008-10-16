@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (c) 2007, 2008 Sonatype, Inc.
+  All rights reserved. This program and the accompanying materials
+  are made available under the terms of the Eclipse Public License v1.0
+  which accompanies this distribution, and is available at
+  http://www.eclipse.org/legal/epl-v10.html
+-->
+<?eclipse version="3.0"?>
+<plugin>
+
+  <extension point="org.eclipse.ui.commands">
+    <command id="org.maven.ide.eclipse.pomFileAction.run"
+             categoryId="org.eclipse.debug.ui.category.run"
+             name="%m2.shortcut.description.run"
+             description="%m2.shortcut.description.run"/>
+    <command id="org.maven.ide.eclipse.actions.LifeCycleInstall.run"
+             categoryId="org.eclipse.debug.ui.category.run"
+             name="%m2.shortcut.description.install"
+             description="%m2.shortcut.description.install"/>
+    <command id="org.maven.ide.eclipse.actions.LifeCycleClean.run"
+             categoryId="org.eclipse.debug.ui.category.run"
+             name="%m2.shortcut.description.clean"
+             description="%m2.shortcut.description.clean"/>
+    <command id="org.maven.ide.eclipse.actions.LifeCycleTest.run"
+             categoryId="org.eclipse.debug.ui.category.run"
+             name="%m2.shortcut.description.test"
+             description="%m2.shortcut.description.test"/>
+    <command id="org.maven.ide.eclipse.actions.LifeCycleGenerateSources.run"
+             name="%m2.shortcut.description.generate-sources"
+             description="%m2.shortcut.description.generate-sources"
+             categoryId="org.eclipse.debug.ui.category.run"/>
+  </extension>
+
+  <extension point="org.eclipse.ui.bindings">
+    <key sequence="M3+M2+X M"
+         contextId="org.eclipse.ui.contexts.window"
+         commandId="org.maven.ide.eclipse.pomFileAction.run"
+         schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+    <key sequence="M2+M3+P"
+         commandId="org.maven.ide.eclipse.ui.command.openPom"
+         schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+  </extension>
+
+   <extension point="org.eclipse.debug.ui.launchShortcuts">
+      <shortcut id="org.maven.ide.eclipse.pomFileAction"
+                class="org.maven.ide.eclipse.actions.ExecutePomAction"
+                icon="icons/m2.gif"
+                label="%m2.popup.pomFile.label"
+                modes="run,debug">
+         <contextualLaunch>
+           <contextLabel label="%m2.popup.pomFile.label" mode="run"/>
+           <contextLabel label="%m2.popup.pomFile.label" mode="debug"/>
+           <enablement>
+             <with variable="selection">
+               <count value="1"/>
+               <iterate>
+                 <and>
+                   <test property="org.maven.ide.eclipse.launchable"/>
+                   <adapt type="org.eclipse.core.runtime.IAdaptable"/>
+                 </and>
+               </iterate>
+             </with>
+           </enablement>
+       </contextualLaunch>
+     </shortcut>
+     <shortcut id="org.maven.ide.eclipse.pomFileActionWithDialog"
+               class="org.maven.ide.eclipse.actions.ExecutePomAction:WITH_DIALOG"
+               icon="icons/m2.gif"
+               label="%m2.popup.pomFileWithDialog.label"
+               modes="run,debug">
+        <contextualLaunch>
+           <contextLabel label="%m2.popup.pomFileWithDialog.label" mode="run"/>
+           <contextLabel label="%m2.popup.pomFileWithDialog.label" mode="debug"/>
+           <enablement>
+              <with variable="selection">
+                 <count value="1"/>
+                 <iterate>
+                    <and>
+                   <test property="org.maven.ide.eclipse.launchable"/>
+                   <adapt type="org.eclipse.core.runtime.IAdaptable"/>
+                    </and>
+                 </iterate>
+              </with>
+           </enablement>
+        </contextualLaunch>
+     </shortcut>
+     <shortcut id="org.maven.ide.eclipse.actions.LifeCycleInstall"
+               class="org.maven.ide.eclipse.actions.ExecutePomAction:install"
+               icon="icons/m2.gif"
+               label="%m2.popup.lifecycle.install"
+               modes="run,debug">
+        <contextualLaunch>
+           <contextLabel label="%m2.popup.lifecycle.install" mode="run"/>
+           <contextLabel label="%m2.popup.lifecycle.install" mode="debug"/>
+           <enablement>
+              <with variable="selection">
+                 <count value="1"/>
+                 <iterate>
+                    <and>
+                      <test property="org.maven.ide.eclipse.launchable"/>
+                      <adapt type="org.eclipse.core.runtime.IAdaptable"/>
+                    </and>
+                 </iterate>
+              </with>
+           </enablement>
+        </contextualLaunch>
+     </shortcut>
+     <shortcut id="org.maven.ide.eclipse.actions.LifeCyclePackage"
+               class="org.maven.ide.eclipse.actions.ExecutePomAction:package"
+               icon="icons/m2.gif"
+               label="%m2.popup.lifecycle.package"
+               modes="run,debug">
+        <contextualLaunch>
+           <contextLabel label="%m2.popup.lifecycle.package" mode="run"/>
+           <contextLabel label="%m2.popup.lifecycle.package" mode="debug"/>
+           <enablement>
+              <with variable="selection">
+                 <count value="1"/>
+                 <iterate>
+                    <and>
+                      <test property="org.maven.ide.eclipse.launchable"/>
+                      <adapt type="org.eclipse.core.runtime.IAdaptable"/>
+                    </and>
+                 </iterate>
+              </with>
+           </enablement>
+        </contextualLaunch>
+     </shortcut>
+     <shortcut id="org.maven.ide.eclipse.actions.LifeCycleSource"
+               class="org.maven.ide.eclipse.actions.ExecutePomAction:source:jar"
+               icon="icons/m2.gif"
+               label="%m2.popup.lifecycle.source"
+               modes="run,debug">
+        <contextualLaunch>
+           <contextLabel label="%m2.popup.lifecycle.source" mode="run"/>
+           <contextLabel label="%m2.popup.lifecycle.source" mode="debug"/>
+           <enablement>
+              <with variable="selection">
+                 <count value="1"/>
+                 <iterate>
+                    <and>
+                      <test property="org.maven.ide.eclipse.launchable"/>
+                      <adapt type="org.eclipse.core.runtime.IAdaptable"/>
+                    </and>
+                 </iterate>
+              </with>
+           </enablement>
+        </contextualLaunch>
+     </shortcut>
+     <shortcut id="org.maven.ide.eclipse.actions.LifeCycleTest"
+               class="org.maven.ide.eclipse.actions.ExecutePomAction:test"
+               icon="icons/m2.gif"
+               label="%m2.popup.lifecycle.test"
+               modes="run,debug">
+        <contextualLaunch>
+           <contextLabel label="%m2.popup.lifecycle.test" mode="run"/>
+           <contextLabel label="%m2.popup.lifecycle.test" mode="debug"/>
+           <enablement>
+              <with variable="selection">
+                 <count value="1"/>
+                 <iterate>
+                    <and>
+                      <test property="org.maven.ide.eclipse.launchable"/>
+                      <adapt type="org.eclipse.core.runtime.IAdaptable"/>
+                    </and>
+                 </iterate>
+              </with>
+           </enablement>
+        </contextualLaunch>
+     </shortcut>
+     <shortcut id="org.maven.ide.eclipse.actions.LifeCycleGenerateSources"
+           class="org.maven.ide.eclipse.actions.ExecutePomAction:generate-sources"
+           icon="icons/m2.gif"
+           label="%m2.popup.lifecycle.generate-sources"
+           modes="run,debug">
+        <contextualLaunch>
+           <contextLabel label="%m2.popup.lifecycle.generate-sources" mode="run"/>
+           <contextLabel label="%m2.popup.lifecycle.generate-sources" mode="debug"/>
+           <enablement>
+              <with variable="selection">
+                 <count value="1"/>
+                 <iterate>
+                    <and>
+                      <test property="org.maven.ide.eclipse.launchable"/>
+                      <adapt type="org.eclipse.core.runtime.IAdaptable"/>
+                    </and>
+                 </iterate>
+              </with>
+           </enablement>
+        </contextualLaunch>
+     </shortcut>
+     <shortcut id="org.maven.ide.eclipse.actions.LifeCycleAssembly"
+           class="org.maven.ide.eclipse.actions.ExecutePomAction:assembly:assembly"
+           icon="icons/m2.gif"
+           label="%m2.popup.lifecycle.assembly"
+           modes="run,debug">
+        <contextualLaunch>
+           <contextLabel label="%m2.popup.lifecycle.assembly" mode="run"/>
+           <contextLabel label="%m2.popup.lifecycle.assembly" mode="debug"/>
+           <enablement>
+              <with variable="selection">
+                 <count value="1"/>
+                 <iterate>
+                    <and>
+                      <test property="org.maven.ide.eclipse.launchable"/>
+                      <adapt type="org.eclipse.core.runtime.IAdaptable"/>
+                    </and>
+                 </iterate>
+              </with>
+           </enablement>
+        </contextualLaunch>
+     </shortcut>
+     <shortcut id="org.maven.ide.eclipse.actions.LifeCycleClean"
+               class="org.maven.ide.eclipse.actions.ExecutePomAction:clean"
+               icon="icons/m2.gif"
+               label="%m2.popup.lifecycle.clean"
+               modes="run,debug">
+        <contextualLaunch>
+           <contextLabel label="%m2.popup.lifecycle.clean" mode="run"/>
+           <contextLabel label="%m2.popup.lifecycle.clean" mode="debug"/>
+           <enablement>
+              <with variable="selection">
+                 <count value="1"/>
+                 <iterate>
+                    <and>
+                      <test property="org.maven.ide.eclipse.launchable"/>
+                      <adapt type="org.eclipse.core.runtime.IAdaptable"/>
+                    </and>
+                 </iterate>
+              </with>
+           </enablement>
+        </contextualLaunch>
+     </shortcut>
+  </extension>
+
+   <!-- m2 LaunchGroup -->
+   <extension point="org.eclipse.debug.core.launchConfigurationTypes">
+   <!-- careful when changing id, it's used to locate launch configuration from the java code! -->
+      <!--      category="org.eclipse.ui.externaltools" -->
+      <launchConfigurationType
+            id="org.maven.ide.eclipse.Maven2LaunchConfigurationType"
+            delegate="org.maven.ide.eclipse.internal.launch.MavenLaunchDelegate"
+            name="%m2.launch.type.name"
+            modes="run,debug"
+            public="true"/>
+      <launchConfigurationType
+            id="org.maven.ide.eclipse.Maven2BuilderConfigurationType"
+            delegate="org.maven.ide.eclipse.internal.launch.MavenLaunchDelegate"
+            category="org.eclipse.ui.externaltools.builder"
+            name="%m2.launch.type.builder.name"
+            modes="run"/>
+   </extension>
+
+   <extension point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+      <launchConfigurationTabGroup id="org.maven.ide.eclipse.LaunchConfigurationTabGroup"
+            type="org.maven.ide.eclipse.Maven2LaunchConfigurationType"
+            class="org.maven.ide.eclipse.ui.internal.launch.MavenLaunchConfigurationTabGroup"/>
+      <launchConfigurationTabGroup id="org.maven.ide.eclipse.BuilderConfigurationTabGroup"
+            type="org.maven.ide.eclipse.Maven2BuilderConfigurationType"
+            class="org.maven.ide.eclipse.ui.internal.launch.MavenBuilderConfigurationTabGroup"/>
+   </extension>
+
+   <!-- Maven launcher configuration type image -->
+   <extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+      <launchConfigurationTypeImage
+            icon="icons/m2.gif"
+            configTypeID="org.maven.ide.eclipse.Maven2LaunchConfigurationType"
+            id="org.maven.ide.eclipse.launch.Maven2LaunchConfigurationTypeImage"/>
+      <launchConfigurationTypeImage
+            icon="icons/m2.gif"
+            configTypeID="org.maven.ide.eclipse.Maven2BuilderConfigurationType"
+            id="org.maven.ide.eclipse.launch.Maven2BuilderConfigurationTypeImage"/>
+   </extension>
+
+   <extension point="org.eclipse.debug.ui.consoleLineTrackers">
+      <consoleLineTracker id="org.maven.ide.eclipse.console.MavenConsoleLineTracker"
+            class="org.maven.ide.eclipse.internal.launch.MavenConsoleLineTracker"
+            processType="java"/>
+   </extension>
+
+</plugin>

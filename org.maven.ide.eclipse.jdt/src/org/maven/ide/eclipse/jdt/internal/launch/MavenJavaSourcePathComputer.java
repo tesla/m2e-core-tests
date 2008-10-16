@@ -6,22 +6,13 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.actions;
+package org.maven.ide.eclipse.jdt.internal.launch;
 
-import org.eclipse.jface.action.Action;
-
-import org.maven.ide.eclipse.MavenImages;
-import org.maven.ide.eclipse.MavenPlugin;
-
-public class MavenConsoleRemoveAction extends Action {
-
-  public MavenConsoleRemoveAction() {
-    setToolTipText("Close Maven2 Console");
-    setImageDescriptor(MavenImages.CLOSE);
-  }
-  
-  public void run() {
-    MavenPlugin.getDefault().getConsole().closeConsole();
-  }
+/**
+ * MavenJavaSourcePathComputer
+ *
+ * @author Eugene Kuleshov
+ */
+public class MavenJavaSourcePathComputer {
 
 }

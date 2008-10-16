@@ -17,14 +17,15 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
+//import org.eclipse.jdt.core.IJavaProject;
+//import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
 
 import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.embedder.ArtifactKey;
 
 
 /**
@@ -80,11 +81,9 @@ public class SelectionUtil {
       }
     }
 
-    IPackageFragmentRoot fragment = getType(element, IPackageFragmentRoot.class);
-    if(fragment != null) {
-      if(/*fragment.isExternal() && */fragment.isArchive()) {
-        return JAR_FILE;
-      }
+    ArtifactKey artifactKey  = getType(element, ArtifactKey.class);
+    if(artifactKey != null) {
+      return JAR_FILE;
     }
 
     IWorkingSet workingSet = getType(element, IWorkingSet.class);
@@ -102,8 +101,12 @@ public class SelectionUtil {
   public static <T> T getType(Object element, Class<T> type) {
     if(type.isInstance(element)) {
       return (T) element;
-    } else if(element instanceof IAdaptable) {
-      return (T) ((IAdaptable) element).getAdapter(type);
+    }
+    if(element instanceof IAdaptable) {
+      T adapter = (T) ((IAdaptable) element).getAdapter(type);
+      if(adapter != null) {
+        return adapter;
+      }
     }
     return element == null ? null : (T) Platform.getAdapterManager().getAdapter(element, type);
   }
@@ -112,21 +115,26 @@ public class SelectionUtil {
     Object element = selection == null ? null : selection.getFirstElement();
     {
       IResource resource = getType(element, IResource.class);
-      if(resource!=null) {
+      if(resource != null) {
         return resource.getProject().getProject().getLocation();
       }
     }
     
-    IPackageFragmentRoot fragment = getType(element, IPackageFragmentRoot.class);
-    if(fragment != null) {
-      IJavaProject javaProject = fragment.getJavaProject();
-      if(javaProject != null) {
-        IResource resource = getType(javaProject, IResource.class);
-        if(resource != null) {
-          return resource.getProject().getProject().getLocation();
-        }
-      }
-    }
+//    IResource resource = getType(element, IResource.class);
+//    if(resource != null) {
+//      return resource.getLocation();
+//    }
+    
+//    IPackageFragmentRoot fragment = getType(element, IResource.class);
+//    if(fragment != null) {
+//      IJavaProject javaProject = fragment.getJavaProject();
+//      if(javaProject != null) {
+//        IResource resource = getType(javaProject, IResource.class);
+//        if(resource != null) {
+//          return resource.getProject().getProject().getLocation();
+//        }
+//      }
+//    }
     
     return null; 
   }
@@ -145,18 +153,22 @@ public class SelectionUtil {
         return getWorkingSet(resource.getProject());
       }
     }
-    
-    IPackageFragmentRoot fragment = getType(element, IPackageFragmentRoot.class);
-    if(fragment != null) {
-      IJavaProject javaProject = fragment.getJavaProject();
-      if(javaProject != null) {
-        IResource resource = getType(javaProject, IResource.class);
-        if(resource != null) {
-          return getWorkingSet(resource.getProject());
-        }
 
-      }
-    }
+//    IResource resource = getType(element, IResource.class);
+//    if(resource != null) {
+//      return getWorkingSet(resource);
+//    }
+    
+//    IPackageFragmentRoot fragment = getType(element, IPackageFragmentRoot.class);
+//    if(fragment != null) {
+//      IJavaProject javaProject = fragment.getJavaProject();
+//      if(javaProject != null) {
+//        IResource resource = getType(javaProject, IResource.class);
+//        if(resource != null) {
+//          return getWorkingSet(resource.getProject());
+//        }
+//      }
+//    }
 
     return null;
   }

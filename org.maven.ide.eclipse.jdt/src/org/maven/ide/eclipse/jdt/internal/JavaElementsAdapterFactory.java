@@ -9,8 +9,10 @@
 package org.maven.ide.eclipse.jdt.internal;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdapterFactory;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
@@ -19,42 +21,45 @@ import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.jdt.MavenJdtPlugin;
 
+
 /**
  * Adapter factory for Java elements
- *
+ * 
  * @author Igor Fedorenko
  */
 @SuppressWarnings("unchecked")
 public class JavaElementsAdapterFactory implements IAdapterFactory {
 
-  private static final Class[] ADAPTER_LIST = new Class[] { ArtifactKey.class };
+  private static final Class[] ADAPTER_LIST = new Class[] {ArtifactKey.class, IResource.class};
 
-	public Object getAdapter(Object adaptableObject, Class adapterType) {
-		if (!ArtifactKey.class.equals(adapterType)) {
-		  return null;
-		}
+  public Class[] getAdapterList() {
+    return ADAPTER_LIST;
+  }
 
-		if (adaptableObject instanceof IPackageFragmentRoot) {
-			IPackageFragmentRoot fragment = (IPackageFragmentRoot) adaptableObject;
-			IProject project = fragment.getJavaProject().getProject();
-			if (project.isAccessible() && fragment.isArchive()) {
-				try {
-					return MavenJdtPlugin.getDefault().getBuildpathManager().findArtifact(project, fragment.getPath());
-				} catch (CoreException ex) {
-					MavenLogger.log(ex);
-					MavenPlugin.getDefault().getConsole().logError("Can't find artifact for " + fragment);
-					return null;
-				}
-			}
-		} else if (adaptableObject instanceof IJavaProject) {
-		  IJavaProject javaProject = (IJavaProject) adaptableObject;
-		  return javaProject.getProject().getAdapter(ArtifactKey.class);
-		}
-		return null;
-	}
+  public Object getAdapter(Object adaptableObject, Class adapterType) {
+    if(adapterType == ArtifactKey.class) {
+      if(adaptableObject instanceof IPackageFragmentRoot) {
+        IPackageFragmentRoot fragment = (IPackageFragmentRoot) adaptableObject;
+        IProject project = fragment.getJavaProject().getProject();
+        if(project.isAccessible() && fragment.isArchive()) {
+          try {
+            return MavenJdtPlugin.getDefault().getBuildpathManager().findArtifact(project, fragment.getPath());
+          } catch(CoreException ex) {
+            MavenLogger.log(ex);
+            MavenPlugin.getDefault().getConsole().logError("Can't find artifact for " + fragment);
+            return null;
+          }
+        }
+      } else if(adaptableObject instanceof IJavaProject) {
+        return ((IJavaProject) adaptableObject).getProject().getAdapter(ArtifactKey.class);
+      }
 
-	public Class[] getAdapterList() {
-		return ADAPTER_LIST;
-	}
+    } else if(adapterType == IResource.class) {
+      if(adaptableObject instanceof IJavaElement) {
+        return ((IJavaElement) adaptableObject).getResource();
+      }
+    }
 
+    return null;
+  }
 }

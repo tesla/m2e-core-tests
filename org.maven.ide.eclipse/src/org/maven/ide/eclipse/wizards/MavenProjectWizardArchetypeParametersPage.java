@@ -16,11 +16,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ICellModifier;
@@ -314,10 +314,8 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
 
     String packageName = packageCombo.getText();
     if(packageName.trim().length() != 0) {
-      @SuppressWarnings("deprecation")
-      IStatus status = JavaConventions.validatePackageName(packageName);
-      if(!status.isOK()) {
-        setErrorMessage(status.getMessage());
+      if(!Pattern.matches("[A-Za-z_$][A-Za-z_$\\d]*(?:\\.[A-Za-z_$][A-Za-z_$\\d]*)*", packageName)) {
+        setErrorMessage("Invalid package name");
         setPageComplete(false);
         return;
       }

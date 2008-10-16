@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
+import org.maven.ide.eclipse.MavenImages;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
@@ -324,20 +325,20 @@ public class MavenPomSelectionComponent extends Composite {
         IndexedArtifactFile f = (IndexedArtifactFile) element;
         if(IndexManager.SEARCH_CLASS_NAME.equals(queryType)) {
           if(f.sourcesExists==IndexManager.PRESENT) {
-            return MavenPlugin.getImage("icons/java_src_obj.gif");
+            return MavenImages.IMG_JAVA_SRC;
           }
-          return MavenPlugin.getImage("icons/java_obj.gif");
+          return MavenImages.IMG_JAVA;
         }
         if(f.sourcesExists==IndexManager.PRESENT) {
-          return MavenPlugin.getImage("icons/jar_src_version.gif");
+          return MavenImages.IMG_VERSION_SRC;
         }
-        return MavenPlugin.getImage("icons/jar_version.gif");
+        return MavenImages.IMG_VERSION;
       } else if(element instanceof IndexedArtifact) {
         // IndexedArtifact i = (IndexedArtifact) element;
         if(IndexManager.SEARCH_CLASS_NAME.equals(queryType)) {
-          return MavenPlugin.getImage("icons/java_obj.gif");
+          return MavenImages.IMG_JAVA;
         }
-        return MavenPlugin.getImage("icons/jar_obj.gif");
+        return MavenImages.IMG_JAR;
       }
       return null;
     }

@@ -13,8 +13,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.jdt.ui.ISharedImages;
-import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -36,6 +34,7 @@ import org.eclipse.swt.widgets.Label;
 
 import org.apache.maven.model.Dependency;
 
+import org.maven.ide.eclipse.MavenImages;
 import org.maven.ide.eclipse.core.Messages;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.index.IndexManager;
@@ -226,8 +225,7 @@ public class MavenDependenciesWizardPage extends AbstractMavenWizardPage {
   public static class ArtifactLabelProvider extends LabelProvider {
 
     /** The image to show for all objects of type <code>Dependency</code>. */
-    private static final Image DEPENDENCY_IMAGE = JavaUI.getSharedImages().getImage(
-        ISharedImages.IMG_OBJS_EXTERNAL_ARCHIVE);
+    private static final Image DEPENDENCY_IMAGE = MavenImages.IMG_JAR;
 
     /**
      * {@inheritDoc}

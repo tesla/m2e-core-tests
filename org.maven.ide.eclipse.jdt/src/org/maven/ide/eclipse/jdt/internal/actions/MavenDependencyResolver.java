@@ -46,8 +46,8 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
 
+import org.maven.ide.eclipse.MavenImages;
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.actions.ChangeCorrectionProposal;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
@@ -129,7 +129,7 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
     private final boolean addImport;
 
     OpenBuildPathCorrectionProposal(String query, IInvocationContext context, int relevance, boolean addImport) {
-      super("Search dependency for " + query, null, relevance, MavenPlugin.getImage("icons/mjar.gif"));
+      super("Search dependency for " + query, null, relevance, MavenImages.IMG_MAVEN_JAR);
       this.query = query;
       this.context = context;
       this.addImport = addImport;

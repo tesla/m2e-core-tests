@@ -13,7 +13,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.swt.SWT;
@@ -29,7 +28,6 @@ import org.apache.maven.model.Dependency;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.SelectionUtil;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
-import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.project.MavenProjectPomScanner;
 import org.maven.ide.eclipse.project.MavenProjectScmInfo;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
@@ -81,18 +79,14 @@ public class MavenMaterializePomWizard extends Wizard implements IImportWizard, 
 
     for(Iterator<?> it = selection.iterator(); it.hasNext();) {
       Object element = it.next();
-      if(element instanceof IPackageFragmentRoot) {
-        ArtifactKey a = SelectionUtil.getType(element, ArtifactKey.class);
-        if(a!=null) {
-          Dependency d = new Dependency();
-          d.setGroupId(a.getGroupId());
-          d.setArtifactId(a.getArtifactId());
-          d.setVersion(a.getVersion());
-          d.setClassifier(a.getClassifier());
-          dependencies.add(d);
-        }
-      } else if(element instanceof IndexedArtifactFile) {
-        dependencies.add(((IndexedArtifactFile) element).getDependency());
+      ArtifactKey artifactKey = SelectionUtil.getType(element, ArtifactKey.class);
+      if(artifactKey!=null) {
+        Dependency d = new Dependency();
+        d.setGroupId(artifactKey.getGroupId());
+        d.setArtifactId(artifactKey.getArtifactId());
+        d.setVersion(artifactKey.getVersion());
+        d.setClassifier(artifactKey.getClassifier());
+        dependencies.add(d);
       }
     }
     

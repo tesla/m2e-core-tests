@@ -67,8 +67,6 @@ public class RepositoryIndexDialog extends TitleAreaDialog {
 
   private String title;
 
-  private String icon;
-
   private String message;
 
   Combo repositoryIdCombo;
@@ -87,10 +85,9 @@ public class RepositoryIndexDialog extends TitleAreaDialog {
 
   private IndexInfo indexInfo;
 
-  protected RepositoryIndexDialog(Shell shell, String title, String icon) {
+  protected RepositoryIndexDialog(Shell shell, String title) {
     super(shell);
     this.title = title;
-    this.icon = icon;
     this.message = "Enter Maven repository URL and repository Id";
     setShellStyle(SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
 
@@ -242,7 +239,7 @@ public class RepositoryIndexDialog extends TitleAreaDialog {
   protected void configureShell(Shell shell) {
     super.configureShell(shell);
     shell.setText(title);
-    shell.setImage(MavenPlugin.getImage(icon));
+    // shell.setImage(MavenPlugin.getImage(icon));
   }
 
   public void create() {

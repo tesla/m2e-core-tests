@@ -11,11 +11,15 @@ package org.maven.ide.eclipse.index;
 import java.util.Date;
 import java.util.List;
 
+import org.eclipse.core.runtime.IAdaptable;
+
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.model.Dependency;
 
-public class IndexedArtifactFile {
+import org.maven.ide.eclipse.embedder.ArtifactKey;
+
+public class IndexedArtifactFile implements IAdaptable {
   
   public final String repository;
 
@@ -63,6 +67,13 @@ public class IndexedArtifactFile {
     this.goals = goals;
   }
 
+  public ArtifactVersion getArtifactVersion() {
+    if (artifactVersion == null) {
+      artifactVersion = new DefaultArtifactVersion(version);
+    }
+    return artifactVersion;
+  }
+  
   public Dependency getDependency() {
     Dependency dependency = new Dependency();
     dependency.setArtifactId(artifact);
@@ -74,10 +85,17 @@ public class IndexedArtifactFile {
     return dependency;
   }
 
-  public ArtifactVersion getArtifactVersion() {
-    if (artifactVersion == null) {
-      artifactVersion = new DefaultArtifactVersion(version);
-    }
-    return artifactVersion;
+  public ArtifactKey getArtifactKey() {
+    return new ArtifactKey(group, artifact, version, classifier);    
   }
+  
+  @SuppressWarnings("unchecked")
+  public Object getAdapter(Class adapter) {
+    if(adapter==ArtifactKey.class) {
+      return getArtifactKey();
+    }
+    return null;
+  }
+
 }
+

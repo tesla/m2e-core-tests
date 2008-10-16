@@ -51,8 +51,6 @@ public class CustomArchetypeDialog extends TitleAreaDialog {
 
   private String title;
 
-  private String icon;
-
   private String message;
 
   private Combo archetypeGroupIdCombo;
@@ -73,10 +71,9 @@ public class CustomArchetypeDialog extends TitleAreaDialog {
 
   private String repositoryUrl;
 
-  protected CustomArchetypeDialog(Shell shell, String title, String icon) {
+  protected CustomArchetypeDialog(Shell shell, String title) {
     super(shell);
     this.title = title;
-    this.icon = icon;
     this.message = "Specify Archetype and Maven repository URL";
     setShellStyle(SWT.DIALOG_TRIM);
 
@@ -163,7 +160,6 @@ public class CustomArchetypeDialog extends TitleAreaDialog {
   protected void configureShell(Shell shell) {
     super.configureShell(shell);
     shell.setText(title);
-    shell.setImage(MavenPlugin.getImage(icon));
   }
 
   public void create() {

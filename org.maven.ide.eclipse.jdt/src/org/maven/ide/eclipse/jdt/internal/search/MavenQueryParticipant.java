@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.ui.internal.search;
+package org.maven.ide.eclipse.jdt.internal.search;
 
 import java.util.Collections;
 import java.util.Map;

@@ -13,11 +13,12 @@ import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -31,18 +32,16 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.IDebugEventSetListener;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.sourcelookup.AbstractSourceLookupDirector;
+import org.eclipse.debug.core.sourcelookup.ISourceContainerType;
 import org.eclipse.debug.core.sourcelookup.ISourceLookupDirector;
 import org.eclipse.debug.core.sourcelookup.ISourceLookupParticipant;
+import org.eclipse.debug.core.sourcelookup.containers.ProjectSourceContainer;
+import org.eclipse.debug.core.sourcelookup.containers.WorkspaceSourceContainer;
 import org.eclipse.debug.ui.RefreshTab;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
 import org.eclipse.jdt.launching.IVMRunner;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
-import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.VMRunnerConfiguration;
 import org.eclipse.jdt.launching.sourcelookup.containers.JavaSourceLookupParticipant;
 import org.eclipse.ui.externaltools.internal.model.ExternalToolBuilder;
@@ -74,12 +73,41 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
     console.logMessage("" + getWorkingDirectory(configuration));
     console.logMessage(" mvn" + getProgramArguments(configuration));
     
-    if(ILaunchManager.DEBUG_MODE.equals(mode)) {
-      ISourceLookupDirector sourceLocator = createSourceLocator(configuration);
-      launch.setSourceLocator(sourceLocator);
-    }
+//    if(ILaunchManager.DEBUG_MODE.equals(mode)) {
+//      ISourceLookupDirector sourceLocator = createSourceLocator(configuration);
+//      launch.setSourceLocator(sourceLocator);
+//    }
     
     super.launch(configuration, mode, launch, monitor);
+  }
+  
+  protected void setDefaultSourceLocator(ILaunch launch, ILaunchConfiguration configuration) throws CoreException {
+    //  set default source locator if none specified
+    if (launch.getSourceLocator() == null) {
+      ISourceLookupDirector sourceLocator = new AbstractSourceLookupDirector() {
+        private final Set<String> filteredTypes = new HashSet<String>();
+        {
+          filteredTypes.add(ProjectSourceContainer.TYPE_ID);
+          filteredTypes.add(WorkspaceSourceContainer.TYPE_ID);
+          // can't reference UI constant
+          filteredTypes.add("org.eclipse.debug.ui.containerType.workingSet"); //$NON-NLS-1$
+        }
+        
+        public void initializeParticipants() {
+          addParticipants(new ISourceLookupParticipant[] {new JavaSourceLookupParticipant()});
+        }
+
+        public boolean supportsSourceContainerType(ISourceContainerType type) {
+          return !filteredTypes.contains(type.getId());
+        }
+      };
+      
+      sourceLocator.setSourcePathComputer(getLaunchManager().getSourcePathComputer(
+                  "org.eclipse.jdt.launching.sourceLookup.javaSourcePathComputer")); //$NON-NLS-1$
+      sourceLocator.initializeDefaults(configuration);
+      
+      launch.setSourceLocator(sourceLocator);
+    }
   }
   
   /* (non-Javadoc)
@@ -100,39 +128,6 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
         }
       }
     };
-  }
-
-  // grab source locations from all open java projects
-  private ISourceLookupDirector createSourceLocator(ILaunchConfiguration configuration) throws CoreException {
-    ISourceLookupDirector sourceLocator = new AbstractSourceLookupDirector() {
-      public void initializeParticipants() {
-        addParticipants(new ISourceLookupParticipant[] {new JavaSourceLookupParticipant()});
-      }
-    };
-    sourceLocator.initializeDefaults(configuration);
-
-    IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-    IProject[] projects = root.getProjects();
-    List<IRuntimeClasspathEntry> entries = new ArrayList<IRuntimeClasspathEntry>();
-    IRuntimeClasspathEntry jreEntry = JavaRuntime.computeJREEntry(configuration);
-    if (jreEntry != null) {
-      entries.add(jreEntry);
-    }
-    for(IProject project : projects) {
-      IJavaProject javaProject = JavaCore.create(project);
-      if (javaProject != null) {
-        entries.add(JavaRuntime.newDefaultProjectClasspathEntry(javaProject));
-      }
-    }
-    
-    try {
-      IRuntimeClasspathEntry[] resolved = JavaRuntime.resolveSourceLookupPath(entries.toArray(new IRuntimeClasspathEntry[entries.size()]), configuration);
-      sourceLocator.setSourceContainers(JavaRuntime.getSourceContainers(resolved));
-    } catch(CoreException ex) {
-      MavenLogger.log(ex);
-    }
-    
-    return sourceLocator;
   }
 
   public String getMainTypeName(ILaunchConfiguration configuration) throws CoreException {

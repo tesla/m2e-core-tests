@@ -50,6 +50,7 @@ import org.eclipse.ui.actions.BaseSelectionListenerAction;
 import org.eclipse.ui.part.DrillDownAdapter;
 import org.eclipse.ui.part.ViewPart;
 
+import org.maven.ide.eclipse.MavenImages;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.MaterializeAction;
 import org.maven.ide.eclipse.actions.OpenPomAction;
@@ -233,7 +234,7 @@ public class MavenIndexesView extends ViewPart {
       }
     };
     collapseAllAction.setToolTipText("Collapse All");
-    collapseAllAction.setImageDescriptor(MavenPlugin.getImageDescriptor("icons/collapseall.gif"));
+    collapseAllAction.setImageDescriptor(MavenImages.COLLAPSE_ALL);
 
     refreshAction = new Action("Refresh") {
       public void run() {
@@ -241,7 +242,7 @@ public class MavenIndexesView extends ViewPart {
       }
     };
     refreshAction.setToolTipText("Refresh View");
-    refreshAction.setImageDescriptor(MavenPlugin.getImageDescriptor("icons/refresh.gif"));
+    refreshAction.setImageDescriptor(MavenImages.REFRESH);
 
     updateAction = new BaseSelectionListenerAction("Update Index") {
       public void run() {
@@ -258,7 +259,7 @@ public class MavenIndexesView extends ViewPart {
       }
     };
     updateAction.setToolTipText("Update repository index");
-    updateAction.setImageDescriptor(MavenPlugin.getImageDescriptor("icons/update_index.gif"));
+    updateAction.setImageDescriptor(MavenImages.UPD_INDEX);
 
     unpackAction = new BaseSelectionListenerAction("Unpack Index") {
       public void run() {
@@ -290,8 +291,7 @@ public class MavenIndexesView extends ViewPart {
 
     addIndexAction = new Action("Add Index") {
       public void run() {
-        RepositoryIndexDialog dialog = new RepositoryIndexDialog(getSite().getShell(), "Add Repository Index",
-            "icons/add_index.gif");
+        RepositoryIndexDialog dialog = new RepositoryIndexDialog(getSite().getShell(), "Add Repository Index");
         int res = dialog.open();
         if(res == Window.OK) {
           IndexInfo indexInfo = dialog.getIndexInfo();
@@ -302,15 +302,14 @@ public class MavenIndexesView extends ViewPart {
       }
     };
     addIndexAction.setToolTipText("Add repository index");
-    addIndexAction.setImageDescriptor(MavenPlugin.getImageDescriptor("icons/add_index.gif"));
+    addIndexAction.setImageDescriptor(MavenImages.ADD_INDEX);
 
     editIndexAction = new BaseSelectionListenerAction("Edit Index") {
       public void run() {
         Object element = getStructuredSelection().getFirstElement();
         if(element instanceof IndexInfo) {
           String indexName = ((IndexInfo) element).getIndexName();
-          RepositoryIndexDialog dialog = new RepositoryIndexDialog(getSite().getShell(), "Edit Repository Index",
-              "icons/maven_index.gif");
+          RepositoryIndexDialog dialog = new RepositoryIndexDialog(getSite().getShell(), "Edit Repository Index");
           dialog.setIndexInfo((IndexInfo) element);
           int res = dialog.open();
           if(res == Window.OK) {
@@ -356,7 +355,6 @@ public class MavenIndexesView extends ViewPart {
       }
     };
     removeIndexAction.setToolTipText("Add repository index");
-    // removeIndexAction.setImageDescriptor(MavenPlugin.getImageDescriptor("icons/add_index.gif"));
 
     openPomAction = new BaseSelectionListenerAction("Open POM") {
       public void run() {
@@ -373,7 +371,7 @@ public class MavenIndexesView extends ViewPart {
       }
     };
     openPomAction.setToolTipText("Open Maven POM");
-    openPomAction.setImageDescriptor(MavenPlugin.getImageDescriptor("icons/pom_obj.gif"));
+    openPomAction.setImageDescriptor(MavenImages.POM);
 
     copyUrlAction = new BaseSelectionListenerAction("Copy URL") {
       public void run() {
@@ -418,7 +416,7 @@ public class MavenIndexesView extends ViewPart {
         return selection.getFirstElement() instanceof IndexedArtifactFile;
       }
     };
-    materializeProjectAction.setImageDescriptor(MavenPlugin.getImageDescriptor("icons/import_m2_project.gif"));
+    materializeProjectAction.setImageDescriptor(MavenImages.IMPORT_PROJECT);
 
     viewer.addSelectionChangedListener(openPomAction);
     viewer.addSelectionChangedListener(updateAction);
@@ -623,20 +621,20 @@ public class MavenIndexesView extends ViewPart {
 
     public Image getImage(Object obj) {
       if(obj instanceof IndexInfo) {
-        return MavenPlugin.getImage("icons/maven_index.gif");
+        return MavenImages.IMG_INDEX; 
 
       } else if(obj instanceof IndexedArtifactGroup) {
         return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER);
 
       } else if(obj instanceof IndexedArtifact) {
-        return MavenPlugin.getImage("icons/jar_obj.gif");
+        return MavenImages.IMG_JAR;
 
       } else if(obj instanceof IndexedArtifactFile) {
         IndexedArtifactFile f = (IndexedArtifactFile) obj;
         if(f.sourcesExists == IndexManager.PRESENT) {
-          return MavenPlugin.getImage("icons/jar_src_version.gif");
+          return MavenImages.IMG_VERSION_SRC;
         }
-        return MavenPlugin.getImage("icons/jar_version.gif");
+        return MavenImages.IMG_VERSION;
 
       }
 

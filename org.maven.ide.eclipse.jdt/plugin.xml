@@ -50,10 +50,12 @@
       <factory adaptableType="org.eclipse.jdt.core.IPackageFragmentRoot"
                class="org.maven.ide.eclipse.jdt.internal.JavaElementsAdapterFactory">
          <adapter type="org.maven.ide.eclipse.embedder.ArtifactKey"/>
+         <adapter type="org.eclipse.core.resources.IResource"/>
       </factory>
       <factory adaptableType="org.eclipse.jdt.core.IJavaProject"
                class="org.maven.ide.eclipse.jdt.internal.JavaElementsAdapterFactory">
          <adapter type="org.maven.ide.eclipse.embedder.ArtifactKey"/>
+         <adapter type="org.eclipse.core.resources.IResource"/>
       </factory>
    </extension>
 
@@ -75,14 +77,63 @@
       </perspectiveExtension>
    </extension>
    
-   <extension
-         point="org.eclipse.jdt.core.compilationParticipant">
+   <extension point="org.eclipse.jdt.core.compilationParticipant">
       <compilationParticipant
+            id="org.maven.ide.eclipse.compilationParticipant"
             class="org.maven.ide.eclipse.jdt.internal.JDTCompilationParticipant"
             createsProblems="false"
-            id="org.maven.ide.eclipse.compilationParticipant"
-            modifiesEnvironment="false">
-      </compilationParticipant>
+            modifiesEnvironment="false"/>
+   </extension>
+
+   <extension point="org.eclipse.ui.popupMenus">
+     <objectContribution id="org.maven.ide.eclipse.classpathMenu" adaptable="true"
+           objectClass="org.eclipse.jdt.core.IPackageFragmentRoot">
+       <action id="org.maven.ide.eclipse.classpathMenu.action"
+               class="org.maven.ide.eclipse.actions.MavenMenuAction"
+               label="%m2.popup.menu.label"
+               style="pulldown"
+               menubarPath="additions"
+               enablesFor="+"
+               icon="icons/m2.gif"/>
+       <!--
+       <visibility>
+          <objectState name="name" value="pom.xml"/>
+       </visibility>
+       -->
+     </objectContribution>
+   </extension>  
+
+   <!--
+   <extension
+         point="org.eclipse.jdt.ui.queryParticipants">
+      <queryParticipant
+            class="org.maven.ide.eclipse.ui.internal.search.MavenQueryParticipant"
+            id="org.maven.ide.eclipse.MavenQueryParticipantJava"
+            name="Maven Respository Search"
+            nature="org.eclipse.jdt.core.javanature">
+      </queryParticipant>
+   </extension>
+   -->
+   
+   <extension point="org.eclipse.debug.core.sourceLocators">
+      <sourceLocator
+        id="org.maven.ide.eclipse.jdt.internal.launch.MavenJavaSourceLookupDirector"
+        class="org.maven.ide.eclipse.jdt.internal.launch.MavenJavaSourceLookupDirector"
+        name="Maven Java Source Loocator"/>
+   </extension>
+   <extension point="org.eclipse.debug.core.sourcePathComputers">
+      <sourcePathComputer
+        id="org.maven.ide.eclipse.jdt.internal.launch.MavenSourcePathComputer"
+        class="org.maven.ide.eclipse.jdt.internal.launch.MavenJavaSourcePathComputer"/>
+   </extension>
+
+   <extension point="org.eclipse.jdt.ui.javaElementFilters">
+      <filter id="org.maven.ide.eclipse.MavenModuleFilter"
+          targetId="org.eclipse.jdt.ui.PackageExplorer"
+          class="org.maven.ide.eclipse.ui.internal.filter.MavenModuleFilter"
+          description="Filters module folders from the Maven projects"
+          name="Maven modules filter"
+          enabled="false"/>
    </extension>
 
 </plugin>
