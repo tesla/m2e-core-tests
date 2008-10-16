@@ -6,21 +6,18 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.wizards;
+package org.maven.ide.eclipse.ui.dialogs;
 
-import org.eclipse.debug.ui.StringVariableSelectionDialog;
+// import org.eclipse.debug.ui.StringVariableSelectionDialog;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
@@ -35,30 +32,26 @@ public class MavenPropertyDialog extends Dialog {
 
   private final String title;
   
-  private final String[] initialValues;
+  private final String initialName;
   
-  private final boolean variables;
+  private final String initialValue;
   
-  private Text nameText;
+  private final VerifyListener verifyListener;
+  
+  protected Text nameText;
 
-  private Text valueText;
+  protected Text valueText;
 
   private String name;
   
   private String value;
 
-  private VerifyListener verifyListener;
-  
-  public MavenPropertyDialog(Shell shell, String title, String[] initialValues, boolean variables) {
+  public MavenPropertyDialog(Shell shell, String title, String initialName, String initialValue, VerifyListener verifyListener) {
     super(shell);
     this.title = title;
-    this.initialValues = initialValues;
-    this.variables = variables;
-  }
-
-  public MavenPropertyDialog(Shell shell, String title, String[] initialValues, boolean variables, VerifyListener nameVerifyListener) {
-    this(shell, title, initialValues, variables);
-    this.verifyListener = nameVerifyListener;
+    this.initialName = initialName;
+    this.initialValue = initialValue;
+    this.verifyListener = verifyListener;
   }
 
   /* (non-Javadoc)
@@ -80,9 +73,7 @@ public class MavenPropertyDialog extends Dialog {
     gd.widthHint = 300;
     nameText.setLayoutData(gd);
     nameText.setFont(comp.getFont());
-    if(initialValues.length >= 1) {
-      nameText.setText(initialValues[0]);
-    }
+    nameText.setText(initialName==null ? "" : initialName);
     nameText.addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent e) {
         updateButtons();
@@ -98,51 +89,45 @@ public class MavenPropertyDialog extends Dialog {
     gd.widthHint = 300;
     valueText.setLayoutData(gd);
     valueText.setFont(comp.getFont());
-    if(initialValues.length >= 2) {
-      valueText.setText(initialValues[1]);
-    }
+    valueText.setText(initialValue==null ? "" : initialValue);
     valueText.addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent e) {
         updateButtons();
       }
     });
 
-    if(variables) {
-      Button variablesButton = new Button(comp, SWT.PUSH);
-      variablesButton.setText(Messages.getString("launch.propertyDialog.browseVariables")); //$NON-NLS-1$;
-      gd = new GridData(GridData.HORIZONTAL_ALIGN_END);
-      gd.horizontalSpan = 2;
-      int widthHint = convertHorizontalDLUsToPixels(IDialogConstants.BUTTON_WIDTH);
-      gd.widthHint = Math.max(widthHint, variablesButton.computeSize(SWT.DEFAULT, SWT.DEFAULT, true).x);
-      variablesButton.setLayoutData(gd);
-      variablesButton.setFont(comp.getFont());
-  
-      variablesButton.addSelectionListener(new SelectionAdapter() {
-        public void widgetSelected(SelectionEvent se) {
-          getVariable();
-        }
-      });
-    }
+//    if(variables) {
+//      Button variablesButton = new Button(comp, SWT.PUSH);
+//      variablesButton.setText(Messages.getString("launch.propertyDialog.browseVariables")); //$NON-NLS-1$;
+//      gd = new GridData(GridData.HORIZONTAL_ALIGN_END);
+//      gd.horizontalSpan = 2;
+//      int widthHint = convertHorizontalDLUsToPixels(IDialogConstants.BUTTON_WIDTH);
+//      gd.widthHint = Math.max(widthHint, variablesButton.computeSize(SWT.DEFAULT, SWT.DEFAULT, true).x);
+//      variablesButton.setLayoutData(gd);
+//      variablesButton.setFont(comp.getFont());
+//  
+//      variablesButton.addSelectionListener(new SelectionAdapter() {
+//        public void widgetSelected(SelectionEvent se) {
+//          StringVariableSelectionDialog variablesDialog = new StringVariableSelectionDialog(getShell());
+//          if(variablesDialog.open() == IDialogConstants.OK_ID) {
+//            String variable = variablesDialog.getVariableExpression();
+//            if(variable != null) {
+//              valueText.insert(variable.trim());
+//            }
+//          }
+//        }
+//      });
+//    }
     
     return comp;
   }
 
-  protected void getVariable() {
-    StringVariableSelectionDialog variablesDialog = new StringVariableSelectionDialog(getShell());
-    int returnCode = variablesDialog.open();
-    if(returnCode == IDialogConstants.OK_ID) {
-      String variable = variablesDialog.getVariableExpression();
-      if(variable != null) {
-        valueText.insert(variable.trim());
-      }
-    }
+  public String getName() {
+    return this.name;
   }
-
-  /**
-   * Return the name/value pair entered in this dialog. If the cancel button was hit, both will be <code>null</code>.
-   */
-  public String[] getNameValuePair() {
-    return new String[] {name, value};
+  
+  public String getValue() {
+    return this.value;
   }
 
   /* (non-Javadoc)
@@ -180,7 +165,7 @@ public class MavenPropertyDialog extends Dialog {
   protected void updateButtons() {
     String name = nameText.getText().trim();
     String value = valueText.getText().trim();
-    //verify name
+    // verify name
     Event e = new Event();
     e.widget = nameText;
     VerifyEvent ev = new VerifyEvent(e);

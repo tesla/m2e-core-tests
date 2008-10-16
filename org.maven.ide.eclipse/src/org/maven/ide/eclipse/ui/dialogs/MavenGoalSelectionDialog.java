@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.ui.internal.launch;
+package org.maven.ide.eclipse.ui.dialogs;
 
 import java.util.ArrayList;
 import java.util.Iterator;
