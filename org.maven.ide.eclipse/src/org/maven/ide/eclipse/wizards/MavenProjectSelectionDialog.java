@@ -34,6 +34,7 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.core.Messages;
+import org.maven.ide.eclipse.ui.dialogs.AbstractMavenDialog;
 
 /**
  * A simple dialog allowing the selection of

@@ -29,7 +29,7 @@ import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
-import org.maven.ide.eclipse.wizards.MavenRepositorySearchDialog;
+import org.maven.ide.eclipse.ui.dialogs.MavenRepositorySearchDialog;
 
 
 public class AddPluginAction implements IObjectActionDelegate {

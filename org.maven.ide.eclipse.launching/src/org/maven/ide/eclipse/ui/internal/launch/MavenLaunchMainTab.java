@@ -45,6 +45,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
@@ -63,8 +64,9 @@ import org.maven.ide.eclipse.core.Messages;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.internal.launch.MavenLaunchConstants;
+import org.maven.ide.eclipse.ui.dialogs.MavenGoalSelectionDialog;
+import org.maven.ide.eclipse.ui.dialogs.MavenPropertyDialog;
 import org.maven.ide.eclipse.util.Util;
-import org.maven.ide.eclipse.wizards.MavenPropertyDialog;
 
 
 /**
@@ -160,8 +162,8 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
     browseWorkspaceButton.setText(Messages.getString("launch.browseWorkspace")); //$NON-NLS-1$
     browseWorkspaceButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
-        ContainerSelectionDialog dialog = new ContainerSelectionDialog(getShell(), ResourcesPlugin.getWorkspace()
-            .getRoot(), false, Messages.getString("launch.choosePomDir")); //$NON-NLS-1$
+        ContainerSelectionDialog dialog = new ContainerSelectionDialog(getShell(), //
+            ResourcesPlugin.getWorkspace().getRoot(), false, Messages.getString("launch.choosePomDir")); //$NON-NLS-1$
         dialog.showClosedProjects(false);
         
         int buttonId = dialog.open();
@@ -446,32 +448,56 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
   }
 
   void addProperty() {
-    MavenPropertyDialog dialog = new MavenPropertyDialog(getShell(), //
-        Messages.getString("launch.propAddDialogTitle"), new String[] {}, true); //$NON-NLS-1$
-    int res = dialog.open();
-    if(res == IDialogConstants.OK_ID) {
-      String[] result = dialog.getNameValuePair();
+    MavenPropertyDialog dialog = getMavenPropertyDialog("Add Parameter", "", "");
+    if(dialog.open() == IDialogConstants.OK_ID) {
       TableItem item = new TableItem(propsTable, SWT.NONE);
-      item.setText(0, result[0]);
-      item.setText(1, result[1]);
+      item.setText(0, dialog.getName());
+      item.setText(1, dialog.getValue());
       entriesChanged();
     }
   }
 
   void editProperty(String name, String value) {
-    MavenPropertyDialog dialog = new MavenPropertyDialog(getShell(), //
-        Messages.getString("launch.propEditDialogTitle"), new String[] {name, value}, true); //$NON-NLS-1$
-    int res = dialog.open();
-    if(res == IDialogConstants.OK_ID) {
-      String[] result = dialog.getNameValuePair();
+    MavenPropertyDialog dialog = getMavenPropertyDialog("Edit Parameter", name, value);
+    if(dialog.open() == IDialogConstants.OK_ID) {
       TableItem[] item = propsTable.getSelection();
-      // we expect only one row selected
-      item[0].setText(0, result[0]);
-      item[0].setText(1, result[1]);
+      item[0].setText(0, dialog.getName());
+      item[0].setText(1, dialog.getValue());
       entriesChanged();
     }
   }
 
+  private MavenPropertyDialog getMavenPropertyDialog(String title, String initName, String initValue) {
+    return new MavenPropertyDialog(getShell(), title, initName, initValue, null) {
+      protected Control createDialogArea(Composite parent) {
+        Composite comp = (Composite) super.createDialogArea(parent);
+
+        Button variablesButton = new Button(comp, SWT.PUSH);
+        GridData gd = new GridData(GridData.HORIZONTAL_ALIGN_END);
+        gd.horizontalSpan = 2;
+        gd.widthHint = Math.max(convertHorizontalDLUsToPixels(IDialogConstants.BUTTON_WIDTH), //
+            variablesButton.computeSize(SWT.DEFAULT, SWT.DEFAULT, true).x);
+        variablesButton.setLayoutData(gd);
+        variablesButton.setFont(comp.getFont());
+        variablesButton.setText(Messages.getString("launch.propertyDialog.browseVariables")); //$NON-NLS-1$;
+    
+        variablesButton.addSelectionListener(new SelectionAdapter() {
+          public void widgetSelected(SelectionEvent se) {
+            StringVariableSelectionDialog variablesDialog = new StringVariableSelectionDialog(getShell());
+            if(variablesDialog.open() == IDialogConstants.OK_ID) {
+              String variable = variablesDialog.getVariableExpression();
+              if(variable != null) {
+                valueText.insert(variable.trim());
+              }
+            }
+          }
+        });
+        
+        return comp;
+      }
+    };
+  }
+  
   public void initializeFrom(ILaunchConfiguration configuration) {
     String pomDirName = getAttribute(configuration, ATTR_POM_DIR, ""); //$NON-NLS-1$
     if(isBuilder && pomDirName.length()==0) {

@@ -38,7 +38,7 @@ import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
-import org.maven.ide.eclipse.wizards.MavenRepositorySearchDialog;
+import org.maven.ide.eclipse.ui.dialogs.MavenRepositorySearchDialog;
 
 
 public class AddDependencyAction implements IObjectActionDelegate {

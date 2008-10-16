@@ -13,7 +13,6 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 
-
 public class Messages {
   private static final String BUNDLE_NAME = IMavenConstants.PLUGIN_ID + ".messages"; //$NON-NLS-1$
 

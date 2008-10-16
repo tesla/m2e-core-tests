@@ -30,6 +30,7 @@ import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
+import org.maven.ide.eclipse.ui.dialogs.MavenRepositorySearchDialog;
 
 
 /**

@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * Copyright (c) 2008 Sonatype, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *******************************************************************************/
+
 package org.maven.ide.eclipse.editor.pom;
 
 import java.util.List;
@@ -30,49 +38,41 @@ import org.maven.ide.components.pom.Properties;
 import org.maven.ide.components.pom.PropertyPair;
 import org.maven.ide.eclipse.editor.composites.ListEditorComposite;
 import org.maven.ide.eclipse.editor.composites.ListEditorContentProvider;
-import org.maven.ide.eclipse.wizards.MavenPropertyDialog;
+import org.maven.ide.eclipse.ui.dialogs.MavenPropertyDialog;
 
 /**
- * 
  * This is properties editor (double click edits the property)
  * 
  * @author Anton Kraev
- *
  */
 public class PropertiesSection {
+  protected static PomPackage POM_PACKAGE = PomPackage.eINSTANCE;
+  
   private EditingDomain editingDomain;
   private EObject model;
   private EStructuralFeature feature;
   private FormToolkit toolkit;
   private Composite composite;
   private Section propertiesSection;
-  private ListEditorComposite<PropertyPair> propertiesEditor;
-  private boolean allowVariables;
-  private VerifyListener listener;
-  protected static PomPackage POM_PACKAGE = PomPackage.eINSTANCE;
+  ListEditorComposite<PropertyPair> propertiesEditor;
+  
+  private VerifyListener listener = new VerifyListener() {
+    public void verifyText(VerifyEvent e) {
+      e.doit = XMLChar.isValidName(e.text);
+    }
+  };
 
-  public PropertiesSection(FormToolkit toolkit, Composite composite, 
-      EditingDomain editingDomain) {
+  public PropertiesSection(FormToolkit toolkit, Composite composite, EditingDomain editingDomain) {
     this.toolkit = toolkit;
     this.composite = composite;
     this.editingDomain = editingDomain;
-    //XXX not sure if akkowVariables should be true (last parameter in constructor to MavenPropertyDialog)
-    this.allowVariables = true;
     createSection();
-    this.listener = new VerifyListener() {
-      public void verifyText(VerifyEvent e) {
-        e.doit = XMLChar.isValidName(e.text);
-      }
-    };
   }
   
   public void setModel(EObject model, EStructuralFeature feature) {
     this.model = model;
     this.feature = feature;
-    if (getProperties() != null)
-      propertiesEditor.setInput(getProperties().getProperty());
-    else
-      propertiesEditor.setInput(null);
+    this.propertiesEditor.setInput(getProperties() != null ? getProperties().getProperty() : null);
   }
 
   private Properties getProperties() {
@@ -96,19 +96,16 @@ public class PropertiesSection {
     propertiesEditor.setLabelProvider(new PropertyPairLabelProvider());
 
     propertiesEditor.setAddListener(new SelectionAdapter() {
-      @SuppressWarnings("synthetic-access")
       public void widgetSelected(SelectionEvent e) {
         createNewProperty();
       }
     });
     propertiesEditor.setRemoveListener(new SelectionAdapter() {
-      @SuppressWarnings("synthetic-access")
       public void widgetSelected(SelectionEvent e) {
         deleteProperties(propertiesEditor.getSelection());
       }
     });
     propertiesEditor.setDoubleClickListener(new IDoubleClickListener() {
-      @SuppressWarnings("synthetic-access")
       public void doubleClick(DoubleClickEvent event) {
         editProperty(propertiesEditor.getSelection());
       }
@@ -121,65 +118,53 @@ public class PropertiesSection {
     propertiesEditor.refresh();
   }
   
-  private void editProperty(List<PropertyPair> list) {
-    if (list.size() != 1)
+  void editProperty(List<PropertyPair> list) {
+    if (list.size() != 1) {
       return;
+    }
     
     PropertyPair pp = list.get(0);
     
     MavenPropertyDialog dialog = new MavenPropertyDialog(propertiesSection.getShell(), //
-        "Edit property", new String[] {pp.getKey(), pp.getValue()}, allowVariables, listener); //$NON-NLS-1$
-    int res = dialog.open();
-    if(res == IDialogConstants.OK_ID) {
-      String[] result = dialog.getNameValuePair();
-      String key = result[0];
-      String value = result[1];
-      CompoundCommand compoundCommand = new CompoundCommand();
+        "Edit property", pp.getKey(), pp.getValue(), listener);
+    if(dialog.open() == IDialogConstants.OK_ID) {
+      String key = dialog.getName();
+      String value = dialog.getValue();
+      CompoundCommand command = new CompoundCommand();
       if (!key.equals(pp.getKey())) {
-        Command setCommand = SetCommand.create(editingDomain, pp, POM_PACKAGE.getPropertyPair_Key(), key);
-        compoundCommand.append(setCommand);
+        command.append(SetCommand.create(editingDomain, pp, POM_PACKAGE.getPropertyPair_Key(), key));
       }
       if (!value.equals(pp.getValue())) {
-        Command setCommand = SetCommand.create(editingDomain, pp, POM_PACKAGE.getPropertyPair_Value(), value);
-        compoundCommand.append(setCommand);
+        command.append(SetCommand.create(editingDomain, pp, POM_PACKAGE.getPropertyPair_Value(), value));
       }
-      editingDomain.getCommandStack().execute(compoundCommand);
+      editingDomain.getCommandStack().execute(command);
       propertiesEditor.setInput(getProperties().getProperty());
     }
   }
 
-  private void createNewProperty() {
-    //XXX not sure if variable should be true (last parameter in constructor)
+  void createNewProperty() {
     MavenPropertyDialog dialog = new MavenPropertyDialog(propertiesSection.getShell(), //
-        "Add property", new String[] {"", ""}, allowVariables, listener); //$NON-NLS-1$
-    int res = dialog.open();
-    if(res == IDialogConstants.OK_ID) {
+        "Add property", "", "", listener);
+    if(dialog.open() == IDialogConstants.OK_ID) {
       Properties properties = getProperties();
-      CompoundCommand compoundCommand = new CompoundCommand();
+      CompoundCommand command = new CompoundCommand();
       if(properties == null) {
         properties = PomFactory.eINSTANCE.createProperties();
-        Command set = SetCommand.create(editingDomain, model, feature, properties);
-        compoundCommand.append(set);
+        command.append(SetCommand.create(editingDomain, model, feature, properties));
       }
       
-      PropertyPair pp = PomFactory.eINSTANCE.createPropertyPair();
-      addProperty(dialog, compoundCommand, properties, pp, properties.getProperty().size());
-      editingDomain.getCommandStack().execute(compoundCommand);
+      PropertyPair propertyPair = PomFactory.eINSTANCE.createPropertyPair();
+      propertyPair.setKey(dialog.getName());
+      propertyPair.setValue(dialog.getValue());
+      command.append(AddCommand.create(editingDomain, properties, POM_PACKAGE.getProperties_Property(), //
+          propertyPair, properties.getProperty().size()));
       
+      editingDomain.getCommandStack().execute(command);
       propertiesEditor.setInput(properties.getProperty());
     }
   }
 
-  private void addProperty(MavenPropertyDialog dialog, CompoundCommand compoundCommand, Properties properties,
-      PropertyPair pair, int pos) {
-    String[] result = dialog.getNameValuePair();
-    pair.setKey(result[0]);
-    pair.setValue(result[1]);
-    Command addProperty = AddCommand.create(editingDomain, properties, POM_PACKAGE.getProperties_Property(), pair, pos);
-    compoundCommand.append(addProperty);
-  }
-  
-  private void deleteProperties(List<PropertyPair> selection) {
+  void deleteProperties(List<PropertyPair> selection) {
     Properties properties = getProperties();
     Command deleteProperties = RemoveCommand.create(editingDomain, properties, POM_PACKAGE.getProperties_Property(), selection);
     editingDomain.getCommandStack().execute(deleteProperties);

@@ -14,8 +14,6 @@ Require-Bundle:
  org.eclipse.core.filesystem,
  org.eclipse.jface.text,
  org.eclipse.search,
- org.eclipse.debug.core,
- org.eclipse.debug.ui,
  org.eclipse.ui,
  org.eclipse.ui.ide,
  org.eclipse.ui.console,
@@ -46,6 +44,7 @@ Export-Package: org.maven.ide.eclipse,
  org.maven.ide.eclipse.project,
  org.maven.ide.eclipse.project.configurator,
  org.maven.ide.eclipse.scm,
+ org.maven.ide.eclipse.ui.dialogs,
  org.maven.ide.eclipse.util,
  org.maven.ide.eclipse.wizards
 MavenArtifact-GroupId: org.maven.ide.eclipse

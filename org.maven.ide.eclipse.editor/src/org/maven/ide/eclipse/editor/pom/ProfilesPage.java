@@ -71,7 +71,6 @@ import org.maven.ide.components.pom.Plugins;
 import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.Profile;
 import org.maven.ide.components.pom.ProfilesType;
-import org.maven.ide.components.pom.PropertyPair;
 import org.maven.ide.components.pom.Reporting;
 import org.maven.ide.components.pom.Repositories;
 import org.maven.ide.components.pom.StringModules;

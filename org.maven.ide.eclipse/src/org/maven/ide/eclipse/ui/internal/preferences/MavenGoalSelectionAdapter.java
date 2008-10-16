@@ -14,7 +14,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import org.maven.ide.eclipse.ui.internal.launch.MavenGoalSelectionDialog;
+import org.maven.ide.eclipse.ui.dialogs.MavenGoalSelectionDialog;
 
 public class MavenGoalSelectionAdapter extends SelectionAdapter {
     private Shell shell;
