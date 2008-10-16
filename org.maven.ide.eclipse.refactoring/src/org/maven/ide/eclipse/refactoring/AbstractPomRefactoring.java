@@ -10,8 +10,8 @@ package org.maven.ide.eclipse.refactoring;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
@@ -47,38 +47,38 @@ import org.maven.ide.eclipse.project.IMavenProjectFacade;
  */
 public abstract class AbstractPomRefactoring extends Refactoring {
 
-  //main file that is being refactored
+  // main file that is being refactored
   protected IFile file;
   
-  //file buffer manager
+  // file buffer manager
   protected ITextFileBufferManager textFileBufferManager;
 
-  //maven plugin
+  // maven plugin
   MavenPlugin mavenPlugin;
 
-  //maven model manager
+  // maven model manager
   protected MavenModelManager mavenModelManager;
   
-  //refactored files in workspace
-  protected HashMap<IFile, List<EObject>> refactored;
+  // refactored files in workspace
+  protected Map<IFile, List<EObject>> refactored = new HashMap<IFile,List<EObject>>();
 
-  //editing domain
+  // editing domain
   private AdapterFactoryEditingDomain editingDomain;
 
   public AbstractPomRefactoring(IFile file) {
     this.file = file;
     
-    textFileBufferManager = FileBuffers.getTextFileBufferManager();
-    mavenPlugin = MavenPlugin.getDefault();
-    mavenModelManager = MavenPlugin.getDefault().getMavenModelManager();
-    refactored = new HashMap<IFile,List<EObject>>();
+    this.textFileBufferManager = FileBuffers.getTextFileBufferManager();
+    this.mavenPlugin = MavenPlugin.getDefault();
+    this.mavenModelManager = MavenPlugin.getDefault().getMavenModelManager();
+
     List<AdapterFactoryImpl> factories = new ArrayList<AdapterFactoryImpl>();
     factories.add(new ResourceItemProviderAdapterFactory());
     factories.add(new ReflectiveItemProviderAdapterFactory());
 
     ComposedAdapterFactory adapterFactory = new ComposedAdapterFactory(factories);
     BasicCommandStack commandStack = new BasicCommandStack();
-    editingDomain = new AdapterFactoryEditingDomain(adapterFactory, //
+    this.editingDomain = new AdapterFactoryEditingDomain(adapterFactory, //
         commandStack, new HashMap<Resource, Boolean>());
   }
 
@@ -89,14 +89,13 @@ public abstract class AbstractPomRefactoring extends Refactoring {
   public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException, OperationCanceledException {
     //calculate the list of affected files
     RefactoringStatus status = new RefactoringStatus();
-    IMavenProjectFacade[] res = mavenPlugin.getMavenProjectManager().getProjects();
-    for (int i=0; i<res.length; i++) {
+    for(IMavenProjectFacade projectFacade : mavenPlugin.getMavenProjectManager().getProjects()) {
       try {
-        IFile file = res[i].getPom();
+        IFile file = projectFacade.getPom();
         Model current = mavenModelManager.loadResource(file).getModel();
         List<EObject> affected = getVisitor().scanModel(file, current);
         if (!affected.isEmpty()) {
-          refactored.put(res[i].getPom(), affected);
+          refactored.put(projectFacade.getPom(), affected);
         }
       } catch(CoreException e) {
         status.addError(e.getMessage());
@@ -108,19 +107,21 @@ public abstract class AbstractPomRefactoring extends Refactoring {
   @Override
   public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
     CompositeChange res = new CompositeChange("Renaming " + file.getParent().getName());
-    Iterator<IFile> files = refactored.keySet().iterator();
-    while (files.hasNext()) {
-      IFile file = files.next();
+    for(IFile file : refactored.keySet()) {
       ITextFileBuffer buffer = getBuffer(file);
       String before = buffer.getDocument().get();
       Command command = getVisitor().applyModel(editingDomain, refactored.get(file));
       editingDomain.getCommandStack().execute(command);
       String after = buffer.getDocument().get();
       editingDomain.getCommandStack().undo();
-      //TODO: files are still dirty after this... try IStructuredDocument?
-      //because after undo, command can be redone. need to clean
-      //maybe there is special "releaseBuffer" call?
-      releaseBuffer(file);
+
+      // TODO files are still dirty after this... try IStructuredDocument?
+      // because after undo, command can be redone. need to clean
+      // maybe there is special "releaseBuffer" call?
+      
+      // XXX this breaks buffer.getDocument()
+      // releaseBuffer(file);
+      
       DocumentChange change = new ChangeCreator(buffer.getDocument(), file.getParent().getName(), before, after).createChange();
       res.add(change);
     }
@@ -136,7 +137,7 @@ public abstract class AbstractPomRefactoring extends Refactoring {
     textFileBufferManager.disconnect(file.getLocation(), LocationKind.NORMALIZE, null);
   }
   
-  //TODO: modelManager.loadResource(file) should be cached!!!
+  // TODO modelManager.loadResource(file) should be cached!!!
   public Model getModel() {
     try {
       return mavenModelManager.loadResource(file).getModel();

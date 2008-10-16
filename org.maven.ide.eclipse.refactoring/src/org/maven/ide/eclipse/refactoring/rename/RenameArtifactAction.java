@@ -9,6 +9,7 @@
 package org.maven.ide.eclipse.refactoring.rename;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizardOpenOperation;
@@ -16,6 +17,8 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionDelegate;
 import org.eclipse.ui.internal.ObjectPluginAction;
+import org.maven.ide.eclipse.core.MavenLogger;
+
 
 /**
  * @author Anton Kraev
@@ -39,17 +42,29 @@ public class RenameArtifactAction extends ActionDelegate {
   }
 
   public void doRun(IAction action) {
-    try {
-      //get the model from existing file
-      IFile file = (IFile) ((IStructuredSelection) ((ObjectPluginAction) action).getSelection()).getFirstElement();
-      MavenRenameWizard wizard = new MavenRenameWizard(file);
-      RefactoringWizardOpenOperation op = new RefactoringWizardOpenOperation( wizard );
-      String titleForFailedChecks = ""; //$NON-NLS-1$
-      op.run( PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), titleForFailedChecks );
-    } catch(Exception e) {
-      e.printStackTrace();
+    Object element = ((IStructuredSelection) ((ObjectPluginAction) action).getSelection()).getFirstElement();
+    if(element instanceof IFile) {
+      rename((IFile) element);
+    } else if (element instanceof IProject) {
+      IProject project = (IProject) element;
+      IFile file = project.getFile("pom.xml");
+      if(file!=null) {
+        rename(file);
+      }
     }
   }
 
+  private void rename(IFile file) {
+    try {
+      // get the model from existing file
+      MavenRenameWizard wizard = new MavenRenameWizard(file);
+      RefactoringWizardOpenOperation op = new RefactoringWizardOpenOperation(wizard);
+      String titleForFailedChecks = ""; //$NON-NLS-1$
+      op.run(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), titleForFailedChecks);
+    } catch(Exception e) {
+      MavenLogger.log("Unable to rename " + file, e);
+    }
+  }
 
 }
+

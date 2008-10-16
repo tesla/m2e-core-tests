@@ -18,19 +18,25 @@
         <action id="org.maven.ide.eclipse.editor.RenameAction"
               class="org.maven.ide.eclipse.refactoring.rename.RenameArtifactAction"
               enablesFor="1"
-              label="Rename artifact"
+              label="Rename Maven artifact..."
               menubarPath="org.eclipse.jdt.ui.refactoring.menu/Maven refactoring"/>
+        <!-- add visibility condition for managet poms -->      
      </objectContribution>
      <objectContribution
-           id="org.maven.ide.eclipse.editor.pomContributor1"
+           id="org.maven.ide.eclipse.editor.projectContributor"
            adaptable="true"
-           nameFilter="*.pom"
-           objectClass="org.eclipse.core.resources.IFile">
+           objectClass="org.eclipse.core.resources.IProject">
         <action id="org.maven.ide.eclipse.editor.RenameAction"
               class="org.maven.ide.eclipse.refactoring.rename.RenameArtifactAction"
               enablesFor="1"
               label="Rename Maven artifact..."
               menubarPath="org.eclipse.jdt.ui.refactoring.menu/Maven refactoring"/>
+        <visibility>
+          <and>
+            <objectState name="open" value="true"/>
+            <objectState name="nature" value="org.maven.ide.eclipse.maven2Nature"/>
+          </and>
+        </visibility>
      </objectContribution>
   </extension>
 

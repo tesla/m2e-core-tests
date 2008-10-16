@@ -81,7 +81,6 @@ public class MavenRenameWizardPage extends UserInputWizardPage {
 
     groupIdText = new Text(composite, SWT.BORDER);
     groupIdText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-    groupIdText.setText(model.getGroupId());
 
     Label artifactIdLabel = new Label(composite, SWT.NONE);
     artifactIdLabel.setLayoutData(new GridData());
@@ -89,7 +88,6 @@ public class MavenRenameWizardPage extends UserInputWizardPage {
 
     artifactIdText = new Text(composite, SWT.BORDER);
     artifactIdText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-    artifactIdText.setText(model.getArtifactId());
 
     Label versionLabel = new Label(composite, SWT.NONE);
     versionLabel.setLayoutData(new GridData());
@@ -97,7 +95,6 @@ public class MavenRenameWizardPage extends UserInputWizardPage {
 
     versionText = new Text(composite, SWT.BORDER);
     versionText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-    versionText.setText(model.getVersion());
     
     ModifyListener listener = new ModifyListener() {
       public void modifyText(ModifyEvent e) {
@@ -111,6 +108,10 @@ public class MavenRenameWizardPage extends UserInputWizardPage {
     groupIdText.addModifyListener(listener);
     artifactIdText.addModifyListener(listener);
     versionText.addModifyListener(listener);
+    
+    groupIdText.setText(model.getGroupId());
+    artifactIdText.setText(model.getArtifactId());
+    versionText.setText(model.getVersion());
   }
 
 }

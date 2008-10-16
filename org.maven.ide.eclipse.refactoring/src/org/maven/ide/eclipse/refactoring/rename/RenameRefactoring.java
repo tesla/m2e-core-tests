@@ -35,12 +35,17 @@ import org.maven.ide.eclipse.refactoring.PomVisitor;
  */
 public class RenameRefactoring extends AbstractPomRefactoring {
   private static final String VERSION = "version";
+
   private static final String ARTIFACT_ID = "artifactId";
+
   private static final String GROUP_ID = "groupId";
 
   MavenRenameWizardPage page;
+
   String groupId;
+
   String artifactId;
+
   String version;
 
   public RenameRefactoring(IFile file, MavenRenameWizardPage page) {
@@ -95,10 +100,8 @@ public class RenameRefactoring extends AbstractPomRefactoring {
 
   Command applyModel(AdapterFactoryEditingDomain editingDomain, List<EObject> affected, String groupId,
       String artifactId, String version) {
-    Iterator<EObject> it = affected.iterator();
     CompoundCommand command = new CompoundCommand();
-    while(it.hasNext()) {
-      EObject obj = it.next();
+    for(EObject obj : affected) {
       applyObject(editingDomain, command, obj, GROUP_ID, groupId);
       applyObject(editingDomain, command, obj, ARTIFACT_ID, artifactId);
       applyObject(editingDomain, command, obj, VERSION, version);
@@ -109,11 +112,13 @@ public class RenameRefactoring extends AbstractPomRefactoring {
   private void applyObject(AdapterFactoryEditingDomain editingDomain, CompoundCommand command, EObject obj,
       String featureName, String value) {
     EStructuralFeature feature = obj.eClass().getEStructuralFeature(featureName);
-    if(feature == null)
+    if(feature == null) {
       return;
+    }
     Object old = obj.eGet(feature);
-    if((old == null && value == null) || (old != null && old.equals(value)))
+    if((old == null && value == null) || (old != null && old.equals(value))) {
       return;
+    }
     command.append(new SetCommand(editingDomain, obj, feature, value));
   }
 
