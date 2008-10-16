@@ -1,33 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (c) 2007, 2008 Sonatype, Inc.
+  All rights reserved. This program and the accompanying materials
+  are made available under the terms of the Eclipse Public License v1.0
+  which accompanies this distribution, and is available at
+  http://www.eclipse.org/legal/epl-v10.html
+-->
 <?eclipse version="3.2"?>
 <plugin>
-  <extension
-        point="org.eclipse.ui.popupMenus">
+
+  <extension point="org.eclipse.ui.popupMenus">
      <objectContribution
-           adaptable="true"
            id="org.maven.ide.eclipse.editor.pomContributor"
+           adaptable="true"
            nameFilter="pom.xml"
            objectClass="org.eclipse.core.resources.IFile">
-        <action
-              class="org.maven.ide.eclipse.refactoring.RenameArtifactAction"
+        <action id="org.maven.ide.eclipse.editor.RenameAction"
+              class="org.maven.ide.eclipse.refactoring.rename.RenameArtifactAction"
               enablesFor="1"
-              id="org.maven.ide.eclipse.editor.RenameAction"
               label="Rename artifact"
-              menubarPath="org.eclipse.jdt.ui.refactoring.menu/Maven refactoring">
-        </action>
+              menubarPath="org.eclipse.jdt.ui.refactoring.menu/Maven refactoring"/>
      </objectContribution>
      <objectContribution
-           adaptable="true"
            id="org.maven.ide.eclipse.editor.pomContributor1"
+           adaptable="true"
            nameFilter="*.pom"
            objectClass="org.eclipse.core.resources.IFile">
-        <action
-              class="org.maven.ide.eclipse.refactoring.RenameArtifactAction"
+        <action id="org.maven.ide.eclipse.editor.RenameAction"
+              class="org.maven.ide.eclipse.refactoring.rename.RenameArtifactAction"
               enablesFor="1"
-              id="org.maven.ide.eclipse.editor.RenameAction"
-              label="Rename artifact"
-              menubarPath="org.eclipse.jdt.ui.refactoring.menu/Maven refactoring">
-        </action>
+              label="Rename Maven artifact..."
+              menubarPath="org.eclipse.jdt.ui.refactoring.menu/Maven refactoring"/>
      </objectContribution>
   </extension>
+
 </plugin>

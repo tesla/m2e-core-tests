@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * Copyright (c) 2008 Sonatype, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *******************************************************************************/
+
 package org.maven.ide.eclipse.refactoring;
 
 import java.util.ArrayList;
@@ -36,9 +44,8 @@ import org.maven.ide.eclipse.project.IMavenProjectFacade;
  * Base class for all pom.xml refactorings in workspace
  * 
  * @author Anton Kraev
- *
  */
-public abstract class PomRefactoring extends Refactoring {
+public abstract class AbstractPomRefactoring extends Refactoring {
 
   //main file that is being refactored
   protected IFile file;
@@ -58,7 +65,7 @@ public abstract class PomRefactoring extends Refactoring {
   //editing domain
   private AdapterFactoryEditingDomain editingDomain;
 
-  public PomRefactoring(IFile file) {
+  public AbstractPomRefactoring(IFile file) {
     this.file = file;
     
     textFileBufferManager = FileBuffers.getTextFileBufferManager();

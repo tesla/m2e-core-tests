@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * Copyright (c) 2008 Sonatype, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *******************************************************************************/
+
 package org.maven.ide.eclipse.refactoring;
 
 import java.util.ArrayList;
@@ -18,57 +26,21 @@ import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.ReplaceEdit;
 
+
 /**
- * This class creates an org.eclipse.ltk.core.refactoring.DocumentChange instance
- * based on old and new text values
+ * This class creates an org.eclipse.ltk.core.refactoring.DocumentChange instance based on old and new text values 
  *
- * diff algorithm is based on http://www.incava.org/projects/java/java-diff/index.html 
- *
+ * <p>
+ * The diff algorithm is based on http://www.incava.org/projects/java/java-diff/index.html
+ * 
  * @author Anton Kraev
- *
  */
-
 public class ChangeCreator {
-
-  class StringWithPos {
-    public String str;
-    public int offset;
-    
-    public StringWithPos(String str, int offset) {
-      this.str = str;
-      this.offset = offset;
-    }
-  }
-  
-  class StringWithPosComparator implements Comparator<StringWithPos> {
-    public int compare(StringWithPos o1, StringWithPos o2) {
-      return o1.str.equals(o2.str)? 0: 1;
-    }
-  }
-
   private String label;
   private String oldText;
   private String newText;
   private IDocument document;
 
-  private List<StringWithPos> parse(String txt) {
-    List<StringWithPos> res = new ArrayList<StringWithPos>();
-    StringTokenizer st = new StringTokenizer(txt, "\n\r", true);
-    int offset = 0;
-    while (st.hasMoreElements()) {
-      String str = st.nextToken();
-      if (str.equals("\n") || str.equals("\r")) {
-        if (res.size() > 0)
-          res.get(res.size() - 1).str = res.get(res.size() - 1).str + str;
-        continue;
-      }
-      int pos = txt.indexOf(str, offset);
-      res.add(new StringWithPos(str, pos));
-      offset = pos;
-    }
-    return res;
-  }
-  
   public ChangeCreator(IDocument document, String label, String oldText, String newText) {
     this.document = document;
     this.label = label;
@@ -106,6 +78,24 @@ public class ChangeCreator {
     }
     return change;
   }
+
+  private List<StringWithPos> parse(String txt) {
+    List<StringWithPos> res = new ArrayList<StringWithPos>();
+    StringTokenizer st = new StringTokenizer(txt, "\n\r", true);
+    int offset = 0;
+    while (st.hasMoreElements()) {
+      String str = st.nextToken();
+      if (str.equals("\n") || str.equals("\r")) {
+        if (res.size() > 0)
+          res.get(res.size() - 1).str = res.get(res.size() - 1).str + str;
+        continue;
+      }
+      int pos = txt.indexOf(str, offset);
+      res.add(new StringWithPos(str, pos));
+      offset = pos;
+    }
+    return res;
+  }
   
   /**
    * Represents a difference, as used in <code>Diff</code>. A difference consists
@@ -115,7 +105,7 @@ public class ChangeCreator {
    * if <code>getDeletedEnd()</code> returns -1, then the difference represents an
    * addition.
    */
-  public class Difference
+  public static class Difference
   {
       public static final int NONE = -1;
       
@@ -253,7 +243,7 @@ public class ChangeCreator {
    * <p>The file FileDiff.java shows an example usage of this class, in an
    * application similar to the Unix "diff" program.</p>
    */
-  public class Diff
+  public static class Diff
   {
       /**
        * The source array, AKA the "from" values.
@@ -709,4 +699,21 @@ public class ChangeCreator {
           return k;
       }
   }
+  
+  static class StringWithPos {
+    public String str;
+    public int offset;
+    
+    public StringWithPos(String str, int offset) {
+      this.str = str;
+      this.offset = offset;
+    }
+  }
+  
+  static class StringWithPosComparator implements Comparator<StringWithPos> {
+    public int compare(StringWithPos o1, StringWithPos o2) {
+      return o1.str.equals(o2.str)? 0: 1;
+    }
+  }
+  
 }
