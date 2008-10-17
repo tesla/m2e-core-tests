@@ -63,8 +63,6 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
 
   private static final String THIS_PROJECT_CLASSIFIER = "";
 
-  private static final Path MAVEN2_CONTAINER_PATH = new Path(IMavenConstants.CONTAINER_ID);
-  
   public static final String JDT_JUNIT_TEST = "org.eclipse.jdt.junit.launchconfig";
 
   public static final String JDT_JAVA_APPLICATION = "org.eclipse.jdt.launching.localJavaApplication";
@@ -84,7 +82,7 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
       IJavaProject javaProject = JavaRuntime.getJavaProject(configuration);
       IRuntimeClasspathEntry jreEntry = JavaRuntime.computeJREEntry(configuration);
       IRuntimeClasspathEntry projectEntry = JavaRuntime.newProjectRuntimeClasspathEntry(javaProject);
-      IRuntimeClasspathEntry mavenEntry = JavaRuntime.newRuntimeContainerClasspathEntry(MAVEN2_CONTAINER_PATH, IRuntimeClasspathEntry.USER_CLASSES);
+      IRuntimeClasspathEntry mavenEntry = JavaRuntime.newRuntimeContainerClasspathEntry(new Path(BuildPathManager.CONTAINER_ID), IRuntimeClasspathEntry.USER_CLASSES);
 
       if(jreEntry == null) {
         return new IRuntimeClasspathEntry[] {projectEntry, mavenEntry};
@@ -97,16 +95,12 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
   }
 
   public IRuntimeClasspathEntry[] resolveClasspath(IRuntimeClasspathEntry[] entries, ILaunchConfiguration configuration)
-      throws CoreException 
-  {
-    int scope = getArtifactScope(configuration);
-
+      throws CoreException {
     IProgressMonitor monitor = new NullProgressMonitor(); // XXX
-
+    int scope = getArtifactScope(configuration);
     Set<IRuntimeClasspathEntry> all = new LinkedHashSet<IRuntimeClasspathEntry>(entries.length);
-    for (int i = 0; i < entries.length; i++) {
-      IRuntimeClasspathEntry entry = entries[i];
-      if (MAVEN2_CONTAINER_PATH.equals(entry.getPath()) && entry.getType() == IRuntimeClasspathEntry.CONTAINER) {
+    for(IRuntimeClasspathEntry entry : entries) {
+      if (entry.getType() == IRuntimeClasspathEntry.CONTAINER && BuildPathManager.isMaven2ClasspathContainer(entry.getPath())) {
         addMavenClasspathEntries(all, entry, configuration, scope, monitor);
       } else if (entry.getType() == IRuntimeClasspathEntry.PROJECT) {
         IJavaProject javaProject = JavaRuntime.getJavaProject(configuration);
@@ -138,13 +132,13 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
     MavenJdtPlugin plugin = MavenJdtPlugin.getDefault();
     BuildPathManager buildpathManager = plugin.getBuildpathManager();
     IClasspathEntry[] cp = buildpathManager.getClasspath(javaProject.getProject(), scope, false, new NullProgressMonitor());
-    for (int i = 0; i < cp.length; i++) {
-      switch (cp[i].getEntryKind()) {
+    for(IClasspathEntry entry : cp) {
+      switch (entry.getEntryKind()) {
         case IClasspathEntry.CPE_PROJECT:
-          addProjectEntries(resolved, cp[i].getPath(), scope, getArtifactClassifier(cp[i]), configuration, monitor);
+          addProjectEntries(resolved, entry.getPath(), scope, getArtifactClassifier(entry), configuration, monitor);
           break;
         case IClasspathEntry.CPE_LIBRARY:
-          resolved.add(JavaRuntime.newArchiveRuntimeClasspathEntry(cp[i].getPath()));
+          resolved.add(JavaRuntime.newArchiveRuntimeClasspathEntry(entry.getPath()));
           break;
 //        case IClasspathEntry.CPE_SOURCE:
 //          resolved.add(newSourceClasspathEntry(javaProject, cp[i]));
@@ -224,12 +218,11 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
     }, IMavenProjectVisitor.NESTED_MODULES);
 
     IJavaProject javaProject = JavaCore.create(project);
-    IClasspathEntry[] cp = javaProject.getRawClasspath();
 
     boolean projectResolved = false;
-    for (int i = 0; i < cp.length; i++) {
+    for(IClasspathEntry entry : javaProject.getRawClasspath()) {
       IRuntimeClasspathEntry rce = null;
-      switch (cp[i].getEntryKind()) {
+      switch (entry.getEntryKind()) {
         case IClasspathEntry.CPE_SOURCE:
           if (!projectResolved) {
             if (BuildPathManager.CLASSPATH_TEST == scope && isTestClassifier(classifier)) {
@@ -243,8 +236,8 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
           }
           break;
         case IClasspathEntry.CPE_CONTAINER:
-          IClasspathContainer container = JavaCore.getClasspathContainer(cp[i].getPath(), javaProject);
-          if (container != null && !MAVEN2_CONTAINER_PATH.isPrefixOf(cp[i].getPath())) {
+          IClasspathContainer container = JavaCore.getClasspathContainer(entry.getPath(), javaProject);
+          if (container != null && !BuildPathManager.isMaven2ClasspathContainer(entry.getPath())) {
             switch (container.getKind()) {
               case IClasspathContainer.K_APPLICATION:
                 rce = JavaRuntime.newRuntimeContainerClasspathEntry(container.getPath(), IRuntimeClasspathEntry.USER_CLASSES, javaProject);
@@ -259,15 +252,15 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
           }
           break;
         case IClasspathEntry.CPE_LIBRARY:
-          rce = JavaRuntime.newArchiveRuntimeClasspathEntry(cp[i].getPath());
+          rce = JavaRuntime.newArchiveRuntimeClasspathEntry(entry.getPath());
           break;
         case IClasspathEntry.CPE_VARIABLE:
-          if (!JavaRuntime.JRELIB_VARIABLE.equals(cp[i].getPath().segment(0))) {
-            rce = JavaRuntime.newVariableRuntimeClasspathEntry(cp[i].getPath());
+          if (!JavaRuntime.JRELIB_VARIABLE.equals(entry.getPath().segment(0))) {
+            rce = JavaRuntime.newVariableRuntimeClasspathEntry(entry.getPath());
           }
           break;
         case IClasspathEntry.CPE_PROJECT:
-          IProject res = root.getProject(cp[i].getPath().segment(0));
+          IProject res = root.getProject(entry.getPath().segment(0));
           if (res != null) {
             IJavaProject otherProject = JavaCore.create(res);
             if (otherProject != null) {
@@ -333,7 +326,7 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
   private static String getArtifactClassifier(IClasspathEntry entry) {
     IClasspathAttribute[] attributes = entry.getExtraAttributes();
     for(int j = 0; j < attributes.length; j++ ) {
-      if(IMavenConstants.CLASSIFIER_ATTRIBUTE.equals(attributes[j].getName())) {
+      if(BuildPathManager.CLASSIFIER_ATTRIBUTE.equals(attributes[j].getName())) {
         return attributes[j].getValue();
       }
     }

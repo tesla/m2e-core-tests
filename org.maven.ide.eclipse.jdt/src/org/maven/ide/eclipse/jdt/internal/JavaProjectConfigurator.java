@@ -216,11 +216,10 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
     Util.createFolder(classes, true);
     Util.createFolder(testClasses, true);
     
-    addSourceDirs(project, sources, entries, mavenProject.getCompileSourceRoots(), classes.getFullPath(), null);
+    addSourceDirs(project, sources, entries, mavenProject.getCompileSourceRoots(), classes.getFullPath());
     addResourceDirs(project, sources, entries, mavenProject.getBuild().getResources(), classes.getFullPath());
 
-    addSourceDirs(project, sources, entries, mavenProject.getTestCompileSourceRoots(), testClasses.getFullPath(),
-        BuildPathManager.TEST_TYPE);
+    addSourceDirs(project, sources, entries, mavenProject.getTestCompileSourceRoots(), testClasses.getFullPath());
     addResourceDirs(project, sources, entries, mavenProject.getBuild().getTestResources(), testClasses.getFullPath());
 
     // HACK to support xmlbeans generated classes MNGECLIPSE-374
@@ -233,8 +232,7 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
     }
   }
 
-  private void addSourceDirs(IProject project, Set<String> sources, Set<IClasspathEntry> entries, List<String> sourceRoots, IPath output,
-      String scope) {
+  private void addSourceDirs(IProject project, Set<String> sources, Set<IClasspathEntry> entries, List<String> sourceRoots, IPath output) {
     for(String sourceRoot : sourceRoots) {
       if(new File(sourceRoot).isDirectory()) {
         IResource r = project.findMember(toRelativeAndFixSeparator(project, sourceRoot));
@@ -578,7 +576,7 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
           }
         }
   
-        newEntries.add(JavaCore.newContainerEntry(new Path(IMavenConstants.CONTAINER_ID)));
+        newEntries.add(BuildPathManager.getDefaultContainerEntry());
   
         javaProject.setRawClasspath(newEntries.toArray(new IClasspathEntry[newEntries.size()]), monitor);
       }

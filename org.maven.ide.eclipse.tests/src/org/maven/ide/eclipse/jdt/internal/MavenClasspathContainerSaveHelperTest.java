@@ -20,7 +20,7 @@ import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
-import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.jdt.BuildPathManager;
 
 /**
  * @author Eugene Kuleshov
@@ -30,8 +30,6 @@ public class MavenClasspathContainerSaveHelperTest extends TestCase {
   private MavenClasspathContainerSaveHelper helper = new MavenClasspathContainerSaveHelper();
 
   public void testClasspathContainerSace() throws Exception {
-    Path path = new Path(IMavenConstants.CONTAINER_ID);
-    
     IClasspathEntry[] entries = new IClasspathEntry[2];
 
     {
@@ -59,12 +57,12 @@ public class MavenClasspathContainerSaveHelperTest extends TestCase {
     }
     
     ByteArrayOutputStream os = new ByteArrayOutputStream();
-    helper.writeContainer(new MavenClasspathContainer(path, entries), os);
+    helper.writeContainer(new MavenClasspathContainer(new Path(BuildPathManager.CONTAINER_ID), entries), os);
     os.close();
     
     IClasspathContainer container = helper.readContainer(new ByteArrayInputStream(os.toByteArray()));
 
-    assertEquals(path.toString(), container.getPath().toString());
+    assertEquals(BuildPathManager.CONTAINER_ID, container.getPath().toString());
     
     IClasspathEntry[] classpathEntries = container.getClasspathEntries();
     assertEquals(2, classpathEntries.length);

@@ -105,17 +105,32 @@ import org.maven.ide.eclipse.project.MavenProjectManager;
 @SuppressWarnings("restriction")
 public class BuildPathManager implements IMavenProjectChangedListener, IDownloadSourceListener, IResourceChangeListener {
 
-  private static final String PROPERTY_SRC_ROOT = ".srcRoot";
+  // container settings
+  public static final String CONTAINER_ID = "org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER"; //$NON-NLS-1$
+  
+  // entry attributes
+  public static final String GROUP_ID_ATTRIBUTE = "maven.groupId"; //$NON-NLS-1$
 
-  private static final String PROPERTY_SRC_PATH = ".srcPath";
+  public static final String ARTIFACT_ID_ATTRIBUTE = "maven.artifactId"; //$NON-NLS-1$
 
-  private static final String PROPERTY_JAVADOC_URL = ".javadoc"; 
+  public static final String VERSION_ATTRIBUTE = "maven.version"; //$NON-NLS-1$
 
-  public static final String TEST_CLASSES_FOLDERNAME = "test-classes";
+  public static final String CLASSIFIER_ATTRIBUTE = "maven.classifier"; //$NON-NLS-1$
 
-  public static final String CLASSES_FOLDERNAME = "classes";
+  public static final String SCOPE_ATTRIBUTE = "maven.scope"; //$NON-NLS-1$
 
-  public static final String TEST_TYPE = "test";
+  // local repository variable
+  public static final String M2_REPO = "M2_REPO"; //$NON-NLS-1$
+  
+  private static final String PROPERTY_SRC_ROOT = ".srcRoot"; //$NON-NLS-1$
+
+  private static final String PROPERTY_SRC_PATH = ".srcPath"; //$NON-NLS-1$
+
+  private static final String PROPERTY_JAVADOC_URL = ".javadoc"; //$NON-NLS-1$
+
+  // public static final String TEST_CLASSES_FOLDERNAME = "test-classes"; //$NON-NLS-1$
+
+  // public static final String CLASSES_FOLDERNAME = "classes"; //$NON-NLS-1$
 
   public static final int CLASSPATH_TEST = 0;
 
@@ -162,25 +177,25 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     this.stateLocationDir = stateLocationDir;
   }
 
+  public static boolean isMaven2ClasspathContainer(IPath containerPath) {
+    return containerPath != null && containerPath.segmentCount() > 0
+        && CONTAINER_ID.equals(containerPath.segment(0));
+  }
+  
   public static IClasspathEntry getDefaultContainerEntry() {
-    return JavaCore.newContainerEntry(new Path(IMavenConstants.CONTAINER_ID));
+    return JavaCore.newContainerEntry(new Path(CONTAINER_ID));
   }
 
   public static IClasspathEntry getMavenContainerEntry(IJavaProject javaProject) {
-    if(javaProject == null) {
-      return null;
-    }
-    
-    IClasspathEntry[] classpath;
-    try {
-      classpath = javaProject.getRawClasspath();
-    } catch(JavaModelException ex) {
-      return null;
-    }
-    for(int i = 0; i < classpath.length; i++ ) {
-      IClasspathEntry entry = classpath[i];
-      if(isMaven2ClasspathContainer(entry.getPath())) {
-        return entry;
+    if(javaProject != null) {
+      try {
+        for(IClasspathEntry entry : javaProject.getRawClasspath()) {
+          if(isMaven2ClasspathContainer(entry.getPath())) {
+            return entry;
+          }
+        }
+      } catch(JavaModelException ex) {
+        return null;
       }
     }
     return null;
@@ -201,12 +216,11 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     if(getJDTVersion().startsWith("3.3")) {
       DeltaProcessingState state = JavaModelManager.getJavaModelManager().deltaState;
       synchronized(state) {
-        IElementChangedListener[] listeners = state.elementChangedListeners;
-        for(int i = 0; i < listeners.length; i++ ) {
-          if(listeners[i] instanceof PackageExplorerContentProvider) {
+        for(IElementChangedListener listener : state.elementChangedListeners) {
+          if(listener instanceof PackageExplorerContentProvider) {
             JavaElementDelta delta = new JavaElementDelta(javaProject);
             delta.changed(IJavaElementDelta.F_CLASSPATH_CHANGED);
-            listeners[i].elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
+            listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
           }
         }
       }
@@ -256,7 +270,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     if(javaProject != null) {
       try {
         IClasspathEntry containerEntry = getMavenContainerEntry(javaProject);
-        IPath path = containerEntry != null ? containerEntry.getPath() : new Path(IMavenConstants.CONTAINER_ID);
+        IPath path = containerEntry != null ? containerEntry.getPath() : new Path(CONTAINER_ID);
         IClasspathEntry[] classpath = getClasspath(project, monitor);
         IClasspathContainer container = new MavenClasspathContainer(path, classpath);
         JavaCore.setClasspathContainer(container.getPath(), new IJavaProject[] {javaProject},
@@ -426,14 +440,14 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
       }
 
       ArrayList<IClasspathAttribute> attributes = new ArrayList<IClasspathAttribute>();
-      attributes.add(JavaCore.newClasspathAttribute(IMavenConstants.GROUP_ID_ATTRIBUTE, a.getGroupId()));
-      attributes.add(JavaCore.newClasspathAttribute(IMavenConstants.ARTIFACT_ID_ATTRIBUTE, a.getArtifactId()));
-      attributes.add(JavaCore.newClasspathAttribute(IMavenConstants.VERSION_ATTRIBUTE, a.getVersion()));
+      attributes.add(JavaCore.newClasspathAttribute(GROUP_ID_ATTRIBUTE, a.getGroupId()));
+      attributes.add(JavaCore.newClasspathAttribute(ARTIFACT_ID_ATTRIBUTE, a.getArtifactId()));
+      attributes.add(JavaCore.newClasspathAttribute(VERSION_ATTRIBUTE, a.getVersion()));
       if (a.getClassifier() != null) {
-        attributes.add(JavaCore.newClasspathAttribute(IMavenConstants.CLASSIFIER_ATTRIBUTE, a.getClassifier()));
+        attributes.add(JavaCore.newClasspathAttribute(CLASSIFIER_ATTRIBUTE, a.getClassifier()));
       }
       if (a.getScope() != null) {
-        attributes.add(JavaCore.newClasspathAttribute(IMavenConstants.SCOPE_ATTRIBUTE, a.getScope()));
+        attributes.add(JavaCore.newClasspathAttribute(SCOPE_ATTRIBUTE, a.getScope()));
       }
 
       for (Iterator<AbstractClasspathConfigurator> ci = configurators.iterator(); ci.hasNext(); ) {
@@ -539,7 +553,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
       }
       return getClasspath(facade, scope, props, uniquePaths, monitor);
     } catch (IOException e) {
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, //
+      throw new CoreException(new Status(IStatus.ERROR, MavenJdtPlugin.PLUGIN_ID, -1, //
           "Can't save classpath container changes", e));
     }
   }
@@ -621,13 +635,13 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     String version = null;
     String classifier = null;
     for(int j = 0; j < attributes.length; j++ ) {
-      if(IMavenConstants.GROUP_ID_ATTRIBUTE.equals(attributes[j].getName())) {
+      if(GROUP_ID_ATTRIBUTE.equals(attributes[j].getName())) {
         groupId = attributes[j].getValue();
-      } else if(IMavenConstants.ARTIFACT_ID_ATTRIBUTE.equals(attributes[j].getName())) {
+      } else if(ARTIFACT_ID_ATTRIBUTE.equals(attributes[j].getName())) {
         artifactId = attributes[j].getValue();
-      } else if(IMavenConstants.VERSION_ATTRIBUTE.equals(attributes[j].getName())) {
+      } else if(VERSION_ATTRIBUTE.equals(attributes[j].getName())) {
         version = attributes[j].getValue();
-      } else if(IMavenConstants.CLASSIFIER_ATTRIBUTE.equals(attributes[j].getName())) {
+      } else if(CLASSIFIER_ATTRIBUTE.equals(attributes[j].getName())) {
         classifier = attributes[j].getValue();
       }
     }
@@ -656,7 +670,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
       }
       
     } catch(DigesterException ex) {
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, 0, "MD5 calculation error", ex));
+      throw new CoreException(new Status(IStatus.ERROR, MavenJdtPlugin.PLUGIN_ID, 0, "MD5 calculation error", ex));
     }
     
     return null;
@@ -780,7 +794,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
         os.close();
       }
     } catch (IOException e) {
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Can't save classpath container changes", e));
+      throw new CoreException(new Status(IStatus.ERROR, MavenJdtPlugin.PLUGIN_ID, -1, "Can't save classpath container changes", e));
     }
 
     // update classpath container. suboptimal as this will re-calculate classpath
@@ -835,7 +849,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
       File localRepositoryDir = embedderManager.getLocalRepositoryDir();
       
       setAutobuild(workspace, false);
-      JavaCore.setClasspathVariable(IMavenConstants.M2_REPO, //
+      JavaCore.setClasspathVariable(M2_REPO, //
           new Path(localRepositoryDir.getAbsolutePath()), //
           new NullProgressMonitor());
     } catch(CoreException ex) {
@@ -858,11 +872,6 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
       workspace.setDescription(description);
     }
     return oldState;
-  }
-  
-  public static boolean isMaven2ClasspathContainer(IPath containerPath) {
-    return containerPath != null && containerPath.segmentCount() > 0
-        && IMavenConstants.CONTAINER_ID.equals(containerPath.segment(0));
   }
   
 }
