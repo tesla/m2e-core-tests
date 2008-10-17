@@ -36,8 +36,11 @@ import org.maven.ide.eclipse.project.ResolverConfiguration;
  */
 public class ResolverConfigurationComponent extends ExpandableComposite {
 
-  private static final String[] DEFAULT_NAME_TEMPLATES = {"[artifactId]", "[artifactId]-TRUNK",
-      "[artifactId]-[version]", "[groupId].[artifactId]-[version]"};
+  private static final String[] DEFAULT_NAME_TEMPLATES = {"[artifactId]", //
+      "[artifactId]-TRUNK", //
+      "[artifactId]-[version]", //
+      "[groupId].[artifactId]",
+      "[groupId].[artifactId]-[version]"};
 
   /** The resolver configuration */
   protected final ResolverConfiguration resolverConfiguration;
