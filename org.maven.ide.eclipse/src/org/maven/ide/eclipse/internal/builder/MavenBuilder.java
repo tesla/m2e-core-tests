@@ -45,15 +45,6 @@ public class MavenBuilder extends IncrementalProjectBuilder {
   public static boolean DEBUG = MavenPlugin.getDefault().isDebugging()
       & Boolean.parseBoolean(Platform.getDebugOption(IMavenConstants.PLUGIN_ID + "/debug/builder"));
   
-  private final MavenConsole console;
-  private MavenProjectManager projectManager;
-
-  public MavenBuilder() {
-    MavenPlugin plugin = MavenPlugin.getDefault();
-    console = plugin.getConsole();
-    this.projectManager = plugin.getMavenProjectManager();
-  }
-
   /*
    * (non-Javadoc)
    * 
@@ -62,6 +53,10 @@ public class MavenBuilder extends IncrementalProjectBuilder {
    */
   @SuppressWarnings("unchecked")
   protected IProject[] build(int kind, Map args, IProgressMonitor monitor) throws CoreException {
+    MavenPlugin plugin = MavenPlugin.getDefault();
+    MavenConsole console = plugin.getConsole();
+    MavenProjectManager projectManager = plugin.getMavenProjectManager();
+
     IProject project = getProject();
     if(project.hasNature(IMavenConstants.NATURE_ID)) {
       IFile pomResource = project.getFile(IMavenConstants.POM_FILE_NAME);
@@ -180,7 +175,7 @@ public class MavenBuilder extends IncrementalProjectBuilder {
       @SuppressWarnings("unchecked")
       List<Exception> exceptions = result.getExceptions();
       for(Exception ex : exceptions) {
-        console.logError(msg + "; " + ex.toString());
+        MavenPlugin.getDefault().getConsole().logError(msg + "; " + ex.toString());
         MavenLogger.log(msg, ex);
       }
       

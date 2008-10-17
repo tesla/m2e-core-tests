@@ -243,11 +243,13 @@ public class MavenConsoleImpl extends IOConsole implements MavenConsole, IProper
 
   public void logMessage(String message) {
     appendLine(ConsoleDocument.MESSAGE, getDateFormat().format(new Date()) + ": " + message); //$NON-NLS-1$
+    // System.out.println(message);
   }
 
   public void logError(String message) {
     bringConsoleToFront();
     appendLine(ConsoleDocument.ERROR, getDateFormat().format(new Date()) + ": " + message); //$NON-NLS-1$
+    // System.err.println(message);
   }
 
   public IConsoleListener newLifecycle() {
