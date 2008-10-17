@@ -8,7 +8,10 @@
 
 package org.maven.ide.eclipse.editor.pom;
 
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.actions.ActionFactory;
@@ -32,18 +35,18 @@ public class MavenPomEditorContributor extends MultiPageEditorActionBarContribut
       sourceEditorPart = (ITextEditor) part;
     }
 
+    IActionBars actionBars = getActionBars();
     if(sourceEditorPart !=null) {
-      IActionBars actionBars = getActionBars();
       if (actionBars != null) {
         actionBars.clearGlobalActionHandlers();
         
-        //undo/redo always enabled
+        // undo/redo always enabled
         actionBars.setGlobalActionHandler(ActionFactory.UNDO.getId(), //
             getAction(ITextEditorActionConstants.UNDO));
         actionBars.setGlobalActionHandler(ActionFactory.REDO.getId(), //
             getAction(ITextEditorActionConstants.REDO));
   
-        //all other action, for text editor only (FormPage doesn't provide for these actions...)
+        // all other action, for text editor only (FormPage doesn't provide for these actions...)
         if (part instanceof ITextEditor) {
           actionBars.setGlobalActionHandler(ActionFactory.DELETE.getId(), //
               getAction(ITextEditorActionConstants.DELETE));
@@ -61,6 +64,20 @@ public class MavenPomEditorContributor extends MultiPageEditorActionBarContribut
               getAction(IDEActionFactory.BOOKMARK.getId()));
         }
         
+        actionBars.updateActionBars();
+      }
+    }
+    
+    if(part instanceof DependencyGraphPage) {
+      final DependencyGraphPage graphPage = (DependencyGraphPage) part;
+      IAction printaAction = new Action() {
+        public void run() {
+          new DependencyGraphPrintDialog(graphPage.getEditorSite().getShell(), graphPage).open();
+        }
+      };
+
+      if(actionBars!=null) {
+        actionBars.setGlobalActionHandler(ActionFactory.PRINT.getId(), printaAction);
         actionBars.updateActionBars();
       }
     }

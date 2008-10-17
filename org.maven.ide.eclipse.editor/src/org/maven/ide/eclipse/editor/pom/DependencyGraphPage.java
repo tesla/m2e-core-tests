@@ -62,6 +62,7 @@ import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
 
+
 /**
  * Dependency graph editor page
  * 
@@ -74,26 +75,39 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
   protected static final Object[] EMPTY = new Object[0];
 
   final MavenPomEditor pomEditor;
-  
+
   GraphViewer viewer;
 
   IAction openAction;
+
   private IAction selectAllAction;
 
   private IAction showVersionAction;
+
   private IAction showGroupAction;
+
   private IAction showScopeAction;
+
   private IAction showIconAction;
+
   private IAction wrapLabelAction;
 
   private IAction showAllScopeAction;
+
   private IAction showCompileScopeAction;
+
   private IAction showTestScopeAction;
+
   private IAction showRuntimeScopeAction;
+
   private IAction showProvidedScopeAction;
+
   private IAction showSystemScopeAction;
+
   private IAction showResolvedAction;
+
   private IAction radialLayoutAction;
+
   private IAction showLegendAction;
 
   DependencyGraphLabelProvider graphLabelProvider;
@@ -110,9 +124,13 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
     super(pomEditor, IMavenConstants.PLUGIN_ID + ".dependency.graph", DEPENDENCY_GRAPH);
     this.pomEditor = pomEditor;
   }
-  
+
   public AbstractZoomableViewer getZoomableViewer() {
     return viewer;
+  }
+
+  public MavenPomEditor getPomEditor() {
+    return pomEditor;
   }
 
   protected void createFormContent(final IManagedForm managedForm) {
@@ -143,7 +161,6 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
 
     // viewer.setNodeStyle(ZestStyles.NODES_FISHEYE);
     viewer.setConnectionStyle(ZestStyles.CONNECTIONS_DIRECTED);
-    
 
     // graphViewer.getGraphControl().setScrollBarVisibility(SWT.NONE);
 
@@ -172,7 +189,7 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
 
     viewer.setLayoutAlgorithm(new CompositeLayoutAlgorithm(
         LayoutStyles.NO_LAYOUT_NODE_RESIZING | LayoutStyles.ENFORCE_BOUNDS, // 
-        new LayoutAlgorithm[] { // 
+        new LayoutAlgorithm[] { //
             new DirectedGraphLayoutAlgorithm(
                 LayoutStyles.NO_LAYOUT_NODE_RESIZING
                     | LayoutStyles.ENFORCE_BOUNDS), // 
@@ -181,7 +198,7 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
 
     graphContentProvider = new DependencyGraphContentProvider();
     viewer.setContentProvider(graphContentProvider);
-    
+
     graphLabelProvider = new DependencyGraphLabelProvider(viewer, graphContentProvider);
     viewer.setLabelProvider(graphLabelProvider);
     viewer.addSelectionChangedListener(graphLabelProvider);
@@ -191,54 +208,11 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
       }
     });
 
-    IToolBarManager toolBarManager = form.getForm().getToolBarManager();
-
     searchControl = new SearchControl("Find", managedForm);
-    
+
+    IToolBarManager toolBarManager = form.getForm().getToolBarManager();
     toolBarManager.add(searchControl);
-
-    class ScopeDropdown extends Action implements IMenuCreator {
-      private Menu menu;
-
-      public ScopeDropdown() {
-        setText("Scope");
-        setImageDescriptor(MavenEditorImages.SCOPE);
-        setMenuCreator(this);
-      }
-      
-      public Menu getMenu(Menu parent) {
-        return null;
-      }
-
-      public Menu getMenu(Control parent) {
-        if (menu != null) {
-          menu.dispose();
-        }
-        
-        menu = new Menu(parent);
-        addToMenu(menu, "all (test)", Artifact.SCOPE_TEST, currentScope);
-        addToMenu(menu, "compile", Artifact.SCOPE_COMPILE, currentScope);
-        addToMenu(menu, "runtime", Artifact.SCOPE_RUNTIME, currentScope);
-        addToMenu(menu, "provided", Artifact.SCOPE_PROVIDED, currentScope);
-        addToMenu(menu, "system", Artifact.SCOPE_SYSTEM, currentScope);
-        return menu;
-      }
-      
-      protected void addToMenu(Menu parent, String text, String scope, String currentScope) {
-        ScopeAction action = new ScopeAction(text, scope);
-        action.setChecked(scope.equals(currentScope));
-        new ActionContributionItem(action).fill(parent, -1);
-      }
-      
-      public void dispose() {
-        if (menu != null)  {
-          menu.dispose();
-          menu = null;
-        }
-      }
-    }
     toolBarManager.add(new ScopeDropdown());
-    
     toolBarManager.add(new Separator());
 
     toolBarManager.add(new Action("Refresh", MavenEditorImages.REFRESH) {
@@ -247,13 +221,13 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
         updateGraphAsync(true, currentScope);
       }
     });
-    
+
     createActions();
     initPopupMenu();
 
     // compatibility proxy to support Eclipse 3.2
     FormUtils.decorateHeader(managedForm.getToolkit(), form.getForm());
-    
+
     form.updateToolBar();
 
     searchControl.getSearchText().addFocusListener(new FocusAdapter() {
@@ -267,7 +241,7 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
         selectElements();
       }
     });
-    
+
     updateGraphAsync(false, currentScope);
   }
 
@@ -278,11 +252,11 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
   void selectElements() {
     ArrayList<Artifact> elements = new ArrayList<Artifact>();
     String text = searchControl.getSearchText().getText();
-    if(text.length()>0) {
+    if(text.length() > 0) {
       Object[] nodeElements = viewer.getNodeElements();
       for(int i = 0; i < nodeElements.length; i++ ) {
         Artifact a = (Artifact) nodeElements[i];
-        if(a.getGroupId().indexOf(text)>-1 || a.getArtifactId().indexOf(text)>-1) {
+        if(a.getGroupId().indexOf(text) > -1 || a.getArtifactId().indexOf(text) > -1) {
           elements.add(a);
         }
       }
@@ -333,7 +307,7 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
       }
     };
     showIconAction.setChecked(true);
-    
+
     wrapLabelAction = new Action("&Wrap Label", SWT.CHECK) {
       public void run() {
         graphLabelProvider.setWarpLabel(isChecked());
@@ -348,20 +322,20 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
       }
     };
     showResolvedAction.setChecked(true);
-    
+
     radialLayoutAction = new Action("&Radial Layout", SWT.CHECK) {
       public void run() {
-        if (isChecked()) {
-          viewer.setLayoutAlgorithm(new CompositeLayoutAlgorithm(LayoutStyles.NO_LAYOUT_NODE_RESIZING, // 
-              new LayoutAlgorithm[] { // 
-                new RadialLayoutAlgorithm(LayoutStyles.NO_LAYOUT_NODE_RESIZING),
+        if(isChecked()) {
+          viewer.setLayoutAlgorithm(new CompositeLayoutAlgorithm(LayoutStyles.NO_LAYOUT_NODE_RESIZING, //
+              new LayoutAlgorithm[] { //
+              new RadialLayoutAlgorithm(LayoutStyles.NO_LAYOUT_NODE_RESIZING),
                 new HorizontalShift(LayoutStyles.NO_LAYOUT_NODE_RESIZING),
               }));
 
         } else {
           viewer.setLayoutAlgorithm(new CompositeLayoutAlgorithm(LayoutStyles.NO_LAYOUT_NODE_RESIZING /*| LayoutStyles.ENFORCE_BOUNDS*/, // 
-              new LayoutAlgorithm[] { // 
-                new DirectedGraphLayoutAlgorithm(LayoutStyles.NO_LAYOUT_NODE_RESIZING /*| LayoutStyles.ENFORCE_BOUNDS*/), // 
+                  new LayoutAlgorithm[] { //
+                      new DirectedGraphLayoutAlgorithm(LayoutStyles.NO_LAYOUT_NODE_RESIZING /*| LayoutStyles.ENFORCE_BOUNDS*/), //
                 new HorizontalShift(LayoutStyles.NO_LAYOUT_NODE_RESIZING)
               }));
         }
@@ -382,7 +356,7 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
         popup.open();
       }
     };
-    
+
 //    showAllScopeAction = new Action("Show All Scopes", SWT.CHECK) {
 //      public void run() {
 //        updateGraph(null);
@@ -390,7 +364,7 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
 //      }
 //    };
 //    showAllScopeAction.setChecked(true);
-//    
+//
 //    showCompileScopeAction = new Action("Show Compile Scope", SWT.CHECK) {
 //      public void run() {
 //        updateGraph(ArtifactScopeEnum.compile);
@@ -450,12 +424,12 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
   }
 
   void updateScopeActions(IAction action) {
-    showAllScopeAction.setChecked(showAllScopeAction==action);
-    showCompileScopeAction.setChecked(showCompileScopeAction==action);
-    showTestScopeAction.setChecked(showTestScopeAction==this);
-    showRuntimeScopeAction.setChecked(showRuntimeScopeAction==action);
-    showProvidedScopeAction.setChecked(showProvidedScopeAction==action);
-    showSystemScopeAction.setChecked(showSystemScopeAction==action);
+    showAllScopeAction.setChecked(showAllScopeAction == action);
+    showCompileScopeAction.setChecked(showCompileScopeAction == action);
+    showTestScopeAction.setChecked(showTestScopeAction == this);
+    showRuntimeScopeAction.setChecked(showRuntimeScopeAction == action);
+    showProvidedScopeAction.setChecked(showProvidedScopeAction == action);
+    showSystemScopeAction.setChecked(showSystemScopeAction == action);
   }
 
   void updateGraphAsync(final boolean force, final String scope) {
@@ -478,7 +452,7 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
             }
           });
         }
-        
+
         return Status.OK_STATUS;
       }
     }.schedule();
@@ -491,7 +465,7 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
     // MetadataGraph graph = result.getGraph(MetadataResolutionRequestTypeEnum.scopedGraph);
 
     viewer.setInput(node);
-    
+
     IStructuredContentProvider contentProvider = (IStructuredContentProvider) viewer.getContentProvider();
     viewer.setSelection(new StructuredSelection(contentProvider.getElements(node)));
   }
@@ -499,7 +473,7 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
   void fillContextMenu(IMenuManager manager) {
     manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 
-    if (!viewer.getSelection().isEmpty()) {
+    if(!viewer.getSelection().isEmpty()) {
       manager.add(openAction);
       manager.add(new Separator());
     }
@@ -511,7 +485,7 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
     manager.add(showScopeAction);
     manager.add(showIconAction);
     manager.add(wrapLabelAction);
-    
+
 //    manager.add(new Separator());
 //    manager.add(showAllScopeAction);
 //    manager.add(showCompileScopeAction);
@@ -526,13 +500,13 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
 
     manager.add(new Separator());
     manager.add(showLegendAction);
-    
-    // XXX disabled zoom control until Zest menu bug is fixed 
+
+    // XXX disabled zoom control until Zest menu bug is fixed
     // manager.add(new Separator());
     // manager.add(zoomContributionItem);
   }
 
-/*  
+/*
   private static final class MavenViewerFilter extends ViewerFilter {
     private final GraphViewer graphViewer;
 
@@ -604,9 +578,8 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
 
   }
 */
- 
-  public class ScopeAction extends Action {
 
+  public class ScopeAction extends Action {
     private final String scope;
 
     public ScopeAction(String text, String scope) {
@@ -623,5 +596,46 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
       }
     }
   }
-  
+
+  class ScopeDropdown extends Action implements IMenuCreator {
+    private Menu menu;
+
+    public ScopeDropdown() {
+      setText("Scope");
+      setImageDescriptor(MavenEditorImages.SCOPE);
+      setMenuCreator(this);
+    }
+
+    public Menu getMenu(Menu parent) {
+      return null;
+    }
+
+    public Menu getMenu(Control parent) {
+      if(menu != null) {
+        menu.dispose();
+      }
+
+      menu = new Menu(parent);
+      addToMenu(menu, "all (test)", Artifact.SCOPE_TEST, currentScope);
+      addToMenu(menu, "compile", Artifact.SCOPE_COMPILE, currentScope);
+      addToMenu(menu, "runtime", Artifact.SCOPE_RUNTIME, currentScope);
+      addToMenu(menu, "provided", Artifact.SCOPE_PROVIDED, currentScope);
+      addToMenu(menu, "system", Artifact.SCOPE_SYSTEM, currentScope);
+      return menu;
+    }
+
+    protected void addToMenu(Menu parent, String text, String scope, String currentScope) {
+      ScopeAction action = new ScopeAction(text, scope);
+      action.setChecked(scope.equals(currentScope));
+      new ActionContributionItem(action).fill(parent, -1);
+    }
+
+    public void dispose() {
+      if(menu != null) {
+        menu.dispose();
+        menu = null;
+      }
+    }
+  }
+
 }

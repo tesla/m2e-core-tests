@@ -90,6 +90,7 @@ import org.eclipse.search.ui.text.Match;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IPartListener;
@@ -313,6 +314,17 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     addSourcePage();
     
     addEditorPageExtensions();
+  }
+
+  protected void pageChange(int newPageIndex) {
+    super.pageChange(newPageIndex);
+
+    // a workaround for editor pages not returned 
+    IEditorActionBarContributor contributor = getEditorSite().getActionBarContributor();
+    if(contributor != null && contributor instanceof MultiPageEditorActionBarContributor) {
+      IEditorPart activeEditor = getActivePageInstance();
+      ((MultiPageEditorActionBarContributor) contributor).setActivePage(activeEditor);
+    }
   }
 
   private void addEditorPageExtensions() {
