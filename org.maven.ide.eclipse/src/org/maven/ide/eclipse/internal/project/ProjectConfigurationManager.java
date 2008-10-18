@@ -9,6 +9,7 @@
 package org.maven.ide.eclipse.internal.project;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -529,7 +530,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
       if(!renamed) {
         throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Can't rename " + projectDir.getAbsolutePath(), null));
       }
-      projectInfo.setPomFile(new File(newProject, IMavenConstants.POM_FILE_NAME));
+      projectInfo.setPomFile(getCanonicalPomFile(newProject));
       projectDir = newProject;
     }
 
@@ -542,7 +543,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
         if(!renamed) {
           throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Can't rename " + projectDir.getAbsolutePath(), null));
         }
-        projectInfo.setPomFile(new File(newProject, IMavenConstants.POM_FILE_NAME));
+        projectInfo.setPomFile(getCanonicalPomFile(newProject));
       }
       project.create(monitor);
     } else {
@@ -559,6 +560,15 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     enableBasicMavenNature(project, resolverConfiguration, monitor);
 
     return project;
+  }
+
+  private File getCanonicalPomFile(File projectDir) throws CoreException {
+    try {
+      return new File(projectDir.getCanonicalFile(), IMavenConstants.POM_FILE_NAME);
+    } catch(IOException ex) {
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, //
+          "Can't get canonical file for " + projectDir.getAbsolutePath(), null));
+    }
   }
 
   public void mavenProjectChanged(MavenProjectChangedEvent[] events, IProgressMonitor monitor) {

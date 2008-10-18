@@ -105,11 +105,12 @@ public class LocalProjectScanner extends AbstractProjectScanner<MavenProjectInfo
 
   @SuppressWarnings("unchecked")
   private MavenProjectInfo readMavenProjectInfo(File baseDir, String modulePath, MavenProjectInfo parentInfo) {
-    File pomFile = new File(baseDir, IMavenConstants.POM_FILE_NAME);
     try {
+      baseDir = baseDir.getCanonicalFile();
+      File pomFile = new File(baseDir, IMavenConstants.POM_FILE_NAME);
       Model model = modelManager.readMavenModel(pomFile);
 
-      if (!scannedFolders.add(baseDir.getCanonicalFile())) {
+      if (!scannedFolders.add(baseDir)) {
         return null; // we already know this project
       }
 
@@ -150,10 +151,10 @@ public class LocalProjectScanner extends AbstractProjectScanner<MavenProjectInfo
 
     } catch(CoreException ex) {
       addError(ex);
-      console.logError("Unable to read model " + pomFile.getAbsolutePath());
+      console.logError("Unable to read model " + baseDir.getAbsolutePath());
     } catch(IOException ex) {
       addError(ex);
-      console.logError("Unable to read model " + pomFile.getAbsolutePath());
+      console.logError("Unable to read model " + baseDir.getAbsolutePath());
     }
 
     return null;
