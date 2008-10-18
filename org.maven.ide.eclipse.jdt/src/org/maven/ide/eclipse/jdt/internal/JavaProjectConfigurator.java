@@ -396,10 +396,12 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
       @SuppressWarnings("unchecked")
       List<String> modules = mavenProject.getModules();
       for(String module : modules) {
-        IFolder moduleDir = project.getFolder(module);
-        if(moduleDir.isAccessible()) {
-          // TODO don't set derived on modules that are not in Eclipse workspace
-          moduleDir.setDerived(true);
+        if(!module.startsWith("..")) {
+          IFolder moduleDir = project.getFolder(module);
+          if(moduleDir.isAccessible()) {
+            // TODO don't set derived on modules that are not in Eclipse workspace
+            moduleDir.setDerived(true);
+          }
         }
       }
     }
