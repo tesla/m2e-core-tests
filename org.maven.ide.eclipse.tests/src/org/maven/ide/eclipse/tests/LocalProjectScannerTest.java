@@ -147,7 +147,7 @@ public class LocalProjectScannerTest extends TestCase {
 
     MavenProjectInfo module = modules.get(0);
     assertEquals("../module/pom.xml", module.getLabel());
-    assertEquals(new File(baseDir, "../module/pom.xml"), module.getPomFile());
+    assertEquals(new File(baseDir, "../module/pom.xml").getCanonicalFile(), module.getPomFile());
   }
 
   public void testCircleRefs() throws Exception {
