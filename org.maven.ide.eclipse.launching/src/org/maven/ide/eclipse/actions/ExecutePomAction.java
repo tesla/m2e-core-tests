@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -52,6 +53,9 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.internal.launch.MavenLaunchConstants;
+import org.maven.ide.eclipse.project.IMavenProjectFacade;
+import org.maven.ide.eclipse.project.MavenProjectManager;
+import org.maven.ide.eclipse.project.ResolverConfiguration;
 import org.maven.ide.eclipse.ui.internal.launch.MavenLaunchMainTab;
 import org.maven.ide.eclipse.util.Util;
 
@@ -153,31 +157,31 @@ public class ExecutePomAction implements ILaunchShortcut, IExecutableExtension {
     return MavenPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow().getShell();
   }
 
-  private IContainer findPomXmlBasedir(IContainer origDir) {
-    if(origDir == null) {
+  private IContainer findPomXmlBasedir(IContainer dir) {
+    if(dir == null) {
       return null;
     }
 
     try {
       // loop upwards through the parents as long as we do not cross the project boundary
-      while(origDir.exists() && origDir.getProject() != null && origDir.getProject() != origDir) {
+      while(dir.exists() && dir.getProject() != null && dir.getProject() != dir) {
         // see if pom.xml exists
-        if(origDir.getType() == IResource.FOLDER) {
-          IFolder fold = (IFolder) origDir;
-          if(fold.findMember(IMavenConstants.POM_FILE_NAME) != null) {
-            return fold;
+        if(dir.getType() == IResource.FOLDER) {
+          IFolder folder = (IFolder) dir;
+          if(folder.findMember(IMavenConstants.POM_FILE_NAME) != null) {
+            return folder;
           }
-        } else if(origDir.getType() == IResource.FILE) {
-          if(((IFile) origDir).getName().equals(IMavenConstants.POM_FILE_NAME)) {
-            return origDir.getParent();
+        } else if(dir.getType() == IResource.FILE) {
+          if(((IFile) dir).getName().equals(IMavenConstants.POM_FILE_NAME)) {
+            return dir.getParent();
           }
         }
-        origDir = origDir.getParent();
+        dir = dir.getParent();
       }
     } catch(Exception e) {
-      return origDir;
+      return dir;
     }
-    return origDir;
+    return dir;
   }
 
   private ILaunchConfiguration createLaunchConfiguration(IContainer basedir, String goal) {
@@ -190,8 +194,11 @@ public class ExecutePomAction implements ILaunchShortcut, IExecutableExtension {
           "Executing " + goal + " in " + basedir.getLocation());
       workingCopy.setAttribute(MavenLaunchConstants.ATTR_POM_DIR, basedir.getLocation().toOSString());
       workingCopy.setAttribute(MavenLaunchConstants.ATTR_GOALS, goal);
+      
       workingCopy.setAttribute(RefreshTab.ATTR_REFRESH_SCOPE, "${project}");
       workingCopy.setAttribute(RefreshTab.ATTR_REFRESH_RECURSIVE, true);
+      
+      setActiveProfiles(workingCopy, basedir);
 
       IPath path = getJREContainerPath(basedir);
       if(path != null) {
@@ -203,6 +210,19 @@ public class ExecutePomAction implements ILaunchShortcut, IExecutableExtension {
       MavenLogger.log(ex);
     }
     return null;
+  }
+
+  private void setActiveProfiles(ILaunchConfigurationWorkingCopy workingCopy, IContainer basedir) {
+    MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
+    IFile pomFile = basedir.getFile(new Path(IMavenConstants.POM_FILE_NAME));
+    if(pomFile.isAccessible()) {
+      IMavenProjectFacade projectFacade = projectManager.create(pomFile, false, new NullProgressMonitor());
+      ResolverConfiguration configuration = projectFacade.getResolverConfiguration();
+      String activeProfiles = configuration.getActiveProfiles();
+      if(activeProfiles!=null && activeProfiles.length()>0) {
+        workingCopy.setAttribute(MavenLaunchConstants.ATTR_PROFILES, activeProfiles);
+      }
+    }
   }
 
   // TODO ideally it should use MavenProject, but it is faster to scan IJavaProjects 
@@ -327,6 +347,8 @@ public class ExecutePomAction implements ILaunchShortcut, IExecutableExtension {
       ILaunchConfigurationWorkingCopy workingCopy = launchConfigurationType.newInstance(null, newName);
       workingCopy.setAttribute(MavenLaunchConstants.ATTR_POM_DIR, basedirLocation.toString());
 
+      setActiveProfiles(workingCopy, basedir);
+      
       // set other defaults if needed
       // MavenLaunchMainTab maintab = new MavenLaunchMainTab();
       // maintab.setDefaults(workingCopy);
