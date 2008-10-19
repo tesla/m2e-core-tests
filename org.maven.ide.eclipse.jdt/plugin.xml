@@ -115,18 +115,6 @@
    </extension>
    -->
    
-   <extension point="org.eclipse.debug.core.sourceLocators">
-      <sourceLocator
-        id="org.maven.ide.eclipse.jdt.internal.launch.MavenJavaSourceLookupDirector"
-        class="org.maven.ide.eclipse.jdt.internal.launch.MavenJavaSourceLookupDirector"
-        name="Maven Java Source Loocator"/>
-   </extension>
-   <extension point="org.eclipse.debug.core.sourcePathComputers">
-      <sourcePathComputer
-        id="org.maven.ide.eclipse.jdt.internal.launch.MavenSourcePathComputer"
-        class="org.maven.ide.eclipse.jdt.internal.launch.MavenJavaSourcePathComputer"/>
-   </extension>
-
    <extension point="org.eclipse.jdt.ui.javaElementFilters">
       <filter id="org.maven.ide.eclipse.MavenModuleFilter"
           targetId="org.eclipse.jdt.ui.PackageExplorer"

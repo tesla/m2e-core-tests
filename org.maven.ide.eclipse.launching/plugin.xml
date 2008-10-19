@@ -241,15 +241,29 @@
       <launchConfigurationType
             id="org.maven.ide.eclipse.Maven2LaunchConfigurationType"
             delegate="org.maven.ide.eclipse.internal.launch.MavenLaunchDelegate"
+            sourceLocatorId="org.maven.ide.eclipse.launching.MavenSourceLocator"
+            sourcePathComputerId="org.maven.ide.eclipse.launching.MavenSourceComputer"
             name="%m2.launch.type.name"
-            modes="run,debug"
-            public="true"/>
+            modes="run,debug" public="true"/>
       <launchConfigurationType
             id="org.maven.ide.eclipse.Maven2BuilderConfigurationType"
             delegate="org.maven.ide.eclipse.internal.launch.MavenLaunchDelegate"
             category="org.eclipse.ui.externaltools.builder"
             name="%m2.launch.type.builder.name"
             modes="run"/>
+   </extension>
+   
+   <extension point="org.eclipse.debug.core.sourceLocators">
+      <sourceLocator
+            id="org.maven.ide.eclipse.launching.MavenSourceLocator"
+            class="org.maven.ide.eclipse.internal.launch.MavenSourceLocator"
+            name="Maven source locator"/>
+   </extension>
+   
+   <extension point="org.eclipse.debug.core.sourcePathComputers">
+      <sourcePathComputer
+            id="org.maven.ide.eclipse.launching.MavenSourceComputer"
+            class="org.maven.ide.eclipse.internal.launch.MavenSourcePathComputer"/>
    </extension>
 
    <extension point="org.eclipse.debug.ui.launchConfigurationTabGroups">

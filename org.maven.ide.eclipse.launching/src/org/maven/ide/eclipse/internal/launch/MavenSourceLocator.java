@@ -6,13 +6,20 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.jdt.internal.launch;
+package org.maven.ide.eclipse.internal.launch;
+
+import org.eclipse.debug.core.sourcelookup.AbstractSourceLookupDirector;
+import org.eclipse.debug.core.sourcelookup.ISourceLookupParticipant;
+import org.eclipse.jdt.launching.sourcelookup.containers.JavaSourceLookupParticipant;
 
 /**
- * MavenJavaSourcePathComputer
- *
  * @author Eugene Kuleshov
  */
-public class MavenJavaSourcePathComputer {
+public class MavenSourceLocator extends AbstractSourceLookupDirector {
+
+  public void initializeParticipants() {
+    addParticipants(new ISourceLookupParticipant[] {new JavaSourceLookupParticipant()});
+  }
 
 }
+

@@ -13,11 +13,13 @@ import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.StringTokenizer;
 
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
+import org.apache.maven.artifact.resolver.ArtifactResolutionException;
+import org.apache.maven.embedder.MavenEmbedder;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -33,25 +35,12 @@ import org.eclipse.debug.core.IDebugEventSetListener;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.model.IProcess;
-import org.eclipse.debug.core.sourcelookup.AbstractSourceLookupDirector;
-import org.eclipse.debug.core.sourcelookup.ISourceContainerType;
-import org.eclipse.debug.core.sourcelookup.ISourceLookupDirector;
-import org.eclipse.debug.core.sourcelookup.ISourceLookupParticipant;
-import org.eclipse.debug.core.sourcelookup.containers.ProjectSourceContainer;
-import org.eclipse.debug.core.sourcelookup.containers.WorkspaceSourceContainer;
 import org.eclipse.debug.ui.RefreshTab;
 import org.eclipse.jdt.launching.IVMRunner;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
 import org.eclipse.jdt.launching.VMRunnerConfiguration;
-import org.eclipse.jdt.launching.sourcelookup.containers.JavaSourceLookupParticipant;
 import org.eclipse.ui.externaltools.internal.model.ExternalToolBuilder;
 import org.eclipse.ui.externaltools.internal.model.IExternalToolConstants;
-
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
-import org.apache.maven.artifact.resolver.ArtifactResolutionException;
-import org.apache.maven.embedder.MavenEmbedder;
-
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
@@ -73,41 +62,7 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
     console.logMessage("" + getWorkingDirectory(configuration));
     console.logMessage(" mvn" + getProgramArguments(configuration));
     
-//    if(ILaunchManager.DEBUG_MODE.equals(mode)) {
-//      ISourceLookupDirector sourceLocator = createSourceLocator(configuration);
-//      launch.setSourceLocator(sourceLocator);
-//    }
-    
     super.launch(configuration, mode, launch, monitor);
-  }
-  
-  protected void setDefaultSourceLocator(ILaunch launch, ILaunchConfiguration configuration) throws CoreException {
-    //  set default source locator if none specified
-    if (launch.getSourceLocator() == null) {
-      ISourceLookupDirector sourceLocator = new AbstractSourceLookupDirector() {
-        private final Set<String> filteredTypes = new HashSet<String>();
-        {
-          filteredTypes.add(ProjectSourceContainer.TYPE_ID);
-          filteredTypes.add(WorkspaceSourceContainer.TYPE_ID);
-          // can't reference UI constant
-          filteredTypes.add("org.eclipse.debug.ui.containerType.workingSet"); //$NON-NLS-1$
-        }
-        
-        public void initializeParticipants() {
-          addParticipants(new ISourceLookupParticipant[] {new JavaSourceLookupParticipant()});
-        }
-
-        public boolean supportsSourceContainerType(ISourceContainerType type) {
-          return !filteredTypes.contains(type.getId());
-        }
-      };
-      
-      sourceLocator.setSourcePathComputer(getLaunchManager().getSourcePathComputer(
-                  "org.eclipse.jdt.launching.sourceLookup.javaSourcePathComputer")); //$NON-NLS-1$
-      sourceLocator.initializeDefaults(configuration);
-      
-      launch.setSourceLocator(sourceLocator);
-    }
   }
   
   /* (non-Javadoc)
