@@ -308,7 +308,7 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
           public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request) {
             request.setUseReactor(false);
             request.setRecursive(configuration.shouldIncludeModules());
-            request.setGoals(Arrays.asList(goalsToExecute.split(", ")));
+            request.setGoals(Arrays.asList(goalsToExecute.split("[\\s,]+")));
             return embedder.execute(request);
           }
         }, monitor);
