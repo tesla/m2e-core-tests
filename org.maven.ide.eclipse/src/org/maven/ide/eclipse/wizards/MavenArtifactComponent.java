@@ -38,7 +38,8 @@ public class MavenArtifactComponent extends Composite {
   // MNGECLIPSE-688 add EJB Support
   public static final String EJB = "ejb";
 
-  static final String[] PACKAGING_OPTIONS = {JAR, WAR, EJB, EAR, RAR, POM};
+  public static final String[] PACKAGING_OPTIONS = {JAR, WAR, EJB, EAR, RAR, POM, //
+      "maven-plugin", "maven-archetype", "osgi-bundle", "eclipse-plugin"};
 
   public static final String DEFAULT_PACKAGING = JAR;
 
@@ -120,7 +121,7 @@ public class MavenArtifactComponent extends Composite {
     packagingCombo = new Combo(artifactGroup, SWT.NONE);
     packagingCombo.setItems(PACKAGING_OPTIONS);
     packagingCombo.setText(DEFAULT_PACKAGING);
-    packagingCombo.setLayoutData(new GridData(50, SWT.DEFAULT));
+    packagingCombo.setLayoutData(new GridData(150, SWT.DEFAULT));
     packagingCombo.setData("name", "packagingCombo");
 
     nameLabel = new Label(artifactGroup, SWT.NONE);

@@ -289,6 +289,7 @@
 
    <extension point="org.eclipse.ui.importWizards">
      <category id="org.eclipse.ui.Basic" name="General"/>
+     <category id="org.maven.ide.eclipse" name="%m2.wizard.name"/>
 
      <wizard id="org.maven.ide.eclipse.wizards.Maven2ImportWizard"
              class="org.maven.ide.eclipse.wizards.MavenImportWizard"
@@ -300,6 +301,7 @@
 
      <wizard id="org.maven.ide.eclipse.wizards.MavenPomCheckoutWizard"
              class="org.maven.ide.eclipse.wizards.MavenMaterializePomWizard"
+             category="org.maven.ide.eclipse"
              name="%m2.wizard.materialize.name"
              icon="icons/import_m2_project.gif">
        <description>%m2.wizard.materialize.description</description>
@@ -307,6 +309,7 @@
 
      <wizard id="org.maven.ide.eclipse.wizards.MavenCheckoutWizard"
              class="org.maven.ide.eclipse.wizards.MavenCheckoutWizard"
+             category="org.maven.ide.eclipse"
              name="Check out Maven Projects from SCM"
              icon="icons/import_m2_project.gif">
        <description>Checkout Maven Project from SCM</description>
@@ -314,7 +317,16 @@
        <selection class="org.tigris.subversion.subclipse.core.ISVNRemoteFolder"/>
        -->
      </wizard>
-  </extension>
+
+     <wizard id="org.maven.ide.eclipse.wizards.MavenInstallFileWizard"
+             class="org.maven.ide.eclipse.wizards.MavenInstallFileWizard"
+             category="org.maven.ide.eclipse"
+             icon="icons/import_jar.gif"
+             name="Install or deploy an artifact to a Maven repository">
+         <selection class="org.eclipse.core.resources.IFile" name="*.jar"/>
+         <description>Install or Deploy an artifact (archive) into a Maven repository</description>
+     </wizard>
+   </extension>
 
    <extension point="org.eclipse.ui.console.consoleFactories">
       <consoleFactory label="Maven Console" icon="icons/m2.gif"
