@@ -107,7 +107,12 @@ public class LocalProjectScanner extends AbstractProjectScanner<MavenProjectInfo
   private MavenProjectInfo readMavenProjectInfo(File baseDir, String modulePath, MavenProjectInfo parentInfo) {
     try {
       baseDir = baseDir.getCanonicalFile();
+      
       File pomFile = new File(baseDir, IMavenConstants.POM_FILE_NAME);
+      if(!pomFile.exists()) {
+        return null;
+      }
+      
       Model model = modelManager.readMavenModel(pomFile);
 
       if (!scannedFolders.add(baseDir)) {
