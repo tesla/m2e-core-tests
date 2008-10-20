@@ -655,21 +655,17 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 
   private MavenProject readMavenProject(File pomFile) throws MavenEmbedderException, CoreException {
     MavenPlugin plugin = MavenPlugin.getDefault();
-    MavenProjectManager mavenProjectManager = plugin.getMavenProjectManager();
-    MavenEmbedder embedder = mavenProjectManager.createWorkspaceEmbedder();
+    MavenProjectManager projectManager = plugin.getMavenProjectManager();
+    MavenEmbedder embedder = projectManager.createWorkspaceEmbedder();
     try {
-      ResolverConfiguration resolverConfiguration = new ResolverConfiguration();
-      IProgressMonitor monitor = new NullProgressMonitor();
-
-      MavenProjectManager projectManager = plugin.getMavenProjectManager();
-      MavenExecutionResult result = projectManager.execute(embedder, pomFile, resolverConfiguration,
+      MavenExecutionResult result = projectManager.execute(embedder, pomFile, new ResolverConfiguration(),
           new MavenRunnable() {
             public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request) {
               request.setOffline(false);
               request.setUpdateSnapshots(false);
               return embedder.readProjectWithDependencies(request);
             }
-          }, monitor);
+          }, new NullProgressMonitor());
 
       MavenProject project = result.getProject();
       if(project!=null) {
