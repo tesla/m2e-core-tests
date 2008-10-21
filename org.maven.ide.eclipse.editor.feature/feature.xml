@@ -87,4 +87,11 @@ http://www.eclipse.org/legal/epl-v10.html
          version="1.0.0.v20080226"
          unpack="false"/>
 
+   <plugin
+         id="com.ibm.icu"
+         download-size="0"
+         install-size="0"
+         version="3.8.1.v20080530"
+         unpack="false"/>
+
 </feature>

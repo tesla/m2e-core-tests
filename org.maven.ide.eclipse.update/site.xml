@@ -65,6 +65,7 @@
    <archive path="plugins/org.eclipse.zest.core_1.0.0.v20080115.jar" url="http://download.eclipse.org/tools/gef/updates/milestones/plugins/org.eclipse.zest.core_1.0.0.v20080115.jar"/>
    <archive path="plugins/org.eclipse.zest.layouts_1.0.0.v20080226.jar" url="http://download.eclipse.org/tools/gef/updates/milestones/plugins/org.eclipse.zest.layouts_1.0.0.v20080226.jar"/>
    <archive path="plugins/org.eclipse.draw2d_3.4.1.v20080910-1351.jar" url="http://download.eclipse.org/releases/ganymede/plugins/org.eclipse.draw2d_3.4.1.v20080910-1351.jar"/>
+   <archive path="plugins/com.ibm.icu_3.8.1.v20080530.jar" url="http://download.eclipse.org/releases/ganymede/plugins/com.ibm.icu_3.8.1.v20080530.jar"/>
    
    <category-def name="Maven Integration" label="Maven Integration"/>
    <category-def name="Maven Optional Components" label="Maven Optional Components"/>
