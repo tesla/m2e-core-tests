@@ -21,4 +21,17 @@
 
   <name>Maven Integration for Eclipse Update Site</name>
 
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.tycho</groupId>
+        <artifactId>maven-osgi-packaging-plugin</artifactId>
+        <configuration>
+          <metadataRepositoryName>Maven Integration for Eclipse Dev Update Site</metadataRepositoryName>
+          <artifactRepositoryName>Maven Integration for Eclipse Dev Update Site Artifacts</artifactRepositoryName>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
 </project>
