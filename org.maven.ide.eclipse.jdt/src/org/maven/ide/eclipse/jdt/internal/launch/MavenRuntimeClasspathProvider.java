@@ -66,12 +66,15 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
   public static final String JDT_JUNIT_TEST = "org.eclipse.jdt.junit.launchconfig";
 
   public static final String JDT_JAVA_APPLICATION = "org.eclipse.jdt.launching.localJavaApplication";
+  
+  public static final String JDT_TESTNG_TEST = "org.testng.eclipse.launchconfig";
 
   private static final Set<String> supportedTypes = new HashSet<String>();
   static {
     // not exactly nice, but works with eclipse 3.2, 3.3 and 3.4M3
     supportedTypes.add(MavenRuntimeClasspathProvider.JDT_JAVA_APPLICATION);
     supportedTypes.add(MavenRuntimeClasspathProvider.JDT_JUNIT_TEST);
+    supportedTypes.add(MavenRuntimeClasspathProvider.JDT_TESTNG_TEST);
   }
 
   MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
@@ -179,12 +182,12 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
           }
         }
       }
-
       return BuildPathManager.CLASSPATH_RUNTIME;
-    } else if (JDT_JUNIT_TEST.equals(typeid)) {
+    } else if(JDT_JUNIT_TEST.equals(typeid) || JDT_TESTNG_TEST.equals(typeid)) {
       return BuildPathManager.CLASSPATH_TEST;
     } else {
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, 0, "Unsupported launch configuratio type " + typeid, null));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, 0,
+          "Unsupported launch configuration type " + typeid, null));
     }
   }
 
