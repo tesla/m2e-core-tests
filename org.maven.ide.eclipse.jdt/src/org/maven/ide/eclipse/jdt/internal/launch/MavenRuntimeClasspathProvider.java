@@ -328,23 +328,27 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
   
   private static String getArtifactClassifier(IClasspathEntry entry) {
     IClasspathAttribute[] attributes = entry.getExtraAttributes();
-    for(int j = 0; j < attributes.length; j++ ) {
-      if(BuildPathManager.CLASSIFIER_ATTRIBUTE.equals(attributes[j].getName())) {
-        return attributes[j].getValue();
+    for(IClasspathAttribute attribute : attributes) {
+      if(BuildPathManager.CLASSIFIER_ATTRIBUTE.equals(attribute.getName())) {
+        return attribute.getValue();
       }
     }
     return null;
   }
 
   public static void enable(IProject project) throws CoreException {
-    for (ILaunchConfiguration config : getLaunchConfiguration(project)) {
-      enable(config);
+    for(ILaunchConfiguration config : getLaunchConfiguration(project)) {
+      if(isSupportedType(config.getType().getIdentifier())) {
+        enable(config);
+      }
     }
   }
   
   public static void disable(IProject project) throws CoreException {
-    for (ILaunchConfiguration config : getLaunchConfiguration(project)) {
-      disable(config);
+    for(ILaunchConfiguration config : getLaunchConfiguration(project)) {
+      if(isSupportedType(config.getType().getIdentifier())) {
+        disable(config);
+      }
     }
   }
 
