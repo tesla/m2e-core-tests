@@ -10,8 +10,6 @@ package org.maven.ide.eclipse.editor.pom;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.actions.ActionFactory;
@@ -27,16 +25,19 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
  * editors in the multi-page editor.
  */
 public class MavenPomEditorContributor extends MultiPageEditorActionBarContributor {
-  private ITextEditor sourceEditorPart;
+  private MavenPomEditor editorPart;
+
+  public void setActiveEditor(IEditorPart targetEditor) {
+    if (targetEditor instanceof MavenPomEditor) {
+      editorPart = (MavenPomEditor) targetEditor;
+      setActivePage(editorPart.getActiveEditor());
+    }
+  }
 
   public void setActivePage(IEditorPart part) {
     //set the text editor
-    if (part instanceof ITextEditor && sourceEditorPart == null) {
-      sourceEditorPart = (ITextEditor) part;
-    }
-
     IActionBars actionBars = getActionBars();
-    if(sourceEditorPart !=null) {
+    if(editorPart !=null) {
       if (actionBars != null) {
         actionBars.clearGlobalActionHandlers();
         
@@ -89,7 +90,7 @@ public class MavenPomEditorContributor extends MultiPageEditorActionBarContribut
    * @return IAction or null if editor is null.
    */
   protected IAction getAction(String actionId) {
-    return sourceEditorPart.getAction(actionId);
+    return editorPart.getSourcePage().getAction(actionId);
   }
   
 }

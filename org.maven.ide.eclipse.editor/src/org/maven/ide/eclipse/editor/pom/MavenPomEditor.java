@@ -409,7 +409,6 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 
       // TODO activate xml source page if model is empty or have errors
       
-      setSSEActionBarContributor();
       if(doc instanceof IStructuredDocument) {
         List<AdapterFactoryImpl> factories = new ArrayList<AdapterFactoryImpl>();
         factories.add(new ResourceItemProviderAdapterFactory());
@@ -905,14 +904,6 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     return pages;
   }
 
-  private void setSSEActionBarContributor() {
-    // this is to enable undo/redo actions from sourcePage for all pages
-    IEditorActionBarContributor contributor = getEditorSite().getActionBarContributor();
-    if(contributor != null && contributor instanceof MultiPageEditorActionBarContributor) {
-      ((MultiPageEditorActionBarContributor) contributor).setActivePage(sourcePage);
-    }
-  }
-  
   public void showDependencyHierarchy(ArtifactKey artifactKey) {
     setActivePage(dependencyTreePage.getId());
     dependencyTreePage.selectDepedency(artifactKey);
