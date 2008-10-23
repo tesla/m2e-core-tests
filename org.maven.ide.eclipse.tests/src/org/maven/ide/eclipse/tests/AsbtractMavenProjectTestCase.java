@@ -107,7 +107,7 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
     ContainerCustomizer customizer = EmbedderFactory.createExecutionCustomizer();
     MavenEmbedder embedder = EmbedderFactory.createMavenEmbedder(customizer,
         new MavenEmbedderConsoleLogger(), 
-        runtimeManager.getUserSettingsFile(), null);
+        runtimeManager.getUserSettingsFile(), runtimeManager.getUserSettingsFile());
     
     ArtifactRepository localRepository = embedder.getLocalRepository();
     if(localRepository != null) {

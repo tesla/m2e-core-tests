@@ -111,11 +111,11 @@ public class MavenSettingsTest extends TestCase {
     // if(globalSettings!=null) {
     //   configuration.setGlobalSettingsFile(new File(globalSettings));
     // }
-    configuration.setUserSettingsFile(null);
+    
+    File settings = new File("settingsWithDefaultLocalRepo.xml").getCanonicalFile();
+    configuration.setUserSettingsFile(settings);
     
     MavenEmbedder embedder = EmbedderFactory.createMavenEmbedder(configuration, null);
-    
-    assertEquals(MavenEmbedder.DEFAULT_USER_SETTINGS_FILE, embedder.getConfiguration().getUserSettingsFile());
     
     String localRepository = embedder.getLocalRepository().getBasedir();
     assertEquals(System.getProperty("user.home").replace('\\', '/') + "/.m2/repository", //
