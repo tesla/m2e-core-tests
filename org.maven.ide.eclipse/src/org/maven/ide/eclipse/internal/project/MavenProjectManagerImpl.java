@@ -618,24 +618,24 @@ public class MavenProjectManagerImpl {
   }
 
   private static boolean hasDependencyChange(MavenProject before, MavenProject after) {
-    if (before == after) {
+    if(before == after) {
       // either same instance or both null
       return false;
     }
 
-    if (before == null || after == null) {
+    if(before == null || after == null) {
       // one but not both null
       return true;
     }
 
-    if (!ArtifactKey.equals(before.getArtifact(), after.getArtifact())) {
+    if(!ArtifactKey.equals(before.getArtifact(), after.getArtifact())) {
       // groupId/artifactId/version changed
       return true;
     }
 
-    if (!ArtifactKey.equals(before.getParentArtifact(), after.getParentArtifact())
-          || !(before.getParent() == null? after.getParent() == null: equals(before.getParent().getFile(), after.getParent().getFile()))) 
-    {
+    if(!ArtifactKey.equals(before.getParentArtifact(), after.getParentArtifact()) //
+        || !(before.getParent() == null ? after.getParent() == null //
+            : equals(before.getParent().getFile(), after.getParent().getFile()))) {
       return true;
     }
 
@@ -647,14 +647,14 @@ public class MavenProjectManagerImpl {
     Iterator<Artifact> beforeIt = before.getArtifacts().iterator();
     @SuppressWarnings("unchecked")
     Iterator<Artifact> afterIt = after.getArtifacts().iterator();
-    while (beforeIt.hasNext()) {
+    while(beforeIt.hasNext()) {
       Artifact beforeDependency = beforeIt.next();
       Artifact afterDependency = afterIt.next();
-      if (!ArtifactKey.equals(beforeDependency, afterDependency)
-            || !equals(beforeDependency.getFile(), afterDependency.getFile())
-            || !equals(beforeDependency.getScope(), afterDependency.getScope())//Change in scope should trigger update event
-            || beforeDependency.isOptional() != afterDependency.isOptional()) 
-      {
+      if(!ArtifactKey.equals(beforeDependency, afterDependency)
+          || !equals(beforeDependency.getFile(), afterDependency.getFile())
+          // scope change should trigger update event
+          || !equals(beforeDependency.getScope(), afterDependency.getScope())
+          || beforeDependency.isOptional() != afterDependency.isOptional()) {
         return true;
       }
     }
@@ -663,7 +663,7 @@ public class MavenProjectManagerImpl {
   }
 
   private static boolean equals(Object o1, Object o2) {
-    return o1 == null? o2 == null: o1.equals(o2);
+    return o1 == null ? o2 == null : o1.equals(o2);
   }
 
   public void addMavenProjectChangedListener(IMavenProjectChangedListener listener) {
