@@ -879,4 +879,36 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     Artifact a = (Artifact) f11.getMavenProject(monitor).getArtifacts().iterator().next();
     assertEquals("3.8.1", a.getVersion());
   }
+
+  public void testDependencyScopeChanged() throws Exception {
+	//Changing the scope of a dependency should trigger a project update
+    IProject p1 = createExisting("changedscope-p01");
+    IProject p2 = createExisting("changedscope-p02");
+    waitForJobsToComplete();
+
+    add(manager, new IProject[] {p1, p2});
+
+    IFile pom1 = p1.getFile("pom.xml");
+    IFile pom2 = p2.getFile("pom.xml");
+    
+    {
+      IMavenProjectFacade f = manager.create(pom2, false, null);
+      Artifact[] a = getMavenProjectArtifacts(f).toArray(new Artifact[0]);
+      assertEquals(2, a.length);
+      assertEquals(pom1.getLocation().toFile().getCanonicalFile(), a[0].getFile().getCanonicalFile());
+      assertEquals("junit-3.8.1.jar", a[1].getFile().getName());
+    }
+
+    copyContent(p1, "pom-scope-changed.xml", "pom.xml");
+    add(manager, new IProject[] {p1});
+
+    {
+      IMavenProjectFacade f = manager.create(pom2, false, null);
+      Artifact[] a = getMavenProjectArtifacts(f).toArray(new Artifact[0]);
+      assertEquals("provided scope dependency should disappear", 1, a.length);
+      assertEquals(pom1.getLocation().toFile().getCanonicalFile(), a[0].getFile().getCanonicalFile());
+    }
+  }
+
+
 }

@@ -648,11 +648,12 @@ public class MavenProjectManagerImpl {
     @SuppressWarnings("unchecked")
     Iterator<Artifact> afterIt = after.getArtifacts().iterator();
     while (beforeIt.hasNext()) {
-      Artifact beforeDependeny = beforeIt.next();
-      Artifact afterDependeny = afterIt.next();
-      if (!ArtifactKey.equals(beforeDependeny, afterDependeny)
-            || !equals(beforeDependeny.getFile(), afterDependeny.getFile())
-            || beforeDependeny.isOptional() != afterDependeny.isOptional()) 
+      Artifact beforeDependency = beforeIt.next();
+      Artifact afterDependency = afterIt.next();
+      if (!ArtifactKey.equals(beforeDependency, afterDependency)
+            || !equals(beforeDependency.getFile(), afterDependency.getFile())
+            || !equals(beforeDependency.getScope(), afterDependency.getScope())//Change in scope should trigger update event
+            || beforeDependency.isOptional() != afterDependency.isOptional()) 
       {
         return true;
       }
