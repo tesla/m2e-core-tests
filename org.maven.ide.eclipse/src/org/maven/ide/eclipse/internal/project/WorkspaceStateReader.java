@@ -63,9 +63,7 @@ public class WorkspaceStateReader {
           }
         };
         return (WorkspaceState) is.readObject();
-      } catch(IOException ex) {
-        MavenLogger.log("Can't read workspace state", ex);
-      } catch(ClassNotFoundException ex) {
+      } catch(Exception ex) {
         MavenLogger.log("Can't read workspace state", ex);
       } finally {
         IOUtil.close(is);
@@ -96,7 +94,7 @@ public class WorkspaceStateReader {
       synchronized(state) {  // see MNGECLIPSE-860
         os.writeObject(state);
       }
-    } catch(IOException ex) {
+    } catch(Exception ex) {
       MavenLogger.log("Can't write workspace state", ex);
     } finally {
       IOUtil.close(os);
