@@ -79,6 +79,44 @@ public class ArtifactKey implements Serializable {
     return sb.toString();
   }
 
+  public static ArtifactKey fromPortableString(String str) {
+    int p, c;
+
+    p = 0;  c = nextColonIndex(str, p);
+    String groupId = substring(str, p, c); 
+
+    p = c + 1; c = nextColonIndex(str, p);
+    String artifactId = substring(str, p, c); 
+    
+    p = c + 1; c = nextColonIndex(str, p);
+    String version = substring(str, p, c);
+    
+    p = c + 1; c = nextColonIndex(str, p);
+    String classifier = substring(str, p, c);
+    
+    return new ArtifactKey(groupId, artifactId, version, classifier);
+  }
+  
+  private static String substring(String str, int start, int end) {
+    String substring = str.substring(start, end);
+    return "".equals(substring)? null: substring;
+  }
+
+  private static int nextColonIndex(String str, int pos) {
+    int idx = str.indexOf(':', pos);
+    if (idx < 0) throw new IllegalArgumentException("Invalid portable string: " + str);
+    return idx;
+  }
+
+  public String toPortableString() {
+    StringBuilder sb = new StringBuilder();
+    if (groupId != null) sb.append(groupId); sb.append(':');
+    if (artifactId != null) sb.append(artifactId); sb.append(':');
+    if (version != null) sb.append(version); sb.append(':');
+    if (classifier != null) sb.append(classifier); sb.append(':');
+    return sb.toString();
+  }
+
   public String getGroupId() {
     return groupId;
   }
