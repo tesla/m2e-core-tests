@@ -15,6 +15,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
@@ -32,8 +33,9 @@ import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.Messages;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
+import org.maven.ide.eclipse.project.IMavenMarkerManager;
 
-public class MavenMarkerManager {
+public class MavenMarkerManager implements IMavenMarkerManager {
   
   private final MavenRuntimeManager runtimeManager;
   private final MavenConsole console;
@@ -44,7 +46,7 @@ public class MavenMarkerManager {
   }
   
   @SuppressWarnings("unchecked")
-  void addMarkers(IFile pomFile, MavenExecutionResult result) {
+  public void addMarkers(IFile pomFile, MavenExecutionResult result) {
     List<Exception> exceptions = result.getExceptions();
     for(Exception ex : exceptions) {
       if(ex instanceof ExtensionScanningException) {
@@ -78,7 +80,7 @@ public class MavenMarkerManager {
       addErrorMarkers(pomFile, "Metadata resolution error", resolutionResult.getMetadataResolutionExceptions());
       addErrorMarkers(pomFile, "Artifact error", resolutionResult.getErrorArtifactExceptions());
       addErrorMarkers(pomFile, "Version range violation", resolutionResult.getVersionRangeViolations());
-      addErrorMarkers(pomFile, "Curcular dependency error", resolutionResult.getCircularDependencyExceptions());
+      addErrorMarkers(pomFile, "Circular dependency error", resolutionResult.getCircularDependencyExceptions());
     }
 
     MavenProject mavenProject = result.getProject();
@@ -87,12 +89,17 @@ public class MavenMarkerManager {
     }
   }
 
-  void addMarker(IResource resource, String message, int lineNumber, int severity) {
+  public void addMarker(IResource resource, String message, int lineNumber, int severity) {
+    addMarker(resource, message, lineNumber, severity, true); 
+  }
+
+  private void addMarker(IResource resource, String message, int lineNumber, int severity, boolean isTransient) {
     try {
       if(resource.isAccessible()) {
         IMarker marker = resource.createMarker(IMavenConstants.MARKER_ID);
         marker.setAttribute(IMarker.MESSAGE, message);
         marker.setAttribute(IMarker.SEVERITY, severity);
+        marker.setAttribute(IMarker.TRANSIENT, isTransient);
         if(lineNumber == -1) {
           lineNumber = 1;
         }
@@ -149,23 +156,20 @@ public class MavenMarkerManager {
   }
 
   private String getErrorMessage(Exception ex) {
+    return getRootCause(ex).getMessage();
+  }
+
+  private Throwable getRootCause(Exception ex) {
     Throwable lastCause = ex;
     Throwable cause = lastCause.getCause();
-
-    String msg = lastCause.getMessage();
     while(cause != null && cause != lastCause) {
-      msg = cause.getMessage();
-//      if(lastCause instanceof ResourceDoesNotExistException) {
-//        msg = ((ResourceDoesNotExistException) lastCause).getLocalizedMessage();
-//      } else {
-//      }
       lastCause = cause;
       cause = cause.getCause();
     }
-
-    return msg;
+    return cause == null? lastCause:cause;
   }
 
+  
   private void addErrorMarkers(IFile pomFile, String msg, List<? extends Exception> exceptions) {
     if(exceptions != null) {
       for(Exception ex : exceptions) {
@@ -183,9 +187,9 @@ public class MavenMarkerManager {
     }
   }
 
-  void deleteMarkers(IFile pom) throws CoreException {
-    if (pom != null && pom.exists()) {
-      pom.deleteMarkers(IMavenConstants.MARKER_ID, true, IResource.DEPTH_INFINITE);
+  public void deleteMarkers(IResource resource) throws CoreException {
+    if (resource != null && resource.exists()) {
+      resource.deleteMarkers(IMavenConstants.MARKER_ID, true, IResource.DEPTH_INFINITE);
     }
   }
 
@@ -212,5 +216,22 @@ public class MavenMarkerManager {
       }
     }
   }
+  
+ public  void addErrorMarkers(IResource resource, Exception ex) {
+   Throwable cause = getRootCause(ex);
+   if (cause instanceof CoreException) {
+     CoreException cex = (CoreException)cause;
+     IStatus status = cex.getStatus();
+     if(status != null) {
+       addMarker(resource, status.getMessage(), 1, IMarker.SEVERITY_ERROR, false); //$NON-NLS-1$
+       IStatus[] children = status.getChildren();
+       if(children != null) {
+         for(IStatus childStatus : children) {
+           addMarker(resource, childStatus.getMessage(), 1, IMarker.SEVERITY_ERROR, false); //$NON-NLS-1$
+         }
+       } 
+     }
+   }
+ }
 
 }

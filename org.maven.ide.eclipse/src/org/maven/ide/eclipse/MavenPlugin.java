@@ -69,10 +69,12 @@ import org.maven.ide.eclipse.internal.embedder.MavenWorkspaceRuntime;
 import org.maven.ide.eclipse.internal.index.IndexInfoWriter;
 import org.maven.ide.eclipse.internal.index.NexusIndexManager;
 import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;
+import org.maven.ide.eclipse.internal.project.MavenMarkerManager;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerImpl;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerRefreshJob;
 import org.maven.ide.eclipse.internal.project.ProjectConfigurationManager;
 import org.maven.ide.eclipse.internal.project.WorkspaceStateWriter;
+import org.maven.ide.eclipse.project.IMavenMarkerManager;
 import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
@@ -113,6 +115,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
   private MavenProjectManagerImpl managerImpl;
 
+  private IMavenMarkerManager mavenMarkerManager;
 
   public MavenPlugin() {
     plugin = this;
@@ -185,9 +188,11 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     this.modelManager = new MavenModelManager(embedderManager, console);
 
     boolean updateProjectsOnStartup = runtimeManager.isUpdateProjectsOnStartup();
+
+    mavenMarkerManager = new MavenMarkerManager(runtimeManager, console);
     
     this.managerImpl = new MavenProjectManagerImpl(console, indexManager, embedderManager,
-        stateLocationDir, !updateProjectsOnStartup /* readState */, runtimeManager);
+        stateLocationDir, !updateProjectsOnStartup /* readState */, runtimeManager, mavenMarkerManager);
 
     this.mavenBackgroundJob = new MavenProjectManagerRefreshJob(managerImpl, runtimeManager);
 
@@ -409,6 +414,10 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     return this.archetypeManager;
   }
   
+  public IMavenMarkerManager getMavenMarkerManager() {
+    return this.mavenMarkerManager;
+  }
+
   /**
    * Returns an Image for the file at the given relative path.
    */
