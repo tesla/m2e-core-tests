@@ -92,7 +92,7 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
 
   protected static PomPackage POM_PACKAGE = PomPackage.eINSTANCE;
 
-  protected static Map<Object, List<ModifyListener>> modifyListeners = new HashMap<Object, List<ModifyListener>>();
+  protected Map<Object, List<ModifyListener>> modifyListeners = new HashMap<Object, List<ModifyListener>>();
 
   public MavenPomEditorPage(MavenPomEditor pomEditor, String id, String title) {
     super(pomEditor, id, title);
