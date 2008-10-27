@@ -122,7 +122,7 @@ public abstract class AbstractPomRefactoring extends Refactoring {
       // XXX this breaks buffer.getDocument()
       // releaseBuffer(file);
       
-      DocumentChange change = new ChangeCreator(buffer.getDocument(), file.getParent().getName(), before, after).createChange();
+      DocumentChange change = new ChangeCreator(buffer.getDocument(), file.getParent().getName(), before, after).createChange(pm);
       res.add(change);
     }
     return res;

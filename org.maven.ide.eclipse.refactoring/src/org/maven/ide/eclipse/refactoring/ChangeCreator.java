@@ -19,6 +19,8 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.text.edits.DeleteEdit;
@@ -50,11 +52,15 @@ public class ChangeCreator {
     this.newText = newText;
   }
 
-  public DocumentChange createChange() {
+  public DocumentChange createChange(IProgressMonitor progressMonitor) {
+    if (progressMonitor.isCanceled())
+      throw new OperationCanceledException();
+
     List<StringWithPos> before = parse(oldText);
     List<StringWithPos> after = parse(newText);
     DocumentChange change = new DocumentChange(label, document);
-    change.setEdit(new MultiTextEdit());
+    MultiTextEdit edit = new MultiTextEdit();
+    change.setEdit(edit);
     Diff diff = new Diff(before.toArray(), after.toArray(), new StringWithPosComparator());
     List<Difference> diffs = diff.diff();
     for(int i = 0; i < diffs.size(); i++ ) {
@@ -65,20 +71,21 @@ public class ChangeCreator {
         for(int j = d.addStart; j <= d.addEnd; j++ ) {
           adding = adding + after.get(j).str;
         }
-        change.addEdit(new InsertEdit(before.get(d.addStart).offset, adding));
+        edit.addChild(new InsertEdit(before.get(d.addStart).offset, adding));
       } else if(d.addEnd == -1) {
         //deletion
         for(int j = d.delStart; j <= d.delEnd; j++ ) {
-          change.addEdit(new DeleteEdit(before.get(j).offset, before.get(j).str.length()));
+          edit.addChild(new DeleteEdit(before.get(j).offset, before.get(j).str.length()));
         }
       } else {
         //replacement
         for(int j = d.addStart; j <= d.addEnd; j++ ) {
-          change.addEdit(new ReplaceEdit(before.get(j).offset, //
+          edit.addChild(new ReplaceEdit(before.get(j).offset, //
               before.get(j).str.length(), after.get(d.delStart + j - d.addStart).str));
         }
       }
     }
+    progressMonitor.worked(1);
     return change;
   }
 

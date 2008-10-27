@@ -72,24 +72,35 @@ public class RenameRefactoring extends AbstractPomRefactoring {
   }
 
   private void scanObject(String groupId, String artifactId, String version, List<EObject> res, EObject obj) {
-    scanFeature(obj, GROUP_ID, groupId, res);
-    scanFeature(obj, ARTIFACT_ID, artifactId, res);
-    scanFeature(obj, VERSION, version, res);
+    boolean sameGroup = scanFeature(obj, GROUP_ID, groupId);
+    boolean sameArtifact = scanFeature(obj, ARTIFACT_ID, artifactId);
+    if (sameGroup && sameArtifact)
+      res.add(obj);
   }
 
-  private void scanFeature(EObject obj, String featureName, String value, List<EObject> res) {
+  private boolean scanFeature(EObject obj, String featureName, String value) {
     //not searching on this
     if(value == null) {
-      return;
+      return false;
     }
     EStructuralFeature feature = obj.eClass().getEStructuralFeature(featureName);
     if(feature == null) {
-      return;
+      return false;
     }
     String val = obj.eGet(feature) == null ? null : obj.eGet(feature).toString();
-    if(value.equals(val) && !res.contains(obj)) {
-      res.add(obj);
+    if(value.equals(val)) {
+      return true;
     }
+    return false;
+  }
+
+  private boolean isSet(EObject obj, String featureName) {
+    EStructuralFeature feature = obj.eClass().getEStructuralFeature(featureName);
+    if(feature == null) {
+      return false;
+    }
+    String val = obj.eGet(feature) == null ? null : obj.eGet(feature).toString();
+    return val != null && !val.equals("");
   }
 
   /**
@@ -104,7 +115,8 @@ public class RenameRefactoring extends AbstractPomRefactoring {
     for(EObject obj : affected) {
       applyObject(editingDomain, command, obj, GROUP_ID, groupId);
       applyObject(editingDomain, command, obj, ARTIFACT_ID, artifactId);
-      applyObject(editingDomain, command, obj, VERSION, version);
+      if (isSet(obj, VERSION))
+        applyObject(editingDomain, command, obj, VERSION, version);
     }
     return command;
   }
