@@ -76,11 +76,6 @@ import org.maven.ide.eclipse.core.MavenLogger;
  */
 public class ProjectsImportPage extends WizardPage implements IOverwriteQuery {
 
-  /**
-   * The name of the folder containing metadata information for the workspace.
-   */
-  public static final String METADATA_FOLDER = ".metadata"; //$NON-NLS-1$
-
   String location;
   
   CheckboxTreeViewer projectsList;
@@ -334,7 +329,7 @@ public class ProjectsImportPage extends WizardPage implements IOverwriteQuery {
     // no project description found, so recurse into sub-directories
     for(int i = 0; i < contents.length; i++ ) {
       if(contents[i].isDirectory()) {
-        if(!contents[i].getName().equals(METADATA_FOLDER)) {
+        if(!contents[i].getName().equals(IMavenConstants.METADATA_FOLDER)) {
           try {
             String canonicalPath = contents[i].getCanonicalPath();
             if(!directoriesVisited.add(canonicalPath)) {

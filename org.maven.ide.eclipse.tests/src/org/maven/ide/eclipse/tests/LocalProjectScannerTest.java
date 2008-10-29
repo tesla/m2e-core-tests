@@ -175,4 +175,17 @@ public class LocalProjectScannerTest extends TestCase {
     assertTrue(project.isNeedsRename());
 
   }
+
+  public void testNoMetadata() throws Exception {
+    File baseDir = new File("projects/localprojectscanner/nometadata").getCanonicalFile();
+
+    LocalProjectScanner scanner = new LocalProjectScanner(baseDir, baseDir.getAbsolutePath(), false, modelManager,
+        console);
+    scanner.run(new NullProgressMonitor());
+    //.metadata folder shouldn't be scanned, hence the project hidden inside shouldn't be found 
+    List<MavenProjectInfo> projects = scanner.getProjects();
+
+    assertEquals(1, projects.size());
+  }
+
 }

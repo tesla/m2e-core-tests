@@ -46,4 +46,9 @@ public interface IMavenConstants {
    * It is not intended to be used by clients directly.
    */
   public static final QualifiedName FULL_MAVEN_BUILD = new QualifiedName(PLUGIN_ID, "fullBuild");
+
+  /**
+   * The name of the folder containing metadata information for the workspace.
+   */
+  public static final String METADATA_FOLDER = ".metadata"; //$NON-NLS-1$
 }

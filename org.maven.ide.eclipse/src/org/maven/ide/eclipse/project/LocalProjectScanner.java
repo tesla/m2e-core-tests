@@ -79,7 +79,8 @@ public class LocalProjectScanner extends AbstractProjectScanner<MavenProjectInfo
     monitor.subTask(baseDir.toString());
     monitor.worked(1);
 
-    if(!baseDir.exists() || !baseDir.isDirectory()) {
+    //Don't scan the .metadata folder
+    if(!baseDir.exists() || !baseDir.isDirectory() || IMavenConstants.METADATA_FOLDER.equals(baseDir.getName())) {
       return;
     }
 
