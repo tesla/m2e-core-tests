@@ -870,7 +870,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     tmp.delete();
   }
 
-  //FB 30/10/2008 : Archetype tests are disabled while MNGECLIPSE-948 is not fixed 
+  //FIXME FB 30/10/2008 : Archetype tests are disabled while MNGECLIPSE-948 is not fixed 
   public void XXXtestArchetypeProject() throws CoreException {
     MavenPlugin plugin = MavenPlugin.getDefault();
     boolean modules = true;
