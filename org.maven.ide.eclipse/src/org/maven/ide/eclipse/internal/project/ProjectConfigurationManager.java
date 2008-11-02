@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
@@ -53,6 +54,8 @@ import org.apache.maven.project.MavenProject;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.embedder.ArtifactKey;
+import org.maven.ide.eclipse.embedder.ArtifactRef;
 import org.maven.ide.eclipse.embedder.EmbedderFactory;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
@@ -173,21 +176,39 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
         monitor.worked(1);
       }
   
-      // then, perform detailed project configuration
+      
+      //Creating maven facades 
+      List<IMavenProjectFacade> facades = new ArrayList<IMavenProjectFacade>(projects.size());
       for(IProject project : projects) {
         if(monitor.isCanceled()) {
           throw new OperationCanceledException();
-        }
-  
+        } 
         IMavenProjectFacade facade = projectManagerImpl.create(project, monitor);
         if (facade != null) {
-          ProjectConfigurationRequest request = new ProjectConfigurationRequest(facade.getProject(), facade.getPom(), facade.getMavenProject(monitor), facade.getResolverConfiguration(), false /*updateSources*/);
-          updateProjectConfiguration(embedder, request, monitor);
+          facades.add(facade);
         }
+      }
+
+      //MNGECLIPSE-1028 : Sort projects by build order here, 
+      //as dependent projects need to be configured before depending projects (in WTP integration for ex.)
+      sortProjects(facades);
+      
+      //Then, perform detailed project configuration
+      for(IMavenProjectFacade facade : facades) {
+        if(monitor.isCanceled()) {
+          throw new OperationCanceledException();
+        }
+        ProjectConfigurationRequest request = new ProjectConfigurationRequest(facade.getProject(), facade.getPom(), facade.getMavenProject(monitor), facade.getResolverConfiguration(), false /*updateSources*/);
+        updateProjectConfiguration(embedder, request, monitor);
       }
     } finally {
       projectManagerImpl.notifyProjectChangeListeners(monitor);
     }
+  }
+
+  private void sortProjects(List<IMavenProjectFacade> facades) {
+    //XXX  should probably use ReactorManager.getSortedProjects
+    Collections.sort(facades, new ReferencedProjectComparator());
   }
 
   // PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(project, new IWorkingSet[] {workingSet});
@@ -596,5 +617,44 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
       return res==0 ? c1.getId().compareTo(c2.getId()) : res;
     }
   }
+  
+  /**
+   * Projects comparator, used to determine build order between maven projects.
+   *  
+   */
+  static class ReferencedProjectComparator implements Comparator<IMavenProjectFacade>, Serializable  {
+
+    private static final long serialVersionUID = -1L;
+    
+    private static final int BEFORE = -1;
+
+    private static final int UNDEFINED = 0;
+
+    private static final int AFTER = 1;
+
+    public int compare(IMavenProjectFacade pf1, IMavenProjectFacade pf2) {
+      Set<ArtifactKey> refs2 = ArtifactRef.toArtifactKey(pf2.getMavenProjectArtifacts());
+      //p1 is a reference of p2, should be built before p2 ...
+      if (refs2.contains(pf1.getArtifactKey())) {
+        //... unless p2 is a pom project.
+        return (isPom(pf2))?AFTER:BEFORE; 
+      }
+
+      Set<ArtifactKey> refs1 = ArtifactRef.toArtifactKey(pf1.getMavenProjectArtifacts());
+      //p1 depends on p2, should be built after p2
+      if (refs1.contains(pf2.getArtifactKey())) {
+        //... unless p1 is a pom project.
+        return (isPom(pf1))?BEFORE:AFTER; 
+      }
+      
+      //projects don't depend on each other
+      return UNDEFINED;
+    }
+    
+    private boolean isPom(IMavenProjectFacade pf) {
+      return "pom".equals(pf.getPackaging());
+    }
+  }
+
   
 }

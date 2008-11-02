@@ -409,5 +409,11 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
     }
     return errors;
   }
+
+  protected void assertMarkers(IProject project, int expected) throws CoreException {
+    List<IMarker> markers = findErrorMarkers(project);
+    assertEquals(project.getName() + " : " + toString(markers.toArray(new IMarker[markers.size()])), //
+        expected, markers.size());
+  }
   
 }
