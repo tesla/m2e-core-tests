@@ -8,6 +8,7 @@
 
 package org.maven.ide.eclipse.internal.builder;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -15,6 +16,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -25,9 +27,13 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 
-import org.codehaus.plexus.util.StringUtils;
-
+import org.apache.maven.embedder.MavenEmbedder;
+import org.apache.maven.embedder.MavenEmbedderException;
+import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionResult;
+import org.apache.maven.lifecycle.NoSuchPhaseException;
+import org.apache.maven.lifecycle.model.MojoBinding;
+import org.apache.maven.lifecycle.plan.BuildPlan;
 import org.apache.maven.model.Resource;
 import org.apache.maven.project.MavenProject;
 
@@ -38,6 +44,8 @@ import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.IMavenProjectVisitor;
 import org.maven.ide.eclipse.project.MavenProjectManager;
+import org.maven.ide.eclipse.project.MavenRunnable;
+import org.maven.ide.eclipse.project.ResolverConfiguration;
 
 
 public class MavenBuilder extends IncrementalProjectBuilder {
@@ -65,52 +73,69 @@ public class MavenBuilder extends IncrementalProjectBuilder {
         return null;
       }
 
-      IMavenProjectFacade mavenProject = projectManager.create(getProject(), monitor);
-      if (mavenProject == null) {
+      IMavenProjectFacade projectFacade = projectManager.create(getProject(), monitor);
+      if (projectFacade == null) {
         // XXX is this really possible? should we warn the user?
         return null;
       }
 
       if(DEBUG) {
-        System.out.println("\nStarting Maven build for " + project.getName() //$NON-NLS-1$
-            + " kind:" + kind + " requestedFullBuild:" + getRequireFullBuild(project) //$NON-NLS-1$
-            + " @ " + new Date(System.currentTimeMillis())); //$NON-NLS-1$
+        System.out.println("\nStarting Maven build for " + project.getName()
+            + " kind:" + kind + " requestedFullBuild:" + getRequireFullBuild(projectFacade)
+            + " @ " + new Date(System.currentTimeMillis()));
       }
       
-      if (FULL_BUILD == kind || CLEAN_BUILD == kind || getRequireFullBuild(getProject())) {
+      boolean requireFullBuild = getRequireFullBuild(projectFacade);
+
+      console.logMessage("Maven Builder: " + getKind(kind) + " " + (requireFullBuild ? "requireFullBuild" : ""));
+      
+      if (FULL_BUILD == kind || CLEAN_BUILD == kind || requireFullBuild) {
         try {
-          executePostBuild(mavenProject, monitor);
+          boolean offline = FULL_BUILD != kind && CLEAN_BUILD != kind;
+          executePostBuild(projectFacade, offline, monitor);
         } finally {
           resetRequireFullBuild(getProject());
         }
       } else {
-        // if( kind == AUTO_BUILD || kind == INCREMENTAL_BUILD ) {
-        processResources(mavenProject, monitor);
+        // kind == AUTO_BUILD || kind == INCREMENTAL_BUILD
+        processResources(projectFacade, monitor);
       }
     }
     return null;
   }
 
-  private void resetRequireFullBuild(IProject project) throws CoreException {
-    project.setSessionProperty(IMavenConstants.FULL_MAVEN_BUILD, null);
-  }
+  private void executePostBuild(final IMavenProjectFacade projectFacade, //
+      final boolean offline, final IProgressMonitor monitor) throws CoreException {
+    MavenExecutionResult result = projectFacade.execute(new MavenRunnable() {
+      public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request) {
+        ResolverConfiguration configuration = projectFacade.getResolverConfiguration();
 
-  private boolean getRequireFullBuild(IProject project) {
-    return false;
-    // return project.getSessionProperty(IMavenConstants.FULL_MAVEN_BUILD) != null;
+        List<String> goals = Arrays.asList(configuration.getFullBuildGoals().split("[,\\s]+"));
+        List<String> filteredGoals = getFilteredGoals(embedder, goals, projectFacade, monitor);
+        request.setGoals(filteredGoals.isEmpty() ? goals : filteredGoals);
+        
+        request.setRecursive(configuration.shouldIncludeModules());
+        
+        if(offline) {
+          request.setOffline(true);
+        }
+        
+        return embedder.execute(request);
+      }
+    }, monitor);
+    logErrors(result, projectFacade.getProject().getName());
   }
-
+  
   private void processResources(IMavenProjectFacade projectFacade, final IProgressMonitor monitor) throws CoreException {
     final IResourceDelta delta = getDelta(projectFacade.getProject());
-
     projectFacade.accept(new IMavenProjectVisitor() {
       public boolean visit(IMavenProjectFacade projectFacade) throws CoreException {
         MavenExecutionResult result = null;
         if (hasChangedResources(projectFacade, delta, true, monitor)) {
-          result = projectFacade.filterResources(monitor);
+          result = filterResources(projectFacade, monitor);
         } else if (hasChangedResources(projectFacade, delta, false, monitor)) {
           // XXX optimize! no filtering, just copy the changed resources
-          result = projectFacade.filterResources(monitor);
+          result = filterResources(projectFacade, monitor);
         }
         if(result!=null) {
           logErrors(result, projectFacade.getProject().getName());
@@ -118,6 +143,24 @@ public class MavenBuilder extends IncrementalProjectBuilder {
         return true;
       }
     }, IMavenProjectVisitor.NESTED_MODULES);
+  }
+
+  protected MavenExecutionResult filterResources(final IMavenProjectFacade projectFacade, //
+      final IProgressMonitor monitor) throws CoreException {
+    return projectFacade.execute(new MavenRunnable() {
+      public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request) {
+        ResolverConfiguration configuration = projectFacade.getResolverConfiguration();
+        
+        List<String> goals = Arrays.asList(configuration.getResourceFilteringGoals().split("[,\\s]+"));
+        List<String> filteredGoals = getFilteredGoals(embedder, goals, projectFacade, monitor);
+        request.setGoals(filteredGoals.isEmpty() ? goals : filteredGoals);
+        
+        request.setRecursive(configuration.shouldIncludeModules());
+        request.setOffline(true);  // always execute resource filtering offline
+        
+        return embedder.execute(request);
+      } 
+    }, monitor);
   }
 
   boolean hasChangedResources(IMavenProjectFacade facade, IResourceDelta delta, boolean filteredOnly, IProgressMonitor monitor) throws CoreException {
@@ -162,13 +205,6 @@ public class MavenBuilder extends IncrementalProjectBuilder {
     return folders;
   }
 
-  private void executePostBuild(IMavenProjectFacade projectFacade, IProgressMonitor monitor) throws CoreException {
-    String goalsStr = projectFacade.getResolverConfiguration().getFullBuildGoals();
-    List<String> goals = Arrays.asList(StringUtils.split(goalsStr));
-    MavenExecutionResult result = projectFacade.execute(goals, monitor);
-    logErrors(result, projectFacade.getProject().getName());
-  }
-  
   void logErrors(MavenExecutionResult result, String projectNname) {
     if(result.hasExceptions()) {
       String msg = "Build errors for " + projectNname;
@@ -189,6 +225,61 @@ public class MavenBuilder extends IncrementalProjectBuilder {
     // resolutionResult.getMetadataResolutionExceptions();
     // resolutionResult.getVersionRangeViolations();
   }
+
+  private boolean getRequireFullBuild(IMavenProjectFacade projectFacade) throws CoreException {
+    if(projectFacade.getResolverConfiguration().isSkipCompiler()) {
+      // see MNGECLIPSE-823
+      return projectFacade.getProject().getSessionProperty(IMavenConstants.FULL_MAVEN_BUILD) != null;
+    }
+    return false;  
+  }
+  
+  private void resetRequireFullBuild(IProject project) throws CoreException {
+    project.setSessionProperty(IMavenConstants.FULL_MAVEN_BUILD, null);
+  }
+
+  private String getKind(int kind) {
+    switch(kind) {
+      case FULL_BUILD:
+        return "FULL_BUILD";
+      case AUTO_BUILD:
+        return "AUTO_BUILD";
+      case INCREMENTAL_BUILD:
+        return "INCREMENTAL_BUILD";
+      case CLEAN_BUILD:
+        return "CLEAN_BUILD";
+    }
+    return "unknown";
+  }
+  
+  @SuppressWarnings("unchecked")
+  protected List<String> getFilteredGoals(MavenEmbedder embedder, List<String> goals,
+      IMavenProjectFacade projectFacade, IProgressMonitor monitor) {
+    if(projectFacade.getResolverConfiguration().isSkipCompiler()) {
+      try {
+        MavenProject mavenProject = projectFacade.getMavenProject(monitor);
+        BuildPlan buildPlan = embedder.getBuildPlan(goals, mavenProject);
+        
+        List<String> result = new ArrayList<String>();
+        for(MojoBinding m : (List<MojoBinding>) buildPlan.renderExecutionPlan(new Stack())) {
+          if(!("org.apache.maven.plugins".equals(m.getGroupId()) && "maven-compiler-plugin".equals(m.getArtifactId()))) {
+            result.add(m.getGroupId() + ":" + m.getArtifactId() + ":" + m.getVersion() + ":" + m.getGoal());
+          }
+        }
+        return result;
+        
+      } catch(MavenEmbedderException ex) {
+        MavenLogger.log("Can't get build plan", ex);
+      } catch(NoSuchPhaseException ex) {
+        MavenLogger.log("Can't get build plan", ex);
+      } catch(CoreException ex) {
+        MavenLogger.log(ex);
+      }
+    }
+    return goals;
+  }
+
+  
   
 }
 

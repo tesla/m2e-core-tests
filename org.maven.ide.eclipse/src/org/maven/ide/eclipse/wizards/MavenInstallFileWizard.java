@@ -101,7 +101,7 @@ public class MavenInstallFileWizard extends Wizard implements IImportWizard {
           // Run the install:install-file goal
           MavenEmbedderManager embedderManager = plugin.getMavenEmbedderManager();
           MavenEmbedder embedder = embedderManager.createEmbedder(EmbedderFactory.createExecutionCustomizer());
-          MavenExecutionRequest request = embedderManager.createRequest(embedder);
+          MavenExecutionRequest request = embedderManager.createRequest();
           request.setGoals(Arrays.asList("install:install-file"));
           request.setProperties(properties);
           MavenExecutionResult executionResult = embedder.execute(request);
