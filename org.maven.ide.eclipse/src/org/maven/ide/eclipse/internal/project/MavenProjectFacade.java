@@ -10,6 +10,7 @@ package org.maven.ide.eclipse.internal.project;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -26,22 +27,20 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 
+import org.codehaus.plexus.util.StringUtils;
+
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.embedder.MavenEmbedder;
-import org.apache.maven.embedder.MavenEmbedderException;
 import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.model.Build;
 import org.apache.maven.project.MavenProject;
 
 import org.maven.ide.eclipse.core.IMavenConstants;
-import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.ArtifactRef;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.IMavenProjectVisitor;
 import org.maven.ide.eclipse.project.IMavenProjectVisitor2;
 import org.maven.ide.eclipse.project.MavenProjectUtils;
-import org.maven.ide.eclipse.project.MavenRunnable;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 
@@ -60,7 +59,7 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
 
   private transient MavenProject mavenProject;
 
-  ResolverConfiguration resolverConfiguration;
+  private ResolverConfiguration resolverConfiguration;
 
   private final long[] timestamp = new long[MavenProjectManagerImpl.METADATA_PATH.size() + 1];
 
@@ -80,9 +79,9 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
       ResolverConfiguration resolverConfiguration) {
     this.manager = manager;
     this.pom = pom;
-    this.pomFile = pom.getLocation().toFile();  // save pom file
-    this.resolverConfiguration = resolverConfiguration;
+    this.pomFile = pom.getLocation().toFile();
     setMavenProject(mavenProject);
+    this.resolverConfiguration = resolverConfiguration;
     updateTimestamp();
   }
 
@@ -143,6 +142,18 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
   }
 
   /**
+   * Filters resources of this project. Does not recurse into nested modules.
+   * @return 
+   */
+  public MavenExecutionResult filterResources(IProgressMonitor monitor) throws CoreException {
+    String goalsStr = resolverConfiguration.getResourceFilteringGoals();
+    List<String> goals = Arrays.asList(StringUtils.split(goalsStr));
+    MavenExecutionResult result = manager.execute(this, goals, false /* non-recursive*/, monitor);
+    refreshBuildDirectory(monitor); // XXX only need to refresh classes and test-classes
+    return result;
+  }
+
+  /**
    * Returns the full, absolute path of this project maven build output directory relative to the workspace or null if
    * maven build output directory cannot be determined or outside of the workspace.
    */
@@ -168,7 +179,8 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
   public MavenProject getMavenProject(IProgressMonitor monitor) throws CoreException {
     if (mavenProject == null) {
       MavenExecutionResult result = manager.readProjectWithDependencies(pom, resolverConfiguration, //
-          new MavenUpdateRequest(true /* offline */, false /* updateSnapshots */), monitor);
+          new MavenUpdateRequest(true /* offline */, false /* updateSnapshots */),
+          monitor);
       mavenProject = result.getProject();
       if (mavenProject == null) {
         MultiStatus status = new MultiStatus(IMavenConstants.PLUGIN_ID, 0, "Could not read maven project", null);
@@ -225,8 +237,10 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
   @SuppressWarnings("unchecked")
   private void acceptImpl(IMavenProjectVisitor visitor, int flags, IProgressMonitor monitor) throws CoreException {
     if(visitor.visit(this)) {
+      
       if (visitor instanceof IMavenProjectVisitor2 && monitor != null) {
-        for(Artifact artifact : (Set<Artifact>) getMavenProject(monitor).getArtifacts()) {
+        MavenProject mavenProject = getMavenProject(monitor);
+        for(Artifact artifact : (Set<Artifact>) mavenProject.getArtifacts()) {
           ((IMavenProjectVisitor2) visitor).visit(this, artifact);
         }
       }
@@ -298,42 +312,27 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
    * 
    * @return execution result 
    */
-//  public MavenExecutionResult execute(List<String> goals, IProgressMonitor monitor) throws CoreException {
-//    MavenExecutionResult result = execute(goals, resolverConfiguration.shouldIncludeModules(), monitor);
-//    refreshBuildDirectory(monitor);
-//    return result;
-//  }
-
-  public MavenExecutionResult execute(MavenRunnable runnable, IProgressMonitor monitor) throws CoreException {
-    MavenEmbedder embedder = manager.createWorkspaceEmbedder();
-    try {
-      MavenExecutionResult result = manager.execute(embedder, pom, resolverConfiguration, runnable, monitor);
-      
-      // XXX only need to refresh target or target/classes and target/test-classes
-      refreshBuildFolders(monitor);
-      
-      return result; 
-  
-    } finally {
-      try {
-        embedder.stop();
-      } catch(MavenEmbedderException ex) {
-        MavenLogger.log("Error stopping Maven Embedder", ex);
-      }
-    }
+  public MavenExecutionResult execute(List<String> goals, IProgressMonitor monitor) throws CoreException {
+    MavenExecutionResult result = manager.execute(this, goals, resolverConfiguration.shouldIncludeModules(), monitor);
+    refreshBuildDirectory(monitor);
+    return result;
   }
-  
-  private void refreshBuildFolders(final IProgressMonitor monitor) throws CoreException {
+
+  private void refreshBuildDirectory(final IProgressMonitor monitor) throws CoreException {
     accept(new IMavenProjectVisitor() {
       public boolean visit(IMavenProjectFacade projectFacade) throws CoreException {
         Build build = projectFacade.getMavenProject(monitor).getBuild();
-        IFolder folder = getProject().getFolder(projectFacade.getProjectRelativePath(build.getDirectory()));
-        if(folder != null) {
-          folder.refreshLocal(IResource.DEPTH_INFINITE, monitor);
-        }
+        refreshFolder(projectFacade.getProjectRelativePath(build.getDirectory()), monitor);
         return true; // keep visiting
       }
     }, IMavenProjectVisitor.NESTED_MODULES);
+  }
+
+  void refreshFolder(IPath path, IProgressMonitor monitor) throws CoreException {
+    IFolder folder = getProject().getFolder(path);
+    if (folder != null) {
+      folder.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+    }
   }
 
   public ArtifactKey getArtifactKey() {
@@ -343,13 +342,4 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
   public MavenProject getMavenProject() {
     return mavenProject;
   }
-
-  /* (non-Javadoc)
-   * @see org.maven.ide.eclipse.project.IMavenProjectFacade#getFilteredGoals(org.apache.maven.embedder.MavenEmbedder, java.util.List)
-   */
-  public List<String> getFilteredGoals(MavenEmbedder embedder, List<String> goals) {
-    // TODO Auto-generated method getFilteredGoals
-    return null;
-  }
-  
 }

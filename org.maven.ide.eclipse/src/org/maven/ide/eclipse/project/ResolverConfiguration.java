@@ -29,11 +29,6 @@ public class ResolverConfiguration implements Serializable {
   private String resourceFilteringGoals = DEFAULT_FILTERING_GOALS;
   private String fullBuildGoals = DEFAULT_FULL_BUILD_GOALS;
 
-  /**
-   * Skip execution of Maven compiler plugin
-   */
-  private boolean skipCompiler = true;
-
 //  public ResolverConfiguration() {
 //  }
 //  
@@ -87,13 +82,5 @@ public class ResolverConfiguration implements Serializable {
 
   public void setFullBuildGoals(String fullBuildGoals) {
     this.fullBuildGoals = fullBuildGoals;
-  }
-
-  public boolean isSkipCompiler() {
-    return this.skipCompiler;
-  }
-  
-  public void setSkipCompiler(boolean skipCompiler) {
-    this.skipCompiler = skipCompiler;
   }
 }

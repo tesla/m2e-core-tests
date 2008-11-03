@@ -20,7 +20,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.apache.maven.artifact.Artifact;
@@ -51,13 +50,10 @@ public class WorkspaceStateWriter implements IMavenProjectChangedListener {
         try {
           Artifact artifact = projectFacade.getMavenProject(monitor).getArtifact();
           IFile pomFile = projectFacade.getPom();
-          IPath location = pomFile.getLocation();
-          if(location != null) {
-            File pom = location.toFile();
-            if(pom.canRead()) {
-              String key = artifact.getGroupId() + ":" + artifact.getArtifactId() + ":pom:" + artifact.getBaseVersion();
-              state.put(key, pom.getCanonicalPath());
-            }
+          File pom = pomFile.getLocation().toFile();
+          if (pom.canRead()) {
+            String key = artifact.getGroupId() + ":" + artifact.getArtifactId() + ":pom:" + artifact.getBaseVersion();
+            state.put(key, pom.getCanonicalPath());
           }
           IResource outputLocation = root.findMember(projectFacade.getOutputLocation());
           if (!"pom".equals(artifact.getType()) && outputLocation != null && outputLocation.exists()) {

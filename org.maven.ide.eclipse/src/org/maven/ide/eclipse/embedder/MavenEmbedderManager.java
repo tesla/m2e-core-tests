@@ -80,11 +80,11 @@ public class MavenEmbedderManager {
     }
   }
 
-  public synchronized MavenExecutionRequest createRequest() {
+  public synchronized MavenExecutionRequest createRequest(MavenEmbedder embedder) {
     boolean offline = runtimeManager.isOffline();
     boolean debug = runtimeManager.isDebugOutput();
 
-    return EmbedderFactory.createMavenExecutionRequest(offline, debug);
+    return EmbedderFactory.createMavenExecutionRequest(embedder, offline, debug);
   }
   
   public MavenEmbedder getWorkspaceEmbedder() throws CoreException {

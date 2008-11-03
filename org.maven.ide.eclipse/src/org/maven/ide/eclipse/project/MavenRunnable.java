@@ -13,7 +13,5 @@ import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionResult;
 
 public interface MavenRunnable {
-  
   public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request);
-  
 }

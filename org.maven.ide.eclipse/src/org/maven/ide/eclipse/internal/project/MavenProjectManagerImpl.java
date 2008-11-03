@@ -108,7 +108,6 @@ public class MavenProjectManagerImpl {
   private static final String P_RESOLVE_WORKSPACE_PROJECTS = "resolveWorkspaceProjects";
   private static final String P_RESOURCE_FILTER_GOALS = "resourceFilterGoals";
   private static final String P_FULL_BUILD_GOALS = "fullBuildGoals";
-  private static final String P_SKIP_COMPILER_PLUGIN = "skipCompilerPlugin";
   private static final String P_ACTIVE_PROFILES = "activeProfiles";
 
   private static final String VERSION = "1";
@@ -128,6 +127,10 @@ public class MavenProjectManagerImpl {
 
   private static final ThreadLocal<Context> context = new ThreadLocal<Context>();
   
+  static Context getContext() {
+    return context.get();
+  }
+
   private final WorkspaceState state;
 
   private final MavenConsole console;
@@ -143,10 +146,6 @@ public class MavenProjectManagerImpl {
 
   private final Set<IDownloadSourceListener> downloadSourceListeners = new LinkedHashSet<IDownloadSourceListener>();
   private final Map<IProject, DownloadSourceEvent> downloadSourceEvents = new LinkedHashMap<IProject, DownloadSourceEvent>();
-
-  static Context getContext() {
-    return context.get();
-  }
 
   public MavenProjectManagerImpl(MavenConsole console, IndexManager indexManager, MavenEmbedderManager embedderManager,
       File stateLocationDir, boolean readState, MavenRuntimeManager runtimeManager, IMavenMarkerManager mavenMarkerManager) {
@@ -225,7 +224,6 @@ public class MavenProjectManagerImpl {
     if(projectNode != null) {
       projectNode.put(P_VERSION, VERSION);
       
-      projectNode.putBoolean(P_SKIP_COMPILER_PLUGIN, configuration.isSkipCompiler());
       projectNode.putBoolean(P_RESOLVE_WORKSPACE_PROJECTS, configuration.shouldResolveWorkspaceProjects());
       projectNode.putBoolean(P_INCLUDE_MODULES, configuration.shouldIncludeModules());
       
@@ -258,7 +256,6 @@ public class MavenProjectManagerImpl {
     }
   
     ResolverConfiguration configuration = new ResolverConfiguration();
-    configuration.setSkipCompiler(projectNode.getBoolean(P_SKIP_COMPILER_PLUGIN, true));
     configuration.setResolveWorkspaceProjects(projectNode.getBoolean(P_RESOLVE_WORKSPACE_PROJECTS, false));
     configuration.setIncludeModules(projectNode.getBoolean(P_INCLUDE_MODULES, false));
     
@@ -973,31 +970,37 @@ public class MavenProjectManagerImpl {
     }
   }
   
-  public MavenExecutionResult execute(MavenEmbedder embedder, File pom, ResolverConfiguration configuration,
-      MavenRunnable runnable, IProgressMonitor monitor) {
-    return runnable.execute(embedder, createRequest(pom, configuration, monitor));
-  }
-
-  public MavenExecutionResult execute(MavenEmbedder embedder, IFile pomFile, ResolverConfiguration configuration,
-      MavenRunnable runnable, IProgressMonitor monitor) {
-    context.set(new Context(this.state, configuration, pomFile));
-    try {
-      return runnable.execute(embedder, createRequest(pomFile.getLocation().toFile(), configuration, monitor));
-    } finally {
-      context.set(null);
-    }
-  }
-
-  private MavenExecutionRequest createRequest(File pom, ResolverConfiguration configuration, IProgressMonitor monitor) {
-    MavenExecutionRequest request = embedderManager.createRequest();
+  public MavenExecutionResult execute(MavenEmbedder embedder, File pom, ResolverConfiguration resolverConfiguration, MavenRunnable runnable, IProgressMonitor monitor) {
+    MavenExecutionRequest request = embedderManager.createRequest(embedder);
     request.setPomFile(pom.getAbsolutePath());
     request.setBaseDirectory(pom.getParentFile());
     request.setTransferListener(new TransferListenerAdapter(monitor, console, indexManager));
-    request.setProfiles(configuration.getActiveProfileList());
-    request.addActiveProfiles(configuration.getActiveProfileList());
+    request.setProfiles(resolverConfiguration.getActiveProfileList());
+    request.addActiveProfiles(resolverConfiguration.getActiveProfileList());
     request.setRecursive(false);
     request.setUseReactor(false);
-    return request;
+
+    return runnable.execute(embedder, request);
+  }
+  
+  public MavenExecutionResult execute(MavenEmbedder embedder, IFile pomFile, ResolverConfiguration resolverConfiguration, MavenRunnable runnable, IProgressMonitor monitor) {
+    File pom = pomFile.getLocation().toFile();
+
+    MavenExecutionRequest request = embedderManager.createRequest(embedder);
+    request.setPomFile(pom.getAbsolutePath());
+    request.setBaseDirectory(pom.getParentFile());
+    request.setTransferListener(new TransferListenerAdapter(monitor, console, indexManager));
+    request.setProfiles(resolverConfiguration.getActiveProfileList());
+    request.addActiveProfiles(resolverConfiguration.getActiveProfileList());
+    request.setRecursive(false);
+    request.setUseReactor(false);
+
+    context.set(new Context(this.state, resolverConfiguration, pomFile));
+    try {
+      return runnable.execute(embedder, request);
+    } finally {
+      context.set(null);
+    }
   }
 
   public IMavenProjectFacade[] getProjects() {
@@ -1010,6 +1013,79 @@ public class MavenProjectManagerImpl {
       projectFacade.setResolverConfiguration(configuration);
     }
     return saveResolverConfiguration(project, configuration);
+  }
+
+  /**
+   * Context
+   */
+  static class Context {
+    final WorkspaceState state;
+
+    final ResolverConfiguration resolverConfiguration;
+
+    final IFile pom;
+
+    Context(WorkspaceState state, ResolverConfiguration resolverConfiguration, IFile pom) {
+      this.state = state;
+      this.resolverConfiguration = resolverConfiguration;
+      this.pom = pom;
+    }
+  }
+
+  private static class MavenExecutor implements MavenRunnable {
+    private final List<String> goals;
+
+    MavenExecutor(List<String> goals) {
+      this.goals = goals;
+    }
+
+    public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request) {
+      request.setGoals(goals);
+      return embedder.execute(request);
+    }
+  }
+
+  private static final class MavenProjectReader implements MavenRunnable {
+    private final MavenUpdateRequest updateRequest;
+
+    MavenProjectReader(MavenUpdateRequest updateRequest) {
+      this.updateRequest = updateRequest;
+    }
+
+    public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request) {
+      request.setOffline(updateRequest.isOffline());
+      request.setUpdateSnapshots(updateRequest.isUpdateSnapshots());
+      return embedder.readProjectWithDependencies(request);
+    }
+  }
+
+  public MavenExecutionResult execute(MavenProjectFacade facade, List<String> goals, final boolean recursive,
+      IProgressMonitor monitor) throws CoreException {
+    MavenEmbedder embedder = createWorkspaceEmbedder();
+    try {
+      IFile pom = facade.getPom();
+      final ResolverConfiguration resolverConfiguration = facade.getResolverConfiguration();
+      
+      if(DEBUG) {
+        System.out.println("  executing Maven for " + facade.getProject()  //$NON-NLS-1$
+            + " goals:" + goals.toString() 
+            + " recursive:" + recursive);  //$NON-NLS-1$
+      }
+      
+      return execute(embedder, pom, resolverConfiguration, new MavenExecutor(goals) {
+        public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request) {
+          request.setRecursive(recursive);
+          return super.execute(embedder, request);
+        }
+      }, monitor);
+
+    } finally {
+      try {
+        embedder.stop();
+      } catch(MavenEmbedderException ex) {
+        MavenLogger.log("Error stopping Maven Embedder", ex);
+      }
+    }
   }
 
   public String getJavaDocUrl(String fileName) {
@@ -1084,37 +1160,6 @@ public class MavenProjectManagerImpl {
 //          desc.setImplementation(EclipseWagonManager.class.getName());
       }
     };
-  }
-
-  /**
-   * Context
-   */
-  static class Context {
-    final WorkspaceState state;
-
-    final ResolverConfiguration resolverConfiguration;
-
-    final IFile pom;
-
-    Context(WorkspaceState state, ResolverConfiguration resolverConfiguration, IFile pom) {
-      this.state = state;
-      this.resolverConfiguration = resolverConfiguration;
-      this.pom = pom;
-    }
-  }
-
-  private static final class MavenProjectReader implements MavenRunnable {
-    private final MavenUpdateRequest updateRequest;
-
-    MavenProjectReader(MavenUpdateRequest updateRequest) {
-      this.updateRequest = updateRequest;
-    }
-
-    public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request) {
-      request.setOffline(updateRequest.isOffline());
-      request.setUpdateSnapshots(updateRequest.isUpdateSnapshots());
-      return embedder.readProjectWithDependencies(request);
-    }
   }
   
 }

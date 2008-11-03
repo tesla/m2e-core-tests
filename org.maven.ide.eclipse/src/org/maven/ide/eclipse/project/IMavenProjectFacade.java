@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+//import org.apache.maven.artifact.Artifact;
 import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.project.MavenProject;
 
@@ -29,7 +30,7 @@ import org.maven.ide.eclipse.embedder.ArtifactRef;
  * 
  * @noimplement This interface is not intended to be implemented by clients.
  *
- * @author Igor Fedorenko
+ * @author igor
  */
 public interface IMavenProjectFacade {
 
@@ -54,6 +55,11 @@ public interface IMavenProjectFacade {
    * @return IPath the full, absolute workspace path resourceLocation
    */
   IPath getProjectRelativePath(String resourceLocation);
+
+  /**
+   * Filters resources of this project. Does not recurse into nested modules.
+   */
+  MavenExecutionResult filterResources(IProgressMonitor monitor) throws CoreException;
 
   /**
    * Returns the full, absolute path of this project maven build output directory relative to the workspace or null if
@@ -109,11 +115,13 @@ public interface IMavenProjectFacade {
   boolean isStale();
 
   /**
-   * Executes MavenRunnable. Runnable can set goals and other execution settings. 
+   * Executes specified maven goals. 
+   * 
+   * Recurses into nested modules depending on resolver configuration.
    * 
    * @return execution result 
    */
-  MavenExecutionResult execute(MavenRunnable runnable, IProgressMonitor monitor) throws CoreException;
+  MavenExecutionResult execute(List<String> goals, IProgressMonitor monitor) throws CoreException;
 
   ArtifactKey getArtifactKey();
 
