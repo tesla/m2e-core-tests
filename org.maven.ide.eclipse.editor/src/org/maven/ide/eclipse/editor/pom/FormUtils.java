@@ -16,7 +16,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.fieldassist.ContentProposalAdapter;
 import org.eclipse.jface.fieldassist.FieldDecoration;
@@ -37,6 +36,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
+import org.eclipse.ui.fieldassist.ContentAssistCommandAdapter;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
@@ -263,8 +263,11 @@ public abstract class FormUtils {
       contentAdapter = new CComboContentAdapter();
     }
 
-    ContentProposalAdapter adapter = new ContentProposalAdapter(control, contentAdapter, //
-        proposalProvider, KeyStroke.getInstance(SWT.MOD1, ' '), null);
+    ContentAssistCommandAdapter adapter = new ContentAssistCommandAdapter( //
+        control, contentAdapter, proposalProvider, //
+        ContentAssistCommandAdapter.CONTENT_PROPOSAL_COMMAND, null);
+    // ContentProposalAdapter adapter = new ContentProposalAdapter(control, contentAdapter, //
+    //     proposalProvider, KeyStroke.getInstance(SWT.MOD1, ' '), null);
     adapter.setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_REPLACE);
     adapter.setPopupSize(new Point(250, 120));
     adapter.setPopupSize(new Point(250, 120));
