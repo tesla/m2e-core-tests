@@ -11,7 +11,6 @@ package org.maven.ide.eclipse.refactoring;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
@@ -21,6 +20,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.common.command.BasicCommandStack;
 import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.common.notify.impl.AdapterFactoryImpl;
@@ -59,9 +59,6 @@ public abstract class AbstractPomRefactoring extends Refactoring {
   // maven model manager
   protected MavenModelManager mavenModelManager;
   
-  // refactored files in workspace
-  protected Map<IFile, List<EObject>> refactored = new HashMap<IFile,List<EObject>>();
-
   // editing domain
   private AdapterFactoryEditingDomain editingDomain;
 
@@ -87,43 +84,52 @@ public abstract class AbstractPomRefactoring extends Refactoring {
   
   @Override
   public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException, OperationCanceledException {
-    //calculate the list of affected files
-    RefactoringStatus status = new RefactoringStatus();
-    for(IMavenProjectFacade projectFacade : mavenPlugin.getMavenProjectManager().getProjects()) {
-      try {
-        IFile file = projectFacade.getPom();
-        Model current = mavenModelManager.loadResource(file).getModel();
-        List<EObject> affected = getVisitor().scanModel(file, current);
-        if (!affected.isEmpty()) {
-          refactored.put(projectFacade.getPom(), affected);
-        }
-      } catch(CoreException e) {
-        status.addError(e.getMessage());
-      }
-    }
-    return status;
+    return new RefactoringStatus();
   }
 
   @Override
   public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
+    //calculate the list of affected files
     CompositeChange res = new CompositeChange("Renaming " + file.getParent().getName());
-    for(IFile file : refactored.keySet()) {
-      ITextFileBuffer buffer = getBuffer(file);
-      String before = buffer.getDocument().get();
-      Command command = getVisitor().applyModel(editingDomain, refactored.get(file));
-      editingDomain.getCommandStack().execute(command);
-      String after = buffer.getDocument().get();
-      editingDomain.getCommandStack().undo();
-
-      // TODO files are still dirty after this... try IStructuredDocument?
-      // because after undo, command can be redone. need to clean
-      // maybe there is special "releaseBuffer" call?
-      
-      // XXX this breaks buffer.getDocument()
-      // releaseBuffer(file);
-      
-      DocumentChange change = new ChangeCreator(buffer.getDocument(), file.getParent().getName(), before, after).createChange(pm);
-      res.add(change);
+    for(IMavenProjectFacade projectFacade : mavenPlugin.getMavenProjectManager().getProjects()) {
+      IFile file = projectFacade.getPom();
+      IFile tmpFile = null;
+      try {
+        //create temp file
+        String tmpName = file.getName();
+        int pos = tmpName.lastIndexOf('.');
+        if (pos > 0) {
+          tmpName = tmpName.substring(0, pos) + "_refactored" + tmpName.substring(pos); 
+        } else {
+          tmpName = "_" + tmpName;
+        }
+        tmpFile = file.getParent().getFile(new Path(tmpName));
+        if (tmpFile.exists())
+          tmpFile.setContents(file.getContents(), 0, pm);
+        else
+          tmpFile.create(file.getContents(), true, pm);
+        
+        //scan it
+        Model current = mavenModelManager.loadResource(tmpFile).getModel();
+        List<EObject> affected = getVisitor().scanModel(tmpFile, current);
+        if (!affected.isEmpty()) {
+          //apply changes to temp file
+          ITextFileBuffer tmpBuffer = getBuffer(tmpFile);
+          ITextFileBuffer buffer = getBuffer(file);
+          Command command = getVisitor().applyModel(editingDomain, affected);
+          editingDomain.getCommandStack().execute(command);
+          
+          //create text change comparing temp file and real file
+          DocumentChange change = new ChangeCreator(buffer.getDocument(), tmpBuffer.getDocument(), file.getParent().getName()).createChange();
+          res.add(change);
+        }
+      } finally {
+        releaseBuffer(file);
+        if (tmpFile != null && tmpFile.exists()) {
+          releaseBuffer(tmpFile);
+          tmpFile.delete(true, pm);
+        }
+      }
     }
     return res;
   }

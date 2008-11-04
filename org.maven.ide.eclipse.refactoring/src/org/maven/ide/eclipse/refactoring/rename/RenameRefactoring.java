@@ -158,7 +158,9 @@ public class RenameRefactoring extends AbstractPomRefactoring {
       }
 
       public List<EObject> scanModel(IFile file, Model current) {
-        return RenameRefactoring.this.scanModel(current, groupId, artifactId, version, file.equals(getFile()));
+        //process <project> element only for the refactored file itself
+        boolean processRoot = file.getParent().equals(getFile().getParent());
+        return RenameRefactoring.this.scanModel(current, groupId, artifactId, version, processRoot);
       }
 
     };
