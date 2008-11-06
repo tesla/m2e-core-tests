@@ -14,10 +14,11 @@ import java.util.Arrays;
 import org.eclipse.compare.rangedifferencer.IRangeComparator;
 import org.eclipse.compare.rangedifferencer.RangeDifference;
 import org.eclipse.compare.rangedifferencer.RangeDifferencer;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.ltk.core.refactoring.DocumentChange;
+import org.eclipse.ltk.core.refactoring.TextFileChange;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.maven.ide.eclipse.core.MavenLogger;
@@ -35,6 +36,8 @@ public class ChangeCreator {
   private IDocument oldDocument;
 
   private IDocument newDocument;
+
+  private IFile oldFile;
 
   @SuppressWarnings("unchecked")
   public class LineComparator implements IRangeComparator {
@@ -116,14 +119,16 @@ public class ChangeCreator {
     }
   }
 
-  public ChangeCreator(IDocument oldDocument, IDocument newDocument, String label) {
+  public ChangeCreator(IFile oldFile, IDocument oldDocument, IDocument newDocument, String label) {
     this.newDocument = newDocument;
     this.oldDocument = oldDocument;
+    this.oldFile = oldFile;
     this.label = label;
   }
 
-  public DocumentChange createChange() {
-    DocumentChange change = new DocumentChange(label, oldDocument);
+  public TextFileChange createChange() {
+    TextFileChange change = new TextFileChange(label, oldFile);
+    change.setSaveMode(TextFileChange.FORCE_SAVE);
     change.setEdit(new MultiTextEdit());
     Object leftSide= new LineComparator(oldDocument);
     Object rightSide= new LineComparator(newDocument);

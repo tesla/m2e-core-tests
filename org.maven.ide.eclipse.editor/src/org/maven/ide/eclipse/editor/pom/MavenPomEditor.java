@@ -215,6 +215,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       return;
     }
 
+    //handle project delete
     if(event.getType() == IResourceChangeEvent.PRE_CLOSE || event.getType() == IResourceChangeEvent.PRE_DELETE) {
       if(pomFile.getProject().equals(event.getResource())) {
         Display.getDefault().asyncExec(new Runnable() {
@@ -226,7 +227,8 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       return;
     }
 
-    class ResourceDeltaVisitor implements IResourceDeltaVisitor {
+    //handle pom delete
+    class RemovedResourceDeltaVisitor implements IResourceDeltaVisitor {
       boolean removed = false;
 
       public boolean visit(IResourceDelta delta) throws CoreException {
@@ -237,11 +239,10 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
         }
         return true;
       }
-
-    }
-    ;
+    };
+    
     try {
-      ResourceDeltaVisitor visitor = new ResourceDeltaVisitor();
+      RemovedResourceDeltaVisitor visitor = new RemovedResourceDeltaVisitor();
       event.getDelta().accept(visitor);
       if(visitor.removed) {
         Display.getDefault().asyncExec(new Runnable() {
@@ -253,6 +254,37 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     } catch(CoreException ex) {
       MavenLogger.log(ex);
     }
+
+    //handle pom change (from refactoring), this assumes editor is not dirty, because all poms 
+    //will be saved before refactoring
+    //TODO: implement generic merge scenario (when file is externally changed and is dirty)
+    class ChangedResourceDeltaVisitor implements IResourceDeltaVisitor {
+      boolean changed = false;
+
+      public boolean visit(IResourceDelta delta) throws CoreException {
+        if(delta.getResource().getName().equals(pomFile.getName()) //
+            && (delta.getKind() & (IResourceDelta.CHANGED)) != 0) {
+          changed = true;
+          return false;
+        }
+        return true;
+      }
+    };
+    
+    try {
+      ChangedResourceDeltaVisitor visitor = new ChangedResourceDeltaVisitor();
+      event.getDelta().accept(visitor);
+      if(visitor.changed) {
+        Display.getDefault().asyncExec(new Runnable() {
+          public void run() {
+            reload();
+          }
+        });
+      }
+    } catch(CoreException ex) {
+      MavenLogger.log(ex);
+    }
+
   }
 
   public void reload() {

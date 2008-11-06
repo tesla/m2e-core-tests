@@ -8,6 +8,7 @@
 
 package org.maven.ide.eclipse.refactoring;
 
+import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,9 +33,9 @@ import org.eclipse.emf.edit.provider.ReflectiveItemProviderAdapterFactory;
 import org.eclipse.emf.edit.provider.resource.ResourceItemProviderAdapterFactory;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
-import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.TextFileChange;
 import org.maven.ide.components.pom.Model;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
@@ -95,6 +96,8 @@ public abstract class AbstractPomRefactoring extends Refactoring {
       IFile file = projectFacade.getPom();
       IFile tmpFile = null;
       try {
+        ITextFileBuffer buffer = getBuffer(file);
+        ByteArrayInputStream contents = new ByteArrayInputStream(buffer.getDocument().get().getBytes());
         //create temp file
         String tmpName = file.getName();
         int pos = tmpName.lastIndexOf('.');
@@ -105,9 +108,9 @@ public abstract class AbstractPomRefactoring extends Refactoring {
         }
         tmpFile = file.getParent().getFile(new Path(tmpName));
         if (tmpFile.exists())
-          tmpFile.setContents(file.getContents(), 0, pm);
+          tmpFile.setContents(contents, 0, pm);
         else
-          tmpFile.create(file.getContents(), true, pm);
+          tmpFile.create(contents, true, pm);
         
         //scan it
         Model current = mavenModelManager.loadResource(tmpFile).getModel();
@@ -115,12 +118,11 @@ public abstract class AbstractPomRefactoring extends Refactoring {
         if (!affected.isEmpty()) {
           //apply changes to temp file
           ITextFileBuffer tmpBuffer = getBuffer(tmpFile);
-          ITextFileBuffer buffer = getBuffer(file);
           Command command = getVisitor().applyModel(editingDomain, affected);
           editingDomain.getCommandStack().execute(command);
           
           //create text change comparing temp file and real file
-          DocumentChange change = new ChangeCreator(buffer.getDocument(), tmpBuffer.getDocument(), file.getParent().getName()).createChange();
+          TextFileChange change = new ChangeCreator(file, buffer.getDocument(), tmpBuffer.getDocument(), file.getParent().getName()).createChange();
           res.add(change);
         }
       } finally {

@@ -11,13 +11,17 @@ package org.maven.ide.eclipse.refactoring.rename;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizardOpenOperation;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionDelegate;
 import org.eclipse.ui.internal.ObjectPluginAction;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.refactoring.SaveDirtyFilesDialog;
 
 
 /**
@@ -57,10 +61,14 @@ public class RenameArtifactAction extends ActionDelegate {
   private void rename(IFile file) {
     try {
       // get the model from existing file
+      Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+      boolean rc = SaveDirtyFilesDialog.saveDirtyFiles("pom.xml");
+      if (!rc)
+        return;
       MavenRenameWizard wizard = new MavenRenameWizard(file);
       RefactoringWizardOpenOperation op = new RefactoringWizardOpenOperation(wizard);
       String titleForFailedChecks = ""; //$NON-NLS-1$
-      op.run(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), titleForFailedChecks);
+      op.run(shell, titleForFailedChecks);
     } catch(Exception e) {
       MavenLogger.log("Unable to rename " + file, e);
     }
