@@ -61,8 +61,11 @@ public class AddDependencyAction implements IObjectActionDelegate {
 
     MavenPlugin plugin = MavenPlugin.getDefault();
     
+    //do not try to get artifacts from MavenProject, it returns more than we really need
+    //disable checking here, as POM editor doesn't have the checking at all
+    Set<ArtifactKey> artifacts = Collections.emptySet();
     MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-        "Add Dependency", IndexManager.SEARCH_ARTIFACT, getArtifacts(file, plugin), true);
+        "Add Dependency", IndexManager.SEARCH_ARTIFACT, artifacts, true);
     if(dialog.open() == Window.OK) {
       IndexedArtifactFile indexedArtifactFile = (IndexedArtifactFile) dialog.getFirstResult();
       if(indexedArtifactFile != null) {
