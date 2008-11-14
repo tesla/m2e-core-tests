@@ -8,6 +8,7 @@
 
 package org.maven.ide.eclipse.jdt.internal;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -25,6 +26,7 @@ import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.jdt.BuildPathManager;
 import org.maven.ide.eclipse.jdt.MavenJdtPlugin;
+import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
 
 
@@ -50,7 +52,7 @@ public class MavenClasspathContainerInitializer extends ClasspathContainerInitia
 
       // force refresh if can't read persisted state
       MavenUpdateRequest request = new MavenUpdateRequest(project.getProject(), true, false);
-      MavenPlugin.getDefault().getMavenProjectManager().refresh(request);
+      getMavenProjectManager().refresh(request);
     }
   }
 
@@ -78,4 +80,21 @@ public class MavenClasspathContainerInitializer extends ClasspathContainerInitia
     return MavenJdtPlugin.getDefault().getBuildpathManager();
   }
 
+  MavenProjectManager getMavenProjectManager() {
+    return MavenPlugin.getDefault().getMavenProjectManager();
+  }
+
+  public IStatus getSourceAttachmentStatus(IPath path, IJavaProject project) {
+    try {
+    	//silently try to download all sources for a project 
+      //(fine-grained download is impossible because we don't know the class)
+      IProject prj = project.getProject();
+      getBuildPathManager().downloadSources(prj, null);
+      getBuildPathManager().downloadJavaDoc(prj, null);
+    } catch(CoreException ex) {
+      MavenLogger.log("Exception trying to download sources " + path.toString(), ex);
+    }
+
+    return super.getSourceAttachmentStatus(path, project);
+  }
 }
