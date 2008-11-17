@@ -10,22 +10,23 @@ package org.maven.ide.eclipse.editor.xml.search;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
+
+import org.apache.maven.artifact.versioning.ComparableVersion;
 
 import org.maven.ide.eclipse.core.MavenLogger;
 
 
 /**
- * Search engine composed from everal other SearchEngines. Calls appropriate methods in its component SearchEngines add
+ * Search engine composed from several other SearchEngines. Calls appropriate methods in its component SearchEngines and
  * puts results to TreeSet
  * 
  * @author Lukas Krecan
  */
 public class CompositeSearchEngine implements SearchEngine {
-  private static final VersionComparator VERSION_COMPARATOR = new VersionComparator();
-
   private List<SearchEngine> components = new ArrayList<SearchEngine>();
 
   /**
@@ -75,13 +76,26 @@ public class CompositeSearchEngine implements SearchEngine {
     });
   }
 
-  public SortedSet<String> findVersions(final String groupId, final String artifactId, final String searchExpression, final Packaging packaging) {
+  public List<String> findVersions(final String groupId, final String artifactId, final String searchExpression, final Packaging packaging) {
     //I like closures :-/
-    return findInternal(new TreeSet<String>(VERSION_COMPARATOR), new SearchCallback() {
+    SortedSet<String> result = findInternal(new SearchCallback() {
       public Collection<String> search(SearchEngine searchEngine) {
         return searchEngine.findVersions(groupId, artifactId, searchExpression, packaging);
       }
     });
+    // sort results according to o.a.m.artifact.versioning.ComparableVersion
+    SortedSet<ComparableVersion> versions = new TreeSet<ComparableVersion>();
+    for(String version : result) {
+      versions.add(new ComparableVersion(version));
+    }
+    result = null; // not used any more
+    List<String> sorted = new ArrayList<String>(versions.size());
+    for(ComparableVersion version : versions) {
+      sorted.add(version.toString());
+    }
+    versions = null; // not used any more
+    Collections.reverse(sorted);
+    return sorted;
   }
 
   public SortedSet<String> findClassifiers(final String groupId, final String artifactId, final String version, final String prefix, final Packaging packaging) {

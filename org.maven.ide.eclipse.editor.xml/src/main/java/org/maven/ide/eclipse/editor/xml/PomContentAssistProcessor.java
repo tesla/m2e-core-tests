@@ -156,7 +156,10 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
         // ignore
       }
     }
-    Collections.sort(matches, PROPOSAL_COMPARATOR);
+    if (templateContext!=PomTemplateContext.VERSION) {
+      // versions are already sorted with o.a.m.artifact.versioning.ComparableVersion
+      Collections.sort(matches, PROPOSAL_COMPARATOR);
+    }
 
     return (ICompletionProposal[]) matches.toArray(new ICompletionProposal[matches.size()]);
 
