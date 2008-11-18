@@ -17,6 +17,7 @@ import static org.junit.Assert.assertNotNull;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -120,9 +121,9 @@ public class TestCompositeSearchEngine {
     composite.addSearchEngine(component1);
     composite.addSearchEngine(component2);
 
-    SortedSet<String> result = composite.findVersions("test", "test", "", Packaging.ALL);
+    List<String> result = composite.findVersions("test", "test", "", Packaging.ALL);
     assertEquals(result1, result);
-    assertEquals("1.1", result.first());
+    assertEquals("1.1", result.get(0));
 
     verify(component1, component2);
   }
