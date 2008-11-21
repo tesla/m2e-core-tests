@@ -50,6 +50,18 @@ public class RefactoringTest extends RefactoringTestBase {
     ui.click(new TreeItemLocator(MINE_POM_XML, new ViewLocator(
         ORG_ECLIPSE_JDT_UI_PACKAGE_EXPLORER)));
     
+    //click cancel after preview
+    ui.contextClick(new TreeItemLocator(MINE_POM_XML, new ViewLocator(
+        ORG_ECLIPSE_JDT_UI_PACKAGE_EXPLORER)),
+        REFACTOR_RENAME_MAVEN_ARTIFACT);
+    ui.wait(new ShellDisposedCondition(PROGRESS_INFORMATION));
+    ui.wait(new ShellShowingCondition(RENAME_ARTIFACT));
+    setTextValue(VERSION, _0_0_ZQ_SNAPSHOT);
+    ui.click(new ButtonLocator("Previe&w >"));
+    ui.wait(new ShellDisposedCondition(PROGRESS_INFORMATION));
+    ui.wait(new ShellDisposedCondition(PROGRESS_INFORMATION));
+    ui.click(new ButtonLocator("Cancel"));
+
     //refactor version
     ui.contextClick(new TreeItemLocator(MINE_POM_XML, new ViewLocator(
         ORG_ECLIPSE_JDT_UI_PACKAGE_EXPLORER)),

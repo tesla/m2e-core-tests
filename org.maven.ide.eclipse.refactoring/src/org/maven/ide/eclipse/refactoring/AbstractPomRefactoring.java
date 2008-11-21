@@ -9,10 +9,12 @@
 package org.maven.ide.eclipse.refactoring;
 
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.maven.project.MavenProject;
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
@@ -25,7 +27,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.common.command.BasicCommandStack;
 import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.common.notify.impl.AdapterFactoryImpl;
-import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.edit.domain.AdapterFactoryEditingDomain;
 import org.eclipse.emf.edit.provider.ComposedAdapterFactory;
@@ -38,6 +39,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 import org.maven.ide.components.pom.Model;
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 
@@ -92,12 +94,19 @@ public abstract class AbstractPomRefactoring extends Refactoring {
   public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
     //calculate the list of affected files
     CompositeChange res = new CompositeChange("Renaming " + file.getParent().getName());
-    for(IMavenProjectFacade projectFacade : mavenPlugin.getMavenProjectManager().getProjects()) {
+    IMavenProjectFacade[] projects = mavenPlugin.getMavenProjectManager().getProjects();
+    pm.beginTask("Refactoring", projects.length);
+    for(IMavenProjectFacade projectFacade : projects) {
+      MavenProject prj = projectFacade.getMavenProject(null);
+      org.apache.maven.model.Model effective = prj.getModel();
+      pm.setTaskName("Scanning " + prj.getBasedir().getName());
+
       IFile file = projectFacade.getPom();
+      ITextFileBuffer buffer = getBuffer(file);
+      ITextFileBuffer tmpBuffer = null;
       IFile tmpFile = null;
       try {
-        ITextFileBuffer buffer = getBuffer(file);
-        ByteArrayInputStream contents = new ByteArrayInputStream(buffer.getDocument().get().getBytes());
+        InputStream contents = file.getContents();
         //create temp file
         String tmpName = file.getName();
         int pos = tmpName.lastIndexOf('.');
@@ -108,29 +117,30 @@ public abstract class AbstractPomRefactoring extends Refactoring {
         }
         tmpFile = file.getParent().getFile(new Path(tmpName));
         if (tmpFile.exists())
-          tmpFile.setContents(contents, 0, pm);
+          tmpFile.setContents(contents, 0, null);
         else
-          tmpFile.create(contents, true, pm);
+          tmpFile.create(contents, true, null);
         
         //scan it
         Model current = mavenModelManager.loadResource(tmpFile).getModel();
-        List<EObject> affected = getVisitor().scanModel(tmpFile, current);
-        if (!affected.isEmpty()) {
+        tmpBuffer = getBuffer(tmpFile);
+        Command command = getVisitor().applyChanges(editingDomain, tmpFile, effective, current);
+        if (command == null)
+          continue;
+        if (command.canExecute()) {
           //apply changes to temp file
-          ITextFileBuffer tmpBuffer = getBuffer(tmpFile);
-          Command command = getVisitor().applyModel(editingDomain, affected);
           editingDomain.getCommandStack().execute(command);
-          
           //create text change comparing temp file and real file
           TextFileChange change = new ChangeCreator(file, buffer.getDocument(), tmpBuffer.getDocument(), file.getParent().getName()).createChange();
           res.add(change);
         }
       } finally {
-        releaseBuffer(file);
+        releaseBuffer(buffer, file);
         if (tmpFile != null && tmpFile.exists()) {
-          releaseBuffer(tmpFile);
-          tmpFile.delete(true, pm);
+          releaseBuffer(tmpBuffer, tmpFile);
+          tmpFile.delete(true, null);
         }
+        pm.worked(1);
       }
     }
     return res;
@@ -141,15 +151,16 @@ public abstract class AbstractPomRefactoring extends Refactoring {
     return textFileBufferManager.getTextFileBuffer(file.getLocation(), LocationKind.NORMALIZE); 
   }
 
-  protected void releaseBuffer(IFile file) throws CoreException {
+  protected void releaseBuffer(ITextFileBuffer buffer, IFile file) throws CoreException {
+    buffer.revert(null);
     textFileBufferManager.disconnect(file.getLocation(), LocationKind.NORMALIZE, null);
   }
   
-  // TODO modelManager.loadResource(file) should be cached!!!
   public Model getModel() {
     try {
       return mavenModelManager.loadResource(file).getModel();
     } catch(CoreException e) {
+      MavenLogger.log("Cannot load model for refactoring", e);
       return null;
     }
   }

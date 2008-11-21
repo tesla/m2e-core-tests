@@ -112,9 +112,13 @@ public class MavenRenameWizardPage extends UserInputWizardPage {
     artifactIdText.addModifyListener(listener);
     versionText.addModifyListener(listener);
     
-    groupIdText.setText(model.getGroupId());
-    artifactIdText.setText(model.getArtifactId());
-    versionText.setText(model.getVersion());
+    groupIdText.setText(nvl(model.getGroupId()));
+    artifactIdText.setText(nvl(model.getArtifactId()));
+    versionText.setText(nvl(model.getVersion()));
+  }
+  
+  private String nvl(String str) {
+    return str == null? "": str;
   }
 
 }
