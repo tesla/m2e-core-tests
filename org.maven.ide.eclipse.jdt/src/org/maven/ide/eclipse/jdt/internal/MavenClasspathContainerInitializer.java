@@ -8,7 +8,6 @@
 
 package org.maven.ide.eclipse.jdt.internal;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -82,19 +81,5 @@ public class MavenClasspathContainerInitializer extends ClasspathContainerInitia
 
   MavenProjectManager getMavenProjectManager() {
     return MavenPlugin.getDefault().getMavenProjectManager();
-  }
-
-  public IStatus getSourceAttachmentStatus(IPath path, IJavaProject project) {
-    try {
-    	//silently try to download all sources for a project 
-      //(fine-grained download is impossible because we don't know the class)
-      IProject prj = project.getProject();
-      getBuildPathManager().downloadSources(prj, null);
-      getBuildPathManager().downloadJavaDoc(prj, null);
-    } catch(CoreException ex) {
-      MavenLogger.log("Exception trying to download sources " + path.toString(), ex);
-    }
-
-    return super.getSourceAttachmentStatus(path, project);
   }
 }
