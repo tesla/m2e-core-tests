@@ -8,8 +8,7 @@
 
 package org.maven.ide.eclipse.refactoring;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +19,9 @@ import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filebuffers.LocationKind;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
@@ -90,6 +91,7 @@ public abstract class AbstractPomRefactoring extends Refactoring {
     return new RefactoringStatus();
   }
 
+  @SuppressWarnings("deprecation")
   @Override
   public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
     //calculate the list of affected files
@@ -106,25 +108,30 @@ public abstract class AbstractPomRefactoring extends Refactoring {
       ITextFileBuffer tmpBuffer = null;
       IFile tmpFile = null;
       try {
-        InputStream contents = file.getContents();
         //create temp file
-        String tmpName = file.getName();
-        int pos = tmpName.lastIndexOf('.');
-        if (pos > 0) {
-          tmpName = tmpName.substring(0, pos) + "_refactored" + tmpName.substring(pos); 
+        IProject project = file.getProject();
+        IPath wsPrefix = project.getWorkspace().getRoot().getLocation();
+        IPath location = file.getProject().getDescription().getLocation();
+        String tmpName = File.createTempFile("pom", ".xml").getName();
+        if (location != null) {
+          //(EMF2DOMSSE has problems with virtual resources from nested projects)
+          //so temp file must be created under shell project (1st level)           
+          location = location.append(tmpName);
+          location = location.removeFirstSegments(wsPrefix.segmentCount()).setDevice(null).makeAbsolute();
+          location = new Path(location.removeLastSegments(location.segmentCount() - 1).toString() + "/" +
+              location.removeFirstSegments(location.segmentCount() - 1));
         } else {
-          tmpName = "_" + tmpName;
+          location = file.getParent().getFullPath().append(tmpName);
         }
-        tmpFile = file.getParent().getFile(new Path(tmpName));
-        if (tmpFile.exists())
-          tmpFile.setContents(contents, 0, null);
-        else
-          tmpFile.create(contents, true, null);
+        file.copy(location, true, null);
+        //System.out.println("location: " + location + " for project " + project.getName());
+        tmpFile = file.getWorkspace().getRoot().getFile(location);
         
         //scan it
         Model current = mavenModelManager.loadResource(tmpFile).getModel();
         tmpBuffer = getBuffer(tmpFile);
-        Command command = getVisitor().applyChanges(editingDomain, tmpFile, effective, current);
+        Command command = getVisitor().applyChanges(editingDomain, file, effective, current);
+        //System.out.println("resulting command: " + command);
         if (command == null)
           continue;
         if (command.canExecute()) {
@@ -133,7 +140,10 @@ public abstract class AbstractPomRefactoring extends Refactoring {
           //create text change comparing temp file and real file
           TextFileChange change = new ChangeCreator(file, buffer.getDocument(), tmpBuffer.getDocument(), file.getParent().getName()).createChange();
           res.add(change);
+          //System.out.println("resulting change: " + change);
         }
+      } catch (Exception e) {
+        MavenLogger.log("Problems during refactoring", e);
       } finally {
         releaseBuffer(buffer, file);
         if (tmpFile != null && tmpFile.exists()) {

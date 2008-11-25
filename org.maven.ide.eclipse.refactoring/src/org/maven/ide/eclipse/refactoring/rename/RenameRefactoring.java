@@ -155,7 +155,7 @@ public class RenameRefactoring extends AbstractPomRefactoring {
   //add candidate objects with same artifactId
   private List<EObjectWithPath> scanObject(Path current, EObject obj, String groupId, String artifactId, String version, List<EObjectWithPath> res) {
     if (scanFeature(obj, ARTIFACT_ID, artifactId)) {
-      System.out.println("found object " + obj + " : " + current);
+      //System.out.println("found object " + obj + " : " + current);
       res.add(new EObjectWithPath(obj, current));
     }
     scanChildren(current, obj, groupId, artifactId, version, res);
@@ -209,7 +209,7 @@ public class RenameRefactoring extends AbstractPomRefactoring {
       Object effectiveObj = getElement(effective, obj.path.clone());
       try {
         if (effectiveObj == null) {
-          System.out.println("cannot find effective for: " + obj.object);
+          //System.out.println("cannot find effective for: " + obj.object);
           continue;
         }
         Method method = effectiveObj.getClass().getMethod(GETVERSION, new Class[] {});
