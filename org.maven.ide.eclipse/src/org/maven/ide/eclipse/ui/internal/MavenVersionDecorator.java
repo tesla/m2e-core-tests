@@ -42,18 +42,23 @@ public class MavenVersionDecorator implements ILabelDecorator {
 
   public String decorateText(String text, Object element) {
     if(element instanceof IResource) {
-      IProject project = ((IResource) element).getProject();
+      IResource resource = (IResource) element;
+      IProject project = resource.getProject();
       if(project!=null) {
         MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
         IMavenProjectFacade facade = projectManager.create(project, new NullProgressMonitor());
         if(facade!=null) {
           ArtifactKey mavenProject = facade.getArtifactKey();
           if(mavenProject!=null) {
-            int n = text.indexOf(' ');
-            if(n==-1) {
-              return text + "  " + mavenProject.getVersion();
+            String name = resource.getName();
+            int start = text.indexOf(name);
+            if(start>-1) {
+              int n = text.indexOf(' ', start + name.length());
+              if(n>-1) {
+                return text.substring(0, n) + "  " + mavenProject.getVersion() + text.substring(n);
+              }
             }
-            return text.substring(0, n) + "  " + mavenProject.getVersion() + text.substring(n);
+            return text + "  " + mavenProject.getVersion();
           }
         }
       }
