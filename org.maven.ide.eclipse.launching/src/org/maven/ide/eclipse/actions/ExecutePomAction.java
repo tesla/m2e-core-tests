@@ -215,14 +215,12 @@ public class ExecutePomAction implements ILaunchShortcut, IExecutableExtension {
   private void setActiveProfiles(ILaunchConfigurationWorkingCopy workingCopy, IContainer basedir) {
     MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
     IFile pomFile = basedir.getFile(new Path(IMavenConstants.POM_FILE_NAME));
-    if(pomFile.isAccessible()) {
-      IMavenProjectFacade projectFacade = projectManager.create(pomFile, false, new NullProgressMonitor());
-      if(projectFacade != null) {
-        ResolverConfiguration configuration = projectFacade.getResolverConfiguration();
-        String activeProfiles = configuration.getActiveProfiles();
-        if(activeProfiles != null && activeProfiles.length() > 0) {
-          workingCopy.setAttribute(MavenLaunchConstants.ATTR_PROFILES, activeProfiles);
-        }
+    IMavenProjectFacade projectFacade = projectManager.create(pomFile, false, new NullProgressMonitor());
+    if(projectFacade != null) {
+      ResolverConfiguration configuration = projectFacade.getResolverConfiguration();
+      String activeProfiles = configuration.getActiveProfiles();
+      if(activeProfiles != null && activeProfiles.length() > 0) {
+        workingCopy.setAttribute(MavenLaunchConstants.ATTR_PROFILES, activeProfiles);
       }
     }
   }
