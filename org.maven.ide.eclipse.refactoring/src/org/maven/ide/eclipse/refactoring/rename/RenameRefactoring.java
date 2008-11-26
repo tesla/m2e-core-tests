@@ -189,11 +189,16 @@ public class RenameRefactoring extends AbstractPomRefactoring {
     return false;
   }
 
+  public String getNewProjectName() {
+    return page.getRenamed()? page.getNewArtifactId(): null;
+  }
+  
   /**
    * Applies new values in model
    * @param editingDomain 
    * 
    * @param editingDomain
+   * @param renameProject 
    */
 
   public Command applyModel(AdapterFactoryEditingDomain editingDomain, Model model, org.apache.maven.model.Model effective, 

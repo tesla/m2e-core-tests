@@ -33,6 +33,9 @@ import org.eclipse.emf.edit.domain.AdapterFactoryEditingDomain;
 import org.eclipse.emf.edit.provider.ComposedAdapterFactory;
 import org.eclipse.emf.edit.provider.ReflectiveItemProviderAdapterFactory;
 import org.eclipse.emf.edit.provider.resource.ResourceItemProviderAdapterFactory;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.corext.refactoring.changes.RenameJavaProjectChange;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -153,9 +156,21 @@ public abstract class AbstractPomRefactoring extends Refactoring {
         pm.worked(1);
       }
     }
+    
+    //rename project
+    String newName = getNewProjectName(); 
+    if (newName != null) {
+      res.add(new RenameJavaProjectChange(JavaCore.create(file.getProject()), newName, true));
+    }
+    
     return res;
   }
 
+  //returns new eclipse project name or null if no change
+  public String getNewProjectName() {
+    return null;
+  }
+  
   protected ITextFileBuffer getBuffer(IFile file) throws CoreException {
     textFileBufferManager.connect(file.getLocation(), LocationKind.NORMALIZE, null);
     return textFileBufferManager.getTextFileBuffer(file.getLocation(), LocationKind.NORMALIZE); 

@@ -13,8 +13,11 @@ import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -31,9 +34,14 @@ public class MavenRenameWizardPage extends UserInputWizardPage {
   
   private Model model;
   
-  private String groupId = "";
-  private String artifactId = "";
-  private String version = "";
+  private String groupId;
+  private String artifactId;
+  private String version;
+  private String newGroupId = "";
+  private String newArtifactId = "";
+  private String newVersion = "";
+  private boolean renamed;
+  private Button renameCheckbox;
 
   protected MavenRenameWizardPage() {
     super("MavenRenameWizardPage");
@@ -43,25 +51,32 @@ public class MavenRenameWizardPage extends UserInputWizardPage {
 
   public void setModel(Model model) {
     this.model = model;
+    this.groupId = nvl(model.getGroupId());
+    this.artifactId = nvl(model.getArtifactId());
+    this.version = nvl(model.getVersion());
   }
 
   public String getNewGroupId() {
-    return groupId;
+    return newGroupId;
   }
 
   public String getNewArtifactId() {
-    return artifactId;
+    return newArtifactId;
   }
 
   public String getNewVersion() {
-    return version;
+    return newVersion;
   }
 
   @Override
   public boolean isPageComplete() {
-    return !groupId.equals(groupIdText.getText()) //
-        || !artifactId.equals(artifactIdText.getText()) //
-        || !version.equals(versionText.getText()) //
+    boolean renamedArtifact = !newArtifactId.equals(artifactId);
+    renameCheckbox.setEnabled(renamedArtifact);
+    if (!renamedArtifact)
+      renameCheckbox.setSelection(false);
+    return !newGroupId.equals(groupId) //
+        || renamedArtifact //
+        || !newVersion.equals(version) //
         || !isCurrentPage();
   }
 
@@ -99,26 +114,52 @@ public class MavenRenameWizardPage extends UserInputWizardPage {
     versionText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
     versionText.setData("name", "version");
     
+    Label renameLabel = new Label(composite, SWT.NONE);
+    renameLabel.setLayoutData(new GridData());
+    renameLabel.setText("Rename eclipse project");
+
+    renameCheckbox = new Button(composite, SWT.CHECK);
+    renameCheckbox.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+    renameCheckbox.setData("name", "rename");
+    renameCheckbox.setEnabled(false);
+    renameCheckbox.addSelectionListener(new SelectionListener() {
+      public void widgetDefaultSelected(SelectionEvent e) {
+      }
+
+      public void widgetSelected(SelectionEvent e) {
+        renamed = renameCheckbox.getSelection();
+        getWizard().getContainer().updateButtons();
+      }
+      
+    });
+    
     ModifyListener listener = new ModifyListener() {
       public void modifyText(ModifyEvent e) {
+        newGroupId = groupIdText.getText();
+        newArtifactId = artifactIdText.getText();
+        newVersion = versionText.getText();
         getWizard().getContainer().updateButtons();
-        groupId = groupIdText.getText();
-        artifactId = artifactIdText.getText();
-        version = versionText.getText();
       }
     };
+
+    groupIdText.setText(nvl(model.getGroupId()));
+    artifactIdText.setText(nvl(model.getArtifactId()));
+    versionText.setText(nvl(model.getVersion()));
 
     groupIdText.addModifyListener(listener);
     artifactIdText.addModifyListener(listener);
     versionText.addModifyListener(listener);
-    
-    groupIdText.setText(nvl(model.getGroupId()));
-    artifactIdText.setText(nvl(model.getArtifactId()));
-    versionText.setText(nvl(model.getVersion()));
   }
   
   private String nvl(String str) {
     return str == null? "": str;
+  }
+
+  /**
+   * @return
+   */
+  public boolean getRenamed() {
+    return renamed;
   }
 
 }
