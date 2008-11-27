@@ -12,12 +12,12 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -28,6 +28,8 @@ import org.maven.ide.components.pom.Model;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.refactoring.AbstractPomRefactoring;
 import org.maven.ide.eclipse.refactoring.PomVisitor;
+import org.maven.ide.eclipse.refactoring.RefactoringModelResources;
+import org.maven.ide.eclipse.refactoring.RefactoringModelResources.PropertyInfo;
 
 
 /**
@@ -201,17 +203,17 @@ public class RenameRefactoring extends AbstractPomRefactoring {
    * @param renameProject 
    */
 
-  public Command applyModel(AdapterFactoryEditingDomain editingDomain, Model model, org.apache.maven.model.Model effective, 
+  public CompoundCommand applyModel(AdapterFactoryEditingDomain editingDomain, RefactoringModelResources model, 
       String newGroupId, String newArtifactId, String newVersion, boolean processRoot) {
     //find all affected objects in EMF model
-    List<EObjectWithPath> affected = scanModel(model, this.oldGroupId, this.oldArtifactId, this.oldVersion, processRoot);
+    List<EObjectWithPath> affected = scanModel(model.getTmpModel(), this.oldGroupId, this.oldArtifactId, this.oldVersion, processRoot);
     
     //go through all affected objects, check in effective model
     Iterator<EObjectWithPath> i = affected.iterator();
     CompoundCommand command = new CompoundCommand();
     while (i.hasNext()) {
       EObjectWithPath obj = i.next();
-      Object effectiveObj = getElement(effective, obj.path.clone());
+      Object effectiveObj = getElement(model.getEffective(), obj.path.clone());
       try {
         if (effectiveObj == null) {
           //System.out.println("cannot find effective for: " + obj.object);
@@ -241,6 +243,20 @@ public class RenameRefactoring extends AbstractPomRefactoring {
       }
     }
 
+    //XXX - just a refactoring mark
+//    if (!command.isEmpty()) {
+//      Set props = model.getProperties().keySet();
+//      Object[] arr = props.toArray();
+//      double koeff = System.currentTimeMillis() % 10;
+//      koeff = koeff / 10;
+//      PropertyInfo info = model.getProperties().get(arr[(int) (arr.length * koeff)]);
+//      info.setNewValue(new SetCommand(editingDomain, info.getPair(), info.getPair().eClass().getEStructuralFeature("value"), "" + koeff));
+//      int sum = 0;
+//      for (int f=0; f<10000000; f++)
+//        sum+= f;
+//      System.out.println(info.getPair().getKey() + ":" + koeff + ":" + sum);
+//    }
+    
     return command.isEmpty()? null: command;
   }
 
@@ -248,7 +264,7 @@ public class RenameRefactoring extends AbstractPomRefactoring {
       String featureName, String value) {
     EStructuralFeature feature = obj.eClass().getEStructuralFeature(featureName);
     if(feature == null) {
-      return;
+      return; 
     }
     Object old = obj.eGet(feature);
     if(old == null || old.equals(value)) {
@@ -275,10 +291,10 @@ public class RenameRefactoring extends AbstractPomRefactoring {
   public PomVisitor getVisitor() {
     return new PomVisitor() {
 
-      public Command applyChanges(AdapterFactoryEditingDomain editingDomain, IFile file, org.apache.maven.model.Model effective, Model current) {
+      public CompoundCommand applyChanges(AdapterFactoryEditingDomain editingDomain, IFile file, RefactoringModelResources current) {
         //process <project> element only for the refactored file itself
         boolean processRoot = file.getParent().equals(getFile().getParent());
-        return RenameRefactoring.this.applyModel(editingDomain, current, effective, page.getNewGroupId(), 
+        return RenameRefactoring.this.applyModel(editingDomain, current, page.getNewGroupId(), 
             page.getNewArtifactId(), page.getNewVersion(), processRoot);
       }
     };

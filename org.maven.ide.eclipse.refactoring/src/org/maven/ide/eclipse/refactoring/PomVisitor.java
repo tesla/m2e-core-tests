@@ -9,9 +9,8 @@
 package org.maven.ide.eclipse.refactoring;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.emf.common.command.Command;
+import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.edit.domain.AdapterFactoryEditingDomain;
-import org.maven.ide.components.pom.Model;
 
 
 /**
@@ -23,5 +22,5 @@ public interface PomVisitor {
   /**
    * Applies refactoring changes through undoable command
    */
-  public Command applyChanges(AdapterFactoryEditingDomain editingDomain, IFile file, org.apache.maven.model.Model effective, Model current);
+  public CompoundCommand applyChanges(AdapterFactoryEditingDomain editingDomain, IFile file, RefactoringModelResources model);
 }
