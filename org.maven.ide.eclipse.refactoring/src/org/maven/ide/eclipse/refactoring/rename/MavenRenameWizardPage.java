@@ -51,9 +51,9 @@ public class MavenRenameWizardPage extends UserInputWizardPage {
 
   public void setModel(Model model) {
     this.model = model;
-    this.groupId = nvl(model.getGroupId());
-    this.artifactId = nvl(model.getArtifactId());
-    this.version = nvl(model.getVersion());
+    this.groupId = newGroupId = nvl(model.getGroupId());
+    this.artifactId = newArtifactId = nvl(model.getArtifactId());
+    this.version = newVersion = nvl(model.getVersion());
   }
 
   public String getNewGroupId() {
@@ -72,8 +72,10 @@ public class MavenRenameWizardPage extends UserInputWizardPage {
   public boolean isPageComplete() {
     boolean renamedArtifact = !newArtifactId.equals(artifactId);
     renameCheckbox.setEnabled(renamedArtifact);
-    if (!renamedArtifact)
+    if (!renamedArtifact) {
       renameCheckbox.setSelection(false);
+      renamed = false;
+    }
     return !newGroupId.equals(groupId) //
         || renamedArtifact //
         || !newVersion.equals(version) //
