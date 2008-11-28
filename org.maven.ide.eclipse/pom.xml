@@ -26,13 +26,13 @@
     <sourceDirectory>src</sourceDirectory>
 
     <resources>
-    <resource>
-      <directory>${basedir}/src</directory>
-      <includes>
-        <include>**/*.properties</include>
-      </includes>
-    </resource>
-  </resources>
+      <resource>
+        <directory>${basedir}/src</directory>
+        <includes>
+          <include>**/*.properties</include>
+        </includes>
+      </resource>
+    </resources>
 
     <plugins>
       <plugin>
