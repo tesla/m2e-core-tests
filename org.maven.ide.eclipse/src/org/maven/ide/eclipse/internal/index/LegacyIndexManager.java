@@ -239,4 +239,11 @@ public class LegacyIndexManager extends IndexManager {
     return null;
   }
 
+  /* (non-Javadoc)
+   * @see org.maven.ide.eclipse.index.IndexManager#identify(java.io.File)
+   */
+  public IndexedArtifactFile identify(File file) {
+    return null;
+  }
+
 }

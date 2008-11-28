@@ -208,6 +208,11 @@ public abstract class IndexManager {
   public abstract void removeDocument(String indexName, File pomFile, String documentKey);
 
   /**
+   * Identify file in the index
+   */
+  public abstract IndexedArtifactFile identify(File file) throws CoreException;
+  
+  /**
    * @param term - search term
    * @param searchType - query type. Should be one of the SEARCH_* values.
    * 

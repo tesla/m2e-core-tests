@@ -9,7 +9,6 @@
 package org.maven.ide.eclipse.wizards;
 
 import java.io.File;
-import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -28,9 +27,6 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import org.codehaus.plexus.digest.DigesterException;
-import org.codehaus.plexus.digest.Sha1Digester;
-
 import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.project.MavenProject;
 
@@ -38,8 +34,6 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.SelectionUtil;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
-import org.maven.ide.eclipse.index.IndexManager;
-import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 
@@ -252,15 +246,8 @@ public class MavenInstallFileArtifactWizardPage extends WizardPage {
     
     MavenPlugin plugin = MavenPlugin.getDefault();
     try {
-      Sha1Digester digester = new Sha1Digester();
-      String sha1 = digester.calc(file);
-      plugin.getConsole().logMessage("Artifact digest " + sha1 + " for " + fileName);
-      
-      Map<String, IndexedArtifact> result = plugin.getIndexManager().search(sha1, IndexManager.SEARCH_SHA1);
-      if(result.size()==1) {
-        IndexedArtifact ia = result.values().iterator().next();
-        IndexedArtifactFile iaf = ia.files.iterator().next();
-
+      IndexedArtifactFile iaf = plugin.getIndexManager().identify(file);
+      if(iaf!=null) {
         groupIdCombo.setText(iaf.group);
         artifactIdCombo.setText(iaf.artifact);
         versionCombo.setText(iaf.version);
@@ -273,8 +260,6 @@ public class MavenInstallFileArtifactWizardPage extends WizardPage {
         setMessage("Selected artifact corresponds to " + name, WARNING);
         return;
       }
-    } catch(DigesterException ex) {
-      MavenLogger.log("Digest calculation error", ex);
     } catch(CoreException ex) {
       MavenLogger.log(ex);
     }

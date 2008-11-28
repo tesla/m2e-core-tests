@@ -11,7 +11,6 @@ package org.maven.ide.eclipse.internal.index;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -50,6 +49,8 @@ import org.sonatype.nexus.index.ArtifactAvailablility;
 import org.sonatype.nexus.index.ArtifactContext;
 import org.sonatype.nexus.index.ArtifactInfo;
 import org.sonatype.nexus.index.ArtifactScanningListener;
+import org.sonatype.nexus.index.FlatSearchRequest;
+import org.sonatype.nexus.index.FlatSearchResponse;
 import org.sonatype.nexus.index.IndexUtils;
 import org.sonatype.nexus.index.NexusIndexer;
 import org.sonatype.nexus.index.context.DefaultIndexingContext;
@@ -57,7 +58,6 @@ import org.sonatype.nexus.index.context.IndexContextInInconsistentStateException
 import org.sonatype.nexus.index.context.IndexingContext;
 import org.sonatype.nexus.index.context.UnsupportedExistingLuceneIndexException;
 import org.sonatype.nexus.index.creator.AbstractIndexCreator;
-import org.sonatype.nexus.index.locator.ArtifactLocator;
 import org.sonatype.nexus.index.locator.PomLocator;
 import org.sonatype.nexus.index.scan.ScanningResult;
 import org.sonatype.nexus.index.updater.IndexUpdater;
@@ -117,7 +117,7 @@ public class NexusIndexManager extends IndexManager {
       Directory directory = getIndexDirectory(indexInfo);
       getIndexer().addIndexingContext(indexName, indexName, indexInfo.getRepositoryDir(), directory, //
           indexInfo.getRepositoryUrl(), indexInfo.getIndexUpdateUrl(), //
-          (indexInfo.isShort() ? NexusIndexer.MINIMAL_INDEX : NexusIndexer.FULL_INDEX), true);
+          (indexInfo.isShort() ? NexusIndexer.MINIMAL_INDEX : NexusIndexer.FULL_INDEX));
       fireIndexAdded(indexInfo);
 
     } catch(IOException ex) {
@@ -182,6 +182,17 @@ public class NexusIndexManager extends IndexManager {
     return null;
   }
   
+  public IndexedArtifactFile identify(File file) throws CoreException {
+    try {
+      ArtifactInfo artifactInfo = getIndexer().identify(file);
+      return artifactInfo==null ? null : getIndexedArtifactFile(artifactInfo);
+    } catch(IOException ex) {
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Search error", ex));
+    } catch(IndexContextInInconsistentStateException ex) {
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Search error", ex));
+    }
+  }
+  
   public Query createQuery(String field, String expression) throws CoreException {
     return getIndexer().constructQuery(field, expression);
   }
@@ -207,7 +218,6 @@ public class NexusIndexManager extends IndexManager {
       
       bq.add(getIndexer().constructQuery(ArtifactInfo.GROUP_ID, term), Occur.SHOULD);
       bq.add(getIndexer().constructQuery(ArtifactInfo.ARTIFACT_ID, term), Occur.SHOULD);
-      bq.add(new PrefixQuery(new Term(ArtifactInfo.MD5, term)), Occur.SHOULD);
       bq.add(new PrefixQuery(new Term(ArtifactInfo.SHA1, term)), Occur.SHOULD);
       query = bq;
 
@@ -232,9 +242,6 @@ public class NexusIndexManager extends IndexManager {
     } else if(IndexManager.SEARCH_PACKAGING.equals(type)) {
       query = new TermQuery(new Term(ArtifactInfo.PACKAGING, term));
 
-    } else if(IndexManager.SEARCH_MD5.equals(type)) {
-      query = new WildcardQuery(new Term(ArtifactInfo.MD5, term + "*"));
-
     } else if(IndexManager.SEARCH_SHA1.equals(type)) {
       query = new WildcardQuery(new Term(ArtifactInfo.SHA1, term + "*"));
       
@@ -247,11 +254,11 @@ public class NexusIndexManager extends IndexManager {
 
     try {
       IndexingContext context = getIndexingContext(indexName);
-      Collection<ArtifactInfo> artifacts;
+      FlatSearchResponse response;
       if(context == null) {
-        artifacts = getIndexer().searchFlat(ArtifactInfo.VERSION_COMPARATOR, query);
+        response = getIndexer().searchFlat(new FlatSearchRequest(query));
       } else {
-        artifacts = getIndexer().searchFlat(ArtifactInfo.VERSION_COMPARATOR, query, context);
+        response = getIndexer().searchFlat(new FlatSearchRequest(query, context));
       }
 
 //      IndexingContext context = (IndexingContext) indexer.getIndexingContexts().get("local");
@@ -267,7 +274,7 @@ public class NexusIndexManager extends IndexManager {
       String regex = "^(.*?" + term.replaceAll("\\*", ".+?") + ".*?)$";
       Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
 
-      for(ArtifactInfo artifactInfo : artifacts) {
+      for(ArtifactInfo artifactInfo : response.getResults()) {
         IndexedArtifactFile af = getIndexedArtifactFile(artifactInfo);
 
         if(!IndexManager.SEARCH_CLASS_NAME.equals(type) || term.length() < IndexManager.MIN_CLASS_QUERY_LENGTH) {
@@ -312,14 +319,14 @@ public class NexusIndexManager extends IndexManager {
     Map<String, IndexedArtifact> result = new TreeMap<String, IndexedArtifact>();
     try {
       IndexingContext context = getIndexingContext(indexName);
-      Collection<ArtifactInfo> artifacts;
+      FlatSearchResponse response;
       if(context == null) {
-        artifacts = getIndexer().searchFlat(ArtifactInfo.VERSION_COMPARATOR, query);
+        response = getIndexer().searchFlat(new FlatSearchRequest(query));
       } else {
-        artifacts = getIndexer().searchFlat(ArtifactInfo.VERSION_COMPARATOR, query, context);
+        response = getIndexer().searchFlat(new FlatSearchRequest(query, context));
       }
       
-      for(ArtifactInfo artifactInfo : artifacts) {
+      for(ArtifactInfo artifactInfo : response.getResults()) {
         IndexedArtifactFile af = getIndexedArtifactFile(artifactInfo);
         addArtifactFile(result, af, null, null, artifactInfo.packaging);
       }
@@ -467,14 +474,15 @@ public class NexusIndexManager extends IndexManager {
     
     } else if(file.getName().endsWith(".pom")) {
       pomFile = file;
-      artifactFile = new ArtifactLocator().locate( file, gav );
+      String path = file.getAbsolutePath();
+      artifactFile = new File(path.substring(0, path.length()-4) + ".jar");
     
     } else {
-      pomFile = new PomLocator().locate( file, gav );
+      pomFile = new PomLocator().locate( file, gavCalculator, gav );
       artifactFile = file;
     }
 
-    return new ArtifactContext(pomFile, artifactFile, null, ai);
+    return new ArtifactContext(pomFile, artifactFile, null, ai, gav);
   }
 
   public Date getIndexArchiveTime(InputStream is) throws IOException {
