@@ -69,9 +69,6 @@ import org.eclipse.jdt.internal.core.JavaElementDelta;
 import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerContentProvider;
 
-import org.codehaus.plexus.digest.DigesterException;
-import org.codehaus.plexus.digest.Sha1Digester;
-
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.artifact.resolver.filter.ScopeArtifactFilter;
@@ -85,7 +82,6 @@ import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.index.IndexManager;
-import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.jdt.internal.MavenClasspathContainer;
 import org.maven.ide.eclipse.jdt.internal.MavenClasspathContainerSaveHelper;
@@ -653,26 +649,14 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
   }
 
   private ArtifactKey findArtifactInIndex(IProject project, IClasspathEntry entry) throws CoreException {
-    // calculate md5
-    try {
-      IFile jarFile = project.getWorkspace().getRoot().getFile(entry.getPath());
-      File file = jarFile==null || jarFile.getLocation()==null ? entry.getPath().toFile() : jarFile.getLocation().toFile();
+    IFile jarFile = project.getWorkspace().getRoot().getFile(entry.getPath());
+    File file = jarFile==null || jarFile.getLocation()==null ? entry.getPath().toFile() : jarFile.getLocation().toFile();
 
-      Sha1Digester digester = new Sha1Digester();
-      String sha1 = digester.calc(file);
-      console.logMessage("Artifact digest " + sha1 + " for " + entry.getPath());
-
-      Map<String, IndexedArtifact> result = indexManager.search(sha1, IndexManager.SEARCH_SHA1);
-      if(result.size()==1) {
-        IndexedArtifact ia = result.values().iterator().next();
-        IndexedArtifactFile iaf = ia.files.iterator().next();
-        return new ArtifactKey(iaf.group, iaf.artifact, iaf.version, null);
-      }
-      
-    } catch(DigesterException ex) {
-      throw new CoreException(new Status(IStatus.ERROR, MavenJdtPlugin.PLUGIN_ID, 0, "MD5 calculation error", ex));
+    IndexedArtifactFile iaf = indexManager.identify(file);
+    if(iaf!=null) {
+      return new ArtifactKey(iaf.group, iaf.artifact, iaf.version, iaf.classifier);
     }
-    
+      
     return null;
   }
 
