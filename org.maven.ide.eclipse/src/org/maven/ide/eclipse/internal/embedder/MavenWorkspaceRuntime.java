@@ -10,7 +10,6 @@ package org.maven.ide.eclipse.internal.embedder;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFolder;
@@ -24,13 +23,14 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.project.MavenProject;
 
 import org.maven.ide.eclipse.embedder.ArtifactKey;
+import org.maven.ide.eclipse.embedder.IClasspathCollector;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 
 /**
- * Maven 2.1-SNAPSHOT runtime loaded from the Eclipse Workspace
+ * Maven 3.0-SNAPSHOT runtime loaded from the Eclipse Workspace
  */
 public class MavenWorkspaceRuntime extends MavenRuntime {
 
@@ -67,20 +67,40 @@ public class MavenWorkspaceRuntime extends MavenRuntime {
   }
 
   public String[] getClasspath(String[] forcedComponents) throws CoreException {
-    List<String> cp = new ArrayList<String>();
+    final ArrayList<String> cp = new ArrayList<String>();
+    
+    if (forcedComponents != null) {
+      for (int i = 0; i < forcedComponents.length; i++) {
+        cp.add(forcedComponents[i]);
+      }
+    }
 
-    IMavenProjectFacade maven = projectManager.getMavenProject(MAVEN_DISTRIBUTION.getGroupId(), MAVEN_DISTRIBUTION.getArtifactId(), MAVEN_DISTRIBUTION.getVersion());
-    if (maven != null) {
-      if (forcedComponents != null) {
-        for (int i = 0; i < forcedComponents.length; i++) {
-          cp.add(forcedComponents[i]);
-        }
+    final IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+
+    NullProgressMonitor monitor = new NullProgressMonitor();
+    IClasspathCollector collector = new IClasspathCollector() {
+
+      public void addArchiveEntry(String entry) {
+        cp.add(entry);
       }
 
-      IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+      public void addProjectEntry(IMavenProjectFacade facade) {
+        IFolder output = root.getFolder(facade.getOutputLocation());
+        if (output.isAccessible()) {
+          cp.add(output.getLocation().toFile().getAbsolutePath());
+        }
+      }
+      
+    };
+    getClasspath(collector, monitor);
+    
+    return cp.toArray(new String[cp.size()]);
+    
+  }
 
-      IProgressMonitor monitor = new NullProgressMonitor();
-
+  public void getClasspath(IClasspathCollector collector, IProgressMonitor monitor) throws CoreException {
+    IMavenProjectFacade maven = projectManager.getMavenProject(MAVEN_DISTRIBUTION.getGroupId(), MAVEN_DISTRIBUTION.getArtifactId(), MAVEN_DISTRIBUTION.getVersion());
+    if (maven != null) {
       MavenProject mavenProject = maven.getMavenProject(monitor);
 
       @SuppressWarnings("unchecked")
@@ -93,27 +113,25 @@ public class MavenWorkspaceRuntime extends MavenRuntime {
 
         IMavenProjectFacade facade = projectManager.getMavenProject(artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion());
 
-        File file = null;
         if (facade != null) {
-          IFolder output = root.getFolder(facade.getOutputLocation());
-          if (output.isAccessible()) {
-            file = output.getLocation().toFile();
-          }
+          collector.addProjectEntry(facade);
         } else {
-            file = artifact.getFile();
+          File file = artifact.getFile();
+          if (file != null) {
+            collector.addArchiveEntry(file.getAbsolutePath());
+          }
         }
         
-        if (file != null) {
-          cp.add(file.getAbsolutePath());
-        }
       }
     }
-    
-    return cp.toArray(new String[cp.size()]);
   }
 
   public String toString() {
     return "Workspace";
+  }
+
+  public void getSourcePath(IClasspathCollector collector, IProgressMonitor monitor) throws CoreException {
+    getClasspath(collector, monitor);
   }
 
 }

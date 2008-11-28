@@ -18,9 +18,12 @@ import java.util.List;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.embedder.IClasspathCollector;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 
@@ -66,6 +69,17 @@ public class MavenEmbeddedRuntime extends MavenRuntime {
   }
   
   public String[] getClasspath(String[] forcedComponents) {
+    String[] result = getClasspath();
+    if (forcedComponents != null && forcedComponents.length > 0) {
+      String[] cp = new String[CLASSPATH.length + forcedComponents.length];
+      System.arraycopy(forcedComponents, 0, cp, 0, forcedComponents.length);
+      System.arraycopy(CLASSPATH, 0, cp, forcedComponents.length, CLASSPATH.length);
+      result = cp;
+    }
+    return result;
+  }
+
+  private String[] getClasspath() {
     if(CLASSPATH == null) {
       List<String> cp = new ArrayList<String>();
 
@@ -87,12 +101,7 @@ public class MavenEmbeddedRuntime extends MavenRuntime {
 
       CLASSPATH = cp.toArray(new String[cp.size()]);
     }
-    if (forcedComponents != null && forcedComponents.length > 0) {
-      String[] cp = new String[CLASSPATH.length + forcedComponents.length];
-      System.arraycopy(forcedComponents, 0, cp, 0, forcedComponents.length);
-      System.arraycopy(CLASSPATH, 0, cp, forcedComponents.length, CLASSPATH.length);
-      return cp;
-    }
+
     return CLASSPATH;
   }
 
@@ -119,5 +128,11 @@ public class MavenEmbeddedRuntime extends MavenRuntime {
   public String toString() {
     return "Embedded";
   }
-  
+
+  public void getSourcePath(IClasspathCollector collector, IProgressMonitor monitor) throws CoreException {
+    for (String entry : getClasspath()) {
+      collector.addArchiveEntry(entry);
+    }
+  }
+
 }

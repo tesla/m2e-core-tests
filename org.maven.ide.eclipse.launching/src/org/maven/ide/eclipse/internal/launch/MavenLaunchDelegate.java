@@ -9,22 +9,10 @@
 package org.maven.ide.eclipse.internal.launch;
 
 import java.io.File;
-import java.net.URI;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.StringTokenizer;
 
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
-import org.apache.maven.artifact.resolver.ArtifactResolutionException;
-import org.apache.maven.embedder.MavenEmbedder;
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -42,14 +30,10 @@ import org.eclipse.jdt.launching.VMRunnerConfiguration;
 import org.eclipse.ui.externaltools.internal.model.ExternalToolBuilder;
 import org.eclipse.ui.externaltools.internal.model.IExternalToolConstants;
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
-import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
-import org.maven.ide.eclipse.project.IMavenProjectFacade;
-import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.util.Util;
 
 
@@ -87,57 +71,14 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
 
   public String getMainTypeName(ILaunchConfiguration configuration) throws CoreException {
     // return MAVEN_EXECUTOR_CLASS;
-    return getMavenRuntime(configuration).getMainTypeName();
+    return MavenLaunchUtils.getMavenRuntime(configuration).getMainTypeName();
   }
 
   public String[] getClasspath(ILaunchConfiguration configuration) throws CoreException {
-    String[] forcedCompoStrings = getForcedComponents(configuration);
-    return getMavenRuntime(configuration).getClasspath(forcedCompoStrings);
+    return MavenLaunchUtils.getClasspath(configuration);
   }
   
-  private MavenRuntime getMavenRuntime(ILaunchConfiguration configuration) throws CoreException {
-    MavenRuntimeManager runtimeManager = MavenPlugin.getDefault().getMavenRuntimeManager();
-    String location = getMavenRuntimeLocation(configuration);
-    MavenRuntime runtime = runtimeManager.getRuntime(location);
-    if(runtime==null) {
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, //
-          "Can't find Maven installation " + location, null));
-    }
-    return runtime;
-  }
-
-  private String getMavenRuntimeLocation(ILaunchConfiguration configuration) throws CoreException {
-    return configuration.getAttribute(MavenLaunchConstants.ATTR_RUNTIME, "");
-  }
-
-//  private Bundle findMavenEmbedderBundle() {
-//    Bundle[] bundles = MavenPlugin.getDefault().getBundleContext().getBundles();
-//    for(int i = 0; i < bundles.length; i++ ) {
-//      Bundle bundle = bundles[i];
-//      if("org.maven.ide.components.maven_embedder".equals(bundle.getSymbolicName())) {
-//        return bundle;
-//      }
-//    }
-//
-//    return null;
-//  }
-
   public String getProgramArguments(ILaunchConfiguration configuration) throws CoreException {
-//    String pomDirName = configuration.getAttribute(ATTR_POM_DIR, (String) null);
-//    pomDirName = VariablesPlugin.getDefault().getStringVariableManager().performStringSubstitution(pomDirName);
-//    Tracer.trace(this, "pomDirName", pomDirName);
-//
-//    String sep = System.getProperty("file.separator"); //$NON-NLS-1$
-//    if(!pomDirName.endsWith(sep)) {
-//      pomDirName += sep;
-//    }
-//    String pomFileName = pomDirName + MavenPlugin.POM_FILE_NAME;
-//    // wrap file path with quotes to handle spaces
-//    if(pomFileName.indexOf(' ') >= 0) {
-//      pomFileName = '"' + pomFileName + '"';
-//    }
-//    Tracer.trace(this, "pomFileName", pomFileName);
-
     return getProperties(configuration) + //
         getPreferences(configuration) + " " + //
         getGoals(configuration);
@@ -151,25 +92,13 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
     }
     sb.append(" ").append(super.getVMArguments(configuration));
     File state = MavenPlugin.getDefault().getStateLocation().toFile();
-    String[] forcedComponents = getForcedComponents(configuration);
-    sb.append(getMavenRuntime(configuration).getOptions(new File(state, configuration.getName()), forcedComponents));
+    String[] forcedComponents = MavenLaunchUtils.getForcedComponents(configuration);
+    sb.append(MavenLaunchUtils.getMavenRuntime(configuration).getOptions(new File(state, configuration.getName()), forcedComponents));
     return sb.toString();
   }
 
   private boolean shouldResolveWorkspaceArtifacts(ILaunchConfiguration configuration) throws CoreException {
     return configuration.getAttribute(ATTR_WORKSPACE_RESOLUTION, false);
-  }
-
-  private String getCliResolver() throws CoreException {
-    URL url = MavenPlugin.getDefault().getBundle().getEntry("org.maven.ide.eclipse.cliresolver.jar");
-    try {
-      URL fileURL = FileLocator.toFileURL(url);
-      // MNGECLIPSE-804 workaround for spaces in the original path
-      URI fileURI = new URI(fileURL.getProtocol(), fileURL.getHost(), fileURL.getPath(), fileURL.getQuery());
-      return new File(fileURI).getCanonicalPath();
-    } catch(Exception ex) {
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, ex.getMessage(), ex));
-    }
   }
 
   private String getGoals(ILaunchConfiguration configuration) throws CoreException {
@@ -356,57 +285,4 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
     }
   }
 
-  private String[] getForcedComponents(ILaunchConfiguration configuration) throws CoreException {
-    List<String> components = new ArrayList<String>();
-    if (shouldResolveWorkspaceArtifacts(configuration)) {
-      components.add(getCliResolver());
-    }
-    addUserComponents(configuration, components);
-    return components.toArray(new String[components.size()]);
-  }
-
-  private void addUserComponents(ILaunchConfiguration configuration, List<String> components) throws CoreException {
-    @SuppressWarnings("unchecked")
-    List<String> list = configuration.getAttribute(ATTR_FORCED_COMPONENTS_LIST, new ArrayList());
-    if(list == null) {
-      return;
-    }
-    
-    IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-    MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
-    MavenEmbedderManager embedderManager = MavenPlugin.getDefault().getMavenEmbedderManager();
-    for(String gav : list) {
-      // groupId:artifactId:version
-      StringTokenizer st = new StringTokenizer(gav, ":");
-      String groupId = st.nextToken();
-      String artifactId = st.nextToken();
-      String version = st.nextToken();
-
-      IMavenProjectFacade facade = projectManager.getMavenProject(groupId, artifactId, version);
-
-      File file = null;
-      if (facade != null) {
-        IFolder output = root.getFolder(facade.getOutputLocation());
-        if (output.isAccessible()) {
-          file = output.getLocation().toFile();
-        }
-      } else {
-        String name = groupId + ":" + artifactId + ":" + version;
-        try {
-          MavenEmbedder embedder = embedderManager.getWorkspaceEmbedder();
-          Artifact artifact = embedder.createArtifact(groupId, artifactId, version, null, "jar");
-          embedder.resolve(artifact, Collections.EMPTY_LIST, embedder.getLocalRepository());
-          file = artifact.getFile();
-        } catch(ArtifactResolutionException ex) {
-          MavenLogger.log("Artifact resolution error " + name, ex);
-        } catch(ArtifactNotFoundException ex) {
-          MavenLogger.log("Artifact not found " + name, ex);
-        }
-      }
-      
-      if (file != null) {
-        components.add(file.getAbsolutePath());
-      }
-    }
-  }
 }
