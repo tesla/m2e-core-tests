@@ -26,6 +26,7 @@ import java.util.Stack;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.progress.IProgressConstants;
@@ -418,6 +419,7 @@ public abstract class IndexManager {
 
     public void run(IndexManager indexManager, MavenConsole console, IProgressMonitor monitor) {
       monitor.setTaskName("Updating index " + info.getIndexName());
+      console.logMessage("Updating index " + info.getIndexName());
       try {
         Date indexTime = indexManager.fetchAndUpdateIndex(info.getIndexName(), force, monitor);
         if(indexTime==null) {
@@ -429,6 +431,8 @@ public abstract class IndexManager {
         String msg = "Unable to update index for " + info.getIndexName() + " " + info.getRepositoryUrl();
         MavenLogger.log(msg, ex);
         console.logError(msg);
+      } catch (OperationCanceledException ex) {
+        console.logMessage("Updating index " + info.getIndexName() + " is canceled");
       }
     }
   }

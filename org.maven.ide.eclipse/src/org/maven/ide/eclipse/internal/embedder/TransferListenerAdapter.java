@@ -12,6 +12,7 @@ import java.io.File;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.WagonConstants;
@@ -66,6 +67,10 @@ public final class TransferListenerAdapter implements TransferListener {
   }
 
   public void transferProgress(TransferEvent e, byte[] buffer, int length) {
+    if(monitor.isCanceled()) {
+      throw new OperationCanceledException("Transfer is canceled");
+    }
+    
     complete += length;
 
     long total = e.getResource().getContentLength();
