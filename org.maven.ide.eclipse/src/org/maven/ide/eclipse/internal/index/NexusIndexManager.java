@@ -254,7 +254,7 @@ public class NexusIndexManager extends IndexManager {
 
     try {
       FlatSearchResponse response;
-      IndexingContext context = indexName == null ? null : getIndexingContext(indexName);
+      IndexingContext context = getIndexingContext(indexName);
       if(context == null) {
         response = getIndexer().searchFlat(new FlatSearchRequest(query));
       } else {
@@ -640,7 +640,7 @@ public class NexusIndexManager extends IndexManager {
   // 
 
   private IndexingContext getIndexingContext(String indexName) throws CoreException {
-    return getIndexer().getIndexingContexts().get(indexName);
+    return indexName == null ? null : getIndexer().getIndexingContexts().get(indexName);
   }
 
   private synchronized NexusIndexer getIndexer() throws CoreException {
