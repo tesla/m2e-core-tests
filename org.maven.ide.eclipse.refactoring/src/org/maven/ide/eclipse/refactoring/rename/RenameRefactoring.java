@@ -191,6 +191,14 @@ public class RenameRefactoring extends AbstractPomRefactoring {
     return false;
   }
 
+  private String getValue(EObject obj, String featureName) {
+    EStructuralFeature feature = obj.eClass().getEStructuralFeature(featureName);
+    if(feature == null) {
+      return null;
+    }
+    return obj.eGet(feature) == null ? null : obj.eGet(feature).toString();
+  }
+
   public String getNewProjectName() {
     return page.getRenamed()? page.getNewArtifactId(): null;
   }
@@ -235,8 +243,20 @@ public class RenameRefactoring extends AbstractPomRefactoring {
         applyObject(editingDomain, command, obj.object, ARTIFACT_ID, newArtifactId);
         //only set version if effective version is the same (already checked by the above)
         //and new version is not empty
-        if (!"".equals(newVersion))
-          applyObject(editingDomain, command, obj.object, VERSION, newVersion);
+        if (!"".equals(newVersion)) {
+          PropertyInfo info = null;
+          String old = getValue(obj.object, VERSION);
+          if (old.startsWith("${")) {
+            //this is a property, go find it
+            String pName = old.substring(2);
+            pName = pName.substring(0, pName.length() - 1).trim();
+            info = model.getProperties().get(pName);
+          }
+          if (info != null)
+            info.setNewValue(new SetCommand(editingDomain, info.getPair(), info.getPair().eClass().getEStructuralFeature("value"), newVersion));
+          else
+            applyObject(editingDomain, command, obj.object, VERSION, newVersion);
+        }
         
       } catch(Exception e) {
         MavenLogger.log("Error processing refactoring", e);
