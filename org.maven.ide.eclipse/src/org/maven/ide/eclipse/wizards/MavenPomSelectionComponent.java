@@ -143,7 +143,8 @@ public class MavenPomSelectionComponent extends Composite {
         if(!selection.isEmpty()) {
           if(selection.size() == 1) {
             IndexedArtifactFile f = getSelectedIndexedArtifactFile(selection.getFirstElement());
-            int severity = artifactKeys.contains(f.group + ":" + f.artifact) ? IStatus.ERROR : IStatus.OK;
+            // int severity = artifactKeys.contains(f.group + ":" + f.artifact) ? IStatus.ERROR : IStatus.OK;
+            int severity = IStatus.OK;
             setStatus(severity, f.fname + " " + f.size + " " + f.date);
           } else {
             setStatus(IStatus.OK, "Selected " + selection.size());
