@@ -13,24 +13,18 @@ import java.util.Date;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.compiler.BuildContext;
 import org.eclipse.jdt.core.compiler.CompilationParticipant;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.jdt.MavenJdtPlugin;
-import org.maven.ide.eclipse.project.MavenProjectManager;
 
 
 public class JDTCompilationParticipant extends CompilationParticipant {
   
   public static boolean DEBUG = MavenPlugin.getDefault().isDebugging()
       & Boolean.parseBoolean(Platform.getDebugOption(MavenJdtPlugin.PLUGIN_ID + "/debug/compilationParticipant"));
-  
-  private final MavenProjectManager mavenProjectManager;
-
-  public JDTCompilationParticipant() {
-    this.mavenProjectManager = MavenPlugin.getDefault().getMavenProjectManager();
-  }
   
   @Override
   public synchronized void cleanStarting(IJavaProject project) {
@@ -39,15 +33,25 @@ public class JDTCompilationParticipant extends CompilationParticipant {
           + " @ " + new Date(System.currentTimeMillis())); //$NON-NLS-1$
     }
     
+    MavenPlugin plugin = MavenPlugin.getDefault();
+    plugin.getConsole().logMessage("Maven compilation participant: clean starting");
+
     super.cleanStarting(project);
 
     try {
-      mavenProjectManager.requestFullMavenBuild(project.getProject());
+      plugin.getMavenProjectManager().requestFullMavenBuild(project.getProject());
     } catch(CoreException ex) {
       MavenLogger.log("Exception requesting full Maven build", ex);
     }
   }
 
+  public void buildStarting(BuildContext[] files, boolean isBatch) {
+  }
+  
+  // 3.4
+  public void buildFinished(IJavaProject project) {
+  }
+  
   public boolean isActive(IJavaProject project) {
     return true;
   }
