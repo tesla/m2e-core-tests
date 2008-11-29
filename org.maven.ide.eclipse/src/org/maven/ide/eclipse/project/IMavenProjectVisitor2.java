@@ -13,7 +13,7 @@ import org.apache.maven.artifact.Artifact;
 /**
  * IMavenProjectVisitor2
  *
- * @author igor
+ * @author Igor Fedorenko
  */
 public interface IMavenProjectVisitor2 extends IMavenProjectVisitor {
 

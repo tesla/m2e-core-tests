@@ -38,85 +38,90 @@ import org.maven.ide.eclipse.project.ResolverConfiguration;
  * @author Eugene Kuleshov
  */
 public class MavenProjectPreferencePage extends PropertyPage {
-
+  private Button skipMavenCompilerButton;
   private Button resolveWorspaceProjectsButton;
-	private Button includeModulesButton;
-	
-	private Text goalsCleanText;
-	private Text goalsChangedText;
-	private Text activeProfilesText;
+  private Button includeModulesButton;
+  
+  private Text goalsCleanText;
+  private Text goalsChangedText;
+  private Text activeProfilesText;
 
-	public MavenProjectPreferencePage() {
-	  setTitle("Maven");
+  public MavenProjectPreferencePage() {
+    setTitle("Maven");
     setDescription("Maven project configuration:");
-	}
+  }
 
   protected Control createContents(Composite parent) {
-  	Composite composite = new Composite(parent, SWT.NONE);
-  	composite.setLayout(new GridLayout(2, false));
-  	composite.setLayoutData(new GridData(GridData.FILL));
+    Composite composite = new Composite(parent, SWT.NONE);
+    composite.setLayout(new GridLayout(2, false));
+    composite.setLayoutData(new GridData(GridData.FILL));
 
-  	Label profilesLabel = new Label(composite, SWT.NONE);
-  	profilesLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
-  	profilesLabel.setText("Active Maven &Profiles (comma separated):");
+    Label profilesLabel = new Label(composite, SWT.NONE);
+    profilesLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
+    profilesLabel.setText("Active Maven &Profiles (comma separated):");
 
-  	activeProfilesText = new Text(composite, SWT.BORDER);
-  	activeProfilesText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+    activeProfilesText = new Text(composite, SWT.BORDER);
+    activeProfilesText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 
-  	Label goalsCleanLabel = new Label(composite, SWT.NONE);
-  	goalsCleanLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-  	goalsCleanLabel.setText("Goals to invoke after project clea&n:");
+    Label goalsCleanLabel = new Label(composite, SWT.NONE);
+    goalsCleanLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+    goalsCleanLabel.setText("Goals to invoke after project clea&n:");
 
-  	goalsCleanText = new Text(composite, SWT.BORDER);
-  	goalsCleanText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    goalsCleanText = new Text(composite, SWT.BORDER);
+    goalsCleanText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-  	Button selectGoalsCleanButton = new Button(composite, SWT.NONE);
-  	selectGoalsCleanButton.setLayoutData(new GridData());
-  	selectGoalsCleanButton.setText("&Select...");
+    Button selectGoalsCleanButton = new Button(composite, SWT.NONE);
+    selectGoalsCleanButton.setLayoutData(new GridData());
+    selectGoalsCleanButton.setText("&Select...");
     selectGoalsCleanButton.addSelectionListener(new MavenGoalSelectionAdapter(goalsCleanText, getShell()));
-  	
-  	final Label goalsChangedLabel = new Label(composite, SWT.NONE);
-  	goalsChangedLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-  	goalsChangedLabel.setText("&Goals to invoke on resource changes:");
     
-  	goalsChangedText = new Text(composite, SWT.SINGLE | SWT.BORDER);
-  	goalsChangedText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    final Label goalsChangedLabel = new Label(composite, SWT.NONE);
+    goalsChangedLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+    goalsChangedLabel.setText("&Goals to invoke on resource changes:");
     
-  	final Button selectGoalsChangedButton = new Button(composite, SWT.NONE);
-  	selectGoalsChangedButton.setText("S&elect...");
-  	selectGoalsChangedButton.addSelectionListener(new MavenGoalSelectionAdapter(goalsChangedText, getShell()));
+    goalsChangedText = new Text(composite, SWT.SINGLE | SWT.BORDER);
+    goalsChangedText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    
+    final Button selectGoalsChangedButton = new Button(composite, SWT.NONE);
+    selectGoalsChangedButton.setText("S&elect...");
+    selectGoalsChangedButton.addSelectionListener(new MavenGoalSelectionAdapter(goalsChangedText, getShell()));
 
-  	final Label warningLabel = new Label(composite, SWT.NONE);
-  	warningLabel.setText("Note that these goals can affect incremental build performance");
-  	warningLabel.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_BLUE));
-  	GridData warningLabelData = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
-  	warningLabelData.horizontalIndent = 12;
-  	warningLabel.setLayoutData(warningLabelData);
+    final Label warningLabel = new Label(composite, SWT.NONE);
+    warningLabel.setText("Note that these goals can affect incremental build performance");
+    warningLabel.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_BLUE));
+    GridData warningLabelData = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
+    warningLabelData.horizontalIndent = 12;
+    warningLabel.setLayoutData(warningLabelData);
 
-  	resolveWorspaceProjectsButton = new Button(composite, SWT.CHECK);
-  	GridData resolveWorspaceProjectsButtonData = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
-  	resolveWorspaceProjectsButtonData.verticalIndent = 7;
-  	resolveWorspaceProjectsButton.setLayoutData(resolveWorspaceProjectsButtonData);
-  	resolveWorspaceProjectsButton.setText("Resolve dependencies from &Workspace projects");
+    skipMavenCompilerButton = new Button(composite, SWT.CHECK);
+    skipMavenCompilerButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
+    skipMavenCompilerButton.setData("name", "skipMavenCompilerButton");
+    skipMavenCompilerButton.setText("Skip Maven compiler plugin when processing resources (recommended)");
 
-  	includeModulesButton = new Button(composite, SWT.CHECK);
-  	includeModulesButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
-  	includeModulesButton.setText("Include &Modules");
+    resolveWorspaceProjectsButton = new Button(composite, SWT.CHECK);
+    GridData resolveWorspaceProjectsButtonData = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
+    resolveWorspaceProjectsButtonData.verticalIndent = 7;
+    resolveWorspaceProjectsButton.setLayoutData(resolveWorspaceProjectsButtonData);
+    resolveWorspaceProjectsButton.setText("Resolve dependencies from &Workspace projects");
 
-  	Text includeModulesText = new Text(composite, SWT.WRAP | SWT.READ_ONLY | SWT.MULTI);
-  	includeModulesText.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_BLUE));
-  	GridData gd_includeModulesText = new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1);
-  	gd_includeModulesText.horizontalIndent = 12;
-  	gd_includeModulesText.widthHint = 300;
-  	includeModulesText.setLayoutData(gd_includeModulesText);
-  	includeModulesText.setText("When enabled, dependencies from all nested modules "
+    includeModulesButton = new Button(composite, SWT.CHECK);
+    includeModulesButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
+    includeModulesButton.setText("Include &Modules");
+
+    Text includeModulesText = new Text(composite, SWT.WRAP | SWT.READ_ONLY | SWT.MULTI);
+    includeModulesText.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_BLUE));
+    GridData gd_includeModulesText = new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1);
+    gd_includeModulesText.horizontalIndent = 12;
+    gd_includeModulesText.widthHint = 300;
+    includeModulesText.setLayoutData(gd_includeModulesText);
+    includeModulesText.setText("When enabled, dependencies from all nested modules "
         + "are added to the \"Maven Dependencies\" container and "
         + "source folders from nested modules are added to the current "
         + "project build path (use \"Update Sources\" action)");
 
     init(getResolverConfiguration());
     
-  	return composite;
+    return composite;
   }
 
   protected void performDefaults() {
@@ -124,6 +129,7 @@ public class MavenProjectPreferencePage extends PropertyPage {
   }
   
   private void init(ResolverConfiguration configuration) {
+    skipMavenCompilerButton.setSelection(configuration.isSkipCompiler());
     resolveWorspaceProjectsButton.setSelection(configuration.shouldResolveWorkspaceProjects());
     includeModulesButton.setSelection(configuration.shouldIncludeModules());
 
@@ -132,34 +138,36 @@ public class MavenProjectPreferencePage extends PropertyPage {
     activeProfilesText.setText(configuration.getActiveProfiles());
   }
 
-	public boolean performOk() {
-	  final IProject project = getProject();
-	  try {
-	    if(!project.isAccessible() || !project.hasNature(IMavenConstants.NATURE_ID)) {
-	      return true;
-	    }
-	  } catch(CoreException ex) {
-	    MavenLogger.log(ex);
-	    return false;
-	  }
+  public boolean performOk() {
+    final IProject project = getProject();
+    try {
+      if(!project.isAccessible() || !project.hasNature(IMavenConstants.NATURE_ID)) {
+        return true;
+      }
+    } catch(CoreException ex) {
+      MavenLogger.log(ex);
+      return false;
+    }
 
-	  final ResolverConfiguration configuration = getResolverConfiguration();
-	  if(configuration.getActiveProfiles().equals(activeProfilesText.getText()) &&
-	      configuration.getFullBuildGoals().equals(goalsCleanText.getText()) &&
-	      configuration.getResourceFilteringGoals().equals(goalsChangedText.getText()) &&
-	      configuration.shouldIncludeModules()==includeModulesButton.getSelection() &&
-	      configuration.shouldResolveWorkspaceProjects()==resolveWorspaceProjectsButton.getSelection()) {
-	    return true;
-	  }
-	  
-	  configuration.setResolveWorkspaceProjects(resolveWorspaceProjectsButton.getSelection());
-	  configuration.setIncludeModules(includeModulesButton.getSelection());
-	  
-	  configuration.setFullBuildGoals(goalsCleanText.getText());
-	  configuration.setResourceFilteringGoals(goalsChangedText.getText());
-	  configuration.setActiveProfiles(activeProfilesText.getText());
-	  
-	  MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
+    final ResolverConfiguration configuration = getResolverConfiguration();
+    if(configuration.getActiveProfiles().equals(activeProfilesText.getText()) &&
+        configuration.getFullBuildGoals().equals(goalsCleanText.getText()) &&
+        configuration.getResourceFilteringGoals().equals(goalsChangedText.getText()) &&
+        configuration.shouldIncludeModules()==includeModulesButton.getSelection() &&
+        configuration.shouldResolveWorkspaceProjects()==resolveWorspaceProjectsButton.getSelection() &&
+        configuration.isSkipCompiler()==skipMavenCompilerButton.getSelection()) {
+      return true;
+    }
+    
+    configuration.setSkipCompiler(skipMavenCompilerButton.getSelection());
+    configuration.setResolveWorkspaceProjects(resolveWorspaceProjectsButton.getSelection());
+    configuration.setIncludeModules(includeModulesButton.getSelection());
+    
+    configuration.setFullBuildGoals(goalsCleanText.getText());
+    configuration.setResourceFilteringGoals(goalsChangedText.getText());
+    configuration.setActiveProfiles(activeProfilesText.getText());
+    
+    MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
     boolean isSet = projectManager.setResolverConfiguration(getProject(), configuration);
     if(isSet) {
       
@@ -189,7 +197,7 @@ public class MavenProjectPreferencePage extends PropertyPage {
     }
     
     return isSet;
-	}
+  }
 
   private ResolverConfiguration getResolverConfiguration() {
     MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();

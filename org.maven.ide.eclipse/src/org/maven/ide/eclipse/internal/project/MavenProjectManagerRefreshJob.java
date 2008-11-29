@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
@@ -32,6 +33,7 @@ import org.eclipse.ui.progress.IProgressConstants;
 
 import org.maven.ide.eclipse.actions.OpenMavenConsoleAction;
 import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
@@ -49,11 +51,15 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
   private final MavenProjectManagerImpl manager;
   
   private final MavenRuntimeManager runtimeManager;
+
+  private final MavenConsole console;
   
-  public MavenProjectManagerRefreshJob(MavenProjectManagerImpl manager, MavenRuntimeManager runtimeManager) {
+  public MavenProjectManagerRefreshJob(MavenProjectManagerImpl manager, //
+      MavenRuntimeManager runtimeManager, MavenConsole console) {
     super("Updating Maven Dependencies");
     this.manager = manager;
     this.runtimeManager = runtimeManager;
+    this.console = console;
     setRule(new SchedulingRule(true));
     setProperty(IProgressConstants.ACTION_PROPERTY, new OpenMavenConsoleAction());
   }
@@ -101,6 +107,9 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
       
     } catch(CoreException ex) {
       MavenLogger.log(ex);
+      
+    } catch(OperationCanceledException ex) {
+      console.logMessage("Refreshing Maven model is canceled");
       
     } catch(Exception ex) {
       MavenLogger.log(ex.getMessage(), ex);
@@ -158,17 +167,20 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
         }
       }
       
+      // XXX consider to run refresh in offline mode when it is triggered by resource change
       if(!removeProjects.isEmpty()) {
         IProject[] projects = removeProjects.toArray(new IProject[removeProjects.size()]);
         MavenUpdateRequest updateRequest = new MavenUpdateRequest(projects, offline, updateSnapshots);
         updateRequest.setForce(false);
         queue(refreshQueue, new RemoveCommand(updateRequest));
+        console.logMessage("Refreshing " + updateRequest.toString());
       }
       if(!refreshProjects.isEmpty()) {
         IProject[] projects = refreshProjects.toArray(new IProject[refreshProjects.size()]);
         MavenUpdateRequest updateRequest = new MavenUpdateRequest(projects, offline, updateSnapshots);
         updateRequest.setForce(false);
         queue(refreshQueue, new RefreshCommand(updateRequest));
+        console.logMessage("Refreshing " + updateRequest.toString());
       }
     }
 

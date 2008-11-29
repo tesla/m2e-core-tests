@@ -153,7 +153,7 @@ public class EmbedderFactory {
     };
   }
 
-  public static MavenExecutionRequest createMavenExecutionRequest(MavenEmbedder embedder, boolean offline, boolean debug) {
+  public static MavenExecutionRequest createMavenExecutionRequest(boolean offline, boolean debug) {
     DefaultMavenExecutionRequest request = new DefaultMavenExecutionRequest();
 
     request.setOffline(offline);
