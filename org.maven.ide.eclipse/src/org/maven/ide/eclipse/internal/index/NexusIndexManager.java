@@ -253,8 +253,8 @@ public class NexusIndexManager extends IndexManager {
     Map<String, IndexedArtifact> result = new TreeMap<String, IndexedArtifact>();
 
     try {
-      IndexingContext context = getIndexingContext(indexName);
       FlatSearchResponse response;
+      IndexingContext context = indexName == null ? null : getIndexingContext(indexName);
       if(context == null) {
         response = getIndexer().searchFlat(new FlatSearchRequest(query));
       } else {
