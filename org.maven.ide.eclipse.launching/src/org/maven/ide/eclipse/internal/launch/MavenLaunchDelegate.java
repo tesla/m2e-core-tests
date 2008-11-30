@@ -47,6 +47,7 @@ import org.maven.ide.eclipse.util.Util;
 public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaunchConstants {
 
   private static final String LAUNCHER_TYPE = "org.codehaus.classworlds.Launcher";
+  private static final String LAUNCH_M2CONF_FILE = "org.maven.ide.eclipse.internal.launch.M2_CONF";
   
   private MavenRuntime runtime;
   private MavenLauncherConfigurationHandler m2conf;
@@ -72,7 +73,7 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
       File dir = new File(state, "launches");
       dir.mkdirs();
       confFile = File.createTempFile("m2conf", ".tmp", dir);
-      confFile.deleteOnExit(); // TODO delete when execution stops
+      launch.setAttribute(LAUNCH_M2CONF_FILE, confFile.getCanonicalPath());
       OutputStream os = new FileOutputStream(confFile);
       try {
         m2conf.save(os);
@@ -96,8 +97,10 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
         
         IProcess[] processes = launch.getProcesses();
         if(processes!=null && processes.length>0) {
-          BackgroundResourceRefresher refresher = new BackgroundResourceRefresher(configuration, processes[0]);
+          BackgroundResourceRefresher refresher = new BackgroundResourceRefresher(configuration, launch);
           refresher.startBackgroundRefresh();
+        } else {
+          removeTempFiles(launch);
         }
       }
     };
@@ -282,6 +285,13 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
     return sb.toString();
   }
 
+  static void removeTempFiles(ILaunch launch) {
+    String m2confName = launch.getAttribute(LAUNCH_M2CONF_FILE);
+    if (m2confName != null) {
+      new File(m2confName).delete();
+    }
+  }
+
   /**
    * Refreshes resources as specified by a launch configuration, when 
    * an associated process terminates.
@@ -291,10 +301,12 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
   public static class BackgroundResourceRefresher implements IDebugEventSetListener  {
     final ILaunchConfiguration configuration;
     final IProcess process;
+    final ILaunch launch;
     
-    public BackgroundResourceRefresher(ILaunchConfiguration configuration, IProcess process) {
+    public BackgroundResourceRefresher(ILaunchConfiguration configuration, ILaunch launch) {
       this.configuration = configuration;
-      this.process = process;
+      this.process = launch.getProcesses()[0];
+      this.launch = launch;
     }
     
     /**
@@ -330,6 +342,8 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
      * Submits a job to do the refresh
      */
     protected void refresh() {
+      removeTempFiles(launch);
+
       Job job= new Job("Refreshing resources...") {
         public IStatus run(IProgressMonitor monitor) {
           try {
@@ -345,4 +359,5 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
     }
   }
 
+  
 }
