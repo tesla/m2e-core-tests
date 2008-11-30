@@ -68,9 +68,11 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
     runtime.createLauncherConfiguration(m2conf, new NullProgressMonitor());
 
     File state = MavenPlugin.getDefault().getStateLocation().toFile();
-    confFile = new File(state, configuration.getName() + "/m2.conf");
-    confFile.getParentFile().mkdirs();
     try {
+      File dir = new File(state, "launches");
+      dir.mkdirs();
+      confFile = File.createTempFile("m2conf", ".tmp", dir);
+      confFile.deleteOnExit(); // TODO delete when execution stops
       OutputStream os = new FileOutputStream(confFile);
       try {
         m2conf.save(os);

@@ -64,6 +64,9 @@ public class MavenLauncherConfigurationHandler implements IMavenLauncherConfigur
     BufferedWriter out = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
     out.write("main is " + mainType + " from " + mainRealm + "\n");
     for (Map.Entry<String, List<String>> realm : realms.entrySet()) {
+      if (isSpecialReal(realm.getKey())) {
+        continue;
+      }
       out.write("[" + realm.getKey() + "]\n");
       if (mainRealm.equals(realm.getKey())) {
         for (String entry : forcedEntries) {
@@ -75,6 +78,10 @@ public class MavenLauncherConfigurationHandler implements IMavenLauncherConfigur
       }
     }
     out.flush();
+  }
+
+  private boolean isSpecialReal(String realm) {
+    return LAUNCHER_REALM.equals(realm);
   }
 
   public String getMainReal() {
