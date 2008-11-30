@@ -22,7 +22,7 @@ import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.maven.ide.eclipse.core.MavenLogger;
-import org.maven.ide.eclipse.embedder.IMavenLauncherConfigurationCollector;
+import org.maven.ide.eclipse.embedder.IMavenLauncherConfiguration;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 
@@ -65,20 +65,21 @@ public class MavenEmbeddedRuntime implements MavenRuntime {
     return true;
   }
 
-  public void getMavenLauncherConfiguration(IMavenLauncherConfigurationCollector collector, IProgressMonitor monitor) throws CoreException {
+  public void createLauncherConfiguration(IMavenLauncherConfiguration collector, IProgressMonitor monitor) throws CoreException {
     collector.setMainType(MAVEN_EXECUTOR_CLASS, PLEXUS_CLASSWORLD_NAME);
-
-    collector.addRealm(PLEXUS_CLASSWORLD_NAME);
-    for(String entry : getClasspath()) {
+    
+    initClasspath(findMavenEmbedderBundle());
+    
+    collector.addRealm(IMavenLauncherConfiguration.LAUNCHER_REALM);
+    for(String entry : LAUNCHER_CLASSPATH) {
       collector.addArchiveEntry(entry);
     }
-  }
 
-  private String[] getClasspath() {
-    initClasspath(findMavenEmbedderBundle());
-
-    return CLASSPATH;
-  }
+    collector.addRealm(PLEXUS_CLASSWORLD_NAME);
+    for(String entry : CLASSPATH) {
+      collector.addArchiveEntry(entry);
+    }
+ }
 
   private static synchronized void initClasspath(Bundle bundle) {
     if(CLASSPATH == null) {
@@ -123,16 +124,6 @@ public class MavenEmbeddedRuntime implements MavenRuntime {
   
   public String toString() {
     return "Embedded";
-  }
-
-  public String[] getLauncherClasspath() {
-    initClasspath(findMavenEmbedderBundle());
-
-    return LAUNCHER_CLASSPATH;
-  }
-
-  public String getLauncherType() {
-    return LAUNCHER_TYPE;
   }
 
 }

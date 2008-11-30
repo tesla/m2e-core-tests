@@ -20,7 +20,7 @@ import java.util.Map;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.maven.ide.eclipse.embedder.IMavenLauncherConfigurationCollector;
+import org.maven.ide.eclipse.embedder.IMavenLauncherConfiguration;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 
 /**
@@ -28,7 +28,7 @@ import org.maven.ide.eclipse.project.IMavenProjectFacade;
  * 
  * @author Igor Fedorenko
  */
-public class MavenLauncherConfigurationHandler implements IMavenLauncherConfigurationCollector {
+public class MavenLauncherConfigurationHandler implements IMavenLauncherConfiguration {
 
   private String mainType;
   private String mainRealm;

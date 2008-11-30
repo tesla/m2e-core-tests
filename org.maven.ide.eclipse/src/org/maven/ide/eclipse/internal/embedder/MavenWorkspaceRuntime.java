@@ -19,7 +19,7 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.project.MavenProject;
 
 import org.maven.ide.eclipse.embedder.ArtifactKey;
-import org.maven.ide.eclipse.embedder.IMavenLauncherConfigurationCollector;
+import org.maven.ide.eclipse.embedder.IMavenLauncherConfiguration;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
@@ -63,7 +63,7 @@ public class MavenWorkspaceRuntime implements MavenRuntime {
     return projectManager.getMavenProject(MAVEN_DISTRIBUTION.getGroupId(), MAVEN_DISTRIBUTION.getArtifactId(), MAVEN_DISTRIBUTION.getVersion()) != null;
   }
 
-  public void getMavenLauncherConfiguration(IMavenLauncherConfigurationCollector collector, IProgressMonitor monitor) throws CoreException {
+  public void createLauncherConfiguration(IMavenLauncherConfiguration collector, IProgressMonitor monitor) throws CoreException {
     IMavenProjectFacade maven = projectManager.getMavenProject(MAVEN_DISTRIBUTION.getGroupId(), MAVEN_DISTRIBUTION.getArtifactId(), MAVEN_DISTRIBUTION.getVersion());
     if (maven != null) {
       MavenProject mavenProject = maven.getMavenProject(monitor);
@@ -74,58 +74,46 @@ public class MavenWorkspaceRuntime implements MavenRuntime {
 
       @SuppressWarnings("unchecked")
       Set<Artifact> artifacts = mavenProject.getArtifacts();
+      
+      Artifact launcherArtifact = null;
 
       for (Artifact artifact : artifacts) {
         if (Artifact.SCOPE_TEST.equals(artifact.getScope())) {
           continue;
         }
 
-        IMavenProjectFacade facade = projectManager.getMavenProject(artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion());
-
-        if (facade != null) {
-          collector.addProjectEntry(facade);
-        } else {
-          File file = artifact.getFile();
-          if (file != null) {
-            collector.addArchiveEntry(file.getAbsolutePath());
-          }
+        if (PLEXUS_CLASSWORLDS.getGroupId().equals(artifact.getGroupId()) && PLEXUS_CLASSWORLDS.getArtifactId().equals(artifact.getArtifactId())) {
+          launcherArtifact = artifact;
+          continue;
         }
-        
+
+        addArtifact(collector, artifact);
+      }
+      
+      if (launcherArtifact != null) {
+        collector.addRealm(IMavenLauncherConfiguration.LAUNCHER_REALM);
+        addArtifact(collector, launcherArtifact);
       }
     }
 
     // XXX throw something at the caller! 
+  }
+
+  private void addArtifact(IMavenLauncherConfiguration collector, Artifact artifact) throws CoreException {
+    IMavenProjectFacade facade = projectManager.getMavenProject(artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion());
+
+    if (facade != null) {
+      collector.addProjectEntry(facade);
+    } else {
+      File file = artifact.getFile();
+      if (file != null) {
+        collector.addArchiveEntry(file.getAbsolutePath());
+      }
+    }
   }
 
   public String toString() {
     return "Workspace";
-  }
-
-  public String[] getLauncherClasspath() {
-    IMavenProjectFacade maven = projectManager.getMavenProject(MAVEN_DISTRIBUTION.getGroupId(), MAVEN_DISTRIBUTION.getArtifactId(), MAVEN_DISTRIBUTION.getVersion());
-    if (maven != null) {
-      try {
-        MavenProject mavenProject;
-        mavenProject = maven.getMavenProject(new NullProgressMonitor());
-        @SuppressWarnings("unchecked")
-        Set<Artifact> artifacts = mavenProject.getArtifacts();
-        ArtifactKey key = PLEXUS_CLASSWORLDS;
-        for (Artifact artifact : artifacts) {
-          if (key.getGroupId().equals(artifact.getGroupId()) && key.getArtifactId().equals(artifact.getArtifactId())) {
-            return new String[] {artifact.getFile().getAbsolutePath()};
-          }
-        }
-      } catch(CoreException ex) {
-        // should not happen
-      }
-    }
-
-    // XXX throw something at the caller! 
-    return null;
-  }
-
-  public String getLauncherType() {
-    return LAUNCHER_TYPE;
   }
 
 }

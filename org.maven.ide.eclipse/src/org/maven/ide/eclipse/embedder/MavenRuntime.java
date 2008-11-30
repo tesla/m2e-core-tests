@@ -21,8 +21,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
  */
 public interface MavenRuntime {
   
-  public static final String LAUNCHER_TYPE = "org.codehaus.classworlds.Launcher";
-
   public abstract boolean isEditable();
 
   /**
@@ -31,16 +29,12 @@ public interface MavenRuntime {
    * Collector callback methods are invoked in the order corresponding
    * configuration elements are present in m2.conf file. 
    */
-  public abstract void getMavenLauncherConfiguration(IMavenLauncherConfigurationCollector collector, IProgressMonitor monitor) throws CoreException;
+  public abstract void createLauncherConfiguration(IMavenLauncherConfiguration collector, IProgressMonitor monitor) throws CoreException;
 
   public abstract String getLocation();
 
   public abstract String getSettings();
 
   public abstract boolean isAvailable();
-
-  public abstract String[] getLauncherClasspath();
-
-  public abstract String getLauncherType();
 
 }

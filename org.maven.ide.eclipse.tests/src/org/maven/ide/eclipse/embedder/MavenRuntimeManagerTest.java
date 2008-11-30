@@ -9,10 +9,14 @@
 package org.maven.ide.eclipse.embedder;
 
 import java.io.File;
-
-import org.maven.ide.eclipse.MavenPlugin;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 import junit.framework.TestCase;
+
+import org.eclipse.core.runtime.CoreException;
+import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.project.IMavenProjectFacade;
 
 
 /**
@@ -52,18 +56,19 @@ public class MavenRuntimeManagerTest extends TestCase {
 
   public void testDefaultRuntime() throws Exception {
     MavenRuntime runtime = runtimeManager.getDefaultRuntime();
-    assertNotNull(runtime.getMainTypeName());
     assertFalse(runtime.isEditable());
     assertTrue(runtime.isAvailable());
     assertEquals(MavenRuntimeManager.EMBEDDED, runtime.getLocation());
     assertNull(runtime.getSettings());
 
-    File location = new File(MavenPlugin.getDefault().getStateLocation().toFile(), "test");
-    assertEquals("", runtime.getOptions(location, new String[0]));
+    DummyLauncherConfig m2conf = new DummyLauncherConfig();
+    runtime.createLauncherConfiguration(m2conf, null);
+    
+    assertNotNull(m2conf.mainRealm);
+    assertNotNull(m2conf.mainType);
+    assertTrue(m2conf.realms.get(m2conf.mainRealm).size() > 0);
+    assertTrue(m2conf.realms.get(IMavenLauncherConfiguration.LAUNCHER_REALM).size() > 0);
 
-    assertTrue(runtime.getClasspath(null).length > 0);
-    assertTrue(runtime.getClasspath(new String[0]).length > 0);
-    assertTrue(runtime.getClasspath(new String[] {"foo.jar"}).length > 0);
     assertTrue(runtime.equals(runtime));
     assertFalse(runtime.equals(null));
     assertTrue(runtime.hashCode()!=0);
@@ -71,19 +76,21 @@ public class MavenRuntimeManagerTest extends TestCase {
   }
 
   public void testExternalRuntime() throws Exception {
-    MavenRuntime runtime = MavenRuntime.createExternalRuntime("testRuntime");
-    assertNotNull(runtime.getMainTypeName());
+    String location = new File("resources/testRuntime").getCanonicalPath();
+    MavenRuntime runtime = MavenRuntimeManager.createExternalRuntime(location);
     assertTrue(runtime.isEditable());
     assertFalse(runtime.isAvailable()); // runtime from non-existing folder
-    assertEquals("testRuntime", runtime.getLocation());
+    assertEquals(location, runtime.getLocation());
     assertNotNull(runtime.getSettings());
 
-    File location = new File(MavenPlugin.getDefault().getStateLocation().toFile(), "test");
-    assertTrue(runtime.getOptions(location, new String[] {"foo.jar"}).length() > 0);
+    DummyLauncherConfig m2conf = new DummyLauncherConfig();
+    runtime.createLauncherConfiguration(m2conf, null);
 
-    assertTrue(runtime.getClasspath(null).length == 0);
-    assertTrue(runtime.getClasspath(new String[0]).length == 0);
-    assertTrue(runtime.getClasspath(new String[] {"foo.jar"}).length == 0);
+    assertNotNull(m2conf.mainRealm);
+    assertNotNull(m2conf.mainType);
+    assertTrue(m2conf.realms.get(m2conf.mainRealm).size() == 0);
+    assertTrue(m2conf.realms.get(IMavenLauncherConfiguration.LAUNCHER_REALM).size() == 1);
+
     assertTrue(runtime.equals(runtime));
     assertFalse(runtime.equals(null));
     assertFalse(runtime.equals(runtimeManager.getDefaultRuntime()));
@@ -91,4 +98,29 @@ public class MavenRuntimeManagerTest extends TestCase {
     assertTrue(runtime.toString().startsWith("External"));
   }
 
+  static class DummyLauncherConfig implements IMavenLauncherConfiguration {
+    
+    public String mainType;
+    public String mainRealm;
+    public LinkedHashMap<String, ArrayList<String>> realms = new LinkedHashMap<String, ArrayList<String>>();
+    public ArrayList<String> curRealm;
+    
+    public void addArchiveEntry(String entry) throws CoreException {
+      curRealm.add(entry);
+    }
+
+    public void addProjectEntry(IMavenProjectFacade facade) {
+      curRealm.add(facade.getProject().getName());
+    }
+
+    public void addRealm(String realm) {
+      curRealm = new ArrayList<String>();
+      realms.put(realm, curRealm);
+    }
+
+    public void setMainType(String type, String realm) {
+      this.mainType = type;
+      this.mainRealm = realm;
+    }
+  }
 }

@@ -28,7 +28,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
-import org.maven.ide.eclipse.embedder.IMavenLauncherConfigurationCollector;
+import org.maven.ide.eclipse.embedder.IMavenLauncherConfiguration;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
@@ -73,7 +73,7 @@ public class MavenLaunchUtils {
     }
   }
 
-  public static void addUserComponents(ILaunchConfiguration configuration, IMavenLauncherConfigurationCollector collector) throws CoreException {
+  public static void addUserComponents(ILaunchConfiguration configuration, IMavenLauncherConfiguration collector) throws CoreException {
     @SuppressWarnings("unchecked")
     List<String> list = configuration.getAttribute(MavenLaunchConstants.ATTR_FORCED_COMPONENTS_LIST, new ArrayList());
     if(list == null) {

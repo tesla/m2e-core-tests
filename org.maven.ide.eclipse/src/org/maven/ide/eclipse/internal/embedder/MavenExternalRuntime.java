@@ -25,7 +25,7 @@ import org.eclipse.core.runtime.Status;
 import org.codehaus.plexus.util.DirectoryScanner;
 
 import org.maven.ide.eclipse.core.IMavenConstants;
-import org.maven.ide.eclipse.embedder.IMavenLauncherConfigurationCollector;
+import org.maven.ide.eclipse.embedder.IMavenLauncherConfiguration;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
 
 /**
@@ -70,7 +70,10 @@ public class MavenExternalRuntime implements MavenRuntime {
     return new File(location, "bin/m2.conf");
   }
 
-  public void getMavenLauncherConfiguration(final IMavenLauncherConfigurationCollector collector, IProgressMonitor monitor) throws CoreException {
+  public void createLauncherConfiguration(final IMavenLauncherConfiguration collector, IProgressMonitor monitor) throws CoreException {
+    
+    collector.addRealm(IMavenLauncherConfiguration.LAUNCHER_REALM);
+    collector.addArchiveEntry(getLauncherClasspath());
     
     ConfigurationHandler handler = new ConfigurationHandler() {
       public void addImportFrom(String relamName, String importSpec) throws ConfigurationException {
@@ -142,7 +145,7 @@ public class MavenExternalRuntime implements MavenRuntime {
     }
   }
 
-  public String[] getLauncherClasspath() {
+  private String getLauncherClasspath() {
     File mavenHome = new File(location);
     DirectoryScanner ds = new DirectoryScanner();
     ds.setBasedir(mavenHome);
@@ -155,13 +158,9 @@ public class MavenExternalRuntime implements MavenRuntime {
     String[] includedFiles = ds.getIncludedFiles();
 
     if (includedFiles.length == 1) {
-      return new String[] {new File(mavenHome, includedFiles[0]).getAbsolutePath()};
+      return new File(mavenHome, includedFiles[0]).getAbsolutePath();
     }
 
     return null;
-  }
-
-  public String getLauncherType() {
-    return LAUNCHER_TYPE;
   }
 }

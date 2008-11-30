@@ -17,9 +17,14 @@ import org.maven.ide.eclipse.project.IMavenProjectFacade;
  *
  * @author Igor Fedorenko
  * 
- * @see MavenRuntime#
+ * @see MavenRuntime#createLauncherConfiguration
  */
-public interface IMavenLauncherConfigurationCollector {
+public interface IMavenLauncherConfiguration {
+
+  /**
+   * Special realm name used for launcher classpath entries. 
+   */
+  public static final String LAUNCHER_REALM = "]laucnher";
 
   public void setMainType(String type, String realm);
 

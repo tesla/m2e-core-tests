@@ -36,7 +36,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.embedder.IMavenLauncherConfigurationCollector;
+import org.maven.ide.eclipse.embedder.IMavenLauncherConfiguration;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
@@ -73,7 +73,7 @@ public class MavenSourcePathComputer implements ISourcePathComputer {
     }
 
     MavenRuntime runtime = MavenLaunchUtils.getMavenRuntime(configuration);
-    IMavenLauncherConfigurationCollector collector = new IMavenLauncherConfigurationCollector() {
+    IMavenLauncherConfiguration collector = new IMavenLauncherConfiguration() {
       public void addArchiveEntry(String entry) throws CoreException {
         addArchiveRuntimeClasspathEntry(entries, entry);
       }
@@ -91,7 +91,7 @@ public class MavenSourcePathComputer implements ISourcePathComputer {
 
     collector.addArchiveEntry(MavenLaunchUtils.getCliResolver());
     MavenLaunchUtils.addUserComponents(configuration, collector);
-    runtime.getMavenLauncherConfiguration(collector, monitor);
+    runtime.createLauncherConfiguration(collector, monitor);
 
     IRuntimeClasspathEntry[] resolved = JavaRuntime.resolveSourceLookupPath( //
         entries.toArray(new IRuntimeClasspathEntry[entries.size()]), configuration);

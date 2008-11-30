@@ -37,6 +37,7 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.embedder.IMavenLauncherConfiguration;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.util.Util;
@@ -45,12 +46,41 @@ import org.maven.ide.eclipse.util.Util;
 @SuppressWarnings("restriction")
 public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaunchConstants {
 
+  private static final String LAUNCHER_TYPE = "org.codehaus.classworlds.Launcher";
+  
+  private MavenRuntime runtime;
+  private MavenLauncherConfigurationHandler m2conf;
+  private File confFile;
+
   public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor)
       throws CoreException {
     MavenConsole console = MavenPlugin.getDefault().getConsole();
     console.logMessage("" + getWorkingDirectory(configuration));
     console.logMessage(" mvn" + getProgramArguments(configuration));
 
+    runtime = MavenLaunchUtils.getMavenRuntime(configuration);
+
+    m2conf = new MavenLauncherConfigurationHandler();
+    if (shouldResolveWorkspaceArtifacts(configuration)) {
+      m2conf.addArchiveEntry(MavenLaunchUtils.getCliResolver());
+    }
+    MavenLaunchUtils.addUserComponents(configuration, m2conf);
+    runtime.createLauncherConfiguration(m2conf, new NullProgressMonitor());
+
+    File state = MavenPlugin.getDefault().getStateLocation().toFile();
+    confFile = new File(state, configuration.getName() + "/m2.conf");
+    confFile.getParentFile().mkdirs();
+    try {
+      OutputStream os = new FileOutputStream(confFile);
+      try {
+        m2conf.save(os);
+      } finally {
+        os.close();
+      }
+    } catch (IOException e) {
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Can't create m2.conf ", e));
+    }
+    
     super.launch(configuration, mode, launch, monitor);
   }
 
@@ -72,13 +102,12 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
   }
 
   public String getMainTypeName(ILaunchConfiguration configuration) throws CoreException {
-    MavenRuntime runtime = MavenLaunchUtils.getMavenRuntime(configuration);
-    return runtime.getLauncherType();
+    return LAUNCHER_TYPE;
   }
 
   public String[] getClasspath(ILaunchConfiguration configuration) throws CoreException {
-    MavenRuntime runtime = MavenLaunchUtils.getMavenRuntime(configuration);
-    return runtime.getLauncherClasspath();
+    List<String> cp = m2conf.getRealmEntries(IMavenLauncherConfiguration.LAUNCHER_REALM);
+    return cp.toArray(new String[cp.size()]);
   }
 
   public String getProgramArguments(ILaunchConfiguration configuration) throws CoreException {
@@ -99,17 +128,12 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
     * </pre>
     */
 
-    MavenRuntime runtime = MavenLaunchUtils.getMavenRuntime(configuration);
-
-    MavenLauncherConfigurationHandler m2conf = new MavenLauncherConfigurationHandler();
-
     StringBuffer sb = new StringBuffer();
 
     // workspace artifact resolution
     if (shouldResolveWorkspaceArtifacts(configuration)) {
       File state = MavenPlugin.getDefault().getMavenProjectManager().getWorkspaceStateFile();
       sb.append("-Dm2eclipse.workspace.state=").append(quote(state.getAbsolutePath()));
-      m2conf.addArchiveEntry(MavenLaunchUtils.getCliResolver());
     }
 
     // maven.home
@@ -119,21 +143,6 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
     }
 
     // m2.conf
-    MavenLaunchUtils.addUserComponents(configuration, m2conf);
-    runtime.getMavenLauncherConfiguration(m2conf, new NullProgressMonitor());
-    File state = MavenPlugin.getDefault().getStateLocation().toFile();
-    File confFile = new File(state, configuration.getName() + "/m2.conf");
-    confFile.getParentFile().mkdirs();
-    try {
-      OutputStream os = new FileOutputStream(confFile);
-      try {
-        m2conf.save(os);
-      } finally {
-        os.close();
-      }
-    } catch (IOException e) {
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Can't create m2.conf ", e));
-    }
     sb.append(" -Dclassworlds.conf=").append(quote(confFile.getAbsolutePath()));
 
     // user configured entries
