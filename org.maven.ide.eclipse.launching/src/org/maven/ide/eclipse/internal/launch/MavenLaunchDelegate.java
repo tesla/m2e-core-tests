@@ -98,7 +98,7 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
         IProcess[] processes = launch.getProcesses();
         if(processes!=null && processes.length>0) {
           BackgroundResourceRefresher refresher = new BackgroundResourceRefresher(configuration, launch);
-          refresher.startBackgroundRefresh();
+          refresher.init();
         } else {
           removeTempFiles(launch);
         }
@@ -314,10 +314,10 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
      * immediately in the current thread. Otherwise, refreshing is done when the
      * process terminates.
      */
-    public void startBackgroundRefresh() {
+    public void init() {
       synchronized (process) {
         if (process.isTerminated()) {
-          refresh();
+          processResources();
         } else {
           DebugPlugin.getDefault().addDebugEventListener(this);
         }
@@ -332,19 +332,16 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
         DebugEvent event = events[i];
         if (event.getSource() == process && event.getKind() == DebugEvent.TERMINATE) {
           DebugPlugin.getDefault().removeDebugEventListener(this);
-          refresh();
+          processResources();
           break;
         }
       }
     }
     
-    /**
-     * Submits a job to do the refresh
-     */
-    protected void refresh() {
+    protected void processResources() {
       removeTempFiles(launch);
 
-      Job job= new Job("Refreshing resources...") {
+      Job job = new Job("Refreshing resources...") {
         public IStatus run(IProgressMonitor monitor) {
           try {
             RefreshTab.refreshResources(configuration, monitor);
