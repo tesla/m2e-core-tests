@@ -1,9 +1,21 @@
+/*******************************************************************************
+ * Copyright (c) 2008 Sonatype, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *******************************************************************************/
+
 package org.maven.ide.eclipse.internal.embedder;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.FileInputStream;
+import java.net.URL;
+import java.util.Properties;
+
+import copy.org.codehaus.plexus.classworlds.launcher.ConfigurationException;
+import copy.org.codehaus.plexus.classworlds.launcher.ConfigurationHandler;
+import copy.org.codehaus.plexus.classworlds.launcher.ConfigurationParser;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -13,24 +25,22 @@ import org.eclipse.core.runtime.Status;
 import org.codehaus.plexus.util.DirectoryScanner;
 
 import org.maven.ide.eclipse.core.IMavenConstants;
-import org.maven.ide.eclipse.embedder.IClasspathCollector;
+import org.maven.ide.eclipse.embedder.IMavenLauncherConfigurationCollector;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
 
 /**
  * Maven external runtime using ClassWorlds launcher
  * 
- * <pre>
- * %MAVEN_JAVA_EXE% %MAVEN_OPTS% 
- *   -classpath %CLASSWORLDS_JAR% 
- *   "-Dclassworlds.conf=%M2_HOME%\bin\m2.conf" 
- *   "-Dmaven.home=%M2_HOME%" 
- *   org.codehaus.classworlds.Launcher 
- *   %MAVEN_CMD_LINE_ARGS%
- * </pre>
+ * @author Eugene Kuleshov
+ * @author Igor Fedorenko
+ * 
  */
-public class MavenExternalRuntime extends MavenRuntime {
+public class MavenExternalRuntime implements MavenRuntime {
+
+  private static final String PROPERTY_MAVEN_HOME = "maven.home";
 
   private final String location;
+  
 
   public MavenExternalRuntime(String location) {
     this.location = location;
@@ -41,7 +51,7 @@ public class MavenExternalRuntime extends MavenRuntime {
   }
 
   public boolean isAvailable() {
-    return new File(location, "bin").exists();
+    return new File(location, "bin").exists() && getLauncherClasspath() != null;
   }
   
   public String getLocation() {
@@ -56,64 +66,58 @@ public class MavenExternalRuntime extends MavenRuntime {
     return "org.codehaus.classworlds.Launcher";
   }
 
-  public String getOptions(File tmpfolder, String[] forcedComponents) throws CoreException {
-    String m2conf = location + File.separator + "bin" + File.separator + "m2.conf";
-    if (forcedComponents != null && forcedComponents.length > 0) {
-      try {
-        if(!tmpfolder.exists()) {
-          if(!tmpfolder.mkdirs()) {
-            throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
-                "Can't create temporary folder " + tmpfolder, null));
-          }
-        }
-        m2conf = new File(tmpfolder, "m2.conf").getCanonicalPath();
-        BufferedWriter out = new BufferedWriter(new FileWriter(m2conf));
+  private File getLauncherConfigurationFile() {
+    return new File(location, "bin/m2.conf");
+  }
+
+  public void getMavenLauncherConfiguration(final IMavenLauncherConfigurationCollector collector, IProgressMonitor monitor) throws CoreException {
+    
+    ConfigurationHandler handler = new ConfigurationHandler() {
+      public void addImportFrom(String relamName, String importSpec) throws ConfigurationException {
+        throw new ConfigurationException("Unsupported m2.conf element");
+      }
+      public void addLoadFile(File file) {
         try {
-          out.write("main is org.apache.maven.cli.MavenCli from plexus.core\n");
-          // we always set maven.home
-//          out.write("set maven.home default ${user.home}/m2\n");
-          out.write("[plexus.core]\n");
-          for (int i = 0; i < forcedComponents.length; i++) {
-            out.write("load " + forcedComponents[i] + "\n");
-          }
-          out.write("load ${maven.home}/lib/*.jar\n");
-        } finally {
-          out.close();
+          collector.addArchiveEntry(file.getAbsolutePath());
+        } catch(CoreException ex) {
+          throw new ExceptionWrapper(ex);
         }
-      } catch (IOException ex) {
-        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, ex.getMessage(), ex));
       }
-    }
-    StringBuffer sb = new StringBuffer();
-    sb.append(" ").append(quote("-Dclassworlds.conf=" + m2conf));
-    sb.append(" ").append(quote("-Dmaven.home=" + location));
-    return sb.toString();
-  }
-
-  private String quote(String string) {
-    return string.indexOf(' ')>-1 ? "\"" + string + "\"" : string;
-  }
-
-  public String[] getClasspath(String[] forcedComponents) {
-    if(isAvailable()) {
-      File mavenHome = new File(location);
-      DirectoryScanner ds = new DirectoryScanner();
-      ds.setBasedir(mavenHome);
-      ds.setIncludes(new String[] {
-          "core/boot/classworlds*.jar", // 2.0.4
-          "boot/classworlds*.jar", // 2.0.7
-          "boot/plexus-classworlds*.jar", // 2.1 as of 2008-03-27
-      });
-      ds.scan();
-      String[] includedFiles = ds.getIncludedFiles();
-
-      if (includedFiles.length == 1) {
-        return new String[] {new File(mavenHome, includedFiles[0]).getAbsolutePath()};
+      public void addLoadURL(URL url) {
+        try {
+          collector.addArchiveEntry(url.toExternalForm());
+        } catch(CoreException ex) {
+          throw new ExceptionWrapper(ex);
+        }
       }
+      public void addRealm(String realmName) {
+        collector.addRealm(realmName);
+      }
+      public void setAppMain(String mainClassName, String mainRealmName) {
+        collector.setMainType(mainClassName, mainRealmName);
+      }
+    };
+
+    Properties properties = new Properties();
+    properties.put(PROPERTY_MAVEN_HOME, location);
+
+    ConfigurationParser parser = new ConfigurationParser(handler, properties);
+    
+    try {
+      FileInputStream is = new FileInputStream(getLauncherConfigurationFile());
+      try {
+        parser.parse(is);
+      } finally {
+        is.close();
+      }
+    } catch (Exception e) {
+      if (e instanceof ExceptionWrapper && e.getCause() instanceof CoreException) {
+        throw (CoreException) e.getCause();
+      }
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Can't parse m2.conf", e));
     }
 
     // XXX show error dialog and fail launch
-    return new String[0];
   }
 
   public boolean equals(Object o) {
@@ -131,9 +135,33 @@ public class MavenExternalRuntime extends MavenRuntime {
     return "External" + " " + location;
   }
 
-  public void getSourcePath(IClasspathCollector collector, IProgressMonitor monitor) throws CoreException {
-    // TODO Auto-generated method getSourcePath
-    
+  private static class ExceptionWrapper extends RuntimeException {
+    private static final long serialVersionUID = 8815818826909815028L;
+    public ExceptionWrapper(Exception cause) {
+      super(cause);
+    }
   }
-  
+
+  public String[] getLauncherClasspath() {
+    File mavenHome = new File(location);
+    DirectoryScanner ds = new DirectoryScanner();
+    ds.setBasedir(mavenHome);
+    ds.setIncludes(new String[] {
+        "core/boot/classworlds*.jar", // 2.0.4
+        "boot/classworlds*.jar", // 2.0.7
+        "boot/plexus-classworlds*.jar", // 2.1 as of 2008-03-27
+    });
+    ds.scan();
+    String[] includedFiles = ds.getIncludedFiles();
+
+    if (includedFiles.length == 1) {
+      return new String[] {new File(mavenHome, includedFiles[0]).getAbsolutePath()};
+    }
+
+    return null;
+  }
+
+  public String getLauncherType() {
+    return LAUNCHER_TYPE;
+  }
 }

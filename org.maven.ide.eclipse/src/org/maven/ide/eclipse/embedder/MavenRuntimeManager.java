@@ -15,6 +15,7 @@ import java.util.Map;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import org.maven.ide.eclipse.internal.embedder.MavenExternalRuntime;
 import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;
 
 /**
@@ -134,7 +135,7 @@ public class MavenRuntimeManager {
     if(runtimesPreference!=null && runtimesPreference.length()>0) {
       String[] locations = runtimesPreference.split("\\|");
       for(int i = 0; i < locations.length; i++ ) {
-        MavenRuntime runtime = MavenRuntime.createExternalRuntime(locations[i]);
+        MavenRuntime runtime = createExternalRuntime(locations[i]);
         runtimes.put(runtime.getLocation(), runtime);
         if(runtime.getLocation().equals(selected)) {
           defaultRuntime = runtime;
@@ -143,6 +144,10 @@ public class MavenRuntimeManager {
     }
   }
 
+  public static MavenRuntime createExternalRuntime(String location) {
+    return new MavenExternalRuntime(location);
+  }
+  
   public String getGlobalSettingsFile() {
 //  if(defaultRuntime.isEditable()) {
 //    return defaultRuntime.getSettings();  // settings for external Maven runtime

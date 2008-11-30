@@ -242,7 +242,7 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
         dlg.setMessage("Select Maven installation directory");
         String dir = dlg.open();
         if(dir != null) {
-          MavenRuntime runtime = MavenRuntime.createExternalRuntime(dir);
+          MavenRuntime runtime = MavenRuntimeManager.createExternalRuntime(dir);
           if(runtimes.contains(runtime)) {
             MessageDialog.openError(getShell(), "Maven Install", "Selected Maven install is already registered");
           } else {
@@ -267,7 +267,7 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
         dlg.setFilterPath(runtime.getLocation());
         String dir = dlg.open();
         if(dir != null && !dir.equals(runtime.getLocation())) {
-          MavenRuntime newRuntime = MavenRuntime.createExternalRuntime(dir);
+          MavenRuntime newRuntime = MavenRuntimeManager.createExternalRuntime(dir);
           if(runtimes.contains(newRuntime)) {
             MessageDialog.openError(getShell(), "Maven Install", "Selected Maven install is already registered");
           } else {

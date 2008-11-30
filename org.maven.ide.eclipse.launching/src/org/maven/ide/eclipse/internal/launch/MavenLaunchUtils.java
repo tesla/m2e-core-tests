@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * Copyright (c) 2008 Sonatype, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *******************************************************************************/
+
 package org.maven.ide.eclipse.internal.launch;
 
 import java.io.File;
@@ -12,9 +20,6 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.embedder.MavenEmbedder;
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IStatus;
@@ -23,13 +28,18 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
-import org.maven.ide.eclipse.embedder.IClasspathCollector;
+import org.maven.ide.eclipse.embedder.IMavenLauncherConfigurationCollector;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 
+/**
+ * MavenLaunchUtils
+ * 
+ * @author Igor Fedorenko
+ */
 public class MavenLaunchUtils {
 
   public static MavenRuntime getMavenRuntime(ILaunchConfiguration configuration) throws CoreException {
@@ -47,39 +57,11 @@ public class MavenLaunchUtils {
     return configuration.getAttribute(MavenLaunchConstants.ATTR_RUNTIME, "");
   }
 
-  public static String[] getForcedComponents(ILaunchConfiguration configuration) throws CoreException {
-    final List<String> components = new ArrayList<String>();
-    
-    final IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-    IClasspathCollector collector = new IClasspathCollector() {
-      public void addArchiveEntry(String entry) throws CoreException {
-        components.add(entry);
-      }
-      public void addProjectEntry(IMavenProjectFacade facade) {
-        IFolder output = root.getFolder(facade.getOutputLocation());
-        if (output.isAccessible()) {
-          components.add(output.getLocation().toFile().getAbsolutePath());
-        }
-      }
-    };
-    
-    addForcedComponents(configuration, collector);
-    
-    return components.toArray(new String[components.size()]);
-  }
-
-  public static void addForcedComponents(ILaunchConfiguration configuration, IClasspathCollector collector) throws CoreException {
-    if (shouldResolveWorkspaceArtifacts(configuration)) {
-      collector.addArchiveEntry(getCliResolver());
-    }
-    addUserComponents(configuration, collector);
-  }
-  
   public static boolean shouldResolveWorkspaceArtifacts(ILaunchConfiguration configuration) throws CoreException {
     return configuration.getAttribute(MavenLaunchConstants.ATTR_WORKSPACE_RESOLUTION, false);
   }
 
-  private static String getCliResolver() throws CoreException {
+  public static String getCliResolver() throws CoreException {
     URL url = MavenPlugin.getDefault().getBundle().getEntry("org.maven.ide.eclipse.cliresolver.jar");
     try {
       URL fileURL = FileLocator.toFileURL(url);
@@ -91,13 +73,13 @@ public class MavenLaunchUtils {
     }
   }
 
-  private static void addUserComponents(ILaunchConfiguration configuration, IClasspathCollector collector) throws CoreException {
+  public static void addUserComponents(ILaunchConfiguration configuration, IMavenLauncherConfigurationCollector collector) throws CoreException {
     @SuppressWarnings("unchecked")
     List<String> list = configuration.getAttribute(MavenLaunchConstants.ATTR_FORCED_COMPONENTS_LIST, new ArrayList());
     if(list == null) {
       return;
     }
-    
+
     MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
     MavenEmbedderManager embedderManager = MavenPlugin.getDefault().getMavenEmbedderManager();
     for(String gav : list) {
@@ -130,10 +112,4 @@ public class MavenLaunchUtils {
       
     }
   }
-
-  public static String[] getClasspath(ILaunchConfiguration configuration) throws CoreException {
-    String[] forcedCompoStrings = getForcedComponents(configuration);
-    return getMavenRuntime(configuration).getClasspath(forcedCompoStrings);
-  }
-
 }

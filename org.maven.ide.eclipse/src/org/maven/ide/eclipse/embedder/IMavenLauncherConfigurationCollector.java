@@ -13,13 +13,19 @@ import org.eclipse.core.runtime.CoreException;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 
 /**
- * IClasspathCollector
+ * Receive notification of content of plexus configuration. 
  *
- * @author igor
+ * @author Igor Fedorenko
+ * 
+ * @see MavenRuntime#
  */
-public interface IClasspathCollector {
+public interface IMavenLauncherConfigurationCollector {
+
+  public void setMainType(String type, String realm);
+
+  public void addRealm(String realm);
 
   public void addProjectEntry(IMavenProjectFacade facade);
-  
+
   public void addArchiveEntry(String entry) throws CoreException;
 }

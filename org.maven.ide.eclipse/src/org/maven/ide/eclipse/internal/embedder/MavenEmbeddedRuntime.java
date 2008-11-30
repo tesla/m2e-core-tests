@@ -8,7 +8,6 @@
 
 package org.maven.ide.eclipse.internal.embedder;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -23,19 +22,25 @@ import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.maven.ide.eclipse.core.MavenLogger;
-import org.maven.ide.eclipse.embedder.IClasspathCollector;
+import org.maven.ide.eclipse.embedder.IMavenLauncherConfigurationCollector;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 
 /**
  * Embedded Maven runtime
+ * 
+ * @author Eugene Kuleshov
+ * @author Igor Fedorenko
  */
-public class MavenEmbeddedRuntime extends MavenRuntime {
+public class MavenEmbeddedRuntime implements MavenRuntime {
 
   private static final String MAVEN_MAVEN_EMBEDDER_BUNDLE_ID = "org.maven.ide.components.maven_embedder";
 
   private static final String MAVEN_EXECUTOR_CLASS = org.apache.maven.cli.MavenCli.class.getName();
-  
+
+  private static final String PLEXUS_CLASSWORLD_NAME = "plexus.core";
+
+  private static String[] LAUNCHER_CLASSPATH;
   private static String[] CLASSPATH;
 
   private BundleContext bundleContext;
@@ -59,32 +64,27 @@ public class MavenEmbeddedRuntime extends MavenRuntime {
   public boolean isAvailable() {
     return true;
   }
-  
-  public String getMainTypeName() {
-    return MAVEN_EXECUTOR_CLASS;
-  }
-  
-  public String getOptions(File tpmfolder, String[] forcedComponents) {
-    return "";
-  }
-  
-  public String[] getClasspath(String[] forcedComponents) {
-    String[] result = getClasspath();
-    if (forcedComponents != null && forcedComponents.length > 0) {
-      String[] cp = new String[CLASSPATH.length + forcedComponents.length];
-      System.arraycopy(forcedComponents, 0, cp, 0, forcedComponents.length);
-      System.arraycopy(CLASSPATH, 0, cp, forcedComponents.length, CLASSPATH.length);
-      result = cp;
+
+  public void getMavenLauncherConfiguration(IMavenLauncherConfigurationCollector collector, IProgressMonitor monitor) throws CoreException {
+    collector.setMainType(MAVEN_EXECUTOR_CLASS, PLEXUS_CLASSWORLD_NAME);
+
+    collector.addRealm(PLEXUS_CLASSWORLD_NAME);
+    for(String entry : getClasspath()) {
+      collector.addArchiveEntry(entry);
     }
-    return result;
   }
 
   private String[] getClasspath() {
+    initClasspath(findMavenEmbedderBundle());
+
+    return CLASSPATH;
+  }
+
+  private static synchronized void initClasspath(Bundle bundle) {
     if(CLASSPATH == null) {
       List<String> cp = new ArrayList<String>();
+      List<String> lcp = new ArrayList<String>();
 
-      Bundle bundle = findMavenEmbedderBundle();
-      
       @SuppressWarnings("unchecked")
       Enumeration<URL> entries = bundle.findEntries("/", "*", true);
       while(entries.hasMoreElements()) {
@@ -92,7 +92,12 @@ public class MavenEmbeddedRuntime extends MavenRuntime {
         String path = url.getPath();
         if(path.endsWith(".jar") || path.endsWith("bin/")) {
           try {
-            cp.add(FileLocator.toFileURL(url).getFile());
+            String file = FileLocator.toFileURL(url).getFile();
+            if (file.contains("plexus-classworlds")) {
+              lcp.add(file);
+            } else {
+              cp.add(file);
+            }
           } catch(IOException ex) {
             MavenLogger.log("Error adding classpath entry " + url.toString(), ex);
           }
@@ -100,9 +105,8 @@ public class MavenEmbeddedRuntime extends MavenRuntime {
       }
 
       CLASSPATH = cp.toArray(new String[cp.size()]);
+      LAUNCHER_CLASSPATH = lcp.toArray(new String[lcp.size()]);
     }
-
-    return CLASSPATH;
   }
 
   private Bundle findMavenEmbedderBundle() {
@@ -117,22 +121,18 @@ public class MavenEmbeddedRuntime extends MavenRuntime {
     return bundle;
   }
   
-  public boolean equals(Object o) {
-    return o==this;
-  }
-  
-  public int hashCode() {
-    return 1568475786;  // "EMBEDDED".hashCode() 
-  }
-  
   public String toString() {
     return "Embedded";
   }
 
-  public void getSourcePath(IClasspathCollector collector, IProgressMonitor monitor) throws CoreException {
-    for (String entry : getClasspath()) {
-      collector.addArchiveEntry(entry);
-    }
+  public String[] getLauncherClasspath() {
+    initClasspath(findMavenEmbedderBundle());
+
+    return LAUNCHER_CLASSPATH;
+  }
+
+  public String getLauncherType() {
+    return LAUNCHER_TYPE;
   }
 
 }

@@ -9,12 +9,8 @@
 package org.maven.ide.eclipse.internal.embedder;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Set;
 
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -23,7 +19,7 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.project.MavenProject;
 
 import org.maven.ide.eclipse.embedder.ArtifactKey;
-import org.maven.ide.eclipse.embedder.IClasspathCollector;
+import org.maven.ide.eclipse.embedder.IMavenLauncherConfigurationCollector;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
@@ -31,10 +27,19 @@ import org.maven.ide.eclipse.project.MavenProjectManager;
 
 /**
  * Maven 3.0-SNAPSHOT runtime loaded from the Eclipse Workspace
+ * 
+ * @author Eugene Kuleshov
+ * @author Igor Fedorenko
  */
-public class MavenWorkspaceRuntime extends MavenRuntime {
+public class MavenWorkspaceRuntime implements MavenRuntime {
 
   private static final ArtifactKey MAVEN_DISTRIBUTION = new ArtifactKey("org.apache.maven", "maven-distribution", "3.0-SNAPSHOT", null);
+
+  private static final ArtifactKey PLEXUS_CLASSWORLDS = new ArtifactKey("org.codehaus.plexus", "plexus-classworlds", null, null);
+
+  private static final String MAVEN_EXECUTOR_CLASS = "org.apache.maven.cli.MavenCli";
+
+  private static final String PLEXUS_CLASSWORLD_NAME = "plexus.core";
 
   private MavenProjectManager projectManager;
 
@@ -50,14 +55,6 @@ public class MavenWorkspaceRuntime extends MavenRuntime {
     return null;
   }
 
-  public String getMainTypeName() {
-    return "org.apache.maven.cli.MavenCli";
-  }
-
-  public String getOptions(File tpmfolder, String[] forcedComponents) {
-    return "";
-  }
-
   public boolean isEditable() {
     return false;
   }
@@ -66,42 +63,14 @@ public class MavenWorkspaceRuntime extends MavenRuntime {
     return projectManager.getMavenProject(MAVEN_DISTRIBUTION.getGroupId(), MAVEN_DISTRIBUTION.getArtifactId(), MAVEN_DISTRIBUTION.getVersion()) != null;
   }
 
-  public String[] getClasspath(String[] forcedComponents) throws CoreException {
-    final ArrayList<String> cp = new ArrayList<String>();
-    
-    if (forcedComponents != null) {
-      for (int i = 0; i < forcedComponents.length; i++) {
-        cp.add(forcedComponents[i]);
-      }
-    }
-
-    final IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-
-    NullProgressMonitor monitor = new NullProgressMonitor();
-    IClasspathCollector collector = new IClasspathCollector() {
-
-      public void addArchiveEntry(String entry) {
-        cp.add(entry);
-      }
-
-      public void addProjectEntry(IMavenProjectFacade facade) {
-        IFolder output = root.getFolder(facade.getOutputLocation());
-        if (output.isAccessible()) {
-          cp.add(output.getLocation().toFile().getAbsolutePath());
-        }
-      }
-      
-    };
-    getClasspath(collector, monitor);
-    
-    return cp.toArray(new String[cp.size()]);
-    
-  }
-
-  public void getClasspath(IClasspathCollector collector, IProgressMonitor monitor) throws CoreException {
+  public void getMavenLauncherConfiguration(IMavenLauncherConfigurationCollector collector, IProgressMonitor monitor) throws CoreException {
     IMavenProjectFacade maven = projectManager.getMavenProject(MAVEN_DISTRIBUTION.getGroupId(), MAVEN_DISTRIBUTION.getArtifactId(), MAVEN_DISTRIBUTION.getVersion());
     if (maven != null) {
       MavenProject mavenProject = maven.getMavenProject(monitor);
+
+      collector.setMainType(MAVEN_EXECUTOR_CLASS, PLEXUS_CLASSWORLD_NAME);
+
+      collector.addRealm(PLEXUS_CLASSWORLD_NAME);
 
       @SuppressWarnings("unchecked")
       Set<Artifact> artifacts = mavenProject.getArtifacts();
@@ -124,14 +93,39 @@ public class MavenWorkspaceRuntime extends MavenRuntime {
         
       }
     }
+
+    // XXX throw something at the caller! 
   }
 
   public String toString() {
     return "Workspace";
   }
 
-  public void getSourcePath(IClasspathCollector collector, IProgressMonitor monitor) throws CoreException {
-    getClasspath(collector, monitor);
+  public String[] getLauncherClasspath() {
+    IMavenProjectFacade maven = projectManager.getMavenProject(MAVEN_DISTRIBUTION.getGroupId(), MAVEN_DISTRIBUTION.getArtifactId(), MAVEN_DISTRIBUTION.getVersion());
+    if (maven != null) {
+      try {
+        MavenProject mavenProject;
+        mavenProject = maven.getMavenProject(new NullProgressMonitor());
+        @SuppressWarnings("unchecked")
+        Set<Artifact> artifacts = mavenProject.getArtifacts();
+        ArtifactKey key = PLEXUS_CLASSWORLDS;
+        for (Artifact artifact : artifacts) {
+          if (key.getGroupId().equals(artifact.getGroupId()) && key.getArtifactId().equals(artifact.getArtifactId())) {
+            return new String[] {artifact.getFile().getAbsolutePath()};
+          }
+        }
+      } catch(CoreException ex) {
+        // should not happen
+      }
+    }
+
+    // XXX throw something at the caller! 
+    return null;
+  }
+
+  public String getLauncherType() {
+    return LAUNCHER_TYPE;
   }
 
 }

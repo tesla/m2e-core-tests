@@ -9,12 +9,16 @@
 package org.maven.ide.eclipse.internal.launch;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.DebugEvent;
@@ -30,6 +34,7 @@ import org.eclipse.jdt.launching.VMRunnerConfiguration;
 import org.eclipse.ui.externaltools.internal.model.ExternalToolBuilder;
 import org.eclipse.ui.externaltools.internal.model.IExternalToolConstants;
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
@@ -45,13 +50,10 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
     MavenConsole console = MavenPlugin.getDefault().getConsole();
     console.logMessage("" + getWorkingDirectory(configuration));
     console.logMessage(" mvn" + getProgramArguments(configuration));
-    
+
     super.launch(configuration, mode, launch, monitor);
   }
-  
-  /* (non-Javadoc)
-   * @see org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate#getVMRunner(org.eclipse.debug.core.ILaunchConfiguration, java.lang.String)
-   */
+
   public IVMRunner getVMRunner(final ILaunchConfiguration configuration, String mode) throws CoreException {
     final IVMRunner runner = super.getVMRunner(configuration, mode);
     
@@ -70,14 +72,15 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
   }
 
   public String getMainTypeName(ILaunchConfiguration configuration) throws CoreException {
-    // return MAVEN_EXECUTOR_CLASS;
-    return MavenLaunchUtils.getMavenRuntime(configuration).getMainTypeName();
+    MavenRuntime runtime = MavenLaunchUtils.getMavenRuntime(configuration);
+    return runtime.getLauncherType();
   }
 
   public String[] getClasspath(ILaunchConfiguration configuration) throws CoreException {
-    return MavenLaunchUtils.getClasspath(configuration);
+    MavenRuntime runtime = MavenLaunchUtils.getMavenRuntime(configuration);
+    return runtime.getLauncherClasspath();
   }
-  
+
   public String getProgramArguments(ILaunchConfiguration configuration) throws CoreException {
     return getProperties(configuration) + //
         getPreferences(configuration) + " " + //
@@ -85,16 +88,62 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
   }
 
   public String getVMArguments(ILaunchConfiguration configuration) throws CoreException {
+    /*
+    * <pre>
+    * %MAVEN_JAVA_EXE% %MAVEN_OPTS% 
+    *   -classpath %CLASSWORLDS_JAR% 
+    *   "-Dclassworlds.conf=%M2_HOME%\bin\m2.conf" 
+    *   "-Dmaven.home=%M2_HOME%" 
+    *   org.codehaus.classworlds.Launcher 
+    *   %MAVEN_CMD_LINE_ARGS%
+    * </pre>
+    */
+
+    MavenRuntime runtime = MavenLaunchUtils.getMavenRuntime(configuration);
+
+    MavenLauncherConfigurationHandler m2conf = new MavenLauncherConfigurationHandler();
+
     StringBuffer sb = new StringBuffer();
+
+    // workspace artifact resolution
     if (shouldResolveWorkspaceArtifacts(configuration)) {
       File state = MavenPlugin.getDefault().getMavenProjectManager().getWorkspaceStateFile();
-      sb.append("-Dm2eclipse.workspace.state=\"").append(state.getAbsolutePath()).append("\"");
+      sb.append("-Dm2eclipse.workspace.state=").append(quote(state.getAbsolutePath()));
+      m2conf.addArchiveEntry(MavenLaunchUtils.getCliResolver());
     }
-    sb.append(" ").append(super.getVMArguments(configuration));
+
+    // maven.home
+    String location = runtime.getLocation();
+    if (location != null) {
+      sb.append(" -Dmaven.home=").append(quote(location));
+    }
+
+    // m2.conf
+    MavenLaunchUtils.addUserComponents(configuration, m2conf);
+    runtime.getMavenLauncherConfiguration(m2conf, new NullProgressMonitor());
     File state = MavenPlugin.getDefault().getStateLocation().toFile();
-    String[] forcedComponents = MavenLaunchUtils.getForcedComponents(configuration);
-    sb.append(MavenLaunchUtils.getMavenRuntime(configuration).getOptions(new File(state, configuration.getName()), forcedComponents));
+    File confFile = new File(state, configuration.getName() + "/m2.conf");
+    confFile.getParentFile().mkdirs();
+    try {
+      OutputStream os = new FileOutputStream(confFile);
+      try {
+        m2conf.save(os);
+      } finally {
+        os.close();
+      }
+    } catch (IOException e) {
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Can't create m2.conf ", e));
+    }
+    sb.append(" -Dclassworlds.conf=").append(quote(confFile.getAbsolutePath()));
+
+    // user configured entries
+    sb.append(" ").append(super.getVMArguments(configuration));
+
     return sb.toString();
+  }
+
+  private String quote(String string) {
+    return string.indexOf(' ')>-1 ? "\"" + string + "\"" : string;
   }
 
   private boolean shouldResolveWorkspaceArtifacts(ILaunchConfiguration configuration) throws CoreException {

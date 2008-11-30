@@ -8,38 +8,39 @@
 
 package org.maven.ide.eclipse.embedder;
 
-import java.io.File;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.maven.ide.eclipse.internal.embedder.MavenExternalRuntime;
 
 /**
  * Maven runtime
  *
  * @author Eugene Kuleshov
+ * @author Igor Fedorenko
+ * 
+ * @noimplement This interface is not intended to be implemented by clients.
  */
-public abstract class MavenRuntime {
+public interface MavenRuntime {
   
+  public static final String LAUNCHER_TYPE = "org.codehaus.classworlds.Launcher";
+
   public abstract boolean isEditable();
-  
-  public abstract String getMainTypeName();
 
-  public abstract String getOptions(File tpmfolder, String[] forcedComponents) throws CoreException;
+  /**
+   * Reads m2.conf file and notifies configuration collector of the logical content of plexus configuration.
+   * 
+   * Collector callback methods are invoked in the order corresponding
+   * configuration elements are present in m2.conf file. 
+   */
+  public abstract void getMavenLauncherConfiguration(IMavenLauncherConfigurationCollector collector, IProgressMonitor monitor) throws CoreException;
 
-  public abstract String[] getClasspath(String[] forcedComponents) throws CoreException;
-
-  public abstract void getSourcePath(IClasspathCollector collector, IProgressMonitor monitor) throws CoreException;
-  
   public abstract String getLocation();
 
   public abstract String getSettings();
-  
+
   public abstract boolean isAvailable();
-  
-  public static MavenRuntime createExternalRuntime(String location) {
-    return new MavenExternalRuntime(location);
-  }
+
+  public abstract String[] getLauncherClasspath();
+
+  public abstract String getLauncherType();
 
 }
