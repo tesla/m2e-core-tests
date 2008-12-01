@@ -1194,11 +1194,11 @@ public class RepositoriesComposite extends Composite {
     {
       RepositoryPolicy releases = repository.getReleases();
       if(releases != null) {
-        setButton(releasesEnabledButton, "true".equals(releases.getEnabled()));
+        setButton(releasesEnabledButton, releases.getEnabled() == null || "true".equals(releases.getEnabled()));
         setText(releasesChecksumPolicyCombo, releases.getChecksumPolicy());
         setText(releasesUpdatePolicyCombo, releases.getUpdatePolicy());
       } else {
-        setButton(releasesEnabledButton, false);
+        setButton(releasesEnabledButton, true);
       }
       boolean isReleasesEnabled = releasesEnabledButton.getSelection();
       releasesChecksumPolicyCombo.setEnabled(isReleasesEnabled);
@@ -1210,11 +1210,11 @@ public class RepositoriesComposite extends Composite {
     {
       RepositoryPolicy snapshots = repository.getSnapshots();
       if(snapshots != null) {
-        setButton(snapshotsEnabledButton, "true".equals(snapshots.getEnabled()));
+        setButton(snapshotsEnabledButton, snapshots.getEnabled() == null || "true".equals(snapshots.getEnabled()));
         setText(snapshotsChecksumPolicyCombo, snapshots.getChecksumPolicy());
         setText(snapshotsUpdatePolicyCombo, snapshots.getUpdatePolicy());
       } else {
-        snapshotsEnabledButton.setSelection(false);
+        setButton(snapshotsEnabledButton, true);
       }
       boolean isSnapshotsEnabled = snapshotsEnabledButton.getSelection();
       snapshotsChecksumPolicyCombo.setEnabled(isSnapshotsEnabled);
