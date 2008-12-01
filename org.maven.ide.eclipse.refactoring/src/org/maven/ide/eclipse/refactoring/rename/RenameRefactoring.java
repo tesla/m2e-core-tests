@@ -238,24 +238,13 @@ public class RenameRefactoring extends AbstractPomRefactoring {
         
         //only set groupId if effective group id is the same as old group id
         if (oldGroupId != null && oldGroupId.equals(effectiveGroupId))
-          applyObject(editingDomain, command, obj.object, GROUP_ID, newGroupId);
+          applyFeature(editingDomain, model, GROUP_ID, newGroupId, command, obj);
         //set artifact id unconditionally
-        applyObject(editingDomain, command, obj.object, ARTIFACT_ID, newArtifactId);
+        applyFeature(editingDomain, model, ARTIFACT_ID, newArtifactId, command, obj);
         //only set version if effective version is the same (already checked by the above)
         //and new version is not empty
         if (!"".equals(newVersion)) {
-          PropertyInfo info = null;
-          String old = getValue(obj.object, VERSION);
-          if (old.startsWith("${")) {
-            //this is a property, go find it
-            String pName = old.substring(2);
-            pName = pName.substring(0, pName.length() - 1).trim();
-            info = model.getProperties().get(pName);
-          }
-          if (info != null)
-            info.setNewValue(new SetCommand(editingDomain, info.getPair(), info.getPair().eClass().getEStructuralFeature("value"), newVersion));
-          else
-            applyObject(editingDomain, command, obj.object, VERSION, newVersion);
+          applyFeature(editingDomain, model, VERSION, newVersion, command, obj);
         }
         
       } catch(Exception e) {
@@ -263,21 +252,24 @@ public class RenameRefactoring extends AbstractPomRefactoring {
       }
     }
 
-    //XXX - just a refactoring mark
-//    if (!command.isEmpty()) {
-//      Set props = model.getProperties().keySet();
-//      Object[] arr = props.toArray();
-//      double koeff = System.currentTimeMillis() % 10;
-//      koeff = koeff / 10;
-//      PropertyInfo info = model.getProperties().get(arr[(int) (arr.length * koeff)]);
-//      info.setNewValue(new SetCommand(editingDomain, info.getPair(), info.getPair().eClass().getEStructuralFeature("value"), "" + koeff));
-//      int sum = 0;
-//      for (int f=0; f<10000000; f++)
-//        sum+= f;
-//      System.out.println(info.getPair().getKey() + ":" + koeff + ":" + sum);
-//    }
-    
     return command.isEmpty()? null: command;
+  }
+
+  //apply the value, considering properties
+  private void applyFeature(AdapterFactoryEditingDomain editingDomain, RefactoringModelResources model,
+      String feature, String newValue, CompoundCommand command, EObjectWithPath obj) {
+    PropertyInfo info = null;
+    String old = getValue(obj.object, feature);
+    if (old.startsWith("${")) {
+      //this is a property, go find it
+      String pName = old.substring(2);
+      pName = pName.substring(0, pName.length() - 1).trim();
+      info = model.getProperties().get(pName);
+    }
+    if (info != null)
+      info.setNewValue(new SetCommand(editingDomain, info.getPair(), info.getPair().eClass().getEStructuralFeature("value"), newValue));
+    else
+      applyObject(editingDomain, command, obj.object, feature, newValue);
   }
 
   private void applyObject(AdapterFactoryEditingDomain editingDomain, CompoundCommand command, EObject obj,

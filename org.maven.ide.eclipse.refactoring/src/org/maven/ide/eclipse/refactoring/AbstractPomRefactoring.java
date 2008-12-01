@@ -95,6 +95,9 @@ public abstract class AbstractPomRefactoring extends Refactoring {
       //XXX: assumption: artifactId is unique within workspace
       for(IMavenProjectFacade projectFacade : projects) {
         pm.setTaskName("Loading " + projectFacade.getProject().getName());
+        //skip closed projects
+        if (!projectFacade.getProject().isAccessible() || !projectFacade.getPom().isAccessible())
+          continue;
         RefactoringModelResources current = new RefactoringModelResources(projectFacade);
         models.put(current.effective.getArtifactId(), current);
         pm.worked(1);
@@ -166,19 +169,21 @@ public abstract class AbstractPomRefactoring extends Refactoring {
           }
         }
       }
-      
+
+      //process the file itself first
       for (String artifact: models.keySet()) {
         RefactoringModelResources model = models.get(artifact);
-        CompoundCommand command = model.getCommand();
-        if (command == null)
-          continue;
-        if (command.canExecute()) {
-          //apply changes to temp file
-          editingDomain.getCommandStack().execute(command);
-          //create text change comparing temp file and real file
-          TextFileChange change = new ChangeCreator(model.getPomFile(), model.getPomBuffer().getDocument(), model.getTmpBuffer().getDocument(), file.getParent().getName()).createChange();
-          res.add(change);
+        if (model.getPomFile().equals(file)) {
+          processCommand(model, res);
+          model.releaseAllResources();
+          models.remove(artifact);
+          break;
         }
+      }
+      
+      //process others
+      for (String artifact: models.keySet()) {
+        processCommand(models.get(artifact), res);
       }
 
       //rename project if required
@@ -197,6 +202,19 @@ public abstract class AbstractPomRefactoring extends Refactoring {
     return res;
   }
 
+  protected void processCommand(RefactoringModelResources model, CompositeChange res) {
+    CompoundCommand command = model.getCommand();
+    if (command == null)
+      return;
+    if (command.canExecute()) {
+      //apply changes to temp file
+      editingDomain.getCommandStack().execute(command);
+      //create text change comparing temp file and real file
+      TextFileChange change = new ChangeCreator(model.getPomFile(), model.getPomBuffer().getDocument(), model.getTmpBuffer().getDocument(), file.getParent().getName()).createChange();
+      res.add(change);
+    }
+  }
+  
   //returns new eclipse project name or null if no change
   public String getNewProjectName() {
     return null;
