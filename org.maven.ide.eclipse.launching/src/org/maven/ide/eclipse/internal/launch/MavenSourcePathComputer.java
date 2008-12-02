@@ -151,7 +151,6 @@ public class MavenSourcePathComputer implements ISourcePathComputer {
   private void addArchiveRuntimeClasspathEntry(List<IRuntimeClasspathEntry> entries, String entryPath, InputStream is) throws IOException, CoreException {
     Properties p = new Properties();
     p.load(is);
-    String projectName = p.getProperty("m2e-project");
 
     String groupId = p.getProperty("groupId");
     String artifactId = p.getProperty("artifactId");
