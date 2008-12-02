@@ -43,6 +43,8 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 
+import org.apache.maven.embedder.MavenEmbedder;
+
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
@@ -160,13 +162,13 @@ public class MavenGoalSelectionDialog extends ElementTreeSelectionDialog {
     public GoalsContentProvider() {
       MavenEmbedderManager embedderManager = MavenPlugin.getDefault().getMavenEmbedderManager();
       try {
-        List<Entry> entries = new ArrayList<Entry>();
-        @SuppressWarnings("unchecked")
-        List<String> phases = embedderManager.getWorkspaceEmbedder().getLifecyclePhases();
-        for(int i = 0; i < phases.size(); i++ ) {
-          entries.add(new Entry(phases.get(i), null, null));
-        }
-        groups.add(new Group(Messages.getString("launch.goalsDialog.lifecyclePhases"), null, null, entries)); //$NON-NLS-1$
+        MavenEmbedder embedder = embedderManager.getWorkspaceEmbedder();
+        groups.add(new Group(Messages.getString("launch.goalsDialog.lifecycleBuild"), //$NON-NLS-1$
+            null, null, getLifecyclePhases(embedder.getBuildLifecyclePhases()))); 
+        groups.add(new Group(Messages.getString("launch.goalsDialog.lifecycleSite"), //$NON-NLS-1$
+            null, null, getLifecyclePhases(embedder.getSiteLifecyclePhases()))); 
+        groups.add(new Group(Messages.getString("launch.goalsDialog.lifecycleClean"), //$NON-NLS-1$
+            null, null, getLifecyclePhases(embedder.getCleanLifecyclePhases()))); 
       } catch(Exception e) {
         MavenLogger.log("Unable to get lifecycle phases", e);
       }
@@ -193,6 +195,14 @@ public class MavenGoalSelectionDialog extends ElementTreeSelectionDialog {
       } catch(CoreException e) {
         MavenLogger.log(e);
       }
+    }
+
+    private List<Entry> getLifecyclePhases(List<?> phases) {
+      List<Entry> entries = new ArrayList<Entry>();
+      for(int i = 0; i < phases.size(); i++ ) {
+        entries.add(new Entry((String) phases.get(i), null, null));
+      }
+      return entries;
     }
 
     public Object[] getElements(Object inputElement) {
