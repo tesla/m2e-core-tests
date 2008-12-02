@@ -30,10 +30,9 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 
 /**
- * @author Anton Kraev
- * 
  * This class manages all refactoring-related resources for a particular maven project
- *
+ * 
+ * @author Anton Kraev
  */
 public class RefactoringModelResources {
   protected IFile pomFile;
@@ -47,37 +46,6 @@ public class RefactoringModelResources {
   protected MavenProject project;
   protected CompoundCommand command;
   
-  public static class PropertyInfo {
-    protected PropertyPair pair;
-    protected RefactoringModelResources resource;
-    protected Command newValue;
-    
-    public Command getNewValue() {
-      return newValue;
-    }
-
-    public void setNewValue(Command newValue) {
-      this.newValue = newValue;
-    }
-    
-    public PropertyPair getPair() {
-      return pair;
-    }
-
-    public void setPair(PropertyPair pair) {
-      this.pair = pair;
-    }
-
-    public RefactoringModelResources getResource() {
-      return resource;
-    }
-
-    public void setResource(RefactoringModelResources resource) {
-      this.resource = resource;
-    }
-  }
-
-  @SuppressWarnings("deprecation")
   public RefactoringModelResources(IMavenProjectFacade projectFacade) throws CoreException, IOException {
     textFileBufferManager = FileBuffers.getTextFileBufferManager();
     project = projectFacade.getMavenProject(null);
@@ -88,11 +56,14 @@ public class RefactoringModelResources {
     //create temp file
     IProject project = pomFile.getProject();
     IPath wsPrefix = project.getWorkspace().getRoot().getLocation();
+    
+    @SuppressWarnings("deprecation")
     IPath location = pomFile.getProject().getDescription().getLocation();
+    
     String tmpName = File.createTempFile("pom", ".xml").getName();
     if (location != null) {
-      //(EMF2DOMSSE has problems with virtual resources from nested projects)
-      //so temp file must be created under shell project (1st level)           
+      // EMF2DOMSSE has problems with virtual resources from nested projects
+      // so temp file must be created under shell project (1st level)
       location = location.append(tmpName);
       location = location.removeFirstSegments(wsPrefix.segmentCount()).setDevice(null).makeAbsolute();
       location = new Path(location.removeLastSegments(location.segmentCount() - 1).toString() + "/" +
@@ -176,4 +147,35 @@ public class RefactoringModelResources {
   public String getName() {
     return pomFile.getProject().getName();
   }
+
+  public static class PropertyInfo {
+    protected PropertyPair pair;
+    protected RefactoringModelResources resource;
+    protected Command newValue;
+    
+    public Command getNewValue() {
+      return newValue;
+    }
+
+    public void setNewValue(Command newValue) {
+      this.newValue = newValue;
+    }
+    
+    public PropertyPair getPair() {
+      return pair;
+    }
+
+    public void setPair(PropertyPair pair) {
+      this.pair = pair;
+    }
+
+    public RefactoringModelResources getResource() {
+      return resource;
+    }
+
+    public void setResource(RefactoringModelResources resource) {
+      this.resource = resource;
+    }
+  }
+
 }

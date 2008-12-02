@@ -26,7 +26,6 @@ import org.maven.ide.eclipse.core.MavenLogger;
 
 /**
  * This class creates an org.eclipse.ltk.core.refactoring.DocumentChange instance based on old and new text values
- * <p>
  * 
  * @author Anton Kraev
  */
@@ -39,86 +38,6 @@ public class ChangeCreator {
 
   private IFile oldFile;
 
-  @SuppressWarnings("unchecked")
-  public class LineComparator implements IRangeComparator {
-
-    private final IDocument fDocument;
-    private final ArrayList fHashes;
-
-      /**
-     * Create a line comparator for the given document.
-     * 
-     * @param document
-     */
-    public LineComparator(IDocument document) {
-      fDocument= document;
-
-      Object[] nulls= new Object[fDocument.getNumberOfLines()];
-      fHashes= new ArrayList(Arrays.asList(nulls));
-    }
-
-    /*
-       * @see org.eclipse.compare.rangedifferencer.IRangeComparator#getRangeCount()
-       */
-      public int getRangeCount() {
-          return fDocument.getNumberOfLines();
-      }
-
-      /*
-       * @see org.eclipse.compare.rangedifferencer.IRangeComparator#rangesEqual(int, org.eclipse.compare.rangedifferencer.IRangeComparator, int)
-       */
-      public boolean rangesEqual(int thisIndex, IRangeComparator other, int otherIndex) {
-        try {
-          return getHash(thisIndex).equals(((LineComparator) other).getHash(otherIndex));
-        } catch (BadLocationException e) {
-          MavenLogger.log("Problem comparing", e);
-          return false;
-        }
-      }
-
-    /*
-     * @see org.eclipse.compare.rangedifferencer.IRangeComparator#skipRangeComparison(int, int, org.eclipse.compare.rangedifferencer.IRangeComparator)
-     */
-    public boolean skipRangeComparison(int length, int maxLength, IRangeComparator other) {
-      return false;
-    }
-
-    /**
-     * @param line the number of the line in the document to get the hash for
-     * @return the hash of the line
-     * @throws BadLocationException if the line number is invalid
-     */
-    private Integer getHash(int line) throws BadLocationException {
-      Integer hash= (Integer) fHashes.get(line);
-      if (hash == null) {
-        IRegion lineRegion;
-        lineRegion = fDocument.getLineInformation(line);
-        String lineContents= fDocument.get(lineRegion.getOffset(), lineRegion.getLength());
-        hash= new Integer(computeDJBHash(lineContents));
-        fHashes.set(line, hash);
-      }
-
-      return hash;
-    }
-
-    /**
-     * Compute a hash using the DJB hash algorithm
-     * 
-     * @param string the string for which to compute a hash
-     * @return the DJB hash value of the string
-     */
-    private int computeDJBHash(String string) {
-      int hash= 5381;
-      int len= string.length();
-      for (int i= 0; i < len; i++) {
-        char ch= string.charAt(i);
-        hash= (hash << 5) + hash + ch;
-      }
-
-      return hash;
-    }
-  }
-
   public ChangeCreator(IFile oldFile, IDocument oldDocument, IDocument newDocument, String label) {
     this.newDocument = newDocument;
     this.oldDocument = oldDocument;
@@ -130,8 +49,8 @@ public class ChangeCreator {
     TextFileChange change = new TextFileChange(label, oldFile);
     change.setSaveMode(TextFileChange.FORCE_SAVE);
     change.setEdit(new MultiTextEdit());
-    Object leftSide= new LineComparator(oldDocument);
-    Object rightSide= new LineComparator(newDocument);
+    Object leftSide = new LineComparator(oldDocument);
+    Object rightSide = new LineComparator(newDocument);
 
     RangeDifference[] differences = RangeDifferencer.findDifferences((IRangeComparator) leftSide, (IRangeComparator) rightSide);
     for(int i = 0; i < differences.length; i++ ) {
@@ -152,4 +71,78 @@ public class ChangeCreator {
     }
     return change;
   }
+  
+  public static class LineComparator implements IRangeComparator {
+    private final IDocument document;
+    private final ArrayList<Integer> hashes;
+
+      /**
+     * Create a line comparator for the given document.
+     * 
+     * @param document
+     */
+    public LineComparator(IDocument document) {
+      this.document = document;
+      this.hashes = new ArrayList<Integer>(Arrays.asList(new Integer[document.getNumberOfLines()]));
+    }
+
+    /*
+     * @see org.eclipse.compare.rangedifferencer.IRangeComparator#getRangeCount()
+     */
+    public int getRangeCount() {
+      return document.getNumberOfLines();
+    }
+
+    /*
+     * @see org.eclipse.compare.rangedifferencer.IRangeComparator#rangesEqual(int, org.eclipse.compare.rangedifferencer.IRangeComparator, int)
+     */
+    public boolean rangesEqual(int thisIndex, IRangeComparator other, int otherIndex) {
+      try {
+        return getHash(thisIndex).equals(((LineComparator) other).getHash(otherIndex));
+      } catch (BadLocationException e) {
+        MavenLogger.log("Problem comparing", e);
+        return false;
+      }
+    }
+
+    /*
+     * @see org.eclipse.compare.rangedifferencer.IRangeComparator#skipRangeComparison(int, int, org.eclipse.compare.rangedifferencer.IRangeComparator)
+     */
+    public boolean skipRangeComparison(int length, int maxLength, IRangeComparator other) {
+      return false;
+    }
+
+    /**
+     * @param line the number of the line in the document to get the hash for
+     * @return the hash of the line
+     * @throws BadLocationException if the line number is invalid
+     */
+    private Integer getHash(int line) throws BadLocationException {
+      Integer hash = hashes.get(line);
+      if (hash == null) {
+        IRegion lineRegion;
+        lineRegion = document.getLineInformation(line);
+        String lineContents= document.get(lineRegion.getOffset(), lineRegion.getLength());
+        hash = new Integer(computeDJBHash(lineContents));
+        hashes.set(line, hash);
+      }
+      return hash;
+    }
+
+    /**
+     * Compute a hash using the DJB hash algorithm
+     * 
+     * @param string the string for which to compute a hash
+     * @return the DJB hash value of the string
+     */
+    private int computeDJBHash(String string) {
+      int hash = 5381;
+      int len = string.length();
+      for (int i = 0; i < len; i++) {
+        hash = (hash << 5) + hash + string.charAt(i);
+      }
+      return hash;
+    }
+  }
+
 }

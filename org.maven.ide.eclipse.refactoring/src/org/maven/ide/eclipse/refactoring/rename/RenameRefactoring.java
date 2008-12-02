@@ -12,7 +12,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -47,16 +46,10 @@ public class RenameRefactoring extends AbstractPomRefactoring {
   private static final String GROUP_ID = "groupId";
   private static final String GETGROUP_ID = "getGroupId";
 
-  //XXX: move stuff UP after implementing another refactoring
-  //after moving up, use this
-  interface ScanVisitor {
-    public boolean interested(EObject obj);
-  }
-  
-  //this page contains new values
+  // this page contains new values
   MavenRenameWizardPage page;
 
-  //old values
+  // old values
   String oldGroupId;
   String oldArtifactId;
   String oldVersion;
@@ -66,43 +59,11 @@ public class RenameRefactoring extends AbstractPomRefactoring {
     this.page = page;
   }
   
-  //path (built during traversal of EMF model, used to find in effective model)
-  class PathElement {
-    String element;
-    String artifactId;
-    
-    public PathElement(String element, String artifactId) {
-      this.element = element;
-      this.artifactId = artifactId;
-    }
-    
-    public String toString() {
-      return "/" + element + "[artifactId=" + artifactId + "]";
-    }
-  }
-  
-  class Path {
-    List<PathElement> path = new ArrayList<PathElement>();
-    
-    public void addElement(String element, String artifactId) {
-      path.add(new PathElement(element, artifactId));
-    }
-    
-    public String toString() {
-      return path.toString();
-    }
-
-    public Path clone() {
-      Path res = new Path();
-      res.path = new ArrayList<PathElement>(this.path);
-      return res;
-    }
-  }
-  
-  //gets element from effective model based on path
+  // gets element from effective model based on path
   private Object getElement(Object root, Path path) {
-    if (path == null || path.path.size() == 0)
+    if (path == null || path.path.size() == 0) {
       return root;
+    }
     
     PathElement current = path.path.remove(0);
     String getterName = "get" + current.element;
@@ -129,19 +90,8 @@ public class RenameRefactoring extends AbstractPomRefactoring {
     }
   }
   
-  class EObjectWithPath {
-    public EObject object;
-    public Path path;
-    
-    public EObjectWithPath(EObject object, Path path) {
-      this.object = object;
-      this.path = path;
-    }
-  }
-  
   /**
    * Finds all potential matched objects in model
-   * 
    */
   private List<EObjectWithPath> scanModel(Model model, String groupId, String artifactId, String version, boolean processRoot) {
     List<EObjectWithPath> res = new ArrayList<EObjectWithPath>();
@@ -154,10 +104,10 @@ public class RenameRefactoring extends AbstractPomRefactoring {
     return res;
   }
 
-  //add candidate objects with same artifactId
+  // add candidate objects with same artifactId
   private List<EObjectWithPath> scanObject(Path current, EObject obj, String groupId, String artifactId, String version, List<EObjectWithPath> res) {
     if (scanFeature(obj, ARTIFACT_ID, artifactId)) {
-      //System.out.println("found object " + obj + " : " + current);
+      // System.out.println("found object " + obj + " : " + current);
       res.add(new EObjectWithPath(obj, current));
     }
     scanChildren(current, obj, groupId, artifactId, version, res);
@@ -200,7 +150,7 @@ public class RenameRefactoring extends AbstractPomRefactoring {
   }
 
   public String getNewProjectName() {
-    return page.getRenamed()? page.getNewArtifactId(): null;
+    return page.getRenameEclipseProject()? page.getNewArtifactId(): null;
   }
   
   /**
@@ -210,13 +160,12 @@ public class RenameRefactoring extends AbstractPomRefactoring {
    * @param editingDomain
    * @param renameProject 
    */
-
   public CompoundCommand applyModel(AdapterFactoryEditingDomain editingDomain, RefactoringModelResources model, 
       String newGroupId, String newArtifactId, String newVersion, boolean processRoot) {
-    //find all affected objects in EMF model
+    // find all affected objects in EMF model
     List<EObjectWithPath> affected = scanModel(model.getTmpModel(), this.oldGroupId, this.oldArtifactId, this.oldVersion, processRoot);
     
-    //go through all affected objects, check in effective model
+    // go through all affected objects, check in effective model
     Iterator<EObjectWithPath> i = affected.iterator();
     CompoundCommand command = new CompoundCommand();
     while (i.hasNext()) {
@@ -224,25 +173,25 @@ public class RenameRefactoring extends AbstractPomRefactoring {
       Object effectiveObj = getElement(model.getEffective(), obj.path.clone());
       try {
         if (effectiveObj == null) {
-          //System.out.println("cannot find effective for: " + obj.object);
+          // System.out.println("cannot find effective for: " + obj.object);
           continue;
         }
         Method method = effectiveObj.getClass().getMethod(GETVERSION, new Class[] {});
         String effectiveVersion = (String) method.invoke(effectiveObj, EMPTY_OBJECT_ARRAY);
         method = effectiveObj.getClass().getMethod(GETGROUP_ID, new Class[] {});
         String effectiveGroupId = (String) method.invoke(effectiveObj, EMPTY_OBJECT_ARRAY);
-        //if version from effective POM is different from old version, skip it
+        // if version from effective POM is different from old version, skip it
         if (this.oldVersion != null && !this.oldVersion.equals(effectiveVersion)) {
           continue;
         }
         
-        //only set groupId if effective group id is the same as old group id
+        // only set groupId if effective group id is the same as old group id
         if (oldGroupId != null && oldGroupId.equals(effectiveGroupId))
           applyFeature(editingDomain, model, GROUP_ID, newGroupId, command, obj);
-        //set artifact id unconditionally
+        // set artifact id unconditionally
         applyFeature(editingDomain, model, ARTIFACT_ID, newArtifactId, command, obj);
-        //only set version if effective version is the same (already checked by the above)
-        //and new version is not empty
+        // only set version if effective version is the same (already checked by the above)
+        // and new version is not empty
         if (!"".equals(newVersion)) {
           applyFeature(editingDomain, model, VERSION, newVersion, command, obj);
         }
@@ -255,13 +204,13 @@ public class RenameRefactoring extends AbstractPomRefactoring {
     return command.isEmpty()? null: command;
   }
 
-  //apply the value, considering properties
+  // apply the value, considering properties
   private void applyFeature(AdapterFactoryEditingDomain editingDomain, RefactoringModelResources model,
       String feature, String newValue, CompoundCommand command, EObjectWithPath obj) {
     PropertyInfo info = null;
     String old = getValue(obj.object, feature);
     if (old.startsWith("${")) {
-      //this is a property, go find it
+      // this is a property, go find it
       String pName = old.substring(2);
       pName = pName.substring(0, pName.length() - 1).trim();
       info = model.getProperties().get(pName);
@@ -296,7 +245,7 @@ public class RenameRefactoring extends AbstractPomRefactoring {
 
   @Override
   public String getName() {
-    return "Rename artifact";
+    return "Rename Maven Artifact";
   }
 
   @Override
@@ -312,4 +261,53 @@ public class RenameRefactoring extends AbstractPomRefactoring {
     };
   }
 
+  static class Path {
+    List<PathElement> path = new ArrayList<PathElement>();
+    
+    public void addElement(String element, String artifactId) {
+      path.add(new PathElement(element, artifactId));
+    }
+    
+    public String toString() {
+      return path.toString();
+    }
+
+    public Path clone() {
+      Path res = new Path();
+      res.path = new ArrayList<PathElement>(this.path);
+      return res;
+    }
+  }
+  
+  // path (built during traversal of EMF model, used to find in effective model)
+  static class PathElement {
+    String element;
+    String artifactId;
+    
+    public PathElement(String element, String artifactId) {
+      this.element = element;
+      this.artifactId = artifactId;
+    }
+    
+    public String toString() {
+      return "/" + element + "[artifactId=" + artifactId + "]";
+    }
+  }
+  
+  static class EObjectWithPath {
+    public EObject object;
+    public Path path;
+    
+    public EObjectWithPath(EObject object, Path path) {
+      this.object = object;
+      this.path = path;
+    }
+  }
+  
+  // XXX move stuff UP after implementing another refactoring
+  // after moving up, use this
+  interface ScanVisitor {
+    public boolean interested(EObject obj);
+  }
+  
 }

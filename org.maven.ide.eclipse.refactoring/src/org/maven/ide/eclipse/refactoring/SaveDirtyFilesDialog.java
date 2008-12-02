@@ -1,4 +1,3 @@
-package org.maven.ide.eclipse.refactoring;
 /**
  * Copyright (c) 2006 IBM Corporation and others.
  * All rights reserved.   This program and the accompanying materials
@@ -9,6 +8,7 @@ package org.maven.ide.eclipse.refactoring;
  * Contributors:
  *   IBM - Initial API and implementation
  */
+package org.maven.ide.eclipse.refactoring;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,6 +32,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ListDialog;
+
 /**
  * Taken from org.eclipse.wst.common.ui.internal.dialogs
  * 
@@ -39,14 +40,8 @@ import org.eclipse.ui.dialogs.ListDialog;
  * from the JDT refactoring support in
  * org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper. This class is
  * a good candidate for reuse amoung components.
- * 
  */
-@SuppressWarnings("unchecked")
-public class SaveDirtyFilesDialog extends ListDialog
-{
-  /**
-   * 
-   */
+public class SaveDirtyFilesDialog extends ListDialog {
   public static final String ALL_MODIFIED_RESOURCES_MUST_BE_SAVED_BEFORE_THIS_OPERATION = "All modified resources must be saved before this operation.";
 
   public static boolean saveDirtyFiles(String mask)
@@ -83,24 +78,22 @@ public class SaveDirtyFilesDialog extends ListDialog
 
   private static IEditorPart[] getDirtyEditors(String mask)
   {
-    List result = new ArrayList(0);
+    List<IEditorPart> result = new ArrayList<IEditorPart>(0);
     IWorkbench workbench = PlatformUI.getWorkbench();
     IWorkbenchWindow[] windows = workbench.getWorkbenchWindows();
-    for (int i = 0; i < windows.length; i++)
-    {
+    for (int i = 0; i < windows.length; i++) {
       IWorkbenchPage[] pages = windows[i].getPages();
-      for (int x = 0; x < pages.length; x++)
-      {
+      for (int x = 0; x < pages.length; x++) {
         IEditorPart[] editors = pages[x].getDirtyEditors();
-        for (int z = 0; z < editors.length; z++)
-        {
+        for (int z = 0; z < editors.length; z++) {
           IEditorPart ep = editors[z];
-          if (ep.getTitle().indexOf(mask) > 0)
+          if (ep.getTitle().indexOf(mask) > 0) {
             result.add(ep);
+          }
         }
       }
     }
-    return (IEditorPart[]) result.toArray(new IEditorPart[result.size()]);
+    return result.toArray(new IEditorPart[result.size()]);
   }
 
   public SaveDirtyFilesDialog(Shell parent)
@@ -142,36 +135,29 @@ public class SaveDirtyFilesDialog extends ListDialog
    * This class has been copied from org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider
    * This class should be removed once a generic solution is made available.
    */   
-  private static class ListContentProvider implements IStructuredContentProvider
-  {
+  @SuppressWarnings("unchecked")
+  static class ListContentProvider implements IStructuredContentProvider {
     List fContents;
 
-    public ListContentProvider()
-    {
-    }
-
-    public Object[] getElements(Object input)
-    {
-      if (fContents != null && fContents == input)
+    public Object[] getElements(Object input) {
+      if(fContents != null && fContents == input)
         return fContents.toArray();
       return new Object[0];
     }
 
-    public void inputChanged(Viewer viewer, Object oldInput, Object newInput)
-    {
-      if (newInput instanceof List)
+    public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+      if(newInput instanceof List) {
         fContents = (List) newInput;
-      else
+      } else {
         fContents = null;
-      // we use a fixed set.
+        // we use a fixed set.
+      }
     }
 
-    public void dispose()
-    {
+    public void dispose() {
     }
 
-    public boolean isDeleted(Object o)
-    {
+    public boolean isDeleted(Object o) {
       return fContents != null && !fContents.contains(o);
     }
   }

@@ -47,7 +47,6 @@ import org.maven.ide.eclipse.refactoring.RefactoringModelResources.PropertyInfo;
  * 
  * @author Anton Kraev
  */
-@SuppressWarnings("restriction")
 public abstract class AbstractPomRefactoring extends Refactoring {
 
   // main file that is being refactored
@@ -170,7 +169,7 @@ public abstract class AbstractPomRefactoring extends Refactoring {
         }
       }
 
-      //process the file itself first
+      // process the file itself first
       for (String artifact: models.keySet()) {
         RefactoringModelResources model = models.get(artifact);
         if (model.getPomFile().equals(file)) {
@@ -181,14 +180,15 @@ public abstract class AbstractPomRefactoring extends Refactoring {
         }
       }
       
-      //process others
+      // process others
       for (String artifact: models.keySet()) {
         processCommand(models.get(artifact), res);
       }
 
-      //rename project if required
+      // rename project if required
       String newName = getNewProjectName(); 
       if (newName != null) {
+        // TODO probably should copy relevant classes from internal packages
         res.add(new RenameJavaProjectChange(JavaCore.create(file.getProject()), newName, true));
       }
     } catch(Exception ex) {
@@ -204,18 +204,19 @@ public abstract class AbstractPomRefactoring extends Refactoring {
 
   protected void processCommand(RefactoringModelResources model, CompositeChange res) {
     CompoundCommand command = model.getCommand();
-    if (command == null)
+    if (command == null) {
       return;
+    }
     if (command.canExecute()) {
-      //apply changes to temp file
+      // apply changes to temp file
       editingDomain.getCommandStack().execute(command);
-      //create text change comparing temp file and real file
+      // create text change comparing temp file and real file
       TextFileChange change = new ChangeCreator(model.getPomFile(), model.getPomBuffer().getDocument(), model.getTmpBuffer().getDocument(), file.getParent().getName()).createChange();
       res.add(change);
     }
   }
   
-  //returns new eclipse project name or null if no change
+  // returns new eclipse project name or null if no change
   public String getNewProjectName() {
     return null;
   }
