@@ -13,9 +13,6 @@ import java.io.FileInputStream;
 import java.net.URL;
 import java.util.Properties;
 
-import copy.org.codehaus.plexus.classworlds.launcher.ConfigurationException;
-import copy.org.codehaus.plexus.classworlds.launcher.ConfigurationHandler;
-import copy.org.codehaus.plexus.classworlds.launcher.ConfigurationParser;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
