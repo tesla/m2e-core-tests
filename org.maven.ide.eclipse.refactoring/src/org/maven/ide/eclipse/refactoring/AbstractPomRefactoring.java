@@ -18,7 +18,9 @@ import org.apache.maven.project.MavenProject;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.common.command.BasicCommandStack;
 import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.common.notify.impl.AdapterFactoryImpl;
@@ -28,12 +30,17 @@ import org.eclipse.emf.edit.provider.ComposedAdapterFactory;
 import org.eclipse.emf.edit.provider.ReflectiveItemProviderAdapterFactory;
 import org.eclipse.emf.edit.provider.resource.ResourceItemProviderAdapterFactory;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.internal.corext.refactoring.changes.RenameJavaProjectChange;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameJavaProjectProcessor;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
+import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
+import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
+import org.eclipse.ltk.core.refactoring.participants.ResourceChangeChecker;
+import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
+import org.eclipse.ltk.internal.core.refactoring.resource.RenameResourceProcessor;
 import org.maven.ide.components.pom.Model;
 import org.maven.ide.components.pom.Properties;
 import org.maven.ide.components.pom.PropertyPair;
@@ -48,6 +55,8 @@ import org.maven.ide.eclipse.refactoring.RefactoringModelResources.PropertyInfo;
  * @author Anton Kraev
  */
 public abstract class AbstractPomRefactoring extends Refactoring {
+
+  private static final String PROBLEMS_DURING_REFACTORING = "Problems during refactoring";
 
   // main file that is being refactored
   protected IFile file;
@@ -186,17 +195,28 @@ public abstract class AbstractPomRefactoring extends Refactoring {
       }
 
       // rename project if required
-      String newName = getNewProjectName(); 
+      // TODO probably should copy relevant classes from internal packages
+      String newName = getNewProjectName();
       if (newName != null) {
-        // TODO probably should copy relevant classes from internal packages
-        res.add(new RenameJavaProjectChange(JavaCore.create(file.getProject()), newName, true));
+        RenameJavaProjectProcessor processor = new RenameJavaProjectProcessor(JavaCore.create(file.getProject()));
+        RenameRefactoring refactoring = new RenameRefactoring(processor);
+        processor.setNewElementName(newName);
+        RefactoringStatus tmp= new RefactoringStatus();
+        tmp.merge(refactoring.checkInitialConditions(pm));
+        if (!tmp.hasFatalError()) {
+          tmp.merge(refactoring.checkFinalConditions(pm));
+          if (!tmp.hasFatalError()) {
+            res.add(refactoring.createChange(pm));
+          }
+        }
       }
     } catch(Exception ex) {
-      MavenLogger.log("Problems during refactoring", ex);
+      throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, PROBLEMS_DURING_REFACTORING, ex));
     } finally {
       for (String artifact: models.keySet()) {
         models.get(artifact).releaseAllResources();
       }
+      RefactoringModelResources.cleanupTmpProject();
     }
     
     return res;
@@ -229,7 +249,7 @@ public abstract class AbstractPomRefactoring extends Refactoring {
     try {
       return RefactoringModelResources.loadModel(file);
     } catch(CoreException ex) {
-      MavenLogger.log("Problems during refactoring", ex);
+      MavenLogger.log(PROBLEMS_DURING_REFACTORING, ex);
       return null;
     }
   }

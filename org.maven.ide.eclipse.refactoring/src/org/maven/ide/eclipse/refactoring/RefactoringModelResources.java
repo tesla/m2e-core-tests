@@ -19,14 +19,14 @@ import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filebuffers.LocationKind;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.common.command.CompoundCommand;
 import org.maven.ide.components.pom.Model;
 import org.maven.ide.components.pom.PropertyPair;
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 
 /**
@@ -35,6 +35,7 @@ import org.maven.ide.eclipse.project.IMavenProjectFacade;
  * @author Anton Kraev
  */
 public class RefactoringModelResources {
+  private static final String TMP_PROJECT_NAME = ".m2eclipse_refactoring";
   protected IFile pomFile;
   protected IFile tmpFile;
   protected ITextFileBuffer pomBuffer;
@@ -45,6 +46,22 @@ public class RefactoringModelResources {
   protected Map<String, PropertyInfo> properties;
   protected MavenProject project;
   protected CompoundCommand command;
+  protected static IProject tmpProject;
+  
+  protected IProject getTmpProject() {
+    if (tmpProject == null) {
+      tmpProject = ResourcesPlugin.getWorkspace().getRoot().getProject(TMP_PROJECT_NAME);
+    }
+    if (!tmpProject.exists()) {
+      try {
+        tmpProject.create(null);
+        tmpProject.open(null);
+      } catch(CoreException ex) {
+        MavenLogger.log(ex);
+      }
+    }
+    return tmpProject;
+  }
   
   public RefactoringModelResources(IMavenProjectFacade projectFacade) throws CoreException, IOException {
     textFileBufferManager = FileBuffers.getTextFileBufferManager();
@@ -54,25 +71,11 @@ public class RefactoringModelResources {
     pomBuffer = getBuffer(pomFile);
 
     //create temp file
-    IProject project = pomFile.getProject();
-    IPath wsPrefix = project.getWorkspace().getRoot().getLocation();
-    
-    @SuppressWarnings("deprecation")
-    IPath location = pomFile.getProject().getDescription().getLocation();
-    
-    String tmpName = File.createTempFile("pom", ".xml").getName();
-    if (location != null) {
-      // EMF2DOMSSE has problems with virtual resources from nested projects
-      // so temp file must be created under shell project (1st level)
-      location = location.append(tmpName);
-      location = location.removeFirstSegments(wsPrefix.segmentCount()).setDevice(null).makeAbsolute();
-      location = new Path(location.removeLastSegments(location.segmentCount() - 1).toString() + "/" +
-          location.removeFirstSegments(location.segmentCount() - 1));
-    } else {
-      location = pomFile.getParent().getFullPath().append(tmpName);
-    }
-    pomFile.copy(location, true, null);
-    tmpFile = pomFile.getWorkspace().getRoot().getFile(location);
+    IProject project = getTmpProject();
+    File f = File.createTempFile("pom", ".xml", project.getLocation().toFile());
+    f.delete();
+    tmpFile = project.getFile(f.getName());
+    pomFile.copy(tmpFile.getFullPath(), true, null);
     
     tmpModel = loadModel(tmpFile);
     tmpBuffer = getBuffer(tmpFile);
@@ -130,10 +133,16 @@ public class RefactoringModelResources {
     releaseBuffer(pomBuffer, pomFile);
     if (tmpFile != null && tmpFile.exists()) {
       releaseBuffer(tmpBuffer, tmpFile);
-      tmpFile.delete(true, null);
     }
   }
 
+  public static void cleanupTmpProject() throws CoreException {
+    if (tmpProject.exists()) {
+      tmpProject.delete(true, true, null);
+    }
+  }
+    
+  
   protected ITextFileBuffer getBuffer(IFile file) throws CoreException {
     textFileBufferManager.connect(file.getLocation(), LocationKind.NORMALIZE, null);
     return textFileBufferManager.getTextFileBuffer(file.getLocation(), LocationKind.NORMALIZE); 
