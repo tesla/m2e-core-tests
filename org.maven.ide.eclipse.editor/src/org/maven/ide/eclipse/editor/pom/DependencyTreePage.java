@@ -507,11 +507,6 @@ public class DependencyTreePage extends FormPage {
       }
     });
 
-    List<Viewer> viewers = new ArrayList<Viewer>();
-    viewers.add(this.treeViewer);
-    viewers.add(this.listViewer);
-    toolBarManager.add(new DependencyExcludeAction(viewers, (MavenPomEditor) getEditor()));
-
     form.updateToolBar();
 
     searchControl.getSearchText().addFocusListener(new FocusAdapter() {
