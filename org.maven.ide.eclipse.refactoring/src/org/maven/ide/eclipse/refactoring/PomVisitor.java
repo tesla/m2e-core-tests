@@ -8,9 +8,8 @@
 
 package org.maven.ide.eclipse.refactoring;
 
-import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.emf.common.command.CompoundCommand;
-import org.eclipse.emf.edit.domain.AdapterFactoryEditingDomain;
 
 
 /**
@@ -21,6 +20,11 @@ import org.eclipse.emf.edit.domain.AdapterFactoryEditingDomain;
 public interface PomVisitor {
   /**
    * Applies refactoring changes through undoable command
+   * 
+   * @param model - current model being visited
+   * @param pm - progress monitor
+   * @return command that executes changes (if any)
+   * @throws Exception 
    */
-  public CompoundCommand applyChanges(AdapterFactoryEditingDomain editingDomain, IFile file, RefactoringModelResources model);
+  public CompoundCommand applyChanges(RefactoringModelResources model, IProgressMonitor pm) throws Exception;
 }

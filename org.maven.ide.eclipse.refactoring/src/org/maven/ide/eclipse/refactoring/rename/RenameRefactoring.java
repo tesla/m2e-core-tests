@@ -24,7 +24,6 @@ import org.eclipse.emf.edit.command.SetCommand;
 import org.eclipse.emf.edit.domain.AdapterFactoryEditingDomain;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.maven.ide.components.pom.Model;
-import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.refactoring.AbstractPomRefactoring;
 import org.maven.ide.eclipse.refactoring.PomVisitor;
 import org.maven.ide.eclipse.refactoring.RefactoringModelResources;
@@ -155,13 +154,13 @@ public class RenameRefactoring extends AbstractPomRefactoring {
   
   /**
    * Applies new values in model
-   * @param editingDomain 
-   * 
    * @param editingDomain
    * @param renameProject 
+   * @throws NoSuchMethodException 
+   * @throws Exception 
    */
-  public CompoundCommand applyModel(AdapterFactoryEditingDomain editingDomain, RefactoringModelResources model, 
-      String newGroupId, String newArtifactId, String newVersion, boolean processRoot) {
+  public CompoundCommand applyModel(RefactoringModelResources model, 
+      String newGroupId, String newArtifactId, String newVersion, boolean processRoot) throws Exception {
     // find all affected objects in EMF model
     List<EObjectWithPath> affected = scanModel(model.getTmpModel(), this.oldGroupId, this.oldArtifactId, this.oldVersion, processRoot);
     
@@ -171,33 +170,28 @@ public class RenameRefactoring extends AbstractPomRefactoring {
     while (i.hasNext()) {
       EObjectWithPath obj = i.next();
       Object effectiveObj = getElement(model.getEffective(), obj.path.clone());
-      try {
-        if (effectiveObj == null) {
-          // System.out.println("cannot find effective for: " + obj.object);
-          continue;
-        }
-        Method method = effectiveObj.getClass().getMethod(GETVERSION, new Class[] {});
-        String effectiveVersion = (String) method.invoke(effectiveObj, EMPTY_OBJECT_ARRAY);
-        method = effectiveObj.getClass().getMethod(GETGROUP_ID, new Class[] {});
-        String effectiveGroupId = (String) method.invoke(effectiveObj, EMPTY_OBJECT_ARRAY);
-        // if version from effective POM is different from old version, skip it
-        if (this.oldVersion != null && !this.oldVersion.equals(effectiveVersion)) {
-          continue;
-        }
-        
-        // only set groupId if effective group id is the same as old group id
-        if (oldGroupId != null && oldGroupId.equals(effectiveGroupId))
-          applyFeature(editingDomain, model, GROUP_ID, newGroupId, command, obj);
-        // set artifact id unconditionally
-        applyFeature(editingDomain, model, ARTIFACT_ID, newArtifactId, command, obj);
-        // only set version if effective version is the same (already checked by the above)
-        // and new version is not empty
-        if (!"".equals(newVersion)) {
-          applyFeature(editingDomain, model, VERSION, newVersion, command, obj);
-        }
-        
-      } catch(Exception e) {
-        MavenLogger.log("Error processing refactoring", e);
+      if (effectiveObj == null) {
+        // System.out.println("cannot find effective for: " + obj.object);
+        continue;
+      }
+      Method method = effectiveObj.getClass().getMethod(GETVERSION, new Class[] {});
+      String effectiveVersion = (String) method.invoke(effectiveObj, EMPTY_OBJECT_ARRAY);
+      method = effectiveObj.getClass().getMethod(GETGROUP_ID, new Class[] {});
+      String effectiveGroupId = (String) method.invoke(effectiveObj, EMPTY_OBJECT_ARRAY);
+      // if version from effective POM is different from old version, skip it
+      if (this.oldVersion != null && !this.oldVersion.equals(effectiveVersion)) {
+        continue;
+      }
+      
+      // only set groupId if effective group id is the same as old group id
+      if (oldGroupId != null && oldGroupId.equals(effectiveGroupId))
+        applyFeature(editingDomain, model, GROUP_ID, newGroupId, command, obj);
+      // set artifact id unconditionally
+      applyFeature(editingDomain, model, ARTIFACT_ID, newArtifactId, command, obj);
+      // only set version if effective version is the same (already checked by the above)
+      // and new version is not empty
+      if (!"".equals(newVersion)) {
+        applyFeature(editingDomain, model, VERSION, newVersion, command, obj);
       }
     }
 
@@ -209,7 +203,7 @@ public class RenameRefactoring extends AbstractPomRefactoring {
       String feature, String newValue, CompoundCommand command, EObjectWithPath obj) {
     PropertyInfo info = null;
     String old = getValue(obj.object, feature);
-    if (old.startsWith("${")) {
+    if (old != null && old.startsWith("${")) {
       // this is a property, go find it
       String pName = old.substring(2);
       pName = pName.substring(0, pName.length() - 1).trim();
@@ -252,10 +246,10 @@ public class RenameRefactoring extends AbstractPomRefactoring {
   public PomVisitor getVisitor() {
     return new PomVisitor() {
 
-      public CompoundCommand applyChanges(AdapterFactoryEditingDomain editingDomain, IFile file, RefactoringModelResources current) {
+      public CompoundCommand applyChanges(RefactoringModelResources current, IProgressMonitor pm) throws Exception {
         //process <project> element only for the refactored file itself
-        boolean processRoot = file.getParent().equals(getFile().getParent());
-        return RenameRefactoring.this.applyModel(editingDomain, current, page.getNewGroupId(), 
+        boolean processRoot = current.getPomFile().equals(file);
+        return RenameRefactoring.this.applyModel(current, page.getNewGroupId(), 
             page.getNewArtifactId(), page.getNewVersion(), processRoot);
       }
     };
@@ -308,6 +302,14 @@ public class RenameRefactoring extends AbstractPomRefactoring {
   // after moving up, use this
   interface ScanVisitor {
     public boolean interested(EObject obj);
+  }
+
+  public boolean scanAllArtifacts() {
+    return true;
+  }
+
+  public String getTitle() {
+    return "Renaming " + file.getParent().getName();
   }
   
 }

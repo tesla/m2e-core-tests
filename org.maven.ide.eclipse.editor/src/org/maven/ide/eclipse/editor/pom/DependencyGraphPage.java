@@ -222,6 +222,8 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
       }
     });
 
+    toolBarManager.add(new DependencyExcludeAction(viewer, (MavenPomEditor) getEditor()));
+
     createActions();
     initPopupMenu();
 

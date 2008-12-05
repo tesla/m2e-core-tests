@@ -1028,12 +1028,14 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
               changed[0] = true;
             }
           };
-          
-          sourcePage.getTextViewer().addTextListener(listener);
-          try {
-            sourcePage.safelySanityCheckState(getEditorInput());
-          } finally {
-            sourcePage.getTextViewer().removeTextListener(listener);
+
+          if (sourcePage != null) {
+            sourcePage.getTextViewer().addTextListener(listener);
+            try {
+              sourcePage.safelySanityCheckState(getEditorInput());
+            } finally {
+              sourcePage.getTextViewer().removeTextListener(listener);
+            }
           }
           
           if(changed[0]) {
@@ -1075,6 +1077,10 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       return result; 
     }
     return sourcePage.getAdapter(adapter);
+  }
+
+  public IFile getPomFile() {
+    return pomFile;
   }
   
 }

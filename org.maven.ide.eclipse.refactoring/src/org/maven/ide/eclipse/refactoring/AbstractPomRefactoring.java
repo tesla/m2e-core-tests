@@ -8,6 +8,7 @@
 
 package org.maven.ide.eclipse.refactoring;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -36,11 +37,7 @@ import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
-import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
-import org.eclipse.ltk.core.refactoring.participants.ResourceChangeChecker;
-import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
-import org.eclipse.ltk.internal.core.refactoring.resource.RenameResourceProcessor;
 import org.maven.ide.components.pom.Model;
 import org.maven.ide.components.pom.Properties;
 import org.maven.ide.components.pom.PropertyPair;
@@ -54,18 +51,21 @@ import org.maven.ide.eclipse.refactoring.RefactoringModelResources.PropertyInfo;
  * 
  * @author Anton Kraev
  */
+@SuppressWarnings("restriction")
 public abstract class AbstractPomRefactoring extends Refactoring {
 
-  private static final String PROBLEMS_DURING_REFACTORING = "Problems during refactoring";
+  protected static final String PROBLEMS_DURING_REFACTORING = "Problems during refactoring";
 
   // main file that is being refactored
   protected IFile file;
   
   // maven plugin
-  MavenPlugin mavenPlugin;
+  protected MavenPlugin mavenPlugin;
 
   // editing domain
-  private AdapterFactoryEditingDomain editingDomain;
+  protected AdapterFactoryEditingDomain editingDomain;
+
+  private HashMap<String, RefactoringModelResources> models;
 
   public AbstractPomRefactoring(IFile file) {
     this.file = file;
@@ -82,7 +82,7 @@ public abstract class AbstractPomRefactoring extends Refactoring {
         commandStack, new HashMap<Resource, Boolean>());
   }
 
-  //this gets actual refactoring visitor
+  // this gets actual refactoring visitor
   public abstract PomVisitor getVisitor();
   
   @Override
@@ -92,34 +92,38 @@ public abstract class AbstractPomRefactoring extends Refactoring {
   
   @Override
   public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
-    CompositeChange res = new CompositeChange("Renaming " + file.getParent().getName());
+    CompositeChange res = new CompositeChange(getTitle());
     IMavenProjectFacade[] projects = mavenPlugin.getMavenProjectManager().getProjects();
     pm.beginTask("Refactoring", projects.length);
     
-    Map<String, RefactoringModelResources> models = new HashMap<String, RefactoringModelResources>();
+    models = new HashMap<String, RefactoringModelResources>();
     
     try {
-      //load all models
-      //XXX: assumption: artifactId is unique within workspace
+      // load all models
+      // XXX: assumption: artifactId is unique within workspace
       for(IMavenProjectFacade projectFacade : projects) {
-        pm.setTaskName("Loading " + projectFacade.getProject().getName());
-        //skip closed projects
-        if (!projectFacade.getProject().isAccessible() || !projectFacade.getPom().isAccessible())
+        // skip "other" projects if not requested
+        if (!scanAllArtifacts() && !projectFacade.getPom().equals(file)) {
           continue;
-        RefactoringModelResources current = new RefactoringModelResources(projectFacade);
-        models.put(current.effective.getArtifactId(), current);
-        pm.worked(1);
+        }
+        
+        // skip closed projects
+        if (!projectFacade.getProject().isAccessible() || !projectFacade.getPom().isAccessible()) {
+          continue;
+        }
+
+        loadModel(projectFacade, pm);
       }
       
-      //construct properties for all models
+      // construct properties for all models
       for (String artifact: models.keySet()) {
         RefactoringModelResources model = models.get(artifact);
         Map<String, PropertyInfo> properties = new HashMap<String, PropertyInfo>();
         
-        //find all workspace parents
+        // find all workspace parents
         List<RefactoringModelResources> workspaceParents = new ArrayList<RefactoringModelResources>();
         MavenProject current = model.getProject();
-        //add itself
+        // add itself
         workspaceParents.add(model);
         while (current.getParent() != null) {
           MavenProject parentProject = current.getParent();
@@ -156,15 +160,20 @@ public abstract class AbstractPomRefactoring extends Refactoring {
         model.setProperties(properties);
       }
 
-      //calculate the list of affected models
+      // calculate the list of affected models
       for (String artifact: models.keySet()) {
         RefactoringModelResources model = models.get(artifact);
-        model.setCommand(getVisitor().applyChanges(editingDomain, file, model));
+        model.setCommand(getVisitor().applyChanges(model, pm));
       }
       
-      //process all refactored properties, creating more commands
+      // process all refactored properties, creating more commands
       for (String artifact: models.keySet()) {
         RefactoringModelResources model = models.get(artifact);
+        
+        if (model.getProperties() == null) {
+          continue;
+        }
+
         for (String pName: model.getProperties().keySet()) {
           PropertyInfo info = model.getProperties().get(pName);
           if (info.getNewValue() != null) {
@@ -222,7 +231,21 @@ public abstract class AbstractPomRefactoring extends Refactoring {
     return res;
   }
 
-  protected void processCommand(RefactoringModelResources model, CompositeChange res) {
+  // title for a composite change
+  public abstract String getTitle();
+
+  protected RefactoringModelResources loadModel(IMavenProjectFacade projectFacade, IProgressMonitor pm) throws CoreException, IOException {
+    pm.setTaskName("Loading " + projectFacade.getProject().getName());
+    RefactoringModelResources current = new RefactoringModelResources(projectFacade);
+    models.put(current.effective.getArtifactId(), current);
+    pm.worked(1);
+    return current;
+  }
+  
+  // this method determines whether all artifacts will be sent to visitor or only main one
+  public abstract boolean scanAllArtifacts();
+
+  protected void processCommand(RefactoringModelResources model, CompositeChange res) throws Exception {
     CompoundCommand command = model.getCommand();
     if (command == null) {
       return;
@@ -241,10 +264,6 @@ public abstract class AbstractPomRefactoring extends Refactoring {
     return null;
   }
   
-  protected IFile getFile() {
-    return file;
-  }
-
   public Model getModel() {
     try {
       return RefactoringModelResources.loadModel(file);

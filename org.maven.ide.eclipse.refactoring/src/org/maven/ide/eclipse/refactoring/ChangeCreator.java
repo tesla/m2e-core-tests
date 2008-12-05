@@ -19,6 +19,8 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
+import org.eclipse.text.edits.DeleteEdit;
+import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.maven.ide.eclipse.core.MavenLogger;
@@ -45,28 +47,48 @@ public class ChangeCreator {
     this.label = label;
   }
 
-  public TextFileChange createChange() {
+  public TextFileChange createChange() throws Exception {
     TextFileChange change = new TextFileChange(label, oldFile);
-    change.setSaveMode(TextFileChange.FORCE_SAVE);
+    // change.setSaveMode(TextFileChange.FORCE_SAVE);
     change.setEdit(new MultiTextEdit());
     Object leftSide = new LineComparator(oldDocument);
     Object rightSide = new LineComparator(newDocument);
 
     RangeDifference[] differences = RangeDifferencer.findDifferences((IRangeComparator) leftSide, (IRangeComparator) rightSide);
+    int insertOffset = 0;
     for(int i = 0; i < differences.length; i++ ) {
       RangeDifference curr = differences[i];
-      if (curr.kind() == RangeDifference.CHANGE && curr.rightLength() > 0) {
+      // when comparing 2 files, only RangeDifference.CHANGE is possible, no need to test
+      if (curr.rightLength() == curr.leftLength()) {
+        // replace
         int startLine = curr.rightStart();
         int endLine = curr.rightEnd() - 1;
         for(int j = startLine; j <= endLine; j++ ) {
           int newPos = curr.leftStart() - startLine + j;
-          try {
-            String newText = newDocument.get(newDocument.getLineOffset(newPos), newDocument.getLineLength(newPos));
-            change.addEdit(new ReplaceEdit(oldDocument.getLineOffset(j), oldDocument.getLineLength(j), newText));
-          } catch(BadLocationException ex) {
-            ex.printStackTrace();
-          }
+          String newText = newDocument.get(newDocument.getLineOffset(newPos), newDocument.getLineLength(newPos));
+          change.addEdit(new ReplaceEdit(oldDocument.getLineOffset(j), oldDocument.getLineLength(j), newText));
         }
+      } else if (curr.rightLength() > 0 && curr.leftLength() == 0) {
+        // insert
+        int startLine = curr.rightStart();
+        int endLine = curr.rightEnd() - 1;
+        int posInsert = oldDocument.getLineOffset(curr.leftStart());
+        for(int j = startLine; j <= endLine; j++ ) {
+          int newPos = curr.leftStart() - startLine + j + insertOffset;
+          String newText = newDocument.get(newDocument.getLineOffset(newPos), newDocument.getLineLength(newPos));
+          change.addEdit(new InsertEdit(posInsert, newText));
+        }
+        insertOffset += curr.rightEnd() - curr.rightStart();
+      } else if (curr.leftLength() > 0 && curr.rightLength() == 0) {
+        // delete
+        int startLine = curr.leftStart();
+        int endLine = curr.leftEnd() - 1;
+        for(int j = startLine; j <= endLine; j++ ) {
+          change.addEdit(new DeleteEdit(oldDocument.getLineOffset(startLine), oldDocument.getLineLength(j)));
+        }
+        insertOffset -= curr.leftEnd() - curr.leftStart();
+      } else {
+        // unhandled
       }
     }
     return change;
