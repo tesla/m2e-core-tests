@@ -11,7 +11,7 @@
 
   <extension point="org.eclipse.ui.popupMenus">
      <objectContribution
-           id="org.maven.ide.eclipse.editor.pomContributor"
+           id="org.maven.ide.eclipse.refactoring.rename.pomContributor"
            adaptable="true"
            nameFilter="pom.xml"
            objectClass="org.eclipse.core.resources.IFile">
@@ -23,7 +23,7 @@
         <!-- add visibility condition for managet poms -->      
      </objectContribution>
      <objectContribution
-           id="org.maven.ide.eclipse.editor.projectContributor"
+           id="org.maven.ide.eclipse.refactoring.rename.projectContributor"
            adaptable="true"
            objectClass="org.eclipse.core.resources.IProject">
         <action id="org.maven.ide.eclipse.editor.RenameAction"
@@ -38,37 +38,59 @@
           </and>
         </visibility>
      </objectContribution>
-  </extension>
-<extension
-       id="popupMenus"
-       point="org.eclipse.ui.popupMenus">
-    <viewerContribution
-          id="org.maven.ide.eclipse.refactoring.menuContributions"
-          targetID="org.maven.ide.eclipse.editor.MavenPomEditor.refactoring">
-       <action
-             class="org.maven.ide.eclipse.refactoring.exclude.DependencyExcludeAction"
-             enablesFor="1"
-             icon="icons/exclude.gif"
-             id="org.maven.ide.eclipse.refactoring.exclude.DependencyExcludeAction"
-             label="Exclude artifact"
-             menubarPath="org.maven.ide.eclipse.editor.MavenPomEditor.refactoring"
-             tooltip="Exclude artifact"/>
-    </viewerContribution>
-   <objectContribution id="org.maven.ide.eclipse.classpathMenu" adaptable="true"
-         objectClass="org.eclipse.jdt.core.IPackageFragmentRoot">
-     <action id="org.maven.ide.eclipse.refactoring.exclude.DependencyExcludeAction"
-             class="org.maven.ide.eclipse.refactoring.exclude.DependencyExcludeAction"
-             label="Exclude artifact"
-             style="pulldown"
-             menubarPath="additions"
-             enablesFor="1"
-             icon="icons/exclude.gif"/>
+   <objectContribution id="org.maven.ide.eclipse.refactoring.exclude.jarContributor" adaptable="true"
+         objectClass="org.eclipse.jdt.internal.core.JarPackageFragmentRoot">
+     <action
+           class="org.maven.ide.eclipse.refactoring.exclude.DependencyExcludeAction"
+           enablesFor="1"
+           icon="icons/exclude.gif"
+           id="org.maven.ide.eclipse.projectMenu.action"
+           label="Exclude Maven artifact..."
+           menubarPath="additions"/>
      <!--
      <visibility>
         <objectState name="name" value="pom.xml"/>
      </visibility>
      -->
    </objectContribution>
- </extension>
-
+   <objectContribution
+         adaptable="true"
+         id="org.maven.ide.eclipse.refactoring.exclude.projectContributor"
+         objectClass="org.eclipse.jdt.internal.ui.packageview.ClassPathContainer$RequiredProjectWrapper">
+      <action
+            class="org.maven.ide.eclipse.refactoring.exclude.DependencyExcludeAction"
+            enablesFor="1"
+            icon="icons/exclude.gif"
+            id="org.maven.ide.eclipse.projectMenu.action"
+            label="Exclude Maven artifact..."
+            menubarPath="additions">
+      </action>
+   </objectContribution>
+   <objectContribution
+         adaptable="true"
+         id="org.maven.ide.eclipse.refactoring.exclude.artifactContributor"
+         objectClass="org.apache.maven.artifact.Artifact">
+      <action
+            class="org.maven.ide.eclipse.refactoring.exclude.DependencyExcludeAction"
+            enablesFor="1"
+            icon="icons/exclude.gif"
+            id="org.maven.ide.eclipse.projectMenu.action"
+            label="Exclude Maven artifact..."
+            menubarPath="additions">
+      </action>
+   </objectContribution>
+   <objectContribution
+         adaptable="true"
+         id="org.maven.ide.eclipse.refactoring.exclude.dependencyContributor"
+         objectClass="org.apache.maven.shared.dependency.tree.DependencyNode">
+      <action
+            class="org.maven.ide.eclipse.refactoring.exclude.DependencyExcludeAction"
+            enablesFor="1"
+            icon="icons/exclude.gif"
+            id="org.maven.ide.eclipse.projectMenu.action"
+            label="Exclude Maven artifact..."
+            menubarPath="additions">
+      </action>
+   </objectContribution>
+  </extension>
 </plugin>

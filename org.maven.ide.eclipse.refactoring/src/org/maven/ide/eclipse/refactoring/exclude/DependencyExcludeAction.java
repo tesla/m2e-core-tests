@@ -1,11 +1,15 @@
 package org.maven.ide.eclipse.refactoring.exclude;
 
-import java.lang.reflect.Method;
 import java.util.List;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.model.Model;
+import org.apache.maven.shared.dependency.tree.DependencyNode;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer.RequiredProjectWrapper;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -15,21 +19,38 @@ import org.eclipse.ui.IEditorActionDelegate;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.PlatformUI;
+import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.actions.SelectionUtil;
+import org.maven.ide.eclipse.embedder.ArtifactKey;
 
 /**
  * This action is intended to be used in popup menus
  * 
  * @author Anton Kraev
  */
+@SuppressWarnings("restriction")
 public class DependencyExcludeAction implements IEditorActionDelegate {
-  Artifact selectedArtifact;
-  private IFile pomFile;
+  private Artifact artifact;
+  private IFile file;
+  private ArtifactKey key;
+  private Model model;
 
   public void run(IAction action) {
-    if (selectedArtifact != null) {
+    if ((artifact != null || key != null || model != null) && file != null) {
+      String artifactId;
+      String groupId;
+      if (artifact != null) {
+        groupId = artifact.getGroupId();
+        artifactId = artifact.getArtifactId(); 
+      } else if (key != null) {
+        groupId = key.getGroupId();
+        artifactId = key.getArtifactId(); 
+      } else {
+        groupId = model.getGroupId();
+        artifactId = model.getArtifactId(); 
+      }
       Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-      MavenExcludeWizard wizard = new MavenExcludeWizard(pomFile, 
-          selectedArtifact.getGroupId(), selectedArtifact.getArtifactId());
+      MavenExcludeWizard wizard = new MavenExcludeWizard(file, groupId, artifactId);
       RefactoringWizardOpenOperation op = new RefactoringWizardOpenOperation(wizard);
       String titleForFailedChecks = ""; //$NON-NLS-1$
       try {
@@ -41,13 +62,12 @@ public class DependencyExcludeAction implements IEditorActionDelegate {
   }
 
   public void selectionChanged(IAction action, ISelection selection) {
-    //get file
-    IEditorPart part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
-    if (part != null && part.getEditorInput() instanceof IFileEditorInput) {
-      IFileEditorInput input = (IFileEditorInput) part.getEditorInput();
-      pomFile = input.getFile();
-    }
-
+    //init
+    file = null;
+    key = null;
+    artifact = null;
+    model = null;
+    
     //get artifact
     if (selection instanceof IStructuredSelection) {
       IStructuredSelection ssel = (IStructuredSelection) selection;
@@ -56,23 +76,52 @@ public class DependencyExcludeAction implements IEditorActionDelegate {
         if (sel.size() == 1) {
           Object selected = sel.get(0);
           if (selected instanceof Artifact) {
-            selectedArtifact = (Artifact) selected;
-            return;
-          } else if (selected instanceof IPackageFragmentRoot) {
-            //IPackageFragmentRoot root = (IPackageFragmentRoot) selected;
-          } else if (selected.getClass().getName().endsWith("DependencyNode")) {
-            Object dependencyNode = selected;
+            artifact = (Artifact) selected;
+            file = getFileFromEditor();
+          } else if (selected instanceof DependencyNode) {
+            artifact = ((DependencyNode) selected).getArtifact();
+            file = getFileFromEditor();
+          } else if (selected instanceof RequiredProjectWrapper) {
+            RequiredProjectWrapper w = (RequiredProjectWrapper) selected;
+            IFile pomFile = w.getProject().getProject().getFile("pom.xml");
             try {
-              Method m = dependencyNode.getClass().getMethod("getArtifact", new Class[] {});
-              selectedArtifact = (Artifact) m.invoke(dependencyNode, new Object[] {});
-            } catch(Exception ex) {
-              //ignore
+              model = MavenPlugin.getDefault().getMavenModelManager().readMavenModel(pomFile);
+            } catch(CoreException ex) {
+              ex.printStackTrace();
             }
-            return;
+            file = getFileFromProject(w.getParentClassPathContainer().getJavaProject());
+          } else {
+            key = SelectionUtil.getType(selected, ArtifactKey.class);
+            if (selected instanceof IJavaElement) {
+              IJavaElement el = (IJavaElement) selected;
+              file = getFileFromProject(el.getParent().getJavaProject());
+            }
           }
         }
       }
     }
+    
+    if ((artifact != null || key != null || model != null) && file != null) {
+      action.setEnabled(true);
+    } else {
+      action.setEnabled(false);
+    }
+  }
+
+  /**
+   * @param javaProject
+   */
+  private IFile getFileFromProject(IJavaProject javaProject) {
+    return javaProject.getProject().getFile("pom.xml");
+  }
+
+  private IFile getFileFromEditor() {
+    IEditorPart part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
+    if (part != null && part.getEditorInput() instanceof IFileEditorInput) {
+      IFileEditorInput input = (IFileEditorInput) part.getEditorInput();
+      return input.getFile();
+    }
+    return null;
   }
 
   public void setActiveEditor(IAction action, IEditorPart targetEditor) {

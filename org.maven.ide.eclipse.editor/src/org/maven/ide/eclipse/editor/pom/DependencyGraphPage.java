@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
@@ -44,7 +45,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.forms.IManagedForm;
-import org.eclipse.ui.forms.editor.FormPage;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.zest.core.viewers.AbstractZoomableViewer;
 import org.eclipse.zest.core.viewers.GraphViewer;
@@ -67,7 +67,7 @@ import org.maven.ide.eclipse.editor.MavenEditorImages;
  * 
  * @author Eugene Kuleshov
  */
-public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchPart {
+public class DependencyGraphPage extends MavenPomEditorPage implements IZoomableWorkbenchPart {
 
   private static final String DEPENDENCY_GRAPH = "Dependency Graph";
 
@@ -216,8 +216,7 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
 
     toolBarManager.add(new Action("Refresh", MavenEditorImages.REFRESH) {
       public void run() {
-        // viewer.getGraphControl().applyLayout();
-        updateGraphAsync(true, currentScope);
+        loadData();
       }
     });
 
@@ -419,7 +418,7 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
 
     Menu menu = menuMgr.createContextMenu(viewer.getControl());
     viewer.getControl().setMenu(menu);
-    getSite().registerContextMenu(MavenPomEditor.EDITOR_ID + ".refactoring", menuMgr, viewer);
+    getSite().registerContextMenu(MavenPomEditor.EDITOR_ID + ".graph", menuMgr, viewer);
   }
 
   void updateScopeActions(IAction action) {
@@ -635,6 +634,14 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
         menu = null;
       }
     }
+  }
+
+  public void loadData() {
+    updateGraphAsync(true, currentScope);
+  }
+
+  public void updateView(Notification notification) {
+    //ignore fine-grained notifications
   }
 
 }

@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
@@ -70,7 +71,6 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.forms.IManagedForm;
-import org.eclipse.ui.forms.editor.FormPage;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
@@ -88,7 +88,7 @@ import org.maven.ide.eclipse.project.MavenProjectManager;
 /**
  * @author Eugene Kuleshov
  */
-public class DependencyTreePage extends FormPage {
+public class DependencyTreePage extends MavenPomEditorPage {
 
   private static final String DEPENDENCY_HIERARCHY = "Dependency Hierarchy";
 
@@ -157,19 +157,19 @@ public class DependencyTreePage extends FormPage {
     // compatibility proxy to support Eclipse 3.2
     FormUtils.decorateHeader(managedForm.getToolkit(), form.getForm());
 
-    initPopupMenu();
+    initPopupMenu(treeViewer, ".tree");
+    initPopupMenu(listViewer, ".list");
 
     loadData(false);
   }
 
-  private void initPopupMenu() {
-  MenuManager menuMgr = new MenuManager("#PopupMenu");
-  menuMgr.setRemoveAllWhenShown(true);
-  Menu menu = menuMgr.createContextMenu(listViewer.getControl());
-  listViewer.getControl().setMenu(menu);
-  treeViewer.getControl().setMenu(menu);
-  getSite().registerContextMenu(MavenPomEditor.EDITOR_ID + ".refactoring", menuMgr, treeViewer);
-}
+  private void initPopupMenu(Viewer viewer, String id) {
+    MenuManager menuMgr = new MenuManager("#PopupMenu");
+    menuMgr.setRemoveAllWhenShown(true);
+    Menu menu = menuMgr.createContextMenu(viewer.getControl());
+    viewer.getControl().setMenu(menu);
+    getSite().registerContextMenu(MavenPomEditor.EDITOR_ID + id, menuMgr, viewer);
+  }
 
   String formatFormTitle() {
     return DEPENDENCY_HIERARCHY + " [" + currentScope + "]";
@@ -1114,6 +1114,16 @@ public class DependencyTreePage extends FormPage {
         loadData(false);
       }
     }
+  }
+
+  @Override
+  public void loadData() {
+    loadData(true);
+  }
+
+  @Override
+  public void updateView(Notification notification) {
+    //ignore fine-grained notifications
   }
   
 }
