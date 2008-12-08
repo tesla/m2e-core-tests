@@ -39,5 +39,36 @@
         </visibility>
      </objectContribution>
   </extension>
+<extension
+       id="popupMenus"
+       point="org.eclipse.ui.popupMenus">
+    <viewerContribution
+          id="org.maven.ide.eclipse.refactoring.menuContributions"
+          targetID="org.maven.ide.eclipse.editor.MavenPomEditor.refactoring">
+       <action
+             class="org.maven.ide.eclipse.refactoring.exclude.DependencyExcludeAction"
+             enablesFor="1"
+             icon="icons/exclude.gif"
+             id="org.maven.ide.eclipse.refactoring.exclude.DependencyExcludeAction"
+             label="Exclude artifact"
+             menubarPath="org.maven.ide.eclipse.editor.MavenPomEditor.refactoring"
+             tooltip="Exclude artifact"/>
+    </viewerContribution>
+   <objectContribution id="org.maven.ide.eclipse.classpathMenu" adaptable="true"
+         objectClass="org.eclipse.jdt.core.IPackageFragmentRoot">
+     <action id="org.maven.ide.eclipse.refactoring.exclude.DependencyExcludeAction"
+             class="org.maven.ide.eclipse.refactoring.exclude.DependencyExcludeAction"
+             label="Exclude artifact"
+             style="pulldown"
+             menubarPath="additions"
+             enablesFor="1"
+             icon="icons/exclude.gif"/>
+     <!--
+     <visibility>
+        <objectState name="name" value="pom.xml"/>
+     </visibility>
+     -->
+   </objectContribution>
+ </extension>
 
 </plugin>

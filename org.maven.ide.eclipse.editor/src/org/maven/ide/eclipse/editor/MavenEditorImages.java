@@ -63,8 +63,6 @@ public class MavenEditorImages {
   
   public static final ImageDescriptor REFRESH = create("refresh.gif"); 
   
-  public static final ImageDescriptor EXCLUDE = create("exclude.gif"); 
-  
   public static final ImageDescriptor COLLAPSE_ALL = create("collapseall.gif");
 
   public static final ImageDescriptor EXPAND_ALL = create("expandall.gif");

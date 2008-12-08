@@ -121,11 +121,7 @@ public class ExcludeRefactoring extends AbstractPomRefactoring {
       }
 
       private boolean checkTrail(String trail, String groupId, String artifactId) {
-        boolean res = trail.startsWith(groupId + ":" + artifactId + ":");
-        if (res) {
-          System.out.println(trail + " " + groupId + ":" + artifactId);
-        }
-        return res;
+        return trail.startsWith(groupId + ":" + artifactId + ":");
       }
       
       private void addExclusion(CompoundCommand command, Dependency dep) {

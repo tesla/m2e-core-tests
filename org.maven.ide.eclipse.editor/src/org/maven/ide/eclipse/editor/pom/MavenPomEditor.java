@@ -141,6 +141,8 @@ import org.maven.ide.eclipse.project.ResolverConfiguration;
 public class MavenPomEditor extends FormEditor implements IResourceChangeListener, IShowEditorInput, IGotoMarker,
     ISearchEditorAccess, IEditingDomainProvider {
 
+  public static final String EDITOR_ID = "org.maven.ide.eclipse.editor.MavenPomEditor";
+
   private static final String EXTENSION_FACTORIES = MavenEditorPlugin.PLUGIN_ID + ".pageFactories";
 
   private static final String ELEMENT_PAGE = "factory";

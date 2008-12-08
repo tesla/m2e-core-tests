@@ -31,6 +31,7 @@ import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuCreator;
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.IMessageProvider;
@@ -156,8 +157,19 @@ public class DependencyTreePage extends FormPage {
     // compatibility proxy to support Eclipse 3.2
     FormUtils.decorateHeader(managedForm.getToolkit(), form.getForm());
 
+    initPopupMenu();
+
     loadData(false);
   }
+
+  private void initPopupMenu() {
+  MenuManager menuMgr = new MenuManager("#PopupMenu");
+  menuMgr.setRemoveAllWhenShown(true);
+  Menu menu = menuMgr.createContextMenu(listViewer.getControl());
+  listViewer.getControl().setMenu(menu);
+  treeViewer.getControl().setMenu(menu);
+  getSite().registerContextMenu(MavenPomEditor.EDITOR_ID + ".refactoring", menuMgr, treeViewer);
+}
 
   String formatFormTitle() {
     return DEPENDENCY_HIERARCHY + " [" + currentScope + "]";

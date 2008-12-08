@@ -43,7 +43,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
-import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.editor.FormPage;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
@@ -420,7 +419,7 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
 
     Menu menu = menuMgr.createContextMenu(viewer.getControl());
     viewer.getControl().setMenu(menu);
-    // getSite().registerContextMenu(menuMgr, viewer);
+    getSite().registerContextMenu(MavenPomEditor.EDITOR_ID + ".refactoring", menuMgr, viewer);
   }
 
   void updateScopeActions(IAction action) {
@@ -471,7 +470,7 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
   }
 
   void fillContextMenu(IMenuManager manager) {
-    manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+    //manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 
     if(!viewer.getSelection().isEmpty()) {
       manager.add(openAction);
