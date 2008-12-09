@@ -9,7 +9,9 @@
 package org.maven.ide.eclipse.refactoring.exclude;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
@@ -20,6 +22,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.edit.command.AddCommand;
+import org.eclipse.emf.edit.command.RemoveCommand;
 import org.eclipse.emf.edit.command.SetCommand;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.maven.ide.components.pom.Dependency;
@@ -59,12 +62,18 @@ public class ExcludeRefactoring extends AbstractPomRefactoring {
       public CompoundCommand applyChanges(RefactoringModelResources resources, IProgressMonitor pm) throws CoreException, IOException {
         CompoundCommand command = new CompoundCommand();
 
+        List<Dependency> toRemove = new ArrayList<Dependency>();
         Model model = resources.getTmpModel();
         
         // scan dependencies
         Iterator<?> it = model.getDependencies().eContents().iterator();
         while (it.hasNext()) {
           Dependency dep = (Dependency) it.next();
+          if (dep.getGroupId().equals(excludedGroupId) && dep.getArtifactId().equals(excludedArtifactId)) {
+            toRemove.add(dep);
+            continue;
+          }
+          
           // XXX do we need to scan on facade at all?
           IMavenProjectFacade facade = mavenPlugin.getMavenProjectManager().getMavenProject(dep.getGroupId(), dep.getArtifactId(), dep.getVersion());
           
@@ -113,6 +122,11 @@ public class ExcludeRefactoring extends AbstractPomRefactoring {
               }
             }
           }
+        }
+        
+        Iterator rem = toRemove.iterator();
+        while (rem.hasNext()) {
+          command.append(new RemoveCommand(editingDomain, model.getDependencies().getDependency(), rem.next()));
         }
         
         // XXX scan management as well
