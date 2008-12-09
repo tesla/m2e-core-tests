@@ -19,7 +19,7 @@
               class="org.maven.ide.eclipse.refactoring.rename.RenameArtifactAction"
               enablesFor="1"
               label="Rename Maven artifact..."
-              menubarPath="org.eclipse.jdt.ui.refactoring.menu/Maven refactoring"/>
+              menubarPath="org.eclipse.jdt.ui.refactoring.menu/MavenRefactoring"/>
         <!-- add visibility condition for managet poms -->      
      </objectContribution>
      <objectContribution
@@ -30,7 +30,7 @@
               class="org.maven.ide.eclipse.refactoring.rename.RenameArtifactAction"
               enablesFor="1"
               label="Rename Maven artifact..."
-              menubarPath="org.eclipse.jdt.ui.refactoring.menu/Maven refactoring"/>
+              menubarPath="org.eclipse.jdt.ui.refactoring.menu/MavenRefactoring"/>
         <visibility>
           <and>
             <objectState name="open" value="true"/>
