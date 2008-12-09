@@ -311,17 +311,17 @@ public class MavenModelManager {
       } catch(MavenEmbedderException ex) {
         String msg = "Can't create Maven embedder";
         MavenLogger.log(msg, ex);
-        throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
+        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
 
       } catch(ComponentLookupException ex) {
         String msg = "Component lookup error";
         MavenLogger.log(msg, ex);
-        throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
+        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
 
       } catch(DependencyTreeBuilderException ex) {
         String msg = "Project read error";
         MavenLogger.log(msg, ex);
-        throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
+        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
 
       }
     }

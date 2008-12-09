@@ -90,8 +90,6 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   
   private static final String PREFS_ARCHETYPES = "archetypesInfo.xml";
 
-  public static final String PLUGIN_ID = "org.maven.ide.eclipse";
-  
   // The shared instance
   private static MavenPlugin plugin;
 
