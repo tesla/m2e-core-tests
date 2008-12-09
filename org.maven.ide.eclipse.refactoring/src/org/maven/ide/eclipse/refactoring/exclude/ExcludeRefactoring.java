@@ -12,9 +12,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.shared.dependency.tree.DependencyNode;
+import org.apache.maven.shared.dependency.tree.traversal.DependencyNodeVisitor;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -30,7 +31,7 @@ import org.maven.ide.components.pom.Exclusion;
 import org.maven.ide.components.pom.ExclusionsType;
 import org.maven.ide.components.pom.Model;
 import org.maven.ide.components.pom.impl.PomFactoryImpl;
-import org.maven.ide.eclipse.project.IMavenProjectFacade;
+import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.refactoring.AbstractPomRefactoring;
 import org.maven.ide.eclipse.refactoring.PomVisitor;
 import org.maven.ide.eclipse.refactoring.RefactoringModelResources;
@@ -60,69 +61,55 @@ public class ExcludeRefactoring extends AbstractPomRefactoring {
 
       @SuppressWarnings("unchecked")
       public CompoundCommand applyChanges(RefactoringModelResources resources, IProgressMonitor pm) throws CoreException, IOException {
-        CompoundCommand command = new CompoundCommand();
+        final CompoundCommand command = new CompoundCommand();
 
-        List<Dependency> toRemove = new ArrayList<Dependency>();
+        final List<Dependency> toRemove = new ArrayList<Dependency>();
+        
         Model model = resources.getTmpModel();
         
-        // scan dependencies
-        Iterator<?> it = model.getDependencies().eContents().iterator();
-        while (it.hasNext()) {
-          Dependency dep = (Dependency) it.next();
-          if (dep.getGroupId().equals(excludedGroupId) && dep.getArtifactId().equals(excludedArtifactId)) {
-            toRemove.add(dep);
-            continue;
-          }
-          
-          // XXX do we need to scan on facade at all?
-          IMavenProjectFacade facade = mavenPlugin.getMavenProjectManager().getMavenProject(dep.getGroupId(), dep.getArtifactId(), dep.getVersion());
-          
-          if (facade == null) {
-            // find by artifacts for binary dependencies
-            Set<Artifact> artifacts = resources.getProject().getArtifacts();
-            boolean excluded = false;
-            for(Artifact a : artifacts) {
-              if (a.getGroupId().equals(excludedGroupId) &&
-                  a.getArtifactId().equals(excludedArtifactId)) {
-                Iterator<String> trail = a.getDependencyTrail().iterator();
-                boolean hasDep = false;
-                while (trail.hasNext()) {
-                  String current = trail.next();
-                  if (!hasDep) {
-                    hasDep = checkTrail(current, dep.getGroupId(), dep.getArtifactId());
-                  }
+        final List<Dependency> deps = model.getDependencies().getDependency();
 
-                  if (hasDep) {
-                    break;
-                  }
-                }
-                
-                if (hasDep) {
-                  excluded = true;
-                  break;
-                }
+        pm.beginTask("Loading dependency tree", 1);
+        DependencyNode root = MavenPlugin.getDefault().getMavenModelManager().readDependencies(resources.getPomFile(), true, pm, Artifact.SCOPE_COMPILE);
+        pm.worked(1);
+        root.accept(new DependencyNodeVisitor() {
+
+          private Dependency findDependency(String groupId, String artifactId) {
+            for (Dependency d: deps) {
+              if (d.getGroupId().equals(groupId) && d.getArtifactId().equals(artifactId)) {
+                return d;
               }
             }
-
-            if (excluded) {
-              addExclusion(command, dep);
-            }
-          } else {
-            // find by model for dependencies in workspace
-            RefactoringModelResources res = loadModel(facade, pm);
-
-            // XXX scan management as well
-            Iterator<?> itEffective = res.getEffective().getDependencies().iterator();
-            while (itEffective.hasNext()) {
-              org.apache.maven.model.Dependency depEffective = (org.apache.maven.model.Dependency) itEffective.next();
-              if (depEffective.getArtifactId().equals(excludedArtifactId) && 
-                  depEffective.getGroupId().equals(excludedGroupId)) {
-                //found, need to add exclusion
-                addExclusion(command, dep);
-              }
-            }
+            return null;
           }
-        }
+          
+          public boolean endVisit(DependencyNode arg0) {
+            return true;
+          }
+
+          public boolean visit(DependencyNode node) {
+            Artifact a = node.getArtifact();
+            if (a.getGroupId().equals(excludedGroupId) && a.getArtifactId().equals(excludedArtifactId)) {
+              DependencyNode parent = node.getParent();
+              if (parent == null) {
+                // do not touch itself
+                return false; 
+              }
+              if (parent.getParent() == null) {
+                // need to remove first-level dependency
+                toRemove.add(findDependency(excludedGroupId, excludedArtifactId));
+                return false;
+              }
+              while (parent.getParent().getParent() != null) {
+                parent = parent.getParent();
+              }
+              addExclusion(command, findDependency(parent.getArtifact().getGroupId(), parent.getArtifact().getArtifactId()));
+              
+            }
+            return true;
+          }
+          
+        });
         
         Iterator rem = toRemove.iterator();
         while (rem.hasNext()) {
@@ -134,10 +121,6 @@ public class ExcludeRefactoring extends AbstractPomRefactoring {
         return command;
       }
 
-      private boolean checkTrail(String trail, String groupId, String artifactId) {
-        return trail.startsWith(groupId + ":" + artifactId + ":");
-      }
-      
       private void addExclusion(CompoundCommand command, Dependency dep) {
         Exclusion exclusion = PomFactoryImpl.eINSTANCE.createExclusion();
         exclusion.setArtifactId(excludedArtifactId);

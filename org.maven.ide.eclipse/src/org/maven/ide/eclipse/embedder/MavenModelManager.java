@@ -15,7 +15,9 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -34,6 +36,7 @@ import org.xml.sax.InputSource;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
@@ -42,9 +45,25 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.jem.util.emf.workbench.EMFWorkbenchContextBase;
 import org.eclipse.wst.common.internal.emf.resource.EMF2DOMRenderer;
 
+import org.codehaus.plexus.PlexusContainer;
+import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.factory.ArtifactFactory;
+import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
+import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.resolver.ArtifactCollector;
+import org.apache.maven.artifact.resolver.filter.ScopeArtifactFilter;
 import org.apache.maven.embedder.MavenEmbedder;
+import org.apache.maven.embedder.MavenEmbedderException;
+import org.apache.maven.project.MavenProject;
+import org.apache.maven.shared.dependency.tree.DependencyNode;
+import org.apache.maven.shared.dependency.tree.DependencyTreeBuilder;
+import org.apache.maven.shared.dependency.tree.DependencyTreeBuilderException;
+import org.apache.maven.shared.dependency.tree.filter.ArtifactDependencyNodeFilter;
+import org.apache.maven.shared.dependency.tree.traversal.BuildingDependencyNodeVisitor;
+import org.apache.maven.shared.dependency.tree.traversal.FilteringDependencyNodeVisitor;
 
 import org.maven.ide.components.pom.Build;
 import org.maven.ide.components.pom.Configuration;
@@ -59,9 +78,12 @@ import org.maven.ide.components.pom.Plugins;
 import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.util.PomResourceFactoryImpl;
 import org.maven.ide.components.pom.util.PomResourceImpl;
+import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.project.IMavenProjectFacade;
+import org.maven.ide.eclipse.project.MavenProjectManager;
 
 
 /**
@@ -79,6 +101,8 @@ public class MavenModelManager {
   private final MavenEmbedderManager embedderManager;
 
   private final MavenConsole console;
+
+  private Map<String,DependencyNode> rootNode = new HashMap<String, DependencyNode>();
 
   public MavenModelManager(MavenEmbedderManager embedderManager, MavenConsole console) {
     this.embedderManager = embedderManager;
@@ -234,6 +258,83 @@ public class MavenModelManager {
       console.logError(msg);
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
     }
+  }
+
+  /**
+   * @param force
+   * @param monitor
+   * @param scope one of 
+   *   {@link Artifact#SCOPE_COMPILE}, 
+   *   {@link Artifact#SCOPE_TEST}, 
+   *   {@link Artifact#SCOPE_SYSTEM}, 
+   *   {@link Artifact#SCOPE_PROVIDED}, 
+   *   {@link Artifact#SCOPE_RUNTIME}
+   *   
+   * @return dependency node
+   */
+  public synchronized DependencyNode readDependencies(IFile file, boolean force, IProgressMonitor monitor, String scope) throws CoreException {
+    if(force || !rootNode.containsKey(scope)) {
+      MavenPlugin plugin = MavenPlugin.getDefault();
+
+      try {
+        monitor.setTaskName("Reading project");
+        MavenProject mavenProject = readMavenProject(file, monitor);
+
+        MavenProjectManager mavenProjectManager = plugin.getMavenProjectManager();
+        MavenEmbedder embedder = mavenProjectManager.createWorkspaceEmbedder();
+        try {
+          monitor.setTaskName("Building dependency tree");
+          PlexusContainer plexus = embedder.getPlexusContainer();
+
+          ArtifactFactory artifactFactory = (ArtifactFactory) plexus.lookup(ArtifactFactory.class);
+          ArtifactMetadataSource artifactMetadataSource = //
+          (ArtifactMetadataSource) plexus.lookup(ArtifactMetadataSource.class);
+
+          ArtifactCollector artifactCollector = (ArtifactCollector) plexus.lookup(ArtifactCollector.class);
+
+          ArtifactRepository localRepository = embedder.getLocalRepository();
+
+          DependencyTreeBuilder builder = (DependencyTreeBuilder) plexus.lookup(DependencyTreeBuilder.ROLE);
+          DependencyNode node = builder.buildDependencyTree(mavenProject, localRepository, artifactFactory,
+              artifactMetadataSource, null, artifactCollector);
+          
+          BuildingDependencyNodeVisitor visitor = new BuildingDependencyNodeVisitor(); 
+          node.accept(new FilteringDependencyNodeVisitor(visitor,
+              new ArtifactDependencyNodeFilter(new ScopeArtifactFilter(scope))));
+//          node.accept(visitor);
+          
+          rootNode.put(scope, visitor.getDependencyTree());
+        } finally {
+          embedder.stop();
+        }
+
+      } catch(MavenEmbedderException ex) {
+        String msg = "Can't create Maven embedder";
+        MavenLogger.log(msg, ex);
+        throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
+
+      } catch(ComponentLookupException ex) {
+        String msg = "Component lookup error";
+        MavenLogger.log(msg, ex);
+        throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
+
+      } catch(DependencyTreeBuilderException ex) {
+        String msg = "Project read error";
+        MavenLogger.log(msg, ex);
+        throw new CoreException(new Status(IStatus.ERROR, MavenPlugin.PLUGIN_ID, -1, msg, ex));
+
+      }
+    }
+
+    return rootNode.get(scope);
+  }
+
+  public MavenProject readMavenProject(IFile file, IProgressMonitor monitor) throws CoreException {
+    MavenPlugin plugin = MavenPlugin.getDefault();
+    MavenProjectManager projectManager = plugin.getMavenProjectManager();
+    IMavenProjectFacade projectFacade = projectManager.create(file, true, monitor);
+    MavenProject mavenProject = projectFacade.getMavenProject(monitor);
+    return mavenProject;
   }
 
 //  public ProjectDocument readProjectDocument(IFile pomFile) throws CoreException {
