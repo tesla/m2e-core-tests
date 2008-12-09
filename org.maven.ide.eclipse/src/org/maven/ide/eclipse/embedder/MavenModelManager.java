@@ -15,9 +15,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -101,8 +99,6 @@ public class MavenModelManager {
   private final MavenEmbedderManager embedderManager;
 
   private final MavenConsole console;
-
-  private Map<String,DependencyNode> rootNode = new HashMap<String, DependencyNode>();
 
   public MavenModelManager(MavenEmbedderManager embedderManager, MavenConsole console) {
     this.embedderManager = embedderManager;
@@ -272,61 +268,54 @@ public class MavenModelManager {
    *   
    * @return dependency node
    */
-  public synchronized DependencyNode readDependencies(IFile file, boolean force, IProgressMonitor monitor, String scope) throws CoreException {
-    if(force || !rootNode.containsKey(scope)) {
-      MavenPlugin plugin = MavenPlugin.getDefault();
+  public synchronized DependencyNode readDependencies(IFile file, IProgressMonitor monitor, String scope) throws CoreException {
+    MavenPlugin plugin = MavenPlugin.getDefault();
 
+    try {
+      monitor.setTaskName("Reading project");
+      MavenProject mavenProject = readMavenProject(file, monitor);
+
+      MavenProjectManager mavenProjectManager = plugin.getMavenProjectManager();
+      MavenEmbedder embedder = mavenProjectManager.createWorkspaceEmbedder();
       try {
-        monitor.setTaskName("Reading project");
-        MavenProject mavenProject = readMavenProject(file, monitor);
+        monitor.setTaskName("Building dependency tree");
+        PlexusContainer plexus = embedder.getPlexusContainer();
 
-        MavenProjectManager mavenProjectManager = plugin.getMavenProjectManager();
-        MavenEmbedder embedder = mavenProjectManager.createWorkspaceEmbedder();
-        try {
-          monitor.setTaskName("Building dependency tree");
-          PlexusContainer plexus = embedder.getPlexusContainer();
+        ArtifactFactory artifactFactory = (ArtifactFactory) plexus.lookup(ArtifactFactory.class);
+        ArtifactMetadataSource artifactMetadataSource = //
+        (ArtifactMetadataSource) plexus.lookup(ArtifactMetadataSource.class);
 
-          ArtifactFactory artifactFactory = (ArtifactFactory) plexus.lookup(ArtifactFactory.class);
-          ArtifactMetadataSource artifactMetadataSource = //
-          (ArtifactMetadataSource) plexus.lookup(ArtifactMetadataSource.class);
+        ArtifactCollector artifactCollector = (ArtifactCollector) plexus.lookup(ArtifactCollector.class);
 
-          ArtifactCollector artifactCollector = (ArtifactCollector) plexus.lookup(ArtifactCollector.class);
+        ArtifactRepository localRepository = embedder.getLocalRepository();
 
-          ArtifactRepository localRepository = embedder.getLocalRepository();
-
-          DependencyTreeBuilder builder = (DependencyTreeBuilder) plexus.lookup(DependencyTreeBuilder.ROLE);
-          DependencyNode node = builder.buildDependencyTree(mavenProject, localRepository, artifactFactory,
-              artifactMetadataSource, null, artifactCollector);
-          
-          BuildingDependencyNodeVisitor visitor = new BuildingDependencyNodeVisitor(); 
-          node.accept(new FilteringDependencyNodeVisitor(visitor,
-              new ArtifactDependencyNodeFilter(new ScopeArtifactFilter(scope))));
-//          node.accept(visitor);
-          
-          rootNode.put(scope, visitor.getDependencyTree());
-        } finally {
-          embedder.stop();
-        }
-
-      } catch(MavenEmbedderException ex) {
-        String msg = "Can't create Maven embedder";
-        MavenLogger.log(msg, ex);
-        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
-
-      } catch(ComponentLookupException ex) {
-        String msg = "Component lookup error";
-        MavenLogger.log(msg, ex);
-        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
-
-      } catch(DependencyTreeBuilderException ex) {
-        String msg = "Project read error";
-        MavenLogger.log(msg, ex);
-        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
-
+        DependencyTreeBuilder builder = (DependencyTreeBuilder) plexus.lookup(DependencyTreeBuilder.ROLE);
+        DependencyNode node = builder.buildDependencyTree(mavenProject, localRepository, artifactFactory,
+            artifactMetadataSource, null, artifactCollector);
+        
+        BuildingDependencyNodeVisitor visitor = new BuildingDependencyNodeVisitor(); 
+        node.accept(new FilteringDependencyNodeVisitor(visitor,
+            new ArtifactDependencyNodeFilter(new ScopeArtifactFilter(scope))));
+        return visitor.getDependencyTree();
+      } finally {
+        embedder.stop();
       }
-    }
 
-    return rootNode.get(scope);
+    } catch(MavenEmbedderException ex) {
+      String msg = "Can't create Maven embedder";
+      MavenLogger.log(msg, ex);
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
+
+    } catch(ComponentLookupException ex) {
+      String msg = "Component lookup error";
+      MavenLogger.log(msg, ex);
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
+
+    } catch(DependencyTreeBuilderException ex) {
+      String msg = "Project read error";
+      MavenLogger.log(msg, ex);
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
+    }
   }
 
   public MavenProject readMavenProject(IFile file, IProgressMonitor monitor) throws CoreException {
