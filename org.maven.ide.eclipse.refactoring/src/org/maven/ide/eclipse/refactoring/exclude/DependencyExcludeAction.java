@@ -1,6 +1,12 @@
-package org.maven.ide.eclipse.refactoring.exclude;
+/*******************************************************************************
+ * Copyright (c) 2008 Sonatype, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *******************************************************************************/
 
-import java.util.List;
+package org.maven.ide.eclipse.refactoring.exclude;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Model;
@@ -21,6 +27,7 @@ import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.PlatformUI;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.SelectionUtil;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 
 /**
@@ -62,40 +69,36 @@ public class DependencyExcludeAction implements IEditorActionDelegate {
   }
 
   public void selectionChanged(IAction action, ISelection selection) {
-    //init
     file = null;
     key = null;
     artifact = null;
     model = null;
     
-    //get artifact
+    // get artifact
     if (selection instanceof IStructuredSelection) {
       IStructuredSelection ssel = (IStructuredSelection) selection;
-      if(!ssel.isEmpty()) {
-        List<?> sel = ssel.toList();
-        if (sel.size() == 1) {
-          Object selected = sel.get(0);
-          if (selected instanceof Artifact) {
-            artifact = (Artifact) selected;
-            file = getFileFromEditor();
-          } else if (selected instanceof DependencyNode) {
-            artifact = ((DependencyNode) selected).getArtifact();
-            file = getFileFromEditor();
-          } else if (selected instanceof RequiredProjectWrapper) {
-            RequiredProjectWrapper w = (RequiredProjectWrapper) selected;
-            IFile pomFile = w.getProject().getProject().getFile("pom.xml");
-            try {
-              model = MavenPlugin.getDefault().getMavenModelManager().readMavenModel(pomFile);
-            } catch(CoreException ex) {
-              ex.printStackTrace();
-            }
-            file = getFileFromProject(w.getParentClassPathContainer().getJavaProject());
-          } else {
-            key = SelectionUtil.getType(selected, ArtifactKey.class);
-            if (selected instanceof IJavaElement) {
-              IJavaElement el = (IJavaElement) selected;
-              file = getFileFromProject(el.getParent().getJavaProject());
-            }
+      if(ssel.size()==1) {
+        Object selected = ssel.getFirstElement();
+        if (selected instanceof Artifact) {
+          artifact = (Artifact) selected;
+          file = getFileFromEditor();
+        } else if (selected instanceof DependencyNode) {
+          artifact = ((DependencyNode) selected).getArtifact();
+          file = getFileFromEditor();
+        } else if (selected instanceof RequiredProjectWrapper) {
+          RequiredProjectWrapper w = (RequiredProjectWrapper) selected;
+          IFile pomFile = w.getProject().getProject().getFile("pom.xml");
+          try {
+            model = MavenPlugin.getDefault().getMavenModelManager().readMavenModel(pomFile);
+          } catch(CoreException ex) {
+            MavenLogger.log(ex);
+          }
+          file = getFileFromProject(w.getParentClassPathContainer().getJavaProject());
+        } else {
+          key = SelectionUtil.getType(selected, ArtifactKey.class);
+          if (selected instanceof IJavaElement) {
+            IJavaElement el = (IJavaElement) selected;
+            file = getFileFromProject(el.getParent().getJavaProject());
           }
         }
       }
@@ -108,9 +111,6 @@ public class DependencyExcludeAction implements IEditorActionDelegate {
     }
   }
 
-  /**
-   * @param javaProject
-   */
   private IFile getFileFromProject(IJavaProject javaProject) {
     return javaProject.getProject().getFile("pom.xml");
   }
@@ -127,4 +127,5 @@ public class DependencyExcludeAction implements IEditorActionDelegate {
   public void setActiveEditor(IAction action, IEditorPart targetEditor) {
     //ignore
   }
+  
 }

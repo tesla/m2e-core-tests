@@ -164,11 +164,13 @@ public class DependencyTreePage extends MavenPomEditorPage {
   }
 
   private void initPopupMenu(Viewer viewer, String id) {
-    MenuManager menuMgr = new MenuManager("#PopupMenu");
+    MenuManager menuMgr = new MenuManager("#PopupMenu-" + id);
     menuMgr.setRemoveAllWhenShown(true);
+    
     Menu menu = menuMgr.createContextMenu(viewer.getControl());
     viewer.getControl().setMenu(menu);
-    getSite().registerContextMenu(MavenPomEditor.EDITOR_ID + id, menuMgr, viewer);
+    
+    getEditorSite().registerContextMenu(MavenPomEditor.EDITOR_ID + id, menuMgr, viewer, false);
   }
 
   String formatFormTitle() {

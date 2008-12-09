@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
+import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuCreator;
 import org.eclipse.jface.action.IMenuListener;
@@ -44,11 +45,13 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.zest.core.viewers.AbstractZoomableViewer;
 import org.eclipse.zest.core.viewers.GraphViewer;
 import org.eclipse.zest.core.viewers.IZoomableWorkbenchPart;
+import org.eclipse.zest.core.viewers.ZoomContributionViewItem;
 import org.eclipse.zest.core.widgets.Graph;
 import org.eclipse.zest.core.widgets.ZestStyles;
 import org.eclipse.zest.layouts.LayoutAlgorithm;
@@ -113,7 +116,7 @@ public class DependencyGraphPage extends MavenPomEditorPage implements IZoomable
 
   DependencyGraphContentProvider graphContentProvider;
 
-//  private ZoomContributionViewItem zoomContributionItem;
+  private ZoomContributionViewItem zoomContributionItem;
 
   private SearchControl searchControl;
 
@@ -263,7 +266,7 @@ public class DependencyGraphPage extends MavenPomEditorPage implements IZoomable
   }
 
   private void createActions() {
-    openAction = new Action("&Open") {
+    openAction = new Action("&Open POM") {
       public void run() {
         IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
         if(!selection.isEmpty()) {
@@ -406,9 +409,9 @@ public class DependencyGraphPage extends MavenPomEditorPage implements IZoomable
   }
 
   private void initPopupMenu() {
-//    zoomContributionItem = new ZoomContributionViewItem(this);
+    zoomContributionItem = new ZoomContributionViewItem(this);
 
-    MenuManager menuMgr = new MenuManager("#PopupMenu");
+    MenuManager menuMgr = new MenuManager("graph");
     menuMgr.setRemoveAllWhenShown(true);
     menuMgr.addMenuListener(new IMenuListener() {
       public void menuAboutToShow(IMenuManager manager) {
@@ -418,7 +421,8 @@ public class DependencyGraphPage extends MavenPomEditorPage implements IZoomable
 
     Menu menu = menuMgr.createContextMenu(viewer.getControl());
     viewer.getControl().setMenu(menu);
-    getSite().registerContextMenu(MavenPomEditor.EDITOR_ID + ".graph", menuMgr, viewer);
+    
+    getEditorSite().registerContextMenu(MavenPomEditor.EDITOR_ID + ".graph", menuMgr, viewer, false);
   }
 
   void updateScopeActions(IAction action) {
@@ -469,39 +473,37 @@ public class DependencyGraphPage extends MavenPomEditorPage implements IZoomable
   }
 
   void fillContextMenu(IMenuManager manager) {
-    //manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
-
+    manager.add(selectAllAction);
+    
     if(!viewer.getSelection().isEmpty()) {
-      manager.add(openAction);
       manager.add(new Separator());
+      manager.add(openAction);
     }
 
-    manager.add(selectAllAction);
+    manager.add(new GroupMarker(IWorkbenchActionConstants.MB_ADDITIONS));
     manager.add(new Separator());
-    manager.add(showGroupAction);
-    manager.add(showVersionAction);
-    manager.add(showScopeAction);
-    manager.add(showIconAction);
-    manager.add(wrapLabelAction);
-
-//    manager.add(new Separator());
-//    manager.add(showAllScopeAction);
-//    manager.add(showCompileScopeAction);
-//    manager.add(showTestScopeAction);
-//    manager.add(showRuntimeScopeAction);
-//    manager.add(showProvidedScopeAction);
-//    manager.add(showSystemScopeAction);
-
-    manager.add(new Separator());
-    manager.add(showResolvedAction);
-    manager.add(radialLayoutAction);
+    
+    {
+      MenuManager subMenu = new MenuManager("Presentation");
+      
+      subMenu.add(showGroupAction);
+      subMenu.add(showVersionAction);
+      subMenu.add(showScopeAction);
+      subMenu.add(showIconAction);
+      subMenu.add(wrapLabelAction);
+  
+      subMenu.add(new Separator());
+      subMenu.add(showResolvedAction);
+      subMenu.add(radialLayoutAction);
+      
+      manager.add(subMenu);
+    }
 
     manager.add(new Separator());
     manager.add(showLegendAction);
 
-    // XXX disabled zoom control until Zest menu bug is fixed
-    // manager.add(new Separator());
-    // manager.add(zoomContributionItem);
+    manager.add(new Separator());
+    manager.add(zoomContributionItem);
   }
 
 /*
