@@ -84,9 +84,9 @@ public class ChangeCreator {
         int startLine = curr.leftStart();
         int endLine = curr.leftEnd() - 1;
         for(int j = startLine; j <= endLine; j++ ) {
-          change.addEdit(new DeleteEdit(oldDocument.getLineOffset(startLine), oldDocument.getLineLength(j)));
+          change.addEdit(new DeleteEdit(oldDocument.getLineOffset(j), oldDocument.getLineLength(j)));
         }
-        insertOffset -= curr.leftEnd() - curr.leftStart();
+        insertOffset -= (curr.leftEnd() - curr.leftStart());
       } else {
         // unhandled
       }
