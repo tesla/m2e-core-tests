@@ -80,7 +80,8 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
       ResolverConfiguration resolverConfiguration) {
     this.manager = manager;
     this.pom = pom;
-    this.pomFile = pom.getLocation().toFile();  // save pom file
+    IPath location = pom.getLocation();
+    this.pomFile = location == null ? null : location.toFile(); // save pom file
     this.resolverConfiguration = resolverConfiguration;
     setMavenProject(mavenProject);
     updateTimestamp();
