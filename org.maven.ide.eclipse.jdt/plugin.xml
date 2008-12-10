@@ -50,17 +50,21 @@
       <factory adaptableType="org.eclipse.jdt.core.IPackageFragmentRoot"
                class="org.maven.ide.eclipse.jdt.internal.JavaElementsAdapterFactory">
          <adapter type="org.maven.ide.eclipse.embedder.ArtifactKey"/>
-         <adapter type="org.eclipse.core.resources.IResource"/>
+         <adapter type="org.eclipse.core.runtime.IPath"/>
+         <adapter type="org.maven.ide.eclipse.project.IMavenProjectFacade"/>
       </factory>
       <factory adaptableType="org.eclipse.jdt.core.IJavaProject"
                class="org.maven.ide.eclipse.jdt.internal.JavaElementsAdapterFactory">
          <adapter type="org.maven.ide.eclipse.embedder.ArtifactKey"/>
-         <adapter type="org.eclipse.core.resources.IResource"/>
+         <adapter type="org.eclipse.core.runtime.IPath"/>
+         <adapter type="org.maven.ide.eclipse.project.IMavenProjectFacade"/>
       </factory>
-   </extension>
-
-   <extension point="org.maven.ide.eclipse.m2menu">
-      <factory class="org.maven.ide.eclipse.jdt.internal.ui.MavenJdtMenuCreator"/>
+      <factory adaptableType="org.eclipse.jdt.internal.ui.packageview.ClassPathContainer$RequiredProjectWrapper"
+               class="org.maven.ide.eclipse.jdt.internal.JavaElementsAdapterFactory">
+         <adapter type="org.maven.ide.eclipse.embedder.ArtifactKey"/>
+         <adapter type="org.eclipse.core.runtime.IPath"/>
+         <adapter type="org.maven.ide.eclipse.project.IMavenProjectFacade"/>
+      </factory>
    </extension>
 
    <extension point="org.eclipse.jdt.ui.quickAssistProcessors">
@@ -86,22 +90,33 @@
    </extension>
 
    <extension point="org.eclipse.ui.popupMenus">
-     <objectContribution id="org.maven.ide.eclipse.classpathMenu" adaptable="true"
-           objectClass="org.eclipse.jdt.core.IPackageFragmentRoot">
+     <objectContribution id="org.maven.ide.eclipse.classpathMenu" 
+           objectClass="org.eclipse.jdt.core.IPackageFragmentRoot"
+           adaptable="true">
        <action id="org.maven.ide.eclipse.classpathMenu.action"
                class="org.maven.ide.eclipse.actions.MavenMenuAction"
                label="%m2.popup.menu.label"
                style="pulldown"
                menubarPath="additions"
-               enablesFor="+"
+               enablesFor="1"
                icon="icons/m2.gif"/>
-       <!--
-       <visibility>
-          <objectState name="name" value="pom.xml"/>
-       </visibility>
-       -->
+     </objectContribution>
+     <objectContribution id="org.maven.ide.eclipse.classpathMenuWrapper" 
+           objectClass="org.eclipse.jdt.internal.ui.packageview.ClassPathContainer$RequiredProjectWrapper"
+           adaptable="true">
+       <action id="org.maven.ide.eclipse.classpathMenu.action"
+               class="org.maven.ide.eclipse.actions.MavenMenuAction"
+               label="%m2.popup.menu.label"
+               style="pulldown"
+               menubarPath="additions"
+               enablesFor="1"
+               icon="icons/m2.gif"/>
      </objectContribution>
    </extension>  
+
+   <extension point="org.maven.ide.eclipse.m2menu">
+      <factory class="org.maven.ide.eclipse.jdt.internal.ui.MavenJdtMenuCreator"/>
+   </extension>
 
    <!--
    <extension

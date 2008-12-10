@@ -8,7 +8,7 @@
  * Contributors:
  *   IBM - Initial API and implementation
  */
-package org.maven.ide.eclipse.refactoring;
+package org.maven.ide.eclipse.refactoring.internal;
 
 import java.util.ArrayList;
 import java.util.Arrays;

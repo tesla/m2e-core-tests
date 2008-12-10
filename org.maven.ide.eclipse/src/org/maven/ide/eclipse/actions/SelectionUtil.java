@@ -114,9 +114,9 @@ public class SelectionUtil {
   public static IPath getSelectedLocation(IStructuredSelection selection) {
     Object element = selection == null ? null : selection.getFirstElement();
     {
-      IResource resource = getType(element, IResource.class);
-      if(resource != null) {
-        return resource.getProject().getProject().getLocation();
+      IPath path = getType(element, IPath.class);
+      if(path != null) {
+        return path;
       }
     }
     

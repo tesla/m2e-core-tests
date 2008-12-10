@@ -32,6 +32,7 @@ import org.maven.ide.components.pom.ExclusionsType;
 import org.maven.ide.components.pom.Model;
 import org.maven.ide.components.pom.impl.PomFactoryImpl;
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.refactoring.AbstractPomRefactoring;
 import org.maven.ide.eclipse.refactoring.PomVisitor;
 import org.maven.ide.eclipse.refactoring.RefactoringModelResources;
@@ -70,7 +71,8 @@ public class ExcludeRefactoring extends AbstractPomRefactoring {
         final List<Dependency> deps = model.getDependencies().getDependency();
 
         pm.beginTask("Loading dependency tree", 1);
-        DependencyNode root = MavenPlugin.getDefault().getMavenModelManager().readDependencies(resources.getPomFile(), pm, Artifact.SCOPE_COMPILE);
+        MavenModelManager modelManager = MavenPlugin.getDefault().getMavenModelManager();
+        DependencyNode root = modelManager.readDependencies(resources.getPomFile(), Artifact.SCOPE_COMPILE, pm);
         pm.worked(1);
         root.accept(new DependencyNodeVisitor() {
 

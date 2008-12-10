@@ -39,6 +39,7 @@ import org.apache.maven.model.CiManagement;
 import org.apache.maven.model.IssueManagement;
 import org.apache.maven.model.Scm;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.shared.dependency.tree.DependencyNode;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
@@ -63,10 +64,13 @@ public class OpenUrlAction extends ActionDelegate implements IWorkbenchWindowAct
 
   public static final String ID_CI = "org.maven.ide.eclipse.openCiPage";
 
+  String actionId;
+  
   private IStructuredSelection selection;
 
-  final String actionId;
-
+  public OpenUrlAction() {
+  }
+  
   public OpenUrlAction(String id) {
     this.actionId = id;
   }
@@ -104,6 +108,12 @@ public class OpenUrlAction extends ActionDelegate implements IWorkbenchWindowAct
   }
 
   private ArtifactKey getArtifact(Object element) {
+    if(element instanceof Artifact) {
+      return new ArtifactKey(((Artifact) element));
+    } else if(element instanceof DependencyNode) {
+      Artifact artifact = ((DependencyNode) element).getArtifact();
+      return new ArtifactKey(artifact);
+    }
     return SelectionUtil.getType(element, ArtifactKey.class);
   }
 
@@ -215,6 +225,9 @@ public class OpenUrlAction extends ActionDelegate implements IWorkbenchWindowAct
    * @see org.eclipse.core.runtime.IExecutableExtension#setInitializationData(org.eclipse.core.runtime.IConfigurationElement, java.lang.String, java.lang.Object)
    */
   public void setInitializationData(IConfigurationElement config, String propertyName, Object data) {
+    if(data != null) {
+      actionId = (String) data;
+    }
   }
 
 }

@@ -185,8 +185,6 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
     Set<IndexInfo> indexes = loadIndexConfiguration(new File(stateLocationDir, PREFS_INDEXES));
 
-    this.modelManager = new MavenModelManager(embedderManager, console);
-
     boolean updateProjectsOnStartup = runtimeManager.isUpdateProjectsOnStartup();
 
     mavenMarkerManager = new MavenMarkerManager(runtimeManager, console);
@@ -207,6 +205,8 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
           true /*offline*/, false /* updateSnapshots */));
     }
 
+    this.modelManager = new MavenModelManager(embedderManager, projectManager, console);
+    
     this.runtimeManager.setWorkspaceRuntime(new MavenWorkspaceRuntime(projectManager));
     
     this.configurationManager = new ProjectConfigurationManager(modelManager, console, 

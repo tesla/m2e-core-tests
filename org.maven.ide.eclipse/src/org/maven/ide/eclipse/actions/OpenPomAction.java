@@ -59,6 +59,7 @@ import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.AbstractArtifactResolutionException;
 import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.model.Dependency;
+import org.apache.maven.shared.dependency.tree.DependencyNode;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
@@ -116,13 +117,21 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
    * @see org.eclipse.ui.actions.ActionDelegate#run(org.eclipse.jface.action.IAction)
    */
   public void run(IAction action) {
-    // TODO check if POM is in Eclipse workspace
-    
     if(selection!=null) {
       Object element = this.selection.getFirstElement();
       if(IndexManager.SEARCH_ARTIFACT.equals(type) && element !=null) {
-        final ArtifactKey a = SelectionUtil.getType(element, ArtifactKey.class);
-        if(a!=null) {
+        ArtifactKey key;
+        if(element instanceof Artifact) {
+          key = new ArtifactKey(((Artifact) element));
+        } else if(element instanceof DependencyNode) {
+          Artifact artifact = ((DependencyNode) element).getArtifact();
+          key = new ArtifactKey(artifact);
+        } else {
+          key = SelectionUtil.getType(element, ArtifactKey.class);
+        }
+        
+        final ArtifactKey a = key;
+        if(a != null) {
           new Job("Opening POM") {
             protected IStatus run(IProgressMonitor monitor) {
               openEditor(a.getGroupId(), a.getArtifactId(), a.getVersion());

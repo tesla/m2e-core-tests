@@ -599,13 +599,13 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
       if(artifact == null) {
         artifact = findArtifactInIndex(project, entry);
         if(artifact == null) {
-          console.logError("Can't find artifact for " + entry.getPath());
+          // console.logError("Can't find artifact for " + entry.getPath());
         } else {
-          console.logMessage("Found indexed artifact " + artifact + " for " + entry.getPath());
+          // console.logMessage("Found indexed artifact " + artifact + " for " + entry.getPath());
           artifacts.add(artifact);
         }
       } else {
-        console.logMessage("Found artifact " + artifact + " for " + entry.getPath());
+        // console.logMessage("Found artifact " + artifact + " for " + entry.getPath());
         artifacts.add(artifact);
       }
     }

@@ -19,7 +19,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionDelegate;
 import org.eclipse.ui.internal.ObjectPluginAction;
 import org.maven.ide.eclipse.core.MavenLogger;
-import org.maven.ide.eclipse.refactoring.SaveDirtyFilesDialog;
+import org.maven.ide.eclipse.refactoring.internal.SaveDirtyFilesDialog;
 
 
 /**

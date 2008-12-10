@@ -173,6 +173,7 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
     menuMgr.setRemoveAllWhenShown(true);
     
     Menu menu = menuMgr.createContextMenu(viewer.getControl());
+
     viewer.getControl().setMenu(menu);
     
     getEditorSite().registerContextMenu(MavenPomEditor.EDITOR_ID + id, menuMgr, viewer, false);
@@ -245,13 +246,16 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
 
     Section hierarchySection = formToolkit.createSection(hierarchyComposite, ExpandableComposite.TITLE_BAR);
     hierarchySection.marginHeight = 1;
-    hierarchySection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+    GridData gd_hierarchySection = new GridData(SWT.FILL, SWT.FILL, true, true);
+    gd_hierarchySection.widthHint = 100;
+    gd_hierarchySection.minimumWidth = 100;
+    hierarchySection.setLayoutData(gd_hierarchySection);
     hierarchySection.setText(DEPENDENCY_HIERARCHY);
     formToolkit.paintBordersFor(hierarchySection);
 
     Tree tree = formToolkit.createTree(hierarchySection, SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI);
     hierarchySection.setClient(tree);
-
+    
     treeViewer = new TreeViewer(tree);
     treeViewer.setData(FormToolkit.KEY_DRAW_BORDER, Boolean.TRUE);
 
@@ -368,7 +372,10 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
 
     Section listSection = formToolkit.createSection(listComposite, ExpandableComposite.TITLE_BAR);
     listSection.marginHeight = 1;
-    listSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+    GridData gd_listSection = new GridData(SWT.FILL, SWT.FILL, true, true);
+    gd_listSection.widthHint = 100;
+    gd_listSection.minimumWidth = 100;
+    listSection.setLayoutData(gd_listSection);
     listSection.setText("Resolved Dependencies");
     formToolkit.paintBordersFor(listSection);
 

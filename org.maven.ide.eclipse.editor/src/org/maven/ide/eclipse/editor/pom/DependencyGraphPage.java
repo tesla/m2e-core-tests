@@ -28,10 +28,7 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.IMessageProvider;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusAdapter;
@@ -62,7 +59,6 @@ import org.eclipse.zest.layouts.algorithms.DirectedGraphLayoutAlgorithm;
 import org.eclipse.zest.layouts.algorithms.HorizontalShift;
 import org.eclipse.zest.layouts.algorithms.RadialLayoutAlgorithm;
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
@@ -89,8 +85,6 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
   final MavenPomEditor pomEditor;
 
   GraphViewer viewer;
-
-  IAction openAction;
 
   private IAction selectAllAction;
 
@@ -216,11 +210,6 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
     graphLabelProvider = new DependencyGraphLabelProvider(viewer, graphContentProvider);
     viewer.setLabelProvider(graphLabelProvider);
     viewer.addSelectionChangedListener(graphLabelProvider);
-    viewer.addSelectionChangedListener(new ISelectionChangedListener() {
-      public void selectionChanged(SelectionChangedEvent event) {
-        openAction.setEnabled(!viewer.getSelection().isEmpty());
-      }
-    });
 
     searchControl = new SearchControl("Find", managedForm);
 
@@ -278,21 +267,6 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
   }
 
   private void createActions() {
-    openAction = new Action("&Open POM") {
-      public void run() {
-        IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
-        if(!selection.isEmpty()) {
-          for(Object o : selection.toList()) {
-            if(o instanceof Artifact) {
-              Artifact a = (Artifact) o;
-              OpenPomAction.openEditor(a.getGroupId(), a.getArtifactId(), a.getVersion());
-            }
-          }
-        }
-      }
-    };
-    openAction.setEnabled(false);
-
     showVersionAction = new Action("Show &Version", SWT.CHECK) {
       public void run() {
         graphLabelProvider.setShowVersion(isChecked());
@@ -489,7 +463,6 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
     
     if(!viewer.getSelection().isEmpty()) {
       manager.add(new Separator());
-      manager.add(openAction);
     }
 
     manager.add(new GroupMarker(IWorkbenchActionConstants.MB_ADDITIONS));

@@ -190,6 +190,41 @@
                 class="org.maven.ide.eclipse.actions.CheckoutAsMavenAction"
                 menubarPath="checkoutGroup"/>
       </objectContribution>
+      
+      <objectContribution id="org.maven.ide.eclipse.openPom"
+          objectClass="org.apache.maven.artifact.Artifact"
+          adaptable="false">
+        <action id="org.maven.ide.eclipse.ui.openPom"
+                class="org.maven.ide.eclipse.actions.OpenPomAction"
+                label="Open POM"
+                enablesFor="1"/>
+      </objectContribution>
+      <objectContribution id="org.maven.ide.eclipse.openPom"
+          objectClass="org.apache.maven.shared.dependency.tree.DependencyNode"
+          adaptable="false">
+        <action id="org.maven.ide.eclipse.ui.openPom"
+                class="org.maven.ide.eclipse.actions.OpenPomAction"
+                label="Open POM"
+                enablesFor="1"/>
+      </objectContribution>
+      
+      <objectContribution id="org.maven.ide.eclipse.openPom"
+          objectClass="org.apache.maven.artifact.Artifact"
+          adaptable="false">
+        <action id="org.maven.ide.eclipse.ui.openPom"
+                class="org.maven.ide.eclipse.actions.OpenUrlAction:org.maven.ide.eclipse.openProjectPage"
+                label="Open Project Page"
+                enablesFor="1" icon="icons/web.gif"/>
+      </objectContribution>
+      <objectContribution id="org.maven.ide.eclipse.openPom"
+          objectClass="org.apache.maven.shared.dependency.tree.DependencyNode"
+          adaptable="false">
+        <action id="org.maven.ide.eclipse.ui.openPom"
+                class="org.maven.ide.eclipse.actions.OpenUrlAction:org.maven.ide.eclipse.openProjectPage"
+                label="Open Project Page"
+                enablesFor="1" icon="icons/web.gif"/>
+      </objectContribution>
+
    </extension>
 
    <extension point="org.eclipse.core.expressions.propertyTesters">

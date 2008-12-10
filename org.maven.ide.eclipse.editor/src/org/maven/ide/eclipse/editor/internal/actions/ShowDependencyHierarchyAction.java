@@ -8,26 +8,21 @@
 
 package org.maven.ide.eclipse.editor.internal.actions;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.actions.ActionDelegate;
-import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.actions.SelectionUtil;
 import org.maven.ide.eclipse.editor.pom.MavenPomEditor;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
-import org.maven.ide.eclipse.project.MavenProjectManager;
 
 
 /**
@@ -50,38 +45,32 @@ public class ShowDependencyHierarchyAction extends ActionDelegate {
   public void run(IAction action) {
     if(selection != null) {
       Object element = this.selection.getFirstElement();
-      if(element instanceof IPackageFragmentRoot) {
-        IPackageFragmentRoot fragment = (IPackageFragmentRoot) element;
-        IProject project = fragment.getJavaProject().getProject();
-        if(project.isAccessible() && fragment.isArchive()) {
-          MavenPlugin plugin = MavenPlugin.getDefault();
-          MavenProjectManager projectManager = plugin.getMavenProjectManager();
-          IMavenProjectFacade projectFacade = projectManager.create(project, new NullProgressMonitor());
-          if(projectFacade == null) {
-            plugin.getConsole().logMessage("Unable to get Maven project for " + project.getName());
-          } else {
-            final ArtifactKey artifactKey = SelectionUtil.getType(element, ArtifactKey.class);
-            if(artifactKey != null) {
-              final ArtifactKey projectKey = projectFacade.getArtifactKey();
-              new Job("Opening POM editor") {
-                protected IStatus run(IProgressMonitor monitor) {
-                  final IEditorPart editor = OpenPomAction.openEditor(projectKey.getGroupId(), //
-                      projectKey.getArtifactId(), projectKey.getVersion());
-                  if(editor instanceof MavenPomEditor) {
-//                    ((MavenPomEditor) editor).showDependencyHierarchy(artifactKey);
-                    Display.getDefault().asyncExec(new Runnable() {
-                      public void run() {
-                        ((MavenPomEditor) editor).showDependencyHierarchy(artifactKey);
-                      }
-                    });
-                  }
-                  return Status.OK_STATUS;
-                }
-              }.schedule();
-            }
-          }
+      IMavenProjectFacade projectFacade = SelectionUtil.getType(element, IMavenProjectFacade.class);
+      if(projectFacade!=null) {
+        ArtifactKey artifactKey = SelectionUtil.getType(element, ArtifactKey.class);
+        if(artifactKey!=null) {
+          showDependencyHierarchy(projectFacade.getArtifactKey(), artifactKey);
         }
       }
+    }
+  }
+
+  private void showDependencyHierarchy(final ArtifactKey projectKey, final ArtifactKey artifactKey) {
+    if(artifactKey != null) {
+      new Job("Opening POM editor") {
+        protected IStatus run(IProgressMonitor monitor) {
+          final IEditorPart editor = OpenPomAction.openEditor(projectKey.getGroupId(), //
+              projectKey.getArtifactId(), projectKey.getVersion());
+          if(editor instanceof MavenPomEditor) {
+            Display.getDefault().asyncExec(new Runnable() {
+              public void run() {
+                ((MavenPomEditor) editor).showDependencyHierarchy(artifactKey);
+              }
+            });
+          }
+          return Status.OK_STATUS;
+        }
+      }.schedule();
     }
   }
 

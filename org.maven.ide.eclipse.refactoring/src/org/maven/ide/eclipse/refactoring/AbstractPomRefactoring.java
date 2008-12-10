@@ -45,6 +45,7 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.refactoring.RefactoringModelResources.PropertyInfo;
+import org.maven.ide.eclipse.refactoring.internal.Activator;
 
 /**
  * Base class for all pom.xml refactorings in workspace

@@ -98,10 +98,13 @@ public class MavenModelManager {
   
   private final MavenEmbedderManager embedderManager;
 
+  private final MavenProjectManager projectManager;
+  
   private final MavenConsole console;
 
-  public MavenModelManager(MavenEmbedderManager embedderManager, MavenConsole console) {
+  public MavenModelManager(MavenEmbedderManager embedderManager, MavenProjectManager projectManager, MavenConsole console) {
     this.embedderManager = embedderManager;
+    this.projectManager = projectManager;
     this.console = console;
   }
 
@@ -268,15 +271,12 @@ public class MavenModelManager {
    *   
    * @return dependency node
    */
-  public synchronized DependencyNode readDependencies(IFile file, IProgressMonitor monitor, String scope) throws CoreException {
-    MavenPlugin plugin = MavenPlugin.getDefault();
-
+  public synchronized DependencyNode readDependencies(IFile file, String scope, IProgressMonitor monitor) throws CoreException {
     try {
       monitor.setTaskName("Reading project");
       MavenProject mavenProject = readMavenProject(file, monitor);
 
-      MavenProjectManager mavenProjectManager = plugin.getMavenProjectManager();
-      MavenEmbedder embedder = mavenProjectManager.createWorkspaceEmbedder();
+      MavenEmbedder embedder = projectManager.createWorkspaceEmbedder();
       try {
         monitor.setTaskName("Building dependency tree");
         PlexusContainer plexus = embedder.getPlexusContainer();

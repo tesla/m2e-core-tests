@@ -11,12 +11,16 @@ package org.maven.ide.eclipse.jdt.internal.ui;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
 
+import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.AbstractMavenMenuCreator;
 import org.maven.ide.eclipse.actions.MaterializeAction;
 import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.actions.OpenUrlAction;
 import org.maven.ide.eclipse.actions.SelectionUtil;
+import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.jdt.internal.actions.DownloadSourcesAction;
+import org.maven.ide.eclipse.project.IMavenProjectFacade;
+import org.maven.ide.eclipse.project.MavenProjectManager;
 
 
 /**
@@ -63,10 +67,18 @@ public class MavenJdtMenuCreator extends AbstractMavenMenuCreator {
       mgr.appendToGroup(OPEN, getAction(new OpenUrlAction(OpenUrlAction.ID_CI), //
           OpenUrlAction.ID_CI, "Open Continuous Integration"));
 
-      mgr.prependToGroup(IMPORT, new Separator());
-      mgr.appendToGroup(IMPORT, getAction(new MaterializeAction(), //
-          MaterializeAction.ID, //
-          selection.size() == 1 ? "Import Project" : "Import Projects", "icons/import_m2_project.gif"));
+      ArtifactKey key = SelectionUtil.getType(selection.getFirstElement(), ArtifactKey.class);
+      if(key != null) {
+        MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
+        IMavenProjectFacade mavenProject = projectManager.getMavenProject( //
+            key.getGroupId(), key.getArtifactId(), key.getVersion());
+        if(mavenProject == null) {
+          mgr.prependToGroup(IMPORT, new Separator());
+          mgr.appendToGroup(IMPORT, getAction(new MaterializeAction(), //
+              MaterializeAction.ID, //
+              selection.size() == 1 ? "Import Project" : "Import Projects", "icons/import_m2_project.gif"));
+        }
+      }
     }
     
     if(selectionType == SelectionUtil.WORKING_SET) {
