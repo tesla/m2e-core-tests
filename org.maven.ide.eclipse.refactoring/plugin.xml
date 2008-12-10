@@ -14,17 +14,17 @@
            id="org.maven.ide.eclipse.refactoring.rename.pomContributor"
            objectClass="org.eclipse.core.resources.IFile"
            nameFilter="pom.xml" adaptable="true">
-        <action id="org.maven.ide.eclipse.editor.RenameAction"
+        <action id="org.maven.ide.eclipse.editor.RenamePomAction"
               class="org.maven.ide.eclipse.refactoring.rename.RenameArtifactAction"
               enablesFor="1"
               label="Rename Maven Artifact..."
               menubarPath="org.eclipse.jdt.ui.refactoring.menu/MavenRefactoring"/>
-        <!-- add visibility condition for managet poms -->      
+        <!-- add visibility condition for managed poms -->      
      </objectContribution>
      <objectContribution id="org.maven.ide.eclipse.refactoring.rename.projectContributor"
            objectClass="org.eclipse.core.resources.IProject"
            adaptable="true">
-        <action id="org.maven.ide.eclipse.editor.RenameAction"
+        <action id="org.maven.ide.eclipse.editor.RenameProjectAction"
               class="org.maven.ide.eclipse.refactoring.rename.RenameArtifactAction"
               enablesFor="1"
               label="Rename Maven Artifact..."
