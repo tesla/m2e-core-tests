@@ -70,7 +70,7 @@ public class ExcludeRefactoring extends AbstractPomRefactoring {
         final List<Dependency> deps = model.getDependencies().getDependency();
 
         pm.beginTask("Loading dependency tree", 1);
-        DependencyNode root = MavenPlugin.getDefault().getMavenModelManager().readDependencies(resources.getPomFile(), true, pm, Artifact.SCOPE_COMPILE);
+        DependencyNode root = MavenPlugin.getDefault().getMavenModelManager().readDependencies(resources.getPomFile(), pm, Artifact.SCOPE_COMPILE);
         pm.worked(1);
         root.accept(new DependencyNodeVisitor() {
 
