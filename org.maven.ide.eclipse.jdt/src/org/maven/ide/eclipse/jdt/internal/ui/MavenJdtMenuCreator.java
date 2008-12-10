@@ -51,12 +51,28 @@ public class MavenJdtMenuCreator extends AbstractMavenMenuCreator {
     }
 
     if(selectionType == SelectionUtil.JAR_FILE) {
-      mgr.appendToGroup(UPDATE, getAction(new DownloadSourcesAction(ID_SOURCES), //
-          DownloadSourcesAction.ID_SOURCES, "Download Sources"));
-      mgr.appendToGroup(UPDATE, getAction(new DownloadSourcesAction(ID_JAVADOC), //
-          DownloadSourcesAction.ID_JAVADOC, "Download JavaDoc"));
+      boolean isProject = false;
+      if(selection.size() == 1) {
+        ArtifactKey key = SelectionUtil.getType(selection.getFirstElement(), ArtifactKey.class);
+        if(key != null) {
+          MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
+          IMavenProjectFacade mavenProject = null;
+          mavenProject = projectManager.getMavenProject( //
+              key.getGroupId(), key.getArtifactId(), key.getVersion());
+          if(mavenProject!=null) {
+            isProject = true;
+          }
+        }
+      }
+      
+      if(!isProject) {
+        mgr.appendToGroup(UPDATE, getAction(new DownloadSourcesAction(ID_SOURCES), //
+            DownloadSourcesAction.ID_SOURCES, "Download Sources"));
+        mgr.appendToGroup(UPDATE, getAction(new DownloadSourcesAction(ID_JAVADOC), //
+            DownloadSourcesAction.ID_JAVADOC, "Download JavaDoc"));
+        mgr.prependToGroup(OPEN, new Separator());
+      }
 
-      mgr.prependToGroup(OPEN, new Separator());
       mgr.appendToGroup(OPEN, getAction(new OpenPomAction(), OpenPomAction.ID, "Open POM"));
       mgr.appendToGroup(OPEN, getAction(new OpenUrlAction(OpenUrlAction.ID_PROJECT), //
           OpenUrlAction.ID_PROJECT, "Open Project Page", "icons/web.gif"));
@@ -67,17 +83,11 @@ public class MavenJdtMenuCreator extends AbstractMavenMenuCreator {
       mgr.appendToGroup(OPEN, getAction(new OpenUrlAction(OpenUrlAction.ID_CI), //
           OpenUrlAction.ID_CI, "Open Continuous Integration"));
 
-      ArtifactKey key = SelectionUtil.getType(selection.getFirstElement(), ArtifactKey.class);
-      if(key != null) {
-        MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
-        IMavenProjectFacade mavenProject = projectManager.getMavenProject( //
-            key.getGroupId(), key.getArtifactId(), key.getVersion());
-        if(mavenProject == null) {
-          mgr.prependToGroup(IMPORT, new Separator());
-          mgr.appendToGroup(IMPORT, getAction(new MaterializeAction(), //
-              MaterializeAction.ID, //
-              selection.size() == 1 ? "Import Project" : "Import Projects", "icons/import_m2_project.gif"));
-        }
+      if(!isProject) {
+        mgr.prependToGroup(IMPORT, new Separator());
+        mgr.appendToGroup(IMPORT, getAction(new MaterializeAction(), //
+            MaterializeAction.ID, //
+            selection.size() == 1 ? "Import Project" : "Import Projects", "icons/import_m2_project.gif"));
       }
     }
     
