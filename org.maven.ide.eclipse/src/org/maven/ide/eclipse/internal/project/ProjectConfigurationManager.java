@@ -219,8 +219,17 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
       IAdaptable[] newElements = new IAdaptable[oldElements.length + 1];
       System.arraycopy(oldElements, 0, newElements, 0, oldElements.length);
       newElements[oldElements.length] = project;
-      workingSet.setElements(newElements);
+      
+      // Eclipse 3.2 compatibility
+      workingSet.setElements(Util.proxy(workingSet, A.class).adaptElements(newElements));
     // }
+  }
+  
+  /**
+   * A compatibility proxy stub
+   */
+  private static interface A {
+    public IAdaptable[] adaptElements(IAdaptable[] objects);
   }
 
   public void updateProjectConfiguration(IProject project, ResolverConfiguration configuration, String goalToExecute, IProgressMonitor monitor) throws CoreException {

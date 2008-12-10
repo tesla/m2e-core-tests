@@ -8,6 +8,10 @@
 
 package org.maven.ide.eclipse.util;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.CoreException;
@@ -22,6 +26,25 @@ import org.maven.ide.eclipse.core.MavenLogger;
  * @author Eugene Kuleshov
  */
 public class Util {
+
+  /**
+   * Proxy factory for compatibility stubs
+   */
+  @SuppressWarnings("unchecked")
+  public static <T> T proxy(final Object o, Class<T> type) {
+    return (T) Proxy.newProxyInstance(type.getClassLoader(), //
+        new Class[] { type }, //
+        new InvocationHandler() {
+          public Object invoke(Object proxy, Method m, Object[] args) throws Throwable {
+            try {
+              Method mm = o.getClass().getMethod(m.getName(), m.getParameterTypes());
+              return mm.invoke(o, args);
+            } catch (final NoSuchMethodException e) {
+              return null;
+            }
+          }
+        });
+  }
 
   /**
    * Helper method which creates a folder and, recursively, all its parent

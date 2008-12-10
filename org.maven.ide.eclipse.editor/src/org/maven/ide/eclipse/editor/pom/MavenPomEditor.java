@@ -129,6 +129,7 @@ import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.MavenRunnable;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
+import org.maven.ide.eclipse.util.Util;
 
 
 /**
@@ -533,7 +534,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
         }
 
       } else if(input.getClass().getName().endsWith("FileStoreEditorInput")) {
-        projectDocument = loadModel(FormUtils.proxy(input, C.class).getURI().getPath());
+        projectDocument = loadModel(Util.proxy(input, C.class).getURI().getPath());
       }
     }
 
@@ -543,7 +544,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   /**
    * Stub interface for FileStoreEditorInput
    * 
-   * @see FormUtils#proxy(Object, Class)
+   * @see Util#proxy(Object, Class)
    */
   public static interface C {
     public java.net.URI getURI();
@@ -688,7 +689,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 //        IURIEditorInput uriInput = (IURIEditorInput) input;
 //        mavenProject = readMavenProject(new File(uriInput.getURI().getPath()));
       } else if(input.getClass().getName().endsWith("FileStoreEditorInput")) {
-        mavenProject = readMavenProject(new File(FormUtils.proxy(input, C.class).getURI().getPath()));
+        mavenProject = readMavenProject(new File(Util.proxy(input, C.class).getURI().getPath()));
       }
     }
     return mavenProject;

@@ -8,9 +8,6 @@
 
 package org.maven.ide.eclipse.editor.pom;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -45,33 +42,15 @@ import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.editor.xml.MvnIndexPlugin;
 import org.maven.ide.eclipse.editor.xml.search.Packaging;
 import org.maven.ide.eclipse.editor.xml.search.SearchEngine;
+import org.maven.ide.eclipse.util.Util;
 
 /**
  * @author Eugene Kuleshov
  */
 public abstract class FormUtils {
 
-  /**
-   * Proxy factory for compatibility stubs
-   */
-  @SuppressWarnings("unchecked")
-  public static <T> T proxy(final Object o, Class<T> type) {
-    return (T) Proxy.newProxyInstance(type.getClassLoader(), //
-        new Class[] { type }, //
-        new InvocationHandler() {
-          public Object invoke(Object proxy, Method m, Object[] args) throws Throwable {
-            try {
-              Method mm = o.getClass().getMethod(m.getName(), m.getParameterTypes());
-              return mm.invoke(o, args);
-            } catch (final NoSuchMethodException e) {
-              return null;
-            }
-          }
-        });
-  }
-
   public static void decorateHeader(FormToolkit toolkit, Form form) {
-    proxy(toolkit, FormTooliktStub.class).decorateFormHeading(form);
+    Util.proxy(toolkit, FormTooliktStub.class).decorateFormHeading(form);
   }
   
   /**
@@ -82,7 +61,7 @@ public abstract class FormUtils {
   }
 
   public static void setMessage(ScrolledForm form, String message, int severity) {
-    proxy(form, FormStub.class).setMessage(message, severity);
+    Util.proxy(form, FormStub.class).setMessage(message, severity);
   }
   
   /**
