@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.maven.ide.eclipse.editor.feature"
-      label="Maven POM Editor (Incubation, Optional)"
+      label="Maven POM Editor (Optional)"
       version="0.9.7.qualifier"
       provider-name="Sonatype, Inc."
       plugin="org.maven.ide.eclipse">
@@ -92,6 +92,13 @@ http://www.eclipse.org/legal/epl-v10.html
          download-size="0"
          install-size="0"
          version="3.8.1.v20080530"
+         unpack="false"/>
+
+   <plugin
+         id="org.maven.ide.eclipse.refactoring"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
          unpack="false"/>
 
 </feature>
