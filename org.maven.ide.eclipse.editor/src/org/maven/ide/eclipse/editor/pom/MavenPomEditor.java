@@ -203,6 +203,8 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 
   BasicCommandStack sseCommandStack;
 
+  List<IPomFileChangedListener> fileChangeListeners = new ArrayList<IPomFileChangedListener>();
+
   public MavenPomEditor() {
     modelManager = StructuredModelManager.getModelManager();
   }
@@ -280,6 +282,9 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
         Display.getDefault().asyncExec(new Runnable() {
           public void run() {
             reload();
+            for (IPomFileChangedListener listener: fileChangeListeners) {
+              listener.fileChanged();
+            }
           }
         });
       }
@@ -472,6 +477,9 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     try {
       if(page instanceof MavenPomEditorPage) {
         pages.add((MavenPomEditorPage) page);
+      }
+      if (page instanceof IPomFileChangedListener) {
+        fileChangeListeners .add((IPomFileChangedListener) page);
       }
       return addPage(page);
     } catch(PartInitException ex) {

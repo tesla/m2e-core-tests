@@ -26,7 +26,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
@@ -71,24 +70,28 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.forms.IManagedForm;
+import org.eclipse.ui.forms.editor.FormPage;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.Section;
+import org.eclipse.ui.progress.UIJob;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
+import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
+import org.maven.ide.eclipse.project.MavenProjectChangedEvent;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 
 
 /**
  * @author Eugene Kuleshov
  */
-public class DependencyTreePage extends MavenPomEditorPage {
+public class DependencyTreePage extends FormPage implements IMavenProjectChangedListener, IPomFileChangedListener {
 
   private static final String DEPENDENCY_HIERARCHY = "Dependency Hierarchy";
 
@@ -130,6 +133,8 @@ public class DependencyTreePage extends MavenPomEditorPage {
   }
 
   protected void createFormContent(IManagedForm managedForm) {
+    MavenPlugin.getDefault().getMavenProjectManager().addMavenProjectChangedListener(this);
+
     FormToolkit formToolkit = managedForm.getToolkit();
 
     searchHighlightColor = new Color(Display.getDefault(), 242, 218, 170);
@@ -1063,6 +1068,8 @@ public class DependencyTreePage extends MavenPomEditorPage {
 
   @Override
   public void dispose() {
+    MavenPlugin.getDefault().getMavenProjectManager().removeMavenProjectChangedListener(this);
+
     if(searchHighlightColor != null) {
       searchHighlightColor.dispose();
     }
@@ -1118,14 +1125,37 @@ public class DependencyTreePage extends MavenPomEditorPage {
     }
   }
 
-  @Override
   public void loadData() {
     loadData(true);
   }
 
-  @Override
-  public void updateView(Notification notification) {
-    //ignore fine-grained notifications
+  public void mavenProjectChanged(MavenProjectChangedEvent[] events, IProgressMonitor monitor) {
+    if (getManagedForm() == null || getManagedForm().getForm() == null)
+      return;
+    
+    for (int i=0; i<events.length; i++) {
+      if (events[i].getSource().equals(((MavenPomEditor) getEditor()).getPomFile())) {
+        // file has been changed. need to update graph  
+        new UIJob("Reloading") {
+          public IStatus runInUIThread(IProgressMonitor monitor) {
+            loadData();
+            FormUtils.setMessage(getManagedForm().getForm(), null, IMessageProvider.WARNING);
+            return Status.OK_STATUS;
+          }
+        }.schedule();
+      }
+    }
   }
-  
+
+  public void fileChanged() {
+    if (getManagedForm() == null || getManagedForm().getForm() == null)
+      return;
+    
+    new UIJob("Reloading") {
+      public IStatus runInUIThread(IProgressMonitor monitor) {
+        FormUtils.setMessage(getManagedForm().getForm(), "Updating dependencies...", IMessageProvider.WARNING);
+        return Status.OK_STATUS;
+      }
+    }.schedule();
+  }
 }

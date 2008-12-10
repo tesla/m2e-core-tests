@@ -17,7 +17,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.GroupMarker;
@@ -47,7 +46,9 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.forms.IManagedForm;
+import org.eclipse.ui.forms.editor.FormPage;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
+import org.eclipse.ui.progress.UIJob;
 import org.eclipse.zest.core.viewers.AbstractZoomableViewer;
 import org.eclipse.zest.core.viewers.GraphViewer;
 import org.eclipse.zest.core.viewers.IZoomableWorkbenchPart;
@@ -60,9 +61,12 @@ import org.eclipse.zest.layouts.algorithms.CompositeLayoutAlgorithm;
 import org.eclipse.zest.layouts.algorithms.DirectedGraphLayoutAlgorithm;
 import org.eclipse.zest.layouts.algorithms.HorizontalShift;
 import org.eclipse.zest.layouts.algorithms.RadialLayoutAlgorithm;
+import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
+import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
+import org.maven.ide.eclipse.project.MavenProjectChangedEvent;
 
 
 /**
@@ -70,7 +74,13 @@ import org.maven.ide.eclipse.editor.MavenEditorImages;
  * 
  * @author Eugene Kuleshov
  */
-public class DependencyGraphPage extends MavenPomEditorPage implements IZoomableWorkbenchPart {
+public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchPart, IMavenProjectChangedListener, IPomFileChangedListener {
+
+  @Override
+  public void dispose() {
+    MavenPlugin.getDefault().getMavenProjectManager().removeMavenProjectChangedListener(this);
+    super.dispose();
+  }
 
   private static final String DEPENDENCY_GRAPH = "Dependency Graph";
 
@@ -136,6 +146,8 @@ public class DependencyGraphPage extends MavenPomEditorPage implements IZoomable
   }
 
   protected void createFormContent(final IManagedForm managedForm) {
+    MavenPlugin.getDefault().getMavenProjectManager().addMavenProjectChangedListener(this);
+
     ScrolledForm form = managedForm.getForm();
     form.setText(formatFormTitle());
     form.setExpandHorizontal(true);
@@ -642,8 +654,33 @@ public class DependencyGraphPage extends MavenPomEditorPage implements IZoomable
     updateGraphAsync(true, currentScope);
   }
 
-  public void updateView(Notification notification) {
-    //ignore fine-grained notifications
+  public void mavenProjectChanged(MavenProjectChangedEvent[] events, IProgressMonitor monitor) {
+    if (getManagedForm() == null || getManagedForm().getForm() == null)
+      return;
+    
+    for (int i=0; i<events.length; i++) {
+      if (events[i].getSource().equals(((MavenPomEditor) getEditor()).getPomFile())) {
+        // file has been changed. need to update graph  
+        new UIJob("Reloading") {
+          public IStatus runInUIThread(IProgressMonitor monitor) {
+            loadData();
+            FormUtils.setMessage(getManagedForm().getForm(), null, IMessageProvider.WARNING);
+            return Status.OK_STATUS;
+          }
+        }.schedule();
+      }
+    }
   }
 
+  public void fileChanged() {
+    if (getManagedForm() == null || getManagedForm().getForm() == null)
+      return;
+    
+    new UIJob("Reloading") {
+      public IStatus runInUIThread(IProgressMonitor monitor) {
+        FormUtils.setMessage(getManagedForm().getForm(), "Updating dependencies...", IMessageProvider.WARNING);
+        return Status.OK_STATUS;
+      }
+    }.schedule();
+  }
 }
