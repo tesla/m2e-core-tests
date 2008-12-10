@@ -17,7 +17,7 @@
         <action id="org.maven.ide.eclipse.editor.RenameAction"
               class="org.maven.ide.eclipse.refactoring.rename.RenameArtifactAction"
               enablesFor="1"
-              label="Rename Maven artifact..."
+              label="Rename Maven Artifact..."
               menubarPath="org.eclipse.jdt.ui.refactoring.menu/MavenRefactoring"/>
         <!-- add visibility condition for managet poms -->      
      </objectContribution>
@@ -27,7 +27,7 @@
         <action id="org.maven.ide.eclipse.editor.RenameAction"
               class="org.maven.ide.eclipse.refactoring.rename.RenameArtifactAction"
               enablesFor="1"
-              label="Rename Maven artifact..."
+              label="Rename Maven Artifact..."
               menubarPath="org.eclipse.jdt.ui.refactoring.menu/MavenRefactoring"/>
         <visibility>
           <and>
