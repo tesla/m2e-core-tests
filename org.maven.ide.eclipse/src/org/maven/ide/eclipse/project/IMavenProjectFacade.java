@@ -116,5 +116,10 @@ public interface IMavenProjectFacade {
   MavenExecutionResult execute(MavenRunnable runnable, IProgressMonitor monitor) throws CoreException;
 
   ArtifactKey getArtifactKey();
+  
+  /*
+   * @return calculated name template for a project
+   */
+  String getNameTemplate();
 
 }
