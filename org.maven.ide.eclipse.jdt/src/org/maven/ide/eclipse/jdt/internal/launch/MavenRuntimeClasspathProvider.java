@@ -150,7 +150,7 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
     }
   }
 
-  private int getArtifactScope(ILaunchConfiguration configuration) throws CoreException {
+  protected int getArtifactScope(ILaunchConfiguration configuration) throws CoreException {
     String typeid = configuration.getType().getAttribute("id");
     if (JDT_JAVA_APPLICATION.equals(typeid)) {
       IResource[] resources = configuration.getMappedResources();
