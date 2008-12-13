@@ -17,7 +17,6 @@ import com.windowtester.runtime.swt.locator.CTabItemLocator;
 import com.windowtester.runtime.swt.locator.TableItemLocator;
 import com.windowtester.runtime.swt.locator.TreeItemLocator;
 import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
-import com.windowtester.runtime.util.ScreenCapture;
 
 
 /**
@@ -30,11 +29,11 @@ public class RefactoringTest extends RefactoringTestBase {
   private static final String _0_0_ZZQ_SNAPSHOT = "0.0.zzq-SNAPSHOT";
   private static final String ARTIFACT_ID = "artifactId";
   private static final String VERSION = "version";
-  private static final String REFACTOR_RENAME_MAVEN_ARTIFACT = "Refactor/Rename Maven artifact...";
+  private static final String REFACTOR_RENAME_MAVEN_ARTIFACT = "Refactor/Rename Maven Artifact...";
   private static final String OK = "OK";
   private static final String SAVE_ALL_MODIFIED_RESOURCES = "Save All Modified Resources";
   private static final String ORG_ECLIPSE_JDT_UI_PACKAGE_EXPLORER = "org.eclipse.jdt.ui.PackageExplorer";
-  private static final String RENAME_ARTIFACT = "Rename artifact";
+  private static final String RENAME_ARTIFACT = "Rename Maven Artifact";
   private static final String PROGRESS_INFORMATION = "Progress Information";
   private static final String CHILD_POM_XML = "child/pom.xml";
   private static final String MINE_POM_XML = "mine/pom.xml";
@@ -46,7 +45,7 @@ public class RefactoringTest extends RefactoringTestBase {
         ORG_ECLIPSE_JDT_UI_PACKAGE_EXPLORER)));
     ui.click(2, new TreeItemLocator(CHILD_POM_XML, new ViewLocator(
         ORG_ECLIPSE_JDT_UI_PACKAGE_EXPLORER)));
-    ui.click(new CTabItemLocator(MINE_POM_XML));
+    //ui.click(new CTabItemLocator(MINE_POM_XML));
     ui.click(new TreeItemLocator(MINE_POM_XML, new ViewLocator(
         ORG_ECLIPSE_JDT_UI_PACKAGE_EXPLORER)));
     
