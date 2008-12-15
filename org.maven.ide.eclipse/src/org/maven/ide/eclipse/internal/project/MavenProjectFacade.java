@@ -56,6 +56,10 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
 
   private static final long serialVersionUID = 707484407691175077L;
 
+  private static final String VERSION = "[version]";
+  private static final String ARTIFACT_ID = "[artifactId]";
+  private static final String GROUP_ID = "[groupId]";
+  
   private final MavenProjectManagerImpl manager;
 
   private final IFile pom;
@@ -357,12 +361,75 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
     return null;
   }
 
+  public String getNameTemplate() {
+    return getNamePattern(getProject().getName(), getArtifactKey().getGroupId(), 
+        getArtifactKey().getArtifactId(), getArtifactKey().getVersion());
+  }
+  
+  public static String getNamePattern(String projectName, String groupId, String artifactId, String version) {
+    GAVPatternIterator iterator = new GAVPatternIterator(groupId, artifactId, version);
+    while (iterator.hasNext()) {
+      Pattern p = iterator.next();
+      Matcher m = p.matcher(projectName); 
+      if (m.matches()) {
+        // replace longest first. if same length, priority is A > G > V. calculate weighted length
+        // assumption is weighted lengths are never equal
+        int l1 = groupId.length() * groupId.length() + 1;
+        int l2 = artifactId.length() * artifactId.length() + 2;
+        int l3 = version.length() * version.length();
+        
+        if (l1 > l2 && l1 > l3) {
+          projectName = replace(projectName, groupId, GROUP_ID);
+          if (l2 > l3) {
+            projectName = replace(projectName, artifactId, ARTIFACT_ID);
+            projectName = replace(projectName, version, VERSION);
+          } else {
+            projectName = replace(projectName, version, VERSION);
+            projectName = replace(projectName, artifactId, ARTIFACT_ID);
+          }
+        } else if (l2 > l1 && l2 > l3) {
+          projectName = replace(projectName, artifactId, ARTIFACT_ID);
+          if (l1 > l3) {
+            projectName = replace(projectName, groupId, GROUP_ID);
+            projectName = replace(projectName, version, VERSION);
+          } else {
+            projectName = replace(projectName, version, VERSION);
+            projectName = replace(projectName, groupId, GROUP_ID);
+          }
+        } else {
+          projectName = replace(projectName, version, VERSION);
+          if (l1 > l2) {
+            projectName = replace(projectName, groupId, GROUP_ID);
+            projectName = replace(projectName, artifactId, ARTIFACT_ID);
+          } else {
+            projectName = replace(projectName, artifactId, ARTIFACT_ID);
+            projectName = replace(projectName, groupId, GROUP_ID);
+          }
+        }
+
+        return projectName;
+      }
+    }
+
+    // cannot guess...
+    return ARTIFACT_ID;
+  }
+  
+  private static String replace(String str, String value, String template) {
+    int pos = str.indexOf(value);
+    if (pos >= 0) {
+      str = str.substring(0, pos) + template + str.substring(pos + value.length());
+    }
+    return str;
+  }
+
+  
   public static class GAVPatternIterator implements Iterator<Pattern> {
     private static final int num1 = 3;
     private static final int num2 = 6;
     private static final int num3 = 6;
     private static final int totalNum = num1 + num2 + num3;
-    private static final String RANDOM = ".*";
+    private static final String ANY = ".*";
 
     private int currentNum;
     private String groupId;
@@ -385,17 +452,18 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
     }
 
     private String getPattern() {
-      if (currentNum < num1) {
-        //one
-        return RANDOM + get(currentNum--) + RANDOM;
-      } else if (currentNum < num1 + num2) {
-        //two
+      if(currentNum < num1) {
+        // one
+        return ANY + get(currentNum-- ) + ANY;
+      } else if(currentNum < num1 + num2) {
+        // two
         int offset = (currentNum - num1) / 3;
-        return RANDOM + get(currentNum + offset) + RANDOM + get(currentNum-- + offset*2 + 1) + RANDOM;
+        return ANY + get(currentNum + offset) + ANY + get(currentNum-- + offset * 2 + 1) + ANY;
       } else {
-        //three
+        // three
         int offset = (currentNum - num1 - num2) / 3;
-        return RANDOM + get(currentNum + offset) + RANDOM + get(currentNum + offset*2 + 1) + RANDOM + get(currentNum-- + offset + 2);
+        return ANY + get(currentNum + offset) + ANY + get(currentNum + offset * 2 + 1) + ANY
+            + get(currentNum-- + offset + 2);
       }
     }
 
@@ -414,72 +482,6 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
       //not supported
     }
     
-  }
-  
-  private static final String VERSION = "[version]";
-  private static final String ARTIFACT_ID = "[artifactId]";
-  private static final String GROUP_ID = "[groupId]";
-
-  public static String getNamePattern(String name, String groupId, String artifactId, String version) {
-    GAVPatternIterator iterator = new GAVPatternIterator(groupId, artifactId, version);
-    while (iterator.hasNext()) {
-      Pattern p = iterator.next();
-      Matcher m = p.matcher(name); 
-      if (m.matches()) {
-        // replace longest first. if same length, priority is A > G > V. calculate weighted length
-        // assumption is weighted lengths are never equal
-        int l1 = groupId.length() * groupId.length() + 1;
-        int l2 = artifactId.length() * artifactId.length() + 2;
-        int l3 = version.length() * version.length();
-        
-        if (l1 > l2 && l1 > l3) {
-          name = replace(name, groupId, GROUP_ID);
-          if (l2 > l3) {
-            name = replace(name, artifactId, ARTIFACT_ID);
-            name = replace(name, version, VERSION);
-          } else {
-            name = replace(name, version, VERSION);
-            name = replace(name, artifactId, ARTIFACT_ID);
-          }
-        } else if (l2 > l1 && l2 > l3) {
-          name = replace(name, artifactId, ARTIFACT_ID);
-          if (l1 > l3) {
-            name = replace(name, groupId, GROUP_ID);
-            name = replace(name, version, VERSION);
-          } else {
-            name = replace(name, version, VERSION);
-            name = replace(name, groupId, GROUP_ID);
-          }
-        } else {
-          name = replace(name, version, VERSION);
-          if (l1 > l2) {
-            name = replace(name, groupId, GROUP_ID);
-            name = replace(name, artifactId, ARTIFACT_ID);
-          } else {
-            name = replace(name, artifactId, ARTIFACT_ID);
-            name = replace(name, groupId, GROUP_ID);
-          }
-        }
-
-        return name;
-      }
-    }
-
-    // cannot guess...
-    return ARTIFACT_ID;
-  }
-  
-  private static String replace(String str, String value, String template) {
-    int pos = str.indexOf(value);
-    if (pos >= 0) {
-      str = str.substring(0, pos) + template + str.substring(pos + value.length());
-    }
-    return str;
-  }
-
-  public String getNameTemplate() {
-    return getNamePattern(getProject().getName(), getArtifactKey().getGroupId(), 
-        getArtifactKey().getArtifactId(), getArtifactKey().getVersion());
   }
   
 }
