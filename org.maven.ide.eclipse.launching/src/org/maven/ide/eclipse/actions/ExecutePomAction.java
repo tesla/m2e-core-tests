@@ -34,7 +34,6 @@ import org.eclipse.debug.ui.RefreshTab;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -226,9 +225,9 @@ public class ExecutePomAction implements ILaunchShortcut, IExecutableExtension {
   }
 
   // TODO ideally it should use MavenProject, but it is faster to scan IJavaProjects 
-  private IPath getJREContainerPath(IContainer basedir) throws JavaModelException {
+  private IPath getJREContainerPath(IContainer basedir) throws CoreException {
     IProject project = basedir.getProject();
-    if(project != null) {
+    if(project != null && project.hasNature(JavaCore.NATURE_ID)) {
       IJavaProject javaProject = JavaCore.create(project);
       IClasspathEntry[] entries = javaProject.getRawClasspath();
       for(int i = 0; i < entries.length; i++ ) {
