@@ -654,7 +654,9 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
         ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
 
         IMavenProjectFacade projectFacade = projectManager.create(pomFile, true, monitor);
-        mavenProject = projectFacade.getMavenProject(monitor);
+        if(projectFacade != null) {
+          mavenProject = projectFacade.getMavenProject(monitor);
+        }
 
       } else if(input instanceof IStorageEditorInput) {
         IStorageEditorInput storageInput = (IStorageEditorInput) input;
