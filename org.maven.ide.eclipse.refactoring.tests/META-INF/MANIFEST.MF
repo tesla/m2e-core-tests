@@ -30,7 +30,7 @@ Bundle-Name: Maven Integration Tests Plug-in
 Bundle-Version: 0.9.7.qualifier
 MavenArtifact-ArtifactId: org.maven.ide.eclipse.test
 Bundle-Vendor: Sonatype, Inc.
-Bundle-SymbolicName: org.maven.ide.eclipse.editor.tests;singleton:=true
+Bundle-SymbolicName: org.maven.ide.eclipse.refactoring.tests;singleton:=true
 Bundle-ClassPath: .
 MavenArtifact-GroupId: org.maven.ide.eclipse
 Manifest-Version: 1.0
