@@ -377,8 +377,8 @@
 
   <repositories>
     <repository>
-      <id>maven-eclipse</id>
-      <url>http://repository.sonatype.org/content/groups/maven-eclipse</url>
+      <id>sonatype-public</id>
+      <url>http://repository.sonatype.org/content/groups/public</url>
       <snapshots>
         <enabled>true</enabled>
       </snapshots>
@@ -390,8 +390,8 @@
 
   <pluginRepositories>
     <pluginRepository>
-      <id>eclipse-snapshots</id>
-      <url>http://repository.sonatype.org/content/repositories/eclipse-snapshots</url>
+      <id>sonatype-public</id>
+      <url>http://repository.sonatype.org/content/groups/public</url>
       <snapshots>
         <enabled>true</enabled>
       </snapshots>
