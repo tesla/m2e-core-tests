@@ -554,7 +554,8 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     cp = container.getClasspathEntries();
 
     assertEquals(1, cp.length);
-    assertEquals("downloadsources-t006-0.0.1-sources.jar", cp[0].getSourceAttachmentPath().lastSegment());
+    assertNotNull(cp[0].getSourceAttachmentPath());
+    assertEquals(cp[0].getSourceAttachmentPath().toString(), "downloadsources-t006-0.0.1-sources.jar", cp[0].getSourceAttachmentPath().lastSegment());
   }
 
   public void testDownloadSources_006_nonMavenProject() throws Exception {
@@ -736,8 +737,8 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
 
     // Build path specifies execution environment J2SE-1.4. 
     // There are no JREs in the workspace strictly compatible with this environment.
-    IMarker[] markers = project.findMarkers(null, true, IResource.DEPTH_INFINITE);
-    assertEquals(toString(markers), 1, markers.length);
+    List<IMarker> errorMarkers = findErrorMarkers(project);
+    assertEquals(errorMarkers.toString(), 0, errorMarkers.size());
 
     IJavaProject javaProject = JavaCore.create(project);
     assertEquals("1.4", javaProject.getOption(JavaCore.COMPILER_SOURCE, true));
