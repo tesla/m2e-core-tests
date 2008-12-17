@@ -282,7 +282,9 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       if(visitor.changed) {
         Display.getDefault().asyncExec(new Runnable() {
           public void run() {
-            reload();
+            // command stack shouldn't be dirty after refactoring
+            // changes can be undone though
+            flushCommandStack();
             for (IPomFileChangedListener listener: fileChangeListeners) {
               listener.fileChanged();
             }
