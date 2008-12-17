@@ -41,7 +41,7 @@ public class MavenProjectUtils {
     }
     IPath projectLocation = project.getLocation();
     IPath directory = Path.fromOSString(resourceLocation); // this is an absolute path!
-    if(!projectLocation.isPrefixOf(directory)) {
+    if(projectLocation == null || !projectLocation.isPrefixOf(directory)) {
       return null;
     }
 
