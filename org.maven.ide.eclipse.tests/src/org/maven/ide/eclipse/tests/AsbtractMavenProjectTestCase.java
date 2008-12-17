@@ -276,7 +276,7 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
 
   protected void waitForJobsToComplete() throws InterruptedException, CoreException {
     /*
-     * First, we need to make surerefresh job gets all resource change events
+     * First, make sure refresh job gets all resource change events
      * 
      * Resource change events are delivered after WorkspaceJob#runInWorkspace returns
      * and during IWorkspace#run. Each change notification is delivered by
@@ -293,9 +293,7 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
     try {
       Job[] jobs = jobManager.find(null);
       for (int i = 0; i < jobs.length; i++) {
-        if (jobs[i] instanceof WorkspaceJob 
-            || jobs[i].getClass().getName().endsWith("JREUpdateJob")) 
-        {
+        if(jobs[i] instanceof WorkspaceJob || jobs[i].getClass().getName().endsWith("JREUpdateJob")) {
           jobs[i].join();
         }
       }
@@ -307,9 +305,7 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
       jobManager.resume();
     }
 
-    /*
-     * Now we run background refresh job one time 
-     */
+    // Now we run background refresh job once 
     job.wakeUp();
     job.schedule();
     job.join();
