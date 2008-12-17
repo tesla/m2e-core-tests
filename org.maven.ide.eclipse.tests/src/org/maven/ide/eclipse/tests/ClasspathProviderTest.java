@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
@@ -32,6 +33,7 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.jdt.internal.launch.MavenRuntimeClasspathProvider;
 import org.maven.ide.eclipse.jdt.internal.launch.MavenSourcePathProvider;
 import org.maven.ide.eclipse.project.IProjectConfigurationManager;
@@ -47,6 +49,10 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
 
     workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
 
+    MavenEmbedder embedder = plugin.getMavenEmbedderManager().getWorkspaceEmbedder();
+    MavenLogger.log("### Effective Settings " + embedder.getSettings().getLocalRepository(), null);
+    MavenLogger.log("### User Settings " + plugin.getMavenRuntimeManager().getUserSettingsFile(), null);
+    
     List<IMarker> errorMarkers = findErrorMarkers(cptest);
     assertEquals(toString(errorMarkers.toArray(new IMarker[errorMarkers.size()])), 0, errorMarkers.size());
     
