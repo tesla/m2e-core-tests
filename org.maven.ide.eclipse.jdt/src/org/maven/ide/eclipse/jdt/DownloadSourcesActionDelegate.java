@@ -32,6 +32,10 @@ import org.maven.ide.eclipse.embedder.ArtifactKey;
 public class DownloadSourcesActionDelegate implements IEditorActionDelegate {
 
   public void setActiveEditor(IAction action, IEditorPart part) {
+    if (MavenPlugin.getDefault().getMavenRuntimeManager().isOffline()) {
+      return;
+    }
+
     if (part != null) {
       try {
         IClassFileEditorInput input = (IClassFileEditorInput) part.getEditorInput();
@@ -44,7 +48,7 @@ public class DownloadSourcesActionDelegate implements IEditorActionDelegate {
             IJavaProject project = (IJavaProject) root.getParent();
             ArtifactKey a = MavenPlugin.getDefault().getIndexManager().identify(f).getArtifactKey();
             MavenPlugin.getDefault().getMavenProjectManager().downloadSources(project.getProject(), 
-                project.getPath(), a.getGroupId(), a.getArtifactId(), a.getVersion(), a.getClassifier(), true, true);
+                project.getPath(), a.getGroupId(), a.getArtifactId(), a.getVersion(), a.getClassifier(), true, false);
             break;
           }
         }
