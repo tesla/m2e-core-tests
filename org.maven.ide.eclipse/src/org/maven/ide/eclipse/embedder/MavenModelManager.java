@@ -482,19 +482,110 @@ public class MavenModelManager {
         dependency.setExclusions(exclusions);
       }
       
-      // search for dependency with same GA and remove if found
+      // search for dependency with same GAC and remove if found
       Iterator<Dependency> it = dependencies.getDependency().iterator();
+      boolean mergeScope = false;
+      String oldScope = Artifact.SCOPE_COMPILE;
       while (it.hasNext()) {
         Dependency dep = it.next();
-        if (dep.getGroupId().equals(this.dependency.getGroupId()) && 
-            dep.getArtifactId().equals(this.dependency.getArtifactId())) {
+        if (dep.getGroupId().equals(dependency.getGroupId()) && 
+            dep.getArtifactId().equals(dependency.getArtifactId()) &&
+            compareNulls(dep.getClassifier(), dependency.getClassifier())) {
+          oldScope = dep.getScope();
           it.remove();
+          mergeScope = true;
+        }
+      }
+      
+      if (mergeScope) {
+        // merge scopes
+        if (oldScope == null) {
+          oldScope = Artifact.SCOPE_COMPILE;
+        }
+        
+        String newScope = this.dependency.getScope();
+        if (newScope == null) {
+          newScope = Artifact.SCOPE_COMPILE;
+        }
+        
+        if (!oldScope.equals(newScope)) {
+          boolean systemScope = false;
+          boolean providedScope = false;
+          boolean compileScope = false;
+          boolean runtimeScope = false;
+          boolean testScope = false;
+  
+          // test old scope
+          if ( Artifact.SCOPE_COMPILE.equals( oldScope ) ) {
+            systemScope = true;
+            providedScope = true;
+            compileScope = true;
+            runtimeScope = false;
+            testScope = false;
+          } else if ( Artifact.SCOPE_RUNTIME.equals( oldScope ) ) {
+            systemScope = false;
+            providedScope = false;
+            compileScope = true;
+            runtimeScope = true;
+            testScope = false;
+          } else if ( Artifact.SCOPE_TEST.equals( oldScope ) ) {
+            systemScope = true;
+            providedScope = true;
+            compileScope = true;
+            runtimeScope = true;
+            testScope = true;
+          }
+
+          // merge with new one
+          if ( Artifact.SCOPE_COMPILE.equals( newScope ) ) {
+            systemScope = systemScope || true;
+            providedScope = providedScope || true;
+            compileScope = compileScope || true;
+            runtimeScope = runtimeScope || false;
+            testScope = testScope || false;
+          } else if ( Artifact.SCOPE_RUNTIME.equals( newScope ) ) {
+            systemScope = systemScope || false;
+            providedScope = providedScope || false;
+            compileScope = compileScope || true;
+            runtimeScope = runtimeScope || true;
+            testScope = testScope || false;
+          } else if ( Artifact.SCOPE_TEST.equals( newScope ) ) {
+            systemScope = systemScope || true;
+            providedScope = providedScope || true;
+            compileScope = compileScope || true;
+            runtimeScope = runtimeScope || true;
+            testScope = testScope || true;
+          }
+          
+          if (testScope) {
+            newScope = Artifact.SCOPE_TEST;
+          } else if (runtimeScope) {
+            newScope = Artifact.SCOPE_RUNTIME;
+          } else if (compileScope) {
+            newScope = Artifact.SCOPE_COMPILE;
+          } else {
+            // unchanged
+          }
+
+          dependency.setScope(newScope);
         }
       }
       
       dependencies.getDependency().add(dependency);
     }
+
+    @SuppressWarnings("null")
+    private boolean compareNulls(String s1, String s2) {
+      if (s1 == null && s2 == null) {
+        return true;
+      }
+      if ((s1 == null && s2 != null) || (s2 == null && s1 != null)) {
+        return false;
+      }
+      return s1.equals(s2);   
+    }
   }
+  
 
   /**
    * Project updater for adding modules
