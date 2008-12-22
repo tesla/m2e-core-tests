@@ -482,6 +482,16 @@ public class MavenModelManager {
         dependency.setExclusions(exclusions);
       }
       
+      // search for dependency with same GA and remove if found
+      Iterator<Dependency> it = dependencies.getDependency().iterator();
+      while (it.hasNext()) {
+        Dependency dep = it.next();
+        if (dep.getGroupId().equals(this.dependency.getGroupId()) && 
+            dep.getArtifactId().equals(this.dependency.getArtifactId())) {
+          it.remove();
+        }
+      }
+      
       dependencies.getDependency().add(dependency);
     }
   }
