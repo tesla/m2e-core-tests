@@ -138,5 +138,18 @@
           name="Maven modules filter"
           enabled="false"/>
    </extension>
+   <extension
+         point="org.eclipse.ui.editorActions">
+      <editorContribution
+            id="org.maven.ide.eclipse.jdt.downloadSourcesContribution"
+            targetID="org.eclipse.jdt.ui.ClassFileEditor">
+         <action
+               class="org.maven.ide.eclipse.jdt.DownloadSourcesActionDelegate"
+               id="org.maven.ide.eclipse.jdt.downloadSourcesAction"
+               label="label"
+               style="push">
+         </action>
+      </editorContribution>
+   </extension>
 
 </plugin>
