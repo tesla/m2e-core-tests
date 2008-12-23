@@ -566,7 +566,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       resource.load(Collections.EMPTY_MAP);
       return resource.getModel();
 
-    } catch(IOException ex) {
+    } catch(Exception ex) {
       MavenLogger.log("Can't load model " + path, ex);
       return null;
 
