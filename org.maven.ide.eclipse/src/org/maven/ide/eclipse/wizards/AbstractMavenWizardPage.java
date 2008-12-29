@@ -92,7 +92,9 @@ public abstract class AbstractMavenWizardPage extends WizardPage {
     if(visible) {
       if(!isHistoryLoaded) {
         // load data before history kicks in
-        resolverConfigurationComponent.loadData();
+        if(resolverConfigurationComponent != null) {
+          resolverConfigurationComponent.loadData();
+        }
         loadInputHistory();
         isHistoryLoaded = true;
       } else {
