@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+	<extension
+		point="org.eclipse.ui.actionSets">
+		<actionSet
+			label="Maven"
+			visible="true"
+			id="org.maven.ide.eclipse.actionSet">
+		   <menu id="org_maven_ide_eclipse_maven"
+			   label="Maven"
+			   path="help/helpStart"> 
+			   <separator name="slot1"/>
+		   </menu>
+		   <action id="org_maven_ide_eclipse_maven_problem"
+			   menubarPath="help/org_maven_ide_eclipse_maven/slot1"
+			   label="Report Issue..."
+			   tooltip="Report Issue..."
+			   icon="icons/report-bug.gif"
+			   class="org.maven.ide.eclipse.pr.internal.wizard.ProblemReportingAction">
+		   </action>
+		</actionSet>
+	</extension>
+</plugin>
