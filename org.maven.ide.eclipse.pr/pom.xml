@@ -21,64 +21,65 @@
   <packaging>eclipse-plugin</packaging>
   <name>Maven Problem Reporting</name>
 
+  <properties>
+    <plexus.version>1.0-beta-3.0.1</plexus.version>
+  </properties>
+ 
   <profiles>
     <profile>
       <id>update-dependencies</id>
       <dependencies>
         <dependency>
-          <groupId>org.apache.maven</groupId>
-          <artifactId>maven-embedder</artifactId>
+          <groupId>org.sonatype.spice</groupId>
+          <artifactId>plexus-swizzle</artifactId>
+          <version>1.0-alpha-1</version>
         </dependency>
       </dependencies>
-    <build>
-      <plugins>
-        <plugin>
-          <artifactId>maven-clean-plugin</artifactId>
-          <configuration>
-            <filesets>
-              <fileset>
-                <directory>jars</directory>
-                <followSymlinks>false</followSymlinks>
-                <includes>
-                  <include>**/*.jar</include>
-                </includes>
-              </fileset>
-              <fileset>
-                <directory>META-INF</directory>
-                <followSymlinks>false</followSymlinks>
-                <includes>
-                  <include>**/MANIFEST.MF</include>
-                </includes>
-              </fileset>
-            </filesets>
-          </configuration>
-        </plugin>
-
-        <plugin>
-          <groupId>org.codehaus.tycho</groupId>
-          <artifactId>maven-osgi-packaging-plugin</artifactId>
-          <executions>
-            <execution>
-              <phase>process-classes</phase>
-              <goals>
-                <goal>generate-bundle</goal>
-              </goals>
-            </execution>
-          </executions>
-          <configuration>
-            <packageSources>false</packageSources>
-            <exportPackages>
-              org.maven.ide.eclipse.pr.*
-            </exportPackages>
-            <manifestAttributes>
-              <Bundle-RequiredExecutionEnvironment>J2SE-1.5, JavaSE-1.6</Bundle-RequiredExecutionEnvironment>
-              <Eclipse-BuddyPolicy>dependent</Eclipse-BuddyPolicy>
-            </manifestAttributes>
-          </configuration>
-        </plugin>
-      </plugins>
-    </build>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-clean-plugin</artifactId>
+            <configuration>
+              <filesets>
+                <fileset>
+                  <directory>jars</directory>
+                  <followSymlinks>false</followSymlinks>
+                  <includes>
+                    <include>**/*.jar</include>
+                  </includes>
+                </fileset>
+                <fileset>
+                  <directory>META-INF</directory>
+                  <followSymlinks>false</followSymlinks>
+                  <includes>
+                    <include>**/MANIFEST.MF</include>
+                  </includes>
+                </fileset>
+              </filesets>
+            </configuration>
+          </plugin>
+ 
+          <plugin>
+            <groupId>org.codehaus.tycho</groupId>
+            <artifactId>maven-osgi-packaging-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>process-classes</phase>
+                <goals>
+                  <goal>generate-bundle</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <packageSources>false</packageSources>
+              <manifestAttributes>
+                <Bundle-RequiredExecutionEnvironment>J2SE-1.5,JavaSE-1.6</Bundle-RequiredExecutionEnvironment>
+                <Require-Bundle>org.eclipse.core.runtime, org.eclipse.core.resources, org.eclipse.ui, org.eclipse.ui.console, org.eclipse.jface.text, org.maven.ide.components.maven_embedder, org.maven.ide.eclipse</Require-Bundle>
+              </manifestAttributes>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
-
 </project>
