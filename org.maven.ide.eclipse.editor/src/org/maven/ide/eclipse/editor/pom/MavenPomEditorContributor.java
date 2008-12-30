@@ -91,9 +91,12 @@ public class MavenPomEditorContributor extends MultiPageEditorActionBarContribut
    */
   protected IAction getAction(String actionId) {
     if(editorPart != null) {
-      return editorPart.getSourcePage().getAction(actionId);
+      try {
+        return editorPart.getSourcePage().getAction(actionId);
+      } catch (NullPointerException e) {
+        //editor has been disposed, ignore
+      }
     }
-    
     return null;
   }
   
