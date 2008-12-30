@@ -74,7 +74,7 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
       IProblemLocation location = locations[i];
       String[] arguments = location.getProblemArguments();
       String name;
-      if(arguments != null) {
+      if(arguments != null && arguments.length > 0) {
         name = arguments[0];
       } else {
         ASTNode coveringNode = context.getCoveringNode();
