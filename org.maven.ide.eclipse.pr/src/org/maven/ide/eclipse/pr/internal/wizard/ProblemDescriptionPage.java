@@ -35,6 +35,7 @@ public class ProblemDescriptionPage extends AbstractMavenWizardPage {
     setTitle("Problem details");
     setDescription("Enter problem summary and description");
     setImageDescriptor(ProblemReportingImages.REPORT_WIZARD);
+    setPageComplete(false);
   }
 
   public void createControl(Composite parent) {

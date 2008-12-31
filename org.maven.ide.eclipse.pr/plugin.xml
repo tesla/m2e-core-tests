@@ -7,20 +7,21 @@
    </extension>
 
 	<extension point="org.eclipse.ui.actionSets">
-		<actionSet id="org.maven.ide.eclipse.actionSet"
-			label="Maven"
-			visible="true">
+		<actionSet id="org.maven.ide.eclipse.help.actionSet"
+          label="Maven Problem Reporting"
+          description="Maven Problem Reporting"
+          visible="true">
 		   <menu id="org.maven.ide.eclipse.help"
-			   label="Maven"
-			   path="help/helpStart"> 
+           label="Maven"
+           path="help/maven">
 			   <separator name="slot1"/>
 		   </menu>
 		   <action id="org.maven.ide.eclipse.help.report"
-			   menubarPath="help/org.maven.ide.eclipse.help/slot1"
-			   label="Report Issue..."
-			   tooltip="Report Issue..."
-			   icon="icons/report-bug.gif"
-			   class="org.maven.ide.eclipse.pr.internal.wizard.ProblemReportingAction"/>
+           label="Report Issue..."
+           tooltip="Report Issue..."
+           menubarPath="help/org.maven.ide.eclipse.help/slot1"
+           icon="icons/report-bug.gif"
+           class="org.maven.ide.eclipse.pr.internal.wizard.ProblemReportingAction"/>
 		</actionSet>
 	</extension>
 	
