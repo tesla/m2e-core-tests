@@ -32,8 +32,8 @@
     <maven_model_edit.version>1.0.0-SNAPSHOT</maven_model_edit.version>
     <maven_pom.version>1.0.0-SNAPSHOT</maven_pom.version>
 
-    <nexus_indexer.version>1.1.0.20081130-1300</nexus_indexer.version>
-    <nexus.version>1.1.0-SNAPSHOT</nexus.version>
+    <nexus_indexer.version>1.1.3.20081231-0310</nexus_indexer.version>
+    <nexus.version>1.1.3-SNAPSHOT</nexus.version>
 
     <doxia_converter.version>1.0.0.20080917-1930</doxia_converter.version>
     <doxia.version>1.0-SNAPSHOT</doxia.version>
@@ -106,7 +106,6 @@
 
     <module>../org.maven.ide.eclipse.editor.xml</module>
     <module>../org.maven.ide.eclipse.editor</module>
-    <module>../org.maven.ide.eclipse.pr</module>
     <module>../org.maven.ide.eclipse.editor.tests</module>
     <module>../org.maven.ide.eclipse.refactoring</module>
     <!--
@@ -120,6 +119,7 @@
     <module>../org.maven.ide.eclipse.wtp.tests</module>
     <module>../org.maven.ide.eclipse.book</module>
     <module>../org.maven.doxia.ide.eclipse</module>
+    <module>../org.maven.ide.eclipse.pr</module>
 
     <!-- features -->
     <module>../org.maven.ide.components.maven_embedder.feature</module>
