@@ -13,7 +13,9 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.maven.ide.eclipse.MavenPlugin;
@@ -22,8 +24,9 @@ import org.maven.ide.eclipse.MavenPlugin;
 /**
  * Gather information about user .
  */
-public class ProblemReportingAction implements IWorkbenchWindowActionDelegate {
+public class ProblemReportingAction implements IWorkbenchWindowActionDelegate, IObjectActionDelegate {
 
+  public static final String ID = "org.maven.ide.eclipse.pr.action.ProblemReportingAction";
   private IStructuredSelection selection;
 
   public void dispose() {
@@ -55,5 +58,9 @@ public class ProblemReportingAction implements IWorkbenchWindowActionDelegate {
     
     IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
     return window == null ? null : window.getShell();
+  }
+
+  public void setActivePart(IAction action, IWorkbenchPart targetPart) {
+    //don't need
   }
 }

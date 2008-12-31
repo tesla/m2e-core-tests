@@ -12,11 +12,17 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.zip.ZipOutputStream;
 
+import org.codehaus.plexus.swizzle.IssueSubmissionRequest;
+import org.codehaus.plexus.swizzle.IssueSubmitter;
+import org.codehaus.plexus.swizzle.JiraIssueSubmitter;
+import org.codehaus.plexus.swizzle.jira.authentication.DefaultAuthenticationSource;
 import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -25,6 +31,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -41,11 +48,18 @@ import org.maven.ide.eclipse.pr.internal.data.DataGatherer;
  *
  * @author Eugene Kuleshov
  */
+@SuppressWarnings("restriction")
 public class ProblemReportingWizard extends Wizard implements IImportWizard {
 
   private IStructuredSelection selection;
   
-  private ProblemReportingSelectionPage selectionPage;
+  // TODO replace with proper jira
+  private static final String URL = "http://localhost:8080";
+  private static final String USERNAME = "jimmi1977";
+  private static final String PASSWORD = "jimmi123";
+  private static final String PROJECT = "TODO";
+  
+  //private ProblemReportingSelectionPage selectionPage;
 
   private ProblemDescriptionPage descriptionPage;
   
@@ -57,45 +71,62 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
   public void addPages() {
     descriptionPage = new ProblemDescriptionPage();
     addPage(descriptionPage);
-    selectionPage = new ProblemReportingSelectionPage();
-    addPage(selectionPage);
+    //selectionPage = new ProblemReportingSelectionPage();
+    //addPage(selectionPage);
   }
   
   public void init(IWorkbench workbench, IStructuredSelection selection) {
     this.selection = selection;
   }
   
-  /* (non-Javadoc)
-   * @see org.eclipse.jface.wizard.Wizard#performFinish()
-   */
   public boolean performFinish() {
-    final Set<Data> dataSet = selectionPage.getDataSet();
-    final String location = selectionPage.getLocation();
-    File locationFile = new File(location);
-    if(locationFile.exists()) {
-      if(!MessageDialog.openQuestion(getShell(), "File already exists", //
-          "File " + location + " already exists.\nDo you want to overwrite?")) {
-        return false;
-      }
-      if(!locationFile.delete()) {
-        MavenLogger.log("Can't delete file " + location, null);
-      }
-    }
+    final Set<Data> dataSet = new HashSet<Data>();//selectionPage.getDataSet();
+    dataSet.addAll(EnumSet.allOf(Data.class));
+//    if(locationFile.exists()) {
+//      if(!MessageDialog.openQuestion(getShell(), "File already exists", //
+//          "File " + location + " already exists.\nDo you want to overwrite?")) {
+//        return false;
+//      }
+//      if(!locationFile.delete()) {
+//        MavenLogger.log("Can't delete file " + location, null);
+//      }
+//    }
     
     new Job("Gathering Information") {
       protected IStatus run(IProgressMonitor monitor) {
+        File locationFile = null;
         try {
+          String tmpPath = ResourcesPlugin.getPlugin().getStateLocation().toOSString();
+          File tmpDir = new File(tmpPath);
+          String location = File.createTempFile("bundle", ".zip", tmpDir).getAbsolutePath();//final String location = selectionPage.getLocation();
+          locationFile = new File(location);
           IStatus status = saveData(location, dataSet, monitor);
           if(status.isOK()) {
-            showMessage(location);
+            //showMessage("The problem reporting bundle is saved to " + location);
+            IssueSubmitter is = new JiraIssueSubmitter( URL, new DefaultAuthenticationSource( USERNAME, PASSWORD ) );
+            
+            IssueSubmissionRequest r = new IssueSubmissionRequest();
+            r.setProjectId( PROJECT );
+            r.setSummary( descriptionPage.getSummary() );
+            r.setDescription( descriptionPage.getDescription() );
+            r.setAssignee( USERNAME );
+            r.setReporter( USERNAME );
+            r.setProblemReportBundle( locationFile );
+            
+            is.submitIssue( r );
+
+            showMessage("Successfully submitted issue to " + URL);
           } else {
             MavenLogger.log(new CoreException(status));
             showError();
           }
-          
-        } catch(IOException ex) {
+        } catch(Exception ex) {
           MavenLogger.log("Failed generate errorto report issue", ex);
           showError();
+        } finally {
+          if (locationFile != null && locationFile.exists()) {
+            locationFile.delete();
+          }
         }
         
         return Status.OK_STATUS;
@@ -111,11 +142,11 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
         });
       }
       
-      private void showMessage(final String fileName) {
+      private void showMessage(final String msg) {
         Display.getDefault().asyncExec(new Runnable() {
           public void run() {
             MessageDialog.openInformation(Display.getCurrent().getActiveShell(), //
-                "Problem Reporting", "The problem reporting bundle is saved to " + fileName);
+                "Problem Reporting", msg);
           }
         });
       }
@@ -132,6 +163,9 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
     Set<IProject> projects = new LinkedHashSet<IProject>(); 
     for(Iterator<?> i = selection.iterator(); i.hasNext();) {
       Object o = i.next();
+      if (o instanceof JavaProject) {
+        projects.add(((JavaProject) o).getProject());
+      }
       if (o instanceof IProject) {
         projects.add((IProject) o);
       }

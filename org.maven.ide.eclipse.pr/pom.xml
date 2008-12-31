@@ -74,7 +74,7 @@
               <packageSources>false</packageSources>
               <manifestAttributes>
                 <Bundle-RequiredExecutionEnvironment>J2SE-1.5,JavaSE-1.6</Bundle-RequiredExecutionEnvironment>
-                <Require-Bundle>org.eclipse.core.runtime, org.eclipse.core.resources, org.eclipse.ui, org.eclipse.ui.console, org.eclipse.jface.text, org.maven.ide.components.maven_embedder, org.maven.ide.eclipse</Require-Bundle>
+                <Require-Bundle>org.eclipse.core.runtime,org.eclipse.core.resources,org.eclipse.ui,org.eclipse.ui.console,org.eclipse.jface.text,org.maven.ide.components.maven_embedder,org.maven.ide.eclipse</Require-Bundle>
               </manifestAttributes>
             </configuration>
           </plugin>

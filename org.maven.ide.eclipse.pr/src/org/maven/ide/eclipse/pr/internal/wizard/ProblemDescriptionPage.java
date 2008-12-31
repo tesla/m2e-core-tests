@@ -57,6 +57,7 @@ public class ProblemDescriptionPage extends AbstractMavenWizardPage {
     summaryText.addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent e) {
         summary = summaryText.getText();
+        getContainer().updateButtons();
       }
     });
 
@@ -73,6 +74,7 @@ public class ProblemDescriptionPage extends AbstractMavenWizardPage {
     descriptionText.addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent e) {
         description = descriptionText.getText();
+        getContainer().updateButtons();
       }
     });
 
