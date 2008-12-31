@@ -197,7 +197,7 @@ public class ExecutePomAction implements ILaunchShortcut, IExecutableExtension {
       workingCopy.setAttribute(RefreshTab.ATTR_REFRESH_SCOPE, "${project}");
       workingCopy.setAttribute(RefreshTab.ATTR_REFRESH_RECURSIVE, true);
       
-      setActiveProfiles(workingCopy, basedir);
+      setProjectConfiguration(workingCopy, basedir);
 
       IPath path = getJREContainerPath(basedir);
       if(path != null) {
@@ -211,15 +211,20 @@ public class ExecutePomAction implements ILaunchShortcut, IExecutableExtension {
     return null;
   }
 
-  private void setActiveProfiles(ILaunchConfigurationWorkingCopy workingCopy, IContainer basedir) {
+  private void setProjectConfiguration(ILaunchConfigurationWorkingCopy workingCopy, IContainer basedir) {
     MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
     IFile pomFile = basedir.getFile(new Path(IMavenConstants.POM_FILE_NAME));
     IMavenProjectFacade projectFacade = projectManager.create(pomFile, false, new NullProgressMonitor());
     if(projectFacade != null) {
       ResolverConfiguration configuration = projectFacade.getResolverConfiguration();
+
       String activeProfiles = configuration.getActiveProfiles();
       if(activeProfiles != null && activeProfiles.length() > 0) {
         workingCopy.setAttribute(MavenLaunchConstants.ATTR_PROFILES, activeProfiles);
+      }
+
+      if(configuration.shouldResolveWorkspaceProjects()) {
+        workingCopy.setAttribute(MavenLaunchConstants.ATTR_WORKSPACE_RESOLUTION, true);
       }
     }
   }
@@ -346,7 +351,7 @@ public class ExecutePomAction implements ILaunchShortcut, IExecutableExtension {
       ILaunchConfigurationWorkingCopy workingCopy = launchConfigurationType.newInstance(null, newName);
       workingCopy.setAttribute(MavenLaunchConstants.ATTR_POM_DIR, basedirLocation.toString());
 
-      setActiveProfiles(workingCopy, basedir);
+      setProjectConfiguration(workingCopy, basedir);
       
       // set other defaults if needed
       // MavenLaunchMainTab maintab = new MavenLaunchMainTab();
