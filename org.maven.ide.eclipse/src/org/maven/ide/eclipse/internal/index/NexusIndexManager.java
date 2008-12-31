@@ -494,7 +494,9 @@ public class NexusIndexManager extends IndexManager {
     IndexingContext context = getIndexingContext(indexName);
     if(context != null) {
       try {
-        Date indexTime = getUpdater().fetchAndUpdateIndex(context, new TransferListenerAdapter(monitor, console, null), getProxyInfo());
+        @SuppressWarnings("deprecation")
+        Date indexTime = getUpdater().fetchAndUpdateIndex(context, //
+            new TransferListenerAdapter(monitor, console, null), getProxyInfo());
         if(indexTime!=null) {
           IndexInfo indexInfo = getIndexInfo(indexName);
           indexInfo.setUpdateTime(indexTime);
@@ -514,7 +516,7 @@ public class NexusIndexManager extends IndexManager {
       IProgressMonitor monitor) throws CoreException {
     IndexingContext context;
     try {
-      context = new DefaultIndexingContext("inknown", "unknown", null, new RAMDirectory(), repositoryUrl,
+      context = new DefaultIndexingContext("unknown", "unknown", null, new RAMDirectory(), repositoryUrl,
           indexUpdateUrl, null, false);
     } catch(UnsupportedExistingLuceneIndexException ex) {
       throw new CoreException(
@@ -524,8 +526,10 @@ public class NexusIndexManager extends IndexManager {
           "Error creating temporary indexing context", ex));
     }
     try {
-      return getUpdater().fetchIndexProperties(context, new TransferListenerAdapter(monitor, console, null),
-          getProxyInfo());
+      @SuppressWarnings("deprecation")
+      Properties properties = getUpdater().fetchIndexProperties(context, //
+          new TransferListenerAdapter(monitor, console, null), getProxyInfo());
+      return properties;
     } catch(IOException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
           "Error fetching index properties", ex));
