@@ -81,11 +81,12 @@ public class ProblemDescriptionPage extends AbstractMavenWizardPage {
   }
 
   public boolean isPageComplete() {
-    return !description.equals("") && !summary.equals("");
+    return !description.trim().equals("") && !summary.trim().equals("");
   }
 
   public String getDescription() {
-    return description;
+    // all line endings must be spaces 
+    return description.replace("\n", " ").replace("\r", " ");
   }
 
   public String getSummary() {
