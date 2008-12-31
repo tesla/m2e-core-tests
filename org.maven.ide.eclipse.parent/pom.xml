@@ -106,6 +106,7 @@
 
     <module>../org.maven.ide.eclipse.editor.xml</module>
     <module>../org.maven.ide.eclipse.editor</module>
+    <module>../org.maven.ide.eclipse.pr</module>
     <module>../org.maven.ide.eclipse.editor.tests</module>
     <module>../org.maven.ide.eclipse.refactoring</module>
     <!--
