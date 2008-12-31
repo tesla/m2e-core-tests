@@ -44,29 +44,32 @@ import org.maven.ide.eclipse.pr.internal.data.ArchiveTarget;
 import org.maven.ide.eclipse.pr.internal.data.Data;
 import org.maven.ide.eclipse.pr.internal.data.DataGatherer;
 
+
 /**
- *
  * @author Eugene Kuleshov
  */
 @SuppressWarnings("restriction")
 public class ProblemReportingWizard extends Wizard implements IImportWizard {
 
   private IStructuredSelection selection;
-  
+
   // TODO replace with proper jira
   private static final String URL = "http://localhost:8080";
+
   private static final String USERNAME = "test";
+
   private static final String PASSWORD = "test";
+
   private static final String PROJECT = "TEST";
-  
+
   //private ProblemReportingSelectionPage selectionPage;
 
   private ProblemDescriptionPage descriptionPage;
-  
+
   public ProblemReportingWizard() {
     setWindowTitle("Reporting Problem");
   }
-  
+
   @Override
   public void addPages() {
     descriptionPage = new ProblemDescriptionPage();
@@ -74,11 +77,11 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
     //selectionPage = new ProblemReportingSelectionPage();
     //addPage(selectionPage);
   }
-  
+
   public void init(IWorkbench workbench, IStructuredSelection selection) {
     this.selection = selection;
   }
-  
+
   public boolean performFinish() {
     final Set<Data> dataSet = new HashSet<Data>();//selectionPage.getDataSet();
     dataSet.addAll(EnumSet.allOf(Data.class));
@@ -92,7 +95,7 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
 //        MavenLogger.log("Can't delete file " + location, null);
 //      }
 //    }
-    
+
     new Job("Gathering Information") {
       protected IStatus run(IProgressMonitor monitor) {
         File locationFile = null;
@@ -104,17 +107,17 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
           IStatus status = saveData(location, dataSet, monitor);
           if(status.isOK()) {
             //showMessage("The problem reporting bundle is saved to " + location);
-            IssueSubmitter is = new JiraIssueSubmitter( URL, new DefaultAuthenticationSource( USERNAME, PASSWORD ) );
-            
+            IssueSubmitter is = new JiraIssueSubmitter(URL, new DefaultAuthenticationSource(USERNAME, PASSWORD));
+
             IssueSubmissionRequest r = new IssueSubmissionRequest();
-            r.setProjectId( PROJECT );
-            r.setSummary( descriptionPage.getSummary() );
-            r.setDescription( descriptionPage.getDescription() );
-            r.setAssignee( USERNAME );
-            r.setReporter( USERNAME );
-            r.setProblemReportBundle( locationFile );
-            
-            is.submitIssue( r );
+            r.setProjectId(PROJECT);
+            r.setSummary(descriptionPage.getProblemSummary());
+            r.setDescription(descriptionPage.getProblemDescription());
+            r.setAssignee(USERNAME);
+            r.setReporter(USERNAME);
+            r.setProblemReportBundle(locationFile);
+
+            is.submitIssue(r);
 
             showMessage("Successfully submitted issue to " + URL);
           } else {
@@ -125,11 +128,11 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
           MavenLogger.log("Failed generate errorto report issue", ex);
           showError();
         } finally {
-          if (locationFile != null && locationFile.exists()) {
+          if(locationFile != null && locationFile.exists()) {
             locationFile.delete();
           }
         }
-        
+
         return Status.OK_STATUS;
       }
 
@@ -142,7 +145,7 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
           }
         });
       }
-      
+
       private void showMessage(final String msg) {
         Display.getDefault().asyncExec(new Runnable() {
           public void run() {
@@ -152,7 +155,7 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
         });
       }
     }.schedule();
-    
+
     return true;
   }
 
@@ -161,17 +164,17 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
       location = location + ".zip";
     }
 
-    Set<IProject> projects = new LinkedHashSet<IProject>(); 
+    Set<IProject> projects = new LinkedHashSet<IProject>();
     for(Iterator<?> i = selection.iterator(); i.hasNext();) {
       Object o = i.next();
-      if (o instanceof JavaProject) {
+      if(o instanceof JavaProject) {
         projects.add(((JavaProject) o).getProject());
       }
-      if (o instanceof IProject) {
+      if(o instanceof IProject) {
         projects.add((IProject) o);
       }
     }
-    
+
     MavenPlugin mavenPlugin = MavenPlugin.getDefault();
     DataGatherer gatherer = new DataGatherer(mavenPlugin.getMavenRuntimeManager(), //
         mavenPlugin.getMavenProjectManager(), mavenPlugin.getConsole(), //
@@ -179,19 +182,14 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
 
     ZipOutputStream zos = null;
     try {
-      zos = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(location))); 
+      zos = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(location)));
       gatherer.gather(new ArchiveTarget(zos), dataSet, monitor);
       zos.flush();
     } finally {
       IOUtil.close(zos);
     }
-      
-    return gatherer.getStatus();
 
-//      DataDeliverer deliverer = new DataDeliverer(outputFile);
-//      MessageDialog.openInformation(targetPart.getSite().getWorkbenchWindow().getShell(),
-//          "Maven Integration: Problem Determination", "Problem diagnostics information has been written to "
-//              + outputFile.getPath());
+    return gatherer.getStatus();
   }
-  
+
 }

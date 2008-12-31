@@ -32,65 +32,75 @@ public class ProblemDescriptionPage extends AbstractMavenWizardPage {
 
   protected ProblemDescriptionPage() {
     super("problemDescriptionPage");
-    setTitle("Problem description");
+    setTitle("Problem details");
     setDescription("Enter problem summary and description");
     setImageDescriptor(ProblemReportingImages.REPORT_WIZARD);
   }
 
   public void createControl(Composite parent) {
     Composite composite = new Composite(parent, SWT.NONE);
-    GridLayout gridLayout = new GridLayout();
-    gridLayout.numColumns = 3;
-    composite.setLayout(gridLayout);
+    composite.setLayout(new GridLayout());
     setControl(composite);
 
     Label summaryLabel = new Label(composite, SWT.NONE);
-    GridData gd_summaryLabel = new GridData();
-    summaryLabel.setLayoutData(gd_summaryLabel);
     summaryLabel.setData("name", "summaryLabel");
-    summaryLabel.setText("&Summary:");
+    summaryLabel.setText("Problem &summary:");
 
     final Text summaryText = new Text(composite, SWT.BORDER);
     summaryText.setData("name", "summaryText");
-    GridData gd_summaryText = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
-    summaryText.setLayoutData(gd_summaryText);
+    summaryText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
     summaryText.addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent e) {
         summary = summaryText.getText();
-        getContainer().updateButtons();
+        updatePage();
       }
     });
 
     Label descriptionLabel = new Label(composite, SWT.NONE);
-    GridData gd_descriptionLabel = new GridData();
-    descriptionLabel.setLayoutData(gd_descriptionLabel);
     descriptionLabel.setData("name", "descriptionLabel");
-    descriptionLabel.setText("&Description:");
+    descriptionLabel.setText("Problem &description:");
 
     final Text descriptionText = new Text(composite, SWT.MULTI | SWT.BORDER | SWT.WRAP);
     descriptionText.setData("name", "descriptionText");
-    GridData gd_descriptionText = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 21);
-    descriptionText.setLayoutData(gd_descriptionText);
+    descriptionText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     descriptionText.addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent e) {
         description = descriptionText.getText();
-        getContainer().updateButtons();
+        updatePage();
       }
     });
 
   }
 
-  public boolean isPageComplete() {
-    return !description.trim().equals("") && !summary.trim().equals("");
+  protected void updatePage() {
+    boolean isSummaryBlank = summary.trim().length()==0;
+    boolean isDescriptionBlank = description.trim().length()==0;
+    boolean isComplete = true;
+    
+    if(isSummaryBlank) {
+      if(isDescriptionBlank) {
+        setErrorMessage("Problem summary and description should not be blank");
+      } else {
+        setErrorMessage("Problem summary should not be blank");
+      }
+      isComplete = false;
+    } else if(isDescriptionBlank) {
+      setErrorMessage("Problem description should not be blank");
+      isComplete = false;
+    }
+    
+    setPageComplete(isComplete);
+    if(isComplete) {
+      setErrorMessage(null);
+    }
   }
 
-  public String getDescription() {
-    // all line endings must be spaces 
-    return description.replace("\n", " ").replace("\r", " ");
+  public String getProblemSummary() {
+    return summary.trim();
   }
 
-  public String getSummary() {
-    return summary;
+  public String getProblemDescription() {
+    return description.trim();
   }
 
 }
