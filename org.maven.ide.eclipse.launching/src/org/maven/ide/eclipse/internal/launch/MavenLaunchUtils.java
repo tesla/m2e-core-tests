@@ -35,6 +35,7 @@ import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 
+
 /**
  * MavenLaunchUtils
  * 
@@ -44,21 +45,13 @@ public class MavenLaunchUtils {
 
   public static MavenRuntime getMavenRuntime(ILaunchConfiguration configuration) throws CoreException {
     MavenRuntimeManager runtimeManager = MavenPlugin.getDefault().getMavenRuntimeManager();
-    String location = getMavenRuntimeLocation(configuration);
+    String location = configuration.getAttribute(MavenLaunchConstants.ATTR_RUNTIME, "");
     MavenRuntime runtime = runtimeManager.getRuntime(location);
-    if(runtime==null) {
+    if(runtime == null) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, //
           "Can't find Maven installation " + location, null));
     }
     return runtime;
-  }
-
-  private static String getMavenRuntimeLocation(ILaunchConfiguration configuration) throws CoreException {
-    return configuration.getAttribute(MavenLaunchConstants.ATTR_RUNTIME, "");
-  }
-
-  public static boolean shouldResolveWorkspaceArtifacts(ILaunchConfiguration configuration) throws CoreException {
-    return configuration.getAttribute(MavenLaunchConstants.ATTR_WORKSPACE_RESOLUTION, false);
   }
 
   public static String getCliResolver() throws CoreException {
@@ -73,7 +66,8 @@ public class MavenLaunchUtils {
     }
   }
 
-  public static void addUserComponents(ILaunchConfiguration configuration, IMavenLauncherConfiguration collector) throws CoreException {
+  public static void addUserComponents(ILaunchConfiguration configuration, IMavenLauncherConfiguration collector)
+      throws CoreException {
     @SuppressWarnings("unchecked")
     List<String> list = configuration.getAttribute(MavenLaunchConstants.ATTR_FORCED_COMPONENTS_LIST, new ArrayList());
     if(list == null) {
@@ -91,7 +85,7 @@ public class MavenLaunchUtils {
 
       IMavenProjectFacade facade = projectManager.getMavenProject(groupId, artifactId, version);
 
-      if (facade != null) {
+      if(facade != null) {
         collector.addProjectEntry(facade);
       } else {
         String name = groupId + ":" + artifactId + ":" + version;
@@ -100,7 +94,7 @@ public class MavenLaunchUtils {
           Artifact artifact = embedder.createArtifact(groupId, artifactId, version, null, "jar");
           embedder.resolve(artifact, Collections.EMPTY_LIST, embedder.getLocalRepository());
           File file = artifact.getFile();
-          if (file != null) {
+          if(file != null) {
             collector.addArchiveEntry(file.getAbsolutePath());
           }
         } catch(ArtifactResolutionException ex) {
@@ -109,7 +103,6 @@ public class MavenLaunchUtils {
           MavenLogger.log("Artifact not found " + name, ex);
         }
       }
-      
     }
   }
 }
