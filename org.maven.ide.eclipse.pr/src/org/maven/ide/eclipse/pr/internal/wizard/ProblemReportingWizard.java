@@ -54,14 +54,14 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
   private IStructuredSelection selection;
 
   // TODO replace with proper jira
-  private static final String URL = "http://localhost:8080";
-
-  private static final String USERNAME = "test";
-
-  private static final String PASSWORD = "test";
-
-  private static final String PROJECT = "TEST";
-
+  private static final String URL = "https://issues.sonatype.org";
+  
+  private static final String USERNAME = "sonatype_problem_reporting";
+  
+  private static final String PASSWORD = "sonatype_problem_reporting";
+  
+  private static final String PROJECT = "PR";
+  
   //private ProblemReportingSelectionPage selectionPage;
 
   private ProblemDescriptionPage descriptionPage;
