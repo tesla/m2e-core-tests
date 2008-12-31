@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -396,14 +397,24 @@ public class OverviewPage extends MavenPomEditorPage {
     
     modulesEditor.setOpenListener(new IOpenListener() {
       public void open(OpenEvent openevent) {
-        List<String> selection = modulesEditor.getSelection();
-        for(String module : selection) {
-          IMavenProjectFacade projectFacade = findModuleProject(module);
-          if(projectFacade!=null) {
-            ArtifactKey mavenProject = projectFacade.getArtifactKey();
-            OpenPomAction.openEditor(mavenProject.getGroupId(), mavenProject.getArtifactId(), mavenProject.getVersion());
+        final List<String> selection = modulesEditor.getSelection();
+        new Job("Opening POM editors") {
+          protected IStatus run(IProgressMonitor monitor) {
+            for(String module : selection) {
+              IMavenProjectFacade projectFacade = findModuleProject(module);
+              if(projectFacade!=null) {
+                ArtifactKey key = projectFacade.getArtifactKey();
+                OpenPomAction.openEditor(key.getGroupId(), key.getArtifactId(), key.getVersion());
+              } else {
+                IFile modulePom = findModuleFile(module);
+                if(modulePom!=null && modulePom.isAccessible()) {
+                  OpenPomAction.openEditor(new FileEditorInput(modulePom), "pom.xml");
+                }
+              }
+            }
+            return Status.OK_STATUS;
           }
-        }
+        }.schedule();
       }
     });
     

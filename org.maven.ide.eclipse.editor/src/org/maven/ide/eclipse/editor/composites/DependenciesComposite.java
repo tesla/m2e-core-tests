@@ -146,6 +146,10 @@ public class DependenciesComposite extends Composite {
 
   ValueProvider<Dependencies> dependencyManagementProvider;
 
+  DependencyLabelProvider dependencyLabelProvider = new DependencyLabelProvider();
+  DependencyLabelProvider dependencyManagementLabelProvider = new DependencyLabelProvider();
+  DependencyLabelProvider exclusionLabelProvider = new DependencyLabelProvider();
+
 
   public DependenciesComposite(Composite composite, int flags) {
     super(composite, flags);
@@ -196,8 +200,7 @@ public class DependenciesComposite extends Composite {
     dependenciesSection.setText("Dependencies");
 
     dependenciesEditor = new ListEditorComposite<Dependency>(dependenciesSection, SWT.NONE);
-    final DependencyLabelProvider labelProvider = new DependencyLabelProvider();
-    dependenciesEditor.setLabelProvider(labelProvider);
+    dependenciesEditor.setLabelProvider(dependencyLabelProvider);
     dependenciesEditor.setContentProvider(new ListEditorContentProvider<Dependency>());
 
     dependenciesEditor.setAddListener(new SelectionAdapter() {
@@ -280,7 +283,7 @@ public class DependenciesComposite extends Composite {
         return AS_CHECK_BOX;
       }
       public void run() {
-        labelProvider.setShowGroupId(isChecked());
+        dependencyLabelProvider.setShowGroupId(isChecked());
         dependenciesEditor.getViewer().refresh();
       }
     });
@@ -322,8 +325,7 @@ public class DependenciesComposite extends Composite {
     dependencyManagementEditor = new ListEditorComposite<Dependency>(dependencyManagementSection, SWT.NONE);
     dependencyManagementSection.setClient(dependencyManagementEditor);
 
-    final DependencyLabelProvider labelProvider = new DependencyLabelProvider();
-    dependencyManagementEditor.setLabelProvider(labelProvider);
+    dependencyManagementEditor.setLabelProvider(dependencyManagementLabelProvider);
     dependencyManagementEditor.setContentProvider(new ListEditorContentProvider<Dependency>());
 
     dependencyManagementEditor.setAddListener(new SelectionAdapter() {
@@ -405,7 +407,7 @@ public class DependenciesComposite extends Composite {
         return AS_CHECK_BOX;
       }
       public void run() {
-        labelProvider.setShowGroupId(isChecked());
+        dependencyManagementLabelProvider.setShowGroupId(isChecked());
         dependencyManagementEditor.getViewer().refresh();
       }
     });
@@ -662,7 +664,7 @@ public class DependenciesComposite extends Composite {
     toolkit.adapt(exclusionsEditor);
 
     exclusionsEditor.setContentProvider(new ListEditorContentProvider<Exclusion>());
-    exclusionsEditor.setLabelProvider(new DependencyLabelProvider());
+    exclusionsEditor.setLabelProvider(exclusionLabelProvider);
     
     exclusionsEditor.addSelectionListener(new ISelectionChangedListener() {
       public void selectionChanged(SelectionChangedEvent event) {
@@ -936,6 +938,9 @@ public class DependenciesComposite extends Composite {
     this.parent = editorPage;
     this.dependenciesProvider = dependenciesProvider;
     this.dependencyManagementProvider = dependencyManagementProvider;
+    this.dependencyLabelProvider.setPomEditor(editorPage.getPomEditor());
+    this.dependencyManagementLabelProvider.setPomEditor(editorPage.getPomEditor());
+    this.exclusionLabelProvider.setPomEditor(editorPage.getPomEditor());
     
     changingSelection = true;
 

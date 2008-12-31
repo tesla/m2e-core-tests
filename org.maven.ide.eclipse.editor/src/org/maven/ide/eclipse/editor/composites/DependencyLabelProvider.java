@@ -8,6 +8,12 @@
 
 package org.maven.ide.eclipse.editor.composites;
 
+import java.util.Collection;
+
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.embedder.MavenEmbedderException;
+import org.apache.maven.project.MavenProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
@@ -18,7 +24,9 @@ import org.maven.ide.components.pom.Dependency;
 import org.maven.ide.components.pom.Exclusion;
 import org.maven.ide.components.pom.Extension;
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
+import org.maven.ide.eclipse.editor.pom.MavenPomEditor;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 
@@ -30,8 +38,14 @@ import org.maven.ide.eclipse.project.MavenProjectManager;
  */
 public class DependencyLabelProvider extends LabelProvider implements IColorProvider {
 
+  private MavenPomEditor pomEditor;
+
   private boolean showGroupId = true;
 
+  public void setPomEditor(MavenPomEditor pomEditor) {
+    this.pomEditor = pomEditor;
+  }
+  
   public void setShowGroupId(boolean showGroupId) {
     this.showGroupId = showGroupId;
   }
@@ -89,13 +103,41 @@ public class DependencyLabelProvider extends LabelProvider implements IColorProv
 
   private Image getImage(String groupId, String artifactId, String version) {
     // XXX need to resolve actual dependencies (i.e. inheritance, dependency management or properties)
+    // XXX need to handle version ranges
+    
+    if((version == null || version.indexOf("${") > -1) && pomEditor != null) {
+      try {
+        MavenProject mavenProject = pomEditor.readMavenProject(false, null);
+        if(mavenProject != null) {
+          Artifact artifact = (Artifact) mavenProject.getArtifactMap().get(groupId + ":" + artifactId);
+          if(artifact!=null) {
+            version = artifact.getVersion();
+          }
+          if(version==null || version.indexOf("${") > -1) {
+            @SuppressWarnings("unchecked")
+            Collection<Artifact> artifacts = mavenProject.getManagedVersionMap().values();
+            for(Artifact a : artifacts) {
+              if(a.getGroupId().equals(groupId) && a.getArtifactId().equals(artifactId)) {
+                version = a.getVersion();
+                break;
+              }
+            }
+          }
+        }
+      } catch(MavenEmbedderException ex) {
+        MavenLogger.log("Error reading Maven project", ex);
+      } catch(CoreException ex) {
+        MavenLogger.log(ex);
+      }
+    }
+    
     if(groupId != null && artifactId != null && version != null) {
       MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
       IMavenProjectFacade projectFacade = projectManager.getMavenProject(groupId, artifactId, version);
       if(projectFacade != null) {
         return MavenEditorImages.IMG_PROJECT;
       }
-    }
+    } 
     return MavenEditorImages.IMG_JAR;
   }
 

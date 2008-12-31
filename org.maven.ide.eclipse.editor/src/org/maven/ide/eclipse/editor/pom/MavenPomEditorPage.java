@@ -22,6 +22,7 @@ import org.apache.maven.embedder.MavenEmbedderException;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.apache.maven.project.MavenProject;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -544,6 +545,19 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
     }
     return null;
   }
+  
+  public IFile findModuleFile(String moduleName) {
+    IEditorInput editorInput = getEditorInput();
+    if(editorInput instanceof IFileEditorInput) {
+      // XXX is there a better way to get edited file?
+      IFile pomFile = ((IFileEditorInput) editorInput).getFile();
+      IPath modulePath = pomFile.getParent().getLocation().append(moduleName).append("pom.xml");
+      IFile file = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(modulePath);
+      return file;
+    }
+    return null;
+  }
+  
   /*
    * returns added/removed/updated EObject from notification (convenience method for detail forms)
    */

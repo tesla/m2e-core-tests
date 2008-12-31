@@ -8,6 +8,7 @@
 
 package org.maven.ide.eclipse.editor.pom;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.swt.graphics.Image;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.editor.composites.StringLabelProvider;
@@ -28,6 +29,11 @@ public class ModulesLabelProvider extends StringLabelProvider {
       String moduleName = (String) element;
       IMavenProjectFacade projectFacade = editorPage.findModuleProject(moduleName);
       if(projectFacade!=null) {
+        return MavenEditorImages.IMG_PROJECT;
+      }
+      
+      IFile moduleFile = editorPage.findModuleFile(moduleName);
+      if(moduleFile!=null && moduleFile.isAccessible()) {
         return MavenEditorImages.IMG_PROJECT;
       }
     }

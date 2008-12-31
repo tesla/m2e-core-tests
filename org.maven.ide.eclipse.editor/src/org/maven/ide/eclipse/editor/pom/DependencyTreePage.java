@@ -905,9 +905,11 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
     public Image getImage(Object element) {
       if(element instanceof DependencyNode) {
         DependencyNode node = (DependencyNode) element;
-        Artifact artifact = node.getArtifact();
+        Artifact a = node.getArtifact();
         MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
-        IMavenProjectFacade projectFacade = projectManager.getMavenProject(artifact.getGroupId(), artifact.getGroupId(), artifact.getVersion());
+        IMavenProjectFacade projectFacade = projectManager.getMavenProject(a.getGroupId(), //
+            a.getArtifactId(), //
+            a.getBaseVersion() == null ? a.getVersion() : a.getBaseVersion());
         return projectFacade == null ? MavenEditorImages.IMG_JAR : MavenEditorImages.IMG_PROJECT;
       }
       return null;
@@ -983,7 +985,9 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
       if(element instanceof Artifact) {
         Artifact a = (Artifact) element;
         MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
-        IMavenProjectFacade projectFacade = projectManager.getMavenProject(a.getGroupId(), a.getArtifactId(), a.getVersion());
+        IMavenProjectFacade projectFacade = projectManager.getMavenProject(a.getGroupId(), //
+            a.getArtifactId(), //
+            a.getBaseVersion() == null ? a.getVersion() : a.getBaseVersion());
         return projectFacade == null ? MavenEditorImages.IMG_JAR : MavenEditorImages.IMG_PROJECT;
       }
       return null;
