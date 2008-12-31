@@ -55,9 +55,9 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
   
   // TODO replace with proper jira
   private static final String URL = "http://localhost:8080";
-  private static final String USERNAME = "jimmi1977";
-  private static final String PASSWORD = "jimmi123";
-  private static final String PROJECT = "TODO";
+  private static final String USERNAME = "test";
+  private static final String PASSWORD = "test";
+  private static final String PROJECT = "TEST";
   
   //private ProblemReportingSelectionPage selectionPage;
 
@@ -82,6 +82,7 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
   public boolean performFinish() {
     final Set<Data> dataSet = new HashSet<Data>();//selectionPage.getDataSet();
     dataSet.addAll(EnumSet.allOf(Data.class));
+    dataSet.remove(Data.MAVEN_SOURCES);
 //    if(locationFile.exists()) {
 //      if(!MessageDialog.openQuestion(getShell(), "File already exists", //
 //          "File " + location + " already exists.\nDo you want to overwrite?")) {

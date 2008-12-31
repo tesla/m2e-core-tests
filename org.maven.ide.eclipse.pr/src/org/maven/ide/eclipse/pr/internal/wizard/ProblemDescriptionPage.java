@@ -69,7 +69,7 @@ public class ProblemDescriptionPage extends AbstractMavenWizardPage {
 
     final Text descriptionText = new Text(composite, SWT.MULTI | SWT.BORDER | SWT.WRAP);
     descriptionText.setData("name", "descriptionText");
-    GridData gd_descriptionText = new GridData(SWT.FILL, SWT.FILL, true, false, 2, 21);
+    GridData gd_descriptionText = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 21);
     descriptionText.setLayoutData(gd_descriptionText);
     descriptionText.addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent e) {
@@ -80,7 +80,7 @@ public class ProblemDescriptionPage extends AbstractMavenWizardPage {
 
   }
 
-  public boolean canFlipToNextPage() {
+  public boolean isPageComplete() {
     return !description.equals("") && !summary.equals("");
   }
 
