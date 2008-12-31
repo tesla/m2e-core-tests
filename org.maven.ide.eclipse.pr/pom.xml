@@ -21,10 +21,6 @@
   <packaging>eclipse-plugin</packaging>
   <name>Maven Problem Reporting</name>
 
-  <properties>
-    <plexus.version>1.0-beta-3.0.1</plexus.version>
-  </properties>
- 
   <profiles>
     <profile>
       <id>update-dependencies</id>
@@ -33,6 +29,36 @@
           <groupId>org.sonatype.spice</groupId>
           <artifactId>plexus-swizzle</artifactId>
           <version>1.0-alpha-1</version>
+          <exclusions>
+            <exclusion>
+              <artifactId>swizzle-jirareport</artifactId>
+              <groupId>org.codehaus.swizzle</groupId>
+            </exclusion>
+            <exclusion>
+              <artifactId>plexus-utils</artifactId>
+              <groupId>org.codehaus.plexus</groupId>
+            </exclusion>
+            <exclusion>
+              <artifactId>plexus-container-default</artifactId>
+              <groupId>org.codehaus.plexus</groupId>
+            </exclusion>
+            <exclusion>
+              <artifactId>plexus-component-annotations</artifactId>
+              <groupId>org.codehaus.plexus</groupId>
+            </exclusion>
+            <exclusion>
+              <artifactId>plexus-classworlds</artifactId>
+              <groupId>org.codehaus.plexus</groupId>
+            </exclusion>
+            <exclusion>
+              <artifactId>xml-apis</artifactId>
+              <groupId>xml-apis</groupId>
+            </exclusion>
+            <exclusion>
+              <artifactId>junit</artifactId>
+              <groupId>junit</groupId>
+            </exclusion>
+          </exclusions>
         </dependency>
       </dependencies>
       <build>
@@ -74,7 +100,7 @@
               <packageSources>false</packageSources>
               <manifestAttributes>
                 <Bundle-RequiredExecutionEnvironment>J2SE-1.5,JavaSE-1.6</Bundle-RequiredExecutionEnvironment>
-                <Require-Bundle>org.eclipse.core.runtime,org.eclipse.core.resources,org.eclipse.ui,org.eclipse.ui.console,org.eclipse.jface.text,org.maven.ide.components.maven_embedder,org.maven.ide.eclipse</Require-Bundle>
+                <Require-Bundle>org.eclipse.core.runtime,org.eclipse.core.resources, org.eclipse.ui,org.eclipse.ui.console, org.eclipse.jface.text, org.maven.ide.components.maven_embedder, org.maven.ide.eclipse</Require-Bundle>
               </manifestAttributes>
             </configuration>
           </plugin>

@@ -1,30 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.2"?>
 <plugin>
-   <extension
-         point="org.maven.ide.eclipse.m2menu">
-      <factory
-            class="org.maven.ide.eclipse.pr.internal.ProblemReportingMenuCreator">
-      </factory>
+
+   <extension point="org.maven.ide.eclipse.m2menu">
+      <factory class="org.maven.ide.eclipse.pr.internal.ProblemReportingMenuCreator"/>
    </extension>
-	<extension
-		point="org.eclipse.ui.actionSets">
-		<actionSet
+
+	<extension point="org.eclipse.ui.actionSets">
+		<actionSet id="org.maven.ide.eclipse.actionSet"
 			label="Maven"
-			visible="true"
-			id="org.maven.ide.eclipse.actionSet">
-		   <menu id="org_maven_ide_eclipse_maven"
+			visible="true">
+		   <menu id="org.maven.ide.eclipse.help"
 			   label="Maven"
 			   path="help/helpStart"> 
 			   <separator name="slot1"/>
 		   </menu>
-		   <action id="org_maven_ide_eclipse_maven_problem"
-			   menubarPath="help/org_maven_ide_eclipse_maven/slot1"
+		   <action id="org.maven.ide.eclipse.help.report"
+			   menubarPath="help/org.maven.ide.eclipse.help/slot1"
 			   label="Report Issue..."
 			   tooltip="Report Issue..."
 			   icon="icons/report-bug.gif"
-			   class="org.maven.ide.eclipse.pr.internal.wizard.ProblemReportingAction">
-		   </action>
+			   class="org.maven.ide.eclipse.pr.internal.wizard.ProblemReportingAction"/>
 		</actionSet>
 	</extension>
+	
 </plugin>
