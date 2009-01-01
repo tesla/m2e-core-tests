@@ -199,7 +199,10 @@ public class MavenBuilder extends IncrementalProjectBuilder {
         if(DEBUG) {
           System.out.println("  included folder " + resource.getDirectory()); //$NON-NLS-1$
         }
-        folders.add(facade.getProjectRelativePath(resource.getDirectory()));
+        IPath folder = facade.getProjectRelativePath(resource.getDirectory());
+        if(folder!=null) {
+          folders.add(folder);
+        }
       }
     }
     return folders;
