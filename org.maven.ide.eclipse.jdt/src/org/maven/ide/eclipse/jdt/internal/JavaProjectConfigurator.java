@@ -164,6 +164,7 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
       String msg = "Unable to update source folders " + project.getName() + "; " + ex.toString();
       console.logMessage(msg);
       MavenLogger.log(msg, ex);
+      markerManager.addErrorMarkers(project, ex);
 
     } finally {
       // monitor.done();
@@ -342,6 +343,7 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
         console.logError(msg + "; " + ex.toString());
         MavenLogger.log(msg, ex);
       }
+      markerManager.addMarkers(project, result);
     }
 
     return mavenProject;
@@ -388,6 +390,7 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
         String msg = "Unable to read project " + pomResource.getFullPath();
         console.logError(msg + "; " + ex2.toString());
         MavenLogger.log(msg, ex2);
+        markerManager.addErrorMarkers(pomResource, ex2);
         return null;
       }
     }
