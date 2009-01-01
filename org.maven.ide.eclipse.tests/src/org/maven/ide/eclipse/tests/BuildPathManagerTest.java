@@ -717,9 +717,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     IProject project = workspace.getRoot().getProject("compilerSettingsJsr14");
     assertTrue(project.exists());
 
-    // IMarker[] markers = project.findMarkers(null, true, IResource.DEPTH_INFINITE);
-    List<IMarker> errorMarkers = findErrorMarkers(project);
-    assertEquals(errorMarkers.toString(), 0, errorMarkers.size());
+    assertMarkers(project, 0);
 
     IJavaProject javaProject = JavaCore.create(project);
     assertEquals("1.5", javaProject.getOption(JavaCore.COMPILER_SOURCE, true));
@@ -743,8 +741,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
 
     // Build path specifies execution environment J2SE-1.4. 
     // There are no JREs in the workspace strictly compatible with this environment.
-    List<IMarker> errorMarkers = findErrorMarkers(project);
-    assertEquals(errorMarkers.toString(), 0, errorMarkers.size());
+    assertMarkers(project, 0);
 
     IJavaProject javaProject = JavaCore.create(project);
     assertEquals("1.4", javaProject.getOption(JavaCore.COMPILER_SOURCE, true));
@@ -832,15 +829,13 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     }
     waitForJobsToComplete();
 
-    IMarker[] markers1 = project1.findMarkers(null, true, IResource.DEPTH_INFINITE);
-    assertTrue("Unexpected markers " + toString(markers1), markers1.length == 0);
+    assertMarkers(project2, 0);
 
     // update configuration
     configurationManager.updateProjectConfiguration(project2, configuration, "", monitor);
     waitForJobsToComplete();
 
-    IMarker[] markers2 = project2.findMarkers(null, true, IResource.DEPTH_INFINITE);
-    assertTrue("Unexpected markers " + toString(markers2), markers2.length == 0);
+    assertMarkers(project2, 0);
   }
   
 
