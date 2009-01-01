@@ -97,6 +97,12 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals("MNGECLIPSE-248parent", project2entries[0].getPath().segment(0));
     assertEquals(IClasspathEntry.CPE_LIBRARY, project2entries[1].getEntryKind());
     assertEquals("junit-4.1.jar", project2entries[1].getPath().lastSegment());
+    
+    configurationManager.updateProjectConfiguration(project2, configuration, "", monitor);
+    waitForJobsToComplete();
+
+    IMarker[] markers2 = project2.findMarkers(null, true, IResource.DEPTH_INFINITE);
+    assertTrue("Unexpected markers " + Arrays.asList(markers2), markers2.length == 0);
   }
   
   public void testDisableMavenNature() throws Exception {
@@ -796,6 +802,47 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     configurationManager.enableMavenNature(project, configuration, monitor);
     verifyNaturesAndBuilders(project);
   }
+  
+  // MNGECLIPSE-1133
+  public void testUpdateProjectConfigurationWithWorkspace() throws Exception {
+    deleteProject("MNGECLIPSE-1133parent");
+    deleteProject("MNGECLIPSE-1133child");
+
+    final IProject project1 = createProject("MNGECLIPSE-1133parent", "projects/MNGECLIPSE-1133/parent/pom.xml");
+    final IProject project2 = createProject("MNGECLIPSE-1133child", "projects/MNGECLIPSE-1133/child/pom.xml");
+
+    NullProgressMonitor monitor = new NullProgressMonitor();
+    IProjectConfigurationManager configurationManager = MavenPlugin.getDefault().getProjectConfigurationManager();
+
+    ResolverConfiguration configuration = new ResolverConfiguration();
+    configurationManager.enableMavenNature(project1, configuration, monitor);
+//    buildpathManager.updateSourceFolders(project1, monitor);
+
+    configurationManager.enableMavenNature(project2, configuration, monitor);
+//    buildpathManager.updateSourceFolders(project2, monitor);
+
+//    waitForJob("Initializing " + project1.getProject().getName());
+//    waitForJob("Initializing " + project2.getProject().getName());
+
+    try {
+      project1.build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
+      project2.build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
+    } catch(Exception ex) {
+      throw ex;
+    }
+    waitForJobsToComplete();
+
+    IMarker[] markers1 = project1.findMarkers(null, true, IResource.DEPTH_INFINITE);
+    assertTrue("Unexpected markers " + toString(markers1), markers1.length == 0);
+
+    // update configuration
+    configurationManager.updateProjectConfiguration(project2, configuration, "", monitor);
+    waitForJobsToComplete();
+
+    IMarker[] markers2 = project2.findMarkers(null, true, IResource.DEPTH_INFINITE);
+    assertTrue("Unexpected markers " + toString(markers2), markers2.length == 0);
+  }
+  
 
   private void verifyNaturesAndBuilders(IProject project) throws CoreException {
     
