@@ -9,7 +9,10 @@
 package org.maven.ide.eclipse.internal.launch;
 
 import java.io.File;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.codehaus.plexus.util.DirectoryScanner;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -27,10 +30,6 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.IHyperlink;
 import org.eclipse.ui.ide.IDE;
-
-import org.codehaus.plexus.util.DirectoryScanner;
-
-import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
 
 
@@ -41,7 +40,13 @@ import org.maven.ide.eclipse.core.MavenLogger;
  */
 public class MavenConsoleLineTracker implements IConsoleLineTracker {
 
+  private static final String PLUGIN_ID = "org.maven.ide.eclipse.launching";
+
   private static final String RUNNING_MARKER = "Running ";
+  // private static final String TEMPLATE1 = "Running ([\\w\\.]+)";
+  private static final String TEST_TEMPLATE = "(?:  )test.+\\(([\\w\\.]+)\\)";
+  
+  private static final Pattern PATTERN2 = Pattern.compile(TEST_TEMPLATE);
   
   private IConsole console;
 
@@ -60,16 +65,26 @@ public class MavenConsoleLineTracker implements IConsoleLineTracker {
         int length = line.getLength();
 
         String text = console.getDocument().get(offset, length);
-
+        
+        String testName = null;
+        
         int index = text.indexOf(RUNNING_MARKER);
-        if(index == -1) {
-          return;
+        if(index > -1) {
+          testName = text.substring(RUNNING_MARKER.length());
+          offset += RUNNING_MARKER.length();
+        } else {
+          Matcher m = PATTERN2.matcher(text);
+          if(m.find()) {
+            testName = m.group(1);
+            offset += m.start(1);
+          }          
         }
 
-        String testName = text.substring(RUNNING_MARKER.length());
-        String baseDir = launchConfiguration.getAttribute(MavenLaunchConstants.ATTR_POM_DIR, (String) null);
-        MavenConsoleHyperLink link = new MavenConsoleHyperLink(baseDir, testName);
-        console.addLink(link, line.getOffset() + RUNNING_MARKER.length(), testName.length());
+        if(testName != null) {
+          String baseDir = launchConfiguration.getAttribute(MavenLaunchConstants.ATTR_POM_DIR, (String) null);
+          MavenConsoleHyperLink link = new MavenConsoleHyperLink(baseDir, testName);
+          console.addLink(link, offset, testName.length());
+        }
 
       } catch(BadLocationException ex) {
         // ignore
@@ -85,7 +100,7 @@ public class MavenConsoleLineTracker implements IConsoleLineTracker {
   private boolean isMavenProcess(ILaunchConfiguration launchConfiguration) {
     try {
       ILaunchConfigurationType type = launchConfiguration.getType();
-      return IMavenConstants.PLUGIN_ID.equals(type.getPluginIdentifier());
+      return PLUGIN_ID.equals(type.getPluginIdentifier());
     } catch(CoreException ex) {
       MavenLogger.log(ex);
       return false;
