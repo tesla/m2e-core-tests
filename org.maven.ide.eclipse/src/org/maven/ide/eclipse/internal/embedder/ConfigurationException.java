@@ -26,39 +26,36 @@ package org.maven.ide.eclipse.internal.embedder;
 
 /**
  * Indicates an error during <code>Launcher</code> configuration.
- *
+ * 
  * @author <a href="mailto:bob@eng.werken.com">bob mcwhirter</a>
- * @version $Id$
  */
-public class ConfigurationException
-    extends Exception
-{
-    /**
-     * Construct.
-     *
-     * @param msg The message.
-     */
-    public ConfigurationException( String msg )
-    {
-        super( msg );
-    }
+public class ConfigurationException extends Exception {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
 
-    /**
-     * Construct.
-     *
-     * @param msg    The message.
-     * @param lineNo The number of configuraton line where the problem occured.
-     * @param line   The configuration line where the problem occured.
-     */
-    public ConfigurationException( String msg,
-                                   int lineNo,
-                                   String line )
-    {
-        super( msg + " (" + lineNo + "): " + line );
-    }
+  /**
+   * Construct.
+   * 
+   * @param msg The message.
+   */
+  public ConfigurationException(String msg) {
+    super(msg);
+  }
 
-    public ConfigurationException( Exception cause )
-    {
-        super( cause );
-    }
+  /**
+   * Construct.
+   * 
+   * @param msg The message.
+   * @param lineNo The number of configuration line where the problem occurred.
+   * @param line The configuration line where the problem occurred.
+   */
+  public ConfigurationException(String msg, int lineNo, String line) {
+    super(msg + " (" + lineNo + "): " + line);
+  }
+
+  public ConfigurationException(Exception cause) {
+    super(cause);
+  }
 }

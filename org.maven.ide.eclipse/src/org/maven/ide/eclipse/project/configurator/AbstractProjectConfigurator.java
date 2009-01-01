@@ -20,6 +20,7 @@ import org.apache.maven.embedder.MavenEmbedder;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
+import org.maven.ide.eclipse.project.IMavenMarkerManager;
 import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
 import org.maven.ide.eclipse.project.MavenProjectChangedEvent;
 import org.maven.ide.eclipse.project.MavenProjectManager;
@@ -49,8 +50,8 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
 
   protected MavenProjectManager projectManager;
   protected MavenRuntimeManager runtimeManager;
+  protected IMavenMarkerManager markerManager; 
   protected MavenConsole console;
-
   
   public void setProjectManager(MavenProjectManager projectManager) {
     this.projectManager = projectManager;
@@ -59,11 +60,14 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
   public void setRuntimeManager(MavenRuntimeManager runtimeManager) {
     this.runtimeManager = runtimeManager;
   }
+
+  public void setMarkerManager(IMavenMarkerManager markerManager) {
+    this.markerManager = markerManager;
+  }
   
   public void setConsole(MavenConsole console) {
     this.console = console;
   }
-  
   
   /**
    * Configures Eclipse project passed in ProjectConfigurationRequest, using information

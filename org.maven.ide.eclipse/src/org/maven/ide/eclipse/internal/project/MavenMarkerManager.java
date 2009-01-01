@@ -11,7 +11,6 @@ package org.maven.ide.eclipse.internal.project;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -21,6 +20,7 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.AbstractArtifactResolutionException;
+import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
 import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.extension.ExtensionScanningException;
@@ -46,7 +46,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
   }
   
   @SuppressWarnings("unchecked")
-  public void addMarkers(IFile pomFile, MavenExecutionResult result) {
+  public void addMarkers(IResource pomFile, MavenExecutionResult result) {
     List<Exception> exceptions = result.getExceptions();
     for(Exception ex : exceptions) {
       if(ex instanceof ExtensionScanningException) {
@@ -110,17 +110,17 @@ public class MavenMarkerManager implements IMavenMarkerManager {
     }
   }
 
-  private void handleProjectBuildingException(IFile pomFile, ProjectBuildingException ex) {
+  private void handleProjectBuildingException(IResource pomFile, ProjectBuildingException ex) {
     Throwable cause = ex.getCause();
     if(cause instanceof XmlPullParserException) {
       XmlPullParserException pex = (XmlPullParserException) cause;
 //      console.logError(Messages.getString("plugin.markerParsingError") + getPomName(pomFile) + "; " + pex.getMessage());
-      addMarker(pomFile, pex.getMessage(), pex.getLineNumber(), IMarker.SEVERITY_ERROR); //$NON-NLS-1$
+      addMarker(pomFile, pex.getMessage(), pex.getLineNumber(), IMarker.SEVERITY_ERROR);
 
     } else if(ex instanceof InvalidProjectModelException) {
       InvalidProjectModelException mex = (InvalidProjectModelException) ex;
       ModelValidationResult validationResult = mex.getValidationResult();
-      String msg = Messages.getString("plugin.markerBuildError") + mex.getMessage();
+      String msg = Messages.getString("plugin.markerBuildError", mex.getMessage()); //$NON-NLS-1$
 //      console.logError(msg);
       if(validationResult == null) {
         addMarker(pomFile, msg, 1, IMarker.SEVERITY_ERROR); //$NON-NLS-1$
@@ -138,9 +138,10 @@ public class MavenMarkerManager implements IMavenMarkerManager {
     }
   }
 
-  private void handleBuildException(IFile pomFile, Exception ex) {
-    String msg = Messages.getString("plugin.markerBuildError") + ex.getMessage();
-    addMarker(pomFile, msg, 1, IMarker.SEVERITY_ERROR); //$NON-NLS-1$
+  private void handleBuildException(IResource pomFile, Exception ex) {
+    Throwable cause = getRootCause(ex);
+    String msg = Messages.getString("plugin.markerBuildError", cause.getMessage());  //$NON-NLS-1$
+    addMarker(pomFile, msg, 1, IMarker.SEVERITY_ERROR);
 //    console.logError(msg);
   }
 
@@ -164,13 +165,13 @@ public class MavenMarkerManager implements IMavenMarkerManager {
     Throwable cause = lastCause.getCause();
     while(cause != null && cause != lastCause) {
       lastCause = cause;
-      cause = cause.getCause();
+      cause = cause.getCause() instanceof ArtifactNotFoundException ? null : cause.getCause();
     }
-    return cause == null? lastCause:cause;
+    return cause == null ? lastCause : cause;
   }
 
   
-  private void addErrorMarkers(IFile pomFile, String msg, List<? extends Exception> exceptions) {
+  private void addErrorMarkers(IResource pomFile, String msg, List<? extends Exception> exceptions) {
     if(exceptions != null) {
       for(Exception ex : exceptions) {
         if(ex instanceof AbstractArtifactResolutionException) {
@@ -193,7 +194,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
     }
   }
 
-  private void addMissingArtifactMarkers(IFile pomFile, MavenProject mavenProject) {
+  private void addMissingArtifactMarkers(IResource pomFile, MavenProject mavenProject) {
     @SuppressWarnings("unchecked")
     Set<Artifact> directDependencies = mavenProject.getDependencyArtifacts();
     @SuppressWarnings("unchecked")
@@ -231,6 +232,8 @@ public class MavenMarkerManager implements IMavenMarkerManager {
          }
        } 
      }
+   } else {
+     addMarker(resource, cause.getMessage(), 1, IMarker.SEVERITY_ERROR, false); //$NON-NLS-1$
    }
  }
 

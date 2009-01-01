@@ -13,7 +13,6 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.project.MavenProject;

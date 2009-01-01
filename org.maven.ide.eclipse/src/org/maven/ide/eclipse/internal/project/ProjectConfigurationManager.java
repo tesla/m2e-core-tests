@@ -56,13 +56,13 @@ import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.ArtifactRef;
-import org.maven.ide.eclipse.embedder.EmbedderFactory;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.internal.ExtensionReader;
 import org.maven.ide.eclipse.internal.embedder.TransferListenerAdapter;
+import org.maven.ide.eclipse.project.IMavenMarkerManager;
 import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.IProjectConfigurationManager;
@@ -102,13 +102,15 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
 
   final MavenModelManager mavenModelManager;
 
+  final IMavenMarkerManager mavenMarkerManager;
+  
   private Set<AbstractProjectConfigurator> configurators;
 
   
   public ProjectConfigurationManager(MavenModelManager modelManager, MavenConsole console,
       MavenRuntimeManager runtimeManager, MavenProjectManager projectManager,
       MavenProjectManagerImpl projectManagerImpl, IndexManager indexManager, MavenEmbedderManager embedderManager,
-      MavenModelManager mavenModelManager) {
+      MavenModelManager mavenModelManager, IMavenMarkerManager mavenMarkerManager) {
     this.modelManager = modelManager;
     this.console = console;
     this.runtimeManager = runtimeManager;
@@ -117,6 +119,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     this.indexManager = indexManager;
     this.embedderManager = embedderManager;
     this.mavenModelManager = mavenModelManager;
+    this.mavenMarkerManager = mavenMarkerManager;
   }
 
   public void importProjects(Collection<MavenProjectInfo> projectInfos, ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException {
@@ -234,7 +237,8 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
 
   public void updateProjectConfiguration(IProject project, ResolverConfiguration configuration, String goalToExecute, IProgressMonitor monitor) throws CoreException {
     try {
-      MavenEmbedder embedder = embedderManager.createEmbedder(EmbedderFactory.createExecutionCustomizer());
+      // MavenEmbedder embedder = embedderManager.createEmbedder(EmbedderFactory.createExecutionCustomizer());
+      MavenEmbedder embedder = projectManagerImpl.createWorkspaceEmbedder();
       try {
         IFile pom = project.getFile(IMavenConstants.POM_FILE_NAME);
         if (pom.isAccessible()) {
@@ -254,6 +258,8 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
 
   private void updateProjectConfiguration(MavenEmbedder embedder, ProjectConfigurationRequest request,
       IProgressMonitor monitor) throws CoreException {
+    mavenMarkerManager.deleteMarkers(request.getProject());
+    
     for(AbstractProjectConfigurator configurator : getConfigurators()) {
       if(monitor.isCanceled()) {
         throw new OperationCanceledException();
@@ -610,7 +616,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
   public synchronized Set<AbstractProjectConfigurator> getConfigurators() {
     if(configurators == null) {
       configurators = new TreeSet<AbstractProjectConfigurator>(new ProjectConfiguratorComparator());
-      configurators.addAll(ExtensionReader.readProjectConfiguratorExtensions(projectManager, runtimeManager, console));
+      configurators.addAll(ExtensionReader.readProjectConfiguratorExtensions(projectManager, runtimeManager, mavenMarkerManager, console));
     }
     return Collections.unmodifiableSet(configurators);
   }

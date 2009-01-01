@@ -8,7 +8,6 @@
 
 package org.maven.ide.eclipse.project;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 
@@ -21,13 +20,12 @@ import org.apache.maven.execution.MavenExecutionResult;
  */
 public interface IMavenMarkerManager {
 
-
   /**
    * Add markers to a pom file from a MavenExecutionResult.
    * @param pomFile the pom file to attach markers to.
    * @param result containing messages to be addedd as markers
    */
-  public void addMarkers(IFile pomFile, MavenExecutionResult result);
+  public void addMarkers(IResource pomFile, MavenExecutionResult result);
   
   /**
    * Add a Maven marker to a resource

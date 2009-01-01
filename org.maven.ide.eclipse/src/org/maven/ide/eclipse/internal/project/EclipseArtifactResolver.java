@@ -25,7 +25,6 @@ import org.apache.maven.artifact.resolver.DefaultArtifactResolver;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 
 
-
 public class EclipseArtifactResolver extends DefaultArtifactResolver {
 
   public void resolve(Artifact artifact, List<ArtifactRepository> remoteRepositories, ArtifactRepository localRepository)
@@ -57,6 +56,9 @@ public class EclipseArtifactResolver extends DefaultArtifactResolver {
     ArtifactKey key = new ArtifactKey(artifact.getGroupId(), artifact.getArtifactId(), artifact.getBaseVersion(), null); 
     IPath pomPath = context.state.getWorkspaceArtifact(key);
     if(pomPath == null) {
+      return false;
+    }
+    if(pomPath.equals(context.pom.getFullPath())) {
       return false;
     }
 
