@@ -49,6 +49,7 @@ import org.codehaus.plexus.component.repository.exception.ComponentLookupExcepti
 import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
@@ -81,6 +82,7 @@ import org.eclipse.emf.edit.domain.IEditingDomainProvider;
 import org.eclipse.emf.edit.provider.ComposedAdapterFactory;
 import org.eclipse.emf.edit.provider.ReflectiveItemProviderAdapterFactory;
 import org.eclipse.emf.edit.provider.resource.ResourceItemProviderAdapterFactory;
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextListener;
 import org.eclipse.jface.text.TextEvent;
@@ -121,6 +123,7 @@ import org.maven.ide.components.pom.Model;
 import org.maven.ide.components.pom.util.PomResourceFactoryImpl;
 import org.maven.ide.components.pom.util.PomResourceImpl;
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.editor.MavenEditorPlugin;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
@@ -260,15 +263,15 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       MavenLogger.log(ex);
     }
 
-    //handle pom change (from refactoring), this assumes editor is not dirty, because all poms 
-    //will be saved before refactoring
-    //TODO: implement generic merge scenario (when file is externally changed and is dirty)
+    // handle pom change (from refactoring), this assumes editor is not dirty, because all poms 
+    // will be saved before refactoring
+    // TODO implement generic merge scenario (when file is externally changed and is dirty)
     class ChangedResourceDeltaVisitor implements IResourceDeltaVisitor {
       boolean changed = false;
 
       public boolean visit(IResourceDelta delta) throws CoreException {
         if(delta.getResource().getName().equals(pomFile.getName()) //
-            && (delta.getKind() & (IResourceDelta.CHANGED)) != 0) {
+            && (delta.getKind() & IResourceDelta.CHANGED) != 0) {
           changed = true;
           return false;
         }
@@ -280,12 +283,20 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       ChangedResourceDeltaVisitor visitor = new ChangedResourceDeltaVisitor();
       event.getDelta().accept(visitor);
       if(visitor.changed) {
+        IMarker[] markers = pomFile.findMarkers(IMavenConstants.MARKER_ID, true, IResource.DEPTH_ZERO);
+        final String msg = markers != null && markers.length > 0 //
+            ? markers[0].getAttribute(IMarker.MESSAGE, "Unknown error") : null;
+        
         Display.getDefault().asyncExec(new Runnable() {
           public void run() {
+            for(MavenPomEditorPage page : pages) {
+              page.setErrorMessage(msg, msg == null ? IMessageProvider.NONE : IMessageProvider.ERROR);
+            }
+            
             // command stack shouldn't be dirty after refactoring
             // changes can be undone though
             flushCommandStack();
-            for (IPomFileChangedListener listener: fileChangeListeners) {
+            for(IPomFileChangedListener listener : fileChangeListeners) {
               listener.fileChanged();
             }
           }
@@ -482,7 +493,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
         pages.add((MavenPomEditorPage) page);
       }
       if (page instanceof IPomFileChangedListener) {
-        fileChangeListeners .add((IPomFileChangedListener) page);
+        fileChangeListeners.add((IPomFileChangedListener) page);
       }
       return addPage(page);
     } catch(PartInitException ex) {

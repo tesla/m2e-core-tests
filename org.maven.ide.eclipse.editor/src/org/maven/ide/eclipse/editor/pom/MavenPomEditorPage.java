@@ -22,6 +22,8 @@ import org.apache.maven.embedder.MavenEmbedderException;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.apache.maven.project.MavenProject;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -53,7 +55,6 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.editor.FormPage;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
@@ -62,6 +63,7 @@ import org.maven.ide.components.pom.Parent;
 import org.maven.ide.components.pom.PomPackage;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.OpenPomAction;
+import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
@@ -206,18 +208,36 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
                 });
               }
             }
+            
+            IFile pomFile = pomEditor.getPomFile();
+            if(pomFile!=null) {
+              IMarker[] markers = pomFile.findMarkers(IMavenConstants.MARKER_ID, true, IResource.DEPTH_ZERO);
+              if(markers != null && markers.length > 0) {
+                setErrorMessage(markers[0].getAttribute(IMarker.MESSAGE, "Unknown error"), IMessageProvider.ERROR);
+              } else {
+                setErrorMessage(null, IMessageProvider.NONE);
+              }
+            }
+            
           } catch(final CoreException ex) {
             MavenLogger.log(ex);
-            getPartControl().getDisplay().asyncExec(new Runnable() {
-              public void run() {
-                FormUtils.setMessage(getManagedForm().getForm(), ex.getMessage(), IMessageProvider.ERROR);
-              }
-            });
+            final String msg = ex.getMessage();
+            setErrorMessage(msg, IMessageProvider.ERROR);
           }
 
 //          return Status.OK_STATUS;
 //        }
 //      }.schedule();
+    }
+  }
+
+  public void setErrorMessage(final String msg, final int severity) {
+    if(getPartControl()!=null) {
+      getPartControl().getDisplay().asyncExec(new Runnable() {
+        public void run() {
+          FormUtils.setMessage(getManagedForm().getForm(), msg, severity);
+        }
+      });
     }
   }
 
@@ -525,10 +545,8 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
   }
   
   public IMavenProjectFacade findModuleProject(String moduleName) {
-    IEditorInput editorInput = getEditorInput();
-    if(editorInput instanceof IFileEditorInput) {
-      // XXX is there a better way to get edited file?
-      IFile pomFile = ((IFileEditorInput) editorInput).getFile();
+    IFile pomFile = pomEditor.getPomFile();
+    if(pomFile != null) {
       return findModuleProject(pomFile, moduleName);
     }
     return null;
@@ -547,10 +565,8 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
   }
   
   public IFile findModuleFile(String moduleName) {
-    IEditorInput editorInput = getEditorInput();
-    if(editorInput instanceof IFileEditorInput) {
-      // XXX is there a better way to get edited file?
-      IFile pomFile = ((IFileEditorInput) editorInput).getFile();
+    IFile pomFile = pomEditor.getPomFile();
+    if(pomFile!=null) {
       IPath modulePath = pomFile.getParent().getLocation().append(moduleName).append("pom.xml");
       IFile file = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(modulePath);
       return file;

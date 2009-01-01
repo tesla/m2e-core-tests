@@ -13,7 +13,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.fieldassist.ContentProposalAdapter;
 import org.eclipse.jface.fieldassist.FieldDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
@@ -61,19 +60,7 @@ public abstract class FormUtils {
   }
 
   public static void setMessage(ScrolledForm form, String message, int severity) {
-    Util.proxy(form, FormStub.class).setMessage(message, severity);
-  }
-  
-  /**
-   * Stub interface for API added to Form in Eclipse 3.3
-   */
-  private interface FormStub {
-    /**
-     * @param message test of the message
-     * @param severity one of {@link IMessageProvider#ERROR}, {@link IMessageProvider#WARNING} or
-     *          {@link IMessageProvider#INFORMATION}
-     */
-    public void setMessage(String message, int severity);
+    form.getForm().setMessage(message, severity);
   }
   
   public static String nvl(String s) {
