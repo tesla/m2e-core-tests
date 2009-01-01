@@ -204,8 +204,9 @@ public class MavenProjectManagerImpl {
           List<Exception> exceptions = executionResult.getExceptions();
           if (exceptions != null) {
             for(Exception ex : exceptions) {
-              String msg = "Failed to create Maven embedder";
-              console.logError(msg + "; " + ex.toString());
+              String msg = "Failed to read Maven project";
+              console.logError(msg);
+              console.logError(ex.toString());
               MavenLogger.log(msg, ex);
             }
           }
