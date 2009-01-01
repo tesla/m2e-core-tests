@@ -140,7 +140,8 @@ public class MavenMarkerManager implements IMavenMarkerManager {
 
   private void handleBuildException(IResource pomFile, Exception ex) {
     Throwable cause = getRootCause(ex);
-    String msg = Messages.getString("plugin.markerBuildError", cause.getMessage());  //$NON-NLS-1$
+    // String msg = Messages.getString("plugin.markerBuildError", cause.getMessage());  //$NON-NLS-1$
+    String msg = cause.getMessage();
     addMarker(pomFile, msg, 1, IMarker.SEVERITY_ERROR);
 //    console.logError(msg);
   }
@@ -164,8 +165,12 @@ public class MavenMarkerManager implements IMavenMarkerManager {
     Throwable lastCause = ex;
     Throwable cause = lastCause.getCause();
     while(cause != null && cause != lastCause) {
-      lastCause = cause;
-      cause = cause.getCause() instanceof ArtifactNotFoundException ? null : cause.getCause();
+      if(cause instanceof ArtifactNotFoundException) {
+        cause = null;
+      } else {
+        lastCause = cause;
+        cause = cause.getCause();
+      }
     }
     return cause == null ? lastCause : cause;
   }
