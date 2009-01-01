@@ -101,8 +101,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     configurationManager.updateProjectConfiguration(project2, configuration, "", monitor);
     waitForJobsToComplete();
 
-    IMarker[] markers2 = project2.findMarkers(null, true, IResource.DEPTH_INFINITE);
-    assertTrue("Unexpected markers " + Arrays.asList(markers2), markers2.length == 0);
+    assertMarkers(project2, 0);
   }
   
   public void testDisableMavenNature() throws Exception {
@@ -187,8 +186,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals("junit-3.8.1.jar", classpathEntries[0].getPath().lastSegment());
     assertEquals("jaxb-api-1.5.jar", classpathEntries[1].getPath().lastSegment());
 
-    IMarker[] markers = project.findMarkers(null, true, IResource.DEPTH_INFINITE);
-    assertEquals(toString(markers), 0, markers.length);
+    assertMarkers(project, 0);
   }
 
   public void testProjectImportWithProfile2() throws Exception {
@@ -212,8 +210,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals("jsr173_api-1.0.jar", classpathEntries[2].getPath().lastSegment());
     assertEquals("activation-1.1.jar", classpathEntries[3].getPath().lastSegment());
 
-    IMarker[] markers = project.findMarkers(null, true, IResource.DEPTH_INFINITE);
-    assertEquals(toString(markers), 0, markers.length);
+    assertMarkers(project, 0);
   }
 
   public void testProjectImport001_useMavenOutputFolders() throws Exception {
