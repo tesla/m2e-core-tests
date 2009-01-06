@@ -20,6 +20,7 @@ import org.eclipse.ui.IEditorPart;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
+import org.maven.ide.eclipse.index.IndexedArtifactFile;
 
 /**
  * 
@@ -45,11 +46,14 @@ public class DownloadSourcesActionDelegate implements IEditorActionDelegate {
           if (element instanceof JarPackageFragmentRoot) {
             JarPackageFragmentRoot root = (JarPackageFragmentRoot) element;
             File f = root.getPath().toFile();
-            IJavaProject project = (IJavaProject) root.getParent();
-            ArtifactKey a = MavenPlugin.getDefault().getIndexManager().identify(f).getArtifactKey();
-            MavenPlugin.getDefault().getMavenProjectManager().downloadSources(project.getProject(), 
-                project.getPath(), a.getGroupId(), a.getArtifactId(), a.getVersion(), a.getClassifier(), true, false);
-            break;
+            IndexedArtifactFile af = MavenPlugin.getDefault().getIndexManager().identify(f);
+            if (af != null) {
+              ArtifactKey a = af.getArtifactKey();
+              IJavaProject project = (IJavaProject) root.getParent();
+              MavenPlugin.getDefault().getMavenProjectManager().downloadSources(project.getProject(), 
+                  project.getPath(), a.getGroupId(), a.getArtifactId(), a.getVersion(), a.getClassifier(), true, false);
+              break;
+            }
           }
         }
       } catch(Exception ex) {
