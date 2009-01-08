@@ -378,34 +378,18 @@ public class NexusIndexManager extends IndexManager {
   }
 
   public Date reindex(String indexName, final IProgressMonitor monitor) throws CoreException {
-    final IndexInfo indexInfo = getIndexInfo(indexName);
-    if(indexInfo == null) {
-      // TODO log this
-      return null;
-    }
-
-    removeIndex(indexName, true);
-
-    addIndex(indexInfo, false);
-
-    IndexingContext context = getIndexingContext(indexName);
-    if(context == null) {
-      // TODO log this
-      return null;
-    }
-
     try {
-      getIndexer().scan(context, new ArtifactScanningMonitor(indexInfo, monitor, console), false);
-    } catch(IOException ex) {
+      IndexingContext context = getIndexer().getIndexingContexts().get(indexName);
+      getIndexer().scan( context );
+
+      Date indexTime = context.getTimestamp();
+      IndexInfo indexInfo = getIndexInfo(indexName); 
+      indexInfo.setUpdateTime(indexTime);
+      fireIndexUpdated(indexInfo);
+      return indexTime;
+    } catch(Exception ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Reindexing error", ex));
     }
-    
-    Date indexTime = context.getTimestamp();
-    indexInfo.setUpdateTime(indexTime);
-    
-    fireIndexUpdated(indexInfo);
-    
-    return indexTime;
   }
 
   public void addDocument(String indexName, File file, String documentKey, long size, long date, File jarFile,
