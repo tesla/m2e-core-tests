@@ -655,15 +655,8 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
         return (isPom(pf2))?AFTER:BEFORE; 
       }
 
-      Set<ArtifactKey> refs1 = ArtifactRef.toArtifactKey(pf1.getMavenProjectArtifacts());
-      //p1 depends on p2, should be built after p2
-      if (refs1.contains(pf2.getArtifactKey())) {
-        //... unless p1 is a pom project.
-        return (isPom(pf1))?BEFORE:AFTER; 
-      }
-      
-      //projects don't depend on each other
-      return UNDEFINED;
+      //Thanks to Timothy G. Rundle contribution (see MNGECLIPSE-1157/MNGECLIPSE-1028)
+      return (isPom(pf1))?BEFORE:AFTER; 
     }
     
     private boolean isPom(IMavenProjectFacade pf) {
