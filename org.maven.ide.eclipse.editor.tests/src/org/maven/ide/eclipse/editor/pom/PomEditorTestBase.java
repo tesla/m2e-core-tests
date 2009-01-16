@@ -12,13 +12,17 @@ import java.io.Writer;
 import org.apache.maven.model.Model;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.SWT;
@@ -63,6 +67,7 @@ import com.windowtester.runtime.condition.IHandler;
 import com.windowtester.runtime.locator.IWidgetLocator;
 import com.windowtester.runtime.locator.WidgetReference;
 import com.windowtester.runtime.swt.UITestCaseSWT;
+import com.windowtester.runtime.swt.condition.eclipse.JobsCompleteCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellDisposedCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellShowingCondition;
 import com.windowtester.runtime.swt.locator.ButtonLocator;
@@ -71,7 +76,7 @@ import com.windowtester.runtime.swt.locator.NamedWidgetLocator;
 import com.windowtester.runtime.swt.locator.SWTWidgetLocator;
 import com.windowtester.runtime.util.ScreenCapture;
 
-
+@SuppressWarnings("unchecked")
 public class PomEditorTestBase extends UITestCaseSWT {
 
   private static final String FIND_REPLACE = "Find/Replace";
@@ -141,7 +146,7 @@ public class PomEditorTestBase extends UITestCaseSWT {
     // close unnecessary tabs (different versions have different defaults in java perspective)
     closeView("org.eclipse.mylyn.tasks.ui.views.tasks", "Task List");
     closeView("org.eclipse.ui.views.ContentOutline", "Outline");
-  
+ 
     createTestProject();
   }
 
@@ -225,20 +230,33 @@ public class PomEditorTestBase extends UITestCaseSWT {
     // ui.click(new ButtonLocator("&Finish"));
     // ui.wait(new ShellDisposedCondition("New Maven Project"));
   
-    IProjectConfigurationManager configurationManager = MavenPlugin.getDefault().getProjectConfigurationManager();
+    final IProjectConfigurationManager configurationManager = MavenPlugin.getDefault().getProjectConfigurationManager();
     
-    Model model = new Model();
+    final Model model = new Model();
     model.setModelVersion("4.0.0");
     model.setGroupId("org.foo");
     model.setArtifactId("test-pom");
     model.setVersion("1.0.0");
     
-    String[] folders = new String[0];
-    ProjectImportConfiguration config = new ProjectImportConfiguration();
+    ResourcesPlugin.getWorkspace().getRoot().refreshLocal(IResource.DEPTH_INFINITE, null);
     
-    IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(PROJECT_NAME);
-    IPath location = null;
-    configurationManager.createSimpleProject(project, location, model, folders, config, new NullProgressMonitor());
+    final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(PROJECT_NAME);
+    if (project.exists()) {
+      project.delete(true, null);
+    }
+    
+    WorkspaceJob job = new WorkspaceJob("creating test project") {
+      public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
+        //createTestProject();
+        configurationManager.createSimpleProject(project, null, model, new String[0], new ProjectImportConfiguration(), new NullProgressMonitor());
+        return Status.OK_STATUS;
+      }
+    };
+    
+    job.setRule(configurationManager.getRule());
+    job.schedule();
+    ui.wait(new JobsCompleteCondition());
+    
   }
 
   protected void createFile(String name, String content) throws Exception {
