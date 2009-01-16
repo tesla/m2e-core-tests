@@ -450,7 +450,7 @@ public class MavenModelManager {
       if(this.dependency.getType() != null //
           && !"jar".equals(this.dependency.getType()) //
           && !"null".equals(this.dependency.getType())) { // guard against MNGECLIPSE-622
-        dependency.setClassifier(this.dependency.getType());
+        dependency.setType(this.dependency.getType());
       }
       
       if(this.dependency.getScope() != null && !"compile".equals(this.dependency.getScope())) {
