@@ -157,5 +157,9 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
   public String toString() {
     return id + ":" + name + "(" + priority + ")";
   }
+
+  public void init() {
+    //do nothing here, extenders may override
+  }
   
 }
