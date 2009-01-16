@@ -146,7 +146,7 @@ public class PomEditorTestBase extends UITestCaseSWT {
     // close unnecessary tabs (different versions have different defaults in java perspective)
     closeView("org.eclipse.mylyn.tasks.ui.views.tasks", "Task List");
     closeView("org.eclipse.ui.views.ContentOutline", "Outline");
- 
+    ui.wait(new JobsCompleteCondition());
     createTestProject();
   }
 
