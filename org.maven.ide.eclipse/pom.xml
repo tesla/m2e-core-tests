@@ -16,6 +16,7 @@
     <relativePath>../org.maven.ide.eclipse.parent</relativePath>
   </parent>
 
+
   <artifactId>org.maven.ide.eclipse</artifactId>
   <version>${m2eclipse.version}</version>
   <packaging>eclipse-plugin</packaging>
