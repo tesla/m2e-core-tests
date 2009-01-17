@@ -77,7 +77,7 @@ import com.windowtester.runtime.swt.locator.SWTWidgetLocator;
 import com.windowtester.runtime.util.ScreenCapture;
 
 @SuppressWarnings("unchecked")
-public class PomEditorTestBase extends UITestCaseSWT {
+public class PomEditorTestBase extends M2EUITestCase {
 
   private static final String FIND_REPLACE = "Find/Replace";
   protected static final String TEST_POM_POM_XML = "test-pom/pom.xml";
@@ -93,7 +93,7 @@ public class PomEditorTestBase extends UITestCaseSWT {
   static final String TAB_DEPENDENCY_TREE = IMavenConstants.PLUGIN_ID + ".pom.dependencyTree";
   static final String TAB_DEPENDENCY_GRAPH = IMavenConstants.PLUGIN_ID + ".pom.dependencyGraph";
   protected static final String PROJECT_NAME = "test-pom";
-  protected IUIContext ui;
+
   protected IWorkspaceRoot root;
   IWorkspace workspace;
 
@@ -187,13 +187,6 @@ public class PomEditorTestBase extends UITestCaseSWT {
     ui.keyClick(SWT.CTRL, 'w');
   }
 
-  private void closeView(String id, String title) throws Exception {
-    IViewPart view = getActivePage().findView(id);
-    if (view != null) {
-      ui.close(new CTabItemLocator(title));
-    }
-  }
-
   protected void putIntoClipboard(final String str) throws Exception {
   //		ui.contextClick(new TreeItemLocator(PROJECT_NAME, new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")), "New/File");
   //		ui.wait(new ShellShowingCondition("New File"));
@@ -255,7 +248,7 @@ public class PomEditorTestBase extends UITestCaseSWT {
     
     job.setRule(configurationManager.getRule());
     job.schedule();
-    ui.wait(new JobsCompleteCondition());
+    ui.wait(new JobsCompleteCondition(), 300000);
     
   }
 
@@ -376,12 +369,6 @@ public class PomEditorTestBase extends UITestCaseSWT {
     IEditorPart editor = getActivePage().getActiveEditor();
     IEditorSite editorSite = editor.getEditorSite();
     return editorSite;
-  }
-
-  IWorkbenchPage getActivePage() {
-    IWorkbench workbench = PlatformUI.getWorkbench();
-    IWorkbenchWindow window = workbench.getWorkbenchWindows()[0];
-    return window.getActivePage();
   }
 
   protected String getEditorText() {
