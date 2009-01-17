@@ -255,7 +255,7 @@ public class PomEditorTestBase extends UITestCaseSWT {
     
     job.setRule(configurationManager.getRule());
     job.schedule();
-    ui.wait(new JobsCompleteCondition());
+    ui.wait(new JobsCompleteCondition(), 300000);
     
   }
 
