@@ -77,7 +77,7 @@ import com.windowtester.runtime.swt.locator.SWTWidgetLocator;
 import com.windowtester.runtime.util.ScreenCapture;
 
 @SuppressWarnings("unchecked")
-public class PomEditorTestBase extends M2EUITestCase {
+public class PomEditorTestBase extends UITestCaseSWT {
 
   private static final String FIND_REPLACE = "Find/Replace";
   protected static final String TEST_POM_POM_XML = "test-pom/pom.xml";
@@ -93,7 +93,7 @@ public class PomEditorTestBase extends M2EUITestCase {
   static final String TAB_DEPENDENCY_TREE = IMavenConstants.PLUGIN_ID + ".pom.dependencyTree";
   static final String TAB_DEPENDENCY_GRAPH = IMavenConstants.PLUGIN_ID + ".pom.dependencyGraph";
   protected static final String PROJECT_NAME = "test-pom";
-
+  protected IUIContext ui;
   protected IWorkspaceRoot root;
   IWorkspace workspace;
 
@@ -146,7 +146,7 @@ public class PomEditorTestBase extends M2EUITestCase {
     // close unnecessary tabs (different versions have different defaults in java perspective)
     closeView("org.eclipse.mylyn.tasks.ui.views.tasks", "Task List");
     closeView("org.eclipse.ui.views.ContentOutline", "Outline");
-    ui.wait(new JobsCompleteCondition());
+ 
     createTestProject();
   }
 
@@ -185,6 +185,13 @@ public class PomEditorTestBase extends M2EUITestCase {
     ui.keyClick(SWT.CTRL, 's');
     Thread.sleep(500L);
     ui.keyClick(SWT.CTRL, 'w');
+  }
+
+  private void closeView(String id, String title) throws Exception {
+    IViewPart view = getActivePage().findView(id);
+    if (view != null) {
+      ui.close(new CTabItemLocator(title));
+    }
   }
 
   protected void putIntoClipboard(final String str) throws Exception {
@@ -248,7 +255,7 @@ public class PomEditorTestBase extends M2EUITestCase {
     
     job.setRule(configurationManager.getRule());
     job.schedule();
-    ui.wait(new JobsCompleteCondition(), 300000);
+    ui.wait(new JobsCompleteCondition());
     
   }
 
@@ -369,6 +376,12 @@ public class PomEditorTestBase extends M2EUITestCase {
     IEditorPart editor = getActivePage().getActiveEditor();
     IEditorSite editorSite = editor.getEditorSite();
     return editorSite;
+  }
+
+  IWorkbenchPage getActivePage() {
+    IWorkbench workbench = PlatformUI.getWorkbench();
+    IWorkbenchWindow window = workbench.getWorkbenchWindows()[0];
+    return window.getActivePage();
   }
 
   protected String getEditorText() {
