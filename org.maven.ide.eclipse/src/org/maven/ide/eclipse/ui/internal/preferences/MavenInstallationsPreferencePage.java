@@ -1,4 +1,3 @@
-
 package org.maven.ide.eclipse.ui.internal.preferences;
 
 import java.io.File;
@@ -546,7 +545,7 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
           if(globalSettings != null) {
             configuration.setGlobalSettingsFile(new File(globalSettings));
           }
-          if(userSettings != null) {
+          if(userSettings != null && userSettings.length() > 0) {
             configuration.setUserSettingsFile(new File(userSettings));
           }
 

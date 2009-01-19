@@ -225,20 +225,24 @@ public class MavenRuntimeManager {
     preferenceStore.setValue(MavenPreferenceConstants.P_OUTPUT_FOLDER, name);
   }
   
-  public void setGoalOnImport(String goalName) {
-    preferenceStore.setValue(MavenPreferenceConstants.P_GOAL_ON_IMPORT, goalName);
+  public void setGoalOnImport(String goalNames) {
+    preferenceStore.setValue(MavenPreferenceConstants.P_GOAL_ON_IMPORT, nvl(goalNames));
   }
   
-  public void setGoalOnUpdate(String goalName) {
-    preferenceStore.setValue(MavenPreferenceConstants.P_GOAL_ON_UPDATE, goalName);
+  public void setGoalOnUpdate(String goalNames) {
+    preferenceStore.setValue(MavenPreferenceConstants.P_GOAL_ON_UPDATE, nvl(goalNames));
   }
   
   public void setUserSettingsFile(String fileName) {
-    preferenceStore.setValue(MavenPreferenceConstants.P_USER_SETTINGS_FILE, fileName);
+    preferenceStore.setValue(MavenPreferenceConstants.P_USER_SETTINGS_FILE, nvl(fileName));
   }
   
   public void setGlobalSettingsFile(String fileName) {
-    preferenceStore.setValue(MavenPreferenceConstants.P_GLOBAL_SETTINGS_FILE, fileName);
+    preferenceStore.setValue(MavenPreferenceConstants.P_GLOBAL_SETTINGS_FILE, nvl(fileName));
   }
 
+  private static String nvl(String s) {
+    return s == null ? "" : s;
+  }
+  
 }
