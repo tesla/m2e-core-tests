@@ -207,11 +207,26 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
     return project;
   }
 
+  /**
+   * Import a test project into the Eclipse workspace
+   * 
+   * @param pomName - a relative location of the pom file for the project to import
+   * @param configuration - a resolver configuration to be used to configure imported project 
+   * @return created project
+   */
   protected IProject importProject(String pomName, ResolverConfiguration configuration) throws IOException, CoreException {
     File pomFile = new File(pomName);
     return importProjects(pomFile.getParentFile().getCanonicalPath(), new String[] {pomFile.getName()}, configuration)[0];
   }
 
+  /**
+   * Import test projects into the Eclipse workspace
+   * 
+   * @param basedir - a base directory for all projects to import
+   * @param pomNames - a relative locations of the pom files for the projects to import
+   * @param configuration - a resolver configuration to be used to configure imported projects 
+   * @return created projects
+   */
   protected IProject[] importProjects(String basedir, String[] pomNames, ResolverConfiguration configuration) throws IOException, CoreException {
     final MavenPlugin plugin = MavenPlugin.getDefault();
     MavenModelManager mavenModelManager = plugin.getMavenModelManager();
