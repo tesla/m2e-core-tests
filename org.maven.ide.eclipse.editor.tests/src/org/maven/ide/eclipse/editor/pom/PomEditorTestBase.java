@@ -67,6 +67,7 @@ import com.windowtester.runtime.condition.IHandler;
 import com.windowtester.runtime.locator.IWidgetLocator;
 import com.windowtester.runtime.locator.WidgetReference;
 import com.windowtester.runtime.swt.UITestCaseSWT;
+import com.windowtester.runtime.swt.condition.SWTIdleCondition;
 import com.windowtester.runtime.swt.condition.eclipse.JobsCompleteCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellDisposedCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellShowingCondition;
@@ -273,7 +274,7 @@ public class PomEditorTestBase extends UITestCaseSWT {
         editor.setActivePage(id);
       }
     });
-    Thread.sleep(1000L);
+    ui.wait(new SWTIdleCondition());
   }
 
   protected void openPomFile(String name) throws Exception {
