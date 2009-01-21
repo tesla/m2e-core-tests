@@ -52,6 +52,8 @@
 
     <tycho.version>0.3.0-SNAPSHOT</tycho.version>
     -->
+    <org.maven.ide.eclipse.integration.tests.skip>true</org.maven.ide.eclipse.integration.tests.skip>
+    <org.maven.ide.eclipse.tests.skip>false</org.maven.ide.eclipse.tests.skip>
   </properties>
 
   <organization>
@@ -103,7 +105,7 @@
     <module>../org.maven.ide.eclipse.scm</module>
     <module>../org.maven.ide.eclipse.cvs</module>
     <module>../org.maven.ide.eclipse.tests</module>
-
+	<module>../org.maven.ide.eclipse.integration.tests</module>
     <module>../org.maven.ide.eclipse.editor.xml</module>
     <module>../org.maven.ide.eclipse.editor</module>
     <module>../org.maven.ide.eclipse.editor.tests</module>
@@ -431,6 +433,14 @@
       </properties>
     </profile>
 
+	<profile>
+		<id>m2e-system-test</id>
+		<properties>
+    		<org.maven.ide.eclipse.integration.tests.skip>false</org.maven.ide.eclipse.integration.tests.skip>
+    		<org.maven.ide.eclipse.tests.skip>true</org.maven.ide.eclipse.tests.skip>
+  		</properties>
+	</profile>
+	
     <profile>
       <id>e34-p2</id>
       <repositories>

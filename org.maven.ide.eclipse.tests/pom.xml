@@ -20,11 +20,7 @@
   <packaging>eclipse-test-plugin</packaging>
 
   <name>Maven Integration for Eclipse tests</name>
-
-  <properties>
-    <org.maven.ide.eclipse.tests.skip>false</org.maven.ide.eclipse.tests.skip>
-  </properties>
-
+  
   <build>
     <sourceDirectory>src</sourceDirectory>
     <resources>
