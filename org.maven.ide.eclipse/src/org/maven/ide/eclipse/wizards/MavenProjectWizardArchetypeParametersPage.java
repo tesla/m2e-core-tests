@@ -156,6 +156,7 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
     groupIdCombo = new Combo(parent, SWT.BORDER);
     groupIdCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
     addFieldWithHistory("groupId", groupIdCombo);
+    groupIdCombo.setData("name", "groupId");
     groupIdCombo.addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent e) {
         updateJavaPackage();
@@ -169,6 +170,7 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
     artifactIdCombo = new Combo(parent, SWT.BORDER);
     artifactIdCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
     addFieldWithHistory("artifactId", artifactIdCombo);
+    artifactIdCombo.setData("name", "artifactId");
     artifactIdCombo.addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent e) {
         updateJavaPackage();
