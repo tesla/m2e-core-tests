@@ -23,51 +23,61 @@ import com.windowtester.runtime.swt.locator.MenuItemLocator;
 import com.windowtester.runtime.swt.locator.NamedWidgetLocator;
 import com.windowtester.runtime.swt.locator.SWTWidgetLocator;
 import com.windowtester.runtime.swt.locator.TableCellLocator;
+import com.windowtester.runtime.swt.locator.TreeItemLocator;
+import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
+import com.windowtester.runtime.util.ScreenCapture;
 
 
 public class ArchetypeProjectCreationTest extends UIIntegrationTestCase {
 
-  private final static String[] ARCHETYPES = {
-      "maven-archetype-mojo", "maven-archetype-portlet", "maven-archetype-profiles",
-      "maven-archetype-site", "maven-archetype-site-simple", "maven-archetype-webapp", "maven-archetype-j2ee-simple"};
-
+  private final static String[] ARCHETYPES = {"maven-archetype-mojo", "maven-archetype-portlet",
+      "maven-archetype-profiles", "maven-archetype-site", "maven-archetype-site-simple", "maven-archetype-webapp",
+      "struts2-archetype-starter", "spring-ws-archetype", "maven-archetype-j2ee-simple"};
 
   private IProject createArchetypeProjct(String archetypeName) throws Exception {
-    IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("project");
-    assertFalse(project.exists());
+    try {
+      IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("project");
+      assertFalse(project.exists());
 
-    IUIContext ui = getUI();
-    ui.click(new SWTWidgetLocator(ViewForm.class, new SWTWidgetLocator(CTabFolder.class, 0, new SWTWidgetLocator(
-        Composite.class))));
-    ui.click(new MenuItemLocator("File/New/Project..."));
-    ui.wait(new ShellShowingCondition("New Project"));
-    ui.click(new FilteredTreeItemLocator("Plug-in Project"));
-    ui.click(new FilteredTreeItemLocator("Maven/Maven Project"));
-    ui.click(new ButtonLocator("&Next >"));
-    ui.click(new ButtonLocator("&Next >"));
-    ui.click(new TableCellLocator(archetypeName, 2));
-    NamedWidgetLocator table = new NamedWidgetLocator("archetypesTable");
+      IUIContext ui = getUI();
+      ui.click(new SWTWidgetLocator(ViewForm.class, new SWTWidgetLocator(CTabFolder.class, 0, new SWTWidgetLocator(
+          Composite.class))));
+      ui.click(new MenuItemLocator("File/New/Project..."));
+      ui.wait(new ShellShowingCondition("New Project"));
+      ui.click(new FilteredTreeItemLocator("Plug-in Project"));
+      ui.click(new FilteredTreeItemLocator("Maven/Maven Project"));
+      ui.click(new ButtonLocator("&Next >"));
+      ui.click(new ButtonLocator("&Next >"));
+      ui.click(new TableCellLocator(archetypeName, 2));
+      NamedWidgetLocator table = new NamedWidgetLocator("archetypesTable");
 
-    ui.click(new ButtonLocator("&Next >"));
-    ui.wait(new SWTIdleCondition());
-    IWidgetLocator groupCombo = ui.find(new NamedWidgetLocator("groupId"));
-    ui.setFocus(groupCombo);
-    ui.enterText("org.sonatype.test");
-    ui.setFocus(ui.find(new NamedWidgetLocator("artifactId")));
-    ui.enterText("project");
-    ui.click(new ButtonLocator("&Finish"));
-    ui.wait(new ShellDisposedCondition("New Maven Project"));
-    ui.wait(new JobsCompleteCondition(), 60000);
-    
-    project = ResourcesPlugin.getWorkspace().getRoot().getProject("project");
-    assertTrue(project.exists());
-    int severity = project.findMaxProblemSeverity(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
-    assertFalse("archtype project \""+ archetypeName + "\" has errors on initial creation", severity == IMarker.SEVERITY_ERROR);
-    assertTrue("archtype project \""+ archetypeName + "\" creared without Maven nature", project.hasNature("org.maven.ide.eclipse.maven2Nature")); // TODO: find constant for this...
-    
-    return project;
+      ui.click(new ButtonLocator("&Next >"));
+      ui.wait(new SWTIdleCondition());
+      IWidgetLocator groupCombo = ui.find(new NamedWidgetLocator("groupId"));
+      ui.setFocus(groupCombo);
+      ui.enterText("org.sonatype.test");
+      ui.setFocus(ui.find(new NamedWidgetLocator("artifactId")));
+      ui.enterText("project");
+      ui.click(new ButtonLocator("&Finish"));
+      ui.wait(new ShellDisposedCondition("New Maven Project"));
+      ui.wait(new JobsCompleteCondition(), 60000);
+
+      project = ResourcesPlugin.getWorkspace().getRoot().getProject("project");
+      assertTrue(project.exists());
+      int severity = project.findMaxProblemSeverity(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
+      assertFalse("archtype project \"" + archetypeName + "\" has errors on initial creation",
+          severity == IMarker.SEVERITY_ERROR);
+      assertTrue("archtype project \"" + archetypeName + "\" creared without Maven nature", project
+          .hasNature("org.maven.ide.eclipse.maven2Nature")); // TODO: find constant for this...
+
+      ui.click(new TreeItemLocator("project.*", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
+      return project;
+    } catch(Exception ex) {
+      ScreenCapture.createScreenCapture();
+      throw new Exception("Failed to create project for archetype:" + archetypeName, ex);
+    }
   }
-  
+
   protected void tearDown() throws Exception {
     clearProjects();
     super.tearDown();
@@ -88,7 +98,7 @@ public class ArchetypeProjectCreationTest extends UIIntegrationTestCase {
   public void testCreateBasicArchetypes() throws Exception {
     // Sanity check of basic projects, will fail if project is created with problem markers or 
     // without a Maven nature.
-    for (String archetype: ARCHETYPES) {
+    for(String archetype : ARCHETYPES) {
       createArchetypeProjct(archetype);
       clearProjects();
     }
