@@ -6,8 +6,13 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
@@ -32,6 +37,7 @@ import org.eclipse.ui.part.FileEditorInput;
 import org.maven.ide.components.pom.Model;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.editor.pom.MavenPomEditor;
+import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 
 import com.windowtester.finder.swt.ShellFinder;
 import com.windowtester.runtime.IUIContext;
@@ -111,21 +117,26 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
     ui.wait(new JobsCompleteCondition(), 300000);
   }
 
-  private void clearProjects() throws CoreException {
-    ResourcesPlugin.getWorkspace().getRoot().refreshLocal(IResource.DEPTH_INFINITE, null);
-    IProject [] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-    for (IProject project:projects) {
-      project.delete(true, null);
-    }
+  protected void clearProjects() throws CoreException {
+    
+    WorkspaceJob job = new WorkspaceJob("deleting test projects") {
+      public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
+        ResourcesPlugin.getWorkspace().getRoot().refreshLocal(IResource.DEPTH_INFINITE, null);
+        IProject [] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+        for (IProject project:projects) {
+          project.delete(true, null);
+        }
+        return Status.OK_STATUS;
+      }
+    };
+    
+    job.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
+    job.schedule();
+    ui.wait(new JobsCompleteCondition(), 300000);
+    
+
   }
   
-//  private void assertHasElement(String path, File f) {
-//    DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
-//    DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
-//    Document doc = docBuilder.parse (new File("book.xml"));
-//    doc.getElementById(arg0)
-//
-//  }
   protected void oneTimeTearDown() throws Exception {
     clearProjects();
     super.oneTimeTearDown();
@@ -192,11 +203,7 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
     ui.enterText(text);
     ui.click(new ButtonLocator("Fi&nd"));
     ui.click(new LabeledLocator(Button.class, "String Not Found"));
-    ui.wait(new ShellDisposedCondition("Find/Replace"));
-//    ui.keyClick(WT.CR);
-//    ui.click(new LabeledLocator(Button.class, "String Not Found"));
-//    ui.close(new SWTWidgetLocator(Shell.class, FIND_REPLACE));
-//    ui.wait(new ShellDisposedCondition(FIND_REPLACE));
+    ui.wait(new ShellDisposedCondition(FIND_REPLACE));
   }
   
   protected void findText(String src) throws WaitTimedOutException, WidgetSearchException {
