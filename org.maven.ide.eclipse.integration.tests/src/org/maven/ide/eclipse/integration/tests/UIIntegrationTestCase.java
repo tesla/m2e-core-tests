@@ -1,5 +1,15 @@
+
 package org.maven.ide.eclipse.integration.tests;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -8,10 +18,11 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.Clipboard;
@@ -37,13 +48,13 @@ import org.eclipse.ui.part.FileEditorInput;
 import org.maven.ide.components.pom.Model;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.editor.pom.MavenPomEditor;
-import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 
 import com.windowtester.finder.swt.ShellFinder;
 import com.windowtester.runtime.IUIContext;
 import com.windowtester.runtime.WT;
 import com.windowtester.runtime.WaitTimedOutException;
 import com.windowtester.runtime.WidgetSearchException;
+import com.windowtester.runtime.locator.IWidgetLocator;
 import com.windowtester.runtime.swt.UITestCaseSWT;
 import com.windowtester.runtime.swt.condition.SWTIdleCondition;
 import com.windowtester.runtime.swt.condition.eclipse.JobsCompleteCondition;
@@ -51,21 +62,26 @@ import com.windowtester.runtime.swt.condition.shell.ShellDisposedCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellShowingCondition;
 import com.windowtester.runtime.swt.locator.ButtonLocator;
 import com.windowtester.runtime.swt.locator.CTabItemLocator;
+import com.windowtester.runtime.swt.locator.FilteredTreeItemLocator;
 import com.windowtester.runtime.swt.locator.LabeledLocator;
+import com.windowtester.runtime.swt.locator.MenuItemLocator;
 import com.windowtester.runtime.swt.locator.SWTWidgetLocator;
 import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
 import com.windowtester.runtime.util.ScreenCapture;
 
+
 public class UIIntegrationTestCase extends UITestCaseSWT {
-  
+
   private static final String FIND_REPLACE = "Find/Replace";
-  
+
+  private static final String PLUGIN_ID = "org.maven.ide.eclipse.integration.tests";
+
   protected IUIContext ui;
-  
+
   protected IWorkspaceRoot root;
+
   IWorkspace workspace;
 
-  
   public UIIntegrationTestCase() {
     super();
   }
@@ -73,70 +89,68 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
   public UIIntegrationTestCase(String testName) {
     super(testName);
   }
-  
+
   protected IWorkbenchPage getActivePage() {
     IWorkbench workbench = PlatformUI.getWorkbench();
     IWorkbenchWindow window = workbench.getWorkbenchWindows()[0];
     return window.getActivePage();
   }
-  
+
   protected void closeView(String id, String title) throws Exception {
     IViewPart view = getActivePage().findView(id);
-    if (view != null)  {
+    if(view != null) {
       ui.close(new ViewLocator(id));
     }
   }
 
   protected void oneTimeSetup() throws Exception {
     super.oneTimeSetup();
-  
+
     WorkbenchPlugin.getDefault().getPreferenceStore().setValue(IPreferenceConstants.RUN_IN_BACKGROUND, true);
     PrefUtil.getAPIPreferenceStore().setValue(IWorkbenchPreferenceConstants.ENABLE_ANIMATIONS, false);
-    
+
     ShellFinder.bringRootToFront(getActivePage().getWorkbenchWindow().getShell().getDisplay());
-    
+
     MavenPlugin.getDefault(); // force m2e to load so its indexing jobs will be scheduled.
     Thread.sleep(2000);
     ui = getUI();
     if("Welcome".equals(getActivePage().getActivePart().getTitle())) {
       ui.close(new CTabItemLocator("Welcome"));
     }
-    
+
     IPerspectiveRegistry perspectiveRegistry = PlatformUI.getWorkbench().getPerspectiveRegistry();
     IPerspectiveDescriptor perspective = perspectiveRegistry
         .findPerspectiveWithId("org.eclipse.jdt.ui.JavaPerspective");
     getActivePage().setPerspective(perspective);
-  
+
     // close unnecessary tabs (different versions have different defaults in java perspective)
     closeView("org.eclipse.ui.views.ContentOutline", "Outline");
     closeView("org.eclipse.mylyn.tasks.ui.views.tasks", "Task List");
-    
-    
+
     clearProjects();
-    
+
     ui.wait(new JobsCompleteCondition(), 300000);
   }
 
   protected void clearProjects() throws CoreException {
-    
+
     WorkspaceJob job = new WorkspaceJob("deleting test projects") {
       public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
         ResourcesPlugin.getWorkspace().getRoot().refreshLocal(IResource.DEPTH_INFINITE, null);
-        IProject [] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-        for (IProject project:projects) {
+        IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+        for(IProject project : projects) {
           project.delete(true, null);
         }
         return Status.OK_STATUS;
       }
     };
-    
+
     job.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
     job.schedule();
     ui.wait(new JobsCompleteCondition(), 300000);
-    
 
   }
-  
+
   protected void oneTimeTearDown() throws Exception {
     clearProjects();
     super.oneTimeTearDown();
@@ -144,21 +158,21 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
 
   protected void setUp() throws Exception {
     super.setUp();
-     
+
     ShellFinder.bringRootToFront(getActivePage().getWorkbenchWindow().getShell().getDisplay());
-    
+
     workspace = ResourcesPlugin.getWorkspace();
-    
+
     root = workspace.getRoot();
     ui = getUI();
-    
+
     if("Welcome".equals(getActivePage().getActivePart().getTitle())) {
       ui.close(new CTabItemLocator("Welcome"));
     }
   }
 
   protected void putIntoClipboard(final String str) throws Exception {
-    
+
     Display.getDefault().syncExec(new Runnable() {
       public void run() {
         Clipboard clipboard = new Clipboard(Display.getDefault());
@@ -168,35 +182,37 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
       }
     });
   }
-  
+
   protected Model getModel(final MavenPomEditor editor) throws Exception {
-    Model model = (Model)executeOnEventQueue(new Task(){
+    Model model = (Model) executeOnEventQueue(new Task() {
 
       public Object runEx() throws Exception {
         return editor.readProjectDocument();
-      }});
+      }
+    });
     return model;
   }
-  
+
   protected MavenPomEditor openPomFile(String name) throws Exception {
-    
+
     IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
     IFile file = root.getFile(new Path(name));
-  
+
     final IEditorInput editorInput = new FileEditorInput(file);
-    MavenPomEditor editor = (MavenPomEditor)executeOnEventQueue(new Task(){
+    MavenPomEditor editor = (MavenPomEditor) executeOnEventQueue(new Task() {
 
       public Object runEx() throws Exception {
         IEditorPart part = getActivePage().openEditor(editorInput, "org.maven.ide.eclipse.editor.MavenPomEditor", true);
-        if (part instanceof MavenPomEditor) {
-          return (MavenPomEditor)part;
+        if(part instanceof MavenPomEditor) {
+          return (MavenPomEditor) part;
         }
         return null;
-      }});
+      }
+    });
     ui.wait(new SWTIdleCondition());
     return editor;
   }
-  
+
   protected void checkTextNotFound(String text) throws WaitTimedOutException, WidgetSearchException {
     ui.keyClick(SWT.MOD1, 'f');
     ui.wait(new ShellShowingCondition(FIND_REPLACE));
@@ -205,7 +221,7 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
     ui.click(new LabeledLocator(Button.class, "String Not Found"));
     ui.wait(new ShellDisposedCondition(FIND_REPLACE));
   }
-  
+
   protected void findText(String src) throws WaitTimedOutException, WidgetSearchException {
     ui.keyClick(SWT.CTRL, 'f');
     ui.wait(new ShellShowingCondition(FIND_REPLACE));
@@ -214,34 +230,35 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
     ui.close(new SWTWidgetLocator(Shell.class, FIND_REPLACE));
     ui.wait(new ShellDisposedCondition(FIND_REPLACE));
   }
-  
+
   protected void replaceText(String src, String target) throws WaitTimedOutException, WidgetSearchException {
     ui.keyClick(SWT.CTRL, 'f');
     ui.wait(new ShellShowingCondition(FIND_REPLACE));
-  
+
     ui.enterText(src);
     ui.keyClick(WT.TAB);
     ScreenCapture.createScreenCapture();
-    
+
     ui.enterText(target);
-    
+
     // ui.keyClick(SWT.ALT, 'a'); // "replace all"
     ui.click(new ButtonLocator("Replace &All"));
-    
+
     ui.close(new SWTWidgetLocator(Shell.class, FIND_REPLACE));
     ui.wait(new ShellDisposedCondition(FIND_REPLACE));
     // ScreenCapture.createScreenCapture();
   }
-  
+
   public static abstract class Task implements Runnable {
 
     private Object result = null;
+
     private Exception exception = null;
 
     final public void run() {
       try {
         result = runEx();
-      } catch (Exception ex) {
+      } catch(Exception ex) {
         exception = ex;
       }
 
@@ -259,17 +276,51 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
 
   }
 
-  
   public static Object executeOnEventQueue(Task task) throws Exception {
-    if (Display.getDefault().getThread() == Thread.currentThread()) {
+    if(Display.getDefault().getThread() == Thread.currentThread()) {
       task.run();
     } else {
       Display.getDefault().syncExec(task);
     }
-    if (task.getException() != null) {
+    if(task.getException() != null) {
       throw task.getException();
     }
     return task.getResult();
   }
 
+  protected File copyPluginResourceToTempFile(String plugin, String file) throws MalformedURLException, IOException {
+    URL url = FileLocator.find(Platform.getBundle(plugin), new Path("/" + file), null);
+    File f = File.createTempFile("temp", new Path(file).getFileExtension());
+    InputStream is = new BufferedInputStream(url.openStream());
+    FileOutputStream os = new FileOutputStream(f);
+    try {
+      IOUtil.copy(is, os);
+    } finally {
+      is.close();
+      os.close();
+    }
+
+    return f;
+  }
+  
+  
+  public void importZippedProject(String pluginPath) throws Exception {
+    IUIContext ui = getUI();
+    File f = copyPluginResourceToTempFile(PLUGIN_ID, pluginPath);
+    try {
+      ui.click(new MenuItemLocator("File/Import..."));
+      ui.wait(new ShellShowingCondition("Import"));
+      ui.click(new FilteredTreeItemLocator("General/Existing Projects into Workspace"));
+      ui.click(new ButtonLocator("&Next >"));
+      ui.click(new ButtonLocator("Select roo&t directory:"));
+      ui.click(new ButtonLocator("Select &archive file:"));
+      ui.enterText(f.getCanonicalPath());
+      ui.keyClick(SWT.TAB);
+      ui.click(new ButtonLocator("&Finish"));
+      ui.wait(new ShellDisposedCondition("Import"));
+      ui.wait(new JobsCompleteCondition());
+    } finally {
+      f.delete();
+    }
+  }
 }
