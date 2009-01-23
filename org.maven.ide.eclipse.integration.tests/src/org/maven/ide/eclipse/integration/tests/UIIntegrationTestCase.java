@@ -318,7 +318,7 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
       ui.keyClick(SWT.TAB);
       ui.click(new ButtonLocator("&Finish"));
       ui.wait(new ShellDisposedCondition("Import"));
-      ui.wait(new JobsCompleteCondition());
+      ui.wait(new JobsCompleteCondition(), 60000);
     } finally {
       f.delete();
     }
