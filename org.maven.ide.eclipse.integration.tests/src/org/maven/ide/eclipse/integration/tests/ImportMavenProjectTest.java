@@ -23,8 +23,16 @@ public class ImportMavenProjectTest extends UIIntegrationTestCase {
 
   private File tempDir;
 
+  public void testSimpleModuleImport() throws Exception {
+    doImport("projects/commons-collections-3.2.1-src.zip");
+  }
+
   public void testMultiModuleImport() throws Exception {
-    tempDir = unzipProject("projects/commons-collections-3.2.1-src.zip");
+    doImport("projects/httpcomponents-core-4.0-beta3-src.zip");
+  }
+
+  private void doImport(String projectPath) throws Exception {
+    tempDir = unzipProject(projectPath);
 
     ui.click(new MenuItemLocator("File/Import..."));
     ui.wait(new ShellShowingCondition("Import"));
@@ -47,13 +55,16 @@ public class ImportMavenProjectTest extends UIIntegrationTestCase {
 
   }
 
-  protected void oneTimeTearDown() throws Exception {
-
-    super.oneTimeTearDown();
-
+  protected void tearDown() throws Exception {
+    clearProjects();
+    
     if(tempDir != null && tempDir.exists()) {
       deleteDirectory(tempDir);
+      tempDir = null;
     }
+    super.tearDown();
+
+  
   }
 
 }
