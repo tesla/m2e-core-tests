@@ -32,6 +32,7 @@ import org.eclipse.ui.progress.IProgressConstants;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 
@@ -61,6 +62,11 @@ public class UpdateSourcesAction implements IObjectActionDelegate {
         setProperty(IProgressConstants.ACTION_PROPERTY, new OpenMavenConsoleAction());
         monitor.beginTask(getName(), projects.size());
         
+        MavenConsole console = plugin.getConsole();
+        
+        long l1 = System.currentTimeMillis();
+        console.logMessage("Update started");
+        
         MultiStatus status = null;
         for(IProject project : projects) {
           if (monitor.isCanceled()) {
@@ -77,12 +83,16 @@ public class UpdateSourcesAction implements IObjectActionDelegate {
                   new SubProgressMonitor(monitor, 1));
             } catch(CoreException ex) {
               if (status == null) {
-                status = new MultiStatus(IMavenConstants.PLUGIN_ID, IStatus.ERROR, "Can't update maven configuration", null);
+                status = new MultiStatus(IMavenConstants.PLUGIN_ID, IStatus.ERROR, //
+                    "Can't update Maven configuration", null);
               }
               status.add(ex.getStatus());
             }
           }
         }
+        
+        long l2 = System.currentTimeMillis();
+        console.logMessage("Update completed: " + ((l2 - l1) / 1000) + " sec");
 
         return status != null? status: Status.OK_STATUS;
       }

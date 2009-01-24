@@ -131,6 +131,8 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     try {
       MavenEmbedder embedder = projectManagerImpl.createWorkspaceEmbedder();
       try {
+        long t1 = System.currentTimeMillis();
+        
         ArrayList<IProject> projects = new ArrayList<IProject>();
 
         // first, create all projects with basic configuration
@@ -152,6 +154,10 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
 
         // then configure maven for all projects
         configureNewMavenProject(embedder, projects, monitor);
+        
+        long t2 = System.currentTimeMillis();
+        console.logMessage("Project import completed " + ((t2 - t1) / 1000) + " sec");
+        
       } finally {
         embedder.stop();
       }
@@ -640,34 +646,32 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
   
   /**
    * Projects comparator, used to determine build order between maven projects.
-   *  
    */
-  static class ReferencedProjectComparator implements Comparator<IMavenProjectFacade>, Serializable  {
+  static class ReferencedProjectComparator implements Comparator<IMavenProjectFacade>, Serializable {
 
     private static final long serialVersionUID = -1L;
-    
+
     private static final int BEFORE = -1;
 
-    private static final int UNDEFINED = 0;
+    // private static final int UNDEFINED = 0;
 
     private static final int AFTER = 1;
 
     public int compare(IMavenProjectFacade pf1, IMavenProjectFacade pf2) {
       Set<ArtifactKey> refs2 = ArtifactRef.toArtifactKey(pf2.getMavenProjectArtifacts());
       //p1 is a reference of p2, should be built before p2 ...
-      if (refs2.contains(pf1.getArtifactKey())) {
+      if(refs2.contains(pf1.getArtifactKey())) {
         //... unless p2 is a pom project.
-        return (isPom(pf2))?AFTER:BEFORE; 
+        return isPom(pf2) ? AFTER : BEFORE;
       }
 
       //Thanks to Timothy G. Rundle contribution (see MNGECLIPSE-1157/MNGECLIPSE-1028)
-      return (isPom(pf1))?BEFORE:AFTER; 
+      return isPom(pf1) ? BEFORE : AFTER;
     }
-    
+
     private boolean isPom(IMavenProjectFacade pf) {
       return "pom".equals(pf.getPackaging());
     }
   }
-
   
 }
