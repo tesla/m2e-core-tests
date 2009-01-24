@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * Copyright (c) 2008 Sonatype, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *******************************************************************************/
 
 package org.maven.ide.eclipse.integration.tests;
 
@@ -28,6 +35,9 @@ import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
 import com.windowtester.runtime.util.ScreenCapture;
 
 
+/**
+ * @author Rich Seddon
+ */
 public class ArchetypeProjectCreationTest extends UIIntegrationTestCase {
 
   private final static String[] ARCHETYPES = {"maven-archetype-mojo", "maven-archetype-portlet",
@@ -49,7 +59,7 @@ public class ArchetypeProjectCreationTest extends UIIntegrationTestCase {
       ui.click(new ButtonLocator("&Next >"));
       ui.click(new ButtonLocator("&Next >"));
       ui.click(new TableCellLocator(archetypeName, 2));
-      NamedWidgetLocator table = new NamedWidgetLocator("archetypesTable");
+      // NamedWidgetLocator table = new NamedWidgetLocator("archetypesTable");
 
       ui.click(new ButtonLocator("&Next >"));
       ui.wait(new SWTIdleCondition());

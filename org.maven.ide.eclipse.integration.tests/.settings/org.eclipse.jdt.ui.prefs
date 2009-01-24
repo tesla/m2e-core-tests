@@ -1,4 +1,4 @@
-#Fri Jul 04 15:27:59 EDT 2008
+#Sat Jan 24 12:19:26 EST 2009
 eclipse.preferences.version=1
 formatter_profile=_m2 plugin
 formatter_settings_version=11
@@ -6,7 +6,7 @@ org.eclipse.jdt.ui.exception.name=ex
 org.eclipse.jdt.ui.gettersetter.use.is=true
 org.eclipse.jdt.ui.ignorelowercasenames=true
 org.eclipse.jdt.ui.importorder=java;javax;org;com;
-org.eclipse.jdt.ui.javadoc=false
+org.eclipse.jdt.ui.javadoc=true
 org.eclipse.jdt.ui.keywordthis=false
 org.eclipse.jdt.ui.ondemandthreshold=99
 org.eclipse.jdt.ui.overrideannotation=false

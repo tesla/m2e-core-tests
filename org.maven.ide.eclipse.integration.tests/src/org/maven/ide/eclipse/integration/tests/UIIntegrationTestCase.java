@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * Copyright (c) 2008 Sonatype, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *******************************************************************************/
 
 package org.maven.ide.eclipse.integration.tests;
 
@@ -73,6 +80,10 @@ import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
 import com.windowtester.runtime.util.ScreenCapture;
 
 
+/**
+ * @author Rich Seddon
+ */
+@SuppressWarnings("restriction")
 public class UIIntegrationTestCase extends UITestCaseSWT {
 
   private static final String FIND_REPLACE = "Find/Replace";
@@ -135,7 +146,7 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
     ui.wait(new JobsCompleteCondition(), 300000);
   }
 
-  protected void clearProjects() throws CoreException {
+  protected void clearProjects() {
 
     WorkspaceJob job = new WorkspaceJob("deleting test projects") {
       public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
@@ -207,7 +218,7 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
       public Object runEx() throws Exception {
         IEditorPart part = getActivePage().openEditor(editorInput, "org.maven.ide.eclipse.editor.MavenPomEditor", true);
         if(part instanceof MavenPomEditor) {
-          return (MavenPomEditor) part;
+          return part;
         }
         return null;
       }
