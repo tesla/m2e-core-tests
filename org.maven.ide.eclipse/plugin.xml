@@ -314,7 +314,7 @@
               name="Checkout Maven Projects from SCM"
               class="org.maven.ide.eclipse.wizards.MavenCheckoutWizard"
               category="org.maven.ide.eclipse"
-              icon="icons/import_m2_project.gif">
+              icon="icons/import_m2_project.gif" project="true">
          <description>Check out Maven Project from SVN</description>
          <!--
          <selection class="org.tigris.subversion.subclipse.core.ISVNRemoteFolder"/>
