@@ -303,6 +303,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
     viewer = new TableViewer(composite1, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.FULL_SELECTION);
 
     Table table = viewer.getTable();
+    table.setData("name", "archetypesTable");
     table.setHeaderVisible(true);
 
     TableColumn column1 = new TableColumn(table, SWT.LEFT);
