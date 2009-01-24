@@ -2,12 +2,16 @@
 package org.maven.ide.eclipse.integration.tests;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.core.resources.IFile;
@@ -54,7 +58,6 @@ import com.windowtester.runtime.IUIContext;
 import com.windowtester.runtime.WT;
 import com.windowtester.runtime.WaitTimedOutException;
 import com.windowtester.runtime.WidgetSearchException;
-import com.windowtester.runtime.locator.IWidgetLocator;
 import com.windowtester.runtime.swt.UITestCaseSWT;
 import com.windowtester.runtime.swt.condition.SWTIdleCondition;
 import com.windowtester.runtime.swt.condition.eclipse.JobsCompleteCondition;
@@ -302,8 +305,7 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
 
     return f;
   }
-  
-  
+
   public void importZippedProject(String pluginPath) throws Exception {
     IUIContext ui = getUI();
     File f = copyPluginResourceToTempFile(PLUGIN_ID, pluginPath);
@@ -323,4 +325,61 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
       f.delete();
     }
   }
+
+  public File unzipProject(String pluginPath) throws Exception {
+    URL url = FileLocator.find(Platform.getBundle(PLUGIN_ID), new Path("/" + pluginPath), null);
+    InputStream is = new BufferedInputStream(url.openStream());
+    ZipInputStream zis = new ZipInputStream(is);
+    File tempDir = createTempDir("sonatype");
+    try {
+      ZipEntry entry = zis.getNextEntry();
+      while(entry != null) {
+        File f = new File(tempDir, entry.getName());
+        if(entry.isDirectory()) {
+          f.mkdirs();
+        } else {
+          if(!f.getParentFile().exists()) {
+            f.getParentFile().mkdirs();
+          }
+          OutputStream os = new BufferedOutputStream(new FileOutputStream(f));
+          try {
+            IOUtil.copy(zis, os);
+          } finally {
+            os.close();
+          }
+        }
+        zis.closeEntry();
+        entry = zis.getNextEntry();
+      }
+    } finally {
+      zis.close();
+    }
+    return tempDir;
+  }
+
+  protected File createTempDir(String prefix) throws IOException {
+    File temp = null;
+    temp = File.createTempFile(prefix, "");
+    if(!temp.delete()) {
+      throw new IOException("Unable to delete temp file:" + temp.getName());
+    }
+    if(!temp.mkdir()) {
+      throw new IOException("Unable to create temp dir:" + temp.getName());
+    }
+    return temp;
+  }
+
+  void deleteDirectory(File dir) {
+    File[] fileArray = dir.listFiles();
+    if(fileArray != null) {
+      for(int i = 0; i < fileArray.length; i++ ) {
+        if(fileArray[i].isDirectory())
+          deleteDirectory(fileArray[i]);
+        else
+          fileArray[i].delete();
+      }
+    }
+    dir.delete();
+  }
+
 }
