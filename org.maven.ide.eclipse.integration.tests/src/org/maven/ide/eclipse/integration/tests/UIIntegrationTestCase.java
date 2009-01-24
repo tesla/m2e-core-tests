@@ -161,7 +161,7 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
 
     job.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
     job.schedule();
-    ui.wait(new JobsCompleteCondition(), 300000);
+    ui.wait(new JobsCompleteCondition(), 600000);
 
   }
 

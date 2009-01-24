@@ -51,8 +51,9 @@ public class ImportMavenProjectTest extends UIIntegrationTestCase {
     ui.wait(new SWTIdleCondition());
     ui.enterText(tempDir.getCanonicalPath());
     ui.keyClick(SWT.CR);
+    Thread.sleep(2000);
     ui.click(new ButtonLocator("&Finish"));
-    ui.wait(new ShellDisposedCondition("Checkout as Maven project from SCM"));
+    ui.wait(new ShellDisposedCondition("Import Maven Projects"));//"Checkout as Maven project from SCM"));
     ui.wait(new JobsCompleteCondition(), 300000);
 
     IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();

@@ -42,7 +42,7 @@ public class ArchetypeProjectCreationTest extends UIIntegrationTestCase {
 
   private final static String[] ARCHETYPES = {"maven-archetype-mojo", "maven-archetype-portlet",
       "maven-archetype-profiles", "maven-archetype-site", "maven-archetype-site-simple", "maven-archetype-webapp",
-      "struts2-archetype-starter", "spring-ws-archetype", "maven-archetype-j2ee-simple"};
+      "struts2-archetype-starter", "spring-ws-archetype"};//, "maven-archetype-j2ee-simple"};
 
   private IProject createArchetypeProjct(String archetypeName) throws Exception {
     try {
