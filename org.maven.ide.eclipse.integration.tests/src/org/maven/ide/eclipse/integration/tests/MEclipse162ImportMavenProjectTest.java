@@ -29,7 +29,7 @@ import com.windowtester.runtime.swt.locator.MenuItemLocator;
 /**
  * @author Rich Seddon
  */
-public class ImportMavenProjectTest extends UIIntegrationTestCase {
+public class MEclipse162ImportMavenProjectTest extends UIIntegrationTestCase {
 
   private File tempDir;
 
