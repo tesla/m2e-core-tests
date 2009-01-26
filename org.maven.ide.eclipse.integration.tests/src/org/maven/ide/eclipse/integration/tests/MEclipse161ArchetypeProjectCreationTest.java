@@ -38,7 +38,7 @@ import com.windowtester.runtime.util.ScreenCapture;
 /**
  * @author Rich Seddon
  */
-public class ArchetypeProjectCreationTest extends UIIntegrationTestCase {
+public class MEclipse161ArchetypeProjectCreationTest extends UIIntegrationTestCase {
 
   private final static String[] ARCHETYPES = {"maven-archetype-mojo", "maven-archetype-portlet",
       "maven-archetype-profiles", "maven-archetype-site", "maven-archetype-site-simple", "maven-archetype-webapp",
