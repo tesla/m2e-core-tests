@@ -28,7 +28,7 @@ import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
 /**
  * @author Rich Seddon
  */
-public class ResolveDependenciesTest extends UIIntegrationTestCase {
+public class MEclipse163ResolveDependenciesTest extends UIIntegrationTestCase {
 
   private void openFile() throws WidgetSearchException {
     ui.click(new TreeItemLocator("project.*", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
