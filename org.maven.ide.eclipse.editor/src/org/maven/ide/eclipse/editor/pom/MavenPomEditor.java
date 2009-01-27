@@ -282,7 +282,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     try {
       ChangedResourceDeltaVisitor visitor = new ChangedResourceDeltaVisitor();
       event.getDelta().accept(visitor);
-      if(visitor.changed) {
+      if(visitor.changed && pomFile.exists()) {
         IMarker[] markers = pomFile.findMarkers(IMavenConstants.MARKER_ID, true, IResource.DEPTH_ZERO);
         final String msg = markers != null && markers.length > 0 //
             ? markers[0].getAttribute(IMarker.MESSAGE, "Unknown error") : null;
