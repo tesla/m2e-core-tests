@@ -6,7 +6,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jface.text,
  org.maven.ide.components.maven_embedder,
  org.maven.ide.eclipse,
- org.eclipse.jdt.core
+ org.eclipse.jdt.core,
+ org.eclipse.ui.ide
 Bundle-Vendor: Sonatype, Inc.
 Bundle-ClassPath: jars/plexus-swizzle-1.0-alpha-1.jar,
  jars/swizzle-jira-1.3.3-sonatype-1.jar,

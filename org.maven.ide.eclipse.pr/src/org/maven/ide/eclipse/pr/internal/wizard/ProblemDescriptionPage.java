@@ -8,6 +8,13 @@
 
 package org.maven.ide.eclipse.pr.internal.wizard;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.ICheckStateListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -16,6 +23,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.model.WorkbenchContentProvider;
+import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.maven.ide.eclipse.pr.internal.ProblemReportingImages;
 import org.maven.ide.eclipse.wizards.AbstractMavenWizardPage;
 
@@ -29,9 +38,12 @@ public class ProblemDescriptionPage extends AbstractMavenWizardPage {
 
   String description = "";
   String summary = "";
+  private CheckboxTableViewer projectsViewer;
+  private IStructuredSelection selection;
 
-  protected ProblemDescriptionPage() {
+  protected ProblemDescriptionPage(IStructuredSelection selection) {
     super("problemDescriptionPage");
+    this.selection = selection;
     setTitle("Problem details");
     setDescription("Enter problem summary and description");
     setImageDescriptor(ProblemReportingImages.REPORT_WIZARD);
@@ -63,7 +75,9 @@ public class ProblemDescriptionPage extends AbstractMavenWizardPage {
 
     final Text descriptionText = new Text(composite, SWT.MULTI | SWT.BORDER | SWT.WRAP);
     descriptionText.setData("name", "descriptionText");
-    descriptionText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+    GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+    gd.heightHint = 100;
+    descriptionText.setLayoutData(gd);
     descriptionText.addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent e) {
         description = descriptionText.getText();
@@ -71,11 +85,31 @@ public class ProblemDescriptionPage extends AbstractMavenWizardPage {
       }
     });
 
+    Label projectsLabel = new Label(composite, SWT.NONE);
+    projectsLabel.setData("name", "projectsLabel");
+    projectsLabel.setText("Projects to &submit (with sources):");
+
+    projectsViewer = CheckboxTableViewer.newCheckList(composite, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.MULTI);
+    projectsViewer.setData("name", "projectsViewer");
+    projectsViewer.addCheckStateListener(new ICheckStateListener() {
+      public void checkStateChanged(CheckStateChangedEvent event) {
+        updatePage();
+      }
+    });
+    GridData data= new GridData(SWT.FILL, SWT.FILL, true, true);
+    projectsViewer.getTable().setLayoutData(data);
+    
+    projectsViewer.setContentProvider(new WorkbenchContentProvider());
+    projectsViewer.setLabelProvider(new WorkbenchLabelProvider());
+    
+    projectsViewer.setInput(ResourcesPlugin.getWorkspace().getRoot());
+    projectsViewer.setCheckedElements(new Object[] {(IProject) selection.getFirstElement()});
   }
 
   protected void updatePage() {
     boolean isSummaryBlank = summary.trim().length()==0;
     boolean isDescriptionBlank = description.trim().length()==0;
+    boolean projectSelecionEmpty = projectsViewer.getCheckedElements().length == 0;
     boolean isComplete = true;
     
     if(isSummaryBlank) {
@@ -88,11 +122,16 @@ public class ProblemDescriptionPage extends AbstractMavenWizardPage {
     } else if(isDescriptionBlank) {
       setErrorMessage("Problem description should not be blank");
       isComplete = false;
+    } else if (projectSelecionEmpty) {
+      setErrorMessage("At least one project must be selected for submission");
+      isComplete = false;
     }
     
     setPageComplete(isComplete);
     if(isComplete) {
       setErrorMessage(null);
+      
+      selection = new StructuredSelection(projectsViewer.getCheckedElements());
     }
   }
 
@@ -102,6 +141,10 @@ public class ProblemDescriptionPage extends AbstractMavenWizardPage {
 
   public String getProblemDescription() {
     return description.trim();
+  }
+
+  public IStructuredSelection getSelectedProjects() {
+    return selection;
   }
 
 }

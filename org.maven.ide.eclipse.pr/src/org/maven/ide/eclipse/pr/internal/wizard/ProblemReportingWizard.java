@@ -72,7 +72,7 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
 
   @Override
   public void addPages() {
-    descriptionPage = new ProblemDescriptionPage();
+    descriptionPage = new ProblemDescriptionPage(selection);
     addPage(descriptionPage);
     //selectionPage = new ProblemReportingSelectionPage();
     //addPage(selectionPage);
@@ -85,7 +85,7 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
   public boolean performFinish() {
     final Set<Data> dataSet = new HashSet<Data>();//selectionPage.getDataSet();
     dataSet.addAll(EnumSet.allOf(Data.class));
-    dataSet.remove(Data.MAVEN_SOURCES);
+    dataSet.remove(Data.MAVEN_POM_FILES);
 //    if(locationFile.exists()) {
 //      if(!MessageDialog.openQuestion(getShell(), "File already exists", //
 //          "File " + location + " already exists.\nDo you want to overwrite?")) {
@@ -165,7 +165,7 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
     }
 
     Set<IProject> projects = new LinkedHashSet<IProject>();
-    for(Iterator<?> i = selection.iterator(); i.hasNext();) {
+    for(Iterator<?> i = descriptionPage.getSelectedProjects().iterator(); i.hasNext();) {
       Object o = i.next();
       if(o instanceof JavaProject) {
         projects.add(((JavaProject) o).getProject());
