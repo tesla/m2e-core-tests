@@ -103,13 +103,15 @@ public class ProblemDescriptionPage extends AbstractMavenWizardPage {
     projectsViewer.setLabelProvider(new WorkbenchLabelProvider());
     
     projectsViewer.setInput(ResourcesPlugin.getWorkspace().getRoot());
-    projectsViewer.setCheckedElements(new Object[] {(IProject) selection.getFirstElement()});
+    Object prj = selection.getFirstElement();
+    if (prj instanceof IProject) {
+      projectsViewer.setCheckedElements(new Object[] {(IProject) prj});
+    }
   }
 
   protected void updatePage() {
     boolean isSummaryBlank = summary.trim().length()==0;
     boolean isDescriptionBlank = description.trim().length()==0;
-    boolean projectSelecionEmpty = projectsViewer.getCheckedElements().length == 0;
     boolean isComplete = true;
     
     if(isSummaryBlank) {
@@ -121,9 +123,6 @@ public class ProblemDescriptionPage extends AbstractMavenWizardPage {
       isComplete = false;
     } else if(isDescriptionBlank) {
       setErrorMessage("Problem description should not be blank");
-      isComplete = false;
-    } else if (projectSelecionEmpty) {
-      setErrorMessage("At least one project must be selected for submission");
       isComplete = false;
     }
     
