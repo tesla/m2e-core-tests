@@ -103,9 +103,8 @@ public class ProblemDescriptionPage extends AbstractMavenWizardPage {
     projectsViewer.setLabelProvider(new WorkbenchLabelProvider());
     
     projectsViewer.setInput(ResourcesPlugin.getWorkspace().getRoot());
-    Object prj = selection.getFirstElement();
-    if (prj instanceof IProject) {
-      projectsViewer.setCheckedElements(new Object[] {(IProject) prj});
+    if (selection != null && selection.getFirstElement() instanceof IProject) {
+      projectsViewer.setCheckedElements(new Object[] {(IProject) selection.getFirstElement()});
     }
   }
 
