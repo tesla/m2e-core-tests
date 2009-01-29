@@ -111,6 +111,7 @@ public class CustomArchetypeDialog extends TitleAreaDialog {
     archetypeGroupIdComboData.widthHint = 350;
     archetypeGroupIdCombo.setLayoutData(archetypeGroupIdComboData);
     archetypeGroupIdCombo.setItems(getSavedValues(KEY_ARCHETYPE_GROUP_ID));
+    archetypeGroupIdCombo.setData("name", "archetypeGroupId");
 
     Label archetypeArtifactIdLabel = new Label(composite, SWT.NONE);
     archetypeArtifactIdLabel.setText("Archetype Artifact Id:");
@@ -118,6 +119,7 @@ public class CustomArchetypeDialog extends TitleAreaDialog {
     archetypeArtifactIdCombo = new Combo(composite, SWT.NONE);
     archetypeArtifactIdCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
     archetypeArtifactIdCombo.setItems(getSavedValues(KEY_ARCHETYPE_ARTIFACT_ID));
+    archetypeArtifactIdCombo.setData("name", "archetypeArtifactId");
 
     Label archetypeVersionLabel = new Label(composite, SWT.NONE);
     archetypeVersionLabel.setText("Archetype Version:");
@@ -125,6 +127,7 @@ public class CustomArchetypeDialog extends TitleAreaDialog {
     archetypeVersionCombo = new Combo(composite, SWT.NONE);
     archetypeVersionCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
     archetypeVersionCombo.setItems(getSavedValues(KEY_ARCHETYPE_VERSION));
+    archetypeVersionCombo.setData("name", "archetypeVersion");
 
     Label repositoryLabel = new Label(composite, SWT.NONE);
     repositoryLabel.setText("Repository URL:");
@@ -132,6 +135,7 @@ public class CustomArchetypeDialog extends TitleAreaDialog {
     repositoryCombo = new Combo(composite, SWT.NONE);
     repositoryCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
     repositoryCombo.setItems(getSavedValues(KEY_REPOSITORY_URL));
+    repositoryCombo.setData("name", "repository");
     
     ModifyListener modifyListener = new ModifyListener() {
       public void modifyText(final ModifyEvent e) {

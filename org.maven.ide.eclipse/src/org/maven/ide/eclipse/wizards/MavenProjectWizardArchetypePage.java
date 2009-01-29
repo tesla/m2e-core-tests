@@ -411,6 +411,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
 
     addArchetypeButton = new Button(buttonComposite, SWT.NONE);
     addArchetypeButton.setText("&Add Archetype...");
+    addArchetypeButton.setData("name", "addArchetypeButton");
     addArchetypeButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         CustomArchetypeDialog dialog = new CustomArchetypeDialog(getShell(), "Add Archetype");

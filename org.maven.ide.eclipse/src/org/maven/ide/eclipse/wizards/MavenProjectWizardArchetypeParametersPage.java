@@ -198,6 +198,7 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
 
     packageCombo = new Combo(parent, SWT.BORDER);
     packageCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
+    packageCombo.setData("name", "package");
     addFieldWithHistory("package", packageCombo);
     packageCombo.addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent e) {
