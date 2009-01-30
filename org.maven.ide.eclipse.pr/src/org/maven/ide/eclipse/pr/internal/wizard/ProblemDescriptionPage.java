@@ -75,7 +75,7 @@ public class ProblemDescriptionPage extends AbstractMavenWizardPage {
 
     final Text descriptionText = new Text(composite, SWT.MULTI | SWT.BORDER | SWT.WRAP);
     descriptionText.setData("name", "descriptionText");
-    GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+    GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
     gd.heightHint = 100;
     descriptionText.setLayoutData(gd);
     descriptionText.addModifyListener(new ModifyListener() {
