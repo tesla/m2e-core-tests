@@ -245,4 +245,11 @@ public class MavenRuntimeManager {
     return s == null ? "" : s;
   }
   
+  public String getJiraUsername() {
+    return preferenceStore.getString(MavenPreferenceConstants.P_JIRA_USERNAME);
+  }
+
+  public String getJiraPassword() {
+    return preferenceStore.getString(MavenPreferenceConstants.P_JIRA_PASSWORD);
+  }
 }

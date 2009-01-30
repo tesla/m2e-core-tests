@@ -73,5 +73,11 @@ public interface MavenPreferenceConstants {
 
   /** boolean */
   public static final String P_UPDATE_PROJECTS = PREFIX + "updateProjects";
+
+  /** String */
+  public static final String P_JIRA_USERNAME = PREFIX + "jiraUsername";
+  
+  /** String */
+  public static final String P_JIRA_PASSWORD = PREFIX + "jiraPassword";
   
 }

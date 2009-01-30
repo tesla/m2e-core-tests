@@ -107,14 +107,21 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
           IStatus status = saveData(location, dataSet, monitor);
           if(status.isOK()) {
             //showMessage("The problem reporting bundle is saved to " + location);
-            IssueSubmitter is = new JiraIssueSubmitter(URL, new DefaultAuthenticationSource(USERNAME, PASSWORD));
+            String username = MavenPlugin.getDefault().getMavenRuntimeManager().getJiraUsername();
+            String password = MavenPlugin.getDefault().getMavenRuntimeManager().getJiraPassword();
+            if (username == null || username.trim().equals("")) {
+              username = USERNAME;
+              password = PASSWORD;
+            }
+
+            IssueSubmitter is = new JiraIssueSubmitter(URL, new DefaultAuthenticationSource(username, password));
 
             IssueSubmissionRequest r = new IssueSubmissionRequest();
             r.setProjectId(PROJECT);
             r.setSummary(descriptionPage.getProblemSummary());
             r.setDescription(descriptionPage.getProblemDescription());
-            r.setAssignee(USERNAME);
-            r.setReporter(USERNAME);
+            r.setAssignee(username);
+            r.setReporter(username);
             r.setProblemReportBundle(locationFile);
 
             is.submitIssue(r);
@@ -122,11 +129,11 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
             showMessage("Successfully submitted issue to " + URL);
           } else {
             MavenLogger.log(new CoreException(status));
-            showError();
+            showError(status.getMessage());
           }
         } catch(Exception ex) {
           MavenLogger.log("Failed generate errorto report issue", ex);
-          showError();
+          showError(ex.getMessage());
         } finally {
           if(locationFile != null && locationFile.exists()) {
             locationFile.delete();
@@ -136,12 +143,11 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
         return Status.OK_STATUS;
       }
 
-      private void showError() {
+      private void showError(final String msg) {
         Display.getDefault().asyncExec(new Runnable() {
           public void run() {
             MessageDialog.openError(Display.getCurrent().getActiveShell(), //
-                "Problem Reporting", "Reporting bundle generated with errors.\n"
-                    + "See Eclipse error log for more details");
+                "Problem Reporting", msg);
           }
         });
       }
