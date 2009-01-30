@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.zip.ZipOutputStream;
 
 import org.codehaus.plexus.swizzle.IssueSubmissionRequest;
+import org.codehaus.plexus.swizzle.IssueSubmissionResult;
 import org.codehaus.plexus.swizzle.IssueSubmitter;
 import org.codehaus.plexus.swizzle.JiraIssueSubmitter;
 import org.codehaus.plexus.swizzle.jira.authentication.DefaultAuthenticationSource;
@@ -124,9 +125,9 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
             r.setReporter(username);
             r.setProblemReportBundle(locationFile);
 
-            is.submitIssue(r);
+            IssueSubmissionResult res = is.submitIssue(r);
 
-            showMessage("Successfully submitted issue to " + URL);
+            showMessage("Successfully submitted issue to " + res.getIssueUrl());
           } else {
             MavenLogger.log(new CoreException(status));
             showError(status.getMessage());

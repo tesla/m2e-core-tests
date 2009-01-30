@@ -13,6 +13,6 @@
 	<classpathentry kind="lib" path="jars/ws-commons-util-1.0.1.jar"/>
 	<classpathentry kind="lib" path="jars/xmlrpc-client-3.0.jar"/>
 	<classpathentry kind="lib" path="jars/xmlrpc-common-3.0.jar"/>
-	<classpathentry kind="lib" path="jars/plexus-swizzle-1.0-alpha-1.jar"/>
+	<classpathentry kind="lib" path="jars/plexus-swizzle-1.0-alpha-2.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
