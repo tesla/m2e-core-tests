@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.internal.core.JavaProject;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -62,6 +63,8 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
   private static final String PASSWORD = "sonatype_problem_reporting";
   
   private static final String PROJECT = "PR";
+  
+  protected static String TITLE = "Problem Reporting";
   
   //private ProblemReportingSelectionPage selectionPage;
 
@@ -127,13 +130,13 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
 
             IssueSubmissionResult res = is.submitIssue(r);
 
-            showMessage("Successfully submitted issue to " + res.getIssueUrl());
+            showHyperlink("Successfully submitted issue to:", res.getIssueUrl());
           } else {
             MavenLogger.log(new CoreException(status));
             showError(status.getMessage());
           }
         } catch(Exception ex) {
-          MavenLogger.log("Failed generate errorto report issue", ex);
+          MavenLogger.log("Failed to generate problem report", ex);
           showError(ex.getMessage());
         } finally {
           if(locationFile != null && locationFile.exists()) {
@@ -148,16 +151,17 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
         Display.getDefault().asyncExec(new Runnable() {
           public void run() {
             MessageDialog.openError(Display.getCurrent().getActiveShell(), //
-                "Problem Reporting", msg);
+                TITLE, msg);
           }
         });
       }
 
-      private void showMessage(final String msg) {
+      private void showHyperlink(final String msg, final String url) {
         Display.getDefault().asyncExec(new Runnable() {
           public void run() {
-            MessageDialog.openInformation(Display.getCurrent().getActiveShell(), //
-                "Problem Reporting", msg);
+            HyperlinkDialog dialog = new HyperlinkDialog(Display.getCurrent().getActiveShell(), TITLE, null, 
+                msg, MessageDialog.INFORMATION, new String[] { IDialogConstants.OK_LABEL }, 0, url);
+            dialog.open();
           }
         });
       }
