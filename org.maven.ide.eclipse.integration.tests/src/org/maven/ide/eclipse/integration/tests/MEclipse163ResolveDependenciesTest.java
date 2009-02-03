@@ -64,6 +64,7 @@ public class MEclipse163ResolveDependenciesTest extends UIIntegrationTestCase {
     ui.keyClick(SWT.MOD1 | SWT.SHIFT, 't');
     ui.wait(new ShellShowingCondition("Open Type"));
     ui.enterText("app");
+    ui.wait(new SWTIdleCondition());
     ui.click(new ButtonLocator("OK"));
     ui.wait(new ShellDisposedCondition("Open Type"));
     ui.wait(new JobsCompleteCondition(), 60000);
@@ -85,16 +86,10 @@ public class MEclipse163ResolveDependenciesTest extends UIIntegrationTestCase {
             "JFreeChart   org.jfree.chart   jfree   jfreechart/1.0.7 - jfreechart-1.0.7.jar .*",
             new NamedWidgetLocator("searchResultTree")));
 
-//    ui.click(new TreeItemLocator("SessionFactory   org.hibernate   hibernate   hibernate", new NamedWidgetLocator(
-//        "searchResultTree")));
-//    ui.click(new TreeItemLocator(
-//        "SessionFactory   org.hibernate   hibernate   hibernate/3.0.5 - hibernate-3.0.5.jar .*",
-//        new NamedWidgetLocator("searchResultTree")));
     ui.click(new ButtonLocator("OK"));
 
     ui.wait(new ShellDisposedCondition("Search in Maven repositories"));
 
-    Thread.sleep(50000);
     ui.wait(new JobsCompleteCondition());
 
     severity = project.findMaxProblemSeverity(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
