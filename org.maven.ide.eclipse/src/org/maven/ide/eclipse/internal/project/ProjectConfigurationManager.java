@@ -120,11 +120,6 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     this.embedderManager = embedderManager;
     this.mavenModelManager = mavenModelManager;
     this.mavenMarkerManager = mavenMarkerManager;
-    
-    // init all configurators
-    for(AbstractProjectConfigurator configurator : getConfigurators()) {
-      configurator.init();
-    }
   }
 
   public void importProjects(Collection<MavenProjectInfo> projectInfos, ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException {
