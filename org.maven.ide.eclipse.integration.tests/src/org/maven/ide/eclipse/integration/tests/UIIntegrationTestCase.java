@@ -22,6 +22,7 @@ import java.util.zip.ZipInputStream;
 
 import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
@@ -35,6 +36,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
@@ -393,4 +395,34 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
     dir.delete();
   }
 
+  protected File doImport(String projectPath) throws Exception {
+    File tempDir = unzipProject(projectPath);
+
+    try {
+      ui.click(new MenuItemLocator("File/Import..."));
+      ui.wait(new ShellShowingCondition("Import"));
+      ui.click(new FilteredTreeItemLocator("General/Maven Projects"));
+      ui.click(new ButtonLocator("&Next >"));
+      ui.wait(new SWTIdleCondition());
+      ui.enterText(tempDir.getCanonicalPath());
+      ui.keyClick(SWT.CR);
+      Thread.sleep(2000);
+      ui.click(new ButtonLocator("&Finish"));
+      ui.wait(new ShellDisposedCondition("Import Maven Projects"));
+      ui.wait(new JobsCompleteCondition(), 300000);
+
+      IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+      for(IProject project : projects) {
+        int severity = project.findMaxProblemSeverity(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
+        assertTrue(IMarker.SEVERITY_ERROR > severity);
+        assertTrue(project.hasNature(JavaCore.NATURE_ID));
+        assertTrue(project.hasNature("org.maven.ide.eclipse.maven2Nature"));
+      }
+    } catch(Exception ex) {
+      deleteDirectory(tempDir);
+      throw ex;
+    }
+
+    return tempDir;
+  }
 }

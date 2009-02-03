@@ -40,10 +40,6 @@ import com.windowtester.runtime.util.ScreenCapture;
  */
 public class MEclipse161ArchetypeProjectCreationTest extends UIIntegrationTestCase {
 
-  private final static String[] ARCHETYPES = {"maven-archetype-mojo", "maven-archetype-portlet",
-      "maven-archetype-profiles", "maven-archetype-site", "maven-archetype-site-simple", "maven-archetype-webapp",
-      "struts2-archetype-starter", "spring-ws-archetype"};//, "maven-archetype-j2ee-simple"};
-
   private IProject createArchetypeProjct(String archetypeName) throws Exception {
     try {
       IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("project");
@@ -105,12 +101,39 @@ public class MEclipse161ArchetypeProjectCreationTest extends UIIntegrationTestCa
 
   }
 
-  public void testCreateBasicArchetypes() throws Exception {
-    // Sanity check of basic projects, will fail if project is created with problem markers or 
-    // without a Maven nature.
-    for(String archetype : ARCHETYPES) {
-      createArchetypeProjct(archetype);
-      clearProjects();
-    }
+  public void testCreateMojo() throws Exception {
+    createArchetypeProjct("maven-archetype-mojo");
+  }
+
+  public void testCreatePortlet() throws Exception {
+    createArchetypeProjct("maven-archetype-portlet");
+  }
+
+  public void testCreateProfiles() throws Exception {
+    createArchetypeProjct("maven-archetype-profiles");
+  }
+
+  public void testCreateSite() throws Exception {
+    createArchetypeProjct("maven-archetype-site");
+  }
+
+  public void testCreateSiteSimple() throws Exception {
+    createArchetypeProjct("maven-archetype-site-simple");
+  }
+
+  public void testCreateSiteWebapp() throws Exception {
+    createArchetypeProjct("maven-archetype-webapp");
+  }
+  
+  public void testCreateStrutsStarter() throws Exception {
+    createArchetypeProjct("struts2-archetype-starter");
+  }
+  
+  public void testCreateSpringWS() throws Exception {
+    createArchetypeProjct("spring-ws-archetype");
+  }
+  
+  public void createJ2EESimple() throws Exception {
+    createArchetypeProjct("maven-archetype-j2ee-simple");
   }
 }
