@@ -11,15 +11,10 @@
           label="Maven Problem Reporting"
           description="Maven Problem Reporting"
           visible="true">
-		   <!--menu id="org.maven.ide.eclipse.help"
-           label="Maven"
-           path="help/maven">
-			   <separator name="slot1"/>
-		   </menu-->
 		   <action id="org.maven.ide.eclipse.help.report"
-           label="Report Issue..."
-           tooltip="Report Issue..."
-           menubarPath="help/org.maven.ide.eclipse.help/slot1"
+           label="Report Maven Issue..."
+           tooltip="Report Maven Issue"
+           menubarPath="help/additions"
            icon="icons/report-bug.gif"
            class="org.maven.ide.eclipse.pr.internal.wizard.ProblemReportingAction"/>
 		</actionSet>
