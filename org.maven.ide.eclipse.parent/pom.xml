@@ -46,6 +46,7 @@
     <m2e.snapshots>http://localhost</m2e.snapshots>
     <m2e.site>http://localhost</m2e.site>
 
+    <org.maven.ide.eclipse.integration.tests.skip>true</org.maven.ide.eclipse.integration.tests.skip>
     <!--
     Use implicit ${tycho-version} property to make sure
     tycho plugins version matches version of tycho distribution.
