@@ -84,7 +84,8 @@ public class MEclipse163ResolveDependenciesTest extends UIIntegrationTestCase {
             "JFreeChart   org.jfree.chart   jfree   jfreechart/1.0.7 - jfreechart-1.0.7.jar .*",
             new NamedWidgetLocator("searchResultTree")));
 
-    ui.click(new ButtonLocator("OK"));
+    ui.wait(new SWTIdleCondition());
+    ui.keyClick(SWT.CR);
 
     ui.wait(new ShellDisposedCondition("Search in Maven repositories"));
 
