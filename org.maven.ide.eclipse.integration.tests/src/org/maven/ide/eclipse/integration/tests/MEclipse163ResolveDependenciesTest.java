@@ -13,7 +13,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Tree;
 
 import com.windowtester.runtime.WidgetSearchException;
 import com.windowtester.runtime.swt.condition.SWTIdleCondition;
@@ -22,7 +21,6 @@ import com.windowtester.runtime.swt.condition.shell.ShellDisposedCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellShowingCondition;
 import com.windowtester.runtime.swt.locator.ButtonLocator;
 import com.windowtester.runtime.swt.locator.CTabItemLocator;
-import com.windowtester.runtime.swt.locator.LabeledLocator;
 import com.windowtester.runtime.swt.locator.NamedWidgetLocator;
 import com.windowtester.runtime.swt.locator.TreeItemLocator;
 import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
@@ -90,6 +88,8 @@ public class MEclipse163ResolveDependenciesTest extends UIIntegrationTestCase {
 
     ui.wait(new ShellDisposedCondition("Search in Maven repositories"));
 
+    Thread.sleep(5000);
+    
     ui.wait(new JobsCompleteCondition());
 
     severity = project.findMaxProblemSeverity(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
