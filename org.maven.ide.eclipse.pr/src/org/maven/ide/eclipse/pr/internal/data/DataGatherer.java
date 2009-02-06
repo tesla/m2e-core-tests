@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.maven.ide.eclipse.core.MavenConsole;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.pr.internal.ProblemReportingPlugin;
 import org.maven.ide.eclipse.project.MavenProjectManager;
@@ -92,6 +93,7 @@ public class DataGatherer {
     try {
       target.consume(folderName, source);
     } catch(CoreException ex) {
+      MavenLogger.log(ex);
       addStatus(ex.getStatus());
     }
   }
