@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<project>
+	<parent>
+		<artifactId>PosGateway</artifactId>
+		<groupId>test</groupId>
+		<version>1.0-SNAPSHOT</version>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>PosGatewayWeb</artifactId>
+	<packaging>war</packaging>
+	<name>PosGatewayWeb</name>
+	<description>PosGatewayWeb</description>
+	<dependencies>
+
+		<dependency>
+			<groupId>test</groupId>
+			<artifactId>OrderEJB</artifactId>
+			<version>1.0-SNAPSHOT</version>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>test</groupId>
+			<artifactId>WarehouseEJB</artifactId>
+			<version>1.0-SNAPSHOT</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>test</groupId>
+			<artifactId>PosConfigJar</artifactId>
+			<version>1.0-SNAPSHOT</version>
+			<optional>true</optional>
+		</dependency>
+	</dependencies>
+
+</project>

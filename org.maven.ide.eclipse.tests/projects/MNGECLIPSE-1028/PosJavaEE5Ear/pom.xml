@@ -1,0 +1,79 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<artifactId>Pos</artifactId>
+		<groupId>test</groupId>
+		<version>1.0-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>PosJavaEE5Ear</artifactId>
+	<packaging>ear</packaging>
+	<name>PosJavaEE5Ear</name>
+	<dependencies>
+		<dependency>
+			<groupId>test</groupId>
+			<artifactId>PosConfigJar</artifactId>
+			<version>1.0-SNAPSHOT</version>
+			<type>jar</type>
+		</dependency>
+
+		<dependency>
+			<groupId>test</groupId>
+			<artifactId>PosConfigWeb</artifactId>
+			<version>1.0-SNAPSHOT</version>
+			<type>war</type>
+		</dependency>
+
+		<dependency>
+			<groupId>test</groupId>
+			<artifactId>ClientWeb</artifactId>
+			<version>1.0-SNAPSHOT</version>
+			<type>war</type>
+		</dependency>
+
+		<dependency>
+			<groupId>test</groupId>
+			<artifactId>OrderEJB</artifactId>
+			<version>1.0-SNAPSHOT</version>
+			<type>ejb</type>
+		</dependency>
+
+		<dependency>
+			<groupId>test</groupId>
+			<artifactId>WarehouseWeb</artifactId>
+			<version>1.0-SNAPSHOT</version>
+			<type>war</type>
+		</dependency>
+
+		<dependency>
+			<groupId>test</groupId>
+			<artifactId>WarehouseEJB</artifactId>
+			<version>1.0-SNAPSHOT</version>
+			<type>ejb</type>
+		</dependency>
+
+		<!--
+			Uncomment to add Gateway component, require configurations for JMS on
+			server
+		-->
+		<dependency>
+			<groupId>test</groupId>
+			<artifactId>PosGatewayJavaEE5EJB</artifactId>
+			<version>1.0-SNAPSHOT</version>
+			<type>ejb</type>
+		</dependency>
+
+		<dependency>
+			<groupId>test</groupId>
+			<artifactId>PosGatewayWeb</artifactId>
+			<version>1.0-SNAPSHOT</version>
+			<type>war</type>
+		</dependency>
+	</dependencies>
+
+
+
+
+</project>

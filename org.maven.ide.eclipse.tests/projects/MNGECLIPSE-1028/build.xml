@@ -1,0 +1,11 @@
+<project name="Pos" default="clean">
+ <target name="clean">
+  <delete includeemptydirs="true">
+   <fileset dir=".">
+ 		<exclude name="**/pom.xml"/>
+ 		<exclude name="build.xml"/>
+ 		<exclude name="clean.bat"/>
+   </fileset>
+  </delete>
+ </target>
+</project>

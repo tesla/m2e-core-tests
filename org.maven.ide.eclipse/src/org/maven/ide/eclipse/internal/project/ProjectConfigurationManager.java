@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -43,19 +44,21 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.ui.IWorkingSet;
 
+import org.codehaus.plexus.util.dag.CycleDetectedException;
+
 import org.apache.maven.archetype.ArchetypeGenerationRequest;
 import org.apache.maven.archetype.ArchetypeGenerationResult;
 import org.apache.maven.archetype.catalog.Archetype;
 import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.embedder.MavenEmbedderException;
+import org.apache.maven.execution.ReactorManager;
 import org.apache.maven.model.Model;
+import org.apache.maven.project.DuplicateProjectException;
 import org.apache.maven.project.MavenProject;
 
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
-import org.maven.ide.eclipse.embedder.ArtifactKey;
-import org.maven.ide.eclipse.embedder.ArtifactRef;
 import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
@@ -185,6 +188,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
         monitor.worked(1);
       }
   
+        
       
       //Creating maven facades 
       List<IMavenProjectFacade> facades = new ArrayList<IMavenProjectFacade>(projects.size());
@@ -200,7 +204,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
 
       //MNGECLIPSE-1028 : Sort projects by build order here, 
       //as dependent projects need to be configured before depending projects (in WTP integration for ex.)
-      sortProjects(facades);
+      sortProjects(facades, monitor);
       
       //Then, perform detailed project configuration
       for(IMavenProjectFacade facade : facades) {
@@ -215,9 +219,24 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     }
   }
 
-  private void sortProjects(List<IMavenProjectFacade> facades) {
-    //XXX  should probably use ReactorManager.getSortedProjects
-    Collections.sort(facades, new ReferencedProjectComparator());
+  @SuppressWarnings("unchecked")
+  public static final void sortProjects(List<IMavenProjectFacade> facades, IProgressMonitor monitor) throws CoreException {
+      HashMap<MavenProject, IMavenProjectFacade> mavenProjectToFacadeMap = new HashMap<MavenProject, IMavenProjectFacade>(facades.size());
+      for(IMavenProjectFacade facade:facades) {
+        mavenProjectToFacadeMap.put(facade.getMavenProject(monitor), facade);
+      }
+      ReactorManager rm;
+      try {
+        rm = new ReactorManager(new ArrayList<MavenProject>(mavenProjectToFacadeMap.keySet()), ReactorManager.FAIL_FAST);
+      } catch(CycleDetectedException ex) {
+        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, "unable to sort projects", ex));
+      } catch(DuplicateProjectException ex) {
+        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, "unable to sort projects", ex));
+      }
+      facades.clear();
+      for(MavenProject mavenProject: (List<MavenProject>) rm.getSortedProjects()) {
+        facades.add(mavenProjectToFacadeMap.get(mavenProject));
+      }
   }
 
   // PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(project, new IWorkingSet[] {workingSet});
@@ -276,6 +295,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     IProject project = request.getProject();
     addMavenNature(project, monitor);
     addMavenBuilder(project, monitor);
+    
   }
 
   private void addMavenBuilder(IProject project, IProgressMonitor monitor) throws CoreException {
@@ -637,36 +657,5 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
       int res = c1.getPriority() - c2.getPriority();
       return res==0 ? c1.getId().compareTo(c2.getId()) : res;
     }
-  }
-  
-  /**
-   * Projects comparator, used to determine build order between maven projects.
-   */
-  static class ReferencedProjectComparator implements Comparator<IMavenProjectFacade>, Serializable {
-
-    private static final long serialVersionUID = -1L;
-
-    private static final int BEFORE = -1;
-
-    // private static final int UNDEFINED = 0;
-
-    private static final int AFTER = 1;
-
-    public int compare(IMavenProjectFacade pf1, IMavenProjectFacade pf2) {
-      Set<ArtifactKey> refs2 = ArtifactRef.toArtifactKey(pf2.getMavenProjectArtifacts());
-      //p1 is a reference of p2, should be built before p2 ...
-      if(refs2.contains(pf1.getArtifactKey())) {
-        //... unless p2 is a pom project.
-        return isPom(pf2) ? AFTER : BEFORE;
-      }
-
-      //Thanks to Timothy G. Rundle contribution (see MNGECLIPSE-1157/MNGECLIPSE-1028)
-      return isPom(pf1) ? BEFORE : AFTER;
-    }
-
-    private boolean isPom(IMavenProjectFacade pf) {
-      return "pom".equals(pf.getPackaging());
-    }
-  }
-  
+  }  
 }
