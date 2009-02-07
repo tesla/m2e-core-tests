@@ -11,12 +11,14 @@ package org.maven.ide.eclipse.integration.tests;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.channels.FileChannel;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -31,6 +33,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
@@ -67,6 +70,7 @@ import com.windowtester.runtime.IUIContext;
 import com.windowtester.runtime.WT;
 import com.windowtester.runtime.WaitTimedOutException;
 import com.windowtester.runtime.WidgetSearchException;
+import com.windowtester.runtime.locator.IWidgetLocator;
 import com.windowtester.runtime.swt.UITestCaseSWT;
 import com.windowtester.runtime.swt.condition.SWTIdleCondition;
 import com.windowtester.runtime.swt.condition.eclipse.JobsCompleteCondition;
@@ -409,15 +413,10 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
       Thread.sleep(2000);
       ui.click(new ButtonLocator("&Finish"));
       ui.wait(new ShellDisposedCondition("Import Maven Projects"));
+      Thread.sleep(5000);
       ui.wait(new JobsCompleteCondition(), 300000);
-
-      IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-      for(IProject project : projects) {
-        int severity = project.findMaxProblemSeverity(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
-        assertTrue(IMarker.SEVERITY_ERROR > severity);
-        assertTrue(project.hasNature(JavaCore.NATURE_ID));
-        assertTrue(project.hasNature("org.maven.ide.eclipse.maven2Nature"));
-      }
+      assertProjectsHaveNoErrors();
+    
     } catch(Exception ex) {
       deleteDirectory(tempDir);
       throw ex;
@@ -425,4 +424,104 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
 
     return tempDir;
   }
+  
+  protected IViewPart showView(final String id) throws Exception {
+    return (IViewPart)executeOnEventQueue(new Task() {
+      public Object runEx() throws Exception {
+        return getActivePage().showView(id);
+      }});
+  }
+  
+  protected void replaceText(IWidgetLocator locator, String text) throws WidgetSearchException {
+    ui.click(locator);
+    ui.keyClick(SWT.MOD1, 'a');
+    ui.enterText(text);
+  }
+  
+  public void assertProjectsHaveNoErrors() throws Exception {
+    StringBuffer messages = new StringBuffer();
+    IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+    int count = 0;
+    for(IProject project : projects) {
+      if("Servers".equals(project.getName())) {
+        continue;
+      }
+      if (count >= 10) {
+        break;
+      }
+      IMarker[] markers = project.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
+      for(int i = 0; i < markers.length; i++ ) {
+        if(markers[i].getAttribute(IMarker.SEVERITY, 0) == IMarker.SEVERITY_ERROR) {
+          count++;
+          messages.append('\t');
+          if(messages.length() > 0) {
+            messages.append(System.getProperty("line.separator"));
+          }
+          messages.append(project.getName() + ":" +
+               markers[i].getAttribute(IMarker.LOCATION, "unknown location") + " " +
+               markers[i].getAttribute(IMarker.MESSAGE, "unknown message"));
+        }
+      }
+    }
+    if (count > 0) {
+      fail("One or more compile errors found:" + System.getProperty("line.separator") + messages);
+      
+    }
+  }
+  
+  public static void copyFile(File from, File to) throws IOException {
+    FileInputStream is = null;
+    FileOutputStream os = null;
+
+    File dest = to.getParentFile();
+    if (dest != null) {
+      dest.mkdirs();
+    }
+
+    try {
+      is = new FileInputStream(from);
+      os = new FileOutputStream(to);
+
+      FileChannel outChannel = os.getChannel();
+      outChannel.transferFrom(is.getChannel(), 0, is.getChannel().size());
+    } finally {
+      if (is != null) {
+        is.close();
+      }
+      if (os != null) {
+        os.close();
+      }
+    }
+  }
+  
+  public String getPlatformPath() {
+    URL installURL = Platform.getInstallLocation().getURL();
+    IPath ppath = new Path(installURL.getFile()).removeTrailingSeparator();
+    return getCorrectPath(ppath.toOSString());
+  }
+
+  private String getCorrectPath(String path) {
+    StringBuffer buf = new StringBuffer();
+    for (int i = 0; i < path.length(); i++) {
+      char c = path.charAt(i);
+      if (Platform.getOS().equals("win32")) { //$NON-NLS-1$
+        if (i == 0 && c == '/')
+          continue;
+      }
+      // Some VMs may return %20 instead of a space
+      if (c == '%' && i + 2 < path.length()) {
+        char c1 = path.charAt(i + 1);
+        char c2 = path.charAt(i + 2);
+        if (c1 == '2' && c2 == '0') {
+          i += 2;
+          buf.append(" "); //$NON-NLS-1$
+          continue;
+        }
+      }
+      buf.append(c);
+    }
+    return buf.toString();
+  }
+
+
 }
