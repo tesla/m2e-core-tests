@@ -104,7 +104,6 @@
     <module>../org.maven.ide.eclipse.scm</module>
     <module>../org.maven.ide.eclipse.cvs</module>
     <module>../org.maven.ide.eclipse.tests</module>
-	<module>../org.maven.ide.eclipse.integration.tests</module>
     <module>../org.maven.ide.eclipse.editor.xml</module>
     <module>../org.maven.ide.eclipse.editor</module>
     <module>../org.maven.ide.eclipse.editor.tests</module>
@@ -121,6 +120,8 @@
     <module>../org.maven.ide.eclipse.book</module>
     <module>../org.maven.doxia.ide.eclipse</module>
     <module>../org.maven.ide.eclipse.pr</module>
+
+    <module>../org.maven.ide.eclipse.integration.tests</module>
 
     <!-- features -->
     <module>../org.maven.ide.components.maven_embedder.feature</module>
