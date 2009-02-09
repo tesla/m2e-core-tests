@@ -110,7 +110,7 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
 
   protected IWorkbenchPage getActivePage() {
     IWorkbench workbench = PlatformUI.getWorkbench();
-    return workbench.getActiveWorkbenchWindow().getActivePage();
+    return workbench.getWorkbenchWindows()[0].getActivePage();
   }
 
   protected void closeView(String id) throws Exception {
