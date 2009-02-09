@@ -79,7 +79,7 @@ public class MEclipse173SimpleWebAppTest extends UIIntegrationTestCase {
     ui.wait(new JobsCompleteCondition(), 120000);
 
     ui.click(new TreeItemLocator("simple-webapp", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
-    ui.click(new MenuItemLocator("Run/Run As/8 Maven build..."));
+    ui.click(new MenuItemLocator("Run/Run As/.*Maven build..."));
     ui.wait(new ShellShowingCondition("Edit Configuration"));
     ui.enterText("hibernate3:hbm2ddl");
     ui.click(new ButtonLocator("&Run"));
