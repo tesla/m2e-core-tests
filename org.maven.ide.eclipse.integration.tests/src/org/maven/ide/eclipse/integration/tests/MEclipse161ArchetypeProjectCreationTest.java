@@ -9,9 +9,7 @@
 package org.maven.ide.eclipse.integration.tests;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.swt.custom.CTabFolder;
@@ -70,9 +68,7 @@ public class MEclipse161ArchetypeProjectCreationTest extends UIIntegrationTestCa
 
       project = ResourcesPlugin.getWorkspace().getRoot().getProject("project");
       assertTrue(project.exists());
-      int severity = project.findMaxProblemSeverity(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
-      assertFalse("archtype project \"" + archetypeName + "\" has errors on initial creation",
-          severity == IMarker.SEVERITY_ERROR);
+      assertProjectsHaveNoErrors();
       assertTrue("archtype project \"" + archetypeName + "\" creared without Maven nature", project
           .hasNature("org.maven.ide.eclipse.maven2Nature")); // TODO: find constant for this...
 

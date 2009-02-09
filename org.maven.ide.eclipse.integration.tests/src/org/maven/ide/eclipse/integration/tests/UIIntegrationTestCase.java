@@ -39,7 +39,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
@@ -55,7 +54,6 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPreferenceConstants;
-import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.IPreferenceConstants;
 import org.eclipse.ui.internal.WorkbenchPlugin;
@@ -112,11 +110,10 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
 
   protected IWorkbenchPage getActivePage() {
     IWorkbench workbench = PlatformUI.getWorkbench();
-    IWorkbenchWindow window = workbench.getWorkbenchWindows()[0];
-    return window.getActivePage();
+    return workbench.getActiveWorkbenchWindow().getActivePage();
   }
 
-  protected void closeView(String id, String title) throws Exception {
+  protected void closeView(String id) throws Exception {
     IViewPart view = getActivePage().findView(id);
     if(view != null) {
       ui.close(new ViewLocator(id));
@@ -144,8 +141,8 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
     getActivePage().setPerspective(perspective);
 
     // close unnecessary tabs (different versions have different defaults in java perspective)
-    closeView("org.eclipse.ui.views.ContentOutline", "Outline");
-    closeView("org.eclipse.mylyn.tasks.ui.views.tasks", "Task List");
+    closeView("org.eclipse.ui.views.ContentOutline");
+    closeView("org.eclipse.mylyn.tasks.ui.views.tasks");
 
     clearProjects();
 
@@ -261,12 +258,10 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
 
     ui.enterText(target);
 
-    // ui.keyClick(SWT.ALT, 'a'); // "replace all"
     ui.click(new ButtonLocator("Replace &All"));
 
     ui.close(new SWTWidgetLocator(Shell.class, FIND_REPLACE));
     ui.wait(new ShellDisposedCondition(FIND_REPLACE));
-    // ScreenCapture.createScreenCapture();
   }
 
   public static abstract class Task implements Runnable {
@@ -416,7 +411,7 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
       Thread.sleep(5000);
       ui.wait(new JobsCompleteCondition(), 300000);
       assertProjectsHaveNoErrors();
-    
+
     } catch(Exception ex) {
       deleteDirectory(tempDir);
       throw ex;
@@ -424,22 +419,23 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
 
     return tempDir;
   }
-  
+
   protected IViewPart showView(final String id) throws Exception {
-    IViewPart part = (IViewPart)executeOnEventQueue(new Task() {
+    IViewPart part = (IViewPart) executeOnEventQueue(new Task() {
       public Object runEx() throws Exception {
         return getActivePage().showView(id);
-      }});
+      }
+    });
     ui.wait(new SWTIdleCondition());
     return part;
   }
-  
+
   protected void replaceText(IWidgetLocator locator, String text) throws WidgetSearchException {
     ui.click(locator);
     ui.keyClick(SWT.MOD1, 'a');
     ui.enterText(text);
   }
-  
+
   public void assertProjectsHaveNoErrors() throws Exception {
     StringBuffer messages = new StringBuffer();
     IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
@@ -448,35 +444,34 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
       if("Servers".equals(project.getName())) {
         continue;
       }
-      if (count >= 10) {
+      if(count >= 10) {
         break;
       }
       IMarker[] markers = project.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
       for(int i = 0; i < markers.length; i++ ) {
         if(markers[i].getAttribute(IMarker.SEVERITY, 0) == IMarker.SEVERITY_ERROR) {
-          count++;
+          count++ ;
           messages.append('\t');
           if(messages.length() > 0) {
             messages.append(System.getProperty("line.separator"));
           }
-          messages.append(project.getName() + ":" +
-               markers[i].getAttribute(IMarker.LOCATION, "unknown location") + " " +
-               markers[i].getAttribute(IMarker.MESSAGE, "unknown message"));
+          messages.append(project.getName() + ":" + markers[i].getAttribute(IMarker.LOCATION, "unknown location") + " "
+              + markers[i].getAttribute(IMarker.MESSAGE, "unknown message"));
         }
       }
     }
-    if (count > 0) {
+    if(count > 0) {
       fail("One or more compile errors found:" + System.getProperty("line.separator") + messages);
-      
+
     }
   }
-  
+
   public static void copyFile(File from, File to) throws IOException {
     FileInputStream is = null;
     FileOutputStream os = null;
 
     File dest = to.getParentFile();
-    if (dest != null) {
+    if(dest != null) {
       dest.mkdirs();
     }
 
@@ -487,15 +482,15 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
       FileChannel outChannel = os.getChannel();
       outChannel.transferFrom(is.getChannel(), 0, is.getChannel().size());
     } finally {
-      if (is != null) {
+      if(is != null) {
         is.close();
       }
-      if (os != null) {
+      if(os != null) {
         os.close();
       }
     }
   }
-  
+
   public String getPlatformPath() {
     URL installURL = Platform.getInstallLocation().getURL();
     IPath ppath = new Path(installURL.getFile()).removeTrailingSeparator();
@@ -504,17 +499,17 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
 
   private String getCorrectPath(String path) {
     StringBuffer buf = new StringBuffer();
-    for (int i = 0; i < path.length(); i++) {
+    for(int i = 0; i < path.length(); i++ ) {
       char c = path.charAt(i);
-      if (Platform.getOS().equals("win32")) { //$NON-NLS-1$
-        if (i == 0 && c == '/')
+      if(Platform.getOS().equals("win32")) { //$NON-NLS-1$
+        if(i == 0 && c == '/')
           continue;
       }
       // Some VMs may return %20 instead of a space
-      if (c == '%' && i + 2 < path.length()) {
+      if(c == '%' && i + 2 < path.length()) {
         char c1 = path.charAt(i + 1);
         char c2 = path.charAt(i + 2);
-        if (c1 == '2' && c2 == '0') {
+        if(c1 == '2' && c2 == '0') {
           i += 2;
           buf.append(" "); //$NON-NLS-1$
           continue;
@@ -524,6 +519,5 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
     }
     return buf.toString();
   }
-
 
 }

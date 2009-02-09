@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * Copyright (c) 2009 Sonatype, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *******************************************************************************/
 
 package org.maven.ide.eclipse.integration.tests;
 
@@ -41,7 +48,7 @@ public class MEclipse173SimpleWebAppTest extends UIIntegrationTestCase {
 
   public void testSimpleWebApp() throws Exception {
 
-    // Install the server to WTP
+    // Install the Tomcat server 
     showView("org.eclipse.wst.server.ui.ServersView");
 
     ui.contextClick(new SWTWidgetLocator(Tree.class, new ViewLocator("org.eclipse.wst.server.ui.ServersView")),
@@ -55,8 +62,10 @@ public class MEclipse173SimpleWebAppTest extends UIIntegrationTestCase {
     ui.wait(new ShellDisposedCondition("New Server"));
     ui.wait(new JobsCompleteCondition());
 
+    // Import the test project
     tempDir = doImport("projects/ch07project.zip");
 
+    // Add the hsqldb.jar to the dependencies so it can be found at runtime
     ui.click(new TreeItemLocator("simple-webapp/pom.xml", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
     ui.click(2, new TreeItemLocator("simple-webapp/pom.xml", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
 
@@ -69,6 +78,7 @@ public class MEclipse173SimpleWebAppTest extends UIIntegrationTestCase {
     Thread.sleep(5000);
     ui.wait(new JobsCompleteCondition(), 120000);
 
+    // Generate the database using maven goal hibernate3:hbm2ddl
     ui.click(new TreeItemLocator("simple-webapp", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
     ui.click(new MenuItemLocator("Run/Run As/.*Maven build..."));
     ui.wait(new ShellShowingCondition("Edit Configuration"));
@@ -91,7 +101,7 @@ public class MEclipse173SimpleWebAppTest extends UIIntegrationTestCase {
           .hasNature("org.maven.ide.eclipse.maven2Nature"));
     }
 
-    // Patch up database URL
+    // Put the correct dababase URL in applicationContext-persist.xml
     IProject simpleWebAppProject = ResourcesPlugin.getWorkspace().getRoot().getProject("simple-webapp");
     IFolder data = simpleWebAppProject.getFolder("data");
 
@@ -120,7 +130,7 @@ public class MEclipse173SimpleWebAppTest extends UIIntegrationTestCase {
     
     ui.wait(new JobsCompleteCondition(), 120000);
 
-    // Deploy the test project.
+    // Deploy the test project into tomcat
     ui.click(new CTabItemLocator("Servers"));
     ui.contextClick(new TreeItemLocator(SERVER_NAME, new ViewLocator("org.eclipse.wst.server.ui.ServersView")),
         "Add and Remove Projects...");
@@ -130,6 +140,7 @@ public class MEclipse173SimpleWebAppTest extends UIIntegrationTestCase {
     ui.wait(new ShellDisposedCondition("Add and Remove Projects"));
 
     Thread.sleep(3000);
+    
     // Start the server
     ui.click(new TreeItemLocator(SERVER_NAME, new ViewLocator("org.eclipse.wst.server.ui.ServersView")));
     ui.keyClick(SWT.MOD1 | SWT.ALT, 'r');
@@ -137,7 +148,7 @@ public class MEclipse173SimpleWebAppTest extends UIIntegrationTestCase {
     Thread.sleep(5000);
 
     
-    // Verify deployment worked
+    // Verify deployment worked (attempt to get weather forcast for Moss Beach CA)
     
     URL url = new URL(DEPLOYED_URL);
     URLConnection conn = url.openConnection();
@@ -150,6 +161,7 @@ public class MEclipse173SimpleWebAppTest extends UIIntegrationTestCase {
     String s = new String(out.toByteArray(), "UTF-8");
     
     assertTrue("Couldn't find Moss Beach in web page" , s.indexOf("Moss Beach") > 0);
+    
     // Stop the server
     ui.click(new CTabItemLocator("Servers"));
     ui.click(new TreeItemLocator(SERVER_NAME, new ViewLocator("org.eclipse.wst.server.ui.ServersView")));
