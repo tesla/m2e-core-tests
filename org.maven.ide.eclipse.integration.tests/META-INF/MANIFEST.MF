@@ -35,4 +35,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.maven.ide.eclipse.editor.xml,
  org.eclipse.ui.forms,
  org.eclipse.wst.sse.ui,
- org.eclipse.search
+ org.eclipse.search,
+ org.maven.ide.eclipse.wtp,
+ org.maven.ide.eclipse.jdt
