@@ -426,10 +426,12 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
   }
   
   protected IViewPart showView(final String id) throws Exception {
-    return (IViewPart)executeOnEventQueue(new Task() {
+    IViewPart part = (IViewPart)executeOnEventQueue(new Task() {
       public Object runEx() throws Exception {
         return getActivePage().showView(id);
       }});
+    ui.wait(new SWTIdleCondition());
+    return part;
   }
   
   protected void replaceText(IWidgetLocator locator, String text) throws WidgetSearchException {
