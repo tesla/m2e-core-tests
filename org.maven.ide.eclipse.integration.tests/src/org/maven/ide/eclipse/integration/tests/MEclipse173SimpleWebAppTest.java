@@ -39,15 +39,6 @@ public class MEclipse173SimpleWebAppTest extends UIIntegrationTestCase {
 
   private File tempDir;
 
-  protected void oneTimeSetup() throws Exception {
-    //TODO: This is a temporary hack to kill rogue servers, will do something similar in CI script next week and remove this.
-    String javaHome=System.getProperty("java.home");
-    Runtime.getRuntime().exec("cmd.exe  /c " + SERVER_INSTALL_LOCATION + "\\bin\\shutdown.bat", 
-        new String[] {"SystemRoot=C:\\WINDOWS", "OS=Windows_NT", "JRE_HOME=" + javaHome , "CATALINA_HOME=" + SERVER_INSTALL_LOCATION},
-        new File(SERVER_INSTALL_LOCATION + "\\bin"));
-    super.oneTimeSetup();
-  }
-  
   public void testSimpleWebApp() throws Exception {
 
     // Install the server to WTP
