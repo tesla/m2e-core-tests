@@ -94,6 +94,8 @@ import com.windowtester.runtime.util.ScreenCapture;
 @SuppressWarnings("restriction")
 public class UIIntegrationTestCase extends UITestCaseSWT {
 
+  private static boolean indexDownloaded = false;
+
   private static final String FIND_REPLACE = "Find/Replace";
 
   private static final String PLUGIN_ID = "org.maven.ide.eclipse.integration.tests";
@@ -135,8 +137,7 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
     MavenPlugin.getDefault(); // force m2e to load so its indexing jobs will be scheduled.
     Thread.sleep(2000);
     ui = getUI();
-    
-    
+
     if("Welcome".equals(getActivePage().getActivePart().getTitle())) {
       ui.close(new CTabItemLocator("Welcome"));
     }
@@ -150,46 +151,49 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
     closeView("org.eclipse.ui.views.ContentOutline");
     closeView("org.eclipse.mylyn.tasks.ui.views.tasks");
 
-    // Cancel maven central index job 
-    MavenPlugin.getDefault();
-    Thread.sleep(5000);
-    Job [] jobs = Job.getJobManager().find(null);
-    for(int i = 0; i < jobs.length; i++ ) {
-      if (jobs[i].getClass().getName().endsWith("IndexUpdaterJob"))  {
-        jobs[i].cancel();
-        break;
+    if(indexDownloaded) {
+      indexDownloaded = true;
+      
+      // Cancel maven central index job 
+      MavenPlugin.getDefault();
+      Thread.sleep(5000);
+      Job[] jobs = Job.getJobManager().find(null);
+      for(int i = 0; i < jobs.length; i++ ) {
+        if(jobs[i].getClass().getName().endsWith("IndexUpdaterJob")) {
+          jobs[i].cancel();
+          break;
+        }
       }
+     
+      IViewPart indexView = showView("org.maven.ide.eclipse.views.MavenIndexesView");
+
+      ui.click(new CTabItemLocator("Maven Indexes"));
+
+      // Remove maven central.
+      ui.contextClick(
+          new TreeItemLocator("central .*", new ViewLocator("org.maven.ide.eclipse.views.MavenIndexesView")),
+          "Remove Index");
+      ui.wait(new ShellShowingCondition("Remove Index"));
+      ui.click(new ButtonLocator("OK"));
+
+      // Add in nexus proxy for maven central
+      ui.click(new ContributedToolItemLocator("org.maven.ide.eclipse.addIndexAction"));
+
+      ui.wait(new ShellShowingCondition("Add Repository Index"));
+      ui.click(new NamedWidgetLocator("repositoryUrlCombo"));
+      ui.enterText("http://localhost:8081/nexus/content/groups/public/");
+      ui.click(new NamedWidgetLocator("retrieveButton"));
+      ui.wait(new JobsCompleteCondition());
+      ui.wait(new SWTIdleCondition());
+      ui.click(new ButtonLocator("OK"));
+      ui.wait(new ShellDisposedCondition("Add Repository Index"));
+      ui.contextClick(new TreeItemLocator("central-remote.*", new ViewLocator(
+          "org.maven.ide.eclipse.views.MavenIndexesView")), "Update Index");
+      hideView(indexView);
     }
-    
-    IViewPart indexView = showView("org.maven.ide.eclipse.views.MavenIndexesView");
-
-    ui.click(new CTabItemLocator("Maven Indexes"));
-    
-    // Remove maven central.
-    ui.contextClick(new TreeItemLocator(
-        "central .*",
-        new ViewLocator("org.maven.ide.eclipse.views.MavenIndexesView")), "Remove Index");
-    ui.wait(new ShellShowingCondition("Remove Index"));
-    ui.click(new ButtonLocator("OK"));
-    
-    // Add in nexus proxy for maven central
-    ui.click(new ContributedToolItemLocator("org.maven.ide.eclipse.addIndexAction"));
-
-    ui.wait(new ShellShowingCondition("Add Repository Index"));
-    ui.click(new NamedWidgetLocator("repositoryUrlCombo"));
-    ui.enterText("http://localhost:8081/nexus/content/groups/public/");
-    ui.click(new NamedWidgetLocator("retrieveButton"));
-    ui.wait(new JobsCompleteCondition());
-    ui.wait(new SWTIdleCondition());
-    ui.click(new ButtonLocator("OK"));
-    ui.wait(new ShellDisposedCondition("Add Repository Index"));
-    ui.contextClick(new TreeItemLocator(
-        "central-remote.*",
-        new ViewLocator("org.maven.ide.eclipse.views.MavenIndexesView")), "Update Index");
-    hideView(indexView);
 
     clearProjects();
-    
+
     ui.wait(new JobsCompleteCondition(), 300000);
   }
 
@@ -471,7 +475,7 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
         return getActivePage().showView(id);
       }
     });
-    
+
     getUI().wait(new SWTIdleCondition());
     return part;
   }
@@ -483,10 +487,10 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
         return null;
       }
     });
-    
+
     getUI().wait(new SWTIdleCondition());
   }
-  
+
   protected void replaceText(IWidgetLocator locator, String text) throws WidgetSearchException {
     ui.click(locator);
     ui.keyClick(SWT.MOD1, 'a');
