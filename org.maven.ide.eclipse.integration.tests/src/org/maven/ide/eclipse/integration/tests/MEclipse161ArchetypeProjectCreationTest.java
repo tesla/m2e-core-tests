@@ -80,6 +80,11 @@ public class MEclipse161ArchetypeProjectCreationTest extends UIIntegrationTestCa
     }
   }
 
+  protected void setUp() throws Exception {
+    clearProjects();
+    super.setUp();
+  }
+  
   protected void tearDown() throws Exception {
     clearProjects();
     super.tearDown();
