@@ -51,6 +51,8 @@ public class MEclipse173SimpleWebAppTest extends UIIntegrationTestCase {
     // Install the Tomcat server 
     showView("org.eclipse.wst.server.ui.ServersView");
 
+    Thread.sleep(5000);
+    
     ui.contextClick(new SWTWidgetLocator(Tree.class, new ViewLocator("org.eclipse.wst.server.ui.ServersView")),
         "Ne&w/Server");
     ui.wait(new ShellShowingCondition("New Server"));
