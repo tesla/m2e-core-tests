@@ -301,6 +301,7 @@ public class MavenIndexesView extends ViewPart {
         }
       }
     };
+    addIndexAction.setId("org.maven.ide.eclipse.addIndexAction");
     addIndexAction.setToolTipText("Add repository index");
     addIndexAction.setImageDescriptor(MavenImages.ADD_INDEX);
 

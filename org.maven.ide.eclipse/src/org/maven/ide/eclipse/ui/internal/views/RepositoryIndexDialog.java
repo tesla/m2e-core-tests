@@ -123,6 +123,7 @@ public class RepositoryIndexDialog extends TitleAreaDialog {
     repositoryUrlCombo = new Combo(composite, SWT.NONE);
     GridData repositoryUrlTextData = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
     repositoryUrlTextData.widthHint = 350;
+    repositoryUrlCombo.setData("name", "repositoryUrlCombo");
     repositoryUrlCombo.setLayoutData(repositoryUrlTextData);
     repositoryUrlCombo.setItems(getSavedValues(KEY_REPOSITORY_URLS));
 
@@ -144,6 +145,7 @@ public class RepositoryIndexDialog extends TitleAreaDialog {
     retrieveButton.setText("&Retrieve");
     retrieveButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
     retrieveButton.setEnabled(false);
+    retrieveButton.setData("name", "retrieveButton");
     retrieveButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(final SelectionEvent e) {
         final String repositoryUrl = repositoryUrlCombo.getText();
