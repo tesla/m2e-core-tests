@@ -8,7 +8,9 @@
 
 package org.maven.ide.eclipse.integration.tests;
 
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.swt.SWT;
 
@@ -47,7 +49,9 @@ public class MEclipse163ResolveDependenciesTest extends UIIntegrationTestCase {
 
     openFile();
 
-    assertProjectsHaveNoErrors();
+    // there should be compile errors
+    int severity = project.findMaxProblemSeverity(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
+    assertEquals(IMarker.SEVERITY_ERROR, severity);
 
     //Workaround for Window tester bug, close & reopen tab to prevent editor from being in invalid state.
     ui.close(new CTabItemLocator("App.java"));
