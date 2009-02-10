@@ -151,7 +151,7 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
     closeView("org.eclipse.ui.views.ContentOutline");
     closeView("org.eclipse.mylyn.tasks.ui.views.tasks");
 
-    if(indexDownloaded) {
+    if(!indexDownloaded) {
       indexDownloaded = true;
       
       // Cancel maven central index job 
@@ -212,7 +212,7 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
 
     job.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
     job.schedule();
-    ui.wait(new JobsCompleteCondition(), 600000);
+    getUI().wait(new JobsCompleteCondition(), 600000);
 
   }
 
