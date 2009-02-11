@@ -272,6 +272,7 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
   
   protected void setUp() throws Exception {
     super.setUp();
+    ui = getUI();
     clearProjects();
     ShellFinder.bringRootToFront(getActivePage().getWorkbenchWindow().getShell().getDisplay());
   }
