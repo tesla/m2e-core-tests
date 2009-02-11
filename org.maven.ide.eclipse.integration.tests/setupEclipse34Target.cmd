@@ -1,8 +1,7 @@
 rem Set up an Eclipse 3.4 instance with plug-ins necessary to run integration tests
-rem
-rem Adjust ECLIPSE_DIR to point to your target Eclipse 3.4 installation.
+rem Adjust ECLIPSE_DIR to point to your target Eclipse 3.4 installation (this should be an Eclipse Classic SDK with no addons))
 
-set ECLIPSE_DIR=c:\test\34\eclipse
+set ECLIPSE_DIR=c:\platforms\eclipse-tp-e34\eclipse
 
 rem Eclipse Ganymade dependencies
 %ECLIPSE_DIR%/eclipse -nosplash -application org.eclipse.equinox.p2.director.app.application -metadataRepository http://download.eclipse.org/releases/ganymede/ -artifactRepository http://download.eclipse.org/releases/ganymede/ -installIU org.eclipse.gef.feature.group
