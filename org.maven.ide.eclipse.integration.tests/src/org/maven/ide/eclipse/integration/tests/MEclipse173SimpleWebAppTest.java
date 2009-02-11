@@ -14,31 +14,22 @@ import java.net.URL;
 import java.net.URLConnection;
 
 import org.codehaus.plexus.util.IOUtil;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Tree;
-import org.eclipse.ui.ide.IDE;
 
 import com.windowtester.runtime.swt.condition.eclipse.JobsCompleteCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellDisposedCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellShowingCondition;
 import com.windowtester.runtime.swt.locator.ButtonLocator;
 import com.windowtester.runtime.swt.locator.CTabItemLocator;
-import com.windowtester.runtime.swt.locator.FilteredTreeItemLocator;
-import com.windowtester.runtime.swt.locator.LabeledTextLocator;
 import com.windowtester.runtime.swt.locator.MenuItemLocator;
-import com.windowtester.runtime.swt.locator.SWTWidgetLocator;
 import com.windowtester.runtime.swt.locator.TreeItemLocator;
 import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
 
 
 public class MEclipse173SimpleWebAppTest extends UIIntegrationTestCase {
-
-//TODO: This needs to move to a property file soon!
-  private static final String SERVER_INSTALL_LOCATION = "C:\\test\\apache-tomcat-6.0.18";
 
   private static final String SERVER_NAME = "Tomcat.*";
 
@@ -48,29 +39,14 @@ public class MEclipse173SimpleWebAppTest extends UIIntegrationTestCase {
 
   public void testSimpleWebApp() throws Exception {
 
-    // Install the Tomcat server 
-    showView("org.eclipse.wst.server.ui.ServersView");
-
-    Thread.sleep(5000);
-    
-    ui.contextClick(new SWTWidgetLocator(Tree.class, new ViewLocator("org.eclipse.wst.server.ui.ServersView")),
-        "Ne&w/Server");
-    ui.wait(new ShellShowingCondition("New Server"));
-    Thread.sleep(2000);
-    ui.click(new FilteredTreeItemLocator("Apache/Tomcat v6.0 Server"));
-    ui.click(new ButtonLocator("&Next >"));
-    replaceText(new LabeledTextLocator("Tomcat installation &directory:"), SERVER_INSTALL_LOCATION);
-    ui.click(new ButtonLocator("&Finish"));
-    ui.wait(new ShellDisposedCondition("New Server"));
-    ui.wait(new JobsCompleteCondition());
+    installTomcat6();
 
     // Import the test project
     tempDir = doImport("projects/ch07project.zip");
 
     // Add the hsqldb.jar to the dependencies so it can be found at runtime
-    ui.click(new TreeItemLocator("simple-webapp/pom.xml", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
-    ui.click(2, new TreeItemLocator("simple-webapp/pom.xml", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
-
+    IProject simpleWebAppProject = ResourcesPlugin.getWorkspace().getRoot().getProject("simple-webapp");
+    openFile(simpleWebAppProject, "pom.xml");
     ui.click(new CTabItemLocator("pom.xml"));
     ui.wait(new JobsCompleteCondition(), 120000);
     findText("</dependencies");
@@ -104,20 +80,11 @@ public class MEclipse173SimpleWebAppTest extends UIIntegrationTestCase {
     }
 
     // Put the correct dababase URL in applicationContext-persist.xml
-    IProject simpleWebAppProject = ResourcesPlugin.getWorkspace().getRoot().getProject("simple-webapp");
     IFolder data = simpleWebAppProject.getFolder("data");
 
     IProject simplePersistProject = ResourcesPlugin.getWorkspace().getRoot().getProject("simple-persist");
-    final IFile context = simplePersistProject.getFile("src/main/resources/applicationContext-persist.xml");
-    
-    executeOnEventQueue(new Task() {
+    openFile(simplePersistProject, "src/main/resources/applicationContext-persist.xml");
 
-      public Object runEx() throws Exception {
-        IDE.openEditor(getActivePage(), context, true);
-        return null;
-      }
-    });
-    
     ui.click(new CTabItemLocator("Source"));
     ui.keyClick(SWT.MOD1, 'f');
     ui.wait(new ShellShowingCondition("Find/Replace"));
@@ -129,7 +96,7 @@ public class MEclipse173SimpleWebAppTest extends UIIntegrationTestCase {
     ui.click(new ButtonLocator("Close"));
     ui.wait(new ShellDisposedCondition("Find/Replace"));
     ui.keyClick(SWT.MOD1, 's');
-    
+
     ui.wait(new JobsCompleteCondition(), 120000);
 
     // Deploy the test project into tomcat
@@ -142,16 +109,15 @@ public class MEclipse173SimpleWebAppTest extends UIIntegrationTestCase {
     ui.wait(new ShellDisposedCondition("Add and Remove Projects"));
 
     Thread.sleep(3000);
-    
+
     // Start the server
     ui.click(new TreeItemLocator(SERVER_NAME, new ViewLocator("org.eclipse.wst.server.ui.ServersView")));
     ui.keyClick(SWT.MOD1 | SWT.ALT, 'r');
     ui.wait(new JobsCompleteCondition(), 120000);
     Thread.sleep(5000);
 
-    
     // Verify deployment worked (attempt to get weather forcast for Moss Beach CA)
-    
+
     URL url = new URL(DEPLOYED_URL);
     URLConnection conn = url.openConnection();
     conn.setDoInput(true);
@@ -159,27 +125,31 @@ public class MEclipse173SimpleWebAppTest extends UIIntegrationTestCase {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     IOUtil.copy(conn.getInputStream(), out);
     conn.getInputStream().close();
-    
+
     String s = new String(out.toByteArray(), "UTF-8");
-    
-    assertTrue("Couldn't find Moss Beach in web page" , s.indexOf("Moss Beach") > 0);
-    
-    // Stop the server
-    ui.click(new CTabItemLocator("Servers"));
-    ui.click(new TreeItemLocator(SERVER_NAME, new ViewLocator("org.eclipse.wst.server.ui.ServersView")));
-    ui.keyClick(SWT.MOD1 | SWT.ALT, 's');
-    ui.wait(new JobsCompleteCondition(), 120000);
+
+    assertTrue("Couldn't find Moss Beach weather in web page", s.indexOf("Moss Beach") > 0);
 
   }
 
   protected void tearDown() throws Exception {
-    clearProjects();
+   
+    try {
+      // Stop the server
+      ui.click(new CTabItemLocator("Servers"));
+      ui.click(new TreeItemLocator(SERVER_NAME, new ViewLocator("org.eclipse.wst.server.ui.ServersView")));
+      ui.keyClick(SWT.MOD1 | SWT.ALT, 's');
+      ui.wait(new JobsCompleteCondition(), 120000);
+    } catch(Exception ex) {
+      ex.printStackTrace();
+    }
 
+    super.tearDown();
+    
     if(tempDir != null && tempDir.exists()) {
       deleteDirectory(tempDir);
       tempDir = null;
     }
-    super.tearDown();
 
   }
 

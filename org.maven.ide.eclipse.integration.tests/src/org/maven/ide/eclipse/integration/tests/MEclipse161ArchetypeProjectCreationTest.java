@@ -34,10 +34,13 @@ import com.windowtester.runtime.util.ScreenCapture;
 
 
 /**
- * @author Rich Seddon
+ * @author rseddon
  */
 public class MEclipse161ArchetypeProjectCreationTest extends UIIntegrationTestCase {
 
+  /** 
+   * Create an archetype project and assert that it has proper natures & builders, and no error markers
+   */
   private IProject createArchetypeProjct(String archetypeName) throws Exception {
     try {
       IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("project");
@@ -69,8 +72,8 @@ public class MEclipse161ArchetypeProjectCreationTest extends UIIntegrationTestCa
       project = ResourcesPlugin.getWorkspace().getRoot().getProject("project");
       assertTrue(project.exists());
       assertProjectsHaveNoErrors();
-      assertTrue("archtype project \"" + archetypeName + "\" creared without Maven nature", project
-          .hasNature("org.maven.ide.eclipse.maven2Nature")); // TODO: find constant for this...
+      assertTrue("archtype project \"" + archetypeName + "\" created without Maven nature", project
+          .hasNature("org.maven.ide.eclipse.maven2Nature")); 
 
       ui.click(new TreeItemLocator("project.*", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
       return project;
@@ -78,16 +81,6 @@ public class MEclipse161ArchetypeProjectCreationTest extends UIIntegrationTestCa
       ScreenCapture.createScreenCapture();
       throw new Exception("Failed to create project for archetype:" + archetypeName, ex);
     }
-  }
-
-  protected void setUp() throws Exception {
-    clearProjects();
-    super.setUp();
-  }
-  
-  protected void tearDown() throws Exception {
-    clearProjects();
-    super.tearDown();
   }
 
   public void testQuickStartCreate() throws Exception {

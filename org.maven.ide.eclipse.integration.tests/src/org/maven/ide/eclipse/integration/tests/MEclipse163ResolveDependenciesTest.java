@@ -14,7 +14,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.swt.SWT;
 
-import com.windowtester.runtime.WidgetSearchException;
 import com.windowtester.runtime.swt.condition.SWTIdleCondition;
 import com.windowtester.runtime.swt.condition.eclipse.JobsCompleteCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellDisposedCondition;
@@ -31,23 +30,12 @@ import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
  */
 public class MEclipse163ResolveDependenciesTest extends UIIntegrationTestCase {
 
-  private void openFile() throws WidgetSearchException {
-    ui.click(new TreeItemLocator("project.*", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
-    ui.keyClick(SWT.MOD1 | SWT.SHIFT, 't');
-    ui.wait(new ShellShowingCondition("Open Type"));
-    ui.enterText("app");
-    ui.click(new ButtonLocator("OK"));
-    ui.wait(new ShellDisposedCondition("Open Type"));
-    ui.wait(new JobsCompleteCondition(), 60000);
-  }
-
   public void testResolveDependencies() throws Exception {
     importZippedProject("projects/resolve_deps_test.zip");
-    assertTrue(ResourcesPlugin.getWorkspace().getRoot().getProject("project").exists());
-
     final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("project");
+    assertTrue(project.exists());
 
-    openFile();
+    openFile(project, "src/main/java/org/sonatype/test/project/App.java");
 
     // there should be compile errors
     int severity = project.findMaxProblemSeverity(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
@@ -55,7 +43,7 @@ public class MEclipse163ResolveDependenciesTest extends UIIntegrationTestCase {
 
     //Workaround for Window tester bug, close & reopen tab to prevent editor from being in invalid state.
     ui.close(new CTabItemLocator("App.java"));
-    openFile();
+    openFile(project, "src/main/java/org/sonatype/test/project/App.java");
 
     //launch quick fix for SessionFactory dependency
     ui.click(new TreeItemLocator("project.*", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
@@ -89,7 +77,7 @@ public class MEclipse163ResolveDependenciesTest extends UIIntegrationTestCase {
 
     ui.wait(new ShellDisposedCondition("Search in Maven repositories"));
 
-    Thread.sleep(5000);
+    Thread.sleep(7000); // Build jobs start after a delay
     
     ui.wait(new JobsCompleteCondition());
 
