@@ -177,7 +177,7 @@ public class PomEditorTest extends PomEditorTestBase {
     selectEditorTab(TAB_OVERVIEW);
 
     // externally replace file contents
-    IFile file = root.getFile(new Path(TEST_POM_POM_XML));
+    IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(TEST_POM_POM_XML));
     File f = new File(file.getLocation().toOSString());
     String text = getContents(f);
     setContents(f, text.replace("parent4", "parent6"));
@@ -202,16 +202,6 @@ public class PomEditorTest extends PomEditorTestBase {
     // XXX verify that value changed on a page haven't been active before
   }
 
-//  public void testEditorIsClosedWhenProjectIsClosed() throws Exception {
-//    // XXX test editor is closed when project is closed
-//    
-//  }
-  
-//  public void testEditorIsClosedWhenProjectIsDeleted() throws Exception {
-//    // XXX test editor is closed when project is deleted
-//  
-//  }
-  
   public void testNewEditorIsClean() throws Exception {
     openPomFile(TEST_POM_POM_XML);
 
@@ -273,14 +263,6 @@ public class PomEditorTest extends PomEditorTestBase {
     createFile(name, "");
     openPomFile(name);
     
-//    ui.contextClick(new TreeItemLocator(PROJECT_NAME, new ViewLocator(
-//				"org.eclipse.jdt.ui.PackageExplorer")), "New/File");
-//		ui.wait(new ShellShowingCondition("New File"));
-//		ui.enterText("test.pom");
-//		ui.click(new ButtonLocator("&Finish"));
-//		ui.wait(new ShellDisposedCondition("Progress Information"));
-//		ui.wait(new ShellDisposedCondition("New File"));
-		
 	  assertTextValue("artifactId", "");
 	  setTextValue("artifactId", "artf1");
 	  selectEditorTab(TAB_POM_XML);
@@ -288,8 +270,6 @@ public class PomEditorTest extends PomEditorTestBase {
 	  selectEditorTab(TAB_OVERVIEW);
 	  assertTextValue("artifactId", "artf2");
 	  
-	  // ui.keyClick(SWT.CTRL, 's');
-		// ui.close(new CTabItemLocator(PROJECT_NAME + "/test.pom"));
   }
 
 	//MNGECLIPSE-834
@@ -297,15 +277,6 @@ public class PomEditorTest extends PomEditorTestBase {
 		String name = PROJECT_NAME + "/another.pom";
 		createFile(name, "");
 		openPomFile(name);
-		
-//		ui.contextClick(new TreeItemLocator(PROJECT_NAME, new ViewLocator(
-//				"org.eclipse.jdt.ui.PackageExplorer")), "New/File");
-//		ui.wait(new ShellShowingCondition("New File"));
-//		ui.enterText("another.pom");
-//    ui.click(new ButtonLocator("&Finish"));
-//		// ui.keyClick(WT.CR);
-//		ui.wait(new ShellDisposedCondition("Progress Information"));
-//		ui.wait(new ShellDisposedCondition("New File"));
 		
 		ui.keyClick(SWT.CTRL, 's');
 		ui.close(new CTabItemLocator(name));
@@ -332,7 +303,7 @@ public class PomEditorTest extends PomEditorTestBase {
 		ui.wait(new ShellShowingCondition("Confirm Delete"));
 		ui.keyClick(WT.CR);
 		
-		IFile file = root.getFile(new Path(name));
+		IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(name));
 		ui.wait(new FileExistsCondition(file, false));
 	}
 	
