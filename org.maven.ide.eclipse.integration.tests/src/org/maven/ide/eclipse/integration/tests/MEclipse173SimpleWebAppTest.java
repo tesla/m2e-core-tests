@@ -47,26 +47,26 @@ public class MEclipse173SimpleWebAppTest extends UIIntegrationTestCase {
     // Add the hsqldb.jar to the dependencies so it can be found at runtime
     IProject simpleWebAppProject = ResourcesPlugin.getWorkspace().getRoot().getProject("simple-webapp");
     openFile(simpleWebAppProject, "pom.xml");
-    ui.click(new CTabItemLocator("pom.xml"));
-    ui.wait(new JobsCompleteCondition(), 120000);
+    getUI().click(new CTabItemLocator("pom.xml"));
+    getUI().wait(new JobsCompleteCondition(), 120000);
     findText("</dependencies");
-    ui.keyClick(SWT.ARROW_LEFT);
-    ui.enterText("<dependency><groupId>hsqldb</<artifactId>hsqldb</<version>1.8.0.7</</");
-    ui.keyClick(SWT.MOD1, 's');
+    getUI().keyClick(SWT.ARROW_LEFT);
+    getUI().enterText("<dependency><groupId>hsqldb</<artifactId>hsqldb</<version>1.8.0.7</</");
+    getUI().keyClick(SWT.MOD1, 's');
     Thread.sleep(5000);
-    ui.wait(new JobsCompleteCondition(), 120000);
+    getUI().wait(new JobsCompleteCondition(), 120000);
 
     // Generate the database using maven goal hibernate3:hbm2ddl
-    ui.click(new TreeItemLocator("simple-webapp", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
-    ui.click(new MenuItemLocator("Run/Run As/.*Maven build..."));
-    ui.wait(new ShellShowingCondition("Edit Configuration"));
-    ui.enterText("hibernate3:hbm2ddl");
-    ui.click(new ButtonLocator("&Run"));
-    ui.wait(new ShellDisposedCondition("Edit Configuration"));
-    ui.wait(new JobsCompleteCondition(), 60000);
-    ui.click(new TreeItemLocator("simple-webapp", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
-    ui.keyClick(SWT.F5);
-    ui.wait(new JobsCompleteCondition());
+    getUI().click(new TreeItemLocator("simple-webapp", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
+    getUI().click(new MenuItemLocator("Run/Run As/.*Maven build..."));
+    getUI().wait(new ShellShowingCondition("Edit Configuration"));
+    getUI().enterText("hibernate3:hbm2ddl");
+    getUI().click(new ButtonLocator("&Run"));
+    getUI().wait(new ShellDisposedCondition("Edit Configuration"));
+    getUI().wait(new JobsCompleteCondition(), 60000);
+    getUI().click(new TreeItemLocator("simple-webapp", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
+    getUI().keyClick(SWT.F5);
+    getUI().wait(new JobsCompleteCondition());
 
     assertProjectsHaveNoErrors();
 
@@ -85,35 +85,35 @@ public class MEclipse173SimpleWebAppTest extends UIIntegrationTestCase {
     IProject simplePersistProject = ResourcesPlugin.getWorkspace().getRoot().getProject("simple-persist");
     openFile(simplePersistProject, "src/main/resources/applicationContext-persist.xml");
 
-    ui.click(new CTabItemLocator("Source"));
-    ui.keyClick(SWT.MOD1, 'f');
-    ui.wait(new ShellShowingCondition("Find/Replace"));
-    ui.keyClick(SWT.MOD1, 'a');
-    ui.enterText("data/weather");
-    ui.keyClick(SWT.TAB);
-    ui.enterText(data.getLocation().toFile().getAbsolutePath() + "/weather");
-    ui.click(new ButtonLocator("Replace &All"));
-    ui.click(new ButtonLocator("Close"));
-    ui.wait(new ShellDisposedCondition("Find/Replace"));
-    ui.keyClick(SWT.MOD1, 's');
+    getUI().click(new CTabItemLocator("Source"));
+    getUI().keyClick(SWT.MOD1, 'f');
+    getUI().wait(new ShellShowingCondition("Find/Replace"));
+    getUI().keyClick(SWT.MOD1, 'a');
+    getUI().enterText("data/weather");
+    getUI().keyClick(SWT.TAB);
+    getUI().enterText(data.getLocation().toFile().getAbsolutePath() + "/weather");
+    getUI().click(new ButtonLocator("Replace &All"));
+    getUI().click(new ButtonLocator("Close"));
+    getUI().wait(new ShellDisposedCondition("Find/Replace"));
+    getUI().keyClick(SWT.MOD1, 's');
 
-    ui.wait(new JobsCompleteCondition(), 120000);
+    getUI().wait(new JobsCompleteCondition(), 120000);
 
     // Deploy the test project into tomcat
-    ui.click(new CTabItemLocator("Servers"));
-    ui.contextClick(new TreeItemLocator(SERVER_NAME, new ViewLocator("org.eclipse.wst.server.ui.ServersView")),
+    getUI().click(new CTabItemLocator("Servers"));
+    getUI().contextClick(new TreeItemLocator(SERVER_NAME, new ViewLocator("org.eclipse.wst.server.ui.ServersView")),
         "Add and Remove Projects...");
-    ui.wait(new ShellShowingCondition("Add and Remove Projects"));
-    ui.click(new ButtonLocator("Add A&ll >>"));
-    ui.click(new ButtonLocator("&Finish"));
-    ui.wait(new ShellDisposedCondition("Add and Remove Projects"));
+    getUI().wait(new ShellShowingCondition("Add and Remove Projects"));
+    getUI().click(new ButtonLocator("Add A&ll >>"));
+    getUI().click(new ButtonLocator("&Finish"));
+    getUI().wait(new ShellDisposedCondition("Add and Remove Projects"));
 
     Thread.sleep(3000);
 
     // Start the server
-    ui.click(new TreeItemLocator(SERVER_NAME, new ViewLocator("org.eclipse.wst.server.ui.ServersView")));
-    ui.keyClick(SWT.MOD1 | SWT.ALT, 'r');
-    ui.wait(new JobsCompleteCondition(), 120000);
+    getUI().click(new TreeItemLocator(SERVER_NAME, new ViewLocator("org.eclipse.wst.server.ui.ServersView")));
+    getUI().keyClick(SWT.MOD1 | SWT.ALT, 'r');
+    getUI().wait(new JobsCompleteCondition(), 120000);
     Thread.sleep(5000);
 
     // Verify deployment worked (attempt to get weather forcast for Moss Beach CA)
@@ -136,10 +136,10 @@ public class MEclipse173SimpleWebAppTest extends UIIntegrationTestCase {
    
     try {
       // Stop the server
-      ui.click(new CTabItemLocator("Servers"));
-      ui.click(new TreeItemLocator(SERVER_NAME, new ViewLocator("org.eclipse.wst.server.ui.ServersView")));
-      ui.keyClick(SWT.MOD1 | SWT.ALT, 's');
-      ui.wait(new JobsCompleteCondition(), 120000);
+      getUI().click(new CTabItemLocator("Servers"));
+      getUI().click(new TreeItemLocator(SERVER_NAME, new ViewLocator("org.eclipse.wst.server.ui.ServersView")));
+      getUI().keyClick(SWT.MOD1 | SWT.ALT, 's');
+      getUI().wait(new JobsCompleteCondition(), 120000);
     } catch(Exception ex) {
       ex.printStackTrace();
     }

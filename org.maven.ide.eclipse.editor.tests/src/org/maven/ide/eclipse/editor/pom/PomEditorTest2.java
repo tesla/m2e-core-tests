@@ -1,7 +1,6 @@
 package org.maven.ide.eclipse.editor.pom;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.ui.forms.widgets.Form;
 
 import com.windowtester.runtime.WT;
 import com.windowtester.runtime.WaitTimedOutException;
@@ -10,7 +9,6 @@ import com.windowtester.runtime.swt.condition.shell.ShellDisposedCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellShowingCondition;
 import com.windowtester.runtime.swt.locator.ButtonLocator;
 import com.windowtester.runtime.swt.locator.CTabItemLocator;
-import com.windowtester.runtime.swt.locator.SWTWidgetLocator;
 import com.windowtester.runtime.swt.locator.TableItemLocator;
 
 public class PomEditorTest2 extends PomEditorTestBase {
@@ -24,36 +22,36 @@ public class PomEditorTest2 extends PomEditorTestBase {
     collapseSectionIfRequired("modulesSection", "Modules");
 
     addProperty("pz", "pz");
-    ui.click(2, new TableItemLocator("pz : pz"));
-    ui.wait(new ShellShowingCondition("Edit property"));
-    ui.keyClick(SWT.CTRL, 'a');
-    ui.enterText("p12");
-    ui.keyClick(WT.TAB);
-    ui.keyClick(SWT.CTRL, 'a');
-    ui.enterText("p12");
-    ui.click(new ButtonLocator("OK"));
-    ui.wait(new ShellDisposedCondition("Edit property"));
+    getUI().click(2, new TableItemLocator("pz : pz"));
+    getUI().wait(new ShellShowingCondition("Edit property"));
+    getUI().keyClick(SWT.CTRL, 'a');
+    getUI().enterText("p12");
+    getUI().keyClick(WT.TAB);
+    getUI().keyClick(SWT.CTRL, 'a');
+    getUI().enterText("p12");
+    getUI().click(new ButtonLocator("OK"));
+    getUI().wait(new ShellDisposedCondition("Edit property"));
     addProperty("p2", "p2");
-    ui.click(new TableItemLocator("p12 : p12"));
-    ui.click(new ButtonLocator("Delete"));
+    getUI().click(new TableItemLocator("p12 : p12"));
+    getUI().click(new ButtonLocator("Delete"));
     
     selectEditorTab(TAB_POM_XML);
     String editorText = getEditorText();
     assertTrue(editorText, editorText.contains("<p2>p2</p2>"));
 
-    ui.keyClick(SWT.CTRL, 'z');
-    ui.keyClick(SWT.CTRL, 'z');
-    ui.keyClick(SWT.CTRL, 'z');
+    getUI().keyClick(SWT.CTRL, 'z');
+    getUI().keyClick(SWT.CTRL, 'z');
+    getUI().keyClick(SWT.CTRL, 'z');
     editorText = getEditorText();
     assertTrue(editorText, editorText.contains("<pz>pz</pz>"));
     
-    ui.keyClick(SWT.CTRL, 'z');
+    getUI().keyClick(SWT.CTRL, 'z');
     editorText = getEditorText();
     assertFalse(editorText, editorText.contains("<properties>"));
-    ui.keyClick(SWT.CTRL, 'y');
+    getUI().keyClick(SWT.CTRL, 'y');
     editorText = getEditorText();
     assertTrue(editorText, editorText.contains("<pz>pz</pz>"));
-    ui.keyClick(SWT.CTRL, 's');
+    getUI().keyClick(SWT.CTRL, 's');
   }
 
   public void testPropertiesSectionXML2Model() throws Exception {
@@ -69,38 +67,38 @@ public class PomEditorTest2 extends PomEditorTestBase {
 
     selectEditorTab(TAB_OVERVIEW);
 
-    ui.click(2, new TableItemLocator("prop : hoho"));
-    ui.wait(new ShellShowingCondition("Edit property"));
-    ui.click(new ButtonLocator("OK"));
-    ui.wait(new ShellDisposedCondition("Edit property"));
-    ui.click(2, new TableItemLocator("prop1 : hoho1"));
-    ui.wait(new ShellShowingCondition("Edit property"));
-    ui.click(new ButtonLocator("OK"));
-    ui.wait(new ShellDisposedCondition("Edit property"));
+    getUI().click(2, new TableItemLocator("prop : hoho"));
+    getUI().wait(new ShellShowingCondition("Edit property"));
+    getUI().click(new ButtonLocator("OK"));
+    getUI().wait(new ShellDisposedCondition("Edit property"));
+    getUI().click(2, new TableItemLocator("prop1 : hoho1"));
+    getUI().wait(new ShellShowingCondition("Edit property"));
+    getUI().click(new ButtonLocator("OK"));
+    getUI().wait(new ShellDisposedCondition("Edit property"));
 
     selectEditorTab(TAB_POM_XML);
     replaceText("<prop>hoho</prop><prop1>hoho1</prop1>", "<prop>hoho</prop>");
     selectEditorTab(TAB_OVERVIEW);
 
-    ui.click(2, new TableItemLocator("prop : hoho"));
-    ui.wait(new ShellShowingCondition("Edit property"));
-    ui.click(new ButtonLocator("OK"));
-    ui.wait(new ShellDisposedCondition("Edit property"));
+    getUI().click(2, new TableItemLocator("prop : hoho"));
+    getUI().wait(new ShellShowingCondition("Edit property"));
+    getUI().click(new ButtonLocator("OK"));
+    getUI().wait(new ShellDisposedCondition("Edit property"));
   }
 
   ///MNGECLIPSE-912
   public void testCloseAllAndSave() throws Exception {
     openPomFile(TEST_POM_POM_XML);
     
-    ui.click(new CTabItemLocator(TEST_POM_POM_XML));
+    getUI().click(new CTabItemLocator(TEST_POM_POM_XML));
     selectEditorTab(TAB_POM_XML);
     replaceText("org.foo", "org.foo1");
     selectEditorTab(TAB_OVERVIEW);
-    ui.contextClick(new CTabItemLocator("*" + TEST_POM_POM_XML), "Close &All");
-    ui.wait(new ShellDisposedCondition("Progress Information"));
-    ui.wait(new ShellShowingCondition("Save Resource"));
-    ui.click(new ButtonLocator("&Yes"));
-    ui.wait(new ShellDisposedCondition("Save Resource"));
+    getUI().contextClick(new CTabItemLocator("*" + TEST_POM_POM_XML), "Close &All");
+    getUI().wait(new ShellDisposedCondition("Progress Information"));
+    getUI().wait(new ShellShowingCondition("Save Resource"));
+    getUI().click(new ButtonLocator("&Yes"));
+    getUI().wait(new ShellDisposedCondition("Save Resource"));
 
     openPomFile(TEST_POM_POM_XML);
     selectEditorTab(TAB_OVERVIEW);
@@ -108,13 +106,13 @@ public class PomEditorTest2 extends PomEditorTestBase {
   }
   
   private void addProperty(String name, String value) throws WidgetSearchException, WaitTimedOutException {
-    ui.click(new ButtonLocator("Add..."));
-    ui.wait(new ShellShowingCondition("Add property"));
-    ui.enterText(name);
-    ui.keyClick(WT.TAB);
-    ui.enterText(value);
-    ui.keyClick(WT.CR);
-    ui.wait(new ShellDisposedCondition("Add property"));
+    getUI().click(new ButtonLocator("Add..."));
+    getUI().wait(new ShellShowingCondition("Add property"));
+    getUI().enterText(name);
+    getUI().keyClick(WT.TAB);
+    getUI().enterText(value);
+    getUI().keyClick(WT.CR);
+    getUI().wait(new ShellDisposedCondition("Add property"));
   }
 
 

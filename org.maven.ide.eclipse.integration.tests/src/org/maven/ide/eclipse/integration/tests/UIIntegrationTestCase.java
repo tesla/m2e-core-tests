@@ -115,8 +115,6 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
   
   private static final String FIND_REPLACE = "Find/Replace";
 
-  protected IUIContext ui;
-
   public UIIntegrationTestCase() {
     super();
   }
@@ -133,7 +131,7 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
   protected void closeView(String id) throws Exception {
     IViewPart view = getActivePage().findView(id);
     if(view != null) {
-      ui.close(new ViewLocator(id));
+      getUI().close(new ViewLocator(id));
     }
   }
 
@@ -148,7 +146,6 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
 
     MavenPlugin.getDefault(); // force m2e to load so its indexing jobs will be scheduled.
     Thread.sleep(5000);
-    ui = getUI();
 
     closeView("org.eclipse.ui.internal.introview");
 
@@ -166,7 +163,7 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
     // Clean out projects left over from previous test runs.
     clearProjects();
 
-    ui.wait(new JobsCompleteCondition(), 300000);
+    getUI().wait(new JobsCompleteCondition(), 300000);
   }
 
   /**
@@ -206,28 +203,28 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
 
         IViewPart indexView = showView("org.maven.ide.eclipse.views.MavenIndexesView");
 
-        ui.click(new CTabItemLocator("Maven Indexes"));
+        getUI().click(new CTabItemLocator("Maven Indexes"));
 
-        ui.wait(new SWTIdleCondition());
+        getUI().wait(new SWTIdleCondition());
 
         // Remove maven central index.
-        ui.contextClick(new TreeItemLocator("central .*", new ViewLocator(
+        getUI().contextClick(new TreeItemLocator("central .*", new ViewLocator(
             "org.maven.ide.eclipse.views.MavenIndexesView")), "Remove Index");
-        ui.wait(new ShellShowingCondition("Remove Index"));
-        ui.click(new ButtonLocator("OK"));
+        getUI().wait(new ShellShowingCondition("Remove Index"));
+        getUI().click(new ButtonLocator("OK"));
 
         // Add in nexus proxy for maven central
-        ui.click(new ContributedToolItemLocator("org.maven.ide.eclipse.addIndexAction"));
+        getUI().click(new ContributedToolItemLocator("org.maven.ide.eclipse.addIndexAction"));
 
-        ui.wait(new ShellShowingCondition("Add Repository Index"));
-        ui.click(new NamedWidgetLocator("repositoryUrlCombo"));
-        ui.enterText(nexusURL + "/content/groups/public/");
-        ui.click(new NamedWidgetLocator("retrieveButton"));
-        ui.wait(new JobsCompleteCondition());
-        ui.wait(new SWTIdleCondition());
-        ui.click(new ButtonLocator("OK"));
-        ui.wait(new ShellDisposedCondition("Add Repository Index"));
-        ui.contextClick(new TreeItemLocator("central-remote.*", new ViewLocator(
+        getUI().wait(new ShellShowingCondition("Add Repository Index"));
+        getUI().click(new NamedWidgetLocator("repositoryUrlCombo"));
+        getUI().enterText(nexusURL + "/content/groups/public/");
+        getUI().click(new NamedWidgetLocator("retrieveButton"));
+        getUI().wait(new JobsCompleteCondition());
+        getUI().wait(new SWTIdleCondition());
+        getUI().click(new ButtonLocator("OK"));
+        getUI().wait(new ShellDisposedCondition("Add Repository Index"));
+        getUI().contextClick(new TreeItemLocator("central-remote.*", new ViewLocator(
             "org.maven.ide.eclipse.views.MavenIndexesView")), "Update Index");
         hideView(indexView);
       } catch(IOException ex) {
@@ -272,7 +269,6 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
   
   protected void setUp() throws Exception {
     super.setUp();
-    ui = getUI();
     clearProjects();
     ShellFinder.bringRootToFront(getActivePage().getWorkbenchWindow().getShell().getDisplay());
   }
@@ -299,7 +295,7 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
          return IDE.openEditor(getActivePage(), f, true);
        }
      });
-     ui.wait(new JobsCompleteCondition(), 60000);
+     getUI().wait(new JobsCompleteCondition(), 60000);
      return editor;
    }
   
@@ -319,33 +315,33 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
         return null;
       }
     });
-    ui.wait(new SWTIdleCondition());
+    getUI().wait(new SWTIdleCondition());
     return editor;
   }
 
   protected void findText(String src) throws WaitTimedOutException, WidgetSearchException {
-    ui.keyClick(SWT.CTRL, 'f');
-    ui.wait(new ShellShowingCondition(FIND_REPLACE));
-    ui.enterText(src);
-    ui.keyClick(WT.CR); // "find"
-    ui.close(new SWTWidgetLocator(Shell.class, FIND_REPLACE));
-    ui.wait(new ShellDisposedCondition(FIND_REPLACE));
+    getUI().keyClick(SWT.CTRL, 'f');
+    getUI().wait(new ShellShowingCondition(FIND_REPLACE));
+    getUI().enterText(src);
+    getUI().keyClick(WT.CR); // "find"
+    getUI().close(new SWTWidgetLocator(Shell.class, FIND_REPLACE));
+    getUI().wait(new ShellDisposedCondition(FIND_REPLACE));
   }
 
   protected void replaceText(String src, String target) throws WaitTimedOutException, WidgetSearchException {
-    ui.keyClick(SWT.CTRL, 'f');
-    ui.wait(new ShellShowingCondition(FIND_REPLACE));
+    getUI().keyClick(SWT.CTRL, 'f');
+    getUI().wait(new ShellShowingCondition(FIND_REPLACE));
 
-    ui.enterText(src);
-    ui.keyClick(WT.TAB);
+    getUI().enterText(src);
+    getUI().keyClick(WT.TAB);
     ScreenCapture.createScreenCapture();
 
-    ui.enterText(target);
+    getUI().enterText(target);
 
-    ui.click(new ButtonLocator("Replace &All"));
+    getUI().click(new ButtonLocator("Replace &All"));
 
-    ui.close(new SWTWidgetLocator(Shell.class, FIND_REPLACE));
-    ui.wait(new ShellDisposedCondition(FIND_REPLACE));
+    getUI().close(new SWTWidgetLocator(Shell.class, FIND_REPLACE));
+    getUI().wait(new ShellDisposedCondition(FIND_REPLACE));
   }
 
  
@@ -448,18 +444,18 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
     File tempDir = unzipProject(projectPath);
 
     try {
-      ui.click(new MenuItemLocator("File/Import..."));
-      ui.wait(new ShellShowingCondition("Import"));
-      ui.click(new FilteredTreeItemLocator("General/Maven Projects"));
-      ui.click(new ButtonLocator("&Next >"));
-      ui.wait(new SWTIdleCondition());
-      ui.enterText(tempDir.getCanonicalPath());
-      ui.keyClick(SWT.CR);
+      getUI().click(new MenuItemLocator("File/Import..."));
+      getUI().wait(new ShellShowingCondition("Import"));
+      getUI().click(new FilteredTreeItemLocator("General/Maven Projects"));
+      getUI().click(new ButtonLocator("&Next >"));
+      getUI().wait(new SWTIdleCondition());
+      getUI().enterText(tempDir.getCanonicalPath());
+      getUI().keyClick(SWT.CR);
       Thread.sleep(2000);
-      ui.click(new ButtonLocator("&Finish"));
-      ui.wait(new ShellDisposedCondition("Import Maven Projects"));
+      getUI().click(new ButtonLocator("&Finish"));
+      getUI().wait(new ShellDisposedCondition("Import Maven Projects"));
       Thread.sleep(5000);
-      ui.wait(new JobsCompleteCondition(), 300000);
+      getUI().wait(new JobsCompleteCondition(), 300000);
       assertProjectsHaveNoErrors();
 
     } catch(Exception ex) {
@@ -493,9 +489,9 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
   }
 
   protected void replaceText(IWidgetLocator locator, String text) throws WidgetSearchException {
-    ui.click(locator);
-    ui.keyClick(SWT.MOD1, 'a');
-    ui.enterText(text);
+    getUI().click(locator);
+    getUI().keyClick(SWT.MOD1, 'a');
+    getUI().enterText(text);
   }
 
   protected void assertProjectsHaveNoErrors() throws Exception {
@@ -586,19 +582,19 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
   }
 
   protected void checkoutProjectsFromSVN(String url) throws Exception {
-    ui.click(new MenuItemLocator("File/Import..."));
-    ui.wait(new ShellShowingCondition("Import"));
-    ui.click(new FilteredTreeItemLocator("General"));
-    ui.click(new FilteredTreeItemLocator("Maven/Check out Maven Projects from SCM"));
-    ui.click(new ButtonLocator("&Next >"));
-    ui.wait(new SWTIdleCondition());
-    ui.click(new ComboItemLocator("svn", new NamedWidgetLocator("mavenCheckoutLocation.typeCombo")));
-    ui.setFocus(new NamedWidgetLocator("mavenCheckoutLocation.urlCombo"));
-    ui.enterText(url);
-    ui.click(new ButtonLocator("&Finish"));
-    ui.wait(new ShellDisposedCondition("Checkout as Maven project from SCM"));
+    getUI().click(new MenuItemLocator("File/Import..."));
+    getUI().wait(new ShellShowingCondition("Import"));
+    getUI().click(new FilteredTreeItemLocator("General"));
+    getUI().click(new FilteredTreeItemLocator("Maven/Check out Maven Projects from SCM"));
+    getUI().click(new ButtonLocator("&Next >"));
+    getUI().wait(new SWTIdleCondition());
+    getUI().click(new ComboItemLocator("svn", new NamedWidgetLocator("mavenCheckoutLocation.typeCombo")));
+    getUI().setFocus(new NamedWidgetLocator("mavenCheckoutLocation.urlCombo"));
+    getUI().enterText(url);
+    getUI().click(new ButtonLocator("&Finish"));
+    getUI().wait(new ShellDisposedCondition("Checkout as Maven project from SCM"));
 
-    ui.wait(new JobsCompleteCondition(), 300000);
+    getUI().wait(new JobsCompleteCondition(), 300000);
 
     Thread.sleep(5000);
   }
@@ -616,16 +612,16 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
 
     Thread.sleep(5000);
     
-    ui.contextClick(new SWTWidgetLocator(Tree.class, new ViewLocator("org.eclipse.wst.server.ui.ServersView")),
+    getUI().contextClick(new SWTWidgetLocator(Tree.class, new ViewLocator("org.eclipse.wst.server.ui.ServersView")),
         "Ne&w/Server");
-    ui.wait(new ShellShowingCondition("New Server"));
+    getUI().wait(new ShellShowingCondition("New Server"));
     Thread.sleep(2000);
-    ui.click(new FilteredTreeItemLocator("Apache/Tomcat v6.0 Server"));
-    ui.click(new ButtonLocator("&Next >"));
+    getUI().click(new FilteredTreeItemLocator("Apache/Tomcat v6.0 Server"));
+    getUI().click(new ButtonLocator("&Next >"));
     replaceText(new LabeledTextLocator("Tomcat installation &directory:"), tomcatInstallLocation);
-    ui.click(new ButtonLocator("&Finish"));
-    ui.wait(new ShellDisposedCondition("New Server"));
-    ui.wait(new JobsCompleteCondition());
+    getUI().click(new ButtonLocator("&Finish"));
+    getUI().wait(new ShellDisposedCondition("New Server"));
+    getUI().wait(new JobsCompleteCondition());
   }
   
   protected Model getModel(final MavenPomEditor editor) throws Exception {
@@ -637,4 +633,6 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
     });
     return model;
   }
+
+ 
 }

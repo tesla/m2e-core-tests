@@ -18,6 +18,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Label;
 
 import com.windowtester.runtime.WT;
+import com.windowtester.runtime.swt.condition.SWTIdleCondition;
 import com.windowtester.runtime.swt.condition.eclipse.FileExistsCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellDisposedCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellShowingCondition;
@@ -55,7 +56,7 @@ public class PomEditorTest extends PomEditorTestBase {
 
     // test FORM->XML and XML->FORM update of parentArtifactId
     selectEditorTab(TAB_OVERVIEW);
-    ui.click(new SWTWidgetLocator(Label.class, "Parent"));
+    getUI().click(new SWTWidgetLocator(Label.class, "Parent"));
     setTextValue("parentArtifactId", "parent2");
 
     selectEditorTab(TAB_POM_XML);
@@ -74,10 +75,10 @@ public class PomEditorTest extends PomEditorTestBase {
     expandSectionIfRequired("organizationSection", "Organization");
     ScreenCapture.createScreenCapture();
 		
-    ui.click(new NamedWidgetLocator("organizationName"));
+    getUI().click(new NamedWidgetLocator("organizationName"));
     ScreenCapture.createScreenCapture();
     
-		ui.enterText("org.foo");
+		getUI().enterText("org.foo");
     ScreenCapture.createScreenCapture();
 		
 		selectEditorTab(TAB_POM_XML);
@@ -90,19 +91,19 @@ public class PomEditorTest extends PomEditorTestBase {
   public void testUndoRedo() throws Exception {
     openPomFile(TEST_POM_POM_XML);
 
-    ui.click(new NamedWidgetLocator("organizationName"));
-    ui.keyClick(SWT.CTRL, 'a');
-    ui.enterText("orgfoo");
-    ui.click(new NamedWidgetLocator("organizationUrl"));
-    ui.click(new NamedWidgetLocator("organizationName"));
-    ui.keyClick(SWT.CTRL, 'a');
-    ui.enterText("orgfoo1");
+    getUI().click(new NamedWidgetLocator("organizationName"));
+    getUI().keyClick(SWT.CTRL, 'a');
+    getUI().enterText("orgfoo");
+    getUI().click(new NamedWidgetLocator("organizationUrl"));
+    getUI().click(new NamedWidgetLocator("organizationName"));
+    getUI().keyClick(SWT.CTRL, 'a');
+    getUI().enterText("orgfoo1");
     
     // test undo
-	  ui.keyClick(SWT.CTRL, 'z');
+	  getUI().keyClick(SWT.CTRL, 'z');
 	  assertTextValue("organizationName", "orgfoo");
 	  // test redo
-	  ui.keyClick(SWT.CTRL, 'y');
+	  getUI().keyClick(SWT.CTRL, 'y');
 	  assertTextValue("organizationName", "orgfoo1");
   }
 
@@ -110,7 +111,7 @@ public class PomEditorTest extends PomEditorTestBase {
     openPomFile(TEST_POM_POM_XML);
 
     selectEditorTab(TAB_OVERVIEW);
-    ui.click(new SWTWidgetLocator(Label.class, "SCM"));
+    getUI().click(new SWTWidgetLocator(Label.class, "SCM"));
     ScreenCapture.createScreenCapture();
     
     // XXX can't use "." in the url due to issue on Linux in WindowTester
@@ -120,6 +121,7 @@ public class PomEditorTest extends PomEditorTestBase {
     selectEditorTab(TAB_POM_XML);
     delete("<scm>", "</scm>");
     selectEditorTab(TAB_OVERVIEW);
+    getUI().wait(new SWTIdleCondition());
     assertTextValue("scmUrl", "");
     selectEditorTab(TAB_POM_XML);
     delete("<organization>", "</organization>");
@@ -144,12 +146,12 @@ public class PomEditorTest extends PomEditorTestBase {
     setContents(f, text.replace("parent3", "parent4"));
 
     // reload the file
-    ui.click(new CTabItemLocator("Package Explorer"));
-    ui.click(new CTabItemLocator(TEST_POM_POM_XML));
+    getUI().click(new CTabItemLocator("Package Explorer"));
+    getUI().click(new CTabItemLocator(TEST_POM_POM_XML));
     // ui.contextClick(new TreeItemLocator(TEST_POM_POM_XML, new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")), "Refresh");
     
-    ui.wait(new ShellShowingCondition("File Changed"));
-    ui.click(new ButtonLocator("&Yes"));
+    getUI().wait(new ShellShowingCondition("File Changed"));
+    getUI().click(new ButtonLocator("&Yes"));
     
     assertTextValue("parentArtifactId", "parent4");
 
@@ -171,7 +173,7 @@ public class PomEditorTest extends PomEditorTestBase {
     openPomFile(TEST_POM_POM_XML);
 
     // make editor dirty
-    ui.click(new CTabItemLocator(TEST_POM_POM_XML));
+    getUI().click(new CTabItemLocator(TEST_POM_POM_XML));
     selectEditorTab(TAB_POM_XML);
     replaceText("parent4", "parent5");
     selectEditorTab(TAB_OVERVIEW);
@@ -183,14 +185,14 @@ public class PomEditorTest extends PomEditorTestBase {
     setContents(f, text.replace("parent4", "parent6"));
 
     // reload the file
-    ui.click(new CTabItemLocator("Package Explorer"));
+    getUI().click(new CTabItemLocator("Package Explorer"));
     // ui.click(new CTabItemLocator("*" + TEST_POM_POM_XML));  // take dirty state into the account
-    ui.keyClick(SWT.F12);
+    getUI().keyClick(SWT.F12);
     
     // ui.contextClick(new TreeItemLocator(TEST_POM_POM_XML, new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")), "Refresh");
     
-    ui.wait(new ShellShowingCondition("File Changed"));
-    ui.click(new ButtonLocator("&Yes"));
+    getUI().wait(new ShellShowingCondition("File Changed"));
+    getUI().click(new ButtonLocator("&Yes"));
     
     assertTextValue("parentArtifactId", "parent6");
     
@@ -206,12 +208,12 @@ public class PomEditorTest extends PomEditorTestBase {
     openPomFile(TEST_POM_POM_XML);
 
     // close/open the file 
-    ui.close(new CTabItemLocator(TEST_POM_POM_XML));
+    getUI().close(new CTabItemLocator(TEST_POM_POM_XML));
     // ui.click(2, new TreeItemLocator(TEST_POM_POM_XML, new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
     openPomFile(TEST_POM_POM_XML);
 
     // test the editor is clean
-    ui.assertThat(new NotCondition(new DirtyEditorCondition()));
+    getUI().assertThat(new NotCondition(new DirtyEditorCondition()));
   }
 
   //MNGECLIPSE-874
@@ -219,22 +221,22 @@ public class PomEditorTest extends PomEditorTestBase {
     openPomFile(TEST_POM_POM_XML);
 
     // make a change 
-    ui.click(new CTabItemLocator(TEST_POM_POM_XML));
+    getUI().click(new CTabItemLocator(TEST_POM_POM_XML));
     selectEditorTab(TAB_POM_XML);
     replaceText("parent6", "parent7");
     selectEditorTab(TAB_OVERVIEW);
     
     //save file
-    ui.keyClick(SWT.CTRL, 's');
+    getUI().keyClick(SWT.CTRL, 's');
 
     // test the editor is clean
-    ui.assertThat(new NotCondition(new DirtyEditorCondition()));
+    getUI().assertThat(new NotCondition(new DirtyEditorCondition()));
 
     // undo change
-    ui.keyClick(SWT.CTRL, 'z');
+    getUI().keyClick(SWT.CTRL, 'z');
 
     // test the editor is dirty
-    ui.assertThat(new DirtyEditorCondition());
+    getUI().assertThat(new DirtyEditorCondition());
 
     //test the value
     assertTextValue("parentArtifactId", "parent6");
@@ -247,15 +249,15 @@ public class PomEditorTest extends PomEditorTestBase {
     openPomFile(TEST_POM_POM_XML);
 
     // make a change 
-    ui.click(new CTabItemLocator(TEST_POM_POM_XML));
+    getUI().click(new CTabItemLocator(TEST_POM_POM_XML));
     selectEditorTab(TAB_POM_XML);
     replaceText("parent6", "parent7");
     selectEditorTab(TAB_OVERVIEW);
     // undo change
-    ui.keyClick(SWT.CTRL, 'z');
+    getUI().keyClick(SWT.CTRL, 'z');
 
     // test the editor is clean
-    ui.assertThat(new NotCondition(new DirtyEditorCondition()));
+    getUI().assertThat(new NotCondition(new DirtyEditorCondition()));
   }
 
   public void testEmptyFile() throws Exception {
@@ -278,33 +280,33 @@ public class PomEditorTest extends PomEditorTestBase {
 		createFile(name, "");
 		openPomFile(name);
 		
-		ui.keyClick(SWT.CTRL, 's');
-		ui.close(new CTabItemLocator(name));
+		getUI().keyClick(SWT.CTRL, 's');
+		getUI().close(new CTabItemLocator(name));
 		
 		// ui.click(2, new TreeItemLocator(name, new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
 		openPomFile(name);
 		
-		ui.click(new NamedWidgetLocator("groupId"));
-		ui.enterText("1");
-		ui.close(new CTabItemLocator("*" + name));
-		ui.wait(new ShellDisposedCondition("Progress Information"));
-		ui.wait(new ShellShowingCondition("Save Resource"));
-		ui.click(new ButtonLocator("&No"));
+		getUI().click(new NamedWidgetLocator("groupId"));
+		getUI().enterText("1");
+		getUI().close(new CTabItemLocator("*" + name));
+		getUI().wait(new ShellDisposedCondition("Progress Information"));
+		getUI().wait(new ShellShowingCondition("Save Resource"));
+		getUI().click(new ButtonLocator("&No"));
 		
     ScreenCapture.createScreenCapture();
     
-		ui.click(new TreeItemLocator(PROJECT_NAME, new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
+		getUI().click(new TreeItemLocator(PROJECT_NAME, new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
     ScreenCapture.createScreenCapture();
 		    
-		ui.contextClick(new TreeItemLocator(name, //
+		getUI().contextClick(new TreeItemLocator(name, //
         new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")), "Delete");
     ScreenCapture.createScreenCapture();
-		ui.wait(new ShellDisposedCondition("Progress Information"));
-		ui.wait(new ShellShowingCondition("Confirm Delete"));
-		ui.keyClick(WT.CR);
+		getUI().wait(new ShellDisposedCondition("Progress Information"));
+		getUI().wait(new ShellShowingCondition("Confirm Delete"));
+		getUI().keyClick(WT.CR);
 		
 		IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(name));
-		ui.wait(new FileExistsCondition(file, false));
+		getUI().wait(new FileExistsCondition(file, false));
 	}
 	
 	// MNGECLIPSE-833
@@ -326,55 +328,55 @@ public class PomEditorTest extends PomEditorTestBase {
 		openPomFile(name);
 		
 	  selectEditorTab(TAB_POM_XML);
-		ui.wait(new NotCondition(new DirtyEditorCondition()));
+		getUI().wait(new NotCondition(new DirtyEditorCondition()));
 		findText("</project>");
-		ui.keyClick(WT.ARROW_LEFT);
+		getUI().keyClick(WT.ARROW_LEFT);
 		
 		putIntoClipboard("<properties><sample>sample</sample></properties>");
-		ui.keyClick(SWT.CTRL, 'v');
-		ui.wait(new DirtyEditorCondition());
+		getUI().keyClick(SWT.CTRL, 'v');
+		getUI().wait(new DirtyEditorCondition());
 		
-		ui.keyClick(SWT.CTRL, 's');
-		ui.wait(new NotCondition(new DirtyEditorCondition()));
-		ui.keyClick(SWT.CTRL, 'w');
+		getUI().keyClick(SWT.CTRL, 's');
+		getUI().wait(new NotCondition(new DirtyEditorCondition()));
+		getUI().keyClick(SWT.CTRL, 'w');
 	}
 
 	// MNGECLIPSE-835
   public void testModulesEditorActivation() throws Exception {
     openPomFile(TEST_POM_POM_XML);
     
-    ui.keyClick(SWT.CTRL, 'm');
+    getUI().keyClick(SWT.CTRL, 'm');
     
-    ui.click(new SWTWidgetLocator(Label.class, "Parent"));
+    getUI().click(new SWTWidgetLocator(Label.class, "Parent"));
     // ui.click(new SWTWidgetLocator(Label.class, "Properties"));
     
     selectEditorTab(TAB_OVERVIEW);
     ScreenCapture.createScreenCapture();
   
-    ui.click(new ButtonLocator("Add..."));
+    getUI().click(new ButtonLocator("Add..."));
     ScreenCapture.createScreenCapture();
-    ui.click(new TableItemLocator("?"));
+    getUI().click(new TableItemLocator("?"));
     ScreenCapture.createScreenCapture();
-    ui.enterText("foo1");
-    ui.keyClick(WT.CR);
-    ui.keyClick(WT.CR);
+    getUI().enterText("foo1");
+    getUI().keyClick(WT.CR);
+    getUI().keyClick(WT.CR);
     
-    ui.click(new ButtonLocator("Add..."));
-    ui.click(new TableItemLocator("?"));
-    ui.enterText("foo2");
-    ui.keyClick(WT.CR);
-    ui.keyClick(WT.CR);
+    getUI().click(new ButtonLocator("Add..."));
+    getUI().click(new TableItemLocator("?"));
+    getUI().enterText("foo2");
+    getUI().keyClick(WT.CR);
+    getUI().keyClick(WT.CR);
   
     // save
-    ui.keyClick(SWT.CTRL, 's');
+    getUI().keyClick(SWT.CTRL, 's');
     
-    ui.click(new TableItemLocator("foo1"));
-    ui.click(new TableItemLocator("foo2"));
+    getUI().click(new TableItemLocator("foo1"));
+    getUI().click(new TableItemLocator("foo2"));
 
-    ui.keyClick(SWT.CTRL, 'm');
+    getUI().keyClick(SWT.CTRL, 'm');
     
     // test the editor is clean
-    ui.assertThat(new NotCondition(new DirtyEditorCondition()));
+    getUI().assertThat(new NotCondition(new DirtyEditorCondition()));
   }
 
 }

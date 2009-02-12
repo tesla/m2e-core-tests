@@ -95,10 +95,12 @@ public class PomEditorTestBase extends UIIntegrationTestCase {
 
   
 
+  protected void setUp() {
+  }
   protected void tearDown() throws Exception {
-    super.tearDown();
     
-    IConditionMonitor monitor = (IConditionMonitor) ui.getAdapter(IConditionMonitor.class);
+    
+    IConditionMonitor monitor = (IConditionMonitor) getUI().getAdapter(IConditionMonitor.class);
     monitor.add(new ShellShowingCondition("Save Resource(s)?"), //
       new IHandler() {
         public void handle(IUIContext ui) {
@@ -112,9 +114,10 @@ public class PomEditorTestBase extends UIIntegrationTestCase {
       });
     
     // ui.close(new CTabItemLocator("\\*?" + TEST_POM_POM_XML));
-    ui.keyClick(SWT.CTRL, 's');
+    getUI().keyClick(SWT.CTRL, 's');
     Thread.sleep(500L);
-    ui.keyClick(SWT.CTRL, 'w');
+    getUI().keyClick(SWT.CTRL, 'w');
+    //super.tearDown();
   }
 
 
@@ -141,7 +144,7 @@ public class PomEditorTestBase extends UIIntegrationTestCase {
     
     job.setRule(configurationManager.getRule());
     job.schedule();
-    ui.wait(new JobsCompleteCondition(), 300000);
+    getUI().wait(new JobsCompleteCondition(), 300000);
     
   }
 
@@ -149,7 +152,7 @@ public class PomEditorTestBase extends UIIntegrationTestCase {
     IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
     IFile file = root.getFile(new Path(name));
     file.create(new ByteArrayInputStream(content.getBytes("UTF-8")), true, null);
-    ui.wait(new ShellDisposedCondition("Progress Information"));
+    getUI().wait(new ShellDisposedCondition("Progress Information"));
   }
 
   protected void selectEditorTab(final String id) throws Exception {
@@ -159,7 +162,7 @@ public class PomEditorTestBase extends UIIntegrationTestCase {
         editor.setActivePage(id);
       }
     });
-    ui.wait(new SWTIdleCondition());
+    getUI().wait(new SWTIdleCondition());
   }
 
   protected String getContents(File aFile) throws Exception {
@@ -193,15 +196,15 @@ public class PomEditorTestBase extends UIIntegrationTestCase {
   }
 
   protected void assertTextValue(String id, String value) {
-    ui.assertThat(new HasTextCondition(new NamedWidgetLocator(id), value));
+    getUI().assertThat(new HasTextCondition(new NamedWidgetLocator(id), value));
   }
 
   protected void setTextValue(String id, String value) throws WidgetSearchException {
-    ui.setFocus(new NamedWidgetLocator(id));
+    getUI().setFocus(new NamedWidgetLocator(id));
     ScreenCapture.createScreenCapture();
-    ui.keyClick(SWT.CTRL, 'a');
+    getUI().keyClick(SWT.CTRL, 'a');
     ScreenCapture.createScreenCapture();
-    ui.enterText(value);
+    getUI().enterText(value);
     ScreenCapture.createScreenCapture();
   }
 
@@ -221,9 +224,9 @@ public class PomEditorTestBase extends UIIntegrationTestCase {
     Display.getDefault().syncExec(new Runnable() {
       public void run() {
         try {
-          IWidgetLocator[] loc = ui.findAll(new SWTWidgetLocator(StyledText.class));
+          IWidgetLocator[] loc = getUI().findAll(new SWTWidgetLocator(StyledText.class));
           for (int i=0; i<loc.length; i++) {
-            WidgetReference ref = (WidgetReference) ui.find(loc[i]);
+            WidgetReference ref = (WidgetReference) getUI().find(loc[i]);
             texts[0] = ((StyledText) ref.getWidget()).getText();
             if (texts[0].contains("<project"))
               break;
@@ -239,19 +242,19 @@ public class PomEditorTestBase extends UIIntegrationTestCase {
 
   protected void expandSectionIfRequired(String sectionName, String sectionLabel) throws WidgetSearchException {
     SWTWidgetLocator organizationLocator = new NamedWidgetLocator(sectionName);
-    WidgetReference organizationReference = (WidgetReference) ui.find(organizationLocator);
+    WidgetReference organizationReference = (WidgetReference) getUI().find(organizationLocator);
     Section organizationSection = (Section) organizationReference.getWidget();
     if(!organizationSection.isExpanded()) {
-      ui.click(new SWTWidgetLocator(Label.class, sectionLabel));
+      getUI().click(new SWTWidgetLocator(Label.class, sectionLabel));
     }
   }
 
   protected void collapseSectionIfRequired(String sectionName, String sectionLabel) throws WidgetSearchException {
     SWTWidgetLocator organizationLocator = new NamedWidgetLocator(sectionName);
-    WidgetReference organizationReference = (WidgetReference) ui.find(organizationLocator);
+    WidgetReference organizationReference = (WidgetReference) getUI().find(organizationLocator);
     Section organizationSection = (Section) organizationReference.getWidget();
     if(organizationSection.isExpanded()) {
-      ui.click(new SWTWidgetLocator(Label.class, sectionLabel));
+      getUI().click(new SWTWidgetLocator(Label.class, sectionLabel));
     }
   }
 
