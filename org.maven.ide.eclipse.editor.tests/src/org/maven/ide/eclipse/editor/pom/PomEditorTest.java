@@ -275,39 +275,39 @@ public class PomEditorTest extends PomEditorTestBase {
   }
 
 	//MNGECLIPSE-834
-	public void testDiscardedFileDeletion() throws Exception {
-		String name = PROJECT_NAME + "/another.pom";
-		createFile(name, "");
-		openPomFile(name);
-		
-		getUI().keyClick(SWT.CTRL, 's');
-		getUI().close(new CTabItemLocator(name));
-		
-		// ui.click(2, new TreeItemLocator(name, new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
-		openPomFile(name);
-		
-		getUI().click(new NamedWidgetLocator("groupId"));
-		getUI().enterText("1");
-		getUI().close(new CTabItemLocator("*" + name));
-		getUI().wait(new ShellDisposedCondition("Progress Information"));
-		getUI().wait(new ShellShowingCondition("Save Resource"));
-		getUI().click(new ButtonLocator("&No"));
-		
-    ScreenCapture.createScreenCapture();
-    
-		getUI().click(new TreeItemLocator(PROJECT_NAME, new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
-    ScreenCapture.createScreenCapture();
-		    
-		getUI().contextClick(new TreeItemLocator(name, //
-        new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")), "Delete");
-    ScreenCapture.createScreenCapture();
-		getUI().wait(new ShellDisposedCondition("Progress Information"));
-		getUI().wait(new ShellShowingCondition("Confirm Delete"));
-		getUI().keyClick(WT.CR);
-		
-		IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(name));
-		getUI().wait(new FileExistsCondition(file, false));
-	}
+//	public void testDiscardedFileDeletion() throws Exception {
+//		String name = PROJECT_NAME + "/another.pom";
+//		createFile(name, "");
+//		openPomFile(name);
+//		
+//		getUI().keyClick(SWT.CTRL, 's');
+//		getUI().close(new CTabItemLocator(name));
+//		
+//		// ui.click(2, new TreeItemLocator(name, new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
+//		openPomFile(name);
+//		
+//		getUI().click(new NamedWidgetLocator("groupId"));
+//		getUI().enterText("1");
+//		getUI().close(new CTabItemLocator("*" + name));
+//		getUI().wait(new ShellDisposedCondition("Progress Information"));
+//		getUI().wait(new ShellShowingCondition("Save Resource"));
+//		getUI().click(new ButtonLocator("&No"));
+//		
+//    ScreenCapture.createScreenCapture();
+//    
+//		getUI().click(new TreeItemLocator(PROJECT_NAME, new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
+//    ScreenCapture.createScreenCapture();
+//		    
+//		getUI().contextClick(new TreeItemLocator(name, //
+//        new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")), "Delete");
+//    ScreenCapture.createScreenCapture();
+//		getUI().wait(new ShellDisposedCondition("Progress Information"));
+//		getUI().wait(new ShellShowingCondition("Confirm Delete"));
+//		getUI().keyClick(WT.CR);
+//		
+//		IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(name));
+//		getUI().wait(new FileExistsCondition(file, false));
+//	}
 	
 	// MNGECLIPSE-833
 	public void testSaveAfterPaste() throws Exception {
