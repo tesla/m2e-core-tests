@@ -225,9 +225,6 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
             setErrorMessage(msg, IMessageProvider.ERROR);
           }
 
-//          return Status.OK_STATUS;
-//        }
-//      }.schedule();
     }
   }
 
@@ -235,7 +232,9 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
     if(getPartControl()!=null) {
       getPartControl().getDisplay().asyncExec(new Runnable() {
         public void run() {
-          FormUtils.setMessage(getManagedForm().getForm(), msg, severity);
+          if (!getManagedForm().getForm().isDisposed()) {
+            FormUtils.setMessage(getManagedForm().getForm(), msg, severity);
+          }
         }
       });
     }
