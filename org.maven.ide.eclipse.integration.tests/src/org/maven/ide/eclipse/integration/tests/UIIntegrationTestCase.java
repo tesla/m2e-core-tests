@@ -85,7 +85,6 @@ import com.windowtester.runtime.swt.locator.MenuItemLocator;
 import com.windowtester.runtime.swt.locator.NamedWidgetLocator;
 import com.windowtester.runtime.swt.locator.SWTWidgetLocator;
 import com.windowtester.runtime.swt.locator.TreeItemLocator;
-import com.windowtester.runtime.swt.locator.eclipse.ContributedToolItemLocator;
 import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
 import com.windowtester.runtime.util.ScreenCapture;
 
@@ -108,7 +107,7 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
   private static final String NEXUS_URL_PROPERTY = "nexus.server.url";
 
   // Location of tomcat 6 installation which can be used by Eclipse WTP tests
-  private static final String DEFAULT_TOMCAT_INSTALL_LOCATION = "C:\\test\\apache-tomcat-6.0.18";
+  private static final String DEFAULT_TOMCAT_INSTALL_LOCATION = "c:/test/apache-tomcat-6.0.18";
   
   // Set this system property to override DEFAULT_TOMCAT_INSTALL_LOCATION
   private static final String TOMCAT_INSTALL_LOCATION_PROPERTY = "tomcat.install.location";
@@ -215,8 +214,12 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
         getUI().wait(new ShellShowingCondition("Remove Index"));
         getUI().click(new ButtonLocator("OK"));
 
+        getUI().click(new CTabItemLocator("Maven Indexes"));
+        
         // Add in nexus proxy for maven central
-        getUI().click(new ContributedToolItemLocator("org.maven.ide.eclipse.addIndexAction"));
+        getUI().contextClick(new TreeItemLocator("workspace", new ViewLocator(
+        "org.maven.ide.eclipse.views.MavenIndexesView")), "Add Index");
+        //getUI().click(new ContributedToolItemLocator("org.maven.ide.eclipse.addIndexAction"));
 
         getUI().wait(new ShellShowingCondition("Add Repository Index"));
         getUI().click(new NamedWidgetLocator("repositoryUrlCombo"));
@@ -491,8 +494,7 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
   }
 
   protected void replaceText(IWidgetLocator locator, String text) throws WidgetSearchException {
-    getUI().click(locator);
-    getUI().keyClick(SWT.MOD1, 'a');
+    getUI().click(2, locator);
     getUI().enterText(text);
   }
 
@@ -620,10 +622,12 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
     Thread.sleep(2000);
     getUI().click(new FilteredTreeItemLocator("Apache/Tomcat v6.0 Server"));
     getUI().click(new ButtonLocator("&Next >"));
-    replaceText(new LabeledTextLocator("Tomcat installation &directory:"), tomcatInstallLocation);
+    getUI().click(new LabeledTextLocator("Tomcat installation &directory:"));
+    getUI().enterText(tomcatInstallLocation);
     getUI().click(new ButtonLocator("&Finish"));
     getUI().wait(new ShellDisposedCondition("New Server"));
-    getUI().wait(new JobsCompleteCondition());
+    Thread.sleep(5000);
+    getUI().wait(new JobsCompleteCondition(), 120000);
   }
   
   protected Model getModel(final MavenPomEditor editor) throws Exception {
