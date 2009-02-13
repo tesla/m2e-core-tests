@@ -112,11 +112,9 @@ public class PomEditorTest extends PomEditorTestBase {
 
     selectEditorTab(TAB_OVERVIEW);
     getUI().click(new SWTWidgetLocator(Label.class, "SCM"));
-    ScreenCapture.createScreenCapture();
     
     // XXX can't use "." in the url due to issue on Linux in WindowTester
     setTextValue("scmUrl", "http://m2eclipse");
-    ScreenCapture.createScreenCapture();
     assertTextValue("scmUrl", "http://m2eclipse");
     selectEditorTab(TAB_POM_XML);
     delete("<scm>", "</scm>");
@@ -134,10 +132,6 @@ public class PomEditorTest extends PomEditorTestBase {
   public void testExternalModificationEditorClean() throws Exception {
     openPomFile(TEST_POM_POM_XML);
 
-    // save editor
-//    ui.keyClick(SWT.CTRL, 's');
-//    Thread.sleep(2000);
-
     // externally replace file contents
     IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
     IFile file = root.getFile(new Path(TEST_POM_POM_XML));
@@ -148,7 +142,6 @@ public class PomEditorTest extends PomEditorTestBase {
     // reload the file
     getUI().click(new CTabItemLocator("Package Explorer"));
     getUI().click(new CTabItemLocator(TEST_POM_POM_XML));
-    // ui.contextClick(new TreeItemLocator(TEST_POM_POM_XML, new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")), "Refresh");
     
     getUI().wait(new ShellShowingCondition("File Changed"));
     getUI().click(new ButtonLocator("&Yes"));
@@ -186,13 +179,12 @@ public class PomEditorTest extends PomEditorTestBase {
 
     // reload the file
     getUI().click(new CTabItemLocator("Package Explorer"));
-    // ui.click(new CTabItemLocator("*" + TEST_POM_POM_XML));  // take dirty state into the account
     getUI().keyClick(SWT.F12);
     
-    // ui.contextClick(new TreeItemLocator(TEST_POM_POM_XML, new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")), "Refresh");
     
     getUI().wait(new ShellShowingCondition("File Changed"));
     getUI().click(new ButtonLocator("&Yes"));
+    
     
     assertTextValue("parentArtifactId", "parent6");
     

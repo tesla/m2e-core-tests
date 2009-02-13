@@ -117,7 +117,6 @@ public class PomEditorTestBase extends UIIntegrationTestCase {
     getUI().keyClick(SWT.CTRL, 's');
     Thread.sleep(500L);
     getUI().keyClick(SWT.CTRL, 'w');
-    //super.tearDown();
   }
 
 
@@ -177,22 +176,30 @@ public class PomEditorTestBase extends UIIntegrationTestCase {
     return contents.toString();
   }
 
-  protected void delete(String startMarker, final String endMarker) throws WaitTimedOutException {
+  protected void delete(final String startMarker, final String endMarker) throws WaitTimedOutException {
       final MavenPomEditor editor = (MavenPomEditor) getActivePage().getActiveEditor();
       final StructuredTextEditor[] sse = new StructuredTextEditor[1];
       Display.getDefault().syncExec(new Runnable() {
         public void run() {
           sse[0] = (StructuredTextEditor) editor.getActiveEditor();
+          
+          IDocument structuredDocument = sse[0].getDocumentProvider().getDocument(sse[0].getEditorInput());
+          String text = structuredDocument.get();
+          int pos1 = text.indexOf(startMarker); 
+          int pos2 = text.indexOf(endMarker);
+          text = text.substring(0, pos1) + text.substring(pos2 + endMarker.length());
+          structuredDocument.set(text);
         }
       });
       
      
-      IDocument structuredDocument = sse[0].getDocumentProvider().getDocument(sse[0].getEditorInput());
-      String text = structuredDocument.get();
-      int pos1 = text.indexOf(startMarker); 
-      int pos2 = text.indexOf(endMarker);
-      text = text.substring(0, pos1) + text.substring(pos2 + endMarker.length());
-      structuredDocument.set(text);
+//      IDocument structuredDocument = sse[0].getDocumentProvider().getDocument(sse[0].getEditorInput());
+//      String text = structuredDocument.get();
+//      int pos1 = text.indexOf(startMarker); 
+//      int pos2 = text.indexOf(endMarker);
+//      text = text.substring(0, pos1) + text.substring(pos2 + endMarker.length());
+//      structuredDocument.set(text);
+//      getUI().wait(new SWTIdleCondition());
   }
 
   protected void assertTextValue(String id, String value) {
