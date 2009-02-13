@@ -494,7 +494,8 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
   }
 
   protected void replaceText(IWidgetLocator locator, String text) throws WidgetSearchException {
-    getUI().click(2, locator);
+    getUI().click(locator);
+    getUI().keyClick(SWT.MOD1, 'a');
     getUI().enterText(text);
   }
 
