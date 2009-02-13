@@ -443,7 +443,9 @@ public class MavenIndexesView extends ViewPart {
   void refreshView() {
     Display.getDefault().asyncExec(new Runnable() {
       public void run() {
-        refreshAction.run();
+        if (!viewer.getControl().isDisposed()) {
+          refreshAction.run();
+        }
       }
     });
   };
