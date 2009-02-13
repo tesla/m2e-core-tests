@@ -46,7 +46,7 @@ public class MEclipse163ResolveDependenciesTest extends UIIntegrationTestCase {
     openFile(project, "src/main/java/org/sonatype/test/project/App.java");
 
     //launch quick fix for SessionFactory dependency
-    getUI().click(new TreeItemLocator("project.*", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
+    getUI().click(new TreeItemLocator("project.*", new ViewLocator(PACKAGE_EXPLORER_VIEW_ID)));
     getUI().keyClick(SWT.MOD1 | SWT.SHIFT, 't');
     getUI().wait(new ShellShowingCondition("Open Type"));
     getUI().enterText("app");

@@ -115,6 +115,8 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
   
   private static final String FIND_REPLACE = "Find/Replace";
 
+  public static final String PACKAGE_EXPLORER_VIEW_ID = "org.eclipse.jdt.ui.PackageExplorer";
+  
   public UIIntegrationTestCase() {
     super();
   }

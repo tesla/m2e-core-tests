@@ -57,14 +57,14 @@ public class MEclipse173SimpleWebAppTest extends UIIntegrationTestCase {
     getUI().wait(new JobsCompleteCondition(), 120000);
 
     // Generate the database using maven goal hibernate3:hbm2ddl
-    getUI().click(new TreeItemLocator("simple-webapp", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
+    getUI().click(new TreeItemLocator("simple-webapp", new ViewLocator(PACKAGE_EXPLORER_VIEW_ID)));
     getUI().click(new MenuItemLocator("Run/Run As/.*Maven build..."));
     getUI().wait(new ShellShowingCondition("Edit Configuration"));
     getUI().enterText("hibernate3:hbm2ddl");
     getUI().click(new ButtonLocator("&Run"));
     getUI().wait(new ShellDisposedCondition("Edit Configuration"));
     getUI().wait(new JobsCompleteCondition(), 60000);
-    getUI().click(new TreeItemLocator("simple-webapp", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
+    getUI().click(new TreeItemLocator("simple-webapp", new ViewLocator(PACKAGE_EXPLORER_VIEW_ID)));
     getUI().keyClick(SWT.F5);
     getUI().wait(new JobsCompleteCondition());
 
@@ -136,6 +136,8 @@ public class MEclipse173SimpleWebAppTest extends UIIntegrationTestCase {
    
     try {
       // Stop the server
+      getUI().click(new TreeItemLocator("Servers", new ViewLocator(PACKAGE_EXPLORER_VIEW_ID)));
+      getUI().keyClick(SWT.F5);
       getUI().click(new CTabItemLocator("Servers"));
       getUI().click(new TreeItemLocator(SERVER_NAME, new ViewLocator("org.eclipse.wst.server.ui.ServersView")));
       getUI().keyClick(SWT.MOD1 | SWT.ALT, 's');

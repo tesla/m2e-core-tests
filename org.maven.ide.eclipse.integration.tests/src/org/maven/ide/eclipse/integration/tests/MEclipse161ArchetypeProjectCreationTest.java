@@ -75,7 +75,7 @@ public class MEclipse161ArchetypeProjectCreationTest extends UIIntegrationTestCa
       assertTrue("archtype project \"" + archetypeName + "\" created without Maven nature", project
           .hasNature("org.maven.ide.eclipse.maven2Nature")); 
 
-      ui.click(new TreeItemLocator("project.*", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
+      ui.click(new TreeItemLocator("project.*", new ViewLocator(PACKAGE_EXPLORER_VIEW_ID)));
       return project;
     } catch(Exception ex) {
       ScreenCapture.createScreenCapture();
