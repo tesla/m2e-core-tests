@@ -283,7 +283,7 @@ public class PomEditorTest extends PomEditorTestBase {
     getUI().keyClick(SWT.CTRL, 's');
     getUI().close(new CTabItemLocator(name));
     
-    // getUI().click(2, new TreeItemLocator(name, new ViewLocator("org.eclipse.jdt.getUI().PackageExplorer")));
+    // getUI().click(2, new TreeItemLocator(name, new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
     openPomFile(name);
     
     getUI().click(new NamedWidgetLocator("groupId"));
@@ -295,11 +295,11 @@ public class PomEditorTest extends PomEditorTestBase {
     
     ScreenCapture.createScreenCapture();
     
-    getUI().click(new TreeItemLocator(PROJECT_NAME, new ViewLocator("org.eclipse.jdt.getUI().PackageExplorer")));
+    getUI().click(new TreeItemLocator(PROJECT_NAME, new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
     ScreenCapture.createScreenCapture();
         
     getUI().contextClick(new TreeItemLocator(name, //
-        new ViewLocator("org.eclipse.jdt.getUI().PackageExplorer")), "Delete");
+        new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")), "Delete");
     ScreenCapture.createScreenCapture();
     getUI().wait(new ShellDisposedCondition("Progress Information"));
     getUI().wait(new ShellShowingCondition("Confirm Delete"));
