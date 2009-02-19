@@ -157,7 +157,7 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
   }
 
   private String quote(String string) {
-    return string.indexOf(' ')>-1 ? "\"" + string + "\"" : string;
+    return string.indexOf(' ') > -1 ? "\"" + string + "\"" : string;
   }
 
   private boolean shouldResolveWorkspaceArtifacts(ILaunchConfiguration configuration) throws CoreException {
@@ -200,13 +200,21 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
       @SuppressWarnings("unchecked")
       List<String> properties = configuration.getAttribute(ATTR_PROPERTIES, Collections.EMPTY_LIST);
       for(String property : properties) {
-        String[] s = property.split("=");
-        String n = s[0];
-        String v = Util.substituteVar(s[1]);
-        if(v.indexOf(' ') >= 0) {
-          v = '"' + v + '"';
+        int n = property.indexOf('=');
+        String name = property;
+        String value = null;
+
+        if(n > -1) {
+          name = property.substring(0, n);
+          if(n > 1) {
+            value = Util.substituteVar(property.substring(n + 1));
+          }
         }
-        sb.append(" -D").append(n).append("=").append(v);
+
+        sb.append(" -D").append(name);
+        if(value != null) {
+          sb.append('=').append(quote(value));
+        }
       }
     } catch(CoreException e) {
       String msg = "Exception while getting configuration attribute " + ATTR_PROPERTIES;
@@ -263,12 +271,7 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
 //      settings = getMavenRuntime(configuration).getSettings();
 //    }
     if(settings != null && settings.trim().length() > 0) {
-      sb.append(" -s ");
-      if(settings.indexOf(' ') > -1) {
-        sb.append('\"').append(settings).append('\"');
-      } else {
-        sb.append(settings);
-      }
+      sb.append(" -s ").append(quote(settings));
     }
 
     // boolean b = preferenceStore.getBoolean(MavenPreferenceConstants.P_CHECK_LATEST_PLUGIN_VERSION);

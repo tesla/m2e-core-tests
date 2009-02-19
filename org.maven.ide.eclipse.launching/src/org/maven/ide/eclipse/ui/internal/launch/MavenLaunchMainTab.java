@@ -58,7 +58,6 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.externaltools.internal.model.IExternalToolConstants;
 import org.maven.ide.eclipse.MavenImages;
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.core.Messages;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
@@ -536,17 +535,19 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
       @SuppressWarnings("unchecked")
       List<String> properties = configuration.getAttribute(ATTR_PROPERTIES, Collections.EMPTY_LIST);
       for(String property : properties) {
-        try {
-          String[] ss = property.split("="); //$NON-NLS-1$
-          TableItem item = new TableItem(propsTable, SWT.NONE);
-          item.setText(0, ss[0]);
-          if(ss.length > 1) {
-            item.setText(1, ss[1]);
+        int n = property.indexOf('=');
+        String name = property;
+        String value = "";
+        if(n > -1) {
+          name = property.substring(0, n);
+          if(n > 1) {
+            value = property.substring(n + 1);
           }
-        } catch(Exception e) {
-          String msg = "Error parsing argument: " + property; //$NON-NLS-1$
-          MavenLogger.log(msg, e);
         }
+        
+        TableItem item = new TableItem(propsTable, SWT.NONE);
+        item.setText(0, name);
+        item.setText(1, value);
       }
     } catch(CoreException ex) {
     }
