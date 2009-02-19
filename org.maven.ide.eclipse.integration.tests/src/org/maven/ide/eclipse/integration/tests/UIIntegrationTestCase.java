@@ -41,9 +41,12 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.ViewForm;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
@@ -84,6 +87,7 @@ import com.windowtester.runtime.swt.locator.LabeledTextLocator;
 import com.windowtester.runtime.swt.locator.MenuItemLocator;
 import com.windowtester.runtime.swt.locator.NamedWidgetLocator;
 import com.windowtester.runtime.swt.locator.SWTWidgetLocator;
+import com.windowtester.runtime.swt.locator.TableCellLocator;
 import com.windowtester.runtime.swt.locator.TreeItemLocator;
 import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
 import com.windowtester.runtime.util.ScreenCapture;
@@ -641,5 +645,50 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
     return model;
   }
 
- 
+  /** 
+   * Create an archetype project and assert that it has proper natures & builders, and no error markers
+   */
+  protected IProject createArchetypeProjct(String archetypeName, String projectName) throws Exception {
+    try {
+      IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+      assertFalse(project.exists());
+
+      IUIContext ui = getUI();
+      ui.click(new SWTWidgetLocator(ViewForm.class, new SWTWidgetLocator(CTabFolder.class, 0, new SWTWidgetLocator(
+          Composite.class))));
+      ui.click(new MenuItemLocator("File/New/Project..."));
+      ui.wait(new ShellShowingCondition("New Project"));
+      ui.click(new FilteredTreeItemLocator("Plug-in Project"));
+      ui.click(new FilteredTreeItemLocator("Maven/Maven Project"));
+      ui.click(new ButtonLocator("&Next >"));
+      ui.click(new ButtonLocator("&Next >"));
+      ui.click(new TableCellLocator(archetypeName, 2));
+      // NamedWidgetLocator table = new NamedWidgetLocator("archetypesTable");
+
+      ui.click(new ButtonLocator("&Next >"));
+      ui.wait(new SWTIdleCondition());
+      IWidgetLocator groupCombo = ui.find(new NamedWidgetLocator("groupId"));
+      ui.setFocus(groupCombo);
+      ui.enterText("org.sonatype.test");
+      ui.setFocus(ui.find(new NamedWidgetLocator("artifactId")));
+      ui.enterText(projectName);
+      ui.click(new ButtonLocator("&Finish"));
+      ui.wait(new ShellDisposedCondition("New Maven Project"));
+      Thread.sleep(5000); // Give builder a chance to start
+      ui.wait(new JobsCompleteCondition(), 240000);
+
+      project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+      assertTrue(project.exists());
+      assertProjectsHaveNoErrors();
+      assertTrue("archtype project \"" + archetypeName + "\" created without Maven nature", project
+          .hasNature("org.maven.ide.eclipse.maven2Nature")); 
+
+      ui.click(new TreeItemLocator(projectName + ".*", new ViewLocator(PACKAGE_EXPLORER_VIEW_ID)));
+      return project;
+    } catch(Exception ex) {
+      ScreenCapture.createScreenCapture();
+      throw new Exception("Failed to create project for archetype:" + archetypeName, ex);
+    }
+  }
+
 }
