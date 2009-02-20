@@ -2,21 +2,16 @@ package org.maven.ide.eclipse.integration.tests;
 
 import java.io.File;
 
-import com.windowtester.runtime.swt.locator.TreeItemLocator;
-import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
-import com.windowtester.runtime.swt.UITestCaseSWT;
+import org.eclipse.swt.SWT;
+
 import com.windowtester.runtime.IUIContext;
 import com.windowtester.runtime.swt.condition.eclipse.JobsCompleteCondition;
+import com.windowtester.runtime.swt.condition.shell.ShellDisposedCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellShowingCondition;
 import com.windowtester.runtime.swt.locator.ButtonLocator;
-import com.windowtester.runtime.swt.condition.shell.ShellDisposedCondition;
-import com.windowtester.runtime.swt.locator.SWTWidgetLocator;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StyledText;
-import com.windowtester.runtime.locator.XYLocator;
-import com.windowtester.runtime.WT;
 import com.windowtester.runtime.swt.locator.CTabItemLocator;
+import com.windowtester.runtime.swt.locator.TreeItemLocator;
+import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
 
 public class MEclipse178IssueTrackerTest extends UIIntegrationTestCase {
 

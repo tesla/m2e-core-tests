@@ -6,18 +6,15 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.integration.tests;
+package org.maven.ide.eclipse.integration.tests.wtp;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.net.URL;
-import java.net.URLConnection;
 
-import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.swt.SWT;
+import org.maven.ide.eclipse.integration.tests.UIIntegrationTestCase;
 
 import com.windowtester.runtime.swt.condition.eclipse.JobsCompleteCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellDisposedCondition;
@@ -30,8 +27,6 @@ import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
 
 
 public class MEclipse173SimpleWebAppTest extends UIIntegrationTestCase {
-
-  private static final String SERVER_NAME = "Tomcat.*";
 
   private static final String DEPLOYED_URL = "http://localhost:8080/simple-webapp/weather.x?zip=94038";
 
@@ -99,34 +94,10 @@ public class MEclipse173SimpleWebAppTest extends UIIntegrationTestCase {
 
     getUI().wait(new JobsCompleteCondition(), 120000);
 
-    // Deploy the test project into tomcat
-    getUI().click(new CTabItemLocator("Servers"));
-    getUI().contextClick(new TreeItemLocator(SERVER_NAME, new ViewLocator("org.eclipse.wst.server.ui.ServersView")),
-        "Add and Remove Projects...");
-    getUI().wait(new ShellShowingCondition("Add and Remove Projects"));
-    getUI().click(new ButtonLocator("Add A&ll >>"));
-    getUI().click(new ButtonLocator("&Finish"));
-    getUI().wait(new ShellDisposedCondition("Add and Remove Projects"));
-
-    Thread.sleep(3000);
-
-    // Start the server
-    getUI().click(new TreeItemLocator(SERVER_NAME, new ViewLocator("org.eclipse.wst.server.ui.ServersView")));
-    getUI().keyClick(SWT.MOD1 | SWT.ALT, 'r');
-    getUI().wait(new JobsCompleteCondition(), 120000);
-    Thread.sleep(5000);
+    deployProjectsIntoTomcat();
 
     // Verify deployment worked (attempt to get weather forcast for Moss Beach CA)
-
-    URL url = new URL(DEPLOYED_URL);
-    URLConnection conn = url.openConnection();
-    conn.setDoInput(true);
-    conn.connect();
-    ByteArrayOutputStream out = new ByteArrayOutputStream();
-    IOUtil.copy(conn.getInputStream(), out);
-    conn.getInputStream().close();
-
-    String s = new String(out.toByteArray(), "UTF-8");
+    String s = retrieveWebPage(DEPLOYED_URL);
 
     assertTrue("Couldn't find Moss Beach weather in web page", s.indexOf("Moss Beach") > 0);
 
@@ -135,13 +106,7 @@ public class MEclipse173SimpleWebAppTest extends UIIntegrationTestCase {
   protected void tearDown() throws Exception {
    
     try {
-      // Stop the server
-      getUI().click(new TreeItemLocator("Servers", new ViewLocator(PACKAGE_EXPLORER_VIEW_ID)));
-      getUI().keyClick(SWT.F5);
-      getUI().click(new CTabItemLocator("Servers"));
-      getUI().click(new TreeItemLocator(SERVER_NAME, new ViewLocator("org.eclipse.wst.server.ui.ServersView")));
-      getUI().keyClick(SWT.MOD1 | SWT.ALT, 's');
-      getUI().wait(new JobsCompleteCondition(), 120000);
+      shutdownTomcat();
     } catch(Exception ex) {
       ex.printStackTrace();
     }

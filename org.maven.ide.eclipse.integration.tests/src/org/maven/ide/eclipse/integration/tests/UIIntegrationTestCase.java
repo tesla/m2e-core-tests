@@ -10,6 +10,7 @@ package org.maven.ide.eclipse.integration.tests;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -103,7 +104,7 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
 
   // Has the maven central index been cached into local workspace?
   private static boolean indexDownloaded = false;
-  
+
   // URL of local nexus server, tests will attempt download maven/central index from here.
   private static final String DEFAULT_NEXUS_URL = "http://localhost:8081/nexus";
 
@@ -112,14 +113,14 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
 
   // Location of tomcat 6 installation which can be used by Eclipse WTP tests
   private static final String DEFAULT_TOMCAT_INSTALL_LOCATION = "c:/test/apache-tomcat-6.0.18";
-  
+
   // Set this system property to override DEFAULT_TOMCAT_INSTALL_LOCATION
   private static final String TOMCAT_INSTALL_LOCATION_PROPERTY = "tomcat.install.location";
-  
+
   private static final String FIND_REPLACE = "Find/Replace";
 
   public static final String PACKAGE_EXPLORER_VIEW_ID = "org.eclipse.jdt.ui.PackageExplorer";
-  
+
   public UIIntegrationTestCase() {
     super();
   }
@@ -213,16 +214,18 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
         getUI().wait(new SWTIdleCondition());
 
         // Remove maven central index.
-        getUI().contextClick(new TreeItemLocator("central .*", new ViewLocator(
-            "org.maven.ide.eclipse.views.MavenIndexesView")), "Remove Index");
+        getUI().contextClick(
+            new TreeItemLocator("central .*", new ViewLocator("org.maven.ide.eclipse.views.MavenIndexesView")),
+            "Remove Index");
         getUI().wait(new ShellShowingCondition("Remove Index"));
         getUI().click(new ButtonLocator("OK"));
 
         getUI().click(new CTabItemLocator("Maven Indexes"));
-        
+
         // Add in nexus proxy for maven central
-        getUI().contextClick(new TreeItemLocator("workspace", new ViewLocator(
-        "org.maven.ide.eclipse.views.MavenIndexesView")), "Add Index");
+        getUI().contextClick(
+            new TreeItemLocator("workspace", new ViewLocator("org.maven.ide.eclipse.views.MavenIndexesView")),
+            "Add Index");
         //getUI().click(new ContributedToolItemLocator("org.maven.ide.eclipse.addIndexAction"));
 
         getUI().wait(new ShellShowingCondition("Add Repository Index"));
@@ -233,8 +236,9 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
         getUI().wait(new SWTIdleCondition());
         getUI().click(new ButtonLocator("OK"));
         getUI().wait(new ShellDisposedCondition("Add Repository Index"));
-        getUI().contextClick(new TreeItemLocator("central-remote.*", new ViewLocator(
-            "org.maven.ide.eclipse.views.MavenIndexesView")), "Update Index");
+        getUI().contextClick(
+            new TreeItemLocator("central-remote.*", new ViewLocator("org.maven.ide.eclipse.views.MavenIndexesView")),
+            "Update Index");
         hideView(indexView);
       } catch(IOException ex) {
         // Couldn't reach local nexus server, just go ahead and use maven central
@@ -275,7 +279,7 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
     super.tearDown();
     clearProjects();
   }
-  
+
   protected void setUp() throws Exception {
     super.setUp();
     clearProjects();
@@ -295,19 +299,19 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
   }
 
   protected IEditorPart openFile(IProject project, String relPath) throws Exception {
-    
-    final IFile f = project.getFile(relPath);
-     
-    IEditorPart editor = (IEditorPart)UIThreadTask.executeOnEventQueue(new UIThreadTask() {
 
-       public Object runEx() throws Exception {
-         return IDE.openEditor(getActivePage(), f, true);
-       }
-     });
-     getUI().wait(new JobsCompleteCondition(), 60000);
-     return editor;
-   }
-  
+    final IFile f = project.getFile(relPath);
+
+    IEditorPart editor = (IEditorPart) UIThreadTask.executeOnEventQueue(new UIThreadTask() {
+
+      public Object runEx() throws Exception {
+        return IDE.openEditor(getActivePage(), f, true);
+      }
+    });
+    getUI().wait(new JobsCompleteCondition(), 60000);
+    return editor;
+  }
+
   protected MavenPomEditor openPomFile(String name) throws Exception {
 
     IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
@@ -353,7 +357,6 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
     getUI().wait(new ShellDisposedCondition(FIND_REPLACE));
   }
 
- 
   protected File copyPluginResourceToTempFile(String plugin, String file) throws MalformedURLException, IOException {
     URL url = FileLocator.find(Platform.getBundle(plugin), new Path("/" + file), null);
     File f = File.createTempFile("temp", new Path(file).getFileExtension());
@@ -433,7 +436,7 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
     return temp;
   }
 
-  void deleteDirectory(File dir) {
+  protected void deleteDirectory(File dir) {
     File[] fileArray = dir.listFiles();
     if(fileArray != null) {
       for(int i = 0; i < fileArray.length; i++ ) {
@@ -607,34 +610,39 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
 
     Thread.sleep(5000);
   }
-  
+
   protected void installTomcat6() throws Exception {
-    
+
     String tomcatInstallLocation = System.getProperty(TOMCAT_INSTALL_LOCATION_PROPERTY);
-    if (tomcatInstallLocation == null) {
+    if(tomcatInstallLocation == null) {
       tomcatInstallLocation = DEFAULT_TOMCAT_INSTALL_LOCATION;
     }
-    
+
     assertTrue("Can't locate tomcat installation: " + tomcatInstallLocation, new File(tomcatInstallLocation).exists());
     // Install the Tomcat server 
     showView("org.eclipse.wst.server.ui.ServersView");
 
     Thread.sleep(5000);
-    
+
     getUI().contextClick(new SWTWidgetLocator(Tree.class, new ViewLocator("org.eclipse.wst.server.ui.ServersView")),
         "Ne&w/Server");
     getUI().wait(new ShellShowingCondition("New Server"));
     Thread.sleep(2000);
     getUI().click(new FilteredTreeItemLocator("Apache/Tomcat v6.0 Server"));
     getUI().click(new ButtonLocator("&Next >"));
-    getUI().click(new LabeledTextLocator("Tomcat installation &directory:"));
-    getUI().enterText(tomcatInstallLocation);
+
+    ButtonLocator b = new ButtonLocator("&Finish");
+    if(!b.isEnabled(getUI())) {
+      //First time...
+      getUI().click(new LabeledTextLocator("Tomcat installation &directory:"));
+      getUI().enterText(tomcatInstallLocation);
+    }
     getUI().click(new ButtonLocator("&Finish"));
     getUI().wait(new ShellDisposedCondition("New Server"));
     Thread.sleep(5000);
     getUI().wait(new JobsCompleteCondition(), 120000);
   }
-  
+
   protected Model getModel(final MavenPomEditor editor) throws Exception {
     Model model = (Model) UIThreadTask.executeOnEventQueue(new UIThreadTask() {
 
@@ -645,7 +653,7 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
     return model;
   }
 
-  /** 
+  /**
    * Create an archetype project and assert that it has proper natures & builders, and no error markers
    */
   protected IProject createArchetypeProjct(String archetypeName, String projectName) throws Exception {
@@ -681,7 +689,7 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
       assertTrue(project.exists());
       assertProjectsHaveNoErrors();
       assertTrue("archtype project \"" + archetypeName + "\" created without Maven nature", project
-          .hasNature("org.maven.ide.eclipse.maven2Nature")); 
+          .hasNature("org.maven.ide.eclipse.maven2Nature"));
 
       ui.click(new TreeItemLocator(projectName + ".*", new ViewLocator(PACKAGE_EXPLORER_VIEW_ID)));
       return project;
@@ -691,4 +699,67 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
     }
   }
 
+  private static final String TOMCAT_SERVER_NAME = "Tomcat.*";
+
+  protected void removeAllProjectInTomcat() throws Exception {
+    getUI().click(new CTabItemLocator("Servers"));
+    getUI().contextClick(
+        new TreeItemLocator(TOMCAT_SERVER_NAME, new ViewLocator("org.eclipse.wst.server.ui.ServersView")),
+        "Add and Remove Projects...");
+    getUI().wait(new ShellShowingCondition("Add and Remove Projects"));
+    getUI().click(new ButtonLocator("<< Re&move All"));
+    getUI().click(new ButtonLocator("&Finish"));
+    getUI().wait(new ShellDisposedCondition("Add and Remove Projects"));
+
+    Thread.sleep(3000);
+  }
+
+  protected void deployProjectsIntoTomcat() throws WidgetSearchException, InterruptedException {
+    // Deploy the test project into tomcat
+    getUI().click(new CTabItemLocator("Servers"));
+    getUI().contextClick(
+        new TreeItemLocator(TOMCAT_SERVER_NAME, new ViewLocator("org.eclipse.wst.server.ui.ServersView")),
+        "Add and Remove Projects...");
+    getUI().wait(new ShellShowingCondition("Add and Remove Projects"));
+    getUI().click(new ButtonLocator("Add A&ll >>"));
+    getUI().click(new ButtonLocator("&Finish"));
+    getUI().wait(new ShellDisposedCondition("Add and Remove Projects"));
+
+    Thread.sleep(3000);
+
+    // Start the server
+    getUI().click(new TreeItemLocator(TOMCAT_SERVER_NAME, new ViewLocator("org.eclipse.wst.server.ui.ServersView")));
+    getUI().keyClick(SWT.MOD1 | SWT.ALT, 'r');
+    getUI().wait(new JobsCompleteCondition(), 120000);
+    Thread.sleep(5000);
+
+  }
+
+  protected void shutdownTomcat() throws Exception {
+    // Stop the server
+    getUI().click(new TreeItemLocator("Servers", new ViewLocator(PACKAGE_EXPLORER_VIEW_ID)));
+    getUI().keyClick(SWT.F5);
+    getUI().click(new CTabItemLocator("Servers"));
+    getUI().click(new TreeItemLocator(TOMCAT_SERVER_NAME, new ViewLocator("org.eclipse.wst.server.ui.ServersView")));
+    getUI().keyClick(SWT.MOD1 | SWT.ALT, 's');
+    getUI().wait(new JobsCompleteCondition(), 120000);
+    getUI().click(new TreeItemLocator(TOMCAT_SERVER_NAME, new ViewLocator("org.eclipse.wst.server.ui.ServersView")));
+    getUI().contextClick(
+        new TreeItemLocator(TOMCAT_SERVER_NAME, new ViewLocator("org.eclipse.wst.server.ui.ServersView")), "Delete");
+    getUI().wait(new ShellShowingCondition("Delete Server"));
+    getUI().click(new ButtonLocator("OK"));
+    getUI().wait(new ShellDisposedCondition("Delete Server"));
+  }
+
+  protected String retrieveWebPage(String urlString) throws Exception {
+    URL url = new URL(urlString);
+    URLConnection conn = url.openConnection();
+    conn.setDoInput(true);
+    conn.connect();
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    IOUtil.copy(conn.getInputStream(), out);
+    conn.getInputStream().close();
+
+    return new String(out.toByteArray(), "UTF-8");
+  }
 }
