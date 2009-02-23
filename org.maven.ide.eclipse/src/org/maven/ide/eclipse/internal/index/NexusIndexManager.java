@@ -379,11 +379,10 @@ public class NexusIndexManager extends IndexManager {
 
   public Date reindex(String indexName, final IProgressMonitor monitor) throws CoreException {
     try {
-      IndexingContext context = getIndexer().getIndexingContexts().get(indexName);
-      getIndexer().scan( context );
-
-      Date indexTime = context.getTimestamp();
       IndexInfo indexInfo = getIndexInfo(indexName); 
+      IndexingContext context = getIndexer().getIndexingContexts().get(indexName);
+      getIndexer().scan(context, new ArtifactScanningMonitor(indexInfo, monitor, console), false);
+      Date indexTime = context.getTimestamp();
       indexInfo.setUpdateTime(indexTime);
       fireIndexUpdated(indexInfo);
       return indexTime;

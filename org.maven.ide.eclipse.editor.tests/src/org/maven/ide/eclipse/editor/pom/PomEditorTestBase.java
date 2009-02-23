@@ -12,7 +12,6 @@ import java.io.Writer;
 import org.apache.maven.model.Model;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
@@ -120,7 +119,7 @@ public class PomEditorTestBase extends UIIntegrationTestCase {
   }
 
 
-  private void createTestProject() throws CoreException {
+  private void createTestProject() {
     
     final IProjectConfigurationManager configurationManager = MavenPlugin.getDefault().getProjectConfigurationManager();
     
