@@ -68,6 +68,8 @@ import org.eclipse.ui.part.FileEditorInput;
 import org.maven.ide.components.pom.Model;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.editor.pom.MavenPomEditor;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.Version;
 
 import com.windowtester.finder.swt.ShellFinder;
 import com.windowtester.runtime.IUIContext;
@@ -501,8 +503,13 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
   }
 
   protected void replaceText(IWidgetLocator locator, String text) throws WidgetSearchException {
-    getUI().click(locator);
-    getUI().keyClick(SWT.MOD1, 'a');
+    // Ctrl+A doesn't work in Eclipse 3.3 form view, but it is more reliable than double click so it is preferable to use it in later versions.
+    // This is a workaround
+    if(isEclipse33()) {
+      getUI().click(2, locator);
+    } else {
+      getUI().keyClick(SWT.MOD1, 'a');
+    }
     getUI().enterText(text);
   }
 
@@ -762,4 +769,12 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
 
     return new String(out.toByteArray(), "UTF-8");
   }
+
+  public static boolean isEclipse33() {
+    Bundle bundle = ResourcesPlugin.getPlugin().getBundle();
+    String version = (String) bundle.getHeaders().get(org.osgi.framework.Constants.BUNDLE_VERSION);
+    Version v = org.osgi.framework.Version.parseVersion(version);
+    return v.getMajor() == 3 && v.getMinor() == 3;
+  }
+
 }
