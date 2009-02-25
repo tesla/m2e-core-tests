@@ -8,24 +8,61 @@
 
 package org.maven.ide.eclipse.actions;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 //import org.eclipse.jdt.core.IJavaProject;
 //import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IStorageEditorInput;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
 
+import org.codehaus.plexus.util.IOUtil;
+
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.embedder.MavenEmbedder;
+import org.apache.maven.embedder.MavenEmbedderException;
+import org.apache.maven.execution.MavenExecutionRequest;
+import org.apache.maven.execution.MavenExecutionResult;
+import org.apache.maven.project.MavenProject;
+import org.apache.maven.shared.dependency.tree.DependencyNode;
+
+import org.maven.ide.components.pom.Dependency;
+import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
+import org.maven.ide.eclipse.project.IMavenProjectFacade;
+import org.maven.ide.eclipse.project.MavenProjectManager;
+import org.maven.ide.eclipse.project.MavenRunnable;
+import org.maven.ide.eclipse.project.ResolverConfiguration;
+import org.maven.ide.eclipse.util.Util;
+import org.maven.ide.eclipse.util.Util.FileStoreEditorInputStub;
 
 
 /**
@@ -180,6 +217,133 @@ public class SelectionUtil {
         if(adaptable.getAdapter(IResource.class) == element) {
           return workingSet;
         }
+      }
+    }
+    return null;
+  }
+  
+  public static ArtifactKey getArtifactKey(Object element) throws CoreException {
+    if(element instanceof Artifact) {
+      return new ArtifactKey(((Artifact) element));
+    
+    } else if(element instanceof DependencyNode) {
+      Artifact artifact = ((DependencyNode) element).getArtifact();
+      return new ArtifactKey(artifact);
+      
+    } else if(element instanceof Dependency) {
+      Dependency dependency = (Dependency) element;
+      String groupId = dependency.getGroupId();
+      String artifactId = dependency.getArtifactId();
+      String version = dependency.getVersion();
+      
+      if(version == null) {
+        IEditorPart editor = getActiveEditor();
+        if(editor!=null) {
+          MavenProject mavenProject = getMavenProject(editor.getEditorInput());
+          if(mavenProject!=null) {
+            Artifact a = (Artifact) mavenProject.getArtifactMap().get(groupId + ":" + artifactId);
+            version = a.getBaseVersion();
+          }
+        }
+      }
+      return new ArtifactKey(dependency.getGroupId(), dependency.getArtifactId(), version, null);
+    }
+    
+    return SelectionUtil.getType(element, ArtifactKey.class);
+  }
+
+  public static MavenProject getMavenProject(IEditorInput editorInput) throws CoreException {
+    if(editorInput instanceof IFileEditorInput) {
+      IFile pomFile = ((IFileEditorInput) editorInput).getFile();
+      MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
+      IMavenProjectFacade facade = projectManager.create(pomFile, true, null);
+      if(facade!=null) {
+        return facade.getMavenProject(null);
+      }
+
+    } else if(editorInput instanceof IStorageEditorInput) {
+      IStorageEditorInput storageInput = (IStorageEditorInput) editorInput;
+      IStorage storage = storageInput.getStorage();
+      IPath path = storage.getFullPath();
+      if(path == null || !new File(path.toOSString()).exists()) {
+        File tempPomFile = null;
+        InputStream is = null;
+        OutputStream os = null;
+        try {
+          tempPomFile = File.createTempFile("maven-pom", ".pom");
+          os = new FileOutputStream(tempPomFile);
+          is = storage.getContents();
+          IOUtil.copy(is, os);
+          return readMavenProject(tempPomFile);
+        } catch(IOException ex) {
+          MavenLogger.log("Can't close stream", ex);
+        } finally {
+          IOUtil.close(is);
+          IOUtil.close(os);
+          if(tempPomFile != null) {
+            tempPomFile.delete();
+          }
+        }
+      } else {
+        return readMavenProject(path.toFile());
+      }
+
+    } else if(editorInput.getClass().getName().endsWith("FileStoreEditorInput")) {
+      return readMavenProject(new File(Util.proxy(editorInput, FileStoreEditorInputStub.class).getURI().getPath()));
+    }
+    
+    return null;
+  }
+  
+  private static MavenProject readMavenProject(File pomFile) throws CoreException {
+    MavenPlugin plugin = MavenPlugin.getDefault();
+    MavenProjectManager projectManager = plugin.getMavenProjectManager();
+    MavenEmbedder embedder = projectManager.createWorkspaceEmbedder();
+    try {
+      MavenExecutionResult result = projectManager.execute(embedder, pomFile, new ResolverConfiguration(),
+          new MavenRunnable() {
+            public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request) {
+              request.setOffline(false);
+              request.setUpdateSnapshots(false);
+              return embedder.readProjectWithDependencies(request);
+            }
+          }, new NullProgressMonitor());
+
+      MavenProject project = result.getProject();
+      if(project!=null) {
+        return project;
+      }
+      
+      if(result.hasExceptions()) {
+        List<IStatus> statuses = new ArrayList<IStatus>();
+        @SuppressWarnings("unchecked")
+        List<Throwable> exceptions = result.getExceptions();
+        for(Throwable e : exceptions) {
+          statuses.add(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, e.getMessage(), e));
+        }
+        
+        throw new CoreException(new MultiStatus(IMavenConstants.PLUGIN_ID, IStatus.ERROR, //
+            statuses.toArray(new IStatus[statuses.size()]), "Can't read Maven project", null));
+      }
+      
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, //
+          "Can't read Maven project", null));
+
+    } finally {
+      try {
+        embedder.stop();
+      } catch(MavenEmbedderException ex) {
+        MavenLogger.log("Can't stop Maven embedder", ex);
+      }
+    }
+  }
+
+  private static IEditorPart getActiveEditor() {
+    IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+    if(window != null) {
+      IWorkbenchPage page = window.getActivePage();
+      if(page != null) {
+        return page.getActiveEditor();
       }
     }
     return null;

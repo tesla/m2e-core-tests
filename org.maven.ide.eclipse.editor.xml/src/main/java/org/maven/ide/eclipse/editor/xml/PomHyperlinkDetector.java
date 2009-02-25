@@ -91,6 +91,8 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
       public void open() {
         new Job("Opening POM") {
           protected IStatus run(IProgressMonitor monitor) {
+            // TODO resolve groupId if groupId==null
+            // TODO resolve version if version==null
             OpenPomAction.openEditor(groupId, artifactId, version);
             return Status.OK_STATUS;
           }

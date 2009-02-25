@@ -624,7 +624,7 @@ public class ProfilesPage extends MavenPomEditorPage {
       }
     };
 
-    dependenciesComposite.loadData(this, dependenciesProvider, dependencyManagementProvider);
+    dependenciesComposite.loadData(dependenciesProvider, dependencyManagementProvider);
   }
 
   private void updateRepositoriesTab() {
@@ -794,6 +794,7 @@ public class ProfilesPage extends MavenPomEditorPage {
     dependenciesTabItem.setText("Dependencies");
   
     dependenciesComposite = new DependenciesComposite(tabFolder, SWT.NONE);
+    dependenciesComposite.setEditorPage(this);
     dependenciesTabItem.setControl(dependenciesComposite);
     toolkit.adapt(dependenciesComposite);
   }

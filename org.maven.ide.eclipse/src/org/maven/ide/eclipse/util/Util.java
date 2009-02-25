@@ -45,6 +45,15 @@ public class Util {
           }
         });
   }
+  
+  /**
+   * Stub interface for FileStoreEditorInput
+   * 
+   * @see Util#proxy(Object, Class)
+   */
+  public static interface FileStoreEditorInputStub {
+    public java.net.URI getURI();
+  }
 
   /**
    * Helper method which creates a folder and, recursively, all its parent

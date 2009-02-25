@@ -18,7 +18,9 @@ import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.actions.OpenUrlAction;
 import org.maven.ide.eclipse.actions.SelectionUtil;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
+import org.maven.ide.eclipse.jdt.internal.MavenJdtImages;
 import org.maven.ide.eclipse.jdt.internal.actions.DownloadSourcesAction;
+import org.maven.ide.eclipse.jdt.internal.actions.OpenJavaDocAction;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 
@@ -82,6 +84,8 @@ public class MavenJdtMenuCreator extends AbstractMavenMenuCreator {
           OpenUrlAction.ID_SCM, "Open Source Control"));
       mgr.appendToGroup(OPEN, getAction(new OpenUrlAction(OpenUrlAction.ID_CI), //
           OpenUrlAction.ID_CI, "Open Continuous Integration"));
+      mgr.appendToGroup(OPEN, getAction(new OpenJavaDocAction(), //
+          OpenJavaDocAction.ID, "Open JavaDoc", MavenJdtImages.JAVA_DOC));
 
       if(!isProject) {
         mgr.prependToGroup(IMPORT, new Separator());

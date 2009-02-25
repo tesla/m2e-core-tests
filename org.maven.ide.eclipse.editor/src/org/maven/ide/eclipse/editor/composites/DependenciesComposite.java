@@ -17,6 +17,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.embedder.MavenEmbedderException;
+import org.apache.maven.project.MavenProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -68,6 +72,7 @@ import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.PomPackage;
 import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.actions.OpenUrlAction;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.editor.pom.FormUtils;
 import org.maven.ide.eclipse.editor.pom.MavenPomEditorPage;
@@ -89,7 +94,7 @@ public class DependenciesComposite extends Composite {
 
   protected static PomPackage POM_PACKAGE = PomPackage.eINSTANCE;
   
-  protected MavenPomEditorPage parent; 
+  protected MavenPomEditorPage editorPage; 
   
   private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
 
@@ -156,6 +161,13 @@ public class DependenciesComposite extends Composite {
 
     createComposite();
   }
+  
+  public void setEditorPage(MavenPomEditorPage editorPage) {
+    this.editorPage = editorPage;
+    
+    editorPage.initPopupMenu(dependenciesEditor.getViewer(), ".dependencies");
+    editorPage.initPopupMenu(dependencyManagementEditor.getViewer(), ".dependencyManagement");
+  }
 
   private void createComposite() {
     GridLayout gridLayout = new GridLayout();
@@ -216,7 +228,7 @@ public class DependenciesComposite extends Composite {
     dependenciesEditor.setRemoveListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         CompoundCommand compoundCommand = new CompoundCommand();
-        EditingDomain editingDomain = parent.getEditingDomain();
+        EditingDomain editingDomain = editorPage.getEditingDomain();
 
         List<Dependency> dependencyList = dependenciesEditor.getSelection();
         for(Dependency dependency : dependencyList) {
@@ -341,7 +353,7 @@ public class DependenciesComposite extends Composite {
     dependencyManagementEditor.setRemoveListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         CompoundCommand compoundCommand = new CompoundCommand();
-        EditingDomain editingDomain = parent.getEditingDomain();
+        EditingDomain editingDomain = editorPage.getEditingDomain();
  
         List<Dependency> dependencyList = dependencyManagementEditor.getSelection();
         for(Dependency dependency : dependencyList) {
@@ -467,14 +479,15 @@ public class DependenciesComposite extends Composite {
     };
     dependencySelectAction.setEnabled(false);
 
-    openWebPageAction = new Action("Open Web Page", MavenEditorImages.WEB_PAGE) {
+    openWebPageAction = new Action("Open Project Page", MavenEditorImages.WEB_PAGE) {
       public void run() {
         final String groupId = groupIdText.getText();
         final String artifactId = artifactIdText.getText();
         final String version = versionText.getText();
         new Job("Opening " + groupId + ":" + artifactId + ":" + version) {
           protected IStatus run(IProgressMonitor monitor) {
-            OpenUrlAction.openBrowser(OpenUrlAction.ID_PROJECT, groupId, artifactId, version, monitor);
+            OpenUrlAction.openBrowser(OpenUrlAction.ID_PROJECT, groupId, artifactId, //
+                version != null ? version : getVersion(groupId, artifactId, monitor), monitor);
             return Status.OK_STATUS;
           }
         }.schedule();
@@ -525,8 +538,9 @@ public class DependenciesComposite extends Composite {
         final String artifactId = artifactIdText.getText();
         final String version = versionText.getText();
         new Job("Opening " + groupId + ":" + artifactId + ":" + version) {
-          protected IStatus run(IProgressMonitor arg0) {
-            OpenPomAction.openEditor(groupId, artifactId, version);
+          protected IStatus run(IProgressMonitor monitor) {
+            OpenPomAction.openEditor(groupId, artifactId, //
+                version != null ? version : getVersion(groupId, artifactId, monitor));
             return Status.OK_STATUS;
           }
         }.schedule();
@@ -682,7 +696,7 @@ public class DependenciesComposite extends Composite {
     exclusionsEditor.setRemoveListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         CompoundCommand compoundCommand = new CompoundCommand();
-        EditingDomain editingDomain = parent.getEditingDomain();
+        EditingDomain editingDomain = editorPage.getEditingDomain();
  
         ExclusionsType exclusions = currentDependency.getExclusions();
         int n = 0;
@@ -829,21 +843,21 @@ public class DependenciesComposite extends Composite {
     this.currentDependency = dependency;
     
     openWebPageAction.setEnabled(dependency!=null);
-    dependencySelectAction.setEnabled(dependency!=null && !parent.isReadOnly());
-    exclusionAddAction.setEnabled(dependency!=null && !parent.isReadOnly());
+    dependencySelectAction.setEnabled(dependency!=null && !editorPage.isReadOnly());
+    exclusionAddAction.setEnabled(dependency!=null && !editorPage.isReadOnly());
     
-    if(parent != null) {
-      parent.removeNotifyListener(groupIdText);
-      parent.removeNotifyListener(artifactIdText);
-      parent.removeNotifyListener(versionText);
-      parent.removeNotifyListener(classifierText);
-      parent.removeNotifyListener(typeCombo);
-      parent.removeNotifyListener(scopeCombo);
-      parent.removeNotifyListener(systemPathText);
-      parent.removeNotifyListener(optionalButton);
+    if(editorPage != null) {
+      editorPage.removeNotifyListener(groupIdText);
+      editorPage.removeNotifyListener(artifactIdText);
+      editorPage.removeNotifyListener(versionText);
+      editorPage.removeNotifyListener(classifierText);
+      editorPage.removeNotifyListener(typeCombo);
+      editorPage.removeNotifyListener(scopeCombo);
+      editorPage.removeNotifyListener(systemPathText);
+      editorPage.removeNotifyListener(optionalButton);
     }
 
-    if(parent == null || dependency == null) {
+    if(editorPage == null || dependency == null) {
       FormUtils.setEnabled(dependencyDetailsComposite, false);
 
       setText(groupIdText, "");
@@ -865,7 +879,7 @@ public class DependenciesComposite extends Composite {
     }
 
     FormUtils.setEnabled(dependencyDetailsComposite, true);
-    FormUtils.setReadonly(dependencyDetailsComposite, parent.isReadOnly());
+    FormUtils.setReadonly(dependencyDetailsComposite, editorPage.isReadOnly());
 
     setText(groupIdText, dependency.getGroupId());
     setText(artifactIdText, dependency.getArtifactId());
@@ -885,16 +899,16 @@ public class DependenciesComposite extends Composite {
     
     // set new listeners
     ValueProvider<Dependency> dependencyProvider = new ValueProvider.DefaultValueProvider<Dependency>(dependency); 
-    parent.setModifyListener(groupIdText, dependencyProvider, POM_PACKAGE.getDependency_GroupId(), "");
-    parent.setModifyListener(artifactIdText, dependencyProvider, POM_PACKAGE.getDependency_ArtifactId(), "");
-    parent.setModifyListener(versionText, dependencyProvider, POM_PACKAGE.getDependency_Version(), "");
-    parent.setModifyListener(classifierText, dependencyProvider, POM_PACKAGE.getDependency_Classifier(), "");
-    parent.setModifyListener(typeCombo, dependencyProvider, POM_PACKAGE.getDependency_Type(), "jar");
-    parent.setModifyListener(scopeCombo, dependencyProvider, POM_PACKAGE.getDependency_Scope(), "compile");
-    parent.setModifyListener(systemPathText, dependencyProvider, POM_PACKAGE.getDependency_SystemPath(), "");
-    parent.setModifyListener(optionalButton, dependencyProvider, POM_PACKAGE.getDependency_Optional(), "false");
+    editorPage.setModifyListener(groupIdText, dependencyProvider, POM_PACKAGE.getDependency_GroupId(), "");
+    editorPage.setModifyListener(artifactIdText, dependencyProvider, POM_PACKAGE.getDependency_ArtifactId(), "");
+    editorPage.setModifyListener(versionText, dependencyProvider, POM_PACKAGE.getDependency_Version(), "");
+    editorPage.setModifyListener(classifierText, dependencyProvider, POM_PACKAGE.getDependency_Classifier(), "");
+    editorPage.setModifyListener(typeCombo, dependencyProvider, POM_PACKAGE.getDependency_Type(), "jar");
+    editorPage.setModifyListener(scopeCombo, dependencyProvider, POM_PACKAGE.getDependency_Scope(), "compile");
+    editorPage.setModifyListener(systemPathText, dependencyProvider, POM_PACKAGE.getDependency_SystemPath(), "");
+    editorPage.setModifyListener(optionalButton, dependencyProvider, POM_PACKAGE.getDependency_Optional(), "false");
     
-    parent.registerListeners();
+    editorPage.registerListeners();
     
     updateExclusionDetails(null);
   }
@@ -906,12 +920,12 @@ public class DependenciesComposite extends Composite {
     
     currentExclusion = exclusion;
     
-    if(parent != null) {
-      parent.removeNotifyListener(exclusionGroupIdText);
-      parent.removeNotifyListener(exclusionArtifactIdText);
+    if(editorPage != null) {
+      editorPage.removeNotifyListener(exclusionGroupIdText);
+      editorPage.removeNotifyListener(exclusionArtifactIdText);
     }
     
-    if(parent == null || exclusion == null) {
+    if(editorPage == null || exclusion == null) {
       FormUtils.setEnabled(exclusionDetailsSection, false);
       exclusionSelectAction.setEnabled(false);
 
@@ -921,21 +935,20 @@ public class DependenciesComposite extends Composite {
     }
     
     FormUtils.setEnabled(exclusionDetailsSection, true);
-    FormUtils.setReadonly(exclusionDetailsSection, parent.isReadOnly());
-    exclusionSelectAction.setEnabled(!parent.isReadOnly());
+    FormUtils.setReadonly(exclusionDetailsSection, editorPage.isReadOnly());
+    exclusionSelectAction.setEnabled(!editorPage.isReadOnly());
     
     setText(exclusionGroupIdText, exclusion.getGroupId());
     setText(exclusionArtifactIdText, exclusion.getArtifactId());
     
     ValueProvider<Exclusion> exclusionProvider = new ValueProvider.DefaultValueProvider<Exclusion>(exclusion);
-    parent.setModifyListener(exclusionGroupIdText, exclusionProvider, POM_PACKAGE.getExclusion_GroupId(), "");
-    parent.setModifyListener(exclusionArtifactIdText, exclusionProvider, POM_PACKAGE.getExclusion_ArtifactId(), "");
+    editorPage.setModifyListener(exclusionGroupIdText, exclusionProvider, POM_PACKAGE.getExclusion_GroupId(), "");
+    editorPage.setModifyListener(exclusionArtifactIdText, exclusionProvider, POM_PACKAGE.getExclusion_ArtifactId(), "");
     
-    parent.registerListeners();
+    editorPage.registerListeners();
   }
 
-  public void loadData(MavenPomEditorPage editorPage, ValueProvider<Dependencies> dependenciesProvider, ValueProvider<Dependencies> dependencyManagementProvider) {
-    this.parent = editorPage;
+  public void loadData(ValueProvider<Dependencies> dependenciesProvider, ValueProvider<Dependencies> dependencyManagementProvider) {
     this.dependenciesProvider = dependenciesProvider;
     this.dependencyManagementProvider = dependencyManagementProvider;
     this.dependencyLabelProvider.setPomEditor(editorPage.getPomEditor());
@@ -952,11 +965,11 @@ public class DependenciesComposite extends Composite {
     
     changingSelection = false;
     
-    dependenciesEditor.setReadOnly(parent.isReadOnly());
-    dependencyManagementEditor.setReadOnly(parent.isReadOnly());
+    dependenciesEditor.setReadOnly(editorPage.isReadOnly());
+    dependencyManagementEditor.setReadOnly(editorPage.isReadOnly());
     
-    dependencyAddAction.setEnabled(!parent.isReadOnly());
-    dependencyManagementAddAction.setEnabled(!parent.isReadOnly());
+    dependencyAddAction.setEnabled(!editorPage.isReadOnly());
+    dependencyManagementAddAction.setEnabled(!editorPage.isReadOnly());
 
     if(searchControl!=null) {
       searchControl.getSearchText().setEditable(true);
@@ -1025,7 +1038,7 @@ public class DependenciesComposite extends Composite {
   Dependency createDependency(ValueProvider<Dependencies> provider, //
       String groupId, String artifactId, String version, String classifier, String type, String scope) {
     CompoundCommand compoundCommand = new CompoundCommand();
-    EditingDomain editingDomain = parent.getEditingDomain();
+    EditingDomain editingDomain = editorPage.getEditingDomain();
     
     Dependencies dependencies = provider.getValue();
     if(dependencies == null) {
@@ -1086,7 +1099,7 @@ public class DependenciesComposite extends Composite {
   
   void createExclusion(String groupId, String artifactId) {
     CompoundCommand compoundCommand = new CompoundCommand();
-    EditingDomain editingDomain = parent.getEditingDomain();
+    EditingDomain editingDomain = editorPage.getEditingDomain();
 
     boolean created = false;
     ExclusionsType exclusions = currentDependency.getExclusions();
@@ -1114,6 +1127,21 @@ public class DependenciesComposite extends Composite {
     exclusionsEditor.setSelection(Collections.singletonList(exclusion));
     updateExclusionDetails(exclusion);
     exclusionGroupIdText.setFocus();
+  }
+
+  String getVersion(String groupId, String artifactId, IProgressMonitor monitor) {
+    try {
+      MavenProject mavenProject = editorPage.getPomEditor().readMavenProject(false, monitor);
+      Artifact a = (Artifact) mavenProject.getArtifactMap().get(groupId + ":" + artifactId);
+      if(a!=null) {
+        return a.getBaseVersion();
+      }
+    } catch(MavenEmbedderException ex) {
+      MavenLogger.log("Unable to read Maven project", ex);
+    } catch(CoreException ex) {
+      MavenLogger.log(ex);
+    }
+    return null;
   }
 
   public static class DependencyFilter extends ViewerFilter {

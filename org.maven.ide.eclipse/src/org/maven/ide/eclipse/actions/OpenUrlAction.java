@@ -13,6 +13,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -39,7 +40,6 @@ import org.apache.maven.model.CiManagement;
 import org.apache.maven.model.IssueManagement;
 import org.apache.maven.model.Scm;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.shared.dependency.tree.DependencyNode;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
@@ -91,30 +91,29 @@ public class OpenUrlAction extends ActionDelegate implements IWorkbenchWindowAct
    */
   public void run(IAction action) {
     if(selection != null) {
-      Object element = this.selection.getFirstElement();
-      final ArtifactKey a = getArtifact(element);
-      if(a != null) {
-        new Job("Opening Browser") {
-          protected IStatus run(IProgressMonitor monitor) {
-            openBrowser(actionId, a.getGroupId(), a.getArtifactId(), a.getVersion(), monitor);
-            return Status.OK_STATUS;
+      try {
+        Object element = this.selection.getFirstElement();
+        final ArtifactKey a = SelectionUtil.getArtifactKey(element);
+        if(a != null) {
+          new Job("Opening Browser") {
+            protected IStatus run(IProgressMonitor monitor) {
+              openBrowser(actionId, a.getGroupId(), a.getArtifactId(), a.getVersion(), monitor);
+              return Status.OK_STATUS;
+            }
+            
+          }.schedule();
+          return;
+        }
+      } catch(CoreException ex) {
+        MavenLogger.log(ex);
+        PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+          public void run() {
+            MessageDialog.openInformation(Display.getDefault().getActiveShell(), //
+                "Open URL", "Unable to read Maven project");
           }
-          
-        }.schedule();
-        return;
+        });
       }
     }
-
-  }
-
-  private ArtifactKey getArtifact(Object element) {
-    if(element instanceof Artifact) {
-      return new ArtifactKey(((Artifact) element));
-    } else if(element instanceof DependencyNode) {
-      Artifact artifact = ((DependencyNode) element).getArtifact();
-      return new ArtifactKey(artifact);
-    }
-    return SelectionUtil.getType(element, ArtifactKey.class);
   }
 
   public static void openBrowser(String actionId, String groupId, String artifactId, String version, IProgressMonitor monitor) {

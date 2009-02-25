@@ -191,7 +191,7 @@
                 menubarPath="checkoutGroup"/>
       </objectContribution>
       
-      <objectContribution id="org.maven.ide.eclipse.openPom"
+      <objectContribution id="org.maven.ide.eclipse.openPomArtifact"
           objectClass="org.apache.maven.artifact.Artifact"
           adaptable="false">
         <action id="org.maven.ide.eclipse.ui.openPomArtifact"
@@ -199,7 +199,7 @@
                 label="Open POM"
                 enablesFor="1"/>
       </objectContribution>
-      <objectContribution id="org.maven.ide.eclipse.openPom"
+      <objectContribution id="org.maven.ide.eclipse.openPomDependencyNode"
           objectClass="org.apache.maven.shared.dependency.tree.DependencyNode"
           adaptable="false">
         <action id="org.maven.ide.eclipse.ui.openPomDependency"
@@ -207,8 +207,16 @@
                 label="Open POM"
                 enablesFor="1"/>
       </objectContribution>
+      <objectContribution id="org.maven.ide.eclipse.openPomDependency"
+            objectClass="org.maven.ide.components.pom.Dependency"
+            adaptable="false">
+        <action id="org.maven.ide.eclipse.ui.openPomDependency"
+                class="org.maven.ide.eclipse.actions.OpenPomAction"
+                label="Open POM"
+                enablesFor="1"/>
+      </objectContribution>
       
-      <objectContribution id="org.maven.ide.eclipse.openPom"
+      <objectContribution id="org.maven.ide.eclipse.openProjectPageArtifact"
           objectClass="org.apache.maven.artifact.Artifact"
           adaptable="false">
         <action id="org.maven.ide.eclipse.ui.openPomArtifactUrl"
@@ -216,10 +224,18 @@
                 label="Open Project Page"
                 enablesFor="1" icon="icons/web.gif"/>
       </objectContribution>
-      <objectContribution id="org.maven.ide.eclipse.openPom"
+      <objectContribution id="org.maven.ide.eclipse.openProjectPageDependencyNode"
           objectClass="org.apache.maven.shared.dependency.tree.DependencyNode"
           adaptable="false">
         <action id="org.maven.ide.eclipse.ui.openPomDependencyUrl"
+                class="org.maven.ide.eclipse.actions.OpenUrlAction:org.maven.ide.eclipse.openProjectPage"
+                label="Open Project Page"
+                enablesFor="1" icon="icons/web.gif"/>
+      </objectContribution>
+      <objectContribution id="org.maven.ide.eclipse.openopenProjectPageDependency"
+            objectClass="org.maven.ide.components.pom.Dependency"
+            adaptable="false">
+        <action id="org.maven.ide.eclipse.ui.openPomArtifactUrl"
                 class="org.maven.ide.eclipse.actions.OpenUrlAction:org.maven.ide.eclipse.openProjectPage"
                 label="Open Project Page"
                 enablesFor="1" icon="icons/web.gif"/>

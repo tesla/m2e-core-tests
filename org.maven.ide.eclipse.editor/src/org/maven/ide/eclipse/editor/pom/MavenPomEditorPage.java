@@ -43,7 +43,9 @@ import org.eclipse.emf.edit.command.SetCommand;
 import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -53,6 +55,7 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.forms.IManagedForm;
@@ -573,6 +576,17 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
     return null;
   }
   
+  public void initPopupMenu(Viewer viewer, String id) {
+    MenuManager menuMgr = new MenuManager("#PopupMenu-" + id);
+    menuMgr.setRemoveAllWhenShown(true);
+    
+    Menu menu = menuMgr.createContextMenu(viewer.getControl());
+  
+    viewer.getControl().setMenu(menu);
+    
+    getEditorSite().registerContextMenu(MavenPomEditor.EDITOR_ID + id, menuMgr, viewer, false);
+  }
+
   /*
    * returns added/removed/updated EObject from notification (convenience method for detail forms)
    */

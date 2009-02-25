@@ -32,8 +32,6 @@ import org.apache.maven.artifact.resolver.metadata.MetadataResolutionResult;
 import org.apache.maven.artifact.resolver.metadata.MetadataResolver;
 import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.embedder.MavenEmbedderException;
-import org.apache.maven.execution.MavenExecutionRequest;
-import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.extension.ExtensionScanningException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuildingException;
@@ -64,8 +62,6 @@ import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.common.command.BasicCommandStack;
@@ -123,16 +119,15 @@ import org.maven.ide.components.pom.Model;
 import org.maven.ide.components.pom.util.PomResourceFactoryImpl;
 import org.maven.ide.components.pom.util.PomResourceImpl;
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.actions.SelectionUtil;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.editor.MavenEditorPlugin;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
-import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
-import org.maven.ide.eclipse.project.MavenRunnable;
-import org.maven.ide.eclipse.project.ResolverConfiguration;
 import org.maven.ide.eclipse.util.Util;
+import org.maven.ide.eclipse.util.Util.FileStoreEditorInputStub;
 
 
 /**
@@ -547,20 +542,11 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
         }
 
       } else if(input.getClass().getName().endsWith("FileStoreEditorInput")) {
-        projectDocument = loadModel(Util.proxy(input, C.class).getURI().getPath());
+        projectDocument = loadModel(Util.proxy(input, FileStoreEditorInputStub.class).getURI().getPath());
       }
     }
 
     return projectDocument;
-  }
-
-  /**
-   * Stub interface for FileStoreEditorInput
-   * 
-   * @see Util#proxy(Object, Class)
-   */
-  public static interface C {
-    public java.net.URI getURI();
   }
 
   private Model loadModel(String path) {
@@ -656,97 +642,18 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   public MavenProject readMavenProject(boolean force, IProgressMonitor monitor) throws MavenEmbedderException,
       CoreException {
     if(force || mavenProject == null) {
-      MavenPlugin plugin = MavenPlugin.getDefault();
-      MavenProjectManager projectManager = plugin.getMavenProjectManager();
-
       IEditorInput input = getEditorInput();
+      
       if(input instanceof IFileEditorInput) {
         IFileEditorInput fileInput = (IFileEditorInput) input;
         pomFile = fileInput.getFile();
         pomFile.refreshLocal(1, null);
         ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
-
-        IMavenProjectFacade projectFacade = projectManager.create(pomFile, true, monitor);
-        if(projectFacade != null) {
-          mavenProject = projectFacade.getMavenProject(monitor);
-        }
-
-      } else if(input instanceof IStorageEditorInput) {
-        IStorageEditorInput storageInput = (IStorageEditorInput) input;
-        IStorage storage = storageInput.getStorage();
-        IPath path = storage.getFullPath();
-        if(path == null || !new File(path.toOSString()).exists()) {
-          InputStream is = null;
-          FileOutputStream fos = null;
-          File tempPomFile = null;
-          try {
-            tempPomFile = File.createTempFile("maven-pom", "pom");
-            is = storage.getContents();
-            fos = new FileOutputStream(tempPomFile);
-            IOUtil.copy(is, fos);
-            mavenProject = readMavenProject(tempPomFile);
-          } catch(IOException ex) {
-            MavenLogger.log("Can't load POM", ex);
-            throw new CoreException(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1,
-                "Can't load Maven project", ex));
-            
-          } finally {
-            IOUtil.close(is);
-            IOUtil.close(fos);
-            if(tempPomFile != null) {
-              tempPomFile.delete();
-            }
-          }
-        } else {
-          mavenProject = readMavenProject(path.toFile());
-        }
-//      } else if(input instanceof IURIEditorInput) {
-//        IURIEditorInput uriInput = (IURIEditorInput) input;
-//        mavenProject = readMavenProject(new File(uriInput.getURI().getPath()));
-      } else if(input.getClass().getName().endsWith("FileStoreEditorInput")) {
-        mavenProject = readMavenProject(new File(Util.proxy(input, C.class).getURI().getPath()));
       }
+      
+      mavenProject = SelectionUtil.getMavenProject(input);
     }
     return mavenProject;
-  }
-
-  private MavenProject readMavenProject(File pomFile) throws MavenEmbedderException, CoreException {
-    MavenPlugin plugin = MavenPlugin.getDefault();
-    MavenProjectManager projectManager = plugin.getMavenProjectManager();
-    MavenEmbedder embedder = projectManager.createWorkspaceEmbedder();
-    try {
-      MavenExecutionResult result = projectManager.execute(embedder, pomFile, new ResolverConfiguration(),
-          new MavenRunnable() {
-            public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request) {
-              request.setOffline(false);
-              request.setUpdateSnapshots(false);
-              return embedder.readProjectWithDependencies(request);
-            }
-          }, new NullProgressMonitor());
-
-      MavenProject project = result.getProject();
-      if(project!=null) {
-        return project;
-      }
-      
-      if(result.hasExceptions()) {
-        List<IStatus> statuses = new ArrayList<IStatus>();
-        @SuppressWarnings("unchecked")
-        List<Throwable> exceptions = result.getExceptions();
-        for(Throwable e : exceptions) {
-          statuses.add(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, e.getMessage(), e));
-        }
-        
-        throw new CoreException(new MultiStatus(MavenEditorPlugin.PLUGIN_ID, IStatus.ERROR, //
-            statuses.toArray(new IStatus[statuses.size()]), "Can't read Maven project", null));
-      }
-      
-      throw new CoreException(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, //
-          "Can't read Maven project", null));
-
-    } finally {
-      embedder.stop();
-    }
   }
 
   public MetadataResolutionResult readDependencyMetadata(IFile pomFile, IProgressMonitor monitor) throws CoreException {

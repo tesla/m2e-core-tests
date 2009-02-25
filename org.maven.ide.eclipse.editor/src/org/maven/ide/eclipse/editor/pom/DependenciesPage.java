@@ -63,6 +63,7 @@ public class DependenciesPage extends MavenPomEditorPage {
     form.getBody().setLayout(new GridLayout(1, true));
 
     dependenciesComposite = new DependenciesComposite(form.getBody(), SWT.NONE);
+    dependenciesComposite.setEditorPage(this);
     dependenciesComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     toolkit.adapt(dependenciesComposite);
 
@@ -121,7 +122,7 @@ public class DependenciesPage extends MavenPomEditorPage {
       }
     };
 
-    dependenciesComposite.loadData(this, dependenciesProvider, dependencyManagementProvider);
+    dependenciesComposite.loadData(dependenciesProvider, dependencyManagementProvider);
   }
   
   public void updateView(Notification notification) {

@@ -58,8 +58,6 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.AbstractArtifactResolutionException;
 import org.apache.maven.embedder.MavenEmbedder;
-import org.apache.maven.model.Dependency;
-import org.apache.maven.shared.dependency.tree.DependencyNode;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
@@ -120,25 +118,25 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
     if(selection!=null) {
       Object element = this.selection.getFirstElement();
       if(IndexManager.SEARCH_ARTIFACT.equals(type) && element !=null) {
-        ArtifactKey key;
-        if(element instanceof Artifact) {
-          key = new ArtifactKey(((Artifact) element));
-        } else if(element instanceof DependencyNode) {
-          Artifact artifact = ((DependencyNode) element).getArtifact();
-          key = new ArtifactKey(artifact);
-        } else {
-          key = SelectionUtil.getType(element, ArtifactKey.class);
-        }
-        
-        final ArtifactKey a = key;
-        if(a != null) {
-          new Job("Opening POM") {
-            protected IStatus run(IProgressMonitor monitor) {
-              openEditor(a.getGroupId(), a.getArtifactId(), a.getVersion());
-              return Status.OK_STATUS;
+        try {
+          final ArtifactKey ak = SelectionUtil.getArtifactKey(element);
+          if(ak != null) {
+            new Job("Opening POM") {
+              protected IStatus run(IProgressMonitor monitor) {
+                openEditor(ak.getGroupId(), ak.getArtifactId(), ak.getVersion());
+                return Status.OK_STATUS;
+              }
+            }.schedule();
+            return;
+          }
+        } catch(CoreException ex) {
+          MavenLogger.log(ex);
+          PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+            public void run() {
+              MessageDialog.openInformation(Display.getDefault().getActiveShell(), //
+                  "Open POM", "Unable to read Maven project");
             }
-          }.schedule();
-          return;
+          });
         }
       }
     }
@@ -175,11 +173,9 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
       return;
     }
 
-    Dependency dependency = f.getDependency();
-
-    String groupId = dependency.getGroupId();
-    String artifactId = dependency.getArtifactId();
-    String version = dependency.getVersion();
+    String groupId = f.getDependency().getGroupId();
+    String artifactId = f.getDependency().getArtifactId();
+    String version = f.getDependency().getVersion();
 
     String name = ia.className;
     String fileName = ia.packageName.replace('.', '/') + "/" + ia.className + ".java";
@@ -253,11 +249,13 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
       openDialog("Can't download " + name);
 
     } catch(AbstractArtifactResolutionException ex) {
-      MavenLogger.log("Can't resolve artifact " + name, ex);
-      openDialog("Can't resolve artifact " + name + "\n" + ex.toString());
+      String msg = "Can't download pom for " + name;
+      MavenLogger.log(msg, ex);
+      openDialog(msg);
     } catch(IOException ex) {
-      MavenLogger.log("Can't open pom file for " + name, ex);
-      openDialog("Can't open pom file for " + name + "\n" + ex.toString());
+      String msg = "Can't open pom file for " + name;
+      MavenLogger.log(msg, ex);
+      openDialog(msg + "\n" + ex.toString());
     } catch(CoreException ex) {
       MavenLogger.log(ex);
       openDialog(ex.getMessage() + "\n" + ex.toString());
