@@ -631,8 +631,9 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
 
     Thread.sleep(5000);
 
+    String newServer = isEclipse33() ? "New/Server" : "Ne&w/Server";
     getUI().contextClick(new SWTWidgetLocator(Tree.class, new ViewLocator("org.eclipse.wst.server.ui.ServersView")),
-        "Ne&w/Server");
+        newServer);
     getUI().wait(new ShellShowingCondition("New Server"));
     Thread.sleep(2000);
     getUI().click(new FilteredTreeItemLocator("Apache/Tomcat v6.0 Server"));

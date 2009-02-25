@@ -22,6 +22,7 @@ import com.windowtester.runtime.swt.condition.shell.ShellShowingCondition;
 import com.windowtester.runtime.swt.locator.ButtonLocator;
 import com.windowtester.runtime.swt.locator.CTabItemLocator;
 import com.windowtester.runtime.swt.locator.MenuItemLocator;
+import com.windowtester.runtime.swt.locator.NamedWidgetLocator;
 import com.windowtester.runtime.swt.locator.TreeItemLocator;
 import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
 
@@ -54,10 +55,12 @@ public class MEclipse173SimpleWebAppTest extends UIIntegrationTestCase {
     // Generate the database using maven goal hibernate3:hbm2ddl
     getUI().click(new TreeItemLocator("simple-webapp", new ViewLocator(PACKAGE_EXPLORER_VIEW_ID)));
     getUI().click(new MenuItemLocator("Run/Run As/.*Maven build..."));
-    getUI().wait(new ShellShowingCondition("Edit Configuration"));
+    String shellName = isEclipse33() ? "simple-webapp" : "Edit Configuration";
+    getUI().wait(new ShellShowingCondition(shellName));
+    getUI().click(new NamedWidgetLocator("goalsText"));
     getUI().enterText("hibernate3:hbm2ddl");
     getUI().click(new ButtonLocator("&Run"));
-    getUI().wait(new ShellDisposedCondition("Edit Configuration"));
+    getUI().wait(new ShellDisposedCondition(shellName));
     getUI().wait(new JobsCompleteCondition(), 60000);
     getUI().click(new TreeItemLocator("simple-webapp", new ViewLocator(PACKAGE_EXPLORER_VIEW_ID)));
     getUI().keyClick(SWT.F5);
