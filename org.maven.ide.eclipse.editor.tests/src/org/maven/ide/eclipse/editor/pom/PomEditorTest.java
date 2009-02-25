@@ -22,8 +22,6 @@ import com.windowtester.runtime.swt.condition.SWTIdleCondition;
 import com.windowtester.runtime.swt.condition.eclipse.FileExistsCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellDisposedCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellShowingCondition;
-import com.windowtester.runtime.swt.internal.condition.NotCondition;
-import com.windowtester.runtime.swt.internal.condition.eclipse.DirtyEditorCondition;
 import com.windowtester.runtime.swt.locator.ButtonLocator;
 import com.windowtester.runtime.swt.locator.CTabItemLocator;
 import com.windowtester.runtime.swt.locator.NamedWidgetLocator;
@@ -91,13 +89,9 @@ public class PomEditorTest extends PomEditorTestBase {
   public void testUndoRedo() throws Exception {
     openPomFile(TEST_POM_POM_XML);
 
-    getUI().click(new NamedWidgetLocator("organizationName"));
-    getUI().keyClick(SWT.CTRL, 'a');
-    getUI().enterText("orgfoo");
+    replaceText(new NamedWidgetLocator("organizationName"), "orgfoo");
     getUI().click(new NamedWidgetLocator("organizationUrl"));
-    getUI().click(new NamedWidgetLocator("organizationName"));
-    getUI().keyClick(SWT.CTRL, 'a');
-    getUI().enterText("orgfoo1");
+    replaceText(new NamedWidgetLocator("organizationName"), "orgfoo1");
     
     // test undo
 	  getUI().keyClick(SWT.CTRL, 'z');
@@ -197,20 +191,20 @@ public class PomEditorTest extends PomEditorTestBase {
   }
 
   public void testNewEditorIsClean() throws Exception {
-    openPomFile(TEST_POM_POM_XML);
+    MavenPomEditor editor = openPomFile(TEST_POM_POM_XML);
 
     // close/open the file 
     getUI().close(new CTabItemLocator(TEST_POM_POM_XML));
-    // ui.click(2, new TreeItemLocator(TEST_POM_POM_XML, new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
+    // ui.click(2, new TreeItemLocator(TEST_POM_POM_XML, new ViewLocator(PACKAGE_EXPLORER_VIEW_ID)));
     openPomFile(TEST_POM_POM_XML);
 
     // test the editor is clean
-    getUI().assertThat(new NotCondition(new DirtyEditorCondition()));
+    assertFalse(editor.isDirty());
   }
 
   //MNGECLIPSE-874
   public void testUndoAfterSave() throws Exception {
-    openPomFile(TEST_POM_POM_XML);
+    MavenPomEditor editor = openPomFile(TEST_POM_POM_XML);
 
     // make a change 
     getUI().click(new CTabItemLocator(TEST_POM_POM_XML));
@@ -222,13 +216,13 @@ public class PomEditorTest extends PomEditorTestBase {
     getUI().keyClick(SWT.CTRL, 's');
 
     // test the editor is clean
-    getUI().assertThat(new NotCondition(new DirtyEditorCondition()));
+    assertFalse(editor.isDirty());
 
     // undo change
     getUI().keyClick(SWT.CTRL, 'z');
 
     // test the editor is dirty
-    getUI().assertThat(new DirtyEditorCondition());
+    assertTrue(editor.isDirty());
 
     //test the value
     assertTextValue("parentArtifactId", "parent6");
@@ -238,7 +232,7 @@ public class PomEditorTest extends PomEditorTestBase {
   }
 
   public void testAfterUndoEditorIsClean() throws Exception {
-    openPomFile(TEST_POM_POM_XML);
+    MavenPomEditor editor = openPomFile(TEST_POM_POM_XML);
 
     // make a change 
     getUI().click(new CTabItemLocator(TEST_POM_POM_XML));
@@ -249,7 +243,7 @@ public class PomEditorTest extends PomEditorTestBase {
     getUI().keyClick(SWT.CTRL, 'z');
 
     // test the editor is clean
-    getUI().assertThat(new NotCondition(new DirtyEditorCondition()));
+    assertFalse(editor.isDirty());
   }
 
   public void testEmptyFile() throws Exception {
@@ -272,7 +266,7 @@ public class PomEditorTest extends PomEditorTestBase {
     openPomFile(name);
     
 //    ui.contextClick(new TreeItemLocator(PROJECT_NAME, new ViewLocator(
-//        "org.eclipse.jdt.ui.PackageExplorer")), "New/File");
+//        PACKAGE_EXPLORER_VIEW_ID)), "New/File");
 //    ui.wait(new ShellShowingCondition("New File"));
 //    ui.enterText("another.pom");
 //    ui.click(new ButtonLocator("&Finish"));
@@ -283,7 +277,7 @@ public class PomEditorTest extends PomEditorTestBase {
     getUI().keyClick(SWT.CTRL, 's');
     getUI().close(new CTabItemLocator(name));
     
-    // getUI().click(2, new TreeItemLocator(name, new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
+    // getUI().click(2, new TreeItemLocator(name, new ViewLocator(PACKAGE_EXPLORER_VIEW_ID)));
     openPomFile(name);
     
     getUI().click(new NamedWidgetLocator("groupId"));
@@ -295,11 +289,11 @@ public class PomEditorTest extends PomEditorTestBase {
     
     ScreenCapture.createScreenCapture();
     
-    getUI().click(new TreeItemLocator(PROJECT_NAME, new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
+    getUI().click(new TreeItemLocator(PROJECT_NAME, new ViewLocator(PACKAGE_EXPLORER_VIEW_ID)));
     ScreenCapture.createScreenCapture();
         
     getUI().contextClick(new TreeItemLocator(name, //
-        new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")), "Delete");
+        new ViewLocator(PACKAGE_EXPLORER_VIEW_ID)), "Delete");
     ScreenCapture.createScreenCapture();
     getUI().wait(new ShellDisposedCondition("Progress Information"));
     getUI().wait(new ShellShowingCondition("Confirm Delete"));
@@ -325,25 +319,37 @@ public class PomEditorTest extends PomEditorTestBase {
 //		IFile file = root.getFile(new Path(name));
 //		file.create(new ByteArrayInputStream(str.getBytes()), true, null);
 
-		openPomFile(name);
+		MavenPomEditor editor = openPomFile(name);
 		
 	  selectEditorTab(TAB_POM_XML);
-		getUI().wait(new NotCondition(new DirtyEditorCondition()));
+	  waitForEditorDirtyState(editor, false);
 		findText("</project>");
 		getUI().keyClick(WT.ARROW_LEFT);
 		
 		putIntoClipboard("<properties><sample>sample</sample></properties>");
 		getUI().keyClick(SWT.CTRL, 'v');
-		getUI().wait(new DirtyEditorCondition());
+		waitForEditorDirtyState(editor, true);
 		
 		getUI().keyClick(SWT.CTRL, 's');
-		getUI().wait(new NotCondition(new DirtyEditorCondition()));
+		waitForEditorDirtyState(editor, false);
 		getUI().keyClick(SWT.CTRL, 'w');
 	}
 
+	private void waitForEditorDirtyState(MavenPomEditor editor, boolean dirtyState) throws InterruptedException {
+	   int time = 0;
+	    while (time < 30000) {
+	      if (dirtyState == editor.isDirty()) {
+	        return;
+	      }
+	      Thread.sleep(5000);
+	      time += 5000;
+	    }
+	    fail("Timed out waiting for editor dirty state: "  + dirtyState);
+	}
+	
 	// MNGECLIPSE-835
   public void testModulesEditorActivation() throws Exception {
-    openPomFile(TEST_POM_POM_XML);
+    MavenPomEditor editor = openPomFile(TEST_POM_POM_XML);
     
     getUI().keyClick(SWT.CTRL, 'm');
     
@@ -376,7 +382,7 @@ public class PomEditorTest extends PomEditorTestBase {
     getUI().keyClick(SWT.CTRL, 'm');
     
     // test the editor is clean
-    getUI().assertThat(new NotCondition(new DirtyEditorCondition()));
+    assertFalse(editor.isDirty());
   }
 
 }
