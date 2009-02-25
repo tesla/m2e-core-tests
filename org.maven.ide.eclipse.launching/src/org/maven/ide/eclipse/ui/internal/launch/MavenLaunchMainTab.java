@@ -267,6 +267,7 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
       goalsLabel.setLayoutData(gd_goalsLabel);
       goalsLabel.setText(Messages.getString("launch.goalsLabel")); //$NON-NLS-1$
       goalsText = new Text(mainComposite, SWT.BORDER);
+      goalsText.setData("name", "goalsText");
       GridData gd_goalsText = new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1);
       gd_goalsText.verticalIndent = 7;
       goalsText.setLayoutData(gd_goalsText);
