@@ -508,6 +508,7 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
     if(isEclipse33()) {
       getUI().click(2, locator);
     } else {
+      getUI().click(locator);
       getUI().keyClick(SWT.MOD1, 'a');
     }
     getUI().enterText(text);
