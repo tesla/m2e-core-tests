@@ -102,6 +102,11 @@ import com.windowtester.runtime.util.ScreenCapture;
 @SuppressWarnings("restriction")
 public class UIIntegrationTestCase extends UITestCaseSWT {
 
+  /**
+   * 
+   */
+  private static final String SERVERS_VIEW_ID = "org.eclipse.wst.server.ui.ServersView";
+
   private static final String PLUGIN_ID = "org.maven.ide.eclipse.integration.tests";
 
   // Has the maven central index been cached into local workspace?
@@ -628,12 +633,12 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
 
     assertTrue("Can't locate tomcat installation: " + tomcatInstallLocation, new File(tomcatInstallLocation).exists());
     // Install the Tomcat server 
-    showView("org.eclipse.wst.server.ui.ServersView");
+    showView(SERVERS_VIEW_ID);
 
     Thread.sleep(5000);
 
     String newServer = isEclipse33() ? "New/Server" : "Ne&w/Server";
-    getUI().contextClick(new SWTWidgetLocator(Tree.class, new ViewLocator("org.eclipse.wst.server.ui.ServersView")),
+    getUI().contextClick(new SWTWidgetLocator(Tree.class, new ViewLocator(SERVERS_VIEW_ID)),
         newServer);
     getUI().wait(new ShellShowingCondition("New Server"));
     Thread.sleep(2000);
@@ -713,7 +718,7 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
   protected void removeAllProjectInTomcat() throws Exception {
     getUI().click(new CTabItemLocator("Servers"));
     getUI().contextClick(
-        new TreeItemLocator(TOMCAT_SERVER_NAME, new ViewLocator("org.eclipse.wst.server.ui.ServersView")),
+        new TreeItemLocator(TOMCAT_SERVER_NAME, new ViewLocator(SERVERS_VIEW_ID)),
         "Add and Remove Projects...");
     getUI().wait(new ShellShowingCondition("Add and Remove Projects"));
     getUI().click(new ButtonLocator("<< Re&move All"));
@@ -727,7 +732,7 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
     // Deploy the test project into tomcat
     getUI().click(new CTabItemLocator("Servers"));
     getUI().contextClick(
-        new TreeItemLocator(TOMCAT_SERVER_NAME, new ViewLocator("org.eclipse.wst.server.ui.ServersView")),
+        new TreeItemLocator(TOMCAT_SERVER_NAME, new ViewLocator(SERVERS_VIEW_ID)),
         "Add and Remove Projects...");
     getUI().wait(new ShellShowingCondition("Add and Remove Projects"));
     getUI().click(new ButtonLocator("Add A&ll >>"));
@@ -737,9 +742,16 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
     Thread.sleep(3000);
 
     // Start the server
-    getUI().click(new TreeItemLocator(TOMCAT_SERVER_NAME, new ViewLocator("org.eclipse.wst.server.ui.ServersView")));
-    getUI().keyClick(SWT.MOD1 | SWT.ALT, 'r');
-    getUI().wait(new JobsCompleteCondition(), 120000);
+    if(isEclipse33()) {
+      getUI().contextClick(
+          new TreeItemLocator(TOMCAT_SERVER_NAME, new ViewLocator(SERVERS_VIEW_ID)), "Start");
+      getUI().wait(new JobsCompleteCondition(JobsCompleteCondition.IGNORE_SYSTEM_JOBS), 120000);
+    } else {
+      getUI().click(new TreeItemLocator(TOMCAT_SERVER_NAME, new ViewLocator(SERVERS_VIEW_ID)));
+      getUI().keyClick(SWT.MOD1 | SWT.ALT, 'r');
+      getUI().wait(new JobsCompleteCondition(), 120000);
+    }
+    
     Thread.sleep(5000);
 
   }
@@ -749,12 +761,17 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
     getUI().click(new TreeItemLocator("Servers", new ViewLocator(PACKAGE_EXPLORER_VIEW_ID)));
     getUI().keyClick(SWT.F5);
     getUI().click(new CTabItemLocator("Servers"));
-    getUI().click(new TreeItemLocator(TOMCAT_SERVER_NAME, new ViewLocator("org.eclipse.wst.server.ui.ServersView")));
-    getUI().keyClick(SWT.MOD1 | SWT.ALT, 's');
+    if(isEclipse33()) {
+      getUI().contextClick(
+          new TreeItemLocator(TOMCAT_SERVER_NAME, new ViewLocator(SERVERS_VIEW_ID)), "Stop");
+    } else {
+      getUI().click(new TreeItemLocator(TOMCAT_SERVER_NAME, new ViewLocator(SERVERS_VIEW_ID)));
+      getUI().keyClick(SWT.MOD1 | SWT.ALT, 's');
+    }
     getUI().wait(new JobsCompleteCondition(), 120000);
-    getUI().click(new TreeItemLocator(TOMCAT_SERVER_NAME, new ViewLocator("org.eclipse.wst.server.ui.ServersView")));
+    getUI().click(new TreeItemLocator(TOMCAT_SERVER_NAME, new ViewLocator(SERVERS_VIEW_ID)));
     getUI().contextClick(
-        new TreeItemLocator(TOMCAT_SERVER_NAME, new ViewLocator("org.eclipse.wst.server.ui.ServersView")), "Delete");
+        new TreeItemLocator(TOMCAT_SERVER_NAME, new ViewLocator(SERVERS_VIEW_ID)), "Delete");
     getUI().wait(new ShellShowingCondition("Delete Server"));
     getUI().click(new ButtonLocator("OK"));
     getUI().wait(new ShellDisposedCondition("Delete Server"));
