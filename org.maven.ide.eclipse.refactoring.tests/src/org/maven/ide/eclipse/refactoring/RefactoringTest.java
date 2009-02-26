@@ -8,9 +8,9 @@
 
 package org.maven.ide.eclipse.refactoring;
 
+import com.windowtester.internal.runtime.condition.NotCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellDisposedCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellShowingCondition;
-import com.windowtester.runtime.swt.internal.condition.NotCondition;
 import com.windowtester.runtime.swt.internal.condition.eclipse.DirtyEditorCondition;
 import com.windowtester.runtime.swt.locator.ButtonLocator;
 import com.windowtester.runtime.swt.locator.CTabItemLocator;
