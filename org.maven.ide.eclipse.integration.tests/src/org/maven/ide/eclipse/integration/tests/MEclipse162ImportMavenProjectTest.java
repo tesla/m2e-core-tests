@@ -26,6 +26,10 @@ public class MEclipse162ImportMavenProjectTest extends UIIntegrationTestCase {
     tempDir = doImport("projects/httpcomponents-core-4.0-beta3-src.zip");
   }
 
+  public void testMultiModuleImport2() throws Exception {
+    tempDir = doImport("projects/testMultiModule.zip");
+    
+  }
   public void testMNGEclipse1028ImportOrderMatters() throws Exception {
     checkoutProjectsFromSVN("http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.wtp.tests/projects/import-order-matters/");
     assertProjectsHaveNoErrors();
