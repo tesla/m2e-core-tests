@@ -20,6 +20,7 @@ import org.eclipse.swt.widgets.Label;
 import com.windowtester.runtime.WT;
 import com.windowtester.runtime.swt.condition.SWTIdleCondition;
 import com.windowtester.runtime.swt.condition.eclipse.FileExistsCondition;
+import com.windowtester.runtime.swt.condition.eclipse.JobsCompleteCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellDisposedCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellShowingCondition;
 import com.windowtester.runtime.swt.locator.ButtonLocator;
@@ -215,6 +216,8 @@ public class PomEditorTest extends PomEditorTestBase {
     //save file
     getUI().keyClick(SWT.CTRL, 's');
 
+    getUI().wait(new JobsCompleteCondition());
+    
     // test the editor is clean
     assertFalse(editor.isDirty());
 
@@ -265,19 +268,9 @@ public class PomEditorTest extends PomEditorTestBase {
     createFile(name, "");
     openPomFile(name);
     
-//    ui.contextClick(new TreeItemLocator(PROJECT_NAME, new ViewLocator(
-//        PACKAGE_EXPLORER_VIEW_ID)), "New/File");
-//    ui.wait(new ShellShowingCondition("New File"));
-//    ui.enterText("another.pom");
-//    ui.click(new ButtonLocator("&Finish"));
-//    // ui.keyClick(WT.CR);
-//    ui.wait(new ShellDisposedCondition("Progress Information"));
-//    ui.wait(new ShellDisposedCondition("New File"));
-    
     getUI().keyClick(SWT.CTRL, 's');
     getUI().close(new CTabItemLocator(name));
     
-    // getUI().click(2, new TreeItemLocator(name, new ViewLocator(PACKAGE_EXPLORER_VIEW_ID)));
     openPomFile(name);
     
     getUI().click(new NamedWidgetLocator("groupId"));
