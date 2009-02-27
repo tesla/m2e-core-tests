@@ -216,16 +216,15 @@ public class PomEditorTest extends PomEditorTestBase {
     //save file
     getUI().keyClick(SWT.CTRL, 's');
 
-    getUI().wait(new JobsCompleteCondition());
     
     // test the editor is clean
-    assertFalse(editor.isDirty());
+    waitForEditorDirtyState(editor, false);
 
     // undo change
     getUI().keyClick(SWT.CTRL, 'z');
 
     // test the editor is dirty
-    assertTrue(editor.isDirty());
+    waitForEditorDirtyState(editor, true);
 
     //test the value
     assertTextValue("parentArtifactId", "parent6");
