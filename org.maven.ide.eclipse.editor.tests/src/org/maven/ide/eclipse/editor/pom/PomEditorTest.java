@@ -20,7 +20,6 @@ import org.eclipse.swt.widgets.Label;
 import com.windowtester.runtime.WT;
 import com.windowtester.runtime.swt.condition.SWTIdleCondition;
 import com.windowtester.runtime.swt.condition.eclipse.FileExistsCondition;
-import com.windowtester.runtime.swt.condition.eclipse.JobsCompleteCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellDisposedCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellShowingCondition;
 import com.windowtester.runtime.swt.locator.ButtonLocator;
@@ -200,7 +199,7 @@ public class PomEditorTest extends PomEditorTestBase {
     openPomFile(TEST_POM_POM_XML);
 
     // test the editor is clean
-    assertFalse(editor.isDirty());
+    waitForEditorDirtyState(editor, false);
   }
 
   //MNGECLIPSE-874
@@ -245,7 +244,7 @@ public class PomEditorTest extends PomEditorTestBase {
     getUI().keyClick(SWT.CTRL, 'z');
 
     // test the editor is clean
-    assertFalse(editor.isDirty());
+    waitForEditorDirtyState(editor, false);
   }
 
   public void testEmptyFile() throws Exception {
@@ -374,7 +373,7 @@ public class PomEditorTest extends PomEditorTestBase {
     getUI().keyClick(SWT.CTRL, 'm');
     
     // test the editor is clean
-    assertFalse(editor.isDirty());
+    waitForEditorDirtyState(editor, false);
   }
 
 }
