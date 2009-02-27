@@ -745,14 +745,12 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
     if(isEclipse33()) {
       getUI().contextClick(
           new TreeItemLocator(TOMCAT_SERVER_NAME, new ViewLocator(SERVERS_VIEW_ID)), "Start");
-      getUI().wait(new JobsCompleteCondition(JobsCompleteCondition.IGNORE_SYSTEM_JOBS), 120000);
     } else {
       getUI().click(new TreeItemLocator(TOMCAT_SERVER_NAME, new ViewLocator(SERVERS_VIEW_ID)));
       getUI().keyClick(SWT.MOD1 | SWT.ALT, 'r');
-      getUI().wait(new JobsCompleteCondition(), 120000);
     }
-    
-    Thread.sleep(5000);
+    getUI().wait(new JobsCompleteCondition(JobsCompleteCondition.IGNORE_SYSTEM_JOBS), 120000);
+    Thread.sleep(10000);
 
   }
 
