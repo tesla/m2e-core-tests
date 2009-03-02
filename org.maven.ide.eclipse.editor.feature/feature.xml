@@ -67,34 +67,6 @@ http://www.eclipse.org/legal/epl-v10.html
          version="0.0.0"/>
 
    <plugin
-         id="org.eclipse.draw2d"
-         download-size="0"
-         install-size="0"
-         version="3.4.1.v20080910-1351"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.zest.core"
-         download-size="0"
-         install-size="0"
-         version="1.0.0.v20080115"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.zest.layouts"
-         download-size="0"
-         install-size="0"
-         version="1.0.0.v20080226"
-         unpack="false"/>
-
-   <plugin
-         id="com.ibm.icu"
-         download-size="0"
-         install-size="0"
-         version="3.8.1.v20080530"
-         unpack="false"/>
-
-   <plugin
          id="org.maven.ide.eclipse.refactoring"
          download-size="0"
          install-size="0"
