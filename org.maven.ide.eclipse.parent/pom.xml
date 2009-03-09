@@ -36,7 +36,8 @@
     <nexus.version>1.1.3-SNAPSHOT</nexus.version>
 
     <doxia_converter.version>1.0.0.20080917-1930</doxia_converter.version>
-    <doxia.version>1.0-SNAPSHOT</doxia.version>
+    <doxia.version>1.1</doxia.version>
+    <doxia_tools.version>1.0</doxia_tools.version>
 
     <maven_scm.version>1.0.0.20080602-2350</maven_scm.version>
     <dependency_tree.version>1.2.0.20080424-1900</dependency_tree.version>
