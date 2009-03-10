@@ -27,8 +27,7 @@ Require-Bundle:
  org.maven.ide.components.archetype_common,
  org.maven.ide.components.nexus_indexer,
  org.maven.ide.components.maven_model_edit,
- org.maven.ide.components.dependency_tree,
- org.eclipse.core.net
+ org.maven.ide.components.dependency_tree
 Eclipse-LazyStart: true
 Bundle-ClassPath: .
 Bundle-RequiredExecutionEnvironment: J2SE-1.5,
