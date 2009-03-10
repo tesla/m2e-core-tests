@@ -21,7 +21,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
 
+import org.eclipse.core.net.proxy.IProxyService;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -116,6 +118,8 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   private MavenProjectManagerImpl managerImpl;
 
   private IMavenMarkerManager mavenMarkerManager;
+
+  private ServiceTracker tracker;
 
   public MavenPlugin() {
     plugin = this;
@@ -217,6 +221,10 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     initializeIndexes(indexes, runtimeManager.isUpdateIndexesOnStartup());
 
     checkJdk();
+    
+    tracker = new ServiceTracker(getBundle().getBundleContext(), IProxyService.class.getName(), null);
+    tracker.open();
+
   }
 
   private void initializeIndexes(Set<IndexInfo> indexes, boolean updateIndexesOnStartup) {
@@ -272,6 +280,9 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
    * This method is called when the plug-in is stopped
    */
   public void stop(BundleContext context) throws Exception {
+    if (tracker != null) {
+      tracker.close();
+    }
     super.stop(context);
 
     this.mavenBackgroundJob.cancel();
@@ -493,5 +504,10 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
       }
     }
   }
+  
+  public IProxyService getProxyService() {
+    return (IProxyService) tracker.getService();
+  }
+
 
 }
