@@ -8,10 +8,10 @@
 
 package org.maven.ide.eclipse.refactoring;
 
-import com.windowtester.internal.runtime.condition.NotCondition;
+import org.maven.ide.eclipse.editor.pom.MavenPomEditor;
+
 import com.windowtester.runtime.swt.condition.shell.ShellDisposedCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellShowingCondition;
-import com.windowtester.runtime.swt.internal.condition.eclipse.DirtyEditorCondition;
 import com.windowtester.runtime.swt.locator.ButtonLocator;
 import com.windowtester.runtime.swt.locator.CTabItemLocator;
 import com.windowtester.runtime.swt.locator.TableItemLocator;
@@ -41,11 +41,9 @@ public class RefactoringTest extends RefactoringTestBase {
   //tests version refactoring
   public void testRefactoringVersion() throws Exception {
     //open 2 editors
-    ui.click(2, new TreeItemLocator(MINE_POM_XML, new ViewLocator(
-        ORG_ECLIPSE_JDT_UI_PACKAGE_EXPLORER)));
-    ui.click(2, new TreeItemLocator(CHILD_POM_XML, new ViewLocator(
-        ORG_ECLIPSE_JDT_UI_PACKAGE_EXPLORER)));
-    //ui.click(new CTabItemLocator(MINE_POM_XML));
+    MavenPomEditor mineEditor = openPomFile(MINE_POM_XML);
+    MavenPomEditor childEditor = openPomFile(CHILD_POM_XML);
+ 
     ui.click(new TreeItemLocator(MINE_POM_XML, new ViewLocator(
         ORG_ECLIPSE_JDT_UI_PACKAGE_EXPLORER)));
     
@@ -76,12 +74,13 @@ public class RefactoringTest extends RefactoringTestBase {
     assertTextValue(VERSION, _0_0_ZQ_SNAPSHOT);
 
     //check editor is not dirty
-    ui.assertThat(new NotCondition(new DirtyEditorCondition()));
+    waitForEditorDirtyState(mineEditor, false);
     
     //make it dirty
     setTextValue(VERSION, "");
     setTextValue(VERSION, _0_0_ZQ_SNAPSHOT);
-    ui.assertThat(new DirtyEditorCondition());
+    waitForEditorDirtyState(mineEditor, true);
+ //   ui.assertThat(new DirtyEditorCondition());
     
     //see if the save dialog is displayed
     ui.contextClick(new TreeItemLocator(MINE_POM_XML, new ViewLocator(
@@ -98,15 +97,16 @@ public class RefactoringTest extends RefactoringTestBase {
     
     //check to see the child pom has proper parent
     ui.click(new CTabItemLocator(CHILD_POM_XML));
-    ui.assertThat(new NotCondition(new DirtyEditorCondition()));
+    waitForEditorDirtyState(childEditor, false);
     assertTextValue("parentVersion", _0_0_ZZQ_SNAPSHOT);
   }
 
   //tests artifactId refactoring (tests version wildcard)
   public void testRefactoringArtifactId() throws Exception {
-    ui.click(2, new TreeItemLocator(CHILD_POM_XML, new ViewLocator(
-        ORG_ECLIPSE_JDT_UI_PACKAGE_EXPLORER)));
 
+    MavenPomEditor mineEditor = openPomFile(MINE_POM_XML);
+    MavenPomEditor childEditor = openPomFile(CHILD_POM_XML);
+    
     //refactor artifactId
     ui.contextClick(new TreeItemLocator(MINE_POM_XML, new ViewLocator(
         ORG_ECLIPSE_JDT_UI_PACKAGE_EXPLORER)),
@@ -122,11 +122,11 @@ public class RefactoringTest extends RefactoringTestBase {
     assertTextValue("parentArtifactId", "parent");
 
     //check editor is not dirty
-    ui.assertThat(new NotCondition(new DirtyEditorCondition()));
+    waitForEditorDirtyState(mineEditor, false);
     
     //check to see the child pom has proper parent
     ui.click(new CTabItemLocator(CHILD_POM_XML));
-    ui.assertThat(new NotCondition(new DirtyEditorCondition()));
+    waitForEditorDirtyState(childEditor, false);
     assertTextValue("parentArtifactId", "parent");
     
     //test that dependencies were refactored (including wildcard)
@@ -134,4 +134,17 @@ public class RefactoringTest extends RefactoringTestBase {
     ui.click(new TableItemLocator("mine : parent"));
     ui.click(new TableItemLocator("mine : parent : 0.0.zzq-SNAPSHOT"));
   }
+  
+  private void waitForEditorDirtyState(MavenPomEditor editor, boolean dirtyState) throws InterruptedException {
+    int time = 0;
+     while (time < 30000) {
+       if (dirtyState == editor.isDirty()) {
+         return;
+       }
+       Thread.sleep(5000);
+       time += 5000;
+     }
+     fail("Timed out waiting for editor dirty state: "  + dirtyState);
+ }
+ 
 }

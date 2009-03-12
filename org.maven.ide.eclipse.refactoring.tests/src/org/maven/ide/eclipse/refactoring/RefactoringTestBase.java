@@ -50,7 +50,6 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPreferenceConstants;
 import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.internal.IPreferenceConstants;
@@ -77,6 +76,7 @@ import com.windowtester.runtime.condition.IHandler;
 import com.windowtester.runtime.locator.IWidgetLocator;
 import com.windowtester.runtime.locator.WidgetReference;
 import com.windowtester.runtime.swt.UITestCaseSWT;
+import com.windowtester.runtime.swt.condition.SWTIdleCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellDisposedCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellShowingCondition;
 import com.windowtester.runtime.swt.locator.ButtonLocator;
@@ -331,23 +331,26 @@ public class RefactoringTestBase extends UITestCaseSWT {
     Thread.sleep(1000L);
   }
 
-  protected void openPomFile(String name) throws Exception {
-    // ui.click(2, new TreeItemLocator(name, new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
-    
+  protected MavenPomEditor openPomFile(String name) throws Exception {
+
     IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
     IFile file = root.getFile(new Path(name));
-  
+
     final IEditorInput editorInput = new FileEditorInput(file);
-    Display.getDefault().syncExec(new Runnable() {
-      public void run() {
-        try {
-          getActivePage().openEditor(editorInput, "org.maven.ide.eclipse.editor.MavenPomEditor", true);
-        } catch(PartInitException ex) {
-          throw new RuntimeException(ex);
+    MavenPomEditor editor = (MavenPomEditor) UIThreadTask.executeOnEventQueue(new UIThreadTask() {
+
+      public Object runEx() throws Exception {
+        IEditorPart part = getActivePage().openEditor(editorInput, "org.maven.ide.eclipse.editor.MavenPomEditor", true);
+        if(part instanceof MavenPomEditor) {
+          return part;
         }
+        return null;
       }
     });
+    getUI().wait(new SWTIdleCondition());
+    return editor;
   }
+ 
 
   protected String getContents(File aFile) throws Exception {
     StringBuilder contents = new StringBuilder();
