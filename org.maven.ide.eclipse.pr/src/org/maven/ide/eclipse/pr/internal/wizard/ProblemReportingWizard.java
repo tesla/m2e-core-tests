@@ -45,6 +45,8 @@ import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.pr.internal.data.ArchiveTarget;
 import org.maven.ide.eclipse.pr.internal.data.Data;
 import org.maven.ide.eclipse.pr.internal.data.DataGatherer;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.Version;
 
 
 /**
@@ -55,17 +57,18 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
 
   private IStructuredSelection selection;
 
-  // TODO replace with proper jira
-  private static final String URL = "https://issues.sonatype.org";
-  
+  private static final String HOSTNAME = "jiratest.sonatype.org/";
+
+  private static final String URL = "https://" + HOSTNAME;
+
   private static final String USERNAME = "sonatype_problem_reporting";
-  
+
   private static final String PASSWORD = "sonatype_problem_reporting";
-  
+
   private static final String PROJECT = "PR";
-  
+
   protected static String TITLE = "Problem Reporting";
-  
+
   //private ProblemReportingSelectionPage selectionPage;
 
   private ProblemDescriptionPage descriptionPage;
@@ -113,7 +116,7 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
             //showMessage("The problem reporting bundle is saved to " + location);
             String username = MavenPlugin.getDefault().getMavenRuntimeManager().getJiraUsername();
             String password = MavenPlugin.getDefault().getMavenRuntimeManager().getJiraPassword();
-            if (username == null || username.trim().equals("")) {
+            if(username == null || username.trim().equals("")) {
               username = USERNAME;
               password = PASSWORD;
             }
@@ -127,6 +130,7 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
             r.setAssignee(username);
             r.setReporter(username);
             r.setProblemReportBundle(locationFile);
+            r.setEnvironment(getEnvironment());
 
             IssueSubmissionResult res = is.submitIssue(r);
 
@@ -146,6 +150,7 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
 
         return Status.OK_STATUS;
       }
+      
 
       private void showError(final String msg) {
         Display.getDefault().asyncExec(new Runnable() {
@@ -159,8 +164,8 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
       private void showHyperlink(final String msg, final String url) {
         Display.getDefault().asyncExec(new Runnable() {
           public void run() {
-            HyperlinkDialog dialog = new HyperlinkDialog(Display.getCurrent().getActiveShell(), TITLE, null, 
-                msg, MessageDialog.INFORMATION, new String[] { IDialogConstants.OK_LABEL }, 0, url);
+            HyperlinkDialog dialog = new HyperlinkDialog(Display.getCurrent().getActiveShell(), TITLE, null, msg,
+                MessageDialog.INFORMATION, new String[] {IDialogConstants.OK_LABEL}, 0, url);
             dialog.open();
           }
         });
@@ -170,6 +175,24 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
     return true;
   }
 
+  private static final String [] PROPERTIES=new String[]{"java.vendor","java.version","os.name","os.version","os.arch","osgi.arch","osgi.nl"};
+  
+  private String getEnvironment() {
+    StringBuffer sb = new StringBuffer();
+    
+    String sep = System.getProperty("line.separator");
+    
+    Bundle bundle = ResourcesPlugin.getPlugin().getBundle();
+    String version = (String) bundle.getHeaders().get(org.osgi.framework.Constants.BUNDLE_VERSION);
+    Version v = org.osgi.framework.Version.parseVersion(version);
+    
+    sb.append("Eclipse Version: ").append(v.toString()).append(sep);
+    for(int i = 0; i < PROPERTIES.length; i++ ) {
+      sb.append(PROPERTIES[i]).append(": ").append(System.getProperty(PROPERTIES[i])).append(sep);
+    }
+    return sb.toString();
+  }
+  
   IStatus saveData(String location, Set<Data> dataSet, IProgressMonitor monitor) throws IOException {
     if(!location.endsWith(".zip")) {
       location = location + ".zip";
