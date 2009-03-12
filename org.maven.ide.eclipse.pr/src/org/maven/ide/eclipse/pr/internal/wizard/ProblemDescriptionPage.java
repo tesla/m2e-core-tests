@@ -18,11 +18,15 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.maven.ide.eclipse.pr.internal.ProblemReportingImages;
@@ -106,6 +110,26 @@ public class ProblemDescriptionPage extends AbstractMavenWizardPage {
     if (selection != null && selection.getFirstElement() instanceof IProject) {
       projectsViewer.setCheckedElements(new Object[] {(IProject) selection.getFirstElement()});
     }
+    
+    Link link= new Link(composite, SWT.NONE);
+    link.setFont(composite.getFont());
+    link.setText("<A>Set Jira user (optional)</A>");  //$NON-NLS-1$//$NON-NLS-2$
+    link.addSelectionListener(new SelectionListener() {
+      public void widgetSelected(SelectionEvent e) {
+        doLaunchProblemReportingPrefs();
+      }
+
+      public void widgetDefaultSelected(SelectionEvent e) {
+        doLaunchProblemReportingPrefs();
+      }
+    });
+    data= new GridData(SWT.FILL, SWT.CENTER, true, false);
+    link.setLayoutData(data);
+    
+  }
+  
+  private void doLaunchProblemReportingPrefs() {
+    PreferencesUtil.createPreferenceDialogOn(getShell(), "org.maven.ide.eclipse.preferences.ProblemReportingPreferencePage", new String[] { "org.maven.ide.eclipse.preferences.ProblemReportingPreferencePage" }, null).open();
   }
 
   protected void updatePage() {
@@ -144,5 +168,6 @@ public class ProblemDescriptionPage extends AbstractMavenWizardPage {
   public IStructuredSelection getSelectedProjects() {
     return selection;
   }
+  
 
 }
