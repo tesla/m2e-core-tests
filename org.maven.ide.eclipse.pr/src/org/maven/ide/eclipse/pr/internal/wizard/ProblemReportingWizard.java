@@ -182,15 +182,21 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
     
     String sep = System.getProperty("line.separator");
     
-    Bundle bundle = ResourcesPlugin.getPlugin().getBundle();
-    String version = (String) bundle.getHeaders().get(org.osgi.framework.Constants.BUNDLE_VERSION);
-    Version v = org.osgi.framework.Version.parseVersion(version);
+    sb.append("M2E Version: ").append(getBundleVersion(MavenPlugin.getDefault().getBundle())).append(sep);
+    sb.append("Eclipse Version: ").append(getBundleVersion(ResourcesPlugin.getPlugin().getBundle())).append(sep);
     
-    sb.append("Eclipse Version: ").append(v.toString()).append(sep);
     for(int i = 0; i < PROPERTIES.length; i++ ) {
       sb.append(PROPERTIES[i]).append(": ").append(System.getProperty(PROPERTIES[i])).append(sep);
     }
+    
+    
     return sb.toString();
+  }
+  
+  private String getBundleVersion(Bundle bundle) {
+    String version = (String) bundle.getHeaders().get(org.osgi.framework.Constants.BUNDLE_VERSION);
+    Version v = org.osgi.framework.Version.parseVersion(version);
+    return v.toString();
   }
   
   IStatus saveData(String location, Set<Data> dataSet, IProgressMonitor monitor) throws IOException {
