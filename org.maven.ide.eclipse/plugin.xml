@@ -13,7 +13,6 @@
    <extension-point id="scmHandlersUi" name="SCM Handlers UI" schema="schema/scmHandlersUi.exsd"/>
    <extension-point id="archetypeCatalogs" name="Maven Archetypes" schema="schema/archetypes.exsd"/>
    <extension-point id="projectConfigurators" name="Project Configurators" schema="schema/projectConfigurators.exsd"/>
-   <extension-point id="classpathConfiguratorFactories" name="Classpath Configurator Factories" schema="schema/classpathConfiguratorFactories.exsd"/>
    <extension-point id="m2menu" name="m2 menu items" schema="schema/m2menu.exsd"/>
 
    <extension point="org.eclipse.ui.intro.configExtension">

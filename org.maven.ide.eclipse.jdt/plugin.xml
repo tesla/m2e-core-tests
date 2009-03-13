@@ -9,6 +9,8 @@
 <?eclipse version="3.2"?>
 <plugin>
 
+   <extension-point id="classpathConfiguratorFactories" name="Classpath Configurator Factories" schema="schema/classpathConfiguratorFactories.exsd"/>
+
    <extension point="org.eclipse.jdt.core.classpathContainerInitializer"
               id="maven2ClasspathContainer"
               name="%m2.classpath-container.name">

@@ -138,7 +138,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
   static final ArtifactFilter SCOPE_FILTER_RUNTIME = new ScopeArtifactFilter(Artifact.SCOPE_RUNTIME); 
   static final ArtifactFilter SCOPE_FILTER_TEST = new ScopeArtifactFilter(Artifact.SCOPE_TEST);
 
-  private static final String EXTENSION_CLASSPATH_CONFIGURATOR_FACTORIES = "org.maven.ide.eclipse.classpathConfiguratorFactories";
+  private static final String EXTENSION_CLASSPATH_CONFIGURATOR_FACTORIES = "org.maven.ide.eclipse.jdt.classpathConfiguratorFactories";
 
   private static final String ELEMENT_CLASSPATH_CONFIGURATOR_FACTORY = "classpathConfiguratorFactory";
 

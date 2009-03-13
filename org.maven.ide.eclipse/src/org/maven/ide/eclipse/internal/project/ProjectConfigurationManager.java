@@ -77,16 +77,20 @@ import org.maven.ide.eclipse.project.MavenUpdateRequest;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
+import org.maven.ide.eclipse.project.configurator.LifecycleMapping;
 import org.maven.ide.eclipse.project.configurator.ProjectConfigurationRequest;
 import org.maven.ide.eclipse.util.Util;
 
 /**
- * ProjectConfiguration Manager
+ * import Maven projects
+ * update project configuration from Maven 
+ * enable Maven nature
+ * create new project
  *
  * @author igor
  */
 public class ProjectConfigurationManager implements IProjectConfigurationManager, IMavenProjectChangedListener {
-  
+
   static final QualifiedName QNAME = new QualifiedName(IMavenConstants.PLUGIN_ID, "ProjectImportManager");
 
   final MavenModelManager modelManager;
@@ -211,7 +215,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
         if(monitor.isCanceled()) {
           throw new OperationCanceledException();
         }
-        ProjectConfigurationRequest request = new ProjectConfigurationRequest(facade.getProject(), facade.getPom(), facade.getMavenProject(monitor), facade.getResolverConfiguration(), false /*updateSources*/);
+        ProjectConfigurationRequest request = new ProjectConfigurationRequest(facade, facade.getProject(), facade.getPom(), facade.getMavenProject(monitor), facade.getResolverConfiguration(), false /*updateSources*/);
         updateProjectConfiguration(embedder, request, monitor);
       }
     } finally {
@@ -269,7 +273,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
         if (pom.isAccessible()) {
           IMavenProjectFacade facade = projectManagerImpl.create(pom, false, monitor);
           if (facade != null) { // facade is null if pom.xml cannot be read
-            ProjectConfigurationRequest request = new ProjectConfigurationRequest(project, facade.getPom(), facade.getMavenProject(monitor), configuration, true);
+            ProjectConfigurationRequest request = new ProjectConfigurationRequest(facade, project, facade.getPom(), facade.getMavenProject(monitor), configuration, true);
             updateProjectConfiguration(embedder, request, monitor);
           }
         }
@@ -284,43 +288,16 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
   private void updateProjectConfiguration(MavenEmbedder embedder, ProjectConfigurationRequest request,
       IProgressMonitor monitor) throws CoreException {
     mavenMarkerManager.deleteMarkers(request.getProject());
-    
-    for(AbstractProjectConfigurator configurator : getConfigurators()) {
-      if(monitor.isCanceled()) {
-        throw new OperationCanceledException();
-      }
-      configurator.configure(embedder, request, monitor);
-    }
-    
+
     IProject project = request.getProject();
     addMavenNature(project, monitor);
-    addMavenBuilder(project, monitor);
-    
+
+    LifecycleMapping lifecycleMapping = getLifecycleMapping(request.getMavenProjectFacade());
+
+    lifecycleMapping.configure(embedder, request, monitor);
+
   }
 
-  private void addMavenBuilder(IProject project, IProgressMonitor monitor) throws CoreException {
-    IProjectDescription description = project.getDescription();
-    
-    // ensure Maven builder is always the last one
-    ICommand mavenBuilder = null;
-    ArrayList<ICommand> newSpec = new ArrayList<ICommand>();
-    for(ICommand command : description.getBuildSpec()) {
-      if(IMavenConstants.BUILDER_ID.equals(command.getBuilderName())) {
-        mavenBuilder = command;
-      } else {
-        newSpec.add(command);
-      }
-    }
-    if(mavenBuilder == null) {
-      mavenBuilder = description.newCommand();
-      mavenBuilder.setBuilderName(IMavenConstants.BUILDER_ID);
-    }
-    newSpec.add(mavenBuilder);
-    description.setBuildSpec(newSpec.toArray(new ICommand[newSpec.size()]));
-    
-    project.setDescription(description, monitor);
-  }
-  
   public void enableMavenNature(IProject project, ResolverConfiguration configuration, IProgressMonitor monitor)
       throws CoreException {
     monitor.subTask("Enable Maven nature");
@@ -347,7 +324,6 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
 
     // add maven nature even for projects without valid pom.xml file
     addMavenNature(project, monitor);
-    addMavenBuilder(project, monitor);
   }
 
   private void addMavenNature(IProject project, IProgressMonitor monitor) throws CoreException {
@@ -370,14 +346,12 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
       try {
         IFile pom = project.getFile(IMavenConstants.POM_FILE_NAME);
         IMavenProjectFacade facade = projectManager.create(project, monitor);
-        MavenProject mavenProject = facade != null? facade.getMavenProject(monitor): null;
-        ResolverConfiguration resolverConfiguration = facade != null? facade.getResolverConfiguration(): null;
-        ProjectConfigurationRequest request = new ProjectConfigurationRequest(project, pom, mavenProject, resolverConfiguration, false);
-        for(AbstractProjectConfigurator configurator : getConfigurators()) {
-          if(monitor.isCanceled()) {
-            throw new OperationCanceledException();
-          }
-          configurator.unconfigure(embedder, request, monitor);
+        if(facade!=null) {
+          LifecycleMapping lifecycleMapping = getLifecycleMapping(facade);
+          MavenProject mavenProject = facade.getMavenProject(monitor);
+          ResolverConfiguration resolverConfiguration = facade.getResolverConfiguration();
+          ProjectConfigurationRequest request = new ProjectConfigurationRequest(facade, project, pom, mavenProject, resolverConfiguration, false);
+          lifecycleMapping.unconfigure(embedder, request, monitor);
         }
 
         project.deleteMarkers(IMavenConstants.MARKER_ID, true, IResource.DEPTH_INFINITE);
@@ -634,11 +608,17 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
   }
 
   public void mavenProjectChanged(MavenProjectChangedEvent[] events, IProgressMonitor monitor) {
-    for(AbstractProjectConfigurator configurator : getConfigurators()) {
-      configurator.mavenProjectChanged(events, monitor);
+    for(MavenProjectChangedEvent event : events) {
+      LifecycleMapping lifecycleMapping = getLifecycleMapping(event.getMavenProject());
+      if(lifecycleMapping != null) {
+        for(AbstractProjectConfigurator configurator : lifecycleMapping.getProjectConfigurators()) {
+          configurator.mavenProjectChanged(events, monitor);
+        }
+      }
     }
   }
   
+  @SuppressWarnings("deprecation")
   public synchronized Set<AbstractProjectConfigurator> getConfigurators() {
     if(configurators == null) {
       configurators = new TreeSet<AbstractProjectConfigurator>(new ProjectConfiguratorComparator());
@@ -657,5 +637,12 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
       int res = c1.getPriority() - c2.getPriority();
       return res==0 ? c1.getId().compareTo(c2.getId()) : res;
     }
+  }
+
+  public LifecycleMapping getLifecycleMapping(IMavenProjectFacade projectFacade) {
+    if (projectFacade==null) {
+      return null;
+    }
+    return new DefaultLifecycleMapping(getConfigurators());
   }  
 }

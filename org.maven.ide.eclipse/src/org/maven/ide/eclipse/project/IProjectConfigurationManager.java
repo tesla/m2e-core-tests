@@ -22,6 +22,7 @@ import org.apache.maven.archetype.catalog.Archetype;
 import org.apache.maven.model.Model;
 
 import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
+import org.maven.ide.eclipse.project.configurator.LifecycleMapping;
 
 
 public interface IProjectConfigurationManager {
@@ -48,6 +49,9 @@ public interface IProjectConfigurationManager {
   void updateProjectConfiguration(IProject project, ResolverConfiguration configuration, String goalToExecute,
       IProgressMonitor monitor) throws CoreException;
 
+  @Deprecated
   Set<AbstractProjectConfigurator> getConfigurators();
+
+  LifecycleMapping getLifecycleMapping(IMavenProjectFacade projectFacade);
 
 }

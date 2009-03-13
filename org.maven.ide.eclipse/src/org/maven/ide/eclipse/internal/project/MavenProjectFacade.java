@@ -63,12 +63,13 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
   private final MavenProjectManagerImpl manager;
 
   private final IFile pom;
-  
+
   private final File pomFile;
 
   private transient MavenProject mavenProject;
 
-  ResolverConfiguration resolverConfiguration;
+  // XXX make final, there should be no need to change it
+  private ResolverConfiguration resolverConfiguration;
 
   private final long[] timestamp = new long[MavenProjectManagerImpl.METADATA_PATH.size() + 1];
 
@@ -483,5 +484,4 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
     }
     
   }
-  
 }

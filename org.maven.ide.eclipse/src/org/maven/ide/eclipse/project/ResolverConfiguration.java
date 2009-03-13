@@ -13,7 +13,10 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Resolver configuration holder
+ * Resolver configuration holder.
+ * 
+ * TODO need a better name, this configures all aspects of maven project in eclipse, 
+ *      not just dependency resolution.
  *
  * @author Eugene Kuleshov
  */
@@ -95,5 +98,9 @@ public class ResolverConfiguration implements Serializable {
   
   public void setSkipCompiler(boolean skipCompiler) {
     this.skipCompiler = skipCompiler;
+  }
+  
+  public String getLifecycleMapping() {
+    return null;
   }
 }
