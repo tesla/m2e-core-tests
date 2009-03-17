@@ -10,18 +10,16 @@ package org.maven.ide.eclipse.internal.project;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IFile;
@@ -77,7 +75,7 @@ import org.maven.ide.eclipse.project.MavenUpdateRequest;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
-import org.maven.ide.eclipse.project.configurator.LifecycleMapping;
+import org.maven.ide.eclipse.project.configurator.ILifecycleMapping;
 import org.maven.ide.eclipse.project.configurator.ProjectConfigurationRequest;
 import org.maven.ide.eclipse.util.Util;
 
@@ -92,6 +90,8 @@ import org.maven.ide.eclipse.util.Util;
 public class ProjectConfigurationManager implements IProjectConfigurationManager, IMavenProjectChangedListener {
 
   static final QualifiedName QNAME = new QualifiedName(IMavenConstants.PLUGIN_ID, "ProjectImportManager");
+
+  private static final String DEFAULT_LIFECYCLE_MAPPING_ID = "default";
 
   final MavenModelManager modelManager;
 
@@ -111,8 +111,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
 
   final IMavenMarkerManager mavenMarkerManager;
   
-  private Set<AbstractProjectConfigurator> configurators;
-
+  private Map<String, ILifecycleMapping> lifecycleMappings;
   
   public ProjectConfigurationManager(MavenModelManager modelManager, MavenConsole console,
       MavenRuntimeManager runtimeManager, MavenProjectManager projectManager,
@@ -292,7 +291,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     IProject project = request.getProject();
     addMavenNature(project, monitor);
 
-    LifecycleMapping lifecycleMapping = getLifecycleMapping(request.getMavenProjectFacade());
+    ILifecycleMapping lifecycleMapping = getLifecycleMapping(request.getMavenProjectFacade());
 
     lifecycleMapping.configure(embedder, request, monitor);
 
@@ -347,7 +346,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
         IFile pom = project.getFile(IMavenConstants.POM_FILE_NAME);
         IMavenProjectFacade facade = projectManager.create(project, monitor);
         if(facade!=null) {
-          LifecycleMapping lifecycleMapping = getLifecycleMapping(facade);
+          ILifecycleMapping lifecycleMapping = getLifecycleMapping(facade);
           MavenProject mavenProject = facade.getMavenProject(monitor);
           ResolverConfiguration resolverConfiguration = facade.getResolverConfiguration();
           ProjectConfigurationRequest request = new ProjectConfigurationRequest(facade, project, pom, mavenProject, resolverConfiguration, false);
@@ -609,7 +608,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
 
   public void mavenProjectChanged(MavenProjectChangedEvent[] events, IProgressMonitor monitor) {
     for(MavenProjectChangedEvent event : events) {
-      LifecycleMapping lifecycleMapping = getLifecycleMapping(event.getMavenProject());
+      ILifecycleMapping lifecycleMapping = getLifecycleMapping(event.getMavenProject());
       if(lifecycleMapping != null) {
         for(AbstractProjectConfigurator configurator : lifecycleMapping.getProjectConfigurators()) {
           configurator.mavenProjectChanged(events, monitor);
@@ -620,29 +619,24 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
   
   @SuppressWarnings("deprecation")
   public synchronized Set<AbstractProjectConfigurator> getConfigurators() {
-    if(configurators == null) {
-      configurators = new TreeSet<AbstractProjectConfigurator>(new ProjectConfiguratorComparator());
-      configurators.addAll(ExtensionReader.readProjectConfiguratorExtensions(projectManager, runtimeManager, mavenMarkerManager, console));
-    }
-    return Collections.unmodifiableSet(configurators);
-  }
-  
-  /**
-   * ProjectConfigurator comparator
-   */
-  static class ProjectConfiguratorComparator implements Comparator<AbstractProjectConfigurator>, Serializable {
-    private static final long serialVersionUID = 1L;
-
-    public int compare(AbstractProjectConfigurator c1, AbstractProjectConfigurator c2) {
-      int res = c1.getPriority() - c2.getPriority();
-      return res==0 ? c1.getId().compareTo(c2.getId()) : res;
-    }
+    return Collections.unmodifiableSet(new LinkedHashSet<AbstractProjectConfigurator>(getLifecycleMapping(DEFAULT_LIFECYCLE_MAPPING_ID).getProjectConfigurators()));
   }
 
-  public LifecycleMapping getLifecycleMapping(IMavenProjectFacade projectFacade) {
+  public ILifecycleMapping getLifecycleMapping(IMavenProjectFacade projectFacade) {
     if (projectFacade==null) {
       return null;
     }
-    return new DefaultLifecycleMapping(getConfigurators());
-  }  
+    return getLifecycleMapping(DEFAULT_LIFECYCLE_MAPPING_ID);
+  }
+
+  private ILifecycleMapping getLifecycleMapping(String mappingId) {
+    Map<String, ILifecycleMapping> lifecycleMappings;
+    synchronized(this) {
+      if(this.lifecycleMappings == null) {
+        this.lifecycleMappings = ExtensionReader.readLifecycleMappingExtensions();
+      }
+      lifecycleMappings = this.lifecycleMappings;
+    }
+    return lifecycleMappings.get(mappingId);
+  }
 }

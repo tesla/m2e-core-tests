@@ -15,6 +15,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,7 @@ import org.maven.ide.eclipse.internal.index.IndexInfoWriter;
 import org.maven.ide.eclipse.project.IMavenMarkerManager;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
+import org.maven.ide.eclipse.project.configurator.ILifecycleMapping;
 
 
 /**
@@ -52,6 +54,8 @@ public class ExtensionReader {
   public static final String EXTENSION_INDEXES = "org.maven.ide.eclipse.indexes";
 
   public static final String EXTENSION_PROJECT_CONFIGURATORS = "org.maven.ide.eclipse.projectConfigurators";
+
+  public static final String EXTENSION_LIFECYCLE_MAPPINGS = "org.maven.ide.eclipse.lifecycleMappings";
 
   private static final String ELEMENT_INDEX = "index";
 
@@ -76,6 +80,8 @@ public class ExtensionReader {
   private static final String ATTR_DESCRIPTION = "description";
 
   private static final String ELEMENT_CONFIGURATOR = "configurator";
+  
+  private static final String ELEMENT_LIFECYCLE_MAPPING = "lifecycleMapping";
 
   /**
    * @param configFile previously saved indexes configuration
@@ -236,5 +242,37 @@ public class ExtensionReader {
     
     return projectConfigurators;
   }
+
+  public static Map<String, ILifecycleMapping> readLifecycleMappingExtensions() {
+    Map<String, ILifecycleMapping> lifecycleMappings = new HashMap<String, ILifecycleMapping>();
+    
+    IExtensionRegistry registry = Platform.getExtensionRegistry();
+    IExtensionPoint configuratorsExtensionPoint = registry.getExtensionPoint(EXTENSION_LIFECYCLE_MAPPINGS);
+    if(configuratorsExtensionPoint != null) {
+      IExtension[] configuratorExtensions = configuratorsExtensionPoint.getExtensions();
+      for(IExtension extension : configuratorExtensions) {
+        IConfigurationElement[] elements = extension.getConfigurationElements();
+        for(IConfigurationElement element : elements) {
+          if(element.getName().equals(ELEMENT_LIFECYCLE_MAPPING)) {
+            try {
+              Object o = element.createExecutableExtension(AbstractProjectConfigurator.ATTR_CLASS);
+              
+              ILifecycleMapping lifecycleMapping = (ILifecycleMapping) o;
+              String id = element.getAttribute("id");
+              
+              lifecycleMappings.put(id, lifecycleMapping);
+
+            } catch(CoreException ex) {
+              MavenLogger.log(ex);
+            }
+          }
+          
+        }
+      }
+    }
+    
+    return lifecycleMappings;
+  }
+
 }
 

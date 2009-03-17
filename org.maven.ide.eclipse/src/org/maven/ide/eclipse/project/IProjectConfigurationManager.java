@@ -22,7 +22,7 @@ import org.apache.maven.archetype.catalog.Archetype;
 import org.apache.maven.model.Model;
 
 import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
-import org.maven.ide.eclipse.project.configurator.LifecycleMapping;
+import org.maven.ide.eclipse.project.configurator.ILifecycleMapping;
 
 
 public interface IProjectConfigurationManager {
@@ -52,6 +52,6 @@ public interface IProjectConfigurationManager {
   @Deprecated
   Set<AbstractProjectConfigurator> getConfigurators();
 
-  LifecycleMapping getLifecycleMapping(IMavenProjectFacade projectFacade);
+  ILifecycleMapping getLifecycleMapping(IMavenProjectFacade projectFacade);
 
 }

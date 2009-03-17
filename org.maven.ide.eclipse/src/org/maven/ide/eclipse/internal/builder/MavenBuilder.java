@@ -27,7 +27,7 @@ import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.MavenProjectManager;
-import org.maven.ide.eclipse.project.configurator.LifecycleMapping;
+import org.maven.ide.eclipse.project.configurator.ILifecycleMapping;
 
 
 public class MavenBuilder extends IncrementalProjectBuilder {
@@ -41,7 +41,7 @@ public class MavenBuilder extends IncrementalProjectBuilder {
 
   private GetDeltaCallback getDeltaCallback = new GetDeltaCallback() {
     public IResourceDelta getDelta(IProject project) {
-      return getDelta(project);
+      return MavenBuilder.this.getDelta(project);
     }
   };
 
@@ -72,7 +72,7 @@ public class MavenBuilder extends IncrementalProjectBuilder {
 
       IResourceDelta delta = getDelta(project);
 
-      LifecycleMapping lifecycleMapping = configurationManager.getLifecycleMapping(projectFacade);
+      ILifecycleMapping lifecycleMapping = configurationManager.getLifecycleMapping(projectFacade);
 
       Set<IProject> dependencies = new HashSet<IProject>();
 

@@ -14,6 +14,7 @@
    <extension-point id="archetypeCatalogs" name="Maven Archetypes" schema="schema/archetypes.exsd"/>
    <extension-point id="projectConfigurators" name="Project Configurators" schema="schema/projectConfigurators.exsd"/>
    <extension-point id="m2menu" name="m2 menu items" schema="schema/m2menu.exsd"/>
+   <extension-point id="lifecycleMappings" name="Maven Lifecycle Mappings" schema="schema/lifecycleMappings.exsd"/>
 
    <extension point="org.eclipse.ui.intro.configExtension">
       <configExtension configId="org.eclipse.ui.intro.universalConfig"
@@ -479,6 +480,17 @@
           class="org.maven.ide.eclipse.project.configurator.MavenProjectConfigurator:org.codehaus.mojo:sysdeo-tomcat-maven-plugin|sysdeo-tomcat:m2eclipse"
           name="sysdeo-tomcat-maven-plugin" priority="50"/>
 
+   </extension>
+   <extension
+         point="org.maven.ide.eclipse.lifecycleMappings">
+      <lifecycleMapping
+            class="org.maven.ide.eclipse.internal.project.DefaultLifecycleMapping"
+            id="default"
+            name="Default Lifecycle Mapping">
+         <packaging
+               name="*">
+         </packaging>
+      </lifecycleMapping>
    </extension>
 
    <!--

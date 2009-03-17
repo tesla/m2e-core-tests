@@ -8,9 +8,11 @@
 
 package org.maven.ide.eclipse.internal.project;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IProject;
@@ -21,10 +23,16 @@ import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.apache.maven.embedder.MavenEmbedder;
 
+import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.core.MavenConsole;
+import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
+import org.maven.ide.eclipse.internal.ExtensionReader;
+import org.maven.ide.eclipse.project.IMavenMarkerManager;
+import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.configurator.AbstractBuildParticipant;
 import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
-import org.maven.ide.eclipse.project.configurator.LifecycleMapping;
+import org.maven.ide.eclipse.project.configurator.ILifecycleMapping;
 import org.maven.ide.eclipse.project.configurator.ProjectConfigurationRequest;
 
 
@@ -33,15 +41,13 @@ import org.maven.ide.eclipse.project.configurator.ProjectConfigurationRequest;
  * 
  * @author igor
  */
-public class DefaultLifecycleMapping implements LifecycleMapping {
+public class DefaultLifecycleMapping implements ILifecycleMapping {
 
-  private final List<AbstractProjectConfigurator> configurators;
+  private static List<AbstractProjectConfigurator> configurators;
 
   private final List<AbstractBuildParticipant> buildParticipants = new ArrayList<AbstractBuildParticipant>();
 
-  public DefaultLifecycleMapping(Set<AbstractProjectConfigurator> configurators) {
-    this.configurators = new ArrayList<AbstractProjectConfigurator>(configurators);
-
+  public DefaultLifecycleMapping() {
     this.buildParticipants.add(new DefaultBuildParticipant());
   }
 
@@ -95,7 +101,33 @@ public class DefaultLifecycleMapping implements LifecycleMapping {
   }
 
   public List<AbstractProjectConfigurator> getProjectConfigurators() {
+    List<AbstractProjectConfigurator> configurators;
+    synchronized(DefaultLifecycleMapping.class) {
+      if(DefaultLifecycleMapping.configurators == null) {
+        MavenPlugin plugin = MavenPlugin.getDefault();
+        MavenProjectManager projectManager = plugin.getMavenProjectManager();
+        MavenRuntimeManager runtimeManager = plugin.getMavenRuntimeManager();
+        IMavenMarkerManager mavenMarkerManager = plugin.getMavenMarkerManager();
+        MavenConsole console = plugin.getConsole();
+        DefaultLifecycleMapping.configurators = new ArrayList<AbstractProjectConfigurator>(ExtensionReader
+            .readProjectConfiguratorExtensions(projectManager, runtimeManager, mavenMarkerManager, console));
+        Collections.sort(DefaultLifecycleMapping.configurators, new ProjectConfiguratorComparator());
+      }
+      configurators = DefaultLifecycleMapping.configurators;
+    }
     return configurators;
+  }
+
+  /**
+   * ProjectConfigurator comparator
+   */
+  static class ProjectConfiguratorComparator implements Comparator<AbstractProjectConfigurator>, Serializable {
+    private static final long serialVersionUID = 1L;
+
+    public int compare(AbstractProjectConfigurator c1, AbstractProjectConfigurator c2) {
+      int res = c1.getPriority() - c2.getPriority();
+      return res == 0 ? c1.getId().compareTo(c2.getId()) : res;
+    }
   }
 
 }

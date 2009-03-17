@@ -20,7 +20,7 @@ import org.apache.maven.embedder.MavenEmbedder;
  *
  * @author igor
  */
-public interface LifecycleMapping {
+public interface ILifecycleMapping {
 
   void configure(MavenEmbedder embedder, ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException;
 
