@@ -244,7 +244,7 @@ public class UIIntegrationTestCase extends UITestCaseSWT {
         getUI().click(new ButtonLocator("OK"));
         getUI().wait(new ShellDisposedCondition("Add Repository Index"));
         getUI().contextClick(
-            new TreeItemLocator("central-remote.*", new ViewLocator("org.maven.ide.eclipse.views.MavenIndexesView")),
+            new TreeItemLocator("central.*", new ViewLocator("org.maven.ide.eclipse.views.MavenIndexesView")),
             "Update Index");
         hideView(indexView);
       } catch(IOException ex) {
