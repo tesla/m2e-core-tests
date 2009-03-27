@@ -258,26 +258,42 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       MavenLogger.log(ex);
     }
 
-    // handle pom change (from refactoring), this assumes editor is not dirty, because all poms 
-    // will be saved before refactoring
+    // Reload model if pom file was changed externally.
     // TODO implement generic merge scenario (when file is externally changed and is dirty)
     class ChangedResourceDeltaVisitor implements IResourceDeltaVisitor {
-      boolean changed = false;
 
       public boolean visit(IResourceDelta delta) throws CoreException {
         if(delta.getResource().getName().equals(pomFile.getName()) //
-            && (delta.getKind() & IResourceDelta.CHANGED) != 0) {
-          changed = true;
-          return false;
+            && (delta.getKind() & IResourceDelta.CHANGED) != 0 && delta.getResource().exists()) {
+          int flags = delta.getFlags();
+          if ((flags & (IResourceDelta.CONTENT | flags & IResourceDelta.REPLACED |IResourceDelta.SYNC)) != 0) {
+            handleContentChanged();
+            return false;
+          }
+          if ((flags & IResourceDelta.MARKERS) != 0) {
+            handleMarkersChanged();
+            return false;
+          }
         }
         return true;
       }
-    };
-    
-    try {
-      ChangedResourceDeltaVisitor visitor = new ChangedResourceDeltaVisitor();
-      event.getDelta().accept(visitor);
-      if(visitor.changed && pomFile.exists()) {
+      
+      private void handleContentChanged() {
+        Display.getDefault().asyncExec(new Runnable() {
+          public void run() {
+            try {
+              structuredModel.reload(pomFile.getContents());
+              reload();
+            } catch(CoreException e) {
+              MavenLogger.log(e);
+            } catch(Exception e) {
+              MavenLogger.log("Error loading pom editor model.", e);
+            }
+          }
+        });
+      }
+      private void handleMarkersChanged() {
+        try {
         IMarker[] markers = pomFile.findMarkers(IMavenConstants.MARKER_ID, true, IResource.DEPTH_ZERO);
         final String msg = markers != null && markers.length > 0 //
             ? markers[0].getAttribute(IMarker.MESSAGE, "Unknown error") : null;
@@ -287,16 +303,17 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
             for(MavenPomEditorPage page : pages) {
               page.setErrorMessage(msg, msg == null ? IMessageProvider.NONE : IMessageProvider.ERROR);
             }
-            
-            // command stack shouldn't be dirty after refactoring
-            // changes can be undone though
-            flushCommandStack();
-            for(IPomFileChangedListener listener : fileChangeListeners) {
-              listener.fileChanged();
-            }
           }
         });
+        } catch (CoreException ex ) {
+          MavenLogger.log("Error updating pom file markers.", ex);
+        }
       }
+    };
+    
+    try {
+      ChangedResourceDeltaVisitor visitor = new ChangedResourceDeltaVisitor();
+      event.getDelta().accept(visitor);
     } catch(CoreException ex) {
       MavenLogger.log(ex);
     }
@@ -972,14 +989,12 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
           }
           
           if(changed[0]) {
+            
             try {
-              structuredModel.reload(pomFile.getContents()); // need to be done in UI thread
-              reload();
+              pomFile.refreshLocal(IResource.DEPTH_ZERO, null);
             } catch(CoreException e) {
               MavenLogger.log(e);
-            } catch(Exception e) {
-              MavenLogger.log("Can't load model", e);
-            }
+            } 
           }
           
         } finally {
