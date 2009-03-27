@@ -1,10 +1,19 @@
 package org.maven.ide.eclipse.editor.pom;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.SWT;
 
 import com.windowtester.runtime.WT;
 import com.windowtester.runtime.WaitTimedOutException;
 import com.windowtester.runtime.WidgetSearchException;
+import com.windowtester.runtime.swt.condition.eclipse.JobsCompleteCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellDisposedCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellShowingCondition;
 import com.windowtester.runtime.swt.locator.ButtonLocator;
@@ -114,6 +123,28 @@ public class PomEditorTest2 extends PomEditorTestBase {
     getUI().keyClick(WT.CR);
     getUI().wait(new ShellDisposedCondition("Add property"));
   }
+  
+  public void testInternalModificationUpdatesModel() throws Exception {
+    openPomFile(TEST_POM_POM_XML);
 
+    assertTextValue("version", "1.0.0");
+    
+    // internally replace file contents
+    IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+    IFile file = root.getFile(new Path(TEST_POM_POM_XML));
+    File f = new File(file.getLocation().toOSString());
+    String text = getContents(f);
+    file.setContents(new ByteArrayInputStream(text.replace("1.0.0", "1.0.1").getBytes()), true, true, null);
+
+    file.refreshLocal(IResource.DEPTH_ZERO, null);
+    getUI().wait(new JobsCompleteCondition());
+    
+    assertTextValue("version", "1.0.1");
+    
+    selectEditorTab(TAB_POM_XML);
+    String editorText = getEditorText();
+    assertTrue(editorText, editorText.contains("<version>1.0.1</version>"));
+    
+  }
 
 }
