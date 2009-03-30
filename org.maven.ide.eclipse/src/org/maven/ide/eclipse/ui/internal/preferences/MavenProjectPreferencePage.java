@@ -9,6 +9,7 @@
 package org.maven.ide.eclipse.ui.internal.preferences;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -189,7 +190,7 @@ public class MavenProjectPreferencePage extends PropertyPage {
                 return Status.OK_STATUS;
               }
             };
-            job.setRule(plugin.getProjectConfigurationManager().getRule());
+            job.setRule(plugin.getProjectConfigurationManager().getRule(new IResource[] {project}));
             job.schedule();
           }
 //        }

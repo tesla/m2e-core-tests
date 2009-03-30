@@ -13,6 +13,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -27,7 +28,7 @@ import org.maven.ide.eclipse.project.configurator.ILifecycleMapping;
 
 public interface IProjectConfigurationManager {
 
-  ISchedulingRule getRule();
+  ISchedulingRule getRule(IResource[] resources);
 
   void importProjects(Collection<MavenProjectInfo> projects, //
       ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException;

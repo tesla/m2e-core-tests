@@ -140,7 +140,7 @@ public class PomEditorTestBase extends UIIntegrationTestCase {
       }
     };
     
-    job.setRule(configurationManager.getRule());
+    job.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
     job.schedule();
     getUI().wait(new JobsCompleteCondition(), 300000);
     

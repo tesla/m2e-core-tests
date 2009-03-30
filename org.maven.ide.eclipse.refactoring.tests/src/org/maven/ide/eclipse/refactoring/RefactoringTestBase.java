@@ -20,6 +20,7 @@ import org.apache.maven.model.Model;
 import org.codehaus.plexus.util.FileUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IWorkspaceRunnable;
@@ -252,7 +253,7 @@ public class RefactoringTestBase extends UITestCaseSWT {
       public void run(IProgressMonitor monitor) throws CoreException {
         plugin.getProjectConfigurationManager().importProjects(projectInfos, importConfiguration, monitor);
       }
-    }, plugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
+    }, plugin.getProjectConfigurationManager().getRule(new IResource[]{workspace.getRoot()}), IWorkspace.AVOID_UPDATE, monitor);
 
     IProject[] projects = new IProject[projectInfos.size()];
     for (int i = 0; i < projectInfos.size(); i++) {

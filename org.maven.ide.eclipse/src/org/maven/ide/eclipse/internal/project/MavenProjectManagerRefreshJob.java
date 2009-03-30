@@ -20,6 +20,7 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -60,7 +61,7 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
     this.manager = manager;
     this.runtimeManager = runtimeManager;
     this.console = console;
-    setRule(new SchedulingRule(true));
+    setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
     setProperty(IProgressConstants.ACTION_PROPERTY, new OpenMavenConsoleAction());
   }
   

@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Properties;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -303,7 +304,7 @@ public class MavenProjectWizard extends Wizard implements INewWizard {
     });
     
 
-    job.setRule(plugin.getProjectConfigurationManager().getRule());
+    job.setRule(plugin.getProjectConfigurationManager().getRule(new IResource[]{workspace.getRoot()}));
     job.schedule();
 
 //    ProjectListener listener = new ProjectListener();

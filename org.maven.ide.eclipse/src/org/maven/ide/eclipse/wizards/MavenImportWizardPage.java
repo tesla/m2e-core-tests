@@ -224,7 +224,7 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
 
     final Tree projectTree = projectTreeViewer.getTree();
     GridData projectTreeData = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 3);
-    projectTreeData.heightHint = 300;
+    projectTreeData.heightHint = 250;
     projectTreeData.widthHint = 500;
     projectTree.setLayoutData(projectTreeData);
 

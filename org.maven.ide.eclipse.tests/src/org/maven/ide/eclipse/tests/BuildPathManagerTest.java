@@ -877,7 +877,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
         plugin.getProjectConfigurationManager().createSimpleProject(project, location, model, directories,
             config, monitor);
       }
-    }, plugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
+    }, plugin.getProjectConfigurationManager().getRule(new IResource[] {workspace.getRoot()}), IWorkspace.AVOID_UPDATE, monitor);
 
     return project;
   }
@@ -980,7 +980,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
         plugin.getProjectConfigurationManager().createArchetypeProject(project, location, archetype, //
             projectName, projectName, "0.0.1-SNAPSHOT", "jar", new Properties(), pic, monitor);
       }
-    }, plugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
+    }, plugin.getProjectConfigurationManager().getRule(new IResource[]{workspace.getRoot()}), IWorkspace.AVOID_UPDATE, monitor);
 
     return project;
   }

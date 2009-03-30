@@ -40,6 +40,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.core.runtime.jobs.MultiRule;
 import org.eclipse.ui.IWorkingSet;
 
 import org.codehaus.plexus.util.dag.CycleDetectedException;
@@ -528,8 +529,13 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     }.collectProjects(projects);
   }
 
-  public ISchedulingRule getRule() {
-    return new SchedulingRule(false);
+  public ISchedulingRule getRule(IResource[] resources) {
+    ISchedulingRule [] rules = new ISchedulingRule[resources.length];
+    for(int i = 0; i < resources.length; i++) {
+      rules[i] = ResourcesPlugin.getWorkspace().getRuleFactory().modifyRule(resources[i]);
+    }
+    
+    return new MultiRule(rules);
   }
 
   private IProject create(MavenProjectInfo projectInfo, ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException {

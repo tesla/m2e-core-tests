@@ -12,6 +12,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -100,7 +102,7 @@ public class MavenImportWizard extends Wizard implements IImportWizard {
         return Status.OK_STATUS;
       }
     };
-    job.setRule(plugin.getProjectConfigurationManager().getRule());
+    job.setRule(plugin.getProjectConfigurationManager().getRule(new IResource[] {ResourcesPlugin.getWorkspace().getRoot()}));
     job.schedule();
 
     return true;

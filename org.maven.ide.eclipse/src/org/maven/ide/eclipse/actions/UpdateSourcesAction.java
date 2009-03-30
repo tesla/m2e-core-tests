@@ -97,7 +97,7 @@ public class UpdateSourcesAction implements IObjectActionDelegate {
         return status != null? status: Status.OK_STATUS;
       }
     };
-    job.setRule(plugin.getProjectConfigurationManager().getRule());
+    job.setRule(plugin.getProjectConfigurationManager().getRule(projects.toArray(new IProject[]{})));
     job.schedule();
   }
 

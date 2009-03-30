@@ -14,6 +14,7 @@ import java.util.Properties;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
@@ -278,7 +279,7 @@ public class MavenModuleWizard extends Wizard implements INewWizard {
         }
       }
     });
-    job.setRule(plugin.getProjectConfigurationManager().getRule());
+    job.setRule(plugin.getProjectConfigurationManager().getRule(new IResource[]{ResourcesPlugin.getWorkspace().getRoot()}));
     job.schedule();
 
     if(isEditor) {
