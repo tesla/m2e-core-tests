@@ -100,7 +100,7 @@ import com.windowtester.runtime.util.ScreenCapture;
  * @author rseddon
  */
 @SuppressWarnings("restriction")
-public class UIIntegrationTestCase extends UITestCaseSWT {
+public abstract class UIIntegrationTestCase extends UITestCaseSWT {
 
   /**
    * 
