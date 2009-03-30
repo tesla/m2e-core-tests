@@ -55,7 +55,7 @@ public class MEclipse173SimpleWebAppTest extends UIIntegrationTestCase {
     // Generate the database using maven goal hibernate3:hbm2ddl
     getUI().click(new TreeItemLocator("simple-webapp", new ViewLocator(PACKAGE_EXPLORER_VIEW_ID)));
     getUI().click(new MenuItemLocator("Run/Run As/.*Maven build..."));
-    String shellName = isEclipse33() ? "simple-webapp" : "Edit Configuration";
+    String shellName = isEclipseVersion(3,3) ? "simple-webapp" : "Edit Configuration";
     getUI().wait(new ShellShowingCondition(shellName));
     getUI().click(new NamedWidgetLocator("goalsText"));
     getUI().enterText("hibernate3:hbm2ddl");

@@ -93,6 +93,7 @@ import com.windowtester.runtime.swt.locator.SWTWidgetLocator;
 import com.windowtester.runtime.swt.locator.TableCellLocator;
 import com.windowtester.runtime.swt.locator.TreeItemLocator;
 import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
+import com.windowtester.runtime.swt.locator.eclipse.WorkbenchLocator;
 import com.windowtester.runtime.util.ScreenCapture;
 
 
@@ -151,8 +152,21 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
   protected void oneTimeSetup() throws Exception {
     super.oneTimeSetup();
 
+    getUI().ensureThat(new WorkbenchLocator().hasFocus());
+    
     // Turn off eclipse features which make tests unreliable.
     WorkbenchPlugin.getDefault().getPreferenceStore().setValue(IPreferenceConstants.RUN_IN_BACKGROUND, true);
+    
+    if (isEclipseVersion(3, 5)) {
+      // Disable new xml completion behavior to preserver compatibility with previous versions.
+      getUI().click(new MenuItemLocator("Window/Preferences"));
+      getUI().wait(new ShellShowingCondition("Preferences"));
+      getUI().click(new FilteredTreeItemLocator("XML/XML Files/Editor/Typing"));
+      getUI().click(new ButtonLocator("&Insert a matching end tag"));
+      getUI().click(new ButtonLocator("OK"));
+      getUI().wait(new ShellDisposedCondition("Preferences"));
+    }
+    
     PrefUtil.getAPIPreferenceStore().setValue(IWorkbenchPreferenceConstants.ENABLE_ANIMATIONS, false);
 
     ShellFinder.bringRootToFront(getActivePage().getWorkbenchWindow().getShell().getDisplay());
@@ -510,7 +524,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
   protected void replaceText(IWidgetLocator locator, String text) throws WidgetSearchException {
     // Ctrl+A doesn't work in Eclipse 3.3 form view, but it is more reliable than double click so it is preferable to use it in later versions.
     // This is a workaround
-    if(isEclipse33()) {
+    if(isEclipseVersion(3,3)) {
       getUI().click(2, locator);
     } else {
       getUI().click(locator);
@@ -637,7 +651,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
 
     Thread.sleep(5000);
 
-    String newServer = isEclipse33() ? "New/Server" : "Ne&w/Server";
+    String newServer = isEclipseVersion(3,3) ? "New/Server" : "Ne&w/Server";
     getUI().contextClick(new SWTWidgetLocator(Tree.class, new ViewLocator(SERVERS_VIEW_ID)),
         newServer);
     getUI().wait(new ShellShowingCondition("New Server"));
@@ -731,10 +745,17 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
   protected void deployProjectsIntoTomcat() throws WidgetSearchException, InterruptedException {
     // Deploy the test project into tomcat
     getUI().click(new CTabItemLocator("Servers"));
-    getUI().contextClick(
-        new TreeItemLocator(TOMCAT_SERVER_NAME, new ViewLocator(SERVERS_VIEW_ID)),
-        "Add and Remove Projects...");
-    getUI().wait(new ShellShowingCondition("Add and Remove Projects"));
+    if (isEclipseVersion(3, 5)) {
+      getUI().contextClick(
+          new TreeItemLocator(TOMCAT_SERVER_NAME, new ViewLocator(SERVERS_VIEW_ID)),
+          "&Add and Remove...");
+    } else {
+      getUI().contextClick(
+          new TreeItemLocator(TOMCAT_SERVER_NAME, new ViewLocator(SERVERS_VIEW_ID)),
+          "Add and Remove Projects...");
+    }
+    String title = isEclipseVersion(3, 5) ? "Add and Remove..." : "Add and Remove Projects";
+    getUI().wait(new ShellShowingCondition(title));
     getUI().click(new ButtonLocator("Add A&ll >>"));
     getUI().click(new ButtonLocator("&Finish"));
     getUI().wait(new ShellDisposedCondition("Add and Remove Projects"));
@@ -742,12 +763,12 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     Thread.sleep(3000);
 
     // Start the server
-    if(isEclipse33()) {
-      getUI().contextClick(
-          new TreeItemLocator(TOMCAT_SERVER_NAME, new ViewLocator(SERVERS_VIEW_ID)), "Start");
-    } else {
+    if(isEclipseVersion(3,4)) {
       getUI().click(new TreeItemLocator(TOMCAT_SERVER_NAME, new ViewLocator(SERVERS_VIEW_ID)));
       getUI().keyClick(SWT.MOD1 | SWT.ALT, 'r');
+    } else {
+      getUI().contextClick(
+          new TreeItemLocator(TOMCAT_SERVER_NAME, new ViewLocator(SERVERS_VIEW_ID)), "Start");
     }
     getUI().wait(new JobsCompleteCondition(JobsCompleteCondition.IGNORE_SYSTEM_JOBS), 120000);
     Thread.sleep(10000);
@@ -759,12 +780,12 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     getUI().click(new TreeItemLocator("Servers", new ViewLocator(PACKAGE_EXPLORER_VIEW_ID)));
     getUI().keyClick(SWT.F5);
     getUI().click(new CTabItemLocator("Servers"));
-    if(isEclipse33()) {
-      getUI().contextClick(
-          new TreeItemLocator(TOMCAT_SERVER_NAME, new ViewLocator(SERVERS_VIEW_ID)), "Stop");
-    } else {
+    if(isEclipseVersion(3,4)) {
       getUI().click(new TreeItemLocator(TOMCAT_SERVER_NAME, new ViewLocator(SERVERS_VIEW_ID)));
       getUI().keyClick(SWT.MOD1 | SWT.ALT, 's');
+    } else {
+      getUI().contextClick(
+          new TreeItemLocator(TOMCAT_SERVER_NAME, new ViewLocator(SERVERS_VIEW_ID)), "Stop");
     }
     getUI().wait(new JobsCompleteCondition(), 120000);
     getUI().click(new TreeItemLocator(TOMCAT_SERVER_NAME, new ViewLocator(SERVERS_VIEW_ID)));
@@ -787,11 +808,12 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     return new String(out.toByteArray(), "UTF-8");
   }
 
-  public static boolean isEclipse33() {
+  
+  public static boolean isEclipseVersion(int major, int minor) {
     Bundle bundle = ResourcesPlugin.getPlugin().getBundle();
     String version = (String) bundle.getHeaders().get(org.osgi.framework.Constants.BUNDLE_VERSION);
     Version v = org.osgi.framework.Version.parseVersion(version);
-    return v.getMajor() == 3 && v.getMinor() == 3;
+    return v.getMajor() == major && v.getMinor() == minor;
   }
 
 }
