@@ -315,7 +315,7 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
       workspace.run(new IWorkspaceRunnable() {
         public void run(IProgressMonitor monitor) throws CoreException {
         }
-      }, workspace.getRuleFactory().buildRule(), 0, monitor);
+      }, new SchedulingRule(false), 0, monitor);
     } finally {
       jobManager.resume();
     }
