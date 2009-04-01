@@ -28,3 +28,4 @@ Eclipse-LazyStart: true
 Bundle-RequiredExecutionEnvironment: J2SE-1.5,
  JavaSE-1.6
 Bundle-Vendor: Sonatype, Inc.
+Export-Package: org.maven.ide.eclipse.actions; x-internal:=true
