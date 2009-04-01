@@ -266,7 +266,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
         if(delta.getResource().getName().equals(pomFile.getName()) //
             && (delta.getKind() & IResourceDelta.CHANGED) != 0 && delta.getResource().exists()) {
           int flags = delta.getFlags();
-          if ((flags & (IResourceDelta.CONTENT | flags & IResourceDelta.REPLACED |IResourceDelta.SYNC)) != 0) {
+          if ((flags & (IResourceDelta.CONTENT | flags & IResourceDelta.REPLACED)) != 0) {
             handleContentChanged();
             return false;
           }
