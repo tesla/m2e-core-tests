@@ -158,7 +158,7 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
       MavenJdtPlugin.getDefault().getBuildpathManager().updateClasspath(project, monitor);
 
       long t2 = System.currentTimeMillis();
-      console.logMessage("Updated source folders for project " + project.getName() + " " + (t2 - t1) / 1000 + "sec");
+      console.logMessage("Updated source folders for project " + project.getName() + " " + (t2 - t1) / 1000 + " sec");
 
     } catch(Exception ex) {
       String msg = "Unable to update source folders " + project.getName() + "; " + ex.toString();
@@ -316,7 +316,8 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
 
     // TODO optimize project refresh
     monitor.subTask("refreshing");
-    project.refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 1));
+    // project.refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 1));
+    project.getFolder("target").refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 1));
 
     MavenProject mavenProject = result.getProject();
 

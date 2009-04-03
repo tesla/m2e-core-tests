@@ -11,7 +11,7 @@
 
   <groupId>org.maven.ide.eclipse</groupId>
   <artifactId>parent</artifactId>
-  <version>0.9.7-SNAPSHOT</version>
+  <version>0.9.8-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Maven Integration for Eclipse (parent)</name>
@@ -20,7 +20,7 @@
   <inceptionYear>2005</inceptionYear>
 
   <properties>
-    <m2eclipse.version>0.9.7-SNAPSHOT</m2eclipse.version>
+    <m2eclipse.version>0.9.8-SNAPSHOT</m2eclipse.version>
 
     <maven_embedder.version>2.1.0.20080530-2300</maven_embedder.version>
     <maven.version>2.1-SNAPSHOT</maven.version>
