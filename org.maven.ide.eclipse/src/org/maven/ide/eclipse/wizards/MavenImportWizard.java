@@ -102,7 +102,7 @@ public class MavenImportWizard extends Wizard implements IImportWizard {
         return Status.OK_STATUS;
       }
     };
-    job.setRule(plugin.getProjectConfigurationManager().getRule(new IResource[] {ResourcesPlugin.getWorkspace().getRoot()}));
+    job.setRule(plugin.getProjectConfigurationManager().getRule());
     job.schedule();
 
     return true;

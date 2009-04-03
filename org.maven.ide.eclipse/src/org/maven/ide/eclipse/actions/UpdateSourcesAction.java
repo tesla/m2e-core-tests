@@ -100,7 +100,7 @@ public class UpdateSourcesAction implements IObjectActionDelegate {
       }
     };
     // We need to grab workspace lock because IJavaProject.setRawClasspath() needs it.
-    job.setRule(plugin.getProjectConfigurationManager().getRule(new IResource[]{ResourcesPlugin.getWorkspace().getRoot()}));
+    job.setRule(plugin.getProjectConfigurationManager().getRule());
     job.schedule();
   }
 

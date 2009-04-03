@@ -190,7 +190,7 @@ public class MavenProjectPreferencePage extends PropertyPage {
                 return Status.OK_STATUS;
               }
             };
-            job.setRule(plugin.getProjectConfigurationManager().getRule(new IResource[] {project}));
+            job.setRule(plugin.getProjectConfigurationManager().getRule());
             job.schedule();
           }
 //        }

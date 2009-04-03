@@ -249,7 +249,7 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
       public void run(IProgressMonitor monitor) throws CoreException {
         plugin.getProjectConfigurationManager().importProjects(projectInfos, importConfiguration, monitor);
       }
-    }, plugin.getProjectConfigurationManager().getRule(new IResource[] {workspace.getRoot()}), IWorkspace.AVOID_UPDATE, monitor);
+    }, plugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
 
     IProject[] projects = new IProject[projectInfos.size()];
     for (int i = 0; i < projectInfos.size(); i++) {
@@ -284,7 +284,7 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
         IProject project = workspace.getRoot().getProject(importConfiguration.getProjectName(projectInfo.getModel()));
         assertNotNull("Failed to import project " + projectInfo, project);
       }
-    }, plugin.getProjectConfigurationManager().getRule(new IResource[] {workspace.getRoot()}), IWorkspace.AVOID_UPDATE, monitor);
+    }, plugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
 
     return workspace.getRoot().getProject(projectName);
   }

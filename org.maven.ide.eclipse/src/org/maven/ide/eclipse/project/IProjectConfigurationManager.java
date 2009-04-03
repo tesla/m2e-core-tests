@@ -28,7 +28,7 @@ import org.maven.ide.eclipse.project.configurator.ILifecycleMapping;
 
 public interface IProjectConfigurationManager {
 
-  ISchedulingRule getRule(IResource[] resources);
+  ISchedulingRule getRule();
 
   void importProjects(Collection<MavenProjectInfo> projects, //
       ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException;

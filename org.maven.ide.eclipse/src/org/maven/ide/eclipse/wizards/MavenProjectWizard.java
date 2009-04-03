@@ -304,7 +304,7 @@ public class MavenProjectWizard extends Wizard implements INewWizard {
     });
     
 
-    job.setRule(plugin.getProjectConfigurationManager().getRule(new IResource[]{workspace.getRoot()}));
+    job.setRule(plugin.getProjectConfigurationManager().getRule());
     job.schedule();
 
 //    ProjectListener listener = new ProjectListener();

@@ -529,13 +529,8 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     }.collectProjects(projects);
   }
 
-  public ISchedulingRule getRule(IResource[] resources) {
-    ISchedulingRule [] rules = new ISchedulingRule[resources.length];
-    for(int i = 0; i < resources.length; i++) {
-      rules[i] = ResourcesPlugin.getWorkspace().getRuleFactory().modifyRule(resources[i]);
-    }
-    
-    return new MultiRule(rules);
+  public ISchedulingRule getRule() {
+    return ResourcesPlugin.getWorkspace().getRuleFactory().buildRule();
   }
 
   private IProject create(MavenProjectInfo projectInfo, ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException {

@@ -105,7 +105,7 @@ public class ChangeNatureAction implements IObjectActionDelegate {
       this.importManager = plugin.getProjectConfigurationManager();
       this.projectManager = plugin.getMavenProjectManager();
 
-      setRule(importManager.getRule(projects.toArray(new IProject[]{})));
+      setRule(importManager.getRule());
     }
     
     public IStatus runInWorkspace(IProgressMonitor monitor) {

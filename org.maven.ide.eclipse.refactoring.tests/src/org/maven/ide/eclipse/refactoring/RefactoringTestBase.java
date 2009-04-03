@@ -253,7 +253,7 @@ public class RefactoringTestBase extends UITestCaseSWT {
       public void run(IProgressMonitor monitor) throws CoreException {
         plugin.getProjectConfigurationManager().importProjects(projectInfos, importConfiguration, monitor);
       }
-    }, plugin.getProjectConfigurationManager().getRule(new IResource[]{workspace.getRoot()}), IWorkspace.AVOID_UPDATE, monitor);
+    }, plugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
 
     IProject[] projects = new IProject[projectInfos.size()];
     for (int i = 0; i < projectInfos.size(); i++) {

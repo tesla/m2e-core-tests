@@ -279,7 +279,7 @@ public class MavenModuleWizard extends Wizard implements INewWizard {
         }
       }
     });
-    job.setRule(plugin.getProjectConfigurationManager().getRule(new IResource[]{ResourcesPlugin.getWorkspace().getRoot()}));
+    job.setRule(plugin.getProjectConfigurationManager().getRule());
     job.schedule();
 
     if(isEditor) {
