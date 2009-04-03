@@ -8,7 +8,7 @@
       <category name="Maven Integration"/>
    </feature>
    
-   <feature url="features/org.maven.ide.eclipse.feature_0.9.8.qualifier.jar" id="org.maven.ide.eclipse.feature" version="0.9.8.qualifier">
+   <feature url="features/org.maven.ide.eclipse.feature_0.9.7.200904021036.jar" id="org.maven.ide.eclipse.feature" version="0.9.7.200904021036">
       <category name="Maven Integration"/>
    </feature>
    <feature url="features/org.maven.ide.eclipse.book.feature_0.9.8.qualifier.jar" id="org.maven.ide.eclipse.book.feature" version="0.9.8.qualifier">
