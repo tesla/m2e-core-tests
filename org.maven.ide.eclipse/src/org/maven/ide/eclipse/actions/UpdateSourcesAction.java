@@ -13,6 +13,8 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -97,7 +99,8 @@ public class UpdateSourcesAction implements IObjectActionDelegate {
         return status != null? status: Status.OK_STATUS;
       }
     };
-    job.setRule(plugin.getProjectConfigurationManager().getRule(projects.toArray(new IProject[]{})));
+    // We need to grab workspace lock because IJavaProject.setRawClasspath() needs it.
+    job.setRule(plugin.getProjectConfigurationManager().getRule(new IResource[]{ResourcesPlugin.getWorkspace().getRoot()}));
     job.schedule();
   }
 
