@@ -51,7 +51,6 @@ import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
-import org.maven.ide.eclipse.internal.launch.MavenLaunchConstants;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.ResolverConfiguration;

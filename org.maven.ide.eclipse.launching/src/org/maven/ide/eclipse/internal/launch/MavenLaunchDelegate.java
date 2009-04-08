@@ -34,6 +34,7 @@ import org.eclipse.jdt.launching.VMRunnerConfiguration;
 import org.eclipse.ui.externaltools.internal.model.ExternalToolBuilder;
 import org.eclipse.ui.externaltools.internal.model.IExternalToolConstants;
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.actions.MavenLaunchConstants;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;

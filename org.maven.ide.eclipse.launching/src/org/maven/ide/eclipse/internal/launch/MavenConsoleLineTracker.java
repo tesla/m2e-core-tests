@@ -40,6 +40,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.IHyperlink;
 import org.eclipse.ui.ide.IDE;
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.actions.MavenLaunchConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
