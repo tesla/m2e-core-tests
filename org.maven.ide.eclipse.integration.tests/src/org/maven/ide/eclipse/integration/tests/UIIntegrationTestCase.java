@@ -816,4 +816,12 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     return v.getMajor() == major && v.getMinor() == minor;
   }
 
+  protected void waitForAllBuildsToComplete() throws InterruptedException {
+    
+    // Some m2e builds trigger subqequent builds, and each build starts with a delay.
+    for (int i = 0; i < 10 && !new JobsCompleteCondition().test(); i++) {
+      getUI().wait(new JobsCompleteCondition(), 120000);
+      Thread.sleep(5000);
+    }
+  }
 }
