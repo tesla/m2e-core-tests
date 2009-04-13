@@ -295,7 +295,7 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
      * 
      * Resource change events are delivered after WorkspaceJob#runInWorkspace returns
      * and during IWorkspace#run. Each change notification is delivered by
-     * only one thread/jon, so we make sure no other workspaceJob is running then
+     * only one thread/job, so we make sure no other workspaceJob is running then
      * call IWorkspace#run from this thread. 
      * 
      * Unfortunately, this does not catch other jobs and threads that call IWorkspace#run
