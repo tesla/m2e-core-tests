@@ -407,8 +407,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
       ui.keyClick(SWT.TAB);
       ui.click(new ButtonLocator("&Finish"));
       ui.wait(new ShellDisposedCondition("Import"));
-      Thread.sleep(5000);
-      ui.wait(new JobsCompleteCondition(), 240000);
+      waitForAllBuildsToComplete();
     } finally {
       f.delete();
     }
@@ -820,8 +819,23 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     
     // Some m2e builds trigger subqequent builds, and each build starts with a delay.
     for (int i = 0; i < 10 && !new JobsCompleteCondition().test(); i++) {
-      getUI().wait(new JobsCompleteCondition(), 120000);
       Thread.sleep(5000);
+      getUI().wait(new JobsCompleteCondition(), 120000);
     }
+  }
+  
+  protected void addDependency(IProject project, String groupId, String artifactID, String version) throws Exception {
+    openFile(project, "pom.xml");
+
+    getUI().click(new CTabItemLocator("pom.xml"));
+    getUI().wait(new JobsCompleteCondition(), 120000);
+    findText("</dependencies");
+    getUI().keyClick(SWT.ARROW_LEFT);
+    getUI()
+        .enterText(
+            "<dependency><groupId>" + groupId + "</<artifactId>" + artifactID +"</<version>" + version + "</<type>jar</<scope>compile</</");
+    getUI().keyClick(SWT.MOD1, 's');
+
+    waitForAllBuildsToComplete();
   }
 }
