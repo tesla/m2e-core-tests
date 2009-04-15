@@ -817,11 +817,12 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
 
   protected void waitForAllBuildsToComplete() throws InterruptedException {
     
+    Thread.sleep(5000);
+    
     // Some m2e builds trigger subqequent builds, and each build starts with a delay.
     for (int i = 0; i < 10 && !new JobsCompleteCondition().test(); i++) {
-      Thread.sleep(2000);
       getUI().wait(new JobsCompleteCondition(), 240000);
-      Thread.sleep(2000);
+      Thread.sleep(5000);
     }
   }
   
