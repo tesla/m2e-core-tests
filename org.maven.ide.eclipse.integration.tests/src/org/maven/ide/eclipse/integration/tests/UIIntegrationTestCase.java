@@ -709,8 +709,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
       ui.enterText(projectName);
       ui.click(new ButtonLocator("&Finish"));
       ui.wait(new ShellDisposedCondition("New Maven Project"));
-      Thread.sleep(5000); // Give builder a chance to start
-      ui.wait(new JobsCompleteCondition(), 240000);
+      waitForAllBuildsToComplete();
 
       project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
       assertTrue(project.exists());
