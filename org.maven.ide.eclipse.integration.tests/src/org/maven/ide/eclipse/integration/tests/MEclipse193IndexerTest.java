@@ -21,6 +21,8 @@ import com.windowtester.runtime.swt.condition.shell.ShellDisposedCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellShowingCondition;
 import com.windowtester.runtime.swt.locator.ButtonLocator;
 import com.windowtester.runtime.swt.locator.CTabItemLocator;
+import com.windowtester.runtime.swt.locator.LabeledLocator;
+import com.windowtester.runtime.swt.locator.MenuItemLocator;
 import com.windowtester.runtime.swt.locator.NamedWidgetLocator;
 import com.windowtester.runtime.swt.locator.TreeItemLocator;
 import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
@@ -33,7 +35,51 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
     .deleteDirectory(System.getProperty("user.home") + "/.m2/repository/commons-logging/commons-logging/1.1.1");
     FileUtils
     .deleteDirectory(System.getProperty("user.home") + "/.m2/repository/args4j");
+    FileUtils
+    .deleteDirectory(System.getProperty("user.home") + "/.m2/repository/org/sonatype/test/depencency");
   }
+  
+  public void testLocalResolution() throws Exception {
+    IUIContext ui = getUI();
+    
+    createArchetypeProjct("maven-archetype-quickstart", "project");
+    createArchetypeProjct("maven-archetype-quickstart", "dependency");
+    
+    //Install version 1.0-SNAPSHOT of project2
+    ui.click(new TreeItemLocator("dependency", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
+    ui.click(new MenuItemLocator("Run/Run As/Maven install"));
+    ui.wait(new JobsCompleteCondition(), 240000);
+    
+    openPomFile("dependency/pom.xml");
+    ui.click(new CTabItemLocator("dependency/pom.xml"));
+    replaceText(new NamedWidgetLocator("version"), "0.0.2-SNAPSHOT");
+    ui.keyClick(SWT.MOD1, 's');
+    Thread.sleep(5000);
+    ui.wait(new JobsCompleteCondition(), 240000);
+    
+    assertProjectsHaveNoErrors();
+    
+    updateLocalIndex(ui);
+    
+    ui.click(new TreeItemLocator("project", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
+    ui.click(new TreeItemLocator("project", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
+    ui.contextClick(new TreeItemLocator("project", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")), "Maven/Add Dependency");
+    ui.wait(new ShellShowingCondition("Add Dependency"));
+    ui.enterText("dependency");
+    getUI().click(
+        new TreeItemLocator("org.sonatype.test   dependency", new LabeledLocator(Tree.class, "&Search Results:")));
+    ui.click(new TreeItemLocator(
+        "org.sonatype.test   dependency/0.0.1-SNAPSHOT - dependency-0.0.1-SNAPSHOT.jar.*",
+        new LabeledLocator(Tree.class, "&Search Results:")));
+   // ui.click(new LabeledLocator(Button.class, "Scope:"));
+    ui.click(new ButtonLocator("OK"));
+    ui.wait(new ShellDisposedCondition("Add Dependency"));
+    
+    waitForAllBuildsToComplete();
+    
+    assertProjectsHaveNoErrors();
+  }
+  
   public void testUpdateLocalIndex() throws Exception {
     IUIContext ui = getUI();
 
