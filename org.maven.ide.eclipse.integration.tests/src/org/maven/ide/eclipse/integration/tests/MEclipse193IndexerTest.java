@@ -8,10 +8,14 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.jdt.core.IClasspathContainer;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.IViewPart;
+import org.maven.ide.eclipse.jdt.BuildPathManager;
 
 import com.windowtester.runtime.IUIContext;
 import com.windowtester.runtime.locator.IWidgetReference;
@@ -42,14 +46,16 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
   public void testLocalResolution() throws Exception {
     IUIContext ui = getUI();
     
-    createArchetypeProjct("maven-archetype-quickstart", "project");
+    // set up two projects.
+    IProject project = createArchetypeProjct("maven-archetype-quickstart", "project");
     createArchetypeProjct("maven-archetype-quickstart", "dependency");
     
-    //Install version 1.0-SNAPSHOT of project2
+    // mvn install "dependency" project
     ui.click(new TreeItemLocator("dependency", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
     ui.click(new MenuItemLocator("Run/Run As/Maven install"));
     ui.wait(new JobsCompleteCondition(), 240000);
     
+    // bump version # of "dependency" project
     openPomFile("dependency/pom.xml");
     ui.click(new CTabItemLocator("dependency/pom.xml"));
     replaceText(new NamedWidgetLocator("version"), "0.0.2-SNAPSHOT");
@@ -59,8 +65,10 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
     
     assertProjectsHaveNoErrors();
     
+    // Update local index.
     updateLocalIndex(ui);
     
+    // Make sure local dependency from above can be added to 2nd proejct
     ui.click(new TreeItemLocator("project", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
     ui.click(new TreeItemLocator("project", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
     ui.contextClick(new TreeItemLocator("project", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")), "Maven/Add Dependency");
@@ -71,16 +79,26 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
     ui.click(new TreeItemLocator(
         "org.sonatype.test   dependency/0.0.1-SNAPSHOT - dependency-0.0.1-SNAPSHOT.jar.*",
         new LabeledLocator(Tree.class, "&Search Results:")));
-   // ui.click(new LabeledLocator(Button.class, "Scope:"));
     ui.click(new ButtonLocator("OK"));
     ui.wait(new ShellDisposedCondition("Add Dependency"));
     
     waitForAllBuildsToComplete();
     
     assertProjectsHaveNoErrors();
+    
+    IJavaProject jp = (IJavaProject)project.getNature(JavaCore.NATURE_ID);
+    Thread.sleep(10000);
+    IClasspathContainer maven2Container = BuildPathManager.getMaven2ClasspathContainer(jp);
+    
+    for(IClasspathEntry entry : maven2Container.getClasspathEntries()) {
+        if (entry.getPath().toString().endsWith("dependency-0.0.1-SNAPSHOT.jar")) {
+          return;
+      }
+    }
+    fail("Failed to find dependency-0.0.1-SNAPSHOT.jar in project");
   }
   
-  public void testUpdateLocalIndex() throws Exception {
+  public void updateLocalIndex() throws Exception {
     IUIContext ui = getUI();
 
     showView("org.maven.ide.eclipse.views.MavenIndexesView");
@@ -134,6 +152,7 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
     assertTrue(loggingProject.exists());
     assertTrue(loggingProject.hasNature(JavaCore.NATURE_ID));
     assertProjectsHaveNoErrors();
+
   }
 
   private void updateLocalIndex(IUIContext ui) throws Exception {
@@ -149,7 +168,7 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
 
   }
 
-  public void testAddNewIndex() throws Exception {
+  public void addNewIndex() throws Exception {
     importZippedProject("projects/add_index_test.zip");
     final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("project");
     assertTrue(project.exists());
