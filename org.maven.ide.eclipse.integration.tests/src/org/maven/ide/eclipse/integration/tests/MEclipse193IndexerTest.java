@@ -98,7 +98,7 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
     fail("Failed to find dependency-0.0.1-SNAPSHOT.jar in project");
   }
   
-  public void updateLocalIndex() throws Exception {
+  public void testUpdateLocalIndex() throws Exception {
     IUIContext ui = getUI();
 
     showView("org.maven.ide.eclipse.views.MavenIndexesView");
@@ -168,7 +168,7 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
 
   }
 
-  public void addNewIndex() throws Exception {
+  public void testAddNewIndex() throws Exception {
     importZippedProject("projects/add_index_test.zip");
     final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("project");
     assertTrue(project.exists());
