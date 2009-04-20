@@ -14,9 +14,9 @@ rem Eclipse Ganymade dependencies
 %ECLIPSE_DIR%/eclipse -nosplash -application org.eclipse.equinox.p2.director.app.application -metadataRepository http://download.eclipse.org/releases/ganymede/ -artifactRepository http://download.eclipse.org/releases/ganymede/ -installIU org.eclipse.jst.feature.group
 
 rem Subversive
-%ECLIPSE_DIR%/eclipse -nosplash -application org.eclipse.equinox.p2.director.app.application -metadataRepository http://subclipse.tigris.org/update_1.4.x/ -artifactRepository http://subclipse.tigris.org/update_1.4.x/ -installIU org.tigris.subversion.subclipse.feature.group
-%ECLIPSE_DIR%/eclipse -nosplash -application org.eclipse.equinox.p2.director.app.application -metadataRepository http://subclipse.tigris.org/update_1.4.x/ -artifactRepository http://subclipse.tigris.org/update_1.4.x/ -installIU org.tigris.subversion.clientadapter.svnkit.feature.feature.group
-%ECLIPSE_DIR%/eclipse -nosplash -application org.eclipse.equinox.p2.director.app.application -metadataRepository http://subclipse.tigris.org/update_1.4.x/ -artifactRepository http://subclipse.tigris.org/update_1.4.x/ -installIU org.tigris.subversion.subclipse.mylyn
+%ECLIPSE_DIR%/eclipse -nosplash -application org.eclipse.equinox.p2.director.app.application -metadataRepository http://subclipse.tigris.org/update_1.6.x/ -artifactRepository http://subclipse.tigris.org/update_1.6.x/ -installIU org.tigris.subversion.subclipse.feature.group
+%ECLIPSE_DIR%/eclipse -nosplash -application org.eclipse.equinox.p2.director.app.application -metadataRepository http://subclipse.tigris.org/update_1.6.x/ -artifactRepository http://subclipse.tigris.org/update_1.6.x/ -installIU org.tigris.subversion.clientadapter.svnkit.feature.feature.group
+%ECLIPSE_DIR%/eclipse -nosplash -application org.eclipse.equinox.p2.director.app.application -metadataRepository http://subclipse.tigris.org/update_1.6.x/ -artifactRepository http://subclipse.tigris.org/update_1.6.x/ -installIU org.tigris.subversion.subclipse.mylyn
 
 rem AspectJ
 %ECLIPSE_DIR%/eclipse -nosplash -application org.eclipse.equinox.p2.director.app.application -metadataRepository http://download.eclipse.org/tools/ajdt/34/update/ -artifactRepository http://download.eclipse.org/tools/ajdt/34/update/ -installIU org.eclipse.ajdt.feature.group
