@@ -10,14 +10,17 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.SWT;
 
+import com.windowtester.runtime.IUIContext;
 import com.windowtester.runtime.WT;
 import com.windowtester.runtime.WaitTimedOutException;
 import com.windowtester.runtime.WidgetSearchException;
+import com.windowtester.runtime.swt.condition.SWTIdleCondition;
 import com.windowtester.runtime.swt.condition.eclipse.JobsCompleteCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellDisposedCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellShowingCondition;
 import com.windowtester.runtime.swt.locator.ButtonLocator;
 import com.windowtester.runtime.swt.locator.CTabItemLocator;
+import com.windowtester.runtime.swt.locator.NamedWidgetLocator;
 import com.windowtester.runtime.swt.locator.TableItemLocator;
 
 public class PomEditorTest2 extends PomEditorTestBase {
@@ -147,4 +150,41 @@ public class PomEditorTest2 extends PomEditorTestBase {
     
   }
 
+  public void testMutlipleMNGEclipse1315() throws Exception {
+    
+    createArchetypeProjct("maven-archetype-quickstart", "projectA");
+    createArchetypeProjct("maven-archetype-quickstart", "projectB");
+    
+    MavenPomEditor editorA = openPomFile("projectA/pom.xml");
+    MavenPomEditor editorB = openPomFile("projectB/pom.xml");
+    
+    assertFalse(editorA.isDirty());
+    assertFalse(editorB.isDirty());
+    
+    IUIContext ui = getUI();
+    
+    ui.click(new CTabItemLocator("projectA/pom.xml"));
+    replaceText(new NamedWidgetLocator("version"), "0.0.2-SNAPSHOT");
+    
+    ui.click(new CTabItemLocator("projectB/pom.xml"));
+    replaceText(new NamedWidgetLocator("version"), "0.0.2-SNAPSHOT");
+    
+    assertTrue(editorA.isDirty());
+    assertTrue(editorB.isDirty());
+    
+    ui.keyClick(SWT.MOD1, 's');
+    Thread.sleep(5000);
+    ui.wait(new JobsCompleteCondition(), 240000);
+    
+    assertTrue(editorA.isDirty());
+    assertFalse(editorB.isDirty());
+    
+    ui.keyClick(SWT.MOD1|SWT.SHIFT, 's');
+    
+    ui.wait(new SWTIdleCondition());
+    ui.wait(new JobsCompleteCondition());
+    
+    assertFalse(editorA.isDirty());
+    assertFalse(editorB.isDirty());
+  }
 }
