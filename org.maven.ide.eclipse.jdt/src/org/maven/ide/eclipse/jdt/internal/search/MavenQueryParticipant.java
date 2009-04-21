@@ -64,7 +64,7 @@ public class MavenQueryParticipant implements IQueryParticipant, IJavaSearchCons
           public String getText(Object element) {
             if(element instanceof IndexedArtifact) {
               IndexedArtifact ia = (IndexedArtifact) element;
-              return ia.getPackageName() + "." + ia.className + " - " + ia.group + ":" + ia.artifact+"YYYY"; 
+              return ia.getPackageName() + "." + ia.className + " - " + ia.group + ":" + ia.artifact; 
             }
             return null;
           }
