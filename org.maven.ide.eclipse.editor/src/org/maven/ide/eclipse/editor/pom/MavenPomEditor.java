@@ -263,7 +263,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     class ChangedResourceDeltaVisitor implements IResourceDeltaVisitor {
 
       public boolean visit(IResourceDelta delta) throws CoreException {
-        if(delta.getResource().getName().equals(pomFile.getName()) //
+        if(delta.getResource().equals(pomFile)
             && (delta.getKind() & IResourceDelta.CHANGED) != 0 && delta.getResource().exists()) {
           int flags = delta.getFlags();
           if ((flags & (IResourceDelta.CONTENT | flags & IResourceDelta.REPLACED)) != 0) {
