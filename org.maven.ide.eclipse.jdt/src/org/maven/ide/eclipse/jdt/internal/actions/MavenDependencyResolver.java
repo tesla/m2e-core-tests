@@ -231,7 +231,7 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
         // add import for selected class
         if(addImport) {
           IndexedArtifact ia = dialog.getSelectedIndexedArtifact();
-          String packageName = ia.packageName;
+          String packageName = ia.getPackageName();
           String className = ia.className;
 
           if(addImportDeclaration(document, context, packageName, className)) {
