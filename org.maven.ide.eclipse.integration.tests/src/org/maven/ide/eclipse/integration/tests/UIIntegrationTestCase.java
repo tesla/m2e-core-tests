@@ -190,7 +190,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     // Clean out projects left over from previous test runs.
     clearProjects();
 
-    getUI().wait(new JobsCompleteCondition(), 300000);
+    getUI().wait(new JobsCompleteCondition(), 600000);
   }
 
   /**
