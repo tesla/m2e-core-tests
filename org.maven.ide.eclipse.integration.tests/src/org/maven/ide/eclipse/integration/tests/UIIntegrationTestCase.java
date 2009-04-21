@@ -228,6 +228,8 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
           }
         }
 
+        getUI().wait(new JobsCompleteCondition(), 300000);
+        
         IViewPart indexView = showView("org.maven.ide.eclipse.views.MavenIndexesView");
 
         getUI().click(new CTabItemLocator("Maven Indexes"));
@@ -253,7 +255,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
         getUI().click(new NamedWidgetLocator("repositoryUrlCombo"));
         getUI().enterText(nexusURL + "/content/groups/public/");
         getUI().click(new NamedWidgetLocator("retrieveButton"));
-        getUI().wait(new JobsCompleteCondition());
+        getUI().wait(new JobsCompleteCondition(), 300000);
         getUI().wait(new SWTIdleCondition());
         getUI().click(new ButtonLocator("OK"));
         getUI().wait(new ShellDisposedCondition("Add Repository Index"));
