@@ -45,7 +45,7 @@ public class IndexedArtifact {
 
   public final String artifact;
 
-  public final String packageName;
+  private final String packageName;
 
   public final String className;
 
@@ -63,11 +63,17 @@ public class IndexedArtifact {
     this.className = className;
     this.packaging = packaging;
   }
-
+  
   public void addFile(IndexedArtifactFile indexedArtifactFile) {
     files.add(indexedArtifactFile);
   }
-
+  public String getPackageName(){
+    if(packageName.startsWith(".") && packageName.length()>1){ 
+      return packageName.substring(1);
+    } else {
+      return packageName;
+    }
+  }
   public String toString() {
     StringBuffer sb = new StringBuffer("\n" + className + "  " + packageName + "  " + group + " : " + artifact /*+ "\n"*/);
 //    for(Iterator it = files.iterator(); it.hasNext();) {
