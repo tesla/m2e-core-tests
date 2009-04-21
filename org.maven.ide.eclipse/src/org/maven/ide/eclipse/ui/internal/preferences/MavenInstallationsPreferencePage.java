@@ -105,6 +105,8 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
 
   Text localRepositoryText;
 
+  boolean dirty = false;
+
   public MavenInstallationsPreferencePage() {
     setTitle("Maven Installations");
 
@@ -129,40 +131,40 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
   }
 
   public boolean performOk() {
-    final String userSettings = getUserSettings();
-
-    new Job("Invalidating Maven settings") {
-      protected IStatus run(IProgressMonitor monitor) {
-        try {
-          final File localRepositoryDir = embedderManager.getLocalRepositoryDir();
-
-          runtimeManager.setRuntimes(runtimes);
-          runtimeManager.setDefaultRuntime(defaultRuntime);
-
-          if(userSettings.length() > 0) {
-            runtimeManager.setUserSettingsFile(userSettings);
-          } else {
-            runtimeManager.setUserSettingsFile(null);
+    if (dirty) {
+     
+      final String userSettings = getUserSettings();
+  
+      new Job("Invalidating Maven settings") {
+        protected IStatus run(IProgressMonitor monitor) {
+          try {
+            final File localRepositoryDir = embedderManager.getLocalRepositoryDir();
+  
+            runtimeManager.setRuntimes(runtimes);
+            runtimeManager.setDefaultRuntime(defaultRuntime);
+  
+            if(userSettings.length() > 0) {
+              runtimeManager.setUserSettingsFile(userSettings);
+            } else {
+              runtimeManager.setUserSettingsFile(null);
+            }
+            mavenPlugin.getMavenEmbedderManager().invalidateMavenSettings();
+  
+            File newRepositoryDir = embedderManager.getLocalRepositoryDir();
+            if(!newRepositoryDir.equals(localRepositoryDir)) {
+              mavenPlugin.getIndexManager().scheduleIndexUpdate(IndexManager.LOCAL_INDEX, true, 0L);
+            }
+          } catch(CoreException ex) {
+            MavenLogger.log(ex);
+            IStatus status = ex.getStatus();
+            Throwable t = status.getException();
+            setErrorMessage(status.getMessage() + "; " + t.getMessage() == null ? t.toString() : t.getMessage());
           }
-          // runtimeManager.setGlobalSettingsFile(globalSettingsText.getText());
-
-          mavenPlugin.getMavenEmbedderManager().invalidateMavenSettings();
-
-          File newRepositoryDir = embedderManager.getLocalRepositoryDir();
-          if(!newRepositoryDir.equals(localRepositoryDir)) {
-            mavenPlugin.getIndexManager().scheduleIndexUpdate(IndexManager.LOCAL_INDEX, true, 0L);
-          }
-        } catch(CoreException ex) {
-          MavenLogger.log(ex);
-          IStatus status = ex.getStatus();
-          Throwable t = status.getException();
-          setErrorMessage(status.getMessage() + "; " + t.getMessage() == null ? t.toString() : t.getMessage());
+          return Status.OK_STATUS;
         }
-        return Status.OK_STATUS;
-      }
-    }.schedule();
-
-    return super.performOk();
+      }.schedule();
+    }
+    return true;
   }
 
   protected Control createContents(Composite parent) {
@@ -318,6 +320,7 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
           globalSettingsText.setText(globalSettings == null ? "" : globalSettings);
         }
         initLocalRepository();
+        dirty = true;
       }
     });
 
@@ -507,12 +510,14 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
       public void modifyText(ModifyEvent modifyevent) {
         initLocalRepository();
         checkSettings();
+        dirty = true;
       }
     });
     userSettingsText.addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent modifyevent) {
         initLocalRepository();
         checkSettings();
+        dirty = true;
       }
     });
 

@@ -39,8 +39,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -61,6 +59,7 @@ import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -824,38 +823,43 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     }
   }
 
-  public void setupVariables() {
-    IWorkspace workspace = ResourcesPlugin.getWorkspace();
-    IWorkspaceDescription wsDescription = workspace.getDescription();        
-    boolean autobuild = wsDescription.isAutoBuilding();
-    
+  public boolean setupVariables() {
+    boolean changed = false;
     try {
       File localRepositoryDir = embedderManager.getLocalRepositoryDir();
-      
-      setAutobuild(workspace, false);
+      IPath oldPath = JavaCore.getClasspathVariable(M2_REPO);
+      IPath newPath = new Path(localRepositoryDir.getAbsolutePath());
       JavaCore.setClasspathVariable(M2_REPO, //
-          new Path(localRepositoryDir.getAbsolutePath()), //
+          newPath, //
           new NullProgressMonitor());
+      changed = !newPath.equals(oldPath);
     } catch(CoreException ex) {
       MavenLogger.log(ex);
-    } finally {
-      try {
-        setAutobuild(workspace, autobuild);
-      } catch (CoreException ex2) {
-        MavenLogger.log(ex2);
-      }
+      changed = false;
     }
-  
+    return changed;
   }
-
-  private boolean setAutobuild(IWorkspace workspace, boolean newState) throws CoreException {
-    IWorkspaceDescription description = workspace.getDescription();
-    boolean oldState = description.isAutoBuilding();
-    if(oldState != newState) {
-      description.setAutoBuilding(newState);
-      workspace.setDescription(description);
+  
+  public boolean variablesAreInUse() {
+    try {
+      IJavaModel model= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
+      IJavaProject[] projects= model.getJavaProjects();
+      for (int i= 0; i < projects.length; i++) {
+        IClasspathEntry[] entries= projects[i].getRawClasspath();
+        for (int k= 0; k < entries.length; k++) {
+          IClasspathEntry curr= entries[k];
+          if (curr.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
+            String var= curr.getPath().segment(0);
+            if (M2_REPO.equals(var)) {
+              return true;
+            }
+          }
+        }
+      }
+    } catch (JavaModelException e) {
+      return true;
     }
-    return oldState;
+    return false;
   }
   
 }
