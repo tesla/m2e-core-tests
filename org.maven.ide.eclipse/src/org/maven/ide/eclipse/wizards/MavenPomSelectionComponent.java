@@ -293,7 +293,7 @@ public class MavenPomSelectionComponent extends Composite {
     public String getText(Object element) {
       if(element instanceof IndexedArtifact) {
         IndexedArtifact a = (IndexedArtifact) element;
-        return (a.className == null ? "" : a.className + "   " + a.getPackageName() + "   ") + a.group + "   " + a.artifact+"XXXX";
+        return (a.className == null ? "" : a.className + "   " + a.getPackageName() + "   ") + a.group + "   " + a.artifact;
       } else if(element instanceof IndexedArtifactFile) {
         IndexedArtifactFile f = (IndexedArtifactFile) element;
         long size_k = (f.size + 512)/1024;
