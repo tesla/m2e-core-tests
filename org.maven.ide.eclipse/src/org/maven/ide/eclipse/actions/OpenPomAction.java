@@ -169,7 +169,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
   }
 
   public static void openEditor(IndexedArtifact ia, IndexedArtifactFile f) {
-    if(f == null || ia.className == null || ia.packageName == null) {
+    if(f == null || ia.className == null || ia.getPackageName() == null) {
       return;
     }
 
@@ -178,7 +178,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
     String version = f.getDependency().getVersion();
 
     String name = ia.className;
-    String fileName = ia.packageName.replace('.', '/') + "/" + ia.className + ".java";
+    String fileName = ia.getPackageName().replace('.', '/') + "/" + ia.className + ".java";
     String tooltip = groupId + ":" + artifactId + ":" + version + "/" + fileName;
 
     try {
