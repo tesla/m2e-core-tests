@@ -233,8 +233,8 @@ public class NexusIndexManager extends IndexManager {
   public Map<String, IndexedArtifact> search(String indexName, String term, String type) throws CoreException {
     Query query;
     if(IndexManager.SEARCH_CLASS_NAME.equals(type)) {
-      query = new WildcardQuery(new Term(ArtifactInfo.NAMES, term + "*"));
-
+      query = getIndexer().constructQuery(ArtifactInfo.NAMES, term);
+      
     } else if(IndexManager.SEARCH_GROUP.equals(type)) {
       query = new PrefixQuery(new Term(ArtifactInfo.GROUP_ID, term));
 
