@@ -76,7 +76,7 @@ public interface MavenPreferenceConstants {
 
   /** String */
   public static final String P_JIRA_USERNAME = PREFIX + "jiraUsername";
-  
+
   /** String */
   public static final String P_JIRA_PASSWORD = PREFIX + "jiraPassword";
   
