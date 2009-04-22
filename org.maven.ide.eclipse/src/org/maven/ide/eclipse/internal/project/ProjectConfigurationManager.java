@@ -10,6 +10,7 @@ package org.maven.ide.eclipse.internal.project;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -21,8 +22,12 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.osgi.framework.Bundle;
+import org.osgi.framework.Version;
+
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
@@ -40,7 +45,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
-import org.eclipse.core.runtime.jobs.MultiRule;
 import org.eclipse.ui.IWorkingSet;
 
 import org.codehaus.plexus.util.dag.CycleDetectedException;
@@ -144,6 +148,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
           }
 
           IProject project = create(projectInfo, configuration, monitor);
+       
           if (project != null) {
             projects.add(project);
             
@@ -154,6 +159,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
           }
         }
 
+        hideNestedProjectsFromParents(projects);
         // then configure maven for all projects
         configureNewMavenProject(embedder, projects, monitor);
         
@@ -169,6 +175,46 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     }
   }
 
+  
+  private void setHidden(IResource resource) {
+    // Invoke IResource.setHidden() through reflection since it is only avaiable in Eclispe 3.4 & later
+    try {
+      Method m = IResource.class.getMethod("setHidden", boolean.class);
+      m.invoke(resource, Boolean.TRUE);
+    } catch (Exception ex) {
+      MavenLogger.log("Failed to hide resource; " + resource.getLocation().toOSString(), ex);
+    }
+  }
+  
+  private void hideNestedProjectsFromParents(List<IProject> projects) {
+    
+    // Prevent child project folders from showing up in parent project folders.
+    
+    Bundle bundle = ResourcesPlugin.getPlugin().getBundle();
+    String version = (String) bundle.getHeaders().get(org.osgi.framework.Constants.BUNDLE_VERSION);
+    Version currentVersion = org.osgi.framework.Version.parseVersion(version);
+    Version e34Version = new Version(3,4,0);
+    if (currentVersion.compareTo(e34Version) < 0) {
+      return; // IResource.setHidden doesn't exist in Eclipse prior to version 3.4
+    }
+    HashMap<File, IProject> projectFileMap = new HashMap<File, IProject>();
+    
+    for (IProject project: projects) {
+      projectFileMap.put(project.getLocation().toFile(), project);
+    }
+    for (IProject project: projects) {
+      File projectFile = project.getLocation().toFile();
+      IProject physicalParentProject = projectFileMap.get(projectFile.getParentFile());
+      if (physicalParentProject == null) {
+        continue;
+      }
+      IFolder folder = physicalParentProject.getFolder(projectFile.getName());
+      if (folder.exists()) {
+          setHidden(folder);
+      }
+    }
+  }
+  
   private void configureNewMavenProject(MavenEmbedder embedder, ArrayList<IProject> projects, IProgressMonitor monitor)
       throws CoreException {
 
