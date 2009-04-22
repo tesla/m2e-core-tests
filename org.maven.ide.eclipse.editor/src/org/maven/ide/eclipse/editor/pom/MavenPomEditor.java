@@ -379,8 +379,16 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     addSourcePage();
     
     addEditorPageExtensions();
+    selectActivePage();
   }
 
+  protected void selectActivePage(){
+    boolean showXML = MavenPlugin.getDefault().getPreferenceStore().getBoolean(PomEditorPreferencePage.P_DEFAULT_POM_EDITOR_PAGE);
+    if(showXML){
+      setActivePage(null);
+    }    
+  }
+  
   protected void pageChange(int newPageIndex) {
     super.pageChange(newPageIndex);
 

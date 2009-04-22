@@ -24,5 +24,12 @@
   <extension point="org.maven.ide.eclipse.m2menu">
      <factory class="org.maven.ide.eclipse.editor.internal.actions.PomEditorMenuCreator"/>
   </extension>
-
+   <extension point="org.eclipse.ui.preferencePages">
+      <page id="org.maven.ide.eclipse.editor.pom.PomEditorPreferencePage"
+         category="org.maven.ide.eclipse.preferences.Maven2PreferencePage"
+         class="org.maven.ide.eclipse.editor.pom.PomEditorPreferencePage"
+         name="POM Editor">
+         <keywordReference id="org.maven.ide.eclipse.maven"/>
+      </page>
+   </extension>
 </plugin>
