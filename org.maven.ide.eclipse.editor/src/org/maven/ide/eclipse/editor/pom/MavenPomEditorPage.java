@@ -18,7 +18,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.maven.embedder.MavenEmbedderException;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.apache.maven.project.MavenProject;
 import org.eclipse.core.resources.IFile;
@@ -66,6 +65,7 @@ import org.maven.ide.components.pom.Parent;
 import org.maven.ide.components.pom.PomPackage;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.OpenPomAction;
+import org.maven.ide.eclipse.actions.SelectionUtil;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
@@ -136,15 +136,10 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
             try {
               StringWriter sw = new StringWriter();
               
-              MavenProject mavenProject = pomEditor.readMavenProject(false, monitor);
+              MavenProject mavenProject = SelectionUtil.getMavenProject(pomEditor.getEditorInput());
               new MavenXpp3Writer().write(sw, mavenProject.getModel());
               
               String effectivePom = sw.toString();
-              
-              // XXX workaround to make EMF recognize namespace (may not be needed anymore)
-//              effectivePom = effectivePom.replaceAll("<project>", "<project xmlns=\"http://maven.apache.org/POM/4.0.0\"" + 
-//                  " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" + 
-//                  " xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd\">");
               
               String name = pomEditor.getPartName() + " [effective]";
               IEditorInput editorInput = new OpenPomAction.MavenEditorStorageInput(name, name, null, //
@@ -153,8 +148,6 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
               
             } catch(CoreException ex) {
               MavenLogger.log(ex);
-            } catch(MavenEmbedderException ex) {
-              MavenLogger.log("Unable to read Maven pom", ex);
             } catch(IOException ex) {
               MavenLogger.log("Unable to create Effective POM", ex);
             }
@@ -162,6 +155,12 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
           }
         }.schedule();
       }
+
+      @Override
+      public String getId() {
+        return "org.maven.ide.ecillpse.editor.showEffectivePOMAction";
+      }
+      
     });
     
     toolBarManager.add(new Action("Refresh", MavenEditorImages.REFRESH) {
