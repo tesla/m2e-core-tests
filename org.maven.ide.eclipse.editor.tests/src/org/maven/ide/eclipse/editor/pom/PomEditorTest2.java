@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -22,6 +23,7 @@ import com.windowtester.runtime.swt.locator.ButtonLocator;
 import com.windowtester.runtime.swt.locator.CTabItemLocator;
 import com.windowtester.runtime.swt.locator.NamedWidgetLocator;
 import com.windowtester.runtime.swt.locator.TableItemLocator;
+import com.windowtester.runtime.swt.locator.eclipse.ContributedToolItemLocator;
 
 public class PomEditorTest2 extends PomEditorTestBase {
 
@@ -150,7 +152,7 @@ public class PomEditorTest2 extends PomEditorTestBase {
     
   }
 
-  public void testMutlipleMNGEclipse1315() throws Exception {
+  public void tstMutlipleMNGEclipse1315() throws Exception {
     
     createArchetypeProjct("maven-archetype-quickstart", "projectA");
     createArchetypeProjct("maven-archetype-quickstart", "projectB");
@@ -186,5 +188,30 @@ public class PomEditorTest2 extends PomEditorTestBase {
     
     assertFalse(editorA.isDirty());
     assertFalse(editorB.isDirty());
+  }
+  
+  public void testMNGEclipse1081() throws Exception {
+    
+    IUIContext ui = getUI();
+    
+    IProject project = createArchetypeProjct("maven-archetype-quickstart", "aProject");
+    openPomFile("aProject/pom.xml");
+    
+    ui.wait(new SWTIdleCondition());
+    ui.click(new ContributedToolItemLocator("org.maven.ide.ecillpse.editor.showEffectivePOMAction"));
+    ui.wait(new SWTIdleCondition());
+    ui.close(new CTabItemLocator("aProject/pom.xml [effective]"));
+    ui.wait(new SWTIdleCondition());
+    
+    addDependency(project, "commons-collections", "commons-collections", "1.0");
+    getUI().click(new CTabItemLocator("Overview"));
+    
+    ui.click(new ContributedToolItemLocator("org.maven.ide.ecillpse.editor.showEffectivePOMAction"));
+    ui.wait(new SWTIdleCondition());
+    
+    ui.click(new CTabItemLocator("Dependencies"));
+    
+    ui.click(new TableItemLocator("commons-collections : commons-collections : 1.0.*", new NamedWidgetLocator("list-editor-composite-table")));
+    
   }
 }
