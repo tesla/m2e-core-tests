@@ -70,7 +70,7 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
     
     // Make sure local dependency from above can be added to 2nd proejct
     ui.click(new TreeItemLocator("project", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
-    ui.click(new TreeItemLocator("project", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
+    ui.wait(new SWTIdleCondition());
     ui.contextClick(new TreeItemLocator("project", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")), "Maven/Add Dependency");
     ui.wait(new ShellShowingCondition("Add Dependency"));
     ui.enterText("dependency");
@@ -164,6 +164,7 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
 
     ui.contextClick(new TreeItemLocator("local : .*repository", new ViewLocator(
         "org.maven.ide.eclipse.views.MavenIndexesView")), "Update Index");
+    closeView("org.maven.ide.eclipse.views.MavenIndexesView");
     ui.wait(new JobsCompleteCondition(), 240000);
 
   }
