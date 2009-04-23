@@ -16,10 +16,12 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
 import org.eclipse.core.resources.IResourceChangeEvent;
@@ -89,6 +91,8 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   private static final String PREFS_INDEXES = "indexInfo.xml";
   
   private static final String PREFS_ARCHETYPES = "archetypesInfo.xml";
+  
+  private static final String PREFS_INDEXES_READ = "indexesHaveBeenRead";
 
   // The shared instance
   private static MavenPlugin plugin;
@@ -233,35 +237,28 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
       }
     }
   }
-
-  private Set<IndexInfo> loadIndexConfiguration(File configFile) throws IOException {
+  
+  private IndexInfo createCentralIndex(){
+    String indexId = "central";
+    String repositoryUrl = "http://repo1.maven.org/maven2/";
+    IndexInfo indexInfo = new IndexInfo(indexId, null, repositoryUrl, IndexInfo.Type.REMOTE, false);
+    indexInfo.setIndexUpdateUrl("");
+    return indexInfo;
+  }
+  
+  private Set<IndexInfo> loadIndexConfiguration(File configFile) {
     LinkedHashSet<IndexInfo> indexes = new LinkedHashSet<IndexInfo>();
     indexes.addAll(ExtensionReader.readIndexInfoConfig(configFile));
-
-    Map<String, IndexInfo> extensionIndexes = ExtensionReader.readIndexInfoExtensions();
-    indexes.addAll(extensionIndexes.values());
-
+    boolean indexesRead = this.getPreferenceStore().getBoolean(PREFS_INDEXES_READ);
+    if(!indexesRead){
+      IndexInfo info = createCentralIndex();
+      indexes.add(info);
+      this.getPreferenceStore().setValue(PREFS_INDEXES_READ, true);
+    } 
     for(IndexInfo indexInfo : indexes) {
-      IndexInfo extensionInfo = extensionIndexes.get(indexInfo.getIndexName());
-      if(extensionInfo != null) {
-        URL archiveUrl = extensionInfo.getArchiveUrl();
-        indexInfo.setArchiveUrl(archiveUrl);
-
-        if(archiveUrl != null) {
-          InputStream is = archiveUrl.openStream();
-          Date indexArchiveTime = indexManager.getIndexArchiveTime(is);
-          Date updateTime = indexInfo.getUpdateTime();
-          if(updateTime == null || indexArchiveTime.after(updateTime)) {
-            indexInfo = extensionInfo;
-          }
-        }
-      }
-
       this.indexManager.addIndex(indexInfo, false);
     }
-    
     this.indexManager.addIndexListener(new IndexManagerWriterListener(indexManager, configFile));
-    
     return indexes;
   }
 
