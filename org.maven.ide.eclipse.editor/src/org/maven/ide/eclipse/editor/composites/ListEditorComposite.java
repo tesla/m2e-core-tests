@@ -62,6 +62,7 @@ public class ListEditorComposite<T> extends Composite {
     setLayout(gridLayout);
 
     final Table table = toolkit.createTable(this, SWT.FLAT | SWT.MULTI | style);
+    table.setData("name", "list-editor-composite-table");
     final TableColumn column = new TableColumn(table, SWT.NONE);
     table.addControlListener(new ControlAdapter() {
       public void controlResized(ControlEvent e) {
