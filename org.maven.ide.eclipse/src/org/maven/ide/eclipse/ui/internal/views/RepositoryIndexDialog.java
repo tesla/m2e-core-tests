@@ -118,6 +118,7 @@ public class RepositoryIndexDialog extends TitleAreaDialog {
     displayNameLabel.setText("Display name (optional):");
 
     displayNameText = new Text(composite, SWT.BORDER);
+    displayNameText.setData("name", "displayName");
     gd = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
     displayNameText.setLayoutData(gd);
     if(indexInfo != null && indexInfo.hasDisplayName()){
