@@ -267,7 +267,7 @@ public class MavenIndexesView extends ViewPart {
         if(element instanceof IndexInfo) {
           IndexInfo indexInfo = (IndexInfo) element;
           boolean res = MessageDialog.openConfirm(getViewSite().getShell(), //
-              "Unpack Index", "Replace index " + indexInfo.getIndexName() + " from the archive ");
+              "Unpack Index", "Replace index " + indexInfo.getDisplayName()+ " from the archive ");
           if(res) {
             IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
             IndexUnpackerJob unpackerJob = new IndexUnpackerJob(indexManager, //
@@ -312,6 +312,8 @@ public class MavenIndexesView extends ViewPart {
           String indexName = ((IndexInfo) element).getIndexName();
           RepositoryIndexDialog dialog = new RepositoryIndexDialog(getSite().getShell(), "Edit Repository Index");
           dialog.setIndexInfo((IndexInfo) element);
+          dialog.create();
+          dialog.update();
           int res = dialog.open();
           if(res == Window.OK) {
             IndexInfo indexInfo = dialog.getIndexInfo();
@@ -340,7 +342,7 @@ public class MavenIndexesView extends ViewPart {
           if(IndexInfo.Type.REMOTE.equals(info.getType())) {
             String indexName = info.getIndexName();
             boolean res = MessageDialog.openConfirm(getViewSite().getShell(), //
-                "Remove Index", "Are you sure you want to delete index " + indexName);
+                "Remove Index", "Are you sure you want to remove index " + info.getDisplayName());
             if(res) {
               // TODO request index deletion
               // TODO add deleted index to 
@@ -594,7 +596,10 @@ public class MavenIndexesView extends ViewPart {
         } else if(IndexInfo.Type.LOCAL.equals(type)) {
           return info.getIndexName() + " : " + info.getRepositoryDir().getAbsolutePath();
         } else {
-          return info.getIndexName() + " : " + info.getRepositoryUrl();
+          if(info.hasDisplayName()){
+            return info.getSimpleDisplayName() + " : "+info.getRepositoryUrl();
+          }
+          return info.getDisplayName();
         }
 
       } else if(obj instanceof IndexedArtifactGroup) {
