@@ -1,8 +1,6 @@
 
 package org.maven.ide.eclipse.integration.tests;
 
-import java.io.IOException;
-
 import org.codehaus.plexus.util.FileUtils;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -34,13 +32,15 @@ import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
 
 public class MEclipse193IndexerTest extends UIIntegrationTestCase {
 
-  public void setUp() throws IOException {
+  public void setUp() throws Exception {
+    super.setUp();
     FileUtils
     .deleteDirectory(System.getProperty("user.home") + "/.m2/repository/commons-logging/commons-logging/1.1.1");
     FileUtils
     .deleteDirectory(System.getProperty("user.home") + "/.m2/repository/args4j");
     FileUtils
     .deleteDirectory(System.getProperty("user.home") + "/.m2/repository/org/sonatype/test/depencency");
+    
   }
   
   public void testLocalResolution() throws Exception {
