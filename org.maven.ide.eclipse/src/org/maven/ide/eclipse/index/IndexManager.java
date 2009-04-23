@@ -418,21 +418,22 @@ public abstract class IndexManager {
     }
 
     public void run(IndexManager indexManager, MavenConsole console, IProgressMonitor monitor) {
-      monitor.setTaskName("Updating index " + info.getIndexName());
-      console.logMessage("Updating index " + info.getIndexName());
+      String displayName = info.getDisplayName();
+      monitor.setTaskName("Updating index " + displayName);
+      console.logMessage("Updating index " + displayName);
       try {
         Date indexTime = indexManager.fetchAndUpdateIndex(info.getIndexName(), force, monitor);
         if(indexTime==null) {
-          console.logMessage("No index update available for " + info.getIndexName());
+          console.logMessage("No index update available for " + displayName);
         } else {
-          console.logMessage("Updated index for " + info.getIndexName() + " " + indexTime);
+          console.logMessage("Updated index for " + displayName + " " + indexTime);
         }
       } catch(CoreException ex) {
-        String msg = "Unable to update index for " + info.getIndexName() + " " + info.getRepositoryUrl();
+        String msg = "Unable to update index for " + displayName;
         MavenLogger.log(msg, ex);
         console.logError(msg);
       } catch (OperationCanceledException ex) {
-        console.logMessage("Updating index " + info.getIndexName() + " is canceled");
+        console.logMessage("Updating index " + displayName + " is canceled");
       }
     }
   }
@@ -456,14 +457,15 @@ public abstract class IndexManager {
       }
 
       String indexName = info.getIndexName();
-      monitor.setTaskName("Unpacking " + indexName);
+      String displayName = info.getDisplayName();
+      monitor.setTaskName("Unpacking " + displayName);
       
       Date archiveIndexTime = null;
       if(info.isNew() && info.getArchiveUrl()!=null) {
         try {
           archiveIndexTime = indexManager.getIndexArchiveTime(indexArchive.openStream());
         } catch(IOException ex) {
-          MavenLogger.log("Unable to read creation time for index " + indexName, ex);
+          MavenLogger.log("Unable to read creation time for index " + displayName, ex);
         }
       }
       
@@ -495,14 +497,14 @@ public abstract class IndexManager {
           is = indexArchive.openStream();
           indexManager.replaceIndex(indexName, is);
 
-          console.logMessage("Unpacked index for " + info.getIndexName() + " " + archiveIndexTime);
+          console.logMessage("Unpacked index for " + displayName + " " + archiveIndexTime);
           
           // XXX update index and repository urls
           // indexManager.removeIndex(indexName, false);
           // indexManager.addIndex(extensionIndexInfo, false);
           
         } catch(Exception ex) {
-          MavenLogger.log("Unable to unpack index " + indexName, ex);
+          MavenLogger.log("Unable to unpack index " + displayName, ex);
         } finally {
           try {
             if(is != null) {

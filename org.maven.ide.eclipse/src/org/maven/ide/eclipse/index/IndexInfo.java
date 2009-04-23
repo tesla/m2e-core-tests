@@ -38,6 +38,8 @@ public class IndexInfo {
 
   private boolean isNew;
   
+  private String displayName;
+  
 
   public IndexInfo(String indexName, File repositoryDir, String repositoryUrl, Type type, boolean isShort) {
     this.indexName = indexName;
@@ -111,6 +113,31 @@ public class IndexInfo {
   }
   
   
+  /**
+   * @param displayName The displayName to set.
+   */
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
+  }
+
+  /**
+   * @return Returns the displayName.
+   */
+  public String getDisplayName() {
+    if(displayName == null || displayName.length()==0){
+      return this.repositoryUrl;
+    }
+    return this.displayName;
+  }
+  
+  public String getSimpleDisplayName(){
+    return displayName;
+  }
+  
+  public boolean hasDisplayName(){
+    return displayName != null && displayName.length() > 0;
+  }
+
   /**
    * Repository index type
    */

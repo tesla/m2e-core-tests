@@ -59,7 +59,7 @@ public class LegacyIndexManager extends IndexManager {
       try {
         indexer.createIndex(workspaceIndexDirectory);
       } catch(IOException ex) {
-        String msg = "Unable to create index " + indexInfo.getIndexName();
+        String msg = "Unable to create index " + indexInfo.getDisplayName();
         console.logError(msg + "; " + ex.getMessage());
         MavenLogger.log(msg, ex);
       }

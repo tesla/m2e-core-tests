@@ -29,8 +29,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
-import org.codehaus.plexus.util.StringUtils;
-
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.FilteredQuery;
@@ -57,14 +55,13 @@ import org.sonatype.nexus.index.ArtifactInfo;
 import org.sonatype.nexus.index.ArtifactScanningListener;
 import org.sonatype.nexus.index.FlatSearchRequest;
 import org.sonatype.nexus.index.FlatSearchResponse;
-import org.sonatype.nexus.index.context.IndexUtils;
 import org.sonatype.nexus.index.NexusIndexer;
+import org.sonatype.nexus.index.ScanningResult;
 import org.sonatype.nexus.index.context.DefaultIndexingContext;
+import org.sonatype.nexus.index.context.IndexUtils;
 import org.sonatype.nexus.index.context.IndexingContext;
 import org.sonatype.nexus.index.context.UnsupportedExistingLuceneIndexException;
-import org.sonatype.nexus.index.creator.AbstractIndexCreator;
 import org.sonatype.nexus.index.locator.PomLocator;
-import org.sonatype.nexus.index.ScanningResult;
 import org.sonatype.nexus.index.updater.IndexUpdater;
 
 import org.maven.ide.eclipse.core.IMavenConstants;
@@ -138,6 +135,7 @@ public class NexusIndexManager extends IndexManager {
 
   private void addIndexingContext(IndexInfo indexInfo) {
     String indexName = indexInfo.getIndexName();
+    String displayName = indexInfo.getRepositoryUrl();
     try {
       indexInfo.setNew(!getIndexDirectoryFile(indexInfo).exists());
       
@@ -149,13 +147,13 @@ public class NexusIndexManager extends IndexManager {
 
     } catch(IOException ex) {
       // XXX how to recover from this?
-      String msg = "Error on adding indexing context " + indexName;
+      String msg = "Error on adding indexing context " + displayName;
       console.logError(msg + "; " + ex.getMessage());
       MavenLogger.log(msg, ex);
 
     } catch(UnsupportedExistingLuceneIndexException ex) {
       // XXX how to recover from this?
-      String msg = "Unsupported existing index " + indexName;
+      String msg = "Unsupported existing index " + displayName;
       console.logError(msg + "; " + ex.getMessage());
       MavenLogger.log(msg, ex);
 

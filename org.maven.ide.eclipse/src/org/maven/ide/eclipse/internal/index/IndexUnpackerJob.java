@@ -59,8 +59,8 @@ public class IndexUnpackerJob extends Job {
     for(Iterator<IndexInfo> it = extensionIndexes.iterator(); it.hasNext();) {
       IndexInfo extensionIndexInfo = it.next();
       String indexName = extensionIndexInfo.getIndexName();
-      
-      monitor.setTaskName(indexName);
+      String displayName = extensionIndexInfo.getDisplayName();
+      monitor.setTaskName(displayName);
 
       IndexInfo indexInfo = indexManager.getIndexInfo(indexName);
       if(indexInfo == null) {
@@ -76,7 +76,7 @@ public class IndexUnpackerJob extends Job {
           extensionIndexTime = indexManager.getIndexArchiveTime(indexArchive.openStream());
           extensionIndexInfo.setUpdateTime(extensionIndexTime);
         } catch(IOException ex) {
-          MavenLogger.log("Unable to read creation time for index " + indexName, ex);
+          MavenLogger.log("Unable to read creation time for index " + displayName, ex);
         }
         
         boolean replace = overwrite || indexInfo.isNew();
@@ -112,7 +112,7 @@ public class IndexUnpackerJob extends Job {
             indexManager.addIndex(extensionIndexInfo, false);
             
           } catch(Exception ex) {
-            MavenLogger.log("Unable to unpack index " + indexName, ex);
+            MavenLogger.log("Unable to unpack index " + displayName, ex);
           } finally {
             close(is);
           }
