@@ -237,9 +237,8 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
         getUI().wait(new SWTIdleCondition());
 
         // Remove maven central index.
-        getUI().contextClick(
-            new TreeItemLocator("central .*", new ViewLocator("org.maven.ide.eclipse.views.MavenIndexesView")),
-            "Remove Index");
+        getUI().contextClick(new TreeItemLocator("http:\\\\/\\\\/repo1.maven.org\\\\/maven2\\\\/", new ViewLocator("org.maven.ide.eclipse.views.MavenIndexesView")),
+        "Remove Index");
         getUI().wait(new ShellShowingCondition("Remove Index"));
         getUI().click(new ButtonLocator("OK"));
 
@@ -254,7 +253,8 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
         getUI().wait(new ShellShowingCondition("Add Repository Index"));
         getUI().click(new NamedWidgetLocator("repositoryUrlCombo"));
         getUI().enterText(nexusURL + "/content/groups/public/");
-        getUI().click(new NamedWidgetLocator("retrieveButton"));
+        getUI().click(new NamedWidgetLocator("displayName"));
+        getUI().enterText("central");
         getUI().wait(new JobsCompleteCondition(), 300000);
         getUI().wait(new SWTIdleCondition());
         getUI().click(new ButtonLocator("OK"));
