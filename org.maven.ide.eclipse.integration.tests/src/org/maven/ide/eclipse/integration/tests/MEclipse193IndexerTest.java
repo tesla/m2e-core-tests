@@ -209,14 +209,9 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
     getUI().wait(new ShellShowingCondition("Add Repository Index"));
     getUI().click(new NamedWidgetLocator("repositoryUrlCombo"));
     getUI().enterText("http://download.java.net/maven/2/");
-    getUI().click(new NamedWidgetLocator("retrieveButton"));
-    getUI().wait(new JobsCompleteCondition());
     getUI().wait(new SWTIdleCondition());
     getUI().click(new ButtonLocator("OK"));
     getUI().wait(new ShellDisposedCondition("Add Repository Index"));
-    getUI().contextClick(
-        new TreeItemLocator("central.*", new ViewLocator("org.maven.ide.eclipse.views.MavenIndexesView")),
-        "Update Index");
     hideView(indexView);
     
     getUI().wait(new JobsCompleteCondition(), 240000);
