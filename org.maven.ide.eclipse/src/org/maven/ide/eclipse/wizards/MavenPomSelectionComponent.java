@@ -46,6 +46,7 @@ import org.maven.ide.eclipse.MavenImages;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
+import org.maven.ide.eclipse.index.IndexInfo;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
@@ -293,26 +294,39 @@ public class MavenPomSelectionComponent extends Composite {
     public String getText(Object element) {
       if(element instanceof IndexedArtifact) {
         IndexedArtifact a = (IndexedArtifact) element;
-        return (a.className == null ? "" : a.className + "   " + a.getPackageName() + "   ") + a.group + "   " + a.artifact;
+        String name = (a.className == null ? "" : a.className + "   " + a.getPackageName() + "   ") + a.group + "   " + a.artifact;
+        return name;
       } else if(element instanceof IndexedArtifactFile) {
         IndexedArtifactFile f = (IndexedArtifactFile) element;
         long size_k = (f.size + 512)/1024;
-        return f.version + " - " + f.fname + " - " + size_k + "K - " + f.date + " [" + f.repository + "]";
+        String displayName = getRepoDisplayName(f.repository);
+        return f.version + " - " + f.fname + " - " + size_k + "K - " + f.date + " [" + displayName + "]";
       }
       return super.getText(element);
     }
-
+    
+    protected String getRepoDisplayName(String repo){
+      try{
+        IndexInfo info = MavenPlugin.getDefault().getIndexManager().getIndexInfo(repo);
+        if(info != null && info.getDisplayName() != null){
+          return info.getDisplayName();
+        }
+        return repo;
+      } catch(Throwable t){
+        return repo;
+      }
+    }
+    
     public Color getForeground(Object element) {
       if(element instanceof IndexedArtifactFile) {
         IndexedArtifactFile f = (IndexedArtifactFile) element;
         if(artifactKeys.contains(f.group + ":" + f.artifact + ":" + f.version)) {
-          return Display.getDefault().getSystemColor(SWT.COLOR_RED);
+          return Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
         }
-        return Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
       } else if(element instanceof IndexedArtifact) {
         IndexedArtifact i = (IndexedArtifact) element;
         if(artifactKeys.contains(i.group + ":" + i.artifact)) {
-          return Display.getDefault().getSystemColor(SWT.COLOR_RED);
+          return Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
         }
       }
       return null;
