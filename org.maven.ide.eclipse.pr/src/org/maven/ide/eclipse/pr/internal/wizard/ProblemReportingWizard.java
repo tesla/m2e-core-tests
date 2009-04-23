@@ -57,7 +57,7 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
 
   private IStructuredSelection selection;
 
-  private static final String HOSTNAME = "jiratest.sonatype.org/";
+  private static final String HOSTNAME = "issues.sonatype.org/";
 
   private static final String URL = "https://" + HOSTNAME;
 
