@@ -10,6 +10,7 @@ package org.maven.ide.eclipse.ui.internal.views;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -81,6 +82,8 @@ public class MavenIndexesView extends ViewPart {
   BaseSelectionListenerAction openPomAction;
 
   BaseSelectionListenerAction updateAction;
+  
+  BaseSelectionListenerAction rebuildAction;
 
   BaseSelectionListenerAction unpackAction;
 
@@ -210,6 +213,7 @@ public class MavenIndexesView extends ViewPart {
     manager.add(new Separator());
     manager.add(addIndexAction);
     manager.add(updateAction);
+    manager.add(rebuildAction);
     manager.add(unpackAction);
     manager.add(removeIndexAction);
     manager.add(editIndexAction);
@@ -246,20 +250,98 @@ public class MavenIndexesView extends ViewPart {
 
     updateAction = new BaseSelectionListenerAction("Update Index") {
       public void run() {
-        Object element = getStructuredSelection().getFirstElement();
-        if(element instanceof IndexInfo) {
-          updateIndex((IndexInfo) element);
+        List<IndexInfo> infoElements = elementsToUpdate(getStructuredSelection().toList());
+        for(IndexInfo info : infoElements){
+          updateIndex(info, false);
         }
       }
-
+      protected List<IndexInfo> elementsToUpdate(List elements){
+        if(elements == null || elements.size() == 0){
+          return null;
+        }
+        ArrayList<IndexInfo> list = new ArrayList<IndexInfo>();
+        for(int i=0;i<elements.size();i++){
+          Object elem = elements.get(i);
+          if(elem instanceof IndexInfo){
+            if(IndexInfo.Type.REMOTE.equals(((IndexInfo)elem).getType()) || IndexInfo.Type.LOCAL.equals(((IndexInfo) elem).getType())){
+              list.add((IndexInfo)elem);
+            }
+          }
+        }
+        return list;
+      }
       protected boolean updateSelection(IStructuredSelection selection) {
-        Object element = selection.getFirstElement();
-        return element instanceof IndexInfo && (IndexInfo.Type.REMOTE.equals(((IndexInfo) element).getType()) //
-            || IndexInfo.Type.LOCAL.equals(((IndexInfo) element).getType()));
+        List<IndexInfo> elems = elementsToUpdate(selection.toList());
+        if(elems != null && elems.size() > 1){
+          setText("Update Indexes");
+        } else {
+          setText("Update Index");
+        }
+        return elems != null && elems.size() > 0;
       }
     };
     updateAction.setToolTipText("Update repository index");
     updateAction.setImageDescriptor(MavenImages.UPD_INDEX);
+
+    rebuildAction = new BaseSelectionListenerAction("Rebuild Index") {
+      public void run() {
+        List<IndexInfo> elemsToUpdate = elementsToUpdate(getStructuredSelection().toList());
+        if(elemsToUpdate != null && elemsToUpdate.size() > 0){
+          if(elemsToUpdate.size() == 1){
+            IndexInfo info = elemsToUpdate.get(0);
+            String name = info.getDisplayName() == null ? info.getIndexName() : info.getDisplayName();
+            String msg = "Are you sure you want to rebuild the index '"+name+"'";
+            boolean res = MessageDialog.openConfirm(getViewSite().getShell(), //
+                "Rebuild Index", msg);
+            if(res) {
+              // TODO request index deletion
+              // TODO add deleted index to 
+              updateIndex(info, true);
+            }
+          } else {
+            String msg = "Are you sure you want to rebuild the selected indexes?";
+            boolean res = MessageDialog.openConfirm(getViewSite().getShell(), //
+                "Rebuild Indexes", msg);
+            if(res) {
+              // TODO request index deletion
+              // TODO add deleted index to 
+              for(IndexInfo info : elemsToUpdate){
+                updateIndex(info, true);
+              }
+            }            
+          }
+        }
+      }
+      
+      protected List<IndexInfo> elementsToUpdate(List elements){
+        if(elements == null || elements.size() == 0){
+          return null;
+        }
+        ArrayList<IndexInfo> list = new ArrayList<IndexInfo>();
+        for(int i=0;i<elements.size();i++){
+          Object elem = elements.get(i);
+          if(elem instanceof IndexInfo){
+            if(IndexInfo.Type.REMOTE.equals(((IndexInfo)elem).getType()) || IndexInfo.Type.LOCAL.equals(((IndexInfo) elem).getType())){
+              list.add((IndexInfo)elem);
+            }
+          }
+        }
+        return list;
+      }
+
+      protected boolean updateSelection(IStructuredSelection selection) {
+        List<IndexInfo> elems = elementsToUpdate(selection.toList());
+        if(elems != null && elems.size() > 1){
+          setText("Rebuild Indexes");
+        } else {
+          setText("Rebuild Index");
+        }
+        return elems != null && elems.size() > 0;
+      }
+    };
+    
+    rebuildAction.setToolTipText("Force a rebuild of the maven index");
+    rebuildAction.setImageDescriptor(MavenImages.REBUILD_INDEX);
 
     unpackAction = new BaseSelectionListenerAction("Unpack Index") {
       public void run() {
@@ -297,7 +379,7 @@ public class MavenIndexesView extends ViewPart {
           IndexInfo indexInfo = dialog.getIndexInfo();
           IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
           indexManager.addIndex(indexInfo, false);
-          updateIndex(indexInfo);
+          updateIndex(indexInfo, false);
         }
       }
     };
@@ -320,7 +402,7 @@ public class MavenIndexesView extends ViewPart {
             IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
             indexManager.removeIndex(indexName, false);
             indexManager.addIndex(indexInfo, false);
-            updateIndex(indexInfo);
+            updateIndex(indexInfo, false);
             viewer.refresh();
             viewer.setSelection(new StructuredSelection(indexInfo));
           }
@@ -336,27 +418,63 @@ public class MavenIndexesView extends ViewPart {
 
     removeIndexAction = new BaseSelectionListenerAction("Remove Index") {
       public void run() {
-        Object element = getStructuredSelection().getFirstElement();
-        if(element instanceof IndexInfo) {
-          IndexInfo info = (IndexInfo) element;
-          if(IndexInfo.Type.REMOTE.equals(info.getType())) {
+        List<IndexInfo> elemsToRemove = elementsToRemove(getStructuredSelection().toList());
+        if(elemsToRemove != null && elemsToRemove.size() > 0){
+          if(elemsToRemove.size() == 1){
+            IndexInfo info = elemsToRemove.get(0);
             String indexName = info.getIndexName();
+            String msg = "Are you sure you want to remove the index '"+info.getDisplayName()+"'";
             boolean res = MessageDialog.openConfirm(getViewSite().getShell(), //
-                "Remove Index", "Are you sure you want to remove index " + info.getDisplayName());
+                "Remove Index", msg);
             if(res) {
               // TODO request index deletion
               // TODO add deleted index to 
               MavenPlugin.getDefault().getIndexManager().removeIndex(indexName, true);
             }
+          } else {
+            String msg = "Are you sure you want to remove the selected indexes?";
+            boolean res = MessageDialog.openConfirm(getViewSite().getShell(), //
+                "Remove Indexes", msg);
+            if(res) {
+              // TODO request index deletion
+              // TODO add deleted index to 
+              for(int i=0;i<elemsToRemove.size();i++){
+                IndexInfo info = elemsToRemove.get(i);
+                String indexName = info.getIndexName();
+                MavenPlugin.getDefault().getIndexManager().removeIndex(indexName, true);
+              }
+            }
           }
         }
       }
 
+      protected List<IndexInfo> elementsToRemove(List elements){
+        if(elements == null || elements.size() == 0){
+          return null;
+        }
+        ArrayList<IndexInfo> list = new ArrayList<IndexInfo>();
+        for(int i=0;i<elements.size();i++){
+          Object elem = elements.get(i);
+          if(elem instanceof IndexInfo){
+            if(IndexInfo.Type.REMOTE.equals(((IndexInfo)elem).getType())){
+              list.add((IndexInfo)elem);
+            }
+          }
+        }
+        return list;
+      }
+
       protected boolean updateSelection(IStructuredSelection selection) {
-        Object element = selection.getFirstElement();
-        return element instanceof IndexInfo && IndexInfo.Type.REMOTE.equals(((IndexInfo) element).getType());
+        List<IndexInfo> elements = elementsToRemove(selection.toList());
+        if(elements != null && elements.size() > 1){
+          setText("Remove Indexes");
+        } else {
+          setText("Remove Index");
+        }
+        return elements != null && elements.size() > 0;
       }
     };
+    
     removeIndexAction.setToolTipText("Add repository index");
 
     openPomAction = new BaseSelectionListenerAction("Open POM") {
@@ -424,6 +542,7 @@ public class MavenIndexesView extends ViewPart {
     viewer.addSelectionChangedListener(openPomAction);
     viewer.addSelectionChangedListener(updateAction);
     viewer.addSelectionChangedListener(unpackAction);
+    viewer.addSelectionChangedListener(rebuildAction);
     viewer.addSelectionChangedListener(removeIndexAction);
     viewer.addSelectionChangedListener(editIndexAction);
     viewer.addSelectionChangedListener(copyUrlAction);
@@ -436,6 +555,7 @@ public class MavenIndexesView extends ViewPart {
     viewer.removeSelectionChangedListener(editIndexAction);
     viewer.removeSelectionChangedListener(removeIndexAction);
     viewer.removeSelectionChangedListener(unpackAction);
+    viewer.removeSelectionChangedListener(rebuildAction);
     viewer.removeSelectionChangedListener(updateAction);
     viewer.removeSelectionChangedListener(openPomAction);
 
@@ -452,26 +572,9 @@ public class MavenIndexesView extends ViewPart {
     });
   };
 
-  void updateIndex(final IndexInfo info) {
+  void updateIndex(final IndexInfo info, boolean force) {
     IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
-    indexManager.scheduleIndexUpdate(info.getIndexName(), false, 0L);
-    
-//    Job job;
-//    if(IndexInfo.Type.REMOTE.equals(info.getType())) {
-//      job = new IndexUpdaterJob(info, plugin.getIndexManager(), plugin.getConsole());
-//    } else if(IndexInfo.Type.LOCAL.equals(info.getType())) {
-//      job = new IndexerJob(info.getIndexName(), plugin.getIndexManager(), plugin.getConsole());
-//    } else {
-//      return;
-//    }
-//
-//    job.addJobChangeListener(new JobChangeAdapter() {
-//      public void done(IJobChangeEvent event) {
-//        refreshView();
-//      }
-//    });
-//    
-//    job.schedule();
+    indexManager.scheduleIndexUpdate(info.getIndexName(), force, 0L);
   }
 
   public class ViewContentProvider implements IStructuredContentProvider, ITreeContentProvider {
