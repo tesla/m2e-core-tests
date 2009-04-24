@@ -62,6 +62,7 @@ import org.sonatype.nexus.index.context.IndexUtils;
 import org.sonatype.nexus.index.context.IndexingContext;
 import org.sonatype.nexus.index.context.UnsupportedExistingLuceneIndexException;
 import org.sonatype.nexus.index.locator.PomLocator;
+import org.sonatype.nexus.index.updater.IndexUpdateRequest;
 import org.sonatype.nexus.index.updater.IndexUpdater;
 
 import org.maven.ide.eclipse.core.IMavenConstants;
@@ -522,21 +523,28 @@ public class NexusIndexManager extends IndexManager {
   
   public Date fetchAndUpdateIndex(String indexName, boolean force, IProgressMonitor monitor) throws CoreException {
     IndexingContext context = getIndexingContext(indexName);
+    
     if(context != null) {
       try {
-        @SuppressWarnings("deprecation")
-        Date indexTime = getUpdater().fetchAndUpdateIndex(context, //
-            new TransferListenerAdapter(monitor, console, null), getProxyInfo());
+        IndexUpdateRequest request = new IndexUpdateRequest(context);
+        request.setProxyInfo(getProxyInfo());
+        request.setTransferListener(new TransferListenerAdapter(monitor, console, null));
+        request.setForceFullUpdate(force);
+        Date indexTime = getUpdater().fetchAndUpdateIndex(request);
         if(indexTime!=null) {
           IndexInfo indexInfo = getIndexInfo(indexName);
           indexInfo.setUpdateTime(indexTime);
           fireIndexUpdated(indexInfo);
           return indexTime;
         }
-      } catch(UnsupportedExistingLuceneIndexException ex) {
-        console.logError("Unsupported index format; " + ex.getMessage());
-      } catch(IOException ex) {
-        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Error updateing index", ex));
+      } catch(Throwable ex) {
+        IndexInfo info = this.getIndexInfo(indexName);
+        if(info == null){
+          //it was probably removed by the user, log the problem and move along.
+          MavenLogger.log("Error updating index, but index is no longer around (probably removed by user).",ex);
+          return null;
+        } 
+        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Error updating index", ex));
       }
     }
     return null;
