@@ -124,7 +124,7 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
 
     updateLocalIndex(ui);
     //TODO: There is a bug, you need to re-index twice to get new items to show up. Remove this when new indexer put into m2e.
-    updateLocalIndex(ui);
+   // updateLocalIndex(ui);
 
     showView("org.maven.ide.eclipse.views.MavenIndexesView");
 
@@ -156,7 +156,7 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
   }
 
   private void updateLocalIndex(IUIContext ui) throws Exception {
-    showView("org.maven.ide.eclipse.views.MavenIndexesView");
+    IViewPart indexView = showView("org.maven.ide.eclipse.views.MavenIndexesView");
 
     ui
         .click(new TreeItemLocator("local .*repository",
@@ -164,7 +164,7 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
 
     ui.contextClick(new TreeItemLocator("local : .*repository", new ViewLocator(
         "org.maven.ide.eclipse.views.MavenIndexesView")), "Update Index");
-    closeView("org.maven.ide.eclipse.views.MavenIndexesView");
+    hideView(indexView);
     ui.wait(new JobsCompleteCondition(), 240000);
 
   }
