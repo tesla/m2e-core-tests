@@ -152,7 +152,7 @@ public class PomEditorTest2 extends PomEditorTestBase {
     
   }
 
-  public void tstMutlipleMNGEclipse1315() throws Exception {
+  public void testMutlipleMNGEclipse1312() throws Exception {
     
     createArchetypeProjct("maven-archetype-quickstart", "projectA");
     createArchetypeProjct("maven-archetype-quickstart", "projectB");
