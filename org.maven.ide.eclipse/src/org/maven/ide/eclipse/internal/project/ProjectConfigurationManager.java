@@ -531,6 +531,8 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
       monitor.worked(1);
     } catch (InterruptedException e) {
       throw new CoreException(Status.CANCEL_STATUS);
+    } catch (Exception ex) {
+      throw new CoreException(new Status(Status.ERROR, "org.maven.ide.eclipse", "Failed to create project.", ex));
     }
   }
 
