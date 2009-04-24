@@ -85,6 +85,8 @@ public class MavenImages {
   public static final ImageDescriptor REFRESH = create("refresh.gif");
   
   public static final ImageDescriptor UPD_INDEX = create("update_index.gif");
+  
+  public static final ImageDescriptor REBUILD_INDEX = create("rebuild_index.gif");
 
   public static final ImageDescriptor POM = create("pom_obj.gif");
   
