@@ -93,7 +93,6 @@ import com.windowtester.runtime.swt.locator.SWTWidgetLocator;
 import com.windowtester.runtime.swt.locator.TableCellLocator;
 import com.windowtester.runtime.swt.locator.TreeItemLocator;
 import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
-import com.windowtester.runtime.swt.locator.eclipse.WorkbenchLocator;
 import com.windowtester.runtime.util.ScreenCapture;
 
 
@@ -152,7 +151,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
   protected void oneTimeSetup() throws Exception {
     super.oneTimeSetup();
 
-    getUI().ensureThat(new WorkbenchLocator().hasFocus());
+    //getUI().ensureThat(new WorkbenchLocator().hasFocus());  Buggy in WT 3.7.1, try bringing this back in next version.
     
     // Turn off eclipse features which make tests unreliable.
     WorkbenchPlugin.getDefault().getPreferenceStore().setValue(IPreferenceConstants.RUN_IN_BACKGROUND, true);
