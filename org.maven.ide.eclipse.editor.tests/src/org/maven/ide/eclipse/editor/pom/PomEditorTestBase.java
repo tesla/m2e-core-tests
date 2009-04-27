@@ -81,10 +81,6 @@ public class PomEditorTestBase extends UIIntegrationTestCase {
     super();
   }
 
-  public PomEditorTestBase(String testName) {
-    super(testName);
-  }
-
 
   protected void oneTimeSetup() throws Exception {
     super.oneTimeSetup();
