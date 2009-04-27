@@ -27,8 +27,10 @@ import org.osgi.framework.BundleContext;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
@@ -242,7 +244,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     }
   }
   
-  private void unzipFile(URL url, File dest) throws IOException {
+  void unzipFile(URL url, File dest) throws IOException {
 
     InputStream is = new BufferedInputStream(url.openStream());
     ZipInputStream zis = new ZipInputStream(is);
@@ -271,21 +273,34 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     }
   }
   
-  private IndexInfo createCentralIndex() throws IllegalStateException, IOException{
+  private IndexInfo createCentralIndex() throws IllegalStateException {
     String indexId = "central";
     String repositoryUrl = "http://repo1.maven.org/maven2/";
     IndexInfo indexInfo = new IndexInfo(indexId, null, repositoryUrl, IndexInfo.Type.REMOTE, false);
     indexInfo.setIndexUpdateUrl("");
     // Hook for integration tests. If plug-in contains a pre-processed central index then install it. 
-    // This speeds up test execution significantly.
-    URL url = FileLocator.find(getBundle(), new Path("/indexes/maven-central.zip"), null);
+    // This speeds up test execution significantly. 
+    final URL url = FileLocator.find(getBundle(), new Path("/indexes/maven-central.zip"), null);
     if (url != null) {
-      unzipFile(url, getStateLocation().toFile());
+      WorkspaceJob job = new WorkspaceJob("Installing maven central index.") {
+
+        public IStatus runInWorkspace(IProgressMonitor monitor) {
+          try {
+            unzipFile(url, getStateLocation().toFile());
+          } catch(Exception ex) {
+            MavenLogger.log("Error unzipping maven central index", ex);
+          } 
+          return Status.OK_STATUS;
+        }
+        
+      };
+      job.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
+      job.schedule();
     }
     return indexInfo;
   }
   
-  private Set<IndexInfo> loadIndexConfiguration(File configFile) throws IllegalStateException, IOException {
+  private Set<IndexInfo> loadIndexConfiguration(File configFile) throws IllegalStateException {
     LinkedHashSet<IndexInfo> indexes = new LinkedHashSet<IndexInfo>();
     indexes.addAll(ExtensionReader.readIndexInfoConfig(configFile));
     boolean indexesRead = this.getPreferenceStore().getBoolean(PREFS_INDEXES_READ);
