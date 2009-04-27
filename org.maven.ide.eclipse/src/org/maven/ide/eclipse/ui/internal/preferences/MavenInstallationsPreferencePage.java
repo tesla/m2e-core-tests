@@ -167,6 +167,24 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
     return true;
   }
 
+  protected boolean validateMavenInstall(String dir){
+    if(dir == null || dir.length() == 0){
+      return false;
+    }
+    File selectedDir = new File(dir);
+    if(!selectedDir.isDirectory()){
+      MessageDialog.openError(getShell(), "Maven Install", "Select the directory where Maven is installed.");
+      return false;
+    }
+    File binDir = new File(dir, "bin");
+    File confDir = new File(dir, "conf");
+    File libDir = new File(dir, "lib");
+    if(!binDir.exists() || !confDir.exists() || !libDir.exists()){
+      MessageDialog.openError(getShell(), "Maven Install", "The selected directory is not a valid Maven directory.");
+      return false;
+    }
+    return true;
+  }
   protected Control createContents(Composite parent) {
     noDefaultAndApplyButton();
 
@@ -242,10 +260,11 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
         dlg.setText("Maven Installation");
         dlg.setMessage("Select Maven installation directory");
         String dir = dlg.open();
-        if(dir != null) {
+        boolean ok = validateMavenInstall(dir);
+        if(ok){
           MavenRuntime runtime = MavenRuntimeManager.createExternalRuntime(dir);
           if(runtimes.contains(runtime)) {
-            MessageDialog.openError(getShell(), "Maven Install", "Selected Maven install is already registered");
+            MessageDialog.openError(getShell(), "Maven Install", "The selected Maven install is already registered.");
           } else {
             runtimes.add(runtime);
             runtimesViewer.refresh();
@@ -267,7 +286,8 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
         dlg.setMessage("Select Maven installation directory");
         dlg.setFilterPath(runtime.getLocation());
         String dir = dlg.open();
-        if(dir != null && !dir.equals(runtime.getLocation())) {
+        boolean ok = validateMavenInstall(dir);
+        if(ok && !dir.equals(runtime.getLocation())) {
           MavenRuntime newRuntime = MavenRuntimeManager.createExternalRuntime(dir);
           if(runtimes.contains(newRuntime)) {
             MessageDialog.openError(getShell(), "Maven Install", "Selected Maven install is already registered");
