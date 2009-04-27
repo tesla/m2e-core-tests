@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.progress.IProgressConstants;
 
@@ -195,6 +196,7 @@ public abstract class IndexManager {
         updaterJob.addCommand(new UpdateCommand(indexInfo, force));
         updaterJob.addCommand(new UnpackCommand(indexInfo, force));
       }
+      updaterJob.setRule(new IndexUpdaterRule());
       updaterJob.schedule(delay);
     }
   }
@@ -519,6 +521,18 @@ public abstract class IndexManager {
     
   }
 
+  public static class IndexUpdaterRule implements ISchedulingRule {
+
+    public boolean contains(ISchedulingRule rule) {
+      return rule == this;
+    }
+
+    public boolean isConflicting(ISchedulingRule rule) {
+      return rule == this;
+    }
+    
+  }
+  
   static class IndexUpdaterJob extends Job {
 
     private final IndexManager indexManager;

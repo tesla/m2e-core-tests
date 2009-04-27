@@ -27,7 +27,6 @@ import org.osgi.framework.BundleContext;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -35,6 +34,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
@@ -70,6 +71,7 @@ import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.index.IndexInfo;
 import org.maven.ide.eclipse.index.IndexListener;
 import org.maven.ide.eclipse.index.IndexManager;
+import org.maven.ide.eclipse.index.IndexManager.IndexUpdaterRule;
 import org.maven.ide.eclipse.internal.ExtensionReader;
 import org.maven.ide.eclipse.internal.console.MavenConsoleImpl;
 import org.maven.ide.eclipse.internal.embedder.MavenEmbeddedRuntime;
@@ -280,24 +282,40 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     indexInfo.setIndexUpdateUrl("");
     // Hook for integration tests. If plug-in contains a pre-processed central index then install it. 
     // This speeds up test execution significantly. 
-    final URL url = FileLocator.find(getBundle(), new Path("/indexes/maven-central.zip"), null);
+    URL url = FileLocator.find(getBundle(), new Path("/indexes/maven-central.zip"), null);
     if (url != null) {
-      WorkspaceJob job = new WorkspaceJob("Installing maven central index.") {
-
-        public IStatus runInWorkspace(IProgressMonitor monitor) {
-          try {
-            unzipFile(url, getStateLocation().toFile());
-          } catch(Exception ex) {
-            MavenLogger.log("Error unzipping maven central index", ex);
-          } 
-          return Status.OK_STATUS;
-        }
-        
-      };
-      job.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
-      job.schedule();
+      installCachedMavenCentralIndex(url);
     }
     return indexInfo;
+  }
+  
+  private void installCachedMavenCentralIndex(final URL indexURL) {
+    Job job = new Job("Installing maven central index.") {
+
+      public IStatus run(IProgressMonitor monitor) {
+        try {
+          monitor.beginTask("Installing index...", IProgressMonitor.UNKNOWN);
+          unzipFile(indexURL, getStateLocation().toFile());
+        } catch(Exception ex) {
+          MavenLogger.log("Error unzipping maven central index", ex);
+        } finally {
+          monitor.done();
+        }
+        return Status.OK_STATUS;
+      }
+      
+    };
+    job.setRule(new ISchedulingRule() {
+      public boolean contains(ISchedulingRule rule) {
+        return rule == this;
+      }
+
+      public boolean isConflicting(ISchedulingRule rule) {
+        return rule == this || rule instanceof IndexUpdaterRule;
+      }
+      
+    });
+    job.schedule();
   }
   
   private Set<IndexInfo> loadIndexConfiguration(File configFile) throws IllegalStateException {
