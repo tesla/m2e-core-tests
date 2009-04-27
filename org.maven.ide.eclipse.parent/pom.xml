@@ -99,7 +99,6 @@
     <module>../org.maven.ide.eclipse</module>
     <module>../org.maven.ide.eclipse.launching</module>
     <module>../org.maven.ide.eclipse.jdt</module>
-    <module>../org.maven.ide.eclipse.central</module>
     <module>../org.maven.ide.eclipse.mylyn3</module>
     <module>../org.maven.ide.eclipse.subclipse</module>
     <module>../org.maven.ide.eclipse.scm</module>
@@ -137,7 +136,6 @@
     <module>../org.maven.ide.eclipse.subclipse.feature</module>
 
     <module>../org.maven.ide.eclipse.book.feature</module>
-    <module>../org.maven.ide.eclipse.central.feature</module>
     <module>../org.maven.ide.eclipse.mylyn3.feature</module>
 
     <module>../org.maven.ide.eclipse.doxia.feature</module>
@@ -166,11 +164,6 @@
       <dependency>
         <groupId>org.maven.ide.eclipse</groupId>
         <artifactId>org.maven.ide.eclipse.subclipse</artifactId>
-        <version>${m2eclipse.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.maven.ide.eclipse</groupId>
-        <artifactId>org.maven.ide.eclipse.central</artifactId>
         <version>${m2eclipse.version}</version>
       </dependency>
       <dependency>

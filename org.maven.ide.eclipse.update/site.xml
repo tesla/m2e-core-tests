@@ -20,9 +20,6 @@
    <feature url="features/org.maven.ide.eclipse.editor.feature_0.9.8.qualifier.jar" id="org.maven.ide.eclipse.editor.feature" version="0.9.8.qualifier">
       <category name="Maven Integration"/>
    </feature>
-   <feature url="features/org.maven.ide.eclipse.central.feature_0.9.8.qualifier.jar" id="org.maven.ide.eclipse.central.feature" version="0.9.8.qualifier">
-      <category name="Maven Optional Components"/>
-   </feature>
    <!--
    <feature url="features/org.maven.ide.eclipse.mylyn.feature_0.9.8.qualifier.jar" id="org.maven.ide.eclipse.mylyn.feature" version="0.9.8.qualifier">
       <category name="Maven Optional Components"/>
