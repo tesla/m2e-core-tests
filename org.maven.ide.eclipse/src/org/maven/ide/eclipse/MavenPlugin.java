@@ -8,6 +8,8 @@
 
 package org.maven.ide.eclipse;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -15,20 +17,20 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Date;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -52,6 +54,8 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+
+import org.codehaus.plexus.util.IOUtil;
 
 import org.maven.ide.eclipse.archetype.ArchetypeCatalogFactory;
 import org.maven.ide.eclipse.archetype.ArchetypeManager;
@@ -238,15 +242,50 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     }
   }
   
-  private IndexInfo createCentralIndex(){
+  private void unzipFile(URL url, File dest) throws IOException {
+
+    InputStream is = new BufferedInputStream(url.openStream());
+    ZipInputStream zis = new ZipInputStream(is);
+    try {
+      ZipEntry entry = zis.getNextEntry();
+      while(entry != null) {
+        File f = new File(dest, entry.getName());
+        if(entry.isDirectory()) {
+          f.mkdirs();
+        } else {
+          if(!f.getParentFile().exists()) {
+            f.getParentFile().mkdirs();
+          }
+          OutputStream os = new BufferedOutputStream(new FileOutputStream(f));
+          try {
+            IOUtil.copy(zis, os);
+          } finally {
+            os.close();
+          }
+        }
+        zis.closeEntry();
+        entry = zis.getNextEntry();
+      }
+    } finally {
+      zis.close();
+    }
+  }
+  
+  private IndexInfo createCentralIndex() throws IllegalStateException, IOException{
     String indexId = "central";
     String repositoryUrl = "http://repo1.maven.org/maven2/";
     IndexInfo indexInfo = new IndexInfo(indexId, null, repositoryUrl, IndexInfo.Type.REMOTE, false);
     indexInfo.setIndexUpdateUrl("");
+    // Hook for integration tests. If plug-in contains a pre-processed central index then install it. 
+    // This speeds up test execution significantly.
+    URL url = FileLocator.find(getBundle(), new Path("/indexes/maven-central.zip"), null);
+    if (url != null) {
+      unzipFile(url, getStateLocation().toFile());
+    }
     return indexInfo;
   }
   
-  private Set<IndexInfo> loadIndexConfiguration(File configFile) {
+  private Set<IndexInfo> loadIndexConfiguration(File configFile) throws IllegalStateException, IOException {
     LinkedHashSet<IndexInfo> indexes = new LinkedHashSet<IndexInfo>();
     indexes.addAll(ExtensionReader.readIndexInfoConfig(configFile));
     boolean indexesRead = this.getPreferenceStore().getBoolean(PREFS_INDEXES_READ);
