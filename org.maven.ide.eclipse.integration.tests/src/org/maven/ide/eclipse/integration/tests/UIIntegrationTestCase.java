@@ -128,12 +128,8 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
 
   public static final String PACKAGE_EXPLORER_VIEW_ID = "org.eclipse.jdt.ui.PackageExplorer";
 
-  public UIIntegrationTestCase() {
-    super();
-  }
 
-  public UIIntegrationTestCase(String testName) {
-    super(testName);
+  public UIIntegrationTestCase() {
   }
 
   protected IWorkbenchPage getActivePage() {
@@ -149,8 +145,9 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
   }
 
   protected void oneTimeSetup() throws Exception {
+  
     super.oneTimeSetup();
-
+    
     //getUI().ensureThat(new WorkbenchLocator().hasFocus());  Buggy in WT 3.7.1, try bringing this back in next version.
     
     // Turn off eclipse features which make tests unreliable.
@@ -192,6 +189,19 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     getUI().wait(new JobsCompleteCondition(), 600000);
   }
 
+  private void cancelIndexJobs() throws InterruptedException {
+    // Cancel maven central index job 
+    MavenPlugin.getDefault();
+    Thread.sleep(5000);
+    Job[] jobs = Job.getJobManager().find(null);
+    for(int i = 0; i < jobs.length; i++ ) {
+      if(jobs[i].getClass().getName().endsWith("IndexManager$IndexUpdaterJob")) {
+        jobs[i].cancel();
+        break;
+      }
+    }
+
+  }
   /**
    * Attempt up M2E to use a local Nexus server for downloading indexes. This speeds up test execution a lot.
    */
@@ -216,17 +226,8 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
           conn.getInputStream().close();
         }
 
-        // Cancel maven central index job 
-        MavenPlugin.getDefault();
-        Thread.sleep(5000);
-        Job[] jobs = Job.getJobManager().find(null);
-        for(int i = 0; i < jobs.length; i++ ) {
-          if(jobs[i].getClass().getName().endsWith("IndexManager$IndexUpdaterJob")) {
-            jobs[i].cancel();
-            break;
-          }
-        }
-
+        cancelIndexJobs();
+        
         getUI().wait(new JobsCompleteCondition(), 300000);
         
         IViewPart indexView = showView("org.maven.ide.eclipse.views.MavenIndexesView");
@@ -394,6 +395,26 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     return f;
   }
 
+  public void importZippedMavenProjects(String pluginPath) throws Exception {
+    IUIContext ui = getUI();
+    File f = copyPluginResourceToTempFile(PLUGIN_ID, pluginPath);
+    try {
+      ui.click(new MenuItemLocator("File/Import..."));
+      ui.wait(new ShellShowingCondition("Import"));
+      ui.click(new FilteredTreeItemLocator("General/Existing Projects into Workspace"));
+      ui.click(new ButtonLocator("&Next >"));
+      ui.click(new ButtonLocator("Select roo&t directory:"));
+      ui.click(new ButtonLocator("Select &archive file:"));
+      ui.enterText(f.getCanonicalPath());
+      ui.keyClick(SWT.TAB);
+      ui.click(new ButtonLocator("&Finish"));
+      ui.wait(new ShellDisposedCondition("Import"));
+      waitForAllBuildsToComplete();
+    } finally {
+      f.delete();
+    }
+  }
+  
   public void importZippedProject(String pluginPath) throws Exception {
     IUIContext ui = getUI();
     File f = copyPluginResourceToTempFile(PLUGIN_ID, pluginPath);
@@ -414,15 +435,14 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     }
   }
 
-  public File unzipProject(String pluginPath) throws Exception {
+  private void unzipFile(String pluginPath, File dest) throws IOException {
     URL url = FileLocator.find(Platform.getBundle(PLUGIN_ID), new Path("/" + pluginPath), null);
     InputStream is = new BufferedInputStream(url.openStream());
     ZipInputStream zis = new ZipInputStream(is);
-    File tempDir = createTempDir("sonatype");
     try {
       ZipEntry entry = zis.getNextEntry();
       while(entry != null) {
-        File f = new File(tempDir, entry.getName());
+        File f = new File(dest, entry.getName());
         if(entry.isDirectory()) {
           f.mkdirs();
         } else {
@@ -442,6 +462,11 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     } finally {
       zis.close();
     }
+  }
+  
+  public File unzipProject(String pluginPath) throws Exception {
+    File tempDir = createTempDir("sonatype");
+    unzipFile(pluginPath, tempDir);
     return tempDir;
   }
 
@@ -470,10 +495,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     dir.delete();
   }
 
-  /**
-   * Import a project and assert it has no markers of SEVERITY_ERROR
-   */
-  protected File doImport(String projectPath) throws Exception {
+  protected File importMavenProjects(String projectPath) throws Exception {
     File tempDir = unzipProject(projectPath);
 
     try {
@@ -489,13 +511,23 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
       getUI().wait(new ShellDisposedCondition("Import Maven Projects"));
       Thread.sleep(5000);
       getUI().wait(new JobsCompleteCondition(), 300000);
-      assertProjectsHaveNoErrors();
+      
 
     } catch(Exception ex) {
       deleteDirectory(tempDir);
       throw ex;
     }
 
+    return tempDir;
+  }
+
+  
+  /**
+   * Import a project and assert it has no markers of SEVERITY_ERROR
+   */
+  protected File doImport(String projectPath) throws Exception {
+    File tempDir = importMavenProjects(projectPath);
+    assertProjectsHaveNoErrors();
     return tempDir;
   }
 
