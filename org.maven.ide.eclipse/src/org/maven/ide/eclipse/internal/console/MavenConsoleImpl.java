@@ -199,15 +199,16 @@ public class MavenConsoleImpl extends IOConsole implements MavenConsole, IProper
 //    }
 //  }
 //
-//  private void bringConsoleToFront() {
-//    if(PlatformUI.isWorkbenchRunning()) {
-//      IConsoleManager manager = ConsolePlugin.getDefault().getConsoleManager();
-//      if(!visible) {
-//        manager.addConsoles(new IConsole[] {this});
-//      }
-//      manager.showConsoleView(this);
-//    }
-//  }
+  private void bringConsoleToFront() {
+    if(PlatformUI.isWorkbenchRunning()) {
+      IConsoleManager manager = ConsolePlugin.getDefault().getConsoleManager();
+      if(!visible) {
+        manager.addConsoles(new IConsole[] {this});
+        manager.showConsoleView(this);
+      }
+      
+    }
+  }
 
   // Called when console is removed from the console view
   protected void dispose() {
@@ -247,7 +248,7 @@ public class MavenConsoleImpl extends IOConsole implements MavenConsole, IProper
   }
 
   public void logError(String message) {
-    //bringConsoleToFront();
+    bringConsoleToFront();
     appendLine(ConsoleDocument.ERROR, getDateFormat().format(new Date()) + ": " + message); //$NON-NLS-1$
     // System.err.println(message);
   }
