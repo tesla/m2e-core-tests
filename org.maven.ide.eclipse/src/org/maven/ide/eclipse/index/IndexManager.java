@@ -196,7 +196,7 @@ public abstract class IndexManager {
         updaterJob.addCommand(new UpdateCommand(indexInfo, force));
         updaterJob.addCommand(new UnpackCommand(indexInfo, force));
       }
-      updaterJob.setRule(new IndexUpdaterRule());
+      
       updaterJob.schedule(delay);
     }
   }
@@ -546,6 +546,7 @@ public abstract class IndexManager {
       this.indexManager = indexManager;
       this.console = console;
       setProperty(IProgressConstants.ACTION_PROPERTY, new OpenMavenConsoleAction());
+      setRule(new IndexUpdaterRule());
     }
 
     public void addCommand(IndexCommand indexCommand) {
