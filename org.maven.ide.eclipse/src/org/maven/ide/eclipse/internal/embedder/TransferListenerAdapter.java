@@ -88,7 +88,6 @@ public final class TransferListenerAdapter implements TransferListener {
         sb.append("/").append(total).append("b");
       }
     }
-
     monitor.setTaskName((int) (100d * complete / total) + "% " + e.getWagon().getRepository() + "/"
         + e.getResource().getName());
   }
