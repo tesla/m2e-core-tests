@@ -101,7 +101,7 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
   public void testUpdateLocalIndex() throws Exception {
     IUIContext ui = getUI();
 
-    showView("org.maven.ide.eclipse.views.MavenIndexesView");
+    IViewPart indexView = showView("org.maven.ide.eclipse.views.MavenIndexesView");
 
     ui
         .click(new TreeItemLocator("local .*repository",
@@ -118,15 +118,16 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
             "org.maven.ide.eclipse.views.MavenIndexesView"));
     ui.assertThat(locator.isVisible(false));
 
+    hideView(indexView);
     // Create a test project and add common-logging 1.1.1 as dependency.
     IProject project = createArchetypeProjct("maven-archetype-quickstart", "project");
     addDependency(project, "commons-logging", "commons-logging", "1.1.1");
 
     updateLocalIndex(ui);
     //TODO: There is a bug, you need to re-index twice to get new items to show up. Remove this when new indexer put into m2e.
-   // updateLocalIndex(ui);
+    updateLocalIndex(ui);
 
-    showView("org.maven.ide.eclipse.views.MavenIndexesView");
+    indexView = showView("org.maven.ide.eclipse.views.MavenIndexesView");
 
     // Find commons-logging 1.1.1 and materialize it.
     ui.click(new TreeItemLocator("local : .*repository/commons-logging/commons-logging - jar", new ViewLocator(
@@ -142,6 +143,8 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
     ui.click(new ButtonLocator("&Finish"));
     ui.wait(new ShellDisposedCondition("Import Maven Projects"));
 
+    hideView(indexView);
+    
     waitForAllBuildsToComplete();
 
     Thread.sleep(5000);
