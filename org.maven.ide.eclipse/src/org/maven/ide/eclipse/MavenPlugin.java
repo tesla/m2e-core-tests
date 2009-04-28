@@ -101,6 +101,8 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   private static final String PREFS_ARCHETYPES = "archetypesInfo.xml";
   
   private static final String PREFS_INDEXES_READ = "indexesHaveBeenRead";
+  
+  private static final String PREFS_NO_REBUILD_ON_START = "forceRebuildOnUpgrade";
 
   // The shared instance
   private static MavenPlugin plugin;
@@ -189,8 +191,13 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
         null, null, IndexInfo.Type.WORKSPACE, false), false);
 
     try {
-      this.indexManager.addIndex(new IndexInfo(IndexManager.LOCAL_INDEX, //
-          embedderManager.getLocalRepositoryDir(), null, IndexInfo.Type.LOCAL, false), false);
+      IndexInfo local = new IndexInfo(IndexManager.LOCAL_INDEX, //
+          embedderManager.getLocalRepositoryDir(), null, IndexInfo.Type.LOCAL, false);
+      this.indexManager.addIndex(local, false);
+      boolean forceUpdate = !this.getPreferenceStore().getBoolean(PREFS_NO_REBUILD_ON_START);
+      if(forceUpdate && !local.isNew()){
+        indexManager.scheduleIndexUpdate(local.getIndexName(), true, 4000L);
+      }
     } catch(CoreException ex) {
       MavenLogger.log(ex);
     }
@@ -233,14 +240,18 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   }
 
   private void initializeIndexes(Set<IndexInfo> indexes, boolean updateIndexesOnStartup) {
+    boolean forceUpdate = !this.getPreferenceStore().getBoolean(PREFS_NO_REBUILD_ON_START);
+    if(forceUpdate){
+      this.getPreferenceStore().setValue(PREFS_NO_REBUILD_ON_START, true);
+    }
     for(IndexInfo indexInfo : indexes) {
       if(IndexInfo.Type.LOCAL.equals(indexInfo.getType())) {
         if(indexInfo.isNew()) {
-          indexManager.scheduleIndexUpdate(indexInfo.getIndexName(), false, 4000L);
+            indexManager.scheduleIndexUpdate(indexInfo.getIndexName(), false, 4000L);
         }
       } else if(IndexInfo.Type.REMOTE.equals(indexInfo.getType())) {
-        if(indexInfo.isNew() || updateIndexesOnStartup) {
-          indexManager.scheduleIndexUpdate(indexInfo.getIndexName(), false, 4000L);
+        if(indexInfo.isNew() || updateIndexesOnStartup || forceUpdate) {
+          indexManager.scheduleIndexUpdate(indexInfo.getIndexName(), forceUpdate, 4000L);
         }
       }
     }
@@ -321,6 +332,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   private Set<IndexInfo> loadIndexConfiguration(File configFile) throws IllegalStateException {
     LinkedHashSet<IndexInfo> indexes = new LinkedHashSet<IndexInfo>();
     indexes.addAll(ExtensionReader.readIndexInfoConfig(configFile));
+
     boolean indexesRead = this.getPreferenceStore().getBoolean(PREFS_INDEXES_READ);
     if(!indexesRead){
       IndexInfo info = createCentralIndex();
