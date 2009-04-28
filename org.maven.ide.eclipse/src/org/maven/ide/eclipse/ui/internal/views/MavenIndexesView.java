@@ -463,15 +463,32 @@ public class MavenIndexesView extends ViewPart {
         }
         return list;
       }
+      
+      protected boolean hasLocalIndexes(List elements){
+        if(elements == null || elements.size() == 0){
+          return false;
+        }
+        for(int i=0;i<elements.size();i++){
+          Object elem = elements.get(i);
+          if(elem instanceof IndexInfo){
+            if(IndexInfo.Type.LOCAL.equals(((IndexInfo)elem).getType()) ||
+                IndexInfo.Type.WORKSPACE.equals(((IndexInfo)elem).getType())){
+              return true;
+            }
+          }
+        }
+        return false;
+      }
 
       protected boolean updateSelection(IStructuredSelection selection) {
         List<IndexInfo> elements = elementsToRemove(selection.toList());
+        boolean hasLocalIndexes = hasLocalIndexes(selection.toList());
         if(elements != null && elements.size() > 1){
           setText("Remove Indexes");
         } else {
           setText("Remove Index");
         }
-        return elements != null && elements.size() > 0;
+        return elements != null && elements.size() > 0 && !hasLocalIndexes;
       }
     };
     
