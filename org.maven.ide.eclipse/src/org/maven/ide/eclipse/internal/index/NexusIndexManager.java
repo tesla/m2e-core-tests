@@ -386,7 +386,7 @@ public class NexusIndexManager extends IndexManager {
     String packaging = artifactInfo.packaging;
     String fname = artifactInfo.fname;
     if(fname == null) {
-      fname = artifactId + '-' + version + (classifier != null ? '-' + classifier : "") + '.' + packaging;
+      fname = artifactId + '-' + version + (classifier != null ? '-' + classifier : "") + (packaging != null ? ('.' + packaging) : "");
     }
 
     long size = artifactInfo.size;
