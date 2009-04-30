@@ -76,13 +76,6 @@
             id="org.maven.ide.eclipse.quickAssistProcessor"/>
    </extension>
 
-   <extension point="org.eclipse.ui.perspectiveExtensions">
-      <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaPerspective">
-         <newWizardShortcut id="org.maven.ide.eclipse.wizards.Maven2ProjectWizard"/>
-         <view id="org.maven.ide.eclipse.views.MavenIndexesView" relationship="fast"/>
-      </perspectiveExtension>
-   </extension>
-   
    <extension point="org.eclipse.jdt.core.compilationParticipant">
       <compilationParticipant
             id="org.maven.ide.eclipse.compilationParticipant"

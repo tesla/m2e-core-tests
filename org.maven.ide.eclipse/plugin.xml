@@ -448,18 +448,11 @@
             class="org.maven.ide.eclipse.ui.internal.views.MavenIndexesView"
             icon="icons/maven_indexes.gif"
             name="Maven Indexes"/>
+      <stickyView id="org.maven.ide.eclipse.views.MavenIndexesView"
+            location="BOTTOM"/>
    </extension>
 
-   <extension point="org.eclipse.ui.perspectiveExtensions">
-      <perspectiveExtension targetID="org.eclipse.debug.ui.DebugPerspective">
-         <newWizardShortcut id="org.maven.ide.eclipse.wizards.Maven2ProjectWizard"/>
-         <view id="org.maven.ide.eclipse.views.MavenIndexesView" relationship="fast"/>
-      </perspectiveExtension>
-      <perspectiveExtension targetID="org.eclipse.ui.resourcePerspective">
-         <newWizardShortcut id="org.maven.ide.eclipse.wizards.Maven2ProjectWizard"/>
-         <view id="org.maven.ide.eclipse.views.MavenIndexesView" relationship="fast"/>
-      </perspectiveExtension>
-   </extension>
+
 
    <extension point="org.eclipse.ui.propertyPages">
       <page id="org.maven.ide.eclipse.MavenProjectPreferencePage"
