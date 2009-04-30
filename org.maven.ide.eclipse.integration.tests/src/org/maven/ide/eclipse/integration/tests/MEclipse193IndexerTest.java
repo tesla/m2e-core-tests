@@ -27,6 +27,7 @@ import com.windowtester.runtime.swt.locator.LabeledLocator;
 import com.windowtester.runtime.swt.locator.MenuItemLocator;
 import com.windowtester.runtime.swt.locator.NamedWidgetLocator;
 import com.windowtester.runtime.swt.locator.TreeItemLocator;
+import com.windowtester.runtime.swt.locator.eclipse.ContributedToolItemLocator;
 import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
 
 
@@ -205,9 +206,7 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
 
     getUI().wait(new SWTIdleCondition());
 
-    getUI().contextClick(
-        new TreeItemLocator("workspace", new ViewLocator("org.maven.ide.eclipse.views.MavenIndexesView")),
-        "Add Index");
+    getUI().click(new ContributedToolItemLocator("org.maven.ide.eclipse.addIndexAction"));
 
     getUI().wait(new ShellShowingCondition("Add Repository Index"));
     getUI().click(new NamedWidgetLocator("repositoryUrlCombo"));
