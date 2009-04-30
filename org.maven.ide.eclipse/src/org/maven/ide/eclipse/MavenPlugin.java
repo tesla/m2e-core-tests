@@ -18,6 +18,7 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -331,14 +332,18 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   
   private Set<IndexInfo> loadIndexConfiguration(File configFile) throws IllegalStateException {
     LinkedHashSet<IndexInfo> indexes = new LinkedHashSet<IndexInfo>();
+    
     indexes.addAll(ExtensionReader.readIndexInfoConfig(configFile));
-
+    Map<String, IndexInfo> extensionIndexes = ExtensionReader.readIndexInfoExtensions();
     boolean indexesRead = this.getPreferenceStore().getBoolean(PREFS_INDEXES_READ);
-    if(!indexesRead){
+    if(!indexesRead && extensionIndexes.size() == 0){
       IndexInfo info = createCentralIndex();
       indexes.add(info);
       this.getPreferenceStore().setValue(PREFS_INDEXES_READ, true);
     } 
+    if(extensionIndexes.size() > 0){
+      indexes.addAll(extensionIndexes.values());
+    }
     for(IndexInfo indexInfo : indexes) {
       this.indexManager.addIndex(indexInfo, false);
     }
