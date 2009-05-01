@@ -34,9 +34,9 @@ public class MNGEclipse1326HideSubprojectsTest extends UIIntegrationTestCase {
 
     IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("security-realms");
 
-    assertTrue(isHidden(project.getFolder("security-url-realm")));
-    assertTrue(isHidden(project.getFolder("plexus-delegating-realm")));
-    assertTrue(isHidden(project.getFolder("security-xml-realm")));
+    assertEquals(hide, isHidden(project.getFolder("security-url-realm")));
+    assertEquals(hide, isHidden(project.getFolder("plexus-delegating-realm")));
+    assertEquals(hide, isHidden(project.getFolder("security-xml-realm")));
 
     project = ResourcesPlugin.getWorkspace().getRoot().getProject("security-aggregator");
 
