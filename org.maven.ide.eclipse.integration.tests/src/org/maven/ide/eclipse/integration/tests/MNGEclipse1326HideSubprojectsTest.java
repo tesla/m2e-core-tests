@@ -15,6 +15,7 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.maven.ide.eclipse.MavenPlugin;
 
 
 /**
@@ -24,7 +25,11 @@ public class MNGEclipse1326HideSubprojectsTest extends UIIntegrationTestCase {
 
   private File tempDir;
 
-  public void testHideSubprojectsOnImport() throws Exception {
+  private void importAsHidden(boolean hide) throws Exception {
+    if(isEclipseVersion(3, 3)) {
+      return;
+    }
+    MavenPlugin.getDefault().getMavenRuntimeManager().setHideFoldersOfNestedProjects(hide);
     tempDir = importMavenProjects("projects/plexus-security-snapshot.zip");
 
     IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("security-realms");
@@ -36,24 +41,28 @@ public class MNGEclipse1326HideSubprojectsTest extends UIIntegrationTestCase {
     project = ResourcesPlugin.getWorkspace().getRoot().getProject("security-aggregator");
 
     assertTrue(project.exists());
-    
-    String[] children = {"security-manager", "security-model", "security-model-xml",
-        "security-parent", "security-realms", "security-rest-api", "security-system"};
-    
+
+    String[] children = {"security-manager", "security-model", "security-model-xml", "security-parent",
+        "security-realms", "security-rest-api", "security-system"};
+
     for(int i = 0; i < children.length; i++ ) {
       IFolder folder = project.getFolder(children[i]);
       assertNotNull("folder exists: " + children[i], folder);
-      assertTrue("Child project is hidden: " + children[i], isHidden(folder));
+      assertEquals("Child project : " + children[i], hide, isHidden(folder));
     }
+  }
 
+  public void testHideSubprojectsOnImport() throws Exception {
+    importAsHidden(true);
+  }
+
+  public void testDontHideSubprojectsOnImport() throws Exception {
+    importAsHidden(false);
   }
 
   private boolean isHidden(IResource resource) throws Exception {
     if(!resource.exists()) {
       throw new Exception("Coudn't find resource: " + resource.toString());
-    }
-    if(isEclipseVersion(3, 3)) {
-      return true;
     }
     Method m = IResource.class.getMethod("isHidden", new Class[] {});
 
@@ -68,6 +77,7 @@ public class MNGEclipse1326HideSubprojectsTest extends UIIntegrationTestCase {
       deleteDirectory(tempDir);
       tempDir = null;
     }
+    MavenPlugin.getDefault().getMavenRuntimeManager().setHideFoldersOfNestedProjects(false);
     super.tearDown();
 
   }
