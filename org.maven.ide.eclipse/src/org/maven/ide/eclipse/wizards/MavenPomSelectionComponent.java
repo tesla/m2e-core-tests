@@ -42,6 +42,8 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
+import org.apache.lucene.search.BooleanQuery;
+
 import org.maven.ide.eclipse.MavenImages;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
@@ -259,6 +261,8 @@ public class MavenPomSelectionComponent extends Composite {
           } else {
             setResult(IStatus.OK, "Results for '" + activeQuery + "' (" + res.size() + ")", res);
           }
+        } catch(BooleanQuery.TooManyClauses ex){
+          setResult(IStatus.ERROR, "Too many results to display. Enter a more specific search term.", Collections.<String, IndexedArtifact>emptyMap());
         } catch(final RuntimeException ex) {
           setResult(IStatus.ERROR, "Search error: " + ex.toString(), Collections.<String, IndexedArtifact>emptyMap());
         } catch(final Exception ex) {
