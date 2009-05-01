@@ -105,6 +105,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   
   private static final String PREFS_NO_REBUILD_ON_START = "forceRebuildOnUpgrade";
 
+  private static final String CENTRAL_URL = "http://repo1.maven.org/maven2/";
   // The shared instance
   private static MavenPlugin plugin;
 
@@ -289,7 +290,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   
   private IndexInfo createCentralIndex() throws IllegalStateException {
     String indexId = "central";
-    String repositoryUrl = "http://repo1.maven.org/maven2/";
+    String repositoryUrl = CENTRAL_URL;
     IndexInfo indexInfo = new IndexInfo(indexId, null, repositoryUrl, IndexInfo.Type.REMOTE, false);
     indexInfo.setIndexUpdateUrl("");
     // Hook for integration tests. If plug-in contains a pre-processed central index then install it. 
@@ -330,19 +331,55 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     job.schedule();
   }
   
+  /**
+   * Figure out if the central plugin should be created automatically
+   * @param extensionIndexes
+   * @return
+   */
+  private boolean shouldCreateCentral(Map<String, IndexInfo> extensionIndexes, boolean firstTime){
+    
+    //special case: if the user has the maven central plugin and *only* the
+    //central plugin installed, then go ahead and create the central plugin (if its the first time in workspace)
+    //when we read the plugins from the extension points later, we deliberately
+    //ignore the maven central extension point, so it won't be taken care of there
+    if(extensionIndexes.size() == 1){
+      for(IndexInfo info: extensionIndexes.values()){
+        if(CENTRAL_URL.equals(info.getRepositoryUrl())){
+          return firstTime;
+        }
+      }
+    }
+    //we will create the central index if these are true: 1) its the first time
+    //the workspace is used, there are no extension points defined (by user plugins)
+    return firstTime && extensionIndexes.size() == 0;
+  }
+  
   private Set<IndexInfo> loadIndexConfiguration(File configFile) throws IllegalStateException {
     LinkedHashSet<IndexInfo> indexes = new LinkedHashSet<IndexInfo>();
-    
     indexes.addAll(ExtensionReader.readIndexInfoConfig(configFile));
     Map<String, IndexInfo> extensionIndexes = ExtensionReader.readIndexInfoExtensions();
-    boolean indexesRead = this.getPreferenceStore().getBoolean(PREFS_INDEXES_READ);
-    if(!indexesRead && extensionIndexes.size() == 0){
+    
+    //check if this is the first time in this workspace
+    boolean firstTime = !this.getPreferenceStore().getBoolean(PREFS_INDEXES_READ);
+    if(firstTime){
+      this.getPreferenceStore().setValue(PREFS_INDEXES_READ, true);
+    }
+    //add central if this is first time through and there are no user defined
+    //extension points
+    if(shouldCreateCentral(extensionIndexes, firstTime)){
+      //this should go away when we get the real central-setup from the settings
       IndexInfo info = createCentralIndex();
       indexes.add(info);
-      this.getPreferenceStore().setValue(PREFS_INDEXES_READ, true);
-    } 
+    }  
+    //now add all the extension point indexes *except* the central one (if its still around)
     if(extensionIndexes.size() > 0){
-      indexes.addAll(extensionIndexes.values());
+      for(IndexInfo xInfo : extensionIndexes.values()){
+        //guard against people who have old maven central plugin to
+        //make sure they don't get double indexes
+        if(!CENTRAL_URL.equals(xInfo.getRepositoryUrl())){
+          indexes.add(xInfo);
+        }
+      }
     }
     for(IndexInfo indexInfo : indexes) {
       this.indexManager.addIndex(indexInfo, false);
