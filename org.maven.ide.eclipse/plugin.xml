@@ -448,8 +448,6 @@
             class="org.maven.ide.eclipse.ui.internal.views.MavenIndexesView"
             icon="icons/maven_indexes.gif"
             name="Maven Indexes"/>
-      <stickyView id="org.maven.ide.eclipse.views.MavenIndexesView"
-            location="BOTTOM"/>
    </extension>
 
 
