@@ -59,6 +59,7 @@ import org.apache.maven.model.Model;
 import org.apache.maven.project.DuplicateProjectException;
 import org.apache.maven.project.MavenProject;
 
+import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
@@ -188,6 +189,9 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
   
   private void hideNestedProjectsFromParents(List<IProject> projects) {
     
+    if (!MavenPlugin.getDefault().getMavenRuntimeManager().isHideFoldersOfNestedProjects()) {
+      return;
+    }
     // Prevent child project folders from showing up in parent project folders.
     
     Bundle bundle = ResourcesPlugin.getPlugin().getBundle();

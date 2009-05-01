@@ -57,6 +57,8 @@ public class MavenPreferenceInitializer extends AbstractPreferenceInitializer {
 
     store.setDefault(MavenPreferenceConstants.P_UPDATE_INDEXES, true);
     store.setDefault(MavenPreferenceConstants.P_UPDATE_PROJECTS, false);
+    
+    store.setDefault(MavenPreferenceConstants.P_HIDE_FOLDERS_OF_NESTED_PROJECTS, false);
   }
 
 }

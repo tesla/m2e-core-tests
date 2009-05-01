@@ -252,4 +252,12 @@ public class MavenRuntimeManager {
   public String getJiraPassword() {
     return preferenceStore.getString(MavenPreferenceConstants.P_JIRA_PASSWORD);
   }
+  
+  public boolean isHideFoldersOfNestedProjects() {
+    return preferenceStore.getBoolean(MavenPreferenceConstants.P_HIDE_FOLDERS_OF_NESTED_PROJECTS);
+  }
+  
+  public void setHideFoldersOfNestedProjects(boolean hide) {
+    preferenceStore.setValue(MavenPreferenceConstants.P_HIDE_FOLDERS_OF_NESTED_PROJECTS, hide);
+  }
 }

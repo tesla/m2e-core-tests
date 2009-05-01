@@ -80,4 +80,7 @@ public interface MavenPreferenceConstants {
   /** String */
   public static final String P_JIRA_PASSWORD = PREFIX + "jiraPassword";
   
+  /** boolean */
+  public static final String P_HIDE_FOLDERS_OF_NESTED_PROJECTS = PREFIX + "hideFoldersOfNestedProjects";
+  
 }
