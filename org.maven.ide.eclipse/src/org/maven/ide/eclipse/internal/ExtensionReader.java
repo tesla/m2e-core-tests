@@ -123,6 +123,10 @@ public class ExtensionReader {
       IExtension[] indexesExtensions = indexesExtensionPoint.getExtensions();
       for(IExtension extension : indexesExtensions) {
         IContributor contributor = extension.getContributor();
+        // central is special cased in MavenPlugin for time being, ignore old central plugin
+        if ("org.maven.ide.eclipse.central".equals(contributor.getName())) {
+          continue;
+        }
         IConfigurationElement[] elements = extension.getConfigurationElements();
         for(IConfigurationElement element : elements) {
           if(element.getName().equals(ELEMENT_INDEX)) {
