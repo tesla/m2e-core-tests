@@ -741,7 +741,10 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       try {
         monitor.setTaskName("Reading project");
         MavenProject mavenProject = readMavenProject(force, monitor);
-
+        if(mavenProject == null){
+          MavenLogger.log("Unable to read maven project. Dependencies not updated.", null);
+          return null;
+        }
         MavenProjectManager mavenProjectManager = plugin.getMavenProjectManager();
         MavenEmbedder embedder = mavenProjectManager.createWorkspaceEmbedder();
         try {

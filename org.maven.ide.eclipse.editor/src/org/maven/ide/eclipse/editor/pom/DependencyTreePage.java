@@ -196,7 +196,9 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
       protected IStatus run(IProgressMonitor monitor) {
         try {
           final DependencyNode dependencyNode = pomEditor.readDependencies(force, monitor, currentScope);
-
+          if(dependencyNode == null){
+            return Status.CANCEL_STATUS;
+          }
           dependencyNode.accept(new DependencyNodeVisitor() {
             public boolean visit(DependencyNode node) {
               dependencyNodes.add(node);
