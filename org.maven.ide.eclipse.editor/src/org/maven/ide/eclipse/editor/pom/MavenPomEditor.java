@@ -475,14 +475,28 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       super(name);
     }
     
+    private void showEffectivePomError(final String name){
+      Display.getDefault().asyncExec(new Runnable(){
+        public void run(){
+          String error = "Unable to load Effective POM. See console for errors.";
+          IEditorInput editorInput = new OpenPomAction.MavenEditorStorageInput(name, name, null, error.getBytes());
+          effectivePomSourcePage.setInput(editorInput);
+        }
+      });
+    }
     @Override
     protected IStatus run(IProgressMonitor monitor) {
       try{
         StringWriter sw = new StringWriter();
+        final String name = getPartName() + " [effective]";
         MavenProject mavenProject = SelectionUtil.getMavenProject(getEditorInput());
+        if(mavenProject == null){
+          showEffectivePomError(name);
+          return Status.CANCEL_STATUS;
+        }
         new MavenXpp3Writer().write(sw, mavenProject.getModel());
         final String content = sw.toString();
-        final String name = getPartName() + " [effective]";
+
         Display.getDefault().asyncExec(new Runnable(){
           public void run() {
             try{
