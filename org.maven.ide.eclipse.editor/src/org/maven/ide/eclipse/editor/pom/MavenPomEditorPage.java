@@ -129,39 +129,6 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
       }
     });
     
-    toolBarManager.add(new Action("Show Effective POM", MavenEditorImages.EFFECTIVE_POM) {
-      public void run() {
-        new Job("Opening Effective POM") {
-          protected IStatus run(IProgressMonitor monitor) {
-            try {
-              StringWriter sw = new StringWriter();
-              
-              MavenProject mavenProject = SelectionUtil.getMavenProject(pomEditor.getEditorInput());
-              new MavenXpp3Writer().write(sw, mavenProject.getModel());
-              
-              String effectivePom = sw.toString();
-              
-              String name = pomEditor.getPartName() + " [effective]";
-              IEditorInput editorInput = new OpenPomAction.MavenEditorStorageInput(name, name, null, //
-                  effectivePom.getBytes("UTF-8"));
-              OpenPomAction.openEditor(editorInput, "pom.xml");
-              
-            } catch(CoreException ex) {
-              MavenLogger.log(ex);
-            } catch(IOException ex) {
-              MavenLogger.log("Unable to create Effective POM", ex);
-            }
-            return Status.OK_STATUS;
-          }
-        }.schedule();
-      }
-
-      @Override
-      public String getId() {
-        return "org.maven.ide.ecillpse.editor.showEffectivePOMAction";
-      }
-      
-    });
     
     toolBarManager.add(new Action("Refresh", MavenEditorImages.REFRESH) {
       public void run() {

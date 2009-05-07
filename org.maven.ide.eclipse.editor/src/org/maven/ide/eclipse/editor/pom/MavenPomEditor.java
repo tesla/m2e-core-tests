@@ -13,6 +13,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EventObject;
@@ -33,6 +34,7 @@ import org.apache.maven.artifact.resolver.metadata.MetadataResolver;
 import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.embedder.MavenEmbedderException;
 import org.apache.maven.extension.ExtensionScanningException;
+import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.reactor.MavenExecutionException;
@@ -64,6 +66,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.command.BasicCommandStack;
 import org.eclipse.emf.common.command.CommandStackListener;
 import org.eclipse.emf.common.notify.Adapter;
@@ -83,6 +86,8 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextListener;
 import org.eclipse.jface.text.TextEvent;
 import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.search.ui.text.ISearchEditorAccess;
 import org.eclipse.search.ui.text.Match;
 import org.eclipse.swt.widgets.Display;
@@ -119,6 +124,7 @@ import org.maven.ide.components.pom.Model;
 import org.maven.ide.components.pom.util.PomResourceFactoryImpl;
 import org.maven.ide.components.pom.util.PomResourceImpl;
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.actions.SelectionUtil;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
@@ -145,6 +151,8 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   private static final String EXTENSION_FACTORIES = MavenEditorPlugin.PLUGIN_ID + ".pageFactories";
 
   private static final String ELEMENT_PAGE = "factory";
+  
+  private static final String EFFECTIVE_POM = "Effective POM";
 
   OverviewPage overviewPage;
 
@@ -167,7 +175,9 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   DependencyGraphPage graphPage;
 
   StructuredTextEditor sourcePage;
-
+  
+  StructuredTextEditor effectivePomSourcePage;
+  
   List<MavenPomEditorPage> pages = new ArrayList<MavenPomEditorPage>();
 
   private Model projectDocument;
@@ -330,9 +340,18 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     for(MavenPomEditorPage page : pages) {
       page.reload();
     }
+    if(isEffectiveActive()){
+      loadEffectivePOM();
+    }
     flushCommandStack();
   }
 
+  private boolean isEffectiveActive(){
+    int active = getActivePage();
+    String name = getPageText(active);
+    return EFFECTIVE_POM.equals(name);
+  }
+  
   void flushCommandStack() {
     dirty = false;
     if (sseCommandStack != null)
@@ -345,31 +364,49 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       });
   }
 
+  /**
+   * Show or hide the advanced pages within the editor
+   */
+  protected void showAdvancedPages(){
+    boolean showAdvancedTabs = MavenPlugin.getDefault().getPreferenceStore().getBoolean(PomEditorPreferencePage.P_SHOW_ADVANCED_TABS);
+    if(showAdvancedTabs && repositoriesPage == null){
+      repositoriesPage = new RepositoriesPage(this);
+      addPomPage(repositoriesPage);
+      buildPage = new BuildPage(this);
+      addPomPage(buildPage);
+      profilesPage = new ProfilesPage(this);
+      addPomPage(profilesPage);
+      teamPage = new TeamPage(this);
+      addPomPage(teamPage);
+    } else {
+      if(repositoriesPage == null){
+        return;
+      }
+      removePomPage(repositoriesPage);
+      repositoriesPage = null;
+      removePomPage(buildPage);
+      buildPage = null;
+      removePomPage(profilesPage);
+      profilesPage = null;
+      removePomPage(teamPage);
+      teamPage = null;
+    }
+  }
+  
   protected void addPages() {
+    
     overviewPage = new OverviewPage(this);
     addPomPage(overviewPage);
 
     dependenciesPage = new DependenciesPage(this);
     addPomPage(dependenciesPage);
 
-    repositoriesPage = new RepositoriesPage(this);
-    addPomPage(repositoriesPage);
-
-    buildPage = new BuildPage(this);
-    addPomPage(buildPage);
-
     pluginsPage = new PluginsPage(this);
     addPomPage(pluginsPage);
 
     reportingPage = new ReportingPage(this);
     addPomPage(reportingPage);
-
-    profilesPage = new ProfilesPage(this);
-    addPomPage(profilesPage);
-
-    teamPage = new TeamPage(this);
-    addPomPage(teamPage);
-
+    
     dependencyTreePage = new DependencyTreePage(this);
     addPomPage(dependencyTreePage);
 
@@ -377,6 +414,8 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     addPomPage(graphPage);
 
     addSourcePage();
+    
+    showAdvancedPages();
     
     addEditorPageExtensions();
     selectActivePage();
@@ -390,8 +429,12 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   }
   
   protected void pageChange(int newPageIndex) {
+    String name = getPageText(newPageIndex);
+    if(EFFECTIVE_POM.equals(name)){
+      loadEffectivePOM();
+    }
     super.pageChange(newPageIndex);
-
+    
     // a workaround for editor pages not returned 
     IEditorActionBarContributor contributor = getEditorSite().getActionBarContributor();
     if(contributor != null && contributor instanceof MultiPageEditorActionBarContributor) {
@@ -421,6 +464,61 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     }
   }
 
+  /**
+   * Load the effective POM in a job and then update the effective pom page when its done
+   * @author dyocum
+   *
+   */
+  class LoadEffectivePomJob extends Job{
+
+    public LoadEffectivePomJob(String name) {
+      super(name);
+    }
+    
+    @Override
+    protected IStatus run(IProgressMonitor monitor) {
+      try{
+        StringWriter sw = new StringWriter();
+        MavenProject mavenProject = SelectionUtil.getMavenProject(getEditorInput());
+        new MavenXpp3Writer().write(sw, mavenProject.getModel());
+        final String content = sw.toString();
+        final String name = getPartName() + " [effective]";
+        Display.getDefault().asyncExec(new Runnable(){
+          public void run() {
+            try{
+              IEditorInput editorInput = new OpenPomAction.MavenEditorStorageInput(name, name, null, content.getBytes("UTF-8"));
+              effectivePomSourcePage.setInput(editorInput);
+              effectivePomSourcePage.update();
+            }catch(IOException ie){
+              MavenLogger.log(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, "Failed to load Effective POM", ie));
+            }
+          }
+        });
+        return Status.OK_STATUS;
+      } catch(CoreException ce){
+        return new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, "Failed to load Effective POM", ce);
+      } catch(IOException ie){
+        return new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, "Failed to load Effective POM", ie);
+      } 
+    }
+  }
+  
+  /**
+   * Load the effective POM. Should only happen when tab is brought to front or tab
+   * is in front when a reload happens.
+   */
+  private void loadEffectivePOM(){
+    //put a msg in the editor saying that the effective pom is loading, in case this is a long running job
+    String content = "Loading Effective POM...";
+    String name = getPartName() + " [effective]";
+    IEditorInput editorInput = new OpenPomAction.MavenEditorStorageInput(name, name, null, content.getBytes());
+    effectivePomSourcePage.setInput(editorInput);
+    
+    //then start the load
+    LoadEffectivePomJob job = new LoadEffectivePomJob("Loading effective POM...");
+    job.schedule();
+  }
+  
   private void addSourcePage() {
     sourcePage = new StructuredTextEditor() {
       public void doSave(IProgressMonitor monitor) {
@@ -444,8 +542,13 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       }
     };
     sourcePage.setEditorPart(this);
-
+    //the page for showing the effective POM
+    effectivePomSourcePage = new StructuredTextEditor();
+    effectivePomSourcePage.setEditorPart(this);
     try {
+      int dex = addPage(effectivePomSourcePage, getEditorInput());
+      setPageText(dex, EFFECTIVE_POM);
+      
       sourcePageIndex = addPage(sourcePage, getEditorInput());
       setPageText(sourcePageIndex, "pom.xml");
       sourcePage.update();
@@ -507,6 +610,16 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     return !(getEditorInput() instanceof IFileEditorInput);
   }
 
+  private void removePomPage(IFormPage page){
+    if(page == null){
+      return;
+    }
+    if(page instanceof IPomFileChangedListener){
+      fileChangeListeners.remove(page);
+    }
+    super.removePage(page.getIndex());
+  }
+  
   private int addPomPage(IFormPage page) {
     try {
       if(page instanceof MavenPomEditorPage) {
@@ -903,7 +1016,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   /**
    * Adapted from <code>org.eclipse.ui.texteditor.AbstractTextEditor.ActivationListener</code>
    */
-  class MavenPomActivationListener implements IPartListener, IWindowListener {
+  class MavenPomActivationListener implements IPartListener, IWindowListener, IPropertyChangeListener {
 
     private IWorkbenchPart activePart;
 
@@ -915,11 +1028,13 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       this.partService = partService;
       this.partService.addPartListener(this);
       PlatformUI.getWorkbench().addWindowListener(this);
+      MavenPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
     }
 
     public void dispose() {
       partService.removePartListener(this);
       PlatformUI.getWorkbench().removeWindowListener(this);
+      MavenEditorPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
       partService = null;
     }
 
@@ -1011,6 +1126,11 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       }
     }
 
+    public void propertyChange(PropertyChangeEvent event) {
+      if(event.getProperty().equals(PomEditorPreferencePage.P_SHOW_ADVANCED_TABS)){
+        showAdvancedPages();
+      }
+    }
   }
 
   public StructuredTextEditor getSourcePage() {
@@ -1038,5 +1158,6 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   public IFile getPomFile() {
     return pomFile;
   }
+
   
 }
