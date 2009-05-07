@@ -166,7 +166,14 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
     }
     return true;
   }
-
+  public void setDirty(boolean dirty){
+    this.dirty = dirty;
+  }
+  
+  public boolean isDirty(){
+    return this.dirty;
+  }
+  
   protected boolean validateMavenInstall(String dir){
     if(dir == null || dir.length() == 0){
       return false;
@@ -269,6 +276,7 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
             runtimes.add(runtime);
             runtimesViewer.refresh();
             runtimesViewer.setSelection(new StructuredSelection(runtime));
+            setDirty(true);
           }
         }
       }
@@ -294,6 +302,7 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
           } else {
             runtimes.set(runtimes.indexOf(runtime), newRuntime);
             runtimesViewer.refresh();
+            setDirty(true);
           }
         }
       }
@@ -313,6 +322,7 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
           defaultRuntime = runtimeManager.getRuntime(MavenRuntimeManager.EMBEDDED);
           runtimesViewer.setChecked(defaultRuntime, true);
         }
+        setDirty(true);
       }
     });
 
@@ -340,7 +350,7 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
           globalSettingsText.setText(globalSettings == null ? "" : globalSettings);
         }
         initLocalRepository();
-        dirty = true;
+        setDirty(true);
       }
     });
 
@@ -401,17 +411,6 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
       }
     });
 
-//    Button userSettingsOpenButton = new Button(composite, SWT.NONE);
-//    GridData gd_userSettingsOpenButton = new GridData(SWT.FILL, SWT.CENTER, false, false);
-//    gd_userSettingsOpenButton.verticalIndent = 5;
-//    userSettingsOpenButton.setLayoutData(gd_userSettingsOpenButton);
-//    userSettingsOpenButton.setText("&Open...");
-//    userSettingsOpenButton.addSelectionListener(new SelectionAdapter() {
-//      public void widgetSelected(SelectionEvent e) {
-//        openEditor(getUserSettings());
-//      }
-//    });
-
     Link globalSettingsLink = new Link(composite, SWT.NONE);
     globalSettingsLink.setData("name", "globalSettingsLink");
     globalSettingsLink.setText("<a href=\"#\">Global Settings</a>:");
@@ -432,43 +431,6 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
     globalSettingsText = new Text(composite, SWT.READ_ONLY | SWT.BORDER);
     globalSettingsText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
 
-//    globalSettingsBrowseButton = new Button(composite, SWT.NONE);
-//    globalSettingsBrowseButton.setText("&Browse...");
-//    GridData gd_localSettingsBrowseButton = new GridData();
-//    gd_localSettingsBrowseButton.verticalIndent = 5;
-//    globalSettingsBrowseButton.setLayoutData(gd_localSettingsBrowseButton);
-//    globalSettingsBrowseButton.addSelectionListener(new SelectionAdapter() {
-//      public void widgetSelected(SelectionEvent e) {
-//        FileDialog dialog = new FileDialog(getShell(), SWT.OPEN);
-//        if(globalSettingsText.getText().length()>0) {
-//          dialog.setFileName(globalSettingsText.getText());
-//        }
-//        String file = dialog.open();
-//        if(file != null) {
-//          file = file.trim();
-//          if(file.length() > 0) {
-//            globalSettingsText.setText(file);
-//            initLocalRepository();
-//            checkSettings();
-//          }
-//        }
-//      }
-//    });
-
-//    globalSettingsOpenButton = new Button(composite, SWT.NONE);
-//    globalSettingsOpenButton.setText("Ope&n...");
-//    globalSettingsOpenButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-//    globalSettingsOpenButton.addSelectionListener(new SelectionAdapter() {
-//      public void widgetSelected(SelectionEvent e) {
-//        String globalSettings = getGlobalSettings();
-//        if(globalSettings.length()==0) {
-//          globalSettings = defaultRuntime.getSettings();
-//        }
-//        if(globalSettings!=null && globalSettings.length()>0) {
-//          openEditor(globalSettings);
-//        }
-//      }
-//    });
 
     Label localRepositoryLabel = new Label(composite, SWT.NONE);
     localRepositoryLabel.setText("Local Repository:");
@@ -530,14 +492,14 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
       public void modifyText(ModifyEvent modifyevent) {
         initLocalRepository();
         checkSettings();
-        dirty = true;
+        setDirty(true);
       }
     });
     userSettingsText.addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent modifyevent) {
         initLocalRepository();
         checkSettings();
-        dirty = true;
+        setDirty(true);
       }
     });
 
@@ -657,6 +619,8 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
     }
   }
 
+
+  
   @SuppressWarnings("unchecked")
   void openEditor(final String fileName) {
     // XXX create new settings.xml if does not exist
