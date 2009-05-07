@@ -80,7 +80,7 @@ public class MavenRuntimeManager {
 
     runtimes.add(embeddedRuntime);
 
-    if(workspaceRuntime.isAvailable()) {
+    if(workspaceRuntime != null && workspaceRuntime.isAvailable()) {
       runtimes.add(workspaceRuntime);
     }
     
