@@ -83,4 +83,7 @@ public interface MavenPreferenceConstants {
   /** boolean */
   public static final String P_HIDE_FOLDERS_OF_NESTED_PROJECTS = PREFIX + "hideFoldersOfNestedProjects";
   
+  public static final String P_SHOW_CONSOLE_ON_ERR = PREFIX+"showConsoleOnErr";
+  
+  public static final String P_SHOW_CONSOLE_ON_OUTPUT = PREFIX+"showConsoleOnOutput"; 
 }

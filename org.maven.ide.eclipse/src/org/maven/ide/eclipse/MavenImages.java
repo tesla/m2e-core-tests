@@ -92,6 +92,9 @@ public class MavenImages {
   
   public static final ImageDescriptor IMPORT_PROJECT = create("import_m2_project.gif");
   
+  public static final ImageDescriptor SHOW_CONSOLE_ERR = create("stderr.gif");
+  
+  public static final ImageDescriptor SHOW_CONSOLE_OUT = create("stdout.gif");
   
   private static ImageDescriptor create(String key) {
     try {

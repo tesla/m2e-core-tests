@@ -73,27 +73,9 @@ public class MavenPreferencePage extends FieldEditorPreferencePage implements IW
     
     addField(new BooleanFieldEditor(MavenPreferenceConstants.P_HIDE_FOLDERS_OF_NESTED_PROJECTS, //
         "Hide folders of physically nested modules (experimental)", getFieldEditorParent()));
-    /*
-     * public static final String CHECKSUM_POLICY_FAIL = "fail"; 
-     * public static final String CHECKSUM_POLICY_WARN = "warn"; 
-     * public static final String CHECKSUM_POLICY_IGNORE = "ignore";
-     */
-
-    addSeparator();
-
-//    String[] goals = new String[] { //
-//        "generate-sources", //
-//        "process-sources", //
-//        "generate-resources", //
-//        "process-resources", //
-//        "process-classes", //
-//        "generate-test-sources", // 
-//        "process-test-sources", // 
-//        "generate-test-resources", // 
-//        "process-test-resources"};
 
     GridData comboCompositeGridData = new GridData();
-    // comboCompositeGridData.verticalIndent = 15;
+    comboCompositeGridData.verticalIndent = 25;
     comboCompositeGridData.horizontalSpan = 3;
     comboCompositeGridData.grabExcessHorizontalSpace = true;
     comboCompositeGridData.horizontalAlignment = GridData.FILL;

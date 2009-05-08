@@ -10,29 +10,48 @@ package org.maven.ide.eclipse.ui.internal;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.ui.console.IConsolePageParticipant;
 import org.eclipse.ui.part.IPageBookViewPage;
 
+import org.maven.ide.eclipse.MavenImages;
+import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.MavenConsoleRemoveAction;
 import org.maven.ide.eclipse.actions.MavenDebugOutputAction;
+import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;
+
 
 
 public class MavenConsolePageParticipant implements IConsolePageParticipant {
 
   private IAction consoleRemoveAction;
   private IAction debugAction;
-
+  private IAction showOnErrorAction;
+  private IAction showOnOutputAction;
+  
+  private static final String SHOW_ON_OUTPUT_LBL = "Show Console on Any Output";
+  private static final String SHOW_ON_ERR_LBL = "Show Console on Error";
+  
   public void init(IPageBookViewPage page, IConsole console) {
     this.consoleRemoveAction = new MavenConsoleRemoveAction();
     this.debugAction = new MavenDebugOutputAction();
 
-    IToolBarManager toolBarManager = page.getSite().getActionBars().getToolBarManager();
-    toolBarManager.appendToGroup(IConsoleConstants.LAUNCH_GROUP, consoleRemoveAction);
-    toolBarManager.prependToGroup(IConsoleConstants.OUTPUT_GROUP, debugAction);
+    
+    showOnOutputAction = new ShowOnOutputAction(console, SHOW_ON_OUTPUT_LBL);
+    showOnErrorAction = new ShowOnErrorAction(console, SHOW_ON_ERR_LBL);
+    
+    IActionBars actionBars = page.getSite().getActionBars();
+    configureToolBar(actionBars.getToolBarManager());
   }
 
+  private void configureToolBar(IToolBarManager mgr){
+    mgr.appendToGroup(IConsoleConstants.LAUNCH_GROUP, consoleRemoveAction);
+    mgr.prependToGroup(IConsoleConstants.OUTPUT_GROUP, debugAction);
+    mgr.appendToGroup(IConsoleConstants.OUTPUT_GROUP, showOnOutputAction);
+    mgr.appendToGroup(IConsoleConstants.OUTPUT_GROUP, showOnErrorAction);
+  }
   public void dispose() {
     this.consoleRemoveAction = null;
     this.debugAction = null;
@@ -49,4 +68,38 @@ public class MavenConsolePageParticipant implements IConsolePageParticipant {
     return null;
   }
 
+
+  
+  class ShowOnErrorAction extends MavenShowConsoleAction{
+    public ShowOnErrorAction(IConsole console, String name){
+      super(name);
+      setImageDescriptor(MavenImages.SHOW_CONSOLE_ERR);
+    }
+
+    /* (non-Javadoc)
+     * @see org.maven.ide.eclipse.ui.internal.MavenShowConsoleAction#getKey()
+     */
+    protected String getKey() {
+      return MavenPreferenceConstants.P_SHOW_CONSOLE_ON_ERR;
+    }
+  }
+  
+  class ShowOnOutputAction extends MavenShowConsoleAction{
+
+    /**
+     * @param console
+     */
+    public ShowOnOutputAction(IConsole console, String name) {
+      super(name);
+      setImageDescriptor(MavenImages.SHOW_CONSOLE_OUT);
+    }
+
+    /* (non-Javadoc)
+     * @see org.maven.ide.eclipse.ui.internal.MavenShowConsoleAction#getKey()
+     */
+    protected String getKey() {
+      return MavenPreferenceConstants.P_SHOW_CONSOLE_ON_OUTPUT;
+    }
+ 
+  }
 }

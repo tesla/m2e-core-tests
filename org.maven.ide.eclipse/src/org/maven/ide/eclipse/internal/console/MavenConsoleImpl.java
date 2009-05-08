@@ -28,8 +28,11 @@ import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.IOConsole;
 import org.eclipse.ui.console.IOConsoleOutputStream;
 
+import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;
+import org.maven.ide.eclipse.ui.internal.MavenConsolePageParticipant;
 
 
 /**
@@ -189,24 +192,13 @@ public class MavenConsoleImpl extends IOConsole implements MavenConsole, IProper
     setFont(JFaceResources.getFontRegistry().get("pref_console_font"));
   }
 
-//  private void showConsole(boolean show) {
-//    IConsoleManager manager = ConsolePlugin.getDefault().getConsoleManager();
-//    if(!visible) {
-//      manager.addConsoles(new IConsole[] {this});
-//    }
-//    if(show) {
-//      manager.showConsoleView(this);
-//    }
-//  }
-//
   private void bringConsoleToFront() {
     if(PlatformUI.isWorkbenchRunning()) {
       IConsoleManager manager = ConsolePlugin.getDefault().getConsoleManager();
       if(!visible) {
-        manager.addConsoles(new IConsole[] {this});
-        manager.showConsoleView(this);
+        manager.addConsoles(new IConsole[] {this});   
       }
-      
+      manager.showConsoleView(this);
     }
   }
 
@@ -243,16 +235,26 @@ public class MavenConsoleImpl extends IOConsole implements MavenConsole, IProper
   // MavenConsole
 
   public void logMessage(String message) {
-    appendLine(ConsoleDocument.MESSAGE, getDateFormat().format(new Date()) + ": " + message); //$NON-NLS-1$
-    // System.out.println(message);
+    if(showConsoleOnOutput()){
+      bringConsoleToFront();
+    }
+    appendLine(ConsoleDocument.MESSAGE, getDateFormat().format(new Date()) + ": " + message); 
   }
-
+  
   public void logError(String message) {
-    bringConsoleToFront();
+    if(showConsoleOnError()){
+      bringConsoleToFront();
+    }
     appendLine(ConsoleDocument.ERROR, getDateFormat().format(new Date()) + ": " + message); //$NON-NLS-1$
-    // System.err.println(message);
   }
 
+  public boolean showConsoleOnError(){
+    return MavenPlugin.getDefault().getPreferenceStore().getBoolean(MavenPreferenceConstants.P_SHOW_CONSOLE_ON_ERR);
+  }
+  
+  public boolean showConsoleOnOutput(){
+    return MavenPlugin.getDefault().getPreferenceStore().getBoolean(MavenPreferenceConstants.P_SHOW_CONSOLE_ON_OUTPUT);
+  }
   public IConsoleListener newLifecycle() {
     return new MavenConsoleLifecycle();
   }
