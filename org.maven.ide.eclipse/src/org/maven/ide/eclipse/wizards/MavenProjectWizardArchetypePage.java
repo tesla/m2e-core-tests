@@ -24,6 +24,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -90,7 +92,7 @@ import org.maven.ide.eclipse.project.ProjectImportConfiguration;
  * Maven Archetype selection wizard page presents the user with a list of available Maven
  * Archetypes available for creating new project.
  */
-public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
+public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage implements IPropertyChangeListener {
 
   private static final String KEY_CATALOG = "catalog";
 
@@ -165,7 +167,6 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
 
     createAdvancedSettings(composite, new GridData(SWT.FILL, SWT.TOP, true, false, 3, 1));
 
-    // loadArchetypes("org.apache.maven.archetypes", "maven-archetype-quickstart", "1.0");
 
     setControl(composite);
   }
@@ -424,6 +425,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
         }
       }
     });
+    MavenPlugin.getDefault().addPropertyChangeListener(this);
   }
   
   protected IWizardContainer getContainer() {
@@ -438,6 +440,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
     if(dialogSettings != null && catalogFactory!=null) {
       dialogSettings.put(KEY_CATALOG, catalogFactory.getId());
     }
+    MavenPlugin.getDefault().removePropertyChangeListener(this);
     super.dispose();
   }
   
@@ -447,11 +450,24 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
       protected IStatus run(IProgressMonitor monitor) {
         try {
           @SuppressWarnings("unchecked")
-          List<Archetype> catalogArchetypes = getArchetypeCatalog().getArchetypes();
+          List<Archetype> catalogArchetypes = getArchetypeCatalog() == null ? null : getArchetypeCatalog().getArchetypes();
 
+          if(catalogArchetypes == null || catalogArchetypes.size() == 0){
+            Display.getDefault().asyncExec(new Runnable(){
+              public void run(){
+                setErrorMessage("No archetypes currently available. The archetype list will refresh when the indexes finish updating.");
+              }
+            });
+          } else {
+            Display.getDefault().asyncExec(new Runnable(){
+              public void run(){
+                setErrorMessage(null);
+              }
+            });
+          }
           archetypes = new TreeSet<Archetype>(ARCHETYPE_COMPARATOR);
           archetypes.addAll(catalogArchetypes);
-
+          
           Display.getDefault().asyncExec(new Runnable() {
             public void run() {
               updateViewer(groupId, artifactId, version);
@@ -503,16 +519,6 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
   ArchetypeCatalog getArchetypeCatalog() throws CoreException {
     MavenEmbedderManager embedderManager = MavenPlugin.getDefault().getMavenEmbedderManager();
     return catalogFactory==null ? null: catalogFactory.getArchetypeCatalog(embedderManager);
-    
-//    MavenEmbedderManager embedderManager = MavenPlugin.getDefault().getMavenEmbedderManager();
-//    ArchetypeCatalog archetypeCatalog = embedderManager.getArchetypeCatalog();
-//
-//    if(archetypeCatalog != null && !archetypeCatalog.getArchetypes().isEmpty()) {
-//      return archetypeCatalog;
-//    }
-//
-//    // TODO use better merging strategy
-//    return null;
   }
 
   /** Sets the flag that the archetype selection is used in the wizard. */
@@ -759,6 +765,19 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
     }
 
     public void widgetDefaultSelected(SelectionEvent e) {
+    }
+  }
+
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
+   */
+  public void propertyChange(PropertyChangeEvent event) {
+    if(MavenPlugin.INDEX_UPDATE_PROP.equals(event.getProperty())){
+      Display.getDefault().asyncExec(new Runnable(){
+        public void run(){
+          loadArchetypes("org.apache.maven.archetypes", "maven-archetype-quickstart", "1.0");
+        }
+      });
     }
   }
 

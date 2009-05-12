@@ -45,6 +45,7 @@ import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.sonatype.nexus.index.ArtifactInfo;
 import org.sonatype.nexus.index.context.IndexingContext;
 
+import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.OpenMavenConsoleAction;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
@@ -401,6 +402,7 @@ public abstract class IndexManager {
       monitor.setTaskName("Reindexing local repository");
       try {
         indexManager.reindex(info.getIndexName(), monitor);
+        MavenPlugin.getDefault().fireIndexUpdate(info.getIndexName());
         console.logMessage("Updated local repository index");
       } catch(CoreException ex) {
         console.logError("Unable to reindex local repository");
@@ -425,6 +427,7 @@ public abstract class IndexManager {
       console.logMessage("Updating index " + displayName);
       try {
         Date indexTime = indexManager.fetchAndUpdateIndex(info.getIndexName(), force, monitor);
+        MavenPlugin.getDefault().fireIndexUpdate(info.getIndexName());
         if(indexTime==null) {
           console.logMessage("No index update available for " + displayName);
         } else {

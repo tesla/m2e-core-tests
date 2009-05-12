@@ -17,6 +17,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -43,6 +44,8 @@ import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -106,6 +109,8 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   private static final String PREFS_NO_REBUILD_ON_START = "forceRebuildOnUpgrade";
 
   private static final String CENTRAL_URL = "http://repo1.maven.org/maven2/";
+  
+  public static final String INDEX_UPDATE_PROP = "indexUpdate";
   // The shared instance
   private static MavenPlugin plugin;
 
@@ -133,6 +138,8 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
   private IMavenMarkerManager mavenMarkerManager;
 
+  private ArrayList<IPropertyChangeListener> listeners;
+  
   public MavenPlugin() {
     plugin = this;
 
@@ -238,9 +245,29 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     initializeIndexes(indexes, runtimeManager.isUpdateIndexesOnStartup());
 
     checkJdk();
-    
   }
 
+  public void fireIndexUpdate(String indexName){
+    if(listeners != null){
+      for(IPropertyChangeListener listener : listeners){
+        listener.propertyChange(new PropertyChangeEvent(this, INDEX_UPDATE_PROP, null, indexName));
+      }
+    }
+  }
+  
+  public void addPropertyChangeListener(IPropertyChangeListener listener){
+    if(listeners == null){
+      listeners = new ArrayList<IPropertyChangeListener>();
+    }
+    listeners.add(listener);
+  }
+  
+  public void removePropertyChangeListener(IPropertyChangeListener listener){
+    if(listeners != null){
+      listeners.remove(listener);
+    }
+  }
+  
   private void initializeIndexes(Set<IndexInfo> indexes, boolean updateIndexesOnStartup) {
     boolean forceUpdate = !this.getPreferenceStore().getBoolean(PREFS_NO_REBUILD_ON_START);
     if(forceUpdate){
@@ -390,6 +417,9 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
     if(this.console != null) {
       this.console.shutdown();
+    }
+    if(listeners != null){
+      listeners.clear();
     }
     plugin = null;
   }
