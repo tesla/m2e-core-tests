@@ -77,9 +77,12 @@ public class ChangeCreator {
         startLine = curr.rightStart();
         int endLine = curr.rightEnd() - 1;
         int posInsert = oldDocument.getLineOffset(curr.leftStart());
+        String newText = "";
         for(int j = startLine; j <= endLine; j++ ) {
           int newPos = curr.leftStart() - startLine + j + insertOffset;
-          String newText = newDocument.get(newDocument.getLineOffset(newPos), newDocument.getLineLength(newPos));
+          newText += newDocument.get(newDocument.getLineOffset(newPos), newDocument.getLineLength(newPos));
+        }
+        if(newText.length() > 0){
           edit = new InsertEdit(posInsert, newText);
         }
         insertOffset += curr.rightEnd() - curr.rightStart();
@@ -87,9 +90,12 @@ public class ChangeCreator {
         // delete
         startLine = curr.leftStart();
         int endLine = curr.leftEnd() - 1;
+        int startOffset = oldDocument.getLineOffset(startLine);
+        int endOffset = 0;
         for(int j = startLine; j <= endLine; j++ ) {
-          edit = new DeleteEdit(oldDocument.getLineOffset(j), oldDocument.getLineLength(j));
+          endOffset += oldDocument.getLineLength(j);
         }
+        edit = new DeleteEdit(startOffset, endOffset);
         insertOffset -= (curr.leftEnd() - curr.leftStart());
       } else {
         // unhandled
