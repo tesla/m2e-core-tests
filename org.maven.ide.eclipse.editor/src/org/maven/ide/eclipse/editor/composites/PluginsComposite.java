@@ -89,7 +89,7 @@ import org.maven.ide.eclipse.ui.dialogs.MavenRepositorySearchDialog;
 /**
  * @author Eugene Kuleshov
  */
-public class PluginsComposite extends Composite {
+public class PluginsComposite extends Composite{
 
   protected static PomPackage POM_PACKAGE = PomPackage.eINSTANCE;
   
@@ -125,9 +125,9 @@ public class PluginsComposite extends Composite {
 
   Action pluginSelectAction;
   
-  Action pluginAddAction;
+  //Action pluginAddAction;
   
-  Action pluginManagementAddAction;
+  //Action pluginManagementAddAction;
   
   Action openWebPageAction;
 
@@ -180,7 +180,7 @@ public class PluginsComposite extends Composite {
     Section pluginsSection = toolkit.createSection(verticalSashForm, ExpandableComposite.TITLE_BAR | ExpandableComposite.COMPACT);
     pluginsSection.setText("Plugins");
   
-    pluginsEditor = new ListEditorComposite<Plugin>(pluginsSection, SWT.NONE);
+    pluginsEditor = new ListEditorComposite<Plugin>(pluginsSection, SWT.NONE, true);
     pluginsSection.setClient(pluginsEditor);
     toolkit.adapt(pluginsEditor);
     toolkit.paintBordersFor(pluginsEditor);
@@ -208,6 +208,19 @@ public class PluginsComposite extends Composite {
       }
     });
     
+    pluginsEditor.setSelectListener(new SelectionAdapter(){
+      public void widgetSelected(SelectionEvent e){
+        MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
+        "Select Plugin", IndexManager.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
+        if(dialog.open() == Window.OK) {
+          IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
+          if(af != null) {
+            createPlugin(pluginsEditor, pluginsProvider, af.group, af.artifact, af.version);
+          }
+        }
+      }
+    });
+    
     pluginsEditor.setRemoveListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         CompoundCommand compoundCommand = new CompoundCommand();
@@ -225,23 +238,24 @@ public class PluginsComposite extends Composite {
       }
     });
     
-    pluginAddAction = new Action("Add Plugin", MavenEditorImages.ADD_PLUGIN) {
-      public void run() {
-        MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            "Add Plugin", IndexManager.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
-        if(dialog.open() == Window.OK) {
-          IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
-          if(af != null) {
-            createPlugin(pluginsEditor, pluginsProvider, af.group, af.artifact, af.version);
-          }
-        }
-      }
-    };
-    pluginAddAction.setEnabled(false);
+//    pluginAddAction = new Action("Add Plugin", MavenEditorImages.ADD_PLUGIN) {
+//      public void run() {
+//        MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
+//            "Add Plugin", IndexManager.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
+//        if(dialog.open() == Window.OK) {
+//          IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
+//          if(af != null) {
+//            createPlugin(pluginsEditor, pluginsProvider, af.group, af.artifact, af.version);
+//          }
+//        }
+//      }
+//    };
+
+    //pluginAddAction.setEnabled(false);
 
     ToolBarManager toolBarManager = new ToolBarManager(SWT.FLAT);
-    toolBarManager.add(pluginAddAction);
-    toolBarManager.add(new Separator());
+    //toolBarManager.add(pluginAddAction);
+    //toolBarManager.add(new Separator());
     
     toolBarManager.add(new Action("Show GroupId", MavenEditorImages.SHOW_GROUP) {
       {
@@ -289,7 +303,7 @@ public class PluginsComposite extends Composite {
     Section pluginManagementSection = toolkit.createSection(verticalSashForm, ExpandableComposite.TITLE_BAR);
     pluginManagementSection.setText("Plugin Management");
   
-    pluginManagementEditor = new ListEditorComposite<Plugin>(pluginManagementSection, SWT.NONE);
+    pluginManagementEditor = new ListEditorComposite<Plugin>(pluginManagementSection, SWT.NONE, true);
     pluginManagementSection.setClient(pluginManagementEditor);
     toolkit.adapt(pluginManagementEditor);
     toolkit.paintBordersFor(pluginManagementEditor);
@@ -333,11 +347,10 @@ public class PluginsComposite extends Composite {
         updatePluginDetails(null);
       }
     });
-    
-    pluginManagementAddAction = new Action("Add Plugin", MavenEditorImages.ADD_PLUGIN) {
-      public void run() {
+    pluginManagementEditor.setSelectListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            "Add Plugin", IndexManager.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
+            "Select Plugin", IndexManager.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {
@@ -345,12 +358,24 @@ public class PluginsComposite extends Composite {
           }
         }
       }
-    };
-    pluginManagementAddAction.setEnabled(false);
+    });
+//    pluginManagementAddAction = new Action("Add Plugin", MavenEditorImages.ADD_PLUGIN) {
+//      public void run() {
+//        MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
+//            "Add Plugin", IndexManager.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
+//        if(dialog.open() == Window.OK) {
+//          IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
+//          if(af != null) {
+//            createPlugin(pluginManagementEditor, pluginManagementProvider, af.group, af.artifact, af.version);
+//          }
+//        }
+//      }
+//    };
+//    pluginManagementAddAction.setEnabled(false);
 
     ToolBarManager toolBarManager = new ToolBarManager(SWT.FLAT);
-    toolBarManager.add(pluginManagementAddAction);
-    toolBarManager.add(new Separator());
+//    toolBarManager.add(pluginManagementAddAction);
+//    toolBarManager.add(new Separator());
     
     toolBarManager.add(new Action("Show GroupId", MavenEditorImages.SHOW_GROUP) {
       {
@@ -917,9 +942,8 @@ public class PluginsComposite extends Composite {
     pluginsEditor.setReadOnly(parent.isReadOnly());
     pluginManagementEditor.setReadOnly(parent.isReadOnly());
     
-    pluginAddAction.setEnabled(!parent.isReadOnly());
-    pluginManagementAddAction.setEnabled(!parent.isReadOnly());
-    
+    //pluginAddAction.setEnabled(!parent.isReadOnly());
+    //pluginManagementAddAction.setEnabled(!parent.isReadOnly());
     updatePluginDetails(null);
     
 //    pluginExecutionsEditor.setReadOnly(parent.isReadOnly());
@@ -1097,6 +1121,5 @@ public class PluginsComposite extends Composite {
     }
 
   }
-
   
 }

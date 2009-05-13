@@ -126,7 +126,7 @@ public class ReportingComposite extends Composite {
   
   Action openWebPageAction;
   
-  Action reportPluginAddAction;
+//  Action reportPluginAddAction;
 
   Action reportPluginSelectAction;
   
@@ -200,7 +200,7 @@ public class ReportingComposite extends Composite {
     reportingPluginsSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
     reportingPluginsSection.setText("Reporting Plugins");
 
-    reportPluginsEditor = new ListEditorComposite<ReportPlugin>(reportingPluginsSection, SWT.NONE);
+    reportPluginsEditor = new ListEditorComposite<ReportPlugin>(reportingPluginsSection, SWT.NONE, true);
     reportingPluginsSection.setClient(reportPluginsEditor);
     toolkit.paintBordersFor(reportPluginsEditor);
     toolkit.adapt(reportPluginsEditor);
@@ -243,8 +243,8 @@ public class ReportingComposite extends Composite {
       }
     });
     
-    reportPluginAddAction = new Action("Add Report Plugin", MavenEditorImages.ADD_PLUGIN) {
-      public void run() {
+    reportPluginsEditor.setSelectListener(new SelectionAdapter(){
+      public void widgetSelected(SelectionEvent e){
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
             "Add Plugin", IndexManager.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
         if(dialog.open() == Window.OK) {
@@ -254,12 +254,17 @@ public class ReportingComposite extends Composite {
           }
         }
       }
-    };
-    reportPluginAddAction.setEnabled(false);
-
+    });
+//    reportPluginAddAction = new Action("Add Report Plugin", MavenEditorImages.ADD_PLUGIN) {
+//      public void run() {
+//
+//      }
+//    };
+//    reportPluginAddAction.setEnabled(false);
+//    toolBarManager.add(reportPluginAddAction);
+//    toolBarManager.add(new Separator());
     ToolBarManager toolBarManager = new ToolBarManager(SWT.FLAT);
-    toolBarManager.add(reportPluginAddAction);
-    toolBarManager.add(new Separator());
+
     
     toolBarManager.add(new Action("Show GroupId", MavenEditorImages.SHOW_GROUP) {
       {
@@ -746,7 +751,7 @@ public class ReportingComposite extends Composite {
     this.parent = editorPage;
     this.reportingProvider = reportingProvider;
     
-    reportPluginAddAction.setEnabled(!parent.getPomEditor().isReadOnly());
+//    reportPluginAddAction.setEnabled(!parent.getPomEditor().isReadOnly());
 
     updateContent(reportingProvider.getValue());
   }
