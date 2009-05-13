@@ -12,12 +12,16 @@ import org.eclipse.jface.action.ControlContribution;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseMoveListener;
+import org.eclipse.swt.events.MouseTrackListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
@@ -54,20 +58,19 @@ public class SearchControl extends ControlContribution {
     Composite composite = toolkit.createComposite(parent);
 
     GridLayout layout = new GridLayout(3, false);
-    layout.marginHeight = 0;
+    layout.marginHeight = -4;
     layout.marginWidth = 0;
     layout.verticalSpacing = 0;
-
     composite.setLayout(layout);
     composite.setBackground(null);
-
+    composite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
     Control label = toolkit.createLabel(composite, "Search:");
     label.setBackground(null);
 
     searchText = toolkit.createText(composite, "", SWT.FLAT);
-    searchText.setData(FormToolkit.KEY_DRAW_BORDER, Boolean.TRUE);
+    searchText.setData(FormToolkit.TEXT_BORDER, Boolean.TRUE);
+    
     searchText.setLayoutData(new GridData(200, -1));
-
     ToolBar cancelBar = new ToolBar(composite, SWT.FLAT);
 
     final ToolItem clearToolItem = new ToolItem(cancelBar, SWT.NONE);
