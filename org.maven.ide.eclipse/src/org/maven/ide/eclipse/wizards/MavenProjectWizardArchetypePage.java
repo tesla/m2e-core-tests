@@ -455,7 +455,9 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
           if(catalogArchetypes == null || catalogArchetypes.size() == 0){
             Display.getDefault().asyncExec(new Runnable(){
               public void run(){
-                setErrorMessage("No archetypes currently available. The archetype list will refresh when the indexes finish updating.");
+                if(catalogFactory != null && "Nexus Indexer".equals(catalogFactory.getDescription())){
+                  setErrorMessage("No archetypes currently available. The archetype list will refresh when the indexes finish updating.");
+                }
               }
             });
           } else {
@@ -464,6 +466,9 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
                 setErrorMessage(null);
               }
             });
+          }
+          if(catalogArchetypes == null){
+            return Status.CANCEL_STATUS;
           }
           archetypes = new TreeSet<Archetype>(ARCHETYPE_COMPARATOR);
           archetypes.addAll(catalogArchetypes);
