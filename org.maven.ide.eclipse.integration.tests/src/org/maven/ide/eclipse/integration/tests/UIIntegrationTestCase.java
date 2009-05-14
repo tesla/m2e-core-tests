@@ -865,9 +865,10 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     getUI().wait(new JobsCompleteCondition(), 120000);
     findText("</dependencies");
     getUI().keyClick(SWT.ARROW_LEFT);
+    String sep = System.getProperty("line.separator");
     getUI()
         .enterText(
-            "<dependency><groupId>" + groupId + "</<artifactId>" + artifactID +"</<version>" + version + "</<type>jar</<scope>compile</</" + System.getProperty("line.separator"));
+            "<dependency>" + sep + "<groupId>" + groupId + "</<artifactId>" + artifactID +"</<version>" + version + "</<type>jar</<scope>compile</" + sep + "</" + sep);
     getUI().keyClick(SWT.MOD1, 's');
 
     waitForAllBuildsToComplete();
