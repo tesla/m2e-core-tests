@@ -128,13 +128,15 @@ public class ExcludeRefactoring extends AbstractPomRefactoring {
         exclusion.setArtifactId(excludedArtifactId);
         exclusion.setGroupId(excludedGroupId);
 
-        if (dep.getExclusions() == null) {
-          EStructuralFeature feature = dep.eClass().getEStructuralFeature("exclusions");
-          ExclusionsType excl = PomFactoryImpl.eINSTANCE.createExclusionsType();
-          excl.getExclusion().add(exclusion);
-          command.append(new SetCommand(editingDomain, dep, feature, excl));
-        } else {
-          command.append(new AddCommand(editingDomain, dep.getExclusions().getExclusion(), exclusion));
+        if(dep != null){
+          if (dep.getExclusions() == null) {
+            EStructuralFeature feature = dep.eClass().getEStructuralFeature("exclusions");
+            ExclusionsType excl = PomFactoryImpl.eINSTANCE.createExclusionsType();
+            excl.getExclusion().add(exclusion);
+            command.append(new SetCommand(editingDomain, dep, feature, excl));
+          } else {
+            command.append(new AddCommand(editingDomain, dep.getExclusions().getExclusion(), exclusion));
+          }
         }
       }
     };
