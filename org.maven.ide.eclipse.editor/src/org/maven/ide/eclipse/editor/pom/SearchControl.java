@@ -58,7 +58,6 @@ public class SearchControl extends ControlContribution {
     Composite composite = toolkit.createComposite(parent);
 
     GridLayout layout = new GridLayout(3, false);
-    layout.marginHeight = -4;
     layout.marginWidth = 0;
     layout.verticalSpacing = 0;
     composite.setLayout(layout);
