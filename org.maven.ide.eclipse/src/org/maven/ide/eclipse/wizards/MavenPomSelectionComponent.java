@@ -98,7 +98,7 @@ public class MavenPomSelectionComponent extends Composite {
   public static final String P_SEARCH_INCLUDE_SOURCES = "searchIncludesSources";  
   public static final String P_SEARCH_INCLUDE_TESTS = "searchIncludesTests";
   private static final long SHORT_DELAY = 150L;
-  private static final long LONG_DELAY = 800L;
+  private static final long LONG_DELAY = 500L;
   
   HashSet<String> artifactKeys = new HashSet<String>();
 
