@@ -223,13 +223,35 @@ public class NexusIndexManager extends IndexManager {
   }
 
   public Map<String, IndexedArtifact> search(String term, String type) throws CoreException {
-    return search(null, term, type);
+    return search(null, term, type, IndexManager.SEARCH_ALL);
   }
-
+  
+  public Map<String, IndexedArtifact> search(String term, String type, int classifier) throws CoreException {
+    return search(null, term, type, classifier);
+  }
+  
+  private void addClassifiersToQuery(BooleanQuery bq, int classifier){
+    boolean includeJavaDocs = (classifier & IndexManager.SEARCH_JAVADOCS) > 0;
+    TermQuery tq = null;
+    if(!includeJavaDocs){
+      tq = new TermQuery(new Term(ArtifactInfo.CLASSIFIER, "javadoc"));
+      bq.add(tq, Occur.MUST_NOT);
+    }
+    boolean includeSources = (classifier & IndexManager.SEARCH_SOURCES) > 0;
+    if(!includeSources){
+      tq = new TermQuery(new Term(ArtifactInfo.CLASSIFIER, "sources"));
+      bq.add(tq, Occur.MUST_NOT);
+    }
+    boolean includeTests = (classifier & IndexManager.SEARCH_TESTS) > 0;
+    if(!includeTests){
+      tq = new TermQuery(new Term(ArtifactInfo.CLASSIFIER, "tests"));
+      bq.add(tq, Occur.MUST_NOT);
+    }
+  }
   /**
    * @return Map<String, IndexedArtifact>
    */
-  public Map<String, IndexedArtifact> search(String indexName, String term, String type) throws CoreException {
+  public Map<String, IndexedArtifact> search(String indexName, String term, String type, int classifier) throws CoreException {
     Query query;
     if(IndexManager.SEARCH_CLASS_NAME.equals(type)) {
       query = getIndexer().constructQuery(ArtifactInfo.NAMES, term + "$");
@@ -244,6 +266,7 @@ public class NexusIndexManager extends IndexManager {
       bq.add(getIndexer().constructQuery(ArtifactInfo.GROUP_ID, term), Occur.SHOULD);
       bq.add(getIndexer().constructQuery(ArtifactInfo.ARTIFACT_ID, term), Occur.SHOULD);
       bq.add(new PrefixQuery(new Term(ArtifactInfo.SHA1, term)), Occur.SHOULD);
+      addClassifiersToQuery(bq, classifier);
       query = bq;
 
     } else if(IndexManager.SEARCH_PLUGIN.equals(type)) {
@@ -286,16 +309,6 @@ public class NexusIndexManager extends IndexManager {
         response = getIndexer().searchFlat(new FlatSearchRequest(query, context));
       }
 
-//      IndexingContext context = (IndexingContext) indexer.getIndexingContexts().get("local");
-//      IndexReader reader = context.getIndexSearcher().getIndexReader();
-//      for(int i = 0; i < reader.numDocs(); i++ ) {
-//        Document doc = reader.document(i);
-//        String uinfo = doc.get(ArtifactInfo.UINFO);
-//        if(uinfo!=null && uinfo.startsWith("org.apache.maven")) {
-//          System.err.println(i + " " + uinfo);
-//        }
-//      }
-
       String regex = "^(.*?" + term.replaceAll("\\*", ".+?") + ".*?)$";
       Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
 
@@ -326,15 +339,18 @@ public class NexusIndexManager extends IndexManager {
         }
       }
 
-    } /*catch(IndexContextInInconsistentStateException ex) {
-      String msg = "Inconsistent index context state " + ex.getMessage();
-      console.logError(msg);
-      MavenLogger.log(msg, ex);
-    } */catch(IOException ex) {
+    }catch(IOException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Search error", ex));
     }
 
     return result;
+  }
+  
+  /**
+   * @return Map<String, IndexedArtifact>
+   */
+  public Map<String, IndexedArtifact> search(String indexName, String term, String type) throws CoreException {
+    return search(indexName, term, type, IndexManager.SEARCH_ALL);
   }
   
   /**

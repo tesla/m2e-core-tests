@@ -31,10 +31,13 @@ import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
@@ -60,9 +63,23 @@ import org.maven.ide.eclipse.index.IndexedArtifactFile;
  */
 public class MavenPomSelectionComponent extends Composite {
 
+  /* (non-Javadoc)
+   * @see org.eclipse.swt.widgets.Widget#dispose()
+   */
+  public void dispose() {
+    if(searchJob != null){
+      searchJob.cancel();
+    }
+    super.dispose();
+  }
+
   Text searchText = null;
 
   TreeViewer searchResultViewer = null;
+  
+  Button javadocCheckBox;
+  Button sourcesCheckBox;
+  Button testCheckBox;
 
   /**
    * One of 
@@ -76,7 +93,13 @@ public class MavenPomSelectionComponent extends Composite {
   private IStatus status;
 
   private ISelectionChangedListener selectionListener;
-
+  
+  public static final String P_SEARCH_INCLUDE_JAVADOC = "searchIncludesJavadoc";
+  public static final String P_SEARCH_INCLUDE_SOURCES = "searchIncludesSources";  
+  public static final String P_SEARCH_INCLUDE_TESTS = "searchIncludesTests";
+  private static final long SHORT_DELAY = 150L;
+  private static final long LONG_DELAY = 800L;
+  
   HashSet<String> artifactKeys = new HashSet<String>();
 
   public MavenPomSelectionComponent(Composite parent, int style) {
@@ -105,7 +128,7 @@ public class MavenPomSelectionComponent extends Composite {
     });
     searchText.addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent e) {
-        scheduleSearch(searchText.getText());
+        scheduleSearch(searchText.getText(), true);
       }
     });
 
@@ -118,12 +141,28 @@ public class MavenPomSelectionComponent extends Composite {
     tree.setData("name", "searchResultTree");
 
     searchResultViewer = new TreeViewer(tree);
+    
   }
-
-  // 
-  // this.queryText = queryText;
-  // this.queryType = queryType;
-  // this.artifacts = artifacts;
+  
+  protected boolean showClassifiers(){
+    return (queryType != null && IndexManager.SEARCH_ARTIFACT.equals(queryType));
+  }
+  
+  private void setupButton(final Button button, String label, final String prefName, int horizontalIndent){
+    button.setText(label);
+    GridData gd = new GridData(SWT.LEFT, SWT.TOP, false, false);
+    gd.horizontalIndent=horizontalIndent;
+    button.setLayoutData(gd);
+    boolean check = MavenPlugin.getDefault().getPreferenceStore().getBoolean(prefName);
+    button.setSelection(check);
+    button.addSelectionListener(new SelectionAdapter(){
+      public void widgetSelected(SelectionEvent e){
+        boolean checked = button.getSelection();
+        MavenPlugin.getDefault().getPreferenceStore().setValue(prefName, checked);
+        scheduleSearch(searchText.getText(), false);
+      }
+    });
+  }
   
   public void init(String queryText, String queryType, Set<ArtifactKey> artifacts) {
     this.queryType = queryType;
@@ -158,11 +197,28 @@ public class MavenPomSelectionComponent extends Composite {
         }
       }
     });
-
+    setupClassifiers();
     setStatus(IStatus.ERROR, "");
-    scheduleSearch(queryText);
+    scheduleSearch(queryText, false);
   }
   
+  protected void setupClassifiers(){
+    if(showClassifiers()){
+      Composite includesComp = new Composite(this, SWT.NONE);
+      includesComp.setLayout(new GridLayout(3, true));
+      GridData gd = new GridData(SWT.LEFT, SWT.TOP, true, false);
+      includesComp.setLayoutData(gd);
+      
+      javadocCheckBox = new Button(includesComp, SWT.CHECK);
+      setupButton(javadocCheckBox, "Include Javadocs", P_SEARCH_INCLUDE_JAVADOC,0);
+      
+      sourcesCheckBox = new Button(includesComp, SWT.CHECK);
+      setupButton(sourcesCheckBox, "Include Sources", P_SEARCH_INCLUDE_SOURCES,10);
+  
+      testCheckBox = new Button(includesComp, SWT.CHECK);
+      setupButton(testCheckBox, "Include Tests", P_SEARCH_INCLUDE_TESTS,10);
+    }
+  }
   public IStatus getStatus() {
     return this.status;
   }
@@ -204,16 +260,22 @@ public class MavenPomSelectionComponent extends Composite {
     return (IndexedArtifactFile) element;
   }
 
-  void scheduleSearch(String query) {
+  void scheduleSearch(String query, boolean delay) {
     if(query != null && query.length() > 2) {
       if(searchJob == null) {
         IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
         searchJob = new SearchJob(queryType, indexManager);
+      } else {
+        if(searchJob.isWaiting()){
+          searchJob.cancel();
+          IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
+          searchJob = new SearchJob(queryType, indexManager);
+        }
       }
-
       searchJob.setQuery(query.toLowerCase());
+      searchJob.setWaiting();
       if(!searchJob.isRunning()) {
-        searchJob.schedule(150L);
+        searchJob.schedule(delay ? LONG_DELAY : SHORT_DELAY);
       }
     }
   }
@@ -231,31 +293,60 @@ public class MavenPomSelectionComponent extends Composite {
     private String field;
 
     boolean isRunning = false;
+    
+    boolean isWaiting = false;
 
     public SearchJob(String field, IndexManager indexManager) {
       super("Repository search");
       this.field = field;
       this.indexManager = indexManager;
+      this.isWaiting = true;
     }
 
     public boolean isRunning() {
       return isRunning;
     }
+    
+    public boolean isWaiting(){
+      return this.isWaiting;
+    }
 
     public void setQuery(String query) {
       this.query = query;
     }
-
+    
+    public void setWaiting(){
+      this.isWaiting = true;
+    }
+    
+    public int getClassifier(){
+      int classifier = IndexManager.SEARCH_JARS;
+      if(MavenPlugin.getDefault().getPreferenceStore().getBoolean(P_SEARCH_INCLUDE_JAVADOC)){
+        classifier = classifier + IndexManager.SEARCH_JAVADOCS;
+      }
+      if(MavenPlugin.getDefault().getPreferenceStore().getBoolean(P_SEARCH_INCLUDE_SOURCES)){
+        classifier = classifier + IndexManager.SEARCH_SOURCES;
+      }
+      if(MavenPlugin.getDefault().getPreferenceStore().getBoolean(P_SEARCH_INCLUDE_TESTS)){
+        classifier = classifier + IndexManager.SEARCH_TESTS;
+      }
+      return classifier;
+    }
+    
     protected IStatus run(IProgressMonitor monitor) {
       isRunning = true;
+      isWaiting = false;
+      
+      int classifier = showClassifiers() ? getClassifier() : IndexManager.SEARCH_ALL;
+      if(searchResultViewer == null || searchResultViewer.getControl() == null || searchResultViewer.getControl().isDisposed()){
+        return Status.CANCEL_STATUS;
+      }
       while(!monitor.isCanceled() && query != null) {
         String activeQuery = query;
         query = null;
         try {
           setResult(IStatus.OK, "Searching \'" + activeQuery.toLowerCase() + "\'...", null);
-          // Map res = indexer.search(indexManager.getIndexes(), activeQuery, field);
-          // Map res = indexManager.search(activeQuery, IndexManager.SEARCH_PACKAGING);
-          Map<String, IndexedArtifact> res = indexManager.search(activeQuery, field);
+          Map<String, IndexedArtifact> res = indexManager.search(activeQuery, field, classifier);
           if(IndexManager.SEARCH_CLASS_NAME.equals(field) && activeQuery.length() < IndexManager.MIN_CLASS_QUERY_LENGTH) {
             setResult(IStatus.WARNING, "Query '" + activeQuery + "' is too short", Collections.<String, IndexedArtifact>emptyMap());
           } else {
@@ -268,7 +359,7 @@ public class MavenPomSelectionComponent extends Composite {
         } catch(final Exception ex) {
           setResult(IStatus.ERROR, "Search error: " + ex.getMessage(), Collections.<String, IndexedArtifact>emptyMap());
         }
-      }
+      } 
       isRunning = false;
       return Status.OK_STATUS;
     }
@@ -278,7 +369,9 @@ public class MavenPomSelectionComponent extends Composite {
         public void run() {
           setStatus(severity, message);
           if(result != null) {
-            searchResultViewer.setInput(result);
+            if(!searchResultViewer.getControl().isDisposed()){
+              searchResultViewer.setInput(result);
+            }
           }
         }
       });
@@ -395,6 +488,7 @@ public class MavenPomSelectionComponent extends Composite {
     }
 
     public void dispose() {
+      
     }
 
   }

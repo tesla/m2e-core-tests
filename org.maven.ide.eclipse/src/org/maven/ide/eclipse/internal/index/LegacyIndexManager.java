@@ -246,4 +246,19 @@ public class LegacyIndexManager extends IndexManager {
     return null;
   }
 
+  /* (non-Javadoc)
+   * @see org.maven.ide.eclipse.index.IndexManager#search(java.lang.String, java.lang.String, int)
+   */
+  public Map<String, IndexedArtifact> search(String term, String type, int classifier) throws CoreException {
+    return Collections.emptyMap();
+  }
+
+  /* (non-Javadoc)
+   * @see org.maven.ide.eclipse.index.IndexManager#search(java.lang.String, java.lang.String, java.lang.String, int)
+   */
+  public Map<String, IndexedArtifact> search(String indexName, String term, String type, int classifier)
+      throws CoreException {
+    return Collections.emptyMap();
+  }
+
 }

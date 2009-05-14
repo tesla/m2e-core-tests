@@ -83,6 +83,16 @@ public abstract class IndexManager {
   public static final String SEARCH_MD5 = "md5";
   
   public static final String SEARCH_SHA1 = "sha1";
+  
+  public static final int SEARCH_JARS = 1 << 0;
+  
+  public static final int SEARCH_JAVADOCS = 1 << 1;
+  
+  public static final int SEARCH_SOURCES = 1 << 2;
+  
+  public static final int SEARCH_TESTS = 1 << 3;
+  
+  public static final int SEARCH_ALL = 15;
 
   // search terms
 
@@ -223,7 +233,21 @@ public abstract class IndexManager {
    * @return Map&lt;String, IndexedArtifact&gt;
    */
   public abstract Map<String, IndexedArtifact> search(String term, String searchType) throws CoreException;
-
+  
+  /**
+   * @param term - search term
+   * @param searchType - query type. Should be one of the SEARCH_* values.
+   * @param classifier - the type of classifiers to search for, SEARCH_ALL, SEARCH_JAVADOCS, SEARCH_SOURCES, SEARCH_TESTS
+   * 
+   * @return Map&lt;String, IndexedArtifact&gt;
+   */
+  public abstract Map<String, IndexedArtifact> search(String term, String type, int classifier) throws CoreException;
+  
+  /**
+   * @return Map&lt;String, IndexedArtifact&gt;
+   */
+  public abstract Map<String, IndexedArtifact> search(String indexName, String term, String type, int classifier) throws CoreException;
+  
   /**
    * @return Map&lt;String, IndexedArtifact&gt;
    */
