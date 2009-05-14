@@ -289,7 +289,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
 
     job.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
     job.schedule();
-    getUI().wait(new JobsCompleteCondition(), 600000);
+    getUI().wait(new JobsCompleteCondition(), 1200000);
 
   }
 
@@ -867,7 +867,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     getUI().keyClick(SWT.ARROW_LEFT);
     getUI()
         .enterText(
-            "<dependency><groupId>" + groupId + "</<artifactId>" + artifactID +"</<version>" + version + "</<type>jar</<scope>compile</</");
+            "<dependency><groupId>" + groupId + "</<artifactId>" + artifactID +"</<version>" + version + "</<type>jar</<scope>compile</</" + System.getProperty("line.separator"));
     getUI().keyClick(SWT.MOD1, 's');
 
     waitForAllBuildsToComplete();
