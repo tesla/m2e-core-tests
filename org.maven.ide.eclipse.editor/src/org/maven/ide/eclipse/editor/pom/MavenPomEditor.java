@@ -233,7 +233,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       if(pomFile.getProject().equals(event.getResource())) {
         Display.getDefault().asyncExec(new Runnable() {
           public void run() {
-            close(true);
+            close(false);
           }
         });
       }
