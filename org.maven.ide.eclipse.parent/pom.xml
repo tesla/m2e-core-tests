@@ -103,11 +103,12 @@
     <module>../org.maven.ide.eclipse.subclipse</module>
     <module>../org.maven.ide.eclipse.scm</module>
     <module>../org.maven.ide.eclipse.cvs</module>
+    <module>../org.maven.ide.eclipse.refactoring</module>
     <module>../org.maven.ide.eclipse.tests</module>
     <module>../org.maven.ide.eclipse.editor.xml</module>
     <module>../org.maven.ide.eclipse.editor</module>
     <module>../org.maven.ide.eclipse.editor.tests</module>
-    <module>../org.maven.ide.eclipse.refactoring</module>
+   
     <!--
     <module>../org.maven.ide.eclipse.editor.xml.tests</module>
     <module>../org.maven.ide.eclipse.refactoring.tests</module>
