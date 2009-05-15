@@ -173,7 +173,9 @@ public class MavenModuleWizardParentPage extends AbstractMavenWizardPage {
       setPageComplete(false);
       return;
     }
-
+    if(!validateParent()){
+      return;
+    }
     setErrorMessage(null);
     setMessage(null);
     setPageComplete(true);
@@ -209,11 +211,24 @@ public class MavenModuleWizardParentPage extends AbstractMavenWizardPage {
       MavenPlugin plugin = MavenPlugin.getDefault();
       try {
         parentModel = plugin.getMavenModelManager().readMavenModel(pom);
+        validateParent();
         parentProjectText.setText(parentModel.getArtifactId());
       } catch(CoreException e) {
         MavenLogger.log("Error loading POM: " + e.getMessage(), e);
       }
     }
+  }
+  
+  private boolean validateParent(){
+    if(parentModel != null){
+      if(!"pom".equals(parentModel.getPackaging())){
+        setMessage(null);
+        setErrorMessage("The parent project must have a packaging type of POM");
+        setPageComplete(false);
+        return false;
+      }
+    }
+    return true;
   }
 
   /** Returns "true" if the user chose not to use archetypes. */
