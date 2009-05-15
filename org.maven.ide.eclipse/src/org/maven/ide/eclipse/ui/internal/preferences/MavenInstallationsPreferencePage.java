@@ -275,7 +275,8 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
           } else {
             runtimes.add(runtime);
             runtimesViewer.refresh();
-            runtimesViewer.setSelection(new StructuredSelection(runtime));
+            runtimesViewer.setAllChecked(false);
+            runtimesViewer.setChecked(runtime, true);
             setDirty(true);
           }
         }
@@ -317,8 +318,8 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
         MavenRuntime runtime = getSelectedRuntime();
         runtimes.remove(runtime);
         runtimesViewer.refresh();
-
-        if(runtimesViewer.getSelection().isEmpty()) {
+        Object[] checkedElements = runtimesViewer.getCheckedElements();
+        if(checkedElements == null || checkedElements.length == 0) {
           defaultRuntime = runtimeManager.getRuntime(MavenRuntimeManager.EMBEDDED);
           runtimesViewer.setChecked(defaultRuntime, true);
         }
