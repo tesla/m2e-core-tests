@@ -60,7 +60,6 @@ public class ChangeCreator {
     int insertOffset = 0;
     for(int i = 0; i < differences.length; i++ ) {
       RangeDifference curr = differences[i];
-      TextEdit edit = null;
       int startLine = 0;
       // when comparing 2 files, only RangeDifference.CHANGE is possible, no need to test
       if (curr.rightLength() == curr.leftLength()) {
@@ -70,7 +69,7 @@ public class ChangeCreator {
         for(int j = startLine; j <= endLine; j++ ) {
           int newPos = curr.leftStart() - startLine + j;
           String newText = newDocument.get(newDocument.getLineOffset(newPos), newDocument.getLineLength(newPos));
-          edit = new ReplaceEdit(oldDocument.getLineOffset(j), oldDocument.getLineLength(j), newText);
+          addEdit(change, startLine, new ReplaceEdit(oldDocument.getLineOffset(j), oldDocument.getLineLength(j), newText));
         }
       } else if (curr.rightLength() > 0 && curr.leftLength() == 0) {
         // insert
@@ -83,7 +82,7 @@ public class ChangeCreator {
           newText += newDocument.get(newDocument.getLineOffset(newPos), newDocument.getLineLength(newPos));
         }
         if(newText.length() > 0){
-          edit = new InsertEdit(posInsert, newText);
+          addEdit(change, startLine, new InsertEdit(posInsert, newText));
         }
         insertOffset += curr.rightEnd() - curr.rightStart();
       } else if (curr.leftLength() > 0 && curr.rightLength() == 0) {
@@ -95,17 +94,18 @@ public class ChangeCreator {
         for(int j = startLine; j <= endLine; j++ ) {
           endOffset += oldDocument.getLineLength(j);
         }
-        edit = new DeleteEdit(startOffset, endOffset);
+        addEdit(change, startLine, new DeleteEdit(startOffset, endOffset));
         insertOffset -= (curr.leftEnd() - curr.leftStart());
       } else {
         // unhandled
       }
-      if (edit != null) {
-        change.addTextEditGroup(new TextEditGroup("Line " + (startLine + 1), edit));
-        change.addEdit(edit);
-      }
     }
     return change;
+  }
+  
+  private void addEdit(TextFileChange change, int startLine, TextEdit edit) {
+    change.addTextEditGroup(new TextEditGroup("Line " + (startLine + 1), edit));
+    change.addEdit(edit);
   }
   
   public static class LineComparator implements IRangeComparator {
