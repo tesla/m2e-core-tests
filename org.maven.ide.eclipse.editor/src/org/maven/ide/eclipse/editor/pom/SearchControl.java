@@ -49,7 +49,7 @@ public class SearchControl extends ControlContribution {
 
   private boolean isMac(){
     String os =System.getProperty("os.name");
-    return os.startsWith("Mac");
+    return os != null && os.startsWith("Mac");
   }
   
   protected Control createControl(Composite parent) {
