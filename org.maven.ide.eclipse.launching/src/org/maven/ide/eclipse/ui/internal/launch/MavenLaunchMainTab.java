@@ -59,6 +59,7 @@ import org.eclipse.ui.externaltools.internal.model.IExternalToolConstants;
 import org.maven.ide.eclipse.MavenImages;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.MavenLaunchConstants;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.core.Messages;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
@@ -103,6 +104,10 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
   
   private Button enableWorkspaceResolution;
 
+  private Button removePropButton;
+  
+  private Button editPropButton;
+  
   ComboViewer runtimeComboViewer;
 
 
@@ -346,10 +351,27 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
         }
       }
     });
+    tableViewer.addSelectionChangedListener(new ISelectionChangedListener(){
+
+      public void selectionChanged(SelectionChangedEvent event) {
+        TableItem[] items = propsTable.getSelection();
+        if(items == null || items.length == 0){
+          editPropButton.setEnabled(false);
+          removePropButton.setEnabled(false);
+        } else if(items.length == 1){
+          editPropButton.setEnabled(true);
+          removePropButton.setEnabled(true);
+        } else {
+          editPropButton.setEnabled(false);
+          removePropButton.setEnabled(true);
+        }
+      }
+      
+    });
     
     this.propsTable = tableViewer.getTable();
     //this.tProps.setItemCount(10);
-    this.propsTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4, 2));
+    this.propsTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,  4, 3));
     this.propsTable.setLinesVisible(true);
     this.propsTable.setHeaderVisible(true);
 
@@ -369,8 +391,21 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
         addProperty();
       }
     });
-
-    final Button removePropButton = new Button(mainComposite, SWT.NONE);
+    editPropButton = new Button(mainComposite, SWT.NONE);
+    editPropButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+    editPropButton.setText(Messages.getString("launch.propEditButton")); //$NON-NLS-1$
+    editPropButton.addSelectionListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        if(propsTable.getSelectionCount() > 0) {
+          TableItem[] selection = propsTable.getSelection();
+          if(selection.length == 1) {
+            editProperty(selection[0].getText(0), selection[0].getText(1));
+          }
+        }
+      }
+    });
+    editPropButton.setEnabled(false);
+    removePropButton = new Button(mainComposite, SWT.NONE);
     removePropButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
     removePropButton.setText(Messages.getString("launch.propRemoveButton")); //$NON-NLS-1$
     removePropButton.addSelectionListener(new SelectionAdapter() {
@@ -381,6 +416,7 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
         }
       }
     });
+    removePropButton.setEnabled(false);
 
     {
       Composite composite = new Composite(mainComposite, SWT.NONE);
@@ -528,8 +564,9 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
 
     String location = getAttribute(configuration, ATTR_RUNTIME, "");
     MavenRuntime runtime = runtimeManager.getRuntime(location);
-    this.runtimeComboViewer.setSelection(new StructuredSelection(runtime));
-    
+    if(runtime != null){
+      this.runtimeComboViewer.setSelection(new StructuredSelection(runtime));
+    } 
     try {
       propsTable.removeAll();
       
@@ -559,6 +596,7 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
     try {
       return configuration.getAttribute(name, defaultValue);
     } catch(CoreException ex) {
+      MavenLogger.log(ex);
       return defaultValue;
     }
   }
