@@ -47,6 +47,11 @@ public class SearchControl extends ControlContribution {
     return searchText;
   }
 
+  private boolean isMac(){
+    String os =System.getProperty("os.name");
+    return os.startsWith("Mac");
+  }
+  
   protected Control createControl(Composite parent) {
     if(parent instanceof ToolBar) {
       // the FormHeading class sets the toolbar cursor to hand for some reason,
@@ -59,6 +64,11 @@ public class SearchControl extends ControlContribution {
 
     GridLayout layout = new GridLayout(3, false);
     layout.marginWidth = 0;
+    //gross, but on the Mac the search controls are cut off on the bottom, 
+    //so they need to be bumped up  a little. other OSs are fine.
+    if(isMac()){
+      layout.marginHeight = -4;
+    }
     layout.verticalSpacing = 0;
     composite.setLayout(layout);
     composite.setBackground(null);
