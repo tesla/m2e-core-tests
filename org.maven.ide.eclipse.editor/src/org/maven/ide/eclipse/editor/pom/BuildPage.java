@@ -56,8 +56,8 @@ import org.eclipse.ui.forms.widgets.Section;
 import org.maven.ide.components.pom.Build;
 import org.maven.ide.components.pom.BuildBase;
 import org.maven.ide.components.pom.Extension;
-import org.maven.ide.components.pom.ExtensionsType;
 import org.maven.ide.components.pom.PomFactory;
+import org.maven.ide.components.pom.PomPackage;
 import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.actions.OpenUrlAction;
 import org.maven.ide.eclipse.core.IMavenConstants;
@@ -237,8 +237,8 @@ public class BuildPage extends MavenPomEditorPage {
  
         List<Extension> list = extensionsEditor.getSelection();
         for(Extension extension : list) {
-          Command removeCommand = RemoveCommand.create(editingDomain, model.getBuild().getExtensions(), //
-              POM_PACKAGE.getExtensionsType_Extension(), extension);
+          Command removeCommand = RemoveCommand.create(editingDomain, model.getBuild(), //
+              POM_PACKAGE.getBuild_Extensions(), extension);
           compoundCommand.append(removeCommand);
         }
         
@@ -488,7 +488,7 @@ public class BuildPage extends MavenPomEditorPage {
       setText(testOutputText, build.getTestOutputDirectory());
       setText(scriptsSourceText, build.getScriptSourceDirectory());
       
-      extensionsEditor.setInput(build.getExtensions() == null ? null : build.getExtensions().getExtension());
+      extensionsEditor.setInput(build.getExtensions() == null ? null : build.getExtensions());
     }
     
     FormUtils.setReadonly(foldersSection, isReadOnly());
@@ -537,6 +537,7 @@ public class BuildPage extends MavenPomEditorPage {
 
   public void updateView(Notification notification) {
     EObject object = (EObject) notification.getNotifier();
+    Object feature = notification.getFeature();
     if (object instanceof Build) {
       loadBuild();
     }
@@ -544,7 +545,7 @@ public class BuildPage extends MavenPomEditorPage {
       loadBuildBase();
     }
 
-    if (object instanceof ExtensionsType) {
+    if (feature == PomPackage.Literals.BUILD__EXTENSIONS) {
       extensionsEditor.refresh();
     }
     
@@ -571,29 +572,17 @@ public class BuildPage extends MavenPomEditorPage {
       compoundCommand.append(command);
     }
     
-    boolean created = false;
-    ExtensionsType extensions = build.getExtensions();
-    if(extensions==null) {
-      extensions = PomFactory.eINSTANCE.createExtensionsType();
-      Command command = SetCommand.create(editingDomain, build, POM_PACKAGE.getBuild_Extensions(), extensions);
-      compoundCommand.append(command);
-      created = true;
-    }
-    
     Extension extension = PomFactory.eINSTANCE.createExtension();
     extension.setGroupId(groupId);
     extension.setArtifactId(artifactId);
     extension.setVersion(version);
     
-    Command addCommand = AddCommand.create(editingDomain, extensions, //
-        POM_PACKAGE.getExtensionsType_Extension(), extension);
+    Command addCommand = AddCommand.create(editingDomain, build, //
+        POM_PACKAGE.getBuild_Extensions(), extension);
     compoundCommand.append(addCommand);
     
     editingDomain.getCommandStack().execute(compoundCommand);
-    
-    if(created) {
-      extensionsEditor.setInput(extensions.getExtension());
-    }
+
     extensionsEditor.setSelection(Collections.singletonList(extension));
     extensionGroupIdText.setFocus();
   }

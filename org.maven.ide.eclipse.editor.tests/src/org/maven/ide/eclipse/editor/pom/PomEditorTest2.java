@@ -120,7 +120,7 @@ public class PomEditorTest2 extends PomEditorTestBase {
   }
   
   private void addProperty(String name, String value) throws WidgetSearchException, WaitTimedOutException {
-    getUI().click(new ButtonLocator("Add..."));
+    getUI().click(new ButtonLocator("Add...").findAll(getUI())[0]);
     getUI().wait(new ShellShowingCondition("Add property"));
     getUI().enterText(name);
     getUI().keyClick(WT.TAB);

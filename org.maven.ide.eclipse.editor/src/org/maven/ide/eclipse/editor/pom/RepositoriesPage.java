@@ -21,9 +21,7 @@ import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.maven.ide.components.pom.DistributionManagement;
-import org.maven.ide.components.pom.PluginRepositories;
 import org.maven.ide.components.pom.PomFactory;
-import org.maven.ide.components.pom.Repositories;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.editor.composites.RepositoriesComposite;
 
@@ -64,32 +62,6 @@ public class RepositoriesPage extends MavenPomEditorPage {
   }
 
   public void loadData() {
-    ValueProvider<Repositories> repositoriesProvider = new ValueProvider<Repositories>() {
-      public Repositories getValue() {
-        return model.getRepositories();
-      }
-      public Repositories create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
-        Repositories repositories = PomFactory.eINSTANCE.createRepositories();
-        Command createDependenciesCommand = SetCommand.create(editingDomain, model,
-            POM_PACKAGE.getModel_Repositories(), repositories);
-        compoundCommand.append(createDependenciesCommand);
-        return repositories;
-      }
-    };
-    
-    ValueProvider<PluginRepositories> pluginRepositoriesProvider = new ValueProvider<PluginRepositories>() {
-      public PluginRepositories getValue() {
-        return model.getPluginRepositories();
-      }
-      public PluginRepositories create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
-        PluginRepositories pluginRepositories = PomFactory.eINSTANCE.createPluginRepositories();
-        Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_PluginRepositories(),
-            pluginRepositories);
-        compoundCommand.append(command);
-        return pluginRepositories;
-      }
-    };
-    
     ValueProvider<DistributionManagement> distributionManagementProvider = new ValueProvider<DistributionManagement>() {
       public DistributionManagement getValue() {
         return model.getDistributionManagement();
@@ -103,7 +75,7 @@ public class RepositoriesPage extends MavenPomEditorPage {
       }
     };
     
-    repositoriesComposite.loadData(this, repositoriesProvider, pluginRepositoriesProvider, distributionManagementProvider);
+    repositoriesComposite.loadData(this, model, distributionManagementProvider);
   }
   
   public void updateView(Notification notification) {

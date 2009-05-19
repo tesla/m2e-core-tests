@@ -19,7 +19,7 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.maven.ide.components.pom.Dependencies;
+import org.eclipse.emf.common.util.EList;
 import org.maven.ide.components.pom.Dependency;
 import org.maven.ide.components.pom.Model;
 import org.maven.ide.components.pom.Parent;
@@ -51,6 +51,7 @@ public class MavenModelEditTest extends TestCase {
   public void testAttributeRoundtrip() throws Exception {
     PomResourceImpl resource = loadModel("attr.xml");
     assertEquals(loadFile("attr.xml"), MavenModelUtil.toString(resource));
+    resource.unload();
   }
 
   public void testAttributeRemove() throws Exception {
@@ -61,6 +62,7 @@ public class MavenModelEditTest extends TestCase {
     model.setVersion(null);
     
     assertEquals(loadFile("attr_remove.xml"), MavenModelUtil.toString(resource));
+    resource.unload();
   }
 
   public void testAttributeAdd() throws Exception {
@@ -69,6 +71,7 @@ public class MavenModelEditTest extends TestCase {
     model.setDescription("description");
     
     assertEquals(loadFile("attr_add.xml"), MavenModelUtil.toString(resource));
+    resource.unload();
   }
 
   public void testAttributeChange() throws Exception {
@@ -76,11 +79,13 @@ public class MavenModelEditTest extends TestCase {
     Model model = resource.getModel();
     model.setArtifactId("changed-artifactId");
     assertEquals(loadFile("attr_change.xml"), MavenModelUtil.toString(resource));
+    resource.unload();
   }
 
   public void testOneRoundtrip() throws Exception {
     PomResourceImpl resource = loadModel("one.xml");
     assertEquals(loadFile("one.xml"), MavenModelUtil.toString(resource));
+    resource.unload();
   }
 
   public void testOneRemove() throws Exception {
@@ -90,6 +95,7 @@ public class MavenModelEditTest extends TestCase {
     model.setParent(null);
     
     assertEquals(loadFile("one_remove.xml"), MavenModelUtil.toString(resource));
+    resource.unload();
   }
 
   public void testOneReplace() throws Exception {
@@ -100,11 +106,13 @@ public class MavenModelEditTest extends TestCase {
     parent.setArtifactId("tttt");
     
     assertEquals(loadFile("one_replace.xml"), MavenModelUtil.toString(resource));
+    resource.unload();
   }
 
   public void testManyRoundtrip() throws Exception {
     PomResourceImpl resource = loadModel("many.xml");
     assertEquals(loadFile("many.xml"), MavenModelUtil.toString(resource));
+    resource.unload();
   }
 
   public void testManyRemove() throws Exception {
@@ -112,9 +120,10 @@ public class MavenModelEditTest extends TestCase {
     Model model = resource.getModel();
 
     // model.getProject().getDependencies().removeDependency(1);
-    model.getDependencies().getDependency().remove(1);
+    model.getDependencies().remove(1);
 
     assertEquals(loadFile("many_remove.xml"), MavenModelUtil.toString(resource));
+    resource.unload();
   }
 
   public void testManyChange() throws Exception {
@@ -122,10 +131,11 @@ public class MavenModelEditTest extends TestCase {
     Model model = resource.getModel();
 
     // Dependency dependency = model.getDependencies().getDependencyArray(0);
-    Dependency dependency = model.getDependencies().getDependency().get(0);
+    Dependency dependency = model.getDependencies().get(0);
     dependency.setArtifactId("changed-maven-lifecycle");
     
     assertEquals(loadFile("many_change.xml"), MavenModelUtil.toString(resource));
+    resource.unload();
   }
 
   public void testManyAdd() throws Exception {
@@ -136,29 +146,33 @@ public class MavenModelEditTest extends TestCase {
     dependency.setGroupId("added-groupId");
     dependency.setArtifactId("added-artifactId");
     
-    Dependencies dependencies = model.getDependencies();
-    dependencies.getDependency().add(dependency);
+    EList<Dependency> dependencies = model.getDependencies();
+    dependencies.add(dependency);
 
     assertEquals(loadFile("many_add.xml"), MavenModelUtil.toString(resource));
+    resource.unload();
   }
 
   public void testManybuildinRoundtrip() throws Exception {
     PomResourceImpl resource = loadModel("manybuiltin.xml");
     assertEquals(loadFile("manybuiltin.xml"), MavenModelUtil.toString(resource));
+    resource.unload();
   }
 
   public void testManybuildinRemove() throws Exception {
     PomResourceImpl resource = loadModel("manybuiltin.xml");
     Model model = resource.getModel();
-    model.getModules().getModule().remove(0);
+    model.getModules().remove(0);
     assertEquals(loadFile("manybuiltin_remove.xml"), MavenModelUtil.toString(resource));
+    resource.unload();
   }
 
   public void testManybuildincommentRemove() throws Exception {
     PomResourceImpl resource = loadModel("manybuiltincomment.xml");
     Model model = resource.getModel();
-    model.getModules().getModule().remove(1);
+    model.getModules().remove(1);
     assertEquals(loadFile("manybuiltincomment_remove.xml"), MavenModelUtil.toString(resource));
+    resource.unload();
   }
 
 // XXX restore properties tests  
@@ -210,6 +224,7 @@ public class MavenModelEditTest extends TestCase {
   public void testXpp3domRoundtrip() throws Exception {
     PomResourceImpl resource = loadModel("xpp3dom.xml");
     assertEquals(loadFile("xpp3dom.xml"), MavenModelUtil.toString(resource));
+    resource.unload();
   }
 
   public void testEncoding() throws Exception {
@@ -220,6 +235,7 @@ public class MavenModelEditTest extends TestCase {
     String expected = "\u043f\u043e\u002d\u0440\u0443\u0441\u0441\u043a\u0438";
     assertEquals(expected, description);
     assertEquals(loadFile("encoding.xml"), MavenModelUtil.toString(resource));
+    resource.unload();
   }
 
   private PomResourceImpl loadModel(String name) throws Exception {

@@ -110,7 +110,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
   private static final String PLUGIN_ID = "org.maven.ide.eclipse.integration.tests";
 
   // Has the maven central index been cached into local workspace?
-  private static boolean indexDownloaded = false;
+  private static boolean indexDownloaded = true;
 
   // URL of local nexus server, tests will attempt download maven/central index from here.
   private static final String DEFAULT_NEXUS_URL = "http://localhost:8081/nexus";
@@ -560,6 +560,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
       getUI().click(2, locator);
     } else {
       getUI().click(locator);
+      getUI().setFocus(locator);
       getUI().keyClick(SWT.MOD1, 'a');
     }
     getUI().enterText(text);

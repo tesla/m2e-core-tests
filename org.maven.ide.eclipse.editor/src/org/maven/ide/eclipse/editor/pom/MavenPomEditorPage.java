@@ -237,6 +237,7 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
         case Notification.MOVE:
         case Notification.REMOVE:
         case Notification.SET:
+        case Notification.UNSET:
         case Notification.ADD_MANY: //this is for properties (clear/addAll is used for any properties update)
           if (getManagedForm() != null)
             updateView(notification);
@@ -245,7 +246,6 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
         default:
           break;
           
-        // case Notification.UNSET:
         // case Notification.ADD_MANY:
         // case Notification.REMOVE_MANY:
       }
@@ -403,20 +403,19 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
     ModifyListener listener = new ModifyListener() {
       public void modifyText(ModifyEvent e) {
         T owner = provider.getValue();
+        CompoundCommand compoundCommand = new CompoundCommand();
         if(owner==null && !provider.isEmpty()) {
-          CompoundCommand compoundCommand = new CompoundCommand();
-          provider.create(getEditingDomain(), compoundCommand);
-          getEditingDomain().getCommandStack().execute(compoundCommand);
-          owner = provider.getValue();
+          owner = provider.create(getEditingDomain(), compoundCommand);
         }
         
         Command command;
         if(adapter.getText().equals(defaultValue) || isEmpty(adapter.getText())) {
-          command = SetCommand.create(getEditingDomain(), owner, feature, null);
+          command = SetCommand.create(getEditingDomain(), owner, feature, SetCommand.UNSET_VALUE);
         } else {
           command = SetCommand.create(getEditingDomain(), owner, feature, adapter.getText());
         }
-        getEditingDomain().getCommandStack().execute(command);
+        compoundCommand.append(command);
+        getEditingDomain().getCommandStack().execute(compoundCommand);
         registerListeners();
       }
     };

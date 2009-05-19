@@ -24,7 +24,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.common.command.CompoundCommand;
 import org.maven.ide.components.pom.Model;
-import org.maven.ide.components.pom.PropertyPair;
+import org.maven.ide.components.pom.PropertyElement;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
@@ -82,7 +82,7 @@ public class RefactoringModelResources {
   }
 
   public static Model loadModel(IFile file) throws CoreException {
-    return MavenPlugin.getDefault().getMavenModelManager().loadResource(file).getModel();
+    return (Model)MavenPlugin.getDefault().getMavenModelManager().loadResource(file).getContents().get(0);
   }
   
   public CompoundCommand getCommand() {
@@ -158,7 +158,7 @@ public class RefactoringModelResources {
   }
 
   public static class PropertyInfo {
-    protected PropertyPair pair;
+    protected PropertyElement pair;
     protected RefactoringModelResources resource;
     protected Command newValue;
     
@@ -170,11 +170,11 @@ public class RefactoringModelResources {
       this.newValue = newValue;
     }
     
-    public PropertyPair getPair() {
+    public PropertyElement getPair() {
       return pair;
     }
 
-    public void setPair(PropertyPair pair) {
+    public void setPair(PropertyElement pair) {
       this.pair = pair;
     }
 

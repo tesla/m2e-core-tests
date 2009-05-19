@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.SWT;
@@ -30,6 +31,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.forms.widgets.Section;
+import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
@@ -178,12 +180,13 @@ public class PomEditorTestBase extends UIIntegrationTestCase {
         public void run() {
           sse[0] = (StructuredTextEditor) editor.getActiveEditor();
           
-          IDocument structuredDocument = sse[0].getDocumentProvider().getDocument(sse[0].getEditorInput());
+          IStructuredDocument structuredDocument = (IStructuredDocument)sse[0].getDocumentProvider().getDocument(sse[0].getEditorInput());
           String text = structuredDocument.get();
           int pos1 = text.indexOf(startMarker); 
           int pos2 = text.indexOf(endMarker);
-          text = text.substring(0, pos1) + text.substring(pos2 + endMarker.length());
-          structuredDocument.set(text);
+          if(pos1 > -1 && pos2 > -1) {
+            structuredDocument.replaceText(this, pos1, (pos2 + endMarker.length()) - pos1, null);
+          }
         }
       });
       

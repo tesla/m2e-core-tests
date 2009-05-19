@@ -15,6 +15,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -38,10 +39,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
-import org.eclipse.jem.util.emf.workbench.EMFWorkbenchContextBase;
-import org.eclipse.wst.common.internal.emf.resource.EMF2DOMRenderer;
+import org.eclipse.emf.ecore.resource.Resource;
 
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
@@ -65,14 +64,10 @@ import org.apache.maven.shared.dependency.tree.traversal.FilteringDependencyNode
 
 import org.maven.ide.components.pom.Build;
 import org.maven.ide.components.pom.Configuration;
-import org.maven.ide.components.pom.Dependencies;
 import org.maven.ide.components.pom.Dependency;
 import org.maven.ide.components.pom.Exclusion;
-import org.maven.ide.components.pom.ExclusionsType;
 import org.maven.ide.components.pom.Model;
-import org.maven.ide.components.pom.Modules;
 import org.maven.ide.components.pom.Plugin;
-import org.maven.ide.components.pom.Plugins;
 import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.util.PomResourceFactoryImpl;
 import org.maven.ide.components.pom.util.PomResourceImpl;
@@ -113,40 +108,18 @@ public class MavenModelManager {
     URI uri = URI.createPlatformResourceURI(path, true);
 
     try {
-      PomResourceFactoryImpl factory = new PomResourceFactoryImpl();
-      PomResourceImpl resource = (PomResourceImpl) factory.createResource(uri);
-      
-      EMFWorkbenchContextBase contextBase = new EMFWorkbenchContextBase(pomFile.getProject());
-      contextBase.getResourceSet().getResources().add(resource);
-      
-      resource.load(Collections.EMPTY_MAP);
-      return resource;
+      Resource resource = new PomResourceFactoryImpl().createResource(uri);
+      resource.load(new HashMap());
+      return (PomResourceImpl)resource;
 
-    } catch(IOException ex) {
+    } catch(Exception ex) {
       String msg = "Can't load model " + pomFile;
       MavenLogger.log(msg, ex);
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
     }
   }
 
-  public Model loadModel(String pomFile) throws CoreException {
-    URI uri = URI.createFileURI(pomFile);
 
-    PomResourceFactoryImpl factory = new PomResourceFactoryImpl();
-    PomResourceImpl resource = (PomResourceImpl) factory.createResource(uri);
-
-    // disable SSE support for read-only external documents
-    resource.setRenderer(new EMF2DOMRenderer());
-
-    try {
-      resource.load(Collections.EMPTY_MAP);
-      return (Model) resource.getContents().get(0);
-    } catch(IOException ex) {
-      String msg = "Can't load model " + pomFile;
-      MavenLogger.log(msg, ex);
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
-    }
-  }
 
   public org.apache.maven.model.Model readMavenModel(Reader reader) throws CoreException {
     try {
@@ -360,17 +333,7 @@ public class MavenModelManager {
     try {
       PomResourceImpl resource = loadResource(pomFile);
       updater.update(resource.getModel());
-
-//      XmlCursor cursor = projectDocument.newCursor();
-//      if (cursor.toFirstChild()) {
-//        cursor.setAttributeText(new QName("http://www.w3.org/2001/XMLSchema-instance","schemaLocation"), location);
-//      }      
-
       resource.save(Collections.EMPTY_MAP);
-
-      // pomFile.setContents(new ByteArrayInputStream(bos.toByteArray()), true, true, null);
-      // pomFile.refreshLocal(IResource.DEPTH_ONE, null); // TODO ???
-
     } catch(Exception ex) {
       String msg = "Unable to update " + pom;
       console.logError(msg + "; " + ex.getMessage());
@@ -428,12 +391,6 @@ public class MavenModelManager {
     }
 
     public void update(org.maven.ide.components.pom.Model model) {
-      Dependencies dependencies = model.getDependencies();
-      if(dependencies==null) {
-        dependencies = POM_FACTORY.createDependencies();
-        model.setDependencies(dependencies);
-      }
-      
       Dependency dependency = POM_FACTORY.createDependency();
       
       dependency.setGroupId(this.dependency.getGroupId());
@@ -466,8 +423,6 @@ public class MavenModelManager {
       }
 
       if(!this.dependency.getExclusions().isEmpty()) {
-        ExclusionsType exclusions = POM_FACTORY.createExclusionsType();
-        EList<Exclusion> exclusionList = exclusions.getExclusion();
 
         @SuppressWarnings("unchecked")
         Iterator<org.apache.maven.model.Exclusion> it = this.dependency.getExclusions().iterator();
@@ -476,14 +431,12 @@ public class MavenModelManager {
           Exclusion exclusion = POM_FACTORY.createExclusion();
           exclusion.setGroupId(e.getGroupId());
           exclusion.setArtifactId(e.getArtifactId());
-          exclusionList.add(exclusion);
+          dependency.getExclusions().add(exclusion);
         }
-        
-        dependency.setExclusions(exclusions);
       }
       
       // search for dependency with same GAC and remove if found
-      Iterator<Dependency> it = dependencies.getDependency().iterator();
+      Iterator<Dependency> it = model.getDependencies().iterator();
       boolean mergeScope = false;
       String oldScope = Artifact.SCOPE_COMPILE;
       while (it.hasNext()) {
@@ -571,7 +524,7 @@ public class MavenModelManager {
         }
       }
       
-      dependencies.getDependency().add(dependency);
+      model.getDependencies().add(dependency);
     }
 
     @SuppressWarnings("null")
@@ -599,13 +552,7 @@ public class MavenModelManager {
     }
 
     public void update(Model model) {
-      Modules modules = model.getModules();
-      if(modules==null) {
-        modules = POM_FACTORY.createModules();
-        model.setModules(modules);
-      }
-
-      modules.getModule().add(moduleName);
+      model.getModules().add(moduleName);
     }
   }
 
@@ -631,12 +578,6 @@ public class MavenModelManager {
         model.setBuild(build);
       }
 
-      Plugins plugins = build.getPlugins();
-      if(plugins==null) {
-        plugins = POM_FACTORY.createPlugins();
-        build.setPlugins(plugins);
-      }
-
       Plugin plugin = POM_FACTORY.createPlugin();
       
       if(!"org.apache.maven.plugins".equals(this.groupId)) {
@@ -652,7 +593,7 @@ public class MavenModelManager {
       Configuration configuration = POM_FACTORY.createConfiguration();
       plugin.setConfiguration(configuration);
       
-      plugins.getPlugin().add(plugin);
+      build.getPlugins().add(plugin);
     }
   }
 

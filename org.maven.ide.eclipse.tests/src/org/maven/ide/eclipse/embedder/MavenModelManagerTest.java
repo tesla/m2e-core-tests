@@ -231,7 +231,7 @@ public class MavenModelManagerTest extends TestCase {
     dependency.setArtifactId("spring");
     dependency.setVersion("2.5");
     
-    PomResourceImpl resource = MavenModelUtil.createResource(project, "testAddingDependencies.xml", pom);
+    PomResourceImpl resource = MavenModelUtil.createResource(project, "testAddingPlugin.xml", pom);
     new MavenModelManager.PluginAdder("org.apache.maven.plugins", "maven-help-plugin", "2.0.2").update(resource.getModel());
     
     assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + // 
@@ -246,8 +246,7 @@ public class MavenModelManagerTest extends TestCase {
         "      <plugin>\n" + // 
         "        <artifactId>maven-help-plugin</artifactId>\n" + // 
         "        <version>2.0.2</version>\n" +  //
-        "        <configuration>\n" + // 
-        "        </configuration>\n" + // 
+        "        <configuration></configuration>\n" + // 
         "      </plugin>\n" + // 
         "    </plugins>\n" + // 
         "  </build>\n" + //

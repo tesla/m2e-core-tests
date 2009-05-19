@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.common.command.BasicCommandStack;
 import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.common.notify.impl.AdapterFactoryImpl;
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.edit.domain.AdapterFactoryEditingDomain;
 import org.eclipse.emf.edit.provider.ComposedAdapterFactory;
@@ -39,8 +40,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 import org.maven.ide.components.pom.Model;
-import org.maven.ide.components.pom.Properties;
-import org.maven.ide.components.pom.PropertyPair;
+import org.maven.ide.components.pom.PropertyElement;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
@@ -141,13 +141,13 @@ public abstract class AbstractPomRefactoring extends Refactoring {
         //fill properties (from the root)
         for (int i=workspaceParents.size() - 1; i >= 0; i--) {
           RefactoringModelResources resource = workspaceParents.get(i);
-          Properties props = resource.getTmpModel().getProperties();
+          EList<PropertyElement> props = resource.getTmpModel().getProperties();
           if (props == null)
             continue;
-          Iterator<?> it = props.getProperty().iterator();
+          Iterator<?> it = props.iterator();
           while (it.hasNext()) {
-            PropertyPair pair = (PropertyPair) it.next();
-            String pName = pair.getKey();
+            PropertyElement pair = (PropertyElement) it.next();
+            String pName = pair.getName();
             PropertyInfo info = properties.get(pName);
             if (info == null) {
               info = new PropertyInfo();

@@ -16,7 +16,9 @@ import java.util.List;
 import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.common.notify.Notification;
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.edit.command.AddCommand;
 import org.eclipse.emf.edit.command.RemoveCommand;
 import org.eclipse.emf.edit.command.SetCommand;
@@ -43,13 +45,11 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.Section;
 import org.maven.ide.components.pom.Contributor;
-import org.maven.ide.components.pom.ContributorsType;
 import org.maven.ide.components.pom.Developer;
-import org.maven.ide.components.pom.DevelopersType;
+import org.maven.ide.components.pom.Model;
 import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.PomPackage;
-import org.maven.ide.components.pom.Properties;
-import org.maven.ide.components.pom.Roles;
+import org.maven.ide.components.pom.PropertyElement;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.editor.pom.FormUtils;
 import org.maven.ide.eclipse.editor.pom.MavenPomEditorPage;
@@ -71,9 +71,7 @@ public class TeamComposite extends Composite {
 
   // controls
 
-  ValueProvider<DevelopersType> developersProvider;
-  
-  ValueProvider<ContributorsType> contributorsProvider;
+  Model model;
   
   ListEditorComposite<Developer> developersEditor;
 
@@ -150,23 +148,13 @@ public class TeamComposite extends Composite {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = parent.getEditingDomain();
 
-        DevelopersType developers = developersProvider.getValue();
-        boolean developersCreated = false;
-        if(developers == null) {
-          developers = developersProvider.create(editingDomain, compoundCommand);
-          developersCreated = true;
-        }
-
         Developer developer = PomFactory.eINSTANCE.createDeveloper();
-        Command addDependencyCommand = AddCommand.create(editingDomain, developers, POM_PACKAGE
-            .getDevelopersType_Developer(), developer);
+        Command addDependencyCommand = AddCommand.create(editingDomain, model, POM_PACKAGE
+            .getModel_Developers(), developer);
         compoundCommand.append(addDependencyCommand);
 
         editingDomain.getCommandStack().execute(compoundCommand);
 
-        if(developersCreated) {
-          loadDevelopers();
-        }
         developersEditor.setSelection(Collections.singletonList(developer));
         updateDetails(developer);
         userIdText.setFocus();
@@ -180,8 +168,8 @@ public class TeamComposite extends Composite {
 
         List<Developer> developerList = developersEditor.getSelection();
         for(Developer developer : developerList) {
-          Command removeCommand = RemoveCommand.create(editingDomain, developersProvider.getValue(), POM_PACKAGE
-              .getDevelopersType_Developer(), developer);
+          Command removeCommand = RemoveCommand.create(editingDomain, model, POM_PACKAGE
+              .getModel_Developers(), developer);
           compoundCommand.append(removeCommand);
         }
 
@@ -224,23 +212,13 @@ public class TeamComposite extends Composite {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = parent.getEditingDomain();
 
-        ContributorsType contributors = contributorsProvider.getValue();
-        boolean contributorsCreated = false;
-        if(contributors == null) {
-          contributors = contributorsProvider.create(editingDomain, compoundCommand);
-          contributorsCreated = true;
-        }
-
         Contributor contributor = PomFactory.eINSTANCE.createContributor();
-        Command addDependencyCommand = AddCommand.create(editingDomain, contributors, POM_PACKAGE
-            .getContributorsType_Contributor(), contributor);
+        Command addDependencyCommand = AddCommand.create(editingDomain, model, POM_PACKAGE
+            .getModel_Contributors(), contributor);
         compoundCommand.append(addDependencyCommand);
 
         editingDomain.getCommandStack().execute(compoundCommand);
 
-        if(contributorsCreated) {
-          loadContributors();
-        }
         contributorsEditor.setSelection(Collections.singletonList(contributor));
         updateDetails(contributor);
         userNameText.setFocus();
@@ -254,8 +232,8 @@ public class TeamComposite extends Composite {
 
         List<Contributor> contributorList = contributorsEditor.getSelection();
         for(Contributor contributor : contributorList) {
-          Command removeCommand = RemoveCommand.create(editingDomain, contributorsProvider.getValue(), POM_PACKAGE
-              .getContributorsType_Contributor(), contributor);
+          Command removeCommand = RemoveCommand.create(editingDomain, model, POM_PACKAGE
+              .getModel_Contributors(), contributor);
           compoundCommand.append(removeCommand);
         }
 
@@ -394,21 +372,22 @@ public class TeamComposite extends Composite {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = parent.getEditingDomain();
 
-        Roles roles = getRoles();
-        if(roles == null) {
-          roles = PomFactory.eINSTANCE.createRoles();
-          Command createRolesCommand = SetCommand.create(editingDomain, currentSelection,
-              currentSelection instanceof Contributor ? POM_PACKAGE.getContributor_Roles() : POM_PACKAGE
-                  .getDeveloper_Roles(), roles);
-          compoundCommand.append(createRolesCommand);
+        EObject parentObject = currentSelection;
+        EStructuralFeature feature = null;
+        if(currentSelection != null) {
+          if(currentSelection instanceof Contributor) {
+            feature = POM_PACKAGE.getContributor_Roles();
+          } else if(currentSelection instanceof Developer) {
+            feature = POM_PACKAGE.getDeveloper_Roles();
+          }
         }
 
-        Command addRoleCommand = AddCommand.create(editingDomain, roles, POM_PACKAGE.getRoles_Role(), "?");
+        Command addRoleCommand = AddCommand.create(editingDomain, parentObject, feature, "?");
         compoundCommand.append(addRoleCommand);
 
         editingDomain.getCommandStack().execute(compoundCommand);
 
-        updateRoles(roles);
+        updateRoles((EList<String>)parentObject.eGet(feature));
       }
     });
 
@@ -417,10 +396,18 @@ public class TeamComposite extends Composite {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = parent.getEditingDomain();
 
-        Roles roles = getRoles();
+        EObject parentObject = currentSelection;
+        EStructuralFeature feature = null;
+        if(currentSelection != null) {
+          if(currentSelection instanceof Contributor) {
+            feature = POM_PACKAGE.getContributor_Roles();
+          } else if(currentSelection instanceof Developer) {
+            feature = POM_PACKAGE.getDeveloper_Roles();
+          }
+        }
         List<String> roleList = rolesEditor.getSelection();
         for(String role : roleList) {
-          Command removeCommand = RemoveCommand.create(editingDomain, roles, POM_PACKAGE.getRoles_Role(), role);
+          Command removeCommand = RemoveCommand.create(editingDomain, parentObject, feature, role);
           compoundCommand.append(removeCommand);
         }
 
@@ -439,10 +426,19 @@ public class TeamComposite extends Composite {
  
       public void modify(Object element, String property, Object value) {
         int n = rolesEditor.getViewer().getTable().getSelectionIndex();
-        if(!value.equals(getRoles().getRole().get(n))) {
+        if(!value.equals(getRoles().get(n))) {
           EditingDomain editingDomain = parent.getEditingDomain();
-          Command command = SetCommand.create(editingDomain, getRoles(),
-              POM_PACKAGE.getRoles_Role(), value, n);
+          EObject parentObject = currentSelection;
+          EStructuralFeature feature = null;
+          if(currentSelection != null) {
+            if(currentSelection instanceof Contributor) {
+              feature = POM_PACKAGE.getContributor_Roles();
+            } else if(currentSelection instanceof Developer) {
+              feature = POM_PACKAGE.getDeveloper_Roles();
+            }
+          }
+          Command command = SetCommand.create(editingDomain, parentObject,
+              feature, value, n);
           editingDomain.getCommandStack().execute(command);
         }
       }
@@ -455,16 +451,14 @@ public class TeamComposite extends Composite {
   }
 
   public void loadContributors() {
-    ContributorsType contributors = contributorsProvider.getValue();
     changingSelection = true;
-    contributorsEditor.setInput(contributors == null ? null : contributors.getContributor());
+    contributorsEditor.setInput(model.getContributors());
     changingSelection = false;
   }
 
   void loadDevelopers() {
-    DevelopersType developers = developersProvider.getValue();
     changingSelection = true;
-    developersEditor.setInput(developers == null ? null : developers.getDeveloper());
+    developersEditor.setInput(model.getDevelopers());
     changingSelection = false;
   }
 
@@ -505,7 +499,7 @@ public class TeamComposite extends Composite {
     FormUtils.setEnabled(detailsComposite, true);
     FormUtils.setReadonly(detailsComposite, parent.isReadOnly());
 
-    Roles roles = null;
+    EList<String> roles = null;
     if(eo instanceof Contributor) {
       Contributor contributor = (Contributor) eo;
       updateContributorDetails(contributor);
@@ -566,10 +560,11 @@ public class TeamComposite extends Composite {
 
   public void updateView(Notification notification) {
     EObject object = (EObject) notification.getNotifier();
-
-    if(object instanceof DevelopersType) {
+    Object feature = notification.getFeature();
+    
+    if(feature == PomPackage.Literals.MODEL__DEVELOPERS) {
       developersEditor.refresh();
-    } else if(object instanceof ContributorsType) {
+    } else if(feature == PomPackage.Literals.MODEL__CONTRIBUTORS) {
       contributorsEditor.refresh();
     } else {
       Object notificationObject = MavenPomEditorPage.getFromNotification(notification);
@@ -583,18 +578,17 @@ public class TeamComposite extends Composite {
 
         if(object == currentSelection)
           updateDetails(object);
-      } else if(object instanceof Roles) {
-        if(object == getRoles() && (notificationObject == null || notificationObject instanceof Roles)) {
-          updateRoles((Roles) notificationObject);
+      } else if(feature == PomPackage.Literals.DEVELOPER__ROLES || feature == PomPackage.Literals.CONTRIBUTOR__ROLES) {
+        EList<String> roles = (EList<String>)object.eGet((EStructuralFeature)feature);
+        if(object == getRoles()) {
+          updateRoles(roles);
         }
       }
     }
   }
 
-  public void loadData(ValueProvider<DevelopersType> developersProvider,
-      ValueProvider<ContributorsType> contributorsProvider) {
-    this.developersProvider = developersProvider;
-    this.contributorsProvider = contributorsProvider;
+  public void loadData(Model model) {
+    this.model = model;
     loadDevelopers();
     loadContributors();
 
@@ -604,7 +598,7 @@ public class TeamComposite extends Composite {
     updateDetails(null);
   }
 
-  protected Roles getRoles() {
+  protected EList<String> getRoles() {
     if(currentSelection != null) {
       if(currentSelection instanceof Contributor) {
         return ((Contributor) currentSelection).getRoles();
@@ -615,11 +609,11 @@ public class TeamComposite extends Composite {
     return null;
   }
   
-  protected void updateRoles(Roles roles) {
-    rolesEditor.setInput(roles == null ? null : roles.getRole());
+  protected void updateRoles(EList<String> roles) {
+    rolesEditor.setInput(roles);
   }
 
-  protected Properties getProperties() {
+  protected EList<PropertyElement> getProperties() {
     if(currentSelection != null) {
       if(currentSelection instanceof Contributor) {
         return ((Contributor) currentSelection).getProperties();

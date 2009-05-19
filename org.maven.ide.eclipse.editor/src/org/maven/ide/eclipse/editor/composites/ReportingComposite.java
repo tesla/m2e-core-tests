@@ -61,11 +61,8 @@ import org.eclipse.ui.forms.widgets.Section;
 import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.PomPackage;
 import org.maven.ide.components.pom.ReportPlugin;
-import org.maven.ide.components.pom.ReportPlugins;
 import org.maven.ide.components.pom.ReportSet;
-import org.maven.ide.components.pom.ReportSetsType;
 import org.maven.ide.components.pom.Reporting;
-import org.maven.ide.components.pom.StringReports;
 import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.actions.OpenUrlAction;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
@@ -228,12 +225,12 @@ public class ReportingComposite extends Composite {
         EditingDomain editingDomain = parent.getEditingDomain();
 
         Reporting reporting = reportingProvider.getValue();
-        ReportPlugins reportPlugins = reporting == null ? null : reporting.getPlugins();
-        if(reportPlugins != null) {
+        
+        if(reporting != null) {
           List<ReportPlugin> pluginList = reportPluginsEditor.getSelection();
           for(ReportPlugin reportPlugin : pluginList) {
-            Command removeCommand = RemoveCommand.create(editingDomain, reportPlugins, POM_PACKAGE
-                .getReportPlugins_Plugin(), reportPlugin);
+            Command removeCommand = RemoveCommand.create(editingDomain, reporting, POM_PACKAGE
+                .getReporting_Plugins(), reportPlugin);
             compoundCommand.append(removeCommand);
           }
 
@@ -480,17 +477,8 @@ public class ReportingComposite extends Composite {
 
         boolean reportSetsCreated = false;
 
-        ReportSetsType reportSets = currentReportPlugin.getReportSets();
-        if(reportSets == null) {
-          reportSets = PomFactory.eINSTANCE.createReportSetsType();
-          Command addReportSets = SetCommand.create(editingDomain, currentReportPlugin, POM_PACKAGE
-              .getReportPlugin_ReportSets(), reportSets);
-          compoundCommand.append(addReportSets);
-          reportSetsCreated = true;
-        }
-
         ReportSet reportSet = PomFactory.eINSTANCE.createReportSet();
-        Command addReportSet = AddCommand.create(editingDomain, reportSets, POM_PACKAGE.getReportSetsType_ReportSet(),
+        Command addReportSet = AddCommand.create(editingDomain, currentReportPlugin, POM_PACKAGE.getReportPlugin_ReportSets(),
             reportSet);
         compoundCommand.append(addReportSet);
         editingDomain.getCommandStack().execute(compoundCommand);
@@ -511,18 +499,16 @@ public class ReportingComposite extends Composite {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = parent.getEditingDomain();
 
-        ReportSetsType reportSets = currentReportPlugin.getReportSets();
-        if(reportSets != null) {
-          List<ReportSet> reportSetList = reportSetsEditor.getSelection();
-          for(ReportSet reportSet : reportSetList) {
-            Command removeCommand = RemoveCommand.create(editingDomain, reportSets, POM_PACKAGE
-                .getReportSetsType_ReportSet(), reportSet);
-            compoundCommand.append(removeCommand);
-          }
 
-          editingDomain.getCommandStack().execute(compoundCommand);
-          updateReportPluginDetails(currentReportPlugin);
+        List<ReportSet> reportSetList = reportSetsEditor.getSelection();
+        for(ReportSet reportSet : reportSetList) {
+          Command removeCommand = RemoveCommand.create(editingDomain, currentReportPlugin, POM_PACKAGE
+              .getReportPlugin_ReportSets(), reportSet);
+          compoundCommand.append(removeCommand);
         }
+
+        editingDomain.getCommandStack().execute(compoundCommand);
+        updateReportPluginDetails(currentReportPlugin);
       }
     });
 
@@ -577,26 +563,11 @@ public class ReportingComposite extends Composite {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = parent.getEditingDomain();
 
-        boolean reportsCreated = false;
-
-        StringReports reports = currentReportSet.getReports();
-        if(reports == null) {
-          reports = PomFactory.eINSTANCE.createStringReports();
-          Command addReports = SetCommand.create(editingDomain, currentReportSet, POM_PACKAGE.getReportSet_Reports(),
-              reports);
-          compoundCommand.append(addReports);
-          reportsCreated = true;
-        }
-
-        Command addReport = AddCommand.create(editingDomain, reports, POM_PACKAGE.getStringReports_Report(), "?");
+        Command addReport = AddCommand.create(editingDomain, currentReportSet, POM_PACKAGE.getReportSet_Reports(), "?");
         compoundCommand.append(addReport);
         editingDomain.getCommandStack().execute(compoundCommand);
 
-        if(reportsCreated) {
-          reportsEditor.setInput(reports == null ? null : reports.getReport());
-        } else {
-          reportsEditor.refresh();
-        }
+        reportsEditor.refresh();
       }
     });
 
@@ -609,17 +580,14 @@ public class ReportingComposite extends Composite {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = parent.getEditingDomain();
 
-        StringReports reports = currentReportSet.getReports();
-        if(reports != null) {
-          List<String> reportList = reportsEditor.getSelection();
-          for(String report : reportList) {
-            Command removeCommand = RemoveCommand.create(editingDomain, reports, POM_PACKAGE.getStringReports_Report(),
-                report);
-            compoundCommand.append(removeCommand);
-          }
-
-          editingDomain.getCommandStack().execute(compoundCommand);
+        List<String> reportList = reportsEditor.getSelection();
+        for(String report : reportList) {
+          Command removeCommand = RemoveCommand.create(editingDomain, currentReportSet, POM_PACKAGE.getReportSet_Reports(),
+              report);
+          compoundCommand.append(removeCommand);
         }
+
+        editingDomain.getCommandStack().execute(compoundCommand);
       }
     });
 
@@ -634,8 +602,8 @@ public class ReportingComposite extends Composite {
 
       public void modify(Object element, String property, Object value) {
         EditingDomain editingDomain = parent.getEditingDomain();
-        Command command = SetCommand.create(editingDomain, currentReportSet.getReports(), POM_PACKAGE
-            .getStringReports_Report(), value, reportsEditor.getViewer().getTable().getSelectionIndex());
+        Command command = SetCommand.create(editingDomain, currentReportSet, POM_PACKAGE
+            .getReportSet_Reports(), value, reportsEditor.getViewer().getTable().getSelectionIndex());
         editingDomain.getCommandStack().execute(command);
       }
     });
@@ -715,8 +683,7 @@ public class ReportingComposite extends Composite {
     parent.setModifyListener(pluginInheritedButton, provider, POM_PACKAGE.getReportPlugin_Inherited(), "false");
     parent.registerListeners();
 
-    ReportSetsType reportSets = reportPlugin.getReportSets();
-    reportSetsEditor.setInput(reportSets == null ? null : reportSets.getReportSet());
+    reportSetsEditor.setInput(reportPlugin.getReportSets());
 
     updateReportSetDetails(null);
   }
@@ -743,8 +710,7 @@ public class ReportingComposite extends Composite {
     parent.setModifyListener(reportSetInheritedButton, provider, POM_PACKAGE.getReportSet_Inherited(), "false");
     parent.registerListeners();
 
-    StringReports reports = reportSet.getReports();
-    reportsEditor.setInput(reports == null ? null : reports.getReport());
+    reportsEditor.setInput(reportSet.getReports());
   }
 
   public void loadData(MavenPomEditorPage editorPage, ValueProvider<Reporting> reportingProvider) {
@@ -769,7 +735,7 @@ public class ReportingComposite extends Composite {
     } else {
       setText(outputFolderText,reporting.getOutputDirectory());
       setButton(excludeDefaultsButton, "true".equals(reporting.getExcludeDefaults()));
-      reportPluginsEditor.setInput(reporting.getPlugins() == null ? null : reporting.getPlugins().getPlugin());
+      reportPluginsEditor.setInput(reporting.getPlugins());
     }
     
     parent.setModifyListener(outputFolderText, reportingProvider, POM_PACKAGE.getReporting_OutputDirectory(), "");
@@ -781,8 +747,9 @@ public class ReportingComposite extends Composite {
 
   public void updateView(MavenPomEditorPage editorPage, Notification notification) {
     EObject object = (EObject) notification.getNotifier();
+    Object feature = notification.getFeature();
 
-    if(object instanceof Reporting || object instanceof ReportPlugins) {
+    if(object instanceof Reporting || feature == PomPackage.Literals.REPORTING__PLUGINS) {
       reportPluginsEditor.refresh();
     } else if(object instanceof ReportPlugin) {
       reportPluginsEditor.refresh();
@@ -791,9 +758,9 @@ public class ReportingComposite extends Composite {
       if(object == currentReportPlugin && (notificationObject == null || notificationObject instanceof ReportPlugin)) {
         updateReportPluginDetails((ReportPlugin) notificationObject);
       }
-    } else if(object instanceof ReportSetsType || object instanceof ReportSet) {
+    } else if(feature == PomPackage.Literals.REPORT_PLUGIN__REPORT_SETS || object instanceof ReportSet) {
       reportSetsEditor.refresh();
-    } else if(object instanceof StringReports) {
+    } else if(feature == PomPackage.Literals.REPORT_SET__REPORTS) {
       reportsEditor.refresh();
     }
   }
@@ -810,22 +777,14 @@ public class ReportingComposite extends Composite {
       reportsCreated = true;
     }
 
-    ReportPlugins reportPlugins = reporting.getPlugins();
-    if(reportPlugins == null) {
-      reportPlugins = PomFactory.eINSTANCE.createReportPlugins();
-      Command addReportPlugins = SetCommand.create(editingDomain, reporting, POM_PACKAGE.getReporting_Plugins(),
-          reportPlugins);
-      compoundCommand.append(addReportPlugins);
-      reportsCreated = true;
-    }
 
     ReportPlugin reportPlugin = PomFactory.eINSTANCE.createReportPlugin();
     reportPlugin.setGroupId(groupId);
     reportPlugin.setArtifactId(artifactId);
     reportPlugin.setVersion(version);
     
-    Command addReportPlugin = AddCommand.create(editingDomain, reportPlugins,
-        POM_PACKAGE.getReportPlugins_Plugin(), reportPlugin);
+    Command addReportPlugin = AddCommand.create(editingDomain, reporting,
+        POM_PACKAGE.getReporting_Plugins(), reportPlugin);
     compoundCommand.append(addReportPlugin);
     
     editingDomain.getCommandStack().execute(compoundCommand);
@@ -857,12 +816,9 @@ public class ReportingComposite extends Composite {
         List<ReportPlugin> plugins = new ArrayList<ReportPlugin>();
         Reporting value = provider.getValue();
         if(value != null) {
-          ReportPlugins reportPlugins = value.getPlugins();
-          if(reportPlugins!=null) {
-            for(ReportPlugin p : reportPlugins.getPlugin()) {
-              if(searchMatcher.isMatchingArtifact(p.getGroupId(), p.getArtifactId())) {
-                plugins.add(p);
-              }
+          for(ReportPlugin p : value.getPlugins()) {
+            if(searchMatcher.isMatchingArtifact(p.getGroupId(), p.getArtifactId())) {
+              plugins.add(p);
             }
           }
         }

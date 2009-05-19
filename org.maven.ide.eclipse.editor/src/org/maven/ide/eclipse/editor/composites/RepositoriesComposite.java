@@ -54,11 +54,10 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.Section;
 import org.maven.ide.components.pom.DeploymentRepository;
 import org.maven.ide.components.pom.DistributionManagement;
-import org.maven.ide.components.pom.PluginRepositories;
+import org.maven.ide.components.pom.Model;
 import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.PomPackage;
 import org.maven.ide.components.pom.Relocation;
-import org.maven.ide.components.pom.Repositories;
 import org.maven.ide.components.pom.Repository;
 import org.maven.ide.components.pom.RepositoryPolicy;
 import org.maven.ide.components.pom.Site;
@@ -180,10 +179,8 @@ public class RepositoriesComposite extends Composite {
   // Model model;
   Repository currentRepository;
 
-  ValueProvider<Repositories> repositoriesProvider;
-
-  ValueProvider<PluginRepositories> pluginRepositoriesProvider;
-
+  Model model;
+  
   ValueProvider<DistributionManagement> distributionManagementProvider;
 
   public RepositoriesComposite(Composite parent, int flags) {
@@ -267,23 +264,13 @@ public class RepositoriesComposite extends Composite {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = parent.getEditingDomain();
 
-        Repositories repositories = repositoriesProvider.getValue();
-        boolean repositoriesCreated = false;
-        if(repositories == null) {
-          repositories = repositoriesProvider.create(editingDomain, compoundCommand);
-          repositoriesCreated = true;
-        }
-
         Repository repository = PomFactory.eINSTANCE.createRepository();
-        Command addCommand = AddCommand.create(editingDomain, repositories, POM_PACKAGE.getRepositories_Repository(),
+        Command addCommand = AddCommand.create(editingDomain, model, POM_PACKAGE.getModel_Repositories(),
             repository);
         compoundCommand.append(addCommand);
 
         editingDomain.getCommandStack().execute(compoundCommand);
 
-        if(repositoriesCreated) {
-          repositoriesEditor.setInput(repositories.getRepository());
-        }
         repositoriesEditor.setSelection(Collections.singletonList(repository));
         updateRepositoryDetailsSection(repository);
         repositoryIdText.setFocus();
@@ -297,8 +284,8 @@ public class RepositoriesComposite extends Composite {
 
         List<Repository> list = repositoriesEditor.getSelection();
         for(Repository repository : list) {
-          Command removeCommand = RemoveCommand.create(editingDomain, repositoriesProvider.getValue(), POM_PACKAGE
-              .getRepositories_Repository(), repository);
+          Command removeCommand = RemoveCommand.create(editingDomain, model, POM_PACKAGE
+              .getModel_Repositories(), repository);
           compoundCommand.append(removeCommand);
         }
 
@@ -339,23 +326,13 @@ public class RepositoriesComposite extends Composite {
         CompoundCommand compoundCommand = new CompoundCommand();
         EditingDomain editingDomain = parent.getEditingDomain();
 
-        PluginRepositories pluginRepositories = pluginRepositoriesProvider.getValue();
-        boolean repositoriesCreated = false;
-        if(pluginRepositories == null) {
-          pluginRepositories = pluginRepositoriesProvider.create(editingDomain, compoundCommand);
-          repositoriesCreated = true;
-        }
-
         Repository pluginRepository = PomFactory.eINSTANCE.createRepository();
-        Command addCommand = AddCommand.create(editingDomain, pluginRepositories, POM_PACKAGE
-            .getPluginRepositories_PluginRepository(), pluginRepository);
+        Command addCommand = AddCommand.create(editingDomain, model, POM_PACKAGE
+            .getModel_PluginRepositories(), pluginRepository);
         compoundCommand.append(addCommand);
 
         editingDomain.getCommandStack().execute(compoundCommand);
 
-        if(repositoriesCreated) {
-          pluginRepositoriesEditor.setInput(pluginRepositories.getPluginRepository());
-        }
         pluginRepositoriesEditor.setSelection(Collections.singletonList(pluginRepository));
         updateRepositoryDetailsSection(pluginRepository);
         repositoryIdText.setFocus();
@@ -369,8 +346,8 @@ public class RepositoriesComposite extends Composite {
 
         List<Repository> list = pluginRepositoriesEditor.getSelection();
         for(Repository repository : list) {
-          Command removeCommand = RemoveCommand.create(editingDomain, pluginRepositoriesProvider.getValue(),
-              POM_PACKAGE.getPluginRepositories_PluginRepository(), repository);
+          Command removeCommand = RemoveCommand.create(editingDomain, model,
+              POM_PACKAGE.getModel_PluginRepositories(), repository);
           compoundCommand.append(removeCommand);
         }
 
@@ -751,12 +728,10 @@ public class RepositoriesComposite extends Composite {
     releaseDistributionRepositoryComposite.setTabList(new Control[] {releaseRepositoryIdText, releaseRepositoryNameText, releaseRepositoryUrlText, releaseRepositoryLayoutCombo, releaseRepositoryUniqueVersionButton});
   }
 
-  public void loadData(MavenPomEditorPage editorPage, ValueProvider<Repositories> repositoriesProvider,
-      ValueProvider<PluginRepositories> pluginRepositoriesProvider,
+  public void loadData(MavenPomEditorPage editorPage, Model model,
       ValueProvider<DistributionManagement> distributionManagementProvider) {
     this.parent = editorPage;
-    this.repositoriesProvider = repositoriesProvider;
-    this.pluginRepositoriesProvider = pluginRepositoriesProvider;
+    this.model = model;
     this.distributionManagementProvider = distributionManagementProvider;
 
     loadRepositories();
@@ -1066,8 +1041,7 @@ public class RepositoriesComposite extends Composite {
   }
 
   private void loadRepositories() {
-    Repositories repositories = repositoriesProvider.getValue();
-    repositoriesEditor.setInput(repositories == null ? null : repositories.getRepository());
+    repositoriesEditor.setInput(model.getRepositories());
     repositoriesEditor.setReadOnly(parent.isReadOnly());
     changingSelection = true;
     updateRepositoryDetailsSection(null);
@@ -1075,8 +1049,7 @@ public class RepositoriesComposite extends Composite {
   }
 
   private void loadPluginRepositories() {
-    PluginRepositories pluginRepositories = pluginRepositoriesProvider.getValue();
-    pluginRepositoriesEditor.setInput(pluginRepositories == null ? null : pluginRepositories.getPluginRepository());
+    pluginRepositoriesEditor.setInput(model.getPluginRepositories());
     pluginRepositoriesEditor.setReadOnly(parent.isReadOnly());
     changingSelection = true;
     updateRepositoryDetailsSection(null);
@@ -1085,11 +1058,12 @@ public class RepositoriesComposite extends Composite {
 
   public void updateView(MavenPomEditorPage editorPage, Notification notification) {
     EObject object = (EObject) notification.getNotifier();
-    if(object instanceof Repositories) {
+    Object feature = notification.getFeature();
+    if(PomPackage.Literals.MODEL__REPOSITORIES == feature) {
       repositoriesEditor.refresh();
     }
 
-    if(object instanceof PluginRepositories) {
+    if(PomPackage.Literals.MODEL__PLUGIN_REPOSITORIES == feature) {
       pluginRepositoriesEditor.refresh();
     }
 

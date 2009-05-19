@@ -10,7 +10,7 @@ package org.maven.ide.eclipse.editor.pom;
 
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
-import org.maven.ide.components.pom.PropertyPair;
+import org.maven.ide.components.pom.PropertyElement;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
 
 /**
@@ -21,9 +21,9 @@ import org.maven.ide.eclipse.editor.MavenEditorImages;
 public class PropertyPairLabelProvider extends LabelProvider {
 
   public String getText(Object element) {
-    if(element instanceof PropertyPair) {
-      PropertyPair pair = (PropertyPair) element;
-      return pair.getKey() + " : " + pair.getValue();
+    if(element instanceof PropertyElement) {
+      PropertyElement pair = (PropertyElement) element;
+      return pair.getName() + " : " + pair.getValue();
     }
     return super.getText(element);
   }

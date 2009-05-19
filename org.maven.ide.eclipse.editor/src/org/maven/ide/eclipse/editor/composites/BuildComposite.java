@@ -17,6 +17,7 @@ import java.util.List;
 import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.common.notify.Notification;
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.edit.command.AddCommand;
 import org.eclipse.emf.edit.command.RemoveCommand;
 import org.eclipse.emf.edit.command.SetCommand;
@@ -41,14 +42,9 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Section;
 import org.maven.ide.components.pom.BuildBase;
-import org.maven.ide.components.pom.ExcludesType;
-import org.maven.ide.components.pom.Filters;
-import org.maven.ide.components.pom.IncludesType;
 import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.PomPackage;
 import org.maven.ide.components.pom.Resource;
-import org.maven.ide.components.pom.Resources;
-import org.maven.ide.components.pom.TestResources;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.editor.pom.FormUtils;
 import org.maven.ide.eclipse.editor.pom.MavenPomEditorPage;
@@ -155,22 +151,17 @@ public class BuildComposite extends Composite {
         
         boolean created = false;
         BuildBase build = createBuildBase(compoundCommand, editingDomain);
-        Filters filters = build.getFilters();
-        if(filters==null) {
-          filters = PomFactory.eINSTANCE.createFilters();
-          Command command = SetCommand.create(editingDomain, build, POM_PACKAGE.getBuildBase_Filters(), filters);
-          compoundCommand.append(command);
-          created = true;
-        }
+        EList<String> filters = build.getFilters();
         
         String filter = "?";
-        Command addCommand = AddCommand.create(editingDomain, filters, POM_PACKAGE.getFilters_Filter(), filter);
+        
+        Command addCommand = AddCommand.create(editingDomain, build, POM_PACKAGE.getBuildBase_Filters(), filter);
         compoundCommand.append(addCommand);
         
         editingDomain.getCommandStack().execute(compoundCommand);
         
         if(created) {
-          filtersEditor.setInput(filters.getFilter());
+          filtersEditor.setInput(filters);
         }
         filtersEditor.setSelection(Collections.singletonList(filter));
       }
@@ -183,8 +174,8 @@ public class BuildComposite extends Composite {
  
         List<String> selection = filtersEditor.getSelection();
         for(String filter : selection) {
-          Command removeCommand = RemoveCommand.create(editingDomain, buildProvider.getValue().getFilters(), //
-              POM_PACKAGE.getFilters_Filter(), filter);
+          Command removeCommand = RemoveCommand.create(editingDomain, buildProvider.getValue(), //
+              POM_PACKAGE.getBuildBase_Filters(), filter);
           compoundCommand.append(removeCommand);
         }
         
@@ -203,11 +194,11 @@ public class BuildComposite extends Composite {
  
       public void modify(Object element, String property, Object value) {
         int n = filtersEditor.getViewer().getTable().getSelectionIndex();
-        Filters filters = buildProvider.getValue().getFilters();
-        if(!value.equals(filters.getFilter().get(n))) {
+        EList<String> filters = buildProvider.getValue().getFilters();
+        if(!value.equals(filters.get(n))) {
           EditingDomain editingDomain = parent.getEditingDomain();
-          Command command = SetCommand.create(editingDomain, filters, //
-              POM_PACKAGE.getFilters_Filter(), value, n);
+          Command command = SetCommand.create(editingDomain, buildProvider.getValue(), //
+              POM_PACKAGE.getBuildBase_Filters(), value, n);
           editingDomain.getCommandStack().execute(command);
           filtersEditor.refresh();
         }
@@ -274,21 +265,16 @@ public class BuildComposite extends Composite {
         EditingDomain editingDomain = parent.getEditingDomain();
 
         boolean created = false;
-        IncludesType includes = currentResource.getIncludes();
-        if(includes == null) {
-          includes = PomFactory.eINSTANCE.createIncludesType();
-          Command command = SetCommand.create(editingDomain, currentResource, POM_PACKAGE.getResource_Includes(), includes);
-          compoundCommand.append(command);
-          created = true;
-        }
+        EList<String> includes = currentResource.getIncludes();
+        
 
         String include = "?";
-        Command addCommand = AddCommand.create(editingDomain, includes, POM_PACKAGE.getIncludesType_Include(), include);
+        Command addCommand = AddCommand.create(editingDomain, currentResource, POM_PACKAGE.getResource_Includes(), include);
         compoundCommand.append(addCommand);
         
         editingDomain.getCommandStack().execute(compoundCommand);
         if(created) {
-          resourceIncludesEditor.setInput(includes.getInclude());
+          resourceIncludesEditor.setInput(includes);
         }
         resourceIncludesEditor.setSelection(Collections.singletonList(include));
       }
@@ -301,8 +287,8 @@ public class BuildComposite extends Composite {
  
         List<String> selection = resourceIncludesEditor.getSelection();
         for(String include : selection) {
-          Command removeCommand = RemoveCommand.create(editingDomain, currentResource.getIncludes(), //
-              POM_PACKAGE.getIncludesType_Include(), include);
+          Command removeCommand = RemoveCommand.create(editingDomain, currentResource, //
+              POM_PACKAGE.getResource_Includes(), include);
           compoundCommand.append(removeCommand);
         }
         
@@ -321,11 +307,11 @@ public class BuildComposite extends Composite {
  
       public void modify(Object element, String property, Object value) {
         int n = resourceIncludesEditor.getViewer().getTable().getSelectionIndex();
-        IncludesType includes = currentResource.getIncludes();
-        if(!value.equals(includes.getInclude().get(n))) {
+        EList<String> includes = currentResource.getIncludes();
+        if(!value.equals(includes.get(n))) {
           EditingDomain editingDomain = parent.getEditingDomain();
-          Command command = SetCommand.create(editingDomain, includes, //
-              POM_PACKAGE.getIncludesType_Include(), value, n);
+          Command command = SetCommand.create(editingDomain, currentResource, //
+              POM_PACKAGE.getResource_Includes(), value, n);
           editingDomain.getCommandStack().execute(command);
           resourceIncludesEditor.refresh();
         }
@@ -351,22 +337,16 @@ public class BuildComposite extends Composite {
         EditingDomain editingDomain = parent.getEditingDomain();
 
         boolean created = false;
-        ExcludesType excludes = currentResource.getExcludes();
-        if(excludes == null) {
-          excludes = PomFactory.eINSTANCE.createExcludesType();
-          Command command = SetCommand.create(editingDomain, currentResource, POM_PACKAGE.getResource_Excludes(), excludes);
-          compoundCommand.append(command);
-          created = true;
-        }
+        EList<String> excludes = currentResource.getExcludes();
 
         String exclude = "?";
-        Command addCommand = AddCommand.create(editingDomain, excludes, POM_PACKAGE.getExcludesType_Exclude(), exclude);
+        Command addCommand = AddCommand.create(editingDomain, currentResource, POM_PACKAGE.getResource_Excludes(), exclude);
         compoundCommand.append(addCommand);
         
         editingDomain.getCommandStack().execute(compoundCommand);
         
         if(created) {
-          resourceExcludesEditor.setInput(excludes.getExclude());
+          resourceExcludesEditor.setInput(excludes);
         }
         resourceExcludesEditor.setSelection(Collections.singletonList(exclude));
       }
@@ -379,8 +359,8 @@ public class BuildComposite extends Composite {
  
         List<String> selection = resourceExcludesEditor.getSelection();
         for(String exclude : selection) {
-          Command removeCommand = RemoveCommand.create(editingDomain, currentResource.getExcludes(), //
-              POM_PACKAGE.getExcludesType_Exclude(), exclude);
+          Command removeCommand = RemoveCommand.create(editingDomain, currentResource, //
+              POM_PACKAGE.getResource_Excludes(), exclude);
           compoundCommand.append(removeCommand);
         }
         
@@ -399,11 +379,11 @@ public class BuildComposite extends Composite {
  
       public void modify(Object element, String property, Object value) {
         int n = resourceExcludesEditor.getViewer().getTable().getSelectionIndex();
-        ExcludesType excludes = currentResource.getExcludes();
-        if(!value.equals(excludes.getExclude().get(n))) {
+        EList<String> excludes = currentResource.getExcludes();
+        if(!value.equals(excludes.get(n))) {
           EditingDomain editingDomain = parent.getEditingDomain();
-          Command command = SetCommand.create(editingDomain, excludes, //
-              POM_PACKAGE.getExcludesType_Exclude(), value, n);
+          Command command = SetCommand.create(editingDomain, currentResource, //
+              POM_PACKAGE.getResource_Excludes(), value, n);
           editingDomain.getCommandStack().execute(command);
           resourceExcludesEditor.refresh();
         }
@@ -447,22 +427,16 @@ public class BuildComposite extends Composite {
         
         boolean created = false;
         BuildBase build = createBuildBase(compoundCommand, editingDomain);
-        Resources resources = build.getResources();
-        if(resources==null) {
-          resources = PomFactory.eINSTANCE.createResources();
-          Command command = SetCommand.create(editingDomain, build, POM_PACKAGE.getBuildBase_Resources(), resources);
-          compoundCommand.append(command);
-          created = true;
-        }
+        EList<Resource> resources = build.getResources();
         
         Resource resource = PomFactory.eINSTANCE.createResource();        
-        Command addCommand = AddCommand.create(editingDomain, resources, POM_PACKAGE.getResources_Resource(), resource);
+        Command addCommand = AddCommand.create(editingDomain, build, POM_PACKAGE.getBuildBase_Resources(), resource);
         compoundCommand.append(addCommand);
         
         editingDomain.getCommandStack().execute(compoundCommand);
         
         if(created) {
-          resourcesEditor.setInput(resources.getResource());
+          resourcesEditor.setInput(resources);
         }
         resourcesEditor.setSelection(Collections.singletonList(resource));
         resourceDirectoryText.setFocus();
@@ -476,8 +450,8 @@ public class BuildComposite extends Composite {
  
         List<Resource> selection = resourcesEditor.getSelection();
         for(Resource resource : selection) {
-          Command removeCommand = RemoveCommand.create(editingDomain, buildProvider.getValue().getResources(), //
-              POM_PACKAGE.getResources_Resource(), resource);
+          Command removeCommand = RemoveCommand.create(editingDomain, buildProvider.getValue(), //
+              POM_PACKAGE.getBuildBase_Resources(), resource);
           compoundCommand.append(removeCommand);
         }
         
@@ -522,22 +496,16 @@ public class BuildComposite extends Composite {
         
         boolean created = false;
         BuildBase build = createBuildBase(compoundCommand, editingDomain);
-        TestResources testResources = build.getTestResources();
-        if(testResources==null) {
-          testResources = PomFactory.eINSTANCE.createTestResources();
-          Command command = SetCommand.create(editingDomain, build, POM_PACKAGE.getBuildBase_TestResources(), testResources);
-          compoundCommand.append(command);
-          created = true;
-        }
+        EList<Resource> testResources = build.getTestResources();
         
         Resource resource = PomFactory.eINSTANCE.createResource();        
-        Command addCommand = AddCommand.create(editingDomain, testResources, POM_PACKAGE.getTestResources_TestResource(), resource);
+        Command addCommand = AddCommand.create(editingDomain, build, POM_PACKAGE.getBuildBase_TestResources(), resource);
         compoundCommand.append(addCommand);
         
         editingDomain.getCommandStack().execute(compoundCommand);
         
         if(created) {
-          testResourcesEditor.setInput(testResources.getTestResource());
+          testResourcesEditor.setInput(testResources);
         }
         testResourcesEditor.setSelection(Collections.singletonList(resource));
         resourceDirectoryText.setFocus();
@@ -551,8 +519,8 @@ public class BuildComposite extends Composite {
  
         List<Resource> selection = testResourcesEditor.getSelection();
         for(Resource resource : selection) {
-          Command removeCommand = RemoveCommand.create(editingDomain, buildProvider.getValue().getTestResources(), //
-              POM_PACKAGE.getTestResources_TestResource(), resource);
+          Command removeCommand = RemoveCommand.create(editingDomain, buildProvider.getValue(), //
+              POM_PACKAGE.getBuildBase_TestResources(), resource);
           compoundCommand.append(removeCommand);
         }
         
@@ -582,19 +550,21 @@ public class BuildComposite extends Composite {
   public void updateView(MavenPomEditorPage editorPage, Notification notification) {
     Object object = notification.getNotifier();
     
+    Object feature = notification.getFeature();
+    
     if(object instanceof BuildBase) {
       loadBuild();
     }
     
-    if(object instanceof Filters) {
+    if(feature == PomPackage.Literals.BUILD_BASE__FILTERS) {
       filtersEditor.refresh();
     }
     
-    if(object instanceof Resources) {
+    if(feature == PomPackage.Literals.BUILD_BASE__RESOURCES) {
       resourcesEditor.refresh();
     }
     
-    if(object instanceof TestResources) {
+    if(feature == PomPackage.Literals.BUILD_BASE__TEST_RESOURCES) {
       testResourcesEditor.refresh();
     }
     
@@ -609,11 +579,11 @@ public class BuildComposite extends Composite {
       }
     }
     
-    if(object instanceof IncludesType) {
+    if(feature == PomPackage.Literals.RESOURCE__INCLUDES) {
       resourceIncludesEditor.refresh();
     }
 
-    if(object instanceof ExcludesType) {
+    if(feature == PomPackage.Literals.RESOURCE__EXCLUDES) {
       resourceExcludesEditor.refresh();
     }
 
@@ -639,7 +609,7 @@ public class BuildComposite extends Composite {
     }
     
     filtersEditor.setInput(build == null //
-        || build.getFilters() == null ? null : build.getFilters().getFilter());
+        || build.getFilters() == null ? null : build.getFilters());
     
     parent.setModifyListener(defaultGoalText, buildProvider, POM_PACKAGE.getBuildBase_DefaultGoal(), "");
     parent.setModifyListener(directoryText, buildProvider, POM_PACKAGE.getBuildBase_Directory(), "");
@@ -649,13 +619,13 @@ public class BuildComposite extends Composite {
   private void loadResources() {
     BuildBase build = buildProvider.getValue();
     resourcesEditor.setInput(build == null //
-        || build.getResources() == null ? null : build.getResources().getResource());
+        || build.getResources() == null ? null : build.getResources());
   }
   
   private void loadTestResources() {
     BuildBase build = buildProvider.getValue();
     testResourcesEditor.setInput(build == null //
-        || build.getTestResources() == null ? null : build.getTestResources().getTestResource());
+        || build.getTestResources() == null ? null : build.getTestResources());
   }
 
   void loadResourceDetails(Resource resource) {
@@ -691,8 +661,8 @@ public class BuildComposite extends Composite {
     setText(resourceTargetPathText, resource.getTargetPath());
     setButton(resourceFilteringButton, "true".equals(resource.getFiltering()));
     
-    resourceIncludesEditor.setInput(resource.getIncludes()==null ? null : resource.getIncludes().getInclude());
-    resourceExcludesEditor.setInput(resource.getExcludes()==null ? null : resource.getExcludes().getExclude());
+    resourceIncludesEditor.setInput(resource.getIncludes()==null ? null : resource.getIncludes());
+    resourceExcludesEditor.setInput(resource.getExcludes()==null ? null : resource.getExcludes());
     
     ValueProvider<Resource> provider = new ValueProvider.DefaultValueProvider<Resource>(resource);
     parent.setModifyListener(resourceDirectoryText, provider, POM_PACKAGE.getResource_Directory(), "");

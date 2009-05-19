@@ -12,6 +12,7 @@ import java.util.List;
 
 import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.common.command.CompoundCommand;
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.xml.type.internal.DataValue.XMLChar;
@@ -34,8 +35,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Section;
 import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.PomPackage;
-import org.maven.ide.components.pom.Properties;
-import org.maven.ide.components.pom.PropertyPair;
+import org.maven.ide.components.pom.PropertyElement;
 import org.maven.ide.eclipse.editor.composites.ListEditorComposite;
 import org.maven.ide.eclipse.editor.composites.ListEditorContentProvider;
 import org.maven.ide.eclipse.ui.dialogs.MavenPropertyDialog;
@@ -54,7 +54,7 @@ public class PropertiesSection {
   private FormToolkit toolkit;
   private Composite composite;
   private Section propertiesSection;
-  ListEditorComposite<PropertyPair> propertiesEditor;
+  ListEditorComposite<PropertyElement> propertiesEditor;
   
   private VerifyListener listener = new VerifyListener() {
     public void verifyText(VerifyEvent e) {
@@ -72,11 +72,11 @@ public class PropertiesSection {
   public void setModel(EObject model, EStructuralFeature feature) {
     this.model = model;
     this.feature = feature;
-    this.propertiesEditor.setInput(getProperties() != null ? getProperties().getProperty() : null);
+    this.propertiesEditor.setInput(getProperties());
   }
 
-  private Properties getProperties() {
-    return (Properties) model.eGet(feature);
+  private EList<PropertyElement> getProperties() {
+    return (EList<PropertyElement>) model.eGet(feature);
   }
   
   private Section createSection() {
@@ -88,11 +88,11 @@ public class PropertiesSection {
     propertiesSection.setData("name", "propertiesSection");
     toolkit.paintBordersFor(propertiesSection);
 
-    propertiesEditor = new ListEditorComposite<PropertyPair>(propertiesSection, SWT.NONE);
+    propertiesEditor = new ListEditorComposite<PropertyElement>(propertiesSection, SWT.NONE);
     propertiesSection.setClient(propertiesEditor);
     propertiesEditor.getViewer().getTable().setData("name", "properties");
     
-    propertiesEditor.setContentProvider(new ListEditorContentProvider<PropertyPair>());
+    propertiesEditor.setContentProvider(new ListEditorContentProvider<PropertyElement>());
     propertiesEditor.setLabelProvider(new PropertyPairLabelProvider());
 
     propertiesEditor.setAddListener(new SelectionAdapter() {
@@ -118,27 +118,27 @@ public class PropertiesSection {
     propertiesEditor.refresh();
   }
   
-  void editProperty(List<PropertyPair> list) {
+  void editProperty(List<PropertyElement> list) {
     if (list.size() != 1) {
       return;
     }
     
-    PropertyPair pp = list.get(0);
+    PropertyElement pp = list.get(0);
     
     MavenPropertyDialog dialog = new MavenPropertyDialog(propertiesSection.getShell(), //
-        "Edit property", pp.getKey(), pp.getValue(), listener);
+        "Edit property", pp.getName(), pp.getValue(), listener);
     if(dialog.open() == IDialogConstants.OK_ID) {
       String key = dialog.getName();
       String value = dialog.getValue();
       CompoundCommand command = new CompoundCommand();
-      if (!key.equals(pp.getKey())) {
-        command.append(SetCommand.create(editingDomain, pp, POM_PACKAGE.getPropertyPair_Key(), key));
+      if (!key.equals(pp.getName())) {
+        command.append(SetCommand.create(editingDomain, pp, POM_PACKAGE.getPropertyElement_Name(), key));
       }
       if (!value.equals(pp.getValue())) {
-        command.append(SetCommand.create(editingDomain, pp, POM_PACKAGE.getPropertyPair_Value(), value));
+        command.append(SetCommand.create(editingDomain, pp, POM_PACKAGE.getPropertyElement_Value(), value));
       }
       editingDomain.getCommandStack().execute(command);
-      propertiesEditor.setInput(getProperties().getProperty());
+      propertiesEditor.setInput(getProperties());
     }
   }
 
@@ -146,29 +146,23 @@ public class PropertiesSection {
     MavenPropertyDialog dialog = new MavenPropertyDialog(propertiesSection.getShell(), //
         "Add property", "", "", listener);
     if(dialog.open() == IDialogConstants.OK_ID) {
-      Properties properties = getProperties();
       CompoundCommand command = new CompoundCommand();
-      if(properties == null) {
-        properties = PomFactory.eINSTANCE.createProperties();
-        command.append(SetCommand.create(editingDomain, model, feature, properties));
-      }
       
-      PropertyPair propertyPair = PomFactory.eINSTANCE.createPropertyPair();
-      propertyPair.setKey(dialog.getName());
+      PropertyElement propertyPair = PomFactory.eINSTANCE.createPropertyElement();
+      propertyPair.setName(dialog.getName());
       propertyPair.setValue(dialog.getValue());
-      command.append(AddCommand.create(editingDomain, properties, POM_PACKAGE.getProperties_Property(), //
-          propertyPair, properties.getProperty().size()));
+      command.append(AddCommand.create(editingDomain, model, feature, //
+          propertyPair, getProperties().size()));
       
       editingDomain.getCommandStack().execute(command);
-      propertiesEditor.setInput(properties.getProperty());
+      propertiesEditor.setInput(getProperties());
     }
   }
 
-  void deleteProperties(List<PropertyPair> selection) {
-    Properties properties = getProperties();
-    Command deleteProperties = RemoveCommand.create(editingDomain, properties, POM_PACKAGE.getProperties_Property(), selection);
+  void deleteProperties(List<PropertyElement> selection) {
+    Command deleteProperties = RemoveCommand.create(editingDomain, model, feature, selection);
     editingDomain.getCommandStack().execute(deleteProperties);
-    propertiesEditor.setInput(properties.getProperty());
+    propertiesEditor.setInput(getProperties());
   }
 
   public ExpandableComposite getSection() {

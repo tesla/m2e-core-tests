@@ -21,7 +21,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
-import org.maven.ide.components.pom.Dependencies;
 import org.maven.ide.components.pom.DependencyManagement;
 import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.eclipse.core.IMavenConstants;
@@ -81,27 +80,14 @@ public class DependenciesPage extends MavenPomEditorPage {
   }
 
   public void loadData() {
-    ValueProvider<Dependencies> dependenciesProvider = new ValueProvider<Dependencies>() {
-      public Dependencies getValue() {
-        return model.getDependencies();
+    
+
+    ValueProvider<DependencyManagement> dependencyManagementProvider = new ValueProvider<DependencyManagement>() {
+      public DependencyManagement getValue() {
+        return model.getDependencyManagement();
       }
 
-      public Dependencies create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
-        Dependencies dependencies = PomFactory.eINSTANCE.createDependencies();
-        Command createDependenciesCommand = SetCommand.create(editingDomain, model,
-            POM_PACKAGE.getModel_Dependencies(), dependencies);
-        compoundCommand.append(createDependenciesCommand);
-        return dependencies;
-      }
-    };
-
-    ValueProvider<Dependencies> dependencyManagementProvider = new ValueProvider<Dependencies>() {
-      public Dependencies getValue() {
-        DependencyManagement management = model.getDependencyManagement();
-        return management==null ? null : management.getDependencies();
-      }
-
-      public Dependencies create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+      public DependencyManagement create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
         DependencyManagement management = model.getDependencyManagement();
         if(management==null) {
           management = PomFactory.eINSTANCE.createDependencyManagement();
@@ -110,19 +96,11 @@ public class DependenciesPage extends MavenPomEditorPage {
           compoundCommand.append(command);
         }
         
-        Dependencies dependencies = management.getDependencies();
-        if(dependencies == null) {
-          dependencies = PomFactory.eINSTANCE.createDependencies();
-          Command createDependency = SetCommand.create(editingDomain, management, 
-              POM_PACKAGE.getDependencyManagement_Dependencies(), dependencies);
-          compoundCommand.append(createDependency);
-        }
- 
-        return dependencies;
+        return management;
       }
     };
 
-    dependenciesComposite.loadData(dependenciesProvider, dependencyManagementProvider);
+    dependenciesComposite.loadData(model, dependencyManagementProvider);
   }
   
   public void updateView(Notification notification) {

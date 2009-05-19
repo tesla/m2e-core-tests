@@ -66,7 +66,10 @@ public class RenameRefactoring extends AbstractPomRefactoring {
     
     PathElement current = path.path.remove(0);
     String getterName = "get" + current.element;
+    
     try {
+      Method getter = root.getClass().getMethod(getterName, new Class[] {});
+      root = getElement(getter.invoke(root, EMPTY_OBJECT_ARRAY), path);
       if (root instanceof List) {
         List children = (List) root;
         for (int i=0; i<children.size(); i++) {
@@ -80,8 +83,7 @@ public class RenameRefactoring extends AbstractPomRefactoring {
           return getElement(child, path);
         }
       } else {
-        Method getter = root.getClass().getMethod(getterName, new Class[] {});
-        return getElement(getter.invoke(root, EMPTY_OBJECT_ARRAY), path);
+        return getElement(root, path);
       }
       return null;
     } catch(Exception ex) {
@@ -118,7 +120,9 @@ public class RenameRefactoring extends AbstractPomRefactoring {
     while(it.hasNext()) {
       obj = it.next();
       Path child = current.clone();
-      child.addElement(obj.eClass().getName(), artifactId);
+      String element = obj.eContainingFeature().getName();
+      element = element.substring(0, 1).toUpperCase() + element.substring(1);
+      child.addElement(element, artifactId);
       scanObject(child, obj, groupId, artifactId, version, res);
     }
     return res;

@@ -56,8 +56,9 @@ public class RefactoringTest extends RefactoringTestBase {
     setTextValue(VERSION, _0_0_ZQ_SNAPSHOT);
     ui.click(new ButtonLocator("Previe&w >"));
     ui.wait(new ShellDisposedCondition(PROGRESS_INFORMATION));
-    ui.wait(new ShellDisposedCondition(PROGRESS_INFORMATION));
+    ui.wait(new ShellShowingCondition(RENAME_ARTIFACT));
     ui.click(new ButtonLocator("Cancel"));
+    ui.wait(new ShellDisposedCondition(RENAME_ARTIFACT));
 
     //refactor version
     ui.contextClick(new TreeItemLocator(MINE_POM_XML, new ViewLocator(
@@ -68,9 +69,10 @@ public class RefactoringTest extends RefactoringTestBase {
     setTextValue(VERSION, _0_0_ZQ_SNAPSHOT);
     ui.click(new ButtonLocator("Previe&w >"));
     ui.wait(new ShellDisposedCondition(PROGRESS_INFORMATION));
-    ui.wait(new ShellDisposedCondition(PROGRESS_INFORMATION));
+    ui.wait(new ShellShowingCondition(RENAME_ARTIFACT));
     ui.click(new ButtonLocator(OK));
     ui.wait(new ShellDisposedCondition(RENAME_ARTIFACT));
+    ui.click(new CTabItemLocator(MINE_POM_XML));
     assertTextValue(VERSION, _0_0_ZQ_SNAPSHOT);
 
     //check editor is not dirty

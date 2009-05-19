@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.common.notify.Notification;
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.edit.command.AddCommand;
 import org.eclipse.emf.edit.command.RemoveCommand;
@@ -62,11 +63,11 @@ import org.eclipse.ui.part.FileEditorInput;
 import org.maven.ide.components.pom.CiManagement;
 import org.maven.ide.components.pom.IssueManagement;
 import org.maven.ide.components.pom.Model;
-import org.maven.ide.components.pom.Modules;
 import org.maven.ide.components.pom.Organization;
 import org.maven.ide.components.pom.Parent;
 import org.maven.ide.components.pom.PomFactory;
-import org.maven.ide.components.pom.Properties;
+import org.maven.ide.components.pom.PomPackage;
+import org.maven.ide.components.pom.PropertyElement;
 import org.maven.ide.components.pom.Scm;
 import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.core.IMavenConstants;
@@ -430,13 +431,12 @@ public class OverviewPage extends MavenPomEditorPage {
         EditingDomain editingDomain = getEditingDomain();
 
         int n = 0;
-        Modules modules = model.getModules();
         for(String module : modulesEditor.getSelection()) {
-          Command removeCommand = RemoveCommand.create(editingDomain, modules, POM_PACKAGE.getModules_Module(), module);
+          Command removeCommand = RemoveCommand.create(editingDomain, model, POM_PACKAGE.getModel_Modules(), module);
           compoundCommand.append(removeCommand);
           n++ ;
         }
-        if(modules.getModule().size() - n == 0) {
+        if(model.getModules().size() - n == 0) {
           Command removeModules = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Modules(), null);
           compoundCommand.append(removeModules);
         }
@@ -457,11 +457,11 @@ public class OverviewPage extends MavenPomEditorPage {
  
       public void modify(Object element, String property, Object value) {
         int n = modulesEditor.getViewer().getTable().getSelectionIndex();
-        Modules modules = model.getModules();
-        if(!value.equals(modules.getModule().get(n))) {
+        EList<String> modules = model.getModules();
+        if(!value.equals(modules.get(n))) {
           EditingDomain editingDomain = getEditingDomain();
-          Command command = SetCommand.create(editingDomain, modules, //
-              POM_PACKAGE.getModules_Module(), value, n);
+          Command command = SetCommand.create(editingDomain, model, //
+              POM_PACKAGE.getModel_Modules(), value, n);
           editingDomain.getCommandStack().execute(command);
           // modulesEditor.refresh();
         }
@@ -737,23 +737,27 @@ public class OverviewPage extends MavenPomEditorPage {
 
   public void updateView(Notification notification) {
     EObject object = (EObject) notification.getNotifier();
+    Object feature = notification.getFeature();
+    
     if (object instanceof Model) {
       loadThis();
-      modulesEditor.refresh();
+    }
+    
+    if(object instanceof PropertyElement) {
       propertiesSection.refresh();
     }
 
     Object notificationObject = getFromNotification(notification);
     
-    if(object instanceof Parent && (notificationObject == null || notificationObject instanceof Parent)) {
+    if(feature == PomPackage.Literals.MODEL__PARENT || (object instanceof Parent && (notificationObject == null || notificationObject instanceof Parent))) {
       loadParent((Parent) notificationObject);
     }
 
-    if(object instanceof Organization && (notificationObject == null || notificationObject instanceof Organization)) {
+    if(feature == PomPackage.Literals.MODEL__ORGANIZATION || (object instanceof Organization && (notificationObject == null || notificationObject instanceof Organization))) {
       loadOrganization((Organization) notificationObject);
     }
 
-    if(object instanceof Scm && (notificationObject == null || notificationObject instanceof Scm)) {
+    if(feature == PomPackage.Literals.MODEL__SCM || (object instanceof Scm && (notificationObject == null || notificationObject instanceof Scm))) {
       loadScm((Scm) notificationObject);
     }
 
@@ -766,11 +770,11 @@ public class OverviewPage extends MavenPomEditorPage {
       loadIssueManagement((IssueManagement) notificationObject);
     }
     
-    if(object instanceof Modules) {
+    if(feature == PomPackage.Literals.MODEL__MODULES) {
       modulesEditor.refresh();
     }
     
-    if(notificationObject instanceof Properties) {
+    if(feature == PomPackage.Literals.MODEL__PROPERTIES) {
       propertiesSection.setModel(model, POM_PACKAGE.getModel_Properties());
     }
   }
@@ -810,7 +814,7 @@ public class OverviewPage extends MavenPomEditorPage {
     issueManagementSection.setExpanded(issueManagement != null
         && (!isEmpty(issueManagement.getSystem()) || !isEmpty(issueManagement.getUrl())));
 
-    propertiesSection.getSection().setExpanded(model.getProperties() != null && !model.getProperties().getProperty().isEmpty());
+    propertiesSection.getSection().setExpanded(model.getProperties() != null && !model.getProperties().isEmpty());
     
     // Modules modules = model.getModules();
     // modulesSection.setExpanded(modules !=null && modules.getModule().size()>0);
@@ -890,8 +894,8 @@ public class OverviewPage extends MavenPomEditorPage {
     setModifyListener(parentRelativePathText, parentProvider, POM_PACKAGE.getParent_RelativePath(), "");
   }
   
-  private void loadModules(Modules modules) {
-    modulesEditor.setInput(modules==null ? null : modules.getModule());
+  private void loadModules(EList<String> modules) {
+    modulesEditor.setInput(modules);
     modulesEditor.setReadOnly(isReadOnly());
     newModuleProjectAction.setEnabled(!isReadOnly());
   }
@@ -925,6 +929,10 @@ public class OverviewPage extends MavenPomEditorPage {
   }
 
   private void loadScm(Scm scm) {
+    removeNotifyListener(scmUrlText);
+    removeNotifyListener(scmConnectionText);
+    removeNotifyListener(scmDevConnectionText);
+    removeNotifyListener(scmTagText);
     if(scm==null) {
       setText(scmUrlText, "");
       setText(scmConnectionText, "");
@@ -1013,19 +1021,12 @@ public class OverviewPage extends MavenPomEditorPage {
   protected void createNewModule(String moduleName) {
     CompoundCommand compoundCommand = new CompoundCommand();
     EditingDomain editingDomain = getEditingDomain();
-
-    Modules modules = model.getModules();
-    if(modules == null) {
-      modules = PomFactory.eINSTANCE.createModules();
-      Command addModules = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Modules(), modules);
-      compoundCommand.append(addModules);
-    }
     
-    Command addModule = AddCommand.create(editingDomain, modules, POM_PACKAGE.getModules_Module(), moduleName);
+    Command addModule = AddCommand.create(editingDomain, model, POM_PACKAGE.getModel_Modules(), moduleName);
     compoundCommand.append(addModule);
     
     editingDomain.getCommandStack().execute(compoundCommand);
-    modulesEditor.setInput(model.getModules()==null ? null : model.getModules().getModule());
+    modulesEditor.setInput(model.getModules());
   }
 }
 

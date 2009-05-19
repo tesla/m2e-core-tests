@@ -62,18 +62,13 @@ import org.maven.ide.components.pom.ActivationFile;
 import org.maven.ide.components.pom.ActivationOS;
 import org.maven.ide.components.pom.ActivationProperty;
 import org.maven.ide.components.pom.BuildBase;
-import org.maven.ide.components.pom.Dependencies;
 import org.maven.ide.components.pom.DependencyManagement;
 import org.maven.ide.components.pom.DistributionManagement;
 import org.maven.ide.components.pom.PluginManagement;
-import org.maven.ide.components.pom.PluginRepositories;
-import org.maven.ide.components.pom.Plugins;
 import org.maven.ide.components.pom.PomFactory;
+import org.maven.ide.components.pom.PomPackage;
 import org.maven.ide.components.pom.Profile;
-import org.maven.ide.components.pom.ProfilesType;
 import org.maven.ide.components.pom.Reporting;
-import org.maven.ide.components.pom.Repositories;
-import org.maven.ide.components.pom.StringModules;
 import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
@@ -216,23 +211,13 @@ public class ProfilesPage extends MavenPomEditorPage {
         EditingDomain editingDomain = getEditingDomain();
         
         boolean created = false;
-        ProfilesType profiles = model.getProfiles();
-        if(profiles == null) {
-          profiles = PomFactory.eINSTANCE.createProfilesType();
-          Command command = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Profiles(), profiles);
-          compoundCommand.append(command);
-          created = true;
-        }
 
         Profile profile = PomFactory.eINSTANCE.createProfile();
-        Command addCommand = AddCommand.create(editingDomain, profiles, POM_PACKAGE.getProfilesType_Profile(), profile);
+        Command addCommand = AddCommand.create(editingDomain, model, POM_PACKAGE.getModel_Profiles(), profile);
         compoundCommand.append(addCommand);
         
         editingDomain.getCommandStack().execute(compoundCommand);
         
-        if(created) {
-          profilesEditor.setInput(profiles.getProfile());
-        }
         profilesEditor.setSelection(Collections.singletonList(profile));
       }
     });
@@ -244,8 +229,8 @@ public class ProfilesPage extends MavenPomEditorPage {
  
         List<Profile> selection = profilesEditor.getSelection();
         for(Profile filter : selection) {
-          Command removeCommand = RemoveCommand.create(editingDomain, model.getProfiles(), //
-              POM_PACKAGE.getProfilesType_Profile(), filter);
+          Command removeCommand = RemoveCommand.create(editingDomain, model, //
+              POM_PACKAGE.getModel_Profiles(), filter);
           compoundCommand.append(removeCommand);
         }
         
@@ -267,7 +252,7 @@ public class ProfilesPage extends MavenPomEditorPage {
 
       public void modify(Object element, String property, Object value) {
         int n = profilesEditor.getViewer().getTable().getSelectionIndex();
-        Profile profile = model.getProfiles().getProfile().get(n);
+        Profile profile = model.getProfiles().get(n);
         if(!value.equals(profile.getId())) {
           EditingDomain editingDomain = getEditingDomain();
           Command command = SetCommand.create(editingDomain, profile, POM_PACKAGE.getProfile_Id(), value);
@@ -326,8 +311,8 @@ public class ProfilesPage extends MavenPomEditorPage {
  
         List<String> selection = modulesEditor.getSelection();
         for(String module : selection) {
-          Command removeCommand = RemoveCommand.create(editingDomain, currentProfile.getModules(), //
-              POM_PACKAGE.getStringModules_Module(), module);
+          Command removeCommand = RemoveCommand.create(editingDomain, currentProfile, //
+              POM_PACKAGE.getProfile_Modules(), module);
           compoundCommand.append(removeCommand);
         }
         
@@ -346,10 +331,9 @@ public class ProfilesPage extends MavenPomEditorPage {
 
       public void modify(Object element, String property, Object value) {
         int n = modulesEditor.getViewer().getTable().getSelectionIndex();
-        StringModules modules = currentProfile.getModules();
-        if(!value.equals(modules.getModule().get(n))) {
+        if(!value.equals(currentProfile.getModules().get(n))) {
           EditingDomain editingDomain = getEditingDomain();
-          Command command = SetCommand.create(editingDomain, modules, POM_PACKAGE.getStringModules_Module(), value, n);
+          Command command = SetCommand.create(editingDomain, currentProfile, POM_PACKAGE.getProfile_Modules(), value, n);
           editingDomain.getCommandStack().execute(command);
           modulesEditor.refresh();
         }
@@ -407,7 +391,7 @@ public class ProfilesPage extends MavenPomEditorPage {
     FormUtils.setReadonly(propertiesSection.getSection(), isReadOnly());
     FormUtils.setReadonly(modulesSection, isReadOnly());
     
-    modulesEditor.setInput(profile.getModules()==null ? null : profile.getModules().getModule());
+    modulesEditor.setInput(profile.getModules());
     modulesEditor.setReadOnly(isReadOnly());
 
     propertiesSection.setModel(profile, POM_PACKAGE.getProfile_Properties());
@@ -583,27 +567,13 @@ public class ProfilesPage extends MavenPomEditorPage {
   }
   
   private void updateDependenciesTab() {
-    ValueProvider<Dependencies> dependenciesProvider = new ValueProvider<Dependencies>() {
-      public Dependencies getValue() {
-        return currentProfile==null ? null : currentProfile.getDependencies();
-      }
-
-      public Dependencies create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
-        Dependencies dependencies = PomFactory.eINSTANCE.createDependencies();
-        Command command = SetCommand.create(editingDomain, currentProfile,
-            POM_PACKAGE.getProfile_Dependencies(), dependencies);
-        compoundCommand.append(command);
-        return dependencies;
-      }
-    };
-
-    ValueProvider<Dependencies> dependencyManagementProvider = new ValueProvider<Dependencies>() {
-      public Dependencies getValue() {
+    ValueProvider<DependencyManagement> dependencyManagementProvider = new ValueProvider<DependencyManagement>() {
+      public DependencyManagement getValue() {
         DependencyManagement management = currentProfile == null ? null : currentProfile.getDependencyManagement();
-        return management == null ? null : management.getDependencies();
+        return management;
       }
 
-      public Dependencies create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+      public DependencyManagement create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
         DependencyManagement management = currentProfile.getDependencyManagement();
         if(management == null) {
           management = PomFactory.eINSTANCE.createDependencyManagement();
@@ -612,48 +582,14 @@ public class ProfilesPage extends MavenPomEditorPage {
           compoundCommand.append(command);
         }
 
-        Dependencies dependencies = management.getDependencies();
-        if(dependencies == null) {
-          dependencies = PomFactory.eINSTANCE.createDependencies();
-          Command createDependency = SetCommand.create(editingDomain, management, //
-              POM_PACKAGE.getDependencyManagement_Dependencies(), dependencies);
-          compoundCommand.append(createDependency);
-        }
-
-        return dependencies;
+        return management;
       }
     };
 
-    dependenciesComposite.loadData(dependenciesProvider, dependencyManagementProvider);
+    dependenciesComposite.loadData(model, dependencyManagementProvider);
   }
 
   private void updateRepositoriesTab() {
-    ValueProvider<Repositories> repositoriesProvider = new ValueProvider<Repositories>() {
-      public Repositories getValue() {
-        return currentProfile==null ? null : currentProfile.getRepositories();
-      }
-      public Repositories create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
-        Repositories repositories = PomFactory.eINSTANCE.createRepositories();
-        Command command = SetCommand.create(editingDomain, currentProfile, POM_PACKAGE.getProfile_Repositories(),
-            repositories);
-        compoundCommand.append(command);
-        return repositories;
-      }
-    };
-
-    ValueProvider<PluginRepositories> pluginRepositoriesProvider = new ValueProvider<PluginRepositories>() {
-      public PluginRepositories getValue() {
-        return currentProfile==null ? null : currentProfile.getPluginRepositories();
-      }
-      public PluginRepositories create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
-        PluginRepositories pluginRepositories = PomFactory.eINSTANCE.createPluginRepositories();
-        Command command = SetCommand.create(editingDomain, currentProfile, POM_PACKAGE.getProfile_PluginRepositories(),
-            pluginRepositories);
-        compoundCommand.append(command);
-        return pluginRepositories;
-      }
-    };
-
     ValueProvider<DistributionManagement> dmProvider = new ValueProvider<DistributionManagement>() {
       public DistributionManagement getValue() {
         return currentProfile==null ? null : currentProfile.getDistributionManagement();
@@ -668,7 +604,7 @@ public class ProfilesPage extends MavenPomEditorPage {
       }
     };
 
-    repositoriesComposite.loadData(this, repositoriesProvider, pluginRepositoriesProvider, dmProvider);
+    repositoriesComposite.loadData(this, model, dmProvider);
   }
 
   private void updateBuildTab() {
@@ -688,13 +624,13 @@ public class ProfilesPage extends MavenPomEditorPage {
   }
 
   private void updatePluginsTab() {
-    ValueProvider<Plugins> pluginsProvider = new ValueProvider<Plugins>() {
-      public Plugins getValue() {
+    ValueProvider<BuildBase> buildProvider = new ValueProvider<BuildBase>() {
+      public BuildBase getValue() {
         BuildBase build = currentProfile == null ? null : currentProfile.getBuild();
-        return build == null ? null : build.getPlugins();
+        return build;
       }
 
-      public Plugins create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+      public BuildBase create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
         BuildBase build = currentProfile.getBuild();
         if(build == null) {
           build = PomFactory.eINSTANCE.createBuild();
@@ -702,24 +638,18 @@ public class ProfilesPage extends MavenPomEditorPage {
           compoundCommand.append(command);
         }
 
-        Plugins plugins = build.getPlugins();
-        if(plugins == null) {
-          plugins = PomFactory.eINSTANCE.createPlugins();
-          Command command = SetCommand.create(editingDomain, build, POM_PACKAGE.getBuildBase_Plugins(), plugins);
-          compoundCommand.append(command);
-        }
-        return plugins;
+        return build;
       }
     };
 
-    ValueProvider<Plugins> pluginManagementProvider = new ValueProvider<Plugins>() {
-      public Plugins getValue() {
+    ValueProvider<PluginManagement> pluginManagementProvider = new ValueProvider<PluginManagement>() {
+      public PluginManagement getValue() {
         BuildBase build = currentProfile == null ? null : currentProfile.getBuild();
         PluginManagement management = build == null ? null : build.getPluginManagement();
-        return management == null ? null : management.getPlugins();
+        return management;
       }
 
-      public Plugins create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
+      public PluginManagement create(EditingDomain editingDomain, CompoundCommand compoundCommand) {
         BuildBase build = currentProfile.getBuild();
         if(build == null) {
           build = PomFactory.eINSTANCE.createBuild();
@@ -735,19 +665,11 @@ public class ProfilesPage extends MavenPomEditorPage {
           compoundCommand.append(command);
         }
 
-        Plugins plugins = management.getPlugins();
-        if(plugins == null) {
-          plugins = PomFactory.eINSTANCE.createPlugins();
-          Command command = SetCommand.create(editingDomain, management, //
-              POM_PACKAGE.getPluginManagement_Plugins(), plugins);
-          compoundCommand.append(command);
-        }
-
-        return plugins;
+        return management;
       }
     };
     
-    pluginsComposite.loadData(this, pluginsProvider, pluginManagementProvider);
+    pluginsComposite.loadData(this, buildProvider, pluginManagementProvider);
   }
 
   private void updateReportsTab() {
@@ -940,14 +862,14 @@ public class ProfilesPage extends MavenPomEditorPage {
   }
 
   public void loadData() {
-    ProfilesType profiles = model.getProfiles();
-    profilesEditor.setInput(profiles==null ? null : profiles.getProfile());
+    profilesEditor.setInput(model.getProfiles());
   }
 
   public void updateView(Notification notification) {
     Object object = notification.getNotifier();
+    Object feature = notification.getFeature();
     
-    if(object instanceof ProfilesType) {
+    if(feature == PomPackage.Literals.MODEL__PROFILES) {
       profilesEditor.refresh();
     }
     
@@ -957,7 +879,7 @@ public class ProfilesPage extends MavenPomEditorPage {
         updateProfileDetails((Profile) object);
     }
     
-    if(object instanceof StringModules) {
+    if(feature == PomPackage.Literals.PROFILE__MODULES) {
       modulesEditor.refresh();
     }
 
@@ -986,24 +908,12 @@ public class ProfilesPage extends MavenPomEditorPage {
   void createNewModule(String moduleName) {
     CompoundCommand compoundCommand = new CompoundCommand();
     EditingDomain editingDomain = getEditingDomain();
-    
-    boolean created = false;
-    StringModules modules = currentProfile.getModules();
-    if(modules == null) {
-      modules = PomFactory.eINSTANCE.createStringModules();
-      Command command = SetCommand.create(editingDomain, currentProfile, POM_PACKAGE.getProfile_Modules(), modules);
-      compoundCommand.append(command);
-      created = true;
-    }
 
-    Command addCommand = AddCommand.create(editingDomain, modules, POM_PACKAGE.getStringModules_Module(), moduleName);
+    Command addCommand = AddCommand.create(editingDomain, currentProfile, POM_PACKAGE.getProfile_Modules(), moduleName);
     compoundCommand.append(addCommand);
     
     editingDomain.getCommandStack().execute(compoundCommand);
 
-    if(created) {
-      modulesEditor.setInput(modules.getModule());
-    }
     modulesEditor.setSelection(Collections.singletonList(moduleName));
   }
 

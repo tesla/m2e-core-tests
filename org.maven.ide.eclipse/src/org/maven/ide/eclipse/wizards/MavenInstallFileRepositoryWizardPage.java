@@ -12,6 +12,7 @@ import java.io.File;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -25,7 +26,6 @@ import org.eclipse.swt.widgets.Label;
 
 import org.maven.ide.components.pom.Model;
 import org.maven.ide.components.pom.PomFactory;
-import org.maven.ide.components.pom.Repositories;
 import org.maven.ide.components.pom.Repository;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
@@ -114,13 +114,10 @@ public class MavenInstallFileRepositoryWizardPage extends WizardPage {
     }
 
     public Object[] getElements(Object arg0) {
-      if(repositories == null || repositories.getRepository() == null) {
-        return new Object[] {LOCAL_REPOSITORY};
-      }
-      return repositories.getRepository().toArray();
+      return repositories.toArray();
     }
     
-    private Repositories repositories;
+    private EList<Repository> repositories;
 
     public Object[] getChildren(Object arg0) {
       return null;

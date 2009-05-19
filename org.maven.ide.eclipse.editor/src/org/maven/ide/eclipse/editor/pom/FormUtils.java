@@ -78,6 +78,7 @@ public abstract class FormUtils {
   public static void setText(Text control, String text) {
     if(control!=null && !control.isDisposed() && !control.getText().equals(text)) {
       control.setText(nvl(text));
+      control.setSelection(nvl(text).length());
     }
   }
 

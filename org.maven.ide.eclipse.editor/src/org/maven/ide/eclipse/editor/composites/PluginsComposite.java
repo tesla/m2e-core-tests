@@ -24,7 +24,9 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.common.notify.Notification;
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.edit.command.AddCommand;
 import org.eclipse.emf.edit.command.RemoveCommand;
 import org.eclipse.emf.edit.command.SetCommand;
@@ -62,16 +64,13 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.Section;
-import org.maven.ide.components.pom.Dependencies;
+import org.maven.ide.components.pom.BuildBase;
 import org.maven.ide.components.pom.Dependency;
-import org.maven.ide.components.pom.ExecutionsType;
 import org.maven.ide.components.pom.Plugin;
 import org.maven.ide.components.pom.PluginExecution;
 import org.maven.ide.components.pom.PluginManagement;
-import org.maven.ide.components.pom.Plugins;
 import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.PomPackage;
-import org.maven.ide.components.pom.StringGoals;
 import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.actions.OpenUrlAction;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
@@ -142,9 +141,9 @@ public class PluginsComposite extends Composite{
   Plugin currentPlugin;
   PluginExecution currentPluginExecution;
 
-  ValueProvider<Plugins> pluginsProvider;
+  ValueProvider<BuildBase> buildProvider;
 
-  ValueProvider<Plugins> pluginManagementProvider;
+  ValueProvider<PluginManagement> pluginManagementProvider;
 
   boolean changingSelection = false;
 
@@ -204,7 +203,7 @@ public class PluginsComposite extends Composite{
     
     pluginsEditor.setAddListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
-        createPlugin(pluginsEditor, pluginsProvider, null, null, null);
+        createPlugin(pluginsEditor, buildProvider, POM_PACKAGE.getBuildBase_Plugins(), null, null, null);
       }
     });
     
@@ -215,7 +214,7 @@ public class PluginsComposite extends Composite{
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {
-            createPlugin(pluginsEditor, pluginsProvider, af.group, af.artifact, af.version);
+            createPlugin(pluginsEditor, buildProvider, POM_PACKAGE.getBuildBase_Plugins(), af.group, af.artifact, af.version);
           }
         }
       }
@@ -228,8 +227,8 @@ public class PluginsComposite extends Composite{
   
         List<Plugin> list = pluginsEditor.getSelection();
         for(Plugin plugin : list) {
-          Command removeCommand = RemoveCommand.create(editingDomain, pluginsProvider.getValue(), //
-              POM_PACKAGE.getPlugins_Plugin(), plugin);
+          Command removeCommand = RemoveCommand.create(editingDomain, buildProvider.getValue(), //
+              POM_PACKAGE.getBuildBase_Plugins(), plugin);
           compoundCommand.append(removeCommand);
         }
         
@@ -327,7 +326,7 @@ public class PluginsComposite extends Composite{
     
     pluginManagementEditor.setAddListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
-        createPlugin(pluginManagementEditor, pluginManagementProvider, null, null, null);
+        createPlugin(pluginManagementEditor, pluginManagementProvider, POM_PACKAGE.getPluginManagement_Plugins(), null, null, null);
       }
     });
     
@@ -339,7 +338,7 @@ public class PluginsComposite extends Composite{
         List<Plugin> list = pluginManagementEditor.getSelection();
         for(Plugin plugin : list) {
           Command removeCommand = RemoveCommand.create(editingDomain, //
-              pluginManagementProvider.getValue(), POM_PACKAGE.getPlugins_Plugin(), plugin);
+              pluginManagementProvider.getValue(), POM_PACKAGE.getPluginManagement_Plugins(), plugin);
           compoundCommand.append(removeCommand);
         }
         
@@ -354,7 +353,7 @@ public class PluginsComposite extends Composite{
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {
-            createPlugin(pluginManagementEditor, pluginManagementProvider, af.group, af.artifact, af.version);
+            createPlugin(pluginManagementEditor, pluginManagementProvider, POM_PACKAGE.getPluginManagement_Plugins(), af.group, af.artifact, af.version);
           }
         }
       }
@@ -610,15 +609,9 @@ public class PluginsComposite extends Composite{
           CompoundCommand compoundCommand = new CompoundCommand();
           EditingDomain editingDomain = parent.getEditingDomain();
           
-          ExecutionsType executions = currentPlugin.getExecutions();
-          if(executions == null) {
-            executions = PomFactory.eINSTANCE.createExecutionsType();
-            Command command = SetCommand.create(editingDomain, currentPlugin, POM_PACKAGE.getPlugin_Executions(), executions);
-            compoundCommand.append(command);
-          }
           
           PluginExecution pluginExecution = PomFactory.eINSTANCE.createPluginExecution();
-          Command command = AddCommand.create(editingDomain, executions, POM_PACKAGE.getExecutionsType_Execution(), pluginExecution);
+          Command command = AddCommand.create(editingDomain, currentPlugin, POM_PACKAGE.getPlugin_Executions(), pluginExecution);
           compoundCommand.append(command);
           
           editingDomain.getCommandStack().execute(compoundCommand);
@@ -637,7 +630,7 @@ public class PluginsComposite extends Composite{
           List<PluginExecution> list = pluginExecutionsEditor.getSelection();
           for(PluginExecution pluginExecution : list) {
             Command removeCommand = RemoveCommand.create(editingDomain, //
-                currentPlugin.getExecutions(), POM_PACKAGE.getExecutionsType_Execution(), pluginExecution);
+                currentPlugin.getExecutions(), POM_PACKAGE.getPlugin_Executions(), pluginExecution);
             compoundCommand.append(removeCommand);
           }
           
@@ -715,17 +708,9 @@ public class PluginsComposite extends Composite{
         public void widgetSelected(SelectionEvent e) {
           CompoundCommand compoundCommand = new CompoundCommand();
           EditingDomain editingDomain = parent.getEditingDomain();
-   
-          StringGoals goals = currentPluginExecution.getGoals();
-          if(goals==null) {
-            goals = PomFactory.eINSTANCE.createStringGoals();
-            Command command = SetCommand.create(editingDomain, currentPluginExecution, //
-                POM_PACKAGE.getPluginExecution_Goals(), goals);
-            compoundCommand.append(command);
-          }
           
           String goal = "?";
-          Command command = AddCommand.create(editingDomain, goals, POM_PACKAGE.getStringGoals_Goal(), goal);
+          Command command = AddCommand.create(editingDomain, currentPluginExecution, POM_PACKAGE.getPluginExecution_Goals(), goal);
           compoundCommand.append(command);
           
           editingDomain.getCommandStack().execute(compoundCommand);
@@ -742,7 +727,7 @@ public class PluginsComposite extends Composite{
           List<String> list = goalsEditor.getSelection();
           for(String goal : list) {
             Command removeCommand = RemoveCommand.create(editingDomain, //
-                currentPluginExecution.getGoals(), POM_PACKAGE.getStringGoals_Goal(), goal);
+                currentPluginExecution, POM_PACKAGE.getPluginExecution_Goals(), goal);
             compoundCommand.append(removeCommand);
           }
           
@@ -761,11 +746,10 @@ public class PluginsComposite extends Composite{
    
         public void modify(Object element, String property, Object value) {
           int n = goalsEditor.getViewer().getTable().getSelectionIndex();
-          StringGoals goals = currentPluginExecution.getGoals();
-          if(!value.equals(goals.getGoal().get(n))) {
+          if(!value.equals(currentPluginExecution.getGoals().get(n))) {
             EditingDomain editingDomain = parent.getEditingDomain();
-            Command command = SetCommand.create(editingDomain, goals, //
-                POM_PACKAGE.getStringGoals_Goal(), value, n);
+            Command command = SetCommand.create(editingDomain, currentPluginExecution, //
+                POM_PACKAGE.getPluginExecution_Goals(), value, n);
             editingDomain.getCommandStack().execute(command);
     
             // currentPluginExecution.getGoals().getGoal().set(n, (String) value);
@@ -869,11 +853,9 @@ public class PluginsComposite extends Composite{
     setButton(pluginInheritedButton, plugin.getInherited()==null || "true".equals(plugin.getInherited()));
     setButton(pluginExtensionsButton, "true".equals(plugin.getExtensions()));
     
-    ExecutionsType plugineExecutions = plugin.getExecutions();
-    pluginExecutionsEditor.setInput(plugineExecutions==null ? null : plugineExecutions.getExecution());
+    pluginExecutionsEditor.setInput(plugin.getExecutions());
     
-    Dependencies pluginDependencies = plugin.getDependencies();
-    pluginDependenciesEditor.setInput(pluginDependencies==null ? null : pluginDependencies.getDependency());
+    pluginDependenciesEditor.setInput(plugin.getDependencies());
     
     updatePluginExecution(null);
     
@@ -917,8 +899,7 @@ public class PluginsComposite extends Composite{
     setText(executionPhaseCombo, pluginExecution.getPhase());
     setButton(executionInheritedButton, pluginExecution.getInherited()==null || "true".equals(pluginExecution.getInherited()));
 
-    StringGoals goals = pluginExecution.getGoals();
-    goalsEditor.setInput(goals==null ? null : goals.getGoal());
+    goalsEditor.setInput(pluginExecution.getGoals());
     // goalsEditor.setSelection(Collections.<String>emptyList());
     
     // register listeners
@@ -928,10 +909,10 @@ public class PluginsComposite extends Composite{
     parent.setModifyListener(executionInheritedButton, provider, POM_PACKAGE.getPluginExecution_Inherited(), "true");
   }
 
-  public void loadData(MavenPomEditorPage editorPage, ValueProvider<Plugins> pluginsProvider,
-      ValueProvider<Plugins> pluginManagementProvider) {
+  public void loadData(MavenPomEditorPage editorPage, ValueProvider<BuildBase> buildProvider,
+      ValueProvider<PluginManagement> pluginManagementProvider) {
     this.parent = editorPage;
-    this.pluginsProvider = pluginsProvider;
+    this.buildProvider = buildProvider;
     this.pluginManagementProvider = pluginManagementProvider;
     
     changingSelection = true;
@@ -952,20 +933,21 @@ public class PluginsComposite extends Composite{
   }
 
   private void loadPlugins() {
-    Plugins plugins = pluginsProvider.getValue();
-    pluginsEditor.setInput(plugins==null ? null : plugins.getPlugin());
+    BuildBase build = buildProvider.getValue();
+    pluginsEditor.setInput(build == null ? null : build.getPlugins());
   }
 
   private void loadPluginManagement() {
-    Plugins plugins = pluginManagementProvider.getValue();
-    pluginManagementEditor.setInput(plugins == null ? null : plugins.getPlugin());
+    PluginManagement pluginManagement = pluginManagementProvider.getValue();
+    pluginManagementEditor.setInput(pluginManagement == null ? null : pluginManagement.getPlugins());
   }
   
   public void updateView(MavenPomEditorPage editorPage, Notification notification) {
-    EObject object = (EObject) notification.getNotifier();
+    Object object = notification.getNotifier();
+    Object feature = notification.getFeature();
     Object notificationObject = MavenPomEditorPage.getFromNotification(notification);
     
-    if(object instanceof Plugins) {
+    if(feature == PomPackage.Literals.BUILD_BASE__PLUGINS || feature == PomPackage.Literals.PLUGIN_MANAGEMENT__PLUGINS) {
       pluginsEditor.refresh();
       pluginManagementEditor.refresh();
     }
@@ -982,7 +964,7 @@ public class PluginsComposite extends Composite{
       }
     }
     
-    if(object instanceof ExecutionsType) {
+    if(feature == PomPackage.Literals.PLUGIN__EXECUTIONS) {
       pluginExecutionsEditor.refresh();
       goalsEditor.refresh();
     }
@@ -995,21 +977,21 @@ public class PluginsComposite extends Composite{
       }
     }
     
-    if(object instanceof StringGoals) {
-      goalsEditor.setInput(((StringGoals) object).getGoal());
+    if(feature == PomPackage.Literals.PLUGIN_EXECUTION__GOALS) {
+      goalsEditor.setInput(((PluginExecution) object).getGoals());
       goalsEditor.refresh();
     }
   }
 
-  void createPlugin(ListEditorComposite<Plugin> editor, ValueProvider<Plugins> provider, String groupId, String artifactId, String version) {
+  void createPlugin(ListEditorComposite<Plugin> editor, ValueProvider<? extends EObject> parentObjectProvider, EStructuralFeature feature, String groupId, String artifactId, String version) {
     CompoundCommand compoundCommand = new CompoundCommand();
     EditingDomain editingDomain = parent.getEditingDomain();
     
-    Plugins plugins = provider.getValue();
-    boolean pluginsCreated = false;
-    if(plugins==null) {
-      plugins = provider.create(editingDomain, compoundCommand);
-      pluginsCreated = true;
+    EObject parentObject = parentObjectProvider.getValue();
+    boolean created = false;
+    if(null == parentObject) {
+      parentObject = parentObjectProvider.create(editingDomain, compoundCommand);
+      created = true;
     }
     
     Plugin plugin = PomFactory.eINSTANCE.createPlugin();
@@ -1017,13 +999,13 @@ public class PluginsComposite extends Composite{
     plugin.setArtifactId(artifactId);
     plugin.setVersion(version);
     
-    Command command = AddCommand.create(editingDomain, plugins, POM_PACKAGE.getPlugins_Plugin(), plugin);
+    Command command = AddCommand.create(editingDomain, parentObject, feature, plugin);
     compoundCommand.append(command);
     
     editingDomain.getCommandStack().execute(compoundCommand);
     
-    if(pluginsCreated){
-      editor.setInput(plugins.getPlugin());
+    if(created) {
+      editor.setInput((EList<Plugin>)parentObject.eGet(feature));
     }
     editor.setSelection(Collections.singletonList(plugin));
     updatePluginDetails(plugin);
@@ -1080,18 +1062,17 @@ public class PluginsComposite extends Composite{
     this.searchControl.getSearchText().addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent e) {
         changingSelection = true;
-        selectPlugins(pluginsEditor, pluginsProvider);
-        selectPlugins(pluginManagementEditor, pluginManagementProvider);
+        selectPlugins(pluginsEditor, buildProvider.getValue().getPlugins());
+        selectPlugins(pluginManagementEditor, pluginManagementProvider.getValue().getPlugins());
         changingSelection = false;
         
         updatePluginDetails(null);
       }
 
-      private void selectPlugins(ListEditorComposite<Plugin> editor, ValueProvider<Plugins> provider) {
+      private void selectPlugins(ListEditorComposite<Plugin> editor, List<Plugin> value) {
         List<Plugin> plugins = new ArrayList<Plugin>();
-        Plugins value = provider.getValue();
         if(value!=null) {
-          for(Plugin p : value.getPlugin()) {
+          for(Plugin p : value) {
             if(searchMatcher.isMatchingArtifact(p.getGroupId(), p.getArtifactId())) {
               plugins.add(p);
             }

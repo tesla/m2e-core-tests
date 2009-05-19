@@ -25,7 +25,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.jem.util.emf.workbench.EMFWorkbenchContextBase;
 import org.maven.ide.components.pom.util.PomResourceFactoryImpl;
 import org.maven.ide.components.pom.util.PomResourceImpl;
 
@@ -51,9 +50,6 @@ public class MavenModelUtil {
     
     PomResourceFactoryImpl factory = new PomResourceFactoryImpl();
     PomResourceImpl resource = (PomResourceImpl) factory.createResource(uri);
-
-    EMFWorkbenchContextBase contextBase = new EMFWorkbenchContextBase(project);
-    contextBase.getResourceSet().getResources().add(resource);
     
     resource.load(Collections.EMPTY_MAP);
     

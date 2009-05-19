@@ -184,11 +184,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 
   private Map<String,DependencyNode> rootNode = new HashMap<String, DependencyNode>();
 
-  private PomResourceImpl resource;
-
   IStructuredModel structuredModel;
-
-  EMF2DOMSSERenderer renderer;
 
   private MavenProject mavenProject;
 
@@ -608,12 +604,6 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
         commandStack = new NotificationCommandStack(this);
         editingDomain = new AdapterFactoryEditingDomain(adapterFactory, //
             commandStack, new HashMap<Resource, Boolean>());
-
-        if(resource != null && resource.getRenderer() instanceof EMF2DOMSSERenderer) {
-          renderer = (EMF2DOMSSERenderer) resource.getRenderer();
-          structuredModel.addModelStateListener(renderer);
-          structuredModel.addModelLifecycleListener(renderer);
-        }
       }
     } catch(PartInitException ex) {
       MavenLogger.log(ex);
@@ -664,7 +654,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 
         MavenModelManager modelManager = MavenPlugin.getDefault().getMavenModelManager();
         PomResourceImpl resource = modelManager.loadResource(pomFile);
-        projectDocument = resource.getModel();
+        projectDocument = (Model)resource.getContents().get(0);
 
       } else if(input instanceof IStorageEditorInput) {
         IStorageEditorInput storageInput = (IStorageEditorInput) input;
@@ -704,16 +694,11 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   private Model loadModel(String path) {
     URI uri = URI.createFileURI(path);
     PomResourceFactoryImpl factory = new PomResourceFactoryImpl();
-    resource = (PomResourceImpl) factory.createResource(uri);
-
-    // disable SSE support for read-only external documents
-    EMF2DOMRenderer renderer = new EMF2DOMRenderer();
-    renderer.setValidating(false);
-    resource.setRenderer(renderer);
+    PomResourceImpl resource = (PomResourceImpl) factory.createResource(uri);
 
     try {
       resource.load(Collections.EMPTY_MAP);
-      return resource.getModel();
+      return (Model)resource.getContents().get(0);
 
     } catch(Exception ex) {
       MavenLogger.log("Can't load model " + path, ex);
@@ -920,9 +905,9 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 
         ResourcesPlugin.getWorkspace().removeResourceChangeListener(MavenPomEditor.this);
         
-        structuredModel.removeModelStateListener(renderer);
-        structuredModel.removeModelLifecycleListener(renderer);
-        
+        if(projectDocument != null) {
+          projectDocument.eResource().unload();
+        }
         MavenPomEditor.super.dispose();
         return Status.OK_STATUS;
       }

@@ -21,14 +21,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.emf.common.command.CompoundCommand;
-import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.edit.command.AddCommand;
 import org.eclipse.emf.edit.command.RemoveCommand;
-import org.eclipse.emf.edit.command.SetCommand;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.maven.ide.components.pom.Dependency;
 import org.maven.ide.components.pom.Exclusion;
-import org.maven.ide.components.pom.ExclusionsType;
 import org.maven.ide.components.pom.Model;
 import org.maven.ide.components.pom.impl.PomFactoryImpl;
 import org.maven.ide.eclipse.MavenPlugin;
@@ -68,7 +65,7 @@ public class ExcludeRefactoring extends AbstractPomRefactoring {
         
         Model model = resources.getTmpModel();
         
-        final List<Dependency> deps = model.getDependencies().getDependency();
+        final List<Dependency> deps = model.getDependencies();
 
         pm.beginTask("Loading dependency tree", 1);
         MavenModelManager modelManager = MavenPlugin.getDefault().getMavenModelManager();
@@ -115,7 +112,7 @@ public class ExcludeRefactoring extends AbstractPomRefactoring {
         
         Iterator rem = toRemove.iterator();
         while (rem.hasNext()) {
-          command.append(new RemoveCommand(editingDomain, model.getDependencies().getDependency(), rem.next()));
+          command.append(new RemoveCommand(editingDomain, model.getDependencies(), rem.next()));
         }
         
         // XXX scan management as well
@@ -128,16 +125,7 @@ public class ExcludeRefactoring extends AbstractPomRefactoring {
         exclusion.setArtifactId(excludedArtifactId);
         exclusion.setGroupId(excludedGroupId);
 
-        if(dep != null){
-          if (dep.getExclusions() == null) {
-            EStructuralFeature feature = dep.eClass().getEStructuralFeature("exclusions");
-            ExclusionsType excl = PomFactoryImpl.eINSTANCE.createExclusionsType();
-            excl.getExclusion().add(exclusion);
-            command.append(new SetCommand(editingDomain, dep, feature, excl));
-          } else {
-            command.append(new AddCommand(editingDomain, dep.getExclusions().getExclusion(), exclusion));
-          }
-        }
+        command.append(new AddCommand(editingDomain, dep.getExclusions(), exclusion));
       }
     };
   }
