@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -23,9 +22,8 @@ import com.windowtester.runtime.swt.locator.ButtonLocator;
 import com.windowtester.runtime.swt.locator.CTabItemLocator;
 import com.windowtester.runtime.swt.locator.NamedWidgetLocator;
 import com.windowtester.runtime.swt.locator.TableItemLocator;
-import com.windowtester.runtime.swt.locator.eclipse.ContributedToolItemLocator;
 
-public class PomEditorTest2 extends PomEditorTestBase {
+public class PomEditor2Test extends PomEditorTestBase {
 
   public void testNewPropertiesSectionModel2XML() throws Exception {
     openPomFile(TEST_POM_POM_XML);
