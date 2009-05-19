@@ -189,29 +189,5 @@ public class PomEditorTest2 extends PomEditorTestBase {
     assertFalse(editorA.isDirty());
     assertFalse(editorB.isDirty());
   }
-  
-  public void testMNGEclipse1081() throws Exception {
-    
-    IUIContext ui = getUI();
-    
-    IProject project = createArchetypeProjct("maven-archetype-quickstart", "aProject");
-    openPomFile("aProject/pom.xml");
-    
-    ui.wait(new SWTIdleCondition());
-    ui.click(new ContributedToolItemLocator("org.maven.ide.ecillpse.editor.showEffectivePOMAction"));
-    ui.wait(new SWTIdleCondition());
-    ui.close(new CTabItemLocator("aProject/pom.xml [effective]"));
-    ui.wait(new SWTIdleCondition());
-    
-    addDependency(project, "commons-collections", "commons-collections", "1.0");
-    getUI().click(new CTabItemLocator("Overview"));
-    
-    ui.click(new ContributedToolItemLocator("org.maven.ide.ecillpse.editor.showEffectivePOMAction"));
-    ui.wait(new SWTIdleCondition());
-    
-    ui.click(new CTabItemLocator("Dependencies"));
-    
-    ui.click(new TableItemLocator("commons-collections : commons-collections : 1.0.*", new NamedWidgetLocator("list-editor-composite-table")));
-    
-  }
+
 }
