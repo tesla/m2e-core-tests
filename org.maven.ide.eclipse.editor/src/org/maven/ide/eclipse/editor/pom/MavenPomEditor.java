@@ -110,7 +110,6 @@ import org.eclipse.ui.forms.editor.IFormPage;
 import org.eclipse.ui.ide.IGotoMarker;
 import org.eclipse.ui.part.MultiPageEditorActionBarContributor;
 import org.eclipse.ui.progress.UIJob;
-import org.eclipse.wst.common.internal.emf.resource.EMF2DOMRenderer;
 import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
@@ -118,7 +117,6 @@ import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
 import org.eclipse.wst.sse.core.internal.undo.IStructuredTextUndoManager;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
 import org.eclipse.wst.xml.core.internal.emf2xml.EMF2DOMSSEAdapter;
-import org.eclipse.wst.xml.core.internal.emf2xml.EMF2DOMSSERenderer;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMElement;
 import org.maven.ide.components.pom.Model;
 import org.maven.ide.components.pom.util.PomResourceFactoryImpl;
@@ -235,7 +233,6 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       }
       return;
     }
-
     //handle pom delete
     class RemovedResourceDeltaVisitor implements IResourceDeltaVisitor {
       boolean removed = false;
@@ -330,6 +327,8 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     projectDocument = null;
     try {
       readProjectDocument();
+      //fix for resetting the pom document after an external change
+      sourcePage.getDocumentProvider().resetDocument(sourcePage.getEditorInput());
     } catch(CoreException e) {
       MavenLogger.log(e);
     }
@@ -650,8 +649,8 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       if(input instanceof IFileEditorInput) {
         pomFile = ((IFileEditorInput) input).getFile();
         pomFile.refreshLocal(1, null);
-        ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
 
+        ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
         MavenModelManager modelManager = MavenPlugin.getDefault().getMavenModelManager();
         PomResourceImpl resource = modelManager.loadResource(pomFile);
         projectDocument = (Model)resource.getContents().get(0);
