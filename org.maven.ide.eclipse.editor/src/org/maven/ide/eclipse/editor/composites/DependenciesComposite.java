@@ -1040,59 +1040,47 @@ public class DependenciesComposite extends Composite {
     // exclusionsEditor.setReadOnly(parent.isReadOnly());
   }
 
-  public void updateView(MavenPomEditorPage editorPage, Notification notification) {
-    EObject object = (EObject) notification.getNotifier();
+  public void updateView(final MavenPomEditorPage editorPage, final Notification notification) {
+    Display.getDefault().asyncExec(new Runnable(){
+      public void run(){
+        EObject object = (EObject) notification.getNotifier();
 
-    // XXX event is not received when <dependencies> is deleted in XML
-    if(object instanceof Model) {
-//    	// handle add/remove
-//    	Dependencies dependencies = (Dependencies) object;
-//    	if (model.getDependencies() == dependencies) {
-//    	  // dependencies updated
-// 	      List<Dependency> selection = getUpdatedSelection(dependencies, dependenciesEditor.getSelection());
-// 	      loadDependencies(model);
-// 	      dependenciesEditor.setSelection(selection);
-//        updateDependencyDetails(selection.size()==1 ? selection.get(0) : null);
-//    	} else {
-//    		// dependencyManagement updated
-//        List<Dependency> selection = dependencyManagementEditor.getSelection();
-//        getUpdatedSelection(dependencies, selection);
-//        loadDependencyManagement(model);
-//        dependencyManagementEditor.setSelection(selection);
-//        updateDependencyDetails(selection.size()==1 ? selection.get(0) : null);
-//    	}
-      dependenciesEditor.refresh();
-      dependencyManagementEditor.refresh();
-    }
-    
-    if(object instanceof DependencyManagement) {
-      dependencyManagementEditor.refresh();
-    }
-    
-    Object notificationObject = MavenPomEditorPage.getFromNotification(notification);
-    if(object instanceof Dependency) {
-      dependenciesEditor.refresh();
-      dependencyManagementEditor.refresh();
-      
-      if(object == currentDependency && (notificationObject == null || notificationObject instanceof Dependency)) {
-        updateDependencyDetails((Dependency) notificationObject);
+        // XXX event is not received when <dependencies> is deleted in XML
+        if(object instanceof Model) {
+          dependenciesEditor.refresh();
+          dependencyManagementEditor.refresh();
+        }
+        
+        if(object instanceof DependencyManagement) {
+          dependencyManagementEditor.refresh();
+        }
+        
+        Object notificationObject = MavenPomEditorPage.getFromNotification(notification);
+        if(object instanceof Dependency) {
+          dependenciesEditor.refresh();
+          dependencyManagementEditor.refresh();
+          
+          if(object == currentDependency && (notificationObject == null || notificationObject instanceof Dependency)) {
+            updateDependencyDetails((Dependency) notificationObject);
+          }
+        }
+        
+        EList<Exclusion> exclusions = currentDependency==null ? null : currentDependency.getExclusions();
+        if(object instanceof Dependency) {
+          exclusionsEditor.refresh();
+          if(exclusions == object) {
+            updateDependencyDetails(currentDependency);
+          }
+        }
+        
+        if(object instanceof Exclusion) {
+          exclusionsEditor.refresh();
+          if(currentExclusion == object && (notificationObject == null || notificationObject instanceof Exclusion)) {
+            updateExclusionDetails((Exclusion) notificationObject);
+          }
+        }        
       }
-    }
-    
-    EList<Exclusion> exclusions = currentDependency==null ? null : currentDependency.getExclusions();
-    if(object instanceof Dependency) {
-      exclusionsEditor.refresh();
-      if(exclusions == object) {
-        updateDependencyDetails(currentDependency);
-      }
-    }
-    
-    if(object instanceof Exclusion) {
-      exclusionsEditor.refresh();
-      if(currentExclusion == object && (notificationObject == null || notificationObject instanceof Exclusion)) {
-        updateExclusionDetails((Exclusion) notificationObject);
-      }
-    }
+    });
   }
 
   Dependency createDependency(ValueProvider<? extends EObject> parentProvider, EReference feature,

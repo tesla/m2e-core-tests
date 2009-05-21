@@ -821,36 +821,41 @@ public class OverviewPage extends MavenPomEditorPage {
   }
 
   private void loadThis() {
-    removeNotifyListener(artifactGroupIdText);
-    removeNotifyListener(artifactIdText);
-    removeNotifyListener(artifactVersionText);
-    removeNotifyListener(artifactPackagingCombo);
+    Display.getDefault().asyncExec(new Runnable(){
+      public void run(){
+        removeNotifyListener(artifactGroupIdText);
+        removeNotifyListener(artifactIdText);
+        removeNotifyListener(artifactVersionText);
+        removeNotifyListener(artifactPackagingCombo);
 
-    removeNotifyListener(projectNameText);
-    removeNotifyListener(projectDescriptionText);
-    removeNotifyListener(projectUrlText);
-    removeNotifyListener(inceptionYearText);
-    
-    setText(artifactGroupIdText, model.getGroupId());
-    setText(artifactIdText, model.getArtifactId());
-    setText(artifactVersionText, model.getVersion());
-    setText(artifactPackagingCombo, model.getPackaging());
-    
-    setText(projectNameText, model.getName());
-    setText(projectDescriptionText, model.getDescription());
-    setText(projectUrlText, model.getUrl());
-    setText(inceptionYearText, model.getInceptionYear());
+        removeNotifyListener(projectNameText);
+        removeNotifyListener(projectDescriptionText);
+        removeNotifyListener(projectUrlText);
+        removeNotifyListener(inceptionYearText);
+        
+        setText(artifactGroupIdText, model.getGroupId());
+        setText(artifactIdText, model.getArtifactId());
+        setText(artifactVersionText, model.getVersion());
+        setText(artifactPackagingCombo, model.getPackaging());
+        
+        setText(projectNameText, model.getName());
+        setText(projectDescriptionText, model.getDescription());
+        setText(projectUrlText, model.getUrl());
+        setText(inceptionYearText, model.getInceptionYear());
 
-    ValueProvider<Model> modelProvider = new ValueProvider.DefaultValueProvider<Model>(model);
-    setModifyListener(artifactGroupIdText, modelProvider, POM_PACKAGE.getModel_GroupId(), "");
-    setModifyListener(artifactIdText, modelProvider, POM_PACKAGE.getModel_ArtifactId(), "");
-    setModifyListener(artifactVersionText, modelProvider, POM_PACKAGE.getModel_Version(), "");
-    setModifyListener(artifactPackagingCombo, modelProvider, POM_PACKAGE.getModel_Packaging(), "jar");
-    
-    setModifyListener(projectNameText, modelProvider, POM_PACKAGE.getModel_Name(), "");
-    setModifyListener(projectDescriptionText, modelProvider, POM_PACKAGE.getModel_Description(), "");
-    setModifyListener(projectUrlText, modelProvider, POM_PACKAGE.getModel_Url(), "");
-    setModifyListener(inceptionYearText, modelProvider, POM_PACKAGE.getModel_InceptionYear(), "");
+        ValueProvider<Model> modelProvider = new ValueProvider.DefaultValueProvider<Model>(model);
+        setModifyListener(artifactGroupIdText, modelProvider, POM_PACKAGE.getModel_GroupId(), "");
+        setModifyListener(artifactIdText, modelProvider, POM_PACKAGE.getModel_ArtifactId(), "");
+        setModifyListener(artifactVersionText, modelProvider, POM_PACKAGE.getModel_Version(), "");
+        setModifyListener(artifactPackagingCombo, modelProvider, POM_PACKAGE.getModel_Packaging(), "jar");
+        
+        setModifyListener(projectNameText, modelProvider, POM_PACKAGE.getModel_Name(), "");
+        setModifyListener(projectDescriptionText, modelProvider, POM_PACKAGE.getModel_Description(), "");
+        setModifyListener(projectUrlText, modelProvider, POM_PACKAGE.getModel_Url(), "");
+        setModifyListener(inceptionYearText, modelProvider, POM_PACKAGE.getModel_InceptionYear(), "");        
+      }
+    });
+
   }
 
   private void loadParent(Parent parent) {
