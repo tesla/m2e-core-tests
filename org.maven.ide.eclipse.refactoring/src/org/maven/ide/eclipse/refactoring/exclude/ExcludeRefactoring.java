@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.emf.common.command.CompoundCommand;
+import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.edit.command.AddCommand;
 import org.eclipse.emf.edit.command.RemoveCommand;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -102,8 +103,11 @@ public class ExcludeRefactoring extends AbstractPomRefactoring {
               while (parent.getParent().getParent() != null) {
                 parent = parent.getParent();
               }
-              addExclusion(command, findDependency(parent.getArtifact().getGroupId(), parent.getArtifact().getArtifactId()));
-              
+              if(node.getState() == DependencyNode.INCLUDED){
+                addExclusion(command, findDependency(parent.getArtifact().getGroupId(), parent.getArtifact().getArtifactId()));
+              } else {
+                return false;
+              }
             }
             return true;
           }
@@ -124,7 +128,6 @@ public class ExcludeRefactoring extends AbstractPomRefactoring {
         Exclusion exclusion = PomFactoryImpl.eINSTANCE.createExclusion();
         exclusion.setArtifactId(excludedArtifactId);
         exclusion.setGroupId(excludedGroupId);
-
         command.append(new AddCommand(editingDomain, dep.getExclusions(), exclusion));
       }
     };
