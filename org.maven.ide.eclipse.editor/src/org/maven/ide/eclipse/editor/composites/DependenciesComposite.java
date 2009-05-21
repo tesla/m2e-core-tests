@@ -755,9 +755,12 @@ public class DependenciesComposite extends Composite {
           n++;
         }
         if(exclusions.size()-n==0) {
-          Command removeExclusions = SetCommand.create(editingDomain, currentDependency, 
-              POM_PACKAGE.getDependency_Exclusions(), null);
-          compoundCommand.append(removeExclusions);
+          //if there are no exclusions left, just create a command to yank all the exclusions at once (by
+          //removing the root <exclusions> tag
+            Command removeExclusions = SetCommand.create(editingDomain, currentDependency, 
+                POM_PACKAGE.getDependency_Exclusions(), SetCommand.UNSET_VALUE);
+            compoundCommand = new CompoundCommand();
+            compoundCommand.append(removeExclusions);
         }
         
         editingDomain.getCommandStack().execute(compoundCommand);
