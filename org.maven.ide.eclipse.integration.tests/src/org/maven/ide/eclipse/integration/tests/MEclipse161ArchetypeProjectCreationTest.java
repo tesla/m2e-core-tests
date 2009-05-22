@@ -40,17 +40,17 @@ import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
 public class MEclipse161ArchetypeProjectCreationTest extends UIIntegrationTestCase {
 
   private IProject createArchetypeProjct(String archetypeName) throws Exception {
-    return createArchetypeProjct(archetypeName, "project");
+    return createArchetypeProjct(archetypeName, "archetypeproject");
   }
 
   public void testQuickStartCreate() throws Exception {
     IProject project = createArchetypeProjct("maven-archetype-quickstart");
     assertTrue(project.hasNature(JavaCore.NATURE_ID));
-    IFile f = project.getFile("src/main/java/org/sonatype/test/project/App.java");
+    IFile f = project.getFile("src/main/java/org/sonatype/test/archetypeproject/App.java");
     assertTrue(f.exists());
     f = project.getFile("pom.xml");
     assertTrue(f.exists());
-    f = project.getFile("src/test/java/org/sonatype/test/project/AppTest.java");
+    f = project.getFile("src/test/java/org/sonatype/test/archetypeproject/AppTest.java");
     assertTrue(f.exists());
 
   }
