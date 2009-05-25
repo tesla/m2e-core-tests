@@ -26,11 +26,8 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-//import org.eclipse.jdt.core.IJavaProject;
-//import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -45,8 +42,6 @@ import org.eclipse.ui.PlatformUI;
 import org.codehaus.plexus.util.IOUtil;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.embedder.MavenEmbedder;
-import org.apache.maven.embedder.MavenEmbedderException;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.project.MavenProject;
@@ -57,10 +52,9 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
+import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
-import org.maven.ide.eclipse.project.MavenRunnable;
-import org.maven.ide.eclipse.project.ResolverConfiguration;
 import org.maven.ide.eclipse.util.Util;
 import org.maven.ide.eclipse.util.Util.FileStoreEditorInputStub;
 
@@ -241,7 +235,7 @@ public class SelectionUtil {
         if(editor!=null) {
           MavenProject mavenProject = getMavenProject(editor.getEditorInput());
           if(mavenProject!=null) {
-            Artifact a = (Artifact) mavenProject.getArtifactMap().get(groupId + ":" + artifactId);
+            Artifact a = mavenProject.getArtifactMap().get(groupId + ":" + artifactId);
             version = a.getBaseVersion();
           }
         }
@@ -296,46 +290,32 @@ public class SelectionUtil {
   }
   
   private static MavenProject readMavenProject(File pomFile) throws CoreException {
-    MavenPlugin plugin = MavenPlugin.getDefault();
-    MavenProjectManager projectManager = plugin.getMavenProjectManager();
-    MavenEmbedder embedder = projectManager.createWorkspaceEmbedder();
-    try {
-      MavenExecutionResult result = projectManager.execute(embedder, pomFile, new ResolverConfiguration(),
-          new MavenRunnable() {
-            public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request) {
-              request.setOffline(false);
-              request.setUpdateSnapshots(false);
-              return embedder.readProjectWithDependencies(request);
-            }
-          }, new NullProgressMonitor());
+    IMaven maven = MavenPlugin.lookup(IMaven.class);
 
-      MavenProject project = result.getProject();
-      if(project!=null) {
-        return project;
-      }
-      
-      if(result.hasExceptions()) {
-        List<IStatus> statuses = new ArrayList<IStatus>();
-        @SuppressWarnings("unchecked")
-        List<Throwable> exceptions = result.getExceptions();
-        for(Throwable e : exceptions) {
-          statuses.add(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, e.getMessage(), e));
-        }
-        
-        throw new CoreException(new MultiStatus(IMavenConstants.PLUGIN_ID, IStatus.ERROR, //
-            statuses.toArray(new IStatus[statuses.size()]), "Can't read Maven project", null));
-      }
-      
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, //
-          "Can't read Maven project", null));
+    MavenExecutionRequest request = maven.createExecutionRequest();
+    request.setOffline(false);
+    request.setUpdateSnapshots(false);
 
-    } finally {
-      try {
-        embedder.stop();
-      } catch(MavenEmbedderException ex) {
-        MavenLogger.log("Can't stop Maven embedder", ex);
-      }
+    MavenExecutionResult result = maven.execute(request, null);
+
+    MavenProject project = result.getProject();
+    if(project!=null) {
+      return project;
     }
+
+    if(result.hasExceptions()) {
+      List<IStatus> statuses = new ArrayList<IStatus>();
+      List<Exception> exceptions = result.getExceptions();
+      for(Throwable e : exceptions) {
+        statuses.add(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, e.getMessage(), e));
+      }
+
+      throw new CoreException(new MultiStatus(IMavenConstants.PLUGIN_ID, IStatus.ERROR, //
+          statuses.toArray(new IStatus[statuses.size()]), "Can't read Maven project", null));
+    }
+
+    throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, //
+        "Can't read Maven project", null));
   }
 
   private static IEditorPart getActiveEditor() {

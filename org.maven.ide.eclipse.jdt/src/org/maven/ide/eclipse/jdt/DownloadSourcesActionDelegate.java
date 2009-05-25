@@ -20,6 +20,7 @@ import org.eclipse.ui.IEditorPart;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
+import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 
 /**
@@ -33,12 +34,16 @@ import org.maven.ide.eclipse.index.IndexedArtifactFile;
 public class DownloadSourcesActionDelegate implements IEditorActionDelegate {
 
   public void setActiveEditor(IAction action, IEditorPart part) {
-    if (MavenPlugin.getDefault().getMavenRuntimeManager().isOffline()) {
-      return;
-    }
+    
 
     if (part != null) {
       try {
+        IMavenConfiguration mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
+        
+        if (mavenConfiguration.isOffline()) {
+          return;
+        }
+
         IClassFileEditorInput input = (IClassFileEditorInput) part.getEditorInput();
         IJavaElement element = input.getClassFile();
         while (element.getParent() != null) {

@@ -42,22 +42,18 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 
-import org.codehaus.plexus.PlexusContainer;
-import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
-
 import org.apache.maven.archetype.catalog.Archetype;
 import org.apache.maven.archetype.common.ArchetypeArtifactManager;
 import org.apache.maven.archetype.exception.UnknownArchetype;
 import org.apache.maven.archetype.metadata.ArchetypeDescriptor;
 import org.apache.maven.archetype.metadata.RequiredProperty;
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.model.Model;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.core.Messages;
-import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
+import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.ui.internal.components.TextComboBoxCellEditor;
 
@@ -390,16 +386,15 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
           monitor.beginTask("Downloading Archetype " + archetypeName, IProgressMonitor.UNKNOWN);
           try {
             MavenPlugin mavenPlugin = MavenPlugin.getDefault();
-            MavenEmbedderManager embedderMgr = mavenPlugin.getMavenEmbedderManager();
-            MavenEmbedder embedder = embedderMgr.getWorkspaceEmbedder();
 
-            ArtifactRepository localRepository = embedder.getLocalRepository();
+            IMaven maven = MavenPlugin.lookup(IMaven.class);
+
+            ArtifactRepository localRepository = maven.getLocalRepository();
 
             List<ArtifactRepository> repositories = new ArrayList<ArtifactRepository>();
             repositories.addAll(mavenPlugin.getIndexManager().getArtifactRepositories(null, null));
 
-            PlexusContainer plexus = embedder.getPlexusContainer();
-            ArchetypeArtifactManager aaMgr = (ArchetypeArtifactManager) plexus.lookup(ArchetypeArtifactManager.class);
+            ArchetypeArtifactManager aaMgr = MavenPlugin.lookup(ArchetypeArtifactManager.class);
             if(aaMgr.isFileSetArchetype(groupId, artifactId, version, null, localRepository, repositories)) {
               ArchetypeDescriptor descriptor = aaMgr.getFileSetArchetypeDescriptor(groupId, artifactId, version, null,
                   localRepository, repositories);
@@ -414,8 +409,6 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
                 }
               }
             }
-          } catch(ComponentLookupException e) {
-            MavenLogger.log("Error downloading archetype " + archetypeName, e);
           } catch(UnknownArchetype e) {
             MavenLogger.log("Error downloading archetype " + archetypeName, e);
           } catch(CoreException ex) {

@@ -21,12 +21,10 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
-import org.apache.maven.embedder.MavenEmbedder;
-
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
-import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
+import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.internal.ExtensionReader;
 import org.maven.ide.eclipse.project.IMavenMarkerManager;
 import org.maven.ide.eclipse.project.MavenProjectManager;
@@ -51,13 +49,13 @@ public class DefaultLifecycleMapping implements ILifecycleMapping {
     this.buildParticipants.add(new DefaultBuildParticipant());
   }
 
-  public void configure(MavenEmbedder embedder, ProjectConfigurationRequest request, IProgressMonitor monitor)
+  public void configure(ProjectConfigurationRequest request, IProgressMonitor monitor)
       throws CoreException {
     for(AbstractProjectConfigurator configurator : getProjectConfigurators()) {
       if(monitor.isCanceled()) {
         throw new OperationCanceledException();
       }
-      configurator.configure(embedder, request, monitor);
+      configurator.configure(request, monitor);
     }
 
     addMavenBuilder(request.getProject(), monitor);
@@ -90,13 +88,13 @@ public class DefaultLifecycleMapping implements ILifecycleMapping {
     return buildParticipants;
   }
 
-  public void unconfigure(MavenEmbedder embedder, ProjectConfigurationRequest request, IProgressMonitor monitor)
+  public void unconfigure(ProjectConfigurationRequest request, IProgressMonitor monitor)
       throws CoreException {
     for(AbstractProjectConfigurator configurator : getProjectConfigurators()) {
       if(monitor.isCanceled()) {
         throw new OperationCanceledException();
       }
-      configurator.unconfigure(embedder, request, monitor);
+      configurator.unconfigure(request, monitor);
     }
   }
 
@@ -106,11 +104,12 @@ public class DefaultLifecycleMapping implements ILifecycleMapping {
       if(DefaultLifecycleMapping.configurators == null) {
         MavenPlugin plugin = MavenPlugin.getDefault();
         MavenProjectManager projectManager = plugin.getMavenProjectManager();
-        MavenRuntimeManager runtimeManager = plugin.getMavenRuntimeManager();
+        IMavenConfiguration mavenConfiguration;
+        mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
         IMavenMarkerManager mavenMarkerManager = plugin.getMavenMarkerManager();
         MavenConsole console = plugin.getConsole();
         DefaultLifecycleMapping.configurators = new ArrayList<AbstractProjectConfigurator>(ExtensionReader
-            .readProjectConfiguratorExtensions(projectManager, runtimeManager, mavenMarkerManager, console));
+            .readProjectConfiguratorExtensions(projectManager, mavenConfiguration, mavenMarkerManager, console));
         Collections.sort(DefaultLifecycleMapping.configurators, new ProjectConfiguratorComparator());
       }
       configurators = DefaultLifecycleMapping.configurators;

@@ -65,11 +65,14 @@ import org.sonatype.nexus.index.locator.PomLocator;
 import org.sonatype.nexus.index.updater.IndexUpdateRequest;
 import org.sonatype.nexus.index.updater.IndexUpdater;
 
+import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
-import org.maven.ide.eclipse.embedder.AbstractMavenEmbedderListener;
-import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
+import org.maven.ide.eclipse.embedder.AbstractMavenConfigurationChangeListener;
+import org.maven.ide.eclipse.embedder.IMaven;
+import org.maven.ide.eclipse.embedder.IMavenConfiguration;
+import org.maven.ide.eclipse.embedder.MavenConfigurationChangeEvent;
 import org.maven.ide.eclipse.index.IndexInfo;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
@@ -92,11 +95,13 @@ public class NexusIndexManager extends IndexManager {
 
   private final GavCalculator gavCalculator = new M2GavCalculator();
   
-  private final MavenEmbedderManager embedderManager;
-  
   private NexusIndexer indexer;
 
   private volatile boolean creatingIndexer = false;
+  
+  private IMaven maven;
+  
+  private IMavenConfiguration mavenConfiguration;
 
   public static String nvl( String v )
   {
@@ -113,13 +118,18 @@ public class NexusIndexManager extends IndexManager {
           .toString();
   }
   
-  public NexusIndexManager(MavenEmbedderManager embedderManager, MavenConsole console, File stateDir) {
+  public NexusIndexManager(MavenConsole console, File stateDir) {
     super(console, stateDir, "nexus");
-    
-    this.embedderManager = embedderManager;
-    this.embedderManager.addListener(new AbstractMavenEmbedderListener() {
-      public void workspaceEmbedderCreated() {
-        invalidateIndexer();
+
+    this.maven = MavenPlugin.lookup(IMaven.class);
+    this.mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
+
+    // TODO what should trigger index invalidation?
+    this.mavenConfiguration.addConfigurationChangeListener(new AbstractMavenConfigurationChangeListener() {
+      public void mavenConfigutationChange(MavenConfigurationChangeEvent event) throws CoreException {
+        if(MavenConfigurationChangeEvent.P_USER_SETTINGS_FILE.equals(event.getKey())) {
+          invalidateIndexer();
+        }
       }
     });
   }
@@ -157,11 +167,6 @@ public class NexusIndexManager extends IndexManager {
       String msg = "Unsupported existing index " + displayName;
       console.logError(msg + "; " + ex.getMessage());
       MavenLogger.log(msg, ex);
-
-    } catch(CoreException ex) {
-      // XXX how to recover from this?
-      MavenLogger.log(ex);
-      
     }
   }
 
@@ -590,12 +595,12 @@ public class NexusIndexManager extends IndexManager {
     }
   }
 
-  private IndexUpdater getUpdater() throws CoreException {
-    return embedderManager.getComponent(IndexUpdater.class, null);
+  private IndexUpdater getUpdater() {
+    return MavenPlugin.lookup(IndexUpdater.class);
   }
 
   private ProxyInfo getProxyInfo() throws CoreException {
-    Settings settings = embedderManager.getWorkspaceEmbedder().getSettings();
+    Settings settings = maven.getSettings();
     Proxy proxy = settings.getActiveProxy();
     ProxyInfo proxyInfo = null;
     if(proxy != null) {
@@ -739,11 +744,11 @@ public class NexusIndexManager extends IndexManager {
     return indexName == null ? null : getIndexer().getIndexingContexts().get(indexName);
   }
 
-  private synchronized NexusIndexer getIndexer() throws CoreException {
+  private synchronized NexusIndexer getIndexer() {
     if(indexer == null) {
       try {
         creatingIndexer = true; 
-        indexer = embedderManager.getComponent(NexusIndexer.class, null);
+        indexer = MavenPlugin.lookup(NexusIndexer.class);
       } finally {
         creatingIndexer = false; 
       }
@@ -751,7 +756,7 @@ public class NexusIndexManager extends IndexManager {
     return indexer;
   }
   
-  synchronized void invalidateIndexer() {
+  synchronized void invalidateIndexer() throws CoreException {
     if(creatingIndexer) {
       return;
     }
@@ -774,13 +779,9 @@ public class NexusIndexManager extends IndexManager {
       workspaceIndexDirectory = directory;
     }
 
-    try {
-      addIndex(new IndexInfo(IndexManager.LOCAL_INDEX, //
-          embedderManager.getLocalRepositoryDir(), null, IndexInfo.Type.LOCAL, false), false);
-    } catch(CoreException ex) {
-      MavenLogger.log(ex);
-    }
-    
+    addIndex(new IndexInfo(IndexManager.LOCAL_INDEX, //
+        new File(maven.getLocalRepository().getBasedir()), null, IndexInfo.Type.LOCAL, false), false);
+
     for(IndexInfo info : getIndexes().values()) {
       addIndexingContext(info);
     }

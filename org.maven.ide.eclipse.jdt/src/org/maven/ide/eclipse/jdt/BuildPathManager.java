@@ -73,11 +73,13 @@ import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.artifact.resolver.filter.ScopeArtifactFilter;
 import org.apache.maven.project.MavenProject;
 
+import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
-import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
+import org.maven.ide.eclipse.embedder.IMaven;
+import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.index.IndexManager;
@@ -141,17 +143,17 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
 
   private static final String ELEMENT_CLASSPATH_CONFIGURATOR_FACTORY = "classpathConfiguratorFactory";
 
-  final MavenEmbedderManager embedderManager;
-
   final MavenConsole console;
 
   final MavenProjectManager projectManager;
 
   final IndexManager indexManager;
   
-  final MavenRuntimeManager runtimeManager;
+  final IMavenConfiguration mavenConfiguration;
   
   final BundleContext bundleContext;
+  
+  final IMaven maven;
   
   final File stateLocationDir;
 
@@ -160,16 +162,16 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
   private Set<AbstractClasspathConfiguratorFactory> factories;
   
 
-  public BuildPathManager(MavenEmbedderManager embedderManager, MavenConsole console,
+  public BuildPathManager(MavenConsole console,
       MavenProjectManager projectManager, IndexManager indexManager, MavenModelManager modelManager,
       MavenRuntimeManager runtimeManager, BundleContext bundleContext, File stateLocationDir) {
-    this.embedderManager = embedderManager;
     this.console = console;
     this.projectManager = projectManager;
     this.indexManager = indexManager;
-    this.runtimeManager = runtimeManager;
+    this.mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
     this.bundleContext = bundleContext;
     this.stateLocationDir = stateLocationDir;
+    this.maven = MavenPlugin.lookup(IMaven.class);
   }
 
   public static boolean isMaven2ClasspathContainer(IPath containerPath) {
@@ -421,7 +423,6 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     }
     
     MavenProject mavenProject = facade.getMavenProject(monitor);
-    @SuppressWarnings("unchecked")
     Set<Artifact> artifacts = mavenProject.getArtifacts();
     for(Artifact a : artifacts) {
       if (!scopeFilter.include(a) || !a.getArtifactHandler().isAddedToClasspath()) {
@@ -494,8 +495,8 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
               javaDocUrl));
         }
         
-        boolean downloadSources = srcPath==null && runtimeManager.isDownloadSources();
-        boolean downloadJavaDoc = javaDocUrl==null && runtimeManager.isDownloadJavaDoc();
+        boolean downloadSources = srcPath==null && mavenConfiguration.isDownloadSources();
+        boolean downloadJavaDoc = javaDocUrl==null && mavenConfiguration.isDownloadJavaDoc();
         downloadSources(facade.getProject(), a, downloadSources, downloadJavaDoc);
 
         entries.add(JavaCore.newLibraryEntry(entryPath, //
@@ -826,7 +827,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
   public boolean setupVariables() {
     boolean changed = false;
     try {
-      File localRepositoryDir = embedderManager.getLocalRepositoryDir();
+      File localRepositoryDir = new File(maven.getLocalRepository().getBasedir());
       IPath oldPath = JavaCore.getClasspathVariable(M2_REPO);
       IPath newPath = new Path(localRepositoryDir.getAbsolutePath());
       JavaCore.setClasspathVariable(M2_REPO, //

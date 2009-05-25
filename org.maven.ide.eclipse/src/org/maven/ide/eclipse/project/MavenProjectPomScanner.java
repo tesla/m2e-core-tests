@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
@@ -22,17 +23,17 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
-import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 import org.apache.maven.model.Profile;
 import org.apache.maven.model.Scm;
 
+import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
-import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
+import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.index.IndexManager;
 
@@ -47,20 +48,20 @@ public class MavenProjectPomScanner<T> extends AbstractProjectScanner<MavenProje
   
   private final Dependency[] dependencies;
 
-  private MavenEmbedderManager embedderManager;
-
   private IndexManager indexManager;
 
   private MavenConsole console;
+  
+  private IMaven maven;
 
   public MavenProjectPomScanner(boolean developer, Dependency[] dependencies, //
       MavenModelManager modelManager,
-      MavenEmbedderManager embedderManager, IndexManager indexManager, MavenConsole console) {
+      IndexManager indexManager, MavenConsole console) {
     this.developer = developer;
     this.dependencies = dependencies;
-    this.embedderManager = embedderManager;
     this.indexManager = indexManager;
     this.console = console;
+    this.maven = MavenPlugin.lookup(IMaven.class);
   }
 
   public String getDescription() {
@@ -78,18 +79,17 @@ public class MavenProjectPomScanner<T> extends AbstractProjectScanner<MavenProje
       }
       
       Dependency d = dependencies[i];
-      
+
       try {
-        MavenEmbedder embedder = embedderManager.getWorkspaceEmbedder();
-        Model model = resolveModel(embedder, d.getGroupId(), d.getArtifactId(), d.getVersion(), monitor);
+        Model model = resolveModel(d.getGroupId(), d.getArtifactId(), d.getVersion(), monitor);
         if(model==null) {
           String msg = "Can't resolve " + d.getArtifactId();
           console.logError(msg);
           addError(new Exception(msg));
           continue;
         }
-        
-        Scm scm = resolveScm(embedder, model, monitor);
+
+        Scm scm = resolveScm(model, monitor);
         if(scm==null) {
           String msg = "No SCM info for " + d.getArtifactId();
           console.logError(msg);
@@ -149,9 +149,8 @@ public class MavenProjectPomScanner<T> extends AbstractProjectScanner<MavenProje
     }    
   }
 
-  @SuppressWarnings("unchecked")
-  private Scm resolveScm(MavenEmbedder embedder, Model model, IProgressMonitor monitor) throws ArtifactResolutionException,
-      ArtifactNotFoundException, XmlPullParserException, IOException {
+  private Scm resolveScm(Model model, IProgressMonitor monitor) throws ArtifactResolutionException,
+      ArtifactNotFoundException, XmlPullParserException, IOException, CoreException {
     Scm scm = model.getScm();
     if(scm != null) {
       return scm;
@@ -162,12 +161,12 @@ public class MavenProjectPomScanner<T> extends AbstractProjectScanner<MavenProje
       return null;
     }
 
-    Model parentModel = resolveModel(embedder, parent.getGroupId(), parent.getArtifactId(), parent.getVersion(), monitor);
+    Model parentModel = resolveModel(parent.getGroupId(), parent.getArtifactId(), parent.getVersion(), monitor);
     if(parentModel==null) {
       return null;
     }
     
-    Scm parentScm = resolveScm(embedder, parentModel, monitor);
+    Scm parentScm = resolveScm(parentModel, monitor);
     if(parentScm==null) {
       return null;
     }
@@ -197,18 +196,16 @@ public class MavenProjectPomScanner<T> extends AbstractProjectScanner<MavenProje
     return parentScm;
   }
 
-  private Model resolveModel(MavenEmbedder embedder, String groupId, String artifactId, String version, IProgressMonitor monitor)
-      throws ArtifactResolutionException, ArtifactNotFoundException, XmlPullParserException, IOException {
+  private Model resolveModel(String groupId, String artifactId, String version, IProgressMonitor monitor)
+      throws CoreException {
     monitor.subTask("Resolving artifact " + groupId + ":" + artifactId + ":" + version);
 
-    Artifact artifact = embedder.createArtifact(groupId, artifactId, version, null, "pom");
-    
     ArtifactRepositoryPolicy policy = new ArtifactRepositoryPolicy();
     policy.setUpdatePolicy(ArtifactRepositoryPolicy.UPDATE_POLICY_NEVER);
     policy.setChecksumPolicy(ArtifactRepositoryPolicy.CHECKSUM_POLICY_IGNORE);
     policy.setEnabled(true);
-    embedder.resolve(artifact, indexManager.getArtifactRepositories(policy, policy), embedder.getLocalRepository());
-    
+    Artifact artifact = maven.resolve(groupId, artifactId, version, "pom", null, indexManager.getArtifactRepositories(policy, policy), monitor);
+
     File file = artifact.getFile();
     if(file == null) {
       return null;
@@ -218,7 +215,7 @@ public class MavenProjectPomScanner<T> extends AbstractProjectScanner<MavenProje
     // MavenProject project = embedder.readProject(file);
     
     monitor.subTask("Reading model " + groupId + ":" + artifactId + ":" + version);
-    return embedder.readModel(file);
+    return maven.readModel(file);
   }
   
 

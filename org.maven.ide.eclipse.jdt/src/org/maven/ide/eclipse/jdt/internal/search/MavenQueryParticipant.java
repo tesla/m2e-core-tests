@@ -88,7 +88,7 @@ public class MavenQueryParticipant implements IQueryParticipant, IJavaSearchCons
               String name = af.group + ":" + af.artifact + ":" + af.version;
               new Job("Opening " + name) {
                 protected IStatus run(IProgressMonitor monitor) {
-                  OpenPomAction.openEditor(ia, af);
+                  OpenPomAction.openEditor(ia, af, monitor);
                   return Status.OK_STATUS;
                 }
               };

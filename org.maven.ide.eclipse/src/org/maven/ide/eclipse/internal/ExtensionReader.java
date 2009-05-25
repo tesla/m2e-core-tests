@@ -33,7 +33,7 @@ import org.eclipse.core.runtime.Platform;
 import org.maven.ide.eclipse.archetype.ArchetypeCatalogFactory;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
-import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
+import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.index.IndexInfo;
 import org.maven.ide.eclipse.internal.index.IndexInfoWriter;
 import org.maven.ide.eclipse.project.IMavenMarkerManager;
@@ -215,7 +215,7 @@ public class ExtensionReader {
   }
 
   public static List<AbstractProjectConfigurator> readProjectConfiguratorExtensions(MavenProjectManager projectManager,
-      MavenRuntimeManager runtimeManager, IMavenMarkerManager markerManager, MavenConsole console) {
+      IMavenConfiguration runtimeManager, IMavenMarkerManager markerManager, MavenConsole console) {
     ArrayList<AbstractProjectConfigurator> projectConfigurators = new ArrayList<AbstractProjectConfigurator>();
     
     IExtensionRegistry registry = Platform.getExtensionRegistry();
@@ -231,7 +231,7 @@ public class ExtensionReader {
 
               AbstractProjectConfigurator projectConfigurator = (AbstractProjectConfigurator) o;
               projectConfigurator.setProjectManager(projectManager);
-              projectConfigurator.setRuntimeManager(runtimeManager);
+              projectConfigurator.setMavenConfiguration(runtimeManager);
               projectConfigurator.setMarkerManager(markerManager);
               projectConfigurator.setConsole(console);
               

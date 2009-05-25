@@ -8,8 +8,8 @@
 
 package org.maven.ide.eclipse.embedder;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.StringReader;
 import java.io.StringWriter;
 
 import junit.framework.TestCase;
@@ -277,7 +277,7 @@ public class MavenModelManagerTest extends TestCase {
   private void testCreateMavenModel(String pom, String pomFileName) throws Exception {
     MavenModelManager modelManager = MavenPlugin.getDefault().getMavenModelManager();
     
-    Model model = modelManager.readMavenModel(new StringReader(pom));
+    Model model = modelManager.readMavenModel(new ByteArrayInputStream(pom.getBytes("UTF-8")));
     
     IFile pomFile = project.getFile(pomFileName);
     modelManager.createMavenModel(pomFile, model);

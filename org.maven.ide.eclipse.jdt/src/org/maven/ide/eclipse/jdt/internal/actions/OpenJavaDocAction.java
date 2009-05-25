@@ -30,14 +30,12 @@ import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.resolver.AbstractArtifactResolutionException;
-import org.apache.maven.embedder.MavenEmbedder;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.SelectionUtil;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
-import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
+import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.index.IndexManager;
 
 /**
@@ -70,7 +68,7 @@ public class OpenJavaDocAction extends ActionDelegate {
 
         new Job("Opening JavaDoc for " + ak) {
           protected IStatus run(IProgressMonitor monitor) {
-            openJavaDoc(ak.getGroupId(), ak.getArtifactId(), ak.getVersion());
+            openJavaDoc(ak.getGroupId(), ak.getArtifactId(), ak.getVersion(), monitor);
             return Status.OK_STATUS;
           }
         }.schedule();
@@ -87,20 +85,18 @@ public class OpenJavaDocAction extends ActionDelegate {
     }
   }
 
-  protected void openJavaDoc(String groupId, String artifactId, String version) {
+  protected void openJavaDoc(String groupId, String artifactId, String version, IProgressMonitor monitor) {
     final String name = groupId + ":" + artifactId + ":" + version + ":javadoc";
 
     try {
       MavenPlugin plugin = MavenPlugin.getDefault();
       
-      MavenEmbedderManager embedderManager = plugin.getMavenEmbedderManager();
-      MavenEmbedder embedder = embedderManager.getWorkspaceEmbedder();
-      Artifact artifact = embedder.createArtifactWithClassifier(groupId, artifactId, version, "javadoc", "javadoc");
-  
       IndexManager indexManager = plugin.getIndexManager();
       List<ArtifactRepository> artifactRepositories = indexManager.getArtifactRepositories(null, null);
+
+      IMaven maven = MavenPlugin.lookup(IMaven.class);
       
-      embedder.resolve(artifact, artifactRepositories, embedder.getLocalRepository());
+      Artifact artifact = maven.resolve(groupId, artifactId, version, "javadoc", "javadoc", artifactRepositories, monitor);
       
       final File file = artifact.getFile();
       if(file == null) {
@@ -124,17 +120,12 @@ public class OpenJavaDocAction extends ActionDelegate {
         }
       });
       
-    } catch(AbstractArtifactResolutionException ex) {
+    } catch(CoreException ex) {
       MavenLogger.log("Can't download JavaDoc for " + name, ex);
       openDialog("Can't download JavaDoc for " + name);
       // TODO search index and offer to select other version
-      
-    } catch(CoreException ex) {
-      MavenLogger.log(ex);
-      openDialog(ex.getMessage() + "\n" + ex.toString());
-      
     }    
-    
+
   }
 
   private static void openDialog(final String msg) {

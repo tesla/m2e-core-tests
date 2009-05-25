@@ -6,25 +6,17 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.project.configurator;
-
-import java.util.List;
+package org.maven.ide.eclipse.embedder;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 
 /**
- * LifecycleMapping
+ * IMavenConfigurationChangeListener
  *
  * @author igor
  */
-public interface ILifecycleMapping {
+public interface IMavenConfigurationChangeListener {
 
-  void configure(ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException;
+  public void mavenConfigutationChange(MavenConfigurationChangeEvent event) throws CoreException;
 
-  void unconfigure(ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException;
-
-  List<AbstractBuildParticipant> getBuildParticipants();
-
-  List<AbstractProjectConfigurator> getProjectConfigurators();
 }

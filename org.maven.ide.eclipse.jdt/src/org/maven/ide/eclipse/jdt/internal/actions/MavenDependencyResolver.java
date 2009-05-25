@@ -294,11 +294,10 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
       }
     }
 
-    @SuppressWarnings("unchecked")
     private IFile findModulePom(IResource resource, IFile pomFile, MavenModelManager modelManager) throws CoreException {
       Model model = modelManager.readMavenModel(pomFile);
 
-      for(String module : (List<String>) model.getModules()) {
+      for(String module : model.getModules()) {
         IFile modulePom = pomFile.getParent().getFile(new Path(module).append(IMavenConstants.POM_FILE_NAME));
         if(modulePom.exists() && modulePom.isAccessible()) {
           IPath modulePath = modulePom.getLocation();
@@ -309,8 +308,8 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
         }
       }
 
-      for(Profile profile : (List<Profile>) model.getProfiles()) {
-        for(String module : (List<String>) profile.getModules()) {
+      for(Profile profile : model.getProfiles()) {
+        for(String module : profile.getModules()) {
           IFile modulePom = pomFile.getParent().getFile(new Path(module).append(IMavenConstants.POM_FILE_NAME));
           IPath modulePath = modulePom.getLocation();
           if(modulePath.matchingFirstSegments(resource.getLocation()) == modulePath.segmentCount()) {

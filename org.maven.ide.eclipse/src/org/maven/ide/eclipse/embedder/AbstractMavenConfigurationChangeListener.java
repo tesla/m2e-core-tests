@@ -6,14 +6,14 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.project;
+package org.maven.ide.eclipse.embedder;
 
-import org.apache.maven.embedder.MavenEmbedder;
-import org.apache.maven.execution.MavenExecutionRequest;
-import org.apache.maven.execution.MavenExecutionResult;
+/**
+ * AbstractMavenConfigurationChangeListener
+ *
+ * @author igor
+ */
+public abstract class AbstractMavenConfigurationChangeListener implements IMavenConfigurationChangeListener {
 
-public interface MavenRunnable {
-  
-  public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request);
-  
+
 }

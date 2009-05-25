@@ -104,7 +104,6 @@ public class LocalProjectScanner extends AbstractProjectScanner<MavenProjectInfo
     }
   }
 
-  @SuppressWarnings("unchecked")
   private MavenProjectInfo readMavenProjectInfo(File baseDir, String modulePath, MavenProjectInfo parentInfo) {
     try {
       baseDir = baseDir.getCanonicalFile();
@@ -126,12 +125,12 @@ public class LocalProjectScanner extends AbstractProjectScanner<MavenProjectInfo
       projectInfo.setNeedsRename(getNeedsRename(projectInfo));
 
       Map<String, Set<String>> modules = new LinkedHashMap<String, Set<String>>();
-      for(String module : (List<String>) model.getModules()) {
+      for(String module : model.getModules()) {
         modules.put(module, new HashSet<String>());
       }
 
-      for(Profile profile : (List<Profile>) model.getProfiles()) {
-        for(String module : (List<String>) profile.getModules()) {
+      for(Profile profile : model.getProfiles()) {
+        for(String module : profile.getModules()) {
           Set<String> profiles = modules.get(module);
           if(profiles == null) {
             profiles = new HashSet<String>();

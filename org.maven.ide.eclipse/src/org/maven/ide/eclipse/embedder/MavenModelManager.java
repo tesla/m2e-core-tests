@@ -9,11 +9,9 @@
 package org.maven.ide.eclipse.embedder;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -31,8 +29,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 
-import org.xml.sax.InputSource;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -42,18 +38,12 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 
-import org.codehaus.plexus.PlexusContainer;
-import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactCollector;
 import org.apache.maven.artifact.resolver.filter.ScopeArtifactFilter;
-import org.apache.maven.embedder.MavenEmbedder;
-import org.apache.maven.embedder.MavenEmbedderException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.dependency.tree.DependencyNode;
 import org.apache.maven.shared.dependency.tree.DependencyTreeBuilder;
@@ -86,19 +76,18 @@ import org.maven.ide.eclipse.project.MavenProjectManager;
  * 
  * XXX fix circular dependency
  */
-@SuppressWarnings("restriction")
 public class MavenModelManager {
 
   static final PomFactory POM_FACTORY = PomFactory.eINSTANCE;
   
-  private final MavenEmbedderManager embedderManager;
-
   private final MavenProjectManager projectManager;
   
   private final MavenConsole console;
 
-  public MavenModelManager(MavenEmbedderManager embedderManager, MavenProjectManager projectManager, MavenConsole console) {
-    this.embedderManager = embedderManager;
+  private final IMaven maven;
+
+  public MavenModelManager(IMaven maven, MavenProjectManager projectManager, MavenConsole console) {
+    this.maven = maven;
     this.projectManager = projectManager;
     this.console = console;
   }
@@ -119,52 +108,16 @@ public class MavenModelManager {
     }
   }
 
-
-
-  public org.apache.maven.model.Model readMavenModel(Reader reader) throws CoreException {
-    try {
-      MavenEmbedder embedder = embedderManager.getWorkspaceEmbedder();
-      return embedder.readModel(reader);
-    } catch(XmlPullParserException ex) {
-      String msg = "Model parsing error; " + ex.toString();
-      console.logError(msg);
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
-    } catch(IOException ex) {
-      String msg = "Can't read model; " + ex.toString();
-      console.logError(msg);
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
-    }
+  public org.apache.maven.model.Model readMavenModel(InputStream reader) throws CoreException {
+    return maven.readModel(reader);
   }
 
   public org.apache.maven.model.Model readMavenModel(File pomFile) throws CoreException {
-    try {
-      MavenEmbedder embedder = embedderManager.getWorkspaceEmbedder();
-      return embedder.readModel(pomFile);
-    } catch(XmlPullParserException ex) {
-      String msg = "Parsing error " + pomFile.getAbsolutePath() + "; " + ex.toString();
-      console.logError(msg);
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
-    } catch(IOException ex) {
-      String msg = "Can't read model " + pomFile.getAbsolutePath() + "; " + ex.toString();
-      console.logError(msg);
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
-    }
+    return maven.readModel(pomFile);
   }
 
   public org.apache.maven.model.Model readMavenModel(IFile pomFile) throws CoreException {
-    String name = pomFile.getProject().getName() + "/" + pomFile.getProjectRelativePath();
-    try {
-      MavenEmbedder embedder = embedderManager.getWorkspaceEmbedder();
-      return embedder.readModel(pomFile.getLocation().toFile());
-    } catch(XmlPullParserException ex) {
-      String msg = "Parsing error " + name + "; " + ex.getMessage();
-      console.logError(msg);
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
-    } catch(IOException ex) {
-      String msg = "Can't read model " + name + "; " + ex.toString();
-      console.logError(msg);
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
-    }
+    return maven.readModel(pomFile.getLocation().toFile());
   }
 
   public void createMavenModel(IFile pomFile, org.apache.maven.model.Model model) throws CoreException {
@@ -176,19 +129,16 @@ public class MavenModelManager {
     }
 
     try {
-      StringWriter sw = new StringWriter();
+      ByteArrayOutputStream buf = new ByteArrayOutputStream();
 
-      MavenEmbedder embedder = embedderManager.getWorkspaceEmbedder();
-      embedder.writeModel(sw, model, true);
-
-      String pom = sw.toString();
+      maven.writeModel(model, buf);
 
       // XXX MNGECLIPSE-495
       DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
       documentBuilderFactory.setNamespaceAware(false);
       DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
       
-      Document document = documentBuilder.parse(new InputSource(new StringReader(pom)));
+      Document document = documentBuilder.parse(new ByteArrayInputStream(buf.toByteArray()));
       Element documentElement = document.getDocumentElement();
 
       NamedNodeMap attributes = document.getAttributes();
@@ -214,12 +164,11 @@ public class MavenModelManager {
       TransformerFactory transfac = TransformerFactory.newInstance();
       Transformer trans = transfac.newTransformer();
       trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-      
-      sw = new StringWriter();
-      trans.transform(new DOMSource(document), new StreamResult(sw));
-      pom = sw.toString();
-      
-      pomFile.create(new ByteArrayInputStream(pom.getBytes("UTF-8")), true, new NullProgressMonitor());
+
+      buf.reset();
+      trans.transform(new DOMSource(document), new StreamResult(buf));
+
+      pomFile.create(new ByteArrayInputStream(buf.toByteArray()), true, new NullProgressMonitor());
 
     } catch(RuntimeException ex) {
       String msg = "Can't create model " + pomFileName + "; " + ex.toString();
@@ -249,41 +198,23 @@ public class MavenModelManager {
       monitor.setTaskName("Reading project");
       MavenProject mavenProject = readMavenProject(file, monitor);
 
-      MavenEmbedder embedder = projectManager.createWorkspaceEmbedder();
-      try {
-        monitor.setTaskName("Building dependency tree");
-        PlexusContainer plexus = embedder.getPlexusContainer();
+      monitor.setTaskName("Building dependency tree");
 
-        ArtifactFactory artifactFactory = (ArtifactFactory) plexus.lookup(ArtifactFactory.class);
-        ArtifactMetadataSource artifactMetadataSource = //
-        (ArtifactMetadataSource) plexus.lookup(ArtifactMetadataSource.class);
+      ArtifactFactory artifactFactory = MavenPlugin.lookup(ArtifactFactory.class);
+      ArtifactMetadataSource artifactMetadataSource = MavenPlugin.lookup(ArtifactMetadataSource.class);
 
-        ArtifactCollector artifactCollector = (ArtifactCollector) plexus.lookup(ArtifactCollector.class);
+      ArtifactCollector artifactCollector = MavenPlugin.lookup(ArtifactCollector.class);
 
-        ArtifactRepository localRepository = embedder.getLocalRepository();
+      ArtifactRepository localRepository = maven.getLocalRepository();
 
-        DependencyTreeBuilder builder = (DependencyTreeBuilder) plexus.lookup(DependencyTreeBuilder.ROLE);
-        DependencyNode node = builder.buildDependencyTree(mavenProject, localRepository, artifactFactory,
-            artifactMetadataSource, null, artifactCollector);
-        
-        BuildingDependencyNodeVisitor visitor = new BuildingDependencyNodeVisitor(); 
-        node.accept(new FilteringDependencyNodeVisitor(visitor,
-            new ArtifactDependencyNodeFilter(new ScopeArtifactFilter(scope))));
-        return visitor.getDependencyTree();
-      } finally {
-        embedder.stop();
-      }
+      DependencyTreeBuilder builder = MavenPlugin.lookup(DependencyTreeBuilder.class);
+      DependencyNode node = builder.buildDependencyTree(mavenProject, localRepository, artifactFactory,
+          artifactMetadataSource, null, artifactCollector);
 
-    } catch(MavenEmbedderException ex) {
-      String msg = "Can't create Maven embedder";
-      MavenLogger.log(msg, ex);
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
-
-    } catch(ComponentLookupException ex) {
-      String msg = "Component lookup error";
-      MavenLogger.log(msg, ex);
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
-
+      BuildingDependencyNodeVisitor visitor = new BuildingDependencyNodeVisitor(); 
+      node.accept(new FilteringDependencyNodeVisitor(visitor,
+          new ArtifactDependencyNodeFilter(new ScopeArtifactFilter(scope))));
+      return visitor.getDependencyTree();
     } catch(DependencyTreeBuilderException ex) {
       String msg = "Project read error";
       MavenLogger.log(msg, ex);
@@ -292,8 +223,6 @@ public class MavenModelManager {
   }
 
   public MavenProject readMavenProject(IFile file, IProgressMonitor monitor) throws CoreException {
-    MavenPlugin plugin = MavenPlugin.getDefault();
-    MavenProjectManager projectManager = plugin.getMavenProjectManager();
     IMavenProjectFacade projectFacade = projectManager.create(file, true, monitor);
     MavenProject mavenProject = projectFacade.getMavenProject(monitor);
     return mavenProject;
@@ -424,7 +353,6 @@ public class MavenModelManager {
 
       if(!this.dependency.getExclusions().isEmpty()) {
 
-        @SuppressWarnings("unchecked")
         Iterator<org.apache.maven.model.Exclusion> it = this.dependency.getExclusions().iterator();
         while(it.hasNext()) {
           org.apache.maven.model.Exclusion e = it.next();

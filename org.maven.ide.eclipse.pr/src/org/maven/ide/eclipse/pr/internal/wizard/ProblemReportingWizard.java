@@ -42,6 +42,7 @@ import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.pr.internal.data.ArchiveTarget;
 import org.maven.ide.eclipse.pr.internal.data.Data;
 import org.maven.ide.eclipse.pr.internal.data.DataGatherer;
@@ -114,8 +115,9 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
           IStatus status = saveData(location, dataSet, monitor);
           if(status.isOK()) {
             //showMessage("The problem reporting bundle is saved to " + location);
-            String username = MavenPlugin.getDefault().getMavenRuntimeManager().getJiraUsername();
-            String password = MavenPlugin.getDefault().getMavenRuntimeManager().getJiraPassword();
+            IMavenConfiguration mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
+            String username = mavenConfiguration.getJiraUsername();
+            String password = mavenConfiguration.getJiraPassword();
             if(username == null || username.trim().equals("")) {
               username = USERNAME;
               password = PASSWORD;
@@ -216,7 +218,7 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
     }
 
     MavenPlugin mavenPlugin = MavenPlugin.getDefault();
-    DataGatherer gatherer = new DataGatherer(mavenPlugin.getMavenRuntimeManager(), //
+    DataGatherer gatherer = new DataGatherer(MavenPlugin.lookup(IMavenConfiguration.class), //
         mavenPlugin.getMavenProjectManager(), mavenPlugin.getConsole(), //
         ResourcesPlugin.getWorkspace(), projects);
 

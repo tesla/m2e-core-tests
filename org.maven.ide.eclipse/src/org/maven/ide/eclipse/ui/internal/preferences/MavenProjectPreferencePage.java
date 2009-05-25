@@ -9,7 +9,6 @@
 package org.maven.ide.eclipse.ui.internal.preferences;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -30,6 +29,7 @@ import org.eclipse.ui.dialogs.PropertyPage;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 
@@ -182,8 +182,9 @@ public class MavenProjectPreferencePage extends PropertyPage {
             WorkspaceJob job = new WorkspaceJob("Updating " + project.getName() + " Sources") {
               public IStatus runInWorkspace(IProgressMonitor monitor) {
                 try {
+                  final IMavenConfiguration mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
                   plugin.getProjectConfigurationManager().updateProjectConfiguration(project, configuration,
-                      plugin.getMavenRuntimeManager().getGoalOnUpdate(), monitor);
+                      mavenConfiguration.getGoalOnUpdate(), monitor);
                 } catch(CoreException ex) {
                   return ex.getStatus();
                 }

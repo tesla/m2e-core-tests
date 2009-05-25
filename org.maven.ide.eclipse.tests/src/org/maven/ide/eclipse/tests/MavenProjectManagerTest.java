@@ -57,7 +57,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     super.setUp();
 
     manager = new MavenProjectManagerImpl(plugin.getConsole(), plugin.getIndexManager(), //
-        plugin.getMavenEmbedderManager(), null, false, plugin.getMavenRuntimeManager(), plugin.getMavenMarkerManager());
+        null, false, plugin.getMavenRuntimeManager(), plugin.getMavenMarkerManager());
     
     events = new ArrayList<MavenProjectChangedEvent>();
     manager.addMavenProjectChangedListener(listener);
@@ -83,13 +83,11 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     return events.toArray(new MavenProjectChangedEvent[events.size()]);
   }
 
-  @SuppressWarnings("unchecked")
   private Set<Artifact> getMavenProjectArtifacts(IMavenProjectFacade f1) throws CoreException {
     MavenProject mavenProject = f1.getMavenProject(monitor);
     return mavenProject.getArtifacts();
   }
 
-  @SuppressWarnings("unchecked")
   private List<Artifact> getTestArtifacts(IMavenProjectFacade f1) throws CoreException {
     MavenProject mavenProject = f1.getMavenProject(monitor);
     return mavenProject.getTestArtifacts();
@@ -114,6 +112,8 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
   }
 
   public void test000_simple() throws Exception {
+//    System.out.println("ENTER!"); System.in.read();
+    
     IProject p1 = createExisting("t000-p1");
     waitForJobsToComplete();
     
@@ -753,7 +753,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     IFile pom = p1.getFile("t017-p1-m1/pom.xml");
 
     MavenProject mavenProject = manager.create(pom, false, null).getMavenProject(monitor);
-    Artifact a = (Artifact) mavenProject.getArtifacts().iterator().next();
+    Artifact a = mavenProject.getArtifacts().iterator().next();
     assertTrue(a.isResolved());
     assertEquals(p4.getFile(IMavenConstants.POM_FILE_NAME).getLocation().toFile().getAbsoluteFile(), 
         a.getFile().getAbsoluteFile());
@@ -763,7 +763,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     add(manager, new IProject[] {p1});
 
     mavenProject = manager.create(pom, false, null).getMavenProject(monitor);
-    a = (Artifact) mavenProject.getArtifacts().iterator().next();
+    a = mavenProject.getArtifacts().iterator().next();
     assertFalse(a.isResolved());
   }
 
@@ -778,7 +778,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     IFile pom = p3.getFile("pom.xml");
 
     MavenProject mavenProject = manager.create(pom, false, null).getMavenProject(monitor);
-    Artifact a = (Artifact) mavenProject.getArtifacts().iterator().next();
+    Artifact a = mavenProject.getArtifacts().iterator().next();
     assertTrue(a.isResolved());
     assertEquals(p4.getFile(IMavenConstants.POM_FILE_NAME).getLocation().toFile().getAbsoluteFile(), 
         a.getFile().getAbsoluteFile());
@@ -788,7 +788,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     add(manager, new IProject[] {p2});
 
     mavenProject = manager.create(pom, false, null).getMavenProject(monitor);
-    a = (Artifact) mavenProject.getArtifacts().iterator().next();
+    a = mavenProject.getArtifacts().iterator().next();
     assertFalse(a.isResolved());
   }
 
@@ -876,7 +876,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     IFile pom11 = p1m1.getFile("pom.xml");
     IMavenProjectFacade f11 = manager.create(pom11, false, null);
 
-    Artifact a = (Artifact) f11.getMavenProject(monitor).getArtifacts().iterator().next();
+    Artifact a = f11.getMavenProject(monitor).getArtifacts().iterator().next();
     assertEquals("3.8.1", a.getVersion());
   }
 

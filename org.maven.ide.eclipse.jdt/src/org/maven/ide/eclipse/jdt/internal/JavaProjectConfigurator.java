@@ -42,23 +42,22 @@ import org.eclipse.jdt.launching.environments.IExecutionEnvironmentsManager;
 
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 
-import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionResult;
-import org.apache.maven.execution.ReactorManager;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginExecution;
 import org.apache.maven.model.PluginManagement;
 import org.apache.maven.model.Resource;
 import org.apache.maven.project.MavenProject;
 
+import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.jdt.BuildPathManager;
 import org.maven.ide.eclipse.jdt.MavenJdtPlugin;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.IMavenProjectVisitor;
-import org.maven.ide.eclipse.project.MavenRunnable;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
 import org.maven.ide.eclipse.project.configurator.ProjectConfigurationRequest;
@@ -82,7 +81,7 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
   }
 
   // XXX make sure to configure only Java projects
-  public void configure(MavenEmbedder embedder, ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException {
+  public void configure(ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException {
     IProject project = request.getProject();
     ResolverConfiguration configuration = request.getResolverConfiguration();
 
@@ -91,25 +90,27 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
 
     String goalOnImport = "";
     if (request.isProjectConfigure()) {
-      goalOnImport = runtimeManager.getGoalOnUpdate();
+      goalOnImport = mavenConfiguration.getGoalOnUpdate();
     } else if (request.isProjectImport()) {
-      goalOnImport = runtimeManager.getGoalOnImport();
+      goalOnImport = mavenConfiguration.getGoalOnImport();
     }
 
-    updateSourceFolders(embedder, project, configuration, goalOnImport, monitor);
+    updateSourceFolders(project, configuration, goalOnImport, monitor);
   }
   
-  private void updateSourceFolders(MavenEmbedder embedder, IProject project, ResolverConfiguration configuration,
+  private void updateSourceFolders(IProject project, ResolverConfiguration configuration,
       String goalToExecute, IProgressMonitor monitor) {
     // monitor.beginTask("Updating sources " + project.getName(), IProgressMonitor.UNKNOWN);
     monitor.setTaskName("Updating sources " + project.getName());
 
     long t1 = System.currentTimeMillis();
     try {
+      IMaven maven = MavenPlugin.lookup(IMaven.class);
+      
       Set<String> sources = new LinkedHashSet<String>();
       Set<IClasspathEntry> entries = new LinkedHashSet<IClasspathEntry>();
 
-      MavenProject mavenProject = collectSourceEntries(embedder, project, entries, sources, configuration,
+      MavenProject mavenProject = collectSourceEntries(maven, project, entries, sources, configuration,
           goalToExecute, monitor);
 
       monitor.subTask("Configuring Build Path");
@@ -204,7 +205,6 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
     return options;
   }
 
-  @SuppressWarnings("unchecked")
   void addDirs(IProject project, ResolverConfiguration resolverConfiguration, Set<String> sources, Set<IClasspathEntry> entries,
       MavenProject mavenProject) throws CoreException {
     IFolder classes;
@@ -292,7 +292,7 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
     return relative.replace('\\', '/'); //$NON-NLS-1$ //$NON-NLS-2$
   }
 
-  private MavenProject generateSourceEntries(MavenEmbedder mavenEmbedder, final IProject project,
+  private MavenProject generateSourceEntries(IMaven maven, final IProject project,
       final Set<IClasspathEntry> entries, final Set<String> sources, final ResolverConfiguration configuration,
       final String goalsToExecute, IProgressMonitor monitor) throws CoreException {
     IFile pomResource = project.getFile(IMavenConstants.POM_FILE_NAME);
@@ -300,19 +300,15 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
     console.logMessage("Generating sources " + pomResource.getFullPath());
 
     monitor.subTask("reading " + pomResource.getFullPath());
-    if(runtimeManager.isDebugOutput()) {
+    if(mavenConfiguration.isDebugOutput()) {
       console.logMessage("Reading " + pomResource.getFullPath());
     }
 
-    MavenExecutionResult result = projectManager.execute(mavenEmbedder, pomResource, configuration,
-        new MavenRunnable() {
-          public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request) {
-            request.setUseReactor(false);
-            request.setRecursive(configuration.shouldIncludeModules());
-            request.setGoals(Arrays.asList(goalsToExecute.split("[\\s,]+")));
-            return embedder.execute(request);
-          }
-        }, monitor);
+    MavenExecutionRequest request = projectManager.createExecutionRequest(pomResource, configuration);
+    request.setPom(pomResource.getLocation().toFile());
+    request.setRecursive(configuration.shouldIncludeModules());
+    request.setGoals(Arrays.asList(goalsToExecute.split("[\\s,]+")));
+    MavenExecutionResult result = maven.execute(request, monitor);
 
     // TODO optimize project refresh
     monitor.subTask("refreshing");
@@ -321,24 +317,19 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
 
     MavenProject mavenProject = result.getProject();
 
-    ReactorManager reactorManager = result.getReactorManager();
-    if(reactorManager != null) {
-      @SuppressWarnings("unchecked")
-      List<MavenProject> projects = reactorManager.getSortedProjects();
-      if(projects != null) {
-        if(configuration.shouldIncludeModules()) {
-          for(MavenProject p : projects) {
-            addDirs(project, configuration, sources, entries, p);
-          }
-        } else {
-          addDirs(project, configuration, sources, entries, projects.iterator().next());
+    List<MavenProject> projects = result.getTopologicallySortedProjects();
+    if(projects != null) {
+      if(configuration.shouldIncludeModules()) {
+        for(MavenProject p : projects) {
+          addDirs(project, configuration, sources, entries, p);
         }
+      } else {
+        addDirs(project, configuration, sources, entries, projects.iterator().next());
       }
     }
 
     if(result.hasExceptions()) {
       String msg = "Build error for " + pomResource.getFullPath();
-      @SuppressWarnings("unchecked")
       List<Exception> exceptions = result.getExceptions();
       for(Exception ex : exceptions) {
         console.logError(msg + "; " + ex.toString());
@@ -350,7 +341,7 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
     return mavenProject;
   }
 
-  private MavenProject collectSourceEntries(MavenEmbedder mavenEmbedder, final IProject project,
+  private MavenProject collectSourceEntries(IMaven maven, final IProject project,
       final Set<IClasspathEntry> entries, final Set<String> sources, final ResolverConfiguration configuration,
       final String goalsToExecute, final IProgressMonitor monitor) throws CoreException {
 
@@ -363,7 +354,7 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
     MavenProject mavenProject = null;
 
     if(goalsToExecute.trim().length() > 0) {
-      mavenProject = generateSourceEntries(mavenEmbedder, project, entries, sources, configuration, goalsToExecute,
+      mavenProject = generateSourceEntries(maven, project, entries, sources, configuration, goalsToExecute,
           monitor);
     }
 
@@ -383,7 +374,7 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
 
     if(mavenProject == null) {
       try {
-        mavenProject = mavenEmbedder.readProject(pomResource.getLocation().toFile());
+        mavenProject = maven.readProject(pomResource.getLocation().toFile(), monitor);
         if(mavenProject != null) {
           addDirs(project, configuration, sources, entries, mavenProject);
         }
@@ -397,7 +388,6 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
     }
     
     if(mavenProject != null && !configuration.shouldIncludeModules()) {
-      @SuppressWarnings("unchecked")
       List<String> modules = mavenProject.getModules();
       for(String module : modules) {
         if(!module.startsWith("..")) {
@@ -512,7 +502,6 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
 //    return null;
 //  }
 
-  @SuppressWarnings("unchecked")
   private String getBuildOption(MavenProject project, String optionName, List<String> values) {
     LinkedHashSet<String> options = new LinkedHashSet<String>();
     addBuildOptions(options, project.getBuild().getPluginsAsMap(), optionName);
@@ -545,7 +534,6 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
     if(plugin!=null) {
       addOption(options, (Xpp3Dom) plugin.getConfiguration(), optionName);
 
-      @SuppressWarnings("unchecked")
       List<PluginExecution> executions = plugin.getExecutions();
       if(executions!=null) {
         for(PluginExecution execution : executions) {
@@ -593,8 +581,8 @@ public class JavaProjectConfigurator extends AbstractProjectConfigurator {
     }
   }
   
-  public void unconfigure(MavenEmbedder embedder, ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException {
-    super.unconfigure(embedder, request, monitor);
+  public void unconfigure(ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException {
+    super.unconfigure(request, monitor);
     removeMavenClasspathContainer(request.getProject());
   }
   

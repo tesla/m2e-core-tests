@@ -12,14 +12,10 @@ import java.io.File;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.StringTokenizer;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
-import org.apache.maven.artifact.resolver.ArtifactResolutionException;
-import org.apache.maven.embedder.MavenEmbedder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IStatus;
@@ -29,8 +25,8 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.MavenLaunchConstants;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.embedder.IMavenLauncherConfiguration;
-import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
@@ -76,7 +72,7 @@ public class MavenLaunchUtils {
     }
 
     MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
-    MavenEmbedderManager embedderManager = MavenPlugin.getDefault().getMavenEmbedderManager();
+    IMaven maven = MavenPlugin.lookup(IMaven.class);
     for(String gav : list) {
       // groupId:artifactId:version
       StringTokenizer st = new StringTokenizer(gav, ":");
@@ -91,16 +87,12 @@ public class MavenLaunchUtils {
       } else {
         String name = groupId + ":" + artifactId + ":" + version;
         try {
-          MavenEmbedder embedder = embedderManager.getWorkspaceEmbedder();
-          Artifact artifact = embedder.createArtifact(groupId, artifactId, version, null, "jar");
-          embedder.resolve(artifact, Collections.EMPTY_LIST, embedder.getLocalRepository());
+          Artifact artifact = maven.resolve(groupId, artifactId, version, "jar", null, null, null);
           File file = artifact.getFile();
           if(file != null) {
             collector.addArchiveEntry(file.getAbsolutePath());
           }
-        } catch(ArtifactResolutionException ex) {
-          MavenLogger.log("Artifact resolution error " + name, ex);
-        } catch(ArtifactNotFoundException ex) {
+        } catch(CoreException ex) {
           MavenLogger.log("Artifact not found " + name, ex);
         }
       }

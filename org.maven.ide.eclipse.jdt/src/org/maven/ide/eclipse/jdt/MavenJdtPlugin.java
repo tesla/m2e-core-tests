@@ -28,8 +28,9 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenConsole;
-import org.maven.ide.eclipse.embedder.AbstractMavenEmbedderListener;
-import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
+import org.maven.ide.eclipse.embedder.AbstractMavenConfigurationChangeListener;
+import org.maven.ide.eclipse.embedder.IMavenConfiguration;
+import org.maven.ide.eclipse.embedder.MavenConfigurationChangeEvent;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.index.IndexManager;
@@ -65,36 +66,39 @@ public class MavenJdtPlugin extends AbstractUIPlugin {
     MavenPlugin mavenPlugin = MavenPlugin.getDefault();
 
     MavenProjectManager projectManager = mavenPlugin.getMavenProjectManager();
-    MavenEmbedderManager embedderManager = mavenPlugin.getMavenEmbedderManager();
     MavenConsole console = mavenPlugin.getConsole();
     IndexManager indexManager = mavenPlugin.getIndexManager();
     MavenModelManager modelManager = mavenPlugin.getMavenModelManager();
     MavenRuntimeManager runtimeManager = mavenPlugin.getMavenRuntimeManager();
+    IMavenConfiguration mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
 
     File stateLocationDir = mavenPlugin.getStateLocation().toFile(); // TODO migrate JDT settings to this plugin's store
 
-    this.buildpathManager = new BuildPathManager(embedderManager, console, projectManager, indexManager, modelManager,
+    this.buildpathManager = new BuildPathManager(console, projectManager, indexManager, modelManager,
         runtimeManager, bundleContext, stateLocationDir);
     workspace.addResourceChangeListener(buildpathManager, IResourceChangeEvent.PRE_DELETE);
 
     projectManager.addMavenProjectChangedListener(this.buildpathManager);
     projectManager.addDownloadSourceListener(this.buildpathManager);
 
-    embedderManager.addListener(new AbstractMavenEmbedderListener() {
-      public void workspaceEmbedderInvalidated() {
-        if (buildpathManager.setupVariables() && buildpathManager.variablesAreInUse()) {
-        WorkspaceJob job = new WorkspaceJob("Building...") {
+    mavenConfiguration.addConfigurationChangeListener(new AbstractMavenConfigurationChangeListener() {
+      public void mavenConfigutationChange(MavenConfigurationChangeEvent event) {
+        if (!MavenConfigurationChangeEvent.P_USER_SETTINGS_FILE.equals(event.getKey())) {
+          return;
+        }
 
-          public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
-            ResourcesPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, monitor);
-            return Status.OK_STATUS;
-          }
-          
-        };
-        job.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
-        job.schedule();
-      }
-    }});
+        if (buildpathManager.setupVariables() && buildpathManager.variablesAreInUse()) {
+          WorkspaceJob job = new WorkspaceJob("Building...") {
+
+            public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
+              ResourcesPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+              return Status.OK_STATUS;
+            }
+            
+          };
+          job.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
+          job.schedule();
+      }}});
 
     this.launchConfigurationListener = new MavenLaunchConfigurationListener();
     DebugPlugin.getDefault().getLaunchManager().addLaunchConfigurationListener(launchConfigurationListener);

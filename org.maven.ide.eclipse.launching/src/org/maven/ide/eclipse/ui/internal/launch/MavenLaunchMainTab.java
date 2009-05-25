@@ -61,6 +61,7 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.MavenLaunchConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.core.Messages;
+import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.ui.dialogs.MavenGoalSelectionDialog;
@@ -550,24 +551,25 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
     }
     
     this.profilesText.setText(getAttribute(configuration, ATTR_PROFILES, "")); //$NON-NLS-1$
-    
-    MavenPlugin plugin = MavenPlugin.getDefault();
-    MavenRuntimeManager runtimeManager = plugin.getMavenRuntimeManager();
-    
-    this.offlineButton.setSelection(getAttribute(configuration, ATTR_OFFLINE, runtimeManager.isOffline()));
-    this.debugOutputButton.setSelection(getAttribute(configuration, ATTR_DEBUG_OUTPUT, runtimeManager.isDebugOutput()));
-
-    this.updateSnapshotsButton.setSelection(getAttribute(configuration, ATTR_UPDATE_SNAPSHOTS, false));
-    this.skipTestsButton.setSelection(getAttribute(configuration, ATTR_SKIP_TESTS, false));
-    this.nonRecursiveButton.setSelection(getAttribute(configuration, ATTR_NON_RECURSIVE, false));
-    this.enableWorkspaceResolution.setSelection(getAttribute(configuration, ATTR_WORKSPACE_RESOLUTION, false));
-
-    String location = getAttribute(configuration, ATTR_RUNTIME, "");
-    MavenRuntime runtime = runtimeManager.getRuntime(location);
-    if(runtime != null){
-      this.runtimeComboViewer.setSelection(new StructuredSelection(runtime));
-    } 
     try {
+    
+      MavenPlugin plugin = MavenPlugin.getDefault();
+      MavenRuntimeManager runtimeManager = plugin.getMavenRuntimeManager();
+      IMavenConfiguration mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
+      
+      this.offlineButton.setSelection(getAttribute(configuration, ATTR_OFFLINE, mavenConfiguration.isOffline()));
+      this.debugOutputButton.setSelection(getAttribute(configuration, ATTR_DEBUG_OUTPUT, mavenConfiguration.isDebugOutput()));
+  
+      this.updateSnapshotsButton.setSelection(getAttribute(configuration, ATTR_UPDATE_SNAPSHOTS, false));
+      this.skipTestsButton.setSelection(getAttribute(configuration, ATTR_SKIP_TESTS, false));
+      this.nonRecursiveButton.setSelection(getAttribute(configuration, ATTR_NON_RECURSIVE, false));
+      this.enableWorkspaceResolution.setSelection(getAttribute(configuration, ATTR_WORKSPACE_RESOLUTION, false));
+  
+      String location = getAttribute(configuration, ATTR_RUNTIME, "");
+      MavenRuntime runtime = runtimeManager.getRuntime(location);
+      if(runtime != null){
+        this.runtimeComboViewer.setSelection(new StructuredSelection(runtime));
+      } 
       propsTable.removeAll();
       
       @SuppressWarnings("unchecked")
@@ -588,6 +590,7 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
         item.setText(1, value);
       }
     } catch(CoreException ex) {
+      // XXX should we at least log something here?
     }
     setDirty(false);
   }

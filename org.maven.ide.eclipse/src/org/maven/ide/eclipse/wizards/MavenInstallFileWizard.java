@@ -25,7 +25,6 @@ import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.progress.IProgressConstants;
 
-import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionResult;
 
@@ -33,8 +32,7 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.OpenMavenConsoleAction;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
-import org.maven.ide.eclipse.embedder.EmbedderFactory;
-import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
+import org.maven.ide.eclipse.embedder.IMaven;
 
 
 /**
@@ -99,14 +97,12 @@ public class MavenInstallFileWizard extends Wizard implements IImportWizard {
         MavenPlugin plugin = MavenPlugin.getDefault();
         try {
           // Run the install:install-file goal
-          MavenEmbedderManager embedderManager = plugin.getMavenEmbedderManager();
-          MavenEmbedder embedder = embedderManager.createEmbedder(EmbedderFactory.createExecutionCustomizer());
-          MavenExecutionRequest request = embedderManager.createRequest();
+          IMaven maven = MavenPlugin.lookup(IMaven.class);
+          MavenExecutionRequest request = maven.createExecutionRequest();
           request.setGoals(Arrays.asList("install:install-file"));
           request.setProperties(properties);
-          MavenExecutionResult executionResult = embedder.execute(request);
+          MavenExecutionResult executionResult = maven.execute(request, monitor);
           
-          @SuppressWarnings("unchecked")
           List<Exception> exceptions = executionResult.getExceptions();
           if(!exceptions.isEmpty()) {
             for(Exception exception : exceptions) {

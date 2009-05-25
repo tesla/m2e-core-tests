@@ -13,8 +13,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -36,6 +34,7 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 
 
@@ -81,7 +80,7 @@ public class UpdateSourcesAction implements IObjectActionDelegate {
             try {
               plugin.getProjectConfigurationManager().updateProjectConfiguration(project, //
                   projectFacade.getResolverConfiguration(), //
-                  plugin.getMavenRuntimeManager().getGoalOnUpdate(), //
+                  MavenPlugin.lookup(IMavenConfiguration.class).getGoalOnUpdate(), //
                   new SubProgressMonitor(monitor, 1));
             } catch(CoreException ex) {
               if (status == null) {

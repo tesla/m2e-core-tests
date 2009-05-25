@@ -179,8 +179,8 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
   
   public void testGeneratedSources() throws Exception {
     
-    String origGoalsOnImport = plugin.getMavenRuntimeManager().getGoalOnImport();
-    plugin.getMavenRuntimeManager().setGoalOnImport("process-test-resources");
+    String origGoalsOnImport = mavenConfiguration.getGoalOnImport();
+    mavenConfiguration.setGoalOnImport("process-test-resources");
     
     try {
       IProject gensrc01 = importProject("runtimeclasspath-gensrc01", "projects/runtimeclasspath/gensrc01", new ResolverConfiguration());
@@ -203,7 +203,7 @@ public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
   
       assertGeneratedSources(gensrc02);
     } finally {
-      plugin.getMavenRuntimeManager().setGoalOnImport(origGoalsOnImport);
+      mavenConfiguration.setGoalOnImport(origGoalsOnImport);
     }
   }
 

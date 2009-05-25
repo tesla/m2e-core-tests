@@ -19,8 +19,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.embedder.MavenEmbedder;
-import org.apache.maven.execution.MavenExecutionResult;
+import org.apache.maven.execution.MavenExecutionRequest;
 
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerImpl;
@@ -40,7 +39,7 @@ public class MavenProjectManager {
   private final MavenProjectManagerRefreshJob mavenBackgroundJob;
 
   private final File workspaceStateFile;
-
+  
   public MavenProjectManager(MavenProjectManagerImpl manager, MavenProjectManagerRefreshJob mavenBackgroundJob, File stateLocation) {
     this.manager = manager;
     this.mavenBackgroundJob = mavenBackgroundJob;
@@ -154,25 +153,11 @@ public class MavenProjectManager {
   public IMavenProjectFacade[] getProjects() {
     return manager.getProjects();
   }
-  
-  public MavenExecutionResult execute(MavenEmbedder embedder, IFile pomFile,
-      ResolverConfiguration resolverConfiguration, MavenRunnable runnable, IProgressMonitor monitor) {
-    return manager.execute(embedder, pomFile, resolverConfiguration, runnable, monitor);
-  }
-
-  public MavenExecutionResult execute(MavenEmbedder embedder, File pomFile,
-      ResolverConfiguration resolverConfiguration, MavenRunnable runnable, IProgressMonitor monitor) {
-    return manager.execute(embedder, pomFile, resolverConfiguration, runnable, monitor);
-  }
 
   public IMavenProjectFacade getMavenProject(String groupId, String artifactId, String version) {
     return manager.getMavenProject(groupId, artifactId, version);
   }
   
-  public MavenEmbedder createWorkspaceEmbedder() throws CoreException {
-    return manager.createWorkspaceEmbedder();
-  }
-
   public File getWorkspaceStateFile() {
     return workspaceStateFile;
   }
@@ -192,5 +177,12 @@ public class MavenProjectManager {
    */
   public void requestFullMavenBuild(IProject project) throws CoreException {
     project.setSessionProperty(IMavenConstants.FULL_MAVEN_BUILD, Boolean.TRUE);
+  }
+
+  /**
+   * PROVISIONAL
+   */
+  public MavenExecutionRequest createExecutionRequest(IFile pom, ResolverConfiguration resolverConfiguration) throws CoreException {
+    return manager.createExecutionRequest(pom, resolverConfiguration);
   }
 }

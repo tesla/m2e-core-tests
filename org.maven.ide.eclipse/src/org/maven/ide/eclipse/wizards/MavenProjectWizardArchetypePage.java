@@ -73,17 +73,17 @@ import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.DefaultArtifactRepository;
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
-import org.apache.maven.embedder.MavenEmbedder;
 
 import org.maven.ide.eclipse.MavenImages;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.archetype.ArchetypeCatalogFactory;
 import org.maven.ide.eclipse.archetype.ArchetypeManager;
 import org.maven.ide.eclipse.archetype.ArchetypeCatalogFactory.NexusIndexerCatalogFactory;
+import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.core.Messages;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
-import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
+import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 
@@ -522,8 +522,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
   }
 
   ArchetypeCatalog getArchetypeCatalog() throws CoreException {
-    MavenEmbedderManager embedderManager = MavenPlugin.getDefault().getMavenEmbedderManager();
-    return catalogFactory==null ? null: catalogFactory.getArchetypeCatalog(embedderManager);
+    return catalogFactory==null ? null: catalogFactory.getArchetypeCatalog();
   }
 
   /** Sets the flag that the archetype selection is used in the wizard. */
@@ -622,12 +621,13 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
 
     final MavenPlugin plugin = MavenPlugin.getDefault();
     
-    final List<? extends ArtifactRepository> remoteRepositories;
+    final List<ArtifactRepository> remoteRepositories;
     if(repositoryUrl.length()==0) {
       remoteRepositories = plugin.getIndexManager().getArtifactRepositories(null, null);
     } else {
-      remoteRepositories = Collections.singletonList(new DefaultArtifactRepository( //
-          "archetype", repositoryUrl, new DefaultRepositoryLayout(), null, null));
+      ArtifactRepository repository = new DefaultArtifactRepository( //
+          "archetype", repositoryUrl, new DefaultRepositoryLayout(), null, null);
+      remoteRepositories = Collections.singletonList(repository);
     }
 
     try {
@@ -635,23 +635,20 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
         public void run(IProgressMonitor monitor) throws InterruptedException {
           monitor.beginTask("Downloading Archetype " + archetypeName, IProgressMonitor.UNKNOWN);
 
-          MavenEmbedderManager embedderManager = plugin.getMavenEmbedderManager();
           try {
-            MavenEmbedder embedder = embedderManager.getWorkspaceEmbedder();
-            Artifact pomArtifact = embedder.createArtifact(archetypeGroupId, archetypeArtifactId, archetypeVersion, null, "pom");
-            Artifact jarArtifact = embedder.createArtifact(archetypeGroupId, archetypeArtifactId, archetypeVersion, null, "jar");
-
+            IMaven maven = MavenPlugin.lookup(IMaven.class);
+            
             monitor.subTask("resolving POM...");
-            embedder.resolve(pomArtifact, remoteRepositories, embedder.getLocalRepository());
+            Artifact pomArtifact = maven.resolve(archetypeGroupId, archetypeArtifactId, archetypeVersion, "pom", null, remoteRepositories, monitor);
             monitor.worked(1);
             if(monitor.isCanceled()) {
               throw new InterruptedException();
             }
-            
+
             File pomFile = pomArtifact.getFile();
             if(pomFile.exists()) {
               monitor.subTask("resolving JAR...");
-              embedder.resolve(jarArtifact, remoteRepositories, embedder.getLocalRepository());
+              Artifact jarArtifact = maven.resolve(archetypeGroupId, archetypeArtifactId, archetypeVersion, null, "jar", remoteRepositories, monitor);
               monitor.worked(1);
               if(monitor.isCanceled()) {
                 throw new InterruptedException();
@@ -660,7 +657,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
               File jarFile = jarArtifact.getFile();
 
               monitor.subTask("reading project...");
-              embedder.readProject(pomFile);
+              maven.readProject(pomFile, monitor); // TODO what's the point of this?
               monitor.worked(1);
               if(monitor.isCanceled()) {
                 throw new InterruptedException();
@@ -777,7 +774,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
    * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
    */
   public void propertyChange(PropertyChangeEvent event) {
-    if(MavenPlugin.INDEX_UPDATE_PROP.equals(event.getProperty())){
+    if(IMavenConstants.INDEX_UPDATE_PROP.equals(event.getProperty())){
       Display.getDefault().asyncExec(new Runnable(){
         public void run(){
           loadArchetypes("org.apache.maven.archetypes", "maven-archetype-quickstart", "1.0");

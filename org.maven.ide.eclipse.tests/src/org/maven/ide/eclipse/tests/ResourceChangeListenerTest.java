@@ -38,7 +38,7 @@ public class ResourceChangeListenerTest extends AsbtractMavenProjectTestCase {
     IProjectConfigurationManager configurationManager = MavenPlugin.getDefault().getProjectConfigurationManager();
     ResolverConfiguration configuration = new ResolverConfiguration();
     configurationManager.enableMavenNature(project, configuration, monitor);
-    configurationManager.updateProjectConfiguration(project, configuration, runtimeManager.getGoalOnImport(), monitor);
+    configurationManager.updateProjectConfiguration(project, configuration, mavenConfiguration.getGoalOnImport(), monitor);
     
     waitForJobsToComplete();
   }

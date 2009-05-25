@@ -14,18 +14,10 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.apache.maven.embedder.Configuration;
-import org.apache.maven.embedder.ContainerCustomizer;
-import org.apache.maven.embedder.MavenEmbedder;
-import org.apache.maven.embedder.MavenEmbedderConsoleLogger;
-import org.apache.maven.embedder.MavenEmbedderException;
-import org.apache.maven.embedder.MavenEmbedderLogger;
 import org.apache.maven.settings.Profile;
 import org.apache.maven.settings.Repository;
 import org.apache.maven.settings.Settings;
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.embedder.EmbedderFactory;
-import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 
 
 /**

@@ -51,4 +51,7 @@ public interface IMavenConstants {
    * The name of the folder containing metadata information for the workspace.
    */
   public static final String METADATA_FOLDER = ".metadata"; //$NON-NLS-1$
+
+  public static final String INDEX_UPDATE_PROP = "indexUpdate";
+
 }

@@ -955,7 +955,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
 
     @SuppressWarnings("unchecked")
     List<Archetype> archetypes = plugin.getArchetypeManager().getArchetypeCatalogFactory("internal")
-        .getArchetypeCatalog(plugin.getMavenEmbedderManager()).getArchetypes();
+        .getArchetypeCatalog().getArchetypes();
     for(Archetype archetype : archetypes) {
       if("org.apache.maven.archetypes".equals(archetype.getGroupId())
           && "maven-archetype-quickstart".equals(archetype.getArtifactId()) && "1.0".equals(archetype.getVersion())) {

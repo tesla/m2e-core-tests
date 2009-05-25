@@ -30,6 +30,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 import org.maven.ide.eclipse.wizards.MavenPomWizard;
@@ -121,8 +122,9 @@ public class EnableNatureAction implements IObjectActionDelegate, IExecutableExt
       configurationManager.enableMavenNature(project, configuration, new NullProgressMonitor());
       
       if(!hasMavenNature) {
+        IMavenConfiguration mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
         configurationManager.updateProjectConfiguration(project, configuration, //
-            plugin.getMavenRuntimeManager().getGoalOnUpdate(), new NullProgressMonitor());
+            mavenConfiguration.getGoalOnUpdate(), new NullProgressMonitor());
       }
 
     } catch(CoreException ex) {

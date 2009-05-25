@@ -38,9 +38,9 @@ import org.maven.ide.eclipse.actions.MavenLaunchConstants;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.embedder.IMavenLauncherConfiguration;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
-import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.util.Util;
 
 
@@ -239,18 +239,18 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
    * Construct string with preferences to pass to JVM as system properties
    */
   private String getPreferences(ILaunchConfiguration configuration) throws CoreException {
-    MavenRuntimeManager runtimeManager = MavenPlugin.getDefault().getMavenRuntimeManager();
-    
+    IMavenConfiguration mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
+
     StringBuffer sb = new StringBuffer();
 
     sb.append(" -B");
 
-    if(configuration.getAttribute(MavenLaunchConstants.ATTR_DEBUG_OUTPUT, runtimeManager.isDebugOutput())) {
+    if(configuration.getAttribute(MavenLaunchConstants.ATTR_DEBUG_OUTPUT, mavenConfiguration.isDebugOutput())) {
       sb.append(" -X").append(" -e");
     }
     // sb.append(" -D").append(MavenPreferenceConstants.P_DEBUG_OUTPUT).append("=").append(debugOutput);
 
-    if(configuration.getAttribute(MavenLaunchConstants.ATTR_OFFLINE, runtimeManager.isOffline())) {
+    if(configuration.getAttribute(MavenLaunchConstants.ATTR_OFFLINE, mavenConfiguration.isOffline())) {
       sb.append(" -o");
     }
     // sb.append(" -D").append(MavenPreferenceConstants.P_OFFLINE).append("=").append(offline);
@@ -267,7 +267,7 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
       sb.append(" -Dmaven.test.skip=true");
     }
     
-    String settings = runtimeManager.getUserSettingsFile();
+    String settings = mavenConfiguration.getUserSettingsFile();
 //    if(settings==null) {
 //      settings = getMavenRuntime(configuration).getSettings();
 //    }

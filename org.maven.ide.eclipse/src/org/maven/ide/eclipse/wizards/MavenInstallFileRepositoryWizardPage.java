@@ -29,6 +29,7 @@ import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.Repository;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.embedder.IMaven;
 
 
 /**
@@ -105,7 +106,7 @@ public class MavenInstallFileRepositoryWizardPage extends WizardPage {
       repository.setId("local");
       repository.setName("Local Repository");
       try {
-        File localRepositoryDir = MavenPlugin.getDefault().getMavenEmbedderManager().getLocalRepositoryDir();
+        File localRepositoryDir = new File(MavenPlugin.lookup(IMaven.class).getLocalRepository().getBasedir());
         repository.setUrl(localRepositoryDir.toURI().toString());
       } catch(CoreException ex) {
         MavenLogger.log("Unable to determine local repository URL, using default", ex);

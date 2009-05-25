@@ -6,19 +6,19 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.configurators;
+package org.maven.ide.eclipse;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
-import org.maven.ide.eclipse.project.configurator.ProjectConfigurationRequest;
+import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 
 /**
- * @author Eugene Kuleshov
+ * NoSuchComponentException
+ *
+ * @author igor
  */
-public class TestProjectConfigurator extends AbstractProjectConfigurator {
+public class NoSuchComponentException extends IllegalArgumentException {
 
-  public void configure(ProjectConfigurationRequest request, IProgressMonitor monitor) {
-    // do nothing
+  public NoSuchComponentException(ComponentLookupException ex) {
+    super(ex);
   }
 
 }

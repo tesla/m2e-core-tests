@@ -43,7 +43,6 @@ import org.apache.maven.archetype.catalog.ArchetypeCatalog;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.archetype.ArchetypeCatalogFactory;
 import org.maven.ide.eclipse.archetype.ArchetypeCatalogFactory.RemoteCatalogFactory;
-import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 
 /**
  * Remote Archetype catalog dialog
@@ -173,10 +172,7 @@ public class RemoteArchetypeCatalogDialog extends TitleAreaDialog {
             IStatus status = Status.OK_STATUS;
             ArchetypeCatalog catalog = null;
             try {
-              MavenEmbedderManager embedderManager = MavenPlugin.getDefault().getMavenEmbedderManager();
-              catalog = factory.getArchetypeCatalog(embedderManager);
-            } catch(CoreException ex) {
-              status = ex.getStatus();
+              catalog = factory.getArchetypeCatalog();
             } finally {
               final IStatus s = status;
               @SuppressWarnings("unchecked")

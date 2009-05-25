@@ -1,7 +1,6 @@
 package org.maven.ide.eclipse.ui.internal.preferences;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.lang.reflect.Constructor;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -27,7 +26,6 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -63,18 +61,15 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.ide.IDE;
 
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.embedder.Configuration;
-import org.apache.maven.embedder.ConfigurationValidationResult;
-import org.apache.maven.embedder.ContainerCustomizer;
 import org.apache.maven.embedder.MavenEmbedder;
-import org.apache.maven.embedder.MavenEmbedderException;
+import org.apache.maven.settings.Settings;
+import org.apache.maven.settings.validation.SettingsValidationResult;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.core.Messages;
-import org.maven.ide.eclipse.embedder.EmbedderFactory;
-import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
+import org.maven.ide.eclipse.embedder.IMaven;
+import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.index.IndexManager;
@@ -90,8 +85,10 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
   final MavenPlugin mavenPlugin;
 
   final MavenRuntimeManager runtimeManager;
-
-  final MavenEmbedderManager embedderManager;
+  
+  final IMavenConfiguration mavenConfiguration;
+  
+  final IMaven maven;
 
   MavenRuntime defaultRuntime;
 
@@ -110,9 +107,10 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
   public MavenInstallationsPreferencePage() {
     setTitle("Maven Installations");
 
-    mavenPlugin = MavenPlugin.getDefault();
-    runtimeManager = mavenPlugin.getMavenRuntimeManager();
-    embedderManager = mavenPlugin.getMavenEmbedderManager();
+    this.mavenPlugin = MavenPlugin.getDefault();
+    this.runtimeManager = mavenPlugin.getMavenRuntimeManager();
+    this.mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
+    this.maven = MavenPlugin.lookup(IMaven.class);
   }
 
   public void init(IWorkbench workbench) {
@@ -138,29 +136,25 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
       new Job("Invalidating Maven settings") {
         protected IStatus run(IProgressMonitor monitor) {
           try {
-            final File localRepositoryDir = embedderManager.getLocalRepositoryDir();
+            final File localRepositoryDir = new File(maven.getLocalRepository().getBasedir());
   
             runtimeManager.setRuntimes(runtimes);
             runtimeManager.setDefaultRuntime(defaultRuntime);
   
             if(userSettings.length() > 0) {
-              runtimeManager.setUserSettingsFile(userSettings);
+              mavenConfiguration.setUserSettingsFile(userSettings);
             } else {
-              runtimeManager.setUserSettingsFile(null);
+              mavenConfiguration.setUserSettingsFile(null);
             }
-            mavenPlugin.getMavenEmbedderManager().invalidateMavenSettings();
   
-            File newRepositoryDir = embedderManager.getLocalRepositoryDir();
+            File newRepositoryDir = new File(maven.getLocalRepository().getBasedir());
             if(!newRepositoryDir.equals(localRepositoryDir)) {
               mavenPlugin.getIndexManager().scheduleIndexUpdate(IndexManager.LOCAL_INDEX, true, 0L);
             }
-          } catch(CoreException ex) {
-            MavenLogger.log(ex);
-            IStatus status = ex.getStatus();
-            Throwable t = status.getException();
-            setErrorMessage(status.getMessage() + "; " + t.getMessage() == null ? t.toString() : t.getMessage());
+            return Status.OK_STATUS;
+          } catch (CoreException e) {
+            return e.getStatus();
           }
-          return Status.OK_STATUS;
         }
       }.schedule();
     }
@@ -479,7 +473,7 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
     String globalSettings = runtimeManager.getGlobalSettingsFile();
     globalSettingsText.setText(globalSettings == null ? "" : globalSettings);
 
-    String userSettings = runtimeManager.getUserSettingsFile();
+    String userSettings = mavenConfiguration.getUserSettingsFile();
     if(userSettings == null || userSettings.length() == 0) {
       userSettingsText.setText(MavenEmbedder.DEFAULT_USER_SETTINGS_FILE.getAbsolutePath());
     } else {
@@ -508,115 +502,56 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
   }
 
   void initLocalRepository() {
-    // TODO this is quite slow. is there a faster way?
     final String userSettings = getUserSettings();
     final String globalSettings = getGlobalSettings().length() == 0 ? defaultRuntime.getSettings()
         : getGlobalSettings();
-    new Job("Reading local repository location") {
-      protected IStatus run(IProgressMonitor monitor) {
-        final File localRepository = getLocalRepository(globalSettings, userSettings);
-        Display.getDefault().asyncExec(new Runnable() {
-          public void run() {
-            if(!localRepositoryText.isDisposed()) {
-              localRepositoryText.setText(localRepository == null ? "" : localRepository.getAbsolutePath());
-            }
-          }
-        });
-        return Status.OK_STATUS;
+    
+    try {
+      Settings settings = maven.buildSettings(globalSettings, userSettings);
+      String localRepository = settings.getLocalRepository();
+  
+      if(!localRepositoryText.isDisposed()) {
+        localRepositoryText.setText(localRepository == null ? "" : localRepository);
       }
-
-      private File getLocalRepository(String globalSettings, String userSettings) {
-        MavenEmbedder embedder = null;
-        try {
-          ContainerCustomizer customizer = EmbedderFactory.createExecutionCustomizer();
-          Configuration configuration = embedderManager.createDefaultConfiguration(customizer);
-          if(globalSettings != null) {
-            configuration.setGlobalSettingsFile(new File(globalSettings));
-          }
-          if(userSettings != null && userSettings.length() > 0) {
-            configuration.setUserSettingsFile(new File(userSettings));
-          }
-
-          embedder = EmbedderFactory.createMavenEmbedder(configuration, null);
-
-          ArtifactRepository localRepository = embedder.getLocalRepository();
-          if(localRepository != null) {
-            return new File(localRepository.getBasedir());
-          }
-          Display.getDefault().asyncExec(new Runnable() {
-            public void run() {
-              setErrorMessage(null);
-            }
-          });
-
-        } catch(final MavenEmbedderException ex) {
-          MavenLogger.log("Can't create Maven embedder", ex);
-          Display.getDefault().asyncExec(new Runnable() {
-            public void run() {
-              setErrorMessage(ex.getMessage());
-            }
-          });
-
-        } finally {
-          try {
-            if(embedder != null) {
-              embedder.stop();
-            }
-          } catch(MavenEmbedderException ex) {
-            MavenLogger.log("Can't stop Maven embedder", ex);
-          }
-        }
-        return null;
-      }
-    }.schedule();
+    } catch (CoreException e) {
+      setMessage(e.getMessage(), IMessageProvider.ERROR);
+    }
   }
 
   void checkSettings() {
     setErrorMessage(null);
     setMessage(null);
 
-    Configuration configuration = embedderManager.createDefaultConfiguration(null);
-    configuration.setClassLoader(Thread.currentThread().getContextClassLoader());
-
     String globalSettings = getGlobalSettings();
     if(globalSettings != null && globalSettings.length() > 0) {
       File globalSettingsFile = new File(globalSettings);
-      if(globalSettingsFile.exists()) {
-        configuration.setGlobalSettingsFile(globalSettingsFile);
-      } else {
+      if(!globalSettingsFile.exists()) {
         setMessage("Global settings file doesn't exist", IMessageProvider.WARNING);
+        globalSettings = null;
       }
     } else {
-      configuration.setGlobalSettingsFile(null);
+      globalSettings = null;
     }
 
     String userSettings = getUserSettings();
     if(userSettings != null && userSettings.length() > 0) {
       File userSettingsFile = new File(userSettings);
-      if(userSettingsFile.exists()) {
-        configuration.setUserSettingsFile(userSettingsFile);
-      } else {
+      if(!userSettingsFile.exists()) {
         setMessage("User settings file doesn't exist", IMessageProvider.WARNING);
+        userSettings = null;
       }
     } else {
-      configuration.setUserSettingsFile(null);
+      userSettings = null;
+    }
+    
+    SettingsValidationResult result = maven.validateSettings(globalSettings);
+    if(result.getMessageCount() > 0) {
+      setMessage("Unable to parse global settings file; " + result.getMessage(0), IMessageProvider.WARNING);
     }
 
-    ConfigurationValidationResult result = MavenEmbedder.validateConfiguration(configuration);
-    if(!result.isValid()) {
-      Exception uex = result.getUserSettingsException();
-      Exception gex = result.getGlobalSettingsException();
-      if(uex != null) {
-        if(!(uex instanceof FileNotFoundException)) {
-          setMessage("Unable to parse user settings file; " + uex.toString(), IMessageProvider.WARNING);
-        }
-      } else if(gex != null) {
-        if(!(gex instanceof FileNotFoundException)) {
-          setMessage("Unable to parse global settings file; " + gex.toString(), IMessageProvider.WARNING);
-        }
-      } else {
-        setMessage("Maven configuration is invalid", IMessageProvider.WARNING);
-      }
+    result = maven.validateSettings(userSettings);
+    if(result.getMessageCount() > 0) {
+      setMessage("Unable to parse user settings file; " + result.getMessage(0), IMessageProvider.WARNING);
     }
   }
 
@@ -672,15 +607,15 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
   }
 
   void invalidateMavenSettings(final boolean reindex) {
-    new Job("Invalidating Maven settings") {
-      protected IStatus run(IProgressMonitor monitor) {
-        mavenPlugin.getMavenEmbedderManager().invalidateMavenSettings();
-        if(reindex) {
-          mavenPlugin.getIndexManager().scheduleIndexUpdate(IndexManager.LOCAL_INDEX, true, 0L);
-        }
-        return Status.OK_STATUS;
-      }
-    }.schedule();
+//    new Job("Invalidating Maven settings") {
+//      protected IStatus run(IProgressMonitor monitor) {
+//        mavenPlugin.getMavenEmbedderManager().invalidateMavenSettings();
+//        if(reindex) {
+//          mavenPlugin.getIndexManager().scheduleIndexUpdate(IndexManager.LOCAL_INDEX, true, 0L);
+//        }
+//        return Status.OK_STATUS;
+//      }
+//    }.schedule();
   }
 
   String getUserSettings() {

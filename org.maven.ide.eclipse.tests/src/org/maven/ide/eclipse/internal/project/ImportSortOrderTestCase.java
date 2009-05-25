@@ -19,7 +19,7 @@ public class ImportSortOrderTestCase extends AsbtractMavenProjectTestCase {
     List<IMavenProjectFacade> facades =  new ArrayList<IMavenProjectFacade>();
     
     MavenProjectManagerImpl manager = new MavenProjectManagerImpl(plugin.getConsole(), plugin.getIndexManager(), //
-        plugin.getMavenEmbedderManager(), null, false, plugin.getMavenRuntimeManager(), plugin.getMavenMarkerManager());
+        null, false, plugin.getMavenRuntimeManager(), plugin.getMavenMarkerManager());
     
     List<IProject> projects = new ArrayList<IProject>();
     
@@ -56,7 +56,7 @@ public class ImportSortOrderTestCase extends AsbtractMavenProjectTestCase {
       IFile pom = resolutionContext.pop();
       monitor.subTask(pom.getFullPath().toString());
 
-      manager.refresh(manager.createWorkspaceEmbedder(), pom, resolutionContext, monitor);
+      manager.refresh(pom, resolutionContext, monitor);
       monitor.worked(1);    
     }
     

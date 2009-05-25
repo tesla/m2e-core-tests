@@ -8,8 +8,6 @@
 
 package org.maven.ide.eclipse.internal.project;
 
-import java.util.List;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -17,32 +15,20 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
-import org.apache.maven.artifact.resolver.ArtifactResolutionException;
-import org.apache.maven.artifact.resolver.DefaultArtifactResolver;
+import org.apache.maven.repository.LocalArtifactRepository;
 
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 
 
-public class EclipseArtifactResolver extends DefaultArtifactResolver {
+public class EclipseWorkspaceArtifactRepository extends LocalArtifactRepository {
 
-  public void resolve(Artifact artifact, List<ArtifactRepository> remoteRepositories, ArtifactRepository localRepository)
-      throws ArtifactResolutionException, ArtifactNotFoundException {
-    if(!resolveAsEclipseProject(artifact)) {
-      super.resolve(artifact, remoteRepositories, localRepository);
-    }
+  private final MavenProjectManagerImpl.Context context;
+
+  public EclipseWorkspaceArtifactRepository(MavenProjectManagerImpl.Context context) {
+    this.context = context;
   }
 
-  public void resolveAlways(Artifact artifact, List<ArtifactRepository > remoteRepositories, ArtifactRepository localRepository)
-      throws ArtifactResolutionException, ArtifactNotFoundException {
-    if(!resolveAsEclipseProject(artifact)) {
-      super.resolveAlways(artifact, remoteRepositories, localRepository);
-    }
-  }
-
-  protected static boolean resolveAsEclipseProject(Artifact artifact) {
-    MavenProjectManagerImpl.Context context = MavenProjectManagerImpl.getContext();
+  protected boolean resolveAsEclipseProject(Artifact artifact) {
     if(context == null) { // XXX this is actually a bug 
       return false;
     }
@@ -92,6 +78,19 @@ public class EclipseArtifactResolver extends DefaultArtifactResolver {
     }
 
     return false;
+  }
+
+  public Artifact find(Artifact artifact) {
+    resolveAsEclipseProject(artifact);
+    return artifact;
+  }
+
+  public boolean hasLocalMetadata() {
+    return false; // XXX
+  }
+
+  public boolean isAuthoritative() {
+    return true;
   }
 
 }

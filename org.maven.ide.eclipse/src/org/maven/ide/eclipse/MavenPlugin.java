@@ -18,6 +18,7 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -62,14 +63,28 @@ import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
+import org.codehaus.plexus.ContainerConfiguration;
+import org.codehaus.plexus.DefaultContainerConfiguration;
+import org.codehaus.plexus.DefaultPlexusContainer;
+import org.codehaus.plexus.PlexusContainer;
+import org.codehaus.plexus.classworlds.ClassWorld;
+import org.codehaus.plexus.component.discovery.ComponentDiscoveryEvent;
+import org.codehaus.plexus.component.discovery.ComponentDiscoveryListener;
+import org.codehaus.plexus.component.repository.ComponentDescriptor;
+import org.codehaus.plexus.component.repository.ComponentSetDescriptor;
+import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.util.IOUtil;
+
+import org.apache.maven.plugin.PluginManager;
+import org.apache.maven.project.artifact.MavenMetadataCache;
 
 import org.maven.ide.eclipse.archetype.ArchetypeCatalogFactory;
 import org.maven.ide.eclipse.archetype.ArchetypeManager;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
-import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
+import org.maven.ide.eclipse.embedder.IMaven;
+import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.index.IndexInfo;
@@ -78,11 +93,14 @@ import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexManager.IndexUpdaterRule;
 import org.maven.ide.eclipse.internal.ExtensionReader;
 import org.maven.ide.eclipse.internal.console.MavenConsoleImpl;
+import org.maven.ide.eclipse.internal.embedder.MavenConfigurationImpl;
 import org.maven.ide.eclipse.internal.embedder.MavenEmbeddedRuntime;
+import org.maven.ide.eclipse.internal.embedder.MavenImpl;
 import org.maven.ide.eclipse.internal.embedder.MavenWorkspaceRuntime;
 import org.maven.ide.eclipse.internal.index.IndexInfoWriter;
 import org.maven.ide.eclipse.internal.index.NexusIndexManager;
 import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;
+import org.maven.ide.eclipse.internal.project.EclipseMavenMetadataCache;
 import org.maven.ide.eclipse.internal.project.MavenMarkerManager;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerImpl;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerRefreshJob;
@@ -109,18 +127,32 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   private static final String PREFS_NO_REBUILD_ON_START = "forceRebuildOnUpgrade";
 
   private static final String CENTRAL_URL = "http://repo1.maven.org/maven2/";
-  
-  public static final String INDEX_UPDATE_PROP = "indexUpdate";
+
   // The shared instance
   private static MavenPlugin plugin;
+
+  /** 
+   * In-process maven runtime. MavenProject and mojo caches must be
+   * populated using components looked up from this container.
+   */
+  private PlexusContainer mavenCore;
+
+  /**
+   * General purpose plexus container. Containers components from maven embedder
+   * and all other bundles visible from this classloader.
+   */
+  private PlexusContainer plexus;
+
+  /**
+   * Poor man's component registry
+   */
+  private Map<Class, Object> components = new HashMap<Class, Object>();
 
   private MavenConsole console;
 
   private MavenModelManager modelManager;
 
   private IndexManager indexManager;
-
-  MavenEmbedderManager embedderManager;
 
   private BundleContext bundleContext;
 
@@ -170,10 +202,45 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
       MavenLogger.log(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Unable to start console: " + ex.toString(), ex));
     }
 
+    ContainerConfiguration mavenCoreCC = new DefaultContainerConfiguration()
+      .addComponentDiscoverer( PluginManager.class )
+      .addComponentDiscoveryListener( PluginManager.class )
+      .setClassWorld( new ClassWorld("plexus.core", ClassWorld.class.getClassLoader()) )
+      .setName("mavenCore");
+
+    mavenCoreCC.addComponentDiscoveryListener(new ComponentDiscoveryListener() {
+      public void componentDiscovered(ComponentDiscoveryEvent event) {
+        ComponentSetDescriptor set = event.getComponentSetDescriptor();
+        for (ComponentDescriptor desc : set.getComponents()) {
+          if (MavenMetadataCache.class.getName().equals(desc.getRole())) {
+            desc.setImplementationClass(EclipseMavenMetadataCache.class);
+          }
+        }
+      }
+    });
+
+    this.mavenCore = new DefaultPlexusContainer( mavenCoreCC );
+
+    IMavenConfiguration mavenConfiguration = new MavenConfigurationImpl(getPreferenceStore());
+    IMaven maven = new MavenImpl(mavenCore, mavenConfiguration);
+
+    components.put(IMavenConfiguration.class, mavenConfiguration);
+    components.put(IMaven.class, maven);
+
+    ClassLoader cl = MavenPlugin.class.getClassLoader();
+
+//    Enumeration<URL> resources = cl.getResources("META-INF/plexus/components.xml");
+//    while (resources.hasMoreElements()) {
+//      System.out.println(FileLocator.resolve(resources.nextElement()));
+//    }
+    
+    ContainerConfiguration cc = new DefaultContainerConfiguration()
+      .setClassWorld(new ClassWorld("plexus.core", cl))
+      .setName("plexus");
+    this.plexus = new DefaultPlexusContainer( cc);
+
     this.runtimeManager = new MavenRuntimeManager(getPreferenceStore());
     
-    this.embedderManager = new MavenEmbedderManager(console, runtimeManager);
-
     this.runtimeManager.setEmbeddedRuntime(new MavenEmbeddedRuntime(getBundleContext()));
     
     File stateLocationDir = getStateLocation().toFile();
@@ -194,14 +261,14 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     }
     
     // this.indexManager = new LegacyIndexManager(getStateLocation().toFile(), console);
-    this.indexManager = new NexusIndexManager(embedderManager, console, stateLocationDir);
+    this.indexManager = new NexusIndexManager(console, stateLocationDir);
 
     this.indexManager.addIndex(new IndexInfo(IndexManager.WORKSPACE_INDEX, //
         null, null, IndexInfo.Type.WORKSPACE, false), false);
 
     try {
       IndexInfo local = new IndexInfo(IndexManager.LOCAL_INDEX, //
-          embedderManager.getLocalRepositoryDir(), null, IndexInfo.Type.LOCAL, false);
+          new File(maven.getLocalRepository().getBasedir()), null, IndexInfo.Type.LOCAL, false);
       this.indexManager.addIndex(local, false);
       boolean forceUpdate = !this.getPreferenceStore().getBoolean(PREFS_NO_REBUILD_ON_START);
       if(forceUpdate && !local.isNew()){
@@ -213,11 +280,11 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
     Set<IndexInfo> indexes = loadIndexConfiguration(new File(stateLocationDir, PREFS_INDEXES));
 
-    boolean updateProjectsOnStartup = runtimeManager.isUpdateProjectsOnStartup();
+    boolean updateProjectsOnStartup = mavenConfiguration.isUpdateProjectsOnStartup();
 
     mavenMarkerManager = new MavenMarkerManager(runtimeManager, console);
-    
-    this.managerImpl = new MavenProjectManagerImpl(console, indexManager, embedderManager,
+
+    this.managerImpl = new MavenProjectManagerImpl(console, indexManager,
         stateLocationDir, !updateProjectsOnStartup /* readState */, runtimeManager, mavenMarkerManager);
 
     this.mavenBackgroundJob = new MavenProjectManagerRefreshJob(managerImpl, runtimeManager, console);
@@ -227,22 +294,23 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
         | IResourceChangeEvent.PRE_CLOSE | IResourceChangeEvent.PRE_DELETE);
 
     this.projectManager = new MavenProjectManager(managerImpl, mavenBackgroundJob, stateLocationDir);
+    this.components.put(MavenProjectManager.class, projectManager);
     this.projectManager.addMavenProjectChangedListener(new WorkspaceStateWriter(projectManager));
     if(updateProjectsOnStartup || managerImpl.getProjects().length == 0) {
       this.projectManager.refresh(new MavenUpdateRequest(workspace.getRoot().getProjects(), //
           true /*offline*/, false /* updateSnapshots */));
     }
 
-    this.modelManager = new MavenModelManager(embedderManager, projectManager, console);
+    this.modelManager = new MavenModelManager(maven, projectManager, console);
     
     this.runtimeManager.setWorkspaceRuntime(new MavenWorkspaceRuntime(projectManager));
     
     this.configurationManager = new ProjectConfigurationManager(modelManager, console, 
         runtimeManager, projectManager, managerImpl, 
-        indexManager, embedderManager, modelManager, mavenMarkerManager);
+        indexManager, modelManager, mavenMarkerManager);
     projectManager.addMavenProjectChangedListener(this.configurationManager);
 
-    initializeIndexes(indexes, runtimeManager.isUpdateIndexesOnStartup());
+    initializeIndexes(indexes, mavenConfiguration.isUpdateIndexesOnStartup());
 
     checkJdk();
   }
@@ -250,7 +318,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   public void fireIndexUpdate(String indexName){
     if(listeners != null){
       for(IPropertyChangeListener listener : listeners){
-        listener.propertyChange(new PropertyChangeEvent(this, INDEX_UPDATE_PROP, null, indexName));
+        listener.propertyChange(new PropertyChangeEvent(this, IMavenConstants.INDEX_UPDATE_PROP, null, indexName));
       }
     }
   }
@@ -411,7 +479,8 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     this.projectManager.removeMavenProjectChangedListener(this.configurationManager);
     this.projectManager = null;
 
-    this.embedderManager.shutdown();
+    this.plexus.dispose();
+    this.mavenCore.dispose();
 
     this.configurationManager = null;
 
@@ -421,6 +490,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     if(listeners != null){
       listeners.clear();
     }
+    components.clear();
     plugin = null;
   }
 
@@ -529,10 +599,6 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     return this.console;
   }
 
-  public MavenEmbedderManager getMavenEmbedderManager() {
-    return this.embedderManager;
-  }
-
   public MavenRuntimeManager getMavenRuntimeManager() {
     return this.runtimeManager;
   }
@@ -620,6 +686,25 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
       }
     }
   }
-  
 
+  public static <C> C lookup(Class<C> role) {
+    C c = role.cast(plugin.components.get(role));
+    if (c != null) {
+      return c;
+    }
+
+    try {
+      return plugin.plexus.lookup(role);
+    } catch(ComponentLookupException ex) {
+      throw new NoSuchComponentException(ex);
+    }
+  }
+
+  public static <T> T lookup(Class<T> role, String roleHint) {
+    try {
+      return plugin.plexus.lookup(role, roleHint);
+    } catch(ComponentLookupException ex) {
+      throw new NoSuchComponentException(ex);
+    }
+  }
 }

@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.pr.internal.ProblemReportingPlugin;
 import org.maven.ide.eclipse.project.MavenProjectManager;
@@ -31,7 +32,7 @@ import org.maven.ide.eclipse.project.MavenProjectManager;
  */
 public class DataGatherer {
 
-  private final MavenRuntimeManager mavenRuntimeManager;
+  private final IMavenConfiguration mavenConfiguration;
 
   private final MavenProjectManager projectManager;
 
@@ -43,17 +44,17 @@ public class DataGatherer {
 
   private final List<IStatus> statuses = new ArrayList<IStatus>();
 
-  public DataGatherer(MavenRuntimeManager mavenRuntimeManager, MavenProjectManager mavenProjectManager,
+  public DataGatherer(IMavenConfiguration mavenConfiguration, MavenProjectManager mavenProjectManager,
       MavenConsole console, IWorkspace workspace, Set<IProject> projects) {
-    this.mavenRuntimeManager = mavenRuntimeManager;
+    this.mavenConfiguration = mavenConfiguration;
     this.projectManager = mavenProjectManager;
     this.console = console;
     this.workspace = workspace;
     this.projects = projects;
   }
 
-  public MavenRuntimeManager getMavenRuntimeManager() {
-    return mavenRuntimeManager;
+  public IMavenConfiguration getMavenConfiguration() {
+    return mavenConfiguration;
   }
 
   public MavenProjectManager getProjectManager() {

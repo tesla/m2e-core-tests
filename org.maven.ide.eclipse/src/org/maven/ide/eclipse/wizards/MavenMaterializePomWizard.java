@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -138,7 +139,7 @@ public class MavenMaterializePomWizard extends Wizard implements IImportWizard, 
       protected List<MavenProjectScmInfo> getProjects(IProgressMonitor monitor) throws InterruptedException {
         MavenPlugin plugin = MavenPlugin.getDefault();
         MavenProjectPomScanner<MavenProjectScmInfo> scanner = new MavenProjectPomScanner<MavenProjectScmInfo>(developer, dependencies, //
-            plugin.getMavenModelManager(), plugin.getMavenEmbedderManager(), //
+            plugin.getMavenModelManager(), //
             plugin.getIndexManager(), plugin.getConsole());
         scanner.run(monitor);
         // XXX handle errors/warnings

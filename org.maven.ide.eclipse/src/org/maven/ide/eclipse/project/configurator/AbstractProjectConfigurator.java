@@ -15,10 +15,9 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.apache.maven.embedder.MavenEmbedder;
-
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.project.IMavenMarkerManager;
 import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
@@ -49,7 +48,7 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
   private String name;
 
   protected MavenProjectManager projectManager;
-  protected MavenRuntimeManager runtimeManager;
+  protected IMavenConfiguration mavenConfiguration;
   protected IMavenMarkerManager markerManager; 
   protected MavenConsole console;
   
@@ -57,8 +56,8 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
     this.projectManager = projectManager;
   }
   
-  public void setRuntimeManager(MavenRuntimeManager runtimeManager) {
-    this.runtimeManager = runtimeManager;
+  public void setMavenConfiguration(IMavenConfiguration mavenConfiguration) {
+    this.mavenConfiguration = mavenConfiguration;
   }
 
   public void setMarkerManager(IMavenMarkerManager markerManager) {
@@ -79,7 +78,7 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
    * @param request a project configuration request
    * @param monitor a progress monitor
    */
-  public abstract void configure(MavenEmbedder embedder, ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException;
+  public abstract void configure(ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException;
 
   /**
    * Removes Maven specific configuration from the project passed in ProjectConfigurationRequest
@@ -89,7 +88,7 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
    * @param monitor a progress monitor
    */
   @SuppressWarnings("unused")
-  public void unconfigure(MavenEmbedder embedder, ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException {
+  public void unconfigure(ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException {
   }
 
   /**

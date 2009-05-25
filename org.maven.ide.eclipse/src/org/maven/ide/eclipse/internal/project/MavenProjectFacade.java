@@ -30,21 +30,17 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.embedder.MavenEmbedder;
-import org.apache.maven.embedder.MavenEmbedderException;
 import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.model.Build;
 import org.apache.maven.project.MavenProject;
 
 import org.maven.ide.eclipse.core.IMavenConstants;
-import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.ArtifactRef;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.IMavenProjectVisitor;
 import org.maven.ide.eclipse.project.IMavenProjectVisitor2;
 import org.maven.ide.eclipse.project.MavenProjectUtils;
-import org.maven.ide.eclipse.project.MavenRunnable;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 
@@ -96,7 +92,6 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
     updateTimestamp();
   }
 
-  @SuppressWarnings("unchecked")
   private void setMavenProject(MavenProject mavenProject) {
     this.mavenProject = mavenProject;
     
@@ -182,7 +177,6 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
       mavenProject = result.getProject();
       if (mavenProject == null) {
         MultiStatus status = new MultiStatus(IMavenConstants.PLUGIN_ID, 0, "Could not read maven project", null);
-        @SuppressWarnings("unchecked")
         List<Exception> exceptions = result.getExceptions();
         for (Exception e : exceptions) {
           status.add(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, 0, e.getMessage(), e));
@@ -232,11 +226,10 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
     acceptImpl(visitor, flags, monitor);
   }
 
-  @SuppressWarnings("unchecked")
   private void acceptImpl(IMavenProjectVisitor visitor, int flags, IProgressMonitor monitor) throws CoreException {
     if(visitor.visit(this)) {
       if (visitor instanceof IMavenProjectVisitor2 && monitor != null) {
-        for(Artifact artifact : (Set<Artifact>) getMavenProject(monitor).getArtifacts()) {
+        for(Artifact artifact : getMavenProject(monitor).getArtifacts()) {
           ((IMavenProjectVisitor2) visitor).visit(this, artifact);
         }
       }
@@ -314,24 +307,14 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
 //    return result;
 //  }
 
-  public MavenExecutionResult execute(MavenRunnable runnable, IProgressMonitor monitor) throws CoreException {
-    MavenEmbedder embedder = manager.createWorkspaceEmbedder();
-    try {
-      MavenExecutionResult result = manager.execute(embedder, pom, resolverConfiguration, runnable, monitor);
-      
-      // XXX only need to refresh target or target/classes and target/test-classes
-      refreshBuildFolders(monitor);
-      
-      return result; 
-  
-    } finally {
-      try {
-        embedder.stop();
-      } catch(MavenEmbedderException ex) {
-        MavenLogger.log("Error stopping Maven Embedder", ex);
-      }
-    }
-  }
+//  public MavenExecutionResult execute(MavenRunnable runnable, IProgressMonitor monitor) throws CoreException {
+//    MavenExecutionResult result = manager.execute(pom, resolverConfiguration, runnable, monitor, monitor);
+//
+//    // XXX only need to refresh target or target/classes and target/test-classes
+//    refreshBuildFolders(monitor);
+//    
+//    return result; 
+//  }
   
   private void refreshBuildFolders(final IProgressMonitor monitor) throws CoreException {
     accept(new IMavenProjectVisitor() {
@@ -352,14 +335,6 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
 
   public MavenProject getMavenProject() {
     return mavenProject;
-  }
-
-  /* (non-Javadoc)
-   * @see org.maven.ide.eclipse.project.IMavenProjectFacade#getFilteredGoals(org.apache.maven.embedder.MavenEmbedder, java.util.List)
-   */
-  public List<String> getFilteredGoals(MavenEmbedder embedder, List<String> goals) {
-    // TODO Auto-generated method getFilteredGoals
-    return null;
   }
 
   public String getNameTemplate() {

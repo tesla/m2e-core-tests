@@ -20,7 +20,6 @@ import org.maven.ide.eclipse.archetype.ArchetypeCatalogFactory.InternalCatalogFa
 import org.maven.ide.eclipse.archetype.ArchetypeCatalogFactory.LocalCatalogFactory;
 import org.maven.ide.eclipse.archetype.ArchetypeCatalogFactory.NexusIndexerCatalogFactory;
 import org.maven.ide.eclipse.archetype.ArchetypeCatalogFactory.RemoteCatalogFactory;
-import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 
 
 /**
@@ -29,20 +28,18 @@ import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 public class ArchetypeManagerTest extends TestCase {
 
   private ArchetypeManager archetypeManager;
-  private MavenEmbedderManager embedderManager;
 
   protected void setUp() throws Exception {
     super.setUp();
     
     archetypeManager = MavenPlugin.getDefault().getArchetypeManager();
-    embedderManager = MavenPlugin.getDefault().getMavenEmbedderManager();
   }
   
   public void testArchetypeManager() throws Exception {
     {
       ArchetypeCatalogFactory catalog = archetypeManager.getArchetypeCatalogFactory(NexusIndexerCatalogFactory.ID);
       assertNotNull(catalog);
-      ArchetypeCatalog archetypeCatalog = catalog.getArchetypeCatalog(embedderManager);
+      ArchetypeCatalog archetypeCatalog = catalog.getArchetypeCatalog();
       assertNotNull(archetypeCatalog);
       List<?> archetypes = archetypeCatalog.getArchetypes();
       assertNotNull(archetypes);
@@ -53,7 +50,7 @@ public class ArchetypeManagerTest extends TestCase {
       ArchetypeCatalogFactory catalog = archetypeManager.getArchetypeCatalogFactory(InternalCatalogFactory.ID);
       assertNotNull(catalog);
 
-      ArchetypeCatalog archetypeCatalog = catalog.getArchetypeCatalog(embedderManager);
+      ArchetypeCatalog archetypeCatalog = catalog.getArchetypeCatalog();
       assertNotNull(archetypeCatalog);
       List<?> archetypes = archetypeCatalog.getArchetypes();
       assertNotNull(archetypes);
@@ -64,7 +61,7 @@ public class ArchetypeManagerTest extends TestCase {
       ArchetypeCatalogFactory catalog = archetypeManager.getArchetypeCatalogFactory(DefaultLocalCatalogFactory.ID);
       assertNotNull(catalog);
       
-      ArchetypeCatalog archetypeCatalog = catalog.getArchetypeCatalog(embedderManager);
+      ArchetypeCatalog archetypeCatalog = catalog.getArchetypeCatalog();
       assertNotNull(archetypeCatalog);
       List<?> archetypes = archetypeCatalog.getArchetypes();
       assertNotNull(archetypes);
@@ -77,7 +74,7 @@ public class ArchetypeManagerTest extends TestCase {
   
   public void testLocalArchetypeCatalogFactory() throws Exception {
     LocalCatalogFactory catalogFactory = new LocalCatalogFactory("archetype-catalog.xml", "local", true);
-    ArchetypeCatalog catalog = catalogFactory.getArchetypeCatalog(embedderManager);
+    ArchetypeCatalog catalog = catalogFactory.getArchetypeCatalog();
     assertNotNull(catalog);
     assertEquals(1, catalog.getArchetypes().size());
   }
@@ -86,7 +83,7 @@ public class ArchetypeManagerTest extends TestCase {
     
     ArchetypeCatalogFactory catalogFactory = new RemoteCatalogFactory("http://www.sonatype.org/", "test", true);
     assertEquals("test", catalogFactory.getDescription());
-    assertNotNull(catalogFactory.getArchetypeCatalog(embedderManager));
+    assertNotNull(catalogFactory.getArchetypeCatalog());
     
     Collection<ArchetypeCatalogFactory> catalogs = archetypeManager.getArchetypeCatalogs();
     

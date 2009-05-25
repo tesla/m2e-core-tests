@@ -43,13 +43,10 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 
-import org.apache.maven.embedder.MavenEmbedder;
-
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.core.Messages;
-import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
@@ -160,18 +157,18 @@ public class MavenGoalSelectionDialog extends ElementTreeSelectionDialog {
     private final List<Group> groups = new ArrayList<Group>();
 
     public GoalsContentProvider() {
-      MavenEmbedderManager embedderManager = MavenPlugin.getDefault().getMavenEmbedderManager();
-      try {
-        MavenEmbedder embedder = embedderManager.getWorkspaceEmbedder();
-        groups.add(new Group(Messages.getString("launch.goalsDialog.lifecycleBuild"), //$NON-NLS-1$
-            null, null, getLifecyclePhases(embedder.getBuildLifecyclePhases()))); 
-        groups.add(new Group(Messages.getString("launch.goalsDialog.lifecycleSite"), //$NON-NLS-1$
-            null, null, getLifecyclePhases(embedder.getSiteLifecyclePhases()))); 
-        groups.add(new Group(Messages.getString("launch.goalsDialog.lifecycleClean"), //$NON-NLS-1$
-            null, null, getLifecyclePhases(embedder.getCleanLifecyclePhases()))); 
-      } catch(Exception e) {
-        MavenLogger.log("Unable to get lifecycle phases", e);
-      }
+//      MavenEmbedderManager embedderManager = MavenPlugin.getDefault().getMavenEmbedderManager();
+//      try {
+//        MavenEmbedder embedder = embedderManager.getWorkspaceEmbedder();
+//        groups.add(new Group(Messages.getString("launch.goalsDialog.lifecycleBuild"), //$NON-NLS-1$
+//            null, null, getLifecyclePhases(embedder.getBuildLifecyclePhases()))); 
+//        groups.add(new Group(Messages.getString("launch.goalsDialog.lifecycleSite"), //$NON-NLS-1$
+//            null, null, getLifecyclePhases(embedder.getSiteLifecyclePhases()))); 
+//        groups.add(new Group(Messages.getString("launch.goalsDialog.lifecycleClean"), //$NON-NLS-1$
+//            null, null, getLifecyclePhases(embedder.getCleanLifecyclePhases()))); 
+//      } catch(Exception e) {
+//        MavenLogger.log("Unable to get lifecycle phases", e);
+//      }
 
       IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
       try {

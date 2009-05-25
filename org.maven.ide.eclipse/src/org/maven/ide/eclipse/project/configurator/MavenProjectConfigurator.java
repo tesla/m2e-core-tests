@@ -21,15 +21,14 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
-import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.execution.MavenExecutionRequest;
-import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.project.MavenProject;
 
+import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
-import org.maven.ide.eclipse.project.MavenRunnable;
+import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 
 
@@ -45,7 +44,7 @@ public class MavenProjectConfigurator extends AbstractProjectConfigurator {
 
   List<String> goals;
 
-  public void configure(MavenEmbedder embedder, ProjectConfigurationRequest request, IProgressMonitor monitor) {
+  public void configure(ProjectConfigurationRequest request, IProgressMonitor monitor) {
     if(pluginKey == null || goals == null) {
       return;
     }
@@ -53,7 +52,6 @@ public class MavenProjectConfigurator extends AbstractProjectConfigurator {
     MavenProject mavenProject = request.getMavenProject();
     Build build = mavenProject.getBuild();
     if(build != null) {
-      @SuppressWarnings("unchecked")
       Map<String, Plugin> pluginMap = build.getPluginsAsMap();
       Plugin mavenPlugin = pluginMap.get(pluginKey);
       if(mavenPlugin != null) {
@@ -61,13 +59,10 @@ public class MavenProjectConfigurator extends AbstractProjectConfigurator {
         ResolverConfiguration resolverConfiguration = request.getResolverConfiguration();
         // MavenPlugin plugin = MavenPlugin.getDefault();
         try {
-          projectManager.execute(embedder, pomFile, resolverConfiguration, //
-              new MavenRunnable() {
-                public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request) {
-                  request.setGoals(goals);
-                  return embedder.execute(request);
-                }
-              }, monitor);
+          IMaven maven = MavenPlugin.lookup(IMaven.class);
+          MavenExecutionRequest executionRequest = projectManager.createExecutionRequest(pomFile, resolverConfiguration);
+          executionRequest.setGoals(goals);
+          maven.execute(executionRequest, monitor);
         } catch(Exception ex) {
           String msg = ex.getMessage() == null ? ex.toString() : ex.getMessage();
           console.logError(msg);

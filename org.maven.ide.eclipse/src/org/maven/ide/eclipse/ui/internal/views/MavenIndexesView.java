@@ -500,7 +500,7 @@ public class MavenIndexesView extends ViewPart {
         Object element = ((IStructuredSelection) selection).getFirstElement();
         if(element instanceof IndexedArtifactFile) {
           IndexedArtifactFile f = (IndexedArtifactFile) element;
-          OpenPomAction.openEditor(f.group, f.artifact, f.version);
+          OpenPomAction.openEditor(f.group, f.artifact, f.version, null);
         }
       }
 

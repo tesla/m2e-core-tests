@@ -11,7 +11,6 @@ package org.maven.ide.eclipse.tests;
 import java.io.File;
 import java.util.List;
 
-import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.model.License;
 import org.apache.maven.model.Model;
@@ -21,6 +20,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerImpl;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
@@ -43,7 +43,7 @@ public class MavenModelManagerTest extends AsbtractMavenProjectTestCase {
     
     plugin = MavenPlugin.getDefault();
     manager = new MavenProjectManagerImpl(plugin.getConsole(), plugin.getIndexManager(), //
-        plugin.getMavenEmbedderManager(), null, false, plugin.getMavenRuntimeManager(), plugin.getMavenMarkerManager());
+        null, false, plugin.getMavenRuntimeManager(), plugin.getMavenMarkerManager());
   }
   
   protected void tearDown() throws Exception {
@@ -89,17 +89,15 @@ public class MavenModelManagerTest extends AsbtractMavenProjectTestCase {
       MavenModelManager modelManager = plugin.getMavenModelManager();
       Model model = modelManager.readMavenModel(pomFile);
       assertEquals("JT400", model.getName());
-      @SuppressWarnings("unchecked")
       List<License> licenses = model.getLicenses();
       License license = licenses.get(0);
       assertEquals("IBM Public License Version 1.0", license.getName());
     }
     
     {
-      MavenEmbedder embedder = plugin.getMavenEmbedderManager().getWorkspaceEmbedder();
-      MavenProject project = embedder.readProject(pomFile);
+      IMaven embedder = MavenPlugin.lookup(IMaven.class);
+      MavenProject project = embedder.readProject(pomFile, monitor);
       assertEquals("JT400", project.getName());
-      @SuppressWarnings("unchecked")
       List<License> licenses = project.getLicenses();
       License license = licenses.get(0);
       assertEquals("IBM Public License Version 1.0", license.getName());

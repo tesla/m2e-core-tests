@@ -35,7 +35,7 @@ public enum Data {
 
   MAVEN_USER_SETTINGS("Maven user settings.xml") {
     public void gather(DataGatherer gatherer, IDataTarget target, IProgressMonitor monitor) {
-      String settings = gatherer.getMavenRuntimeManager().getUserSettingsFile();
+      String settings = gatherer.getMavenConfiguration().getUserSettingsFile();
       if(settings==null || settings.trim().length() == 0) {
         settings = MavenEmbedder.DEFAULT_USER_SETTINGS_FILE.getAbsolutePath();
       }
@@ -47,7 +47,7 @@ public enum Data {
 
   MAVEN_GLOBAL_SETTINGS("Maven global settings.xml") {
     public void gather(DataGatherer gatherer, IDataTarget target, IProgressMonitor monitor) {
-      String settings = gatherer.getMavenRuntimeManager().getGlobalSettingsFile();
+      String settings = gatherer.getMavenConfiguration().getGlobalSettingsFile();
       gatherer.gather("config", target, new ExternalFileSource(settings, "global-settings.xml"));
     }
   },

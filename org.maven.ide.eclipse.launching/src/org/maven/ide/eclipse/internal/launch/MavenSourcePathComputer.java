@@ -21,9 +21,6 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.repository.layout.ArtifactRepositoryLayout;
-import org.apache.maven.embedder.MavenEmbedder;
 import org.codehaus.plexus.util.DirectoryScanner;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -36,8 +33,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.embedder.IMavenLauncherConfiguration;
-import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 
@@ -53,10 +50,7 @@ import org.maven.ide.eclipse.project.IMavenProjectFacade;
  */
 public class MavenSourcePathComputer implements ISourcePathComputer {
 
-  private MavenEmbedderManager embedderManager;
-
   public MavenSourcePathComputer() {
-    embedderManager = MavenPlugin.getDefault().getMavenEmbedderManager();
   }
 
   public String getId() {
@@ -167,14 +161,12 @@ public class MavenSourcePathComputer implements ISourcePathComputer {
 
   private File getSourcesJar(String groupId, String artifactId, String version) throws CoreException {
     if (groupId != null && artifactId != null && version != null) {
-      MavenEmbedder embedder = embedderManager.getWorkspaceEmbedder();
-      ArtifactRepository localRepository = embedder.getLocalRepository();
-      ArtifactRepositoryLayout localLayout = localRepository.getLayout();
+      IMaven maven = MavenPlugin.lookup(IMaven.class);
 
-      Artifact artifact = embedder.createArtifactWithClassifier(groupId, artifactId, version, "jar", "sources");
-      File file = new File(localRepository.getBasedir(), localLayout.pathOf(artifact));
+      Artifact artifact = maven.resolve(groupId, artifactId, version, "jar", "sources", null, null);
+      File file = artifact.getFile();
       
-      if (file.exists() && file.canRead()) {
+      if (file != null && file.exists() && file.canRead()) {
         return file;
       }
     }

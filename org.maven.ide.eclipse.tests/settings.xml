@@ -1,6 +1,14 @@
 <settings>
   <localRepository>localrepo</localRepository>
 
+  <mirrors>
+    <mirror>
+      <id>remoterepo</id>
+      <mirrorOf>*</mirrorOf>
+      <url>file:remoterepo</url>
+    </mirror>
+  </mirrors>
+
   <profiles>
     <profile>
       <id>test</id>

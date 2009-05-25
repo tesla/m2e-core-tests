@@ -19,9 +19,10 @@ import org.apache.maven.archetype.catalog.ArchetypeCatalog;
 import org.apache.maven.archetype.source.ArchetypeDataSource;
 import org.apache.maven.archetype.source.ArchetypeDataSourceException;
 
+import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
-import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
+
 
 /**
  * Abstract ArchetypeCatalog factory
@@ -51,16 +52,15 @@ public abstract class ArchetypeCatalogFactory {
     return editable;
   }
 
-  public abstract ArchetypeCatalog getArchetypeCatalog(MavenEmbedderManager manager) throws CoreException;
+  public abstract ArchetypeCatalog getArchetypeCatalog() throws CoreException;
 
   public String toString() {
     return getId();
   }
-  
-  protected Archetype getArchetyper(MavenEmbedderManager manager) throws CoreException {
-    return manager.getComponent(Archetype.class, null);
+
+  protected Archetype getArchetyper() {
+    return MavenPlugin.lookup(Archetype.class);
   }
-  
 
   /**
    * Factory for Nexus Indexer ArchetypeCatalog
@@ -72,40 +72,9 @@ public abstract class ArchetypeCatalogFactory {
       super(ID, "Nexus Indexer", false);
     }
 
-    public ArchetypeCatalog getArchetypeCatalog(MavenEmbedderManager manager) throws CoreException {
-//      ArchetypeCatalog catalog = new ArchetypeCatalog();
-//
-//      try {
-//        IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
-//        Map search = indexManager.search("maven-archetype", IndexManager.SEARCH_PACKAGING);
-//
-//        for(Iterator it = search.values().iterator(); it.hasNext();) {
-//          IndexedArtifact artifact = (IndexedArtifact) it.next();
-//
-//          for(Iterator it2 = artifact.files.iterator(); it2.hasNext();) {
-//            IndexedArtifactFile af = (IndexedArtifactFile) it2.next();
-//            Archetype archetype = new Archetype();
-//            archetype.setGroupId(af.group);
-//            archetype.setArtifactId(af.artifact);
-//            archetype.setVersion(af.version);
-//            // archetype.setDescription(af.description);
-//            IndexInfo indexInfo = indexManager.getIndexInfo(af.repository);
-//            if(indexInfo.getType()==IndexInfo.Type.REMOTE) {
-//              archetype.setRepository(indexInfo.getRepositoryUrl());
-//            }
-//            
-//            catalog.addArchetype(archetype);
-//          }
-//        }
-//        
-//      } catch(Exception ex) {
-//        MavenPlugin.log("Unable to retrieve archetypes", ex);
-//      }
-//
-//      return catalog;
-      
+    public ArchetypeCatalog getArchetypeCatalog() throws CoreException {
       try {
-        ArchetypeDataSource source = manager.getComponent(ArchetypeDataSource.class, "nexus");
+        ArchetypeDataSource source = MavenPlugin.lookup(ArchetypeDataSource.class, "nexus");
         return source.getArchetypeCatalog(new Properties());
       } catch(ArchetypeDataSourceException ex) {
         String msg = "Error looking up archetype catalog; " + ex.getMessage();
@@ -126,8 +95,8 @@ public abstract class ArchetypeCatalogFactory {
       super(ID, "Internal", false);
     }
 
-    public ArchetypeCatalog getArchetypeCatalog(MavenEmbedderManager manager) throws CoreException {
-      return getArchetyper(manager).getInternalCatalog();
+    public ArchetypeCatalog getArchetypeCatalog() {
+      return getArchetyper().getInternalCatalog();
     }
   }
 
@@ -136,16 +105,16 @@ public abstract class ArchetypeCatalogFactory {
    */
   public static class DefaultLocalCatalogFactory extends ArchetypeCatalogFactory {
     public static final String ID = "defaultLocal";
-    
+
     public DefaultLocalCatalogFactory() {
       super(ID, "Default Local", false);
     }
-    
-    public ArchetypeCatalog getArchetypeCatalog(MavenEmbedderManager manager) throws CoreException {
-      return getArchetyper(manager).getDefaultLocalCatalog();
+
+    public ArchetypeCatalog getArchetypeCatalog() {
+      return getArchetyper().getDefaultLocalCatalog();
     }
   }
-  
+
   /**
    * Factory for local ArchetypeCatalog
    */
@@ -155,8 +124,8 @@ public abstract class ArchetypeCatalogFactory {
       super(path, description == null || description.trim().length() == 0 ? "Local " + path : description, editable);
     }
 
-    public ArchetypeCatalog getArchetypeCatalog(MavenEmbedderManager manager) throws CoreException {
-      return getArchetyper(manager).getLocalCatalog(getId());
+    public ArchetypeCatalog getArchetypeCatalog() {
+      return getArchetyper().getLocalCatalog(getId());
     }
   }
 
@@ -169,10 +138,9 @@ public abstract class ArchetypeCatalogFactory {
       super(url, description == null || description.trim().length() == 0 ? "Remote " + url : description, editable);
     }
 
-    public ArchetypeCatalog getArchetypeCatalog(MavenEmbedderManager manager) throws CoreException {
-      return getArchetyper(manager).getRemoteCatalog(getId());
+    public ArchetypeCatalog getArchetypeCatalog() {
+      return getArchetyper().getRemoteCatalog(getId());
     }
   }
-  
-}
 
+}

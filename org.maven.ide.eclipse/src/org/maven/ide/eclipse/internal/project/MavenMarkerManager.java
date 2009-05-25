@@ -23,40 +23,33 @@ import org.apache.maven.artifact.resolver.AbstractArtifactResolutionException;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
 import org.apache.maven.execution.MavenExecutionResult;
-import org.apache.maven.extension.ExtensionScanningException;
 import org.apache.maven.project.InvalidProjectModelException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.validation.ModelValidationResult;
 
+import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.Messages;
+import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.project.IMavenMarkerManager;
 
 public class MavenMarkerManager implements IMavenMarkerManager {
   
-  private final MavenRuntimeManager runtimeManager;
   private final MavenConsole console;
+  private final IMavenConfiguration mavenConfiguration; 
 
   public MavenMarkerManager(MavenRuntimeManager runtimeManager, MavenConsole console) {
-    this.runtimeManager = runtimeManager;
     this.console = console;
+    this.mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
   }
   
-  @SuppressWarnings("unchecked")
   public void addMarkers(IResource pomFile, MavenExecutionResult result) {
     List<Exception> exceptions = result.getExceptions();
     for(Exception ex : exceptions) {
-      if(ex instanceof ExtensionScanningException) {
-        if(ex.getCause() instanceof ProjectBuildingException) {
-          handleProjectBuildingException(pomFile, (ProjectBuildingException) ex.getCause());
-        } else {
-          handleBuildException(pomFile, ex);
-        }
-  
-      } else if(ex instanceof ProjectBuildingException) {
+      if(ex instanceof ProjectBuildingException) {
         handleProjectBuildingException(pomFile, (ProjectBuildingException) ex);
   
       } else if(ex instanceof AbstractArtifactResolutionException) {
@@ -200,20 +193,20 @@ public class MavenMarkerManager implements IMavenMarkerManager {
   }
 
   private void addMissingArtifactMarkers(IResource pomFile, MavenProject mavenProject) {
-    @SuppressWarnings("unchecked")
-    Set<Artifact> directDependencies = mavenProject.getDependencyArtifacts();
-    @SuppressWarnings("unchecked")
+//    @SuppressWarnings("unchecked")
+//    Set<Artifact> directDependencies = mavenProject.getDependencyArtifacts();
+//    @SuppressWarnings("unchecked")
     Set<Artifact> artifacts = mavenProject.getArtifacts();
     for(Artifact artifact : artifacts) {
       if (!artifact.isResolved()) {
         String errorMessage;
-        if (directDependencies.contains(artifact)) {
+//        if (directDependencies.contains(artifact)) {
           errorMessage = "Missing artifact " + artifact.toString();
-        } else {
-          errorMessage = "Missing indirectly referenced artifact " + artifact.toString();
-        }
+//        } else {
+//          errorMessage = "Missing indirectly referenced artifact " + artifact.toString();
+//        }
         
-        if(runtimeManager.isOffline()) {
+        if(mavenConfiguration.isOffline()) {
           errorMessage = "Offline / " + errorMessage; 
         }
         

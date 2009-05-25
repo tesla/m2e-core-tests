@@ -18,7 +18,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.project.MavenProject;
 
 import org.maven.ide.eclipse.embedder.ArtifactKey;
@@ -113,7 +112,7 @@ public interface IMavenProjectFacade {
    * 
    * @return execution result 
    */
-  MavenExecutionResult execute(MavenRunnable runnable, IProgressMonitor monitor) throws CoreException;
+//  MavenExecutionResult execute(MavenRunnable runnable, IProgressMonitor monitor) throws CoreException;
 
   ArtifactKey getArtifactKey();
   

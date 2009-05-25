@@ -35,40 +35,33 @@ import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 
-import org.codehaus.plexus.PlexusContainer;
-import org.codehaus.plexus.component.repository.ComponentDescriptor;
-
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.AbstractArtifactResolutionException;
-import org.apache.maven.artifact.resolver.ArtifactResolver;
-import org.apache.maven.embedder.ContainerCustomizer;
-import org.apache.maven.embedder.MavenEmbedder;
-import org.apache.maven.embedder.MavenEmbedderException;
+import org.apache.maven.execution.DefaultMavenExecutionResult;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.repository.DelegatingLocalArtifactRepository;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
-import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
+import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
-import org.maven.ide.eclipse.internal.embedder.TransferListenerAdapter;
 import org.maven.ide.eclipse.project.DownloadSourceEvent;
 import org.maven.ide.eclipse.project.IDownloadSourceListener;
 import org.maven.ide.eclipse.project.IMavenMarkerManager;
@@ -77,7 +70,6 @@ import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.IMavenProjectVisitor;
 import org.maven.ide.eclipse.project.IMavenProjectVisitor2;
 import org.maven.ide.eclipse.project.MavenProjectChangedEvent;
-import org.maven.ide.eclipse.project.MavenRunnable;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 
@@ -126,13 +118,11 @@ public class MavenProjectManagerImpl {
       new Path(".classpath"), //
       new Path(".settings/org.maven.ide.eclipse.prefs")); // dirty hack!
 
-  private static final ThreadLocal<Context> context = new ThreadLocal<Context>();
-  
   private final WorkspaceState state;
 
   private final MavenConsole console;
   private final IndexManager indexManager;
-  private final MavenEmbedderManager embedderManager;
+  private final IMaven maven;
 
   private final IMavenMarkerManager markerManager;
 
@@ -144,16 +134,12 @@ public class MavenProjectManagerImpl {
   private final Set<IDownloadSourceListener> downloadSourceListeners = new LinkedHashSet<IDownloadSourceListener>();
   private final Map<IProject, DownloadSourceEvent> downloadSourceEvents = new LinkedHashMap<IProject, DownloadSourceEvent>();
 
-  static Context getContext() {
-    return context.get();
-  }
-
-  public MavenProjectManagerImpl(MavenConsole console, IndexManager indexManager, MavenEmbedderManager embedderManager,
+  public MavenProjectManagerImpl(MavenConsole console, IndexManager indexManager,
       File stateLocationDir, boolean readState, MavenRuntimeManager runtimeManager, IMavenMarkerManager mavenMarkerManager) {
     this.console = console;
     this.indexManager = indexManager;
-    this.embedderManager = embedderManager;
     this.markerManager = mavenMarkerManager;
+    this.maven = MavenPlugin.lookup(IMaven.class);
 
     this.stateReader = new WorkspaceStateReader(stateLocationDir);
 
@@ -192,29 +178,22 @@ public class MavenProjectManagerImpl {
     if(projectFacade == null && load) {
       ResolverConfiguration configuration = readResolverConfiguration(pom.getProject());
 
-      try {
-        MavenExecutionResult executionResult = readProjectWithDependencies(pom, configuration, //
-            new MavenUpdateRequest(true /* offline */, false /* updateSnapshots */),
-            monitor);
-        MavenProject mavenProject = executionResult.getProject();
-        if(mavenProject != null) {
-          projectFacade = new MavenProjectFacade(this, pom, mavenProject, configuration);
-        } else {
-          @SuppressWarnings("unchecked")
-          List<Exception> exceptions = executionResult.getExceptions();
-          if (exceptions != null) {
-            for(Exception ex : exceptions) {
-              String msg = "Failed to read Maven project";
-              console.logError(msg);
-              console.logError(ex.toString());
-              MavenLogger.log(msg, ex);
-            }
+      MavenExecutionResult executionResult = readProjectWithDependencies(pom, configuration, //
+          new MavenUpdateRequest(true /* offline */, false /* updateSnapshots */),
+          monitor);
+      MavenProject mavenProject = executionResult.getProject();
+      if(mavenProject != null) {
+        projectFacade = new MavenProjectFacade(this, pom, mavenProject, configuration);
+      } else {
+        List<Exception> exceptions = executionResult.getExceptions();
+        if (exceptions != null) {
+          for(Exception ex : exceptions) {
+            String msg = "Failed to read Maven project";
+            console.logError(msg);
+            console.logError(ex.toString());
+            MavenLogger.log(msg, ex);
           }
         }
-      } catch(CoreException ex) {
-        IStatus status = ex.getStatus();
-        console.logError(status.getMessage() + "; " + status.getException());
-        MavenLogger.log(ex);
       }
     }
     return projectFacade;
@@ -338,35 +317,30 @@ public class MavenProjectManagerImpl {
    * @param updateRequests a set of {@link MavenUpdateRequest}
    * @param monitor progress monitor
    */
-  public void refresh(Set<DependencyResolutionContext> updateRequests, IProgressMonitor monitor) throws CoreException, MavenEmbedderException, InterruptedException {
-    MavenEmbedder embedder = createWorkspaceEmbedder();
-    try {
-      for(DependencyResolutionContext updateRequest : updateRequests) {
-        while(!updateRequest.isEmpty()) {
-          if(monitor.isCanceled()) {
-            throw new InterruptedException();
-          }
-
-          IFile pom = updateRequest.pop();
-          monitor.subTask(pom.getFullPath().toString());
-          
-          if (!pom.isAccessible() || !pom.getProject().hasNature(IMavenConstants.NATURE_ID)) {
-            updateRequest.forcePomFiles(remove(pom));
-            continue;
-          }
-
-          refresh(embedder, pom, updateRequest, monitor);
-          monitor.worked(1);
+  public void refresh(Set<DependencyResolutionContext> updateRequests, IProgressMonitor monitor) throws CoreException, InterruptedException {
+    for(DependencyResolutionContext updateRequest : updateRequests) {
+      while(!updateRequest.isEmpty()) {
+        if(monitor.isCanceled()) {
+          throw new InterruptedException();
         }
+
+        IFile pom = updateRequest.pop();
+        monitor.subTask(pom.getFullPath().toString());
+        
+        if (!pom.isAccessible() || !pom.getProject().hasNature(IMavenConstants.NATURE_ID)) {
+          updateRequest.forcePomFiles(remove(pom));
+          continue;
+        }
+
+        refresh(pom, updateRequest, monitor);
+        monitor.worked(1);
       }
-    } finally {
-      embedder.stop();
     }
-    
+
     notifyProjectChangeListeners(monitor);
   }
 
-  public void refresh(MavenEmbedder embedder, IFile pom, DependencyResolutionContext updateRequest, IProgressMonitor monitor) throws CoreException {
+  public void refresh(IFile pom, DependencyResolutionContext updateRequest, IProgressMonitor monitor) throws CoreException {
     MavenProjectFacade oldFacade = state.getProjectFacade(pom);
 
     if(!updateRequest.isForce(pom) && oldFacade != null && !oldFacade.isStale()) {
@@ -381,7 +355,7 @@ public class MavenProjectManagerImpl {
     MavenProject mavenProject = null;
     MavenExecutionResult result = null;
     if (pom.isAccessible()) {
-      result = execute(embedder, pom, resolverConfiguration, new MavenProjectReader(updateRequest.getRequest()), monitor);
+      result = readProjectWithDependencies(pom, resolverConfiguration, updateRequest.getRequest(), monitor);
       mavenProject = result.getProject();
       markerManager.addMarkers(pom, result);
     }
@@ -394,7 +368,7 @@ public class MavenProjectManagerImpl {
       }
       try {
         // MNGECLIPSE-605 embedder is not able to resolve the project due to missing configuration in the parent
-        Model model = embedder.readModel(pom.getLocation().toFile());
+        Model model = maven.readModel(pom.getLocation().toFile());
         if (model != null && model.getParent() != null) {
           Parent parent = model.getParent();
           if (parent.getGroupId() != null && parent.getArtifactId() != null && parent.getVersion() != null) {
@@ -504,9 +478,8 @@ public class MavenProjectManagerImpl {
     return pomSet;
   }
 
-  @SuppressWarnings("unchecked")
   private List<String> getMavenProjectModules(MavenProject mavenProject) {
-    return mavenProject == null ? Collections.emptyList() : mavenProject.getModules();
+    return mavenProject == null ? new ArrayList<String>() : mavenProject.getModules();
   }
 
   /**
@@ -551,12 +524,11 @@ public class MavenProjectManagerImpl {
     return pomSet;
   }
 
-  @SuppressWarnings("unchecked")
   private void addProjectDependencies(IFile pom, MavenProject mavenProject, boolean workspace) {
-    for(Artifact artifact : (Set<Artifact>) mavenProject.getArtifacts()) {
+    for(Artifact artifact : mavenProject.getArtifacts()) {
       state.addProjectDependency(pom, new ArtifactKey(artifact), workspace);
     }
-    for (Plugin plugin : (List<Plugin>) mavenProject.getBuildPlugins()) {
+    for (Plugin plugin : mavenProject.getBuildPlugins()) {
       if (plugin.isExtensions()) {
         ArtifactKey artifactKey = new ArtifactKey(plugin.getGroupId(), plugin.getArtifactId(), plugin.getVersion(), null);
         state.addProjectDependency(pom, artifactKey, workspace);
@@ -602,8 +574,7 @@ public class MavenProjectManagerImpl {
 
   private void addMissingProjectDependencies(IFile pom, MavenExecutionResult result) {
     // kinda hack, but this is the only way I can get info about missing parent artifacts
-    @SuppressWarnings("unchecked")
-    List<Throwable> exceptions = result.getExceptions();
+    List<Exception> exceptions = result.getExceptions();
     if (exceptions != null) {
       for(Throwable t : exceptions) {
         AbstractArtifactResolutionException re = null;
@@ -648,9 +619,7 @@ public class MavenProjectManagerImpl {
       return true;
     }
 
-    @SuppressWarnings("unchecked")
     Iterator<Artifact> beforeIt = before.getArtifacts().iterator();
-    @SuppressWarnings("unchecked")
     Iterator<Artifact> afterIt = after.getArtifacts().iterator();
     while(beforeIt.hasNext()) {
       Artifact beforeDependency = beforeIt.next();
@@ -704,114 +673,106 @@ public class MavenProjectManagerImpl {
     return state.getMavenProject(groupId, artifactId, version);
   }
 
-  public void downloadSources(List<DownloadRequest> downloadRequests, IProgressMonitor monitor) throws MavenEmbedderException, InterruptedException, CoreException {
-    MavenEmbedder embedder = createWorkspaceEmbedder();
-    try {
-      for(DownloadRequest request : downloadRequests) {
-        if(monitor.isCanceled()) {
-          throw new InterruptedException();
-        }
+  public void downloadSources(List<DownloadRequest> downloadRequests, IProgressMonitor monitor) throws InterruptedException, CoreException {
+    for(DownloadRequest request : downloadRequests) {
+      if(monitor.isCanceled()) {
+        throw new InterruptedException();
+      }
 
-        final ArtifactKey key = request.getArtifactKey();
-        MavenProjectFacade projectFacade = create(request.getProject(), monitor);
+      final ArtifactKey key = request.getArtifactKey();
+      MavenProjectFacade projectFacade = create(request.getProject(), monitor);
 
-        Artifact artifact = null;
-        List<ArtifactRepository> remoteRepositories = null;
+      Artifact artifact = null;
+      List<ArtifactRepository> remoteRepositories = null;
 
-        if(projectFacade != null) {
-          // for maven projects find actual artifact and MavenProject corresponding to the artifactKey
+      if(projectFacade != null) {
+        // for maven projects find actual artifact and MavenProject corresponding to the artifactKey
 
-          // XXX ugly, need to find a better way
-          class MavenProjectVisitor implements IMavenProjectVisitor2 {
-            IMavenProjectFacade mavenProject = null;
-            Artifact artifact = null;
+        // XXX ugly, need to find a better way
+        class MavenProjectVisitor implements IMavenProjectVisitor2 {
+          IMavenProjectFacade mavenProject = null;
+          Artifact artifact = null;
 
-            public boolean visit(IMavenProjectFacade mavenProject) {
-              return this.mavenProject == null;
+          public boolean visit(IMavenProjectFacade mavenProject) {
+            return this.mavenProject == null;
+          }
+
+          public void visit(IMavenProjectFacade mavenProject, Artifact artifact) {
+            ArtifactKey otherKey = new ArtifactKey(artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion(), artifact.getClassifier());
+            if(key.equals(otherKey)) {
+              this.mavenProject = mavenProject;
+              this.artifact = artifact;
             }
+          }
+        };
 
-            public void visit(IMavenProjectFacade mavenProject, Artifact artifact) {
-              ArtifactKey otherKey = new ArtifactKey(artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion(), artifact.getClassifier());
-              if(key.equals(otherKey)) {
-                this.mavenProject = mavenProject;
-                this.artifact = artifact;
+        MavenProjectVisitor pv = new MavenProjectVisitor(); 
+        projectFacade.accept(pv, IMavenProjectVisitor.NESTED_MODULES, monitor);
+
+        artifact = pv.artifact;
+
+        IMavenProjectFacade facade = pv.mavenProject;
+        if (facade != null) {
+          List<ArtifactRepository> mavenProjectRepositoreis = facade.getMavenProject(monitor).getRemoteArtifactRepositories();
+          remoteRepositories = mavenProjectRepositoreis;
+        }
+      }
+      
+      if(remoteRepositories == null) {
+        remoteRepositories = indexManager.getArtifactRepositories(null, null);
+      }
+
+      if(artifact == null) {
+        // not a Maven managed artifact
+        try {
+          artifact = maven.resolve(key.getGroupId(), key.getArtifactId(), key.getVersion(), ARTIFACT_TYPE_POM, null, remoteRepositories, monitor);
+        } catch(Exception ex) {
+          MavenLogger.log("Can not resolve artifact for classpath entry of non-maven project", ex);
+          continue;
+        }
+      }
+
+      if (artifact != null && remoteRepositories != null) {
+        monitor.subTask(artifact.getId());
+        IPath srcPath = null;
+        if(request.isDownloadSources()) {
+          srcPath = materializeArtifactPath(remoteRepositories, artifact, //
+              ARTIFACT_TYPE_JAVA_SOURCE, monitor);
+        }
+        
+        String javadocUrl = null;
+        if(request.isDownloadJavaDoc()) {
+          IPath javadocPath = materializeArtifactPath(remoteRepositories, artifact, //
+              ARTIFACT_TYPE_JAVADOC, monitor);
+          if (javadocPath != null) {
+            javadocUrl = getJavaDocUrl(javadocPath.toString());
+          } else {
+            // guess the javadoc url from the project url in the artifact's pom.xml
+            String artifactLocation = artifact.getFile().getAbsolutePath();
+            File file = new File(artifactLocation.substring(0, artifactLocation.length() - 4) + ".pom");
+            if(file.exists()) {
+              try {
+                MavenProject mavenProject = maven.readProject(file, monitor);
+                String url = mavenProject.getUrl();
+                if(url != null) {
+                  url = url.trim();
+                  if(url.length() > 0) {
+                    if(!url.endsWith("/"))
+                      url += "/";
+                    javadocUrl =  url + "apidocs/"; // assuming project is using maven-generated site
+                  }
+                }
+              } catch(Exception ex) {
+                MavenLogger.log("Can't read Maven project from " + file, ex);
               }
             }
-          };
-
-          MavenProjectVisitor pv = new MavenProjectVisitor(); 
-          projectFacade.accept(pv, IMavenProjectVisitor.NESTED_MODULES, monitor);
-
-          artifact = pv.artifact;
-
-          IMavenProjectFacade facade = pv.mavenProject;
-          if (facade != null) {
-            @SuppressWarnings("unchecked")
-            List<ArtifactRepository> mavenProjectRepositoreis = facade.getMavenProject(monitor).getRemoteArtifactRepositories();
-            remoteRepositories = mavenProjectRepositoreis;
           }
         }
         
-        if(remoteRepositories == null) {
-          remoteRepositories = indexManager.getArtifactRepositories(null, null);
-        }
-
-        if(artifact == null) {
-          // not a Maven managed artifact
-          artifact = embedder.createArtifact(key.getGroupId(), key.getArtifactId(), key.getVersion(), null,
-              ARTIFACT_TYPE_POM);
-          try {
-            embedder.resolve(artifact, remoteRepositories, embedder.getLocalRepository());
-          } catch(Exception ex) {
-            MavenLogger.log("Can not resolve artifact for classpath entry of non-maven project", ex);
-            continue;
-          }
-        }
-
-        if (artifact != null && remoteRepositories != null) {
-          monitor.subTask(artifact.getId());
-          IPath srcPath = null;
-          if(request.isDownloadSources()) {
-            srcPath = materializeArtifactPath(embedder, remoteRepositories, artifact, //
-                ARTIFACT_TYPE_JAVA_SOURCE, monitor);
-          }
-          
-          String javadocUrl = null;
-          if(request.isDownloadJavaDoc()) {
-            IPath javadocPath = materializeArtifactPath(embedder, remoteRepositories, artifact, //
-                ARTIFACT_TYPE_JAVADOC, monitor);
-            if (javadocPath != null) {
-              javadocUrl = getJavaDocUrl(javadocPath.toString());
-            } else {
-              // guess the javadoc url from the project url in the artifact's pom.xml
-              String artifactLocation = artifact.getFile().getAbsolutePath();
-              File file = new File(artifactLocation.substring(0, artifactLocation.length() - 4) + ".pom");
-              if(file.exists()) {
-                try {
-                  MavenProject mavenProject = embedder.readProject(file);
-                  String url = mavenProject.getUrl();
-                  if(url != null) {
-                    url = url.trim();
-                    if(url.length() > 0) {
-                      if(!url.endsWith("/"))
-                        url += "/";
-                      javadocUrl =  url + "apidocs/"; // assuming project is using maven-generated site
-                    }
-                  }
-                } catch(Exception ex) {
-                  MavenLogger.log("Can't read Maven project from " + file, ex);
-                }
-              }
-            }
-          }
-          
-          if(srcPath != null || javadocUrl != null) {
-            addDownloadSourceEvent(request.getProject(), request.getPath(), srcPath, javadocUrl);
-          }
+        if(srcPath != null || javadocUrl != null) {
+          addDownloadSourceEvent(request.getProject(), request.getPath(), srcPath, javadocUrl);
         }
       }
-    } finally {
-      embedder.stop();
     }
     
     notifyDownloadSourceListeners(monitor);
@@ -867,8 +828,8 @@ public class MavenProjectManagerImpl {
     }
   }
 
-  private IPath materializeArtifactPath(MavenEmbedder embedder, List<ArtifactRepository> remoteRepositories,
-      Artifact base, String type, IProgressMonitor monitor) {
+  private IPath materializeArtifactPath(List<ArtifactRepository> remoteRepositories,
+      Artifact base, String type, IProgressMonitor monitor) throws CoreException {
     File baseFile = base.getFile();
     if(baseFile == null) {
       console.logError("Missing artifact file for " + base.getId());
@@ -890,9 +851,6 @@ public class MavenProjectManagerImpl {
       // can't really happen
       return null;
     }
-
-    Artifact artifact = embedder.createArtifactWithClassifier(base.getGroupId(), //
-        base.getArtifactId(), base.getVersion(), type, classifier);
 
 //    File artifactFile = new File(baseFile.getParentFile(), artifact.getArtifactId()+ "-" + artifact.getVersion() + "-" + classifier + ".jar");
 //
@@ -922,21 +880,18 @@ public class MavenProjectManagerImpl {
     }
 
     try {
-      if(artifact != null) {
         // TODO can optimize remote repositories using index info
-        embedder.resolve(artifact, remoteRepositories, embedder.getLocalRepository());
+        Artifact artifact = maven.resolve(base.getGroupId(), base.getArtifactId(), base.getVersion(), type, classifier, remoteRepositories, monitor);
 
         updateIndex(IndexManager.PRESENT, isJavaSource, isJavaDoc, af, baseFile, base);
 
         return new Path(artifact.getFile().getAbsolutePath());
-      }
-    } catch(AbstractArtifactResolutionException ex) {
-      String name = ex.getGroupId() + ':' + ex.getArtifactId() + ':' + ex.getVersion();
+    } catch(CoreException ex) {
+      String name = base.getGroupId() + ':' + base.getArtifactId() + ':' + base.getVersion();
       console.logError("Can't download " + type + " for artifact " + name);
       if(!isJavaSource && !isJavaDoc) {
-        String msg = ex.getOriginalMessage()==null ? ex.toString() : ex.getOriginalMessage();
-        console.logError("Error: " + msg);
-        MavenLogger.log(msg, ex);
+        console.logError("Error: " + ex.getMessage());
+        MavenLogger.log(ex);
       }
 
       updateIndex(IndexManager.NOT_AVAILABLE, isJavaSource, isJavaDoc, af, baseFile, base);
@@ -961,44 +916,19 @@ public class MavenProjectManagerImpl {
   }
 
   public MavenExecutionResult readProjectWithDependencies(IFile pomFile, ResolverConfiguration resolverConfiguration,
-      MavenUpdateRequest updateRequest, IProgressMonitor monitor) throws CoreException {
-    MavenEmbedder embedder = createWorkspaceEmbedder();
-    try {
-      return execute(embedder, pomFile, resolverConfiguration, new MavenProjectReader(updateRequest), monitor);
-    } finally {
-      try {
-        embedder.stop();
-      } catch(MavenEmbedderException ex) {
-        MavenLogger.log("Failed to stop Maven embedder", ex);
-      }
-    }
-  }
-  
-  public MavenExecutionResult execute(MavenEmbedder embedder, File pom, ResolverConfiguration configuration,
-      MavenRunnable runnable, IProgressMonitor monitor) {
-    return runnable.execute(embedder, createRequest(pom, configuration, monitor));
-  }
+      MavenUpdateRequest updateRequest, IProgressMonitor monitor) {
 
-  public MavenExecutionResult execute(MavenEmbedder embedder, IFile pomFile, ResolverConfiguration configuration,
-      MavenRunnable runnable, IProgressMonitor monitor) {
-    context.set(new Context(this.state, configuration, pomFile));
     try {
-      return runnable.execute(embedder, createRequest(pomFile.getLocation().toFile(), configuration, monitor));
-    } finally {
-      context.set(null);
+      MavenExecutionRequest request;
+      request = createExecutionRequest(pomFile, resolverConfiguration);
+      request.setOffline(updateRequest.isOffline());
+      return maven.readProjectWithDependencies(request, monitor);
+    } catch(CoreException ex) {
+      DefaultMavenExecutionResult result = new DefaultMavenExecutionResult();
+      result.addException(ex);
+      return result;
     }
-  }
 
-  private MavenExecutionRequest createRequest(File pom, ResolverConfiguration configuration, IProgressMonitor monitor) {
-    MavenExecutionRequest request = embedderManager.createRequest();
-    request.setPomFile(pom.getAbsolutePath());
-    request.setBaseDirectory(pom.getParentFile());
-    request.setTransferListener(new TransferListenerAdapter(monitor, console, indexManager));
-    request.setProfiles(configuration.getActiveProfileList());
-    request.addActiveProfiles(configuration.getActiveProfileList());
-    request.setRecursive(false);
-    request.setUseReactor(false);
-    return request;
   }
 
   public IMavenProjectFacade[] getProjects() {
@@ -1050,43 +980,6 @@ public class MavenProjectManagerImpl {
     return "";
   }
 
-  public MavenEmbedder createWorkspaceEmbedder() throws CoreException {
-    return embedderManager.createEmbedder(createWorkspaceCustomizer());
-  }
-
-  private ContainerCustomizer createWorkspaceCustomizer() {
-    return new ContainerCustomizer() {
-      public void customize(PlexusContainer container) {
-        ComponentDescriptor resolverDescriptor = container.getComponentDescriptor(ArtifactResolver.ROLE);
-        resolverDescriptor.setImplementation(EclipseArtifactResolver.class.getName());
-
-        // desc = plexusContainer.getComponentDescriptor(ArtifactFactory.ROLE);
-        // desc.setImplementation(org.maven.ide.eclipse.embedder.EclipseArtifactFactory.class.getName());
-
-        // Used for building hierarchy of dependencies
-        // desc = container.getComponentDescriptor(ResolutionListener.ROLE);
-        // if(desc == null) {
-        //   desc = new ComponentDescriptor();
-        //   desc.setRole(ResolutionListener.ROLE);
-        //   container.addComponentDescriptor(desc);
-        // }
-        // desc.setImplementation(EclipseResolutionListener.class.getName());
-
-        // Custom artifact resolver for resolving artifacts from Eclipse Worspace
-//        if(resolveWorkspaceProjects) {
-//          ComponentDescriptor resolverDescriptor = container.getComponentDescriptor(ArtifactResolver.ROLE);
-//          // ComponentRequirement requirement = new ComponentRequirement();
-//          // requirement.setRole(ResolutionListener.ROLE);
-//          // desc.addRequirement(requirement);
-//          resolverDescriptor.setImplementation(EclipseArtifactResolver.class.getName());
-//        }
-        
-//          desc = container.getComponentDescriptor(WagonManager.ROLE);
-//          desc.setImplementation(EclipseWagonManager.class.getName());
-      }
-    };
-  }
-
   /**
    * Context
    */
@@ -1104,18 +997,37 @@ public class MavenProjectManagerImpl {
     }
   }
 
-  private static final class MavenProjectReader implements MavenRunnable {
-    private final MavenUpdateRequest updateRequest;
+//  private static final class MavenProjectReader implements MavenRunnable {
+//    private final MavenUpdateRequest updateRequest;
+//
+//    MavenProjectReader(MavenUpdateRequest updateRequest) {
+//      this.updateRequest = updateRequest;
+//    }
+//
+//    public MavenExecutionResult execute(IMaven maven, MavenExecutionRequest request) {
+//      request.setOffline(updateRequest.isOffline());
+//      request.setUpdateSnapshots(updateRequest.isUpdateSnapshots());
+//      return maven.readProjectWithDependencies(request);
+//    }
+//  }
 
-    MavenProjectReader(MavenUpdateRequest updateRequest) {
-      this.updateRequest = updateRequest;
-    }
+  public MavenExecutionRequest createExecutionRequest(IFile pom, ResolverConfiguration resolverConfiguration) throws CoreException {
+    MavenExecutionRequest request = maven.createExecutionRequest();
 
-    public MavenExecutionResult execute(MavenEmbedder embedder, MavenExecutionRequest request) {
-      request.setOffline(updateRequest.isOffline());
-      request.setUpdateSnapshots(updateRequest.isUpdateSnapshots());
-      return embedder.readProjectWithDependencies(request);
-    }
+    request.setPom(pom.getLocation().toFile());
+
+    request.addActiveProfiles(resolverConfiguration.getActiveProfileList());
+
+    // eclipse workspace repository implements both workspace dependency resolution
+    // and inter-module dependency resolution for multi-module projects.
+
+    Context context = new Context(state, resolverConfiguration, pom);
+    ArtifactRepository localRepository = maven.getLocalRepository();
+    EclipseWorkspaceArtifactRepository workspaceRepsotory = new EclipseWorkspaceArtifactRepository(context);
+    DelegatingLocalArtifactRepository repository = new DelegatingLocalArtifactRepository(localRepository);
+    repository.setIdeWorkspace(workspaceRepsotory);
+    request.setLocalRepository(repository);
+
+    return request;
   }
-  
 }

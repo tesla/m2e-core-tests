@@ -29,7 +29,7 @@ import org.eclipse.ui.IWorkbenchPart;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
-import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
+import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
@@ -91,19 +91,20 @@ public class ChangeNatureAction implements IObjectActionDelegate {
     private final Set<IProject> projects;
     private final int option;
 
-    private final MavenRuntimeManager runtimeManager;
     private final IProjectConfigurationManager importManager;
     private final MavenProjectManager projectManager;
-    
+    private final IMavenConfiguration mavenConfiguration;
+
     public UpdateJob(Set<IProject> projects, int option) {
       super("Changing nature");
       this.projects = projects;
       this.option = option;
 
       MavenPlugin plugin = MavenPlugin.getDefault();
-      this.runtimeManager = plugin.getMavenRuntimeManager();
       this.importManager = plugin.getProjectConfigurationManager();
       this.projectManager = plugin.getMavenProjectManager();
+      
+      this.mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
 
       setRule(importManager.getRule());
     }
@@ -127,7 +128,7 @@ public class ChangeNatureAction implements IObjectActionDelegate {
         }
       }
 
-      boolean offline = runtimeManager.isOffline();
+      boolean offline = mavenConfiguration.isOffline();
       boolean updateSnapshots = false;
       projectManager.refresh(new MavenUpdateRequest(projects.toArray(new IProject[projects.size()]), //
           offline, updateSnapshots));
@@ -161,10 +162,10 @@ public class ChangeNatureAction implements IObjectActionDelegate {
       }
 
       projectManager.setResolverConfiguration(project, configuration);
-      
+
       if (updateSourceFolders) {
         importManager.updateProjectConfiguration(project, //
-            configuration, runtimeManager.getGoalOnUpdate(), monitor);
+            configuration, mavenConfiguration.getGoalOnUpdate(), monitor);
       }
     }
   }

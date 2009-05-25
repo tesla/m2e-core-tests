@@ -32,11 +32,13 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChang
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
 import org.eclipse.ui.progress.IProgressConstants;
 
+import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.OpenMavenConsoleAction;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
+import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
 
@@ -51,7 +53,7 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
 
   private final MavenProjectManagerImpl manager;
   
-  private final MavenRuntimeManager runtimeManager;
+  private final IMavenConfiguration mavenConfiguration;
 
   private final MavenConsole console;
   
@@ -59,7 +61,7 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
       MavenRuntimeManager runtimeManager, MavenConsole console) {
     super("Updating Maven Dependencies");
     this.manager = manager;
-    this.runtimeManager = runtimeManager;
+    this.mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
     this.console = console;
     setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
     setProperty(IProgressConstants.ACTION_PROPERTY, new OpenMavenConsoleAction());
@@ -145,7 +147,7 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
   // IResourceChangeListener
   
   public void resourceChanged(IResourceChangeEvent event) {
-    boolean offline = runtimeManager.isOffline();  
+    boolean offline = mavenConfiguration.isOffline();  
     boolean updateSnapshots = false;
 
     int type = event.getType();
@@ -322,7 +324,7 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
   }
 
   public void preferenceChange(PreferenceChangeEvent event) {
-    boolean offline = runtimeManager.isOffline();  
+    boolean offline = mavenConfiguration.isOffline();  
     boolean updateSnapshots = false;
 
     if (event.getSource() instanceof IProject) {

@@ -27,15 +27,14 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.project.MavenProject;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.SelectionUtil;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
+import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
-import org.maven.ide.eclipse.project.MavenProjectManager;
 
 
 /**
@@ -271,10 +270,9 @@ public class MavenInstallFileArtifactWizardPage extends WizardPage {
         
         // read pom file
         
-        MavenProjectManager projectManager = plugin.getMavenProjectManager();
         try {
-          MavenEmbedder embedder = projectManager.createWorkspaceEmbedder();
-          MavenProject mavenProject = embedder.readProject(new File(pomFileName));
+          IMaven maven = MavenPlugin.lookup(IMaven.class);
+          MavenProject mavenProject = maven.readProject(new File(pomFileName), null);
 
           groupIdCombo.setText(mavenProject.getGroupId());
           artifactIdCombo.setText(mavenProject.getArtifactId());
@@ -284,8 +282,6 @@ public class MavenInstallFileArtifactWizardPage extends WizardPage {
           
         } catch(CoreException ex) {
           MavenLogger.log(ex);
-        } catch(Exception ex) {
-          MavenLogger.log("Can't read pom file", ex);
         }
       }
     }

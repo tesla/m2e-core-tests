@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -41,7 +40,6 @@ import org.apache.maven.archetype.catalog.ArchetypeCatalog;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.archetype.ArchetypeCatalogFactory;
 import org.maven.ide.eclipse.archetype.ArchetypeCatalogFactory.LocalCatalogFactory;
-import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
 
 /**
  * Local Archetype catalog dialog
@@ -215,19 +213,11 @@ public class LocalArchetypeCatalogDialog extends TitleAreaDialog {
     }
 
     LocalCatalogFactory factory = new LocalCatalogFactory(location, null, true);
-    MavenEmbedderManager embedderManager = MavenPlugin.getDefault().getMavenEmbedderManager();
-    try {
-      ArchetypeCatalog archetypeCatalog = factory.getArchetypeCatalog(embedderManager);
-      @SuppressWarnings("unchecked")
-      List<Archetype> archetypes = archetypeCatalog.getArchetypes();
-      if(archetypes==null || archetypes.size()==0) {
-        setMessage("Archetype catalog is empty", IStatus.WARNING);
-      }
-      
-    } catch(CoreException ex) {
-      IStatus status = ex.getStatus();
-      setErrorMessage("Invalid archetype catalog;\n" + status.getMessage());
-      return false;
+    ArchetypeCatalog archetypeCatalog = factory.getArchetypeCatalog();
+    @SuppressWarnings("unchecked")
+    List<Archetype> archetypes = archetypeCatalog.getArchetypes();
+    if(archetypes==null || archetypes.size()==0) {
+      setMessage("Archetype catalog is empty", IStatus.WARNING);
     }
     
     return true;

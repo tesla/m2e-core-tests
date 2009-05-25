@@ -35,7 +35,6 @@ import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.model.CiManagement;
 import org.apache.maven.model.IssueManagement;
 import org.apache.maven.model.Scm;
@@ -44,7 +43,7 @@ import org.apache.maven.project.MavenProject;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
-import org.maven.ide.eclipse.embedder.MavenEmbedderManager;
+import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 
@@ -180,12 +179,9 @@ public class OpenUrlAction extends ActionDelegate implements IWorkbenchWindowAct
     String name = groupId + ":" + artifactId + ":" + version;
 
     MavenPlugin plugin = MavenPlugin.getDefault();
-    MavenEmbedderManager embedderManager = plugin.getMavenEmbedderManager();
-    MavenEmbedder embedder = embedderManager.getWorkspaceEmbedder();
-    
-    Artifact a = embedder.createArtifact(groupId, artifactId, version, null, "pom");
-    
-    IMavenProjectFacade projectFacade = plugin.getMavenProjectManager().getMavenProject(a.getGroupId(), a.getArtifactId(), a.getVersion());
+    IMaven maven = MavenPlugin.lookup(IMaven.class);
+
+    IMavenProjectFacade projectFacade = plugin.getMavenProjectManager().getMavenProject(groupId, artifactId, version);
     if(projectFacade != null) {
       return projectFacade.getMavenProject(monitor);
     }
@@ -194,7 +190,7 @@ public class OpenUrlAction extends ActionDelegate implements IWorkbenchWindowAct
     IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
     List<ArtifactRepository> artifactRepositories = indexManager.getArtifactRepositories(null, null);
 
-    embedder.resolve(a, artifactRepositories, embedder.getLocalRepository());
+    Artifact a = maven.resolve(groupId, artifactId, version, "pom", null, artifactRepositories, monitor);
 
     File pomFile = a.getFile();
     if(pomFile == null) {
@@ -202,7 +198,7 @@ public class OpenUrlAction extends ActionDelegate implements IWorkbenchWindowAct
       return null;
     }
 
-    return embedder.readProject(pomFile);
+    return maven.readProject(pomFile, monitor);
   }
 
   private static void openDialog(final String msg) {

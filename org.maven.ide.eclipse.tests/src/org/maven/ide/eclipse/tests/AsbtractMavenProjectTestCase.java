@@ -25,9 +25,6 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.embedder.ContainerCustomizer;
-import org.apache.maven.embedder.MavenEmbedder;
-import org.apache.maven.embedder.MavenEmbedderConsoleLogger;
 import org.apache.maven.model.Model;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
@@ -56,9 +53,9 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
-import org.maven.ide.eclipse.embedder.EmbedderFactory;
+import org.maven.ide.eclipse.embedder.IMaven;
+import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
-import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerRefreshJob;
 import org.maven.ide.eclipse.internal.project.SchedulingRule;
 import org.maven.ide.eclipse.jdt.BuildPathManager;
@@ -73,11 +70,11 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
   protected IWorkspace workspace;
   protected File repo;
   
-  protected MavenRuntimeManager runtimeManager;
-
   protected MavenProjectManagerRefreshJob job;
 
   protected MavenPlugin plugin;
+
+  protected IMavenConfiguration mavenConfiguration;
 
   @SuppressWarnings("unchecked")
   protected void setUp() throws Exception {
@@ -97,19 +94,14 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
     job = plugin.getProjectManagerRefreshJob();
     job.sleep();
 
-    runtimeManager = plugin.getMavenRuntimeManager();
+    mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
 
     File settings = new File("settings.xml").getCanonicalFile();
     if (settings.canRead()) {
-      runtimeManager.setUserSettingsFile(settings.getAbsolutePath());
+      mavenConfiguration.setUserSettingsFile(settings.getAbsolutePath());
     }
 
-    ContainerCustomizer customizer = EmbedderFactory.createExecutionCustomizer();
-    MavenEmbedder embedder = EmbedderFactory.createMavenEmbedder(customizer,
-        new MavenEmbedderConsoleLogger(), 
-        runtimeManager.getUserSettingsFile(), runtimeManager.getUserSettingsFile());
-    
-    ArtifactRepository localRepository = embedder.getLocalRepository();
+    ArtifactRepository localRepository = MavenPlugin.lookup(IMaven.class).getLocalRepository();
     if(localRepository != null) {
       repo =  new File(localRepository.getBasedir());
     } else {
