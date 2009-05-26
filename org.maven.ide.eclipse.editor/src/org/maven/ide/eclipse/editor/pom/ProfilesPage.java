@@ -292,7 +292,7 @@ public class ProfilesPage extends MavenPomEditorPage {
           IMavenProjectFacade projectFacade = findModuleProject(module);
           if(projectFacade!=null) {
             ArtifactKey mavenProject = projectFacade.getArtifactKey();
-            OpenPomAction.openEditor(mavenProject.getGroupId(), mavenProject.getArtifactId(), mavenProject.getVersion());
+            OpenPomAction.openEditor(mavenProject.getGroupId(), mavenProject.getArtifactId(), mavenProject.getVersion(), null);
           }
         }
       }

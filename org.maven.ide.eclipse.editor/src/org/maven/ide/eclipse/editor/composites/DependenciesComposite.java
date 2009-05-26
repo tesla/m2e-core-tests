@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.embedder.MavenEmbedderException;
 import org.apache.maven.project.MavenProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -588,7 +587,8 @@ public class DependenciesComposite extends Composite {
         new Job("Opening " + groupId + ":" + artifactId + ":" + version) {
           protected IStatus run(IProgressMonitor monitor) {
             OpenPomAction.openEditor(groupId, artifactId, //
-                version != null ? version : getVersion(groupId, artifactId, monitor));
+                version != null ? version : getVersion(groupId, artifactId, monitor), //
+                    monitor);
             return Status.OK_STATUS;
           }
         }.schedule();
@@ -1160,12 +1160,10 @@ public class DependenciesComposite extends Composite {
   String getVersion(String groupId, String artifactId, IProgressMonitor monitor) {
     try {
       MavenProject mavenProject = editorPage.getPomEditor().readMavenProject(false, monitor);
-      Artifact a = (Artifact) mavenProject.getArtifactMap().get(groupId + ":" + artifactId);
+      Artifact a = mavenProject.getArtifactMap().get(groupId + ":" + artifactId);
       if(a!=null) {
         return a.getBaseVersion();
       }
-    } catch(MavenEmbedderException ex) {
-      MavenLogger.log("Unable to read Maven project", ex);
     } catch(CoreException ex) {
       MavenLogger.log(ex);
     }

@@ -93,7 +93,7 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
           protected IStatus run(IProgressMonitor monitor) {
             // TODO resolve groupId if groupId==null
             // TODO resolve version if version==null
-            OpenPomAction.openEditor(groupId, artifactId, version);
+            OpenPomAction.openEditor(groupId, artifactId, version, monitor);
             return Status.OK_STATUS;
           }
         }.schedule();

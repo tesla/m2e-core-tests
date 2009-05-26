@@ -11,7 +11,6 @@ package org.maven.ide.eclipse.editor.composites;
 import java.util.Collection;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.embedder.MavenEmbedderException;
 import org.apache.maven.project.MavenProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.viewers.IColorProvider;
@@ -109,12 +108,11 @@ public class DependencyLabelProvider extends LabelProvider implements IColorProv
       try {
         MavenProject mavenProject = pomEditor.readMavenProject(false, null);
         if(mavenProject != null) {
-          Artifact artifact = (Artifact) mavenProject.getArtifactMap().get(groupId + ":" + artifactId);
+          Artifact artifact = mavenProject.getArtifactMap().get(groupId + ":" + artifactId);
           if(artifact!=null) {
             version = artifact.getVersion();
           }
           if(version==null || version.indexOf("${") > -1) {
-            @SuppressWarnings("unchecked")
             Collection<Artifact> artifacts = mavenProject.getManagedVersionMap().values();
             for(Artifact a : artifacts) {
               if(a.getGroupId().equals(groupId) && a.getArtifactId().equals(artifactId)) {
@@ -124,8 +122,6 @@ public class DependencyLabelProvider extends LabelProvider implements IColorProv
             }
           }
         }
-      } catch(MavenEmbedderException ex) {
-        MavenLogger.log("Error reading Maven project", ex);
       } catch(CoreException ex) {
         MavenLogger.log(ex);
       }

@@ -26,26 +26,14 @@ import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactCollector;
-import org.apache.maven.artifact.resolver.metadata.ArtifactMetadata;
-import org.apache.maven.artifact.resolver.metadata.MetadataResolutionException;
-import org.apache.maven.artifact.resolver.metadata.MetadataResolutionRequest;
-import org.apache.maven.artifact.resolver.metadata.MetadataResolutionResult;
-import org.apache.maven.artifact.resolver.metadata.MetadataResolver;
-import org.apache.maven.embedder.MavenEmbedder;
-import org.apache.maven.embedder.MavenEmbedderException;
-import org.apache.maven.extension.ExtensionScanningException;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.ProjectBuildingException;
-import org.apache.maven.reactor.MavenExecutionException;
 import org.apache.maven.shared.dependency.tree.DependencyNode;
 import org.apache.maven.shared.dependency.tree.DependencyTreeBuilder;
 import org.apache.maven.shared.dependency.tree.DependencyTreeBuilderException;
 import org.apache.maven.shared.dependency.tree.filter.ArtifactDependencyNodeFilter;
 import org.apache.maven.shared.dependency.tree.traversal.BuildingDependencyNodeVisitor;
 import org.apache.maven.shared.dependency.tree.traversal.FilteringDependencyNodeVisitor;
-import org.codehaus.plexus.PlexusContainer;
-import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -128,8 +116,8 @@ import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.editor.MavenEditorPlugin;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
+import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
-import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.util.Util;
 import org.maven.ide.eclipse.util.Util.FileStoreEditorInputStub;
 
@@ -720,8 +708,6 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
    */
   public synchronized DependencyNode readDependencies(boolean force, IProgressMonitor monitor, String scope) throws CoreException {
     if(force || !rootNode.containsKey(scope)) {
-      MavenPlugin plugin = MavenPlugin.getDefault();
-
       try {
         monitor.setTaskName("Reading project");
         MavenProject mavenProject = readMavenProject(force, monitor);
@@ -729,43 +715,25 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
           MavenLogger.log("Unable to read maven project. Dependencies not updated.", null);
           return null;
         }
-        MavenProjectManager mavenProjectManager = plugin.getMavenProjectManager();
-        MavenEmbedder embedder = mavenProjectManager.createWorkspaceEmbedder();
-        try {
-          monitor.setTaskName("Building dependency tree");
-          PlexusContainer plexus = embedder.getPlexusContainer();
+        monitor.setTaskName("Building dependency tree");
 
-          ArtifactFactory artifactFactory = (ArtifactFactory) plexus.lookup(ArtifactFactory.class);
-          ArtifactMetadataSource artifactMetadataSource = //
-          (ArtifactMetadataSource) plexus.lookup(ArtifactMetadataSource.class);
+        ArtifactFactory artifactFactory = MavenPlugin.lookup(ArtifactFactory.class);
+        ArtifactMetadataSource artifactMetadataSource = MavenPlugin.lookup(ArtifactMetadataSource.class);
 
-          ArtifactCollector artifactCollector = (ArtifactCollector) plexus.lookup(ArtifactCollector.class);
+        ArtifactCollector artifactCollector = MavenPlugin.lookup(ArtifactCollector.class);
 
-          ArtifactRepository localRepository = embedder.getLocalRepository();
+        ArtifactRepository localRepository = MavenPlugin.lookup(IMaven.class).getLocalRepository();
 
-          DependencyTreeBuilder builder = (DependencyTreeBuilder) plexus.lookup(DependencyTreeBuilder.ROLE);
-          DependencyNode node = builder.buildDependencyTree(mavenProject, localRepository, artifactFactory,
-              artifactMetadataSource, null, artifactCollector);
-          
-          BuildingDependencyNodeVisitor visitor = new BuildingDependencyNodeVisitor(); 
-          node.accept(new FilteringDependencyNodeVisitor(visitor,
-              new ArtifactDependencyNodeFilter(new ScopeArtifactFilter(scope))));
+        DependencyTreeBuilder builder = MavenPlugin.lookup(DependencyTreeBuilder.class);
+        DependencyNode node = builder.buildDependencyTree(mavenProject, localRepository, artifactFactory,
+            artifactMetadataSource, null, artifactCollector);
+
+        BuildingDependencyNodeVisitor visitor = new BuildingDependencyNodeVisitor(); 
+        node.accept(new FilteringDependencyNodeVisitor(visitor,
+            new ArtifactDependencyNodeFilter(new ScopeArtifactFilter(scope))));
 //          node.accept(visitor);
-          
-          rootNode.put(scope, visitor.getDependencyTree());
-        } finally {
-          embedder.stop();
-        }
 
-      } catch(MavenEmbedderException ex) {
-        String msg = "Can't create Maven embedder";
-        MavenLogger.log(msg, ex);
-        throw new CoreException(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, msg, ex));
-
-      } catch(ComponentLookupException ex) {
-        String msg = "Component lookup error";
-        MavenLogger.log(msg, ex);
-        throw new CoreException(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, msg, ex));
+        rootNode.put(scope, visitor.getDependencyTree());
 
       } catch(DependencyTreeBuilderException ex) {
         String msg = "Project read error";
@@ -778,8 +746,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     return rootNode.get(scope);
   }
 
-  public MavenProject readMavenProject(boolean force, IProgressMonitor monitor) throws MavenEmbedderException,
-      CoreException {
+  public MavenProject readMavenProject(boolean force, IProgressMonitor monitor) throws CoreException {
     if(force || mavenProject == null) {
       IEditorInput input = getEditorInput();
       
@@ -793,100 +760,6 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       mavenProject = SelectionUtil.getMavenProject(input);
     }
     return mavenProject;
-  }
-
-  public MetadataResolutionResult readDependencyMetadata(IFile pomFile, IProgressMonitor monitor) throws CoreException {
-    File pom = pomFile.getLocation().toFile();
-
-    MavenPlugin plugin = MavenPlugin.getDefault();
-
-    MavenEmbedder embedder = null;
-    try {
-      MavenProjectManager mavenProjectManager = plugin.getMavenProjectManager();
-      embedder = mavenProjectManager.createWorkspaceEmbedder();
-
-      monitor.setTaskName("Reading project");
-      monitor.subTask("Reading project");
-
-      // ResolverConfiguration configuration = new ResolverConfiguration();
-      // MavenExecutionRequest request = embedderManager.createRequest(embedder);
-      // request.setPomFile(pom.getAbsolutePath());
-      // request.setBaseDirectory(pom.getParentFile());
-      // request.setTransferListener(new TransferListenerAdapter(monitor, console, indexManager));
-      // request.setProfiles(configuration.getActiveProfileList());
-      // request.addActiveProfiles(configuration.getActiveProfileList());
-      // request.setRecursive(false);
-      // request.setUseReactor(false);
-
-      // MavenExecutionResult result = projectManager.readProjectWithDependencies(embedder, pomFile, //
-      // configuration, offline, monitor);
-
-      // MavenExecutionResult result = embedder.readProjectWithDependencies(request);
-      // MavenProject project = result.getProject();
-
-      MavenProject project = embedder.readProject(pom);
-      if(project == null) {
-        return null;
-      }
-
-      ArtifactRepository localRepository = embedder.getLocalRepository();
-
-      @SuppressWarnings("unchecked")
-      List<ArtifactRepository> remoteRepositories = project.getRemoteArtifactRepositories();
-
-      PlexusContainer plexus = embedder.getPlexusContainer();
-
-      MetadataResolver resolver = (MetadataResolver) plexus.lookup(MetadataResolver.ROLE, "default");
-
-      ArtifactMetadata query = new ArtifactMetadata(project.getGroupId(), project.getArtifactId(), project.getVersion());
-
-      monitor.subTask("Building dependency graph...");
-      MetadataResolutionResult result = resolver.resolveMetadata( //
-          new MetadataResolutionRequest(query, localRepository, remoteRepositories));
-
-      if(result == null) {
-        return null;
-      }
-
-      monitor.subTask("Building dependency tree");
-      result.initTreeProcessing(plexus);
-      return result;
-
-    } catch(MetadataResolutionException ex) {
-      String msg = "Metadata resolution error";
-      MavenLogger.log(msg, ex);
-      throw new CoreException(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, msg, ex));
-
-    } catch(ComponentLookupException ex) {
-      String msg = "Metadata resolver error";
-      MavenLogger.log(msg, ex);
-      throw new CoreException(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, msg, ex));
-
-    } catch(ProjectBuildingException ex) {
-      String msg = "Metadata resolver error";
-      MavenLogger.log(msg, ex);
-      throw new CoreException(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, msg, ex));
-
-    } catch(ExtensionScanningException ex) {
-      String msg = "Metadata resolver error";
-      MavenLogger.log(msg, ex);
-      throw new CoreException(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, msg, ex));
-
-    } catch(MavenExecutionException ex) {
-      String msg = "Metadata resolver error";
-      MavenLogger.log(msg, ex);
-      throw new CoreException(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, msg, ex));
-
-    } finally {
-      if(embedder != null) {
-        try {
-          embedder.stop();
-        } catch(MavenEmbedderException ex) {
-          MavenLogger.log("Can't stop Maven Embedder", ex);
-        }
-      }
-    }
-
   }
 
   public void dispose() {

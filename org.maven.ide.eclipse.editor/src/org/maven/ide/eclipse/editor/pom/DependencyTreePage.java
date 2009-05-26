@@ -17,7 +17,6 @@ import java.util.Set;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.metadata.ArtifactMetadata;
 import org.apache.maven.artifact.resolver.metadata.MetadataTreeNode;
-import org.apache.maven.embedder.MavenEmbedderException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.dependency.tree.DependencyNode;
 import org.apache.maven.shared.dependency.tree.traversal.DependencyNodeVisitor;
@@ -227,13 +226,6 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
               FormUtils.setMessage(getManagedForm().getForm(), ex.getMessage(), IMessageProvider.ERROR);
             }
           });
-        } catch(final MavenEmbedderException ex) {
-          MavenLogger.log("Can't load dependency hierarchy", ex);
-          getPartControl().getDisplay().asyncExec(new Runnable() {
-            public void run() {
-              FormUtils.setMessage(getManagedForm().getForm(), ex.getMessage(), IMessageProvider.ERROR);
-            }
-          });
         }
 
         return Status.OK_STATUS;
@@ -283,7 +275,7 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
           Object o = it.next();
           if(o instanceof DependencyNode) {
             Artifact a = ((DependencyNode) o).getArtifact();
-            OpenPomAction.openEditor(a.getGroupId(), a.getArtifactId(), a.getVersion());
+            OpenPomAction.openEditor(a.getGroupId(), a.getArtifactId(), a.getVersion(), null);
           }
         }
       }
@@ -404,7 +396,7 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
           Object o = it.next();
           if(o instanceof Artifact) {
             Artifact a = (Artifact) o;
-            OpenPomAction.openEditor(a.getGroupId(), a.getArtifactId(), a.getVersion());
+            OpenPomAction.openEditor(a.getGroupId(), a.getArtifactId(), a.getVersion(), null);
           }
         }
       }
@@ -999,7 +991,6 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
 
   public class DependencyListContentProvider implements IStructuredContentProvider {
 
-    @SuppressWarnings("unchecked")
     public Object[] getElements(Object input) {
       if(input instanceof MavenProject) {
         MavenProject project = (MavenProject) input;
@@ -1013,7 +1004,7 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
         } else if(Artifact.SCOPE_SYSTEM.equals(currentScope)) {
           artifacts = project.getSystemArtifacts();
         } else if(Artifact.SCOPE_PROVIDED.equals(currentScope)) {
-          for(Artifact artifact : (Set<Artifact>) project.getArtifacts()) {
+          for(Artifact artifact : project.getArtifacts()) {
             if(Artifact.SCOPE_PROVIDED.equals(artifact.getScope())) {
               artifacts.add(artifact);
             }

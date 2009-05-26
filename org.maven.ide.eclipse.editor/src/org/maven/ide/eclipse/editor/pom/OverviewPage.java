@@ -313,8 +313,8 @@ public class OverviewPage extends MavenPomEditorPage {
         final String artifactId = parentArtifactIdText.getText();
         final String version = parentVersionText.getText();
         new Job("Opening " + groupId + ":" + artifactId + ":" + version) {
-          protected IStatus run(IProgressMonitor arg0) {
-            OpenPomAction.openEditor(groupId, artifactId, version);
+          protected IStatus run(IProgressMonitor monitor) {
+            OpenPomAction.openEditor(groupId, artifactId, version, monitor);
             return Status.OK_STATUS;
           }
         }.schedule();
@@ -405,7 +405,7 @@ public class OverviewPage extends MavenPomEditorPage {
               IMavenProjectFacade projectFacade = findModuleProject(module);
               if(projectFacade!=null) {
                 ArtifactKey key = projectFacade.getArtifactKey();
-                OpenPomAction.openEditor(key.getGroupId(), key.getArtifactId(), key.getVersion());
+                OpenPomAction.openEditor(key.getGroupId(), key.getArtifactId(), key.getVersion(), monitor);
               } else {
                 IFile modulePom = findModuleFile(module);
                 if(modulePom!=null && modulePom.isAccessible()) {

@@ -46,6 +46,7 @@ import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.editor.xml.search.ArtifactInfo;
 import org.maven.ide.eclipse.editor.xml.search.Packaging;
 import org.maven.ide.eclipse.editor.xml.search.SearchEngine;
+import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.index.IndexManager;
 
 
@@ -150,14 +151,13 @@ public enum PomTemplateContext {
       MavenPlugin plugin = MavenPlugin.getDefault();
       MavenConsole console = plugin.getConsole();
       try {
-        MavenEmbedder embedder = plugin.getMavenEmbedderManager().getWorkspaceEmbedder();
-        
-        Artifact artifact = embedder.createArtifact(groupId, artifactId, version, null, "maven-plugin");
-        
+        IMaven embedder = MavenPlugin.lookup(IMaven.class);
+
         IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
         List<ArtifactRepository> repositories = indexManager.getArtifactRepositories(null, null);
-        
-        embedder.resolve(artifact, repositories, embedder.getLocalRepository());
+
+        Artifact artifact = embedder.resolve(groupId, artifactId, version, null, "maven-plugin", repositories, null);
+
         File file = artifact.getFile();
         if(file == null) {
           String msg = "Can't resolve plugin " + name;
@@ -191,10 +191,6 @@ public enum PomTemplateContext {
           }
         }
 
-      } catch(AbstractArtifactResolutionException ex) {
-        String msg = "Can't resolve plugin " + name;
-        console.logError(msg);
-        MavenLogger.log(msg, ex);
       } catch(CoreException ex) {
         IStatus status = ex.getStatus();
         console.logError(status.getMessage() + "; " + status.getException().getMessage());

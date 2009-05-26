@@ -60,7 +60,7 @@ public class ShowDependencyHierarchyAction extends ActionDelegate {
       new Job("Opening POM editor") {
         protected IStatus run(IProgressMonitor monitor) {
           final IEditorPart editor = OpenPomAction.openEditor(projectKey.getGroupId(), //
-              projectKey.getArtifactId(), projectKey.getVersion());
+              projectKey.getArtifactId(), projectKey.getVersion(), monitor);
           if(editor instanceof MavenPomEditor) {
             Display.getDefault().asyncExec(new Runnable() {
               public void run() {

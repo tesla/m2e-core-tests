@@ -10,16 +10,12 @@ package org.maven.ide.eclipse.editor.pom;
 
 import static org.maven.ide.eclipse.editor.pom.FormUtils.isEmpty;
 
-import java.io.IOException;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
-import org.apache.maven.project.MavenProject;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -56,7 +52,6 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.editor.FormPage;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
@@ -65,7 +60,6 @@ import org.maven.ide.components.pom.Parent;
 import org.maven.ide.components.pom.PomPackage;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.OpenPomAction;
-import org.maven.ide.eclipse.actions.SelectionUtil;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
@@ -120,8 +114,8 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
         final Parent parent = model.getParent();
         if(parent!=null && !isEmpty(parent.getGroupId()) && !isEmpty(parent.getArtifactId()) && !isEmpty(parent.getVersion())) {
           new Job("Opening POM") {
-            protected IStatus run(IProgressMonitor arg0) {
-              OpenPomAction.openEditor(parent.getGroupId(), parent.getArtifactId(), parent.getVersion());
+            protected IStatus run(IProgressMonitor monitor) {
+              OpenPomAction.openEditor(parent.getGroupId(), parent.getArtifactId(), parent.getVersion(), monitor);
               return Status.OK_STATUS;
             }
           }.schedule();

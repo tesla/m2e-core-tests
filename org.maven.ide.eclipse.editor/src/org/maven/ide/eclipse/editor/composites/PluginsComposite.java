@@ -455,7 +455,7 @@ public class PluginsComposite extends Composite{
           final String version = versionText.getText();
           new Job("Opening " + groupId + ":" + artifactId + ":" + version) {
             protected IStatus run(IProgressMonitor arg0) {
-              OpenPomAction.openEditor(groupId, artifactId, version);
+              OpenPomAction.openEditor(groupId, artifactId, version, null);
               return Status.OK_STATUS;
             }
           }.schedule();
