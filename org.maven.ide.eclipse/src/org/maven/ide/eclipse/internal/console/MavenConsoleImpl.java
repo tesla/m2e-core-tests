@@ -32,7 +32,6 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;
-import org.maven.ide.eclipse.ui.internal.MavenConsolePageParticipant;
 
 
 /**
