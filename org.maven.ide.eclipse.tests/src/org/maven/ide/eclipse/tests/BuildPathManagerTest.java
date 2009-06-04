@@ -479,7 +479,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
 
   }
 
-  public void testDownloadSources_003_customRenoteRepository() throws Exception {
+  public void testDownloadSources_003_customRemoteRepository() throws Exception {
     File file = new File(repo, "downloadsources/downloadsources-t004/0.0.1/downloadsources-t004-0.0.1-sources.jar");
     assertTrue(!file.exists() || file.delete());
 
