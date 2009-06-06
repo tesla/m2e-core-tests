@@ -17,7 +17,9 @@ import org.eclipse.jdt.core.compiler.BuildContext;
 import org.eclipse.jdt.core.compiler.CompilationParticipant;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.jdt.MavenJdtPlugin;
 
 
@@ -32,9 +34,13 @@ public class JDTCompilationParticipant extends CompilationParticipant {
       System.out.println("\nRequested clean for " + project.getProject() //$NON-NLS-1$
           + " @ " + new Date(System.currentTimeMillis())); //$NON-NLS-1$
     }
-    
+
     MavenPlugin plugin = MavenPlugin.getDefault();
-    plugin.getConsole().logMessage("Maven compilation participant: clean starting");
+    IMavenConfiguration configuration = MavenPlugin.lookup(IMavenConfiguration.class);
+    if (configuration.isDebugOutput()) {
+      MavenConsole console = plugin.getConsole();
+      console.logMessage("Maven compilation participant: clean starting");
+    }
 
     super.cleanStarting(project);
 
