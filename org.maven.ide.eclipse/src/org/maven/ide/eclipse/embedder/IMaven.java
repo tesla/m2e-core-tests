@@ -20,14 +20,18 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionResult;
+import org.apache.maven.execution.MavenSession;
+import org.apache.maven.lifecycle.MavenExecutionPlan;
 import org.apache.maven.model.Model;
+import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.settings.validation.SettingsValidationResult;
 
 /**
- * Entry point for all Maven functionality in m2e. This component does not
- * directlu support workspace artifact resolution.
+ * Entry point for all Maven functionality in m2e. 
+ * 
+ * Note that this component does not directly support workspace artifact resolution.
  *
  * @author igor
  * 
@@ -59,6 +63,12 @@ public interface IMaven {
   // execution
 
   public MavenExecutionResult execute(MavenExecutionRequest request, IProgressMonitor monitor);
+
+  public MavenSession newSession(MavenExecutionRequest request, MavenProject project);
+
+  public void execute(MavenSession session, MojoExecution execution, IProgressMonitor monitor);
+
+  public MavenExecutionPlan calculateExecutionPlan(MavenExecutionRequest request, MavenProject project, IProgressMonitor monitor) throws CoreException;
 
   // configuration
 

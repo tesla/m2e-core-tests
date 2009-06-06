@@ -43,6 +43,7 @@ import org.maven.ide.eclipse.project.IMavenProjectVisitor2;
 import org.maven.ide.eclipse.project.MavenProjectUtils;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
+import org.maven.ide.eclipse.project.configurator.AbstractBuildParticipant;
 
 
 /**
@@ -63,6 +64,7 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
   private final File pomFile;
 
   private transient MavenProject mavenProject;
+  private transient List<AbstractBuildParticipant> buildParticipants;
 
   // XXX make final, there should be no need to change it
   private ResolverConfiguration resolverConfiguration;
@@ -170,7 +172,7 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
   /**
    * Lazy load and cache MavenProject instance
    */
-  public MavenProject getMavenProject(IProgressMonitor monitor) throws CoreException {
+  public synchronized MavenProject getMavenProject(IProgressMonitor monitor) throws CoreException {
     if (mavenProject == null) {
       MavenExecutionResult result = manager.readProjectWithDependencies(pom, resolverConfiguration, //
           new MavenUpdateRequest(true /* offline */, false /* updateSnapshots */), monitor);
@@ -185,6 +187,17 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
       }
     }
     return mavenProject;
+  }
+  
+  public synchronized List<AbstractBuildParticipant> getBuildParticipants(IProgressMonitor monitor) throws CoreException {
+    if (buildParticipants == null) {
+      buildParticipants = manager.getBuildParticipants(this, monitor);
+    }
+    return buildParticipants;
+  }
+
+  public synchronized  void setBuildParticipants(List<AbstractBuildParticipant> buildParticipants) {
+    this.buildParticipants = buildParticipants;
   }
 
   public String getPackaging() {
@@ -275,23 +288,35 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
     IProject project = getProject();
     int i = 0;
     for(IPath path : MavenProjectManagerImpl.METADATA_PATH) {
-      IFile file = project.getFile(path);
-      if (timestamp[i] != file.getLocalTimeStamp()) {
+      if (timestamp[i] != getModificationStamp(project.getFile(path))) {
         return true;
       }
       i++;
     }
-    return timestamp[timestamp.length - 1] != pom.getLocalTimeStamp();
+    return timestamp[timestamp.length - 1] != getModificationStamp(pom);
   }
 
   private void updateTimestamp() {
     IProject project = getProject();
     int i = 0;
     for(IPath path : MavenProjectManagerImpl.METADATA_PATH) {
-      timestamp[i] = project.getFile(path).getLocalTimeStamp(); 
+      timestamp[i] = getModificationStamp(project.getFile(path)); 
       i++;
     }
-    timestamp[timestamp.length - 1] = pom.getLocalTimeStamp();
+    timestamp[timestamp.length - 1] = getModificationStamp(pom);
+  }
+
+  private static long getModificationStamp(IFile file) {
+    /*
+     * this implementation misses update in the following scenario
+     * 
+     * 1. two files, A and B, with different content but same length were created
+     *    with same localTimeStamp
+     * 2. original A was deleted and B moved to A
+     * 
+     * See also https://bugs.eclipse.org/bugs/show_bug.cgi?id=160728
+     */
+    return file.getLocation().toFile().length() + file.getLocalTimeStamp() + file.getModificationStamp();
   }
 
   /**

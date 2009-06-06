@@ -13,6 +13,8 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.maven.ide.eclipse.project.IMavenProjectFacade;
+
 /**
  * LifecycleMapping
  *
@@ -24,7 +26,7 @@ public interface ILifecycleMapping {
 
   void unconfigure(ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException;
 
-  List<AbstractBuildParticipant> getBuildParticipants();
+  List<AbstractBuildParticipant> getBuildParticipants(IMavenProjectFacade facade, IProgressMonitor monitor) throws CoreException;
 
   List<AbstractProjectConfigurator> getProjectConfigurators();
 }

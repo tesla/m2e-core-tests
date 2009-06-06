@@ -13,7 +13,6 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -22,7 +21,6 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.apache.maven.archetype.catalog.Archetype;
 import org.apache.maven.model.Model;
 
-import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
 import org.maven.ide.eclipse.project.configurator.ILifecycleMapping;
 
 
@@ -49,9 +47,6 @@ public interface IProjectConfigurationManager {
 
   void updateProjectConfiguration(IProject project, ResolverConfiguration configuration, String goalToExecute,
       IProgressMonitor monitor) throws CoreException;
-
-  @Deprecated
-  Set<AbstractProjectConfigurator> getConfigurators();
 
   ILifecycleMapping getLifecycleMapping(IMavenProjectFacade projectFacade);
 

@@ -1,35 +1,25 @@
 <settings>
   <localRepository>localrepo</localRepository>
 
-  <mirrors>
-    <mirror>
-      <id>remoterepo</id>
-      <mirrorOf>*</mirrorOf>
-      <url>file:remoterepo</url>
-    </mirror>
-  </mirrors>
-
   <profiles>
     <profile>
       <id>test</id>
         <repositories>
           <repository>
-            <id>remoterepo</id>
+            <id>central</id>
             <url>file:remoterepo</url>
             <snapshots><enabled>true</enabled></snapshots>
             <releases><enabled>true</enabled></releases>
           </repository>
         </repositories>
-<!--
         <pluginRepositories>
           <pluginRepository>
-            <id>remoterepo-plugins</id>
+            <id>central</id>
             <url>file:remoterepo</url>
             <snapshots><enabled>true</enabled></snapshots>
             <releases><enabled>true</enabled></releases>
           </pluginRepository>
         </pluginRepositories>
--->
     </profile>
   </profiles>
 

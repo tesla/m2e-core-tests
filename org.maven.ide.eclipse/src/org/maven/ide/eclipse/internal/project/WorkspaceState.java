@@ -9,10 +9,12 @@
 package org.maven.ide.eclipse.internal.project;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -118,15 +120,6 @@ public class WorkspaceState implements Serializable {
   }
 
   public synchronized void removeProject(IFile pom, ArtifactKey mavenProject) {
-    removePom(pom);
-
-    // Remove the project from workspaceArtifacts map
-    if (mavenProject != null) {
-      workspaceArtifacts.remove(mavenProject);
-    }
-  }
-
-  public synchronized void removePom(IFile pom) {
     // Remove the project from workspaceDependents and inprojectDependenys maps
     removeDependents(pom, workspaceDependencies);
     removeDependents(pom, inprojectDependencies);
@@ -136,6 +129,11 @@ public class WorkspaceState implements Serializable {
 
     // Remove the project from workspaceProjects map
     workspacePoms.remove(pom.getFullPath());
+
+    // Remove the project from workspaceArtifacts map
+    if (mavenProject != null) {
+      workspaceArtifacts.remove(mavenProject);
+    }
   }
 
   private void removeDependents(IFile pom, Map<ArtifactKey, Set<IPath>> dependencies) {

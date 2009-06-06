@@ -22,6 +22,7 @@ import org.apache.maven.project.MavenProject;
 
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.ArtifactRef;
+import org.maven.ide.eclipse.project.configurator.AbstractBuildParticipant;
 
 /**
  * IMavenProjectFacade
@@ -73,6 +74,11 @@ public interface IMavenProjectFacade {
    */
   MavenProject getMavenProject(IProgressMonitor monitor) throws CoreException;
 
+  /**
+   * Lazy load and cache build participants
+   */
+  List<AbstractBuildParticipant> getBuildParticipants(IProgressMonitor monitor) throws CoreException;
+
   String getPackaging();
 
   IProject getProject();
@@ -120,5 +126,4 @@ public interface IMavenProjectFacade {
    * @return calculated name template for a project
    */
   String getNameTemplate();
-
 }

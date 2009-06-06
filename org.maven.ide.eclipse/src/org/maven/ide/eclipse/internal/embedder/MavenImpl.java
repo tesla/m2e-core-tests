@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.Status;
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.util.IOUtil;
+import org.codehaus.plexus.util.dag.CycleDetectedException;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 import org.apache.maven.Maven;
@@ -38,16 +39,22 @@ import org.apache.maven.embedder.MavenEmbedderException;
 import org.apache.maven.embedder.execution.MavenExecutionRequestPopulator;
 import org.apache.maven.execution.DefaultMavenExecutionRequest;
 import org.apache.maven.execution.DefaultMavenExecutionResult;
+import org.apache.maven.execution.DuplicateProjectException;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionResult;
+import org.apache.maven.execution.MavenSession;
+import org.apache.maven.lifecycle.LifecycleExecutor;
+import org.apache.maven.lifecycle.MavenExecutionPlan;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.ModelReader;
 import org.apache.maven.model.io.ModelWriter;
+import org.apache.maven.plugin.MojoExecution;
+import org.apache.maven.plugin.PluginManager;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.project.MavenProjectBuildingResult;
-import org.apache.maven.project.ProjectBuilderConfiguration;
+import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
+import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.settings.MavenSettingsBuilder;
 import org.apache.maven.settings.Settings;
@@ -60,32 +67,41 @@ import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 
 public class MavenImpl implements IMaven {
 
-  private Maven maven;
+  private final PlexusContainer plexus;
 
-  private MavenProjectBuilder mavenProjectBuilder;
+  private final Maven maven;
 
-  private ModelReader modelReader;
+  private final ProjectBuilder projectBuilder;
 
-  private ModelWriter modelWriter;
+  private final ModelReader modelReader;
 
-  private RepositorySystem repositorySystem;
+  private final ModelWriter modelWriter;
 
-  private MavenSettingsBuilder settingsBuilder;
+  private final RepositorySystem repositorySystem;
 
-  private IMavenConfiguration mavenConfiguration;
+  private final MavenSettingsBuilder settingsBuilder;
 
-  private MavenExecutionRequestPopulator populator;
+  private final IMavenConfiguration mavenConfiguration;
+
+  private final MavenExecutionRequestPopulator populator;
+
+  private final PluginManager pluginManager;
+
+  private final LifecycleExecutor lifecycleExecutor;
 
   public MavenImpl(PlexusContainer plexus, IMavenConfiguration mavenConfiguration) throws CoreException {
+    this.plexus = plexus;
     try {
       this.maven = plexus.lookup(Maven.class);
-      this.mavenProjectBuilder = plexus.lookup(MavenProjectBuilder.class);
+      this.projectBuilder = plexus.lookup(ProjectBuilder.class);
       this.modelReader = plexus.lookup(ModelReader.class);
       this.modelWriter = plexus.lookup(ModelWriter.class);
       this.repositorySystem = plexus.lookup(RepositorySystem.class);
       this.settingsBuilder = plexus.lookup(MavenSettingsBuilder.class);
       this.mavenConfiguration = mavenConfiguration;
       this.populator = plexus.lookup(MavenExecutionRequestPopulator.class);
+      this.pluginManager = plexus.lookup(PluginManager.class);
+      this.lifecycleExecutor = plexus.lookup(LifecycleExecutor.class);
     } catch(ComponentLookupException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
           "Could not lookup required component", ex));
@@ -126,6 +142,37 @@ public class MavenImpl implements IMaven {
       result.addException(ex);
     }
     return result;
+  }
+
+  public MavenSession newSession(MavenExecutionRequest request, MavenProject project) {
+    MavenExecutionResult result = new DefaultMavenExecutionResult();
+    try {
+      return new MavenSession(plexus, request, result, project);
+    } catch(CycleDetectedException ex) {
+      // can't happen with single project, can it?
+      throw new IllegalStateException(ex);
+    } catch(DuplicateProjectException ex) {
+      // can't happen with single project, can it?
+      throw new IllegalStateException(ex);
+    }
+  }
+
+  public void execute(MavenSession session, MojoExecution execution, IProgressMonitor monitor) {
+    try {
+      pluginManager.executeMojo(session, execution);
+    } catch(Exception ex) {
+      session.getResult().addException(ex);
+    }
+  }
+
+  public MavenExecutionPlan calculateExecutionPlan(MavenExecutionRequest request, MavenProject project, IProgressMonitor monitor) throws CoreException {
+    MavenSession session = newSession(request, project);
+    try {
+      List<String> goals = request.getGoals();
+      return lifecycleExecutor.calculateExecutionPlan(session, goals.toArray(new String[goals.size()]));
+    } catch(Exception ex) {
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not calculate build plan", ex));
+    }
   }
 
   public ArtifactRepository getLocalRepository() throws CoreException {
@@ -228,8 +275,8 @@ public class MavenImpl implements IMaven {
     try {
       MavenExecutionRequest request = createExecutionRequest();
       populator.populateDefaults(request);
-      ProjectBuilderConfiguration configuration = request.getProjectBuildingConfiguration();
-      return mavenProjectBuilder.build(pomFile, configuration);
+      ProjectBuildingRequest configuration = request.getProjectBuildingRequest();
+      return projectBuilder.build(pomFile, configuration);
     } catch(ProjectBuildingException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not read maven project",
           ex));
@@ -245,8 +292,8 @@ public class MavenImpl implements IMaven {
     MavenProjectBuildingResult projectBuildingResult;
     try {
       populator.populateDefaults(request);
-      ProjectBuilderConfiguration configuration = request.getProjectBuildingConfiguration();
-      projectBuildingResult = mavenProjectBuilder.buildProjectWithDependencies(pomFile, configuration);
+      ProjectBuildingRequest configuration = request.getProjectBuildingRequest();
+      projectBuildingResult = projectBuilder.buildProjectWithDependencies(pomFile, configuration);
       result.setProject(projectBuildingResult.getProject());
       result.setArtifactResolutionResult(projectBuildingResult.getArtifactResolutionResult());
     } catch(ProjectBuildingException ex) {

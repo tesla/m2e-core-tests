@@ -94,7 +94,6 @@ public class ResourceChangeListenerTest extends AsbtractMavenProjectTestCase {
     waitForJobsToComplete();
 
     // assert
-    waitForJobsToComplete();
     IClasspathEntry[] cp = getMavenContainerEntries(project);
     assertEquals(1, cp.length);
     assertEquals("junit-4.1.jar", cp[0].getPath().lastSegment());

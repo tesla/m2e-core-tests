@@ -6,15 +6,26 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.project.configurator;
+package org.maven.ide.eclipse.internal.embedder;
 
-import org.eclipse.core.runtime.IExecutableExtension;
+import java.util.Set;
+
+import org.apache.maven.ArtifactFilterManagerDelegate;
+
 
 /**
- * AbstractLifecycleMapping
- *
+ * EclipseArtifactFilterManager
+ * 
  * @author igor
  */
-public abstract class AbstractLifecycleMapping implements ILifecycleMapping, IExecutableExtension {
+public class EclipseArtifactFilterManagerDelegate implements ArtifactFilterManagerDelegate {
+
+  public void addCoreExcludes(Set<String> excludes) {
+    excludes.add("plexus-utils");
+    excludes.add("plexus-build-api");
+  }
+
+  public void addExcludes(Set<String> excludes) {
+  }
 
 }

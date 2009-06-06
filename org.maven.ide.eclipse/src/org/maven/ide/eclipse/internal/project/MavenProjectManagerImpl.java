@@ -72,6 +72,8 @@ import org.maven.ide.eclipse.project.IMavenProjectVisitor2;
 import org.maven.ide.eclipse.project.MavenProjectChangedEvent;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
+import org.maven.ide.eclipse.project.configurator.AbstractBuildParticipant;
+import org.maven.ide.eclipse.project.configurator.ILifecycleMapping;
 
 /**
  * This class keeps track of all maven projects present in the workspace and
@@ -133,6 +135,8 @@ public class MavenProjectManagerImpl {
 
   private final Set<IDownloadSourceListener> downloadSourceListeners = new LinkedHashSet<IDownloadSourceListener>();
   private final Map<IProject, DownloadSourceEvent> downloadSourceEvents = new LinkedHashMap<IProject, DownloadSourceEvent>();
+
+  private final transient List<IManagedCache> caches = new ArrayList<IManagedCache>();
 
   public MavenProjectManagerImpl(MavenConsole console, IndexManager indexManager,
       File stateLocationDir, boolean readState, MavenRuntimeManager runtimeManager, IMavenMarkerManager mavenMarkerManager) {
@@ -286,8 +290,10 @@ public class MavenProjectManagerImpl {
     MavenProjectFacade facade = state.getProjectFacade(pom);
     ArtifactKey mavenProject = facade != null ? facade.getArtifactKey() : null;
 
+    flushCaches(pom, mavenProject);
+
     if (mavenProject == null) {
-      state.removePom(pom);
+      state.removeProject(pom, null);
       return Collections.emptySet();
     }
 
@@ -313,11 +319,19 @@ public class MavenProjectManagerImpl {
     return pomSet;
   }
 
+  private void flushCaches(IFile pom, ArtifactKey key) {
+    for (IManagedCache cache : caches) {
+      cache.removeProject(pom, key);
+    }
+  }
+
   /**
    * @param updateRequests a set of {@link MavenUpdateRequest}
    * @param monitor progress monitor
    */
   public void refresh(Set<DependencyResolutionContext> updateRequests, IProgressMonitor monitor) throws CoreException, InterruptedException {
+    Set<IFile> refreshed = new LinkedHashSet<IFile>();
+
     for(DependencyResolutionContext updateRequest : updateRequests) {
       while(!updateRequest.isEmpty()) {
         if(monitor.isCanceled()) {
@@ -333,11 +347,27 @@ public class MavenProjectManagerImpl {
         }
 
         refresh(pom, updateRequest, monitor);
+        refreshed.add(pom);
         monitor.worked(1);
       }
     }
 
+    for (IFile pom : refreshed) {
+      MavenProjectFacade facade = create(pom, false, monitor);
+      if (facade != null) {
+        facade.setBuildParticipants(getBuildParticipants(facade, monitor));
+      }
+    }
+
     notifyProjectChangeListeners(monitor);
+  }
+
+  List<AbstractBuildParticipant> getBuildParticipants(MavenProjectFacade facade, IProgressMonitor monitor)
+      throws CoreException {
+    ILifecycleMapping mapping = new DefaultLifecycleMapping();
+
+    List<AbstractBuildParticipant> buildParticipants = mapping.getBuildParticipants(facade, monitor);
+    return buildParticipants;
   }
 
   public void refresh(IFile pom, DependencyResolutionContext updateRequest, IProgressMonitor monitor) throws CoreException {
@@ -347,6 +377,8 @@ public class MavenProjectManagerImpl {
       // skip refresh if not forced and up-to-date facade
       return;
     }
+
+    flushCaches(pom, oldFacade != null? oldFacade.getArtifactKey(): null);
 
     markerManager.deleteMarkers(pom);
 
@@ -802,6 +834,14 @@ public class MavenProjectManagerImpl {
     synchronized (downloadSourceListeners) {
       downloadSourceListeners.add(listener);
     }
+  }
+
+  public void addManagedCache(IManagedCache cache) {
+    caches.add(cache);
+  }
+
+  public void removeManagedCache(IManagedCache cache) {
+    caches.remove(cache);
   }
 
   public void removeDownloadSourceListener(IDownloadSourceListener listener) {

@@ -23,10 +23,10 @@ import org.apache.maven.artifact.resolver.AbstractArtifactResolutionException;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
 import org.apache.maven.execution.MavenExecutionResult;
+import org.apache.maven.model.validation.ModelValidationResult;
 import org.apache.maven.project.InvalidProjectModelException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuildingException;
-import org.apache.maven.project.validation.ModelValidationResult;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
@@ -118,7 +118,6 @@ public class MavenMarkerManager implements IMavenMarkerManager {
       if(validationResult == null) {
         addMarker(pomFile, msg, 1, IMarker.SEVERITY_ERROR); //$NON-NLS-1$
       } else {
-        @SuppressWarnings("unchecked")
         List<String> messages = validationResult.getMessages();
         for(String message : messages) {
           addMarker(pomFile, message, 1, IMarker.SEVERITY_ERROR); //$NON-NLS-1$

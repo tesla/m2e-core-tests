@@ -56,8 +56,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
   protected void setUp() throws Exception {
     super.setUp();
 
-    manager = new MavenProjectManagerImpl(plugin.getConsole(), plugin.getIndexManager(), //
-        null, false, plugin.getMavenRuntimeManager(), plugin.getMavenMarkerManager());
+    manager = MavenPlugin.lookup(MavenProjectManagerImpl.class);
     
     events = new ArrayList<MavenProjectChangedEvent>();
     manager.addMavenProjectChangedListener(listener);
@@ -93,16 +92,6 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     return mavenProject.getTestArtifacts();
   }
 
-  private void add(MavenProjectManagerImpl manager, IProject[] projects) throws Exception {
-    MavenUpdateRequest updateRequest = new MavenUpdateRequest(false /*offline*/, false /* updateSnapshots*/);
-    for (int i = 0; i < projects.length; i++) {
-      updateRequest.addPomFile(projects[i].getFile(IMavenConstants.POM_FILE_NAME));
-    }
-    
-    manager.refresh(Collections.singleton(new DependencyResolutionContext(updateRequest)), monitor);
-//    manager.notifyListeners(monitor);
-  }
-
   private void remove(MavenProjectManagerImpl manager, IProject project) throws Exception {
     DependencyResolutionContext updateRequest = new DependencyResolutionContext(new MavenUpdateRequest(true /*offline*/, false /* updateSnapshots*/));
 
@@ -117,8 +106,6 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     IProject p1 = createExisting("t000-p1");
     waitForJobsToComplete();
     
-    add(manager, new IProject[] {p1});
-
     IMavenProjectFacade f1 = manager.create(p1, monitor);
     assertEquals(p1.getFullPath(), f1.getFullPath());
 
@@ -131,12 +118,13 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     IProject p1 = createExisting("t000-p1");
     waitForJobsToComplete();
 
-    add(manager, new IProject[] {p1});
     events.clear();
 
     // this emulates project refresh 
-    manager.remove(p1.getFile("pom.xml"));
-    add(manager, new IProject[] {p1});
+    IFile pom = p1.getFile("pom.xml");
+    pom.setLocalTimeStamp(pom.getLocalTimeStamp() + 1000L);
+    pom.touch(monitor);
+    waitForJobsToComplete();
 
     assertEquals(1, events.size());
     assertEquals(MavenProjectChangedEvent.KIND_CHANGED, events.get(0).getKind());
@@ -145,8 +133,6 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
   public void test000_pom_simple() throws Exception {
     IProject p1 = createExisting("t000-p1");
     waitForJobsToComplete();
-
-    add(manager, new IProject[] {p1});
 
     IFile pom = p1.getFile(IMavenConstants.POM_FILE_NAME);
 
@@ -162,22 +148,21 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     IProject p1 = createExisting("t000-p1");
     waitForJobsToComplete();
 
-    add(manager, new IProject[] {p1});
-
     IMavenProjectFacade f1 = manager.create(p1, monitor);
 
-    assertEquals(1, events.size());
-    MavenProjectChangedEvent event = events.get(0);
-    assertEquals(MavenProjectChangedEvent.KIND_ADDED, event.getKind());
-    assertNull(event.getOldMavenProject());
-    assertSame(f1, event.getMavenProject());
+    MavenProjectChangedEvent event;
+//    assertEquals(1, events.size());
+//    event = events.get(0);
+//    assertEquals(MavenProjectChangedEvent.KIND_ADDED, event.getKind());
+//    assertNull(event.getOldMavenProject());
+//    assertSame(f1, event.getMavenProject());
 
     assertEquals(p1.getFullPath(), f1.getFullPath());
 
-    p1.close(monitor);
-
     events.clear();
-    remove(manager, p1);
+
+    p1.close(monitor);
+    waitForJobsToComplete();
 
     assertNull(manager.create(p1, monitor));
 
@@ -191,8 +176,6 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
   public void test000_removeDeleted() throws Exception {
     IProject p1 = createExisting("t000-p1");
     waitForJobsToComplete();
-
-    add(manager, new IProject[] {p1});
 
     IMavenProjectFacade f1 = manager.create(p1, monitor);
     assertEquals(p1.getFullPath(), f1.getFullPath());
@@ -208,41 +191,39 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     IProject p1 = createExisting("t000-p1");
     waitForJobsToComplete();
 
-    add(manager, new IProject[] {p1});
-
     assertNotNull(manager.create(p1, monitor));
 
     p1.getFile(IMavenConstants.POM_FILE_NAME).delete(true, monitor);
     waitForJobsToComplete();
-
-    add(manager, new IProject[] {p1});
 
     assertNull(manager.create(p1, monitor));
   }
 
   public void test000_noChangeReload() throws Exception {
     IProject p1 = createExisting("t000-p1");
+    IFile pom = p1.getFile(IMavenConstants.POM_FILE_NAME);
     waitForJobsToComplete();
 
-    add(manager, new IProject[] {p1});
-    
     IMavenProjectFacade oldFacade = manager.create(p1, monitor);
 
-    assertEquals(1, events.size());
-    MavenProjectChangedEvent event = events.get(0);
-    assertEquals(p1.getFile(IMavenConstants.POM_FILE_NAME), event.getSource());
-    assertEquals(MavenProjectChangedEvent.KIND_ADDED, event.getKind());
+    MavenProjectChangedEvent event;
+//    assertEquals(1, events.size());
+//    event = events.get(0);
+//    assertEquals(pom, event.getSource());
+//    assertEquals(MavenProjectChangedEvent.KIND_ADDED, event.getKind());
 
     events.clear();
 
-    add(manager, new IProject[] {p1});
+    pom.setLocalTimeStamp(pom.getLocalTimeStamp() + 1000L);
+    pom.touch(monitor);
+    waitForJobsToComplete();
 
     IMavenProjectFacade newFacade = manager.create(p1, monitor);
     assertNotSame(oldFacade.getMavenProject(monitor), newFacade.getMavenProject(monitor));
 
     assertEquals(1, events.size());
     event = events.get(0);
-    assertEquals(p1.getFile(IMavenConstants.POM_FILE_NAME), event.getSource());
+    assertEquals(pom, event.getSource());
     assertEquals(MavenProjectChangedEvent.KIND_CHANGED, event.getKind());
     assertEquals(MavenProjectChangedEvent.FLAG_NONE, event.getFlags());
     assertNotNull(event.getOldMavenProject());
@@ -251,16 +232,16 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
 
   public void test001_missingParent() throws Exception {
     IProject p2 = createExisting("t001-p2");
-    IProject p3 = createExisting("t001-p3");
     waitForJobsToComplete();
 
-    add(manager, new IProject[] {p2});
     assertNull(manager.create(p2, monitor));
 
     IMarker[] markers = p2.findMarkers(null, true, IResource.DEPTH_INFINITE);
     assertEquals(toString(markers), 1, markers.length);
 
-    add(manager, new IProject[] {p3});
+    IProject p3 = createExisting("t001-p3");
+    waitForJobsToComplete();
+
     assertNotNull(manager.create(p2, monitor));
 
     remove(manager, p3);
@@ -272,8 +253,6 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     IProject p2 = createExisting("t001-p2");
     IProject p3 = createExisting("t001-p3");
     waitForJobsToComplete();
-
-    add(manager, new IProject[] {p1, p2, p3});
 
     IMavenProjectFacade f1 = manager.create(p1, monitor);
     Set<Artifact> artifacts = getMavenProjectArtifacts(f1);
@@ -297,8 +276,6 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     IProject p1 = createExisting("t005-p1");
     IProject p2 = createExisting("t005-p2");
     waitForJobsToComplete();
-
-    add(manager, new IProject[] {p1, p2});
 
     {
       IMavenProjectFacade f = manager.create(p1, monitor);
@@ -327,7 +304,6 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
   public void test005_snapshotAvailableFromLocalRepoAndWorkspace() throws Exception {
     IProject p1 = createExisting("t005-p3");
     waitForJobsToComplete();
-    add(manager, new IProject[] {p1});
 
     {
       IMavenProjectFacade f = manager.create(p1, monitor);
@@ -341,7 +317,6 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
 
     IProject p2 = createExisting("t005-p4");
     waitForJobsToComplete();
-    add(manager, new IProject[] {p2});
 
     {
       IMavenProjectFacade f = manager.create(p1, monitor);
@@ -358,8 +333,6 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     IProject p2 = createExisting("t006-p2");
     waitForJobsToComplete();
 
-    add(manager, new IProject[] {p1, p2});
-
     IMavenProjectFacade f1 = manager.create(p1, monitor);
     assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME).getLocation().toFile(), f1.getMavenProject(monitor).getParent().getFile());
 
@@ -373,22 +346,19 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
   }
 
   public void test007_staleDependencies() throws Exception {
+    // p1 depends on p2
     IProject p1 = createExisting("t007-p1");
     IProject p2 = createExisting("t007-p2");
     waitForJobsToComplete();
 
-    // p1 depends on p2
-    add(manager, new IProject[] {p1, p2});
-
     IMavenProjectFacade f1 = manager.create(p1, monitor);
     assertEquals(1, f1.getMavenProject(monitor).getArtifacts().size());
 
+    // update p1 to remove dependency on p2
     InputStream contents = p1.getFile("pom_updated.xml").getContents();
     p1.getFile("pom.xml").setContents(contents, IResource.FORCE, monitor);
     contents.close();
-
-    // update p1 to remove dependency on p2
-    add(manager, new IProject[] {p1});
+    waitForJobsToComplete();
 
     f1 = manager.create(p1, monitor);
     assertEquals(0, f1.getMavenProject(monitor).getArtifacts().size());
@@ -405,13 +375,10 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
   }
 
   public void test008_staleMissingParent() throws Exception {
+    // p1 does not have parent
     IProject p1 = createExisting("t008-p1");
-    IProject p2 = createExisting("t008-p2");
     IProject p3 = createExisting("t008-p3");
     waitForJobsToComplete();
-
-    // p1 does not have parent
-    add(manager, new IProject[] {p1, p3});
 
     IMavenProjectFacade f1 = manager.create(p1, monitor);
     assertNull(f1); // XXX should I return non-null facade that does not have MavenProject?
@@ -420,13 +387,14 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     InputStream contents = p1.getFile("pom_updated.xml").getContents();
     p1.getFile("pom.xml").setContents(contents, IResource.FORCE, monitor);
     contents.close();
-    add(manager, new IProject[] {p1});
+    waitForJobsToComplete();
 
     f1 = manager.create(p1, monitor);
     assertEquals("t008-p3", f1.getMavenProject(monitor).getParent().getArtifactId());
 
     events.clear();
-    add(manager, new IProject[] {p2});
+    IProject p2 = createExisting("t008-p2");
+    waitForJobsToComplete();
 
     assertEquals(1, events.size());
     MavenProjectChangedEvent event = events.get(0);
@@ -435,21 +403,19 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
   }
 
   public void test008_staleMissingParent2() throws Exception {
-    IProject p1 = createExisting("t008-p1");
-    IProject p2 = createExisting("t008-p2");
-    waitForJobsToComplete();
-
     // p1 does not have parent
-    add(manager, new IProject[] {p1});
+    IProject p1 = createExisting("t008-p1");
+    waitForJobsToComplete();
 
     // update p1 to have p3 parent
     InputStream contents = p1.getFile("pom_updated.xml").getContents();
     p1.getFile("pom.xml").setContents(contents, IResource.FORCE, monitor);
     contents.close();
-    add(manager, new IProject[] {p1});
+    waitForJobsToComplete();
 
     events.clear();
-    add(manager, new IProject[] {p2});
+    IProject p2 = createExisting("t008-p2");
+    waitForJobsToComplete();
 
     assertEquals(1, events.size());
     MavenProjectChangedEvent event = events.get(0);
@@ -462,8 +428,6 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     IProject p2 = createExisting("t009-p2");
     IProject p3 = createExisting("t009-p3");
     waitForJobsToComplete();
-
-    add(manager, new IProject[] {p1, p2, p3});
 
     {
       IMavenProjectFacade f1 = manager.create(p1, monitor);
@@ -533,8 +497,6 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     createExisting("t010-p4");
     waitForJobsToComplete();
 
-    add(manager, new IProject[] {p1, p2, p3});
-
     IMavenProjectFacade f1 = manager.create(p1, monitor);
 //    MavenProject f2 = manager.create(p2).getMavenProject();
 
@@ -567,8 +529,6 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
       }
       projects[dirs.length - d - 1] = cptest;
     }
-
-    add(manager, projects);
   }
 
   public void test011_interModuleDependencies() throws Exception {
@@ -577,8 +537,6 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
 
     File m1 = p1.getFile("t011-p1-m1/pom.xml").getLocation().toFile().getAbsoluteFile();
     File m2 = p1.getFile("t011-p1-m2/pom.xml").getLocation().toFile().getAbsoluteFile();
-
-    add(manager, new IProject[] {p1});
 
     IMavenProjectFacade f1 = manager.create(p1, monitor);
     IMavenProjectFacade[] mavenProjects = getAllMavenProjects(f1);
@@ -621,7 +579,9 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
 
     jar.delete();
 
-    add(manager, new IProject[] {p1});
+    MavenUpdateRequest request = new MavenUpdateRequest(p1, false /*offline*/, false /*updateSnapshots*/ );
+    plugin.getMavenProjectManager().refresh(request);
+    waitForJobsToComplete();
 
     IMavenProjectFacade f1 = manager.create(p1, monitor);
     IMavenProjectFacade[] mavenProjects = getAllMavenProjects(f1);
@@ -637,13 +597,11 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     IProject p1 = createExisting("t013-p1");
     waitForJobsToComplete();
 
-    add(manager, new IProject[] {p1});
     assertNull(manager.create(p1, monitor));
     IMarker[] markers = p1.findMarkers(null, true, IResource.DEPTH_INFINITE);
     assertEquals(toString(markers), 1, markers.length);
 
     copyContent(p1, "pom_good.xml", "pom.xml");
-    add(manager, new IProject[] {p1});
     markers = p1.findMarkers(null, true, IResource.DEPTH_INFINITE);
     assertEquals(toString(markers), 0, markers.length);
     assertNotNull(manager.create(p1, monitor));
@@ -655,7 +613,6 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
 
     workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
     
-    add(manager, new IProject[] {p2});
     IMarker[] markers = p2.findMarkers(null, true, IResource.DEPTH_INFINITE);
     assertEquals(toString(markers), 3, markers.length); // two come from java builder
   }
@@ -666,8 +623,6 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
 
     copyContent(p1, "pom.xml", "pom_original.xml");
 
-    add(manager, new IProject[] {p1});
-
     IMavenProjectFacade f1 = manager.create(p1, monitor);
     IMavenProjectFacade[] mavenProjects = getAllMavenProjects(f1);
     assertEquals(1, mavenProjects.length);
@@ -677,7 +632,6 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals(true, a1[0].isResolved());
 
     copyContent(p1, "pom_changed.xml", "pom.xml");
-    add(manager, new IProject[] {p1});
     f1 = manager.create(p1, monitor);
     mavenProjects = getAllMavenProjects(f1);
     a1 = mavenProjects[0].getMavenProjectArtifacts().toArray(new Artifact[mavenProjects[0].getMavenProjectArtifacts().size()]);
@@ -685,7 +639,6 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals("junit-4.0.jar", a1[0].getFile().getName());
 
     copyContent(p1, "pom_original.xml", "pom.xml");
-    add(manager, new IProject[] {p1});
     f1 = manager.create(p1, monitor);
     mavenProjects = getAllMavenProjects(f1);
     a1 = mavenProjects[0].getMavenProjectArtifacts().toArray(new Artifact[mavenProjects[0].getMavenProjectArtifacts().size()]);
@@ -716,7 +669,6 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
       assertEquals(false, a1.get(0).isResolved());
     }
 
-    add(manager, new IProject[] {p1});
     assertEquals(true, file.exists());
 
     {
@@ -732,13 +684,9 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
 
     IFile pom = p1.getFile("t016-p1-m1/pom.xml");
 
-    add(manager, new IProject[] {p1});
-
     assertNotNull(manager.create(pom, false, null));
 
     copyContent(p1, "pom_changed.xml", "pom.xml");
-
-    add(manager, new IProject[] {p1});
 
     assertNull(manager.create(pom, false, null));
   }
@@ -747,8 +695,6 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     IProject p1 = createExisting("t017-p1");
     IProject p4 = createExisting("t017-p4");
     waitForJobsToComplete();
-
-    add(manager, new IProject[] {p1, p4});
 
     IFile pom = p1.getFile("t017-p1-m1/pom.xml");
 
@@ -759,8 +705,6 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
         a.getFile().getAbsoluteFile());
 
     copyContent(p1, "pom_changed.xml", "pom.xml");
-
-    add(manager, new IProject[] {p1});
 
     mavenProject = manager.create(pom, false, null).getMavenProject(monitor);
     a = mavenProject.getArtifacts().iterator().next();
@@ -773,8 +717,6 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     IProject p4 = createExisting("t017-p4");
     waitForJobsToComplete();
 
-    add(manager, new IProject[] {p2, p3, p4});
-
     IFile pom = p3.getFile("pom.xml");
 
     MavenProject mavenProject = manager.create(pom, false, null).getMavenProject(monitor);
@@ -784,8 +726,6 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
         a.getFile().getAbsoluteFile());
 
     copyContent(p2, "pom_changed.xml", "pom.xml");
-
-    add(manager, new IProject[] {p2});
 
     mavenProject = manager.create(pom, false, null).getMavenProject(monitor);
     a = mavenProject.getArtifacts().iterator().next();
@@ -797,11 +737,9 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     IProject p2 = createExisting("optionaldependency-p02");
     waitForJobsToComplete();
 
-    add(manager, new IProject[] {p1, p2});
-
     IFile pom1 = p1.getFile("pom.xml");
     IFile pom2 = p2.getFile("pom.xml");
-    
+
     {
       IMavenProjectFacade f = manager.create(pom2, false, null);
       Artifact[] a = getMavenProjectArtifacts(f).toArray(new Artifact[0]);
@@ -811,7 +749,6 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     }
 
     copyContent(p1, "pom-changed.xml", "pom.xml");
-    add(manager, new IProject[] {p1});
 
     {
       IMavenProjectFacade f = manager.create(pom2, false, null);
@@ -828,25 +765,20 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
 
     p1.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
 
-    add(manager, new IProject[] {p1, p2});
-
     IFile pom2 = p2.getFile("pom.xml");
     assertNotNull(manager.create(pom2, false, null));
 
     remove(manager, p1);
     assertNull(manager.create(pom2, false, null));
 
-    add(manager, new IProject[] {p1});
     assertNotNull(manager.create(pom2, false, null));
   }
-  
+
   public void testPropertiesSubstitution() throws Exception {
     IProject p1 = createExisting("t019-p1");
     waitForJobsToComplete();
 
     p1.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
-
-    add(manager, new IProject[] {p1});
     
     IMavenProjectFacade f1 = manager.create(p1, monitor);
     MavenProject m1 = f1.getMavenProject(monitor);
@@ -865,13 +797,10 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     IProject p1m1 = createExisting("t020-p1-m1");
     waitForJobsToComplete();
 
-    add(manager, new IProject[] {p1, p1m1});
-
     InputStream contents = p1.getFile("pom_updated.xml").getContents();
     p1.getFile("pom.xml").setContents(contents, IResource.FORCE, monitor);
     contents.close();
-
-    add(manager, new IProject[] {p1});
+    waitForJobsToComplete();
 
     IFile pom11 = p1m1.getFile("pom.xml");
     IMavenProjectFacade f11 = manager.create(pom11, false, null);
@@ -886,8 +815,6 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     IProject p2 = createExisting("changedscope-p02");
     waitForJobsToComplete();
 
-    add(manager, new IProject[] {p1, p2});
-
     IFile pom1 = p1.getFile("pom.xml");
     IFile pom2 = p2.getFile("pom.xml");
     
@@ -900,7 +827,6 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     }
 
     copyContent(p1, "pom-scope-changed.xml", "pom.xml");
-    add(manager, new IProject[] {p1});
 
     {
       IMavenProjectFacade f = manager.create(pom2, false, null);

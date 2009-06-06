@@ -10,7 +10,6 @@ package org.maven.ide.eclipse.internal.project;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -21,13 +20,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
-import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
-import org.maven.ide.eclipse.core.MavenConsole;
-import org.maven.ide.eclipse.embedder.IMavenConfiguration;
-import org.maven.ide.eclipse.internal.ExtensionReader;
-import org.maven.ide.eclipse.project.IMavenMarkerManager;
-import org.maven.ide.eclipse.project.MavenProjectManager;
+import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.configurator.AbstractBuildParticipant;
 import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
 import org.maven.ide.eclipse.project.configurator.ILifecycleMapping;
@@ -35,13 +29,10 @@ import org.maven.ide.eclipse.project.configurator.ProjectConfigurationRequest;
 
 
 /**
- * DefaultLifecycleMapping
  * 
  * @author igor
  */
-public class DefaultLifecycleMapping implements ILifecycleMapping {
-
-  private static List<AbstractProjectConfigurator> configurators;
+public class DefaultLifecycleMapping extends AbstractLifecycleMapping implements ILifecycleMapping {
 
   private final List<AbstractBuildParticipant> buildParticipants = new ArrayList<AbstractBuildParticipant>();
 
@@ -84,7 +75,7 @@ public class DefaultLifecycleMapping implements ILifecycleMapping {
     project.setDescription(description, monitor);
   }
 
-  public List<AbstractBuildParticipant> getBuildParticipants() {
+  public List<AbstractBuildParticipant> getBuildParticipants(IMavenProjectFacade facade, IProgressMonitor monitor) {
     return buildParticipants;
   }
 
@@ -96,25 +87,6 @@ public class DefaultLifecycleMapping implements ILifecycleMapping {
       }
       configurator.unconfigure(request, monitor);
     }
-  }
-
-  public List<AbstractProjectConfigurator> getProjectConfigurators() {
-    List<AbstractProjectConfigurator> configurators;
-    synchronized(DefaultLifecycleMapping.class) {
-      if(DefaultLifecycleMapping.configurators == null) {
-        MavenPlugin plugin = MavenPlugin.getDefault();
-        MavenProjectManager projectManager = plugin.getMavenProjectManager();
-        IMavenConfiguration mavenConfiguration;
-        mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
-        IMavenMarkerManager mavenMarkerManager = plugin.getMavenMarkerManager();
-        MavenConsole console = plugin.getConsole();
-        DefaultLifecycleMapping.configurators = new ArrayList<AbstractProjectConfigurator>(ExtensionReader
-            .readProjectConfiguratorExtensions(projectManager, mavenConfiguration, mavenMarkerManager, console));
-        Collections.sort(DefaultLifecycleMapping.configurators, new ProjectConfiguratorComparator());
-      }
-      configurators = DefaultLifecycleMapping.configurators;
-    }
-    return configurators;
   }
 
   /**
