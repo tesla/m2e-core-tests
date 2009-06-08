@@ -102,6 +102,11 @@ import com.windowtester.runtime.util.ScreenCapture;
 @SuppressWarnings("restriction")
 public abstract class UIIntegrationTestCase extends UITestCaseSWT {
 
+  public static final String DEFAULT_PROJECT_ZIP = "projects/someproject.zip";
+  public static final String DEFAULT_PROJECT_VERSION = "0.0.1-SNAPSHOT";
+  public static final String DEFAULT_PROJECT_ARTIFACT = "someproject";
+  public static final String DEFAULT_PROJECT_GROUP = "org.sonatype.test";
+
   /**
    * 
    */
@@ -129,6 +134,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
   public static final String PACKAGE_EXPLORER_VIEW_ID = "org.eclipse.jdt.ui.PackageExplorer";
 
 
+  private boolean skipIndexes;
   public UIIntegrationTestCase() {
   }
 
@@ -144,49 +150,49 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     }
   }
 
-  protected void oneTimeSetup() throws Exception {
-  
+  protected void oneTimeSetup()throws Exception{
     super.oneTimeSetup();
     
-    //getUI().ensureThat(new WorkbenchLocator().hasFocus());  Buggy in WT 3.7.1, try bringing this back in next version.
-    
-    // Turn off eclipse features which make tests unreliable.
-    WorkbenchPlugin.getDefault().getPreferenceStore().setValue(IPreferenceConstants.RUN_IN_BACKGROUND, true);
-    
-    if (isEclipseVersion(3, 5)) {
-      // Disable new xml completion behavior to preserver compatibility with previous versions.
-      getUI().click(new MenuItemLocator("Window/Preferences"));
-      getUI().wait(new ShellShowingCondition("Preferences"));
-      getUI().click(new FilteredTreeItemLocator("XML/XML Files/Editor/Typing"));
-      getUI().click(new ButtonLocator("&Insert a matching end tag"));
-      getUI().click(new ButtonLocator("OK"));
-      getUI().wait(new ShellDisposedCondition("Preferences"));
-    }
-    
-    PrefUtil.getAPIPreferenceStore().setValue(IWorkbenchPreferenceConstants.ENABLE_ANIMATIONS, false);
+    // getUI().ensureThat(new WorkbenchLocator().hasFocus()); 
+     
+     // Turn off eclipse features which make tests unreliable.
+     WorkbenchPlugin.getDefault().getPreferenceStore().setValue(IPreferenceConstants.RUN_IN_BACKGROUND, true);
+     
+     if (isEclipseVersion(3, 5)) {
+       // Disable new xml completion behavior to preserver compatibility with previous versions.
+       getUI().click(new MenuItemLocator("Window/Preferences"));
+       getUI().wait(new ShellShowingCondition("Preferences"));
+       getUI().click(new FilteredTreeItemLocator("XML/XML Files/Editor/Typing"));
+       getUI().click(new ButtonLocator("&Insert a matching end tag"));
+       getUI().click(new ButtonLocator("OK"));
+       getUI().wait(new ShellDisposedCondition("Preferences"));
+     }
+     
+     PrefUtil.getAPIPreferenceStore().setValue(IWorkbenchPreferenceConstants.ENABLE_ANIMATIONS, false);
 
-    ShellFinder.bringRootToFront(getActivePage().getWorkbenchWindow().getShell().getDisplay());
+     ShellFinder.bringRootToFront(getActivePage().getWorkbenchWindow().getShell().getDisplay());
 
-    MavenPlugin.getDefault(); // force m2e to load so its indexing jobs will be scheduled.
-    Thread.sleep(5000);
+     MavenPlugin.getDefault(); // force m2e to load so its indexing jobs will be scheduled.
+     Thread.sleep(5000);
 
-    closeView("org.eclipse.ui.internal.introview");
+     closeView("org.eclipse.ui.internal.introview");
 
-    IPerspectiveRegistry perspectiveRegistry = PlatformUI.getWorkbench().getPerspectiveRegistry();
-    IPerspectiveDescriptor perspective = perspectiveRegistry
-        .findPerspectiveWithId("org.eclipse.jdt.ui.JavaPerspective");
-    getActivePage().setPerspective(perspective);
+     IPerspectiveRegistry perspectiveRegistry = PlatformUI.getWorkbench().getPerspectiveRegistry();
+     IPerspectiveDescriptor perspective = perspectiveRegistry
+         .findPerspectiveWithId("org.eclipse.jdt.ui.JavaPerspective");
+     getActivePage().setPerspective(perspective);
 
-    closeView("org.eclipse.ui.views.ContentOutline");
-    closeView("org.eclipse.mylyn.tasks.ui.views.tasks");
+     closeView("org.eclipse.ui.views.ContentOutline");
+     closeView("org.eclipse.mylyn.tasks.ui.views.tasks");
 
-    // Attempt to use local nexus as maven central proxy to speed up tests
-    setupLocalMavenIndex();
+     // Attempt to use local nexus as maven central proxy to speed up tests
+     if(this.skipIndexes()){
+       setupLocalMavenIndex();
+     }
+     // Clean out projects left over from previous test runs.
+     clearProjects();
 
-    // Clean out projects left over from previous test runs.
-    clearProjects();
-
-    getUI().wait(new JobsCompleteCondition(), 600000);
+     getUI().wait(new JobsCompleteCondition(), 600000);
   }
 
   private void cancelIndexJobs() throws InterruptedException {
@@ -364,6 +370,20 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     getUI().wait(new ShellDisposedCondition(FIND_REPLACE));
   }
 
+  protected void replaceTextWithClick(String src, String target) throws WaitTimedOutException, WidgetSearchException {
+    getUI().click(new MenuItemLocator("Edit/Find\\\\/Replace..."));
+    getUI().wait(new ShellShowingCondition("Find/Replace"));
+    getUI().enterText(src);
+    getUI().keyClick(WT.TAB);
+    ScreenCapture.createScreenCapture();
+
+    getUI().enterText(target);
+
+    getUI().click(new ButtonLocator("Replace &All"));
+
+    getUI().close(new SWTWidgetLocator(Shell.class, FIND_REPLACE));
+    getUI().wait(new ShellDisposedCondition(FIND_REPLACE));
+  }
   protected void replaceText(String src, String target) throws WaitTimedOutException, WidgetSearchException {
     getUI().keyClick(SWT.CTRL, 'f');
     getUI().wait(new ShellShowingCondition(FIND_REPLACE));
@@ -469,6 +489,17 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     unzipFile(pluginPath, tempDir);
     return tempDir;
   }
+  
+  public IProject setupDefaultProject() throws Exception{
+    importMavenProjects(DEFAULT_PROJECT_ZIP);
+    IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+    for(IProject project : projects) {
+      if(DEFAULT_PROJECT_ARTIFACT.equals(project.getName())) {
+        return project;
+      }
+    }
+    return null;
+  }
 
   protected File createTempDir(String prefix) throws IOException {
     File temp = null;
@@ -501,7 +532,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     try {
       getUI().click(new MenuItemLocator("File/Import..."));
       getUI().wait(new ShellShowingCondition("Import"));
-      getUI().click(new FilteredTreeItemLocator("General/Maven Projects"));
+      getUI().click(new FilteredTreeItemLocator("Maven/Existing Maven Projects"));
       getUI().click(new ButtonLocator("&Next >"));
       getUI().wait(new SWTIdleCondition());
       getUI().enterText(tempDir.getCanonicalPath());
@@ -510,7 +541,8 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
       getUI().click(new ButtonLocator("&Finish"));
       getUI().wait(new ShellDisposedCondition("Import Maven Projects"));
       Thread.sleep(5000);
-      getUI().wait(new JobsCompleteCondition(), 300000);
+      
+      waitForAllBuildsToComplete();
       
 
     } catch(Exception ex) {
@@ -538,6 +570,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
       }
     });
 
+    Thread.sleep(5000);
     getUI().wait(new SWTIdleCondition());
     return part;
   }
@@ -738,7 +771,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
       ui.wait(new SWTIdleCondition());
       IWidgetLocator groupCombo = ui.find(new NamedWidgetLocator("groupId"));
       ui.setFocus(groupCombo);
-      ui.enterText("org.sonatype.test");
+      ui.enterText(DEFAULT_PROJECT_GROUP);
       ui.setFocus(ui.find(new NamedWidgetLocator("artifactId")));
       ui.enterText(projectName);
       ui.click(new ButtonLocator("&Finish"));
@@ -862,8 +895,9 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
   protected void addDependency(IProject project, String groupId, String artifactID, String version) throws Exception {
     openFile(project, "pom.xml");
 
-    getUI().click(new CTabItemLocator("pom.xml"));
+    
     getUI().wait(new JobsCompleteCondition(), 120000);
+    getUI().click(new CTabItemLocator("pom.xml"));
     findText("</dependencies");
     getUI().keyClick(SWT.ARROW_LEFT);
     String sep = System.getProperty("line.separator");
@@ -873,5 +907,19 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     getUI().keyClick(SWT.MOD1, 's');
 
     waitForAllBuildsToComplete();
+  }
+
+  /**
+   * @param skipIndexes the skipIndexes to set
+   */
+  public void setSkipIndexes(boolean skipIndexes) {
+    this.skipIndexes = skipIndexes;
+  }
+
+  /**
+   * @return the skipIndexes
+   */
+  public boolean skipIndexes() {
+    return skipIndexes;
   }
 }

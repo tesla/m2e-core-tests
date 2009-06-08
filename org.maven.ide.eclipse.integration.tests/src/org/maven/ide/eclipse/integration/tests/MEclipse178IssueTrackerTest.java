@@ -43,7 +43,7 @@ public class MEclipse178IssueTrackerTest extends UIIntegrationTestCase {
 		ui.click(new CTabItemLocator("pom.xml"));
 		replaceText("</modules>", "</modules><issueManagement><system>JIRA</system><url>http://issues.sonatype.org</url></issueManagement>");
 		ui.keyClick(SWT.MOD1, 's');
-		ui.wait(new JobsCompleteCondition());
+		waitForAllBuildsToComplete();
 		
 		ui.click(new TreeItemLocator("simple-parent", new ViewLocator(
 				"org.eclipse.jdt.ui.PackageExplorer")));

@@ -28,13 +28,18 @@ import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
  */
 public class MngEclipse1377ExcludeArtifactTest extends UIIntegrationTestCase {
 
+  public MngEclipse1377ExcludeArtifactTest(){
+    super();
+    this.setSkipIndexes(true);
+  }
   public void testEclipseArtifact() throws Exception {
-    IProject project = createArchetypeProjct("maven-archetype-quickstart", "project");
+    //IProject project = createArchetypeProjct("maven-archetype-quickstart", "project");
+    IProject project = setupDefaultProject();
     IJavaProject jp = (IJavaProject) project.getNature(JavaCore.NATURE_ID);
 
     assertMavenCPEntry(jp, "commons-collections-3.2.1.jar", false);
 
-    openPomFile("project/pom.xml");
+    openPomFile("someproject/pom.xml");
     addDependency(project, "commons-collections", "commons-collections", "3.2.1");
 
     assertMavenCPEntry(jp, "commons-collections-3.2.1.jar", true);
@@ -46,10 +51,11 @@ public class MngEclipse1377ExcludeArtifactTest extends UIIntegrationTestCase {
 
   public void testExcludeTransitiveArtifact() throws Exception {
 
-    IProject project = createArchetypeProjct("maven-archetype-quickstart", "project");
+    IProject project = setupDefaultProject();
+    //IProject project = createArchetypeProjct("maven-archetype-quickstart", "project");
     IJavaProject jp = (IJavaProject) project.getNature(JavaCore.NATURE_ID);
 
-    openPomFile("project/pom.xml");
+    openPomFile("someproject/pom.xml");
     addDependency(project, "org.hibernate", "hibernate", "3.2.4.ga");
 
     assertMavenCPEntry(jp, "hibernate-3.2.4.ga.jar", true);
@@ -82,9 +88,9 @@ public class MngEclipse1377ExcludeArtifactTest extends UIIntegrationTestCase {
 
   private void excludeArtifact(String jarName) throws Exception {
     IUIContext ui = getUI();
-    ui.click(new TreeItemLocator("project/Maven Dependencies/" + jarName + ".*", new ViewLocator(
+    ui.click(new TreeItemLocator("someproject/Maven Dependencies/" + jarName + ".*", new ViewLocator(
         "org.eclipse.jdt.ui.PackageExplorer")));
-    ui.contextClick(new TreeItemLocator("project/Maven Dependencies/" + jarName + ".*", new ViewLocator(
+    ui.contextClick(new TreeItemLocator("someproject/Maven Dependencies/" + jarName + ".*", new ViewLocator(
         "org.eclipse.jdt.ui.PackageExplorer")), "Maven/Exclude Maven artifact...");
     ui.wait(new ShellDisposedCondition("Progress Information"));
     ui.wait(new ShellShowingCondition("Exclude Maven Artifact"));

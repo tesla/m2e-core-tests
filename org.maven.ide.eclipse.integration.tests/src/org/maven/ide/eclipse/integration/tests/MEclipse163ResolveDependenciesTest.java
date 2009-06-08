@@ -77,9 +77,7 @@ public class MEclipse163ResolveDependenciesTest extends UIIntegrationTestCase {
 
     getUI().wait(new ShellDisposedCondition("Search in Maven repositories"));
 
-    Thread.sleep(7000); // Build jobs start after a delay
-    
-    getUI().wait(new JobsCompleteCondition());
+    waitForAllBuildsToComplete();
 
     assertProjectsHaveNoErrors();
     
