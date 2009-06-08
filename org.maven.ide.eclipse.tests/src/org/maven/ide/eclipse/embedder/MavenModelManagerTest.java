@@ -35,6 +35,8 @@ public class MavenModelManagerTest extends TestCase {
   
   private IProject project;
 
+  private PomResourceImpl resource = null;
+
   protected void setUp() throws Exception {
     super.setUp();
     
@@ -50,6 +52,13 @@ public class MavenModelManagerTest extends TestCase {
     }
   }
   
+  protected void tearDown() throws Exception {
+    if (resource != null) {
+      resource.unload();
+    }
+    super.tearDown();
+  }
+  
   public void testAddingNewModule() throws Exception {
     String pom = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + // 
     		"<project>\n" + //
@@ -63,7 +72,7 @@ public class MavenModelManagerTest extends TestCase {
     		"  </modules>\n" + //
     		"</project>";
     
-    PomResourceImpl resource = MavenModelUtil.createResource(project, "testAddingNewModule.xml", pom);
+    resource = MavenModelUtil.createResource(project, "testAddingNewModule.xml", pom);
     new MavenModelManager.ModuleAdder("test").update(resource.getModel());
     
     assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + // 
@@ -92,7 +101,7 @@ public class MavenModelManagerTest extends TestCase {
     "  </modules>\n" + //
     "</project>";
     
-    PomResourceImpl resource = MavenModelUtil.createResource(project, "testAddingNewModule2.xml", pom);
+    resource = MavenModelUtil.createResource(project, "testAddingNewModule2.xml", pom);
     new MavenModelManager.ModuleAdder("test").update(resource.getModel());
     
     assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + // 
@@ -118,7 +127,7 @@ public class MavenModelManagerTest extends TestCase {
         "  <packaging>jar</packaging>\n" + //
         "</project>";
 
-    PomResourceImpl resource = MavenModelUtil.createResource(project, "testAddingModules.xml", pom);
+    resource = MavenModelUtil.createResource(project, "testAddingModules.xml", pom);
     new MavenModelManager.ModuleAdder("test").update(resource.getModel());
 
     assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + // 
@@ -156,7 +165,7 @@ public class MavenModelManagerTest extends TestCase {
     dependency.setArtifactId("spring");
     dependency.setVersion("2.5");
     
-    PomResourceImpl resource = MavenModelUtil.createResource(project, "testAddingNewDependency.xml", pom);
+    resource = MavenModelUtil.createResource(project, "testAddingNewDependency.xml", pom);
     new MavenModelManager.DependencyAdder(dependency).update(resource.getModel());
     
     assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + // 
@@ -196,7 +205,7 @@ public class MavenModelManagerTest extends TestCase {
     dependency.setArtifactId("spring");
     dependency.setVersion("2.5");
     
-    PomResourceImpl resource = MavenModelUtil.createResource(project, "testAddingDependencies.xml", pom);
+    resource = MavenModelUtil.createResource(project, "testAddingDependencies.xml", pom);
     new MavenModelManager.DependencyAdder(dependency).update(resource.getModel());
     
     assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + // 
@@ -214,6 +223,7 @@ public class MavenModelManagerTest extends TestCase {
         "    </dependency>\n" + // 
         "  </dependencies>\n" + //
         "</project>", MavenModelUtil.toString(resource));
+    
   }
   
   public void testAddingNewPlugin() throws Exception {
@@ -231,7 +241,7 @@ public class MavenModelManagerTest extends TestCase {
     dependency.setArtifactId("spring");
     dependency.setVersion("2.5");
     
-    PomResourceImpl resource = MavenModelUtil.createResource(project, "testAddingPlugin.xml", pom);
+    resource = MavenModelUtil.createResource(project, "testAddingPlugin.xml", pom);
     new MavenModelManager.PluginAdder("org.apache.maven.plugins", "maven-help-plugin", "2.0.2").update(resource.getModel());
     
     assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + // 
