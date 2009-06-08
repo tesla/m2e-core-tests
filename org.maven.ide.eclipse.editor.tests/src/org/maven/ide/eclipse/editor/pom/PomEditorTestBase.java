@@ -39,6 +39,7 @@ import org.maven.ide.eclipse.integration.tests.UIIntegrationTestCase;
 import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 
+import com.windowtester.finder.swt.ShellFinder;
 import com.windowtester.runtime.IUIContext;
 import com.windowtester.runtime.WaitTimedOutException;
 import com.windowtester.runtime.WidgetSearchException;
@@ -93,6 +94,7 @@ public class PomEditorTestBase extends UIIntegrationTestCase {
   
 
   protected void setUp() {
+    ShellFinder.bringRootToFront(getActivePage().getWorkbenchWindow().getShell().getDisplay());
   }
   protected void tearDown() throws Exception {
     
