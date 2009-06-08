@@ -24,6 +24,8 @@ import org.eclipse.emf.edit.command.SetCommand;
 import org.eclipse.emf.edit.domain.AdapterFactoryEditingDomain;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.maven.ide.components.pom.Model;
+import org.maven.ide.components.pom.util.PomResourceImpl;
+import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.refactoring.AbstractPomRefactoring;
 import org.maven.ide.eclipse.refactoring.PomVisitor;
 import org.maven.ide.eclipse.refactoring.RefactoringModelResources;
@@ -234,9 +236,15 @@ public class RenameRefactoring extends AbstractPomRefactoring {
 
   @Override
   public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException, OperationCanceledException {
-    this.oldArtifactId = getModel().getArtifactId();
-    this.oldGroupId = getModel().getGroupId();
-    this.oldVersion = getModel().getVersion();
+    PomResourceImpl resource = MavenPlugin.getDefault().getMavenModelManager().loadResource(file);
+    try {
+      Model model = (Model)resource.getContents().get(0);
+      this.oldArtifactId = model.getArtifactId();
+      this.oldGroupId = model.getGroupId();
+      this.oldVersion = model.getVersion();
+    } finally {
+      resource.unload();
+    }
     RefactoringStatus res = new RefactoringStatus();
     return res;
   }

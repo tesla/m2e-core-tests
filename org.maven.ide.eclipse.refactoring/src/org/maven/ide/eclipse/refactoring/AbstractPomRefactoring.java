@@ -265,9 +265,10 @@ public abstract class AbstractPomRefactoring extends Refactoring {
     return null;
   }
   
-  public Model getModel() {
+  public Model createModel() {
     try {
-      return RefactoringModelResources.loadModel(file);
+      Resource resource = MavenPlugin.getDefault().getMavenModelManager().loadResource(file);
+      return (Model)resource.getContents().get(0);
     } catch(CoreException ex) {
       MavenLogger.log(PROBLEMS_DURING_REFACTORING, ex);
       return null;

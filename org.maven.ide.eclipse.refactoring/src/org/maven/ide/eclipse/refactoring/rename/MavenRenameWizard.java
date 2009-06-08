@@ -29,8 +29,9 @@ public class MavenRenameWizard extends RefactoringWizard {
   protected void addUserInputPages() {
     setDefaultPageTitle(getRefactoring().getName());
     addPage(page1);
-    Model model = ((AbstractPomRefactoring) getRefactoring()).getModel();
-    page1.setModel(model);
+    Model model = ((AbstractPomRefactoring) getRefactoring()).createModel();
+    page1.initialize(model.getGroupId(), model.getArtifactId(), model.getVersion());
+    model.eResource().unload();
   }
 
 }

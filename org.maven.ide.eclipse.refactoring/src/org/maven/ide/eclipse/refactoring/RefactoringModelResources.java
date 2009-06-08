@@ -23,6 +23,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.common.command.CompoundCommand;
+import org.eclipse.emf.ecore.resource.Resource;
 import org.maven.ide.components.pom.Model;
 import org.maven.ide.components.pom.PropertyElement;
 import org.maven.ide.eclipse.MavenPlugin;
@@ -77,14 +78,11 @@ public class RefactoringModelResources {
     tmpFile = project.getFile(f.getName());
     pomFile.copy(tmpFile.getFullPath(), true, null);
     
-    tmpModel = loadModel(tmpFile);
+    Resource resource = MavenPlugin.getDefault().getMavenModelManager().loadResource(tmpFile);
+    tmpModel = (Model)resource.getContents().get(0);
     tmpBuffer = getBuffer(tmpFile);
   }
 
-  public static Model loadModel(IFile file) throws CoreException {
-    return (Model)MavenPlugin.getDefault().getMavenModelManager().loadResource(file).getContents().get(0);
-  }
-  
   public CompoundCommand getCommand() {
     return command;
   }
@@ -133,6 +131,9 @@ public class RefactoringModelResources {
     releaseBuffer(pomBuffer, pomFile);
     if (tmpFile != null && tmpFile.exists()) {
       releaseBuffer(tmpBuffer, tmpFile);
+    }
+    if (tmpModel != null) {
+      tmpModel.eResource().unload();
     }
   }
 

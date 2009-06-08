@@ -21,7 +21,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.maven.ide.components.pom.Model;
 
 
 /**
@@ -32,8 +31,6 @@ public class MavenRenameWizardPage extends UserInputWizardPage {
   private Text artifactIdText;
   private Text versionText;
   private Button renameCheckbox;
-  
-  private Model model;
   
   private String groupId;
   private String artifactId;
@@ -49,11 +46,10 @@ public class MavenRenameWizardPage extends UserInputWizardPage {
     setTitle("Rename Maven Artifact");
   }
 
-  public void setModel(Model model) {
-    this.model = model;
-    this.groupId = newGroupId = nvl(model.getGroupId());
-    this.artifactId = newArtifactId = nvl(model.getArtifactId());
-    this.version = newVersion = nvl(model.getVersion());
+  public void initialize(String groupId, String artifactID, String version) {
+    this.groupId = newGroupId = nvl(groupId);
+    this.artifactId = newArtifactId = nvl(artifactID);
+    this.version = newVersion = nvl(version);
   }
 
   public String getNewGroupId() {
@@ -139,9 +135,9 @@ public class MavenRenameWizardPage extends UserInputWizardPage {
       }
     };
 
-    groupIdText.setText(nvl(model.getGroupId()));
-    artifactIdText.setText(nvl(model.getArtifactId()));
-    versionText.setText(nvl(model.getVersion()));
+    groupIdText.setText(groupId);
+    artifactIdText.setText(artifactId);
+    versionText.setText(version);
 
     groupIdText.addModifyListener(listener);
     artifactIdText.addModifyListener(listener);
