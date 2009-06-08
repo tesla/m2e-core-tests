@@ -312,6 +312,9 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   }
 
   public void reload() {
+    if (projectDocument != null) {
+      projectDocument.eResource().unload();
+    }
     projectDocument = null;
     try {
       readProjectDocument();

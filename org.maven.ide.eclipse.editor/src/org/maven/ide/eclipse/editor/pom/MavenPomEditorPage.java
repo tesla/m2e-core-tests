@@ -192,7 +192,7 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
   }
 
   public void setErrorMessage(final String msg, final int severity) {
-    if(getPartControl()!=null) {
+    if(getPartControl()!=null && !getPartControl().isDisposed()) {
       getPartControl().getDisplay().asyncExec(new Runnable() {
         public void run() {
           if (!getManagedForm().getForm().isDisposed()) {
