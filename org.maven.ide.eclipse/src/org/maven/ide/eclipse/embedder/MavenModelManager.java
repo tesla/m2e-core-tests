@@ -259,14 +259,19 @@ public class MavenModelManager {
 
   public void updateProject(IFile pomFile, ProjectUpdater updater) {
     File pom = pomFile.getLocation().toFile();
+    PomResourceImpl resource = null;
     try {
-      PomResourceImpl resource = loadResource(pomFile);
+      resource = loadResource(pomFile);
       updater.update(resource.getModel());
       resource.save(Collections.EMPTY_MAP);
     } catch(Exception ex) {
       String msg = "Unable to update " + pom;
       console.logError(msg + "; " + ex.getMessage());
       MavenLogger.log(msg, ex);
+    } finally {
+      if (resource != null) {
+        resource.unload();
+      }
     }
   }
 

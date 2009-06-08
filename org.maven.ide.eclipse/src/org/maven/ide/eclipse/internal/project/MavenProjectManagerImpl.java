@@ -935,7 +935,6 @@ public class MavenProjectManagerImpl {
       }
 
       updateIndex(IndexManager.NOT_AVAILABLE, isJavaSource, isJavaDoc, af, baseFile, base);
-
     } finally {
       monitor.done();
     }

@@ -348,14 +348,6 @@
      <category id="org.eclipse.ui.Basic" name="General"/>
      <category id="org.maven.ide.eclipse" name="%m2.wizard.name"/>
 
-     <wizard id="org.maven.ide.eclipse.wizards.Maven2ImportWizard"
-             class="org.maven.ide.eclipse.wizards.MavenImportWizard"
-             icon="icons/import_m2_project.gif"
-             category="org.eclipse.ui.Basic"
-             name="%m2.wizard.import.name">
-        <description>%m2.wizard.import.description</description>
-     </wizard>
-
      <wizard id="org.maven.ide.eclipse.wizards.MavenPomCheckoutWizard"
              class="org.maven.ide.eclipse.wizards.MavenMaterializePomWizard"
              category="org.maven.ide.eclipse"
@@ -383,6 +375,15 @@
          <selection class="org.eclipse.core.resources.IFile" name="*.jar"/>
          <description>Install or Deploy an artifact (archive) into a Maven repository</description>
      </wizard>
+     
+     <wizard id="org.maven.ide.eclipse.wizards.Maven2ImportWizard"
+             class="org.maven.ide.eclipse.wizards.MavenImportWizard"
+             icon="icons/import_m2_project.gif"
+             category="org.maven.ide.eclipse"
+             name="%m2.wizard.import.name">
+        <description>%m2.wizard.import.description</description>
+     </wizard>
+     
    </extension>
 
    <extension point="org.eclipse.ui.console.consoleFactories">
