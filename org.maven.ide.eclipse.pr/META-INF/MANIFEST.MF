@@ -21,7 +21,7 @@ Bundle-ClassPath: jars/plexus-swizzle-1.0-alpha-4.jar,
  jars/commons-logging-1.0.4.jar,
  jars/commons-codec-1.2.jar,
  .
-MavenArtifact-BaseVersion: 0.9.8-SNAPSHOT
+MavenArtifact-BaseVersion: 0.9.9-SNAPSHOT
 Bundle-Version: 0.9.9.qualifier
 MavenArtifact-ArtifactId: org.maven.ide.eclipse.pr
 MavenArtifact-GroupId: org.maven.ide.eclipse
