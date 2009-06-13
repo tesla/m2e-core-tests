@@ -758,7 +758,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     }
   }
 
-  public void testExtensionPluginResolution() throws Exception {
+  public void _testExtensionPluginResolution() throws Exception {
     IProject p1 = createExisting("MNGECLIPSE380-plugin", "resources/MNGECLIPSE380/plugin");
     IProject p2 = createExisting("MNGECLIPSE380-project", "resources/MNGECLIPSE380/project");
     waitForJobsToComplete();
