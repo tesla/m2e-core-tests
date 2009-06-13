@@ -11,6 +11,7 @@ package org.maven.ide.eclipse.internal.builder;
 import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -38,7 +39,10 @@ import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
+import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.MavenProjectManager;
+import org.maven.ide.eclipse.project.configurator.AbstractBuildParticipant;
+import org.maven.ide.eclipse.project.configurator.ILifecycleMapping;
 
 
 public class MavenBuilder extends IncrementalProjectBuilder {
@@ -67,6 +71,7 @@ public class MavenBuilder extends IncrementalProjectBuilder {
     MavenPlugin plugin = MavenPlugin.getDefault();
     MavenConsole console = plugin.getConsole();
     MavenProjectManager projectManager = plugin.getMavenProjectManager();
+    IProjectConfigurationManager configurationManager = plugin.getProjectConfigurationManager();
 
     IProject project = getProject();
     if(project.hasNature(IMavenConstants.NATURE_ID)) {
@@ -98,11 +103,13 @@ public class MavenBuilder extends IncrementalProjectBuilder {
 
       IMaven maven = MavenPlugin.lookup(IMaven.class);
       MavenExecutionRequest request = projectManager.createExecutionRequest(pomResource, projectFacade.getResolverConfiguration());
-      MavenSession session = maven.newSession(request, projectFacade.getMavenProject(monitor));
+      MavenSession session = maven.createSession(request, projectFacade.getMavenProject(monitor));
+      ILifecycleMapping lifecycleMapping = configurationManager.getLifecycleMapping(projectFacade, monitor);
 
       ThreadBuildContext.setThreadBuildContext(buildContext);
       try {
-        for(InternalBuildParticipant participant : projectFacade.getBuildParticipants(monitor)) {
+        List<AbstractBuildParticipant> participants = lifecycleMapping.getBuildParticipants(projectFacade, monitor);
+        for(InternalBuildParticipant participant : participants) {
           participant.setMavenProjectFacade(projectFacade);
           participant.setGetDeltaCallback(getDeltaCallback);
           participant.setSession(session);
@@ -175,6 +182,7 @@ public class MavenBuilder extends IncrementalProjectBuilder {
   protected void clean(IProgressMonitor monitor) throws CoreException {
     MavenPlugin plugin = MavenPlugin.getDefault();
     MavenProjectManager projectManager = plugin.getMavenProjectManager();
+    IProjectConfigurationManager configurationManager = plugin.getProjectConfigurationManager();
 
     IProject project = getProject();
     if(project.hasNature(IMavenConstants.NATURE_ID)) {
@@ -197,11 +205,12 @@ public class MavenBuilder extends IncrementalProjectBuilder {
       EclipseBuildContext buildContext = new EclipseBuildContext(project, contextState);
 
       MavenExecutionRequest request = projectManager.createExecutionRequest(pomResource, projectFacade.getResolverConfiguration());
-      MavenSession session = maven.newSession(request, projectFacade.getMavenProject(monitor));
+      MavenSession session = maven.createSession(request, projectFacade.getMavenProject(monitor));
+      ILifecycleMapping lifecycleMapping = configurationManager.getLifecycleMapping(projectFacade, monitor);
       
       ThreadBuildContext.setThreadBuildContext(buildContext);
       try {
-        for (InternalBuildParticipant participant : projectFacade.getBuildParticipants(monitor)) {
+        for (InternalBuildParticipant participant : lifecycleMapping.getBuildParticipants(projectFacade, monitor)) {
           participant.setMavenProjectFacade(projectFacade);
           participant.setGetDeltaCallback(getDeltaCallback);
           participant.setSession(session);

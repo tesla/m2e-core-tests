@@ -14,9 +14,17 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
+import org.apache.maven.execution.MavenSession;
+import org.apache.maven.plugin.MojoExecution;
+
+import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.project.IMavenMarkerManager;
 import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
@@ -27,9 +35,6 @@ import org.maven.ide.eclipse.project.MavenProjectManager;
 /**
  * Used to configure maven projects.
  *
- * XXX investigate using existing maven infrastructure to read plugin configuration
- * org.apache.maven.plugin.DefaultPluginManager.getConfiguredMojo(MavenSession, Xpp3Dom, MavenProject, boolean, MojoExecution, List) 
- * 
  * @author Igor Fedorenko
  */
 public abstract class AbstractProjectConfigurator implements IExecutableExtension, IMavenProjectChangedListener {
@@ -37,6 +42,8 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
   public static final String ATTR_ID = "id";
   
   public static final String ATTR_PRIORITY = "priority";
+  
+  public static final String ATTR_GENERIC = "generic";
 
   public static final String ATTR_NAME = "name";
   
@@ -45,11 +52,14 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
   private int priority;
   private String id;
   private String name;
+  private boolean generic;
 
   protected MavenProjectManager projectManager;
   protected IMavenConfiguration mavenConfiguration;
   protected IMavenMarkerManager markerManager; 
   protected MavenConsole console;
+  protected IMaven maven = MavenPlugin.lookup(IMaven.class);
+
   
   public void setProjectManager(MavenProjectManager projectManager) {
     this.projectManager = projectManager;
@@ -125,12 +135,17 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
   public String getName() {
     return name;
   }
-  
+
+  public boolean isGeneric() {
+    return generic;
+  }
+
   // IExecutableExtension  
   
   public void setInitializationData(IConfigurationElement config, String propertyName, Object data) {
     this.id = config.getAttribute(ATTR_ID);
     this.name = config.getAttribute(ATTR_NAME);
+    this.generic = parseBoolean(config.getAttribute(ATTR_GENERIC), true);
     String priorityString = config.getAttribute(ATTR_PRIORITY);
     try {
       priority = Integer.parseInt(priorityString);
@@ -139,7 +154,12 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
     }
   }
 
-  protected void addNature(IProject project, String natureId, IProgressMonitor monitor) throws CoreException {
+  private boolean parseBoolean(String value, boolean defaultValue) {
+    return value != null? Boolean.parseBoolean(value): defaultValue;
+  }
+
+  // TODO move to a helper
+  public static void addNature(IProject project, String natureId, IProgressMonitor monitor) throws CoreException {
     if (!project.hasNature(natureId)) {
       IProjectDescription description = project.getDescription();
       String[] prevNatures = description.getNatureIds();
@@ -151,8 +171,22 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
     }
   }
 
+  protected <T> T getParameterValue(MavenSession session, MojoExecution execution, String parameter, Class<T> asType) throws CoreException {
+    return maven.getMojoParameterValue(session, execution, parameter, asType);
+  }
+
+  protected void assertHasNature(IProject project, String natureId) throws CoreException {
+    if (project.getNature(natureId) == null) {
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Project does not have required natute " + natureId, null));
+    }
+  }
+
   @Override
   public String toString() {
     return id + ":" + name + "(" + priority + ")";
+  }
+
+  public AbstractBuildParticipant getBuildParticipant(MojoExecution execution) {
+    return null;
   }
 }

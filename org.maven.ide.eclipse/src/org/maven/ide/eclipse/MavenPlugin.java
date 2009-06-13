@@ -27,6 +27,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Version;
 
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IWorkspace;
@@ -183,7 +185,9 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   private IMavenMarkerManager mavenMarkerManager;
 
   private ArrayList<IPropertyChangeListener> listeners;
-  
+
+  private String version = "0.0.0";
+
   public MavenPlugin() {
     plugin = this;
 
@@ -205,6 +209,13 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     }
     
     this.bundleContext = context;
+
+    try {
+      Version bundleVersion = Version.parseVersion((String) getBundle().getHeaders().get(Constants.BUNDLE_VERSION));
+      this.version = bundleVersion.getMajor() + "." + bundleVersion.getMinor() + "." + bundleVersion.getMicro();
+    } catch (IllegalArgumentException e) {
+      // ignored
+    }
 
     MavenLogger.setLog(getLog());
     
@@ -748,5 +759,9 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     } catch(ComponentLookupException ex) {
       throw new NoSuchComponentException(ex);
     }
+  }
+
+  public static String getVersion() {
+    return plugin.version;
   }
 }

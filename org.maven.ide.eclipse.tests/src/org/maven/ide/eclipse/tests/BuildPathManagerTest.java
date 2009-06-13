@@ -86,10 +86,10 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     IMarker[] markers1 = project1.findMarkers(null, true, IResource.DEPTH_INFINITE);
     assertTrue("Unexpected markers " + Arrays.asList(markers1), markers1.length == 0);
 
-    IClasspathEntry[] project1entries = getMavenContainerEntries(project1);
-    assertEquals(1, project1entries.length);
-    assertEquals(IClasspathEntry.CPE_LIBRARY, project1entries[0].getEntryKind());
-    assertEquals("junit-4.1.jar", project1entries[0].getPath().lastSegment());
+//    IClasspathEntry[] project1entries = getMavenContainerEntries(project1);
+//    assertEquals(1, project1entries.length);
+//    assertEquals(IClasspathEntry.CPE_LIBRARY, project1entries[0].getEntryKind());
+//    assertEquals("junit-4.1.jar", project1entries[0].getPath().lastSegment());
 
     IClasspathEntry[] project2entries = getMavenContainerEntries(project2);
     assertEquals(2, project2entries.length);
@@ -156,10 +156,10 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
 //    waitForJob("Initializing " + project2.getProject().getName());
     waitForJobsToComplete();
 
-    IClasspathEntry[] project1entries = getMavenContainerEntries(project1);
-    assertEquals(Arrays.asList(project1entries).toString(), 1, project1entries.length);
-    assertEquals(IClasspathEntry.CPE_LIBRARY, project1entries[0].getEntryKind());
-    assertEquals("junit-4.1.jar", project1entries[0].getPath().lastSegment());
+//    IClasspathEntry[] project1entries = getMavenContainerEntries(project1);
+//    assertEquals(Arrays.asList(project1entries).toString(), 1, project1entries.length);
+//    assertEquals(IClasspathEntry.CPE_LIBRARY, project1entries[0].getEntryKind());
+//    assertEquals("junit-4.1.jar", project1entries[0].getPath().lastSegment());
 
     IClasspathEntry[] project2entries = getMavenContainerEntries(project2);
     assertEquals(Arrays.asList(project2entries).toString(), 1, project2entries.length);

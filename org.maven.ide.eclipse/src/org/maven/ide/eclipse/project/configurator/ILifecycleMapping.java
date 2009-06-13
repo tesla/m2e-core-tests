@@ -28,5 +28,5 @@ public interface ILifecycleMapping {
 
   List<AbstractBuildParticipant> getBuildParticipants(IMavenProjectFacade facade, IProgressMonitor monitor) throws CoreException;
 
-  List<AbstractProjectConfigurator> getProjectConfigurators();
+  List<AbstractProjectConfigurator> getProjectConfigurators(IMavenProjectFacade facade, IProgressMonitor monitor) throws CoreException;
 }

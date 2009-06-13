@@ -18,11 +18,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.apache.maven.lifecycle.MavenExecutionPlan;
 import org.apache.maven.project.MavenProject;
 
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.ArtifactRef;
-import org.maven.ide.eclipse.project.configurator.AbstractBuildParticipant;
 
 /**
  * IMavenProjectFacade
@@ -75,9 +75,9 @@ public interface IMavenProjectFacade {
   MavenProject getMavenProject(IProgressMonitor monitor) throws CoreException;
 
   /**
-   * Lazy load and cache build participants
+   * Lazy load and cache build execution plan
    */
-  List<AbstractBuildParticipant> getBuildParticipants(IProgressMonitor monitor) throws CoreException;
+  MavenExecutionPlan getExecutionPlan(IProgressMonitor monitor) throws CoreException;
 
   String getPackaging();
 

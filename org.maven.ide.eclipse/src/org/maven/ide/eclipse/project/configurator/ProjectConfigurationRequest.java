@@ -11,6 +11,7 @@ package org.maven.ide.eclipse.project.configurator;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.MavenProject;
 
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
@@ -22,28 +23,24 @@ import org.maven.ide.eclipse.project.ResolverConfiguration;
  * @author igor
  */
 public class ProjectConfigurationRequest {
-  private final IProject project;
-  private final IFile pom;
-  private final ResolverConfiguration resolverConfiguration;
-  private final MavenProject mavenProject;
   private final boolean updateSources;
   private final IMavenProjectFacade facade;
+  private final MavenProject mavenProject;
+  private final MavenSession mavenSession;
 
-  public ProjectConfigurationRequest(IMavenProjectFacade facade, IProject project, IFile pom, MavenProject mavenProject, ResolverConfiguration configuration, boolean updateSources) {
+  public ProjectConfigurationRequest(IMavenProjectFacade facade, MavenProject mavenProject, MavenSession mavenSession, boolean updateSources) {
     this.facade = facade;
-    this.project = project;
-    this.pom = pom;
-    this.mavenProject = mavenProject;
-    this.resolverConfiguration = configuration;
+    this.mavenSession = mavenSession;
     this.updateSources = updateSources;
+    this.mavenProject = mavenProject;
   }
 
   public IProject getProject() {
-    return project;
+    return facade.getProject();
   }
 
   public ResolverConfiguration getResolverConfiguration() {
-    return resolverConfiguration;
+    return facade.getResolverConfiguration();
   }
 
   public boolean isProjectConfigure() {
@@ -58,8 +55,12 @@ public class ProjectConfigurationRequest {
     return mavenProject;
   }
 
+  public MavenSession getMavenSession() {
+    return mavenSession;
+  }
+
   public IFile getPom() {
-    return pom;
+    return facade.getPom();
   }
 
   public IMavenProjectFacade getMavenProjectFacade() {

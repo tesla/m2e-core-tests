@@ -9,26 +9,27 @@
 package org.maven.ide.eclipse.internal.project;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.apache.maven.execution.MavenExecutionRequest;
-import org.apache.maven.lifecycle.MavenExecutionPlan;
-import org.apache.maven.plugin.MojoExecution;
+import org.codehaus.plexus.util.xml.Xpp3Dom;
 
-import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.embedder.IMaven;
+import org.apache.maven.model.Plugin;
+import org.apache.maven.plugin.MojoExecution;
+import org.apache.maven.project.MavenProject;
+
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
-import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.configurator.AbstractBuildParticipant;
+import org.maven.ide.eclipse.project.configurator.AbstractLifecycleMapping;
 import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
 import org.maven.ide.eclipse.project.configurator.ILifecycleMapping;
-import org.maven.ide.eclipse.project.configurator.MojoExecutionBuildParticipant;
 import org.maven.ide.eclipse.project.configurator.ProjectConfigurationRequest;
-
 
 
 /**
@@ -38,38 +39,89 @@ import org.maven.ide.eclipse.project.configurator.ProjectConfigurationRequest;
  */
 public class CustomizableLifecycleMapping extends AbstractLifecycleMapping implements ILifecycleMapping {
 
-  public void configure(ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException {
+  public List<AbstractProjectConfigurator> getProjectConfigurators(IMavenProjectFacade facade, IProgressMonitor monitor)
+      throws CoreException {
+    MavenProject mavenProject = facade.getMavenProject(monitor);
+    Plugin plugin = mavenProject.getPlugin("org.maven.ide.eclipse:lifecycle-mapping");
+
+    if(plugin == null) {
+      throw new IllegalArgumentException("no mapping");
+    }
+
+    // TODO assert version
+
+    Map<String, AbstractProjectConfigurator> configuratorsMap = new LinkedHashMap<String, AbstractProjectConfigurator>();
+    for(AbstractProjectConfigurator configurator : getProjectConfigurators(false)) {
+      configuratorsMap.put(configurator.getId(), configurator);
+    }
+
+    Xpp3Dom config = (Xpp3Dom) plugin.getConfiguration();
+
+    if(config == null) {
+      throw new IllegalArgumentException("Empty lifecycle mapping configuration");
+    }
+
+    Xpp3Dom configuratorsDom = config.getChild("configurators");
+    Xpp3Dom executionsDom = config.getChild("mojoExecutions");
+
+    List<AbstractProjectConfigurator> configurators = new ArrayList<AbstractProjectConfigurator>();
     
+    if (configuratorsDom != null) {
+      for(String configuratorId : getListElements(configuratorsDom, "configurator")) {
+        AbstractProjectConfigurator configurator = configuratorsMap.get(configuratorId);
+        if(configurator == null) {
+          throw new IllegalArgumentException("Unknown configurator id=" + configuratorId);
+        }
+        
+        configurators.add(configurator);
+      }
+    }
+    
+    if (executionsDom != null) {
+      for(String executionPattern : getListElements(executionsDom, "mojoExecution")) {
+        configurators.add(MojoExecutionProjectConfigurator.fromString(executionPattern));
+      }
+    }
+
+    return configurators;
   }
 
-  public List<AbstractBuildParticipant> getBuildParticipants(IMavenProjectFacade facade, IProgressMonitor monitor) throws CoreException {
-    IMaven maven = MavenPlugin.lookup(IMaven.class);
-    MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
-    
-    MavenExecutionRequest request = projectManager.createExecutionRequest(facade.getPom(), facade.getResolverConfiguration());
+  private Set<String> getListElements(Xpp3Dom listDom, String elementName) {
+    Set<String> elements = new LinkedHashSet<String>();
+    if (listDom == null) {
+      return elements;
+    }
 
-    // TODO should phase be configurable?
-    request.setGoals(Collections.singletonList("package"));
-    MavenExecutionPlan plan = maven.calculateExecutionPlan(request, facade.getMavenProject(monitor), monitor); 
+    for (Xpp3Dom elementDom : listDom.getChildren(elementName)) {
+      elements.add(elementDom.getValue());
+    }
 
-    ArrayList<AbstractBuildParticipant> participants = new ArrayList<AbstractBuildParticipant>();
-    
-    for (MojoExecution exec : plan.getExecutions()) {
-      if ("org.apache.maven.plugins".equals(exec.getGroupId()) && "maven-resources-plugin".equals(exec.getArtifactId())) {
-        participants.add(new MojoExecutionBuildParticipant(exec));
+    return elements;
+  }
+
+  public List<AbstractBuildParticipant> getBuildParticipants(IMavenProjectFacade facade, IProgressMonitor monitor)
+      throws CoreException {
+
+    List<AbstractProjectConfigurator> configurators = getProjectConfigurators(facade, monitor);
+
+    List<AbstractBuildParticipant> participants = new ArrayList<AbstractBuildParticipant>();
+
+    for (MojoExecution execution : facade.getExecutionPlan(monitor).getExecutions()) {
+      for (AbstractProjectConfigurator configurator : configurators) {
+        AbstractBuildParticipant participant = configurator.getBuildParticipant(execution);
+        if (participant != null) {
+          participants.add(participant);
+        }
       }
     }
 
     return participants;
   }
+  
+  public void configure(ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException {
+    super.configure(request, monitor);
 
-  public List<AbstractProjectConfigurator> getProjectConfigurators() {
-    // TODO Auto-generated method getProjectConfigurators
-    return super.getProjectConfigurators();
+    addMavenBuilder(request.getProject(), monitor);
   }
 
-  public void unconfigure(ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException {
-    // TODO Auto-generated method unconfigure
-
-  }
 }

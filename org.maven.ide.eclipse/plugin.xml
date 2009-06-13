@@ -476,12 +476,14 @@
    <extension
          point="org.maven.ide.eclipse.lifecycleMappings">
       <lifecycleMapping
-            class="org.maven.ide.eclipse.internal.project.DefaultLifecycleMapping"
-            id="default"
-            name="Default Lifecycle Mapping">
-         <packaging
-               name="*">
-         </packaging>
+            class="org.maven.ide.eclipse.internal.project.GenericLifecycleMapping"
+            id="generic"
+            name="Generic Lifecycle Mapping">
+      </lifecycleMapping>
+      <lifecycleMapping
+            class="org.maven.ide.eclipse.internal.project.CustomizableLifecycleMapping"
+            id="customizable"
+            name="Customizable Lifecycle Mapping (Temporary!)">
       </lifecycleMapping>
    </extension>
 

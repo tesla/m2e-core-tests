@@ -24,9 +24,18 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.codehaus.plexus.PlexusContainer;
+import org.codehaus.plexus.classworlds.realm.ClassRealm;
+import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
+import org.codehaus.plexus.component.configurator.converters.ConfigurationConverter;
+import org.codehaus.plexus.component.configurator.converters.lookup.ConverterLookup;
+import org.codehaus.plexus.component.configurator.converters.lookup.DefaultConverterLookup;
+import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
+import org.codehaus.plexus.configuration.PlexusConfiguration;
+import org.codehaus.plexus.configuration.xml.XmlPlexusConfiguration;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.dag.CycleDetectedException;
+import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 import org.apache.maven.Maven;
@@ -50,6 +59,9 @@ import org.apache.maven.model.io.ModelReader;
 import org.apache.maven.model.io.ModelWriter;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.PluginManager;
+import org.apache.maven.plugin.PluginManagerException;
+import org.apache.maven.plugin.PluginParameterExpressionEvaluator;
+import org.apache.maven.plugin.descriptor.MojoDescriptor;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectBuildingResult;
 import org.apache.maven.project.ProjectBuilder;
@@ -60,6 +72,7 @@ import org.apache.maven.settings.MavenSettingsBuilder;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.settings.validation.SettingsValidationResult;
 
+import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
@@ -88,6 +101,8 @@ public class MavenImpl implements IMaven {
   private final PluginManager pluginManager;
 
   private final LifecycleExecutor lifecycleExecutor;
+
+  private final ConverterLookup converterLookup = new DefaultConverterLookup();
 
   public MavenImpl(PlexusContainer plexus, IMavenConfiguration mavenConfiguration) throws CoreException {
     this.plexus = plexus;
@@ -121,6 +136,8 @@ public class MavenImpl implements IMaven {
     request.setLocalRepositoryPath(localRepository.getBasedir());
     request.setOffline(mavenConfiguration.isOffline());
 
+    request.getProperties().put("m2e.version", MavenPlugin.getVersion());
+
     // the right way to disable snapshot update
     // request.setUpdateSnapshots(false);
     return request;
@@ -144,7 +161,7 @@ public class MavenImpl implements IMaven {
     return result;
   }
 
-  public MavenSession newSession(MavenExecutionRequest request, MavenProject project) {
+  public MavenSession createSession(MavenExecutionRequest request, MavenProject project) {
     MavenExecutionResult result = new DefaultMavenExecutionResult();
     try {
       return new MavenSession(plexus, request, result, project);
@@ -166,7 +183,7 @@ public class MavenImpl implements IMaven {
   }
 
   public MavenExecutionPlan calculateExecutionPlan(MavenExecutionRequest request, MavenProject project, IProgressMonitor monitor) throws CoreException {
-    MavenSession session = newSession(request, project);
+    MavenSession session = createSession(request, project);
     try {
       List<String> goals = request.getGoals();
       return lifecycleExecutor.calculateExecutionPlan(session, goals.toArray(new String[goals.size()]));
@@ -211,8 +228,8 @@ public class MavenImpl implements IMaven {
 
   public Settings buildSettings(String globalSettings, String userSettings) throws CoreException {
     MavenExecutionRequest request = createExecutionRequest();
-    request.setGlobalSettingsFile(new File(globalSettings));
-    request.setUserSettingsFile(new File(userSettings));
+    request.setGlobalSettingsFile(globalSettings != null? new File(globalSettings): null);
+    request.setUserSettingsFile(userSettings != null? new File(userSettings): null);
     try {
       return settingsBuilder.buildSettings(request);
     } catch(IOException ex) {
@@ -328,6 +345,42 @@ public class MavenImpl implements IMaven {
     }
 
     return artifact;
+  }
+
+  public <T> T getMojoParameterValue(MavenSession session, MojoExecution mojoExecution, String parameter,
+      Class<T> asType) throws CoreException {
+
+    try {
+      MojoDescriptor mojoDescriptor = mojoExecution.getMojoDescriptor();
+
+      ClassRealm pluginRealm = pluginManager.getPluginRealm(session, mojoDescriptor.getPluginDescriptor());
+
+      ExpressionEvaluator expressionEvaluator = new PluginParameterExpressionEvaluator(session, mojoExecution);
+
+      ConfigurationConverter typeConverter = converterLookup.lookupConverterForType(asType);
+
+      Xpp3Dom dom = mojoExecution.getConfiguration();
+
+      if(dom == null) {
+        return null;
+      } 
+
+      PlexusConfiguration pomConfiguration = new XmlPlexusConfiguration(dom);
+
+      PlexusConfiguration configuration = pomConfiguration.getChild(parameter);
+      
+      if (configuration == null) {
+        return null;
+      }
+
+      Object value = typeConverter.fromConfiguration(converterLookup, configuration, asType, mojoDescriptor
+          .getImplementationClass(), pluginRealm, expressionEvaluator, null);
+      return asType.cast(value);
+    } catch(ComponentConfigurationException ex) {
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not get mojo execution paramater value", ex));
+    } catch(PluginManagerException ex) {
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not get mojo execution paramater value", ex));
+    }
   }
 
 }

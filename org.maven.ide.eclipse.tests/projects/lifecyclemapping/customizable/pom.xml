@@ -1,0 +1,29 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>lifecyclemapping</groupId>
+  <artifactId>customizable</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.maven.ide.eclipse</groupId>
+        <artifactId>lifecycle-mapping</artifactId>
+        <version>0.9.9-SNAPSHOT</version>
+        <configuration>
+          <mappingId>customizable</mappingId>
+          <configurators>
+            <configurator>org.maven.ide.eclipse.jdt.javaConfigurator</configurator>
+            <configurator>org.maven.ide.eclipse.modello.modelloConfigurator</configurator>
+            <configurator>org.maven.ide.eclipse.plexus.annotations.plexusConfigurator</configurator>
+          </configurators>
+          <mojoExecutions>
+            <mojoExecution>org.apache.maven.plugins:maven-resources-plugin::</mojoExecution>
+          </mojoExecutions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

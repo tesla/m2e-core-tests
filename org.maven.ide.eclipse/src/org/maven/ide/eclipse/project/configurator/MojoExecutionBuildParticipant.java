@@ -18,9 +18,10 @@ import org.apache.maven.plugin.MojoExecution;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.embedder.IMaven;
 
+
 /**
  * MojoExecutionBuildParticipant
- *
+ * 
  * @author igor
  */
 public class MojoExecutionBuildParticipant extends AbstractBuildParticipant {
@@ -34,9 +35,13 @@ public class MojoExecutionBuildParticipant extends AbstractBuildParticipant {
   public Set<IProject> build(int kind, IProgressMonitor monitor) throws Exception {
     IMaven maven = MavenPlugin.lookup(IMaven.class);
 
-    maven.execute(getSession(), execution, monitor);
-    
+    maven.execute(getSession(), getMojoExecution(), monitor);
+
     return null;
+  }
+
+  protected MojoExecution getMojoExecution() {
+    return execution;
   }
 
 }

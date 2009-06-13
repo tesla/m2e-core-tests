@@ -3,11 +3,9 @@
    <description url="http://m2eclipse.sonatype.org/update/">
       Maven Integration
    </description>
-   
    <feature url="features/org.maven.ide.components.maven_embedder.feature_2.1.0.20080530-2300.jar" id="org.maven.ide.components.maven_embedder.feature" version="2.1.0.20080530-2300">
       <category name="Maven Integration"/>
    </feature>
-   
    <feature url="features/org.maven.ide.eclipse.feature_0.9.9.qualifier.jar" id="org.maven.ide.eclipse.feature" version="0.9.9.qualifier">
       <category name="Maven Integration"/>
    </feature>
@@ -20,11 +18,6 @@
    <feature url="features/org.maven.ide.eclipse.editor.feature_0.9.9.qualifier.jar" id="org.maven.ide.eclipse.editor.feature" version="0.9.9.qualifier">
       <category name="Maven Integration"/>
    </feature>
-   <!--
-   <feature url="features/org.maven.ide.eclipse.mylyn.feature_0.9.9.qualifier.jar" id="org.maven.ide.eclipse.mylyn.feature" version="0.9.9.qualifier">
-      <category name="Maven Optional Components"/>
-   </feature>
-   -->
    <feature url="features/org.maven.ide.eclipse.mylyn3.feature_0.9.9.qualifier.jar" id="org.maven.ide.eclipse.mylyn3.feature" version="0.9.9.qualifier">
       <category name="Maven Optional Components"/>
    </feature>
@@ -40,14 +33,18 @@
    <feature url="features/org.maven.ide.eclipse.doxia.feature_0.9.9.qualifier.jar" id="org.maven.ide.eclipse.doxia.feature" version="0.9.9.qualifier">
       <category name="Maven Optional Components"/>
    </feature>
-   
    <feature url="features/org.maven.ide.eclipse.ajdt.feature_0.9.9.qualifier.jar" id="org.maven.ide.eclipse.ajdt.feature" version="0.9.9.qualifier">
       <category name="Maven Project Configurators"/>
    </feature>
    <feature url="features/org.maven.ide.eclipse.wtp.feature_0.9.9.qualifier.jar" id="org.maven.ide.eclipse.wtp.feature" version="0.9.9.qualifier">
       <category name="Maven Project Configurators"/>
    </feature>
-   
+   <feature url="features/org.maven.ide.eclipse.modello.feature_0.9.9.qualifier.jar" id="org.maven.ide.eclipse.modello.feature" version="0.9.9.qualifier">
+      <category name="Maven Project Configurators"/>
+   </feature>
+   <feature url="features/org.maven.ide.eclipse.plexus.annotations.feature_0.9.9.qualifier.jar" id="org.maven.ide.eclipse.plexus.annotations.feature" version="0.9.9.qualifier">
+      <category name="Maven Project Configurators"/>
+   </feature>
    <category-def name="Maven Integration" label="Maven Integration"/>
    <category-def name="Maven Optional Components" label="Maven Optional Components"/>
    <category-def name="Maven Project Configurators" label="Maven Project Configurators"/>

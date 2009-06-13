@@ -48,6 +48,6 @@ public interface IProjectConfigurationManager {
   void updateProjectConfiguration(IProject project, ResolverConfiguration configuration, String goalToExecute,
       IProgressMonitor monitor) throws CoreException;
 
-  ILifecycleMapping getLifecycleMapping(IMavenProjectFacade projectFacade);
+  ILifecycleMapping getLifecycleMapping(IMavenProjectFacade projectFacade, IProgressMonitor monitor) throws CoreException;
 
 }

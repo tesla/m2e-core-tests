@@ -17,7 +17,6 @@ import org.eclipse.ui.console.IConsolePageParticipant;
 import org.eclipse.ui.part.IPageBookViewPage;
 
 import org.maven.ide.eclipse.MavenImages;
-import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.MavenConsoleRemoveAction;
 import org.maven.ide.eclipse.actions.MavenDebugOutputAction;
 import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;

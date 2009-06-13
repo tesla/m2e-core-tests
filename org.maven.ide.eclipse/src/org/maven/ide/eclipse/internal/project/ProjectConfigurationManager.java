@@ -47,13 +47,17 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.ui.IWorkingSet;
 
 import org.codehaus.plexus.util.dag.CycleDetectedException;
+import org.codehaus.plexus.util.xml.Xpp3Dom;
 
 import org.apache.maven.archetype.ArchetypeGenerationRequest;
 import org.apache.maven.archetype.ArchetypeGenerationResult;
 import org.apache.maven.archetype.catalog.Archetype;
 import org.apache.maven.execution.DuplicateProjectException;
+import org.apache.maven.execution.MavenExecutionRequest;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.execution.ProjectSorter;
 import org.apache.maven.model.Model;
+import org.apache.maven.model.Plugin;
 import org.apache.maven.project.MavenProject;
 
 import org.maven.ide.eclipse.MavenPlugin;
@@ -80,6 +84,7 @@ import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
 import org.maven.ide.eclipse.project.configurator.ILifecycleMapping;
+import org.maven.ide.eclipse.project.configurator.NoopLifecycleMapping;
 import org.maven.ide.eclipse.project.configurator.ProjectConfigurationRequest;
 import org.maven.ide.eclipse.util.Util;
 
@@ -95,7 +100,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
 
   static final QualifiedName QNAME = new QualifiedName(IMavenConstants.PLUGIN_ID, "ProjectImportManager");
 
-  private static final String DEFAULT_LIFECYCLE_MAPPING_ID = "default";
+  private static final String DEFAULT_LIFECYCLE_MAPPING_ID = "generic";
 
   final MavenModelManager modelManager;
 
@@ -252,12 +257,17 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
         if(monitor.isCanceled()) {
           throw new OperationCanceledException();
         }
-        ProjectConfigurationRequest request = new ProjectConfigurationRequest(facade, facade.getProject(), facade.getPom(), facade.getMavenProject(monitor), facade.getResolverConfiguration(), false /*updateSources*/);
+        ProjectConfigurationRequest request = new ProjectConfigurationRequest(facade, facade.getMavenProject(monitor), createMavenSession(facade, monitor), false /*updateSources*/);
         updateProjectConfiguration(request, monitor);
       }
     } finally {
       projectManagerImpl.notifyProjectChangeListeners(monitor);
     }
+  }
+
+  private MavenSession createMavenSession(IMavenProjectFacade facade, IProgressMonitor monitor) throws CoreException {
+    MavenExecutionRequest request = projectManager.createExecutionRequest(facade.getPom(), facade.getResolverConfiguration());
+    return maven.createSession(request, facade.getMavenProject(monitor));
   }
 
   public static final void sortProjects(List<IMavenProjectFacade> facades, IProgressMonitor monitor) throws CoreException {
@@ -305,7 +315,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     if (pom.isAccessible()) {
       IMavenProjectFacade facade = projectManagerImpl.create(pom, false, monitor);
       if (facade != null) { // facade is null if pom.xml cannot be read
-        ProjectConfigurationRequest request = new ProjectConfigurationRequest(facade, project, facade.getPom(), facade.getMavenProject(monitor), configuration, true);
+        ProjectConfigurationRequest request = new ProjectConfigurationRequest(facade, facade.getMavenProject(monitor), createMavenSession(facade, monitor), true /*updateSources*/);
         updateProjectConfiguration(request, monitor);
       }
     }
@@ -318,7 +328,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     IProject project = request.getProject();
     addMavenNature(project, monitor);
 
-    ILifecycleMapping lifecycleMapping = getLifecycleMapping(request.getMavenProjectFacade());
+    ILifecycleMapping lifecycleMapping = getLifecycleMapping(request.getMavenProjectFacade(), monitor);
 
     lifecycleMapping.configure(request, monitor);
 
@@ -357,13 +367,10 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
   public void disableMavenNature(IProject project, IProgressMonitor monitor) throws CoreException {
     monitor.subTask("Disable Maven nature");
 
-    IFile pom = project.getFile(IMavenConstants.POM_FILE_NAME);
     IMavenProjectFacade facade = projectManager.create(project, monitor);
     if(facade!=null) {
-      ILifecycleMapping lifecycleMapping = getLifecycleMapping(facade);
-      MavenProject mavenProject = facade.getMavenProject(monitor);
-      ResolverConfiguration resolverConfiguration = facade.getResolverConfiguration();
-      ProjectConfigurationRequest request = new ProjectConfigurationRequest(facade, project, pom, mavenProject, resolverConfiguration, false);
+      ILifecycleMapping lifecycleMapping = getLifecycleMapping(facade, monitor);
+      ProjectConfigurationRequest request = new ProjectConfigurationRequest(facade, facade.getMavenProject(monitor), createMavenSession(facade, monitor), false /*updateSources*/);
       lifecycleMapping.unconfigure(request, monitor);
     }
 
@@ -617,20 +624,57 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
 
   public void mavenProjectChanged(MavenProjectChangedEvent[] events, IProgressMonitor monitor) {
     for(MavenProjectChangedEvent event : events) {
-      ILifecycleMapping lifecycleMapping = getLifecycleMapping(event.getMavenProject());
-      if(lifecycleMapping != null) {
-        for(AbstractProjectConfigurator configurator : lifecycleMapping.getProjectConfigurators()) {
-          configurator.mavenProjectChanged(events, monitor);
+      try {
+        ILifecycleMapping lifecycleMapping = getLifecycleMapping(event.getMavenProject(), monitor);
+        if(lifecycleMapping != null) {
+          for(AbstractProjectConfigurator configurator : lifecycleMapping.getProjectConfigurators(event.getMavenProject(), monitor)) {
+            configurator.mavenProjectChanged(events, monitor);
+          }
         }
+      } catch (CoreException e) {
+        MavenLogger.log(e);
       }
     }
   }
-  
-  public ILifecycleMapping getLifecycleMapping(IMavenProjectFacade projectFacade) {
+
+  public ILifecycleMapping getLifecycleMapping(IMavenProjectFacade projectFacade, IProgressMonitor monitor) throws CoreException {
     if (projectFacade==null) {
       return null;
     }
-    return getLifecycleMapping(DEFAULT_LIFECYCLE_MAPPING_ID);
+
+    String mappingId = null;
+
+    MavenProject project = projectFacade.getMavenProject(monitor);
+
+    if (project.equals(projectFacade.getPom().getParent())) {
+      throw new IllegalArgumentException("Nested workspace module " + projectFacade.getPom());
+    }
+
+    if (projectFacade.getResolverConfiguration().shouldIncludeModules()) {
+      return getLifecycleMapping(DEFAULT_LIFECYCLE_MAPPING_ID);
+    }
+
+    if ("pom".equals(projectFacade.getPackaging())) {
+      return new NoopLifecycleMapping();
+    }
+
+    Plugin plugin = project.getPlugin( "org.maven.ide.eclipse:lifecycle-mapping" );
+
+    if (plugin != null) {
+      Xpp3Dom configuration = (Xpp3Dom) plugin.getConfiguration();
+      if (configuration != null) {
+        Xpp3Dom mappingIdDom = configuration.getChild("mappingId");
+        if (mappingIdDom != null) {
+          mappingId = mappingIdDom.getValue();
+        }
+      }
+    }
+
+    if (mappingId == null || mappingId.length() <= 0) {
+      mappingId = DEFAULT_LIFECYCLE_MAPPING_ID;
+    }
+
+    return getLifecycleMapping(mappingId);
   }
 
   private ILifecycleMapping getLifecycleMapping(String mappingId) {

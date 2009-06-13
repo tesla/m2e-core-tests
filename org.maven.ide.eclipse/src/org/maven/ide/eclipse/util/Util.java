@@ -73,9 +73,9 @@ public class Util {
       if(parent != null && !parent.exists()) {
         createFolder((IFolder) parent, false);
       }
-      folder.create(false, true, null);
+      folder.create(true, true, null);
     }
-    
+
     if(folder.isAccessible() && derived) {
       folder.setDerived(true);
     }

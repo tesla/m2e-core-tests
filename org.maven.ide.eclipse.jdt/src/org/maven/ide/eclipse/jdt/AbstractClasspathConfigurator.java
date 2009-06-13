@@ -16,7 +16,7 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.apache.maven.artifact.Artifact;
 
 /**
- * AbstractClasspathConfigurator
+ * Manipulates content of Maven Dependencies classpath container.
  *
  * @author igor
  */

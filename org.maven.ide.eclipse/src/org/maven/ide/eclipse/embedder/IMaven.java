@@ -64,11 +64,14 @@ public interface IMaven {
 
   public MavenExecutionResult execute(MavenExecutionRequest request, IProgressMonitor monitor);
 
-  public MavenSession newSession(MavenExecutionRequest request, MavenProject project);
+  public MavenSession createSession(MavenExecutionRequest request, MavenProject project);
 
   public void execute(MavenSession session, MojoExecution execution, IProgressMonitor monitor);
 
   public MavenExecutionPlan calculateExecutionPlan(MavenExecutionRequest request, MavenProject project, IProgressMonitor monitor) throws CoreException;
+
+  public <T> T getMojoParameterValue(MavenSession session, MojoExecution mojoExecution, String parameter, Class<T> asType)
+      throws CoreException;
 
   // configuration
 

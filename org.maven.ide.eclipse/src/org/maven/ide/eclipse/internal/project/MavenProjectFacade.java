@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.Status;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.execution.MavenExecutionResult;
+import org.apache.maven.lifecycle.MavenExecutionPlan;
 import org.apache.maven.model.Build;
 import org.apache.maven.project.MavenProject;
 
@@ -43,7 +44,6 @@ import org.maven.ide.eclipse.project.IMavenProjectVisitor2;
 import org.maven.ide.eclipse.project.MavenProjectUtils;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
-import org.maven.ide.eclipse.project.configurator.AbstractBuildParticipant;
 
 
 /**
@@ -56,7 +56,7 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
   private static final String VERSION = "[version]";
   private static final String ARTIFACT_ID = "[artifactId]";
   private static final String GROUP_ID = "[groupId]";
-  
+
   private final MavenProjectManagerImpl manager;
 
   private final IFile pom;
@@ -64,7 +64,7 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
   private final File pomFile;
 
   private transient MavenProject mavenProject;
-  private transient List<AbstractBuildParticipant> buildParticipants;
+  private transient MavenExecutionPlan executionPlan;
 
   // XXX make final, there should be no need to change it
   private ResolverConfiguration resolverConfiguration;
@@ -188,16 +188,12 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
     }
     return mavenProject;
   }
-  
-  public synchronized List<AbstractBuildParticipant> getBuildParticipants(IProgressMonitor monitor) throws CoreException {
-    if (buildParticipants == null) {
-      buildParticipants = manager.getBuildParticipants(this, monitor);
-    }
-    return buildParticipants;
-  }
 
-  public synchronized  void setBuildParticipants(List<AbstractBuildParticipant> buildParticipants) {
-    this.buildParticipants = buildParticipants;
+  public synchronized MavenExecutionPlan getExecutionPlan(IProgressMonitor monitor) throws CoreException {
+    if (executionPlan == null) {
+      executionPlan = manager.calculateExecutionPlan(this, monitor);
+    }
+    return executionPlan;
   }
 
   public String getPackaging() {

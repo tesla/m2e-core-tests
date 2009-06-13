@@ -6,7 +6,7 @@
   <groupId>org.maven.ide.eclipse.projects</groupId>
   <artifactId>compilerSettingsJsr14</artifactId>
   <version>1.0.0-SNAPSHOT</version>
-  <packaging>pom</packaging>
+  <packaging>jar</packaging>
   <description>test project for MNGECLIPSE-639</description>
   
   <build>

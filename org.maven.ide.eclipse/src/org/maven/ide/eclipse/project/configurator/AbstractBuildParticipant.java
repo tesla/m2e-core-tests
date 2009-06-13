@@ -15,6 +15,8 @@ import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.apache.maven.execution.MavenSession;
+
 import org.maven.ide.eclipse.internal.builder.InternalBuildParticipant;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 
@@ -60,5 +62,9 @@ public abstract class AbstractBuildParticipant extends InternalBuildParticipant 
   
   protected IResourceDelta getDelta(IProject project) {
     return super.getDelta(project);
+  }
+  
+  protected MavenSession getSession() {
+    return super.getSession();
   }
 }

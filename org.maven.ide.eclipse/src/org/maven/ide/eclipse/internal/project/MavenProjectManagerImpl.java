@@ -47,6 +47,7 @@ import org.apache.maven.artifact.resolver.AbstractArtifactResolutionException;
 import org.apache.maven.execution.DefaultMavenExecutionResult;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionResult;
+import org.apache.maven.lifecycle.MavenExecutionPlan;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 import org.apache.maven.model.Plugin;
@@ -72,8 +73,6 @@ import org.maven.ide.eclipse.project.IMavenProjectVisitor2;
 import org.maven.ide.eclipse.project.MavenProjectChangedEvent;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
-import org.maven.ide.eclipse.project.configurator.AbstractBuildParticipant;
-import org.maven.ide.eclipse.project.configurator.ILifecycleMapping;
 
 /**
  * This class keeps track of all maven projects present in the workspace and
@@ -352,22 +351,13 @@ public class MavenProjectManagerImpl {
       }
     }
 
-    for (IFile pom : refreshed) {
-      MavenProjectFacade facade = create(pom, false, monitor);
-      if (facade != null) {
-        facade.setBuildParticipants(getBuildParticipants(facade, monitor));
-      }
-    }
-
     notifyProjectChangeListeners(monitor);
   }
 
-  List<AbstractBuildParticipant> getBuildParticipants(MavenProjectFacade facade, IProgressMonitor monitor)
-      throws CoreException {
-    ILifecycleMapping mapping = new DefaultLifecycleMapping();
-
-    List<AbstractBuildParticipant> buildParticipants = mapping.getBuildParticipants(facade, monitor);
-    return buildParticipants;
+  MavenExecutionPlan calculateExecutionPlan(MavenProjectFacade facade, IProgressMonitor monitor) throws CoreException {
+    MavenExecutionRequest request = createExecutionRequest(facade.getPom(), facade.getResolverConfiguration());
+    request.setGoals(Arrays.asList("package"));
+    return maven.calculateExecutionPlan(request, facade.getMavenProject(monitor), monitor);
   }
 
   public void refresh(IFile pom, DependencyResolutionContext updateRequest, IProgressMonitor monitor) throws CoreException {
@@ -958,8 +948,7 @@ public class MavenProjectManagerImpl {
       MavenUpdateRequest updateRequest, IProgressMonitor monitor) {
 
     try {
-      MavenExecutionRequest request;
-      request = createExecutionRequest(pomFile, resolverConfiguration);
+      MavenExecutionRequest request = createExecutionRequest(pomFile, resolverConfiguration);
       request.setOffline(updateRequest.isOffline());
       return maven.readProjectWithDependencies(request, monitor);
     } catch(CoreException ex) {

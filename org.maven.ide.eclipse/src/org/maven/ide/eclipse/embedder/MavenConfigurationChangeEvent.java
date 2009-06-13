@@ -17,6 +17,8 @@ import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;
  */
 public class MavenConfigurationChangeEvent implements MavenPreferenceConstants {
 
+  public static final String P_USER_SETTINGS_FILE = MavenPreferenceConstants.P_USER_SETTINGS_FILE;
+
   private final String key;
   private final Object newValue;
   private final Object oldValue;

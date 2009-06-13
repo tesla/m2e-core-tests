@@ -38,9 +38,17 @@
    </extension>
 
    <extension point="org.maven.ide.eclipse.projectConfigurators">
-      <configurator id="org.maven.ide.eclipse.configurator.jdt"
-          class="org.maven.ide.eclipse.jdt.internal.JavaProjectConfigurator"
-          name="JDT" priority="10"/>
+      <configurator
+            class="org.maven.ide.eclipse.jdt.internal.GenericJavaProjectConfigurator"
+            id="org.maven.ide.eclipse.jdt.genericJava"
+            name="Generic JDT"
+            priority="10"/>
+      <configurator
+            class="org.maven.ide.eclipse.jdt.internal.JavaProjectConfigurator"
+            generic="false"
+            id="org.maven.ide.eclipse.jdt.javaConfigurator"
+            name="JDT">
+      </configurator>
    </extension>
    
    <extension point="org.eclipse.jdt.core.classpathVariableInitializer">
