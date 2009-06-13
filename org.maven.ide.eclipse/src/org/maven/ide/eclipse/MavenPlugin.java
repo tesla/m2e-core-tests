@@ -84,6 +84,7 @@ import org.codehaus.plexus.util.IOUtil;
 
 import org.apache.maven.ArtifactFilterManagerDelegate;
 import org.apache.maven.artifact.resolver.metadata.MetadataSource;
+import org.apache.maven.plugin.PluginManager;
 import org.apache.maven.project.artifact.MavenMetadataCache;
 
 import org.sonatype.plexus.build.incremental.BuildContext;
@@ -113,6 +114,7 @@ import org.maven.ide.eclipse.internal.index.IndexInfoWriter;
 import org.maven.ide.eclipse.internal.index.NexusIndexManager;
 import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;
 import org.maven.ide.eclipse.internal.project.EclipseMavenMetadataCache;
+import org.maven.ide.eclipse.internal.project.EclipsePluginManager;
 import org.maven.ide.eclipse.internal.project.IManagedCache;
 import org.maven.ide.eclipse.internal.project.MavenMarkerManager;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerImpl;
@@ -263,6 +265,8 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
             desc.setImplementationClass(EclipseMavenMetadataCache.class);
           } else if (BuildContext.class.getName().equals(desc.getRole())) {
             desc.setImplementationClass(ThreadBuildContext.class);
+          } else if (PluginManager.class.getName().equals(desc.getRole())) {
+            desc.setImplementationClass(EclipsePluginManager.class);
           }
         }
       }

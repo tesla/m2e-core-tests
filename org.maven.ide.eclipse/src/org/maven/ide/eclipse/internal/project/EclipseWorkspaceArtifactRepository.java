@@ -22,13 +22,21 @@ import org.maven.ide.eclipse.embedder.ArtifactKey;
 
 public class EclipseWorkspaceArtifactRepository extends LocalArtifactRepository {
 
-  private final MavenProjectManagerImpl.Context context;
+  private static final long serialVersionUID = 1018465082844566543L;
+
+  private final transient MavenProjectManagerImpl.Context context;
+
+  private static final ThreadLocal<Boolean> disabled = new ThreadLocal<Boolean>();
 
   public EclipseWorkspaceArtifactRepository(MavenProjectManagerImpl.Context context) {
     this.context = context;
   }
 
   protected boolean resolveAsEclipseProject(Artifact artifact) {
+    if (isDisabled()) {
+      return false;
+    }
+
     if(context == null) { // XXX this is actually a bug 
       return false;
     }
@@ -93,4 +101,11 @@ public class EclipseWorkspaceArtifactRepository extends LocalArtifactRepository 
     return true;
   }
 
+  public static void setDisabled(boolean disable) {
+    disabled.set(disable? Boolean.TRUE: null);
+  }
+  
+  public static boolean isDisabled() {
+    return Boolean.TRUE.equals(disabled.get());
+  }
 }
