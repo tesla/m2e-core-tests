@@ -67,12 +67,13 @@ public class CustomizableLifecycleMapping extends AbstractLifecycleMapping imple
     List<AbstractProjectConfigurator> configurators = new ArrayList<AbstractProjectConfigurator>();
     
     if (configuratorsDom != null) {
-      for(String configuratorId : getListElements(configuratorsDom, "configurator")) {
+      for(Xpp3Dom configuratorDom : configuratorsDom.getChildren("configurator")) {
+        String configuratorId = configuratorDom.getAttribute("id");
         AbstractProjectConfigurator configurator = configuratorsMap.get(configuratorId);
         if(configurator == null) {
           throw new IllegalArgumentException("Unknown configurator id=" + configuratorId);
         }
-        
+
         configurators.add(configurator);
       }
     }

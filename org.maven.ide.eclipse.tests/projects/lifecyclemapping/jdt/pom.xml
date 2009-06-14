@@ -12,7 +12,7 @@
         <artifactId>lifecycle-mapping</artifactId>
         <version>0.9.9-SNAPSHOT</version>
         <configuration>
-          <mappingId>jdt</mappingId>
+          <mappingId>jdt-only</mappingId>
         </configuration>
       </plugin>
     </plugins>
