@@ -113,17 +113,22 @@ public interface IMavenProjectFacade {
    */
   boolean isStale();
 
-  /**
-   * Executes MavenRunnable. Runnable can set goals and other execution settings. 
-   * 
-   * @return execution result 
-   */
-//  MavenExecutionResult execute(MavenRunnable runnable, IProgressMonitor monitor) throws CoreException;
-
   ArtifactKey getArtifactKey();
-  
-  /*
-   * @return calculated name template for a project
+
+  /**
+   * Associates the value with the key in session (i.e. transient) context.
+   * Intended as a mechanism to cache state derived from MavenProject.
+   * Session properties are cleared when MavenProject is re-read from disk.
+   * 
+   * @see #getSessionProperty(String)
    */
-  String getNameTemplate();
+  public void setSessionProperty(String key, Object value);
+
+  /**
+   * @return the value associated with the key in session context or null
+   *   if the key is not associated with any value.
+   *   
+   * @see #setSessionProperty(String, Object)
+   */
+  public Object getSessionProperty(String key);
 }

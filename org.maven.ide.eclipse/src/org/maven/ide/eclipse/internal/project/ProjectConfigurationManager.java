@@ -41,7 +41,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.ui.IWorkingSet;
@@ -98,9 +97,9 @@ import org.maven.ide.eclipse.util.Util;
  */
 public class ProjectConfigurationManager implements IProjectConfigurationManager, IMavenProjectChangedListener {
 
-  static final QualifiedName QNAME = new QualifiedName(IMavenConstants.PLUGIN_ID, "ProjectImportManager");
-
   private static final String DEFAULT_LIFECYCLE_MAPPING_ID = "generic";
+  
+  private static final String PROP_LIFECYCLE_MAPPING = ProjectConfigurationManager.class.getName() + "/lifecycleMapping";
 
   final MavenModelManager modelManager;
 
@@ -642,6 +641,18 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
       return null;
     }
 
+    ILifecycleMapping mapping = (ILifecycleMapping) projectFacade.getSessionProperty(PROP_LIFECYCLE_MAPPING);
+
+    if (mapping == null) {
+      mapping = doGetLifecycleMapping(projectFacade, monitor);
+      projectFacade.setSessionProperty(PROP_LIFECYCLE_MAPPING, mapping);
+    }
+
+    return mapping;
+  }
+
+  private ILifecycleMapping doGetLifecycleMapping(IMavenProjectFacade projectFacade, IProgressMonitor monitor)
+      throws CoreException {
     String mappingId = null;
 
     MavenProject project = projectFacade.getMavenProject(monitor);

@@ -10,16 +10,13 @@ package org.maven.ide.eclipse.internal.project;
 
 import java.io.File;
 import java.io.Serializable;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -32,7 +29,6 @@ import org.eclipse.core.runtime.Status;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.lifecycle.MavenExecutionPlan;
-import org.apache.maven.model.Build;
 import org.apache.maven.project.MavenProject;
 
 import org.maven.ide.eclipse.core.IMavenConstants;
@@ -53,10 +49,6 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
 
   private static final long serialVersionUID = 707484407691175077L;
 
-  private static final String VERSION = "[version]";
-  private static final String ARTIFACT_ID = "[artifactId]";
-  private static final String GROUP_ID = "[groupId]";
-
   private final MavenProjectManagerImpl manager;
 
   private final IFile pom;
@@ -65,6 +57,8 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
 
   private transient MavenProject mavenProject;
   private transient MavenExecutionPlan executionPlan;
+
+  private final transient Map<String, Object> sessionProperties = new HashMap<String, Object>();
 
   // XXX make final, there should be no need to change it
   private ResolverConfiguration resolverConfiguration;
@@ -306,48 +300,12 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
     /*
      * this implementation misses update in the following scenario
      * 
-     * 1. two files, A and B, with different content but same length were created
-     *    with same localTimeStamp
+     * 1. two files, A and B, with different content were created with same localTimeStamp
      * 2. original A was deleted and B moved to A
      * 
      * See also https://bugs.eclipse.org/bugs/show_bug.cgi?id=160728
      */
-    return file.getLocation().toFile().length() + file.getLocalTimeStamp() + file.getModificationStamp();
-  }
-
-  /**
-   * Executes specified maven goals. 
-   * 
-   * Recurses into nested modules depending on resolver configuration.
-   * 
-   * @return execution result 
-   */
-//  public MavenExecutionResult execute(List<String> goals, IProgressMonitor monitor) throws CoreException {
-//    MavenExecutionResult result = execute(goals, resolverConfiguration.shouldIncludeModules(), monitor);
-//    refreshBuildDirectory(monitor);
-//    return result;
-//  }
-
-//  public MavenExecutionResult execute(MavenRunnable runnable, IProgressMonitor monitor) throws CoreException {
-//    MavenExecutionResult result = manager.execute(pom, resolverConfiguration, runnable, monitor, monitor);
-//
-//    // XXX only need to refresh target or target/classes and target/test-classes
-//    refreshBuildFolders(monitor);
-//    
-//    return result; 
-//  }
-  
-  private void refreshBuildFolders(final IProgressMonitor monitor) throws CoreException {
-    accept(new IMavenProjectVisitor() {
-      public boolean visit(IMavenProjectFacade projectFacade) throws CoreException {
-        Build build = projectFacade.getMavenProject(monitor).getBuild();
-        IFolder folder = getProject().getFolder(projectFacade.getProjectRelativePath(build.getDirectory()));
-        if(folder != null) {
-          folder.refreshLocal(IResource.DEPTH_INFINITE, monitor);
-        }
-        return true; // keep visiting
-      }
-    }, IMavenProjectVisitor.NESTED_MODULES);
+    return file.getLocalTimeStamp() + file.getModificationStamp();
   }
 
   public ArtifactKey getArtifactKey() {
@@ -358,126 +316,15 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
     return mavenProject;
   }
 
-  public String getNameTemplate() {
-    return getNamePattern(getProject().getName(), getArtifactKey().getGroupId(), 
-        getArtifactKey().getArtifactId(), getArtifactKey().getVersion());
-  }
-  
-  public static String getNamePattern(String projectName, String groupId, String artifactId, String version) {
-    GAVPatternIterator iterator = new GAVPatternIterator(groupId, artifactId, version);
-    while (iterator.hasNext()) {
-      Pattern p = iterator.next();
-      Matcher m = p.matcher(projectName); 
-      if (m.matches()) {
-        // replace longest first. if same length, priority is A > G > V. calculate weighted length
-        // assumption is weighted lengths are never equal
-        int l1 = groupId.length() * groupId.length() + 1;
-        int l2 = artifactId.length() * artifactId.length() + 2;
-        int l3 = version.length() * version.length();
-        
-        if (l1 > l2 && l1 > l3) {
-          projectName = replace(projectName, groupId, GROUP_ID);
-          if (l2 > l3) {
-            projectName = replace(projectName, artifactId, ARTIFACT_ID);
-            projectName = replace(projectName, version, VERSION);
-          } else {
-            projectName = replace(projectName, version, VERSION);
-            projectName = replace(projectName, artifactId, ARTIFACT_ID);
-          }
-        } else if (l2 > l1 && l2 > l3) {
-          projectName = replace(projectName, artifactId, ARTIFACT_ID);
-          if (l1 > l3) {
-            projectName = replace(projectName, groupId, GROUP_ID);
-            projectName = replace(projectName, version, VERSION);
-          } else {
-            projectName = replace(projectName, version, VERSION);
-            projectName = replace(projectName, groupId, GROUP_ID);
-          }
-        } else {
-          projectName = replace(projectName, version, VERSION);
-          if (l1 > l2) {
-            projectName = replace(projectName, groupId, GROUP_ID);
-            projectName = replace(projectName, artifactId, ARTIFACT_ID);
-          } else {
-            projectName = replace(projectName, artifactId, ARTIFACT_ID);
-            projectName = replace(projectName, groupId, GROUP_ID);
-          }
-        }
-
-        return projectName;
-      }
+  public void setSessionProperty(String key, Object value) {
+    if (value != null) {
+      sessionProperties.put(key, value);
+    } else {
+      sessionProperties.remove(key);
     }
-
-    // cannot guess...
-    return ARTIFACT_ID;
-  }
-  
-  private static String replace(String str, String value, String template) {
-    int pos = str.indexOf(value);
-    if (pos >= 0) {
-      str = str.substring(0, pos) + template + str.substring(pos + value.length());
-    }
-    return str;
   }
 
-  
-  public static class GAVPatternIterator implements Iterator<Pattern> {
-    private static final int num1 = 3;
-    private static final int num2 = 6;
-    private static final int num3 = 6;
-    private static final int totalNum = num1 + num2 + num3;
-    private static final String ANY = ".*";
-
-    private int currentNum;
-    private String groupId;
-    private String artifactId;
-    private String version;    
-    
-    public GAVPatternIterator(String groupId, String artifactId, String version) {
-      this.currentNum = totalNum;
-      this.groupId = groupId;
-      this.artifactId = artifactId;
-      this.version = version;
-    }
-
-    public boolean hasNext() {
-      return currentNum > 0;
-    }
-
-    public Pattern next() {
-      return Pattern.compile(getPattern());
-    }
-
-    private String getPattern() {
-      if(currentNum < num1) {
-        // one
-        return ANY + get(currentNum-- ) + ANY;
-      } else if(currentNum < num1 + num2) {
-        // two
-        int offset = (currentNum - num1) / 3;
-        return ANY + get(currentNum + offset) + ANY + get(currentNum-- + offset * 2 + 1) + ANY;
-      } else {
-        // three
-        int offset = (currentNum - num1 - num2) / 3;
-        return ANY + get(currentNum + offset) + ANY + get(currentNum + offset * 2 + 1) + ANY
-            + get(currentNum-- + offset + 2);
-      }
-    }
-
-    private String get(int pos) {
-      pos %= 3;
-      if (pos == 0) {
-        return groupId;
-      } else if (pos == 1) {
-        return artifactId;
-      } else {
-        return version;
-      }
-    }
-    
-    public void remove() {
-      //not supported
-    }
-    
+  public Object getSessionProperty(String key) {
+    return sessionProperties.get(key);
   }
 }
