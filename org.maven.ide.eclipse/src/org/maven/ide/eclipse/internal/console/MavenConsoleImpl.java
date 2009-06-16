@@ -122,32 +122,37 @@ public class MavenConsoleImpl extends IOConsole implements MavenConsole, IProper
     }
   }
 
-  private void appendLine(int type, String line) {
+  private void appendLine(final int type, final String line) {
     show(false);
-    synchronized(document) {
-      if(visible) {
-        try {
-          switch(type) {
-            case ConsoleDocument.COMMAND:
-              commandStream.write(line);
-              commandStream.write('\n');
-              break;
-            case ConsoleDocument.MESSAGE:
-              messageStream.write(line);
-              messageStream.write('\n');
-              break;
-            case ConsoleDocument.ERROR:
-              errorStream.write(line);
-              errorStream.write('\n');
-              break;
+    //the synchronization here caused a deadlock. since the writes are simply appending to the output stream
+    //or the document, just doing it on the main thread to avoid deadlocks and or corruption of the 
+    //document or output stream
+    Display.getDefault().asyncExec(new Runnable(){
+      public void run(){
+        if(visible) {
+          try {
+            switch(type) {
+              case ConsoleDocument.COMMAND:
+                commandStream.write(line);
+                commandStream.write('\n');
+                break;
+              case ConsoleDocument.MESSAGE:
+                messageStream.write(line);
+                messageStream.write('\n');
+                break;
+              case ConsoleDocument.ERROR:
+                errorStream.write(line);
+                errorStream.write('\n');
+                break;
+            }
+          } catch(IOException ex) {
+            MavenLogger.log("Console error", ex);
           }
-        } catch(IOException ex) {
-          MavenLogger.log("Console error", ex);
+        } else {
+          document.appendConsoleLine(type, line);
         }
-      } else {
-        document.appendConsoleLine(type, line);
       }
-    }
+    });
   }
 
   /**
