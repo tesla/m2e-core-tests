@@ -88,10 +88,7 @@ public class ResourceChangeListenerTest extends AsbtractMavenProjectTestCase {
     waitForJobsToComplete();
 
     // modify
-    project.getFile("pom.xml").delete(true, null);
-    IFile pom001 = project.getFile("pom001.xml");
-    pom001.move(project.getFile("pom.xml").getFullPath(), true, null);
-    waitForJobsToComplete();
+    copyContent(project, "pom001.xml", "pom.xml");
 
     // assert
     IClasspathEntry[] cp = getMavenContainerEntries(project);
@@ -115,14 +112,7 @@ public class ResourceChangeListenerTest extends AsbtractMavenProjectTestCase {
     waitForJobsToComplete();
 
     // modify
-    workspace.run(new IWorkspaceRunnable() {
-      public void run(IProgressMonitor monitor) throws CoreException {
-        project.getFile("pom.xml").delete(true, null);
-        IFile pom001 = project.getFile("pom001.xml");
-        pom001.move(project.getFile("pom.xml").getFullPath(), true, null);
-      }
-    }, null);
-    waitForJobsToComplete();
+    copyContent(project, "pom001.xml", "pom.xml");
 
     // assert
     waitForJobsToComplete();

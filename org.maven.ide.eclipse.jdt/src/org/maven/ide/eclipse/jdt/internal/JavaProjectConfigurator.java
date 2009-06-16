@@ -10,11 +10,9 @@ package org.maven.ide.eclipse.jdt.internal;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -24,7 +22,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -37,10 +34,16 @@ import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
 
-import org.maven.ide.eclipse.jdt.AbstractJavaProjectConfigurator;
+import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.jdt.BuildPathManager;
+import org.maven.ide.eclipse.jdt.IClasspathDescriptor;
+import org.maven.ide.eclipse.jdt.IClasspathEntryDescriptor;
+import org.maven.ide.eclipse.jdt.IJavaProjectConfigurator;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.IMavenProjectVisitor;
+import org.maven.ide.eclipse.project.IProjectConfigurationManager;
+import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
+import org.maven.ide.eclipse.project.configurator.ILifecycleMapping;
 import org.maven.ide.eclipse.project.configurator.ProjectConfigurationRequest;
 import org.maven.ide.eclipse.util.Util;
 
@@ -50,7 +53,7 @@ import org.maven.ide.eclipse.util.Util;
  * 
  * @author igor
  */
-public class JavaProjectConfigurator extends AbstractJavaProjectConfigurator {
+public class JavaProjectConfigurator extends AbstractProjectConfigurator {
 
   private static final List<String> SOURCES = Arrays.asList("1.1,1.2,1.3,1.4,1.5,1.6,1.7".split(","));
 
@@ -81,7 +84,7 @@ public class JavaProjectConfigurator extends AbstractJavaProjectConfigurator {
     IJavaProject javaProject = JavaCore.create(project);
 
     // XXX full/incremental configuration update
-    final Map<IPath, IClasspathEntry> cp = new LinkedHashMap<IPath, IClasspathEntry>(); //getRawClasspath(javaProject);
+    final IClasspathDescriptor classpath = new ClasspathDescriptor(javaProject);
 
     // source/target compiler compliance levels
     String source = null, target = null;
@@ -91,7 +94,7 @@ public class JavaProjectConfigurator extends AbstractJavaProjectConfigurator {
         target = getCompilerLevel(mavenSession, mojoExecution, "target", target, TARGETS);
       }
     }
-    
+
     if (source == null || target == null) {
       // this really means java compiler is not present in build lifecycle
       throw new IllegalArgumentException("Not a java project " + project);
@@ -100,14 +103,22 @@ public class JavaProjectConfigurator extends AbstractJavaProjectConfigurator {
     // source folders
     facade.accept(new IMavenProjectVisitor() {
       public boolean visit(IMavenProjectFacade projectFacade) throws CoreException {
-        addProjectSourceFolders(cp, projectFacade, projectFacade.getMavenProject(monitor));
+        addProjectSourceFolders(classpath, projectFacade, projectFacade.getMavenProject(monitor));
         return true;
       }
     }, IMavenProjectVisitor.NESTED_MODULES);
 
+    IProjectConfigurationManager configurationManager = MavenPlugin.getDefault().getProjectConfigurationManager();
+    ILifecycleMapping lifecycleMapping = configurationManager.getLifecycleMapping(facade, monitor);
+    for (AbstractProjectConfigurator configurator : lifecycleMapping.getProjectConfigurators(facade, monitor)) {
+      if (configurator instanceof IJavaProjectConfigurator) {
+        ((IJavaProjectConfigurator) configurator).configureRawClasspath(request, classpath, monitor);
+      }
+    }
+
     // classpath containers
-    addJREClasspathContainer(cp, target);
-    addMavenClasspathContainer(cp);
+    addJREClasspathContainer(classpath, target);
+    addMavenClasspathContainer(classpath);
 
     // set java project options
     Map<String, String> options = javaProject.getOptions(false);
@@ -116,12 +127,11 @@ public class JavaProjectConfigurator extends AbstractJavaProjectConfigurator {
     options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, target);
     javaProject.setOptions(options);
 
-    // set raw classpath
-    setRawClasspath(javaProject, cp, monitor);
+    javaProject.setRawClasspath(classpath.getEntries(), facade.getOutputLocation(), monitor);
   }
 
 
-  void addProjectSourceFolders(Map<IPath, IClasspathEntry> cp, IMavenProjectFacade projectFacade, MavenProject mavenProject) throws CoreException {
+  void addProjectSourceFolders(IClasspathDescriptor classpath, IMavenProjectFacade projectFacade, MavenProject mavenProject) throws CoreException {
     IProject project = projectFacade.getProject();
     IWorkspaceRoot workspaceRoot = project.getWorkspace().getRoot();
 
@@ -131,15 +141,15 @@ public class JavaProjectConfigurator extends AbstractJavaProjectConfigurator {
     Util.createFolder(classes, true);
     Util.createFolder(testClasses, true);
 
-    addSourceDirs(cp, projectFacade, mavenProject.getCompileSourceRoots(), classes.getFullPath());
-    addResourceDirs(cp, projectFacade, mavenProject.getBuild().getResources(), classes.getFullPath());
+    addSourceDirs(classpath, projectFacade, mavenProject.getCompileSourceRoots(), classes.getFullPath());
+    addResourceDirs(classpath, projectFacade, mavenProject.getBuild().getResources(), classes.getFullPath());
 
-    addSourceDirs(cp, projectFacade, mavenProject.getTestCompileSourceRoots(), testClasses.getFullPath());
-    addResourceDirs(cp, projectFacade, mavenProject.getBuild().getTestResources(), testClasses.getFullPath());
+    addSourceDirs(classpath, projectFacade, mavenProject.getTestCompileSourceRoots(), testClasses.getFullPath());
+    addResourceDirs(classpath, projectFacade, mavenProject.getBuild().getTestResources(), testClasses.getFullPath());
   }
 
-  private void addResourceDirs(Map<IPath, IClasspathEntry> cp, IMavenProjectFacade projectFacade,
-      List<Resource> resources, IPath outputPath) {
+  private void addResourceDirs(IClasspathDescriptor classpath, IMavenProjectFacade projectFacade,
+      List<Resource> resources, IPath outputPath) throws CoreException {
     IProject project = projectFacade.getProject();
     
     for(Resource resource : resources) {
@@ -164,30 +174,27 @@ public class JavaProjectConfigurator extends AbstractJavaProjectConfigurator {
            *     </resource>
            */
           console.logError("Skipping resource folder " + r.getFullPath());
-        } else if(r != null && cp.containsKey(r.getFullPath())) {
-          IClasspathEntry cpe = JavaCore.newSourceEntry(r.getFullPath(), new IPath[] {new Path("**")} /*exclusion*/, outputPath);
-          cp.put(cpe.getPath(), cpe);
+        } else if(r != null && classpath.containsPath(r.getFullPath())) {
           console.logMessage("Adding resource folder " + r.getFullPath());
+//          IClasspathEntry cpe = JavaCore.newSourceEntry(, , outputPath);
+          classpath.addSourceEntry(r.getFullPath(), outputPath, new IPath[] {new Path("**")} /*exclusion*/, new IPath[0] /*inclusions*/, false /*optional*/);
         }
       }
     }
   }
 
 
-  private void addSourceDirs(Map<IPath, IClasspathEntry> cp, IMavenProjectFacade projectFacade, List<String> sourceRoots, IPath outputPath) {
+  private void addSourceDirs(IClasspathDescriptor classpath, IMavenProjectFacade projectFacade, List<String> sourceRoots, IPath outputPath) throws CoreException {
     IProject project = projectFacade.getProject();
     for(String sourceRoot : sourceRoots) {
       IFolder sourceFolder = project.getFolder(projectFacade.getProjectRelativePath(sourceRoot));
 
       if(sourceFolder != null && sourceFolder.exists()) {
         console.logMessage("Adding source folder " + sourceFolder.getFullPath());
-        IClasspathAttribute[] attrs = new IClasspathAttribute[0];
-        IClasspathEntry cpe = JavaCore.newSourceEntry(sourceFolder.getFullPath(), //
-            new IPath[0] /*inclusion*/, new IPath[0] /*exclusion*/, outputPath, attrs);
-        cp.put(cpe.getPath(), cpe);
+        classpath.addSourceEntry(sourceFolder.getFullPath(), outputPath, false);
       } else {
         if (sourceFolder != null) {
-          cp.remove(sourceFolder.getFullPath());
+          classpath.removeEntry(sourceFolder.getFullPath());
         }
       }
     }
@@ -221,15 +228,13 @@ public class JavaProjectConfigurator extends AbstractJavaProjectConfigurator {
     return "org.apache.maven.plugins".equals(mojoExecution.getGroupId()) && "maven-compiler-plugin".equals(mojoExecution.getArtifactId());
   }
 
-  private void addJREClasspathContainer(Map<IPath, IClasspathEntry> cp, String target) {
+  private void addJREClasspathContainer(IClasspathDescriptor classpath, String target) {
     // remove existing JRE entry
-    Iterator<Entry<IPath, IClasspathEntry>> cpi = cp.entrySet().iterator();
-    while(cpi.hasNext()) {
-      Entry<IPath, IClasspathEntry> cpe = cpi.next();
-      if(JavaRuntime.JRE_CONTAINER.equals(cpe.getKey().segment(0))) {
-        cpi.remove();
+    classpath.removeEntry(new ClasspathDescriptor.EntryFilter() {
+      public boolean accept(IClasspathEntryDescriptor descriptor) {
+        return JavaRuntime.JRE_CONTAINER.equals(descriptor.getPath().segment(0));
       }
-    }
+    });
 
     IClasspathEntry cpe;
     IExecutionEnvironment executionEnvironment = getExecutionEnvironment(ENVIRONMENTS.get(target));
@@ -240,7 +245,7 @@ public class JavaProjectConfigurator extends AbstractJavaProjectConfigurator {
       cpe = JavaCore.newContainerEntry(containerPath);
     }
 
-    cp.put(cpe.getPath(), cpe);
+    classpath.addEntry(cpe);
   }
 
   private IExecutionEnvironment getExecutionEnvironment(String environmentId) {
@@ -253,19 +258,17 @@ public class JavaProjectConfigurator extends AbstractJavaProjectConfigurator {
     return null;
   }
   
-  private void addMavenClasspathContainer(Map<IPath, IClasspathEntry> cp) {
+  private void addMavenClasspathContainer(IClasspathDescriptor classpath) {
     // remove any old maven classpath container entries
-    Iterator<Entry<IPath, IClasspathEntry>> cpi = cp.entrySet().iterator();
-    while(cpi.hasNext()) {
-      Entry<IPath, IClasspathEntry> cpe = cpi.next();
-      if(BuildPathManager.isMaven2ClasspathContainer(cpe.getKey())) {
-        cpi.remove();
+    classpath.removeEntry(new ClasspathDescriptor.EntryFilter() {
+      public boolean accept(IClasspathEntryDescriptor entry) {
+        return BuildPathManager.isMaven2ClasspathContainer(entry.getPath());
       }
-    }
+    });
 
     // add new entry
     IClasspathEntry cpe = BuildPathManager.getDefaultContainerEntry();
-    cp.put(cpe.getPath(), cpe);
+    classpath.addEntry(cpe);
   }
 
 }

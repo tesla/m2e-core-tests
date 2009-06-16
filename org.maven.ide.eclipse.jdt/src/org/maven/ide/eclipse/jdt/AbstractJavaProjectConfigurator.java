@@ -26,7 +26,7 @@ import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
  * 
  * @author igor
  */
-public abstract class AbstractJavaProjectConfigurator extends AbstractProjectConfigurator {
+public abstract class AbstractJavaProjectConfigurator extends AbstractProjectConfigurator implements IJavaProjectConfigurator {
 
   protected void setRawClasspath(IJavaProject javaProject, Map<IPath, IClasspathEntry> cp, IProgressMonitor monitor)
       throws JavaModelException {
