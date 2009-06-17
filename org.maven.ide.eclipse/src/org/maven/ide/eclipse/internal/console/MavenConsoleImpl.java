@@ -46,7 +46,7 @@ public class MavenConsoleImpl extends IOConsole implements MavenConsole, IProper
   // console is visible in the Console view
   private boolean visible = false;
 
-  private ConsoleDocument document;
+  private ConsoleDocument consoleDocument;
 
   // created colors for each line type - must be disposed at shutdown
   private Color commandColor;
@@ -61,65 +61,63 @@ public class MavenConsoleImpl extends IOConsole implements MavenConsole, IProper
   private IOConsoleOutputStream messageStream;
 
   private IOConsoleOutputStream errorStream;
+  private static final String TITLE = "Maven Console";
 
   public MavenConsoleImpl(ImageDescriptor imageDescriptor) {
-    // TODO extract constants
-    super("Maven Console", imageDescriptor);
-    this.document = new ConsoleDocument();
+    super(TITLE, imageDescriptor);
+    this.setConsoleDocument(new ConsoleDocument());
   }
 
   protected void init() {
     super.init();
 
     //  Ensure that initialization occurs in the UI thread
-    final Display display = PlatformUI.getWorkbench().getDisplay();
-    display.asyncExec(new Runnable() {
+    Display.getDefault().asyncExec(new Runnable() {
       public void run() {
         JFaceResources.getFontRegistry().addListener(MavenConsoleImpl.this);
-        initializeStreams(display);
-        dump();
+        initializeConsoleStreams(Display.getDefault());
+        dumpConsole();
       }
     });
   }
 
   /*
-   * Initialize three streams of the console. Must be called from the UI thread.
+   * Initialize three streams of the console. Must be called from the UI thread, so synchronization is unnecessary.
    */
-  void initializeStreams(Display display) {
-    synchronized(document) {
-      if(!initialized) {
-        commandStream = newOutputStream();
-        errorStream = newOutputStream();
-        messageStream = newOutputStream();
+  protected void initializeConsoleStreams(Display display) {
+    if(!initialized) {
+      setCommandStream(newOutputStream());
+      setErrorStream(newOutputStream());
+      setMessageStream(newOutputStream());
 
-        // TODO convert this to use themes
-        // install colors
-        commandColor = new Color(display, new RGB(0, 0, 0));
-        messageColor = new Color(display, new RGB(0, 0, 255));
-        errorColor = new Color(display, new RGB(255, 0, 0));
+      // TODO convert this to use themes
+      // install colors
+      commandColor = new Color(display, new RGB(0, 0, 0));
+      messageColor = new Color(display, new RGB(0, 0, 255));
+      errorColor = new Color(display, new RGB(255, 0, 0));
 
-        commandStream.setColor(commandColor);
-        messageStream.setColor(messageColor);
-        errorStream.setColor(errorColor);
+      getCommandStream().setColor(commandColor);
+      getMessageStream().setColor(messageColor);
+      getErrorStream().setColor(errorColor);
 
-        // install font
-        setFont(JFaceResources.getFontRegistry().get("pref_console_font"));
+      // install font
+      setFont(JFaceResources.getFontRegistry().get("pref_console_font"));
 
-        initialized = true;
-      }
+      initialized = true;
     }
   }
 
-  void dump() {
-    synchronized(document) {
-      visible = true;
-      ConsoleDocument.ConsoleLine[] lines = document.getLines();
-      for(int i = 0; i < lines.length; i++ ) {
-        ConsoleDocument.ConsoleLine line = lines[i];
-        appendLine(line.type, line.line);
-      }
-      document.clear();
+  /**
+   * Is always called from main thread, so synchronization not necessary
+   */
+  protected void dumpConsole() {
+    setVisible(true);
+    ConsoleDocument.ConsoleLine[] lines = getConsoleDocument().getLines();
+    for(int i = 0; i < lines.length; i++ ) {
+      ConsoleDocument.ConsoleLine line = lines[i];
+      appendLine(line.type, line.line);
     }
+    getConsoleDocument().clear();
   }
 
   private void appendLine(final int type, final String line) {
@@ -129,27 +127,27 @@ public class MavenConsoleImpl extends IOConsole implements MavenConsole, IProper
     //document or output stream
     Display.getDefault().asyncExec(new Runnable(){
       public void run(){
-        if(visible) {
+        if(isVisible()) {
           try {
             switch(type) {
               case ConsoleDocument.COMMAND:
-                commandStream.write(line);
-                commandStream.write('\n');
+                getCommandStream().write(line);
+                getCommandStream().write('\n');
                 break;
               case ConsoleDocument.MESSAGE:
-                messageStream.write(line);
-                messageStream.write('\n');
+                getMessageStream().write(line);
+                getMessageStream().write('\n');
                 break;
               case ConsoleDocument.ERROR:
-                errorStream.write(line);
-                errorStream.write('\n');
+                getErrorStream().write(line);
+                getErrorStream().write('\n');
                 break;
             }
           } catch(IOException ex) {
             MavenLogger.log("Console error", ex);
           }
         } else {
-          document.appendConsoleLine(type, line);
+          getConsoleDocument().appendConsoleLine(type, line);
         }
       }
     });
@@ -161,8 +159,8 @@ public class MavenConsoleImpl extends IOConsole implements MavenConsole, IProper
    * @param showNoMatterWhat ignore preferences if <code>true</code>
    */
   public void show(boolean showNoMatterWhat) {
-    if(showNoMatterWhat /*|| showOnMessage*/) {
-      if(!visible) {
+    if(showNoMatterWhat) {
+      if(!isVisible()) {
         showConsole();
       } else {
         ConsolePlugin.getDefault().getConsoleManager().showConsoleView(this);
@@ -199,7 +197,7 @@ public class MavenConsoleImpl extends IOConsole implements MavenConsole, IProper
   private void bringConsoleToFront() {
     if(PlatformUI.isWorkbenchRunning()) {
       IConsoleManager manager = ConsolePlugin.getDefault().getConsoleManager();
-      if(!visible) {
+      if(!isVisible()) {
         manager.addConsoles(new IConsole[] {this});   
       }
       manager.showConsoleView(this);
@@ -211,10 +209,12 @@ public class MavenConsoleImpl extends IOConsole implements MavenConsole, IProper
     // Here we can't call super.dispose() because we actually want the partitioner to remain
     // connected, but we won't show lines until the console is added to the console manager
     // again.
-    synchronized(document) {
-      visible = false;
-      JFaceResources.getFontRegistry().removeListener(this);
-    }
+    Display.getDefault().asyncExec(new Runnable(){
+      public void run(){
+        setVisible(false);
+        JFaceResources.getFontRegistry().removeListener(MavenConsoleImpl.this);
+      }
+    });
   }
 
   public void shutdown() {
@@ -261,6 +261,76 @@ public class MavenConsoleImpl extends IOConsole implements MavenConsole, IProper
   }
   public IConsoleListener newLifecycle() {
     return new MavenConsoleLifecycle();
+  }
+
+  /**
+   * @param commandStream The commandStream to set.
+   */
+  protected void setCommandStream(IOConsoleOutputStream commandStream) {
+    this.commandStream = commandStream;
+  }
+
+  /**
+   * @return Returns the commandStream.
+   */
+  protected IOConsoleOutputStream getCommandStream() {
+    return commandStream;
+  }
+
+  /**
+   * @param messageStream The messageStream to set.
+   */
+  protected void setMessageStream(IOConsoleOutputStream messageStream) {
+    this.messageStream = messageStream;
+  }
+
+  /**
+   * @return Returns the messageStream.
+   */
+  protected IOConsoleOutputStream getMessageStream() {
+    return messageStream;
+  }
+
+  /**
+   * @param errorStream The errorStream to set.
+   */
+  protected void setErrorStream(IOConsoleOutputStream errorStream) {
+    this.errorStream = errorStream;
+  }
+
+  /**
+   * @return Returns the errorStream.
+   */
+  protected IOConsoleOutputStream getErrorStream() {
+    return errorStream;
+  }
+
+  /**
+   * @param visible The visible to set.
+   */
+  protected void setVisible(boolean visible) {
+    this.visible = visible;
+  }
+
+  /**
+   * @return Returns the visible.
+   */
+  protected boolean isVisible() {
+    return visible;
+  }
+
+  /**
+   * @param consoleDocument The consoleDocument to set.
+   */
+  private void setConsoleDocument(ConsoleDocument consoleDocument) {
+    this.consoleDocument = consoleDocument;
+  }
+
+  /**
+   * @return Returns the consoleDocument.
+   */
+  protected ConsoleDocument getConsoleDocument() {
+    return consoleDocument;
   }
 
   /**
