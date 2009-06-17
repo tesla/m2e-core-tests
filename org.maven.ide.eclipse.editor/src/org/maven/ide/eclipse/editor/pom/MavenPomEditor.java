@@ -71,6 +71,7 @@ import org.eclipse.emf.edit.provider.ReflectiveItemProviderAdapterFactory;
 import org.eclipse.emf.edit.provider.resource.ResourceItemProviderAdapterFactory;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.ITextListener;
 import org.eclipse.jface.text.TextEvent;
 import org.eclipse.jface.text.source.IAnnotationModel;
@@ -554,6 +555,19 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       sourcePage.update();
       
       IDocument doc = sourcePage.getDocumentProvider().getDocument(getEditorInput());
+      
+      doc.addDocumentListener(new IDocumentListener(){
+
+        public void documentAboutToBeChanged(org.eclipse.jface.text.DocumentEvent event) {         
+        }
+
+        public void documentChanged(org.eclipse.jface.text.DocumentEvent event) {
+          //recheck the read-only status if the document changes (will happen when xml page is edited)
+          if(MavenPomEditor.this.checkedWritableStatus && MavenPomEditor.this.readOnly){
+            MavenPomEditor.this.checkedWritableStatus = false;
+          }
+        }
+      });
       structuredModel = modelManager.getExistingModelForEdit(doc);
       if(structuredModel == null) {
         structuredModel = modelManager.getModelForEdit((IStructuredDocument) doc);
@@ -888,7 +902,34 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     setActivePage(dependencyTreePage.getId());
     dependencyTreePage.selectDepedency(artifactKey);
   }
-
+  
+  private boolean checkedWritableStatus;
+  private boolean readOnly;
+  /** read/write check for read only pom files -- called when the file is opened
+  *   and will validateEdit -- so files will be checked out of src control, etc
+  *   Note: this is actually done separately from isReadOnly() because there are 2 notions of 'read only'
+  *   for a POM. The first is for a file downloaded from a repo, like maven central. That one
+  *   is never editable. The second is for a local file that is read only because its been marked
+  *   that way by an SCM, etc. This method will do a one-time check/validateEdit for the life of the POM
+  *   editor.
+  **/
+  protected boolean checkReadOnly(){
+    if(checkedWritableStatus){
+      return readOnly;
+    }
+    checkedWritableStatus = true;
+    if(getPomFile() != null && getPomFile().isReadOnly()){
+      IStatus validateEdit = ResourcesPlugin.getWorkspace().validateEdit(new IFile[]{getPomFile()}, getEditorSite().getShell());
+      if(!validateEdit.isOK()){
+        readOnly = true;
+      } else {
+        readOnly = isReadOnly();
+      }
+    } else {
+      readOnly = isReadOnly();
+    }
+    return readOnly;
+  }
   
   /**
    * Adapted from <code>org.eclipse.ui.texteditor.AbstractTextEditor.ActivationListener</code>
@@ -915,11 +956,13 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       partService = null;
     }
 
+    
     // IPartListener
 
     public void partActivated(IWorkbenchPart part) {
       activePart = part;
       handleActivation();
+      checkReadOnly();
     }
 
     public void partBroughtToTop(IWorkbenchPart part) {
