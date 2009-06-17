@@ -84,14 +84,14 @@ public class ListEditorComposite<T> extends Composite {
     viewer.setData(FormToolkit.KEY_DRAW_BORDER, Boolean.TRUE);
     GridData gd = null;
     if(includeSearch){
-      selectButton = toolkit.createButton(this, "Select...", SWT.FLAT);
+      selectButton = toolkit.createButton(this, "Add...", SWT.FLAT);
       gd = new GridData(SWT.FILL, SWT.TOP, false, false);
       gd.verticalIndent=0;
       selectButton.setLayoutData(gd);
       selectButton.setEnabled(false);
     }
     
-    addButton = toolkit.createButton(this, "Add...", SWT.FLAT);
+    addButton = toolkit.createButton(this, "Create...", SWT.FLAT);
     gd = new GridData(SWT.FILL, SWT.TOP, false, false);
     gd.verticalIndent=0;
     addButton.setLayoutData(gd);
