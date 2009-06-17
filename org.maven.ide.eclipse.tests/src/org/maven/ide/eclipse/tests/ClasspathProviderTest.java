@@ -31,71 +31,65 @@ import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.jdt.internal.launch.MavenRuntimeClasspathProvider;
+import org.maven.ide.eclipse.jdt.internal.launch.MavenSourcePathProvider;
 import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 
 public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
 
-  // TODO: Need to re-enable this test (see MECLIPSE-158)
-//  public void test() throws Exception {
-//    IProject cptest = createExisting("cptest", "projects/MNGECLIPSE-369/cptest");
-//    createExisting("cptest2", "projects/MNGECLIPSE-369/cptest2");
-//    createExisting("testlib", "projects/MNGECLIPSE-369/testlib");
-//    waitForJobsToComplete();
-//
-//    workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
-//
-//    MavenEmbedderManager embedderManager = plugin.getMavenEmbedderManager();
-//    MavenLogger.log("### Local repository " + embedderManager.getLocalRepositoryDir().getAbsolutePath(), null);
-//    MavenLogger.log("### User Settings " + runtimeManager.getUserSettingsFile(), null);
-//    
-//    assertMarkers(cptest, 0);
-//    
-//    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(cptest.getFile("TestApp.launch"));
-//
-//    MavenRuntimeClasspathProvider classpathProvider = new MavenRuntimeClasspathProvider();
-//    IRuntimeClasspathEntry[] unresolvedClasspath = classpathProvider.computeUnresolvedClasspath(configuration);
-//    
-//    assertEquals(Arrays.asList(unresolvedClasspath).toString(), 3, unresolvedClasspath.length);
-//
-//    IRuntimeClasspathEntry[] resolvedClasspath = classpathProvider.resolveClasspath(unresolvedClasspath, configuration);
-//    IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
-//
-//    assertEquals(Arrays.asList(userClasspath).toString(), 4, userClasspath.length);
-//    assertEquals(new Path("/cptest/target/classes"), userClasspath[0].getPath());
-//    assertEquals("testlib-2.0.jar", userClasspath[1].getPath().lastSegment());
-//    assertEquals("commons-logging-1.0.2.jar", userClasspath[2].getPath().lastSegment());
-//    assertEquals(new Path("/cptest2/target/classes"), userClasspath[3].getPath());
-//  }
-//
-  
-//TODO: Need to re-enable this test (see MECLIPSE-158)
-//  public void testSourcePath() throws Exception {
-//    IProject cptest = createExisting("cptest", "projects/MNGECLIPSE-369/cptest");
-//    createExisting("cptest2", "projects/MNGECLIPSE-369/cptest2");
-//    createExisting("testlib", "projects/MNGECLIPSE-369/testlib");
-//    waitForJobsToComplete();
-//
-//    workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
-//
-//    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(cptest.getFile("TestApp.launch"));
-//    MavenSourcePathProvider classpathProvider = new MavenSourcePathProvider();
-//    IRuntimeClasspathEntry[] unresolvedClasspath = classpathProvider.computeUnresolvedClasspath(configuration);
-//
-//    assertEquals(Arrays.asList(unresolvedClasspath).toString(), 3, unresolvedClasspath.length);
-//
-//    IRuntimeClasspathEntry[] resolvedClasspath = classpathProvider.resolveClasspath(unresolvedClasspath, configuration);
-//    IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
-//
-//    // source path contains project entries
-//    assertEquals(Arrays.asList(userClasspath).toString(), 4, userClasspath.length);
-//    assertEquals(new Path("/cptest"), userClasspath[0].getPath());
-//    assertEquals(IRuntimeClasspathEntry.PROJECT, userClasspath[0].getType());
-//    assertEquals("testlib-2.0.jar", userClasspath[1].getPath().lastSegment());
-//    assertEquals("commons-logging-1.0.2.jar", userClasspath[2].getPath().lastSegment());
-//    assertEquals(new Path("/cptest2"), userClasspath[3].getPath());
-//    assertEquals(IRuntimeClasspathEntry.PROJECT, userClasspath[3].getType());
-//  }
+  public void test() throws Exception {
+    IProject cptest = createExisting("cptest", "projects/MNGECLIPSE-369/cptest");
+    createExisting("cptest2", "projects/MNGECLIPSE-369/cptest2");
+    createExisting("testlib", "projects/MNGECLIPSE-369/testlib");
+    waitForJobsToComplete();
+
+    workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+
+    assertMarkers(cptest, 0);
+    
+    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(cptest.getFile("TestApp.launch"));
+
+    MavenRuntimeClasspathProvider classpathProvider = new MavenRuntimeClasspathProvider();
+    IRuntimeClasspathEntry[] unresolvedClasspath = classpathProvider.computeUnresolvedClasspath(configuration);
+    
+    assertEquals(Arrays.asList(unresolvedClasspath).toString(), 3, unresolvedClasspath.length);
+
+    IRuntimeClasspathEntry[] resolvedClasspath = classpathProvider.resolveClasspath(unresolvedClasspath, configuration);
+    IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
+
+    assertEquals(Arrays.asList(userClasspath).toString(), 4, userClasspath.length);
+    assertEquals(new Path("/cptest/target/classes"), userClasspath[0].getPath());
+    assertEquals("testlib-2.0.jar", userClasspath[1].getPath().lastSegment());
+    assertEquals("commons-logging-1.0.2.jar", userClasspath[2].getPath().lastSegment());
+    assertEquals(new Path("/cptest2/target/classes"), userClasspath[3].getPath());
+  }
+
+  public void testSourcePath() throws Exception {
+    IProject cptest = createExisting("cptest", "projects/MNGECLIPSE-369/cptest");
+    createExisting("cptest2", "projects/MNGECLIPSE-369/cptest2");
+    createExisting("testlib", "projects/MNGECLIPSE-369/testlib");
+    waitForJobsToComplete();
+
+    workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+
+    ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(cptest.getFile("TestApp.launch"));
+    MavenSourcePathProvider classpathProvider = new MavenSourcePathProvider();
+    IRuntimeClasspathEntry[] unresolvedClasspath = classpathProvider.computeUnresolvedClasspath(configuration);
+
+    assertEquals(Arrays.asList(unresolvedClasspath).toString(), 3, unresolvedClasspath.length);
+
+    IRuntimeClasspathEntry[] resolvedClasspath = classpathProvider.resolveClasspath(unresolvedClasspath, configuration);
+    IRuntimeClasspathEntry[] userClasspath = getUserClasspathEntries(resolvedClasspath);
+
+    // source path contains project entries
+    assertEquals(Arrays.asList(userClasspath).toString(), 4, userClasspath.length);
+    assertEquals(new Path("/cptest"), userClasspath[0].getPath());
+    assertEquals(IRuntimeClasspathEntry.PROJECT, userClasspath[0].getType());
+    assertEquals("testlib-2.0.jar", userClasspath[1].getPath().lastSegment());
+    assertEquals("commons-logging-1.0.2.jar", userClasspath[2].getPath().lastSegment());
+    assertEquals(new Path("/cptest2"), userClasspath[3].getPath());
+    assertEquals(IRuntimeClasspathEntry.PROJECT, userClasspath[3].getType());
+  }
 
   IRuntimeClasspathEntry[] getUserClasspathEntries(IRuntimeClasspathEntry[] entries) {
     ArrayList<IRuntimeClasspathEntry> result = new ArrayList<IRuntimeClasspathEntry>();
