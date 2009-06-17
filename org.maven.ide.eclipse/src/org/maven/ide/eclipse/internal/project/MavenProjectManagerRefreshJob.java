@@ -37,7 +37,6 @@ import org.maven.ide.eclipse.actions.OpenMavenConsoleAction;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
-import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
@@ -48,8 +47,6 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
   | IResourceDelta.COPIED_FROM | IResourceDelta.REPLACED;
   
   private final List<Command> refreshQueue = new ArrayList<Command>();
-
-  private final List<Command> downloadSourcesQueue = new ArrayList<Command>();
 
   private final MavenProjectManagerImpl manager;
   
@@ -72,14 +69,6 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
     schedule(1000L);
   }
 
-  public void downloadSources(IProject project, IPath path, String groupId, String artifactId, String version,
-      String classifier, boolean downloadSources, boolean downloadJavaDoc) {
-    queue(downloadSourcesQueue, new DownloadSourcesCommand(project, path, //
-        new ArtifactKey(groupId, artifactId, version, classifier), downloadSources, downloadJavaDoc));
-    schedule(1000L);
-  }
-  
-
   // Job
   
   protected IStatus run(IProgressMonitor monitor) {
@@ -95,14 +84,6 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
       if(updateRequestCount > 0) {
         monitor.subTask("Refreshing Maven model");
         manager.refresh(context.updateRequests, monitor);
-      }
-
-      // download sources
-      executeCommands(downloadSourcesQueue, context, monitor);
-
-      if(context.downloadRequests.size() > 0) {
-        monitor.subTask("Downloading sources");
-        manager.downloadSources(context.downloadRequests, monitor);
       }
 
     } catch(InterruptedException ex) {
@@ -233,8 +214,6 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
 
     public final MavenProjectManagerImpl manager;
 
-    public final List<DownloadRequest> downloadRequests = new ArrayList<DownloadRequest>();
-
     public int sourcesCount = 0;
 
     /**
@@ -291,35 +270,6 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
 
     public String toString() {
       return "REFRESH " + updateRequest.toString();
-    }
-  }
-
-  /**
-   * Download sources
-   */
-  private static class DownloadSourcesCommand extends Command {
-    private final IProject project;
-    private final IPath path;
-    private final ArtifactKey artifactKey;
-    private final boolean downloadSources;
-    private final boolean downloadJavaDoc;
-
-    DownloadSourcesCommand(IProject project, IPath path, ArtifactKey artifactKey, //
-        boolean downloadSources, boolean downloadJavaDoc) {
-      this.project = project;
-      this.path = path;
-      this.artifactKey = artifactKey;
-      this.downloadSources = downloadSources;
-      this.downloadJavaDoc = downloadJavaDoc;
-    }
-
-    void execute(CommandContext context, IProgressMonitor monitor) {
-      context.downloadRequests.add(new DownloadRequest(project, path, artifactKey, downloadSources, downloadJavaDoc));
-      context.sourcesCount++ ;
-    }
-
-    public String toString() {
-      return "DOWNLOADSOURCES " + project.getName() + " " + path;
     }
   }
 

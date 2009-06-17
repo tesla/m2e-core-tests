@@ -9,22 +9,16 @@
 package org.maven.ide.eclipse.internal.project;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 import org.osgi.service.prefs.BackingStoreException;
 
@@ -62,14 +56,9 @@ import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.index.IndexManager;
-import org.maven.ide.eclipse.index.IndexedArtifactFile;
-import org.maven.ide.eclipse.project.DownloadSourceEvent;
-import org.maven.ide.eclipse.project.IDownloadSourceListener;
 import org.maven.ide.eclipse.project.IMavenMarkerManager;
 import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
-import org.maven.ide.eclipse.project.IMavenProjectVisitor;
-import org.maven.ide.eclipse.project.IMavenProjectVisitor2;
 import org.maven.ide.eclipse.project.MavenProjectChangedEvent;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
@@ -90,11 +79,6 @@ public class MavenProjectManagerImpl {
   static final String ARTIFACT_TYPE_JAR = "jar";
   public static final String ARTIFACT_TYPE_JAVA_SOURCE = "java-source";
   public static final String ARTIFACT_TYPE_JAVADOC = "javadoc";
-
-  static final String CLASSIFIER_SOURCES = "sources";
-  static final String CLASSIFIER_JAVADOC = "javadoc";
-  static final String CLASSIFIER_TESTS = "tests";
-  static final String CLASSIFIER_TESTSOURCES = "test-sources";
 
   private static final String P_VERSION = "version";
   private static final String P_INCLUDE_MODULES = "includeModules";
@@ -131,9 +115,6 @@ public class MavenProjectManagerImpl {
 
   private final Set<IMavenProjectChangedListener> projectChangeListeners = new LinkedHashSet<IMavenProjectChangedListener>();
   private final Map<IFile, MavenProjectChangedEvent> projectChangeEvents = new LinkedHashMap<IFile, MavenProjectChangedEvent>();
-
-  private final Set<IDownloadSourceListener> downloadSourceListeners = new LinkedHashSet<IDownloadSourceListener>();
-  private final Map<IProject, DownloadSourceEvent> downloadSourceEvents = new LinkedHashMap<IProject, DownloadSourceEvent>();
 
   private final transient List<IManagedCache> caches = new ArrayList<IManagedCache>();
 
@@ -695,253 +676,12 @@ public class MavenProjectManagerImpl {
     return state.getMavenProject(groupId, artifactId, version);
   }
 
-  public void downloadSources(List<DownloadRequest> downloadRequests, IProgressMonitor monitor) throws InterruptedException, CoreException {
-    for(DownloadRequest request : downloadRequests) {
-      if(monitor.isCanceled()) {
-        throw new InterruptedException();
-      }
-
-      final ArtifactKey key = request.getArtifactKey();
-      MavenProjectFacade projectFacade = create(request.getProject(), monitor);
-
-      Artifact artifact = null;
-      List<ArtifactRepository> remoteRepositories = null;
-
-      if(projectFacade != null) {
-        // for maven projects find actual artifact and MavenProject corresponding to the artifactKey
-
-        // XXX ugly, need to find a better way
-        class MavenProjectVisitor implements IMavenProjectVisitor2 {
-          IMavenProjectFacade mavenProject = null;
-          Artifact artifact = null;
-
-          public boolean visit(IMavenProjectFacade mavenProject) {
-            return this.mavenProject == null;
-          }
-
-          public void visit(IMavenProjectFacade mavenProject, Artifact artifact) {
-            ArtifactKey otherKey = new ArtifactKey(artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion(), artifact.getClassifier());
-            if(key.equals(otherKey)) {
-              this.mavenProject = mavenProject;
-              this.artifact = artifact;
-            }
-          }
-        };
-
-        MavenProjectVisitor pv = new MavenProjectVisitor(); 
-        projectFacade.accept(pv, IMavenProjectVisitor.NESTED_MODULES, monitor);
-
-        artifact = pv.artifact;
-
-        IMavenProjectFacade facade = pv.mavenProject;
-        if (facade != null) {
-          List<ArtifactRepository> mavenProjectRepositoreis = facade.getMavenProject(monitor).getRemoteArtifactRepositories();
-          remoteRepositories = mavenProjectRepositoreis;
-        }
-      }
-      
-      if(remoteRepositories == null) {
-        remoteRepositories = indexManager.getArtifactRepositories(null, null);
-      }
-
-      if(artifact == null) {
-        // not a Maven managed artifact
-        try {
-          artifact = maven.resolve(key.getGroupId(), key.getArtifactId(), key.getVersion(), ARTIFACT_TYPE_POM, null, remoteRepositories, monitor);
-        } catch(Exception ex) {
-          MavenLogger.log("Can not resolve artifact for classpath entry of non-maven project", ex);
-          continue;
-        }
-      }
-
-      if (artifact != null && remoteRepositories != null) {
-        monitor.subTask(artifact.getId());
-        IPath srcPath = null;
-        if(request.isDownloadSources()) {
-          srcPath = materializeArtifactPath(remoteRepositories, artifact, //
-              ARTIFACT_TYPE_JAVA_SOURCE, monitor);
-        }
-        
-        String javadocUrl = null;
-        if(request.isDownloadJavaDoc()) {
-          IPath javadocPath = materializeArtifactPath(remoteRepositories, artifact, //
-              ARTIFACT_TYPE_JAVADOC, monitor);
-          if (javadocPath != null) {
-            javadocUrl = getJavaDocUrl(javadocPath.toString());
-          } else {
-            // guess the javadoc url from the project url in the artifact's pom.xml
-            String artifactLocation = artifact.getFile().getAbsolutePath();
-            File file = new File(artifactLocation.substring(0, artifactLocation.length() - 4) + ".pom");
-            if(file.exists()) {
-              try {
-                MavenProject mavenProject = maven.readProject(file, monitor);
-                String url = mavenProject.getUrl();
-                if(url != null) {
-                  url = url.trim();
-                  if(url.length() > 0) {
-                    if(!url.endsWith("/"))
-                      url += "/";
-                    javadocUrl =  url + "apidocs/"; // assuming project is using maven-generated site
-                  }
-                }
-              } catch(Exception ex) {
-                MavenLogger.log("Can't read Maven project from " + file, ex);
-              }
-            }
-          }
-        }
-        
-        if(srcPath != null || javadocUrl != null) {
-          addDownloadSourceEvent(request.getProject(), request.getPath(), srcPath, javadocUrl);
-        }
-      }
-    }
-    
-    notifyDownloadSourceListeners(monitor);
-  }
-
-  private void notifyDownloadSourceListeners(IProgressMonitor monitor) {
-    if (downloadSourceEvents.size() > 0) {
-      IDownloadSourceListener[] listeners;
-      synchronized (this.downloadSourceListeners) {
-        listeners = this.downloadSourceListeners.toArray(new IDownloadSourceListener[this.downloadSourceListeners.size()]);
-      }
-      for (int i = 0; i < listeners.length; i++) {
-        for (Iterator<DownloadSourceEvent> eventsIter = downloadSourceEvents.values().iterator(); eventsIter.hasNext(); ) {
-          DownloadSourceEvent event = eventsIter.next();
-          try {
-            listeners[i].sourcesDownloaded(event, monitor);
-          } catch(CoreException ex) {
-            MavenLogger.log(ex);
-          }
-        }
-      }
-      this.downloadSourceEvents.clear();
-    }
-  }
-
-  public void addDownloadSourceListener(IDownloadSourceListener listener) {
-    synchronized (downloadSourceListeners) {
-      downloadSourceListeners.add(listener);
-    }
-  }
-
   public void addManagedCache(IManagedCache cache) {
     caches.add(cache);
   }
 
   public void removeManagedCache(IManagedCache cache) {
     caches.remove(cache);
-  }
-
-  public void removeDownloadSourceListener(IDownloadSourceListener listener) {
-    synchronized (downloadSourceListeners) {
-      downloadSourceListeners.remove(listener);
-    }
-  }
-
-  private void addDownloadSourceEvent(IProject project, IPath path, IPath srcPath, String javadocUrl) {
-    downloadSourceEvents.put(project, new DownloadSourceEvent(project, path, srcPath, javadocUrl));
-  }
-
-  public String getClassifier(String type, String classifier) {
-    if (ARTIFACT_TYPE_JAVADOC.equals(type)) {
-      return CLASSIFIER_JAVADOC;
-    } else if (ARTIFACT_TYPE_JAVA_SOURCE.equals(type)) {
-      if (CLASSIFIER_TESTS.equals(classifier)) {
-        return CLASSIFIER_TESTSOURCES;
-      }
-      return CLASSIFIER_SOURCES;
-    } else {
-      // can't really happen
-      return null;
-    }
-  }
-
-  private IPath materializeArtifactPath(List<ArtifactRepository> remoteRepositories,
-      Artifact base, String type, IProgressMonitor monitor) throws CoreException {
-    File baseFile = base.getFile();
-    if(baseFile == null) {
-      console.logError("Missing artifact file for " + base.getId());
-      return null;
-    }
-
-    boolean isJavaSource;
-    boolean isJavaDoc;
-
-    String classifier = getClassifier(type, base.getClassifier());
-
-    if (ARTIFACT_TYPE_JAVADOC.equals(type)) {
-      isJavaDoc = true;
-      isJavaSource = false;
-    } else if (ARTIFACT_TYPE_JAVA_SOURCE.equals(type)) {
-      isJavaDoc = false;
-      isJavaSource = true;
-    } else {
-      // can't really happen
-      return null;
-    }
-
-//    File artifactFile = new File(baseFile.getParentFile(), artifact.getArtifactId()+ "-" + artifact.getVersion() + "-" + classifier + ".jar");
-//
-//    IPath path = getArtifactPath(base, type, classifier);
-//    if (path != null) {
-//      return null;
-//    }
-
-    monitor.beginTask("Resolving " + type + " " + base.getId(), IProgressMonitor.UNKNOWN);
-
-    IndexedArtifactFile af = null;
-    if(isJavaSource || isJavaDoc) {
-      try {
-        af = indexManager.getIndexedArtifactFile(IndexManager.LOCAL_INDEX, indexManager.getDocumentKey(new ArtifactKey(base)));
-        if(isJavaSource && af != null && af.sourcesExists == IndexManager.NOT_AVAILABLE) {
-          return null; // sources are not available in any remote repository
-        }
-        if(isJavaDoc && af != null && af.javadocExists == IndexManager.NOT_AVAILABLE) {
-          return null; // javadoc is not available in any remote repository
-        }
-      } catch(Exception ex) {
-        // XXX lets hide all indexer exceptions for now
-        String msg = ex.getMessage()==null ? ex.toString() : ex.getMessage();
-        console.logError("Error: " + msg);
-        MavenLogger.log(msg, ex);
-      }
-    }
-
-    try {
-        // TODO can optimize remote repositories using index info
-        Artifact artifact = maven.resolve(base.getGroupId(), base.getArtifactId(), base.getVersion(), type, classifier, remoteRepositories, monitor);
-
-        updateIndex(IndexManager.PRESENT, isJavaSource, isJavaDoc, af, baseFile, base);
-
-        return new Path(artifact.getFile().getAbsolutePath());
-    } catch(CoreException ex) {
-      String name = base.getGroupId() + ':' + base.getArtifactId() + ':' + base.getVersion();
-      console.logError("Can't download " + type + " for artifact " + name);
-      if(!isJavaSource && !isJavaDoc) {
-        console.logError("Error: " + ex.getMessage());
-        MavenLogger.log(ex);
-      }
-
-      updateIndex(IndexManager.NOT_AVAILABLE, isJavaSource, isJavaDoc, af, baseFile, base);
-    } finally {
-      monitor.done();
-    }
-
-    return null;
-  }
-
-  private void updateIndex(int exist, boolean isJavaSource, boolean isJavaDoc, //
-      IndexedArtifactFile af, File artifactFile, Artifact artifact) {
-    if(isJavaSource || isJavaDoc) {
-      int sourcesExists = isJavaSource ? exist : (af != null ? af.sourcesExists : IndexManager.NOT_PRESENT);
-      int javadocExists = isJavaDoc ? exist : (af != null ? af.javadocExists : IndexManager.NOT_PRESENT);
-      
-      // XXX add test to make sure update don't erase class names
-      indexManager.addDocument(IndexManager.LOCAL_INDEX, null, indexManager.getDocumentKey(new ArtifactKey(artifact)), //
-          artifactFile.length(), artifactFile.lastModified(), artifactFile, sourcesExists, javadocExists);
-    }
   }
 
   public MavenExecutionResult readProjectWithDependencies(IFile pomFile, ResolverConfiguration resolverConfiguration,
@@ -969,43 +709,6 @@ public class MavenProjectManagerImpl {
       projectFacade.setResolverConfiguration(configuration);
     }
     return saveResolverConfiguration(project, configuration);
-  }
-
-  public String getJavaDocUrl(String fileName) {
-    try {
-      URL fileUrl = new File(fileName).toURL();
-      return "jar:" + fileUrl.toExternalForm() + "!/" + getJavaDocPathInArchive(fileName);
-    } catch(MalformedURLException ex) {
-      return null;
-    }
-  }
-
-  private String getJavaDocPathInArchive(String name) {
-    long l1 = System.currentTimeMillis();
-    ZipFile jarFile = null;
-    try {
-      jarFile = new ZipFile(name);
-      String marker = "package-list";
-      for(Enumeration<? extends ZipEntry> en = jarFile.entries(); en.hasMoreElements();) {
-        ZipEntry entry = en.nextElement();
-        String entryName = entry.getName();
-        if(entryName.endsWith(marker)) {
-          return entry.getName().substring(0, entryName.length()-marker.length());
-        }
-      }
-    } catch(IOException ex) {
-      // ignore
-    } finally {
-      long l2 = System.currentTimeMillis();
-      console.logMessage("Scanned javadoc " + name + " " + (l2-l1)/1000f);
-      try {
-        if(jarFile!=null) jarFile.close();
-      } catch(IOException ex) {
-        //
-      }
-    }
-    
-    return "";
   }
 
   /**

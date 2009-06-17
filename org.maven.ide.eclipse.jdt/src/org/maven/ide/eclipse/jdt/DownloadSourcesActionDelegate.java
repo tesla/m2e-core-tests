@@ -55,8 +55,8 @@ public class DownloadSourcesActionDelegate implements IEditorActionDelegate {
             if (af != null) {
               ArtifactKey a = af.getArtifactKey();
               IJavaProject project = (IJavaProject) root.getParent();
-              MavenPlugin.getDefault().getMavenProjectManager().downloadSources(project.getProject(), 
-                  project.getPath(), a.getGroupId(), a.getArtifactId(), a.getVersion(), a.getClassifier(), true, false);
+              BuildPathManager buildpathManager = MavenJdtPlugin .getDefault().getBuildpathManager();
+              buildpathManager.downloadSources(project.getProject(), a, true, false);
               break;
             }
           }

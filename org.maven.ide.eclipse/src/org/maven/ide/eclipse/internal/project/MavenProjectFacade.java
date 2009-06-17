@@ -58,7 +58,7 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
   private transient MavenProject mavenProject;
   private transient MavenExecutionPlan executionPlan;
 
-  private final transient Map<String, Object> sessionProperties = new HashMap<String, Object>();
+  private transient Map<String, Object> sessionProperties;
 
   // XXX make final, there should be no need to change it
   private ResolverConfiguration resolverConfiguration;
@@ -316,7 +316,10 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
     return mavenProject;
   }
 
-  public void setSessionProperty(String key, Object value) {
+  public synchronized void setSessionProperty(String key, Object value) {
+    if (sessionProperties == null) {
+      sessionProperties = new HashMap<String, Object>();
+    }
     if (value != null) {
       sessionProperties.put(key, value);
     } else {
@@ -324,7 +327,7 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
     }
   }
 
-  public Object getSessionProperty(String key) {
-    return sessionProperties.get(key);
+  public synchronized Object getSessionProperty(String key) {
+    return sessionProperties != null? sessionProperties.get(key): null;
   }
 }

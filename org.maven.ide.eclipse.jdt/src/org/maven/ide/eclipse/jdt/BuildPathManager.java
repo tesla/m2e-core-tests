@@ -16,9 +16,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -26,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -43,6 +48,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathContainer;
@@ -59,6 +65,7 @@ import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerContentProvider;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.artifact.resolver.filter.ScopeArtifactFilter;
 import org.apache.maven.project.MavenProject;
@@ -77,8 +84,6 @@ import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.jdt.internal.ClasspathDescriptor;
 import org.maven.ide.eclipse.jdt.internal.MavenClasspathContainer;
 import org.maven.ide.eclipse.jdt.internal.MavenClasspathContainerSaveHelper;
-import org.maven.ide.eclipse.project.DownloadSourceEvent;
-import org.maven.ide.eclipse.project.IDownloadSourceListener;
 import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.IMavenProjectVisitor;
@@ -94,7 +99,7 @@ import org.maven.ide.eclipse.project.configurator.ILifecycleMapping;
  * XXX take project import code into a separate class (ProjectImportManager?)
  */
 @SuppressWarnings("restriction")
-public class BuildPathManager implements IMavenProjectChangedListener, IDownloadSourceListener, IResourceChangeListener {
+public class BuildPathManager implements IMavenProjectChangedListener, IResourceChangeListener {
 
   // container settings
   public static final String CONTAINER_ID = "org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER"; //$NON-NLS-1$
@@ -119,9 +124,13 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
 
   private static final String PROPERTY_JAVADOC_URL = ".javadoc"; //$NON-NLS-1$
 
-  // public static final String TEST_CLASSES_FOLDERNAME = "test-classes"; //$NON-NLS-1$
+  static final String CLASSIFIER_SOURCES = "sources";
 
-  // public static final String CLASSES_FOLDERNAME = "classes"; //$NON-NLS-1$
+  static final String CLASSIFIER_JAVADOC = "javadoc";
+
+  static final String CLASSIFIER_TESTS = "tests";
+
+  static final String CLASSIFIER_TESTSOURCES = "test-sources";
 
   public static final int CLASSPATH_TEST = 0;
 
@@ -151,6 +160,8 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
 
   private String jdtVersion;
 
+  private final DownloadSourcesJob downloadSourcesJob;
+
   public BuildPathManager(MavenConsole console,
       MavenProjectManager projectManager, IndexManager indexManager, MavenModelManager modelManager,
       MavenRuntimeManager runtimeManager, BundleContext bundleContext, File stateLocationDir) {
@@ -162,6 +173,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     this.stateLocationDir = stateLocationDir;
     this.maven = MavenPlugin.lookup(IMaven.class);
     this.configurationManager = MavenPlugin.getDefault().getProjectConfigurationManager();
+    this.downloadSourcesJob = new DownloadSourcesJob(this);
   }
 
   public static boolean isMaven2ClasspathContainer(IPath containerPath) {
@@ -413,7 +425,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
           }
         }
         if (srcPath == null) {
-          srcPath = projectManager.getSourcePath(a);
+          srcPath = getSourcePath(a);
         }
 
         // configure javadocs if available
@@ -422,12 +434,12 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
           javaDocUrl = (String) sourceAttachment.get(key + PROPERTY_JAVADOC_URL);
         }
         if (javaDocUrl == null) {
-          javaDocUrl = projectManager.getJavaDocUrl(a);
+          javaDocUrl = getJavaDocUrl(a);
         }
 
         boolean downloadSources = srcPath==null && mavenConfiguration.isDownloadSources();
         boolean downloadJavaDoc = javaDocUrl==null && mavenConfiguration.isDownloadJavaDoc();
-        downloadSources(facade.getProject(), a, downloadSources, downloadJavaDoc);
+        downloadSources(facade.getProject(), new ArtifactKey(a), downloadSources, downloadJavaDoc);
 
         classpath.addLibraryEntry(a, srcPath, srcRoot, javaDocUrl);
 
@@ -435,18 +447,19 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     }
   }
 
-  private void downloadSources(IProject project, Artifact artifact, boolean downloadSources, boolean downloadJavaDoc) {
+  public void downloadSources(IProject project, ArtifactKey artifact, boolean downloadSources, boolean downloadJavaDoc) {
     if(downloadSources || downloadJavaDoc) {
       try {
         IndexedArtifactFile af = indexManager.getIndexedArtifactFile(IndexManager.LOCAL_INDEX, //
-            indexManager.getDocumentKey(new ArtifactKey(artifact)));
+            indexManager.getDocumentKey(artifact));
         if(af != null) {
           // download if sources and javadoc artifact is available from remote repositories
           boolean shouldDownloadSources = downloadSources && af.sourcesExists != IndexManager.NOT_AVAILABLE;
           boolean shouldDownloadJavaDoc = downloadJavaDoc && af.javadocExists != IndexManager.NOT_AVAILABLE;
           if(shouldDownloadSources || shouldDownloadJavaDoc) {
-            projectManager.downloadSources(project, null, artifact.getGroupId(), artifact.getArtifactId(), //
-                artifact.getVersion(), artifact.getClassifier(), shouldDownloadSources, shouldDownloadJavaDoc);
+            Set<ArtifactKey> artifacts = new HashSet<ArtifactKey>();
+            artifacts.add(artifact);
+            downloadSourcesJob.scheduleDownload(project, null, artifacts, shouldDownloadSources, shouldDownloadJavaDoc);
           }
         }
       } catch(Exception ex) {
@@ -494,7 +507,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
    * given path.
    */
   public void downloadSources(IProject project, IPath path) throws CoreException {
-    download(project, path, true, false);
+    downloadSourcesJob.scheduleDownload(project, path, findArtifacts(project, path), true, false);
   }
 
   /**
@@ -505,17 +518,9 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
    * given path.
    */
   public void downloadJavaDoc(IProject project, IPath path) throws CoreException {
-    download(project, path, false, true);
+    downloadSourcesJob.scheduleDownload(project, path, findArtifacts(project, path), false, true);
   }
 
-  private void download(IProject project, IPath path, boolean downloadSources, boolean downloadJavaDoc)
-      throws CoreException {
-    for(ArtifactKey artifact : findArtifacts(project, path)) {
-      projectManager.downloadSources(project, path, artifact.getGroupId(), artifact.getArtifactId(), //
-          artifact.getVersion(), artifact.getClassifier(), downloadSources, downloadJavaDoc);
-    }
-  }
-  
   private Set<ArtifactKey> findArtifacts(IProject project, IPath path) throws CoreException {
     ArrayList<IClasspathEntry> entries = findClasspathEntries(project, path);
 
@@ -610,8 +615,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     }
   }
 
-  public void sourcesDownloaded(DownloadSourceEvent event, IProgressMonitor monitor) throws CoreException {
-    IProject project = event.getSource();
+  void setSourcePath(IProject project, IPath entryPath, IPath srcPath, String javaDocUrl, IProgressMonitor monitor) throws CoreException {
     IJavaProject javaProject = JavaCore.create(project);
 
     IMavenProjectFacade mavenProject = projectManager.create(project, monitor);
@@ -619,20 +623,17 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
       // Maven project, refresh classpath container
       updateClasspath(project, monitor);
     }
-    
-    IPath path = event.getPath();
-    if(path != null) {
+
+    if(entryPath != null) {
       // non-Maven jar, modify specific classpath entry
       IClasspathEntry[] cp = javaProject.getRawClasspath();
       for(int i = 0; i < cp.length; i++ ) {
         IClasspathEntry entry = cp[i];
-        if (IClasspathEntry.CPE_LIBRARY == entry.getEntryKind() && path.equals(entry.getPath())) {
+        if (IClasspathEntry.CPE_LIBRARY == entry.getEntryKind() && entryPath.equals(entry.getPath())) {
           List<IClasspathAttribute> attributes = new ArrayList<IClasspathAttribute>(Arrays.asList(entry.getExtraAttributes()));
-          IPath srcPath = event.getSourcePath();
 
           if(srcPath == null) {
             // configure javadocs if available
-            String javaDocUrl = event.getJavadocUrl();
             if(javaDocUrl != null) {
               attributes.add(JavaCore.newClasspathAttribute(IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME,
                   javaDocUrl));
@@ -790,5 +791,92 @@ public class BuildPathManager implements IMavenProjectChangedListener, IDownload
     }
     return false;
   }
+
+  static String getSourcesClassifier(String baseClassifier) {
+    return BuildPathManager.CLASSIFIER_TESTS.equals(baseClassifier) ? BuildPathManager.CLASSIFIER_TESTSOURCES
+        : BuildPathManager.CLASSIFIER_SOURCES;
+  }
+
+  private IPath getSourcePath(Artifact base) throws CoreException {
+    File file = getAttachedArtifactFile(base, getSourcesClassifier(base.getClassifier()));
+
+    if (file != null) {
+      return Path.fromOSString(file.getAbsolutePath());
+    }
+
+    return null;
+  }
+
+  private File getAttachedArtifactFile(Artifact base, String classifier) throws CoreException {
+    if (base == null || base.getFile() == null || !base.getFile().canRead()) {
+      return null;
+    }
+
+    // there is nothing wrong with a little hack, right?
+
+    ArtifactRepository repository = maven.getLocalRepository();
+
+    File parent = new File(repository.getBasedir(), repository.pathOf(base)).getParentFile();
+
+    if (!parent.exists()) {
+      return null;
+    }
+
+    File file = new File(parent, base.getArtifactId() + "-" + base.getVersion() + "-" + classifier + ".jar");
+    
+    return file.canRead()? file: null;
+  }
   
+  private String getJavaDocUrl(Artifact base) throws CoreException {
+    File file = getAttachedArtifactFile(base, CLASSIFIER_JAVADOC);
+
+    if (file != null) {
+      return getJavaDocUrl(file);
+    }
+
+    return null;
+  }
+
+  static String getJavaDocUrl(File file) {
+    try {
+      URL fileUrl = file.toURL();
+      return "jar:" + fileUrl.toExternalForm() + "!/" + getJavaDocPathInArchive(file);
+    } catch(MalformedURLException ex) {
+      return null;
+    }
+  }
+
+  private static String getJavaDocPathInArchive(File file) {
+    ZipFile jarFile = null;
+    try {
+      jarFile = new ZipFile(file);
+      String marker = "package-list";
+      for(Enumeration<? extends ZipEntry> en = jarFile.entries(); en.hasMoreElements();) {
+        ZipEntry entry = en.nextElement();
+        String entryName = entry.getName();
+        if(entryName.endsWith(marker)) {
+          return entry.getName().substring(0, entryName.length() - marker.length());
+        }
+      }
+    } catch(IOException ex) {
+      // ignore
+    } finally {
+      try {
+        if(jarFile != null)
+          jarFile.close();
+      } catch(IOException ex) {
+        //
+      }
+    }
+
+    return "";
+  }
+
+  /**
+   * this is for unit tests only!
+   */
+  public Job getDownloadSourcesJob() {
+    return downloadSourcesJob;
+  }
+
 }

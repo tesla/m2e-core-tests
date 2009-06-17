@@ -12,7 +12,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
@@ -51,7 +50,7 @@ public class MojoExecutionProjectConfigurator extends AbstractProjectConfigurato
         && (goals == null || goals.contains(execution.getGoal()));
   }
 
-  public void configure(ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException {
+  public void configure(ProjectConfigurationRequest request, IProgressMonitor monitor) {
     // do nothing
   }
 

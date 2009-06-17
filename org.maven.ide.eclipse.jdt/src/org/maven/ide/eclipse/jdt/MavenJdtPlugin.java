@@ -79,7 +79,6 @@ public class MavenJdtPlugin extends AbstractUIPlugin {
     workspace.addResourceChangeListener(buildpathManager, IResourceChangeEvent.PRE_DELETE);
 
     projectManager.addMavenProjectChangedListener(this.buildpathManager);
-    projectManager.addDownloadSourceListener(this.buildpathManager);
 
     mavenConfiguration.addConfigurationChangeListener(new AbstractMavenConfigurationChangeListener() {
       public void mavenConfigutationChange(MavenConfigurationChangeEvent event) {
@@ -111,7 +110,6 @@ public class MavenJdtPlugin extends AbstractUIPlugin {
 
     MavenProjectManager projectManager = mavenPlugin.getMavenProjectManager();
     projectManager.removeMavenProjectChangedListener(buildpathManager);
-    projectManager.removeDownloadSourceListener(this.buildpathManager);
 
     workspace.removeResourceChangeListener(this.buildpathManager);
 
