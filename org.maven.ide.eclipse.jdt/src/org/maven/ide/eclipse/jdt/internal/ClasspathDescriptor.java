@@ -63,12 +63,12 @@ public class ClasspathDescriptor implements IClasspathDescriptor {
     return false;
   }
 
-  public void addSourceEntry(IPath sourcePath, IPath outputLocation, boolean optional) throws CoreException {
+  public void addSourceEntry(IPath sourcePath, IPath outputLocation, boolean generated) throws CoreException {
     addSourceEntry(sourcePath, //
         outputLocation, //
         new IPath[0] /* inclusion */, //
         new IPath[0] /* exclusion */, //
-        optional );
+        generated );
   }
 
   public void removeEntry(final IPath path) {
@@ -90,13 +90,13 @@ public class ClasspathDescriptor implements IClasspathDescriptor {
   }
 
   public void addSourceEntry(IPath sourcePath, IPath outputLocation, IPath[] inclusion, IPath[] exclusion,
-      boolean optional) throws CoreException {
+      boolean generated) throws CoreException {
     IWorkspaceRoot workspaceRoot = project.getProject().getWorkspace().getRoot();
 
-    Util.createFolder(workspaceRoot.getFolder(sourcePath), true);
+    Util.createFolder(workspaceRoot.getFolder(sourcePath), generated);
 
     IClasspathAttribute[] attrs;
-    if(optional) {
+    if(generated) {
       attrs = new IClasspathAttribute[] {ATTR_OPTIONAL};
     } else {
       attrs = new IClasspathAttribute[0];

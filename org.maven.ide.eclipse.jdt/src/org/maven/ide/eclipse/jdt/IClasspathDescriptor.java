@@ -37,14 +37,14 @@ public interface IClasspathDescriptor {
    */
   public boolean containsPath(IPath path);
 
-  public void addSourceEntry(IPath sourcePath, IPath outputLocation, boolean optional) throws CoreException;
+  public void addSourceEntry(IPath sourcePath, IPath outputLocation, boolean generated) throws CoreException;
 
   public void removeEntry(IPath path);
 
   public void removeEntry(EntryFilter filter);
 
   public void addSourceEntry(IPath sourcePath, IPath outputLocation, IPath[] inclusion, IPath[] exclusion,
-      boolean optional) throws CoreException;
+      boolean generated) throws CoreException;
 
   public IClasspathEntry[] getEntries();
 
