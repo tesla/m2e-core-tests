@@ -59,6 +59,7 @@ import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerRefreshJob;
 import org.maven.ide.eclipse.internal.project.SchedulingRule;
 import org.maven.ide.eclipse.jdt.BuildPathManager;
+import org.maven.ide.eclipse.jdt.MavenJdtPlugin;
 import org.maven.ide.eclipse.project.MavenProjectInfo;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
@@ -70,7 +71,8 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
   protected IWorkspace workspace;
   protected File repo;
   
-  protected MavenProjectManagerRefreshJob job;
+  protected MavenProjectManagerRefreshJob projectRefreshJob;
+  protected Job downloadSourcesJob;
 
   protected MavenPlugin plugin;
 
@@ -91,8 +93,11 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
 
     plugin = MavenPlugin.getDefault();
 
-    job = plugin.getProjectManagerRefreshJob();
-    job.sleep();
+    projectRefreshJob = plugin.getProjectManagerRefreshJob();
+    projectRefreshJob.sleep();
+
+    downloadSourcesJob = MavenJdtPlugin.getDefault().getBuildpathManager().getDownloadSourcesJob();
+    downloadSourcesJob.sleep();
 
     mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
 
@@ -122,7 +127,7 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
     }, new NullProgressMonitor());
 
     waitForJobsToComplete();
-    job.wakeUp();
+    projectRefreshJob.wakeUp();
     IWorkspaceDescription description = workspace.getDescription();
     description.setAutoBuilding(true);
     workspace.setDescription(description);
@@ -313,10 +318,15 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
     }
 
     // Now we run background refresh job once 
-    job.wakeUp();
-    job.schedule();
-    job.join();
-    job.sleep();
+    projectRefreshJob.wakeUp();
+    projectRefreshJob.schedule();
+    projectRefreshJob.join();
+    projectRefreshJob.sleep();
+
+    downloadSourcesJob.wakeUp();
+    downloadSourcesJob.schedule();
+    downloadSourcesJob.join();
+    downloadSourcesJob.sleep();
   }
 
   protected IClasspathEntry[] getMavenContainerEntries(IProject project) throws JavaModelException {
@@ -418,5 +428,11 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
     assertEquals(project.getName() + " : " + toString(markers.toArray(new IMarker[markers.size()])), //
         expected, markers.size());
   }
-  
+
+  protected void assertNoErrors(IProject project) throws CoreException {
+    int severity = project.findMaxProblemSeverity(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
+    IMarker[] markers = project.findMarkers(null, true, IResource.DEPTH_INFINITE);
+    assertTrue("Unexpected error markers " + toString(markers), severity < IMarker.SEVERITY_ERROR);
+  }
+
 }
