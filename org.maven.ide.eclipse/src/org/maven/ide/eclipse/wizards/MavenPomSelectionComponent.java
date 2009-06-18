@@ -245,6 +245,9 @@ public class MavenPomSelectionComponent extends Composite {
       return (IndexedArtifact) element;
     }
     TreeItem[] treeItems = searchResultViewer.getTree().getSelection();
+    if(treeItems.length == 0){
+      return null;
+    }
     return (IndexedArtifact) treeItems[0].getParentItem().getData();
   }
   
