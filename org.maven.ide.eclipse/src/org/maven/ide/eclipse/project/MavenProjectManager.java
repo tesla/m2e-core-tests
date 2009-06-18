@@ -45,8 +45,23 @@ public class MavenProjectManager {
 
   // Maven projects    
 
+  /**
+   * Performs requested Maven project update asynchronously, using background
+   * job. This method returns immediately.
+   */
   public void refresh(MavenUpdateRequest request) {
     mavenBackgroundJob.refresh(request);
+  }
+
+  /**
+   * Performs requested Maven project update synchronously. In other words, this method 
+   * does not return until all affected projects have been updated and 
+   * corresponding MavenProjectChangeEvent's broadcast.
+   * 
+   * This method acquires a lock on the workspace's root.
+   */
+  public void refresh(MavenUpdateRequest request, IProgressMonitor monitor) throws CoreException {
+    manager.refresh(request, monitor);
   }
 
   public void addMavenProjectChangedListener(IMavenProjectChangedListener listener) {

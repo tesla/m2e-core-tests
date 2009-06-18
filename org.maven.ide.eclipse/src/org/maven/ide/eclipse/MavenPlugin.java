@@ -361,7 +361,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     this.runtimeManager.setWorkspaceRuntime(new MavenWorkspaceRuntime(projectManager));
     
     this.configurationManager = new ProjectConfigurationManager(modelManager, console, 
-        runtimeManager, projectManager, managerImpl, 
+        runtimeManager, projectManager, 
         indexManager, modelManager, mavenMarkerManager);
     projectManager.addMavenProjectChangedListener(this.configurationManager);
 

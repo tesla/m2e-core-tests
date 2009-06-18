@@ -29,9 +29,14 @@ import org.maven.ide.eclipse.embedder.ArtifactKey;
  * @author igor
  */
 public class MutableProjectRegistry extends BasicProjectRegistry implements IProjectRegistry {
+  
+  private final ProjectRegistry parent;
+  private final int parentVersion;
 
   public MutableProjectRegistry(ProjectRegistry state) {
     super(state);
+    this.parent = state;
+    this.parentVersion = state.getVersion();
   }
 
   public void addProjectDependency(IFile pom, ArtifactKey dependencyKey, boolean workspace) {
@@ -133,6 +138,10 @@ public class MutableProjectRegistry extends BasicProjectRegistry implements IPro
 
   public Set<IPath> removeWorkspaceModules(IFile pom, ArtifactKey mavenProject) {
     return workspaceModules.remove(mavenProject);
+  }
+
+  public boolean isStale() {
+    return parentVersion != parent.getVersion();
   }
 
 }

@@ -8,13 +8,11 @@
 
 package org.maven.ide.eclipse.project;
 
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 
 import org.maven.ide.eclipse.core.IMavenConstants;
 
@@ -33,8 +31,6 @@ public class MavenUpdateRequest {
    */
   private final Set<IFile> pomFiles = new LinkedHashSet<IFile>();
 
-  private final Set<IResource> affectedResources = new HashSet<IResource>();
-  
   public MavenUpdateRequest(boolean offline, boolean updateSnapshots) {
     this.offline = offline;
     this.updateSnapshots = updateSnapshots;
@@ -69,7 +65,6 @@ public class MavenUpdateRequest {
 
   public void addPomFile(IFile pomFile) {
     pomFiles.add(pomFile);
-    addRule(pomFile.getProject());
   }
   
   public void addPomFile(IProject project) {
@@ -77,10 +72,6 @@ public class MavenUpdateRequest {
     
   }
 
-  private void addRule(IProject project) {
-    affectedResources.add(project);
-  }
-  
   public void removePomFile(IFile pomFile) {
     pomFiles.remove(pomFile);
   }
@@ -125,10 +116,6 @@ public class MavenUpdateRequest {
     }
     
     return sb.toString();
-  }
-  
-  public Set<IResource> getAffectedResources() {
-    return affectedResources;
   }
 
 }

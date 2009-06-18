@@ -23,12 +23,16 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ProjectScope;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 
@@ -110,6 +114,8 @@ public class MavenProjectManagerImpl {
   private final Set<IMavenProjectChangedListener> projectChangeListeners = new LinkedHashSet<IMavenProjectChangedListener>();
 
   private final transient List<IManagedCache> caches = new ArrayList<IManagedCache>();
+
+  private volatile Thread syncRefreshThread;
 
   public MavenProjectManagerImpl(MavenConsole console, IndexManager indexManager,
       File stateLocationDir, boolean readState, MavenRuntimeManager runtimeManager, IMavenMarkerManager mavenMarkerManager) {
@@ -299,31 +305,50 @@ public class MavenProjectManagerImpl {
   }
 
   /**
-   * @param updateRequests a set of {@link MavenUpdateRequest}
-   * @param monitor progress monitor
+   * This method acquires workspace root's lock and sends project change events.
+   * It is meant for synchronous registry updates.
    */
-  public void refresh(MutableProjectRegistry newState, Set<DependencyResolutionContext> updateRequests, IProgressMonitor monitor) throws CoreException, InterruptedException {
+  public void refresh(MavenUpdateRequest request, IProgressMonitor monitor) throws CoreException {
+    ISchedulingRule rule = ResourcesPlugin.getWorkspace().getRoot();
+    Job.getJobManager().beginRule(rule, monitor);
+    try {
+      syncRefreshThread = Thread.currentThread();
 
-    for(DependencyResolutionContext updateRequest : updateRequests) {
-      while(!updateRequest.isEmpty()) {
-        if(monitor.isCanceled()) {
-          throw new InterruptedException();
-        }
+      MutableProjectRegistry newState = newMutableProjectRegistry();
+      refresh(newState, request, monitor);
 
-        IFile pom = updateRequest.pop();
-        monitor.subTask(pom.getFullPath().toString());
-        
-        if (!pom.isAccessible() || !pom.getProject().hasNature(IMavenConstants.NATURE_ID)) {
-          updateRequest.forcePomFiles(remove(newState, pom));
-          continue;
-        }
+      applyMutableProjectRegistry(newState, monitor);
+    } finally {
+      syncRefreshThread = null;
+      Job.getJobManager().endRule(rule);
+    }
+  }
 
-        refresh(newState, pom, updateRequest, monitor);
-        monitor.worked(1);
+  void refresh(MutableProjectRegistry newState, MavenUpdateRequest updateRequest, IProgressMonitor monitor) throws CoreException {
+
+    DependencyResolutionContext context = new DependencyResolutionContext(updateRequest);
+
+    while(!context.isEmpty()) {
+      if(monitor.isCanceled()) {
+        throw new OperationCanceledException();
       }
+
+      if (newState.isStale() || (syncRefreshThread != null && syncRefreshThread != Thread.currentThread())) {
+        throw new StaleMutableProjectRegistryException();
+      }
+
+      IFile pom = context.pop();
+      monitor.subTask(pom.getFullPath().toString());
+
+      if (!pom.isAccessible() || !pom.getProject().hasNature(IMavenConstants.NATURE_ID)) {
+        context.forcePomFiles(remove(newState, pom));
+        continue;
+      }
+
+      refresh(newState, pom, context, monitor);
+      monitor.worked(1);
     }
 
-    notifyProjectChangeListeners(applyMutableProjectRegistry(newState), monitor);
   }
 
   MavenExecutionPlan calculateExecutionPlan(MavenProjectFacade facade, IProgressMonitor monitor) throws CoreException {
@@ -335,10 +360,10 @@ public class MavenProjectManagerImpl {
     return maven.calculateExecutionPlan(request, facade.getMavenProject(monitor), monitor);
   }
 
-  public void refresh(MutableProjectRegistry state, IFile pom, DependencyResolutionContext updateRequest, IProgressMonitor monitor) throws CoreException {
+  public void refresh(MutableProjectRegistry state, IFile pom, DependencyResolutionContext context, IProgressMonitor monitor) throws CoreException {
     MavenProjectFacade oldFacade = state.getProjectFacade(pom);
 
-    if(!updateRequest.isForce(pom) && oldFacade != null && !oldFacade.isStale()) {
+    if(!context.isForce(pom) && oldFacade != null && !oldFacade.isStale()) {
       // skip refresh if not forced and up-to-date facade
       return;
     }
@@ -352,13 +377,13 @@ public class MavenProjectManagerImpl {
     MavenProject mavenProject = null;
     MavenExecutionResult result = null;
     if (pom.isAccessible()) {
-      result = readProjectWithDependencies(state, pom, resolverConfiguration, updateRequest.getRequest(), monitor);
+      result = readProjectWithDependencies(state, pom, resolverConfiguration, context.getRequest(), monitor);
       mavenProject = result.getProject();
       markerManager.addMarkers(pom, result);
     }
 
     if (mavenProject == null) {
-      updateRequest.forcePomFiles(remove(state, pom));
+      context.forcePomFiles(remove(state, pom));
       if (result != null && resolverConfiguration.shouldResolveWorkspaceProjects()) {
         // this only really add missing parent
         addMissingProjectDependencies(state, pom, result);
@@ -394,17 +419,17 @@ public class MavenProjectManagerImpl {
 
     // refresh modules
     if (resolverConfiguration.shouldIncludeModules()) {
-      updateRequest.forcePomFiles(remove(state, getRemovedNestedModules(pom, oldModules, getMavenProjectModules(mavenProject)), true));
-      updateRequest.forcePomFiles(refreshNestedModules(pom, mavenProject));
+      context.forcePomFiles(remove(state, getRemovedNestedModules(pom, oldModules, getMavenProjectModules(mavenProject)), true));
+      context.forcePomFiles(refreshNestedModules(pom, mavenProject));
     } else {
-      updateRequest.forcePomFiles(refreshWorkspaceModules(state, pom, oldProjectKey));
-      updateRequest.forcePomFiles(refreshWorkspaceModules(state, pom, projectKey));
+      context.forcePomFiles(refreshWorkspaceModules(state, pom, oldProjectKey));
+      context.forcePomFiles(refreshWorkspaceModules(state, pom, projectKey));
     }
 
     // refresh dependents
     if (dependencyChanged) {
-      updateRequest.forcePomFiles(state.getDependents(pom, oldProjectKey, resolverConfiguration.shouldIncludeModules()));
-      updateRequest.forcePomFiles(state.getDependents(pom, projectKey, resolverConfiguration.shouldIncludeModules()));
+      context.forcePomFiles(state.getDependents(pom, oldProjectKey, resolverConfiguration.shouldIncludeModules()));
+      context.forcePomFiles(state.getDependents(pom, projectKey, resolverConfiguration.shouldIncludeModules()));
     }
 
     // cleanup old project and old dependencies
@@ -426,19 +451,6 @@ public class MavenProjectManagerImpl {
         state.addProjectDependency(pom, new ArtifactKey(mavenProject.getParentArtifact()), true);
       }
     }
-
-    // send appropriate event
-//    int kind;
-//    int flags = MavenProjectChangedEvent.FLAG_NONE;
-//    if (oldFacade == null) {
-//      kind = MavenProjectChangedEvent.KIND_ADDED;
-//    } else {
-//      kind = MavenProjectChangedEvent.KIND_CHANGED;
-//    }
-//    if (dependencyChanged) {
-//      flags |= MavenProjectChangedEvent.FLAG_DEPENDENCIES;
-//    }
-//    addProjectChangeEvent(pom, kind, flags, oldFacade, facade);
 
     // update index
     removeFromIndex(oldFacade);
@@ -546,28 +558,6 @@ public class MavenProjectManagerImpl {
           mavenProject.getPomFile(), indexManager.getDocumentKey(mavenProject.getArtifactKey()));
     }
   }
-
-//  private void addProjectChangeEvent(IFile pom, int kind, int flags, MavenProjectFacade oldMavenProject, MavenProjectFacade mavenProject) {
-//    MavenProjectChangedEvent event = projectChangeEvents.get(pom);
-//    if (event == null) {
-//      event = new MavenProjectChangedEvent(pom, kind, flags, oldMavenProject, mavenProject);
-//      projectChangeEvents.put(pom, event);
-//      return;
-//    }
-//
-//    // merge events
-//    IMavenProjectFacade old = event.getOldMavenProject() != null? event.getOldMavenProject(): oldMavenProject;
-//    int mergedKind;
-//    if (MavenProjectChangedEvent.KIND_REMOVED == kind) {
-//      mergedKind = MavenProjectChangedEvent.KIND_REMOVED;
-//    } else if (event.getKind() == kind) {
-//      mergedKind = kind;
-//    } else {
-//      mergedKind = MavenProjectChangedEvent.KIND_CHANGED;
-//    }
-//    event = new MavenProjectChangedEvent(pom, mergedKind, event.getFlags() | flags, old, mavenProject);
-//    projectChangeEvents.put(pom, event);
-//  }
 
   private void addMissingProjectDependencies(MutableProjectRegistry state, IFile pom, MavenExecutionResult result) {
     // kinda hack, but this is the only way I can get info about missing parent artifacts
@@ -748,11 +738,22 @@ public class MavenProjectManagerImpl {
     return request;
   }
 
-  public MutableProjectRegistry newMutableProjectRegistry() {
+  MutableProjectRegistry newMutableProjectRegistry() {
     return new MutableProjectRegistry(projectRegistry);
   }
 
-  public List<MavenProjectChangedEvent> applyMutableProjectRegistry(MutableProjectRegistry newState) {
-    return projectRegistry.apply(newState);
+  /**
+   * Applies mutable project registry to the primary project registry and
+   * and corresponding MavenProjectChangedEvent's to all registered 
+   * IMavenProjectChangedListener's.
+   * 
+   * This method must be called from a thread holding workspace root's lock.
+   * 
+   * @throws StaleMutableProjectRegistryException if primary project registry
+   *    was modified after mutable registry has been created
+   */
+  void applyMutableProjectRegistry(MutableProjectRegistry newState, IProgressMonitor monitor) {
+    List<MavenProjectChangedEvent> events = projectRegistry.apply(newState);
+    notifyProjectChangeListeners(events, monitor);
   }
 }

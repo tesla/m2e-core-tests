@@ -28,6 +28,8 @@ public class ProjectRegistry extends BasicProjectRegistry implements Serializabl
 
   private static final long serialVersionUID = -8747318065115176241L;
 
+  private int version;
+
   public synchronized MavenProjectFacade getProjectFacade(IFile pom) {
     return super.getProjectFacade(pom);
   }
@@ -44,7 +46,11 @@ public class ProjectRegistry extends BasicProjectRegistry implements Serializabl
     return super.getWorkspaceArtifact(key);
   }
 
-  public synchronized List<MavenProjectChangedEvent> apply(BasicProjectRegistry newState) {
+  public synchronized List<MavenProjectChangedEvent> apply(MutableProjectRegistry newState) throws StaleMutableProjectRegistryException {
+    if (newState.isStale()) {
+      throw new StaleMutableProjectRegistryException();
+    }
+    
     ArrayList<MavenProjectChangedEvent> events = new ArrayList<MavenProjectChangedEvent>();
 
     // removed projects
@@ -89,6 +95,12 @@ public class ProjectRegistry extends BasicProjectRegistry implements Serializabl
 
     replaceWith(newState);
 
+    version++;
+
     return events;
+  }
+
+  public synchronized int getVersion() {
+    return version;
   }
 }

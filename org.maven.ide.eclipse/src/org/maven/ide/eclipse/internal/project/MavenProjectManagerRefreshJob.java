@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
@@ -46,14 +47,14 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
   private static final int DELTA_FLAGS = IResourceDelta.CONTENT | IResourceDelta.MOVED_FROM | IResourceDelta.MOVED_TO
   | IResourceDelta.COPIED_FROM | IResourceDelta.REPLACED;
   
-  private final List<Command> refreshQueue = new ArrayList<Command>();
+  private final List<MavenUpdateRequest> queue = new ArrayList<MavenUpdateRequest>();
 
   private final MavenProjectManagerImpl manager;
   
   private final IMavenConfiguration mavenConfiguration;
 
   private final MavenConsole console;
-  
+
   public MavenProjectManagerRefreshJob(MavenProjectManagerImpl manager, //
       MavenRuntimeManager runtimeManager, MavenConsole console) {
     super("Updating Maven Dependencies");
@@ -63,9 +64,9 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
     setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
     setProperty(IProgressConstants.ACTION_PROPERTY, new OpenMavenConsoleAction());
   }
-  
+
   public void refresh(MavenUpdateRequest updateRequest) {
-    queue(refreshQueue, new RemoveCommand(updateRequest));
+    queue(updateRequest);
     schedule(1000L);
   }
 
@@ -73,27 +74,44 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
   
   protected IStatus run(IProgressMonitor monitor) {
     monitor.beginTask("Refreshing Maven model", IProgressMonitor.UNKNOWN);
+    ArrayList<MavenUpdateRequest> requests;
+    synchronized(this.queue) {
+      requests = new ArrayList<MavenUpdateRequest>(this.queue);
+      this.queue.clear();
+    }
+
     try {
-      CommandContext context = new CommandContext(manager);
+      MutableProjectRegistry newState = manager.newMutableProjectRegistry();
 
-      // find all poms that need to be refreshed 
-      executeCommands(refreshQueue, context, monitor);
+      for (MavenUpdateRequest request : requests) {
+        if(monitor.isCanceled()) {
+          throw new OperationCanceledException();
+        }
 
-      // refresh affected poms
-      int updateRequestCount = context.updateRequests.size();
-      if(updateRequestCount > 0) {
-        monitor.subTask("Refreshing Maven model");
-        manager.refresh(context.newState, context.updateRequests, monitor);
+        manager.refresh(newState, request, monitor);
       }
 
-    } catch(InterruptedException ex) {
-      return Status.CANCEL_STATUS;
-      
+      ISchedulingRule rule = ResourcesPlugin.getWorkspace().getRoot();
+      getJobManager().beginRule(rule, monitor);
+      try {
+        manager.applyMutableProjectRegistry(newState, monitor);
+      } finally {
+        getJobManager().endRule(rule);
+      }
+
     } catch(CoreException ex) {
       MavenLogger.log(ex);
       
     } catch(OperationCanceledException ex) {
       console.logMessage("Refreshing Maven model is canceled");
+
+    } catch (StaleMutableProjectRegistryException e) {
+      synchronized(this.queue) {
+        this.queue.addAll(0, requests);
+        if(!this.queue.isEmpty()) {
+          schedule(1000L);
+        }
+      }
       
     } catch(Exception ex) {
       MavenLogger.log(ex.getMessage(), ex);
@@ -106,25 +124,6 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
     return Status.OK_STATUS;
   }
 
-  private void executeCommands(List<Command> queue, CommandContext context, IProgressMonitor monitor)
-      throws InterruptedException {
-    Command[] commands;
-    synchronized(queue) {
-      commands = queue.toArray(new Command[queue.size()]);
-      queue.clear();
-    }
-
-    if(commands.length > 0) {
-      for(Command command : commands) {
-        if(monitor.isCanceled()) {
-          throw new InterruptedException();
-        }
-        command.execute(context, monitor);
-      }
-    }
-  }
-
-  
   // IResourceChangeListener
   
   public void resourceChanged(IResourceChangeEvent event) {
@@ -134,8 +133,8 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
     int type = event.getType();
 
     if(IResourceChangeEvent.PRE_CLOSE == type || IResourceChangeEvent.PRE_DELETE == type) {
-      queue(refreshQueue, new RemoveCommand(new MavenUpdateRequest((IProject) event.getResource(), //
-          offline, updateSnapshots)));
+      queue(new MavenUpdateRequest((IProject) event.getResource(), //
+          offline, updateSnapshots));
 
     } else {
       // if (IResourceChangeEvent.POST_CHANGE == type)
@@ -156,20 +155,20 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
         IProject[] projects = removeProjects.toArray(new IProject[removeProjects.size()]);
         MavenUpdateRequest updateRequest = new MavenUpdateRequest(projects, offline, updateSnapshots);
         updateRequest.setForce(false);
-        queue(refreshQueue, new RemoveCommand(updateRequest));
+        queue(updateRequest);
         console.logMessage("Refreshing " + updateRequest.toString());
       }
       if(!refreshProjects.isEmpty()) {
         IProject[] projects = refreshProjects.toArray(new IProject[refreshProjects.size()]);
         MavenUpdateRequest updateRequest = new MavenUpdateRequest(projects, offline, updateSnapshots);
         updateRequest.setForce(false);
-        queue(refreshQueue, new RefreshCommand(updateRequest));
+        queue(updateRequest);
         console.logMessage("Refreshing " + updateRequest.toString());
       }
     }
 
-    synchronized(refreshQueue) {
-      if(!refreshQueue.isEmpty()) {
+    synchronized(queue) {
+      if(!queue.isEmpty()) {
         schedule(1000L);
       }
     }
@@ -204,74 +203,9 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
     });
   }
 
-  private void queue(List<Command> queue, Command command) {
+  private void queue(MavenUpdateRequest command) {
     synchronized(queue) {
       queue.add(command);
-    }
-  }
-
-  static final class CommandContext {
-
-    public final MavenProjectManagerImpl manager;
-    public final MutableProjectRegistry newState;
-
-    public int sourcesCount = 0;
-
-    /**
-     * Set of <code>MavenUpdateRequest</code>
-     */
-    public Set<DependencyResolutionContext> updateRequests = new LinkedHashSet<DependencyResolutionContext>();
-
-    CommandContext(MavenProjectManagerImpl manager) {
-      this.manager = manager;
-      this.newState = manager.newMutableProjectRegistry();
-    }
-  }
-
-  /**
-   * Command for background execution
-   */
-  static abstract class Command {
-    abstract void execute(CommandContext context, IProgressMonitor monitor);
-  }
-  
-  /**
-   * Remove (forced refresh)
-   */
-  private static class RemoveCommand extends Command {
-    private final MavenUpdateRequest updateRequest;
-
-    RemoveCommand(MavenUpdateRequest updateRequest) {
-      this.updateRequest = updateRequest;
-    }
-
-    void execute(CommandContext context, IProgressMonitor monitor) {
-      DependencyResolutionContext resolutionContext = new DependencyResolutionContext(updateRequest);
-      resolutionContext.forcePomFiles(context.manager.remove(context.newState, updateRequest.getPomFiles(), updateRequest.isForce()));
-      context.updateRequests.add(resolutionContext);
-    }
-
-    public String toString() {
-      return "REMOVE " + updateRequest.toString();
-    }
-  }
-
-  /**
-   * Refresh
-   */
-  private static class RefreshCommand extends Command {
-    private final MavenUpdateRequest updateRequest;
-
-    RefreshCommand(MavenUpdateRequest updateRequest) {
-      this.updateRequest = updateRequest;
-    }
-
-    void execute(CommandContext context, IProgressMonitor monitor) {
-      context.updateRequests.add(new DependencyResolutionContext(updateRequest));
-    }
-
-    public String toString() {
-      return "REFRESH " + updateRequest.toString();
     }
   }
 
@@ -280,7 +214,7 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
     boolean updateSnapshots = false;
 
     if (event.getSource() instanceof IProject) {
-      queue(refreshQueue, new RemoveCommand(new MavenUpdateRequest(new IProject[] {(IProject) event.getSource()}, offline, updateSnapshots)));
+      queue(new MavenUpdateRequest(new IProject[] {(IProject) event.getSource()}, offline, updateSnapshots));
     }
   }
 }

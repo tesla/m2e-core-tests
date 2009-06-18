@@ -109,8 +109,6 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
 
   final MavenProjectManager projectManager;
   
-  final MavenProjectManagerImpl projectManagerImpl;
-
   final IndexManager indexManager;
 
   final MavenModelManager mavenModelManager;
@@ -123,13 +121,12 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
   
   public ProjectConfigurationManager(MavenModelManager modelManager, MavenConsole console,
       MavenRuntimeManager runtimeManager, MavenProjectManager projectManager,
-      MavenProjectManagerImpl projectManagerImpl, IndexManager indexManager,
+      IndexManager indexManager,
       MavenModelManager mavenModelManager, IMavenMarkerManager mavenMarkerManager) {
     this.modelManager = modelManager;
     this.console = console;
     this.runtimeManager = runtimeManager;
     this.projectManager = projectManager;
-    this.projectManagerImpl = projectManagerImpl;
     this.indexManager = indexManager;
     this.mavenModelManager = mavenModelManager;
     this.mavenMarkerManager = mavenMarkerManager;
@@ -219,50 +216,32 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
       updateRequest.addPomFile(project);
     }
 
-    MutableProjectRegistry newState = projectManagerImpl.newMutableProjectRegistry();
+    // TODO this emits project change events, which may be premature at this point
+    projectManager.refresh(updateRequest, monitor);
 
-    DependencyResolutionContext resolutionContext = new DependencyResolutionContext(updateRequest);
-    while(!resolutionContext.isEmpty()) {
+    //Creating maven facades 
+    List<IMavenProjectFacade> facades = new ArrayList<IMavenProjectFacade>(projects.size());
+    for(IProject project : projects) {
+      if(monitor.isCanceled()) {
+        throw new OperationCanceledException();
+      } 
+      IMavenProjectFacade facade = projectManager.create(project, monitor);
+      if (facade != null) {
+        facades.add(facade);
+      }
+    }
+
+    //MNGECLIPSE-1028 : Sort projects by build order here, 
+    //as dependent projects need to be configured before depending projects (in WTP integration for ex.)
+    sortProjects(facades, monitor);
+    
+    //Then, perform detailed project configuration
+    for(IMavenProjectFacade facade : facades) {
       if(monitor.isCanceled()) {
         throw new OperationCanceledException();
       }
-
-      IFile pom = resolutionContext.pop();
-      monitor.subTask(pom.getFullPath().toString());
-
-      projectManagerImpl.refresh(newState, pom, resolutionContext, monitor);
-      monitor.worked(1);
-    }
-
-    List<MavenProjectChangedEvent> events = projectManagerImpl.applyMutableProjectRegistry(newState);
-
-    try {
-      //Creating maven facades 
-      List<IMavenProjectFacade> facades = new ArrayList<IMavenProjectFacade>(projects.size());
-      for(IProject project : projects) {
-        if(monitor.isCanceled()) {
-          throw new OperationCanceledException();
-        } 
-        IMavenProjectFacade facade = projectManagerImpl.create(project, monitor);
-        if (facade != null) {
-          facades.add(facade);
-        }
-      }
-
-      //MNGECLIPSE-1028 : Sort projects by build order here, 
-      //as dependent projects need to be configured before depending projects (in WTP integration for ex.)
-      sortProjects(facades, monitor);
-      
-      //Then, perform detailed project configuration
-      for(IMavenProjectFacade facade : facades) {
-        if(monitor.isCanceled()) {
-          throw new OperationCanceledException();
-        }
-        ProjectConfigurationRequest request = new ProjectConfigurationRequest(facade, facade.getMavenProject(monitor), createMavenSession(facade, monitor), false /*updateSources*/);
-        updateProjectConfiguration(request, monitor);
-      }
-    } finally {
-      projectManagerImpl.notifyProjectChangeListeners(events, monitor);
+      ProjectConfigurationRequest request = new ProjectConfigurationRequest(facade, facade.getMavenProject(monitor), createMavenSession(facade, monitor), false /*updateSources*/);
+      updateProjectConfiguration(request, monitor);
     }
   }
 
@@ -314,7 +293,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
   public void updateProjectConfiguration(IProject project, ResolverConfiguration configuration, String goalToExecute, IProgressMonitor monitor) throws CoreException {
     IFile pom = project.getFile(IMavenConstants.POM_FILE_NAME);
     if (pom.isAccessible()) {
-      IMavenProjectFacade facade = projectManagerImpl.create(pom, false, monitor);
+      IMavenProjectFacade facade = projectManager.create(pom, false, monitor);
       if (facade != null) { // facade is null if pom.xml cannot be read
         ProjectConfigurationRequest request = new ProjectConfigurationRequest(facade, facade.getMavenProject(monitor), createMavenSession(facade, monitor), true /*updateSources*/);
         updateProjectConfiguration(request, monitor);
@@ -347,7 +326,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
 
   private void enableBasicMavenNature(IProject project, ResolverConfiguration configuration, IProgressMonitor monitor)
       throws CoreException {
-    projectManagerImpl.setResolverConfiguration(project, configuration);
+    projectManager.setResolverConfiguration(project, configuration);
 
     // add maven nature even for projects without valid pom.xml file
     addMavenNature(project, monitor);

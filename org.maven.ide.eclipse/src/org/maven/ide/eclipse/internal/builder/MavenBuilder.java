@@ -41,6 +41,7 @@ import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.MavenProjectManager;
+import org.maven.ide.eclipse.project.MavenUpdateRequest;
 import org.maven.ide.eclipse.project.configurator.AbstractBuildParticipant;
 import org.maven.ide.eclipse.project.configurator.ILifecycleMapping;
 
@@ -85,6 +86,12 @@ public class MavenBuilder extends IncrementalProjectBuilder {
       if(projectFacade == null) {
         // XXX is this really possible? should we warn the user?
         return null;
+      }
+
+      if (projectFacade.isStale()) {
+        MavenUpdateRequest updateRequest = new MavenUpdateRequest(project, true /*offline*/, false /*updateSnapshots*/);
+        projectManager.refresh(updateRequest, monitor);
+        projectFacade = projectManager.create(project, monitor);
       }
 
       IResourceDelta delta = getDelta(project);
