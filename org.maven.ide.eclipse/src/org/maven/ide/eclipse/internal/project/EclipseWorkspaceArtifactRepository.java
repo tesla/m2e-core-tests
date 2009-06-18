@@ -68,7 +68,7 @@ public class EclipseWorkspaceArtifactRepository extends LocalArtifactRepository 
 //    }
 
     if(context.resolverConfiguration.shouldResolveWorkspaceProjects()
-        || (context.resolverConfiguration.shouldIncludeModules() && WorkspaceState.isSameProject(context.pom, pom))) {
+        || (context.resolverConfiguration.shouldIncludeModules() && MutableProjectRegistry.isSameProject(context.pom, pom))) {
 
       IPath file = pom.getLocation();
       if (!"pom".equals(artifact.getType())) {

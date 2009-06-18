@@ -33,17 +33,17 @@ import org.maven.ide.eclipse.core.MavenLogger;
  *
  * @author Eugene Kuleshov
  */
-public class WorkspaceStateReader {
+public class ProjectRegistryReader {
 
   private static final String WORKSPACE_STATE = "workspaceState.ser";
 
   private final File stateFile;
 
-  public WorkspaceStateReader(File stateLocationDir) {
+  public ProjectRegistryReader(File stateLocationDir) {
     this.stateFile = new File(stateLocationDir, WORKSPACE_STATE);
   }
 
-  public WorkspaceState readWorkspaceState(final MavenProjectManagerImpl managerImpl) {
+  public ProjectRegistry readWorkspaceState(final MavenProjectManagerImpl managerImpl) {
     if(stateFile.exists()) {
       ObjectInputStream is = null;
       try {
@@ -62,7 +62,7 @@ public class WorkspaceStateReader {
             return super.resolveObject(o);
           }
         };
-        return (WorkspaceState) is.readObject();
+        return (ProjectRegistry) is.readObject();
       } catch(Exception ex) {
         MavenLogger.log("Can't read workspace state", ex);
       } finally {
@@ -72,7 +72,7 @@ public class WorkspaceStateReader {
     return null;
   }
 
-  public void writeWorkspaceState(WorkspaceState state) {
+  public void writeWorkspaceState(IProjectRegistry state) {
     ObjectOutputStream os = null;
     try {
       os = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(stateFile))) {

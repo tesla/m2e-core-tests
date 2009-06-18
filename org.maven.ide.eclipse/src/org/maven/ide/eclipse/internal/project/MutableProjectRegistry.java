@@ -8,9 +8,7 @@
 
 package org.maven.ide.eclipse.internal.project;
 
-import java.io.Serializable;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -26,66 +24,17 @@ import org.apache.maven.project.MavenProject;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 
 /**
- * Workspace state
- *
- * @author Igor Fedorenko
+ * WorkspaceStateDelta
+ * 
+ * @author igor
  */
-public class WorkspaceState implements Serializable {
-  
-  private static final long serialVersionUID = -8747318065115176241L;
+public class MutableProjectRegistry extends BasicProjectRegistry implements IProjectRegistry {
 
-  /**
-   * Map<ArtifactKey, IPath> 
-   * Maps ArtifactKey to full workspace IPath of the POM file that defines this artifact. 
-   */
-  private final Map<ArtifactKey, IPath> workspaceArtifacts = new HashMap<ArtifactKey, IPath>();
-
-  /**
-   * Map<ArtifactKey, Set<IPath>> 
-   * Maps ArtifactKey to Set of IPath of poms that depend on the artifact.
-   * This map only includes dependencies between different (eclipse) projects.
-   */
-  private final Map<ArtifactKey, Set<IPath>> workspaceDependencies = new HashMap<ArtifactKey, Set<IPath>>();
-
-  /**
-   * Map<ArtifactKey, Set<IPath>> 
-   * Maps ArtifactKey to Set of IPath of poms that depend on the artifact.
-   * This map only includes dependencies within the same (eclipse) projects.
-   */
-  private final Map<ArtifactKey, Set<IPath>> inprojectDependencies = new HashMap<ArtifactKey, Set<IPath>>();
-
-  /**
-   * Maps parent ArtifactKey to Set of module poms IPath. This map only includes
-   * module defined in eclipse projects other than project that defines parent pom. 
-   */
-  private final Map<ArtifactKey, Set<IPath>> workspaceModules = new HashMap<ArtifactKey, Set<IPath>>();
-
-  /**
-   * Maps full pom IPath to MavenProjectFacade
-   */
-  private final Map<IPath, MavenProjectFacade> workspacePoms = new HashMap<IPath, MavenProjectFacade>();
-
-  public synchronized MavenProjectFacade getProjectFacade(IFile pom) {
-    return workspacePoms.get(pom.getFullPath());
+  public MutableProjectRegistry(ProjectRegistry state) {
+    super(state);
   }
 
-  public synchronized MavenProjectFacade getMavenProject(String groupId, String artifactId, String version) {
-    IPath path = workspaceArtifacts.get(new ArtifactKey(groupId, artifactId, version, null));
-    if (path == null) {
-      return null;
-    }
-    return workspacePoms.get(path);
-  }
-
-  public synchronized MavenProjectFacade[] getProjects() {
-    return workspacePoms.values().toArray(new MavenProjectFacade[workspacePoms.size()]);
-  }
-
-  public synchronized IPath getWorkspaceArtifact(ArtifactKey key) {
-    return workspaceArtifacts.get(key);
-  }
-
-  public synchronized void addProjectDependency(IFile pom, ArtifactKey dependencyKey, boolean workspace) {
+  public void addProjectDependency(IFile pom, ArtifactKey dependencyKey, boolean workspace) {
     Map<ArtifactKey, Set<IPath>> dependencies = workspace ? workspaceDependencies : inprojectDependencies;
     Set<IPath> dependentProjects = dependencies.get(dependencyKey);
     if (dependentProjects == null) {
@@ -100,7 +49,7 @@ public class WorkspaceState implements Serializable {
     addWorkspaceModule(pom, parentArtifactKey);
   }
 
-  public synchronized void addWorkspaceModule(IFile pom, ArtifactKey parentArtifactKey) {
+  public void addWorkspaceModule(IFile pom, ArtifactKey parentArtifactKey) {
     Set<IPath> children = workspaceModules.get(parentArtifactKey);
     if (children == null) {
       children = new HashSet<IPath>();
@@ -109,7 +58,7 @@ public class WorkspaceState implements Serializable {
     children.add(pom.getFullPath());
   }
 
-  public synchronized void addProject(IFile pom, MavenProjectFacade facade) {
+  public void addProject(IFile pom, MavenProjectFacade facade) {
     // Add the project to workspaceProjects map
     workspacePoms.put(pom.getFullPath(), facade);
 
@@ -117,7 +66,7 @@ public class WorkspaceState implements Serializable {
     workspaceArtifacts.put(facade.getArtifactKey(), pom.getFullPath());
   }
 
-  public synchronized void removeProject(IFile pom, ArtifactKey mavenProject) {
+  public void removeProject(IFile pom, ArtifactKey mavenProject) {
     // Remove the project from workspaceDependents and inprojectDependenys maps
     removeDependents(pom, workspaceDependencies);
     removeDependents(pom, inprojectDependencies);
@@ -166,7 +115,7 @@ public class WorkspaceState implements Serializable {
     return pomSet;
   }
 
-  public synchronized Set<IFile> getDependents(IFile pom, ArtifactKey mavenProject, boolean includeNestedModules) {
+  public Set<IFile> getDependents(IFile pom, ArtifactKey mavenProject, boolean includeNestedModules) {
     Set<IFile> dependents = new HashSet<IFile>();
     dependents.addAll(getDependents(pom, mavenProject, workspaceDependencies));
     if (includeNestedModules) {
@@ -182,7 +131,7 @@ public class WorkspaceState implements Serializable {
     return r1.getProject().equals(r2.getProject());
   }
 
-  public synchronized Set<IPath> removeWorkspaceModules(IFile pom, ArtifactKey mavenProject) {
+  public Set<IPath> removeWorkspaceModules(IFile pom, ArtifactKey mavenProject) {
     return workspaceModules.remove(mavenProject);
   }
 

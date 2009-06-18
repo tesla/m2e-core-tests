@@ -213,28 +213,30 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
   private void configureNewMavenProject(ArrayList<IProject> projects, IProgressMonitor monitor)
       throws CoreException {
 
-    try {
-      // first, resolve maven dependencies for all projects
-      MavenUpdateRequest updateRequest = new MavenUpdateRequest(false, false);
-      for (IProject project : projects) {
-        updateRequest.addPomFile(project);
-      }
-  
-      DependencyResolutionContext resolutionContext = new DependencyResolutionContext(updateRequest);
-      while(!resolutionContext.isEmpty()) {
-        if(monitor.isCanceled()) {
-          throw new OperationCanceledException();
-        }
+    // first, resolve maven dependencies for all projects
+    MavenUpdateRequest updateRequest = new MavenUpdateRequest(false, false);
+    for (IProject project : projects) {
+      updateRequest.addPomFile(project);
+    }
 
-        IFile pom = resolutionContext.pop();
-        monitor.subTask(pom.getFullPath().toString());
-  
-        projectManagerImpl.refresh(pom, resolutionContext, monitor);
-        monitor.worked(1);
+    MutableProjectRegistry newState = projectManagerImpl.newMutableProjectRegistry();
+
+    DependencyResolutionContext resolutionContext = new DependencyResolutionContext(updateRequest);
+    while(!resolutionContext.isEmpty()) {
+      if(monitor.isCanceled()) {
+        throw new OperationCanceledException();
       }
-  
-        
-      
+
+      IFile pom = resolutionContext.pop();
+      monitor.subTask(pom.getFullPath().toString());
+
+      projectManagerImpl.refresh(newState, pom, resolutionContext, monitor);
+      monitor.worked(1);
+    }
+
+    List<MavenProjectChangedEvent> events = projectManagerImpl.applyMutableProjectRegistry(newState);
+
+    try {
       //Creating maven facades 
       List<IMavenProjectFacade> facades = new ArrayList<IMavenProjectFacade>(projects.size());
       for(IProject project : projects) {
@@ -260,7 +262,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
         updateProjectConfiguration(request, monitor);
       }
     } finally {
-      projectManagerImpl.notifyProjectChangeListeners(monitor);
+      projectManagerImpl.notifyProjectChangeListeners(events, monitor);
     }
   }
 

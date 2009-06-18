@@ -83,7 +83,7 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
       int updateRequestCount = context.updateRequests.size();
       if(updateRequestCount > 0) {
         monitor.subTask("Refreshing Maven model");
-        manager.refresh(context.updateRequests, monitor);
+        manager.refresh(context.newState, context.updateRequests, monitor);
       }
 
     } catch(InterruptedException ex) {
@@ -213,6 +213,7 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
   static final class CommandContext {
 
     public final MavenProjectManagerImpl manager;
+    public final MutableProjectRegistry newState;
 
     public int sourcesCount = 0;
 
@@ -223,6 +224,7 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
 
     CommandContext(MavenProjectManagerImpl manager) {
       this.manager = manager;
+      this.newState = manager.newMutableProjectRegistry();
     }
   }
 
@@ -245,7 +247,7 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
 
     void execute(CommandContext context, IProgressMonitor monitor) {
       DependencyResolutionContext resolutionContext = new DependencyResolutionContext(updateRequest);
-      resolutionContext.forcePomFiles(context.manager.remove(updateRequest.getPomFiles(), updateRequest.isForce()));
+      resolutionContext.forcePomFiles(context.manager.remove(context.newState, updateRequest.getPomFiles(), updateRequest.isForce()));
       context.updateRequests.add(resolutionContext);
     }
 

@@ -47,6 +47,8 @@ public class ImportSortOrderTestCase extends AsbtractMavenProjectTestCase {
       updateRequest.addPomFile(project);
     }
 
+    MutableProjectRegistry newState = manager.newMutableProjectRegistry();
+
     DependencyResolutionContext resolutionContext = new DependencyResolutionContext(updateRequest);
     while(!resolutionContext.isEmpty()) {
       if(monitor.isCanceled()) {
@@ -56,10 +58,12 @@ public class ImportSortOrderTestCase extends AsbtractMavenProjectTestCase {
       IFile pom = resolutionContext.pop();
       monitor.subTask(pom.getFullPath().toString());
 
-      manager.refresh(pom, resolutionContext, monitor);
-      monitor.worked(1);    
+      manager.refresh(newState, pom, resolutionContext, monitor);
+      monitor.worked(1);
     }
-    
+
+    manager.applyMutableProjectRegistry(newState);
+
     for(IProject project:projects) {
       facades.add(manager.create(project, monitor));
     }

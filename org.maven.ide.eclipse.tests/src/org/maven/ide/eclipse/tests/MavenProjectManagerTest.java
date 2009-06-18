@@ -32,6 +32,7 @@ import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.internal.project.DependencyResolutionContext;
 import org.maven.ide.eclipse.internal.project.MavenProjectFacade;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerImpl;
+import org.maven.ide.eclipse.internal.project.MutableProjectRegistry;
 import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.IMavenProjectVisitor;
@@ -95,8 +96,9 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
   private void remove(MavenProjectManagerImpl manager, IProject project) throws Exception {
     DependencyResolutionContext updateRequest = new DependencyResolutionContext(new MavenUpdateRequest(true /*offline*/, false /* updateSnapshots*/));
 
-    updateRequest.forcePomFiles(manager.remove(project.getFile(IMavenConstants.POM_FILE_NAME)));
-    manager.refresh(Collections.singleton(updateRequest), monitor);
+    MutableProjectRegistry newState = manager.newMutableProjectRegistry();
+    updateRequest.forcePomFiles(manager.remove(newState, project.getFile(IMavenConstants.POM_FILE_NAME)));
+    manager.refresh(newState, Collections.singleton(updateRequest), monitor);
 //    manager.notifyListeners(monitor);
   }
 
@@ -659,7 +661,8 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
 
     MavenUpdateRequest updateRequest = new MavenUpdateRequest(true /*offline*/, false /* updateSources */);
     updateRequest.addPomFile(p1);
-    manager.refresh(Collections.singleton(new DependencyResolutionContext(updateRequest)), monitor);
+    MutableProjectRegistry newState = manager.newMutableProjectRegistry();
+    manager.refresh(newState, Collections.singleton(new DependencyResolutionContext(updateRequest)), monitor);
 //    manager.notifyListeners(monitor);
     assertEquals(false, file.exists());
 

@@ -11,13 +11,10 @@ package org.maven.ide.eclipse.internal.project;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.osgi.service.prefs.BackingStoreException;
@@ -66,9 +63,6 @@ import org.maven.ide.eclipse.project.ResolverConfiguration;
 /**
  * This class keeps track of all maven projects present in the workspace and
  * provides mapping between Maven and the workspace.
- * 
- * XXX materializeArtifactPath does not belong here
- * XXX downloadSources does not belong here
  */
 public class MavenProjectManagerImpl {
 
@@ -103,7 +97,7 @@ public class MavenProjectManagerImpl {
       new Path(".classpath"), //
       new Path(".settings/org.maven.ide.eclipse.prefs")); // dirty hack!
 
-  private final WorkspaceState state;
+  private final ProjectRegistry projectRegistry;
 
   private final MavenConsole console;
   private final IndexManager indexManager;
@@ -111,10 +105,9 @@ public class MavenProjectManagerImpl {
 
   private final IMavenMarkerManager markerManager;
 
-  private final WorkspaceStateReader stateReader;
+  private final ProjectRegistryReader stateReader;
 
   private final Set<IMavenProjectChangedListener> projectChangeListeners = new LinkedHashSet<IMavenProjectChangedListener>();
-  private final Map<IFile, MavenProjectChangedEvent> projectChangeEvents = new LinkedHashMap<IFile, MavenProjectChangedEvent>();
 
   private final transient List<IManagedCache> caches = new ArrayList<IManagedCache>();
 
@@ -125,12 +118,12 @@ public class MavenProjectManagerImpl {
     this.markerManager = mavenMarkerManager;
     this.maven = MavenPlugin.lookup(IMaven.class);
 
-    this.stateReader = new WorkspaceStateReader(stateLocationDir);
+    this.stateReader = new ProjectRegistryReader(stateLocationDir);
 
-    WorkspaceState state = readState && stateReader != null ? stateReader.readWorkspaceState(this) : null;
-    this.state = state == null ? new WorkspaceState() : state;
+    ProjectRegistry state = readState && stateReader != null ? stateReader.readWorkspaceState(this) : null;
+    this.projectRegistry = state == null ? new ProjectRegistry() : state;
 
-    for (MavenProjectFacade facade : this.state.getProjects()) {
+    for (MavenProjectFacade facade : this.projectRegistry.getProjects()) {
       addToIndex(facade);
     }
   }
@@ -158,11 +151,11 @@ public class MavenProjectManagerImpl {
     }
 
     // MavenProjectFacade projectFacade = (MavenProjectFacade) workspacePoms.get(pom.getFullPath());
-    MavenProjectFacade projectFacade = state.getProjectFacade(pom);
+    MavenProjectFacade projectFacade = projectRegistry.getProjectFacade(pom);
     if(projectFacade == null && load) {
       ResolverConfiguration configuration = readResolverConfiguration(pom.getProject());
 
-      MavenExecutionResult executionResult = readProjectWithDependencies(pom, configuration, //
+      MavenExecutionResult executionResult = readProjectWithDependencies(projectRegistry, pom, configuration, //
           new MavenUpdateRequest(true /* offline */, false /* updateSnapshots */),
           monitor);
       MavenProject mavenProject = executionResult.getProject();
@@ -247,13 +240,13 @@ public class MavenProjectManagerImpl {
    * 
    * @return a {@link Set} of {@link IFile} affected poms
    */
-  public Set<IFile> remove(Set<IFile> poms, boolean force) {
+  public Set<IFile> remove(MutableProjectRegistry state, Set<IFile> poms, boolean force) {
     Set<IFile> pomSet = new LinkedHashSet<IFile>();
     for (Iterator<IFile> it = poms.iterator(); it.hasNext(); ) {
       IFile pom = it.next();
       MavenProjectFacade facade = state.getProjectFacade(pom);
       if (force || facade == null || facade.isStale()) {
-        pomSet.addAll(remove(pom));
+        pomSet.addAll(remove(state, pom));
       }
     }
     return pomSet;
@@ -266,7 +259,7 @@ public class MavenProjectManagerImpl {
    * 
    * @return a {@link Set} of {@link IFile} affected poms
    */
-  public Set<IFile> remove(IFile pom) {
+  public Set<IFile> remove(MutableProjectRegistry state, IFile pom) {
     MavenProjectFacade facade = state.getProjectFacade(pom);
     ArtifactKey mavenProject = facade != null ? facade.getArtifactKey() : null;
 
@@ -282,17 +275,17 @@ public class MavenProjectManagerImpl {
     pomSet.addAll(state.getDependents(pom, mavenProject, false));
     state.removeProject(pom, mavenProject);
     removeFromIndex(facade);
-    addProjectChangeEvent(pom, MavenProjectChangedEvent.KIND_REMOVED, MavenProjectChangedEvent.FLAG_NONE, facade, null);
+//    addProjectChangeEvent(pom, MavenProjectChangedEvent.KIND_REMOVED, MavenProjectChangedEvent.FLAG_NONE, facade, null);
 
     // XXX this will likely NOT work for closed/removed projects, need to move to IResourceChangeEventListener
     if(facade!=null) {
       ResolverConfiguration resolverConfiguration = facade.getResolverConfiguration();
       if (resolverConfiguration != null && resolverConfiguration.shouldIncludeModules()) {
-        pomSet.addAll(removeNestedModules(pom, facade.getMavenProjectModules()));
+        pomSet.addAll(removeNestedModules(state, pom, facade.getMavenProjectModules()));
       }
     }
 
-    pomSet.addAll(refreshWorkspaceModules(pom, mavenProject));
+    pomSet.addAll(refreshWorkspaceModules(state, pom, mavenProject));
 
     pomSet.remove(pom);
     
@@ -309,8 +302,7 @@ public class MavenProjectManagerImpl {
    * @param updateRequests a set of {@link MavenUpdateRequest}
    * @param monitor progress monitor
    */
-  public void refresh(Set<DependencyResolutionContext> updateRequests, IProgressMonitor monitor) throws CoreException, InterruptedException {
-    Set<IFile> refreshed = new LinkedHashSet<IFile>();
+  public void refresh(MutableProjectRegistry newState, Set<DependencyResolutionContext> updateRequests, IProgressMonitor monitor) throws CoreException, InterruptedException {
 
     for(DependencyResolutionContext updateRequest : updateRequests) {
       while(!updateRequest.isEmpty()) {
@@ -322,26 +314,28 @@ public class MavenProjectManagerImpl {
         monitor.subTask(pom.getFullPath().toString());
         
         if (!pom.isAccessible() || !pom.getProject().hasNature(IMavenConstants.NATURE_ID)) {
-          updateRequest.forcePomFiles(remove(pom));
+          updateRequest.forcePomFiles(remove(newState, pom));
           continue;
         }
 
-        refresh(pom, updateRequest, monitor);
-        refreshed.add(pom);
+        refresh(newState, pom, updateRequest, monitor);
         monitor.worked(1);
       }
     }
 
-    notifyProjectChangeListeners(monitor);
+    notifyProjectChangeListeners(applyMutableProjectRegistry(newState), monitor);
   }
 
   MavenExecutionPlan calculateExecutionPlan(MavenProjectFacade facade, IProgressMonitor monitor) throws CoreException {
-    MavenExecutionRequest request = createExecutionRequest(facade.getPom(), facade.getResolverConfiguration());
+    return calculateExecutionPlan(projectRegistry, facade, monitor);
+  }
+  private MavenExecutionPlan calculateExecutionPlan(IProjectRegistry state, MavenProjectFacade facade, IProgressMonitor monitor) throws CoreException {
+    MavenExecutionRequest request = createExecutionRequest(state, facade.getPom(), facade.getResolverConfiguration());
     request.setGoals(Arrays.asList("package"));
     return maven.calculateExecutionPlan(request, facade.getMavenProject(monitor), monitor);
   }
 
-  public void refresh(IFile pom, DependencyResolutionContext updateRequest, IProgressMonitor monitor) throws CoreException {
+  public void refresh(MutableProjectRegistry state, IFile pom, DependencyResolutionContext updateRequest, IProgressMonitor monitor) throws CoreException {
     MavenProjectFacade oldFacade = state.getProjectFacade(pom);
 
     if(!updateRequest.isForce(pom) && oldFacade != null && !oldFacade.isStale()) {
@@ -358,16 +352,16 @@ public class MavenProjectManagerImpl {
     MavenProject mavenProject = null;
     MavenExecutionResult result = null;
     if (pom.isAccessible()) {
-      result = readProjectWithDependencies(pom, resolverConfiguration, updateRequest.getRequest(), monitor);
+      result = readProjectWithDependencies(state, pom, resolverConfiguration, updateRequest.getRequest(), monitor);
       mavenProject = result.getProject();
       markerManager.addMarkers(pom, result);
     }
 
     if (mavenProject == null) {
-      updateRequest.forcePomFiles(remove(pom));
+      updateRequest.forcePomFiles(remove(state, pom));
       if (result != null && resolverConfiguration.shouldResolveWorkspaceProjects()) {
         // this only really add missing parent
-        addMissingProjectDependencies(pom, result);
+        addMissingProjectDependencies(state, pom, result);
       }
       try {
         // MNGECLIPSE-605 embedder is not able to resolve the project due to missing configuration in the parent
@@ -400,11 +394,11 @@ public class MavenProjectManagerImpl {
 
     // refresh modules
     if (resolverConfiguration.shouldIncludeModules()) {
-      updateRequest.forcePomFiles(remove(getRemovedNestedModules(pom, oldModules, getMavenProjectModules(mavenProject)), true));
+      updateRequest.forcePomFiles(remove(state, getRemovedNestedModules(pom, oldModules, getMavenProjectModules(mavenProject)), true));
       updateRequest.forcePomFiles(refreshNestedModules(pom, mavenProject));
     } else {
-      updateRequest.forcePomFiles(refreshWorkspaceModules(pom, oldProjectKey));
-      updateRequest.forcePomFiles(refreshWorkspaceModules(pom, projectKey));
+      updateRequest.forcePomFiles(refreshWorkspaceModules(state, pom, oldProjectKey));
+      updateRequest.forcePomFiles(refreshWorkspaceModules(state, pom, projectKey));
     }
 
     // refresh dependents
@@ -420,31 +414,31 @@ public class MavenProjectManagerImpl {
     MavenProjectFacade facade = new MavenProjectFacade(this, pom, mavenProject, resolverConfiguration);
     state.addProject(pom, facade);
     if (resolverConfiguration.shouldResolveWorkspaceProjects()) {
-      addProjectDependencies(pom, mavenProject, true);
+      addProjectDependencies(state, pom, mavenProject, true);
     }
     if (resolverConfiguration.shouldIncludeModules()) {
-      addProjectDependencies(pom, mavenProject, false);
+      addProjectDependencies(state, pom, mavenProject, false);
     }
     MavenProject parentProject = mavenProject.getParent();
     if (parentProject != null) {
-      state.addWorkspaceModule(pom, mavenProject);
+      state.addWorkspaceModule(pom, new ArtifactKey(mavenProject.getParentArtifact()));
       if (resolverConfiguration.shouldResolveWorkspaceProjects()) {
         state.addProjectDependency(pom, new ArtifactKey(mavenProject.getParentArtifact()), true);
       }
     }
 
     // send appropriate event
-    int kind;
-    int flags = MavenProjectChangedEvent.FLAG_NONE;
-    if (oldFacade == null) {
-      kind = MavenProjectChangedEvent.KIND_ADDED;
-    } else {
-      kind = MavenProjectChangedEvent.KIND_CHANGED;
-    }
-    if (dependencyChanged) {
-      flags |= MavenProjectChangedEvent.FLAG_DEPENDENCIES;
-    }
-    addProjectChangeEvent(pom, kind, flags, oldFacade, facade);
+//    int kind;
+//    int flags = MavenProjectChangedEvent.FLAG_NONE;
+//    if (oldFacade == null) {
+//      kind = MavenProjectChangedEvent.KIND_ADDED;
+//    } else {
+//      kind = MavenProjectChangedEvent.KIND_CHANGED;
+//    }
+//    if (dependencyChanged) {
+//      flags |= MavenProjectChangedEvent.FLAG_DEPENDENCIES;
+//    }
+//    addProjectChangeEvent(pom, kind, flags, oldFacade, facade);
 
     // update index
     removeFromIndex(oldFacade);
@@ -466,7 +460,7 @@ public class MavenProjectManagerImpl {
     return pomSet;
   }
 
-  private Set<IFile> removeNestedModules(IFile pom, List<String> modules) {
+  private Set<IFile> removeNestedModules(MutableProjectRegistry state, IFile pom, List<String> modules) {
     if (modules == null || modules.isEmpty()) {
       return Collections.emptySet();
     }
@@ -475,7 +469,7 @@ public class MavenProjectManagerImpl {
     for(String module : modules) {
       IFile modulePom = getModulePom(pom, module);
       if (modulePom != null) {
-        pomSet.addAll(remove(modulePom));
+        pomSet.addAll(remove(state, modulePom));
       }
     }
     return pomSet;
@@ -508,7 +502,7 @@ public class MavenProjectManagerImpl {
     return pom.getParent().getFile(new Path(moduleName).append(IMavenConstants.POM_FILE_NAME));
   }
 
-  private Set<IFile> refreshWorkspaceModules(IFile pom, ArtifactKey mavenProject) {
+  private Set<IFile> refreshWorkspaceModules(MutableProjectRegistry state, IFile pom, ArtifactKey mavenProject) {
     if (mavenProject == null) {
       return Collections.emptySet();
     }
@@ -527,7 +521,7 @@ public class MavenProjectManagerImpl {
     return pomSet;
   }
 
-  private void addProjectDependencies(IFile pom, MavenProject mavenProject, boolean workspace) {
+  private void addProjectDependencies(MutableProjectRegistry state, IFile pom, MavenProject mavenProject, boolean workspace) {
     for(Artifact artifact : mavenProject.getArtifacts()) {
       state.addProjectDependency(pom, new ArtifactKey(artifact), workspace);
     }
@@ -553,29 +547,29 @@ public class MavenProjectManagerImpl {
     }
   }
 
-  private void addProjectChangeEvent(IFile pom, int kind, int flags, MavenProjectFacade oldMavenProject, MavenProjectFacade mavenProject) {
-    MavenProjectChangedEvent event = projectChangeEvents.get(pom);
-    if (event == null) {
-      event = new MavenProjectChangedEvent(pom, kind, flags, oldMavenProject, mavenProject);
-      projectChangeEvents.put(pom, event);
-      return;
-    }
+//  private void addProjectChangeEvent(IFile pom, int kind, int flags, MavenProjectFacade oldMavenProject, MavenProjectFacade mavenProject) {
+//    MavenProjectChangedEvent event = projectChangeEvents.get(pom);
+//    if (event == null) {
+//      event = new MavenProjectChangedEvent(pom, kind, flags, oldMavenProject, mavenProject);
+//      projectChangeEvents.put(pom, event);
+//      return;
+//    }
+//
+//    // merge events
+//    IMavenProjectFacade old = event.getOldMavenProject() != null? event.getOldMavenProject(): oldMavenProject;
+//    int mergedKind;
+//    if (MavenProjectChangedEvent.KIND_REMOVED == kind) {
+//      mergedKind = MavenProjectChangedEvent.KIND_REMOVED;
+//    } else if (event.getKind() == kind) {
+//      mergedKind = kind;
+//    } else {
+//      mergedKind = MavenProjectChangedEvent.KIND_CHANGED;
+//    }
+//    event = new MavenProjectChangedEvent(pom, mergedKind, event.getFlags() | flags, old, mavenProject);
+//    projectChangeEvents.put(pom, event);
+//  }
 
-    // merge events
-    IMavenProjectFacade old = event.getOldMavenProject() != null? event.getOldMavenProject(): oldMavenProject;
-    int mergedKind;
-    if (MavenProjectChangedEvent.KIND_REMOVED == kind) {
-      mergedKind = MavenProjectChangedEvent.KIND_REMOVED;
-    } else if (event.getKind() == kind) {
-      mergedKind = kind;
-    } else {
-      mergedKind = MavenProjectChangedEvent.KIND_CHANGED;
-    }
-    event = new MavenProjectChangedEvent(pom, mergedKind, event.getFlags() | flags, old, mavenProject);
-    projectChangeEvents.put(pom, event);
-  }
-
-  private void addMissingProjectDependencies(IFile pom, MavenExecutionResult result) {
+  private void addMissingProjectDependencies(MutableProjectRegistry state, IFile pom, MavenExecutionResult result) {
     // kinda hack, but this is the only way I can get info about missing parent artifacts
     List<Exception> exceptions = result.getExceptions();
     if (exceptions != null) {
@@ -596,7 +590,7 @@ public class MavenProjectManagerImpl {
     }
   }
 
-  private static boolean hasDependencyChange(MavenProject before, MavenProject after) {
+  static boolean hasDependencyChange(MavenProject before, MavenProject after) {
     if(before == after) {
       // either same instance or both null
       return false;
@@ -655,25 +649,23 @@ public class MavenProjectManagerImpl {
     }
   }
 
-  public void notifyProjectChangeListeners(IProgressMonitor monitor) {
-    if (projectChangeEvents.size() > 0) {
-      stateReader.writeWorkspaceState(state); // TODO create a listener
+  public void notifyProjectChangeListeners(List<MavenProjectChangedEvent> events, IProgressMonitor monitor) {
+    if (events.size() > 0) {
+      stateReader.writeWorkspaceState(projectRegistry); // TODO create a listener
 
-      Collection<MavenProjectChangedEvent> eventCollection = this.projectChangeEvents.values();
-      MavenProjectChangedEvent[] events = eventCollection.toArray(new MavenProjectChangedEvent[eventCollection.size()]);
+      MavenProjectChangedEvent[] eventsArray = events.toArray(new MavenProjectChangedEvent[events.size()]);
       IMavenProjectChangedListener[] listeners;
       synchronized (this.projectChangeListeners) {
         listeners = this.projectChangeListeners.toArray(new IMavenProjectChangedListener[this.projectChangeListeners.size()]);
       }
-      this.projectChangeEvents.clear();
       for (int i = 0; i < listeners.length; i++) {
-        listeners[i].mavenProjectChanged(events, monitor);
+        listeners[i].mavenProjectChanged(eventsArray, monitor);
       }
     }
   }
 
   public MavenProjectFacade getMavenProject(String groupId, String artifactId, String version) {
-    return state.getMavenProject(groupId, artifactId, version);
+    return projectRegistry.getProjectFacade(groupId, artifactId, version);
   }
 
   public void addManagedCache(IManagedCache cache) {
@@ -684,11 +676,15 @@ public class MavenProjectManagerImpl {
     caches.remove(cache);
   }
 
-  public MavenExecutionResult readProjectWithDependencies(IFile pomFile, ResolverConfiguration resolverConfiguration,
+  MavenExecutionResult readProjectWithDependencies(IFile pomFile, ResolverConfiguration resolverConfiguration,
+      MavenUpdateRequest updateRequest, IProgressMonitor monitor) {
+    return readProjectWithDependencies(projectRegistry, pomFile, resolverConfiguration, updateRequest, monitor);
+  }
+  private MavenExecutionResult readProjectWithDependencies(IProjectRegistry state, IFile pomFile, ResolverConfiguration resolverConfiguration,
       MavenUpdateRequest updateRequest, IProgressMonitor monitor) {
 
     try {
-      MavenExecutionRequest request = createExecutionRequest(pomFile, resolverConfiguration);
+      MavenExecutionRequest request = createExecutionRequest(state, pomFile, resolverConfiguration);
       request.setOffline(updateRequest.isOffline());
       return maven.readProjectWithDependencies(request, monitor);
     } catch(CoreException ex) {
@@ -700,7 +696,7 @@ public class MavenProjectManagerImpl {
   }
 
   public IMavenProjectFacade[] getProjects() {
-    return state.getProjects();
+    return projectRegistry.getProjects();
   }
 
   public boolean setResolverConfiguration(IProject project, ResolverConfiguration configuration) {
@@ -715,34 +711,24 @@ public class MavenProjectManagerImpl {
    * Context
    */
   static class Context {
-    final WorkspaceState state;
+    final IProjectRegistry state;
 
     final ResolverConfiguration resolverConfiguration;
 
     final IFile pom;
 
-    Context(WorkspaceState state, ResolverConfiguration resolverConfiguration, IFile pom) {
+    Context(IProjectRegistry state, ResolverConfiguration resolverConfiguration, IFile pom) {
       this.state = state;
       this.resolverConfiguration = resolverConfiguration;
       this.pom = pom;
     }
   }
 
-//  private static final class MavenProjectReader implements MavenRunnable {
-//    private final MavenUpdateRequest updateRequest;
-//
-//    MavenProjectReader(MavenUpdateRequest updateRequest) {
-//      this.updateRequest = updateRequest;
-//    }
-//
-//    public MavenExecutionResult execute(IMaven maven, MavenExecutionRequest request) {
-//      request.setOffline(updateRequest.isOffline());
-//      request.setUpdateSnapshots(updateRequest.isUpdateSnapshots());
-//      return maven.readProjectWithDependencies(request);
-//    }
-//  }
-
   public MavenExecutionRequest createExecutionRequest(IFile pom, ResolverConfiguration resolverConfiguration) throws CoreException {
+    return createExecutionRequest(projectRegistry, pom, resolverConfiguration);
+  }
+
+  private MavenExecutionRequest createExecutionRequest(IProjectRegistry state, IFile pom, ResolverConfiguration resolverConfiguration) throws CoreException {
     MavenExecutionRequest request = maven.createExecutionRequest();
 
     request.setPom(pom.getLocation().toFile());
@@ -760,5 +746,13 @@ public class MavenProjectManagerImpl {
     request.setLocalRepository(repository);
 
     return request;
+  }
+
+  public MutableProjectRegistry newMutableProjectRegistry() {
+    return new MutableProjectRegistry(projectRegistry);
+  }
+
+  public List<MavenProjectChangedEvent> applyMutableProjectRegistry(MutableProjectRegistry newState) {
+    return projectRegistry.apply(newState);
   }
 }
