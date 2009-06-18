@@ -57,7 +57,6 @@ import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerRefreshJob;
-import org.maven.ide.eclipse.internal.project.SchedulingRule;
 import org.maven.ide.eclipse.jdt.BuildPathManager;
 import org.maven.ide.eclipse.jdt.MavenJdtPlugin;
 import org.maven.ide.eclipse.project.MavenProjectInfo;
@@ -312,7 +311,7 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
       workspace.run(new IWorkspaceRunnable() {
         public void run(IProgressMonitor monitor) throws CoreException {
         }
-      }, new SchedulingRule(false), 0, monitor);
+      }, workspace.getRoot(), 0, monitor);
     } finally {
       jobManager.resume();
     }
