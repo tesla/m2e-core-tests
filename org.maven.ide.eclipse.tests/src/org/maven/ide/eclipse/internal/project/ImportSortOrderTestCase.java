@@ -5,14 +5,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.CoreException;
+import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
+import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
 import org.maven.ide.eclipse.tests.AsbtractMavenProjectTestCase;
 
 public class ImportSortOrderTestCase extends AsbtractMavenProjectTestCase {
+  
+  protected IProject createProject(String projectName, String projectLocation) throws CoreException {
+    IProject project = super.createProject(projectName, projectLocation);
+    AbstractProjectConfigurator.addNature(project, IMavenConstants.NATURE_ID, monitor);
+    return project;
+  }
 
   private  List<IMavenProjectFacade> createFacades() throws Exception {
 
@@ -47,22 +54,7 @@ public class ImportSortOrderTestCase extends AsbtractMavenProjectTestCase {
       updateRequest.addPomFile(project);
     }
 
-    MutableProjectRegistry newState = manager.newMutableProjectRegistry();
-
-    DependencyResolutionContext resolutionContext = new DependencyResolutionContext(updateRequest);
-    while(!resolutionContext.isEmpty()) {
-      if(monitor.isCanceled()) {
-        throw new OperationCanceledException();
-      }
-
-      IFile pom = resolutionContext.pop();
-      monitor.subTask(pom.getFullPath().toString());
-
-      manager.refresh(newState, pom, resolutionContext, monitor);
-      monitor.worked(1);
-    }
-
-    manager.applyMutableProjectRegistry(newState);
+    manager.refresh(updateRequest, monitor);
 
     for(IProject project:projects) {
       facades.add(manager.create(project, monitor));

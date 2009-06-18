@@ -12,7 +12,7 @@ import org.maven.ide.eclipse.internal.project.ProjectRegistry;
 import org.maven.ide.eclipse.internal.project.MutableProjectRegistry;
 import org.maven.ide.eclipse.project.MavenProjectChangedEvent;
 
-public class WorkspaceStateDeltaTest extends AsbtractMavenProjectTestCase {
+public class MutableProjectRegistryTest extends AsbtractMavenProjectTestCase {
 
   private IMaven maven = MavenPlugin.lookup(IMaven.class);
 
@@ -129,7 +129,7 @@ public class WorkspaceStateDeltaTest extends AsbtractMavenProjectTestCase {
     assertTrue(events.isEmpty());
   }
 
-  public void _testIllageStateMerge() throws Exception {
+  public void testIllageStateMerge() throws Exception {
     ProjectRegistry state = new ProjectRegistry();
     MutableProjectRegistry delta = new MutableProjectRegistry(state);
 

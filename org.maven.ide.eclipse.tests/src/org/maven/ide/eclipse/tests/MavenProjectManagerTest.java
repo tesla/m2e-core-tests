@@ -12,7 +12,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -29,10 +28,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
-import org.maven.ide.eclipse.internal.project.DependencyResolutionContext;
 import org.maven.ide.eclipse.internal.project.MavenProjectFacade;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerImpl;
-import org.maven.ide.eclipse.internal.project.MutableProjectRegistry;
 import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.IMavenProjectVisitor;
@@ -91,15 +88,6 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
   private List<Artifact> getTestArtifacts(IMavenProjectFacade f1) throws CoreException {
     MavenProject mavenProject = f1.getMavenProject(monitor);
     return mavenProject.getTestArtifacts();
-  }
-
-  private void remove(MavenProjectManagerImpl manager, IProject project) throws Exception {
-    DependencyResolutionContext updateRequest = new DependencyResolutionContext(new MavenUpdateRequest(true /*offline*/, false /* updateSnapshots*/));
-
-    MutableProjectRegistry newState = manager.newMutableProjectRegistry();
-    updateRequest.forcePomFiles(manager.remove(newState, project.getFile(IMavenConstants.POM_FILE_NAME)));
-    manager.refresh(newState, Collections.singleton(updateRequest), monitor);
-//    manager.notifyListeners(monitor);
   }
 
   public void test000_simple() throws Exception {
@@ -183,8 +171,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals(p1.getFullPath(), f1.getFullPath());
 
     p1.delete(false, true, monitor);
-
-    remove(manager, p1);
+    waitForJobsToComplete();
 
     assertNull(manager.create(p1, monitor));
   }
@@ -246,7 +233,9 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
 
     assertNotNull(manager.create(p2, monitor));
 
-    remove(manager, p3);
+    p3.delete(true, monitor);
+    waitForJobsToComplete();
+
     assertNull(manager.create(p2, monitor));
   }
 
@@ -289,8 +278,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     }
 
     p2.delete(false, true, monitor);
-
-    remove(manager, p2);
+    waitForJobsToComplete();
 
     {
       IMavenProjectFacade f = manager.create(p1, monitor);
@@ -339,8 +327,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME).getLocation().toFile(), f1.getMavenProject(monitor).getParent().getFile());
 
     p2.delete(false, true, monitor);
-
-    remove(manager, p2);
+    waitForJobsToComplete();
 
     f1 = manager.create(p1, monitor);
     // assertTrue(f1.getMavenProject().getParent().getFile().getAbsolutePath().startsWith(repo.getAbsolutePath()));
@@ -368,7 +355,8 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     events.clear();
 
     // remove p2
-    remove(manager, p2);
+    p2.delete(true, monitor);
+    waitForJobsToComplete();
 
     assertEquals(1, events.size());
     MavenProjectChangedEvent event = events.get(0);
@@ -448,7 +436,9 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     }
 
     this.events.clear();
-    remove(manager, p3);
+    
+    p3.delete(true, monitor);
+    waitForJobsToComplete();
 
     {
       IMavenProjectFacade f1 = manager.create(p1, monitor);
@@ -473,7 +463,8 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals(p1.getFile(IMavenConstants.POM_FILE_NAME), events[1].getSource());
 
     this.events.clear();
-    remove(manager, p2);
+    p2.delete(true, monitor);
+    waitForJobsToComplete();
 
     {
       IMavenProjectFacade f1 = manager.create(p1, monitor);
@@ -661,8 +652,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
 
     MavenUpdateRequest updateRequest = new MavenUpdateRequest(true /*offline*/, false /* updateSources */);
     updateRequest.addPomFile(p1);
-    MutableProjectRegistry newState = manager.newMutableProjectRegistry();
-    manager.refresh(newState, Collections.singleton(new DependencyResolutionContext(updateRequest)), monitor);
+    manager.refresh(updateRequest, monitor);
 //    manager.notifyListeners(monitor);
     assertEquals(false, file.exists());
 
@@ -771,7 +761,8 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     IFile pom2 = p2.getFile("pom.xml");
     assertNotNull(manager.create(pom2, false, null));
 
-    remove(manager, p1);
+    p1.delete(true, monitor);
+    waitForJobsToComplete();
     assertNull(manager.create(pom2, false, null));
 
     assertNotNull(manager.create(pom2, false, null));
