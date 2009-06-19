@@ -83,8 +83,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     }
     waitForJobsToComplete();
 
-    IMarker[] markers1 = project1.findMarkers(null, true, IResource.DEPTH_INFINITE);
-    assertTrue("Unexpected markers " + Arrays.asList(markers1), markers1.length == 0);
+    assertNoErrors(project1);
 
 //    IClasspathEntry[] project1entries = getMavenContainerEntries(project1);
 //    assertEquals(1, project1entries.length);
@@ -646,7 +645,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals("/simple-project/src/main/resources", rawClasspath[1].getPath().toString());
     assertEquals("/simple-project/src/test/java", rawClasspath[2].getPath().toString());
     assertEquals("/simple-project/src/test/resources", rawClasspath[3].getPath().toString());
-    assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER", rawClasspath[4].getPath().toString());
+    assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.4", rawClasspath[4].getPath().toString());
     assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[5].getPath().toString());
    
     IClasspathEntry[] entries = getMavenContainerEntries(project);
