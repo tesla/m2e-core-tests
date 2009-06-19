@@ -49,19 +49,18 @@ public class LifecycleMappingTest extends AsbtractMavenProjectTestCase {
   }
 
   public void testCustomizableMapping() throws Exception {
-    //just commenting this out for a min to see how it affects the tests on trunk
-//    ResolverConfiguration configuration = new ResolverConfiguration();
-//    IProject project1 = importProject("projects/lifecyclemapping/customizable/pom.xml", configuration);
-//    waitForJobsToComplete();
-//
-//    IMavenProjectFacade facade = mavenProjectManager.create(project1, monitor);
-//
-//    ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade, monitor);
-//
-//    assertTrue( lifecycleMapping instanceof CustomizableLifecycleMapping );
-//    
-//    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
-//    assertEquals(4, configurators.size());
-//    assertTrue(configurators.get(3) instanceof MojoExecutionProjectConfigurator);
+    ResolverConfiguration configuration = new ResolverConfiguration();
+    IProject project1 = importProject("projects/lifecyclemapping/customizable/pom.xml", configuration);
+    waitForJobsToComplete();
+
+    IMavenProjectFacade facade = mavenProjectManager.create(project1, monitor);
+
+    ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade, monitor);
+
+    assertTrue( lifecycleMapping instanceof CustomizableLifecycleMapping );
+    
+    List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
+    assertEquals(4, configurators.size());
+    assertTrue(configurators.get(3) instanceof MojoExecutionProjectConfigurator);
   }
 }
