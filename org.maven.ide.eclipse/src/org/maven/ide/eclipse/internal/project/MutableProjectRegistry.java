@@ -32,6 +32,7 @@ public class MutableProjectRegistry extends BasicProjectRegistry implements IPro
   
   private final ProjectRegistry parent;
   private final int parentVersion;
+  private boolean closed;
 
   public MutableProjectRegistry(ProjectRegistry state) {
     super(state);
@@ -40,6 +41,8 @@ public class MutableProjectRegistry extends BasicProjectRegistry implements IPro
   }
 
   public void addProjectDependency(IFile pom, ArtifactKey dependencyKey, boolean workspace) {
+    assertNotClosed();
+
     Map<ArtifactKey, Set<IPath>> dependencies = workspace ? workspaceDependencies : inprojectDependencies;
     Set<IPath> dependentProjects = dependencies.get(dependencyKey);
     if (dependentProjects == null) {
@@ -49,12 +52,22 @@ public class MutableProjectRegistry extends BasicProjectRegistry implements IPro
     dependentProjects.add(pom.getFullPath());
   }
 
+  private void assertNotClosed() {
+    if (closed) {
+      throw new IllegalStateException("Can't modify closed MutableProjectRegistry");
+    }
+  }
+
   public void addWorkspaceModule(IFile pom, MavenProject mavenProject) {
+    assertNotClosed();
+    
     ArtifactKey parentArtifactKey = new ArtifactKey(mavenProject.getParentArtifact());
     addWorkspaceModule(pom, parentArtifactKey);
   }
 
   public void addWorkspaceModule(IFile pom, ArtifactKey parentArtifactKey) {
+    assertNotClosed();
+
     Set<IPath> children = workspaceModules.get(parentArtifactKey);
     if (children == null) {
       children = new HashSet<IPath>();
@@ -64,6 +77,8 @@ public class MutableProjectRegistry extends BasicProjectRegistry implements IPro
   }
 
   public void addProject(IFile pom, MavenProjectFacade facade) {
+    assertNotClosed();
+
     // Add the project to workspaceProjects map
     workspacePoms.put(pom.getFullPath(), facade);
 
@@ -72,6 +87,8 @@ public class MutableProjectRegistry extends BasicProjectRegistry implements IPro
   }
 
   public void removeProject(IFile pom, ArtifactKey mavenProject) {
+    assertNotClosed();
+
     // Remove the project from workspaceDependents and inprojectDependenys maps
     removeDependents(pom, workspaceDependencies);
     removeDependents(pom, inprojectDependencies);
@@ -121,6 +138,8 @@ public class MutableProjectRegistry extends BasicProjectRegistry implements IPro
   }
 
   public Set<IFile> getDependents(IFile pom, ArtifactKey mavenProject, boolean includeNestedModules) {
+    assertNotClosed();
+
     Set<IFile> dependents = new HashSet<IFile>();
     dependents.addAll(getDependents(pom, mavenProject, workspaceDependencies));
     if (includeNestedModules) {
@@ -137,6 +156,8 @@ public class MutableProjectRegistry extends BasicProjectRegistry implements IPro
   }
 
   public Set<IPath> removeWorkspaceModules(IFile pom, ArtifactKey mavenProject) {
+    assertNotClosed();
+
     return workspaceModules.remove(mavenProject);
   }
 
@@ -144,4 +165,45 @@ public class MutableProjectRegistry extends BasicProjectRegistry implements IPro
     return parentVersion != parent.getVersion();
   }
 
+  public void close() {
+    this.closed = true;
+
+    clear();
+  }
+
+  private boolean isClosed() {
+    return closed;
+  }
+  
+  // IProjectRegistry
+  
+  public MavenProjectFacade getProjectFacade(IFile pom) {
+    if (isClosed()) {
+      return parent.getProjectFacade(pom);
+    }
+    return super.getProjectFacade(pom);
+  }
+
+  public MavenProjectFacade getProjectFacade(String groupId, String artifactId, String version) {
+    if (isClosed()) {
+      return parent.getProjectFacade(groupId, artifactId, version);
+    }
+    return super.getProjectFacade(groupId, artifactId, version);
+  }
+
+  public MavenProjectFacade[] getProjects() {
+    if (isClosed()) {
+      return parent.getProjects();
+    }
+    return super.getProjects();
+  }
+
+  public IPath getWorkspaceArtifact(ArtifactKey key) {
+    if (isClosed()) {
+      return parent.getWorkspaceArtifact(key);
+    }
+    return super.getWorkspaceArtifact(key);
+  }
+  
+  
 }

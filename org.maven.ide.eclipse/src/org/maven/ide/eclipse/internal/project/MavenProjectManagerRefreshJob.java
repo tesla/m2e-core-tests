@@ -82,21 +82,25 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
 
     try {
       MutableProjectRegistry newState = manager.newMutableProjectRegistry();
-
-      for (MavenUpdateRequest request : requests) {
-        if(monitor.isCanceled()) {
-          throw new OperationCanceledException();
-        }
-
-        manager.refresh(newState, request, monitor);
-      }
-
-      ISchedulingRule rule = ResourcesPlugin.getWorkspace().getRoot();
-      getJobManager().beginRule(rule, monitor);
       try {
-        manager.applyMutableProjectRegistry(newState, monitor);
+
+        for (MavenUpdateRequest request : requests) {
+          if(monitor.isCanceled()) {
+            throw new OperationCanceledException();
+          }
+  
+          manager.refresh(newState, request, monitor);
+        }
+  
+        ISchedulingRule rule = ResourcesPlugin.getWorkspace().getRoot();
+        getJobManager().beginRule(rule, monitor);
+        try {
+          manager.applyMutableProjectRegistry(newState, monitor);
+        } finally {
+          getJobManager().endRule(rule);
+        }
       } finally {
-        getJobManager().endRule(rule);
+        newState.close();
       }
 
     } catch(CoreException ex) {

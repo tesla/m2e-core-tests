@@ -127,7 +127,7 @@ public class MavenProjectManagerImpl {
     this.stateReader = new ProjectRegistryReader(stateLocationDir);
 
     ProjectRegistry state = readState && stateReader != null ? stateReader.readWorkspaceState(this) : null;
-    this.projectRegistry = state == null ? new ProjectRegistry() : state;
+    this.projectRegistry = (state != null && state.isValid())? state: new ProjectRegistry();
 
     for (MavenProjectFacade facade : this.projectRegistry.getProjects()) {
       addToIndex(facade);
@@ -315,9 +315,13 @@ public class MavenProjectManagerImpl {
       syncRefreshThread = Thread.currentThread();
 
       MutableProjectRegistry newState = newMutableProjectRegistry();
-      refresh(newState, request, monitor);
-
-      applyMutableProjectRegistry(newState, monitor);
+      try {
+        refresh(newState, request, monitor);
+  
+        applyMutableProjectRegistry(newState, monitor);
+      } finally {
+        newState.close();
+      }
     } finally {
       syncRefreshThread = null;
       Job.getJobManager().endRule(rule);
@@ -355,12 +359,12 @@ public class MavenProjectManagerImpl {
     return calculateExecutionPlan(projectRegistry, facade, monitor);
   }
   private MavenExecutionPlan calculateExecutionPlan(IProjectRegistry state, MavenProjectFacade facade, IProgressMonitor monitor) throws CoreException {
-    MavenExecutionRequest request = createExecutionRequest(state, facade.getPom(), facade.getResolverConfiguration());
+    MavenExecutionRequest request = createExecutionRequest(state, facade.getPom(), facade.getResolverConfiguration(), monitor);
     request.setGoals(Arrays.asList("package"));
     return maven.calculateExecutionPlan(request, facade.getMavenProject(monitor), monitor);
   }
 
-  public void refresh(MutableProjectRegistry state, IFile pom, DependencyResolutionContext context, IProgressMonitor monitor) throws CoreException {
+  private void refresh(MutableProjectRegistry state, IFile pom, DependencyResolutionContext context, IProgressMonitor monitor) throws CoreException {
     MavenProjectFacade oldFacade = state.getProjectFacade(pom);
 
     if(!context.isForce(pom) && oldFacade != null && !oldFacade.isStale()) {
@@ -641,8 +645,6 @@ public class MavenProjectManagerImpl {
 
   public void notifyProjectChangeListeners(List<MavenProjectChangedEvent> events, IProgressMonitor monitor) {
     if (events.size() > 0) {
-      stateReader.writeWorkspaceState(projectRegistry); // TODO create a listener
-
       MavenProjectChangedEvent[] eventsArray = events.toArray(new MavenProjectChangedEvent[events.size()]);
       IMavenProjectChangedListener[] listeners;
       synchronized (this.projectChangeListeners) {
@@ -674,7 +676,7 @@ public class MavenProjectManagerImpl {
       MavenUpdateRequest updateRequest, IProgressMonitor monitor) {
 
     try {
-      MavenExecutionRequest request = createExecutionRequest(state, pomFile, resolverConfiguration);
+      MavenExecutionRequest request = createExecutionRequest(state, pomFile, resolverConfiguration, monitor);
       request.setOffline(updateRequest.isOffline());
       return maven.readProjectWithDependencies(request, monitor);
     } catch(CoreException ex) {
@@ -714,12 +716,12 @@ public class MavenProjectManagerImpl {
     }
   }
 
-  public MavenExecutionRequest createExecutionRequest(IFile pom, ResolverConfiguration resolverConfiguration) throws CoreException {
-    return createExecutionRequest(projectRegistry, pom, resolverConfiguration);
+  public MavenExecutionRequest createExecutionRequest(IFile pom, ResolverConfiguration resolverConfiguration, IProgressMonitor monitor) throws CoreException {
+    return createExecutionRequest(projectRegistry, pom, resolverConfiguration, monitor);
   }
 
-  private MavenExecutionRequest createExecutionRequest(IProjectRegistry state, IFile pom, ResolverConfiguration resolverConfiguration) throws CoreException {
-    MavenExecutionRequest request = maven.createExecutionRequest();
+  private MavenExecutionRequest createExecutionRequest(IProjectRegistry state, IFile pom, ResolverConfiguration resolverConfiguration, IProgressMonitor monitor) throws CoreException {
+    MavenExecutionRequest request = maven.createExecutionRequest(monitor);
 
     request.setPom(pom.getLocation().toFile());
 
@@ -754,6 +756,7 @@ public class MavenProjectManagerImpl {
    */
   void applyMutableProjectRegistry(MutableProjectRegistry newState, IProgressMonitor monitor) {
     List<MavenProjectChangedEvent> events = projectRegistry.apply(newState);
+    stateReader.writeWorkspaceState(projectRegistry);
     notifyProjectChangeListeners(events, monitor);
   }
 }

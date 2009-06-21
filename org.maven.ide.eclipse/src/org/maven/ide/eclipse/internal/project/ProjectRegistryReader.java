@@ -72,7 +72,7 @@ public class ProjectRegistryReader {
     return null;
   }
 
-  public void writeWorkspaceState(IProjectRegistry state) {
+  public void writeWorkspaceState(ProjectRegistry state) {
     ObjectOutputStream os = null;
     try {
       os = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(stateFile))) {

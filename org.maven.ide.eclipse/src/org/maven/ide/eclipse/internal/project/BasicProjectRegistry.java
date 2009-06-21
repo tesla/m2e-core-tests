@@ -8,6 +8,7 @@
 
 package org.maven.ide.eclipse.internal.project;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -22,7 +23,9 @@ import org.maven.ide.eclipse.embedder.ArtifactKey;
  *
  * @author igor
  */
-class BasicProjectRegistry {
+class BasicProjectRegistry implements Serializable {
+
+  private static final long serialVersionUID = 2476327375565147378L;
 
   /**
    * Map<ArtifactKey, IPath> 
@@ -63,19 +66,12 @@ class BasicProjectRegistry {
   }
 
   protected final void replaceWith(BasicProjectRegistry other) {
-    workspaceArtifacts.clear();
+    clear();
+
     workspaceArtifacts.putAll(other.workspaceArtifacts);
-
-    workspaceDependencies.clear();
     workspaceDependencies.putAll(other.workspaceDependencies);
-
-    inprojectDependencies.clear();
     inprojectDependencies.putAll(other.inprojectDependencies);
-
-    workspaceModules.clear();
     workspaceModules.putAll(other.workspaceModules);
-
-    workspacePoms.clear();
     workspacePoms.putAll(other.workspacePoms);
   }
 
@@ -99,4 +95,20 @@ class BasicProjectRegistry {
     return workspaceArtifacts.get(key);
   }
 
+  protected void clear() {
+    workspaceArtifacts.clear();
+    workspaceDependencies.clear();
+    inprojectDependencies.clear();
+    workspaceModules.clear();
+    workspacePoms.clear();
+  }
+
+  public boolean isValid() {
+    return workspaceArtifacts != null //
+        && workspaceDependencies != null //
+        && inprojectDependencies != null //
+        && workspaceModules != null //
+        && workspacePoms != null;
+  }
+  
 }

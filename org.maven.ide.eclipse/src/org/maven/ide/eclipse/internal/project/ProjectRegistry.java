@@ -28,7 +28,7 @@ public class ProjectRegistry extends BasicProjectRegistry implements Serializabl
 
   private static final long serialVersionUID = -8747318065115176241L;
 
-  private int version;
+  private transient int version;
 
   public synchronized MavenProjectFacade getProjectFacade(IFile pom) {
     return super.getProjectFacade(pom);
