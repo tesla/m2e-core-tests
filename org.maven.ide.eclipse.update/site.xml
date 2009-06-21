@@ -3,7 +3,7 @@
    <description url="http://m2eclipse.sonatype.org/update/">
       Maven Integration
    </description>
-   <feature url="features/org.maven.ide.components.maven_embedder.feature_2.1.0.20080530-2300.jar" id="org.maven.ide.components.maven_embedder.feature" version="2.1.0.20080530-2300">
+   <feature url="features/org.maven.ide.components.maven_embedder.feature_3.0.0.qualifier.jar" id="org.maven.ide.components.maven_embedder.feature" version="3.0.0.qualifier">
       <category name="Maven Integration"/>
    </feature>
    <feature url="features/org.maven.ide.eclipse.feature_0.9.9.qualifier.jar" id="org.maven.ide.eclipse.feature" version="0.9.9.qualifier">
