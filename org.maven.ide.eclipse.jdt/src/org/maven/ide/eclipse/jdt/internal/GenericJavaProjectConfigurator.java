@@ -68,7 +68,7 @@ public class GenericJavaProjectConfigurator extends AbstractJavaProjectConfigura
       return result;
     }
 
-    MavenExecutionRequest executionRequest = projectManager.createExecutionRequest(pomResource, configuration);
+    MavenExecutionRequest executionRequest = projectManager.createExecutionRequest(pomResource, configuration, monitor);
     executionRequest.setGoals(Arrays.asList(goalsToExecute.split("[\\s,]+")));
     MavenExecutionResult result = maven.execute(executionRequest, monitor);
 

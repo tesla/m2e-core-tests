@@ -6,20 +6,20 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.embedder;
+package org.maven.ide.eclipse.internal.embedder;
 
-import org.apache.maven.embedder.MavenEmbedderLogger;
+import org.codehaus.plexus.logging.Logger;
 
 import org.maven.ide.eclipse.core.MavenConsole;
+import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 
-
-class PluginConsoleMavenEmbeddedLogger implements MavenEmbedderLogger {
+class EclipseLogger implements Logger {
   private MavenConsole console;
-  private int treshold;
-  
-  public PluginConsoleMavenEmbeddedLogger(MavenConsole console, boolean debug) {
+  private final IMavenConfiguration mavenConfiguration;
+
+  public EclipseLogger(MavenConsole console, IMavenConfiguration mavenConfiguration) {
     this.console = console;
-    this.treshold = debug ? LEVEL_DEBUG : LEVEL_INFO;
+    this.mavenConfiguration = mavenConfiguration;
   }
 
   private void out(String s) {
@@ -91,34 +91,38 @@ class PluginConsoleMavenEmbeddedLogger implements MavenEmbedderLogger {
   }
   
   public boolean isDebugEnabled() {
-    return this.treshold <= LEVEL_DEBUG;
+    return mavenConfiguration.isDebugOutput();
   }
   
   public boolean isInfoEnabled() {
-    return this.treshold <= LEVEL_INFO;
+    return true;
   }
 
   public boolean isWarnEnabled() {
-    return this.treshold <= LEVEL_WARN;
+    return true;
   }
 
   public boolean isErrorEnabled() {
-    return this.treshold <= LEVEL_ERROR;
+    return true;
   }
 
   public boolean isFatalErrorEnabled() {
-    return this.treshold <= LEVEL_FATAL;
+    return true;
   }
 
   public void setThreshold( int treshold ) {
-    this.treshold = treshold;
   }
 
   public int getThreshold() {
-    return treshold;
+    return LEVEL_DEBUG;
   }
 
-  public void close() {
+  public Logger getChildLogger(String name) {
+    return this;
+  }
+
+  public String getName() {
+    return "m2e console logger";
   }
 
 }

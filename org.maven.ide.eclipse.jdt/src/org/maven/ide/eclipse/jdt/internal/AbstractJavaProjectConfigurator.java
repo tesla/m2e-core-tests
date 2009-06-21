@@ -226,8 +226,8 @@ abstract class AbstractJavaProjectConfigurator extends AbstractProjectConfigurat
           console.logError("Skipping resource folder " + r.getFullPath());
         } else if(r != null && !classpath.containsPath(r.getFullPath())) {
           console.logMessage("Adding resource folder " + r.getFullPath());
-          classpath.addSourceEntry(r.getFullPath(), outputPath, new IPath[] {new Path("**")} /*exclusion*/,
-              new IPath[0] /*inclusions*/, false /*optional*/);
+          classpath.addSourceEntry(r.getFullPath(), outputPath, new IPath[0] /*inclusions*/,  
+              new IPath[] {new Path("**")} /*exclusion*/, false /*optional*/);
         }
       }
     }
@@ -293,7 +293,7 @@ abstract class AbstractJavaProjectConfigurator extends AbstractProjectConfigurat
   private MavenExecutionPlan getExecutionPlan(MavenProject mavenProject, ProjectConfigurationRequest request,
       IProgressMonitor monitor) throws CoreException {
     MavenExecutionRequest executionRequest = projectManager.createExecutionRequest(request.getPom(), request
-        .getResolverConfiguration());
+        .getResolverConfiguration(), monitor);
     executionRequest.setGoals(Arrays.asList("package"));
     MavenExecutionPlan executionPlan = maven.calculateExecutionPlan(executionRequest, mavenProject, monitor);
     return executionPlan;

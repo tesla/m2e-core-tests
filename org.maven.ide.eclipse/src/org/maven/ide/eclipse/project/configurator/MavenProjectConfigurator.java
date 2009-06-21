@@ -60,7 +60,7 @@ public class MavenProjectConfigurator extends AbstractProjectConfigurator {
         // MavenPlugin plugin = MavenPlugin.getDefault();
         try {
           IMaven maven = MavenPlugin.lookup(IMaven.class);
-          MavenExecutionRequest executionRequest = projectManager.createExecutionRequest(pomFile, resolverConfiguration);
+          MavenExecutionRequest executionRequest = projectManager.createExecutionRequest(pomFile, resolverConfiguration, monitor);
           executionRequest.setGoals(goals);
           maven.execute(executionRequest, monitor);
         } catch(Exception ex) {

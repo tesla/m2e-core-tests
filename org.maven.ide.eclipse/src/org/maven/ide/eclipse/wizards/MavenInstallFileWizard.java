@@ -98,7 +98,7 @@ public class MavenInstallFileWizard extends Wizard implements IImportWizard {
         try {
           // Run the install:install-file goal
           IMaven maven = MavenPlugin.lookup(IMaven.class);
-          MavenExecutionRequest request = maven.createExecutionRequest();
+          MavenExecutionRequest request = maven.createExecutionRequest(monitor);
           request.setGoals(Arrays.asList("install:install-file"));
           request.setProperties(properties);
           MavenExecutionResult executionResult = maven.execute(request, monitor);

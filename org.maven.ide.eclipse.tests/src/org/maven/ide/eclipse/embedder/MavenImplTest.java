@@ -22,7 +22,7 @@ public class MavenImplTest extends TestCase {
   private IMaven maven = MavenPlugin.lookup(IMaven.class);
 
   public void testGetMojoParameterValue() throws Exception {
-    MavenExecutionRequest request = maven.createExecutionRequest();
+    MavenExecutionRequest request = maven.createExecutionRequest(monitor);
     request.setPom(new File("projects/mojoparametervalue/pom.xml"));
     request.setGoals(Arrays.asList("compile"));
     

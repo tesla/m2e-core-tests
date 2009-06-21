@@ -109,7 +109,7 @@ public class MavenBuilder extends IncrementalProjectBuilder {
       Set<IProject> dependencies = new HashSet<IProject>();
 
       IMaven maven = MavenPlugin.lookup(IMaven.class);
-      MavenExecutionRequest request = projectManager.createExecutionRequest(pomResource, projectFacade.getResolverConfiguration());
+      MavenExecutionRequest request = projectManager.createExecutionRequest(pomResource, projectFacade.getResolverConfiguration(), monitor);
       MavenSession session = maven.createSession(request, projectFacade.getMavenProject(monitor));
       ILifecycleMapping lifecycleMapping = configurationManager.getLifecycleMapping(projectFacade, monitor);
 
@@ -211,7 +211,7 @@ public class MavenBuilder extends IncrementalProjectBuilder {
       Map<String, Object> contextState = new HashMap<String, Object>();
       EclipseBuildContext buildContext = new EclipseBuildContext(project, contextState);
 
-      MavenExecutionRequest request = projectManager.createExecutionRequest(pomResource, projectFacade.getResolverConfiguration());
+      MavenExecutionRequest request = projectManager.createExecutionRequest(pomResource, projectFacade.getResolverConfiguration(), monitor);
       MavenSession session = maven.createSession(request, projectFacade.getMavenProject(monitor));
       ILifecycleMapping lifecycleMapping = configurationManager.getLifecycleMapping(projectFacade, monitor);
       

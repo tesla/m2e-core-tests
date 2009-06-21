@@ -246,7 +246,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
   }
 
   private MavenSession createMavenSession(IMavenProjectFacade facade, IProgressMonitor monitor) throws CoreException {
-    MavenExecutionRequest request = projectManager.createExecutionRequest(facade.getPom(), facade.getResolverConfiguration());
+    MavenExecutionRequest request = projectManager.createExecutionRequest(facade.getPom(), facade.getResolverConfiguration(), monitor);
     return maven.createSession(request, facade.getMavenProject(monitor));
   }
 

@@ -116,7 +116,7 @@ public class DefaultBuildParticipant extends AbstractBuildParticipant {
 
     ResolverConfiguration configuration = projectFacade.getResolverConfiguration();
 
-    MavenExecutionRequest request = manager.createExecutionRequest(projectFacade.getPom(), configuration);
+    MavenExecutionRequest request = manager.createExecutionRequest(projectFacade.getPom(), configuration, monitor);
     List<String> goals = Arrays.asList(configuration.getFullBuildGoals().split("[,\\s]+"));
     List<String> filteredGoals = getFilteredGoals(maven, goals, projectFacade, monitor);
     request.setGoals(filteredGoals.isEmpty() ? goals : filteredGoals);
@@ -175,7 +175,7 @@ public class DefaultBuildParticipant extends AbstractBuildParticipant {
 
     ResolverConfiguration configuration = projectFacade.getResolverConfiguration();
     
-    MavenExecutionRequest request = manager.createExecutionRequest(projectFacade.getPom(), configuration);
+    MavenExecutionRequest request = manager.createExecutionRequest(projectFacade.getPom(), configuration, monitor);
     List<String> goals = Arrays.asList(configuration.getResourceFilteringGoals().split("[,\\s]+"));
     List<String> filteredGoals = getFilteredGoals(maven, goals, projectFacade, monitor);
     request.setGoals(filteredGoals.isEmpty() ? goals : filteredGoals);

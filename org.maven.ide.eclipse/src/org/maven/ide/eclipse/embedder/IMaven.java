@@ -39,7 +39,13 @@ import org.apache.maven.settings.validation.SettingsValidationResult;
  */
 public interface IMaven {
 
-  public MavenExecutionRequest createExecutionRequest() throws CoreException;
+  /**
+   * Creates new Maven execution request. 
+   * 
+   * This method is not long running, but created execution request is configured 
+   * to report progress to provided progress monitor. Monitor can be null.
+   */
+  public MavenExecutionRequest createExecutionRequest(IProgressMonitor monitor) throws CoreException;
 
   // POM Model read/write operations
 

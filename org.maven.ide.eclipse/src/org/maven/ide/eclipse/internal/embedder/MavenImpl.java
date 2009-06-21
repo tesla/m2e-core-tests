@@ -74,8 +74,10 @@ import org.apache.maven.settings.validation.SettingsValidationResult;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
+import org.maven.ide.eclipse.index.IndexManager;
 
 
 public class MavenImpl implements IMaven {
@@ -104,6 +106,10 @@ public class MavenImpl implements IMaven {
 
   private final ConverterLookup converterLookup = new DefaultConverterLookup();
 
+  private MavenConsole console;
+
+  private IndexManager indexManager;
+
   public MavenImpl(PlexusContainer plexus, IMavenConfiguration mavenConfiguration) throws CoreException {
     this.plexus = plexus;
     try {
@@ -123,7 +129,7 @@ public class MavenImpl implements IMaven {
     }
   }
 
-  public MavenExecutionRequest createExecutionRequest() throws CoreException {
+  public MavenExecutionRequest createExecutionRequest(IProgressMonitor monitor) throws CoreException {
     MavenExecutionRequest request = new DefaultMavenExecutionRequest();
     if (mavenConfiguration.getGlobalSettingsFile() != null) {
       request.setGlobalSettingsFile(new File(mavenConfiguration.getGlobalSettingsFile()));
@@ -135,6 +141,9 @@ public class MavenImpl implements IMaven {
     request.setLocalRepository(localRepository);
     request.setLocalRepositoryPath(localRepository.getBasedir());
     request.setOffline(mavenConfiguration.isOffline());
+
+    // logging
+    request.setTransferListener(new TransferListenerAdapter(monitor, console, indexManager));
 
     request.getProperties().put("m2e.version", MavenPlugin.getVersion());
 
@@ -227,7 +236,7 @@ public class MavenImpl implements IMaven {
   }
 
   public Settings buildSettings(String globalSettings, String userSettings) throws CoreException {
-    MavenExecutionRequest request = createExecutionRequest();
+    MavenExecutionRequest request = createExecutionRequest(null);
     request.setGlobalSettingsFile(globalSettings != null? new File(globalSettings): null);
     request.setUserSettingsFile(userSettings != null? new File(userSettings): null);
     try {
@@ -290,7 +299,7 @@ public class MavenImpl implements IMaven {
 
   public MavenProject readProject(File pomFile, IProgressMonitor monitor) throws CoreException {
     try {
-      MavenExecutionRequest request = createExecutionRequest();
+      MavenExecutionRequest request = createExecutionRequest(monitor);
       populator.populateDefaults(request);
       ProjectBuildingRequest configuration = request.getProjectBuildingRequest();
       return projectBuilder.build(pomFile, configuration);

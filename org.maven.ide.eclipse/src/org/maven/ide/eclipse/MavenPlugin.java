@@ -69,7 +69,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.codehaus.plexus.ContainerConfiguration;
 import org.codehaus.plexus.DefaultContainerConfiguration;
 import org.codehaus.plexus.DefaultPlexusContainer;
-import org.codehaus.plexus.PlexusContainer;
+import org.codehaus.plexus.MutablePlexusContainer;
 import org.codehaus.plexus.classworlds.ClassWorld;
 import org.codehaus.plexus.classworlds.realm.ClassRealm;
 import org.codehaus.plexus.component.discovery.ComponentDiscoverer;
@@ -106,6 +106,7 @@ import org.maven.ide.eclipse.index.IndexManager.IndexUpdaterRule;
 import org.maven.ide.eclipse.internal.ExtensionReader;
 import org.maven.ide.eclipse.internal.console.MavenConsoleImpl;
 import org.maven.ide.eclipse.internal.embedder.EclipseArtifactFilterManagerDelegate;
+import org.maven.ide.eclipse.internal.embedder.EclipseLoggerManager;
 import org.maven.ide.eclipse.internal.embedder.MavenConfigurationImpl;
 import org.maven.ide.eclipse.internal.embedder.MavenEmbeddedRuntime;
 import org.maven.ide.eclipse.internal.embedder.MavenImpl;
@@ -150,13 +151,13 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
    * In-process maven runtime. MavenProject and mojo caches must be
    * populated using components looked up from this container.
    */
-  private PlexusContainer mavenCore;
+  private MutablePlexusContainer mavenCore;
 
   /**
    * General purpose plexus container. Containers components from maven embedder
    * and all other bundles visible from this classloader.
    */
-  private PlexusContainer plexus;
+  private MutablePlexusContainer plexus;
 
   /**
    * Poor man's component registry
@@ -272,9 +273,11 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
       }
     });
 
-    this.mavenCore = new DefaultPlexusContainer( mavenCoreCC );
-
     IMavenConfiguration mavenConfiguration = new MavenConfigurationImpl(getPreferenceStore());
+
+    this.mavenCore = new DefaultPlexusContainer( mavenCoreCC );
+    this.mavenCore.setLoggerManager(new EclipseLoggerManager(console, mavenConfiguration));
+
     IMaven maven = new MavenImpl(mavenCore, mavenConfiguration);
 
     components.put(IMavenConfiguration.class, mavenConfiguration);

@@ -132,7 +132,7 @@ public class MavenProjectManager {
   /**
    * PROVISIONAL
    */
-  public MavenExecutionRequest createExecutionRequest(IFile pom, ResolverConfiguration resolverConfiguration) throws CoreException {
-    return manager.createExecutionRequest(pom, resolverConfiguration);
+  public MavenExecutionRequest createExecutionRequest(IFile pom, ResolverConfiguration resolverConfiguration, IProgressMonitor monitor) throws CoreException {
+    return manager.createExecutionRequest(pom, resolverConfiguration, monitor);
   }
 }

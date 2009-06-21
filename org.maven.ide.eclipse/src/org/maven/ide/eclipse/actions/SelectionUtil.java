@@ -24,8 +24,10 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -291,12 +293,14 @@ public class SelectionUtil {
   
   private static MavenProject readMavenProject(File pomFile) throws CoreException {
     IMaven maven = MavenPlugin.lookup(IMaven.class);
+    
+    IProgressMonitor monitor = new NullProgressMonitor();
 
-    MavenExecutionRequest request = maven.createExecutionRequest();
+    MavenExecutionRequest request = maven.createExecutionRequest(monitor);
     request.setOffline(false);
     request.setUpdateSnapshots(false);
 
-    MavenExecutionResult result = maven.execute(request, null);
+    MavenExecutionResult result = maven.execute(request, monitor);
 
     MavenProject project = result.getProject();
     if(project!=null) {
