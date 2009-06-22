@@ -11,9 +11,14 @@ package org.maven.ide.eclipse.internal.project;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.Text;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -24,11 +29,13 @@ import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
 
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.configurator.AbstractBuildParticipant;
 import org.maven.ide.eclipse.project.configurator.AbstractLifecycleMapping;
 import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
 import org.maven.ide.eclipse.project.configurator.ILifecycleMapping;
+import org.maven.ide.eclipse.project.configurator.MojoExecutionBuildParticipant;
 import org.maven.ide.eclipse.project.configurator.ProjectConfigurationRequest;
 
 
@@ -38,9 +45,23 @@ import org.maven.ide.eclipse.project.configurator.ProjectConfigurationRequest;
  * @author igor
  */
 public class CustomizableLifecycleMapping extends AbstractLifecycleMapping implements ILifecycleMapping {
-
+  public static final String EXTENSION_ID = "customizable";
+  
+  private final List<AbstractProjectConfigurator> configurators;
+  
+  public CustomizableLifecycleMapping() {
+    configurators = null;
+  }
+  
+  public CustomizableLifecycleMapping(Element configurationNode) {
+    this.configurators = parseFromDOM(configurationNode);
+  }
+  
   public List<AbstractProjectConfigurator> getProjectConfigurators(IMavenProjectFacade facade, IProgressMonitor monitor)
       throws CoreException {
+    if(configurators != null) {
+      return configurators;
+    }
     MavenProject mavenProject = facade.getMavenProject(monitor);
     Plugin plugin = mavenProject.getPlugin("org.maven.ide.eclipse:lifecycle-mapping");
 
@@ -79,12 +100,94 @@ public class CustomizableLifecycleMapping extends AbstractLifecycleMapping imple
     }
     
     if (executionsDom != null) {
-      for(String executionPattern : getListElements(executionsDom, "mojoExecution")) {
-        configurators.add(MojoExecutionProjectConfigurator.fromString(executionPattern));
+      for(Xpp3Dom execution : executionsDom.getChildren("mojoExecution")) {
+        String strRunOnClean = execution.getAttribute("runOnClean");
+        String strRunOnIncremental = execution.getAttribute("runOnIncremental");
+        configurators.add(MojoExecutionProjectConfigurator.fromString(execution.getValue(), toBool(strRunOnIncremental, true), toBool(strRunOnClean, true)));
       }
     }
 
     return configurators;
+  }
+  
+  private List<AbstractProjectConfigurator> parseFromDOM(Element configNode) {
+    
+    Map<String, AbstractProjectConfigurator> configuratorsMap = new LinkedHashMap<String, AbstractProjectConfigurator>();
+    for(AbstractProjectConfigurator configurator : getProjectConfigurators(false)) {
+      configuratorsMap.put(configurator.getId(), configurator);
+    }
+
+    Element configuratorsDom = getChildElement(configNode, "configurators");
+    Element executionsDom = getChildElement(configNode, "mojoExecutions");
+
+    List<AbstractProjectConfigurator> configurators = new ArrayList<AbstractProjectConfigurator>();
+    
+    if (configuratorsDom != null) {
+      for(Element configuratorDom : getChildren(configuratorsDom, "configurator")) {
+        String configuratorId = configuratorDom.getAttribute("id");
+        AbstractProjectConfigurator configurator = configuratorsMap.get(configuratorId);
+        if(configurator == null) {
+          throw new IllegalArgumentException("Unknown configurator id=" + configuratorId);
+        }
+
+        configurators.add(configurator);
+      }
+    }
+    
+    if (executionsDom != null) {
+      for(Element execution : getChildren(executionsDom, "mojoExecution")) {
+        String strRunOnClean = execution.getAttribute("runOnClean");
+        String strRunOnIncremental = execution.getAttribute("runOnIncremental");
+        configurators.add(MojoExecutionProjectConfigurator.fromString(getNodeContents(execution), toBool(strRunOnIncremental, true), toBool(strRunOnClean, true)));
+      }
+    }
+    
+    return configurators;
+  }
+  
+  private boolean toBool(String value, boolean def) {
+    if(value == null || value.length() == 0) {
+      return def;
+    }
+    return Boolean.parseBoolean(value);
+  }
+  
+  private Element getChildElement(Element parent, String name) {
+    Node n = parent.getFirstChild();
+    while(n != null) {
+      if(n instanceof Element && n.getNodeName().equals(name)) {
+        return (Element)n;
+      }
+      n = n.getNextSibling();
+    }
+    return null;
+  }
+  
+  private List<Element> getChildren(Element parent, String name) {
+    List<Element> ret = new LinkedList<Element>();
+    Node n = parent.getFirstChild();
+    while(n != null) {
+      if(n instanceof Element && n.getNodeName().equals(name)) {
+        ret.add((Element)n);
+      }
+      n = n.getNextSibling();
+    }
+    return ret;
+  }
+  
+  private String getNodeContents(Node n) {
+    if(n instanceof Text) {
+      return ((Text)n).getNodeValue();
+    } else if(n instanceof Element) {
+      StringBuilder value = new StringBuilder();
+      Node child = ((Element)n).getFirstChild();
+      while(child != null) {
+        value.append(getNodeContents(child));
+        child = child.getNextSibling();
+      }
+      return value.toString();
+    }
+    return "";
   }
 
   private Set<String> getListElements(Xpp3Dom listDom, String elementName) {
@@ -123,6 +226,30 @@ public class CustomizableLifecycleMapping extends AbstractLifecycleMapping imple
     super.configure(request, monitor);
 
     addMavenBuilder(request.getProject(), monitor);
+  }
+  
+  /* (non-Javadoc)
+   * @see org.maven.ide.eclipse.project.configurator.ILifecycleMapping#getPotentialMojoExecutionsForBuildKind(org.maven.ide.eclipse.project.IMavenProjectFacade, int, org.eclipse.core.runtime.IProgressMonitor)
+   */
+  public List<String> getPotentialMojoExecutionsForBuildKind(IMavenProjectFacade projectFacade, int kind,
+      IProgressMonitor progressMonitor) {
+    List<String> mojos = new LinkedList<String>();
+    try {
+      for (MojoExecution execution : projectFacade.getExecutionPlan(progressMonitor).getExecutions()) {
+        for (AbstractProjectConfigurator configurator : getProjectConfigurators(projectFacade, progressMonitor)) {
+          AbstractBuildParticipant participant = configurator.getBuildParticipant(execution);
+          if (participant != null && participant instanceof MojoExecutionBuildParticipant) {
+            if(((MojoExecutionBuildParticipant)participant).appliesToBuildKind(kind)) {
+              MojoExecution mojo = ((MojoExecutionBuildParticipant)participant).getMojoExecution();
+              mojos.add(MojoExecutionUtils.getExecutionKey(mojo));
+            }
+          }
+        }
+      }
+    } catch(CoreException ex) {
+      MavenLogger.log(ex);
+    }
+    return mojos;
   }
 
 }

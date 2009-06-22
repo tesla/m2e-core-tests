@@ -160,6 +160,8 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   DependencyTreePage dependencyTreePage;
 
   DependencyGraphPage graphPage;
+  
+  LifecyclePage lifecyclePage;
 
   StructuredTextEditor sourcePage;
   
@@ -394,11 +396,15 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     reportingPage = new ReportingPage(this);
     addPomPage(reportingPage);
     
+    lifecyclePage = new LifecyclePage(this);
+    addPomPage(lifecyclePage);
+    
     dependencyTreePage = new DependencyTreePage(this);
     addPomPage(dependencyTreePage);
 
     graphPage = new DependencyGraphPage(this);
     addPomPage(graphPage);
+    
 
     addSourcePage();
     

@@ -21,7 +21,10 @@ import org.maven.ide.eclipse.project.IMavenProjectFacade;
  * @author igor
  */
 public interface ILifecycleMapping {
-
+  String getName();
+  
+  List<String> getPotentialMojoExecutionsForBuildKind(IMavenProjectFacade projectFacade, int kind, IProgressMonitor progressMonitor);
+  
   void configure(ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException;
 
   void unconfigure(ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException;

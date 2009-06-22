@@ -35,9 +35,10 @@ import org.maven.ide.eclipse.project.MavenProjectManager;
  *
  * @author igor
  */
-public abstract class AbstractLifecycleMapping implements ILifecycleMapping {
+public abstract class AbstractLifecycleMapping implements IExtensionLifecycleMapping {
 
   private static List<AbstractProjectConfigurator> configurators;
+  private String name;
 
   /**
    * Calls #configure method of all registered project configurators
@@ -118,6 +119,20 @@ public abstract class AbstractLifecycleMapping implements ILifecycleMapping {
     description.setBuildSpec(newSpec.toArray(new ICommand[newSpec.size()]));
 
     project.setDescription(description, monitor);
+  }
+
+  /**
+   * @return Returns the name.
+   */
+  public String getName() {
+    return this.name;
+  }
+
+  /**
+   * @param name The name to set.
+   */
+  public void setName(String name) {
+    this.name = name;
   }
   
 }

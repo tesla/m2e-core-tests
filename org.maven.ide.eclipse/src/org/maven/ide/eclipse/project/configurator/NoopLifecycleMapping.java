@@ -9,6 +9,7 @@
 package org.maven.ide.eclipse.project.configurator;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -39,6 +40,14 @@ public class NoopLifecycleMapping implements ILifecycleMapping {
 
   public void unconfigure(ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException {
     // do nothing
+  }
+  
+  public List<String> getPotentialMojoExecutionsForBuildKind(IMavenProjectFacade facade, int kind, IProgressMonitor progressMonitor) {
+    return Collections.emptyList();
+  }
+  
+  public String getName() {
+    return "Empty lifecycle mapping";
   }
 
 }

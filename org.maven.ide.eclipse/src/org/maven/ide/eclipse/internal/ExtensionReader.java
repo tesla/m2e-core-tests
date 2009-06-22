@@ -39,7 +39,9 @@ import org.maven.ide.eclipse.internal.index.IndexInfoWriter;
 import org.maven.ide.eclipse.project.IMavenMarkerManager;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
+import org.maven.ide.eclipse.project.configurator.IExtensionLifecycleMapping;
 import org.maven.ide.eclipse.project.configurator.ILifecycleMapping;
+import org.maven.ide.eclipse.project.configurator.NoopLifecycleMapping;
 
 
 /**
@@ -261,8 +263,9 @@ public class ExtensionReader {
             try {
               Object o = element.createExecutableExtension(AbstractProjectConfigurator.ATTR_CLASS);
               
-              ILifecycleMapping lifecycleMapping = (ILifecycleMapping) o;
+              IExtensionLifecycleMapping lifecycleMapping = (IExtensionLifecycleMapping) o;
               String id = element.getAttribute("id");
+              lifecycleMapping.setName(element.getAttribute("name"));
               
               lifecycleMappings.put(id, lifecycleMapping);
 
@@ -274,7 +277,7 @@ public class ExtensionReader {
         }
       }
     }
-    
+    lifecycleMappings.put("NULL", new NoopLifecycleMapping());
     return lifecycleMappings;
   }
 

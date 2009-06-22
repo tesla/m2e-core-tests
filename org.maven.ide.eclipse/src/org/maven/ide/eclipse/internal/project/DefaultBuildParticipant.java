@@ -85,6 +85,15 @@ public class DefaultBuildParticipant extends AbstractBuildParticipant {
 
     return null;
   }
+  
+  public List<String> getPossibleGoalsForBuildKind(IMavenProjectFacade projectFacade, int kind) {
+    ResolverConfiguration configuration = projectFacade.getResolverConfiguration();
+    if(IncrementalProjectBuilder.FULL_BUILD == kind || IncrementalProjectBuilder.CLEAN_BUILD == kind) {
+      return Arrays.asList(configuration.getFullBuildGoals().split("[,\\s]+"));
+    } else {
+      return Arrays.asList(configuration.getResourceFilteringGoals().split("[,\\s]+"));
+    }
+  }
 
   private boolean getRequireFullBuild(IMavenProjectFacade projectFacade) throws CoreException {
     if(projectFacade.getResolverConfiguration().isSkipCompiler()) {
