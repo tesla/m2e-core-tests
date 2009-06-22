@@ -352,7 +352,7 @@ public class PomEditorTest extends PomEditorTestBase {
     selectEditorTab(TAB_OVERVIEW);
     ScreenCapture.createScreenCapture();
   
-    getUI().click(new ButtonLocator("Add..."));
+    getUI().click(new ButtonLocator("Create..."));
     ScreenCapture.createScreenCapture();
     getUI().click(new TableItemLocator("?"));
     ScreenCapture.createScreenCapture();
@@ -360,7 +360,7 @@ public class PomEditorTest extends PomEditorTestBase {
     getUI().keyClick(WT.CR);
     getUI().keyClick(WT.CR);
     
-    getUI().click(new ButtonLocator("Add..."));
+    getUI().click(new ButtonLocator("Create..."));
     getUI().click(new TableItemLocator("?"));
     getUI().enterText("foo2");
     getUI().keyClick(WT.CR);
