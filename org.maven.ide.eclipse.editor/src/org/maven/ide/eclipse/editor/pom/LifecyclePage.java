@@ -681,7 +681,7 @@ private void buildTopSection(Composite parent, FormToolkit toolkit) {
     }
 
     public GoalMenuManager(String text, ImageDescriptor image, String id) {
-      super(text, image, id);
+      super(text, id);
     }
 
     public GoalMenuManager(String text, String id) {
