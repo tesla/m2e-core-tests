@@ -747,6 +747,9 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     }
   }
 
+  /**
+   * @deprecated will likely be removed before 1.0
+   */
   public static <C> C lookup(Class<C> role) {
     C c = role.cast(plugin.components.get(role));
     if (c != null) {
@@ -760,6 +763,9 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     }
   }
 
+  /**
+   * @deprecated will likely be removed before 1.0
+   */
   public static <T> T lookup(Class<T> role, String roleHint) {
     try {
       return plugin.plexus.lookup(role, roleHint);
