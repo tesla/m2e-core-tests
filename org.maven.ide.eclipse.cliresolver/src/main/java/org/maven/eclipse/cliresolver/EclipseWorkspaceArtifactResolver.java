@@ -8,6 +8,7 @@ import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.resolver.DefaultArtifactResolver;
+import org.maven.eclipse.cli.WorkspaceState;
 
 public class EclipseWorkspaceArtifactResolver extends DefaultArtifactResolver {
 	public void resolve(Artifact artifact, List remoteRepositories,

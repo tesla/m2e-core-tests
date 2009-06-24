@@ -37,4 +37,5 @@ public interface MavenRuntime {
 
   public abstract boolean isAvailable();
 
+  public String getVersion();
 }

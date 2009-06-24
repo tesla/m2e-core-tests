@@ -126,4 +126,8 @@ public class MavenEmbeddedRuntime implements MavenRuntime {
     return "Embedded";
   }
 
+  public String getVersion() {
+    return "3.0-SNAPSHOT"; // TODO may as well discover
+  }
+
 }

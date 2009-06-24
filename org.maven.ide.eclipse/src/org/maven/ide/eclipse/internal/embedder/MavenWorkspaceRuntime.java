@@ -32,7 +32,7 @@ import org.maven.ide.eclipse.project.MavenProjectManager;
  */
 public class MavenWorkspaceRuntime implements MavenRuntime {
 
-  private static final ArtifactKey MAVEN_DISTRIBUTION = new ArtifactKey("org.apache.maven", "maven-distribution", "3.0-SNAPSHOT", null);
+  private static final ArtifactKey MAVEN_DISTRIBUTION = new ArtifactKey("org.apache.maven", "apache-maven", "3.0-SNAPSHOT", null);
 
   private static final ArtifactKey PLEXUS_CLASSWORLDS = new ArtifactKey("org.codehaus.plexus", "plexus-classworlds", null, null);
 
@@ -113,6 +113,10 @@ public class MavenWorkspaceRuntime implements MavenRuntime {
 
   public String toString() {
     return "Workspace";
+  }
+
+  public String getVersion() {
+    return MAVEN_DISTRIBUTION.getVersion();
   }
 
 }

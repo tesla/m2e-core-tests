@@ -160,4 +160,8 @@ public class MavenExternalRuntime implements MavenRuntime {
 
     return null;
   }
+
+  public String getVersion() {
+    return "2.0"; // XXX fix me
+  }
 }

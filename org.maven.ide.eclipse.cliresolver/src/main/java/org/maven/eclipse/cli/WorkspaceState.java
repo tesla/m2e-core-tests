@@ -1,4 +1,4 @@
-package org.maven.eclipse.cliresolver;
+package org.maven.eclipse.cli;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -31,7 +31,7 @@ public class WorkspaceState {
 		return state;
 	}
 
-	static boolean resolveArtifact(Artifact artifact) {
+	public static boolean resolveArtifact(Artifact artifact) {
 		String key = artifact.getGroupId() + ":" + artifact.getArtifactId() + ":" + artifact.getType() + ":" + artifact.getBaseVersion();
 		String value = getState().getProperty(key);
 
