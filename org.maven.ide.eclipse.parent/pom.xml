@@ -143,10 +143,10 @@
 
     <module>../org.maven.ide.eclipse.modello</module>
     <module>../org.maven.ide.eclipse.modello.feature</module>
-    <module>../org.maven.ide.eclipse.modello.tests</module>
+    <!-- <module>../org.maven.ide.eclipse.modello.tests</module>-->
     <module>../org.maven.ide.eclipse.plexus.annotations</module>
     <module>../org.maven.ide.eclipse.plexus.annotations.feature</module>
-    <module>../org.maven.ide.eclipse.plexus.annotations.tests</module>
+    <!--  <module>../org.maven.ide.eclipse.plexus.annotations.tests</module>-->
 
     <module>../org.maven.ide.eclipse.update</module>
   </modules>
