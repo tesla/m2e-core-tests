@@ -39,6 +39,7 @@ public abstract class AbstractLifecycleMapping implements IExtensionLifecycleMap
 
   private static List<AbstractProjectConfigurator> configurators;
   private String name;
+  private String id;
 
   /**
    * Calls #configure method of all registered project configurators
@@ -63,7 +64,7 @@ public abstract class AbstractLifecycleMapping implements IExtensionLifecycleMap
     }
   }
   
-  public List<AbstractProjectConfigurator> getProjectConfigurators(boolean generic) {
+  public static List<AbstractProjectConfigurator> getProjectConfigurators(boolean generic) {
     synchronized(AbstractLifecycleMapping.class) {
       if(configurators == null) {
         MavenPlugin plugin = MavenPlugin.getDefault();
@@ -134,5 +135,21 @@ public abstract class AbstractLifecycleMapping implements IExtensionLifecycleMap
   public void setName(String name) {
     this.name = name;
   }
+
+  /**
+   * @return Returns the id.
+   */
+  public String getId() {
+    return this.id;
+  }
+
+  /**
+   * @param id The id to set.
+   */
+  public void setId(String id) {
+    this.id = id;
+  }
+  
+  
   
 }

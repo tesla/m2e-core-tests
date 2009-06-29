@@ -21,6 +21,8 @@ import org.maven.ide.eclipse.project.IMavenProjectFacade;
  * @author igor
  */
 public interface ILifecycleMapping {
+  String getId();
+  
   String getName();
   
   List<String> getPotentialMojoExecutionsForBuildKind(IMavenProjectFacade projectFacade, int kind, IProgressMonitor progressMonitor);

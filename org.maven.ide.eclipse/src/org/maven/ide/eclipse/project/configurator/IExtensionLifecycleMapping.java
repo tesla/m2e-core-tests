@@ -14,5 +14,6 @@ package org.maven.ide.eclipse.project.configurator;
  * @author mpoindexter
  */
 public interface IExtensionLifecycleMapping extends ILifecycleMapping {
+  public void setId(String id);
   public void setName(String name);
 }

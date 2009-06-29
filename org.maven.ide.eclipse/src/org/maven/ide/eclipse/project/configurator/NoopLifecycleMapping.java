@@ -22,7 +22,7 @@ import org.maven.ide.eclipse.project.IMavenProjectFacade;
  *
  * @author igor
  */
-public class NoopLifecycleMapping implements ILifecycleMapping {
+public class NoopLifecycleMapping extends AbstractLifecycleMapping {
 
   public void configure(ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException {
     // do nothing
@@ -44,10 +44,6 @@ public class NoopLifecycleMapping implements ILifecycleMapping {
   
   public List<String> getPotentialMojoExecutionsForBuildKind(IMavenProjectFacade facade, int kind, IProgressMonitor progressMonitor) {
     return Collections.emptyList();
-  }
-  
-  public String getName() {
-    return "Empty lifecycle mapping";
   }
 
 }

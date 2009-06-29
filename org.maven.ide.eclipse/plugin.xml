@@ -473,7 +473,12 @@
       <lifecycleMapping
             class="org.maven.ide.eclipse.internal.project.CustomizableLifecycleMapping"
             id="customizable"
-            name="Customizable Lifecycle Mapping (Temporary!)">
+            name="Customizable Lifecycle Mapping">
+      </lifecycleMapping>
+      <lifecycleMapping
+            class="org.maven.ide.eclipse.project.configurator.NoopLifecycleMapping"
+            id="NULL"
+            name="Empty Lifecycle Mapping">
       </lifecycleMapping>
    </extension>
 
