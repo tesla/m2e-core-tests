@@ -39,9 +39,6 @@
    <feature url="features/org.maven.ide.eclipse.wtp.feature_0.9.9.qualifier.jar" id="org.maven.ide.eclipse.wtp.feature" version="0.9.9.qualifier">
       <category name="Maven Project Configurators"/>
    </feature>
-   <feature url="features/org.maven.ide.eclipse.modello.feature_0.9.9.qualifier.jar" id="org.maven.ide.eclipse.modello.feature" version="0.9.9.qualifier">
-      <category name="Maven Project Configurators"/>
-   </feature>
    <feature url="features/org.maven.ide.eclipse.plexus.annotations.feature_0.9.9.qualifier.jar" id="org.maven.ide.eclipse.plexus.annotations.feature" version="0.9.9.qualifier">
       <category name="Maven Project Configurators"/>
    </feature>
