@@ -64,7 +64,7 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
 
     m2conf = new MavenLauncherConfigurationHandler();
     if (shouldResolveWorkspaceArtifacts(configuration)) {
-      m2conf.addArchiveEntry(MavenLaunchUtils.getCliResolver());
+      m2conf.addArchiveEntry(MavenLaunchUtils.getCliResolver(runtime));
     }
     MavenLaunchUtils.addUserComponents(configuration, m2conf);
     runtime.createLauncherConfiguration(m2conf, new NullProgressMonitor());
@@ -266,11 +266,11 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
     if(configuration.getAttribute(MavenLaunchConstants.ATTR_SKIP_TESTS, false)) {
       sb.append(" -Dmaven.test.skip=true");
     }
-    
-    String settings = mavenConfiguration.getUserSettingsFile();
-//    if(settings==null) {
-//      settings = getMavenRuntime(configuration).getSettings();
-//    }
+
+    String settings = configuration.getAttribute(MavenLaunchConstants.ATTR_USER_SETTINGS, (String) null);
+    if(settings == null || settings.trim().length() <= 0) {
+      settings = mavenConfiguration.getUserSettingsFile();
+    }
     if(settings != null && settings.trim().length() > 0) {
       sb.append(" -s ").append(quote(settings));
     }

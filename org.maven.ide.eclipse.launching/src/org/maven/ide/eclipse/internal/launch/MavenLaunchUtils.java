@@ -51,8 +51,15 @@ public class MavenLaunchUtils {
     return runtime;
   }
 
-  public static String getCliResolver() throws CoreException {
-    URL url = MavenPlugin.getDefault().getBundle().getEntry("org.maven.ide.eclipse.cliresolver.jar");
+  public static String getCliResolver(MavenRuntime runtime) throws CoreException {
+    String jarname;
+    String runtimeVersion = runtime.getVersion();
+    if (runtimeVersion.startsWith("3.")) {
+      jarname = "org.maven.ide.eclipse.cliresolver30.jar";
+    } else {
+      jarname = "org.maven.ide.eclipse.cliresolver.jar";
+    }
+    URL url = MavenLaunchPlugin.getDefault().getBundle().getEntry(jarname);
     try {
       URL fileURL = FileLocator.toFileURL(url);
       // MNGECLIPSE-804 workaround for spaces in the original path

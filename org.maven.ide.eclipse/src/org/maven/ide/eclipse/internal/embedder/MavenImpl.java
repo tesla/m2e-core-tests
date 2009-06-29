@@ -338,6 +338,15 @@ public class MavenImpl implements IMaven {
     request.setLocalRepository(getLocalRepository());
     if(remoteRepositories != null) {
       request.setRemoteRepostories(remoteRepositories);
+    } else {
+      try {
+        MavenExecutionRequest er = new DefaultMavenExecutionRequest();
+        populator.populateDefaults(er);
+        request.setRemoteRepostories(er.getRemoteRepositories());
+      } catch (MavenEmbedderException e) {
+        // we've tried
+        request.setRemoteRepostories(new ArrayList<ArtifactRepository>());
+      }
     }
     request.setArtifact(artifact);
 

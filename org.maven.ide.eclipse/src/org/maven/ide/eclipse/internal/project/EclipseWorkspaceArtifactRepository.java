@@ -20,7 +20,7 @@ import org.apache.maven.repository.LocalArtifactRepository;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 
 
-public class EclipseWorkspaceArtifactRepository extends LocalArtifactRepository {
+public final class EclipseWorkspaceArtifactRepository extends LocalArtifactRepository {
 
   private static final long serialVersionUID = 1018465082844566543L;
 
@@ -107,5 +107,13 @@ public class EclipseWorkspaceArtifactRepository extends LocalArtifactRepository 
   
   public static boolean isDisabled() {
     return Boolean.TRUE.equals(disabled.get());
+  }
+
+  public int hashCode() {
+    return 0; // no state
+  }
+
+  public boolean equals(Object obj) {
+    return obj instanceof EclipseWorkspaceArtifactRepository;
   }
 }

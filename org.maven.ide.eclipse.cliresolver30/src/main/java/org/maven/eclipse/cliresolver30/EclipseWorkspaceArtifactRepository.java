@@ -8,7 +8,7 @@ import org.codehaus.plexus.component.annotations.Component;
 import org.maven.eclipse.cli.WorkspaceState;
 
 @Component( role = LocalArtifactRepository.class, hint = LocalArtifactRepository.IDE_WORKSPACE )
-public class EclipseWorkspaceArtifactRepository
+public final class EclipseWorkspaceArtifactRepository
     extends LocalArtifactRepository
 {
 
@@ -45,4 +45,15 @@ public class EclipseWorkspaceArtifactRepository
         return true;
     }
 
+    @Override
+    public int hashCode()
+    {
+        return 0; // no state
+    }
+    
+    @Override
+    public boolean equals( Object obj )
+    {
+        return obj instanceof EclipseWorkspaceArtifactRepository;
+    }
 }

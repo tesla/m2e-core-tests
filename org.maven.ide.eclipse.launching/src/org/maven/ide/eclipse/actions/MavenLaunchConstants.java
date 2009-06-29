@@ -34,6 +34,8 @@ public interface MavenLaunchConstants {
     public final String ATTR_NON_RECURSIVE = "M2_NON_RECURSIVE";
     public final String ATTR_WORKSPACE_RESOLUTION = "M2_WORKSPACE_RESOLUTION";
 
+    public final String ATTR_USER_SETTINGS = "M2_USER_SETTINGS";
+
     public final String ATTR_RUNTIME = "M2_RUNTIME";
 
     // hidden (for now) list of workspace components to be pushed into maven runtime
