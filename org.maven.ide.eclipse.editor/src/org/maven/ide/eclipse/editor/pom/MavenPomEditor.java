@@ -116,6 +116,7 @@ import org.maven.ide.eclipse.actions.SelectionUtil;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.editor.MavenEditorPlugin;
+import org.maven.ide.eclipse.editor.lifecycle.internal.LifecyclePage;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.embedder.MavenModelManager;

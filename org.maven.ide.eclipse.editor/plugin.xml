@@ -9,6 +9,7 @@
 <?eclipse version="3.2"?>
 <plugin>
    <extension-point id="pageFactories" name="Maven POM editor page factory" schema="schema/pageFactories.exsd"/>
+   <extension-point id="org.maven.ide.eclipse.editor.lifecycleMappingEditorContribution" name="Lifecycle Mapping Editor Contribution" schema="schema/org.maven.ide.eclipse.editor.lifecycleMappingEditorContribution.exsd"/>
 
   <extension point="org.eclipse.ui.editors">
     <editor
@@ -31,5 +32,12 @@
          name="POM Editor">
          <keywordReference id="org.maven.ide.eclipse.maven"/>
       </page>
+   </extension>
+   <extension
+         point="org.maven.ide.eclipse.editor.lifecycleMappingEditorContribution">
+      <editContributor
+            class="org.maven.ide.eclipse.editor.lifecycle.custom.CustomLifecycleMappingEditorContribution"
+            editorFor="customizable">
+      </editContributor>
    </extension>
 </plugin>
