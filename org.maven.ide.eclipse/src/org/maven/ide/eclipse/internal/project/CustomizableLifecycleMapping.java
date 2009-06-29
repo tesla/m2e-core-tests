@@ -16,10 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.Text;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -46,22 +42,13 @@ import org.maven.ide.eclipse.project.configurator.ProjectConfigurationRequest;
  */
 public class CustomizableLifecycleMapping extends AbstractLifecycleMapping implements ILifecycleMapping {
   public static final String EXTENSION_ID = "customizable";
-  
-  private final List<AbstractProjectConfigurator> configurators;
-  
+
   public CustomizableLifecycleMapping() {
-    configurators = null;
-  }
-  
-  public CustomizableLifecycleMapping(Element configurationNode) {
-    this.configurators = parseFromDOM(configurationNode);
+
   }
   
   public List<AbstractProjectConfigurator> getProjectConfigurators(IMavenProjectFacade facade, IProgressMonitor monitor)
       throws CoreException {
-    if(configurators != null) {
-      return configurators;
-    }
     MavenProject mavenProject = facade.getMavenProject(monitor);
     Plugin plugin = mavenProject.getPlugin("org.maven.ide.eclipse:lifecycle-mapping");
 
@@ -101,47 +88,11 @@ public class CustomizableLifecycleMapping extends AbstractLifecycleMapping imple
     
     if (executionsDom != null) {
       for(Xpp3Dom execution : executionsDom.getChildren("mojoExecution")) {
-        String strRunOnClean = execution.getAttribute("runOnClean");
         String strRunOnIncremental = execution.getAttribute("runOnIncremental");
-        configurators.add(MojoExecutionProjectConfigurator.fromString(execution.getValue(), toBool(strRunOnIncremental, true), toBool(strRunOnClean, true)));
+        configurators.add(MojoExecutionProjectConfigurator.fromString(execution.getValue(), toBool(strRunOnIncremental, true)));
       }
     }
 
-    return configurators;
-  }
-  
-  private List<AbstractProjectConfigurator> parseFromDOM(Element configNode) {
-    
-    Map<String, AbstractProjectConfigurator> configuratorsMap = new LinkedHashMap<String, AbstractProjectConfigurator>();
-    for(AbstractProjectConfigurator configurator : getProjectConfigurators(false)) {
-      configuratorsMap.put(configurator.getId(), configurator);
-    }
-
-    Element configuratorsDom = getChildElement(configNode, "configurators");
-    Element executionsDom = getChildElement(configNode, "mojoExecutions");
-
-    List<AbstractProjectConfigurator> configurators = new ArrayList<AbstractProjectConfigurator>();
-    
-    if (configuratorsDom != null) {
-      for(Element configuratorDom : getChildren(configuratorsDom, "configurator")) {
-        String configuratorId = configuratorDom.getAttribute("id");
-        AbstractProjectConfigurator configurator = configuratorsMap.get(configuratorId);
-        if(configurator == null) {
-          throw new IllegalArgumentException("Unknown configurator id=" + configuratorId);
-        }
-
-        configurators.add(configurator);
-      }
-    }
-    
-    if (executionsDom != null) {
-      for(Element execution : getChildren(executionsDom, "mojoExecution")) {
-        String strRunOnClean = execution.getAttribute("runOnClean");
-        String strRunOnIncremental = execution.getAttribute("runOnIncremental");
-        configurators.add(MojoExecutionProjectConfigurator.fromString(getNodeContents(execution), toBool(strRunOnIncremental, true), toBool(strRunOnClean, true)));
-      }
-    }
-    
     return configurators;
   }
   
@@ -152,44 +103,6 @@ public class CustomizableLifecycleMapping extends AbstractLifecycleMapping imple
     return Boolean.parseBoolean(value);
   }
   
-  private Element getChildElement(Element parent, String name) {
-    Node n = parent.getFirstChild();
-    while(n != null) {
-      if(n instanceof Element && n.getNodeName().equals(name)) {
-        return (Element)n;
-      }
-      n = n.getNextSibling();
-    }
-    return null;
-  }
-  
-  private List<Element> getChildren(Element parent, String name) {
-    List<Element> ret = new LinkedList<Element>();
-    Node n = parent.getFirstChild();
-    while(n != null) {
-      if(n instanceof Element && n.getNodeName().equals(name)) {
-        ret.add((Element)n);
-      }
-      n = n.getNextSibling();
-    }
-    return ret;
-  }
-  
-  private String getNodeContents(Node n) {
-    if(n instanceof Text) {
-      return ((Text)n).getNodeValue();
-    } else if(n instanceof Element) {
-      StringBuilder value = new StringBuilder();
-      Node child = ((Element)n).getFirstChild();
-      while(child != null) {
-        value.append(getNodeContents(child));
-        child = child.getNextSibling();
-      }
-      return value.toString();
-    }
-    return "";
-  }
-
   private Set<String> getListElements(Xpp3Dom listDom, String elementName) {
     Set<String> elements = new LinkedHashSet<String>();
     if (listDom == null) {

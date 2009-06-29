@@ -29,11 +29,9 @@ public class MojoExecutionBuildParticipant extends AbstractBuildParticipant {
 
   private final MojoExecution execution;
   private final boolean runOnIncremental;
-  private final boolean runOnClean;
   
-  public MojoExecutionBuildParticipant(MojoExecution execution, boolean runOnIncremental, boolean runOnClean) {
+  public MojoExecutionBuildParticipant(MojoExecution execution, boolean runOnIncremental) {
     this.execution = execution;
-    this.runOnClean = runOnClean;
     this.runOnIncremental = runOnIncremental;
   }
 
@@ -48,7 +46,7 @@ public class MojoExecutionBuildParticipant extends AbstractBuildParticipant {
   
   public boolean appliesToBuildKind(int kind) {
     if(IncrementalProjectBuilder.FULL_BUILD == kind || IncrementalProjectBuilder.CLEAN_BUILD == kind) {
-      return runOnClean;
+      return true;
     } else {
       return runOnIncremental;
     }

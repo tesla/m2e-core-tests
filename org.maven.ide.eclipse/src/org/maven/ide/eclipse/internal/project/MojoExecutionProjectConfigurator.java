@@ -36,15 +36,13 @@ public class MojoExecutionProjectConfigurator extends AbstractProjectConfigurato
   private final VersionRange range;
   private final Set<String> goals;
   private final boolean runOnIncremental;
-  private final boolean runOnClean;
 
-  MojoExecutionProjectConfigurator(String groupId, String artifactId, VersionRange range, Set<String> goals, boolean runOnIncremental, boolean runOnClean) {
+  MojoExecutionProjectConfigurator(String groupId, String artifactId, VersionRange range, Set<String> goals, boolean runOnIncremental) {
     this.groupId = groupId;
     this.artifactId = artifactId;
     this.range = range;
     this.goals = goals;
     this.runOnIncremental = runOnIncremental;
-    this.runOnClean = runOnClean;
   }
 
   public boolean isMatch(MojoExecution execution) {
@@ -60,13 +58,13 @@ public class MojoExecutionProjectConfigurator extends AbstractProjectConfigurato
 
   public AbstractBuildParticipant getBuildParticipant(MojoExecution execution) {
     if (isMatch(execution)) {
-      return new MojoExecutionBuildParticipant(execution, runOnIncremental, runOnClean);
+      return new MojoExecutionBuildParticipant(execution, runOnIncremental);
     }
     
     return null;
   }
 
-  public static MojoExecutionProjectConfigurator fromString(String str, boolean runOnIncremental, boolean runOnClean) {
+  public static MojoExecutionProjectConfigurator fromString(String str, boolean runOnIncremental) {
     if (str == null || str.trim().length() <= 0) {
       return null;
     }
@@ -95,7 +93,7 @@ public class MojoExecutionProjectConfigurator extends AbstractProjectConfigurato
     String goalsStr = substring(str, p, str.length());
     Set<String> goals = goalsStr != null? new HashSet<String>(Arrays.asList(goalsStr.split(","))): null;
 
-    return new MojoExecutionProjectConfigurator(groupId, artifactId, version, goals, runOnIncremental, runOnClean);
+    return new MojoExecutionProjectConfigurator(groupId, artifactId, version, goals, runOnIncremental);
   }
 
   private static String substring(String str, int start, int end) {
