@@ -947,20 +947,17 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 
     private boolean isHandlingActivation = false;
 
-    private IPartService partService;
 
     public MavenPomActivationListener(IPartService partService) {
-      this.partService = partService;
-      this.partService.addPartListener(this);
+      partService.addPartListener(this);
       PlatformUI.getWorkbench().addWindowListener(this);
       MavenPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
     }
 
     public void dispose() {
-      partService.removePartListener(this);
+      getSite().getWorkbenchWindow().getPartService().removePartListener(this);
       PlatformUI.getWorkbench().removeWindowListener(this);
-      MavenEditorPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
-      partService = null;
+      MavenPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
     }
 
     
