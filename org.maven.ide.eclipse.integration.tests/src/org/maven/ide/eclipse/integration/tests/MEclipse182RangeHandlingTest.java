@@ -8,8 +8,6 @@
 
 package org.maven.ide.eclipse.integration.tests;
 
-import junit.framework.AssertionFailedError;
-
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -75,12 +73,7 @@ public class MEclipse182RangeHandlingTest extends UIIntegrationTestCase {
     IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("project");
     int problemSeverity = project.findMaxProblemSeverity(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
 
-    try {
-      assertEquals("project should have compile errors", IMarker.SEVERITY_ERROR, problemSeverity);
-    } catch(AssertionFailedError ex) {
-      System.out.println("MECLIPSE-184: " + ex.getMessage());
-      ex.printStackTrace();
-    }
+    assertEquals("project should have compile errors", IMarker.SEVERITY_ERROR, problemSeverity);
 
   }
 }
