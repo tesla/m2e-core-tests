@@ -302,6 +302,7 @@ public class MavenImpl implements IMaven {
       MavenExecutionRequest request = createExecutionRequest(monitor);
       populator.populateDefaults(request);
       ProjectBuildingRequest configuration = request.getProjectBuildingRequest();
+      configuration.setLenientValidation(true);
       return projectBuilder.build(pomFile, configuration);
     } catch(ProjectBuildingException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not read maven project",
@@ -319,6 +320,7 @@ public class MavenImpl implements IMaven {
     try {
       populator.populateDefaults(request);
       ProjectBuildingRequest configuration = request.getProjectBuildingRequest();
+      configuration.setLenientValidation(true);
       projectBuildingResult = projectBuilder.buildProjectWithDependencies(pomFile, configuration);
       result.setProject(projectBuildingResult.getProject());
       result.setArtifactResolutionResult(projectBuildingResult.getArtifactResolutionResult());
