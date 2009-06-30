@@ -13,6 +13,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.fieldassist.ContentProposalAdapter;
 import org.eclipse.jface.fieldassist.FieldDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
@@ -22,11 +23,17 @@ import org.eclipse.jface.fieldassist.IControlContentAdapter;
 import org.eclipse.jface.fieldassist.TextContentAdapter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseTrackAdapter;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
@@ -41,17 +48,22 @@ import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.editor.xml.MvnIndexPlugin;
 import org.maven.ide.eclipse.editor.xml.search.Packaging;
 import org.maven.ide.eclipse.editor.xml.search.SearchEngine;
+import org.maven.ide.eclipse.ui.dialogs.MavenMessageDialog;
 import org.maven.ide.eclipse.util.Util;
+
 
 /**
  * @author Eugene Kuleshov
  */
 public abstract class FormUtils {
+  public static final int MAX_MSG_LENGTH = 80;
+
+  public static final String MORE_DETAILS = " (Click for more details)";
 
   public static void decorateHeader(FormToolkit toolkit, Form form) {
     Util.proxy(toolkit, FormTooliktStub.class).decorateFormHeading(form);
   }
-  
+
   /**
    * Stub interface for API added to FormToolikt in Eclipse 3.3
    */
@@ -59,16 +71,41 @@ public abstract class FormUtils {
     public void decorateFormHeading(Form form);
   }
 
-  public static void setMessage(ScrolledForm form, String message, int severity) {
-    form.getForm().setMessage(message, severity);
+  /**
+   * @param form
+   * @param message
+   * @param severity
+   * @return
+   */
+  public static boolean setMessage(ScrolledForm form, String message, int severity) {
+    if(message != null && message.length() > MAX_MSG_LENGTH) {
+      String truncMsg = message;
+      String[] lines = message.split("\n");
+      if(lines.length > 0) {
+        truncMsg = lines[0];
+      } else {
+        truncMsg = message.substring(0, MAX_MSG_LENGTH);
+      }
+      setMessageAndTTip(form, truncMsg + MORE_DETAILS, message, severity);
+      return true;
+    } else {
+      setMessageAndTTip(form, message, message, severity);
+      return false;
+    }
   }
-  
+
+  public static void setMessageAndTTip(final ScrolledForm form, final String message, final String ttip,
+      final int severity) {
+    form.getForm().setMessage(message, severity);
+    addFormTitleListeners(form, message, ttip, severity);
+  }
+
   public static String nvl(String s) {
     return s == null ? "" : s;
   }
 
   public static boolean isEmpty(String s) {
-    return s == null || s.length()==0;
+    return s == null || s.length() == 0;
   }
 
   public static boolean isEmpty(Text t) {
@@ -76,20 +113,20 @@ public abstract class FormUtils {
   }
 
   public static void setText(Text control, String text) {
-    if(control!=null && !control.isDisposed() && !control.getText().equals(text)) {
+    if(control != null && !control.isDisposed() && !control.getText().equals(text)) {
       control.setText(nvl(text));
       control.setSelection(nvl(text).length());
     }
   }
 
   public static void setText(CCombo control, String text) {
-    if(control!=null && !control.isDisposed() && !control.getText().equals(text)) {
+    if(control != null && !control.isDisposed() && !control.getText().equals(text)) {
       control.setText(nvl(text));
     }
   }
 
   public static void setButton(Button control, boolean selection) {
-    if(control!=null && !control.isDisposed() && control.getSelection()!=selection) {
+    if(control != null && !control.isDisposed() && control.getSelection() != selection) {
       control.setSelection(selection);
     }
   }
@@ -111,7 +148,7 @@ public abstract class FormUtils {
   }
 
   public static void setEnabled(Composite composite, boolean enabled) {
-    if(composite!=null && !composite.isDisposed()) {
+    if(composite != null && !composite.isDisposed()) {
       composite.setEnabled(enabled);
       for(Control control : composite.getChildren()) {
         if(control instanceof Combo) {
@@ -135,7 +172,7 @@ public abstract class FormUtils {
   }
 
   public static void setReadonly(Composite composite, boolean readonly) {
-    if(composite!=null) {
+    if(composite != null) {
       for(Control control : composite.getChildren()) {
         if(control instanceof Text) {
           ((Text) control).setEditable(!readonly);
@@ -166,8 +203,7 @@ public abstract class FormUtils {
     });
   }
 
-  public static void addArtifactIdProposal(final Text groupIdText, final Text artifactIdText,
-      final Packaging packaging) {
+  public static void addArtifactIdProposal(final Text groupIdText, final Text artifactIdText, final Packaging packaging) {
     addCompletionProposal(artifactIdText, new Searcher() {
       public Collection<String> search() {
         // TODO handle artifact info
@@ -184,6 +220,63 @@ public abstract class FormUtils {
             artifactIdText.getText(), versionText.getText(), packaging);
       }
     });
+  }
+
+  private static void cleanupMouseListeners(Control kid, int event) {
+    Listener[] listeners = kid.getListeners(event);
+    if(listeners != null) {
+      for(Listener list : listeners) {
+        kid.removeListener(event, list);
+      }
+    }
+  }
+
+  private static void addFormTitleListeners(final ScrolledForm form, final String message, final String ttip,
+      final int severity) {
+    if(ttip != null && ttip.length() > 0 && message != null && severity == IMessageProvider.ERROR) {
+      final Composite head = form.getForm().getHead();
+      Control[] kids = head.getChildren();
+      for(Control kid : kids) {
+        //want to get the title region only
+        //Note: doing this instead of adding a head 'client' control because that gets put 
+        //on the second line of the title, and looks broken. instead, converting the title
+        //into a url
+        if(kid != form && kid instanceof Canvas) {
+          cleanupMouseListeners(kid, SWT.MouseUp);
+          cleanupMouseListeners(kid, SWT.MouseEnter);
+          cleanupMouseListeners(kid, SWT.MouseExit);
+          kid.addMouseListener(new MouseAdapter() {
+            public void mouseUp(MouseEvent e) {
+              MavenMessageDialog.openInfo(form.getShell(), "Error info:", "The POM has the following error:", ttip);
+            }
+          });
+          kid.addMouseTrackListener(new MouseTrackAdapter() {
+            public void mouseEnter(MouseEvent e) {
+              head.setCursor(Display.getDefault().getSystemCursor(SWT.CURSOR_HAND));
+            }
+
+            public void mouseExit(MouseEvent e) {
+              head.setCursor(null);
+            }
+          });
+        }
+      }
+    } else {
+      //no ttip or message, make sure old listeners are cleaned up if errs are removed
+      final Composite head = form.getForm().getHead();
+      Control[] kids = head.getChildren();
+      for(Control kid : kids) {
+        //want to get the title region only
+        //Note: doing this instead of adding a head 'client' control because that gets put 
+        //on the second line of the title, and looks broken. instead, converting the title
+        //into a url
+        if(kid != form && kid instanceof Canvas) {
+          cleanupMouseListeners(kid, SWT.MouseUp);
+          cleanupMouseListeners(kid, SWT.MouseEnter);
+          cleanupMouseListeners(kid, SWT.MouseExit);
+        }
+      }
+    }
   }
 
   public static void addClassifierProposal(final Text groupIdText, final Text artifactIdText, final Text versionText,
@@ -207,7 +300,8 @@ public abstract class FormUtils {
 //  }
 
   public static void addCompletionProposal(final Control control, final Searcher searcher) {
-    FieldDecoration fieldDecoration = FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_CONTENT_PROPOSAL);
+    FieldDecoration fieldDecoration = FieldDecorationRegistry.getDefault().getFieldDecoration(
+        FieldDecorationRegistry.DEC_CONTENT_PROPOSAL);
     ControlDecoration decoration = new ControlDecoration(control, SWT.LEFT | SWT.TOP);
     decoration.setShowOnlyOnFocus(true);
     decoration.setDescriptionText(fieldDecoration.getDescription());
@@ -247,7 +341,6 @@ public abstract class FormUtils {
   public static abstract class Searcher {
     public abstract Collection<String> search();
   }
-
 
   public static final class TextProposal implements IContentProposal {
     private final String text;

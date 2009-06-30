@@ -197,6 +197,7 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
       getPartControl().getDisplay().asyncExec(new Runnable() {
         public void run() {
           if (!getManagedForm().getForm().isDisposed()) {
+            
             FormUtils.setMessage(getManagedForm().getForm(), msg, severity);
           }
         }
