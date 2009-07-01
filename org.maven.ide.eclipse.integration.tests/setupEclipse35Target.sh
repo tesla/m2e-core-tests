@@ -2,7 +2,7 @@
 # Set up an Eclipse 3.5 instance with plug-ins necessary to run integration tests
 # Adjust ECLIPSE_DIR to point to your target Eclipse 3.5 installation (this should be an Eclipse Classic SDK with no addons))
 
-ECLIPSE_DIR=/Users/hudson/platforms/eclipse-tp-e35/eclipse
+ECLIPSE_DIR=/Users/rseddon/test/eclipse/350/eclipse
 
 
 UPDATE_URL=http://download.eclipse.org/releases/galileo/
@@ -20,9 +20,13 @@ p2_director $UPDATE_URL org.eclipse.zest.sdk.feature.group
 p2_director $UPDATE_URL org.eclipse.emf.feature.group
 p2_director $UPDATE_URL org.eclipse.xsd.feature.group
 p2_director $UPDATE_URL org.eclipse.datatools.sdk.feature.feature.group
-p2_director $UPDATE_URL org.eclipse.wst.feature.group
+p2_director $UPDATE_URL org.eclipse.wst.web_core.feature.feature.group
+p2_director $UPDATE_URL org.eclipse.wst.web_ui.feature.feature.group
 p2_director $UPDATE_URL org.eclipse.mylyn_feature.feature.group
-p2_director $UPDATE_URL org.eclipse.jst.feature.group
+p2_director $UPDATE_URL org.eclipse.jst.web_ui.feature.feature.group
+p2_director $UPDATE_URL org.eclipse.jst.server_adapters.feature.feature.group
+p2_director $UPDATE_URL org.eclipse.jst.server_ui.feature.feature.group
+p2_director $UPDATE_URL org.eclipse.jst.enterprise_core.feature.feature.group
 
 # Subversive
 p2_director $SUBVERSIVE_URL org.tigris.subversion.subclipse.feature.group
