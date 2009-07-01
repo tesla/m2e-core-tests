@@ -83,7 +83,6 @@ import org.codehaus.plexus.context.Context;
 import org.codehaus.plexus.util.IOUtil;
 
 import org.apache.maven.ArtifactFilterManagerDelegate;
-import org.apache.maven.artifact.resolver.metadata.MetadataSource;
 import org.apache.maven.plugin.PluginManager;
 import org.apache.maven.project.artifact.MavenMetadataCache;
 
@@ -537,7 +536,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     this.projectManager.removeMavenProjectChangedListener(this.configurationManager);
     this.projectManager = null;
 
-    managerImpl.removeManagedCache((IManagedCache) mavenCore.lookup(MetadataSource.class));
+    managerImpl.removeManagedCache((IManagedCache) mavenCore.lookup(MavenMetadataCache.class));
 
     this.plexus.dispose();
     this.mavenCore.dispose();
