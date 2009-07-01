@@ -279,11 +279,7 @@ public class DependencyGraphLabelProvider implements ILabelProvider, IEntityStyl
   }
 
   public int getBorderWidth(Object entity) {
-    if(Util.isEclipseVersion(3, 5)){
-      return 1;
-    } else {
-      return 4;
-    }
+    return 1;
   }
 
   public Color getBorderColor(Object entity) {
