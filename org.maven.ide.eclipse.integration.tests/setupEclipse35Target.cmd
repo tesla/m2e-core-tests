@@ -1,10 +1,10 @@
 
-set ECLIPSE_DIR=c:\platforms\eclipse-tp-e34\eclipse
+set ECLIPSE_DIR=c:\platforms\eclipse-tp-e35\eclipse
 
-set UPDATE_URL=http://download.eclipse.org/releases/ganymede/
-set WINDOWTESTER_URL=http://download.instantiations.com/WindowTesterPro/integration/latest/update/3.4
+set UPDATE_URL=http://download.eclipse.org/releases/galileo/
+set WINDOWTESTER_URL=http://download.instantiations.com/WindowTesterPro/integration/latest/update/3.5
 set SUBCLIPSE_URL=http://subclipse.tigris.org/update_1.6.x/
-set ASPECTJ_URL=http://download.eclipse.org/tools/ajdt/34/update/
+set ASPECTJ_URL=http://download.eclipse.org/tools/ajdt/35/update/
 
 
 rem Eclipse Ganymade dependencies
@@ -20,7 +20,7 @@ call :P2_DIRECTOR %UPDATE_URL% org.eclipse.jst.feature.group
 rem Subversive
 call :P2_DIRECTOR %SUBCLIPSE_URL% org.tigris.subversion.subclipse.feature.group
 call :P2_DIRECTOR %SUBCLIPSE_URL% org.tigris.subversion.clientadapter.svnkit.feature.feature.group
-call :P2_DIRECTOR %SUBCLIPSE_URL% org.tigris.subversion.subclipse.mylyn
+rem call :P2_DIRECTOR %SUBCLIPSE_URL% org.tigris.subversion.subclipse.mylyn
 
 rem AspectJ
 call :P2_DIRECTOR %ASPECTJ_URL% org.eclipse.ajdt.feature.group

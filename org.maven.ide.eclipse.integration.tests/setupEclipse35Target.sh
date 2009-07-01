@@ -1,14 +1,14 @@
 #!/bin/bash
-# Set up an Eclipse 3.4 instance with plug-ins necessary to run integration tests
-# Adjust ECLIPSE_DIR to point to your target Eclipse 3.4 installation (this should be an Eclipse Classic SDK with no addons))
+# Set up an Eclipse 3.5 instance with plug-ins necessary to run integration tests
+# Adjust ECLIPSE_DIR to point to your target Eclipse 3.5 installation (this should be an Eclipse Classic SDK with no addons))
 
-ECLIPSE_DIR=/Users/hudson/platforms/eclipse-tp-e34/eclipse
+ECLIPSE_DIR=/Users/hudson/platforms/eclipse-tp-e35/eclipse
 
 
-UPDATE_URL=http://download.eclipse.org/releases/ganymede/
-WINDOWTESTER_URL=http://download.instantiations.com/WindowTesterPro/integration/latest/update/3.4
+UPDATE_URL=http://download.eclipse.org/releases/galileo/
+WINDOWTESTER_URL=http://download.instantiations.com/WindowTesterPro/integration/latest/update/3.5
 SUBVERSIVE_URL=http://subclipse.tigris.org/update_1.6.x/
-ASPECTJ_URL=http://download.eclipse.org/tools/ajdt/34/update/
+ASPECTJ_URL=http://download.eclipse.org/tools/ajdt/35/update/
 
 function p2_director {
   $ECLIPSE_DIR/eclipse -nosplash -application org.eclipse.equinox.p2.director -metadataRepository $1 -artifactRepository $1 -installIU $2
@@ -27,7 +27,7 @@ p2_director $UPDATE_URL org.eclipse.jst.feature.group
 # Subversive
 p2_director $SUBVERSIVE_URL org.tigris.subversion.subclipse.feature.group
 p2_director $SUBVERSIVE_URL org.tigris.subversion.clientadapter.svnkit.feature.feature.group
-p2_director $SUBVERSIVE_URL org.tigris.subversion.subclipse.mylyn
+#p2_director $SUBVERSIVE_URL org.tigris.subversion.subclipse.mylyn
 
 # AspectJ
 p2_director $ASPECTJ_URL org.eclipse.ajdt.feature.group
