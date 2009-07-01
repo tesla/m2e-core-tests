@@ -187,7 +187,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
 
      // Attempt to use local nexus as maven central proxy to speed up tests
      if(this.skipIndexes()){
-       setupLocalMavenIndex();
+      // setupLocalMavenIndex();
      }
      // Clean out projects left over from previous test runs.
      clearProjects();
