@@ -12,8 +12,12 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
+import org.osgi.framework.Bundle;
+import org.osgi.framework.Version;
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.variables.VariablesPlugin;
 
@@ -26,7 +30,13 @@ import org.maven.ide.eclipse.core.MavenLogger;
  * @author Eugene Kuleshov
  */
 public class Util {
-
+  
+  public static boolean isEclipseVersion(int major, int minor) {
+    Bundle bundle = ResourcesPlugin.getPlugin().getBundle();
+    String version = (String) bundle.getHeaders().get(org.osgi.framework.Constants.BUNDLE_VERSION);
+    Version v = Version.parseVersion(version);
+    return v.getMajor() == major && v.getMinor() == minor;
+  }
   /**
    * Proxy factory for compatibility stubs
    */
