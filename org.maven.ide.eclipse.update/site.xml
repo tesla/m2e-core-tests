@@ -39,7 +39,7 @@
    <feature url="features/org.maven.ide.eclipse.wtp.feature_0.9.9.qualifier.jar" id="org.maven.ide.eclipse.wtp.feature" version="0.9.9.qualifier">
       <category name="Maven Project Configurators"/>
    </feature>
-   <feature url="features/org.maven.ide.eclipse.plexus.annotations.feature_0.9.9.qualifier.jar" id="org.maven.ide.eclipse.plexus.annotations.feature" version="0.9.9.qualifier">
+   <feature url="features/org.maven.ide.eclipse.temporary.mojos.feature_0.9.9.qualifier.jar" id="org.maven.ide.eclipse.temporary.mojos.feature" version="0.9.9.qualifier">
       <category name="Maven Project Configurators"/>
    </feature>
    <category-def name="Maven Integration" label="Maven Integration"/>
