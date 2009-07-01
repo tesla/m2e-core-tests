@@ -21,6 +21,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
@@ -33,6 +34,7 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
+import org.maven.ide.eclipse.util.Util;
 
 
 /**
@@ -57,7 +59,6 @@ public class DependencyGraphLabelProvider implements ILabelProvider, IEntityStyl
   // private final Color colorTestHighlight = Display.getCurrent().getSystemColor(SWT.COLOR_DARK_YELLOW);
   // private final Color colorTestHighlight = new Color(null, 255, 255, 206);
   private final Color colorTestHighlight = new Color(null, 255, 255, 180);
-  private final Color colorBorder = new Color(null, 0, 0, 0);
   private final Color colorRelated = new Color(Display.getDefault(), 127, 0, 0);
   
   private boolean showGroup = false;
@@ -200,7 +201,6 @@ public class DependencyGraphLabelProvider implements ILabelProvider, IEntityStyl
     colorTestRel.dispose();
     colorRel.dispose();
     colorRelResolved.dispose();
-    colorBorder.dispose();
     colorRelated.dispose();
   }
 
@@ -333,15 +333,19 @@ public class DependencyGraphLabelProvider implements ILabelProvider, IEntityStyl
   }
 
   public int getBorderWidth(Object entity) {
-    return 4;
+    if(Util.isEclipseVersion(3, 5)){
+      return 1;
+    } else {
+      return 4;
+    }
   }
 
   public Color getBorderColor(Object entity) {
-    return colorBorder;
+    return Display.getDefault().getSystemColor(SWT.COLOR_GRAY);
   }
 
   public Color getBorderHighlightColor(Object entity) {
-    return colorBorder;
+    return Display.getDefault().getSystemColor(SWT.COLOR_GRAY);
   }
 
   public Color getForegroundColour(Object entity) {
