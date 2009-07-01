@@ -68,6 +68,7 @@ public class DependencyGraphLabelProvider implements ILabelProvider, IEntityStyl
 
   private boolean showIcon = true;
 
+  
   public DependencyGraphLabelProvider(GraphViewer viewer, DependencyGraphContentProvider contentProvider) {
     this.viewer = viewer;
     this.contentProvider = contentProvider;
@@ -103,34 +104,7 @@ public class DependencyGraphLabelProvider implements ILabelProvider, IEntityStyl
     viewer.getGraphControl().applyLayout();
   }
 
-//    public void setCurrentSelection(Object currentSelection) {
-//      this.currentSelection = currentSelection;
-//
-//      interestingRelationships = new HashSet();
-//      interestingDependencies = new HashSet();
-//      if (this.currentSelection != null) {
-//        calculateInterestingDependencies(interestingRelationships,
-//            interestingDependencies);
-//      }
-//
-//      Object[] connections = viewer.getConnectionElements();
-//      for (Iterator iter = interestingRelationships.iterator(); iter.hasNext();) {
-//        Object entityConnectionData = iter.next();
-//        viewer.reveal(entityConnectionData);
-//      }
-//
-//      for (int i = 0; i < connections.length; i++) {
-//        viewer.update(connections[i], null);
-//      }
-//    }
-
-//    private void calculateInterestingDependencies(Set interestingRelationships,
-//        Set interestingDependencies) {
-//
-//    }
-
   // ISelectionChangedListener
-
   public void selectionChanged(SelectionChangedEvent event) {
     if(selectedConnections != null) {
       for(DependencyNode node : selectedConnections) {
@@ -151,29 +125,6 @@ public class DependencyGraphLabelProvider implements ILabelProvider, IEntityStyl
             selectedConnections.add(node);
           }
         }
-        
-//          if(o instanceof MetadataGraphVertex) {
-//            MetadataGraphVertex v = (MetadataGraphVertex) o;
-//            Object[] s = contentProvider.getConnectedTo(v);
-//            if(s!=null) {
-//              for(int i = 0; i < s.length; i++ ) {
-//                MetadataGraphVertex vertex = (MetadataGraphVertex) s[i];
-//                EntityConnectionData data1 = new EntityConnectionData(v, vertex);
-//                viewer.reveal(data1);
-//                selectedConnections.add(data1);
-//              }
-//            }
-//            
-//            List incidentEdges = contentProvider.getGraph().getIncidentEdges(v);
-//            if(incidentEdges!=null) {
-//              for(Iterator iterator = incidentEdges.iterator(); iterator.hasNext();) {
-//                MetadataGraphEdge edge = (MetadataGraphEdge) iterator.next();
-//                EntityConnectionData data = new EntityConnectionData(edge.getSource(), v);
-//                viewer.reveal(data);
-//                selectedConnections.add(data);
-//              }
-//            }
-//          }
       }
     }
 
@@ -262,11 +213,6 @@ public class DependencyGraphLabelProvider implements ILabelProvider, IEntityStyl
         label += "\n " + a.getClassifier() + " ";
       }
       return new Label(label);
-//    } else if(entity instanceof DependencyNode) {
-//      DependencyNode node = (DependencyNode) entity;
-//      return new Label("node");
-//    } else if(entity instanceof EntityConnectionData) {
-//      return new Label("connection");
     } else if(entity instanceof DependencyNode) {
       DependencyNode node = (DependencyNode) entity;
       
