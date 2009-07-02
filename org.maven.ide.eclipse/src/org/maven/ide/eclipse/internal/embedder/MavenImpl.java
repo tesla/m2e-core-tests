@@ -34,7 +34,6 @@ import org.codehaus.plexus.component.repository.exception.ComponentLookupExcepti
 import org.codehaus.plexus.configuration.PlexusConfiguration;
 import org.codehaus.plexus.configuration.xml.XmlPlexusConfiguration;
 import org.codehaus.plexus.util.IOUtil;
-import org.codehaus.plexus.util.dag.CycleDetectedException;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
@@ -48,13 +47,13 @@ import org.apache.maven.embedder.MavenEmbedderException;
 import org.apache.maven.embedder.execution.MavenExecutionRequestPopulator;
 import org.apache.maven.execution.DefaultMavenExecutionRequest;
 import org.apache.maven.execution.DefaultMavenExecutionResult;
-import org.apache.maven.execution.DuplicateProjectException;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.lifecycle.LifecycleExecutor;
 import org.apache.maven.lifecycle.MavenExecutionPlan;
 import org.apache.maven.model.Model;
+import org.apache.maven.model.building.ModelBuildingRequest;
 import org.apache.maven.model.io.ModelReader;
 import org.apache.maven.model.io.ModelWriter;
 import org.apache.maven.plugin.MojoExecution;
@@ -172,15 +171,7 @@ public class MavenImpl implements IMaven {
 
   public MavenSession createSession(MavenExecutionRequest request, MavenProject project) {
     MavenExecutionResult result = new DefaultMavenExecutionResult();
-    try {
-      return new MavenSession(plexus, request, result, project);
-    } catch(CycleDetectedException ex) {
-      // can't happen with single project, can it?
-      throw new IllegalStateException(ex);
-    } catch(DuplicateProjectException ex) {
-      // can't happen with single project, can it?
-      throw new IllegalStateException(ex);
-    }
+    return new MavenSession(plexus, request, result, project);
   }
 
   public void execute(MavenSession session, MojoExecution execution, IProgressMonitor monitor) {
@@ -302,7 +293,7 @@ public class MavenImpl implements IMaven {
       MavenExecutionRequest request = createExecutionRequest(monitor);
       populator.populateDefaults(request);
       ProjectBuildingRequest configuration = request.getProjectBuildingRequest();
-      configuration.setLenientValidation(true);
+      configuration.setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL);
       return projectBuilder.build(pomFile, configuration);
     } catch(ProjectBuildingException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not read maven project",
@@ -320,7 +311,7 @@ public class MavenImpl implements IMaven {
     try {
       populator.populateDefaults(request);
       ProjectBuildingRequest configuration = request.getProjectBuildingRequest();
-      configuration.setLenientValidation(true);
+      configuration.setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL);
       projectBuildingResult = projectBuilder.buildProjectWithDependencies(pomFile, configuration);
       result.setProject(projectBuildingResult.getProject());
       result.setArtifactResolutionResult(projectBuildingResult.getArtifactResolutionResult());

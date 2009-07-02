@@ -15,9 +15,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.maven.artifact.resolver.metadata.MetadataGraph;
-import org.apache.maven.artifact.resolver.metadata.MetadataGraphEdge;
-import org.apache.maven.artifact.resolver.metadata.MetadataGraphVertex;
+import org.apache.maven.repository.metadata.MetadataGraph;
+import org.apache.maven.repository.metadata.MetadataGraphEdge;
+import org.apache.maven.repository.metadata.MetadataGraphVertex;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.zest.core.viewers.IGraphEntityContentProvider;
 

@@ -118,10 +118,12 @@ public class MavenMarkerManager implements IMavenMarkerManager {
       if(validationResult == null) {
         addMarker(pomFile, msg, 1, IMarker.SEVERITY_ERROR); //$NON-NLS-1$
       } else {
-        List<String> messages = validationResult.getMessages();
-        for(String message : messages) {
+        for(String message : validationResult.getErrors()) {
           addMarker(pomFile, message, 1, IMarker.SEVERITY_ERROR); //$NON-NLS-1$
 //          console.logError("  " + message);
+        }
+        for(String message : validationResult.getWarnings()) {
+          addMarker(pomFile, message, 1, IMarker.SEVERITY_WARNING); //$NON-NLS-1$
         }
       }
 

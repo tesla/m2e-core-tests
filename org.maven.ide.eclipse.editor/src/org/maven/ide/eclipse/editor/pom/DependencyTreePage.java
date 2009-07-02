@@ -15,8 +15,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.resolver.metadata.ArtifactMetadata;
-import org.apache.maven.artifact.resolver.metadata.MetadataTreeNode;
+import org.apache.maven.repository.metadata.ArtifactMetadata;
+import org.apache.maven.repository.metadata.MetadataTreeNode;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.dependency.tree.DependencyNode;
 import org.apache.maven.shared.dependency.tree.traversal.DependencyNodeVisitor;

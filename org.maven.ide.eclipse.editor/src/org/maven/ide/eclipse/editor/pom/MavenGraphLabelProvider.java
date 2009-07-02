@@ -13,9 +13,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.maven.artifact.ArtifactScopeEnum;
-import org.apache.maven.artifact.resolver.metadata.ArtifactMetadata;
-import org.apache.maven.artifact.resolver.metadata.MetadataGraphEdge;
-import org.apache.maven.artifact.resolver.metadata.MetadataGraphVertex;
+import org.apache.maven.repository.metadata.ArtifactMetadata;
+import org.apache.maven.repository.metadata.MetadataGraphEdge;
+import org.apache.maven.repository.metadata.MetadataGraphVertex;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
 import org.eclipse.jface.viewers.ILabelProvider;
