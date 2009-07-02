@@ -13,9 +13,16 @@ call :P2_DIRECTOR %UPDATE_URL% org.eclipse.zest.sdk.feature.group
 call :P2_DIRECTOR %UPDATE_URL% org.eclipse.emf.feature.group
 call :P2_DIRECTOR %UPDATE_URL% org.eclipse.xsd.feature.group
 call :P2_DIRECTOR %UPDATE_URL% org.eclipse.datatools.sdk.feature.feature.group
-call :P2_DIRECTOR %UPDATE_URL% org.eclipse.wst.feature.group
+call :P2_DIRECTOR %UPDATE_URL% org.eclipse.wst.web_core.feature.feature.group
+call :P2_DIRECTOR %UPDATE_URL% org.eclipse.wst.web_ui.feature.feature.group
 call :P2_DIRECTOR %UPDATE_URL% org.eclipse.mylyn_feature.feature.group
-call :P2_DIRECTOR %UPDATE_URL% org.eclipse.jst.feature.group
+call :P2_DIRECTOR %UPDATE_URL% org.eclipse.jst.web_ui.feature.feature.group
+call :P2_DIRECTOR %UPDATE_URL% org.eclipse.jst.server_adapters.feature.feature.group
+call :P2_DIRECTOR %UPDATE_URL% org.eclipse.jst.server_ui.feature.feature.group
+call :P2_DIRECTOR %UPDATE_URL% org.eclipse.jst.enterprise_core.feature.feature.group
+
+
+
 
 rem Subversive
 call :P2_DIRECTOR %SUBCLIPSE_URL% org.tigris.subversion.subclipse.feature.group
@@ -26,21 +33,21 @@ rem AspectJ
 call :P2_DIRECTOR %ASPECTJ_URL% org.eclipse.ajdt.feature.group
 
 rem WindowTester
-call :P2_DIRECTOR %WINDOWTESTER_URL%? com.instantiations.eclipse.shared.feature.group
-call :P2_DIRECTOR %WINDOWTESTER_URL%? com.instantiations.eclipse.core.feature.feature.group
-call :P2_DIRECTOR %WINDOWTESTER_URL%? com.instantiations.eclipse.coverage.feature.feature.group
-call :P2_DIRECTOR %WINDOWTESTER_URL%? com.windowtester.ide.feature.group
-call :P2_DIRECTOR %WINDOWTESTER_URL%? com.windowtester.ide.gef.feature.group
-call :P2_DIRECTOR %WINDOWTESTER_URL%? com.windowtester.launcher.feature.group
-call :P2_DIRECTOR %WINDOWTESTER_URL%? com.windowtester.runtime.feature.group
-call :P2_DIRECTOR %WINDOWTESTER_URL%? com.windowtester.runtime.gef.feature.group
+call :P2_DIRECTOR %WINDOWTESTER_URL% com.instantiations.eclipse.shared.feature.group
+call :P2_DIRECTOR %WINDOWTESTER_URL% com.instantiations.eclipse.core.feature.feature.group
+call :P2_DIRECTOR %WINDOWTESTER_URL% com.instantiations.eclipse.coverage.feature.feature.group
+call :P2_DIRECTOR %WINDOWTESTER_URL% com.windowtester.ide.feature.group
+call :P2_DIRECTOR %WINDOWTESTER_URL% com.windowtester.ide.gef.feature.group
+call :P2_DIRECTOR %WINDOWTESTER_URL% com.windowtester.launcher.feature.group
+call :P2_DIRECTOR %WINDOWTESTER_URL% com.windowtester.runtime.feature.group
+call :P2_DIRECTOR %WINDOWTESTER_URL% com.windowtester.runtime.gef.feature.group
 
 %ECLIPSE_DIR%\eclipse.exe -nosplash -initialize -clean
 
-goto :END
+goto :EXIT
 
 :P2_DIRECTOR
 %ECLIPSE_DIR%\eclipse.exe -nosplash -application org.eclipse.equinox.p2.director -metadataRepository %1 -artifactRepository %1 -installIU %2
 exit /b
 
-:END
+:EXIT
