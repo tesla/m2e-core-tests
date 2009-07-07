@@ -368,6 +368,9 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       addPomPage(profilesPage);
       teamPage = new TeamPage(this);
       addPomPage(teamPage);
+      lifecyclePage = new LifecyclePage(this);
+      addPomPage(lifecyclePage);
+      
     } else {
       if(repositoriesPage == null){
         return;
@@ -380,6 +383,8 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       profilesPage = null;
       removePomPage(teamPage);
       teamPage = null;
+      removePomPage(lifecyclePage);
+      lifecyclePage = null;
     }
   }
   
@@ -397,8 +402,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     reportingPage = new ReportingPage(this);
     addPomPage(reportingPage);
     
-    lifecyclePage = new LifecyclePage(this);
-    addPomPage(lifecyclePage);
+
     
     dependencyTreePage = new DependencyTreePage(this);
     addPomPage(dependencyTreePage);
