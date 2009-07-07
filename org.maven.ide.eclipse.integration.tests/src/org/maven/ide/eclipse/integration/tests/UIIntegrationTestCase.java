@@ -21,6 +21,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -68,6 +70,8 @@ import org.eclipse.ui.part.FileEditorInput;
 import org.maven.ide.components.pom.Model;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.editor.pom.MavenPomEditor;
+import org.maven.ide.eclipse.embedder.MavenRuntime;
+import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 
@@ -135,6 +139,8 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
 
 
   private boolean skipIndexes;
+  private boolean useExternalMaven;
+  
   public UIIntegrationTestCase() {
   }
 
@@ -150,6 +156,15 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     }
   }
 
+  protected void switchToExternalMaven() throws Exception{
+    MavenRuntime newRuntime = MavenRuntimeManager.createExternalRuntime("C:\\apache-maven-2.1.0");
+    List<MavenRuntime> currRuntimes = MavenPlugin.getDefault().getMavenRuntimeManager().getMavenRuntimes();
+    ArrayList<MavenRuntime> list = new ArrayList<MavenRuntime>(currRuntimes);
+    list.add(newRuntime);
+    MavenPlugin.getDefault().getMavenRuntimeManager().setRuntimes(list);
+    MavenPlugin.getDefault().getMavenRuntimeManager().setDefaultRuntime(newRuntime);
+  }
+  
   protected void oneTimeSetup()throws Exception{
     super.oneTimeSetup();
     
@@ -174,7 +189,6 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
 
      MavenPlugin.getDefault(); // force m2e to load so its indexing jobs will be scheduled.
      Thread.sleep(5000);
-
      closeView("org.eclipse.ui.internal.introview");
 
      IPerspectiveRegistry perspectiveRegistry = PlatformUI.getWorkbench().getPerspectiveRegistry();
@@ -189,6 +203,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
      if(this.skipIndexes()){
        setupLocalMavenIndex();
      }
+
      // Clean out projects left over from previous test runs.
      clearProjects();
 
@@ -566,12 +581,16 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
   protected IViewPart showView(final String id) throws Exception {
     IViewPart part = (IViewPart) UIThreadTask.executeOnEventQueue(new UIThreadTask() {
       public Object runEx() throws Exception {
-        return getActivePage().showView(id);
+        IViewPart part = getActivePage().showView(id);
+
+        return part;
       }
     });
 
     Thread.sleep(5000);
+    
     getUI().wait(new SWTIdleCondition());
+    assertFalse(part == null);
     return part;
   }
 
@@ -713,11 +732,11 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
 
     assertTrue("Can't locate tomcat installation: " + tomcatInstallLocation, new File(tomcatInstallLocation).exists());
     // Install the Tomcat server 
-    showView(SERVERS_VIEW_ID);
 
     Thread.sleep(5000);
 
     String newServer = isEclipseVersion(3,3) ? "New/Server" : "Ne&w/Server";
+    showView(SERVERS_VIEW_ID);
     getUI().contextClick(new SWTWidgetLocator(Tree.class, new ViewLocator(SERVERS_VIEW_ID)),
         newServer);
     getUI().wait(new ShellShowingCondition("New Server"));
@@ -785,6 +804,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
           .hasNature("org.maven.ide.eclipse.maven2Nature"));
 
       ui.click(new TreeItemLocator(projectName + ".*", new ViewLocator(PACKAGE_EXPLORER_VIEW_ID)));
+     
       return project;
     } catch(Exception ex) {
       ScreenCapture.createScreenCapture();
@@ -922,4 +942,13 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
   public boolean skipIndexes() {
     return skipIndexes;
   }
+  
+  public void setUseExternalMaven(boolean useExternal){
+    this.useExternalMaven = useExternal;
+  }
+  
+  public boolean useExternalMaven(){
+    return this.useExternalMaven;
+  }
+  
 }
