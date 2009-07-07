@@ -33,6 +33,10 @@ public class MEclipse173SimpleWebAppTest extends UIIntegrationTestCase {
 
   private File tempDir;
 
+  public MEclipse173SimpleWebAppTest(){
+    super();
+    this.setUseExternalMaven(true);
+  }
   public void testSimpleWebApp() throws Exception {
 
     installTomcat6();
@@ -101,8 +105,13 @@ public class MEclipse173SimpleWebAppTest extends UIIntegrationTestCase {
 
     // Verify deployment worked (attempt to get weather forcast for Moss Beach CA)
     String s = retrieveWebPage(DEPLOYED_URL);
-
-    assertTrue("Couldn't find Moss Beach weather in web page", s.indexOf("Moss Beach") > 0);
+//    System.out.println(DEPLOYED_URL);
+//    Thread.sleep(20000);
+    int dex = s.indexOf("Moss Beach");
+//    System.out.println("page: "+s);
+//    System.out.println("==================================");
+//    System.out.println("!!!!!!!!!!!!!!!!index is: "+dex);
+    assertTrue("Couldn't find Moss Beach weather in web page", (dex >=0));
 
   }
 
