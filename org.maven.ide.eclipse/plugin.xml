@@ -451,8 +451,6 @@
             name="Maven Indexes"/>
    </extension>
 
-
-
    <extension point="org.eclipse.ui.propertyPages">
       <page id="org.maven.ide.eclipse.MavenProjectPreferencePage"
             class="org.maven.ide.eclipse.ui.internal.preferences.MavenProjectPreferencePage"
@@ -460,6 +458,14 @@
             objectClass="org.eclipse.core.resources.IProject"
             adaptable="true">
          <filter name="nature" value="org.maven.ide.eclipse.maven2Nature"/>
+      </page>
+      <page id="org.maven.ide.eclipse.MavenProjectLifecycleMappingPage"
+            class="org.maven.ide.eclipse.ui.internal.preferences.MavenProjectLifecycleMappingPage"
+            name="Lifecycle Mapping"
+            category="org.maven.ide.eclipse.MavenProjectPreferencePage"
+            objectClass="org.eclipse.core.resources.IProject"
+            adaptable="true">
+          <filter name="nature" value="org.maven.ide.eclipse.maven2Nature"/>
       </page>
    </extension>
 
