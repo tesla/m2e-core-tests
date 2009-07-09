@@ -43,8 +43,6 @@ public class MavenProjectPreferencePage extends PropertyPage {
   private Button resolveWorspaceProjectsButton;
   private Button includeModulesButton;
   
-  private Text goalsCleanText;
-  private Text goalsChangedText;
   private Text activeProfilesText;
 
   public MavenProjectPreferencePage() {
@@ -63,29 +61,6 @@ public class MavenProjectPreferencePage extends PropertyPage {
 
     activeProfilesText = new Text(composite, SWT.BORDER);
     activeProfilesText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-
-    Label goalsCleanLabel = new Label(composite, SWT.NONE);
-    goalsCleanLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-    goalsCleanLabel.setText("Goals to invoke after project clea&n:");
-
-    goalsCleanText = new Text(composite, SWT.BORDER);
-    goalsCleanText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-
-    Button selectGoalsCleanButton = new Button(composite, SWT.NONE);
-    selectGoalsCleanButton.setLayoutData(new GridData());
-    selectGoalsCleanButton.setText("&Select...");
-    selectGoalsCleanButton.addSelectionListener(new MavenGoalSelectionAdapter(goalsCleanText, getShell()));
-    
-    final Label goalsChangedLabel = new Label(composite, SWT.NONE);
-    goalsChangedLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-    goalsChangedLabel.setText("&Goals to invoke on resource changes:");
-    
-    goalsChangedText = new Text(composite, SWT.SINGLE | SWT.BORDER);
-    goalsChangedText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-    
-    final Button selectGoalsChangedButton = new Button(composite, SWT.NONE);
-    selectGoalsChangedButton.setText("S&elect...");
-    selectGoalsChangedButton.addSelectionListener(new MavenGoalSelectionAdapter(goalsChangedText, getShell()));
 
     final Label warningLabel = new Label(composite, SWT.NONE);
     warningLabel.setText("Note that these goals can affect incremental build performance");
@@ -133,9 +108,6 @@ public class MavenProjectPreferencePage extends PropertyPage {
     skipMavenCompilerButton.setSelection(configuration.isSkipCompiler());
     resolveWorspaceProjectsButton.setSelection(configuration.shouldResolveWorkspaceProjects());
     includeModulesButton.setSelection(configuration.shouldIncludeModules());
-
-    goalsCleanText.setText(configuration.getFullBuildGoals());
-    goalsChangedText.setText(configuration.getResourceFilteringGoals());
     activeProfilesText.setText(configuration.getActiveProfiles());
   }
 
@@ -152,8 +124,6 @@ public class MavenProjectPreferencePage extends PropertyPage {
 
     final ResolverConfiguration configuration = getResolverConfiguration();
     if(configuration.getActiveProfiles().equals(activeProfilesText.getText()) &&
-        configuration.getFullBuildGoals().equals(goalsCleanText.getText()) &&
-        configuration.getResourceFilteringGoals().equals(goalsChangedText.getText()) &&
         configuration.shouldIncludeModules()==includeModulesButton.getSelection() &&
         configuration.shouldResolveWorkspaceProjects()==resolveWorspaceProjectsButton.getSelection() &&
         configuration.isSkipCompiler()==skipMavenCompilerButton.getSelection()) {
@@ -163,39 +133,32 @@ public class MavenProjectPreferencePage extends PropertyPage {
     configuration.setSkipCompiler(skipMavenCompilerButton.getSelection());
     configuration.setResolveWorkspaceProjects(resolveWorspaceProjectsButton.getSelection());
     configuration.setIncludeModules(includeModulesButton.getSelection());
-    
-    configuration.setFullBuildGoals(goalsCleanText.getText());
-    configuration.setResourceFilteringGoals(goalsChangedText.getText());
     configuration.setActiveProfiles(activeProfilesText.getText());
     
     MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
     boolean isSet = projectManager.setResolverConfiguration(getProject(), configuration);
     if(isSet) {
-      
-      // XXX this hack need to be replaced with a listener listening on java model or resource changes
-//      Display.getCurrent().asyncExec(new Runnable() {
-//        public void run() {
-          boolean res = MessageDialog.openQuestion(getShell(), "Maven Settings", //
-              "Maven settings has changed. Do you want to update project configuration?");
-          if(res) {
-            final MavenPlugin plugin = MavenPlugin.getDefault();
-            WorkspaceJob job = new WorkspaceJob("Updating " + project.getName() + " Sources") {
-              public IStatus runInWorkspace(IProgressMonitor monitor) {
-                try {
-                  final IMavenConfiguration mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
-                  plugin.getProjectConfigurationManager().updateProjectConfiguration(project, configuration,
-                      mavenConfiguration.getGoalOnUpdate(), monitor);
-                } catch(CoreException ex) {
-                  return ex.getStatus();
-                }
-                return Status.OK_STATUS;
+
+        boolean res = MessageDialog.openQuestion(getShell(), "Maven Settings", //
+            "Maven settings has changed. Do you want to update project configuration?");
+        if(res) {
+          final MavenPlugin plugin = MavenPlugin.getDefault();
+          WorkspaceJob job = new WorkspaceJob("Updating " + project.getName() + " Sources") {
+            public IStatus runInWorkspace(IProgressMonitor monitor) {
+              try {
+                final IMavenConfiguration mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
+                plugin.getProjectConfigurationManager().updateProjectConfiguration(project, configuration,
+                    mavenConfiguration.getGoalOnUpdate(), monitor);
+              } catch(CoreException ex) {
+                return ex.getStatus();
               }
-            };
-            job.setRule(plugin.getProjectConfigurationManager().getRule());
-            job.schedule();
-          }
-//        }
-//      });
+              return Status.OK_STATUS;
+            }
+          };
+          job.setRule(plugin.getProjectConfigurationManager().getRule());
+          job.schedule();
+        }
+
     }
     
     return isSet;
