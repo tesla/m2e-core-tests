@@ -71,6 +71,7 @@ public class MavenProjectLifecycleMappingPage extends PropertyPage {
   public static final String GENERIC_STRATEGY = "Generic";
   private static final int TABLE_WIDTH = 500;
   private static final int TABLE_HEIGHT = 320;
+  private Button skipMavenCompilerButton;
   private Text goalsCleanText;
   private Text goalsChangedText;
   private TableViewer configuratorsTable;
@@ -126,6 +127,14 @@ public class MavenProjectLifecycleMappingPage extends PropertyPage {
       final Button selectGoalsChangedButton = new Button(composite, SWT.NONE);
       selectGoalsChangedButton.setText("S&elect...");
       selectGoalsChangedButton.addSelectionListener(new MavenGoalSelectionAdapter(goalsChangedText, getShell()));
+
+      skipMavenCompilerButton = new Button(composite, SWT.CHECK);
+      gd = new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1);
+      gd.horizontalIndent = 4;
+      skipMavenCompilerButton.setLayoutData(gd);
+      skipMavenCompilerButton.setData("name", "skipMavenCompilerButton");
+      skipMavenCompilerButton.setText("Skip Maven compiler plugin when processing resources (recommended)");
+
     }
     if(canShowConfigurators()){
       
@@ -255,6 +264,9 @@ public class MavenProjectLifecycleMappingPage extends PropertyPage {
   }
   
   private void init(ResolverConfiguration configuration) {
+    if(skipMavenCompilerButton != null){
+      skipMavenCompilerButton.setSelection(configuration.isSkipCompiler());
+    }
     if(goalsCleanText != null){
       goalsCleanText.setText(configuration.getFullBuildGoals());
     }
@@ -293,10 +305,11 @@ public class MavenProjectLifecycleMappingPage extends PropertyPage {
     if(canSpecifyGoals()){
       final ResolverConfiguration configuration = getResolverConfiguration();
       if(configuration.getFullBuildGoals().equals(goalsCleanText.getText()) &&
-          configuration.getResourceFilteringGoals().equals(goalsChangedText.getText())) {
+          configuration.getResourceFilteringGoals().equals(goalsChangedText.getText())  &&
+          configuration.isSkipCompiler()==skipMavenCompilerButton.getSelection()) {
         return true;
       }
-      
+      configuration.setSkipCompiler(skipMavenCompilerButton.getSelection());
       configuration.setFullBuildGoals(goalsCleanText.getText());
       configuration.setResourceFilteringGoals(goalsChangedText.getText());
       
