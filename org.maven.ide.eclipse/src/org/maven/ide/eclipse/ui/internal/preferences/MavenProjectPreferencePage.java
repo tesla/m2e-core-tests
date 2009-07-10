@@ -47,7 +47,6 @@ public class MavenProjectPreferencePage extends PropertyPage {
 
   public MavenProjectPreferencePage() {
     setTitle("Maven");
-    setDescription("Maven project configuration:");
   }
 
   protected Control createContents(Composite parent) {
@@ -62,34 +61,33 @@ public class MavenProjectPreferencePage extends PropertyPage {
     activeProfilesText = new Text(composite, SWT.BORDER);
     activeProfilesText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 
-    final Label warningLabel = new Label(composite, SWT.NONE);
-    warningLabel.setText("Note that these goals can affect incremental build performance");
-    warningLabel.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_BLUE));
-    GridData warningLabelData = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
-    warningLabelData.horizontalIndent = 12;
-    warningLabel.setLayoutData(warningLabelData);
-
     skipMavenCompilerButton = new Button(composite, SWT.CHECK);
-    skipMavenCompilerButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
+    GridData gd = new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1);
+    gd.verticalIndent = 15;
+    skipMavenCompilerButton.setLayoutData(gd);
     skipMavenCompilerButton.setData("name", "skipMavenCompilerButton");
     skipMavenCompilerButton.setText("Skip Maven compiler plugin when processing resources (recommended)");
 
     resolveWorspaceProjectsButton = new Button(composite, SWT.CHECK);
     GridData resolveWorspaceProjectsButtonData = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
-    resolveWorspaceProjectsButtonData.verticalIndent = 7;
     resolveWorspaceProjectsButton.setLayoutData(resolveWorspaceProjectsButtonData);
     resolveWorspaceProjectsButton.setText("Resolve dependencies from &Workspace projects");
 
     includeModulesButton = new Button(composite, SWT.CHECK);
-    includeModulesButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
+    gd = new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1);
+    gd.verticalIndent = 15;
+    includeModulesButton.setLayoutData(gd);
     includeModulesButton.setText("Include &Modules");
 
     Text includeModulesText = new Text(composite, SWT.WRAP | SWT.READ_ONLY | SWT.MULTI);
     includeModulesText.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_BLUE));
     GridData gd_includeModulesText = new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1);
-    gd_includeModulesText.horizontalIndent = 12;
+    gd_includeModulesText.horizontalIndent = 15;
+    gd_includeModulesText.verticalIndent = 0;
     gd_includeModulesText.widthHint = 300;
+    gd_includeModulesText.heightHint = 120;
     includeModulesText.setLayoutData(gd_includeModulesText);
+    includeModulesText.setBackground(composite.getBackground());
     includeModulesText.setText("When enabled, dependencies from all nested modules "
         + "are added to the \"Maven Dependencies\" container and "
         + "source folders from nested modules are added to the current "
