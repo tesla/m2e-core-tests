@@ -40,6 +40,7 @@ public abstract class AbstractLifecycleMapping implements IExtensionLifecycleMap
   private static List<AbstractProjectConfigurator> configurators;
   private String name;
   private String id;
+  private boolean showConfigurators;
 
   /**
    * Calls #configure method of all registered project configurators
@@ -150,6 +151,18 @@ public abstract class AbstractLifecycleMapping implements IExtensionLifecycleMap
     this.id = id;
   }
   
+  /**
+   * @param show Set whether the project configurators should show. Default is true.
+   */
+  public void setShowConfigurators(boolean show){
+    this.showConfigurators = show;
+  }
   
+  /**
+   * Returns whether the project configurators will be shown in the UI. Default is true.
+   */
+  public boolean showConfigurators(){
+    return this.showConfigurators;
+  }
   
 }
