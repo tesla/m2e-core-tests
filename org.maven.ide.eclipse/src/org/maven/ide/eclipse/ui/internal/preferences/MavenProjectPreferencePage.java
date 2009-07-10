@@ -39,7 +39,7 @@ import org.maven.ide.eclipse.project.ResolverConfiguration;
  * @author Eugene Kuleshov
  */
 public class MavenProjectPreferencePage extends PropertyPage {
-  private Button skipMavenCompilerButton;
+
   private Button resolveWorspaceProjectsButton;
   private Button includeModulesButton;
   
@@ -61,20 +61,13 @@ public class MavenProjectPreferencePage extends PropertyPage {
     activeProfilesText = new Text(composite, SWT.BORDER);
     activeProfilesText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 
-    skipMavenCompilerButton = new Button(composite, SWT.CHECK);
-    GridData gd = new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1);
-    gd.verticalIndent = 15;
-    skipMavenCompilerButton.setLayoutData(gd);
-    skipMavenCompilerButton.setData("name", "skipMavenCompilerButton");
-    skipMavenCompilerButton.setText("Skip Maven compiler plugin when processing resources (recommended)");
-
     resolveWorspaceProjectsButton = new Button(composite, SWT.CHECK);
     GridData resolveWorspaceProjectsButtonData = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
     resolveWorspaceProjectsButton.setLayoutData(resolveWorspaceProjectsButtonData);
     resolveWorspaceProjectsButton.setText("Resolve dependencies from &Workspace projects");
 
     includeModulesButton = new Button(composite, SWT.CHECK);
-    gd = new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1);
+    GridData gd = new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1);
     gd.verticalIndent = 15;
     includeModulesButton.setLayoutData(gd);
     includeModulesButton.setText("Include &Modules");
@@ -103,7 +96,7 @@ public class MavenProjectPreferencePage extends PropertyPage {
   }
   
   private void init(ResolverConfiguration configuration) {
-    skipMavenCompilerButton.setSelection(configuration.isSkipCompiler());
+
     resolveWorspaceProjectsButton.setSelection(configuration.shouldResolveWorkspaceProjects());
     includeModulesButton.setSelection(configuration.shouldIncludeModules());
     activeProfilesText.setText(configuration.getActiveProfiles());
@@ -123,12 +116,10 @@ public class MavenProjectPreferencePage extends PropertyPage {
     final ResolverConfiguration configuration = getResolverConfiguration();
     if(configuration.getActiveProfiles().equals(activeProfilesText.getText()) &&
         configuration.shouldIncludeModules()==includeModulesButton.getSelection() &&
-        configuration.shouldResolveWorkspaceProjects()==resolveWorspaceProjectsButton.getSelection() &&
-        configuration.isSkipCompiler()==skipMavenCompilerButton.getSelection()) {
+        configuration.shouldResolveWorkspaceProjects()==resolveWorspaceProjectsButton.getSelection()) {
       return true;
     }
     
-    configuration.setSkipCompiler(skipMavenCompilerButton.getSelection());
     configuration.setResolveWorkspaceProjects(resolveWorspaceProjectsButton.getSelection());
     configuration.setIncludeModules(includeModulesButton.getSelection());
     configuration.setActiveProfiles(activeProfilesText.getText());
