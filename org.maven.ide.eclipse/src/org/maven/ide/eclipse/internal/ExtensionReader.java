@@ -74,7 +74,11 @@ public class ExtensionReader {
 
   private static final String ELEMENT_REMOTE_ARCHETYPE = "remote";
 
+  private static final String ATTR_ID = "id";
+  
   private static final String ATTR_NAME = "name";
+  
+  private static final String ATTR_SHOW_CONFIGURATORS = "showConfigurators";
 
   private static final String ATTR_URL = "url";
   
@@ -263,9 +267,16 @@ public class ExtensionReader {
               Object o = element.createExecutableExtension(AbstractProjectConfigurator.ATTR_CLASS);
               
               IExtensionLifecycleMapping lifecycleMapping = (IExtensionLifecycleMapping) o;
-              String id = element.getAttribute("id");
-              lifecycleMapping.setName(element.getAttribute("name"));
+              String id = element.getAttribute(ATTR_ID);
+              lifecycleMapping.setName(element.getAttribute(ATTR_NAME));
               lifecycleMapping.setId(id);
+              String confAttr = element.getAttribute(ATTR_SHOW_CONFIGURATORS);
+              //showConfigurators should be true by default, so if nothing is specified, leave it as true
+              boolean showConfigurators = true;
+              if(confAttr != null){
+                showConfigurators = Boolean.valueOf(confAttr).booleanValue();
+              }
+              lifecycleMapping.setShowConfigurators(showConfigurators);
               lifecycleMappings.put(id, lifecycleMapping);
 
             } catch(CoreException ex) {
