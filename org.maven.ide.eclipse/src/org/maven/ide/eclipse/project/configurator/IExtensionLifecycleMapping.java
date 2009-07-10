@@ -16,4 +16,5 @@ package org.maven.ide.eclipse.project.configurator;
 public interface IExtensionLifecycleMapping extends ILifecycleMapping {
   public void setId(String id);
   public void setName(String name);
+  public void setShowConfigurators(boolean show);
 }

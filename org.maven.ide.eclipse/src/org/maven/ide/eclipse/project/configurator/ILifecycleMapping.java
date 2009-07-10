@@ -25,6 +25,8 @@ public interface ILifecycleMapping {
   
   String getName();
   
+  boolean showConfigurators();
+  
   List<String> getPotentialMojoExecutionsForBuildKind(IMavenProjectFacade projectFacade, int kind, IProgressMonitor progressMonitor);
   
   void configure(ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException;
