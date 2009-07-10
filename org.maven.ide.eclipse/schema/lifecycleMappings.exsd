@@ -56,10 +56,16 @@
                </documentation>
             </annotation>
          </attribute>
-         <attribute name="class" type="string" use="required">
+         <attribute name="showConfigurators" type="boolean">
             <annotation>
                <documentation>
-                  
+                  Show project configurators in the lifecycle mapping preferences
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="class" type="string" use="required">
+            <annotation>
+               <documentation>          
                </documentation>
                <appInfo>
                   <meta.attribute kind="java" basedOn="org.maven.ide.eclipse.project.configurator.AbstractLifecycleMapping:org.maven.ide.eclipse.project.configurator.IExtensionLifecycleMapping"/>
