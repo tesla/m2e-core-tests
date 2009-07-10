@@ -484,7 +484,8 @@
       <lifecycleMapping
             class="org.maven.ide.eclipse.project.configurator.NoopLifecycleMapping"
             id="NULL"
-            name="Empty Lifecycle Mapping">
+            name="Empty Lifecycle Mapping"
+            showConfigurators="false">
       </lifecycleMapping>
    </extension>
 
