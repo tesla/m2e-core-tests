@@ -54,6 +54,9 @@
 
     <tycho.version>0.3.0-SNAPSHOT</tycho.version>
     -->
+
+    <!-- default target platform, see ../target-platform/*.target -->
+    <target.platform>m2e-e35</target.platform>
   </properties>
 
   <organization>
@@ -148,6 +151,8 @@
     <!-- <module>../org.maven.ide.eclipse.modello.tests</module>  -->
 
     <module>../org.maven.ide.eclipse.update</module>
+
+    <module>../target-platform</module>
   </modules>
 
   <dependencyManagement>
@@ -315,21 +320,22 @@
         </configuration>
       </plugin>
 
-      <!--
       <plugin>
         <groupId>org.codehaus.tycho</groupId>
-        <artifactId>maven-osgi-packaging-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>timestamp</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>timestamp</goal>
-            </goals>
-          </execution>
-        </executions>
+        <artifactId>target-platform-configuration</artifactId>
+        <configuration>
+          <resolver>p2</resolver>
+          <target>
+            <artifact>
+              <groupId>org.maven.ide.eclipse</groupId>
+              <artifactId>target-platform</artifactId>
+              <version>${m2eclipse.version}</version>
+              <classifier>${target.platform}</classifier>
+            </artifact>
+          </target>
+        </configuration>
       </plugin>
-      -->
+
     </plugins>
 
     <pluginManagement>
@@ -447,102 +453,6 @@
       </properties>
   </profile>
 	
-    <profile>
-      <id>e34-p2</id>
-      <repositories>
-        <repository>
-          <id>update34</id>
-          <layout>p2</layout>
-          <url>http://download.eclipse.org/eclipse/updates/3.4/</url>
-        </repository>
-        <repository>
-          <id>ganymede</id>
-          <layout>p2</layout>
-          <url>http://download.eclipse.org/releases/ganymede/</url>
-        </repository>
-        <repository>
-          <id>m2e-prereqs</id>
-          <layout>p2</layout>
-          <url>http://m2eclipse.sonatype.org/prereqs-3.4</url>
-        </repository>
-      </repositories>
-      <dependencyManagement>
-        <dependencies>
-          <dependency>
-            <groupId>org.eclipse</groupId>
-            <artifactId>org.eclipse.sdk.ide</artifactId>
-            <version>3.4.0.I20080617-2000</version>
-            <type>osgi-bundle</type>
-          </dependency>
-          <dependency>
-            <groupId>org.eclipse</groupId>
-            <artifactId>org.eclipse.jst.feature.group</artifactId>
-            <version>3.0.0.v200806111800-7U-8Y9LIrwYBUV7sHGjhtz0LTrMd</version>
-            <type>osgi-bundle</type>
-          </dependency>
-          <dependency>
-            <groupId>org.eclipse</groupId>
-            <artifactId>org.eclipse.emf.ecore.editor.feature.group</artifactId>
-            <version>2.4.0.v200806091234</version>
-            <type>osgi-bundle</type>
-          </dependency>
-          <dependency>
-            <groupId>org.eclipse</groupId>
-            <artifactId>org.eclipse.zest.sdk.feature.group</artifactId>
-            <version>1.0.0.v20080115-53-8_GACFGHKZGOLXW_WSRQ6FDTE</version>
-            <type>osgi-bundle</type>
-          </dependency>
-          <dependency>
-            <groupId>org.eclipse</groupId>
-            <artifactId>org.eclipse.mylyn_feature.feature.group</artifactId>
-            <version>2.3.2.v20080402-2100</version>
-            <type>osgi-bundle</type>
-          </dependency>
-          <dependency>
-            <groupId>org.eclipse</groupId>
-            <artifactId>org.eclipse.mylyn.java_feature.feature.group</artifactId>
-            <version>2.3.2.v20080402-2100</version>
-            <type>osgi-bundle</type>
-          </dependency>
-          <dependency>
-            <groupId>org.eclipse</groupId>
-            <artifactId>org.eclipse.mylyn.jira_feature.feature.group</artifactId>
-            <version>2.3.2.v20080402-2100</version>
-            <type>osgi-bundle</type>
-          </dependency>
-          <dependency>
-            <groupId>org.eclipse</groupId>
-            <artifactId>org.tigris.subversion.subclipse.mylyn.feature.group</artifactId>
-            <version>2.0.2</version>
-            <type>osgi-bundle</type>
-          </dependency>
-          <dependency>
-            <groupId>org.eclipse</groupId>
-            <artifactId>org.eclipse.ajdt.feature.group</artifactId>
-            <version>1.6.0.200806051919</version>
-            <type>osgi-bundle</type>
-          </dependency>
-          <dependency>
-            <groupId>org.eclipse</groupId>
-            <artifactId>org.tigris.subversion.clientadapter.feature.feature.group</artifactId>
-            <version>1.3.8</version>
-            <type>osgi-bundle</type>
-          </dependency>
-          <dependency>
-            <groupId>org.eclipse</groupId>
-            <artifactId>org.tigris.subversion.clientadapter.javahl.feature.feature.group</artifactId>
-            <version>1.3.13</version>
-            <type>osgi-bundle</type>
-          </dependency>
-          <dependency>
-            <groupId>org.eclipse</groupId>
-            <artifactId>org.tigris.subversion.subclipse.feature.group</artifactId>
-            <version>1.3.16</version>
-            <type>osgi-bundle</type>
-          </dependency>
-        </dependencies>
-      </dependencyManagement>
-    </profile>
   </profiles>
 
   <developers>
