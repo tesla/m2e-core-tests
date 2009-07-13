@@ -27,6 +27,8 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ControlAdapter;
+import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
@@ -36,6 +38,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
@@ -201,26 +205,21 @@ public class MavenProjectLifecycleMappingPage extends PropertyPage {
       configuratorsTable.setLabelProvider(configuratorsLabelProvider);
       configuratorsTable.setColumnProperties(CONFIG_TABLE_COLUMN_PROPERTIES);
       
-      gd = new GridData(SWT.LEFT, SWT.TOP, true, true, 2, 1);
-      gd.widthHint = TABLE_WIDTH;
-      gd.heightHint = TABLE_HEIGHT;
+      gd = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1);
       gd.horizontalIndent=6;
+      gd.grabExcessHorizontalSpace = true;
+      gd.grabExcessVerticalSpace = true;
       configuratorsTable.getControl().setLayoutData(gd);
-      //TODO: get the table/columns to resize
-//      composite.addControlListener(new ControlAdapter(){
-//        public void controlResized(ControlEvent e){
-//          
-//        }
-//      });
-//      final TableColumn nCol = nameColumn.getColumn();
-//      final TableColumn iCol = idColumn.getColumn();
-//      final Table tab = configuratorsTable.getTable();
-//      configuratorsTable.getTable().addControlListener(new ControlAdapter() {
-//        public void controlResized(ControlEvent e) {
-//          nCol.setWidth((int)(tab.getClientArea().width*0.50));
-//          iCol.setWidth((int)(tab.getClientArea().width*0.50));
-//        }
-//      });
+
+      final TableColumn nCol = nameColumn.getColumn();
+      final TableColumn iCol = idColumn.getColumn();
+      final Table tab = configuratorsTable.getTable();
+      configuratorsTable.getTable().addControlListener(new ControlAdapter() {
+        public void controlResized(ControlEvent e) {
+          nCol.setWidth((int)(tab.getClientArea().width*0.50));
+          iCol.setWidth((int)(tab.getClientArea().width*0.50));
+        }
+      });
     }
     init(getResolverConfiguration());
     return composite;
@@ -304,19 +303,18 @@ public class MavenProjectLifecycleMappingPage extends PropertyPage {
 
     if(canSpecifyGoals()){
       final ResolverConfiguration configuration = getResolverConfiguration();
-      if(configuration.getFullBuildGoals().equals(goalsCleanText.getText()) &&
-          configuration.getResourceFilteringGoals().equals(goalsChangedText.getText())  &&
+      if((configuration.getFullBuildGoals() != null && configuration.getFullBuildGoals().equals(goalsCleanText.getText())) &&
+          (configuration.getResourceFilteringGoals() != null &&  configuration.getResourceFilteringGoals().equals(goalsChangedText.getText()))  &&
           configuration.isSkipCompiler()==skipMavenCompilerButton.getSelection()) {
         return true;
       }
       configuration.setSkipCompiler(skipMavenCompilerButton.getSelection());
       configuration.setFullBuildGoals(goalsCleanText.getText());
       configuration.setResourceFilteringGoals(goalsChangedText.getText());
-      
       MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
       boolean isSet = projectManager.setResolverConfiguration(getProject(), configuration);
+      
       if(isSet) {
-        
           boolean res = MessageDialog.openQuestion(getShell(), "Maven Settings", //
               "Maven settings have changed. Do you want to update project configuration?");
           if(res) {
