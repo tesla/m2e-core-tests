@@ -10,7 +10,6 @@ package org.maven.ide.eclipse.ui.internal.preferences;
 
 import java.util.List;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
@@ -41,14 +40,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.dialogs.PropertyPage;
-import org.eclipse.ui.forms.editor.FormEditor;
-import org.eclipse.ui.forms.events.HyperlinkEvent;
-import org.eclipse.ui.forms.events.IHyperlinkListener;
-import org.eclipse.ui.forms.widgets.Hyperlink;
-import org.eclipse.ui.ide.IDE;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
@@ -79,7 +71,7 @@ public class MavenProjectLifecycleMappingPage extends PropertyPage {
   private Text goalsCleanText;
   private Text goalsChangedText;
   private TableViewer configuratorsTable;
-  private Hyperlink pomEditorHyperlink;
+//  private Hyperlink pomEditorHyperlink;
   private ConfiguratorsTableContentProvider configuratorsContentProvider;
   private ConfiguratorsTableLabelProvider configuratorsLabelProvider;
 
@@ -157,37 +149,37 @@ public class MavenProjectLifecycleMappingPage extends PropertyPage {
       gd = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
       configuratorsLabel.setLayoutData(gd);
       configuratorsLabel.setText("Project Configurators:");
-      pomEditorHyperlink = new Hyperlink(labelComp, SWT.NONE);
-      pomEditorHyperlink.setUnderlined(true);
-      pomEditorHyperlink.addHyperlinkListener(new IHyperlinkListener() {
-        
-        public void linkExited(HyperlinkEvent e) {
-        }
-        
-        public void linkEntered(HyperlinkEvent e) {
-        }
-        
-        public void linkActivated(HyperlinkEvent e) {
-          IFile pomFile = getProjectFacade().getPom();
-          if(pomFile != null){
-            if(performOk()){
-              getShell().close();
-              try{
-                IEditorPart part = IDE.openEditor(MavenPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow().getActivePage(), getProjectFacade().getPom());
-                if(part instanceof FormEditor){
-                  ((FormEditor)part).setActivePage(IMavenConstants.PLUGIN_ID + ".pom.lifecycleMappings");
-                }
-              } catch(PartInitException pie){
-                MavenLogger.log("Unable to open the POM file", pie);
-              }
-            }
-          }
-        }
-      });
-      pomEditorHyperlink.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_BLUE));
-      pomEditorHyperlink.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1));
-      pomEditorHyperlink.setText("View/Edit in POM Editor");
-      
+//      pomEditorHyperlink = new Hyperlink(labelComp, SWT.NONE);
+//      pomEditorHyperlink.setUnderlined(true);
+//      pomEditorHyperlink.addHyperlinkListener(new IHyperlinkListener() {
+//        
+//        public void linkExited(HyperlinkEvent e) {
+//        }
+//        
+//        public void linkEntered(HyperlinkEvent e) {
+//        }
+//        
+//        public void linkActivated(HyperlinkEvent e) {
+//          IFile pomFile = getProjectFacade().getPom();
+//          if(pomFile != null){
+//            if(performOk()){
+//              getShell().close();
+//              try{
+//                IEditorPart part = IDE.openEditor(MavenPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow().getActivePage(), getProjectFacade().getPom());
+//                if(part instanceof FormEditor){
+//                  ((FormEditor)part).setActivePage(IMavenConstants.PLUGIN_ID + ".pom.lifecycleMappings");
+//                }
+//              } catch(PartInitException pie){
+//                MavenLogger.log("Unable to open the POM file", pie);
+//              }
+//            }
+//          }
+//        }
+//      });
+//      pomEditorHyperlink.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_BLUE));
+//      pomEditorHyperlink.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1));
+//      pomEditorHyperlink.setText("View/Edit in POM Editor");
+//      
       configuratorsTable = new TableViewer(composite, SWT.BORDER|SWT.H_SCROLL|SWT.V_SCROLL);
       TableViewerColumn nameColumn = new TableViewerColumn(configuratorsTable, SWT.LEFT);
       nameColumn.getColumn().setText(CONFIG_TABLE_COLUMN_NAMES[0]);
