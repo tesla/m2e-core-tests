@@ -271,7 +271,9 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
             runtimesViewer.refresh();
             runtimesViewer.setAllChecked(false);
             runtimesViewer.setChecked(runtime, true);
-            setDirty(true);
+            if(runtime != null){
+              setCheckedRuntime(runtime);
+            }
           }
         }
       }
@@ -334,18 +336,10 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
 
     runtimesViewer.addCheckStateListener(new ICheckStateListener() {
       public void checkStateChanged(CheckStateChangedEvent event) {
-        runtimesViewer.setAllChecked(false);
-        runtimesViewer.setChecked(event.getElement(), true);
-        defaultRuntime = (MavenRuntime) event.getElement();
-
-        if(!defaultRuntime.isEditable()) {
-          globalSettingsText.setText("");
-        } else {
-          String globalSettings = defaultRuntime.getSettings();
-          globalSettingsText.setText(globalSettings == null ? "" : globalSettings);
+        if(event.getElement() != null && event.getChecked()){
+          
+          setCheckedRuntime((MavenRuntime)event.getElement());
         }
-        initLocalRepository();
-        setDirty(true);
       }
     });
 
@@ -501,6 +495,21 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
     return composite;
   }
 
+  protected void setCheckedRuntime(MavenRuntime runtime){
+    runtimesViewer.setAllChecked(false);
+    runtimesViewer.setChecked(runtime, true);
+    defaultRuntime = runtime;
+
+    if(!defaultRuntime.isEditable()) {
+      globalSettingsText.setText("");
+    } else {
+      String globalSettings = defaultRuntime.getSettings();
+      globalSettingsText.setText(globalSettings == null ? "" : globalSettings);
+    }
+    initLocalRepository();
+    setDirty(true);
+  }
+  
   void initLocalRepository() {
     final String userSettings = getUserSettings();
     final String globalSettings = getGlobalSettings().length() == 0 ? defaultRuntime.getSettings()
