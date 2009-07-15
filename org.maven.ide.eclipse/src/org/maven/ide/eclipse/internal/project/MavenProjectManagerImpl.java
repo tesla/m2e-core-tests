@@ -683,6 +683,11 @@ public class MavenProjectManagerImpl {
       DefaultMavenExecutionResult result = new DefaultMavenExecutionResult();
       result.addException(ex);
       return result;
+    } catch(NullPointerException npe){
+      //temporary;
+      DefaultMavenExecutionResult result = new DefaultMavenExecutionResult();
+      result.addException(npe);
+      return result;
     }
 
   }
