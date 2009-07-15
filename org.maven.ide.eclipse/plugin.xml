@@ -15,7 +15,7 @@
    <extension-point id="projectConfigurators" name="Project Configurators" schema="schema/projectConfigurators.exsd"/>
    <extension-point id="m2menu" name="m2 menu items" schema="schema/m2menu.exsd"/>
    <extension-point id="lifecycleMappings" name="Maven Lifecycle Mappings" schema="schema/lifecycleMappings.exsd"/>
-
+   <extension-point id="lifecycleMappingPropertyPage" name = "Maven Lifecycle Mapping Property Page" schema = "schema/lifecycleMappingPropertyPage.exsd"/>
    <extension point="org.eclipse.ui.intro.configExtension">
       <configExtension configId="org.eclipse.ui.intro.universalConfig"
                        content="intro/overview.xml"/>
@@ -468,7 +468,29 @@
           <filter name="nature" value="org.maven.ide.eclipse.maven2Nature"/>
       </page>
    </extension>
-
+   
+  <extension 
+    point="org.maven.ide.eclipse.lifecycleMappingPropertyPage">
+    <lifecycleMappingPropertyPage
+      class="org.maven.ide.eclipse.ui.internal.preferences.GenericLifecycleMappingPropertyPage"
+      id="genericPropertyPage"
+      lifecycleMappingId="generic"
+      name="Generic Lifecycle Mapping">
+    </lifecycleMappingPropertyPage>
+    <lifecycleMappingPropertyPage
+      class="org.maven.ide.eclipse.ui.internal.preferences.EmptyLifecycleMappingPropertyPage"
+      id = "emptyPropertyPage"
+      lifecycleMappingId = "NULL"
+      name = "Empty Lifecycle Mapping">
+    </lifecycleMappingPropertyPage>
+    <lifecycleMappingPropertyPage
+      class="org.maven.ide.eclipse.ui.internal.preferences.CustomizableLifecycleMappingPropertyPage"
+      id = "customizablePropertyPage"
+      lifecycleMappingId = "customizable"
+      name = "Customizable Lifecycle Mapping">
+    </lifecycleMappingPropertyPage>
+  </extension>
+  
    <extension
          point="org.maven.ide.eclipse.lifecycleMappings">
       <lifecycleMapping
@@ -484,8 +506,7 @@
       <lifecycleMapping
             class="org.maven.ide.eclipse.project.configurator.NoopLifecycleMapping"
             id="NULL"
-            name="Empty Lifecycle Mapping"
-            showConfigurators="false">
+            name="Empty Lifecycle Mapping">
       </lifecycleMapping>
    </extension>
 
