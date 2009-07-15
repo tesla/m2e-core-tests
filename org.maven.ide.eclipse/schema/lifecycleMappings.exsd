@@ -56,13 +56,6 @@
                </documentation>
             </annotation>
          </attribute>
-         <attribute name="showConfigurators" type="boolean">
-            <annotation>
-               <documentation>
-                  Show project configurators in the lifecycle mapping preferences
-               </documentation>
-            </annotation>
-         </attribute>
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>          
