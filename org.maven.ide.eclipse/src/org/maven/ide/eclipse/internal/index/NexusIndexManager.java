@@ -12,6 +12,7 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -28,6 +29,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+
+import org.codehaus.plexus.PlexusContainer;
+import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanQuery;
@@ -48,6 +52,7 @@ import org.apache.maven.wagon.proxy.ProxyInfo;
 
 import org.sonatype.nexus.artifact.Gav;
 import org.sonatype.nexus.artifact.GavCalculator;
+import org.sonatype.nexus.artifact.IllegalArtifactCoordinateException;
 import org.sonatype.nexus.artifact.M2GavCalculator;
 import org.sonatype.nexus.index.ArtifactAvailablility;
 import org.sonatype.nexus.index.ArtifactContext;
@@ -58,6 +63,7 @@ import org.sonatype.nexus.index.FlatSearchResponse;
 import org.sonatype.nexus.index.NexusIndexer;
 import org.sonatype.nexus.index.ScanningResult;
 import org.sonatype.nexus.index.context.DefaultIndexingContext;
+import org.sonatype.nexus.index.context.IndexCreator;
 import org.sonatype.nexus.index.context.IndexUtils;
 import org.sonatype.nexus.index.context.IndexingContext;
 import org.sonatype.nexus.index.context.UnsupportedExistingLuceneIndexException;
@@ -102,7 +108,11 @@ public class NexusIndexManager extends IndexManager {
   private IMaven maven;
   
   private IMavenConfiguration mavenConfiguration;
-
+  
+  private ArrayList<IndexCreator> fullCreators = null;
+  
+  private ArrayList<IndexCreator> minCreators = null;
+  
   public static String nvl( String v )
   {
       return v == null ? NA : v;
@@ -144,6 +154,41 @@ public class NexusIndexManager extends IndexManager {
     addIndexingContext(indexInfo);
   }
 
+  private ArrayList<IndexCreator> getFullCreator() {
+    if(fullCreators == null) {
+      try {
+        PlexusContainer container = MavenPlugin.getDefault().getPlexusContainer();
+        IndexCreator min = container.lookup(IndexCreator.class, "min");
+        IndexCreator jar = container.lookup(IndexCreator.class, "jarContent");
+        fullCreators = new ArrayList<IndexCreator>();
+        fullCreators.add(min);
+        fullCreators.add(jar);
+      } catch(ComponentLookupException ce) {
+        String msg = "Error looking up component ";
+        ce.printStackTrace();
+        console.logError(msg + "; " + ce.getMessage());
+        MavenLogger.log(msg, ce);
+
+      }
+    }
+    return fullCreators;
+  }
+  private ArrayList<IndexCreator> getMinCreator() {
+    if(minCreators == null) {
+      try {
+        PlexusContainer container = MavenPlugin.getDefault().getPlexusContainer();
+        IndexCreator min = container.lookup(IndexCreator.class, "min");
+        minCreators = new ArrayList<IndexCreator>();
+        minCreators.add(min);
+      } catch(ComponentLookupException ce) {
+        String msg = "Error looking up component ";
+        MavenLogger.log(msg, ce);
+        ce.printStackTrace();
+      }
+
+    }
+    return minCreators;
+  }
   private void addIndexingContext(IndexInfo indexInfo) {
     String indexName = indexInfo.getIndexName();
     String displayName = indexInfo.getRepositoryUrl();
@@ -151,9 +196,9 @@ public class NexusIndexManager extends IndexManager {
       indexInfo.setNew(!getIndexDirectoryFile(indexInfo).exists());
       
       Directory directory = getIndexDirectory(indexInfo);
-      getIndexer().addIndexingContext(indexName, indexName, indexInfo.getRepositoryDir(), directory, //
+      getIndexer().addIndexingContextForced(indexName, indexName, indexInfo.getRepositoryDir(), directory, //
           indexInfo.getRepositoryUrl(), indexInfo.getIndexUpdateUrl(), //
-          (indexInfo.isShort() ? NexusIndexer.MINIMAL_INDEX : NexusIndexer.FULL_INDEX));
+          (indexInfo.isShort() ? getMinCreator() : getFullCreator()));
       fireIndexAdded(indexInfo);
 
     } catch(IOException ex) {
@@ -161,13 +206,7 @@ public class NexusIndexManager extends IndexManager {
       String msg = "Error on adding indexing context " + displayName;
       console.logError(msg + "; " + ex.getMessage());
       MavenLogger.log(msg, ex);
-
-    } catch(UnsupportedExistingLuceneIndexException ex) {
-      // XXX how to recover from this?
-      String msg = "Unsupported existing index " + displayName;
-      console.logError(msg + "; " + ex.getMessage());
-      MavenLogger.log(msg, ex);
-    }
+    } 
   }
 
   public void removeIndex(String indexName, boolean delete) {
@@ -193,24 +232,25 @@ public class NexusIndexManager extends IndexManager {
 
 
   public IndexedArtifactFile getIndexedArtifactFile(String indexName, String documentKey) throws CoreException {
-    Gav gav = gavCalculator.pathToGav(documentKey);
-    
-    String key = getGAV(gav.getGroupId(), //
-        gav.getArtifactId(), gav.getVersion(), gav.getClassifier());
-    
-    TermQuery query = new TermQuery(new Term(ArtifactInfo.UINFO, key));
+
     try {
+      Gav gav = gavCalculator.pathToGav(documentKey);
+      
+      String key = getGAV(gav.getGroupId(), //
+          gav.getArtifactId(), gav.getVersion(), gav.getClassifier());
+      
+      TermQuery query = new TermQuery(new Term(ArtifactInfo.UINFO, key));
       ArtifactInfo artifactInfo = getIndexer().identify(query, Collections.singleton(getIndexingContext(indexName)));
       if(artifactInfo != null) {
         return getIndexedArtifactFile(artifactInfo);
       }
-    } /*catch(IndexContextInInconsistentStateException ex) {
-      String msg = "Inconsistent index context state " + ex.getMessage();
-      console.logError(msg);
+    } catch(IllegalArtifactCoordinateException ex) {
+      String msg = "Illegal artifact coordinate " + ex.getMessage();
       MavenLogger.log(msg, ex);
-    } */catch(IOException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Search error", ex));
-    }
+    } catch(IOException ex) {
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Search error", ex));
+    } 
     return null;
   }
   
@@ -433,6 +473,7 @@ public class NexusIndexManager extends IndexManager {
       fireIndexUpdated(indexInfo);
       return indexTime;
     } catch(Exception ex) {
+      MavenLogger.log("Unable to re-index "+indexName, ex);
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Reindexing error", ex));
     }
   }
@@ -479,7 +520,7 @@ public class NexusIndexManager extends IndexManager {
   }
 
   private ArtifactContext getArtifactContext(File file, String documentKey, long size, long date, int sourceExists,
-      int javadocExists, String repository) {
+      int javadocExists, String repository) throws IllegalArtifactCoordinateException{
     Gav gav = gavCalculator.pathToGav(documentKey);
 
     String groupId = gav.getGroupId();
