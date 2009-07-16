@@ -70,6 +70,7 @@ import org.codehaus.plexus.ContainerConfiguration;
 import org.codehaus.plexus.DefaultContainerConfiguration;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.MutablePlexusContainer;
+import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.classworlds.ClassWorld;
 import org.codehaus.plexus.classworlds.realm.ClassRealm;
 import org.codehaus.plexus.component.discovery.ComponentDiscoverer;
@@ -517,6 +518,10 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     // nothing to do here, all startup work is done in #start(BundleContext)
   }
 
+  public PlexusContainer getPlexusContainer(){
+    return plexus;
+  }
+  
   /**
    * This method is called when the plug-in is stopped
    */
