@@ -57,6 +57,7 @@ public class ExtensionReader {
   public static final String EXTENSION_PROJECT_CONFIGURATORS = "org.maven.ide.eclipse.projectConfigurators";
 
   public static final String EXTENSION_LIFECYCLE_MAPPINGS = "org.maven.ide.eclipse.lifecycleMappings";
+  
 
   private static final String ELEMENT_INDEX = "index";
 
@@ -77,8 +78,6 @@ public class ExtensionReader {
   private static final String ATTR_ID = "id";
   
   private static final String ATTR_NAME = "name";
-  
-  private static final String ATTR_SHOW_CONFIGURATORS = "showConfigurators";
 
   private static final String ATTR_URL = "url";
   
@@ -252,6 +251,8 @@ public class ExtensionReader {
     return projectConfigurators;
   }
 
+
+  
   public static Map<String, ILifecycleMapping> readLifecycleMappingExtensions() {
     Map<String, ILifecycleMapping> lifecycleMappings = new HashMap<String, ILifecycleMapping>();
     
@@ -270,13 +271,7 @@ public class ExtensionReader {
               String id = element.getAttribute(ATTR_ID);
               lifecycleMapping.setName(element.getAttribute(ATTR_NAME));
               lifecycleMapping.setId(id);
-              String confAttr = element.getAttribute(ATTR_SHOW_CONFIGURATORS);
-              //showConfigurators should be true by default, so if nothing is specified, leave it as true
-              boolean showConfigurators = true;
-              if(confAttr != null){
-                showConfigurators = Boolean.valueOf(confAttr).booleanValue();
-              }
-              lifecycleMapping.setShowConfigurators(showConfigurators);
+
               lifecycleMappings.put(id, lifecycleMapping);
 
             } catch(CoreException ex) {
