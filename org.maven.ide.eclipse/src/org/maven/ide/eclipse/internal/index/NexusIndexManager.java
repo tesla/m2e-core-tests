@@ -52,7 +52,6 @@ import org.apache.maven.wagon.proxy.ProxyInfo;
 
 import org.sonatype.nexus.artifact.Gav;
 import org.sonatype.nexus.artifact.GavCalculator;
-import org.sonatype.nexus.artifact.IllegalArtifactCoordinateException;
 import org.sonatype.nexus.artifact.M2GavCalculator;
 import org.sonatype.nexus.index.ArtifactAvailablility;
 import org.sonatype.nexus.index.ArtifactContext;
@@ -244,11 +243,9 @@ public class NexusIndexManager extends IndexManager {
       if(artifactInfo != null) {
         return getIndexedArtifactFile(artifactInfo);
       }
-    } catch(IllegalArtifactCoordinateException ex) {
+    } catch(Exception ex) {
       String msg = "Illegal artifact coordinate " + ex.getMessage();
       MavenLogger.log(msg, ex);
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Search error", ex));
-    } catch(IOException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Search error", ex));
     } 
     return null;
@@ -520,7 +517,7 @@ public class NexusIndexManager extends IndexManager {
   }
 
   private ArtifactContext getArtifactContext(File file, String documentKey, long size, long date, int sourceExists,
-      int javadocExists, String repository) throws IllegalArtifactCoordinateException{
+      int javadocExists, String repository) {
     Gav gav = gavCalculator.pathToGav(documentKey);
 
     String groupId = gav.getGroupId();
