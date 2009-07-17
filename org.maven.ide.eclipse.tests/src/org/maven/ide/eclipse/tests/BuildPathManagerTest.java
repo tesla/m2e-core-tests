@@ -990,5 +990,41 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
    assertEquals(repo.toString(), m2_repo.toOSString());
   }
   
+  public void testMNGECLIPSE_696_compiler_includes_excludes() throws Exception {
+    final String projectName = "MNGECLIPSE-696";
+    
+    deleteProject(projectName);
+    
+    final ResolverConfiguration configuration = new ResolverConfiguration();
+    final IProject project = importProject("projects/" + projectName + "/pom.xml", configuration);
+    waitForJobsToComplete();
+
+    assertMarkers(project, 0);
+
+    final IJavaProject javaProject = JavaCore.create(project);
+    final IClasspathEntry[] cp = javaProject.getRawClasspath();
+    final IClasspathEntry cpMain = cp[0];
+    final IClasspathEntry cpTest = cp[1];
+
+    assertEquals(new Path("/" + projectName + "/src/main/java"), cpMain.getPath());
+    assertEquals(new Path("/" + projectName + "/src/test/java"), cpTest.getPath());
+
+    final IPath[] inclusionsMain = cpMain.getInclusionPatterns();
+    assertEquals(2, inclusionsMain.length);
+    assertEquals(new Path("org/apache/maven/"), inclusionsMain[0]);
+    assertEquals(new Path("org/maven/ide/eclipse/"), inclusionsMain[1]);
+
+    final IPath[] exclusionsMain = cpMain.getExclusionPatterns();
+    assertEquals(1, exclusionsMain.length);
+    assertEquals(new Path("org/maven/ide/eclipse/tests/"), exclusionsMain[0]);
+        
+    final IPath[] inclusionsTest = cpTest.getInclusionPatterns();
+    assertEquals(1, inclusionsTest.length);
+    assertEquals(new Path("org/apache/maven/tests/"), inclusionsTest[0]);
+
+    final IPath[] exclusionsTest = cpTest.getExclusionPatterns();
+    assertEquals(1, exclusionsTest.length);
+    assertEquals(new Path("org/apache/maven/tests/Excluded.java"), exclusionsTest[0]);
+  }
   
 }

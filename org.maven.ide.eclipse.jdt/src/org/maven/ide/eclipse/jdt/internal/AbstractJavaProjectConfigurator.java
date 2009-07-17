@@ -23,7 +23,9 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -32,6 +34,11 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironmentsManager;
 
+import org.codehaus.plexus.configuration.PlexusConfiguration;
+import org.codehaus.plexus.configuration.PlexusConfigurationException;
+import org.codehaus.plexus.configuration.xml.XmlPlexusConfiguration;
+import org.codehaus.plexus.util.xml.Xpp3Dom;
+
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.lifecycle.MavenExecutionPlan;
@@ -39,6 +46,7 @@ import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
 
+import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.jdt.BuildPathManager;
 import org.maven.ide.eclipse.jdt.IClasspathDescriptor;
 import org.maven.ide.eclipse.jdt.IClasspathEntryDescriptor;
@@ -94,7 +102,7 @@ abstract class AbstractJavaProjectConfigurator extends AbstractProjectConfigurat
     Map<String, String> options = collectOptions(mavenProjects, request, monitor);
 
     for(MavenProject mavenProject : mavenProjects) {
-      addProjectSourceFolders(classpath, project, mavenProject);
+      addProjectSourceFolders(classpath, project, mavenProject, request, monitor);
     }
 
     addClasspathEntries(classpath, request, monitor);
@@ -168,7 +176,8 @@ abstract class AbstractJavaProjectConfigurator extends AbstractProjectConfigurat
     classpath.addEntry(cpe);
   }
 
-  protected void addProjectSourceFolders(IClasspathDescriptor classpath, IProject project, MavenProject mavenProject)
+  protected void addProjectSourceFolders(IClasspathDescriptor classpath, IProject project, MavenProject mavenProject,
+                                          ProjectConfigurationRequest request, IProgressMonitor monitor)
       throws CoreException {
     IFolder classes = getFolder(project, mavenProject.getBuild().getOutputDirectory());
     IFolder testClasses = getFolder(project, mavenProject.getBuild().getTestOutputDirectory());
@@ -176,21 +185,77 @@ abstract class AbstractJavaProjectConfigurator extends AbstractProjectConfigurat
     Util.createFolder(classes, true);
     Util.createFolder(testClasses, true);
 
-    addSourceDirs(classpath, project, mavenProject.getCompileSourceRoots(), classes.getFullPath());
+    final IPath[] inclusion;
+    final IPath[] exclusion;
+    final MavenExecutionPlan executionPlan = getExecutionPlan(mavenProject, request, monitor);
+    final PlexusConfiguration pomConfigurationCompile = findJavaCompilerExecutionConfiguration(executionPlan, "compile");
+    if (pomConfigurationCompile == null) {
+      inclusion = new IPath[0]; 
+      exclusion = new IPath[0];
+    } else {
+      inclusion = collectPaths(pomConfigurationCompile, "includes", "include");
+      exclusion = collectPaths(pomConfigurationCompile, "excludes", "exclude");
+    }
+
+    final IPath[] inclusionTest;
+    final IPath[] exclusionTest;
+    final PlexusConfiguration pomConfigurationTestCompile = findJavaCompilerExecutionConfiguration(executionPlan, "testCompile");
+    if (pomConfigurationTestCompile == null) {
+      inclusionTest = new IPath[0]; 
+      exclusionTest = new IPath[0];
+    } else {
+      inclusionTest = collectPaths(pomConfigurationTestCompile, "testIncludes", "include");
+      exclusionTest = collectPaths(pomConfigurationTestCompile, "testExcludes", "exclude");
+    }
+    
+    addSourceDirs(classpath, project, mavenProject.getCompileSourceRoots(), classes.getFullPath(), inclusion, exclusion);
     addResourceDirs(classpath, project, mavenProject.getBuild().getResources(), classes.getFullPath());
 
-    addSourceDirs(classpath, project, mavenProject.getTestCompileSourceRoots(), testClasses.getFullPath());
+    addSourceDirs(classpath, project, mavenProject.getTestCompileSourceRoots(), testClasses.getFullPath(), inclusionTest, exclusionTest);
     addResourceDirs(classpath, project, mavenProject.getBuild().getTestResources(), testClasses.getFullPath());
   }
+  
+  private PlexusConfiguration findJavaCompilerExecutionConfiguration(final MavenExecutionPlan executionPlan, String goal) {
+    for(MojoExecution mojoExecution : executionPlan.getExecutions()) {
+      if(isJavaCompilerExecution(mojoExecution)) {
+        if (goal.equals(mojoExecution.getGoal())) {
+          final Xpp3Dom dom = mojoExecution.getConfiguration();
+          if(dom != null) {
+            final PlexusConfiguration pomConfiguration = new XmlPlexusConfiguration(dom);
+            return pomConfiguration;
+          }
+        }
+      }
+    }
+    return null;
+  }
 
+  private IPath[] collectPaths(final PlexusConfiguration pomConfiguration, final String set, final String item) throws CoreException {
+    final PlexusConfiguration configuration = pomConfiguration.getChild(set);
+    if (configuration == null) return new IPath[0];
+    final PlexusConfiguration[] children = configuration.getChildren(item);
+    final IPath[] paths = new IPath[children.length];
+    for (int i = 0; i <= children.length - 1; i++) {
+      final String value;
+      try {
+        value = children[i].getValue();
+      } catch(PlexusConfigurationException ex) {
+        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, 
+                                  "Could not get Java compiler execution path value", ex));
+      }
+      paths[i] = new Path(value);
+    }
+    return paths;
+  }
+  
   private void addSourceDirs(IClasspathDescriptor classpath, IProject project, List<String> sourceRoots,
-      IPath outputPath) throws CoreException {
+      IPath outputPath, IPath[] inclusion, IPath[] exclusion) throws CoreException {
     for(String sourceRoot : sourceRoots) {
       IFolder sourceFolder = getFolder(project, sourceRoot);
 
       if(sourceFolder != null && sourceFolder.exists()) {
         console.logMessage("Adding source folder " + sourceFolder.getFullPath());
-        classpath.addSourceEntry(sourceFolder.getFullPath(), outputPath, false);
+        classpath.addSourceEntry(sourceFolder.getFullPath(), outputPath, inclusion, exclusion, false);
       } else {
         if(sourceFolder != null) {
           classpath.removeEntry(sourceFolder.getFullPath());

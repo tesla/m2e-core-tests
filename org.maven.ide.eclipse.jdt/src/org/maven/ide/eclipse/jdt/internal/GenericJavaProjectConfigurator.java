@@ -106,9 +106,10 @@ public class GenericJavaProjectConfigurator extends AbstractJavaProjectConfigura
   }
 
   @Override
-  protected void addProjectSourceFolders(IClasspathDescriptor classpath, IProject project, MavenProject mavenProject) throws CoreException {
+  protected void addProjectSourceFolders(IClasspathDescriptor classpath, IProject project, MavenProject mavenProject,
+      ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException {
 
-    super.addProjectSourceFolders(classpath, project, mavenProject);
+    super.addProjectSourceFolders(classpath, project, mavenProject, request, monitor);
 
     // HACK to support xmlbeans generated classes MNGECLIPSE-374
     File generatedClassesDir = new File(mavenProject.getBuild().getDirectory(), //
