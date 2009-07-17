@@ -109,4 +109,30 @@ public class MojoExecutionProjectConfigurator extends AbstractProjectConfigurato
     return idx;
   }
 
+  public String getName() {
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(groupId);
+    sb.append(':').append(artifactId);
+
+    sb.append(':');
+    if (range != null) {
+      sb.append(range.toString());
+    }
+
+    sb.append(':');
+    if (goals != null) {
+      boolean first = true;
+      for (String goal : goals) {
+        if (!first) {
+          sb.append(',');
+        }
+        sb.append(goal);
+        first = false;
+      }
+    }
+
+    
+    return sb.toString();
+  }
 }
