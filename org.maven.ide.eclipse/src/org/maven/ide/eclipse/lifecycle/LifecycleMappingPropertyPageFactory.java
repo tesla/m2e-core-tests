@@ -69,7 +69,14 @@ public class LifecycleMappingPropertyPageFactory {
    * @return
    */
   public ILifecyclePropertyPage getPageForId(String id, IProject project, Shell shell) {
+    if(id == null){
+      //for the no-op (empty) lifecycle mapping, use that page
+      id = "NULL";
+    }
     ILifecyclePropertyPage page = getFactory().pageMap.get(id);
+    if(page == null){
+      return null;
+    }
     page.setProject(project);
     page.setShell(shell);
     return page;
