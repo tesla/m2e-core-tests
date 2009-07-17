@@ -89,4 +89,12 @@ public interface IMaven {
 
   public SettingsValidationResult validateSettings(String settings);
 
+  /**
+   * Temporary solution/workaround for http://jira.codehaus.org/browse/MNG-4194.
+   * 
+   * Extensions realm is created each time MavenProject instance is built, so
+   * we have to remove unused extensions realms to avoid OOME.
+   */
+  public void xxxRemoveExtensionsRealm(MavenProject project);
+
 }

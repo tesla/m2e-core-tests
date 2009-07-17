@@ -22,16 +22,27 @@ import org.maven.ide.eclipse.project.IMavenProjectFacade;
  */
 public interface ILifecycleMapping {
   String getId();
-  
+
   String getName();
   
   List<String> getPotentialMojoExecutionsForBuildKind(IMavenProjectFacade projectFacade, int kind, IProgressMonitor progressMonitor);
-  
+
+  /**
+   * Configure Eclipse workspace project according to Maven build project configuration.
+   */
   void configure(ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException;
 
+  /**
+   * Undo any Eclipse project configuration done during previous call(s) to {@link #configure(ProjectConfigurationRequest, IProgressMonitor)}
+   */
   void unconfigure(ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException;
 
+  /**
+   * Returns list of AbstractBuildParticipant that need to be executed during 
+   * Eclipse workspace build. List can be empty but cannot be null.
+   */
   List<AbstractBuildParticipant> getBuildParticipants(IMavenProjectFacade facade, IProgressMonitor monitor) throws CoreException;
 
+  /** TODO this does not belong here */
   List<AbstractProjectConfigurator> getProjectConfigurators(IMavenProjectFacade facade, IProgressMonitor monitor) throws CoreException;
 }

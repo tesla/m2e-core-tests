@@ -38,7 +38,7 @@ import org.maven.ide.eclipse.project.configurator.ProjectConfigurationRequest;
  */
 public class GenericLifecycleMapping extends AbstractLifecycleMapping implements ILifecycleMapping {
 
-  private final DefaultBuildParticipant buildParticipant = new DefaultBuildParticipant();
+  private final GenericBuildParticipant buildParticipant = new GenericBuildParticipant();
 
   public GenericLifecycleMapping() {
   }

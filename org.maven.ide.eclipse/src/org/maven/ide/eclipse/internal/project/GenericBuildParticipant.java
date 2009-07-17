@@ -49,7 +49,7 @@ import org.maven.ide.eclipse.project.configurator.AbstractBuildParticipant;
  * 
  * @author igor
  */
-public class DefaultBuildParticipant extends AbstractBuildParticipant {
+public class GenericBuildParticipant extends AbstractBuildParticipant {
 
   public static boolean DEBUG = MavenPlugin.getDefault().isDebugging()
       & Boolean.parseBoolean(Platform.getDebugOption(IMavenConstants.PLUGIN_ID + "/debug/builder"));

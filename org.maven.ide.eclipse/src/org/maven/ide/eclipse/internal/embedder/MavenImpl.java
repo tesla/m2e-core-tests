@@ -23,8 +23,11 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 
+import org.codehaus.plexus.MutablePlexusContainer;
 import org.codehaus.plexus.PlexusContainer;
+import org.codehaus.plexus.classworlds.ClassWorld;
 import org.codehaus.plexus.classworlds.realm.ClassRealm;
+import org.codehaus.plexus.classworlds.realm.NoSuchRealmException;
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
 import org.codehaus.plexus.component.configurator.converters.ConfigurationConverter;
 import org.codehaus.plexus.component.configurator.converters.lookup.ConverterLookup;
@@ -74,6 +77,7 @@ import org.apache.maven.settings.validation.SettingsValidationResult;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.index.IndexManager;
@@ -394,4 +398,15 @@ public class MavenImpl implements IMaven {
     }
   }
 
+  public void xxxRemoveExtensionsRealm(MavenProject project) {
+    ClassRealm realm = project.getClassRealm();
+    if (realm != null && realm != plexus.getContainerRealm()) {
+      ClassWorld world = ((MutablePlexusContainer) plexus).getClassWorld();
+      try {
+        world.disposeRealm(realm.getId());
+      } catch(NoSuchRealmException ex) {
+        MavenLogger.log("Could not dispose of project extensions class realm", ex);
+      }
+    }
+  }
 }

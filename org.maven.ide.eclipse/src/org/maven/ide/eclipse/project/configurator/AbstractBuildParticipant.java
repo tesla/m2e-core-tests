@@ -28,29 +28,18 @@ import org.maven.ide.eclipse.project.IMavenProjectFacade;
  */
 public abstract class AbstractBuildParticipant extends InternalBuildParticipant {
 
+  /**
+   * This method is called during workspace full or incremental build.
+   */
   public abstract Set<IProject> build(int kind, IProgressMonitor monitor) throws Exception;
 
   public boolean callOnEmptyDelta() {
     return false;
   }
 
-//  protected List<MojoBinding> getMojoBindings(IMavenProjectFacade projectFacade, String pluginId, String goals,
-//      VersionRange pluginVersion, IProgressMonitor monitor) throws CoreException {
-//    ArrayList<MojoBinding> result = new ArrayList<MojoBinding>();
-//
-//    List<MojoBinding> mojoBindings = projectFacade.getMojoBindings(monitor);
-//    for(MojoBinding mojoBinding : mojoBindings) {
-//      ArtifactVersion version = new DefaultArtifactVersion(mojoBinding.getVersion());
-//      if(pluginId.equals(mojoBinding.getGroupId() + ":" + mojoBinding.getArtifactId())
-//          && (goals == null || goals.contains(mojoBinding.getGoal()))
-//          && (pluginVersion == null || pluginVersion.containsVersion(version))) {
-//        result.add(mojoBinding);
-//      }
-//    }
-//
-//    return result;
-//  }
-
+  /**
+   * This method is called during workspace clean build.
+   */
   @SuppressWarnings("unused")
   public void clean(IProgressMonitor monitor) throws CoreException {
     // default implementation does nothing
@@ -59,11 +48,11 @@ public abstract class AbstractBuildParticipant extends InternalBuildParticipant 
   protected IMavenProjectFacade getMavenProjectFacade() {
     return super.getMavenProjectFacade();
   }
-  
+
   protected IResourceDelta getDelta(IProject project) {
     return super.getDelta(project);
   }
-  
+
   protected MavenSession getSession() {
     return super.getSession();
   }

@@ -269,7 +269,7 @@ public class MavenProjectManagerImpl {
     MavenProjectFacade facade = state.getProjectFacade(pom);
     ArtifactKey mavenProject = facade != null ? facade.getArtifactKey() : null;
 
-    flushCaches(pom, mavenProject);
+    flushCaches(pom, facade);
 
     if (mavenProject == null) {
       state.removeProject(pom, null);
@@ -298,9 +298,19 @@ public class MavenProjectManagerImpl {
     return pomSet;
   }
 
-  private void flushCaches(IFile pom, ArtifactKey key) {
+  private void flushCaches(IFile pom, MavenProjectFacade facade) {
+    ArtifactKey key = null;
+    MavenProject project = null;
+    
+    if (facade != null) {
+      key = facade.getArtifactKey();
+      project = facade.getMavenProject();
+    }
     for (IManagedCache cache : caches) {
       cache.removeProject(pom, key);
+    }
+    if (project != null) {
+      maven.xxxRemoveExtensionsRealm(project);
     }
   }
 
@@ -372,7 +382,7 @@ public class MavenProjectManagerImpl {
       return;
     }
 
-    flushCaches(pom, oldFacade != null? oldFacade.getArtifactKey(): null);
+    flushCaches(pom, oldFacade);
 
     markerManager.deleteMarkers(pom);
 
