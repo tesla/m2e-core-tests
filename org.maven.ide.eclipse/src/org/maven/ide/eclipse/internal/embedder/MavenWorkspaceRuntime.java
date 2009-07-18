@@ -32,7 +32,7 @@ import org.maven.ide.eclipse.project.MavenProjectManager;
  */
 public class MavenWorkspaceRuntime implements MavenRuntime {
 
-  private static final ArtifactKey MAVEN_DISTRIBUTION = new ArtifactKey("org.apache.maven", "apache-maven", "3.0-SNAPSHOT", null);
+  private static final ArtifactKey MAVEN_DISTRIBUTION = new ArtifactKey("org.apache.maven", "apache-maven", "3.0", null);
 
   private static final ArtifactKey PLEXUS_CLASSWORLDS = new ArtifactKey("org.codehaus.plexus", "plexus-classworlds", null, null);
 
@@ -59,11 +59,23 @@ public class MavenWorkspaceRuntime implements MavenRuntime {
   }
 
   public boolean isAvailable() {
-    return projectManager.getMavenProject(MAVEN_DISTRIBUTION.getGroupId(), MAVEN_DISTRIBUTION.getArtifactId(), MAVEN_DISTRIBUTION.getVersion()) != null;
+    return getMavenDistribution() != null;
+  }
+
+  private IMavenProjectFacade getMavenDistribution() {
+    for (IMavenProjectFacade facade : projectManager.getProjects()) {
+      ArtifactKey artifactKey = facade.getArtifactKey();
+      if (MAVEN_DISTRIBUTION.getGroupId().equals(artifactKey.getGroupId()) //
+            && MAVEN_DISTRIBUTION.getArtifactId().equals(artifactKey.getArtifactId())//
+            && artifactKey.getVersion().startsWith(MAVEN_DISTRIBUTION.getVersion())) {
+        return facade;
+      }
+    }
+    return null;
   }
 
   public void createLauncherConfiguration(IMavenLauncherConfiguration collector, IProgressMonitor monitor) throws CoreException {
-    IMavenProjectFacade maven = projectManager.getMavenProject(MAVEN_DISTRIBUTION.getGroupId(), MAVEN_DISTRIBUTION.getArtifactId(), MAVEN_DISTRIBUTION.getVersion());
+    IMavenProjectFacade maven = getMavenDistribution();
     if (maven != null) {
       MavenProject mavenProject = maven.getMavenProject(monitor);
 
@@ -71,7 +83,6 @@ public class MavenWorkspaceRuntime implements MavenRuntime {
 
       collector.addRealm(PLEXUS_CLASSWORLD_NAME);
 
-      @SuppressWarnings("unchecked")
       Set<Artifact> artifacts = mavenProject.getArtifacts();
       
       Artifact launcherArtifact = null;
