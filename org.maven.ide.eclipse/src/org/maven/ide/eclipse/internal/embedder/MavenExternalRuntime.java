@@ -12,16 +12,20 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.net.URL;
 import java.util.Properties;
-
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
+import org.codehaus.plexus.classworlds.launcher.ConfigurationHandler;
+import org.codehaus.plexus.classworlds.launcher.ConfigurationParser;
 import org.codehaus.plexus.util.DirectoryScanner;
 
 import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.IMavenLauncherConfiguration;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
 
@@ -71,10 +75,10 @@ public class MavenExternalRuntime implements MavenRuntime {
     
     collector.addRealm(IMavenLauncherConfiguration.LAUNCHER_REALM);
     collector.addArchiveEntry(getLauncherClasspath());
-    
+
     ConfigurationHandler handler = new ConfigurationHandler() {
-      public void addImportFrom(String relamName, String importSpec) throws ConfigurationException {
-        throw new ConfigurationException("Unsupported m2.conf element");
+      public void addImportFrom(String relamName, String importSpec) {
+        throw new UnsupportedOperationException("Unsupported m2.conf element");
       }
       public void addLoadFile(File file) {
         try {
@@ -162,6 +166,70 @@ public class MavenExternalRuntime implements MavenRuntime {
   }
 
   public String getVersion() {
-    return "2.0"; // XXX fix me
-  }
+    
+    class VersionHandler implements ConfigurationHandler {
+      File mavenCore;
+      File uber;
+      public void addImportFrom(String relamName, String importSpec) {
+      }
+      public void addLoadFile(File file) {
+        if (file.getName().contains("maven-core")) {
+          mavenCore = file;
+        } else if (file.getName().endsWith("uber.jar")) {
+          uber = file;
+        }
+      }
+      public void addLoadURL(URL url) {
+      }
+      public void addRealm(String realmName) {
+      }
+      public void setAppMain(String mainClassName, String mainRealmName) {
+      }
+    };
+    VersionHandler handler = new VersionHandler();
+
+    Properties properties = new Properties();
+    properties.put(PROPERTY_MAVEN_HOME, location);
+
+    ConfigurationParser parser = new ConfigurationParser(handler, properties);
+
+    try {
+      FileInputStream is = new FileInputStream(getLauncherConfigurationFile());
+      try {
+        parser.parse(is);
+      } finally {
+        is.close();
+      }
+
+      ZipFile zip = null;
+      if (handler.mavenCore != null) {
+        zip = new ZipFile(handler.mavenCore);
+      } else if (handler.uber != null) {
+        zip = new ZipFile(handler.uber);
+      }
+      if (zip != null) {
+        try {
+          ZipEntry zipEntry = zip.getEntry("META-INF/maven/org.apache.maven/maven-core/pom.properties");
+          if (zipEntry != null) {
+            Properties pomProperties = new Properties();
+            pomProperties.load(zip.getInputStream(zipEntry));
+            
+            String version = pomProperties.getProperty("version");
+            if (version != null) {
+              return version;
+            }
+          }
+        } finally {
+          zip.close();
+        }
+      }
+
+    } catch (Exception e) {
+      // most likely a bad location, but who knows
+      MavenLogger.log("Could not parse classwords configuration file", e);
+    }
+
+
+    return "UNKNOWN";
+ }
 }
