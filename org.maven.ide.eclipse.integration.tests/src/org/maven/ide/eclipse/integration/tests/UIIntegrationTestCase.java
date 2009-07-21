@@ -133,7 +133,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
   // Set this system property to override DEFAULT_TOMCAT_INSTALL_LOCATION
   private static final String TOMCAT_INSTALL_LOCATION_PROPERTY = "tomcat.install.location";
 
-  private static final String FIND_REPLACE = "Find/Replace";
+  public static final String FIND_REPLACE = "Find/Replace";
 
   public static final String PACKAGE_EXPLORER_VIEW_ID = "org.eclipse.jdt.ui.PackageExplorer";
 
@@ -200,10 +200,12 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
      closeView("org.eclipse.mylyn.tasks.ui.views.tasks");
 
      // Attempt to use local nexus as maven central proxy to speed up tests
-     if(this.skipIndexes()){
+     //if(this.skipIndexes()){
        setupLocalMavenIndex();
+     //} 
+     if(this.useExternalMaven()){
+       this.switchToExternalMaven();
      }
-
      // Clean out projects left over from previous test runs.
      clearProjects();
 
@@ -399,7 +401,12 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     getUI().close(new SWTWidgetLocator(Shell.class, FIND_REPLACE));
     getUI().wait(new ShellDisposedCondition(FIND_REPLACE));
   }
+  
   protected void replaceText(String src, String target) throws WaitTimedOutException, WidgetSearchException {
+    replaceTextWithWrap(src, target, false);
+  }
+  
+  protected void replaceTextWithWrap(String src, String target, boolean wrapSearch) throws WaitTimedOutException, WidgetSearchException {
     getUI().keyClick(SWT.CTRL, 'f');
     getUI().wait(new ShellShowingCondition(FIND_REPLACE));
 
@@ -408,7 +415,9 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     ScreenCapture.createScreenCapture();
 
     getUI().enterText(target);
-
+    if(wrapSearch){
+      getUI().click(new ButtonLocator("Wrap search"));
+    }
     getUI().click(new ButtonLocator("Replace &All"));
 
     getUI().close(new SWTWidgetLocator(Shell.class, FIND_REPLACE));
@@ -856,8 +865,9 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
           new TreeItemLocator(TOMCAT_SERVER_NAME, new ViewLocator(SERVERS_VIEW_ID)), "Start");
     }
     getUI().wait(new JobsCompleteCondition(JobsCompleteCondition.IGNORE_SYSTEM_JOBS), 120000);
-    Thread.sleep(10000);
-
+    Thread.sleep(20000);
+    //getUI().click(new CTabItemLocator("Servers"));
+    //Thread.sleep(3000);
   }
 
   protected void shutdownTomcat() throws Exception {
