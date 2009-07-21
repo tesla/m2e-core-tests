@@ -74,7 +74,7 @@ public class ProjectConfiguratorsTable {
     configuratorsTable.setContentProvider(configuratorsContentProvider);
     configuratorsTable.setLabelProvider(configuratorsLabelProvider);
     configuratorsTable.setColumnProperties(CONFIG_TABLE_COLUMN_PROPERTIES);
-    
+    configuratorsTable.getTable().setData("name", "projectConfiguratorsTable");
     GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1);
     gd.horizontalIndent=6;
     gd.grabExcessHorizontalSpace = true;
