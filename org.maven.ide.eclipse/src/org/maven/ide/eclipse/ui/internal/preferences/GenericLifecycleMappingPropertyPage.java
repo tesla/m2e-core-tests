@@ -64,6 +64,7 @@ public class GenericLifecycleMappingPropertyPage extends AbstractLifecycleProper
       goalsCleanLabel.setText("Goals to invoke after project clea&n:");
   
       goalsCleanText = new Text(composite, SWT.BORDER);
+      goalsCleanText.setData("name", "goalsText");
       gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
       gd.horizontalIndent = 6;
       goalsCleanText.setLayoutData(gd);
