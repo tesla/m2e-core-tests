@@ -140,7 +140,13 @@ public class MEclipse161ArchetypeProjectCreationTest extends UIIntegrationTestCa
         "Maven/Update Project Configuration");
     
     waitForAllBuildsToComplete();
-
+    
+    getUI().click(new TreeItemLocator("ear*", new ViewLocator(PACKAGE_EXPLORER_VIEW_ID)));
+    getUI().contextClick(new TreeItemLocator("ear", new ViewLocator(PACKAGE_EXPLORER_VIEW_ID)),
+        "Maven/Update Project Configuration");
+    
+    waitForAllBuildsToComplete();
+    
     assertProjectsHaveNoErrors();
     assertTrue("archtype project \"" + archetypeName + "\" created without Maven nature", project
         .hasNature("org.maven.ide.eclipse.maven2Nature"));
