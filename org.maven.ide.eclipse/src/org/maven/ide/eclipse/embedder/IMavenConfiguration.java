@@ -27,6 +27,9 @@ public interface IMavenConfiguration {
 
   public String getGlobalSettingsFile();
 
+  //settable for embedded maven
+  public void setGlobalSettingsFile(String absolutePath);
+  
   public String getUserSettingsFile();
 
   public void setUserSettingsFile(String absolutePath);

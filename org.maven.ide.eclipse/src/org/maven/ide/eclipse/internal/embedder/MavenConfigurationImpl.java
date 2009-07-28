@@ -81,6 +81,10 @@ public class MavenConfigurationImpl implements IMavenConfiguration, IPropertyCha
   public void setUserSettingsFile(String settingsFile) {
     preferenceStore.setValue(MavenPreferenceConstants.P_USER_SETTINGS_FILE, nvl(settingsFile));
   }
+  
+  public void setGlobalSettingsFile(String globalSettingsFile){
+    preferenceStore.setValue(MavenPreferenceConstants.P_GLOBAL_SETTINGS_FILE, nvl(globalSettingsFile));
+  }
 
   private static String nvl(String s) {
     return s == null ? "" : s;

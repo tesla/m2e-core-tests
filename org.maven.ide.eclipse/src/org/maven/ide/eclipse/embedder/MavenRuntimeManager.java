@@ -15,6 +15,7 @@ import java.util.Map;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import org.maven.ide.eclipse.internal.embedder.MavenEmbeddedRuntime;
 import org.maven.ide.eclipse.internal.embedder.MavenExternalRuntime;
 import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;
 
@@ -149,13 +150,13 @@ public class MavenRuntimeManager {
   }
   
   public String getGlobalSettingsFile() {
-//  if(defaultRuntime.isEditable()) {
-//    return defaultRuntime.getSettings();  // settings for external Maven runtime
-//  }
-//  String globalSettings = preferenceStore.getString(MavenPreferenceConstants.P_GLOBAL_SETTINGS_FILE);
-//  return globalSettings.trim().length()==0 ? null : globalSettings;
-
+    //only return the preference store value for the global settings file if its an embedded runtime
+    if(defaultRuntime == null || defaultRuntime instanceof MavenEmbeddedRuntime){
+      String globalSettings = preferenceStore.getString(MavenPreferenceConstants.P_GLOBAL_SETTINGS_FILE);
+      return globalSettings.trim().length()==0 ? null : globalSettings;
+    }
     return defaultRuntime == null ? null : defaultRuntime.getSettings();
-  }
+  } 
+  
   
 }

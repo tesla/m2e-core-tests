@@ -84,6 +84,7 @@ import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.index.IndexedArtifactGroup;
 import org.maven.ide.eclipse.internal.embedder.TransferListenerAdapter;
+import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;
 
 
 /**
@@ -136,7 +137,7 @@ public class NexusIndexManager extends IndexManager {
     // TODO what should trigger index invalidation?
     this.mavenConfiguration.addConfigurationChangeListener(new AbstractMavenConfigurationChangeListener() {
       public void mavenConfigutationChange(MavenConfigurationChangeEvent event) throws CoreException {
-        if(MavenConfigurationChangeEvent.P_USER_SETTINGS_FILE.equals(event.getKey())) {
+        if(MavenConfigurationChangeEvent.P_USER_SETTINGS_FILE.equals(event.getKey()) || MavenPreferenceConstants.P_GLOBAL_SETTINGS_FILE.equals(event.getKey())) {
           invalidateIndexer();
         }
       }
