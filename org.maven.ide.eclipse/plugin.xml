@@ -284,6 +284,12 @@
             name="Installations">
          <keywordReference id="org.maven.ide.eclipse.maven"/>
       </page>
+      <page id="org.maven.ide.eclipse.preferences.MavenSettingsPreferencePage"
+            category="org.maven.ide.eclipse.preferences.Maven2PreferencePage"
+            class="org.maven.ide.eclipse.ui.internal.preferences.MavenSettingsPreferencePage"
+            name="User Settings">
+      <keywordReference id="org.maven.ide.eclipse.maven"/>
+      </page>
       <page id="org.maven.ide.eclipse.preferences.ProblemReportingPreferencePage"
             category="org.maven.ide.eclipse.preferences.Maven2PreferencePage"
             class="org.maven.ide.eclipse.ui.internal.preferences.ProblemReportingPreferencePage"
