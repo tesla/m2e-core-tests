@@ -149,13 +149,21 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     return workbench.getWorkbenchWindows()[0].getActivePage();
   }
 
-  protected void closeView(String id) throws Exception {
-    IViewPart view = getActivePage().findView(id);
+  protected void closeView(final String id) throws Exception {
+    
+    IViewPart view = (IViewPart)UIThreadTask.executeOnEventQueue(new UIThreadTask() {
+
+      public Object runEx() throws Exception {
+        IViewPart view = getActivePage().findView(id);
+
+        return view;
+      }});
+    
     if(view != null) {
       getUI().close(new ViewLocator(id));
     }
   }
-
+  
   protected void switchToExternalMaven() throws Exception{
     MavenRuntime newRuntime = MavenRuntimeManager.createExternalRuntime("C:\\apache-maven-2.1.0");
     List<MavenRuntime> currRuntimes = MavenPlugin.getDefault().getMavenRuntimeManager().getMavenRuntimes();
@@ -185,16 +193,13 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
      
      PrefUtil.getAPIPreferenceStore().setValue(IWorkbenchPreferenceConstants.ENABLE_ANIMATIONS, false);
 
-     ShellFinder.bringRootToFront(getActivePage().getWorkbenchWindow().getShell().getDisplay());
+     ShellFinder.bringRootToFront(Display.getDefault());
 
      MavenPlugin.getDefault(); // force m2e to load so its indexing jobs will be scheduled.
      Thread.sleep(5000);
      closeView("org.eclipse.ui.internal.introview");
 
-     IPerspectiveRegistry perspectiveRegistry = PlatformUI.getWorkbench().getPerspectiveRegistry();
-     IPerspectiveDescriptor perspective = perspectiveRegistry
-         .findPerspectiveWithId("org.eclipse.jdt.ui.JavaPerspective");
-     getActivePage().setPerspective(perspective);
+     openPerspective("org.eclipse.jdt.ui.JavaPerspective");
 
      closeView("org.eclipse.ui.views.ContentOutline");
      closeView("org.eclipse.mylyn.tasks.ui.views.tasks");
@@ -212,6 +217,19 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
      getUI().wait(new JobsCompleteCondition(), 600000);
   }
 
+  private void openPerspective(final String id) throws Exception {
+    UIThreadTask.executeOnEventQueue(new UIThreadTask() {
+
+      public Object runEx() throws Exception {
+        IPerspectiveRegistry perspectiveRegistry = PlatformUI.getWorkbench().getPerspectiveRegistry();
+        IPerspectiveDescriptor perspective = perspectiveRegistry
+            .findPerspectiveWithId(id);
+        getActivePage().setPerspective(perspective);
+
+        return null;
+      }});
+  }
+  
   private void cancelIndexJobs() throws InterruptedException {
     // Cancel maven central index job 
     MavenPlugin.getDefault();
