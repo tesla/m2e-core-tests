@@ -86,7 +86,6 @@ public class MngEclipse1526InstallationPreferencesTest extends UIIntegrationTest
     
     openFile(project, externalLocation.lastSegment());
     getUI().click(new CTabItemLocator("Source"));
-    Thread.sleep(3000);
     
 		showInstallationPrefs();
 		assertFalse(new ButtonLocator("Browse...").isEnabled(getUI()));
@@ -110,15 +109,13 @@ public class MngEclipse1526InstallationPreferencesTest extends UIIntegrationTest
     IWidgetLocator localRepo = getUI().find(new TreeItemLocator("local : "+repoDir.getAbsolutePath()));
     assertNotNull(localRepo);
     
-    
-    
+    //now for the user settings test
     showUserSettingsPrefs();
     verifyRepoSettingsValue(repoDir.getAbsolutePath());
     
     String newRepoDir = setUserSettingsXML(mavenProject.getProject());
     getUI().click(new ButtonLocator("Apply"));
     getUI().wait(new JobsCompleteCondition(), 60000);
-    Thread.sleep(3000);
     verifyRepoSettingsValue(newRepoDir);
     closeUserSettingPrefs();
     
@@ -207,10 +204,6 @@ public class MngEclipse1526InstallationPreferencesTest extends UIIntegrationTest
         }
       }
     });
-	}
-	public void testUserSettingsPrefs() throws Exception {
-	  
-	  
 	}
   protected void selectEditorTab(final String id) throws Exception {
     final MavenPomEditor editor = (MavenPomEditor) getActivePage().getActiveEditor();
