@@ -156,7 +156,7 @@ public enum PomTemplateContext {
         IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
         List<ArtifactRepository> repositories = indexManager.getArtifactRepositories(null, null);
 
-        Artifact artifact = embedder.resolve(groupId, artifactId, version, null, "maven-plugin", repositories, null);
+        Artifact artifact = embedder.resolve(groupId, artifactId, version, "maven-plugin", null,  repositories, null);
 
         File file = artifact.getFile();
         if(file == null) {
