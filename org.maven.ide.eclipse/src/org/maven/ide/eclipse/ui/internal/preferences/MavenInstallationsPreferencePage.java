@@ -341,6 +341,7 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
 
     globalSettingsText = new Text(composite, SWT.BORDER);
     globalSettingsText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+    globalSettingsText.setData("name", "globalSettingsText");
     globalSettingsBrowseButton = new Button(composite, SWT.NONE);
     GridData gd_globalSettingsBrowseButton = new GridData(SWT.FILL, SWT.CENTER, false, false);
     gd_globalSettingsBrowseButton.verticalIndent = 5;

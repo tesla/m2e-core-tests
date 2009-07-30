@@ -174,6 +174,7 @@ public class MavenSettingsPreferencePage extends PreferencePage implements IWork
     
     localRepositoryText = new Text(composite, SWT.READ_ONLY|SWT.BORDER);
     localRepositoryText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
+    localRepositoryText.setData("name", "localRepositoryText");
     localRepositoryText.setEditable(false);
     Button reindexButton = new Button(composite, SWT.NONE);
     reindexButton.setLayoutData(new GridData(SWT.FILL, SWT.RIGHT, false, false, 1, 1));
