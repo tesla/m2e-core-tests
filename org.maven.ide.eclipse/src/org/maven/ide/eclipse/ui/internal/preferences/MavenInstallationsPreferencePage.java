@@ -316,6 +316,7 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
     MavenRuntime runtime = getCheckedRuntime();
     boolean enabled = (runtime != null && (runtime instanceof MavenEmbeddedRuntime));
     globalSettingsBrowseButton.setEnabled(enabled);
+    globalSettingsText.setEditable(enabled);
   }
   
   private void createGlobalSettings(Composite composite) {
@@ -344,7 +345,6 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
     globalSettingsText.setData("name", "globalSettingsText");
     globalSettingsBrowseButton = new Button(composite, SWT.NONE);
     GridData gd_globalSettingsBrowseButton = new GridData(SWT.FILL, SWT.CENTER, false, false);
-    gd_globalSettingsBrowseButton.verticalIndent = 5;
     globalSettingsBrowseButton.setLayoutData(gd_globalSettingsBrowseButton);
     globalSettingsBrowseButton.setText("&Browse...");
     globalSettingsBrowseButton.addSelectionListener(new SelectionAdapter() {
