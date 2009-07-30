@@ -247,6 +247,7 @@ public class MavenSettingsPreferencePage extends PreferencePage implements IWork
       }
     });
     userSettingsText = new Text(composite, SWT.BORDER);
+    userSettingsText.setData("name", "userSettingsText");
     GridData gd_userSettingsText = new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1);
     gd_userSettingsText.verticalIndent = 5;
     gd_userSettingsText.widthHint = 100;
