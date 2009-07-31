@@ -26,7 +26,14 @@ public final class EclipseWorkspaceArtifactRepository
             return false;
         }
 
-        return WorkspaceState.resolveArtifact(artifact);
+        boolean resolved = WorkspaceState.resolveArtifact(artifact);
+
+        if ( resolved )
+        {
+            artifact.setFromAuthoritativeRepository( true );
+        }
+
+        return resolved;
     }
 
     public Artifact find( Artifact artifact )
