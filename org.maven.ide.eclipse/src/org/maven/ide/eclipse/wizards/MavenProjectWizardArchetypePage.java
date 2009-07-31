@@ -393,7 +393,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
     descriptionTextData.heightHint = 40;
     descriptionText.setLayoutData(descriptionTextData);
 
-    sashForm.setWeights(new int[] {90, 10});
+    sashForm.setWeights(new int[] {80, 20});
 
     Composite buttonComposite = new Composite(parent, SWT.NONE);
     GridData gd_buttonComposite = new GridData(SWT.FILL, SWT.CENTER, false, false, 3, 1);
