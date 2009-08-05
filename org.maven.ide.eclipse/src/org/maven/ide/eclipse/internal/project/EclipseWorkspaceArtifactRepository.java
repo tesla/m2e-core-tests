@@ -97,10 +97,6 @@ public final class EclipseWorkspaceArtifactRepository extends LocalArtifactRepos
     return false; // XXX
   }
 
-  public boolean isAuthoritative() {
-    return true;
-  }
-
   public static void setDisabled(boolean disable) {
     disabled.set(disable? Boolean.TRUE: null);
   }

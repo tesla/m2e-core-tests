@@ -16,15 +16,14 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.AbstractArtifactResolutionException;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
 import org.apache.maven.execution.MavenExecutionResult;
-import org.apache.maven.model.validation.ModelValidationResult;
-import org.apache.maven.project.InvalidProjectModelException;
+import org.apache.maven.model.building.ModelBuildingException;
+import org.apache.maven.model.building.ModelProblem;
+import org.apache.maven.model.building.ModelProblem.Severity;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuildingException;
 
@@ -105,28 +104,14 @@ public class MavenMarkerManager implements IMavenMarkerManager {
 
   private void handleProjectBuildingException(IResource pomFile, ProjectBuildingException ex) {
     Throwable cause = ex.getCause();
-    if(cause instanceof XmlPullParserException) {
-      XmlPullParserException pex = (XmlPullParserException) cause;
-//      console.logError(Messages.getString("plugin.markerParsingError") + getPomName(pomFile) + "; " + pex.getMessage());
-      addMarker(pomFile, pex.getMessage(), pex.getLineNumber(), IMarker.SEVERITY_ERROR);
-
-    } else if(ex instanceof InvalidProjectModelException) {
-      InvalidProjectModelException mex = (InvalidProjectModelException) ex;
-      ModelValidationResult validationResult = mex.getValidationResult();
-      String msg = Messages.getString("plugin.markerBuildError", mex.getMessage()); //$NON-NLS-1$
+    if(cause instanceof ModelBuildingException) {
+      ModelBuildingException mbe = (ModelBuildingException) cause;
+      for (ModelProblem problem : mbe.getProblems()) {
+        String msg = Messages.getString("plugin.markerBuildError", problem.getMessage()); //$NON-NLS-1$
 //      console.logError(msg);
-      if(validationResult == null) {
-        addMarker(pomFile, msg, 1, IMarker.SEVERITY_ERROR); //$NON-NLS-1$
-      } else {
-        for(String message : validationResult.getErrors()) {
-          addMarker(pomFile, message, 1, IMarker.SEVERITY_ERROR); //$NON-NLS-1$
-//          console.logError("  " + message);
-        }
-        for(String message : validationResult.getWarnings()) {
-          addMarker(pomFile, message, 1, IMarker.SEVERITY_WARNING); //$NON-NLS-1$
-        }
+        int severity = (Severity.FATAL == problem.getSeverity())? IMarker.SEVERITY_WARNING: IMarker.SEVERITY_ERROR;
+        addMarker(pomFile, msg, 1, severity);
       }
-
     } else {
       handleBuildException(pomFile, ex);
     }

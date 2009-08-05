@@ -324,14 +324,14 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     waitForJobsToComplete();
 
     IMavenProjectFacade f1 = manager.create(p1, monitor);
-    assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME).getLocation().toFile(), f1.getMavenProject(monitor).getParent().getFile());
+    assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME).getLocation().toFile(), f1.getMavenProject(monitor).getParentArtifact().getFile());
 
     p2.delete(false, true, monitor);
     waitForJobsToComplete();
 
     f1 = manager.create(p1, monitor);
     // assertTrue(f1.getMavenProject().getParent().getFile().getAbsolutePath().startsWith(repo.getAbsolutePath()));
-    assertStartWith(repo.getAbsolutePath(), f1.getMavenProject(monitor).getParent().getFile().getAbsolutePath());
+    assertStartWith(repo.getAbsolutePath(), f1.getMavenProject(monitor).getParentArtifact().getFile().getAbsolutePath());
   }
 
   public void test007_staleDependencies() throws Exception {

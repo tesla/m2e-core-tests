@@ -148,7 +148,7 @@ public class MavenImpl implements IMaven {
     // logging
     request.setTransferListener(new TransferListenerAdapter(monitor, console, indexManager));
 
-    request.getProperties().put("m2e.version", MavenPlugin.getVersion());
+    request.getUserProperties().put("m2e.version", MavenPlugin.getVersion());
 
     // the right way to disable snapshot update
     // request.setUpdateSnapshots(false);
