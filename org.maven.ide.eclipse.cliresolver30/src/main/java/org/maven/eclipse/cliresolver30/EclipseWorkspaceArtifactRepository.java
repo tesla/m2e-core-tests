@@ -26,14 +26,7 @@ public final class EclipseWorkspaceArtifactRepository
             return false;
         }
 
-        boolean resolved = WorkspaceState.resolveArtifact(artifact);
-
-        if ( resolved )
-        {
-            artifact.setFromAuthoritativeRepository( true );
-        }
-
-        return resolved;
+        return WorkspaceState.resolveArtifact(artifact);
     }
 
     public Artifact find( Artifact artifact )
@@ -45,11 +38,6 @@ public final class EclipseWorkspaceArtifactRepository
     public boolean hasLocalMetadata()
     {
         return false; // XXX
-    }
-
-    public boolean isAuthoritative()
-    {
-        return true;
     }
 
     @Override
