@@ -109,7 +109,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
       for (ModelProblem problem : mbe.getProblems()) {
         String msg = Messages.getString("plugin.markerBuildError", problem.getMessage()); //$NON-NLS-1$
 //      console.logError(msg);
-        int severity = (Severity.FATAL == problem.getSeverity())? IMarker.SEVERITY_WARNING: IMarker.SEVERITY_ERROR;
+        int severity = (Severity.WARNING == problem.getSeverity())? IMarker.SEVERITY_WARNING: IMarker.SEVERITY_ERROR;
         addMarker(pomFile, msg, 1, severity);
       }
     } else {
