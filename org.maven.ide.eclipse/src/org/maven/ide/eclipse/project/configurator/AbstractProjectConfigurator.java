@@ -83,7 +83,6 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
    * 
    * <p><i>Should be implemented by subclass</i> 
    * 
-   * @param embedder a Maven embedder instance that can be reused in current project configuration session
    * @param request a project configuration request
    * @param monitor a progress monitor
    */
@@ -92,7 +91,6 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
   /**
    * Removes Maven specific configuration from the project passed in ProjectConfigurationRequest
    * 
-   * @param embedder a Maven embedder instance that can be reused in current project configuration session
    * @param request a project un-configuration request
    * @param monitor a progress monitor
    */
