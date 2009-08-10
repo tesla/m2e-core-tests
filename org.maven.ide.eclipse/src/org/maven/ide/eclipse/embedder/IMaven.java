@@ -25,8 +25,11 @@ import org.apache.maven.lifecycle.MavenExecutionPlan;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.settings.Mirror;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.settings.validation.SettingsValidationResult;
+
+import org.maven.ide.eclipse.index.IndexInfo;
 
 /**
  * Entry point for all Maven functionality in m2e. 
@@ -79,6 +82,15 @@ public interface IMaven {
   public <T> T getMojoParameterValue(MavenSession session, MojoExecution mojoExecution, String parameter, Class<T> asType)
       throws CoreException;
 
+  //TODO: implement these methods
+  public List<ArtifactRepository> getAllRepositories();
+  
+  public List<ArtifactRepository> getEffectiveRepositories();
+    
+  public List<IndexInfo> getIndexesForMirror(Mirror mirror);
+  
+  public List<IndexInfo> getIndexesForArtifactRepository(ArtifactRepository repository);
+  
   // configuration
 
   public Settings getSettings() throws CoreException;

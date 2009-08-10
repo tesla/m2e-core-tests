@@ -71,6 +71,7 @@ import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.settings.MavenSettingsBuilder;
+import org.apache.maven.settings.Mirror;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.settings.validation.SettingsValidationResult;
 
@@ -80,6 +81,7 @@ import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
+import org.maven.ide.eclipse.index.IndexInfo;
 import org.maven.ide.eclipse.index.IndexManager;
 
 
@@ -167,8 +169,18 @@ public class MavenImpl implements IMaven {
       populator.populateDefaults(request);
       result = maven.execute(request);
     } catch(MavenEmbedderException ex) {
+      ex.printStackTrace();
       result = new DefaultMavenExecutionResult();
       result.addException(ex);
+    } catch (Exception e){
+      e.printStackTrace();
+      result = new DefaultMavenExecutionResult();
+      result.addException(e);
+    }
+    if(result.getExceptions() != null && result.getExceptions().size() > 0){
+      for(Exception e :result.getExceptions()){
+        e.printStackTrace();
+      }
     }
     return result;
   }
@@ -408,5 +420,36 @@ public class MavenImpl implements IMaven {
         MavenLogger.log("Could not dispose of project extensions class realm", ex);
       }
     }
+  }
+
+//TODO: implement these methods
+  /* (non-Javadoc)
+   * @see org.maven.ide.eclipse.embedder.IMaven#getAllRepositories()
+   */
+  public List<ArtifactRepository> getAllRepositories() {
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see org.maven.ide.eclipse.embedder.IMaven#getEffectiveRepositories()
+   */
+  public List<ArtifactRepository> getEffectiveRepositories() {
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see org.maven.ide.eclipse.embedder.IMaven#getIndexesForArtifactRepository(org.apache.maven.artifact.repository.ArtifactRepository)
+   */
+  public List<IndexInfo> getIndexesForArtifactRepository(ArtifactRepository repository) {
+    // TODO Auto-generated method getIndexesForArtifactRepository
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see org.maven.ide.eclipse.embedder.IMaven#getIndexesForMirror(org.apache.maven.settings.Mirror)
+   */
+  public List<IndexInfo> getIndexesForMirror(Mirror mirror) {
+    // TODO Auto-generated method getIndexesForMirror
+    return null;
   }
 }
