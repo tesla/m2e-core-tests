@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.embedder.MavenEmbedderException;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.execution.MavenSession;
@@ -25,7 +26,6 @@ import org.apache.maven.lifecycle.MavenExecutionPlan;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.settings.Mirror;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.settings.validation.SettingsValidationResult;
 
@@ -83,12 +83,10 @@ public interface IMaven {
       throws CoreException;
 
   //TODO: implement these methods
-  public List<ArtifactRepository> getAllRepositories();
+  public List<ArtifactRepository> getAllRepositories() throws CoreException;
   
-  public List<ArtifactRepository> getEffectiveRepositories();
-    
-  public List<IndexInfo> getIndexesForMirror(Mirror mirror);
-  
+  public List<ArtifactRepository> getEffectiveRepositories() throws CoreException, MavenEmbedderException;
+
   public List<IndexInfo> getIndexesForArtifactRepository(ArtifactRepository repository);
   
   // configuration

@@ -86,6 +86,7 @@ import org.codehaus.plexus.util.IOUtil;
 import org.apache.maven.ArtifactFilterManagerDelegate;
 import org.apache.maven.plugin.PluginManager;
 import org.apache.maven.project.artifact.MavenMetadataCache;
+import org.apache.maven.repository.RepositorySystem;
 
 import org.sonatype.plexus.build.incremental.BuildContext;
 import org.sonatype.plexus.build.incremental.ThreadBuildContext;
@@ -199,6 +200,18 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
       new Throwable().printStackTrace();
     }
   }
+  
+  public IMaven getMaven(){
+    return lookup(IMaven.class);
+  }
+
+  public RepositorySystem getRepositorySystem() throws ComponentLookupException{
+    if(getPlexusContainer() != null){
+      return getPlexusContainer().lookup(RepositorySystem.class);
+    } 
+    return null;
+  }
+
 
   /**
    * This method is called upon plug-in activation
