@@ -599,6 +599,7 @@ public class MavenIndexesView extends ViewPart {
     private final IndexManager indexManager;
 
     ViewContentProvider() {
+      
       this.indexManager = MavenPlugin.getDefault().getIndexManager();
     }
 
