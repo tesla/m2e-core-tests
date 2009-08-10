@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 
 import org.codehaus.plexus.MutablePlexusContainer;
@@ -71,7 +72,6 @@ import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.settings.MavenSettingsBuilder;
-import org.apache.maven.settings.Mirror;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.settings.validation.SettingsValidationResult;
 
@@ -426,15 +426,17 @@ public class MavenImpl implements IMaven {
   /* (non-Javadoc)
    * @see org.maven.ide.eclipse.embedder.IMaven#getAllRepositories()
    */
-  public List<ArtifactRepository> getAllRepositories() {
+  public List<ArtifactRepository> getAllRepositories() throws CoreException {
     return null;
   }
 
   /* (non-Javadoc)
    * @see org.maven.ide.eclipse.embedder.IMaven#getEffectiveRepositories()
    */
-  public List<ArtifactRepository> getEffectiveRepositories() {
-    return null;
+  public List<ArtifactRepository> getEffectiveRepositories() throws CoreException, MavenEmbedderException{
+    MavenExecutionRequest request = createExecutionRequest(new NullProgressMonitor());      
+    populator.populateDefaults(request);
+    return request.getRemoteRepositories();
   }
 
   /* (non-Javadoc)
@@ -445,11 +447,4 @@ public class MavenImpl implements IMaven {
     return null;
   }
 
-  /* (non-Javadoc)
-   * @see org.maven.ide.eclipse.embedder.IMaven#getIndexesForMirror(org.apache.maven.settings.Mirror)
-   */
-  public List<IndexInfo> getIndexesForMirror(Mirror mirror) {
-    // TODO Auto-generated method getIndexesForMirror
-    return null;
-  }
 }
