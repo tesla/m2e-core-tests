@@ -50,14 +50,16 @@ public class DownloadSourcesActionDelegate implements IEditorActionDelegate {
           element = element.getParent();
           if (element instanceof JarPackageFragmentRoot) {
             JarPackageFragmentRoot root = (JarPackageFragmentRoot) element;
-            File f = root.getPath().toFile();
-            IndexedArtifactFile af = MavenPlugin.getDefault().getIndexManager().identify(f);
-            if (af != null) {
-              ArtifactKey a = af.getArtifactKey();
-              IJavaProject project = (IJavaProject) root.getParent();
-              BuildPathManager buildpathManager = MavenJdtPlugin .getDefault().getBuildpathManager();
-              buildpathManager.downloadSources(project.getProject(), a, true, false);
-              break;
+            if (root.getResource()!=null) {
+              File f = root.getResource().getLocation().toFile();
+              IndexedArtifactFile af = MavenPlugin.getDefault().getIndexManager().identify(f);
+              if (af != null) {
+                ArtifactKey a = af.getArtifactKey();
+                IJavaProject project = (IJavaProject) root.getParent();
+                BuildPathManager buildpathManager = MavenJdtPlugin .getDefault().getBuildpathManager();
+                buildpathManager.downloadSources(project.getProject(), a, true, false);
+                break;
+              }
             }
           }
         }
