@@ -221,7 +221,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     String displayName = indexInfo.getRepositoryUrl();
     try {
       indexInfo.setNew(!getIndexDirectoryFile(indexInfo).exists());
-      
+
       Directory directory = getIndexDirectory(indexInfo);
       getIndexer().addIndexingContextForced(indexName, indexName, indexInfo.getRepositoryDir(), directory, //
           indexInfo.getRepositoryUrl(), indexInfo.getIndexUpdateUrl(), //
@@ -266,7 +266,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     } 
   }
   
-  public Query createQuery(String field, String expression) throws CoreException {
+  public Query createQuery(String field, String expression) {
     return getIndexer().constructQuery(field, expression);
   }
 
@@ -743,46 +743,27 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
 //    
 //    return indexTime;
 //  }
+  
+  public IndexedArtifactGroup[] getRootGroups(String indexId) throws CoreException {
+    IndexingContext context = getIndexingContext(indexId);
+    if(context != null) {
+      try {
+        Set<String> rootGroups = context.getRootGroups();
+        IndexedArtifactGroup[] groups = new IndexedArtifactGroup[rootGroups.size()];
+        int i = 0;
+        for(String group : rootGroups) {
+          groups[i++] = new IndexedArtifactGroup(getIndexInfo(indexId), group);
+        }
+        return groups;
+      } catch(IOException ex) {
+        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, //
+            "Can't get root groups for " + indexId, ex));
+      }
+    }
+    return new IndexedArtifactGroup[0];
+  }
 
-//  public IndexedArtifactGroup[] getGroups(String indexId) throws CoreException {
-//    IndexingContext context = getIndexingContext(indexId);
-//    if(context != null) {
-//      try {
-//        Set<String> allGroups = context.getAllGroups();
-//        IndexedArtifactGroup[] groups = new IndexedArtifactGroup[allGroups.size()];
-//        int i = 0;
-//        for(String group : allGroups) {
-//          groups[i++] = new IndexedArtifactGroup(getIndexInfo(indexId), group);
-//        }
-//        return groups;
-//      } catch(IOException ex) {
-//        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, //
-//            "Can't get groups for " + indexId, ex));
-//      }
-//    }
-//    return new IndexedArtifactGroup[0];
-//  }
-//  
-//  public IndexedArtifactGroup[] getRootGroups(String indexId) throws CoreException {
-//    IndexingContext context = getIndexingContext(indexId);
-//    if(context != null) {
-//      try {
-//        Set<String> rootGroups = context.getRootGroups();
-//        IndexedArtifactGroup[] groups = new IndexedArtifactGroup[rootGroups.size()];
-//        int i = 0;
-//        for(String group : rootGroups) {
-//          groups[i++] = new IndexedArtifactGroup(getIndexInfo(indexId), group);
-//        }
-//        return groups;
-//      } catch(IOException ex) {
-//        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, //
-//            "Can't get root groups for " + indexId, ex));
-//      }
-//    }
-//    return new IndexedArtifactGroup[0];
-//  }
-
-  private IndexingContext getIndexingContext(String indexName) throws CoreException {
+  private IndexingContext getIndexingContext(String indexName) {
     return indexName == null ? null : getIndexer().getIndexingContexts().get(indexName);
   }
 
@@ -1019,25 +1000,6 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       MavenLogger.log("Can't retrieve groups for " + indexName + ":" + prefix, ex);
       return group;
     }
-  }
-
-  public IndexedArtifactGroup[] getRootGroups(String indexId) throws CoreException {
-    IndexingContext context = getIndexingContext(indexId);
-    if(context != null) {
-      try {
-        Set<String> rootGroups = context.getRootGroups();
-        IndexedArtifactGroup[] groups = new IndexedArtifactGroup[rootGroups.size()];
-        int i = 0;
-        for(String group : rootGroups) {
-          groups[i++] = new IndexedArtifactGroup(getIndexInfo(indexId), group);
-        }
-        return groups;
-      } catch(IOException ex) {
-        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, //
-            "Can't get root groups for " + indexId, ex));
-      }
-    }
-    return new IndexedArtifactGroup[0];
   }
 
 }
