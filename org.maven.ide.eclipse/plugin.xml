@@ -450,11 +450,18 @@
    <extension point="org.eclipse.ui.views">
       <category id="org.maven.ide.eclipse.views.indexes"
                 name="Maven"/>
+<!--
       <view id="org.maven.ide.eclipse.views.MavenIndexesView"
             category="org.maven.ide.eclipse.views.indexes"
             class="org.maven.ide.eclipse.ui.internal.views.MavenIndexesView"
             icon="icons/maven_indexes.gif"
             name="Maven Indexes"/>
+-->
+      <view id="org.maven.ide.eclipse.views.MavenRepositoryView"
+            category="org.maven.ide.eclipse.views.indexes"
+            class="org.maven.ide.eclipse.ui.internal.views.MavenRepositoryView"
+            icon="icons/maven_indexes.gif"
+            name="Maven Repositories"/>
    </extension>
 
    <extension point="org.eclipse.ui.propertyPages">
