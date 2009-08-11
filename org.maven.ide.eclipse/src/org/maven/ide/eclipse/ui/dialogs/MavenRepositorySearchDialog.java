@@ -26,7 +26,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import org.maven.ide.eclipse.embedder.ArtifactKey;
-import org.maven.ide.eclipse.index.IndexManager;
+import org.maven.ide.eclipse.index.IIndex;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.wizards.MavenPomSelectionComponent;
@@ -46,8 +46,8 @@ public class MavenRepositorySearchDialog extends AbstractMavenDialog {
 
   /**
    * One of 
-   *   {@link IndexManager#SEARCH_ARTIFACT}, 
-   *   {@link IndexManager#SEARCH_CLASS_NAME}, 
+   *   {@link IIndex#SEARCH_ARTIFACT}, 
+   *   {@link IIndex#SEARCH_CLASS_NAME}, 
    */
   private final String queryType;
 
@@ -69,8 +69,8 @@ public class MavenRepositorySearchDialog extends AbstractMavenDialog {
    * @param parent parent shell
    * @param title dialog title
    * @param queryType one of 
-   *   {@link IndexManager#SEARCH_ARTIFACT}, 
-   *   {@link IndexManager#SEARCH_CLASS_NAME}, 
+   *   {@link IIndex#SEARCH_ARTIFACT}, 
+   *   {@link IIndex#SEARCH_CLASS_NAME}, 
    * @param artifacts Set&lt;Artifact&gt;
    */
   public MavenRepositorySearchDialog(Shell parent, String title, String queryType, Set<ArtifactKey> artifacts) {

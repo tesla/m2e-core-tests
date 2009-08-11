@@ -72,6 +72,7 @@ import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.settings.MavenSettingsBuilder;
+import org.apache.maven.settings.Mirror;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.settings.validation.SettingsValidationResult;
 
@@ -81,7 +82,6 @@ import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
-import org.maven.ide.eclipse.index.IndexInfo;
 import org.maven.ide.eclipse.index.IndexManager;
 
 
@@ -136,10 +136,10 @@ public class MavenImpl implements IMaven {
 
   public MavenExecutionRequest createExecutionRequest(IProgressMonitor monitor) throws CoreException {
     MavenExecutionRequest request = new DefaultMavenExecutionRequest();
-    if (mavenConfiguration.getGlobalSettingsFile() != null) {
+    if(mavenConfiguration.getGlobalSettingsFile() != null) {
       request.setGlobalSettingsFile(new File(mavenConfiguration.getGlobalSettingsFile()));
     }
-    if (mavenConfiguration.getUserSettingsFile() != null) {
+    if(mavenConfiguration.getUserSettingsFile() != null) {
       request.setUserSettingsFile(new File(mavenConfiguration.getUserSettingsFile()));
     }
     ArtifactRepository localRepository = getLocalRepository();
@@ -198,20 +198,22 @@ public class MavenImpl implements IMaven {
     }
   }
 
-  public MavenExecutionPlan calculateExecutionPlan(MavenExecutionRequest request, MavenProject project, IProgressMonitor monitor) throws CoreException {
+  public MavenExecutionPlan calculateExecutionPlan(MavenExecutionRequest request, MavenProject project,
+      IProgressMonitor monitor) throws CoreException {
     MavenSession session = createSession(request, project);
     try {
       List<String> goals = request.getGoals();
       return lifecycleExecutor.calculateExecutionPlan(session, goals.toArray(new String[goals.size()]));
     } catch(Exception ex) {
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not calculate build plan", ex));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
+          "Could not calculate build plan", ex));
     }
   }
 
   public ArtifactRepository getLocalRepository() throws CoreException {
     try {
       String localRepositoryPath = getLocalRepositoryPath();
-      if (localRepositoryPath != null) {
+      if(localRepositoryPath != null) {
         return repositorySystem.createLocalRepository(new File(localRepositoryPath));
       }
       return repositorySystem.createLocalRepository(RepositorySystem.defaultUserLocalRepository);
@@ -225,10 +227,10 @@ public class MavenImpl implements IMaven {
     // MUST NOT use createRequest!
 
     MavenExecutionRequest request = new DefaultMavenExecutionRequest();
-    if (mavenConfiguration.getGlobalSettingsFile() != null) {
+    if(mavenConfiguration.getGlobalSettingsFile() != null) {
       request.setGlobalSettingsFile(new File(mavenConfiguration.getGlobalSettingsFile()));
     }
-    if (mavenConfiguration.getUserSettingsFile() != null) {
+    if(mavenConfiguration.getUserSettingsFile() != null) {
       request.setUserSettingsFile(new File(mavenConfiguration.getUserSettingsFile()));
     }
     try {
@@ -244,8 +246,8 @@ public class MavenImpl implements IMaven {
 
   public Settings buildSettings(String globalSettings, String userSettings) throws CoreException {
     MavenExecutionRequest request = createExecutionRequest(null);
-    request.setGlobalSettingsFile(globalSettings != null? new File(globalSettings): null);
-    request.setUserSettingsFile(userSettings != null? new File(userSettings): null);
+    request.setGlobalSettingsFile(globalSettings != null ? new File(globalSettings) : null);
+    request.setUserSettingsFile(userSettings != null ? new File(userSettings) : null);
     try {
       return settingsBuilder.buildSettings(request);
     } catch(IOException ex) {
@@ -352,7 +354,7 @@ public class MavenImpl implements IMaven {
         MavenExecutionRequest er = new DefaultMavenExecutionRequest();
         populator.populateDefaults(er);
         request.setRemoteRepostories(er.getRemoteRepositories());
-      } catch (MavenEmbedderException e) {
+      } catch(MavenEmbedderException e) {
         // we've tried
         request.setRemoteRepostories(new ArrayList<ArtifactRepository>());
       }
@@ -390,13 +392,13 @@ public class MavenImpl implements IMaven {
 
       if(dom == null) {
         return null;
-      } 
+      }
 
       PlexusConfiguration pomConfiguration = new XmlPlexusConfiguration(dom);
 
       PlexusConfiguration configuration = pomConfiguration.getChild(parameter);
-      
-      if (configuration == null) {
+
+      if(configuration == null) {
         return null;
       }
 
@@ -404,15 +406,17 @@ public class MavenImpl implements IMaven {
           .getImplementationClass(), pluginRealm, expressionEvaluator, null);
       return asType.cast(value);
     } catch(ComponentConfigurationException ex) {
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not get mojo execution paramater value", ex));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
+          "Could not get mojo execution paramater value", ex));
     } catch(PluginManagerException ex) {
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not get mojo execution paramater value", ex));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
+          "Could not get mojo execution paramater value", ex));
     }
   }
 
   public void xxxRemoveExtensionsRealm(MavenProject project) {
     ClassRealm realm = project.getClassRealm();
-    if (realm != null && realm != plexus.getContainerRealm()) {
+    if(realm != null && realm != plexus.getContainerRealm()) {
       ClassWorld world = ((MutablePlexusContainer) plexus).getClassWorld();
       try {
         world.disposeRealm(realm.getId());
@@ -422,29 +426,44 @@ public class MavenImpl implements IMaven {
     }
   }
 
-//TODO: implement these methods
-  /* (non-Javadoc)
-   * @see org.maven.ide.eclipse.embedder.IMaven#getAllRepositories()
-   */
-  public List<ArtifactRepository> getAllRepositories() throws CoreException {
-    return null;
+  public List<ArtifactRepository> getArtifactRepositories() throws CoreException {
+    return createPopulatedExecutionRequest().getRemoteRepositories();
   }
 
-  /* (non-Javadoc)
-   * @see org.maven.ide.eclipse.embedder.IMaven#getEffectiveRepositories()
-   */
-  public List<ArtifactRepository> getEffectiveRepositories() throws CoreException, MavenEmbedderException{
-    MavenExecutionRequest request = createExecutionRequest(new NullProgressMonitor());      
-    populator.populateDefaults(request);
-    return request.getRemoteRepositories();
+  private MavenExecutionRequest createPopulatedExecutionRequest() throws CoreException {
+    MavenExecutionRequest request = createExecutionRequest(new NullProgressMonitor());
+    try {
+      populator.populateDefaults(request);
+    } catch(MavenEmbedderException ex) {
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
+          "Could not read Maven configuration", ex));
+    }
+    return request;
+  }
+  
+  public List<ArtifactRepository> getPluginArtifactRepository() throws CoreException {
+    return createPopulatedExecutionRequest().getPluginArtifactRepositories();
   }
 
-  /* (non-Javadoc)
-   * @see org.maven.ide.eclipse.embedder.IMaven#getIndexesForArtifactRepository(org.apache.maven.artifact.repository.ArtifactRepository)
-   */
-  public List<IndexInfo> getIndexesForArtifactRepository(ArtifactRepository repository) {
-    // TODO Auto-generated method getIndexesForArtifactRepository
-    return null;
+  public List<String> getMirrorUrls() throws CoreException {
+    ArrayList<String> result = new ArrayList<String>();
+    for(Mirror mirror : getSettings().getMirrors()) {
+      result.add(mirror.getUrl());
+    }
+    return result;
   }
 
+  public List<ArtifactRepository> getEffectiveRepositories(List<ArtifactRepository> repositories) {
+    return repositorySystem.getEffectiveRepositories(repositories);
+  }
+
+  /*
+   * This is not exactly nice, MavenImpl and NexusIndexManager depend on each other.
+   * 
+   * Ideally, we need to split the code that reads maven static configuration
+   * in a separate interface.
+   */
+  public void setIndexManager(IndexManager indexManager) {
+    this.indexManager = indexManager;
+  }
 }

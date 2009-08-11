@@ -44,7 +44,6 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.IMaven;
-import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 
 
@@ -186,9 +185,7 @@ public class OpenUrlAction extends ActionDelegate implements IWorkbenchWindowAct
       return projectFacade.getMavenProject(monitor);
     }
 
-    // XXX this should also use repositories declared in settings.xml
-    IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
-    List<ArtifactRepository> artifactRepositories = indexManager.getArtifactRepositories(null, null);
+    List<ArtifactRepository> artifactRepositories = maven.getArtifactRepositories();
 
     Artifact a = maven.resolve(groupId, artifactId, version, "pom", null, artifactRepositories, monitor);
 

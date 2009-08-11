@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.maven.ide.eclipse.internal.index.IndexInfo;
 import org.maven.ide.eclipse.internal.index.IndexInfoWriter;
 
 import junit.framework.TestCase;

@@ -35,6 +35,7 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
+import org.maven.ide.eclipse.index.IIndex;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
@@ -64,7 +65,7 @@ public class MavenQueryParticipant implements IQueryParticipant, IJavaSearchCons
           public String getText(Object element) {
             if(element instanceof IndexedArtifact) {
               IndexedArtifact ia = (IndexedArtifact) element;
-              return ia.getPackageName() + "." + ia.className + " - " + ia.group + ":" + ia.artifact; 
+              return ia.getPackageName() + "." + ia.getClassname() + " - " + ia.getGroupId() + ":" + ia.getArtifactId(); 
             }
             return null;
           }
@@ -74,13 +75,13 @@ public class MavenQueryParticipant implements IQueryParticipant, IJavaSearchCons
       public void showMatch(Match match, int currentOffset, int currentLength, boolean activate) {
         final IndexedArtifact ia = (IndexedArtifact) match.getElement();
         
-        final String className = ia.className;
+        final String className = ia.getClassname();
         
         Display.getDefault().asyncExec(new Runnable() {
           public void run() {
             MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(new Shell(Display.getCurrent()), //
                 "Open Type from Maven", 
-                IndexManager.SEARCH_CLASS_NAME, Collections.<ArtifactKey>emptySet());
+                IIndex.SEARCH_CLASS_NAME, Collections.<ArtifactKey>emptySet());
             dialog.setQuery(className);
             if(dialog.open() == Window.OK) {
               final IndexedArtifact ia = dialog.getSelectedIndexedArtifact();
@@ -116,7 +117,7 @@ public class MavenQueryParticipant implements IQueryParticipant, IJavaSearchCons
 
       if(term != null) {
         try {
-          Map<String, IndexedArtifact> result = indexManager.search(term, IndexManager.SEARCH_CLASS_NAME);
+          Map<String, IndexedArtifact> result = indexManager.search(term, IIndex.SEARCH_CLASS_NAME);
           for(IndexedArtifact ia : result.values()) {
             requestor.reportMatch(new Match(ia, 0, 0));
           }

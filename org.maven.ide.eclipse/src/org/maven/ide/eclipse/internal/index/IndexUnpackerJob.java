@@ -24,8 +24,6 @@ import org.eclipse.ui.progress.IProgressConstants;
 
 import org.maven.ide.eclipse.actions.OpenMavenConsoleAction;
 import org.maven.ide.eclipse.core.MavenLogger;
-import org.maven.ide.eclipse.index.IndexInfo;
-import org.maven.ide.eclipse.index.IndexManager;
 
 /**
  * Index unpacker job
@@ -33,7 +31,7 @@ import org.maven.ide.eclipse.index.IndexManager;
  * @author Eugene Kuleshov
  */
 public class IndexUnpackerJob extends Job {
-  private final IndexManager indexManager;
+  private final NexusIndexManager indexManager;
   
   /**
    * <code>Collection</code> of <code>IndexInfo</code>s to unpack 
@@ -42,7 +40,7 @@ public class IndexUnpackerJob extends Job {
   
   private boolean overwrite;
 
-  public IndexUnpackerJob(IndexManager indexManager, Collection<IndexInfo> extensionIndexes) {
+  public IndexUnpackerJob(NexusIndexManager indexManager, Collection<IndexInfo> extensionIndexes) {
     super("Unpacking indexes");
     this.indexManager = indexManager;
     this.extensionIndexes = extensionIndexes;

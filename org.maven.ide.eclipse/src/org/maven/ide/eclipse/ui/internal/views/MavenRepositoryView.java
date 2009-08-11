@@ -41,12 +41,12 @@ import org.maven.ide.eclipse.MavenImages;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.MaterializeAction;
 import org.maven.ide.eclipse.actions.OpenPomAction;
-import org.maven.ide.eclipse.index.IndexInfo;
-import org.maven.ide.eclipse.index.IndexListener;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
-import org.maven.ide.eclipse.index.IndexedArtifactGroup;
+import org.maven.ide.eclipse.internal.index.IndexInfo;
+import org.maven.ide.eclipse.internal.index.IndexListener;
+import org.maven.ide.eclipse.internal.index.IndexedArtifactGroup;
 
 
 /**
@@ -326,7 +326,7 @@ public class MavenRepositoryView extends ViewPart {
           if(!repositoryUrl.endsWith("/")) {
             repositoryUrl += "/";
           }
-          url = repositoryUrl + group.prefix.replace('.', '/');
+          url = repositoryUrl + group.getPrefix().replace('.', '/');
         } else if(element instanceof IndexedArtifact) {
           // 
         } else if(element instanceof IndexedArtifactFile) {

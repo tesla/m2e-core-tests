@@ -53,7 +53,7 @@ import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.ArtifactRef;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
-import org.maven.ide.eclipse.index.IndexManager;
+import org.maven.ide.eclipse.index.IIndex;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
@@ -217,7 +217,7 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
       Shell shell = workbench.getDisplay().getActiveShell();
       
       MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(shell, //
-          "Search in Maven repositories", IndexManager.SEARCH_CLASS_NAME, artifacts, true);
+          "Search in Maven repositories", IIndex.SEARCH_CLASS_NAME, artifacts, true);
       dialog.setQuery(query);
 
       if(dialog.open() == Window.OK) {
@@ -232,7 +232,7 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
         if(addImport) {
           IndexedArtifact ia = dialog.getSelectedIndexedArtifact();
           String packageName = ia.getPackageName();
-          String className = ia.className;
+          String className = ia.getClassname();
 
           if(addImportDeclaration(document, context, packageName, className)) {
             IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();

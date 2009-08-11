@@ -61,7 +61,7 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.IMaven;
-import org.maven.ide.eclipse.index.IndexManager;
+import org.maven.ide.eclipse.index.IIndex;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
@@ -78,7 +78,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
 
   public static final String ID = "org.maven.ide.eclipse.openPomAction";
   
-  String type = IndexManager.SEARCH_ARTIFACT;
+  String type = IIndex.SEARCH_ARTIFACT;
 
   private IStructuredSelection selection;
 
@@ -93,11 +93,11 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
    */
   public void setInitializationData(IConfigurationElement config, String propertyName, Object data) {
     if("class".equals(data)) {
-      this.type = IndexManager.SEARCH_CLASS_NAME;
+      this.type = IIndex.SEARCH_CLASS_NAME;
     } else if("plugins".equals(data)) {
-      this.type = IndexManager.SEARCH_PACKAGING;
+      this.type = IIndex.SEARCH_PACKAGING;
     } else {
-      this.type = IndexManager.SEARCH_ARTIFACT;
+      this.type = IIndex.SEARCH_ARTIFACT;
     }
   }
   
@@ -115,7 +115,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
   public void run(IAction action) {
     if(selection!=null) {
       Object element = this.selection.getFirstElement();
-      if(IndexManager.SEARCH_ARTIFACT.equals(type) && element !=null) {
+      if(IIndex.SEARCH_ARTIFACT.equals(type) && element !=null) {
         try {
           final ArtifactKey ak = SelectionUtil.getArtifactKey(element);
           if(ak != null) {
@@ -140,7 +140,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
     }
     
     String title;
-    if(IndexManager.SEARCH_CLASS_NAME.equals(type)) {
+    if(IIndex.SEARCH_CLASS_NAME.equals(type)) {
       title = "Search class in Maven repositories";
     } else {
       title = "Search Maven POM";
@@ -153,7 +153,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
       final IndexedArtifact indexedArtifact = dialog.getSelectedIndexedArtifact();
       new Job("Opening POM") {
         protected IStatus run(IProgressMonitor monitor) {
-          if(IndexManager.SEARCH_CLASS_NAME.equals(type)) {
+          if(IIndex.SEARCH_CLASS_NAME.equals(type)) {
             if(indexedArtifact != null) {
               openEditor(indexedArtifact, iaf, monitor);
             }
@@ -167,7 +167,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
   }
 
   public static void openEditor(IndexedArtifact ia, IndexedArtifactFile f, IProgressMonitor monitor) {
-    if(f == null || ia.className == null || ia.getPackageName() == null) {
+    if(f == null || ia.getClassname() == null || ia.getPackageName() == null) {
       return;
     }
 
@@ -175,15 +175,15 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
     String artifactId = f.getDependency().getArtifactId();
     String version = f.getDependency().getVersion();
 
-    String name = ia.className;
-    String fileName = ia.getPackageName().replace('.', '/') + "/" + ia.className + ".java";
+    String name = ia.getClassname();
+    String fileName = ia.getPackageName().replace('.', '/') + "/" + ia.getClassname() + ".java";
     String tooltip = groupId + ":" + artifactId + ":" + version + "/" + fileName;
 
     try {
-      IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
-      List<ArtifactRepository> artifactRepositories = indexManager.getArtifactRepositories(null, null);
-
       IMaven maven = MavenPlugin.lookup(IMaven.class);
+
+      List<ArtifactRepository> artifactRepositories = maven.getArtifactRepositories();
+
       
       Artifact artifact = maven.resolve(groupId, artifactId, version, "java-source", "sources", artifactRepositories, monitor);
 
@@ -225,8 +225,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
       
       IMaven maven = MavenPlugin.lookup(IMaven.class);
 
-      IndexManager indexManager = plugin.getIndexManager();
-      List<ArtifactRepository> artifactRepositories = indexManager.getArtifactRepositories(null, null);
+      List<ArtifactRepository> artifactRepositories = maven.getArtifactRepositories();
 
       Artifact artifact = maven.resolve(groupId, artifactId, version, "pom", null, artifactRepositories, monitor);
 

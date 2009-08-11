@@ -14,8 +14,9 @@ import org.eclipse.swt.graphics.Image;
 import org.maven.ide.eclipse.MavenImages;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
-import org.maven.ide.eclipse.index.IndexInfo;
-import org.maven.ide.eclipse.index.IndexedArtifactGroup;
+import org.maven.ide.eclipse.internal.index.IndexInfo;
+import org.maven.ide.eclipse.internal.index.IndexedArtifactGroup;
+import org.maven.ide.eclipse.internal.index.NexusIndexManager;
 
 /**
  * LocalRepsoitoryNode
@@ -37,7 +38,8 @@ public class LocalRepositoryNode implements IMavenRepositoryNode {
   public Object[] getChildren() {
     String indexName = indexInfo.getIndexName();
     try {
-      IndexedArtifactGroup[] rootGroups = MavenPlugin.getDefault().getIndexManager().getRootGroups(indexName);
+      NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getDefault().getIndexManager();
+      IndexedArtifactGroup[] rootGroups = indexManager.getRootGroups(indexName);
       if(rootGroups == null){
         return new Object[0];
       }

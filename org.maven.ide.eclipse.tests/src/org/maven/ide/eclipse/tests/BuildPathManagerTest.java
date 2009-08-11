@@ -40,8 +40,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
-import org.maven.ide.eclipse.index.IndexInfo;
-import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.jdt.BuildPathManager;
 import org.maven.ide.eclipse.jdt.MavenJdtPlugin;
 import org.maven.ide.eclipse.project.IProjectConfigurationManager;
@@ -561,11 +559,11 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
   }
 
   public void testDownloadSources_006_nonMavenProject() throws Exception {
-    IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
-    IndexInfo indexInfo = new IndexInfo("remoterepo-local", new File("remoterepo"), null, IndexInfo.Type.LOCAL, false);
-    indexManager.addIndex(indexInfo, false);
-    indexManager.reindex(indexInfo.getIndexName(), monitor);
-    indexManager.addIndex(new IndexInfo("remoterepo", null, "file:remoterepo", IndexInfo.Type.REMOTE, false), false);
+//    IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
+//    IndexInfo indexInfo = new IndexInfo("remoterepo-local", new File("remoterepo"), null, IndexInfo.Type.LOCAL, false);
+//    indexManager.addIndex(indexInfo, false);
+//    indexManager.reindex(indexInfo.getIndexName(), monitor);
+//    indexManager.addIndex(new IndexInfo("remoterepo", null, "file:remoterepo", IndexInfo.Type.REMOTE, false), false);
 
     IProject project = createExisting("downloadsources-p006", "projects/downloadsources/p006");
 

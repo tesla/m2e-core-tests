@@ -27,7 +27,7 @@ import org.apache.maven.model.Model;
 
 import org.maven.ide.eclipse.core.Messages;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
-import org.maven.ide.eclipse.index.IndexManager;
+import org.maven.ide.eclipse.index.IIndex;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.ui.dialogs.MavenRepositorySearchDialog;
@@ -148,7 +148,7 @@ public class MavenProjectWizardArtifactPage extends AbstractMavenWizardPage {
     parentComponent.addBrowseButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            "Select Parent Artifact", IndexManager.SEARCH_ARTIFACT, Collections.<ArtifactKey>emptySet());
+            "Select Parent Artifact", IIndex.SEARCH_ARTIFACT, Collections.<ArtifactKey>emptySet());
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile indexedArtifactFile = (IndexedArtifactFile) dialog.getFirstResult();
           if(indexedArtifactFile != null) {

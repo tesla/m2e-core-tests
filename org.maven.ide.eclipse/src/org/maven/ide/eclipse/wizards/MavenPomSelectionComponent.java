@@ -51,7 +51,7 @@ import org.maven.ide.eclipse.MavenImages;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
-import org.maven.ide.eclipse.index.IndexInfo;
+import org.maven.ide.eclipse.index.IIndex;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
@@ -83,8 +83,8 @@ public class MavenPomSelectionComponent extends Composite {
 
   /**
    * One of 
-   *   {@link IndexManager#SEARCH_ARTIFACT}, 
-   *   {@link IndexManager#SEARCH_CLASS_NAME}, 
+   *   {@link IIndex#SEARCH_ARTIFACT}, 
+   *   {@link IIndex#SEARCH_CLASS_NAME}, 
    */
   String queryType;
   
@@ -145,7 +145,7 @@ public class MavenPomSelectionComponent extends Composite {
   }
   
   protected boolean showClassifiers(){
-    return (queryType != null && IndexManager.SEARCH_ARTIFACT.equals(queryType));
+    return (queryType != null && IIndex.SEARCH_ARTIFACT.equals(queryType));
   }
   
   private void setupButton(final Button button, String label, final String prefName, int horizontalIndent){
@@ -258,7 +258,7 @@ public class MavenPomSelectionComponent extends Composite {
 
   IndexedArtifactFile getSelectedIndexedArtifactFile(Object element) {
     if(element instanceof IndexedArtifact) {
-      return ((IndexedArtifact) element).files.iterator().next();
+      return ((IndexedArtifact) element).getFiles().iterator().next();
     }
     return (IndexedArtifactFile) element;
   }
@@ -323,15 +323,15 @@ public class MavenPomSelectionComponent extends Composite {
     }
     
     public int getClassifier(){
-      int classifier = IndexManager.SEARCH_JARS;
+      int classifier = IIndex.SEARCH_JARS;
       if(MavenPlugin.getDefault().getPreferenceStore().getBoolean(P_SEARCH_INCLUDE_JAVADOC)){
-        classifier = classifier + IndexManager.SEARCH_JAVADOCS;
+        classifier = classifier + IIndex.SEARCH_JAVADOCS;
       }
       if(MavenPlugin.getDefault().getPreferenceStore().getBoolean(P_SEARCH_INCLUDE_SOURCES)){
-        classifier = classifier + IndexManager.SEARCH_SOURCES;
+        classifier = classifier + IIndex.SEARCH_SOURCES;
       }
       if(MavenPlugin.getDefault().getPreferenceStore().getBoolean(P_SEARCH_INCLUDE_TESTS)){
-        classifier = classifier + IndexManager.SEARCH_TESTS;
+        classifier = classifier + IIndex.SEARCH_TESTS;
       }
       return classifier;
     }
@@ -340,7 +340,7 @@ public class MavenPomSelectionComponent extends Composite {
       isRunning = true;
       isWaiting = false;
       
-      int classifier = showClassifiers() ? getClassifier() : IndexManager.SEARCH_ALL;
+      int classifier = showClassifiers() ? getClassifier() : IIndex.SEARCH_ALL;
       if(searchResultViewer == null || searchResultViewer.getControl() == null || searchResultViewer.getControl().isDisposed()){
         return Status.CANCEL_STATUS;
       }
@@ -350,7 +350,7 @@ public class MavenPomSelectionComponent extends Composite {
         try {
           setResult(IStatus.OK, "Searching \'" + activeQuery.toLowerCase() + "\'...", null);
           Map<String, IndexedArtifact> res = indexManager.search(activeQuery, field, classifier);
-          if(IndexManager.SEARCH_CLASS_NAME.equals(field) && activeQuery.length() < IndexManager.MIN_CLASS_QUERY_LENGTH) {
+          if(IIndex.SEARCH_CLASS_NAME.equals(field) && activeQuery.length() < IndexManager.MIN_CLASS_QUERY_LENGTH) {
             setResult(IStatus.WARNING, "Query '" + activeQuery + "' is too short", Collections.<String, IndexedArtifact>emptyMap());
           } else {
             setResult(IStatus.OK, "Results for '" + activeQuery + "' (" + res.size() + ")", res);
@@ -394,7 +394,7 @@ public class MavenPomSelectionComponent extends Composite {
     public String getText(Object element) {
       if(element instanceof IndexedArtifact) {
         IndexedArtifact a = (IndexedArtifact) element;
-        String name = (a.className == null ? "" : a.className + "   " + a.getPackageName() + "   ") + a.group + "   " + a.artifact;
+        String name = (a.getClassname() == null ? "" : a.getClassname() + "   " + a.getPackageName() + "   ") + a.getGroupId() + "   " + a.getArtifactId();
         return name;
       } else if(element instanceof IndexedArtifactFile) {
         IndexedArtifactFile f = (IndexedArtifactFile) element;
@@ -406,15 +406,7 @@ public class MavenPomSelectionComponent extends Composite {
     }
     
     protected String getRepoDisplayName(String repo){
-      try{
-        IndexInfo info = MavenPlugin.getDefault().getIndexManager().getIndexInfo(repo);
-        if(info != null && info.getDisplayName() != null){
-          return info.getDisplayName();
-        }
-        return repo;
-      } catch(Throwable t){
-        return repo;
-      }
+      return repo;
     }
     
     public Color getForeground(Object element) {
@@ -425,7 +417,7 @@ public class MavenPomSelectionComponent extends Composite {
         }
       } else if(element instanceof IndexedArtifact) {
         IndexedArtifact i = (IndexedArtifact) element;
-        if(artifactKeys.contains(i.group + ":" + i.artifact)) {
+        if(artifactKeys.contains(i.getGroupId() + ":" + i.getArtifactId())) {
           return Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
         }
       }
@@ -439,19 +431,19 @@ public class MavenPomSelectionComponent extends Composite {
     public Image getImage(Object element) {
       if(element instanceof IndexedArtifactFile) {
         IndexedArtifactFile f = (IndexedArtifactFile) element;
-        if(IndexManager.SEARCH_CLASS_NAME.equals(queryType)) {
-          if(f.sourcesExists==IndexManager.PRESENT) {
+        if(IIndex.SEARCH_CLASS_NAME.equals(queryType)) {
+          if(f.sourcesExists==IIndex.PRESENT) {
             return MavenImages.IMG_JAVA_SRC;
           }
           return MavenImages.IMG_JAVA;
         }
-        if(f.sourcesExists==IndexManager.PRESENT) {
+        if(f.sourcesExists==IIndex.PRESENT) {
           return MavenImages.IMG_VERSION_SRC;
         }
         return MavenImages.IMG_VERSION;
       } else if(element instanceof IndexedArtifact) {
         // IndexedArtifact i = (IndexedArtifact) element;
-        if(IndexManager.SEARCH_CLASS_NAME.equals(queryType)) {
+        if(IIndex.SEARCH_CLASS_NAME.equals(queryType)) {
           return MavenImages.IMG_JAVA;
         }
         return MavenImages.IMG_JAR;
@@ -477,7 +469,7 @@ public class MavenPomSelectionComponent extends Composite {
     public Object[] getChildren(Object parentElement) {
       if(parentElement instanceof IndexedArtifact) {
         IndexedArtifact a = (IndexedArtifact) parentElement;
-        return a.files.toArray();
+        return a.getFiles().toArray();
       }
       return EMPTY;
     }

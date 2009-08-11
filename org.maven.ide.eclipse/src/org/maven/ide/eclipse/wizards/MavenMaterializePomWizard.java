@@ -139,7 +139,7 @@ public class MavenMaterializePomWizard extends Wizard implements IImportWizard, 
         MavenPlugin plugin = MavenPlugin.getDefault();
         MavenProjectPomScanner<MavenProjectScmInfo> scanner = new MavenProjectPomScanner<MavenProjectScmInfo>(developer, dependencies, //
             plugin.getMavenModelManager(), //
-            plugin.getIndexManager(), plugin.getConsole());
+            plugin.getConsole());
         scanner.run(monitor);
         // XXX handle errors/warnings
         

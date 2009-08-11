@@ -13,6 +13,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.fieldassist.ContentProposalAdapter;
 import org.eclipse.jface.fieldassist.FieldDecoration;
@@ -194,29 +196,29 @@ public abstract class FormUtils {
     }
   }
 
-  public static void addGroupIdProposal(final Text groupIdText, final Packaging packaging) {
+  public static void addGroupIdProposal(final IProject project, final Text groupIdText, final Packaging packaging) {
     addCompletionProposal(groupIdText, new Searcher() {
-      public Collection<String> search() {
+      public Collection<String> search() throws CoreException {
         // TODO handle artifact info
-        return getSearchEngine().findGroupIds(groupIdText.getText(), packaging, null);
+        return getSearchEngine(project).findGroupIds(groupIdText.getText(), packaging, null);
       }
     });
   }
 
-  public static void addArtifactIdProposal(final Text groupIdText, final Text artifactIdText, final Packaging packaging) {
+  public static void addArtifactIdProposal(final IProject project, final Text groupIdText, final Text artifactIdText, final Packaging packaging) {
     addCompletionProposal(artifactIdText, new Searcher() {
-      public Collection<String> search() {
+      public Collection<String> search() throws CoreException {
         // TODO handle artifact info
-        return getSearchEngine().findArtifactIds(groupIdText.getText(), artifactIdText.getText(), packaging, null);
+        return getSearchEngine(project).findArtifactIds(groupIdText.getText(), artifactIdText.getText(), packaging, null);
       }
     });
   }
 
-  public static void addVersionProposal(final Text groupIdText, final Text artifactIdText, final Text versionText,
+  public static void addVersionProposal(final IProject project, final Text groupIdText, final Text artifactIdText, final Text versionText,
       final Packaging packaging) {
     addCompletionProposal(versionText, new Searcher() {
-      public Collection<String> search() {
-        return getSearchEngine().findVersions(groupIdText.getText(), //
+      public Collection<String> search() throws CoreException {
+        return getSearchEngine(project).findVersions(groupIdText.getText(), //
             artifactIdText.getText(), versionText.getText(), packaging);
       }
     });
@@ -279,11 +281,11 @@ public abstract class FormUtils {
     }
   }
 
-  public static void addClassifierProposal(final Text groupIdText, final Text artifactIdText, final Text versionText,
+  public static void addClassifierProposal(final IProject project, final Text groupIdText, final Text artifactIdText, final Text versionText,
       final Text classifierText, final Packaging packaging) {
     addCompletionProposal(classifierText, new Searcher() {
-      public Collection<String> search() {
-        return getSearchEngine().findClassifiers(groupIdText.getText(), //
+      public Collection<String> search() throws CoreException {
+        return getSearchEngine(project).findClassifiers(groupIdText.getText(), //
             artifactIdText.getText(), versionText.getText(), classifierText.getText(), packaging);
       }
     });
@@ -310,8 +312,12 @@ public abstract class FormUtils {
     IContentProposalProvider proposalProvider = new IContentProposalProvider() {
       public IContentProposal[] getProposals(String contents, int position) {
         ArrayList<IContentProposal> proposals = new ArrayList<IContentProposal>();
-        for(final String text : searcher.search()) {
-          proposals.add(new FormUtils.TextProposal(text));
+        try {
+          for(final String text : searcher.search()) {
+            proposals.add(new FormUtils.TextProposal(text));
+          }
+        } catch (CoreException e) {
+          MavenLogger.log(e);
         }
         return proposals.toArray(new IContentProposal[proposals.size()]);
       }
@@ -334,12 +340,12 @@ public abstract class FormUtils {
     adapter.setPopupSize(new Point(250, 120));
   }
 
-  static SearchEngine getSearchEngine() {
-    return MvnIndexPlugin.getDefault().getSearchEngine();
+  static SearchEngine getSearchEngine(final IProject project) throws CoreException {
+    return MvnIndexPlugin.getDefault().getSearchEngine(project);
   }
 
   public static abstract class Searcher {
-    public abstract Collection<String> search();
+    public abstract Collection<String> search() throws CoreException;
   }
 
   public static final class TextProposal implements IContentProposal {

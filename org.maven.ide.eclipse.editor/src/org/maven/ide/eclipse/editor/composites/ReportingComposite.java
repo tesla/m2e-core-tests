@@ -74,7 +74,7 @@ import org.maven.ide.eclipse.editor.pom.SearchMatcher;
 import org.maven.ide.eclipse.editor.pom.ValueProvider;
 import org.maven.ide.eclipse.editor.xml.search.Packaging;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
-import org.maven.ide.eclipse.index.IndexManager;
+import org.maven.ide.eclipse.index.IIndex;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.ui.dialogs.MavenRepositorySearchDialog;
 
@@ -243,7 +243,7 @@ public class ReportingComposite extends Composite {
     reportPluginsEditor.setSelectListener(new SelectionAdapter(){
       public void widgetSelected(SelectionEvent e){
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            "Add Plugin", IndexManager.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
+            "Add Plugin", IIndex.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {
@@ -326,7 +326,7 @@ public class ReportingComposite extends Composite {
     gd_groupIdText.horizontalIndent = 4;
     groupIdText.setLayoutData(gd_groupIdText);
     groupIdText.setData("name", "groupIdText");
-    FormUtils.addGroupIdProposal(groupIdText, Packaging.ALL);
+    FormUtils.addGroupIdProposal(parent.getProject(), groupIdText, Packaging.ALL);
     
     Hyperlink artifactIdHyperlink = toolkit.createHyperlink(pluginDetailsComposite, "Artifact Id:*", SWT.NONE);
     artifactIdHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
@@ -348,7 +348,7 @@ public class ReportingComposite extends Composite {
     gd_artifactIdText.horizontalIndent = 4;
     artifactIdText.setLayoutData(gd_artifactIdText);
     artifactIdText.setData("name", "artifactIdText");
-    FormUtils.addArtifactIdProposal(groupIdText, artifactIdText, Packaging.ALL);
+    FormUtils.addArtifactIdProposal(parent.getProject(), groupIdText, artifactIdText, Packaging.ALL);
 
     toolkit.createLabel(pluginDetailsComposite, "Version:", SWT.NONE);
 
@@ -357,7 +357,7 @@ public class ReportingComposite extends Composite {
     gd_versionText.horizontalIndent = 4;
     versionText.setLayoutData(gd_versionText);
     versionText.setData("name", "versionText");
-    FormUtils.addVersionProposal(groupIdText, artifactIdText, versionText, Packaging.ALL);
+    FormUtils.addVersionProposal(parent.getProject(), groupIdText, artifactIdText, versionText, Packaging.ALL);
 
     Composite pluginConfigureComposite = toolkit.createComposite(pluginDetailsComposite, SWT.NONE);
     GridData pluginConfigureCompositeData = new GridData(SWT.RIGHT, SWT.CENTER, false, false, 2, 1);
@@ -402,7 +402,7 @@ public class ReportingComposite extends Composite {
     reportPluginSelectAction = new Action("Select Reporting Plugin", MavenEditorImages.SELECT_PLUGIN) {
       public void run() {
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            "Select Plugin", IndexManager.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
+            "Select Plugin", IIndex.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {

@@ -41,20 +41,20 @@ public class IndexedArtifact {
     
   };
 
-  public final String group;
+  private final String group;
 
-  public final String artifact;
+  private final String artifact;
 
   private final String packageName;
 
-  public final String className;
+  private final String className;
 
-  public final String packaging;
+  private final String packaging;
   
   /**
    * Set<IndexedArtifactFile>
    */
-  public final Set<IndexedArtifactFile> files = new TreeSet<IndexedArtifactFile>(FILE_INFO_COMPARATOR);
+  private final Set<IndexedArtifactFile> files = new TreeSet<IndexedArtifactFile>(FILE_INFO_COMPARATOR);
 
   public IndexedArtifact(String group, String artifact, String packageName, String className, String packaging) {
     this.group = group;
@@ -65,8 +65,9 @@ public class IndexedArtifact {
   }
   
   public void addFile(IndexedArtifactFile indexedArtifactFile) {
-    files.add(indexedArtifactFile);
+    getFiles().add(indexedArtifactFile);
   }
+
   public String getPackageName(){
     if(packageName.startsWith(".") && packageName.length()>1){ 
       return packageName.substring(1);
@@ -74,13 +75,34 @@ public class IndexedArtifact {
       return packageName;
     }
   }
+
   public String toString() {
-    StringBuffer sb = new StringBuffer("\n" + className + "  " + packageName + "  " + group + " : " + artifact /*+ "\n"*/);
+    StringBuffer sb = new StringBuffer("\n" + getClassname() + "  " + packageName + "  " + getGroupId() + " : " + getArtifactId());
 //    for(Iterator it = files.iterator(); it.hasNext();) {
 //      IndexedArtifactFile f = (IndexedArtifactFile) it.next();
 //      sb.append("  " + f.version + "  " + f.fname + "\n");
 //    }
     return sb.toString();
+  }
+
+  public String getGroupId() {
+    return group;
+  }
+
+  public String getArtifactId() {
+    return artifact;
+  }
+
+  public String getPackaging() {
+    return packaging;
+  }
+
+  public String getClassname() {
+    return className;
+  }
+
+  public Set<IndexedArtifactFile> getFiles() {
+    return files;
   }
 
 }

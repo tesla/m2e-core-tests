@@ -18,7 +18,6 @@ import org.eclipse.ui.progress.IProgressConstants;
 import org.maven.ide.eclipse.actions.OpenMavenConsoleAction;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
-import org.maven.ide.eclipse.index.IndexManager;
 
 
 /**
@@ -27,12 +26,12 @@ import org.maven.ide.eclipse.index.IndexManager;
  * @author Eugene Kuleshov
  */
 public class IndexerJob extends Job {
-  private final IndexManager indexManager;
+  private final NexusIndexManager indexManager;
   private final MavenConsole console;
 
   private String indexName;
 
-  public IndexerJob(String indexName, IndexManager indexManager, MavenConsole console) {
+  public IndexerJob(String indexName, NexusIndexManager indexManager, MavenConsole console) {
     super("Indexing");
     this.indexName = indexName;
     this.indexManager = indexManager;

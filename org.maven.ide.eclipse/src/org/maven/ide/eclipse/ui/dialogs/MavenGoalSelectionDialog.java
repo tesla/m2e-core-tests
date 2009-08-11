@@ -47,6 +47,7 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.core.Messages;
+import org.maven.ide.eclipse.index.IIndex;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
@@ -172,10 +173,10 @@ public class MavenGoalSelectionDialog extends ElementTreeSelectionDialog {
 
       IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
       try {
-        Map<String, IndexedArtifact> result = indexManager.search("*", IndexManager.SEARCH_PLUGIN);
+        Map<String, IndexedArtifact> result = indexManager.search("*", IIndex.SEARCH_PLUGIN);
         TreeMap<String, Group> map = new TreeMap<String, Group>();
         for(IndexedArtifact a : result.values()) {
-          IndexedArtifactFile f = a.files.iterator().next();
+          IndexedArtifactFile f = a.getFiles().iterator().next();
           if(f.prefix != null && f.prefix.length()>0 && f.goals != null) {
             List<Entry> goals = new ArrayList<Entry>();
             for(String goal : f.goals) {

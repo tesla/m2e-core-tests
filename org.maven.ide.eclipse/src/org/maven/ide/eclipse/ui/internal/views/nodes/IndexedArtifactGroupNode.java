@@ -17,7 +17,8 @@ import org.eclipse.ui.PlatformUI;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.index.IndexedArtifact;
-import org.maven.ide.eclipse.index.IndexedArtifactGroup;
+import org.maven.ide.eclipse.internal.index.IndexedArtifactGroup;
+import org.maven.ide.eclipse.internal.index.NexusIndexManager;
 
 /**
  * IndexedArtifactGroupNode
@@ -35,15 +36,16 @@ public class IndexedArtifactGroupNode implements IMavenRepositoryNode {
    * @see org.maven.ide.eclipse.ui.internal.views.IMavenRepositoryNode#getChildren()
    */
   public Object[] getChildren() {
-    IndexedArtifactGroup resolvedGroup = MavenPlugin.getDefault().getIndexManager().resolveGroup(indexedArtifactGroup);
+    NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getDefault().getIndexManager();
+    IndexedArtifactGroup resolvedGroup = indexManager.resolveGroup(indexedArtifactGroup);
     ArrayList<Object> results = new ArrayList<Object>();
-    Collection<IndexedArtifactGroup> groups = resolvedGroup.nodes.values();
+    Collection<IndexedArtifactGroup> groups = resolvedGroup.getNodes().values();
     for(IndexedArtifactGroup group : groups){
      IndexedArtifactGroupNode node = new IndexedArtifactGroupNode(group); 
      results.add(node);
     }
     
-    Collection<IndexedArtifact> artifacts = resolvedGroup.files.values(); // IndexedArtifact
+    Collection<IndexedArtifact> artifacts = resolvedGroup.getFiles().values(); // IndexedArtifact
     for(IndexedArtifact artifact : artifacts){
       IndexedArtifactNode artifactNode = new IndexedArtifactNode(artifact);
       results.add(artifactNode);
@@ -55,7 +57,7 @@ public class IndexedArtifactGroupNode implements IMavenRepositoryNode {
    * @see org.maven.ide.eclipse.ui.internal.views.IMavenRepositoryNode#getName()
    */
   public String getName() {
-    String prefix = indexedArtifactGroup.prefix;
+    String prefix = indexedArtifactGroup.getPrefix();
     int n = prefix.lastIndexOf('.');
     return n < 0 ? prefix : prefix.substring(n + 1);
   }

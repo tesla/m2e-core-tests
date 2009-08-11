@@ -34,7 +34,7 @@ import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.ArtifactRef;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
-import org.maven.ide.eclipse.index.IndexManager;
+import org.maven.ide.eclipse.index.IIndex;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
@@ -63,7 +63,7 @@ public class AddDependencyAction implements IObjectActionDelegate {
     
     Set<ArtifactKey> artifacts = getArtifacts(file, plugin);
     MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-        "Add Dependency", IndexManager.SEARCH_ARTIFACT, artifacts, true);
+        "Add Dependency", IIndex.SEARCH_ARTIFACT, artifacts, true);
     if(dialog.open() == Window.OK) {
       IndexedArtifactFile indexedArtifactFile = (IndexedArtifactFile) dialog.getFirstResult();
       if(indexedArtifactFile != null) {

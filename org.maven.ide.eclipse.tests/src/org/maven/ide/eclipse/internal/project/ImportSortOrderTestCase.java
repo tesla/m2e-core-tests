@@ -25,7 +25,7 @@ public class ImportSortOrderTestCase extends AsbtractMavenProjectTestCase {
 
     List<IMavenProjectFacade> facades =  new ArrayList<IMavenProjectFacade>();
     
-    MavenProjectManagerImpl manager = new MavenProjectManagerImpl(plugin.getConsole(), plugin.getIndexManager(), //
+    MavenProjectManagerImpl manager = new MavenProjectManagerImpl(plugin.getConsole(), //
         null, false, plugin.getMavenRuntimeManager(), plugin.getMavenMarkerManager());
     
     List<IProject> projects = new ArrayList<IProject>();

@@ -20,7 +20,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.model.Dependency;
@@ -35,7 +35,6 @@ import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
-import org.maven.ide.eclipse.index.IndexManager;
 
 /**
  * Maven project scanner using dependency list
@@ -48,18 +47,14 @@ public class MavenProjectPomScanner<T> extends AbstractProjectScanner<MavenProje
   
   private final Dependency[] dependencies;
 
-  private IndexManager indexManager;
-
   private MavenConsole console;
   
   private IMaven maven;
 
   public MavenProjectPomScanner(boolean developer, Dependency[] dependencies, //
-      MavenModelManager modelManager,
-      IndexManager indexManager, MavenConsole console) {
+      MavenModelManager modelManager, MavenConsole console) {
     this.developer = developer;
     this.dependencies = dependencies;
-    this.indexManager = indexManager;
     this.console = console;
     this.maven = MavenPlugin.lookup(IMaven.class);
   }
@@ -200,11 +195,8 @@ public class MavenProjectPomScanner<T> extends AbstractProjectScanner<MavenProje
       throws CoreException {
     monitor.subTask("Resolving artifact " + groupId + ":" + artifactId + ":" + version);
 
-    ArtifactRepositoryPolicy policy = new ArtifactRepositoryPolicy();
-    policy.setUpdatePolicy(ArtifactRepositoryPolicy.UPDATE_POLICY_NEVER);
-    policy.setChecksumPolicy(ArtifactRepositoryPolicy.CHECKSUM_POLICY_IGNORE);
-    policy.setEnabled(true);
-    Artifact artifact = maven.resolve(groupId, artifactId, version, "pom", null, indexManager.getArtifactRepositories(policy, policy), monitor);
+    List<ArtifactRepository> repositories = maven.getArtifactRepositories();
+    Artifact artifact = maven.resolve(groupId, artifactId, version, "pom", null, repositories, monitor);
 
     File file = artifact.getFile();
     if(file == null) {

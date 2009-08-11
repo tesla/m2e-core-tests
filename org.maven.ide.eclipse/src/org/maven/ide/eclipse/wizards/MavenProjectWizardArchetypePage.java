@@ -84,6 +84,8 @@ import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.core.Messages;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.IMaven;
+import org.maven.ide.eclipse.index.IIndex;
+import org.maven.ide.eclipse.index.IMutableIndex;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 
@@ -616,19 +618,8 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
   }
 
   protected void downloadArchetype(final String archetypeGroupId, final String archetypeArtifactId,
-      final String archetypeVersion, String repositoryUrl) {
+      final String archetypeVersion, final String repositoryUrl) {
     final String archetypeName = archetypeGroupId + ":" + archetypeArtifactId + ":" + archetypeVersion;
-
-    final MavenPlugin plugin = MavenPlugin.getDefault();
-    
-    final List<ArtifactRepository> remoteRepositories;
-    if(repositoryUrl.length()==0) {
-      remoteRepositories = plugin.getIndexManager().getArtifactRepositories(null, null);
-    } else {
-      ArtifactRepository repository = new DefaultArtifactRepository( //
-          "archetype", repositoryUrl, new DefaultRepositoryLayout(), null, null);
-      remoteRepositories = Collections.singletonList(repository);
-    }
 
     try {
       getContainer().run(true, true, new IRunnableWithProgress() {
@@ -636,7 +627,18 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
           monitor.beginTask("Downloading Archetype " + archetypeName, IProgressMonitor.UNKNOWN);
 
           try {
-            IMaven maven = MavenPlugin.lookup(IMaven.class);
+            final IMaven maven = MavenPlugin.lookup(IMaven.class);
+
+            final MavenPlugin plugin = MavenPlugin.getDefault();
+            
+            final List<ArtifactRepository> remoteRepositories;
+            if(repositoryUrl.length()==0) {
+              remoteRepositories = maven.getArtifactRepositories(); // XXX should use ArchetypeManager.getArhetypeRepositories()
+            } else {
+              ArtifactRepository repository = new DefaultArtifactRepository( //
+                  "archetype", repositoryUrl, new DefaultRepositoryLayout(), null, null);
+              remoteRepositories = Collections.singletonList(repository);
+            }
             
             monitor.subTask("resolving POM...");
             Artifact pomArtifact = maven.resolve(archetypeGroupId, archetypeArtifactId, archetypeVersion, "pom", null, remoteRepositories, monitor);
@@ -665,9 +667,10 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
 
               monitor.subTask("indexing...");
               IndexManager indexManager = plugin.getIndexManager();
-              indexManager.addDocument(IndexManager.LOCAL_INDEX, jarFile, //
-                  indexManager.getDocumentKey(new ArtifactKey(pomArtifact)), jarFile.length(), jarFile.lastModified(), jarFile, //
-                  IndexManager.NOT_PRESENT, IndexManager.NOT_PRESENT);
+              IMutableIndex localIndex = indexManager.getLocalIndex();
+              localIndex.addArtifact(jarFile, //
+                  new ArtifactKey(pomArtifact), jarFile.length(), jarFile.lastModified(), jarFile, //
+                  IIndex.NOT_PRESENT, IIndex.NOT_PRESENT);
               
               loadArchetypes(archetypeGroupId, archetypeArtifactId, archetypeVersion);
             }

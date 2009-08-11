@@ -81,7 +81,7 @@ import org.maven.ide.eclipse.editor.pom.SearchMatcher;
 import org.maven.ide.eclipse.editor.pom.ValueProvider;
 import org.maven.ide.eclipse.editor.xml.search.Packaging;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
-import org.maven.ide.eclipse.index.IndexManager;
+import org.maven.ide.eclipse.index.IIndex;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.ui.dialogs.MavenRepositorySearchDialog;
 
@@ -210,7 +210,7 @@ public class PluginsComposite extends Composite{
     pluginsEditor.setSelectListener(new SelectionAdapter(){
       public void widgetSelected(SelectionEvent e){
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-        "Select Plugin", IndexManager.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
+        "Select Plugin", IIndex.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {
@@ -349,7 +349,7 @@ public class PluginsComposite extends Composite{
     pluginManagementEditor.setSelectListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            "Select Plugin", IndexManager.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
+            "Select Plugin", IIndex.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {
@@ -445,8 +445,8 @@ public class PluginsComposite extends Composite{
       gd_groupIdText.horizontalIndent = 4;
       groupIdText.setLayoutData(gd_groupIdText);
       groupIdText.setData("name", "groupIdText");
-      FormUtils.addGroupIdProposal(groupIdText, Packaging.PLUGIN);
-    
+      FormUtils.addGroupIdProposal(parent.getProject(), groupIdText, Packaging.PLUGIN);
+
       Hyperlink artifactIdHyperlink = toolkit.createHyperlink(pluginDetailsComposite, "Artifact Id:*", SWT.NONE);
       artifactIdHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
         public void linkActivated(HyperlinkEvent e) {
@@ -467,7 +467,7 @@ public class PluginsComposite extends Composite{
       gd_artifactIdText.horizontalIndent = 4;
       artifactIdText.setLayoutData(gd_artifactIdText);
       artifactIdText.setData("name", "artifactIdText");
-      FormUtils.addArtifactIdProposal(groupIdText, artifactIdText, Packaging.PLUGIN);
+      FormUtils.addArtifactIdProposal(parent.getProject(), groupIdText, artifactIdText, Packaging.PLUGIN);
     
       Label label = toolkit.createLabel(pluginDetailsComposite, "Version:", SWT.NONE);
       label.setLayoutData(new GridData());
@@ -478,7 +478,7 @@ public class PluginsComposite extends Composite{
       versionTextData.widthHint = 200;
       versionText.setLayoutData(versionTextData);
       versionText.setData("name", "versionText");
-      FormUtils.addVersionProposal(groupIdText, artifactIdText, versionText, Packaging.PLUGIN);
+      FormUtils.addVersionProposal(parent.getProject(), groupIdText, artifactIdText, versionText, Packaging.PLUGIN);
   
   //    pluginSelectButton = toolkit.createButton(pluginDetailsComposite, "Select...", SWT.NONE);
   //    pluginSelectButton.addSelectionListener(new SelectionAdapter() {
@@ -500,7 +500,7 @@ public class PluginsComposite extends Composite{
       pluginSelectAction = new Action("Select Plugin", MavenEditorImages.SELECT_PLUGIN) {
         public void run() {
           MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-              "Select Plugin", IndexManager.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
+              "Select Plugin", IIndex.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
           if(dialog.open() == Window.OK) {
             IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
             if(af != null) {

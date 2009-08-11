@@ -33,8 +33,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.index.IndexInfo;
 import org.maven.ide.eclipse.index.IndexManager;
+import org.maven.ide.eclipse.internal.index.IndexInfo;
 
 
 /**

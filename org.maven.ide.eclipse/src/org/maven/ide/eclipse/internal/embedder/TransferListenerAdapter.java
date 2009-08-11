@@ -22,6 +22,8 @@ import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 
 import org.maven.ide.eclipse.core.MavenConsole;
+import org.maven.ide.eclipse.index.IIndex;
+import org.maven.ide.eclipse.index.IMutableIndex;
 import org.maven.ide.eclipse.index.IndexManager;
 
 
@@ -35,14 +37,14 @@ public final class TransferListenerAdapter implements TransferListener {
 
   private final MavenConsole console;
 
-  private final IndexManager indexManager;
+  private final IMutableIndex localIndex;
 
   private long complete = 0;
 
   public TransferListenerAdapter(IProgressMonitor monitor, MavenConsole console, IndexManager indexManager) {
     this.monitor = monitor == null ? new NullProgressMonitor() : monitor;
     this.console = console;
-    this.indexManager = indexManager;
+    this.localIndex = indexManager != null? indexManager.getLocalIndex(): null;
   }
 
   public void transferInitiated(TransferEvent e) {
@@ -102,12 +104,12 @@ public final class TransferListenerAdapter implements TransferListener {
     // String repository = e.getWagon().getRepository().getName();
     Resource resource = e.getResource();
 
-    if(indexManager != null) {
+    if(localIndex != null) {
       File file = e.getLocalFile();
       if(file.getName().endsWith(".jar")) {
-        indexManager.addDocument(IndexManager.LOCAL_INDEX, file, resource.getName(), //
+        localIndex.addArtifact(file, null, //
             resource.getContentLength(), resource.getLastModified(), e.getLocalFile(), //
-            IndexManager.NOT_PRESENT, IndexManager.NOT_PRESENT);
+            IIndex.NOT_PRESENT, IIndex.NOT_PRESENT);
       }
     }
   }

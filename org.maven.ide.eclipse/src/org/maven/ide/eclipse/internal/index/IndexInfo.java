@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.index;
+package org.maven.ide.eclipse.internal.index;
 
 import java.io.File;
 import java.net.URL;

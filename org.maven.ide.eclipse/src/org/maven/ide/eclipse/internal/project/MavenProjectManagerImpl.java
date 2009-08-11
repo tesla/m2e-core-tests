@@ -56,7 +56,6 @@ import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
-import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.project.IMavenMarkerManager;
 import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
@@ -104,7 +103,6 @@ public class MavenProjectManagerImpl {
   private final ProjectRegistry projectRegistry;
 
   private final MavenConsole console;
-  private final IndexManager indexManager;
   private final IMaven maven;
 
   private final IMavenMarkerManager markerManager;
@@ -117,10 +115,9 @@ public class MavenProjectManagerImpl {
 
   private volatile Thread syncRefreshThread;
 
-  public MavenProjectManagerImpl(MavenConsole console, IndexManager indexManager,
+  public MavenProjectManagerImpl(MavenConsole console,
       File stateLocationDir, boolean readState, MavenRuntimeManager runtimeManager, IMavenMarkerManager mavenMarkerManager) {
     this.console = console;
-    this.indexManager = indexManager;
     this.markerManager = mavenMarkerManager;
     this.maven = MavenPlugin.lookup(IMaven.class);
 
@@ -128,10 +125,6 @@ public class MavenProjectManagerImpl {
 
     ProjectRegistry state = readState && stateReader != null ? stateReader.readWorkspaceState(this) : null;
     this.projectRegistry = (state != null && state.isValid())? state: new ProjectRegistry();
-
-    for (MavenProjectFacade facade : this.projectRegistry.getProjects()) {
-      addToIndex(facade);
-    }
   }
   
   /**
@@ -280,8 +273,6 @@ public class MavenProjectManagerImpl {
 
     pomSet.addAll(state.getDependents(pom, mavenProject, false));
     state.removeProject(pom, mavenProject);
-    removeFromIndex(facade);
-//    addProjectChangeEvent(pom, MavenProjectChangedEvent.KIND_REMOVED, MavenProjectChangedEvent.FLAG_NONE, facade, null);
 
     // XXX this will likely NOT work for closed/removed projects, need to move to IResourceChangeEventListener
     if(facade!=null) {
@@ -465,10 +456,6 @@ public class MavenProjectManagerImpl {
         state.addProjectDependency(pom, new ArtifactKey(mavenProject.getParentArtifact()), true);
       }
     }
-
-    // update index
-    removeFromIndex(oldFacade);
-    addToIndex(facade);
   }
 
   private Set<IFile> refreshNestedModules(IFile pom, MavenProject mavenProject) {
@@ -556,20 +543,6 @@ public class MavenProjectManagerImpl {
         ArtifactKey artifactKey = new ArtifactKey(plugin.getGroupId(), plugin.getArtifactId(), plugin.getVersion(), null);
         state.addProjectDependency(pom, artifactKey, workspace);
       }
-    }
-  }
-
-  private void addToIndex(MavenProjectFacade mavenProject) {
-    if (mavenProject != null) {
-      indexManager.addDocument(IndexManager.WORKSPACE_INDEX, mavenProject.getPomFile(), //
-          indexManager.getDocumentKey(mavenProject.getArtifactKey()), -1, -1, null, IndexManager.NOT_PRESENT, IndexManager.NOT_PRESENT);
-    }
-  }
-  
-  private void removeFromIndex(MavenProjectFacade mavenProject) {
-    if (mavenProject != null) {
-      indexManager.removeDocument(IndexManager.WORKSPACE_INDEX, //
-          mavenProject.getPomFile(), indexManager.getDocumentKey(mavenProject.getArtifactKey()));
     }
   }
 
@@ -704,6 +677,10 @@ public class MavenProjectManagerImpl {
 
   public IMavenProjectFacade[] getProjects() {
     return projectRegistry.getProjects();
+  }
+
+  public IMavenProjectFacade getProject(IProject project) {
+    return projectRegistry.getProjectFacade(getPom(project));
   }
 
   public boolean setResolverConfiguration(IProject project, ResolverConfiguration configuration) {

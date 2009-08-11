@@ -81,7 +81,7 @@ import org.maven.ide.eclipse.editor.pom.SearchMatcher;
 import org.maven.ide.eclipse.editor.pom.ValueProvider;
 import org.maven.ide.eclipse.editor.xml.search.Packaging;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
-import org.maven.ide.eclipse.index.IndexManager;
+import org.maven.ide.eclipse.index.IIndex;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.ui.dialogs.MavenRepositorySearchDialog;
 import org.maven.ide.eclipse.wizards.WidthGroup;
@@ -271,7 +271,7 @@ public class DependenciesComposite extends Composite {
         // TODO calculate current list of artifacts for the project
         Set<ArtifactKey> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            "Select Dependency", IndexManager.SEARCH_ARTIFACT, artifacts, true);
+            "Select Dependency", IIndex.SEARCH_ARTIFACT, artifacts, true);
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {
@@ -419,7 +419,7 @@ public class DependenciesComposite extends Composite {
         // TODO calculate current list of artifacts for the project
         Set<ArtifactKey> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            "Select Dependency", IndexManager.SEARCH_ARTIFACT, artifacts, true);
+            "Select Dependency", IIndex.SEARCH_ARTIFACT, artifacts, true);
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {
@@ -511,7 +511,7 @@ public class DependenciesComposite extends Composite {
         // TODO calculate current list of artifacts for the project
         Set<ArtifactKey> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            "Select Dependency", IndexManager.SEARCH_ARTIFACT, artifacts, true);
+            "Select Dependency", IIndex.SEARCH_ARTIFACT, artifacts, true);
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {
@@ -575,7 +575,7 @@ public class DependenciesComposite extends Composite {
     GridData gd_groupIdText = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
     gd_groupIdText.horizontalIndent = 4;
     groupIdText.setLayoutData(gd_groupIdText);
-    FormUtils.addGroupIdProposal(groupIdText, Packaging.ALL);
+    FormUtils.addGroupIdProposal(editorPage.getProject(), groupIdText, Packaging.ALL);
 
     Hyperlink artifactIdHyperlink = toolkit.createHyperlink(dependencyComposite, "Artifact Id:*", SWT.NONE);
     artifactIdHyperlink.setLayoutData(new GridData());
@@ -601,7 +601,7 @@ public class DependenciesComposite extends Composite {
     GridData gd_artifactIdText = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
     gd_artifactIdText.horizontalIndent = 4;
     artifactIdText.setLayoutData(gd_artifactIdText);
-    FormUtils.addArtifactIdProposal(groupIdText, artifactIdText, Packaging.ALL);
+    FormUtils.addArtifactIdProposal(editorPage.getProject(), groupIdText, artifactIdText, Packaging.ALL);
 
     Label versionLabel = toolkit.createLabel(dependencyComposite, "Version:", SWT.NONE);
     versionLabel.setLayoutData(new GridData());
@@ -612,7 +612,7 @@ public class DependenciesComposite extends Composite {
     versionTextData.horizontalIndent = 4;
     versionTextData.widthHint = 200;
     versionText.setLayoutData(versionTextData);
-    FormUtils.addVersionProposal(groupIdText, artifactIdText, versionText, Packaging.ALL);
+    FormUtils.addVersionProposal(editorPage.getProject(), groupIdText, artifactIdText, versionText, Packaging.ALL);
 
 //    dependencySelectButton = toolkit.createButton(dependencyComposite, "Select...", SWT.NONE);
 //    dependencySelectButton.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 2));
@@ -643,7 +643,7 @@ public class DependenciesComposite extends Composite {
     gd_classifierText.horizontalIndent = 4;
     gd_classifierText.widthHint = 200;
     classifierText.setLayoutData(gd_classifierText);
-    FormUtils.addClassifierProposal(groupIdText, artifactIdText, versionText, classifierText, Packaging.ALL);
+    FormUtils.addClassifierProposal(editorPage.getProject(), groupIdText, artifactIdText, versionText, classifierText, Packaging.ALL);
     
     Label typeLabel = toolkit.createLabel(dependencyComposite, "Type:", SWT.NONE);
     typeLabel.setLayoutData(new GridData());
@@ -771,7 +771,7 @@ public class DependenciesComposite extends Composite {
       public void widgetSelected(SelectionEvent e) {
         Set<ArtifactKey> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            "Add Exclusion", IndexManager.SEARCH_ARTIFACT, artifacts);
+            "Add Exclusion", IIndex.SEARCH_ARTIFACT, artifacts);
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {
@@ -833,7 +833,7 @@ public class DependenciesComposite extends Composite {
     gd_exclusionGroupIdText.horizontalIndent = 4;
     exclusionGroupIdText.setLayoutData(gd_exclusionGroupIdText);
     // TODO handle ArtifactInfo
-    FormUtils.addGroupIdProposal(exclusionGroupIdText, Packaging.ALL);
+    FormUtils.addGroupIdProposal(editorPage.getProject(), exclusionGroupIdText, Packaging.ALL);
 
 //    exclusionSelectButton = toolkit.createButton(exclusionDetailsComposite, "Select...", SWT.NONE);
 //    exclusionSelectButton.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 2));
@@ -862,14 +862,14 @@ public class DependenciesComposite extends Composite {
     gd_exclusionArtifactIdText.horizontalIndent = 4;
     exclusionArtifactIdText.setLayoutData(gd_exclusionArtifactIdText);
     // TODO handle ArtifactInfo
-    FormUtils.addArtifactIdProposal(exclusionGroupIdText, exclusionArtifactIdText, Packaging.ALL);
+    FormUtils.addArtifactIdProposal(editorPage.getProject(), exclusionGroupIdText, exclusionArtifactIdText, Packaging.ALL);
     
     exclusionSelectAction = new Action("Select Exclusion", MavenEditorImages.SELECT_ARTIFACT) {
       public void run() {
         // XXX calculate list available for exclusion
         Set<ArtifactKey> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            "Select Exclusion", IndexManager.SEARCH_ARTIFACT, artifacts);
+            "Select Exclusion", IIndex.SEARCH_ARTIFACT, artifacts);
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {

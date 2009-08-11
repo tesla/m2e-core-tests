@@ -36,7 +36,6 @@ import org.maven.ide.eclipse.actions.SelectionUtil;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.IMaven;
-import org.maven.ide.eclipse.index.IndexManager;
 
 /**
  * Open JavaDoc action
@@ -89,12 +88,9 @@ public class OpenJavaDocAction extends ActionDelegate {
     final String name = groupId + ":" + artifactId + ":" + version + ":javadoc";
 
     try {
-      MavenPlugin plugin = MavenPlugin.getDefault();
-      
-      IndexManager indexManager = plugin.getIndexManager();
-      List<ArtifactRepository> artifactRepositories = indexManager.getArtifactRepositories(null, null);
-
       IMaven maven = MavenPlugin.lookup(IMaven.class);
+
+      List<ArtifactRepository> artifactRepositories = maven.getArtifactRepositories();
       
       Artifact artifact = maven.resolve(groupId, artifactId, version, "javadoc", "javadoc", artifactRepositories, monitor);
       

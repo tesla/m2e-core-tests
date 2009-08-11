@@ -56,14 +56,15 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.MaterializeAction;
 import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.core.MavenLogger;
-import org.maven.ide.eclipse.index.IndexInfo;
-import org.maven.ide.eclipse.index.IndexListener;
+import org.maven.ide.eclipse.index.IIndex;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.index.IndexedArtifactGroup;
-import org.maven.ide.eclipse.index.IndexInfo.Type;
+import org.maven.ide.eclipse.internal.index.IndexInfo;
+import org.maven.ide.eclipse.internal.index.IndexListener;
 import org.maven.ide.eclipse.internal.index.IndexUnpackerJob;
+import org.maven.ide.eclipse.internal.index.IndexInfo.Type;
 
 
 /**
@@ -660,7 +661,7 @@ public class MavenIndexesView extends ViewPart {
         return results.toArray(new Object[results.size()]);
 
       } else if(parent instanceof IndexedArtifact) {
-        Set<IndexedArtifactFile> files = ((IndexedArtifact) parent).files;
+        Set<IndexedArtifactFile> files = ((IndexedArtifact) parent).getFiles();
         return files.toArray(new IndexedArtifactFile[files.size()]);
       }
 
@@ -731,7 +732,7 @@ public class MavenIndexesView extends ViewPart {
       } else if(obj instanceof IndexedArtifact) {
         IndexedArtifact a = (IndexedArtifact) obj;
         // return a.group + ":" + a.artifact;
-        return a.artifact + " - " + a.packaging;
+        return a.getArtifactId() + " - " + a.getPackaging();
 
       } else if(obj instanceof IndexedArtifactFile) {
         IndexedArtifactFile f = (IndexedArtifactFile) obj;
@@ -760,7 +761,7 @@ public class MavenIndexesView extends ViewPart {
 
       } else if(obj instanceof IndexedArtifactFile) {
         IndexedArtifactFile f = (IndexedArtifactFile) obj;
-        if(f.sourcesExists == IndexManager.PRESENT) {
+        if(f.sourcesExists == IIndex.PRESENT) {
           return MavenImages.IMG_VERSION_SRC;
         }
         return MavenImages.IMG_VERSION;

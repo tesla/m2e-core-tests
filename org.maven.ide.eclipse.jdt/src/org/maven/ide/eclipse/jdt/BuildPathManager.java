@@ -79,6 +79,7 @@ import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
+import org.maven.ide.eclipse.index.IIndex;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.jdt.internal.ClasspathDescriptor;
@@ -95,8 +96,6 @@ import org.maven.ide.eclipse.project.configurator.ILifecycleMapping;
 
 /**
  * This class is responsible for mapping Maven classpath to JDT and back.
- * 
- * XXX take project import code into a separate class (ProjectImportManager?)
  */
 @SuppressWarnings("restriction")
 public class BuildPathManager implements IMavenProjectChangedListener, IResourceChangeListener {
@@ -450,12 +449,11 @@ public class BuildPathManager implements IMavenProjectChangedListener, IResource
   public void downloadSources(IProject project, ArtifactKey artifact, boolean downloadSources, boolean downloadJavaDoc) {
     if(downloadSources || downloadJavaDoc) {
       try {
-        IndexedArtifactFile af = indexManager.getIndexedArtifactFile(IndexManager.LOCAL_INDEX, //
-            indexManager.getDocumentKey(artifact));
+        IndexedArtifactFile af = indexManager.getIndex(project).getIndexedArtifactFile(artifact);
         if(af != null) {
           // download if sources and javadoc artifact is available from remote repositories
-          boolean shouldDownloadSources = downloadSources && af.sourcesExists != IndexManager.NOT_AVAILABLE;
-          boolean shouldDownloadJavaDoc = downloadJavaDoc && af.javadocExists != IndexManager.NOT_AVAILABLE;
+          boolean shouldDownloadSources = downloadSources && af.sourcesExists != IIndex.NOT_AVAILABLE;
+          boolean shouldDownloadJavaDoc = downloadJavaDoc && af.javadocExists != IIndex.NOT_AVAILABLE;
           if(shouldDownloadSources || shouldDownloadJavaDoc) {
             Set<ArtifactKey> artifacts = new HashSet<ArtifactKey>();
             artifacts.add(artifact);
@@ -585,11 +583,11 @@ public class BuildPathManager implements IMavenProjectChangedListener, IResource
     IFile jarFile = project.getWorkspace().getRoot().getFile(entry.getPath());
     File file = jarFile==null || jarFile.getLocation()==null ? entry.getPath().toFile() : jarFile.getLocation().toFile();
 
-    IndexedArtifactFile iaf = indexManager.identify(file);
+    IndexedArtifactFile iaf = indexManager.getIndex(project).identify(file);
     if(iaf!=null) {
       return new ArtifactKey(iaf.group, iaf.artifact, iaf.version, iaf.classifier);
     }
-      
+
     return null;
   }
 

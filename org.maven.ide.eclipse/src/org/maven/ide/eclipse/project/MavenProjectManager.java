@@ -104,6 +104,14 @@ public class MavenProjectManager {
     return manager.getProjects();
   }
 
+  /**
+   * @return IMavenProjectFacade cached IMavenProjectFacade corresponding
+   *    to the project or null if there is no cache entry for the project.
+   */
+  public IMavenProjectFacade getProject(IProject project) {
+    return manager.getProject(project);
+  }
+
   public IMavenProjectFacade getMavenProject(String groupId, String artifactId, String version) {
     return manager.getMavenProject(groupId, artifactId, version);
   }

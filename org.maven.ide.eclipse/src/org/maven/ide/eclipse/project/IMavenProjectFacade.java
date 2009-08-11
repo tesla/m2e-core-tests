@@ -131,4 +131,9 @@ public interface IMavenProjectFacade {
    * @see #setSessionProperty(String, Object)
    */
   public Object getSessionProperty(String key);
+
+  Set<String> getArtifactRepositoryUrls();
+
+  Set<String> getPluginArtifactRepositoryUrls();
+
 }

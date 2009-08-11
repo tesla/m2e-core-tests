@@ -31,7 +31,12 @@ public class RemoteRepositoryRootNode implements IMavenRepositoryNode{
 
   public List<ArtifactRepository> getRemoteRepositories() throws Exception{
     IMaven maven = MavenPlugin.getDefault().getMaven();
-    return maven.getEffectiveRepositories();
+    
+    ArrayList<ArtifactRepository> repositories = new ArrayList<ArtifactRepository>();
+    repositories.addAll(maven.getArtifactRepositories());
+    repositories.addAll(maven.getPluginArtifactRepository());
+
+    return maven.getEffectiveRepositories(repositories);
   }
   
   public List<Mirror> getMirrors(){

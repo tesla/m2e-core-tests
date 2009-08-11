@@ -68,7 +68,7 @@ import org.maven.ide.eclipse.editor.composites.ListEditorComposite;
 import org.maven.ide.eclipse.editor.composites.ListEditorContentProvider;
 import org.maven.ide.eclipse.editor.xml.search.Packaging;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
-import org.maven.ide.eclipse.index.IndexManager;
+import org.maven.ide.eclipse.index.IIndex;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.ui.dialogs.MavenRepositorySearchDialog;
 
@@ -252,7 +252,7 @@ public class BuildPage extends MavenPomEditorPage {
         // XXX calculate list available extensions
         Set<ArtifactKey> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getEditorSite().getShell(), //
-            "Add Extension", IndexManager.SEARCH_ARTIFACT, artifacts);
+            "Add Extension", IIndex.SEARCH_ARTIFACT, artifacts);
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {
@@ -320,7 +320,7 @@ public class BuildPage extends MavenPomEditorPage {
     extensionGroupIdText = toolkit.createText(extensionDetialsComposite, null, SWT.FLAT);
     extensionGroupIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
     extensionGroupIdText.setData("name", "extensionGroupIdText");
-    FormUtils.addGroupIdProposal(extensionGroupIdText, Packaging.ALL);
+    FormUtils.addGroupIdProposal(getProject(), extensionGroupIdText, Packaging.ALL);
     
     Hyperlink extensionArtifactIdHyperlink = toolkit.createHyperlink(extensionDetialsComposite, "Artifact Id:*", SWT.NONE);
     extensionArtifactIdHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
@@ -340,14 +340,14 @@ public class BuildPage extends MavenPomEditorPage {
     extensionArtifactIdText = toolkit.createText(extensionDetialsComposite, null, SWT.FLAT);
     extensionArtifactIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
     extensionArtifactIdText.setData("name", "extensionArtifactIdText");
-    FormUtils.addArtifactIdProposal(extensionGroupIdText, extensionArtifactIdText, Packaging.ALL);
+    FormUtils.addArtifactIdProposal(getProject(), extensionGroupIdText, extensionArtifactIdText, Packaging.ALL);
     
     toolkit.createLabel(extensionDetialsComposite, "Version:");
     
     extensionVersionText = toolkit.createText(extensionDetialsComposite, null, SWT.FLAT);
     extensionVersionText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
     extensionVersionText.setData("name", "extensionVersionText");
-    FormUtils.addVersionProposal(extensionGroupIdText, extensionArtifactIdText, extensionVersionText, Packaging.ALL);
+    FormUtils.addVersionProposal(getProject(), extensionGroupIdText, extensionArtifactIdText, extensionVersionText, Packaging.ALL);
     extensionDetialsComposite.setTabList(new Control[] {extensionGroupIdText, extensionArtifactIdText, extensionVersionText});
 
 //    extensionSelectButton = toolkit.createButton(extensionDetialsComposite, "Select...", SWT.FLAT);
@@ -374,7 +374,7 @@ public class BuildPage extends MavenPomEditorPage {
         // XXX calculate list available extensions
         Set<ArtifactKey> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getEditorSite().getShell(), //
-            "Select Extension", IndexManager.SEARCH_ARTIFACT, artifacts);
+            "Select Extension", IIndex.SEARCH_ARTIFACT, artifacts);
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {

@@ -8,15 +8,9 @@
 
 package org.maven.ide.eclipse.internal;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,8 +28,6 @@ import org.maven.ide.eclipse.archetype.ArchetypeCatalogFactory;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
-import org.maven.ide.eclipse.index.IndexInfo;
-import org.maven.ide.eclipse.internal.index.IndexInfoWriter;
 import org.maven.ide.eclipse.project.IMavenMarkerManager;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
@@ -91,84 +83,84 @@ public class ExtensionReader {
    * @param configFile previously saved indexes configuration
    * @return collection of {@link IndexInfo} loaded from given config
    */
-  public static Collection<IndexInfo> readIndexInfoConfig(File configFile) {
-    if(configFile != null && configFile.exists()) {
-      FileInputStream is = null;
-      try {
-        is = new FileInputStream(configFile);
-        IndexInfoWriter writer = new IndexInfoWriter();
-        return writer.readIndexInfo(is);
-      } catch(IOException ex) {
-        MavenLogger.log("Unable to read index configuration", ex);
-      } finally {
-        if(is != null) {
-          try {
-            is.close();
-          } catch(IOException ex) {
-            MavenLogger.log("Unable to close index config stream", ex);
-          }
-        }
-      }
-    }
-
-    return Collections.emptyList();
-  }
+//  public static Collection<IndexInfo> readIndexInfoConfig(File configFile) {
+//    if(configFile != null && configFile.exists()) {
+//      FileInputStream is = null;
+//      try {
+//        is = new FileInputStream(configFile);
+//        IndexInfoWriter writer = new IndexInfoWriter();
+//        return writer.readIndexInfo(is);
+//      } catch(IOException ex) {
+//        MavenLogger.log("Unable to read index configuration", ex);
+//      } finally {
+//        if(is != null) {
+//          try {
+//            is.close();
+//          } catch(IOException ex) {
+//            MavenLogger.log("Unable to close index config stream", ex);
+//          }
+//        }
+//      }
+//    }
+//
+//    return Collections.emptyList();
+//  }
 
   /**
    * @param configFile previously saved indexes configuration
    * @return collection of {@link IndexInfo} from the extension points
    */
-  public static Map<String, IndexInfo> readIndexInfoExtensions() {
-    Map<String, IndexInfo> indexes = new LinkedHashMap<String, IndexInfo>();
-
-    IExtensionRegistry registry = Platform.getExtensionRegistry();
-    IExtensionPoint indexesExtensionPoint = registry.getExtensionPoint(EXTENSION_INDEXES);
-    if(indexesExtensionPoint != null) {
-      IExtension[] indexesExtensions = indexesExtensionPoint.getExtensions();
-      for(IExtension extension : indexesExtensions) {
-        IContributor contributor = extension.getContributor();
-        // central is special cased in MavenPlugin for time being, ignore old central plugin
-        if ("org.maven.ide.eclipse.central".equals(contributor.getName())) {
-          continue;
-        }
-        IConfigurationElement[] elements = extension.getConfigurationElements();
-        for(IConfigurationElement element : elements) {
-          if(element.getName().equals(ELEMENT_INDEX)) {
-            IndexInfo indexInfo = readIndexElement(element, contributor);
-            indexes.put(indexInfo.getIndexName(), indexInfo);
-          }
-        }
-      }
-    }
-
-    return indexes;
-  }
-
-  private static IndexInfo readIndexElement(IConfigurationElement element, IContributor contributor) {
-    String indexId = element.getAttribute(ATTR_INDEX_ID);
-    String repositoryUrl = element.getAttribute(ATTR_REPOSITORY_URL);
-    String indexUpdateUrl = element.getAttribute(ATTR_UPDATE_URL);
-    boolean isShort = Boolean.valueOf(element.getAttribute(ATTR_IS_SHORT)).booleanValue();
-
-    IndexInfo indexInfo = new IndexInfo(indexId, null, repositoryUrl, IndexInfo.Type.REMOTE, isShort);
-    indexInfo.setIndexUpdateUrl(indexUpdateUrl);
-
-    String archive = element.getAttribute(ATTR_INDEX_ARCHIVE);
-    if(archive != null) {
-      Bundle[] bundles = Platform.getBundles(contributor.getName(), null);
-      URL archiveUrl = null;
-      for(int i = 0; i < bundles.length && archiveUrl == null; i++ ) {
-        Bundle bundle = bundles[i];
-        archiveUrl = bundle.getEntry(archive);
-        indexInfo.setArchiveUrl(archiveUrl);
-      }
-      if(archiveUrl == null) {
-        MavenLogger.log("Unable to find index archive " + archive + " in " + contributor.getName(), null);
-      }
-    }
-
-    return indexInfo;
-  }
+//  public static Map<String, IndexInfo> readIndexInfoExtensions() {
+//    Map<String, IndexInfo> indexes = new LinkedHashMap<String, IndexInfo>();
+//
+//    IExtensionRegistry registry = Platform.getExtensionRegistry();
+//    IExtensionPoint indexesExtensionPoint = registry.getExtensionPoint(EXTENSION_INDEXES);
+//    if(indexesExtensionPoint != null) {
+//      IExtension[] indexesExtensions = indexesExtensionPoint.getExtensions();
+//      for(IExtension extension : indexesExtensions) {
+//        IContributor contributor = extension.getContributor();
+//        // central is special cased in MavenPlugin for time being, ignore old central plugin
+//        if ("org.maven.ide.eclipse.central".equals(contributor.getName())) {
+//          continue;
+//        }
+//        IConfigurationElement[] elements = extension.getConfigurationElements();
+//        for(IConfigurationElement element : elements) {
+//          if(element.getName().equals(ELEMENT_INDEX)) {
+//            IndexInfo indexInfo = readIndexElement(element, contributor);
+//            indexes.put(indexInfo.getIndexName(), indexInfo);
+//          }
+//        }
+//      }
+//    }
+//
+//    return indexes;
+//  }
+//
+//  private static IndexInfo readIndexElement(IConfigurationElement element, IContributor contributor) {
+//    String indexId = element.getAttribute(ATTR_INDEX_ID);
+//    String repositoryUrl = element.getAttribute(ATTR_REPOSITORY_URL);
+//    String indexUpdateUrl = element.getAttribute(ATTR_UPDATE_URL);
+//    boolean isShort = Boolean.valueOf(element.getAttribute(ATTR_IS_SHORT)).booleanValue();
+//
+//    IndexInfo indexInfo = new IndexInfo(indexId, null, repositoryUrl, IndexInfo.Type.REMOTE, isShort);
+//    indexInfo.setIndexUpdateUrl(indexUpdateUrl);
+//
+//    String archive = element.getAttribute(ATTR_INDEX_ARCHIVE);
+//    if(archive != null) {
+//      Bundle[] bundles = Platform.getBundles(contributor.getName(), null);
+//      URL archiveUrl = null;
+//      for(int i = 0; i < bundles.length && archiveUrl == null; i++ ) {
+//        Bundle bundle = bundles[i];
+//        archiveUrl = bundle.getEntry(archive);
+//        indexInfo.setArchiveUrl(archiveUrl);
+//      }
+//      if(archiveUrl == null) {
+//        MavenLogger.log("Unable to find index archive " + archive + " in " + contributor.getName(), null);
+//      }
+//    }
+//
+//    return indexInfo;
+//  }
 
   public static List<ArchetypeCatalogFactory> readArchetypeExtensions() {
     List<ArchetypeCatalogFactory> archetypeCatalogs = new ArrayList<ArchetypeCatalogFactory>();

@@ -31,7 +31,6 @@ import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.IMaven;
-import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 
@@ -74,8 +73,6 @@ class DownloadSourcesJob extends Job {
 
   private final MavenProjectManager projectManager;
 
-  private final IndexManager indexManager;
-
   private final ArrayList<DownloadRequest> queue = new ArrayList<DownloadRequest>();
 
   public DownloadSourcesJob(BuildPathManager manager) {
@@ -86,7 +83,6 @@ class DownloadSourcesJob extends Job {
 
     MavenPlugin plugin = MavenPlugin.getDefault();
     this.projectManager = plugin.getMavenProjectManager();
-    this.indexManager = plugin.getIndexManager();
     this.console = plugin.getConsole();
   }
 
@@ -126,7 +122,7 @@ class DownloadSourcesJob extends Job {
     if(projectFacade != null) {
       repositories = projectFacade.getMavenProject(monitor).getRemoteArtifactRepositories();
     } else {
-      repositories = indexManager.getArtifactRepositories(null, null);
+      repositories = maven.getArtifactRepositories();
     }
 
     Artifact[] sources = new Artifact[request.artifacts.size()];

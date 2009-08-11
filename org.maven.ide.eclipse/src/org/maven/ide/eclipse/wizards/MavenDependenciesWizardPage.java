@@ -37,7 +37,7 @@ import org.apache.maven.model.Dependency;
 import org.maven.ide.eclipse.MavenImages;
 import org.maven.ide.eclipse.core.Messages;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
-import org.maven.ide.eclipse.index.IndexManager;
+import org.maven.ide.eclipse.index.IIndex;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
@@ -124,7 +124,7 @@ public class MavenDependenciesWizardPage extends AbstractMavenWizardPage {
     addDependencyButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            "Add Dependency", IndexManager.SEARCH_ARTIFACT, Collections.<ArtifactKey>emptySet(), showScope);
+            "Add Dependency", IIndex.SEARCH_ARTIFACT, Collections.<ArtifactKey>emptySet(), showScope);
         if(dialog.open() == Window.OK) {
           Object result = dialog.getFirstResult();
           if(result instanceof IndexedArtifactFile) {
@@ -135,7 +135,7 @@ public class MavenDependenciesWizardPage extends AbstractMavenWizardPage {
           } else if(result instanceof IndexedArtifact) {
             // If we have an ArtifactInfo, we add the first FileInfo it contains
             // which corresponds to the latest version of the artifact.
-            Set<IndexedArtifactFile> files = ((IndexedArtifact) result).files;
+            Set<IndexedArtifactFile> files = ((IndexedArtifact) result).getFiles();
             if(files != null && !files.isEmpty()) {
               dependencyViewer.add(files.iterator().next().getDependency());
               notifyListeners();

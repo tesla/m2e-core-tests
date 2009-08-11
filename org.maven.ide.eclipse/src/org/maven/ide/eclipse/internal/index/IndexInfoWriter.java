@@ -35,7 +35,6 @@ import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.XMLFilterImpl;
 
 import org.maven.ide.eclipse.core.MavenLogger;
-import org.maven.ide.eclipse.index.IndexInfo;
 
 
 /**

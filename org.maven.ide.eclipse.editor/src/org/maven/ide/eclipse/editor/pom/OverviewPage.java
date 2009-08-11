@@ -76,7 +76,7 @@ import org.maven.ide.eclipse.editor.composites.ListEditorComposite;
 import org.maven.ide.eclipse.editor.composites.ListEditorContentProvider;
 import org.maven.ide.eclipse.editor.xml.search.Packaging;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
-import org.maven.ide.eclipse.index.IndexManager;
+import org.maven.ide.eclipse.index.IIndex;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.ui.dialogs.MavenRepositorySearchDialog;
@@ -202,7 +202,7 @@ public class OverviewPage extends MavenPomEditorPage {
     GridData gd_artifactGroupIdText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_artifactGroupIdText.horizontalIndent = 4;
     artifactGroupIdText.setLayoutData(gd_artifactGroupIdText);
-    FormUtils.addGroupIdProposal(artifactGroupIdText, Packaging.ALL);
+    FormUtils.addGroupIdProposal(getProject(), artifactGroupIdText, Packaging.ALL);
   
     Label artifactIdLabel = toolkit.createLabel(artifactComposite, "Artifact Id:*", SWT.NONE);
   
@@ -263,7 +263,7 @@ public class OverviewPage extends MavenPomEditorPage {
         // TODO calculate current list of artifacts for the project
         Set<ArtifactKey> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getEditorSite().getShell(), //
-            "Add Dependency", IndexManager.SEARCH_ARTIFACT, artifacts, false);
+            "Add Dependency", IIndex.SEARCH_ARTIFACT, artifacts, false);
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {
@@ -304,7 +304,7 @@ public class OverviewPage extends MavenPomEditorPage {
     gd_parentGroupIdText.horizontalIndent = 4;
     parentGroupIdText.setLayoutData(gd_parentGroupIdText);
     parentGroupIdText.setData("name", "parentGroupId");
-    FormUtils.addGroupIdProposal(parentGroupIdText, Packaging.POM);
+    FormUtils.addGroupIdProposal(getProject(), parentGroupIdText, Packaging.POM);
     
     Hyperlink parentArtifactIdLabel = toolkit.createHyperlink(parentComposite, "Artifact Id:*", SWT.NONE);
     parentArtifactIdLabel.addHyperlinkListener(new HyperlinkAdapter() {
@@ -326,7 +326,7 @@ public class OverviewPage extends MavenPomEditorPage {
     gd_parentArtifactIdText.horizontalIndent = 4;
     parentArtifactIdText.setLayoutData(gd_parentArtifactIdText);
     parentArtifactIdText.setData("name", "parentArtifactId");
-    FormUtils.addArtifactIdProposal(parentGroupIdText, parentArtifactIdText, Packaging.POM);
+    FormUtils.addArtifactIdProposal(getProject(), parentGroupIdText, parentArtifactIdText, Packaging.POM);
   
     Label parentVersionLabel = toolkit.createLabel(parentComposite, "Version:*", SWT.NONE);
     parentVersionLabel.setLayoutData(new GridData());
@@ -337,7 +337,7 @@ public class OverviewPage extends MavenPomEditorPage {
     parentVersionTextData.widthHint = 200;
     parentVersionText.setLayoutData(parentVersionTextData);
     parentVersionText.setData("name", "parentVersion");
-    FormUtils.addVersionProposal(parentGroupIdText, parentArtifactIdText, parentVersionText, Packaging.POM);
+    FormUtils.addVersionProposal(getProject(), parentGroupIdText, parentArtifactIdText, parentVersionText, Packaging.POM);
   
 //    Button parentSelectButton = toolkit.createButton(parentComposite, "Select...", SWT.NONE);
 //    parentSelectButton.addSelectionListener(new SelectionAdapter() {

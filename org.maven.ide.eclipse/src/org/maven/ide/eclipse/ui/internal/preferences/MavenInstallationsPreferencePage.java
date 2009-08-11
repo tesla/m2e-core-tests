@@ -154,7 +154,8 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
         if(defaultRuntime == null || defaultRuntime instanceof MavenEmbeddedRuntime){
           storeCustom(dir);
         }
-        mavenPlugin.getIndexManager().scheduleIndexUpdate(IndexManager.LOCAL_INDEX, true, 0L);
+        IndexManager indexManager = mavenPlugin.getIndexManager();
+        indexManager.getWorkspaceIndex().scheduleIndexUpdate(true, 0L);
         if((dir == null && oldSettings != null) || (dir != null && !(dir.equals(oldSettings)))){
           //mavenPlugin.getIndexManager().scheduleIndexUpdate(IndexManager.LOCAL_INDEX, true, 0L);
         }

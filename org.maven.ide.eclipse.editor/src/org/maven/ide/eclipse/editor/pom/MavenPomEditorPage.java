@@ -18,6 +18,7 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -568,5 +569,10 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
     String getText();
     void addModifyListener(ModifyListener listener);
   }
-  
+
+  public IProject getProject() {
+    IFile pomFile = pomEditor.getPomFile();
+    return pomFile != null? pomFile.getProject(): null;
+  }
+
 }

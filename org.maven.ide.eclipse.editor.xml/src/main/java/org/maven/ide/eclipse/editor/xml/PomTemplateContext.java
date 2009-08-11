@@ -24,8 +24,6 @@ import java.util.zip.ZipFile;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.resolver.AbstractArtifactResolutionException;
-import org.apache.maven.embedder.MavenEmbedder;
 import org.apache.maven.plugin.descriptor.MojoDescriptor;
 import org.apache.maven.plugin.descriptor.Parameter;
 import org.apache.maven.plugin.descriptor.PluginDescriptor;
@@ -35,6 +33,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.text.templates.Template;
@@ -47,7 +46,6 @@ import org.maven.ide.eclipse.editor.xml.search.ArtifactInfo;
 import org.maven.ide.eclipse.editor.xml.search.Packaging;
 import org.maven.ide.eclipse.editor.xml.search.SearchEngine;
 import org.maven.ide.eclipse.embedder.IMaven;
-import org.maven.ide.eclipse.index.IndexManager;
 
 
 /**
@@ -86,7 +84,7 @@ public enum PomTemplateContext {
     private final Map<String, PluginDescriptor> descriptors = new HashMap<String, PluginDescriptor>();
 
     @Override
-    protected void addTemplates(Collection<Template> proposals, Node node, String prefix) {
+    protected void addTemplates(IProject project, Collection<Template> proposals, Node node, String prefix) throws CoreException {
       String groupId = getGroupId(node);
       if(groupId==null) {
         groupId = "org.apache.maven.plugins";  // TODO support other default groups
@@ -94,7 +92,7 @@ public enum PomTemplateContext {
       String artifactId = getArtifactId(node);
       String version = getVersion(node);
       if(version==null) {
-        Collection<String> versions = getSearchEngine().findVersions(groupId, artifactId, "", Packaging.PLUGIN);
+        Collection<String> versions = getSearchEngine(project).findVersions(groupId, artifactId, "", Packaging.PLUGIN);
         if(versions.isEmpty()) {
           return;
         }
@@ -153,8 +151,7 @@ public enum PomTemplateContext {
       try {
         IMaven embedder = MavenPlugin.lookup(IMaven.class);
 
-        IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
-        List<ArtifactRepository> repositories = indexManager.getArtifactRepositories(null, null);
+        List<ArtifactRepository> repositories = embedder.getArtifactRepositories();
 
         Artifact artifact = embedder.resolve(groupId, artifactId, version, "maven-plugin", null,  repositories, null);
 
@@ -202,9 +199,9 @@ public enum PomTemplateContext {
   
   GROUP_ID("groupId") {
     @Override
-    public void addTemplates(Collection<Template> proposals, Node node, String prefix) {
+    public void addTemplates(IProject project, Collection<Template> proposals, Node node, String prefix) throws CoreException {
       String contextTypeId = getContextTypeId();
-      for(String groupId : getSearchEngine().findGroupIds(prefix, getPackaging(node), getContainingArtifact(node))) {
+      for(String groupId : getSearchEngine(project).findGroupIds(prefix, getPackaging(node), getContainingArtifact(node))) {
         add(proposals, contextTypeId, groupId);
       }
     }
@@ -212,11 +209,11 @@ public enum PomTemplateContext {
 
   ARTIFACT_ID("artifactId") {
     @Override
-    public void addTemplates(Collection<Template> proposals, Node node, String prefix) {
+    public void addTemplates(IProject project, Collection<Template> proposals, Node node, String prefix) throws CoreException {
       String groupId = getGroupId(node);
       if(groupId != null) {
         String contextTypeId = getContextTypeId();
-        for(String artifactId : getSearchEngine().findArtifactIds(groupId, prefix, getPackaging(node),
+        for(String artifactId : getSearchEngine(project).findArtifactIds(groupId, prefix, getPackaging(node),
             getContainingArtifact(node))) {
           add(proposals, contextTypeId, artifactId, groupId + ":" + artifactId);
         }
@@ -226,12 +223,12 @@ public enum PomTemplateContext {
 
   VERSION("version") {
     @Override
-    public void addTemplates(Collection<Template> proposals, Node node, String prefix) {
+    public void addTemplates(IProject project, Collection<Template> proposals, Node node, String prefix) throws CoreException {
       String groupId = getGroupId(node);
       String artifactId = getArtifactId(node);
       if(groupId != null && artifactId != null) {
         String contextTypeId = getContextTypeId();
-        for(String version : getSearchEngine().findVersions(groupId, artifactId, prefix, getPackaging(node))) {
+        for(String version : getSearchEngine(project).findVersions(groupId, artifactId, prefix, getPackaging(node))) {
           add(proposals, contextTypeId, version, groupId + ":" + artifactId + ":" + version);
         }
       }
@@ -240,13 +237,13 @@ public enum PomTemplateContext {
 
   CLASSIFIER("classifier") {
     @Override
-    public void addTemplates(Collection<Template> proposals, Node node, String prefix) {
+    public void addTemplates(IProject project, Collection<Template> proposals, Node node, String prefix) throws CoreException {
       String groupId = getGroupId(node);
       String artifactId = getArtifactId(node);
       String version = getVersion(node);
       if(groupId != null && artifactId != null && version != null) {
         String contextTypeId = getContextTypeId();
-        for(String classifier : getSearchEngine().findClassifiers(groupId, artifactId, version, prefix,
+        for(String classifier : getSearchEngine(project).findClassifiers(groupId, artifactId, version, prefix,
             getPackaging(node))) {
           add(proposals, contextTypeId, classifier, groupId + ":" + artifactId + ":" + version + ":" + classifier);
         }
@@ -256,13 +253,13 @@ public enum PomTemplateContext {
 
   TYPE("type") {
     @Override
-    public void addTemplates(Collection<Template> proposals, Node node, String prefix) {
+    public void addTemplates(IProject project, Collection<Template> proposals, Node node, String prefix) throws CoreException {
       String groupId = getGroupId(node);
       String artifactId = getArtifactId(node);
       String version = getVersion(node);
       String contextTypeId = getContextTypeId();
       if(groupId != null && artifactId != null && version != null) {
-        for(String type : getSearchEngine().findTypes(groupId, artifactId, version, prefix, getPackaging(node))) {
+        for(String type : getSearchEngine(project).findTypes(groupId, artifactId, version, prefix, getPackaging(node))) {
           add(proposals, contextTypeId, type, groupId + ":" + artifactId + ":" + version + ":" + type);
         }
       }
@@ -303,7 +300,7 @@ public enum PomTemplateContext {
   
   PHASE("phase") {
     @Override
-    public void addTemplates(Collection<Template> proposals, Node node, String prefix) {
+    public void addTemplates(IProject project, Collection<Template> proposals, Node node, String prefix) {
       // TODO the following list should be derived from the packaging handler (the actual lifecycle)
       
       // Clean Lifecycle
@@ -354,9 +351,13 @@ public enum PomTemplateContext {
   /**
    * Return templates depending on the context type.
    */
-  public Template[] getTemplates(Node node, String prefix) {
+  public Template[] getTemplates(IProject project, Node node, String prefix) {
     Collection<Template> templates = new ArrayList<Template>();
-    addTemplates(templates, node, prefix);
+    try {
+      addTemplates(project, templates, node, prefix);
+    } catch (CoreException e) {
+      MavenLogger.log(e);
+    }
     
     TemplateStore store = MvnIndexPlugin.getDefault().getTemplateStore();
     if(store != null) {
@@ -366,7 +367,7 @@ public enum PomTemplateContext {
     return templates.toArray(new Template[templates.size()]);
   }
   
-  protected void addTemplates(Collection<Template> templates, Node currentNode, String prefix) {
+  protected void addTemplates(IProject project, Collection<Template> templates, Node currentNode, String prefix) throws CoreException {
   }
 
   protected String getNodeName() {
@@ -395,8 +396,8 @@ public enum PomTemplateContext {
     return UNKNOWN;
   }
 
-  private static SearchEngine getSearchEngine() {
-    return MvnIndexPlugin.getDefault().getSearchEngine();
+  private static SearchEngine getSearchEngine(IProject project) throws CoreException {
+    return MvnIndexPlugin.getDefault().getSearchEngine(project);
   }
   
   

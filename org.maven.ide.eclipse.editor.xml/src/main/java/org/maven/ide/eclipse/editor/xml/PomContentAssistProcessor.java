@@ -16,6 +16,7 @@ import java.util.List;
 import org.w3c.dom.Node;
 import org.w3c.dom.Text;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -79,7 +80,9 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
 
   private void addProposals(ContentAssistRequest request, PomTemplateContext context) {
     if(request != null) {
-      ICompletionProposal[] templateProposals = getTemplateProposals(sourceViewer, //
+      ICompletionProposal[] templateProposals = getTemplateProposals(
+          null, // XXX project context
+          sourceViewer, //
           request.getReplacementBeginPosition(), context.getContextTypeId(), getCurrentNode(request));
       for(ICompletionProposal proposal : templateProposals) {
         if(request.shouldSeparate()) {
@@ -91,7 +94,7 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
     }
   }
   
-  private ICompletionProposal[] getTemplateProposals(ITextViewer viewer, int offset, String contextTypeId, Node currentNode) {
+  private ICompletionProposal[] getTemplateProposals(IProject project, ITextViewer viewer, int offset, String contextTypeId, Node currentNode) {
     ITextSelection selection = (ITextSelection) viewer.getSelectionProvider().getSelection();
 
     // adjust offset to end of normalized selection
@@ -136,7 +139,7 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
     }
     
     List<TemplateProposal> matches = new ArrayList<TemplateProposal>();
-    Template[] templates = templateContext.getTemplates(currentNode, prefix);
+    Template[] templates = templateContext.getTemplates(project, currentNode, prefix);
     for(final Template template : templates) {
       try {
         context.getContextType().validate(template.getPattern());

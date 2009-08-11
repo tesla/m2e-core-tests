@@ -33,7 +33,7 @@ public class IndexedArtifactNode implements IMavenRepositoryNode {
    * @see org.maven.ide.eclipse.ui.internal.views.IMavenRepositoryNode#getChildren()
    */
   public Object[] getChildren() {
-    Set<IndexedArtifactFile> files = artifact.files;
+    Set<IndexedArtifactFile> files = artifact.getFiles();
     if(files == null){
       return new Object[0];
     }
@@ -49,7 +49,7 @@ public class IndexedArtifactNode implements IMavenRepositoryNode {
    */
   public String getName() {
     // return a.group + ":" + a.artifact;
-    return artifact.artifact + " - " + artifact.packaging;
+    return artifact.getArtifactId() + " - " + artifact.getPackaging();
   }
 
   /* (non-Javadoc)

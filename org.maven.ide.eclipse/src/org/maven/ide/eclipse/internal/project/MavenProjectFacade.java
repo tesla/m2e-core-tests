@@ -11,6 +11,7 @@ package org.maven.ide.eclipse.internal.project;
 import java.io.File;
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,6 +28,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.lifecycle.MavenExecutionPlan;
 import org.apache.maven.project.MavenProject;
@@ -76,6 +78,8 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
   private IPath outputLocation;
   private IPath testOutputLocation;
   private Set<ArtifactRef> artifacts;
+  private Set<String> artifactRepositoryUrls;
+  private Set<String> pluginArtifactRepositoryUrls;
 
   public MavenProjectFacade(MavenProjectManagerImpl manager, IFile pom, MavenProject mavenProject,
       ResolverConfiguration resolverConfiguration) {
@@ -109,6 +113,16 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
     this.testOutputLocation = path != null ? fullPath.append(path) : null;
 
     this.artifacts = ArtifactRef.fromArtifact(mavenProject.getArtifacts());
+
+    this.artifactRepositoryUrls = new LinkedHashSet<String>();
+    for(ArtifactRepository repository : mavenProject.getRemoteArtifactRepositories()) {
+      this.artifactRepositoryUrls.add(repository.getUrl());
+    }
+
+    this.pluginArtifactRepositoryUrls = new LinkedHashSet<String>();
+    for(ArtifactRepository repository : mavenProject.getPluginArtifactRepositories()) {
+      this.pluginArtifactRepositoryUrls.add(repository.getUrl()); 
+    }
   }
 
   /**
@@ -329,5 +343,13 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
 
   public synchronized Object getSessionProperty(String key) {
     return sessionProperties != null? sessionProperties.get(key): null;
+  }
+
+  public Set<String> getArtifactRepositoryUrls() {
+    return artifactRepositoryUrls;
+  }
+
+  public Set<String> getPluginArtifactRepositoryUrls() {
+    return pluginArtifactRepositoryUrls;
   }
 }

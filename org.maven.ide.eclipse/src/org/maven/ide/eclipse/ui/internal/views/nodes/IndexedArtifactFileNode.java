@@ -11,7 +11,7 @@ package org.maven.ide.eclipse.ui.internal.views.nodes;
 import org.eclipse.swt.graphics.Image;
 
 import org.maven.ide.eclipse.MavenImages;
-import org.maven.ide.eclipse.index.IndexManager;
+import org.maven.ide.eclipse.index.IIndex;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 
 /**
@@ -59,7 +59,7 @@ public class IndexedArtifactFileNode implements IMavenRepositoryNode {
    * @see org.maven.ide.eclipse.ui.internal.views.nodes.IMavenRepositoryNode#getImage()
    */
   public Image getImage() {
-    if(artifactFile.sourcesExists == IndexManager.PRESENT) {
+    if(artifactFile.sourcesExists == IIndex.PRESENT) {
       return MavenImages.IMG_VERSION_SRC;
     }
     return MavenImages.IMG_VERSION;
