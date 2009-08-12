@@ -136,7 +136,7 @@ public class MavenExternalRuntime implements MavenRuntime {
   }
 
   public String toString() {
-    return "External" + " " + location;
+    return "External" + " " + location + " (" + getVersion() + ")";
   }
 
   private static class ExceptionWrapper extends RuntimeException {

@@ -121,9 +121,9 @@ public class MavenEmbeddedRuntime implements MavenRuntime {
     }
     return bundle;
   }
-  
+
   public String toString() {
-    return "Embedded";
+    return "Embedded (" + getVersion() + ")";
   }
 
   public String getVersion() {

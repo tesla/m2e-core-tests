@@ -123,10 +123,14 @@ public class MavenWorkspaceRuntime implements MavenRuntime {
   }
 
   public String toString() {
-    return "Workspace";
+    return "Workspace (" + getVersion() + ")";
   }
 
   public String getVersion() {
+    IMavenProjectFacade maven = getMavenDistribution();
+    if (maven != null) {
+      return maven.getArtifactKey().getVersion();
+    }
     return MAVEN_DISTRIBUTION.getVersion();
   }
 
