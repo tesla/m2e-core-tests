@@ -20,6 +20,7 @@ import org.osgi.framework.BundleContext;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.IMavenLauncherConfiguration;
@@ -123,7 +124,16 @@ public class MavenEmbeddedRuntime implements MavenRuntime {
   }
 
   public String toString() {
-    return "Embedded (" + getVersion() + ")";
+    Bundle embedder = Platform.getBundle("org.maven.ide.components.maven_embedder");
+
+    StringBuilder sb = new StringBuilder();
+    sb.append("Embedded (").append(getVersion());
+    if (embedder != null) {
+      sb.append('/').append(embedder.getVersion().toString());
+    }
+    sb.append(')');
+
+    return  sb.toString();
   }
 
   public String getVersion() {
