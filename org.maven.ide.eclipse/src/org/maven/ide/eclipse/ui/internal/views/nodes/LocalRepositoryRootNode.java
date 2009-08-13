@@ -11,8 +11,7 @@ package org.maven.ide.eclipse.ui.internal.views.nodes;
 import org.eclipse.swt.graphics.Image;
 
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.index.IndexManager;
-import org.maven.ide.eclipse.internal.index.IndexInfo;
+import org.maven.ide.eclipse.index.IMutableIndex;
 import org.maven.ide.eclipse.internal.index.NexusIndexManager;
 
 /**
@@ -27,9 +26,11 @@ public class LocalRepositoryRootNode implements IMavenRepositoryNode{
    */
   public Object[] getChildren() {
     NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getDefault().getIndexManager();
-    IndexInfo localInfo = indexManager.getIndexInfo(IndexManager.LOCAL_INDEX);
-    IndexInfo workspaceInfo = indexManager.getIndexInfo(IndexManager.WORKSPACE_INDEX);
-    return new Object[]{new LocalRepositoryNode(localInfo), new LocalRepositoryNode(workspaceInfo)};
+    IMutableIndex localIndex = indexManager.getLocalIndex();
+    IMutableIndex workspaceIndex = indexManager.getWorkspaceIndex();
+    //IndexInfo localInfo = indexManager.getIndexInfo(IndexManager.LOCAL_INDEX);
+    //IndexInfo workspaceInfo = indexManager.getIndexInfo(IndexManager.WORKSPACE_INDEX);
+    return new Object[]{new IndexNode(localIndex), new IndexNode(workspaceIndex)};
   }
 
   /* (non-Javadoc)

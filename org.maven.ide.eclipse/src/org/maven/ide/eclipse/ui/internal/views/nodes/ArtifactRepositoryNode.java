@@ -13,6 +13,9 @@ import org.eclipse.swt.graphics.Image;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 
 import org.maven.ide.eclipse.MavenImages;
+import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.internal.index.NexusIndex;
+import org.maven.ide.eclipse.internal.index.NexusIndexManager;
 
 /**
  * ArtifactRepositoryNode
@@ -36,8 +39,9 @@ public class ArtifactRepositoryNode implements IMavenRepositoryNode {
    * @see org.maven.ide.eclipse.ui.internal.views.nodes.IMavenRepositoryNode#getChildren()
    */
   public Object[] getChildren() {
-    // TODO Auto-generated method getChildren
-    return null;
+    NexusIndex index = new NexusIndex(((NexusIndexManager)MavenPlugin.getDefault().getIndexManager()), repository.getUrl());
+    IndexNode node = new IndexNode(index);
+    return new Object[]{node};
   }
 
   /* (non-Javadoc)

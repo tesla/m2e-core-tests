@@ -36,7 +36,7 @@ public class RemoteRepositoryRootNode implements IMavenRepositoryNode{
     repositories.addAll(maven.getArtifactRepositories());
     repositories.addAll(maven.getPluginArtifactRepository());
 
-    return maven.getEffectiveRepositories(repositories);
+    return maven.getHiddenRepositories(repositories);
   }
   
   public List<Mirror> getMirrors(){

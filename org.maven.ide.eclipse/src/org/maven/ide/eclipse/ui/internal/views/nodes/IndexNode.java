@@ -14,7 +14,8 @@ import org.eclipse.swt.graphics.Image;
 import org.maven.ide.eclipse.MavenImages;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
-import org.maven.ide.eclipse.internal.index.IndexInfo;
+import org.maven.ide.eclipse.index.IMutableIndex;
+import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.internal.index.IndexedArtifactGroup;
 import org.maven.ide.eclipse.internal.index.NexusIndexManager;
 
@@ -23,23 +24,24 @@ import org.maven.ide.eclipse.internal.index.NexusIndexManager;
  *
  * @author dyocum
  */
-public class LocalRepositoryNode implements IMavenRepositoryNode {
+public class IndexNode implements IMavenRepositoryNode {
 
-  private IndexInfo indexInfo;
+//  private IndexInfo indexInfo;
   private String displayName;
 
-  public LocalRepositoryNode(IndexInfo info){
-    this.indexInfo = info;
+  private IMutableIndex index;
+  public IndexNode(IMutableIndex index){
+    this.index = index;
   }
   
   /* (non-Javadoc)
    * @see org.maven.ide.eclipse.ui.internal.views.IMavenRepositoryNode#getChildren()
    */
   public Object[] getChildren() {
-    String indexName = indexInfo.getIndexName();
+    
     try {
       NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getDefault().getIndexManager();
-      IndexedArtifactGroup[] rootGroups = indexManager.getRootGroups(indexName);
+      IndexedArtifactGroup[] rootGroups = indexManager.getRootGroups(index.getIndexName());
       if(rootGroups == null){
         return new Object[0];
       }
@@ -58,12 +60,13 @@ public class LocalRepositoryNode implements IMavenRepositoryNode {
    * @see org.maven.ide.eclipse.ui.internal.views.IMavenRepositoryNode#getName()
    */
   public String getName() {
-    if(IndexInfo.Type.LOCAL.equals(indexInfo.getType())){
-      return indexInfo.getIndexName() + " : " + indexInfo.getRepositoryDir().getAbsolutePath();
-    } else if(IndexInfo.Type.WORKSPACE.equals(indexInfo.getType())){
-      return indexInfo.getIndexName();
+    if(IndexManager.LOCAL_INDEX.equals(index.getIndexName())){
+      return index.getIndexName();// + " : " + indexInfo.getRepositoryDir().getAbsolutePath();
+    } else if(IndexManager.WORKSPACE_INDEX.equals(index.getIndexName())){
+      return index.getIndexName();
+    } else {
+      return index.getIndexName();
     }
-    return displayName;
   }
 
   /* (non-Javadoc)
