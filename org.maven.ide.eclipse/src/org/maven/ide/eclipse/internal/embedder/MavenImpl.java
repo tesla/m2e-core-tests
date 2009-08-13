@@ -453,8 +453,27 @@ public class MavenImpl implements IMaven {
     return result;
   }
 
-  public List<ArtifactRepository> getEffectiveRepositories(List<ArtifactRepository> repositories) {
-    return repositorySystem.getEffectiveRepositories(repositories);
+  public List<ArtifactRepository> getHiddenRepositories(List<ArtifactRepository> repositories) {
+    //return repositorySystem.getEffectiveRepositories(repositories);
+    //TODO: either same if its not mirrored, or a different one if it is
+    if(repositories == null){
+      return null;
+    }
+    
+    ArrayList<ArtifactRepository> hiddenRepos = new ArrayList<ArtifactRepository>();
+    for(ArtifactRepository repo : repositories){
+      ArrayList<ArtifactRepository> tmpRepo = new ArrayList<ArtifactRepository>();
+      tmpRepo.add(repo);
+      List<ArtifactRepository> resultRepos = repositorySystem.getEffectiveRepositories(tmpRepo);
+      if(resultRepos != null && resultRepos.size() == 1){
+        ArtifactRepository result = resultRepos.get(0);
+        //if its the same url, then its not mirrored, so include it in this list
+        if(repo.getUrl() != null && repo.getUrl().equals(result.getUrl())){
+          hiddenRepos.add(repo);
+        }
+      }
+    }
+    return repositories;
   }
 
   /*
