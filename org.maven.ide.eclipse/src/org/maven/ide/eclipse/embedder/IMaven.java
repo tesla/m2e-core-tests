@@ -90,7 +90,7 @@ public interface IMaven {
 
   public List<ArtifactRepository> getPluginArtifactRepository() throws CoreException;
 
-  public List<ArtifactRepository> getEffectiveRepositories(List<ArtifactRepository> repositories);
+  public List<ArtifactRepository> getHiddenRepositories(List<ArtifactRepository> repositories);
 
   public List<String> getMirrorUrls() throws CoreException;
 
