@@ -118,7 +118,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   
   private static final String PREFS_INDEXES_READ = "indexesHaveBeenRead";
   
-  private static final String PREFS_NO_REBUILD_ON_START = "forceRebuildOnUpgrade";
+  public static final String PREFS_NO_REBUILD_ON_START = "forceRebuildOnUpgrade";
 
   private static final String CENTRAL_URL = "http://repo1.maven.org/maven2/";
 
@@ -335,17 +335,18 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     // this.indexManager = new LegacyIndexManager(getStateLocation().toFile(), console);
     this.indexManager = new NexusIndexManager(console, projectManager, stateLocationDir);
     this.projectManager.addMavenProjectChangedListener(indexManager);
-
+    this.indexManager.createLocalIndex();
+    this.indexManager.createWorkspaceIndex();
 //    this.indexManager.addIndex(new IndexInfo(IndexManager.WORKSPACE_INDEX, //
 //        null, null, IndexInfo.Type.WORKSPACE, false), false);
-//
+////
 //    try {
 //      IndexInfo local = new IndexInfo(IndexManager.LOCAL_INDEX, //
 //          new File(maven.getLocalRepository().getBasedir()), null, IndexInfo.Type.LOCAL, false);
 //      this.indexManager.addIndex(local, false);
 //      boolean forceUpdate = !this.getPreferenceStore().getBoolean(PREFS_NO_REBUILD_ON_START);
 //      if(forceUpdate && !local.isNew()){
-//        indexManager.scheduleIndexUpdate(local.getIndexName(), true, 4000L);
+//        indexManager.scheduleIndexUpdate(local.getIndexName(), true, new NullProgressMonitor());
 //      }
 //    } catch(CoreException ex) {
 //      MavenLogger.log(ex);

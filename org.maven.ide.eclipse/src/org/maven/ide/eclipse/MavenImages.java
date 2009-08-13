@@ -81,6 +81,8 @@ public class MavenImages {
   public static final ImageDescriptor CLOSE = create("close.gif");
 
   public static final ImageDescriptor COLLAPSE_ALL = create("collapseall.gif");
+  
+  public static final ImageDescriptor EXPAND_ALL = create("expandall.gif");
 
   public static final ImageDescriptor REFRESH = create("refresh.gif");
   
