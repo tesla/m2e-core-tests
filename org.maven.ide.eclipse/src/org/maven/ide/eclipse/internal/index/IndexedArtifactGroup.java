@@ -14,13 +14,17 @@ import org.maven.ide.eclipse.index.IndexedArtifact;
 
 
 public class IndexedArtifactGroup {
-  private final IndexInfo indexInfo;
+//  private final IndexInfo indexInfo;
+  private final String indexName;
+  private final String repositoryUrl;
   private final String prefix;
   private final LinkedHashMap<String, IndexedArtifactGroup> nodes = new LinkedHashMap<String, IndexedArtifactGroup>();
   private final LinkedHashMap<String, IndexedArtifact> files = new LinkedHashMap<String, IndexedArtifact>();
 
-  public IndexedArtifactGroup(IndexInfo indexInfo, String prefix) {
-    this.indexInfo = indexInfo;
+  public IndexedArtifactGroup(String indexName, String repositoryUrl, String prefix) {
+    //this.indexInfo = indexInfo;
+    this.indexName = indexName;
+    this.repositoryUrl = repositoryUrl;
     this.prefix = prefix;
   }
 
@@ -35,8 +39,15 @@ public class IndexedArtifactGroup {
   public String getPrefix() {
     return prefix;
   }
-
-  public IndexInfo getIndexInfo() {
-    return indexInfo;
+  
+  public String getIndexName(){
+    return indexName;
   }
+  public String getRepositoryUrl(){
+    return this.repositoryUrl;
+  }
+//
+//  public IndexInfo getIndexInfo() {
+//    return indexInfo;
+//  }
 }

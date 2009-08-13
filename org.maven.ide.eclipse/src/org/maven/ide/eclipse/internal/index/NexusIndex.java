@@ -34,21 +34,26 @@ public class NexusIndex implements IIndex, IMutableIndex {
 
   private NexusIndexManager indexManager;
 
-  private String repsitoryUrl;
+  private String repositoryUrl;
 
+  
   public NexusIndex(NexusIndexManager indexManager, String repositoryUrl) {
     this.indexManager = indexManager;
-    this.repsitoryUrl = repositoryUrl;
+    this.repositoryUrl = repositoryUrl;
+    
   }
 
+  public String getIndexName(){
+    return repositoryUrl;
+  }
   public void addArtifact(File pomFile, ArtifactKey artifactKey, long size, long date, File jarFile, int sourceExists,
       int javadocExists) {
-    indexManager.addDocument(repsitoryUrl, pomFile, NexusIndexManager.getDocumentKey(artifactKey), size, date, jarFile, sourceExists,
+    indexManager.addDocument(repositoryUrl, pomFile, NexusIndexManager.getDocumentKey(artifactKey), size, date, jarFile, sourceExists,
         javadocExists);
   }
 
   public void removeArtifact(File pomFile, ArtifactKey artifactKey) {
-    indexManager.removeDocument(repsitoryUrl, pomFile, NexusIndexManager.getDocumentKey(artifactKey));
+    indexManager.removeDocument(repositoryUrl, pomFile, NexusIndexManager.getDocumentKey(artifactKey));
   }
 
   public Collection<IndexedArtifact> find(String groupId, String artifactId, String version, String packaging)
@@ -72,11 +77,11 @@ public class NexusIndex implements IIndex, IMutableIndex {
       query.add(indexManager.createQuery(NexusIndexManager.FIELD_VERSION, version), Occur.MUST);
     }
  
-    return indexManager.search(repsitoryUrl, query).values();
+    return indexManager.search(repositoryUrl, query).values();
   }
 
   public IndexedArtifactFile getIndexedArtifactFile(ArtifactKey artifact) throws CoreException {
-    return indexManager.getIndexedArtifactFile(repsitoryUrl, artifact);
+    return indexManager.getIndexedArtifactFile(repositoryUrl, artifact);
   }
 
   public IndexedArtifactFile identify(File file) throws CoreException {

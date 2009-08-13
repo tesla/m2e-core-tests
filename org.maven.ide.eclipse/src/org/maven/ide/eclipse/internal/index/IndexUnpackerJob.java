@@ -60,14 +60,14 @@ public class IndexUnpackerJob extends Job {
       String displayName = extensionIndexInfo.getDisplayName();
       monitor.setTaskName(displayName);
 
-      IndexInfo indexInfo = indexManager.getIndexInfo(indexName);
-      if(indexInfo == null) {
-        continue;
-      }
+      //IndexInfo indexInfo = indexManager.getIndexInfo(indexName);
+//      if(indexInfo == null) {
+//        continue;
+//      }
 
       URL indexArchive = extensionIndexInfo.getArchiveUrl();
       if(indexArchive!=null) {
-        indexInfo.setArchiveUrl(indexArchive);
+        //indexInfo.setArchiveUrl(indexArchive);
 
         Date extensionIndexTime = null;
         try {
@@ -77,13 +77,13 @@ public class IndexUnpackerJob extends Job {
           MavenLogger.log("Unable to read creation time for index " + displayName, ex);
         }
         
-        boolean replace = overwrite || indexInfo.isNew();
-        if(!replace) {
-          if(extensionIndexTime!=null) {
-            Date currentIndexTime = indexInfo.getUpdateTime();
-            replace = currentIndexTime==null || extensionIndexTime.after(currentIndexTime);
-          }
-        }
+        boolean replace = overwrite; //|| indexInfo.isNew();
+//        if(!replace) {
+//          if(extensionIndexTime!=null) {
+//            Date currentIndexTime = indexInfo.getUpdateTime();
+//            replace = currentIndexTime==null || extensionIndexTime.after(currentIndexTime);
+//          }
+//        }
 
         if(replace) {
           File index = new File(indexManager.getBaseIndexDir(), indexName);
