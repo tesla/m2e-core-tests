@@ -66,4 +66,5 @@ public interface IIndex {
 
   public Collection<IndexedArtifact> find(String groupId, String artifactId, String version,
       String packaging) throws CoreException;
+  
 }

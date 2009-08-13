@@ -8,25 +8,19 @@
 
 package org.maven.ide.eclipse.index;
 
-import java.io.File;
 
-import org.maven.ide.eclipse.embedder.ArtifactKey;
 
 /**
- * @author igor
+ * IndexListener
+ *
+ * @author Eugene Kuleshov
  */
-public interface IMutableIndex extends IIndex {
-
-  // index content manipulation
-
-  public void addArtifact(File pomFile, ArtifactKey artifactKey, //
-      long size, long date, File jarFile, int sourceExists, int javadocExists);
-
-  public void removeArtifact(File pomFile, ArtifactKey artifactKey);
-
-  // reindexing
+public interface IndexListener {
   
-  public void scheduleIndexUpdate(boolean force, long delay);
+  public void indexAdded(String indexName);
 
-  public String getIndexName();
+  public void indexRemoved(String indexName);
+  
+  public void indexChanged(String indexName);
+
 }

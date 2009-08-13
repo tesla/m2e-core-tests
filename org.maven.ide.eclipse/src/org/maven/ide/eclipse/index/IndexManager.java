@@ -14,6 +14,9 @@ import java.util.Map;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 
+import org.sonatype.nexus.index.context.IndexingContext;
+
+
 
 public interface IndexManager {
 
@@ -28,7 +31,7 @@ public interface IndexManager {
   public abstract IMutableIndex getWorkspaceIndex();
 
   public abstract IMutableIndex getLocalIndex();
-
+  
   /**
    * For Maven projects, returns index of all repositories configured for the project. Index includes repositories
    * defined in the project pom.xml, inherited from parent projects and defined in enabled profiles in settings.xml. If
@@ -63,4 +66,12 @@ public interface IndexManager {
    */
   public abstract IndexedArtifactFile identify(File file) throws CoreException;
 
+  //do we want this in IndexManager?
+  public void scheduleIndexUpdate(String indexName, boolean force, long delay) throws CoreException;
+  
+  public void addIndexListener(IndexListener listener);
+  
+  public Map<String, IndexingContext> getIndexes();
+//  
+//  public IndexInfo getIndexInfoByUrl(String url);
 }
