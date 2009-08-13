@@ -226,13 +226,14 @@ public class RepositoryIndexDialog extends TitleAreaDialog {
       return false;
     }
 
-    if(indexInfo == null) {
-      IndexInfo info = indexManager.getIndexInfoByUrl(repositoryUrl);
-      if(info != null) {
-        setMessage("Repository '" + info.getDisplayName() + "' is using the same repository url", IStatus.WARNING);
-        return true;
-      }
-    }
+    //TODO: do we need this check anymore? I think we can't create them, so no.
+//    if(indexInfo == null) {
+//      IndexInfo info = indexManager.getIndexInfoByUrl(repositoryUrl);
+//      if(info != null) {
+//        setMessage("Repository '" + info.getDisplayName() + "' is using the same repository url", IStatus.WARNING);
+//        return true;
+//      }
+//    }
 
     setMessage(message);
     return true;

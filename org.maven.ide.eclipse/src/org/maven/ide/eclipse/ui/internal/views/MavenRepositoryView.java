@@ -11,6 +11,12 @@ package org.maven.ide.eclipse.ui.internal.views;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.resources.WorkspaceJob;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
@@ -41,11 +47,12 @@ import org.maven.ide.eclipse.MavenImages;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.MaterializeAction;
 import org.maven.ide.eclipse.actions.OpenPomAction;
+import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.index.IndexListener;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.internal.index.IndexInfo;
-import org.maven.ide.eclipse.internal.index.IndexListener;
 import org.maven.ide.eclipse.internal.index.IndexedArtifactGroup;
 
 
@@ -111,15 +118,15 @@ public class MavenRepositoryView extends ViewPart {
     IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
     indexManager.addIndexListener(new IndexListener() {
 
-      public void indexAdded(IndexInfo info) {
+      public void indexAdded(String indexName) {
         refreshView();
       }
 
-      public void indexChanged(IndexInfo info) {
+      public void indexChanged(String indexName) {
         refreshView();
       }
 
-      public void indexRemoved(IndexInfo info) {
+      public void indexRemoved(String indexName) {
         refreshView();
       }
     });
@@ -187,12 +194,22 @@ public class MavenRepositoryView extends ViewPart {
 
     expandAllAction = new Action("Expand All"){
       public void run(){
-        viewer.expandAll();
+        Job job = new WorkspaceJob("Expanding Repository Tree") {
+          public IStatus runInWorkspace(IProgressMonitor monitor) {
+            Display.getDefault().asyncExec(new Runnable(){
+              public void run(){
+                viewer.expandAll();
+              }
+            });
+            return Status.OK_STATUS;
+          }
+        };
+        job.schedule();
       }
     };
+    
     expandAllAction.setToolTipText("Expand All");
-    //TODO: fix this
-    expandAllAction.setImageDescriptor(MavenImages.COLLAPSE_ALL);
+    expandAllAction.setImageDescriptor(MavenImages.EXPAND_ALL);
     refreshAction = new Action("Refresh") {
       public void run() {
         viewer.setInput(getViewSite());
@@ -322,7 +339,7 @@ public class MavenRepositoryView extends ViewPart {
           url = ((IndexInfo) element).getRepositoryUrl();
         } else if(element instanceof IndexedArtifactGroup) {
           IndexedArtifactGroup group = (IndexedArtifactGroup) element;
-          String repositoryUrl = group.info.getRepositoryUrl();
+          String repositoryUrl = group.getRepositoryUrl();
           if(!repositoryUrl.endsWith("/")) {
             repositoryUrl += "/";
           }
@@ -386,9 +403,13 @@ public class MavenRepositoryView extends ViewPart {
     });
   };
 
-  void updateIndex(final IndexInfo info, boolean force) {
-    IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
-    indexManager.scheduleIndexUpdate(info.getIndexName(), force, 0L);
+  void updateIndex(final IndexInfo info, boolean force){
+    try{
+      IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
+      indexManager.scheduleIndexUpdate(info.getIndexName(), force, 1L);
+    } catch(CoreException ce){
+      MavenLogger.log(ce);
+    }
   }
 
 }
