@@ -15,6 +15,8 @@ import java.util.Map.Entry;
 import org.eclipse.core.resources.IFile;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.metadata.ResolutionGroup;
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.project.artifact.DefaultMavenMetadataCache;
 import org.apache.maven.project.artifact.MavenMetadataCache;
 
@@ -28,26 +30,43 @@ import org.maven.ide.eclipse.embedder.ArtifactKey;
  */
 public class EclipseMavenMetadataCache extends DefaultMavenMetadataCache implements MavenMetadataCache, IManagedCache {
 
+  public void put(Artifact artifact, boolean resolveManagedVersions, ArtifactRepository localRepository,
+      List<ArtifactRepository> remoteRepositories, ResolutionGroup result) {
+
+    ArtifactKey gav = new ArtifactKey(artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion(), null);
+
+    if ("pom".equals(artifact.getType()) ) {
+      // new project pom, remove any existing project entries
+      removeProject(gav);
+    }
+
+    super.put(artifact, resolveManagedVersions, localRepository, remoteRepositories, result);
+  }
+
   public void removeProject(IFile pom, ArtifactKey key) {
-    if (key == null) {
+    removeProject(key);
+  }
+
+  private void removeProject(ArtifactKey key) {
+    if(key == null) {
       return;
     }
-    
+
     Iterator<Entry<CacheKey, CacheRecord>> iter = cache.entrySet().iterator();
 
-    while (iter.hasNext()) {
+    while(iter.hasNext()) {
       Entry<CacheKey, CacheRecord> entry = iter.next();
       CacheRecord record = entry.getValue();
 
-      if (equals(record.getArtifact(), key) || contains(record.getArtifacts(), key)) {
+      if(equals(record.getArtifact(), key) || contains(record.getArtifacts(), key)) {
         iter.remove();
       }
     }
   }
 
   private boolean contains(List<Artifact> artifacts, ArtifactKey key) {
-    for (Artifact artifact : artifacts) {
-      if (equals(artifact, key)) {
+    for(Artifact artifact : artifacts) {
+      if(equals(artifact, key)) {
         return true;
       }
     }
@@ -64,6 +83,6 @@ public class EclipseMavenMetadataCache extends DefaultMavenMetadataCache impleme
   }
 
   private <T> boolean eq(T a, T b) {
-    return a != null? a.equals(b): b == null;
+    return a != null ? a.equals(b) : b == null;
   }
 }

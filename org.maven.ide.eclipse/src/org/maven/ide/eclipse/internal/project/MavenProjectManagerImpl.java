@@ -38,7 +38,7 @@ import org.eclipse.core.runtime.preferences.IScopeContext;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.resolver.AbstractArtifactResolutionException;
+import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
 import org.apache.maven.execution.DefaultMavenExecutionResult;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionResult;
@@ -390,7 +390,6 @@ public class MavenProjectManagerImpl {
     if (mavenProject == null) {
       context.forcePomFiles(remove(state, pom));
       if (result != null && resolverConfiguration.shouldResolveWorkspaceProjects()) {
-        // this only really add missing parent
         addMissingProjectDependencies(state, pom, result);
       }
       try {
@@ -404,7 +403,7 @@ public class MavenProjectManagerImpl {
           }
         }
       } catch(Exception ex) {
-        // we've tried out best, but there is nothing we can do
+        // we've tried our best, there is nothing else we can do
       }
       return;
     }
@@ -445,6 +444,7 @@ public class MavenProjectManagerImpl {
     state.addProject(pom, facade);
     if (resolverConfiguration.shouldResolveWorkspaceProjects()) {
       addProjectDependencies(state, pom, mavenProject, true);
+      addMissingProjectDependencies(state, pom, result);
     }
     if (resolverConfiguration.shouldIncludeModules()) {
       addProjectDependencies(state, pom, mavenProject, false);
@@ -546,21 +546,12 @@ public class MavenProjectManagerImpl {
     }
   }
 
-  private void addMissingProjectDependencies(MutableProjectRegistry state, IFile pom, MavenExecutionResult result) {
-    // kinda hack, but this is the only way I can get info about missing parent artifacts
-    List<Exception> exceptions = result.getExceptions();
-    if (exceptions != null) {
-      for(Throwable t : exceptions) {
-        AbstractArtifactResolutionException re = null;
-        while (t != null) {
-          if(t instanceof AbstractArtifactResolutionException) {
-            re = (AbstractArtifactResolutionException) t;
-            break;
-          }
-          t = t.getCause();
-        }
-        if(re != null) {
-          ArtifactKey dependencyKey = new ArtifactKey(re.getGroupId(), re.getArtifactId(), re.getVersion(), null);
+  private void addMissingProjectDependencies(MutableProjectRegistry state, IFile pom, MavenExecutionResult executionResult) {
+    ArtifactResolutionResult resolutionResult = executionResult.getArtifactResolutionResult();
+    if (resolutionResult != null && resolutionResult.getRequestedArtifacts() != null) {
+      for (Artifact artifact : resolutionResult.getRequestedArtifacts()) {
+        if (!artifact.isResolved()) {
+          ArtifactKey dependencyKey = new ArtifactKey(artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion(), null);
           state.addProjectDependency(pom, dependencyKey, true);
         }
       }
@@ -660,16 +651,13 @@ public class MavenProjectManagerImpl {
 
     try {
       MavenExecutionRequest request = createExecutionRequest(state, pomFile, resolverConfiguration, monitor);
+      maven.populateDefaults(request);
       request.setOffline(updateRequest.isOffline());
-      return maven.readProjectWithDependencies(request, monitor);
+      request.getProjectBuildingRequest().setResolveDependencies(true);
+      return maven.readProject(request, monitor);
     } catch(CoreException ex) {
       DefaultMavenExecutionResult result = new DefaultMavenExecutionResult();
       result.addException(ex);
-      return result;
-    } catch(NullPointerException npe){
-      //temporary;
-      DefaultMavenExecutionResult result = new DefaultMavenExecutionResult();
-      result.addException(npe);
       return result;
     }
 

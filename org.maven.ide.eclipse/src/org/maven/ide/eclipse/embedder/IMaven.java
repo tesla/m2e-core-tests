@@ -60,7 +60,7 @@ public interface IMaven {
 
   public MavenProject readProject(File pomFile, IProgressMonitor monitor) throws CoreException;
 
-  public MavenExecutionResult readProjectWithDependencies(MavenExecutionRequest request, IProgressMonitor monitor);
+  public MavenExecutionResult readProject(MavenExecutionRequest request, IProgressMonitor monitor);
 
   // execution
 
@@ -82,6 +82,8 @@ public interface IMaven {
 
   public ArtifactRepository getLocalRepository() throws CoreException;
 
+  public void populateDefaults(MavenExecutionRequest request) throws CoreException;
+
   /**
    * Returns list of remote artifact repositories configured in settings.xml. Only profiles active by default are
    * considered when calculating the list.
@@ -90,7 +92,7 @@ public interface IMaven {
 
   public List<ArtifactRepository> getPluginArtifactRepository() throws CoreException;
 
-  public List<ArtifactRepository> getHiddenRepositories(List<ArtifactRepository> repositories);
+  public List<ArtifactRepository> getEffectiveRepositories(List<ArtifactRepository> repositories);
 
   public List<String> getMirrorUrls() throws CoreException;
 

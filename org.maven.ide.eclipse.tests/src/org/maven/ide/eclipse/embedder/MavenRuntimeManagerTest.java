@@ -72,7 +72,7 @@ public class MavenRuntimeManagerTest extends TestCase {
     assertTrue(runtime.equals(runtime));
     assertFalse(runtime.equals(null));
     assertTrue(runtime.hashCode()!=0);
-    assertEquals("Embedded", runtime.toString());
+    assertTrue(runtime.toString().startsWith("Embedded"));
   }
 
   public void testExternalRuntime() throws Exception {

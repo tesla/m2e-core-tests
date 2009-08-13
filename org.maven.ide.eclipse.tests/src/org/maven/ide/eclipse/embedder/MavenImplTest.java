@@ -26,7 +26,7 @@ public class MavenImplTest extends TestCase {
     request.setPom(new File("projects/mojoparametervalue/pom.xml"));
     request.setGoals(Arrays.asList("compile"));
     
-    MavenExecutionResult result = maven.readProjectWithDependencies(request, monitor);
+    MavenExecutionResult result = maven.readProject(request, monitor);
     assertFalse(result.hasExceptions());
     MavenProject project = result.getProject();
 

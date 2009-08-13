@@ -66,10 +66,10 @@ import org.apache.maven.plugin.PluginManagerException;
 import org.apache.maven.plugin.PluginParameterExpressionEvaluator;
 import org.apache.maven.plugin.descriptor.MojoDescriptor;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.MavenProjectBuildingResult;
 import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.ProjectBuildingRequest;
+import org.apache.maven.project.ProjectBuildingResult;
 import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.settings.MavenSettingsBuilder;
 import org.apache.maven.settings.Mirror;
@@ -312,7 +312,7 @@ public class MavenImpl implements IMaven {
       populator.populateDefaults(request);
       ProjectBuildingRequest configuration = request.getProjectBuildingRequest();
       configuration.setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL);
-      return projectBuilder.build(pomFile, configuration);
+      return projectBuilder.build(pomFile, configuration).getProject();
     } catch(ProjectBuildingException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not read maven project",
           ex));
@@ -322,15 +322,14 @@ public class MavenImpl implements IMaven {
     }
   }
 
-  public MavenExecutionResult readProjectWithDependencies(MavenExecutionRequest request, IProgressMonitor monitor) {
+  public MavenExecutionResult readProject(MavenExecutionRequest request, IProgressMonitor monitor) {
     File pomFile = request.getPom();
     MavenExecutionResult result = new DefaultMavenExecutionResult();
-    MavenProjectBuildingResult projectBuildingResult;
     try {
       populator.populateDefaults(request);
       ProjectBuildingRequest configuration = request.getProjectBuildingRequest();
       configuration.setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL);
-      projectBuildingResult = projectBuilder.buildProjectWithDependencies(pomFile, configuration);
+      ProjectBuildingResult projectBuildingResult = projectBuilder.build(pomFile, configuration);
       result.setProject(projectBuildingResult.getProject());
       result.setArtifactResolutionResult(projectBuildingResult.getArtifactResolutionResult());
     } catch(ProjectBuildingException ex) {
@@ -348,15 +347,15 @@ public class MavenImpl implements IMaven {
     ArtifactResolutionRequest request = new ArtifactResolutionRequest();
     request.setLocalRepository(getLocalRepository());
     if(remoteRepositories != null) {
-      request.setRemoteRepostories(remoteRepositories);
+      request.setRemoteRepositories(remoteRepositories);
     } else {
       try {
         MavenExecutionRequest er = new DefaultMavenExecutionRequest();
         populator.populateDefaults(er);
-        request.setRemoteRepostories(er.getRemoteRepositories());
+        request.setRemoteRepositories(er.getRemoteRepositories());
       } catch(MavenEmbedderException e) {
         // we've tried
-        request.setRemoteRepostories(new ArrayList<ArtifactRepository>());
+        request.setRemoteRepositories(new ArrayList<ArtifactRepository>());
       }
     }
     request.setArtifact(artifact);
@@ -432,15 +431,10 @@ public class MavenImpl implements IMaven {
 
   private MavenExecutionRequest createPopulatedExecutionRequest() throws CoreException {
     MavenExecutionRequest request = createExecutionRequest(new NullProgressMonitor());
-    try {
-      populator.populateDefaults(request);
-    } catch(MavenEmbedderException ex) {
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
-          "Could not read Maven configuration", ex));
-    }
+    populateDefaults(request);
     return request;
   }
-  
+
   public List<ArtifactRepository> getPluginArtifactRepository() throws CoreException {
     return createPopulatedExecutionRequest().getPluginArtifactRepositories();
   }
@@ -453,36 +447,30 @@ public class MavenImpl implements IMaven {
     return result;
   }
 
-  public List<ArtifactRepository> getHiddenRepositories(List<ArtifactRepository> repositories) {
-    //return repositorySystem.getEffectiveRepositories(repositories);
-    //TODO: either same if its not mirrored, or a different one if it is
-    if(repositories == null){
+  public List<ArtifactRepository> getEffectiveRepositories(List<ArtifactRepository> repositories) {
+    if(repositories == null) {
       return null;
     }
-    
-    ArrayList<ArtifactRepository> hiddenRepos = new ArrayList<ArtifactRepository>();
-    for(ArtifactRepository repo : repositories){
-      ArrayList<ArtifactRepository> tmpRepo = new ArrayList<ArtifactRepository>();
-      tmpRepo.add(repo);
-      List<ArtifactRepository> resultRepos = repositorySystem.getEffectiveRepositories(tmpRepo);
-      if(resultRepos != null && resultRepos.size() == 1){
-        ArtifactRepository result = resultRepos.get(0);
-        //if its the same url, then its not mirrored, so include it in this list
-        if(repo.getUrl() != null && repo.getUrl().equals(result.getUrl())){
-          hiddenRepos.add(repo);
-        }
-      }
-    }
-    return repositories;
+
+    return repositorySystem.getEffectiveRepositories(repositories);
   }
 
   /*
    * This is not exactly nice, MavenImpl and NexusIndexManager depend on each other.
    * 
-   * Ideally, we need to split the code that reads maven static configuration
-   * in a separate interface.
+   * Ideally, we need to move the code that reads maven static configuration
+   * to a separate interface.
    */
   public void setIndexManager(IndexManager indexManager) {
     this.indexManager = indexManager;
+  }
+
+  public void populateDefaults(MavenExecutionRequest request) throws CoreException {
+    try {
+      populator.populateDefaults(request);
+    } catch(MavenEmbedderException ex) {
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
+          "Could not read Maven configuration", ex));
+    }
   }
 }

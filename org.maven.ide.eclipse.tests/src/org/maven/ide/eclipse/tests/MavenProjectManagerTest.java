@@ -607,7 +607,11 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
     
     IMarker[] markers = p2.findMarkers(null, true, IResource.DEPTH_INFINITE);
-    assertEquals(toString(markers), 3, markers.length); // two come from java builder
+    // (jdt) The container 'Maven Dependencies' references non existing library ...missing/missing/0.0.0/missing-0.0.0.jar'
+    // (jdt) The project cannot be built until build path errors are resolved
+    // (maven) missing:missing:0.0.0:jar The repository system is offline and the requested artifact is not locally available at  ...
+    // (maven) Missing artifact missing:missing:jar:0.0.0:compile
+    assertEquals(toString(markers), 4, markers.length); 
   }
 
   public void __test014_resolveDependencies() throws Exception {
@@ -653,7 +657,6 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     MavenUpdateRequest updateRequest = new MavenUpdateRequest(true /*offline*/, false /* updateSources */);
     updateRequest.addPomFile(p1);
     manager.refresh(updateRequest, monitor);
-//    manager.notifyListeners(monitor);
     assertEquals(false, file.exists());
 
     {
@@ -662,6 +665,9 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
       assertEquals(false, a1.get(0).isResolved());
     }
 
+    updateRequest = new MavenUpdateRequest(false /*offline*/, false /* updateSources */);
+    updateRequest.addPomFile(p1);
+    manager.refresh(updateRequest, monitor);
     assertEquals(true, file.exists());
 
     {

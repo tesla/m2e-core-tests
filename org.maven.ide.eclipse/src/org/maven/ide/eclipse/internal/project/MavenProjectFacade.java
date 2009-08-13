@@ -125,6 +125,10 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
     }
   }
 
+  public void setMavenProject() {
+    setMavenProject(mavenProject);
+  }
+
   /**
    * Returns project relative paths of resource directories
    */

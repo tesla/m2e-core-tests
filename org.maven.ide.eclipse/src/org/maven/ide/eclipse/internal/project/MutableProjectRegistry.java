@@ -92,7 +92,7 @@ public class MutableProjectRegistry extends BasicProjectRegistry implements IPro
     // Remove the project from workspaceDependents and inprojectDependenys maps
     removeDependents(pom, workspaceDependencies);
     removeDependents(pom, inprojectDependencies);
-    
+
     // Remove the project from workspaceModules map
     removeDependents(pom, workspaceModules);
 

@@ -60,12 +60,13 @@ import org.codehaus.plexus.component.discovery.ComponentDiscoverer;
 import org.codehaus.plexus.component.discovery.ComponentDiscoveryEvent;
 import org.codehaus.plexus.component.discovery.ComponentDiscoveryListener;
 import org.codehaus.plexus.component.repository.ComponentDescriptor;
+import org.codehaus.plexus.component.repository.ComponentRequirement;
 import org.codehaus.plexus.component.repository.ComponentSetDescriptor;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.configuration.PlexusConfigurationException;
 import org.codehaus.plexus.context.Context;
 
-import org.apache.maven.ArtifactFilterManagerDelegate;
+import org.apache.maven.classrealm.ClassRealmManagerDelegate;
 import org.apache.maven.plugin.PluginManager;
 import org.apache.maven.project.artifact.MavenMetadataCache;
 
@@ -84,7 +85,7 @@ import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.internal.ExtensionReader;
 import org.maven.ide.eclipse.internal.console.MavenConsoleImpl;
-import org.maven.ide.eclipse.internal.embedder.EclipseArtifactFilterManagerDelegate;
+import org.maven.ide.eclipse.internal.embedder.EclipseClassRealmManagerDelegate;
 import org.maven.ide.eclipse.internal.embedder.EclipseLoggerManager;
 import org.maven.ide.eclipse.internal.embedder.MavenConfigurationImpl;
 import org.maven.ide.eclipse.internal.embedder.MavenEmbeddedRuntime;
@@ -112,15 +113,9 @@ import org.maven.ide.eclipse.project.MavenUpdateRequest;
 public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
   // preferences
-  private static final String PREFS_INDEXES = "indexInfo.xml";
-  
   private static final String PREFS_ARCHETYPES = "archetypesInfo.xml";
   
-  private static final String PREFS_INDEXES_READ = "indexesHaveBeenRead";
-  
   public static final String PREFS_NO_REBUILD_ON_START = "forceRebuildOnUpgrade";
-
-  private static final String CENTRAL_URL = "http://repo1.maven.org/maven2/";
 
   // The shared instance
   private static MavenPlugin plugin;
@@ -227,8 +222,12 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
           ComponentDescriptor componentDescriptor = new ComponentDescriptor();
           componentDescriptor.setRealm(classRealm);
-          componentDescriptor.setRole(ArtifactFilterManagerDelegate.class.getName());
-          componentDescriptor.setImplementationClass(EclipseArtifactFilterManagerDelegate.class);
+          componentDescriptor.setRole(ClassRealmManagerDelegate.class.getName());
+          componentDescriptor.setImplementationClass(EclipseClassRealmManagerDelegate.class);
+          ComponentRequirement plexusRequirement = new ComponentRequirement();
+          plexusRequirement.setRole("org.codehaus.plexus.PlexusContainer");
+          plexusRequirement.setFieldName("plexus");
+          componentDescriptor.addRequirement(plexusRequirement );
           componentSetDescriptor.addComponentDescriptor(componentDescriptor);
 
           componentSetDescriptors.add(componentSetDescriptor);
@@ -298,8 +297,6 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
       MavenLogger.log(msg, ex);
     }
 
-//    Set<IndexInfo> indexes = loadIndexConfiguration(new File(stateLocationDir, PREFS_INDEXES));
-
     boolean updateProjectsOnStartup = mavenConfiguration.isUpdateProjectsOnStartup();
 
     mavenMarkerManager = new MavenMarkerManager(runtimeManager, console);
@@ -332,7 +329,6 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
         indexManager, modelManager, mavenMarkerManager);
     projectManager.addMavenProjectChangedListener(this.configurationManager);
 
-    // this.indexManager = new LegacyIndexManager(getStateLocation().toFile(), console);
     this.indexManager = new NexusIndexManager(console, projectManager, stateLocationDir);
     this.projectManager.addMavenProjectChangedListener(indexManager);
     this.indexManager.createLocalIndex();
@@ -357,14 +353,6 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     checkJdk();
   }
 
-//  public void fireIndexUpdate(String indexName){
-//    if(listeners != null){
-//      for(IPropertyChangeListener listener : listeners){
-//        listener.propertyChange(new PropertyChangeEvent(this, IMavenConstants.INDEX_UPDATE_PROP, null, indexName));
-//      }
-//    }
-//  }
-  
   public void addPropertyChangeListener(IPropertyChangeListener listener){
     if(listeners == null){
       listeners = new ArrayList<IPropertyChangeListener>();
@@ -377,126 +365,6 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
       listeners.remove(listener);
     }
   }
-  
-//  private void initializeIndexes(Set<IndexInfo> indexes, boolean updateIndexesOnStartup) {
-//    boolean forceUpdate = !this.getPreferenceStore().getBoolean(PREFS_NO_REBUILD_ON_START);
-//    if(forceUpdate){
-//      this.getPreferenceStore().setValue(PREFS_NO_REBUILD_ON_START, true);
-//    }
-//    for(IndexInfo indexInfo : indexes) {
-//      if(IndexInfo.Type.LOCAL.equals(indexInfo.getType())) {
-//        if(indexInfo.isNew()) {
-//            indexManager.scheduleIndexUpdate(indexInfo.getIndexName(), false, 4000L);
-//        }
-//      } else if(IndexInfo.Type.REMOTE.equals(indexInfo.getType())) {
-//        if(indexInfo.isNew() || updateIndexesOnStartup || forceUpdate) {
-//          indexManager.scheduleIndexUpdate(indexInfo.getIndexName(), forceUpdate, 4000L);
-//        }
-//      }
-//    }
-//  }
-  
-//  void unzipFile(URL url, File dest) throws IOException {
-//
-//    InputStream is = new BufferedInputStream(url.openStream());
-//    ZipInputStream zis = new ZipInputStream(is);
-//    try {
-//      ZipEntry entry = zis.getNextEntry();
-//      while(entry != null) {
-//        File f = new File(dest, entry.getName());
-//        if(entry.isDirectory()) {
-//          f.mkdirs();
-//        } else {
-//          if(!f.getParentFile().exists()) {
-//            f.getParentFile().mkdirs();
-//          }
-//          OutputStream os = new BufferedOutputStream(new FileOutputStream(f));
-//          try {
-//            IOUtil.copy(zis, os);
-//          } finally {
-//            os.close();
-//          }
-//        }
-//        zis.closeEntry();
-//        entry = zis.getNextEntry();
-//      }
-//    } finally {
-//      zis.close();
-//    }
-//  }
-  
-//  private IndexInfo createCentralIndex() throws IllegalStateException {
-//    String indexId = "central";
-//    String repositoryUrl = CENTRAL_URL;
-//    IndexInfo indexInfo = new IndexInfo(indexId, null, repositoryUrl, IndexInfo.Type.REMOTE, false);
-//    indexInfo.setIndexUpdateUrl("");
-//    // Hook for integration tests. If plug-in contains a pre-processed central index then install it. 
-//    // This speeds up test execution significantly. 
-//    URL url = FileLocator.find(getBundle(), new Path("/indexes/maven-central.zip"), null);
-//    if (url != null) {
-//      installCachedMavenCentralIndex(url);
-//    }
-//    return indexInfo;
-//  }
-  
-//  private void installCachedMavenCentralIndex(final URL indexURL) {
-//    Job job = new Job("Installing maven central index.") {
-//
-//      public IStatus run(IProgressMonitor monitor) {
-//        try {
-//          monitor.beginTask("Installing index...", IProgressMonitor.UNKNOWN);
-//          unzipFile(indexURL, getStateLocation().toFile());
-//        } catch(Exception ex) {
-//          MavenLogger.log("Error unzipping maven central index", ex);
-//        } finally {
-//          monitor.done();
-//        }
-//        return Status.OK_STATUS;
-//      }
-//      
-//    };
-//    job.setRule(new ISchedulingRule() {
-//      public boolean contains(ISchedulingRule rule) {
-//        return rule == this;
-//      }
-//
-//      public boolean isConflicting(ISchedulingRule rule) {
-//        return rule == this || rule instanceof IndexUpdaterRule;
-//      }
-//      
-//    });
-//    job.schedule();
-//  }
-  
-//  private Set<IndexInfo> loadIndexConfiguration(File configFile) throws IllegalStateException {
-//    LinkedHashSet<IndexInfo> indexes = new LinkedHashSet<IndexInfo>();
-//    indexes.addAll(ExtensionReader.readIndexInfoConfig(configFile));
-//    Map<String, IndexInfo> extensionIndexes = ExtensionReader.readIndexInfoExtensions();
-//    
-//    //check if this is the first time in this workspace
-//    boolean firstTime = !this.getPreferenceStore().getBoolean(PREFS_INDEXES_READ);
-//    if(firstTime){
-//      this.getPreferenceStore().setValue(PREFS_INDEXES_READ, true);
-//    }
-//    //add central if this is first time through and there are no user defined
-//    //extension points
-//    if(firstTime && extensionIndexes.size() == 0){
-//      //this should go away when we get the real central-setup from the settings
-//      IndexInfo info = createCentralIndex();
-//      indexes.add(info);
-//    }  
-//    //now add all the extension point indexes 
-//    if(extensionIndexes.size() > 0){
-//      for(IndexInfo xInfo : extensionIndexes.values()){
-//        indexes.add(xInfo);
-//      }
-//    }
-//    for(IndexInfo indexInfo : indexes) {
-//      this.indexManager.addIndex(indexInfo, false);
-//    }
-//    this.indexManager.addIndexListener(new IndexManagerWriterListener(indexManager, configFile));
-//    return indexes;
-//  }
 
   public void earlyStartup() {
     // nothing to do here, all startup work is done in #start(BundleContext)
@@ -690,52 +558,6 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     return mavenBackgroundJob;
   }
   
-//  /**
-//   * IndexManagerWriterListener
-//   */
-//  static class IndexManagerWriterListener implements IndexListener {
-//    private final File configFile;
-//
-//    private final IndexManager indexManager;
-//
-//    private IndexInfoWriter writer = new IndexInfoWriter();
-//
-//    public IndexManagerWriterListener(IndexManager indexManager, File configFile) {
-//      this.indexManager = indexManager;
-//      this.configFile = configFile;
-//    }
-//
-//    public void indexAdded(IndexInfo info) {
-//      writeIndexInfo();
-//    }
-//
-//    public void indexChanged(IndexInfo info) {
-//      writeIndexInfo();
-//    }
-//
-//    public void indexRemoved(IndexInfo info) {
-//      writeIndexInfo();
-//    }
-//
-//    private void writeIndexInfo() {
-//      OutputStream os = null;
-//      try {
-//        os = new FileOutputStream(configFile);
-//        writer.writeIndexInfo(indexManager.getIndexes().values(), os);
-//      } catch(IOException ex) {
-//        MavenLogger.log("Unable to write index info", ex);
-//      } finally {
-//        if(os != null) {
-//          try {
-//            os.close();
-//          } catch(IOException ex) {
-//            MavenLogger.log("Unable to close stream for index configuration", ex);
-//          }
-//        }
-//      }
-//    }
-//  }
-
   /**
    * @deprecated will likely be removed before 1.0
    */

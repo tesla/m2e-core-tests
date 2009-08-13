@@ -835,7 +835,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     configured.addAll(maven.getArtifactRepositories());
     configured.addAll(maven.getPluginArtifactRepository());
 
-    List<ArtifactRepository> effective = maven.getHiddenRepositories(configured);
+    List<ArtifactRepository> effective = maven.getEffectiveRepositories(configured);
 
     LinkedHashSet<String> urls = new LinkedHashSet<String>();
     for (ArtifactRepository repository : effective) {

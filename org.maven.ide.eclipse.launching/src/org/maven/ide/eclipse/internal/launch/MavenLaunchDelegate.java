@@ -48,8 +48,9 @@ import org.maven.ide.eclipse.util.Util;
 public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaunchConstants {
 
   private static final String LAUNCHER_TYPE = "org.codehaus.classworlds.Launcher";
+  private static final String LAUNCHER_TYPE3 = "org.codehaus.plexus.classworlds.launcher.Launcher"; // classwordls 2.0
   private static final String LAUNCH_M2CONF_FILE = "org.maven.ide.eclipse.internal.launch.M2_CONF";
-  
+
   private MavenRuntime runtime;
   private MavenLauncherConfigurationHandler m2conf;
   private File confFile;
@@ -108,7 +109,7 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
   }
 
   public String getMainTypeName(ILaunchConfiguration configuration) throws CoreException {
-    return LAUNCHER_TYPE;
+    return runtime.getVersion().startsWith("3.0")? LAUNCHER_TYPE3: LAUNCHER_TYPE;
   }
 
   public String[] getClasspath(ILaunchConfiguration configuration) throws CoreException {
