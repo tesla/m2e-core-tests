@@ -49,6 +49,10 @@ public class NexusIndex implements IIndex, IMutableIndex {
     return indexName;
   }
   
+  public String getRepositoryUrl(){
+    return this.repositoryUrl;
+  }
+  
   public void addArtifact(File pomFile, ArtifactKey artifactKey, long size, long date, File jarFile, int sourceExists,
       int javadocExists) {
     indexManager.addDocument(repositoryUrl, pomFile, NexusIndexManager.getDocumentKey(artifactKey), size, date, jarFile, sourceExists,

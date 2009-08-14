@@ -1131,6 +1131,14 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       }
     }
   }
+  
+  public void fireIndexUpdating(String indexName){
+    synchronized(indexListeners){
+      for(IndexListener listener : indexListeners){
+        listener.indexUpdating(indexName);
+      }
+    }    
+  }
   public void fireIndexChanged(String indexName){
     synchronized(indexListeners){
       for(IndexListener listener : indexListeners){
@@ -1232,6 +1240,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       monitor.setTaskName("Updating index " + displayName);
       console.logMessage("Updating index " + displayName);
       try {
+        fireIndexUpdating(getIndexName());
         IndexingContext context = getIndexingContext(getIndexName());
         IndexUpdateRequest request = new IndexUpdateRequest(context);
         request.setProxyInfo(getProxyInfo());
@@ -1240,6 +1249,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
         Date indexTime = getUpdater().fetchAndUpdateIndex(request);
         //MavenPlugin.getDefault().fireIndexUpdate(getIndexName());
         fireIndexChanged(getIndexName());
+       
         if(indexTime==null) {
           console.logMessage("No index update available for " + displayName);
         } else {
