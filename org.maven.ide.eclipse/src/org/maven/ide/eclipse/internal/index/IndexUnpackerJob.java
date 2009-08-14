@@ -107,7 +107,7 @@ public class IndexUnpackerJob extends Job {
             
             // update index and repository urls
             indexManager.removeIndex(indexName, false);
-            indexManager.addIndex(extensionIndexInfo, false);
+            indexManager.addIndex(extensionIndexInfo);
             
           } catch(Exception ex) {
             MavenLogger.log("Unable to unpack index " + displayName, ex);

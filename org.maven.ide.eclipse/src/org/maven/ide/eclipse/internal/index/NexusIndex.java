@@ -35,17 +35,20 @@ public class NexusIndex implements IIndex, IMutableIndex {
   private NexusIndexManager indexManager;
 
   private String repositoryUrl;
-
   
-  public NexusIndex(NexusIndexManager indexManager, String repositoryUrl) {
+  private String indexName;
+
+  public NexusIndex(NexusIndexManager indexManager, String indexName, String repositoryUrl) {
+    this.indexName = indexName;
     this.indexManager = indexManager;
     this.repositoryUrl = repositoryUrl;
     
   }
 
   public String getIndexName(){
-    return repositoryUrl;
+    return indexName;
   }
+  
   public void addArtifact(File pomFile, ArtifactKey artifactKey, long size, long date, File jarFile, int sourceExists,
       int javadocExists) {
     indexManager.addDocument(repositoryUrl, pomFile, NexusIndexManager.getDocumentKey(artifactKey), size, date, jarFile, sourceExists,

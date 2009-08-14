@@ -12,6 +12,7 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -151,9 +152,9 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
 //   */
 //  private Map<String, IndexInfo> configuredIndexes = new HashMap<String, IndexInfo>();
 
-  private IMutableIndex localIndex = new NexusIndex(this, LOCAL_INDEX);
+  private IMutableIndex localIndex = new NexusIndex(this, LOCAL_INDEX, LOCAL_INDEX);
   
-  private IMutableIndex workspaceIndex = new NexusIndex(this, WORKSPACE_INDEX);
+  private IMutableIndex workspaceIndex = new NexusIndex(this, WORKSPACE_INDEX, WORKSPACE_INDEX);
 
   public static String nvl( String v )
   {
@@ -627,9 +628,11 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       if(IndexManager.LOCAL_INDEX.equals(indexName)){
         updaterJob.addCommand(new ReindexCommand(indexName));
         
-      } else if(IndexManager.WORKSPACE_INDEX.equals(indexName)) {
+      } else if(!IndexManager.WORKSPACE_INDEX.equals(indexName)) {
         updaterJob.addCommand(new UpdateCommand(indexName, force));
-        updaterJob.addCommand(new UnpackCommand(indexName, force));
+//        IndexingContext context = getIndexingContext(indexName);
+//        URL archiveURL = null;
+//        updaterJob.addCommand(new UnpackCommand(indexName, archiveURL, force));
       }      
       updaterJob.schedule(delay);
     }
@@ -966,7 +969,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
 //    try{
       IndexInfo workspaceIndex = new IndexInfo(IndexManager.WORKSPACE_INDEX, //
           null, null, IndexInfo.Type.WORKSPACE, false);
-      addIndex(workspaceIndex, false);
+      addIndex(workspaceIndex);
       //scheduleIndexUpdate(workspaceIndex.getIndexName(), true, new NullProgressMonitor());
 //    } catch(CoreException ce){
 //      MavenLogger.log(ce);
@@ -983,7 +986,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     try {
       IndexInfo local = new IndexInfo(IndexManager.LOCAL_INDEX, //
           new File(maven.getLocalRepository().getBasedir()), null, IndexInfo.Type.LOCAL, false);
-      addIndex(local, false);
+      addIndex(local);
       boolean forceUpdate = !MavenPlugin.getDefault().getPreferenceStore().getBoolean(MavenPlugin.PREFS_NO_REBUILD_ON_START);
       scheduleIndexUpdate(local.getIndexName(), true, 30);
       
@@ -1016,7 +1019,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     indexes.add(getWorkspaceIndex());
     indexes.add(getLocalIndex());
     for (String repository : repositories) {
-      indexes.add(new NexusIndex(this, repository));
+      indexes.add(new NexusIndex(this, repository, repository));
     }
 
     return new CompositeIndex(indexes);
@@ -1031,6 +1034,9 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     return new File(getBaseIndexDir(), repositoryUrl);
   }
 
+  protected Directory getIndexDirectory(String repositoryUrl) throws IOException{
+    return FSDirectory.getDirectory(getIndexDirectoryFile(repositoryUrl));
+  }
   protected Directory getIndexDirectory(IndexInfo indexInfo) throws IOException {
     return FSDirectory.getDirectory(getIndexDirectoryFile(indexInfo));
   }
@@ -1044,7 +1050,6 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     //IndexInfo info = group.getIndexInfo();
     String indexName = group.getIndexName();
     String prefix = group.getPrefix();
-
     try {
       IndexedArtifactGroup g = new IndexedArtifactGroup(group.getIndexName(), group.getRepositoryUrl(), prefix);
       for(IndexedArtifact a : search(indexName, prefix, IIndex.SEARCH_GROUP).values()) {
@@ -1067,8 +1072,15 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
   }
 
+  public void addIndexForRemote(String indexName, String url) throws IOException{
+    Directory dir = getIndexDirectory(indexName);
+    getIndexer().addIndexingContextForced(indexName, indexName, null, dir, //
+        url, null, //
+        (getFullCreator()));
+    fireIndexAdded(indexName);
+  }
   
-  public void addIndex(IndexInfo indexInfo, boolean something){
+  public void addIndex(IndexInfo indexInfo){
     String indexName = indexInfo.getIndexName();
     String displayName = indexInfo.getRepositoryUrl();
     try {
@@ -1216,7 +1228,6 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
 
     public void run(NexusIndexManager indexManager, MavenConsole console, IProgressMonitor monitor) {
-      //String displayName = info.getDisplayName();
       String displayName = getIndexName();
       monitor.setTaskName("Updating index " + displayName);
       console.logMessage("Updating index " + displayName);
@@ -1254,80 +1265,66 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
   static class UnpackCommand extends IndexCommand {
 
     private final boolean force;
-
-    UnpackCommand(String indexName, boolean force) {
+    private URL archiveUrl;
+    
+    UnpackCommand(String indexName, URL archiveURL, boolean force) {
       this.indexName = indexName;
+      this.archiveUrl = archiveURL;
       this.force = force;
     }
     public void run(NexusIndexManager indexManager, MavenConsole console, IProgressMonitor monitor) {
+      URL indexArchive = this.archiveUrl;
+      if(indexArchive==null) {
+        return;
+      }
+
+      String indexName = getIndexName();
+      String displayName = getIndexName();
+      monitor.setTaskName("Unpacking " + displayName);
       
+      Date archiveIndexTime = null;
+
+      boolean replace = force;
+
+      if(replace) {
+        File index = new File(indexManager.getBaseIndexDir(), indexName);
+        if(!index.exists()) {
+          if(!index.mkdirs()) {
+            MavenLogger.log("Can't create index folder " + index.getAbsolutePath(), null);
+          }
+        } else {
+          File[] files = index.listFiles();
+          for(int j = 0; j < files.length; j++ ) {
+            if(!files[j].delete()) {
+              MavenLogger.log("Can't delete " + files[j].getAbsolutePath(), null);
+            }
+          }
+        }
+        
+        InputStream is = null;
+        try {
+          is = indexArchive.openStream();
+          indexManager.replaceIndex(indexName, is);
+
+          console.logMessage("Unpacked index for " + displayName + " " + archiveIndexTime);
+          
+          // XXX update index and repository urls
+          // indexManager.removeIndex(indexName, false);
+          // indexManager.addIndex(extensionIndexInfo, false);
+          
+        } catch(Exception ex) {
+          MavenLogger.log("Unable to unpack index " + displayName, ex);
+        } finally {
+          try {
+            if(is != null) {
+              is.close();
+            }
+          } catch(IOException ex) {
+            MavenLogger.log("Unable to close stream", ex);
+          }
+        }
+      }
     }
-//    public void run(NexusIndexManager indexManager, MavenConsole console, IProgressMonitor monitor) {
-//      URL indexArchive = info.getArchiveUrl();
-//      if(indexArchive==null) {
-//        return;
-//      }
-//
-//      String indexName = info.getIndexName();
-//      String displayName = info.getDisplayName();
-//      monitor.setTaskName("Unpacking " + displayName);
-//      
-//      Date archiveIndexTime = null;
-//      if(info.isNew() && info.getArchiveUrl()!=null) {
-//        try {
-//          archiveIndexTime = indexManager.getIndexArchiveTime(indexArchive.openStream());
-//        } catch(IOException ex) {
-//          MavenLogger.log("Unable to read creation time for index " + displayName, ex);
-//        }
-//      }
-//      
-//      boolean replace = force || info.isNew();
-//      if(!replace) {
-//        if(archiveIndexTime!=null) {
-//          Date currentIndexTime = info.getUpdateTime();
-//          replace = currentIndexTime==null || archiveIndexTime.after(currentIndexTime);
-//        }
-//      }
-//
-//      if(replace) {
-//        File index = new File(indexManager.getBaseIndexDir(), indexName);
-//        if(!index.exists()) {
-//          if(!index.mkdirs()) {
-//            MavenLogger.log("Can't create index folder " + index.getAbsolutePath(), null);
-//          }
-//        } else {
-//          File[] files = index.listFiles();
-//          for(int j = 0; j < files.length; j++ ) {
-//            if(!files[j].delete()) {
-//              MavenLogger.log("Can't delete " + files[j].getAbsolutePath(), null);
-//            }
-//          }
-//        }
-//        
-//        InputStream is = null;
-//        try {
-//          is = indexArchive.openStream();
-//          indexManager.replaceIndex(indexName, is);
-//
-//          console.logMessage("Unpacked index for " + displayName + " " + archiveIndexTime);
-//          
-//          // XXX update index and repository urls
-//          // indexManager.removeIndex(indexName, false);
-//          // indexManager.addIndex(extensionIndexInfo, false);
-//          
-//        } catch(Exception ex) {
-//          MavenLogger.log("Unable to unpack index " + displayName, ex);
-//        } finally {
-//          try {
-//            if(is != null) {
-//              is.close();
-//            }
-//          } catch(IOException ex) {
-//            MavenLogger.log("Unable to close stream", ex);
-//          }
-//        }
-//      }
-//    }
     
   }
 
