@@ -24,6 +24,7 @@ import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.Clipboard;
@@ -47,8 +48,9 @@ import org.maven.ide.eclipse.index.IndexListener;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
-import org.maven.ide.eclipse.internal.index.IndexInfo;
 import org.maven.ide.eclipse.internal.index.IndexedArtifactGroup;
+import org.maven.ide.eclipse.ui.internal.views.nodes.IndexNode;
+import org.maven.ide.eclipse.ui.internal.views.nodes.IndexedArtifactFileNode;
 
 
 /**
@@ -124,6 +126,9 @@ public class MavenRepositoryView extends ViewPart {
       public void indexRemoved(String indexName) {
         refreshView();
       }
+      public void indexUpdating(String indexName){
+        markIndexUpdating();
+      }
     });
   }
 
@@ -153,6 +158,22 @@ public class MavenRepositoryView extends ViewPart {
     manager.add(refreshAction);
   }
 
+  protected List<IndexNode> getIndexElementsToUpdate(List elements){
+    if(elements == null || elements.size() == 0){
+      return null;
+    }
+    ArrayList<IndexNode> list = new ArrayList<IndexNode>();
+    for(int i=0;i<elements.size();i++){
+      Object elem = elements.get(i);
+      if(elem instanceof IndexNode){
+        IndexNode node = (IndexNode)elem;
+        if(!node.isWorkspace()){
+          list.add((IndexNode)elem);
+        }
+      }
+    }
+    return list;
+  }
   void fillContextMenu(IMenuManager manager) {
     manager.add(openPomAction);
     manager.add(copyUrlAction);
@@ -213,28 +234,14 @@ public class MavenRepositoryView extends ViewPart {
 
     updateAction = new BaseSelectionListenerAction("Update Index") {
       public void run() {
-        List<IndexInfo> infoElements = elementsToUpdate(getStructuredSelection().toList());
-        for(IndexInfo info : infoElements){
-          updateIndex(info, false);
+        List<IndexNode> infoElements = getIndexElementsToUpdate(getStructuredSelection().toList());
+        for(IndexNode node : infoElements){
+          updateIndex(node.getIndexName(), false);
         }
       }
-      protected List<IndexInfo> elementsToUpdate(List elements){
-        if(elements == null || elements.size() == 0){
-          return null;
-        }
-        ArrayList<IndexInfo> list = new ArrayList<IndexInfo>();
-        for(int i=0;i<elements.size();i++){
-          Object elem = elements.get(i);
-          if(elem instanceof IndexInfo){
-            if(IndexInfo.Type.REMOTE.equals(((IndexInfo)elem).getType()) || IndexInfo.Type.LOCAL.equals(((IndexInfo) elem).getType())){
-              list.add((IndexInfo)elem);
-            }
-          }
-        }
-        return list;
-      }
+
       protected boolean updateSelection(IStructuredSelection selection) {
-        List<IndexInfo> elems = elementsToUpdate(selection.toList());
+        List<IndexNode> elems = getIndexElementsToUpdate(selection.toList());
         if(elems != null && elems.size() > 1){
           setText("Update Indexes");
         } else {
@@ -248,18 +255,18 @@ public class MavenRepositoryView extends ViewPart {
 
     rebuildAction = new BaseSelectionListenerAction("Rebuild Index") {
       public void run() {
-        List<IndexInfo> elemsToUpdate = elementsToUpdate(getStructuredSelection().toList());
+        List<IndexNode> elemsToUpdate = getIndexElementsToUpdate(getStructuredSelection().toList());
         if(elemsToUpdate != null && elemsToUpdate.size() > 0){
           if(elemsToUpdate.size() == 1){
-            IndexInfo info = elemsToUpdate.get(0);
-            String name = info.getDisplayName() == null ? info.getIndexName() : info.getDisplayName();
+            IndexNode info = elemsToUpdate.get(0);
+            String name = info.getName();
             String msg = "Are you sure you want to rebuild the index '"+name+"'";
             boolean res = MessageDialog.openConfirm(getViewSite().getShell(), //
                 "Rebuild Index", msg);
             if(res) {
               // TODO request index deletion
               // TODO add deleted index to 
-              updateIndex(info, true);
+              updateIndex(info.getIndexName(), true);
             }
           } else {
             String msg = "Are you sure you want to rebuild the selected indexes?";
@@ -268,32 +275,16 @@ public class MavenRepositoryView extends ViewPart {
             if(res) {
               // TODO request index deletion
               // TODO add deleted index to 
-              for(IndexInfo info : elemsToUpdate){
-                updateIndex(info, true);
+              for(IndexNode info : elemsToUpdate){
+                updateIndex(info.getIndexName(), true);
               }
             }            
           }
         }
       }
       
-      protected List<IndexInfo> elementsToUpdate(List elements){
-        if(elements == null || elements.size() == 0){
-          return null;
-        }
-        ArrayList<IndexInfo> list = new ArrayList<IndexInfo>();
-        for(int i=0;i<elements.size();i++){
-          Object elem = elements.get(i);
-          if(elem instanceof IndexInfo){
-            if(IndexInfo.Type.REMOTE.equals(((IndexInfo)elem).getType()) || IndexInfo.Type.LOCAL.equals(((IndexInfo) elem).getType())){
-              list.add((IndexInfo)elem);
-            }
-          }
-        }
-        return list;
-      }
-
       protected boolean updateSelection(IStructuredSelection selection) {
-        List<IndexInfo> elems = elementsToUpdate(selection.toList());
+        List<IndexNode> elems = getIndexElementsToUpdate(selection.toList());
         if(elems != null && elems.size() > 1){
           setText("Rebuild Indexes");
         } else {
@@ -310,8 +301,8 @@ public class MavenRepositoryView extends ViewPart {
       public void run() {
         ISelection selection = viewer.getSelection();
         Object element = ((IStructuredSelection) selection).getFirstElement();
-        if(element instanceof IndexedArtifactFile) {
-          IndexedArtifactFile f = (IndexedArtifactFile) element;
+        if(element instanceof IndexedArtifactFileNode) {
+          IndexedArtifactFile f = ((IndexedArtifactFileNode) element).getIndexedArtifactFile();
           OpenPomAction.openEditor(f.group, f.artifact, f.version, null);
         }
       }
@@ -327,8 +318,8 @@ public class MavenRepositoryView extends ViewPart {
       public void run() {
         Object element = getStructuredSelection().getFirstElement();
         String url = null;
-        if(element instanceof IndexInfo) {
-          url = ((IndexInfo) element).getRepositoryUrl();
+        if(element instanceof IndexNode) {
+          url = ((IndexNode) element).getRepositoryUrl();
         } else if(element instanceof IndexedArtifactGroup) {
           IndexedArtifactGroup group = (IndexedArtifactGroup) element;
           String repositoryUrl = group.getRepositoryUrl();
@@ -350,20 +341,24 @@ public class MavenRepositoryView extends ViewPart {
 
       protected boolean updateSelection(IStructuredSelection selection) {
         Object element = selection.getFirstElement();
-        return element instanceof IndexInfo || element instanceof IndexedArtifactGroup;
+        return element instanceof IndexNode;
       }
     };
     copyUrlAction.setToolTipText("Copy URL to Clipboard");
     
     materializeProjectAction = new BaseSelectionListenerAction("Materialize Projects") {
       public void run() {
-        MaterializeAction action = new MaterializeAction();
-        action.selectionChanged(this, getStructuredSelection());
-        action.run(this);
+        Object element = getStructuredSelection().getFirstElement();
+        if(element instanceof IndexedArtifactFileNode){
+          MaterializeAction action = new MaterializeAction();
+          StructuredSelection sel = new StructuredSelection(new Object[]{((IndexedArtifactFileNode) element).getIndexedArtifactFile()});
+          action.selectionChanged(this, sel);
+          action.run(this);
+        }
       }
       
       protected boolean updateSelection(IStructuredSelection selection) {
-        return selection.getFirstElement() instanceof IndexedArtifactFile;
+        return selection.getFirstElement() instanceof IndexedArtifactFileNode;
       }
     };
     materializeProjectAction.setImageDescriptor(MavenImages.IMPORT_PROJECT);
@@ -385,6 +380,14 @@ public class MavenRepositoryView extends ViewPart {
     super.dispose();
   }
 
+  void markIndexUpdating(){
+    Display.getDefault().asyncExec(new Runnable() {
+      public void run() {
+        //TODO: mark the nodes as 'updating' when the update index is running
+      }
+    });    
+  }
+  
   void refreshView() {
     Display.getDefault().asyncExec(new Runnable() {
       public void run() {
@@ -399,10 +402,10 @@ public class MavenRepositoryView extends ViewPart {
     });
   };
 
-  void updateIndex(final IndexInfo info, boolean force){
+  protected void updateIndex(final String indexName, boolean force){
     try{
       IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
-      indexManager.scheduleIndexUpdate(info.getIndexName(), force, 1L);
+      indexManager.scheduleIndexUpdate(indexName, force, 1L);
     } catch(CoreException ce){
       MavenLogger.log(ce);
     }
