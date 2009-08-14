@@ -29,6 +29,21 @@ public class IndexNode implements IMavenRepositoryNode {
 //  private IndexInfo indexInfo;
   private String displayName;
 
+  private boolean isMirror;
+  /**
+   * @return Returns the isMirror.
+   */
+  public boolean isMirror() {
+    return this.isMirror;
+  }
+
+  /**
+   * @param isMirror The isMirror to set.
+   */
+  public void setMirror(boolean isMirror) {
+    this.isMirror = isMirror;
+  }
+
   private IMutableIndex index;
   public IndexNode(IMutableIndex index){
     this.index = index;

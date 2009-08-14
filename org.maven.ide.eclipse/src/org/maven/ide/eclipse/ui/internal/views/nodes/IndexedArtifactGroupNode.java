@@ -28,7 +28,7 @@ import org.maven.ide.eclipse.internal.index.NexusIndexManager;
 public class IndexedArtifactGroupNode implements IMavenRepositoryNode {
 
   private IndexedArtifactGroup indexedArtifactGroup;
-
+  private Object[] kids = null;
   public IndexedArtifactGroupNode(IndexedArtifactGroup group){
     this.indexedArtifactGroup = group;
   }
@@ -37,7 +37,9 @@ public class IndexedArtifactGroupNode implements IMavenRepositoryNode {
    */
   public Object[] getChildren() {
     NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getDefault().getIndexManager();
+    
     IndexedArtifactGroup resolvedGroup = indexManager.resolveGroup(indexedArtifactGroup);
+    //IndexedArtifactGroup resolvedGroup = indexedArtifactGroup;
     ArrayList<Object> results = new ArrayList<Object>();
     Collection<IndexedArtifactGroup> groups = resolvedGroup.getNodes().values();
     for(IndexedArtifactGroup group : groups){
@@ -50,7 +52,8 @@ public class IndexedArtifactGroupNode implements IMavenRepositoryNode {
       IndexedArtifactNode artifactNode = new IndexedArtifactNode(artifact);
       results.add(artifactNode);
     }
-    return results.toArray(new Object[results.size()]);
+    kids = results.toArray(new Object[results.size()]);
+    return kids;
   }
 
   /* (non-Javadoc)
@@ -66,7 +69,11 @@ public class IndexedArtifactGroupNode implements IMavenRepositoryNode {
    * @see org.maven.ide.eclipse.ui.internal.views.IMavenRepositoryNode#hasChildren()
    */
   public boolean hasChildren() {
-    return getChildren() != null && getChildren().length > 0;
+//    if(kids == null){
+//      kids = getChildren();
+//    }
+//    return kids != null && kids.length > 0;
+    return true;
   }
   /* (non-Javadoc)
    * @see org.maven.ide.eclipse.ui.internal.views.nodes.IMavenRepositoryNode#getImage()

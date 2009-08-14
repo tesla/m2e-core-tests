@@ -21,6 +21,8 @@ import org.apache.maven.settings.Settings;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.IMaven;
+import org.maven.ide.eclipse.internal.index.NexusIndex;
+import org.maven.ide.eclipse.internal.index.NexusIndexManager;
 
 /**
  * RemoteRepositoryNode
@@ -61,23 +63,16 @@ public class RemoteRepositoryRootNode implements IMavenRepositoryNode{
    * @see org.maven.ide.eclipse.ui.internal.views.IMavenRepositoryRootNode#getElements()
    */
   public Object[] getChildren() {
-//    List<Mirror> mirrors = getMirrors();
-//    ArrayList<Object> repoList = new ArrayList<Object>();
-//    if(mirrors != null && mirrors.size() > 0){
-//      for(Mirror mirror : mirrors){
-//        MirrorNode node = new MirrorNode(mirror);
-//        repoList.add(node);
-//      }
-//    }
     ArrayList<Object> repoList = new ArrayList<Object>();
     try{
        List<ArtifactRepository> repos = getRemoteRepositories();
        if(repos != null){
         for(ArtifactRepository repo : repos){
-          ArtifactRepositoryNode node = new ArtifactRepositoryNode(repo);
+          NexusIndex index = new NexusIndex(((NexusIndexManager)MavenPlugin.getDefault().getIndexManager()), repo.getId(), repo.getUrl());
+          IndexNode node = new IndexNode(index);
           repoList.add(node);
           if(isMirror(repo)){
-            node.setIsMirror(true);
+            node.setMirror(true);
           }
         }
       }

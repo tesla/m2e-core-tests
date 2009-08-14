@@ -25,7 +25,7 @@ import org.maven.ide.eclipse.index.IndexedArtifactFile;
 public class IndexedArtifactNode implements IMavenRepositoryNode {
 
   private IndexedArtifact artifact;
-
+  private Object[] kids = null;
   public IndexedArtifactNode(IndexedArtifact artifact){
     this.artifact = artifact;
   }
@@ -41,7 +41,8 @@ public class IndexedArtifactNode implements IMavenRepositoryNode {
     for(IndexedArtifactFile iaf : files){
       fileList.add(new IndexedArtifactFileNode(iaf));
     }
-    return fileList.toArray(new IndexedArtifactFileNode[fileList.size()]);
+    kids = fileList.toArray(new IndexedArtifactFileNode[fileList.size()]);
+    return kids;
   }
 
   /* (non-Javadoc)
@@ -49,14 +50,19 @@ public class IndexedArtifactNode implements IMavenRepositoryNode {
    */
   public String getName() {
     // return a.group + ":" + a.artifact;
-    return artifact.getArtifactId() + " - " + artifact.getPackaging();
+    String pkg = artifact.getPackaging();
+    if(pkg == null){
+      pkg = "[No Packaging]";
+    }
+    return artifact.getArtifactId() + " - " + pkg;
   }
 
   /* (non-Javadoc)
    * @see org.maven.ide.eclipse.ui.internal.views.IMavenRepositoryNode#hasChildren()
    */
   public boolean hasChildren() {
-    return getChildren() != null && getChildren().length > 0;
+    //return kids != null && kids.length > 0;
+    return true;
   }
   
   /* (non-Javadoc)
