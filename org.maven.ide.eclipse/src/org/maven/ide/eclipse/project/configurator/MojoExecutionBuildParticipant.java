@@ -29,12 +29,12 @@ public class MojoExecutionBuildParticipant extends AbstractBuildParticipant {
 
   private final MojoExecution execution;
   private final boolean runOnIncremental;
-  
+
   public MojoExecutionBuildParticipant(MojoExecution execution, boolean runOnIncremental) {
     this.execution = execution;
     this.runOnIncremental = runOnIncremental;
   }
-
+  
   public Set<IProject> build(int kind, IProgressMonitor monitor) throws Exception {
     if(appliesToBuildKind(kind)) {
       IMaven maven = MavenPlugin.lookup(IMaven.class);
@@ -47,9 +47,8 @@ public class MojoExecutionBuildParticipant extends AbstractBuildParticipant {
   public boolean appliesToBuildKind(int kind) {
     if(IncrementalProjectBuilder.FULL_BUILD == kind || IncrementalProjectBuilder.CLEAN_BUILD == kind) {
       return true;
-    } else {
-      return runOnIncremental;
     }
+    return runOnIncremental;
   }
 
   public MojoExecution getMojoExecution() {

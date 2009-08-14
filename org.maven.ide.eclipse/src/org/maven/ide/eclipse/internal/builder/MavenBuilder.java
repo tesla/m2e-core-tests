@@ -120,6 +120,7 @@ public class MavenBuilder extends IncrementalProjectBuilder {
           participant.setMavenProjectFacade(projectFacade);
           participant.setGetDeltaCallback(getDeltaCallback);
           participant.setSession(session);
+          participant.setBuildContext(buildContext);
           try {
             if(FULL_BUILD == kind || delta != null || participant.callOnEmptyDelta()) {
               Set<IProject> sub = participant.build(kind, monitor);
@@ -133,6 +134,7 @@ public class MavenBuilder extends IncrementalProjectBuilder {
             participant.setMavenProjectFacade(null);
             participant.setGetDeltaCallback(null);
             participant.setSession(null);
+            participant.setBuildContext(null);
           }
         }
       } finally {

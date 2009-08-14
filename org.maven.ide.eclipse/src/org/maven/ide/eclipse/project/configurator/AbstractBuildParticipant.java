@@ -17,6 +17,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.apache.maven.execution.MavenSession;
 
+import org.sonatype.plexus.build.incremental.BuildContext;
+
 import org.maven.ide.eclipse.internal.builder.InternalBuildParticipant;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 
@@ -55,5 +57,9 @@ public abstract class AbstractBuildParticipant extends InternalBuildParticipant 
 
   protected MavenSession getSession() {
     return super.getSession();
+  }
+  
+  protected BuildContext getBuildContext() {
+    return super.getBuildContext();
   }
 }

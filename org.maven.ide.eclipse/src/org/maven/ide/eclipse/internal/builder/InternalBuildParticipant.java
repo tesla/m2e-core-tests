@@ -17,6 +17,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.apache.maven.execution.MavenSession;
 
+import org.sonatype.plexus.build.incremental.BuildContext;
+
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 
 public abstract class InternalBuildParticipant {
@@ -25,6 +27,7 @@ public abstract class InternalBuildParticipant {
   private MavenBuilder.GetDeltaCallback getDeltaCallback;
 //  private BuildContext buildContext;
   private MavenSession session;
+  private AbstractEclipseBuildContext buildContext;
 
   protected IMavenProjectFacade getMavenProjectFacade() {
     return facade;
@@ -59,4 +62,11 @@ public abstract class InternalBuildParticipant {
 
   public abstract boolean callOnEmptyDelta();
 
+  void setBuildContext(AbstractEclipseBuildContext buildContext) {
+    this.buildContext = buildContext;
+  }
+
+  protected BuildContext getBuildContext() {
+    return buildContext;
+  }
 }
