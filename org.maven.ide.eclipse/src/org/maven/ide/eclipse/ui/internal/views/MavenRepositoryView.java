@@ -11,12 +11,7 @@ package org.maven.ide.eclipse.ui.internal.views;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
@@ -66,8 +61,6 @@ public class MavenRepositoryView extends ViewPart {
   IAction refreshAction;
 
   IAction collapseAllAction;
-  
-  IAction expandAllAction;
   
   BaseSelectionListenerAction openPomAction;
 
@@ -123,7 +116,9 @@ public class MavenRepositoryView extends ViewPart {
       }
 
       public void indexChanged(String indexName) {
+
         refreshView();
+
       }
 
       public void indexRemoved(String indexName) {
@@ -154,7 +149,6 @@ public class MavenRepositoryView extends ViewPart {
 
   private void fillLocalPullDown(IMenuManager manager) {
     manager.add(new Separator());
-    manager.add(expandAllAction);
     manager.add(collapseAllAction);
     manager.add(refreshAction);
   }
@@ -167,7 +161,6 @@ public class MavenRepositoryView extends ViewPart {
     manager.add(updateAction);
     manager.add(rebuildAction);
     manager.add(new Separator());
-    manager.add(expandAllAction);
     manager.add(collapseAllAction);
     manager.add(new Separator());
     drillDownAdapter.addNavigationActions(manager);
@@ -176,7 +169,6 @@ public class MavenRepositoryView extends ViewPart {
 
   private void fillLocalToolBar(IToolBarManager manager) {
     manager.add(new Separator());
-    manager.add(expandAllAction);
     manager.add(collapseAllAction);
     manager.add(refreshAction);
     manager.add(new Separator());
@@ -192,24 +184,24 @@ public class MavenRepositoryView extends ViewPart {
     collapseAllAction.setToolTipText("Collapse All");
     collapseAllAction.setImageDescriptor(MavenImages.COLLAPSE_ALL);
 
-    expandAllAction = new Action("Expand All"){
-      public void run(){
-        Job job = new WorkspaceJob("Expanding Repository Tree") {
-          public IStatus runInWorkspace(IProgressMonitor monitor) {
-            Display.getDefault().asyncExec(new Runnable(){
-              public void run(){
-                viewer.expandAll();
-              }
-            });
-            return Status.OK_STATUS;
-          }
-        };
-        job.schedule();
-      }
-    };
-    
-    expandAllAction.setToolTipText("Expand All");
-    expandAllAction.setImageDescriptor(MavenImages.EXPAND_ALL);
+//    expandAllAction = new Action("Expand All"){
+//      public void run(){
+//        Job job = new WorkspaceJob("Expanding Repository Tree") {
+//          public IStatus runInWorkspace(IProgressMonitor monitor) {
+//            Display.getDefault().asyncExec(new Runnable(){
+//              public void run(){
+//                viewer.expandAll();
+//              }
+//            });
+//            return Status.OK_STATUS;
+//          }
+//        };
+//        job.schedule();
+//      }
+//    };
+//    
+//    expandAllAction.setToolTipText("Expand All");
+//    expandAllAction.setImageDescriptor(MavenImages.EXPAND_ALL);
     refreshAction = new Action("Refresh") {
       public void run() {
         viewer.setInput(getViewSite());
@@ -396,8 +388,12 @@ public class MavenRepositoryView extends ViewPart {
   void refreshView() {
     Display.getDefault().asyncExec(new Runnable() {
       public void run() {
+        Object[] expandedElems = viewer.getExpandedElements();
         if (!viewer.getControl().isDisposed()) {
-          refreshAction.run();
+          viewer.setInput(getViewSite());
+          if(expandedElems != null && expandedElems.length > 0){
+            viewer.setExpandedElements(expandedElems);
+          }
         }
       }
     });
