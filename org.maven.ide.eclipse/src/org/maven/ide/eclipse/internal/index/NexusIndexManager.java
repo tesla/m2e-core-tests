@@ -16,6 +16,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -1125,6 +1126,9 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
   }
   public void fireIndexRemoved(String indexName){
+    synchronized(updatingIndexes){
+      updatingIndexes.remove(indexName);
+    }
     synchronized(indexListeners){
       for(IndexListener listener : indexListeners){
         listener.indexRemoved(indexName);
@@ -1132,14 +1136,22 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
   }
   
+  private Set<String> updatingIndexes = new HashSet<String>();
+  public boolean isUpdatingIndex(String indexName){
+    synchronized(updatingIndexes){
+      return updatingIndexes.contains(indexName);
+    }
+  }
+  
   public void fireIndexUpdating(String indexName){
-    synchronized(indexListeners){
-      for(IndexListener listener : indexListeners){
-        listener.indexUpdating(indexName);
-      }
+    synchronized(updatingIndexes){
+      updatingIndexes.add(indexName);
     }    
   }
   public void fireIndexChanged(String indexName){
+    synchronized(updatingIndexes){
+      updatingIndexes.remove(indexName);
+    }
     synchronized(indexListeners){
       for(IndexListener listener : indexListeners){
         listener.indexChanged(indexName);
