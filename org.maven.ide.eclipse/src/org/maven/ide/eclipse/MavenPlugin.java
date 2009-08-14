@@ -341,6 +341,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
     boolean forceUpdate = !this.getPreferenceStore().getBoolean(PREFS_NO_REBUILD_ON_START);
     updateRepos(forceUpdate);
+    this.getPreferenceStore().setValue(PREFS_NO_REBUILD_ON_START, true);
     checkJdk();
   }
 
@@ -367,10 +368,11 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   
   private void updateRepos(boolean force){
     try{
-      List<ArtifactRepository> remoteRepositories = getRemoteRepositories();
+      List<ArtifactRepository> repositories = getRemoteRepositories();
+      List<ArtifactRepository> remoteRepositories = getMaven().getEffectiveRepositories(repositories);
       if(remoteRepositories != null){
         for(ArtifactRepository repo : remoteRepositories){
-          getIndexManager().scheduleIndexUpdate(repo.getId(), force, 4000L);
+          getIndexManager().scheduleIndexUpdate(repo.getId(), force, 3000L);
         }
       }
     } catch(Exception e){
