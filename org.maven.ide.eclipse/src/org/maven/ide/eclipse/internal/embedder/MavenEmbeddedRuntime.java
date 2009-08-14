@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
@@ -129,7 +130,8 @@ public class MavenEmbeddedRuntime implements MavenRuntime {
     StringBuilder sb = new StringBuilder();
     sb.append("Embedded (").append(getVersion());
     if (embedder != null) {
-      sb.append('/').append(embedder.getVersion().toString());
+      String version = (String) embedder.getHeaders().get(Constants.BUNDLE_VERSION);
+      sb.append('/').append(version);
     }
     sb.append(')');
 
