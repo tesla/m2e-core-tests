@@ -8,19 +8,24 @@
 
 package org.maven.ide.eclipse.ui.internal.views;
 
+import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
 import org.maven.ide.eclipse.ui.internal.views.nodes.IMavenRepositoryNode;
+import org.maven.ide.eclipse.ui.internal.views.nodes.IndexNode;
 
 /**
  * RepositoryViewLabelProvider
  *
  * @author dyocum
  */
-public class RepositoryViewLabelProvider extends LabelProvider {
+public class RepositoryViewLabelProvider extends LabelProvider implements IColorProvider {
 
   public String getText(Object obj) {
     if(obj instanceof IMavenRepositoryNode){
@@ -34,6 +39,22 @@ public class RepositoryViewLabelProvider extends LabelProvider {
       return ((IMavenRepositoryNode)obj).getImage();
     }
     return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_ELEMENT);
+  }
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.viewers.IColorProvider#getBackground(java.lang.Object)
+   */
+  public Color getBackground(Object element) {
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
+   */
+  public Color getForeground(Object element) {
+    if(element instanceof IndexNode && ((IndexNode)element).isUpdating()){
+      return Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
+    } 
+    return Display.getDefault().getSystemColor(SWT.COLOR_BLACK);
   }
 
 }

@@ -118,16 +118,18 @@ public class MavenRepositoryView extends ViewPart {
       }
 
       public void indexChanged(String indexName) {
-
+//        markIndexUpdating(indexName, false);
         refreshView();
 
       }
 
       public void indexRemoved(String indexName) {
         refreshView();
+        
       }
       public void indexUpdating(String indexName){
-        markIndexUpdating();
+//        markIndexUpdating(indexName, true);
+
       }
     });
   }
@@ -380,13 +382,22 @@ public class MavenRepositoryView extends ViewPart {
     super.dispose();
   }
 
-  void markIndexUpdating(){
-    Display.getDefault().asyncExec(new Runnable() {
-      public void run() {
-        //TODO: mark the nodes as 'updating' when the update index is running
-      }
-    });    
-  }
+//  void markIndexUpdating(final String indexName, final boolean isUpdating){
+//    Display.getDefault().asyncExec(new Runnable() {
+//      public void run() {
+//        //TODO: mark the nodes as 'updating' when the update index is running
+//        TreeItem[] items = viewer.getTree().getItems();
+//        for(TreeItem item : items){
+//          Object data = item.getData();
+//          if(data instanceof IndexNode && ((IndexNode)data).getIndexName().equals(indexName)){
+//            ((IndexNode)data).setIsUpdating(isUpdating);
+//          }
+//        }
+//        viewer.refresh(true);
+//      }
+//      
+//    });    
+//  }
   
   void refreshView() {
     Display.getDefault().asyncExec(new Runnable() {
