@@ -67,6 +67,7 @@ import org.codehaus.plexus.configuration.PlexusConfigurationException;
 import org.codehaus.plexus.context.Context;
 
 import org.apache.maven.classrealm.ClassRealmManagerDelegate;
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.PluginManager;
 import org.apache.maven.project.artifact.MavenMetadataCache;
 
@@ -116,6 +117,8 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   private static final String PREFS_ARCHETYPES = "archetypesInfo.xml";
   
   public static final String PREFS_NO_REBUILD_ON_START = "forceRebuildOnUpgrade";
+  
+  public static final String PREFS_INDEXES = "indexInfo.xml";
 
   // The shared instance
   private static MavenPlugin plugin;
@@ -297,6 +300,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
       MavenLogger.log(msg, ex);
     }
 
+
     boolean updateProjectsOnStartup = mavenConfiguration.isUpdateProjectsOnStartup();
 
     mavenMarkerManager = new MavenMarkerManager(runtimeManager, console);
@@ -330,26 +334,13 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     projectManager.addMavenProjectChangedListener(this.configurationManager);
 
     this.indexManager = new NexusIndexManager(console, projectManager, stateLocationDir);
+    loadIndexConfiguration(new File(stateLocationDir, PREFS_INDEXES));
     this.projectManager.addMavenProjectChangedListener(indexManager);
     this.indexManager.createLocalIndex();
     this.indexManager.createWorkspaceIndex();
-//    this.indexManager.addIndex(new IndexInfo(IndexManager.WORKSPACE_INDEX, //
-//        null, null, IndexInfo.Type.WORKSPACE, false), false);
-////
-//    try {
-//      IndexInfo local = new IndexInfo(IndexManager.LOCAL_INDEX, //
-//          new File(maven.getLocalRepository().getBasedir()), null, IndexInfo.Type.LOCAL, false);
-//      this.indexManager.addIndex(local, false);
-//      boolean forceUpdate = !this.getPreferenceStore().getBoolean(PREFS_NO_REBUILD_ON_START);
-//      if(forceUpdate && !local.isNew()){
-//        indexManager.scheduleIndexUpdate(local.getIndexName(), true, new NullProgressMonitor());
-//      }
-//    } catch(CoreException ex) {
-//      MavenLogger.log(ex);
-//    }
-//    
-//    initializeIndexes(indexes, mavenConfiguration.isUpdateIndexesOnStartup());
 
+    boolean forceUpdate = !this.getPreferenceStore().getBoolean(PREFS_NO_REBUILD_ON_START);
+    updateRepos(forceUpdate);
     checkJdk();
   }
 
@@ -365,6 +356,134 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
       listeners.remove(listener);
     }
   }
+  public List<ArtifactRepository> getRemoteRepositories() throws Exception{
+    IMaven maven = MavenPlugin.getDefault().getMaven();
+    
+    ArrayList<ArtifactRepository> repositories = new ArrayList<ArtifactRepository>();
+    repositories.addAll(maven.getArtifactRepositories());
+    repositories.addAll(maven.getPluginArtifactRepository());
+    return repositories;
+  }
+  
+  private void updateRepos(boolean force){
+    try{
+      List<ArtifactRepository> remoteRepositories = getRemoteRepositories();
+      if(remoteRepositories != null){
+        for(ArtifactRepository repo : remoteRepositories){
+          getIndexManager().scheduleIndexUpdate(repo.getId(), force, 4000L);
+        }
+      }
+    } catch(Exception e){
+      String msg = "Unable to load remote repositories";
+      MavenLogger.log(msg, e);
+      getConsole().logError(msg);
+    }
+  }
+  private void loadIndexConfiguration(File configFile) throws IllegalStateException {
+    try{
+      List<ArtifactRepository> remoteRepositories = getRemoteRepositories();
+      for(ArtifactRepository repo : remoteRepositories){
+        //NexusIndex index = new NexusIndex(this.indexManager, repo.getUrl());
+        String url = repo.getUrl();
+        this.indexManager.addIndexForRemote(repo.getId(), url);
+      } 
+    } catch(Exception e){
+      String msg = "Unable to load remote repositories";
+      MavenLogger.log(msg, e);
+      getConsole().logError(msg);
+    }
+  }
+  
+//  private void initializeIndexes(Set<IndexInfo> indexes, boolean updateIndexesOnStartup) {
+//    boolean forceUpdate = !this.getPreferenceStore().getBoolean(PREFS_NO_REBUILD_ON_START);
+//    if(forceUpdate){
+//      this.getPreferenceStore().setValue(PREFS_NO_REBUILD_ON_START, true);
+//    }
+//    for(IndexInfo indexInfo : indexes) {
+//      if(IndexInfo.Type.LOCAL.equals(indexInfo.getType())) {
+//        if(indexInfo.isNew()) {
+//            indexManager.scheduleIndexUpdate(indexInfo.getIndexName(), false, 4000L);
+//        }
+//      } else if(IndexInfo.Type.REMOTE.equals(indexInfo.getType())) {
+//        if(indexInfo.isNew() || updateIndexesOnStartup || forceUpdate) {
+//          indexManager.scheduleIndexUpdate(indexInfo.getIndexName(), forceUpdate, 4000L);
+//        }
+//      }
+//    }
+//  }
+  
+//  void unzipFile(URL url, File dest) throws IOException {
+//
+//    InputStream is = new BufferedInputStream(url.openStream());
+//    ZipInputStream zis = new ZipInputStream(is);
+//    try {
+//      ZipEntry entry = zis.getNextEntry();
+//      while(entry != null) {
+//        File f = new File(dest, entry.getName());
+//        if(entry.isDirectory()) {
+//          f.mkdirs();
+//        } else {
+//          if(!f.getParentFile().exists()) {
+//            f.getParentFile().mkdirs();
+//          }
+//          OutputStream os = new BufferedOutputStream(new FileOutputStream(f));
+//          try {
+//            IOUtil.copy(zis, os);
+//          } finally {
+//            os.close();
+//          }
+//        }
+//        zis.closeEntry();
+//        entry = zis.getNextEntry();
+//      }
+//    } finally {
+//      zis.close();
+//    }
+//  }
+  
+//  private IndexInfo createCentralIndex() throws IllegalStateException {
+//    String indexId = "central";
+//    String repositoryUrl = CENTRAL_URL;
+//    IndexInfo indexInfo = new IndexInfo(indexId, null, repositoryUrl, IndexInfo.Type.REMOTE, false);
+//    indexInfo.setIndexUpdateUrl("");
+//    // Hook for integration tests. If plug-in contains a pre-processed central index then install it. 
+//    // This speeds up test execution significantly. 
+//    URL url = FileLocator.find(getBundle(), new Path("/indexes/maven-central.zip"), null);
+//    if (url != null) {
+//      installCachedMavenCentralIndex(url);
+//    }
+//    return indexInfo;
+//  }
+  
+//  private void installCachedMavenCentralIndex(final URL indexURL) {
+//    Job job = new Job("Installing maven central index.") {
+//
+//      public IStatus run(IProgressMonitor monitor) {
+//        try {
+//          monitor.beginTask("Installing index...", IProgressMonitor.UNKNOWN);
+//          unzipFile(indexURL, getStateLocation().toFile());
+//        } catch(Exception ex) {
+//          MavenLogger.log("Error unzipping maven central index", ex);
+//        } finally {
+//          monitor.done();
+//        }
+//        return Status.OK_STATUS;
+//      }
+//      
+//    };
+//    job.setRule(new ISchedulingRule() {
+//      public boolean contains(ISchedulingRule rule) {
+//        return rule == this;
+//      }
+//
+//      public boolean isConflicting(ISchedulingRule rule) {
+//        return rule == this || rule instanceof IndexUpdaterRule;
+//      }
+//      
+//    });
+//    job.schedule();
+//  }
+
 
   public void earlyStartup() {
     // nothing to do here, all startup work is done in #start(BundleContext)
