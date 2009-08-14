@@ -22,5 +22,7 @@ public interface IndexListener {
   public void indexRemoved(String indexName);
   
   public void indexChanged(String indexName);
+  
+  public void indexUpdating(String indexName);
 
 }

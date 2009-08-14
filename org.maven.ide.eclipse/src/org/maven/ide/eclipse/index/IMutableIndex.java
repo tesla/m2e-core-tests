@@ -29,4 +29,6 @@ public interface IMutableIndex extends IIndex {
   public void scheduleIndexUpdate(boolean force, long delay);
 
   public String getIndexName();
+  
+  public String getRepositoryUrl();
 }
