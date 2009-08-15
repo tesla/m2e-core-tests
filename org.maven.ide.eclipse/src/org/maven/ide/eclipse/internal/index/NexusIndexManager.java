@@ -454,18 +454,18 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
         sourcesExists, javadocExists, prefix, goals);
   }
 
-  public Date reindex(String indexName, final IProgressMonitor monitor) throws CoreException {
+  public void reindex(String indexName, final IProgressMonitor monitor) throws CoreException {
     try {
+      fireIndexUpdating(indexName);
       //IndexInfo indexInfo = getIndexInfo(indexName);
       IndexingContext context = getIndexer().getIndexingContexts().get(indexName);
       getIndexer().scan(context, new ArtifactScanningMonitor(context.getRepository(), monitor, console), false);
-      Date indexTime = context.getTimestamp();
-     // indexInfo.setUpdateTime(indexTime);
-//      fireIndexUpdated(indexInfo);
-      return indexTime;
+      fireIndexChanged(indexName);
     } catch(Exception ex) {
       MavenLogger.log("Unable to re-index "+indexName, ex);
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Reindexing error", ex));
+    } finally {
+      fireIndexChanged(indexName);
     }
   }
 
@@ -1228,7 +1228,6 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       try {
         indexManager.reindex(getIndexName(), monitor);
         fireIndexChanged(getIndexName());
-//        MavenPlugin.getDefault().fireIndexUpdate(getIndexName());
         console.logMessage("Updated local repository index");
       } catch(CoreException ex) {
         console.logError("Unable to reindex local repository");
@@ -1259,9 +1258,6 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
         request.setTransferListener(new TransferListenerAdapter(monitor, console, null));
         request.setForceFullUpdate(force);
         Date indexTime = getUpdater().fetchAndUpdateIndex(request);
-        //MavenPlugin.getDefault().fireIndexUpdate(getIndexName());
-        fireIndexChanged(getIndexName());
-       
         if(indexTime==null) {
           console.logMessage("No index update available for " + displayName);
         } else {
@@ -1277,6 +1273,8 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
         String msg = "Unable to update index for " + displayName;
         MavenLogger.log(msg, ie);
         console.logError(msg);
+      } finally {
+        fireIndexChanged(getIndexName());
       }
     }
   }

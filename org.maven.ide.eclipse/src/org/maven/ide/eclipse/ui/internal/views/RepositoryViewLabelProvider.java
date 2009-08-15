@@ -17,8 +17,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
+import org.maven.ide.eclipse.ui.internal.views.nodes.HiddenRepositoryNode;
 import org.maven.ide.eclipse.ui.internal.views.nodes.IMavenRepositoryNode;
-import org.maven.ide.eclipse.ui.internal.views.nodes.IndexNode;
 
 /**
  * RepositoryViewLabelProvider
@@ -51,7 +51,7 @@ public class RepositoryViewLabelProvider extends LabelProvider implements IColor
    * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
    */
   public Color getForeground(Object element) {
-    if(element instanceof IndexNode && ((IndexNode)element).isUpdating()){
+    if(element instanceof HiddenRepositoryNode){
       return Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
     } 
     return Display.getDefault().getSystemColor(SWT.COLOR_BLACK);
