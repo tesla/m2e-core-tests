@@ -9,13 +9,18 @@
 package org.maven.ide.eclipse.ui.internal.views.nodes;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.graphics.Image;
 
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.settings.Mirror;
+import org.apache.maven.settings.Profile;
+import org.apache.maven.settings.Repository;
 import org.apache.maven.settings.Settings;
 
 import org.maven.ide.eclipse.MavenPlugin;
@@ -35,12 +40,42 @@ public class RemoteRepositoryRootNode implements IMavenRepositoryNode{
     IMaven maven = MavenPlugin.getDefault().getMaven();
     
     ArrayList<ArtifactRepository> repositories = new ArrayList<ArtifactRepository>();
-    repositories.addAll(maven.getArtifactRepositories());
-    repositories.addAll(maven.getPluginArtifactRepository());
+    List<ArtifactRepository> artifactRepositories = maven.getArtifactRepositories();
+    List<ArtifactRepository> pluginArtifactRepository = maven.getPluginArtifactRepository();
+    
+    repositories.addAll(artifactRepositories);
+    repositories.addAll(pluginArtifactRepository);
+    
+    List<ArtifactRepository> effectiveRepositories = maven.getEffectiveRepositories(repositories);
 
-    return repositories;
+    return effectiveRepositories;
   }
 
+  public List<HiddenRepositoryNode> getHiddenRepositories() throws CoreException{
+    IMaven maven = MavenPlugin.getDefault().getMaven();
+    List<HiddenRepositoryNode> repoNodes = new ArrayList<HiddenRepositoryNode>();
+    Map repos = maven.getSettings().getProfilesAsMap();
+    List<String> active = maven.getSettings().getActiveProfiles();
+    Set keys = repos.keySet();
+    Collection values = repos.values();
+    ArrayList<Profile> profileList = new ArrayList<Profile>();
+    for(Object key : keys){
+      Profile profile = (Profile)repos.get(key);
+      if(active.contains(profile.getId())){
+        profileList.add(profile);
+      }
+    }
+    for(Profile profile : profileList){
+      List<Repository> pluginRepositories = profile.getPluginRepositories();
+      for(Repository rep : pluginRepositories){
+        String name = rep.getId();
+        String url = rep.getUrl();
+        HiddenRepositoryNode node = new HiddenRepositoryNode(name, url);
+        repoNodes.add(node);
+      }
+    }
+    return repoNodes;
+  }
   public List<Mirror> getMirrors(){
     try{
       IMaven maven = MavenPlugin.getDefault().getMaven();
@@ -75,9 +110,10 @@ public class RemoteRepositoryRootNode implements IMavenRepositoryNode{
             node.setMirror(true);
           }
         }
+        List<HiddenRepositoryNode> hiddenRepos = getHiddenRepositories();
+        repoList.addAll(hiddenRepos);
       }
     } catch(Exception e){
-      e.printStackTrace();
       MavenLogger.log("Unable to load remote repositories", e);
     }
     return repoList.toArray(new Object[repoList.size()]);

@@ -27,6 +27,9 @@ public class IndexedArtifactFileNode implements IMavenRepositoryNode {
     this.artifactFile = artifactFile;
   }
   
+  public IndexedArtifactFile getIndexedArtifactFile(){
+    return this.artifactFile;
+  }
   /* (non-Javadoc)
    * @see org.maven.ide.eclipse.ui.internal.views.IMavenRepositoryNode#getChildren()
    */

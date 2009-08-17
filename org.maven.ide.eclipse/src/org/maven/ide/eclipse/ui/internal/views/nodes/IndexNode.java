@@ -30,6 +30,8 @@ public class IndexNode implements IMavenRepositoryNode {
   private String displayName;
 
   private boolean isMirror;
+
+  private boolean updating;
   /**
    * @return Returns the isMirror.
    */
@@ -37,6 +39,17 @@ public class IndexNode implements IMavenRepositoryNode {
     return this.isMirror;
   }
 
+  public void setIsUpdating(boolean updating){
+    this.updating = updating;
+  }
+  
+  public boolean isUpdating(){
+    return ((NexusIndexManager)MavenPlugin.getDefault().getIndexManager()).isUpdatingIndex(getIndexName());
+  }
+  
+  public boolean isWorkspace(){
+    return IndexManager.WORKSPACE_INDEX.equals(index.getIndexName());
+  }
   /**
    * @param isMirror The isMirror to set.
    */
@@ -49,6 +62,12 @@ public class IndexNode implements IMavenRepositoryNode {
     this.index = index;
   }
   
+  public String getIndexName(){
+    return index.getIndexName();
+  }
+  public String getRepositoryUrl(){
+    return index.getRepositoryUrl();
+  }
   /* (non-Javadoc)
    * @see org.maven.ide.eclipse.ui.internal.views.IMavenRepositoryNode#getChildren()
    */
@@ -70,18 +89,24 @@ public class IndexNode implements IMavenRepositoryNode {
       return new Object[0];
     }
   }
+  
+  private String getUpdatingStatus(){
+    return isUpdating() ? " [updating]" : "";
+  }
 
   /* (non-Javadoc)
    * @see org.maven.ide.eclipse.ui.internal.views.IMavenRepositoryNode#getName()
    */
   public String getName() {
+    String name = "";
     if(IndexManager.LOCAL_INDEX.equals(index.getIndexName())){
-      return index.getIndexName();// + " : " + indexInfo.getRepositoryDir().getAbsolutePath();
+      name =  index.getIndexName();// + " : " + indexInfo.getRepositoryDir().getAbsolutePath();
     } else if(IndexManager.WORKSPACE_INDEX.equals(index.getIndexName())){
-      return index.getIndexName();
+      name = index.getIndexName();
     } else {
-      return index.getIndexName();
+      name = index.getIndexName() +": "+ index.getRepositoryUrl();
     }
+    return name + getUpdatingStatus();
   }
 
   /* (non-Javadoc)
