@@ -631,9 +631,9 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
         
       } else if(!IndexManager.WORKSPACE_INDEX.equals(indexName)) {
         updaterJob.addCommand(new UpdateCommand(indexName, force));
-//        IndexingContext context = getIndexingContext(indexName);
-//        URL archiveURL = null;
-//        updaterJob.addCommand(new UnpackCommand(indexName, archiveURL, force));
+        IndexingContext context = getIndexingContext(indexName);
+        URL archiveURL = null;
+        updaterJob.addCommand(new UnpackCommand(indexName, archiveURL, force));
       }      
       updaterJob.schedule(delay);
     }

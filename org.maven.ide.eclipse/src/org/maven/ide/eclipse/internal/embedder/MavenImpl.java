@@ -451,7 +451,6 @@ public class MavenImpl implements IMaven {
     if(repositories == null) {
       return null;
     }
-
     return repositorySystem.getEffectiveRepositories(repositories);
   }
 
@@ -472,5 +471,12 @@ public class MavenImpl implements IMaven {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
           "Could not read Maven configuration", ex));
     }
+  }
+
+  /* (non-Javadoc)
+   * @see org.maven.ide.eclipse.embedder.IMaven#getMavenConfiguration()
+   */
+  public IMavenConfiguration getMavenConfiguration() {
+    return this.mavenConfiguration;
   }
 }
