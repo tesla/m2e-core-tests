@@ -11,13 +11,17 @@ package org.maven.ide.eclipse.ui.internal.views.nodes;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.graphics.Image;
 
+import org.apache.maven.embedder.MavenEmbedder;
+
 import org.maven.ide.eclipse.MavenImages;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.index.IMutableIndex;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.internal.index.IndexedArtifactGroup;
 import org.maven.ide.eclipse.internal.index.NexusIndexManager;
+import org.maven.ide.eclipse.util.StringUtils;
 
 /**
  * LocalRepsoitoryNode
@@ -100,7 +104,16 @@ public class IndexNode implements IMavenRepositoryNode {
   public String getName() {
     String name = "";
     if(IndexManager.LOCAL_INDEX.equals(index.getIndexName())){
-      name =  index.getIndexName();// + " : " + indexInfo.getRepositoryDir().getAbsolutePath();
+      name =  index.getIndexName();
+      IMavenConfiguration config = MavenPlugin.getDefault().getMaven().getMavenConfiguration();
+      if(config != null){
+         String userSettingsFile = config.getUserSettingsFile();
+         if(StringUtils.nullOrEmpty(userSettingsFile)){
+           name = name+": "+MavenEmbedder.DEFAULT_USER_SETTINGS_FILE.getAbsolutePath();
+         } else {
+           name = name+": "+userSettingsFile;
+         }
+      }
     } else if(IndexManager.WORKSPACE_INDEX.equals(index.getIndexName())){
       name = index.getIndexName();
     } else {
