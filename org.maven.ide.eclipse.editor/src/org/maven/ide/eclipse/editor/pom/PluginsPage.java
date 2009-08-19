@@ -67,7 +67,7 @@ public class PluginsPage extends MavenPomEditorPage {
     gridLayout.marginHeight = 0;
     body.setLayout(gridLayout);
 
-    pluginsComposite = new PluginsComposite(body, SWT.NONE);
+    pluginsComposite = new PluginsComposite(body, this, SWT.NONE);
     pluginsComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     toolkit.adapt(pluginsComposite);
     

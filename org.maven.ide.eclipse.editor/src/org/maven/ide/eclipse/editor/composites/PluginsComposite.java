@@ -92,7 +92,7 @@ public class PluginsComposite extends Composite{
 
   protected static PomPackage POM_PACKAGE = PomPackage.eINSTANCE;
   
-  MavenPomEditorPage parent;
+  MavenPomEditorPage parentEditorPage;
   
   // controls
   CCombo executionPhaseCombo;
@@ -148,9 +148,9 @@ public class PluginsComposite extends Composite{
   boolean changingSelection = false;
 
   
-  public PluginsComposite(Composite composite, int style) {
+  public PluginsComposite(Composite composite, MavenPomEditorPage page, int style) {
     super(composite, style);
-    
+    this.parentEditorPage = page;
     GridLayout gridLayout = new GridLayout(1, false);
     gridLayout.marginWidth = 0;
     setLayout(gridLayout);
@@ -223,7 +223,7 @@ public class PluginsComposite extends Composite{
     pluginsEditor.setRemoveListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         CompoundCommand compoundCommand = new CompoundCommand();
-        EditingDomain editingDomain = parent.getEditingDomain();
+        EditingDomain editingDomain = parentEditorPage.getEditingDomain();
   
         List<Plugin> list = pluginsEditor.getSelection();
         for(Plugin plugin : list) {
@@ -333,7 +333,7 @@ public class PluginsComposite extends Composite{
     pluginManagementEditor.setRemoveListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         CompoundCommand compoundCommand = new CompoundCommand();
-        EditingDomain editingDomain = parent.getEditingDomain();
+        EditingDomain editingDomain = parentEditorPage.getEditingDomain();
   
         List<Plugin> list = pluginManagementEditor.getSelection();
         for(Plugin plugin : list) {
@@ -445,7 +445,7 @@ public class PluginsComposite extends Composite{
       gd_groupIdText.horizontalIndent = 4;
       groupIdText.setLayoutData(gd_groupIdText);
       groupIdText.setData("name", "groupIdText");
-      FormUtils.addGroupIdProposal(parent.getProject(), groupIdText, Packaging.PLUGIN);
+      FormUtils.addGroupIdProposal(parentEditorPage.getProject(), groupIdText, Packaging.PLUGIN);
 
       Hyperlink artifactIdHyperlink = toolkit.createHyperlink(pluginDetailsComposite, "Artifact Id:*", SWT.NONE);
       artifactIdHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
@@ -467,7 +467,7 @@ public class PluginsComposite extends Composite{
       gd_artifactIdText.horizontalIndent = 4;
       artifactIdText.setLayoutData(gd_artifactIdText);
       artifactIdText.setData("name", "artifactIdText");
-      FormUtils.addArtifactIdProposal(parent.getProject(), groupIdText, artifactIdText, Packaging.PLUGIN);
+      FormUtils.addArtifactIdProposal(parentEditorPage.getProject(), groupIdText, artifactIdText, Packaging.PLUGIN);
     
       Label label = toolkit.createLabel(pluginDetailsComposite, "Version:", SWT.NONE);
       label.setLayoutData(new GridData());
@@ -478,7 +478,7 @@ public class PluginsComposite extends Composite{
       versionTextData.widthHint = 200;
       versionText.setLayoutData(versionTextData);
       versionText.setData("name", "versionText");
-      FormUtils.addVersionProposal(parent.getProject(), groupIdText, artifactIdText, versionText, Packaging.PLUGIN);
+      FormUtils.addVersionProposal(parentEditorPage.getProject(), groupIdText, artifactIdText, versionText, Packaging.PLUGIN);
   
   //    pluginSelectButton = toolkit.createButton(pluginDetailsComposite, "Select...", SWT.NONE);
   //    pluginSelectButton.addSelectionListener(new SelectionAdapter() {
@@ -564,7 +564,7 @@ public class PluginsComposite extends Composite{
       pluginConfigurationHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
         public void linkActivated(HyperlinkEvent e) {
           EObject element = currentPlugin.getConfiguration();
-          parent.getPomEditor().showInSourceEditor(element==null ? currentPlugin : element);
+          parentEditorPage.getPomEditor().showInSourceEditor(element==null ? currentPlugin : element);
         }
       });
       pluginDetailsComposite.setTabList(new Control[] {groupIdText, artifactIdText, versionText, composite});
@@ -607,7 +607,7 @@ public class PluginsComposite extends Composite{
       pluginExecutionsEditor.setAddListener(new SelectionAdapter() {
         public void widgetSelected(SelectionEvent e) {
           CompoundCommand compoundCommand = new CompoundCommand();
-          EditingDomain editingDomain = parent.getEditingDomain();
+          EditingDomain editingDomain = parentEditorPage.getEditingDomain();
           
           
           PluginExecution pluginExecution = PomFactory.eINSTANCE.createPluginExecution();
@@ -625,7 +625,7 @@ public class PluginsComposite extends Composite{
       pluginExecutionsEditor.setRemoveListener(new SelectionAdapter() {
         public void widgetSelected(SelectionEvent e) {
           CompoundCommand compoundCommand = new CompoundCommand();
-          EditingDomain editingDomain = parent.getEditingDomain();
+          EditingDomain editingDomain = parentEditorPage.getEditingDomain();
    
           List<PluginExecution> list = pluginExecutionsEditor.getSelection();
           for(PluginExecution pluginExecution : list) {
@@ -707,7 +707,7 @@ public class PluginsComposite extends Composite{
       goalsEditor.setAddListener(new SelectionAdapter() {
         public void widgetSelected(SelectionEvent e) {
           CompoundCommand compoundCommand = new CompoundCommand();
-          EditingDomain editingDomain = parent.getEditingDomain();
+          EditingDomain editingDomain = parentEditorPage.getEditingDomain();
           
           String goal = "?";
           Command command = AddCommand.create(editingDomain, currentPluginExecution, POM_PACKAGE.getPluginExecution_Goals(), goal);
@@ -722,7 +722,7 @@ public class PluginsComposite extends Composite{
       goalsEditor.setRemoveListener(new SelectionAdapter() {
         public void widgetSelected(SelectionEvent e) {
           CompoundCommand compoundCommand = new CompoundCommand();
-          EditingDomain editingDomain = parent.getEditingDomain();
+          EditingDomain editingDomain = parentEditorPage.getEditingDomain();
    
           List<String> list = goalsEditor.getSelection();
           for(String goal : list) {
@@ -747,7 +747,7 @@ public class PluginsComposite extends Composite{
         public void modify(Object element, String property, Object value) {
           int n = goalsEditor.getViewer().getTable().getSelectionIndex();
           if(!value.equals(currentPluginExecution.getGoals().get(n))) {
-            EditingDomain editingDomain = parent.getEditingDomain();
+            EditingDomain editingDomain = parentEditorPage.getEditingDomain();
             Command command = SetCommand.create(editingDomain, currentPluginExecution, //
                 POM_PACKAGE.getPluginExecution_Goals(), value, n);
             editingDomain.getCommandStack().execute(command);
@@ -774,7 +774,7 @@ public class PluginsComposite extends Composite{
       pluginExecutionConfigurationHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
         public void linkActivated(HyperlinkEvent e) {
           EObject element = currentPluginExecution.getConfiguration();
-          parent.getPomEditor().showInSourceEditor(element==null ? currentPluginExecution : element);
+          parentEditorPage.getPomEditor().showInSourceEditor(element==null ? currentPluginExecution : element);
         }
       });
   
@@ -807,12 +807,12 @@ public class PluginsComposite extends Composite{
 //    }
     this.currentPlugin = plugin;
     
-    if(parent!=null) {
-      parent.removeNotifyListener(groupIdText);
-      parent.removeNotifyListener(artifactIdText);
-      parent.removeNotifyListener(versionText);
-      parent.removeNotifyListener(pluginExtensionsButton);
-      parent.removeNotifyListener(pluginInheritedButton);
+    if(parentEditorPage!=null) {
+      parentEditorPage.removeNotifyListener(groupIdText);
+      parentEditorPage.removeNotifyListener(artifactIdText);
+      parentEditorPage.removeNotifyListener(versionText);
+      parentEditorPage.removeNotifyListener(pluginExtensionsButton);
+      parentEditorPage.removeNotifyListener(pluginInheritedButton);
     }
     
     if(plugin==null) {
@@ -838,9 +838,9 @@ public class PluginsComposite extends Composite{
     FormUtils.setEnabled(pluginExecutionsSection, true);
     FormUtils.setEnabled(pluginDependenciesSection, true);
 
-    FormUtils.setReadonly(pluginDetailsSection, parent.isReadOnly());
-    FormUtils.setReadonly(pluginExecutionsSection, parent.isReadOnly());
-    pluginSelectAction.setEnabled(!parent.isReadOnly());
+    FormUtils.setReadonly(pluginDetailsSection, parentEditorPage.isReadOnly());
+    FormUtils.setReadonly(pluginExecutionsSection, parentEditorPage.isReadOnly());
+    pluginSelectAction.setEnabled(!parentEditorPage.isReadOnly());
     openWebPageAction.setEnabled(true);
 
     // XXX implement dependency editing
@@ -862,11 +862,11 @@ public class PluginsComposite extends Composite{
     // register listeners
     
     ValueProvider<Plugin> provider = new ValueProvider.DefaultValueProvider<Plugin>(currentPlugin);
-    parent.setModifyListener(groupIdText, provider, POM_PACKAGE.getPlugin_GroupId(), "");
-    parent.setModifyListener(artifactIdText, provider, POM_PACKAGE.getPlugin_ArtifactId(), "");
-    parent.setModifyListener(versionText, provider, POM_PACKAGE.getPlugin_Version(), "");
-    parent.setModifyListener(pluginInheritedButton, provider, POM_PACKAGE.getPlugin_Inherited(), "true");
-    parent.setModifyListener(pluginExtensionsButton, provider, POM_PACKAGE.getPlugin_Extensions(), "false");
+    parentEditorPage.setModifyListener(groupIdText, provider, POM_PACKAGE.getPlugin_GroupId(), "");
+    parentEditorPage.setModifyListener(artifactIdText, provider, POM_PACKAGE.getPlugin_ArtifactId(), "");
+    parentEditorPage.setModifyListener(versionText, provider, POM_PACKAGE.getPlugin_Version(), "");
+    parentEditorPage.setModifyListener(pluginInheritedButton, provider, POM_PACKAGE.getPlugin_Inherited(), "true");
+    parentEditorPage.setModifyListener(pluginExtensionsButton, provider, POM_PACKAGE.getPlugin_Extensions(), "false");
   }
 
   void updatePluginExecution(PluginExecution pluginExecution) {
@@ -875,10 +875,10 @@ public class PluginsComposite extends Composite{
 //    }
     currentPluginExecution = pluginExecution;
     
-    if(parent!=null) {
-      parent.removeNotifyListener(executionIdText);
-      parent.removeNotifyListener(executionPhaseCombo);
-      parent.removeNotifyListener(executionInheritedButton);
+    if(parentEditorPage!=null) {
+      parentEditorPage.removeNotifyListener(executionIdText);
+      parentEditorPage.removeNotifyListener(executionPhaseCombo);
+      parentEditorPage.removeNotifyListener(executionInheritedButton);
     }
     
     if(pluginExecution==null) {
@@ -893,7 +893,7 @@ public class PluginsComposite extends Composite{
     }
     
     FormUtils.setEnabled(pluginExecutionSection, true);
-    FormUtils.setReadonly(pluginExecutionSection, parent.isReadOnly());
+    FormUtils.setReadonly(pluginExecutionSection, parentEditorPage.isReadOnly());
     
     setText(executionIdText, pluginExecution.getId());
     setText(executionPhaseCombo, pluginExecution.getPhase());
@@ -904,14 +904,14 @@ public class PluginsComposite extends Composite{
     
     // register listeners
     ValueProvider<PluginExecution> provider = new ValueProvider.DefaultValueProvider<PluginExecution>(pluginExecution);
-    parent.setModifyListener(executionIdText, provider, POM_PACKAGE.getPluginExecution_Id(), "");
-    parent.setModifyListener(executionPhaseCombo, provider, POM_PACKAGE.getPluginExecution_Phase(), "");
-    parent.setModifyListener(executionInheritedButton, provider, POM_PACKAGE.getPluginExecution_Inherited(), "true");
+    parentEditorPage.setModifyListener(executionIdText, provider, POM_PACKAGE.getPluginExecution_Id(), "");
+    parentEditorPage.setModifyListener(executionPhaseCombo, provider, POM_PACKAGE.getPluginExecution_Phase(), "");
+    parentEditorPage.setModifyListener(executionInheritedButton, provider, POM_PACKAGE.getPluginExecution_Inherited(), "true");
   }
 
   public void loadData(MavenPomEditorPage editorPage, ValueProvider<BuildBase> buildProvider,
       ValueProvider<PluginManagement> pluginManagementProvider) {
-    this.parent = editorPage;
+    this.parentEditorPage = editorPage;
     this.buildProvider = buildProvider;
     this.pluginManagementProvider = pluginManagementProvider;
     
@@ -920,8 +920,8 @@ public class PluginsComposite extends Composite{
     loadPluginManagement();
     changingSelection = false;
     
-    pluginsEditor.setReadOnly(parent.isReadOnly());
-    pluginManagementEditor.setReadOnly(parent.isReadOnly());
+    pluginsEditor.setReadOnly(parentEditorPage.isReadOnly());
+    pluginManagementEditor.setReadOnly(parentEditorPage.isReadOnly());
     
     //pluginAddAction.setEnabled(!parent.isReadOnly());
     //pluginManagementAddAction.setEnabled(!parent.isReadOnly());
@@ -985,7 +985,7 @@ public class PluginsComposite extends Composite{
 
   void createPlugin(ListEditorComposite<Plugin> editor, ValueProvider<? extends EObject> parentObjectProvider, EStructuralFeature feature, String groupId, String artifactId, String version) {
     CompoundCommand compoundCommand = new CompoundCommand();
-    EditingDomain editingDomain = parent.getEditingDomain();
+    EditingDomain editingDomain = parentEditorPage.getEditingDomain();
     
     EObject parentObject = parentObjectProvider.getValue();
     boolean created = false;

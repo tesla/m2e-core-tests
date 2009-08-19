@@ -706,7 +706,7 @@ public class ProfilesPage extends MavenPomEditorPage {
     CTabItem pluginsTabItem = new CTabItem(tabFolder, SWT.NONE);
     pluginsTabItem.setText("Plugins");
 
-    pluginsComposite = new PluginsComposite(tabFolder, SWT.NONE);
+    pluginsComposite = new PluginsComposite(tabFolder, this, SWT.NONE);
     pluginsTabItem.setControl(pluginsComposite);
     toolkit.adapt(pluginsComposite);
   }
@@ -715,8 +715,7 @@ public class ProfilesPage extends MavenPomEditorPage {
     CTabItem dependenciesTabItem = new CTabItem(tabFolder, SWT.NONE);
     dependenciesTabItem.setText("Dependencies");
   
-    dependenciesComposite = new DependenciesComposite(tabFolder, SWT.NONE);
-    dependenciesComposite.setEditorPage(this);
+    dependenciesComposite = new DependenciesComposite(tabFolder, this, SWT.NONE);
     dependenciesTabItem.setControl(dependenciesComposite);
     toolkit.adapt(dependenciesComposite);
   }
@@ -734,7 +733,7 @@ public class ProfilesPage extends MavenPomEditorPage {
     CTabItem reportingTabItem = new CTabItem(tabFolder, SWT.NONE);
     reportingTabItem.setText("Reporting");
 
-    reportingComposite = new ReportingComposite(tabFolder, SWT.NONE);
+    reportingComposite = new ReportingComposite(tabFolder, this, SWT.NONE);
     toolkit.adapt(reportingComposite);
     reportingTabItem.setControl(reportingComposite);
   }

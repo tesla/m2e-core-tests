@@ -60,7 +60,7 @@ public class ReportingPage extends MavenPomEditorPage {
     body.setLayout(gridLayout);
     toolkit.paintBordersFor(body);
 
-    reportingComposite = new ReportingComposite(body, SWT.NONE);
+    reportingComposite = new ReportingComposite(body, this, SWT.NONE);
     reportingComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     toolkit.adapt(reportingComposite);
 

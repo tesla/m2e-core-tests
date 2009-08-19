@@ -89,7 +89,7 @@ public class ReportingComposite extends Composite {
 
   FormToolkit toolkit = new FormToolkit(Display.getCurrent());
   
-  MavenPomEditorPage parent;
+  MavenPomEditorPage editorPage;
   
   Text outputFolderText;
 
@@ -142,9 +142,9 @@ public class ReportingComposite extends Composite {
   ReportSet currentReportSet = null;
 
   
-  public ReportingComposite(Composite parent, int style) {
+  public ReportingComposite(Composite parent, MavenPomEditorPage page, int style) {
     super(parent, style);
-
+    this.editorPage = page;
     GridLayout gridLayout = new GridLayout(1, false);
     gridLayout.marginWidth = 0;
     setLayout(gridLayout);
@@ -222,7 +222,7 @@ public class ReportingComposite extends Composite {
     reportPluginsEditor.setRemoveListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         CompoundCommand compoundCommand = new CompoundCommand();
-        EditingDomain editingDomain = parent.getEditingDomain();
+        EditingDomain editingDomain = editorPage.getEditingDomain();
 
         Reporting reporting = reportingProvider.getValue();
         
@@ -326,7 +326,7 @@ public class ReportingComposite extends Composite {
     gd_groupIdText.horizontalIndent = 4;
     groupIdText.setLayoutData(gd_groupIdText);
     groupIdText.setData("name", "groupIdText");
-    FormUtils.addGroupIdProposal(parent.getProject(), groupIdText, Packaging.ALL);
+    FormUtils.addGroupIdProposal(editorPage.getProject(), groupIdText, Packaging.ALL);
     
     Hyperlink artifactIdHyperlink = toolkit.createHyperlink(pluginDetailsComposite, "Artifact Id:*", SWT.NONE);
     artifactIdHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
@@ -348,7 +348,7 @@ public class ReportingComposite extends Composite {
     gd_artifactIdText.horizontalIndent = 4;
     artifactIdText.setLayoutData(gd_artifactIdText);
     artifactIdText.setData("name", "artifactIdText");
-    FormUtils.addArtifactIdProposal(parent.getProject(), groupIdText, artifactIdText, Packaging.ALL);
+    FormUtils.addArtifactIdProposal(editorPage.getProject(), groupIdText, artifactIdText, Packaging.ALL);
 
     toolkit.createLabel(pluginDetailsComposite, "Version:", SWT.NONE);
 
@@ -357,7 +357,7 @@ public class ReportingComposite extends Composite {
     gd_versionText.horizontalIndent = 4;
     versionText.setLayoutData(gd_versionText);
     versionText.setData("name", "versionText");
-    FormUtils.addVersionProposal(parent.getProject(), groupIdText, artifactIdText, versionText, Packaging.ALL);
+    FormUtils.addVersionProposal(editorPage.getProject(), groupIdText, artifactIdText, versionText, Packaging.ALL);
 
     Composite pluginConfigureComposite = toolkit.createComposite(pluginDetailsComposite, SWT.NONE);
     GridData pluginConfigureCompositeData = new GridData(SWT.RIGHT, SWT.CENTER, false, false, 2, 1);
@@ -377,7 +377,7 @@ public class ReportingComposite extends Composite {
       public void linkActivated(HyperlinkEvent e) {
         if(currentReportPlugin != null) {
           EObject element = currentReportPlugin.getConfiguration();
-          parent.getPomEditor().showInSourceEditor(element == null ? currentReportPlugin : element);
+          editorPage.getPomEditor().showInSourceEditor(element == null ? currentReportPlugin : element);
         }
       }
     });
@@ -473,7 +473,7 @@ public class ReportingComposite extends Composite {
         }
 
         CompoundCommand compoundCommand = new CompoundCommand();
-        EditingDomain editingDomain = parent.getEditingDomain();
+        EditingDomain editingDomain = editorPage.getEditingDomain();
 
         boolean reportSetsCreated = false;
 
@@ -497,7 +497,7 @@ public class ReportingComposite extends Composite {
         }
 
         CompoundCommand compoundCommand = new CompoundCommand();
-        EditingDomain editingDomain = parent.getEditingDomain();
+        EditingDomain editingDomain = editorPage.getEditingDomain();
 
 
         List<ReportSet> reportSetList = reportSetsEditor.getSelection();
@@ -526,7 +526,7 @@ public class ReportingComposite extends Composite {
       }
 
       public void modify(Object element, String property, Object value) {
-        EditingDomain editingDomain = parent.getEditingDomain();
+        EditingDomain editingDomain = editorPage.getEditingDomain();
         if(!value.equals(currentReportSet.getId())) {
           Command command = SetCommand.create(editingDomain, currentReportSet, POM_PACKAGE.getReportSet_Id(), value);
           editingDomain.getCommandStack().execute(command);
@@ -561,7 +561,7 @@ public class ReportingComposite extends Composite {
         }
 
         CompoundCommand compoundCommand = new CompoundCommand();
-        EditingDomain editingDomain = parent.getEditingDomain();
+        EditingDomain editingDomain = editorPage.getEditingDomain();
 
         Command addReport = AddCommand.create(editingDomain, currentReportSet, POM_PACKAGE.getReportSet_Reports(), "?");
         compoundCommand.append(addReport);
@@ -578,7 +578,7 @@ public class ReportingComposite extends Composite {
         }
 
         CompoundCommand compoundCommand = new CompoundCommand();
-        EditingDomain editingDomain = parent.getEditingDomain();
+        EditingDomain editingDomain = editorPage.getEditingDomain();
 
         List<String> reportList = reportsEditor.getSelection();
         for(String report : reportList) {
@@ -601,7 +601,7 @@ public class ReportingComposite extends Composite {
       }
 
       public void modify(Object element, String property, Object value) {
-        EditingDomain editingDomain = parent.getEditingDomain();
+        EditingDomain editingDomain = editorPage.getEditingDomain();
         Command command = SetCommand.create(editingDomain, currentReportSet, POM_PACKAGE
             .getReportSet_Reports(), value, reportsEditor.getViewer().getTable().getSelectionIndex());
         editingDomain.getCommandStack().execute(command);
@@ -626,7 +626,7 @@ public class ReportingComposite extends Composite {
       public void linkActivated(HyperlinkEvent e) {
         if(currentReportSet != null) {
           EObject element = currentReportSet.getConfiguration();
-          parent.getPomEditor().showInSourceEditor(element == null ? currentReportSet : element);
+          editorPage.getPomEditor().showInSourceEditor(element == null ? currentReportSet : element);
         }
       }
     });
@@ -637,14 +637,14 @@ public class ReportingComposite extends Composite {
   protected void updateReportPluginDetails(ReportPlugin reportPlugin) {
     currentReportPlugin = reportPlugin;
 
-    if(parent != null) {
-      parent.removeNotifyListener(groupIdText);
-      parent.removeNotifyListener(artifactIdText);
-      parent.removeNotifyListener(versionText);
-      parent.removeNotifyListener(pluginInheritedButton);
+    if(editorPage != null) {
+      editorPage.removeNotifyListener(groupIdText);
+      editorPage.removeNotifyListener(artifactIdText);
+      editorPage.removeNotifyListener(versionText);
+      editorPage.removeNotifyListener(pluginInheritedButton);
     }
 
-    if(parent == null || reportPlugin == null) {
+    if(editorPage == null || reportPlugin == null) {
       FormUtils.setEnabled(pluginDetailsSection, false);
       FormUtils.setEnabled(reportSetsSection, false);
       reportPluginSelectAction.setEnabled(false);
@@ -665,9 +665,9 @@ public class ReportingComposite extends Composite {
 
     FormUtils.setEnabled(pluginDetailsSection, true);
     FormUtils.setEnabled(reportSetsSection, true);
-    FormUtils.setReadonly(pluginDetailsSection, parent.isReadOnly());
-    FormUtils.setReadonly(reportSetsSection, parent.isReadOnly());
-    reportPluginSelectAction.setEnabled(!parent.isReadOnly());
+    FormUtils.setReadonly(pluginDetailsSection, editorPage.isReadOnly());
+    FormUtils.setReadonly(reportSetsSection, editorPage.isReadOnly());
+    reportPluginSelectAction.setEnabled(!editorPage.isReadOnly());
     openWebPageAction.setEnabled(true);
 
     setText(groupIdText, reportPlugin.getGroupId());
@@ -677,11 +677,11 @@ public class ReportingComposite extends Composite {
     pluginInheritedButton.setSelection(Boolean.parseBoolean(reportPlugin.getInherited()));
 
     ValueProvider<ReportPlugin> provider = new ValueProvider.DefaultValueProvider<ReportPlugin>(reportPlugin);
-    parent.setModifyListener(groupIdText, provider, POM_PACKAGE.getReportPlugin_GroupId(), "");
-    parent.setModifyListener(artifactIdText, provider, POM_PACKAGE.getReportPlugin_ArtifactId(), "");
-    parent.setModifyListener(versionText, provider, POM_PACKAGE.getReportPlugin_Version(), "");
-    parent.setModifyListener(pluginInheritedButton, provider, POM_PACKAGE.getReportPlugin_Inherited(), "false");
-    parent.registerListeners();
+    editorPage.setModifyListener(groupIdText, provider, POM_PACKAGE.getReportPlugin_GroupId(), "");
+    editorPage.setModifyListener(artifactIdText, provider, POM_PACKAGE.getReportPlugin_ArtifactId(), "");
+    editorPage.setModifyListener(versionText, provider, POM_PACKAGE.getReportPlugin_Version(), "");
+    editorPage.setModifyListener(pluginInheritedButton, provider, POM_PACKAGE.getReportPlugin_Inherited(), "false");
+    editorPage.registerListeners();
 
     reportSetsEditor.setInput(reportPlugin.getReportSets());
 
@@ -689,13 +689,13 @@ public class ReportingComposite extends Composite {
   }
 
   protected void updateReportSetDetails(ReportSet reportSet) {
-    if(parent != null) {
-      parent.removeNotifyListener(reportSetInheritedButton);
+    if(editorPage != null) {
+      editorPage.removeNotifyListener(reportSetInheritedButton);
     }
 
     currentReportSet = reportSet;
 
-    if(reportSet == null || parent == null) {
+    if(reportSet == null || editorPage == null) {
       FormUtils.setEnabled(reportSetDetailsSection, false);
       reportSetInheritedButton.setSelection(false);
       reportsEditor.setInput(null);
@@ -703,18 +703,18 @@ public class ReportingComposite extends Composite {
     }
 
     FormUtils.setEnabled(reportSetDetailsSection, true);
-    FormUtils.setReadonly(reportSetDetailsSection, parent.isReadOnly());
+    FormUtils.setReadonly(reportSetDetailsSection, editorPage.isReadOnly());
 
     reportSetInheritedButton.setSelection(Boolean.parseBoolean(reportSet.getInherited()));
     ValueProvider<ReportSet> provider = new ValueProvider.DefaultValueProvider<ReportSet>(reportSet);
-    parent.setModifyListener(reportSetInheritedButton, provider, POM_PACKAGE.getReportSet_Inherited(), "false");
-    parent.registerListeners();
+    editorPage.setModifyListener(reportSetInheritedButton, provider, POM_PACKAGE.getReportSet_Inherited(), "false");
+    editorPage.registerListeners();
 
     reportsEditor.setInput(reportSet.getReports());
   }
 
   public void loadData(MavenPomEditorPage editorPage, ValueProvider<Reporting> reportingProvider) {
-    this.parent = editorPage;
+    this.editorPage = editorPage;
     this.reportingProvider = reportingProvider;
     
 //    reportPluginAddAction.setEnabled(!parent.getPomEditor().isReadOnly());
@@ -723,9 +723,9 @@ public class ReportingComposite extends Composite {
   }
 
   void updateContent(Reporting reporting) {
-    if(parent != null) {
-      parent.removeNotifyListener(outputFolderText);
-      parent.removeNotifyListener(excludeDefaultsButton);
+    if(editorPage != null) {
+      editorPage.removeNotifyListener(outputFolderText);
+      editorPage.removeNotifyListener(excludeDefaultsButton);
     }
     
     if(reporting == null) {
@@ -738,9 +738,9 @@ public class ReportingComposite extends Composite {
       reportPluginsEditor.setInput(reporting.getPlugins());
     }
     
-    parent.setModifyListener(outputFolderText, reportingProvider, POM_PACKAGE.getReporting_OutputDirectory(), "");
-    parent.setModifyListener(excludeDefaultsButton, reportingProvider, POM_PACKAGE.getReporting_ExcludeDefaults(), "false");
-    parent.registerListeners();
+    editorPage.setModifyListener(outputFolderText, reportingProvider, POM_PACKAGE.getReporting_OutputDirectory(), "");
+    editorPage.setModifyListener(excludeDefaultsButton, reportingProvider, POM_PACKAGE.getReporting_ExcludeDefaults(), "false");
+    editorPage.registerListeners();
     
     updateReportPluginDetails(null);
   }
@@ -767,7 +767,7 @@ public class ReportingComposite extends Composite {
 
   void createReportingPlugin(String groupId, String artifactId, String version) {
     CompoundCommand compoundCommand = new CompoundCommand();
-    EditingDomain editingDomain = parent.getEditingDomain();
+    EditingDomain editingDomain = editorPage.getEditingDomain();
 
     boolean reportsCreated = false;
 

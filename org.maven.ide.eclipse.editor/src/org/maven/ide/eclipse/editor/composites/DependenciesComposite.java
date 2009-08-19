@@ -155,15 +155,10 @@ public class DependenciesComposite extends Composite {
   DependencyLabelProvider exclusionLabelProvider = new DependencyLabelProvider();
 
 
-  public DependenciesComposite(Composite composite, int flags) {
+  public DependenciesComposite(Composite composite, MavenPomEditorPage editorPage, int flags) {
     super(composite, flags);
-
-    createComposite();
-  }
-  
-  public void setEditorPage(MavenPomEditorPage editorPage) {
     this.editorPage = editorPage;
-    
+    createComposite();
     editorPage.initPopupMenu(dependenciesEditor.getViewer(), ".dependencies");
     editorPage.initPopupMenu(dependencyManagementEditor.getViewer(), ".dependencyManagement");
   }
