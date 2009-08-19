@@ -52,7 +52,12 @@ public class RemoteRepositoryRootNode implements IMavenRepositoryNode{
   }
 
   public List<HiddenRepositoryNode> getHiddenRepositories() throws CoreException{
+   
     IMaven maven = MavenPlugin.getDefault().getMaven();
+    List<Mirror> mirrorUrls = getMirrors();
+    if(mirrorUrls == null || mirrorUrls.size() == 0){
+      return null;
+    }
     List<HiddenRepositoryNode> repoNodes = new ArrayList<HiddenRepositoryNode>();
     Map repos = maven.getSettings().getProfilesAsMap();
     List<String> active = maven.getSettings().getActiveProfiles();
@@ -111,7 +116,9 @@ public class RemoteRepositoryRootNode implements IMavenRepositoryNode{
           }
         }
         List<HiddenRepositoryNode> hiddenRepos = getHiddenRepositories();
-        repoList.addAll(hiddenRepos);
+        if(hiddenRepos != null){
+          repoList.addAll(hiddenRepos);
+        }
       }
     } catch(Exception e){
       MavenLogger.log("Unable to load remote repositories", e);
