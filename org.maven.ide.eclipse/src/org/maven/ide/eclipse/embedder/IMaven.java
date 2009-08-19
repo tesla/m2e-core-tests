@@ -79,6 +79,8 @@ public interface IMaven {
   // configuration
 
   public Settings getSettings() throws CoreException;
+  
+  public IMavenConfiguration getMavenConfiguration();
 
   public ArtifactRepository getLocalRepository() throws CoreException;
 

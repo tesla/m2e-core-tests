@@ -967,29 +967,19 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
 //  }
 
   public void createWorkspaceIndex(){
-//    try{
       IndexInfo workspaceIndex = new IndexInfo(IndexManager.WORKSPACE_INDEX, //
           null, null, IndexInfo.Type.WORKSPACE, false);
       addIndex(workspaceIndex);
-      //scheduleIndexUpdate(workspaceIndex.getIndexName(), true, new NullProgressMonitor());
-//    } catch(CoreException ce){
-//      MavenLogger.log(ce);
-//      ce.printStackTrace();
-//    }
-//    
-//    addIndex(new IndexInfo(IndexManager.WORKSPACE_INDEX, //
-//        null, null, IndexInfo.Type.WORKSPACE, false), false);
-//
+
 
   }
   
-  public void createLocalIndex(){
+  public void createLocalIndex(boolean forceUpdate){
     try {
       IndexInfo local = new IndexInfo(IndexManager.LOCAL_INDEX, //
           new File(maven.getLocalRepository().getBasedir()), null, IndexInfo.Type.LOCAL, false);
       addIndex(local);
-      boolean forceUpdate = !MavenPlugin.getDefault().getPreferenceStore().getBoolean(MavenPlugin.PREFS_NO_REBUILD_ON_START);
-      scheduleIndexUpdate(local.getIndexName(), true, 30);
+      scheduleIndexUpdate(local.getIndexName(), forceUpdate, 30);
       
     } catch(CoreException ex) {
       MavenLogger.log(ex);

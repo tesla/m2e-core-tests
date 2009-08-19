@@ -11,7 +11,12 @@ package org.maven.ide.eclipse.ui.internal.views;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
@@ -60,23 +65,23 @@ import org.maven.ide.eclipse.ui.internal.views.nodes.IndexedArtifactFileNode;
  */
 public class MavenRepositoryView extends ViewPart {
 
-  IAction refreshAction;
 
-  IAction collapseAllAction;
+  private IAction collapseAllAction;
   
-  BaseSelectionListenerAction openPomAction;
-
-  BaseSelectionListenerAction updateAction;
+  private IAction reloadSettings;
   
-  BaseSelectionListenerAction rebuildAction;
+  private BaseSelectionListenerAction openPomAction;
 
-  BaseSelectionListenerAction copyUrlAction;
-
-  BaseSelectionListenerAction materializeProjectAction;
+  private BaseSelectionListenerAction updateAction;
   
-  TreeViewer viewer;
-  RepositoryViewContentProvider contentProvider;
-  RepositoryViewLabelProvider labelProvider;
+  private BaseSelectionListenerAction rebuildAction;
+
+  private BaseSelectionListenerAction copyUrlAction;
+
+  private BaseSelectionListenerAction materializeProjectAction;
+  
+  private TreeViewer viewer;
+  private RepositoryViewContentProvider contentProvider;
 
   private DrillDownAdapter drillDownAdapter;
 
@@ -118,7 +123,6 @@ public class MavenRepositoryView extends ViewPart {
       }
 
       public void indexChanged(String indexName) {
-//        markIndexUpdating(indexName, false);
         refreshView();
 
       }
@@ -128,7 +132,6 @@ public class MavenRepositoryView extends ViewPart {
         
       }
       public void indexUpdating(String indexName){
-//        markIndexUpdating(indexName, true);
 
       }
     });
@@ -157,7 +160,7 @@ public class MavenRepositoryView extends ViewPart {
   private void fillLocalPullDown(IMenuManager manager) {
     manager.add(new Separator());
     manager.add(collapseAllAction);
-    manager.add(refreshAction);
+    manager.add(reloadSettings);
   }
 
   protected List<IndexNode> getIndexElementsToUpdate(List elements){
@@ -181,6 +184,7 @@ public class MavenRepositoryView extends ViewPart {
     manager.add(copyUrlAction);
     manager.add(materializeProjectAction);
     manager.add(new Separator());
+    manager.add(reloadSettings);
     manager.add(updateAction);
     manager.add(rebuildAction);
     manager.add(new Separator());
@@ -193,7 +197,7 @@ public class MavenRepositoryView extends ViewPart {
   private void fillLocalToolBar(IToolBarManager manager) {
     manager.add(new Separator());
     manager.add(collapseAllAction);
-    manager.add(refreshAction);
+    manager.add(reloadSettings);
     manager.add(new Separator());
     drillDownAdapter.addNavigationActions(manager);
   }
@@ -206,34 +210,23 @@ public class MavenRepositoryView extends ViewPart {
     };
     collapseAllAction.setToolTipText("Collapse All");
     collapseAllAction.setImageDescriptor(MavenImages.COLLAPSE_ALL);
-
-//    expandAllAction = new Action("Expand All"){
-//      public void run(){
-//        Job job = new WorkspaceJob("Expanding Repository Tree") {
-//          public IStatus runInWorkspace(IProgressMonitor monitor) {
-//            Display.getDefault().asyncExec(new Runnable(){
-//              public void run(){
-//                viewer.expandAll();
-//              }
-//            });
-//            return Status.OK_STATUS;
-//          }
-//        };
-//        job.schedule();
-//      }
-//    };
-//    
-//    expandAllAction.setToolTipText("Expand All");
-//    expandAllAction.setImageDescriptor(MavenImages.EXPAND_ALL);
-    refreshAction = new Action("Refresh") {
-      public void run() {
-        viewer.setInput(getViewSite());
+    reloadSettings = new Action("Reload settings.xml"){
+      public void run(){
+        String msg = "This will reload the settings.xml and rebuild the indexes for the repositories. Are you sure you want to reload the settings?";
+        boolean res = MessageDialog.openConfirm(getViewSite().getShell(), //
+            "Reload settings.xml", msg);
+        if(res){
+          Job job = new WorkspaceJob("Reloading settings.xml"){
+            public IStatus runInWorkspace(IProgressMonitor monitor){
+              MavenPlugin.getDefault().reloadSettingsXml();
+              return Status.OK_STATUS;
+            }
+          };
+          job.schedule();
+        }
       }
     };
-    
-    refreshAction.setToolTipText("Refresh View");
-    refreshAction.setImageDescriptor(MavenImages.REFRESH);
-
+    reloadSettings.setImageDescriptor(MavenImages.REFRESH);
     updateAction = new BaseSelectionListenerAction("Update Index") {
       public void run() {
         List<IndexNode> infoElements = getIndexElementsToUpdate(getStructuredSelection().toList());

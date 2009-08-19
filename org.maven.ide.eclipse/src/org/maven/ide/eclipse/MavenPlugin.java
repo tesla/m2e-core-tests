@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -71,6 +72,7 @@ import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.PluginManager;
 import org.apache.maven.project.artifact.MavenMetadataCache;
 
+import org.sonatype.nexus.index.context.IndexingContext;
 import org.sonatype.plexus.build.incremental.BuildContext;
 import org.sonatype.plexus.build.incremental.ThreadBuildContext;
 
@@ -334,12 +336,12 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     projectManager.addMavenProjectChangedListener(this.configurationManager);
 
     this.indexManager = new NexusIndexManager(console, projectManager, stateLocationDir);
-    loadIndexConfiguration(new File(stateLocationDir, PREFS_INDEXES));
+    loadIndexConfiguration();
     this.projectManager.addMavenProjectChangedListener(indexManager);
-    this.indexManager.createLocalIndex();
+    //create the local repos
+    boolean forceUpdate = !MavenPlugin.getDefault().getPreferenceStore().getBoolean(MavenPlugin.PREFS_NO_REBUILD_ON_START);
+    this.indexManager.createLocalIndex(forceUpdate);
     this.indexManager.createWorkspaceIndex();
-
-    boolean forceUpdate = !this.getPreferenceStore().getBoolean(PREFS_NO_REBUILD_ON_START);
     updateRepos(forceUpdate);
     this.getPreferenceStore().setValue(PREFS_NO_REBUILD_ON_START, true);
     checkJdk();
@@ -357,9 +359,9 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
       listeners.remove(listener);
     }
   }
+  
   public List<ArtifactRepository> getRemoteRepositories() throws Exception{
-    IMaven maven = MavenPlugin.getDefault().getMaven();
-    
+    IMaven maven = MavenPlugin.getDefault().getMaven(); 
     ArrayList<ArtifactRepository> repositories = new ArrayList<ArtifactRepository>();
     repositories.addAll(maven.getArtifactRepositories());
     repositories.addAll(maven.getPluginArtifactRepository());
@@ -381,38 +383,42 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
       getConsole().logError(msg);
     }
   }
-  private void loadIndexConfiguration(File configFile) throws IllegalStateException {
+  
+  public void reloadSettingsXml(){
+    //TODO: check to see if anything has changed?
+    Map<String, IndexingContext> indexes = indexManager.getIndexes();
+    Set<String> keySet = indexes.keySet();
+    if(keySet != null){
+      for(String key : keySet){
+        indexManager.removeIndex(key, true);
+      }
+    }
+    //create the locals
+    boolean forceUpdate = !MavenPlugin.getDefault().getPreferenceStore().getBoolean(MavenPlugin.PREFS_NO_REBUILD_ON_START);
+    this.indexManager.createLocalIndex(true);
+    this.indexManager.createWorkspaceIndex();
+    //load the remotes
+    loadIndexConfiguration();
+    //update the remotes
+    updateRepos(true);
+  }
+  
+  private void loadIndexConfiguration() throws IllegalStateException {
     try{
+      //remove everything
       List<ArtifactRepository> remoteRepositories = getRemoteRepositories();
       for(ArtifactRepository repo : remoteRepositories){
-        //NexusIndex index = new NexusIndex(this.indexManager, repo.getUrl());
         String url = repo.getUrl();
         this.indexManager.addIndexForRemote(repo.getId(), url);
       } 
+
     } catch(Exception e){
       String msg = "Unable to load remote repositories";
       MavenLogger.log(msg, e);
       getConsole().logError(msg);
     }
   }
-  
-//  private void initializeIndexes(Set<IndexInfo> indexes, boolean updateIndexesOnStartup) {
-//    boolean forceUpdate = !this.getPreferenceStore().getBoolean(PREFS_NO_REBUILD_ON_START);
-//    if(forceUpdate){
-//      this.getPreferenceStore().setValue(PREFS_NO_REBUILD_ON_START, true);
-//    }
-//    for(IndexInfo indexInfo : indexes) {
-//      if(IndexInfo.Type.LOCAL.equals(indexInfo.getType())) {
-//        if(indexInfo.isNew()) {
-//            indexManager.scheduleIndexUpdate(indexInfo.getIndexName(), false, 4000L);
-//        }
-//      } else if(IndexInfo.Type.REMOTE.equals(indexInfo.getType())) {
-//        if(indexInfo.isNew() || updateIndexesOnStartup || forceUpdate) {
-//          indexManager.scheduleIndexUpdate(indexInfo.getIndexName(), forceUpdate, 4000L);
-//        }
-//      }
-//    }
-//  }
+
   
 //  void unzipFile(URL url, File dest) throws IOException {
 //
