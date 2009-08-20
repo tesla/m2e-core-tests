@@ -205,9 +205,12 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
      closeView("org.eclipse.mylyn.tasks.ui.views.tasks");
 
      // Attempt to use local nexus as maven central proxy to speed up tests
-     //if(this.skipIndexes()){
-       setupLocalMavenIndex();
-     //} 
+//     if(!this.skipIndexes()){
+//       setupLocalMavenIndex();
+//     } else {
+//       cancelIndexJobs();
+//     }
+     setupLocalMavenIndex();
      if(this.useExternalMaven()){
        this.switchToExternalMaven();
      }
@@ -230,7 +233,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
       }});
   }
   
-  private void cancelIndexJobs() throws InterruptedException {
+  protected void cancelIndexJobs() throws InterruptedException {
     // Cancel maven central index job 
     MavenPlugin.getDefault();
     Thread.sleep(5000);
