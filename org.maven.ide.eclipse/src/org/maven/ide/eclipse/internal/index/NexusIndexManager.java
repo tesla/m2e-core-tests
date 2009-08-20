@@ -202,7 +202,6 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
         fullCreators.add(jar);
       } catch(ComponentLookupException ce) {
         String msg = "Error looking up component ";
-        ce.printStackTrace();
         console.logError(msg + "; " + ce.getMessage());
         MavenLogger.log(msg, ce);
 
@@ -220,7 +219,6 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       } catch(ComponentLookupException ce) {
         String msg = "Error looking up component ";
         MavenLogger.log(msg, ce);
-        ce.printStackTrace();
       }
 
     }
@@ -494,14 +492,14 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     try {
       IndexingContext context = getIndexingContext(indexName);
       if(context == null) {
-        // TODO log
+        String msg = "Unable to find document to remove"+documentKey;
+        MavenLogger.log(new Status(Status.ERROR,"org.maven.ide.eclipse", msg));
         return;
       }
-      
       ArtifactContext artifactContext = getArtifactContext(null, documentKey, -1, -1, //
           IIndex.NOT_AVAILABLE, IIndex.NOT_AVAILABLE, context.getRepositoryId());
       getIndexer().deleteArtifactFromIndex(artifactContext, context);
-//      fireIndexUpdated(getIndexInfo(indexName));
+     fireIndexChanged(indexName);
       
     } catch(Exception ex) {
       String msg = "Unable to remove " + documentKey;
@@ -510,6 +508,17 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
   }
 
+  public ArtifactContext getArtifactContext(String documentKey, String repository){
+    Gav gav = gavCalculator.pathToGav(documentKey);
+    ArtifactInfo ai = new ArtifactInfo(repository, gav.getGroupId(), gav.getArtifactId(), gav.getVersion(), gav.getClassifier());
+
+    File pomFile = null;
+    File artifactFile = null;
+
+    return new ArtifactContext(pomFile, artifactFile, null, ai, gav);
+   
+  }
+  
   private ArtifactContext getArtifactContext(File file, String documentKey, long size, long date, int sourceExists,
       int javadocExists, String repository) {
     Gav gav = gavCalculator.pathToGav(documentKey);
@@ -621,7 +630,6 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
   private IndexUpdaterJob updaterJob;
   
   public void scheduleIndexUpdate(String indexName, boolean force, long delay) {
-//    IndexInfo indexInfo = getIndexInfo(indexName);
     if(indexName!=null) {
       if(updaterJob == null) {
         updaterJob = new IndexUpdaterJob(this, console);
@@ -906,7 +914,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
   }
 
-  static String getDocumentKey(ArtifactKey artifact) {
+  public static String getDocumentKey(ArtifactKey artifact) {
     String groupId = artifact.getGroupId();
     if(groupId == null) {
       groupId = "[inherited]";
@@ -983,7 +991,6 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       
     } catch(CoreException ex) {
       MavenLogger.log(ex);
-      ex.printStackTrace();
     }
   }
   
@@ -1263,6 +1270,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
         String msg = "Unable to update index for " + displayName;
         MavenLogger.log(msg, ie);
         console.logError(msg);
+      } catch(Exception e){
       } finally {
         fireIndexChanged(getIndexName());
       }
