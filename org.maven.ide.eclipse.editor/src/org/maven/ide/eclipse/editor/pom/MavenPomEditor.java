@@ -69,6 +69,8 @@ import org.eclipse.emf.edit.domain.IEditingDomainProvider;
 import org.eclipse.emf.edit.provider.ComposedAdapterFactory;
 import org.eclipse.emf.edit.provider.ReflectiveItemProviderAdapterFactory;
 import org.eclipse.emf.edit.provider.resource.ResourceItemProviderAdapterFactory;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
@@ -115,6 +117,7 @@ import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.actions.SelectionUtil;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.editor.MavenEditorPlugin;
 import org.maven.ide.eclipse.editor.lifecycle.internal.LifecyclePage;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
@@ -141,6 +144,8 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   private static final String ELEMENT_PAGE = "factory";
   
   private static final String EFFECTIVE_POM = "Effective POM";
+  
+  IAction showAdvancedTabsAction;
 
   OverviewPage overviewPage;
 
@@ -355,11 +360,19 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   }
 
   /**
-   * Show or hide the advanced pages within the editor
+   * Show or hide the advanced pages within the editor (based on the default setting)
    */
   protected void showAdvancedPages(){
-    boolean showAdvancedTabs = MavenPlugin.getDefault().getPreferenceStore().getBoolean(PomEditorPreferencePage.P_SHOW_ADVANCED_TABS);
+    showAdvancedPages(MavenPlugin.getDefault().getPreferenceStore().getBoolean(PomEditorPreferencePage.P_SHOW_ADVANCED_TABS));
+  }
+
+  /**
+   * Show or hide the advanced pages within the editor (forced)
+   */
+  protected void showAdvancedPages(boolean showAdvancedTabs){
     if(showAdvancedTabs && repositoriesPage == null){
+      showAdvancedTabsAction.setChecked(true);
+
       repositoriesPage = new RepositoriesPage(this);
       addPomPage(repositoriesPage);
       buildPage = new BuildPage(this);
@@ -375,6 +388,9 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       if(repositoriesPage == null){
         return;
       }
+
+      showAdvancedTabsAction.setChecked(false);
+
       removePomPage(repositoriesPage);
       repositoriesPage = null;
       removePomPage(buildPage);
@@ -387,8 +403,16 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       lifecyclePage = null;
     }
   }
-  
+
   protected void addPages() {
+
+    showAdvancedTabsAction = new Action("Show Advanced Tabs", IAction.AS_RADIO_BUTTON) {
+      public void run() {
+        showAdvancedPages(showAdvancedTabsAction.isChecked());
+//        pomEditor.reload();
+      }
+    };
+    showAdvancedTabsAction.setImageDescriptor(MavenEditorImages.ADVANCED_TABS);
     
     overviewPage = new OverviewPage(this);
     addPomPage(overviewPage);

@@ -109,6 +109,8 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
     ScrolledForm form = managedForm.getForm();
     IToolBarManager toolBarManager = form.getToolBarManager();
 
+    toolBarManager.add(pomEditor.showAdvancedTabsAction);
+    
     toolBarManager.add(new Action("Open Parent POM", MavenEditorImages.PARENT_POM) {
       public void run() {
         // XXX listen to parent modification and accordingly enable/disable action
