@@ -2,10 +2,7 @@
 package org.maven.ide.eclipse.integration.tests;
 
 import org.codehaus.plexus.util.FileUtils;
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -16,7 +13,6 @@ import org.eclipse.ui.IViewPart;
 import org.maven.ide.eclipse.jdt.BuildPathManager;
 
 import com.windowtester.runtime.IUIContext;
-import com.windowtester.runtime.locator.IWidgetReference;
 import com.windowtester.runtime.swt.condition.SWTIdleCondition;
 import com.windowtester.runtime.swt.condition.eclipse.JobsCompleteCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellDisposedCondition;
@@ -27,12 +23,18 @@ import com.windowtester.runtime.swt.locator.LabeledLocator;
 import com.windowtester.runtime.swt.locator.MenuItemLocator;
 import com.windowtester.runtime.swt.locator.NamedWidgetLocator;
 import com.windowtester.runtime.swt.locator.TreeItemLocator;
-import com.windowtester.runtime.swt.locator.eclipse.ContributedToolItemLocator;
 import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
 
 
 public class MEclipse193IndexerTest extends UIIntegrationTestCase {
 
+  public MEclipse193IndexerTest(){
+    super();
+    try{
+      super.cancelIndexJobs();
+    } catch(Exception e){
+    }
+  }
   public void setUp() throws Exception {
     super.setUp();
     FileUtils
@@ -44,9 +46,26 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
     
   }
   
+  public void testUpdateRemote() throws Exception{
+    IUIContext ui = getUI();
+    IViewPart indexView = showView("org.maven.ide.eclipse.views.MavenRepositoryView");
+
+    ui.click(new TreeItemLocator("Remote Repositories",
+        new ViewLocator("org.maven.ide.eclipse.views.MavenRepositoryView")));
+    ui.contextClick(new TreeItemLocator("Remote Repositories/central: .*",
+        new ViewLocator("org.maven.ide.eclipse.views.MavenRepositoryView")), "Update Index");
+    ui.wait(new JobsCompleteCondition(), 400000); 
+    //now make sure the index update worked
+    ui.contextClick(new TreeItemLocator("Remote Repositories/central: .*/abbot/abbot - jar/abbot : 0.13.0",
+        new ViewLocator("org.maven.ide.eclipse.views.MavenRepositoryView")), "Update Index");
+
+  }
+  
   public void testLocalResolution() throws Exception {
     IUIContext ui = getUI();
-    
+    IViewPart indexView = showView("org.maven.ide.eclipse.views.MavenRepositoryView");
+    ui.click(new TreeItemLocator("Local Repositories/local:.*repository",
+        new ViewLocator("org.maven.ide.eclipse.views.MavenRepositoryView")));
     // set up two projects.
     IProject project = createArchetypeProjct("maven-archetype-quickstart", "project");
     createArchetypeProjct("maven-archetype-quickstart", "dependency");
@@ -66,7 +85,6 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
     
     assertProjectsHaveNoErrors();
     
-    // Update local index.
     updateLocalIndex(ui);
     
     // Make sure local dependency from above can be added to 2nd proejct
@@ -99,142 +117,20 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
     fail("Failed to find dependency-0.0.1-SNAPSHOT.jar in project");
   }
   
-  public void testUpdateLocalIndex() throws Exception {
-    IUIContext ui = getUI();
-
-    IViewPart indexView = showView("org.maven.ide.eclipse.views.MavenIndexesView");
-
-    ui
-        .click(new TreeItemLocator("local .*repository",
-            new ViewLocator("org.maven.ide.eclipse.views.MavenIndexesView")));
-    ui.contextClick(new TreeItemLocator("local : .*repository", new ViewLocator(
-        "org.maven.ide.eclipse.views.MavenIndexesView")), "Update Index");
-    ui.wait(new JobsCompleteCondition(), 300000);
-
-    showView("org.maven.ide.eclipse.views.MavenIndexesView");
-
-    // Assert local index does not have commons-logging.
-    TreeItemLocator locator = new TreeItemLocator(
-        "local : .*repository/commons-logging/commons-logging - jar/commons-logging : 1.1.1", new ViewLocator(
-            "org.maven.ide.eclipse.views.MavenIndexesView"));
-    ui.assertThat(locator.isVisible(false));
-
-    hideView(indexView);
-    // Create a test project and add common-logging 1.1.1 as dependency.
-    IProject project = createArchetypeProjct("maven-archetype-quickstart", "project");
-    addDependency(project, "commons-logging", "commons-logging", "1.1.1");
-
-    updateLocalIndex(ui);
-    //TODO: There is a bug, you need to re-index twice to get new items to show up. Remove this when new indexer put into m2e.
-    updateLocalIndex(ui);
-
-    indexView = showView("org.maven.ide.eclipse.views.MavenIndexesView");
-
-    // Find commons-logging 1.1.1 and materialize it.
-    ui.click(new TreeItemLocator("local : .*repository/commons-logging/commons-logging - jar", new ViewLocator(
-        "org.maven.ide.eclipse.views.MavenIndexesView")));
-
-    ui.click(new TreeItemLocator("local : .*repository/commons-logging/commons-logging - jar/commons-logging : 1.1.1",
-        new ViewLocator("org.maven.ide.eclipse.views.MavenIndexesView")));
-    ui.contextClick(new TreeItemLocator("local .*commons-logging/commons-logging - jar/commons-logging : 1.1.1",
-        new ViewLocator("org.maven.ide.eclipse.views.MavenIndexesView")), "Materialize Projects");
-    waitForAllBuildsToComplete();
-    ui.wait(new ShellShowingCondition("Import Maven Projects"));
-    ui.click(new ButtonLocator("&Next >"));
-    ui.click(new ButtonLocator("&Finish"));
-    ui.wait(new ShellDisposedCondition("Import Maven Projects"));
-
-    hideView(indexView);
-    
-    waitForAllBuildsToComplete();
-
-    Thread.sleep(5000);
-    ui.click(new ButtonLocator("&Finish"));
-    waitForAllBuildsToComplete();
-
-    IProject loggingProject = ResourcesPlugin.getWorkspace().getRoot().getProject("commons-logging");
-    assertTrue(loggingProject.exists());
-    assertTrue(loggingProject.hasNature(JavaCore.NATURE_ID));
-    assertProjectsHaveNoErrors();
-
-  }
-
   private void updateLocalIndex(IUIContext ui) throws Exception {
-    IViewPart indexView = showView("org.maven.ide.eclipse.views.MavenIndexesView");
+    IViewPart indexView = showView("org.maven.ide.eclipse.views.MavenRepositoryView");
 
-    ui
-        .click(new TreeItemLocator("local .*repository",
-            new ViewLocator("org.maven.ide.eclipse.views.MavenIndexesView")));
+    ui.click(new TreeItemLocator("Local Repositories/local: .*repository",
+            new ViewLocator("org.maven.ide.eclipse.views.MavenRepositoryView")));
 
-    ui.contextClick(new TreeItemLocator("local : .*repository", new ViewLocator(
-        "org.maven.ide.eclipse.views.MavenIndexesView")), "Update Index");
-    hideView(indexView);
+    ui.contextClick(new TreeItemLocator("Local Repositories/local: .*repository", new ViewLocator(
+        "org.maven.ide.eclipse.views.MavenRepositoryView")), "Update Index");
+    
     ui.wait(new JobsCompleteCondition(), 240000);
-
-  }
-
-  public void testAddNewIndex() throws Exception {
-    importZippedProject("projects/add_index_test.zip");
-    final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("project");
-    assertTrue(project.exists());
-
-    openFile(project, "src/main/java/org/sonatype/test/project/App.java");
-
-    // there should be compile errors
-    int severity = project.findMaxProblemSeverity(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
-    assertEquals(IMarker.SEVERITY_ERROR, severity);
-
-    launchQuickFix(project);
-
-    UIThreadTask.executeOnEventQueue(new UIThreadTask() {
-
-      public Object runEx() throws Exception {
-        Tree tree = (Tree) ((IWidgetReference) getUI().find(new NamedWidgetLocator("searchResultTree"))).getWidget();
-        assertEquals(0, tree.getItemCount()); // Missing class shouldn't be found, since it isn't in maven central.
-        return null;
-      }
-    });
-
-    getUI().keyClick(SWT.ESC);
-    getUI().wait(new ShellDisposedCondition("Search in Maven repositories"));
     
-    
-    // Now add in the index:  http://download.java.net/maven/2/
-    IViewPart indexView = showView("org.maven.ide.eclipse.views.MavenIndexesView");
-
-    getUI().click(new CTabItemLocator("Maven Indexes"));
-
-    getUI().wait(new SWTIdleCondition());
-
-    getUI().click(new ContributedToolItemLocator("org.maven.ide.eclipse.addIndexAction"));
-
-    getUI().wait(new ShellShowingCondition("Add Repository Index"));
-    getUI().click(new NamedWidgetLocator("repositoryUrlCombo"));
-    getUI().enterText("http://download.java.net/maven/2/");
-    getUI().wait(new SWTIdleCondition());
-    getUI().click(new ButtonLocator("OK"));
-    getUI().wait(new ShellDisposedCondition("Add Repository Index"));
-    hideView(indexView);
-    
-    getUI().wait(new JobsCompleteCondition(), 240000);
-    
-    // Attempt to quick fix again...
-    launchQuickFix(project);
-    
-    getUI().click(new TreeItemLocator("ShortOptionHandler   org.kohsuke.args4j.spi   args4j   args4j", new NamedWidgetLocator("searchResultTree")));
-    getUI().click(new TreeItemLocator(
-        "ShortOptionHandler   org.kohsuke.args4j.spi   args4j   args4j/2.0.12 - args4j-2.0.12.jar .*",
-        new NamedWidgetLocator("searchResultTree")));
-    
-    getUI().wait(new SWTIdleCondition());
-    getUI().keyClick(SWT.CR);
-
-    getUI().wait(new ShellDisposedCondition("Search in Maven repositories"));
-
-    waitForAllBuildsToComplete();
-
-    assertProjectsHaveNoErrors();
-
+    //now make sure that the local index updated correctly
+    ui.click(new TreeItemLocator("Local Repositories/local: .*repository/com",
+        new ViewLocator("org.maven.ide.eclipse.views.MavenRepositoryView")));
   }
 
   private void launchQuickFix(IProject project) throws Exception {
