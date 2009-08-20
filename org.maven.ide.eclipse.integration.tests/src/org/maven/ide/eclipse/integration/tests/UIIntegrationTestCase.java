@@ -204,13 +204,6 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
      closeView("org.eclipse.ui.views.ContentOutline");
      closeView("org.eclipse.mylyn.tasks.ui.views.tasks");
 
-     // Attempt to use local nexus as maven central proxy to speed up tests
-//     if(!this.skipIndexes()){
-//       setupLocalMavenIndex();
-//     } else {
-//       cancelIndexJobs();
-//     }
-     setupLocalMavenIndex();
      if(this.useExternalMaven()){
        this.switchToExternalMaven();
      }
