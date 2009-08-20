@@ -54,6 +54,8 @@ import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.internal.index.IndexedArtifactGroup;
+import org.maven.ide.eclipse.internal.index.NexusIndexManager;
+import org.maven.ide.eclipse.ui.internal.views.nodes.HiddenRepositoryNode;
 import org.maven.ide.eclipse.ui.internal.views.nodes.IndexNode;
 import org.maven.ide.eclipse.ui.internal.views.nodes.IndexedArtifactFileNode;
 
@@ -75,6 +77,8 @@ public class MavenRepositoryView extends ViewPart {
   private BaseSelectionListenerAction updateAction;
   
   private BaseSelectionListenerAction rebuildAction;
+  
+  private BaseSelectionListenerAction enableAction;
 
   private BaseSelectionListenerAction copyUrlAction;
 
@@ -187,6 +191,7 @@ public class MavenRepositoryView extends ViewPart {
     manager.add(reloadSettings);
     manager.add(updateAction);
     manager.add(rebuildAction);
+    manager.add(enableAction);
     manager.add(new Separator());
     manager.add(collapseAllAction);
     manager.add(new Separator());
@@ -292,6 +297,35 @@ public class MavenRepositoryView extends ViewPart {
     rebuildAction.setToolTipText("Force a rebuild of the maven index");
     rebuildAction.setImageDescriptor(MavenImages.REBUILD_INDEX);
 
+    enableAction = new BaseSelectionListenerAction("Enable Index") {
+      public void run() {
+        ISelection selection = viewer.getSelection();
+        Object element = ((IStructuredSelection) selection).getFirstElement();
+        if(element instanceof HiddenRepositoryNode) {
+          HiddenRepositoryNode node = (HiddenRepositoryNode)element;
+          String msg = "Are you sure you want to enable the index '"+node.getRepoName()+"'. This will allow the index to be used for dependency resolution, but it will NOT be used during a maven build.";
+          boolean res = MessageDialog.openConfirm(getViewSite().getShell(), //
+              "Enable Index", msg);
+          if(res){
+            NexusIndexManager im = (NexusIndexManager)MavenPlugin.getDefault().getIndexManager();
+            try{
+              im.addIndexForRemote(node.getRepoName(), node.getRepoUrl());
+              im.scheduleIndexUpdate(node.getRepoName(), true, 1000);
+            } catch(Exception e){
+              MavenLogger.log("Unable to enable index "+node.getName(), e);
+            }
+          }
+        }
+      }
+
+      protected boolean updateSelection(IStructuredSelection selection) {
+        return (selection.getFirstElement() instanceof HiddenRepositoryNode);
+      }
+    };
+    
+    enableAction.setToolTipText("Enable the index to be used for dependency resolution");
+    enableAction.setImageDescriptor(MavenImages.REBUILD_INDEX);
+    
     openPomAction = new BaseSelectionListenerAction("Open POM") {
       public void run() {
         ISelection selection = viewer.getSelection();
@@ -340,6 +374,7 @@ public class MavenRepositoryView extends ViewPart {
       }
     };
     copyUrlAction.setToolTipText("Copy URL to Clipboard");
+    copyUrlAction.setImageDescriptor(MavenImages.COPY);
     
     materializeProjectAction = new BaseSelectionListenerAction("Materialize Projects") {
       public void run() {
@@ -360,6 +395,7 @@ public class MavenRepositoryView extends ViewPart {
 
     viewer.addSelectionChangedListener(openPomAction);
     viewer.addSelectionChangedListener(updateAction);
+    viewer.addSelectionChangedListener(enableAction);
     viewer.addSelectionChangedListener(rebuildAction);
     viewer.addSelectionChangedListener(copyUrlAction);
     viewer.addSelectionChangedListener(materializeProjectAction);
@@ -369,6 +405,7 @@ public class MavenRepositoryView extends ViewPart {
     viewer.removeSelectionChangedListener(materializeProjectAction);
     viewer.removeSelectionChangedListener(copyUrlAction);
     viewer.removeSelectionChangedListener(rebuildAction);
+    viewer.removeSelectionChangedListener(enableAction);
     viewer.removeSelectionChangedListener(updateAction);
     viewer.removeSelectionChangedListener(openPomAction);
 
