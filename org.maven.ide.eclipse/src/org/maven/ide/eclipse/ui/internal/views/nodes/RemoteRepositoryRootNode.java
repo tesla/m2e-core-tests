@@ -72,8 +72,9 @@ public class RemoteRepositoryRootNode implements IMavenRepositoryNode{
       }
     }
     for(Profile profile : profileList){
-      List<Repository> pluginRepositories = profile.getPluginRepositories();
-      for(Repository rep : pluginRepositories){
+      //List<Repository> pluginRepositories = profile.getPluginRepositories();
+      List<Repository> repositories = profile.getRepositories();
+      for(Repository rep : repositories){
         String name = rep.getId();
         String url = rep.getUrl();
         HiddenRepositoryNode node = new HiddenRepositoryNode(name, url);
