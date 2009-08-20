@@ -13,6 +13,7 @@ import org.eclipse.ui.IViewPart;
 import org.maven.ide.eclipse.jdt.BuildPathManager;
 
 import com.windowtester.runtime.IUIContext;
+import com.windowtester.runtime.locator.IWidgetLocator;
 import com.windowtester.runtime.swt.condition.SWTIdleCondition;
 import com.windowtester.runtime.swt.condition.eclipse.JobsCompleteCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellDisposedCondition;
@@ -44,6 +45,16 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
     FileUtils
     .deleteDirectory(System.getProperty("user.home") + "/.m2/repository/org/sonatype/test/depencency");
     
+  }
+  
+  //needs to be 2 'mirrored' repos in an active profile in the settings.xml. one id 'central', one id 'foo'
+  public void testMirroredRepos() throws Exception {
+    IUIContext ui = getUI();
+    IViewPart indexView = showView("org.maven.ide.eclipse.views.MavenRepositoryView");
+    ui.click(new TreeItemLocator("Remote Repositories/central:.*",
+        new ViewLocator("org.maven.ide.eclipse.views.MavenRepositoryView")));
+    IWidgetLocator[] findAll = ui.findAll(new TreeItemLocator("Remote Repositories/.*Disabled by Mirror.*"));
+    assertTrue(findAll.length == 2);
   }
   
   public void testUpdateRemote() throws Exception{
@@ -132,31 +143,31 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
     ui.click(new TreeItemLocator("Local Repositories/local: .*repository/com",
         new ViewLocator("org.maven.ide.eclipse.views.MavenRepositoryView")));
   }
-
-  private void launchQuickFix(IProject project) throws Exception {
-    //Workaround for Window tester bug, close & reopen tab to prevent editor from being in invalid state.
-    getUI().close(new CTabItemLocator("App.java"));
-    openFile(project, "src/main/java/org/sonatype/test/project/App.java");
-
-    //launch quick fix for SessionFactory dependency
-    getUI().click(new TreeItemLocator("project.*", new ViewLocator(PACKAGE_EXPLORER_VIEW_ID)));
-    getUI().keyClick(SWT.MOD1 | SWT.SHIFT, 't');
-    getUI().wait(new ShellShowingCondition("Open Type"));
-    getUI().enterText("app");
-    getUI().wait(new SWTIdleCondition());
-    getUI().click(new ButtonLocator("OK"));
-    getUI().wait(new ShellDisposedCondition("Open Type"));
-    getUI().wait(new JobsCompleteCondition(), 60000);
-
-    getUI().keyClick(SWT.MOD1, '.'); // next annotation
-
-    getUI().keyClick(SWT.MOD1, '1');
-    getUI().wait(new ShellShowingCondition(""));
-    getUI().keyClick(SWT.END);
-    getUI().keyClick(SWT.ARROW_UP);
-
-    getUI().keyClick(SWT.CR);
-    getUI().wait(new ShellShowingCondition("Search in Maven repositories"));
-    getUI().wait(new SWTIdleCondition());
-  }
+//
+//  private void launchQuickFix(IProject project) throws Exception {
+//    //Workaround for Window tester bug, close & reopen tab to prevent editor from being in invalid state.
+//    getUI().close(new CTabItemLocator("App.java"));
+//    openFile(project, "src/main/java/org/sonatype/test/project/App.java");
+//
+//    //launch quick fix for SessionFactory dependency
+//    getUI().click(new TreeItemLocator("project.*", new ViewLocator(PACKAGE_EXPLORER_VIEW_ID)));
+//    getUI().keyClick(SWT.MOD1 | SWT.SHIFT, 't');
+//    getUI().wait(new ShellShowingCondition("Open Type"));
+//    getUI().enterText("app");
+//    getUI().wait(new SWTIdleCondition());
+//    getUI().click(new ButtonLocator("OK"));
+//    getUI().wait(new ShellDisposedCondition("Open Type"));
+//    getUI().wait(new JobsCompleteCondition(), 60000);
+//
+//    getUI().keyClick(SWT.MOD1, '.'); // next annotation
+//
+//    getUI().keyClick(SWT.MOD1, '1');
+//    getUI().wait(new ShellShowingCondition(""));
+//    getUI().keyClick(SWT.END);
+//    getUI().keyClick(SWT.ARROW_UP);
+//
+//    getUI().keyClick(SWT.CR);
+//    getUI().wait(new ShellShowingCondition("Search in Maven repositories"));
+//    getUI().wait(new SWTIdleCondition());
+//  }
 }
