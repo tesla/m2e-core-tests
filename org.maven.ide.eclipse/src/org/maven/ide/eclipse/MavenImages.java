@@ -79,6 +79,8 @@ public class MavenImages {
   public static final ImageDescriptor ADD_INDEX = create("add_index.gif");
 
   public static final ImageDescriptor CLOSE = create("close.gif");
+  
+  public static final ImageDescriptor COPY = create("copy.gif");
 
   public static final ImageDescriptor COLLAPSE_ALL = create("collapseall.gif");
   
