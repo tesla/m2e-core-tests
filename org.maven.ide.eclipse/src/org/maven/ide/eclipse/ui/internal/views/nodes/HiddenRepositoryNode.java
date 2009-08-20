@@ -27,10 +27,33 @@ public class HiddenRepositoryNode implements IMavenRepositoryNode{
     this.name = name;
     this.url = url;
   }
+  
+  public String getRepoName(){
+    return name;
+  }
+  public String getRepoUrl(){
+    return url;
+  }
   /* (non-Javadoc)
    * @see org.maven.ide.eclipse.ui.internal.views.nodes.IMavenRepositoryNode#getChildren()
    */
   public Object[] getChildren() {
+//    ArrayList<Object> repoList = new ArrayList<Object>();
+//    try{
+//       List<ArtifactRepository> repos = getRemoteRepositories();
+//       if(repos != null){
+//        for(ArtifactRepository repo : repos){
+//          NexusIndex index = new NexusIndex(((NexusIndexManager)MavenPlugin.getDefault().getIndexManager()), repo.getId(), repo.getUrl());
+//          IndexNode node = new IndexNode(index);
+//          repoList.add(node);
+//          
+//        }
+//
+//      }
+//    } catch(Exception e){
+//      MavenLogger.log("Unable to load remote repositories", e);
+//    }
+//    return repoList.toArray(new Object[repoList.size()]);
     return null;
   }
 
