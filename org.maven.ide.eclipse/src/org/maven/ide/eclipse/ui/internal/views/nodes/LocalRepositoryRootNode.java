@@ -10,6 +10,7 @@ package org.maven.ide.eclipse.ui.internal.views.nodes;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.maven.ide.eclipse.MavenImages;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.index.IMutableIndex;
 import org.maven.ide.eclipse.internal.index.NexusIndexManager;
@@ -51,7 +52,7 @@ public class LocalRepositoryRootNode implements IMavenRepositoryNode{
    * @see org.maven.ide.eclipse.ui.internal.views.nodes.IMavenRepositoryNode#getImage()
    */
   public Image getImage() {
-    // TODO Auto-generated method getImage
-    return null;
+    return MavenImages.IMG_INDEXES;
   }
+  
 }

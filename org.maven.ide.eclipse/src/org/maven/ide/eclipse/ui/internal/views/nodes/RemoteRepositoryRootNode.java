@@ -23,6 +23,7 @@ import org.apache.maven.settings.Profile;
 import org.apache.maven.settings.Repository;
 import org.apache.maven.settings.Settings;
 
+import org.maven.ide.eclipse.MavenImages;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.IMaven;
@@ -158,8 +159,7 @@ public class RemoteRepositoryRootNode implements IMavenRepositoryNode{
    * @see org.maven.ide.eclipse.ui.internal.views.nodes.IMavenRepositoryNode#getImage()
    */
   public Image getImage() {
-    // TODO Auto-generated method getImage
-    return null;
+    return MavenImages.IMG_INDEXES;
   }
   
   
