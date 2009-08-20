@@ -25,7 +25,7 @@ import org.maven.ide.eclipse.internal.index.NexusIndexManager;
  *
  * @author dyocum
  */
-public class IndexedArtifactGroupNode implements IMavenRepositoryNode {
+public class IndexedArtifactGroupNode implements IMavenRepositoryNode, IArtifactNode {
 
   private IndexedArtifactGroup indexedArtifactGroup;
   private Object[] kids = null;
@@ -80,6 +80,12 @@ public class IndexedArtifactGroupNode implements IMavenRepositoryNode {
    */
   public Image getImage() {
     return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER);
+  }
+  /* (non-Javadoc)
+   * @see org.maven.ide.eclipse.ui.internal.views.nodes.IArtifactNode#getDocumentKey()
+   */
+  public String getDocumentKey() {
+    return indexedArtifactGroup.getPrefix();
   }
 
 }

@@ -13,13 +13,14 @@ import org.eclipse.swt.graphics.Image;
 import org.maven.ide.eclipse.MavenImages;
 import org.maven.ide.eclipse.index.IIndex;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
+import org.maven.ide.eclipse.internal.index.NexusIndexManager;
 
 /**
  * IndexedArtifactFileNode
  *
  * @author dyocum
  */
-public class IndexedArtifactFileNode implements IMavenRepositoryNode {
+public class IndexedArtifactFileNode implements IMavenRepositoryNode, IArtifactNode {
 
   private IndexedArtifactFile artifactFile;
 
@@ -30,6 +31,7 @@ public class IndexedArtifactFileNode implements IMavenRepositoryNode {
   public IndexedArtifactFile getIndexedArtifactFile(){
     return this.artifactFile;
   }
+  
   /* (non-Javadoc)
    * @see org.maven.ide.eclipse.ui.internal.views.IMavenRepositoryNode#getChildren()
    */
@@ -67,6 +69,13 @@ public class IndexedArtifactFileNode implements IMavenRepositoryNode {
     }
     return MavenImages.IMG_VERSION;
 
+  }
+
+  /* (non-Javadoc)
+   * @see org.maven.ide.eclipse.ui.internal.views.nodes.IArtifactNode#getDocumentKey()
+   */
+  public String getDocumentKey() {
+    return NexusIndexManager.getDocumentKey(artifactFile.getArtifactKey());
   }
 
 }

@@ -22,7 +22,7 @@ import org.maven.ide.eclipse.index.IndexedArtifactFile;
  *
  * @author dyocum
  */
-public class IndexedArtifactNode implements IMavenRepositoryNode {
+public class IndexedArtifactNode implements IMavenRepositoryNode, IArtifactNode {
 
   private IndexedArtifact artifact;
   private Object[] kids = null;
@@ -70,6 +70,12 @@ public class IndexedArtifactNode implements IMavenRepositoryNode {
    */
   public Image getImage() {
     return MavenImages.IMG_JAR;
+  }
+  /* (non-Javadoc)
+   * @see org.maven.ide.eclipse.ui.internal.views.nodes.IArtifactNode#getDocumentKey()
+   */
+  public String getDocumentKey() {
+    return artifact.getArtifactId();
   }
 
 }

@@ -56,6 +56,7 @@ import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.internal.index.IndexedArtifactGroup;
 import org.maven.ide.eclipse.internal.index.NexusIndexManager;
 import org.maven.ide.eclipse.ui.internal.views.nodes.HiddenRepositoryNode;
+import org.maven.ide.eclipse.ui.internal.views.nodes.IArtifactNode;
 import org.maven.ide.eclipse.ui.internal.views.nodes.IndexNode;
 import org.maven.ide.eclipse.ui.internal.views.nodes.IndexedArtifactFileNode;
 
@@ -81,6 +82,10 @@ public class MavenRepositoryView extends ViewPart {
   private BaseSelectionListenerAction enableAction;
 
   private BaseSelectionListenerAction copyUrlAction;
+  
+  //can't do this in indexer...yet
+
+  //private BaseSelectionListenerAction deleteFromLocalAction;
 
   private BaseSelectionListenerAction materializeProjectAction;
   
@@ -183,6 +188,20 @@ public class MavenRepositoryView extends ViewPart {
     }
     return list;
   }
+  protected List<IArtifactNode> getArtifactNodes(List elements){
+    if(elements == null || elements.size() == 0){
+      return null;
+    }
+    ArrayList<IArtifactNode> list = new ArrayList<IArtifactNode>();
+    for(int i=0;i<elements.size();i++){
+      Object elem = elements.get(i);
+      if(elem instanceof IArtifactNode){
+        IArtifactNode node = (IArtifactNode)elem;
+        list.add(node);
+      }
+    }
+    return list;
+  }
   void fillContextMenu(IMenuManager manager) {
     manager.add(openPomAction);
     manager.add(copyUrlAction);
@@ -192,6 +211,7 @@ public class MavenRepositoryView extends ViewPart {
     manager.add(updateAction);
     manager.add(rebuildAction);
     manager.add(enableAction);
+//    manager.add(deleteFromLocalAction);
     manager.add(new Separator());
     manager.add(collapseAllAction);
     manager.add(new Separator());
@@ -231,7 +251,29 @@ public class MavenRepositoryView extends ViewPart {
         }
       }
     };
+    
     reloadSettings.setImageDescriptor(MavenImages.REFRESH);
+//    deleteFromLocalAction = new BaseSelectionListenerAction("Delete from Repository") {
+//      public void run() {
+//        List<IArtifactNode> nodes = getArtifactNodes(getStructuredSelection().toList());
+//        if(nodes != null){
+//          for(IArtifactNode node : nodes){
+//            String key = node.getDocumentKey();
+//            System.out.println("key: "+key);
+//            ((NexusIndexManager)MavenPlugin.getDefault().getIndexManager()).removeDocument("local", null, key);
+//          }
+//        }
+//      }
+//
+//      protected boolean updateSelection(IStructuredSelection selection) {
+//        List<IArtifactNode> nodes = getArtifactNodes(getStructuredSelection().toList());
+//        return (nodes != null && nodes.size() > 0);
+//      }
+//    };
+//    deleteFromLocalAction.setToolTipText("Delete the selected GAV from the local repository");
+    //updateAction.setImageDescriptor(MavenImages.UPD_INDEX);
+
+    
     updateAction = new BaseSelectionListenerAction("Update Index") {
       public void run() {
         List<IndexNode> infoElements = getIndexElementsToUpdate(getStructuredSelection().toList());
@@ -396,6 +438,7 @@ public class MavenRepositoryView extends ViewPart {
     viewer.addSelectionChangedListener(openPomAction);
     viewer.addSelectionChangedListener(updateAction);
     viewer.addSelectionChangedListener(enableAction);
+//    viewer.addSelectionChangedListener(deleteFromLocalAction);
     viewer.addSelectionChangedListener(rebuildAction);
     viewer.addSelectionChangedListener(copyUrlAction);
     viewer.addSelectionChangedListener(materializeProjectAction);
@@ -405,6 +448,7 @@ public class MavenRepositoryView extends ViewPart {
     viewer.removeSelectionChangedListener(materializeProjectAction);
     viewer.removeSelectionChangedListener(copyUrlAction);
     viewer.removeSelectionChangedListener(rebuildAction);
+//    viewer.removeSelectionChangedListener(deleteFromLocalAction);
     viewer.removeSelectionChangedListener(enableAction);
     viewer.removeSelectionChangedListener(updateAction);
     viewer.removeSelectionChangedListener(openPomAction);
