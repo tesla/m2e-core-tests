@@ -33,7 +33,7 @@ public class RepositoryViewLabelProvider extends LabelProvider implements IColor
   private Font italicFont;
   public RepositoryViewLabelProvider(Font treeFont){
     //JFaceResources.getFontRegistry().
-    italicFont = Util.deriveFont(treeFont, SWT.ITALIC, (int)treeFont.size);
+    italicFont = Util.deriveFont(treeFont, SWT.ITALIC, 12);
   }
   
   
