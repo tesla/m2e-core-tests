@@ -102,7 +102,7 @@ public class MavenRepositoryView extends ViewPart {
     viewer = new TreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
     contentProvider = new RepositoryViewContentProvider();
     viewer.setContentProvider(contentProvider);
-    viewer.setLabelProvider(new RepositoryViewLabelProvider());
+    viewer.setLabelProvider(new RepositoryViewLabelProvider(viewer.getTree().getFont()));
     viewer.setSorter(new RepositoryViewerSorter());
     
     viewer.addDoubleClickListener(new IDoubleClickListener() {
@@ -141,7 +141,11 @@ public class MavenRepositoryView extends ViewPart {
         
       }
       public void indexUpdating(String indexName){
-
+        Display.getDefault().asyncExec(new Runnable(){
+          public void run(){
+           viewer.refresh(true); 
+          }
+        });
       }
     });
   }
@@ -172,20 +176,26 @@ public class MavenRepositoryView extends ViewPart {
     manager.add(reloadSettings);
   }
 
-  protected List<IndexNode> getIndexElementsToUpdate(List elements){
+  protected List<String> getIndexesToUpdate(List elements){
     if(elements == null || elements.size() == 0){
       return null;
     }
-    ArrayList<IndexNode> list = new ArrayList<IndexNode>();
+    ArrayList<String> list = new ArrayList<String>();
     for(int i=0;i<elements.size();i++){
       Object elem = elements.get(i);
       if(elem instanceof IndexNode){
         IndexNode node = (IndexNode)elem;
         if(!node.isWorkspace()){
-          list.add((IndexNode)elem);
+          list.add(((IndexNode)elem).getIndexName());
+        }
+      } else if(elem instanceof HiddenRepositoryNode){
+        if(((HiddenRepositoryNode)elem).isEnabledIndex()){
+          String name = ((HiddenRepositoryNode)elem).getRepoName();
+          list.add(name);
         }
       }
     }
+    
     return list;
   }
   protected List<IArtifactNode> getArtifactNodes(List elements){
@@ -276,14 +286,14 @@ public class MavenRepositoryView extends ViewPart {
     
     updateAction = new BaseSelectionListenerAction("Update Index") {
       public void run() {
-        List<IndexNode> infoElements = getIndexElementsToUpdate(getStructuredSelection().toList());
-        for(IndexNode node : infoElements){
-          updateIndex(node.getIndexName(), false);
+        List<String> names = getIndexesToUpdate(getStructuredSelection().toList());
+        for(String name : names){
+          updateIndex(name, false);
         }
       }
 
       protected boolean updateSelection(IStructuredSelection selection) {
-        List<IndexNode> elems = getIndexElementsToUpdate(selection.toList());
+        List<String> elems = getIndexesToUpdate(selection.toList());
         if(elems != null && elems.size() > 1){
           setText("Update Indexes");
         } else {
@@ -297,18 +307,17 @@ public class MavenRepositoryView extends ViewPart {
 
     rebuildAction = new BaseSelectionListenerAction("Rebuild Index") {
       public void run() {
-        List<IndexNode> elemsToUpdate = getIndexElementsToUpdate(getStructuredSelection().toList());
+        List<String> elemsToUpdate = getIndexesToUpdate(getStructuredSelection().toList());
         if(elemsToUpdate != null && elemsToUpdate.size() > 0){
           if(elemsToUpdate.size() == 1){
-            IndexNode info = elemsToUpdate.get(0);
-            String name = info.getName();
+            String name = elemsToUpdate.get(0);
             String msg = "Are you sure you want to rebuild the index '"+name+"'";
             boolean res = MessageDialog.openConfirm(getViewSite().getShell(), //
                 "Rebuild Index", msg);
             if(res) {
               // TODO request index deletion
               // TODO add deleted index to 
-              updateIndex(info.getIndexName(), true);
+              updateIndex(name, true);
             }
           } else {
             String msg = "Are you sure you want to rebuild the selected indexes?";
@@ -317,8 +326,8 @@ public class MavenRepositoryView extends ViewPart {
             if(res) {
               // TODO request index deletion
               // TODO add deleted index to 
-              for(IndexNode info : elemsToUpdate){
-                updateIndex(info.getIndexName(), true);
+              for(String name : elemsToUpdate){
+                updateIndex(name, true);
               }
             }            
           }
@@ -326,7 +335,7 @@ public class MavenRepositoryView extends ViewPart {
       }
       
       protected boolean updateSelection(IStructuredSelection selection) {
-        List<IndexNode> elems = getIndexElementsToUpdate(selection.toList());
+        List<String> elems = getIndexesToUpdate(selection.toList());
         if(elems != null && elems.size() > 1){
           setText("Rebuild Indexes");
         } else {
@@ -443,16 +452,20 @@ public class MavenRepositoryView extends ViewPart {
     Object element = ((IStructuredSelection) selection).getFirstElement();
     if(element instanceof HiddenRepositoryNode) {
       HiddenRepositoryNode node = (HiddenRepositoryNode)element;
-      
       String msg = "";
       if(enable){
         msg = "Are you sure you want to enable the index '"+node.getRepoName()+"'. This will allow the index to be used for dependency resolution, but it will NOT be used during a maven build.";
+      } 
+      
+      boolean ok = false;
+      if(enable){
+        ok = MessageDialog.openConfirm(getViewSite().getShell(), //
+            "Enable Index", msg);
       } else {
-        msg = "Are you sure you want to disable the index '"+node.getRepoName()+"'. This will prevent the index from being used for dependency resolution.";
+        ok = true;
       }
-      boolean res = MessageDialog.openConfirm(getViewSite().getShell(), //
-          "Enable Index", msg);
-      if(res){
+      
+      if(ok){
         NexusIndexManager im = (NexusIndexManager)MavenPlugin.getDefault().getIndexManager();
         if(enable){
           try{
@@ -465,7 +478,7 @@ public class MavenRepositoryView extends ViewPart {
         } else {
           try{
             MavenPlugin.getDefault().removeEnabledIndex(node.getRepoName(), node.getRepoUrl());
-            im.removeIndex(node.getRepoName(), true);
+            im.removeIndex(node.getRepoName(), false);
           } catch(Exception e){
             MavenLogger.log("Unable to enable index "+node.getName(), e);
           }

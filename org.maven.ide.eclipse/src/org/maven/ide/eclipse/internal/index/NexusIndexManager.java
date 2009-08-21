@@ -1094,10 +1094,6 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       MavenLogger.log(msg, ex);
     } 
   }
-//  
-//  public IndexInfo getIndexInfoByUrl(String url){
-//      return configuredIndexes.get(url);
-//  }
   
   public void removeIndex(String indexName, boolean deleteFiles){
     try{
@@ -1144,6 +1140,11 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     synchronized(updatingIndexes){
       updatingIndexes.add(indexName);
     }    
+    synchronized(indexListeners){
+      for(IndexListener listener : indexListeners){
+        listener.indexUpdating(indexName);
+      }
+    }
   }
   public void fireIndexChanged(String indexName){
     synchronized(updatingIndexes){

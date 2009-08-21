@@ -9,9 +9,11 @@
 package org.maven.ide.eclipse.ui.internal.views;
 
 import org.eclipse.jface.viewers.IColorProvider;
+import org.eclipse.jface.viewers.IFontProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.ISharedImages;
@@ -19,13 +21,30 @@ import org.eclipse.ui.PlatformUI;
 
 import org.maven.ide.eclipse.ui.internal.views.nodes.HiddenRepositoryNode;
 import org.maven.ide.eclipse.ui.internal.views.nodes.IMavenRepositoryNode;
+import org.maven.ide.eclipse.util.Util;
 
 /**
  * RepositoryViewLabelProvider
  *
  * @author dyocum
  */
-public class RepositoryViewLabelProvider extends LabelProvider implements IColorProvider {
+public class RepositoryViewLabelProvider extends LabelProvider implements IColorProvider, IFontProvider {
+
+  private Font italicFont;
+  public RepositoryViewLabelProvider(Font treeFont){
+    //JFaceResources.getFontRegistry().
+    italicFont = Util.deriveFont(treeFont, SWT.ITALIC, (int)treeFont.size);
+  }
+  
+  
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.viewers.BaseLabelProvider#dispose()
+   */
+  public void dispose() {
+    italicFont.dispose();
+    super.dispose();
+  }
+
 
   public String getText(Object obj) {
     if(obj instanceof IMavenRepositoryNode){
@@ -58,6 +77,16 @@ public class RepositoryViewLabelProvider extends LabelProvider implements IColor
       return Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
     } 
     return Display.getDefault().getSystemColor(SWT.COLOR_BLACK);
+  }
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.viewers.IFontProvider#getFont(java.lang.Object)
+   */
+  public Font getFont(Object element) {
+    if(element instanceof IMavenRepositoryNode){
+      boolean updating = ((IMavenRepositoryNode)element).isUpdating();
+      return updating ? italicFont : null;
+    }
+    return null;
   }
 
 }
