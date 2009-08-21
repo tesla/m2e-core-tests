@@ -29,7 +29,6 @@
 <repository location="http://download.eclipse.org/releases/galileo"/>
 </location>
 <location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
-<location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
 <unit id='com.windowtester.launcher.feature.group' version='3.9.0.200906301836'/>
 <unit id='com.windowtester.runtime.feature.group' version='3.9.0.200906301905'/>
 <repository location="http://download.instantiations.com/WindowTesterPro/release/latest/update/3.5"/>
