@@ -24,9 +24,9 @@
 <repository location="http://download.eclipse.org/releases/ganymede"/>
 </location>
 <location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
-<unit id="com.windowtester.runtime.feature.group" version="3.9.1.200907171009"/>
-<unit id="com.windowtester.launcher.feature.group" version="3.9.1.200907152103"/>
-<repository location="http://download.instantiations.com/WindowTesterPro/integration/latest/update/3.4/"/>
+<unit id="com.windowtester.runtime.feature.group" version="3.9.0.200906301905"/>
+<unit id="com.windowtester.launcher.feature.group" version="3.9.0.200906301836"/>
+<repository location="http://download.instantiations.com/WindowTesterPro/release/latest/update/3.4"/>
 </location>
 <location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
 <unit id="org.tigris.subversion.subclipse.feature.group" version="1.6.3"/>
