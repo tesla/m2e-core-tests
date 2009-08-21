@@ -20,6 +20,9 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.variables.VariablesPlugin;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.widgets.Display;
 
 import org.maven.ide.eclipse.core.MavenLogger;
 
@@ -36,6 +39,15 @@ public class Util {
     String version = (String) bundle.getHeaders().get(org.osgi.framework.Constants.BUNDLE_VERSION);
     Version v = Version.parseVersion(version);
     return v.getMajor() == major && v.getMinor() == minor;
+  }
+  
+  public static Font deriveFont(Font f, int style, int height){
+    FontData[] fd = f.getFontData();
+    FontData[] newFD = new FontData[fd.length];
+    for(int i=0;i<fd.length;i++){
+      newFD[i] = new FontData(fd[i].getName(), height, style);
+    }
+    return new Font(Display.getCurrent(), newFD);
   }
   /**
    * Proxy factory for compatibility stubs
