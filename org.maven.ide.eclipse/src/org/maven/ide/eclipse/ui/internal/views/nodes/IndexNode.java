@@ -32,7 +32,6 @@ public class IndexNode implements IMavenRepositoryNode {
 
   private boolean isMirror;
 
-  private boolean updating;
   /**
    * @return Returns the isMirror.
    */
@@ -40,9 +39,6 @@ public class IndexNode implements IMavenRepositoryNode {
     return this.isMirror;
   }
 
-  public void setIsUpdating(boolean updating){
-    this.updating = updating;
-  }
   
   public boolean isUpdating(){
     return ((NexusIndexManager)MavenPlugin.getDefault().getIndexManager()).isUpdatingIndex(getIndexName());

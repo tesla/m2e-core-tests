@@ -54,5 +54,13 @@ public class LocalRepositoryRootNode implements IMavenRepositoryNode{
   public Image getImage() {
     return MavenImages.IMG_INDEXES;
   }
+
+  /* (non-Javadoc)
+   * @see org.maven.ide.eclipse.ui.internal.views.nodes.IMavenRepositoryNode#isUpdating()
+   */
+  public boolean isUpdating() {
+    // TODO Auto-generated method isUpdating
+    return false;
+  }
   
 }

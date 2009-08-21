@@ -21,7 +21,6 @@ import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.settings.Mirror;
 import org.apache.maven.settings.Profile;
 import org.apache.maven.settings.Repository;
-import org.apache.maven.settings.Settings;
 
 import org.maven.ide.eclipse.MavenImages;
 import org.maven.ide.eclipse.MavenPlugin;
@@ -55,7 +54,7 @@ public class RemoteRepositoryRootNode implements IMavenRepositoryNode{
   public List<HiddenRepositoryNode> getHiddenRepositories() throws CoreException{
    
     IMaven maven = MavenPlugin.getDefault().getMaven();
-    List<Mirror> mirrorUrls = getMirrors();
+    List<Mirror> mirrorUrls = MavenPlugin.getDefault().getMirrors();
     if(mirrorUrls == null || mirrorUrls.size() == 0){
       return null;
     }
@@ -83,21 +82,10 @@ public class RemoteRepositoryRootNode implements IMavenRepositoryNode{
     }
     return repoNodes;
   }
-  public List<Mirror> getMirrors(){
-    try{
-      IMaven maven = MavenPlugin.getDefault().getMaven();
-      Settings settings = maven.getSettings();
-      List<Mirror> mirrors = settings.getMirrors();
-      
-      return mirrors;
-    } catch(CoreException core){
-      MavenLogger.log(core);
-    }
-    return null;
-  }
+
   
   public boolean hasMirror(){
-    List<Mirror> mirrors = getMirrors();
+    List<Mirror> mirrors = MavenPlugin.getDefault().getMirrors();
     return mirrors != null && mirrors.size() > 0;
   }
 
@@ -129,7 +117,7 @@ public class RemoteRepositoryRootNode implements IMavenRepositoryNode{
   }
 
   private boolean isMirror(ArtifactRepository repo){
-    List<Mirror> mirrors = getMirrors();
+    List<Mirror> mirrors = MavenPlugin.getDefault().getMirrors();
     for(Mirror mirror : mirrors){
       if(mirror.getId().equals(repo.getId())){
         return true;
@@ -161,6 +149,14 @@ public class RemoteRepositoryRootNode implements IMavenRepositoryNode{
    */
   public Image getImage() {
     return MavenImages.IMG_INDEXES;
+  }
+
+  /* (non-Javadoc)
+   * @see org.maven.ide.eclipse.ui.internal.views.nodes.IMavenRepositoryNode#isUpdating()
+   */
+  public boolean isUpdating() {
+    // TODO Auto-generated method isUpdating
+    return false;
   }
   
   

@@ -33,6 +33,12 @@ public class HiddenRepositoryNode implements IMavenRepositoryNode{
     this.name = name;
     this.url = url;
   }
+  public boolean isUpdating(){
+    if(isEnabledIndex()){
+      return ((NexusIndexManager)MavenPlugin.getDefault().getIndexManager()).isUpdatingIndex(getRepoName());  
+    }
+    return false;
+  }
   
   public String getRepoName(){
     return name;
@@ -92,10 +98,13 @@ public class HiddenRepositoryNode implements IMavenRepositoryNode{
     if(isEnabledIndex()){
       mirrorStr = " [Enabled by User]";
     }
-   
-    return StringUtils.nullOrEmpty(namePart) ? url+mirrorStr : namePart+": "+url+mirrorStr;
+    return StringUtils.nullOrEmpty(namePart) ? url+mirrorStr : namePart+": "+url+mirrorStr+getUpdatingString();
   }
 
+  private String getUpdatingString(){
+    return isUpdating() ? " [updating]" : "";
+  }
+  
   /* (non-Javadoc)
    * @see org.maven.ide.eclipse.ui.internal.views.nodes.IMavenRepositoryNode#hasChildren()
    */

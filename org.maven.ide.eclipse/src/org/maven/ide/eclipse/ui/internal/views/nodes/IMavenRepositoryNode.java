@@ -21,4 +21,5 @@ public interface IMavenRepositoryNode {
   public String getName();
   public Image getImage();
   public boolean hasChildren();
+  public boolean isUpdating();
 }

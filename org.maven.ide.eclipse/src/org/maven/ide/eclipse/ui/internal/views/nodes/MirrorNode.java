@@ -52,5 +52,12 @@ public class MirrorNode implements IMavenRepositoryNode {
     Object[] kids = getChildren();
     return kids != null && kids.length > 0;
   }
+  /* (non-Javadoc)
+   * @see org.maven.ide.eclipse.ui.internal.views.nodes.IMavenRepositoryNode#isUpdating()
+   */
+  public boolean isUpdating() {
+    // TODO Auto-generated method isUpdating
+    return false;
+  }
 
 }

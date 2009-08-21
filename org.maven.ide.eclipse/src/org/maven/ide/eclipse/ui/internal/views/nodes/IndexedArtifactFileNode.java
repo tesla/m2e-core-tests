@@ -78,4 +78,11 @@ public class IndexedArtifactFileNode implements IMavenRepositoryNode, IArtifactN
     return NexusIndexManager.getDocumentKey(artifactFile.getArtifactKey());
   }
 
+  /* (non-Javadoc)
+   * @see org.maven.ide.eclipse.ui.internal.views.nodes.IMavenRepositoryNode#isUpdating()
+   */
+  public boolean isUpdating() {
+    return false;
+  }
+
 }

@@ -77,5 +77,12 @@ public class IndexedArtifactNode implements IMavenRepositoryNode, IArtifactNode 
   public String getDocumentKey() {
     return artifact.getArtifactId();
   }
+  /* (non-Javadoc)
+   * @see org.maven.ide.eclipse.ui.internal.views.nodes.IMavenRepositoryNode#isUpdating()
+   */
+  public boolean isUpdating() {
+    // TODO Auto-generated method isUpdating
+    return false;
+  }
 
 }
