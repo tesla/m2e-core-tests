@@ -232,6 +232,6 @@ public class WorkingSetGroup {
   }
 
   public void setWorkingSet(IWorkingSet workingSet) {
-    workingsetComboViewer.setSelection(new StructuredSelection(workingSet));
+    workingsetComboViewer.setSelection(workingSet == null ? null : new StructuredSelection(workingSet));
   }
 }
