@@ -59,6 +59,7 @@ public class WorkingSetGroup {
       "org.eclipse.jdt.ui.JavaWorkingSetPage");
   
   ComboViewer workingsetComboViewer;
+  Button addToWorkingSetButton;
 
   final ProjectImportConfiguration configuration;
 
@@ -72,7 +73,7 @@ public class WorkingSetGroup {
   }
 
   private void createControl(Composite container) {
-    final Button addToWorkingSetButton = new Button(container, SWT.CHECK);
+    addToWorkingSetButton = new Button(container, SWT.CHECK);
     GridData gd_addToWorkingSetButton = new GridData(SWT.LEFT, SWT.CENTER, false, false, 3, 1);
     gd_addToWorkingSetButton.verticalIndent = 12;
     addToWorkingSetButton.setLayoutData(gd_addToWorkingSetButton);
@@ -153,7 +154,7 @@ public class WorkingSetGroup {
         if(dialog.open()==Window.OK) {
           IWorkingSet workingSet = wizard.getSelection();
           workingSetManager.addWorkingSet(workingSet);
-          
+
           Set<IWorkingSet> workingSets = getWorkingSets();
           workingsetComboViewer.setInput(workingSets.toArray(new IWorkingSet[workingSets.size()]));
           workingsetComboViewer.setSelection(new StructuredSelection(workingSet));
@@ -181,19 +182,28 @@ public class WorkingSetGroup {
         workingsetLabel.setEnabled(addToWorkingingSet);
         workingsetComboViewer.getCombo().setEnabled(addToWorkingingSet);
         newWorkingSetButton.setEnabled(addToWorkingingSet);
-        if(!addToWorkingingSet) {
-          // configuration.setWorkingSet(null);
-          workingsetComboViewer.setSelection(null);
+        if(addToWorkingingSet) {
+          updateConfiguration();
+        }
+        else {
+          configuration.setWorkingSet(null);
+//          workingsetComboViewer.setSelection(null);
         }
       }
     });
     
     workingsetComboViewer.addSelectionChangedListener(new ISelectionChangedListener() {
       public void selectionChanged(SelectionChangedEvent event) {
-        IStructuredSelection selection = (IStructuredSelection) workingsetComboViewer.getSelection();
-        configuration.setWorkingSet((IWorkingSet) selection.getFirstElement());
+        updateConfiguration();
       }
     });
+  }
+
+  protected void updateConfiguration() {
+    if (addToWorkingSetButton.getSelection()) {
+      IStructuredSelection selection = (IStructuredSelection) workingsetComboViewer.getSelection();
+      configuration.setWorkingSet((IWorkingSet) selection.getFirstElement());
+    }
   }
   
   Set<IWorkingSet> getWorkingSets() {
@@ -221,4 +231,7 @@ public class WorkingSetGroup {
     workingsetComboViewer.getLabelProvider().dispose();
   }
 
+  public void setWorkingSet(IWorkingSet workingSet) {
+    workingsetComboViewer.setSelection(new StructuredSelection(workingSet));
+  }
 }

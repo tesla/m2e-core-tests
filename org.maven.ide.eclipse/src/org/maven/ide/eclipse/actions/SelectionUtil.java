@@ -206,7 +206,7 @@ public class SelectionUtil {
     return null;
   }
 
-  private static IWorkingSet getWorkingSet(Object element) {
+  public static IWorkingSet getWorkingSet(Object element) {
     IWorkingSetManager workingSetManager = PlatformUI.getWorkbench().getWorkingSetManager();
     for(IWorkingSet workingSet : workingSetManager.getWorkingSets()) {
       for(IAdaptable adaptable : workingSet.getElements()) {
