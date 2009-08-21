@@ -44,8 +44,6 @@ import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 
 /**
  * Maven2ModuleParentPage
- * 
- * @author dip
  */
 public class MavenModuleWizardParentPage extends AbstractMavenWizardPage {
 
@@ -69,6 +67,10 @@ public class MavenModuleWizardParentPage extends AbstractMavenWizardPage {
 
   /** the parent model */
   private Model parentModel;
+
+  /** working set selector widget */
+  private WorkingSetGroup workingSetGroup;
+
 
   /** Creates a new page. */
   public MavenModuleWizardParentPage(ProjectImportConfiguration projectImportConfiguration) {
@@ -127,6 +129,8 @@ public class MavenModuleWizardParentPage extends AbstractMavenWizardPage {
         }
       }
     });
+
+    this.workingSetGroup = new WorkingSetGroup(container, getImportConfiguration(), getShell());
 
     createAdvancedSettings(container, new GridData(SWT.FILL, SWT.TOP, true, false, 3, 1));
 
@@ -290,5 +294,11 @@ public class MavenModuleWizardParentPage extends AbstractMavenWizardPage {
   /** Removes the listener watching the project name field. */
   public void removeArchetypeSelectionListener(SelectionListener selectionListener) {
     simpleProject.removeSelectionListener(selectionListener);
+  }
+
+  /** Cleans up. */
+  public void dispose() {
+    super.dispose();
+    workingSetGroup.dispose();
   }
 }
