@@ -9,7 +9,7 @@
 </location>
 <location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
 <unit id="org.eclipse.zest.sdk.feature.group" version="1.1.0.v20090422-2346-66-8CNBS9R9XSPdMjP_cnNcPPPPO"/>
-<repository location="http://localhost:8081/nexus/content/groups/e35lileo"/>
+<repository location="http://localhost:8081/nexus/content/groups/m2e-e35"/>
 </location>
 <location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
 <unit id="org.eclipse.mylyn_feature.feature.group" version="3.2.0.v20090617-0100-e3x"/>
