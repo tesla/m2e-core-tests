@@ -8,9 +8,14 @@
 
 package org.maven.ide.eclipse.ui.internal.views.nodes;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.graphics.Image;
 
 import org.maven.ide.eclipse.MavenImages;
+import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.internal.index.IndexedArtifactGroup;
+import org.maven.ide.eclipse.internal.index.NexusIndexManager;
 import org.maven.ide.eclipse.util.StringUtils;
 
 /**
@@ -22,6 +27,7 @@ public class HiddenRepositoryNode implements IMavenRepositoryNode{
 
   private String name;
   private String url;
+  private Object[] kids;
 
   public HiddenRepositoryNode(String name, String url){
     this.name = name;
@@ -34,27 +40,40 @@ public class HiddenRepositoryNode implements IMavenRepositoryNode{
   public String getRepoUrl(){
     return url;
   }
+  public boolean isEnabledIndex(){
+    return MavenPlugin.getDefault().isEnabledIndex(getRepoName());
+  }
+  
   /* (non-Javadoc)
    * @see org.maven.ide.eclipse.ui.internal.views.nodes.IMavenRepositoryNode#getChildren()
    */
   public Object[] getChildren() {
-//    ArrayList<Object> repoList = new ArrayList<Object>();
-//    try{
-//       List<ArtifactRepository> repos = getRemoteRepositories();
-//       if(repos != null){
-//        for(ArtifactRepository repo : repos){
-//          NexusIndex index = new NexusIndex(((NexusIndexManager)MavenPlugin.getDefault().getIndexManager()), repo.getId(), repo.getUrl());
-//          IndexNode node = new IndexNode(index);
-//          repoList.add(node);
-//          
-//        }
-//
-//      }
-//    } catch(Exception e){
-//      MavenLogger.log("Unable to load remote repositories", e);
-//    }
-//    return repoList.toArray(new Object[repoList.size()]);
-    return null;
+    if(isEnabledIndex()){
+      kids = getEnabledIndexChildren();
+      return kids;
+    }
+    return new Object[0];
+  }
+
+  /**
+   * @return
+   */
+  private Object[] getEnabledIndexChildren() {
+    try {
+      NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getDefault().getIndexManager();
+      IndexedArtifactGroup[] rootGroups = indexManager.getRootGroups(getRepoName());
+      if(rootGroups == null){
+        return new Object[0];
+      }
+      IndexedArtifactGroupNode[] children = new IndexedArtifactGroupNode[rootGroups.length];
+      for(int i=0;i<rootGroups.length;i++){
+        children[i] = new IndexedArtifactGroupNode(rootGroups[i]);
+      }
+      return children;
+    } catch(CoreException ex) {
+      MavenLogger.log(ex);
+      return new Object[0];
+    }
   }
 
   /* (non-Javadoc)
@@ -70,6 +89,10 @@ public class HiddenRepositoryNode implements IMavenRepositoryNode{
   public String getName() {
     String namePart = name;
     String mirrorStr = " [Disabled by Mirror]";
+    if(isEnabledIndex()){
+      mirrorStr = " [Enabled by User]";
+    }
+   
     return StringUtils.nullOrEmpty(namePart) ? url+mirrorStr : namePart+": "+url+mirrorStr;
   }
 
@@ -77,6 +100,10 @@ public class HiddenRepositoryNode implements IMavenRepositoryNode{
    * @see org.maven.ide.eclipse.ui.internal.views.nodes.IMavenRepositoryNode#hasChildren()
    */
   public boolean hasChildren() {
+    if(isEnabledIndex()){
+      Object[] kids = getChildren();
+      return kids != null && kids.length > 0;
+    }
     return false;
   }
 

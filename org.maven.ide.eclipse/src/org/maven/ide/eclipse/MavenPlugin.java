@@ -67,8 +67,8 @@ import org.codehaus.plexus.component.repository.exception.ComponentLookupExcepti
 import org.codehaus.plexus.configuration.PlexusConfigurationException;
 import org.codehaus.plexus.context.Context;
 
-import org.apache.maven.classrealm.ClassRealmManagerDelegate;
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.classrealm.ClassRealmManagerDelegate;
 import org.apache.maven.plugin.PluginManager;
 import org.apache.maven.project.artifact.MavenMetadataCache;
 
@@ -168,6 +168,8 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   private ArrayList<IPropertyChangeListener> listeners;
 
   private String version = "0.0.0";
+  
+  private Map<String, String> enabledIndexes = new HashMap<String, String>();
 
   public MavenPlugin() {
     plugin = this;
@@ -271,10 +273,8 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
     ClassLoader cl = MavenPlugin.class.getClassLoader();
 
-//    Enumeration<URL> resources = cl.getResources("META-INF/plexus/components.xml");
-//    while (resources.hasMoreElements()) {
-//      System.out.println(FileLocator.resolve(resources.nextElement()));
-//    }
+    ArrayList<String> foo = new ArrayList<String>();
+    
     
     ContainerConfiguration cc = new DefaultContainerConfiguration()
       .setClassWorld(new ClassWorld(mavenCoreRealmId, cl))
@@ -419,6 +419,13 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     }
   }
 
+  public void addEnabledIndex(String name, String url){
+    enabledIndexes.put(name, url);
+  }
+  
+  public void removeEnabledIndex(String name, String url){
+    enabledIndexes.remove(name);
+  }
   
 //  void unzipFile(URL url, File dest) throws IOException {
 //
@@ -714,5 +721,13 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
   public static String getVersion() {
     return plugin.version;
+  }
+
+  /**
+   * @param name
+   * @return
+   */
+  public boolean isEnabledIndex(String name) {
+    return enabledIndexes.containsKey(name);
   }
 }

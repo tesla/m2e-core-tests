@@ -340,28 +340,19 @@ public class MavenRepositoryView extends ViewPart {
     rebuildAction.setImageDescriptor(MavenImages.REBUILD_INDEX);
 
     enableAction = new BaseSelectionListenerAction("Enable Index") {
+      private boolean isEnabled;
       public void run() {
-        ISelection selection = viewer.getSelection();
-        Object element = ((IStructuredSelection) selection).getFirstElement();
-        if(element instanceof HiddenRepositoryNode) {
-          HiddenRepositoryNode node = (HiddenRepositoryNode)element;
-          String msg = "Are you sure you want to enable the index '"+node.getRepoName()+"'. This will allow the index to be used for dependency resolution, but it will NOT be used during a maven build.";
-          boolean res = MessageDialog.openConfirm(getViewSite().getShell(), //
-              "Enable Index", msg);
-          if(res){
-            NexusIndexManager im = (NexusIndexManager)MavenPlugin.getDefault().getIndexManager();
-            try{
-              im.addIndexForRemote(node.getRepoName(), node.getRepoUrl());
-              im.scheduleIndexUpdate(node.getRepoName(), true, 1000);
-            } catch(Exception e){
-              MavenLogger.log("Unable to enable index "+node.getName(), e);
-            }
-          }
-        }
+        enableIndex(!this.isEnabled);
       }
 
       protected boolean updateSelection(IStructuredSelection selection) {
-        return (selection.getFirstElement() instanceof HiddenRepositoryNode);
+        if(selection.getFirstElement() instanceof HiddenRepositoryNode){
+          HiddenRepositoryNode node = ((HiddenRepositoryNode)selection.getFirstElement());
+          this.isEnabled =  MavenPlugin.getDefault().isEnabledIndex(node.getRepoName()); 
+          this.setText(this.isEnabled ? "Disable Index" : "Enable Index");
+          return true;
+        } 
+        return false;
       }
     };
     
@@ -442,6 +433,45 @@ public class MavenRepositoryView extends ViewPart {
     viewer.addSelectionChangedListener(rebuildAction);
     viewer.addSelectionChangedListener(copyUrlAction);
     viewer.addSelectionChangedListener(materializeProjectAction);
+  }
+
+  /**
+   * 
+   */
+  protected void enableIndex(boolean enable) {
+    ISelection selection = viewer.getSelection();
+    Object element = ((IStructuredSelection) selection).getFirstElement();
+    if(element instanceof HiddenRepositoryNode) {
+      HiddenRepositoryNode node = (HiddenRepositoryNode)element;
+      
+      String msg = "";
+      if(enable){
+        msg = "Are you sure you want to enable the index '"+node.getRepoName()+"'. This will allow the index to be used for dependency resolution, but it will NOT be used during a maven build.";
+      } else {
+        msg = "Are you sure you want to disable the index '"+node.getRepoName()+"'. This will prevent the index from being used for dependency resolution.";
+      }
+      boolean res = MessageDialog.openConfirm(getViewSite().getShell(), //
+          "Enable Index", msg);
+      if(res){
+        NexusIndexManager im = (NexusIndexManager)MavenPlugin.getDefault().getIndexManager();
+        if(enable){
+          try{
+            MavenPlugin.getDefault().addEnabledIndex(node.getRepoName(), node.getRepoUrl());
+            im.addIndexForRemote(node.getRepoName(), node.getRepoUrl());
+            im.scheduleIndexUpdate(node.getRepoName(), false, 1000);
+          } catch(Exception e){
+            MavenLogger.log("Unable to enable index "+node.getName(), e);
+          }
+        } else {
+          try{
+            MavenPlugin.getDefault().removeEnabledIndex(node.getRepoName(), node.getRepoUrl());
+            im.removeIndex(node.getRepoName(), true);
+          } catch(Exception e){
+            MavenLogger.log("Unable to enable index "+node.getName(), e);
+          }
+        }
+      }
+    }
   }
 
   public void dispose() {
