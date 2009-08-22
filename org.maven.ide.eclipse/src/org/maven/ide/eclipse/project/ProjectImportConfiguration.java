@@ -42,7 +42,7 @@ public class ProjectImportConfiguration {
   
   private boolean needsRename;
 
-  private IWorkingSet workingSet;
+  private IWorkingSet[] workingSets;
 
   /** Creates a new configuration. */
   public ProjectImportConfiguration(ResolverConfiguration resolverConfiguration) {
@@ -76,13 +76,17 @@ public class ProjectImportConfiguration {
   public boolean isNeedsRename() {
     return this.needsRename;
   }
-  
+
   public void setWorkingSet(IWorkingSet workingSet) {
-    this.workingSet = workingSet;
+    this.workingSets = new IWorkingSet[]{workingSet};
+  }
+
+  public void setWorkingSets(IWorkingSet[] workingSets) {
+    this.workingSets = workingSets;
   }
   
-  public IWorkingSet getWorkingSet() {
-    return this.workingSet;
+  public IWorkingSet[] getWorkingSets() {
+    return this.workingSets;
   }
   
   /** Calculates the project name for the given model. */

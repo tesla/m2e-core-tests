@@ -149,10 +149,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
       if (project != null) {
         projects.add(project);
         
-        IWorkingSet workingSet = configuration.getWorkingSet();
-        if(workingSet != null) {
-          addToWorkingSet(project, workingSet);              
-        }
+        addToWorkingSets(project, configuration.getWorkingSets());              
       }
     }
 
@@ -270,17 +267,21 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
   }
 
   // PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(project, new IWorkingSet[] {workingSet});
-  private void addToWorkingSet(IProject project, IWorkingSet workingSet) {
+  private void addToWorkingSets(IProject project, IWorkingSet[] workingSets) {
+    if (workingSets != null && workingSets.length > 0) {
     // IAdaptable[] elements = workingSet.adaptElements(new IAdaptable[] {project});
     // if(elements.length == 1) {
-      IAdaptable[] oldElements = workingSet.getElements();
-      IAdaptable[] newElements = new IAdaptable[oldElements.length + 1];
-      System.arraycopy(oldElements, 0, newElements, 0, oldElements.length);
-      newElements[oldElements.length] = project;
-      
-      // Eclipse 3.2 compatibility
-      workingSet.setElements(Util.proxy(workingSet, A.class).adaptElements(newElements));
-    // }
+      for (IWorkingSet workingSet : workingSets) {
+        IAdaptable[] oldElements = workingSet.getElements();
+        IAdaptable[] newElements = new IAdaptable[oldElements.length + 1];
+        System.arraycopy(oldElements, 0, newElements, 0, oldElements.length);
+        newElements[oldElements.length] = project;
+        
+        // Eclipse 3.2 compatibility
+        workingSet.setElements(Util.proxy(workingSet, A.class).adaptElements(newElements));
+        // }
+      }
+    }
   }
   
   /**
@@ -402,10 +403,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     project.open(monitor);
     monitor.worked(1);
     
-    IWorkingSet workingSet = configuration.getWorkingSet();
-    if(workingSet != null) {
-      addToWorkingSet(project, workingSet);
-    }
+    addToWorkingSets(project, configuration.getWorkingSets());
     monitor.worked(1);
 
     monitor.subTask("Creating the POM file...");

@@ -217,6 +217,19 @@ public class SelectionUtil {
     }
     return null;
   }
+
+  public static IWorkingSet[] getAssignedWorkingSets(Object element) {
+    List<IWorkingSet> list = new ArrayList<IWorkingSet>();
+    IWorkingSetManager workingSetManager = PlatformUI.getWorkbench().getWorkingSetManager();
+    for(IWorkingSet workingSet : workingSetManager.getWorkingSets()) {
+      for(IAdaptable adaptable : workingSet.getElements()) {
+        if(adaptable.getAdapter(IResource.class) == element) {
+          list.add(workingSet);
+        }
+      }
+    }
+    return list.toArray(new IWorkingSet[list.size()]);
+  }
   
   public static ArtifactKey getArtifactKey(Object element) throws CoreException {
     if(element instanceof Artifact) {

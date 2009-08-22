@@ -28,8 +28,8 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -43,22 +43,23 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.dialogs.IWorkingSetNewWizard;
+import org.eclipse.ui.dialogs.IWorkingSetSelectionDialog;
 
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 
+
 /**
  * Working set group
- *
+ * 
  * @author Eugene Kuleshov
  */
 public class WorkingSetGroup {
-  
+
   static final List<String> WORKING_SET_IDS = Arrays.asList( //
-      "org.eclipse.ui.resourceWorkingSetPage",
-      "org.eclipse.jdt.ui.JavaWorkingSetPage");
-  
+      "org.eclipse.ui.resourceWorkingSetPage", "org.eclipse.jdt.ui.JavaWorkingSetPage");
+
   ComboViewer workingsetComboViewer;
+
   Button addToWorkingSetButton;
 
   final ProjectImportConfiguration configuration;
@@ -68,7 +69,7 @@ public class WorkingSetGroup {
   public WorkingSetGroup(Composite container, ProjectImportConfiguration configuration, Shell shell) {
     this.configuration = configuration;
     this.shell = shell;
-    
+
     createControl(container);
   }
 
@@ -81,7 +82,7 @@ public class WorkingSetGroup {
     addToWorkingSetButton.setData("name", "addToWorkingSetButton");
     addToWorkingSetButton.setText("&Add project(s) to working set");
     addToWorkingSetButton.setSelection(false);
-    
+
     final Label workingsetLabel = new Label(container, SWT.NONE);
     GridData gd_workingsetLabel = new GridData();
     gd_workingsetLabel.horizontalIndent = 10;
@@ -89,7 +90,7 @@ public class WorkingSetGroup {
     workingsetLabel.setEnabled(false);
     workingsetLabel.setData("name", "workingsetLabel");
     workingsetLabel.setText("Wo&rking set:");
-    
+
     Combo workingsetCombo = new Combo(container, SWT.READ_ONLY);
     workingsetCombo.setEnabled(false);
     workingsetCombo.setData("name", "workingsetCombo");
@@ -100,10 +101,14 @@ public class WorkingSetGroup {
       public Object[] getElements(Object input) {
         if(input instanceof IWorkingSet[]) {
           return (IWorkingSet[]) input;
+        } else if(input instanceof List<?>) {
+          return new Object[] {input};
+        } else if(input instanceof Set<?>) {
+          return ((Set<?>) input).toArray();
         }
         return new IWorkingSet[0];
       }
-      
+
       public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
       }
 
@@ -117,7 +122,7 @@ public class WorkingSetGroup {
       public Image getImage(Object element) {
         if(element instanceof IWorkingSet) {
           ImageDescriptor imageDescriptor = ((IWorkingSet) element).getImage();
-          if(imageDescriptor!=null) {
+          if(imageDescriptor != null) {
             try {
               return (Image) images.create(imageDescriptor);
             } catch(DeviceResourceException ex) {
@@ -127,11 +132,22 @@ public class WorkingSetGroup {
         }
         return super.getImage(element);
       }
-      
+
       public String getText(Object element) {
         if(element instanceof IWorkingSet) {
           return ((IWorkingSet) element).getLabel();
-        }        
+        } else if(element instanceof List<?>) {
+          StringBuffer sb = new StringBuffer();
+          for(Object o : (List<?>) element) {
+            if(o instanceof IWorkingSet) {
+              if(sb.length() > 0) {
+                sb.append(", ");
+              }
+              sb.append(((IWorkingSet) o).getLabel());
+            }
+          }
+          return sb.toString();
+        }
         return super.getText(element);
       }
 
@@ -140,42 +156,34 @@ public class WorkingSetGroup {
         super.dispose();
       }
     });
-    
+
+    workingsetComboViewer.setSorter(new ViewerSorter());
+
     final Button newWorkingSetButton = new Button(container, SWT.NONE);
     newWorkingSetButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
     newWorkingSetButton.setData("name", "configureButton");
-    newWorkingSetButton.setText("&New...");
+    newWorkingSetButton.setText("Mor&e...");
     newWorkingSetButton.setEnabled(false);
     newWorkingSetButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(final SelectionEvent e) {
         IWorkingSetManager workingSetManager = PlatformUI.getWorkbench().getWorkingSetManager();
-        IWorkingSetNewWizard wizard = workingSetManager.createWorkingSetNewWizard(WORKING_SET_IDS.toArray(new String[0]));
-        WizardDialog dialog = new WizardDialog(shell, wizard);
-        if(dialog.open()==Window.OK) {
-          IWorkingSet workingSet = wizard.getSelection();
-          workingSetManager.addWorkingSet(workingSet);
+        IWorkingSetSelectionDialog dialog = workingSetManager.createWorkingSetSelectionDialog(shell, true,
+            WORKING_SET_IDS.toArray(new String[0]));
+        if(dialog.open() == Window.OK) {
+          IWorkingSet[] workingSets = dialog.getSelection();
 
-          Set<IWorkingSet> workingSets = getWorkingSets();
-          workingsetComboViewer.setInput(workingSets.toArray(new IWorkingSet[workingSets.size()]));
-          workingsetComboViewer.setSelection(new StructuredSelection(workingSet));
+          selectWorkingSets(workingSets);
         }
       }
     });
-    
-    Set<IWorkingSet> workingSets = getWorkingSets();
-    workingsetComboViewer.setInput(workingSets.toArray(new IWorkingSet[workingSets.size()]));
-    
-    IWorkingSet workingSet = configuration.getWorkingSet();
-    if(workingSet!=null) {
-      if(workingSets.contains(workingSet)) {
-        addToWorkingSetButton.setSelection(true);
-        workingsetLabel.setEnabled(true);
-        workingsetComboViewer.getCombo().setEnabled(true);
-        newWorkingSetButton.setEnabled(true);
-        workingsetComboViewer.setSelection(new StructuredSelection(workingSet));
-      }
+
+    if(selectWorkingSets(configuration.getWorkingSets())) {
+      addToWorkingSetButton.setSelection(true);
+      workingsetLabel.setEnabled(true);
+      workingsetComboViewer.getCombo().setEnabled(true);
+      newWorkingSetButton.setEnabled(true);
     }
-    
+
     addToWorkingSetButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         boolean addToWorkingingSet = addToWorkingSetButton.getSelection();
@@ -184,14 +192,12 @@ public class WorkingSetGroup {
         newWorkingSetButton.setEnabled(addToWorkingingSet);
         if(addToWorkingingSet) {
           updateConfiguration();
-        }
-        else {
+        } else {
           configuration.setWorkingSet(null);
-//          workingsetComboViewer.setSelection(null);
         }
       }
     });
-    
+
     workingsetComboViewer.addSelectionChangedListener(new ISelectionChangedListener() {
       public void selectionChanged(SelectionChangedEvent event) {
         updateConfiguration();
@@ -200,21 +206,29 @@ public class WorkingSetGroup {
   }
 
   protected void updateConfiguration() {
-    if (addToWorkingSetButton.getSelection()) {
+    if(addToWorkingSetButton.getSelection()) {
       IStructuredSelection selection = (IStructuredSelection) workingsetComboViewer.getSelection();
-      configuration.setWorkingSet((IWorkingSet) selection.getFirstElement());
+      Object o = selection.getFirstElement();
+      if(o != null) {
+        if(o instanceof IWorkingSet) {
+          configuration.setWorkingSet((IWorkingSet) o);
+        } else if(o instanceof List<?>) {
+          List<?> l = (List<?>) o;
+          configuration.setWorkingSets(l.toArray(new IWorkingSet[l.size()]));
+        }
+      }
     }
   }
-  
+
   Set<IWorkingSet> getWorkingSets() {
     Set<IWorkingSet> workingSets = new HashSet<IWorkingSet>();
-    
+
     IWorkingSetManager workingSetManager = PlatformUI.getWorkbench().getWorkingSetManager();
     for(IWorkingSet workingSet : workingSetManager.getWorkingSets()) {
       if(!workingSet.isEmpty()) {
         IAdaptable[] elements = workingSet.getElements();
         IResource resource = (IResource) elements[0].getAdapter(IResource.class);
-        if(resource!=null) {
+        if(resource != null) {
           workingSets.add(workingSet);
         }
       } else {
@@ -223,15 +237,31 @@ public class WorkingSetGroup {
         }
       }
     }
-    
+
     return workingSets;
   }
-  
+
   public void dispose() {
     workingsetComboViewer.getLabelProvider().dispose();
   }
 
-  public void setWorkingSet(IWorkingSet workingSet) {
-    workingsetComboViewer.setSelection(workingSet == null ? null : new StructuredSelection(workingSet));
+  protected boolean selectWorkingSets(IWorkingSet[] workingSets) {
+    Set<IWorkingSet> defaultSets = getWorkingSets();
+    workingsetComboViewer.setInput(defaultSets);
+
+    if(workingSets != null && workingSets.length > 0) {
+      if(workingSets.length == 1) {
+        IWorkingSet workingSet = workingSets[0];
+        if(defaultSets.contains(workingSet)) {
+          workingsetComboViewer.setSelection(new StructuredSelection(workingSet));
+        }
+      } else {
+        List<?> list = Arrays.asList(workingSets);
+        workingsetComboViewer.add(list);
+        workingsetComboViewer.setSelection(new StructuredSelection((Object) list));
+      }
+      return true;
+    }
+    return false;
   }
 }
