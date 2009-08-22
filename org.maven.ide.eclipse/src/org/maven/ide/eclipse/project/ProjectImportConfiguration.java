@@ -78,7 +78,7 @@ public class ProjectImportConfiguration {
   }
 
   public void setWorkingSet(IWorkingSet workingSet) {
-    this.workingSets = new IWorkingSet[]{workingSet};
+    this.workingSets = workingSet == null ? null : new IWorkingSet[]{workingSet};
   }
 
   public void setWorkingSets(IWorkingSet[] workingSets) {
