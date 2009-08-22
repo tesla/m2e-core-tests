@@ -132,6 +132,9 @@ public class SelectionUtil {
    */
   @SuppressWarnings("unchecked")
   public static <T> T getType(Object element, Class<T> type) {
+    if(element==null) {
+      return null;
+    }
     if(type.isInstance(element)) {
       return (T) element;
     }
@@ -141,22 +144,21 @@ public class SelectionUtil {
         return adapter;
       }
     }
-    return element == null ? null : (T) Platform.getAdapterManager().getAdapter(element, type);
+    return (T) Platform.getAdapterManager().getAdapter(element, type);
   }
 
   public static IPath getSelectedLocation(IStructuredSelection selection) {
     Object element = selection == null ? null : selection.getFirstElement();
-    {
-      IPath path = getType(element, IPath.class);
-      if(path != null) {
-        return path;
-      }
+
+    IPath path = getType(element, IPath.class);
+    if(path != null) {
+      return path;
     }
-    
-//    IResource resource = getType(element, IResource.class);
-//    if(resource != null) {
-//      return resource.getLocation();
-//    }
+
+    IResource resource = getType(element, IResource.class);
+    if(resource != null) {
+      return resource.getLocation();
+    }
     
 //    IPackageFragmentRoot fragment = getType(element, IResource.class);
 //    if(fragment != null) {
