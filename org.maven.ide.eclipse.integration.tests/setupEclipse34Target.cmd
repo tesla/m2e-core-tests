@@ -40,7 +40,7 @@ call :P2_DIRECTOR %WINDOWTESTER_URL%? com.windowtester.runtime.gef.feature.group
 goto :END
 
 :P2_DIRECTOR
-%ECLIPSE_DIR%\eclipse.exe -nosplash -application org.eclipse.equinox.p2.director -metadataRepository %1 -artifactRepository %1 -installIU %2
+%ECLIPSE_DIR%\eclipse.exe -nosplash -application org.eclipse.equinox.p2.director.app.application -metadataRepository %1 -artifactRepository %1 -installIU %2
 exit /b
 
 :END
