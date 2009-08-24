@@ -26,7 +26,9 @@ import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 
+import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.Messages;
+import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 
@@ -39,8 +41,7 @@ public class ResolverConfigurationComponent extends ExpandableComposite {
   private static final String[] DEFAULT_NAME_TEMPLATES = {"[artifactId]", //
       "[artifactId]-TRUNK", //
       "[artifactId]-[version]", //
-      "[groupId].[artifactId]",
-      "[groupId].[artifactId]-[version]"};
+      "[groupId].[artifactId]", "[groupId].[artifactId]-[version]"};
 
   /** The resolver configuration */
   protected final ResolverConfiguration resolverConfiguration;
@@ -62,7 +63,6 @@ public class ResolverConfigurationComponent extends ExpandableComposite {
   public ResolverConfigurationComponent(final Composite parent,
       final ProjectImportConfiguration propectImportConfiguration, final boolean enableProjectNameTemplate) {
     super(parent, ExpandableComposite.COMPACT | ExpandableComposite.TWISTIE | ExpandableComposite.EXPANDED);
-
     this.projectImportConfiguration = propectImportConfiguration;
     this.resolverConfiguration = propectImportConfiguration.getResolverConfiguration();
 
@@ -95,14 +95,18 @@ public class ResolverConfigurationComponent extends ExpandableComposite {
       }
     });
 
-    projectsForModules = new Button(advancedComposite, SWT.CHECK);
-    projectsForModules.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
-    projectsForModules.setText(Messages.getString("resolverConfiguration.projectsForModules"));
-    projectsForModules.addSelectionListener(new SelectionAdapter() {
-      public void widgetSelected(SelectionEvent e) {
-        resolverConfiguration.setIncludeModules(!projectsForModules.getSelection());
-      }
-    });
+    if(MavenPlugin.getDefault().getPreferenceStore().getBoolean(
+        MavenPreferenceConstants.P_SUPPORT_SEPARATE_PROJECTS_FOR_MODULES)) {
+
+      projectsForModules = new Button(advancedComposite, SWT.CHECK);
+      projectsForModules.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
+      projectsForModules.setText(Messages.getString("resolverConfiguration.projectsForModules"));
+      projectsForModules.addSelectionListener(new SelectionAdapter() {
+        public void widgetSelected(SelectionEvent e) {
+          resolverConfiguration.setIncludeModules(!projectsForModules.getSelection());
+        }
+      });
+    }
 
     Label profilesLabel = new Label(advancedComposite, SWT.NONE);
     profilesLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
@@ -137,7 +141,9 @@ public class ResolverConfigurationComponent extends ExpandableComposite {
 
   public void loadData() {
     resolveWorkspaceProjects.setSelection(resolverConfiguration.shouldResolveWorkspaceProjects());
-    projectsForModules.setSelection(!resolverConfiguration.shouldIncludeModules());
+    if(projectsForModules != null) {
+      projectsForModules.setSelection(!resolverConfiguration.shouldIncludeModules());
+    }
     profiles.setText(resolverConfiguration.getActiveProfiles());
     if(template != null) {
       template.setText(projectImportConfiguration.getProjectNameTemplate());

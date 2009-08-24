@@ -21,7 +21,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.PropertyPage;
@@ -41,7 +40,7 @@ import org.maven.ide.eclipse.project.ResolverConfiguration;
 public class MavenProjectPreferencePage extends PropertyPage {
 
   private Button resolveWorspaceProjectsButton;
-  private Button includeModulesButton;
+//  private Button includeModulesButton;
   
   private Text activeProfilesText;
 
@@ -66,25 +65,25 @@ public class MavenProjectPreferencePage extends PropertyPage {
     resolveWorspaceProjectsButton.setLayoutData(resolveWorspaceProjectsButtonData);
     resolveWorspaceProjectsButton.setText("Resolve dependencies from &Workspace projects");
 
-    includeModulesButton = new Button(composite, SWT.CHECK);
-    GridData gd = new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1);
-    gd.verticalIndent = 15;
-    includeModulesButton.setLayoutData(gd);
-    includeModulesButton.setText("Include &Modules");
-
-    Text includeModulesText = new Text(composite, SWT.WRAP | SWT.READ_ONLY | SWT.MULTI);
-    includeModulesText.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_BLUE));
-    GridData gd_includeModulesText = new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1);
-    gd_includeModulesText.horizontalIndent = 15;
-    gd_includeModulesText.verticalIndent = 0;
-    gd_includeModulesText.widthHint = 300;
-    gd_includeModulesText.heightHint = 120;
-    includeModulesText.setLayoutData(gd_includeModulesText);
-    includeModulesText.setBackground(composite.getBackground());
-    includeModulesText.setText("When enabled, dependencies from all nested modules "
-        + "are added to the \"Maven Dependencies\" container and "
-        + "source folders from nested modules are added to the current "
-        + "project build path (use \"Update Sources\" action)");
+//    includeModulesButton = new Button(composite, SWT.CHECK);
+//    GridData gd = new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1);
+//    gd.verticalIndent = 15;
+//    includeModulesButton.setLayoutData(gd);
+//    includeModulesButton.setText("Include &Modules");
+//
+//    Text includeModulesText = new Text(composite, SWT.WRAP | SWT.READ_ONLY | SWT.MULTI);
+//    includeModulesText.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_BLUE));
+//    GridData gd_includeModulesText = new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1);
+//    gd_includeModulesText.horizontalIndent = 15;
+//    gd_includeModulesText.verticalIndent = 0;
+//    gd_includeModulesText.widthHint = 300;
+//    gd_includeModulesText.heightHint = 120;
+//    includeModulesText.setLayoutData(gd_includeModulesText);
+//    includeModulesText.setBackground(composite.getBackground());
+//    includeModulesText.setText("When enabled, dependencies from all nested modules "
+//        + "are added to the \"Maven Dependencies\" container and "
+//        + "source folders from nested modules are added to the current "
+//        + "project build path (use \"Update Sources\" action)");
 
     init(getResolverConfiguration());
     
@@ -98,7 +97,7 @@ public class MavenProjectPreferencePage extends PropertyPage {
   private void init(ResolverConfiguration configuration) {
 
     resolveWorspaceProjectsButton.setSelection(configuration.shouldResolveWorkspaceProjects());
-    includeModulesButton.setSelection(configuration.shouldIncludeModules());
+//    includeModulesButton.setSelection(configuration.shouldIncludeModules());
     activeProfilesText.setText(configuration.getActiveProfiles());
   }
 
@@ -115,13 +114,13 @@ public class MavenProjectPreferencePage extends PropertyPage {
 
     final ResolverConfiguration configuration = getResolverConfiguration();
     if(configuration.getActiveProfiles().equals(activeProfilesText.getText()) &&
-        configuration.shouldIncludeModules()==includeModulesButton.getSelection() &&
+//        configuration.shouldIncludeModules()==includeModulesButton.getSelection() &&
         configuration.shouldResolveWorkspaceProjects()==resolveWorspaceProjectsButton.getSelection()) {
       return true;
     }
     
     configuration.setResolveWorkspaceProjects(resolveWorspaceProjectsButton.getSelection());
-    configuration.setIncludeModules(includeModulesButton.getSelection());
+//    configuration.setIncludeModules(includeModulesButton.getSelection());
     configuration.setActiveProfiles(activeProfilesText.getText());
     
     MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
