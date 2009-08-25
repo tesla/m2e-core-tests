@@ -57,8 +57,9 @@ public class ExtensionReader {
   public static final String EXTENSION_PROJECT_CONFIGURATORS = "org.maven.ide.eclipse.projectConfigurators";
 
   public static final String EXTENSION_LIFECYCLE_MAPPINGS = "org.maven.ide.eclipse.lifecycleMappings";
-  
 
+  public static final String EXTENSION_DEFAULT_LIFECYCLE_MAPPINGS = "org.maven.ide.eclipse.defaultLifecycleMappings";
+  
   private static final String ELEMENT_INDEX = "index";
 
   private static final String ATTR_INDEX_ID = "indexId";
@@ -86,6 +87,12 @@ public class ExtensionReader {
   private static final String ELEMENT_CONFIGURATOR = "configurator";
   
   private static final String ELEMENT_LIFECYCLE_MAPPING = "lifecycleMapping";
+
+  private static final String ELEMENT_DEFAULT_LIFECYCLE_MAPPING = "defaultLifecycleMapping";
+
+  private static final String ATTR_PACKAGING = "packaging";
+  
+  private static final String ATTR_LIFECYCLE_MAPPING_ID = "lifecycleMappingId";
 
   public static Collection<EnabledIndex> readEnabledIndexConfig(File configFile) {
     if(configFile != null && configFile.exists()) {
@@ -279,6 +286,30 @@ public class ExtensionReader {
       }
     }
     return lifecycleMappings;
+  }
+
+  public static Map<String, String> readDefaultLifecycleMappingExtensions() {
+    Map<String, String> defaultLifecycleMappings = new HashMap<String, String>();
+    
+    IExtensionRegistry registry = Platform.getExtensionRegistry();
+    IExtensionPoint mappingsExtensionPoint = registry.getExtensionPoint(EXTENSION_DEFAULT_LIFECYCLE_MAPPINGS);
+    if(mappingsExtensionPoint != null) {
+      IExtension[] mappingsExtensions = mappingsExtensionPoint.getExtensions();
+      for(IExtension extension : mappingsExtensions) {
+        IConfigurationElement[] elements = extension.getConfigurationElements();
+        for(IConfigurationElement element : elements) {
+          if(element.getName().equals(ELEMENT_DEFAULT_LIFECYCLE_MAPPING)) {
+            String packaging = element.getAttribute(ATTR_PACKAGING);
+            String lifecycleMappingId = element.getAttribute(ATTR_LIFECYCLE_MAPPING_ID);
+
+            if (packaging != null && lifecycleMappingId != null) {
+              defaultLifecycleMappings.put(packaging, lifecycleMappingId);
+            }
+          }
+        }
+      }
+    }
+    return defaultLifecycleMappings;
   }
 
 }

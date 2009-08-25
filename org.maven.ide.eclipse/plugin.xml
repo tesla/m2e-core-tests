@@ -16,6 +16,7 @@
    <extension-point id="m2menu" name="m2 menu items" schema="schema/m2menu.exsd"/>
    <extension-point id="lifecycleMappings" name="Maven Lifecycle Mappings" schema="schema/lifecycleMappings.exsd"/>
    <extension-point id="lifecycleMappingPropertyPage" name = "Maven Lifecycle Mapping Property Page" schema = "schema/lifecycleMappingPropertyPage.exsd"/>
+   <extension-point id="defaultLifecycleMappings" name="Default Maven Lifecycle Mappings" schema="schema/defaultLifecycleMappings.exsd"/>
    <extension point="org.eclipse.ui.intro.configExtension">
       <configExtension configId="org.eclipse.ui.intro.universalConfig"
                        content="intro/overview.xml"/>

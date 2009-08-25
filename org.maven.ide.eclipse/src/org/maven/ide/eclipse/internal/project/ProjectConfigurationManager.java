@@ -116,9 +116,17 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
   final IMavenMarkerManager mavenMarkerManager;
   
   final IMaven maven;
-  
+
+  /**
+   * mappingId->ILifecycleMapping
+   */
   private Map<String, ILifecycleMapping> lifecycleMappings;
-  
+
+  /**
+   * packaging->mappingId
+   */
+  private Map<String, String> defaultLifecycleMappings;
+
   public ProjectConfigurationManager(MavenModelManager modelManager, MavenConsole console,
       MavenRuntimeManager runtimeManager, MavenProjectManager projectManager,
       IndexManager indexManager,
@@ -661,10 +669,25 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     }
 
     if (mappingId == null || mappingId.length() <= 0) {
+      mappingId = getDefaultLifecycleMappingId(project.getPackaging());
+    }
+
+    if (mappingId == null || mappingId.length() <= 0) {
       mappingId = DEFAULT_LIFECYCLE_MAPPING_ID;
     }
 
     return getLifecycleMapping(mappingId);
+  }
+
+  private String getDefaultLifecycleMappingId(String packaging) {
+    Map<String, String> defaultLifecycleMappings;
+    synchronized(this) {
+      if(this.defaultLifecycleMappings == null) {
+        this.defaultLifecycleMappings = ExtensionReader.readDefaultLifecycleMappingExtensions();
+      }
+      defaultLifecycleMappings = this.defaultLifecycleMappings;
+    }
+    return defaultLifecycleMappings.get(packaging);
   }
 
   private ILifecycleMapping getLifecycleMapping(String mappingId) {
