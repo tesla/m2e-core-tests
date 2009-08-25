@@ -8,8 +8,6 @@
 
 package org.maven.ide.eclipse.ui.internal.preferences;
 
-import java.util.Map;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -30,7 +28,6 @@ import org.maven.ide.eclipse.project.configurator.ILifecycleMapping;
 public class MavenProjectLifecycleMappingPage extends PropertyPage{
 
   private ILifecyclePropertyPage currentPage;
-  private Map<String, ILifecyclePropertyPage> map = null;
   
   public MavenProjectLifecycleMappingPage() {
     
@@ -49,14 +46,15 @@ public class MavenProjectLifecycleMappingPage extends PropertyPage{
     return p;
   }
   
-  private ILifecyclePropertyPage getPage(String id){
-    ILifecyclePropertyPage page = LifecycleMappingPropertyPageFactory.getFactory().getPageForId(id, getProject(), this.getShell());
+  private ILifecyclePropertyPage getPage(ILifecycleMapping lifecycleMapping){
+    ILifecyclePropertyPage page = LifecycleMappingPropertyPageFactory.getFactory().getPageForId(lifecycleMapping.getId(), getProject(), this.getShell());
     if(page == null){
-      return getErrorPage("No lifecycle mapping property page found.");
+      page = getErrorPage("No lifecycle mapping property page found.");
+      page.setName(lifecycleMapping.getName());
     }
     return page;
   }
-  
+
   private ILifecyclePropertyPage loadCurrentPage(IProject project){
     ILifecyclePropertyPage page = null;
     try{
@@ -64,7 +62,7 @@ public class MavenProjectLifecycleMappingPage extends PropertyPage{
       if(lifecycleMapping == null){
         return getErrorPage("No lifecycle mapping strategy found.");
       }
-      page = getPage(lifecycleMapping.getId());
+      page = getPage(lifecycleMapping);
       return page;
     } catch(CoreException ce){
       MavenLogger.log(ce);
