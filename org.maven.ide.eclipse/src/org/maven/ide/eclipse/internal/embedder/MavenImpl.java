@@ -60,8 +60,8 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.building.ModelBuildingRequest;
 import org.apache.maven.model.io.ModelReader;
 import org.apache.maven.model.io.ModelWriter;
+import org.apache.maven.plugin.BuildPluginManager;
 import org.apache.maven.plugin.MojoExecution;
-import org.apache.maven.plugin.PluginManager;
 import org.apache.maven.plugin.PluginManagerException;
 import org.apache.maven.plugin.PluginParameterExpressionEvaluator;
 import org.apache.maven.plugin.descriptor.MojoDescriptor;
@@ -105,7 +105,7 @@ public class MavenImpl implements IMaven {
 
   private final MavenExecutionRequestPopulator populator;
 
-  private final PluginManager pluginManager;
+  private final BuildPluginManager pluginManager;
 
   private final LifecycleExecutor lifecycleExecutor;
 
@@ -126,7 +126,7 @@ public class MavenImpl implements IMaven {
       this.settingsBuilder = plexus.lookup(MavenSettingsBuilder.class);
       this.mavenConfiguration = mavenConfiguration;
       this.populator = plexus.lookup(MavenExecutionRequestPopulator.class);
-      this.pluginManager = plexus.lookup(PluginManager.class);
+      this.pluginManager = plexus.lookup(BuildPluginManager.class);
       this.lifecycleExecutor = plexus.lookup(LifecycleExecutor.class);
     } catch(ComponentLookupException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,

@@ -8,22 +8,23 @@
 
 package org.maven.ide.eclipse.internal.project;
 
-import org.codehaus.plexus.classworlds.realm.ClassRealm;
+import java.util.List;
 
 import org.apache.maven.execution.MavenSession;
-import org.apache.maven.plugin.DefaultPluginManager;
 import org.apache.maven.plugin.PluginManagerException;
+import org.apache.maven.plugin.PluginResolutionException;
 import org.apache.maven.plugin.descriptor.PluginDescriptor;
+import org.apache.maven.plugin.internal.DefaultMavenPluginManager;
 
 /**
  * EclipsePluginManager
  *
  * @author igor
  */
-public class EclipsePluginManager extends DefaultPluginManager {
-
-  public synchronized ClassRealm getPluginRealm(MavenSession session, PluginDescriptor pluginDescriptor)
-      throws PluginManagerException {
+public class EclipseMavenPluginManager extends DefaultMavenPluginManager {
+  
+  public void setupPluginRealm(PluginDescriptor pluginDescriptor, MavenSession session, ClassLoader parent,
+      List<String> imports) throws PluginResolutionException, PluginManagerException {
     /*
      * Plugin realms are cached and there is currently no way to purge cached
      * realms due to http://jira.codehaus.org/browse/MNG-4194.
@@ -34,7 +35,7 @@ public class EclipsePluginManager extends DefaultPluginManager {
     boolean disabled = EclipseWorkspaceArtifactRepository.isDisabled();
     EclipseWorkspaceArtifactRepository.setDisabled(true);
     try {
-      return super.getPluginRealm(session, pluginDescriptor);
+      super.setupPluginRealm(pluginDescriptor, session, parent, imports);
     } finally {
       EclipseWorkspaceArtifactRepository.setDisabled(disabled);
     }
