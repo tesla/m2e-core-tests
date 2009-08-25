@@ -5,6 +5,7 @@
 <locations>
 <location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
 <unit id="org.eclipse.jst.feature.group" version="3.0.4.v200811190840-7U1959LJIHM6ogLbhvbrAnWtxuyM"/>
+<unit id='org.eclipse.wst.feature.group' version='3.0.4.v200811190840-7A-8l8Qqcz0HyVgjXUE-iuOYZ9ai'/>
 <repository location="http://download.eclipse.org/releases/ganymede"/>
 </location>
 <location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
