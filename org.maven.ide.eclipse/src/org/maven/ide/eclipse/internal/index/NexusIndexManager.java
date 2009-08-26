@@ -642,7 +642,6 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
         
       } else if(!IndexManager.WORKSPACE_INDEX.equals(indexName)) {
         updaterJob.addCommand(new UpdateCommand(indexName, force));
-        IndexingContext context = getIndexingContext(indexName);
         URL archiveURL = null;
         updaterJob.addCommand(new UnpackCommand(indexName, archiveURL, force));
       }      
@@ -679,13 +678,17 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     return maven.getEffectiveRepositories(allRepos);
   }
   
-  private AuthenticationInfo getAuthenticationInfo() throws CoreException{
+  private AuthenticationInfo getAuthenticationInfo(String indexName) throws CoreException{
     AuthenticationInfo info = new AuthenticationInfo();
     List<ArtifactRepository> effectiveRepositories = getEffectiveRepositories();
-    if(effectiveRepositories.size() > 0){
-      ArtifactRepository repo = effectiveRepositories.get(0);
-      Authentication authentication = repo.getAuthentication();
-      
+    ArtifactRepository activeRepo = null;
+    for(ArtifactRepository repo : effectiveRepositories){
+      if(repo.getId().equals(indexName)){
+        activeRepo = repo;
+      }
+    }
+    if(activeRepo != null){
+      Authentication authentication = activeRepo.getAuthentication();
       info.setUserName(authentication.getUsername());
       info.setPassword(authentication.getPassword());
       return info;
@@ -776,7 +779,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     return new IndexedArtifactGroup[0];
   }
 
-  private IndexingContext getIndexingContext(String indexName) {
+  protected IndexingContext getIndexingContext(String indexName) {
     return indexName == null ? null : getIndexer().getIndexingContexts().get(indexName);
   }
 
@@ -1208,11 +1211,12 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       monitor.setTaskName("Updating index " + displayName);
       console.logMessage("Updating index " + displayName);
       try {
+        
         fireIndexUpdating(getIndexName());
-        IndexingContext context = getIndexingContext(getIndexName());
+        IndexingContext context = getIndexingContext(displayName);
         IndexUpdateRequest request = new IndexUpdateRequest(context);
         request.setProxyInfo(getProxyInfo());
-        AuthenticationInfo authInfo = getAuthenticationInfo();
+        AuthenticationInfo authInfo = getAuthenticationInfo(displayName);
         if(authInfo != null){
           request.setAuthenticationInfo(authInfo);
         }
