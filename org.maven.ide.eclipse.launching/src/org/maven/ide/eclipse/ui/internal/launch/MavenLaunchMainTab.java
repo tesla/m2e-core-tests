@@ -341,6 +341,7 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
     enableWorkspaceResolution = new Button(mainComposite, SWT.CHECK);
     enableWorkspaceResolution.addSelectionListener(modyfyingListener);
     enableWorkspaceResolution.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 4, 1));
+    enableWorkspaceResolution.setData("name", "enableWorkspaceResolution");
     enableWorkspaceResolution.setText("Resolve Workspace artifacts");
 
     TableViewer tableViewer = new TableViewer(mainComposite, SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
