@@ -62,7 +62,8 @@ public class MEclipse173SimpleWebAppTest extends UIIntegrationTestCase {
     String shellName = isEclipseVersion(3,3) ? "simple-webapp" : "Edit Configuration";
     getUI().wait(new ShellShowingCondition(shellName));
     getUI().click(new NamedWidgetLocator("goalsText"));
-    getUI().enterText("hibernate3:hbm2ddl");
+    getUI().enterText("org.codehaus.mojo:hibernate3-maven-plugin:2.1:hbm2ddl");
+    getUI().click(new NamedWidgetLocator("enableWorkspaceResolution"));
     getUI().click(new ButtonLocator("&Run"));
     getUI().wait(new ShellDisposedCondition(shellName));
     getUI().wait(new JobsCompleteCondition(), 60000);
