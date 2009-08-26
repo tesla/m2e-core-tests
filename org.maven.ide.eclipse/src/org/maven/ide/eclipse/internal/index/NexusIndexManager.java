@@ -56,12 +56,15 @@ import org.apache.lucene.store.IndexOutput;
 import org.apache.lucene.store.RAMDirectory;
 
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.repository.Authentication;
 import org.apache.maven.settings.Proxy;
 import org.apache.maven.settings.Settings;
+import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 
 import org.sonatype.nexus.artifact.Gav;
 import org.sonatype.nexus.artifact.GavCalculator;
+import org.sonatype.nexus.artifact.IllegalArtifactCoordinateException;
 import org.sonatype.nexus.artifact.M2GavCalculator;
 import org.sonatype.nexus.index.ArtifactAvailablility;
 import org.sonatype.nexus.index.ArtifactContext;
@@ -508,7 +511,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
   }
 
-  public ArtifactContext getArtifactContext(String documentKey, String repository){
+  public ArtifactContext getArtifactContext(String documentKey, String repository) throws IllegalArtifactCoordinateException{
     Gav gav = gavCalculator.pathToGav(documentKey);
     ArtifactInfo ai = new ArtifactInfo(repository, gav.getGroupId(), gav.getArtifactId(), gav.getVersion(), gav.getClassifier());
 
@@ -520,7 +523,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
   }
   
   private ArtifactContext getArtifactContext(File file, String documentKey, long size, long date, int sourceExists,
-      int javadocExists, String repository) {
+      int javadocExists, String repository) throws IllegalArtifactCoordinateException {
     Gav gav = gavCalculator.pathToGav(documentKey);
 
     String groupId = gav.getGroupId();
@@ -646,59 +649,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       updaterJob.schedule(delay);
     }
   }
-  
-//  public Date scheduleIndexUpdate(String indexName, boolean force, IProgressMonitor monitor) throws CoreException {
-//    IndexingContext context = getIndexingContext(indexName);
-//    
-//    if(context != null) {
-//      try {
-//        IndexUpdateRequest request = new IndexUpdateRequest(context);
-//        request.setProxyInfo(getProxyInfo());
-//        request.setTransferListener(new TransferListenerAdapter(monitor, console, null));
-//        request.setForceFullUpdate(force);
-//        Date indexTime = getUpdater().fetchAndUpdateIndex(request);
-//        if(indexTime!=null) {
-//          //IndexInfo indexInfo = getIndexInfo(indexName);
-//          //indexInfo.setUpdateTime(indexTime);
-//          fireIndexChanged(indexName);
-//          return indexTime;
-//        }
-//      } catch(Throwable ex) {
-//        //IndexInfo info = this.getIndexInfo(indexName);
-//        if(indexName == null){
-//          //it was probably removed by the user, log the problem and move along.
-//          MavenLogger.log("Error updating index, but index is no longer around (probably removed by user).",ex);
-//          return null;
-//        } 
-//        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Error updating index", ex));
-//      }
-//    }
-//    return null;
-//  }
-
-//  public Properties fetchIndexProperties(final String repositoryUrl, final String indexUpdateUrl,
-//      IProgressMonitor monitor) throws CoreException {
-//    IndexingContext context;
-//    try {
-//      context = new DefaultIndexingContext("unknown", "unknown", null, new RAMDirectory(), repositoryUrl,
-//          indexUpdateUrl, null, false);
-//    } catch(UnsupportedExistingLuceneIndexException ex) {
-//      throw new CoreException(
-//          new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Unsupported existing index", ex));
-//    } catch(IOException ex) {
-//      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
-//          "Error creating temporary indexing context", ex));
-//    }
-//    try {
-//      @SuppressWarnings("deprecation")
-//      Properties properties = getUpdater().fetchIndexProperties(context, //
-//          new TransferListenerAdapter(monitor, console, null), getProxyInfo());
-//      return properties;
-//    } catch(IOException ex) {
-//      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
-//          "Error fetching index properties", ex));
-//    }
-//  }
+ 
 
   private IndexUpdater getUpdater() {
     return MavenPlugin.lookup(IndexUpdater.class);
@@ -717,6 +668,29 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       proxyInfo.setPassword(proxy.getPassword());
     }
     return proxyInfo;
+  }
+  
+  private List<ArtifactRepository> getEffectiveRepositories() throws CoreException{
+    List<ArtifactRepository> allRepos = new ArrayList<ArtifactRepository>();
+    List<ArtifactRepository> artifactRepositories = maven.getArtifactRepositories();
+    List<ArtifactRepository> pluginArtifactRepository = maven.getPluginArtifactRepository();
+    allRepos.addAll(artifactRepositories);
+    allRepos.addAll(pluginArtifactRepository);
+    return maven.getEffectiveRepositories(allRepos);
+  }
+  
+  private AuthenticationInfo getAuthenticationInfo() throws CoreException{
+    AuthenticationInfo info = new AuthenticationInfo();
+    List<ArtifactRepository> effectiveRepositories = getEffectiveRepositories();
+    if(effectiveRepositories.size() > 0){
+      ArtifactRepository repo = effectiveRepositories.get(0);
+      Authentication authentication = repo.getAuthentication();
+      
+      info.setUserName(authentication.getUsername());
+      info.setPassword(authentication.getPassword());
+      return info;
+    }
+    return null;
   }
   
   public Date unpackIndexArchive(InputStream is, Directory directory) throws IOException{
@@ -843,11 +817,8 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
   }
 
   private LinkedHashSet<String> getRepositoryUrls() throws CoreException {
-    ArrayList<ArtifactRepository> configured = new ArrayList<ArtifactRepository>();
-    configured.addAll(maven.getArtifactRepositories());
-    configured.addAll(maven.getPluginArtifactRepository());
 
-    List<ArtifactRepository> effective = maven.getEffectiveRepositories(configured);
+    List<ArtifactRepository> effective = getEffectiveRepositories();
 
     LinkedHashSet<String> urls = new LinkedHashSet<String>();
     for (ArtifactRepository repository : effective) {
@@ -857,18 +828,6 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     return urls;
   }
 
-//  public IndexInfo getIndexInfo(String url) {
-//    // look for explicitly configured repository indexes first
-//    // if not found, create&return default repository index configuration
-//
-//    IndexInfo info = configuredIndexes.get(url);
-//
-//    if (info == null) {
-//      info = new IndexInfo(url, getIndexDirectoryFile(url), url, Type.REMOTE, true /*short*/);
-//    }
-//
-//    return info;
-//  }
 
   private static final class ArtifactScanningMonitor implements ArtifactScanningListener {
 
@@ -1253,6 +1212,10 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
         IndexingContext context = getIndexingContext(getIndexName());
         IndexUpdateRequest request = new IndexUpdateRequest(context);
         request.setProxyInfo(getProxyInfo());
+        AuthenticationInfo authInfo = getAuthenticationInfo();
+        if(authInfo != null){
+          request.setAuthenticationInfo(authInfo);
+        }
         request.setTransferListener(new TransferListenerAdapter(monitor, console, null));
         request.setForceFullUpdate(force);
         Date indexTime = getUpdater().fetchAndUpdateIndex(request);
