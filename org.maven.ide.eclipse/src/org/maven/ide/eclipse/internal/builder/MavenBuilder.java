@@ -38,6 +38,7 @@ import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.IMaven;
+import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.MavenProjectManager;
@@ -73,6 +74,7 @@ public class MavenBuilder extends IncrementalProjectBuilder {
     MavenConsole console = plugin.getConsole();
     MavenProjectManager projectManager = plugin.getMavenProjectManager();
     IProjectConfigurationManager configurationManager = plugin.getProjectConfigurationManager();
+    IMavenConfiguration mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
 
     IProject project = getProject();
     if(project.hasNature(IMavenConstants.NATURE_ID)) {
@@ -89,7 +91,7 @@ public class MavenBuilder extends IncrementalProjectBuilder {
       }
 
       if (projectFacade.isStale()) {
-        MavenUpdateRequest updateRequest = new MavenUpdateRequest(project, true /*offline*/, false /*updateSnapshots*/);
+        MavenUpdateRequest updateRequest = new MavenUpdateRequest(project, mavenConfiguration.isOffline() /*offline*/, false /*updateSnapshots*/);
         projectManager.refresh(updateRequest, monitor);
         projectFacade = projectManager.create(project, monitor);
       }
