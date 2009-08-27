@@ -9,9 +9,9 @@
 package org.maven.ide.eclipse.internal.index;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.TreeSet;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -62,15 +62,17 @@ public class CompositeIndex implements IIndex {
 
   public Collection<IndexedArtifact> find(String groupId, String artifactId, String version, String packaging)
       throws CoreException {
-
-    // XXX de-dub same artifact coming from multiple repositories
-
-    TreeSet<IndexedArtifact> result = new TreeSet<IndexedArtifact>();
-
+    List<IndexedArtifact> result = new ArrayList<IndexedArtifact>();
     for(IIndex index : indexes) {
-      result.addAll(index.find(groupId, artifactId, version, packaging));
+      Collection<IndexedArtifact> findResults = index.find(groupId, artifactId, version, packaging);
+      if(findResults != null && findResults.size() > 0){
+        for(IndexedArtifact artifact : findResults){
+          if(!result.contains(artifact)){
+            result.add(artifact);
+          }
+        }
+      }
     }
-
     return result;
   }
 
