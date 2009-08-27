@@ -639,17 +639,15 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       }
       if(IndexManager.LOCAL_INDEX.equals(indexName)){
         updaterJob.addCommand(new ReindexCommand(indexName));
-        
-      } else if(!IndexManager.WORKSPACE_INDEX.equals(indexName)) {
+      }  else if(!IndexManager.WORKSPACE_INDEX.equals(indexName)) {
         updaterJob.addCommand(new UpdateCommand(indexName, force));
         URL archiveURL = null;
         updaterJob.addCommand(new UnpackCommand(indexName, archiveURL, force));
-      }      
+      }  
       updaterJob.schedule(delay);
     }
   }
  
-
   private IndexUpdater getUpdater() {
     return MavenPlugin.lookup(IndexUpdater.class);
   }
@@ -940,8 +938,6 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       IndexInfo workspaceIndex = new IndexInfo(IndexManager.WORKSPACE_INDEX, //
           null, null, IndexInfo.Type.WORKSPACE, false);
       addIndex(workspaceIndex);
-
-
   }
   
   public void createLocalIndex(boolean forceUpdate){

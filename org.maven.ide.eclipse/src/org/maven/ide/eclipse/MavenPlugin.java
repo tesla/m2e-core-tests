@@ -349,6 +349,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
     //create the index manager
     this.indexManager = new NexusIndexManager(console, projectManager, stateLocationDir);
+    
     //read all the repos specified in settings.xml and add them to index manager
     loadIndexConfiguration();
     //read all the indexes in the list of manually enabled indexes and add them to the index manager
@@ -364,6 +365,8 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     //now start an update on all the repos, including the manually enabled ones
     updateRepos(forceUpdate);
     this.getPreferenceStore().setValue(PREFS_NO_REBUILD_ON_START, true);
+    //add the workspace indexes into the index manager
+    managerImpl.addWorkspaceIndexes();
     checkJdk();
   }
 
@@ -795,6 +798,10 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   }
 
   public IndexManager getIndexManager() {
+    return this.indexManager;
+  }
+  
+  public NexusIndexManager getNexusIndexManager(){
     return this.indexManager;
   }
 
