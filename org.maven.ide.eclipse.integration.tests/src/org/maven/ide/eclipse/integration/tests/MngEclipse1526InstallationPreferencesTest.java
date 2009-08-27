@@ -17,6 +17,7 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.editor.pom.MavenPomEditor;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
+import org.maven.ide.eclipse.internal.embedder.MavenEmbeddedRuntime;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 
 import com.windowtester.runtime.WT;
@@ -50,6 +51,8 @@ public class MngEclipse1526InstallationPreferencesTest extends UIIntegrationTest
 	 */
 	public void testInstallationPrefs() throws Exception {
     File tempDir = importMavenProjects("projects/someproject.zip");
+    MavenEmbeddedRuntime runtime = (MavenEmbeddedRuntime)MavenPlugin.getDefault().getMavenRuntimeManager().getDefaultRuntime();
+    String version = runtime.toString();
     IMavenProjectFacade mavenProject = MavenPlugin.getDefault().getMavenProjectManager().getMavenProject("org.sonatype.test", "someproject", "0.0.1-SNAPSHOT");
     assertNotNull(mavenProject);
     
@@ -92,10 +95,11 @@ public class MngEclipse1526InstallationPreferencesTest extends UIIntegrationTest
 		
 		IWidgetReference browseButtonRef = (IWidgetReference)getUI().find(new ButtonLocator("Browse..."));
 		verifyGlobalSettingsValue(externalRuntime+"\\conf\\settings.xml");
-		
+
 		//now check the embedded and make sure its blank
-		TableItemLocator locator = new TableItemLocator(WT.CHECK, "Embedded");
+		TableItemLocator locator = new TableItemLocator(WT.CHECK, version);
 		getUI().click(locator);
+
 		verifyGlobalSettingsValue("");
 		assertTrue(new ButtonLocator("Browse...").isEnabled(getUI()));
     getUI().click(new NamedWidgetLocator("globalSettingsText"));
@@ -104,9 +108,9 @@ public class MngEclipse1526InstallationPreferencesTest extends UIIntegrationTest
     closeInstallationPrefs();
     
     //now open the index view and make sure 'local' has the right value, 
-    showView("org.maven.ide.eclipse.views.MavenIndexesView");
-    getUI().click(new CTabItemLocator("Maven Indexes"));
-    IWidgetLocator localRepo = getUI().find(new TreeItemLocator("local : "+repoDir.getAbsolutePath()));
+    showView("org.maven.ide.eclipse.views.MavenRepositoryView");
+    getUI().click(new CTabItemLocator("Maven Repositories"));
+    IWidgetLocator localRepo = getUI().find(new TreeItemLocator("Local Repositories"));
     assertNotNull(localRepo);
     
     //now for the user settings test
@@ -120,9 +124,9 @@ public class MngEclipse1526InstallationPreferencesTest extends UIIntegrationTest
     closeUserSettingPrefs();
     
     //now open the index view and make sure 'local' has the right new value, 
-    showView("org.maven.ide.eclipse.views.MavenIndexesView");
-    getUI().click(new CTabItemLocator("Maven Indexes"));
-    IWidgetLocator newLocalRepo = getUI().find(new TreeItemLocator("local : "+newRepoDir));
+    showView("org.maven.ide.eclipse.views.MavenRepositoryView");
+    getUI().click(new CTabItemLocator("Maven Repositories"));
+    IWidgetLocator newLocalRepo = getUI().find(new TreeItemLocator("Local Repositories"));
     assertNotNull(newLocalRepo);
 	}
 
