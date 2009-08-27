@@ -20,6 +20,7 @@ import org.eclipse.ui.editors.text.templates.ContributionContextTypeRegistry;
 import org.eclipse.ui.editors.text.templates.ContributionTemplateStore;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
+import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.editor.xml.internal.search.IndexSearchEngine;
 import org.maven.ide.eclipse.editor.xml.search.SearchEngine;
@@ -40,8 +41,6 @@ public class MvnIndexPlugin extends AbstractUIPlugin {
 
   private ContributionContextTypeRegistry contextTypeRegistry;
 
-  private IndexManager indexManager;
-
   @Override
   public void start(BundleContext context) throws Exception {
     super.start(context);
@@ -59,7 +58,7 @@ public class MvnIndexPlugin extends AbstractUIPlugin {
   }
 
   public SearchEngine getSearchEngine(IProject context) throws CoreException {
-    return new IndexSearchEngine(indexManager.getIndex(context));
+    return new IndexSearchEngine(MavenPlugin.getDefault().getIndexManager().getIndex(context));
   }
 
   /**
