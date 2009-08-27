@@ -56,8 +56,6 @@ import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
-import org.maven.ide.eclipse.index.IndexManager;
-import org.maven.ide.eclipse.internal.index.NexusIndexManager;
 import org.maven.ide.eclipse.project.IMavenMarkerManager;
 import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
@@ -458,26 +456,8 @@ public class MavenProjectManagerImpl {
         state.addProjectDependency(pom, new ArtifactKey(mavenProject.getParentArtifact()), true);
       }
     }
-    // update index
-    removeFromIndex(oldFacade);
-    addToIndex(facade);
   }
-  
-  private void addToIndex(MavenProjectFacade mavenProject) {
-    NexusIndexManager indexManager = MavenPlugin.getDefault().getNexusIndexManager();
-    if (mavenProject != null) {
-      indexManager.addDocument(IndexManager.WORKSPACE_INDEX, mavenProject.getPomFile(), //
-          indexManager.getDocumentKey(mavenProject.getArtifactKey()), -1, -1, null, 0, 0);
-    }
-  }
-  
-  private void removeFromIndex(MavenProjectFacade mavenProject) {
-    if (mavenProject != null) {
-      NexusIndexManager indexManager = MavenPlugin.getDefault().getNexusIndexManager();
-      indexManager.removeDocument(IndexManager.WORKSPACE_INDEX, //
-          mavenProject.getPomFile(), indexManager.getDocumentKey(mavenProject.getArtifactKey()));
-    }
-  }
+
   private Set<IFile> refreshNestedModules(IFile pom, MavenProject mavenProject) {
     if (mavenProject == null) {
       return Collections.emptySet();
@@ -760,15 +740,4 @@ public class MavenProjectManagerImpl {
     notifyProjectChangeListeners(events, monitor);
   }
 
-  /**
-   * 
-   */
-  public void addWorkspaceIndexes() {
-    MavenProjectFacade[] projects = projectRegistry.getProjects();
-    if(projects != null){
-      for(MavenProjectFacade project : projects){
-        addToIndex(project);
-      }
-    }
-  }
 }

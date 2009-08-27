@@ -85,6 +85,8 @@ public interface IMavenProjectFacade {
 
   IFile getPom();
 
+  File getPomFile();
+
   /**
    * Returns the full, absolute path of the given file relative to the workspace. Returns null if the file does not
    * exist or is not a member of this project.

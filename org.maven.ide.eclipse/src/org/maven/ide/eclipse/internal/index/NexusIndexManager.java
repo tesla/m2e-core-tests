@@ -733,31 +733,6 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     return IndexUtils.getTimestamp( directory );    
   }
   
-//  public Date mergeIndex(String indexName, InputStream is) throws CoreException {
-//    Date indexTime = null;
-//
-//    IndexingContext context = getIndexingContext(indexName);
-//    if(context != null) {
-//      Directory tempDirectory = new RAMDirectory();
-//      
-//      try {
-//        indexTime = unpackIndexArchive(is, tempDirectory);
-//        context.merge(tempDirectory);
-//      } catch(IOException ex) {
-//        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Error merging index", ex));
-//      }
-//      
-//      // TODO only update time if current index is older then merged
-//      IndexInfo indexInfo = getIndexInfo(indexName);
-//      indexInfo.setUpdateTime(indexTime);
-//      
-//      fireIndexUpdated(indexInfo);
-//    }
-//    
-//    return indexTime;
-//  }
-
-  
   public IndexedArtifactGroup[] getRootGroups(String indexName) throws CoreException {
     IndexingContext context = getIndexingContext(indexName);
     if(context != null) {
@@ -899,45 +874,35 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
   }
 
   public void mavenProjectChanged(MavenProjectChangedEvent[] events, IProgressMonitor monitor) {
-    //TODO: do we need to rebuild this list anymore??
-//    for(MavenProjectChangedEvent event : events) {
-//      try {
-//      if (event.getOldMavenProject() != null) {
-//          File file = event.getOldMavenProject().getMavenProject(monitor).getBasedir();
-//          String key = getDocumentKey(event.getOldMavenProject().getArtifactKey());
-//          removeDocument(WORKSPACE_INDEX, file, key);
-//        }
-//        if(event.getMavenProject() != null) {
-//          File file = event.getMavenProject().getMavenProject(monitor).getBasedir();
-//          String key = getDocumentKey(event.getMavenProject().getArtifactKey());
-//          addDocument(WORKSPACE_INDEX, file, key, -1, -1, null, IIndex.NOT_PRESENT, IIndex.NOT_PRESENT);
-//
-//          MavenProject mavenProject = event.getMavenProject().getMavenProject(monitor);
-//
-//          List<ArtifactRepository> repositories = new ArrayList<ArtifactRepository>();
-//          repositories.addAll(mavenProject.getRemoteArtifactRepositories());
-//          repositories.addAll(mavenProject.getPluginArtifactRepositories());
-//          repositories = maven.getEffectiveRepositories(repositories);
-//
-//          for(ArtifactRepository repository : repositories) {
-//            IndexInfo info = getIndexInfo(repository.getUrl());
-//            addIndex(info, false);
-//          }
-//        }
-//      } catch (CoreException e) {
-//        MavenLogger.log(e);
-//      }
-//    }
-  }
-//  
-//  public IndexInfo getInfoForIndex(String indexName){
-//    
-//  }
+    for(MavenProjectChangedEvent event : events) {
+      try {
+      if (event.getOldMavenProject() != null) {
+          File file = event.getOldMavenProject().getMavenProject(monitor).getBasedir();
+          String key = getDocumentKey(event.getOldMavenProject().getArtifactKey());
+          removeDocument(WORKSPACE_INDEX, file, key);
+        }
+        if(event.getMavenProject() != null) {
+          File file = event.getMavenProject().getMavenProject(monitor).getBasedir();
+          String key = getDocumentKey(event.getMavenProject().getArtifactKey());
+          addDocument(WORKSPACE_INDEX, file, key, -1, -1, null, IIndex.NOT_PRESENT, IIndex.NOT_PRESENT);
 
-  public void createWorkspaceIndex(){
+          // TODO project-specific indexes
+        }
+      } catch (CoreException e) {
+        MavenLogger.log(e);
+      }
+    }
+  }
+
+  public void createWorkspaceIndex() {
       IndexInfo workspaceIndex = new IndexInfo(IndexManager.WORKSPACE_INDEX, //
           null, null, IndexInfo.Type.WORKSPACE, false);
       addIndex(workspaceIndex);
+
+      for (IMavenProjectFacade facade : projectManager.getProjects()) {
+        addDocument(IndexManager.WORKSPACE_INDEX, facade.getPomFile(), //
+            getDocumentKey(facade.getArtifactKey()), -1, -1, null, 0, 0);
+      }
   }
   
   public void createLocalIndex(boolean forceUpdate){
