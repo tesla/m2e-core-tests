@@ -36,6 +36,7 @@ import org.w3c.dom.Text;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.persistence.TemplateStore;
 
@@ -151,7 +152,7 @@ public enum PomTemplateContext {
       try {
         IMaven embedder = MavenPlugin.lookup(IMaven.class);
 
-        List<ArtifactRepository> repositories = embedder.getArtifactRepositories();
+        List<ArtifactRepository> repositories = embedder.getArtifactRepositories(new NullProgressMonitor());
 
         Artifact artifact = embedder.resolve(groupId, artifactId, version, "maven-plugin", null,  repositories, null);
 
