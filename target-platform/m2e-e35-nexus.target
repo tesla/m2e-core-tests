@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.5"?>
 
-<target name="m2e-e35">
+<target name="m2e-e35-nexus">
 <locations>
 <location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
 <unit id="org.eclipse.sdk.ide" version="3.5.0.I20090611-1540"/>
