@@ -990,26 +990,25 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
   }
 
+  public void doIndexAdd(String indexName, String url, File repoDir, Directory dir, String indexUpdateUrl, boolean fullIndex) throws IOException{
+    //boolean fullPrefs = !MavenPlugin.getDefault().getPreferenceStore().getBoolean(MavenPreferenceConstants.P_FULL_INDEX);
+    getIndexer().addIndexingContextForced(indexName, indexName, repoDir, dir, //
+        url, indexUpdateUrl, (fullIndex ? getFullCreator() : getMinCreator()));
+    fireIndexAdded(indexName); 
+  }
+  
   public void addIndexForRemote(String indexName, String url) throws IOException{
     Directory dir = getIndexDirectory(indexName);
-    getIndexer().addIndexingContextForced(indexName, indexName, null, dir, //
-        url, null, //
-        (getFullCreator()));
-    fireIndexAdded(indexName);
+    doIndexAdd(indexName, url, null, dir, null, true);
   }
   
   public void addIndex(IndexInfo indexInfo){
     String indexName = indexInfo.getIndexName();
-    String displayName = indexInfo.getRepositoryUrl();
     try {
-      indexInfo.setNew(!getIndexDirectoryFile(indexInfo).exists());
       Directory directory = getIndexDirectory(indexInfo);
-      getIndexer().addIndexingContextForced(indexName, indexName, indexInfo.getRepositoryDir(), directory, //
-          indexInfo.getRepositoryUrl(), indexInfo.getIndexUpdateUrl(), //
-          (indexInfo.isShort() ? getMinCreator() : getFullCreator()));
-      fireIndexAdded(indexName);
+      doIndexAdd(indexName, indexInfo.getRepositoryUrl(), indexInfo.getRepositoryDir(), directory, indexInfo.getIndexUpdateUrl(), !indexInfo.isShort());
     } catch(IOException ex) {
-      String msg = "Error on adding indexing context " + displayName;
+      String msg = "Error on adding indexing context " + indexName;
       console.logError(msg + "; " + ex.getMessage());
       MavenLogger.log(msg, ex);
     } 

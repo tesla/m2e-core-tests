@@ -15,7 +15,7 @@ import java.util.TreeSet;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 
 
-public class IndexedArtifact {
+public class IndexedArtifact{
 
   public static final Comparator<IndexedArtifactFile> FILE_INFO_COMPARATOR = new Comparator<IndexedArtifactFile>() {
 
@@ -51,6 +51,9 @@ public class IndexedArtifact {
 
   private final String packaging;
   
+  //a non-zero odd-prime hash seed
+  private static final int SEED = 17;
+  
   /**
    * Set<IndexedArtifactFile>
    */
@@ -69,19 +72,14 @@ public class IndexedArtifact {
   }
 
   public String getPackageName(){
-    if(packageName.startsWith(".") && packageName.length()>1){ 
+    if(packageName != null && packageName.startsWith(".") && packageName.length()>1){ 
       return packageName.substring(1);
-    } else {
-      return packageName;
-    }
+    } 
+    return packageName;
   }
 
   public String toString() {
     StringBuffer sb = new StringBuffer("\n" + getClassname() + "  " + packageName + "  " + getGroupId() + " : " + getArtifactId());
-//    for(Iterator it = files.iterator(); it.hasNext();) {
-//      IndexedArtifactFile f = (IndexedArtifactFile) it.next();
-//      sb.append("  " + f.version + "  " + f.fname + "\n");
-//    }
     return sb.toString();
   }
 
@@ -103,6 +101,48 @@ public class IndexedArtifact {
 
   public Set<IndexedArtifactFile> getFiles() {
     return files;
+  }
+
+  /* (non-Javadoc)
+   * @see java.lang.Object#hashCode()
+   */
+  public int hashCode() {
+    int result = SEED;
+    result *= fieldHash(getGroupId());
+    result *= fieldHash(getArtifactId());
+    result *= fieldHash(getPackaging());
+    result *= fieldHash(getClassname());
+    result *= fieldHash(getPackageName());
+    return result;
+  }
+
+  private int fieldHash(Object field){
+    if(field == null){
+      return SEED;
+    }
+    return field.hashCode();
+  }
+  
+  /**
+   * Assumes all the fields are important for equals.
+   */
+  public boolean equals(Object artifact){
+    if(this == artifact){
+      return true;
+    } else if(!(artifact instanceof IndexedArtifact)){
+      return false;
+    } else {
+      IndexedArtifact other = (IndexedArtifact)artifact;
+      return  fieldsEqual(this.getGroupId(), other.getGroupId()) && 
+              fieldsEqual(this.getArtifactId(), other.getArtifactId()) &&
+              fieldsEqual(this.getPackageName(), other.getPackageName()) &&
+              fieldsEqual(this.getPackaging(), other.getPackaging()) &&
+              fieldsEqual(this.getClassname(), other.getClassname());
+    }
+  }
+  
+  private boolean fieldsEqual(Object field1, Object field2){
+    return field1 == null ? field2 == null : field1.equals(field2);
   }
 
 }

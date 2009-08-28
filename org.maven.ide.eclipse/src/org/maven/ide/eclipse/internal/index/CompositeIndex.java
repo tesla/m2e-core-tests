@@ -9,9 +9,10 @@
 package org.maven.ide.eclipse.internal.index;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -62,15 +63,11 @@ public class CompositeIndex implements IIndex {
 
   public Collection<IndexedArtifact> find(String groupId, String artifactId, String version, String packaging)
       throws CoreException {
-    List<IndexedArtifact> result = new ArrayList<IndexedArtifact>();
+    Set<IndexedArtifact> result = new LinkedHashSet<IndexedArtifact>();
     for(IIndex index : indexes) {
       Collection<IndexedArtifact> findResults = index.find(groupId, artifactId, version, packaging);
-      if(findResults != null && findResults.size() > 0){
-        for(IndexedArtifact artifact : findResults){
-          if(!result.contains(artifact)){
-            result.add(artifact);
-          }
-        }
+      if(findResults != null){
+        result.addAll(findResults);
       }
     }
     return result;
