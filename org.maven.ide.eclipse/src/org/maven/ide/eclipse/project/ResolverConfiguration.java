@@ -9,6 +9,7 @@
 package org.maven.ide.eclipse.project;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -61,7 +62,10 @@ public class ResolverConfiguration implements Serializable {
   }
   
   public List<String> getActiveProfileList() {
-    return Arrays.asList(activeProfiles.split("[,\\s\\|]"));
+    if (activeProfiles.trim().length() > 0) {
+      return Arrays.asList(activeProfiles.split("[,\\s\\|]"));
+    }
+    return new ArrayList<String>();
   }
 
   public void setResolveWorkspaceProjects(boolean resolveWorkspaceProjects) {
