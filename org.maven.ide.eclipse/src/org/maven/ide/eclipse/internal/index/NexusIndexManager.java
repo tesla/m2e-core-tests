@@ -140,7 +140,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
 
   private IMavenConfiguration mavenConfiguration;
 
-  private MavenProjectManager projectManager;
+  MavenProjectManager projectManager;
 
   private ArrayList<IndexCreator> fullCreators = null;
 
@@ -639,7 +639,9 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       }
       if(IndexManager.LOCAL_INDEX.equals(indexName)){
         updaterJob.addCommand(new ReindexCommand(indexName));
-      }  else if(!IndexManager.WORKSPACE_INDEX.equals(indexName)) {
+      }  else if(IndexManager.WORKSPACE_INDEX.equals(indexName)) {
+        updaterJob.addCommand(new ReindexWorkspaceCommand());
+      } else {
         updaterJob.addCommand(new UpdateCommand(indexName, force));
         URL archiveURL = null;
         updaterJob.addCommand(new UnpackCommand(indexName, archiveURL, force));
@@ -898,11 +900,6 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       IndexInfo workspaceIndex = new IndexInfo(IndexManager.WORKSPACE_INDEX, //
           null, null, IndexInfo.Type.WORKSPACE, false);
       addIndex(workspaceIndex);
-
-      for (IMavenProjectFacade facade : projectManager.getProjects()) {
-        addDocument(IndexManager.WORKSPACE_INDEX, facade.getPomFile(), //
-            getDocumentKey(facade.getArtifactKey()), -1, -1, null, 0, 0);
-      }
   }
   
   public void createLocalIndex(boolean forceUpdate){
@@ -1202,6 +1199,15 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       } catch(Exception e){
       } finally {
         fireIndexChanged(getIndexName());
+      }
+    }
+  }
+
+  static class ReindexWorkspaceCommand extends IndexCommand {
+    void run(NexusIndexManager indexManager, MavenConsole console, IProgressMonitor monitor) {
+      for (IMavenProjectFacade facade : indexManager.projectManager.getProjects()) {
+        indexManager.addDocument(IndexManager.WORKSPACE_INDEX, facade.getPomFile(), //
+            getDocumentKey(facade.getArtifactKey()), -1, -1, null, 0, 0);
       }
     }
   }
