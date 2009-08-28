@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
@@ -122,7 +123,7 @@ class DownloadSourcesJob extends Job {
     if(projectFacade != null) {
       repositories = projectFacade.getMavenProject(monitor).getRemoteArtifactRepositories();
     } else {
-      repositories = maven.getArtifactRepositories();
+      repositories = maven.getArtifactRepositories(new NullProgressMonitor());
     }
 
     Artifact[] sources = new Artifact[request.artifacts.size()];
@@ -168,6 +169,7 @@ class DownloadSourcesJob extends Job {
       try {
         IPath srcPath = (sources[0] != null) ? Path.fromOSString(sources[0].getFile().getAbsolutePath()) : null;
         manager.setSourcePath(request.project, request.path, srcPath, javadocUrls[0], monitor);
+        
       } finally {
         getJobManager().endRule(schedulingRule);
       }

@@ -15,6 +15,7 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IAction;
@@ -90,7 +91,7 @@ public class OpenJavaDocAction extends ActionDelegate {
     try {
       IMaven maven = MavenPlugin.lookup(IMaven.class);
 
-      List<ArtifactRepository> artifactRepositories = maven.getArtifactRepositories();
+      List<ArtifactRepository> artifactRepositories = maven.getArtifactRepositories(new NullProgressMonitor());
       
       Artifact artifact = maven.resolve(groupId, artifactId, version, "javadoc", "javadoc", artifactRepositories, monitor);
       
