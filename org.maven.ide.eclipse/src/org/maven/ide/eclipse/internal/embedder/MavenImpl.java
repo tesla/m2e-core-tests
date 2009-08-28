@@ -21,7 +21,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 
 import org.codehaus.plexus.MutablePlexusContainer;
@@ -425,18 +424,18 @@ public class MavenImpl implements IMaven {
     }
   }
 
-  public List<ArtifactRepository> getArtifactRepositories() throws CoreException {
-    return createPopulatedExecutionRequest().getRemoteRepositories();
+  public List<ArtifactRepository> getArtifactRepositories(IProgressMonitor monitor) throws CoreException {
+    return createPopulatedExecutionRequest(monitor).getRemoteRepositories();
   }
 
-  private MavenExecutionRequest createPopulatedExecutionRequest() throws CoreException {
-    MavenExecutionRequest request = createExecutionRequest(new NullProgressMonitor());
+  private MavenExecutionRequest createPopulatedExecutionRequest(IProgressMonitor monitor) throws CoreException {
+    MavenExecutionRequest request = createExecutionRequest(monitor);
     populateDefaults(request);
     return request;
   }
 
-  public List<ArtifactRepository> getPluginArtifactRepository() throws CoreException {
-    return createPopulatedExecutionRequest().getPluginArtifactRepositories();
+  public List<ArtifactRepository> getPluginArtifactRepository(IProgressMonitor monitor) throws CoreException {
+    return createPopulatedExecutionRequest(monitor).getPluginArtifactRepositories();
   }
 
   public List<String> getMirrorUrls() throws CoreException {

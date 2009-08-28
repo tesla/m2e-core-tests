@@ -90,9 +90,9 @@ public interface IMaven {
    * Returns list of remote artifact repositories configured in settings.xml. Only profiles active by default are
    * considered when calculating the list.
    */
-  public List<ArtifactRepository> getArtifactRepositories() throws CoreException;
+  public List<ArtifactRepository> getArtifactRepositories(IProgressMonitor monitor) throws CoreException;
 
-  public List<ArtifactRepository> getPluginArtifactRepository() throws CoreException;
+  public List<ArtifactRepository> getPluginArtifactRepository(IProgressMonitor monitor) throws CoreException;
 
   public List<ArtifactRepository> getEffectiveRepositories(List<ArtifactRepository> repositories);
 

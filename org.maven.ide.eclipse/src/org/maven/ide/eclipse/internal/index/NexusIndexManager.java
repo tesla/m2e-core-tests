@@ -32,6 +32,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
@@ -671,8 +672,8 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
   
   private List<ArtifactRepository> getEffectiveRepositories() throws CoreException{
     List<ArtifactRepository> allRepos = new ArrayList<ArtifactRepository>();
-    List<ArtifactRepository> artifactRepositories = maven.getArtifactRepositories();
-    List<ArtifactRepository> pluginArtifactRepository = maven.getPluginArtifactRepository();
+    List<ArtifactRepository> artifactRepositories = maven.getArtifactRepositories(new NullProgressMonitor());
+    List<ArtifactRepository> pluginArtifactRepository = maven.getPluginArtifactRepository(new NullProgressMonitor());
     allRepos.addAll(artifactRepositories);
     allRepos.addAll(pluginArtifactRepository);
     return maven.getEffectiveRepositories(allRepos);
@@ -689,6 +690,10 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
     if(activeRepo != null){
       Authentication authentication = activeRepo.getAuthentication();
+      //a public repo, no auth needed
+      if(authentication == null){
+        return null;
+      }
       info.setUserName(authentication.getUsername());
       info.setPassword(authentication.getPassword());
       return info;

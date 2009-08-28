@@ -633,7 +633,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
             
             final List<ArtifactRepository> remoteRepositories;
             if(repositoryUrl.length()==0) {
-              remoteRepositories = maven.getArtifactRepositories(); // XXX should use ArchetypeManager.getArhetypeRepositories()
+              remoteRepositories = maven.getArtifactRepositories(monitor); // XXX should use ArchetypeManager.getArhetypeRepositories()
             } else {
               ArtifactRepository repository = new DefaultArtifactRepository( //
                   "archetype", repositoryUrl, new DefaultRepositoryLayout(), null, null);

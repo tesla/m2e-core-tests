@@ -30,7 +30,9 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -381,17 +383,17 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     }
   }
   
-  public List<ArtifactRepository> getRemoteRepositories() throws Exception{
+  public List<ArtifactRepository> getRemoteRepositories(IProgressMonitor monitor) throws Exception{
     IMaven maven = MavenPlugin.getDefault().getMaven(); 
     ArrayList<ArtifactRepository> repositories = new ArrayList<ArtifactRepository>();
-    repositories.addAll(maven.getArtifactRepositories());
-    repositories.addAll(maven.getPluginArtifactRepository());
+    repositories.addAll(maven.getArtifactRepositories(monitor));
+    repositories.addAll(maven.getPluginArtifactRepository(monitor));
     return repositories;
   }
   
   private void updateRepos(boolean force){
     try{
-      List<ArtifactRepository> repositories = getRemoteRepositories();
+      List<ArtifactRepository> repositories = getRemoteRepositories(new NullProgressMonitor());
       List<ArtifactRepository> remoteRepositories = getMaven().getEffectiveRepositories(repositories);
       if(remoteRepositories != null){
         for(ArtifactRepository repo : remoteRepositories){
@@ -518,7 +520,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   private void loadIndexConfiguration() throws IllegalStateException {
     try{
       //remove everything
-      List<ArtifactRepository> remoteRepositories = getRemoteRepositories();
+      List<ArtifactRepository> remoteRepositories = getRemoteRepositories(new NullProgressMonitor());
       for(ArtifactRepository repo : remoteRepositories){
         String url = repo.getUrl();
         this.indexManager.addIndexForRemote(repo.getId(), url);

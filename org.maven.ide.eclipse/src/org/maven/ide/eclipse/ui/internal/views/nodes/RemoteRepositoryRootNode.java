@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.swt.graphics.Image;
 
 import org.apache.maven.artifact.repository.ArtifactRepository;
@@ -40,8 +41,8 @@ public class RemoteRepositoryRootNode implements IMavenRepositoryNode{
     IMaven maven = MavenPlugin.getDefault().getMaven();
     
     ArrayList<ArtifactRepository> repositories = new ArrayList<ArtifactRepository>();
-    List<ArtifactRepository> artifactRepositories = maven.getArtifactRepositories();
-    List<ArtifactRepository> pluginArtifactRepository = maven.getPluginArtifactRepository();
+    List<ArtifactRepository> artifactRepositories = maven.getArtifactRepositories(new NullProgressMonitor());
+    List<ArtifactRepository> pluginArtifactRepository = maven.getPluginArtifactRepository(new NullProgressMonitor());
     
     repositories.addAll(artifactRepositories);
     repositories.addAll(pluginArtifactRepository);

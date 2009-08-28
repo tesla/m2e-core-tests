@@ -388,8 +388,8 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
             IMaven maven = MavenPlugin.lookup(IMaven.class);
 
             ArtifactRepository localRepository = maven.getLocalRepository();
-
-            List<ArtifactRepository> repositories = maven.getArtifactRepositories();
+            
+            List<ArtifactRepository> repositories = maven.getArtifactRepositories(monitor);
 
             ArchetypeArtifactManager aaMgr = MavenPlugin.lookup(ArchetypeArtifactManager.class);
             if(aaMgr.isFileSetArchetype(groupId, artifactId, version, null, localRepository, repositories)) {
