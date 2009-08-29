@@ -12,89 +12,148 @@ import java.io.File;
 import java.util.List;
 
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
-import org.maven.ide.components.pom.util.PomResourceImpl;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.integration.tests.UIIntegrationTestCase;
+
+import com.windowtester.runtime.swt.condition.eclipse.JobsCompleteCondition;
 
 /**
  * @author dyocum
  *
  */
-public class NexusIndexManagerTest extends UIIntegrationTestCase {
-
-  private static final String TEST_PROJECT_NAME = "editor-tests";
-  
-  private IProject project;
-
-  private PomResourceImpl resource = null;
-
-  protected void setUp() throws Exception {
-    super.setUp();
-    
-    IWorkspace workspace = ResourcesPlugin.getWorkspace();
-    IWorkspaceRoot root = workspace.getRoot();
-    
-    project = root.getProject(TEST_PROJECT_NAME);
-    if(!project.exists()) {
-      project.create(new NullProgressMonitor());
-    }
-    if(!project.isOpen()) {
-      project.open(new NullProgressMonitor());
-    }
-  }
-  
-  protected void tearDown() throws Exception {
-    if (resource != null) {
-      resource.unload();
-    }
-    super.tearDown();
-  }
-
+public class NexusIndexManagerTest extends UIIntegrationTestCase {  
   protected List<ArtifactRepository> remoteRepos = null;
-  public void testPublicRepo() throws Exception{
-    final File emptySettingsFile = new File("src/org/maven/ide/eclipse/internal/index/empty_settings.xml");
-    assertTrue(emptySettingsFile.exists());
-//    String publicMirrorPath = "";
-//    String publicNonMirroredPath = "";
-    
-    WorkspaceJob job = new WorkspaceJob("!!!!!!!!!!! setting file"){
 
+  public NexusIndexManagerTest(){
+    super();
+    try{
+      super.cancelIndexJobs();
+    }catch(Exception e){
+      
+    }
+  }
+
+  /**
+   * Authentication was causing a failure for public (non-auth) repos. This test makes sure its ok.
+   */
+  public void testMngEclipse1621() throws Exception{
+    String publicRepoName = "nexus";
+    String publicRepoUrl = "http://repository.sonatype.org/content/groups/public";
+    final File mirroredRepoFile = new File("src/org/maven/ide/eclipse/internal/index/public_mirror_repo_settings.xml");
+    assertTrue(mirroredRepoFile.exists());
+    WorkspaceJob job = new WorkspaceJob("setting two public repo file"){
       public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
-        try{
-          
-          MavenPlugin.getDefault().getMaven().getMavenConfiguration().setUserSettingsFile(emptySettingsFile.getAbsolutePath());
-          assertEquals(MavenPlugin.getDefault().getMaven().getMavenConfiguration().getUserSettingsFile(), emptySettingsFile.getAbsolutePath());
-          
+        try{     
+          MavenPlugin.getDefault().getMaven().getMavenConfiguration().setUserSettingsFile(mirroredRepoFile.getAbsolutePath());
+          assertEquals(MavenPlugin.getDefault().getMaven().getMavenConfiguration().getUserSettingsFile(), mirroredRepoFile.getAbsolutePath());        
           remoteRepos = MavenPlugin.getDefault().getRemoteRepositories(monitor);
         } catch(Exception e){
-          assertTrue(false);
+          assertTrue("The Maven settings blew up", false);
         }
         return Status.OK_STATUS;
       }
     };
     
     job.schedule();
-    Thread.sleep(3000);
-    for(ArtifactRepository repo : remoteRepos){
-      System.out.println("repos are: "+repo.getId()+ "at "+repo.getUrl());
-    }
-    System.out.println("settings: "+MavenPlugin.getDefault().getMaven().getMavenConfiguration().getUserSettingsFile());
-    List<ArtifactRepository> remoteRepositories = MavenPlugin.getDefault().getMaven().getEffectiveRepositories(remoteRepos);
-    for(ArtifactRepository rr : remoteRepositories){
-      System.out.println("repos are: "+rr.getId()+ "at "+rr.getUrl());
-    }
-    assertEquals(1, remoteRepositories.size());
+
+    getUI().wait(new JobsCompleteCondition(), 120000);
+
+    List<ArtifactRepository> effectiveRepos = MavenPlugin.getDefault().getMaven().getEffectiveRepositories(remoteRepos);
+
+    assertEquals(1, effectiveRepos.size());
+    ArtifactRepository publicRepo = effectiveRepos.get(0);
+    assertEquals(publicRepo.getId(), publicRepoName);
+    assertEquals(publicRepo.getUrl(), publicRepoUrl);
+    MavenPlugin.getDefault().reloadSettingsXml();
+    //MavenPlugin.getDefault().getIndexManager().scheduleIndexUpdate(publicRepoName, true, 0);
+
+    getUI().wait(new JobsCompleteCondition(), 600000);
+    
+    //this failed with the bug in authentication (NPE) in NexusIndexManager
+    IndexedArtifactGroup[] rootGroups = ((NexusIndexManager)MavenPlugin.getDefault().getIndexManager()).getRootGroups(publicRepoName);
+    assertTrue(rootGroups.length > 0);
+    
+    
   }
+  
+  public void testNoMirror() throws Exception {
+    final File settingsFile = new File("src/org/maven/ide/eclipse/internal/index/no_mirror_settings.xml");
+    assertTrue(settingsFile.exists());
+    WorkspaceJob job = new WorkspaceJob("settings.xml file has 2 repos but no mirror"){
+      public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
+        try{     
+          MavenPlugin.getDefault().getMaven().getMavenConfiguration().setUserSettingsFile(settingsFile.getAbsolutePath());
+          assertEquals(MavenPlugin.getDefault().getMaven().getMavenConfiguration().getUserSettingsFile(), settingsFile.getAbsolutePath());        
+          remoteRepos = MavenPlugin.getDefault().getRemoteRepositories(monitor);
+        } catch(Exception e){
+          assertTrue("The Maven settings blew up", false);
+        }
+        return Status.OK_STATUS;
+      }
+    };
+    
+    job.schedule();
+
+    getUI().wait(new JobsCompleteCondition(), 120000);
+    List<ArtifactRepository> effectiveRepos = MavenPlugin.getDefault().getMaven().getEffectiveRepositories(remoteRepos);
+    assertEquals(effectiveRepos.size(), 1);
+  }
+  
+  public void testPublicMirror() throws Exception{
+    String publicRepoName = "nexus";
+    String publicRepoUrl = "http://repository.sonatype.org/content/groups/public";
+    final File mirroredRepoFile = new File("src/org/maven/ide/eclipse/internal/index/public_mirror_repo_settings.xml");
+    assertTrue(mirroredRepoFile.exists());
+    WorkspaceJob job = new WorkspaceJob("setting two public repo file"){
+      public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
+        try{     
+          MavenPlugin.getDefault().getMaven().getMavenConfiguration().setUserSettingsFile(mirroredRepoFile.getAbsolutePath());
+          assertEquals(MavenPlugin.getDefault().getMaven().getMavenConfiguration().getUserSettingsFile(), mirroredRepoFile.getAbsolutePath());        
+          remoteRepos = MavenPlugin.getDefault().getRemoteRepositories(monitor);
+        } catch(Exception e){
+          assertTrue("The Maven settings blew up", false);
+        }
+        return Status.OK_STATUS;
+      }
+    };
+    
+    job.schedule();
+
+    getUI().wait(new JobsCompleteCondition(), 120000);
+
+    List<ArtifactRepository> effectiveRepos = MavenPlugin.getDefault().getMaven().getEffectiveRepositories(remoteRepos);
+
+    assertEquals(1, effectiveRepos.size());
+
+  }
+  public void testPublicNonMirrored() throws Exception {
+    final File nonMirroredRepoFile = new File("src/org/maven/ide/eclipse/internal/index/public_nonmirrored_repo_settings.xml");
+    assertTrue(nonMirroredRepoFile.exists());
+    WorkspaceJob job = new WorkspaceJob("setting two public repo file"){
+      public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
+        try{     
+          MavenPlugin.getDefault().getMaven().getMavenConfiguration().setUserSettingsFile(nonMirroredRepoFile.getAbsolutePath());
+          assertEquals(MavenPlugin.getDefault().getMaven().getMavenConfiguration().getUserSettingsFile(), nonMirroredRepoFile.getAbsolutePath());        
+          remoteRepos = MavenPlugin.getDefault().getRemoteRepositories(monitor);
+        } catch(Exception e){
+          assertTrue("The Maven settings blew up", false);
+        }
+        return Status.OK_STATUS;
+      }
+    };
+    
+    job.schedule();
+    getUI().wait(new JobsCompleteCondition(), 120000);
+    List<ArtifactRepository> effectiveRepos = MavenPlugin.getDefault().getMaven().getEffectiveRepositories(remoteRepos);
+
+    assertEquals(1, effectiveRepos.size());
+  }
+ 
   
 }
 
