@@ -1004,7 +1004,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
   
   public void addIndexForRemote(String indexName, String url) throws IOException{
     Directory dir = getIndexDirectory(indexName);
-    doIndexAdd(indexName, url, null, dir, null, true);
+    doIndexAdd(indexName, url, null, dir, null, false);
   }
   
   public void addIndex(IndexInfo indexInfo){
