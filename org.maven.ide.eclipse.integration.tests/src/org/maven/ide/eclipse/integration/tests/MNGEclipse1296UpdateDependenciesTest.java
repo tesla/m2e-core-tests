@@ -41,7 +41,7 @@ public class MNGEclipse1296UpdateDependenciesTest extends UIIntegrationTestCase 
     
     // Add a dependency.
     openFile(project, "pom.xml");
-    getUI().wait(new JobsCompleteCondition(), 120000);
+    waitForAllBuildsToComplete();
     getUI().click(new CTabItemLocator("pom.xml"));
     findText("</dependencies");
     getUI().keyClick(SWT.ARROW_LEFT);
