@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 
 import org.osgi.service.prefs.BackingStoreException;
@@ -706,6 +707,11 @@ public class MavenProjectManagerImpl {
     request.setPom(pom.getLocation().toFile());
 
     request.addActiveProfiles(resolverConfiguration.getActiveProfileList());
+
+    // temporary solution for https://issues.sonatype.org/browse/MNGECLIPSE-1607
+    Properties systemProperties = new Properties();
+    systemProperties.putAll(System.getProperties());
+    request.setSystemProperties(systemProperties);
 
     // eclipse workspace repository implements both workspace dependency resolution
     // and inter-module dependency resolution for multi-module projects.

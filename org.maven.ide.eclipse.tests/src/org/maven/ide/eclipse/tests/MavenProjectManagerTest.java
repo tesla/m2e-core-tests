@@ -20,7 +20,6 @@ import org.apache.maven.project.MavenProject;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
@@ -28,6 +27,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.embedder.ArtifactRef;
 import org.maven.ide.eclipse.internal.project.MavenProjectFacade;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerImpl;
 import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
@@ -35,6 +35,7 @@ import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.IMavenProjectVisitor;
 import org.maven.ide.eclipse.project.MavenProjectChangedEvent;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
+import org.maven.ide.eclipse.project.ResolverConfiguration;
 
 
 public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
@@ -503,27 +504,6 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
 //    assertEquals(p3.getFile("t010-p3/pom.xml").getLocation().toFile(), a2[0].getFile());
   }
 
-  public void ___test40projects() throws Exception {
-    File[] dirs = new File("S:/tmp/40projects").listFiles();
-    IProject[] projects = new IProject[dirs.length];
-    for (int d = 0; d < dirs.length; d++) {
-      String name = dirs[d].getName();
-      File dir = new File(workspace.getRoot().getLocation().toFile(), name);
-      copyDir(dirs[d], dir);
-
-      IProject cptest = workspace.getRoot().getProject(name);
-      if (!cptest.exists()) {
-        IProjectDescription projectDescription = workspace.newProjectDescription(cptest.getName());
-        projectDescription.setLocation(null); 
-        cptest.create(projectDescription, monitor);
-        cptest.open(IResource.NONE, monitor);
-      } else {
-        cptest.refreshLocal(IResource.DEPTH_INFINITE, monitor);
-      }
-      projects[dirs.length - d - 1] = cptest;
-    }
-  }
-
   public void test011_interModuleDependencies() throws Exception {
     IProject p1 = createExisting("t011-p1");
     waitForJobsToComplete();
@@ -756,6 +736,9 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     }
   }
 
+  /**
+   * This test disabled until https://issues.sonatype.org/browse/MNGECLIPSE-1448 is resolved 
+   */
   public void _testExtensionPluginResolution() throws Exception {
     IProject p1 = createExisting("MNGECLIPSE380-plugin", "resources/MNGECLIPSE380/plugin");
     IProject p2 = createExisting("MNGECLIPSE380-project", "resources/MNGECLIPSE380/project");
@@ -835,5 +818,16 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     }
   }
 
+  public void testJdkProfileActivation() throws Exception {
+    IProject[] projects = importProjects("projects/jdkprofileactivation", 
+        new String[] {"p001/pom.xml", "p002/pom.xml"}, 
+        new ResolverConfiguration());
+    waitForJobsToComplete();
+
+    IMavenProjectFacade f1 = manager.create(projects[0], monitor);
+    ArrayList<ArtifactRef> a1 = new ArrayList<ArtifactRef>(f1.getMavenProjectArtifacts());
+    assertEquals(2, a1.size());
+    assertEquals("junit", a1.get(1).getArtifactId());
+  }
 
 }
