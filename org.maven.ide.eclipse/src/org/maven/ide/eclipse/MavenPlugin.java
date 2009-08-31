@@ -337,7 +337,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     this.projectManager.addMavenProjectChangedListener(new WorkspaceStateWriter(projectManager));
     if(updateProjectsOnStartup || managerImpl.getProjects().length == 0) {
       this.projectManager.refresh(new MavenUpdateRequest(workspace.getRoot().getProjects(), //
-          true /*offline*/, false /* updateSnapshots */));
+          mavenConfiguration.isOffline() /*offline*/, false /* updateSnapshots */));
     }
 
     this.modelManager = new MavenModelManager(maven, projectManager, console);
