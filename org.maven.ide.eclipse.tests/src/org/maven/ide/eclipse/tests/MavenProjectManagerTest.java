@@ -609,9 +609,8 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     IMarker[] markers = p2.findMarkers(null, true, IResource.DEPTH_INFINITE);
     // (jdt) The container 'Maven Dependencies' references non existing library ...missing/missing/0.0.0/missing-0.0.0.jar'
     // (jdt) The project cannot be built until build path errors are resolved
-    // (maven) missing:missing:0.0.0:jar The repository system is offline and the requested artifact is not locally available at  ...
     // (maven) Missing artifact missing:missing:jar:0.0.0:compile
-    assertEquals(toString(markers), 4, markers.length); 
+    assertEquals(toString(markers), 3, markers.length); 
   }
 
   public void __test014_resolveDependencies() throws Exception {

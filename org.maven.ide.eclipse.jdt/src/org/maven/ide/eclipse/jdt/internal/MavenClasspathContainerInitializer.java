@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.jdt.BuildPathManager;
 import org.maven.ide.eclipse.jdt.MavenJdtPlugin;
 import org.maven.ide.eclipse.project.MavenProjectManager;
@@ -50,7 +51,8 @@ public class MavenClasspathContainerInitializer extends ClasspathContainerInitia
       }
 
       // force refresh if can't read persisted state
-      MavenUpdateRequest request = new MavenUpdateRequest(project.getProject(), true, false);
+      IMavenConfiguration configuration = MavenPlugin.lookup(IMavenConfiguration.class);
+      MavenUpdateRequest request = new MavenUpdateRequest(project.getProject(), configuration.isOffline(), false);
       getMavenProjectManager().refresh(request);
     }
   }
