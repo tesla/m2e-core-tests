@@ -48,8 +48,6 @@ public class IndexInfoWriter {
 
   private static final String ELEMENT_INDEX = "indexInfo";
 
-  private static final String ATT_INDEX_NAME = "indexName";
-
   private static final String ATT_REPOSITORY_URL = "repositoryUrl";
 
   private static final String ATT_UPDATE_URL = "updateUrl";
@@ -108,7 +106,6 @@ public class IndexInfoWriter {
       for(IndexInfo indexInfo : this.indexes) {
         if(IndexInfo.Type.REMOTE.equals(indexInfo.getType())) {
           AttributesImpl indexAttrs = new AttributesImpl();
-          indexAttrs.addAttribute(null, ATT_INDEX_NAME, ATT_INDEX_NAME, null, indexInfo.getIndexName());
           if(indexInfo.getRepositoryUrl()!=null) {
             indexAttrs.addAttribute(null, ATT_REPOSITORY_URL, ATT_REPOSITORY_URL, null, indexInfo.getRepositoryUrl());
           }
@@ -142,7 +139,6 @@ public class IndexInfoWriter {
 
     public void startElement(String uri, String localName, String qName, Attributes attributes) {
       if(ELEMENT_INDEX.equals(qName) && attributes != null) {
-        String indexName = attributes.getValue(ATT_INDEX_NAME);
         String repositoryUrl = attributes.getValue(ATT_REPOSITORY_URL);
         String indexUpdateUrl = attributes.getValue(ATT_UPDATE_URL);
         
@@ -157,7 +153,7 @@ public class IndexInfoWriter {
           updateTime = null;
         }
 
-        IndexInfo indexInfo = new IndexInfo(indexName, null, repositoryUrl, IndexInfo.Type.REMOTE, isShort);
+        IndexInfo indexInfo = new IndexInfo(null, repositoryUrl, IndexInfo.Type.REMOTE, isShort);
         indexInfo.setIndexUpdateUrl(indexUpdateUrl);
         indexInfo.setUpdateTime(updateTime);
         indexes.add(indexInfo);

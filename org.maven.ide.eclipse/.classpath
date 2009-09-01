@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry excluding="org/maven/ide/eclipse/embedder/EmbedderFactory.java|org/maven/ide/eclipse/embedder/MavenEmbedderManager.java|org/maven/ide/eclipse/index/Indexer.java|org/maven/ide/eclipse/internal/index/LegacyIndexManager.java|org/maven/ide/eclipse/internal/index/NexusIndexManagerBackup.java|org/maven/ide/eclipse/index/IndexManagerBackup.java|org/maven/ide/eclipse/internal/index/CopyOfNexusIndexManager.java|org/maven/ide/eclipse/ui/internal/views/MavenIndexesView.java" kind="src" path="src"/>
+	<classpathentry excluding="org/maven/ide/eclipse/embedder/EmbedderFactory.java|org/maven/ide/eclipse/embedder/MavenEmbedderManager.java|org/maven/ide/eclipse/index/Indexer.java|org/maven/ide/eclipse/internal/index/LegacyIndexManager.java|org/maven/ide/eclipse/internal/index/NexusIndexManagerBackup.java|org/maven/ide/eclipse/index/IndexManagerBackup.java|org/maven/ide/eclipse/internal/index/CopyOfNexusIndexManager.java|org/maven/ide/eclipse/ui/internal/views/MavenIndexesView.java|org/maven/ide/eclipse/ui/internal/views/nodes/HiddenRepositoryNode.java|org/maven/ide/eclipse/ui/internal/views/RepositoryViewerSorter.java" kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="output" path="target/classes"/>

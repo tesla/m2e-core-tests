@@ -12,7 +12,7 @@ import org.eclipse.swt.graphics.Image;
 
 import org.maven.ide.eclipse.MavenImages;
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.index.IMutableIndex;
+import org.maven.ide.eclipse.internal.index.NexusIndex;
 import org.maven.ide.eclipse.internal.index.NexusIndexManager;
 
 /**
@@ -22,44 +22,26 @@ import org.maven.ide.eclipse.internal.index.NexusIndexManager;
  */
 public class LocalRepositoryRootNode implements IMavenRepositoryNode{
 
-  /* (non-Javadoc)
-   * @see org.maven.ide.eclipse.ui.internal.views.IMavenRepositoryRootNode#getElements()
-   */
   public Object[] getChildren() {
     NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getDefault().getIndexManager();
-    IMutableIndex localIndex = indexManager.getLocalIndex();
-    IMutableIndex workspaceIndex = indexManager.getWorkspaceIndex();
-    //IndexInfo localInfo = indexManager.getIndexInfo(IndexManager.LOCAL_INDEX);
-    //IndexInfo workspaceInfo = indexManager.getIndexInfo(IndexManager.WORKSPACE_INDEX);
-    return new Object[]{new IndexNode(localIndex), new IndexNode(workspaceIndex)};
+    NexusIndex localIndex = indexManager.getLocalIndex();
+    NexusIndex workspaceIndex = indexManager.getWorkspaceIndex();
+    return new Object[]{new LocalRepositoryNode(indexManager, localIndex), new LocalRepositoryNode(indexManager, workspaceIndex)};
   }
 
-  /* (non-Javadoc)
-   * @see org.maven.ide.eclipse.ui.internal.views.IMavenRepositoryRootNode#getName()
-   */
   public String getName() {
     return "Local Repositories";
   }
 
-  /* (non-Javadoc)
-   * @see org.maven.ide.eclipse.ui.internal.views.IMavenRepositoryNode#hasChildren()
-   */
   public boolean hasChildren() {
     return true;
   }
 
-  /* (non-Javadoc)
-   * @see org.maven.ide.eclipse.ui.internal.views.nodes.IMavenRepositoryNode#getImage()
-   */
   public Image getImage() {
     return MavenImages.IMG_INDEXES;
   }
 
-  /* (non-Javadoc)
-   * @see org.maven.ide.eclipse.ui.internal.views.nodes.IMavenRepositoryNode#isUpdating()
-   */
   public boolean isUpdating() {
-    // TODO Auto-generated method isUpdating
     return false;
   }
   

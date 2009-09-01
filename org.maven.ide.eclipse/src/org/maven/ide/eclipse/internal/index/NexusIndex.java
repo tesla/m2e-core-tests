@@ -36,19 +36,15 @@ public class NexusIndex implements IIndex, IMutableIndex {
 
   private String repositoryUrl;
   
-  private String indexName;
-
-  public NexusIndex(NexusIndexManager indexManager, String indexName, String repositoryUrl) {
-    this.indexName = indexName;
+  public NexusIndex(NexusIndexManager indexManager, String repositoryUrl) {
     this.indexManager = indexManager;
     this.repositoryUrl = repositoryUrl;
-    
   }
 
   public String getIndexName(){
-    return indexName;
+    return repositoryUrl;
   }
-  
+
   public String getRepositoryUrl(){
     return this.repositoryUrl;
   }

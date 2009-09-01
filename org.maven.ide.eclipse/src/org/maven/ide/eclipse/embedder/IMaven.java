@@ -94,18 +94,17 @@ public interface IMaven {
 
   public List<ArtifactRepository> getPluginArtifactRepository(IProgressMonitor monitor) throws CoreException;
 
-  public List<ArtifactRepository> getEffectiveRepositories(List<ArtifactRepository> repositories);
-
-  public List<String> getMirrorUrls() throws CoreException;
-
   public Settings buildSettings(String globalSettings, String userSettings) throws CoreException;
 
   public SettingsValidationResult validateSettings(String settings);
+
+  public ArtifactRepository getMirror(ArtifactRepository repo);
 
   /**
    * Temporary solution/workaround for http://jira.codehaus.org/browse/MNG-4194. Extensions realm is created each time
    * MavenProject instance is built, so we have to remove unused extensions realms to avoid OOME.
    */
   public void xxxRemoveExtensionsRealm(MavenProject project);
+
 
 }

@@ -56,7 +56,7 @@ public class IndexUnpackerJob extends Job {
   protected IStatus run(IProgressMonitor monitor) {
     for(Iterator<IndexInfo> it = extensionIndexes.iterator(); it.hasNext();) {
       IndexInfo extensionIndexInfo = it.next();
-      String indexName = extensionIndexInfo.getIndexName();
+      String repositoryUrl = extensionIndexInfo.getRepositoryUrl();
       String displayName = extensionIndexInfo.getDisplayName();
       monitor.setTaskName(displayName);
 
@@ -76,37 +76,31 @@ public class IndexUnpackerJob extends Job {
         } catch(IOException ex) {
           MavenLogger.log("Unable to read creation time for index " + displayName, ex);
         }
-        
-        boolean replace = overwrite; //|| indexInfo.isNew();
-//        if(!replace) {
-//          if(extensionIndexTime!=null) {
-//            Date currentIndexTime = indexInfo.getUpdateTime();
-//            replace = currentIndexTime==null || extensionIndexTime.after(currentIndexTime);
-//          }
-//        }
+
+        boolean replace = overwrite;
 
         if(replace) {
-          File index = new File(indexManager.getBaseIndexDir(), indexName);
+          File index = indexManager.getIndexDirectoryFile(extensionIndexInfo);
           if(!index.exists()) {
             if(!index.mkdirs()) {
               MavenLogger.log("Can't create index folder " + index.getAbsolutePath(), null);
+              continue;
             }
-          } else {
-            File[] files = index.listFiles();
-            for(int j = 0; j < files.length; j++ ) {
-              if(!files[j].delete()) {
-                MavenLogger.log("Can't delete " + files[j].getAbsolutePath(), null);
-              }
+          }
+          File[] files = index.listFiles();
+          for(int j = 0; j < files.length; j++ ) {
+            if(!files[j].delete()) {
+              MavenLogger.log("Can't delete " + files[j].getAbsolutePath(), null);
             }
           }
           
           InputStream is = null;
           try {
             is = indexArchive.openStream();
-            indexManager.replaceIndex(indexName, is);
+            indexManager.replaceIndex(repositoryUrl, is);
             
             // update index and repository urls
-            indexManager.removeIndex(indexName, false);
+            indexManager.removeIndex(repositoryUrl, false);
             indexManager.addIndex(extensionIndexInfo);
             
           } catch(Exception ex) {

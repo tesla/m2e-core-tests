@@ -9,18 +9,12 @@
 package org.maven.ide.eclipse;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -29,10 +23,8 @@ import org.osgi.framework.Version;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -79,12 +71,7 @@ import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.classrealm.ClassRealmManagerDelegate;
 import org.apache.maven.plugin.MavenPluginManager;
 import org.apache.maven.project.artifact.MavenMetadataCache;
-import org.apache.maven.settings.Mirror;
-import org.apache.maven.settings.Profile;
-import org.apache.maven.settings.Repository;
-import org.apache.maven.settings.Settings;
 
-import org.sonatype.nexus.index.context.IndexingContext;
 import org.sonatype.plexus.build.incremental.BuildContext;
 import org.sonatype.plexus.build.incremental.ThreadBuildContext;
 
@@ -97,7 +84,6 @@ import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
-import org.maven.ide.eclipse.index.EnabledIndex;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.internal.ExtensionReader;
 import org.maven.ide.eclipse.internal.console.MavenConsoleImpl;
@@ -107,7 +93,6 @@ import org.maven.ide.eclipse.internal.embedder.MavenConfigurationImpl;
 import org.maven.ide.eclipse.internal.embedder.MavenEmbeddedRuntime;
 import org.maven.ide.eclipse.internal.embedder.MavenImpl;
 import org.maven.ide.eclipse.internal.embedder.MavenWorkspaceRuntime;
-import org.maven.ide.eclipse.internal.index.EnabledIndexWriter;
 import org.maven.ide.eclipse.internal.index.NexusIndexManager;
 import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;
 import org.maven.ide.eclipse.internal.project.EclipseMavenMetadataCache;
@@ -351,21 +336,9 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
     //create the index manager
     this.indexManager = new NexusIndexManager(console, projectManager, stateLocationDir);
-    
-    //read all the repos specified in settings.xml and add them to index manager
-    loadIndexConfiguration();
-    //read all the indexes in the list of manually enabled indexes and add them to the index manager
-    loadEnabledIndexes();
-    
     this.projectManager.addMavenProjectChangedListener(indexManager);
-    
-    boolean forceUpdate = !MavenPlugin.getDefault().getPreferenceStore().getBoolean(MavenPlugin.PREFS_NO_REBUILD_ON_START);
-    //create the local repos
-    this.indexManager.createLocalIndex(forceUpdate);
-    this.indexManager.createWorkspaceIndex();
-    
-    //now start an update on all the repos, including the manually enabled ones
-    updateRepos(forceUpdate);
+    this.indexManager.initialize();
+
     this.getPreferenceStore().setValue(PREFS_NO_REBUILD_ON_START, true);
     checkJdk();
   }
@@ -390,270 +363,11 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     repositories.addAll(maven.getPluginArtifactRepository(monitor));
     return repositories;
   }
-  
-  private void updateRepos(boolean force){
-    try{
-      List<ArtifactRepository> repositories = getRemoteRepositories(new NullProgressMonitor());
-      List<ArtifactRepository> remoteRepositories = getMaven().getEffectiveRepositories(repositories);
-      if(remoteRepositories != null){
-        for(ArtifactRepository repo : remoteRepositories){
-          getIndexManager().scheduleIndexUpdate(repo.getId(), force, 3000L);
-        }
-      }
-      Set<String> keySet = enabledIndexes.keySet();
-      if(keySet != null){
-        for(String key : keySet){
-          getIndexManager().scheduleIndexUpdate(key, force, 3000L);
-        }
-      }
-    } catch(Exception e){
-      String msg = "Unable to load remote repositories";
-      MavenLogger.log(msg, e);
-      getConsole().logError(msg);
-    }
-  }
-  
-  public void reloadSettingsXml(){
-    //TODO: check to see if anything has changed?
-    Map<String, IndexingContext> indexes = indexManager.getIndexes();
-    Set<String> keySet = indexes.keySet();
-    if(keySet != null){
-      for(String key : keySet){
-        indexManager.removeIndex(key, true);
-      }
-    }
-    //create the locals
-    boolean forceUpdate = !MavenPlugin.getDefault().getPreferenceStore().getBoolean(MavenPlugin.PREFS_NO_REBUILD_ON_START);
-    this.indexManager.createLocalIndex(true);
-    this.indexManager.createWorkspaceIndex();
-    //load the remotes
-    loadIndexConfiguration();
-    loadEnabledIndexes();
-    //update the remotes
-    updateRepos(true);
-  }
-  
-  /**
-   * Loads all the indexes that the user has manually enabled
-   */
-  private void loadEnabledIndexes() {
-    try{
-      loadEnabledIndexConfiguration(getEnabledIndexesConfig());
-    } catch(IllegalStateException ise){
-      MavenLogger.log("Unable to load the manually enabled indexes", ise);
-    }
-  }
-  
-  /**
-   * Loads all the indexes that the user has manually enabled
-   */
-  private Set<EnabledIndex> loadEnabledIndexConfiguration(File configFile) throws IllegalStateException {
-    LinkedHashSet<EnabledIndex> indexes = new LinkedHashSet<EnabledIndex>();
-    indexes.addAll(ExtensionReader.readEnabledIndexConfig(configFile));
-    //make sure that the repo/index listed in the .xml file is still in the settings.xml
-    List<String> hiddenRepos = getHiddenRepositoryNames();
-    for(EnabledIndex index : indexes) {
-      try{
-        if(hiddenRepos != null && hiddenRepos.contains(index.getName())){
-          this.enabledIndexes.put(index.getName(), index.getUrl());
-          this.indexManager.addIndexForRemote(index.getName(), index.getUrl());
-        }
-      } catch(IOException ie){
-        MavenLogger.log("Unable to add enabled index: "+index.getName(), ie);
-      }
-    }
-    return indexes;
-  }
-  
-  public List<Mirror> getMirrors(){
-    try{
-      IMaven maven = MavenPlugin.getDefault().getMaven();
-      Settings settings = maven.getSettings();
-      List<Mirror> mirrors = settings.getMirrors();
-      
-      return mirrors;
-    } catch(CoreException core){
-      MavenLogger.log(core);
-    }
-    return null;
-  }
-  
-  
-  /**
-   * The names of all repos specified in the settings.xml but are not active because of a mirror.
-   * @return
-   */
-  public List<String> getHiddenRepositoryNames(){
-    try{
-      IMaven maven = MavenPlugin.getDefault().getMaven();
-      List<Mirror> mirrorUrls = getMirrors();
-      if(mirrorUrls == null || mirrorUrls.size() == 0){
-        return null;
-      }
-      List<String> repoNames = new ArrayList<String>();
-      Map repos = maven.getSettings().getProfilesAsMap();
-      List<String> active = maven.getSettings().getActiveProfiles();
-      Set keys = repos.keySet();
-      Collection values = repos.values();
-      ArrayList<Profile> profileList = new ArrayList<Profile>();
-      for(Object key : keys){
-        Profile profile = (Profile)repos.get(key);
-        if(active.contains(profile.getId())){
-          profileList.add(profile);
-        }
-      }
-      for(Profile profile : profileList){
-        //List<Repository> pluginRepositories = profile.getPluginRepositories();
-        List<Repository> repositories = profile.getRepositories();
-        for(Repository rep : repositories){
-          String name = rep.getId();
-          repoNames.add(name);
-        }
-      }
-      return repoNames;
-    } catch(CoreException ce){
-      MavenLogger.log(ce);
-      return null;
-    }
-  }
-  
-  private void loadIndexConfiguration() throws IllegalStateException {
-    try{
-      //remove everything
-      List<ArtifactRepository> remoteRepositories = getRemoteRepositories(new NullProgressMonitor());
-      for(ArtifactRepository repo : remoteRepositories){
-        String url = repo.getUrl();
-        this.indexManager.addIndexForRemote(repo.getId(), url);
-      } 
 
-    } catch(Exception e){
-      String msg = "Unable to load remote repositories";
-      MavenLogger.log(msg, e);
-      getConsole().logError(msg);
-    }
-  }
-
-  public void addEnabledIndex(String name, String url){
-    enabledIndexes.put(name, url);
-    writeEnabledIndexes();
-  }
-  
-  public void removeEnabledIndex(String name, String url){
-    enabledIndexes.remove(name);
-    writeEnabledIndexes();
-  }
-  
   protected File getEnabledIndexesConfig(){
     File stateLocationDir = getStateLocation().toFile();
     return new File(stateLocationDir, PREFS_ENABLED_INDEXES);
   }
-  
-  /**
-   * 
-   */
-  private void writeEnabledIndexes() {
-    OutputStream os = null;
-    try {
-      os = new FileOutputStream(getEnabledIndexesConfig());
-      EnabledIndexWriter writer = new EnabledIndexWriter();
-      List<EnabledIndex> enabled = new ArrayList<EnabledIndex>();
-      Set<String> keySet = enabledIndexes.keySet();
-      List<String> hiddenRepos = getHiddenRepositoryNames();
-      if(keySet != null){
-        for(String key : keySet){
-          //only write it out if its still in the settings.xml as a hidden repo
-          if(hiddenRepos.contains(key)){
-            EnabledIndex index = new EnabledIndex(key, enabledIndexes.get(key));
-            enabled.add(index);
-          }
-        }
-      }
-      writer.writeIndexInfo(enabled, os);
-    } catch(IOException ex) {
-      MavenLogger.log("Unable to write enabled index", ex);
-    } finally {
-      if(os != null) {
-        try {
-          os.close();
-        } catch(IOException ex) {
-          MavenLogger.log("Unable to close stream for enabled index configuration", ex);
-        }
-      }
-    }
-  }
-
-//  void unzipFile(URL url, File dest) throws IOException {
-//
-//    InputStream is = new BufferedInputStream(url.openStream());
-//    ZipInputStream zis = new ZipInputStream(is);
-//    try {
-//      ZipEntry entry = zis.getNextEntry();
-//      while(entry != null) {
-//        File f = new File(dest, entry.getName());
-//        if(entry.isDirectory()) {
-//          f.mkdirs();
-//        } else {
-//          if(!f.getParentFile().exists()) {
-//            f.getParentFile().mkdirs();
-//          }
-//          OutputStream os = new BufferedOutputStream(new FileOutputStream(f));
-//          try {
-//            IOUtil.copy(zis, os);
-//          } finally {
-//            os.close();
-//          }
-//        }
-//        zis.closeEntry();
-//        entry = zis.getNextEntry();
-//      }
-//    } finally {
-//      zis.close();
-//    }
-//  }
-  
-//  private IndexInfo createCentralIndex() throws IllegalStateException {
-//    String indexId = "central";
-//    String repositoryUrl = CENTRAL_URL;
-//    IndexInfo indexInfo = new IndexInfo(indexId, null, repositoryUrl, IndexInfo.Type.REMOTE, false);
-//    indexInfo.setIndexUpdateUrl("");
-//    // Hook for integration tests. If plug-in contains a pre-processed central index then install it. 
-//    // This speeds up test execution significantly. 
-//    URL url = FileLocator.find(getBundle(), new Path("/indexes/maven-central.zip"), null);
-//    if (url != null) {
-//      installCachedMavenCentralIndex(url);
-//    }
-//    return indexInfo;
-//  }
-  
-//  private void installCachedMavenCentralIndex(final URL indexURL) {
-//    Job job = new Job("Installing maven central index.") {
-//
-//      public IStatus run(IProgressMonitor monitor) {
-//        try {
-//          monitor.beginTask("Installing index...", IProgressMonitor.UNKNOWN);
-//          unzipFile(indexURL, getStateLocation().toFile());
-//        } catch(Exception ex) {
-//          MavenLogger.log("Error unzipping maven central index", ex);
-//        } finally {
-//          monitor.done();
-//        }
-//        return Status.OK_STATUS;
-//      }
-//      
-//    };
-//    job.setRule(new ISchedulingRule() {
-//      public boolean contains(ISchedulingRule rule) {
-//        return rule == this;
-//      }
-//
-//      public boolean isConflicting(ISchedulingRule rule) {
-//        return rule == this || rule instanceof IndexUpdaterRule;
-//      }
-//      
-//    });
-//    job.schedule();
-//  }
-
 
   public void earlyStartup() {
     // nothing to do here, all startup work is done in #start(BundleContext)
@@ -876,14 +590,5 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
   public static String getVersion() {
     return plugin.version;
-  }
-
-  /**
-   * @param name
-   * @return
-   */
-  public boolean isEnabledIndex(String name) {
-    List<String> hidden = getHiddenRepositoryNames();
-    return enabledIndexes.containsKey(name) && hidden.contains(name);
   }
 }

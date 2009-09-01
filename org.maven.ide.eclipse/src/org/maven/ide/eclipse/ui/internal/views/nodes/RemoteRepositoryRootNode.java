@@ -9,19 +9,13 @@
 package org.maven.ide.eclipse.ui.internal.views.nodes;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.swt.graphics.Image;
 
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.settings.Mirror;
-import org.apache.maven.settings.Profile;
-import org.apache.maven.settings.Repository;
 
 import org.maven.ide.eclipse.MavenImages;
 import org.maven.ide.eclipse.MavenPlugin;
@@ -31,134 +25,75 @@ import org.maven.ide.eclipse.internal.index.NexusIndex;
 import org.maven.ide.eclipse.internal.index.NexusIndexManager;
 
 /**
- * RemoteRepositoryNode
- *
+ * Parent node for all configured artifact repositories and their mirrors.
+ * 
  * @author dyocum
  */
-public class RemoteRepositoryRootNode implements IMavenRepositoryNode{
+public class RemoteRepositoryRootNode implements IMavenRepositoryNode {
 
-  public List<ArtifactRepository> getRemoteRepositories() throws Exception{
-    IMaven maven = MavenPlugin.getDefault().getMaven();
-    
-    ArrayList<ArtifactRepository> repositories = new ArrayList<ArtifactRepository>();
-    List<ArtifactRepository> artifactRepositories = maven.getArtifactRepositories(new NullProgressMonitor());
-    List<ArtifactRepository> pluginArtifactRepository = maven.getPluginArtifactRepository(new NullProgressMonitor());
-    
-    repositories.addAll(artifactRepositories);
-    repositories.addAll(pluginArtifactRepository);
-    
-    List<ArtifactRepository> effectiveRepositories = maven.getEffectiveRepositories(repositories);
+  IMaven maven = MavenPlugin.getDefault().getMaven();
 
-    return effectiveRepositories;
+  public List<ArtifactRepository> getRemoteRepositories() throws Exception {
+    LinkedHashSet<ArtifactRepository> repositories = new LinkedHashSet<ArtifactRepository>();
+    repositories.addAll(maven.getArtifactRepositories(new NullProgressMonitor()));
+    repositories.addAll(maven.getPluginArtifactRepository(new NullProgressMonitor()));
+    return new ArrayList<ArtifactRepository>(repositories);
   }
 
-  public List<HiddenRepositoryNode> getHiddenRepositories() throws CoreException{
-   
-    IMaven maven = MavenPlugin.getDefault().getMaven();
-    List<Mirror> mirrorUrls = MavenPlugin.getDefault().getMirrors();
-    if(mirrorUrls == null || mirrorUrls.size() == 0){
-      return null;
-    }
-    List<HiddenRepositoryNode> repoNodes = new ArrayList<HiddenRepositoryNode>();
-    Map repos = maven.getSettings().getProfilesAsMap();
-    List<String> active = maven.getSettings().getActiveProfiles();
-    Set keys = repos.keySet();
-    Collection values = repos.values();
-    ArrayList<Profile> profileList = new ArrayList<Profile>();
-    for(Object key : keys){
-      Profile profile = (Profile)repos.get(key);
-      if(active.contains(profile.getId())){
-        profileList.add(profile);
-      }
-    }
-    for(Profile profile : profileList){
-      //List<Repository> pluginRepositories = profile.getPluginRepositories();
-      List<Repository> repositories = profile.getRepositories();
-      for(Repository rep : repositories){
-        String name = rep.getId();
-        String url = rep.getUrl();
-        HiddenRepositoryNode node = new HiddenRepositoryNode(name, url);
-        repoNodes.add(node);
-      }
-    }
-    return repoNodes;
-  }
-
-  
-  public boolean hasMirror(){
-    List<Mirror> mirrors = MavenPlugin.getDefault().getMirrors();
-    return mirrors != null && mirrors.size() > 0;
-  }
-
-  /* (non-Javadoc)
-   * @see org.maven.ide.eclipse.ui.internal.views.IMavenRepositoryRootNode#getElements()
-   */
   public Object[] getChildren() {
+    NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getDefault().getIndexManager();
+
+    LinkedHashSet<ArtifactRepository> mirrors = new LinkedHashSet<ArtifactRepository>();
+
     ArrayList<Object> repoList = new ArrayList<Object>();
-    try{
-       List<ArtifactRepository> repos = getRemoteRepositories();
-       if(repos != null){
-        for(ArtifactRepository repo : repos){
-          NexusIndex index = new NexusIndex(((NexusIndexManager)MavenPlugin.getDefault().getIndexManager()), repo.getId(), repo.getUrl());
-          IndexNode node = new IndexNode(index);
-          repoList.add(node);
-          if(isMirror(repo)){
-            node.setMirror(true);
-          }
+    try {
+      for(ArtifactRepository repo : getRemoteRepositories()) {
+        ArtifactRepository mirror = maven.getMirror(repo);
+
+        NexusIndex index;
+        if (mirror == null) {
+          index = new NexusIndex(indexManager, repo.getUrl());
+        } else {
+          index = null;
+          mirrors.add(mirror);
         }
-        List<HiddenRepositoryNode> hiddenRepos = getHiddenRepositories();
-        if(hiddenRepos != null){
-          repoList.addAll(hiddenRepos);
-        }
+
+        RepositoryNode repoNode = new RepositoryNode(indexManager, index, repo, mirror);
+
+        repoList.add(repoNode);
       }
-    } catch(Exception e){
+
+      for (ArtifactRepository mirror : mirrors) {
+        NexusIndex index = new NexusIndex(indexManager, mirror.getUrl());
+        RepositoryNode mirrorNode = new RepositoryNode(indexManager, index, mirror, null);
+        repoList.add(0, mirrorNode);
+      }
+    } catch(Exception e) {
       MavenLogger.log("Unable to load remote repositories", e);
     }
     return repoList.toArray(new Object[repoList.size()]);
   }
 
-  private boolean isMirror(ArtifactRepository repo){
-    List<Mirror> mirrors = MavenPlugin.getDefault().getMirrors();
-    for(Mirror mirror : mirrors){
-      if(mirror.getId().equals(repo.getId())){
-        return true;
-      }
-    }
-    return false;
-  }
-  /* (non-Javadoc)
-   * @see org.maven.ide.eclipse.ui.internal.views.IMavenRepositoryRootNode#getName()
-   */
   public String getName() {
     return "Remote Repositories";
   }
-  
-  public String toString(){
+
+  public String toString() {
     return getName();
   }
 
-  /* (non-Javadoc)
-   * @see org.maven.ide.eclipse.ui.internal.views.IMavenRepositoryNode#hasChildren()
-   */
   public boolean hasChildren() {
     Object[] kids = getChildren();
     return kids != null && kids.length > 0;
   }
 
-  /* (non-Javadoc)
-   * @see org.maven.ide.eclipse.ui.internal.views.nodes.IMavenRepositoryNode#getImage()
-   */
   public Image getImage() {
     return MavenImages.IMG_INDEXES;
   }
 
-  /* (non-Javadoc)
-   * @see org.maven.ide.eclipse.ui.internal.views.nodes.IMavenRepositoryNode#isUpdating()
-   */
   public boolean isUpdating() {
     // TODO Auto-generated method isUpdating
     return false;
   }
-  
-  
+
 }

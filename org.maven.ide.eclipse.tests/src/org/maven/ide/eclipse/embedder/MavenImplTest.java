@@ -70,14 +70,6 @@ public class MavenImplTest extends TestCase {
       assertEquals("http:customremote", repositories.get(1).getUrl());
       assertEquals("http:customrepo", repositories.get(2).getUrl());
 
-
-      // effective repositories
-      // DISABLED because of workaround for https://issues.sonatype.org/browse/MNGECLIPSE-1553
-//      repositories = maven.getEffectiveRepositories(repositories);
-//      assertEquals(2, repositories.size());
-//      assertEquals("nexus", repositories.get(0).getId());
-//      assertEquals("custom", repositories.get(1).getId());
-      
       // plugin repositories
       repositories = maven.getPluginArtifactRepository(monitor);
       assertEquals(2, repositories.size());

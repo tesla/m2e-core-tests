@@ -20,8 +20,6 @@ import java.util.Date;
  */
 public class IndexInfo {
 
-  private final String indexName;
-
   private final File repositoryDir;
 
   private final String repositoryUrl;
@@ -41,16 +39,11 @@ public class IndexInfo {
   private String displayName;
   
 
-  public IndexInfo(String indexName, File repositoryDir, String repositoryUrl, Type type, boolean isShort) {
-    this.indexName = indexName;
+  public IndexInfo(File repositoryDir, String repositoryUrl, Type type, boolean isShort) {
     this.repositoryDir = repositoryDir;
     this.repositoryUrl = repositoryUrl;
     this.type = type;
     this.isShort = isShort;
-  }
-
-  public String getIndexName() {
-    return indexName;
   }
 
   public File getRepositoryDir() {
@@ -102,16 +95,16 @@ public class IndexInfo {
   }
   
   public boolean equals(Object obj) {
-    if(obj instanceof IndexInfo) {
-      return getIndexName().equals(((IndexInfo) obj).getIndexName());
+    if(!(obj instanceof IndexInfo)) {
+      return false;
     }
-    return false;
+    IndexInfo other = (IndexInfo) obj;
+    return repositoryUrl.equals(other.repositoryUrl);
   }
-  
+
   public int hashCode() {
-    return getIndexName().hashCode();
+    return repositoryUrl.hashCode();
   }
-  
   
   /**
    * @param displayName The displayName to set.

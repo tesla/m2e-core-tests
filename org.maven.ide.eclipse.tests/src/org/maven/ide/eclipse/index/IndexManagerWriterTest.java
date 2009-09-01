@@ -16,10 +16,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import junit.framework.TestCase;
+
 import org.maven.ide.eclipse.internal.index.IndexInfo;
 import org.maven.ide.eclipse.internal.index.IndexInfoWriter;
-
-import junit.framework.TestCase;
 
 public class IndexManagerWriterTest extends TestCase {
 
@@ -27,16 +27,13 @@ public class IndexManagerWriterTest extends TestCase {
     
     Collection<IndexInfo> indexes = new ArrayList<IndexInfo>();
 
-    IndexInfo indexJavaNet = new IndexInfo("java.net", null, //
-        "http://download.java.net/maven/2/", IndexInfo.Type.REMOTE, false);
+    IndexInfo indexJavaNet = new IndexInfo(null, "http://download.java.net/maven/2/", IndexInfo.Type.REMOTE, false);
     indexes.add(indexJavaNet);
 
-    IndexInfo indexCodehaus = new IndexInfo("codehaus", null,
-        "http://repository.codehaus.org/", IndexInfo.Type.REMOTE, false);
+    IndexInfo indexCodehaus = new IndexInfo(null, "http://repository.codehaus.org/", IndexInfo.Type.REMOTE, false);
     indexes.add(indexCodehaus);
     
-    IndexInfo indexCodehausSnapshots = new IndexInfo("codehaus.snapshots", null,
-        "http://snapshots.repository.codehaus.org/", IndexInfo.Type.REMOTE, false);
+    IndexInfo indexCodehausSnapshots = new IndexInfo(null, "http://snapshots.repository.codehaus.org/", IndexInfo.Type.REMOTE, false);
     indexes.add(indexCodehausSnapshots);
 
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -47,7 +44,7 @@ public class IndexManagerWriterTest extends TestCase {
     Map<String, IndexInfo> readIndexMap = new HashMap<String, IndexInfo>();
     Collection<IndexInfo> readIndexes = writer.readIndexInfo(new ByteArrayInputStream(bos.toByteArray()));
     for(IndexInfo info : readIndexes) {
-      readIndexMap.put(info.getIndexName(), info);
+      readIndexMap.put(info.getRepositoryUrl(), info);
     }
     
     assertEquals(indexes.size(), readIndexes.size());
@@ -57,7 +54,6 @@ public class IndexManagerWriterTest extends TestCase {
   }
 
   public void assertEquals(IndexInfo i1, IndexInfo i2) {
-    assertEquals(i1.getIndexName(), i2.getIndexName());
     assertEquals(i1.getRepositoryUrl(), i2.getRepositoryUrl());
     assertEquals(i1.getRepositoryDir(), i2.getRepositoryDir());
     assertEquals(i1.getArchiveUrl(), i2.getArchiveUrl());

@@ -54,11 +54,12 @@ import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.internal.index.IndexedArtifactGroup;
+import org.maven.ide.eclipse.internal.index.NexusIndex;
 import org.maven.ide.eclipse.internal.index.NexusIndexManager;
-import org.maven.ide.eclipse.ui.internal.views.nodes.HiddenRepositoryNode;
+import org.maven.ide.eclipse.ui.internal.views.nodes.AbstractIndexedRepositoryNode;
 import org.maven.ide.eclipse.ui.internal.views.nodes.IArtifactNode;
-import org.maven.ide.eclipse.ui.internal.views.nodes.IndexNode;
 import org.maven.ide.eclipse.ui.internal.views.nodes.IndexedArtifactFileNode;
+import org.maven.ide.eclipse.ui.internal.views.nodes.RepositoryNode;
 
 
 /**
@@ -103,7 +104,6 @@ public class MavenRepositoryView extends ViewPart {
     contentProvider = new RepositoryViewContentProvider();
     viewer.setContentProvider(contentProvider);
     viewer.setLabelProvider(new RepositoryViewLabelProvider(viewer.getTree().getFont()));
-    viewer.setSorter(new RepositoryViewerSorter());
     
     viewer.addDoubleClickListener(new IDoubleClickListener() {
       public void doubleClick(DoubleClickEvent event) {
@@ -183,15 +183,11 @@ public class MavenRepositoryView extends ViewPart {
     ArrayList<String> list = new ArrayList<String>();
     for(int i=0;i<elements.size();i++){
       Object elem = elements.get(i);
-      if(elem instanceof IndexNode){
-        IndexNode node = (IndexNode)elem;
-        if(!node.isWorkspace()){
-          list.add(((IndexNode)elem).getIndexName());
-        }
-      } else if(elem instanceof HiddenRepositoryNode){
-        if(((HiddenRepositoryNode)elem).isEnabledIndex()){
-          String name = ((HiddenRepositoryNode)elem).getRepoName();
-          list.add(name);
+      if(elem instanceof AbstractIndexedRepositoryNode){
+        AbstractIndexedRepositoryNode node = (AbstractIndexedRepositoryNode)elem;
+        NexusIndex index = node.getIndex();
+        if(index!=null) {
+          list.add(index.getIndexName());
         }
       }
     }
@@ -253,7 +249,7 @@ public class MavenRepositoryView extends ViewPart {
         if(res){
           Job job = new WorkspaceJob("Reloading settings.xml"){
             public IStatus runInWorkspace(IProgressMonitor monitor){
-              MavenPlugin.getDefault().reloadSettingsXml();
+//              MavenPlugin.getDefault().reloadSettingsXml();
               return Status.OK_STATUS;
             }
           };
@@ -355,12 +351,6 @@ public class MavenRepositoryView extends ViewPart {
       }
 
       protected boolean updateSelection(IStructuredSelection selection) {
-        if(selection.getFirstElement() instanceof HiddenRepositoryNode){
-          HiddenRepositoryNode node = ((HiddenRepositoryNode)selection.getFirstElement());
-          this.isEnabled =  MavenPlugin.getDefault().isEnabledIndex(node.getRepoName()); 
-          this.setText(this.isEnabled ? "Disable Index" : "Enable Index");
-          return true;
-        } 
         return false;
       }
     };
@@ -389,8 +379,8 @@ public class MavenRepositoryView extends ViewPart {
       public void run() {
         Object element = getStructuredSelection().getFirstElement();
         String url = null;
-        if(element instanceof IndexNode) {
-          url = ((IndexNode) element).getRepositoryUrl();
+        if(element instanceof RepositoryNode) {
+          url = ((RepositoryNode) element).getRepositoryUrl();
         } else if(element instanceof IndexedArtifactGroup) {
           IndexedArtifactGroup group = (IndexedArtifactGroup) element;
           String repositoryUrl = group.getRepositoryUrl();
@@ -412,7 +402,7 @@ public class MavenRepositoryView extends ViewPart {
 
       protected boolean updateSelection(IStructuredSelection selection) {
         Object element = selection.getFirstElement();
-        return element instanceof IndexNode;
+        return element instanceof RepositoryNode;
       }
     };
     copyUrlAction.setToolTipText("Copy URL to Clipboard");
@@ -450,8 +440,8 @@ public class MavenRepositoryView extends ViewPart {
   protected void enableIndex(boolean enable) {
     ISelection selection = viewer.getSelection();
     Object element = ((IStructuredSelection) selection).getFirstElement();
-    if(element instanceof HiddenRepositoryNode) {
-      HiddenRepositoryNode node = (HiddenRepositoryNode)element;
+    if(element instanceof RepositoryNode) {
+      RepositoryNode node = (RepositoryNode)element;
       String msg = "";
       if(enable){
         msg = "Are you sure you want to enable the index '"+node.getRepoName()+"'. This will allow the index to be used for dependency resolution, but it will NOT be used during a maven build.";
@@ -467,22 +457,22 @@ public class MavenRepositoryView extends ViewPart {
       
       if(ok){
         NexusIndexManager im = (NexusIndexManager)MavenPlugin.getDefault().getIndexManager();
-        if(enable){
-          try{
-            MavenPlugin.getDefault().addEnabledIndex(node.getRepoName(), node.getRepoUrl());
-            im.addIndexForRemote(node.getRepoName(), node.getRepoUrl());
-            im.scheduleIndexUpdate(node.getRepoName(), false, 1000);
-          } catch(Exception e){
-            MavenLogger.log("Unable to enable index "+node.getName(), e);
-          }
-        } else {
-          try{
-            MavenPlugin.getDefault().removeEnabledIndex(node.getRepoName(), node.getRepoUrl());
-            im.removeIndex(node.getRepoName(), false);
-          } catch(Exception e){
-            MavenLogger.log("Unable to enable index "+node.getName(), e);
-          }
-        }
+//        if(enable){
+//          try{
+//            MavenPlugin.getDefault().addEnabledIndex(node.getRepoName(), node.getRepositoryUrl());
+//            im.addIndexForRemote(node.getRepoName(), node.getRepoUrl());
+//            im.scheduleIndexUpdate(node.getRepoName(), false, 1000);
+//          } catch(Exception e){
+//            MavenLogger.log("Unable to enable index "+node.getName(), e);
+//          }
+//        } else {
+//          try{
+//            MavenPlugin.getDefault().removeEnabledIndex(node.getRepoName(), node.getRepoUrl());
+//            im.removeIndex(node.getRepoName(), false);
+//          } catch(Exception e){
+//            MavenLogger.log("Unable to enable index "+node.getName(), e);
+//          }
+//        }
       }
     }
   }

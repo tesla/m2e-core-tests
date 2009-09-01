@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 
 import org.codehaus.plexus.MutablePlexusContainer;
@@ -74,9 +75,9 @@ import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.project.ProjectBuildingResult;
+import org.apache.maven.repository.MirrorBuilder;
 import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.settings.MavenSettingsBuilder;
-import org.apache.maven.settings.Mirror;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.settings.SettingsUtils;
 import org.apache.maven.settings.validation.SettingsValidationResult;
@@ -115,6 +116,8 @@ public class MavenImpl implements IMaven {
   private final LifecycleExecutor lifecycleExecutor;
 
   private final ConverterLookup converterLookup = new DefaultConverterLookup();
+  
+  private final MirrorBuilder mirrorBuilder;
 
   private MavenConsole console;
 
@@ -133,6 +136,7 @@ public class MavenImpl implements IMaven {
       this.populator = plexus.lookup(MavenExecutionRequestPopulator.class);
       this.pluginManager = plexus.lookup(BuildPluginManager.class);
       this.lifecycleExecutor = plexus.lookup(LifecycleExecutor.class);
+      this.mirrorBuilder = plexus.lookup(MirrorBuilder.class);
     } catch(ComponentLookupException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
           "Could not lookup required component", ex));
@@ -471,22 +475,16 @@ public class MavenImpl implements IMaven {
     return new ArrayList<ArtifactRepository>(repositories);
   }
 
-  public List<String> getMirrorUrls() throws CoreException {
-    ArrayList<String> result = new ArrayList<String>();
-    for(Mirror mirror : getSettings().getMirrors()) {
-      result.add(mirror.getUrl());
+  public ArtifactRepository getMirror(ArtifactRepository repo) {
+    // XXX workaround for https://issues.sonatype.org/browse/MNGECLIPSE-1553
+    try {
+      populateDefaults(createExecutionRequest(new NullProgressMonitor()));
+    } catch(CoreException ex) {
+      MavenLogger.log(ex);
     }
-    return result;
-  }
-
-  public List<ArtifactRepository> getEffectiveRepositories(List<ArtifactRepository> repositories) {
-    if(repositories == null) {
-      return null;
-    }
-    repositories = repositorySystem.getMirrors(repositories);
-    return repositorySystem.getEffectiveRepositories(repositories);
-  }
-
+    return mirrorBuilder.getMirror(repo);
+  };
+  
   /*
    * This is not exactly nice, MavenImpl and NexusIndexManager depend on each other.
    * 

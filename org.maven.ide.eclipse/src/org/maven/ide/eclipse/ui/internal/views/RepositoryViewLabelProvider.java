@@ -19,8 +19,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
-import org.maven.ide.eclipse.ui.internal.views.nodes.HiddenRepositoryNode;
 import org.maven.ide.eclipse.ui.internal.views.nodes.IMavenRepositoryNode;
+import org.maven.ide.eclipse.ui.internal.views.nodes.RepositoryNode;
 import org.maven.ide.eclipse.util.Util;
 
 /**
@@ -59,28 +59,21 @@ public class RepositoryViewLabelProvider extends LabelProvider implements IColor
     }
     return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_ELEMENT);
   }
-  /* (non-Javadoc)
-   * @see org.eclipse.jface.viewers.IColorProvider#getBackground(java.lang.Object)
-   */
+
   public Color getBackground(Object element) {
     return null;
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
-   */
   public Color getForeground(Object element) {
-    if(element instanceof HiddenRepositoryNode){
-      if(((HiddenRepositoryNode)element).isEnabledIndex()){
+    if(element instanceof RepositoryNode){
+      if(((RepositoryNode)element).isEnabledIndex()){
         return Display.getDefault().getSystemColor(SWT.COLOR_BLACK);
       }
       return Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
     } 
     return Display.getDefault().getSystemColor(SWT.COLOR_BLACK);
   }
-  /* (non-Javadoc)
-   * @see org.eclipse.jface.viewers.IFontProvider#getFont(java.lang.Object)
-   */
+
   public Font getFont(Object element) {
     if(element instanceof IMavenRepositoryNode){
       boolean updating = ((IMavenRepositoryNode)element).isUpdating();
