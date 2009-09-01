@@ -671,14 +671,12 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
   }
   
   private List<ArtifactRepository> getEffectiveRepositories() throws CoreException{
-    List<ArtifactRepository> allRepos = new ArrayList<ArtifactRepository>();
-    List<ArtifactRepository> artifactRepositories = maven.getArtifactRepositories(new NullProgressMonitor());
-    List<ArtifactRepository> pluginArtifactRepository = maven.getPluginArtifactRepository(new NullProgressMonitor());
-    allRepos.addAll(artifactRepositories);
-    allRepos.addAll(pluginArtifactRepository);
+    ArrayList<ArtifactRepository> allRepos = new ArrayList<ArtifactRepository>();
+    allRepos.addAll(maven.getArtifactRepositories(new NullProgressMonitor()));
+    allRepos.addAll(maven.getPluginArtifactRepository(new NullProgressMonitor()));
     return maven.getEffectiveRepositories(allRepos);
   }
-  
+
   private AuthenticationInfo getAuthenticationInfo(String indexName) throws CoreException{
     AuthenticationInfo info = new AuthenticationInfo();
     List<ArtifactRepository> effectiveRepositories = getEffectiveRepositories();

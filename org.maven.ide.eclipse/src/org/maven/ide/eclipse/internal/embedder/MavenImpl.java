@@ -15,7 +15,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -56,6 +59,8 @@ import org.apache.maven.execution.MavenSession;
 import org.apache.maven.lifecycle.LifecycleExecutor;
 import org.apache.maven.lifecycle.MavenExecutionPlan;
 import org.apache.maven.model.Model;
+import org.apache.maven.model.Profile;
+import org.apache.maven.model.Repository;
 import org.apache.maven.model.building.ModelBuildingRequest;
 import org.apache.maven.model.io.ModelReader;
 import org.apache.maven.model.io.ModelWriter;
@@ -73,6 +78,7 @@ import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.settings.MavenSettingsBuilder;
 import org.apache.maven.settings.Mirror;
 import org.apache.maven.settings.Settings;
+import org.apache.maven.settings.SettingsUtils;
 import org.apache.maven.settings.validation.SettingsValidationResult;
 
 import org.maven.ide.eclipse.MavenPlugin;
@@ -425,17 +431,44 @@ public class MavenImpl implements IMaven {
   }
 
   public List<ArtifactRepository> getArtifactRepositories(IProgressMonitor monitor) throws CoreException {
-    return createPopulatedExecutionRequest(monitor).getRemoteRepositories();
+    Set<ArtifactRepository> repositories = new LinkedHashSet<ArtifactRepository>();
+    for(Profile profile : getActiveProfiles()) {
+      addArtifactRepositories(repositories, profile.getRepositories());
+    }
+
+    return new ArrayList<ArtifactRepository>(repositories);
   }
 
-  private MavenExecutionRequest createPopulatedExecutionRequest(IProgressMonitor monitor) throws CoreException {
-    MavenExecutionRequest request = createExecutionRequest(monitor);
-    populateDefaults(request);
-    return request;
+  private void addArtifactRepositories(Set<ArtifactRepository> artifactRepositories, List<Repository> repositories) throws CoreException {
+    for(Repository repository : repositories) {
+      try {
+        artifactRepositories.add(repositorySystem.buildArtifactRepository(repository));
+      } catch(InvalidRepositoryException ex) {
+        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
+            "Could not read settings.xml", ex));
+      }
+    }
+  }
+
+  private List<Profile> getActiveProfiles() throws CoreException {
+    Settings settings = getSettings();
+    Map<String,org.apache.maven.settings.Profile> profiles = settings.getProfilesAsMap();
+    ArrayList<Profile> activeProfiles = new ArrayList<Profile>();
+    for (String profileId : settings.getActiveProfiles()) {
+      org.apache.maven.settings.Profile settingsProfile = profiles.get(profileId);
+      Profile profile = SettingsUtils.convertFromSettingsProfile(settingsProfile);
+      activeProfiles.add(profile);
+    }
+    return activeProfiles;
   }
 
   public List<ArtifactRepository> getPluginArtifactRepository(IProgressMonitor monitor) throws CoreException {
-    return createPopulatedExecutionRequest(monitor).getPluginArtifactRepositories();
+    Set<ArtifactRepository> repositories = new LinkedHashSet<ArtifactRepository>();
+    for(Profile profile : getActiveProfiles()) {
+      addArtifactRepositories(repositories, profile.getPluginRepositories());
+    }
+
+    return new ArrayList<ArtifactRepository>(repositories);
   }
 
   public List<String> getMirrorUrls() throws CoreException {
@@ -450,6 +483,7 @@ public class MavenImpl implements IMaven {
     if(repositories == null) {
       return null;
     }
+    repositories = repositorySystem.getMirrors(repositories);
     return repositorySystem.getEffectiveRepositories(repositories);
   }
 
