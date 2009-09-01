@@ -176,22 +176,16 @@ public class MavenRepositoryView extends ViewPart {
     manager.add(reloadSettings);
   }
 
-  protected List<String> getIndexesToUpdate(List elements){
-    if(elements == null || elements.size() == 0){
-      return null;
-    }
-    ArrayList<String> list = new ArrayList<String>();
-    for(int i=0;i<elements.size();i++){
-      Object elem = elements.get(i);
-      if(elem instanceof AbstractIndexedRepositoryNode){
-        AbstractIndexedRepositoryNode node = (AbstractIndexedRepositoryNode)elem;
-        NexusIndex index = node.getIndex();
-        if(index!=null) {
-          list.add(index.getIndexName());
+  protected List<AbstractIndexedRepositoryNode> getSelectedRepositoryNodes(List elements){
+    ArrayList<AbstractIndexedRepositoryNode> list = new ArrayList<AbstractIndexedRepositoryNode>();
+    if (elements != null) {
+      for(int i=0;i<elements.size();i++){
+        Object elem = elements.get(i);
+        if(elem instanceof AbstractIndexedRepositoryNode) {
+          list.add((AbstractIndexedRepositoryNode)elem);
         }
       }
     }
-    
     return list;
   }
   protected List<IArtifactNode> getArtifactNodes(List elements){
@@ -282,20 +276,27 @@ public class MavenRepositoryView extends ViewPart {
     
     updateAction = new BaseSelectionListenerAction("Update Index") {
       public void run() {
-        List<String> names = getIndexesToUpdate(getStructuredSelection().toList());
-        for(String name : names){
-          updateIndex(name, false);
+        List<AbstractIndexedRepositoryNode> nodes = getSelectedRepositoryNodes(getStructuredSelection().toList());
+        for(AbstractIndexedRepositoryNode node : nodes) {
+          if (node instanceof RepositoryNode) {
+            updateIndex(((RepositoryNode) node).getRepositoryUrl(), false);
+          }
         }
       }
 
       protected boolean updateSelection(IStructuredSelection selection) {
-        List<String> elems = getIndexesToUpdate(selection.toList());
-        if(elems != null && elems.size() > 1){
+        int repoCount = 0; 
+        for (AbstractIndexedRepositoryNode node : getSelectedRepositoryNodes(getStructuredSelection().toList())) {
+          if (node instanceof RepositoryNode) {
+            repoCount ++;
+          }
+        }
+        if(repoCount > 1){
           setText("Update Indexes");
         } else {
           setText("Update Index");
         }
-        return elems != null && elems.size() > 0;
+        return repoCount > 0;
       }
     };
     updateAction.setToolTipText("Update repository index");
@@ -303,17 +304,20 @@ public class MavenRepositoryView extends ViewPart {
 
     rebuildAction = new BaseSelectionListenerAction("Rebuild Index") {
       public void run() {
-        List<String> elemsToUpdate = getIndexesToUpdate(getStructuredSelection().toList());
-        if(elemsToUpdate != null && elemsToUpdate.size() > 0){
-          if(elemsToUpdate.size() == 1){
-            String name = elemsToUpdate.get(0);
-            String msg = "Are you sure you want to rebuild the index '"+name+"'";
-            boolean res = MessageDialog.openConfirm(getViewSite().getShell(), //
-                "Rebuild Index", msg);
-            if(res) {
-              // TODO request index deletion
-              // TODO add deleted index to 
-              updateIndex(name, true);
+        List<AbstractIndexedRepositoryNode> nodes = getSelectedRepositoryNodes(getStructuredSelection().toList());
+        if(nodes.size() > 0){
+          if(nodes.size() == 1){
+            NexusIndex index = nodes.get(0).getIndex();
+            if (index != null) {
+              String repositoryUrl = index.getRepositoryUrl();
+              String msg = "Are you sure you want to rebuild the index '"+repositoryUrl+"'";
+              boolean res = MessageDialog.openConfirm(getViewSite().getShell(), //
+                  "Rebuild Index", msg);
+              if(res) {
+                // TODO request index deletion
+                // TODO add deleted index to 
+                updateIndex(repositoryUrl, true);
+              }
             }
           } else {
             String msg = "Are you sure you want to rebuild the selected indexes?";
@@ -322,8 +326,11 @@ public class MavenRepositoryView extends ViewPart {
             if(res) {
               // TODO request index deletion
               // TODO add deleted index to 
-              for(String name : elemsToUpdate){
-                updateIndex(name, true);
+              for(AbstractIndexedRepositoryNode node : nodes){
+                NexusIndex index = node.getIndex();
+                if (index != null) {
+                  updateIndex(index.getRepositoryUrl(), true);
+                }
               }
             }            
           }
@@ -331,13 +338,18 @@ public class MavenRepositoryView extends ViewPart {
       }
       
       protected boolean updateSelection(IStructuredSelection selection) {
-        List<String> elems = getIndexesToUpdate(selection.toList());
-        if(elems != null && elems.size() > 1){
+        int indexCount = 0;
+        for (AbstractIndexedRepositoryNode node : getSelectedRepositoryNodes(selection.toList())) {
+          if (node.getIndex() != null) {
+            indexCount ++;
+          }
+        }
+        if(indexCount > 1){
           setText("Rebuild Indexes");
         } else {
           setText("Rebuild Index");
         }
-        return elems != null && elems.size() > 0;
+        return indexCount > 0;
       }
     };
     
@@ -520,10 +532,10 @@ public class MavenRepositoryView extends ViewPart {
     });
   };
 
-  protected void updateIndex(final String indexName, boolean force){
+  protected void updateIndex(final String repositoryUrl, boolean force){
     try{
       IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
-      indexManager.scheduleIndexUpdate(indexName, force, 1L);
+      indexManager.scheduleIndexUpdate(repositoryUrl, force, 1L);
     } catch(CoreException ce){
       MavenLogger.log(ce);
     }
