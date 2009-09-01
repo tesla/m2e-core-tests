@@ -1,6 +1,8 @@
 
 package org.maven.ide.eclipse.integration.tests;
 
+import java.io.File;
+
 import org.codehaus.plexus.util.FileUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IClasspathContainer;
@@ -10,6 +12,9 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.IViewPart;
+import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.embedder.IMavenConfiguration;
+import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.jdt.BuildPathManager;
 
 import com.windowtester.runtime.IUIContext;
@@ -30,12 +35,18 @@ import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
 public class MEclipse193IndexerTest extends UIIntegrationTestCase {
 
   public MEclipse193IndexerTest(){
-    super();
-    try{
-      super.cancelIndexJobs();
-    } catch(Exception e){
-    }
   }
+  
+  protected void oneTimeSetup()throws Exception{
+    File projectDir = unzipProject("projects/m2.zip");
+    File settingsXML = new File(projectDir.getAbsolutePath() + "/m2/settings.xml");
+    IMavenConfiguration mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
+    mavenConfiguration.setUserSettingsFile(settingsXML.getAbsolutePath());
+    IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
+    indexManager.getWorkspaceIndex().scheduleIndexUpdate(true, 0L);
+    super.oneTimeSetup();
+  }
+  
   public void setUp() throws Exception {
     super.setUp();
     FileUtils
