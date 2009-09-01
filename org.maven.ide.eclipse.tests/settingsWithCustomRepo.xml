@@ -21,8 +21,18 @@
           </snapshots>
         </repository>
         <repository>
+          <id>customremote</id>
+          <url>http:customremote</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </repository>
+        <repository>
           <id>custom</id>
-          <url>file:customrepo</url>
+          <url>http:customrepo</url>
           <releases>
             <enabled>true</enabled>
           </releases>
@@ -44,7 +54,7 @@
         </pluginRepository>
         <pluginRepository>
           <id>custom</id>
-          <url>file:customrepo</url>
+          <url>http:customrepo</url>
           <releases>
             <enabled>true</enabled>
           </releases>
@@ -69,7 +79,7 @@
         </repository>
         <repository>
           <id>custom</id>
-          <url>file:customrepo</url>
+          <url>http:customrepo</url>
           <releases>
             <enabled>true</enabled>
           </releases>
@@ -91,7 +101,7 @@
         </pluginRepository>
         <pluginRepository>
           <id>custom</id>
-          <url>file:customrepo</url>
+          <url>http:customrepo</url>
           <releases>
             <enabled>true</enabled>
           </releases>

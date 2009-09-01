@@ -65,24 +65,24 @@ public class MavenImplTest extends TestCase {
       
       // artifact repositories
       repositories = maven.getArtifactRepositories(monitor);
-      assertEquals(2, repositories.size());
+      assertEquals(3, repositories.size());
       assertEquals("http://central", repositories.get(0).getUrl());
-      assertEquals("file:customrepo", repositories.get(1).getUrl());
+      assertEquals("http:customremote", repositories.get(1).getUrl());
+      assertEquals("http:customrepo", repositories.get(2).getUrl());
+
+
+      // effective repositories
+      // DISABLED because of workaround for https://issues.sonatype.org/browse/MNGECLIPSE-1553
+//      repositories = maven.getEffectiveRepositories(repositories);
+//      assertEquals(2, repositories.size());
+//      assertEquals("nexus", repositories.get(0).getId());
+//      assertEquals("custom", repositories.get(1).getId());
       
       // plugin repositories
       repositories = maven.getPluginArtifactRepository(monitor);
       assertEquals(2, repositories.size());
       assertEquals("http://central", repositories.get(0).getUrl());
-      assertEquals("file:customrepo", repositories.get(1).getUrl());      
-
-      // workaround for https://issues.sonatype.org/browse/MNGECLIPSE-1553
-      maven.populateDefaults(maven.createExecutionRequest(monitor));
-
-      // effective repositories
-      repositories = maven.getEffectiveRepositories(repositories);
-      assertEquals(2, repositories.size());
-      assertEquals("nexus", repositories.get(0).getId());
-      assertEquals("custom", repositories.get(1).getId());
+      assertEquals("http:customrepo", repositories.get(1).getUrl());      
     } finally {
       configuration.setUserSettingsFile(origSettings);
     }
