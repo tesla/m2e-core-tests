@@ -25,6 +25,7 @@ import org.apache.maven.lifecycle.MavenExecutionPlan;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.settings.Mirror;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.settings.validation.SettingsValidationResult;
 
@@ -98,7 +99,7 @@ public interface IMaven {
 
   public SettingsValidationResult validateSettings(String settings);
 
-  public ArtifactRepository getMirror(ArtifactRepository repo);
+  public Mirror getMirror(ArtifactRepository repo) throws CoreException;
 
   /**
    * Temporary solution/workaround for http://jira.codehaus.org/browse/MNG-4194. Extensions realm is created each time

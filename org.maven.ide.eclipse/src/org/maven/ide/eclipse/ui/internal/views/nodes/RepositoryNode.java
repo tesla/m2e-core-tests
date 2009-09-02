@@ -9,6 +9,7 @@
 package org.maven.ide.eclipse.ui.internal.views.nodes;
 
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.settings.Mirror;
 
 import org.maven.ide.eclipse.internal.index.NexusIndex;
 import org.maven.ide.eclipse.internal.index.NexusIndexManager;
@@ -21,20 +22,20 @@ import org.maven.ide.eclipse.internal.index.NexusIndexManager;
 public class RepositoryNode extends AbstractIndexedRepositoryNode {
 
   private final ArtifactRepository repository;
-  private final ArtifactRepository effectiveMirror;
+  private final Mirror mirror;
 
-  public RepositoryNode(NexusIndexManager indexManager, NexusIndex index, ArtifactRepository repository, ArtifactRepository effectiveMirror){
+  public RepositoryNode(NexusIndexManager indexManager, NexusIndex index, ArtifactRepository repository, Mirror mirror){
     super(indexManager, index);
     this.repository = repository;
-    this.effectiveMirror = effectiveMirror;
+    this.mirror = mirror;
   }
 
   public String getName() {
     StringBuilder sb = new StringBuilder();
     sb.append(repository.getId());
     sb.append(" (").append(repository.getUrl()).append(")");
-    if (effectiveMirror != null) {
-      sb.append(" [mirrored by ").append(effectiveMirror.getId()).append("]");
+    if (mirror != null) {
+      sb.append(" [mirrored by ").append(mirror.getId()).append("]");
     }
     if (isUpdating()) {
       sb.append(" [updating]");

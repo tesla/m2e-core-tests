@@ -54,6 +54,7 @@ import org.apache.lucene.store.RAMDirectory;
 
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.Authentication;
+import org.apache.maven.settings.Mirror;
 import org.apache.maven.settings.Proxy;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
@@ -632,17 +633,17 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
           return info;
         }
       }
-      // yuck
-      ArtifactRepository mirror = maven.getMirror(repo);
-      if (mirror != null && repositoryURL.equals(mirror.getUrl())) {
-        Authentication authentication = mirror.getAuthentication();
-        if (authentication != null) {
-          AuthenticationInfo info = new AuthenticationInfo();
-          info.setUserName(authentication.getUsername());
-          info.setPassword(authentication.getPassword());
-          return info;
-        }
-      }
+//      // yuck
+//      Mirror mirror = maven.getMirror(repo);
+//      if (mirror != null && repositoryURL.equals(mirror.getUrl())) {
+//        Authentication authentication = repo.getAuthentication();
+//        if (authentication != null) {
+//          AuthenticationInfo info = new AuthenticationInfo();
+//          info.setUserName(authentication.getUsername());
+//          info.setPassword(authentication.getPassword());
+//          return info;
+//        }
+//      }
     }
     return null;
   }
@@ -723,7 +724,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
 
     LinkedHashSet<String> urls = new LinkedHashSet<String>();
     for (ArtifactRepository repo : repos) {
-      ArtifactRepository mirror = maven.getMirror(repo);
+      Mirror mirror = maven.getMirror(repo);
       urls.add(mirror != null? mirror.getUrl() : repo.getUrl());
     }
 

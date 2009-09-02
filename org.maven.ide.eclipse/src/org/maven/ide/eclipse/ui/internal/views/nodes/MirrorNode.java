@@ -8,56 +8,32 @@
 
 package org.maven.ide.eclipse.ui.internal.views.nodes;
 
-import org.eclipse.swt.graphics.Image;
-
 import org.apache.maven.settings.Mirror;
+
+import org.maven.ide.eclipse.internal.index.NexusIndex;
+import org.maven.ide.eclipse.internal.index.NexusIndexManager;
+
 
 /**
  * MirrorNode
- *
+ * 
  * @author dyocum
  */
-public class MirrorNode implements IMavenRepositoryNode {
+public class MirrorNode extends AbstractIndexedRepositoryNode {
 
   private Mirror mirror;
 
-  public MirrorNode(Mirror mirror){
+  public MirrorNode(NexusIndexManager indexManager, NexusIndex index, Mirror mirror) {
+    super(indexManager, index);
     this.mirror = mirror;
   }
-  /* (non-Javadoc)
-   * @see org.maven.ide.eclipse.ui.internal.views.nodes.IMavenRepositoryNode#getChildren()
-   */
-  public Object[] getChildren() {
-    return new Object[0];
-  }
 
-  /* (non-Javadoc)
-   * @see org.maven.ide.eclipse.ui.internal.views.nodes.IMavenRepositoryNode#getImage()
-   */
-  public Image getImage() {
-    return null;
-  }
-
-  /* (non-Javadoc)
-   * @see org.maven.ide.eclipse.ui.internal.views.nodes.IMavenRepositoryNode#getName()
-   */
   public String getName() {
-    return mirror.getUrl() + " (mirror)";
-  }
-
-  /* (non-Javadoc)
-   * @see org.maven.ide.eclipse.ui.internal.views.nodes.IMavenRepositoryNode#hasChildren()
-   */
-  public boolean hasChildren() {
-    Object[] kids = getChildren();
-    return kids != null && kids.length > 0;
-  }
-  /* (non-Javadoc)
-   * @see org.maven.ide.eclipse.ui.internal.views.nodes.IMavenRepositoryNode#isUpdating()
-   */
-  public boolean isUpdating() {
-    // TODO Auto-generated method isUpdating
-    return false;
+    StringBuilder sb = new StringBuilder();
+    sb.append(mirror.getId());
+    sb.append(" (").append(mirror.getUrl()).append(")");
+    sb.append(" [mirrorOf=").append(mirror.getMirrorOf()).append("]");
+    return sb.toString();
   }
 
 }
