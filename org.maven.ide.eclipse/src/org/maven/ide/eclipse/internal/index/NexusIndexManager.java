@@ -8,10 +8,8 @@
 
 package org.maven.ide.eclipse.internal.index;
 
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -25,8 +23,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -49,8 +45,6 @@ import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.store.IndexOutput;
-import org.apache.lucene.store.RAMDirectory;
 
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.Authentication;
@@ -67,13 +61,10 @@ import org.sonatype.nexus.artifact.M2GavCalculator;
 import org.sonatype.nexus.index.ArtifactAvailablility;
 import org.sonatype.nexus.index.ArtifactContext;
 import org.sonatype.nexus.index.ArtifactInfo;
-import org.sonatype.nexus.index.ArtifactScanningListener;
 import org.sonatype.nexus.index.FlatSearchRequest;
 import org.sonatype.nexus.index.FlatSearchResponse;
 import org.sonatype.nexus.index.NexusIndexer;
-import org.sonatype.nexus.index.ScanningResult;
 import org.sonatype.nexus.index.context.IndexCreator;
-import org.sonatype.nexus.index.context.IndexUtils;
 import org.sonatype.nexus.index.context.IndexingContext;
 import org.sonatype.nexus.index.locator.PomLocator;
 import org.sonatype.nexus.index.updater.IndexUpdateRequest;
@@ -210,7 +201,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
   }
 
 
-  public IndexedArtifactFile getIndexedArtifactFile(String indexName, ArtifactKey gav) throws CoreException {
+  public IndexedArtifactFile getIndexedArtifactFile(String repositoryUrl, ArtifactKey gav) throws CoreException {
 
     try {
 //      Gav gav = gavCalculator.pathToGav(documentKey);
@@ -219,7 +210,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
           gav.getArtifactId(), gav.getVersion(), gav.getClassifier());
       
       TermQuery query = new TermQuery(new Term(ArtifactInfo.UINFO, key));
-      ArtifactInfo artifactInfo = getIndexer().identify(query, Collections.singleton(getIndexingContext(indexName)));
+      ArtifactInfo artifactInfo = getIndexer().identify(query, Collections.singleton(getIndexingContext(repositoryUrl)));
       if(artifactInfo != null) {
         return getIndexedArtifactFile(artifactInfo);
       }
@@ -501,17 +492,6 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
   }
 
-  public ArtifactContext getArtifactContext(String documentKey, String repository) throws IllegalArtifactCoordinateException{
-    Gav gav = gavCalculator.pathToGav(documentKey);
-    ArtifactInfo ai = new ArtifactInfo(repository, gav.getGroupId(), gav.getArtifactId(), gav.getVersion(), gav.getClassifier());
-
-    File pomFile = null;
-    File artifactFile = null;
-
-    return new ArtifactContext(pomFile, artifactFile, null, ai, gav);
-   
-  }
-  
   private ArtifactContext getArtifactContext(File file, String documentKey, long size, long date, int sourceExists,
       int javadocExists, String repository) throws IllegalArtifactCoordinateException {
     Gav gav = gavCalculator.pathToGav(documentKey);
@@ -546,33 +526,6 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
 
     return new ArtifactContext(pomFile, artifactFile, null, ai, gav);
-  }
-
-  public Date getIndexArchiveTime(InputStream is) throws IOException {
-    ZipInputStream zis = null;
-    try
-    {
-        zis = new ZipInputStream( is );
-
-        long timestamp = -1;
-
-        ZipEntry entry;
-        while ( ( entry = zis.getNextEntry() ) != null )
-        {
-            if ( entry.getName() == IndexUtils.TIMESTAMP_FILE )
-            {
-                return new Date( new DataInputStream( zis ).readLong() );
-            }
-            timestamp = entry.getTime();
-        }
-
-        return timestamp == -1 ? null : new Date( timestamp );
-    }
-    finally
-    {
-        zis.close();
-        is.close();
-    }
   }
 
   public void scheduleIndexUpdate(final String repositoryUrl, final boolean force) {
@@ -648,45 +601,6 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     return null;
   }
   
-  public Date unpackIndexArchive(InputStream is, Directory directory) throws IOException{
-    ZipInputStream zis = new ZipInputStream( is );
-    try
-    {
-        byte[] buf = new byte[4096];
-
-        ZipEntry entry;
-
-        while ( ( entry = zis.getNextEntry() ) != null )
-        {
-            if ( entry.isDirectory() || entry.getName().indexOf( '/' ) > -1 )
-            {
-                continue;
-            }
-
-            IndexOutput io = directory.createOutput( entry.getName() );
-
-            try
-            {
-                int n = 0;
-
-                while ( ( n = zis.read( buf ) ) != -1 )
-                {
-                    io.writeBytes( buf, n );
-                }
-            }
-            finally
-            {
-                io.close(  );
-            }
-        }
-    }
-    finally
-    {
-        zis.close(  );
-    }
-    return IndexUtils.getTimestamp( directory );    
-  }
-  
   public IndexedArtifactGroup[] getRootGroups(String repositoryUrl) throws CoreException {
     IndexingContext context = getIndexingContext(repositoryUrl);
     if(context != null) {
@@ -736,50 +650,6 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     repos.addAll(maven.getArtifactRepositories(monitor ));
     repos.addAll(maven.getPluginArtifactRepository(monitor));
     return repos;
-  }
-
-  private static final class ArtifactScanningMonitor implements ArtifactScanningListener {
-
-    private static final long THRESHOLD = 1 * 1000L;
-
-    //private final IndexInfo indexInfo;
-
-    private final IProgressMonitor monitor;
-
-    private final MavenConsole console;
-    
-    private long timestamp = System.currentTimeMillis();
-
-    private File repositoryDir;
-
-    ArtifactScanningMonitor(File repositoryDir, IProgressMonitor monitor, MavenConsole console) {
-      //this.indexInfo = indexInfo;
-      this.repositoryDir = repositoryDir;
-      this.monitor = monitor;
-      this.console = console;
-    }
-
-    public void scanningStarted(IndexingContext ctx) {
-    }
-
-    public void scanningFinished(IndexingContext ctx, ScanningResult result) {
-    }
-
-    public void artifactDiscovered(ArtifactContext ac) {
-      long current = System.currentTimeMillis();
-      if((current - timestamp) > THRESHOLD) {
-        // String id = info.groupId + ":" + info.artifactId + ":" + info.version;
-        String id = ac.getPom().getAbsolutePath().substring(
-            this.repositoryDir.getAbsolutePath().length());
-        this.monitor.setTaskName(id);
-        this.timestamp = current;
-      }
-    }
-
-    public void artifactError(ArtifactContext ac, Exception e) {
-      String id = ac.getPom().getAbsolutePath().substring(repositoryDir.getAbsolutePath().length());
-      console.logError(id + " " + e.getMessage());
-    }
   }
 
   public static String getDocumentKey(ArtifactKey artifact) {
@@ -1029,27 +899,6 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
   }
 
-  public Date replaceIndex(String repositoryUrl, InputStream is) throws CoreException {
-    Date indexTime = null;
-    
-    IndexingContext context = getIndexingContext(repositoryUrl);
-    if(context != null) {
-      Directory tempDirectory = new RAMDirectory();
-      
-      try {
-        indexTime = unpackIndexArchive(is, tempDirectory);
-        context.replace(tempDirectory);
-      } catch(IOException ex) {
-        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Error replacing index", ex));
-      }
-      
-      //IndexInfo indexInfo = getIndexInfo(indexName);
-      //indexInfo.setUpdateTime(indexTime);
-      fireIndexChanged(repositoryUrl);
-    }
-    return indexTime;
-  }
-  
   public void updateIndex(String repositoryUrl, boolean force, IProgressMonitor monitor) throws CoreException {
     monitor.setTaskName("Updating index " + repositoryUrl);
     console.logMessage("Updating index " + repositoryUrl);
