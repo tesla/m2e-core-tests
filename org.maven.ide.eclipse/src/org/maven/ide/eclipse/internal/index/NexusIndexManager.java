@@ -12,7 +12,6 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -23,7 +22,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -35,11 +33,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.ISchedulingRule;
-import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.ui.progress.IProgressConstants;
 
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
@@ -85,22 +79,19 @@ import org.sonatype.nexus.index.updater.IndexUpdateRequest;
 import org.sonatype.nexus.index.updater.IndexUpdater;
 
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.actions.OpenMavenConsoleAction;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
-import org.maven.ide.eclipse.embedder.AbstractMavenConfigurationChangeListener;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
-import org.maven.ide.eclipse.embedder.MavenConfigurationChangeEvent;
 import org.maven.ide.eclipse.index.IIndex;
 import org.maven.ide.eclipse.index.IndexListener;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.internal.embedder.TransferListenerAdapter;
-import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;
+import org.maven.ide.eclipse.internal.index.IndexUpdaterJob.IndexCommand;
 import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectChangedEvent;
@@ -120,23 +111,11 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
   /** Non available value */
   public static final String NA = "NA";
 
-  // TODO do we need to redefine index fields here?
-
-  public static final String FIELD_GROUP_ID = ArtifactInfo.GROUP_ID;
-
-  public static final String FIELD_ARTIFACT_ID = ArtifactInfo.ARTIFACT_ID;
-
-  public static final String FIELD_VERSION = ArtifactInfo.VERSION;
-
-  public static final String FIELD_PACKAGING = ArtifactInfo.PACKAGING;
-
-  public static final String FIELD_SHA1 = ArtifactInfo.SHA1;
-
-  public static final String FIELD_NAMES = ArtifactInfo.NAMES;
-
   private final GavCalculator gavCalculator = new M2GavCalculator();
 
   private NexusIndexer indexer;
+  
+  private IndexUpdater indexUpdater;
 
   private IMaven maven;
 
@@ -186,13 +165,13 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     this.updaterJob = new IndexUpdaterJob(this, console);
 
     // TODO what should trigger index invalidation?
-    this.mavenConfiguration.addConfigurationChangeListener(new AbstractMavenConfigurationChangeListener() {
-      public void mavenConfigutationChange(MavenConfigurationChangeEvent event) throws CoreException {
-        if(MavenConfigurationChangeEvent.P_USER_SETTINGS_FILE.equals(event.getKey()) || MavenPreferenceConstants.P_GLOBAL_SETTINGS_FILE.equals(event.getKey())) {
-          invalidateIndexer();
-        }
-      }
-    });
+//    this.mavenConfiguration.addConfigurationChangeListener(new AbstractMavenConfigurationChangeListener() {
+//      public void mavenConfigutationChange(MavenConfigurationChangeEvent event) throws CoreException {
+//        if(MavenConfigurationChangeEvent.P_USER_SETTINGS_FILE.equals(event.getKey()) || MavenPreferenceConstants.P_GLOBAL_SETTINGS_FILE.equals(event.getKey())) {
+//          invalidateIndexer();
+//        }
+//      }
+//    });
   }
 
   private ArrayList<IndexCreator> getFullCreator() {
@@ -456,13 +435,14 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
         sourcesExists, javadocExists, prefix, goals);
   }
 
-  public void reindex(String indexName, final IProgressMonitor monitor) throws CoreException {
+  public void reindexLocalRepository(String indexName, final IProgressMonitor monitor) throws CoreException {
     try {
       fireIndexUpdating(indexName);
       //IndexInfo indexInfo = getIndexInfo(indexName);
       IndexingContext context = getIndexer().getIndexingContexts().get(indexName);
       getIndexer().scan(context, new ArtifactScanningMonitor(context.getRepository(), monitor, console), false);
       fireIndexChanged(indexName);
+      console.logMessage("Updated local repository index");
     } catch(Exception ex) {
       MavenLogger.log("Unable to re-index "+indexName, ex);
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Reindexing error", ex));
@@ -471,10 +451,18 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
   }
 
-  public void addDocument(String indexName, File file, String documentKey, long size, long date, File jarFile,
+  public void reindexWorkspace(IProgressMonitor monitor) {
+    // TODO clean current index
+    for (IMavenProjectFacade facade : projectManager.getProjects()) {
+      addDocument(IndexManager.WORKSPACE_INDEX, facade.getPomFile(), //
+          getDocumentKey(facade.getArtifactKey()), -1, -1, null, 0, 0);
+    }
+  }
+
+  public void addDocument(String repositoryUrl, File file, String documentKey, long size, long date, File jarFile,
       int sourceExists, int javadocExists) {
     try {
-      IndexingContext context = getIndexingContext(indexName);
+      IndexingContext context = getIndexingContext(repositoryUrl);
       if(context == null) {
         // TODO log
         return;
@@ -497,7 +485,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       IndexingContext context = getIndexingContext(indexName);
       if(context == null) {
         String msg = "Unable to find document to remove"+documentKey;
-        MavenLogger.log(new Status(Status.ERROR,"org.maven.ide.eclipse", msg));
+        MavenLogger.log(new Status(IStatus.ERROR,"org.maven.ide.eclipse", msg));
         return;
       }
       ArtifactContext artifactContext = getArtifactContext(null, documentKey, -1, -1, //
@@ -585,63 +573,31 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
         is.close();
     }
   }
-  public static class IndexUpdaterRule implements ISchedulingRule {
 
-    public boolean contains(ISchedulingRule rule) {
-      return rule == this;
-    }
-
-    public boolean isConflicting(ISchedulingRule rule) {
-      return rule == this;
-    }
-    
-  }
-  static class IndexUpdaterJob extends Job {
-
-    private final NexusIndexManager indexManager;
-
-    private final MavenConsole console;
-
-    private final Stack<IndexCommand> updateQueue = new Stack<IndexCommand>(); 
-
-    public IndexUpdaterJob(NexusIndexManager indexManager, MavenConsole console) {
-      super("Updating indexes");
-      this.indexManager = indexManager;
-      this.console = console;
-      setProperty(IProgressConstants.ACTION_PROPERTY, new OpenMavenConsoleAction());
-      setRule(new IndexUpdaterRule());
-    }
-
-    public void addCommand(IndexCommand indexCommand) {
-      updateQueue.add(indexCommand);
-    }
-    
-    protected IStatus run(IProgressMonitor monitor) {
-      monitor.beginTask(getName(), IProgressMonitor.UNKNOWN);
-      
-      while(!updateQueue.isEmpty()) {
-        IndexCommand command = updateQueue.pop();
-        command.run(indexManager, console, monitor);
-      }
-      
-      monitor.done();
-      
-      return Status.OK_STATUS;
-    }
-    
-  }  
-  
-  public void scheduleIndexUpdate(String repositoryUrl, boolean force, long delay) {
-    if(repositoryUrl!=null) {
-      if(IndexManager.LOCAL_INDEX.equals(repositoryUrl)){
-        updaterJob.addCommand(new ReindexCommand(repositoryUrl));
-      }  else if(IndexManager.WORKSPACE_INDEX.equals(repositoryUrl)) {
-        updaterJob.addCommand(new ReindexWorkspaceCommand());
+  public void scheduleIndexUpdate(final String repositoryUrl, final boolean force) {
+    if(repositoryUrl != null) {
+      IndexCommand command;
+      if(IndexManager.LOCAL_INDEX.equals(repositoryUrl)) {
+        command = new IndexUpdaterJob.IndexCommand() {
+          public void run(IProgressMonitor monitor) throws CoreException {
+            reindexLocalRepository(IndexManager.LOCAL_INDEX, monitor);
+          }
+        };
+      } else if(IndexManager.WORKSPACE_INDEX.equals(repositoryUrl)) {
+        command = new IndexUpdaterJob.IndexCommand() {
+          public void run(IProgressMonitor monitor) {
+            reindexWorkspace(monitor);
+          }
+        };
       } else {
-        updaterJob.addCommand(new UpdateCommand(repositoryUrl, force));
-        updaterJob.addCommand(new UnpackCommand(repositoryUrl, null /*archiveURL*/, force));
-      }  
-      updaterJob.schedule(delay);
+        command = new IndexUpdaterJob.IndexCommand() {
+          public void run(IProgressMonitor monitor) throws CoreException {
+            updateIndex(repositoryUrl, force, monitor);
+          }
+        };
+      }
+      updaterJob.addCommand(command);
+      updaterJob.schedule(1000L);
     }
   }
 
@@ -758,35 +714,6 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       indexer = MavenPlugin.lookup(NexusIndexer.class);
     }
     return indexer;
-  }
-
-  synchronized void invalidateIndexer() throws CoreException {
-    //TODO: is this invalidate Indexer call even needed still
-//    if(indexer != null) {
-//      for (IndexingContext context : indexer.getIndexingContexts().values()) {
-//        try {
-//          indexer.removeIndexingContext(context, false);
-//        } catch(IOException ex) {
-//          MavenLogger.log("Could not remove indexing context", ex);
-//        }
-//      }
-//      indexer = null;
-//    }
-//
-//    // global repositories and mirrors
-//    LinkedHashSet<String> repositories = new LinkedHashSet<String>();
-//    repositories.addAll(getRepositoryUrls());
-//
-//    // project-specific repositories
-//    for (IMavenProjectFacade project : projectManager.getProjects()) {
-//      repositories.addAll(project.getArtifactRepositoryUrls());
-//      repositories.addAll(project.getPluginArtifactRepositoryUrls());
-//    }
-//
-//    for (String url : repositories) {
-//      IndexInfo info = getIndexInfo(url);
-//      addIndex(info, false);
-//    }
   }
 
   private LinkedHashSet<String> getGlobalRepositoryUrls() throws CoreException {
@@ -928,10 +855,6 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     return new CompositeIndex(indexes);
   }
 
-  public File getIndexDirectoryFile(IndexInfo indexInfo) {
-    return getIndexDirectoryFile(indexInfo.getRepositoryUrl());
-  }
-
   public File getIndexDirectoryFile(String repositoryUrl) {
     String indexName;
     try {
@@ -957,11 +880,8 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     return new File(getBaseIndexDir(), indexName);
   }
 
-  protected Directory getIndexDirectory(String repositoryUrl) throws IOException{
-    return FSDirectory.getDirectory(getIndexDirectoryFile(repositoryUrl));
-  }
-  protected Directory getIndexDirectory(IndexInfo indexInfo) throws IOException {
-    return FSDirectory.getDirectory(getIndexDirectoryFile(indexInfo));
+  protected Directory getIndexDirectory(String repositoryPath) throws IOException {
+    return FSDirectory.getDirectory(getIndexDirectoryFile(repositoryPath));
   }
   
 
@@ -995,30 +915,42 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
   }
 
-  public void doIndexAdd(String indexName, String url, File repoDir, Directory dir, String indexUpdateUrl, boolean fullIndex) throws IOException{
-    //boolean fullPrefs = !MavenPlugin.getDefault().getPreferenceStore().getBoolean(MavenPreferenceConstants.P_FULL_INDEX);
-    getIndexer().addIndexingContextForced(indexName, indexName, repoDir, dir, //
-        url, indexUpdateUrl, (fullIndex ? getFullCreator() : getMinCreator()));
-    fireIndexAdded(indexName); 
+  private IndexingContext addRepositoryIndex(String repositoryUrl, IProgressMonitor monitor) throws CoreException {
+    boolean fullIndex = false;
+
+    IndexingContext indexingContext = addIndexingContext(repositoryUrl, null, fullIndex);
+
+    updateIndex(repositoryUrl, false, monitor);
+
+    return indexingContext;
   }
 
-//  public void addIndexForRemote(String indexName, String url) throws IOException{
-//    Directory dir = getIndexDirectory(indexName);
-//    doIndexAdd(indexName, url, null, dir, null, false);
-//  }
-  
-  public void addIndex(IndexInfo indexInfo){
-    String repositoryUrl = indexInfo.getRepositoryUrl();
+  private IndexingContext addIndexingContext(String repositoryUrl, File repositoryPath, boolean fullIndex) throws CoreException {
+    IndexingContext indexingContext;
     try {
-      Directory directory = getIndexDirectory(indexInfo);
-      doIndexAdd(repositoryUrl, indexInfo.getRepositoryUrl(), indexInfo.getRepositoryDir(), directory, indexInfo.getIndexUpdateUrl(), !indexInfo.isShort());
+      Directory directory = getIndexDirectory(repositoryUrl);
+
+      indexingContext = getIndexer().addIndexingContextForced(
+          repositoryUrl, //
+          repositoryUrl, //
+          repositoryPath, //
+          directory, //
+          repositoryUrl,
+          null, //
+          (fullIndex ? getFullCreator() : getMinCreator()));
+
     } catch(IOException ex) {
       String msg = "Error on adding indexing context " + repositoryUrl;
       console.logError(msg + "; " + ex.getMessage());
       MavenLogger.log(msg, ex);
-    } 
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not add repository index", ex));
+    }
+
+    fireIndexAdded(repositoryUrl);
+
+    return indexingContext;
   }
-  
+
   public void removeIndex(String repositoryUrl, boolean deleteFiles){
     try{
       IndexingContext context = getIndexingContext(repositoryUrl);
@@ -1035,10 +967,10 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
   }
 
-  public void fireIndexAdded(String indexName){
+  public void fireIndexAdded(String repositoryUrl){
     synchronized(indexListeners){
       for(IndexListener listener : indexListeners){
-        listener.indexAdded(indexName);
+        listener.indexAdded(repositoryUrl);
       }
     }
   }
@@ -1096,14 +1028,10 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
   }
 
-  public Map<String, IndexingContext> getIndexes(){
-    return indexer.getIndexingContexts();
-  }
-  
-  public Date replaceIndex(String indexName, InputStream is) throws CoreException {
+  public Date replaceIndex(String repositoryUrl, InputStream is) throws CoreException {
     Date indexTime = null;
     
-    IndexingContext context = getIndexingContext(indexName);
+    IndexingContext context = getIndexingContext(repositoryUrl);
     if(context != null) {
       Directory tempDirectory = new RAMDirectory();
       
@@ -1116,192 +1044,83 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       
       //IndexInfo indexInfo = getIndexInfo(indexName);
       //indexInfo.setUpdateTime(indexTime);
-      fireIndexChanged(indexName);
+      fireIndexChanged(repositoryUrl);
     }
     return indexTime;
   }
   
+  public void updateIndex(String repositoryUrl, boolean force, IProgressMonitor monitor) throws CoreException {
+    monitor.setTaskName("Updating index " + repositoryUrl);
+    console.logMessage("Updating index " + repositoryUrl);
+    try {
+      fireIndexUpdating(repositoryUrl);
 
-  
-  /**
-   * Abstract index command
-   */
-  abstract static class IndexCommand {
-    
-    protected String repositoryUrl;
-    
-    abstract void run(NexusIndexManager indexManager, MavenConsole console, IProgressMonitor monitor);
-
-    protected String getRepositoryUrl() {
-      return repositoryUrl;
-    }
-  }
-
-  /**
-   * Reindex command
-   */
-   class ReindexCommand extends IndexCommand {
-
-    ReindexCommand(String repositoryUrl) {
-      this.repositoryUrl = repositoryUrl;
-    }
-
-    public void run(NexusIndexManager indexManager, MavenConsole console, IProgressMonitor monitor) {
-      monitor.setTaskName("Reindexing local repository");
-      try {
-        indexManager.reindex(getRepositoryUrl(), monitor);
-        fireIndexChanged(getRepositoryUrl());
-        console.logMessage("Updated local repository index");
-      } catch(CoreException ex) {
-        console.logError("Unable to reindex local repository");
+      IndexingContext context = getIndexingContext(repositoryUrl);
+      IndexUpdateRequest request = new IndexUpdateRequest(context);
+      request.setProxyInfo(getProxyInfo());
+      AuthenticationInfo authInfo = getAuthenticationInfo(repositoryUrl);
+      if(authInfo != null){
+        request.setAuthenticationInfo(authInfo);
       }
-    }
-  }
-
-  /**
-   * Update command
-   */
-   class UpdateCommand extends IndexCommand {
-    private final boolean force;
-
-    UpdateCommand(String repositoryUrl, boolean force) {
-      this.repositoryUrl = repositoryUrl;
-      this.force = force;
-    }
-
-    public void run(NexusIndexManager indexManager, MavenConsole console, IProgressMonitor monitor) {
-      String repositoryUrl = getRepositoryUrl();
-      monitor.setTaskName("Updating index " + repositoryUrl);
-      console.logMessage("Updating index " + repositoryUrl);
-      try {
-        
-        fireIndexUpdating(getRepositoryUrl());
-        IndexingContext context = getIndexingContext(repositoryUrl);
-        IndexUpdateRequest request = new IndexUpdateRequest(context);
-        request.setProxyInfo(getProxyInfo());
-        AuthenticationInfo authInfo = getAuthenticationInfo(repositoryUrl);
-        if(authInfo != null){
-          request.setAuthenticationInfo(authInfo);
-        }
-        request.setTransferListener(new TransferListenerAdapter(monitor, console, null));
-        request.setForceFullUpdate(force);
-        Date indexTime = getUpdater().fetchAndUpdateIndex(request);
-        if(indexTime==null) {
-          console.logMessage("No index update available for " + repositoryUrl);
-        } else {
-          console.logMessage("Updated index for " + repositoryUrl + " " + indexTime);
-        }
-      } catch(CoreException ex) {
-        String msg = "Unable to update index for " + repositoryUrl;
-        MavenLogger.log(msg, ex);
-        console.logError(msg);
-      } catch (OperationCanceledException ex) {
-        console.logMessage("Updating index " + repositoryUrl + " is canceled");
-      } catch(IOException ie){
-        String msg = "Unable to update index for " + repositoryUrl;
-        MavenLogger.log(msg, ie);
-        console.logError(msg);
-      } catch(Exception e){
-      } finally {
-        fireIndexChanged(getRepositoryUrl());
+      request.setTransferListener(new TransferListenerAdapter(monitor, console, null));
+      request.setForceFullUpdate(force);
+      Date indexTime = getUpdater().fetchAndUpdateIndex(request);
+      if(indexTime==null) {
+        console.logMessage("No index update available for " + repositoryUrl);
+      } else {
+        console.logMessage("Updated index for " + repositoryUrl + " " + indexTime);
       }
-    }
-  }
-
-  static class ReindexWorkspaceCommand extends IndexCommand {
-    void run(NexusIndexManager indexManager, MavenConsole console, IProgressMonitor monitor) {
-      for (IMavenProjectFacade facade : indexManager.projectManager.getProjects()) {
-        indexManager.addDocument(IndexManager.WORKSPACE_INDEX, facade.getPomFile(), //
-            getDocumentKey(facade.getArtifactKey()), -1, -1, null, 0, 0);
-      }
-    }
-  }
-
-  /**
-   * Unpack command
-   */
-  static class UnpackCommand extends IndexCommand {
-
-    private final boolean force;
-    private URL archiveUrl;
-    
-    UnpackCommand(String indexName, URL archiveURL, boolean force) {
-      this.repositoryUrl = indexName;
-      this.archiveUrl = archiveURL;
-      this.force = force;
-    }
-    public void run(NexusIndexManager indexManager, MavenConsole console, IProgressMonitor monitor) {
-      URL indexArchive = this.archiveUrl;
-      if(indexArchive==null) {
-        return;
-      }
-
-      String indexName = getRepositoryUrl();
-      String displayName = getRepositoryUrl();
-      monitor.setTaskName("Unpacking " + displayName);
-      
-      Date archiveIndexTime = null;
-
-      boolean replace = force;
-
-      if(replace) {
-        File index = new File(indexManager.getBaseIndexDir(), indexName);
-        if(!index.exists()) {
-          if(!index.mkdirs()) {
-            MavenLogger.log("Can't create index folder " + index.getAbsolutePath(), null);
-          }
-        } else {
-          File[] files = index.listFiles();
-          for(int j = 0; j < files.length; j++ ) {
-            if(!files[j].delete()) {
-              MavenLogger.log("Can't delete " + files[j].getAbsolutePath(), null);
-            }
-          }
-        }
-        
-        InputStream is = null;
-        try {
-          is = indexArchive.openStream();
-          indexManager.replaceIndex(indexName, is);
-
-          console.logMessage("Unpacked index for " + displayName + " " + archiveIndexTime);
-          
-          // XXX update index and repository urls
-          // indexManager.removeIndex(indexName, false);
-          // indexManager.addIndex(extensionIndexInfo, false);
-          
-        } catch(Exception ex) {
-          MavenLogger.log("Unable to unpack index " + displayName, ex);
-        } finally {
-          try {
-            if(is != null) {
-              is.close();
-            }
-          } catch(IOException ex) {
-            MavenLogger.log("Unable to close stream", ex);
-          }
-        }
-      }
+//    } catch(CoreException ex) {
+//      String msg = "Unable to update index for " + repositoryUrl;
+//      MavenLogger.log(msg, ex);
+//      console.logError(msg);
+//    } catch (OperationCanceledException ex) {
+//      console.logMessage("Updating index " + repositoryUrl + " is canceled");
+    } catch(IOException ie){
+      String msg = "Unable to update index for " + repositoryUrl;
+      MavenLogger.log(msg, ie);
+      console.logError(msg);
+//    } catch(Exception e){
+    } finally {
+      fireIndexChanged(repositoryUrl);
     }
     
   }
 
-  public void initialize() throws CoreException {
-    // workspace
-    addIndex(new IndexInfo(null, IndexManager.WORKSPACE_INDEX, IndexInfo.Type.WORKSPACE, false));
-    updaterJob.addCommand(new ReindexWorkspaceCommand());
-
-    // local repo
-    addIndex(new IndexInfo(new File(maven.getLocalRepository().getBasedir()), IndexManager.LOCAL_INDEX, IndexInfo.Type.LOCAL, false));
-    updaterJob.addCommand(new ReindexCommand(IndexManager.LOCAL_INDEX));
-
-    // configured repositories
-    for (String url : getGlobalRepositoryUrls()) {
-      addIndex(new IndexInfo(null, url, IndexInfo.Type.REMOTE, true));
-      updaterJob.addCommand(new UpdateCommand(url, false));
-    }
-
+  /**
+   * This method is called from bundle startup thread and so it should do
+   * as little as possible to avoid classloader timeouts.
+   */
+  public void initialize() {
+    updaterJob.addCommand(new IndexCommand() {
+      public void run(IProgressMonitor monitor) throws CoreException {
+        initialize(monitor);
+      }
+    });
     updaterJob.schedule(1000L);
   }
 
+  void initialize(IProgressMonitor monitor) throws CoreException {
+    // create workspace and localRepo indexing contexts
+    addIndexingContext(IndexManager.WORKSPACE_INDEX, null /*repositoryPath*/, false /*fullIndex*/);
+    ArtifactRepository localRepository = maven.getLocalRepository();
+    addIndexingContext(IndexManager.LOCAL_INDEX, new File(localRepository.getBasedir()) /*repositoryPath*/, false /*fullIndex*/);
+
+    // populate workspace and localRepo indexes
+    reindexWorkspace(monitor);
+    reindexLocalRepository(IndexManager.LOCAL_INDEX, monitor);
+
+    // process configured repositories
+    for (String url : getGlobalRepositoryUrls()) {
+      addRepositoryIndex(url, monitor);
+    }
+  }
+
+  public void enableIndex(String repositoryUrl, boolean isShort) {
+    
+  }
+
+  public void disableIndex(String repositoryUrl) {
+    
+  }
 }

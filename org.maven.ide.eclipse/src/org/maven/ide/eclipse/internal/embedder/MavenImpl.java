@@ -15,10 +15,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -435,21 +433,39 @@ public class MavenImpl implements IMaven {
   }
 
   public List<ArtifactRepository> getArtifactRepositories(IProgressMonitor monitor) throws CoreException {
-    Set<ArtifactRepository> repositories = new LinkedHashSet<ArtifactRepository>();
+    ArrayList<ArtifactRepository> repositories = new ArrayList<ArtifactRepository>();
     for(Profile profile : getActiveProfiles()) {
       addArtifactRepositories(repositories, profile.getRepositories());
     }
 
-    return new ArrayList<ArtifactRepository>(repositories);
+    addDefaultRepository(repositories);
+
+    return repositories;
   }
 
-  private void addArtifactRepositories(Set<ArtifactRepository> artifactRepositories, List<Repository> repositories) throws CoreException {
+  private void addDefaultRepository(ArrayList<ArtifactRepository> repositories) {
+    for (ArtifactRepository repository : repositories) {
+      if (RepositorySystem.DEFAULT_REMOTE_REPO_ID.equals(repository.getId())) {
+        return;
+      }
+    }
+    try {
+      repositories.add(0, repositorySystem.createDefaultRemoteRepository());
+    } catch(InvalidRepositoryException ex) {
+      MavenLogger.log("Unexpected exception", ex);
+    }
+  }
+
+  private void addArtifactRepositories(ArrayList<ArtifactRepository> artifactRepositories, List<Repository> repositories) throws CoreException {
     for(Repository repository : repositories) {
       try {
-        artifactRepositories.add(repositorySystem.buildArtifactRepository(repository));
+        ArtifactRepository artifactRepository = repositorySystem.buildArtifactRepository(repository);
+        if(!artifactRepositories.contains(artifactRepository)) {
+          artifactRepositories.add(artifactRepository);
+        }
       } catch(InvalidRepositoryException ex) {
-        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
-            "Could not read settings.xml", ex));
+        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not read settings.xml",
+            ex));
       }
     }
   }
@@ -467,12 +483,13 @@ public class MavenImpl implements IMaven {
   }
 
   public List<ArtifactRepository> getPluginArtifactRepository(IProgressMonitor monitor) throws CoreException {
-    Set<ArtifactRepository> repositories = new LinkedHashSet<ArtifactRepository>();
+    ArrayList<ArtifactRepository> repositories = new ArrayList<ArtifactRepository>();
     for(Profile profile : getActiveProfiles()) {
       addArtifactRepositories(repositories, profile.getPluginRepositories());
     }
+    addDefaultRepository(repositories);
 
-    return new ArrayList<ArtifactRepository>(repositories);
+    return repositories;
   }
 
   public ArtifactRepository getMirror(ArtifactRepository repo) {

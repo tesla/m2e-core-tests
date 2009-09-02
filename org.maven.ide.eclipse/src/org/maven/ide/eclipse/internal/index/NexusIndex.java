@@ -18,6 +18,8 @@ import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.BooleanClause.Occur;
 
+import org.sonatype.nexus.index.ArtifactInfo;
+
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.index.IIndex;
 import org.maven.ide.eclipse.index.IMutableIndex;
@@ -64,20 +66,20 @@ public class NexusIndex implements IIndex, IMutableIndex {
     BooleanQuery query = new BooleanQuery();
 
     if(packaging != null) {
-      query.add(new TermQuery(new Term(NexusIndexManager.FIELD_PACKAGING, packaging)), Occur.MUST);
+      query.add(new TermQuery(new Term(ArtifactInfo.PACKAGING, packaging)), Occur.MUST);
     }
 
     if(groupId!=null) {
       // TODO remove '-' workaround once Nexus indexer is fixed
-      query.add(indexManager.createQuery(NexusIndexManager.FIELD_GROUP_ID, groupId.replace('-', '*')), Occur.MUST);
+      query.add(indexManager.createQuery(ArtifactInfo.GROUP_ID, groupId.replace('-', '*')), Occur.MUST);
     }
 
     if(artifactId != null) {
-      query.add(indexManager.createQuery(NexusIndexManager.FIELD_ARTIFACT_ID, artifactId), Occur.MUST);
+      query.add(indexManager.createQuery(ArtifactInfo.ARTIFACT_ID, artifactId), Occur.MUST);
     }
  
     if(version != null) {
-      query.add(indexManager.createQuery(NexusIndexManager.FIELD_VERSION, version), Occur.MUST);
+      query.add(indexManager.createQuery(ArtifactInfo.VERSION, version), Occur.MUST);
     }
  
     return indexManager.search(repositoryUrl, query).values();

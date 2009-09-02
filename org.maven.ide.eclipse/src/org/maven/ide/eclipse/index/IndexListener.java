@@ -17,12 +17,12 @@ package org.maven.ide.eclipse.index;
  */
 public interface IndexListener {
   
-  public void indexAdded(String indexName);
+  public void indexAdded(String repositoryUrl);
 
-  public void indexRemoved(String indexName);
+  public void indexRemoved(String repositoryUrl);
   
-  public void indexChanged(String indexName);
+  public void indexChanged(String repositoryUrl);
   
-  public void indexUpdating(String indexName);
+  public void indexUpdating(String repositoryUrl);
 
 }

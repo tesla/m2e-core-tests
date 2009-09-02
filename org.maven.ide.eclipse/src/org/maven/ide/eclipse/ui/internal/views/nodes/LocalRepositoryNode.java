@@ -23,6 +23,9 @@ public class LocalRepositoryNode extends AbstractIndexedRepositoryNode {
   }
 
   public String getName() {
-    return index.getIndexName();
+    StringBuilder sb = new StringBuilder();
+    sb.append(index.getIndexName());
+    // TODO local repository path
+    return sb.toString();
   }
 }

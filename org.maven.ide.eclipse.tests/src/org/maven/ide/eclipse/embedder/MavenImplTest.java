@@ -79,4 +79,26 @@ public class MavenImplTest extends TestCase {
       configuration.setUserSettingsFile(origSettings);
     }
   }
+
+  public void testGetDefaultRepositories() throws Exception {
+    String origSettings = configuration.getUserSettingsFile();
+    try {
+      configuration.setUserSettingsFile(new File("settingsWithDefaultRepos.xml").getCanonicalPath());
+      List<ArtifactRepository> repositories;
+
+      // artifact repositories
+      repositories = maven.getArtifactRepositories(monitor);
+      assertEquals(2, repositories.size());
+      assertEquals("central", repositories.get(0).getId());
+      assertEquals("custom", repositories.get(1).getId());
+
+      // plugin repositories
+      repositories = maven.getPluginArtifactRepository(monitor);
+      assertEquals(2, repositories.size());
+      assertEquals("central", repositories.get(0).getId());
+      assertEquals("custom", repositories.get(1).getId());
+    } finally {
+      configuration.setUserSettingsFile(origSettings);
+    }
+  }
 }

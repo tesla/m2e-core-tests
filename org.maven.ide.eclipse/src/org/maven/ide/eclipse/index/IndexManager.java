@@ -14,10 +14,6 @@ import java.util.Map;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 
-import org.sonatype.nexus.index.context.IndexingContext;
-
-
-
 public interface IndexManager {
 
   public static final int MIN_CLASS_QUERY_LENGTH = 6;
@@ -67,11 +63,8 @@ public interface IndexManager {
   public abstract IndexedArtifactFile identify(File file) throws CoreException;
 
   //do we want this in IndexManager?
-  public void scheduleIndexUpdate(String indexName, boolean force, long delay) throws CoreException;
+  public void scheduleIndexUpdate(String indexName, boolean force) throws CoreException;
   
   public void addIndexListener(IndexListener listener);
   
-  public Map<String, IndexingContext> getIndexes();
-//  
-//  public IndexInfo getIndexInfoByUrl(String url);
 }

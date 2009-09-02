@@ -32,6 +32,7 @@ public class RepositoryNode extends AbstractIndexedRepositoryNode {
   public String getName() {
     StringBuilder sb = new StringBuilder();
     sb.append(repository.getId());
+    sb.append(" (").append(repository.getUrl()).append(")");
     if (effectiveMirror != null) {
       sb.append(" [mirrored by ").append(effectiveMirror.getId()).append("]");
     }

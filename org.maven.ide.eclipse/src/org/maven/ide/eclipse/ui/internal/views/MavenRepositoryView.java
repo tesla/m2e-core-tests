@@ -90,7 +90,7 @@ public class MavenRepositoryView extends ViewPart {
 
   private BaseSelectionListenerAction materializeProjectAction;
   
-  private TreeViewer viewer;
+  TreeViewer viewer;
   private RepositoryViewContentProvider contentProvider;
 
   private DrillDownAdapter drillDownAdapter;
@@ -127,20 +127,20 @@ public class MavenRepositoryView extends ViewPart {
     IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
     indexManager.addIndexListener(new IndexListener() {
 
-      public void indexAdded(String indexName) {
+      public void indexAdded(String repositoryUrl) {
         refreshView();
       }
 
-      public void indexChanged(String indexName) {
+      public void indexChanged(String repositoryUrl) {
         refreshView();
 
       }
 
-      public void indexRemoved(String indexName) {
+      public void indexRemoved(String repositoryUrl) {
         refreshView();
         
       }
-      public void indexUpdating(String indexName){
+      public void indexUpdating(String repositoryUrl){
         Display.getDefault().asyncExec(new Runnable(){
           public void run(){
            viewer.refresh(true); 
@@ -285,18 +285,18 @@ public class MavenRepositoryView extends ViewPart {
       }
 
       protected boolean updateSelection(IStructuredSelection selection) {
-        int repoCount = 0; 
-        for (AbstractIndexedRepositoryNode node : getSelectedRepositoryNodes(getStructuredSelection().toList())) {
-          if (node instanceof RepositoryNode) {
-            repoCount ++;
+        int indexCount = 0;
+        for (AbstractIndexedRepositoryNode node : getSelectedRepositoryNodes(selection.toList())) {
+          if (node instanceof RepositoryNode && node.getIndex() != null) {
+            indexCount ++;
           }
         }
-        if(repoCount > 1){
+        if(indexCount > 1){
           setText("Update Indexes");
         } else {
           setText("Update Index");
         }
-        return repoCount > 0;
+        return indexCount > 0;
       }
     };
     updateAction.setToolTipText("Update repository index");
@@ -357,16 +357,35 @@ public class MavenRepositoryView extends ViewPart {
     rebuildAction.setImageDescriptor(MavenImages.REBUILD_INDEX);
 
     enableAction = new BaseSelectionListenerAction("Enable Index") {
-      private boolean isEnabled;
+      private RepositoryNode repositoryNode;
       public void run() {
-        enableIndex(!this.isEnabled);
+        enableIndex(repositoryNode);
       }
 
       protected boolean updateSelection(IStructuredSelection selection) {
-        return false;
+        List<AbstractIndexedRepositoryNode> nodes = getSelectedRepositoryNodes(getStructuredSelection().toList());
+        RepositoryNode repositoryNode = null;
+        for (AbstractIndexedRepositoryNode node : nodes) {
+          if (node instanceof RepositoryNode) {
+            if (repositoryNode != null) {
+              return false;
+            }
+            repositoryNode = (RepositoryNode) node;
+          }
+        }
+        if (repositoryNode == null) {
+          return false;
+        }
+        if (repositoryNode.getImage() == null) {
+          setText("Enable Index");
+        } else {
+          setText("Disable Index");
+        }
+        this.repositoryNode = repositoryNode;
+        return true;
       }
     };
-    
+
     enableAction.setToolTipText("Enable the index to be used for dependency resolution");
     enableAction.setImageDescriptor(MavenImages.REBUILD_INDEX);
     
@@ -449,42 +468,19 @@ public class MavenRepositoryView extends ViewPart {
   /**
    * 
    */
-  protected void enableIndex(boolean enable) {
-    ISelection selection = viewer.getSelection();
-    Object element = ((IStructuredSelection) selection).getFirstElement();
-    if(element instanceof RepositoryNode) {
-      RepositoryNode node = (RepositoryNode)element;
-      String msg = "";
-      if(enable){
-        msg = "Are you sure you want to enable the index '"+node.getRepoName()+"'. This will allow the index to be used for dependency resolution, but it will NOT be used during a maven build.";
-      } 
+  protected void enableIndex(RepositoryNode node) {
+    String msg = "Are you sure you want to enable the index '" + node.getRepoName();
+
+    boolean ok = MessageDialog.openConfirm(getViewSite().getShell(), "Enable Index", msg);
+
+    if(ok) {
+      NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getDefault().getIndexManager();
       
-      boolean ok = false;
-      if(enable){
-        ok = MessageDialog.openConfirm(getViewSite().getShell(), //
-            "Enable Index", msg);
+      if(node.getIndex() == null) {
+        // TODO select between short and full index
+        indexManager.enableIndex(node.getRepositoryUrl(), true);
       } else {
-        ok = true;
-      }
-      
-      if(ok){
-        NexusIndexManager im = (NexusIndexManager)MavenPlugin.getDefault().getIndexManager();
-//        if(enable){
-//          try{
-//            MavenPlugin.getDefault().addEnabledIndex(node.getRepoName(), node.getRepositoryUrl());
-//            im.addIndexForRemote(node.getRepoName(), node.getRepoUrl());
-//            im.scheduleIndexUpdate(node.getRepoName(), false, 1000);
-//          } catch(Exception e){
-//            MavenLogger.log("Unable to enable index "+node.getName(), e);
-//          }
-//        } else {
-//          try{
-//            MavenPlugin.getDefault().removeEnabledIndex(node.getRepoName(), node.getRepoUrl());
-//            im.removeIndex(node.getRepoName(), false);
-//          } catch(Exception e){
-//            MavenLogger.log("Unable to enable index "+node.getName(), e);
-//          }
-//        }
+        indexManager.disableIndex(node.getRepositoryUrl());
       }
     }
   }
@@ -535,7 +531,7 @@ public class MavenRepositoryView extends ViewPart {
   protected void updateIndex(final String repositoryUrl, boolean force){
     try{
       IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
-      indexManager.scheduleIndexUpdate(repositoryUrl, force, 1L);
+      indexManager.scheduleIndexUpdate(repositoryUrl, force);
     } catch(CoreException ce){
       MavenLogger.log(ce);
     }
