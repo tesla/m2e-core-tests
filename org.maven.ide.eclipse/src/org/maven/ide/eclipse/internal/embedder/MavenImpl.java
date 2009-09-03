@@ -429,7 +429,7 @@ public class MavenImpl implements IMaven {
     }
   }
 
-  public List<ArtifactRepository> getArtifactRepositories(IProgressMonitor monitor) throws CoreException {
+  public List<ArtifactRepository> getArtifactRepositories() throws CoreException {
     ArrayList<ArtifactRepository> repositories = new ArrayList<ArtifactRepository>();
     for(Profile profile : getActiveProfiles()) {
       addArtifactRepositories(repositories, profile.getRepositories());
@@ -479,7 +479,7 @@ public class MavenImpl implements IMaven {
     return activeProfiles;
   }
 
-  public List<ArtifactRepository> getPluginArtifactRepository(IProgressMonitor monitor) throws CoreException {
+  public List<ArtifactRepository> getPluginArtifactRepository() throws CoreException {
     ArrayList<ArtifactRepository> repositories = new ArrayList<ArtifactRepository>();
     for(Profile profile : getActiveProfiles()) {
       addArtifactRepositories(repositories, profile.getPluginRepositories());
@@ -514,10 +514,9 @@ public class MavenImpl implements IMaven {
     }
   }
 
-  /* (non-Javadoc)
-   * @see org.maven.ide.eclipse.embedder.IMaven#getMavenConfiguration()
-   */
-  public IMavenConfiguration getMavenConfiguration() {
-    return this.mavenConfiguration;
+  public List<Mirror> getMirrors() throws CoreException {
+    MavenExecutionRequest request = createExecutionRequest(null);
+    populateDefaults(request);
+    return request.getMirrors();
   }
 }

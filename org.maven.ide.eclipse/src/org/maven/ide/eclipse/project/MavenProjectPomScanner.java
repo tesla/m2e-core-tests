@@ -16,7 +16,6 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
@@ -196,7 +195,7 @@ public class MavenProjectPomScanner<T> extends AbstractProjectScanner<MavenProje
       throws CoreException {
     monitor.subTask("Resolving artifact " + groupId + ":" + artifactId + ":" + version);
 
-    List<ArtifactRepository> repositories = maven.getArtifactRepositories(new NullProgressMonitor());
+    List<ArtifactRepository> repositories = maven.getArtifactRepositories();
     Artifact artifact = maven.resolve(groupId, artifactId, version, "pom", null, repositories, monitor);
 
     File file = artifact.getFile();

@@ -12,6 +12,7 @@ import java.io.File;
 import java.util.Collection;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanQuery;
@@ -94,8 +95,7 @@ public class NexusIndex implements IIndex, IMutableIndex {
     return indexManager.identify(file);
   }
 
-  public void scheduleIndexUpdate(boolean force, long delay) {
-    // TODO Auto-generated method scheduleIndexUpdate
-    
+  public void updateIndex(boolean force, IProgressMonitor monitor) throws CoreException {
+    indexManager.updateIndex(repositoryUrl, force, monitor);
   }
 }

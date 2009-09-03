@@ -64,14 +64,14 @@ public class MavenImplTest extends TestCase {
       List<ArtifactRepository> repositories;
       
       // artifact repositories
-      repositories = maven.getArtifactRepositories(monitor);
+      repositories = maven.getArtifactRepositories();
       assertEquals(3, repositories.size());
       assertEquals("http://central", repositories.get(0).getUrl());
       assertEquals("http:customremote", repositories.get(1).getUrl());
       assertEquals("http:customrepo", repositories.get(2).getUrl());
 
       // plugin repositories
-      repositories = maven.getPluginArtifactRepository(monitor);
+      repositories = maven.getPluginArtifactRepository();
       assertEquals(2, repositories.size());
       assertEquals("http://central", repositories.get(0).getUrl());
       assertEquals("http:customrepo", repositories.get(1).getUrl());      
@@ -87,13 +87,13 @@ public class MavenImplTest extends TestCase {
       List<ArtifactRepository> repositories;
 
       // artifact repositories
-      repositories = maven.getArtifactRepositories(monitor);
+      repositories = maven.getArtifactRepositories();
       assertEquals(2, repositories.size());
       assertEquals("central", repositories.get(0).getId());
       assertEquals("custom", repositories.get(1).getId());
 
       // plugin repositories
-      repositories = maven.getPluginArtifactRepository(monitor);
+      repositories = maven.getPluginArtifactRepository();
       assertEquals(2, repositories.size());
       assertEquals("central", repositories.get(0).getId());
       assertEquals("custom", repositories.get(1).getId());

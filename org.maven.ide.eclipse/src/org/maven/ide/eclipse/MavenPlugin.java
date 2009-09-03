@@ -359,8 +359,8 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   public List<ArtifactRepository> getRemoteRepositories(IProgressMonitor monitor) throws Exception{
     IMaven maven = MavenPlugin.getDefault().getMaven(); 
     ArrayList<ArtifactRepository> repositories = new ArrayList<ArtifactRepository>();
-    repositories.addAll(maven.getArtifactRepositories(monitor));
-    repositories.addAll(maven.getPluginArtifactRepository(monitor));
+    repositories.addAll(maven.getArtifactRepositories());
+    repositories.addAll(maven.getPluginArtifactRepository());
     return repositories;
   }
 

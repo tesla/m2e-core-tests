@@ -126,7 +126,7 @@ public class MavenSettingsPreferencePage extends PreferencePage implements IWork
           File newRepositoryDir = new File(maven.getLocalRepository().getBasedir());
           if(!newRepositoryDir.equals(localRepositoryDir)) {
             IndexManager indexManager = mavenPlugin.getIndexManager();
-            indexManager.getWorkspaceIndex().scheduleIndexUpdate(true, 0L);
+            indexManager.getWorkspaceIndex().updateIndex(true, monitor);
           }
           return Status.OK_STATUS;
         } catch (CoreException e) {
@@ -187,9 +187,9 @@ public class MavenSettingsPreferencePage extends PreferencePage implements IWork
        */
       public void widgetSelected(SelectionEvent e) {
         new WorkspaceJob("Indexing Local Repository...") {
-            public IStatus runInWorkspace(IProgressMonitor monitor) {
+            public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
               IndexManager indexManager = mavenPlugin.getIndexManager();
-              indexManager.getWorkspaceIndex().scheduleIndexUpdate(true, 0L);
+              indexManager.getWorkspaceIndex().updateIndex(true, monitor);
               return Status.OK_STATUS;
             }
          }.schedule();

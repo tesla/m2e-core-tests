@@ -62,9 +62,4 @@ public interface IndexManager {
    */
   public abstract IndexedArtifactFile identify(File file) throws CoreException;
 
-  //do we want this in IndexManager?
-  public void scheduleIndexUpdate(String indexName, boolean force) throws CoreException;
-  
-  public void addIndexListener(IndexListener listener);
-  
 }

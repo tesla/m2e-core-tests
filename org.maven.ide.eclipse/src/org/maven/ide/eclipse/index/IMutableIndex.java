@@ -10,7 +10,11 @@ package org.maven.ide.eclipse.index;
 
 import java.io.File;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.maven.ide.eclipse.embedder.ArtifactKey;
+
 
 /**
  * @author igor
@@ -25,10 +29,10 @@ public interface IMutableIndex extends IIndex {
   public void removeArtifact(File pomFile, ArtifactKey artifactKey);
 
   // reindexing
-  
-  public void scheduleIndexUpdate(boolean force, long delay);
+
+  public void updateIndex(boolean force, IProgressMonitor monitor) throws CoreException;
 
   public String getIndexName();
-  
+
   public String getRepositoryUrl();
 }

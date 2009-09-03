@@ -79,9 +79,10 @@ public interface IMaven {
 
   // configuration
 
+  /**
+   * TODO should we expose Settings or provie access to servers and proxies instead?
+   */
   public Settings getSettings() throws CoreException;
-  
-  public IMavenConfiguration getMavenConfiguration();
 
   public ArtifactRepository getLocalRepository() throws CoreException;
 
@@ -91,13 +92,15 @@ public interface IMaven {
    * Returns list of remote artifact repositories configured in settings.xml. Only profiles active by default are
    * considered when calculating the list.
    */
-  public List<ArtifactRepository> getArtifactRepositories(IProgressMonitor monitor) throws CoreException;
+  public List<ArtifactRepository> getArtifactRepositories() throws CoreException;
 
-  public List<ArtifactRepository> getPluginArtifactRepository(IProgressMonitor monitor) throws CoreException;
+  public List<ArtifactRepository> getPluginArtifactRepository() throws CoreException;
 
   public Settings buildSettings(String globalSettings, String userSettings) throws CoreException;
 
   public SettingsValidationResult validateSettings(String settings);
+
+  public List<Mirror> getMirrors() throws CoreException;
 
   public Mirror getMirror(ArtifactRepository repo) throws CoreException;
 
@@ -106,6 +109,5 @@ public interface IMaven {
    * MavenProject instance is built, so we have to remove unused extensions realms to avoid OOME.
    */
   public void xxxRemoveExtensionsRealm(MavenProject project);
-
 
 }

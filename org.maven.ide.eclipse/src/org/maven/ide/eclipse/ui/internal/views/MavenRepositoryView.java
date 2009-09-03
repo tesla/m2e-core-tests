@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.WorkspaceJob;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -48,9 +47,7 @@ import org.maven.ide.eclipse.MavenImages;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.MaterializeAction;
 import org.maven.ide.eclipse.actions.OpenPomAction;
-import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.index.IndexListener;
-import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.internal.index.IndexedArtifactGroup;
@@ -69,6 +66,7 @@ import org.maven.ide.eclipse.ui.internal.views.nodes.RepositoryNode;
  */
 public class MavenRepositoryView extends ViewPart {
 
+  private NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getDefault().getIndexManager();
 
   private IAction collapseAllAction;
   
@@ -124,7 +122,6 @@ public class MavenRepositoryView extends ViewPart {
 
     contributeToActionBars();
 
-    IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
     indexManager.addIndexListener(new IndexListener() {
 
       public void indexAdded(String repositoryUrl) {
@@ -474,7 +471,6 @@ public class MavenRepositoryView extends ViewPart {
     boolean ok = MessageDialog.openConfirm(getViewSite().getShell(), "Enable Index", msg);
 
     if(ok) {
-      NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getDefault().getIndexManager();
       
       if(node.getIndex() == null) {
         // TODO select between short and full index
@@ -529,12 +525,7 @@ public class MavenRepositoryView extends ViewPart {
   };
 
   protected void updateIndex(final String repositoryUrl, boolean force){
-    try{
-      IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
-      indexManager.scheduleIndexUpdate(repositoryUrl, force);
-    } catch(CoreException ce){
-      MavenLogger.log(ce);
-    }
+    indexManager.scheduleIndexUpdate(repositoryUrl, force);
   }
 
 }

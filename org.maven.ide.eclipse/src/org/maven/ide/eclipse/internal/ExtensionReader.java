@@ -35,7 +35,6 @@ import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.index.EnabledIndex;
 import org.maven.ide.eclipse.internal.index.EnabledIndexWriter;
-import org.maven.ide.eclipse.internal.index.IndexInfo;
 import org.maven.ide.eclipse.project.IMavenMarkerManager;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
@@ -119,7 +118,7 @@ public class ExtensionReader {
 
   /**
    * @param configFile previously saved indexes configuration
-   * @return collection of {@link IndexInfo} from the extension points
+   * @return collection of {@link RepositoryInfo} from the extension points
    */
 //  public static Map<String, IndexInfo> readIndexInfoExtensions() {
 //    Map<String, IndexInfo> indexes = new LinkedHashMap<String, IndexInfo>();

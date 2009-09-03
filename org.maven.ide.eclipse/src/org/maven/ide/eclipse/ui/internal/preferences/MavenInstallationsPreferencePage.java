@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -155,7 +156,11 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
           storeCustom(dir);
         }
         IndexManager indexManager = mavenPlugin.getIndexManager();
-        indexManager.getWorkspaceIndex().scheduleIndexUpdate(true, 0L);
+        try {
+          indexManager.getWorkspaceIndex().updateIndex(true, monitor);
+        } catch(CoreException ex) {
+          return ex.getStatus();
+        }
         if((dir == null && oldSettings != null) || (dir != null && !(dir.equals(oldSettings)))){
           //mavenPlugin.getIndexManager().scheduleIndexUpdate(IndexManager.LOCAL_INDEX, true, 0L);
         }

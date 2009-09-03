@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.swt.graphics.Image;
 
 import org.apache.maven.artifact.repository.ArtifactRepository;
@@ -38,8 +37,8 @@ public class RemoteRepositoryRootNode implements IMavenRepositoryNode {
 
   public List<ArtifactRepository> getRemoteRepositories() throws Exception {
     LinkedHashSet<ArtifactRepository> repositories = new LinkedHashSet<ArtifactRepository>();
-    repositories.addAll(maven.getArtifactRepositories(new NullProgressMonitor()));
-    repositories.addAll(maven.getPluginArtifactRepository(new NullProgressMonitor()));
+    repositories.addAll(maven.getArtifactRepositories());
+    repositories.addAll(maven.getPluginArtifactRepository());
     return new ArrayList<ArtifactRepository>(repositories);
   }
 
@@ -51,7 +50,7 @@ public class RemoteRepositoryRootNode implements IMavenRepositoryNode {
       MavenExecutionRequest request = maven.createExecutionRequest(null);
       maven.populateDefaults(request);
       for (Mirror mirror : request.getMirrors()) {
-        NexusIndex index = new NexusIndex(indexManager, mirror.getUrl());
+        NexusIndex index = indexManager.getIndex(mirror.getUrl());
         MirrorNode mirrorNode = new MirrorNode(indexManager, index, mirror);
         repoList.add(mirrorNode);
       }
@@ -59,7 +58,7 @@ public class RemoteRepositoryRootNode implements IMavenRepositoryNode {
       // repositories
       for(ArtifactRepository repo : getRemoteRepositories()) {
         Mirror mirror = maven.getMirror(repo);
-        NexusIndex index = mirror == null? new NexusIndex(indexManager, repo.getUrl()) : null;
+        NexusIndex index = indexManager.getIndex(repo.getUrl());
         RepositoryNode repoNode = new RepositoryNode(indexManager, index, repo, mirror);
         repoList.add(repoNode);
       }
