@@ -17,7 +17,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.maven.ide.components.archetype_common,
  org.maven.ide.eclipse.jdt,
  org.junit,
- org.maven.ide.eclipse.launching
+ org.maven.ide.eclipse.launching,
+ org.maven.ide.components.nexus_indexer
 Eclipse-LazyStart: true
 Bundle-RequiredExecutionEnvironment: J2SE-1.5,
  JavaSE-1.6
@@ -28,7 +29,7 @@ MavenArtifact-ArtifactId: org.maven.ide.eclipse.test
 Export-Package: org.maven.ide.eclipse.archetype,
  org.maven.ide.eclipse.configurators,
  org.maven.ide.eclipse.embedder,
- org.maven.ide.eclipse.index,
+ org.maven.ide.eclipse.internal.index,
  org.maven.ide.eclipse.scm,
  org.maven.ide.eclipse.tests,
  org.maven.ide.eclipse.util

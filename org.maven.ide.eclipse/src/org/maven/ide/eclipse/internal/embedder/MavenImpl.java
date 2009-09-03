@@ -86,10 +86,14 @@ import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
+import org.maven.ide.eclipse.embedder.IMavenConfigurationChangeListener;
+import org.maven.ide.eclipse.embedder.ISettingsChangeListener;
+import org.maven.ide.eclipse.embedder.MavenConfigurationChangeEvent;
 import org.maven.ide.eclipse.index.IndexManager;
+import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;
 
 
-public class MavenImpl implements IMaven {
+public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
 
   private final PlexusContainer plexus;
 
@@ -119,6 +123,8 @@ public class MavenImpl implements IMaven {
 
   private IndexManager indexManager;
 
+  private ArrayList<ISettingsChangeListener> listeners = new ArrayList<ISettingsChangeListener>();
+
   public MavenImpl(PlexusContainer plexus, IMavenConfiguration mavenConfiguration) throws CoreException {
     this.plexus = plexus;
     try {
@@ -136,6 +142,8 @@ public class MavenImpl implements IMaven {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
           "Could not lookup required component", ex));
     }
+
+    mavenConfiguration.addConfigurationChangeListener(this);
   }
 
   public MavenExecutionRequest createExecutionRequest(IProgressMonitor monitor) throws CoreException {
@@ -279,6 +287,25 @@ public class MavenImpl implements IMaven {
     }
 
     return result;
+  }
+
+  public void reloadSettings() throws CoreException {
+    // TODO do something more meaningful
+    Settings settings = getSettings();
+    for (ISettingsChangeListener listener : listeners) {
+      try {
+        listener.settingsChanged(settings);
+      } catch (CoreException e) {
+        MavenLogger.log(e);
+      }
+    }
+  }
+
+  public void mavenConfigutationChange(MavenConfigurationChangeEvent event) throws CoreException {
+    if(MavenConfigurationChangeEvent.P_USER_SETTINGS_FILE.equals(event.getKey())
+        || MavenPreferenceConstants.P_GLOBAL_SETTINGS_FILE.equals(event.getKey())) {
+      reloadSettings();
+    }
   }
 
   public Model readModel(InputStream in) throws CoreException {
@@ -518,5 +545,13 @@ public class MavenImpl implements IMaven {
     MavenExecutionRequest request = createExecutionRequest(null);
     populateDefaults(request);
     return request.getMirrors();
+  }
+
+  public void addSettingsChangeListener(ISettingsChangeListener listener) {
+    listeners.add(listener);
+  }
+  
+  public void removeSettingsChangeListener(ISettingsChangeListener listener) {
+    listeners.remove(listener);
   }
 }

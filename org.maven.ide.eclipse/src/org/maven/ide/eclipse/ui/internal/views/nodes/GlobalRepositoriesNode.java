@@ -33,7 +33,7 @@ public class GlobalRepositoriesNode implements IMavenRepositoryNode {
     ArrayList<Object> globalRepoNodes = new ArrayList<Object>();
 
     for (RepositoryInfo repo : indexManager.getRepositories()) {
-      NexusIndex index = indexManager.getIndex(repo.getRepositoryUrl());
+      NexusIndex index = indexManager.getIndex(repo.getUrl());
       RepositoryNode node = new RepositoryNode(indexManager, repo, index);
       if (repo.isGlobal()) {
         if (repo.getMirrorOf() != null) {

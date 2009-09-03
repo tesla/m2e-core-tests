@@ -5,6 +5,7 @@ import java.io.File;
 
 import org.codehaus.plexus.util.FileUtils;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -43,7 +44,7 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
     IMavenConfiguration mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
     mavenConfiguration.setUserSettingsFile(settingsXML.getAbsolutePath());
     IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
-    indexManager.getWorkspaceIndex().scheduleIndexUpdate(true, 0L);
+    indexManager.getWorkspaceIndex().updateIndex(true, new NullProgressMonitor());
     super.oneTimeSetup();
   }
   

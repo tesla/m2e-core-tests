@@ -37,6 +37,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
@@ -84,7 +85,7 @@ import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.ArtifactRepositoryRef;
 import org.maven.ide.eclipse.embedder.IMaven;
-import org.maven.ide.eclipse.embedder.IMavenConfiguration;
+import org.maven.ide.eclipse.embedder.ISettingsChangeListener;
 import org.maven.ide.eclipse.index.IIndex;
 import org.maven.ide.eclipse.index.IndexListener;
 import org.maven.ide.eclipse.index.IndexManager;
@@ -117,9 +118,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
   
   private IMaven maven;
 
-  private IMavenConfiguration mavenConfiguration;
-
-  MavenProjectManager projectManager;
+  private MavenProjectManager projectManager;
 
   private ArrayList<IndexCreator> fullCreators = null;
 
@@ -165,18 +164,14 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     this.baseIndexDir = new File(stateDir, "nexus");
 
     this.maven = MavenPlugin.lookup(IMaven.class);
-    this.mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
 
     this.updaterJob = new IndexUpdaterJob(this, console);
 
-    // TODO what should trigger index invalidation?
-//    this.mavenConfiguration.addConfigurationChangeListener(new AbstractMavenConfigurationChangeListener() {
-//      public void mavenConfigutationChange(MavenConfigurationChangeEvent event) throws CoreException {
-//        if(MavenConfigurationChangeEvent.P_USER_SETTINGS_FILE.equals(event.getKey()) || MavenPreferenceConstants.P_GLOBAL_SETTINGS_FILE.equals(event.getKey())) {
-//          invalidateIndexer();
-//        }
-//      }
-//    });
+    this.maven.addSettingsChangeListener(new ISettingsChangeListener() {
+      public void settingsChanged(Settings settings) {
+        initialize();
+      }
+    });
   }
 
   private ArrayList<IndexCreator> getFullCreator() {
@@ -576,7 +571,8 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     return new IndexedArtifactGroup[0];
   }
 
-  protected IndexingContext getIndexingContext(String repositoryUrl) {
+  /** public for unit tests only! */
+  public IndexingContext getIndexingContext(String repositoryUrl) {
     return repositoryUrl == null ? null : getIndexer().getIndexingContexts().get(repositoryUrl);
   }
 
@@ -656,15 +652,17 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       if (repository != null && !repository.isGlobal()) {
         repository.removeProject(facade.getPom().getFullPath());
         if (repository.getProjects().isEmpty()) {
-          removeRepository(repository.getRepositoryUrl(), false);
+          removeRepository(repository.getUrl(), false);
         }
       }
     }
     
   }
 
-  private void addProjectRepositories(Settings settings,
+  private Set<String> addProjectRepositories(Settings settings,
       IMavenProjectFacade facade, IProgressMonitor monitor) throws CoreException {
+    Set<String> repositoryUrls = new HashSet<String>();
+    
     ArrayList<ArtifactRepositoryRef> repositories = getProjectRepositories(facade);
 
     for (ArtifactRepositoryRef repo : repositories) {
@@ -681,7 +679,9 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       addRepository(repository, //
           RepositoryInfo.DETAILS_MIN, //
           monitor);
+      repositoryUrls.add(repository.getUrl());
     }
+    return repositoryUrls;
   }
 
   private ArrayList<ArtifactRepositoryRef> getProjectRepositories(IMavenProjectFacade facade) {
@@ -717,7 +717,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     } else {
       for (RepositoryInfo repoInfo : this.repositories.values()) {
         if (repoInfo.isGlobal()) {
-          indexes.add(getIndex(repoInfo.getRepositoryUrl()));
+          indexes.add(getIndex(repoInfo.getUrl()));
         }
       }
     }
@@ -791,7 +791,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
   }
 
   private void addRepository(RepositoryInfo repository, String defaultIndexDetails, IProgressMonitor monitor) throws CoreException {
-    String repositoryUrl = repository.getRepositoryUrl();
+    String repositoryUrl = repository.getUrl();
 
     String details = indexDetails.getProperty(repositoryUrl, defaultIndexDetails);
 
@@ -1008,6 +1008,8 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
 
     // process configured repositories
 
+    Set<String> oldRepositoryUrls = new HashSet<String>(repositories.keySet());
+
     // mirrors
     Settings settings = maven.getSettings();
     List<Mirror> mirrors = maven.getMirrors();
@@ -1017,6 +1019,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       RepositoryInfo repository = new RepositoryInfo(mirror.getId(), mirror.getUrl(), true /*global*/, auth, proxy);
       repository.setMirrorOf(mirror.getMirrorOf());
       addRepository(repository, RepositoryInfo.DETAILS_MIN, monitor);
+      oldRepositoryUrls.remove(repository.getUrl());
     }
 
     // repositories from settings.xml
@@ -1035,11 +1038,16 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       addRepository(repository, //
           mirror != null ? RepositoryInfo.DETAILS_DISABLED : RepositoryInfo.DETAILS_MIN, //
           monitor);
+      oldRepositoryUrls.remove(repository.getUrl());
     }
 
     // project-specific repositories
     for (IMavenProjectFacade facade : projectManager.getProjects()) {
-      addProjectRepositories(settings, facade, monitor);
+      oldRepositoryUrls.removeAll(addProjectRepositories(settings, facade, monitor));
+    }
+
+    for (String repositoryUrl : oldRepositoryUrls) {
+      removeRepository(repositoryUrl, false);
     }
   }
 
@@ -1115,4 +1123,8 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     return repositories.values();
   }
 
+  /** for unit tests only */
+  public Job getIndexUpdateJob() {
+    return updaterJob;
+  }
 }

@@ -24,8 +24,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -79,7 +77,6 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.archetype.ArchetypeCatalogFactory;
 import org.maven.ide.eclipse.archetype.ArchetypeManager;
 import org.maven.ide.eclipse.archetype.ArchetypeCatalogFactory.NexusIndexerCatalogFactory;
-import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.core.Messages;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
@@ -94,7 +91,7 @@ import org.maven.ide.eclipse.project.ProjectImportConfiguration;
  * Maven Archetype selection wizard page presents the user with a list of available Maven
  * Archetypes available for creating new project.
  */
-public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage implements IPropertyChangeListener {
+public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
 
   private static final String KEY_CATALOG = "catalog";
 
@@ -427,7 +424,6 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
         }
       }
     });
-    MavenPlugin.getDefault().addPropertyChangeListener(this);
   }
   
   protected IWizardContainer getContainer() {
@@ -442,7 +438,6 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
     if(dialogSettings != null && catalogFactory!=null) {
       dialogSettings.put(KEY_CATALOG, catalogFactory.getId());
     }
-    MavenPlugin.getDefault().removePropertyChangeListener(this);
     super.dispose();
   }
   
@@ -776,14 +771,14 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
   /* (non-Javadoc)
    * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
    */
-  public void propertyChange(PropertyChangeEvent event) {
-    if(IMavenConstants.INDEX_UPDATE_PROP.equals(event.getProperty())){
-      Display.getDefault().asyncExec(new Runnable(){
-        public void run(){
-          loadArchetypes("org.apache.maven.archetypes", "maven-archetype-quickstart", "1.0");
-        }
-      });
-    }
-  }
+//  public void propertyChange(PropertyChangeEvent event) {
+//    if(IMavenConstants.INDEX_UPDATE_PROP.equals(event.getProperty())){
+//      Display.getDefault().asyncExec(new Runnable(){
+//        public void run(){
+//          loadArchetypes("org.apache.maven.archetypes", "maven-archetype-quickstart", "1.0");
+//        }
+//      });
+//    }
+//  }
 
 }

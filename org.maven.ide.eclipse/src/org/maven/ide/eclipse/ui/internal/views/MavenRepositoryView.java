@@ -209,7 +209,6 @@ public class MavenRepositoryView extends ViewPart {
     manager.add(copyUrlAction);
     manager.add(materializeProjectAction);
     manager.add(new Separator());
-    manager.add(reloadSettings);
     manager.add(updateAction);
     manager.add(rebuildAction);
     manager.add(new Separator());

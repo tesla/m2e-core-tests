@@ -30,7 +30,7 @@ public class ProjectRepositoriesNode implements IMavenRepositoryNode {
     ArrayList<Object> nodes = new ArrayList<Object>();
     for(RepositoryInfo repo : indexManager.getRepositories()) {
       if(!repo.isGlobal()) {
-        NexusIndex index = indexManager.getIndex(repo.getRepositoryUrl());
+        NexusIndex index = indexManager.getIndex(repo.getUrl());
         RepositoryNode node = new RepositoryNode(indexManager, repo, index);
         nodes.add(node);
       }

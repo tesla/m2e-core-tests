@@ -1,16 +1,5 @@
 <settings>
-<mirrors>
-  <mirror>
-    <id>nexusXX</id>
-    <mirrorOf>external:*</mirrorOf>
-    <url>http://repository.sonatype.org/content/groups/public/blah</url>
-  </mirror>
-    <mirror>
-    <id>nexus2</id>
-    <mirrorOf>external:*</mirrorOf>
-    <url>http://repository.sonatype.org/content/groups/public/foo</url>
-  </mirror>
-</mirrors>
+
   <profiles>
    <profile>
       <id>development</id>
@@ -18,6 +7,16 @@
         <repository>
           <id>central</id>
           <url>http://central</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </repository>
+        <repository>
+          <id>DifferentCentral</id>
+          <url>http://central/foo</url>
           <releases>
             <enabled>true</enabled>
           </releases>
@@ -37,6 +36,16 @@
             <enabled>true</enabled>
           </snapshots>
         </pluginRepository>
+        <pluginRepository>
+          <id>centralPlugin</id>
+          <url>http://central/plugin</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </pluginRepository>
       </pluginRepositories>
     </profile>
    </profiles>
@@ -44,3 +53,4 @@
         <activeProfile>development</activeProfile>
     </activeProfiles>
 </settings>
+

@@ -2,8 +2,8 @@
 <mirrors>
   <mirror>
     <id>nexus</id>
-    <mirrorOf>external:*,!jboss</mirrorOf>
-    <url>http://repository.sonatype.org/content/groups/public</url>
+    <mirrorOf>external:*</mirrorOf>
+    <url>http://repository.sonatype.org/content/repositories/eclipse</url>
   </mirror>
 </mirrors>
   <profiles>
@@ -13,16 +13,6 @@
         <repository>
           <id>central</id>
           <url>http://central</url>
-          <releases>
-            <enabled>true</enabled>
-          </releases>
-          <snapshots>
-            <enabled>true</enabled>
-          </snapshots>
-        </repository>
-        <repository>
-          <id>jboss</id>
-          <url>http://repository.jboss.com/maven2/</url>
           <releases>
             <enabled>true</enabled>
           </releases>

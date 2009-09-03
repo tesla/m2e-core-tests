@@ -59,7 +59,7 @@ public class RepositoryInfo {
     return authInfo;
   }
 
-  public String getRepositoryUrl() {
+  public String getUrl() {
     return repositoryUrl;
   }
 

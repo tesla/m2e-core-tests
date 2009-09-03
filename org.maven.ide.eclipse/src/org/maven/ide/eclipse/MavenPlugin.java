@@ -23,7 +23,6 @@ import org.osgi.framework.Version;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
@@ -33,7 +32,6 @@ import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
-import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -67,7 +65,6 @@ import org.codehaus.plexus.component.repository.exception.ComponentLookupExcepti
 import org.codehaus.plexus.configuration.PlexusConfigurationException;
 import org.codehaus.plexus.context.Context;
 
-import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.classrealm.ClassRealmManagerDelegate;
 import org.apache.maven.plugin.MavenPluginManager;
 import org.apache.maven.project.artifact.MavenMetadataCache;
@@ -164,12 +161,8 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
   private IMavenMarkerManager mavenMarkerManager;
 
-  private ArrayList<IPropertyChangeListener> listeners;
-
   private String version = "0.0.0";
   
-  private Map<String, String> enabledIndexes = new HashMap<String, String>();
-
   public MavenPlugin() {
     plugin = this;
 
@@ -343,32 +336,6 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     checkJdk();
   }
 
-  public void addPropertyChangeListener(IPropertyChangeListener listener){
-    if(listeners == null){
-      listeners = new ArrayList<IPropertyChangeListener>();
-    }
-    listeners.add(listener);
-  }
-  
-  public void removePropertyChangeListener(IPropertyChangeListener listener){
-    if(listeners != null){
-      listeners.remove(listener);
-    }
-  }
-  
-  public List<ArtifactRepository> getRemoteRepositories(IProgressMonitor monitor) throws Exception{
-    IMaven maven = MavenPlugin.getDefault().getMaven(); 
-    ArrayList<ArtifactRepository> repositories = new ArrayList<ArtifactRepository>();
-    repositories.addAll(maven.getArtifactRepositories());
-    repositories.addAll(maven.getPluginArtifactRepository());
-    return repositories;
-  }
-
-  protected File getEnabledIndexesConfig(){
-    File stateLocationDir = getStateLocation().toFile();
-    return new File(stateLocationDir, PREFS_ENABLED_INDEXES);
-  }
-
   public void earlyStartup() {
     // nothing to do here, all startup work is done in #start(BundleContext)
   }
@@ -407,9 +374,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     if(this.console != null) {
       this.console.shutdown();
     }
-    if(listeners != null){
-      listeners.clear();
-    }
+
     components.clear();
     plugin = null;
   }

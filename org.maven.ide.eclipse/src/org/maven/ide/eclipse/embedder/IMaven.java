@@ -80,7 +80,7 @@ public interface IMaven {
   // configuration
 
   /**
-   * TODO should we expose Settings or provie access to servers and proxies instead?
+   * TODO should we expose Settings or provide access to servers and proxies instead?
    */
   public Settings getSettings() throws CoreException;
 
@@ -103,6 +103,12 @@ public interface IMaven {
   public List<Mirror> getMirrors() throws CoreException;
 
   public Mirror getMirror(ArtifactRepository repo) throws CoreException;
+
+  public void addSettingsChangeListener(ISettingsChangeListener listener);
+
+  public void removeSettingsChangeListener(ISettingsChangeListener listener);
+
+  public void reloadSettings() throws CoreException;
 
   /**
    * Temporary solution/workaround for http://jira.codehaus.org/browse/MNG-4194. Extensions realm is created each time
