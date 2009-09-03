@@ -245,9 +245,13 @@ public class MavenRepositoryView extends ViewPart {
         boolean res = MessageDialog.openConfirm(getViewSite().getShell(), //
             "Reload settings.xml", msg);
         if(res){
-          Job job = new WorkspaceJob("Reloading settings.xml"){
-            public IStatus runInWorkspace(IProgressMonitor monitor){
-//              MavenPlugin.getDefault().reloadSettingsXml();
+          Job job = new WorkspaceJob("Reloading settings.xml") {
+            public IStatus runInWorkspace(IProgressMonitor monitor) {
+              try {
+                MavenPlugin.getDefault().getMaven().reloadSettings();
+              } catch(CoreException ex) {
+                return ex.getStatus();
+              }
               return Status.OK_STATUS;
             }
           };
