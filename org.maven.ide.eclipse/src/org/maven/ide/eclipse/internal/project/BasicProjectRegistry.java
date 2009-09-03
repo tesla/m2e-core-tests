@@ -16,16 +16,19 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IPath;
 
+import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 
 /**
- * BasicWorkspaceState
+ * BasicProjectRegistry
  *
  * @author igor
  */
 class BasicProjectRegistry implements Serializable {
 
   private static final long serialVersionUID = 2476327375565147378L;
+
+  private final String m2e_version = MavenPlugin.getQualifiedVersion();
 
   /**
    * Map<ArtifactKey, IPath> 
@@ -104,11 +107,12 @@ class BasicProjectRegistry implements Serializable {
   }
 
   public boolean isValid() {
-    return workspaceArtifacts != null //
+    return MavenPlugin.getQualifiedVersion().equals(m2e_version) //
+        && workspaceArtifacts != null //
         && workspaceDependencies != null //
         && inprojectDependencies != null //
         && workspaceModules != null //
         && workspacePoms != null;
   }
-  
+
 }

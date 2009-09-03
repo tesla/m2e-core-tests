@@ -162,6 +162,8 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   private IMavenMarkerManager mavenMarkerManager;
 
   private String version = "0.0.0";
+
+  private String qualifiedVersion = "0.0.0.qualifier";
   
   public MavenPlugin() {
     plugin = this;
@@ -190,7 +192,8 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     this.bundleContext = context;
 
     try {
-      Version bundleVersion = Version.parseVersion((String) getBundle().getHeaders().get(Constants.BUNDLE_VERSION));
+      this.qualifiedVersion = (String) getBundle().getHeaders().get(Constants.BUNDLE_VERSION);
+      Version bundleVersion = Version.parseVersion(this.qualifiedVersion);
       this.version = bundleVersion.getMajor() + "." + bundleVersion.getMinor() + "." + bundleVersion.getMicro();
     } catch (IllegalArgumentException e) {
       // ignored
@@ -556,4 +559,9 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   public static String getVersion() {
     return plugin.version;
   }
+
+  public static String getQualifiedVersion() {
+    return plugin.qualifiedVersion;
+  }
+
 }

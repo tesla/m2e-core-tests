@@ -500,8 +500,10 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
     ArrayList<Profile> activeProfiles = new ArrayList<Profile>();
     for (String profileId : settings.getActiveProfiles()) {
       org.apache.maven.settings.Profile settingsProfile = profiles.get(profileId);
-      Profile profile = SettingsUtils.convertFromSettingsProfile(settingsProfile);
-      activeProfiles.add(profile);
+      if (settingsProfile != null) {
+        Profile profile = SettingsUtils.convertFromSettingsProfile(settingsProfile);
+        activeProfiles.add(profile);
+      }
     }
     return activeProfiles;
   }
