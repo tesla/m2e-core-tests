@@ -8,6 +8,11 @@
 
 package org.maven.ide.eclipse.internal.index;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import org.eclipse.core.runtime.IPath;
+
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 
@@ -29,12 +34,19 @@ public class RepositoryInfo {
    */
   public static final String DETAILS_FULL = "full";
 
+  private final String id;
+  private final String repositoryUrl;
+  private final boolean global;
   private final ProxyInfo proxyInfo;
   private final AuthenticationInfo authInfo;
-  private final String repositoryUrl;
+  private String mirrorId;
+  private String mirrorOf;
+  private Set<IPath> projects = new HashSet<IPath>();
 
-  RepositoryInfo(String repositoryUrl, AuthenticationInfo authInfo, ProxyInfo proxyInfo) {
+  RepositoryInfo(String id, String repositoryUrl, boolean global, AuthenticationInfo authInfo, ProxyInfo proxyInfo) {
+    this.id = id;
     this.repositoryUrl = repositoryUrl;
+    this.global = global;
     this.authInfo = authInfo;
     this.proxyInfo = proxyInfo;
   }
@@ -48,6 +60,44 @@ public class RepositoryInfo {
   }
 
   public String getRepositoryUrl() {
-    return this.repositoryUrl;
+    return repositoryUrl;
+  }
+
+  public boolean isGlobal() {
+    return global;
+  }
+
+  public String getId() {
+    return id;
+  }
+
+  public String getMirrorId() {
+    return mirrorId;
+  }
+
+  public String getMirrorOf() {
+    return mirrorOf;
+  }
+
+  public void setMirrorOf(String mirrorOf) {
+    this.mirrorOf = mirrorOf;
+  }
+
+  public void setMirrorId(String mirrorId) {
+    this.mirrorId = mirrorId;
+  }
+
+  public Set<IPath> getProjects() {
+    return projects;
+  }
+
+  public void addProject(IPath project) {
+    if (!global) {
+      projects.add(project);
+    }
+  }
+
+  public void removeProject(IPath project) {
+    projects.remove(project);
   }
 }

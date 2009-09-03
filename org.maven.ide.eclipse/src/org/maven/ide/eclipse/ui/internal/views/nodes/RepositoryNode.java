@@ -8,11 +8,9 @@
 
 package org.maven.ide.eclipse.ui.internal.views.nodes;
 
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.settings.Mirror;
-
 import org.maven.ide.eclipse.internal.index.NexusIndex;
 import org.maven.ide.eclipse.internal.index.NexusIndexManager;
+import org.maven.ide.eclipse.internal.index.RepositoryInfo;
 
 /**
  * LocalRepsoitoryNode
@@ -21,21 +19,22 @@ import org.maven.ide.eclipse.internal.index.NexusIndexManager;
  */
 public class RepositoryNode extends AbstractIndexedRepositoryNode {
 
-  private final ArtifactRepository repository;
-  private final Mirror mirror;
+  private final RepositoryInfo repository;
 
-  public RepositoryNode(NexusIndexManager indexManager, NexusIndex index, ArtifactRepository repository, Mirror mirror){
+  public RepositoryNode(NexusIndexManager indexManager, RepositoryInfo repository, NexusIndex index){
     super(indexManager, index);
     this.repository = repository;
-    this.mirror = mirror;
   }
 
   public String getName() {
     StringBuilder sb = new StringBuilder();
     sb.append(repository.getId());
-    sb.append(" (").append(repository.getUrl()).append(")");
-    if (mirror != null) {
-      sb.append(" [mirrored by ").append(mirror.getId()).append("]");
+    sb.append(" (").append(repository.getRepositoryUrl()).append(")");
+    if (repository.getMirrorOf() != null) {
+      sb.append(" [mirrorOf=").append(repository.getMirrorOf()).append("]");
+    }
+    if (repository.getMirrorId() != null) {
+      sb.append(" [mirrored by ").append(repository.getMirrorId()).append("]");
     }
     if (isUpdating()) {
       sb.append(" [updating]");
@@ -44,7 +43,7 @@ public class RepositoryNode extends AbstractIndexedRepositoryNode {
   }
 
   public String getRepositoryUrl() {
-    return repository.getUrl();
+    return repository.getRepositoryUrl();
   }
 
   public String getRepoName() {

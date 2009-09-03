@@ -13,9 +13,10 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.ui.IViewSite;
 
+import org.maven.ide.eclipse.ui.internal.views.nodes.GlobalRepositoriesNode;
 import org.maven.ide.eclipse.ui.internal.views.nodes.IMavenRepositoryNode;
 import org.maven.ide.eclipse.ui.internal.views.nodes.LocalRepositoryRootNode;
-import org.maven.ide.eclipse.ui.internal.views.nodes.RemoteRepositoryRootNode;
+import org.maven.ide.eclipse.ui.internal.views.nodes.ProjectRepositoriesNode;
 
 /**
  * RepositoryViewContentProvider
@@ -25,7 +26,8 @@ import org.maven.ide.eclipse.ui.internal.views.nodes.RemoteRepositoryRootNode;
 public class RepositoryViewContentProvider implements IStructuredContentProvider, ITreeContentProvider {
 
   private LocalRepositoryRootNode localNode;
-  private RemoteRepositoryRootNode remoteNode;
+  private GlobalRepositoriesNode globalNode;
+  private ProjectRepositoriesNode projectNode;
   
   public RepositoryViewContentProvider() {
   }
@@ -56,10 +58,13 @@ public class RepositoryViewContentProvider implements IStructuredContentProvider
       localNode = new LocalRepositoryRootNode();
       
     }
-    if(remoteNode == null){
-      remoteNode = new RemoteRepositoryRootNode();
+    if(globalNode == null){
+      globalNode = new GlobalRepositoriesNode();
     }
-    return new Object[]{localNode, remoteNode};
+    if(projectNode == null) {
+      projectNode = new ProjectRepositoriesNode();
+    }
+    return new Object[]{localNode, globalNode, projectNode};
   }
   
   public Object[] getChildren(Object parent) {

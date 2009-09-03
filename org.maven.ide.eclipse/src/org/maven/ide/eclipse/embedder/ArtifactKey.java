@@ -47,7 +47,7 @@ public class ArtifactKey implements Serializable {
   }
 
   public int hashCode() {
-    int hash = 1;
+    int hash = 17;
     hash = hash * 31 + (groupId != null? groupId.hashCode(): 0);
     hash = hash * 31 + (artifactId != null? artifactId.hashCode(): 0);
     hash = hash * 31 + (version != null? version.hashCode(): 0);

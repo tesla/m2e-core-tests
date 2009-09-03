@@ -36,6 +36,7 @@ import org.apache.maven.project.MavenProject;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.ArtifactRef;
+import org.maven.ide.eclipse.embedder.ArtifactRepositoryRef;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.IMavenProjectVisitor;
 import org.maven.ide.eclipse.project.IMavenProjectVisitor2;
@@ -78,8 +79,8 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
   private IPath outputLocation;
   private IPath testOutputLocation;
   private Set<ArtifactRef> artifacts;
-  private Set<String> artifactRepositoryUrls;
-  private Set<String> pluginArtifactRepositoryUrls;
+  private Set<ArtifactRepositoryRef> artifactRepositories;
+  private Set<ArtifactRepositoryRef> pluginArtifactRepositories;
 
   public MavenProjectFacade(MavenProjectManagerImpl manager, IFile pom, MavenProject mavenProject,
       ResolverConfiguration resolverConfiguration) {
@@ -114,14 +115,14 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
 
     this.artifacts = ArtifactRef.fromArtifact(mavenProject.getArtifacts());
 
-    this.artifactRepositoryUrls = new LinkedHashSet<String>();
+    this.artifactRepositories = new LinkedHashSet<ArtifactRepositoryRef>();
     for(ArtifactRepository repository : mavenProject.getRemoteArtifactRepositories()) {
-      this.artifactRepositoryUrls.add(repository.getUrl());
+      this.artifactRepositories.add(new ArtifactRepositoryRef(repository.getId(), repository.getUrl()));
     }
 
-    this.pluginArtifactRepositoryUrls = new LinkedHashSet<String>();
+    this.pluginArtifactRepositories = new LinkedHashSet<ArtifactRepositoryRef>();
     for(ArtifactRepository repository : mavenProject.getPluginArtifactRepositories()) {
-      this.pluginArtifactRepositoryUrls.add(repository.getUrl()); 
+      this.pluginArtifactRepositories.add(new ArtifactRepositoryRef(repository.getId(), repository.getUrl()));
     }
   }
 
@@ -349,11 +350,11 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
     return sessionProperties != null? sessionProperties.get(key): null;
   }
 
-  public Set<String> getArtifactRepositoryUrls() {
-    return artifactRepositoryUrls;
+  public Set<ArtifactRepositoryRef> getArtifactRepositoryRefs() {
+    return artifactRepositories;
   }
 
-  public Set<String> getPluginArtifactRepositoryUrls() {
-    return pluginArtifactRepositoryUrls;
+  public Set<ArtifactRepositoryRef> getPluginArtifactRepositoryRefs() {
+    return pluginArtifactRepositories;
   }
 }

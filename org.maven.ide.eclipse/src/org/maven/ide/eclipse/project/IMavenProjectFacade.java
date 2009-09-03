@@ -23,6 +23,7 @@ import org.apache.maven.project.MavenProject;
 
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.ArtifactRef;
+import org.maven.ide.eclipse.embedder.ArtifactRepositoryRef;
 
 /**
  * IMavenProjectFacade
@@ -134,8 +135,8 @@ public interface IMavenProjectFacade {
    */
   public Object getSessionProperty(String key);
 
-  Set<String> getArtifactRepositoryUrls();
+  public Set<ArtifactRepositoryRef> getArtifactRepositoryRefs();
 
-  Set<String> getPluginArtifactRepositoryUrls();
+  public Set<ArtifactRepositoryRef> getPluginArtifactRepositoryRefs();
 
 }
