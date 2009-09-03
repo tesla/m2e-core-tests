@@ -35,13 +35,16 @@ import org.maven.ide.eclipse.index.IndexedArtifactFile;
  */
 public class NexusIndex implements IIndex, IMutableIndex {
 
-  private NexusIndexManager indexManager;
+  private final NexusIndexManager indexManager;
 
-  private String repositoryUrl;
+  private final String repositoryUrl;
+
+  private final String indexDetails;
   
-  public NexusIndex(NexusIndexManager indexManager, String repositoryUrl) {
+  NexusIndex(NexusIndexManager indexManager, String repositoryUrl, String indexDetails) {
     this.indexManager = indexManager;
     this.repositoryUrl = repositoryUrl;
+    this.indexDetails = indexDetails;
   }
 
   public String getIndexName(){
@@ -51,7 +54,11 @@ public class NexusIndex implements IIndex, IMutableIndex {
   public String getRepositoryUrl(){
     return this.repositoryUrl;
   }
-  
+
+  public String getIndexDetails() {
+    return this.indexDetails;
+  }
+
   public void addArtifact(File pomFile, ArtifactKey artifactKey, long size, long date, File jarFile, int sourceExists,
       int javadocExists) {
     indexManager.addDocument(repositoryUrl, pomFile, NexusIndexManager.getDocumentKey(artifactKey), size, date, jarFile, sourceExists,

@@ -36,4 +36,7 @@ public class MirrorNode extends AbstractIndexedRepositoryNode {
     return sb.toString();
   }
 
+  public String getRepositoryUrl() {
+    return mirror.getUrl();
+  }
 }

@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.WorkspaceJob;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -48,11 +49,13 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.MaterializeAction;
 import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.index.IndexListener;
+import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.internal.index.IndexedArtifactGroup;
 import org.maven.ide.eclipse.internal.index.NexusIndex;
 import org.maven.ide.eclipse.internal.index.NexusIndexManager;
+import org.maven.ide.eclipse.internal.index.RepositoryInfo;
 import org.maven.ide.eclipse.ui.internal.views.nodes.AbstractIndexedRepositoryNode;
 import org.maven.ide.eclipse.ui.internal.views.nodes.IArtifactNode;
 import org.maven.ide.eclipse.ui.internal.views.nodes.IndexedArtifactFileNode;
@@ -78,7 +81,9 @@ public class MavenRepositoryView extends ViewPart {
   
   private BaseSelectionListenerAction rebuildAction;
   
-  private BaseSelectionListenerAction enableAction;
+  private BaseSelectionListenerAction disableAction;
+  private BaseSelectionListenerAction enableMinAction;
+  private BaseSelectionListenerAction enableFullAction;
 
   private BaseSelectionListenerAction copyUrlAction;
   
@@ -207,7 +212,10 @@ public class MavenRepositoryView extends ViewPart {
     manager.add(reloadSettings);
     manager.add(updateAction);
     manager.add(rebuildAction);
-    manager.add(enableAction);
+    manager.add(new Separator());
+    manager.add(disableAction);
+    manager.add(enableMinAction);
+    manager.add(enableFullAction);
 //    manager.add(deleteFromLocalAction);
     manager.add(new Separator());
     manager.add(collapseAllAction);
@@ -353,39 +361,43 @@ public class MavenRepositoryView extends ViewPart {
     rebuildAction.setToolTipText("Force a rebuild of the maven index");
     rebuildAction.setImageDescriptor(MavenImages.REBUILD_INDEX);
 
-    enableAction = new BaseSelectionListenerAction("Enable Index") {
-      private RepositoryNode repositoryNode;
+    disableAction = new BaseSelectionListenerAction("Disable Index") {
       public void run() {
-        enableIndex(repositoryNode);
+        setIndexDetails(getSelectedRepositoryNode(getStructuredSelection()), RepositoryInfo.DETAILS_DISABLED);
       }
-
       protected boolean updateSelection(IStructuredSelection selection) {
-        List<AbstractIndexedRepositoryNode> nodes = getSelectedRepositoryNodes(getStructuredSelection().toList());
-        RepositoryNode repositoryNode = null;
-        for (AbstractIndexedRepositoryNode node : nodes) {
-          if (node instanceof RepositoryNode) {
-            if (repositoryNode != null) {
-              return false;
-            }
-            repositoryNode = (RepositoryNode) node;
-          }
-        }
-        if (repositoryNode == null) {
-          return false;
-        }
-        if (repositoryNode.getImage() == null) {
-          setText("Enable Index");
-        } else {
-          setText("Disable Index");
-        }
-        this.repositoryNode = repositoryNode;
-        return true;
+        AbstractIndexedRepositoryNode node = getSelectedRepositoryNode(selection);
+        return node != null && !IndexManager.LOCAL_INDEX.equals(node.getRepositoryUrl())
+            && !IndexManager.WORKSPACE_INDEX.equals(node.getRepositoryUrl());
       }
     };
+    disableAction.setToolTipText("Disable repository index");
+    disableAction.setImageDescriptor(MavenImages.REBUILD_INDEX);
 
-    enableAction.setToolTipText("Enable the index to be used for dependency resolution");
-    enableAction.setImageDescriptor(MavenImages.REBUILD_INDEX);
-    
+    enableMinAction = new BaseSelectionListenerAction("Enable Min Index") {
+      public void run() {
+        setIndexDetails(getSelectedRepositoryNode(getStructuredSelection()), RepositoryInfo.DETAILS_MIN);
+      }
+      protected boolean updateSelection(IStructuredSelection selection) {
+        AbstractIndexedRepositoryNode node = getSelectedRepositoryNode(selection);
+        return node != null && !IndexManager.WORKSPACE_INDEX.equals(node.getRepositoryUrl());
+      }
+    };
+    enableMinAction.setToolTipText("Enable minimal repository index");
+    enableMinAction.setImageDescriptor(MavenImages.REBUILD_INDEX);
+
+    enableFullAction = new BaseSelectionListenerAction("Enable Full Index") {
+      public void run() {
+        setIndexDetails(getSelectedRepositoryNode(getStructuredSelection()), RepositoryInfo.DETAILS_FULL);
+      }
+      protected boolean updateSelection(IStructuredSelection selection) {
+        AbstractIndexedRepositoryNode node = getSelectedRepositoryNode(selection);
+        return node != null && !IndexManager.WORKSPACE_INDEX.equals(node.getRepositoryUrl());
+      }
+    };
+    enableFullAction.setToolTipText("Enable full repository index");
+    enableFullAction.setImageDescriptor(MavenImages.REBUILD_INDEX);
+
     openPomAction = new BaseSelectionListenerAction("Open POM") {
       public void run() {
         ISelection selection = viewer.getSelection();
@@ -455,30 +467,33 @@ public class MavenRepositoryView extends ViewPart {
 
     viewer.addSelectionChangedListener(openPomAction);
     viewer.addSelectionChangedListener(updateAction);
-    viewer.addSelectionChangedListener(enableAction);
+    viewer.addSelectionChangedListener(disableAction);
+    viewer.addSelectionChangedListener(enableMinAction);
+    viewer.addSelectionChangedListener(enableFullAction);
 //    viewer.addSelectionChangedListener(deleteFromLocalAction);
     viewer.addSelectionChangedListener(rebuildAction);
     viewer.addSelectionChangedListener(copyUrlAction);
     viewer.addSelectionChangedListener(materializeProjectAction);
   }
 
-  /**
-   * 
-   */
-  protected void enableIndex(RepositoryNode node) {
-    String msg = "Are you sure you want to enable the index '" + node.getRepoName();
-
-    boolean ok = MessageDialog.openConfirm(getViewSite().getShell(), "Enable Index", msg);
-
-    if(ok) {
-      
-      if(node.getIndex() == null) {
-        // TODO select between short and full index
-        indexManager.enableIndex(node.getRepositoryUrl(), true);
-      } else {
-        indexManager.disableIndex(node.getRepositoryUrl());
+  protected void setIndexDetails(AbstractIndexedRepositoryNode node, String details) {
+    if (node != null) {
+      try {
+        indexManager.setIndexDetails(node.getRepositoryUrl(), details);
+      } catch(CoreException ex) {
+        // XXX how do I deal with exceptions in the GUI?
+        throw new RuntimeException(ex);
       }
     }
+  }
+
+  protected AbstractIndexedRepositoryNode getSelectedRepositoryNode(IStructuredSelection selection) {
+    List elements = selection.toList();
+    if (elements.size() != 1) {
+      return null;
+    }
+    Object element = elements.get(0);
+    return element instanceof AbstractIndexedRepositoryNode? (AbstractIndexedRepositoryNode) element: null;
   }
 
   public void dispose() {
@@ -486,30 +501,15 @@ public class MavenRepositoryView extends ViewPart {
     viewer.removeSelectionChangedListener(copyUrlAction);
     viewer.removeSelectionChangedListener(rebuildAction);
 //    viewer.removeSelectionChangedListener(deleteFromLocalAction);
-    viewer.removeSelectionChangedListener(enableAction);
+    viewer.removeSelectionChangedListener(disableAction);
+    viewer.removeSelectionChangedListener(enableMinAction);
+    viewer.removeSelectionChangedListener(enableFullAction);
     viewer.removeSelectionChangedListener(updateAction);
     viewer.removeSelectionChangedListener(openPomAction);
 
     super.dispose();
   }
 
-//  void markIndexUpdating(final String indexName, final boolean isUpdating){
-//    Display.getDefault().asyncExec(new Runnable() {
-//      public void run() {
-//        //TODO: mark the nodes as 'updating' when the update index is running
-//        TreeItem[] items = viewer.getTree().getItems();
-//        for(TreeItem item : items){
-//          Object data = item.getData();
-//          if(data instanceof IndexNode && ((IndexNode)data).getIndexName().equals(indexName)){
-//            ((IndexNode)data).setIsUpdating(isUpdating);
-//          }
-//        }
-//        viewer.refresh(true);
-//      }
-//      
-//    });    
-//  }
-  
   void refreshView() {
     Display.getDefault().asyncExec(new Runnable() {
       public void run() {

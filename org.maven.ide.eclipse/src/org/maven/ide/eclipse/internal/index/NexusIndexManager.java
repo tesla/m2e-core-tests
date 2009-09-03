@@ -8,7 +8,12 @@
 
 package org.maven.ide.eclipse.internal.index;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -124,9 +129,9 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
 
   private List<IndexListener> indexListeners = new ArrayList<IndexListener>();
 
-  private NexusIndex localIndex = new NexusIndex(this, LOCAL_INDEX);
+  private NexusIndex localIndex = new NexusIndex(this, LOCAL_INDEX, RepositoryInfo.DETAILS_MIN);
 
-  private NexusIndex workspaceIndex = new NexusIndex(this, WORKSPACE_INDEX);
+  private NexusIndex workspaceIndex = new NexusIndex(this, WORKSPACE_INDEX, RepositoryInfo.DETAILS_MIN);
 
   private final IndexUpdaterJob updaterJob;
 
@@ -135,7 +140,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
    */
   private final Map<String, RepositoryInfo> indexes = new HashMap<String, RepositoryInfo>();
 
-  private Properties indexDetails;
+  private Properties indexDetails = new Properties();
 
   public static String nvl( String v )
   {
@@ -649,15 +654,16 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       repositories.addAll(this.indexes.keySet());
     }
 
-    for (String repository : repositories) {
-      indexes.add(new NexusIndex(this, repository));
+    for (String repositoryUrl : repositories) {
+      indexes.add(getIndex(repositoryUrl));
     }
 
     return new CompositeIndex(indexes);
   }
 
   public NexusIndex getIndex(String repositoryUrl) {
-    return new NexusIndex(this, repositoryUrl);
+    String details = indexDetails.getProperty(repositoryUrl, RepositoryInfo.DETAILS_DISABLED);
+    return new NexusIndex(this, repositoryUrl, details);
   }
 
   public File getIndexDirectoryFile(String repositoryUrl) {
@@ -720,16 +726,20 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
   }
 
-  private IndexingContext addRepositoryIndex(String repositoryUrl, AuthenticationInfo auth, ProxyInfo proxy, IProgressMonitor monitor) throws CoreException {
-    boolean fullIndex = false;
+  private void addRepositoryIndex(String repositoryUrl, String defaultIndexDetails, AuthenticationInfo auth,
+      ProxyInfo proxy, IProgressMonitor monitor) throws CoreException {
 
-    IndexingContext indexingContext = addIndexingContext(repositoryUrl, null, fullIndex);
+    String details = indexDetails.getProperty(repositoryUrl, defaultIndexDetails);
+
     RepositoryInfo index = new RepositoryInfo(repositoryUrl, auth, proxy);
     indexes.put(repositoryUrl, index);
 
-    updateIndex(repositoryUrl, false, monitor);
+    if (!RepositoryInfo.DETAILS_DISABLED.equals(details)) {
+      boolean fullIndex = RepositoryInfo.DETAILS_FULL.equals(details);
+      addIndexingContext(repositoryUrl, null, fullIndex);
+      updateIndex(repositoryUrl, false, monitor);
+    }
 
-    return indexingContext;
   }
 
   private IndexingContext addIndexingContext(String repositoryUrl, File repositoryPath, boolean fullIndex) throws CoreException {
@@ -899,6 +909,19 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
   }
 
   void initialize(IProgressMonitor monitor) throws CoreException {
+    try {
+      BufferedInputStream is = new BufferedInputStream(new FileInputStream(getIndexDetailsFile()));
+      try {
+        indexDetails.load(is);
+      } finally {
+        is.close();
+      }
+    } catch (FileNotFoundException e) {
+      // that's quite alright
+    } catch (IOException e) {
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not read index details file", e));
+    }
+
     // create workspace and localRepo indexing contexts
     addIndexingContext(IndexManager.WORKSPACE_INDEX, null /*repositoryPath*/, false /*fullIndex*/);
     ArtifactRepository localRepository = maven.getLocalRepository();
@@ -913,20 +936,23 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     // mirrors
     Settings settings = maven.getSettings();
     List<Mirror> mirrors = maven.getMirrors();
-    for (Mirror mirror : mirrors) {
+    for(Mirror mirror : mirrors) {
       AuthenticationInfo auth = getAuthenticationInfo(settings, mirror.getId());
       ProxyInfo proxy = getProxyInfo(settings, mirror.getUrl());
-      addRepositoryIndex(mirror.getUrl(), auth, proxy, monitor);
+      addRepositoryIndex(mirror.getUrl(), RepositoryInfo.DETAILS_MIN, auth, proxy, monitor);
     }
 
     ArrayList<ArtifactRepository> repos = new ArrayList<ArtifactRepository>();
     repos.addAll(maven.getArtifactRepositories());
     repos.addAll(maven.getPluginArtifactRepository());
 
-    for (ArtifactRepository repo : repos) {
+    for(ArtifactRepository repo : repos) {
+      Mirror mirror = maven.getMirror(repo);
       AuthenticationInfo auth = getAuthenticationInfo(settings, repo.getId());
       ProxyInfo proxy = getProxyInfo(settings, repo.getUrl());
-      addRepositoryIndex(repo.getUrl(), auth, proxy, monitor);
+      addRepositoryIndex(repo.getUrl(), //
+          mirror != null ? RepositoryInfo.DETAILS_DISABLED : RepositoryInfo.DETAILS_MIN, //
+          auth, proxy, monitor);
     }
   }
 
@@ -958,12 +984,30 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     return info;
   }
 
-  public void enableIndex(String repositoryUrl, boolean isShort) {
-    
+  public void setIndexDetails(String repositoryUrl, String details) throws CoreException {
+    indexDetails.setProperty(repositoryUrl, details);
+    try {
+      BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(getIndexDetailsFile()));
+      try {
+        indexDetails.store(os, null);
+      } finally {
+        os.close();
+      }
+    } catch (IOException e) {
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not write index details file", e));
+    }
+
+    if (!RepositoryInfo.DETAILS_DISABLED.equals(details)) {
+      boolean fullIndex = RepositoryInfo.DETAILS_FULL.equals(details);
+      addIndexingContext(repositoryUrl, null, fullIndex);
+      scheduleIndexUpdate(repositoryUrl, false);
+    } else {
+      removeIndex(repositoryUrl, false);
+    }
   }
 
-  public void disableIndex(String repositoryUrl) {
-    
+  private File getIndexDetailsFile() {
+    return new File(baseIndexDir, "indexDetails.properties");
   }
 
   // copy&paste from MavenArtifactRepository#protocol

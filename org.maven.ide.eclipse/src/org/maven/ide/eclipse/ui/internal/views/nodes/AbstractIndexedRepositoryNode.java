@@ -73,4 +73,6 @@ public abstract class AbstractIndexedRepositoryNode implements IMavenRepositoryN
   public NexusIndex getIndex() {
     return index;
   }
+
+  public abstract String getRepositoryUrl();
 }

@@ -12,13 +12,28 @@ import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 
 
-class RepositoryInfo {
+public class RepositoryInfo {
+
+  /** 
+   * Repository index is disabled.
+   */
+  public static final String DETAILS_DISABLED = "off";
+
+  /**
+   * Only artifact index information is used. Classname index is disabled. 
+   */
+  public static final String DETAILS_MIN = "min";
+
+  /**
+   * Both artifact and classname indexes are used.
+   */
+  public static final String DETAILS_FULL = "full";
 
   private final ProxyInfo proxyInfo;
   private final AuthenticationInfo authInfo;
   private final String repositoryUrl;
 
-  public RepositoryInfo(String repositoryUrl, AuthenticationInfo authInfo, ProxyInfo proxyInfo) {
+  RepositoryInfo(String repositoryUrl, AuthenticationInfo authInfo, ProxyInfo proxyInfo) {
     this.repositoryUrl = repositoryUrl;
     this.authInfo = authInfo;
     this.proxyInfo = proxyInfo;

@@ -18,8 +18,11 @@ import org.maven.ide.eclipse.internal.index.NexusIndexManager;
  */
 public class LocalRepositoryNode extends AbstractIndexedRepositoryNode {
 
-  public LocalRepositoryNode(NexusIndexManager indexManager, NexusIndex index) {
+  private final String repositoryUrl;
+
+  public LocalRepositoryNode(NexusIndexManager indexManager, String repositoryUrl, NexusIndex index) {
     super(indexManager, index);
+    this.repositoryUrl = repositoryUrl;
   }
 
   public String getName() {
@@ -27,5 +30,9 @@ public class LocalRepositoryNode extends AbstractIndexedRepositoryNode {
     sb.append(index.getIndexName());
     // TODO local repository path
     return sb.toString();
+  }
+
+  public String getRepositoryUrl() {
+    return repositoryUrl;
   }
 }
