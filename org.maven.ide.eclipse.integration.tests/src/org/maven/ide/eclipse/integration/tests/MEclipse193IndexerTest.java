@@ -63,9 +63,9 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
   public void testMirroredRepos() throws Exception {
     IUIContext ui = getUI();
     IViewPart indexView = showView("org.maven.ide.eclipse.views.MavenRepositoryView");
-    ui.click(new TreeItemLocator("Remote Repositories/central:.*",
+    ui.click(new TreeItemLocator("Global Repositories/nexus .*",
         new ViewLocator("org.maven.ide.eclipse.views.MavenRepositoryView")));
-    IWidgetLocator[] findAll = ui.findAll(new TreeItemLocator("Remote Repositories/.*Disabled by Mirror.*"));
+    IWidgetLocator[] findAll = ui.findAll(new TreeItemLocator("Global Repositories/.*mirrored by nexus.*"));
     assertTrue(findAll.length == 2);
   }
   
@@ -73,13 +73,14 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
     IUIContext ui = getUI();
     IViewPart indexView = showView("org.maven.ide.eclipse.views.MavenRepositoryView");
 
-    ui.click(new TreeItemLocator("Remote Repositories",
+    ui.click(new TreeItemLocator("Global Repositories",
         new ViewLocator("org.maven.ide.eclipse.views.MavenRepositoryView")));
-    ui.contextClick(new TreeItemLocator("Remote Repositories/central: .*",
+    ui.contextClick(new TreeItemLocator("Global Repositories/nexus .*",
         new ViewLocator("org.maven.ide.eclipse.views.MavenRepositoryView")), "Update Index");
-    ui.wait(new JobsCompleteCondition(), 400000); 
+    
+    waitForAllBuildsToComplete();
     //now make sure the index update worked
-    ui.contextClick(new TreeItemLocator("Remote Repositories/central: .*/abbot/abbot - jar/abbot : 0.13.0",
+    ui.contextClick(new TreeItemLocator("Global Repositories/nexus.*/abbot/abbot - jar/abbot : 0.13.0",
         new ViewLocator("org.maven.ide.eclipse.views.MavenRepositoryView")), "Update Index");
 
   }
@@ -87,7 +88,7 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
   public void testLocalResolution() throws Exception {
     IUIContext ui = getUI();
     IViewPart indexView = showView("org.maven.ide.eclipse.views.MavenRepositoryView");
-    ui.click(new TreeItemLocator("Local Repositories/local:.*repository",
+    ui.click(new TreeItemLocator("Local Repositories/workspace.*",
         new ViewLocator("org.maven.ide.eclipse.views.MavenRepositoryView")));
     // set up two projects.
     IProject project = createArchetypeProjct("maven-archetype-quickstart", "project");

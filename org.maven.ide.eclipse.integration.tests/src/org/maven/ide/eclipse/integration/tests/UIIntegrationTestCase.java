@@ -181,16 +181,6 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
      // Turn off eclipse features which make tests unreliable.
      WorkbenchPlugin.getDefault().getPreferenceStore().setValue(IPreferenceConstants.RUN_IN_BACKGROUND, true);
      
-     if (isEclipseVersion(3, 5)) {
-       // Disable new xml completion behavior to preserver compatibility with previous versions.
-       getUI().click(new MenuItemLocator("Window/Preferences"));
-       getUI().wait(new ShellShowingCondition("Preferences"));
-       getUI().click(new FilteredTreeItemLocator("XML/XML Files/Editor/Typing"));
-       getUI().click(new ButtonLocator("&Insert a matching end tag"));
-       getUI().click(new ButtonLocator("OK"));
-       getUI().wait(new ShellDisposedCondition("Preferences"));
-     }
-     
      PrefUtil.getAPIPreferenceStore().setValue(IWorkbenchPreferenceConstants.ENABLE_ANIMATIONS, false);
 
      ShellFinder.bringRootToFront(Display.getDefault());
@@ -210,7 +200,18 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
      // Clean out projects left over from previous test runs.
      clearProjects();
 
-     getUI().wait(new JobsCompleteCondition(), 600000);
+     waitForAllBuildsToComplete();
+     
+     if (isEclipseVersion(3, 5)) {
+       // Disable new xml completion behavior to preserver compatibility with previous versions.
+       getUI().click(new MenuItemLocator("Window/Preferences"));
+       getUI().wait(new ShellShowingCondition("Preferences"));
+       getUI().click(new FilteredTreeItemLocator("XML/XML Files/Editor/Typing"));
+       getUI().click(new ButtonLocator("&Insert a matching end tag"));
+       getUI().click(new ButtonLocator("OK"));
+       getUI().wait(new ShellDisposedCondition("Preferences"));
+     }
+     
   }
 
   private void openPerspective(final String id) throws Exception {
@@ -492,7 +493,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
       f.delete();
     }
   }
-
+  
   private void unzipFile(String pluginPath, File dest) throws IOException {
     URL url = FileLocator.find(Platform.getBundle(PLUGIN_ID), new Path("/" + pluginPath), null);
     InputStream is = new BufferedInputStream(url.openStream());
