@@ -40,6 +40,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.index.IMutableIndex;
+import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.jdt.BuildPathManager;
 import org.maven.ide.eclipse.jdt.MavenJdtPlugin;
 import org.maven.ide.eclipse.project.IProjectConfigurationManager;
@@ -559,11 +561,9 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
   }
 
   public void testDownloadSources_006_nonMavenProject() throws Exception {
-//    IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
-//    IndexInfo indexInfo = new IndexInfo("remoterepo-local", new File("remoterepo"), null, IndexInfo.Type.LOCAL, false);
-//    indexManager.addIndex(indexInfo, false);
-//    indexManager.reindex(indexInfo.getIndexName(), monitor);
-//    indexManager.addIndex(new IndexInfo("remoterepo", null, "file:remoterepo", IndexInfo.Type.REMOTE, false), false);
+    IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
+    IMutableIndex localIndex = indexManager.getLocalIndex();
+    localIndex.updateIndex(true, monitor);
 
     IProject project = createExisting("downloadsources-p006", "projects/downloadsources/p006");
 
@@ -907,8 +907,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     tmp.delete();
   }
 
-  //FIXME FB 30/10/2008 : Archetype tests are disabled while MNGECLIPSE-948 is not fixed 
-  public void XXXtestArchetypeProject() throws CoreException {
+  public void testArchetypeProject() throws CoreException {
     MavenPlugin plugin = MavenPlugin.getDefault();
     boolean modules = true;
     Archetype quickStart = findQuickStartArchetype();
@@ -919,7 +918,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals(modules, configuration.shouldIncludeModules());
   }
 
-  public void XXXtestArchetypeProjectInExternalLocation() throws CoreException, IOException {
+  public void testArchetypeProjectInExternalLocation() throws CoreException, IOException {
     final MavenPlugin plugin = MavenPlugin.getDefault();
     final boolean modules = true;
     Archetype quickStart = findQuickStartArchetype();

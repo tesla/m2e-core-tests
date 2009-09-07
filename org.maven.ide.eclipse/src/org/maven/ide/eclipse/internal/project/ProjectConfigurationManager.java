@@ -38,7 +38,6 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
@@ -69,7 +68,6 @@ import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.internal.ExtensionReader;
-import org.maven.ide.eclipse.internal.embedder.TransferListenerAdapter;
 import org.maven.ide.eclipse.project.IMavenMarkerManager;
 import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
@@ -98,7 +96,7 @@ import org.maven.ide.eclipse.util.Util;
 public class ProjectConfigurationManager implements IProjectConfigurationManager, IMavenProjectChangedListener {
 
   private static final String DEFAULT_LIFECYCLE_MAPPING_ID = "generic";
-  
+
   private static final String PROP_LIFECYCLE_MAPPING = ProjectConfigurationManager.class.getName() + "/lifecycleMapping";
 
   final MavenModelManager modelManager;
@@ -108,13 +106,11 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
   final MavenRuntimeManager runtimeManager;
 
   final MavenProjectManager projectManager;
-  
-  final IndexManager indexManager;
 
   final MavenModelManager mavenModelManager;
 
   final IMavenMarkerManager mavenMarkerManager;
-  
+
   final IMaven maven;
 
   /**
@@ -135,7 +131,6 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     this.console = console;
     this.runtimeManager = runtimeManager;
     this.projectManager = projectManager;
-    this.indexManager = indexManager;
     this.mavenModelManager = mavenModelManager;
     this.mavenMarkerManager = mavenMarkerManager;
     this.maven = MavenPlugin.lookup(IMaven.class);
@@ -448,7 +443,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
 
     try {
       ArchetypeGenerationRequest request = new ArchetypeGenerationRequest() //
-          .setTransferListener(new TransferListenerAdapter(new NullProgressMonitor(), console, indexManager)) //
+          .setTransferListener(maven.createTransferListener(monitor)) //
           .setArchetypeGroupId(archetype.getGroupId()) //
           .setArchetypeArtifactId(archetype.getArtifactId()) //
           .setArchetypeVersion(archetype.getVersion()) //

@@ -79,6 +79,7 @@ import org.apache.maven.settings.Mirror;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.settings.SettingsUtils;
 import org.apache.maven.settings.validation.SettingsValidationResult;
+import org.apache.maven.wagon.events.TransferListener;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
@@ -89,7 +90,6 @@ import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.embedder.IMavenConfigurationChangeListener;
 import org.maven.ide.eclipse.embedder.ISettingsChangeListener;
 import org.maven.ide.eclipse.embedder.MavenConfigurationChangeEvent;
-import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;
 
 
@@ -119,13 +119,13 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
 
   private final ConverterLookup converterLookup = new DefaultConverterLookup();
   
-  private MavenConsole console;
+  private final MavenConsole console;
 
-  private IndexManager indexManager;
+  private final ArrayList<ISettingsChangeListener> settingsListeners = new ArrayList<ISettingsChangeListener>();
 
-  private ArrayList<ISettingsChangeListener> listeners = new ArrayList<ISettingsChangeListener>();
+  private final ArrayList<TransferListener> transferListeners = new ArrayList<TransferListener>();
 
-  public MavenImpl(PlexusContainer plexus, IMavenConfiguration mavenConfiguration) throws CoreException {
+  public MavenImpl(PlexusContainer plexus, IMavenConfiguration mavenConfiguration, MavenConsole console) throws CoreException {
     this.plexus = plexus;
     try {
       this.maven = plexus.lookup(Maven.class);
@@ -134,7 +134,6 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
       this.modelWriter = plexus.lookup(ModelWriter.class);
       this.repositorySystem = plexus.lookup(RepositorySystem.class);
       this.settingsBuilder = plexus.lookup(MavenSettingsBuilder.class);
-      this.mavenConfiguration = mavenConfiguration;
       this.populator = plexus.lookup(MavenExecutionRequestPopulator.class);
       this.pluginManager = plexus.lookup(BuildPluginManager.class);
       this.lifecycleExecutor = plexus.lookup(LifecycleExecutor.class);
@@ -143,6 +142,8 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
           "Could not lookup required component", ex));
     }
 
+    this.console = console;
+    this.mavenConfiguration = mavenConfiguration;
     mavenConfiguration.addConfigurationChangeListener(this);
   }
 
@@ -154,13 +155,21 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
     if(mavenConfiguration.getUserSettingsFile() != null) {
       request.setUserSettingsFile(new File(mavenConfiguration.getUserSettingsFile()));
     }
+
+    try {
+      populator.populateFromSettings(request, getSettings());
+    } catch(MavenEmbedderException ex) {
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
+          "Could not create maven execution request", ex));
+    }
+
     ArtifactRepository localRepository = getLocalRepository();
     request.setLocalRepository(localRepository);
     request.setLocalRepositoryPath(localRepository.getBasedir());
     request.setOffline(mavenConfiguration.isOffline());
 
     // logging
-    request.setTransferListener(new TransferListenerAdapter(monitor, console, indexManager));
+    request.setTransferListener(createTransferListener(monitor));
 
     request.getUserProperties().put("m2e.version", MavenPlugin.getVersion());
 
@@ -292,7 +301,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
   public void reloadSettings() throws CoreException {
     // TODO do something more meaningful
     Settings settings = getSettings();
-    for (ISettingsChangeListener listener : listeners) {
+    for (ISettingsChangeListener listener : settingsListeners) {
       try {
         listener.settingsChanged(settings);
       } catch (CoreException e) {
@@ -524,16 +533,6 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
     return repositorySystem.getMirror(repo, request.getMirrors());
   };
 
-  /*
-   * This is not exactly nice, MavenImpl and NexusIndexManager depend on each other.
-   * 
-   * Ideally, we need to move the code that reads maven static configuration
-   * to a separate interface.
-   */
-  public void setIndexManager(IndexManager indexManager) {
-    this.indexManager = indexManager;
-  }
-
   public void populateDefaults(MavenExecutionRequest request) throws CoreException {
     try {
       populator.populateDefaults(request);
@@ -550,10 +549,28 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
   }
 
   public void addSettingsChangeListener(ISettingsChangeListener listener) {
-    listeners.add(listener);
+    settingsListeners.add(listener);
   }
   
   public void removeSettingsChangeListener(ISettingsChangeListener listener) {
-    listeners.remove(listener);
+    settingsListeners.remove(listener);
+  }
+
+  @SuppressWarnings("deprecation")
+  public void addTransferListener(TransferListener listener) {
+    transferListeners.add(listener);
+  }
+
+  @SuppressWarnings("deprecation")
+  public void removeTransferListener(TransferListener listener) {
+    transferListeners.remove(listener);
+  }
+
+  @SuppressWarnings("deprecation")
+  public CompoundTransferListener createTransferListener(IProgressMonitor monitor) {
+    ArrayList<TransferListener> listeners = new ArrayList<TransferListener>();
+    listeners.add(new TransferListenerAdapter(monitor, console));
+    listeners.addAll(transferListeners);
+    return new CompoundTransferListener(listeners);
   }
 }

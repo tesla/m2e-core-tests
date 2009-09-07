@@ -43,6 +43,7 @@ import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 
 import org.apache.lucene.index.Term;
+import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.FilteredQuery;
 import org.apache.lucene.search.PrefixQuery;
@@ -91,7 +92,6 @@ import org.maven.ide.eclipse.index.IndexListener;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
-import org.maven.ide.eclipse.internal.embedder.TransferListenerAdapter;
 import org.maven.ide.eclipse.internal.index.IndexUpdaterJob.IndexCommand;
 import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
@@ -212,12 +212,14 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
   public IndexedArtifactFile getIndexedArtifactFile(String repositoryUrl, ArtifactKey gav) throws CoreException {
 
     try {
-//      Gav gav = gavCalculator.pathToGav(documentKey);
-      
-      String key = getGAV(gav.getGroupId(), //
-          gav.getArtifactId(), gav.getVersion(), gav.getClassifier());
-      
-      TermQuery query = new TermQuery(new Term(ArtifactInfo.UINFO, key));
+      BooleanQuery query = new BooleanQuery();
+      query.add( new TermQuery(new Term(ArtifactInfo.GROUP_ID, gav.getGroupId())), BooleanClause.Occur.MUST );
+      query.add( new TermQuery(new Term(ArtifactInfo.ARTIFACT_ID, gav.getArtifactId())), BooleanClause.Occur.MUST );
+      query.add( new TermQuery(new Term(ArtifactInfo.VERSION, gav.getVersion())), BooleanClause.Occur.MUST );
+      if (gav.getClassifier() != null) {
+        query.add( new TermQuery(new Term(ArtifactInfo.CLASSIFIER, gav.getClassifier())), BooleanClause.Occur.MUST );
+      }
+
       ArtifactInfo artifactInfo = getIndexer().identify(query, Collections.singleton(getIndexingContext(repositoryUrl)));
       if(artifactInfo != null) {
         return getIndexedArtifactFile(artifactInfo);
@@ -470,9 +472,9 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
 
       ArtifactContext artifactContext = getArtifactContext(file, documentKey, size, date, //
           sourceExists, javadocExists, context.getRepositoryId());
+
       getIndexer().addArtifactToIndex(artifactContext, context);
-//      fireIndexUpdated(getIndexInfo(indexName));
-      
+
     } catch(Exception ex) {
       String msg = "Unable to add " + documentKey;
       console.logError(msg + "; " + ex.getMessage());
@@ -949,7 +951,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       IndexUpdateRequest request = new IndexUpdateRequest(context);
       request.setProxyInfo(index.getProxyInfo());
       request.setAuthenticationInfo(index.getAuthenticationInfo());
-      request.setTransferListener(new TransferListenerAdapter(monitor, console, null));
+      request.setTransferListener(maven.createTransferListener(monitor));
       request.setForceFullUpdate(force);
       Date indexTime = getUpdater().fetchAndUpdateIndex(request);
       if(indexTime==null) {

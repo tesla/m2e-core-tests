@@ -90,6 +90,7 @@ import org.maven.ide.eclipse.internal.embedder.MavenConfigurationImpl;
 import org.maven.ide.eclipse.internal.embedder.MavenEmbeddedRuntime;
 import org.maven.ide.eclipse.internal.embedder.MavenImpl;
 import org.maven.ide.eclipse.internal.embedder.MavenWorkspaceRuntime;
+import org.maven.ide.eclipse.internal.index.IndexingTransferListener;
 import org.maven.ide.eclipse.internal.index.NexusIndexManager;
 import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;
 import org.maven.ide.eclipse.internal.project.EclipseMavenMetadataCache;
@@ -261,16 +262,13 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     this.mavenCore = new DefaultPlexusContainer( mavenCoreCC );
     this.mavenCore.setLoggerManager(new EclipseLoggerManager(console, mavenConfiguration));
 
-    IMaven maven = new MavenImpl(mavenCore, mavenConfiguration);
+    MavenImpl maven = new MavenImpl(mavenCore, mavenConfiguration, console);
 
     components.put(IMavenConfiguration.class, mavenConfiguration);
     components.put(IMaven.class, maven);
 
     ClassLoader cl = MavenPlugin.class.getClassLoader();
 
-    ArrayList<String> foo = new ArrayList<String>();
-    
-    
     ContainerConfiguration cc = new DefaultContainerConfiguration()
       .setClassWorld(new ClassWorld(mavenCoreRealmId, cl))
       .setName("plexus");
@@ -333,6 +331,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     //create the index manager
     this.indexManager = new NexusIndexManager(console, projectManager, stateLocationDir);
     this.projectManager.addMavenProjectChangedListener(indexManager);
+    maven.addTransferListener(new IndexingTransferListener(indexManager));
     this.indexManager.initialize();
 
     this.getPreferenceStore().setValue(PREFS_NO_REBUILD_ON_START, true);

@@ -28,6 +28,7 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.settings.Mirror;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.settings.validation.SettingsValidationResult;
+import org.apache.maven.wagon.events.TransferListener;
 
 /**
  * Entry point for all Maven functionality in m2e. Note that this component does not directly support workspace artifact
@@ -114,6 +115,15 @@ public interface IMaven {
    * Temporary solution/workaround for http://jira.codehaus.org/browse/MNG-4194. Extensions realm is created each time
    * MavenProject instance is built, so we have to remove unused extensions realms to avoid OOME.
    */
+  @Deprecated
   public void xxxRemoveExtensionsRealm(MavenProject project);
 
+  /** @deprecated IMaven API should not expose wagon.TransferListener */
+  public void addTransferListener(TransferListener listener);
+
+  /** @deprecated IMaven API should not expose wagon.TransferListener */
+  public void removeTransferListener(TransferListener listener);
+
+  /** @deprecated IMaven API should not expose wagon.TransferListener */
+  public TransferListener createTransferListener(IProgressMonitor monitor);
 }

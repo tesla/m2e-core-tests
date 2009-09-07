@@ -8,8 +8,6 @@
 
 package org.maven.ide.eclipse.internal.embedder;
 
-import java.io.File;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -19,13 +17,8 @@ import org.apache.maven.wagon.WagonConstants;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.events.TransferListener;
 import org.apache.maven.wagon.repository.Repository;
-import org.apache.maven.wagon.resource.Resource;
 
 import org.maven.ide.eclipse.core.MavenConsole;
-import org.maven.ide.eclipse.index.IIndex;
-import org.maven.ide.eclipse.index.IMutableIndex;
-import org.maven.ide.eclipse.index.IndexManager;
-
 
 /**
  * TransferListenerAdapter
@@ -37,14 +30,11 @@ public final class TransferListenerAdapter implements TransferListener {
 
   private final MavenConsole console;
 
-  private final IMutableIndex localIndex;
-
   private long complete = 0;
 
-  public TransferListenerAdapter(IProgressMonitor monitor, MavenConsole console, IndexManager indexManager) {
+  TransferListenerAdapter(IProgressMonitor monitor, MavenConsole console) {
     this.monitor = monitor == null ? new NullProgressMonitor() : monitor;
     this.console = console;
-    this.localIndex = indexManager != null? indexManager.getLocalIndex(): null;
   }
 
   public void transferInitiated(TransferEvent e) {
@@ -59,13 +49,6 @@ public final class TransferListenerAdapter implements TransferListener {
     console.logMessage("Downloading " + repositoryId + " : " + e.getResource().getName());
     // monitor.beginTask("0% "+e.getWagon().getRepository()+"/"+e.getResource().getName(), IProgressMonitor.UNKNOWN);
     monitor.setTaskName("0% " + repositoryId + " : " + e.getResource().getName());
-
-    // TODO register new repository
-//    IndexInfo info = indexManager.getIndexInfoByUrl(repositoryUrl);
-//    if(info==null) {
-//      info = new IndexInfo(repositoryId, null, repositoryUrl, IndexInfo.Type.REMOTE, false);
-//      indexManager.addIndex(info, false);
-//    }
   }
 
   public void transferProgress(TransferEvent e, byte[] buffer, int length) {
@@ -99,19 +82,6 @@ public final class TransferListenerAdapter implements TransferListener {
 
     // monitor.subTask("100% "+e.getWagon().getRepository()+"/"+e.getResource().getName());
     monitor.setTaskName("");
-
-    // updating local index
-    // String repository = e.getWagon().getRepository().getName();
-    Resource resource = e.getResource();
-
-    if(localIndex != null) {
-      File file = e.getLocalFile();
-      if(file.getName().endsWith(".jar")) {
-        localIndex.addArtifact(file, null, //
-            resource.getContentLength(), resource.getLastModified(), e.getLocalFile(), //
-            IIndex.NOT_PRESENT, IIndex.NOT_PRESENT);
-      }
-    }
   }
 
   public void transferError(TransferEvent e) {
