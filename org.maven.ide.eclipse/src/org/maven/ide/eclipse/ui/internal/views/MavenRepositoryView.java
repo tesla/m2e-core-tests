@@ -98,6 +98,8 @@ public class MavenRepositoryView extends ViewPart {
 
   private DrillDownAdapter drillDownAdapter;
 
+  private IndexListener indexListener;
+
   public void setFocus() {
     viewer.getControl().setFocus();
   }
@@ -126,8 +128,7 @@ public class MavenRepositoryView extends ViewPart {
     });
 
     contributeToActionBars();
-
-    indexManager.addIndexListener(new IndexListener() {
+    this.indexListener = new IndexListener() {
 
       public void indexAdded(String repositoryUrl) {
         refreshView();
@@ -149,7 +150,9 @@ public class MavenRepositoryView extends ViewPart {
           }
         });
       }
-    });
+    };
+    
+    indexManager.addIndexListener(this.indexListener);
   }
 
   private void hookContextMenu() {
@@ -473,7 +476,6 @@ public class MavenRepositoryView extends ViewPart {
     viewer.addSelectionChangedListener(disableAction);
     viewer.addSelectionChangedListener(enableMinAction);
     viewer.addSelectionChangedListener(enableFullAction);
-//    viewer.addSelectionChangedListener(deleteFromLocalAction);
     viewer.addSelectionChangedListener(rebuildAction);
     viewer.addSelectionChangedListener(copyUrlAction);
     viewer.addSelectionChangedListener(materializeProjectAction);
@@ -503,13 +505,12 @@ public class MavenRepositoryView extends ViewPart {
     viewer.removeSelectionChangedListener(materializeProjectAction);
     viewer.removeSelectionChangedListener(copyUrlAction);
     viewer.removeSelectionChangedListener(rebuildAction);
-//    viewer.removeSelectionChangedListener(deleteFromLocalAction);
     viewer.removeSelectionChangedListener(disableAction);
     viewer.removeSelectionChangedListener(enableMinAction);
     viewer.removeSelectionChangedListener(enableFullAction);
     viewer.removeSelectionChangedListener(updateAction);
     viewer.removeSelectionChangedListener(openPomAction);
-
+    indexManager.removeIndexListener(this.indexListener);
     super.dispose();
   }
 
