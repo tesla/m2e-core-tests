@@ -8,6 +8,8 @@
 
 package org.maven.ide.eclipse.ui.internal.views.nodes;
 
+import java.util.Arrays;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.graphics.Image;
 
@@ -48,6 +50,7 @@ public abstract class AbstractIndexedRepositoryNode implements IMavenRepositoryN
         return NO_CHILDREN;
       }
       IndexedArtifactGroupNode[] children = new IndexedArtifactGroupNode[rootGroups.length];
+      Arrays.sort(rootGroups);
       for(int i = 0; i < rootGroups.length; i++ ) {
         children[i] = new IndexedArtifactGroupNode(rootGroups[i]);
       }
