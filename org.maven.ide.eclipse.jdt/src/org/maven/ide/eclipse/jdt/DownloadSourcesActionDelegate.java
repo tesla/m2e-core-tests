@@ -6,10 +6,8 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/package org.maven.ide.eclipse.jdt;
 
-import java.io.File;
-
+import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.core.JarPackageFragmentRoot;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jface.action.IAction;
@@ -17,11 +15,8 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IEditorActionDelegate;
 import org.eclipse.ui.IEditorPart;
 
-import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
-import org.maven.ide.eclipse.embedder.IMavenConfiguration;
-import org.maven.ide.eclipse.index.IndexedArtifactFile;
 
 /**
  * 
@@ -34,15 +29,10 @@ import org.maven.ide.eclipse.index.IndexedArtifactFile;
 public class DownloadSourcesActionDelegate implements IEditorActionDelegate {
 
   public void setActiveEditor(IAction action, IEditorPart part) {
-    
 
     if (part != null) {
       try {
-        IMavenConfiguration mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
-        
-        if (mavenConfiguration.isOffline()) {
-          return;
-        }
+        BuildPathManager buildpathManager = MavenJdtPlugin .getDefault().getBuildpathManager();
 
         IClassFileEditorInput input = (IClassFileEditorInput) part.getEditorInput();
         IJavaElement element = input.getClassFile();
@@ -50,16 +40,18 @@ public class DownloadSourcesActionDelegate implements IEditorActionDelegate {
           element = element.getParent();
           if (element instanceof JarPackageFragmentRoot) {
             JarPackageFragmentRoot root = (JarPackageFragmentRoot) element;
-            if (root.getResource()!=null) {
-              File f = root.getResource().getLocation().toFile();
-              IndexedArtifactFile af = MavenPlugin.getDefault().getIndexManager().identify(f);
-              if (af != null) {
-                ArtifactKey a = af.getArtifactKey();
-                IJavaProject project = (IJavaProject) root.getParent();
-                BuildPathManager buildpathManager = MavenJdtPlugin .getDefault().getBuildpathManager();
-                buildpathManager.downloadSources(project.getProject(), a, true, false);
-                break;
-              }
+
+            if (root.getSourceAttachmentPath() != null) {
+              // do nothing if sources attached already
+              break;
+            }
+
+            ArtifactKey artifactKey = (ArtifactKey) root.getAdapter(ArtifactKey.class);
+
+            if (artifactKey != null) {
+              IProject project = root.getJavaProject().getProject();
+              buildpathManager.downloadSources(project, artifactKey, true, false);
+              break;
             }
           }
         }

@@ -79,7 +79,6 @@ import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
-import org.maven.ide.eclipse.index.IIndex;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.jdt.internal.ClasspathDescriptor;
@@ -436,36 +435,52 @@ public class BuildPathManager implements IMavenProjectChangedListener, IResource
           javaDocUrl = getJavaDocUrl(a);
         }
 
+        List<ArtifactRepository> repositories = mavenProject.getRemoteArtifactRepositories();
         boolean downloadSources = srcPath==null && mavenConfiguration.isDownloadSources();
         boolean downloadJavaDoc = javaDocUrl==null && mavenConfiguration.isDownloadJavaDoc();
-        downloadSources(facade.getProject(), new ArtifactKey(a), downloadSources, downloadJavaDoc);
+        doDownloadSources(facade.getProject(), new ArtifactKey(a), downloadSources, downloadJavaDoc, repositories);
 
         classpath.addLibraryEntry(a, srcPath, srcRoot, javaDocUrl);
-
       }
     }
   }
 
-  public void downloadSources(IProject project, ArtifactKey artifact, boolean downloadSources, boolean downloadJavaDoc) {
+  private boolean isUnavailable(ArtifactKey a, List<ArtifactRepository> repositories) throws CoreException {
+    return maven.isUnavailable(a.getGroupId(), a.getArtifactId(), a.getVersion(), "jar" /*type*/, a.getClassifier(), repositories);
+  }
+
+  public void downloadSources(IProject project, ArtifactKey artifact, boolean downloadSources, boolean downloadJavaDoc) throws CoreException {
+    List<ArtifactRepository> repositories = null;
+    IMavenProjectFacade facade = projectManager.getProject(project);
+    if (facade != null) {
+      MavenProject mavenProject =  facade.getMavenProject();
+      if (mavenProject != null) {
+        repositories = mavenProject.getRemoteArtifactRepositories();
+      }
+    }
+    doDownloadSources(project, artifact, downloadSources, downloadJavaDoc, repositories);
+  }
+
+  private void doDownloadSources(IProject project, ArtifactKey a, boolean downloadSources, boolean downloadJavaDoc, List<ArtifactRepository> repositories) throws CoreException {
+    ArtifactKey sourcesArtifact = new ArtifactKey(a.getGroupId(), a.getArtifactId(), a.getVersion(), getSourcesClassifier(a.getClassifier()));
+    ArtifactKey javadocArtifact = new ArtifactKey(a.getGroupId(), a.getArtifactId(), a.getVersion(), CLASSIFIER_JAVADOC);
+
+    if (repositories != null) {
+      downloadSources &= !isUnavailable(sourcesArtifact, repositories);
+      downloadJavaDoc &= !isUnavailable(javadocArtifact, repositories);
+    }
+
     if(downloadSources || downloadJavaDoc) {
       try {
-        IndexedArtifactFile af = indexManager.getIndex(project).getIndexedArtifactFile(artifact);
-        if(af != null) {
-          // download if sources and javadoc artifact is available from remote repositories
-          boolean shouldDownloadSources = downloadSources && af.sourcesExists != IIndex.NOT_AVAILABLE;
-          boolean shouldDownloadJavaDoc = downloadJavaDoc && af.javadocExists != IIndex.NOT_AVAILABLE;
-          if(shouldDownloadSources || shouldDownloadJavaDoc) {
-            Set<ArtifactKey> artifacts = new HashSet<ArtifactKey>();
-            artifacts.add(artifact);
-            downloadSourcesJob.scheduleDownload(project, null, artifacts, shouldDownloadSources, shouldDownloadJavaDoc);
-          }
-        }
+        Set<ArtifactKey> artifacts = new HashSet<ArtifactKey>();
+        artifacts.add(a);
+        downloadSourcesJob.scheduleDownload(project, null, artifacts, downloadSources, downloadJavaDoc);
       } catch(Exception ex) {
         MavenLogger.log(ex.getMessage(), ex);
       }
     }
   }
-  
+
   public IClasspathEntry[] getClasspath(IProject project, int scope, IProgressMonitor monitor) throws CoreException {
     return getClasspath(project, scope, true, monitor);
   }

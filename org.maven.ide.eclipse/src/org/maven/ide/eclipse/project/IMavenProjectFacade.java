@@ -76,6 +76,12 @@ public interface IMavenProjectFacade {
   MavenProject getMavenProject(IProgressMonitor monitor) throws CoreException;
 
   /**
+   * Returns cached MavenProject instance associated with this facade or null,
+   * if the cache has not been populated yet.
+   */
+  MavenProject getMavenProject();
+
+  /**
    * Lazy load and cache build execution plan
    */
   MavenExecutionPlan getExecutionPlan(IProgressMonitor monitor) throws CoreException;

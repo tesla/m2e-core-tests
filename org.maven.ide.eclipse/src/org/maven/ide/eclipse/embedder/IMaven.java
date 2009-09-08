@@ -58,6 +58,13 @@ public interface IMaven {
   public Artifact resolve(String groupId, String artifactId, String version, String type, String classifier,
       List<ArtifactRepository> artifactRepositories, IProgressMonitor monitor) throws CoreException;
 
+  /**
+   * Returns true if the artifact does NOT exist in the local repository and
+   * known to be UNavailable from all specified repositories.
+   */
+  public boolean isUnavailable(String groupId, String artifactId, String version, String type, String classifier,
+      List<ArtifactRepository> repositories) throws CoreException;
+
   // read MavenProject
 
   public MavenProject readProject(File pomFile, IProgressMonitor monitor) throws CoreException;

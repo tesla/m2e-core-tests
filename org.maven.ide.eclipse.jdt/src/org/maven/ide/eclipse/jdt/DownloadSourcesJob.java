@@ -9,6 +9,7 @@
 package org.maven.ide.eclipse.jdt;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -63,6 +64,31 @@ class DownloadSourcesJob extends Job {
       this.downloadJavaDoc = downloadJavaDoc;
     }
 
+    public int hashCode() {
+      int hash = 17;
+      hash = hash * 31 + project.hashCode();
+      hash = hash * 31 + (path != null? path.hashCode(): 0);
+      hash = hash * 31 + artifacts.hashCode();
+      hash = hash * 31 + (downloadSources ? 1 : 0);
+      hash = hash * 31 + (downloadJavaDoc ? 1 : 0);
+      return hash;
+    }
+    
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (!(o instanceof DownloadRequest)) {
+        return false;
+      }
+      DownloadRequest other = (DownloadRequest) o;
+      
+      return project.equals(other.project)
+          && (path != null? path.equals(other.path): other.path == null)
+          && artifacts.equals(other.artifacts)
+          && downloadSources == other.downloadSources
+          && downloadJavaDoc == other.downloadJavaDoc;
+    }
   }
 
   private final IMaven maven;
@@ -72,8 +98,8 @@ class DownloadSourcesJob extends Job {
   private final MavenConsole console;
 
   private final MavenProjectManager projectManager;
-
-  private final ArrayList<DownloadRequest> queue = new ArrayList<DownloadRequest>();
+  
+  private final LinkedHashSet<DownloadRequest> queue = new LinkedHashSet<DownloadRequest>();
 
   public DownloadSourcesJob(BuildPathManager manager) {
     super("Download sources and javadoc");
@@ -182,30 +208,35 @@ class DownloadSourcesJob extends Job {
 
   private Artifact downloadJavadoc(ArtifactKey artifact, List<ArtifactRepository> repositories, IProgressMonitor monitor)
       throws CoreException {
-    return maven.resolve(artifact.getGroupId(), //
-        artifact.getArtifactId(), //
-        artifact.getVersion(), //
-        "jar" /*type*/, //
-        BuildPathManager.CLASSIFIER_JAVADOC, // 
-        repositories, //
-        monitor);
+    Artifact resolved = maven.resolve(artifact.getGroupId(), //
+            artifact.getArtifactId(), //
+            artifact.getVersion(), //
+            "jar" /*type*/, //
+            BuildPathManager.CLASSIFIER_JAVADOC, // 
+            repositories, //
+            monitor);
+    return resolved;
   }
 
   private Artifact downloadSources(ArtifactKey artifact, List<ArtifactRepository> repositories, IProgressMonitor monitor)
       throws CoreException {
-    return maven.resolve(artifact.getGroupId(), //
-        artifact.getArtifactId(), //
-        artifact.getVersion(), //
-        "jar" /*type*/, //
-        BuildPathManager.getSourcesClassifier(artifact.getClassifier()), // 
-        repositories, //
-        monitor);
+    Artifact resolved = maven.resolve(artifact.getGroupId(), //
+            artifact.getArtifactId(), //
+            artifact.getVersion(), //
+            "jar" /*type*/, //
+            BuildPathManager.getSourcesClassifier(artifact.getClassifier()), // 
+            repositories, //
+            monitor);
+    return resolved;
   }
 
   public void scheduleDownload(IProject project, IPath path, Set<ArtifactKey> artifacts, boolean downloadSources,
       boolean downloadJavaDoc) {
     synchronized(this.queue) {
-      queue.add(new DownloadRequest(project, path, artifacts, downloadSources, downloadJavaDoc));
+      boolean b = queue.add(new DownloadRequest(project, path, artifacts, downloadSources, downloadJavaDoc));
+      if (b) {
+        System.out.println(b);
+      }
     }
 
     schedule(1000L);
