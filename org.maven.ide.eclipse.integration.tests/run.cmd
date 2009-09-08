@@ -8,3 +8,4 @@ set PATH=%M2_HOME%\bin;%PATH%
 
 cd ../org.maven.ide.eclipse.parent
 mvn clean install -B -Dsurefire.useFile=false -Dtarget.platform=m2e-e34 -Dm2e.system.test=true
+
