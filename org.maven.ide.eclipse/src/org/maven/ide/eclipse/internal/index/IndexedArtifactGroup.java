@@ -13,8 +13,7 @@ import java.util.LinkedHashMap;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 
 
-public class IndexedArtifactGroup {
-//  private final IndexInfo indexInfo;
+public class IndexedArtifactGroup implements Comparable<IndexedArtifactGroup>{
   private final String indexName;
   private final String repositoryUrl;
   private final String prefix;
@@ -22,7 +21,6 @@ public class IndexedArtifactGroup {
   private final LinkedHashMap<String, IndexedArtifact> files = new LinkedHashMap<String, IndexedArtifact>();
 
   public IndexedArtifactGroup(String indexName, String repositoryUrl, String prefix) {
-    //this.indexInfo = indexInfo;
     this.indexName = indexName;
     this.repositoryUrl = repositoryUrl;
     this.prefix = prefix;
@@ -46,8 +44,15 @@ public class IndexedArtifactGroup {
   public String getRepositoryUrl(){
     return this.repositoryUrl;
   }
-//
-//  public IndexInfo getIndexInfo() {
-//    return indexInfo;
-//  }
+
+  /*
+   * Compare the groups by prefix
+   */
+  public int compareTo(IndexedArtifactGroup o) {
+    if(o == null){
+      return -1;
+    }
+    return getPrefix().compareToIgnoreCase(o.getPrefix());
+  }
+
 }
