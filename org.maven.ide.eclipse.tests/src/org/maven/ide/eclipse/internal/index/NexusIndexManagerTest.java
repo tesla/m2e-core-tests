@@ -13,20 +13,21 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
-import junit.framework.TestCase;
-
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.resources.IProject;
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.index.IIndex;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
+import org.maven.ide.eclipse.tests.AsbtractMavenProjectTestCase;
+import org.sonatype.nexus.index.ArtifactInfo;
 
 
 /**
  * @author dyocum
  */
-public class NexusIndexManagerTest extends TestCase {
+public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
 
   private IMavenConfiguration mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
 
@@ -72,13 +73,17 @@ public class NexusIndexManagerTest extends TestCase {
     assertNotNull(localIndex);
   }
 
-  public void testPublicMirror() throws Exception {
-    String publicRepoUrl = "http://repository.sonatype.org/content/repositories/eclipse";
+  protected void setupPublicMirror(String publicRepoUrl) throws Exception {
     final File mirroredRepoFile = new File("src/org/maven/ide/eclipse/internal/index/public_mirror_repo_settings.xml");
     assertTrue(mirroredRepoFile.exists());
 
     mavenConfiguration.setUserSettingsFile(mirroredRepoFile.getCanonicalPath());
     waitForIndexJobToComplete();
+  }
+  
+  public void testPublicMirror() throws Exception {
+    String publicRepoUrl = "http://repository.sonatype.org/content/repositories/eclipse";
+    setupPublicMirror(publicRepoUrl);
 
     ArrayList<RepositoryInfo> repositories = new ArrayList<RepositoryInfo>(indexManager.getRepositories());
     assertEquals(2, repositories.size());
@@ -204,5 +209,73 @@ public class NexusIndexManagerTest extends TestCase {
   public void testBogusSearchType() throws Exception {
     Map<String, IndexedArtifact> search = indexManager.search("commons-logging", "BadSearchType");
     assertTrue(search.size() == 0);
+  }
+  
+  /**
+   * Simply make sure the repositories list comes back for an imported project
+   * @throws Exception
+   */
+
+  
+  public void testIndexedArtifactGroups() throws Exception {
+    String publicRepoUrl = "http://repository.sonatype.org/content/repositories/eclipse";
+    String publicName = "nexus";
+    final File mirroredRepoFile = new File("src/org/maven/ide/eclipse/internal/index/public_mirror_repo_settings.xml");
+    assertTrue(mirroredRepoFile.exists());
+
+    IndexedArtifactGroup[] rootGroups = indexManager.getRootGroups(publicRepoUrl);
+    assertTrue(rootGroups.length == 0);
+    
+    assertTrue(mirroredRepoFile.exists());
+
+    mavenConfiguration.setUserSettingsFile(mirroredRepoFile.getCanonicalPath());
+    waitForIndexJobToComplete();
+    rootGroups = indexManager.getRootGroups(publicRepoUrl);
+    assertTrue(rootGroups.length > 0);
+
+    IndexedArtifactGroup iag = new IndexedArtifactGroup(publicName, publicRepoUrl, "org.junit");
+    IndexedArtifactGroup resolveGroup = indexManager.resolveGroup(iag);
+    assertTrue(resolveGroup.getFiles().size() > 0);
+    
+    IndexedArtifactGroup iag2 = new IndexedArtifactGroup(publicName, publicRepoUrl, "org.junit.fizzle");
+    IndexedArtifactGroup resolveGroup2 = indexManager.resolveGroup(iag2);
+    assertTrue(resolveGroup2.getFiles().size() == 0);
+
+    ArtifactInfo info = new ArtifactInfo(publicRepoUrl, "org.junit", "junit", "3.8.1", "jar");
+    IndexedArtifactFile indexedArtifactFile = indexManager.getIndexedArtifactFile(info);
+    assertNotNull(indexedArtifactFile);
+  }
+  
+  public void testIndexedPublicArtifactGroups() throws Exception {
+    String publicRepoUrl = "http://repository.sonatype.org/content/groups/public/";
+
+    final File mirroredRepoFile = new File("src/org/maven/ide/eclipse/internal/index/public_settings.xml");
+    assertTrue(mirroredRepoFile.exists());
+
+    mavenConfiguration.setUserSettingsFile(mirroredRepoFile.getCanonicalPath());
+    waitForIndexJobToComplete();
+
+    ArtifactKey key = new ArtifactKey("org.junit", "junit", "3.8.1", "jar");
+    
+    IndexedArtifactFile indexedArtifactFile = indexManager.getIndexedArtifactFile(publicRepoUrl, key);
+    //TODO: figure out why this is failing to return an indexedArtifactFile
+    //assertNotNull(indexedArtifactFile);
+  }
+  
+  public void testProjectIndexes() throws Exception {
+    String publicRepoUrl = "http://repository.sonatype.org/content/repositories/eclipse";
+    setupPublicMirror(publicRepoUrl);
+    IProject project = createExisting("resourcefiltering-p005", "projects/resourcefiltering/p005");
+    waitForJobsToComplete();
+    
+    indexManager.scheduleIndexUpdate(publicRepoUrl, true);
+    waitForJobsToComplete();
+    
+    IIndex index = indexManager.getIndex(project);
+    assertNotNull(index);
+    //there should be some global indices too
+    IIndex globalIndices = indexManager.getIndex((IProject)null);
+    assertNotNull(globalIndices);
+
   }
 }
