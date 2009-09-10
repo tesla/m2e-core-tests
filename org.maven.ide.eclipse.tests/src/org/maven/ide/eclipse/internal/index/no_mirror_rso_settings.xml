@@ -1,0 +1,56 @@
+<settings>
+
+  <profiles>
+   <profile>
+      <id>development</id>
+      <repositories>
+        <repository>
+          <id>nexus</id>
+          <url>http://repository.sonatype.org/content/repositories/eclipseXX</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </repository>
+        <repository>
+          <id>DifferentCentral</id>
+          <url>http://central/foo</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>central</id>
+          <url>http://central</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </pluginRepository>
+        <pluginRepository>
+          <id>centralPlugin</id>
+          <url>http://central/plugin</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </pluginRepository>
+      </pluginRepositories>
+    </profile>
+   </profiles>
+    <activeProfiles>
+        <activeProfile>development</activeProfile>
+    </activeProfiles>
+</settings>
+
