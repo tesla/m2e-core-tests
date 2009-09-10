@@ -51,7 +51,7 @@ public class RepositoryNode extends AbstractIndexedRepositoryNode {
   }
 
   public boolean isEnabledIndex() {
-    return repository != null && repository.getMirrorId() == null;
+    return !indexManager.indexDetailsDisabled(repository.getUrl());
   }
 
 }
