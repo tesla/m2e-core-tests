@@ -21,7 +21,7 @@ import org.eclipse.ui.PlatformUI;
 
 import org.maven.ide.eclipse.ui.internal.views.nodes.IMavenRepositoryNode;
 import org.maven.ide.eclipse.ui.internal.views.nodes.RepositoryNode;
-import org.maven.ide.eclipse.util.Util;
+import org.maven.ide.eclipse.util.M2EUtils;
 
 /**
  * RepositoryViewLabelProvider
@@ -33,7 +33,7 @@ public class RepositoryViewLabelProvider extends LabelProvider implements IColor
   private Font italicFont;
   public RepositoryViewLabelProvider(Font treeFont){
     //JFaceResources.getFontRegistry().
-    italicFont = Util.deriveFont(treeFont, SWT.ITALIC, 12);
+    italicFont = M2EUtils.deriveFont(treeFont, SWT.ITALIC, 12);
   }
   
   

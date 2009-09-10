@@ -28,7 +28,9 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
@@ -60,6 +62,7 @@ import org.maven.ide.eclipse.ui.internal.views.nodes.AbstractIndexedRepositoryNo
 import org.maven.ide.eclipse.ui.internal.views.nodes.IArtifactNode;
 import org.maven.ide.eclipse.ui.internal.views.nodes.IndexedArtifactFileNode;
 import org.maven.ide.eclipse.ui.internal.views.nodes.RepositoryNode;
+import org.maven.ide.eclipse.util.M2EUtils;
 
 
 /**
@@ -68,7 +71,13 @@ import org.maven.ide.eclipse.ui.internal.views.nodes.RepositoryNode;
  * @author dyocum
  */
 public class MavenRepositoryView extends ViewPart {
-
+  private static final String ENABLE_FULL = "Enable Full Index";
+  private static final String ENABLED_FULL = "Full Index Enabled";
+  private static final String DISABLE_DETAILS = "Disable Index Details";
+  private static final String DISABLED_DETAILS = "Index Details Disabled";
+  private static final String ENABLE_MIN = "Enable Minimum Index";
+  private static final String ENABLED_MIN = "Minimum Index Enabled";
+  
   private NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getDefault().getIndexManager();
 
   private IAction collapseAllAction;
@@ -81,16 +90,12 @@ public class MavenRepositoryView extends ViewPart {
   
   private BaseSelectionListenerAction rebuildAction;
   
-  private BaseSelectionListenerAction disableAction;
-  private BaseSelectionListenerAction enableMinAction;
-  private BaseSelectionListenerAction enableFullAction;
+  private DisableIndexAction disableAction;
+  private EnableMinIndexAction enableMinAction;
+  private EnableFullIndexAction enableFullAction;
 
   private BaseSelectionListenerAction copyUrlAction;
   
-  //can't do this in indexer...yet
-
-  //private BaseSelectionListenerAction deleteFromLocalAction;
-
   private BaseSelectionListenerAction materializeProjectAction;
   
   TreeViewer viewer;
@@ -367,40 +372,16 @@ public class MavenRepositoryView extends ViewPart {
     rebuildAction.setToolTipText("Force a rebuild of the maven index");
     rebuildAction.setImageDescriptor(MavenImages.REBUILD_INDEX);
 
-    disableAction = new BaseSelectionListenerAction("Disable Index") {
-      public void run() {
-        setIndexDetails(getSelectedRepositoryNode(getStructuredSelection()), RepositoryInfo.DETAILS_DISABLED);
-      }
-      protected boolean updateSelection(IStructuredSelection selection) {
-        AbstractIndexedRepositoryNode node = getSelectedRepositoryNode(selection);
-        return node != null && !IndexManager.LOCAL_INDEX.equals(node.getRepositoryUrl())
-            && !IndexManager.WORKSPACE_INDEX.equals(node.getRepositoryUrl());
-      }
-    };
+    disableAction = new DisableIndexAction();
+
     disableAction.setToolTipText("Disable repository index");
     disableAction.setImageDescriptor(MavenImages.REBUILD_INDEX);
 
-    enableMinAction = new BaseSelectionListenerAction("Enable Min Index") {
-      public void run() {
-        setIndexDetails(getSelectedRepositoryNode(getStructuredSelection()), RepositoryInfo.DETAILS_MIN);
-      }
-      protected boolean updateSelection(IStructuredSelection selection) {
-        AbstractIndexedRepositoryNode node = getSelectedRepositoryNode(selection);
-        return node != null && !IndexManager.WORKSPACE_INDEX.equals(node.getRepositoryUrl());
-      }
-    };
+    enableMinAction = new EnableMinIndexAction();
     enableMinAction.setToolTipText("Enable minimal repository index");
     enableMinAction.setImageDescriptor(MavenImages.REBUILD_INDEX);
 
-    enableFullAction = new BaseSelectionListenerAction("Enable Full Index") {
-      public void run() {
-        setIndexDetails(getSelectedRepositoryNode(getStructuredSelection()), RepositoryInfo.DETAILS_FULL);
-      }
-      protected boolean updateSelection(IStructuredSelection selection) {
-        AbstractIndexedRepositoryNode node = getSelectedRepositoryNode(selection);
-        return node != null && !IndexManager.WORKSPACE_INDEX.equals(node.getRepositoryUrl());
-      }
-    };
+    enableFullAction = new EnableFullIndexAction();
     enableFullAction.setToolTipText("Enable full repository index");
     enableFullAction.setImageDescriptor(MavenImages.REBUILD_INDEX);
 
@@ -486,8 +467,7 @@ public class MavenRepositoryView extends ViewPart {
       try {
         indexManager.setIndexDetails(node.getRepositoryUrl(), details);
       } catch(CoreException ex) {
-        // XXX how do I deal with exceptions in the GUI?
-        throw new RuntimeException(ex);
+        M2EUtils.showErrorDialog(this.getViewSite().getShell(), "Error Setting Index Details", "Unable to set the index details due to the following error:\n", ex);
       }
     }
   }
@@ -532,4 +512,90 @@ public class MavenRepositoryView extends ViewPart {
     indexManager.scheduleIndexUpdate(repositoryUrl, force);
   }
 
+  /**
+   * Base Selection Listener does not allow the style (radio button/check) to be set.
+   * This base class listens to selections and sets the appropriate index value
+   * depending on its value
+   * AbstractIndexAction
+   *
+   * @author dyocum
+   */
+  abstract class AbstractIndexAction extends Action implements ISelectionChangedListener{
+
+    protected abstract String getDetailsValue();
+    protected abstract String getActionText();
+    
+    public AbstractIndexAction(String text, int style){
+      super(text, style);
+    }
+    
+    public void run() {
+      IStructuredSelection sel = (IStructuredSelection)viewer.getSelection();
+      setIndexDetails(getSelectedRepositoryNode(sel), getDetailsValue());
+    }
+    
+    /* 
+     */
+    public void selectionChanged(SelectionChangedEvent event) {
+      IStructuredSelection sel = (IStructuredSelection)event.getSelection();
+      updateSelection(sel);
+    }
+    
+    protected void updateSelection(IStructuredSelection selection) {    
+      AbstractIndexedRepositoryNode node = getSelectedRepositoryNode(selection);
+      updateIndexDetails(node);
+      setText(getActionText());
+      boolean enabled = (node != null && !IndexManager.LOCAL_INDEX.equals(node.getRepositoryUrl())
+          && !IndexManager.WORKSPACE_INDEX.equals(node.getRepositoryUrl()));
+      this.setEnabled(enabled);
+    }
+    
+    protected void updateIndexDetails(AbstractIndexedRepositoryNode node){
+      if(node == null || node.getIndex() == null){
+        return;
+      }
+      NexusIndex index = node.getIndex();
+      setChecked(getDetailsValue().equals(index.getIndexDetails()));
+    }
+    
+  }
+  
+  class DisableIndexAction extends AbstractIndexAction {
+    public DisableIndexAction(){
+      super(DISABLE_DETAILS, IAction.AS_CHECK_BOX);
+    }
+    
+    protected String getDetailsValue(){
+      return RepositoryInfo.DETAILS_DISABLED;
+    }
+    protected String getActionText(){
+      return isChecked() ? DISABLED_DETAILS : DISABLE_DETAILS;
+    }
+  }
+  
+  class EnableMinIndexAction extends AbstractIndexAction {
+    public EnableMinIndexAction(){
+      super(ENABLE_MIN, IAction.AS_CHECK_BOX);
+    }
+    
+    protected String getDetailsValue(){
+      return RepositoryInfo.DETAILS_MIN;
+    }
+    protected String getActionText(){
+      return isChecked() ? ENABLED_MIN : ENABLE_MIN;
+    }
+  }
+
+  class EnableFullIndexAction extends AbstractIndexAction {
+    public EnableFullIndexAction(){
+      super(ENABLE_FULL, IAction.AS_CHECK_BOX);
+    }
+    
+    protected String getDetailsValue(){
+      return RepositoryInfo.DETAILS_FULL;
+    }
+    protected String getActionText(){
+      return isChecked() ? ENABLED_FULL : ENABLE_FULL;
+    }
+  }
 }

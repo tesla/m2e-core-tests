@@ -413,7 +413,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     indexedArtifact.addFile(af);
   }
 
-  IndexedArtifactFile getIndexedArtifactFile(ArtifactInfo artifactInfo) {
+  public IndexedArtifactFile getIndexedArtifactFile(ArtifactInfo artifactInfo) {
     String groupId = artifactInfo.groupId;
     String artifactId = artifactInfo.artifactId;
     String repository = artifactInfo.repository;
@@ -799,7 +799,10 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     String repositoryUrl = repository.getUrl();
 
     String details = indexDetails.getProperty(repositoryUrl, defaultIndexDetails);
-
+    
+    //need to record the details so that they're remembered for later (and the UI can get them)
+    setIndexDetails(repositoryUrl, details);
+    
     repositories.put(repositoryUrl, repository);
 
     setIndexDetails(repositoryUrl, null, details, monitor);
@@ -1101,6 +1104,14 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     return info;
   }
 
+  public String getIndexDetails(String repositoryUrl){
+    return indexDetails.getProperty(repositoryUrl);
+  }
+  
+  public boolean indexDetailsDisabled(String repositoryUrl){
+    return RepositoryInfo.DETAILS_DISABLED.equals(getIndexDetails(repositoryUrl));
+  }
+  
   public void setIndexDetails(String repositoryUrl, String details) throws CoreException {
     indexDetails.setProperty(repositoryUrl, details);
     try {
