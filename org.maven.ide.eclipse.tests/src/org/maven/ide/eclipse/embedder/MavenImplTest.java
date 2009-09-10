@@ -76,7 +76,7 @@ public class MavenImplTest extends TestCase {
       assertEquals("http:customrepo", repositories.get(2).getUrl());
 
       // plugin repositories
-      repositories = maven.getPluginArtifactRepository();
+      repositories = maven.getPluginArtifactRepositories();
       assertEquals(2, repositories.size());
       assertEquals("http://central", repositories.get(0).getUrl());
       assertEquals("http:customrepo", repositories.get(1).getUrl());      
@@ -98,7 +98,7 @@ public class MavenImplTest extends TestCase {
       assertEquals("custom", repositories.get(1).getId());
 
       // plugin repositories
-      repositories = maven.getPluginArtifactRepository();
+      repositories = maven.getPluginArtifactRepositories();
       assertEquals(2, repositories.size());
       assertEquals("central", repositories.get(0).getId());
       assertEquals("custom", repositories.get(1).getId());

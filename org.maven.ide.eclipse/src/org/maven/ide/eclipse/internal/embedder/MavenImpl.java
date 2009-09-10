@@ -461,7 +461,9 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
 
     ArtifactRepository localRepository = getLocalRepository();
 
-    if (localRepository.find(artifact).isResolved()) {
+    File artifactFile = new File(localRepository.getBasedir(), localRepository.pathOf(artifact));
+
+    if (artifactFile.canRead()) {
       // artifact is available locally
       return false;
     }
@@ -595,6 +597,10 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
   }
 
   public List<ArtifactRepository> getArtifactRepositories() throws CoreException {
+    return getArtifactRepositories(true);
+  }
+
+  public List<ArtifactRepository> getArtifactRepositories(boolean injectSettings) throws CoreException {
     ArrayList<ArtifactRepository> repositories = new ArrayList<ArtifactRepository>();
     for(Profile profile : getActiveProfiles()) {
       addArtifactRepositories(repositories, profile.getRepositories());
@@ -602,7 +608,19 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
 
     addDefaultRepository(repositories);
 
+    if (injectSettings) {
+      injectSettings(repositories);
+    }
+
     return repositories;
+  }
+
+  private void injectSettings(ArrayList<ArtifactRepository> repositories) throws CoreException {
+    Settings settings = getSettings();
+    
+    repositorySystem.injectMirror(repositories, getMirrors());
+    repositorySystem.injectProxy(repositories, settings.getProxies());
+    repositorySystem.injectAuthentication(repositories, settings.getServers());
   }
 
   private void addDefaultRepository(ArrayList<ArtifactRepository> repositories) {
@@ -647,12 +665,20 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
     return activeProfiles;
   }
 
-  public List<ArtifactRepository> getPluginArtifactRepository() throws CoreException {
+  public List<ArtifactRepository> getPluginArtifactRepositories() throws CoreException {
+    return getPluginArtifactRepositories(true);
+  }
+
+  public List<ArtifactRepository> getPluginArtifactRepositories(boolean injectSettings) throws CoreException {
     ArrayList<ArtifactRepository> repositories = new ArrayList<ArtifactRepository>();
     for(Profile profile : getActiveProfiles()) {
       addArtifactRepositories(repositories, profile.getPluginRepositories());
     }
     addDefaultRepository(repositories);
+
+    if (injectSettings) {
+      injectSettings(repositories);
+    }
 
     return repositories;
   }

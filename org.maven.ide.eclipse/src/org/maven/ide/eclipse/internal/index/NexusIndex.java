@@ -20,6 +20,7 @@ import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.BooleanClause.Occur;
 
 import org.sonatype.nexus.index.ArtifactInfo;
+import org.sonatype.nexus.index.context.IndexingContext;
 
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.index.IIndex;
@@ -104,5 +105,9 @@ public class NexusIndex implements IIndex, IMutableIndex {
 
   public void updateIndex(boolean force, IProgressMonitor monitor) throws CoreException {
     indexManager.updateIndex(repositoryUrl, force, monitor);
+  }
+
+  public IndexingContext getIndexingContext() {
+    return indexManager.getIndexingContext(repositoryUrl);
   }
 }

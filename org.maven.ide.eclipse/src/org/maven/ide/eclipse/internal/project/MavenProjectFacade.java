@@ -251,8 +251,11 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
   private void acceptImpl(IMavenProjectVisitor visitor, int flags, IProgressMonitor monitor) throws CoreException {
     if(visitor.visit(this)) {
       if (visitor instanceof IMavenProjectVisitor2 && monitor != null) {
-        for(Artifact artifact : getMavenProject(monitor).getArtifacts()) {
-          ((IMavenProjectVisitor2) visitor).visit(this, artifact);
+        MavenProject mavenProject = ((flags & IMavenProjectVisitor.LOAD) > 0)? getMavenProject(monitor): getMavenProject();
+        if (mavenProject != null) {
+          for(Artifact artifact : mavenProject.getArtifacts()) {
+            ((IMavenProjectVisitor2) visitor).visit(this, artifact);
+          }
         }
       }
 

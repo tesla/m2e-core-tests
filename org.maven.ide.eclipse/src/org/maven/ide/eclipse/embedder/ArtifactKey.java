@@ -76,6 +76,9 @@ public class ArtifactKey implements Serializable {
   public String toString() {
     StringBuffer sb = new StringBuffer();
     sb.append(groupId).append(':').append(artifactId).append(':').append(version);
+    if(classifier != null) {
+      sb.append(':').append(classifier);
+    }
     return sb.toString();
   }
 

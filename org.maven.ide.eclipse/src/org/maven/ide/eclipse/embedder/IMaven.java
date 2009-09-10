@@ -97,12 +97,23 @@ public interface IMaven {
   public void populateDefaults(MavenExecutionRequest request) throws CoreException;
 
   /**
-   * Returns list of remote artifact repositories configured in settings.xml. Only profiles active by default are
-   * considered when calculating the list.
+   * Convenience method, fully equivalent to getArtifactRepositories(true)
    */
   public List<ArtifactRepository> getArtifactRepositories() throws CoreException;
 
-  public List<ArtifactRepository> getPluginArtifactRepository() throws CoreException;
+  /**
+   * Returns list of remote artifact repositories configured in settings.xml. Only profiles active by default are
+   * considered when calculating the list.
+   * 
+   * If injectSettings=true, mirrors, authentication and proxy info will be injected.
+   * 
+   * If injectSettings=false, raw repository definition will be used. 
+   */
+  public List<ArtifactRepository> getArtifactRepositories(boolean injectSettings) throws CoreException;
+
+  public List<ArtifactRepository> getPluginArtifactRepositories() throws CoreException;
+
+  public List<ArtifactRepository> getPluginArtifactRepositories(boolean injectSettings) throws CoreException;
 
   public Settings buildSettings(String globalSettings, String userSettings) throws CoreException;
 

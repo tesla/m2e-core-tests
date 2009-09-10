@@ -56,6 +56,7 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.repository.MavenArtifactRepository;
 import org.apache.maven.settings.Mirror;
 import org.apache.maven.settings.Proxy;
 import org.apache.maven.settings.Server;
@@ -437,19 +438,19 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
         sourcesExists, javadocExists, prefix, goals);
   }
 
-  private void reindexLocalRepository(String indexName, final IProgressMonitor monitor) throws CoreException {
+  private void reindexLocalRepository(String repositoryUrl, final IProgressMonitor monitor) throws CoreException {
     try {
-      fireIndexUpdating(indexName);
+      fireIndexUpdating(repositoryUrl);
       //IndexInfo indexInfo = getIndexInfo(indexName);
-      IndexingContext context = getIndexer().getIndexingContexts().get(indexName);
+      IndexingContext context = getIndexer().getIndexingContexts().get(repositoryUrl);
       getIndexer().scan(context, new ArtifactScanningMonitor(context.getRepository(), monitor, console), false);
-      fireIndexChanged(indexName);
+      fireIndexChanged(repositoryUrl);
       console.logMessage("Updated local repository index");
     } catch(Exception ex) {
-      MavenLogger.log("Unable to re-index "+indexName, ex);
+      MavenLogger.log("Unable to re-index "+repositoryUrl, ex);
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Reindexing error", ex));
     } finally {
-      fireIndexChanged(indexName);
+      fireIndexChanged(repositoryUrl);
     }
   }
 
@@ -578,7 +579,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     return repositoryUrl == null ? null : getIndexer().getIndexingContexts().get(repositoryUrl);
   }
 
-  private synchronized NexusIndexer getIndexer() {
+  public synchronized NexusIndexer getIndexer() {
     if(indexer == null) {
       indexer = MavenPlugin.lookup(NexusIndexer.class);
     }
@@ -817,7 +818,11 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
         }
       } else {
           Directory directory = getIndexDirectory(repositoryUrl);
-          
+
+          if (repositoryPath == null && repositoryUrl.startsWith("file:")) {
+            repositoryPath = new File(getBasedir(repositoryUrl)).getCanonicalFile();
+          }
+
           boolean fullIndex = RepositoryInfo.DETAILS_FULL.equals(details);
   
           indexingContext = getIndexer().addIndexingContextForced(
@@ -928,16 +933,19 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
   void updateIndex(String repositoryUrl, boolean force, IProgressMonitor monitor) throws CoreException {
     if (IndexManager.WORKSPACE_INDEX.equals(repositoryUrl)) {
       reindexWorkspace(monitor);
-    } else if (IndexManager.LOCAL_INDEX.equals(repositoryUrl)) {
-      reindexLocalRepository(repositoryUrl, monitor);
     } else {
-      updateRemoteIndex(repositoryUrl, force, monitor);
+      IndexingContext context = getIndexingContext(repositoryUrl);
+      if (context.getRepository() != null) {
+        reindexLocalRepository(repositoryUrl, monitor);
+      } else {
+        updateRemoteIndex(repositoryUrl, force, monitor);
+      }
     }
   }
 
   private void updateRemoteIndex(String repositoryUrl, boolean force, IProgressMonitor monitor) {
-    RepositoryInfo index = repositories.get(repositoryUrl);
-    if (index == null) {
+    RepositoryInfo repository = repositories.get(repositoryUrl);
+    if (repository == null) {
       return;
     }
 
@@ -949,8 +957,8 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       IndexingContext context = getIndexingContext(repositoryUrl);
 
       IndexUpdateRequest request = new IndexUpdateRequest(context);
-      request.setProxyInfo(index.getProxyInfo());
-      request.setAuthenticationInfo(index.getAuthenticationInfo());
+      request.setProxyInfo(repository.getProxyInfo());
+      request.setAuthenticationInfo(repository.getAuthenticationInfo());
       request.setTransferListener(maven.createTransferListener(monitor));
       request.setForceFullUpdate(force);
       Date indexTime = getUpdater().fetchAndUpdateIndex(request);
@@ -1026,8 +1034,8 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
 
     // repositories from settings.xml
     ArrayList<ArtifactRepository> repos = new ArrayList<ArtifactRepository>();
-    repos.addAll(maven.getArtifactRepositories());
-    repos.addAll(maven.getPluginArtifactRepository());
+    repos.addAll(maven.getArtifactRepositories(false));
+    repos.addAll(maven.getPluginArtifactRepositories(false));
 
     for(ArtifactRepository repo : repos) {
       Mirror mirror = maven.getMirror(repo);
@@ -1121,6 +1129,13 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       return url.substring( 0, pos ).trim();
   }
 
+  private static String getBasedir(String repositoryUrl) {
+    // absolute hack
+    MavenArtifactRepository hack = new MavenArtifactRepository();
+    hack.setUrl(repositoryUrl);
+    return hack.getBasedir();
+  }
+  
   public Collection<RepositoryInfo> getRepositories() {
     return repositories.values();
   }

@@ -6,9 +6,8 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/package org.maven.ide.eclipse.jdt;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.internal.core.JarPackageFragmentRoot;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
@@ -16,7 +15,6 @@ import org.eclipse.ui.IEditorActionDelegate;
 import org.eclipse.ui.IEditorPart;
 
 import org.maven.ide.eclipse.core.MavenLogger;
-import org.maven.ide.eclipse.embedder.ArtifactKey;
 
 /**
  * 
@@ -38,25 +36,19 @@ public class DownloadSourcesActionDelegate implements IEditorActionDelegate {
         IJavaElement element = input.getClassFile();
         while (element.getParent() != null) {
           element = element.getParent();
-          if (element instanceof JarPackageFragmentRoot) {
-            JarPackageFragmentRoot root = (JarPackageFragmentRoot) element;
+          if (element instanceof IPackageFragmentRoot) {
+            IPackageFragmentRoot root = (IPackageFragmentRoot) element;
 
             if (root.getSourceAttachmentPath() != null) {
               // do nothing if sources attached already
               break;
             }
 
-            ArtifactKey artifactKey = (ArtifactKey) root.getAdapter(ArtifactKey.class);
-
-            if (artifactKey != null) {
-              IProject project = root.getJavaProject().getProject();
-              buildpathManager.downloadSources(project, artifactKey, true, false);
-              break;
-            }
+            buildpathManager.scheduleDownload(root, true/*sources*/, false/*javadoc*/);
           }
         }
       } catch(Exception ex) {
-        MavenLogger.log("Cannot initiate source download", ex);
+        MavenLogger.log("Could not schedule source download", ex);
       }
     }
   }
