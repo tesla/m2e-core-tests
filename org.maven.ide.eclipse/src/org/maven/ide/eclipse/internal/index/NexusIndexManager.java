@@ -438,14 +438,16 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
         sourcesExists, javadocExists, prefix, goals);
   }
 
-  private void reindexLocalRepository(String repositoryUrl, final IProgressMonitor monitor) throws CoreException {
+  private void reindexLocalRepository(String repositoryUrl, boolean force, final IProgressMonitor monitor) throws CoreException {
     try {
-      fireIndexUpdating(repositoryUrl);
-      //IndexInfo indexInfo = getIndexInfo(indexName);
-      IndexingContext context = getIndexer().getIndexingContexts().get(repositoryUrl);
-      getIndexer().scan(context, new ArtifactScanningMonitor(context.getRepository(), monitor, console), false);
-      fireIndexChanged(repositoryUrl);
-      console.logMessage("Updated local repository index");
+      if (force) {
+        fireIndexUpdating(repositoryUrl);
+        //IndexInfo indexInfo = getIndexInfo(indexName);
+        IndexingContext context = getIndexer().getIndexingContexts().get(repositoryUrl);
+        getIndexer().scan(context, new ArtifactScanningMonitor(context.getRepository(), monitor, console), false);
+        fireIndexChanged(repositoryUrl);
+        console.logMessage("Updated local repository index");
+      }
     } catch(Exception ex) {
       MavenLogger.log("Unable to re-index "+repositoryUrl, ex);
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Reindexing error", ex));
@@ -935,10 +937,12 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       reindexWorkspace(monitor);
     } else {
       IndexingContext context = getIndexingContext(repositoryUrl);
-      if (context.getRepository() != null) {
-        reindexLocalRepository(repositoryUrl, monitor);
-      } else {
-        updateRemoteIndex(repositoryUrl, force, monitor);
+      if (context != null) {
+        if (context.getRepository() != null) {
+          reindexLocalRepository(repositoryUrl, force, monitor);
+        } else {
+          updateRemoteIndex(repositoryUrl, force, monitor);
+        }
       }
     }
   }
