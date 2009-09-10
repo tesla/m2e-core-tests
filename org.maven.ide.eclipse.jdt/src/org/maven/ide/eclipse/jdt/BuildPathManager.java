@@ -98,7 +98,7 @@ import org.maven.ide.eclipse.project.configurator.ILifecycleMapping;
  * This class is responsible for mapping Maven classpath to JDT and back.
  */
 @SuppressWarnings("restriction")
-public class BuildPathManager implements IBuildPathManager, IMavenProjectChangedListener, IResourceChangeListener {
+public class BuildPathManager implements IMavenProjectChangedListener, IResourceChangeListener {
 
   // container settings
   public static final String CONTAINER_ID = "org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER"; //$NON-NLS-1$
