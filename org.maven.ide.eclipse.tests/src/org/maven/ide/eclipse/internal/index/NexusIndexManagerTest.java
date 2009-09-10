@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
@@ -22,6 +23,7 @@ import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.tests.AsbtractMavenProjectTestCase;
 import org.sonatype.nexus.index.ArtifactInfo;
+import org.sonatype.nexus.index.context.IndexingContext;
 
 
 /**
@@ -36,7 +38,14 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
   private void waitForIndexJobToComplete() throws InterruptedException {
     indexManager.getIndexUpdateJob().join();
   }  
-  
+  protected void setupPublicMirror(String publicRepoUrl) throws Exception {
+    final File mirroredRepoFile = new File("src/org/maven/ide/eclipse/internal/index/public_mirror_repo_settings.xml");
+    assertTrue(mirroredRepoFile.exists());
+
+    mavenConfiguration.setUserSettingsFile(mirroredRepoFile.getCanonicalPath());
+    waitForIndexJobToComplete();
+  }
+
   public void testDisableIndex() throws Exception{
     String publicRepoUrl = "http://repository.sonatype.org/content/repositories/eclipse";
     setupPublicMirror(publicRepoUrl); 
@@ -73,34 +82,6 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
     assertTrue(rootGroups.length > 0);
   }
 
-  public void testNoMirror() throws Exception {
-    final File settingsFile = new File("src/org/maven/ide/eclipse/internal/index/no_mirror_settings.xml");
-    assertTrue(settingsFile.exists());
-
-    mavenConfiguration.setUserSettingsFile(settingsFile.getCanonicalPath());
-    waitForIndexJobToComplete();
-
-    ArrayList<RepositoryInfo> repositories = new ArrayList<RepositoryInfo>(indexManager.getRepositories());
-    assertEquals(3, repositories.size());
-    assertNotNull(indexManager.getIndexingContext(repositories.get(0).getUrl()));
-    assertNotNull(indexManager.getIndexingContext(repositories.get(1).getUrl()));
-    assertNotNull(indexManager.getIndexingContext(repositories.get(2).getUrl()));
-    
-    NexusIndex workspaceIndex = indexManager.getIndex("workspace");
-    assertNotNull(workspaceIndex);
-    
-    NexusIndex localIndex = indexManager.getIndex("local");
-    assertNotNull(localIndex);
-  }
-
-  protected void setupPublicMirror(String publicRepoUrl) throws Exception {
-    final File mirroredRepoFile = new File("src/org/maven/ide/eclipse/internal/index/public_mirror_repo_settings.xml");
-    assertTrue(mirroredRepoFile.exists());
-
-    mavenConfiguration.setUserSettingsFile(mirroredRepoFile.getCanonicalPath());
-    waitForIndexJobToComplete();
-  }
-  
   public void testPublicMirror() throws Exception {
     String publicRepoUrl = "http://repository.sonatype.org/content/repositories/eclipse";
     setupPublicMirror(publicRepoUrl);
@@ -135,40 +116,15 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
     assertNotNull(indexManager.getIndexingContext(repositories.get(1).getUrl()));
     assertNull(indexManager.getIndexingContext(repositories.get(2).getUrl()));
   }
-  
-  public void testArtifactSearch() throws Exception {
-    final File settingsFile = new File("src/org/maven/ide/eclipse/internal/index/no_mirror_settings.xml");
-    assertTrue(settingsFile.exists());
 
-    mavenConfiguration.setUserSettingsFile(settingsFile.getCanonicalPath());
+  public void testClassSearch() throws Exception {
+    String publicRepoUrl = "http://repository.sonatype.org/content/repositories/eclipse";
+    setupPublicMirror(publicRepoUrl);
+    
+    indexManager.scheduleIndexUpdate("local", true);
     waitForIndexJobToComplete();
     
-    Map<String, IndexedArtifact> search = indexManager.search("commons-logging", IIndex.SEARCH_ARTIFACT);
-    IndexedArtifact ia = search.get("null : null : commons-logging : commons-logging");
-    String gav = NexusIndexManager.getGAV(ia.getGroupId(), ia.getArtifactId(), "1.1.1", "jar");
-    assertNotNull(ia);
-    boolean hasVersion = false;
-    for(IndexedArtifactFile file : ia.getFiles()){
-      if("1.1.1".equals(file.version)){
-        hasVersion = true;
-        break;
-      }   
-    }
-    assertTrue(hasVersion);
-    
-    //TODO: do something with these
-    Map<String, IndexedArtifact> search2 = indexManager.search(gav, IIndex.SEARCH_ARTIFACT);  
-    search = indexManager.search("commons-logging-1.1.1", IIndex.SEARCH_ARTIFACT, IIndex.SEARCH_JAVADOCS);
-    search = indexManager.search("commons-logging-1.1.1", IIndex.SEARCH_ARTIFACT, IIndex.SEARCH_SOURCES);
-    search = indexManager.search("commons-logging-1.1.1", IIndex.SEARCH_ARTIFACT, IIndex.SEARCH_TESTS);
-    
-    Map<String, IndexedArtifact> noResultsSearch = indexManager.search("beepbeep-nothing", IIndex.SEARCH_ARTIFACT);
-    assertTrue(noResultsSearch.size() == 0);
-  }
-
-  
-  public void testClassSearch() throws Exception {
-    Map<String, IndexedArtifact> search = indexManager.search("TestCase", IIndex.SEARCH_CLASS_NAME);
+    Map<String, IndexedArtifact> search = indexManager.search("junit.framework.TestCase", IIndex.SEARCH_CLASS_NAME);
     assertTrue(search.size() > 0);
 
     Map<String, IndexedArtifact> noResultsSearch = indexManager.search("BeepBeepNoClass", IIndex.SEARCH_CLASS_NAME);
@@ -241,16 +197,13 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
     String publicRepoUrl = "http://repository.sonatype.org/content/repositories/eclipse";
     String publicName = "nexus";
     final File mirroredRepoFile = new File("src/org/maven/ide/eclipse/internal/index/public_mirror_repo_settings.xml");
-    assertTrue(mirroredRepoFile.exists());
-
-    IndexedArtifactGroup[] rootGroups = indexManager.getRootGroups(publicRepoUrl);
-    assertTrue(rootGroups.length == 0);
     
     assertTrue(mirroredRepoFile.exists());
 
     mavenConfiguration.setUserSettingsFile(mirroredRepoFile.getCanonicalPath());
     waitForIndexJobToComplete();
-    rootGroups = indexManager.getRootGroups(publicRepoUrl);
+    
+    IndexedArtifactGroup[] rootGroups = indexManager.getRootGroups(publicRepoUrl);
     assertTrue(rootGroups.length > 0);
 
     IndexedArtifactGroup iag = new IndexedArtifactGroup(publicName, publicRepoUrl, "org.junit");
@@ -266,21 +219,7 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
     assertNotNull(indexedArtifactFile);
   }
   
-  public void testIndexedPublicArtifactGroups() throws Exception {
-    String publicRepoUrl = "http://repository.sonatype.org/content/groups/public/";
 
-    final File mirroredRepoFile = new File("src/org/maven/ide/eclipse/internal/index/public_settings.xml");
-    assertTrue(mirroredRepoFile.exists());
-
-    mavenConfiguration.setUserSettingsFile(mirroredRepoFile.getCanonicalPath());
-    waitForIndexJobToComplete();
-
-    ArtifactKey key = new ArtifactKey("org.junit", "junit", "3.8.1", "jar");
-    
-    IndexedArtifactFile indexedArtifactFile = indexManager.getIndexedArtifactFile(publicRepoUrl, key);
-    //TODO: figure out why this is failing to return an indexedArtifactFile
-    //assertNotNull(indexedArtifactFile);
-  }
   
   public void testProjectIndexes() throws Exception {
     String publicRepoUrl = "http://repository.sonatype.org/content/repositories/eclipse";
@@ -299,5 +238,70 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
 
   }
   
+  public void XXtestIndexedPublicArtifactGroups() throws Exception {
+    String publicRepoUrl = "http://repository.sonatype.org/content/groups/public/";
 
+    final File mirroredRepoFile = new File("src/org/maven/ide/eclipse/internal/index/public_settings.xml");
+    assertTrue(mirroredRepoFile.exists());
+
+    mavenConfiguration.setUserSettingsFile(mirroredRepoFile.getCanonicalPath());
+    waitForIndexJobToComplete();
+
+    ArtifactKey key = new ArtifactKey("org.junit", "junit", "3.8.1", "jar");
+    
+    IndexedArtifactFile indexedArtifactFile = indexManager.getIndexedArtifactFile(publicRepoUrl, key);
+    //TODO: figure out why this is failing to return an indexedArtifactFile
+    //assertNotNull(indexedArtifactFile);
+  }
+  
+  public void testNoMirror() throws Exception {
+    
+    final File settingsFile = new File("src/org/maven/ide/eclipse/internal/index/no_mirror_settings.xml");
+    assertTrue(settingsFile.exists());
+
+    mavenConfiguration.setUserSettingsFile(settingsFile.getCanonicalPath());
+    waitForIndexJobToComplete();
+    
+    ArrayList<RepositoryInfo> repositories = new ArrayList<RepositoryInfo>(indexManager.getRepositories());
+    assertEquals(3, repositories.size());
+    for(RepositoryInfo info : repositories){
+      assertTrue(info.getMirrorId() == null);
+      assertTrue(info.getMirrorOf() == null);
+    }
+    
+    NexusIndex workspaceIndex = indexManager.getIndex("workspace");
+    assertNotNull(workspaceIndex);
+    
+    NexusIndex localIndex = indexManager.getIndex("local");
+    assertNotNull(localIndex);
+  }
+  public void testArtifactSearch() throws Exception {
+    final File settingsFile = new File("src/org/maven/ide/eclipse/internal/index/no_mirror_settings.xml");
+    assertTrue(settingsFile.exists());
+
+    mavenConfiguration.setUserSettingsFile(settingsFile.getCanonicalPath());
+    waitForIndexJobToComplete();
+    
+    Map<String, IndexedArtifact> search = indexManager.search("commons-logging", IIndex.SEARCH_ARTIFACT);
+    IndexedArtifact ia = search.get("null : null : commons-logging : commons-logging");
+    String gav = NexusIndexManager.getGAV(ia.getGroupId(), ia.getArtifactId(), "1.1.1", "jar");
+    assertNotNull(ia);
+    boolean hasVersion = false;
+    for(IndexedArtifactFile file : ia.getFiles()){
+      if("1.1.1".equals(file.version)){
+        hasVersion = true;
+        break;
+      }   
+    }
+    assertTrue(hasVersion);
+    
+    //TODO: do something with these
+    Map<String, IndexedArtifact> search2 = indexManager.search(gav, IIndex.SEARCH_ARTIFACT);  
+    search = indexManager.search("commons-logging-1.1.1", IIndex.SEARCH_ARTIFACT, IIndex.SEARCH_JAVADOCS);
+    search = indexManager.search("commons-logging-1.1.1", IIndex.SEARCH_ARTIFACT, IIndex.SEARCH_SOURCES);
+    search = indexManager.search("commons-logging-1.1.1", IIndex.SEARCH_ARTIFACT, IIndex.SEARCH_TESTS);
+    
+    Map<String, IndexedArtifact> noResultsSearch = indexManager.search("beepbeep-nothing", IIndex.SEARCH_ARTIFACT);
+    assertTrue(noResultsSearch.size() == 0);
+  }
 }
