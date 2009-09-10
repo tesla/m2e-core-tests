@@ -799,12 +799,11 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     String repositoryUrl = repository.getUrl();
 
     String details = indexDetails.getProperty(repositoryUrl, defaultIndexDetails);
-    
-    //need to record the details so that they're remembered for later (and the UI can get them)
-    setIndexDetails(repositoryUrl, details);
-    
     repositories.put(repositoryUrl, repository);
-
+    
+    //need to remember the property (including the defaults) so the UI can get them
+    indexDetails.setProperty(repositoryUrl, details);
+    
     setIndexDetails(repositoryUrl, null, details, monitor);
   }
 
@@ -935,7 +934,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
   }
 
-  void updateIndex(String repositoryUrl, boolean force, IProgressMonitor monitor) throws CoreException {
+  public void updateIndex(String repositoryUrl, boolean force, IProgressMonitor monitor) throws CoreException {
     if (IndexManager.WORKSPACE_INDEX.equals(repositoryUrl)) {
       reindexWorkspace(monitor);
     } else {
@@ -1112,7 +1111,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     return RepositoryInfo.DETAILS_DISABLED.equals(getIndexDetails(repositoryUrl));
   }
   
-  public void setIndexDetails(String repositoryUrl, String details) throws CoreException {
+  protected void writeIndexDetails(String repositoryUrl, String details) throws CoreException {
     indexDetails.setProperty(repositoryUrl, details);
     try {
       BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(getIndexDetailsFile()));
@@ -1124,7 +1123,10 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     } catch (IOException e) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not write index details file", e));
     }
-
+  }
+  
+  public void setIndexDetails(String repositoryUrl, String details) throws CoreException {
+    writeIndexDetails(repositoryUrl, details);
     setIndexDetails(repositoryUrl, null, details, null /*asyncUpdate*/);
   }
 
