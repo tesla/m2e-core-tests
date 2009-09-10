@@ -36,7 +36,27 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
   private void waitForIndexJobToComplete() throws InterruptedException {
     indexManager.getIndexUpdateJob().join();
   }  
-
+  
+  public void testDisableIndex() throws Exception{
+    String publicRepoUrl = "http://repository.sonatype.org/content/repositories/eclipse";
+    setupPublicMirror(publicRepoUrl); 
+    Collection<RepositoryInfo> repositories = indexManager.getRepositories();
+    for(RepositoryInfo info : repositories){
+      String url = info.getUrl();
+      String details = indexManager.getIndexDetails(url);
+      if("local".equals(url)){
+        assertEquals("Local repo should default to full details", RepositoryInfo.DETAILS_FULL, details);
+      } else if("workspace".equals(url)){
+        assertEquals("workspace repo should default to full details", RepositoryInfo.DETAILS_MIN, details);
+      } else {
+       if(publicRepoUrl.equals(url)){
+         assertEquals("Mirror should be min details", RepositoryInfo.DETAILS_MIN, details);
+       } else {
+         assertEquals("Mirrored should be disabled", RepositoryInfo.DETAILS_DISABLED, details);
+       }
+      }
+    }
+  }
   /**
    * Authentication was causing a failure for public (non-auth) repos. This test makes sure its ok.
    */
@@ -278,4 +298,6 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
     assertNotNull(globalIndices);
 
   }
+  
+
 }
