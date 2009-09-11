@@ -109,16 +109,15 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
     
     //after the project is created, there should be the project root group
     rootGroups = indexManager.getRootGroups("workspace");
-    assertTrue(rootGroups.length == 1);
+    assertTrue(rootGroups.length > 0);
     assertEquals("resourcefiltering", rootGroups[0].getPrefix());
   }
   
   public void testLocalIndex() throws Exception {
-    IndexedArtifactGroup[] rootGroups = indexManager.getRootGroups("local");
-    assertTrue(rootGroups.length == 0);
+
     indexManager.scheduleIndexUpdate("local", true);
     waitForIndexJobToComplete();
-    rootGroups = indexManager.getRootGroups("local");
+    IndexedArtifactGroup[] rootGroups = indexManager.getRootGroups("local");
     assertTrue(rootGroups.length > 0);
   }
   
