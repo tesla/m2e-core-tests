@@ -8,13 +8,8 @@
 
 package org.maven.ide.eclipse.internal;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,8 +28,7 @@ import org.maven.ide.eclipse.archetype.ArchetypeCatalogFactory;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
-import org.maven.ide.eclipse.index.EnabledIndex;
-import org.maven.ide.eclipse.internal.index.EnabledIndexWriter;
+import org.maven.ide.eclipse.internal.index.RepositoryInfo;
 import org.maven.ide.eclipse.project.IMavenMarkerManager;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
@@ -92,29 +86,6 @@ public class ExtensionReader {
   private static final String ATTR_PACKAGING = "packaging";
   
   private static final String ATTR_LIFECYCLE_MAPPING_ID = "lifecycleMappingId";
-
-  public static Collection<EnabledIndex> readEnabledIndexConfig(File configFile) {
-    if(configFile != null && configFile.exists()) {
-      FileInputStream is = null;
-      try {
-        is = new FileInputStream(configFile);
-        EnabledIndexWriter writer = new EnabledIndexWriter();
-        return writer.readIndexInfo(is);
-      } catch(IOException ex) {
-        MavenLogger.log("Unable to read enabled index config", ex);
-      } finally {
-        if(is != null) {
-          try {
-            is.close();
-          } catch(IOException ex) {
-            MavenLogger.log("Unable to close enabled index config", ex);
-          }
-        }
-      }
-    }
-
-    return Collections.emptyList();
-  }
 
   /**
    * @param configFile previously saved indexes configuration
