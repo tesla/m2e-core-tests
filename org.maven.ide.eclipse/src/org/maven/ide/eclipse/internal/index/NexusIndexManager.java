@@ -58,11 +58,9 @@ import org.apache.lucene.store.FSDirectory;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.MavenArtifactRepository;
 import org.apache.maven.settings.Mirror;
-import org.apache.maven.settings.Proxy;
 import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
-import org.apache.maven.wagon.proxy.ProxyInfo;
 
 import org.sonatype.nexus.artifact.Gav;
 import org.sonatype.nexus.artifact.GavCalculator;
@@ -677,8 +675,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
         continue;
       }
       AuthenticationInfo auth = getAuthenticationInfo(settings, repo.getId());
-      ProxyInfo proxy = getProxyInfo(settings, repo.getUrl());
-      repository = new RepositoryInfo(repo.getId(), repo.getUrl(), false /*global*/, auth, proxy);
+      repository = new RepositoryInfo(repo.getId(), repo.getUrl(), false /*global*/, auth);
       repository.addProject(facade.getPom().getFullPath());
 
       addRepository(repository, //
@@ -963,7 +960,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       IndexingContext context = getIndexingContext(repositoryUrl);
 
       IndexUpdateRequest request = new IndexUpdateRequest(context);
-      request.setProxyInfo(repository.getProxyInfo());
+      request.setProxyInfo(maven.getProxyInfo(getProtocol(repositoryUrl)));
       request.setAuthenticationInfo(repository.getAuthenticationInfo());
       request.setTransferListener(maven.createTransferListener(monitor));
       request.setForceFullUpdate(force);
@@ -979,11 +976,10 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
 //      console.logError(msg);
 //    } catch (OperationCanceledException ex) {
 //      console.logMessage("Updating index " + repositoryUrl + " is canceled");
-    } catch(IOException ie){
+    } catch (Exception ie){
       String msg = "Unable to update index for " + repositoryUrl;
       MavenLogger.log(msg, ie);
       console.logError(msg);
-//    } catch(Exception e){
     } finally {
       fireIndexChanged(repositoryUrl);
     }
@@ -1031,8 +1027,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     List<Mirror> mirrors = maven.getMirrors();
     for(Mirror mirror : mirrors) {
       AuthenticationInfo auth = getAuthenticationInfo(settings, mirror.getId());
-      ProxyInfo proxy = getProxyInfo(settings, mirror.getUrl());
-      RepositoryInfo repository = new RepositoryInfo(mirror.getId(), mirror.getUrl(), true /*global*/, auth, proxy);
+      RepositoryInfo repository = new RepositoryInfo(mirror.getId(), mirror.getUrl(), true /*global*/, auth);
       repository.setMirrorOf(mirror.getMirrorOf());
       addRepository(repository, RepositoryInfo.DETAILS_MIN, monitor);
       oldRepositoryUrls.remove(repository.getUrl());
@@ -1046,8 +1041,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     for(ArtifactRepository repo : repos) {
       Mirror mirror = maven.getMirror(repo);
       AuthenticationInfo auth = getAuthenticationInfo(settings, repo.getId());
-      ProxyInfo proxy = getProxyInfo(settings, repo.getUrl());
-      RepositoryInfo repository = new RepositoryInfo(repo.getId(), repo.getUrl(), true /*global*/, auth, proxy);
+      RepositoryInfo repository = new RepositoryInfo(repo.getId(), repo.getUrl(), true /*global*/, auth);
       if (mirror != null) {
         repository.setMirrorId(mirror.getId());
       }
@@ -1067,25 +1061,6 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
   }
 
-  private ProxyInfo getProxyInfo(Settings settings, String url) {
-    if (settings == null) {
-      return null;
-    }
-
-    String protocol = getProtocol(url); // can't be null
-    for (Proxy proxy : settings.getProxies()) {
-      if (proxy.isActive() && protocol.equalsIgnoreCase(proxy.getProtocol())) {
-        ProxyInfo proxyInfo = new ProxyInfo();
-        proxyInfo.setHost(proxy.getHost());
-        proxyInfo.setPort(proxy.getPort());
-        proxyInfo.setNonProxyHosts(proxy.getNonProxyHosts());
-        proxyInfo.setUserName(proxy.getUsername());
-        proxyInfo.setPassword(proxy.getPassword());
-        return proxyInfo;
-      }
-    }
-    return null;
-  }
 
   private AuthenticationInfo getAuthenticationInfo(Settings settings, String id) {
     if (settings == null) {

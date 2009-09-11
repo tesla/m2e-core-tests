@@ -81,10 +81,12 @@ import org.apache.maven.project.ProjectBuildingResult;
 import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.settings.MavenSettingsBuilder;
 import org.apache.maven.settings.Mirror;
+import org.apache.maven.settings.Proxy;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.settings.SettingsUtils;
 import org.apache.maven.settings.validation.SettingsValidationResult;
 import org.apache.maven.wagon.events.TransferListener;
+import org.apache.maven.wagon.proxy.ProxyInfo;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
@@ -733,5 +735,23 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
   /** for testing purposes */
   public PlexusContainer getPlexusContainer() {
     return plexus;
+  }
+  
+  public ProxyInfo getProxyInfo(String protocol) throws CoreException {
+    Settings settings = getSettings();
+
+    for (Proxy proxy : settings.getProxies()) {
+      if (proxy.isActive() && protocol.equalsIgnoreCase(proxy.getProtocol())) {
+        ProxyInfo proxyInfo = new ProxyInfo();
+        proxyInfo.setHost(proxy.getHost());
+        proxyInfo.setPort(proxy.getPort());
+        proxyInfo.setNonProxyHosts(proxy.getNonProxyHosts());
+        proxyInfo.setUserName(proxy.getUsername());
+        proxyInfo.setPassword(proxy.getPassword());
+        return proxyInfo;
+      }
+    }
+
+    return null;
   }
 }

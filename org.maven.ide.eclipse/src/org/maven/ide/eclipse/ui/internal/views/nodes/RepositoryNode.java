@@ -28,7 +28,7 @@ public class RepositoryNode extends AbstractIndexedRepositoryNode {
 
   public String getName() {
     StringBuilder sb = new StringBuilder();
-    sb.append(repository.getId());
+    sb.append(repository.getServerId());
     sb.append(" (").append(repository.getUrl()).append(")");
     if (repository.getMirrorOf() != null) {
       sb.append(" [mirrorOf=").append(repository.getMirrorOf()).append("]");
@@ -47,7 +47,7 @@ public class RepositoryNode extends AbstractIndexedRepositoryNode {
   }
 
   public String getRepoName() {
-    return repository.getId();
+    return repository.getServerId();
   }
 
   public boolean isEnabledIndex() {

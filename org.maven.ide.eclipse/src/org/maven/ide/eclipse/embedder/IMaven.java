@@ -29,6 +29,7 @@ import org.apache.maven.settings.Mirror;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.settings.validation.SettingsValidationResult;
 import org.apache.maven.wagon.events.TransferListener;
+import org.apache.maven.wagon.proxy.ProxyInfo;
 
 /**
  * Entry point for all Maven functionality in m2e. Note that this component does not directly support workspace artifact
@@ -144,4 +145,6 @@ public interface IMaven {
 
   /** @deprecated IMaven API should not expose wagon.TransferListener */
   public TransferListener createTransferListener(IProgressMonitor monitor);
+
+  public ProxyInfo getProxyInfo(String protocol) throws CoreException;
 }

@@ -14,10 +14,11 @@ import java.util.Set;
 import org.eclipse.core.runtime.IPath;
 
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
-import org.apache.maven.wagon.proxy.ProxyInfo;
+
+import org.maven.ide.eclipse.repository.IRepository;
 
 
-public class RepositoryInfo {
+public class RepositoryInfo implements IRepository {
 
   /** 
    * Repository index is disabled.
@@ -37,22 +38,16 @@ public class RepositoryInfo {
   private final String id;
   private final String repositoryUrl;
   private final boolean global;
-  private final ProxyInfo proxyInfo;
   private final AuthenticationInfo authInfo;
   private String mirrorId;
   private String mirrorOf;
   private Set<IPath> projects = new HashSet<IPath>();
 
-  RepositoryInfo(String id, String repositoryUrl, boolean global, AuthenticationInfo authInfo, ProxyInfo proxyInfo) {
+  RepositoryInfo(String id, String repositoryUrl, boolean global, AuthenticationInfo authInfo) {
     this.id = id;
     this.repositoryUrl = repositoryUrl;
     this.global = global;
     this.authInfo = authInfo;
-    this.proxyInfo = proxyInfo;
-  }
-
-  public ProxyInfo getProxyInfo() {
-    return proxyInfo;
   }
 
   public AuthenticationInfo getAuthenticationInfo() {
@@ -67,7 +62,7 @@ public class RepositoryInfo {
     return global;
   }
 
-  public String getId() {
+  public String getServerId() {
     return id;
   }
 
