@@ -78,4 +78,5 @@ public abstract class AbstractIndexedRepositoryNode implements IMavenRepositoryN
   }
 
   public abstract String getRepositoryUrl();
+  public abstract boolean isEnabledIndex();
 }

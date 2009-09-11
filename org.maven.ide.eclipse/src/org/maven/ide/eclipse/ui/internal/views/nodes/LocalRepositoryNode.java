@@ -35,4 +35,7 @@ public class LocalRepositoryNode extends AbstractIndexedRepositoryNode {
   public String getRepositoryUrl() {
     return repositoryUrl;
   }
+  public boolean isEnabledIndex(){
+    return false;
+  }
 }

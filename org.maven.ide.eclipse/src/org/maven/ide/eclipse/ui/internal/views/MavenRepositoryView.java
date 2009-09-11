@@ -61,6 +61,7 @@ import org.maven.ide.eclipse.internal.index.RepositoryInfo;
 import org.maven.ide.eclipse.ui.internal.views.nodes.AbstractIndexedRepositoryNode;
 import org.maven.ide.eclipse.ui.internal.views.nodes.IArtifactNode;
 import org.maven.ide.eclipse.ui.internal.views.nodes.IndexedArtifactFileNode;
+import org.maven.ide.eclipse.ui.internal.views.nodes.LocalRepositoryNode;
 import org.maven.ide.eclipse.ui.internal.views.nodes.RepositoryNode;
 import org.maven.ide.eclipse.util.M2EUtils;
 
@@ -303,7 +304,7 @@ public class MavenRepositoryView extends ViewPart {
       protected boolean updateSelection(IStructuredSelection selection) {
         int indexCount = 0;
         for (AbstractIndexedRepositoryNode node : getSelectedRepositoryNodes(selection.toList())) {
-          if (node instanceof RepositoryNode && node.getIndex() != null && ((RepositoryNode) node).isEnabledIndex()) {
+          if (node.isEnabledIndex()) {
             indexCount ++;
           }
         }
@@ -356,7 +357,7 @@ public class MavenRepositoryView extends ViewPart {
       protected boolean updateSelection(IStructuredSelection selection) {
         int indexCount = 0;
         for (AbstractIndexedRepositoryNode node : getSelectedRepositoryNodes(selection.toList())) {
-          if (node.getIndex() != null) {
+          if ((node instanceof LocalRepositoryNode) || node.isEnabledIndex()) {
             indexCount ++;
           }
         }
