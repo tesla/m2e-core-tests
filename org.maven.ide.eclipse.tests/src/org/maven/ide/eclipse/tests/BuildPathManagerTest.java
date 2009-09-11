@@ -391,6 +391,9 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
   }
 
   private void deleteSourcesAndJavadoc(File basedir) {
+    if(!basedir.exists()){
+      return;
+    }
     DirectoryScanner ds = new DirectoryScanner();
     ds.setBasedir(basedir);
     ds.setIncludes(new String[] {
@@ -470,7 +473,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
 
   public void testDownloadSources_002_javadoconly() throws Exception {
     deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t003/0.0.1"));
-
+    
     IProject project = createExisting("downloadsources-p002", "projects/downloadsources/p002");
     waitForJobsToComplete();
 
