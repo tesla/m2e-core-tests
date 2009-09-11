@@ -69,14 +69,14 @@ public class MavenImplTest extends TestCase {
       List<ArtifactRepository> repositories;
       
       // artifact repositories
-      repositories = maven.getArtifactRepositories();
+      repositories = maven.getArtifactRepositories(false);
       assertEquals(3, repositories.size());
       assertEquals("http://central", repositories.get(0).getUrl());
       assertEquals("http:customremote", repositories.get(1).getUrl());
       assertEquals("http:customrepo", repositories.get(2).getUrl());
 
       // plugin repositories
-      repositories = maven.getPluginArtifactRepositories();
+      repositories = maven.getPluginArtifactRepositories(false);
       assertEquals(2, repositories.size());
       assertEquals("http://central", repositories.get(0).getUrl());
       assertEquals("http:customrepo", repositories.get(1).getUrl());      
@@ -92,18 +92,37 @@ public class MavenImplTest extends TestCase {
       List<ArtifactRepository> repositories;
 
       // artifact repositories
-      repositories = maven.getArtifactRepositories();
+      repositories = maven.getArtifactRepositories(false);
       assertEquals(2, repositories.size());
       assertEquals("central", repositories.get(0).getId());
       assertEquals("custom", repositories.get(1).getId());
 
       // plugin repositories
-      repositories = maven.getPluginArtifactRepositories();
+      repositories = maven.getPluginArtifactRepositories(false);
       assertEquals(2, repositories.size());
       assertEquals("central", repositories.get(0).getId());
       assertEquals("custom", repositories.get(1).getId());
     } finally {
       configuration.setUserSettingsFile(origSettings);
+    }
+  }
+
+  public void testGlobalSettings() throws Exception {
+    String userSettings = configuration.getUserSettingsFile();
+    String globalSettings = configuration.getGlobalSettingsFile();
+    
+    try {
+      configuration.setUserSettingsFile(new File("settings_empty.xml").getCanonicalPath());
+      configuration.setGlobalSettingsFile(new File("settings_empty.xml").getCanonicalPath());
+
+      // sanity check
+      assertEquals("http://repo1.maven.org/maven2", maven.getArtifactRepositories().get(0).getUrl());
+      
+      configuration.setGlobalSettingsFile(new File("settingsWithCustomRepo.xml").getCanonicalPath());
+      assertEquals("file:remoterepo", maven.getArtifactRepositories().get(0).getUrl());
+    } finally {
+      configuration.setUserSettingsFile(userSettings);
+      configuration.setGlobalSettingsFile(globalSettings);
     }
   }
 
