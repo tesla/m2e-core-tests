@@ -356,7 +356,7 @@ public class MavenRepositoryView extends ViewPart {
       protected boolean updateSelection(IStructuredSelection selection) {
         int indexCount = 0;
         for (AbstractIndexedRepositoryNode node : getSelectedRepositoryNodes(selection.toList())) {
-          if (node.getIndex() != null && ((RepositoryNode) node).isEnabledIndex()) {
+          if (node.getIndex() != null) {
             indexCount ++;
           }
         }
