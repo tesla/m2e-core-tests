@@ -16,6 +16,7 @@ import org.eclipse.ui.IViewPart;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.index.IndexManager;
+import org.maven.ide.eclipse.internal.index.NexusIndexManager;
 import org.maven.ide.eclipse.jdt.BuildPathManager;
 
 import com.windowtester.runtime.IUIContext;
@@ -40,7 +41,9 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
   
   protected void oneTimeSetup()throws Exception{
     File projectDir = unzipProject("projects/m2.zip");
+    
     File settingsXML = new File(projectDir.getAbsolutePath() + "/m2/settings.xml");
+    System.out.println("path to settings.xml: "+settingsXML.getAbsolutePath());
     IMavenConfiguration mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
     mavenConfiguration.setUserSettingsFile(settingsXML.getAbsolutePath());
     IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
@@ -63,6 +66,8 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
   public void testMirroredRepos() throws Exception {
     IUIContext ui = getUI();
     IViewPart indexView = showView("org.maven.ide.eclipse.views.MavenRepositoryView");
+    ui.click(new TreeItemLocator("Global Repositories",
+        new ViewLocator("org.maven.ide.eclipse.views.MavenRepositoryView")));
     ui.click(new TreeItemLocator("Global Repositories/nexus .*",
         new ViewLocator("org.maven.ide.eclipse.views.MavenRepositoryView")));
     IWidgetLocator[] findAll = ui.findAll(new TreeItemLocator("Global Repositories/.*mirrored by nexus.*"));
