@@ -698,12 +698,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
   }
 
   public void repositoryAdded(IRepository repository, IProgressMonitor monitor) throws CoreException {
-    String repositoryUid = repository.getUid();
-
     String details = getIndexDetails(repository);
-
-    //need to remember the property (including the defaults) so the UI can get them
-    indexDetails.setProperty(repositoryUid, details);
 
     setIndexDetails(repository, details, monitor);
   }
@@ -727,8 +722,14 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
   /**
    * Updates index synchronously if  monitor!=null. Schedules index update otherwise.
    * ... and yes, I know this ain't kosher.
+   * 
+   * Public for unit tests only!
    */
-  private void setIndexDetailsInternal(IRepository repository, String details, IProgressMonitor monitor) throws CoreException {
+  public void setIndexDetails(IRepository repository, String details, IProgressMonitor monitor) throws CoreException {
+    indexDetails.setProperty(repository.getUid(), details);
+
+    writeIndexDetails();
+
     IndexingContext indexingContext = getIndexingContext(repository);
 
     try {
@@ -916,8 +917,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
   }
 
-  protected void writeIndexDetails(IRepository repository, String details) throws CoreException {
-    indexDetails.setProperty(repository.getUid(), details);
+  protected void writeIndexDetails() throws CoreException {
     try {
       File indexDetailsFile = getIndexDetailsFile();
       indexDetailsFile.getParentFile().mkdirs();
@@ -930,15 +930,6 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     } catch (IOException e) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not write index details file", e));
     }
-  }
-
-  public void setIndexDetails(IRepository repository, String details) throws CoreException {
-    setIndexDetails(repository, details, null/*asyncUpdate*/);
-  }
-
-  public void setIndexDetails(IRepository repository, String details, IProgressMonitor monitor) throws CoreException {
-    writeIndexDetails(repository, details);
-    setIndexDetailsInternal(repository, details, monitor);
   }
 
   private File getIndexDetailsFile() {

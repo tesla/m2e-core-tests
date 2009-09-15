@@ -139,6 +139,6 @@ public class NexusIndex implements IIndex, IMutableIndex {
   }
 
   public void setIndexDetails(String details) throws CoreException {
-    indexManager.setIndexDetails(repository, details);
+    indexManager.setIndexDetails(repository, details, null/*async*/);
   }
 }

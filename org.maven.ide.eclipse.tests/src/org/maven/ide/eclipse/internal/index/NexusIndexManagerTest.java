@@ -114,7 +114,6 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
     Map<String, IndexedArtifact> search = indexManager.search("maven-archetype-quickstart", IIndex.SEARCH_ARCHETYPE);
     assertTrue(search.size() == 1);
     
-    //TODO: this should pass. add it back in when archetypes are working
     Map<String, IndexedArtifact> j2eeSearch = indexManager.search("maven-archetype-j2ee-simple", IIndex.SEARCH_ARCHETYPE);
     assertTrue(j2eeSearch.size() == 1);
     
