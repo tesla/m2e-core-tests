@@ -13,20 +13,19 @@ import java.util.List;
 import org.maven.ide.eclipse.repository.IRepository;
 import org.maven.ide.eclipse.repository.IRepositoryRegistry;
 
-
 /**
- * Parent node for all artifact repositories and mirrors defined in settings.xml.
- * 
- * @author dyocum
+ * CustomRepositoriesNode
+ *
+ * @author igor
  */
-public class GlobalRepositoriesNode extends AbstractRepositoriesNode {
-
-  public String getName() {
-    return "Global Repositories";
-  }
+public class CustomRepositoriesNode extends AbstractRepositoriesNode {
 
   protected List<IRepository> getRepositories() {
-    return repositoryRegistry.getRepositories(IRepositoryRegistry.SCOPE_SETTINGS);
+    return repositoryRegistry.getRepositories(IRepositoryRegistry.SCOPE_UNKNOWN);
+  }
+
+  public String getName() {
+    return "Custom repositories";
   }
 
 }

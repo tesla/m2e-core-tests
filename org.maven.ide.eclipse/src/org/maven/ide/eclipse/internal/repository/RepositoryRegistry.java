@@ -13,10 +13,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -58,10 +56,12 @@ public class RepositoryRegistry implements IRepositoryRegistry, IMavenProjectCha
   private final Map<String, RepositoryInfo> repositories = new HashMap<String, RepositoryInfo>();
 
   private RepositoryInfo localRepository;
-  
+
   private RepositoryInfo workspaceRepository;
 
   private ArrayList<IRepositoryIndexer> indexers = new ArrayList<IRepositoryIndexer>();
+
+  private ArrayList<IRepositoryDiscoverer> discoverers = new ArrayList<IRepositoryDiscoverer>();
 
   private Job job = new Job("Repository registry initialization") {
     protected IStatus run(IProgressMonitor monitor) {
@@ -123,9 +123,7 @@ public class RepositoryRegistry implements IRepositoryRegistry, IMavenProjectCha
     }
   }
 
-  private Set<String> addProjectRepositories(Settings settings, IMavenProjectFacade facade, IProgressMonitor monitor) {
-    Set<String> repositoryUids = new HashSet<String>();
-
+  private void addProjectRepositories(Settings settings, IMavenProjectFacade facade, IProgressMonitor monitor) {
     ArrayList<ArtifactRepositoryRef> repositories = getProjectRepositories(facade);
 
     for (ArtifactRepositoryRef repo : repositories) {
@@ -139,13 +137,10 @@ public class RepositoryRegistry implements IRepositoryRegistry, IMavenProjectCha
       repository.addProject(facade.getPom().getFullPath());
 
       addRepository(repository, monitor);
-      repositoryUids.add(repository.getUid());
     }
-
-    return repositoryUids;
   }
 
-  private void addRepository(RepositoryInfo repository, IProgressMonitor monitor) {
+  public void addRepository(RepositoryInfo repository, IProgressMonitor monitor) {
     repositories.put(repository.getUid(), repository);
 
     for (IRepositoryIndexer indexer : indexers) {
@@ -218,12 +213,11 @@ public class RepositoryRegistry implements IRepositoryRegistry, IMavenProjectCha
 
     // process configured repositories
 
+    Map<String, RepositoryInfo> oldRepositories = new HashMap<String, RepositoryInfo>(repositories);
+    repositories.clear();
+
     addRepository(this.workspaceRepository, monitor);
     addRepository(this.localRepository, monitor);
-
-    Map<String, RepositoryInfo> oldRepositories = new HashMap<String, RepositoryInfo>(repositories);
-    oldRepositories.remove(this.workspaceRepository.getUid());
-    oldRepositories.remove(this.localRepository.getUid());
 
     // mirrors
     for(Mirror mirror : mirrors) {
@@ -231,7 +225,6 @@ public class RepositoryRegistry implements IRepositoryRegistry, IMavenProjectCha
       RepositoryInfo repository = new RepositoryInfo(mirror.getId(), mirror.getUrl(), SCOPE_SETTINGS, auth);
       repository.setMirrorOf(mirror.getMirrorOf());
       addRepository(repository, monitor);
-      oldRepositories.remove(repository.getUid());
     }
 
     // repositories from settings.xml
@@ -247,14 +240,19 @@ public class RepositoryRegistry implements IRepositoryRegistry, IMavenProjectCha
         repository.setMirrorId(mirror.getId());
       }
       addRepository(repository, monitor);
-      oldRepositories.remove(repository.getUid());
     }
 
     // project-specific repositories
     for (IMavenProjectFacade facade : projectManager.getProjects()) {
-      oldRepositories.keySet().removeAll(addProjectRepositories(settings, facade, monitor));
+      addProjectRepositories(settings, facade, monitor);
     }
 
+    // custom repositories
+    for (IRepositoryDiscoverer discoverer : discoverers) {
+      discoverer.addRepositories(this, monitor);
+    }
+
+    oldRepositories.keySet().removeAll(repositories.keySet());
     for (RepositoryInfo repository : oldRepositories.values()) {
       removeRepository(repository, monitor);
     }
@@ -276,6 +274,10 @@ public class RepositoryRegistry implements IRepositoryRegistry, IMavenProjectCha
 
   public void addRepositoryIndexer(IRepositoryIndexer indexer) {
     this.indexers.add(indexer);
+  }
+
+  public void addRepositoryDiscoverer(IRepositoryDiscoverer discoverer) {
+    this.discoverers.add(discoverer);
   }
 
   public RepositoryInfo getRepository(ArtifactRepositoryRef ref) {

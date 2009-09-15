@@ -22,7 +22,7 @@ import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.maven.ide.eclipse.repository.IRepository;
 import org.maven.ide.eclipse.repository.IRepositoryRegistry;
 
-class RepositoryInfo implements IRepository {
+public class RepositoryInfo implements IRepository {
 
   private final String id;
   private final String repositoryUrl;
@@ -36,11 +36,11 @@ class RepositoryInfo implements IRepository {
   private String mirrorOf;
   private Set<IPath> projects = new HashSet<IPath>();
 
-  RepositoryInfo(String id, String repositoryUrl, int scope, AuthenticationInfo authInfo) {
+  public RepositoryInfo(String id, String repositoryUrl, int scope, AuthenticationInfo authInfo) {
     this(id, repositoryUrl, getBasedir(repositoryUrl), scope, authInfo);
   }
 
-  RepositoryInfo(String id, String repositoryUrl, File basedir, int scope, AuthenticationInfo authInfo) {
+  public RepositoryInfo(String id, String repositoryUrl, File basedir, int scope, AuthenticationInfo authInfo) {
     this.id = id;
     this.repositoryUrl = repositoryUrl;
     this.scope = scope;

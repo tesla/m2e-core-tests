@@ -2,15 +2,20 @@
 <!-- Schema file written by PDE -->
 <schema targetNamespace="org.maven.ide.eclipse" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
-      <appinfo>
+      <appInfo>
          <meta.schema plugin="org.maven.ide.eclipse" id="indexes" name="Maven Indexes"/>
-      </appinfo>
+      </appInfo>
       <documentation>
          Maven Indexes
       </documentation>
    </annotation>
 
    <element name="extension">
+      <annotation>
+         <appInfo>
+            <meta.element />
+         </appInfo>
+      </annotation>
       <complexType>
          <sequence>
             <element ref="index" minOccurs="1" maxOccurs="unbounded"/>
@@ -34,15 +39,23 @@
                <documentation>
                   
                </documentation>
-               <appinfo>
+               <appInfo>
                   <meta.attribute translatable="true"/>
-               </appinfo>
+               </appInfo>
             </annotation>
          </attribute>
       </complexType>
    </element>
 
    <element name="index">
+      <annotation>
+         <appInfo>
+            <meta.element deprecated="true"/>
+         </appInfo>
+         <documentation>
+            This extension point is provided for backward compatibility with m2e 0.9.8 and earlier. It will be either removed completely or replaced with more flexible &quot;repositories&quot; extension point in a future m2e version.
+         </documentation>
+      </annotation>
       <complexType>
          <attribute name="indexId" type="string" use="required">
             <annotation>
@@ -54,8 +67,11 @@
          <attribute name="archive" type="string">
             <annotation>
                <documentation>
-                  
+                  This attribute is ignored. m2e 0.9.9 does not suppot packaged nexus indexes.
                </documentation>
+               <appInfo>
+                  <meta.attribute deprecated="true"/>
+               </appInfo>
             </annotation>
          </attribute>
          <attribute name="repositoryUrl" type="string">
@@ -68,8 +84,11 @@
          <attribute name="updateUrl" type="string">
             <annotation>
                <documentation>
-                  
+                  This attribute is ignored. m2e 0.9.9 does not support nexus index repository paths.
                </documentation>
+               <appInfo>
+                  <meta.attribute deprecated="true"/>
+               </appInfo>
             </annotation>
          </attribute>
          <attribute name="isShort" type="boolean">
@@ -83,53 +102,51 @@
    </element>
 
    <annotation>
-      <appinfo>
+      <appInfo>
          <meta.section type="since"/>
-      </appinfo>
+      </appInfo>
       <documentation>
          0.0.13
       </documentation>
    </annotation>
 
    <annotation>
-      <appinfo>
+      <appInfo>
          <meta.section type="examples"/>
-      </appinfo>
+      </appInfo>
       <documentation>
          [Enter extension point usage example here.]
       </documentation>
    </annotation>
 
    <annotation>
-      <appinfo>
+      <appInfo>
          <meta.section type="apiInfo"/>
-      </appinfo>
+      </appInfo>
       <documentation>
          [Enter API information here.]
       </documentation>
    </annotation>
 
-
    <annotation>
-      <appinfo>
+      <appInfo>
          <meta.section type="implementation"/>
-      </appinfo>
+      </appInfo>
       <documentation>
          [Enter information about supplied implementation of this extension point.]
       </documentation>
    </annotation>
 
    <annotation>
-      <appinfo>
+      <appInfo>
          <meta.section type="copyright"/>
-      </appinfo>
+      </appInfo>
       <documentation>
          Copyright (c) 2007, 2008 Sonatype, Inc.
 All rights reserved. This program and the accompanying materials
 are made available under the terms of the Eclipse Public License v1.0
 which accompanies this distribution, and is available at
 http://www.eclipse.org/legal/epl-v10.html
-
       </documentation>
    </annotation>
 

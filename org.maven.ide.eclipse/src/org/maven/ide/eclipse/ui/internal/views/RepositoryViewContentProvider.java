@@ -13,6 +13,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.ui.IViewSite;
 
+import org.maven.ide.eclipse.ui.internal.views.nodes.CustomRepositoriesNode;
 import org.maven.ide.eclipse.ui.internal.views.nodes.GlobalRepositoriesNode;
 import org.maven.ide.eclipse.ui.internal.views.nodes.IMavenRepositoryNode;
 import org.maven.ide.eclipse.ui.internal.views.nodes.LocalRepositoryRootNode;
@@ -28,6 +29,7 @@ public class RepositoryViewContentProvider implements IStructuredContentProvider
   private LocalRepositoryRootNode localNode;
   private GlobalRepositoriesNode globalNode;
   private ProjectRepositoriesNode projectNode;
+  private CustomRepositoriesNode customNode;
   
   public RepositoryViewContentProvider() {
   }
@@ -64,7 +66,10 @@ public class RepositoryViewContentProvider implements IStructuredContentProvider
     if(projectNode == null) {
       projectNode = new ProjectRepositoriesNode();
     }
-    return new Object[]{localNode, globalNode, projectNode};
+    if(customNode == null) {
+      customNode = new CustomRepositoriesNode();
+    }
+    return new Object[]{localNode, globalNode, projectNode, customNode};
   }
   
   public Object[] getChildren(Object parent) {

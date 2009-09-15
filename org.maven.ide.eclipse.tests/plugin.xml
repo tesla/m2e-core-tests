@@ -29,5 +29,12 @@
             name="TestMaven" priority="1001"/>
             
    </extension>
+   <extension
+         point="org.maven.ide.eclipse.indexes">
+      <index
+            indexId="testIndex"
+            repositoryUrl="file:testIndex">
+      </index>
+   </extension>
 
 </plugin>

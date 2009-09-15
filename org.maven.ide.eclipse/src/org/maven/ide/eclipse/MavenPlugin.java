@@ -90,6 +90,7 @@ import org.maven.ide.eclipse.internal.embedder.MavenConfigurationImpl;
 import org.maven.ide.eclipse.internal.embedder.MavenEmbeddedRuntime;
 import org.maven.ide.eclipse.internal.embedder.MavenImpl;
 import org.maven.ide.eclipse.internal.embedder.MavenWorkspaceRuntime;
+import org.maven.ide.eclipse.internal.index.IndexesExtensionReader;
 import org.maven.ide.eclipse.internal.index.IndexingTransferListener;
 import org.maven.ide.eclipse.internal.index.NexusIndexManager;
 import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;
@@ -342,6 +343,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     maven.addTransferListener(new IndexingTransferListener(indexManager));
 
     this.repositoryRegistry.addRepositoryIndexer(indexManager);
+    this.repositoryRegistry.addRepositoryDiscoverer(new IndexesExtensionReader(indexManager));
     this.repositoryRegistry.updateRegistry();
 
     this.getPreferenceStore().setValue(PREFS_NO_REBUILD_ON_START, true);

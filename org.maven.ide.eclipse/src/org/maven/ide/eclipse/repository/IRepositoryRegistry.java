@@ -32,24 +32,30 @@ import org.maven.ide.eclipse.embedder.ArtifactRepositoryRef;
 public interface IRepositoryRegistry {
 
   /**
+   * 
+   */
+  public static final int SCOPE_UNKNOWN = 1;
+
+  /**
    * Maven local repositories.
    */
-  public static final int SCOPE_LOCAL = 1;
+  public static final int SCOPE_LOCAL = 1 << 1;
 
   /**
    * Eclipse workspace repository
    */
-  public static final int SCOPE_WORKSPACE = 1 << 1;
+  public static final int SCOPE_WORKSPACE = 1 << 2;
 
   /**
    * Repositories defined in settings.xml file.
    */
-  public static final int SCOPE_SETTINGS = 1 << 2;
+  public static final int SCOPE_SETTINGS = 1 << 3;
 
   /**
    * Repositories defined in pom.xml files of workspace Maven projects
    */
-  public static final int SCOPE_PROJECT = 1 << 3;
+  public static final int SCOPE_PROJECT = 1 << 4;
+
 
   public List<IRepository> getRepositories(int scope);
 

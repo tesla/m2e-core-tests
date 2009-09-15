@@ -44,25 +44,11 @@ public class ExtensionReader {
 
   public static final String EXTENSION_ARCHETYPES = "org.maven.ide.eclipse.archetypeCatalogs";
   
-  public static final String EXTENSION_INDEXES = "org.maven.ide.eclipse.indexes";
-
   public static final String EXTENSION_PROJECT_CONFIGURATORS = "org.maven.ide.eclipse.projectConfigurators";
 
   public static final String EXTENSION_LIFECYCLE_MAPPINGS = "org.maven.ide.eclipse.lifecycleMappings";
 
   public static final String EXTENSION_DEFAULT_LIFECYCLE_MAPPINGS = "org.maven.ide.eclipse.defaultLifecycleMappings";
-  
-  private static final String ELEMENT_INDEX = "index";
-
-  private static final String ATTR_INDEX_ID = "indexId";
-
-  private static final String ATTR_INDEX_ARCHIVE = "archive";
-
-  private static final String ATTR_REPOSITORY_URL = "repositoryUrl";
-
-  private static final String ATTR_UPDATE_URL = "updateUrl";
-
-  private static final String ATTR_IS_SHORT = "isShort";
 
   private static final String ELEMENT_LOCAL_ARCHETYPE = "local";
 
@@ -85,62 +71,6 @@ public class ExtensionReader {
   private static final String ATTR_PACKAGING = "packaging";
   
   private static final String ATTR_LIFECYCLE_MAPPING_ID = "lifecycleMappingId";
-
-  /**
-   * @param configFile previously saved indexes configuration
-   * @return collection of {@link RepositoryInfo} from the extension points
-   */
-//  public static Map<String, IndexInfo> readIndexInfoExtensions() {
-//    Map<String, IndexInfo> indexes = new LinkedHashMap<String, IndexInfo>();
-//
-//    IExtensionRegistry registry = Platform.getExtensionRegistry();
-//    IExtensionPoint indexesExtensionPoint = registry.getExtensionPoint(EXTENSION_INDEXES);
-//    if(indexesExtensionPoint != null) {
-//      IExtension[] indexesExtensions = indexesExtensionPoint.getExtensions();
-//      for(IExtension extension : indexesExtensions) {
-//        IContributor contributor = extension.getContributor();
-//        // central is special cased in MavenPlugin for time being, ignore old central plugin
-//        if ("org.maven.ide.eclipse.central".equals(contributor.getName())) {
-//          continue;
-//        }
-//        IConfigurationElement[] elements = extension.getConfigurationElements();
-//        for(IConfigurationElement element : elements) {
-//          if(element.getName().equals(ELEMENT_INDEX)) {
-//            IndexInfo indexInfo = readIndexElement(element, contributor);
-//            indexes.put(indexInfo.getIndexName(), indexInfo);
-//          }
-//        }
-//      }
-//    }
-//
-//    return indexes;
-//  }
-//
-//  private static IndexInfo readIndexElement(IConfigurationElement element, IContributor contributor) {
-//    String indexId = element.getAttribute(ATTR_INDEX_ID);
-//    String repositoryUrl = element.getAttribute(ATTR_REPOSITORY_URL);
-//    String indexUpdateUrl = element.getAttribute(ATTR_UPDATE_URL);
-//    boolean isShort = Boolean.valueOf(element.getAttribute(ATTR_IS_SHORT)).booleanValue();
-//
-//    IndexInfo indexInfo = new IndexInfo(indexId, null, repositoryUrl, IndexInfo.Type.REMOTE, isShort);
-//    indexInfo.setIndexUpdateUrl(indexUpdateUrl);
-//
-//    String archive = element.getAttribute(ATTR_INDEX_ARCHIVE);
-//    if(archive != null) {
-//      Bundle[] bundles = Platform.getBundles(contributor.getName(), null);
-//      URL archiveUrl = null;
-//      for(int i = 0; i < bundles.length && archiveUrl == null; i++ ) {
-//        Bundle bundle = bundles[i];
-//        archiveUrl = bundle.getEntry(archive);
-//        indexInfo.setArchiveUrl(archiveUrl);
-//      }
-//      if(archiveUrl == null) {
-//        MavenLogger.log("Unable to find index archive " + archive + " in " + contributor.getName(), null);
-//      }
-//    }
-//
-//    return indexInfo;
-//  }
 
   public static List<ArchetypeCatalogFactory> readArchetypeExtensions() {
     List<ArchetypeCatalogFactory> archetypeCatalogs = new ArrayList<ArchetypeCatalogFactory>();

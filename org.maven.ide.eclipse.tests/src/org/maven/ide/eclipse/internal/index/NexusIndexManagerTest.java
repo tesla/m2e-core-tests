@@ -360,5 +360,17 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
     assertNull(indexManager.getIndexingContext(repositories.get(2)));
   }
 
+  public void testIndexesExtensionPoint() throws Exception {
+    List<IRepository> repositories = repositoryRegistry.getRepositories(IRepositoryRegistry.SCOPE_UNKNOWN);
+
+    assertEquals(1, repositories.size());
+    
+    
+    IRepository repository = repositories.get(0);
+    assertEquals("file:testIndex", repository.getUrl());
+    
+    NexusIndex index = indexManager.getIndex(repository);
+    assertEquals(NexusIndex.DETAILS_FULL, index.getIndexDetails());
+  }
   
 }
