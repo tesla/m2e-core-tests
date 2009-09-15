@@ -96,8 +96,8 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
     ui.click(new TreeItemLocator("Local Repositories/workspace.*",
         new ViewLocator("org.maven.ide.eclipse.views.MavenRepositoryView")));
     // set up two projects.
-    IProject project = createArchetypeProjct("maven-archetype-quickstart", "project");
-    createArchetypeProjct("maven-archetype-quickstart", "dependency");
+    IProject project = createArchetypeProject("maven-archetype-quickstart", "project");
+    createArchetypeProject("maven-archetype-quickstart", "dependency");
     
     // mvn install "dependency" project
     ui.click(new TreeItemLocator("dependency", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));

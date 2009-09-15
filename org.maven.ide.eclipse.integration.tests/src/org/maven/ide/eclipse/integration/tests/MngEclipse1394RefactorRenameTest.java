@@ -22,7 +22,7 @@ public class MngEclipse1394RefactorRenameTest extends UIIntegrationTestCase {
 	  
 		IUIContext ui = getUI();
 		
-    createArchetypeProjct("maven-archetype-quickstart", "someproject");
+    createArchetypeProject("maven-archetype-quickstart", "someproject");
     IMavenProjectFacade mavenProject = MavenPlugin.getDefault().getMavenProjectManager().getMavenProject("org.sonatype.test", "someproject", "0.0.1-SNAPSHOT");
     assertNotNull(mavenProject);
     

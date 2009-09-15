@@ -201,7 +201,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
      clearProjects();
 
      waitForAllBuildsToComplete();
-     
+
      if (isEclipseVersion(3, 5)) {
        // Disable new xml completion behavior to preserver compatibility with previous versions.
        getUI().click(new MenuItemLocator("Window/Preferences"));
@@ -793,7 +793,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
   /**
    * Create an archetype project and assert that it has proper natures & builders, and no error markers
    */
-  protected IProject createArchetypeProjct(String archetypeName, String projectName) throws Exception {
+  protected IProject createArchetypeProject(String archetypeName, String projectName) throws Exception {
     try {
       IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
       assertFalse(project.exists());
@@ -806,14 +806,26 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
       ui.click(new FilteredTreeItemLocator("Plug-in Project"));
       ui.click(new FilteredTreeItemLocator("Maven/Maven Project"));
       ui.click(new ButtonLocator("&Next >"));
+      
+      //click 'create a simple project'
+      //ui.click(new ButtonLocator("Create a &simple project (skip archetype selection)"));
+      
       ui.click(new ButtonLocator("&Next >"));
-      ui.click(new TableCellLocator(archetypeName, 2));
-      // NamedWidgetLocator table = new NamedWidgetLocator("archetypesTable");
-
-      ui.click(new ButtonLocator("&Next >"));
+      
+      IWidgetLocator catalogsCombo = ui.find(new NamedWidgetLocator("catalogsCombo"));
+      assertTrue(catalogsCombo != null);
       ui.wait(new SWTIdleCondition());
+      ui.click(catalogsCombo);
+      ui.wait(new SWTIdleCondition());
+      IWidgetLocator find = ui.find(new ComboItemLocator("Internal", catalogsCombo));
+      ui.click(find);
+      ui.keyClick(WT.TAB);
+      ui.keyClick(WT.TAB);
+      ui.keyClick(WT.TAB);
+
       IWidgetLocator groupCombo = ui.find(new NamedWidgetLocator("groupId"));
       ui.setFocus(groupCombo);
+      
       ui.enterText(DEFAULT_PROJECT_GROUP);
       ui.setFocus(ui.find(new NamedWidgetLocator("artifactId")));
       ui.enterText(projectName);

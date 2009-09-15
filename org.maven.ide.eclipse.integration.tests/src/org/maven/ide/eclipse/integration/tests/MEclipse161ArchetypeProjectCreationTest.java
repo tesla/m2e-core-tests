@@ -39,8 +39,11 @@ import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
  */
 public class MEclipse161ArchetypeProjectCreationTest extends UIIntegrationTestCase {
 
+  public MEclipse161ArchetypeProjectCreationTest(){
+    super();
+  }
   private IProject createArchetypeProjct(String archetypeName) throws Exception {
-    return createArchetypeProjct(archetypeName, "project");
+    return createArchetypeProject(archetypeName, "project");
   }
 
   public void testQuickStartCreate() throws Exception {

@@ -27,7 +27,7 @@ import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
 public class MEclipse181MultiLevelDependencyTest extends UIIntegrationTestCase {
 
   private IProject createDependentProject(IProject parent, String childName) throws Exception {
-    IProject childProject = createArchetypeProjct("maven-archetype-quickstart", childName);
+    IProject childProject = createArchetypeProject("maven-archetype-quickstart", childName);
 
     getUI().wait(new JobsCompleteCondition(), 240000);
     getUI().click(new TreeItemLocator(parent.getName(), new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
@@ -50,7 +50,7 @@ public class MEclipse181MultiLevelDependencyTest extends UIIntegrationTestCase {
   }
   
   public void testMultiLevelDependencies() throws Exception {
-    IProject project = createArchetypeProjct("maven-archetype-quickstart", "project0");
+    IProject project = createArchetypeProject("maven-archetype-quickstart", "project0");
 
     for (int i = 1; i < 5; i++) {
       project = createDependentProject(project, "project" + i);
