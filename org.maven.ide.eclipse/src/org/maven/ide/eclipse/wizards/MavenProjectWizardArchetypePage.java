@@ -184,6 +184,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
     catalogsComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 
     catalogsComboViewer = new ComboViewer(catalogsComposite);
+    catalogsComboViewer.getControl().setData("name", "catalogsCombo");
     catalogsComboViewer.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
     catalogsComboViewer.setContentProvider(new IStructuredContentProvider() {
       public Object[] getElements(Object input) {
@@ -301,7 +302,6 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
     composite1.setLayout(gridLayout1);
 
     viewer = new TableViewer(composite1, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.FULL_SELECTION);
-
     Table table = viewer.getTable();
     table.setData("name", "archetypesTable");
     table.setHeaderVisible(true);

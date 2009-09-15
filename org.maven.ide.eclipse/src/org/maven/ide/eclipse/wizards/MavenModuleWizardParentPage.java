@@ -87,6 +87,7 @@ public class MavenModuleWizardParentPage extends AbstractMavenWizardPage {
 
     simpleProject = new Button(container, SWT.CHECK);
     simpleProject.setText(Messages.getString("wizard.project.page.project.simpleProject"));
+    simpleProject.setData("name", "simpleProjectButton");
     simpleProject.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 3, 1));
     simpleProject.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
