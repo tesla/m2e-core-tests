@@ -20,7 +20,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import org.eclipse.core.runtime.CoreException;
@@ -400,10 +399,8 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
       request.setRemoteRepositories(remoteRepositories);
     } else {
       try {
-        MavenExecutionRequest er = new DefaultMavenExecutionRequest();
-        populator.populateDefaults(er);
-        request.setRemoteRepositories(er.getRemoteRepositories());
-      } catch(MavenEmbedderException e) {
+        request.setRemoteRepositories(getArtifactRepositories());
+      } catch(CoreException e) {
         // we've tried
         request.setRemoteRepositories(new ArrayList<ArtifactRepository>());
       }
@@ -412,7 +409,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
 
     ArtifactResolutionResult result = repositorySystem.resolve(request);
 
-    setLastUpdated(localRepository, remoteRepositories, artifact);
+    setLastUpdated(localRepository, request.getRemoteRepositories(), artifact);
 
     if(result.hasExceptions()) {
       ArrayList<IStatus> members = new ArrayList<IStatus>();
@@ -654,12 +651,11 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
 
   private List<Profile> getActiveProfiles() throws CoreException {
     Settings settings = getSettings();
-    @SuppressWarnings("unchecked")
-    Map<String,org.apache.maven.settings.Profile> profiles = settings.getProfilesAsMap();
+    List<String> activeProfilesIds = settings.getActiveProfiles();
     ArrayList<Profile> activeProfiles = new ArrayList<Profile>();
-    for (String profileId : settings.getActiveProfiles()) {
-      org.apache.maven.settings.Profile settingsProfile = profiles.get(profileId);
-      if (settingsProfile != null) {
+    for (org.apache.maven.settings.Profile settingsProfile : settings.getProfiles()) {
+      if ((settingsProfile.getActivation() != null && settingsProfile.getActivation().isActiveByDefault())
+          || activeProfilesIds.contains(settingsProfile.getId())) {
         Profile profile = SettingsUtils.convertFromSettingsProfile(settingsProfile);
         activeProfiles.add(profile);
       }
