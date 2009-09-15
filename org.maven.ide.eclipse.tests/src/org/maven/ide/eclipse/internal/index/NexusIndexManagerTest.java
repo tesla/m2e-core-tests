@@ -120,9 +120,8 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
     Map<String, IndexedArtifact> none = indexManager.search("maven-archetype-foobar", IIndex.SEARCH_ARCHETYPE);
     assertTrue(none.size() == 0);
   }
+
   public void testArtifactSearch() throws Exception {
-    //updateRepo(REPO_URL_ECLIPSE, SETTINGS_ECLIPSE_REPO);
-    
     Map<String, IndexedArtifact> search = indexManager.search("junit", IIndex.SEARCH_ARTIFACT);
     IndexedArtifact ia = search.get("null : null : org.eclipse : org.eclipse.jdt.junit");
     assertNotNull(ia);
@@ -146,15 +145,7 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
     assertTrue(noResultsSearch.size() == 0);
   }
 
-  public void testPackagingSearch() throws Exception {
-    //updateRepo(REPO_URL_ECLIPSE, SETTINGS_ECLIPSE_REPO);
-    
-    Map<String, IndexedArtifact> pomSearch = indexManager.search("pom", IIndex.SEARCH_PACKAGING);
-    assertTrue(pomSearch.size() > 0);
-    
-    pomSearch = indexManager.search("pomXX", IIndex.SEARCH_PACKAGING);
-    assertTrue(pomSearch.size() == 0);
-  }
+
  
   /**
    * TODO: Stupid test at this point. Not sure what a valid sha1 search should look like.
@@ -180,6 +171,9 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
     for(IRepository info : repositoryRegistry.getRepositories(IRepositoryRegistry.SCOPE_SETTINGS)) {
       String details = indexManager.getIndexDetails(info);
       if(!REPO_URL_ECLIPSE.equals(info.getUrl())) {
+        if(!NexusIndex.DETAILS_DISABLED.equals(details)){
+          System.out.println("index not disabled: "+info.getUrl());
+        }
         assertEquals("Mirrored should be disabled", NexusIndex.DETAILS_DISABLED, details);
       }
     }
@@ -224,6 +218,7 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
   
   public void testLocalIndex() throws Exception {
     // TODO this scans real(!) user local repository. is this necessary?
+    // only if we care if this is covered with a test
     waitForIndexJobToComplete();
     IRepository repository = repositoryRegistry.getLocalRepository();
     indexManager.updateIndex(repository, true, monitor);
@@ -279,7 +274,7 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
   }
 
   public void testIndexedPublicArtifactGroups() throws Exception {
-    updateRepo(REPO_URL_ECLIPSE, SETTINGS_ECLIPSE_REPO);
+//    updateRepo(REPO_URL_ECLIPSE, SETTINGS_ECLIPSE_REPO);
     Map<String, IndexedArtifact> search = indexManager.search("junit", IIndex.SEARCH_ARTIFACT);
     IndexedArtifact ia = search.get("null : null : org.eclipse : org.eclipse.jdt.junit");
     assertNotNull(ia);
@@ -303,6 +298,26 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
 
   }
   
+  public void testPublicMirror() throws Exception {
+    List<IRepository> repositories = repositoryRegistry.getRepositories(IRepositoryRegistry.SCOPE_SETTINGS);
+    assertEquals(2, repositories.size());
+    IRepository eclipseRepo = null;
+    for(IRepository repo : repositories){
+      if(REPO_URL_ECLIPSE.equals(repo.getUrl())){
+        eclipseRepo = repo;
+      } else {
+        assertNull(indexManager.getIndexingContext(repo));
+      }
+    }
+    assertNotNull(eclipseRepo);
+    assertNotNull(indexManager.getIndexingContext(eclipseRepo));
+    
+    //make sure that the junit jar can be found in the public repo
+    NexusIndex index = indexManager.getIndex(eclipseRepo);
+    assertNotNull(index);
+    Collection<IndexedArtifact> junitArtifact = index.find("junit", "junit", "3.8.1", "jar");
+    assertTrue(junitArtifact.size() > 0);
+  }
   public void testNoMirror() throws Exception {
     
     final File settingsFile = new File(SETTINGS_NO_MIRROR);
@@ -326,21 +341,7 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
   }
   
 
-  public void testPublicMirror() throws Exception {
-    setupPublicMirror(REPO_URL_ECLIPSE, SETTINGS_ECLIPSE_REPO);
 
-    List<IRepository> repositories = repositoryRegistry.getRepositories(IRepositoryRegistry.SCOPE_SETTINGS);
-    assertEquals(2, repositories.size());
-    assertEquals(REPO_URL_ECLIPSE, repositories.get(0).getUrl());
-    assertNotNull(indexManager.getIndexingContext(repositories.get(0)));
-    assertNull(indexManager.getIndexingContext(repositories.get(1)));
-    
-    //make sure that the junit jar can be found in the public repo
-    NexusIndex index = indexManager.getIndex(repositories.get(0));
-    assertNotNull(index);
-    Collection<IndexedArtifact> junitArtifact = index.find("junit", "junit", "3.8.1", "jar");
-    assertTrue(junitArtifact.size() > 0);
-  }
 
 
   public void testPublicNonMirrored() throws Exception {
@@ -353,11 +354,16 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
 
     List<IRepository> repositories = repositoryRegistry.getRepositories(IRepositoryRegistry.SCOPE_SETTINGS);
     assertEquals(3, repositories.size());
-    assertEquals("http://repository.sonatype.org/content/repositories/eclipse-snapshots/", repositories.get(0).getUrl());
-    assertNotNull(indexManager.getIndexingContext(repositories.get(0)));
-    assertEquals(REPO_URL_ECLIPSE, repositories.get(1).getUrl());
-    assertNotNull(indexManager.getIndexingContext(repositories.get(1)));
-    assertNull(indexManager.getIndexingContext(repositories.get(2)));
+    for(IRepository repo :repositories){
+      if("http://repository.sonatype.org/content/repositories/eclipse-snapshots/".equals(repo.getUrl())){
+        assertNotNull(indexManager.getIndexingContext(repo));
+      } else if(REPO_URL_ECLIPSE.equals(repo.getUrl())){
+        assertNotNull(indexManager.getIndexingContext(repo));
+      } else {
+        assertNull(indexManager.getIndexingContext(repo));
+      }
+    }
+    
   }
 
   public void testIndexesExtensionPoint() throws Exception {
