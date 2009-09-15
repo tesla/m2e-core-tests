@@ -147,7 +147,7 @@ public class LifecyclePage extends MavenPomEditorPage implements IMavenProjectCh
   protected void createFormContent(IManagedForm managedForm) {
     FormToolkit toolkit = managedForm.getToolkit();
     ScrolledForm form = managedForm.getForm();
-    form.setText("Lifecycle Mappings");
+    form.setText("Lifecycle Mappings (experimental)");
 
     Composite body = form.getBody();
     GridLayout gridLayout = new GridLayout(1, true);
