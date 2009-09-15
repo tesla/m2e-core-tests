@@ -72,7 +72,9 @@ public class IndexesExtensionReader implements IRepositoryDiscoverer {
 
     RepositoryInfo repository = new RepositoryInfo(indexId, repositoryUrl, IRepositoryRegistry.SCOPE_UNKNOWN, null);
     registry.addRepository(repository, monitor);
-    indexManager.setIndexDetails(repository, isShort? NexusIndex.DETAILS_MIN: NexusIndex.DETAILS_FULL, monitor);
+    
+    // for consistency, always process indexes using our background thread
+    indexManager.setIndexDetails(repository, isShort? NexusIndex.DETAILS_MIN: NexusIndex.DETAILS_FULL, null/*async*/);
   }
 
 }

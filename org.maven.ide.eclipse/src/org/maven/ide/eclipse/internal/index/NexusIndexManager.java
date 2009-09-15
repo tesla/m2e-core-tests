@@ -720,7 +720,8 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
   public void repositoryAdded(IRepository repository, IProgressMonitor monitor) throws CoreException {
     String details = getIndexDetails(repository);
 
-    setIndexDetails(repository, details, monitor);
+    // for consistency, always process indexes using our background thread
+    setIndexDetails(repository, details, null/*async*/);
   }
 
   public String getIndexDetails(IRepository repository) {
