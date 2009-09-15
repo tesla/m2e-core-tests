@@ -200,20 +200,30 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
     waitForJobsToComplete();
     waitForIndexJobToComplete();
     //not indexed at startup
-    IndexedArtifactGroup[] rootGroups = indexManager.getRootGroups(repositoryRegistry.getWorkspaceRepository());
+    IRepository workspaceRepository = repositoryRegistry.getWorkspaceRepository();
+    IndexedArtifactGroup[] rootGroups = indexManager.getRootGroups(workspaceRepository);
     if(rootGroups != null && rootGroups.length > 0){
       //there should be no files in the workspace after the project delete
       assertTrue(rootGroups[0].getFiles() == null || rootGroups[0].getFiles().size() == 0);
     }
- 
+
     updateRepo(REPO_URL_ECLIPSE, SETTINGS_ECLIPSE_REPO);
     createExisting(projectName, "projects/resourcefiltering/p005");
     waitForJobsToComplete();
-    
+
     //after the project is created, there should be the project root group
-    rootGroups = indexManager.getRootGroups(repositoryRegistry.getWorkspaceRepository());
+    rootGroups = indexManager.getRootGroups(workspaceRepository);
     assertTrue(rootGroups.length > 0);
     assertEquals("resourcefiltering", rootGroups[0].getPrefix());
+
+    Map<String, IndexedArtifact> search = indexManager.search(workspaceRepository, "p005", IIndex.SEARCH_ARTIFACT, 0);
+    assertEquals(1, search.size());
+    assertEquals("jar", search.values().iterator().next().getPackaging());
+
+    deleteProject(projectName);
+    waitForJobsToComplete();
+    waitForIndexJobToComplete();
+    assertTrue(indexManager.search(workspaceRepository, "p005", IIndex.SEARCH_ARTIFACT, 0).isEmpty());
   }
   
   public void testLocalIndex() throws Exception {

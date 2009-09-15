@@ -454,23 +454,27 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
 
   public void addDocument(IRepository repository, File file, String documentKey, long size, long date, File jarFile,
       int sourceExists, int javadocExists) {
-    try {
-      IndexingContext context = getIndexingContext(repository);
-      if(context == null) {
-        // TODO log
-        return;
-      }
+    IndexingContext context = getIndexingContext(repository);
+    if(context == null) {
+      // TODO log
+      return;
+    }
 
+    try {
       ArtifactContext artifactContext = getArtifactContext(file, documentKey, size, date, //
           sourceExists, javadocExists, context.getRepositoryId());
 
-      getIndexer().addArtifactToIndex(artifactContext, context);
+      addArtifactToIndex(context, artifactContext);
 
     } catch(Exception ex) {
       String msg = "Unable to add " + documentKey;
       console.logError(msg + "; " + ex.getMessage());
       MavenLogger.log(msg, ex);
     }
+  }
+
+  private void addArtifactToIndex(IndexingContext context, ArtifactContext artifactContext) throws IOException {
+    getIndexer().addArtifactToIndex(artifactContext, context);
   }
   
   public void removeDocument(IRepository repository, File file, String documentKey) {
@@ -484,8 +488,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       ArtifactContext artifactContext = getArtifactContext(null, documentKey, -1, -1, //
           IIndex.NOT_AVAILABLE, IIndex.NOT_AVAILABLE, context.getRepositoryId());
       getIndexer().deleteArtifactFromIndex(artifactContext, context);
-     fireIndexChanged(repository);
-      
+      fireIndexChanged(repository);
     } catch(Exception ex) {
       String msg = "Unable to remove " + documentKey;
       console.logError(msg + "; " + ex.getMessage());
@@ -527,6 +530,21 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
 
     return new ArtifactContext(pomFile, artifactFile, null, ai, gav);
+  }
+
+  private ArtifactContext getArtifactContext(IMavenProjectFacade facade, IProgressMonitor monitor) throws CoreException {
+    IRepository workspaceRepository = repositoryRegistry.getWorkspaceRepository();
+    ArtifactKey key = facade.getArtifactKey();
+    ArtifactInfo ai = new ArtifactInfo(workspaceRepository.getUid(), key.getGroupId(), key.getArtifactId(), key.getVersion(), null);
+    ai.packaging = facade.getPackaging();
+    File pomFile = facade.getPomFile();
+    File artifactFile = facade.getMavenProject(monitor).getBasedir();
+    try {
+      Gav gav = new Gav(key.getGroupId(), key.getArtifactId(), key.getVersion());
+      return new ArtifactContext(pomFile, artifactFile, null, ai, gav );
+    } catch(IllegalArtifactCoordinateException ex) {
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Unexpected exception", ex));
+    }
   }
 
   public void scheduleIndexUpdate(final IRepository repository, final boolean force) {
@@ -605,22 +623,24 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
      * This method is called while holding workspace lock. Avoid long-running operations if possible. 
      */
 
+    IndexingContext context = getIndexingContext(repositoryRegistry.getWorkspaceRepository());
+
     for(MavenProjectChangedEvent event : events) {
       try {
         IMavenProjectFacade oldFacade = event.getOldMavenProject();
         if (oldFacade != null) {
-          File file = oldFacade.getMavenProject(monitor).getBasedir();
-          String key = getDocumentKey(oldFacade.getArtifactKey());
-          removeDocument(repositoryRegistry.getWorkspaceRepository(), file, key);
+          ArtifactContext artifactContext = getArtifactContext(oldFacade, monitor);
+          getIndexer().deleteArtifactFromIndex(artifactContext, context);
         }
         IMavenProjectFacade facade = event.getMavenProject();
         if(facade != null) {
-          File file = facade.getMavenProject(monitor).getBasedir();
-          String key = getDocumentKey(facade.getArtifactKey());
-          addDocument(repositoryRegistry.getWorkspaceRepository(), file, key, -1, -1, null, IIndex.NOT_PRESENT, IIndex.NOT_PRESENT);
+          ArtifactContext artifactContext = getArtifactContext(facade, monitor);
+          getIndexer().addArtifactToIndex(artifactContext, context);
         }
       } catch (CoreException e) {
         MavenLogger.log(e);
+      } catch(IOException ex) {
+        MavenLogger.log("Could not update workspace index", ex);
       }
     }
   }
