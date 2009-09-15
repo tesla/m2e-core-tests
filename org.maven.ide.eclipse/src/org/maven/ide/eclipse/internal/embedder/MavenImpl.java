@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 
@@ -611,7 +612,27 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
       injectSettings(repositories);
     }
 
-    return repositories;
+    return removeDuplicateRepositories(repositories);
+  }
+
+  private List<ArtifactRepository> removeDuplicateRepositories(ArrayList<ArtifactRepository> repositories) {
+    ArrayList<ArtifactRepository> result = new ArrayList<ArtifactRepository>();
+    
+    HashSet<String> keys = new HashSet<String>();
+    for (ArtifactRepository repository : repositories) {
+      StringBuilder key = new StringBuilder();
+      if (repository.getId() != null) {
+        key.append(repository.getId());
+      }
+      key.append(':').append(repository.getUrl()).append(':');
+      if (repository.getAuthentication() != null && repository.getAuthentication().getUsername() != null) {
+        key.append(repository.getAuthentication().getUsername());
+      }
+      if (keys.add(key.toString())) {
+        result.add(repository);
+      }
+    }
+    return result;
   }
 
   private void injectSettings(ArrayList<ArtifactRepository> repositories) throws CoreException {
@@ -639,9 +660,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
     for(Repository repository : repositories) {
       try {
         ArtifactRepository artifactRepository = repositorySystem.buildArtifactRepository(repository);
-        if(!artifactRepositories.contains(artifactRepository)) {
-          artifactRepositories.add(artifactRepository);
-        }
+        artifactRepositories.add(artifactRepository);
       } catch(InvalidRepositoryException ex) {
         throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not read settings.xml",
             ex));
@@ -678,7 +697,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
       injectSettings(repositories);
     }
 
-    return repositories;
+    return removeDuplicateRepositories(repositories);
   }
 
   public Mirror getMirror(ArtifactRepository repo) throws CoreException {

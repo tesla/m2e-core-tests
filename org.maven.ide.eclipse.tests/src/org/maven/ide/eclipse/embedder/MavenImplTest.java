@@ -85,6 +85,23 @@ public class MavenImplTest extends TestCase {
     }
   }
 
+  public void testGetRepositoriesWithSettingsInjection() throws Exception {
+    String origSettings = configuration.getUserSettingsFile();
+    try {
+      configuration.setUserSettingsFile(new File("settingsWithCustomRepo.xml").getCanonicalPath());
+      List<ArtifactRepository> repositories;
+      
+      // artifact repositories
+      repositories = maven.getArtifactRepositories(true);
+      assertEquals(2, repositories.size());
+      assertEquals("nexus", repositories.get(0).getId());
+      assertEquals("file:remoterepo", repositories.get(0).getUrl());
+      assertEquals("http:customrepo", repositories.get(1).getUrl());
+    } finally {
+      configuration.setUserSettingsFile(origSettings);
+    }
+  }
+  
   public void testGetDefaultRepositories() throws Exception {
     String origSettings = configuration.getUserSettingsFile();
     try {
