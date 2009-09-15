@@ -8,6 +8,8 @@
 
 package org.maven.ide.eclipse.index;
 
+import org.maven.ide.eclipse.repository.IRepository;
+
 
 
 /**
@@ -17,12 +19,12 @@ package org.maven.ide.eclipse.index;
  */
 public interface IndexListener {
   
-  public void indexAdded(String repositoryUrl);
+  public void indexAdded(IRepository repository);
 
-  public void indexRemoved(String repositoryUrl);
+  public void indexRemoved(IRepository repository);
   
-  public void indexChanged(String repositoryUrl);
+  public void indexChanged(IRepository repository);
   
-  public void indexUpdating(String repositoryUrl);
+  public void indexUpdating(IRepository repository);
 
 }

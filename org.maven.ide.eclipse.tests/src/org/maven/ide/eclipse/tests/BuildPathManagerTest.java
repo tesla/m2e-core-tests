@@ -46,12 +46,15 @@ import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.index.IMutableIndex;
 import org.maven.ide.eclipse.internal.index.NexusIndex;
 import org.maven.ide.eclipse.internal.index.NexusIndexManager;
+import org.maven.ide.eclipse.internal.repository.RepositoryRegistry;
 import org.maven.ide.eclipse.jdt.BuildPathManager;
 import org.maven.ide.eclipse.jdt.MavenJdtPlugin;
 import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
+import org.maven.ide.eclipse.repository.IRepository;
+import org.maven.ide.eclipse.repository.IRepositoryRegistry;
 
 
 /**
@@ -100,22 +103,22 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals("MNGECLIPSE-248parent", project2entries[0].getPath().segment(0));
     assertEquals(IClasspathEntry.CPE_LIBRARY, project2entries[1].getEntryKind());
     assertEquals("junit-4.1.jar", project2entries[1].getPath().lastSegment());
-    
+
     configurationManager.updateProjectConfiguration(project2, configuration, "", monitor);
     waitForJobsToComplete();
 
     assertMarkers(project2, 0);
   }
-  
+
   public void testDisableMavenNature() throws Exception {
     deleteProject("disablemaven-p001");
     IProject p = createExisting("disablemaven-p001", "projects/disablemaven/p001");
     waitForJobsToComplete();
-    
+
     assertTrue(p.hasNature(IMavenConstants.NATURE_ID));
     assertTrue(p.hasNature(JavaCore.NATURE_ID));
     assertNotNull(BuildPathManager.getMaven2ClasspathContainer(JavaCore.create(p)));
-    
+
     IProjectConfigurationManager configurationManager = MavenPlugin.getDefault().getProjectConfigurationManager();
     configurationManager.disableMavenNature(p, monitor);
     waitForJobsToComplete();
@@ -127,8 +130,8 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
   }
 
   private boolean hasBuilder(IProject p, String builderId) throws CoreException {
-    for (ICommand command : p.getDescription().getBuildSpec()) {
-      if (builderId.equals(command.getBuilderName())) {
+    for(ICommand command : p.getDescription().getBuildSpec()) {
+      if(builderId.equals(command.getBuilderName())) {
         return true;
       }
     }
@@ -386,7 +389,8 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals("downloadsources-t002-0.0.1-sources.jar", cp[1].getSourceAttachmentPath().lastSegment());
   }
 
-  private IPackageFragmentRoot getPackageFragmentRoot(IJavaProject javaProject, IClasspathEntry cp) throws JavaModelException {
+  private IPackageFragmentRoot getPackageFragmentRoot(IJavaProject javaProject, IClasspathEntry cp)
+      throws JavaModelException {
     return javaProject.findPackageFragmentRoot(cp.getPath());
   }
 
@@ -396,14 +400,10 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     }
     DirectoryScanner ds = new DirectoryScanner();
     ds.setBasedir(basedir);
-    ds.setIncludes(new String[] {
-       "*-sources.jar", 
-       "*-javadoc.jar",
-       "m2e-lastUpdated.properties"
-    });
+    ds.setIncludes(new String[] {"*-sources.jar", "*-javadoc.jar", "m2e-lastUpdated.properties"});
     ds.scan();
 
-    for (String path : ds.getIncludedFiles()) {
+    for(String path : ds.getIncludedFiles()) {
       new File(basedir, path).delete();
     }
   }
@@ -570,16 +570,25 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
 
     assertEquals(1, cp.length);
     assertNotNull(cp[0].getSourceAttachmentPath());
-    assertEquals(cp[0].getSourceAttachmentPath().toString(), "downloadsources-t006-0.0.1-sources.jar", cp[0].getSourceAttachmentPath().lastSegment());
+    assertEquals(cp[0].getSourceAttachmentPath().toString(), "downloadsources-t006-0.0.1-sources.jar", cp[0]
+        .getSourceAttachmentPath().lastSegment());
   }
 
   public void testDownloadSources_006_nonMavenProject() throws Exception {
+    RepositoryRegistry repositoryRegistry = (RepositoryRegistry) MavenPlugin.getDefault().getRepositoryRegistry();
+    repositoryRegistry.updateRegistry(monitor);
+
     NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getDefault().getIndexManager();
     indexManager.getIndexUpdateJob().join();
     IMutableIndex localIndex = indexManager.getLocalIndex();
     localIndex.updateIndex(true, monitor);
-    NexusIndex remoteIndex = indexManager.getIndex("file:remoterepo");
-    remoteIndex.updateIndex(true, monitor); // actuall scan the repo
+
+    for (IRepository repository : repositoryRegistry.getRepositories(IRepositoryRegistry.SCOPE_SETTINGS)) {
+      if ("file:remoterepo".equals(repository.getUrl())) {
+        NexusIndex remoteIndex = indexManager.getIndex(repository);
+        remoteIndex.updateIndex(true, monitor); // actually scan the repo
+      }
+    }
 
     IProject project = createExisting("downloadsources-p006", "projects/downloadsources/p006");
 
@@ -650,7 +659,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
 
     ResolverConfiguration configuration = plugin.getMavenProjectManager().getResolverConfiguration(project);
     assertEquals(modules, configuration.shouldIncludeModules());
-    
+
     IJavaProject javaProject = JavaCore.create(project);
 
     IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
@@ -659,14 +668,16 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals("/simple-project/src/main/resources", rawClasspath[1].getPath().toString());
     assertEquals("/simple-project/src/test/java", rawClasspath[2].getPath().toString());
     assertEquals("/simple-project/src/test/resources", rawClasspath[3].getPath().toString());
-    assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.4", rawClasspath[4].getPath().toString());
+    assertEquals(
+        "org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.4",
+        rawClasspath[4].getPath().toString());
     assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[5].getPath().toString());
-   
+
     IClasspathEntry[] entries = getMavenContainerEntries(project);
     assertEquals(Arrays.toString(entries), 1, entries.length);
     assertEquals(IClasspathEntry.CPE_LIBRARY, entries[0].getEntryKind());
     assertEquals("junit-3.8.1.jar", entries[0].getPath().lastSegment());
-    
+
     assertTrue(project.getFile("pom.xml").exists());
     assertTrue(project.getFolder("src/main/java").exists());
     assertTrue(project.getFolder("src/test/java").exists());
@@ -792,14 +803,14 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     description.setBuildSpec(new ICommand[] {javaBuilder});
     project.setDescription(description, monitor);
     // can't update configuration of non-maven project
-    configurationManager.enableMavenNature(project, configuration, monitor); 
+    configurationManager.enableMavenNature(project, configuration, monitor);
     verifyNaturesAndBuilders(project);
 
     description.setNatureIds(new String[] {});
     description.setBuildSpec(new ICommand[] {mavenBuilder, javaBuilder});
     project.setDescription(description, monitor);
     // can't update configuration of non-maven project
-    configurationManager.enableMavenNature(project, configuration, monitor); 
+    configurationManager.enableMavenNature(project, configuration, monitor);
     verifyNaturesAndBuilders(project);
 
     description.setNatureIds(new String[] {IMavenConstants.NATURE_ID, JavaCore.NATURE_ID});
@@ -809,7 +820,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     configurationManager.enableMavenNature(project, configuration, monitor);
     verifyNaturesAndBuilders(project);
   }
-  
+
   // MNGECLIPSE-1133
   public void testUpdateProjectConfigurationWithWorkspace() throws Exception {
     deleteProject("MNGECLIPSE-1133parent");
@@ -847,10 +858,9 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
 
     assertMarkers(project2, 0);
   }
-  
 
   private void verifyNaturesAndBuilders(IProject project) throws CoreException {
-    
+
     assertTrue(project.hasNature(JavaCore.NATURE_ID));
     assertTrue(project.hasNature(IMavenConstants.NATURE_ID));
 
@@ -874,12 +884,12 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
         model.setArtifactId(projectName);
         model.setVersion("0.0.1-SNAPSHOT");
         model.setModelVersion("4.0.0");
-        
+
         Dependency dependency = new Dependency();
         dependency.setGroupId("junit");
         dependency.setArtifactId("junit");
         dependency.setVersion("3.8.1");
-        
+
         model.addDependency(dependency);
 
         String[] directories = {"src/main/java", "src/test/java", "src/main/resources", "src/test/resources"};
@@ -887,8 +897,8 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
         ProjectImportConfiguration config = new ProjectImportConfiguration();
         config.getResolverConfiguration().setIncludeModules(modules);
 
-        plugin.getProjectConfigurationManager().createSimpleProject(project, location, model, directories,
-            config, monitor);
+        plugin.getProjectConfigurationManager().createSimpleProject(project, location, model, directories, config,
+            monitor);
       }
     }, plugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
 
@@ -999,15 +1009,15 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
 
   //Local repo set by the BuildManager is based on a cached version of MavenEmbedder, not the one configured in setup.
   public void XXXtestMNGECLIPSE_1047_localRepoPath() {
-   IPath m2_repo = JavaCore.getClasspathVariable(BuildPathManager.M2_REPO);
-   assertEquals(repo.toString(), m2_repo.toOSString());
+    IPath m2_repo = JavaCore.getClasspathVariable(BuildPathManager.M2_REPO);
+    assertEquals(repo.toString(), m2_repo.toOSString());
   }
-  
+
   public void testMNGECLIPSE_696_compiler_includes_excludes() throws Exception {
     final String projectName = "MNGECLIPSE-696";
-    
+
     deleteProject(projectName);
-    
+
     final ResolverConfiguration configuration = new ResolverConfiguration();
     final IProject project = importProject("projects/" + projectName + "/pom.xml", configuration);
     waitForJobsToComplete();
@@ -1030,7 +1040,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     final IPath[] exclusionsMain = cpMain.getExclusionPatterns();
     assertEquals(1, exclusionsMain.length);
     assertEquals(new Path("org/maven/ide/eclipse/tests/"), exclusionsMain[0]);
-        
+
     final IPath[] inclusionsTest = cpTest.getInclusionPatterns();
     assertEquals(1, inclusionsTest.length);
     assertEquals(new Path("org/apache/maven/tests/"), inclusionsTest[0]);
@@ -1039,5 +1049,5 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals(1, exclusionsTest.length);
     assertEquals(new Path("org/apache/maven/tests/Excluded.java"), exclusionsTest[0]);
   }
-  
+
 }

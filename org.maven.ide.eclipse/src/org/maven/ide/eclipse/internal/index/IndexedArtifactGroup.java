@@ -11,18 +11,17 @@ package org.maven.ide.eclipse.internal.index;
 import java.util.LinkedHashMap;
 
 import org.maven.ide.eclipse.index.IndexedArtifact;
+import org.maven.ide.eclipse.repository.IRepository;
 
 
 public class IndexedArtifactGroup implements Comparable<IndexedArtifactGroup>{
-  private final String indexName;
-  private final String repositoryUrl;
+  private final IRepository repository;
   private final String prefix;
   private final LinkedHashMap<String, IndexedArtifactGroup> nodes = new LinkedHashMap<String, IndexedArtifactGroup>();
   private final LinkedHashMap<String, IndexedArtifact> files = new LinkedHashMap<String, IndexedArtifact>();
 
-  public IndexedArtifactGroup(String indexName, String repositoryUrl, String prefix) {
-    this.indexName = indexName;
-    this.repositoryUrl = repositoryUrl;
+  public IndexedArtifactGroup(IRepository repository, String prefix) {
+    this.repository = repository;
     this.prefix = prefix;
   }
 
@@ -38,11 +37,8 @@ public class IndexedArtifactGroup implements Comparable<IndexedArtifactGroup>{
     return prefix;
   }
   
-  public String getIndexName(){
-    return indexName;
-  }
-  public String getRepositoryUrl(){
-    return this.repositoryUrl;
+  public IRepository getRepository() {
+    return this.repository;
   }
 
   /*

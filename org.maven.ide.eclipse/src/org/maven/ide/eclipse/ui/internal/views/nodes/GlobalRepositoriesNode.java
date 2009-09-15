@@ -16,7 +16,8 @@ import org.maven.ide.eclipse.MavenImages;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.internal.index.NexusIndex;
 import org.maven.ide.eclipse.internal.index.NexusIndexManager;
-import org.maven.ide.eclipse.internal.index.RepositoryInfo;
+import org.maven.ide.eclipse.repository.IRepository;
+import org.maven.ide.eclipse.repository.IRepositoryRegistry;
 
 /**
  * Parent node for all artifact repositories and mirrors defined in settings.xml.
@@ -25,22 +26,21 @@ import org.maven.ide.eclipse.internal.index.RepositoryInfo;
  */
 public class GlobalRepositoriesNode implements IMavenRepositoryNode {
 
-  NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getDefault().getIndexManager();
+  private NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getDefault().getIndexManager();
+  private IRepositoryRegistry repositoryRegistry = MavenPlugin.getDefault().getRepositoryRegistry();
 
   public Object[] getChildren() {
 
     ArrayList<Object> mirrorNodes = new ArrayList<Object>();
     ArrayList<Object> globalRepoNodes = new ArrayList<Object>();
 
-    for (RepositoryInfo repo : indexManager.getRepositories()) {
-      NexusIndex index = indexManager.getIndex(repo.getUrl());
-      RepositoryNode node = new RepositoryNode(indexManager, repo, index);
-      if (repo.isGlobal()) {
-        if (repo.getMirrorOf() != null) {
-          mirrorNodes.add(node); 
-        } else {
-          globalRepoNodes.add(node);
-        }
+    for (IRepository repo : repositoryRegistry.getRepositories(IRepositoryRegistry.SCOPE_SETTINGS)) {
+      NexusIndex index = indexManager.getIndex(repo);
+      RepositoryNode node = new RepositoryNode(index);
+      if (repo.getMirrorOf() != null) {
+        mirrorNodes.add(node); 
+      } else {
+        globalRepoNodes.add(node);
       }
     }
 

@@ -10,18 +10,23 @@ package org.maven.ide.eclipse.embedder;
 
 import java.io.Serializable;
 
+import org.apache.maven.artifact.repository.ArtifactRepository;
+
 
 public class ArtifactRepositoryRef implements Serializable {
 
-  private static final long serialVersionUID = -8681574362933142640L;
+  private static final long serialVersionUID = 8859289246547259912L;
 
   private final String id;
 
   private final String url;
 
-  public ArtifactRepositoryRef(String id, String url) {
-    this.id = id;
-    this.url = url;
+  private final String username;
+
+  public ArtifactRepositoryRef(ArtifactRepository repository) {
+    this.id = repository.getId();
+    this.url = repository.getUrl();
+    this.username = repository.getAuthentication() != null? repository.getAuthentication().getUsername(): null;
   }
 
   public String getId() {
@@ -32,10 +37,15 @@ public class ArtifactRepositoryRef implements Serializable {
     return url;
   }
 
+  public String getUsername() {
+    return username;
+  }
+
   public int hashCode() {
     int hash = 17;
     hash = hash * 31 + (id != null ? id.hashCode() : 0);
     hash = hash * 31 + (url != null ? url.hashCode() : 0);
+    hash = hash * 31 + (username != null ? username.hashCode() : 0);
     return hash;
   }
 
@@ -47,6 +57,10 @@ public class ArtifactRepositoryRef implements Serializable {
       return false;
     }
     ArtifactRepositoryRef other = (ArtifactRepositoryRef) o;
-    return id.equals(other.id) && url.equals(other.url);
+    return eq(id, other.id) && eq(url, other.url) && eq(username, other.username);
+  }
+
+  private static <T> boolean eq(T a, T b) {
+    return a != null? a.equals(b): b == null;
   }
 }

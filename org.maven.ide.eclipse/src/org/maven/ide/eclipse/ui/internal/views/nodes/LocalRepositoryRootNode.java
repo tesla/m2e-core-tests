@@ -12,7 +12,6 @@ import org.eclipse.swt.graphics.Image;
 
 import org.maven.ide.eclipse.MavenImages;
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.internal.index.NexusIndex;
 import org.maven.ide.eclipse.internal.index.NexusIndexManager;
 
@@ -28,8 +27,8 @@ public class LocalRepositoryRootNode implements IMavenRepositoryNode{
     NexusIndex localIndex = indexManager.getLocalIndex();
     NexusIndex workspaceIndex = indexManager.getWorkspaceIndex();
     return new Object[]{
-        new LocalRepositoryNode(indexManager, IndexManager.LOCAL_INDEX, localIndex), 
-        new LocalRepositoryNode(indexManager, IndexManager.WORKSPACE_INDEX, workspaceIndex)
+        new LocalRepositoryNode(localIndex), 
+        new LocalRepositoryNode(workspaceIndex)
       };
   }
 

@@ -57,7 +57,7 @@ import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.internal.index.IndexedArtifactGroup;
 import org.maven.ide.eclipse.internal.index.NexusIndex;
 import org.maven.ide.eclipse.internal.index.NexusIndexManager;
-import org.maven.ide.eclipse.internal.index.RepositoryInfo;
+import org.maven.ide.eclipse.repository.IRepository;
 import org.maven.ide.eclipse.ui.internal.views.nodes.AbstractIndexedRepositoryNode;
 import org.maven.ide.eclipse.ui.internal.views.nodes.IArtifactNode;
 import org.maven.ide.eclipse.ui.internal.views.nodes.IndexedArtifactFileNode;
@@ -85,7 +85,7 @@ public class MavenRepositoryView extends ViewPart {
   
   private IAction reloadSettings;
   
-  private BaseSelectionListenerAction openPomAction;
+  BaseSelectionListenerAction openPomAction;
 
   private BaseSelectionListenerAction updateAction;
   
@@ -136,20 +136,19 @@ public class MavenRepositoryView extends ViewPart {
     contributeToActionBars();
     this.indexListener = new IndexListener() {
 
-      public void indexAdded(String repositoryUrl) {
+      public void indexAdded(IRepository repository) {
         refreshView();
       }
 
-      public void indexChanged(String repositoryUrl) {
+      public void indexChanged(IRepository repository) {
         refreshView();
-
       }
 
-      public void indexRemoved(String repositoryUrl) {
+      public void indexRemoved(IRepository repository) {
         refreshView();
-        
       }
-      public void indexUpdating(String repositoryUrl){
+
+      public void indexUpdating(IRepository repository){
         Display.getDefault().asyncExec(new Runnable(){
           public void run(){
            viewer.refresh(true); 
@@ -296,7 +295,7 @@ public class MavenRepositoryView extends ViewPart {
         List<AbstractIndexedRepositoryNode> nodes = getSelectedRepositoryNodes(getStructuredSelection().toList());
         for(AbstractIndexedRepositoryNode node : nodes) {
           if (node instanceof RepositoryNode) {
-            updateIndex(((RepositoryNode) node).getRepositoryUrl(), false);
+            ((RepositoryNode) node).getIndex().scheduleIndexUpdate(false);
           }
         }
       }
@@ -331,9 +330,7 @@ public class MavenRepositoryView extends ViewPart {
               boolean res = MessageDialog.openConfirm(getViewSite().getShell(), //
                   "Rebuild Index", msg);
               if(res) {
-                // TODO request index deletion
-                // TODO add deleted index to 
-                updateIndex(repositoryUrl, true);
+                index.scheduleIndexUpdate(true);
               }
             }
           } else {
@@ -341,12 +338,10 @@ public class MavenRepositoryView extends ViewPart {
             boolean res = MessageDialog.openConfirm(getViewSite().getShell(), //
                 "Rebuild Indexes", msg);
             if(res) {
-              // TODO request index deletion
-              // TODO add deleted index to 
               for(AbstractIndexedRepositoryNode node : nodes){
                 NexusIndex index = node.getIndex();
                 if (index != null) {
-                  updateIndex(index.getRepositoryUrl(), true);
+                  index.scheduleIndexUpdate(true);
                 }
               }
             }            
@@ -411,7 +406,7 @@ public class MavenRepositoryView extends ViewPart {
           url = ((RepositoryNode) element).getRepositoryUrl();
         } else if(element instanceof IndexedArtifactGroup) {
           IndexedArtifactGroup group = (IndexedArtifactGroup) element;
-          String repositoryUrl = group.getRepositoryUrl();
+          String repositoryUrl = group.getRepository().getUrl();
           if(!repositoryUrl.endsWith("/")) {
             repositoryUrl += "/";
           }
@@ -464,9 +459,9 @@ public class MavenRepositoryView extends ViewPart {
   }
 
   protected void setIndexDetails(AbstractIndexedRepositoryNode node, String details) {
-    if (node != null) {
+    if (node != null && node.getIndex() != null) {
       try {
-        indexManager.setIndexDetails(node.getRepositoryUrl(), details);
+        node.getIndex().setIndexDetails(details);
       } catch(CoreException ex) {
         M2EUtils.showErrorDialog(this.getViewSite().getShell(), "Error Setting Index Details", "Unable to set the index details due to the following error:\n", ex);
       }
@@ -508,10 +503,6 @@ public class MavenRepositoryView extends ViewPart {
       }
     });
   };
-
-  protected void updateIndex(final String repositoryUrl, boolean force){
-    indexManager.scheduleIndexUpdate(repositoryUrl, force);
-  }
 
   /**
    * Base Selection Listener does not allow the style (radio button/check) to be set.
@@ -567,7 +558,7 @@ public class MavenRepositoryView extends ViewPart {
     }
     
     protected String getDetailsValue(){
-      return RepositoryInfo.DETAILS_DISABLED;
+      return NexusIndex.DETAILS_DISABLED;
     }
     protected String getActionText(){
       return isChecked() ? DISABLED_DETAILS : DISABLE_DETAILS;
@@ -580,7 +571,7 @@ public class MavenRepositoryView extends ViewPart {
     }
     
     protected String getDetailsValue(){
-      return RepositoryInfo.DETAILS_MIN;
+      return NexusIndex.DETAILS_MIN;
     }
     protected String getActionText(){
       return isChecked() ? ENABLED_MIN : ENABLE_MIN;
@@ -593,7 +584,7 @@ public class MavenRepositoryView extends ViewPart {
     }
     
     protected String getDetailsValue(){
-      return RepositoryInfo.DETAILS_FULL;
+      return NexusIndex.DETAILS_FULL;
     }
     protected String getActionText(){
       return isChecked() ? ENABLED_FULL : ENABLE_FULL;

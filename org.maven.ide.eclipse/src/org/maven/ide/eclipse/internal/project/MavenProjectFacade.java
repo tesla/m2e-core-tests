@@ -117,12 +117,12 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
 
     this.artifactRepositories = new LinkedHashSet<ArtifactRepositoryRef>();
     for(ArtifactRepository repository : mavenProject.getRemoteArtifactRepositories()) {
-      this.artifactRepositories.add(new ArtifactRepositoryRef(repository.getId(), repository.getUrl()));
+      this.artifactRepositories.add(new ArtifactRepositoryRef(repository));
     }
 
     this.pluginArtifactRepositories = new LinkedHashSet<ArtifactRepositoryRef>();
     for(ArtifactRepository repository : mavenProject.getPluginArtifactRepositories()) {
-      this.pluginArtifactRepositories.add(new ArtifactRepositoryRef(repository.getId(), repository.getUrl()));
+      this.pluginArtifactRepositories.add(new ArtifactRepositoryRef(repository));
     }
   }
 

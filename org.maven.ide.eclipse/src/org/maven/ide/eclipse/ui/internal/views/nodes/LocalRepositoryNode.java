@@ -9,7 +9,6 @@
 package org.maven.ide.eclipse.ui.internal.views.nodes;
 
 import org.maven.ide.eclipse.internal.index.NexusIndex;
-import org.maven.ide.eclipse.internal.index.NexusIndexManager;
 
 /**
  * LocalRepositoryNode
@@ -18,23 +17,17 @@ import org.maven.ide.eclipse.internal.index.NexusIndexManager;
  */
 public class LocalRepositoryNode extends AbstractIndexedRepositoryNode {
 
-  private final String repositoryUrl;
-
-  public LocalRepositoryNode(NexusIndexManager indexManager, String repositoryUrl, NexusIndex index) {
-    super(indexManager, index);
-    this.repositoryUrl = repositoryUrl;
+  public LocalRepositoryNode(NexusIndex index) {
+    super(index);
   }
 
   public String getName() {
     StringBuilder sb = new StringBuilder();
-    sb.append(index.getIndexName());
+    sb.append(index.getRepository().toString());
     // TODO local repository path
     return sb.toString();
   }
 
-  public String getRepositoryUrl() {
-    return repositoryUrl;
-  }
   public boolean isEnabledIndex(){
     return false;
   }

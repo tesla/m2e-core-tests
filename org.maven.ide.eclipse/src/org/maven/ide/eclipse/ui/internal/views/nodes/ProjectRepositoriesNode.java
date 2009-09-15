@@ -16,7 +16,8 @@ import org.maven.ide.eclipse.MavenImages;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.internal.index.NexusIndex;
 import org.maven.ide.eclipse.internal.index.NexusIndexManager;
-import org.maven.ide.eclipse.internal.index.RepositoryInfo;
+import org.maven.ide.eclipse.repository.IRepository;
+import org.maven.ide.eclipse.repository.IRepositoryRegistry;
 
 
 /**
@@ -24,16 +25,15 @@ import org.maven.ide.eclipse.internal.index.RepositoryInfo;
  */
 public class ProjectRepositoriesNode implements IMavenRepositoryNode {
 
-  NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getDefault().getIndexManager();
+  private NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getDefault().getIndexManager();
+  private IRepositoryRegistry repositoryRegistry = MavenPlugin.getDefault().getRepositoryRegistry();
 
   public Object[] getChildren() {
     ArrayList<Object> nodes = new ArrayList<Object>();
-    for(RepositoryInfo repo : indexManager.getRepositories()) {
-      if(!repo.isGlobal()) {
-        NexusIndex index = indexManager.getIndex(repo.getUrl());
-        RepositoryNode node = new RepositoryNode(indexManager, repo, index);
-        nodes.add(node);
-      }
+    for(IRepository repo : repositoryRegistry.getRepositories(IRepositoryRegistry.SCOPE_PROJECT)) {
+      NexusIndex index = indexManager.getIndex(repo);
+      RepositoryNode node = new RepositoryNode(index);
+      nodes.add(node);
     }
     return nodes.toArray(new Object[nodes.size()]);
   }

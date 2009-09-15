@@ -32,7 +32,4 @@ public interface IMutableIndex extends IIndex {
 
   public void updateIndex(boolean force, IProgressMonitor monitor) throws CoreException;
 
-  public String getIndexName();
-
-  public String getRepositoryUrl();
 }

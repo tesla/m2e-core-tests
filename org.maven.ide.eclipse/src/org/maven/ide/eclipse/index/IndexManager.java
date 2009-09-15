@@ -54,12 +54,6 @@ public interface IndexManager {
   /**
    * Convenience method to search in all indexes enabled for repositories defined in settings.xml
    */
-  public abstract Map<String, IndexedArtifact> search(String indexName, String prefix, String searchGroup)
-      throws CoreException;
-
-  /**
-   * Convenience method to search in all indexes enabled for repositories defined in settings.xml
-   */
   public abstract IndexedArtifactFile identify(File file) throws CoreException;
 
 }

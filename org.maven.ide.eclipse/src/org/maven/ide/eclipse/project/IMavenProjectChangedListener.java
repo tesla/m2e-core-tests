@@ -11,5 +11,8 @@ package org.maven.ide.eclipse.project;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 public interface IMavenProjectChangedListener {
+  /**
+   * This method is called while holding workspace lock.
+   */
   public void mavenProjectChanged(MavenProjectChangedEvent[] events, IProgressMonitor monitor);
 }

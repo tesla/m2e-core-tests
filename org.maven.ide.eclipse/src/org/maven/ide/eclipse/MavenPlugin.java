@@ -101,10 +101,12 @@ import org.maven.ide.eclipse.internal.project.MavenProjectManagerImpl;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerRefreshJob;
 import org.maven.ide.eclipse.internal.project.ProjectConfigurationManager;
 import org.maven.ide.eclipse.internal.project.WorkspaceStateWriter;
+import org.maven.ide.eclipse.internal.repository.RepositoryRegistry;
 import org.maven.ide.eclipse.project.IMavenMarkerManager;
 import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
+import org.maven.ide.eclipse.repository.IRepositoryRegistry;
 
 
 /**
@@ -161,6 +163,8 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   private MavenProjectManagerImpl managerImpl;
 
   private IMavenMarkerManager mavenMarkerManager;
+
+  private RepositoryRegistry repositoryRegistry;
 
   private String version = "0.0.0";
 
@@ -328,11 +332,17 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
         indexManager, modelManager, mavenMarkerManager);
     projectManager.addMavenProjectChangedListener(this.configurationManager);
 
+    //create repository registry
+    this.repositoryRegistry = new RepositoryRegistry(maven, projectManager);
+    maven.addSettingsChangeListener(repositoryRegistry);
+
     //create the index manager
-    this.indexManager = new NexusIndexManager(console, projectManager, stateLocationDir);
+    this.indexManager = new NexusIndexManager(console, projectManager, repositoryRegistry, stateLocationDir);
     this.projectManager.addMavenProjectChangedListener(indexManager);
     maven.addTransferListener(new IndexingTransferListener(indexManager));
-    this.indexManager.initialize();
+
+    this.repositoryRegistry.addRepositoryIndexer(indexManager);
+    this.repositoryRegistry.updateRegistry();
 
     this.getPreferenceStore().setValue(PREFS_NO_REBUILD_ON_START, true);
     checkJdk();
@@ -561,6 +571,10 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
   public static String getQualifiedVersion() {
     return plugin.qualifiedVersion;
+  }
+
+  public IRepositoryRegistry getRepositoryRegistry() {
+    return repositoryRegistry;
   }
 
 }

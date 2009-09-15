@@ -17,7 +17,6 @@ import org.maven.ide.eclipse.MavenImages;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.internal.index.IndexedArtifactGroup;
 import org.maven.ide.eclipse.internal.index.NexusIndex;
-import org.maven.ide.eclipse.internal.index.NexusIndexManager;
 
 
 /**
@@ -29,12 +28,9 @@ public abstract class AbstractIndexedRepositoryNode implements IMavenRepositoryN
 
   protected static final Object[] NO_CHILDREN = new Object[0];
 
-  protected final NexusIndexManager indexManager;
-
   protected final NexusIndex index;
   
-  protected AbstractIndexedRepositoryNode(NexusIndexManager indexManager, NexusIndex index) {
-    this.indexManager = indexManager;
+  protected AbstractIndexedRepositoryNode(NexusIndex index) {
     this.index = index;
   }
 
@@ -45,7 +41,7 @@ public abstract class AbstractIndexedRepositoryNode implements IMavenRepositoryN
     }
 
     try {
-      IndexedArtifactGroup[] rootGroups = indexManager.getRootGroups(index.getIndexName());
+      IndexedArtifactGroup[] rootGroups = index.getRootGroups();
       if(rootGroups == null) {
         return NO_CHILDREN;
       }
@@ -70,13 +66,18 @@ public abstract class AbstractIndexedRepositoryNode implements IMavenRepositoryN
   }
 
   public boolean isUpdating() {
-    return index != null && indexManager.isUpdatingIndex(index.getIndexName());
+    return index != null && index.isUpdating();
   }
 
   public NexusIndex getIndex() {
     return index;
   }
 
-  public abstract String getRepositoryUrl();
-  public abstract boolean isEnabledIndex();
+  public String getRepositoryUrl() {
+    return index.getRepositoryUrl();
+  }
+
+  public boolean isEnabledIndex() {
+    return index != null && index.isEnabled();
+  }
 }

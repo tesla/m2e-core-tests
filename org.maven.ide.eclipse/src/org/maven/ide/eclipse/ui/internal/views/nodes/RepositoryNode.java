@@ -9,8 +9,7 @@
 package org.maven.ide.eclipse.ui.internal.views.nodes;
 
 import org.maven.ide.eclipse.internal.index.NexusIndex;
-import org.maven.ide.eclipse.internal.index.NexusIndexManager;
-import org.maven.ide.eclipse.internal.index.RepositoryInfo;
+import org.maven.ide.eclipse.repository.IRepository;
 
 /**
  * LocalRepsoitoryNode
@@ -19,16 +18,16 @@ import org.maven.ide.eclipse.internal.index.RepositoryInfo;
  */
 public class RepositoryNode extends AbstractIndexedRepositoryNode {
 
-  private final RepositoryInfo repository;
+  private final IRepository repository;
 
-  public RepositoryNode(NexusIndexManager indexManager, RepositoryInfo repository, NexusIndex index){
-    super(indexManager, index);
-    this.repository = repository;
+  public RepositoryNode(NexusIndex index){
+    super(index);
+    this.repository = index.getRepository();
   }
 
   public String getName() {
     StringBuilder sb = new StringBuilder();
-    sb.append(repository.getServerId());
+    sb.append(repository.getId());
     sb.append(" (").append(repository.getUrl()).append(")");
     if (repository.getMirrorOf() != null) {
       sb.append(" [mirrorOf=").append(repository.getMirrorOf()).append("]");
@@ -47,11 +46,7 @@ public class RepositoryNode extends AbstractIndexedRepositoryNode {
   }
 
   public String getRepoName() {
-    return repository.getServerId();
-  }
-
-  public boolean isEnabledIndex() {
-    return !indexManager.indexDetailsDisabled(repository.getUrl());
+    return repository.toString();
   }
 
 }
