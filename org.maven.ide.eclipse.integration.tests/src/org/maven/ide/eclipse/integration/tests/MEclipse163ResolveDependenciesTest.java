@@ -8,11 +8,20 @@
 
 package org.maven.ide.eclipse.integration.tests;
 
+import java.util.List;
+
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.swt.SWT;
+import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.internal.index.NexusIndex;
+import org.maven.ide.eclipse.internal.index.NexusIndexManager;
+import org.maven.ide.eclipse.internal.repository.RepositoryRegistry;
+import org.maven.ide.eclipse.repository.IRepository;
+import org.maven.ide.eclipse.repository.IRepositoryRegistry;
 
 import com.windowtester.runtime.swt.condition.SWTIdleCondition;
 import com.windowtester.runtime.swt.condition.eclipse.JobsCompleteCondition;
@@ -30,13 +39,33 @@ import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
  */
 public class MEclipse163ResolveDependenciesTest extends UIIntegrationTestCase {
 
+  
+
+  protected void updateRepo(){
+    
+  }
   public void testResolveDependencies() throws Exception {
     importZippedProject("projects/resolve_deps_test.zip");
     final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("project");
     assertTrue(project.exists());
-
+    waitForAllBuildsToComplete();
+    //rebuild the mirror
+    IRepositoryRegistry registry = MavenPlugin.getDefault().getRepositoryRegistry();
+    ((RepositoryRegistry)registry).getBackgroundJob().join();
+    List<IRepository> repos = registry.getRepositories(registry.SCOPE_SETTINGS);
+    System.out.println("number of repos: "+repos.size());
+    for(IRepository repo : repos){
+      System.out.println("repo: "+repo.getUrl());
+        
+      //if(repo.getMirrorId() != null){
+        buildFullRepoDetails(repo);
+        break;
+      //}
+    }
+    
     openFile(project, "src/main/java/org/sonatype/test/project/App.java");
 
+    
     // there should be compile errors
     int severity = project.findMaxProblemSeverity(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
     assertEquals(IMarker.SEVERITY_ERROR, severity);
@@ -82,5 +111,21 @@ public class MEclipse163ResolveDependenciesTest extends UIIntegrationTestCase {
     assertProjectsHaveNoErrors();
     
   }
-
+  /**
+   * For any class details, we need a FULL_DETAILS
+   * @param repo
+   */
+  private void buildFullRepoDetails(IRepository repo) throws Exception{
+    NexusIndexManager indexManager = (NexusIndexManager)MavenPlugin.getDefault().getIndexManager();
+    NexusIndex index = indexManager.getIndex(repo);
+    IRepositoryRegistry registry = MavenPlugin.getDefault().getRepositoryRegistry();
+    //build full repo details for the enabled non local/workspace repo
+    if(index.isEnabled() && 
+        !(repo.equals(registry.getLocalRepository())) && 
+            !(repo.equals(registry.getWorkspaceRepository())) ){
+      indexManager.setIndexDetails(repo, "full", null);
+      indexManager.updateIndex(repo, true, null);
+      waitForAllBuildsToComplete();
+    }
+  }
 }
