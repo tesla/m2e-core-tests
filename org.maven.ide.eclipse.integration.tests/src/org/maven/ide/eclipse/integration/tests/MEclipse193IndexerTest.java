@@ -149,16 +149,16 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
   private void updateLocalIndex(IUIContext ui) throws Exception {
     IViewPart indexView = showView("org.maven.ide.eclipse.views.MavenRepositoryView");
 
-    ui.click(new TreeItemLocator("Local Repositories/local: .*repository",
+    ui.click(new TreeItemLocator("Local Repositories/file.*",
             new ViewLocator("org.maven.ide.eclipse.views.MavenRepositoryView")));
 
-    ui.contextClick(new TreeItemLocator("Local Repositories/local: .*repository", new ViewLocator(
-        "org.maven.ide.eclipse.views.MavenRepositoryView")), "Update Index");
-    
-    ui.wait(new JobsCompleteCondition(), 240000);
+    ui.contextClick(new TreeItemLocator("Local Repositories/file.*", new ViewLocator(
+        "org.maven.ide.eclipse.views.MavenRepositoryView")), "Rebuild Index");
+    ui.click(new ButtonLocator("OK"));
+    waitForAllBuildsToComplete();
     
     //now make sure that the local index updated correctly
-    ui.click(new TreeItemLocator("Local Repositories/local: .*repository/com",
+    ui.click(new TreeItemLocator("Local Repositories/file.*/com",
         new ViewLocator("org.maven.ide.eclipse.views.MavenRepositoryView")));
   }
 //
