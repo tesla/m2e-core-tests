@@ -133,15 +133,7 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
     waitForIndexJobToComplete();
     assertTrue(indexManager.search(workspaceRepository, "p005", IIndex.SEARCH_ARTIFACT, 0).isEmpty());
   }
-  
-  public void testLocalIndex() throws Exception {
-    // TODO this scans real(!) user local repository. is this necessary?
-    // only if we care if this is covered with a test
-    IRepository repository = repositoryRegistry.getLocalRepository();
-    indexManager.updateIndex(repository, true, monitor);
-    IndexedArtifactGroup[] rootGroups = indexManager.getRootGroups(repository);
-    assertTrue(rootGroups.length > 0);
-  }
+  //you're right. its too painfully slow
 
   /**
    * Authentication was causing a failure for public (non-auth) repos. This test makes sure its ok.
