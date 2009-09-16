@@ -9,26 +9,20 @@
 package org.maven.ide.eclipse.ui.internal.views.nodes;
 
 import org.maven.ide.eclipse.internal.index.NexusIndex;
-import org.maven.ide.eclipse.repository.IRepository;
 
 /**
- * LocalRepositoryNode
+ * WorkspaceRepositoryNode
  *
  * @author igor
  */
-public class LocalRepositoryNode extends AbstractIndexedRepositoryNode {
+public class WorkspaceRepositoryNode extends AbstractIndexedRepositoryNode {
 
-  public LocalRepositoryNode(NexusIndex index) {
+  public WorkspaceRepositoryNode(NexusIndex index) {
     super(index);
   }
 
   public String getName() {
-    IRepository repository = index.getRepository();
-    StringBuilder sb = new StringBuilder();
-    sb.append("Local repository");
-    if (repository.getBasedir() != null) {
-      sb.append(" (").append(repository.getBasedir().getAbsolutePath()).append(')');
-    }
-    return sb.toString();
+    return "Workspace projects";
   }
+
 }

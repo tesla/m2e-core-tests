@@ -51,7 +51,6 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.MaterializeAction;
 import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.index.IndexListener;
-import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.internal.index.IndexedArtifactGroup;
@@ -303,7 +302,7 @@ public class MavenRepositoryView extends ViewPart {
       protected boolean updateSelection(IStructuredSelection selection) {
         int indexCount = 0;
         for (AbstractIndexedRepositoryNode node : getSelectedRepositoryNodes(selection.toList())) {
-          if (node.isEnabledIndex()) {
+          if (node instanceof RepositoryNode && node.isEnabledIndex()) {
             indexCount ++;
           }
         }
@@ -537,8 +536,7 @@ public class MavenRepositoryView extends ViewPart {
       AbstractIndexedRepositoryNode node = getSelectedRepositoryNode(selection);
       updateIndexDetails(node);
       setText(getActionText());
-      boolean enabled = (node != null && !IndexManager.LOCAL_INDEX.equals(node.getRepositoryUrl())
-          && !IndexManager.WORKSPACE_INDEX.equals(node.getRepositoryUrl()));
+      boolean enabled = (node != null && node instanceof RepositoryNode);
       this.setEnabled(enabled);
     }
     

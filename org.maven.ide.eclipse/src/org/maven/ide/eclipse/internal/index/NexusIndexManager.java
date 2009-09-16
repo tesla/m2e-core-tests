@@ -450,6 +450,8 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       addDocument(workspaceRepository, facade.getPomFile(), //
           getDocumentKey(facade.getArtifactKey()), -1, -1, null, 0, 0);
     }
+
+    fireIndexChanged(workspaceRepository);
   }
 
   public void addDocument(IRepository repository, File file, String documentKey, long size, long date, File jarFile,

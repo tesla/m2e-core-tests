@@ -28,7 +28,7 @@ public class LocalRepositoryRootNode implements IMavenRepositoryNode{
     NexusIndex workspaceIndex = indexManager.getWorkspaceIndex();
     return new Object[]{
         new LocalRepositoryNode(localIndex), 
-        new LocalRepositoryNode(workspaceIndex)
+        new WorkspaceRepositoryNode(workspaceIndex)
       };
   }
 
