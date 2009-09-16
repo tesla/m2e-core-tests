@@ -53,14 +53,9 @@ public class MEclipse163ResolveDependenciesTest extends UIIntegrationTestCase {
     IRepositoryRegistry registry = MavenPlugin.getDefault().getRepositoryRegistry();
     ((RepositoryRegistry)registry).getBackgroundJob().join();
     List<IRepository> repos = registry.getRepositories(registry.SCOPE_SETTINGS);
-    System.out.println("number of repos: "+repos.size());
     for(IRepository repo : repos){
-      System.out.println("repo: "+repo.getUrl());
-        
-      //if(repo.getMirrorId() != null){
         buildFullRepoDetails(repo);
         break;
-      //}
     }
     
     openFile(project, "src/main/java/org/sonatype/test/project/App.java");
