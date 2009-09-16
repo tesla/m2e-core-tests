@@ -892,7 +892,9 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       return;
     }
 
-    monitor.setTaskName("Updating index " + repository.toString());
+    if(monitor != null){
+      monitor.setTaskName("Updating index " + repository.toString());
+    }
     console.logMessage("Updating index " + repository.toString());
     try {
       fireIndexUpdating(repository);
@@ -910,12 +912,6 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       } else {
         console.logMessage("Updated index for " + repository.toString() + " " + indexTime);
       }
-//    } catch(CoreException ex) {
-//      String msg = "Unable to update index for " + repositoryUrl;
-//      MavenLogger.log(msg, ex);
-//      console.logError(msg);
-//    } catch (OperationCanceledException ex) {
-//      console.logMessage("Updating index " + repositoryUrl + " is canceled");
     } catch (Exception ie){
       String msg = "Unable to update index for " + repository.toString();
       MavenLogger.log(msg, ie);
