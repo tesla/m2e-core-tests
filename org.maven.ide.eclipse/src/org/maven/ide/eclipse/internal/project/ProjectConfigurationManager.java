@@ -558,12 +558,15 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
 
     if(projectInfo.isNeedsRename()) {
       File newProject = new File(projectDir.getParent(), projectName);
-      boolean renamed = projectDir.renameTo(newProject);
-      if(!renamed) {
-        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Can't rename " + projectDir.getAbsolutePath(), null));
+      if(!projectDir.equals(newProject)) {
+        boolean renamed = projectDir.renameTo(newProject);
+        if(!renamed) {
+          throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Can't rename "
+              + projectDir.getAbsolutePath(), null));
+        }
+        projectInfo.setPomFile(getCanonicalPomFile(newProject));
+        projectDir = newProject;
       }
-      projectInfo.setPomFile(getCanonicalPomFile(newProject));
-      projectDir = newProject;
     }
 
     String projectParent = projectDir.getParentFile().getAbsolutePath();
