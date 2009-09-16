@@ -31,10 +31,8 @@ import org.sonatype.nexus.index.ArtifactInfo;
  * @author dyocum
  */
 public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
-
   private static final String SETTINGS_NO_MIRROR = "src/org/maven/ide/eclipse/internal/index/no_mirror_settings.xml";
   private static final String SETTINGS_PUBLIC_JBOSS_NOTMIRRORED = "src/org/maven/ide/eclipse/internal/index/public_nonmirrored_repo_settings.xml";
-  private static final String SETTINGS_WITH_PUBLIC = "src/org/maven/ide/eclipse/internal/index/public_settings.xml";
   private static final String SETTINGS_ECLIPSE_REPO = "src/org/maven/ide/eclipse/internal/index/public_mirror_repo_settings.xml";
   
   private static final String REPO_URL_ECLIPSE = "http://repository.sonatype.org/content/repositories/eclipse";
@@ -45,29 +43,21 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
   private RepositoryRegistry repositoryRegistry = (RepositoryRegistry) MavenPlugin.getDefault().getRepositoryRegistry();
 
   private void waitForIndexJobToComplete() throws InterruptedException {
-    repositoryRegistry.getBackgroundJob().join();
     indexManager.getIndexUpdateJob().join();
+    repositoryRegistry.getBackgroundJob().join();
   }  
   
+  protected void setUp() throws Exception {
+    super.setUp();
+    updateRepo(REPO_URL_ECLIPSE, SETTINGS_ECLIPSE_REPO);
+  }
+
   protected void setupPublicMirror(String publicRepoUrl, String settingsFile) throws Exception {
     final File mirroredRepoFile = new File(settingsFile);
     assertTrue(mirroredRepoFile.exists());
-
     mavenConfiguration.setUserSettingsFile(mirroredRepoFile.getCanonicalPath());
-    waitForIndexJobToComplete();
   }
 
-
-  public void testClassSearch() throws Exception {
-    updateRepo(REPO_URL_ECLIPSE, SETTINGS_ECLIPSE_REPO);
-    indexManager.scheduleIndexUpdate(getRepository(REPO_URL_ECLIPSE), true);
-    waitForIndexJobToComplete();
-    Map<String, IndexedArtifact> search = indexManager.search("TestCase", IIndex.SEARCH_CLASS_NAME);
-    assertTrue(search.size() > 0);
-
-    Map<String, IndexedArtifact> noResultsSearch = indexManager.search("BeepBeepNoClass", IIndex.SEARCH_CLASS_NAME);
-    assertTrue(noResultsSearch.size() == 0);
-  }
   
   private IRepository getRepository(String repoUrl) {
     for (IRepository repository : repositoryRegistry.getRepositories(IRepositoryRegistry.SCOPE_SETTINGS)) {
@@ -84,87 +74,10 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
     IRepository repository = getRepository(repoUrl);
     indexManager.setIndexDetails(repository, NexusIndex.DETAILS_FULL, monitor);  
     assertEquals(NexusIndex.DETAILS_FULL, indexManager.getIndexDetails(repository));
+    
   }
   
-  public void testPluginSearch() throws Exception {
-    //updateRepo(REPO_URL_ECLIPSE, SETTINGS_ECLIPSE_REPO);
-    Map<String, IndexedArtifact> search = indexManager.search("maven-tycho", IIndex.SEARCH_PLUGIN);
-    assertTrue(search.size() > 0);
-    
-    Map<String, IndexedArtifact> noResultsSearch = indexManager.search("maven-fake-plugin", IIndex.SEARCH_PLUGIN);
-    assertTrue(noResultsSearch.size() == 0);
-  }
-  
-  public void testGroupSearch() throws Exception {
-    //updateRepo(REPO_URL_ECLIPSE, SETTINGS_ECLIPSE_REPO);
-    Map<String, IndexedArtifact> search = indexManager.search("org.junit", IIndex.SEARCH_GROUP);
-    assertTrue(search.size() > 0);
-    
-    //TODO: this should probably be returning results, but it seems like there result space is too big,
-    //so its not returning results now
-    Map<String, IndexedArtifact> noResultsSearch = indexManager.search("orgXX", IIndex.SEARCH_GROUP);
-    assertTrue(noResultsSearch.size() == 0);
-  }
-
-  
-  public void testArchetypeSearch() throws Exception {
-    // TODO this goes to the REAL r.s.o/public group, where index .gz > 20M! 
-    updateRepo(REPO_URL_PUBLIC, SETTINGS_WITH_PUBLIC);
-    //updateRepo(ECLIPSE_PUBLIC_REPO, SETTINGS_ECLIPSE_REPO);
-    Map<String, IndexedArtifact> search = indexManager.search("maven-archetype-quickstart", IIndex.SEARCH_ARCHETYPE);
-    assertTrue(search.size() == 1);
-    
-    Map<String, IndexedArtifact> j2eeSearch = indexManager.search("maven-archetype-j2ee-simple", IIndex.SEARCH_ARCHETYPE);
-    assertTrue(j2eeSearch.size() == 1);
-    
-    Map<String, IndexedArtifact> none = indexManager.search("maven-archetype-foobar", IIndex.SEARCH_ARCHETYPE);
-    assertTrue(none.size() == 0);
-  }
-
-  public void testArtifactSearch() throws Exception {
-    Map<String, IndexedArtifact> search = indexManager.search("junit", IIndex.SEARCH_ARTIFACT);
-    IndexedArtifact ia = search.get("null : null : org.eclipse : org.eclipse.jdt.junit");
-    assertNotNull(ia);
-    boolean hasVersion = false;
-    for(IndexedArtifactFile file : ia.getFiles()){
-      if(file.version.startsWith("3.3.1")){
-        hasVersion = true;
-        break;
-      }   
-    }
-    assertTrue(hasVersion);
-    
-    search = indexManager.search("junit", IIndex.SEARCH_ARTIFACT, IIndex.SEARCH_JAVADOCS);
-    assertTrue(search.size()>0);
-    search = indexManager.search("junit", IIndex.SEARCH_ARTIFACT, IIndex.SEARCH_SOURCES);
-    assertTrue(search.size()>0);
-    search = indexManager.search("junit", IIndex.SEARCH_ARTIFACT, IIndex.SEARCH_TESTS);
-    assertTrue(search.size()>0);
-    
-    Map<String, IndexedArtifact> noResultsSearch = indexManager.search("beepbeep-nothing", IIndex.SEARCH_ARTIFACT);
-    assertTrue(noResultsSearch.size() == 0);
-  }
-
-
- 
-  /**
-   * TODO: Stupid test at this point. Not sure what a valid sha1 search should look like.
-   * @throws Exception
-   */
-  public void testSha1Search() throws Exception {
-    Map<String, IndexedArtifact> search = indexManager.search("what-should-this-be", IIndex.SEARCH_SHA1);
-    assertTrue(search.size() == 0);
-  }
-  
-  public void testBogusSearchType() throws Exception {
-    //updateRepo(REPO_URL_ECLIPSE, SETTINGS_ECLIPSE_REPO);
-    Map<String, IndexedArtifact> search = indexManager.search("commons-logging", "BadSearchType");
-    assertTrue(search.size() == 0);
-  }
-
   public void testDisableIndex() throws Exception {
-    setupPublicMirror(REPO_URL_ECLIPSE, SETTINGS_ECLIPSE_REPO);
-
     assertEquals("Local repo should default to min details", NexusIndex.DETAILS_MIN, indexManager.getIndexDetails(repositoryRegistry.getLocalRepository()));
     assertEquals("Workspace repo should default to min details", NexusIndex.DETAILS_MIN, indexManager.getIndexDetails(repositoryRegistry.getWorkspaceRepository()));
 
@@ -177,15 +90,11 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
         assertEquals("Mirrored should be disabled", NexusIndex.DETAILS_DISABLED, details);
       }
     }
-  }  
- 
+  }
   
   public void testProjectIndexes() throws Exception {
-    setupPublicMirror(REPO_URL_ECLIPSE, SETTINGS_ECLIPSE_REPO);
     IProject project = createExisting("resourcefiltering-p005", "projects/resourcefiltering/p005");
     waitForJobsToComplete();
-    
-    indexManager.updateIndex(getRepository(REPO_URL_ECLIPSE), true, monitor);
     
     IIndex index = indexManager.getIndex(project);
     assertNotNull(index);
@@ -198,7 +107,6 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
     String projectName = "resourcefiltering-p005";
     deleteProject(projectName);
     waitForJobsToComplete();
-    waitForIndexJobToComplete();
     //not indexed at startup
     IRepository workspaceRepository = repositoryRegistry.getWorkspaceRepository();
     IndexedArtifactGroup[] rootGroups = indexManager.getRootGroups(workspaceRepository);
@@ -207,7 +115,7 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
       assertTrue(rootGroups[0].getFiles() == null || rootGroups[0].getFiles().size() == 0);
     }
 
-    updateRepo(REPO_URL_ECLIPSE, SETTINGS_ECLIPSE_REPO);
+    //updateRepo(REPO_URL_ECLIPSE, SETTINGS_ECLIPSE_REPO);
     createExisting(projectName, "projects/resourcefiltering/p005");
     waitForJobsToComplete();
 
@@ -229,7 +137,6 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
   public void testLocalIndex() throws Exception {
     // TODO this scans real(!) user local repository. is this necessary?
     // only if we care if this is covered with a test
-    waitForIndexJobToComplete();
     IRepository repository = repositoryRegistry.getLocalRepository();
     indexManager.updateIndex(repository, true, monitor);
     IndexedArtifactGroup[] rootGroups = indexManager.getRootGroups(repository);
@@ -349,10 +256,6 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
     NexusIndex localIndex = indexManager.getIndex(repositoryRegistry.getLocalRepository());
     assertNotNull(localIndex);
   }
-  
-
-
-
 
   public void testPublicNonMirrored() throws Exception {
     final File nonMirroredRepoFile = new File(
@@ -373,20 +276,20 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
         assertNull(indexManager.getIndexingContext(repo));
       }
     }
-    
   }
 
-  public void testIndexesExtensionPoint() throws Exception {
-    List<IRepository> repositories = repositoryRegistry.getRepositories(IRepositoryRegistry.SCOPE_UNKNOWN);
-
-    assertEquals(1, repositories.size());
-    
-    
-    IRepository repository = repositories.get(0);
-    assertEquals("file:testIndex", repository.getUrl());
-    
-    NexusIndex index = indexManager.getIndex(repository);
-    assertEquals(NexusIndex.DETAILS_FULL, index.getIndexDetails());
-  }
+//  public void testIndexesExtensionPoint() throws Exception {
+//    List<IRepository> repositories = repositoryRegistry.getRepositories(IRepositoryRegistry.SCOPE_UNKNOWN);
+//
+//    //
+//    assertEquals(1, repositories.size());
+//    
+//    
+//    IRepository repository = repositories.get(0);
+//    assertEquals("file:testIndex", repository.getUrl());
+//    
+//    NexusIndex index = indexManager.getIndex(repository);
+//    assertEquals(NexusIndex.DETAILS_FULL, index.getIndexDetails());
+//  }
   
 }
