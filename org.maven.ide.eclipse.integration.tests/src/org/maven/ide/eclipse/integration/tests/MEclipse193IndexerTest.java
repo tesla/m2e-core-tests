@@ -93,7 +93,7 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
   public void testLocalResolution() throws Exception {
     IUIContext ui = getUI();
     IViewPart indexView = showView("org.maven.ide.eclipse.views.MavenRepositoryView");
-    ui.click(new TreeItemLocator("Local Repositories/workspace.*",
+    ui.click(new TreeItemLocator("Local Repositories/Workspace.*",
         new ViewLocator("org.maven.ide.eclipse.views.MavenRepositoryView")));
     // set up two projects.
     IProject project = createArchetypeProject("maven-archetype-quickstart", "project");
@@ -149,16 +149,16 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
   private void updateLocalIndex(IUIContext ui) throws Exception {
     IViewPart indexView = showView("org.maven.ide.eclipse.views.MavenRepositoryView");
 
-    ui.click(new TreeItemLocator("Local Repositories/file.*",
+    ui.click(new TreeItemLocator("Local Repositories/Local repository.*",
             new ViewLocator("org.maven.ide.eclipse.views.MavenRepositoryView")));
 
-    ui.contextClick(new TreeItemLocator("Local Repositories/file.*", new ViewLocator(
+    ui.contextClick(new TreeItemLocator("Local Repositories/Local repository.*", new ViewLocator(
         "org.maven.ide.eclipse.views.MavenRepositoryView")), "Rebuild Index");
     ui.click(new ButtonLocator("OK"));
     waitForAllBuildsToComplete();
     
     //now make sure that the local index updated correctly
-    ui.click(new TreeItemLocator("Local Repositories/file.*/com",
+    ui.click(new TreeItemLocator("Local Repositories/Local repository.*/com",
         new ViewLocator("org.maven.ide.eclipse.views.MavenRepositoryView")));
   }
 //
