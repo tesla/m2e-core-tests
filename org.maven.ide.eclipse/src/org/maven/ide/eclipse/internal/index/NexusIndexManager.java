@@ -728,11 +728,13 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
 
   public String getIndexDetails(IRepository repository) {
     String details = indexDetails.getProperty(repository.getUid());
-    
+
     if (details == null) {
       if (repository.isScope(IRepositoryRegistry.SCOPE_SETTINGS) && repository.getMirrorId() == null) {
         details = NexusIndex.DETAILS_MIN;
-      } else if (repository.isScope(IRepositoryRegistry.SCOPE_LOCAL) || repository.isScope(IRepositoryRegistry.SCOPE_WORKSPACE)) {
+      } else if (repository.isScope(IRepositoryRegistry.SCOPE_LOCAL)) {
+        details = NexusIndex.DETAILS_MIN;
+      } else if (repository.isScope(IRepositoryRegistry.SCOPE_WORKSPACE)) {
         details = NexusIndex.DETAILS_MIN;
       } else {
         details = NexusIndex.DETAILS_DISABLED;
