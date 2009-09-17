@@ -770,7 +770,11 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
     public void widgetSelected(SelectionEvent e) {
       this.showLastVersion = showLastVersionButton.getSelection();
       viewer.refresh();
-      viewer.reveal(getArchetype());
+      Archetype archetype = getArchetype();
+      //can be null in some cases, don't try to reveal
+      if(archetype != null){
+        viewer.reveal(archetype);
+      }
       viewer.getTable().setSelection(viewer.getTable().getSelectionIndex());
       viewer.getTable().setFocus();
     }
