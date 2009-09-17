@@ -584,6 +584,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
     }
     getShell().pack(true);
     tableData.widthHint = oldHint;
+    selectArchetype(groupId, artifactId, version);
   }
 
   protected void selectArchetype(String groupId, String artifactId, String version) {
@@ -591,8 +592,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
 
     Table table = viewer.getTable();
     if(archetype != null) {
-      viewer.setSelection(new StructuredSelection(archetype));
-      viewer.reveal(archetype);
+      viewer.setSelection(new StructuredSelection(archetype) , true);
 
       int n = table.getSelectionIndex();
       table.setSelection(n);
@@ -667,6 +667,18 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
                   IIndex.NOT_PRESENT, IIndex.NOT_PRESENT);
 
               loadArchetypes(archetypeGroupId, archetypeArtifactId, archetypeVersion);
+            } else {  
+              final Artifact pom = pomArtifact;
+              //the user tried to add an archetype that couldn't be resolved on the server
+              getShell().getDisplay().asyncExec(new Runnable() {
+                public void run() {
+                  if(pom != null){
+                    setErrorMessage("The archetype "+pom.toString()+" could not be resolved.");
+                  } else {
+                    setErrorMessage("The specified archetype could not be resolved");
+                  }
+                }
+              });
             }
             
           } catch(InterruptedException ex) {
