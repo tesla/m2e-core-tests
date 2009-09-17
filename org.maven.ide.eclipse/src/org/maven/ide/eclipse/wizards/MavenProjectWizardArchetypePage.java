@@ -645,7 +645,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
             File pomFile = pomArtifact.getFile();
             if(pomFile.exists()) {
               monitor.subTask("resolving JAR...");
-              Artifact jarArtifact = maven.resolve(archetypeGroupId, archetypeArtifactId, archetypeVersion, null, "jar", remoteRepositories, monitor);
+              Artifact jarArtifact = maven.resolve(archetypeGroupId, archetypeArtifactId, archetypeVersion, "jar", null, remoteRepositories, monitor);
               monitor.worked(1);
               if(monitor.isCanceled()) {
                 throw new InterruptedException();
@@ -654,7 +654,6 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
               File jarFile = jarArtifact.getFile();
 
               monitor.subTask("reading project...");
-              maven.readProject(pomFile, monitor); // TODO what's the point of this?
               monitor.worked(1);
               if(monitor.isCanceled()) {
                 throw new InterruptedException();
@@ -666,7 +665,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
               localIndex.addArtifact(jarFile, //
                   new ArtifactKey(pomArtifact), jarFile.length(), jarFile.lastModified(), jarFile, //
                   IIndex.NOT_PRESENT, IIndex.NOT_PRESENT);
-              
+
               loadArchetypes(archetypeGroupId, archetypeArtifactId, archetypeVersion);
             }
             

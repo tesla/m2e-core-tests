@@ -407,6 +407,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
       }
     }
     request.setArtifact(artifact);
+    request.setTransferListener(createTransferListener(monitor));
 
     ArtifactResolutionResult result = repositorySystem.resolve(request);
 
