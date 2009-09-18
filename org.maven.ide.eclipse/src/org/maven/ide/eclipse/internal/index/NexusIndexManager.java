@@ -63,7 +63,6 @@ import org.sonatype.nexus.index.FlatSearchResponse;
 import org.sonatype.nexus.index.NexusIndexer;
 import org.sonatype.nexus.index.context.IndexCreator;
 import org.sonatype.nexus.index.context.IndexingContext;
-import org.sonatype.nexus.index.creator.JarFileContentsIndexCreator;
 import org.sonatype.nexus.index.locator.PomLocator;
 import org.sonatype.nexus.index.updater.IndexUpdateRequest;
 import org.sonatype.nexus.index.updater.IndexUpdater;
@@ -466,14 +465,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     try {
       ArtifactContext artifactContext = getArtifactContext(file, documentKey, size, date, //
           sourceExists, javadocExists, context.getRepositoryId());
-      
-      //pulls the packaging info out and adds it to artifact info
-      //necessary for archetype creation
-      JarFileContentsIndexCreator c = new JarFileContentsIndexCreator();
-      c.populateArtifactInfo(artifactContext);
-      
       addArtifactToIndex(context, artifactContext);
-
     } catch(Exception ex) {
       String msg = "Unable to add " + documentKey;
       console.logError(msg + "; " + ex.getMessage());
