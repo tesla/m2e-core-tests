@@ -83,15 +83,18 @@ import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.index.IIndex;
 import org.maven.ide.eclipse.index.IMutableIndex;
+import org.maven.ide.eclipse.index.IndexListener;
 import org.maven.ide.eclipse.index.IndexManager;
+import org.maven.ide.eclipse.internal.index.NexusIndexManager;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
+import org.maven.ide.eclipse.repository.IRepository;
 
 
 /**
  * Maven Archetype selection wizard page presents the user with a list of available Maven
  * Archetypes available for creating new project.
  */
-public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
+public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage implements IndexListener {
 
   private static final String KEY_CATALOG = "catalog";
 
@@ -166,7 +169,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
 
     createAdvancedSettings(composite, new GridData(SWT.FILL, SWT.TOP, true, false, 3, 1));
 
-
+    ((NexusIndexManager)MavenPlugin.getDefault().getIndexManager()).addIndexListener(this);
     setControl(composite);
   }
 
@@ -217,11 +220,15 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
           catalogFactory = (ArchetypeCatalogFactory) ((IStructuredSelection) selection).getFirstElement();
           boolean canModifyCatalog = NexusIndexerCatalogFactory.ID.equals(catalogFactory.getId());
           addArchetypeButton.setEnabled(canModifyCatalog);
-          loadArchetypes("org.apache.maven.archetypes", "maven-archetype-quickstart", "1.0");
+          reloadViewer();
         } else {
           catalogFactory = null;
           addArchetypeButton.setEnabled(false);
           loadArchetypes(null, null, null);
+        }
+        //remember what was switched to here
+        if(dialogSettings != null && catalogFactory!=null) {
+          dialogSettings.put(KEY_CATALOG, catalogFactory.getId());
         }
       }
     });
@@ -388,10 +395,12 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
     composite2.setLayout(gridLayout2);
 
     descriptionText = new Text(composite2, SWT.WRAP | SWT.V_SCROLL | SWT.READ_ONLY | SWT.MULTI | SWT.BORDER);
+    
     GridData descriptionTextData = new GridData(SWT.FILL, SWT.FILL, true, true);
     descriptionTextData.heightHint = 40;
     descriptionText.setLayoutData(descriptionTextData);
-
+    //whole dialog resizes badly without the width hint to the desc text
+    descriptionTextData.widthHint = 250;
     sashForm.setWeights(new int[] {80, 20});
 
     Composite buttonComposite = new Composite(parent, SWT.NONE);
@@ -435,9 +444,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
   }
 
   public void dispose() {
-    if(dialogSettings != null && catalogFactory!=null) {
-      dialogSettings.put(KEY_CATALOG, catalogFactory.getId());
-    }
+    ((NexusIndexManager)MavenPlugin.getDefault().getIndexManager()).removeIndexListener(this);
     super.dispose();
   }
   
@@ -552,8 +559,6 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
       if(selected != null) {
         viewer.reveal(selected);
       }
-      
-      
     }
   }
 
@@ -584,7 +589,6 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
     }
     getShell().pack(true);
     tableData.widthHint = oldHint;
-    selectArchetype(groupId, artifactId, version);
   }
 
   protected void selectArchetype(String groupId, String artifactId, String version) {
@@ -793,16 +797,50 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage {
   }
 
   /* (non-Javadoc)
-   * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
+   * @see org.maven.ide.eclipse.index.IndexListener#indexAdded(org.maven.ide.eclipse.repository.IRepository)
    */
-//  public void propertyChange(PropertyChangeEvent event) {
-//    if(IMavenConstants.INDEX_UPDATE_PROP.equals(event.getProperty())){
-//      Display.getDefault().asyncExec(new Runnable(){
-//        public void run(){
-//          loadArchetypes("org.apache.maven.archetypes", "maven-archetype-quickstart", "1.0");
-//        }
-//      });
-//    }
-//  }
+  public void indexAdded(IRepository repository) {
+    
+  }
+
+  //reload the table when index updating finishes
+  //try to preserve selection in case this is a rebuild 
+  protected void reloadViewer(){
+    Display.getDefault().asyncExec(new Runnable(){
+      public void run(){
+        if(isCurrentPage()){     
+          StructuredSelection sel = (StructuredSelection)viewer.getSelection();
+          Archetype selArchetype = null;
+          if(sel != null && sel.getFirstElement() != null){
+            selArchetype = (Archetype)sel.getFirstElement();
+          }
+          if(selArchetype  != null){
+            loadArchetypes(selArchetype.getGroupId(), selArchetype.getArtifactId(), selArchetype.getVersion());
+          } else {
+            loadArchetypes("org.apache.maven.archetypes", "maven-archetype-quickstart", "1.0");
+          }
+        }
+      }
+    });
+  }
+  /* (non-Javadoc)
+   * @see org.maven.ide.eclipse.index.IndexListener#indexChanged(org.maven.ide.eclipse.repository.IRepository)
+   */
+  public void indexChanged(IRepository repository) {
+    reloadViewer();
+  }
+
+  /* (non-Javadoc)
+   * @see org.maven.ide.eclipse.index.IndexListener#indexRemoved(org.maven.ide.eclipse.repository.IRepository)
+   */
+  public void indexRemoved(IRepository repository) {
+  }
+
+  /* (non-Javadoc)
+   * @see org.maven.ide.eclipse.index.IndexListener#indexUpdating(org.maven.ide.eclipse.repository.IRepository)
+   */
+  public void indexUpdating(IRepository repository) {
+  }
+
 
 }
