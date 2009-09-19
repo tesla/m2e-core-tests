@@ -80,6 +80,7 @@ import com.windowtester.runtime.IUIContext;
 import com.windowtester.runtime.WT;
 import com.windowtester.runtime.WaitTimedOutException;
 import com.windowtester.runtime.WidgetSearchException;
+import com.windowtester.runtime.condition.IsEnabledCondition;
 import com.windowtester.runtime.locator.IWidgetLocator;
 import com.windowtester.runtime.swt.UITestCaseSWT;
 import com.windowtester.runtime.swt.condition.SWTIdleCondition;
@@ -95,6 +96,7 @@ import com.windowtester.runtime.swt.locator.MenuItemLocator;
 import com.windowtester.runtime.swt.locator.NamedWidgetLocator;
 import com.windowtester.runtime.swt.locator.SWTWidgetLocator;
 import com.windowtester.runtime.swt.locator.TableCellLocator;
+import com.windowtester.runtime.swt.locator.TextLocator;
 import com.windowtester.runtime.swt.locator.TreeItemLocator;
 import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
 import com.windowtester.runtime.util.ScreenCapture;
@@ -394,14 +396,37 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
   }
 
   protected void findText(String src) throws WaitTimedOutException, WidgetSearchException {
+    findTextWithWrap(src, false);
+  }
+
+  protected void findTextWithWrap(String src, boolean wrap) throws WaitTimedOutException, WidgetSearchException{
     getUI().keyClick(SWT.CTRL, 'f');
     getUI().wait(new ShellShowingCondition(FIND_REPLACE));
     getUI().enterText(src);
+    if(wrap){
+      getUI().click(new ButtonLocator("Wrap search"));
+    }
     getUI().keyClick(WT.CR); // "find"
     getUI().close(new SWTWidgetLocator(Shell.class, FIND_REPLACE));
     getUI().wait(new ShellDisposedCondition(FIND_REPLACE));
   }
-
+ 
+  protected boolean searchForText(String src, boolean wrap) throws WaitTimedOutException, WidgetSearchException{
+    getUI().keyClick(SWT.CTRL, 'f');
+    getUI().wait(new ShellShowingCondition(FIND_REPLACE));
+    getUI().enterText(src);
+    getUI().keyClick(WT.TAB);
+    getUI().enterText("xxxxx");
+    if(wrap){
+      getUI().click(new ButtonLocator("Wrap search"));
+    }
+    getUI().click(new ButtonLocator("Find"));
+    
+    getUI().wait(new SWTIdleCondition());
+    getUI().assertThat(new IsEnabledCondition(new ButtonLocator("&Replace")));
+    return true;
+    
+  }
   protected void replaceTextWithClick(String src, String target) throws WaitTimedOutException, WidgetSearchException {
     getUI().click(new MenuItemLocator("Edit/Find\\\\/Replace..."));
     getUI().wait(new ShellShowingCondition("Find/Replace"));
