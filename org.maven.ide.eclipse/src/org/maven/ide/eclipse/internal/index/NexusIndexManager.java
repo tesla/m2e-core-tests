@@ -624,23 +624,27 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
      */
 
     IndexingContext context = getIndexingContext(repositoryRegistry.getWorkspaceRepository());
+    
+    if (context != null) {
+      // workspace indexing context can by null during startup due to MNGECLIPSE-1633
 
-    for(MavenProjectChangedEvent event : events) {
-      try {
-        IMavenProjectFacade oldFacade = event.getOldMavenProject();
-        if (oldFacade != null) {
-          ArtifactContext artifactContext = getArtifactContext(oldFacade, monitor);
-          getIndexer().deleteArtifactFromIndex(artifactContext, context);
+      for(MavenProjectChangedEvent event : events) {
+        try {
+          IMavenProjectFacade oldFacade = event.getOldMavenProject();
+          if (oldFacade != null) {
+            ArtifactContext artifactContext = getArtifactContext(oldFacade, monitor);
+            getIndexer().deleteArtifactFromIndex(artifactContext, context);
+          }
+          IMavenProjectFacade facade = event.getMavenProject();
+          if(facade != null) {
+            ArtifactContext artifactContext = getArtifactContext(facade, monitor);
+            getIndexer().addArtifactToIndex(artifactContext, context);
+          }
+        } catch (CoreException e) {
+          MavenLogger.log(e);
+        } catch(IOException ex) {
+          MavenLogger.log("Could not update workspace index", ex);
         }
-        IMavenProjectFacade facade = event.getMavenProject();
-        if(facade != null) {
-          ArtifactContext artifactContext = getArtifactContext(facade, monitor);
-          getIndexer().addArtifactToIndex(artifactContext, context);
-        }
-      } catch (CoreException e) {
-        MavenLogger.log(e);
-      } catch(IOException ex) {
-        MavenLogger.log("Could not update workspace index", ex);
       }
     }
   }
