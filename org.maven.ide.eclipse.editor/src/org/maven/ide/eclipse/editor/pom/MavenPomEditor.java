@@ -1052,8 +1052,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
               changed[0] = true;
             }
           };
-
-          if (sourcePage != null) {
+          if (sourcePage != null && sourcePage.getTextViewer() != null) {
             sourcePage.getTextViewer().addTextListener(listener);
             try {
               sourcePage.safelySanityCheckState(getEditorInput());
