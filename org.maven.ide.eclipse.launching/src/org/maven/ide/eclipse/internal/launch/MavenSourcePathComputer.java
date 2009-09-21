@@ -159,15 +159,20 @@ public class MavenSourcePathComputer implements ISourcePathComputer {
     }
   }
 
-  private File getSourcesJar(String groupId, String artifactId, String version) throws CoreException {
+  private File getSourcesJar(String groupId, String artifactId, String version) {
     if (groupId != null && artifactId != null && version != null) {
       IMaven maven = MavenPlugin.lookup(IMaven.class);
 
-      Artifact artifact = maven.resolve(groupId, artifactId, version, "jar", "sources", null, null);
-      File file = artifact.getFile();
-      
-      if (file != null && file.exists() && file.canRead()) {
-        return file;
+      try {
+        Artifact artifact = maven.resolve(groupId, artifactId, version, "jar", "sources", null, null);
+        File file = artifact.getFile();
+        
+        if (file != null && file.exists() && file.canRead()) {
+          return file;
+        }
+      } catch(CoreException ex) {
+        // artifact not found, most likely... 
+        // TODO add special status code so it is possible to know for sure 
       }
     }
 
