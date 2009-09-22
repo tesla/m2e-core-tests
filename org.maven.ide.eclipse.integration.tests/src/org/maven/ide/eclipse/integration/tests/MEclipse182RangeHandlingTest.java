@@ -66,8 +66,7 @@ public class MEclipse182RangeHandlingTest extends UIIntegrationTestCase {
     replaceText("1.0-SNAPSHOT", "[1.0-SNAPSHOT,2.0-SNAPSHOT)");
 
     ui.keyClick(SWT.MOD1, 's');
-    Thread.sleep(5000);
-    ui.wait(new JobsCompleteCondition(), 240000);
+    waitForAllBuildsToComplete();
 
     // Original project should now be using workspace project, this should cause a compile error.
     IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("project");
