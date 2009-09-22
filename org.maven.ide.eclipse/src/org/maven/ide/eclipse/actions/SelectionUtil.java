@@ -314,6 +314,8 @@ public class SelectionUtil {
     MavenExecutionRequest request = maven.createExecutionRequest(monitor);
     request.setOffline(false);
     request.setUpdateSnapshots(false);
+    request.setRecursive(false);
+    request.setPom(pomFile);
 
     MavenExecutionResult result = maven.execute(request, monitor);
 
