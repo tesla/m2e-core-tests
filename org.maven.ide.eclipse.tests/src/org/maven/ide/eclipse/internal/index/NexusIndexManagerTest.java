@@ -122,7 +122,14 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
     //after the project is created, there should be the project root group
     rootGroups = indexManager.getRootGroups(workspaceRepository);
     assertTrue(rootGroups.length > 0);
-    assertEquals("resourcefiltering", rootGroups[0].getPrefix());
+    
+    boolean containsResourceFiltering = false;
+    for(IndexedArtifactGroup group : rootGroups){
+      if("resourcefiltering".equals(group.getPrefix())){
+        containsResourceFiltering = true;
+      }
+    }
+    assertTrue(containsResourceFiltering);
 
     Map<String, IndexedArtifact> search = indexManager.search(workspaceRepository, "p005", IIndex.SEARCH_ARTIFACT, 0);
     assertEquals(1, search.size());
