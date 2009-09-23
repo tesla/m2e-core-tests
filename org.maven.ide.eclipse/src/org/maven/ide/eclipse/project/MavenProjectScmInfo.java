@@ -19,6 +19,9 @@ public class MavenProjectScmInfo extends MavenProjectInfo {
   private final String folderUrl;
   private final String repositoryUrl;
   private final String revision;
+  
+  private String username;
+  private String password;
 
   public MavenProjectScmInfo(String label, Model model, MavenProjectInfo parent, //
       String revision, String folderUrl, String repositoryUrl) {
@@ -55,5 +58,19 @@ public class MavenProjectScmInfo extends MavenProjectInfo {
   public String toString() {
     return getLabel() + " " + folderUrl;
   }
-  
+
+  public String getUsername() {
+    return username;
+  }
+  public void setUsername(String username) {
+    this.username = username;
+  }
+
+  public String getPassword() {
+    return password;
+  }
+  public void setPassword(String password) {
+    this.password = password;
+  }
+
 }
