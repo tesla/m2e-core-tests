@@ -164,7 +164,7 @@ public class RepositoryInfo implements IRepository {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     if (id != null) {
-      sb.append(id);
+      sb.append(id).append('|');
     }
     sb.append(repositoryUrl);
     return sb.toString();
