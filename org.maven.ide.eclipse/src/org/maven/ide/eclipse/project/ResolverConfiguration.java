@@ -49,10 +49,13 @@ public class ResolverConfiguration implements Serializable {
 //    this.useMavenOutputFolders = useMavenOutputFolders;
 //  }
 
+  /**
+   * @deprecated see {@link #setIncludeModules(boolean)}
+   */
   public boolean shouldIncludeModules() {
     return this.includeModules;
   }
-  
+
   public boolean shouldResolveWorkspaceProjects() {
     return this.resolveWorkspaceProjects;
   }
@@ -72,6 +75,10 @@ public class ResolverConfiguration implements Serializable {
     this.resolveWorkspaceProjects = resolveWorkspaceProjects;
   }
   
+  /**
+   * @deprecated ability to map multiple Maven modules to a single workspace project
+   *    is unsupported and will likely be removed in future m2e versions
+   */
   public void setIncludeModules(boolean includeModules) {
     this.includeModules = includeModules;
   }
@@ -80,26 +87,44 @@ public class ResolverConfiguration implements Serializable {
     this.activeProfiles = activeProfiles;
   }
   
+  /**
+   * @deprecated only applies to GenericLifecycleMapping 
+   */
   public String getResourceFilteringGoals() {
     return resourceFilteringGoals;
   }
   
+  /**
+   * @deprecated only applies to GenericLifecycleMapping 
+   */
   public void setResourceFilteringGoals(String resourceFilteringGoals) {
     this.resourceFilteringGoals = resourceFilteringGoals;
   }
 
+  /**
+   * @deprecated only applies to GenericLifecycleMapping 
+   */
   public String getFullBuildGoals() {
     return fullBuildGoals;
   }
 
+  /**
+   * @deprecated only applies to GenericLifecycleMapping 
+   */
   public void setFullBuildGoals(String fullBuildGoals) {
     this.fullBuildGoals = fullBuildGoals;
   }
 
+  /**
+   * @deprecated only applies to GenericLifecycleMapping 
+   */
   public boolean isSkipCompiler() {
     return this.skipCompiler;
   }
   
+  /**
+   * @deprecated only applies to GenericLifecycleMapping 
+   */
   public void setSkipCompiler(boolean skipCompiler) {
     this.skipCompiler = skipCompiler;
   }
