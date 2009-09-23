@@ -63,6 +63,10 @@ import org.sonatype.nexus.index.FlatSearchResponse;
 import org.sonatype.nexus.index.NexusIndexer;
 import org.sonatype.nexus.index.context.IndexCreator;
 import org.sonatype.nexus.index.context.IndexingContext;
+import org.sonatype.nexus.index.creator.JarFileContentsIndexCreator;
+import org.sonatype.nexus.index.creator.MavenArchetypeArtifactInfoIndexCreator;
+import org.sonatype.nexus.index.creator.MavenPluginArtifactInfoIndexCreator;
+import org.sonatype.nexus.index.creator.MinimalArtifactInfoIndexCreator;
 import org.sonatype.nexus.index.locator.PomLocator;
 import org.sonatype.nexus.index.updater.IndexUpdateRequest;
 import org.sonatype.nexus.index.updater.IndexUpdater;
@@ -165,11 +169,16 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     if(fullCreators == null) {
       try {
         PlexusContainer container = MavenPlugin.getDefault().getPlexusContainer();
-        IndexCreator min = container.lookup(IndexCreator.class, "min");
-        IndexCreator jar = container.lookup(IndexCreator.class, "jarContent");
+        IndexCreator min = container.lookup( IndexCreator.class, MinimalArtifactInfoIndexCreator.ID );
+        IndexCreator mavenPlugin = container.lookup( IndexCreator.class, MavenPluginArtifactInfoIndexCreator.ID );
+        IndexCreator mavenArchetype = container.lookup( IndexCreator.class, MavenArchetypeArtifactInfoIndexCreator.ID );
+        IndexCreator jar = container.lookup( IndexCreator.class, JarFileContentsIndexCreator.ID );
+        
         fullCreators = new ArrayList<IndexCreator>();
         fullCreators.add(min);
         fullCreators.add(jar);
+        fullCreators.add(mavenPlugin);      
+        fullCreators.add(mavenArchetype);
       } catch(ComponentLookupException ce) {
         String msg = "Error looking up component ";
         console.logError(msg + "; " + ce.getMessage());
@@ -179,13 +188,16 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
     return fullCreators;
   }
+  
   private ArrayList<IndexCreator> getMinCreator() {
     if(minCreators == null) {
       try {
         PlexusContainer container = MavenPlugin.getDefault().getPlexusContainer();
-        IndexCreator min = container.lookup(IndexCreator.class, "min");
+        IndexCreator min = container.lookup( IndexCreator.class, MinimalArtifactInfoIndexCreator.ID );
+        IndexCreator mavenArchetype = container.lookup( IndexCreator.class, MavenArchetypeArtifactInfoIndexCreator.ID );
         minCreators = new ArrayList<IndexCreator>();
         minCreators.add(min);
+        minCreators.add(mavenArchetype);
       } catch(ComponentLookupException ce) {
         String msg = "Error looking up component ";
         MavenLogger.log(msg, ce);
@@ -522,8 +534,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     } else if(file.getName().endsWith(".pom")) {
       pomFile = file;
       String path = file.getAbsolutePath();
-      artifactFile = new File(path.substring(0, path.length()-4) + ".jar");
-    
+      artifactFile = new File(path.substring(0, path.length()-4) + ".jar");  
     } else {
       pomFile = new PomLocator().locate( file, gavCalculator, gav );
       artifactFile = file;
