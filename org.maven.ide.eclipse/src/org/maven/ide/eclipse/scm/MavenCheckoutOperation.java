@@ -9,7 +9,6 @@
 package org.maven.ide.eclipse.scm;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -17,10 +16,8 @@ import java.util.List;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 
 import org.maven.ide.eclipse.core.MavenConsole;
-import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.project.MavenProjectScmInfo;
 
 
@@ -29,7 +26,7 @@ import org.maven.ide.eclipse.project.MavenProjectScmInfo;
  * 
  * @author Eugene Kuleshov
  */
-public class MavenCheckoutOperation implements IRunnableWithProgress {
+public class MavenCheckoutOperation {
 
   private final MavenConsole console;
   
@@ -45,7 +42,7 @@ public class MavenCheckoutOperation implements IRunnableWithProgress {
     this.console = console;
   }
 
-  public void run(IProgressMonitor monitor) throws InterruptedException, InvocationTargetException {
+  public void run(IProgressMonitor monitor) throws InterruptedException, CoreException {
     List<MavenProjectScmInfo> flatProjects = new ArrayList<MavenProjectScmInfo>();
 
     // sort nested projects
@@ -78,29 +75,22 @@ public class MavenCheckoutOperation implements IRunnableWithProgress {
       if(monitor.isCanceled()) {
         throw new InterruptedException();
       }
-      
-      monitor.setTaskName("Checking out " + info.getLabel() + " " + info.getFolderUrl());
-      
-      try {
-        // XXX if location is pointing to workspace folder need to create unique dir too 
-        File workspaceRoot = ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile();
-        File location = getUniqueDir(this.location == null ? workspaceRoot : this.location);
 
-        ScmHandler handler = ScmHandlerFactory.getHandler(info.getFolderUrl());
-        if(handler == null) {
-          String msg = "SCM provider is not available for " + info.getFolderUrl();
-          console.logError(msg);
-        } else {
-          handler.checkoutProject(info, location, monitor);
-          locations.add(location.getAbsolutePath());
-        }
-        
-      } catch(CoreException ex) {
-        String msg = "Checkout error; " + (ex.getMessage() == null ? ex.toString() : ex.getMessage());
+      monitor.setTaskName("Checking out " + info.getLabel() + " " + info.getFolderUrl());
+
+      // XXX if location is pointing to workspace folder need to create unique dir too 
+      File workspaceRoot = ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile();
+      File location = getUniqueDir(this.location == null ? workspaceRoot : this.location);
+
+      ScmHandler handler = ScmHandlerFactory.getHandler(info.getFolderUrl());
+      if(handler == null) {
+        String msg = "SCM provider is not available for " + info.getFolderUrl();
         console.logError(msg);
-        MavenLogger.log(msg, ex);
-        throw new InvocationTargetException(ex);
+      } else {
+        handler.checkoutProject(info, location, monitor);
+        locations.add(location.getAbsolutePath());
       }
+
     }
 
     /*

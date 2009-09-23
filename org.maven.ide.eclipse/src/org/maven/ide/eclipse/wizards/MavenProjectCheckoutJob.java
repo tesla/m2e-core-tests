@@ -10,7 +10,6 @@ package org.maven.ide.eclipse.wizards;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -46,7 +45,6 @@ import org.apache.maven.model.Model;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.OpenMavenConsoleAction;
-import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
@@ -134,13 +132,6 @@ public abstract class MavenProjectCheckoutJob extends WorkspaceJob {
 
     } catch(InterruptedException ex) {
       return Status.CANCEL_STATUS;
-
-    } catch(InvocationTargetException ex) {
-      Throwable cause = ex.getTargetException() == null ? ex : ex.getTargetException();
-      if(cause instanceof CoreException) {
-        return ((CoreException) cause).getStatus();
-      }
-      return new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, 0, cause.toString(), cause);
     }
   }
 
