@@ -101,7 +101,6 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
     String projectRepo = "EclipseProjectRepo";
     boolean hasProjectRepo = false;
     for(IRepository repo : repositories){
-      System.out.println(repo.getId());
       if(projectRepo.equals(repo.getId())){
         hasProjectRepo = true;
       }
