@@ -18,5 +18,16 @@
       </testResource>
     </testResources>
   </build>
-
+  <repositories>
+  	<repository>
+        <id>EclipseProjectRepo</id>
+        <url>"http://repository.sonatype.org/content/repositories/eclipse"</url>
+        <releases>
+           <enabled>true</enabled>
+        </releases>
+        <snapshots>
+          <enabled>true</enabled>
+        </snapshots>        
+     </repository>
+  </repositories>
 </project>
