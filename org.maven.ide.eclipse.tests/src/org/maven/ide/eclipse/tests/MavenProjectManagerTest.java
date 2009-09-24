@@ -23,6 +23,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.maven.ide.eclipse.MavenPlugin;
@@ -828,6 +829,20 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     ArrayList<ArtifactRef> a1 = new ArrayList<ArtifactRef>(f1.getMavenProjectArtifacts());
     assertEquals(2, a1.size());
     assertEquals("junit", a1.get(1).getArtifactId());
+  }
+
+  public void testWorkspaceDependencyVersionRange() throws Exception {
+    IProject[] projects = importProjects("projects/versionrange", 
+        new String[] {"p001/pom.xml", "p002/pom.xml"}, 
+        new ResolverConfiguration());
+    waitForJobsToComplete();
+
+    IMavenProjectFacade f1 = manager.create(projects[0], monitor);
+    MavenProject p1 = f1.getMavenProject(monitor);
+    ArrayList<Artifact> a1 = new ArrayList<Artifact>(p1.getArtifacts());
+    assertEquals(1, a1.size());
+
+    assertEquals(projects[1].getLocation().append("target/classes").toFile(), a1.get(0).getFile());
   }
 
 }

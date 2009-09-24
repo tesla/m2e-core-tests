@@ -8,6 +8,9 @@
 
 package org.maven.ide.eclipse.internal.project;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -111,5 +114,31 @@ public final class EclipseWorkspaceArtifactRepository extends LocalArtifactRepos
 
   public boolean equals(Object obj) {
     return obj instanceof EclipseWorkspaceArtifactRepository;
+  }
+  
+  @Override
+  public List<String> findVersions(Artifact artifact) {
+    ArrayList<String> versions = new ArrayList<String>();
+
+    if (isDisabled()) {
+      return versions;
+    }
+
+    if(context == null) { // XXX this is actually a bug 
+      return versions;
+    }
+    
+    if (artifact == null) {
+      return versions;
+    }
+
+    for (MavenProjectFacade facade : context.state.getProjects()) {
+      ArtifactKey artifactKey = facade.getArtifactKey();
+      if (artifact.getGroupId().equals(artifactKey.getGroupId()) && artifact.getArtifactId().equals(artifactKey.getArtifactId())) {
+        versions.add(artifactKey.getVersion());
+      }
+    }
+
+    return versions;
   }
 }
