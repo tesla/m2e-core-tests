@@ -118,7 +118,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
    */
   private static final String SERVERS_VIEW_ID = "org.eclipse.wst.server.ui.ServersView";
 
-  private static final String PLUGIN_ID = "org.maven.ide.eclipse.integration.tests";
+  protected static final String PLUGIN_ID = "org.maven.ide.eclipse.integration.tests";
 
   // Has the maven central index been cached into local workspace?
   private static boolean indexDownloaded = true;
