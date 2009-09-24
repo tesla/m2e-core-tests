@@ -282,8 +282,8 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
    * respectively, is displayed to the user. If the user input is complete and correct, the wizard page is marked as
    * begin complete to allow the wizard to proceed. To that end, the following conditions must be met:
    * <ul>
-   * <li>The user must have provided a group ID.</li>
-   * <li>The user must have provided an artifact ID.</li>
+   * <li>The user must have provided a valid group ID.</li>
+   * <li>The user must have provided a valid artifact ID.</li>
    * <li>The user must have provided a version for the artifact.</li>
    * </ul>
    * </p>
@@ -293,23 +293,39 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
    * @see org.eclipse.jface.wizard.WizardPage#setPageComplete(boolean)
    */
   void validate() {
-    if(groupIdCombo.getText().trim().length() == 0) {
+    String groupIdValue = groupIdCombo.getText().trim();
+    if(groupIdValue.length() == 0) {
       setErrorMessage(Messages.getString("wizard.project.page.maven2.validator.groupID"));
       setPageComplete(false);
       return;
     }
-
-    if(artifactIdCombo.getText().trim().length() == 0) {
+    //check validity of groupId
+    if(groupIdValue.contains(" ")){
+      setErrorMessage("Group Id cannot contain spaces.");
+      setPageComplete(false);
+      return;
+    }
+    
+    String artifactIdValue = artifactIdCombo.getText().trim();
+    if(artifactIdValue.length() == 0) {
       setErrorMessage(Messages.getString("wizard.project.page.maven2.validator.artifactID"));
       setPageComplete(false);
       return;
     }
+    //check validity of artifactId
+    if(artifactIdValue.contains(" ")){
+      setErrorMessage("Artifact Id cannot contain spaces.");
+      setPageComplete(false);
+      return;
+    }
 
-    if(versionCombo.getText().trim().length() == 0) {
+    String versionValue = versionCombo.getText().trim();
+    if(versionValue.length() == 0) {
       setErrorMessage(Messages.getString("wizard.project.page.maven2.validator.version"));
       setPageComplete(false);
       return;
     }
+    //TODO: check validity of version?
 
     String packageName = packageCombo.getText();
     if(packageName.trim().length() != 0) {
