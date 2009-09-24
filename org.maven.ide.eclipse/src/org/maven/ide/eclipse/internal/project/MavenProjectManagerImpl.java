@@ -549,12 +549,10 @@ public class MavenProjectManagerImpl {
 
   private void addMissingProjectDependencies(MutableProjectRegistry state, IFile pom, MavenExecutionResult executionResult) {
     ArtifactResolutionResult resolutionResult = executionResult.getArtifactResolutionResult();
-    if (resolutionResult != null && resolutionResult.getRequestedArtifacts() != null) {
-      for (Artifact artifact : resolutionResult.getRequestedArtifacts()) {
-        if (!artifact.isResolved()) {
-          ArtifactKey dependencyKey = new ArtifactKey(artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion(), null);
-          state.addProjectDependency(pom, dependencyKey, true);
-        }
+    if (resolutionResult != null && resolutionResult.getMissingArtifacts() != null) {
+      for (Artifact artifact : resolutionResult.getMissingArtifacts()) {
+        ArtifactKey dependencyKey = new ArtifactKey(artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion(), null);
+        state.addProjectDependency(pom, dependencyKey, true);
       }
     }
   }
