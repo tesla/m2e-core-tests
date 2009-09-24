@@ -93,14 +93,20 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
   }
   
   public void testProjectIndexes() throws Exception {
-    IProject project = createExisting("resourcefiltering-p005", "projects/resourcefiltering/p005");
+    createExisting("resourcefiltering-p009", "projects/resourcefiltering/p009");
     waitForJobsToComplete();
     
-    IIndex index = indexManager.getIndex(project);
-    assertNotNull(index);
-    //there should be some global indices too
-    IIndex globalIndices = indexManager.getIndex((IProject)null);
-    assertNotNull(globalIndices);
+    List<IRepository> repositories = repositoryRegistry.getRepositories(IRepositoryRegistry.SCOPE_PROJECT);
+    assertTrue(repositories.size() > 0);
+    String projectRepo = "EclipseProjectRepo";
+    boolean hasProjectRepo = false;
+    for(IRepository repo : repositories){
+      System.out.println(repo.getId());
+      if(projectRepo.equals(repo.getId())){
+        hasProjectRepo = true;
+      }
+    }
+    assertTrue(hasProjectRepo);
   }
   
   public void testWorkspaceIndex() throws Exception {
