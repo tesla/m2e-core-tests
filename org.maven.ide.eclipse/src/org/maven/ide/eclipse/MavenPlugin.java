@@ -345,7 +345,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     this.repositoryRegistry.addRepositoryIndexer(indexManager);
     this.repositoryRegistry.addRepositoryDiscoverer(new IndexesExtensionReader(indexManager));
     this.repositoryRegistry.updateRegistry();
-
+    this.projectManager.addMavenProjectChangedListener(repositoryRegistry);  
     this.getPreferenceStore().setValue(PREFS_NO_REBUILD_ON_START, true);
     checkJdk();
   }
@@ -376,6 +376,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
     this.projectManager.removeMavenProjectChangedListener(this.configurationManager);
     this.projectManager.removeMavenProjectChangedListener(indexManager);
+    this.projectManager.removeMavenProjectChangedListener(repositoryRegistry);
     this.projectManager = null;
 
     managerImpl.removeManagedCache((IManagedCache) mavenCore.lookup(MavenMetadataCache.class));
