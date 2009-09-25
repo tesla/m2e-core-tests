@@ -830,24 +830,18 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
       ui.wait(new ShellShowingCondition("New Project"));
       ui.click(new FilteredTreeItemLocator("Plug-in Project"));
       ui.click(new FilteredTreeItemLocator("Maven/Maven Project"));
+      //click the first next button
+      ui.click(new ButtonLocator("&Next >"));
+      //then the first page with only 'default' values
       ui.click(new ButtonLocator("&Next >"));
       
-      //click 'create a simple project'
-      //ui.click(new ButtonLocator("Create a &simple project (skip archetype selection)"));
-      
+      ui.wait(new SWTIdleCondition());
+      //now select the quickstart row
+      ui.click(new TableCellLocator(archetypeName, 2));
+      //and then click next
       ui.click(new ButtonLocator("&Next >"));
-      
-      IWidgetLocator catalogsCombo = ui.find(new NamedWidgetLocator("catalogsCombo"));
-      assertTrue(catalogsCombo != null);
-      ui.wait(new SWTIdleCondition());
-      ui.click(catalogsCombo);
-      ui.wait(new SWTIdleCondition());
-      IWidgetLocator find = ui.find(new ComboItemLocator("Internal", catalogsCombo));
-      ui.click(find);
-      ui.keyClick(WT.TAB);
-      ui.keyClick(WT.TAB);
-      ui.keyClick(WT.TAB);
 
+	  //then fill in the last page details
       IWidgetLocator groupCombo = ui.find(new NamedWidgetLocator("groupId"));
       ui.setFocus(groupCombo);
       
