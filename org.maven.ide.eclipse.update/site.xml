@@ -30,9 +30,6 @@
    <feature url="features/org.maven.ide.eclipse.cvs.feature_0.9.9.qualifier.jar" id="org.maven.ide.eclipse.cvs.feature" version="0.9.9.qualifier">
       <category name="Maven Optional Components"/>
    </feature>
-   <feature url="features/org.maven.ide.eclipse.doxia.feature_0.9.9.qualifier.jar" id="org.maven.ide.eclipse.doxia.feature" version="0.9.9.qualifier">
-      <category name="Maven Optional Components"/>
-   </feature>
    <feature url="features/org.maven.ide.eclipse.ajdt.feature_0.9.9.qualifier.jar" id="org.maven.ide.eclipse.ajdt.feature" version="0.9.9.qualifier">
       <category name="Maven Project Configurators"/>
    </feature>
