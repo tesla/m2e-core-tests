@@ -638,18 +638,19 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     
     if (context != null) {
       // workspace indexing context can by null during startup due to MNGECLIPSE-1633
-
       for(MavenProjectChangedEvent event : events) {
         try {
           IMavenProjectFacade oldFacade = event.getOldMavenProject();
           if (oldFacade != null) {
             ArtifactContext artifactContext = getArtifactContext(oldFacade, monitor);
             getIndexer().deleteArtifactFromIndex(artifactContext, context);
+            fireIndexRemoved(repositoryRegistry.getWorkspaceRepository());
           }
           IMavenProjectFacade facade = event.getMavenProject();
           if(facade != null) {
             ArtifactContext artifactContext = getArtifactContext(facade, monitor);
             getIndexer().addArtifactToIndex(artifactContext, context);
+            fireIndexAdded(repositoryRegistry.getWorkspaceRepository());
           }
         } catch (CoreException e) {
           MavenLogger.log(e);
@@ -818,10 +819,8 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       if(context == null) {
         return;
       }
-
       getIndexer().removeIndexingContext(context, false);
       fireIndexRemoved(repository);
-      
     } catch(IOException ie){
       String msg = "Unable to delete files for index";
       MavenLogger.log(msg, ie);
@@ -837,7 +836,10 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
   }
   public void fireIndexRemoved(IRepository repository){
     synchronized(updatingIndexes){
-      updatingIndexes.remove(repository.getUid());
+      if(repository != null){
+        //since workspace index can be null at startup, guard against nulls
+        updatingIndexes.remove(repository.getUid());
+      }
     }
     synchronized(indexListeners){
       for(IndexListener listener : indexListeners){
@@ -854,7 +856,10 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
 
   public void fireIndexUpdating(IRepository repository){
     synchronized(updatingIndexes){
-      updatingIndexes.add(repository.getUid());
+      if(repository != null){
+        //since workspace index can be null at startup, guard against nulls
+        updatingIndexes.add(repository.getUid());
+      }
     }    
     synchronized(indexListeners){
       for(IndexListener listener : indexListeners){
@@ -864,7 +869,11 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
   }
   public void fireIndexChanged(IRepository repository){
     synchronized(updatingIndexes){
-      updatingIndexes.remove(repository.getUid());
+      if(repository != null){
+        //since workspace index can be null at startup, guard against nulls
+        updatingIndexes.remove(repository.getUid());
+      }
+      
     }
     synchronized(indexListeners){
       for(IndexListener listener : indexListeners){
