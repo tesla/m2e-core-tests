@@ -209,7 +209,7 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
   private void createPropertiesGroup(Composite composite) {
     Label propertiesLabel = new Label(composite, SWT.NONE);
     propertiesLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 3, 1));
-    propertiesLabel.setText("Properties:");
+    propertiesLabel.setText("Properties available from archetype:");
 
     propertiesViewer = new TableViewer(composite, SWT.BORDER | SWT.FULL_SELECTION);
     propertiesTable = propertiesViewer.getTable();
@@ -543,6 +543,7 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
   }
 
   public Properties getProperties() {
+    this.getControl().setFocus();
     Properties properties = new Properties();
     for(int i = 0; i < propertiesTable.getItemCount(); i++ ) {
       TableItem item = propertiesTable.getItem(i);
