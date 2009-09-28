@@ -925,16 +925,18 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
 
       IndexingContext context = getIndexingContext(repository);
 
-      IndexUpdateRequest request = new IndexUpdateRequest(context);
-      request.setProxyInfo(maven.getProxyInfo(repository.getProtocol()));
-      request.setAuthenticationInfo(repository.getAuthenticationInfo());
-      request.setTransferListener(maven.createTransferListener(monitor));
-      request.setForceFullUpdate(force);
-      Date indexTime = getUpdater().fetchAndUpdateIndex(request);
-      if(indexTime==null) {
-        console.logMessage("No index update available for " + repository.toString());
-      } else {
-        console.logMessage("Updated index for " + repository.toString() + " " + indexTime);
+      if (context != null) {
+        IndexUpdateRequest request = new IndexUpdateRequest(context);
+        request.setProxyInfo(maven.getProxyInfo(repository.getProtocol()));
+        request.setAuthenticationInfo(repository.getAuthenticationInfo());
+        request.setTransferListener(maven.createTransferListener(monitor));
+        request.setForceFullUpdate(force);
+        Date indexTime = getUpdater().fetchAndUpdateIndex(request);
+        if(indexTime==null) {
+          console.logMessage("No index update available for " + repository.toString());
+        } else {
+          console.logMessage("Updated index for " + repository.toString() + " " + indexTime);
+        }
       }
     } catch (Exception ie){
       String msg = "Unable to update index for " + repository.toString();
