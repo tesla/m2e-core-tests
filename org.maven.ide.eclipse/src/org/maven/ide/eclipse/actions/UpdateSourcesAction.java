@@ -8,8 +8,10 @@
 
 package org.maven.ide.eclipse.actions;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
@@ -36,6 +38,7 @@ import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
+import org.maven.ide.eclipse.util.M2EUtils;
 
 
 public class UpdateSourcesAction implements IObjectActionDelegate {
@@ -69,6 +72,9 @@ public class UpdateSourcesAction implements IObjectActionDelegate {
         console.logMessage("Update started");
         
         MultiStatus status = null;
+        //project names to the errors encountered when updating them
+        Map<String, Throwable> updateErrors = new HashMap<String, Throwable>();
+        
         for(IProject project : projects) {
           if (monitor.isCanceled()) {
             throw new OperationCanceledException();
@@ -85,13 +91,21 @@ public class UpdateSourcesAction implements IObjectActionDelegate {
             } catch(CoreException ex) {
               if (status == null) {
                 status = new MultiStatus(IMavenConstants.PLUGIN_ID, IStatus.ERROR, //
-                    "Can't update Maven configuration", null);
+                    "Unable to update Maven configuration", null);
               }
               status.add(ex.getStatus());
+              updateErrors.put(project.getName(), ex);
+            } catch(IllegalArgumentException e){
+              status = new MultiStatus(IMavenConstants.PLUGIN_ID, IStatus.ERROR, //
+                  "Unable to update Maven configuration", null);
+              updateErrors.put(project.getName(), e);
             }
           }
         }
-        
+        if(updateErrors.size() > 0){        
+          M2EUtils.showErrorsForProjectsDialog(null, "Error Updating Maven Configuration", 
+              "Unable to update maven configuration for the following projects:", updateErrors);
+        }
         long l2 = System.currentTimeMillis();
         console.logMessage("Update completed: " + ((l2 - l1) / 1000) + " sec");
 
