@@ -8,15 +8,15 @@
 <repository location="http://download.eclipse.org/eclipse/updates/3.5"/>
 </location>
 <location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
-<unit id="org.eclipse.zest.sdk.feature.group" version="1.1.0.v20090422-2346-66-8CNBS9R9XSPdMjP_cnNcPPPPO"/>
+<unit id="org.eclipse.zest.sdk.feature.group" version="1.1.1.v20090724-1146-6628CNCSBRDXVPcKmPebkLYNSOSP"/>
 <repository location="http://download.eclipse.org/releases/galileo"/>
 </location>
 <location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
-<unit id="org.eclipse.mylyn_feature.feature.group" version="3.2.0.v20090617-0100-e3x"/>
+<unit id="org.eclipse.mylyn_feature.feature.group" version="3.2.2.v20090912-0400-e3x"/>
 <repository location="http://download.eclipse.org/releases/galileo"/>
 </location>
 <location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
-<unit id="org.eclipse.gef.sdk.feature.group" version="3.5.0.v20090422-2346-7G7O-A5WNWYQIaLUbWhghJaamPKQ"/>
+<unit id="org.eclipse.gef.sdk.feature.group" version="3.5.1.v20090724-1146-7G7O2A5WNWaQLaPUaUkgjJfXcQKM"/>
 <repository location="http://download.eclipse.org/releases/galileo"/>
 </location>
 <location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
@@ -24,14 +24,14 @@
 <repository location="http://download.eclipse.org/tools/ajdt/35/update"/>
 </location>
 <location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
-<unit id="org.eclipse.jst.enterprise_ui.feature.feature.group" version="3.1.0.v200905242144-7_7EGr_FQRwRZSME08aqRiT1Skap"/>
-<unit id='org.eclipse.wst.web_ui.feature.feature.group' version='3.1.0.v200905242131-7R77FShEVw2xUGpF1LiNxdVAELXy'/>
-<unit id='org.eclipse.wst.web_core.feature.feature.group' version='3.1.0.v200901280206-7H77FD4AT7oFldDfJV4g-6iAAR_z'/>
-<unit id="org.eclipse.jst.web_ui.feature.feature.group" version="3.1.0.v200901280155-7E77FBbDlwYa_9Sf53h4Abpn38Ne"/>
-<unit id='org.eclipse.jst.server_ui.feature.feature.group' version='3.1.0.v20080930-7A2FB_9xFaFovXGKcCTNM2355'/>
-<unit id='org.eclipse.jst.enterprise_core.feature.feature.group' version='3.1.0.v200809051357-52FGBAkF77f8FEH7RBD'/>
+<unit id="org.eclipse.jst.enterprise_ui.feature.feature.group" version="3.1.1.v200908101600-7_7EGrfFQRwRZTMYz07YrGeRz0Tj"/>
+<unit id='org.eclipse.wst.web_ui.feature.feature.group' version='3.1.1.v200908120400-7R77FSpEVw2xXR0CtKvX6bG6a2qU'/>
+<unit id='org.eclipse.wst.web_core.feature.feature.group' version='3.1.1.v200908120400-7H77FDAAT7oGlfz0dFV3j0BgbCD7'/>
+<unit id="org.eclipse.jst.web_ui.feature.feature.group" version="3.1.1.v200908121609-7E77FBfDlwYa_9sdy2q77doi14gl"/>
+<unit id='org.eclipse.jst.server_ui.feature.feature.group' version='3.1.1.v20090817-7A2FBa9xFaGovXGKcCWMK2355'/>
+<unit id='org.eclipse.jst.enterprise_core.feature.feature.group' version='3.1.1.v200908101600-52FGCAkF77g7NDE8QA7'/>
 <unit id='org.eclipse.jst.server_adapters.feature.feature.group' version='3.1.0.v20090311c-20-7w311A1422c'/>
-<unit id='org.eclipse.jst.server_adapters.ext.feature.feature.group' version='3.1.0.v20090311b-777HFDNCcNBBz-BcKW6EGF'/>
+<unit id='org.eclipse.jst.server_adapters.ext.feature.feature.group' version='3.1.1.v20090813-777HFDPCcNBBz0BjJU4BA8'/>
 <repository location="http://download.eclipse.org/releases/galileo"/>
 </location>
 <location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
