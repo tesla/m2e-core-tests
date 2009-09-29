@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkingSet;
@@ -47,10 +48,15 @@ public class UpdateSourcesAction implements IObjectActionDelegate {
   
   private IStructuredSelection selection;
 
+  private Shell shell;
+  
+  public UpdateSourcesAction(Shell shell){
+    this.shell = shell;
+  }
   public void setActivePart(IAction action, IWorkbenchPart targetPart) {
   }
 
-  public void selectionChanged(IAction action, ISelection selection) {
+  public void selectionChanged(IAction action, ISelection selection) { 
     if(selection instanceof IStructuredSelection) {
       this.selection = (IStructuredSelection) selection;
     } else {
@@ -102,8 +108,8 @@ public class UpdateSourcesAction implements IObjectActionDelegate {
             }
           }
         }
-        if(updateErrors.size() > 0){        
-          M2EUtils.showErrorsForProjectsDialog(null, "Error Updating Maven Configuration", 
+        if(updateErrors.size() > 0){     
+          M2EUtils.showErrorsForProjectsDialog(shell, "Error Updating Maven Configuration", 
               "Unable to update maven configuration for the following projects:", updateErrors);
         }
         long l2 = System.currentTimeMillis();

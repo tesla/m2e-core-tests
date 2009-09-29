@@ -12,6 +12,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.ui.PlatformUI;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.AbstractMavenMenuCreator;
@@ -76,12 +77,13 @@ public class DefaultMavenMenuCreator extends AbstractMavenMenuCreator {
             ModuleProjectWizardAction.ID, Messages.getString("action.moduleProjectWizardAction")));
         mgr.prependToGroup(UPDATE, new Separator());
       }
+     
 
       mgr.appendToGroup(UPDATE, getAction(new RefreshMavenModelsAction(), RefreshMavenModelsAction.ID,
           "Update Dependencies", "icons/update_dependencies.gif"));
       mgr.appendToGroup(UPDATE, getAction(new RefreshMavenModelsAction(true), RefreshMavenModelsAction.ID_SNAPSHOTS,
           "Update Snapshots"));
-      mgr.appendToGroup(UPDATE, getAction(new UpdateSourcesAction(), //
+      mgr.appendToGroup(UPDATE, getAction(new UpdateSourcesAction(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell()), //
           UpdateSourcesAction.ID, "Update Project Configuration", "icons/update_source_folders.gif"));
 
       mgr.prependToGroup(OPEN, new Separator());
@@ -136,7 +138,7 @@ public class DefaultMavenMenuCreator extends AbstractMavenMenuCreator {
           "Update Dependencies", "icons/update_dependencies.gif"));
       mgr.appendToGroup(UPDATE, getAction(new RefreshMavenModelsAction(true), RefreshMavenModelsAction.ID_SNAPSHOTS,
           "Update Snapshots"));
-      mgr.appendToGroup(UPDATE, getAction(new UpdateSourcesAction(), //
+      mgr.appendToGroup(UPDATE, getAction(new UpdateSourcesAction(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell()), //
           UpdateSourcesAction.ID, "Update Project Configuration", "icons/update_source_folders.gif"));
     }
   }
