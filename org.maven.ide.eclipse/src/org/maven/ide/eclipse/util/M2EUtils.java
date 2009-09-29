@@ -8,6 +8,10 @@
 
 package org.maven.ide.eclipse.util;
 
+import java.util.Map;
+
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
@@ -39,7 +43,15 @@ public class M2EUtils {
     MessageDialog.openError(shell, title, buff.toString());
   }
   
-  public static Throwable getRootCause(Exception ex) {
+  public static String getRootCauseMessage(Throwable t){
+    Throwable root = getRootCause(t);
+    if(t == null){
+      return null;
+    }
+    return root.getMessage();
+  }
+  
+  public static Throwable getRootCause(Throwable ex) {
     if(ex == null){
       return null;
     }
@@ -54,5 +66,27 @@ public class M2EUtils {
   
   public static boolean nullOrEmpty(String s){
     return s == null || s.length() == 0;
+  }
+
+  /**
+   * @param shell
+   * @param string
+   * @param string2
+   * @param updateErrors
+   */
+  public static void showErrorsForProjectsDialog(final Shell shell, final String title, final String message,
+      final Map<String, Throwable> errorMap) {
+    // TODO Auto-generated method showErrorsForProjectsDialog
+    Display.getDefault().asyncExec(new Runnable(){
+      public void run(){
+        String[] buttons = {IDialogConstants.OK_LABEL};
+        int ok_button = 0;
+        M2EErrorDialog errDialog = new M2EErrorDialog(shell, title, Dialog.getImage(Dialog.DLG_IMG_MESSAGE_ERROR), message, MessageDialog.ERROR, buttons, ok_button,
+            errorMap);      
+        errDialog.create();
+        errDialog.open();
+      }
+    });
+
   }
 }
