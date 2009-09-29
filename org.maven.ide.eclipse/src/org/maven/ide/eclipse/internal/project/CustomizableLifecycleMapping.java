@@ -79,7 +79,8 @@ public class CustomizableLifecycleMapping extends AbstractLifecycleMapping imple
         String configuratorId = configuratorDom.getAttribute("id");
         AbstractProjectConfigurator configurator = configuratorsMap.get(configuratorId);
         if(configurator == null) {
-          throw new IllegalArgumentException("Unknown configurator id=" + configuratorId);
+          String message = "Configurator '"+configuratorId+"' is not available for project '"+facade.getProject().getName()+"'. To enable full functionality, install the configurator and run Maven->Update Project Configuration.";
+          throw new IllegalArgumentException(message);
         }
 
         configurators.add(configurator);
