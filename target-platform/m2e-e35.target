@@ -4,7 +4,7 @@
 <target name="m2e-e35">
 <locations>
 <location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
-<unit id="org.eclipse.sdk.ide" version="3.5.0.I20090611-1540"/>
+<unit id="org.eclipse.sdk.ide" version="3.5.1.M20090917-0800"/>
 <repository location="http://download.eclipse.org/eclipse/updates/3.5"/>
 </location>
 <location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
