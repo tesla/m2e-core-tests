@@ -18,7 +18,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.maven.ide.eclipse.jdt,
  org.junit,
  org.maven.ide.eclipse.launching,
- org.maven.ide.components.nexus_indexer
+ org.maven.ide.components.nexus_indexer,
+ org.maven.ide.eclipse.temporary.mojos
 Eclipse-LazyStart: true
 Bundle-RequiredExecutionEnvironment: J2SE-1.5,
  JavaSE-1.6
