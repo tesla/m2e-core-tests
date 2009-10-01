@@ -2,10 +2,14 @@
 package org.maven.ide.eclipse.integration.tests;
 
 import java.io.File;
+import java.net.URL;
 
 import org.codehaus.plexus.util.FileUtils;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -38,6 +42,7 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
 
   public MEclipse193IndexerTest(){
   }
+
   
   protected void oneTimeSetup()throws Exception{
     File projectDir = unzipProject("projects/m2.zip");
@@ -92,9 +97,7 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
   
   public void testLocalResolution() throws Exception {
     IUIContext ui = getUI();
-    IViewPart indexView = showView("org.maven.ide.eclipse.views.MavenRepositoryView");
-    ui.click(new TreeItemLocator("Local Repositories/Workspace.*",
-        new ViewLocator("org.maven.ide.eclipse.views.MavenRepositoryView")));
+
     // set up two projects.
     IProject project = createArchetypeProject("maven-archetype-quickstart", "project");
     createArchetypeProject("maven-archetype-quickstart", "dependency");
@@ -107,7 +110,7 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
     // bump version # of "dependency" project
     openPomFile("dependency/pom.xml");
     ui.click(new CTabItemLocator("dependency/pom.xml"));
-    replaceText(new NamedWidgetLocator("version"), "0.0.2-SNAPSHOT");
+    replaceText(new NamedWidgetLocator("version"), "0.0.1-SNAPSHOT");
     ui.keyClick(SWT.MOD1, 's');
     Thread.sleep(5000);
     ui.wait(new JobsCompleteCondition(), 240000);
@@ -139,7 +142,7 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
     IClasspathContainer maven2Container = BuildPathManager.getMaven2ClasspathContainer(jp);
     
     for(IClasspathEntry entry : maven2Container.getClasspathEntries()) {
-        if (entry.getPath().toString().endsWith("dependency-0.0.1-SNAPSHOT.jar")) {
+        if (entry.getPath().toString().endsWith("dependency")) {
           return;
       }
     }
