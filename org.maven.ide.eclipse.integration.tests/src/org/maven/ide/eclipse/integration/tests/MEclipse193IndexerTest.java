@@ -157,7 +157,9 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
 
     ui.contextClick(new TreeItemLocator("Local Repositories/Local repository.*", new ViewLocator(
         "org.maven.ide.eclipse.views.MavenRepositoryView")), "Rebuild Index");
+    ui.wait(new ShellShowingCondition("Rebuild Index"));
     ui.click(new ButtonLocator("OK"));
+    ui.wait(new ShellDisposedCondition("Rebuild Index"));
     waitForAllBuildsToComplete();
     
     //now make sure that the local index updated correctly
