@@ -121,7 +121,7 @@ public class LocalProjectScanner extends AbstractProjectScanner<MavenProjectInfo
 
       String pomName = modulePath + "/" + IMavenConstants.POM_FILE_NAME;
 
-      MavenProjectInfo projectInfo = new MavenProjectInfo(pomName , pomFile, model, parentInfo);
+      MavenProjectInfo projectInfo = newMavenProjectInfo(pomName, pomFile, model, parentInfo);
       projectInfo.setNeedsRename(getNeedsRename(projectInfo));
 
       Map<String, Set<String>> modules = new LinkedHashMap<String, Set<String>>();
@@ -163,6 +163,10 @@ public class LocalProjectScanner extends AbstractProjectScanner<MavenProjectInfo
     }
 
     return null;
+  }
+
+  protected MavenProjectInfo newMavenProjectInfo(String label, File pomFile, Model model, MavenProjectInfo parent) {
+    return new MavenProjectInfo(label, pomFile, model, parent);
   }
 
   public String getDescription() {

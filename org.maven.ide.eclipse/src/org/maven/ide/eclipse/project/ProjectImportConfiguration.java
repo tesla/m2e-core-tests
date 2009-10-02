@@ -77,14 +77,17 @@ public class ProjectImportConfiguration {
     return this.needsRename;
   }
 
+  /** @deprecated UI aspects will be refactored out of core import logic */
   public void setWorkingSet(IWorkingSet workingSet) {
     this.workingSets = workingSet == null ? null : new IWorkingSet[]{workingSet};
   }
 
+  /** @deprecated UI aspects will be refactored out of core import logic */
   public void setWorkingSets(IWorkingSet[] workingSets) {
     this.workingSets = workingSets;
   }
   
+  /** @deprecated UI aspects will be refactored out of core import logic */
   public IWorkingSet[] getWorkingSets() {
     return this.workingSets;
   }

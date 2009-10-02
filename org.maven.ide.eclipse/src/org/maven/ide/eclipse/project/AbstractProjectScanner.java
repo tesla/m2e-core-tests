@@ -11,7 +11,7 @@ package org.maven.ide.eclipse.project;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 
 /**
@@ -19,7 +19,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
  *
  * @author Eugene Kuleshov
  */
-public abstract class AbstractProjectScanner<T extends MavenProjectInfo> implements IRunnableWithProgress {
+public abstract class AbstractProjectScanner<T extends MavenProjectInfo> {
 
   private final List<T> projects = new ArrayList<T>();
   private final List<Exception> errors = new ArrayList<Exception>();
@@ -48,4 +48,5 @@ public abstract class AbstractProjectScanner<T extends MavenProjectInfo> impleme
 
   public abstract String getDescription();
 
+  public abstract void run(IProgressMonitor monitor) throws InterruptedException;
 }
