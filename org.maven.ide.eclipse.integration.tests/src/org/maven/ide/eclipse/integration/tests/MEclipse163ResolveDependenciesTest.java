@@ -55,7 +55,6 @@ public class MEclipse163ResolveDependenciesTest extends UIIntegrationTestCase {
     List<IRepository> repos = registry.getRepositories(registry.SCOPE_SETTINGS);
     for(IRepository repo : repos){
         buildFullRepoDetails(repo);
-        break;
     }
     
     openFile(project, "src/main/java/org/sonatype/test/project/App.java");
