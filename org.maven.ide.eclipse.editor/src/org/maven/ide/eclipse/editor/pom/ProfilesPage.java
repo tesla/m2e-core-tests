@@ -864,7 +864,7 @@ public class ProfilesPage extends MavenPomEditorPage {
     profilesEditor.setInput(model.getProfiles());
   }
 
-  public void updateView(Notification notification) {
+  protected void doUpdate(Notification notification){
     Object object = notification.getNotifier();
     Object feature = notification.getFeature();
     
@@ -896,12 +896,20 @@ public class ProfilesPage extends MavenPomEditorPage {
         updateActivationTab();
       }
     }
-    
     dependenciesComposite.updateView(this, notification);
     repositoriesComposite.updateView(this, notification);
     buildComposite.updateView(this, notification);
     pluginsComposite.updateView(this, notification);
     reportingComposite.updateView(this, notification);
+  }
+  
+  public void updateView(final Notification notification) {
+    Display.getDefault().asyncExec(new Runnable(){
+      public void run(){
+        doUpdate(notification);
+      }
+    });
+
   }
 
   void createNewModule(String moduleName) {

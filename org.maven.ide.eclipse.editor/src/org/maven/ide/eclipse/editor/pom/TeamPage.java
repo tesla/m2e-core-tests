@@ -12,6 +12,7 @@ import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
@@ -58,9 +59,14 @@ public class TeamPage extends MavenPomEditorPage {
     teamComposite.loadData(model );
   }
   
-  public void updateView(Notification notification) {
-    if(teamComposite!=null) {
-      teamComposite.updateView(notification);
-    }
+  public void updateView(final Notification notification) {
+    Display.getDefault().asyncExec(new Runnable(){
+      public void run(){
+        if(teamComposite!=null) {
+          teamComposite.updateView(notification);
+        }        
+      }
+    });
+
   }
 }

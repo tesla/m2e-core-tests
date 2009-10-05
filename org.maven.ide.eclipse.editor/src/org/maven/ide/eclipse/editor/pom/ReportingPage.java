@@ -19,6 +19,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
@@ -94,8 +95,12 @@ public class ReportingPage extends MavenPomEditorPage {
     reportingComposite.loadData(this, reportingProvider);
   }
 
-  public void updateView(Notification notification) {
-    reportingComposite.updateView(this, notification);
+  public void updateView(final Notification notification) {
+    Display.getDefault().asyncExec(new Runnable(){
+      public void run(){
+        reportingComposite.updateView(ReportingPage.this, notification);
+      }
+    });
   }
 
 }

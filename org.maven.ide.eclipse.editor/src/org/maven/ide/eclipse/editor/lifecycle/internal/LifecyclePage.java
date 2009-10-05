@@ -523,8 +523,6 @@ private void buildTopSection(Composite parent, FormToolkit toolkit) {
   
   @Override
   public void updateView(Notification notification) {
-    // TODO Auto-generated method stub
-    
   } 
 
   public void mavenProjectChanged(MavenProjectChangedEvent[] events, IProgressMonitor monitor) {

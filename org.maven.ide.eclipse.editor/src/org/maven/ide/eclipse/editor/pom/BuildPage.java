@@ -42,6 +42,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.events.ExpansionAdapter;
@@ -535,7 +536,7 @@ public class BuildPage extends MavenPomEditorPage {
     buildComposite.loadData(this, buildProvider);
   }
 
-  public void updateView(Notification notification) {
+  protected void doUpdate(Notification notification){
     EObject object = (EObject) notification.getNotifier();
     Object feature = notification.getFeature();
     if (object instanceof Build) {
@@ -559,6 +560,14 @@ public class BuildPage extends MavenPomEditorPage {
     if(buildComposite!=null) {
       buildComposite.updateView(this, notification);
     }
+  }
+  
+  public void updateView(final Notification notification) {
+    Display.getDefault().asyncExec(new Runnable(){
+      public void run(){
+        doUpdate(notification);
+      }
+    });
   }
 
   void createExtension(String groupId, String artifactId, String version) {

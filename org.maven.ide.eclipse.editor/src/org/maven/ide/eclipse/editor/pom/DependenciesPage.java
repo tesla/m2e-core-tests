@@ -18,6 +18,7 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
@@ -102,8 +103,13 @@ public class DependenciesPage extends MavenPomEditorPage {
     dependenciesComposite.loadData(model, dependencyManagementProvider);
   }
   
-  public void updateView(Notification notification) {
-    dependenciesComposite.updateView(this, notification);
+  public void updateView(final Notification notification) {
+    Display.getDefault().asyncExec(new Runnable(){
+      public void run(){
+        dependenciesComposite.updateView(DependenciesPage.this, notification);
+      }
+    });
+    
   }
   
 }

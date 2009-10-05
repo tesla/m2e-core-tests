@@ -17,6 +17,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
@@ -78,8 +79,13 @@ public class RepositoriesPage extends MavenPomEditorPage {
     repositoriesComposite.loadData(this, model, distributionManagementProvider);
   }
   
-  public void updateView(Notification notification) {
-    repositoriesComposite.updateView(this, notification);
+  public void updateView(final Notification notification) {
+    Display.getDefault().asyncExec(new Runnable(){
+      public void run(){
+        repositoriesComposite.updateView(RepositoriesPage.this, notification);
+      }
+    });
+    
   }
   
 

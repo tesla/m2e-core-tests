@@ -735,7 +735,7 @@ public class OverviewPage extends MavenPomEditorPage {
     ciManagementComposite.setTabList(new Control[] {ciManagementSystemText, ciManagementUrlText});
   }
 
-  public void updateView(Notification notification) {
+  protected void doUpdate(Notification notification){
     EObject object = (EObject) notification.getNotifier();
     Object feature = notification.getFeature();
     
@@ -777,6 +777,13 @@ public class OverviewPage extends MavenPomEditorPage {
     if(feature == PomPackage.Literals.MODEL__PROPERTIES) {
       propertiesSection.setModel(model, POM_PACKAGE.getModel_Properties());
     }
+  }
+  public void updateView(final Notification notification) {
+    Display.getDefault().asyncExec(new Runnable(){
+      public void run(){
+        doUpdate(notification);
+      }
+    });
   }
 
   public void loadData() {
