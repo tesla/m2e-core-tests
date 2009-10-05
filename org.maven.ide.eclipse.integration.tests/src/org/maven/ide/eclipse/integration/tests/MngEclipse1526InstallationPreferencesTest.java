@@ -118,6 +118,8 @@ public class MngEclipse1526InstallationPreferencesTest extends UIIntegrationTest
     verifyRepoSettingsValue(repoDir.getAbsolutePath());
     
     String newRepoDir = setUserSettingsXML(mavenProject.getProject());
+    getUI().wait(new SWTIdleCondition());
+    
     getUI().click(new ButtonLocator("Apply"));
     getUI().wait(new JobsCompleteCondition(), 60000);
     verifyRepoSettingsValue(newRepoDir);
