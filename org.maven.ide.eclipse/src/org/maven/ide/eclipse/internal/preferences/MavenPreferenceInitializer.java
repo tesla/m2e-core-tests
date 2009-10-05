@@ -11,7 +11,7 @@ package org.maven.ide.eclipse.internal.preferences;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 
-import org.apache.maven.embedder.MavenEmbedder;
+import org.apache.maven.cli.MavenCli;
 
 import org.maven.ide.eclipse.MavenPlugin;
 
@@ -32,7 +32,7 @@ public class MavenPreferenceInitializer extends AbstractPreferenceInitializer {
     IPreferenceStore store = MavenPlugin.getDefault().getPreferenceStore();
 
     store.setDefault(MavenPreferenceConstants.P_USER_SETTINGS_FILE, //
-        MavenEmbedder.DEFAULT_USER_SETTINGS_FILE.getAbsolutePath());
+        MavenCli.DEFAULT_USER_SETTINGS_FILE.getAbsolutePath());
     
     store.setDefault(MavenPreferenceConstants.P_GLOBAL_SETTINGS_FILE, "");
 

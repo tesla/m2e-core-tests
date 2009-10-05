@@ -13,7 +13,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.maven.embedder.MavenEmbedder;
+import org.apache.maven.cli.MavenCli;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -37,7 +37,7 @@ public enum Data {
     public void gather(DataGatherer gatherer, IDataTarget target, IProgressMonitor monitor) {
       String settings = gatherer.getMavenConfiguration().getUserSettingsFile();
       if(settings==null || settings.trim().length() == 0) {
-        settings = MavenEmbedder.DEFAULT_USER_SETTINGS_FILE.getAbsolutePath();
+        settings = MavenCli.DEFAULT_USER_SETTINGS_FILE.getAbsolutePath();
       }
       gatherer.gather("config", target, new ExternalFileSource(settings, "user-settings.xml"));
       

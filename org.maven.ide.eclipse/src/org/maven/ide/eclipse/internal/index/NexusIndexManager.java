@@ -938,6 +938,9 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
           console.logMessage("Updated index for " + repository.toString() + " " + indexTime);
         }
       }
+    } catch (FileNotFoundException e) {
+      String msg = "Unable to update index for " + repository.toString() + ": " + e.getMessage();
+      console.logError(msg);
     } catch (Exception ie){
       String msg = "Unable to update index for " + repository.toString();
       MavenLogger.log(msg, ie);

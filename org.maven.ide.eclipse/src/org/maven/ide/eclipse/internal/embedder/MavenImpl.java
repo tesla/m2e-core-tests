@@ -53,11 +53,11 @@ import org.apache.maven.artifact.InvalidRepositoryException;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
 import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
-import org.apache.maven.embedder.MavenEmbedderException;
-import org.apache.maven.embedder.execution.MavenExecutionRequestPopulator;
 import org.apache.maven.execution.DefaultMavenExecutionRequest;
 import org.apache.maven.execution.DefaultMavenExecutionResult;
 import org.apache.maven.execution.MavenExecutionRequest;
+import org.apache.maven.execution.MavenExecutionRequestPopulationException;
+import org.apache.maven.execution.MavenExecutionRequestPopulator;
 import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.lifecycle.LifecycleExecutor;
@@ -165,7 +165,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
 
     try {
       populator.populateFromSettings(request, getSettings());
-    } catch(MavenEmbedderException ex) {
+    } catch(MavenExecutionRequestPopulationException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
           "Could not create maven execution request", ex));
     }
@@ -196,7 +196,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
     try {
       populator.populateDefaults(request);
       result = maven.execute(request);
-    } catch(MavenEmbedderException ex) {
+    } catch(MavenExecutionRequestPopulationException ex) {
       ex.printStackTrace();
       result = new DefaultMavenExecutionResult();
       result.addException(ex);
@@ -365,7 +365,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
     } catch(ProjectBuildingException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not read maven project",
           ex));
-    } catch(MavenEmbedderException ex) {
+    } catch(MavenExecutionRequestPopulationException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not read maven project",
           ex));
     }
@@ -383,7 +383,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
       result.setArtifactResolutionResult(projectBuildingResult.getArtifactResolutionResult());
     } catch(ProjectBuildingException ex) {
       return result.addException(ex);
-    } catch(MavenEmbedderException ex) {
+    } catch(MavenExecutionRequestPopulationException ex) {
       return result.addException(ex);
     }
     return result;
@@ -710,7 +710,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
   public void populateDefaults(MavenExecutionRequest request) throws CoreException {
     try {
       populator.populateDefaults(request);
-    } catch(MavenEmbedderException ex) {
+    } catch(MavenExecutionRequestPopulationException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
           "Could not read Maven configuration", ex));
     }

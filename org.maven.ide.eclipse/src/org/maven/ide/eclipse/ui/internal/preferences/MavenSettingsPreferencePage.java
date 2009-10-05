@@ -39,7 +39,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 
-import org.apache.maven.embedder.MavenEmbedder;
+import org.apache.maven.cli.MavenCli;
 import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.settings.validation.SettingsValidationResult;
@@ -104,7 +104,7 @@ public class MavenSettingsPreferencePage extends PreferencePage implements IWork
   }
 
   protected void performDefaults() {
-    userSettingsText.setText(MavenEmbedder.DEFAULT_USER_SETTINGS_FILE.getAbsolutePath());
+    userSettingsText.setText(MavenCli.DEFAULT_USER_SETTINGS_FILE.getAbsolutePath());
     setDirty(true);
     updateLocalRepository();
     super.performDefaults();
@@ -199,7 +199,7 @@ public class MavenSettingsPreferencePage extends PreferencePage implements IWork
 
     String userSettings = mavenConfiguration.getUserSettingsFile();
     if(userSettings == null || userSettings.length() == 0) {
-      userSettingsText.setText(MavenEmbedder.DEFAULT_USER_SETTINGS_FILE.getAbsolutePath());
+      userSettingsText.setText(MavenCli.DEFAULT_USER_SETTINGS_FILE.getAbsolutePath());
     } else {
       userSettingsText.setText(userSettings);
     }
@@ -242,7 +242,7 @@ public class MavenSettingsPreferencePage extends PreferencePage implements IWork
       public void widgetSelected(SelectionEvent e) {
         String userSettings = getUserSettings();
         if(userSettings.length() == 0) {
-          userSettings = MavenEmbedder.DEFAULT_USER_SETTINGS_FILE.getAbsolutePath();
+          userSettings = MavenCli.DEFAULT_USER_SETTINGS_FILE.getAbsolutePath();
         }
         openEditor(userSettings);
       }
