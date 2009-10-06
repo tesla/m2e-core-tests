@@ -133,7 +133,7 @@ class DownloadSourcesJob extends Job {
     Map<IPackageFragmentRoot, File[]> nonMavenProjects = new LinkedHashMap<IPackageFragmentRoot, File[]>();
 
     for(DownloadRequest request : downloadRequests) {
-      try {
+      if ( request.artifact != null ) try {
         IMavenProjectFacade projectFacade = projectManager.create(request.project, monitor);
         
         if (projectFacade != null) {
