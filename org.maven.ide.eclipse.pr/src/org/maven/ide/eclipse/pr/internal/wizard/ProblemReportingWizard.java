@@ -16,6 +16,7 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.zip.ZipOutputStream;
 
@@ -26,11 +27,13 @@ import org.codehaus.plexus.swizzle.JiraIssueSubmitter;
 import org.codehaus.plexus.swizzle.jira.authentication.DefaultAuthenticationSource;
 import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -206,17 +209,38 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
       location = location + ".zip";
     }
 
+    //refresh the projects in case they're out of date
     Set<IProject> projects = new LinkedHashSet<IProject>();
+    List<?> list = descriptionPage.getSelectedProjects().toList();
+    int numTicks = list == null ? 0 : list.size();
+    SubProgressMonitor sub = new SubProgressMonitor(monitor, numTicks);
+    sub.beginTask("Reading project information", numTicks);
     for(Iterator<?> i = descriptionPage.getSelectedProjects().iterator(); i.hasNext();) {
+      try{
       Object o = i.next();
-      if(o instanceof JavaProject) {
-        projects.add(((JavaProject) o).getProject());
+        if(o instanceof JavaProject) {
+          
+          JavaProject jp = (JavaProject)o;
+          projects.add(jp.getProject());
+          if(jp.getResource() != null){
+            jp.getResource().refreshLocal(IResource.DEPTH_INFINITE, sub);
+          }
+          
+        }else if(o instanceof IProject) {
+          IProject project = (IProject)o;
+          projects.add(project);
+          if(project.getWorkspace() != null && project.getWorkspace().getRoot() != null){
+            project.getWorkspace().getRoot().refreshLocal(IResource.DEPTH_INFINITE, sub);
+          }
+          
+        }
+      } catch(CoreException e){
+        MavenLogger.log(e);
       }
-      if(o instanceof IProject) {
-        projects.add((IProject) o);
-      }
+      sub.worked(1);
     }
-
+    sub.done();
+    
     MavenPlugin mavenPlugin = MavenPlugin.getDefault();
     DataGatherer gatherer = new DataGatherer(MavenPlugin.lookup(IMavenConfiguration.class), //
         mavenPlugin.getMavenProjectManager(), mavenPlugin.getConsole(), //
