@@ -18,6 +18,7 @@ import java.util.List;
 import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.common.notify.Notification;
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.edit.command.AddCommand;
 import org.eclipse.emf.edit.command.RemoveCommand;
@@ -331,7 +332,8 @@ public class ProfilesPage extends MavenPomEditorPage {
 
       public void modify(Object element, String property, Object value) {
         int n = modulesEditor.getViewer().getTable().getSelectionIndex();
-        if(!value.equals(currentProfile.getModules().get(n))) {
+        EList<String> modules = currentProfile.getModules(); 
+        if(n >= 0 && n < modules.size() && !value.equals(modules.get(n))) {
           EditingDomain editingDomain = getEditingDomain();
           Command command = SetCommand.create(editingDomain, currentProfile, POM_PACKAGE.getProfile_Modules(), value, n);
           editingDomain.getCommandStack().execute(command);
