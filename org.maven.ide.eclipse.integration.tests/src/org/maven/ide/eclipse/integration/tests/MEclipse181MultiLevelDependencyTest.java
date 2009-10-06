@@ -41,9 +41,8 @@ public class MEclipse181MultiLevelDependencyTest extends UIIntegrationTestCase {
         new TreeItemLocator("org.sonatype.test   " + childName + "/0.0.1-SNAPSHOT.*", new LabeledLocator(Tree.class,
             "&Search Results:")));
     getUI().click(new ButtonLocator("OK"));
-    Thread.sleep(5000);
-    getUI().wait(new JobsCompleteCondition(), 120000);
 
+    waitForAllBuildsToComplete();
     IJavaProject jp = (IJavaProject) parent.getNature(JavaCore.NATURE_ID);
     assertTrue("classpath dependency for "+ childName + " not found", childName.equals(jp.getRequiredProjectNames()[0]));
     return childProject;
@@ -51,7 +50,7 @@ public class MEclipse181MultiLevelDependencyTest extends UIIntegrationTestCase {
   
   public void testMultiLevelDependencies() throws Exception {
     IProject project = createArchetypeProject("maven-archetype-quickstart", "project0");
-
+    waitForAllBuildsToComplete();
     for (int i = 1; i < 5; i++) {
       project = createDependentProject(project, "project" + i);
     }

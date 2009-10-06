@@ -107,13 +107,16 @@ public class MEclipse161ArchetypeProjectCreationTest extends UIIntegrationTestCa
     ui.wait(new ShellShowingCondition("New Project"));
     ui.click(new FilteredTreeItemLocator("Plug-in Project"));
     ui.click(new FilteredTreeItemLocator("Maven/Maven Project"));
+    //click the first next button
     ui.click(new ButtonLocator("&Next >"));
+    //then the first page with only 'default' values
     ui.click(new ButtonLocator("&Next >"));
-    ui.click(new TableCellLocator(archetypeName, 2));
-    // NamedWidgetLocator table = new NamedWidgetLocator("archetypesTable");
-
-    ui.click(new ButtonLocator("&Next >"));
+    
     ui.wait(new SWTIdleCondition());
+    //now select the quickstart row
+    ui.click(new TableCellLocator(archetypeName, 2));
+    //and then click next
+    ui.click(new ButtonLocator("&Next >"));
     IWidgetLocator groupCombo = ui.find(new NamedWidgetLocator("groupId"));
     ui.setFocus(groupCombo);
     ui.enterText("org.sonatype.test");

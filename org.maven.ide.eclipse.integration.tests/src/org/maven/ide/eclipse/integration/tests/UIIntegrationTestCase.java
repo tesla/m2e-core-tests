@@ -862,6 +862,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
      
       return project;
     } catch(Exception ex) {
+      ex.printStackTrace();
       ScreenCapture.createScreenCapture();
       throw new Exception("Failed to create project for archetype:" + archetypeName, ex);
     }
