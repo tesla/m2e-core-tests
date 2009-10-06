@@ -1,5 +1,5 @@
 <settings>
-  <localRepository>localrepo</localRepository>
+  <localRepository>target/localrepo</localRepository>
 
   <profiles>
     <profile>
