@@ -38,6 +38,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 
+import org.apache.lucene.index.SerialMergeScheduler;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
@@ -795,6 +796,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
               repository.getUrl(),
               null, //
               (fullIndex ? getFullCreator() : getMinCreator()));
+          indexingContext.getIndexWriter().setMergeScheduler(new SerialMergeScheduler());
 
         fireIndexAdded(repository);
 
