@@ -163,7 +163,7 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
     waitForAllBuildsToComplete();
     
     //now make sure that the local index updated correctly
-    ui.click(new TreeItemLocator("Local Repositories/Local repository.*/*",
+    ui.click(new TreeItemLocator("Local Repositories/Local repository.*/ant.*",
         new ViewLocator("org.maven.ide.eclipse.views.MavenRepositoryView")));
   }
 
