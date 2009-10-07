@@ -50,6 +50,8 @@ import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.apache.maven.archetype.ArchetypeGenerationRequest;
 import org.apache.maven.archetype.ArchetypeGenerationResult;
 import org.apache.maven.archetype.catalog.Archetype;
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.execution.DuplicateProjectException;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
@@ -442,17 +444,20 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     }
 
     try {
+      Artifact artifact = resolveArchetype(archetype, monitor);
+      
       ArchetypeGenerationRequest request = new ArchetypeGenerationRequest() //
           .setTransferListener(maven.createTransferListener(monitor)) //
-          .setArchetypeGroupId(archetype.getGroupId()) //
-          .setArchetypeArtifactId(archetype.getArtifactId()) //
-          .setArchetypeVersion(archetype.getVersion()) //
+          .setArchetypeGroupId(artifact.getGroupId()) //
+          .setArchetypeArtifactId(artifact.getArtifactId()) //
+          .setArchetypeVersion(artifact.getVersion()) //
           .setArchetypeRepository(archetype.getRepository()) //
           .setGroupId(groupId) //
           .setArtifactId(artifactId) //
           .setVersion(version) //
           .setPackage(javaPackage) // the model does not have a package field
           .setLocalRepository(maven.getLocalRepository()) //
+          .setRemoteArtifactRepositories(maven.getArtifactRepositories(true))
           .setProperties(properties).setOutputDirectory(location.toPortableString());
 
       ArchetypeGenerationResult result = getArchetyper().generateProjectFromArchetype(request);
@@ -477,10 +482,32 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
       importProjects(projectSet, configuration, monitor);
       
       monitor.worked(1);
+    } catch (CoreException e) {
+      throw e;
     } catch (InterruptedException e) {
       throw new CoreException(Status.CANCEL_STATUS);
     } catch (Exception ex) {
       throw new CoreException(new Status(IStatus.ERROR, "org.maven.ide.eclipse", "Failed to create project.", ex));
+    }
+  }
+
+  /**
+   * Apparently, Archetype#generateProjectFromArchetype 2.0-alpha-4 does not attempt to resolve archetype
+   * from configured remote repositories. To compensate, we populate local repo with archetype pom/jar.
+   */
+  private Artifact resolveArchetype(Archetype a, IProgressMonitor monitor) throws CoreException {
+    ArrayList<ArtifactRepository> repos = new ArrayList<ArtifactRepository>();
+    repos.addAll(maven.getArtifactRepositories()); // see org.apache.maven.archetype.downloader.DefaultDownloader#download
+    if (a.getRepository() != null && a.getRepository().trim().length() > 0) {
+    }
+    try {
+      maven.resolve(a.getGroupId(), a.getArtifactId(),a.getVersion(), "pom", null, repos, monitor);
+      return maven.resolve(a.getGroupId(), a.getArtifactId(),a.getVersion(), "jar", null, repos, monitor);
+    } catch (CoreException e) {
+      StringBuilder sb = new StringBuilder();
+      sb.append("Could not resolve archetype ").append(a.getGroupId()).append(':').append(a.getArtifactId()).append(a.getVersion());
+      sb.append(" from any of the configured repositories.");
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, sb.toString(), e));
     }
   }
 

@@ -413,7 +413,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
 
     setLastUpdated(localRepository, request.getRemoteRepositories(), artifact);
 
-    if(result.hasExceptions()) {
+    if(!result.isSuccess()) {
       ArrayList<IStatus> members = new ArrayList<IStatus>();
       for(Exception e : result.getExceptions()) {
         members.add(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, e.getMessage(), e));
