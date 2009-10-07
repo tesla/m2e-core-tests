@@ -980,7 +980,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
         .getArchetypeCatalog().getArchetypes();
     for(Archetype archetype : archetypes) {
       if("org.apache.maven.archetypes".equals(archetype.getGroupId())
-          && "maven-archetype-quickstart".equals(archetype.getArtifactId()) && "1.0".equals(archetype.getVersion())) {
+          && "maven-archetype-quickstart".equals(archetype.getArtifactId())) {
         return archetype;
       }
     }
