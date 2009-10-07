@@ -11,8 +11,6 @@ package org.maven.ide.eclipse.internal.index;
 import java.io.File;
 import java.util.Map;
 
-import junit.framework.TestCase;
-
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
@@ -28,7 +26,7 @@ import org.maven.ide.eclipse.repository.IRepositoryRegistry;
  * need full indexing details.
  * @author dyocum
  */
-public class NexusIndexManagerFullIndexSearchTest extends TestCase {
+public class NexusIndexManagerFullIndexSearchTest extends AbstractNexusIndexManagerTest {
   private static final String SETTINGS_ECLIPSE_REPO = "src/org/maven/ide/eclipse/internal/index/public_mirror_repo_settings.xml";
   
   private static final String REPO_URL_ECLIPSE = "http://repository.sonatype.org/content/repositories/eclipse";
@@ -37,11 +35,6 @@ public class NexusIndexManagerFullIndexSearchTest extends TestCase {
   private NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getDefault().getIndexManager();
   private RepositoryRegistry repositoryRegistry = (RepositoryRegistry) MavenPlugin.getDefault().getRepositoryRegistry();
 
-  private void waitForIndexJobToComplete() throws InterruptedException {
-    repositoryRegistry.getBackgroundJob().join();
-    indexManager.getIndexUpdateJob().join();
-  }  
-  
   protected void setUp() throws Exception {
     super.setUp();
     updateRepo(REPO_URL_ECLIPSE, SETTINGS_ECLIPSE_REPO);
@@ -58,7 +51,7 @@ public class NexusIndexManagerFullIndexSearchTest extends TestCase {
 
   protected void updateRepo(String repoUrl, String settingsFile) throws Exception{
     setupPublicMirror(repoUrl, settingsFile);
-    waitForIndexJobToComplete();
+    waitForJobsToComplete();
     IRepository repository = getRepository(repoUrl);
     if(!NexusIndex.DETAILS_FULL.equals(indexManager.getIndexDetails(repository))){
       indexManager.setIndexDetails(repository, NexusIndex.DETAILS_FULL, new NullProgressMonitor());  
@@ -68,7 +61,7 @@ public class NexusIndexManagerFullIndexSearchTest extends TestCase {
     if(index != null){
       index.updateIndex(true, null);
     }
-    waitForIndexJobToComplete();
+    waitForJobsToComplete();
   }
   
   protected void setupPublicMirror(String publicRepoUrl, String settingsFile) throws Exception {
@@ -76,7 +69,7 @@ public class NexusIndexManagerFullIndexSearchTest extends TestCase {
     assertTrue(mirroredRepoFile.exists());
 
     mavenConfiguration.setUserSettingsFile(mirroredRepoFile.getCanonicalPath());
-    waitForIndexJobToComplete();
+    waitForJobsToComplete();
   }
 
   public void testClassSearch() throws Exception {

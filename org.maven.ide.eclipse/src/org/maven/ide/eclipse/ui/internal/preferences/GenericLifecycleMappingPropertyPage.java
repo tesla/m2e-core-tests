@@ -28,9 +28,9 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
-import org.maven.ide.eclipse.lifecycle.AbstractLifecyclePropertyPage;
-import org.maven.ide.eclipse.lifecycle.LifecycleMappingPropertyPageFactory;
-import org.maven.ide.eclipse.lifecycle.ProjectConfiguratorsTable;
+import org.maven.ide.eclipse.internal.lifecycle.AbstractLifecyclePropertyPage;
+import org.maven.ide.eclipse.internal.lifecycle.LifecycleMappingPropertyPageFactory;
+import org.maven.ide.eclipse.internal.lifecycle.ProjectConfiguratorsTable;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 

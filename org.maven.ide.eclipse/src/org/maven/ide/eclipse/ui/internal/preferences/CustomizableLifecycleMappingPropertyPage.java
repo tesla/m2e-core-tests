@@ -14,8 +14,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-import org.maven.ide.eclipse.lifecycle.AbstractLifecyclePropertyPage;
-import org.maven.ide.eclipse.lifecycle.ProjectConfiguratorsTable;
+import org.maven.ide.eclipse.internal.lifecycle.AbstractLifecyclePropertyPage;
+import org.maven.ide.eclipse.internal.lifecycle.ProjectConfiguratorsTable;
 
 /**
  * CustomizableLifecycleMappingPropertyPage

@@ -16,7 +16,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 
-import org.maven.ide.eclipse.lifecycle.AbstractLifecyclePropertyPage;
+import org.maven.ide.eclipse.internal.lifecycle.AbstractLifecyclePropertyPage;
 
 /**
  * EmptyLifecycleMappingPropertyPage

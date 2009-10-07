@@ -21,16 +21,16 @@ import org.maven.ide.eclipse.index.IIndex;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.internal.repository.RepositoryRegistry;
+import org.maven.ide.eclipse.project.ResolverConfiguration;
 import org.maven.ide.eclipse.repository.IRepository;
 import org.maven.ide.eclipse.repository.IRepositoryRegistry;
-import org.maven.ide.eclipse.tests.AsbtractMavenProjectTestCase;
 import org.sonatype.nexus.index.ArtifactInfo;
 
 
 /**
  * @author dyocum
  */
-public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
+public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
   private static final String SETTINGS_NO_MIRROR = "src/org/maven/ide/eclipse/internal/index/no_mirror_settings.xml";
   private static final String SETTINGS_PUBLIC_JBOSS_NOTMIRRORED = "src/org/maven/ide/eclipse/internal/index/public_nonmirrored_repo_settings.xml";
   private static final String SETTINGS_ECLIPSE_REPO = "src/org/maven/ide/eclipse/internal/index/public_mirror_repo_settings.xml";
@@ -42,11 +42,6 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
   private NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getDefault().getIndexManager();
   private RepositoryRegistry repositoryRegistry = (RepositoryRegistry) MavenPlugin.getDefault().getRepositoryRegistry();
 
-  private void waitForIndexJobToComplete() throws InterruptedException {
-    indexManager.getIndexUpdateJob().join();
-    repositoryRegistry.getBackgroundJob().join();
-  }  
-  
   protected void setUp() throws Exception {
     super.setUp();
     updateRepo(REPO_URL_ECLIPSE, SETTINGS_ECLIPSE_REPO);
@@ -70,7 +65,7 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
 
   protected void updateRepo(String repoUrl, String settingsFile) throws Exception{
     setupPublicMirror(repoUrl, settingsFile);
-    waitForIndexJobToComplete();
+    waitForJobsToComplete();
     IRepository repository = getRepository(repoUrl);
     indexManager.setIndexDetails(repository, NexusIndex.DETAILS_FULL, monitor);  
     assertEquals(NexusIndex.DETAILS_FULL, indexManager.getIndexDetails(repository));
@@ -110,7 +105,49 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
     }
     assertTrue(hasProjectRepo);
   }
-  
+
+  public void testProjectSpecificThenInSettings() throws Exception {
+    mavenConfiguration.setUserSettingsFile("settings.xml");
+    waitForJobsToComplete();
+
+    importProject("projects/customrepo/pom.xml", new ResolverConfiguration());
+    waitForJobsToComplete();
+
+    IRepository projectRepository = getRepository("customremote", IRepositoryRegistry.SCOPE_PROJECT);
+    assertNotNull(projectRepository);
+
+    NexusIndex index = indexManager.getIndex(projectRepository);
+    assertEquals(NexusIndex.DETAILS_DISABLED, index.getIndexDetails());
+
+    assertNull(getRepository("customremote", IRepositoryRegistry.SCOPE_SETTINGS));
+
+    mavenConfiguration.setUserSettingsFile("src/org/maven/ide/eclipse/internal/index/customremote_settings.xml");
+    waitForJobsToComplete();
+
+    IRepository settingsRepository = getRepository("customremote", IRepositoryRegistry.SCOPE_SETTINGS);
+    assertNotNull(settingsRepository);
+    assertEquals(projectRepository.getUid(), settingsRepository.getUid());
+
+    index = indexManager.getIndex(settingsRepository);
+    assertEquals(NexusIndex.DETAILS_MIN, index.getIndexDetails());
+  }
+
+  /**
+   * @param repositoryId
+   * @param scope
+   * @return
+   */
+  private IRepository getRepository(String repositoryId, int scope) {
+    IRepository customRepository = null;
+    for (IRepository repository : repositoryRegistry.getRepositories(scope)) {
+      if (repositoryId.equals(repository.getId())) {
+        customRepository = repository;
+        break;
+      }
+    }
+    return customRepository;
+  }
+
   public void testWorkspaceIndex() throws Exception {
     String projectName = "resourcefiltering-p005";
     deleteProject(projectName);
@@ -145,7 +182,7 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
 
     deleteProject(projectName);
     waitForJobsToComplete();
-    waitForIndexJobToComplete();
+    waitForJobsToComplete();
     assertTrue(indexManager.search(workspaceRepository, "p005", IIndex.SEARCH_ARTIFACT, 0).isEmpty());
   }
   //you're right. its too painfully slow
@@ -158,7 +195,7 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
     assertTrue(mirroredRepoFile.exists());
 
     mavenConfiguration.setUserSettingsFile(mirroredRepoFile.getCanonicalPath());
-    waitForIndexJobToComplete();
+    waitForJobsToComplete();
 
     //this failed with the bug in authentication (NPE) in NexusIndexManager
     IndexedArtifactGroup[] rootGroups = indexManager.getRootGroups(getRepository(REPO_URL_ECLIPSE));
@@ -178,7 +215,7 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
     assertTrue(mirroredRepoFile.exists());
 
     mavenConfiguration.setUserSettingsFile(mirroredRepoFile.getCanonicalPath());
-    waitForIndexJobToComplete();
+    waitForJobsToComplete();
     
     IRepository repository = getRepository(REPO_URL_ECLIPSE);
     IndexedArtifactGroup[] rootGroups = indexManager.getRootGroups(repository);
@@ -246,7 +283,7 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
     assertTrue(settingsFile.exists());
 
     mavenConfiguration.setUserSettingsFile(settingsFile.getCanonicalPath());
-    waitForIndexJobToComplete();
+    waitForJobsToComplete();
     
     List<IRepository> repositories = repositoryRegistry.getRepositories(IRepositoryRegistry.SCOPE_SETTINGS);
     assertEquals(3, repositories.size());
@@ -268,7 +305,7 @@ public class NexusIndexManagerTest extends AsbtractMavenProjectTestCase {
     assertTrue(nonMirroredRepoFile.exists());
 
     mavenConfiguration.setUserSettingsFile(nonMirroredRepoFile.getCanonicalPath());
-    waitForIndexJobToComplete();
+    waitForJobsToComplete();
 
     List<IRepository> repositories = repositoryRegistry.getRepositories(IRepositoryRegistry.SCOPE_SETTINGS);
     assertEquals(3, repositories.size());

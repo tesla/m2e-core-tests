@@ -18,8 +18,6 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
 import org.apache.maven.artifact.repository.ArtifactRepository;
@@ -63,21 +61,17 @@ public class RepositoryRegistry implements IRepositoryRegistry, IMavenProjectCha
 
   private ArrayList<IRepositoryDiscoverer> discoverers = new ArrayList<IRepositoryDiscoverer>();
 
-  private Job job = new Job("Repository registry initialization") {
-    protected IStatus run(IProgressMonitor monitor) {
-      try {
-        updateRegistry(monitor);
-      } catch(CoreException ex) {
-        return ex.getStatus();
-      }
-      return Status.OK_STATUS;
-    }
-  };
+  private final Job job = new RepositoryRegistryUpdateJob(this);
   
   public RepositoryRegistry(IMaven maven, MavenProjectManager projectManager) throws CoreException {
     this.maven = maven;
     this.projectManager = projectManager;
 
+    this.localRepository = newLocalRepositoryInfo();
+    this.workspaceRepository = new RepositoryInfo(null/*id*/, "workspace://"/*url*/, null/*basedir*/, SCOPE_WORKSPACE, null/*auth*/);
+  }
+
+  private RepositoryInfo newLocalRepositoryInfo() throws CoreException {
     File localBasedir = new File(maven.getLocalRepository().getBasedir());
     try {
       localBasedir = localBasedir.getCanonicalFile();
@@ -95,8 +89,8 @@ public class RepositoryRegistry implements IRepositoryRegistry, IMavenProjectCha
     }
 
     // initialize local and workspace repositories
-    this.localRepository = new RepositoryInfo(null/*id*/, localUrl, localBasedir, SCOPE_LOCAL, null/*auth*/);
-    this.workspaceRepository = new RepositoryInfo(null/*id*/, "workspace://"/*url*/, null/*basedir*/, SCOPE_WORKSPACE, null/*auth*/);
+    RepositoryInfo localRepository = new RepositoryInfo(null/*id*/, localUrl, localBasedir, SCOPE_LOCAL, null/*auth*/);
+    return localRepository;
   }
 
   public void mavenProjectChanged(MavenProjectChangedEvent[] events, IProgressMonitor monitor) {
@@ -141,13 +135,15 @@ public class RepositoryRegistry implements IRepositoryRegistry, IMavenProjectCha
   }
 
   public void addRepository(RepositoryInfo repository, IProgressMonitor monitor) {
-    repositories.put(repository.getUid(), repository);
-
-    for (IRepositoryIndexer indexer : indexers) {
-      try {
-        indexer.repositoryAdded(repository, monitor);
-      } catch (CoreException e) {
-        MavenLogger.log(e);
+    if (!repositories.containsKey(repository.getUid())) {
+      repositories.put(repository.getUid(), repository);
+  
+      for (IRepositoryIndexer indexer : indexers) {
+        try {
+          indexer.repositoryAdded(repository, monitor);
+        } catch (CoreException e) {
+          MavenLogger.log(e);
+        }
       }
     }
   }
@@ -217,6 +213,8 @@ public class RepositoryRegistry implements IRepositoryRegistry, IMavenProjectCha
     repositories.clear();
 
     addRepository(this.workspaceRepository, monitor);
+
+    this.localRepository = newLocalRepositoryInfo();
     addRepository(this.localRepository, monitor);
 
     // mirrors
@@ -297,7 +295,4 @@ public class RepositoryRegistry implements IRepositoryRegistry, IMavenProjectCha
     updateRegistry();
   }
 
-  public Job getBackgroundJob() {
-    return job;
-  }
 }

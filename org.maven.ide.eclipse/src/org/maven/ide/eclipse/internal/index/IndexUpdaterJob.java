@@ -24,8 +24,9 @@ import org.eclipse.ui.progress.IProgressConstants;
 import org.maven.ide.eclipse.actions.OpenMavenConsoleAction;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
+import org.maven.ide.eclipse.jobs.IBackgroundProcessingQueue;
 
-class IndexUpdaterJob extends Job {
+class IndexUpdaterJob extends Job implements IBackgroundProcessingQueue {
 
   public static class IndexUpdaterRule implements ISchedulingRule {
 
@@ -55,7 +56,7 @@ class IndexUpdaterJob extends Job {
     updateQueue.add(indexCommand);
   }
 
-  protected IStatus run(IProgressMonitor monitor) {
+  public IStatus run(IProgressMonitor monitor) {
     monitor.beginTask(getName(), IProgressMonitor.UNKNOWN);
 
     ArrayList<IStatus> problems = new ArrayList<IStatus>();
@@ -78,4 +79,8 @@ class IndexUpdaterJob extends Job {
     return problems.isEmpty()? Status.OK_STATUS: new MultiStatus(IMavenConstants.PLUGIN_ID, -1, problems.toArray(new IStatus[problems.size()]), null, null);
   }
 
+  public boolean isEmpty() {
+    return updateQueue.isEmpty();
+  }
+  
 }

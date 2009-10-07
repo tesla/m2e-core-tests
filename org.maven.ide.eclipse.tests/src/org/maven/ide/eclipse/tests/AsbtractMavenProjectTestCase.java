@@ -59,6 +59,7 @@ import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerRefreshJob;
 import org.maven.ide.eclipse.jdt.BuildPathManager;
 import org.maven.ide.eclipse.jdt.MavenJdtPlugin;
+import org.maven.ide.eclipse.jobs.IBackgroundProcessingQueue;
 import org.maven.ide.eclipse.project.MavenProjectInfo;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
@@ -286,6 +287,10 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
   }
 
   protected void waitForJobsToComplete() throws InterruptedException, CoreException {
+    waitForJobsToComplete(monitor);
+  }
+
+  public static void waitForJobsToComplete(IProgressMonitor monitor) throws InterruptedException, CoreException {
     /*
      * First, make sure refresh job gets all resource change events
      * 
@@ -299,33 +304,49 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
      *  
      * See http://www.eclipse.org/articles/Article-Resource-deltas/resource-deltas.html
      */
+    IWorkspace workspace = ResourcesPlugin.getWorkspace();
     IJobManager jobManager = Job.getJobManager();
     jobManager.suspend();
     try {
       Job[] jobs = jobManager.find(null);
+      ArrayList<IBackgroundProcessingQueue> queues = new ArrayList<IBackgroundProcessingQueue>();
       for (int i = 0; i < jobs.length; i++) {
         if(jobs[i] instanceof WorkspaceJob || jobs[i].getClass().getName().endsWith("JREUpdateJob")) {
           jobs[i].join();
+        }
+        if (jobs[i] instanceof IBackgroundProcessingQueue) {
+          queues.add((IBackgroundProcessingQueue) jobs[i]);
         }
       }
       workspace.run(new IWorkspaceRunnable() {
         public void run(IProgressMonitor monitor) throws CoreException {
         }
       }, workspace.getRoot(), 0, monitor);
+
+      // Now we flush all background processing queues
+      boolean processed = flushProcessingQueues(queues, monitor);
+      for (int i = 0; i < 10 && processed; i++) {
+        processed = flushProcessingQueues(queues, monitor);
+      }
+
+      assertFalse("Could not flush background processing queues", processed);
     } finally {
       jobManager.resume();
     }
 
-    // Now we run background refresh job once 
-    projectRefreshJob.wakeUp();
-    projectRefreshJob.schedule();
-    projectRefreshJob.join();
-    projectRefreshJob.sleep();
+  }
 
-    downloadSourcesJob.wakeUp();
-    downloadSourcesJob.schedule();
-    downloadSourcesJob.join();
-    downloadSourcesJob.sleep();
+  private static boolean flushProcessingQueues(ArrayList<IBackgroundProcessingQueue> queues, IProgressMonitor monitor) throws InterruptedException {
+    boolean processed = false;
+    for (IBackgroundProcessingQueue queue : queues) {
+      queue.join();
+      if (!queue.isEmpty()) {
+        queue.run(monitor);
+        queue.cancel();
+        processed = true;
+      }
+    }
+    return processed;
   }
 
   protected IClasspathEntry[] getMavenContainerEntries(IProject project) throws JavaModelException {

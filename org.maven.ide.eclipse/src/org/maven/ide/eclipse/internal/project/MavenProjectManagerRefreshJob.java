@@ -40,9 +40,10 @@ import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
+import org.maven.ide.eclipse.jobs.IBackgroundProcessingQueue;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
 
-public class MavenProjectManagerRefreshJob extends Job implements IResourceChangeListener, IPreferenceChangeListener {
+public class MavenProjectManagerRefreshJob extends Job implements IResourceChangeListener, IPreferenceChangeListener, IBackgroundProcessingQueue {
 
   private static final int DELTA_FLAGS = IResourceDelta.CONTENT | IResourceDelta.MOVED_FROM | IResourceDelta.MOVED_TO
   | IResourceDelta.COPIED_FROM | IResourceDelta.REPLACED;
@@ -72,7 +73,7 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
 
   // Job
   
-  protected IStatus run(IProgressMonitor monitor) {
+  public IStatus run(IProgressMonitor monitor) {
     monitor.beginTask("Refreshing Maven model", IProgressMonitor.UNKNOWN);
     ArrayList<MavenUpdateRequest> requests;
     synchronized(this.queue) {
@@ -221,4 +222,11 @@ public class MavenProjectManagerRefreshJob extends Job implements IResourceChang
       queue(new MavenUpdateRequest(new IProject[] {(IProject) event.getSource()}, offline, updateSnapshots));
     }
   }
+
+  public boolean isEmpty() {
+    synchronized(queue) {
+      return queue.isEmpty();
+    }
+  }
+
 }

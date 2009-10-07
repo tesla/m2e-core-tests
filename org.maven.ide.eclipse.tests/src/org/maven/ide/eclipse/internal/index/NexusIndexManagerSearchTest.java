@@ -11,8 +11,6 @@ package org.maven.ide.eclipse.internal.index;
 import java.io.File;
 import java.util.Map;
 
-import junit.framework.TestCase;
-
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.index.IIndex;
@@ -28,7 +26,7 @@ import org.maven.ide.eclipse.repository.IRepositoryRegistry;
  * need minimum indexing details.
  * @author dyocum
  */
-public class NexusIndexManagerSearchTest extends TestCase {
+public class NexusIndexManagerSearchTest extends AbstractNexusIndexManagerTest {
   private static final String SETTINGS_ECLIPSE_REPO = "src/org/maven/ide/eclipse/internal/index/public_mirror_repo_settings.xml";
   private static final String REPO_URL_ECLIPSE = "http://repository.sonatype.org/content/repositories/eclipse";
   
@@ -40,17 +38,13 @@ public class NexusIndexManagerSearchTest extends TestCase {
     super.setUp();
     updateRepo(REPO_URL_ECLIPSE, SETTINGS_ECLIPSE_REPO);
   }
-  private void waitForIndexJobToComplete() throws InterruptedException {
-    repositoryRegistry.getBackgroundJob().join();
-    indexManager.getIndexUpdateJob().join();
-  }  
 
   protected void setupPublicMirror(String publicRepoUrl, String settingsFile) throws Exception {
     final File mirroredRepoFile = new File(settingsFile);
     assertTrue(mirroredRepoFile.exists());
 
     mavenConfiguration.setUserSettingsFile(mirroredRepoFile.getCanonicalPath());
-    waitForIndexJobToComplete();
+    waitForJobsToComplete();
   }
   
   private IRepository getRepository(String repoUrl) {
@@ -64,13 +58,13 @@ public class NexusIndexManagerSearchTest extends TestCase {
 
   protected void updateRepo(String repoUrl, String settingsFile) throws Exception{
     setupPublicMirror(repoUrl, settingsFile);
-    waitForIndexJobToComplete();
+    waitForJobsToComplete();
     IRepository repository = getRepository(repoUrl);
     NexusIndex index = indexManager.getIndex(repository);
     if(index != null){
       index.updateIndex(true, null);
     }
-    waitForIndexJobToComplete();
+    waitForJobsToComplete();
   }
   
   public void testPluginSearch() throws Exception {

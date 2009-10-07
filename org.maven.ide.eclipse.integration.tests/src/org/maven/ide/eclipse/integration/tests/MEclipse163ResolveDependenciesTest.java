@@ -22,6 +22,7 @@ import org.maven.ide.eclipse.internal.index.NexusIndexManager;
 import org.maven.ide.eclipse.internal.repository.RepositoryRegistry;
 import org.maven.ide.eclipse.repository.IRepository;
 import org.maven.ide.eclipse.repository.IRepositoryRegistry;
+import org.maven.ide.eclipse.tests.AsbtractMavenProjectTestCase;
 
 import com.windowtester.runtime.swt.condition.SWTIdleCondition;
 import com.windowtester.runtime.swt.condition.eclipse.JobsCompleteCondition;
@@ -51,7 +52,7 @@ public class MEclipse163ResolveDependenciesTest extends UIIntegrationTestCase {
     waitForAllBuildsToComplete();
     //rebuild the mirror
     IRepositoryRegistry registry = MavenPlugin.getDefault().getRepositoryRegistry();
-    ((RepositoryRegistry)registry).getBackgroundJob().join();
+    AsbtractMavenProjectTestCase.waitForJobsToComplete(new NullProgressMonitor());
     List<IRepository> repos = registry.getRepositories(registry.SCOPE_SETTINGS);
     for(IRepository repo : repos){
         buildFullRepoDetails(repo);

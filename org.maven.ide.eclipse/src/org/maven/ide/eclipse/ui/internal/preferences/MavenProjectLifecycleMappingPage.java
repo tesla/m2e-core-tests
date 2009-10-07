@@ -16,8 +16,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.dialogs.PropertyPage;
 
 import org.maven.ide.eclipse.core.MavenLogger;
-import org.maven.ide.eclipse.lifecycle.ILifecyclePropertyPage;
-import org.maven.ide.eclipse.lifecycle.LifecycleMappingPropertyPageFactory;
+import org.maven.ide.eclipse.internal.lifecycle.ILifecyclePropertyPage;
+import org.maven.ide.eclipse.internal.lifecycle.LifecycleMappingPropertyPageFactory;
 import org.maven.ide.eclipse.project.configurator.ILifecycleMapping;
 
 /**

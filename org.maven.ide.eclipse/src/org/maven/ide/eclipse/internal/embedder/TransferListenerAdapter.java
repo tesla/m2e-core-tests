@@ -43,12 +43,17 @@ public final class TransferListenerAdapter implements TransferListener {
   }
 
   public void transferStarted(TransferEvent e) {
-    Wagon wagon = e.getWagon();
-    Repository repository = wagon.getRepository();
-    String repositoryId = repository.getId();
-    console.logMessage("Downloading " + repositoryId + " : " + e.getResource().getName());
+    StringBuilder sb = new StringBuilder();
+    if(e.getWagon() != null && e.getWagon().getRepository() != null) {
+      Wagon wagon = e.getWagon();
+      Repository repository = wagon.getRepository();
+      String repositoryId = repository.getId();
+      sb.append(repositoryId).append(" : ");
+    }
+    sb.append(e.getResource().getName());
+    console.logMessage("Downloading " + sb.toString());
     // monitor.beginTask("0% "+e.getWagon().getRepository()+"/"+e.getResource().getName(), IProgressMonitor.UNKNOWN);
-    monitor.setTaskName("0% " + repositoryId + " : " + e.getResource().getName());
+    monitor.setTaskName("0% " + sb.toString());
   }
 
   public void transferProgress(TransferEvent e, byte[] buffer, int length) {

@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.lifecycle;
+package org.maven.ide.eclipse.internal.lifecycle;
 
 /**
  * AbstractPropertyPageExtensionPoint

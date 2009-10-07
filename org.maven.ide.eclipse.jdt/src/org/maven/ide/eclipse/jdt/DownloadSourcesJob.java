@@ -36,6 +36,7 @@ import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.IMaven;
+import org.maven.ide.eclipse.jobs.IBackgroundProcessingQueue;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 
@@ -45,7 +46,7 @@ import org.maven.ide.eclipse.project.MavenProjectManager;
  * 
  * @author igor
  */
-class DownloadSourcesJob extends Job {
+class DownloadSourcesJob extends Job implements IBackgroundProcessingQueue {
 
   private static class DownloadRequest {
     final IProject project;
@@ -92,10 +93,6 @@ class DownloadSourcesJob extends Job {
           && downloadSources == other.downloadSources
           && downloadJavaDoc == other.downloadJavaDoc;
     }
-  }
-
-  private static class UpdateClasspathRequest {
-    
   }
 
   private final IMaven maven;
@@ -257,4 +254,9 @@ class DownloadSourcesJob extends Job {
     scheduleDownload(project, fragment, artifact, downloadSources, downloadJavadoc);
   }
 
+  public boolean isEmpty() {
+    synchronized(queue) {
+      return queue.isEmpty();
+    }
+  }
 }
