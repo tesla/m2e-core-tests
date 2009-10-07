@@ -138,7 +138,7 @@
     <module>../org.maven.ide.eclipse.temporary.mojos</module>
     <module>../org.maven.ide.eclipse.temporary.mojos.feature</module>
     <module>../org.maven.ide.eclipse.plexus.annotations.tests</module>
-    <!-- <module>../org.maven.ide.eclipse.modello.tests</module>  -->
+    <module>../org.maven.ide.eclipse.modello.tests</module>
 
     <module>../org.maven.ide.eclipse.update</module>
 
