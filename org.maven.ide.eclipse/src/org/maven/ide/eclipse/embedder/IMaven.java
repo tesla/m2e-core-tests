@@ -56,6 +56,11 @@ public interface IMaven {
 
   // artifact resolution
 
+  /**
+   * Resolves specified artifact from specified remote repositories.
+   * @return Artifact resolved artifact
+   * @throws CoreException if the artifact cannot be resolved. 
+   */
   public Artifact resolve(String groupId, String artifactId, String version, String type, String classifier,
       List<ArtifactRepository> artifactRepositories, IProgressMonitor monitor) throws CoreException;
 

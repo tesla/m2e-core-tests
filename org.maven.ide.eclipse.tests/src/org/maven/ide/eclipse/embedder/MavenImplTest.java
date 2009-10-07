@@ -18,6 +18,7 @@ import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.plexus.util.FileUtils;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.maven.ide.eclipse.MavenPlugin;
@@ -162,7 +163,12 @@ public class MavenImplTest extends TestCase {
     assertFalse(maven.isUnavailable(a.getGroupId(), a.getArtifactId(), a.getBaseVersion(), a.getType(), a.getClassifier(), repositories));
 
     // attempt resolve from default repository and verify unresolved
-    assertFalse(maven.resolve(a.getGroupId(), a.getArtifactId(), a.getBaseVersion(), a.getType(), a.getClassifier(), repositories, monitor).isResolved());
+    try {
+      maven.resolve(a.getGroupId(), a.getArtifactId(), a.getBaseVersion(), a.getType(), a.getClassifier(), repositories, monitor);
+      fail();
+    } catch (CoreException e) {
+      // expected
+    }
 
     // the artifact is known to be UNavailable from default remote repository
     assertTrue(maven.isUnavailable(a.getGroupId(), a.getArtifactId(), a.getBaseVersion(), a.getType(), a.getClassifier(), repositories));
@@ -170,7 +176,12 @@ public class MavenImplTest extends TestCase {
     // now lets try with custom repository
     repositories.add(repositorySystem.createArtifactRepository("foo", "bar", null, null, null));
     assertFalse(maven.isUnavailable(a.getGroupId(), a.getArtifactId(), a.getBaseVersion(), a.getType(), a.getClassifier(), repositories));
-    assertFalse(maven.resolve(a.getGroupId(), a.getArtifactId(), a.getBaseVersion(), a.getType(), a.getClassifier(), repositories, monitor).isResolved());
+    try {
+      maven.resolve(a.getGroupId(), a.getArtifactId(), a.getBaseVersion(), a.getType(), a.getClassifier(), repositories, monitor);
+      fail();
+    } catch (CoreException e) {
+      // expected
+    }
     assertTrue(maven.isUnavailable(a.getGroupId(), a.getArtifactId(), a.getBaseVersion(), a.getType(), a.getClassifier(), repositories));
 
   }
