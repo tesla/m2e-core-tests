@@ -798,23 +798,27 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
           fireIndexRemoved(repository);
         }
       } else {
-          Directory directory = getIndexDirectory(repository);
+        if(indexingContext != null) {
+          getIndexer().removeIndexingContext(indexingContext, false);
+        }
 
-          File repositoryPath = null;
-          if (repository.getBasedir() != null) {
-            repositoryPath = repository.getBasedir().getCanonicalFile();
-          }
+        Directory directory = getIndexDirectory(repository);
 
-          boolean fullIndex = NexusIndex.DETAILS_FULL.equals(details);
+        File repositoryPath = null;
+        if (repository.getBasedir() != null) {
+          repositoryPath = repository.getBasedir().getCanonicalFile();
+        }
 
-          indexingContext = getIndexer().addIndexingContextForced(
-              repository.getUid(), //
-              repository.getUrl(), //
-              repositoryPath, //
-              directory, //
-              repository.getUrl(),
-              null, //
-              (fullIndex ? getFullCreator() : getMinCreator()));
+        boolean fullIndex = NexusIndex.DETAILS_FULL.equals(details);
+
+        indexingContext = getIndexer().addIndexingContextForced(
+            repository.getUid(), //
+            repository.getUrl(), //
+            repositoryPath, //
+            directory, //
+            repository.getUrl(),
+            null, //
+            (fullIndex ? getFullCreator() : getMinCreator()));
 
         fireIndexAdded(repository);
 
