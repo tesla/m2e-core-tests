@@ -10,11 +10,9 @@ package org.maven.ide.eclipse.internal.project;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -103,19 +101,6 @@ public class CustomizableLifecycleMapping extends AbstractLifecycleMapping imple
     }
     return Boolean.parseBoolean(value);
   }
-  
-  private Set<String> getListElements(Xpp3Dom listDom, String elementName) {
-    Set<String> elements = new LinkedHashSet<String>();
-    if (listDom == null) {
-      return elements;
-    }
-
-    for (Xpp3Dom elementDom : listDom.getChildren(elementName)) {
-      elements.add(elementDom.getValue());
-    }
-
-    return elements;
-  }
 
   public List<AbstractBuildParticipant> getBuildParticipants(IMavenProjectFacade facade, IProgressMonitor monitor)
       throws CoreException {
@@ -142,9 +127,6 @@ public class CustomizableLifecycleMapping extends AbstractLifecycleMapping imple
     addMavenBuilder(request.getProject(), monitor);
   }
   
-  /* (non-Javadoc)
-   * @see org.maven.ide.eclipse.project.configurator.ILifecycleMapping#getPotentialMojoExecutionsForBuildKind(org.maven.ide.eclipse.project.IMavenProjectFacade, int, org.eclipse.core.runtime.IProgressMonitor)
-   */
   public List<String> getPotentialMojoExecutionsForBuildKind(IMavenProjectFacade projectFacade, int kind,
       IProgressMonitor progressMonitor) {
     List<String> mojos = new LinkedList<String>();
