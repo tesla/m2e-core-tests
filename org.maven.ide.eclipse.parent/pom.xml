@@ -359,7 +359,7 @@
             <argLine>${tycho.test.jvmArgs}</argLine>
             -->
             <argLine>-Xmx800m -XX:MaxPermSize=256m</argLine>
-            <!-- kill test JVM it tests take more than 10 minutes (600 seconds) to finisg -->
+            <!-- kill test JVM it tests take more than 10 minutes (600 seconds) to finish -->
             <forkedProcessTimeoutInSeconds>7200</forkedProcessTimeoutInSeconds>
           </configuration>
         </plugin>
