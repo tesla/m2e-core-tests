@@ -214,4 +214,17 @@ public class MavenBuilderTest extends AsbtractMavenProjectTestCase {
     project.build(IncrementalProjectBuilder.AUTO_BUILD, monitor);
     assertTrue(aFile.isAccessible());
   }
+  
+  public void test010_properties() throws Exception {
+    IProject project = createExisting("resourcefiltering-p010", "projects/resourcefiltering/p010");
+    waitForJobsToComplete();
+    
+    project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+    waitForJobsToComplete();
+    
+    IFile aFile = project.getFile("target/test-classes/b.properties");
+    assertTrue(aFile.exists());
+    assertTrue(aFile.isAccessible());
+  }
+  
 }
