@@ -382,7 +382,7 @@
       <!-- 
         compiles and runs integration tests.
         -->
-      <id>m2e-integration-test</id>
+      <id>m2e-integration-tests</id>
       <properties>
         <org.maven.ide.eclipse.integration.tests.skip>false</org.maven.ide.eclipse.integration.tests.skip>
         <org.maven.ide.eclipse.tests.skip>false</org.maven.ide.eclipse.tests.skip>
