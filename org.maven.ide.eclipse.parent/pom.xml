@@ -42,13 +42,6 @@
     <m2e.snapshots>http://localhost</m2e.snapshots>
     <m2e.site>http://localhost</m2e.site>
 
-    <!--
-    Use implicit ${tycho-version} property to make sure
-    tycho plugins version matches version of tycho distribution.
-
-    <tycho.version>0.3.0-SNAPSHOT</tycho.version>
-    -->
-
     <!-- default target platform, see ../target-platform/*.target -->
     <target.platform>m2e-e35</target.platform>
   </properties>
@@ -79,71 +72,6 @@
     <system>Hudson</system>
     <url>https://ci.sonatype.org/job/m2eclipse-with-e33/</url>
   </ciManagement>
-
-  <modules>
-    <module>../org.maven.ide.components.maven-embedder</module>
-    <module>../org.maven.ide.components.archetype-common</module>
-    <module>../org.maven.ide.components.nexus-indexer</module>
-    <module>../org.maven.ide.components.maven-model-edit</module>
-    <module>../org.maven.ide.components.maven-scm</module>
-    <module>../org.maven.ide.components.dependency-tree</module>
-
-    <!--
-    <module>../org.maven.ide.eclipse.cliresolver</module>
-    -->
-
-    <module>../org.maven.ide.eclipse</module>
-    <module>../org.maven.ide.eclipse.launching</module>
-    <module>../org.maven.ide.eclipse.jdt</module>
-    <module>../org.maven.ide.eclipse.mylyn3</module>
-    <module>../org.maven.ide.eclipse.subclipse</module>
-    <module>../org.maven.ide.eclipse.scm</module>
-    <module>../org.maven.ide.eclipse.cvs</module>
-    <module>../org.maven.ide.eclipse.refactoring</module>
-    <module>../org.maven.ide.eclipse.tests</module>
-    <module>../org.maven.ide.eclipse.editor.xml</module>
-    <module>../org.maven.ide.eclipse.editor</module>
-    <module>../org.maven.ide.eclipse.editor.tests</module>
-   
-    <!--
-    <module>../org.maven.ide.eclipse.editor.xml.tests</module>
-    <module>../org.maven.ide.eclipse.refactoring.tests</module>
-    -->
-
-    <module>../org.maven.ide.eclipse.ajdt</module>
-    <module>../org.maven.ide.eclipse.ajdt.tests</module>
-    <module>../org.maven.ide.eclipse.wtp</module>
-    <module>../org.maven.ide.eclipse.wtp.tests</module>
-    <module>../org.maven.ide.eclipse.book</module>
-    <module>../org.maven.ide.eclipse.pr</module>
-
-    <module>../org.maven.ide.eclipse.integration.tests</module>
-
-    <!-- features -->
-    <module>../org.maven.ide.components.maven_embedder.feature</module>
-    <module>../org.maven.ide.eclipse.feature</module>
-    <module>../org.maven.ide.eclipse.editor.feature</module>
-    <module>../org.maven.ide.eclipse.editor.xml.feature</module>
-    <module>../org.maven.ide.eclipse.wtp.feature</module>
-    <module>../org.maven.ide.eclipse.ajdt.feature</module>
-
-    <module>../org.maven.ide.eclipse.scm.feature</module>
-    <module>../org.maven.ide.eclipse.cvs.feature</module>
-    <module>../org.maven.ide.eclipse.subclipse.feature</module>
-
-    <module>../org.maven.ide.eclipse.book.feature</module>
-    <module>../org.maven.ide.eclipse.mylyn3.feature</module>
-
-    <module>../org.maven.ide.eclipse.plexus.annotations</module>
-    <module>../org.maven.ide.eclipse.temporary.mojos</module>
-    <module>../org.maven.ide.eclipse.temporary.mojos.feature</module>
-    <module>../org.maven.ide.eclipse.plexus.annotations.tests</module>
-    <module>../org.maven.ide.eclipse.modello.tests</module>
-
-    <module>../org.maven.ide.eclipse.update</module>
-
-    <module>../target-platform</module>
-  </modules>
 
   <dependencyManagement>
     <dependencies>
@@ -248,55 +176,6 @@
         </exclusions>
       </dependency>
 
-      <!-- copy and paste from maven-archetype, is there a better way? -->
-<!--
-      <dependency>
-        <groupId>org.apache.maven</groupId>
-        <artifactId>maven-plugin-api</artifactId>
-        <version>${maven.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.maven</groupId>
-        <artifactId>maven-model</artifactId>
-        <version>${maven.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.maven</groupId>
-        <artifactId>maven-project</artifactId>
-        <version>${maven.version}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-artifact</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-artifact-manager</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.maven</groupId>
-        <artifactId>maven-core</artifactId>
-        <version>${maven.version}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-artifact</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-artifact-manager</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-
-      <dependency>
-        <groupId>org.apache.maven.artifact</groupId>
-        <artifactId>maven-artifact</artifactId>
-        <version>${artifact.version}</version>
-      </dependency>
- -->      
     </dependencies>
   </dependencyManagement>
 
@@ -354,11 +233,7 @@
             <includes>
               <include>**/*Test.java</include>
             </includes>
-            <!--
-              does not work due to regression in Tycho
             <argLine>${tycho.test.jvmArgs}</argLine>
-            -->
-            <argLine>-Xmx800m -XX:MaxPermSize=256m</argLine>
             <!-- kill test JVM it tests take more than 10 minutes (600 seconds) to finisg -->
             <forkedProcessTimeoutInSeconds>7200</forkedProcessTimeoutInSeconds>
           </configuration>
@@ -422,26 +297,103 @@
       </properties>
     </profile>
 
-  <profile>
-    <id>m2e-normal-test</id>
+    <profile>
+      <!-- 
+        compiles everything. 
+        runs all unit tests but does not run integration tests. 
+        -->
+      <id>default-build</id>
       <activation>
-        <property><name>!m2e.system.test</name></property>
+       <activeByDefault>true</activeByDefault> 
       </activation>
+
       <properties>
         <org.maven.ide.eclipse.integration.tests.skip>true</org.maven.ide.eclipse.integration.tests.skip>
-        <org.maven.ide.eclipse.tests.skip>false</org.maven.ide.eclipse.tests.skip>
       </properties>
-  </profile>
-  <profile>
-    <id>m2e-system-test</id>
-      <activation>
-        <property><name>m2e.system.test</name><value>true</value></property>
-      </activation>
+
+      <modules>
+        <module>../org.maven.ide.components.maven-embedder</module>
+        <module>../org.maven.ide.components.archetype-common</module>
+        <module>../org.maven.ide.components.nexus-indexer</module>
+        <module>../org.maven.ide.components.maven-model-edit</module>
+        <module>../org.maven.ide.components.maven-scm</module>
+        <module>../org.maven.ide.components.dependency-tree</module>
+    
+        <!--
+        <module>../org.maven.ide.eclipse.cliresolver</module>
+        -->
+    
+        <module>../org.maven.ide.eclipse</module>
+        <module>../org.maven.ide.eclipse.launching</module>
+        <module>../org.maven.ide.eclipse.jdt</module>
+        <module>../org.maven.ide.eclipse.mylyn3</module>
+        <module>../org.maven.ide.eclipse.subclipse</module>
+        <module>../org.maven.ide.eclipse.scm</module>
+        <module>../org.maven.ide.eclipse.cvs</module>
+        <module>../org.maven.ide.eclipse.refactoring</module>
+        <module>../org.maven.ide.eclipse.tests</module>
+        <module>../org.maven.ide.eclipse.editor.xml</module>
+        <module>../org.maven.ide.eclipse.editor</module>
+        <module>../org.maven.ide.eclipse.editor.tests</module>
+       
+        <!--
+        <module>../org.maven.ide.eclipse.editor.xml.tests</module>
+        <module>../org.maven.ide.eclipse.refactoring.tests</module>
+        -->
+    
+        <module>../org.maven.ide.eclipse.ajdt</module>
+        <module>../org.maven.ide.eclipse.ajdt.tests</module>
+        <module>../org.maven.ide.eclipse.wtp</module>
+        <module>../org.maven.ide.eclipse.wtp.tests</module>
+        <module>../org.maven.ide.eclipse.book</module>
+        <module>../org.maven.ide.eclipse.pr</module>
+    
+        <module>../org.maven.ide.eclipse.integration.tests</module>
+
+        <!-- features -->
+        <module>../org.maven.ide.components.maven_embedder.feature</module>
+        <module>../org.maven.ide.eclipse.feature</module>
+        <module>../org.maven.ide.eclipse.editor.feature</module>
+        <module>../org.maven.ide.eclipse.editor.xml.feature</module>
+        <module>../org.maven.ide.eclipse.wtp.feature</module>
+        <module>../org.maven.ide.eclipse.ajdt.feature</module>
+
+        <module>../org.maven.ide.eclipse.scm.feature</module>
+        <module>../org.maven.ide.eclipse.cvs.feature</module>
+        <module>../org.maven.ide.eclipse.subclipse.feature</module>
+
+        <module>../org.maven.ide.eclipse.book.feature</module>
+        <module>../org.maven.ide.eclipse.mylyn3.feature</module>
+
+        <module>../org.maven.ide.eclipse.plexus.annotations</module>
+        <module>../org.maven.ide.eclipse.temporary.mojos</module>
+        <module>../org.maven.ide.eclipse.temporary.mojos.feature</module>
+        <module>../org.maven.ide.eclipse.plexus.annotations.tests</module>
+        <module>../org.maven.ide.eclipse.modello.tests</module>
+
+        <module>../org.maven.ide.eclipse.update</module>
+
+        <module>../target-platform</module>
+      </modules>
+
+    </profile>
+
+    <profile>
+      <!-- 
+        compiles and runs integration tests.
+        -->
+      <id>m2e-integration-test</id>
       <properties>
         <org.maven.ide.eclipse.integration.tests.skip>false</org.maven.ide.eclipse.integration.tests.skip>
         <org.maven.ide.eclipse.tests.skip>false</org.maven.ide.eclipse.tests.skip>
       </properties>
-  </profile>
+
+      <modules>
+        <module>../org.maven.ide.eclipse.integration.tests</module>
+        <module>../target-platform</module>
+      </modules>
+
+    </profile>
 	
   </profiles>
 
