@@ -454,8 +454,14 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     if(EFFECTIVE_POM.equals(name)){
       loadEffectivePOM();
     }
-    super.pageChange(newPageIndex);
-    
+    //The editor occassionally doesn't get 
+    //closed if the project gets deleted. In this case, the editor
+    //stays open and very bad things happen if you select it
+    try{
+      super.pageChange(newPageIndex);
+    }catch(NullPointerException e){
+      this.close(false);
+    }
     // a workaround for editor pages not returned 
     IEditorActionBarContributor contributor = getEditorSite().getActionBarContributor();
     if(contributor != null && contributor instanceof MultiPageEditorActionBarContributor) {
