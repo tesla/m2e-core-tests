@@ -1007,9 +1007,9 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     return project;
   }
 
-  //Local repo set by the BuildManager is based on a cached version of MavenEmbedder, not the one configured in setup.
-  public void XXXtestMNGECLIPSE_1047_localRepoPath() {
+  public void testMNGECLIPSE_1047_localRepoPath() {
     IPath m2_repo = JavaCore.getClasspathVariable(BuildPathManager.M2_REPO);
+    //Local repo set by the BuildManager was based on a cached version of MavenEmbedder, not the one configured in setup.
     assertEquals(repo.toString(), m2_repo.toOSString());
   }
 
