@@ -112,8 +112,7 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
     ui.click(new CTabItemLocator("dependency/pom.xml"));
     replaceText(new NamedWidgetLocator("version"), "0.0.1-SNAPSHOT");
     ui.keyClick(SWT.MOD1, 's');
-    Thread.sleep(5000);
-    ui.wait(new JobsCompleteCondition(), 240000);
+    waitForAllBuildsToComplete();
     
     assertProjectsHaveNoErrors();
     
@@ -161,10 +160,7 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
     ui.click(new ButtonLocator("OK"));
     ui.wait(new ShellDisposedCondition("Rebuild Index"));
     waitForAllBuildsToComplete();
-    
-    //now make sure that the local index updated correctly
-    ui.click(new TreeItemLocator("Local Repositories/Local repository.*/ant.*",
-        new ViewLocator("org.maven.ide.eclipse.views.MavenRepositoryView")));
+    showView("org.maven.ide.eclipse.views.MavenRepositoryView");
   }
 
 }
