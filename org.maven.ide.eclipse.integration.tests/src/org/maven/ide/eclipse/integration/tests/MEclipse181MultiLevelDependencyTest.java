@@ -29,7 +29,7 @@ public class MEclipse181MultiLevelDependencyTest extends UIIntegrationTestCase {
   private IProject createDependentProject(IProject parent, String childName) throws Exception {
     IProject childProject = createArchetypeProject("maven-archetype-quickstart", childName);
 
-    getUI().wait(new JobsCompleteCondition(), 240000);
+    waitForAllBuildsToComplete();
     getUI().click(new TreeItemLocator(parent.getName(), new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
     getUI().contextClick(new TreeItemLocator(parent.getName(), new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")),
         "Maven/Add Dependency");
@@ -51,7 +51,8 @@ public class MEclipse181MultiLevelDependencyTest extends UIIntegrationTestCase {
   public void testMultiLevelDependencies() throws Exception {
     IProject project = createArchetypeProject("maven-archetype-quickstart", "project0");
     waitForAllBuildsToComplete();
-    for (int i = 1; i < 5; i++) {
+    //dropped it to three to speed things up
+    for (int i = 1; i < 4; i++) {
       project = createDependentProject(project, "project" + i);
     }
   }
