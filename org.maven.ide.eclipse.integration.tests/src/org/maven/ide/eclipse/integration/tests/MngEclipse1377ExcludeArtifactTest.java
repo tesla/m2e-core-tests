@@ -33,7 +33,6 @@ public class MngEclipse1377ExcludeArtifactTest extends UIIntegrationTestCase {
     this.setSkipIndexes(true);
   }
   public void testEclipseArtifact() throws Exception {
-    //IProject project = createArchetypeProjct("maven-archetype-quickstart", "project");
     IProject project = setupDefaultProject();
     IJavaProject jp = (IJavaProject) project.getNature(JavaCore.NATURE_ID);
 
@@ -52,7 +51,6 @@ public class MngEclipse1377ExcludeArtifactTest extends UIIntegrationTestCase {
   public void testExcludeTransitiveArtifact() throws Exception {
 
     IProject project = setupDefaultProject();
-    //IProject project = createArchetypeProjct("maven-archetype-quickstart", "project");
     IJavaProject jp = (IJavaProject) project.getNature(JavaCore.NATURE_ID);
 
     openPomFile("someproject/pom.xml");
