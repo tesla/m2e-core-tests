@@ -32,6 +32,7 @@
           <!-- kill test JVM it tests take more than 40 minutes to finish -->
           <forkedProcessTimeoutInSeconds>2400</forkedProcessTimeoutInSeconds>
           <skip>${org.maven.ide.eclipse.integration.tests.skip}</skip>
+          <appArgLine>-pluginCustomization ${project.basedir}/plugin_customization.ini</appArgLine>
         </configuration>
       </plugin>
       

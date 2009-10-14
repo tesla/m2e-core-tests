@@ -96,7 +96,6 @@ import com.windowtester.runtime.swt.locator.MenuItemLocator;
 import com.windowtester.runtime.swt.locator.NamedWidgetLocator;
 import com.windowtester.runtime.swt.locator.SWTWidgetLocator;
 import com.windowtester.runtime.swt.locator.TableCellLocator;
-import com.windowtester.runtime.swt.locator.TextLocator;
 import com.windowtester.runtime.swt.locator.TreeItemLocator;
 import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
 import com.windowtester.runtime.util.ScreenCapture;
@@ -202,18 +201,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
      // Clean out projects left over from previous test runs.
      clearProjects();
 
-     waitForAllBuildsToComplete();
-
-     if (isEclipseVersion(3, 5)) {
-       // Disable new xml completion behavior to preserver compatibility with previous versions.
-       getUI().click(new MenuItemLocator("Window/Preferences"));
-       getUI().wait(new ShellShowingCondition("Preferences"));
-       getUI().click(new FilteredTreeItemLocator("XML/XML Files/Editor/Typing"));
-       getUI().click(new ButtonLocator("&Insert a matching end tag"));
-       getUI().click(new ButtonLocator("OK"));
-       getUI().wait(new ShellDisposedCondition("Preferences"));
-     }
-     
+     waitForAllBuildsToComplete();     
   }
 
   private void openPerspective(final String id) throws Exception {
