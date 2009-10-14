@@ -45,15 +45,15 @@ public class DownloadSourcesAction implements IObjectActionDelegate {
         Object element = it.next();
         if(element instanceof IProject) {
           IProject project = (IProject) element;
-          buildpathManager.scheduleDownload(project, ID_SOURCES.equals(id), !ID_SOURCES.equals(id), true);
+          buildpathManager.scheduleDownload(project, ID_SOURCES.equals(id), !ID_SOURCES.equals(id));
         } else if(element instanceof IPackageFragmentRoot) {
           IPackageFragmentRoot fragment = (IPackageFragmentRoot) element;
-          buildpathManager.scheduleDownload(fragment, ID_SOURCES.equals(id), !ID_SOURCES.equals(id), true);
+          buildpathManager.scheduleDownload(fragment, ID_SOURCES.equals(id), !ID_SOURCES.equals(id));
         } else if(element instanceof IWorkingSet) {
           IWorkingSet workingSet = (IWorkingSet) element;
           for(IAdaptable adaptable : workingSet.getElements()) {
             IProject project = (IProject) adaptable.getAdapter(IProject.class);
-            buildpathManager.scheduleDownload(project, ID_SOURCES.equals(id), !ID_SOURCES.equals(id), true);
+            buildpathManager.scheduleDownload(project, ID_SOURCES.equals(id), !ID_SOURCES.equals(id));
           }
         }
       }

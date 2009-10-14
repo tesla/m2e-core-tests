@@ -65,14 +65,11 @@ import org.eclipse.jdt.internal.core.JavaElementDelta;
 import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerContentProvider;
 
-import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
-
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.artifact.resolver.filter.ScopeArtifactFilter;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.repository.RepositorySystem;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
@@ -330,9 +327,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IResource
     }
   }
   
-  private IClasspathEntry[] getClasspath(IMavenProjectFacade projectFacade, 
-      final int kind, final Properties sourceAttachment, boolean uniquePaths, 
-      final IProgressMonitor monitor) throws CoreException {
+  private IClasspathEntry[] getClasspath(IMavenProjectFacade projectFacade, final int kind, final Properties sourceAttachment, boolean uniquePaths, final IProgressMonitor monitor) throws CoreException {
 
     IJavaProject javaProject = JavaCore.create(projectFacade.getProject());
 
@@ -344,7 +339,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IResource
         return true; // continue traversal
       }
     }, IMavenProjectVisitor.NESTED_MODULES);
-    
+
     for (IJavaProjectConfigurator configurator : getJavaProjectConfigurators(projectFacade, monitor)) {
       configurator.configureClasspath(projectFacade, classpath, monitor);
     }
@@ -443,7 +438,8 @@ public class BuildPathManager implements IMavenProjectChangedListener, IResource
 
         boolean downloadSources = srcPath==null && mavenConfiguration.isDownloadSources();
         boolean downloadJavaDoc = javaDocUrl==null && mavenConfiguration.isDownloadJavaDoc();
-        scheduleDownload(facade.getProject(), mavenProject, new ArtifactKey(a), downloadSources, downloadJavaDoc, false);
+        ArtifactKey aKey = new ArtifactKey(a.getGroupId(), a.getArtifactId(), a.getBaseVersion(), a.getClassifier());
+        scheduleDownload(facade.getProject(), mavenProject, aKey, downloadSources, downloadJavaDoc);
 
         classpath.addLibraryEntry(a, srcPath, srcRoot, javaDocUrl);
       }
@@ -842,7 +838,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IResource
     return downloadSourcesJob;
   }
 
-  public void scheduleDownload(IPackageFragmentRoot fragment, boolean downloadSources, boolean downloadJavadoc, boolean force) {
+  public void scheduleDownload(IPackageFragmentRoot fragment, boolean downloadSources, boolean downloadJavadoc) {
     ArtifactKey artifact = (ArtifactKey) fragment.getAdapter(ArtifactKey.class);
 
     if (artifact == null) {
@@ -857,14 +853,14 @@ public class BuildPathManager implements IMavenProjectChangedListener, IResource
         IMavenProjectFacade facade = projectManager.getProject(project);
         MavenProject mavenProject = facade != null? facade.getMavenProject(): null;
         if (mavenProject != null) {
-          scheduleDownload(project, mavenProject, artifact, downloadSources, downloadJavadoc, force);
+          scheduleDownload(project, mavenProject, artifact, downloadSources, downloadJavadoc);
         } else {
           downloadSourcesJob.scheduleDownload(project, artifact, downloadSources, downloadJavadoc);
         }
       } else {
         // this is a non-maven project
         List<ArtifactRepository> repositories = maven.getArtifactRepositories();
-        ArtifactKey[] attached = getAttachedSourcesAndJavadoc(artifact, repositories, downloadSources, downloadJavadoc, force);
+        ArtifactKey[] attached = getAttachedSourcesAndJavadoc(artifact, repositories, downloadSources, downloadJavadoc);
   
         if (attached[0] != null || attached[1] != null) {
           downloadSourcesJob.scheduleDownload(fragment, artifact, downloadSources, downloadJavadoc);
@@ -876,7 +872,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IResource
 
   }
 
-  public void scheduleDownload(final IProject project, final boolean downloadSources, final boolean downloadJavadoc, boolean force) {
+  public void scheduleDownload(final IProject project, final boolean downloadSources, final boolean downloadJavadoc) {
     try {
       if (project != null && project.isAccessible() && project.hasNature(IMavenConstants.NATURE_ID)) {
         IMavenProjectFacade facade = projectManager.getProject(project);
@@ -884,7 +880,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IResource
         if (mavenProject != null) {
           for(Artifact artifact : mavenProject.getArtifacts()) {
             ArtifactKey artifactKey = new ArtifactKey(artifact.getGroupId(), artifact.getArtifactId(), artifact.getBaseVersion(), artifact.getClassifier());
-            scheduleDownload(project, mavenProject, artifactKey, downloadSources, downloadJavadoc, force);
+            scheduleDownload(project, mavenProject, artifactKey, downloadSources, downloadJavadoc);
           }
         } else {
           // project is not in the cache, push all processing to the background job
@@ -896,49 +892,33 @@ public class BuildPathManager implements IMavenProjectChangedListener, IResource
     }
   }
 
-  private void scheduleDownload(IProject project, MavenProject mavenProject, ArtifactKey artifact, boolean downloadSources, boolean downloadJavadoc, boolean force) throws CoreException {
-    ArtifactKey[] attached = getAttachedSourcesAndJavadoc(artifact, mavenProject.getRemoteArtifactRepositories(), downloadSources, downloadJavadoc, force);
+  private void scheduleDownload(IProject project, MavenProject mavenProject, ArtifactKey artifact, boolean downloadSources, boolean downloadJavadoc) throws CoreException {
+    ArtifactKey[] attached = getAttachedSourcesAndJavadoc(artifact, mavenProject.getRemoteArtifactRepositories(), downloadSources, downloadJavadoc);
 
     if (attached[0] != null || attached[1] != null) {
       downloadSourcesJob.scheduleDownload(project, artifact, downloadSources, downloadJavadoc);
     }
   }
 
-  ArtifactKey[] getAttachedSourcesAndJavadoc(ArtifactKey a, List<ArtifactRepository> repositories, 
-      boolean downloadSources, boolean downloadJavaDoc, boolean force) throws CoreException {
+  ArtifactKey[] getAttachedSourcesAndJavadoc(ArtifactKey a, List<ArtifactRepository> repositories, boolean downloadSources, boolean downloadJavaDoc) throws CoreException {
     ArtifactKey sourcesArtifact = new ArtifactKey(a.getGroupId(), a.getArtifactId(), a.getVersion(), getSourcesClassifier(a.getClassifier()));
     ArtifactKey javadocArtifact = new ArtifactKey(a.getGroupId(), a.getArtifactId(), a.getVersion(), CLASSIFIER_JAVADOC);
+
     if (repositories != null) {
       downloadSources &= !isUnavailable(sourcesArtifact, repositories);
       downloadJavaDoc &= !isUnavailable(javadocArtifact, repositories);
     }
 
     ArtifactKey[] result = new ArtifactKey[2];
-    try{
-      RepositorySystem repoSystem = MavenPlugin.getDefault().getPlexusContainer().lookup(RepositorySystem.class);
-      if (downloadSources) {
-          //before downloading the source or javadoc, make sure the source file isn't already sitting in the local repo
-          //this will prevent the endless source/javadoc downloads as seen in MNGECLIPSE-1777
-          Artifact source = repoSystem.createArtifactWithClassifier(sourcesArtifact.getGroupId(), 
-              sourcesArtifact.getArtifactId(), sourcesArtifact.getVersion(), "jar", sourcesArtifact.getClassifier());
-          Artifact foundArtifact = maven.getLocalRepository().find(source);
-   
-          if(foundArtifact == null || force){
-            result[0] = sourcesArtifact;
-          } 
-      }
-      //same with javadoc - don't download if that exact version/etc is already there
-      if (downloadJavaDoc) {
-        Artifact javadoc = repoSystem.createArtifactWithClassifier(javadocArtifact.getGroupId(), 
-            javadocArtifact.getArtifactId(), javadocArtifact.getVersion(), "jar", javadocArtifact.getClassifier());
-        Artifact foundArtifact = maven.getLocalRepository().find(javadoc);
-        if(foundArtifact == null || force){
-          result[1] = javadocArtifact;
-        } 
-      }
-    } catch(ComponentLookupException e){
-      MavenLogger.log("Unable to download sources/javadoc for "+a.toString(),e);
+
+    if (downloadSources) {
+      result[0] = sourcesArtifact;
     }
+
+    if (downloadJavaDoc) {
+      result[1] = javadocArtifact;
+    }
+
     return result;
   }
 

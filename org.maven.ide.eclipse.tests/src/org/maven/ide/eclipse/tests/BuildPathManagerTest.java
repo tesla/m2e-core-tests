@@ -335,7 +335,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     assertNull(cp[1].getSourceAttachmentPath());
 
     // test project
-    getBuildPathManager().scheduleDownload(project, true, false, true);
+    getBuildPathManager().scheduleDownload(project, true, false);
     waitForJobsToComplete();
     container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
     cp = container.getClasspathEntries();
@@ -353,7 +353,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     }
 
     // test one entry
-    getBuildPathManager().scheduleDownload(getPackageFragmentRoot(javaProject, cp[0]), true, false, true);
+    getBuildPathManager().scheduleDownload(getPackageFragmentRoot(javaProject, cp[0]), true, false);
     waitForJobsToComplete();
     container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
     cp = container.getClasspathEntries();
@@ -371,8 +371,8 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     }
 
     // test two entries
-    getBuildPathManager().scheduleDownload(getPackageFragmentRoot(javaProject, cp[0]), true, false, true);
-    getBuildPathManager().scheduleDownload(getPackageFragmentRoot(javaProject, cp[1]), true, false, true);
+    getBuildPathManager().scheduleDownload(getPackageFragmentRoot(javaProject, cp[0]), true, false);
+    getBuildPathManager().scheduleDownload(getPackageFragmentRoot(javaProject, cp[1]), true, false);
     waitForJobsToComplete();
     container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
     cp = container.getClasspathEntries();
@@ -476,7 +476,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals(1, cp.length);
     assertNull(cp[0].getSourceAttachmentPath());
 
-    getBuildPathManager().scheduleDownload(project, false, true, true);
+    getBuildPathManager().scheduleDownload(project, false, true);
     waitForJobsToComplete();
 
     container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
@@ -499,7 +499,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals(1, cp.length);
     assertNull(cp[0].getSourceAttachmentPath());
 
-    getBuildPathManager().scheduleDownload(project, true, false, true);
+    getBuildPathManager().scheduleDownload(project, true, false);
     waitForJobsToComplete();
 
     javaProject = JavaCore.create(project);
@@ -533,7 +533,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     // sanity check
     assertEquals("downloadsources-t005-0.0.1-tests.jar", cp[1].getPath().lastSegment());
 
-    getBuildPathManager().scheduleDownload(project, true, false, true);
+    getBuildPathManager().scheduleDownload(project, true, false);
     waitForJobsToComplete();
     container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
     cp = container.getClasspathEntries();
@@ -555,7 +555,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     // sanity check
     assertEquals("downloadsources-t006-0.0.1-jdk14.jar", cp[0].getPath().lastSegment());
 
-    getBuildPathManager().scheduleDownload(project, true, false, true);
+    getBuildPathManager().scheduleDownload(project, true, false);
     waitForJobsToComplete();
     container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
     cp = container.getClasspathEntries();
@@ -600,7 +600,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
 
     javaProject.setRawClasspath(cp, monitor);
 
-    getBuildPathManager().scheduleDownload(javaProject.findPackageFragmentRoot(log4jPath), true, false, true);
+    getBuildPathManager().scheduleDownload(javaProject.findPackageFragmentRoot(log4jPath), true, false);
     waitForJobsToComplete();
 
     cp = javaProject.getRawClasspath();
@@ -609,7 +609,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals("log4j-1.2.13-sources.jar", cp[cp.length - 2].getSourceAttachmentPath().lastSegment());
     assertEquals(true, cp[cp.length - 2].isExported());
 
-    getBuildPathManager().scheduleDownload(javaProject.findPackageFragmentRoot(junitPath), true, false, true);
+    getBuildPathManager().scheduleDownload(javaProject.findPackageFragmentRoot(junitPath), true, false);
     waitForJobsToComplete();
 
     assertEquals(junitPath, cp[cp.length - 1].getPath());
