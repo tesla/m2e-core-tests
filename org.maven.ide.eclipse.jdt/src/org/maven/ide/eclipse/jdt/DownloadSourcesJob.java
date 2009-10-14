@@ -190,7 +190,7 @@ class DownloadSourcesJob extends Job implements IBackgroundProcessingQueue {
   private File[] downloadAttachments(ArtifactKey artifact, List<ArtifactRepository> repositories, boolean downloadSources,
       boolean downloadJavadoc, IProgressMonitor monitor) throws CoreException {
 
-    ArtifactKey[] attached = manager.getAttachedSourcesAndJavadoc(artifact, repositories, downloadSources, downloadJavadoc);
+    ArtifactKey[] attached = manager.getAttachedSourcesAndJavadoc(artifact, repositories, downloadSources, downloadJavadoc, true);
 
     File[] files = new File[2]; 
 

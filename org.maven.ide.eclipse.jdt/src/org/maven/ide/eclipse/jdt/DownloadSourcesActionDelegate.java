@@ -44,7 +44,7 @@ public class DownloadSourcesActionDelegate implements IEditorActionDelegate {
               break;
             }
 
-            buildpathManager.scheduleDownload(root, true/*sources*/, false/*javadoc*/);
+            buildpathManager.scheduleDownload(root, true/*sources*/, false/*javadoc*/, true);
           }
         }
       } catch(Exception ex) {
