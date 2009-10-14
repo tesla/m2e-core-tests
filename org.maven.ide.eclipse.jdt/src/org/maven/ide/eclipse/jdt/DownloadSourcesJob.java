@@ -232,6 +232,10 @@ class DownloadSourcesJob extends Job implements IBackgroundProcessingQueue {
   }
 
   private void scheduleDownload(IProject project, IPackageFragmentRoot fragment, ArtifactKey artifact, boolean downloadSources, boolean downloadJavadoc) {
+    if (project == null || !project.isAccessible()) {
+      return;
+    }
+
     synchronized(this.queue) {
       queue.add(new DownloadRequest(project, fragment, artifact, downloadSources, downloadJavadoc));
     }

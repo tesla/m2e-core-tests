@@ -309,13 +309,9 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
     jobManager.suspend();
     try {
       Job[] jobs = jobManager.find(null);
-      ArrayList<IBackgroundProcessingQueue> queues = new ArrayList<IBackgroundProcessingQueue>();
       for (int i = 0; i < jobs.length; i++) {
         if(jobs[i] instanceof WorkspaceJob || jobs[i].getClass().getName().endsWith("JREUpdateJob")) {
           jobs[i].join();
-        }
-        if (jobs[i] instanceof IBackgroundProcessingQueue) {
-          queues.add((IBackgroundProcessingQueue) jobs[i]);
         }
       }
       workspace.run(new IWorkspaceRunnable() {
@@ -324,29 +320,41 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
       }, workspace.getRoot(), 0, monitor);
 
       // Now we flush all background processing queues
-      boolean processed = flushProcessingQueues(queues, monitor);
+      boolean processed = flushProcessingQueues(jobManager, monitor);
       for (int i = 0; i < 10 && processed; i++) {
-        processed = flushProcessingQueues(queues, monitor);
+        processed = flushProcessingQueues(jobManager, monitor);
       }
 
-      assertFalse("Could not flush background processing queues", processed);
+      assertFalse("Could not flush background processing queues: " + getProcessingQueues(jobManager), processed);
     } finally {
       jobManager.resume();
     }
 
   }
 
-  private static boolean flushProcessingQueues(ArrayList<IBackgroundProcessingQueue> queues, IProgressMonitor monitor) throws InterruptedException {
+  private static boolean flushProcessingQueues(IJobManager jobManager, IProgressMonitor monitor) throws InterruptedException {
     boolean processed = false;
-    for (IBackgroundProcessingQueue queue : queues) {
+    for (IBackgroundProcessingQueue queue : getProcessingQueues(jobManager)) {
       queue.join();
       if (!queue.isEmpty()) {
         queue.run(monitor);
-        queue.cancel();
         processed = true;
+      }
+      if (queue.isEmpty()) {
+        queue.cancel();
       }
     }
     return processed;
+  }
+
+  private static List<IBackgroundProcessingQueue> getProcessingQueues(IJobManager jobManager) {
+    ArrayList<IBackgroundProcessingQueue> queues = new ArrayList<IBackgroundProcessingQueue>();
+    for (Job job : jobManager.find(null)) {
+      if (job instanceof IBackgroundProcessingQueue) {
+        queues.add((IBackgroundProcessingQueue) job);
+      }
+    }
+    return queues;
   }
 
   protected IClasspathEntry[] getMavenContainerEntries(IProject project) throws JavaModelException {

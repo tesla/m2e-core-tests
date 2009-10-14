@@ -8,6 +8,8 @@
 
 package org.maven.ide.eclipse.internal.repository;
 
+import java.util.ArrayList;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -25,12 +27,17 @@ public class RepositoryRegistryUpdateJob extends Job implements IBackgroundProce
   
   private final RepositoryRegistry registry;
 
+  private final ArrayList<Object> queue = new ArrayList<Object>();
+
   public RepositoryRegistryUpdateJob(RepositoryRegistry registry) {
     super("Repository registry initialization");
     this.registry = registry;
   }
 
   public IStatus run(IProgressMonitor monitor) {
+    synchronized(queue) {
+      queue.clear();
+    }
     try {
       registry.updateRegistry(monitor);
     } catch(CoreException ex) {
@@ -38,8 +45,17 @@ public class RepositoryRegistryUpdateJob extends Job implements IBackgroundProce
     }
     return Status.OK_STATUS;
   }
-
+  
   public boolean isEmpty() {
-    return getState() == Job.NONE;
+    synchronized(queue) {
+      return queue.isEmpty();
+    }
+  }
+
+  public void updateRegistry() {
+    synchronized(queue) {
+      queue.add(new Object());
+      schedule(1000L);
+    }
   }  
 }

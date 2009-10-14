@@ -41,11 +41,13 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.index.IMutableIndex;
 import org.maven.ide.eclipse.internal.index.NexusIndex;
 import org.maven.ide.eclipse.internal.index.NexusIndexManager;
+import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;
 import org.maven.ide.eclipse.internal.repository.RepositoryRegistry;
 import org.maven.ide.eclipse.jdt.BuildPathManager;
 import org.maven.ide.eclipse.jdt.MavenJdtPlugin;
@@ -540,7 +542,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals("downloadsources-t005-0.0.1-test-sources.jar", cp[1].getSourceAttachmentPath().lastSegment());
   }
 
-  public void testDownloadSources_004_classifier() throws Exception {
+  public void testDownloadSources_005_classifier() throws Exception {
     deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t006/0.0.1"));
 
     IProject project = createExisting("downloadsources-p005", "projects/downloadsources/p005");
@@ -613,6 +615,40 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals(junitPath, cp[cp.length - 1].getPath());
     assertEquals("junit-3.8.1-sources.jar", cp[cp.length - 1].getSourceAttachmentPath().lastSegment());
     assertEquals(false, cp[cp.length - 1].isExported());
+  }
+
+  public void testDownloadSources_007_missingTestsSources() throws Exception {
+    // see MNGECLIPSE-1777
+    deleteSourcesAndJavadoc(new File(repo, "downloadsources/downloadsources-t007/0.0.1"));
+
+    IProject project = createExisting("downloadsources-p007", "projects/downloadsources/p007");
+    waitForJobsToComplete();
+
+    IJavaProject javaProject = JavaCore.create(project);
+    IClasspathContainer container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
+    IClasspathEntry[] cp = container.getClasspathEntries();
+
+    // sanity check
+    assertEquals(1, cp.length);
+    assertEquals("downloadsources-t007-0.0.1-tests.jar", cp[0].getPath().lastSegment());
+    assertNull(cp[0].getSourceAttachmentPath());
+
+    IPreferenceStore preferenceStore = plugin.getPreferenceStore();
+    boolean oldDownloadSources = preferenceStore.getBoolean(MavenPreferenceConstants.P_DOWNLOAD_SOURCES);
+    try {
+      preferenceStore.setValue(MavenPreferenceConstants.P_DOWNLOAD_SOURCES, true);
+      MavenUpdateRequest request = new MavenUpdateRequest(project, false/*offline*/, false/*updateSnapshots*/);
+      plugin.getMavenProjectManager().refresh(request );
+      waitForJobsToComplete();
+      container = BuildPathManager.getMaven2ClasspathContainer(javaProject);
+      cp = container.getClasspathEntries();
+  
+      assertEquals(1, cp.length);
+      assertEquals("downloadsources-t007-0.0.1-tests.jar", cp[0].getPath().lastSegment());
+      assertNull(cp[0].getSourceAttachmentPath());
+    } finally {
+      preferenceStore.setValue(MavenPreferenceConstants.P_DOWNLOAD_SOURCES, oldDownloadSources);
+    }
   }
 
   private BuildPathManager getBuildPathManager() {

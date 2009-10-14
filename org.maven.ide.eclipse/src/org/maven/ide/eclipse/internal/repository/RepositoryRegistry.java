@@ -18,7 +18,6 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.jobs.Job;
 
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.settings.Mirror;
@@ -61,7 +60,7 @@ public class RepositoryRegistry implements IRepositoryRegistry, IMavenProjectCha
 
   private ArrayList<IRepositoryDiscoverer> discoverers = new ArrayList<IRepositoryDiscoverer>();
 
-  private final Job job = new RepositoryRegistryUpdateJob(this);
+  private final RepositoryRegistryUpdateJob job = new RepositoryRegistryUpdateJob(this);
   
   public RepositoryRegistry(IMaven maven, MavenProjectManager projectManager) throws CoreException {
     this.maven = maven;
@@ -267,7 +266,7 @@ public class RepositoryRegistry implements IRepositoryRegistry, IMavenProjectCha
   }
 
   public void updateRegistry() {
-    job.schedule(1000L);
+    job.updateRegistry();
   }
 
   public void addRepositoryIndexer(IRepositoryIndexer indexer) {
