@@ -66,19 +66,18 @@ public final class TransferListenerAdapter implements TransferListener {
     long total = e.getResource().getContentLength();
 
     StringBuffer sb = new StringBuffer();
-    if(total >= 1024) {
-      sb.append(complete / 1024);
-      if(total != WagonConstants.UNKNOWN_LENGTH) {
-        sb.append("/").append(total / 1024).append("K");
-      }
 
-    } else {
-      sb.append(complete);
-      if(total != WagonConstants.UNKNOWN_LENGTH) {
-        sb.append("/").append(total).append("b");
-      }
+    formatBytes(complete, sb);
+    if(total != WagonConstants.UNKNOWN_LENGTH) {
+      sb.append('/');
+      formatBytes(total, sb);
+      sb.append(" (");
+      sb.append(100l * complete / total);
+      sb.append("%)");
     }
-    monitor.setTaskName((int) (100d * complete / total) + "% " + e.getWagon().getRepository() + "/"
+    sb.append(' ');
+
+    monitor.setTaskName(sb.toString() + e.getWagon().getRepository() + "/"
         + e.getResource().getName());
   }
 
@@ -97,5 +96,14 @@ public final class TransferListenerAdapter implements TransferListener {
 
   public void debug(String message) {
     // System.err.println( "debug "+message);
+  }
+  
+  private static final String[] units = {"B","KB","MB"};
+  private void formatBytes(long n, StringBuffer sb) {
+    int i = 0;
+    while (n >= 1024 && ++i <units.length) n >>= 10;
+
+    sb.append(n);
+    sb.append(units[i]);
   }
 }
