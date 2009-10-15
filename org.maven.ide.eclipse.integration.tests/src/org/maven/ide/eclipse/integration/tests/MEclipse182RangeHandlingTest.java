@@ -35,7 +35,7 @@ public class MEclipse182RangeHandlingTest extends UIIntegrationTestCase {
 
     //Install version 1.0-SNAPSHOT of project2
     ui.click(new TreeItemLocator("project2", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
-    ui.click(new MenuItemLocator("Run/Run As/Maven install"));
+    ui.click(new MenuItemLocator("Run/Run As/.*Maven install"));
     ui.wait(new JobsCompleteCondition(), 240000);
     assertProjectsHaveNoErrors();
 
