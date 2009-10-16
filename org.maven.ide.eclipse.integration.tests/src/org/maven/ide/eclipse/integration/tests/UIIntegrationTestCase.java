@@ -371,7 +371,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     IEditorPart editor = (IEditorPart) UIThreadTask.executeOnEventQueue(new UIThreadTask() {
 
       public Object runEx() throws Exception {
-        return IDE.openEditor(getActivePage(), f, "org.eclipse.ui.DefaultTextEditor", true);
+        return IDE.openEditor(getActivePage(), f, EditorsUI.DEFAULT_TEXT_EDITOR_ID, true);
       }
     });
     getUI().wait(new JobsCompleteCondition(), 60000);
