@@ -131,13 +131,19 @@ public class MEclipse161ArchetypeProjectCreationTest extends UIIntegrationTestCa
     assertTrue(project.exists());
 
     // Bump compliance level to 1.5
-    openFile(project, "pom.xml");
+    openTextFile(project, "pom.xml");
     waitForAllBuildsToComplete();
-    getUI().click(new CTabItemLocator("pom.xml"));
     findText("</plugins");
     getUI().keyClick(SWT.ARROW_LEFT);
     getUI().enterText(
-        "<plugin><artifactId>maven-compiler-plugin</<version>2.0.2</<configuration><source>1.5</<target>1.5</</</");
+        "<plugin>" +
+          "<artifactId>maven-compiler-plugin</artifactId>" +
+          "<version>2.0.2</version>" +
+          "<configuration>" +
+            "<source>1.5</source>" +
+            "<target>1.5</target>" +
+          "</configuration>" +
+        "</plugin>");
     getUI().keyClick(SWT.MOD1, 's');
     Thread.sleep(5000);
     getUI().wait(new JobsCompleteCondition(), 120000);

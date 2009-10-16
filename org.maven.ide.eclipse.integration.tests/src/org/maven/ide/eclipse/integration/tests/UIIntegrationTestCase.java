@@ -62,6 +62,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPreferenceConstants;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.internal.IPreferenceConstants;
 import org.eclipse.ui.internal.WorkbenchPlugin;
@@ -357,6 +358,20 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
 
       public Object runEx() throws Exception {
         return IDE.openEditor(getActivePage(), f, true);
+      }
+    });
+    getUI().wait(new JobsCompleteCondition(), 60000);
+    return editor;
+  }
+
+  protected IEditorPart openTextFile(IProject project, String relPath) throws Exception {
+
+    final IFile f = project.getFile(relPath);
+
+    IEditorPart editor = (IEditorPart) UIThreadTask.executeOnEventQueue(new UIThreadTask() {
+
+      public Object runEx() throws Exception {
+        return IDE.openEditor(getActivePage(), f, "org.eclipse.ui.DefaultTextEditor", true);
       }
     });
     getUI().wait(new JobsCompleteCondition(), 60000);
