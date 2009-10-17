@@ -486,7 +486,8 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     IUIContext ui = getUI();
     File f = copyPluginResourceToTempFile(PLUGIN_ID, pluginPath);
     try {
-      ui.click(new MenuItemLocator("File/Import..."));
+      ui.keyClick(SWT.ALT, 'F'); // File -> Import
+      ui.keyClick('I');
       ui.wait(new ShellShowingCondition("Import"));
       ui.click(new FilteredTreeItemLocator("General/Existing Projects into Workspace"));
       ui.click(new ButtonLocator("&Next >"));
@@ -506,7 +507,8 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     IUIContext ui = getUI();
     File f = copyPluginResourceToTempFile(PLUGIN_ID, pluginPath);
     try {
-      ui.click(new MenuItemLocator("File/Import..."));
+      ui.keyClick(SWT.ALT, 'F'); // File -> Import
+      ui.keyClick('I');
       ui.wait(new ShellShowingCondition("Import"));
       ui.click(new FilteredTreeItemLocator("General/Existing Projects into Workspace"));
       ui.click(new ButtonLocator("&Next >"));
