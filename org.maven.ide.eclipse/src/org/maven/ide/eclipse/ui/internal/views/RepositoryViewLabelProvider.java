@@ -14,6 +14,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.ISharedImages;
@@ -32,8 +33,16 @@ public class RepositoryViewLabelProvider extends LabelProvider implements IColor
 
   private Font italicFont;
   public RepositoryViewLabelProvider(Font treeFont){
-    //JFaceResources.getFontRegistry().
-    italicFont = M2EUtils.deriveFont(treeFont, SWT.ITALIC, 12);
+    int size = 0;
+    FontData[] data = treeFont.getFontData();
+    if(data == null){
+      size = 12;
+    } else {
+      for(int i=0;i<data.length;i++){
+        size = Math.max(size, data[i].getHeight());
+      }
+    }
+    italicFont = M2EUtils.deriveFont(treeFont, SWT.ITALIC, size);
   }
   
   
