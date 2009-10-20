@@ -78,6 +78,7 @@ import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.project.ProjectBuildingResult;
+import org.apache.maven.repository.ArtifactTransferListener;
 import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.settings.MavenSettingsBuilder;
 import org.apache.maven.settings.Mirror;
@@ -85,13 +86,13 @@ import org.apache.maven.settings.Proxy;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.settings.SettingsUtils;
 import org.apache.maven.settings.validation.SettingsValidationResult;
-import org.apache.maven.wagon.events.TransferListener;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.embedder.ILocalRepositoryListener;
 import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.embedder.IMavenConfigurationChangeListener;
@@ -130,7 +131,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
 
   private final ArrayList<ISettingsChangeListener> settingsListeners = new ArrayList<ISettingsChangeListener>();
 
-  private final ArrayList<TransferListener> transferListeners = new ArrayList<TransferListener>();
+  private final ArrayList<ILocalRepositoryListener> localRepositoryListeners = new ArrayList<ILocalRepositoryListener>();
 
   public MavenImpl(PlexusContainer plexus, IMavenConfiguration mavenConfiguration, MavenConsole console) throws CoreException {
     this.plexus = plexus;
@@ -176,7 +177,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
     request.setOffline(mavenConfiguration.isOffline());
 
     // logging
-    request.setTransferListener(createTransferListener(monitor));
+    request.setTransferListener(createArtifactTransferListener(monitor));
 
     request.getUserProperties().put("m2e.version", MavenPlugin.getVersion());
 
@@ -204,11 +205,6 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
       e.printStackTrace();
       result = new DefaultMavenExecutionResult();
       result.addException(e);
-    }
-    if(result.getExceptions() != null && result.getExceptions().size() > 0){
-      for(Exception e :result.getExceptions()){
-        e.printStackTrace();
-      }
     }
     return result;
   }
@@ -407,7 +403,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
       }
     }
     request.setArtifact(artifact);
-    request.setTransferListener(createTransferListener(monitor));
+    request.setTransferListener(createArtifactTransferListener(monitor));
 
     ArtifactResolutionResult result = repositorySystem.resolve(request);
 
@@ -730,22 +726,26 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
     settingsListeners.remove(listener);
   }
 
-  @SuppressWarnings("deprecation")
-  public void addTransferListener(TransferListener listener) {
-    transferListeners.add(listener);
+  public void addLocalRepositoryListener(ILocalRepositoryListener listener) {
+    localRepositoryListeners.add(listener);
+  }
+
+  public void removeLocalRepositoryListener(ILocalRepositoryListener listener) {
+    localRepositoryListeners.remove(listener);
+  }
+  
+  public List<ILocalRepositoryListener> getLocalRepositoryListeners() {
+    return localRepositoryListeners;
   }
 
   @SuppressWarnings("deprecation")
-  public void removeTransferListener(TransferListener listener) {
-    transferListeners.remove(listener);
+  public WagonTransferListenerAdapter createTransferListener(IProgressMonitor monitor) {
+    return new WagonTransferListenerAdapter(this, monitor, console);
   }
 
-  @SuppressWarnings("deprecation")
-  public CompoundTransferListener createTransferListener(IProgressMonitor monitor) {
-    ArrayList<TransferListener> listeners = new ArrayList<TransferListener>();
-    listeners.add(new TransferListenerAdapter(monitor, console));
-    listeners.addAll(transferListeners);
-    return new CompoundTransferListener(listeners);
+  public ArtifactTransferListener createArtifactTransferListener(IProgressMonitor monitor) {
+    // TODO maven core does not provide support for us yet. see https://issues.sonatype.org/browse/MNGECLIPSE-1485
+    return null;
   }
 
   /** for testing purposes */

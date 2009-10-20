@@ -671,13 +671,13 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
                   IIndex.NOT_PRESENT, IIndex.NOT_PRESENT);
               
               //save out the archetype
-              Archetype archetype = new Archetype();
-              archetype.setGroupId(archetypeGroupId);
-              archetype.setArtifactId(archetypeArtifactId);
-              archetype.setVersion(archetypeVersion);
-              archetype.setRepository(repositoryUrl);
-              org.apache.maven.archetype.Archetype archetyper = MavenPlugin.lookup(org.apache.maven.archetype.Archetype.class);
-              archetyper.updateLocalCatalog(archetype);
+//              Archetype archetype = new Archetype();
+//              archetype.setGroupId(archetypeGroupId);
+//              archetype.setArtifactId(archetypeArtifactId);
+//              archetype.setVersion(archetypeVersion);
+//              archetype.setRepository(repositoryUrl);
+//              org.apache.maven.archetype.Archetype archetyper = MavenPlugin.lookup(org.apache.maven.archetype.Archetype.class);
+//              archetyper.updateLocalCatalog(archetype);
               
               loadArchetypes(archetypeGroupId, archetypeArtifactId, archetypeVersion);
             } else {  

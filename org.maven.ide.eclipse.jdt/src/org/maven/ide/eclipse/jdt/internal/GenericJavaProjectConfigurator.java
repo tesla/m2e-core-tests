@@ -74,8 +74,8 @@ public class GenericJavaProjectConfigurator extends AbstractJavaProjectConfigura
 
     if(result.hasExceptions()) {
       String msg = "Build error for " + pomResource.getFullPath();
-      List<Exception> exceptions = result.getExceptions();
-      for(Exception ex : exceptions) {
+      List<Throwable> exceptions = result.getExceptions();
+      for(Throwable ex : exceptions) {
         console.logError(msg + "; " + ex.toString());
         MavenLogger.log(msg, ex);
       }

@@ -142,13 +142,20 @@ public interface IMaven {
   @Deprecated
   public void xxxRemoveExtensionsRealm(MavenProject project);
 
-  /** @deprecated IMaven API should not expose wagon.TransferListener */
-  public void addTransferListener(TransferListener listener);
+  /** @provisional */
+  public void addLocalRepositoryListener(ILocalRepositoryListener listener);
 
-  /** @deprecated IMaven API should not expose wagon.TransferListener */
-  public void removeTransferListener(TransferListener listener);
+  /** @provisional */
+  public void removeLocalRepositoryListener(ILocalRepositoryListener listener);
 
-  /** @deprecated IMaven API should not expose wagon.TransferListener */
+  /**
+   * Creates wagon TransferListener that can be used with Archetype, NexusIndexer
+   * and other components that use wagon API directly. The listener will adopt
+   * wagon transfer events to corresponding calls to IProgressMonitor and all
+   * registered ILocalRepositoryListeners.
+   * 
+   * @deprecated IMaven API should not expose maven.repository.ArtifactTransferListener 
+   */
   public TransferListener createTransferListener(IProgressMonitor monitor);
 
   public ProxyInfo getProxyInfo(String protocol) throws CoreException;

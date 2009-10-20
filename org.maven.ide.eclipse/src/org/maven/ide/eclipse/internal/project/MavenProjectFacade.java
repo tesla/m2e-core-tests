@@ -192,8 +192,8 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
       mavenProject = result.getProject();
       if (mavenProject == null) {
         MultiStatus status = new MultiStatus(IMavenConstants.PLUGIN_ID, 0, "Could not read maven project", null);
-        List<Exception> exceptions = result.getExceptions();
-        for (Exception e : exceptions) {
+        List<Throwable> exceptions = result.getExceptions();
+        for (Throwable e : exceptions) {
           status.add(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, 0, e.getMessage(), e));
         }
         throw new CoreException(status);

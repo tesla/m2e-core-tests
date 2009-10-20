@@ -8,31 +8,46 @@
 
 package org.maven.ide.eclipse.internal.embedder;
 
+import java.io.File;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
+import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.WagonConstants;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.events.TransferListener;
 import org.apache.maven.wagon.repository.Repository;
 
+import org.sonatype.nexus.artifact.Gav;
+import org.sonatype.nexus.artifact.GavCalculator;
+import org.sonatype.nexus.artifact.M2GavCalculator;
+
 import org.maven.ide.eclipse.core.MavenConsole;
+import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.embedder.ArtifactKey;
+import org.maven.ide.eclipse.embedder.ILocalRepositoryListener;
 
 /**
- * TransferListenerAdapter
- * 
  * @author Eugene Kuleshov
  */
-public final class TransferListenerAdapter implements TransferListener {
+final class WagonTransferListenerAdapter implements TransferListener {
+  private final MavenImpl maven;
+
   private final IProgressMonitor monitor;
 
   private final MavenConsole console;
 
   private long complete = 0;
 
-  TransferListenerAdapter(IProgressMonitor monitor, MavenConsole console) {
+  // TODO this is just wrong!
+  private final GavCalculator gavCalculator = new M2GavCalculator();
+
+  WagonTransferListenerAdapter(MavenImpl maven, IProgressMonitor monitor, MavenConsole console) {
+    this.maven = maven;
     this.monitor = monitor == null ? new NullProgressMonitor() : monitor;
     this.console = console;
   }
@@ -86,6 +101,8 @@ public final class TransferListenerAdapter implements TransferListener {
 
     // monitor.subTask("100% "+e.getWagon().getRepository()+"/"+e.getResource().getName());
     monitor.setTaskName("");
+    
+    notifyLocalRepositoryListeners(e);
   }
 
   public void transferError(TransferEvent e) {
@@ -106,4 +123,40 @@ public final class TransferListenerAdapter implements TransferListener {
     sb.append(n);
     sb.append(units[i]);
   }
+
+  private void notifyLocalRepositoryListeners(TransferEvent e) {
+    try {
+      ArtifactRepository localRepository = maven.getLocalRepository();
+  
+      if (!(localRepository.getLayout() instanceof DefaultRepositoryLayout)) {
+        return;
+      }
+  
+      String repoBasepath = new File(localRepository.getBasedir()).getCanonicalPath();
+  
+      File artifactFile = e.getLocalFile();
+  
+      if (artifactFile == null) {
+        return;
+      }
+  
+      String artifactPath = artifactFile.getCanonicalPath();
+      if (!artifactPath.startsWith(repoBasepath)) {
+        return;
+      }
+  
+      artifactPath = artifactPath.substring(0, artifactPath.length());
+      Gav gav = gavCalculator.pathToGav(artifactPath);
+      ArtifactKey artifactKey = new ArtifactKey(gav.getGroupId(), gav.getArtifactId(), gav.getVersion(), gav.getClassifier());
+  
+      File repoBasedir = new File(localRepository.getBasedir()).getCanonicalFile();
+  
+      for (ILocalRepositoryListener listener : maven.getLocalRepositoryListeners()) {
+        listener.artifactInstalled(repoBasedir, artifactKey, artifactPath);
+      }
+    } catch (Exception ex) {
+      MavenLogger.log("Could not notify local repository listeners", ex);
+    }
+  }
+
 }

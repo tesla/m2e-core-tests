@@ -46,8 +46,8 @@ public class MavenMarkerManager implements IMavenMarkerManager {
   }
   
   public void addMarkers(IResource pomFile, MavenExecutionResult result) {
-    List<Exception> exceptions = result.getExceptions();
-    for(Exception ex : exceptions) {
+    List<Throwable> exceptions = result.getExceptions();
+    for(Throwable ex : exceptions) {
       if(ex instanceof ProjectBuildingException) {
         handleProjectBuildingException(pomFile, (ProjectBuildingException) ex);
   
@@ -117,7 +117,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
     }
   }
 
-  private void handleBuildException(IResource pomFile, Exception ex) {
+  private void handleBuildException(IResource pomFile, Throwable ex) {
     Throwable cause = getRootCause(ex);
     // String msg = Messages.getString("plugin.markerBuildError", cause.getMessage());  //$NON-NLS-1$
     String msg = cause.getMessage();
@@ -136,11 +136,11 @@ public class MavenMarkerManager implements IMavenMarkerManager {
     return id;
   }
 
-  private String getErrorMessage(Exception ex) {
+  private String getErrorMessage(Throwable ex) {
     return getRootCause(ex).getMessage();
   }
 
-  private Throwable getRootCause(Exception ex) {
+  private Throwable getRootCause(Throwable ex) {
     Throwable lastCause = ex;
     Throwable cause = lastCause.getCause();
     while(cause != null && cause != lastCause) {

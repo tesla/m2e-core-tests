@@ -17,6 +17,7 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
@@ -29,6 +30,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.QualifiedName;
 
 import org.apache.maven.execution.MavenExecutionRequest;
+import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.execution.MavenSession;
 
 import org.sonatype.plexus.build.incremental.ThreadBuildContext;
@@ -39,6 +41,7 @@ import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
+import org.maven.ide.eclipse.project.IMavenMarkerManager;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.MavenProjectManager;
@@ -75,6 +78,7 @@ public class MavenBuilder extends IncrementalProjectBuilder {
     MavenProjectManager projectManager = plugin.getMavenProjectManager();
     IProjectConfigurationManager configurationManager = plugin.getProjectConfigurationManager();
     IMavenConfiguration mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
+    IMavenMarkerManager markerManager = plugin.getMavenMarkerManager();
 
     IProject project = getProject();
     if(project.hasNature(IMavenConstants.NATURE_ID)) {
@@ -139,6 +143,8 @@ public class MavenBuilder extends IncrementalProjectBuilder {
             participant.setBuildContext(null);
           }
         }
+      } catch (CoreException e) {
+        addErrorMarker(e);
       } finally {
         ThreadBuildContext.setThreadBuildContext(null);
       }
@@ -162,14 +168,21 @@ public class MavenBuilder extends IncrementalProjectBuilder {
         }
       }
 
-      // XXX
-      for (Exception e : session.getResult().getExceptions()) {
-        e.printStackTrace();
+      MavenExecutionResult result = session.getResult();
+      if (result.hasExceptions()) {
+        markerManager.addMarkers(pomResource, result);
       }
 
       return !dependencies.isEmpty() ? dependencies.toArray(new IProject[dependencies.size()]) : null;
     }
     return null;
+  }
+
+  private void addErrorMarker(Exception e) throws CoreException {
+    IMarker marker = getProject().createMarker(IMavenConstants.MARKER_ID);
+    marker.setAttribute(IMarker.MESSAGE, e.getMessage());
+    marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
+    marker.setAttribute(IMarker.TRANSIENT, true);
   }
 
   public static IPath getProjectRelativePath(IProject project, File file) {
@@ -208,7 +221,7 @@ public class MavenBuilder extends IncrementalProjectBuilder {
       }
 
       IMaven maven = MavenPlugin.lookup(IMaven.class);
-
+      
       // TODO flush relevant caches
 
       project.setSessionProperty(BUILD_CONTEXT_KEY, null); // clean context state
@@ -236,6 +249,8 @@ public class MavenBuilder extends IncrementalProjectBuilder {
             participant.setSession(null);
           }
         }
+      } catch (CoreException e) {
+        addErrorMarker(e);
       } finally {
         ThreadBuildContext.setThreadBuildContext(null);
       }

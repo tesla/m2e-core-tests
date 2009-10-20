@@ -245,8 +245,8 @@ public class GenericBuildParticipant extends AbstractBuildParticipant {
   void logErrors(MavenExecutionResult result, String projectNname) {
     if(result.hasExceptions()) {
       String msg = "Build errors for " + projectNname;
-      List<Exception> exceptions = result.getExceptions();
-      for(Exception ex : exceptions) {
+      List<Throwable> exceptions = result.getExceptions();
+      for(Throwable ex : exceptions) {
         MavenPlugin.getDefault().getConsole().logError(msg + "; " + ex.toString());
         MavenLogger.log(msg, ex);
       }

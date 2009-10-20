@@ -10,29 +10,24 @@ package org.maven.ide.eclipse.internal.index;
 
 import java.io.File;
 
-import org.apache.maven.wagon.events.TransferEvent;
-import org.apache.maven.wagon.observers.AbstractTransferListener;
-import org.apache.maven.wagon.resource.Resource;
-
+import org.maven.ide.eclipse.embedder.ArtifactKey;
+import org.maven.ide.eclipse.embedder.ILocalRepositoryListener;
 import org.maven.ide.eclipse.index.IIndex;
 
-public class IndexingTransferListener extends AbstractTransferListener {
+public class IndexingTransferListener implements ILocalRepositoryListener {
 
-  private final NexusIndex localIndex;
-  
+  private final NexusIndexManager indexManager;
+
   public IndexingTransferListener(NexusIndexManager indexManager) {
-    localIndex = indexManager.getLocalIndex();
+    this.indexManager = indexManager;
   }
 
-  public void transferCompleted(TransferEvent transferEvent) {
-    // updating local index
-    // String repository = e.getWagon().getRepository().getName();
-    Resource resource = transferEvent.getResource();
-
-    File file = transferEvent.getLocalFile();
-    if(file.getName().endsWith(".jar")) {
-      localIndex.addArtifact(file, null, //
-          resource.getContentLength(), resource.getLastModified(), file, //
+  public void artifactInstalled(File repositoryBasedir, ArtifactKey artifact, String artifactRelpath) {
+    File artifactFile = new File(repositoryBasedir, artifactRelpath);
+    NexusIndex localIndex = indexManager.getLocalIndex();
+    if(artifactFile.getName().endsWith(".jar")) {
+      localIndex.addArtifact(artifactFile, artifact, //
+          artifactFile.length(), artifactFile.lastModified(), artifactFile, //
           IIndex.NOT_PRESENT, IIndex.NOT_PRESENT);
     }
   }

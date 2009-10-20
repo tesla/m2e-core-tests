@@ -103,9 +103,9 @@ public class MavenInstallFileWizard extends Wizard implements IImportWizard {
           request.setUserProperties(properties);
           MavenExecutionResult executionResult = maven.execute(request, monitor);
           
-          List<Exception> exceptions = executionResult.getExceptions();
+          List<Throwable> exceptions = executionResult.getExceptions();
           if(!exceptions.isEmpty()) {
-            for(Exception exception : exceptions) {
+            for(Throwable exception : exceptions) {
               String msg = "Execution error";
               plugin.getConsole().logError(msg + "; " + exception.toString()); 
               MavenLogger.log(msg, exception);

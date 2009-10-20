@@ -340,7 +340,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     //create the index manager
     this.indexManager = new NexusIndexManager(console, projectManager, repositoryRegistry, stateLocationDir);
     this.projectManager.addMavenProjectChangedListener(indexManager);
-    maven.addTransferListener(new IndexingTransferListener(indexManager));
+    maven.addLocalRepositoryListener(new IndexingTransferListener(indexManager));
 
     this.repositoryRegistry.addRepositoryIndexer(indexManager);
     this.repositoryRegistry.addRepositoryDiscoverer(new IndexesExtensionReader(indexManager));

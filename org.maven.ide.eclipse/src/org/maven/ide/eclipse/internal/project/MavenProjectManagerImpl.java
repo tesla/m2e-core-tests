@@ -162,9 +162,9 @@ public class MavenProjectManagerImpl {
       if(mavenProject != null) {
         projectFacade = new MavenProjectFacade(this, pom, mavenProject, configuration);
       } else {
-        List<Exception> exceptions = executionResult.getExceptions();
+        List<Throwable> exceptions = executionResult.getExceptions();
         if (exceptions != null) {
-          for(Exception ex : exceptions) {
+          for(Throwable ex : exceptions) {
             String msg = "Failed to read Maven project";
             console.logError(msg);
             console.logError(ex.toString());

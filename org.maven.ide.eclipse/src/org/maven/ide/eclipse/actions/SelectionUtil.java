@@ -326,7 +326,7 @@ public class SelectionUtil {
 
     if(result.hasExceptions()) {
       List<IStatus> statuses = new ArrayList<IStatus>();
-      List<Exception> exceptions = result.getExceptions();
+      List<Throwable> exceptions = result.getExceptions();
       for(Throwable e : exceptions) {
         statuses.add(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, e.getMessage(), e));
       }
