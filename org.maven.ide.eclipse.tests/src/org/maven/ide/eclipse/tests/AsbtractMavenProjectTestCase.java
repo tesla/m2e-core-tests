@@ -8,13 +8,10 @@
 
 package org.maven.ide.eclipse.tests;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -26,7 +23,6 @@ import junit.framework.TestCase;
 
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.model.Model;
-import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -63,6 +59,7 @@ import org.maven.ide.eclipse.jobs.IBackgroundProcessingQueue;
 import org.maven.ide.eclipse.project.MavenProjectInfo;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
+import org.maven.ide.eclipse.util.FileHelpers;
 
 public abstract class AsbtractMavenProjectTestCase extends TestCase {
   
@@ -393,53 +390,14 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
     waitForJobsToComplete();
   }
 
-  protected static void copyDir(File src, File dst) throws IOException {
-    copyDir(src, dst, new FileFilter() {
-      public boolean accept(File pathname) {
-        return !".svn".equals(pathname.getName());
-      }
-    });
+  public static void copyDir(File src, File dst) throws IOException {
+    FileHelpers.copyDir(src, dst);
   }
-  
+
   public static void copyDir(File src, File dst, FileFilter filter) throws IOException {
-    copyDir(src, dst, filter, true);
+    FileHelpers.copyDir(src, dst, filter);
   }
 
-  private static void copyDir(File src, File dst, FileFilter filter, boolean deleteDst) throws IOException {
-    if (deleteDst) {
-      FileUtils.deleteDirectory(dst);
-    }
-    dst.mkdirs();
-    File[] files = src.listFiles(filter);
-    if (files != null) {
-      for (int i = 0; i < files.length; i++) {
-        File file = files[i];
-        if (file.canRead()) {
-          File dstChild = new File(dst, file.getName());
-          if (file.isDirectory()) {
-            copyDir(file, dstChild, filter, false);
-          } else {
-            copyFile(file, dstChild);
-          }
-        }
-      }
-    }
-  }
-
-  private static void copyFile(File src, File dst) throws IOException {
-    BufferedInputStream in = new BufferedInputStream(new FileInputStream(src));
-    BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(dst));
-
-    byte[] buf = new byte[10240];
-    int len;
-    while ( (len = in.read(buf)) != -1 ) {
-      out.write(buf, 0, len);
-    }
-
-    out.close();
-    in.close();
-  }
-  
   protected List<IMarker> findErrorMarkers(IProject project) throws CoreException {
     ArrayList<IMarker> errors = new ArrayList<IMarker>();
     for(IMarker marker : project.findMarkers(null /* all markers */, true /* subtypes */, IResource.DEPTH_INFINITE)) {

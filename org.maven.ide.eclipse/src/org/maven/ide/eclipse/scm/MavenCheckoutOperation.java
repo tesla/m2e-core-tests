@@ -93,61 +93,9 @@ public class MavenCheckoutOperation {
 
     }
 
-    /*
-    // update projects and import the missing ones
-    for(Iterator it = mavenProjects.iterator(); it.hasNext();) {
-      if(monitor.isCanceled()) {
-        throw new InterruptedException();
-      }
-
-      MavenProjectScmInfo info = (MavenProjectScmInfo) it.next();
-      monitor.subTask("Importing " + info.getLabel());
-
-      String folderUrl = info.getFolderUrl().toString();
-
-      try {
-        int n = flatProjects.indexOf(info);
-        if(n > -1) {
-          // project is already in workspace
-          MavenProjectScmInfo info2 = (MavenProjectScmInfo) flatProjects.get(n);
-          IProject project = configuration.getProject(workspaceRoot, info2.getModel());
-          buildpathManager.configureProject(project, configuration.getResolverConfiguration(), monitor);
-
-        } else {
-          // module project that need to be imported
-          File pomFile = findPomFile(folderUrl, mavenProjects, workspaceRoot);
-          if(pomFile == null) {
-            MavenPlugin.getDefault().getConsole().logError("Can't find POM file for " + folderUrl);
-          } else {
-            buildpathManager.importProject(pomFile, info.getModel(), configuration, monitor);
-          }
-        }
-      } catch(CoreException ex) {
-        MavenPlugin.getDefault().getConsole().logError(
-            "Unable to create project for " + info.getModel().getId() + "; " + ex.toString());
-      }
-    }
-    */
   }
 
-//  private File findPomFile(String folderUrl, Collection mavenProjects, IWorkspaceRoot workspaceRoot) {
-//    for(Iterator it = mavenProjects.iterator(); it.hasNext();) {
-//      MavenProjectScmInfo info = (MavenProjectScmInfo) it.next();
-//      String url = info.getFolderUrl();
-//      if(folderUrl.startsWith(url)) {
-//        IProject parentProject = configuration.getProject(workspaceRoot, info.getModel());
-//        File parentFolder = parentProject.getLocation().toFile();
-//        return new File(parentFolder, folderUrl.substring(url.length()) + File.separator + MavenPlugin.POM_FILE_NAME);
-//      }
-//    }
-//    return null;
-//  }
-
-//  public void setConfiguration(ProjectImportConfiguration configuration) {
-//    this.configuration = configuration;
-//  }
-
-  private File getUniqueDir(File baseDir) {
+  protected File getUniqueDir(File baseDir) {
     long suffix = System.currentTimeMillis();
     while(true) {
       File tempDir = new File(baseDir, "maven." + suffix);

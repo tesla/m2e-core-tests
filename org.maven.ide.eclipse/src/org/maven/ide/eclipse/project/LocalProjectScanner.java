@@ -35,7 +35,7 @@ import org.maven.ide.eclipse.embedder.MavenModelManager;
 public class LocalProjectScanner extends AbstractProjectScanner<MavenProjectInfo> {
   private final File workspaceRoot;
   private final List<String> folders;
-  private final boolean needsRename;
+  private final boolean basedirRemameRequired;
 
   private Set<File> scannedFolders = new HashSet<File>();
   private final MavenConsole console;
@@ -46,11 +46,11 @@ public class LocalProjectScanner extends AbstractProjectScanner<MavenProjectInfo
     this(workspaceRoot, Collections.singletonList(folder), needsRename, modelManager, console);
   }
 
-  public LocalProjectScanner(File workspaceRoot, List<String> folders, boolean needsRename,
+  public LocalProjectScanner(File workspaceRoot, List<String> folders, boolean basedirRemameRequired,
       MavenModelManager modelManager, MavenConsole console) {
     this.workspaceRoot = workspaceRoot;
     this.folders = folders;
-    this.needsRename = needsRename;
+    this.basedirRemameRequired = basedirRemameRequired;
     this.modelManager = modelManager;
     this.console = console;
   }
@@ -122,7 +122,7 @@ public class LocalProjectScanner extends AbstractProjectScanner<MavenProjectInfo
       String pomName = modulePath + "/" + IMavenConstants.POM_FILE_NAME;
 
       MavenProjectInfo projectInfo = newMavenProjectInfo(pomName, pomFile, model, parentInfo);
-      projectInfo.setNeedsRename(getNeedsRename(projectInfo));
+      projectInfo.setBasedirRename(getBasedirRename(projectInfo));
 
       Map<String, Set<String>> modules = new LinkedHashMap<String, Set<String>>();
       for(String module : model.getModules()) {
@@ -173,8 +173,11 @@ public class LocalProjectScanner extends AbstractProjectScanner<MavenProjectInfo
     return folders.toString();
   }
 
-  private boolean getNeedsRename(MavenProjectInfo mavenProjectInfo) throws IOException {
+  private int getBasedirRename(MavenProjectInfo mavenProjectInfo) throws IOException {
     File cannonical = mavenProjectInfo.getPomFile().getParentFile().getParentFile().getCanonicalFile();
-    return needsRename && cannonical.equals(workspaceRoot.getCanonicalFile());
+    if (basedirRemameRequired && cannonical.equals(workspaceRoot.getCanonicalFile())) {
+      return MavenProjectInfo.RENAME_REQUIRED;
+    }
+    return MavenProjectInfo.RENAME_NO;
   }
 }

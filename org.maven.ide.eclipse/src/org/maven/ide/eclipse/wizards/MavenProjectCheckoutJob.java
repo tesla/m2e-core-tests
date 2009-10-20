@@ -203,8 +203,6 @@ public abstract class MavenProjectCheckoutJob extends WorkspaceJob {
         cleanup(collectedLocations);
       }
       
-      configuration.setNeedsRename(true);
-      
       if(checkoutAllProjects) {
         final MavenPlugin plugin = MavenPlugin.getDefault();
         WorkspaceJob job = new WorkspaceJob("Importing Maven projects") {

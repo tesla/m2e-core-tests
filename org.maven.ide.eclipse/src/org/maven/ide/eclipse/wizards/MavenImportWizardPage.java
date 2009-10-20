@@ -393,7 +393,7 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
     if(showLocation || locations == null || locations.isEmpty()) {
       return new LocalProjectScanner(root, rootDirectoryCombo.getText(), false, modelManager, console);
     }
-    return new LocalProjectScanner(root, locations, getImportConfiguration().isNeedsRename(), modelManager, console);
+    return new LocalProjectScanner(root, locations, true, modelManager, console);
   }
 
   /**

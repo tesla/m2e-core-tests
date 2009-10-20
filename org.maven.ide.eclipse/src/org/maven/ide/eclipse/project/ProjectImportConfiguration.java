@@ -40,8 +40,6 @@ public class ProjectImportConfiguration {
   /** the project name template */
   private String projectNameTemplate = "";
   
-  private boolean needsRename;
-
   private IWorkingSet[] workingSets;
 
   /** Creates a new configuration. */
@@ -67,14 +65,6 @@ public class ProjectImportConfiguration {
   /** Returns the project name template. */
   public String getProjectNameTemplate() {
     return projectNameTemplate;
-  }
-
-  public void setNeedsRename(boolean needsRename) {
-    this.needsRename = needsRename;
-  }
-  
-  public boolean isNeedsRename() {
-    return this.needsRename;
   }
 
   /** @deprecated UI aspects will be refactored out of core import logic */

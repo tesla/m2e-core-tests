@@ -172,8 +172,7 @@ public class LocalProjectScannerTest extends TestCase {
     List<MavenProjectInfo> projects = scanner.getProjects();
 
     MavenProjectInfo project = projects.get(0);
-    assertTrue(project.isNeedsRename());
-
+    assertEquals(MavenProjectInfo.RENAME_REQUIRED, project.getBasedirRename());
   }
 
   public void testNoMetadata() throws Exception {

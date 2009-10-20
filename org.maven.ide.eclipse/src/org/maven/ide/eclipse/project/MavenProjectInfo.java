@@ -23,6 +23,16 @@ import org.apache.maven.model.Model;
  */
 public class MavenProjectInfo {
 
+  /**
+   * Project basedir must NOT be renamed on filesystem.
+   */
+  public static final int RENAME_NO = 0;
+
+  /**
+   * Project basedir MUST be ranamed to match workspace project name.  
+   */
+  public static final int RENAME_REQUIRED = 2;
+
   private final String label;
 
   private File pomFile;
@@ -38,8 +48,7 @@ public class MavenProjectInfo {
 
   private final Set<String> profiles = new HashSet<String>();
 
-  private boolean needsRename;
-
+  private int basedirRename = RENAME_NO;
 
   public MavenProjectInfo(String label, File pomFile, Model model, MavenProjectInfo parent) {
     this.label = label;
@@ -64,14 +73,30 @@ public class MavenProjectInfo {
     this.pomFile = pomFile;
   }
 
+  /** @deprecated use set/get BasedirRename */
   public void setNeedsRename(boolean needsRename) {
-    this.needsRename = needsRename;
+    setBasedirRename(needsRename? RENAME_REQUIRED: RENAME_NO);
   }
   
+  /** @deprecated use set/get BasedirRenamePolicy */
   public boolean isNeedsRename() {
-    return this.needsRename;
+    return getBasedirRename() == RENAME_REQUIRED;
   }
-  
+
+  /**
+   * See {@link #RENAME_NO}, {@link #RENAME_REQUIRED}
+   */
+  public void setBasedirRename(int basedirRename) {
+    this.basedirRename = basedirRename;
+  }
+
+  /**
+   * See {@link #RENAME_NO}, {@link #RENAME_REQUIRED}
+   */
+  public int getBasedirRename() {
+    return basedirRename;
+  }
+
   private boolean isSubDir(File parentDir, File subDir) {
     if(parentDir.equals(subDir)) {
       return true;

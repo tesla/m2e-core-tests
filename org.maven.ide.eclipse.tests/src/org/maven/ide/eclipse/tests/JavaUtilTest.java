@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.util;
+package org.maven.ide.eclipse.tests;
 
 import org.maven.ide.eclipse.wizards.MavenProjectWizardArchetypeParametersPage;
 

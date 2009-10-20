@@ -557,6 +557,9 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
   }
 
   private IProject create(MavenProjectInfo projectInfo, ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException {
+    IWorkspace workspace = ResourcesPlugin.getWorkspace();
+    IWorkspaceRoot root = workspace.getRoot();
+    
     File pomFile = projectInfo.getPomFile(); 
     Model model = projectInfo.getModel();
     if(model == null) {
@@ -566,24 +569,10 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
 
     String projectName = configuration.getProjectName(model);
 
-    monitor.subTask("Importing project " + projectName);
-    
-    IWorkspace workspace = ResourcesPlugin.getWorkspace();
-    IWorkspaceRoot root = workspace.getRoot();
-    IProject project = configuration.getProject(root, model);
-    if(project.exists()) {
-      console.logError("Project " + projectName + " already exists");
-      return null;
-    }
-
     File projectDir = pomFile.getParentFile();
+    String projectParent = projectDir.getParentFile().getAbsolutePath();
 
-    if(projectDir.equals(root.getLocation().toFile())) {
-      console.logError("Can't create project " + projectName + " at Workspace folder");
-      return null;
-    }
-
-    if(projectInfo.isNeedsRename()) {
+    if (projectInfo.getBasedirRename() == MavenProjectInfo.RENAME_REQUIRED) {
       File newProject = new File(projectDir.getParent(), projectName);
       if(!projectDir.equals(newProject)) {
         boolean renamed = projectDir.renameTo(newProject);
@@ -598,19 +587,27 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
         projectInfo.setPomFile(getCanonicalPomFile(newProject));
         projectDir = newProject;
       }
+    } else {
+      if(projectParent.equals(root.getLocation().toFile().getAbsolutePath())) {
+        // immediately under workspace root, project name must match filesystem directory name
+        projectName = projectDir.getName();
+      }
     }
 
-    String projectParent = projectDir.getParentFile().getAbsolutePath();
+    monitor.subTask("Importing project " + projectName);
+    
+    IProject project = configuration.getProject(root, model);
+    if(project.exists()) {
+      console.logError("Project " + projectName + " already exists");
+      return null;
+    }
+
+    if(projectDir.equals(root.getLocation().toFile())) {
+      console.logError("Can't create project " + projectName + " at Workspace folder");
+      return null;
+    }
+
     if(projectParent.equals(root.getLocation().toFile().getAbsolutePath())) {
-      // rename dir in workspace to match expected project name
-      if(!projectDir.equals(root.getLocation().append(project.getName()).toFile())) {
-        File newProject = new File(projectDir.getParent(), projectName);
-        boolean renamed = projectDir.renameTo(newProject);
-        if(!renamed) {
-          throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Can't rename " + projectDir.getAbsolutePath(), null));
-        }
-        projectInfo.setPomFile(getCanonicalPomFile(newProject));
-      }
       project.create(monitor);
     } else {
       IProjectDescription description = workspace.newProjectDescription(projectName);
