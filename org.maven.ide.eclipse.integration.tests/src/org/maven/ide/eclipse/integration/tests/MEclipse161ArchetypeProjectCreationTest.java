@@ -133,6 +133,8 @@ public class MEclipse161ArchetypeProjectCreationTest extends UIIntegrationTestCa
     // Bump compliance level to 1.5
     openTextFile(project, "pom.xml");
     waitForAllBuildsToComplete();
+    
+    //Expected to fail here as long as MNGECLIPSE-1795 is happening
     findText("</plugins");
     getUI().keyClick(SWT.ARROW_LEFT);
     getUI().enterText(
