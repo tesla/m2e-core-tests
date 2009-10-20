@@ -22,7 +22,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 public abstract class AbstractProjectScanner<T extends MavenProjectInfo> {
 
   private final List<T> projects = new ArrayList<T>();
-  private final List<Exception> errors = new ArrayList<Exception>();
+  private final List<Throwable> errors = new ArrayList<Throwable>();
   
   /**
    * Returns <code>List</code> of {@link MavenProjectInfo}
@@ -34,7 +34,7 @@ public abstract class AbstractProjectScanner<T extends MavenProjectInfo> {
   /**
    * Returns <code>List</code> of <code>Exception</code>
    */
-  public List<Exception> getErrors() {
+  public List<Throwable> getErrors() {
     return this.errors;
   }
 
@@ -42,7 +42,7 @@ public abstract class AbstractProjectScanner<T extends MavenProjectInfo> {
     projects.add(mavenProjectInfo);
   }
 
-  protected void addError(Exception exception) {
+  protected void addError(Throwable exception) {
     errors.add(exception);
   }
 

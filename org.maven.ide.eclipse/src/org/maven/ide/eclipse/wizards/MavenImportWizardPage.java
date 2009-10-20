@@ -299,11 +299,11 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
       setErrorMessage(null);
       setMessage(null);
 
-      List<Exception> errors = projectScanner.getErrors();
+      List<Throwable> errors = projectScanner.getErrors();
       if(!errors.isEmpty()) {
         StringBuffer sb = new StringBuffer(Messages.getString("wizard.import.page.scanningErrors", errors.size()));
         int n = 1;
-        for(Exception ex : errors) {
+        for(Throwable ex : errors) {
           if(ex instanceof CoreException) {
             String msg = ((CoreException) ex).getStatus().getMessage();
             sb.append("\n  ").append(n).append(" ").append(msg.trim());
