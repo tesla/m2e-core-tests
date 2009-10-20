@@ -10,6 +10,7 @@ package org.maven.ide.eclipse.wizards;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -88,6 +89,7 @@ import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.internal.index.NexusIndexManager;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.repository.IRepository;
+import org.maven.ide.eclipse.util.M2EUtils;
 
 
 /**
@@ -97,6 +99,8 @@ import org.maven.ide.eclipse.repository.IRepository;
 public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage implements IndexListener {
 
   private static final String KEY_CATALOG = "catalog";
+  
+  private static final String ALL_CATALOGS = "All Catalogs";
 
   public static final Comparator<Archetype> ARCHETYPE_COMPARATOR = new Comparator<Archetype>() {
 
@@ -136,6 +140,8 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
   Text descriptionText;
 
   Button showLastVersionButton;
+  
+  Button includeShapshotsButton;
 
   Button addArchetypeButton;
   
@@ -191,6 +197,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
     catalogsComboViewer.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
     catalogsComboViewer.setContentProvider(new IStructuredContentProvider() {
       public Object[] getElements(Object input) {
+        
         if(input instanceof Collection) {
           return ((Collection<?>) input).toArray();
         }
@@ -208,6 +215,8 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
       public String getText(Object element) {
         if(element instanceof ArchetypeCatalogFactory) {
           return ((ArchetypeCatalogFactory) element).getDescription();
+        } else if(element instanceof String){
+          return element.toString();
         }
         return super.getText(element);
       }
@@ -217,13 +226,15 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
       public void selectionChanged(SelectionChangedEvent event) {
         ISelection selection = event.getSelection();
         if(selection instanceof IStructuredSelection) {
-          catalogFactory = (ArchetypeCatalogFactory) ((IStructuredSelection) selection).getFirstElement();
-          boolean canModifyCatalog = NexusIndexerCatalogFactory.ID.equals(catalogFactory.getId());
-          addArchetypeButton.setEnabled(canModifyCatalog);
+          Object factory = ((IStructuredSelection) selection).getFirstElement();
+          if(factory instanceof ArchetypeCatalogFactory){
+            catalogFactory = (ArchetypeCatalogFactory)factory;
+          } else if(factory instanceof String){
+            catalogFactory = null;
+          }
           reloadViewer();
         } else {
           catalogFactory = null;
-          addArchetypeButton.setEnabled(false);
           loadArchetypes(null, null, null);
         }
         //remember what was switched to here
@@ -234,7 +245,10 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
     });
     
     final ArchetypeManager archetypeManager = MavenPlugin.getDefault().getArchetypeManager();
-    catalogsComboViewer.setInput(archetypeManager.getArchetypeCatalogs());
+    Collection<ArchetypeCatalogFactory> archetypeCatalogs = archetypeManager.getArchetypeCatalogs();
+    ArrayList allCatalogs = new ArrayList(archetypeManager.getArchetypeCatalogs());
+    allCatalogs.add(0, ALL_CATALOGS);
+    catalogsComboViewer.setInput(allCatalogs);
     
     Button configureButton = new Button(catalogsComposite, SWT.NONE);
     configureButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
@@ -260,6 +274,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
 
     QuickViewerFilter quickViewerFilter = new QuickViewerFilter();
     LastVersionFilter versionFilter = new LastVersionFilter();
+    IncludeSnapshotsFilter snapshotsFilter = new IncludeSnapshotsFilter();
 
     filterText = new Text(parent, SWT.BORDER);
     filterText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -340,7 +355,8 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
 
     viewer.addFilter(quickViewerFilter);
     viewer.addFilter(versionFilter);
-
+    viewer.addFilter(snapshotsFilter);
+    
     viewer.setContentProvider(new IStructuredContentProvider() {
       public Object[] getElements(Object inputElement) {
         if(inputElement instanceof Collection) {
@@ -409,7 +425,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
     GridLayout gridLayout = new GridLayout();
     gridLayout.marginHeight = 0;
     gridLayout.marginWidth = 0;
-    gridLayout.numColumns = 2;
+    gridLayout.numColumns = 3;
     buttonComposite.setLayout(gridLayout);
 
     showLastVersionButton = new Button(buttonComposite, SWT.CHECK);
@@ -417,10 +433,22 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
     showLastVersionButton.setText("&Show the last version of Archetype only");
     showLastVersionButton.setSelection(true);
     showLastVersionButton.addSelectionListener(versionFilter);
+    
+    includeShapshotsButton = new Button(buttonComposite, SWT.CHECK);
+    GridData buttonData = new GridData(SWT.LEFT, SWT.CENTER, true, false);
+    buttonData.horizontalIndent=25;
+    includeShapshotsButton.setLayoutData(buttonData);
+    includeShapshotsButton.setText("&Include snapshot archetypes");
+    includeShapshotsButton.setSelection(false);
+    includeShapshotsButton.addSelectionListener(snapshotsFilter);    
 
     addArchetypeButton = new Button(buttonComposite, SWT.NONE);
     addArchetypeButton.setText("&Add Archetype...");
     addArchetypeButton.setData("name", "addArchetypeButton");
+    buttonData = new GridData(SWT.RIGHT, SWT.CENTER, true, false);
+    buttonData.horizontalIndent=35;
+    addArchetypeButton.setLayoutData(buttonData);
+    
     addArchetypeButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         CustomArchetypeDialog dialog = new CustomArchetypeDialog(getShell(), "Add Archetype");
@@ -448,44 +476,80 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
     super.dispose();
   }
   
+  public List<Archetype> getArchetypesForCatalog(){
+    if(catalogFactory == null){
+      return getAllArchetypes();
+    }
+    try{
+      return catalogFactory.getArchetypeCatalog().getArchetypes();
+      
+    } catch(CoreException ce){
+      setErrorMessage("Unable to read catalog factory.");
+      return null;
+    }
+  }
+  
+  private List<Archetype> getAllArchetypes(){
+    ArchetypeManager manager = MavenPlugin.getDefault().getArchetypeManager();
+    Collection<ArchetypeCatalogFactory> archetypeCatalogs = manager.getArchetypeCatalogs();
+    ArrayList<Archetype> list = new ArrayList<Archetype>();
+    
+    for(ArchetypeCatalogFactory catalog : archetypeCatalogs){
+      try{
+        //temporary hack to get around 'Test Remote Catalog' blowing up on download
+        //described in https://issues.sonatype.org/browse/MNGECLIPSE-1792
+        if(catalog.getDescription().startsWith("Test")){
+          continue;
+        }
+        @SuppressWarnings("unchecked")
+        List arcs = catalog.getArchetypeCatalog().getArchetypes();
+        if(arcs != null){
+          list.addAll(arcs);
+        }
+      } catch(Exception ce){
+        MavenLogger.log("Unable to read archetype catalog: "+catalog.getId(), ce);
+      }
+    }
+    return list;
+  }
   /** Loads the available archetypes. */
   void loadArchetypes(final String groupId, final String artifactId, final String version) {
     Job job = new Job(Messages.getString("wizard.project.page.archetype.retrievingArchetypes")) {
       protected IStatus run(IProgressMonitor monitor) {
-        try {
-          @SuppressWarnings("unchecked")
-          List<Archetype> catalogArchetypes = getArchetypeCatalog() == null ? null : getArchetypeCatalog().getArchetypes();
-
-          if(catalogArchetypes == null || catalogArchetypes.size() == 0){
-            Display.getDefault().asyncExec(new Runnable(){
-              public void run(){
-                if(catalogFactory != null && "Nexus Indexer".equals(catalogFactory.getDescription())){
-                  setErrorMessage("No archetypes currently available. The archetype list will refresh when the indexes finish updating.");
+          try{
+            @SuppressWarnings("unchecked")
+            List<Archetype> catalogArchetypes = getArchetypesForCatalog();
+  
+            if(catalogArchetypes == null || catalogArchetypes.size() == 0){
+              Display.getDefault().asyncExec(new Runnable(){
+                public void run(){
+                  if(catalogFactory != null && "Nexus Indexer".equals(catalogFactory.getDescription())){
+                    setErrorMessage("No archetypes currently available. The archetype list will refresh when the indexes finish updating.");
+                  }
                 }
+              });
+            } else {
+              Display.getDefault().asyncExec(new Runnable(){
+                public void run(){
+                  setErrorMessage(null);
+                }
+              });
+            }
+            if(catalogArchetypes == null){
+              return Status.CANCEL_STATUS;
+            }
+            archetypes = new TreeSet<Archetype>(ARCHETYPE_COMPARATOR);
+            archetypes.addAll(catalogArchetypes);
+            
+            Display.getDefault().asyncExec(new Runnable() {
+              public void run() {
+                updateViewer(groupId, artifactId, version);
               }
             });
-          } else {
-            Display.getDefault().asyncExec(new Runnable(){
-              public void run(){
-                setErrorMessage(null);
-              }
-            });
-          }
-          if(catalogArchetypes == null){
+          } catch(Exception e){
+            monitor.done();
             return Status.CANCEL_STATUS;
           }
-          archetypes = new TreeSet<Archetype>(ARCHETYPE_COMPARATOR);
-          archetypes.addAll(catalogArchetypes);
-          
-          Display.getDefault().asyncExec(new Runnable() {
-            public void run() {
-              updateViewer(groupId, artifactId, version);
-            }
-          });
-
-        } catch(CoreException e) {
-          // ignore
-        }
 
         return Status.OK_STATUS;
       }
@@ -493,6 +557,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
     job.schedule();
   }
 
+  
   public Set<Archetype> filterVersions(Collection<Archetype> archetypes) {
     HashMap<String, Archetype> filteredArchetypes = new HashMap<String, Archetype>();
 
@@ -548,12 +613,12 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
       String catalogId = dialogSettings.get(KEY_CATALOG);
       if(catalogId != null) {
         catalogFactory = archetypeManager.getArchetypeCatalogFactory(catalogId);
+        catalogsComboViewer.setSelection(new StructuredSelection(catalogFactory));
+      } else {
+        catalogFactory = null;
+        catalogsComboViewer.setSelection(new StructuredSelection(ALL_CATALOGS));
       }
-      if(catalogFactory == null) {
-        catalogFactory = archetypeManager.getArchetypeCatalogFactory(NexusIndexerCatalogFactory.ID);
-      }
-      catalogsComboViewer.setSelection(new StructuredSelection(catalogFactory));
-      
+
       viewer.getTable().setFocus();
       Archetype selected = getArchetype();
       if(selected != null) {
@@ -773,6 +838,44 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
     }
   }
 
+  protected class IncludeSnapshotsFilter extends ViewerFilter implements SelectionListener {
+
+    /**
+     * 
+     */
+    private static final String SNAPSHOT = "SNAPSHOT";
+    private boolean includeSnapshots = false;
+
+    public boolean select(Viewer viewer, Object parentElement, Object element) {
+      if(element instanceof Archetype){
+        String version = ((Archetype)element).getVersion();
+        boolean isSnap = false;
+        if(M2EUtils.nullOrEmpty(version)){
+          isSnap = false;
+        } else if(version.lastIndexOf(SNAPSHOT) >= 0){
+          isSnap = true;
+        }
+        return includeSnapshots ? true : !isSnap;
+      } 
+      return false;
+      
+    }
+
+    public void widgetSelected(SelectionEvent e) {
+      this.includeSnapshots = includeShapshotsButton.getSelection();
+      viewer.refresh();
+      Archetype archetype = getArchetype();
+      //can be null in some cases, don't try to reveal
+      if(archetype != null){
+        viewer.reveal(archetype);
+      }
+      viewer.getTable().setSelection(viewer.getTable().getSelectionIndex());
+      viewer.getTable().setFocus();
+    }
+
+    public void widgetDefaultSelected(SelectionEvent e) {
+    }
+  }
   protected class LastVersionFilter extends ViewerFilter implements SelectionListener {
 
     private boolean showLastVersion = true;
@@ -796,7 +899,6 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
     public void widgetDefaultSelected(SelectionEvent e) {
     }
   }
-
   /* (non-Javadoc)
    * @see org.maven.ide.eclipse.index.IndexListener#indexAdded(org.maven.ide.eclipse.repository.IRepository)
    */
