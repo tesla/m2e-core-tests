@@ -1051,8 +1051,9 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 
       if(activePart == MavenPomEditor.this) {
         isHandlingActivation = true;
+        final boolean[] changed = new boolean[] {false};
         try {
-          final boolean[] changed = new boolean[] {false};
+          
           ITextListener listener = new ITextListener() {
             public void textChanged(TextEvent event) {
               changed[0] = true;
@@ -1065,10 +1066,10 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
             } finally {
               sourcePage.getTextViewer().removeTextListener(listener);
             }
+            sourcePage.getTextViewer().refresh();
           }
           
           if(changed[0]) {
-            
             try {
               pomFile.refreshLocal(IResource.DEPTH_ZERO, null);
             } catch(CoreException e) {
@@ -1078,6 +1079,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
           
         } finally {
           isHandlingActivation = false;
+
         }
       }
     }
