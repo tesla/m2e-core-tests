@@ -4,12 +4,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectInfo;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
@@ -20,14 +22,22 @@ public class ProjectConfigurationManagerTest extends AsbtractMavenProjectTestCas
     testBasedirRename(MavenProjectInfo.RENAME_REQUIRED);
 
     IWorkspaceRoot root = workspace.getRoot();
-    assertNotNull(root.getProject("maven-project"));
+    IProject project = root.getProject("maven-project");
+    assertNotNull(project);
+    IMavenProjectFacade facade = plugin.getMavenProjectManager().getMavenProject("MNGECLIPSE-1793_basedirRename", "maven-project", "0.0.1-SNAPSHOT");
+    assertNotNull(facade);
+    assertEquals(project, facade.getProject());
   }
 
   public void testBasedirRenameNo() throws Exception {
     testBasedirRename(MavenProjectInfo.RENAME_NO);
 
     IWorkspaceRoot root = workspace.getRoot();
-    assertNotNull(root.getProject("mavenNNNNNNN"));
+    IProject project = root.getProject("mavenNNNNNNN");
+    assertNotNull(project);
+    IMavenProjectFacade facade = plugin.getMavenProjectManager().getMavenProject("MNGECLIPSE-1793_basedirRename", "maven-project", "0.0.1-SNAPSHOT");
+    assertNotNull(facade);
+    assertEquals(project, facade.getProject());
   }
 
   private void testBasedirRename(int renameRequired) throws IOException, CoreException {

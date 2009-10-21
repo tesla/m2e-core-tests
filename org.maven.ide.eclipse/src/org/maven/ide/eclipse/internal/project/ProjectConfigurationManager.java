@@ -595,8 +595,8 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     }
 
     monitor.subTask("Importing project " + projectName);
-    
-    IProject project = configuration.getProject(root, model);
+
+    IProject project = root.getProject(projectName);
     if(project.exists()) {
       console.logError("Project " + projectName + " already exists");
       return null;

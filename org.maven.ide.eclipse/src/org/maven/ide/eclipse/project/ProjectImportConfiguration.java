@@ -81,10 +81,14 @@ public class ProjectImportConfiguration {
   public IWorkingSet[] getWorkingSets() {
     return this.workingSets;
   }
-  
-  /** Calculates the project name for the given model. */
-  // XXX should use resolved MavenProject or Model
+
+  /** 
+   * Calculates the project name for the given model.
+   * 
+   * @deprecated This method does not take into account MavenProjectInfo.basedirRename
+   */
   public String getProjectName(Model model) {
+    // XXX should use resolved MavenProject or Model
     if(projectNameTemplate.length() == 0) {
       return model.getArtifactId();
     }
@@ -104,11 +108,17 @@ public class ProjectImportConfiguration {
         version == null ? "" : version);
   }
 
-  // XXX should use resolved MavenProject or Model
+  /**
+   * @deprecated This method does not take into account MavenProjectInfo.basedirRename
+   */
   public IProject getProject(IWorkspaceRoot root, Model model) {
+    // XXX should use resolved MavenProject or Model
     return root.getProject(getProjectName(model));
   }
 
+  /**
+   * @deprecated business logic does not belong to a value object
+   */
   public IStatus validateProjectName(Model model) {
     String projectName = getProjectName(model); 
     IWorkspace workspace = ResourcesPlugin.getWorkspace();
