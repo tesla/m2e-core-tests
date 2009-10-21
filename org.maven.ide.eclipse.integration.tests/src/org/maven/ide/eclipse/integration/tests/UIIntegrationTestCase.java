@@ -151,6 +151,13 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     return workbench.getWorkbenchWindows()[0].getActivePage();
   }
 
+  protected void fullScreen() throws Exception {
+    UIThreadTask.executeOnEventQueue(new UIThreadTask() {
+    public Object runEx() throws Exception {
+      ShellFinder.getWorkbenchRoot().setFullScreen(true);
+      return Display.getDefault();
+    }});
+  }
   protected void closeView(final String id) throws Exception {
     
     IViewPart view = (IViewPart)UIThreadTask.executeOnEventQueue(new UIThreadTask() {
@@ -185,8 +192,8 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
      
      PrefUtil.getAPIPreferenceStore().setValue(IWorkbenchPreferenceConstants.ENABLE_ANIMATIONS, false);
 
-     ShellFinder.bringRootToFront(Display.getDefault());
-
+     
+     fullScreen();
      MavenPlugin.getDefault(); // force m2e to load so its indexing jobs will be scheduled.
      Thread.sleep(5000);
      closeView("org.eclipse.ui.internal.introview");
@@ -203,6 +210,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
      clearProjects();
 
      waitForAllBuildsToComplete();     
+
   }
 
   private void openPerspective(final String id) throws Exception {
@@ -597,7 +605,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
 
   protected File importMavenProjects(String projectPath) throws Exception {
     File tempDir = unzipProject(projectPath);
-
+    waitForAllBuildsToComplete();
     try {
       getUI().click(new MenuItemLocator("File/Import..."));
       getUI().wait(new ShellShowingCondition("Import"));
