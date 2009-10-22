@@ -97,6 +97,7 @@ import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.actions.OpenUrlAction;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
+import org.maven.ide.eclipse.editor.internal.actions.SectionExpansionAdapter;
 import org.maven.ide.eclipse.editor.plugins.DefaultPluginConfigurationEditor;
 import org.maven.ide.eclipse.editor.plugins.IPluginConfigurationExtension;
 import org.maven.ide.eclipse.editor.plugins.PluginExtensionDescriptor;
@@ -657,20 +658,7 @@ public class PluginsComposite extends Composite{
       gd_pluginExecutionSection.minimumHeight = 50;
       pluginExecutionSection.setLayoutData(gd_pluginExecutionSection);
       pluginExecutionSection.setText("Execution Details");
-      IExpansionListener expansionListener = new ExpansionAdapter() {
-        private boolean inProgress = false;
-        public void expansionStateChanged(ExpansionEvent e) {
-          if(!inProgress && e.getSource() instanceof Section) {
-            inProgress = true;
-            boolean expand = ((Section)e.getSource()).isExpanded();
-            pluginExecutionsSection.setExpanded(expand);
-            pluginExecutionSection.setExpanded(expand);
-            inProgress = false;
-          }
-        }
-      };
-      pluginExecutionSection.addExpansionListener(expansionListener);
-      pluginExecutionsSection.addExpansionListener(expansionListener);
+      new SectionExpansionAdapter(new Section[]{pluginExecutionSection, pluginExecutionsSection});
 
       Composite executionComposite = toolkit.createComposite(pluginExecutionSection, SWT.NONE);
       GridLayout executionCompositeLayout = new GridLayout(2, false);
@@ -805,7 +793,8 @@ public class PluginsComposite extends Composite{
         }
       });
   
-      pluginDependenciesSection = toolkit.createSection(detailsComposite, ExpandableComposite.TITLE_BAR);
+      pluginDependenciesSection = toolkit.createSection(detailsComposite, 
+          ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
       GridData pluginDependenciesSectionData = new GridData(SWT.FILL, SWT.FILL, true, true);
       pluginDependenciesSectionData.minimumHeight = 50;
       pluginDependenciesSection.setLayoutData(pluginDependenciesSectionData);
@@ -835,15 +824,6 @@ public class PluginsComposite extends Composite{
     
     defaultConfigurationEditor = new DefaultPluginConfigurationEditor();
     setConfigurationEditor(defaultConfigurationEditor);
-//
-//      pluginConfigurationHyperlink = toolkit.createHyperlink(configurationComposite/*composite*/, "Open XML Configuration", SWT.NONE);
-//      pluginConfigurationHyperlink.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
-//      pluginConfigurationHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
-//        public void linkActivated(HyperlinkEvent e) {
-//          EObject element = currentPlugin.getConfiguration();
-//          parentEditorPage.getPomEditor().showInSourceEditor(element==null ? currentPlugin : element);
-//        }
-//      });
     
     openConfigurationAction = new Action("Open XML Configuration", MavenEditorImages.ELEMENT_OBJECT) {
       public void run() {
