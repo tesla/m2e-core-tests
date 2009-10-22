@@ -94,6 +94,8 @@ public class MavenEditorImages {
   public static final ImageDescriptor SCOPE = create("scope.gif");
   
   public static final ImageDescriptor ADVANCED_TABS = create("advanced_tabs.gif");
+
+  public static final ImageDescriptor ELEMENT_OBJECT = create("element_obj.gif");
   
 
   private static ImageDescriptor create(String key) {

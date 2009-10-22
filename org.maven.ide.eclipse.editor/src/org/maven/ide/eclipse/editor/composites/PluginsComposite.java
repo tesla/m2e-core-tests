@@ -77,8 +77,11 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.Widget;
+import org.eclipse.ui.forms.events.ExpansionAdapter;
+import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.events.IExpansionListener;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
@@ -94,6 +97,8 @@ import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.actions.OpenUrlAction;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
+import org.maven.ide.eclipse.editor.plugins.DefaultPluginConfigurationEditor;
+import org.maven.ide.eclipse.editor.plugins.IPluginConfigurationExtension;
 import org.maven.ide.eclipse.editor.plugins.PluginExtensionDescriptor;
 import org.maven.ide.eclipse.editor.pom.FormUtils;
 import org.maven.ide.eclipse.editor.pom.MavenPomEditorPage;
@@ -135,10 +140,14 @@ public class PluginsComposite extends Composite{
   Button pluginExtensionsButton;
   Button pluginInheritedButton;
 
-  Hyperlink pluginConfigurationHyperlink;
+//  Hyperlink pluginConfigurationHyperlink;
   ListEditorComposite<Dependency> pluginDependenciesEditor;
   ListEditorComposite<String> goalsEditor;
   ListEditorComposite<PluginExecution> pluginExecutionsEditor;
+
+  Section pluginConfigurationSection;
+  IPluginConfigurationExtension configurationEditor;
+  IAction openConfigurationAction;
 
   Section pluginExecutionSection;
   Section pluginExecutionsSection;
@@ -548,7 +557,7 @@ public class PluginsComposite extends Composite{
       compositeLayout.marginHeight = 0;
       compositeLayout.numColumns = 3;
       composite.setLayout(compositeLayout);
-      composite.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false, 3, 1));
+      composite.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false, 1, 1));
       toolkit.adapt(composite);
     
       pluginExtensionsButton = toolkit.createButton(composite, "Extensions", SWT.CHECK);
@@ -557,17 +566,22 @@ public class PluginsComposite extends Composite{
       pluginInheritedButton = toolkit.createButton(composite, "Inherited", SWT.CHECK);
       pluginInheritedButton.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
     
-      pluginConfigurationHyperlink = toolkit.createHyperlink(composite, "Configuration", SWT.NONE);
-      pluginConfigurationHyperlink.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
-      pluginConfigurationHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
-        public void linkActivated(HyperlinkEvent e) {
-          EObject element = currentPlugin.getConfiguration();
-          parentEditorPage.getPomEditor().showInSourceEditor(element==null ? currentPlugin : element);
-        }
-      });
       pluginDetailsComposite.setTabList(new Control[] {groupIdText, artifactIdText, versionText, composite});
+      
+      createConfigurationSection(detailsComposite);
   
-      pluginExecutionsSection = toolkit.createSection(detailsComposite, ExpandableComposite.TITLE_BAR);
+      SashForm executionSash = new SashForm(detailsComposite, SWT.NONE);
+      executionSash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
+      GridLayout executionSashLayout = new GridLayout();
+      executionSashLayout.horizontalSpacing = 3;
+      executionSashLayout.marginWidth = 0;
+      executionSashLayout.marginHeight = 0;
+      executionSashLayout.numColumns = 2;
+      executionSash.setLayout(executionSashLayout);
+      toolkit.adapt(executionSash);
+      
+      pluginExecutionsSection = toolkit.createSection(executionSash,
+          ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
       GridData gd_pluginExecutionsSection = new GridData(SWT.FILL, SWT.FILL, true, true);
       gd_pluginExecutionsSection.minimumHeight = 50;
       pluginExecutionsSection.setLayoutData(gd_pluginExecutionsSection);
@@ -637,12 +651,27 @@ public class PluginsComposite extends Composite{
         }
       });
       
-      pluginExecutionSection = toolkit.createSection(detailsComposite, ExpandableComposite.TITLE_BAR);
+      pluginExecutionSection = toolkit.createSection(executionSash,
+          ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
       GridData gd_pluginExecutionSection = new GridData(SWT.FILL, SWT.CENTER, true, false);
       gd_pluginExecutionSection.minimumHeight = 50;
       pluginExecutionSection.setLayoutData(gd_pluginExecutionSection);
       pluginExecutionSection.setText("Execution Details");
-  
+      IExpansionListener expansionListener = new ExpansionAdapter() {
+        private boolean inProgress = false;
+        public void expansionStateChanged(ExpansionEvent e) {
+          if(!inProgress && e.getSource() instanceof Section) {
+            inProgress = true;
+            boolean expand = ((Section)e.getSource()).isExpanded();
+            pluginExecutionsSection.setExpanded(expand);
+            pluginExecutionSection.setExpanded(expand);
+            inProgress = false;
+          }
+        }
+      };
+      pluginExecutionSection.addExpansionListener(expansionListener);
+      pluginExecutionsSection.addExpansionListener(expansionListener);
+
       Composite executionComposite = toolkit.createComposite(pluginExecutionSection, SWT.NONE);
       GridLayout executionCompositeLayout = new GridLayout(2, false);
       executionCompositeLayout.marginWidth = 2;
@@ -796,6 +825,54 @@ public class PluginsComposite extends Composite{
       FormUtils.setEnabled(pluginDependenciesEditor, false);
     }
 
+  private void createConfigurationSection(Composite detailsComposite) {
+    pluginConfigurationSection = toolkit.createSection(detailsComposite,
+        ExpandableComposite.TITLE_BAR | ExpandableComposite.TWISTIE);
+    pluginConfigurationSection.setText("Configuration");
+    pluginConfigurationSection.setLayout(new GridLayout(1, true));
+    pluginConfigurationSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
+    pluginConfigurationSection.setEnabled(false);
+    
+    configurationEditor = new DefaultPluginConfigurationEditor();
+    configurationEditor.setPomEditor(parentEditorPage);
+    
+    Composite configurationComposite = configurationEditor.createComposite(pluginConfigurationSection);
+    configurationComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
+    toolkit.adapt(configurationComposite);
+    pluginConfigurationSection.setClient(configurationComposite);
+    toolkit.paintBordersFor(configurationComposite);
+//
+//      pluginConfigurationHyperlink = toolkit.createHyperlink(configurationComposite/*composite*/, "Open XML Configuration", SWT.NONE);
+//      pluginConfigurationHyperlink.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+//      pluginConfigurationHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
+//        public void linkActivated(HyperlinkEvent e) {
+//          EObject element = currentPlugin.getConfiguration();
+//          parentEditorPage.getPomEditor().showInSourceEditor(element==null ? currentPlugin : element);
+//        }
+//      });
+    
+    openConfigurationAction = new Action("Open XML Configuration", MavenEditorImages.ELEMENT_OBJECT) {
+      public void run() {
+        EObject element = currentPlugin.getConfiguration();
+        parentEditorPage.getPomEditor().showInSourceEditor(element==null ? currentPlugin : element);
+      }      
+    };
+    openConfigurationAction.setEnabled(false);
+    
+    ToolBarManager toolBarManager = new ToolBarManager(SWT.FLAT);
+    toolBarManager.add(openConfigurationAction);
+    
+    Composite toolbarComposite = toolkit.createComposite(pluginConfigurationSection);
+    GridLayout toolbarLayout = new GridLayout(1, true);
+    toolbarLayout.marginHeight = 0;
+    toolbarLayout.marginWidth = 0;
+    toolbarComposite.setLayout(toolbarLayout);
+    toolbarComposite.setBackground(null);
+ 
+    toolBarManager.createControl(toolbarComposite);
+    pluginConfigurationSection.setTextClient(toolbarComposite);
+  }
+
   void updatePluginDetails(Plugin plugin) {
     if(changingSelection) {
       return;
@@ -814,11 +891,13 @@ public class PluginsComposite extends Composite{
     }
     
     if(plugin==null) {
+      pluginConfigurationSection.setEnabled(false);
       FormUtils.setEnabled(pluginDetailsSection, false);
       FormUtils.setEnabled(pluginExecutionsSection, false);
       FormUtils.setEnabled(pluginDependenciesSection, false);
       pluginSelectAction.setEnabled(false);
       openWebPageAction.setEnabled(false);
+      openConfigurationAction.setEnabled(false);
     
       setText(groupIdText, "");
       setText(artifactIdText, "");
@@ -832,14 +911,17 @@ public class PluginsComposite extends Composite{
       return;
     }
     
+    pluginConfigurationSection.setEnabled(true);
     FormUtils.setEnabled(pluginDetailsSection, true);
     FormUtils.setEnabled(pluginExecutionsSection, true);
     FormUtils.setEnabled(pluginDependenciesSection, true);
 
     FormUtils.setReadonly(pluginDetailsSection, parentEditorPage.isReadOnly());
+    FormUtils.setReadonly(pluginConfigurationSection, parentEditorPage.isReadOnly());
     FormUtils.setReadonly(pluginExecutionsSection, parentEditorPage.isReadOnly());
     pluginSelectAction.setEnabled(!parentEditorPage.isReadOnly());
     openWebPageAction.setEnabled(true);
+    openConfigurationAction.setEnabled(true);
 
     // XXX implement dependency editing
     FormUtils.setReadonly(pluginDependenciesSection, true);
@@ -847,6 +929,8 @@ public class PluginsComposite extends Composite{
     setText(groupIdText, plugin.getGroupId());
     setText(artifactIdText, plugin.getArtifactId());
     setText(versionText, plugin.getVersion());
+    
+    configurationEditor.setPlugin(plugin);
     
     setButton(pluginInheritedButton, plugin.getInherited()==null || "true".equals(plugin.getInherited()));
     setButton(pluginExtensionsButton, "true".equals(plugin.getExtensions()));
