@@ -14,11 +14,20 @@ import static org.maven.ide.eclipse.editor.pom.FormUtils.setButton;
 import static org.maven.ide.eclipse.editor.pom.FormUtils.setText;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.command.Command;
@@ -26,12 +35,17 @@ import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.edit.command.AddCommand;
 import org.eclipse.emf.edit.command.RemoveCommand;
 import org.eclipse.emf.edit.command.SetCommand;
 import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.ActionContributionItem;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IContributionItem;
+import org.eclipse.jface.action.IMenuCreator;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.viewers.ICellModifier;
@@ -50,6 +64,8 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -57,7 +73,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.ToolItem;
+import org.eclipse.swt.widgets.Widget;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
@@ -73,12 +92,15 @@ import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.PomPackage;
 import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.actions.OpenUrlAction;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
+import org.maven.ide.eclipse.editor.plugins.PluginExtensionDescriptor;
 import org.maven.ide.eclipse.editor.pom.FormUtils;
 import org.maven.ide.eclipse.editor.pom.MavenPomEditorPage;
 import org.maven.ide.eclipse.editor.pom.SearchControl;
 import org.maven.ide.eclipse.editor.pom.SearchMatcher;
 import org.maven.ide.eclipse.editor.pom.ValueProvider;
+import org.maven.ide.eclipse.editor.xml.MvnIndexPlugin;
 import org.maven.ide.eclipse.editor.xml.search.Packaging;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.index.IIndex;
@@ -91,6 +113,8 @@ import org.maven.ide.eclipse.ui.dialogs.MavenRepositorySearchDialog;
 public class PluginsComposite extends Composite{
 
   protected static PomPackage POM_PACKAGE = PomPackage.eINSTANCE;
+  public static final String EXTENSION_CONFIGURATION_EDITOR = "org.maven.ide.eclipse.editor.plugins.configurationEditorContribution";
+  public static final String ELEMENT_CONFIGURATION_EDITOR = "editContributor";
   
   MavenPomEditorPage parentEditorPage;
   
@@ -124,9 +148,9 @@ public class PluginsComposite extends Composite{
 
   Action pluginSelectAction;
   
-  //Action pluginAddAction;
+  PluginSelectAction pluginAddAction;
   
-  //Action pluginManagementAddAction;
+  PluginSelectAction pluginManagementAddAction;
   
   Action openWebPageAction;
 
@@ -145,6 +169,8 @@ public class PluginsComposite extends Composite{
 
   ValueProvider<PluginManagement> pluginManagementProvider;
 
+  Map<String,PluginExtensionDescriptor> pluginConfigurators;
+  
   boolean changingSelection = false;
 
   
@@ -163,6 +189,8 @@ public class PluginsComposite extends Composite{
 
     SashForm verticalSashForm = new SashForm(horizontalSashForm, SWT.VERTICAL);
     toolkit.adapt(verticalSashForm, true, true);
+    
+    loadPluginConfigurators();
   
     createPluginsSection(verticalSashForm);
     createPluginManagementSection(verticalSashForm);
@@ -170,7 +198,7 @@ public class PluginsComposite extends Composite{
     verticalSashForm.setWeights(new int[] {1, 1});
 
     createPluginDetailsSection(horizontalSashForm);
-    horizontalSashForm.setWeights(new int[] {1, 1 });
+    horizontalSashForm.setWeights(new int[] {10, 15 });
 
     updatePluginDetails(null);
   }
@@ -236,25 +264,15 @@ public class PluginsComposite extends Composite{
         updatePluginDetails(null);
       }
     });
-    
-//    pluginAddAction = new Action("Add Plugin", MavenEditorImages.ADD_PLUGIN) {
-//      public void run() {
-//        MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-//            "Add Plugin", IndexManager.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
-//        if(dialog.open() == Window.OK) {
-//          IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
-//          if(af != null) {
-//            createPlugin(pluginsEditor, pluginsProvider, af.group, af.artifact, af.version);
-//          }
-//        }
-//      }
-//    };
 
-    //pluginAddAction.setEnabled(false);
+    pluginAddAction = new PluginSelectAction(pluginsEditor, POM_PACKAGE.getBuildBase_Plugins());
 
     ToolBarManager toolBarManager = new ToolBarManager(SWT.FLAT);
-    //toolBarManager.add(pluginAddAction);
-    //toolBarManager.add(new Separator());
+    
+    if(pluginConfigurators.size() > 0) {
+      toolBarManager.add(pluginAddAction.getItem());
+      toolBarManager.add(new Separator());
+    }
     
     toolBarManager.add(new Action("Show GroupId", MavenEditorImages.SHOW_GROUP) {
       {
@@ -346,35 +364,15 @@ public class PluginsComposite extends Composite{
         updatePluginDetails(null);
       }
     });
-    pluginManagementEditor.setSelectListener(new SelectionAdapter() {
-      public void widgetSelected(SelectionEvent e) {
-        MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            "Select Plugin", IIndex.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
-        if(dialog.open() == Window.OK) {
-          IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
-          if(af != null) {
-            createPlugin(pluginManagementEditor, pluginManagementProvider, POM_PACKAGE.getPluginManagement_Plugins(), af.group, af.artifact, af.version);
-          }
-        }
-      }
-    });
-//    pluginManagementAddAction = new Action("Add Plugin", MavenEditorImages.ADD_PLUGIN) {
-//      public void run() {
-//        MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-//            "Add Plugin", IndexManager.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
-//        if(dialog.open() == Window.OK) {
-//          IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
-//          if(af != null) {
-//            createPlugin(pluginManagementEditor, pluginManagementProvider, af.group, af.artifact, af.version);
-//          }
-//        }
-//      }
-//    };
-//    pluginManagementAddAction.setEnabled(false);
+    
+    pluginManagementAddAction = new PluginSelectAction(pluginManagementEditor, POM_PACKAGE.getPluginManagement_Plugins());
 
     ToolBarManager toolBarManager = new ToolBarManager(SWT.FLAT);
-//    toolBarManager.add(pluginManagementAddAction);
-//    toolBarManager.add(new Separator());
+
+    if(pluginConfigurators.size() > 0) {
+      toolBarManager.add(pluginManagementAddAction.getItem());
+      toolBarManager.add(new Separator());
+    }
     
     toolBarManager.add(new Action("Show GroupId", MavenEditorImages.SHOW_GROUP) {
       {
@@ -923,8 +921,10 @@ public class PluginsComposite extends Composite{
     pluginsEditor.setReadOnly(parentEditorPage.isReadOnly());
     pluginManagementEditor.setReadOnly(parentEditorPage.isReadOnly());
     
-    //pluginAddAction.setEnabled(!parent.isReadOnly());
-    //pluginManagementAddAction.setEnabled(!parent.isReadOnly());
+    pluginAddAction.setEnabled(!parentEditorPage.isReadOnly());
+    pluginAddAction.setProvider(buildProvider);
+    pluginManagementAddAction.setEnabled(!parentEditorPage.isReadOnly());
+    pluginManagementAddAction.setProvider(pluginManagementProvider);
     updatePluginDetails(null);
     
 //    pluginExecutionsEditor.setReadOnly(parent.isReadOnly());
@@ -983,6 +983,7 @@ public class PluginsComposite extends Composite{
     }
   }
 
+  @SuppressWarnings("unchecked")
   void createPlugin(ListEditorComposite<Plugin> editor, ValueProvider<? extends EObject> parentObjectProvider, EStructuralFeature feature, String groupId, String artifactId, String version) {
     CompoundCommand compoundCommand = new CompoundCommand();
     EditingDomain editingDomain = parentEditorPage.getEditingDomain();
@@ -1103,4 +1104,122 @@ public class PluginsComposite extends Composite{
 
   }
   
+  private void loadPluginConfigurators() {
+    pluginConfigurators = new HashMap<String,PluginExtensionDescriptor>();
+
+    IExtensionRegistry registry = Platform.getExtensionRegistry();
+    IExtensionPoint configuratorsExtensionPoint = registry.getExtensionPoint(EXTENSION_CONFIGURATION_EDITOR);
+    if(configuratorsExtensionPoint != null) {
+      IExtension[] configuratorExtensions = configuratorsExtensionPoint.getExtensions();
+      for(IExtension extension : configuratorExtensions) {
+        IConfigurationElement[] elements = extension.getConfigurationElements();
+        for(IConfigurationElement element : elements) {
+          if(element.getName().equals(ELEMENT_CONFIGURATION_EDITOR)) {
+            PluginExtensionDescriptor descriptor = new PluginExtensionDescriptor(element);
+            pluginConfigurators.put(descriptor.toString(), descriptor);
+          }
+        }
+      }
+    }
+  }
+
+  // an action button with a list of supported plug-ins
+  final class PluginSelectAction extends Action implements IMenuCreator {
+    private Menu menu = null;
+    private List<IAction> actions = null;
+    ActionContributionItem item = null;
+    ValueProvider<? extends EObject> provider = null;
+
+    protected PluginSelectAction(ListEditorComposite<Plugin> editor, EReference pomPackage) {
+      super("", IAction.AS_DROP_DOWN_MENU); 
+      setImageDescriptor(MavenEditorImages.ADD_PLUGIN);
+      setMenuCreator(this);
+      setEnabled(false);
+      setToolTipText("Add Plugin");
+      actions = new ArrayList<IAction>();
+      for(PluginExtensionDescriptor descriptor : pluginConfigurators.values()) {
+        actions.add(createContributedAction(editor, pomPackage, descriptor));
+      }
+      actions.add(createDefaultAction(editor, pomPackage));
+      item = new ActionContributionItem(this);
+    }
+    
+    private Action createDefaultAction(final ListEditorComposite<Plugin> editor, final EReference pomPackage) {
+      return new Action( "Other..." ) {
+        public void run() {
+          MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(),
+              "Add Plugin", IIndex.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
+          if(dialog.open() == Window.OK) {
+            IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
+            if(af != null) {
+              createPlugin(editor, provider, pomPackage, af.group, af.artifact, af.version);
+            }
+          }
+        }
+      };
+    }
+    
+    private Action createContributedAction(final ListEditorComposite<Plugin> editor, final EReference pomPackage, final PluginExtensionDescriptor descriptor) {
+      return new Action( descriptor.getName() ) {
+        public void run() {
+          String groupId = descriptor.getGroupId();
+          String artifactId = descriptor.getArtifactId();
+          String version = "";
+          try {
+            Collection<String> versions = MvnIndexPlugin.getDefault().getSearchEngine(parentEditorPage.getProject()).findVersions(groupId, artifactId, null, Packaging.PLUGIN);
+            if(!versions.isEmpty()) {
+              version = versions.iterator().next();
+            }
+          } catch(CoreException e) {
+            // TODO Auto-generated catch block
+            MavenLogger.log("Error retrieving available versions for " + groupId + ':' + artifactId, e);
+          }
+          
+          createPlugin(editor, provider, pomPackage, groupId, artifactId, version);
+        }
+      };
+    }
+
+    public Menu getMenu(Menu menu) {
+      return null;
+    }
+    
+    public Menu getMenu(Control control) {
+      dispose();
+      menu = new Menu(control);
+      for(IAction action : actions) {
+        ActionContributionItem item = new ActionContributionItem(action);
+        item.fill(menu, -1);
+      }
+      return menu;
+    }
+    
+    public void dispose() {
+      if(menu != null) {
+        menu.dispose();
+      }
+    }
+    
+    public IContributionItem getItem() {
+      return item;
+    }
+    
+    public void run() {
+      // a drop-down button would have a separate click action which does nothing by default,
+      // we need to show the same menu as if the user clicked on the chevron
+      Widget w = item.getWidget();
+      if(w != null && w instanceof ToolItem) {
+        ToolItem ti = (ToolItem)w;
+        Rectangle r = ti.getBounds(); 
+        Point point = ti.getParent().toDisplay(r.x, r.y + r.height);
+        Menu m = getMenu(ti.getParent());
+        m.setLocation(point.x, point.y);
+        m.setVisible(true);
+      }
+    }
+    
+    protected void setProvider(final ValueProvider<? extends EObject> provider) {
+      this.provider = provider;
+    }
+  }
 }
