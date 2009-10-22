@@ -8,7 +8,10 @@
 
 package org.maven.ide.eclipse.editor.plugins;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
 
 public class PluginExtensionDescriptor {
   public static final String ARTIFACT_ID = "artifactId";
@@ -19,10 +22,21 @@ public class PluginExtensionDescriptor {
   private String groupId;
   private String name;
   
+  private IPluginConfigurationExtension extension = null;
+  
   public PluginExtensionDescriptor(IConfigurationElement element) {
     artifactId = element.getAttribute(ARTIFACT_ID);
     groupId = element.getAttribute(GROUP_ID);
     name = element.getAttribute(NAME);
+
+    Object o;
+    try {
+      o = element.createExecutableExtension(AbstractProjectConfigurator.ATTR_CLASS);
+      extension = (IPluginConfigurationExtension) o;
+    } catch(CoreException e) {
+      // TODO Auto-generated catch block
+      MavenLogger.log(e);
+    }
   }
   
   public void setArtifactId(String artifactId) {
@@ -48,5 +62,9 @@ public class PluginExtensionDescriptor {
 
   public String getName() {
     return name;
+  }
+
+  public IPluginConfigurationExtension getExtension() {
+    return extension;
   }
 }

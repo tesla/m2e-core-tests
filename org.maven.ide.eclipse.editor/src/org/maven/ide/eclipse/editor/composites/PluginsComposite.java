@@ -140,7 +140,6 @@ public class PluginsComposite extends Composite{
   Button pluginExtensionsButton;
   Button pluginInheritedButton;
 
-//  Hyperlink pluginConfigurationHyperlink;
   ListEditorComposite<Dependency> pluginDependenciesEditor;
   ListEditorComposite<String> goalsEditor;
   ListEditorComposite<PluginExecution> pluginExecutionsEditor;
@@ -179,6 +178,7 @@ public class PluginsComposite extends Composite{
   ValueProvider<PluginManagement> pluginManagementProvider;
 
   Map<String,PluginExtensionDescriptor> pluginConfigurators;
+  IPluginConfigurationExtension defaultConfigurationEditor;
   
   boolean changingSelection = false;
 
@@ -833,14 +833,8 @@ public class PluginsComposite extends Composite{
     pluginConfigurationSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
     pluginConfigurationSection.setEnabled(false);
     
-    configurationEditor = new DefaultPluginConfigurationEditor();
-    configurationEditor.setPomEditor(parentEditorPage);
-    
-    Composite configurationComposite = configurationEditor.createComposite(pluginConfigurationSection);
-    configurationComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
-    toolkit.adapt(configurationComposite);
-    pluginConfigurationSection.setClient(configurationComposite);
-    toolkit.paintBordersFor(configurationComposite);
+    defaultConfigurationEditor = new DefaultPluginConfigurationEditor();
+    setConfigurationEditor(defaultConfigurationEditor);
 //
 //      pluginConfigurationHyperlink = toolkit.createHyperlink(configurationComposite/*composite*/, "Open XML Configuration", SWT.NONE);
 //      pluginConfigurationHyperlink.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
@@ -871,6 +865,35 @@ public class PluginsComposite extends Composite{
  
     toolBarManager.createControl(toolbarComposite);
     pluginConfigurationSection.setTextClient(toolbarComposite);
+  }
+
+  private void setConfigurationEditor(IPluginConfigurationExtension editor) {
+    if(configurationEditor == editor) {
+      return;
+    }
+    
+    boolean expanded = pluginConfigurationSection.isExpanded();
+    if(expanded) {
+      pluginConfigurationSection.setExpanded(false);
+    }
+
+    Control control = pluginConfigurationSection.getClient();
+    if(control != null) {
+      control.dispose();
+    }
+    configurationEditor = editor;
+    configurationEditor.setPomEditor(parentEditorPage);
+    
+    Composite configurationComposite = configurationEditor.createComposite(pluginConfigurationSection);
+    configurationComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
+    toolkit.adapt(configurationComposite);
+    pluginConfigurationSection.setClient(configurationComposite);
+    toolkit.paintBordersFor(configurationComposite);
+    pluginConfigurationSection.layout();
+
+    if(expanded) {
+      pluginConfigurationSection.setExpanded(true);
+    }
   }
 
   void updatePluginDetails(Plugin plugin) {
@@ -930,6 +953,9 @@ public class PluginsComposite extends Composite{
     setText(artifactIdText, plugin.getArtifactId());
     setText(versionText, plugin.getVersion());
     
+    String ga = plugin.getGroupId() + ':' + plugin.getArtifactId();
+    PluginExtensionDescriptor descriptor = pluginConfigurators.get(ga);
+    setConfigurationEditor(descriptor == null ? defaultConfigurationEditor : descriptor.getExtension());
     configurationEditor.setPlugin(plugin);
     
     setButton(pluginInheritedButton, plugin.getInherited()==null || "true".equals(plugin.getInherited()));
