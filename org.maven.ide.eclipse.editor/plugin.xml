@@ -10,6 +10,8 @@
 <plugin>
    <extension-point id="pageFactories" name="Maven POM editor page factory" schema="schema/pageFactories.exsd"/>
    <extension-point id="org.maven.ide.eclipse.editor.lifecycleMappingEditorContribution" name="Lifecycle Mapping Editor Contribution" schema="schema/org.maven.ide.eclipse.editor.lifecycleMappingEditorContribution.exsd"/>
+   <extension-point id="org.maven.ide.eclipse.editor.plugins.configurationEditorContribution" name="Plugin Configuration Editor Contribution" schema="schema/configurationEditorContribution.exsd"/>
+   
 
   <extension point="org.eclipse.ui.editors">
     <editor
