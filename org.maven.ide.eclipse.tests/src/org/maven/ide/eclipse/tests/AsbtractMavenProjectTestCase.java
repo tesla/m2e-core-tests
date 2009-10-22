@@ -234,7 +234,9 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
     for(String pomName : pomNames) {
       File pomFile = new File(dst, pomName);
       Model model = mavenModelManager.readMavenModel(pomFile);
-      projectInfos.add(new MavenProjectInfo(pomName, pomFile, model, null));
+      MavenProjectInfo projectInfo = new MavenProjectInfo(pomName, pomFile, model, null);
+      setBasedirRename(projectInfo);
+      projectInfos.add(projectInfo);
     }
 
     final ProjectImportConfiguration importConfiguration = new ProjectImportConfiguration(configuration);
@@ -256,6 +258,13 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
     return projects;
   }
 
+  private void setBasedirRename(MavenProjectInfo projectInfo) throws IOException {
+    File workspaceRoot = workspace.getRoot().getLocation().toFile();
+    File basedir = projectInfo.getPomFile().getParentFile().getCanonicalFile();
+
+    projectInfo.setBasedirRename(basedir.getParentFile().equals(workspaceRoot)? MavenProjectInfo.RENAME_REQUIRED: MavenProjectInfo.RENAME_NO);
+  }
+
   protected IProject importProject(String projectName, String projectLocation, ResolverConfiguration configuration) throws IOException, CoreException {
     ProjectImportConfiguration importConfiguration = new ProjectImportConfiguration(configuration);
     importConfiguration.setProjectNameTemplate(projectName);
@@ -269,6 +278,7 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
     File pomFile = new File(dir, IMavenConstants.POM_FILE_NAME);
     Model model = MavenPlugin.getDefault().getMavenModelManager().readMavenModel(pomFile);
     final MavenProjectInfo projectInfo = new MavenProjectInfo(projectName, pomFile, model, null);
+    setBasedirRename(projectInfo);
 
     final MavenPlugin plugin = MavenPlugin.getDefault();
     
