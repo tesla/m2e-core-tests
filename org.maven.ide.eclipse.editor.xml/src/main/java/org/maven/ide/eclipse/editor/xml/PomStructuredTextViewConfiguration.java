@@ -45,7 +45,9 @@ public class PomStructuredTextViewConfiguration extends StructuredTextViewerConf
 
   public IQuickAssistAssistant getQuickAssistAssistant(ISourceViewer sourceViewer) {
     // TODO Auto-generated method stub
-    return super.getQuickAssistAssistant(sourceViewer);
+    IQuickAssistAssistant quickAssistAssistant = super.getQuickAssistAssistant(sourceViewer);
+    quickAssistAssistant.setQuickAssistProcessor(new PomQuickAssistProcessor());
+    return quickAssistAssistant;
   }
 
 }
