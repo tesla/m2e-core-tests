@@ -635,11 +635,16 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
    * Import a project and assert it has no markers of SEVERITY_ERROR
    */
   protected File doImport(String projectPath) throws Exception {
-    File tempDir = importMavenProjects(projectPath);
-    assertProjectsHaveNoErrors();
-    return tempDir;
+    return doImport(projectPath, true);
   }
 
+  protected File doImport(String projectPath, boolean assertNoErrors) throws Exception{
+    File tempDir = importMavenProjects(projectPath);
+    if(assertNoErrors){
+      assertProjectsHaveNoErrors();
+    }
+    return tempDir;
+  }
   protected IViewPart showView(final String id) throws Exception {
     IViewPart part = (IViewPart) UIThreadTask.executeOnEventQueue(new UIThreadTask() {
       public Object runEx() throws Exception {
