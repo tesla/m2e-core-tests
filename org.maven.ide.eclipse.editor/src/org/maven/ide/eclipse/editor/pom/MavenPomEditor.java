@@ -1066,12 +1066,14 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
             } finally {
               sourcePage.getTextViewer().removeTextListener(listener);
             }
-            sourcePage.getTextViewer().refresh();
+            if(sourcePage.getTextViewer().getTextWidget() != null && !sourcePage.getTextViewer().getTextWidget().isDisposed()){
+              sourcePage.getTextViewer().getTextWidget().redraw();
+            }
           }
           
           if(changed[0]) {
             try {
-              pomFile.refreshLocal(IResource.DEPTH_ZERO, null);
+              pomFile.refreshLocal(IResource.DEPTH_INFINITE, null);
             } catch(CoreException e) {
               MavenLogger.log(e);
             } 
