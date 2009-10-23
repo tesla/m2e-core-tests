@@ -227,7 +227,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     assertNull(manager.create(p2, monitor));
 
     IMarker[] markers = p2.findMarkers(null, true, IResource.DEPTH_INFINITE);
-    assertEquals(toString(markers), 1, markers.length);
+    assertEquals(toString(markers), 2, markers.length);
 
     IProject p3 = createExisting("t001-p3");
     waitForJobsToComplete();
@@ -529,7 +529,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals(0, getTestArtifacts(f1).size());
 
     IMarker[] markers = p1.findMarkers(null, true, IResource.DEPTH_INFINITE);
-    assertEquals(toString(markers), 0, markers.length);
+    assertEquals(toString(markers), 3, markers.length);
   }
 
   private IMavenProjectFacade[] getAllMavenProjects(IMavenProjectFacade facade) throws CoreException {
@@ -572,11 +572,11 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
 
     assertNull(manager.create(p1, monitor));
     IMarker[] markers = p1.findMarkers(null, true, IResource.DEPTH_INFINITE);
-    assertEquals(toString(markers), 1, markers.length);
+    assertEquals(toString(markers), 2, markers.length);
 
     copyContent(p1, "pom_good.xml", "pom.xml");
     markers = p1.findMarkers(null, true, IResource.DEPTH_INFINITE);
-    assertEquals(toString(markers), 0, markers.length);
+    assertEquals(toString(markers), 1, markers.length);
     assertNotNull(manager.create(p1, monitor));
   }
 
@@ -590,7 +590,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     // (jdt) The container 'Maven Dependencies' references non existing library ...missing/missing/0.0.0/missing-0.0.0.jar'
     // (jdt) The project cannot be built until build path errors are resolved
     // (maven) Missing artifact missing:missing:jar:0.0.0:compile
-    assertEquals(toString(markers), 3, markers.length); 
+    assertEquals(toString(markers), 4, markers.length); 
   }
 
   public void __test014_resolveDependencies() throws Exception {
@@ -826,8 +826,8 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
 
     IMavenProjectFacade f1 = manager.create(projects[0], monitor);
     ArrayList<ArtifactRef> a1 = new ArrayList<ArtifactRef>(f1.getMavenProjectArtifacts());
-    assertEquals(2, a1.size());
-    assertEquals("junit", a1.get(1).getArtifactId());
+    assertEquals(1, a1.size());
+    assertEquals("p002", a1.get(0).getArtifactId());
   }
 
   public void testWorkspaceDependencyVersionRange() throws Exception {
