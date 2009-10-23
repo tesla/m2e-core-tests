@@ -121,7 +121,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
         }
       }
       if(!hasSchema){
-        addMarker(pomFile, NO_SCHEMA_ERR, 1, IMarker.SEVERITY_ERROR, false);
+        addMarker(pomFile, NO_SCHEMA_ERR, 1, IMarker.SEVERITY_WARNING, false);
       } 
     } catch(Throwable ex) {
       //something went wrong looking for the schema. don't add the warning
