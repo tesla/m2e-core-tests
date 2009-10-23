@@ -77,11 +77,8 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.Widget;
-import org.eclipse.ui.forms.events.ExpansionAdapter;
-import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
-import org.eclipse.ui.forms.events.IExpansionListener;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
@@ -97,7 +94,6 @@ import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.actions.OpenUrlAction;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
-import org.maven.ide.eclipse.editor.internal.actions.SectionExpansionAdapter;
 import org.maven.ide.eclipse.editor.plugins.DefaultPluginConfigurationEditor;
 import org.maven.ide.eclipse.editor.plugins.IPluginConfigurationExtension;
 import org.maven.ide.eclipse.editor.plugins.PluginExtensionDescriptor;
@@ -818,7 +814,6 @@ public class PluginsComposite extends Composite{
     pluginConfigurationSection = toolkit.createSection(detailsComposite,
         ExpandableComposite.TITLE_BAR | ExpandableComposite.TWISTIE);
     pluginConfigurationSection.setText("Configuration");
-    pluginConfigurationSection.setLayout(new GridLayout(1, true));
     pluginConfigurationSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
     pluginConfigurationSection.setEnabled(false);
     
@@ -935,7 +930,8 @@ public class PluginsComposite extends Composite{
     
     String ga = plugin.getGroupId() + ':' + plugin.getArtifactId();
     PluginExtensionDescriptor descriptor = pluginConfigurators.get(ga);
-    setConfigurationEditor(descriptor == null ? defaultConfigurationEditor : descriptor.getExtension());
+    setConfigurationEditor(descriptor == null || descriptor.getExtension() == null ?
+      defaultConfigurationEditor : descriptor.getExtension());
     configurationEditor.setPlugin(plugin);
     
     setButton(pluginInheritedButton, plugin.getInherited()==null || "true".equals(plugin.getInherited()));

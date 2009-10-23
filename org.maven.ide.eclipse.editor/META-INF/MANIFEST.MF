@@ -33,5 +33,7 @@ Bundle-RequiredExecutionEnvironment: J2SE-1.5,
  JavaSE-1.6
 Bundle-Vendor: Sonatype, Inc.
 Bundle-ClassPath: .
-Export-Package: org.maven.ide.eclipse.editor.plugins,
+Export-Package: org.maven.ide.eclipse.editor,
+ org.maven.ide.eclipse.editor.composites,
+ org.maven.ide.eclipse.editor.plugins,
  org.maven.ide.eclipse.editor.pom
