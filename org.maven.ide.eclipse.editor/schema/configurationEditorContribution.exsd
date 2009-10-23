@@ -17,6 +17,9 @@
          </appInfo>
       </annotation>
       <complexType>
+         <sequence>
+            <element ref="editContributor"/>
+         </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
                <documentation>
