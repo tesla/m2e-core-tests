@@ -11,10 +11,17 @@ package org.maven.ide.eclipse.internal.project;
 import java.util.List;
 import java.util.Set;
 
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.wst.sse.core.StructuredModelManager;
+import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.AbstractArtifactResolutionException;
@@ -36,6 +43,17 @@ import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.project.IMavenMarkerManager;
 
 public class MavenMarkerManager implements IMavenMarkerManager {
+  /**
+   * 
+   */
+  private static final String XSI_SCHEMA_LOCATION = "xsi:schemaLocation";
+
+  /**
+   * 
+   */
+  private static final String PROJECT_NODE = "project";
+
+  public static final String NO_SCHEMA_ERR = "There is no schema defined for this pom.xml. Code completion will not work without a schema defined.";
   
   private final MavenConsole console;
   private final IMavenConfiguration mavenConfiguration; 
@@ -47,20 +65,15 @@ public class MavenMarkerManager implements IMavenMarkerManager {
   
   public void addMarkers(IResource pomFile, MavenExecutionResult result) {
     List<Throwable> exceptions = result.getExceptions();
+    
     for(Throwable ex : exceptions) {
       if(ex instanceof ProjectBuildingException) {
         handleProjectBuildingException(pomFile, (ProjectBuildingException) ex);
   
       } else if(ex instanceof AbstractArtifactResolutionException) {
-        // String msg = ex.getMessage().replaceAll("----------", "").replaceAll("\r\n\r\n", "\n").replaceAll("\n\n", "\n");
-        // addMarker(pomFile, msg, 1, IMarker.SEVERITY_ERROR);
-        // console.logError(msg);
-  
         AbstractArtifactResolutionException rex = (AbstractArtifactResolutionException) ex;
         String errorMessage = getArtifactId(rex) + " " + getErrorMessage(ex);
         addMarker(pomFile, errorMessage, 1, IMarker.SEVERITY_ERROR);
-//        console.logError(errorMessage);
-  
       } else {
         handleBuildException(pomFile, ex);
       }
@@ -79,8 +92,42 @@ public class MavenMarkerManager implements IMavenMarkerManager {
     if (mavenProject != null) {
       addMissingArtifactMarkers(pomFile, mavenProject);
     }
+    
+    checkForSchema(pomFile);
+
   }
 
+  /**
+   * The xsi:schema info is not part of the model, it is stored in the xml only. Need to open the DOM
+   * and look for the project node to see if it has this schema defined
+   * @param pomFile
+   */
+  protected void checkForSchema(IResource pomFile){
+    try{
+      if(!(pomFile instanceof IFile)){
+        return;
+      }
+      IDOMModel domModel = (IDOMModel)StructuredModelManager.getModelManager().getModelForRead((IFile)pomFile);
+      NodeList nodes = domModel.getDocument().getChildNodes();
+      boolean hasSchema = false;
+      for(int i=0;i<nodes.getLength();i++){
+        Node node = nodes.item(i);
+        if(PROJECT_NODE.equals(node.getNodeName())){
+          NamedNodeMap attributes = node.getAttributes();
+          Node namedItem = attributes.getNamedItem(XSI_SCHEMA_LOCATION);
+          if(namedItem != null){
+            hasSchema = true;
+          }
+        }
+      }
+      if(!hasSchema){
+        addMarker(pomFile, NO_SCHEMA_ERR, 1, IMarker.SEVERITY_ERROR, false);
+      } 
+    } catch(Throwable ex) {
+      //something went wrong looking for the schema. don't add the warning
+    }
+  }
+  
   public void addMarker(IResource resource, String message, int lineNumber, int severity) {
     addMarker(resource, message, lineNumber, severity, true); 
   }
