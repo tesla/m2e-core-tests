@@ -31,6 +31,26 @@ import com.windowtester.runtime.swt.locator.TextLocator;
 public class MNGEclipse1674PluginCodeCompletionTest extends UIIntegrationTestCase {
 
   
+  public void testSchemaCodeAssist() throws Exception {
+    
+    doImport("projects/cc_sample2.zip", false);
+    
+    IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("cc_sample2");
+    IJavaProject jp = (IJavaProject)project.getNature(JavaCore.NATURE_ID);
+    assertTrue(project.exists());
+    
+    // Add a dependency.
+    openFile(project, "pom.xml");
+    waitForAllBuildsToComplete();
+    getUI().click(new CTabItemLocator("pom.xml"));
+    
+    findTextWithWrap("<project>", true);
+    
+    getUI().keyClick(WT.CTRL, '1');
+    getUI().keyClick(WT.CR);
+    waitForAllBuildsToComplete();
+    assertProjectsHaveNoErrors();
+  }
   public void testPluginCodeCompletion() throws Exception {
     
     doImport("projects/cc_sample.zip");
@@ -62,9 +82,6 @@ public class MNGEclipse1674PluginCodeCompletionTest extends UIIntegrationTestCas
     getUI().keyClick(SWT.MOD1, 's');
     
     assertTrue(searchForText("configuration", true));
-    
-    
-    
 
   }
 }
