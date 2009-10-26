@@ -11,13 +11,10 @@ package org.maven.ide.eclipse.internal.embedder;
 import java.io.File;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.wagon.Wagon;
-import org.apache.maven.wagon.WagonConstants;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.events.TransferListener;
 import org.apache.maven.wagon.repository.Repository;
@@ -34,27 +31,17 @@ import org.maven.ide.eclipse.embedder.ILocalRepositoryListener;
 /**
  * @author Eugene Kuleshov
  */
-final class WagonTransferListenerAdapter implements TransferListener {
-  private final MavenImpl maven;
-
-  private final IProgressMonitor monitor;
-
-  private final MavenConsole console;
-
-  private long complete = 0;
-
+final class WagonTransferListenerAdapter extends AbstractTransferListenerAdapter implements TransferListener {
   // TODO this is just wrong!
   private final GavCalculator gavCalculator = new M2GavCalculator();
 
   WagonTransferListenerAdapter(MavenImpl maven, IProgressMonitor monitor, MavenConsole console) {
-    this.maven = maven;
-    this.monitor = monitor == null ? new NullProgressMonitor() : monitor;
-    this.console = console;
+    super(maven, monitor, console);
   }
 
   public void transferInitiated(TransferEvent e) {
     // System.err.println( "init "+e.getWagon().getRepository()+"/"+e.getResource().getName());
-    this.complete = 0;
+    transferInitiated((String) null);
   }
 
   public void transferStarted(TransferEvent e) {
@@ -66,62 +53,29 @@ final class WagonTransferListenerAdapter implements TransferListener {
       sb.append(repositoryId).append(" : ");
     }
     sb.append(e.getResource().getName());
-    console.logMessage("Downloading " + sb.toString());
-    // monitor.beginTask("0% "+e.getWagon().getRepository()+"/"+e.getResource().getName(), IProgressMonitor.UNKNOWN);
-    monitor.setTaskName("0% " + sb.toString());
+    transferStarted(sb.toString());
   }
 
   public void transferProgress(TransferEvent e, byte[] buffer, int length) {
-    if(monitor.isCanceled()) {
-      throw new OperationCanceledException("Transfer is canceled");
-    }
-    
-    complete += length;
-
     long total = e.getResource().getContentLength();
+    String artifactUrl = e.getWagon().getRepository() + "/" + e.getResource().getName();
 
-    StringBuffer sb = new StringBuffer();
-
-    formatBytes(complete, sb);
-    if(total != WagonConstants.UNKNOWN_LENGTH) {
-      sb.append('/');
-      formatBytes(total, sb);
-      sb.append(" (");
-      sb.append(100l * complete / total);
-      sb.append("%)");
-    }
-    sb.append(' ');
-
-    monitor.setTaskName(sb.toString() + e.getWagon().getRepository() + "/"
-        + e.getResource().getName());
+    transferProgress(artifactUrl, total, length);
   }
 
   public void transferCompleted(TransferEvent e) {
-    console.logMessage("Downloaded " + e.getWagon().getRepository() + "/" + e.getResource().getName());
-
-    // monitor.subTask("100% "+e.getWagon().getRepository()+"/"+e.getResource().getName());
-    monitor.setTaskName("");
+    String artifactUrl = e.getWagon().getRepository() + "/" + e.getResource().getName();
+    transferCompleted(artifactUrl);
     
     notifyLocalRepositoryListeners(e);
   }
 
   public void transferError(TransferEvent e) {
-    console.logMessage("Unable to download " + e.getWagon().getRepository() + "/" + e.getResource().getName() + ": "
-        + e.getException());
-    monitor.setTaskName("error " + e.getWagon().getRepository() + "/" + e.getResource().getName());
+    transferError(e.getWagon().getRepository() + "/" + e.getResource().getName(), e.getException());
   }
 
   public void debug(String message) {
     // System.err.println( "debug "+message);
-  }
-  
-  private static final String[] units = {"B","KB","MB"};
-  private void formatBytes(long n, StringBuffer sb) {
-    int i = 0;
-    while (n >= 1024 && ++i <units.length) n >>= 10;
-
-    sb.append(n);
-    sb.append(units[i]);
   }
 
   private void notifyLocalRepositoryListeners(TransferEvent e) {

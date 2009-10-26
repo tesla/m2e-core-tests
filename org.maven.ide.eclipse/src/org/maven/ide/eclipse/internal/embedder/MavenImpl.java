@@ -750,8 +750,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
   }
 
   public ArtifactTransferListener createArtifactTransferListener(IProgressMonitor monitor) {
-    // TODO maven core does not provide support for us yet. see https://issues.sonatype.org/browse/MNGECLIPSE-1485
-    return null;
+    return new ArtifactTransferListenerAdapter(this, monitor, console);
   }
 
   /** for testing purposes */
