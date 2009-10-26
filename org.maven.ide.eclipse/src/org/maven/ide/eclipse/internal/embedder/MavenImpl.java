@@ -44,6 +44,7 @@ import org.codehaus.plexus.component.repository.exception.ComponentLookupExcepti
 import org.codehaus.plexus.configuration.PlexusConfiguration;
 import org.codehaus.plexus.configuration.xml.XmlPlexusConfiguration;
 import org.codehaus.plexus.util.IOUtil;
+import org.codehaus.plexus.util.dag.CycleDetectedException;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
@@ -72,12 +73,15 @@ import org.apache.maven.plugin.BuildPluginManager;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.PluginManagerException;
 import org.apache.maven.plugin.PluginParameterExpressionEvaluator;
+import org.apache.maven.plugin.PluginResolutionException;
 import org.apache.maven.plugin.descriptor.MojoDescriptor;
+import org.apache.maven.project.DuplicateProjectException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.project.ProjectBuildingResult;
+import org.apache.maven.project.ProjectSorter;
 import org.apache.maven.repository.ArtifactTransferListener;
 import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.settings.MavenSettingsBuilder;
@@ -290,7 +294,6 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
     if(settings != null) {
       File settingsFile = new File(settings);
       if(settingsFile.canRead()) {
-        @SuppressWarnings("unchecked")
         List<String> messages = settingsBuilder.validateSettings(settingsFile).getMessages();
         for(String message : messages) {
           result.addMessage(message);
@@ -577,6 +580,9 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
     } catch(PluginManagerException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
           "Could not get mojo execution paramater value", ex));
+    } catch(PluginResolutionException ex) {
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
+          "Could not get mojo execution paramater value", ex));
     }
   }
 
@@ -769,5 +775,16 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
     }
 
     return null;
+  }
+
+  public List<MavenProject> getSortedProjects(List<MavenProject> projects) throws CoreException {
+    try {
+      ProjectSorter rm = new ProjectSorter(projects);
+      return rm.getSortedProjects();
+    } catch(CycleDetectedException ex) {
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, "unable to sort projects", ex));
+    } catch(DuplicateProjectException ex) {
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, "unable to sort projects", ex));
+    }
   }
 }

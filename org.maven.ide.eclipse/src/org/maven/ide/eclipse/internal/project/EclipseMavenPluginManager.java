@@ -11,7 +11,7 @@ package org.maven.ide.eclipse.internal.project;
 import java.util.List;
 
 import org.apache.maven.execution.MavenSession;
-import org.apache.maven.plugin.PluginManagerException;
+import org.apache.maven.plugin.PluginContainerException;
 import org.apache.maven.plugin.PluginResolutionException;
 import org.apache.maven.plugin.descriptor.PluginDescriptor;
 import org.apache.maven.plugin.internal.DefaultMavenPluginManager;
@@ -23,8 +23,9 @@ import org.apache.maven.plugin.internal.DefaultMavenPluginManager;
  */
 public class EclipseMavenPluginManager extends DefaultMavenPluginManager {
   
+  @Override
   public void setupPluginRealm(PluginDescriptor pluginDescriptor, MavenSession session, ClassLoader parent,
-      List<String> imports) throws PluginResolutionException, PluginManagerException {
+      List<String> imports) throws PluginResolutionException, PluginContainerException {
     /*
      * Plugin realms are cached and there is currently no way to purge cached
      * realms due to http://jira.codehaus.org/browse/MNG-4194.

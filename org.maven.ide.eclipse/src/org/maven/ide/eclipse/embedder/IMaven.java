@@ -159,4 +159,9 @@ public interface IMaven {
   public TransferListener createTransferListener(IProgressMonitor monitor);
 
   public ProxyInfo getProxyInfo(String protocol) throws CoreException;
+
+  /**
+   *  Sort projects by build order
+   */
+  public List<MavenProject> getSortedProjects(List<MavenProject> projects) throws CoreException;
 }

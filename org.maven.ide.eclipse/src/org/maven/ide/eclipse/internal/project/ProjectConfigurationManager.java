@@ -44,7 +44,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.ui.IWorkingSet;
 
-import org.codehaus.plexus.util.dag.CycleDetectedException;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 
 import org.apache.maven.archetype.ArchetypeGenerationRequest;
@@ -52,10 +51,8 @@ import org.apache.maven.archetype.ArchetypeGenerationResult;
 import org.apache.maven.archetype.catalog.Archetype;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.execution.DuplicateProjectException;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
-import org.apache.maven.execution.ProjectSorter;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.project.MavenProject;
@@ -252,21 +249,13 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     return maven.createSession(request, facade.getMavenProject(monitor));
   }
 
-  public static final void sortProjects(List<IMavenProjectFacade> facades, IProgressMonitor monitor) throws CoreException {
+  public void sortProjects(List<IMavenProjectFacade> facades, IProgressMonitor monitor) throws CoreException {
       HashMap<MavenProject, IMavenProjectFacade> mavenProjectToFacadeMap = new HashMap<MavenProject, IMavenProjectFacade>(facades.size());
       for(IMavenProjectFacade facade:facades) {
         mavenProjectToFacadeMap.put(facade.getMavenProject(monitor), facade);
       }
-      ProjectSorter rm;
-      try {
-        rm = new ProjectSorter(new ArrayList<MavenProject>(mavenProjectToFacadeMap.keySet()));
-      } catch(CycleDetectedException ex) {
-        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, "unable to sort projects", ex));
-      } catch(DuplicateProjectException ex) {
-        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, "unable to sort projects", ex));
-      }
       facades.clear();
-      for(MavenProject mavenProject: rm.getSortedProjects()) {
+      for(MavenProject mavenProject: maven.getSortedProjects(new ArrayList<MavenProject>(mavenProjectToFacadeMap.keySet()))) {
         facades.add(mavenProjectToFacadeMap.get(mavenProject));
       }
   }
