@@ -68,6 +68,7 @@ import org.codehaus.plexus.context.Context;
 import org.apache.maven.classrealm.ClassRealmManagerDelegate;
 import org.apache.maven.plugin.MavenPluginManager;
 import org.apache.maven.project.artifact.MavenMetadataCache;
+import org.apache.maven.repository.LocalRepositoryMaintainer;
 
 import org.sonatype.plexus.build.incremental.BuildContext;
 import org.sonatype.plexus.build.incremental.ThreadBuildContext;
@@ -85,6 +86,7 @@ import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.internal.ExtensionReader;
 import org.maven.ide.eclipse.internal.console.MavenConsoleImpl;
 import org.maven.ide.eclipse.internal.embedder.EclipseClassRealmManagerDelegate;
+import org.maven.ide.eclipse.internal.embedder.EclipseLocalRepositoryMaintainer;
 import org.maven.ide.eclipse.internal.embedder.EclipseLoggerManager;
 import org.maven.ide.eclipse.internal.embedder.MavenConfigurationImpl;
 import org.maven.ide.eclipse.internal.embedder.MavenEmbeddedRuntime;
@@ -228,6 +230,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
         if (mavenCoreRealmId.equals(classRealm.getId())) {
           ComponentSetDescriptor componentSetDescriptor = new ComponentSetDescriptor();
 
+          // register EclipseClassRealmManagerDelegate
           ComponentDescriptor componentDescriptor = new ComponentDescriptor();
           componentDescriptor.setRealm(classRealm);
           componentDescriptor.setRole(ClassRealmManagerDelegate.class.getName());
@@ -236,6 +239,13 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
           plexusRequirement.setRole("org.codehaus.plexus.PlexusContainer");
           plexusRequirement.setFieldName("plexus");
           componentDescriptor.addRequirement(plexusRequirement );
+          componentSetDescriptor.addComponentDescriptor(componentDescriptor);
+
+          // register EclipseLocalRepositoryMaintainer
+          componentDescriptor = new ComponentDescriptor();
+          componentDescriptor.setRealm(classRealm);
+          componentDescriptor.setRole(LocalRepositoryMaintainer.class.getName());
+          componentDescriptor.setImplementationClass(EclipseLocalRepositoryMaintainer.class);
           componentSetDescriptor.addComponentDescriptor(componentDescriptor);
 
           componentSetDescriptors.add(componentSetDescriptor);

@@ -98,15 +98,15 @@ final class WagonTransferListenerAdapter extends AbstractTransferListenerAdapter
       if (!artifactPath.startsWith(repoBasepath)) {
         return;
       }
-  
-      artifactPath = artifactPath.substring(0, artifactPath.length());
+
+      artifactPath = artifactPath.substring(repoBasepath.length());
       Gav gav = gavCalculator.pathToGav(artifactPath);
       ArtifactKey artifactKey = new ArtifactKey(gav.getGroupId(), gav.getArtifactId(), gav.getVersion(), gav.getClassifier());
-  
+
       File repoBasedir = new File(localRepository.getBasedir()).getCanonicalFile();
-  
+
       for (ILocalRepositoryListener listener : maven.getLocalRepositoryListeners()) {
-        listener.artifactInstalled(repoBasedir, artifactKey, artifactPath);
+        listener.artifactInstalled(repoBasedir, artifactKey, artifactFile);
       }
     } catch (Exception ex) {
       MavenLogger.log("Could not notify local repository listeners", ex);

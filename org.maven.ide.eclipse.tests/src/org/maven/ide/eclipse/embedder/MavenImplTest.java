@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import junit.framework.TestCase;
-
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.execution.MavenExecutionRequest;
@@ -23,9 +21,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.internal.embedder.MavenImpl;
+import org.maven.ide.eclipse.tests.AsbtractMavenProjectTestCase;
 
 
-public class MavenImplTest extends TestCase {
+public class MavenImplTest extends AsbtractMavenProjectTestCase {
 
   private IProgressMonitor monitor = new NullProgressMonitor();
 
@@ -184,5 +183,30 @@ public class MavenImplTest extends TestCase {
     }
     assertTrue(maven.isUnavailable(a.getGroupId(), a.getArtifactId(), a.getBaseVersion(), a.getType(), a.getClassifier(), repositories));
 
+  }
+
+  public void testLocalRepositoryListener() throws Exception {
+    List<ArtifactRepository> repositories = maven.getArtifactRepositories(true);
+    final ArtifactRepository localRepository = maven.getLocalRepository();
+
+    FileUtils.deleteDirectory(new File(localRepository.getBasedir(), "junit/junit/3.8.2"));
+
+    ILocalRepositoryListener listener = new ILocalRepositoryListener() {
+      public void artifactInstalled(File repositoryBasedir, ArtifactKey artifact, File artifactFile) {
+        assertEquals(localRepository.getBasedir(), repositoryBasedir.getAbsolutePath());
+
+        assertEquals("junit:junit:3.8.2::", artifact.toPortableString());
+        
+        assertEquals(new File(localRepository.getBasedir(), "junit/junit/3.8.2/junit-3.8.2.jar"), artifactFile.getAbsoluteFile());
+      }
+    };
+
+    maven.addLocalRepositoryListener(listener);
+    try {
+      maven.resolve("junit", "junit", "3.8.2", "jar", null, repositories, monitor);
+    } finally {
+      maven.removeLocalRepositoryListener(listener);
+    }
+  
   }
 }

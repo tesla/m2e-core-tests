@@ -739,7 +739,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
   public void removeLocalRepositoryListener(ILocalRepositoryListener listener) {
     localRepositoryListeners.remove(listener);
   }
-  
+
   public List<ILocalRepositoryListener> getLocalRepositoryListeners() {
     return localRepositoryListeners;
   }

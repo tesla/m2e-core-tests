@@ -22,8 +22,7 @@ public class IndexingTransferListener implements ILocalRepositoryListener {
     this.indexManager = indexManager;
   }
 
-  public void artifactInstalled(File repositoryBasedir, ArtifactKey artifact, String artifactRelpath) {
-    File artifactFile = new File(repositoryBasedir, artifactRelpath);
+  public void artifactInstalled(File repositoryBasedir, ArtifactKey artifact, File artifactFile) {
     NexusIndex localIndex = indexManager.getLocalIndex();
     if(artifactFile.getName().endsWith(".jar")) {
       localIndex.addArtifact(artifactFile, artifact, //
