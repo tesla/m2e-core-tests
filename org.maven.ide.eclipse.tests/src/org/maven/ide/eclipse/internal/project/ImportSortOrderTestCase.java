@@ -64,8 +64,10 @@ public class ImportSortOrderTestCase extends AsbtractMavenProjectTestCase {
   }
   
   public void testCollectionSortProject() throws Exception {
+    ProjectConfigurationManager manager = (ProjectConfigurationManager) plugin.getProjectConfigurationManager();
+    
     List<IMavenProjectFacade> facades = createFacades();
-    ProjectConfigurationManager.sortProjects(facades, monitor);
+    manager.sortProjects(facades, monitor);
 
     Map<String, Integer> aMap = new HashMap<String, Integer>();    
     for(int i=0; i<facades.size(); i++) {
