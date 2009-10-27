@@ -9,6 +9,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
+  <prerequisites>
+    <maven>3.0</maven>
+  </prerequisites>
+
   <groupId>org.maven.ide.eclipse</groupId>
   <artifactId>parent</artifactId>
   <version>0.9.9-SNAPSHOT</version>
@@ -42,12 +46,7 @@
     <m2e.snapshots>http://localhost</m2e.snapshots>
     <m2e.site>http://localhost</m2e.site>
 
-    <!--
-    Use implicit ${tycho-version} property to make sure
-    tycho plugins version matches version of tycho distribution.
-
-    <tycho.version>0.3.0-SNAPSHOT</tycho.version>
-    -->
+    <tycho-version>0.5.0-SNAPSHOT</tycho-version>
 
     <!-- default target platform, see ../target-platform/*.target -->
     <target.platform>m2e-e35</target.platform>
@@ -302,6 +301,13 @@
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.codehaus.tycho</groupId>
+        <artifactId>tycho-maven-plugin</artifactId>
+        <version>${tycho-version}</version>
+        <extensions>true</extensions>
+      </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
