@@ -84,6 +84,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.Section;
 import org.maven.ide.components.pom.BuildBase;
+import org.maven.ide.components.pom.Configuration;
 import org.maven.ide.components.pom.Dependency;
 import org.maven.ide.components.pom.Plugin;
 import org.maven.ide.components.pom.PluginExecution;
@@ -842,6 +843,13 @@ public class PluginsComposite extends Composite{
     pluginConfigurationSection.setTextClient(toolbarComposite);
   }
 
+  private IPluginConfigurationExtension findConfigurationEditor(String groupId, String artifactId) {
+    String ga = groupId + ':' + artifactId;
+    PluginExtensionDescriptor descriptor = pluginConfigurators.get(ga);
+    return descriptor == null || descriptor.getExtension() == null ?
+        defaultConfigurationEditor : descriptor.getExtension();
+  }
+
   private void setConfigurationEditor(IPluginConfigurationExtension editor) {
     if(configurationEditor == editor) {
       return;
@@ -893,6 +901,7 @@ public class PluginsComposite extends Composite{
     }
     
     if(plugin==null) {
+      pluginConfigurationSection.setExpanded(false);
       pluginConfigurationSection.setEnabled(false);
       FormUtils.setEnabled(pluginDetailsSection, false);
       FormUtils.setEnabled(pluginExecutionsSection, false);
@@ -932,14 +941,20 @@ public class PluginsComposite extends Composite{
     // XXX implement dependency editing
     FormUtils.setReadonly(pluginDependenciesSection, true);
 
-    setText(groupIdText, plugin.getGroupId());
-    setText(artifactIdText, plugin.getArtifactId());
-    setText(versionText, plugin.getVersion());
+    String groupId = plugin.getGroupId();
+    String artifactId = plugin.getArtifactId();
+    String version = plugin.getVersion();
     
-    String ga = plugin.getGroupId() + ':' + plugin.getArtifactId();
-    PluginExtensionDescriptor descriptor = pluginConfigurators.get(ga);
-    setConfigurationEditor(descriptor == null || descriptor.getExtension() == null ?
-      defaultConfigurationEditor : descriptor.getExtension());
+    setText(groupIdText, groupId);
+    setText(artifactIdText, artifactId);
+    setText(versionText, version);
+    
+    setConfigurationEditor(findConfigurationEditor(groupId, artifactId));
+    if(configurationEditor != defaultConfigurationEditor && plugin.getConfiguration() == null) {
+      // if a configuration editor is available, create the config section right away
+      Configuration configuration = PomFactory.eINSTANCE.createConfiguration();
+      plugin.setConfiguration(configuration);
+    }
     configurationEditor.setPlugin(plugin);
     
     setButton(pluginInheritedButton, plugin.getInherited()==null || "true".equals(plugin.getInherited()));
@@ -1093,6 +1108,12 @@ public class PluginsComposite extends Composite{
     plugin.setGroupId(groupId);
     plugin.setArtifactId(artifactId);
     plugin.setVersion(version);
+    
+    if(findConfigurationEditor(groupId, artifactId) != defaultConfigurationEditor) {
+      // if a configuration editor is available, create the config section right away
+      Configuration configuration = PomFactory.eINSTANCE.createConfiguration();
+      plugin.setConfiguration(configuration);
+    }
     
     Command command = AddCommand.create(editingDomain, parentObject, feature, plugin);
     compoundCommand.append(command);
