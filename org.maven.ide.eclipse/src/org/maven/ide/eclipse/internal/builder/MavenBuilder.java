@@ -156,9 +156,10 @@ public class MavenBuilder extends IncrementalProjectBuilder {
         }
 
         if(!file.exists()) {
-          // XXX 
           IResource resource = project.findMember(path);
-          resource.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+          if (resource != null) {
+            resource.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+          }
         } else if(file.isDirectory()) {
           IFolder ifolder = project.getFolder(path);
           ifolder.refreshLocal(IResource.DEPTH_INFINITE, monitor);
