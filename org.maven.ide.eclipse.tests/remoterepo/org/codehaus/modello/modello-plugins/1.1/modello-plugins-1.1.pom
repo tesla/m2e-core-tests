@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <artifactId>modello</artifactId>
+    <groupId>org.codehaus.modello</groupId>
+    <version>1.1</version>
+  </parent>
+
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>modello-plugins</artifactId>
+  <packaging>pom</packaging>
+  <name>Modello Plugins</name>
+  <description>
+    Modello Plugins is the main component containing every Modello plugins that are able to generate various types of
+    code and descriptors.
+  </description>
+
+  <modules>
+    <module>modello-plugin-java</module>
+    <module>modello-plugin-converters</module>
+    <module>modello-plugin-xml</module>
+    <module>modello-plugin-xdoc</module>
+    <module>modello-plugin-xsd</module>
+    <module>modello-plugin-xpp3</module>
+    <module>modello-plugin-stax</module>
+    <module>modello-plugin-jdom</module>
+    <module>modello-plugin-dom4j</module>
+  </modules>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-container-default</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.modello</groupId>
+      <artifactId>modello-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.modello</groupId>
+      <artifactId>modello-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

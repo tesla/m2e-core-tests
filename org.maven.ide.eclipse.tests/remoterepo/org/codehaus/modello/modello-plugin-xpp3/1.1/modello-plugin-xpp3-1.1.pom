@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <artifactId>modello-plugins</artifactId>
+    <groupId>org.codehaus.modello</groupId>
+    <version>1.1</version>
+  </parent>
+
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>modello-plugin-xpp3</artifactId>
+  <name>Modello XPP3 Plugin</name>
+  <description>
+    Modello XPP3 Plugin generates XML readers and writers based on XPP3 API (XML Pull Parser).
+  </description>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.codehaus.modello</groupId>
+      <artifactId>modello-plugin-java</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-utils</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.modello</groupId>
+      <artifactId>modello-plugin-xml</artifactId>
+    </dependency>
+
+    <!-- dependencies needed by FeaturesXpp3GeneratorTest -->
+    <dependency>
+      <groupId>xmlunit</groupId>
+      <artifactId>xmlunit</artifactId>
+      <version>1.2</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>
