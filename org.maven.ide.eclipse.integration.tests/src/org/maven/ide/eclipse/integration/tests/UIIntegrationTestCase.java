@@ -209,8 +209,6 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
      // Clean out projects left over from previous test runs.
      clearProjects();
 
-     waitForAllBuildsToComplete();     
-
   }
 
   private void openPerspective(final String id) throws Exception {
@@ -326,8 +324,10 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
 
     job.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
     job.schedule();
-    getUI().wait(new JobsCompleteCondition(), 1200000);
-
+    try{
+      waitForAllBuildsToComplete();
+    } catch(Exception e){
+    }
   }
 
   protected void oneTimeTearDown() throws Exception {
