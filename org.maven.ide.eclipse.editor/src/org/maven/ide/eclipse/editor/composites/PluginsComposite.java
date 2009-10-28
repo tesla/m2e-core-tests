@@ -847,6 +847,10 @@ public class PluginsComposite extends Composite{
       return;
     }
     
+    if(configurationEditor != null) {
+      configurationEditor.cleanup();
+    }
+    
     boolean expanded = pluginConfigurationSection.isExpanded();
     if(expanded) {
       pluginConfigurationSection.setExpanded(false);
@@ -906,6 +910,10 @@ public class PluginsComposite extends Composite{
       pluginExecutionsEditor.setInput(null);
       pluginDependenciesEditor.setInput(null);
       updatePluginExecution(null);
+
+      if(configurationEditor != null) {
+        configurationEditor.cleanup();
+      }
       return;
     }
     

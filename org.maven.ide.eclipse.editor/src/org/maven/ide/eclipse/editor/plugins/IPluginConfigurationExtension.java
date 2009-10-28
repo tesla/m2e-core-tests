@@ -16,4 +16,5 @@ public interface IPluginConfigurationExtension {
   public void setPlugin(Plugin plugin);
   public void setPomEditor(MavenPomEditorPage editor);
   public Composite createComposite(Composite parent);
+  public void cleanup();
 }

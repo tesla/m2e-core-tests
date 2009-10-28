@@ -8,6 +8,9 @@
 
 package org.maven.ide.eclipse.editor.plugins;
 
+import org.eclipse.emf.common.notify.Adapter;
+import org.eclipse.emf.common.notify.Notification;
+import org.eclipse.emf.common.notify.Notifier;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -17,11 +20,12 @@ import org.maven.ide.components.pom.Configuration;
 import org.maven.ide.components.pom.Plugin;
 import org.maven.ide.eclipse.editor.pom.MavenPomEditorPage;
 
-public class DefaultPluginConfigurationEditor implements IPluginConfigurationExtension {
+public class DefaultPluginConfigurationEditor implements Adapter, IPluginConfigurationExtension {
 
   protected Plugin plugin = null;
   protected Configuration configuration = null;
   protected MavenPomEditorPage pomEditor = null;
+  protected Notifier target;
   
   public Composite createComposite(Composite parent) {
     Composite composite = new Composite(parent, SWT.NONE);
@@ -34,13 +38,39 @@ public class DefaultPluginConfigurationEditor implements IPluginConfigurationExt
     
     return composite;
   }
+  
+  public void cleanup() {
+    if(this.configuration != null) {
+      this.configuration.eAdapters().remove(this);
+      this.configuration = null;
+    }
+  }
 
   public void setPlugin(Plugin plugin) {
+    cleanup();
     this.plugin = plugin;
     this.configuration = plugin.getConfiguration();
+    if(this.configuration != null) {
+      this.configuration.eAdapters().add(this);
+    }
   }
 
   public void setPomEditor(MavenPomEditorPage editor) {
     this.pomEditor = editor;
+  }
+
+  public Notifier getTarget() {
+    return target;
+  }
+
+  public void setTarget(Notifier newTarget) {
+    target = newTarget;
+  }
+
+  public boolean isAdapterForType(Object type) {
+    return DefaultPluginConfigurationEditor.class.equals(type);
+  }
+
+  public void notifyChanged(Notification notification) {
   }
 }
