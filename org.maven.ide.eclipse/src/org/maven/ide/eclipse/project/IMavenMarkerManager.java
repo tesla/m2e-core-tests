@@ -8,6 +8,7 @@
 
 package org.maven.ide.eclipse.project;
 
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 
@@ -34,7 +35,7 @@ public interface IMavenMarkerManager {
    * @param lineNumber : the resource line to attach the marker to.
    * @param severity : the severity of the marker. 
    */
-  public void addMarker(IResource resource, String message, int lineNumber, int severity);
+  public IMarker addMarker(IResource resource, String message, int lineNumber, int severity);
   
   /**
    * Delete all Maven markers from an IResource

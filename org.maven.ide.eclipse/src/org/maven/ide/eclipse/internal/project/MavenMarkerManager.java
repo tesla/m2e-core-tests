@@ -11,16 +11,13 @@ package org.maven.ide.eclipse.internal.project;
 import java.util.List;
 import java.util.Set;
 
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.wst.sse.core.StructuredModelManager;
+import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocumentRegion;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 
 import org.apache.maven.artifact.Artifact;
@@ -52,7 +49,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
    * 
    */
   private static final String PROJECT_NODE = "project";
-
+  public static final String OFFSET = "offset";
   public static final String NO_SCHEMA_ERR = "There is no schema defined for this pom.xml. Code completion will not work without a schema defined.";
   
   private final MavenConsole console;
@@ -108,37 +105,46 @@ public class MavenMarkerManager implements IMavenMarkerManager {
         return;
       }
       IDOMModel domModel = (IDOMModel)StructuredModelManager.getModelManager().getModelForRead((IFile)pomFile);
-      NodeList nodes = domModel.getDocument().getChildNodes();
-      boolean hasSchema = false;
-      for(int i=0;i<nodes.getLength();i++){
-        Node node = nodes.item(i);
-        if(PROJECT_NODE.equals(node.getNodeName())){
-          NamedNodeMap attributes = node.getAttributes();
-          Node namedItem = attributes.getNamedItem(XSI_SCHEMA_LOCATION);
-          if(namedItem != null){
-            hasSchema = true;
-          }
+      boolean needsSchema = false;
+      IStructuredDocumentRegion[] structuredDocumentRegions = domModel.getStructuredDocument().getStructuredDocumentRegions();
+      int lineNumber = 0;
+      int offset = 0;
+      for(int i=0;i<structuredDocumentRegions.length;i++){
+        int hasProject = structuredDocumentRegions[i].getText().lastIndexOf("<project");
+        int schemaLoc = structuredDocumentRegions[i].getText().lastIndexOf(XSI_SCHEMA_LOCATION);
+        if(hasProject >=0 && schemaLoc < 0 ){
+          needsSchema=true;
+          lineNumber = domModel.getStructuredDocument().getLineOfOffset( structuredDocumentRegions[i].getStartOffset())+1;
+          offset = structuredDocumentRegions[i].getStartOffset();
         }
       }
-      if(!hasSchema){
-        addMarker(pomFile, NO_SCHEMA_ERR, 1, IMarker.SEVERITY_WARNING, false);
+      if(needsSchema){
+        IMarker marker = addMarker(pomFile, NO_SCHEMA_ERR, lineNumber, IMarker.SEVERITY_WARNING, false);
+        //the quick fix in the marker view needs to know the offset, since it doesn't have access to the
+        //editor/source viewer
+        if(marker != null){
+          marker.setAttribute(OFFSET, offset);
+        }
       } 
     } catch(Throwable ex) {
       //something went wrong looking for the schema. don't add the warning
     }
   }
   
-  public void addMarker(IResource resource, String message, int lineNumber, int severity) {
-    addMarker(resource, message, lineNumber, severity, true); 
+  public IMarker addMarker(IResource resource, String message, int lineNumber, int severity) {
+     return addMarker(resource, message, lineNumber, severity, true); 
   }
 
-  private void addMarker(IResource resource, String message, int lineNumber, int severity, boolean isTransient) {
+
+  private IMarker addMarker(IResource resource, String message, int lineNumber, int severity, boolean isTransient) {
+    IMarker marker = null;
     try {
       if(resource.isAccessible()) {
-        IMarker marker = resource.createMarker(IMavenConstants.MARKER_ID);
+        marker= resource.createMarker(IMavenConstants.MARKER_ID);
         marker.setAttribute(IMarker.MESSAGE, message);
         marker.setAttribute(IMarker.SEVERITY, severity);
         marker.setAttribute(IMarker.TRANSIENT, isTransient);
+        
         if(lineNumber == -1) {
           lineNumber = 1;
         }
@@ -147,6 +153,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
     } catch(CoreException ex) {
       console.logError("Unable to add marker; " + ex.toString());
     }
+    return marker;
   }
 
   private void handleProjectBuildingException(IResource pomFile, ProjectBuildingException ex) {
