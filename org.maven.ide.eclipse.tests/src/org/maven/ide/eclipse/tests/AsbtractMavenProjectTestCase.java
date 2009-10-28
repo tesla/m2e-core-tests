@@ -23,6 +23,7 @@ import junit.framework.TestCase;
 
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.model.Model;
+import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -109,25 +110,47 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
     } else {
       fail("Cannot determine local repository path");
     }
+
+    cleanWorkspace();
   }
 
   protected void tearDown() throws Exception {
     super.tearDown();
 
+    cleanWorkspace();
+
+    projectRefreshJob.wakeUp();
+    IWorkspaceDescription description = workspace.getDescription();
+    description.setAutoBuilding(true);
+    workspace.setDescription(description);
+  }
+
+  private void cleanWorkspace() throws Exception {
     workspace.run(new IWorkspaceRunnable() {
       public void run(IProgressMonitor monitor) throws CoreException {
         IProject[] projects = workspace.getRoot().getProjects();
         for(int i = 0; i < projects.length; i++ ) {
-          projects[i].delete(false, true, monitor);
+          projects[i].delete(true, true, monitor);
         }
       }
     }, new NullProgressMonitor());
 
     waitForJobsToComplete();
-    projectRefreshJob.wakeUp();
-    IWorkspaceDescription description = workspace.getDescription();
-    description.setAutoBuilding(true);
-    workspace.setDescription(description);
+
+    File[] files = workspace.getRoot().getLocation().toFile().listFiles();
+    if (files != null) {
+      for (File file : files) {
+        if (!".metadata".equals(file.getName())) {
+          if (file.isDirectory()) {
+            FileUtils.deleteDirectory(file);
+          } else {
+            if (!file.delete()) {
+              throw new IOException("Could not delete file " + file.getCanonicalPath());
+            }
+          }
+        }
+      }
+    }
   }
 
   protected void deleteProject(String projectName) throws CoreException {
