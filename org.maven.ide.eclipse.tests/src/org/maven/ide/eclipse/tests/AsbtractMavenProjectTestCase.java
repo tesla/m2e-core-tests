@@ -126,6 +126,8 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
   }
 
   private void cleanWorkspace() throws Exception {
+    waitForJobsToComplete();
+
     workspace.run(new IWorkspaceRunnable() {
       public void run(IProgressMonitor monitor) throws CoreException {
         IProject[] projects = workspace.getRoot().getProjects();
