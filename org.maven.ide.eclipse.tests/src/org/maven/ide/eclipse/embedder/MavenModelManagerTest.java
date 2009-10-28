@@ -292,9 +292,14 @@ public class MavenModelManagerTest extends TestCase {
     IFile pomFile = project.getFile(pomFileName);
     modelManager.createMavenModel(pomFile, model);
 
-    InputStream is = pomFile.getContents();
     StringWriter sw = new StringWriter();
-    IOUtil.copy(is, sw, "UTF-8");
+
+    InputStream is = pomFile.getContents();
+    try {
+      IOUtil.copy(is, sw, "UTF-8");
+    } finally {
+      is.close();
+    }
 
     assertEquals("<project xmlns=\"http://maven.apache.org/POM/4.0.0\" " //
         + "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " //
