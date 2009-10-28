@@ -374,9 +374,10 @@
   </build>
 
   <repositories>
+
     <repository>
       <id>sonatype-public</id>
-      <url>http://repository.sonatype.org/content/groups/public</url>
+      <url>http://repository.sonatype.org/content/groups/sonatype-public-grid</url>
       <snapshots>
         <enabled>true</enabled>
       </snapshots>
@@ -389,7 +390,7 @@
   <pluginRepositories>
     <pluginRepository>
       <id>sonatype-public</id>
-      <url>http://repository.sonatype.org/content/groups/public</url>
+      <url>http://repository.sonatype.org/content/groups/sonatype-public-grid</url>
       <snapshots>
         <enabled>true</enabled>
       </snapshots>
