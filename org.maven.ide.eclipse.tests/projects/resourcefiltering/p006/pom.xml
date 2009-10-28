@@ -1,33 +1,44 @@
-<?xml version="1.0" encoding="UTF-8"?><project>
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
   <modelVersion>4.0.0</modelVersion>
-  
+
   <groupId>resourcefiltering</groupId>
   <artifactId>p006</artifactId>
   <version>1.0-SNAPSHOT</version>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>resourcefiltering</groupId>
-				<artifactId>p006helper</artifactId>
-				<version>0.0.1-SNAPSHOT</version>
-				<executions>
-					<execution>
-						<phase>validate</phase>
-						<goals>
-							<goal>set-property</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>resourcefiltering</groupId>
+        <artifactId>p006helper</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <executions>
+          <execution>
+            <phase>validate</phase>
+            <goals>
+              <goal>set-property</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
 
-		<resources>
-			<resource>
-				<directory>src/main/resources</directory>
-				<filtering>true</filtering>
-			</resource>
-		</resources>
-	</build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
+
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>2.4</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
 
 </project>
