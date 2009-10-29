@@ -826,7 +826,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
 
     IMavenProjectFacade f1 = manager.create(projects[0], monitor);
     ArrayList<ArtifactRef> a1 = new ArrayList<ArtifactRef>(f1.getMavenProjectArtifacts());
-    assertEquals(1, a1.size());
+    assertEquals(2, a1.size());
     assertEquals("p002", a1.get(0).getArtifactId());
   }
 
