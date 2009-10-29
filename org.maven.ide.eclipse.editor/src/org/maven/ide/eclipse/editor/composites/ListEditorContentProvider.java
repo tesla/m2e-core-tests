@@ -8,7 +8,8 @@
 
 package org.maven.ide.eclipse.editor.composites;
 
-import org.eclipse.emf.common.util.EList;
+import java.util.List;
+
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
@@ -21,8 +22,8 @@ public class ListEditorContentProvider<T> implements IStructuredContentProvider 
   
   @SuppressWarnings("unchecked")
   public Object[] getElements(Object input) {
-    if(input instanceof EList) {
-      EList<T> list = (EList<T>) input;
+    if(input instanceof List) {
+      List<T> list = (List<T>) input;
       return list.toArray();
     }
     return EMPTY;

@@ -11,7 +11,6 @@ package org.maven.ide.eclipse.editor.composites;
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.emf.common.util.EList;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -123,7 +122,7 @@ public class ListEditorComposite<T> extends Composite {
     viewer.setContentProvider(contentProvider);
   }
 
-  public void setInput(EList<T> input) {
+  public void setInput(List<T> input) {
     viewer.setInput(input);
     viewer.setSelection(new StructuredSelection());
   }
@@ -153,6 +152,14 @@ public class ListEditorComposite<T> extends Composite {
 
   public TableViewer getViewer() {
     return viewer;
+  }
+
+  public int getSelectionIndex() {
+    return viewer.getTable().getSelectionIndex();
+  }
+
+  public void setSelectionIndex(int n) {
+    viewer.getTable().setSelection(n);
   }
 
   @SuppressWarnings("unchecked")
