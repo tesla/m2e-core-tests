@@ -428,27 +428,6 @@
         <tycho.test.jvmArgs>-Xmx800m -XX:MaxPermSize=256m</tycho.test.jvmArgs>
       </properties>
     </profile>
-
-  <profile>
-    <id>m2e-normal-test</id>
-      <activation>
-        <property><name>!m2e.system.test</name></property>
-      </activation>
-      <properties>
-        <org.maven.ide.eclipse.integration.tests.skip>true</org.maven.ide.eclipse.integration.tests.skip>
-        <org.maven.ide.eclipse.tests.skip>false</org.maven.ide.eclipse.tests.skip>
-      </properties>
-  </profile>
-  <profile>
-    <id>m2e-system-test</id>
-      <activation>
-        <property><name>m2e.system.test</name><value>true</value></property>
-      </activation>
-      <properties>
-        <org.maven.ide.eclipse.integration.tests.skip>false</org.maven.ide.eclipse.integration.tests.skip>
-        <org.maven.ide.eclipse.tests.skip>false</org.maven.ide.eclipse.tests.skip>
-      </properties>
-  </profile>
 	
   </profiles>
 

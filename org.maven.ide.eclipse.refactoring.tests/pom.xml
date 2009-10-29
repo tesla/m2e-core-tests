@@ -31,7 +31,6 @@
         <configuration>
           <!-- kill test JVM it tests take more than 20 minutes to finish -->
           <forkedProcessTimeoutInSeconds>1200</forkedProcessTimeoutInSeconds>
-          <skip>${org.maven.ide.eclipse.integration.tests.skip}</skip>
         </configuration>
       </plugin>
       
