@@ -102,21 +102,13 @@
     <module>../org.maven.ide.eclipse.tests</module>
     <module>../org.maven.ide.eclipse.editor.xml</module>
     <module>../org.maven.ide.eclipse.editor</module>
-    <module>../org.maven.ide.eclipse.editor.tests</module>
    
-    <!--
-    <module>../org.maven.ide.eclipse.editor.xml.tests</module>
-    <module>../org.maven.ide.eclipse.refactoring.tests</module>
-    -->
-
     <module>../org.maven.ide.eclipse.ajdt</module>
     <module>../org.maven.ide.eclipse.ajdt.tests</module>
     <module>../org.maven.ide.eclipse.wtp</module>
     <module>../org.maven.ide.eclipse.wtp.tests</module>
     <module>../org.maven.ide.eclipse.book</module>
     <module>../org.maven.ide.eclipse.pr</module>
-
-    <module>../org.maven.ide.eclipse.integration.tests</module>
 
     <!-- features -->
     <module>../org.maven.ide.components.maven_embedder.feature</module>
@@ -247,55 +239,6 @@
         </exclusions>
       </dependency>
 
-      <!-- copy and paste from maven-archetype, is there a better way? -->
-<!--
-      <dependency>
-        <groupId>org.apache.maven</groupId>
-        <artifactId>maven-plugin-api</artifactId>
-        <version>${maven.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.maven</groupId>
-        <artifactId>maven-model</artifactId>
-        <version>${maven.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.maven</groupId>
-        <artifactId>maven-project</artifactId>
-        <version>${maven.version}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-artifact</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-artifact-manager</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.maven</groupId>
-        <artifactId>maven-core</artifactId>
-        <version>${maven.version}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-artifact</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-artifact-manager</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-
-      <dependency>
-        <groupId>org.apache.maven.artifact</groupId>
-        <artifactId>maven-artifact</artifactId>
-        <version>${artifact.version}</version>
-      </dependency>
- -->      
     </dependencies>
   </dependencyManagement>
 
@@ -360,11 +303,7 @@
             <includes>
               <include>**/*Test.java</include>
             </includes>
-            <!--
-              does not work due to regression in Tycho
             <argLine>${tycho.test.jvmArgs}</argLine>
-            -->
-            <argLine>-Xmx800m -XX:MaxPermSize=256m</argLine>
             <!-- kill test JVM it tests take more than 10 minutes (600 seconds) to finish -->
             <forkedProcessTimeoutInSeconds>7200</forkedProcessTimeoutInSeconds>
           </configuration>
@@ -428,7 +367,15 @@
         <tycho.test.jvmArgs>-Xmx800m -XX:MaxPermSize=256m</tycho.test.jvmArgs>
       </properties>
     </profile>
-	
+    
+    <profile>
+      <id>windowtester</id>
+      <modules>
+        <module>../org.maven.ide.eclipse.integration.tests</module>
+        <module>../org.maven.ide.eclipse.editor.tests</module>
+      </modules>
+    </profile>
+
   </profiles>
 
   <developers>
