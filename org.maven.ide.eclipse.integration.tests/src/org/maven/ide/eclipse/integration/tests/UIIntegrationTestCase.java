@@ -982,7 +982,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     
     // Some m2e builds trigger subqequent builds, and each build starts with a delay.
     for (int i = 0; i < 10 && !new JobsCompleteCondition().test(); i++) {
-      getUI().wait(new JobsCompleteCondition(), 240000);
+      getUI().wait(new JobsCompleteCondition(), 340000);
       Thread.sleep(5000);
     }
   }
