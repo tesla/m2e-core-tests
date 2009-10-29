@@ -202,11 +202,9 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
       populator.populateDefaults(request);
       result = maven.execute(request);
     } catch(MavenExecutionRequestPopulationException ex) {
-      ex.printStackTrace();
       result = new DefaultMavenExecutionResult();
       result.addException(ex);
     } catch (Exception e){
-      e.printStackTrace();
       result = new DefaultMavenExecutionResult();
       result.addException(e);
     }
@@ -381,7 +379,8 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
       result.setProject(projectBuildingResult.getProject());
       result.setArtifactResolutionResult(projectBuildingResult.getArtifactResolutionResult());
     } catch(ProjectBuildingException ex) {
-      return result.addException(ex);
+      //don't add the exception here. this should come out as a build marker, not fill
+      //the error logs with msgs
     } catch(MavenExecutionRequestPopulationException ex) {
       return result.addException(ex);
     }

@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.QualifiedName;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.project.MavenProject;
 
 import org.sonatype.plexus.build.incremental.ThreadBuildContext;
 
@@ -97,7 +98,10 @@ public class MavenBuilder extends IncrementalProjectBuilder {
       if (projectFacade.isStale()) {
         MavenUpdateRequest updateRequest = new MavenUpdateRequest(project, mavenConfiguration.isOffline() /*offline*/, false /*updateSnapshots*/);
         projectManager.refresh(updateRequest, monitor);
-        projectFacade = projectManager.create(project, monitor);
+        IMavenProjectFacade facade = projectManager.create(project, monitor);
+        if(facade != null){
+          projectFacade = facade;
+        }
       }
 
       IResourceDelta delta = getDelta(project);
@@ -116,7 +120,17 @@ public class MavenBuilder extends IncrementalProjectBuilder {
 
       IMaven maven = MavenPlugin.lookup(IMaven.class);
       MavenExecutionRequest request = projectManager.createExecutionRequest(pomResource, projectFacade.getResolverConfiguration(), monitor);
-      MavenSession session = maven.createSession(request, projectFacade.getMavenProject(monitor));
+      
+      MavenProject mavenProject = null;
+      try{
+        mavenProject = projectFacade.getMavenProject(monitor);
+      } catch(CoreException ce){
+        //unable to read the project facade
+        addErrorMarker(ce);
+        monitor.done();
+        return null;
+      }
+      MavenSession session = maven.createSession(request, mavenProject);
       ILifecycleMapping lifecycleMapping = configurationManager.getLifecycleMapping(projectFacade, monitor);
 
       ThreadBuildContext.setThreadBuildContext(buildContext);
@@ -180,6 +194,18 @@ public class MavenBuilder extends IncrementalProjectBuilder {
   }
 
   private void addErrorMarker(Exception e) throws CoreException {
+    String msg = e.getMessage();
+    IMarker[] findMarkers = getProject().findMarkers(IMavenConstants.MARKER_ID, false, IResource.DEPTH_ZERO);
+    if(findMarkers != null){
+      for(int i=0;i<findMarkers.length;i++){
+        String markerMsg = (String)findMarkers[i].getAttribute(IMarker.MESSAGE);
+        if(markerMsg != null && markerMsg.equals(msg)){
+          //get rid of old markers with the same message so we don't have a lot of duplicates,
+          //and the marker is always up to date
+          findMarkers[i].delete();
+        }
+      }
+    }
     IMarker marker = getProject().createMarker(IMavenConstants.MARKER_ID);
     marker.setAttribute(IMarker.MESSAGE, e.getMessage());
     marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
@@ -204,7 +230,7 @@ public class MavenBuilder extends IncrementalProjectBuilder {
     return filePath.removeFirstSegments(projectPath.segmentCount());
   }
 
-  protected void clean(IProgressMonitor monitor) throws CoreException {
+  protected void clean(IProgressMonitor monitor) throws CoreException{
     MavenPlugin plugin = MavenPlugin.getDefault();
     MavenProjectManager projectManager = plugin.getMavenProjectManager();
     IProjectConfigurationManager configurationManager = plugin.getProjectConfigurationManager();
@@ -230,7 +256,14 @@ public class MavenBuilder extends IncrementalProjectBuilder {
       EclipseBuildContext buildContext = new EclipseBuildContext(project, contextState);
 
       MavenExecutionRequest request = projectManager.createExecutionRequest(pomResource, projectFacade.getResolverConfiguration(), monitor);
-      MavenSession session = maven.createSession(request, projectFacade.getMavenProject(monitor));
+      MavenSession session = null;
+      try{
+        session = maven.createSession(request, projectFacade.getMavenProject(monitor));
+      } catch(CoreException ce){
+        //the pom cannot be read. don't fill the log full of junk, just add an error marker
+        addErrorMarker(ce);
+        return;
+      }
       ILifecycleMapping lifecycleMapping = configurationManager.getLifecycleMapping(projectFacade, monitor);
       
       ThreadBuildContext.setThreadBuildContext(buildContext);
