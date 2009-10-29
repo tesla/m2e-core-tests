@@ -227,7 +227,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     assertNull(manager.create(p2, monitor));
 
     IMarker[] markers = p2.findMarkers(null, true, IResource.DEPTH_INFINITE);
-    assertEquals(toString(markers), 2, markers.length);
+    assertEquals(toString(markers), 1, markers.length);
 
     IProject p3 = createExisting("t001-p3");
     waitForJobsToComplete();
@@ -572,11 +572,11 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
 
     assertNull(manager.create(p1, monitor));
     IMarker[] markers = p1.findMarkers(null, true, IResource.DEPTH_INFINITE);
-    assertEquals(toString(markers), 2, markers.length);
+    assertEquals(toString(markers), 1, markers.length);
 
     copyContent(p1, "pom_good.xml", "pom.xml");
     markers = p1.findMarkers(null, true, IResource.DEPTH_INFINITE);
-    assertEquals(toString(markers), 1, markers.length);
+    assertEquals(toString(markers), 0, markers.length);
     assertNotNull(manager.create(p1, monitor));
   }
 
@@ -826,7 +826,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
 
     IMavenProjectFacade f1 = manager.create(projects[0], monitor);
     ArrayList<ArtifactRef> a1 = new ArrayList<ArtifactRef>(f1.getMavenProjectArtifacts());
-    assertEquals(2, a1.size());
+    assertEquals(1, a1.size());
     assertEquals("p002", a1.get(0).getArtifactId());
   }
 
