@@ -48,8 +48,6 @@
 
     <tycho-version>0.5.0-SNAPSHOT</tycho-version>
 
-    <!-- default target platform, see ../target-platform/*.target -->
-    <target.platform>m2e-e35</target.platform>
   </properties>
 
   <organization>
@@ -364,8 +362,23 @@
         </property>
       </activation>
       <properties>
+        <target.platform>m2e-e35</target.platform>        
         <tycho.test.jvmArgs>-Xmx800m -XX:MaxPermSize=256m</tycho.test.jvmArgs>
       </properties>
+    </profile>
+    <profile>
+      <id>osx</id>
+      <activation>
+        <property>
+          <name>java.vendor.url</name>
+          <value>http://www.apple.com/</value>
+        </property>
+      </activation>
+      <properties>
+        <target.platform>m2e-e35-nowt</target.platform>        
+        <tycho.test.jvmArgs>-Xmx800m -XX:MaxPermSize=256m -Dosgi.ws=cocoa -XstartOnFirstThread</tycho.test.jvmArgs>
+        <osgi.ws>cocoa</osgi.ws>
+      </properties>      
     </profile>
     
     <profile>
