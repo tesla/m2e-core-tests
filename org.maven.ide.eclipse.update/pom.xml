@@ -54,4 +54,22 @@
     </plugins>
   </build>
 
+  <profiles>
+    <profile>
+      <id>publish-site</id>
+
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.sonatype.maven.plugins</groupId>
+            <artifactId>maven-upload-plugin</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <configuration>
+              <file>${project.build.directory}/${project.artifactId}-${project.version}-site.zip</file>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
