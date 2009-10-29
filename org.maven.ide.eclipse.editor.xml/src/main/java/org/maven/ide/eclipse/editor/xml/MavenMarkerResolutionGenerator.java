@@ -33,9 +33,8 @@ public class MavenMarkerResolutionGenerator implements IMarkerResolutionGenerato
       if(offset != -1) {
         return new IMarkerResolution[] {new MavenMarkerResolution()};
       }
-
     }
-    return null;
+    return new IMarkerResolution[0];
   }
 
 }
