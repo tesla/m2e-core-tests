@@ -381,6 +381,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
     } catch(ProjectBuildingException ex) {
       //don't add the exception here. this should come out as a build marker, not fill
       //the error logs with msgs
+      return result.addException(ex);
     } catch(MavenExecutionRequestPopulationException ex) {
       return result.addException(ex);
     }
