@@ -40,6 +40,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
@@ -126,6 +127,29 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
   }
 
   private void cleanWorkspace() throws Exception {
+    Exception cause = null;
+    for (int  i = 0; i < 10; i++) {
+      try {
+        doCleanWorkspace();
+      } catch (InterruptedException e) {
+        throw e;
+      } catch (OperationCanceledException e) {
+        throw e;
+      } catch (Exception e) {
+        cause = e;
+        Thread.sleep(6000L);
+        continue;
+      }
+
+      // all clear
+      return;
+    }
+
+    // must be a timeout
+    throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, "Could not delete workspace resources", cause));
+  }
+
+  private void doCleanWorkspace() throws InterruptedException, CoreException, IOException {
     waitForJobsToComplete();
 
     workspace.run(new IWorkspaceRunnable() {
