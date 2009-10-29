@@ -65,6 +65,9 @@ import org.maven.ide.eclipse.util.FileHelpers;
 
 public abstract class AsbtractMavenProjectTestCase extends TestCase {
   
+  public static final int DELETE_RETRY_COUNT = 10;
+  public static final long DELETE_RETRY_DELAY = 6000L;
+
   protected static final IProgressMonitor monitor = new NullProgressMonitor();
   
   protected IWorkspace workspace;
@@ -128,7 +131,7 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
 
   private void cleanWorkspace() throws Exception {
     Exception cause = null;
-    for (int  i = 0; i < 10; i++) {
+    for (int  i = 0; i < DELETE_RETRY_COUNT; i++) {
       try {
         doCleanWorkspace();
       } catch (InterruptedException e) {
@@ -137,7 +140,7 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
         throw e;
       } catch (Exception e) {
         cause = e;
-        Thread.sleep(6000L);
+        Thread.sleep(DELETE_RETRY_DELAY);
         continue;
       }
 
@@ -179,9 +182,34 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
     }
   }
 
-  protected void deleteProject(String projectName) throws CoreException {
+  protected void deleteProject(String projectName) throws CoreException, InterruptedException {
+    Exception cause = null;
+    for (int  i = 0; i < DELETE_RETRY_COUNT; i++) {
+      try {
+        doDeleteProject(projectName);
+      } catch (InterruptedException e) {
+        throw e;
+      } catch (OperationCanceledException e) {
+        throw e;
+      } catch (Exception e) {
+        cause = e;
+        Thread.sleep(DELETE_RETRY_DELAY);
+        continue;
+      }
+
+      // all clear
+      return;
+    }
+
+    // must be a timeout
+    throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, "Could not delete project", cause));
+  }
+
+  private void doDeleteProject(String projectName) throws CoreException, InterruptedException {
+    waitForJobsToComplete(monitor);
+
     final IProject project = workspace.getRoot().getProject(projectName);
-  
+
     workspace.run(new IWorkspaceRunnable() {
       public void run(IProgressMonitor monitor) throws CoreException {
         if(project.exists()) {
