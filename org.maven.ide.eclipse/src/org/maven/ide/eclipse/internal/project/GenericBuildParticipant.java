@@ -36,6 +36,7 @@ import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.IMaven;
+import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.IMavenProjectVisitor;
 import org.maven.ide.eclipse.project.MavenProjectManager;
@@ -57,6 +58,7 @@ public class GenericBuildParticipant extends AbstractBuildParticipant {
   public Set<IProject> build(int kind, IProgressMonitor monitor) throws Exception {
     MavenPlugin plugin = MavenPlugin.getDefault();
     MavenConsole console = plugin.getConsole();
+    IMavenConfiguration configuration = MavenPlugin.lookup(IMavenConfiguration.class);
 
     IMavenProjectFacade projectFacade = getMavenProjectFacade();
 
@@ -73,8 +75,7 @@ public class GenericBuildParticipant extends AbstractBuildParticipant {
     if(IncrementalProjectBuilder.FULL_BUILD == kind || IncrementalProjectBuilder.CLEAN_BUILD == kind
         || requireFullBuild) {
       try {
-        boolean offline = IncrementalProjectBuilder.FULL_BUILD != kind && IncrementalProjectBuilder.CLEAN_BUILD != kind;
-        executePostBuild(projectFacade, offline, monitor);
+        executePostBuild(projectFacade, configuration.isOffline(), monitor);
       } finally {
         resetRequireFullBuild(projectFacade.getProject());
       }
