@@ -106,6 +106,10 @@ public abstract class FormUtils {
     return s == null ? "" : s;
   }
 
+  public static String nvl(String s, String defaultValue) {
+    return s == null ? defaultValue : s;
+  }
+
   public static boolean isEmpty(String s) {
     return s == null || s.length() == 0;
   }
