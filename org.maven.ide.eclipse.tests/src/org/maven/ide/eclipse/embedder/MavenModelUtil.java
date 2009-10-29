@@ -66,11 +66,14 @@ public class MavenModelUtil {
     IFile file = root.getFile(new Path(uri.toPlatformString(true)));
     
     StringWriter sw = new StringWriter();
-    
+
     InputStream is = file.getContents(true);
-    IOUtil.copy(is, sw, "UTF-8");
-    is.close();
-    
+    try {
+      IOUtil.copy(is, sw, "UTF-8");
+    } finally {
+      is.close();
+    }
+
     // XXX fix hack with tabs
     return sw.toString().replaceAll("\r\n", "\n").replaceAll("\t", "  ");
   }
