@@ -208,7 +208,15 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
      }
      // Clean out projects left over from previous test runs.
      clearProjects();
-
+    if (isEclipseVersion(3, 5)) {
+       // Disable new xml completion behavior to preserver compatibility with previous versions.
+       getUI().click(new MenuItemLocator("Window/Preferences"));
+       getUI().wait(new ShellShowingCondition("Preferences"));
+       getUI().click(new FilteredTreeItemLocator("XML/XML Files/Editor/Typing"));
+       getUI().click(new ButtonLocator("&Insert a matching end tag"));
+       getUI().click(new ButtonLocator("OK"));
+       getUI().wait(new ShellDisposedCondition("Preferences"));
+     }
   }
 
   private void openPerspective(final String id) throws Exception {
@@ -422,7 +430,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     getUI().wait(new ShellDisposedCondition(FIND_REPLACE));
   }
  
-  protected boolean searchForText(String src, boolean wrap) throws WaitTimedOutException, WidgetSearchException{
+  protected boolean searchForText(String src, boolean wrap, boolean replace) throws WaitTimedOutException, WidgetSearchException{
     getUI().keyClick(SWT.CTRL, 'f');
     getUI().wait(new ShellShowingCondition(FIND_REPLACE));
     getUI().enterText(src);
@@ -434,7 +442,10 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     getUI().click(new ButtonLocator("Find"));
     
     getUI().wait(new SWTIdleCondition());
-    getUI().assertThat(new IsEnabledCondition(new ButtonLocator("&Replace")));
+    if(replace){
+    
+      getUI().assertThat(new IsEnabledCondition(new ButtonLocator("&Replace")));
+    }
     return true;
     
   }

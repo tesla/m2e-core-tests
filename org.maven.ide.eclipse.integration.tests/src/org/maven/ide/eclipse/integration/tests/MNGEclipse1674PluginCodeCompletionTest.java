@@ -81,7 +81,7 @@ public class MNGEclipse1674PluginCodeCompletionTest extends UIIntegrationTestCas
     getUI().keyClick(WT.CR);
     getUI().keyClick(SWT.MOD1, 's');
     
-    assertTrue(searchForText("configuration", true));
+    assertTrue(searchForText("configuration", true, false));
 
   }
 }
