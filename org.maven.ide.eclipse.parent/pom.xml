@@ -310,20 +310,6 @@
     </pluginManagement>
   </build>
 
-  <repositories>
-
-    <repository>
-      <id>sonatype-public</id>
-      <url>http://repository.sonatype.org/content/groups/sonatype-public-grid</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-    </repository>
-  </repositories>
-
   <pluginRepositories>
     <pluginRepository>
       <id>sonatype-public</id>
@@ -332,7 +318,7 @@
         <enabled>true</enabled>
       </snapshots>
       <releases>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
       </releases>
     </pluginRepository>
   </pluginRepositories>
