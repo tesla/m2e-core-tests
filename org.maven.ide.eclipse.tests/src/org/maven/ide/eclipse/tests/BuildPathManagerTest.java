@@ -458,7 +458,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals(true, file.canRead());
 
     // check project delete
-    project.delete(true, monitor);
+    deleteProject(project);
     waitForJobsToComplete();
     assertEquals(false, file.canRead());
   }

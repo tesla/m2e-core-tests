@@ -32,9 +32,9 @@ public class ResourceChangeListenerTest extends AsbtractMavenProjectTestCase {
 
   protected void setUp() throws Exception {
     super.setUp();
-    workspace.getRoot().getProject("resourcechange").delete(true, null);
+    deleteProject("resourcechange");
     project = createProject("resourcechange", "projects/resourcechange/pom.xml");
-    
+
     IProjectConfigurationManager configurationManager = MavenPlugin.getDefault().getProjectConfigurationManager();
     ResolverConfiguration configuration = new ResolverConfiguration();
     configurationManager.enableMavenNature(project, configuration, monitor);
@@ -44,7 +44,7 @@ public class ResourceChangeListenerTest extends AsbtractMavenProjectTestCase {
   }
 
   protected void tearDown() throws Exception {
-    workspace.getRoot().getProject("resourcechange").delete(true, null);
+    deleteProject("resourcechange");
     super.tearDown();
   }
 

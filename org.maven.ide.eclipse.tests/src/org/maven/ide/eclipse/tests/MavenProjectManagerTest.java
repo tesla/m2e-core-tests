@@ -183,7 +183,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
 
     assertNotNull(manager.create(p1, monitor));
 
-    p1.getFile(IMavenConstants.POM_FILE_NAME).delete(true, monitor);
+    deleteProject(p1);
     waitForJobsToComplete();
 
     assertNull(manager.create(p1, monitor));
@@ -234,7 +234,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
 
     assertNotNull(manager.create(p2, monitor));
 
-    p3.delete(true, monitor);
+    deleteProject(p3);
     waitForJobsToComplete();
 
     assertNull(manager.create(p2, monitor));
@@ -356,7 +356,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     events.clear();
 
     // remove p2
-    p2.delete(true, monitor);
+    deleteProject(p2);
     waitForJobsToComplete();
 
     assertEquals(1, events.size());
@@ -438,7 +438,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
 
     this.events.clear();
     
-    p3.delete(true, monitor);
+    deleteProject(p3);
     waitForJobsToComplete();
 
     {
@@ -749,7 +749,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     IFile pom2 = p2.getFile("pom.xml");
     assertNotNull(manager.create(pom2, false, null));
 
-    p1.delete(true, monitor);
+    deleteProject(p1);
     waitForJobsToComplete();
     assertNull(manager.create(pom2, false, null));
 
