@@ -28,6 +28,7 @@ public class MNGEclipse1296UpdateDependenciesTest extends UIIntegrationTestCase 
 
   
   public void testUpdateDependencies() throws Exception {
+    setXmlPrefs();
     
     doImport("projects/update_deps.zip");
     
@@ -49,7 +50,6 @@ public class MNGEclipse1296UpdateDependenciesTest extends UIIntegrationTestCase 
         "<dependency><groupId>commons-lang</<artifactId>commons-lang</<version>2.3</<scope>provided</</");
     getUI().keyClick(SWT.MOD1, 's');
     
-    Thread.sleep(5000);
     waitForAllBuildsToComplete();
     assertProjectsHaveNoErrors();
     
@@ -63,7 +63,6 @@ public class MNGEclipse1296UpdateDependenciesTest extends UIIntegrationTestCase 
     getUI().keyClick(SWT.MOD1, 'z');
     getUI().keyClick(SWT.MOD1, 's');
     
-    Thread.sleep(5000);
     waitForAllBuildsToComplete();
     assertProjectsHaveNoErrors();
     
