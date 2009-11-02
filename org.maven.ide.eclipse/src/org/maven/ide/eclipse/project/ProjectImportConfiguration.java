@@ -109,10 +109,10 @@ public class ProjectImportConfiguration {
   }
 
   /**
-   * @deprecated This method does not take into account MavenProjectInfo.basedirRename
+   * @deprecated This method does not take into account MavenProjectInfo.basedirRename.
+   *    Use IMavenProjectImportResult#getProject instead
    */
   public IProject getProject(IWorkspaceRoot root, Model model) {
-    // XXX should use resolved MavenProject or Model
     return root.getProject(getProjectName(model));
   }
 

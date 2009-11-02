@@ -70,6 +70,7 @@ import org.maven.ide.eclipse.internal.ExtensionReader;
 import org.maven.ide.eclipse.project.IMavenMarkerManager;
 import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
+import org.maven.ide.eclipse.project.IMavenProjectImportResult;
 import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.LocalProjectScanner;
 import org.maven.ide.eclipse.project.MavenProjectChangedEvent;
@@ -135,9 +136,10 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     this.maven = MavenPlugin.lookup(IMaven.class);
   }
 
-  public void importProjects(Collection<MavenProjectInfo> projectInfos, ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException {
+  public List<IMavenProjectImportResult> importProjects(Collection<MavenProjectInfo> projectInfos, ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException {
     long t1 = System.currentTimeMillis();
-    
+
+    ArrayList<IMavenProjectImportResult> result = new ArrayList<IMavenProjectImportResult>();
     ArrayList<IProject> projects = new ArrayList<IProject>();
 
     // first, create all projects with basic configuration
@@ -147,7 +149,9 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
       }
 
       IProject project = create(projectInfo, configuration, monitor);
-   
+
+      result.add(new MavenProjectImportResult(projectInfo, project));
+
       if (project != null) {
         projects.add(project);
         
@@ -158,9 +162,11 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     hideNestedProjectsFromParents(projects);
     // then configure maven for all projects
     configureNewMavenProject(projects, monitor);
-    
+
     long t2 = System.currentTimeMillis();
     console.logMessage("Project import completed " + ((t2 - t1) / 1000) + " sec");
+
+    return result;
   }
 
   

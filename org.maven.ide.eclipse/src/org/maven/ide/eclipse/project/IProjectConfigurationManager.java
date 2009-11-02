@@ -9,6 +9,7 @@
 package org.maven.ide.eclipse.project;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
@@ -28,7 +29,7 @@ public interface IProjectConfigurationManager {
 
   ISchedulingRule getRule();
 
-  void importProjects(Collection<MavenProjectInfo> projects, //
+  List<IMavenProjectImportResult> importProjects(Collection<MavenProjectInfo> projects, //
       ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException;
 
   void createSimpleProject(IProject project, IPath location, Model model, String[] folders,

@@ -58,6 +58,7 @@ import org.maven.ide.eclipse.internal.project.MavenProjectManagerRefreshJob;
 import org.maven.ide.eclipse.jdt.BuildPathManager;
 import org.maven.ide.eclipse.jdt.MavenJdtPlugin;
 import org.maven.ide.eclipse.jobs.IBackgroundProcessingQueue;
+import org.maven.ide.eclipse.project.IMavenProjectImportResult;
 import org.maven.ide.eclipse.project.MavenProjectInfo;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
@@ -321,19 +322,21 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
     }
 
     final ProjectImportConfiguration importConfiguration = new ProjectImportConfiguration(configuration);
+    
+    final ArrayList<IMavenProjectImportResult> importResults = new ArrayList<IMavenProjectImportResult>();
 
     workspace.run(new IWorkspaceRunnable() {
       public void run(IProgressMonitor monitor) throws CoreException {
-        plugin.getProjectConfigurationManager().importProjects(projectInfos, importConfiguration, monitor);
+        importResults.addAll(plugin.getProjectConfigurationManager().importProjects(projectInfos, importConfiguration, monitor));
       }
     }, plugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
 
     IProject[] projects = new IProject[projectInfos.size()];
     for (int i = 0; i < projectInfos.size(); i++) {
-      MavenProjectInfo projectInfo = projectInfos.get(i);
-      IProject project = importConfiguration.getProject(root, projectInfo.getModel());
-      projects[i] = project;
-      assertNotNull("Failed to import project " + projectInfos, project);
+      IMavenProjectImportResult importResult = importResults.get(i);
+      assertSame(projectInfos.get(i), importResult.getMavenProjectInfo());
+      projects[i] = importResult.getProject();
+      assertNotNull("Failed to import project " + projectInfos, projects[i]);
     }
 
     return projects;
