@@ -208,17 +208,19 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
      }
      // Clean out projects left over from previous test runs.
      clearProjects();
-//    if (isEclipseVersion(3, 5)) {
-//       // Disable new xml completion behavior to preserver compatibility with previous versions.
-//       getUI().click(new MenuItemLocator("Window/Preferences"));
-//       getUI().wait(new ShellShowingCondition("Preferences"));
-//       getUI().click(new FilteredTreeItemLocator("XML/XML Files/Editor/Typing"));
-//       getUI().click(new ButtonLocator("&Insert a matching end tag"));
-//       getUI().click(new ButtonLocator("OK"));
-//       getUI().wait(new ShellDisposedCondition("Preferences"));
-//     }
   }
 
+  protected void setXmlPrefs() throws Exception{
+  if (isEclipseVersion(3, 5)) {
+    // Disable new xml completion behavior to preserver compatibility with previous versions.
+      getUI().click(new MenuItemLocator("Window/Preferences"));
+      getUI().wait(new ShellShowingCondition("Preferences"));
+      getUI().click(new FilteredTreeItemLocator("XML/XML Files/Editor/Typing"));
+      getUI().click(new ButtonLocator("&Insert a matching end tag"));
+      getUI().click(new ButtonLocator("OK"));
+      getUI().wait(new ShellDisposedCondition("Preferences"));
+    }
+  }
   private void openPerspective(final String id) throws Exception {
     UIThreadTask.executeOnEventQueue(new UIThreadTask() {
 
