@@ -193,7 +193,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
      PrefUtil.getAPIPreferenceStore().setValue(IWorkbenchPreferenceConstants.ENABLE_ANIMATIONS, false);
 
      
-     fullScreen();
+     //fullScreen();
      MavenPlugin.getDefault(); // force m2e to load so its indexing jobs will be scheduled.
      Thread.sleep(5000);
      closeView("org.eclipse.ui.internal.introview");
@@ -789,10 +789,16 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     getUI().click(new FilteredTreeItemLocator("General"));
     getUI().click(new FilteredTreeItemLocator("Maven/Check out Maven Projects from SCM"));
     getUI().click(new ButtonLocator("&Next >"));
-    getUI().wait(new SWTIdleCondition());
-    getUI().click(new ComboItemLocator("svn", new NamedWidgetLocator("mavenCheckoutLocation.typeCombo")));
-    getUI().setFocus(new NamedWidgetLocator("mavenCheckoutLocation.urlCombo"));
+    //for some reason, in eclipse 3.5.1 and WT, the direct combo selection is
+    //not triggering the UI events, so the finish button never gets enabled
+  //getUI().click(new ComboItemLocator("svn", new NamedWidgetLocator("mavenCheckoutLocation.typeCombo")));
+    getUI().setFocus(new NamedWidgetLocator("mavenCheckoutLocation.typeCombo"));
+    for(int i=0;i<9;i++){
+      getUI().keyClick(WT.ARROW_DOWN);
+    }
+    getUI().click(new NamedWidgetLocator("mavenCheckoutLocation.urlCombo"));
     getUI().enterText(url);
+    getUI().wait(new SWTIdleCondition());
     getUI().click(new ButtonLocator("&Finish"));
     getUI().wait(new ShellDisposedCondition("Checkout as Maven project from SCM"));
 
