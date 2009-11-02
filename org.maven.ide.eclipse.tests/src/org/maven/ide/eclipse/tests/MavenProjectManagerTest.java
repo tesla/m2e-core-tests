@@ -171,7 +171,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     IMavenProjectFacade f1 = manager.create(p1, monitor);
     assertEquals(p1.getFullPath(), f1.getFullPath());
 
-    p1.delete(false, true, monitor);
+    deleteProject(p1);
     waitForJobsToComplete();
 
     assertNull(manager.create(p1, monitor));
@@ -278,7 +278,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
       assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME).getLocation().toFile(), a.getFile());
     }
 
-    p2.delete(false, true, monitor);
+    deleteProject(p2);
     waitForJobsToComplete();
 
     {
@@ -327,7 +327,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     IMavenProjectFacade f1 = manager.create(p1, monitor);
     assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME).getLocation().toFile(), f1.getMavenProject(monitor).getParentArtifact().getFile());
 
-    p2.delete(false, true, monitor);
+    deleteProject(p2);
     waitForJobsToComplete();
 
     f1 = manager.create(p1, monitor);

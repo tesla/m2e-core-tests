@@ -183,10 +183,16 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
   }
 
   protected void deleteProject(String projectName) throws CoreException, InterruptedException {
+    IProject project = workspace.getRoot().getProject(projectName);
+
+    deleteProject(project);
+  }
+
+  protected void deleteProject(IProject project) throws InterruptedException, CoreException {
     Exception cause = null;
     for (int  i = 0; i < DELETE_RETRY_COUNT; i++) {
       try {
-        doDeleteProject(projectName);
+        doDeleteProject(project);
       } catch (InterruptedException e) {
         throw e;
       } catch (OperationCanceledException e) {
@@ -205,10 +211,8 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
     throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, "Could not delete project", cause));
   }
 
-  private void doDeleteProject(String projectName) throws CoreException, InterruptedException {
+  private void doDeleteProject(final IProject project) throws CoreException, InterruptedException {
     waitForJobsToComplete(monitor);
-
-    final IProject project = workspace.getRoot().getProject(projectName);
 
     workspace.run(new IWorkspaceRunnable() {
       public void run(IProgressMonitor monitor) throws CoreException {
