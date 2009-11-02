@@ -34,6 +34,7 @@ public class MngEclipse1394RefactorRenameTest extends UIIntegrationTestCase {
 		replaceText(new NamedWidgetLocator("version"), "1.1.1");
 		ui.click(new NamedWidgetLocator("rename"));
 		ui.click(new ButtonLocator("OK"));
+		ui.wait(new ShellDisposedCondition("Rename Maven Artifact"));
 		waitForAllBuildsToComplete();
 		
 		IProject project2 = ResourcesPlugin.getWorkspace().getRoot().getProject("project2");
