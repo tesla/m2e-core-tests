@@ -32,7 +32,9 @@ public class MngEclipse1377ExcludeArtifactTest extends UIIntegrationTestCase {
     super();
     this.setSkipIndexes(true);
   }
+  
   public void testEclipseArtifact() throws Exception {
+    setXmlPrefs();
     IProject project = setupDefaultProject();
     IJavaProject jp = (IJavaProject) project.getNature(JavaCore.NATURE_ID);
 
@@ -49,7 +51,7 @@ public class MngEclipse1377ExcludeArtifactTest extends UIIntegrationTestCase {
   }
 
   public void testExcludeTransitiveArtifact() throws Exception {
-
+    setXmlPrefs();
     IProject project = setupDefaultProject();
     IJavaProject jp = (IJavaProject) project.getNature(JavaCore.NATURE_ID);
 

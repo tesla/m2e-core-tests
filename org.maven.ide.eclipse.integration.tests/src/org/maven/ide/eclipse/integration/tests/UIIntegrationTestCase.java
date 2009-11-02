@@ -123,6 +123,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
   // Has the maven central index been cached into local workspace?
   private static boolean indexDownloaded = true;
 
+  private boolean xmlPrefsSet = false;
   // URL of local nexus server, tests will attempt download maven/central index from here.
   private static final String DEFAULT_NEXUS_URL = "http://localhost:8081/nexus";
 
@@ -211,7 +212,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
   }
 
   protected void setXmlPrefs() throws Exception{
-  if (isEclipseVersion(3, 5)) {
+  if (isEclipseVersion(3, 5) && !xmlPrefsSet) {
     // Disable new xml completion behavior to preserver compatibility with previous versions.
       getUI().click(new MenuItemLocator("Window/Preferences"));
       getUI().wait(new ShellShowingCondition("Preferences"));
@@ -219,6 +220,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
       getUI().click(new ButtonLocator("&Insert a matching end tag"));
       getUI().click(new ButtonLocator("OK"));
       getUI().wait(new ShellDisposedCondition("Preferences"));
+      xmlPrefsSet=true;
     }
   }
   private void openPerspective(final String id) throws Exception {
