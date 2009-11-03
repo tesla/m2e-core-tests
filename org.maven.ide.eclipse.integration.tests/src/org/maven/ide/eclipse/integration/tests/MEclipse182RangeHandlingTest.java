@@ -36,7 +36,7 @@ public class MEclipse182RangeHandlingTest extends UIIntegrationTestCase {
     //Install version 1.0-SNAPSHOT of project2
     ui.click(new TreeItemLocator("project2", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
     ui.click(new MenuItemLocator("Run/Run As/.*Maven install"));
-    ui.wait(new JobsCompleteCondition(), 240000);
+    waitForAllBuildsToComplete();
     assertProjectsHaveNoErrors();
 
     // Change version of project2 to 1.1-SNAPSHOT
@@ -44,8 +44,7 @@ public class MEclipse182RangeHandlingTest extends UIIntegrationTestCase {
     ui.click(new CTabItemLocator("project2/pom.xml"));
     replaceText(new NamedWidgetLocator("version"), "1.1-SNAPSHOT");
     ui.keyClick(SWT.MOD1, 's');
-    Thread.sleep(5000);
-    ui.wait(new JobsCompleteCondition(), 240000);
+    waitForAllBuildsToComplete();
 
     // Change method signature referenced by original project
     IProject project2 = ResourcesPlugin.getWorkspace().getRoot().getProject("project2");
@@ -53,8 +52,7 @@ public class MEclipse182RangeHandlingTest extends UIIntegrationTestCase {
     ui.click(new CTabItemLocator("Simple.java"));
     replaceText("add(", "add2(");
     ui.keyClick(SWT.MOD1, 's');
-    Thread.sleep(5000);
-    ui.wait(new JobsCompleteCondition(), 240000);
+    waitForAllBuildsToComplete();
 
     // There should be no compile errors, project2:1.1-SNAPSHOT should come from local repository.
     assertProjectsHaveNoErrors();
