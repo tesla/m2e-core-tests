@@ -333,8 +333,8 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
         ResourcesPlugin.getWorkspace().getRoot().refreshLocal(IResource.DEPTH_INFINITE, null);
         IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
         for(IProject project : projects) {
-          project.delete(true, true, monitor);
-          //project.delete(true, monitor);
+          //project.delete(true, true, monitor);
+          project.delete(true, monitor);
         }
         return Status.OK_STATUS;
       }
