@@ -325,24 +325,22 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
    * Remove all projects from the workspace
    */
   protected void clearProjects() {
-
     WorkspaceJob job = new WorkspaceJob("deleting test projects") {
       public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
         ResourcesPlugin.getWorkspace().getRoot().refreshLocal(IResource.DEPTH_INFINITE, null);
         IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
         for(IProject project : projects) {
-          project.delete(true, null);
+          project.delete(true, true, monitor);
+          //project.delete(true, monitor);
         }
         return Status.OK_STATUS;
       }
     };
-
     job.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
     job.schedule();
     try{
       waitForAllBuildsToComplete();
-    } catch(Exception e){
-    }
+    } catch(Exception e){}
   }
 
   protected void oneTimeTearDown() throws Exception {
@@ -1002,7 +1000,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
 
   protected void waitForAllBuildsToComplete() throws InterruptedException {
     
-    Thread.sleep(5000);
+    Thread.sleep(3000);
     
     // Some m2e builds trigger subqequent builds, and each build starts with a delay.
     for (int i = 0; i < 10 && !new JobsCompleteCondition().test(); i++) {
