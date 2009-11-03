@@ -93,20 +93,22 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
   }
   
   public void testLocalResolution() throws Exception {
+    String projectName = "localResolutionProject";
+    String dependencyName = "dependentProject";
     IUIContext ui = getUI();
 
     // set up two projects.
-    IProject project = createArchetypeProject("maven-archetype-quickstart", "project");
-    createArchetypeProject("maven-archetype-quickstart", "dependency");
+    IProject project = createArchetypeProject("maven-archetype-quickstart", projectName);
+    createArchetypeProject("maven-archetype-quickstart", dependencyName);
     
     // mvn install "dependency" project
-    ui.click(new TreeItemLocator("dependency", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
+    ui.click(new TreeItemLocator(dependencyName, new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
     ui.click(new MenuItemLocator("Run/Run As/.*Maven install"));
     ui.wait(new JobsCompleteCondition(), 240000);
     
     // bump version # of "dependency" project
-    openPomFile("dependency/pom.xml");
-    ui.click(new CTabItemLocator("dependency/pom.xml"));
+    openPomFile(dependencyName+"/pom.xml");
+    ui.click(new CTabItemLocator(dependencyName+"/pom.xml"));
     replaceText(new NamedWidgetLocator("version"), "0.0.1-SNAPSHOT");
     ui.keyClick(SWT.MOD1, 's');
     waitForAllBuildsToComplete();
@@ -116,15 +118,15 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
     updateLocalIndex(ui);
     
     // Make sure local dependency from above can be added to 2nd proejct
-    ui.click(new TreeItemLocator("project", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
+    ui.click(new TreeItemLocator(projectName, new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
     ui.wait(new SWTIdleCondition());
-    ui.contextClick(new TreeItemLocator("project", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")), "Maven/Add Dependency");
+    ui.contextClick(new TreeItemLocator(projectName, new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")), "Maven/Add Dependency");
     ui.wait(new ShellShowingCondition("Add Dependency"));
-    ui.enterText("dependency");
+    ui.enterText(dependencyName);
     getUI().click(
-        new TreeItemLocator("org.sonatype.test   dependency", new LabeledLocator(Tree.class, "&Search Results:")));
+        new TreeItemLocator("org.sonatype.test   "+dependencyName, new LabeledLocator(Tree.class, "&Search Results:")));
     ui.click(new TreeItemLocator(
-        "org.sonatype.test   dependency/0.0.1-SNAPSHOT - dependency-0.0.1-SNAPSHOT.jar.*",
+        "org.sonatype.test   "+dependencyName+"/0.0.1-SNAPSHOT - "+dependencyName+"-0.0.1-SNAPSHOT.jar.*",
         new LabeledLocator(Tree.class, "&Search Results:")));
     ui.click(new ButtonLocator("OK"));
     ui.wait(new ShellDisposedCondition("Add Dependency"));
@@ -138,11 +140,11 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
     IClasspathContainer maven2Container = BuildPathManager.getMaven2ClasspathContainer(jp);
     
     for(IClasspathEntry entry : maven2Container.getClasspathEntries()) {
-        if (entry.getPath().toString().endsWith("dependency")) {
+        if (entry.getPath().toString().endsWith(dependencyName)) {
           return;
       }
     }
-    fail("Failed to find dependency-0.0.1-SNAPSHOT.jar in project");
+    fail("Failed to find "+dependencyName+"-0.0.1-SNAPSHOT.jar in project");
   }
   
   private void updateLocalIndex(IUIContext ui) throws Exception {
