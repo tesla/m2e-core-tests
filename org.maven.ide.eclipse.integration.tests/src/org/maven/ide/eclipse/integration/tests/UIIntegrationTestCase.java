@@ -82,6 +82,7 @@ import com.windowtester.runtime.IUIContext;
 import com.windowtester.runtime.WT;
 import com.windowtester.runtime.WaitTimedOutException;
 import com.windowtester.runtime.WidgetSearchException;
+import com.windowtester.runtime.condition.IUICondition;
 import com.windowtester.runtime.condition.IsEnabledCondition;
 import com.windowtester.runtime.locator.IWidgetLocator;
 import com.windowtester.runtime.swt.UITestCaseSWT;
@@ -217,14 +218,16 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
       getUI().click(new MenuItemLocator("Window/Preferences"));
       getUI().wait(new ShellShowingCondition("Preferences"));
       getUI().click(new FilteredTreeItemLocator("XML/XML Files/Editor/Typing"));
-      getUI().click(new ButtonLocator("&Insert a matching end tag"));
+      ButtonLocator buttonLocator = new ButtonLocator("&Insert a matching end tag");
+      IUICondition selected = buttonLocator.isSelected();
+      if(selected.testUI(getUI())){
+        getUI().click(buttonLocator);
+      }
       getUI().click(new ButtonLocator("OK"));
       getUI().wait(new ShellDisposedCondition("Preferences"));
       xmlPrefsSet=true;
       
-    } else {
-      System.out.println("already set");
-    }
+    } 
   }
   private void openPerspective(final String id) throws Exception {
     UIThreadTask.executeOnEventQueue(new UIThreadTask() {
