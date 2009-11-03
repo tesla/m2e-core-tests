@@ -89,9 +89,6 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
         new ViewLocator("org.maven.ide.eclipse.views.MavenRepositoryView")), "Update Index");
     
     waitForAllBuildsToComplete();
-    //now make sure the index update worked
-    ui.contextClick(new TreeItemLocator("Global Repositories/nexus.*/abbot/abbot - jar/abbot : 0.13.0",
-        new ViewLocator("org.maven.ide.eclipse.views.MavenRepositoryView")), "Update Index");
 
   }
   
@@ -104,7 +101,7 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
     
     // mvn install "dependency" project
     ui.click(new TreeItemLocator("dependency", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
-    ui.click(new MenuItemLocator("Run/Run As/Maven install"));
+    ui.click(new MenuItemLocator("Run/Run As/.*Maven install"));
     ui.wait(new JobsCompleteCondition(), 240000);
     
     // bump version # of "dependency" project
@@ -137,7 +134,7 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
     assertProjectsHaveNoErrors();
     
     IJavaProject jp = (IJavaProject)project.getNature(JavaCore.NATURE_ID);
-    Thread.sleep(10000);
+    
     IClasspathContainer maven2Container = BuildPathManager.getMaven2ClasspathContainer(jp);
     
     for(IClasspathEntry entry : maven2Container.getClasspathEntries()) {

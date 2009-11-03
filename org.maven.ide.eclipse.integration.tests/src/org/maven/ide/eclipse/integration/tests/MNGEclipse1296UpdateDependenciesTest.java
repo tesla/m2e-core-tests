@@ -21,7 +21,7 @@ import com.windowtester.runtime.swt.condition.eclipse.JobsCompleteCondition;
 import com.windowtester.runtime.swt.locator.CTabItemLocator;
 
 /**
- * @author rseddon
+ * @author rseddono
  *
  */
 public class MNGEclipse1296UpdateDependenciesTest extends UIIntegrationTestCase {

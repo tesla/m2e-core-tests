@@ -34,7 +34,7 @@ public class MngEclipse1515LifecyleMappingTest extends UIIntegrationTestCase {
 	 * Main test method.
 	 */
 	public void testMgnEclipse1515() throws Exception {
-	  
+	  setXmlPrefs();
 		IUIContext ui = getUI();
     File tempDir = importMavenProjects("projects/someproject.zip");
     IMavenProjectFacade mavenProject = MavenPlugin.getDefault().getMavenProjectManager().getMavenProject("org.sonatype.test", "someproject", "0.0.1-SNAPSHOT");

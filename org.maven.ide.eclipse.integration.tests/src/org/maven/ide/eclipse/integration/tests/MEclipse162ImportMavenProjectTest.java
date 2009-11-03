@@ -54,6 +54,7 @@ public class MEclipse162ImportMavenProjectTest extends UIIntegrationTestCase {
     
   }
   public void testMNGEclipse1028ImportOrderMatters() throws Exception {
+    //this is dependent on WTP tests which are disabled for now
     checkoutProjectsFromSVN("http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.wtp.tests/projects/import-order-matters/");
     assertProjectsHaveNoErrors();
   }

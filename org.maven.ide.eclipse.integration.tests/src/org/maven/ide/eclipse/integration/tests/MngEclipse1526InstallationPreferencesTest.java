@@ -121,7 +121,7 @@ public class MngEclipse1526InstallationPreferencesTest extends UIIntegrationTest
     getUI().wait(new SWTIdleCondition());
     
     getUI().click(new ButtonLocator("Apply"));
-    getUI().wait(new JobsCompleteCondition(), 60000);
+    waitForAllBuildsToComplete();
     verifyRepoSettingsValue(newRepoDir);
     closeUserSettingPrefs();
     
