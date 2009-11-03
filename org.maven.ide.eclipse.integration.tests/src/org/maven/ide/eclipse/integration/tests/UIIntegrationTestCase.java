@@ -77,6 +77,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 
 import com.windowtester.finder.swt.ShellFinder;
+import com.windowtester.internal.runtime.DiagnosticWriter;
 import com.windowtester.runtime.IUIContext;
 import com.windowtester.runtime.WT;
 import com.windowtester.runtime.WaitTimedOutException;
@@ -90,7 +91,6 @@ import com.windowtester.runtime.swt.condition.shell.ShellDisposedCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellShowingCondition;
 import com.windowtester.runtime.swt.locator.ButtonLocator;
 import com.windowtester.runtime.swt.locator.CTabItemLocator;
-import com.windowtester.runtime.swt.locator.ComboItemLocator;
 import com.windowtester.runtime.swt.locator.FilteredTreeItemLocator;
 import com.windowtester.runtime.swt.locator.LabeledTextLocator;
 import com.windowtester.runtime.swt.locator.MenuItemLocator;
@@ -221,6 +221,9 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
       getUI().click(new ButtonLocator("OK"));
       getUI().wait(new ShellDisposedCondition("Preferences"));
       xmlPrefsSet=true;
+      
+    } else {
+      System.out.println("already set");
     }
   }
   private void openPerspective(final String id) throws Exception {
@@ -1003,7 +1006,18 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     
     // Some m2e builds trigger subqequent builds, and each build starts with a delay.
     for (int i = 0; i < 10 && !new JobsCompleteCondition().test(); i++) {
-      getUI().wait(new JobsCompleteCondition(), 340000);
+      JobsCompleteCondition condition = null;
+      try{
+        condition = new JobsCompleteCondition();
+        getUI().wait(condition, 240000);
+      } catch(WaitTimedOutException wtoe){
+        //trying to diagnose what kind of jobs cause this to fail
+        wtoe.printStackTrace();
+        if(condition != null){
+          DiagnosticWriter writer = new DiagnosticWriter();
+          condition.diagnose(writer);
+        }
+      }
       Thread.sleep(5000);
     }
   }
