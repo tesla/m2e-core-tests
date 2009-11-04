@@ -31,6 +31,8 @@ public class EclipseMavenPluginManager extends DefaultMavenPluginManager {
      * realms due to http://jira.codehaus.org/browse/MNG-4194.
      * 
      * Workspace plugins cannot be cached, so we disable this until MNG-4194 is fixed.
+     * 
+     * Corresponding m2e JIRA https://issues.sonatype.org/browse/MNGECLIPSE-1448
      */
     
     boolean disabled = EclipseWorkspaceArtifactRepository.isDisabled();
