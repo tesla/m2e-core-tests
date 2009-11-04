@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.ui.ide.undo.CreateProjectOperation;
 import org.maven.ide.eclipse.jdt.BuildPathManager;
 
 import com.windowtester.runtime.IUIContext;
@@ -35,38 +36,42 @@ public class MngEclipse1377ExcludeArtifactTest extends UIIntegrationTestCase {
   
   public void testEclipseArtifact() throws Exception {
     setXmlPrefs();
-    IProject project = setupDefaultProject();
+    String projectName = "eclipseArtifactProject";
+    //IProject project = setupDefaultProject();
+    IProject project = createQuickstartProject(projectName);
     IJavaProject jp = (IJavaProject) project.getNature(JavaCore.NATURE_ID);
 
     assertMavenCPEntry(jp, "commons-collections-3.2.1.jar", false);
 
-    openPomFile("someproject/pom.xml");
+    openPomFile(projectName+"/pom.xml");
     addDependency(project, "commons-collections", "commons-collections", "3.2.1");
 
     assertMavenCPEntry(jp, "commons-collections-3.2.1.jar", true);
 
-    excludeArtifact("commons-collections-3.2.1.jar");
+    excludeArtifact(projectName, "commons-collections-3.2.1.jar");
 
     assertMavenCPEntry(jp, "commons-collections-3.2.1.jar", false);
   }
 
   public void testExcludeTransitiveArtifact() throws Exception {
     setXmlPrefs();
-    IProject project = setupDefaultProject();
+    String projectName = "excludeProject";
+    //IProject project = setupDefaultProject();
+    IProject project = createQuickstartProject(projectName);
     IJavaProject jp = (IJavaProject) project.getNature(JavaCore.NATURE_ID);
 
-    openPomFile("someproject/pom.xml");
+    openPomFile(projectName+"/pom.xml");
     addDependency(project, "org.hibernate", "hibernate", "3.2.4.ga");
 
     assertMavenCPEntry(jp, "hibernate-3.2.4.ga.jar", true);
     assertMavenCPEntry(jp, "ehcache-1.2.3.jar", true);
 
-    excludeArtifact("ehcache-1.2.3.jar");
+    excludeArtifact(projectName,"ehcache-1.2.3.jar");
 
     assertMavenCPEntry(jp, "ehcache-1.2.3.jar", false);
     assertMavenCPEntry(jp, "hibernate-3.2.4.ga.jar", true);
 
-    excludeArtifact("hibernate-3.2.4.ga.jar");
+    excludeArtifact(projectName,"hibernate-3.2.4.ga.jar");
     assertMavenCPEntry(jp, "hibernate-3.2.4.ga.jar", false);
   }
 
@@ -86,11 +91,11 @@ public class MngEclipse1377ExcludeArtifactTest extends UIIntegrationTestCase {
     }
   }
 
-  private void excludeArtifact(String jarName) throws Exception {
+  private void excludeArtifact(String projectName, String jarName) throws Exception {
     IUIContext ui = getUI();
-    ui.click(new TreeItemLocator("someproject/Maven Dependencies/" + jarName + ".*", new ViewLocator(
+    ui.click(new TreeItemLocator(projectName+"/Maven Dependencies/" + jarName + ".*", new ViewLocator(
         "org.eclipse.jdt.ui.PackageExplorer")));
-    ui.contextClick(new TreeItemLocator("someproject/Maven Dependencies/" + jarName + ".*", new ViewLocator(
+    ui.contextClick(new TreeItemLocator(projectName+"/Maven Dependencies/" + jarName + ".*", new ViewLocator(
         "org.eclipse.jdt.ui.PackageExplorer")), "Maven/Exclude Maven artifact...");
     ui.wait(new ShellDisposedCondition("Progress Information"));
     ui.wait(new ShellShowingCondition("Exclude Maven Artifact"));

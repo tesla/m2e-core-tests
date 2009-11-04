@@ -858,6 +858,9 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     return model;
   }
 
+  protected IProject createQuickstartProject(String projectName) throws Exception{
+    return createArchetypeProject("maven-archetype-quickstart", projectName);
+  }
   /**
    * Create an archetype project and assert that it has proper natures & builders, and no error markers
    */
