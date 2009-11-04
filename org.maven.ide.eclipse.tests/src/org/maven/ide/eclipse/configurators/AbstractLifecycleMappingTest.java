@@ -28,11 +28,11 @@ public abstract class AbstractLifecycleMappingTest extends AsbtractMavenProjectT
     super.tearDown();
   }
   
-  protected IMavenProjectFacade importMavenProject(String pomName) throws Exception {
+  protected IMavenProjectFacade importMavenProject(String basedir, String pomName) throws Exception {
     ResolverConfiguration configuration = new ResolverConfiguration();
-    IProject project = importProject(pomName, configuration);
+    IProject[] project = importProjects(basedir, new String[] {pomName}, configuration);
     waitForJobsToComplete();
 
-    return mavenProjectManager.create(project, monitor);
+    return mavenProjectManager.create(project[0], monitor);
   }
 }

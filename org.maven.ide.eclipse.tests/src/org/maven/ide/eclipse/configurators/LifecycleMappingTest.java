@@ -12,7 +12,7 @@ import org.maven.ide.eclipse.project.configurator.ILifecycleMapping;
 
 public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
   public void testGenericMapping() throws Exception {
-    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/generic/pom.xml");
+    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping", "generic/pom.xml");
 
     ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade, monitor);
 
@@ -20,7 +20,7 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
   }
 
   public void testCustomizableMapping() throws Exception {
-    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping/customizable/pom.xml");
+    IMavenProjectFacade facade = importMavenProject("projects/lifecyclemapping", "customizable/pom.xml");
 
     ILifecycleMapping lifecycleMapping = projectConfigurationManager.getLifecycleMapping(facade, monitor);
 
