@@ -16,6 +16,8 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 
@@ -23,6 +25,8 @@ import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
 
+import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.configurator.AbstractBuildParticipant;
@@ -57,7 +61,7 @@ public class CustomizableLifecycleMapping extends AbstractLifecycleMapping imple
     // TODO assert version
 
     Map<String, AbstractProjectConfigurator> configuratorsMap = new LinkedHashMap<String, AbstractProjectConfigurator>();
-    for(AbstractProjectConfigurator configurator : getProjectConfigurators(false)) {
+    for(AbstractProjectConfigurator configurator : getProjectConfigurators()) {
       configuratorsMap.put(configurator.getId(), configurator);
     }
 
@@ -78,10 +82,12 @@ public class CustomizableLifecycleMapping extends AbstractLifecycleMapping imple
         AbstractProjectConfigurator configurator = configuratorsMap.get(configuratorId);
         if(configurator == null) {
           String message = "Configurator '"+configuratorId+"' is not available for project '"+facade.getProject().getName()+"'. To enable full functionality, install the configurator and run Maven->Update Project Configuration.";
-          throw new IllegalArgumentException(message);
+          MavenPlugin.getDefault().getLog().log(new Status(IStatus.WARNING, IMavenConstants.PLUGIN_ID, message));
+          MavenPlugin.getDefault().getConsole().logError(message);
+//          throw new IllegalArgumentException(message);
+        }else{
+          configurators.add(configurator);
         }
-
-        configurators.add(configurator);
       }
     }
     

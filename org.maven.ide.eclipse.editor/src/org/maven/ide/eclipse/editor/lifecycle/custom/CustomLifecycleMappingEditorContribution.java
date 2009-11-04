@@ -106,7 +106,7 @@ public class CustomLifecycleMappingEditorContribution implements ILifecycleMappi
   
   public List<AbstractProjectConfigurator> getProjectConfigurators() throws CoreException {
     Map<String, AbstractProjectConfigurator> configuratorsMap = new LinkedHashMap<String, AbstractProjectConfigurator>();
-    for(AbstractProjectConfigurator configurator : AbstractLifecycleMapping.getProjectConfigurators(false)) {
+    for(AbstractProjectConfigurator configurator : AbstractLifecycleMapping.getProjectConfigurators()) {
       configuratorsMap.put(configurator.getId(), configurator);
     }
 
@@ -145,7 +145,7 @@ public class CustomLifecycleMappingEditorContribution implements ILifecycleMappi
   }
   
   public void addProjectConfigurator() {
-    List<AbstractProjectConfigurator> allConfigurators = new ArrayList<AbstractProjectConfigurator>(AbstractLifecycleMapping.getProjectConfigurators(false));
+    List<AbstractProjectConfigurator> allConfigurators = new ArrayList<AbstractProjectConfigurator>(AbstractLifecycleMapping.getProjectConfigurators());
     Configuration config = lifecycleMappingPlugin.getConfiguration();
 
     Element configuratorsDom = getChildElement((Element)config.getConfigurationNode(), "configurators");

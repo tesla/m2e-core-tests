@@ -65,7 +65,7 @@ public abstract class AbstractLifecycleMapping implements IExtensionLifecycleMap
     }
   }
   
-  public static List<AbstractProjectConfigurator> getProjectConfigurators(boolean generic) {
+  public static List<AbstractProjectConfigurator> getProjectConfigurators(){
     synchronized(AbstractLifecycleMapping.class) {
       if(configurators == null) {
         MavenPlugin plugin = MavenPlugin.getDefault();
@@ -79,8 +79,12 @@ public abstract class AbstractLifecycleMapping implements IExtensionLifecycleMap
         Collections.sort(configurators, new ProjectConfiguratorComparator());
       }
     }
+    return Collections.unmodifiableList(configurators);
+  }
+  
+  public static List<AbstractProjectConfigurator> getProjectConfigurators(boolean generic) {
     ArrayList<AbstractProjectConfigurator> result = new ArrayList<AbstractProjectConfigurator>();
-    for (AbstractProjectConfigurator configurator : configurators) {
+    for (AbstractProjectConfigurator configurator : getProjectConfigurators()) {
       if (generic == configurator.isGeneric()) {
         result.add(configurator);
       }
