@@ -41,24 +41,27 @@ import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
 public class MEclipse163ResolveDependenciesTest extends UIIntegrationTestCase {
 
   
-
+  private String projectName = "ResolveDepProject";
+  
   protected void updateRepo(){
     
   }
   public void testResolveDependencies() throws Exception {
+    
     importZippedProject("projects/resolve_deps_test.zip");
-    final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("project");
+    final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
     assertTrue(project.exists());
     waitForAllBuildsToComplete();
     //rebuild the mirror
     IRepositoryRegistry registry = MavenPlugin.getDefault().getRepositoryRegistry();
     AsbtractMavenProjectTestCase.waitForJobsToComplete(new NullProgressMonitor());
     List<IRepository> repos = registry.getRepositories(registry.SCOPE_SETTINGS);
+    
     for(IRepository repo : repos){
         buildFullRepoDetails(repo);
     }
     
-    openFile(project, "src/main/java/org/sonatype/test/project/App.java");
+    openFile(project, "src/main/java/org/sonatype/test/ResolveDepProject/App.java");
 
     
     // there should be compile errors
@@ -67,10 +70,10 @@ public class MEclipse163ResolveDependenciesTest extends UIIntegrationTestCase {
 
     //Workaround for Window tester bug, close & reopen tab to prevent editor from being in invalid state.
     getUI().close(new CTabItemLocator("App.java"));
-    openFile(project, "src/main/java/org/sonatype/test/project/App.java");
+    openFile(project, "src/main/java/org/sonatype/test/ResolveDepProject/App.java");
 
     //launch quick fix for SessionFactory dependency
-    getUI().click(new TreeItemLocator("project.*", new ViewLocator(PACKAGE_EXPLORER_VIEW_ID)));
+    getUI().click(new TreeItemLocator(projectName+".*", new ViewLocator(PACKAGE_EXPLORER_VIEW_ID)));
     getUI().keyClick(SWT.MOD1 | SWT.SHIFT, 't');
     getUI().wait(new ShellShowingCondition("Open Type"));
     getUI().enterText("app");
@@ -114,10 +117,11 @@ public class MEclipse163ResolveDependenciesTest extends UIIntegrationTestCase {
     NexusIndexManager indexManager = (NexusIndexManager)MavenPlugin.getDefault().getIndexManager();
     NexusIndex index = indexManager.getIndex(repo);
     IRepositoryRegistry registry = MavenPlugin.getDefault().getRepositoryRegistry();
+    
     //build full repo details for the enabled non local/workspace repo
     if(index.isEnabled() && 
         !(repo.equals(registry.getLocalRepository())) && 
-            !(repo.equals(registry.getWorkspaceRepository())) ){
+            !(repo.equals(registry.getWorkspaceRepository())) && repo.getUrl().equals("http://repository.sonatype.org/content/groups/sonatype")){
       indexManager.setIndexDetails(repo, "full", null);
       indexManager.updateIndex(repo, true, null);
       waitForAllBuildsToComplete();
