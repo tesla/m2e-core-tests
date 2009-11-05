@@ -49,11 +49,10 @@ public class MEclipse181MultiLevelDependencyTest extends UIIntegrationTestCase {
   }
   
   public void testMultiLevelDependencies() throws Exception {
-    IProject project = createArchetypeProject("maven-archetype-quickstart", "project0");
-    waitForAllBuildsToComplete();
+    IProject project = createArchetypeProject("maven-archetype-quickstart", "multiProject0");
     //dropped it to three to speed things up
     for (int i = 1; i < 4; i++) {
-      project = createDependentProject(project, "project" + i);
+      project = createDependentProject(project, "multiProject" + i);
     }
   }
 }

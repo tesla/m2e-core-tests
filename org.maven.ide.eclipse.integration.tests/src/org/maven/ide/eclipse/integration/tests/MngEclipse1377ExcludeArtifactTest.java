@@ -37,8 +37,12 @@ public class MngEclipse1377ExcludeArtifactTest extends UIIntegrationTestCase {
   public void testEclipseArtifact() throws Exception {
     setXmlPrefs();
     String projectName = "eclipseArtifactProject";
-    //IProject project = setupDefaultProject();
-    IProject project = createQuickstartProject(projectName);
+    IProject project = null;
+    try{
+      project = createQuickstartProject(projectName);
+    } catch(Exception e){
+      project = setupDefaultProject();
+    }
     IJavaProject jp = (IJavaProject) project.getNature(JavaCore.NATURE_ID);
 
     assertMavenCPEntry(jp, "commons-collections-3.2.1.jar", false);
