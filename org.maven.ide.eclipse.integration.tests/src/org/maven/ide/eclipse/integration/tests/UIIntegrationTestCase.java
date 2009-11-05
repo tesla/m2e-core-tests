@@ -195,7 +195,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
      PrefUtil.getAPIPreferenceStore().setValue(IWorkbenchPreferenceConstants.ENABLE_ANIMATIONS, false);
 
      
-     //fullScreen();
+     fullScreen();
      MavenPlugin.getDefault(); // force m2e to load so its indexing jobs will be scheduled.
      Thread.sleep(5000);
      closeView("org.eclipse.ui.internal.introview");
