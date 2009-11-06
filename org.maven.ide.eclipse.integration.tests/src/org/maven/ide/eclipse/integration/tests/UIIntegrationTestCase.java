@@ -624,8 +624,17 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
   protected File importMavenProjects(String projectPath) throws Exception {
     File tempDir = unzipProject(projectPath);
     waitForAllBuildsToComplete();
+    try{
+      
+      getUI().click(new ButtonLocator("Cancel"));
+      //if there is a dialog up here, take a screenshot but get rid of it - so we can keep going
+      ScreenCapture.createScreenCapture();
+    } catch(Exception e){
+      //make sure that there are no dialogs up here
+    }
     try {
       getUI().click(new MenuItemLocator("File/Import..."));
+      
       getUI().wait(new ShellShowingCondition("Import"));
       getUI().click(new FilteredTreeItemLocator("Maven/Existing Maven Projects"));
       getUI().click(new ButtonLocator("&Next >"));
