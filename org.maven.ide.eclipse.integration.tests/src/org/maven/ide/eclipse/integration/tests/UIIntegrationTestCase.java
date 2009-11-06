@@ -482,11 +482,10 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
 
     getUI().enterText(src);
     getUI().keyClick(WT.TAB);
-    ScreenCapture.createScreenCapture();
 
     getUI().enterText(target);
     if(wrapSearch){
-      getUI().click(new ButtonLocator("Wrap search"));
+      getUI().click(new ButtonLocator("Wra&p search"));
     }
     getUI().click(new ButtonLocator("Replace &All"));
 
