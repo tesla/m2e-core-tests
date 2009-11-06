@@ -1,7 +1,6 @@
 package org.maven.ide.eclipse.integration.tests;
 
-import java.io.File;
-
+import org.eclipse.core.resources.IProject;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.maven.ide.eclipse.MavenPlugin;
@@ -17,8 +16,6 @@ import com.windowtester.runtime.swt.condition.shell.ShellShowingCondition;
 import com.windowtester.runtime.swt.locator.ButtonLocator;
 import com.windowtester.runtime.swt.locator.CTabItemLocator;
 import com.windowtester.runtime.swt.locator.FilteredTreeItemLocator;
-import com.windowtester.runtime.swt.locator.LabeledLabelLocator;
-import com.windowtester.runtime.swt.locator.LabeledTextLocator;
 import com.windowtester.runtime.swt.locator.NamedWidgetLocator;
 import com.windowtester.runtime.swt.locator.TreeItemLocator;
 import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
@@ -35,16 +32,16 @@ public class MngEclipse1515LifecyleMappingTest extends UIIntegrationTestCase {
 	 */
 	public void testMgnEclipse1515() throws Exception {
 	  setXmlPrefs();
+	  String projectName = "lifecycleTest";
 		IUIContext ui = getUI();
-    File tempDir = importMavenProjects("projects/someproject.zip");
-    IMavenProjectFacade mavenProject = MavenPlugin.getDefault().getMavenProjectManager().getMavenProject("org.sonatype.test", "someproject", "0.0.1-SNAPSHOT");
-    assertNotNull(mavenProject);
+		IProject project = createQuickstartProject(projectName);
+    assertNotNull(project);
     
     //open project prefs, navigate to maven->lifecycle mapping, make sure that the 'generic' lifecycle mapping is showing
-    showGenericLifecycle();
+    showGenericLifecycle(projectName);
     
     
-    openPomFile("someproject/pom.xml");
+    openPomFile(projectName+"/pom.xml");
     ui.click(new CTabItemLocator("pom.xml"));
     
     //then set to customizable and make sure that one is showing
@@ -54,25 +51,25 @@ public class MngEclipse1515LifecyleMappingTest extends UIIntegrationTestCase {
     getUI().enterText("<build><plugins><plugin> <groupId>org.maven.ide.eclipse</ <artifactId>lifecycle-mapping</ <version>0.9.9-SNAPSHOT</  <configuration><mappingId>customizable</ <configurators></ <mojoExecutions></ </ </</</");
     getUI().keyClick(SWT.MOD1, 's');
     waitForAllBuildsToComplete();
-    showCustomizableLifecycle();
+    showCustomizableLifecycle(projectName);
 
     //then, back to generic
-    openPomFile("someproject/pom.xml");
+    openPomFile(projectName+"/pom.xml");
     ui.click(new CTabItemLocator("pom.xml"));
     replaceTextWithWrap("customizable", "generic", true);
     getUI().wait(new ShellDisposedCondition(FIND_REPLACE));
     getUI().keyClick(SWT.MOD1, 's');
     waitForAllBuildsToComplete();
-    showGenericLifecycle();
+    showGenericLifecycle(projectName);
     
     //then switch to empty lifecycle mapping
-    openPomFile("someproject/pom.xml");
+    openPomFile(projectName+"/pom.xml");
     ui.click(new CTabItemLocator("pom.xml"));
     replaceTextWithWrap("generic", "NULL", true);
     getUI().wait(new ShellDisposedCondition(FIND_REPLACE));
     getUI().keyClick(SWT.MOD1, 's');
     waitForAllBuildsToComplete();
-    showEmptyLifecycle();
+    showEmptyLifecycle(projectName);
 	}
 	
   protected void selectEditorTab(final String id) throws Exception {
@@ -88,11 +85,11 @@ public class MngEclipse1515LifecyleMappingTest extends UIIntegrationTestCase {
    * @throws WidgetSearchException 
    * 
    */
-  private void showEmptyLifecycle() throws WidgetSearchException {
-    showLifecyclePropsPage();
+  private void showEmptyLifecycle(String projectName) throws WidgetSearchException {
+    showLifecyclePropsPage(projectName);
     IWidgetLocator widgetLocator = getUI().find(new NamedWidgetLocator("noInfoLabel"));
     assertNotNull(widgetLocator);
-    hideLifecyclePropsPage();
+    hideLifecyclePropsPage(projectName);
   }
 
 
@@ -100,24 +97,24 @@ public class MngEclipse1515LifecyleMappingTest extends UIIntegrationTestCase {
    * @throws WidgetSearchException 
    * 
    */
-  private void showCustomizableLifecycle() throws WidgetSearchException {
-    showLifecyclePropsPage();
+  private void showCustomizableLifecycle(String projectName) throws WidgetSearchException {
+    showLifecyclePropsPage(projectName);
     IWidgetLocator widgetLocator = getUI().find(new NamedWidgetLocator("projectConfiguratorsTable"));
     assertNotNull(widgetLocator);
-    hideLifecyclePropsPage();
+    hideLifecyclePropsPage(projectName);
   }
 
-  private void hideLifecyclePropsPage() throws WidgetSearchException{
+  private void hideLifecyclePropsPage(String projectName) throws WidgetSearchException{
     getUI().click(new ButtonLocator("Cancel"));
-    getUI().wait(new ShellDisposedCondition("Properties for someproject")); 
+    getUI().wait(new ShellDisposedCondition("Properties for "+projectName)); 
   }
   /**
    * @throws WidgetSearchException 
    * 
    */
-  private void showLifecyclePropsPage() throws WidgetSearchException {
-    getUI().contextClick(new TreeItemLocator("someproject", new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")), "Properties");
-    getUI().wait(new ShellShowingCondition("Properties for someproject"));
+  private void showLifecyclePropsPage(String projectName) throws WidgetSearchException {
+    getUI().contextClick(new TreeItemLocator(projectName, new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")), "Properties");
+    getUI().wait(new ShellShowingCondition("Properties for "+projectName));
     getUI().click(new FilteredTreeItemLocator("Maven/Lifecycle Mapping"));
   }
 
@@ -125,11 +122,11 @@ public class MngEclipse1515LifecyleMappingTest extends UIIntegrationTestCase {
    * @throws WidgetSearchException 
    * 
    */
-  private void showGenericLifecycle() throws WidgetSearchException {
-    showLifecyclePropsPage();
+  private void showGenericLifecycle(String projectName) throws WidgetSearchException {
+    showLifecyclePropsPage(projectName);
     IWidgetLocator widgetLocator = getUI().find(new NamedWidgetLocator("goalsText"));
     assertNotNull(widgetLocator);
-    hideLifecyclePropsPage();
+    hideLifecyclePropsPage(projectName);
   }
 
 }
