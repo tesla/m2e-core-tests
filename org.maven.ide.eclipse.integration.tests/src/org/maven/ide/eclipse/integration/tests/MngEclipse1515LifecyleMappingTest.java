@@ -116,6 +116,7 @@ public class MngEclipse1515LifecyleMappingTest extends UIIntegrationTestCase {
     getUI().contextClick(new TreeItemLocator(projectName, new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")), "Properties");
     getUI().wait(new ShellShowingCondition("Properties for "+projectName));
     getUI().click(new FilteredTreeItemLocator("Maven/Lifecycle Mapping"));
+    getUI().wait(new SWTIdleCondition());
   }
 
   /**
