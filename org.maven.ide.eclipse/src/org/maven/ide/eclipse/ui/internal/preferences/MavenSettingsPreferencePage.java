@@ -2,14 +2,17 @@ package org.maven.ide.eclipse.ui.internal.preferences;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.preference.PreferencePage;
@@ -52,6 +55,8 @@ import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.index.IndexManager;
+import org.maven.ide.eclipse.project.IMavenProjectFacade;
+import org.maven.ide.eclipse.project.MavenUpdateRequest;
 
 
 /**
@@ -110,7 +115,7 @@ public class MavenSettingsPreferencePage extends PreferencePage implements IWork
     super.performDefaults();
   }
 
-  protected void updateSettings(){
+  protected void updateSettings(final boolean updateMavenDependencies){
     final String userSettings = getUserSettings();
     
     new Job("Updating Maven settings") {
@@ -128,6 +133,21 @@ public class MavenSettingsPreferencePage extends PreferencePage implements IWork
             IndexManager indexManager = mavenPlugin.getIndexManager();
             indexManager.getWorkspaceIndex().updateIndex(true, monitor);
           }
+          if(updateMavenDependencies){
+            IMavenProjectFacade[] projects = MavenPlugin.getDefault().getMavenProjectManager().getProjects();
+            ArrayList<IProject> allProjects = new ArrayList<IProject>();
+            if(projects != null){
+              MavenPlugin.getDefault().getMaven().reloadSettings();
+              SubProgressMonitor subMonitor = new SubProgressMonitor(monitor, projects.length);
+              for(int i=0;i<projects.length;i++){
+                subMonitor.beginTask("Updating progress for "+projects[i].getProject().getName(), 1);
+                allProjects.add(projects[i].getProject());
+              }
+              IMavenConfiguration configuration = MavenPlugin.lookup(IMavenConfiguration.class);
+              MavenPlugin.getDefault().getMavenProjectManager().refresh(new MavenUpdateRequest(allProjects.toArray(new IProject[]{}), configuration.isOffline(), true));
+              subMonitor.done();
+            }
+          }
           return Status.OK_STATUS;
         } catch (CoreException e) {
           return e.getStatus();
@@ -138,13 +158,13 @@ public class MavenSettingsPreferencePage extends PreferencePage implements IWork
   
   protected void performApply() {
     if(dirty){
-      updateSettings();
+      updateSettings(false);
     }
   }
   
   public boolean performOk() {
     if (dirty) {
-      updateSettings();
+      updateSettings(false);
     }
     return true;
   }
@@ -274,6 +294,15 @@ public class MavenSettingsPreferencePage extends PreferencePage implements IWork
             checkSettings();
           }
         }
+      }
+    });
+    
+    Button updateSettings = new Button(composite, SWT.NONE);
+    GridData gd = new GridData(SWT.FILL, SWT.LEFT, false, false, 1, 1);
+    updateSettings.setText("Update Settings");
+    updateSettings.addSelectionListener(new SelectionAdapter(){
+      public void widgetSelected(SelectionEvent e){
+        updateSettings(true);
       }
     });
   }
