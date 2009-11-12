@@ -19,7 +19,6 @@ import org.eclipse.swt.SWT;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.internal.index.NexusIndex;
 import org.maven.ide.eclipse.internal.index.NexusIndexManager;
-import org.maven.ide.eclipse.internal.repository.RepositoryRegistry;
 import org.maven.ide.eclipse.repository.IRepository;
 import org.maven.ide.eclipse.repository.IRepositoryRegistry;
 import org.maven.ide.eclipse.tests.AsbtractMavenProjectTestCase;
@@ -121,7 +120,7 @@ public class MEclipse163ResolveDependenciesTest extends UIIntegrationTestCase {
     //build full repo details for the enabled non local/workspace repo
     if(index.isEnabled() && 
         !(repo.equals(registry.getLocalRepository())) && 
-            !(repo.equals(registry.getWorkspaceRepository())) && repo.getUrl().equals("http://repository.sonatype.org/content/groups/sonatype")){
+            !(repo.equals(registry.getWorkspaceRepository()))){
       indexManager.setIndexDetails(repo, "full", null);
       indexManager.updateIndex(repo, true, null);
       waitForAllBuildsToComplete();
