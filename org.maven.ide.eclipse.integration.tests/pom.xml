@@ -29,8 +29,7 @@
         <groupId>org.codehaus.tycho</groupId>
         <artifactId>maven-osgi-test-plugin</artifactId>
         <configuration>
-          <!-- kill test JVM it tests take more than 60 minutes to finish -->
-          <forkedProcessTimeoutInSeconds>3600</forkedProcessTimeoutInSeconds>
+          <forkedProcessTimeoutInSeconds>7200</forkedProcessTimeoutInSeconds>
           <appArgLine>-pluginCustomization ${project.basedir}/plugin_customization.ini</appArgLine>
         </configuration>
       </plugin>
