@@ -84,6 +84,7 @@ import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.ArtifactRepositoryRef;
 import org.maven.ide.eclipse.embedder.IMaven;
+import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.index.IIndex;
 import org.maven.ide.eclipse.index.IndexListener;
 import org.maven.ide.eclipse.index.IndexManager;
@@ -822,11 +823,11 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
 
         fireIndexAdded(repository);
 
-        boolean forceUpdate = false;
+        
         if (monitor != null) {
-          updateIndex(repository, forceUpdate, monitor);
+          updateIndex(repository, false, monitor);
         } else {
-          scheduleIndexUpdate(repository, forceUpdate);
+          scheduleIndexUpdate(repository, false);
         }
       }
     } catch(IOException ex) {
@@ -933,7 +934,15 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
         if (context.getRepository() != null) {
           reindexLocalRepository(repository, force, monitor);
         } else {
-          updateRemoteIndex(repository, force, monitor);
+          if(!force){
+            //if 'force' is not set, then only do the remote update if this value is set
+            IMavenConfiguration mavenConfig = MavenPlugin.lookup(IMavenConfiguration.class);
+            if(mavenConfig.isUpdateIndexesOnStartup()){
+              updateRemoteIndex(repository, force, monitor);
+            }
+          } else {
+            updateRemoteIndex(repository, force, monitor);
+          }
         }
       }
     }
