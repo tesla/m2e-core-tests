@@ -56,6 +56,7 @@ import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.IMaven;
+import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.project.IMavenMarkerManager;
 import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
@@ -154,9 +155,12 @@ public class MavenProjectManagerImpl {
     MavenProjectFacade projectFacade = projectRegistry.getProjectFacade(pom);
     if(projectFacade == null && load) {
       ResolverConfiguration configuration = readResolverConfiguration(pom.getProject());
-
+      //this used to just pass in 'true' for 'offline'. when the local repo was removed or
+      //corrupted, though, the project wouldn't load correctly
+      IMavenConfiguration mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
+      boolean isOffline = mavenConfiguration.isOffline();
       MavenExecutionResult executionResult = readProjectWithDependencies(projectRegistry, pom, configuration, //
-          new MavenUpdateRequest(true /* offline */, false /* updateSnapshots */),
+          new MavenUpdateRequest(isOffline, false /* updateSnapshots */),
           monitor);
       MavenProject mavenProject = executionResult.getProject();
       if(mavenProject != null) {
@@ -333,7 +337,7 @@ public class MavenProjectManagerImpl {
   void refresh(MutableProjectRegistry newState, MavenUpdateRequest updateRequest, IProgressMonitor monitor) throws CoreException {
 
     DependencyResolutionContext context = new DependencyResolutionContext(updateRequest);
-
+  
     while(!context.isEmpty()) {
       if(monitor.isCanceled()) {
         throw new OperationCanceledException();
@@ -344,17 +348,14 @@ public class MavenProjectManagerImpl {
       }
 
       IFile pom = context.pop();
-      monitor.subTask(pom.getFullPath().toString());
-
+      monitor.subTask("project "+pom.getProject().getName());
       if (!pom.isAccessible() || !pom.getProject().hasNature(IMavenConstants.NATURE_ID)) {
         context.forcePomFiles(remove(newState, pom));
         continue;
       }
-
       refresh(newState, pom, context, monitor);
       monitor.worked(1);
     }
-
   }
 
   MavenExecutionPlan calculateExecutionPlan(MavenProjectFacade facade, IProgressMonitor monitor) throws CoreException {
