@@ -215,14 +215,22 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
   private void configureNewMavenProject(ArrayList<IProject> projects, IProgressMonitor monitor)
       throws CoreException {
 
-    // first, resolve maven dependencies for all projects
-    MavenUpdateRequest updateRequest = new MavenUpdateRequest(false, false);
-    for (IProject project : projects) {
-      updateRequest.addPomFile(project);
-    }
+    //SubProgressMonitor sub = new SubProgressMonitor(monitor, projects.size()+1);
+    
+      // first, resolve maven dependencies for all projects
+      MavenUpdateRequest updateRequest = new MavenUpdateRequest(false, false);
+      int i=0;
+      monitor.beginTask("Updating POM files", projects.size());
+      for (IProject project : projects) {
+        monitor.worked(1);
+        monitor.subTask("Updating POM for "+project.getName());
+        updateRequest.addPomFile(project);
+      }
+      monitor.beginTask("Refreshing projects", projects.size());
+      projectManager.refresh(updateRequest, monitor);
 
     // TODO this emits project change events, which may be premature at this point
-    projectManager.refresh(updateRequest, monitor);
+
 
     //Creating maven facades 
     List<IMavenProjectFacade> facades = new ArrayList<IMavenProjectFacade>(projects.size());
@@ -239,12 +247,12 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     //MNGECLIPSE-1028 : Sort projects by build order here, 
     //as dependent projects need to be configured before depending projects (in WTP integration for ex.)
     sortProjects(facades, monitor);
-    
     //Then, perform detailed project configuration
     for(IMavenProjectFacade facade : facades) {
       if(monitor.isCanceled()) {
         throw new OperationCanceledException();
       }
+      monitor.subTask("Updating configuration for "+facade.getProject().getName());
       ProjectConfigurationRequest request = new ProjectConfigurationRequest(facade, facade.getMavenProject(monitor), createMavenSession(facade, monitor), false /*updateSources*/);
       updateProjectConfiguration(request, monitor);
     }
