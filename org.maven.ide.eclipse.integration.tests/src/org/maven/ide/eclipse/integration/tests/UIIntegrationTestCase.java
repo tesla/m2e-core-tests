@@ -1013,6 +1013,10 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
   }
 
   protected void waitForAllBuildsToComplete() throws InterruptedException {
+    waitForAllBuildsToComplete(240000);
+  }
+  
+  protected void waitForAllBuildsToComplete(int timeout) throws InterruptedException {
     
     Thread.sleep(3000);
     

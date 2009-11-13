@@ -123,7 +123,7 @@ public class MEclipse163ResolveDependenciesTest extends UIIntegrationTestCase {
             !(repo.equals(registry.getWorkspaceRepository()))){
       indexManager.setIndexDetails(repo, "full", null);
       indexManager.updateIndex(repo, true, null);
-      waitForAllBuildsToComplete();
+      waitForAllBuildsToComplete(600000);
     }
   }
 }
