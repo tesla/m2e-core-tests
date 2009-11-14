@@ -27,11 +27,11 @@ public class PomEditor2Test extends PomEditorTestBase {
   
   ///MNGECLIPSE-912
   public void testCloseAllAndSave() throws Exception {
-    openPomFile(TEST_POM_POM_XML);
-    
-    getUI().click(new CTabItemLocator(TEST_POM_POM_XML));
+    createArchetypeProject("maven-archetype-quickstart", "projectC");
+    openPomFile("projectC/pom.xml");
+    getUI().click(new CTabItemLocator("projectC/pom.xml"));
     selectEditorTab(TAB_POM_XML);
-    replaceText("org.foo", "org.foo1");
+    replaceText("org.sonatype.test", "org.sonatype.test1");
     selectEditorTab(TAB_OVERVIEW);
     getUI().keyClick(SWT.CONTROL|SWT.SHIFT, 'w');
     getUI().wait(new ShellDisposedCondition("Progress Information"));
@@ -39,9 +39,9 @@ public class PomEditor2Test extends PomEditorTestBase {
     getUI().click(new ButtonLocator("&Yes"));
     getUI().wait(new ShellDisposedCondition("Save Resource"));
 
-    openPomFile(TEST_POM_POM_XML);
+    openPomFile("projectC/pom.xml");
     selectEditorTab(TAB_OVERVIEW);
-    assertTextValue("groupId", "org.foo1");
+    assertTextValue("groupId", "org.sonatype.test1");
   }
   
   public void testNewPropertiesSectionModel2XML() throws Exception {
