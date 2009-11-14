@@ -115,6 +115,7 @@ public class PomEditor2Test extends PomEditorTestBase {
     getUI().wait(new ShellShowingCondition("Edit property"));
     getUI().click(new ButtonLocator("OK"));
     getUI().wait(new ShellDisposedCondition("Edit property"));
+    getUI().keyClick(SWT.CTRL, 's');
   }
 
  
