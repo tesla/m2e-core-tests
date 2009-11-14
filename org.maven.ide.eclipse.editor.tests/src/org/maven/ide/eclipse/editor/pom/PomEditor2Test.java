@@ -24,7 +24,26 @@ import com.windowtester.runtime.swt.locator.NamedWidgetLocator;
 import com.windowtester.runtime.swt.locator.TableItemLocator;
 
 public class PomEditor2Test extends PomEditorTestBase {
+  
+  ///MNGECLIPSE-912
+  public void testCloseAllAndSave() throws Exception {
+    openPomFile(TEST_POM_POM_XML);
+    
+    getUI().click(new CTabItemLocator(TEST_POM_POM_XML));
+    selectEditorTab(TAB_POM_XML);
+    replaceText("org.foo", "org.foo1");
+    selectEditorTab(TAB_OVERVIEW);
+    getUI().keyClick(SWT.CONTROL|SWT.SHIFT, 'w');
+    getUI().wait(new ShellDisposedCondition("Progress Information"));
+    getUI().wait(new ShellShowingCondition("Save Resource"));
+    getUI().click(new ButtonLocator("&Yes"));
+    getUI().wait(new ShellDisposedCondition("Save Resource"));
 
+    openPomFile(TEST_POM_POM_XML);
+    selectEditorTab(TAB_OVERVIEW);
+    assertTextValue("groupId", "org.foo1");
+  }
+  
   public void testNewPropertiesSectionModel2XML() throws Exception {
     openPomFile(TEST_POM_POM_XML);
 
@@ -98,24 +117,7 @@ public class PomEditor2Test extends PomEditorTestBase {
     getUI().wait(new ShellDisposedCondition("Edit property"));
   }
 
-  ///MNGECLIPSE-912
-  public void testCloseAllAndSave() throws Exception {
-    openPomFile(TEST_POM_POM_XML);
-    
-    getUI().click(new CTabItemLocator(TEST_POM_POM_XML));
-    selectEditorTab(TAB_POM_XML);
-    replaceText("org.foo", "org.foo1");
-    selectEditorTab(TAB_OVERVIEW);
-    getUI().keyClick(SWT.CONTROL|SWT.SHIFT, 'w');
-    getUI().wait(new ShellDisposedCondition("Progress Information"));
-    getUI().wait(new ShellShowingCondition("Save Resource"));
-    getUI().click(new ButtonLocator("&Yes"));
-    getUI().wait(new ShellDisposedCondition("Save Resource"));
-
-    openPomFile(TEST_POM_POM_XML);
-    selectEditorTab(TAB_OVERVIEW);
-    assertTextValue("groupId", "org.foo1");
-  }
+ 
   
   private void addProperty(String name, String value) throws WidgetSearchException, WaitTimedOutException {
     getUI().click(new ButtonLocator("Create...").findAll(getUI())[0]);
