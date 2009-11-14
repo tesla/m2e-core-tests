@@ -106,7 +106,7 @@ public class PomEditor2Test extends PomEditorTestBase {
     selectEditorTab(TAB_POM_XML);
     replaceText("org.foo", "org.foo1");
     selectEditorTab(TAB_OVERVIEW);
-    getUI().contextClick(new CTabItemLocator("*" + TEST_POM_POM_XML), "Close &All");
+    getUI().keyClick(SWT.CONTROL|SWT.SHIFT, 'w');
     getUI().wait(new ShellDisposedCondition("Progress Information"));
     getUI().wait(new ShellShowingCondition("Save Resource"));
     getUI().click(new ButtonLocator("&Yes"));
