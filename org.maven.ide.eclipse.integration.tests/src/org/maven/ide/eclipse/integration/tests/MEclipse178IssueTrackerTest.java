@@ -53,10 +53,8 @@ public class MEclipse178IssueTrackerTest extends UIIntegrationTestCase {
 		ui.contextClick(new TreeItemLocator("simple-parent", new ViewLocator(
 				"org.eclipse.jdt.ui.PackageExplorer")),
 				"Maven/Open Issue Tracker");
-		ui.wait(new JobsCompleteCondition());
-		//this is getting stuck open and causing other problems. going to
-		//comment it out while I investigate to it doesn't interfere with other tests
-		//ui.click(new CTabItemLocator("http://issues.sonatype.org"));
+		waitForAllBuildsToComplete();
+		ui.click(new CTabItemLocator("http://issues.sonatype.org"));
 	}
 
   protected void tearDown() throws Exception {
