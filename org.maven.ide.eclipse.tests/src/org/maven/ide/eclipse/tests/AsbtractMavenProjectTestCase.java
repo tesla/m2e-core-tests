@@ -15,6 +15,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
@@ -454,22 +455,31 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
     return container.getClasspathEntries();
   }
 
+
   protected String toString(IMarker[] markers) {
+    if (markers != null) {
+      return toString(Arrays.asList(markers));  
+    }
+    return "";  
+  }
+
+  protected String toString(List<IMarker> markers) {
     String sep = "";
-    StringBuffer sb = new StringBuffer();
-    for(int i = 0; i < markers.length; i++ ) {
-      IMarker marker = markers[i];
-      try { 
-        sb.append(sep).append(marker.getType()+":"+marker.getAttribute(IMarker.MESSAGE));
-      } catch(CoreException ex) {
-        // ignore
+    StringBuilder sb = new StringBuilder();
+    if (markers != null) {
+      for(IMarker marker : markers) {
+        try { 
+          sb.append(sep).append(marker.getType()+":"+marker.getAttribute(IMarker.MESSAGE));
+        } catch(CoreException ex) {
+          // ignore
+        }
+        sep = ", ";
       }
-      sep = ", ";
     }
     return sb.toString();
   }
 
-  protected void copyContent(IProject project, String from, String to) throws Exception {
+protected void copyContent(IProject project, String from, String to) throws Exception {
     InputStream contents = project.getFile(from).getContents();
     try {
       IFile file = project.getFile(to);
@@ -493,10 +503,14 @@ public abstract class AsbtractMavenProjectTestCase extends TestCase {
   }
 
   protected List<IMarker> findErrorMarkers(IProject project) throws CoreException {
+    return findMarkers(project, IMarker.SEVERITY_ERROR);
+  }
+
+  protected List<IMarker> findMarkers(IProject project, int targetSeverity) throws CoreException {
     ArrayList<IMarker> errors = new ArrayList<IMarker>();
     for(IMarker marker : project.findMarkers(null /* all markers */, true /* subtypes */, IResource.DEPTH_INFINITE)) {
       int severity = marker.getAttribute(IMarker.SEVERITY, 0);
-      if(severity==IMarker.SEVERITY_ERROR) {
+      if(severity==targetSeverity) {
         errors.add(marker);
       }
     }
