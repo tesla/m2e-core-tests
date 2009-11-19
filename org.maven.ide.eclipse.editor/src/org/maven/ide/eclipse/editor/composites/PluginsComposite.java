@@ -354,7 +354,21 @@ public class PluginsComposite extends Composite{
         createPlugin(pluginManagementEditor, pluginManagementProvider, POM_PACKAGE.getPluginManagement_Plugins(), null, null, null);
       }
     });
+
     
+    pluginManagementEditor.setSelectListener(new SelectionAdapter(){
+      public void widgetSelected(SelectionEvent e){
+        MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
+        "Select Plugin", IIndex.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
+        if(dialog.open() == Window.OK) {
+          IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
+          if(af != null) {
+            createPlugin(pluginManagementEditor, pluginManagementProvider, POM_PACKAGE.getPluginManagement_Plugins(), af.group, af.artifact, af.version);
+          }
+        }
+      }
+    });
+
     pluginManagementEditor.setRemoveListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         CompoundCommand compoundCommand = new CompoundCommand();
