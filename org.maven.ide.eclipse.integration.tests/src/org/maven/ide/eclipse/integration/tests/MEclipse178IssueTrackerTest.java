@@ -30,7 +30,7 @@ public class MEclipse178IssueTrackerTest extends UIIntegrationTestCase {
 		
 		openPomFile("test-project/pom.xml");
 		ui.click(new CTabItemLocator("pom.xml"));
-		replaceText("</dependencies>", "</dependencies><issueManagement><system>JIRA</system><url>http://issues.sonatype.org</url></issueManagement>");
+		replaceText("</dependencies>", "</dependencies><issueManagement><system>JIRA</system><url>http://jira.codehaus.org</url></issueManagement>");
 		ui.keyClick(SWT.MOD1, 's');
 		  waitForAllBuildsToComplete();
 		ui.click(new TreeItemLocator("test-project", new ViewLocator(
@@ -41,7 +41,7 @@ public class MEclipse178IssueTrackerTest extends UIIntegrationTestCase {
 		Thread.sleep(10000);
 		waitForAllBuildsToComplete();
 		ScreenCapture.createScreenCapture();
-		ui.click(new CTabItemLocator("http://issues.sonatype.org"));
+		ui.close(new CTabItemLocator("http://jira.codehaus.org"));
 		
 	}
 
