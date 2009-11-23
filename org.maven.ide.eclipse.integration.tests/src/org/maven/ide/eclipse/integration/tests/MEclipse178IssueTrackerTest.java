@@ -9,6 +9,7 @@ import com.windowtester.runtime.swt.locator.ButtonLocator;
 import com.windowtester.runtime.swt.locator.CTabItemLocator;
 import com.windowtester.runtime.swt.locator.TreeItemLocator;
 import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
+import com.windowtester.runtime.util.ScreenCapture;
 
 public class MEclipse178IssueTrackerTest extends UIIntegrationTestCase {
 
@@ -39,7 +40,9 @@ public class MEclipse178IssueTrackerTest extends UIIntegrationTestCase {
 				"Maven/Open Issue Tracker");
 		Thread.sleep(10000);
 		waitForAllBuildsToComplete();
+		ScreenCapture.createScreenCapture();
 		ui.click(new CTabItemLocator("http://issues.sonatype.org"));
+		
 	}
 
 
