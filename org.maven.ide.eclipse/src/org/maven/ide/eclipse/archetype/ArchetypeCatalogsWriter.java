@@ -110,12 +110,14 @@ public class ArchetypeCatalogsWriter {
             AttributesImpl attrs = new AttributesImpl();
             attrs.addAttribute(null, ATT_CATALOG_TYPE, ATT_CATALOG_TYPE, null, TYPE_LOCAL);
             attrs.addAttribute(null, ATT_CATALOG_LOCATION, ATT_CATALOG_LOCATION, null, factory.getId());
+            attrs.addAttribute(null, ATT_CATALOG_DESCRIPTION, ATT_CATALOG_DESCRIPTION, null, factory.getDescription());
             handler.startElement(null, ELEMENT_CATALOG, ELEMENT_CATALOG, attrs);
             handler.endElement(null, ELEMENT_CATALOG, ELEMENT_CATALOG);
           } else if(factory instanceof RemoteCatalogFactory) {
             AttributesImpl attrs = new AttributesImpl();
             attrs.addAttribute(null, ATT_CATALOG_TYPE, ATT_CATALOG_TYPE, null, TYPE_REMOTE);
             attrs.addAttribute(null, ATT_CATALOG_LOCATION, ATT_CATALOG_LOCATION, null, factory.getId());
+            attrs.addAttribute(null, ATT_CATALOG_DESCRIPTION, ATT_CATALOG_DESCRIPTION, null, factory.getDescription());
             handler.startElement(null, ELEMENT_CATALOG, ELEMENT_CATALOG, attrs);
             handler.endElement(null, ELEMENT_CATALOG, ELEMENT_CATALOG);
           }
