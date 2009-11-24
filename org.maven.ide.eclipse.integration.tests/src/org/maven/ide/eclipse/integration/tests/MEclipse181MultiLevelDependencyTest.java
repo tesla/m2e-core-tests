@@ -13,12 +13,12 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.swt.widgets.Tree;
 
-import com.windowtester.runtime.swt.condition.eclipse.JobsCompleteCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellShowingCondition;
 import com.windowtester.runtime.swt.locator.ButtonLocator;
 import com.windowtester.runtime.swt.locator.LabeledLocator;
 import com.windowtester.runtime.swt.locator.TreeItemLocator;
 import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
+import com.windowtester.runtime.util.ScreenCapture;
 
 
 /**
@@ -37,6 +37,7 @@ public class MEclipse181MultiLevelDependencyTest extends UIIntegrationTestCase {
     getUI().enterText(childName);
     getUI().click(
         new TreeItemLocator("org.sonatype.test   " + childName, new LabeledLocator(Tree.class, "&Search Results:")));
+    ScreenCapture.createScreenCapture();
     getUI().click(
         new TreeItemLocator("org.sonatype.test   " + childName + "/0.0.1-SNAPSHOT.*", new LabeledLocator(Tree.class,
             "&Search Results:")));
