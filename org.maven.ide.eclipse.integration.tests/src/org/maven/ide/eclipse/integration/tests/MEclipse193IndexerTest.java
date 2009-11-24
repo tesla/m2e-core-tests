@@ -36,6 +36,7 @@ import com.windowtester.runtime.swt.locator.MenuItemLocator;
 import com.windowtester.runtime.swt.locator.NamedWidgetLocator;
 import com.windowtester.runtime.swt.locator.TreeItemLocator;
 import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
+import com.windowtester.runtime.util.ScreenCapture;
 
 
 public class MEclipse193IndexerTest extends UIIntegrationTestCase {
@@ -125,6 +126,7 @@ public class MEclipse193IndexerTest extends UIIntegrationTestCase {
     ui.enterText(dependencyName);
     getUI().click(
         new TreeItemLocator("org.sonatype.test   "+dependencyName, new LabeledLocator(Tree.class, "&Search Results:")));
+    ScreenCapture.createScreenCapture();
     ui.click(new TreeItemLocator(
         "org.sonatype.test   "+dependencyName+"/0.0.1-SNAPSHOT - "+dependencyName+"-0.0.1-SNAPSHOT.jar.*",
         new LabeledLocator(Tree.class, "&Search Results:")));
