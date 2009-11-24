@@ -51,6 +51,8 @@ import org.apache.maven.archetype.ArchetypeGenerationResult;
 import org.apache.maven.archetype.catalog.Archetype;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.repository.DefaultArtifactRepositoryFactory;
+import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Model;
@@ -500,9 +502,16 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
    */
   private Artifact resolveArchetype(Archetype a, IProgressMonitor monitor) throws CoreException {
     ArrayList<ArtifactRepository> repos = new ArrayList<ArtifactRepository>();
-    repos.addAll(maven.getArtifactRepositories()); // see org.apache.maven.archetype.downloader.DefaultDownloader#download
+    repos.addAll(maven.getArtifactRepositories()); // see org.apache.maven.archetype.downloader.DefaultDownloader#download    
     if (a.getRepository() != null && a.getRepository().trim().length() > 0) {
+     //MNGECLIPSE-1399 use archetype repository too, not just the default ones
+      ArtifactRepository archetypeRepository = new DefaultArtifactRepositoryFactory()
+            .createArtifactRepository("archetype", a.getRepository().trim(), new DefaultRepositoryLayout(), null, null);
+      repos.add(archetypeRepository);
+      //FIXME If archetype.repository is not explicitly set in its catalog, it should point to the catalog repository by default.
     }
+    
+    
     try {
       maven.resolve(a.getGroupId(), a.getArtifactId(),a.getVersion(), "pom", null, repos, monitor);
       return maven.resolve(a.getGroupId(), a.getArtifactId(),a.getVersion(), "jar", null, repos, monitor);
