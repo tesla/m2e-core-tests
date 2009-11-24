@@ -111,7 +111,11 @@ abstract class AbstractJavaProjectConfigurator extends AbstractProjectConfigurat
     addJREClasspathContainer(classpath, options.get(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM));
     addMavenClasspathContainer(classpath);
 
-    javaProject.setOptions(options);
+    // A single setOptions call erases everything else from an existing settings file.
+    // Must invoke setOption individually to preserve previous options. 
+    for (Map.Entry<String, String> option : options.entrySet()) {
+      javaProject.setOption(option.getKey(), option.getValue());
+    }
 
     IContainer classesFolder;
     if(!mavenProjects.isEmpty()) {

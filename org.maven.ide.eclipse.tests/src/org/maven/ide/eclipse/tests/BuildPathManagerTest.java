@@ -793,6 +793,7 @@ public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
     IJavaProject javaProject = JavaCore.create(project);
     assertEquals("1.4", javaProject.getOption(JavaCore.COMPILER_SOURCE, true));
     assertEquals("1.4", javaProject.getOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, true));
+    assertEquals("123", javaProject.getOption(JavaCore.COMPILER_PB_MAX_PER_UNIT, true));
 
     IClasspathEntry jreEntry = getJreContainer(javaProject.getRawClasspath());
     assertEquals("J2SE-1.4", JavaRuntime.getExecutionEnvironmentId(jreEntry.getPath()));
