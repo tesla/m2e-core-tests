@@ -101,6 +101,10 @@ import org.eclipse.ui.forms.editor.IFormPage;
 import org.eclipse.ui.ide.IGotoMarker;
 import org.eclipse.ui.part.MultiPageEditorActionBarContributor;
 import org.eclipse.ui.progress.UIJob;
+import org.eclipse.ui.texteditor.IDocumentProvider;
+import org.eclipse.ui.texteditor.IDocumentProviderExtension;
+import org.eclipse.ui.texteditor.IDocumentProviderExtension3;
+import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
@@ -169,7 +173,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   
   LifecyclePage lifecyclePage;
 
-  StructuredTextEditor sourcePage;
+  StructuredSourceTextEditor sourcePage;
   
   StructuredTextEditor effectivePomSourcePage;
   
@@ -260,6 +264,10 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 
     // Reload model if pom file was changed externally.
     // TODO implement generic merge scenario (when file is externally changed and is dirty)
+
+    // suppress a prompt to reload the pom if modifications were caused by workspace actions
+    sourcePage.updateModificationStamp();
+
     class ChangedResourceDeltaVisitor implements IResourceDeltaVisitor {
 
       public boolean visit(IResourceDelta delta) throws CoreException {
@@ -281,14 +289,17 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       private void handleContentChanged() {
         Display.getDefault().asyncExec(new Runnable() {
           public void run() {
-            try {
-              structuredModel.reload(pomFile.getContents());
+/* MNGECLIPSE-1789: commented this out since forced model reload caused the XML editor to go crazy;
+                    the model is already updated at this point so reloading from file is unnecessary;
+                    externally originated file updates are checked in handleActivation() */
+//            try {
+//              structuredModel.reload(pomFile.getContents());
               reload();
-            } catch(CoreException e) {
-              MavenLogger.log(e);
-            } catch(Exception e) {
-              MavenLogger.log("Error loading pom editor model.", e);
-            }
+//            } catch(CoreException e) {
+//              MavenLogger.log(e);
+//            } catch(Exception e) {
+//              MavenLogger.log("Error loading pom editor model.", e);
+//            }
           }
         });
       }
@@ -328,7 +339,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     try {
       readProjectDocument();
       //fix for resetting the pom document after an external change
-      sourcePage.getDocumentProvider().resetDocument(sourcePage.getEditorInput());
+//      sourcePage.getDocumentProvider().resetDocument(sourcePage.getEditorInput());
     } catch(CoreException e) {
       MavenLogger.log(e);
     }
@@ -559,29 +570,76 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     LoadEffectivePomJob job = new LoadEffectivePomJob("Loading effective POM...");
     job.schedule();
   }
-  
-  private void addSourcePage() {
-    sourcePage = new StructuredTextEditor() {
-      public void doSave(IProgressMonitor monitor) {
-        // always save text editor
-        ResourcesPlugin.getWorkspace().removeResourceChangeListener(MavenPomEditor.this);
-        try {
-          super.doSave(monitor);
-          flushCommandStack();
-        } finally {
-          ResourcesPlugin.getWorkspace().addResourceChangeListener(MavenPomEditor.this);
+
+  protected class StructuredSourceTextEditor extends StructuredTextEditor {
+    private long fModificationStamp = -1;
+
+    protected void updateModificationStamp() {
+      IDocumentProvider p= getDocumentProvider();
+      if (p == null)
+        return;
+
+      if(p instanceof IDocumentProviderExtension3)  {
+        IDocumentProviderExtension3 p3= (IDocumentProviderExtension3) p;
+        fModificationStamp= p.getModificationStamp(getEditorInput());
+      }
+    }
+    protected void sanityCheckState(IEditorInput input) {
+
+      IDocumentProvider p= getDocumentProvider();
+      if (p == null)
+        return;
+
+      if (p instanceof IDocumentProviderExtension3)  {
+
+        IDocumentProviderExtension3 p3= (IDocumentProviderExtension3) p;
+
+        long stamp= p.getModificationStamp(input);
+        if (stamp != fModificationStamp) {
+          fModificationStamp= stamp;
+          if (!p3.isSynchronized(input))
+            handleEditorInputChanged();
+        }
+
+      } else  {
+
+        if (fModificationStamp == -1)
+          fModificationStamp= p.getSynchronizationStamp(input);
+
+        long stamp= p.getModificationStamp(input);
+        if (stamp != fModificationStamp) {
+          fModificationStamp= stamp;
+          if (stamp != p.getSynchronizationStamp(input))
+            handleEditorInputChanged();
         }
       }
 
-      private boolean oldDirty;
-      public boolean isDirty() {
-        if (oldDirty != dirty) {
-          oldDirty = dirty; 
-          updatePropertyDependentActions();
-        }
-        return dirty;
+      updateState(getEditorInput());
+      updateStatusField(ITextEditorActionConstants.STATUS_CATEGORY_ELEMENT_STATE);
+    }
+    public void doSave(IProgressMonitor monitor) {
+      // always save text editor
+      ResourcesPlugin.getWorkspace().removeResourceChangeListener(MavenPomEditor.this);
+      try {
+        super.doSave(monitor);
+        flushCommandStack();
+      } finally {
+        ResourcesPlugin.getWorkspace().addResourceChangeListener(MavenPomEditor.this);
       }
-    };
+    }
+
+    private boolean oldDirty;
+    public boolean isDirty() {
+      if (oldDirty != dirty) {
+        oldDirty = dirty; 
+        updatePropertyDependentActions();
+      }
+      return dirty;
+    }
+  }
+  
+  private void addSourcePage() {
+    sourcePage = new StructuredSourceTextEditor();
     sourcePage.setEditorPart(this);
     //the page for showing the effective POM
     effectivePomSourcePage = new StructuredTextEditor();
@@ -1066,9 +1124,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
             } finally {
               sourcePage.getTextViewer().removeTextListener(listener);
             }
-            if(sourcePage.getTextViewer().getTextWidget() != null && !sourcePage.getTextViewer().getTextWidget().isDisposed()){
-              sourcePage.getTextViewer().getTextWidget().redraw();
-            }
+            sourcePage.update();
           }
           
           if(changed[0]) {
