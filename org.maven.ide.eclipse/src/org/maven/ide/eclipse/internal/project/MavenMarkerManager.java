@@ -17,8 +17,12 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.wst.sse.core.StructuredModelManager;
+import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocumentRegion;
+import org.eclipse.wst.sse.core.internal.provisional.text.ITextRegion;
+import org.eclipse.wst.xml.core.internal.parser.regions.TagNameRegion;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
+import org.eclipse.wst.xml.core.internal.regions.DOMRegionContext;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.AbstractArtifactResolutionException;
@@ -34,6 +38,7 @@ import org.apache.maven.project.ProjectBuildingException;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
+import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.core.Messages;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
@@ -105,29 +110,34 @@ public class MavenMarkerManager implements IMavenMarkerManager {
         return;
       }
       IDOMModel domModel = (IDOMModel)StructuredModelManager.getModelManager().getModelForRead((IFile)pomFile);
-      boolean needsSchema = false;
-      IStructuredDocumentRegion[] structuredDocumentRegions = domModel.getStructuredDocument().getStructuredDocumentRegions();
-      int lineNumber = 0;
-      int offset = 0;
-      for(int i=0;i<structuredDocumentRegions.length;i++){
-        int hasProject = structuredDocumentRegions[i].getText().lastIndexOf("<project");
-        int schemaLoc = structuredDocumentRegions[i].getText().lastIndexOf(XSI_SCHEMA_LOCATION);
-        if(hasProject >=0 && schemaLoc < 0 ){
-          needsSchema=true;
-          lineNumber = domModel.getStructuredDocument().getLineOfOffset( structuredDocumentRegions[i].getStartOffset())+1;
-          offset = structuredDocumentRegions[i].getStartOffset();
+      IStructuredDocument document = domModel.getStructuredDocument();
+      
+      // iterate through document regions
+      documentLoop:for(IStructuredDocumentRegion documentRegion : document.getStructuredDocumentRegions()) {
+        // only check tag regions
+        if (DOMRegionContext.XML_TAG_NAME.equals(documentRegion.getType())){
+          for(ITextRegion textRegion: documentRegion.getRegions().toArray()){
+            // find a project tag
+            if(textRegion instanceof TagNameRegion && PROJECT_NODE.equals(documentRegion.getText(textRegion))){
+              // check if schema is missing
+              if (documentRegion.getText().lastIndexOf(XSI_SCHEMA_LOCATION) == -1) {
+                int offset = documentRegion.getStartOffset();
+                int lineNumber = document.getLineOfOffset(offset) + 1;
+                IMarker marker = addMarker(pomFile, NO_SCHEMA_ERR, lineNumber, IMarker.SEVERITY_WARNING, false);
+                //the quick fix in the marker view needs to know the offset, since it doesn't have access to the
+                //editor/source viewer
+                if(marker != null){
+                  marker.setAttribute(OFFSET, offset);
+                }
+              }
+              // there could only be one project tag
+              break documentLoop;
+            }
+          }
         }
       }
-      if(needsSchema){
-        IMarker marker = addMarker(pomFile, NO_SCHEMA_ERR, lineNumber, IMarker.SEVERITY_WARNING, false);
-        //the quick fix in the marker view needs to know the offset, since it doesn't have access to the
-        //editor/source viewer
-        if(marker != null){
-          marker.setAttribute(OFFSET, offset);
-        }
-      } 
     } catch(Throwable ex) {
-      //something went wrong looking for the schema. don't add the warning
+      MavenLogger.log("Error checking for schema", ex);
     }
   }
   
