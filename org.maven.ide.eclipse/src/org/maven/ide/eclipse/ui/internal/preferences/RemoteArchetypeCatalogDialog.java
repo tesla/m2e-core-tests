@@ -166,7 +166,7 @@ public class RemoteArchetypeCatalogDialog extends TitleAreaDialog {
         String url = catalogUrlCombo.getText();
         final RemoteCatalogFactory factory = new RemoteCatalogFactory(url, null, true);
 
-        new Job("Downloading remore catalog") {
+        new Job("Downloading remote catalog") {
           protected IStatus run(IProgressMonitor monitor) {
             IStatus status = Status.OK_STATUS;
             ArchetypeCatalog catalog = null;
