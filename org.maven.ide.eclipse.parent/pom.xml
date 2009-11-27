@@ -26,8 +26,8 @@
   <properties>
     <m2eclipse.version>0.9.9-SNAPSHOT</m2eclipse.version>
 
-    <maven_embedder.version>3.0-SNAPSHOT</maven_embedder.version>
-    <maven.version>3.0-SNAPSHOT</maven.version>
+    <maven_embedder.version>3.0.0.alpha-5</maven_embedder.version>
+    <maven.version>3.0-alpha-5</maven.version>
 
     <archetype_common.version>2.0.2.200911171109</archetype_common.version>
     <archetype.version>2.0-alpha-4</archetype.version>
