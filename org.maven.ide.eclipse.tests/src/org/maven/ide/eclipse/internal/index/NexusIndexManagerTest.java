@@ -331,5 +331,16 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
 //    NexusIndex index = indexManager.getIndex(repository);
 //    assertEquals(NexusIndex.DETAILS_FULL, index.getIndexDetails());
 //  }
-  
+
+  public void testMngEclipse1710() throws Exception {
+    final File settingsFile = new File("src/org/maven/ide/eclipse/internal/index/proxy_settings.xml");
+    assertTrue(settingsFile.exists());
+
+    mavenConfiguration.setUserSettingsFile(settingsFile.getCanonicalPath());
+    waitForJobsToComplete();
+
+    IndexedArtifactGroup[] rootGroups = indexManager.getRootGroups(getRepository("http://bad.host/content/repositories/eclipse"));
+    assertTrue(rootGroups.length > 0);
+  }
+
 }

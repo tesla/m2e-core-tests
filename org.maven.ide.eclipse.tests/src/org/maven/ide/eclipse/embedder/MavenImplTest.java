@@ -15,6 +15,7 @@ import org.apache.maven.lifecycle.MavenExecutionPlan;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.RepositorySystem;
+import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.codehaus.plexus.util.FileUtils;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -209,4 +210,22 @@ public class MavenImplTest extends AsbtractMavenProjectTestCase {
     }
   
   }
+
+  public void testGetProxy() throws Exception {
+    String origSettings = configuration.getUserSettingsFile();
+    try {
+      configuration.setUserSettingsFile(new File("src/org/maven/ide/eclipse/embedder/settings-with-proxy.xml")
+          .getCanonicalPath());
+      ProxyInfo proxy = maven.getProxyInfo("http");
+      assertEquals("rso", proxy.getHost());
+      assertEquals(80, proxy.getPort());
+      assertEquals("http", proxy.getType());
+      assertEquals("user", proxy.getUserName());
+      assertEquals("pass", proxy.getPassword());
+      assertEquals("*", proxy.getNonProxyHosts());
+    } finally {
+      configuration.setUserSettingsFile(origSettings);
+    }
+  }
+
 }

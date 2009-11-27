@@ -1,0 +1,18 @@
+<settings>
+	<proxies>
+		<proxy>
+			<active>true</active>
+			<protocol>http</protocol>
+			<host>rso</host>
+			<port>80</port>
+			<username>user</username>
+			<password>pass</password>
+			<nonProxyHosts>*</nonProxyHosts>
+		</proxy>
+	</proxies>
+    <mirror>
+      <id>void</id>
+      <mirrorOf>*</mirrorOf>
+      <url>file:remoterepo</url>
+    </mirror>
+</settings>

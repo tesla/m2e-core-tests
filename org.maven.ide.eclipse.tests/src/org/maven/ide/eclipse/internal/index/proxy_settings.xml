@@ -1,0 +1,18 @@
+<settings>
+	<proxies>
+		<proxy>
+			<active>true</active>
+			<protocol>http</protocol>
+			<host>repository.sonatype.org</host>
+			<port>80</port>
+		</proxy>
+	</proxies>
+	<mirrors>
+		<mirror>
+			<id>nexus</id>
+			<mirrorOf>external:*</mirrorOf>
+			<url>http://bad.host/content/repositories/eclipse</url>
+		</mirror>
+	</mirrors>
+</settings>
+

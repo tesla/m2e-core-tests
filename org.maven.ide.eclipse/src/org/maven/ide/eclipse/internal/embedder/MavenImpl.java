@@ -785,6 +785,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
     for (Proxy proxy : settings.getProxies()) {
       if (proxy.isActive() && protocol.equalsIgnoreCase(proxy.getProtocol())) {
         ProxyInfo proxyInfo = new ProxyInfo();
+        proxyInfo.setType(proxy.getProtocol());
         proxyInfo.setHost(proxy.getHost());
         proxyInfo.setPort(proxy.getPort());
         proxyInfo.setNonProxyHosts(proxy.getNonProxyHosts());
