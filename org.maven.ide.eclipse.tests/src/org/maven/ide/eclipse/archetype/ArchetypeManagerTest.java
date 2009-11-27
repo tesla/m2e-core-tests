@@ -79,6 +79,25 @@ public class ArchetypeManagerTest extends TestCase {
     assertEquals(1, catalog.getArchetypes().size());
   }
   
+  public void testRemoteArchetypeCatalogFactory() throws Exception {
+    assertEquals("http://server/repo", new RemoteCatalogFactory("http://server/repo/archetype-catalog.xml", null, true).getRepositoryUrl());
+    assertEquals("http://server/repo", new RemoteCatalogFactory("http://server/repo/archetype.catalog.xml", null, true).getRepositoryUrl());
+    assertEquals("http://server/repo", new RemoteCatalogFactory("http://server/repo/archetype-catalog.txt", null, true).getRepositoryUrl());
+    assertEquals("http://server/repo", new RemoteCatalogFactory("http://server/repo/", null, true).getRepositoryUrl());
+    assertEquals("http://server/repo", new RemoteCatalogFactory("http://server/repo", null, true).getRepositoryUrl());
+    assertEquals("", new RemoteCatalogFactory("catalog.xml", null, true).getRepositoryUrl());
+    assertEquals("/", new RemoteCatalogFactory("/", null, true).getRepositoryUrl());
+    
+    //Ok these don't make sense
+    assertEquals("", new RemoteCatalogFactory("", null, true).getRepositoryUrl());
+    assertEquals("", new RemoteCatalogFactory("/.", null, true).getRepositoryUrl());
+    assertEquals("", new RemoteCatalogFactory(".", null, true).getRepositoryUrl());
+    assertEquals(".", new RemoteCatalogFactory("./", null, true).getRepositoryUrl());
+    
+    assertEquals(null, new RemoteCatalogFactory(null, null, true).getRepositoryUrl());
+}
+  
+  
   public void testArchetypeManagerSaveRestore() throws Exception {
     
     ArchetypeCatalogFactory catalogFactory = new RemoteCatalogFactory("http://www.sonatype.org/", "test", true);
