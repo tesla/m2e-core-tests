@@ -181,7 +181,7 @@ public class RepositoryRegistry implements IRepositoryRegistry, IMavenProjectCha
   }
 
 
-  private AuthenticationInfo getAuthenticationInfo(Settings settings, String id) {
+  public AuthenticationInfo getAuthenticationInfo(Settings settings, String id) {
     if (settings == null) {
       return null;
     }
@@ -190,6 +190,8 @@ public class RepositoryRegistry implements IRepositoryRegistry, IMavenProjectCha
     if (server == null || server.getUsername() == null) {
       return null;
     }
+
+    server = maven.decryptPassword(server);
 
     AuthenticationInfo info = new AuthenticationInfo();
     info.setUserName(server.getUsername());

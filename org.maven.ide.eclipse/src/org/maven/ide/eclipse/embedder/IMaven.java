@@ -26,6 +26,7 @@ import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.settings.Mirror;
+import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.settings.validation.SettingsValidationResult;
 import org.apache.maven.wagon.events.TransferListener;
@@ -134,6 +135,8 @@ public interface IMaven {
   public void removeSettingsChangeListener(ISettingsChangeListener listener);
 
   public void reloadSettings() throws CoreException;
+
+  public Server decryptPassword(Server server);
 
   /**
    * Temporary solution/workaround for http://jira.codehaus.org/browse/MNG-4194. Extensions realm is created each time

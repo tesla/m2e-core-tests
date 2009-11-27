@@ -46,7 +46,6 @@ import org.codehaus.plexus.configuration.xml.XmlPlexusConfiguration;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.dag.CycleDetectedException;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 import org.apache.maven.Maven;
 import org.apache.maven.artifact.Artifact;
@@ -84,11 +83,20 @@ import org.apache.maven.project.ProjectBuildingResult;
 import org.apache.maven.project.ProjectSorter;
 import org.apache.maven.repository.ArtifactTransferListener;
 import org.apache.maven.repository.RepositorySystem;
-import org.apache.maven.settings.MavenSettingsBuilder;
 import org.apache.maven.settings.Mirror;
 import org.apache.maven.settings.Proxy;
+import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.settings.SettingsUtils;
+import org.apache.maven.settings.building.DefaultSettingsBuildingRequest;
+import org.apache.maven.settings.building.SettingsBuilder;
+import org.apache.maven.settings.building.SettingsBuildingException;
+import org.apache.maven.settings.building.SettingsBuildingRequest;
+import org.apache.maven.settings.building.SettingsProblem;
+import org.apache.maven.settings.crypto.DefaultSettingsDecryptionRequest;
+import org.apache.maven.settings.crypto.SettingsDecrypter;
+import org.apache.maven.settings.crypto.SettingsDecryptionRequest;
+import org.apache.maven.settings.crypto.SettingsDecryptionResult;
 import org.apache.maven.settings.validation.SettingsValidationResult;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 
@@ -119,7 +127,9 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
 
   private final RepositorySystem repositorySystem;
 
-  private final MavenSettingsBuilder settingsBuilder;
+  private final SettingsBuilder settingsBuilder;
+
+  private final SettingsDecrypter settingsDecrypter;
 
   private final IMavenConfiguration mavenConfiguration;
 
@@ -145,7 +155,8 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
       this.modelReader = plexus.lookup(ModelReader.class);
       this.modelWriter = plexus.lookup(ModelWriter.class);
       this.repositorySystem = plexus.lookup(RepositorySystem.class);
-      this.settingsBuilder = plexus.lookup(MavenSettingsBuilder.class);
+      this.settingsBuilder = plexus.lookup(SettingsBuilder.class);
+      this.settingsDecrypter = plexus.lookup(SettingsDecrypter.class);
       this.populator = plexus.lookup(MavenExecutionRequestPopulator.class);
       this.pluginManager = plexus.lookup(BuildPluginManager.class);
       this.lifecycleExecutor = plexus.lookup(LifecycleExecutor.class);
@@ -254,7 +265,8 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
   public Settings getSettings() throws CoreException {
     // MUST NOT use createRequest!
 
-    MavenExecutionRequest request = new DefaultMavenExecutionRequest();
+    // TODO: Can't that delegate to buildSettings()?
+    SettingsBuildingRequest request = new DefaultSettingsBuildingRequest();
     if(mavenConfiguration.getGlobalSettingsFile() != null) {
       request.setGlobalSettingsFile(new File(mavenConfiguration.getGlobalSettingsFile()));
     }
@@ -262,26 +274,20 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
       request.setUserSettingsFile(new File(mavenConfiguration.getUserSettingsFile()));
     }
     try {
-      return settingsBuilder.buildSettings(request);
-    } catch(IOException ex) {
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not read settings.xml",
-          ex));
-    } catch(XmlPullParserException ex) {
+      return settingsBuilder.build(request).getEffectiveSettings();
+    } catch(SettingsBuildingException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not read settings.xml",
           ex));
     }
   }
 
   public Settings buildSettings(String globalSettings, String userSettings) throws CoreException {
-    MavenExecutionRequest request = createExecutionRequest(null);
+    SettingsBuildingRequest request = new DefaultSettingsBuildingRequest();
     request.setGlobalSettingsFile(globalSettings != null ? new File(globalSettings) : null);
     request.setUserSettingsFile(userSettings != null ? new File(userSettings) : null);
     try {
-      return settingsBuilder.buildSettings(request);
-    } catch(IOException ex) {
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not read settings.xml",
-          ex));
-    } catch(XmlPullParserException ex) {
+      return settingsBuilder.build(request).getEffectiveSettings();
+    } catch(SettingsBuildingException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not read settings.xml",
           ex));
     }
@@ -292,9 +298,14 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
     if(settings != null) {
       File settingsFile = new File(settings);
       if(settingsFile.canRead()) {
-        List<String> messages = settingsBuilder.validateSettings(settingsFile).getMessages();
-        for(String message : messages) {
-          result.addMessage(message);
+        SettingsBuildingRequest request = new DefaultSettingsBuildingRequest();
+        request.setUserSettingsFile(settingsFile);
+        try {
+          settingsBuilder.build(request);
+        } catch(SettingsBuildingException ex) {
+          for(SettingsProblem problem : ex.getProblems()) {
+            result.addMessage(problem.getMessage());
+          }
         }
       } else {
         result.addMessage("Can not read settings file " + settings);
@@ -314,6 +325,16 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
         MavenLogger.log(e);
       }
     }
+  }
+
+  public Server decryptPassword(Server server) {
+    SettingsDecryptionRequest request = new DefaultSettingsDecryptionRequest(server);
+    SettingsDecryptionResult result = settingsDecrypter.decrypt(request);
+    for (SettingsProblem problem : result.getProblems()) {
+      MavenLogger.log(new Status(IStatus.WARNING, IMavenConstants.PLUGIN_ID, -1, problem.getMessage(), problem
+          .getException()));
+    }
+    return result.getServer();
   }
 
   public void mavenConfigutationChange(MavenConfigurationChangeEvent event) throws CoreException {
