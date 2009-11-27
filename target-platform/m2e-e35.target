@@ -25,18 +25,18 @@
 </location>
 <location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
 <unit id="org.eclipse.jst.enterprise_ui.feature.feature.group" version="3.1.1.v200908101600-7_7EGrfFQRwRZTMYz07YrGeRz0Tj"/>
-<unit id='org.eclipse.wst.web_ui.feature.feature.group' version='3.1.1.v200908120400-7R77FSpEVw2xXR0CtKvX6bG6a2qU'/>
-<unit id='org.eclipse.wst.web_core.feature.feature.group' version='3.1.1.v200908120400-7H77FDAAT7oGlfz0dFV3j0BgbCD7'/>
+<unit id="org.eclipse.wst.web_ui.feature.feature.group" version="3.1.1.v200908120400-7R77FSpEVw2xXR0CtKvX6bG6a2qU"/>
+<unit id="org.eclipse.wst.web_core.feature.feature.group" version="3.1.1.v200908120400-7H77FDAAT7oGlfz0dFV3j0BgbCD7"/>
 <unit id="org.eclipse.jst.web_ui.feature.feature.group" version="3.1.1.v200908121609-7E77FBfDlwYa_9sdy2q77doi14gl"/>
-<unit id='org.eclipse.jst.server_ui.feature.feature.group' version='3.1.1.v20090817-7A2FBa9xFaGovXGKcCWMK2355'/>
-<unit id='org.eclipse.jst.enterprise_core.feature.feature.group' version='3.1.1.v200908101600-52FGCAkF77g7NDE8QA7'/>
-<unit id='org.eclipse.jst.server_adapters.feature.feature.group' version='3.1.0.v20090311c-20-7w311A1422c'/>
-<unit id='org.eclipse.jst.server_adapters.ext.feature.feature.group' version='3.1.1.v20090813-777HFDPCcNBBz0BjJU4BA8'/>
+<unit id="org.eclipse.jst.server_ui.feature.feature.group" version="3.1.1.v20090817-7A2FBa9xFaGovXGKcCWMK2355"/>
+<unit id="org.eclipse.jst.enterprise_core.feature.feature.group" version="3.1.1.v200908101600-52FGCAkF77g7NDE8QA7"/>
+<unit id="org.eclipse.jst.server_adapters.feature.feature.group" version="3.1.0.v20090311c-20-7w311A1422c"/>
+<unit id="org.eclipse.jst.server_adapters.ext.feature.feature.group" version="3.1.1.v20090813-777HFDPCcNBBz0BjJU4BA8"/>
 <repository location="http://download.eclipse.org/releases/galileo"/>
 </location>
 <location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
-<unit id='com.windowtester.launcher.feature.group' version='4.0.0.200910201414'/>
-<unit id='com.windowtester.runtime.feature.group' version='4.0.0.200910201517'/>
+<unit id="com.windowtester.launcher.feature.group" version="4.0.0.200910201414"/>
+<unit id="com.windowtester.runtime.feature.group" version="4.0.0.200910201517"/>
 <repository location="http://download.instantiations.com/WindowTesterPro/release/latest/update/3.5"/>
 </location>
 <location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
