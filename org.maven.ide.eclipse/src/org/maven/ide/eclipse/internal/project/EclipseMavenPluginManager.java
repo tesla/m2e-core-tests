@@ -10,6 +10,7 @@ package org.maven.ide.eclipse.internal.project;
 
 import java.util.List;
 
+import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.PluginContainerException;
 import org.apache.maven.plugin.PluginResolutionException;
@@ -25,7 +26,7 @@ public class EclipseMavenPluginManager extends DefaultMavenPluginManager {
   
   @Override
   public void setupPluginRealm(PluginDescriptor pluginDescriptor, MavenSession session, ClassLoader parent,
-      List<String> imports) throws PluginResolutionException, PluginContainerException {
+      List<String> imports, ArtifactFilter dependencyFilter) throws PluginResolutionException, PluginContainerException {
     /*
      * Plugin realms are cached and there is currently no way to purge cached
      * realms due to http://jira.codehaus.org/browse/MNG-4194.
@@ -38,7 +39,7 @@ public class EclipseMavenPluginManager extends DefaultMavenPluginManager {
     boolean disabled = EclipseWorkspaceArtifactRepository.isDisabled();
     EclipseWorkspaceArtifactRepository.setDisabled(true);
     try {
-      super.setupPluginRealm(pluginDescriptor, session, parent, imports);
+      super.setupPluginRealm(pluginDescriptor, session, parent, imports, dependencyFilter);
     } finally {
       EclipseWorkspaceArtifactRepository.setDisabled(disabled);
     }
