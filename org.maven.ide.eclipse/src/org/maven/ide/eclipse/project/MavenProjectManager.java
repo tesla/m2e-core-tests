@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.apache.maven.artifact.repository.MavenArtifactRepository;
 import org.apache.maven.execution.MavenExecutionRequest;
 
 import org.maven.ide.eclipse.core.IMavenConstants;
@@ -142,5 +143,14 @@ public class MavenProjectManager {
    */
   public MavenExecutionRequest createExecutionRequest(IFile pom, ResolverConfiguration resolverConfiguration, IProgressMonitor monitor) throws CoreException {
     return manager.createExecutionRequest(pom, resolverConfiguration, monitor);
+  }
+
+  /**
+   * Local repository implementation that checks artifacts in workspace first.
+   * 
+   * PROVISIONAL
+   */
+  public MavenArtifactRepository getWorkspaceLocalRepository() throws CoreException {
+    return manager.getWorkspaceLocalRepository();
   }
 }

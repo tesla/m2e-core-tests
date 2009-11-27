@@ -128,8 +128,4 @@ public class ResolverConfiguration implements Serializable {
   public void setSkipCompiler(boolean skipCompiler) {
     this.skipCompiler = skipCompiler;
   }
-  
-  public String getLifecycleMapping() {
-    return null;
-  }
 }

@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.internal.builder;
+package org.maven.ide.eclipse.builder;
 
 import java.io.File;
 import java.util.List;
@@ -19,6 +19,8 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
 import org.sonatype.plexus.build.incremental.EmptyScanner;
+
+
 import org.codehaus.plexus.util.DirectoryScanner;
 import org.codehaus.plexus.util.Scanner;
 

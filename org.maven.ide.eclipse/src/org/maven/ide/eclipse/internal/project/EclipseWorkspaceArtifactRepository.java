@@ -55,7 +55,7 @@ public final class EclipseWorkspaceArtifactRepository extends LocalArtifactRepos
     if(pomPath == null) {
       return false;
     }
-    if(pomPath.equals(context.pom.getFullPath())) {
+    if(context.pom != null && pomPath.equals(context.pom.getFullPath())) {
       return false;
     }
 

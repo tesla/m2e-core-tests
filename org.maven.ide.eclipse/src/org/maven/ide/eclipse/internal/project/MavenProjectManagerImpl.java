@@ -39,6 +39,7 @@ import org.eclipse.core.runtime.preferences.IScopeContext;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.repository.MavenArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
 import org.apache.maven.execution.DefaultMavenExecutionResult;
 import org.apache.maven.execution.MavenExecutionRequest;
@@ -715,14 +716,25 @@ public class MavenProjectManagerImpl {
     // eclipse workspace repository implements both workspace dependency resolution
     // and inter-module dependency resolution for multi-module projects.
 
+    request.setLocalRepository(getLocalRepository(state, pom, resolverConfiguration));
+
+    return request;
+  }
+
+  private MavenArtifactRepository getLocalRepository(IProjectRegistry state, IFile pom,
+      ResolverConfiguration resolverConfiguration) throws CoreException {
     Context context = new Context(state, resolverConfiguration, pom);
     ArtifactRepository localRepository = maven.getLocalRepository();
     EclipseWorkspaceArtifactRepository workspaceRepsotory = new EclipseWorkspaceArtifactRepository(context);
     DelegatingLocalArtifactRepository repository = new DelegatingLocalArtifactRepository(localRepository);
     repository.setIdeWorkspace(workspaceRepsotory);
-    request.setLocalRepository(repository);
+    return repository;
+  }
 
-    return request;
+  public MavenArtifactRepository getWorkspaceLocalRepository() throws CoreException {
+    ResolverConfiguration resolverConfiguration = new ResolverConfiguration();
+    resolverConfiguration.setResolveWorkspaceProjects(true);
+    return getLocalRepository(projectRegistry, null, resolverConfiguration );
   }
 
   MutableProjectRegistry newMutableProjectRegistry() {

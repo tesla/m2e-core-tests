@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.internal.builder;
+package org.maven.ide.eclipse.builder;
 
 import java.io.File;
 import java.util.List;
@@ -17,6 +17,9 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 
 import org.sonatype.plexus.build.incremental.EmptyScanner;
+
+import org.maven.ide.eclipse.internal.builder.ResourceScanner;
+
 import org.codehaus.plexus.util.Scanner;
 
 /**
@@ -37,7 +40,6 @@ public class EclipseBuildContext extends AbstractEclipseBuildContext {
     return true;
   }
 
-  @SuppressWarnings("unchecked")
   public boolean hasDelta(List relpath) {
     return true;
   }

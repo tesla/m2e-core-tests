@@ -19,6 +19,7 @@ import org.apache.maven.execution.MavenSession;
 
 import org.sonatype.plexus.build.incremental.BuildContext;
 
+import org.maven.ide.eclipse.builder.AbstractEclipseBuildContext;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 
 public abstract class InternalBuildParticipant {

@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.internal.builder;
+package org.maven.ide.eclipse.builder;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;

@@ -142,8 +142,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   /**
    * Poor man's component registry
    */
-  @SuppressWarnings("unchecked")
-  private Map<Class, Object> components = new HashMap<Class, Object>();
+  private Map<Class<?>, Object> components = new HashMap<Class<?>, Object>();
 
   private MavenConsole console;
 

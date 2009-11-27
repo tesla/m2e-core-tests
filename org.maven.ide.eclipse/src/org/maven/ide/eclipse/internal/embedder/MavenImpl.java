@@ -807,4 +807,8 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, "unable to sort projects", ex));
     }
   }
+  
+  public RepositorySystem getRepositorySystem() {
+    return repositorySystem;
+  }
 }

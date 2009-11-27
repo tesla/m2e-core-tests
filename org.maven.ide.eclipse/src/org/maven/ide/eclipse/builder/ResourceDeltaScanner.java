@@ -1,10 +1,12 @@
-package org.maven.ide.eclipse.internal.builder;
+package org.maven.ide.eclipse.builder;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.codehaus.plexus.util.AbstractScanner;
+
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;

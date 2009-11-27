@@ -37,6 +37,9 @@ import org.apache.maven.project.MavenProject;
 import org.sonatype.plexus.build.incremental.ThreadBuildContext;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.builder.AbstractEclipseBuildContext;
+import org.maven.ide.eclipse.builder.EclipseBuildContext;
+import org.maven.ide.eclipse.builder.EclipseIncrementalBuildContext;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
@@ -102,8 +105,9 @@ public class MavenBuilder extends IncrementalProjectBuilder {
         MavenUpdateRequest updateRequest = new MavenUpdateRequest(project, mavenConfiguration.isOffline() /*offline*/, false /*updateSnapshots*/);
         projectManager.refresh(updateRequest, monitor);
         IMavenProjectFacade facade = projectManager.create(project, monitor);
-        if(facade != null){
-          projectFacade = facade;
+        if(facade == null){
+          // error marker should have been created
+          return null;
         }
       }
 
