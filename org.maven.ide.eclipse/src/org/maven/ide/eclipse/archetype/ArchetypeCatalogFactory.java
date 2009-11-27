@@ -134,12 +134,46 @@ public abstract class ArchetypeCatalogFactory {
    */
   public static class RemoteCatalogFactory extends ArchetypeCatalogFactory {
 
+    private String repositoryUrl = null;
+    
     public RemoteCatalogFactory(String url, String description, boolean editable) {
       super(url, description == null || description.trim().length() == 0 ? "Remote " + url : description, editable);
+      repositoryUrl = parseCatalogUrl(url);
+    }
+
+    /**
+     * @param url
+     * @return
+     
+     */
+    private String parseCatalogUrl(String url) {
+      if (url == null) {
+        return null;
+      }
+      int length = url.length();
+      if (length > 1 && url.endsWith("/"))
+      {
+        return url.substring(0, url.length()-1);
+      }
+      int idx = url.lastIndexOf("/");
+      idx = (idx>0)?idx:0; 
+      if (url.lastIndexOf(".") >= idx) {
+        //Assume last fragment of the url is a file, let's keep its parent folder
+        return url.substring(0, idx);
+      }
+      return url;
     }
 
     public ArchetypeCatalog getArchetypeCatalog() {
       return getArchetyper().getRemoteCatalog(getId());
+    }
+
+    
+    /**
+     * @return the url of the remote repository hosting the catalog
+     */
+    public String getRepositoryUrl() {
+      return repositoryUrl;
     }
   }
 

@@ -20,7 +20,12 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.codehaus.plexus.util.IOUtil;
+
+import org.apache.maven.archetype.catalog.Archetype;
+
 
 
 
@@ -86,6 +91,24 @@ public class ArchetypeManager {
     } finally {
       IOUtil.close(os);
     }
+  }
+
+  /**
+   * @return the archetypeCatalogFactory containing the archetype parameter, null if none was found.
+   */
+  public <T extends ArchetypeCatalogFactory> T findParentCatalogFactory(Archetype a, Class<T> type) throws CoreException {
+    if (a!=null){
+      for (ArchetypeCatalogFactory factory : getArchetypeCatalogs()) {
+        if ((type.isAssignableFrom(factory.getClass())) 
+           //temporary hack to get around https://issues.sonatype.org/browse/MNGECLIPSE-1792
+           //cf. MavenProjectWizardArchetypePage.getAllArchetypes 
+           && !(factory.getDescription() != null && factory.getDescription().startsWith("Test"))
+           && factory.getArchetypeCatalog().getArchetypes().contains(a)) {
+          return (T)factory; 
+        }
+      }
+    }
+    return null;
   }
 
 }

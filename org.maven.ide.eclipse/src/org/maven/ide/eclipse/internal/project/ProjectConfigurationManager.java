@@ -44,6 +44,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.ui.IWorkingSet;
 
+import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 
 import org.apache.maven.archetype.ArchetypeGenerationRequest;
@@ -60,6 +61,8 @@ import org.apache.maven.model.Plugin;
 import org.apache.maven.project.MavenProject;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.archetype.ArchetypeManager;
+import org.maven.ide.eclipse.archetype.ArchetypeCatalogFactory.RemoteCatalogFactory;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
@@ -449,6 +452,9 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     }
 
     try {
+      
+      
+      
       Artifact artifact = resolveArchetype(archetype, monitor);
       
       ArchetypeGenerationRequest request = new ArchetypeGenerationRequest() //
@@ -503,21 +509,38 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
   private Artifact resolveArchetype(Archetype a, IProgressMonitor monitor) throws CoreException {
     ArrayList<ArtifactRepository> repos = new ArrayList<ArtifactRepository>();
     repos.addAll(maven.getArtifactRepositories()); // see org.apache.maven.archetype.downloader.DefaultDownloader#download    
-    if (a.getRepository() != null && a.getRepository().trim().length() > 0) {
-     //MNGECLIPSE-1399 use archetype repository too, not just the default ones
-      ArtifactRepository archetypeRepository = new DefaultArtifactRepositoryFactory()
-            .createArtifactRepository("archetype", a.getRepository().trim(), new DefaultRepositoryLayout(), null, null);
-      repos.add(archetypeRepository);
-      //FIXME If archetype.repository is not explicitly set in its catalog, it should point to the catalog repository by default.
-    }
-    
-    
+
+    //MNGECLIPSE-1399 use archetype repository too, not just the default ones
+    String artifactRemoteRepository = a.getRepository();
+
     try {
+    
+      if (StringUtils.isBlank(artifactRemoteRepository)){
+        
+        IMavenConfiguration mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
+        if (!mavenConfiguration.isOffline()){
+          //Try to find the repository from remote catalog if needed
+          final ArchetypeManager archetypeManager = MavenPlugin.getDefault().getArchetypeManager();
+          RemoteCatalogFactory factory = archetypeManager.findParentCatalogFactory(a, RemoteCatalogFactory.class);
+          if (factory != null) {
+             //Grab the computed remote repository url
+              artifactRemoteRepository = factory.getRepositoryUrl();
+              a.setRepository(artifactRemoteRepository);//Hopefully will prevent further lookups for the same archetype
+          }
+        }
+      }
+  
+      if (StringUtils.isNotBlank(artifactRemoteRepository)) {
+        ArtifactRepository archetypeRepository = new DefaultArtifactRepositoryFactory()
+        .createArtifactRepository("archetype", a.getRepository().trim(), new DefaultRepositoryLayout(), null, null);
+        repos.add(0,archetypeRepository);//If the archetype doesn't exist locally, this will be the first remote repo to be searched.
+      }
+    
       maven.resolve(a.getGroupId(), a.getArtifactId(),a.getVersion(), "pom", null, repos, monitor);
       return maven.resolve(a.getGroupId(), a.getArtifactId(),a.getVersion(), "jar", null, repos, monitor);
     } catch (CoreException e) {
       StringBuilder sb = new StringBuilder();
-      sb.append("Could not resolve archetype ").append(a.getGroupId()).append(':').append(a.getArtifactId()).append(a.getVersion());
+      sb.append("Could not resolve archetype ").append(a.getGroupId()).append(':').append(a.getArtifactId()).append(':').append(a.getVersion());
       sb.append(" from any of the configured repositories.");
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, sb.toString(), e));
     }
