@@ -76,9 +76,11 @@ abstract class AbstractTransferListenerAdapter {
     if(total != WagonConstants.UNKNOWN_LENGTH) {
       sb.append('/');
       formatBytes(total, sb);
-      sb.append(" (");
-      sb.append(100l * complete / total);
-      sb.append("%)");
+      if (total > 0) {
+        sb.append(" (");
+        sb.append(100l * complete / total);
+        sb.append("%)");
+      }
     }
     sb.append(' ');
 
