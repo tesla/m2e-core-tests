@@ -26,7 +26,7 @@
   <properties>
     <m2eclipse.version>0.9.9-SNAPSHOT</m2eclipse.version>
 
-    <maven_embedder.version>3.0.0.alpha-5</maven_embedder.version>
+    <maven_embedder.version>${m2eclipse.version}</maven_embedder.version>
     <maven.version>3.0-alpha-5</maven.version>
 
     <archetype_common.version>2.0.2.200911171109</archetype_common.version>
@@ -78,7 +78,7 @@
   </ciManagement>
 
   <modules>
-    <module>../org.maven.ide.components.maven-embedder</module>
+    <module>../org.maven.ide.eclipse.maven-embedder</module>
     <module>../org.maven.ide.components.archetype-common</module>
     <module>../org.maven.ide.components.nexus-indexer</module>
     <module>../org.maven.ide.components.maven-model-edit</module>
@@ -109,7 +109,7 @@
     <module>../org.maven.ide.eclipse.pr</module>
 
     <!-- features -->
-    <module>../org.maven.ide.components.maven_embedder.feature</module>
+    <module>../org.maven.ide.eclipse.maven_embedder.feature</module>
     <module>../org.maven.ide.eclipse.feature</module>
     <module>../org.maven.ide.eclipse.editor.feature</module>
     <module>../org.maven.ide.eclipse.editor.xml.feature</module>
@@ -165,8 +165,8 @@
 
       <!--  components -->
       <dependency>
-        <groupId>org.maven.ide.components</groupId>
-        <artifactId>org.maven.ide.components.maven_embedder</artifactId>
+        <groupId>org.maven.ide.eclipse</groupId>
+        <artifactId>org.maven.ide.eclipse.maven_embedder</artifactId>
         <version>${maven_embedder.version}</version>
       </dependency>
       <dependency>

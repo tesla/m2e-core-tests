@@ -48,7 +48,7 @@ http://www.eclipse.org/legal/epl-v10.html
       <import plugin="org.eclipse.jface"/>
       <import plugin="com.ibm.icu"/>
       <import plugin="org.maven.ide.eclipse"/>
-      <import plugin="org.maven.ide.components.maven_embedder"/>
+      <import plugin="org.maven.ide.eclipse.maven_embedder"/>
       <import plugin="org.maven.ide.components.maven_model_edit"/>
       <import plugin="org.maven.ide.eclipse.editor.xml"/>
    </requires>

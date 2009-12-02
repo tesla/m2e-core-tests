@@ -7,7 +7,7 @@ Bundle-Version: 0.9.9.qualifier
 Bundle-Activator: org.maven.ide.eclipse.refactoring.internal.Activator
 Require-Bundle: org.maven.ide.eclipse,
  org.maven.ide.components.maven_model_edit,
- org.maven.ide.components.maven_embedder,
+ org.maven.ide.eclipse.maven_embedder,
  org.maven.ide.components.dependency_tree,
  org.eclipse.core.runtime,
  org.eclipse.core.resources,

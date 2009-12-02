@@ -36,7 +36,7 @@ import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
  */
 public class MavenEmbeddedRuntime implements MavenRuntime {
 
-  private static final String MAVEN_MAVEN_EMBEDDER_BUNDLE_ID = "org.maven.ide.components.maven_embedder";
+  private static final String MAVEN_MAVEN_EMBEDDER_BUNDLE_ID = "org.maven.ide.eclipse.maven_embedder";
 
   private static final String MAVEN_EXECUTOR_CLASS = org.apache.maven.cli.MavenCli.class.getName();
 
@@ -125,7 +125,7 @@ public class MavenEmbeddedRuntime implements MavenRuntime {
   }
 
   public String toString() {
-    Bundle embedder = Platform.getBundle("org.maven.ide.components.maven_embedder");
+    Bundle embedder = Platform.getBundle(MAVEN_MAVEN_EMBEDDER_BUNDLE_ID);
 
     StringBuilder sb = new StringBuilder();
     sb.append("Embedded (").append(getVersion());

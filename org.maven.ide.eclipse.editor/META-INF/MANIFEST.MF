@@ -24,7 +24,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.emf.ecore.edit,
  org.eclipse.emf.edit.ui;resolution:=optional,
  org.maven.ide.eclipse,
- org.maven.ide.components.maven_embedder,
+ org.maven.ide.eclipse.maven_embedder,
  org.maven.ide.components.dependency_tree,
  org.maven.ide.components.maven_model_edit,
  org.maven.ide.eclipse.editor.xml
