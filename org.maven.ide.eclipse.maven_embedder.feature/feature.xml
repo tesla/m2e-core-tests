@@ -30,5 +30,10 @@ http://www.eclipse.org/legal/epl-v10.html
          download-size="0"
          install-size="0"
          version="0.0.0"/>
+   <plugin
+         id="org.maven.ide.components.maven_embedder"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
 
 </feature>

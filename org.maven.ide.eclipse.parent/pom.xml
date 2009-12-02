@@ -79,6 +79,7 @@
 
   <modules>
     <module>../org.maven.ide.eclipse.maven-embedder</module>
+    <module>../org.maven.ide.components.maven-embedder</module>
     <module>../org.maven.ide.components.archetype-common</module>
     <module>../org.maven.ide.components.nexus-indexer</module>
     <module>../org.maven.ide.components.maven-model-edit</module>
