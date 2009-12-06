@@ -34,10 +34,15 @@ public class EclipseIncrementalBuildContext extends AbstractEclipseBuildContext 
   }
 
   public boolean hasDelta(String relPath) {
-    return delta == null || delta.findMember(new Path(relPath)) != null;
+    IPath path = new Path(relPath);
+    return hasDelta(path);
   }
 
-  @SuppressWarnings("unchecked")
+  protected boolean hasDelta(IPath path) {
+    return delta == null || path == null || delta.findMember(path) != null;
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public boolean hasDelta(List relPaths) {
     for (String relPath : (List<String>) relPaths) {
       if (hasDelta(relPath)) {
@@ -45,6 +50,10 @@ public class EclipseIncrementalBuildContext extends AbstractEclipseBuildContext 
       }
     }
     return false;
+  }
+
+  public boolean hasDelta(File file) {
+    return hasDelta(getRelativePath(file));
   }
 
   public Scanner newDeleteScanner(File basedir) {
@@ -77,8 +86,8 @@ public class EclipseIncrementalBuildContext extends AbstractEclipseBuildContext 
     return ds;
   }
 
-  private IResourceDelta getDelta(File basedir) {
-    IPath relpath = getRelativePath(basedir);
+  private IResourceDelta getDelta(File file) {
+    IPath relpath = getRelativePath(file);
     if (relpath == null) {
       return null;
     }

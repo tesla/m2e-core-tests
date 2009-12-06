@@ -13,14 +13,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
+
+import org.codehaus.plexus.util.Scanner;
 
 import org.sonatype.plexus.build.incremental.EmptyScanner;
 
 import org.maven.ide.eclipse.internal.builder.ResourceScanner;
-
-import org.codehaus.plexus.util.Scanner;
 
 /**
  * EclipseBuildContext
@@ -40,7 +39,12 @@ public class EclipseBuildContext extends AbstractEclipseBuildContext {
     return true;
   }
 
+  @SuppressWarnings("rawtypes")
   public boolean hasDelta(List relpath) {
+    return true;
+  }
+
+  public boolean hasDelta(File file) {
     return true;
   }
 
@@ -57,7 +61,7 @@ public class EclipseBuildContext extends AbstractEclipseBuildContext {
     return newScanner(basedir);
   }
 
-  protected IResource getBaseResource() {
+  protected IProject getBaseResource() {
     return project;
   }
 

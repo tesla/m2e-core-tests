@@ -16,11 +16,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
-import org.sonatype.plexus.build.incremental.BuildContext2;
+import org.sonatype.plexus.build.incremental.BuildContext;
 
 
 /**
@@ -28,7 +29,7 @@ import org.sonatype.plexus.build.incremental.BuildContext2;
  * 
  * @author igor
  */
-public abstract class AbstractEclipseBuildContext implements BuildContext2 {
+public abstract class AbstractEclipseBuildContext implements BuildContext {
 
   public static class Message {
     public final File file;
@@ -88,6 +89,18 @@ public abstract class AbstractEclipseBuildContext implements BuildContext2 {
     return path.removeFirstSegments(basepath.segmentCount());
   }
 
+  protected IResource getResource(File file) {
+    IPath relpath = getRelativePath(file);
+    if (relpath == null) {
+      return null;
+    }
+    IResource baseResource = getBaseResource();
+    if (baseResource instanceof IContainer) {
+      return ((IContainer) baseResource).findMember(relpath);
+    }
+    return null;
+  }
+
   protected abstract IResource getBaseResource();
 
   public void setValue(String key, Object value) {
@@ -112,5 +125,13 @@ public abstract class AbstractEclipseBuildContext implements BuildContext2 {
 
   public List<Message> getWarningMessages() {
     return warningMessages;
+  }
+
+  public boolean isUptodate(File target, File source) {
+    IResource targetResource = getResource(target);
+    IResource sourceResource = getResource(source);
+    return targetResource != null && targetResource.isAccessible() && !hasDelta(target)
+        && sourceResource != null && sourceResource.isAccessible() && !hasDelta(source)
+        && targetResource.getLocalTimeStamp() > sourceResource.getLocalTimeStamp();
   }
 }
