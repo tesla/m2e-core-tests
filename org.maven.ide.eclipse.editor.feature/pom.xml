@@ -17,21 +17,8 @@
   </parent>
 
   <artifactId>org.maven.ide.eclipse.editor.feature</artifactId>
-  <version>${m2eclipse.version}</version>
   <packaging>eclipse-feature</packaging>
 
   <name>Maven POM Editor Feature (Optional)</name>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.codehaus.tycho</groupId>
-        <artifactId>maven-osgi-packaging-plugin</artifactId>
-        <configuration>
-          <featureOnly>true</featureOnly>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 
 </project>

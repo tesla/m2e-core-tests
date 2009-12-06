@@ -17,47 +17,8 @@
   </parent>
 
   <artifactId>org.maven.ide.eclipse.feature</artifactId>
-  <version>${m2eclipse.version}</version>
   <packaging>eclipse-feature</packaging>
 
   <name>Maven Integration for Eclipse</name>
-
-  <build>
-    <sourceDirectory>src</sourceDirectory>
-
-    <plugins>
-      <plugin>
-        <groupId>org.codehaus.tycho</groupId>
-        <artifactId>maven-osgi-packaging-plugin</artifactId>
-        <configuration>
-          <featureOnly>true</featureOnly>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
-
-  <dependencies>
-    <dependency>
-      <groupId>org.maven.ide.eclipse</groupId>
-      <artifactId>org.maven.ide.eclipse</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.maven.ide.components</groupId>
-      <artifactId>org.maven.ide.components.archetype_common</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.maven.ide.eclipse</groupId>
-      <artifactId>org.maven.ide.eclipse.maven_embedder</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.maven.ide.components</groupId>
-      <artifactId>org.maven.ide.components.maven_model_edit</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.maven.ide.components</groupId>
-      <artifactId>org.maven.ide.components.nexus_indexer</artifactId>
-    </dependency>
-  </dependencies>
 
 </project>

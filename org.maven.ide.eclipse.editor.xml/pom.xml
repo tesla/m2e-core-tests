@@ -17,22 +17,8 @@
   </parent>
 
   <artifactId>org.maven.ide.eclipse.editor.xml</artifactId>
-  <version>${m2eclipse.version}</version>
   <packaging>eclipse-plugin</packaging>
 
   <name>Maven POM XML Editor</name>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.codehaus.tycho</groupId>
-        <artifactId>maven-osgi-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.5</source>
-          <target>1.5</target>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 
 </project>

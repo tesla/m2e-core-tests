@@ -17,7 +17,6 @@
   </parent>
 
   <artifactId>org.maven.ide.eclipse.pr</artifactId>
-  <version>${m2eclipse.version}</version>
   <packaging>eclipse-plugin</packaging>
   <name>Maven Problem Reporting</name>
 
@@ -86,7 +85,7 @@
           </plugin>
  
           <plugin>
-            <groupId>org.codehaus.tycho</groupId>
+            <groupId>org.sonatype.tycho</groupId>
             <artifactId>maven-osgi-packaging-plugin</artifactId>
             <executions>
               <execution>

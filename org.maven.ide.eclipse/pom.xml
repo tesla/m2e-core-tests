@@ -18,7 +18,6 @@
 
 
   <artifactId>org.maven.ide.eclipse</artifactId>
-  <version>${m2eclipse.version}</version>
   <packaging>eclipse-plugin</packaging>
 
   <name>Maven Integration for Eclipse Plug-in</name>
@@ -34,17 +33,6 @@
         </includes>
       </resource>
     </resources>
-
-    <plugins>
-      <plugin>
-        <groupId>org.codehaus.tycho</groupId>
-        <artifactId>maven-osgi-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.5</source>
-          <target>1.5</target>
-        </configuration>
-      </plugin>
-    </plugins>
   </build>
 
 </project>
