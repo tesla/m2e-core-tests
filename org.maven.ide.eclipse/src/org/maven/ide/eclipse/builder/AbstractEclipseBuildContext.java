@@ -132,6 +132,6 @@ public abstract class AbstractEclipseBuildContext implements BuildContext {
     IResource sourceResource = getResource(source);
     return targetResource != null && targetResource.isAccessible() && !hasDelta(target)
         && sourceResource != null && sourceResource.isAccessible() && !hasDelta(source)
-        && targetResource.getLocalTimeStamp() > sourceResource.getLocalTimeStamp();
+        && targetResource.getLocalTimeStamp() >= sourceResource.getLocalTimeStamp();
   }
 }
