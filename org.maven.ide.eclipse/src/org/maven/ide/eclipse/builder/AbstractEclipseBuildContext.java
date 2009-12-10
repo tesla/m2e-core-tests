@@ -9,6 +9,7 @@
 package org.maven.ide.eclipse.builder;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -71,7 +72,7 @@ public abstract class AbstractEclipseBuildContext implements BuildContext {
     return refresh;
   }
 
-  public OutputStream newFileOutputStream(File file) {
+  public OutputStream newFileOutputStream(File file) throws IOException {
     return new ChangedFileOutputStream(file, this);
   }
 

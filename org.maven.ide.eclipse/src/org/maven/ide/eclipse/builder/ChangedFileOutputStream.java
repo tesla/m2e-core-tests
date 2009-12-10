@@ -13,6 +13,7 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -26,16 +27,18 @@ public class ChangedFileOutputStream extends OutputStream {
 
   private final File file;
   private final BuildContext buildContext;
+  private final OutputStream os;
 
   private ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
-  public ChangedFileOutputStream(File file) {
+  public ChangedFileOutputStream(File file) throws FileNotFoundException {
     this(file, null);
   }
 
-  public ChangedFileOutputStream(File file, BuildContext buildContext) {
+  public ChangedFileOutputStream(File file, BuildContext buildContext) throws FileNotFoundException {
     this.file = file;
     this.buildContext = buildContext;
+    this.os = new BufferedOutputStream(new FileOutputStream(file));
   }
 
   public void write(int b) {
@@ -47,6 +50,14 @@ public class ChangedFileOutputStream extends OutputStream {
   }
 
   public void close() throws IOException {
+    try {
+      writeIfNewOrChanged();
+    } finally {
+      os.close();
+    }
+  }
+
+  protected void writeIfNewOrChanged() throws IOException {
     byte[] bytes = buffer.toByteArray();
 
     boolean needToWrite = false;
@@ -78,15 +89,7 @@ public class ChangedFileOutputStream extends OutputStream {
         buildContext.refresh(file);
       }
 
-      BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(file));
-      try {
-        os.write(bytes);
-      } finally {
-        try {
-          os.close();
-        } catch (IOException e) {
-        }
-      }
+      os.write(bytes);
     }
   }
 }
