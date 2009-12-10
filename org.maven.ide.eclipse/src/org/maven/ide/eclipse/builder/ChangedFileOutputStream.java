@@ -21,7 +21,13 @@ import java.io.OutputStream;
 import org.sonatype.plexus.build.incremental.BuildContext;
 
 /**
- * Writes to the file only if content of the file is different.  
+ * Writes to the file only if content of the file is different.
+ * 
+ * TODO. Current implementation defers actual writing to the output file until
+ * invocation of {@link #close()} method. This results in missed/ignored IOExceptions
+ * in some cases. First, {@link #flush()} method does not actually flush buffer to the disk. 
+ * Second, any problems writing to the file will be reported as IOException
+ * thrown by {@link #close()}, which are generally ignored.
  */
 public class ChangedFileOutputStream extends OutputStream {
 
