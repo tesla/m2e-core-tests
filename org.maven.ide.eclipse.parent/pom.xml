@@ -102,8 +102,6 @@
     <module>../org.maven.ide.eclipse.editor.xml</module>
     <module>../org.maven.ide.eclipse.editor</module>
    
-    <module>../org.maven.ide.eclipse.ajdt</module>
-    <module>../org.maven.ide.eclipse.ajdt.tests</module>
     <module>../org.maven.ide.eclipse.wtp</module>
     <module>../org.maven.ide.eclipse.wtp.tests</module>
     <module>../org.maven.ide.eclipse.book</module>
@@ -115,7 +113,6 @@
     <module>../org.maven.ide.eclipse.editor.feature</module>
     <module>../org.maven.ide.eclipse.editor.xml.feature</module>
     <module>../org.maven.ide.eclipse.wtp.feature</module>
-    <module>../org.maven.ide.eclipse.ajdt.feature</module>
 
     <module>../org.maven.ide.eclipse.scm.feature</module>
     <module>../org.maven.ide.eclipse.cvs.feature</module>
