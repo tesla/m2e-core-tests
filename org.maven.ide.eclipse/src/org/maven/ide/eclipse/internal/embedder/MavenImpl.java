@@ -438,6 +438,9 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
       for(Exception e : result.getExceptions()) {
         members.add(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, e.getMessage(), e));
       }
+      for(Artifact missing : result.getMissingArtifacts()) {
+        members.add(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Missing " + missing.toString(), null));
+      }
       IStatus[] newMembers = members.toArray(new IStatus[members.size()]);
       throw new CoreException(new MultiStatus(IMavenConstants.PLUGIN_ID, -1, newMembers, "Could not resolve artifact",
           null));

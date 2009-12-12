@@ -171,6 +171,8 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   private String version = "0.0.0";
 
   private String qualifiedVersion = "0.0.0.qualifier";
+
+  private IMavenConfiguration mavenConfiguration;
   
   public MavenPlugin() {
     plugin = this;
@@ -271,7 +273,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
       }
     });
 
-    IMavenConfiguration mavenConfiguration = new MavenConfigurationImpl(getPreferenceStore());
+    this.mavenConfiguration = new MavenConfigurationImpl(getPreferenceStore());
 
     this.mavenCore = new DefaultPlexusContainer( mavenCoreCC );
     this.mavenCore.setLoggerManager(new EclipseLoggerManager(console, mavenConfiguration));
@@ -518,6 +520,10 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   
   public IMavenMarkerManager getMavenMarkerManager() {
     return this.mavenMarkerManager;
+  }
+
+  public IMavenConfiguration getMavenConfiguration() {
+    return this.mavenConfiguration;
   }
 
   /**

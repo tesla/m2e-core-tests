@@ -211,6 +211,15 @@ public class MavenImplTest extends AsbtractMavenProjectTestCase {
   
   }
 
+  public void testMissingArtifact() throws Exception {
+    try {
+      maven.resolve("missing", "missing", "0", "unknown", null, null, monitor);
+      fail();
+    } catch (CoreException e) {
+      assertFalse(e.getStatus().isOK());
+    }
+  }
+
   public void testGetProxy() throws Exception {
     String origSettings = configuration.getUserSettingsFile();
     try {
