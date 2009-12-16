@@ -117,7 +117,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
   /**
    * 
    */
-  private static final String SERVERS_VIEW_ID = "org.eclipse.wst.server.ui.ServersView";
+  public static final String SERVERS_VIEW_ID = "org.eclipse.wst.server.ui.ServersView";
 
   protected static final String PLUGIN_ID = "org.maven.ide.eclipse.integration.tests";
 
@@ -922,7 +922,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     }
   }
 
-  private static final String TOMCAT_SERVER_NAME = "Tomcat.*";
+  public static final String TOMCAT_SERVER_NAME = "Tomcat.*";
 
   protected void removeAllProjectInTomcat() throws Exception {
     getUI().click(new CTabItemLocator("Servers"));
