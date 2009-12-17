@@ -38,6 +38,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
@@ -144,7 +145,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
    */
   private Map<Class<?>, Object> components = new HashMap<Class<?>, Object>();
 
-  private MavenConsole console;
+  protected MavenConsole console;
 
   private MavenModelManager modelManager;
 
@@ -211,7 +212,11 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     MavenLogger.setLog(getLog());
     
     try {
-      this.console = new MavenConsoleImpl(MavenImages.M2); //$NON-NLS-1$
+      Display.getDefault().syncExec(new Runnable() {
+        public void run() {
+          console = new MavenConsoleImpl(MavenImages.M2); //$NON-NLS-1$
+        }
+      });
     } catch(RuntimeException ex) {
       MavenLogger.log(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Unable to start console: " + ex.toString(), ex));
     }
