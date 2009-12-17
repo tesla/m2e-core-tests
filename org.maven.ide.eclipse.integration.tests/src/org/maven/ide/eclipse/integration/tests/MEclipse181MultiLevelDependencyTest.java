@@ -24,7 +24,7 @@ import com.windowtester.runtime.util.ScreenCapture;
 /**
  * @author Administrator
  */
-public class MEclipse181MultiLevelDependencyTest extends UIIntegrationTestCase {
+public class MEclipse181MultiLevelDependencyTest extends M2EUIIntegrationTestCase {
 
   private IProject createDependentProject(IProject parent, String childName) throws Exception {
     IProject childProject = createArchetypeProject("maven-archetype-quickstart", childName);

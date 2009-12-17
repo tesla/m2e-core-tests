@@ -28,12 +28,12 @@ import com.windowtester.runtime.swt.locator.TextLocator;
  * @author dyocum
  *
  */
-public class MNGEclipse1674PluginCodeCompletionTest extends UIIntegrationTestCase {
+public class MNGEclipse1674PluginCodeCompletionTest extends M2EUIIntegrationTestCase {
 
   
   public void testSchemaCodeAssist() throws Exception {
     
-    doImport("projects/cc_sample2.zip", false);
+    doImport(PLUGIN_ID, "projects/cc_sample2.zip", false);
     
     IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("cc_sample2");
     IJavaProject jp = (IJavaProject)project.getNature(JavaCore.NATURE_ID);

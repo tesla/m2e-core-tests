@@ -37,7 +37,7 @@ import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
 /**
  * @author Rich Seddon
  */
-public class MEclipse163ResolveDependenciesTest extends UIIntegrationTestCase {
+public class MEclipse163ResolveDependenciesTest extends M2EUIIntegrationTestCase {
 
   
   private String projectName = "ResolveDepProject";

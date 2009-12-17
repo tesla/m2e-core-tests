@@ -24,7 +24,7 @@ import com.windowtester.runtime.swt.locator.CTabItemLocator;
  * @author rseddono
  *
  */
-public class MNGEclipse1296UpdateDependenciesTest extends UIIntegrationTestCase {
+public class MNGEclipse1296UpdateDependenciesTest extends M2EUIIntegrationTestCase {
 
   
   public void testUpdateDependencies() throws Exception {

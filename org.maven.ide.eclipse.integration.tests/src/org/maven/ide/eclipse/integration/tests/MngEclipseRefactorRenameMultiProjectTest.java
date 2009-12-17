@@ -15,7 +15,7 @@ import com.windowtester.runtime.swt.locator.NamedWidgetLocator;
 import com.windowtester.runtime.swt.locator.TreeItemLocator;
 import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
 
-public class MngEclipseRefactorRenameMultiProjectTest extends UIIntegrationTestCase {
+public class MngEclipseRefactorRenameMultiProjectTest extends M2EUIIntegrationTestCase {
 
   public MngEclipseRefactorRenameMultiProjectTest(){
     super();

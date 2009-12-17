@@ -14,7 +14,7 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.swt.SWT;
-import org.maven.ide.eclipse.integration.tests.UIIntegrationTestCase;
+import org.maven.ide.eclipse.integration.tests.M2EUIIntegrationTestCase;
 
 import com.windowtester.runtime.swt.condition.eclipse.JobsCompleteCondition;
 import com.windowtester.runtime.swt.condition.shell.ShellDisposedCondition;
@@ -27,7 +27,7 @@ import com.windowtester.runtime.swt.locator.TreeItemLocator;
 import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
 
 
-public class MEclipse173SimpleWebAppTest extends UIIntegrationTestCase {
+public class MEclipse173SimpleWebAppTest extends M2EUIIntegrationTestCase {
 
   private static final String DEPLOYED_URL = "http://localhost:8080/simple-webapp/weather.x?zip=94038";
 

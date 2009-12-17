@@ -8,7 +8,7 @@
 
 package org.maven.ide.eclipse.integration.tests;
 
-import static org.maven.ide.eclipse.integration.tests.UIIntegrationTestCase.PLUGIN_ID;
+import static org.maven.ide.eclipse.integration.tests.M2EUIIntegrationTestCase.PLUGIN_ID;
 
 import java.net.URL;
 
@@ -43,7 +43,7 @@ import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
  * @author dyocum
  *
  */
-public class MNGEclipse1687ArchetypeCreationTest extends UIIntegrationTestCase {
+public class MNGEclipse1687ArchetypeCreationTest extends M2EUIIntegrationTestCase {
 
   private static final String GROUP_ID = "org.jboss.portletbridge.archetypes";
   private static final String VERSION_ID = "2.0.0.ALPHA";

@@ -11,7 +11,7 @@ import com.windowtester.runtime.swt.locator.TreeItemLocator;
 import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
 import com.windowtester.runtime.util.ScreenCapture;
 
-public class MEclipse178IssueTrackerTest extends UIIntegrationTestCase {
+public class MEclipse178IssueTrackerTest extends M2EUIIntegrationTestCase {
 
 
 	public void testIssueTracker() throws Exception {

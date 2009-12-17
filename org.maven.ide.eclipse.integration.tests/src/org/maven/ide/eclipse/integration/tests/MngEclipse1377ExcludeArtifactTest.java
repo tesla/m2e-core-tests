@@ -27,7 +27,7 @@ import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
 /**
  * @author rseddon
  */
-public class MngEclipse1377ExcludeArtifactTest extends UIIntegrationTestCase {
+public class MngEclipse1377ExcludeArtifactTest extends M2EUIIntegrationTestCase {
 
   public MngEclipse1377ExcludeArtifactTest(){
     super();

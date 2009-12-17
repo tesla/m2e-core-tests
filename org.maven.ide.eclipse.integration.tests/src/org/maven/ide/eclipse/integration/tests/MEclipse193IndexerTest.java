@@ -39,7 +39,7 @@ import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
 import com.windowtester.runtime.util.ScreenCapture;
 
 
-public class MEclipse193IndexerTest extends UIIntegrationTestCase {
+public class MEclipse193IndexerTest extends M2EUIIntegrationTestCase {
 
   public MEclipse193IndexerTest(){
   }

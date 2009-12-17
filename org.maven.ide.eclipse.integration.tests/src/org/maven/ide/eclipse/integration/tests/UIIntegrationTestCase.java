@@ -102,34 +102,21 @@ import com.windowtester.runtime.swt.locator.TreeItemLocator;
 import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
 import com.windowtester.runtime.util.ScreenCapture;
 
-
 /**
  * @author rseddon
+ *
  */
 @SuppressWarnings("restriction")
 public abstract class UIIntegrationTestCase extends UITestCaseSWT {
 
-  public static final String DEFAULT_PROJECT_ZIP = "projects/someproject.zip";
-  public static final String DEFAULT_PROJECT_VERSION = "0.0.1-SNAPSHOT";
-  public static final String DEFAULT_PROJECT_ARTIFACT = "someproject";
-  public static final String DEFAULT_PROJECT_GROUP = "org.sonatype.test";
+  private static final String DEFAULT_PROJECT_GROUP = "org.sonatype.test";
 
   /**
    * 
    */
   public static final String SERVERS_VIEW_ID = "org.eclipse.wst.server.ui.ServersView";
 
-  protected static final String PLUGIN_ID = "org.maven.ide.eclipse.integration.tests";
-
-  // Has the maven central index been cached into local workspace?
-  private static boolean indexDownloaded = true;
-
   private boolean xmlPrefsSet = false;
-  // URL of local nexus server, tests will attempt download maven/central index from here.
-  private static final String DEFAULT_NEXUS_URL = "http://localhost:8081/nexus";
-
-  // Set this system property to override DEFAULT_NEXUS_URL
-  private static final String NEXUS_URL_PROPERTY = "nexus.server.url";
 
   // Location of tomcat 6 installation which can be used by Eclipse WTP tests
   private static final String DEFAULT_TOMCAT_INSTALL_LOCATION = "c:/test/apache-tomcat-6.0.18";
@@ -254,74 +241,6 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
       }
     }
 
-  }
-  /**
-   * Attempt up M2E to use a local Nexus server for downloading indexes. This speeds up test execution a lot.
-   */
-  private void setupLocalMavenIndex() throws Exception {
-    if(!indexDownloaded) {
-      indexDownloaded = true; // Only attempt to do this once.
-
-      String nexusURL = System.getProperty(NEXUS_URL_PROPERTY);
-      if(nexusURL == null) {
-        nexusURL = DEFAULT_NEXUS_URL;
-      }
-
-      try {
-
-        // Test URL, don't do this if we can't connect.
-        URL url = new URL(nexusURL);
-        URLConnection conn = url.openConnection();
-        try {
-          conn.setDoInput(true);
-          conn.connect();
-        } finally {
-          conn.getInputStream().close();
-        }
-
-        cancelIndexJobs();
-        
-        getUI().wait(new JobsCompleteCondition(), 300000);
-        
-        IViewPart indexView = showView("org.maven.ide.eclipse.views.MavenIndexesView");
-
-        getUI().click(new CTabItemLocator("Maven Indexes"));
-
-        getUI().wait(new SWTIdleCondition());
-
-        // Remove maven central index.
-        getUI().contextClick(new TreeItemLocator("http:\\\\/\\\\/repo1.maven.org\\\\/maven2\\\\/", new ViewLocator("org.maven.ide.eclipse.views.MavenIndexesView")),
-        "Remove Index");
-        getUI().wait(new ShellShowingCondition("Remove Index"));
-        getUI().click(new ButtonLocator("OK"));
-
-        getUI().click(new CTabItemLocator("Maven Indexes"));
-
-        // Add in nexus proxy for maven central
-        getUI().contextClick(
-            new TreeItemLocator("workspace", new ViewLocator("org.maven.ide.eclipse.views.MavenIndexesView")),
-            "Add Index");
-        //getUI().click(new ContributedToolItemLocator("org.maven.ide.eclipse.addIndexAction"));
-
-        getUI().wait(new ShellShowingCondition("Add Repository Index"));
-        getUI().click(new NamedWidgetLocator("repositoryUrlCombo"));
-        getUI().enterText(nexusURL + "/content/groups/public/");
-        getUI().click(new NamedWidgetLocator("displayName"));
-        getUI().enterText("central");
-        getUI().wait(new JobsCompleteCondition(), 300000);
-        getUI().wait(new SWTIdleCondition());
-        getUI().click(new ButtonLocator("OK"));
-        getUI().wait(new ShellDisposedCondition("Add Repository Index"));
-        getUI().contextClick(
-            new TreeItemLocator("central.*", new ViewLocator("org.maven.ide.eclipse.views.MavenIndexesView")),
-            "Update Index");
-        hideView(indexView);
-      } catch(IOException ex) {
-        // Couldn't reach local nexus server, just go ahead and use maven central
-        System.out.println("Failed to connect to local nexus server: " + nexusURL
-            + " test will use maven central instead.");
-      }
-    }
   }
 
   /**
@@ -513,16 +432,6 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     return f;
   }
 
-  public void importZippedMavenProjects(URL url) throws Exception {
-    File f = copyPluginResourceToTempFile(PLUGIN_ID, url);
-    importZippedMavenProjects(f);
-  }
-  
-  public void importZippedMavenProjects(String pluginPath) throws Exception {
-    File f = copyPluginResourceToTempFile(PLUGIN_ID, pluginPath);
-    importZippedMavenProjects(f);
-  }
-
   /**
    * @param f
    * @throws WaitTimedOutException
@@ -530,7 +439,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
    * @throws IOException
    * @throws InterruptedException
    */
-  private void importZippedMavenProjects(File f) throws WaitTimedOutException, WidgetSearchException, IOException,
+  protected void importZippedMavenProjects(File f) throws WaitTimedOutException, WidgetSearchException, IOException,
       InterruptedException {
     IUIContext ui = getUI();
     try {
@@ -551,9 +460,9 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     }
   }
   
-  public void importZippedProject(String pluginPath) throws Exception {
+  public void importZippedProject(String pluginID, String pluginPath) throws Exception {
     IUIContext ui = getUI();
-    File f = copyPluginResourceToTempFile(PLUGIN_ID, pluginPath);
+    File f = copyPluginResourceToTempFile(pluginID, pluginPath);
     try {
       ui.keyClick(SWT.ALT, 'F'); // File -> Import
       ui.keyClick('I');
@@ -572,8 +481,8 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     }
   }
   
-  private void unzipFile(String pluginPath, File dest) throws IOException {
-    URL url = FileLocator.find(Platform.getBundle(PLUGIN_ID), new Path("/" + pluginPath), null);
+  private void unzipFile(String pluginId, String pluginPath, File dest) throws IOException {
+    URL url = FileLocator.find(Platform.getBundle(pluginId), new Path("/" + pluginPath), null);
     InputStream is = new BufferedInputStream(url.openStream());
     ZipInputStream zis = new ZipInputStream(is);
     try {
@@ -601,22 +510,13 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     }
   }
   
-  public File unzipProject(String pluginPath) throws Exception {
+  public File unzipProject(String pluginId, String pluginPath) throws Exception {
     File tempDir = createTempDir("sonatype");
-    unzipFile(pluginPath, tempDir);
+    unzipFile(pluginId, pluginPath, tempDir);
     return tempDir;
   }
   
-  public IProject setupDefaultProject() throws Exception{
-    importMavenProjects(DEFAULT_PROJECT_ZIP);
-    IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-    for(IProject project : projects) {
-      if(DEFAULT_PROJECT_ARTIFACT.equals(project.getName())) {
-        return project;
-      }
-    }
-    return null;
-  }
+
 
   protected File createTempDir(String prefix) throws IOException {
     File temp = null;
@@ -643,8 +543,8 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     dir.delete();
   }
 
-  protected File importMavenProjects(String projectPath) throws Exception {
-    File tempDir = unzipProject(projectPath);
+  protected File importMavenProjects(String pluginId, String projectPath) throws Exception {
+    File tempDir = unzipProject(pluginId, projectPath);
     waitForAllBuildsToComplete();
     try{
       
@@ -683,12 +583,12 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
   /**
    * Import a project and assert it has no markers of SEVERITY_ERROR
    */
-  protected File doImport(String projectPath) throws Exception {
-    return doImport(projectPath, true);
+  protected File doImport(String pluginId, String projectPath) throws Exception {
+    return doImport(pluginId, projectPath, true);
   }
 
-  protected File doImport(String projectPath, boolean assertNoErrors) throws Exception{
-    File tempDir = importMavenProjects(projectPath);
+  protected File doImport(String pluginId, String projectPath, boolean assertNoErrors) throws Exception{
+    File tempDir = importMavenProjects(pluginId, projectPath);
     if(assertNoErrors){
       assertProjectsHaveNoErrors();
     }
@@ -917,7 +817,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
       //and then click next
       ui.click(new ButtonLocator("&Next >"));
 
-	  //then fill in the last page details
+    //then fill in the last page details
       IWidgetLocator groupCombo = ui.find(new NamedWidgetLocator("groupId"));
       ui.setFocus(groupCombo);
       

@@ -10,13 +10,13 @@ package org.maven.ide.eclipse.integration.tests.wtp;
 
 import junit.framework.ComparisonFailure;
 
-import org.maven.ide.eclipse.integration.tests.UIIntegrationTestCase;
+import org.maven.ide.eclipse.integration.tests.M2EUIIntegrationTestCase;
 
 
 /**
  * @author rseddon
  */
-public class MEclipse183WTPResourceBug extends UIIntegrationTestCase {
+public class MEclipse183WTPResourceBug extends M2EUIIntegrationTestCase {
 
   private static final String SERVER_URL = "http://localhost:8080/bug.MNGECLIPSE-1189--war-dep/Test";
 

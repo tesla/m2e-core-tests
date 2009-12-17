@@ -36,7 +36,7 @@ import com.windowtester.runtime.swt.locator.NamedWidgetLocator;
 import com.windowtester.runtime.swt.locator.TableItemLocator;
 import com.windowtester.runtime.swt.locator.TreeItemLocator;
 
-public class MngEclipse1526InstallationPreferencesTest extends UIIntegrationTestCase {
+public class MngEclipse1526InstallationPreferencesTest extends M2EUIIntegrationTestCase {
 
   protected String externalRuntime;
   

@@ -37,7 +37,7 @@ import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
 /**
  * @author rseddon
  */
-public class MEclipse161ArchetypeProjectCreationTest extends UIIntegrationTestCase {
+public class MEclipse161ArchetypeProjectCreationTest extends M2EUIIntegrationTestCase {
 
   public MEclipse161ArchetypeProjectCreationTest(){
     super();

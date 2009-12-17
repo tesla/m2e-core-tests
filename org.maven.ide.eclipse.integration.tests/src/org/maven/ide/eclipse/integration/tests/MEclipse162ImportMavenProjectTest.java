@@ -16,7 +16,7 @@ import com.windowtester.runtime.util.ScreenCapture;
 /**
  * @author Rich Seddon
  */
-public class MEclipse162ImportMavenProjectTest extends UIIntegrationTestCase {
+public class MEclipse162ImportMavenProjectTest extends M2EUIIntegrationTestCase {
 
   private File tempDir;
 

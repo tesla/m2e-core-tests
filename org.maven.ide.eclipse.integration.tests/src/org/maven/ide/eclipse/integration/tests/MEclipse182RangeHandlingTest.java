@@ -26,7 +26,7 @@ import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
 /**
  * @author Administrator
  */
-public class MEclipse182RangeHandlingTest extends UIIntegrationTestCase {
+public class MEclipse182RangeHandlingTest extends M2EUIIntegrationTestCase {
 
   public void testRangeHandling() throws Exception {
     String project1Name = "versionProject1";
