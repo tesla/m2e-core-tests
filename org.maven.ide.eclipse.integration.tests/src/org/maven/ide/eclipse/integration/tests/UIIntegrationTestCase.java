@@ -493,9 +493,14 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     getUI().wait(new ShellDisposedCondition(FIND_REPLACE));
   }
 
+    
   protected File copyPluginResourceToTempFile(String plugin, String file) throws MalformedURLException, IOException {
     URL url = FileLocator.find(Platform.getBundle(plugin), new Path("/" + file), null);
-    File f = File.createTempFile("temp", new Path(file).getFileExtension());
+    return copyPluginResourceToTempFile(plugin, url);
+  }
+
+  protected File copyPluginResourceToTempFile(String plugin, URL url) throws MalformedURLException, IOException {
+    File f = File.createTempFile("temp", new Path(url.getFile()).getFileExtension());
     InputStream is = new BufferedInputStream(url.openStream());
     FileOutputStream os = new FileOutputStream(f);
     try {
@@ -508,9 +513,26 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
     return f;
   }
 
+  public void importZippedMavenProjects(URL url) throws Exception {
+    File f = copyPluginResourceToTempFile(PLUGIN_ID, url);
+    importZippedMavenProjects(f);
+  }
+  
   public void importZippedMavenProjects(String pluginPath) throws Exception {
-    IUIContext ui = getUI();
     File f = copyPluginResourceToTempFile(PLUGIN_ID, pluginPath);
+    importZippedMavenProjects(f);
+  }
+
+  /**
+   * @param f
+   * @throws WaitTimedOutException
+   * @throws WidgetSearchException
+   * @throws IOException
+   * @throws InterruptedException
+   */
+  private void importZippedMavenProjects(File f) throws WaitTimedOutException, WidgetSearchException, IOException,
+      InterruptedException {
+    IUIContext ui = getUI();
     try {
       ui.keyClick(SWT.ALT, 'F'); // File -> Import
       ui.keyClick('I');
