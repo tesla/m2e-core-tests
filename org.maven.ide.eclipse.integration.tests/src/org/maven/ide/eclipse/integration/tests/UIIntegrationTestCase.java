@@ -500,7 +500,7 @@ public abstract class UIIntegrationTestCase extends UITestCaseSWT {
   }
 
   protected File copyPluginResourceToTempFile(String plugin, URL url) throws MalformedURLException, IOException {
-    File f = File.createTempFile("temp", new Path(url.getFile()).getFileExtension());
+    File f = File.createTempFile("temp","."+ new Path(url.getFile()).getFileExtension());
     InputStream is = new BufferedInputStream(url.openStream());
     FileOutputStream os = new FileOutputStream(f);
     try {
