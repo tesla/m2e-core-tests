@@ -63,7 +63,7 @@
   </licenses>
 
   <issueManagement>
-    <url>http://jira.codehaus.org/browse/MNGECLIPSE</url>
+    <url>https://issues.sonatype.org/browse/MNGECLIPSE</url>
     <system>JIRA</system>
   </issueManagement>
 
