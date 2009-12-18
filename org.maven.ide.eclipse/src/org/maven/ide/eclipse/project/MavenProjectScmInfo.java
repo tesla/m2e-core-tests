@@ -19,16 +19,27 @@ public class MavenProjectScmInfo extends MavenProjectInfo {
   private final String folderUrl;
   private final String repositoryUrl;
   private final String revision;
+  private final String branch;
   
   private String username;
   private String password;
 
   public MavenProjectScmInfo(String label, Model model, MavenProjectInfo parent, //
       String revision, String folderUrl, String repositoryUrl) {
+    this(label, model, parent, null, revision, folderUrl, repositoryUrl);
+  }
+
+  public MavenProjectScmInfo(String label, Model model, MavenProjectInfo parent, //
+      String branch, String revision, String folderUrl, String repositoryUrl) {
     super(label, null, model, parent);
     this.revision = revision;
     this.folderUrl = folderUrl;
     this.repositoryUrl = repositoryUrl;
+    this.branch = branch;
+  }
+  
+  public String getBranch() {
+    return this.branch;
   }
   
   public String getRevision() {
