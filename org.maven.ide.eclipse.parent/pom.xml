@@ -46,7 +46,7 @@
     <m2e.snapshots>http://localhost</m2e.snapshots>
     <m2e.site>http://localhost</m2e.site>
 
-    <tycho-version>0.6.0-SNAPSHOT</tycho-version>
+    <tycho-version>0.6.0</tycho-version>
 
   </properties>
 
