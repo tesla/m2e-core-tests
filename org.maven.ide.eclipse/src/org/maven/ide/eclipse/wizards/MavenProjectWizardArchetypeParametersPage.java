@@ -543,7 +543,9 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
   }
 
   public Properties getProperties() {
-    this.getControl().setFocus();
+    if ( propertiesViewer.isCellEditorActive() ) {
+      propertiesTable.setFocus();
+    }
     Properties properties = new Properties();
     for(int i = 0; i < propertiesTable.getItemCount(); i++ ) {
       TableItem item = propertiesTable.getItem(i);
