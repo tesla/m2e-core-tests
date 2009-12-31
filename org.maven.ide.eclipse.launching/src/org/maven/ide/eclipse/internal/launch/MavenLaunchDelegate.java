@@ -31,8 +31,6 @@ import org.eclipse.debug.ui.RefreshTab;
 import org.eclipse.jdt.launching.IVMRunner;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
 import org.eclipse.jdt.launching.VMRunnerConfiguration;
-import org.eclipse.ui.externaltools.internal.model.ExternalToolBuilder;
-import org.eclipse.ui.externaltools.internal.model.IExternalToolConstants;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.MavenLaunchConstants;
 import org.maven.ide.eclipse.core.IMavenConstants;
@@ -44,7 +42,6 @@ import org.maven.ide.eclipse.embedder.MavenRuntime;
 import org.maven.ide.eclipse.util.Util;
 
 
-@SuppressWarnings("restriction")
 public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaunchConstants {
 
   private static final String LAUNCHER_TYPE = "org.codehaus.classworlds.Launcher";
@@ -166,26 +163,8 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
     return configuration.getAttribute(ATTR_WORKSPACE_RESOLUTION, false);
   }
 
-  private String getGoals(ILaunchConfiguration configuration) throws CoreException {
-    String buildType = ExternalToolBuilder.getBuildType();
-    String key = MavenLaunchConstants.ATTR_GOALS;
-    if(IExternalToolConstants.BUILD_TYPE_AUTO.equals(buildType)) {
-      key = MavenLaunchConstants.ATTR_GOALS_AUTO_BUILD;
-    } else if(IExternalToolConstants.BUILD_TYPE_CLEAN.equals(buildType)) {
-      key = MavenLaunchConstants.ATTR_GOALS_CLEAN;
-    } else if(IExternalToolConstants.BUILD_TYPE_FULL.equals(buildType)) {
-      key = MavenLaunchConstants.ATTR_GOALS_AFTER_CLEAN;
-    } else if(IExternalToolConstants.BUILD_TYPE_INCREMENTAL.equals(buildType)) {
-      key = MavenLaunchConstants.ATTR_GOALS_MANUAL_BUILD;
-    }
-    String goals = configuration.getAttribute(key, "");
-    if(goals==null || goals.length()==0) {
-      // use default goals when "full build" returns nothing
-      goals = configuration.getAttribute(MavenLaunchConstants.ATTR_GOALS, "");
-    }
-    
-    MavenPlugin.getDefault().getConsole().logMessage("Build type " + buildType + " : " + goals);
-    return goals;
+  protected String getGoals(ILaunchConfiguration configuration) throws CoreException {
+    return configuration.getAttribute(MavenLaunchConstants.ATTR_GOALS, "");
   }
 
   public boolean buildForLaunch(ILaunchConfiguration configuration, String mode, IProgressMonitor monitor) {

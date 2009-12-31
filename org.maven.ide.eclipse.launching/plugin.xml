@@ -247,7 +247,7 @@
             modes="run,debug" public="true"/>
       <launchConfigurationType
             id="org.maven.ide.eclipse.Maven2BuilderConfigurationType"
-            delegate="org.maven.ide.eclipse.internal.launch.MavenLaunchDelegate"
+            delegate="org.maven.ide.eclipse.internal.launch.MavenBuilderLaunchDelegate"
             category="org.eclipse.ui.externaltools.builder"
             name="%m2.launch.type.builder.name"
             modes="run"/>
