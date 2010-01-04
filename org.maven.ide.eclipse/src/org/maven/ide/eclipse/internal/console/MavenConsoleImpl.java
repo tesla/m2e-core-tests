@@ -11,7 +11,9 @@ package org.maven.ide.eclipse.internal.console;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
@@ -29,6 +31,7 @@ import org.eclipse.ui.console.IOConsole;
 import org.eclipse.ui.console.IOConsoleOutputStream;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.IMavenConsoleListener;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;
@@ -62,6 +65,8 @@ public class MavenConsoleImpl extends IOConsole implements MavenConsole, IProper
 
   private IOConsoleOutputStream errorStream;
   private static final String TITLE = "Maven Console";
+
+  private List<IMavenConsoleListener> listeners = new CopyOnWriteArrayList<IMavenConsoleListener>();
 
   public MavenConsoleImpl(ImageDescriptor imageDescriptor) {
     super(TITLE, imageDescriptor);
@@ -243,6 +248,14 @@ public class MavenConsoleImpl extends IOConsole implements MavenConsole, IProper
       bringConsoleToFront();
     }
     appendLine(ConsoleDocument.MESSAGE, getDateFormat().format(new Date()) + ": " + message); 
+
+    for(IMavenConsoleListener listener : listeners) {
+      try {
+        listener.loggingMessage(message);
+      } catch(Exception e) {
+        e.printStackTrace();
+      }
+    }
   }
   
   public void logError(String message) {
@@ -250,6 +263,14 @@ public class MavenConsoleImpl extends IOConsole implements MavenConsole, IProper
       bringConsoleToFront();
     }
     appendLine(ConsoleDocument.ERROR, getDateFormat().format(new Date()) + ": " + message); //$NON-NLS-1$
+
+    for(IMavenConsoleListener listener : listeners) {
+      try {
+        listener.loggingError(message);
+      } catch(Exception e) {
+        e.printStackTrace();
+      }
+    }
   }
 
   public boolean showConsoleOnError(){
@@ -358,6 +379,21 @@ public class MavenConsoleImpl extends IOConsole implements MavenConsole, IProper
       }
     }
 
+  }
+
+  /* (non-Javadoc)
+   * @see org.maven.ide.eclipse.core.MavenConsole#addMavenConsoleListener(org.maven.ide.eclipse.core.IMavenConsoleListener)
+   */
+  public void addMavenConsoleListener(IMavenConsoleListener listener) {
+    listeners.remove(listener);
+    listeners.add(listener);
+  }
+
+  /* (non-Javadoc)
+   * @see org.maven.ide.eclipse.core.MavenConsole#removeMavenConsoleListener(org.maven.ide.eclipse.core.IMavenConsoleListener)
+   */
+  public void removeMavenConsoleListener(IMavenConsoleListener listener) {
+    listeners.remove(listener);
   }
 
 }

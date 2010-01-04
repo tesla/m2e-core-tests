@@ -15,6 +15,7 @@ import org.eclipse.ui.console.IConsoleListener;
  * Maven Console
  *
  * @author Eugene Kuleshov
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface MavenConsole extends IConsole {
 
@@ -29,5 +30,9 @@ public interface MavenConsole extends IConsole {
   void showConsole();
   
   void closeConsole();
-  
+
+  void addMavenConsoleListener(IMavenConsoleListener listener);
+
+  void removeMavenConsoleListener(IMavenConsoleListener listener);
+
 }
