@@ -8,7 +8,7 @@
 
 package org.maven.ide.eclipse.internal.project;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -54,10 +54,13 @@ public class GenericLifecycleMapping extends AbstractLifecycleMapping implements
     return getProjectConfigurators(true);
   }
 
-  public List<AbstractBuildParticipant> getBuildParticipants(IMavenProjectFacade facade, IProgressMonitor monitor) {
-    return Collections.singletonList((AbstractBuildParticipant)buildParticipant);
+  public List<AbstractBuildParticipant> getBuildParticipants(IMavenProjectFacade facade, IProgressMonitor monitor) throws CoreException {
+    ArrayList<AbstractBuildParticipant> participants = new ArrayList<AbstractBuildParticipant>();
+    participants.add(buildParticipant);
+    participants.addAll(getBuildParticipants(facade, getProjectConfigurators(facade, monitor), monitor));
+    return participants;
   }
-  
+
   public List<String> getPotentialMojoExecutionsForBuildKind(IMavenProjectFacade projectFacade, int kind, IProgressMonitor progressMonitor) {
     List<String> goals = buildParticipant.getPossibleGoalsForBuildKind(projectFacade, kind);
     List<String> mojos = new LinkedList<String>();

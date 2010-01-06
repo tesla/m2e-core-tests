@@ -113,18 +113,7 @@ public class CustomizableLifecycleMapping extends AbstractLifecycleMapping imple
 
     List<AbstractProjectConfigurator> configurators = getProjectConfigurators(facade, monitor);
 
-    List<AbstractBuildParticipant> participants = new ArrayList<AbstractBuildParticipant>();
-
-    for (MojoExecution execution : facade.getExecutionPlan(monitor).getExecutions()) {
-      for (AbstractProjectConfigurator configurator : configurators) {
-        AbstractBuildParticipant participant = configurator.getBuildParticipant(execution);
-        if (participant != null) {
-          participants.add(participant);
-        }
-      }
-    }
-
-    return participants;
+    return getBuildParticipants(facade, configurators, monitor);
   }
   
   public void configure(ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException {

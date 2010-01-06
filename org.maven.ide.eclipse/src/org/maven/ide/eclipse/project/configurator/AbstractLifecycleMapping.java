@@ -21,12 +21,15 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
+import org.apache.maven.plugin.MojoExecution;
+
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.internal.ExtensionReader;
 import org.maven.ide.eclipse.project.IMavenMarkerManager;
+import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 
 
@@ -168,5 +171,21 @@ public abstract class AbstractLifecycleMapping implements IExtensionLifecycleMap
   public boolean showConfigurators(){
     return this.showConfigurators;
   }
-  
+
+  protected List<AbstractBuildParticipant> getBuildParticipants(IMavenProjectFacade facade,
+      List<AbstractProjectConfigurator> configurators, IProgressMonitor monitor) throws CoreException {
+    List<AbstractBuildParticipant> participants = new ArrayList<AbstractBuildParticipant>();
+
+    for (MojoExecution execution : facade.getExecutionPlan(monitor).getExecutions()) {
+      for (AbstractProjectConfigurator configurator : configurators) {
+        AbstractBuildParticipant participant = configurator.getBuildParticipant(execution);
+        if (participant != null) {
+          participants.add(participant);
+        }
+      }
+    }
+
+    return participants;
+  }
+
 }
