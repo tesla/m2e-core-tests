@@ -77,7 +77,7 @@ import org.maven.ide.eclipse.ui.dialogs.MavenRepositorySearchDialog;
 public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowActionDelegate, IExecutableExtension {
 
   public static final String ID = "org.maven.ide.eclipse.openPomAction";
-  
+
   String type = IIndex.SEARCH_ARTIFACT;
 
   private IStructuredSelection selection;
@@ -100,7 +100,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
       this.type = IIndex.SEARCH_ARTIFACT;
     }
   }
-  
+
   public void selectionChanged(IAction action, ISelection selection) {
     if(selection instanceof IStructuredSelection) {
       this.selection = (IStructuredSelection) selection;
@@ -113,9 +113,9 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
    * @see org.eclipse.ui.actions.ActionDelegate#run(org.eclipse.jface.action.IAction)
    */
   public void run(IAction action) {
-    if(selection!=null) {
+    if(selection != null) {
       Object element = this.selection.getFirstElement();
-      if(IIndex.SEARCH_ARTIFACT.equals(type) && element !=null) {
+      if(IIndex.SEARCH_ARTIFACT.equals(type) && element != null) {
         try {
           final ArtifactKey ak = SelectionUtil.getArtifactKey(element);
           if(ak != null) {
@@ -138,16 +138,17 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
         }
       }
     }
-    
+
     String title;
     if(IIndex.SEARCH_CLASS_NAME.equals(type)) {
       title = "Search class in Maven repositories";
     } else {
       title = "Search Maven POM";
     }
-    
+
     Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-    MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(shell, title, type, Collections.<ArtifactKey>emptySet());
+    MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(shell, title, type, Collections
+        .<ArtifactKey> emptySet());
     if(dialog.open() == Window.OK) {
       final IndexedArtifactFile iaf = (IndexedArtifactFile) dialog.getFirstResult();
       final IndexedArtifact indexedArtifact = dialog.getSelectedIndexedArtifact();
@@ -157,7 +158,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
             if(indexedArtifact != null) {
               openEditor(indexedArtifact, iaf, monitor);
             }
-          } else if(iaf!=null) {
+          } else if(iaf != null) {
             openEditor(iaf.group, iaf.artifact, iaf.version, monitor);
           }
           return Status.OK_STATUS;
@@ -184,8 +185,8 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
 
       List<ArtifactRepository> artifactRepositories = maven.getArtifactRepositories();
 
-      
-      Artifact artifact = maven.resolve(groupId, artifactId, version, "java-source", "sources", artifactRepositories, monitor);
+      Artifact artifact = maven.resolve(groupId, artifactId, version, "java-source", "sources", artifactRepositories,
+          monitor);
 
       final File file = artifact.getFile();
       if(file == null) {
@@ -211,41 +212,43 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
   }
 
   public static IEditorPart openEditor(String groupId, String artifactId, String version, IProgressMonitor monitor) {
-    final String name = groupId + ":" + artifactId + ":" + version + ".pom";
+    if(groupId.length() > 0 && artifactId.length() > 0) {
+      final String name = groupId + ":" + artifactId + ":" + version + ".pom";
 
-    try {
-      MavenPlugin plugin = MavenPlugin.getDefault();
-      
-      MavenProjectManager projectManager = plugin.getMavenProjectManager();
-      IMavenProjectFacade projectFacade = projectManager.getMavenProject(groupId, artifactId, version);
-      if(projectFacade!=null) {
-        final IFile pomFile = projectFacade.getPom();
-        return openEditor(new FileEditorInput(pomFile), name);
+      try {
+        MavenPlugin plugin = MavenPlugin.getDefault();
+
+        MavenProjectManager projectManager = plugin.getMavenProjectManager();
+        IMavenProjectFacade projectFacade = projectManager.getMavenProject(groupId, artifactId, version);
+        if(projectFacade != null) {
+          final IFile pomFile = projectFacade.getPom();
+          return openEditor(new FileEditorInput(pomFile), name);
+        }
+
+        IMaven maven = MavenPlugin.lookup(IMaven.class);
+
+        List<ArtifactRepository> artifactRepositories = maven.getArtifactRepositories();
+
+        Artifact artifact = maven.resolve(groupId, artifactId, version, "pom", null, artifactRepositories, monitor);
+
+        File file = artifact.getFile();
+        if(file != null) {
+          return openEditor(new MavenEditorStorageInput(name, name, file.getAbsolutePath(),
+              readStream(new FileInputStream(file))), name);
+        }
+
+        openDialog("Can't download " + name);
+
+      } catch(IOException ex) {
+        String msg = "Can't open pom file for " + name;
+        MavenLogger.log(msg, ex);
+        openDialog(msg + "\n" + ex.toString());
+      } catch(CoreException ex) {
+        MavenLogger.log(ex);
+        openDialog(ex.getMessage() + "\n" + ex.toString());
       }
-      
-      IMaven maven = MavenPlugin.lookup(IMaven.class);
-
-      List<ArtifactRepository> artifactRepositories = maven.getArtifactRepositories();
-
-      Artifact artifact = maven.resolve(groupId, artifactId, version, "pom", null, artifactRepositories, monitor);
-
-      File file = artifact.getFile();
-      if(file != null) {
-        return openEditor(new MavenEditorStorageInput(name, name, file.getAbsolutePath(),
-            readStream(new FileInputStream(file))), name);
-      }
-
-      openDialog("Can't download " + name);
-
-    } catch(IOException ex) {
-      String msg = "Can't open pom file for " + name;
-      MavenLogger.log(msg, ex);
-      openDialog(msg + "\n" + ex.toString());
-    } catch(CoreException ex) {
-      MavenLogger.log(ex);
-      openDialog(ex.getMessage() + "\n" + ex.toString());
     }
-    
+
     return null;
   }
 
@@ -313,7 +316,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
     private final String name;
 
     private final String path;
-    
+
     private final String tooltip;
 
     private final byte[] content;
@@ -366,9 +369,10 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
 
   private static class MavenStorage implements IStorage {
     private String name;
-    private final String path;
-    private final byte[] content;
 
+    private final String path;
+
+    private final byte[] content;
 
     public MavenStorage(String name, String path, byte[] content) {
       this.name = name;
@@ -381,7 +385,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
     }
 
     public IPath getFullPath() {
-      return path==null ? null : new Path(path);
+      return path == null ? null : new Path(path);
     }
 
     public InputStream getContents() {
