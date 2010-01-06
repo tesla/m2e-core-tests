@@ -262,7 +262,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
     }
   }
 
-  public Settings getSettings() throws CoreException {
+  public Settings getSettings() {
     // MUST NOT use createRequest!
 
     // TODO: Can't that delegate to buildSettings()?
@@ -276,8 +276,14 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
     try {
       return settingsBuilder.build(request).getEffectiveSettings();
     } catch(SettingsBuildingException ex) {
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not read settings.xml",
-          ex));
+      String msg = "Could not read settings.xml, assuming default values";
+      MavenPlugin.getDefault().getConsole().logError(msg);
+      MavenLogger.log(msg, ex);
+      /*
+       * NOTE: This method provides input for various other core functions, just bailing out would make m2e highly
+       * unusuable. Instead, we fail gracefully and just ignore the broken settings, using defaults.
+       */
+      return new Settings();
     }
   }
 

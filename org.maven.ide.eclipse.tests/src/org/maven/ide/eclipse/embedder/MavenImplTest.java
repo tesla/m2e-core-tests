@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.internal.embedder.MavenImpl;
+import org.maven.ide.eclipse.internal.repository.RepositoryRegistry;
 import org.maven.ide.eclipse.tests.AsbtractMavenProjectTestCase;
 
 
@@ -232,6 +233,19 @@ public class MavenImplTest extends AsbtractMavenProjectTestCase {
       assertEquals("user", proxy.getUserName());
       assertEquals("pass", proxy.getPassword());
       assertEquals("*", proxy.getNonProxyHosts());
+    } finally {
+      configuration.setUserSettingsFile(origSettings);
+    }
+  }
+
+  public void testUnreadableSettings() throws Exception {
+    String origSettings = configuration.getUserSettingsFile();
+    try {
+      configuration.setUserSettingsFile(new File("src/org/maven/ide/eclipse/embedder/settings-unreadable.xml")
+          .getCanonicalPath());
+      assertNotNull(maven.getSettings());
+      assertNotNull(maven.getLocalRepository());
+      ((RepositoryRegistry) MavenPlugin.getDefault().getRepositoryRegistry()).updateRegistry(null);
     } finally {
       configuration.setUserSettingsFile(origSettings);
     }
