@@ -36,7 +36,7 @@
     <maven_pom.version>1.0.0-SNAPSHOT</maven_pom.version>
 
     <nexus_indexer.version>2.0.2-SNAPSHOT</nexus_indexer.version>
-    <nexus.version>2.0.2-SNAPSHOT</nexus.version>
+    <nexus.version>2.0.2</nexus.version>
 
     <maven_scm.version>1.0.0.20080602-2350</maven_scm.version>
     <dependency_tree.version>1.2.0.20080424-1900</dependency_tree.version>
