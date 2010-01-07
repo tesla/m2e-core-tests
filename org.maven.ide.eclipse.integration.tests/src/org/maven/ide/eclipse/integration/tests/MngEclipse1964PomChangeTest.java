@@ -14,8 +14,10 @@ import com.windowtester.runtime.IUIContext;
 import com.windowtester.runtime.WaitTimedOutException;
 import com.windowtester.runtime.swt.condition.shell.ShellShowingCondition;
 import com.windowtester.runtime.swt.locator.ButtonLocator;
+import com.windowtester.runtime.swt.locator.CTabItemLocator;
 import com.windowtester.runtime.swt.locator.FilteredTreeItemLocator;
 import com.windowtester.runtime.swt.locator.TreeItemLocator;
+import com.windowtester.runtime.swt.locator.eclipse.EditorLocator;
 import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
 
 
@@ -58,6 +60,7 @@ public class MngEclipse1964PomChangeTest extends M2EUIIntegrationTestCase {
     // open pom
     ui.click(new TreeItemLocator("parent/pom.xml", new ViewLocator(PACKAGE_EXPLORER_VIEW_ID)));
     ui.keyClick(SWT.F3);
+    ui.click(new CTabItemLocator("pom.xml"));
 
     // new project
     ui.keyClick(SWT.CTRL, 'N');
