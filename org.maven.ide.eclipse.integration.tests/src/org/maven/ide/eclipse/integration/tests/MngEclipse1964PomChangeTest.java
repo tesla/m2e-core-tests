@@ -17,7 +17,6 @@ import com.windowtester.runtime.swt.locator.ButtonLocator;
 import com.windowtester.runtime.swt.locator.CTabItemLocator;
 import com.windowtester.runtime.swt.locator.FilteredTreeItemLocator;
 import com.windowtester.runtime.swt.locator.TreeItemLocator;
-import com.windowtester.runtime.swt.locator.eclipse.EditorLocator;
 import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
 
 
