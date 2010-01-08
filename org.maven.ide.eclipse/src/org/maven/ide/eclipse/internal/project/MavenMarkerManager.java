@@ -105,11 +105,12 @@ public class MavenMarkerManager implements IMavenMarkerManager {
    * @param pomFile
    */
   protected void checkForSchema(IResource pomFile){
+    IDOMModel domModel = null;
     try{
       if(!(pomFile instanceof IFile)){
         return;
       }
-      IDOMModel domModel = (IDOMModel)StructuredModelManager.getModelManager().getModelForRead((IFile)pomFile);
+      domModel = (IDOMModel)StructuredModelManager.getModelManager().getModelForRead((IFile)pomFile);
       IStructuredDocument document = domModel.getStructuredDocument();
       
       // iterate through document regions
@@ -138,6 +139,11 @@ public class MavenMarkerManager implements IMavenMarkerManager {
       }
     } catch(Throwable ex) {
       MavenLogger.log("Error checking for schema", ex);
+    }
+    finally {
+      if ( domModel != null ) {
+        domModel.releaseFromRead();
+      }
     }
   }
   
