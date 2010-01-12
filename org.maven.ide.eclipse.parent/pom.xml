@@ -39,7 +39,6 @@
     <nexus.version>2.0.2</nexus.version>
 
     <maven_scm.version>1.0.0.20080602-2350</maven_scm.version>
-    <dependency_tree.version>1.2.0.20080424-1900</dependency_tree.version>
 
     <!-- disable accidental deployment -->
     <m2e.releases>http://localhost</m2e.releases>
