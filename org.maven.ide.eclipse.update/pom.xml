@@ -64,12 +64,26 @@
             <groupId>com.sonatype.maven.plugins</groupId>
             <artifactId>maven-upload-plugin</artifactId>
             <version>0.0.1-SNAPSHOT</version>
-            <configuration>
-              <file>${project.build.directory}/${project.artifactId}-${project.version}-site.zip</file>
-            </configuration>
+            <executions>
+              <execution>
+                <id>publish-site</id>
+                <phase>deploy</phase>
+                <goals>
+                  <goal>upload-file</goal>
+                </goals>
+                <configuration>
+                  <file>${project.build.directory}/${project.artifactId}-${project.version}-site.zip</file>
+
+                  <serverId>forge-releases</serverId>
+                  <repositoryUrl>${m2e.site-compressed}</repositoryUrl>
+                  <repositoryPath>m2e/${unqualifiedVersion}/N/${buildQualifier}</repositoryPath>
+                </configuration>
+              </execution>
+            </executions>
           </plugin>
         </plugins>
       </build>
     </profile>
   </profiles>
 </project>
+
