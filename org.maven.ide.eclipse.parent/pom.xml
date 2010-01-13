@@ -103,7 +103,6 @@
    
     <module>../org.maven.ide.eclipse.wtp</module>
     <module>../org.maven.ide.eclipse.wtp.tests</module>
-    <module>../org.maven.ide.eclipse.book</module>
     <module>../org.maven.ide.eclipse.pr</module>
 
     <!-- features -->
@@ -117,7 +116,6 @@
     <module>../org.maven.ide.eclipse.cvs.feature</module>
     <module>../org.maven.ide.eclipse.subclipse.feature</module>
 
-    <module>../org.maven.ide.eclipse.book.feature</module>
     <module>../org.maven.ide.eclipse.mylyn3.feature</module>
 
     <module>../org.maven.ide.eclipse.plexus.annotations</module>
