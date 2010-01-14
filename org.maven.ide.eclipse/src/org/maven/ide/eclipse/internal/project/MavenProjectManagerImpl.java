@@ -452,11 +452,11 @@ public class MavenProjectManagerImpl {
     if (resolverConfiguration.shouldIncludeModules()) {
       addProjectDependencies(state, pom, mavenProject, false);
     }
-    MavenProject parentProject = mavenProject.getParent();
-    if (parentProject != null) {
-      state.addWorkspaceModule(pom, new ArtifactKey(mavenProject.getParentArtifact()));
+    Artifact parentArtifact = mavenProject.getParentArtifact();
+    if (parentArtifact != null) {
+      state.addWorkspaceModule(pom, new ArtifactKey(parentArtifact));
       if (resolverConfiguration.shouldResolveWorkspaceProjects()) {
-        state.addProjectDependency(pom, new ArtifactKey(mavenProject.getParentArtifact()), true);
+        state.addProjectDependency(pom, new ArtifactKey(parentArtifact), true);
       }
     }
   }
