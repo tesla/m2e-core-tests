@@ -340,123 +340,217 @@ public class MavenProjectManagerImpl {
     DependencyResolutionContext context = new DependencyResolutionContext(updateRequest);
   
     while(!context.isEmpty()) {
-      if(monitor.isCanceled()) {
-        throw new OperationCanceledException();
+      List<Refresher> refreshs = new ArrayList<Refresher>();
+
+      // phase 1: build projects without dependencies and populate workspace with known projects
+      while(!context.isEmpty()) {
+        if(monitor.isCanceled()) {
+          throw new OperationCanceledException();
+        }
+
+        if(newState.isStale() || (syncRefreshThread != null && syncRefreshThread != Thread.currentThread())) {
+          throw new StaleMutableProjectRegistryException();
+        }
+
+        IFile pom = context.pop();
+        monitor.subTask("project " + pom.getProject().getName());
+        if(!pom.isAccessible() || !pom.getProject().hasNature(IMavenConstants.NATURE_ID)) {
+          context.forcePomFiles(remove(newState, pom));
+          continue;
+        }
+
+        Refresher refresh = new Refresher(newState, pom, context, monitor);
+        refresh.phaseOne();
+        refreshs.add(refresh);
       }
 
-      if (newState.isStale() || (syncRefreshThread != null && syncRefreshThread != Thread.currentThread())) {
-        throw new StaleMutableProjectRegistryException();
-      }
+      // phase 2: resolve project dependencies
+      for(Refresher refresh : refreshs) {
+        if(monitor.isCanceled()) {
+          throw new OperationCanceledException();
+        }
 
-      IFile pom = context.pop();
-      monitor.subTask("project "+pom.getProject().getName());
-      if (!pom.isAccessible() || !pom.getProject().hasNature(IMavenConstants.NATURE_ID)) {
-        context.forcePomFiles(remove(newState, pom));
-        continue;
+        if(newState.isStale() || (syncRefreshThread != null && syncRefreshThread != Thread.currentThread())) {
+          throw new StaleMutableProjectRegistryException();
+        }
+
+        monitor.subTask("project " + refresh.pom.getProject().getName());
+        refresh.phaseTwo();
+        monitor.worked(1);
       }
-      refresh(newState, pom, context, monitor);
-      monitor.worked(1);
     }
   }
 
   MavenExecutionPlan calculateExecutionPlan(MavenProjectFacade facade, IProgressMonitor monitor) throws CoreException {
     return calculateExecutionPlan(projectRegistry, facade, monitor);
   }
+
   private MavenExecutionPlan calculateExecutionPlan(IProjectRegistry state, MavenProjectFacade facade, IProgressMonitor monitor) throws CoreException {
     MavenExecutionRequest request = createExecutionRequest(state, facade.getPom(), facade.getResolverConfiguration(), monitor);
     request.setGoals(Arrays.asList("package"));
     return maven.calculateExecutionPlan(request, facade.getMavenProject(monitor), monitor);
   }
 
-  private void refresh(MutableProjectRegistry state, IFile pom, DependencyResolutionContext context, IProgressMonitor monitor) throws CoreException {
-    MavenProjectFacade oldFacade = state.getProjectFacade(pom);
+  @SuppressWarnings("synthetic-access")
+  private class Refresher {
 
-    if(!context.isForce(pom) && oldFacade != null && !oldFacade.isStale()) {
-      // skip refresh if not forced and up-to-date facade
-      return;
+    MutableProjectRegistry state;
+
+    IFile pom;
+
+    DependencyResolutionContext context;
+
+    IProgressMonitor monitor;
+
+    MavenExecutionRequest mavenRequest;
+
+    MavenExecutionResult mavenResult;
+
+    MavenProjectFacade facade;
+
+    MavenProjectFacade oldFacade;
+
+    Set<IFile> dependents;
+
+    Refresher(MutableProjectRegistry state, IFile pom, DependencyResolutionContext context, IProgressMonitor monitor) {
+      this.state = state;
+      this.pom = pom;
+      this.context = context;
+      this.monitor = monitor;
     }
 
-    flushCaches(pom, oldFacade);
+    void phaseOne() throws CoreException {
+      oldFacade = state.getProjectFacade(pom);
 
-    markerManager.deleteMarkers(pom);
+      if(!context.isForce(pom) && oldFacade != null && !oldFacade.isStale()) {
+        // skip refresh if not forced and up-to-date facade
+        return;
+      }
 
-    ResolverConfiguration resolverConfiguration = readResolverConfiguration(pom.getProject());
+      flushCaches(pom, oldFacade);
 
-    MavenProject mavenProject = null;
-    MavenExecutionResult result = null;
-    if (pom.isAccessible()) {
-      result = readProjectWithDependencies(state, pom, resolverConfiguration, context.getRequest(), monitor);
-      mavenProject = result.getProject();
-      markerManager.addMarkers(pom, result);
+      markerManager.deleteMarkers(pom);
+
+      ResolverConfiguration resolverConfiguration = readResolverConfiguration(pom.getProject());
+
+      MavenProject mavenProject = null;
+      if (pom.isAccessible()) {
+        try {
+          mavenRequest = createExecutionRequest(state, pom, resolverConfiguration, monitor);
+          maven.populateDefaults(mavenRequest);
+          mavenRequest.setOffline(context.getRequest().isOffline());
+          mavenResult = maven.readProject(mavenRequest, monitor);
+        } catch(CoreException ex) {
+          mavenResult = new DefaultMavenExecutionResult();
+          mavenResult.addException(ex);
+        }
+
+        mavenProject = mavenResult.getProject();
+      }
+
+      if (mavenProject == null) {
+        context.forcePomFiles(remove(state, pom));
+        if (mavenResult != null && resolverConfiguration.shouldResolveWorkspaceProjects()) {
+          addMissingProjectDependencies(state, pom, mavenResult);
+        }
+        try {
+          // MNGECLIPSE-605 embedder is not able to resolve the project due to missing configuration in the parent
+          Model model = maven.readModel(pom.getLocation().toFile());
+          if (model != null && model.getParent() != null) {
+            Parent parent = model.getParent();
+            if (parent.getGroupId() != null && parent.getArtifactId() != null && parent.getVersion() != null) {
+              ArtifactKey parentKey = new ArtifactKey(parent.getGroupId(), parent.getArtifactId(), parent.getVersion(), null);
+              state.addWorkspaceModule(pom, parentKey);
+            }
+          }
+        } catch(Exception ex) {
+          // we've tried our best, there is nothing else we can do
+        }
+        return;
+      }
+
+      ArtifactKey projectKey = new ArtifactKey(mavenProject.getArtifact());
+
+      ArtifactKey oldProjectKey = null;
+      List<String> oldModules = new ArrayList<String>();
+      if (oldFacade != null) {
+        oldProjectKey = oldFacade.getArtifactKey();
+        oldModules = oldFacade.getMavenProjectModules();
+      }
+
+      // refresh modules
+      if (resolverConfiguration.shouldIncludeModules()) {
+        context.forcePomFiles(remove(state, getRemovedNestedModules(pom, oldModules, getMavenProjectModules(mavenProject)), true));
+        context.forcePomFiles(refreshNestedModules(pom, mavenProject));
+      } else {
+        context.forcePomFiles(refreshWorkspaceModules(state, pom, oldProjectKey));
+        context.forcePomFiles(refreshWorkspaceModules(state, pom, projectKey));
+      }
+
+      // save dependents before we remove the project next in case we need to refresh them later
+      dependents = state.getDependents(pom, oldProjectKey, resolverConfiguration.shouldIncludeModules());
+      dependents.addAll(state.getDependents(pom, projectKey, resolverConfiguration.shouldIncludeModules()));
+
+      // cleanup old project and old dependencies
+      state.removeProject(pom, oldProjectKey);
+
+      // create new project and new dependencies
+      facade = new MavenProjectFacade(MavenProjectManagerImpl.this, pom, mavenProject, resolverConfiguration);
+      state.addProject(pom, facade);
     }
 
-    if (mavenProject == null) {
-      context.forcePomFiles(remove(state, pom));
-      if (result != null && resolverConfiguration.shouldResolveWorkspaceProjects()) {
+    void phaseTwo() {
+      if(facade == null) {
+        if(mavenResult != null) {
+          markerManager.addMarkers(pom, mavenResult);
+        }
+        return;
+      }
+
+      ResolverConfiguration resolverConfiguration = facade.getResolverConfiguration();
+
+      MavenProject mavenProject = facade.getMavenProject();
+
+      mavenRequest.getProjectBuildingRequest().setProject(mavenProject);
+      mavenRequest.getProjectBuildingRequest().setResolveDependencies(true);
+      MavenExecutionResult result;
+      ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
+      try {
+        ClassLoader projectRealm = mavenProject.getClassRealm();
+        if(projectRealm != null) {
+          Thread.currentThread().setContextClassLoader(projectRealm);
+        }
+        result = maven.readProject(mavenRequest, monitor);
+        mavenResult.setArtifactResolutionResult(result.getArtifactResolutionResult());
+      } finally {
+        Thread.currentThread().setContextClassLoader(oldClassLoader);
+        mavenRequest.getProjectBuildingRequest().setProject(null);
+      }
+      facade.setMavenProjectArtifacts();
+
+      markerManager.addMarkers(pom, mavenResult);
+
+      boolean dependencyChanged = hasDependencyChange(oldFacade != null ? oldFacade.getMavenProject() : null,
+          mavenProject);
+
+      // refresh dependents
+      if (dependencyChanged) {
+        context.forcePomFiles(dependents);
+      }
+
+      if (resolverConfiguration.shouldResolveWorkspaceProjects()) {
+        addProjectDependencies(state, pom, mavenProject, true);
         addMissingProjectDependencies(state, pom, result);
       }
-      try {
-        // MNGECLIPSE-605 embedder is not able to resolve the project due to missing configuration in the parent
-        Model model = maven.readModel(pom.getLocation().toFile());
-        if (model != null && model.getParent() != null) {
-          Parent parent = model.getParent();
-          if (parent.getGroupId() != null && parent.getArtifactId() != null && parent.getVersion() != null) {
-            ArtifactKey parentKey = new ArtifactKey(parent.getGroupId(), parent.getArtifactId(), parent.getVersion(), null);
-            state.addWorkspaceModule(pom, parentKey);
-          }
-        }
-      } catch(Exception ex) {
-        // we've tried our best, there is nothing else we can do
+      if (resolverConfiguration.shouldIncludeModules()) {
+        addProjectDependencies(state, pom, mavenProject, false);
       }
-      return;
-    }
-
-    ArtifactKey projectKey = new ArtifactKey(mavenProject.getArtifact());
-
-    MavenProject oldMavenProject = null;
-    ArtifactKey oldProjectKey = null;
-    List<String> oldModules = new ArrayList<String>();
-    if (oldFacade != null) {
-      oldProjectKey = oldFacade.getArtifactKey();
-      oldMavenProject = oldFacade.getMavenProject();
-      oldModules = oldFacade.getMavenProjectModules();
-    }
-
-    boolean dependencyChanged = hasDependencyChange(oldMavenProject, mavenProject);
-
-    // refresh modules
-    if (resolverConfiguration.shouldIncludeModules()) {
-      context.forcePomFiles(remove(state, getRemovedNestedModules(pom, oldModules, getMavenProjectModules(mavenProject)), true));
-      context.forcePomFiles(refreshNestedModules(pom, mavenProject));
-    } else {
-      context.forcePomFiles(refreshWorkspaceModules(state, pom, oldProjectKey));
-      context.forcePomFiles(refreshWorkspaceModules(state, pom, projectKey));
-    }
-
-    // refresh dependents
-    if (dependencyChanged) {
-      context.forcePomFiles(state.getDependents(pom, oldProjectKey, resolverConfiguration.shouldIncludeModules()));
-      context.forcePomFiles(state.getDependents(pom, projectKey, resolverConfiguration.shouldIncludeModules()));
-    }
-
-    // cleanup old project and old dependencies
-    state.removeProject(pom, oldProjectKey);
-
-    // create new project and new dependencies
-    MavenProjectFacade facade = new MavenProjectFacade(this, pom, mavenProject, resolverConfiguration);
-    state.addProject(pom, facade);
-    if (resolverConfiguration.shouldResolveWorkspaceProjects()) {
-      addProjectDependencies(state, pom, mavenProject, true);
-      addMissingProjectDependencies(state, pom, result);
-    }
-    if (resolverConfiguration.shouldIncludeModules()) {
-      addProjectDependencies(state, pom, mavenProject, false);
-    }
-    Artifact parentArtifact = mavenProject.getParentArtifact();
-    if (parentArtifact != null) {
-      state.addWorkspaceModule(pom, new ArtifactKey(parentArtifact));
-      if (resolverConfiguration.shouldResolveWorkspaceProjects()) {
-        state.addProjectDependency(pom, new ArtifactKey(parentArtifact), true);
+      Artifact parentArtifact = mavenProject.getParentArtifact();
+      if (parentArtifact != null) {
+        state.addWorkspaceModule(pom, new ArtifactKey(parentArtifact));
+        if (resolverConfiguration.shouldResolveWorkspaceProjects()) {
+          state.addProjectDependency(pom, new ArtifactKey(parentArtifact), true);
+        }
       }
     }
   }
@@ -647,6 +741,7 @@ public class MavenProjectManagerImpl {
       MavenUpdateRequest updateRequest, IProgressMonitor monitor) {
     return readProjectWithDependencies(projectRegistry, pomFile, resolverConfiguration, updateRequest, monitor);
   }
+
   private MavenExecutionResult readProjectWithDependencies(IProjectRegistry state, IFile pomFile, ResolverConfiguration resolverConfiguration,
       MavenUpdateRequest updateRequest, IProgressMonitor monitor) {
 

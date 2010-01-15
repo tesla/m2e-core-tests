@@ -115,7 +115,7 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
     path = getProjectRelativePath(mavenProject.getBuild().getTestOutputDirectory());
     this.testOutputLocation = path != null ? fullPath.append(path) : null;
 
-    this.artifacts = ArtifactRef.fromArtifact(mavenProject.getArtifacts());
+    setMavenProjectArtifacts();
 
     this.artifactRepositories = new LinkedHashSet<ArtifactRepositoryRef>();
     for(ArtifactRepository repository : mavenProject.getRemoteArtifactRepositories()) {
@@ -289,6 +289,10 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
   
   public Set<ArtifactRef> getMavenProjectArtifacts() {
     return artifacts;
+  }
+
+  void setMavenProjectArtifacts() {
+    this.artifacts = ArtifactRef.fromArtifact(mavenProject.getArtifacts());
   }
 
   public ResolverConfiguration getResolverConfiguration() {
