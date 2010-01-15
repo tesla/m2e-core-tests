@@ -147,6 +147,8 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
 
   private WagonManager wagonManager;
 
+  private static final EquinoxLocker locker = new EquinoxLocker();
+
   public static String nvl( String v )
   {
       return v == null ? NA : v;
@@ -972,6 +974,11 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
         request.setTransferListener(transferListener);
         request.setForceFullUpdate(force);
         request.setResourceFetcher(new DefaultIndexUpdater.WagonFetcher(wagonManager, transferListener, authenticationInfo, proxyInfo));
+        request.setLocker(locker);
+        File indexCacheBasedir = new File(repositoryRegistry.getLocalRepository().getBasedir(), ".cache/nexus-index" ).getCanonicalFile();
+        File indexCacheDir = new File(indexCacheBasedir, repository.getUid());
+        indexCacheDir.mkdirs();
+        request.setLocalIndexCacheDir(indexCacheDir);
         Date indexTime = indexUpdater.fetchAndUpdateIndex(request);
         if(indexTime==null) {
           console.logMessage("No index update available for " + repository.toString());
