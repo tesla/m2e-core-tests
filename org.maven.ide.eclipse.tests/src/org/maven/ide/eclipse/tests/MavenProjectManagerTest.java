@@ -325,12 +325,14 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     waitForJobsToComplete();
 
     IMavenProjectFacade f1 = manager.create(p1, monitor);
+    f1.getMavenProject(monitor).getParent();
     assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME).getLocation().toFile(), f1.getMavenProject(monitor).getParentArtifact().getFile());
 
     deleteProject(p2);
     waitForJobsToComplete();
 
     f1 = manager.create(p1, monitor);
+    f1.getMavenProject(monitor).getParent();
     // assertTrue(f1.getMavenProject().getParent().getFile().getAbsolutePath().startsWith(repo.getAbsolutePath()));
     assertStartWith(repo.getAbsolutePath(), f1.getMavenProject(monitor).getParentArtifact().getFile().getAbsolutePath());
   }

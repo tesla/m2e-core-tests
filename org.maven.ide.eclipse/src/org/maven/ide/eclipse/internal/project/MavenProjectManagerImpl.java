@@ -670,8 +670,7 @@ public class MavenProjectManagerImpl {
     }
 
     if(!ArtifactKey.equals(before.getParentArtifact(), after.getParentArtifact()) //
-        || !(before.getParent() == null ? after.getParent() == null //
-            : equals(before.getParent().getFile(), after.getParent().getFile()))) {
+        || !equals(before.getParentFile(), after.getParentFile())) {
       return true;
     }
 
