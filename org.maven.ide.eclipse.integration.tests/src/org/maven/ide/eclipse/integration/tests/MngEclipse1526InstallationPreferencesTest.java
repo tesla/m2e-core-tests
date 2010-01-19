@@ -120,8 +120,9 @@ public class MngEclipse1526InstallationPreferencesTest extends M2EUIIntegrationT
     String newRepoDir = setUserSettingsXML(mavenProject.getProject());
     getUI().wait(new SWTIdleCondition());
     
-    getUI().click(new ButtonLocator("Apply"));
+    getUI().click(new ButtonLocator("OK"));
     waitForAllBuildsToComplete();
+    showUserSettingsPrefs();
     verifyRepoSettingsValue(newRepoDir);
     closeUserSettingPrefs();
     
