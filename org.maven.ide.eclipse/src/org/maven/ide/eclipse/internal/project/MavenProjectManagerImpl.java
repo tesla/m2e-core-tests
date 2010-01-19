@@ -41,6 +41,7 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.MavenArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
+import org.apache.maven.execution.DefaultMavenExecutionRequest;
 import org.apache.maven.execution.DefaultMavenExecutionResult;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionResult;
@@ -336,8 +337,9 @@ public class MavenProjectManagerImpl {
   }
 
   void refresh(MutableProjectRegistry newState, MavenUpdateRequest updateRequest, IProgressMonitor monitor) throws CoreException {
+    MavenExecutionRequest executionRequest = maven.createExecutionRequest(monitor);
 
-    DependencyResolutionContext context = new DependencyResolutionContext(updateRequest);
+    DependencyResolutionContext context = new DependencyResolutionContext(updateRequest, executionRequest);
   
     while(!context.isEmpty()) {
       List<Refresher> refreshs = new ArrayList<Refresher>();
@@ -436,7 +438,8 @@ public class MavenProjectManagerImpl {
       MavenProject mavenProject = null;
       if (pom.isAccessible()) {
         try {
-          mavenRequest = createExecutionRequest(state, pom, resolverConfiguration, monitor);
+          mavenRequest = DefaultMavenExecutionRequest.copy(context.getExecutionRequest());
+          configureExecutionRequest(mavenRequest, state, pom, resolverConfiguration, monitor);
           maven.populateDefaults(mavenRequest);
           mavenRequest.setOffline(context.getRequest().isOffline());
           mavenResult = maven.readProject(mavenRequest, monitor);
@@ -798,6 +801,11 @@ public class MavenProjectManagerImpl {
   private MavenExecutionRequest createExecutionRequest(IProjectRegistry state, IFile pom, ResolverConfiguration resolverConfiguration, IProgressMonitor monitor) throws CoreException {
     MavenExecutionRequest request = maven.createExecutionRequest(monitor);
 
+    return configureExecutionRequest(request, state, pom, resolverConfiguration, monitor);
+  }
+
+  private MavenExecutionRequest configureExecutionRequest(MavenExecutionRequest request, IProjectRegistry state,
+      IFile pom, ResolverConfiguration resolverConfiguration, IProgressMonitor monitor) throws CoreException {
     request.setPom(pom.getLocation().toFile());
 
     request.addActiveProfiles(resolverConfiguration.getActiveProfileList());

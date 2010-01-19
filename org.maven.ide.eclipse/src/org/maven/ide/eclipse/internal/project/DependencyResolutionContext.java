@@ -15,6 +15,8 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 
+import org.apache.maven.execution.MavenExecutionRequest;
+
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
 
 /**
@@ -31,9 +33,13 @@ public class DependencyResolutionContext {
   /** Set of pom files to resolve regardless of their isStale() state */
   private final Set<IFile> forcedPomFiles = new HashSet<IFile>();
 
-  public DependencyResolutionContext(MavenUpdateRequest request) {
+  /** The template request for invocations of Maven */
+  private MavenExecutionRequest executionRequest;
+
+  public DependencyResolutionContext(MavenUpdateRequest request, MavenExecutionRequest executionRequest) {
     this.request = request;
     this.pomFiles.addAll(request.getPomFiles());
+    this.executionRequest = executionRequest;
   }
 
   public boolean isEmpty() {
@@ -47,6 +53,10 @@ public class DependencyResolutionContext {
 
   public MavenUpdateRequest getRequest() {
     return request;
+  }
+
+  public MavenExecutionRequest getExecutionRequest() {
+    return executionRequest;
   }
 
   public boolean isForce(IFile pom) {
