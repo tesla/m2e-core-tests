@@ -251,4 +251,26 @@ public class MavenImplTest extends AsbtractMavenProjectTestCase {
     }
   }
 
+  public void testReadProjectWithDependenciesFromMirror() throws Exception {
+    String origSettings = configuration.getUserSettingsFile();
+    try {
+      configuration.setUserSettingsFile(new File("src/org/maven/ide/eclipse/embedder/settings-mirror.xml")
+          .getCanonicalPath());
+      assertFalse(maven.getSettings().getMirrors().isEmpty());
+      MavenExecutionRequest request = maven.createExecutionRequest(monitor);
+      request.getProjectBuildingRequest().setResolveDependencies(true);
+      request.setPom(new File("projects/dependencies/pom.xml"));
+      MavenExecutionResult result = maven.readProject(request, monitor);
+      assertFalse(result.hasExceptions());
+      assertFalse(result.getArtifactResolutionResult().getMissingArtifacts().toString(), result
+          .getArtifactResolutionResult().hasMissingArtifacts());
+      assertFalse(result.getArtifactResolutionResult().hasExceptions());
+      assertNotNull(result.getProject());
+      assertNotNull(result.getProject().getArtifacts());
+      assertEquals(result.getProject().getArtifacts().toString(), 2, result.getProject().getArtifacts().size());
+    } finally {
+      configuration.setUserSettingsFile(origSettings);
+    }
+  }
+
 }
