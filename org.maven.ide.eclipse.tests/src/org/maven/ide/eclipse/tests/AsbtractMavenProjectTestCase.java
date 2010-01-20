@@ -24,6 +24,9 @@ import junit.framework.TestCase;
 
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.model.Model;
+import org.apache.maven.wagon.Wagon;
+import org.codehaus.plexus.PlexusContainer;
+import org.codehaus.plexus.component.repository.ComponentDescriptor;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.core.resources.IFile;
@@ -55,6 +58,7 @@ import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
+import org.maven.ide.eclipse.internal.embedder.MavenImpl;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerRefreshJob;
 import org.maven.ide.eclipse.jdt.BuildPathManager;
 import org.maven.ide.eclipse.jdt.MavenJdtPlugin;
@@ -527,6 +531,17 @@ protected void copyContent(IProject project, String from, String to) throws Exce
     int severity = project.findMaxProblemSeverity(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
     IMarker[] markers = project.findMarkers(null, true, IResource.DEPTH_INFINITE);
     assertTrue("Unexpected error markers " + toString(markers), severity < IMarker.SEVERITY_ERROR);
+  }
+
+  protected void injectFilexWagon(String roleHint) throws Exception {
+    PlexusContainer container = ((MavenImpl) MavenPlugin.getDefault().getMaven()).getPlexusContainer();
+    ComponentDescriptor<Wagon> descriptor = new ComponentDescriptor<Wagon>();
+    descriptor.setRealm(container.getContainerRealm());
+    descriptor.setRoleClass(Wagon.class);
+    descriptor.setImplementationClass(FilexWagon.class);
+    descriptor.setRoleHint(roleHint);
+    descriptor.setInstantiationStrategy("singleton");
+    container.addComponentDescriptor(descriptor);
   }
 
 }

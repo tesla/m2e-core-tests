@@ -25,6 +25,10 @@ import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.IJobChangeListener;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.embedder.ArtifactRef;
@@ -844,6 +848,35 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     assertEquals(1, a1.size());
 
     assertEquals(projects[1].getLocation().append("target/classes").toFile(), a1.get(0).getFile());
+  }
+
+  public void testRepositoryMetadataCacheUsed() throws Exception {
+    String oldSettings = mavenConfiguration.getUserSettingsFile();
+    try {
+      injectFilexWagon("mngeclipse1996");
+      FilexWagon.setRequestFilterPattern("mngeclipse1996/.*xml", true);
+      mavenConfiguration.setUserSettingsFile(new File("projects/MNGECLIPSE-1996/settings.xml").getAbsolutePath());
+      IJobChangeListener jobChangeListener = new JobChangeAdapter() {
+        public void scheduled(IJobChangeEvent event) {
+          if(event.getJob().getClass().getName().endsWith("MavenProjectManagerRefreshJob")) {
+            // cancel all those concurrent refresh jobs, we want to monitor the main thread only
+            event.getJob().cancel();
+          }
+        }
+      };
+      Job.getJobManager().addJobChangeListener(jobChangeListener);
+      List<String> requests;
+      try {
+        importProjects("projects/MNGECLIPSE-1996", new String[] {"pom.xml", "mod-a/pom.xml", "mod-b/pom.xml",
+            "mod-c/pom.xml", "mod-d/pom.xml", "mod-e/pom.xml"}, new ResolverConfiguration());
+        requests = FilexWagon.getRequests();
+      } finally {
+        Job.getJobManager().removeJobChangeListener(jobChangeListener);
+      }
+      assertTrue("Accessed metadata " + requests.size() + " times", requests.size() == 1);
+    } finally {
+      mavenConfiguration.setUserSettingsFile(oldSettings);
+    }
   }
 
 }

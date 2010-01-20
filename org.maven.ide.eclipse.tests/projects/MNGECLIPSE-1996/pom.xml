@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>test</groupId>
+  <artifactId>MNGECLIPSE-1996</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <modules>
+    <module>mod-a</module>
+    <module>mod-b</module>
+    <module>mod-c</module>
+    <module>mod-d</module>
+    <module>mod-e</module>
+  </modules>
+</project>
