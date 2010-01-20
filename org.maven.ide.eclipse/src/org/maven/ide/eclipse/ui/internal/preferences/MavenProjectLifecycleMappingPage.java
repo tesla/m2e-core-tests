@@ -41,8 +41,7 @@ public class MavenProjectLifecycleMappingPage extends PropertyPage{
   }
   
   private ILifecyclePropertyPage getErrorPage(String msg){
-    EmptyLifecycleMappingPropertyPage p = new EmptyLifecycleMappingPropertyPage();
-    p.setErrorMessage(msg);
+    SimpleLifecycleMappingPropertyPage p = new SimpleLifecycleMappingPropertyPage(msg);
     return p;
   }
   
@@ -66,8 +65,7 @@ public class MavenProjectLifecycleMappingPage extends PropertyPage{
       return page;
     } catch(CoreException ce){
       MavenLogger.log(ce);
-      EmptyLifecycleMappingPropertyPage p = new EmptyLifecycleMappingPropertyPage();
-      p.setErrorMessage("Unable to load the lifecycle mapping property page.");
+      SimpleLifecycleMappingPropertyPage p = new SimpleLifecycleMappingPropertyPage("Unable to load the lifecycle mapping property page.");
       return p;
     }
   }

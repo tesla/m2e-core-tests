@@ -737,7 +737,15 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
       mappingId = DEFAULT_LIFECYCLE_MAPPING_ID;
     }
 
-    return getLifecycleMapping(mappingId);
+    ILifecycleMapping lifecycleMapping = getLifecycleMapping(mappingId);
+
+    if (lifecycleMapping == null) {
+      // TODO create error marker
+      console.logError("Project " + projectFacade.getProject().getName() + " uses unknown or missing lifecycle mapping with id=`" + mappingId + "'");
+      return new MissingLifecycleMapping(mappingId);
+    }
+
+    return lifecycleMapping;
   }
 
   private String getDefaultLifecycleMappingId(String packaging) {

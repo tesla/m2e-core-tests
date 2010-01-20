@@ -496,6 +496,12 @@
       lifecycleMappingId = "customizable"
       name = "Customizable Lifecycle Mapping">
     </lifecycleMappingPropertyPage>
+    <lifecycleMappingPropertyPage
+          class="org.maven.ide.eclipse.ui.internal.preferences.MissingLifecycleMappingPropertyPage"
+          id="missingLifecycleMappingPropertyPage"
+          lifecycleMappingId="MISSING"
+          name="Missing Lifecycle Mapping">
+    </lifecycleMappingPropertyPage>
   </extension>
   
    <extension
