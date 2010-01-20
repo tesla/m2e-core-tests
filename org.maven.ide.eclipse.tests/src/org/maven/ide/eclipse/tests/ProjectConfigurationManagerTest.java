@@ -3,7 +3,11 @@ package org.maven.ide.eclipse.tests;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
+import org.apache.maven.wagon.Wagon;
+import org.codehaus.plexus.PlexusContainer;
+import org.codehaus.plexus.component.repository.ComponentDescriptor;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -11,6 +15,7 @@ import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.internal.embedder.MavenImpl;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectInfo;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
@@ -60,6 +65,28 @@ public class ProjectConfigurationManagerTest extends AsbtractMavenProjectTestCas
         plugin.getProjectConfigurationManager().importProjects(projectInfos, importConfiguration, monitor);
       }
     }, plugin.getProjectConfigurationManager().getRule(), IWorkspace.AVOID_UPDATE, monitor);
+  }
+
+  public void testWorkspaceResolutionOfInterModuleDependenciesDuringImport() throws Exception {
+    String oldSettings = mavenConfiguration.getUserSettingsFile();
+    try {
+      PlexusContainer container = ((MavenImpl) MavenPlugin.getDefault().getMaven()).getPlexusContainer();
+      ComponentDescriptor<Wagon> descriptor = new ComponentDescriptor<Wagon>();
+      descriptor.setRealm(container.getContainerRealm());
+      descriptor.setRoleClass(Wagon.class);
+      descriptor.setImplementationClass(FilexWagon.class);
+      descriptor.setRoleHint("mngeclipse1990");
+      descriptor.setInstantiationStrategy("singleton");
+      container.addComponentDescriptor(descriptor);
+      FilexWagon.setRequestFilterPattern("test/.*", true);
+      mavenConfiguration.setUserSettingsFile(new File("projects/MNGECLIPSE-1990/settings.xml").getAbsolutePath());
+      importProjects("projects/MNGECLIPSE-1990", new String[] {"pom.xml", "dependent/pom.xml", "dependency/pom.xml",
+          "parent/pom.xml"}, new ResolverConfiguration());
+      List<String> requests = FilexWagon.getRequests();
+      assertTrue("Dependency resolution was attempted from remote repository: " + requests, requests.isEmpty());
+    } finally {
+      mavenConfiguration.setUserSettingsFile(oldSettings);
+    }
   }
 
 }

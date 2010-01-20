@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>test</groupId>
+  <artifactId>MNGECLIPSE-1990</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <modules>
+    <!-- NOTE: Module deliberately listed in reverse build order -->
+    <module>dependent</module>
+    <module>dependency</module>
+    <module>parent</module>
+  </modules>
+</project>

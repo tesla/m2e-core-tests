@@ -1,0 +1,38 @@
+<settings>
+  <localRepository>target/localrepo</localRepository>
+
+  <mirrors>
+    <mirror>
+      <id>test</id>
+      <mirrorOf>*</mirrorOf>
+      <url>mngeclipse1990://localhost/remoterepo</url>
+    </mirror>
+  </mirrors>
+
+  <profiles>
+    <profile>
+      <id>test</id>
+        <repositories>
+          <repository>
+            <id>central</id>
+            <url>mngeclipse1990://localhost/remoterepo</url>
+            <snapshots><enabled>true</enabled></snapshots>
+            <releases><enabled>true</enabled></releases>
+          </repository>
+        </repositories>
+        <pluginRepositories>
+          <pluginRepository>
+            <id>central</id>
+            <url>mngeclipse1990://localhost/remoterepo</url>
+            <snapshots><enabled>true</enabled></snapshots>
+            <releases><enabled>true</enabled></releases>
+          </pluginRepository>
+        </pluginRepositories>
+    </profile>
+  </profiles>
+
+  <activeProfiles>
+    <activeProfile>test</activeProfile>
+  </activeProfiles>
+
+</settings>
