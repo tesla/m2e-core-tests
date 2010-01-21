@@ -611,13 +611,11 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
     if(visible) {
       ArchetypeManager archetypeManager = MavenPlugin.getDefault().getArchetypeManager();
       String catalogId = dialogSettings.get(KEY_CATALOG);
+      catalogFactory = null;
       if(catalogId != null) {
         catalogFactory = archetypeManager.getArchetypeCatalogFactory(catalogId);
-        catalogsComboViewer.setSelection(new StructuredSelection(catalogFactory));
-      } else {
-        catalogFactory = null;
-        catalogsComboViewer.setSelection(new StructuredSelection(ALL_CATALOGS));
       }
+      catalogsComboViewer.setSelection(new StructuredSelection(catalogFactory == null ? ALL_CATALOGS : catalogFactory));
 
       viewer.getTable().setFocus();
       Archetype selected = getArchetype();
