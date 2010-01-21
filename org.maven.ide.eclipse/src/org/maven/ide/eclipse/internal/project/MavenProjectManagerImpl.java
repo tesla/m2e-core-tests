@@ -50,6 +50,7 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.properties.internal.EnvironmentUtils;
 import org.apache.maven.repository.DelegatingLocalArtifactRepository;
 
 import org.maven.ide.eclipse.MavenPlugin;
@@ -812,6 +813,7 @@ public class MavenProjectManagerImpl {
 
     // temporary solution for https://issues.sonatype.org/browse/MNGECLIPSE-1607
     Properties systemProperties = new Properties();
+    EnvironmentUtils.addEnvVars(systemProperties);
     systemProperties.putAll(System.getProperties());
     request.setSystemProperties(systemProperties);
 

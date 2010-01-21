@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>test</groupId>
+  <artifactId>MNGECLIPSE-581</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+
+  <dependencies>
+    <dependency>
+      <groupId>mngeclipse581</groupId>
+      <artifactId>system</artifactId>
+      <version>0.1</version>
+      <scope>system</scope>
+      <systemPath>${env.TEMP}/mngeclipse-581.jar</systemPath>
+    </dependency>
+  </dependencies>
+</project>

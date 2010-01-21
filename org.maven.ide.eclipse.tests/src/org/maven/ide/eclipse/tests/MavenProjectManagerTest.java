@@ -17,6 +17,7 @@ import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.util.FileUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -877,6 +878,27 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
     } finally {
       mavenConfiguration.setUserSettingsFile(oldSettings);
     }
+  }
+
+  public void testEnvironmentVariablesConsidered() throws Exception {
+    String tmpDir = System.getenv("TMP");
+    assertTrue("This test requires the environment variable TMP to be set", tmpDir != null);
+
+    File systemJar = new File("projects/MNGECLIPSE-581/mngeclipse-581.jar");
+    File tempJar = new File(tmpDir, "mngeclipse-581.jar");
+    FileUtils.copyFile(systemJar, tempJar);
+    tempJar.deleteOnExit();
+
+    IProject[] projects = importProjects("projects/MNGECLIPSE-581", new String[] {"pom.xml"},
+        new ResolverConfiguration());
+    assertEquals(1, projects.length);
+    assertNotNull(projects[0]);
+    IMavenProjectFacade facade = manager.getProject(projects[0]);
+    assertNotNull(facade);
+    MavenProject project = facade.getMavenProject();
+    assertNotNull(project);
+    File file = project.getArtifacts().iterator().next().getFile();
+    assertTrue(file.toString(), file.isFile());
   }
 
 }
