@@ -47,6 +47,7 @@ import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.refactoring.RefactoringModelResources.PropertyInfo;
 import org.maven.ide.eclipse.refactoring.internal.Activator;
 
+
 /**
  * Base class for all pom.xml refactorings in workspace
  * 
@@ -59,7 +60,7 @@ public abstract class AbstractPomRefactoring extends Refactoring {
 
   // main file that is being refactored
   protected IFile file;
-  
+
   // maven plugin
   protected MavenPlugin mavenPlugin;
 
@@ -70,7 +71,7 @@ public abstract class AbstractPomRefactoring extends Refactoring {
 
   public AbstractPomRefactoring(IFile file) {
     this.file = file;
-    
+
     this.mavenPlugin = MavenPlugin.getDefault();
 
     List<AdapterFactoryImpl> factories = new ArrayList<AdapterFactoryImpl>();
@@ -85,71 +86,71 @@ public abstract class AbstractPomRefactoring extends Refactoring {
 
   // this gets actual refactoring visitor
   public abstract PomVisitor getVisitor();
-  
+
   @Override
   public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException, OperationCanceledException {
     return new RefactoringStatus();
   }
-  
+
   @Override
   public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
     CompositeChange res = new CompositeChange(getTitle());
     IMavenProjectFacade[] projects = mavenPlugin.getMavenProjectManager().getProjects();
     pm.beginTask("Refactoring", projects.length);
-    
+
     models = new HashMap<String, RefactoringModelResources>();
-    
+
     try {
       // load all models
       // XXX: assumption: artifactId is unique within workspace
       for(IMavenProjectFacade projectFacade : projects) {
         // skip "other" projects if not requested
-        if (!scanAllArtifacts() && !projectFacade.getPom().equals(file)) {
+        if(!scanAllArtifacts() && !projectFacade.getPom().equals(file)) {
           continue;
         }
-        
+
         // skip closed projects
-        if (!projectFacade.getProject().isAccessible() || !projectFacade.getPom().isAccessible()) {
+        if(!projectFacade.getProject().isAccessible() || !projectFacade.getPom().isAccessible()) {
           continue;
         }
 
         loadModel(projectFacade, pm);
       }
-      
+
       // construct properties for all models
-      for (String artifact: models.keySet()) {
+      for(String artifact : models.keySet()) {
         RefactoringModelResources model = models.get(artifact);
         Map<String, PropertyInfo> properties = new HashMap<String, PropertyInfo>();
-        
+
         // find all workspace parents
         List<RefactoringModelResources> workspaceParents = new ArrayList<RefactoringModelResources>();
         MavenProject current = model.getProject();
         // add itself
         workspaceParents.add(model);
-        while (current.getParent() != null) {
+        while(current.getParent() != null) {
           MavenProject parentProject = current.getParent();
           String id = parentProject.getArtifactId();
           RefactoringModelResources parent = models.get(id);
-          if (parent != null) {
+          if(parent != null) {
             workspaceParents.add(parent);
           } else {
             break;
           }
           current = parentProject;
         }
-        
+
         //fill properties (from the root)
-        for (int i=workspaceParents.size() - 1; i >= 0; i--) {
+        for(int i = workspaceParents.size() - 1; i >= 0; i-- ) {
           RefactoringModelResources resource = workspaceParents.get(i);
           EList<PropertyElement> props = resource.getTmpModel().getProperties();
-          if (props == null)
+          if(props == null)
             continue;
           Iterator<?> it = props.iterator();
-          while (it.hasNext()) {
+          while(it.hasNext()) {
             PropertyElement pair = (PropertyElement) it.next();
             String pName = pair.getName();
             PropertyInfo info = properties.get(pName);
-            if (info == null) {
+            if(info == null) {
               info = new PropertyInfo();
               properties.put(pName, info);
             }
@@ -157,29 +158,29 @@ public abstract class AbstractPomRefactoring extends Refactoring {
             info.setResource(resource);
           }
         }
-        
+
         model.setProperties(properties);
       }
 
       // calculate the list of affected models
-      for (String artifact: models.keySet()) {
+      for(String artifact : models.keySet()) {
         RefactoringModelResources model = models.get(artifact);
         model.setCommand(getVisitor().applyChanges(model, pm));
       }
-      
+
       // process all refactored properties, creating more commands
-      for (String artifact: models.keySet()) {
+      for(String artifact : models.keySet()) {
         RefactoringModelResources model = models.get(artifact);
-        
-        if (model.getProperties() == null) {
+
+        if(model.getProperties() == null) {
           continue;
         }
 
-        for (String pName: model.getProperties().keySet()) {
+        for(String pName : model.getProperties().keySet()) {
           PropertyInfo info = model.getProperties().get(pName);
-          if (info.getNewValue() != null) {
+          if(info.getNewValue() != null) {
             CompoundCommand command = info.getResource().getCommand();
-            if (command == null) {
+            if(command == null) {
               command = new CompoundCommand();
               info.getResource().setCommand(command);
             }
@@ -189,86 +190,108 @@ public abstract class AbstractPomRefactoring extends Refactoring {
       }
 
       // process the file itself first
-      for (String artifact: models.keySet()) {
+      for(String artifact : models.keySet()) {
         RefactoringModelResources model = models.get(artifact);
-        if (model.getPomFile().equals(file)) {
+        if(model.getPomFile().equals(file)) {
           processCommand(model, res);
           model.releaseAllResources();
           models.remove(artifact);
           break;
         }
       }
-      
+
       // process others
-      for (String artifact: models.keySet()) {
+      for(String artifact : models.keySet()) {
         processCommand(models.get(artifact), res);
       }
 
       // rename project if required
       // TODO probably should copy relevant classes from internal packages
       String newName = getNewProjectName();
-      if (newName != null) {
+      if(newName != null) {
         RenameJavaProjectProcessor processor = new RenameJavaProjectProcessor(JavaCore.create(file.getProject()));
         RenameRefactoring refactoring = new RenameRefactoring(processor);
         processor.setNewElementName(newName);
-        RefactoringStatus tmp= new RefactoringStatus();
+        RefactoringStatus tmp = new RefactoringStatus();
         tmp.merge(refactoring.checkInitialConditions(pm));
-        if (!tmp.hasFatalError()) {
+        if(!tmp.hasFatalError()) {
           tmp.merge(refactoring.checkFinalConditions(pm));
-          if (!tmp.hasFatalError()) {
+          if(!tmp.hasFatalError()) {
             res.add(refactoring.createChange(pm));
           }
         }
       }
+    } catch(final PomRefactoringException ex) {
+      return new Change() {
+        public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException, OperationCanceledException {
+          return RefactoringStatus.createFatalErrorStatus(ex.getStatus().getMessage());
+        }
+        public Object getModifiedElement() {
+          return null;
+        }
+        public String getName() {
+          return ex.getStatus().getMessage();
+        }
+        public void initializeValidationData(IProgressMonitor pm) {
+        }
+        public Change perform(IProgressMonitor pm) throws CoreException {
+          return null;
+        }
+        public boolean isEnabled() {
+          return false;
+        }
+      };
     } catch(Exception ex) {
       throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, PROBLEMS_DURING_REFACTORING, ex));
     } finally {
-      for (String artifact: models.keySet()) {
+      for(String artifact : models.keySet()) {
         models.get(artifact).releaseAllResources();
       }
       RefactoringModelResources.cleanupTmpProject();
     }
-    
+
     return res;
   }
 
   // title for a composite change
   public abstract String getTitle();
 
-  protected RefactoringModelResources loadModel(IMavenProjectFacade projectFacade, IProgressMonitor pm) throws CoreException, IOException {
+  protected RefactoringModelResources loadModel(IMavenProjectFacade projectFacade, IProgressMonitor pm)
+      throws CoreException, IOException {
     pm.setTaskName("Loading " + projectFacade.getProject().getName());
     RefactoringModelResources current = new RefactoringModelResources(projectFacade);
     models.put(current.effective.getArtifactId(), current);
     pm.worked(1);
     return current;
   }
-  
+
   // this method determines whether all artifacts will be sent to visitor or only main one
   public abstract boolean scanAllArtifacts();
 
   protected void processCommand(RefactoringModelResources model, CompositeChange res) throws Exception {
     CompoundCommand command = model.getCommand();
-    if (command == null) {
+    if(command == null) {
       return;
     }
-    if (command.canExecute()) {
+    if(command.canExecute()) {
       // apply changes to temp file
       editingDomain.getCommandStack().execute(command);
       // create text change comparing temp file and real file
-      TextFileChange change = new ChangeCreator(model.getPomFile(), model.getPomBuffer().getDocument(), model.getTmpBuffer().getDocument(), file.getParent().getName()).createChange();
+      TextFileChange change = new ChangeCreator(model.getPomFile(), model.getPomBuffer().getDocument(), model
+          .getTmpBuffer().getDocument(), file.getParent().getName()).createChange();
       res.add(change);
     }
   }
-  
+
   // returns new eclipse project name or null if no change
   public String getNewProjectName() {
     return null;
   }
-  
+
   public Model createModel() {
     try {
       Resource resource = MavenPlugin.getDefault().getMavenModelManager().loadResource(file);
-      return (Model)resource.getContents().get(0);
+      return (Model) resource.getContents().get(0);
     } catch(CoreException ex) {
       MavenLogger.log(PROBLEMS_DURING_REFACTORING, ex);
       return null;
