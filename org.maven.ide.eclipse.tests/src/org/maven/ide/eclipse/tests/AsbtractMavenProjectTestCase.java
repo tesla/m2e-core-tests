@@ -533,13 +533,13 @@ protected void copyContent(IProject project, String from, String to) throws Exce
     assertTrue("Unexpected error markers " + toString(markers), severity < IMarker.SEVERITY_ERROR);
   }
 
-  protected void injectFilexWagon(String roleHint) throws Exception {
+  protected void injectFilexWagon() throws Exception {
     PlexusContainer container = ((MavenImpl) MavenPlugin.getDefault().getMaven()).getPlexusContainer();
     ComponentDescriptor<Wagon> descriptor = new ComponentDescriptor<Wagon>();
     descriptor.setRealm(container.getContainerRealm());
     descriptor.setRoleClass(Wagon.class);
     descriptor.setImplementationClass(FilexWagon.class);
-    descriptor.setRoleHint(roleHint);
+    descriptor.setRoleHint("filex");
     descriptor.setInstantiationStrategy("singleton");
     container.addComponentDescriptor(descriptor);
   }

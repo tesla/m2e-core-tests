@@ -70,7 +70,7 @@ public class ProjectConfigurationManagerTest extends AsbtractMavenProjectTestCas
   public void testWorkspaceResolutionOfInterModuleDependenciesDuringImport() throws Exception {
     String oldSettings = mavenConfiguration.getUserSettingsFile();
     try {
-      injectFilexWagon("mngeclipse1990");
+      injectFilexWagon();
       FilexWagon.setRequestFilterPattern("test/.*", true);
       mavenConfiguration.setUserSettingsFile(new File("projects/MNGECLIPSE-1990/settings.xml").getAbsolutePath());
       IJobChangeListener jobChangeListener = new JobChangeAdapter() {

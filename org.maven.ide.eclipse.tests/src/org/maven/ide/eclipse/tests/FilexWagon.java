@@ -24,6 +24,11 @@ import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 
 
+/**
+ * A special wagon for testing that allows to record the requests made to a repository. Use
+ * {@link #setRequestFilterPattern(String, boolean)} to configure what to record and to optionally clear previous
+ * records. The repository URL to use with this wagon looks like {@code filex://localhost/<path-relative-to-project>}.
+ */
 public class FilexWagon extends FileWagon {
 
   private static List<String> requests = new ArrayList<String>();

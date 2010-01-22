@@ -5,7 +5,7 @@
     <mirror>
       <id>test</id>
       <mirrorOf>*</mirrorOf>
-      <url>mngeclipse1990://localhost/remoterepo</url>
+      <url>filex://localhost/remoterepo</url>
     </mirror>
   </mirrors>
 
@@ -15,7 +15,7 @@
         <repositories>
           <repository>
             <id>central</id>
-            <url>mngeclipse1990://localhost/remoterepo</url>
+            <url>filex://localhost/remoterepo</url>
             <snapshots><enabled>true</enabled></snapshots>
             <releases><enabled>true</enabled></releases>
           </repository>
@@ -23,7 +23,7 @@
         <pluginRepositories>
           <pluginRepository>
             <id>central</id>
-            <url>mngeclipse1990://localhost/remoterepo</url>
+            <url>filex://localhost/remoterepo</url>
             <snapshots><enabled>true</enabled></snapshots>
             <releases><enabled>true</enabled></releases>
           </pluginRepository>

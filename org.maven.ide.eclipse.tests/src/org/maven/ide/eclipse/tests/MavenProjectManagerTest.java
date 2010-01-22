@@ -854,7 +854,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
   public void testRepositoryMetadataCacheUsed() throws Exception {
     String oldSettings = mavenConfiguration.getUserSettingsFile();
     try {
-      injectFilexWagon("mngeclipse1996");
+      injectFilexWagon();
       FilexWagon.setRequestFilterPattern("mngeclipse1996/.*xml", true);
       mavenConfiguration.setUserSettingsFile(new File("projects/MNGECLIPSE-1996/settings.xml").getAbsolutePath());
       IJobChangeListener jobChangeListener = new JobChangeAdapter() {
