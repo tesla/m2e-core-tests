@@ -11,6 +11,10 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.IJobChangeListener;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectInfo;
@@ -69,9 +73,23 @@ public class ProjectConfigurationManagerTest extends AsbtractMavenProjectTestCas
       injectFilexWagon("mngeclipse1990");
       FilexWagon.setRequestFilterPattern("test/.*", true);
       mavenConfiguration.setUserSettingsFile(new File("projects/MNGECLIPSE-1990/settings.xml").getAbsolutePath());
-      importProjects("projects/MNGECLIPSE-1990", new String[] {"pom.xml", "dependent/pom.xml", "dependency/pom.xml",
-          "parent/pom.xml"}, new ResolverConfiguration());
-      List<String> requests = FilexWagon.getRequests();
+      IJobChangeListener jobChangeListener = new JobChangeAdapter() {
+        public void scheduled(IJobChangeEvent event) {
+          if(event.getJob().getClass().getName().endsWith("MavenProjectManagerRefreshJob")) {
+            // cancel all those concurrent refresh jobs, we want to monitor the main thread only
+            event.getJob().cancel();
+          }
+        }
+      };
+      Job.getJobManager().addJobChangeListener(jobChangeListener);
+      List<String> requests;
+      try {
+        importProjects("projects/MNGECLIPSE-1990", new String[] {"pom.xml", "dependent/pom.xml", "dependency/pom.xml",
+            "parent/pom.xml"}, new ResolverConfiguration());
+        requests = FilexWagon.getRequests();
+      } finally {
+        Job.getJobManager().removeJobChangeListener(jobChangeListener);
+      }
       assertTrue("Dependency resolution was attempted from remote repository: " + requests, requests.isEmpty());
     } finally {
       mavenConfiguration.setUserSettingsFile(oldSettings);
