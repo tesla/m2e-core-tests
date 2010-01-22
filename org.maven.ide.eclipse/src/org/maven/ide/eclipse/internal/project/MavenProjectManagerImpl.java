@@ -518,16 +518,10 @@ public class MavenProjectManagerImpl {
       mavenRequest.getProjectBuildingRequest().setProject(mavenProject);
       mavenRequest.getProjectBuildingRequest().setResolveDependencies(true);
       MavenExecutionResult result;
-      ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
       try {
-        ClassLoader projectRealm = mavenProject.getClassRealm();
-        if(projectRealm != null) {
-          Thread.currentThread().setContextClassLoader(projectRealm);
-        }
         result = maven.readProject(mavenRequest, monitor);
         mavenResult.setArtifactResolutionResult(result.getArtifactResolutionResult());
       } finally {
-        Thread.currentThread().setContextClassLoader(oldClassLoader);
         mavenRequest.getProjectBuildingRequest().setProject(null);
       }
       facade.setMavenProjectArtifacts();
