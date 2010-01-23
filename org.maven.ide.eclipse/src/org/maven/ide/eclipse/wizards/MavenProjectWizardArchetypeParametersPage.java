@@ -18,6 +18,9 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -293,55 +296,57 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
    * @see org.eclipse.jface.wizard.WizardPage#setPageComplete(boolean)
    */
   void validate() {
+    String error = validateInput();
+    setErrorMessage(error);
+    setPageComplete(error != null);
+  }
+  
+  private String validateInput() {
+    IWorkspace workspace = ResourcesPlugin.getWorkspace();
+
+    //check validity of groupId
     String groupIdValue = groupIdCombo.getText().trim();
     if(groupIdValue.length() == 0) {
-      setErrorMessage(Messages.getString("wizard.project.page.maven2.validator.groupID"));
-      setPageComplete(false);
-      return;
+      return Messages.getString("wizard.project.page.maven2.validator.groupID");
     }
-    //check validity of groupId
     if(groupIdValue.contains(" ")){
-      setErrorMessage("Group Id cannot contain spaces.");
-      setPageComplete(false);
-      return;
+      return Messages.getString("wizard.project.page.maven2.validator.groupIDnospaces");
+    }
+    IStatus nameStatus = workspace.validateName(groupIdValue, IResource.PROJECT);
+    if(!nameStatus.isOK()) {
+      return Messages.getString("wizard.project.page.maven2.validator.groupIDinvalid", nameStatus.getMessage());
     }
     
+    //check validity of artifactId
     String artifactIdValue = artifactIdCombo.getText().trim();
     if(artifactIdValue.length() == 0) {
-      setErrorMessage(Messages.getString("wizard.project.page.maven2.validator.artifactID"));
-      setPageComplete(false);
-      return;
+      return Messages.getString("wizard.project.page.maven2.validator.artifactID");
     }
-    //check validity of artifactId
     if(artifactIdValue.contains(" ")){
-      setErrorMessage("Artifact Id cannot contain spaces.");
-      setPageComplete(false);
-      return;
+      return Messages.getString("wizard.project.page.maven2.validator.artifactIDnospaces");
+    }
+    nameStatus = workspace.validateName(artifactIdValue, IResource.PROJECT);
+    if(!nameStatus.isOK()) {
+      return Messages.getString("wizard.project.page.maven2.validator.artifactIDinvalid", nameStatus.getMessage());
     }
 
     String versionValue = versionCombo.getText().trim();
     if(versionValue.length() == 0) {
-      setErrorMessage(Messages.getString("wizard.project.page.maven2.validator.version"));
-      setPageComplete(false);
-      return;
+      return Messages.getString("wizard.project.page.maven2.validator.version");
     }
     //TODO: check validity of version?
 
     String packageName = packageCombo.getText();
     if(packageName.trim().length() != 0) {
       if(!Pattern.matches("[A-Za-z_$][A-Za-z_$\\d]*(?:\\.[A-Za-z_$][A-Za-z_$\\d]*)*", packageName)) {
-        setErrorMessage("Invalid package name");
-        setPageComplete(false);
-        return;
+        return "Invalid package name";
       }
     }
 
     // validate project name
-    IStatus nameStatus = getImportConfiguration().validateProjectName(getModel());
+    nameStatus = getImportConfiguration().validateProjectName(getModel());
     if(!nameStatus.isOK()) {
-      setErrorMessage(nameStatus.getMessage());
-      setPageComplete(false);
-      return;
+      return Messages.getString("wizard.project.page.maven2.validator.projectNameInvalid", nameStatus.getMessage());
     }
 
     if(requiredProperties.size() > 0) {
@@ -349,17 +354,12 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
       for(String key : requiredProperties) {
         String value = properties.getProperty(key);
         if(value == null || value.length() == 0) {
-          setErrorMessage(Messages.getString("wizard.project.page.maven2.validator.requiredProperty", key));
-          setPageComplete(false);
-          return;
+          return Messages.getString("wizard.project.page.maven2.validator.requiredProperty", key);
         }
       }
     }
 
-    setPageComplete(true);
-
-    setErrorMessage(null);
-    setMessage(null);
+    return null;
   }
 
   /** Ends the wizard flow chain. */
