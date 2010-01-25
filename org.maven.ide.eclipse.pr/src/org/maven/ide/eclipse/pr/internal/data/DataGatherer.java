@@ -8,16 +8,20 @@
 
 package org.maven.ide.eclipse.pr.internal.data;
 
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.zip.ZipOutputStream;
 
+import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
@@ -26,6 +30,7 @@ import org.maven.ide.eclipse.pr.IDataGatherer;
 import org.maven.ide.eclipse.pr.IDataSource;
 import org.maven.ide.eclipse.pr.IDataTarget;
 import org.maven.ide.eclipse.pr.internal.ProblemReportingPlugin;
+import org.maven.ide.eclipse.pr.internal.sources.StatusSource;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 
 
@@ -75,19 +80,30 @@ public class DataGatherer {
     return projects;
   }
 
-  public IStatus getStatus() {
-    if(statuses.size() == 0) {
-      return Status.OK_STATUS;
+  public void gather(String bundleFile, Set<Data> dataSet, IProgressMonitor monitor) throws IOException {
+    List<IDataGatherer> dataGatherers = DataGathererFactory.getDataGatherers();
+
+    ZipOutputStream zos = null;
+    try {
+      zos = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(bundleFile)));
+      IDataTarget target = new ArchiveTarget(zos);
+      gather(target, dataSet, dataGatherers, monitor);
+      zos.flush();
+    } finally {
+      IOUtil.close(zos);
     }
-    return new MultiStatus(ProblemReportingPlugin.PLUGIN_ID, -1, statuses.toArray(new IStatus[statuses.size()]),
-        "Error gathering data", null);
   }
 
-  public void gather(IDataTarget target, Set<Data> dataSet, List<IDataGatherer> dataGatherers, IProgressMonitor monitor) {
+  private void gather(IDataTarget target, Set<Data> dataSet, List<IDataGatherer> dataGatherers, IProgressMonitor monitor) {
     monitor.beginTask("Gathering", dataSet.size() + dataGatherers.size());
 
     for(Data data : dataSet) {
-      data.gather(this, target, monitor);
+      try {
+        data.gather(this, target, monitor);
+      } catch(Exception e) {
+        addStatus(new Status(IStatus.ERROR, ProblemReportingPlugin.PLUGIN_ID,
+            "Failure while gathering problem report data: " + e.getMessage(), e));
+      }
       monitor.worked(1);
     }
 
@@ -98,9 +114,14 @@ public class DataGatherer {
       } catch(CoreException ex) {
         MavenLogger.log(ex);
         addStatus(ex.getStatus());
+      } catch(Exception e) {
+        addStatus(new Status(IStatus.ERROR, ProblemReportingPlugin.PLUGIN_ID,
+            "Failure while gathering problem report data: " + e.getMessage(), e));
       }
       monitor.worked(1);
     }
+
+    gatherStatus(target);
 
     monitor.done();
   }
@@ -111,6 +132,23 @@ public class DataGatherer {
     } catch(CoreException ex) {
       MavenLogger.log(ex);
       addStatus(ex.getStatus());
+    } catch(Exception e) {
+      addStatus(new Status(IStatus.ERROR, ProblemReportingPlugin.PLUGIN_ID,
+          "Failure while gathering problem report data: " + e.getMessage(), e));
+    }
+  }
+
+  private void gatherStatus(IDataTarget target) {
+    if(!statuses.isEmpty()) {
+      int index = 0;
+      for(IStatus status : statuses) {
+        try {
+          target.consume("pr", new StatusSource(status, "status-" + index + ".txt"));
+        } catch(Exception e) {
+          MavenLogger.log("Failed to save status to problem report", e);
+        }
+        index++ ;
+      }
     }
   }
 

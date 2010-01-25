@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Maven Problem Reporting Tests Plug-in
+Bundle-SymbolicName: org.maven.ide.eclipse.pr.tests;singleton:=true
+Bundle-Version: 0.9.9.qualifier
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.core.resources,
+ org.maven.ide.eclipse,
+ org.maven.ide.eclipse.pr,
+ org.junit
+Eclipse-LazyStart: true
+Bundle-RequiredExecutionEnvironment: J2SE-1.5,
+ JavaSE-1.6
+Bundle-ClassPath: .
+Bundle-Vendor: Sonatype, Inc.
+MavenArtifact-GroupId: org.maven.ide.eclipse
+MavenArtifact-ArtifactId: org.maven.ide.eclipse.pr.tests

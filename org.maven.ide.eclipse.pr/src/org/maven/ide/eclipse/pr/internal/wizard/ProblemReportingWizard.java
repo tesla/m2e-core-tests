@@ -8,9 +8,7 @@
 
 package org.maven.ide.eclipse.pr.internal.wizard;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -18,14 +16,12 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.zip.ZipOutputStream;
 
 import org.codehaus.plexus.swizzle.IssueSubmissionRequest;
 import org.codehaus.plexus.swizzle.IssueSubmissionResult;
 import org.codehaus.plexus.swizzle.IssueSubmitter;
 import org.codehaus.plexus.swizzle.JiraIssueSubmitter;
 import org.codehaus.plexus.swizzle.jira.authentication.DefaultAuthenticationSource;
-import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -46,10 +42,8 @@ import org.eclipse.ui.IWorkbench;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
-import org.maven.ide.eclipse.pr.internal.data.ArchiveTarget;
 import org.maven.ide.eclipse.pr.internal.data.Data;
 import org.maven.ide.eclipse.pr.internal.data.DataGatherer;
-import org.maven.ide.eclipse.pr.internal.data.DataGathererFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 
@@ -116,35 +110,30 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
           File tmpDir = new File(tmpPath);
           String location = File.createTempFile("bundle", ".zip", tmpDir).getAbsolutePath();//final String location = selectionPage.getLocation();
           locationFile = new File(location);
-          IStatus status = saveData(location, dataSet, monitor);
-          if(status.isOK()) {
-            //showMessage("The problem reporting bundle is saved to " + location);
-            IMavenConfiguration mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
-            String username = mavenConfiguration.getJiraUsername();
-            String password = mavenConfiguration.getJiraPassword();
-            if(username == null || username.trim().equals("")) {
-              username = USERNAME;
-              password = PASSWORD;
-            }
-
-            IssueSubmitter is = new JiraIssueSubmitter(URL, new DefaultAuthenticationSource(username, password));
-
-            IssueSubmissionRequest r = new IssueSubmissionRequest();
-            r.setProjectId(PROJECT);
-            r.setSummary(descriptionPage.getProblemSummary());
-            r.setDescription(descriptionPage.getProblemDescription());
-            r.setAssignee(USERNAME);
-            r.setReporter(username);
-            r.setProblemReportBundle(locationFile);
-            r.setEnvironment(getEnvironment());
-
-            IssueSubmissionResult res = is.submitIssue(r);
-
-            showHyperlink("Successfully submitted issue to:", res.getIssueUrl());
-          } else {
-            MavenLogger.log(new CoreException(status));
-            showError(status.getMessage());
+          saveData(location, dataSet, monitor);
+          //showMessage("The problem reporting bundle is saved to " + location);
+          IMavenConfiguration mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
+          String username = mavenConfiguration.getJiraUsername();
+          String password = mavenConfiguration.getJiraPassword();
+          if(username == null || username.trim().equals("")) {
+            username = USERNAME;
+            password = PASSWORD;
           }
+
+          IssueSubmitter is = new JiraIssueSubmitter(URL, new DefaultAuthenticationSource(username, password));
+
+          IssueSubmissionRequest r = new IssueSubmissionRequest();
+          r.setProjectId(PROJECT);
+          r.setSummary(descriptionPage.getProblemSummary());
+          r.setDescription(descriptionPage.getProblemDescription());
+          r.setAssignee(USERNAME);
+          r.setReporter(username);
+          r.setProblemReportBundle(locationFile);
+          r.setEnvironment(getEnvironment());
+
+          IssueSubmissionResult res = is.submitIssue(r);
+
+          showHyperlink("Successfully submitted issue to:", res.getIssueUrl());
         } catch(Exception ex) {
           MavenLogger.log("Failed to generate problem report", ex);
           showError((ex.getMessage() != null) ? ex.getMessage() : ex.toString());
@@ -205,7 +194,7 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
     return v.toString();
   }
   
-  IStatus saveData(String location, Set<Data> dataSet, IProgressMonitor monitor) throws IOException {
+  void saveData(String location, Set<Data> dataSet, IProgressMonitor monitor) throws IOException {
     if(!location.endsWith(".zip")) {
       location = location + ".zip";
     }
@@ -247,16 +236,7 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
         mavenPlugin.getMavenProjectManager(), mavenPlugin.getConsole(), //
         ResourcesPlugin.getWorkspace(), projects);
 
-    ZipOutputStream zos = null;
-    try {
-      zos = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(location)));
-      gatherer.gather(new ArchiveTarget(zos), dataSet, DataGathererFactory.getDataGatherers(), monitor);
-      zos.flush();
-    } finally {
-      IOUtil.close(zos);
-    }
-
-    return gatherer.getStatus();
+    gatherer.gather(location, dataSet, monitor);
   }
 
 }
