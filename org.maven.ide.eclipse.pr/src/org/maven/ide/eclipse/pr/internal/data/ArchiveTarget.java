@@ -17,6 +17,8 @@ import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.maven.ide.eclipse.pr.IDataSource;
+import org.maven.ide.eclipse.pr.IDataTarget;
 import org.maven.ide.eclipse.pr.internal.ProblemReportingPlugin;
 
 

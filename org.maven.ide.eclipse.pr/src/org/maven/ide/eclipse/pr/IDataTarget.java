@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.pr.internal.data;
+package org.maven.ide.eclipse.pr;
 
 import org.eclipse.core.runtime.CoreException;
 

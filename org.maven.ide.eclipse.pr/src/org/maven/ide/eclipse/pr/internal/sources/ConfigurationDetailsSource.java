@@ -28,8 +28,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.about.ISystemSummarySection;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.pr.IDataSource;
 import org.maven.ide.eclipse.pr.internal.ProblemReportingPlugin;
-import org.maven.ide.eclipse.pr.internal.data.IDataSource;
 
 
 /**

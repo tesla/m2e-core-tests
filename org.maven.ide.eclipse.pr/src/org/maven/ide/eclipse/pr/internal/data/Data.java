@@ -21,11 +21,12 @@ import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.maven.ide.eclipse.pr.IDataTarget;
 import org.maven.ide.eclipse.pr.internal.sources.ConfigurationDetailsSource;
 import org.maven.ide.eclipse.pr.internal.sources.EffectivePomSource;
-import org.maven.ide.eclipse.pr.internal.sources.ExternalFileSource;
 import org.maven.ide.eclipse.pr.internal.sources.TextConsoleSource;
 import org.maven.ide.eclipse.pr.internal.sources.WorkspaceFileSource;
+import org.maven.ide.eclipse.pr.sources.ExternalFileSource;
 
 
 /**

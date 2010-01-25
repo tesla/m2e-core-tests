@@ -15,7 +15,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.console.TextConsole;
 import org.maven.ide.eclipse.core.MavenConsole;
-import org.maven.ide.eclipse.pr.internal.data.IDataSource;
+import org.maven.ide.eclipse.pr.IDataSource;
 
 /**
  * Returns the contents of a TextConsole window.

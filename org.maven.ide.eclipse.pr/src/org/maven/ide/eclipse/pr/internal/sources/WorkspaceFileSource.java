@@ -12,7 +12,7 @@ import java.io.InputStream;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
-import org.maven.ide.eclipse.pr.internal.data.IDataSource;
+import org.maven.ide.eclipse.pr.IDataSource;
 
 
 /**

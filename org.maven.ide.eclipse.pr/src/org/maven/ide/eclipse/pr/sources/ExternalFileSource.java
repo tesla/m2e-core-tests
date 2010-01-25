@@ -6,14 +6,14 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
 
-package org.maven.ide.eclipse.pr.internal.sources;
+package org.maven.ide.eclipse.pr.sources;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
-import org.maven.ide.eclipse.pr.internal.data.IDataSource;
+import org.maven.ide.eclipse.pr.IDataSource;
 
 
 /**

@@ -49,6 +49,7 @@ import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.pr.internal.data.ArchiveTarget;
 import org.maven.ide.eclipse.pr.internal.data.Data;
 import org.maven.ide.eclipse.pr.internal.data.DataGatherer;
+import org.maven.ide.eclipse.pr.internal.data.DataGathererFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 
@@ -146,7 +147,7 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
           }
         } catch(Exception ex) {
           MavenLogger.log("Failed to generate problem report", ex);
-          showError(ex.getMessage());
+          showError((ex.getMessage() != null) ? ex.getMessage() : ex.toString());
         } finally {
           if(locationFile != null && locationFile.exists()) {
             locationFile.delete();
@@ -249,7 +250,7 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
     ZipOutputStream zos = null;
     try {
       zos = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(location)));
-      gatherer.gather(new ArchiveTarget(zos), dataSet, monitor);
+      gatherer.gather(new ArchiveTarget(zos), dataSet, DataGathererFactory.getDataGatherers(), monitor);
       zos.flush();
     } finally {
       IOUtil.close(zos);

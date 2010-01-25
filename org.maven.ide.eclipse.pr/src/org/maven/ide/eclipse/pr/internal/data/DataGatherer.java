@@ -22,7 +22,9 @@ import org.eclipse.core.runtime.Status;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
-import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
+import org.maven.ide.eclipse.pr.IDataGatherer;
+import org.maven.ide.eclipse.pr.IDataSource;
+import org.maven.ide.eclipse.pr.IDataTarget;
 import org.maven.ide.eclipse.pr.internal.ProblemReportingPlugin;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 
@@ -81,12 +83,25 @@ public class DataGatherer {
         "Error gathering data", null);
   }
 
-  public void gather(IDataTarget target, Set<Data> dataSet, IProgressMonitor monitor) {
-    monitor.beginTask("Gathering", dataSet.size());
+  public void gather(IDataTarget target, Set<Data> dataSet, List<IDataGatherer> dataGatherers, IProgressMonitor monitor) {
+    monitor.beginTask("Gathering", dataSet.size() + dataGatherers.size());
+
     for(Data data : dataSet) {
       data.gather(this, target, monitor);
       monitor.worked(1);
     }
+
+    DataGatheringContext context = new DataGatheringContext(target, monitor);
+    for(IDataGatherer dataGatherer : dataGatherers) {
+      try {
+        dataGatherer.gather(context);
+      } catch(CoreException ex) {
+        MavenLogger.log(ex);
+        addStatus(ex.getStatus());
+      }
+      monitor.worked(1);
+    }
+
     monitor.done();
   }
 

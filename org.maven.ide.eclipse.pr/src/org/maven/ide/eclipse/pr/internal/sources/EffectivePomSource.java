@@ -19,8 +19,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.maven.ide.eclipse.pr.IDataSource;
 import org.maven.ide.eclipse.pr.internal.ProblemReportingPlugin;
-import org.maven.ide.eclipse.pr.internal.data.IDataSource;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 
