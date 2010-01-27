@@ -298,7 +298,7 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
   void validate() {
     String error = validateInput();
     setErrorMessage(error);
-    setPageComplete(error != null);
+    setPageComplete(error == null);
   }
   
   private String validateInput() {
