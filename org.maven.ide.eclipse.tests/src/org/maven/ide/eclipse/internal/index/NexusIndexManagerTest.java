@@ -9,18 +9,23 @@
 package org.maven.ide.eclipse.internal.index;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.index.IIndex;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
+import org.maven.ide.eclipse.internal.project.MavenProjectFacade;
 import org.maven.ide.eclipse.internal.repository.RepositoryRegistry;
+import org.maven.ide.eclipse.project.IMavenProjectFacade;
+import org.maven.ide.eclipse.project.MavenProjectChangedEvent;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 import org.maven.ide.eclipse.repository.IRepository;
 import org.maven.ide.eclipse.repository.IRepositoryRegistry;
@@ -341,6 +346,24 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
 
     IndexedArtifactGroup[] rootGroups = indexManager.getRootGroups(getRepository("http://bad.host/content/repositories/eclipse"));
     assertTrue(rootGroups.length > 0);
+  }
+
+  public void testMngEclipse1907() throws Exception {
+    IProject project = importProject("projects/projectimport/p001/pom.xml", new ResolverConfiguration());
+    waitForJobsToComplete();
+
+    // make facade shallow as it would be when the workspace was just started and its state deserialized
+    IMavenProjectFacade facade = MavenPlugin.getDefault().getMavenProjectManager().getProject(project);
+    Field field = MavenProjectFacade.class.getDeclaredField("mavenProject");
+    field.setAccessible(true);
+    field.set(facade, null);
+
+    project.delete(true, true, new NullProgressMonitor());
+
+    MavenProjectChangedEvent event = new MavenProjectChangedEvent(facade.getPom(),
+        MavenProjectChangedEvent.KIND_REMOVED, MavenProjectChangedEvent.FLAG_NONE, facade, null);
+    ((NexusIndexManager) MavenPlugin.getDefault().getIndexManager()).mavenProjectChanged(
+        new MavenProjectChangedEvent[] {event}, new NullProgressMonitor());
   }
 
 }

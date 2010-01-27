@@ -568,7 +568,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     ArtifactInfo ai = new ArtifactInfo(workspaceRepository.getUid(), key.getGroupId(), key.getArtifactId(), key.getVersion(), null);
     ai.packaging = facade.getPackaging();
     File pomFile = facade.getPomFile();
-    File artifactFile = facade.getMavenProject(monitor).getBasedir();
+    File artifactFile = (pomFile != null) ? pomFile.getParentFile() : null;
     try {
       Gav gav = new Gav(key.getGroupId(), key.getArtifactId(), key.getVersion());
       return new ArtifactContext(pomFile, artifactFile, null, ai, gav );
