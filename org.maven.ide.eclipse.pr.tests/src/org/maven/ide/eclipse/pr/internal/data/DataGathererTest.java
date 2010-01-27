@@ -9,9 +9,13 @@
 package org.maven.ide.eclipse.pr.internal.data;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.zip.ZipFile;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import junit.framework.TestCase;
@@ -20,11 +24,13 @@ import junit.framework.TestCase;
 public class DataGathererTest extends TestCase {
 
   public void testRobustnessAgainstFailingGatherers() throws Exception {
-    File tmpFile = File.createTempFile("datagatherertest-", "-" + getName());
-    tmpFile.deleteOnExit();
-
     DataGatherer gatherer = new DataGatherer(null, null, null, null, null);
-    gatherer.gather(tmpFile.getAbsolutePath(), EnumSet.allOf(Data.class), new NullProgressMonitor());
+    List<File> files = gatherer.gather(null, EnumSet.allOf(Data.class), new NullProgressMonitor());
+    for(File tmpFile : files) {
+      tmpFile.deleteOnExit();
+    }
+    assertEquals(1, files.size());
+    File tmpFile = files.get(0);
 
     assertTrue(tmpFile.isFile());
     ZipFile zip = new ZipFile(tmpFile);
@@ -33,6 +39,31 @@ public class DataGathererTest extends TestCase {
       assertNotNull(zip.getEntry("pr/status-1.txt"));
     } finally {
       zip.close();
+    }
+  }
+
+  public void testProjectSourcesGatheredInSeparateBundle() throws Exception {
+    IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("DataGathererTest");
+    project.create(new NullProgressMonitor());
+    try {
+      project.open(new NullProgressMonitor());
+      DataGatherer gatherer = new DataGatherer(null, null, null, null, Collections.singleton(project));
+      List<File> files = gatherer.gather(null, EnumSet.allOf(Data.class), new NullProgressMonitor());
+      for(File tmpFile : files) {
+        tmpFile.deleteOnExit();
+      }
+      assertEquals(2, files.size());
+      File tmpFile = files.get(1);
+
+      assertTrue(tmpFile.isFile());
+      ZipFile zip = new ZipFile(tmpFile);
+      try {
+        assertNotNull(zip.getEntry("projects/DataGathererTest/.project"));
+      } finally {
+        zip.close();
+      }
+    } finally {
+      project.delete(true, true, new NullProgressMonitor());
     }
   }
 

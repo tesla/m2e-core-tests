@@ -104,14 +104,11 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
 
     new Job("Gathering Information") {
       protected IStatus run(IProgressMonitor monitor) {
-        File locationFile = null;
+        List<File> bundleFiles = null;
         try {
           String tmpPath = ResourcesPlugin.getPlugin().getStateLocation().toOSString();
           File tmpDir = new File(tmpPath);
-          String location = File.createTempFile("bundle", ".zip", tmpDir).getAbsolutePath();//final String location = selectionPage.getLocation();
-          locationFile = new File(location);
-          saveData(location, dataSet, monitor);
-          //showMessage("The problem reporting bundle is saved to " + location);
+          bundleFiles = saveData(tmpDir, dataSet, monitor);
           IMavenConfiguration mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
           String username = mavenConfiguration.getJiraUsername();
           String password = mavenConfiguration.getJiraPassword();
@@ -128,7 +125,9 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
           r.setDescription(descriptionPage.getProblemDescription());
           r.setAssignee(USERNAME);
           r.setReporter(username);
-          r.setProblemReportBundle(locationFile);
+          for (File bundleFile : bundleFiles) {
+            r.addProblemReportBundle(bundleFile);
+          }
           r.setEnvironment(getEnvironment());
 
           IssueSubmissionResult res = is.submitIssue(r);
@@ -138,8 +137,10 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
           MavenLogger.log("Failed to generate problem report", ex);
           showError((ex.getMessage() != null) ? ex.getMessage() : ex.toString());
         } finally {
-          if(locationFile != null && locationFile.exists()) {
-            locationFile.delete();
+          if(bundleFiles != null) {
+            for(File bundleFile : bundleFiles) {
+              bundleFile.delete();
+            }
           }
         }
 
@@ -194,11 +195,7 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
     return v.toString();
   }
   
-  void saveData(String location, Set<Data> dataSet, IProgressMonitor monitor) throws IOException {
-    if(!location.endsWith(".zip")) {
-      location = location + ".zip";
-    }
-
+  List<File> saveData(File bundleDir, Set<Data> dataSet, IProgressMonitor monitor) throws IOException {
     //refresh the projects in case they're out of date
     Set<IProject> projects = new LinkedHashSet<IProject>();
     List<?> list = descriptionPage.getSelectedProjects().toList();
@@ -236,7 +233,7 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
         mavenPlugin.getMavenProjectManager(), mavenPlugin.getConsole(), //
         ResourcesPlugin.getWorkspace(), projects);
 
-    gatherer.gather(location, dataSet, monitor);
+    return gatherer.gather(bundleDir, dataSet, monitor);
   }
 
 }

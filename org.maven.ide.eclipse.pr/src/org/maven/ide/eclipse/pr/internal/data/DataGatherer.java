@@ -9,9 +9,12 @@
 package org.maven.ide.eclipse.pr.internal.data;
 
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.zip.ZipOutputStream;
@@ -80,14 +83,62 @@ public class DataGatherer {
     return projects;
   }
 
-  public void gather(String bundleFile, Set<Data> dataSet, IProgressMonitor monitor) throws IOException {
+  public List<File> gather(File bundleDir, Set<Data> dataSet, IProgressMonitor monitor) throws IOException {
+    // project sources go into second bundle (if any), all the rest goes into first/primary bundle
+    List<File> bundleFiles = new ArrayList<File>();
+
     List<IDataGatherer> dataGatherers = DataGathererFactory.getDataGatherers();
 
+    monitor.beginTask("Gathering", dataSet.size() + dataGatherers.size());
+
+    // There's a size limit on JIRA attachments, so we split logs, config etc. from the project sources
+    Set<Data> set1 = EnumSet.copyOf(dataSet);
+    set1.remove(Data.MAVEN_SOURCES);
+    Set<Data> set2 = EnumSet.copyOf(dataSet);
+    set2.removeAll(set1);
+
+    try {
+      if(!set2.isEmpty()) {
+        File bundleFile = File.createTempFile("bundle", ".zip", bundleDir);
+        bundleFiles.add(bundleFile);
+
+        gather(bundleFile, set2, Collections.<IDataGatherer> emptyList(), false, monitor);
+
+        if(bundleFile.length() <= 0) {
+          bundleFile.delete();
+          bundleFiles.remove(bundleFile);
+        }
+      }
+
+      // primary bundle with the potential status logs is created last
+      {
+        File bundleFile = File.createTempFile("bundle", ".zip", bundleDir);
+        bundleFiles.add(0, bundleFile);
+
+        gather(bundleFile, set1, dataGatherers, true, monitor);
+      }
+    } catch(IOException e) {
+      for(File bundleFile : bundleFiles) {
+        bundleFile.delete();
+      }
+      throw e;
+    }
+
+    monitor.done();
+
+    return bundleFiles;
+  }
+
+  private void gather(File bundleFile, Set<Data> dataSet, List<IDataGatherer> dataGatherers, boolean status,
+      IProgressMonitor monitor) throws IOException {
     ZipOutputStream zos = null;
     try {
       zos = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(bundleFile)));
       IDataTarget target = new ArchiveTarget(zos);
       gather(target, dataSet, dataGatherers, monitor);
+      if(status) {
+        gatherStatus(target);
+      }
       zos.flush();
     } finally {
       IOUtil.close(zos);
@@ -95,8 +146,6 @@ public class DataGatherer {
   }
 
   private void gather(IDataTarget target, Set<Data> dataSet, List<IDataGatherer> dataGatherers, IProgressMonitor monitor) {
-    monitor.beginTask("Gathering", dataSet.size() + dataGatherers.size());
-
     for(Data data : dataSet) {
       try {
         data.gather(this, target, monitor);
@@ -120,10 +169,6 @@ public class DataGatherer {
       }
       monitor.worked(1);
     }
-
-    gatherStatus(target);
-
-    monitor.done();
   }
 
   void gather(String folderName, IDataTarget target, IDataSource source) {
