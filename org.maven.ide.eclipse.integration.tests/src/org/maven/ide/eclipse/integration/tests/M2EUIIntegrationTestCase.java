@@ -13,6 +13,7 @@ import java.net.URL;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.maven.ide.eclipse.integration.tests.common.UIIntegrationTestCase;
 
 
 /**
@@ -28,12 +29,12 @@ public abstract class M2EUIIntegrationTestCase extends UIIntegrationTestCase {
 
   public void importZippedMavenProjects(URL url) throws Exception {
     File f = copyPluginResourceToTempFile(PLUGIN_ID, url);
-    importZippedMavenProjects(f);
+    importZippedProject(f);
   }
   
   public void importZippedMavenProjects(String pluginPath) throws Exception {
     File f = copyPluginResourceToTempFile(PLUGIN_ID, pluginPath);
-    importZippedMavenProjects(f);
+    importZippedProject(f);
   }
 
   

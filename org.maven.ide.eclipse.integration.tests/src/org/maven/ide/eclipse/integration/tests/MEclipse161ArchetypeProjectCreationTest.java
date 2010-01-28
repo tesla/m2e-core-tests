@@ -10,28 +10,9 @@ package org.maven.ide.eclipse.integration.tests;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CTabFolder;
-import org.eclipse.swt.custom.ViewForm;
-import org.eclipse.swt.widgets.Composite;
-
-import com.windowtester.runtime.IUIContext;
-import com.windowtester.runtime.locator.IWidgetLocator;
-import com.windowtester.runtime.swt.condition.SWTIdleCondition;
-import com.windowtester.runtime.swt.condition.eclipse.JobsCompleteCondition;
-import com.windowtester.runtime.swt.condition.shell.ShellDisposedCondition;
-import com.windowtester.runtime.swt.condition.shell.ShellShowingCondition;
-import com.windowtester.runtime.swt.locator.ButtonLocator;
-import com.windowtester.runtime.swt.locator.CTabItemLocator;
-import com.windowtester.runtime.swt.locator.FilteredTreeItemLocator;
-import com.windowtester.runtime.swt.locator.MenuItemLocator;
-import com.windowtester.runtime.swt.locator.NamedWidgetLocator;
-import com.windowtester.runtime.swt.locator.SWTWidgetLocator;
-import com.windowtester.runtime.swt.locator.TableCellLocator;
-import com.windowtester.runtime.swt.locator.TreeItemLocator;
-import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
+import org.junit.Assert;
+import org.junit.Test;
 
 
 /**
@@ -39,22 +20,24 @@ import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
  */
 public class MEclipse161ArchetypeProjectCreationTest extends M2EUIIntegrationTestCase {
 
-  public MEclipse161ArchetypeProjectCreationTest(){
+  public MEclipse161ArchetypeProjectCreationTest() {
     super();
   }
+
   private IProject createArchetypeProjct(String archetypeName) throws Exception {
     return createArchetypeProject(archetypeName, "project");
   }
 
+  @Test
   public void testQuickStartCreate() throws Exception {
     IProject project = createArchetypeProjct("maven-archetype-quickstart");
-    assertTrue(project.hasNature(JavaCore.NATURE_ID));
+    Assert.assertTrue(project.hasNature(JavaCore.NATURE_ID));
     IFile f = project.getFile("src/main/java/org/sonatype/test/project/App.java");
-    assertTrue(f.exists());
+    Assert.assertTrue(f.exists());
     f = project.getFile("pom.xml");
-    assertTrue(f.exists());
+    Assert.assertTrue(f.exists());
     f = project.getFile("src/test/java/org/sonatype/test/project/AppTest.java");
-    assertTrue(f.exists());
+    Assert.assertTrue(f.exists());
 
   }
 
@@ -81,11 +64,11 @@ public class MEclipse161ArchetypeProjectCreationTest extends M2EUIIntegrationTes
   public void testCreateSiteWebapp() throws Exception {
     createArchetypeProjct("maven-archetype-webapp");
   }
-  
+
   public void testCreateStrutsStarter() throws Exception {
     createArchetypeProjct("struts2-archetype-starter");
   }
-  
+
   public void testCreateSpringWS() throws Exception {
     createArchetypeProjct("spring-ws-archetype");
   }
@@ -169,4 +152,5 @@ public class MEclipse161ArchetypeProjectCreationTest extends M2EUIIntegrationTes
 //    ui.click(new TreeItemLocator(projectName + ".*", new ViewLocator(PACKAGE_EXPLORER_VIEW_ID)));
 //
 //  }
+
 }

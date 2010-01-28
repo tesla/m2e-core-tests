@@ -46,9 +46,12 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
+import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.swtbot.swt.finder.utils.SWTUtils;
+import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
+import org.eclipse.swtbot.swt.finder.waits.ICondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotButton;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
@@ -78,6 +81,9 @@ import org.osgi.framework.Version;
  */
 @RunWith(SWTBotJunit4ClassRunner.class)
 public abstract class UIIntegrationTestCase {
+
+	private static final String DEFAULT_PROJECT_GROUP = "org.sonatype.test";
+
 	protected static SWTWorkbenchBot bot;
 
 	protected static final IProgressMonitor monitor = new NullProgressMonitor();
@@ -108,16 +114,24 @@ public abstract class UIIntegrationTestCase {
 		takeScreenShot(getClass().getSimpleName());
 	}
 
-	public static void takeScreenShot(String classifier) throws IOException {
-		SWTUtils.captureScreenshot(File.createTempFile("swtbot-",
-				"-" + classifier + ".png", new File("target"))
-				.getAbsolutePath());
+	public static File takeScreenShot(String classifier) throws IOException {
+		File output = getCanonicalFile(File.createTempFile("swtbot-", "-"
+				+ classifier + ".png", new File("target")));
+		SWTUtils.captureScreenshot(output.getAbsolutePath());
+		return output;
 	}
 
-	public static void takeScreenShot() throws IOException {
-		takeScreenShot("screen");
+	protected static File getCanonicalFile(File file) {
+		try {
+			return file.getCanonicalFile();
+		} catch (IOException e) {
+			return file.getAbsoluteFile();
+		}
 	}
 
+	public static File takeScreenShot() throws IOException {
+		return takeScreenShot("screen");
+	}
 
 	protected void importZippedProject(File f) throws IOException {
 		try {
@@ -878,6 +892,66 @@ public abstract class UIIntegrationTestCase {
 			}
 		}
 		return queues;
+	}
+
+	/**
+	 * Create an archetype project and assert that it has proper natures &
+	 * builders, and no error markers
+	 */
+	protected IProject createArchetypeProject(final String archetypeName,
+			String projectName) throws Exception {
+		try {
+			IProject project = ResourcesPlugin.getWorkspace().getRoot()
+					.getProject(projectName);
+			Assert.assertFalse(project.exists());
+
+			bot.menu("File").menu("New").menu("Project...").click();
+
+			SWTBotShell shell = bot.shell("New Project");
+			try {
+				shell.activate();
+
+				bot.tree().expandNode("Maven").select("Maven Project");
+				// click the first next button
+				bot.button("Next >").click();
+				// then the first page with only 'default' values
+				bot.button("Next >").click();
+
+				bot.waitUntil(SwtbotUtil.waitForLoad(bot.table()));
+
+				// now select the quickstart row
+				bot.table().select(bot.table().indexOf(archetypeName, 2));
+
+				// and then click next
+				bot.button("Next >").click();
+
+				// then fill in the last page details
+				bot.comboBoxWithLabel("Group Id:").setText(
+						DEFAULT_PROJECT_GROUP);
+				bot.comboBoxWithLabel("Artifact Id:").setText(projectName);
+
+				bot.button("Finish").click();
+			} finally {
+				SwtbotUtil.waitForClose(shell);
+			}
+
+			waitForAllBuildsToComplete();
+
+			project = ResourcesPlugin.getWorkspace().getRoot().getProject(
+					projectName);
+			Assert.assertTrue(project.exists());
+			assertProjectsHaveNoErrors();
+			Assert.assertTrue("archtype project \"" + archetypeName
+					+ "\" created without Maven nature", project
+					.hasNature("org.maven.ide.eclipse.maven2Nature"));
+
+			selectProject(projectName, true);
+
+			return project;
+		} catch (Exception ex) {
+			throw new Exception("Failed to create project for archetype:"
+					+ archetypeName + " - " + takeScreenShot(), ex);
+		}
 	}
 
 }
