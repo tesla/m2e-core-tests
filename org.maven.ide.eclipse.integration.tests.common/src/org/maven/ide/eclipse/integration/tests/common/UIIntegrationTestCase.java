@@ -67,6 +67,7 @@ import org.eclipse.ui.part.FileEditorInput;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.maven.ide.components.pom.Model;
@@ -100,13 +101,25 @@ public abstract class UIIntegrationTestCase {
 		bot.perspectiveByLabel("Java").activate();
 	}
 
+	@Before
+	public void waitMenu() {
+		bot.waitUntil(new DefaultCondition() {
+
+			public boolean test() throws Exception {
+				return bot.menu("File").isEnabled();
+			}
+
+			public String getFailureMessage() {
+				return "Menu bar not available";
+			}
+		});
+	}
+
 	@AfterClass
 	public static void sleep() throws Exception {
 		removeServer();
 		clearProjects();
 		takeScreenShot("cleared projects");
-
-		bot.sleep(1000);
 	}
 
 	@After
@@ -131,6 +144,11 @@ public abstract class UIIntegrationTestCase {
 
 	public static File takeScreenShot() throws IOException {
 		return takeScreenShot("screen");
+	}
+
+	public static Exception takeScreenShot(Exception e) throws Exception {
+		File shot = takeScreenShot("exception");
+		throw new Exception(e.getMessage() + " - " + shot, e);
 	}
 
 	protected void importZippedProject(File f) throws IOException {
