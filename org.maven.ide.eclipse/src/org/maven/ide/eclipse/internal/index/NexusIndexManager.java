@@ -298,7 +298,8 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       query = getIndexer().constructQuery(ArtifactInfo.NAMES, term + "$");
       
     } else if(IIndex.SEARCH_GROUP.equals(type)) {
-      query = new PrefixQuery(new Term(ArtifactInfo.GROUP_ID, term));
+      query = new TermQuery(new Term(ArtifactInfo.GROUP_ID, term));
+      //query = new PrefixQuery(new Term(ArtifactInfo.GROUP_ID, term));
 
     } else if(IIndex.SEARCH_ARTIFACT.equals(type)) {
       BooleanQuery bq = new BooleanQuery();
@@ -380,6 +381,19 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
         }
       }
 
+      // https://issues.sonatype.org/browse/MNGECLIPSE-1630
+      // lucene can't handle prefix queries that match many index entries.
+      // to workaround, use term query to locate group artifacts and manually
+      // match subgroups
+      if(IIndex.SEARCH_GROUP.equals(type) && context != null) {
+        Set<String> groups = context.getAllGroups();
+        for(String group : groups) {
+          if(group.startsWith(term) && !group.equals(term)) {
+            String key = getArtifactFileKey(group, group, null, null);
+            result.put(key, new IndexedArtifact(group, group, null, null, null));
+          }
+        }
+      }
     }catch(IOException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Search error", ex));
     }
@@ -421,13 +435,19 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
 
   private void addArtifactFile(Map<String, IndexedArtifact> result, IndexedArtifactFile af, String className, String packageName,
       String packaging) {
-    String key = className + " : " + packageName + " : " + af.group + " : " + af.artifact;
+    String group = af.group;
+    String artifact = af.artifact;
+    String key = getArtifactFileKey(group, artifact, packageName, className);
     IndexedArtifact indexedArtifact = result.get(key);
     if(indexedArtifact == null) {
-      indexedArtifact = new IndexedArtifact(af.group, af.artifact, packageName, className, packaging);
+      indexedArtifact = new IndexedArtifact(group, artifact, packageName, className, packaging);
       result.put(key, indexedArtifact);
     }
     indexedArtifact.addFile(af);
+  }
+
+  protected String getArtifactFileKey(String group, String artifact, String packageName, String className) {
+    return className + " : " + packageName + " : " + group + " : " + artifact;
   }
 
   public IndexedArtifactFile getIndexedArtifactFile(ArtifactInfo artifactInfo) {
