@@ -376,6 +376,7 @@
     <profile>
       <id>windowtester</id>
       <modules>
+        <module>../org.maven.ide.eclipse.integration.tests.common</module>
         <module>../org.maven.ide.eclipse.integration.tests</module>
         <module>../org.maven.ide.eclipse.editor.tests</module>
       </modules>
