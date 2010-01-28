@@ -10,43 +10,43 @@ package org.maven.ide.eclipse.integration.tests.common;
 
 import org.eclipse.swt.widgets.Display;
 
-
 /**
- * Executes a task on the UI thread. Task can return an object to caller, and any exceptions which occur will be
- * re-thrown in the calling thread.
+ * Executes a task on the UI thread. Task can return an object to caller, and
+ * any exceptions which occur will be re-thrown in the calling thread.
  */
 public abstract class UIThreadTask implements Runnable {
-  private Object result = null;
+	private Object result = null;
 
-  private Exception exception = null;
+	private Exception exception = null;
 
-  final public void run() {
-    try {
-      result = runEx();
-    } catch(Exception ex) {
-      exception = ex;
-    }
-  }
+	final public void run() {
+		try {
+			result = runEx();
+		} catch (Exception ex) {
+			exception = ex;
+		}
+	}
 
-  public Exception getException() {
-    return exception;
-  }
+	public Exception getException() {
+		return exception;
+	}
 
-  public Object getResult() {
-    return result;
-  }
+	public Object getResult() {
+		return result;
+	}
 
-  public abstract Object runEx() throws Exception;
+	public abstract Object runEx() throws Exception;
 
-  public static Object executeOnEventQueue(UIThreadTask task) throws Exception {
-    if(Display.getDefault().getThread() == Thread.currentThread()) {
-      task.run();
-    } else {
-      Display.getDefault().syncExec(task);
-    }
-    if(task.getException() != null) {
-      throw task.getException();
-    }
-    return task.getResult();
-  }
+	public static Object executeOnEventQueue(UIThreadTask task)
+			throws Exception {
+		if (Display.getDefault().getThread() == Thread.currentThread()) {
+			task.run();
+		} else {
+			Display.getDefault().syncExec(task);
+		}
+		if (task.getException() != null) {
+			throw task.getException();
+		}
+		return task.getResult();
+	}
 }

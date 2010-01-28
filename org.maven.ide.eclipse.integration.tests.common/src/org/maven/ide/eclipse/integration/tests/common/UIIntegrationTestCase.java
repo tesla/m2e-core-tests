@@ -71,15 +71,13 @@ import org.maven.ide.eclipse.editor.pom.MavenPomEditor;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 
- 
-
 /**
  * @author rseddon
- *
+ * @author Marvin Froeder
+ * 
  */
-@SuppressWarnings("restriction")
 @RunWith(SWTBotJunit4ClassRunner.class)
-public abstract class UIIntegrationTestCase  {
+public abstract class UIIntegrationTestCase {
 	protected static SWTWorkbenchBot bot;
 
 	protected static final IProgressMonitor monitor = new NullProgressMonitor();
@@ -908,5 +906,5 @@ public abstract class UIIntegrationTestCase  {
 		}
 		return queues;
 	}
-  
+
 }

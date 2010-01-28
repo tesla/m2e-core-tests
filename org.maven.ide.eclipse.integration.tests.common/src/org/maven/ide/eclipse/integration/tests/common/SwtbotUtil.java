@@ -1,6 +1,5 @@
 package org.maven.ide.eclipse.integration.tests.common;
 
-import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 
 public class SwtbotUtil {
