@@ -118,33 +118,6 @@ public abstract class UIIntegrationTestCase {
 		takeScreenShot("screen");
 	}
 
-	protected static final String PLUGIN_ID = "com.sonatype.s2.flex.integration.tests";
-
-	public void importZippedMavenProjects(URL url) throws Exception {
-		File f = copyPluginResourceToTempFile(PLUGIN_ID, url);
-		importZippedProject(f);
-	}
-
-	public void importZippedMavenProjects(String pluginPath) throws Exception {
-		File f = copyPluginResourceToTempFile(PLUGIN_ID, pluginPath);
-		importZippedProject(f);
-	}
-
-	public void importZippedProject(String pluginPath) throws Exception {
-		importZippedProject(PLUGIN_ID, pluginPath);
-	}
-
-	public File unzipProject(String pluginPath) throws Exception {
-		return unzipProject(PLUGIN_ID, pluginPath);
-	}
-
-	protected File importMavenProjects(String projectPath) throws Exception {
-		return importMavenProjects(PLUGIN_ID, projectPath);
-	}
-
-	protected File doImport(String projectPath) throws Exception {
-		return doImport(PLUGIN_ID, projectPath);
-	}
 
 	protected void importZippedProject(File f) throws IOException {
 		try {
