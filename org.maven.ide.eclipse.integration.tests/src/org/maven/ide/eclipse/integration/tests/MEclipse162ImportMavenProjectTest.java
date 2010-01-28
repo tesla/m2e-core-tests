@@ -10,8 +10,7 @@ package org.maven.ide.eclipse.integration.tests;
 
 import java.io.File;
 
-import org.junit.After;
-import org.junit.Test;
+import com.windowtester.runtime.util.ScreenCapture;
 
 
 /**
@@ -21,52 +20,54 @@ public class MEclipse162ImportMavenProjectTest extends M2EUIIntegrationTestCase 
 
   private File tempDir;
 
-  public MEclipse162ImportMavenProjectTest() {
+  public MEclipse162ImportMavenProjectTest(){
     super();
+    super.setSkipIndexes(true);
   }
-
-  @Test
+  
   public void testSimpleModuleImport() throws Exception {
-    try {
+    try{
       tempDir = doImport("projects/commons-collections-3.2.1-src.zip");
-    } catch(Exception e) {
-      throw takeScreenShot(e);
+    } catch(Exception e){
+      ScreenCapture.createScreenCapture();
+      throw e;
     }
   }
 
-  @Test
   public void testMultiModuleImport() throws Exception {
-    try {
+    try{
       tempDir = doImport("projects/httpcomponents-core-4.0-beta3-src.zip");
-    } catch(Exception e) {
-      throw takeScreenShot(e);
+    } catch(Exception e){
+      ScreenCapture.createScreenCapture();
+      throw e;
     }
   }
 
-  @Test
   public void testMultiModuleImport2() throws Exception {
-    try {
+    try{
       tempDir = doImport("projects/testMultiModule.zip");
-    } catch(Exception e) {
-      throw takeScreenShot(e);
+    } catch(Exception e){
+      ScreenCapture.createScreenCapture();
+      throw e;
     }
+    
+    
   }
-
-  @Test
   public void testMNGEclipse1028ImportOrderMatters() throws Exception {
     //this is dependent on WTP tests which are disabled for now
     checkoutProjectsFromSVN("http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.wtp.tests/projects/import-order-matters/");
     assertProjectsHaveNoErrors();
   }
-
-  @After
-  public void tearDown() throws Exception {
+  
+  protected void tearDown() throws Exception {
     clearProjects();
 
     if(tempDir != null && tempDir.exists()) {
       deleteDirectory(tempDir);
       tempDir = null;
     }
+    super.tearDown();
+
   }
 
 }

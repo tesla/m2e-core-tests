@@ -76,7 +76,31 @@ import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 
- 
+import com.windowtester.finder.swt.ShellFinder;
+import com.windowtester.internal.runtime.DiagnosticWriter;
+import com.windowtester.runtime.IUIContext;
+import com.windowtester.runtime.WT;
+import com.windowtester.runtime.WaitTimedOutException;
+import com.windowtester.runtime.WidgetSearchException;
+import com.windowtester.runtime.condition.IUICondition;
+import com.windowtester.runtime.condition.IsEnabledCondition;
+import com.windowtester.runtime.locator.IWidgetLocator;
+import com.windowtester.runtime.swt.UITestCaseSWT;
+import com.windowtester.runtime.swt.condition.SWTIdleCondition;
+import com.windowtester.runtime.swt.condition.eclipse.JobsCompleteCondition;
+import com.windowtester.runtime.swt.condition.shell.ShellDisposedCondition;
+import com.windowtester.runtime.swt.condition.shell.ShellShowingCondition;
+import com.windowtester.runtime.swt.locator.ButtonLocator;
+import com.windowtester.runtime.swt.locator.CTabItemLocator;
+import com.windowtester.runtime.swt.locator.FilteredTreeItemLocator;
+import com.windowtester.runtime.swt.locator.LabeledTextLocator;
+import com.windowtester.runtime.swt.locator.MenuItemLocator;
+import com.windowtester.runtime.swt.locator.NamedWidgetLocator;
+import com.windowtester.runtime.swt.locator.SWTWidgetLocator;
+import com.windowtester.runtime.swt.locator.TableCellLocator;
+import com.windowtester.runtime.swt.locator.TreeItemLocator;
+import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
+import com.windowtester.runtime.util.ScreenCapture;
 
 /**
  * @author rseddon
