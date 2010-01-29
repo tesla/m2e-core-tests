@@ -18,9 +18,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -68,9 +65,9 @@ import org.maven.ide.eclipse.ui.internal.components.TextComboBoxCellEditor;
 public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWizardPage {
 
   public static final String DEFAULT_VERSION = "0.0.1-SNAPSHOT";
-  
+
   public static final String DEFAULT_PACKAGE = "foo";
-  
+
   Table propertiesTable;
 
   TableViewer propertiesViewer;
@@ -300,34 +297,16 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
     setErrorMessage(error);
     setPageComplete(error == null);
   }
-  
-  private String validateInput() {
-    IWorkspace workspace = ResourcesPlugin.getWorkspace();
 
-    //check validity of groupId
-    String groupIdValue = groupIdCombo.getText().trim();
-    if(groupIdValue.length() == 0) {
-      return Messages.getString("wizard.project.page.maven2.validator.groupID");
+  private String validateInput() {
+    String error = validateIdInput(groupIdCombo.getText().trim(), "group");
+    if(error != null) {
+      return error;
     }
-    if(groupIdValue.contains(" ")){
-      return Messages.getString("wizard.project.page.maven2.validator.groupIDnospaces");
-    }
-    IStatus nameStatus = workspace.validateName(groupIdValue, IResource.PROJECT);
-    if(!nameStatus.isOK()) {
-      return Messages.getString("wizard.project.page.maven2.validator.groupIDinvalid", nameStatus.getMessage());
-    }
-    
-    //check validity of artifactId
-    String artifactIdValue = artifactIdCombo.getText().trim();
-    if(artifactIdValue.length() == 0) {
-      return Messages.getString("wizard.project.page.maven2.validator.artifactID");
-    }
-    if(artifactIdValue.contains(" ")){
-      return Messages.getString("wizard.project.page.maven2.validator.artifactIDnospaces");
-    }
-    nameStatus = workspace.validateName(artifactIdValue, IResource.PROJECT);
-    if(!nameStatus.isOK()) {
-      return Messages.getString("wizard.project.page.maven2.validator.artifactIDinvalid", nameStatus.getMessage());
+
+    error = validateIdInput(artifactIdCombo.getText().trim(), "artifact");
+    if(error != null) {
+      return error;
     }
 
     String versionValue = versionCombo.getText().trim();
@@ -344,7 +323,7 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
     }
 
     // validate project name
-    nameStatus = getImportConfiguration().validateProjectName(getModel());
+    IStatus nameStatus = getImportConfiguration().validateProjectName(getModel());
     if(!nameStatus.isOK()) {
       return Messages.getString("wizard.project.page.maven2.validator.projectNameInvalid", nameStatus.getMessage());
     }
@@ -404,7 +383,7 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
             IMaven maven = MavenPlugin.lookup(IMaven.class);
 
             ArtifactRepository localRepository = maven.getLocalRepository();
-            
+
             List<ArtifactRepository> repositories = maven.getArtifactRepositories();
 
             ArchetypeArtifactManager aaMgr = MavenPlugin.lookup(ArchetypeArtifactManager.class);
@@ -498,7 +477,8 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
 
   /** Returns the default package name. */
   protected String getDefaultJavaPackage() {
-    return MavenProjectWizardArchetypeParametersPage.getDefaultJavaPackage(groupIdCombo.getText().trim(), artifactIdCombo.getText().trim());
+    return MavenProjectWizardArchetypeParametersPage.getDefaultJavaPackage(groupIdCombo.getText().trim(),
+        artifactIdCombo.getText().trim());
   }
 
   /** Creates the Model object. */
@@ -543,7 +523,7 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
   }
 
   public Properties getProperties() {
-    if ( propertiesViewer.isCellEditorActive() ) {
+    if(propertiesViewer.isCellEditorActive()) {
       propertiesTable.setFocus();
     }
     Properties properties = new Properties();
@@ -591,22 +571,22 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
 
   public static String getDefaultJavaPackage(String groupId, String artifactId) {
     StringBuffer sb = new StringBuffer(groupId);
-    
-    if(sb.length()>0 && artifactId.length()>0) {
+
+    if(sb.length() > 0 && artifactId.length() > 0) {
       sb.append('.');
     }
-    
+
     sb.append(artifactId);
-    
-    if(sb.length()==0) {
+
+    if(sb.length() == 0) {
       sb.append(DEFAULT_PACKAGE);
     }
-  
+
     boolean isFirst = true;
     StringBuffer pkg = new StringBuffer();
     for(int i = 0; i < sb.length(); i++ ) {
       char c = sb.charAt(i);
-      if(c=='-') {
+      if(c == '-') {
         pkg.append('_');
         isFirst = false;
       } else {
@@ -616,7 +596,7 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
             isFirst = false;
           }
         } else {
-          if(c=='.') {
+          if(c == '.') {
             pkg.append('.');
             isFirst = true;
           } else if(Character.isJavaIdentifierPart(c)) {
@@ -625,7 +605,7 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
         }
       }
     }
-    
+
     return pkg.toString();
   }
 }

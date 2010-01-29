@@ -48,8 +48,7 @@ public class MavenProjectWizardArtifactPage extends AbstractMavenWizardPage {
 
   private static final ProjectFolder RESOURCES = new ProjectFolder("src/main/resources", "target/classes");
 
-  private static final ProjectFolder RESOURCES_TEST = new ProjectFolder("src/test/resources",
-      "target/test-classes");
+  private static final ProjectFolder RESOURCES_TEST = new ProjectFolder("src/test/resources", "target/test-classes");
 
   // private static final ProjectFolder FILTERS = new ProjectFolder("src/main/filters", null, false);
 
@@ -62,14 +61,14 @@ public class MavenProjectWizardArtifactPage extends AbstractMavenWizardPage {
   private static final ProjectFolder WEBAPP = new ProjectFolder("src/main/webapp", null);
 
   private static final ProjectFolder EAR = new ProjectFolder("src/main/application", null);
-  
+
   private static final ProjectFolder SITE = new ProjectFolder("src/site", null);
 
   private static final ProjectFolder[] JAR_DIRS = {JAVA, JAVA_TEST, RESOURCES, RESOURCES_TEST};
 
   private static final ProjectFolder[] WAR_DIRS = {JAVA, JAVA_TEST, RESOURCES, RESOURCES_TEST, WEBAPP};
 
-  private static final ProjectFolder[] EAR_DIRS = {EAR};  // MNGECLIPSE-688 add EAR Support
+  private static final ProjectFolder[] EAR_DIRS = {EAR}; // MNGECLIPSE-688 add EAR Support
 
   private static final ProjectFolder[] POM_DIRS = {SITE};
 
@@ -113,9 +112,9 @@ public class MavenProjectWizardArtifactPage extends AbstractMavenWizardPage {
   }
 
   /**
-   * {@inheritDoc} This wizard page contains a <code>MavenArtifactComponent</code> to gather information about the
-   * Maven artifact and a <code>Maven2DirectoriesComponent</code> which allows to choose which directories of the
-   * default Maven directory structure to create.
+   * {@inheritDoc} This wizard page contains a <code>MavenArtifactComponent</code> to gather information about the Maven
+   * artifact and a <code>Maven2DirectoriesComponent</code> which allows to choose which directories of the default
+   * Maven directory structure to create.
    */
   public void createControl(Composite parent) {
     GridLayout layout = new GridLayout();
@@ -148,7 +147,7 @@ public class MavenProjectWizardArtifactPage extends AbstractMavenWizardPage {
     parentComponent.addBrowseButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            "Select Parent Artifact", IIndex.SEARCH_ARTIFACT, Collections.<ArtifactKey>emptySet());
+            "Select Parent Artifact", IIndex.SEARCH_ARTIFACT, Collections.<ArtifactKey> emptySet());
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile indexedArtifactFile = (IndexedArtifactFile) dialog.getFirstResult();
           if(indexedArtifactFile != null) {
@@ -186,7 +185,7 @@ public class MavenProjectWizardArtifactPage extends AbstractMavenWizardPage {
     super.setVisible(visible);
     artifactComponent.getGroupIdCombo().setFocus();
   }
-  
+
   /**
    * Returns the Maven2 model containing the artifact information provided by the user.
    * 
@@ -210,7 +209,8 @@ public class MavenProjectWizardArtifactPage extends AbstractMavenWizardPage {
    * Returns the directories of the default Maven2 directory structure selected by the user. These directories should be
    * created along with the new project.
    * 
-   * @return The Maven2 directories selected by the user. Neither the array nor any of its elements is <code>null</code>.
+   * @return The Maven2 directories selected by the user. Neither the array nor any of its elements is <code>null</code>
+   *         .
    */
   public String[] getFolders() {
     ProjectFolder[] mavenDirectories = getProjectFolders();
@@ -245,49 +245,42 @@ public class MavenProjectWizardArtifactPage extends AbstractMavenWizardPage {
    * @see org.eclipse.jface.wizard.WizardPage#setPageComplete(boolean)
    */
   void validate() {
-    if(artifactComponent.getGroupId().trim().length() == 0) {
-      setErrorMessage(Messages.getString("wizard.project.page.maven2.validator.groupID"));
-      setPageComplete(false);
-      return;
+    String error = validateInput();
+    setErrorMessage(error);
+    setPageComplete(error == null);
+  }
+
+  private String validateInput() {
+    String error = validateIdInput(artifactComponent.getGroupId().trim(), "group");
+    if(error != null) {
+      return error;
     }
 
-    if(artifactComponent.getArtifactId().trim().length() == 0) {
-      setErrorMessage(Messages.getString("wizard.project.page.maven2.validator.artifactID"));
-      setPageComplete(false);
-      return;
+    error = validateIdInput(artifactComponent.getArtifactId().trim(), "artifact");
+    if(error != null) {
+      return error;
     }
 
     if(artifactComponent.getVersion().trim().length() == 0) {
-      setErrorMessage(Messages.getString("wizard.project.page.maven2.validator.version"));
-      setPageComplete(false);
-      return;
+      return Messages.getString("wizard.project.page.maven2.validator.version");
     }
 
     if(artifactComponent.getPackaging().trim().length() == 0) {
-      setErrorMessage(Messages.getString("wizard.project.page.maven2.validator.packaging"));
-      setPageComplete(false);
-      return;
+      return Messages.getString("wizard.project.page.maven2.validator.packaging");
     }
 
     // if the parent project is specified, all three fields must be present
     if(!parentComponent.validate()) {
-      setErrorMessage(Messages.getString("wizard.project.page.maven2.validator.parent"));
-      setPageComplete(false);
-      return;
+      return Messages.getString("wizard.project.page.maven2.validator.parent");
     }
 
     // validate project name
     IStatus nameStatus = getImportConfiguration().validateProjectName(artifactComponent.getModel());
     if(!nameStatus.isOK()) {
-      setErrorMessage(nameStatus.getMessage());
-      setPageComplete(false);
-      return;
+      return nameStatus.getMessage();
     }
 
-    setPageComplete(true);
-
-    setErrorMessage(null);
-    setMessage(null);
+    return null;
   }
 
   /**
@@ -323,8 +316,7 @@ public class MavenProjectWizardArtifactPage extends AbstractMavenWizardPage {
   public boolean isPageComplete() {
     return !isUsed || super.isPageComplete();
   }
-  
-  
+
   /**
    * A placeholder representing a directory in the project structure.
    */
@@ -336,7 +328,7 @@ public class MavenProjectWizardArtifactPage extends AbstractMavenWizardPage {
     /** Output path */
     private String outputPath = null;
 
-    ProjectFolder( String path, String outputPath ) {
+    ProjectFolder(String path, String outputPath) {
       this.path = path;
       this.outputPath = outputPath;
     }
@@ -359,9 +351,9 @@ public class MavenProjectWizardArtifactPage extends AbstractMavenWizardPage {
      * Returns true for source folder
      */
     boolean isSourceEntry() {
-      return this.getOutputPath()!=null;
+      return this.getOutputPath() != null;
     }
-    
+
   }
-  
+
 }

@@ -15,6 +15,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.layout.GridData;
@@ -22,6 +25,7 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.core.Messages;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 
 
@@ -42,7 +46,7 @@ public abstract class AbstractMavenWizardPage extends WizardPage {
 
   /** The resolver configuration panel */
   protected ResolverConfigurationComponent resolverConfigurationComponent;
-  
+
   /** dialog settings to store input history */
   protected IDialogSettings dialogSettings;
 
@@ -64,10 +68,10 @@ public abstract class AbstractMavenWizardPage extends WizardPage {
     this.importConfiguration = importConfiguration;
 
     fieldsWithHistory = new HashMap<String, List<Combo>>();
-    
+
     initDialogSettings();
   }
-  
+
   public ProjectImportConfiguration getImportConfiguration() {
     return this.importConfiguration;
   }
@@ -132,7 +136,7 @@ public abstract class AbstractMavenWizardPage extends WizardPage {
         for(Combo combo : e.getValue()) {
           String text = combo.getText();
           combo.setItems(items);
-          if (text.length() > 0) {
+          if(text.length() > 0) {
             // setItems() clears the text input, so we need to restore it
             combo.setText(text);
           }
@@ -145,12 +149,12 @@ public abstract class AbstractMavenWizardPage extends WizardPage {
   private void saveInputHistory() {
     for(Map.Entry<String, List<Combo>> e : fieldsWithHistory.entrySet()) {
       String id = e.getKey();
-      
+
       Set<String> history = new LinkedHashSet<String>(MAX_HISTORY);
-      
+
       for(Combo combo : e.getValue()) {
         String lastValue = combo.getText();
-        if ( lastValue!=null && lastValue.trim().length() > 0 ) {
+        if(lastValue != null && lastValue.trim().length() > 0) {
           history.add(lastValue);
         }
       }
@@ -160,20 +164,41 @@ public abstract class AbstractMavenWizardPage extends WizardPage {
       for(int j = 0; j < items.length && history.size() < MAX_HISTORY; j++ ) {
         history.add(items[j]);
       }
-      
+
       dialogSettings.put(id, history.toArray(new String[history.size()]));
     }
   }
 
   /** Adds an input control to the list of fields to save. */
   protected void addFieldWithHistory(String id, Combo combo) {
-    if(combo!=null) {
+    if(combo != null) {
       List<Combo> combos = fieldsWithHistory.get(id);
-      if(combos==null) {
+      if(combos == null) {
         combos = new ArrayList<Combo>();
         fieldsWithHistory.put(id, combos);
       }
       combos.add(combo);
     }
+  }
+
+  protected String validateIdInput(String text, String id) {
+    if(text == null || text.length() == 0) {
+      return Messages.getString("wizard.project.page.maven2.validator." + id + "ID");
+    }
+
+    if(text.contains(" ")) {
+      return Messages.getString("wizard.project.page.maven2.validator." + id + "IDnospaces");
+    }
+
+    IStatus nameStatus = ResourcesPlugin.getWorkspace().validateName(text, IResource.PROJECT);
+    if(!nameStatus.isOK()) {
+      return Messages.getString("wizard.project.page.maven2.validator." + id + "IDinvalid", nameStatus.getMessage());
+    }
+
+    if(!text.matches("[A-Za-z0-9_\\-.]+")) {
+      return Messages.getString("wizard.project.page.maven2.validator." + id + "IDinvalid", text);
+    }
+
+    return null;
   }
 }
