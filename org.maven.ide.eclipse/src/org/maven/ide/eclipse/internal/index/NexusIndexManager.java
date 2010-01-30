@@ -38,6 +38,7 @@ import org.eclipse.core.runtime.jobs.Job;
 
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
+import org.codehaus.plexus.util.FileUtils;
 
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause;
@@ -73,9 +74,11 @@ import org.sonatype.nexus.index.creator.JarFileContentsIndexCreator;
 import org.sonatype.nexus.index.creator.MavenArchetypeArtifactInfoIndexCreator;
 import org.sonatype.nexus.index.creator.MavenPluginArtifactInfoIndexCreator;
 import org.sonatype.nexus.index.creator.MinimalArtifactInfoIndexCreator;
+import org.sonatype.nexus.index.fs.Lock;
 import org.sonatype.nexus.index.locator.PomLocator;
 import org.sonatype.nexus.index.updater.DefaultIndexUpdater;
 import org.sonatype.nexus.index.updater.IndexUpdateRequest;
+import org.sonatype.nexus.index.updater.IndexUpdateResult;
 import org.sonatype.nexus.index.updater.IndexUpdater;
 
 import org.maven.ide.eclipse.MavenPlugin;
@@ -496,6 +499,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
         fireIndexChanged(repository);
         console.logMessage("Updated local repository index");
       }
+      
     } catch(Exception ex) {
       MavenLogger.log("Unable to re-index "+repository.toString(), ex);
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Reindexing error", ex));
@@ -848,23 +852,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
             getIndexer().removeIndexingContext(indexingContext, false);
           }
 
-          Directory directory = getIndexDirectory(repository);
-
-          File repositoryPath = null;
-          if (repository.getBasedir() != null) {
-            repositoryPath = repository.getBasedir().getCanonicalFile();
-          }
-
-          boolean fullIndex = NexusIndex.DETAILS_FULL.equals(details);
-
-          indexingContext = getIndexer().addIndexingContextForced(
-              repository.getUid(), //
-              repository.getUrl(), //
-              repositoryPath, //
-              directory, //
-              repository.getUrl(),
-              null, //
-              (fullIndex ? getFullCreator() : getMinCreator()));
+          createIndexingContext(repository, details);
 
           fireIndexAdded(repository);
 
@@ -886,6 +874,37 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     if (repository.isScope(IRepositoryRegistry.SCOPE_LOCAL)) {
       this.localIndex = newLocalIndex(repositoryRegistry.getLocalRepository());
     }
+  }
+
+  protected IndexingContext createIndexingContext(IRepository repository, String details) throws IOException {
+    IndexingContext indexingContext;
+    Directory directory = getIndexDirectory(repository);
+
+    File repositoryPath = null;
+    if (repository.getBasedir() != null) {
+      repositoryPath = repository.getBasedir().getCanonicalFile();
+    }
+
+    ArrayList<IndexCreator> indexers = getIndexers(details);
+
+    indexingContext = getIndexer().addIndexingContextForced(
+        repository.getUid(), //
+        repository.getUrl(), //
+        repositoryPath, //
+        directory, //
+        repository.getUrl(),
+        null, //
+        indexers);
+    
+    indexingContext.setSearchable(false);
+    
+    return indexingContext;
+  }
+
+  protected ArrayList<IndexCreator> getIndexers(String details) {
+    boolean fullIndex = NexusIndex.DETAILS_FULL.equals(details);
+    ArrayList<IndexCreator> indexers = fullIndex ? getFullCreator() : getMinCreator();
+    return indexers;
   }
 
   public void repositoryRemoved(IRepository repository, IProgressMonitor monitor) {
@@ -999,6 +1018,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
           }
         }
       }
+      getIndexingContext(repository).setSearchable(true);
     }
   }
 
@@ -1018,25 +1038,61 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
         IndexingContext context = getIndexingContext(repository);
 
         if (context != null) {
+          IndexUpdateRequest request = newIndexUpdateRequest(repository, context);
+
           TransferListener transferListener = maven.createTransferListener(monitor);
           ProxyInfo proxyInfo = maven.getProxyInfo(repository.getProtocol());
           AuthenticationInfo authenticationInfo = repository.getAuthenticationInfo();
-          IndexUpdateRequest request = new IndexUpdateRequest(context);
           request.setProxyInfo(proxyInfo);
           request.setAuthenticationInfo(authenticationInfo);
           request.setTransferListener(transferListener);
           request.setForceFullUpdate(force);
           request.setResourceFetcher(new DefaultIndexUpdater.WagonFetcher(wagonManager, transferListener, authenticationInfo, proxyInfo));
-          request.setLocker(locker);
-          File indexCacheBasedir = new File(repositoryRegistry.getLocalRepository().getBasedir(), ".cache/nexus-index" ).getCanonicalFile();
-          File indexCacheDir = new File(indexCacheBasedir, repository.getUid());
-          indexCacheDir.mkdirs();
-          request.setLocalIndexCacheDir(indexCacheDir);
-          Date indexTime = indexUpdater.fetchAndUpdateIndex(request);
-          if(indexTime==null) {
-            console.logMessage("No index update available for " + repository.toString());
-          } else {
-            console.logMessage("Updated index for " + repository.toString() + " " + indexTime);
+
+          Lock cacheLock = locker.lock(request.getLocalIndexCacheDir());
+          try {
+            boolean updated;
+
+            request.setCacheOnly(true);
+            IndexUpdateResult result = indexUpdater.fetchAndUpdateIndex(request);
+            if(result.isFullUpdate() || !context.isSearchable()) {
+              // need to fully recreate index
+
+              // 1. process index gz into cached/shared lucene index. this can be a noop if cache is uptodate
+              String details = getIndexDetails(repository);
+              String id = repository.getUid() + "-cache";
+              File luceneCache = new File(request.getLocalIndexCacheDir(), details);
+              Directory directory = FSDirectory.getDirectory(luceneCache);
+              IndexingContext cacheCtx = getIndexer().addIndexingContextForced(id, id, null, directory, null, null,
+                  getIndexers(details));
+              request=newIndexUpdateRequest(repository, cacheCtx);
+              request.setOffline(true);
+              indexUpdater.fetchAndUpdateIndex(request);
+
+              // 2. copy cached/shared (lets play dirty here!)
+              getIndexer().removeIndexingContext(context, true); // nuke workspace index files
+              getIndexer().removeIndexingContext(cacheCtx, false); // keep the cache!
+              FileUtils.cleanDirectory(context.getIndexDirectoryFile());
+              FileUtils.copyDirectory(luceneCache, context.getIndexDirectoryFile()); // copy cached lucene index
+              context=createIndexingContext(repository, details); // re-create indexing context
+
+              updated=true;
+            } else {
+              // incremental change
+              request = newIndexUpdateRequest(repository, context);
+              request.setOffline(true); // local cache is already uptodate, no need to
+              result = indexUpdater.fetchAndUpdateIndex(request);
+              updated=result.getTimestamp()!=null;
+            }
+
+            if(updated) {
+              console.logMessage("Updated index for " + repository.toString());
+            } else {
+              console.logMessage("No index update available for " + repository.toString());
+            }
+
+          } finally {
+            cacheLock.release();
           }
         }
       }
@@ -1050,6 +1106,17 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     } finally {
       fireIndexChanged(repository);
     }
+  }
+
+  protected IndexUpdateRequest newIndexUpdateRequest(IRepository repository, IndexingContext context)
+      throws IOException {
+    IndexUpdateRequest request = new IndexUpdateRequest(context);
+    File localRepo = repositoryRegistry.getLocalRepository().getBasedir();
+    File indexCacheBasedir = new File(localRepo, ".cache/m2e/" + MavenPlugin.getVersion()).getCanonicalFile();
+    File indexCacheDir = new File(indexCacheBasedir, repository.getUid());
+    indexCacheDir.mkdirs();
+    request.setLocalIndexCacheDir(indexCacheDir);
+    return request;
   }
 
   public void initialize(IProgressMonitor monitor) throws CoreException {
