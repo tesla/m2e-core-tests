@@ -111,6 +111,7 @@
     <module>../org.maven.ide.eclipse.editor.feature</module>
     <module>../org.maven.ide.eclipse.editor.xml.feature</module>
     <module>../org.maven.ide.eclipse.wtp.feature</module>
+    <module>../org.maven.ide.eclipse.sdk.feature</module>
 
     <module>../org.maven.ide.eclipse.scm.feature</module>
     <module>../org.maven.ide.eclipse.cvs.feature</module>
