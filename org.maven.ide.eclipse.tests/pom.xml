@@ -37,7 +37,7 @@
         <artifactId>maven-osgi-test-plugin</artifactId>
         <configuration>
           <environmentVariables>
-            <TMP>${java.io.tmpdir}</TMP>
+            <TEMP>${java.io.tmpdir}</TEMP>
           </environmentVariables>
         </configuration>
       </plugin>

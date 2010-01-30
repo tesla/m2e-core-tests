@@ -882,7 +882,7 @@ public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
 
   public void testEnvironmentVariablesConsidered() throws Exception {
     String tmpDir = System.getenv("TEMP");
-    assertTrue("This test requires the environment variable TMP to be set", tmpDir != null);
+    assertTrue("This test requires the environment variable TEMP to be set", tmpDir != null);
 
     File systemJar = new File("projects/MNGECLIPSE-581/mngeclipse-581.jar");
     File tempJar = new File(tmpDir, "mngeclipse-581.jar");
