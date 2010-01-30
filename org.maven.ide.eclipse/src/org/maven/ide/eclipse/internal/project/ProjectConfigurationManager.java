@@ -41,6 +41,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.ui.IWorkingSet;
 
@@ -144,8 +145,13 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
   public List<IMavenProjectImportResult> importProjects(Collection<MavenProjectInfo> projectInfos, ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException {
     long t1 = System.currentTimeMillis();
 
+    SubMonitor progress = SubMonitor.convert(monitor, "Importing Maven projects", 100);
+
     ArrayList<IMavenProjectImportResult> result = new ArrayList<IMavenProjectImportResult>();
     ArrayList<IProject> projects = new ArrayList<IProject>();
+
+    SubMonitor subProgress =
+      SubMonitor.convert( progress.newChild( 10 ), projectInfos.size() * 100 );
 
     // first, create all projects with basic configuration
     for(MavenProjectInfo projectInfo : projectInfos) {
@@ -153,7 +159,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
         throw new OperationCanceledException();
       }
 
-      IProject project = create(projectInfo, configuration, monitor);
+      IProject project = create(projectInfo, configuration, subProgress.newChild(100));
 
       result.add(new MavenProjectImportResult(projectInfo, project));
 
@@ -166,7 +172,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
 
     hideNestedProjectsFromParents(projects);
     // then configure maven for all projects
-    configureNewMavenProject(projects, monitor);
+    configureNewMavenProject(projects, progress.newChild(90));
 
     long t2 = System.currentTimeMillis();
     console.logMessage("Project import completed " + ((t2 - t1) / 1000) + " sec");
@@ -217,33 +223,31 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     }
   }
   
-  private void configureNewMavenProject(ArrayList<IProject> projects, IProgressMonitor monitor)
+  private void configureNewMavenProject(List<IProject> projects, IProgressMonitor monitor)
       throws CoreException {
+    SubMonitor progress = SubMonitor.convert(monitor, "Configuring Maven projects", 100);
 
     //SubProgressMonitor sub = new SubProgressMonitor(monitor, projects.size()+1);
     
       // first, resolve maven dependencies for all projects
       MavenUpdateRequest updateRequest = new MavenUpdateRequest(false, false);
-      int i=0;
-      monitor.beginTask("Updating POM files", projects.size());
       for (IProject project : projects) {
-        monitor.worked(1);
-        monitor.subTask("Updating POM for "+project.getName());
         updateRequest.addPomFile(project);
       }
-      monitor.beginTask("Refreshing projects", projects.size());
-      projectManager.refresh(updateRequest, monitor);
+      progress.subTask("Refreshing projects");
+      projectManager.refresh(updateRequest, progress.newChild(75));
 
     // TODO this emits project change events, which may be premature at this point
 
 
     //Creating maven facades 
+    SubMonitor subProgress = SubMonitor.convert(progress.newChild(5), projects.size() * 100);
     List<IMavenProjectFacade> facades = new ArrayList<IMavenProjectFacade>(projects.size());
     for(IProject project : projects) {
-      if(monitor.isCanceled()) {
+      if(progress.isCanceled()) {
         throw new OperationCanceledException();
       } 
-      IMavenProjectFacade facade = projectManager.create(project, monitor);
+      IMavenProjectFacade facade = projectManager.create(project, subProgress.newChild(100));
       if (facade != null) {
         facades.add(facade);
       }
@@ -251,15 +255,16 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
 
     //MNGECLIPSE-1028 : Sort projects by build order here, 
     //as dependent projects need to be configured before depending projects (in WTP integration for ex.)
-    sortProjects(facades, monitor);
+    sortProjects(facades, progress.newChild(5));
     //Then, perform detailed project configuration
+    subProgress = SubMonitor.convert(progress.newChild(15), facades.size() * 100);
     for(IMavenProjectFacade facade : facades) {
-      if(monitor.isCanceled()) {
+      if(progress.isCanceled()) {
         throw new OperationCanceledException();
       }
-      monitor.subTask("Updating configuration for "+facade.getProject().getName());
-      ProjectConfigurationRequest request = new ProjectConfigurationRequest(facade, facade.getMavenProject(monitor), createMavenSession(facade, monitor), false /*updateSources*/);
-      updateProjectConfiguration(request, monitor);
+      progress.subTask("Updating configuration for "+facade.getProject().getName());
+      ProjectConfigurationRequest request = new ProjectConfigurationRequest(facade, facade.getMavenProject(subProgress.newChild(5)), createMavenSession(facade, subProgress.newChild(5)), false /*updateSources*/);
+      updateProjectConfiguration(request, subProgress.newChild(90));
     }
   }
 

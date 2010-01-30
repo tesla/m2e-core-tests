@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -318,16 +319,17 @@ public class MavenProjectManagerImpl {
    * It is meant for synchronous registry updates.
    */
   public void refresh(MavenUpdateRequest request, IProgressMonitor monitor) throws CoreException {
+    SubMonitor progress = SubMonitor.convert(monitor, "Refreshing projects", 100);
     ISchedulingRule rule = ResourcesPlugin.getWorkspace().getRoot();
-    Job.getJobManager().beginRule(rule, monitor);
+    Job.getJobManager().beginRule(rule, progress);
     try {
       syncRefreshThread = Thread.currentThread();
 
       MutableProjectRegistry newState = newMutableProjectRegistry();
       try {
-        refresh(newState, request, monitor);
+        refresh(newState, request, progress.newChild(95));
   
-        applyMutableProjectRegistry(newState, monitor);
+        applyMutableProjectRegistry(newState, progress.newChild(5));
       } finally {
         newState.close();
       }
