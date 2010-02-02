@@ -123,7 +123,7 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
           r.setProjectId(PROJECT);
           r.setSummary(descriptionPage.getProblemSummary());
           r.setDescription(descriptionPage.getProblemDescription());
-          r.setAssignee(USERNAME);
+//          r.setAssignee(USERNAME);
           r.setReporter(username);
           for (File bundleFile : bundleFiles) {
             r.addProblemReportBundle(bundleFile);
