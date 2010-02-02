@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.maven.ide.eclipse.sdk.feature"
-      label="Feature"
+      label="M2Eclipse Extensions Development Support (Optional)"
       version="0.9.9.qualifier">
 
    <description url="http://m2eclipse.sonatype.org/">
