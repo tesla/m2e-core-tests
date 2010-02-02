@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.FileUtils;
 import org.eclipse.core.resources.IFile;
@@ -901,6 +902,18 @@ public class MavenProjectManagerTest extends AbstractMavenProjectTestCase {
     assertNotNull(project);
     File file = project.getArtifacts().iterator().next().getFile();
     assertTrue(file.toString(), file.isFile());
+  }
+
+  public void testWorkspaceResolutionApi() throws Exception {
+    IProject[] projects = importProjects("projects/simple-pom", new String[] {"pom.xml"}, new ResolverConfiguration());
+    assertEquals(1, projects.length);
+    assertNotNull(projects[0]);
+    Artifact artifact = new DefaultArtifact("org.maven.ide.eclipse.projects", "simple-pom", "1.0.0", null, "pom", "",
+        null);
+    artifact = manager.getWorkspaceLocalRepository().find(artifact);
+    assertTrue(artifact.isResolved());
+    assertNotNull(artifact.getFile());
+    assertEquals(projects[0].getFile("pom.xml").getLocation().toFile(), artifact.getFile());
   }
 
 }
