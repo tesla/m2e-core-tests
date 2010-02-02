@@ -34,8 +34,9 @@ import org.maven.ide.eclipse.jdt.internal.launch.MavenRuntimeClasspathProvider;
 import org.maven.ide.eclipse.jdt.internal.launch.MavenSourcePathProvider;
 import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
+import org.maven.ide.eclipse.tests.common.AbstractMavenProjectTestCase;
 
-public class ClasspathProviderTest extends AsbtractMavenProjectTestCase {
+public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
 
   public void test() throws Exception {
     IProject cptest = createExisting("cptest", "projects/MNGECLIPSE-369/cptest");

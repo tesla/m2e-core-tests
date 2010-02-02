@@ -11,9 +11,9 @@ import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
 import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
-import org.maven.ide.eclipse.tests.AsbtractMavenProjectTestCase;
+import org.maven.ide.eclipse.tests.common.AbstractMavenProjectTestCase;
 
-public class ImportSortOrderTestCase extends AsbtractMavenProjectTestCase {
+public class ImportSortOrderTestCase extends AbstractMavenProjectTestCase {
   
   protected IProject createProject(String projectName, String projectLocation) throws CoreException {
     IProject project = super.createProject(projectName, projectLocation);

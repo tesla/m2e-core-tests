@@ -57,12 +57,13 @@ import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 import org.maven.ide.eclipse.repository.IRepository;
 import org.maven.ide.eclipse.repository.IRepositoryRegistry;
+import org.maven.ide.eclipse.tests.common.AbstractMavenProjectTestCase;
 
 
 /**
  * @author Eugene Kuleshov
  */
-public class BuildPathManagerTest extends AsbtractMavenProjectTestCase {
+public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 
   public void testEnableMavenNature() throws Exception {
     deleteProject("MNGECLIPSE-248parent");

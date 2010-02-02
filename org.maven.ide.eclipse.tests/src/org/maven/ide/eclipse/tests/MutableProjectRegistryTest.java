@@ -11,8 +11,9 @@ import org.maven.ide.eclipse.internal.project.MavenProjectFacade;
 import org.maven.ide.eclipse.internal.project.ProjectRegistry;
 import org.maven.ide.eclipse.internal.project.MutableProjectRegistry;
 import org.maven.ide.eclipse.project.MavenProjectChangedEvent;
+import org.maven.ide.eclipse.tests.common.AbstractMavenProjectTestCase;
 
-public class MutableProjectRegistryTest extends AsbtractMavenProjectTestCase {
+public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
 
   private IMaven maven = MavenPlugin.lookup(IMaven.class);
 

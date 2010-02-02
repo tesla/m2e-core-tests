@@ -23,10 +23,10 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.internal.embedder.MavenImpl;
 import org.maven.ide.eclipse.internal.repository.RepositoryRegistry;
-import org.maven.ide.eclipse.tests.AsbtractMavenProjectTestCase;
+import org.maven.ide.eclipse.tests.common.AbstractMavenProjectTestCase;
 
 
-public class MavenImplTest extends AsbtractMavenProjectTestCase {
+public class MavenImplTest extends AbstractMavenProjectTestCase {
 
   private IProgressMonitor monitor = new NullProgressMonitor();
 

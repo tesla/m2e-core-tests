@@ -20,8 +20,10 @@ import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectInfo;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
+import org.maven.ide.eclipse.tests.common.AbstractMavenProjectTestCase;
+import org.maven.ide.eclipse.tests.common.FilexWagon;
 
-public class ProjectConfigurationManagerTest extends AsbtractMavenProjectTestCase {
+public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCase {
 
   public void testBasedirRenameRequired() throws Exception {
     testBasedirRename(MavenProjectInfo.RENAME_REQUIRED);

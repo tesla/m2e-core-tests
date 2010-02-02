@@ -10,6 +10,7 @@ import org.maven.ide.eclipse.internal.project.MojoExecutionProjectConfigurator;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
 import org.maven.ide.eclipse.project.configurator.ILifecycleMapping;
+import org.maven.ide.eclipse.tests.common.AbstractLifecycleMappingTest;
 
 public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
   public void testGenericMapping() throws Exception {

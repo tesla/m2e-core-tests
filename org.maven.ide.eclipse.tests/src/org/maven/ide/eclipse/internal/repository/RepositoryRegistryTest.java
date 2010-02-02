@@ -14,10 +14,10 @@ import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.tests.AsbtractMavenProjectTestCase;
+import org.maven.ide.eclipse.tests.common.AbstractMavenProjectTestCase;
 
 
-public class RepositoryRegistryTest extends AsbtractMavenProjectTestCase {
+public class RepositoryRegistryTest extends AbstractMavenProjectTestCase {
 
   private RepositoryRegistry repositoryRegistry;
 

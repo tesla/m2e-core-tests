@@ -24,9 +24,10 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
+import org.maven.ide.eclipse.tests.common.AbstractMavenProjectTestCase;
 
 
-public class ResourceChangeListenerTest extends AsbtractMavenProjectTestCase {
+public class ResourceChangeListenerTest extends AbstractMavenProjectTestCase {
   
   IProject project;
 

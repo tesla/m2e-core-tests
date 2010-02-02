@@ -41,9 +41,11 @@ import org.maven.ide.eclipse.project.IMavenProjectVisitor;
 import org.maven.ide.eclipse.project.MavenProjectChangedEvent;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
+import org.maven.ide.eclipse.tests.common.AbstractMavenProjectTestCase;
+import org.maven.ide.eclipse.tests.common.FilexWagon;
 
 
-public class MavenProjectManagerTest extends AsbtractMavenProjectTestCase {
+public class MavenProjectManagerTest extends AbstractMavenProjectTestCase {
   
   MavenPlugin plugin = MavenPlugin.getDefault();
 

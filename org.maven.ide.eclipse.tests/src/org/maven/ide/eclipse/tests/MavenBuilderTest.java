@@ -24,8 +24,9 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.tests.common.AbstractMavenProjectTestCase;
 
-public class MavenBuilderTest extends AsbtractMavenProjectTestCase {
+public class MavenBuilderTest extends AbstractMavenProjectTestCase {
 
   public void test001_standardLayout() throws Exception {
     deleteProject("resourcefiltering-p001");

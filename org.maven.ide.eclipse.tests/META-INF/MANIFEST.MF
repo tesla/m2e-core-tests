@@ -20,7 +20,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.maven.ide.eclipse.launching,
  org.maven.ide.components.nexus_indexer,
  org.maven.ide.eclipse.temporary.mojos,
- org.maven.ide.eclipse.plexus.annotations
+ org.maven.ide.eclipse.plexus.annotations,
+ org.maven.ide.eclipse.tests.common
 Eclipse-LazyStart: true
 Bundle-RequiredExecutionEnvironment: J2SE-1.5,
  JavaSE-1.6
@@ -33,5 +34,4 @@ Export-Package: org.maven.ide.eclipse.archetype,
  org.maven.ide.eclipse.embedder,
  org.maven.ide.eclipse.internal.index,
  org.maven.ide.eclipse.scm,
- org.maven.ide.eclipse.tests,
- org.maven.ide.eclipse.util
+ org.maven.ide.eclipse.tests

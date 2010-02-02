@@ -39,4 +39,4 @@ Require-Bundle: org.eclipse.core.runtime,
  org.maven.ide.eclipse.wtp,
  org.maven.ide.eclipse.jdt,
  org.eclipse.ui.workbench,
- org.maven.ide.eclipse.tests
+ org.maven.ide.eclipse.tests.common

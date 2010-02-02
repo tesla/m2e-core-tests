@@ -1,7 +1,7 @@
 package org.maven.ide.eclipse.internal.index;
 
-import org.maven.ide.eclipse.tests.AsbtractMavenProjectTestCase;
+import org.maven.ide.eclipse.tests.common.AbstractMavenProjectTestCase;
 
-public abstract class AbstractNexusIndexManagerTest extends AsbtractMavenProjectTestCase {  
+public abstract class AbstractNexusIndexManagerTest extends AbstractMavenProjectTestCase {  
 
 }
