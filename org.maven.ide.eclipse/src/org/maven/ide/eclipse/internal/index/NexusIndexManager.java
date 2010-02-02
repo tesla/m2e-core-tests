@@ -1018,7 +1018,10 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
           }
         }
       }
-      getIndexingContext(repository).setSearchable(true);
+      IndexingContext context = getIndexingContext(repository);
+      if(context != null) {
+        context.setSearchable(true);
+      }
     }
   }
 
