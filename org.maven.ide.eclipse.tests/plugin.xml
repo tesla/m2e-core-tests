@@ -27,6 +27,10 @@
       <configurator id="org.maven.ide.eclipse.configurator.testMaven"
             class="org.maven.ide.eclipse.project.configurator.MavenProjectConfigurator:group:artifact|goal1|goal2"
             name="TestMaven" priority="1001"/>
+
+      <configurator id="org.maven.ide.eclipse.configurator.incompatibleApi"
+            class="org.maven.ide.eclipse.configurators.IncompatibleProjectConfigurator"
+            name="AJDT-0.9.8" priority="1002"/>
             
    </extension>
    <extension

@@ -22,9 +22,12 @@ import org.eclipse.core.runtime.IContributor;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 
 import org.maven.ide.eclipse.archetype.ArchetypeCatalogFactory;
+import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
@@ -140,7 +143,19 @@ public class ExtensionReader {
               projectConfigurator.setMavenConfiguration(runtimeManager);
               projectConfigurator.setMarkerManager(markerManager);
               projectConfigurator.setConsole(console);
-              
+
+              try {
+                projectConfigurator.configure(null, null);
+              } catch(LinkageError e) {
+                // incompatible configurator, just ignore (cf. MNGECLIPSE-1599).
+                MavenLogger.log(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
+                    "Unable to load project configurator " + projectConfigurator.getClass().getName()
+                        + " due to API incompatibilities", e));
+                continue;
+              } catch(Exception e) {
+                // expected
+              }
+
               projectConfigurators.add(projectConfigurator);
             } catch(CoreException ex) {
               MavenLogger.log(ex);
