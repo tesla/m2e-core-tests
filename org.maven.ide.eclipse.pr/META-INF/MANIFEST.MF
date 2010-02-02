@@ -23,7 +23,7 @@ Bundle-ClassPath: jars/plexus-swizzle-1.3-SNAPSHOT.jar,
  jars/spice-utils-1.0.0.jar,
  .
 MavenArtifact-BaseVersion: 0.9.9-SNAPSHOT
-Bundle-Version: 0.9.9.qualifier
+Bundle-Version: 0.10.0.qualifier
 MavenArtifact-ArtifactId: org.maven.ide.eclipse.pr
 MavenArtifact-GroupId: org.maven.ide.eclipse
 Bundle-Name: Maven Problem Reporting

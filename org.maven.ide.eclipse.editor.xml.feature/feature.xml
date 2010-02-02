@@ -2,7 +2,7 @@
 <feature
       id="org.maven.ide.eclipse.editor.xml.feature"
       label="Maven POM XML Editor (Optional)"
-      version="0.9.9.qualifier"
+      version="0.10.0.qualifier"
       provider-name="Sonatype, Inc."
       plugin="org.maven.ide.eclipse">
 

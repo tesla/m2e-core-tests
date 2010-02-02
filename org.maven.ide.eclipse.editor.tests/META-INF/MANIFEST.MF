@@ -28,7 +28,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.search,
  org.maven.ide.eclipse.integration.tests
 Bundle-Name: Maven Integration Tests Plug-in
-Bundle-Version: 0.9.9.qualifier
+Bundle-Version: 0.10.0.qualifier
 MavenArtifact-ArtifactId: org.maven.ide.eclipse.test
 Bundle-Vendor: Sonatype, Inc.
 Bundle-SymbolicName: org.maven.ide.eclipse.editor.tests;singleton:=true
