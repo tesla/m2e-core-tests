@@ -85,6 +85,11 @@ public enum PomTemplateContext {
 
     @Override
     protected void addTemplates(IProject project, Collection<Template> proposals, Node node, String prefix) throws CoreException {
+      if("execution".equals(node.getParentNode().getNodeName())
+          || "reportSet".equals(node.getParentNode().getNodeName())) {
+        node = node.getParentNode().getParentNode();
+      }
+
       String groupId = getGroupId(node);
       if(groupId==null) {
         groupId = "org.apache.maven.plugins";  // TODO support other default groups
@@ -190,7 +195,11 @@ public enum PomTemplateContext {
 
       } catch(CoreException ex) {
         IStatus status = ex.getStatus();
-        console.logError(status.getMessage() + "; " + status.getException().getMessage());
+        if(status.getException() != null) {
+          console.logError(status.getMessage() + "; " + status.getException().getMessage());
+        } else {
+          console.logError(status.getMessage());
+        }
         MavenLogger.log(ex);
       }
       return null;
