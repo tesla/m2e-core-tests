@@ -77,7 +77,6 @@
 
   <modules>
     <module>../org.maven.ide.eclipse.maven-embedder</module>
-    <module>../org.maven.ide.components.maven-embedder</module>
     <module>../org.maven.ide.components.archetype-common</module>
     <module>../org.maven.ide.components.nexus-indexer</module>
     <module>../org.maven.ide.components.maven-model-edit</module>
@@ -96,22 +95,20 @@
     <module>../org.maven.ide.eclipse.scm</module>
     <module>../org.maven.ide.eclipse.cvs</module>
     <module>../org.maven.ide.eclipse.refactoring</module>
+    <module>../org.maven.ide.eclipse.editor.xml</module>
+    <module>../org.maven.ide.eclipse.editor</module>
+    <module>../org.maven.ide.eclipse.pr</module>
+
     <module>../org.maven.ide.eclipse.tests.common</module>
     <module>../org.maven.ide.eclipse.tests</module>
-    <module>../org.maven.ide.eclipse.editor.xml</module>
     <module>../org.maven.ide.eclipse.editor.xml.tests</module>
-    <module>../org.maven.ide.eclipse.editor</module>
+    <module>../org.maven.ide.eclipse.pr.tests</module>
    
     <module>../org.maven.ide.eclipse.wtp</module>
     <module>../org.maven.ide.eclipse.wtp.tests</module>
-    <module>../org.maven.ide.eclipse.pr</module>
-    <module>../org.maven.ide.eclipse.pr.tests</module>
 
     <!-- features -->
-    <module>../org.maven.ide.components.maven_embedder.feature</module>
     <module>../org.maven.ide.eclipse.feature</module>
-    <module>../org.maven.ide.eclipse.editor.feature</module>
-    <module>../org.maven.ide.eclipse.editor.xml.feature</module>
     <module>../org.maven.ide.eclipse.wtp.feature</module>
     <module>../org.maven.ide.eclipse.sdk.feature</module>
 
@@ -127,7 +124,8 @@
     <module>../org.maven.ide.eclipse.plexus.annotations.tests</module>
     <module>../org.maven.ide.eclipse.modello.tests</module>
 
-    <module>../org.maven.ide.eclipse.update</module>
+    <module>../org.maven.ide.eclipse.site</module>
+    <module>../org.maven.ide.eclipse.site-extras</module>
 
     <module>../target-platform</module>
   </modules>

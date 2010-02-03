@@ -16,10 +16,10 @@
     <relativePath>../org.maven.ide.eclipse.parent</relativePath>
   </parent>
 
-  <artifactId>org.maven.ide.eclipse.site-extras</artifactId>
+  <artifactId>org.maven.ide.eclipse.site</artifactId>
   <packaging>eclipse-update-site</packaging>
 
-  <name>Maven Integration for Eclipse Update Extras Site</name>
+  <name>Maven Integration for Eclipse Update Site</name>
 
   <build>
     <plugins>
@@ -27,8 +27,8 @@
         <groupId>org.sonatype.tycho</groupId>
         <artifactId>maven-osgi-packaging-plugin</artifactId>
         <configuration>
-          <metadataRepositoryName>Maven Integration for Eclipse Extras</metadataRepositoryName>
-          <artifactRepositoryName>Maven Integration for Eclipse Extras</artifactRepositoryName>
+          <metadataRepositoryName>Maven Integration for Eclipse</metadataRepositoryName>
+          <artifactRepositoryName>Maven Integration for Eclipse</artifactRepositoryName>
         </configuration>
       </plugin>
       <plugin>
@@ -76,7 +76,7 @@
 
                   <serverId>forge-releases</serverId>
                   <repositoryUrl>${m2e.site-compressed}</repositoryUrl>
-                  <repositoryPath>m2e-extras/${unqualifiedVersion}/N/${buildQualifier}</repositoryPath>
+                  <repositoryPath>m2e/${unqualifiedVersion}/N/${buildQualifier}</repositoryPath>
                 </configuration>
               </execution>
             </executions>

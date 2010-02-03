@@ -38,7 +38,6 @@ http://www.eclipse.org/legal/epl-v10.html
       <import feature="org.eclipse.platform" version="3.3.0" match="greaterOrEqual"/>
       <import feature="org.eclipse.rcp" version="3.3.0" match="greaterOrEqual"/>
       <import feature="org.eclipse.jdt" version="3.3.0" match="greaterOrEqual"/>
-      <import feature="org.maven.ide.components.maven_embedder.feature" version="3.0.0" match="greaterOrEqual"/>
    </requires>
 
    <plugin
@@ -93,5 +92,19 @@ http://www.eclipse.org/legal/epl-v10.html
          download-size="0"
          install-size="0"
          version="0.0.0"/>
+
+   <plugin
+         id="org.maven.ide.eclipse.editor"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.maven.ide.eclipse.editor.xml"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
 
 </feature>

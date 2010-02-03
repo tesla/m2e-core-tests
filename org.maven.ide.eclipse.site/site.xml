@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <description url="http://m2eclipse.sonatype.org/site">
+      Maven Integration for Eclipse
+   </description>
+   <feature url="features/org.maven.ide.eclipse.feature_0.10.0.qualifier.jar" id="org.maven.ide.eclipse.feature" version="0.10.0.qualifier">
+      <category name="m2e"/>
+   </feature>
+   <category-def name="m2e" label="Maven Integration for Eclipse"/>
+</site>
