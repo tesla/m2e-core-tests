@@ -1,0 +1,17 @@
+Bundle-ManifestVersion: 2
+Bundle-RequiredExecutionEnvironment: J2SE-1.5,JavaSE-1.6
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.core.resources,
+ org.eclipse.text,
+ org.junit,
+ org.maven.ide.eclipse.tests.common,
+ org.maven.ide.eclipse.editor.xml
+Bundle-Name: Maven POM XML Editor Tests Plug-In
+Bundle-Version: 0.10.0.qualifier
+MavenArtifact-ArtifactId: org.maven.ide.eclipse.editor.xml.tests
+Bundle-Vendor: Sonatype, Inc.
+Bundle-SymbolicName: org.maven.ide.eclipse.editor.xml.tests;singleton:=true
+Bundle-ClassPath: .
+MavenArtifact-GroupId: org.maven.ide.eclipse
+Manifest-Version: 1.0
+Eclipse-LazyStart: true

@@ -24,7 +24,6 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.editor.xml.internal.search.IndexSearchEngine;
 import org.maven.ide.eclipse.editor.xml.search.SearchEngine;
-import org.maven.ide.eclipse.index.IndexManager;
 
 
 /**
