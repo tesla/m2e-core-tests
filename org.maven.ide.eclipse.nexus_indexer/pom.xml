@@ -16,7 +16,6 @@
     <relativePath>../org.maven.ide.eclipse.parent</relativePath>
   </parent>
 
-  <groupId>org.maven.ide.components</groupId>
   <artifactId>org.maven.ide.eclipse.nexus_indexer</artifactId>
   <packaging>eclipse-plugin</packaging>
 
@@ -104,8 +103,8 @@
                   <version>${maven_embedder.version}</version>
                 </requireBundle>
                 <requireBundle>
-                  <groupId>org.maven.ide.components</groupId>
-                  <artifactId>org.maven.ide.components.archetype_common</artifactId>
+                  <groupId>org.maven.ide.eclipse</groupId>
+                  <artifactId>org.maven.ide.eclipse.archetype_common</artifactId>
                   <version>${archetype_common.version}</version>
                 </requireBundle>
               </requireBundles>

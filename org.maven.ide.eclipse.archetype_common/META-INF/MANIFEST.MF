@@ -40,8 +40,8 @@ Require-Bundle: org.maven.ide.eclipse.maven_embedder;bundle-version="[
 Bundle-Vendor: Sonatype
 MavenArtifact-BaseVersion: 2.0.1.20090526-1230
 Bundle-Version: 0.10.0.qualifier
-MavenArtifact-GroupId: org.maven.ide.components
-MavenArtifact-ArtifactId: org.maven.ide.components.archetype_common
+MavenArtifact-GroupId: org.maven.ide.eclipse
+MavenArtifact-ArtifactId: org.maven.ide.eclipse.archetype_common
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.maven.ide.eclipse.archetype_common;singleton:=true
 

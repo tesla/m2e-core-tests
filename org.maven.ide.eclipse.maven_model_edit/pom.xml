@@ -16,7 +16,6 @@
     <relativePath>../org.maven.ide.eclipse.parent</relativePath>
   </parent>
 
-  <groupId>org.maven.ide.components</groupId>
   <artifactId>org.maven.ide.eclipse.maven_model_edit</artifactId>
   <packaging>eclipse-plugin</packaging>
 

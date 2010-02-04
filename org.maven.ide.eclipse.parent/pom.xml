@@ -166,28 +166,28 @@
         <version>${maven_embedder.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.maven.ide.components</groupId>
-        <artifactId>org.maven.ide.components.maven_scm</artifactId>
+        <groupId>org.maven.ide.eclipse</groupId>
+        <artifactId>org.maven.ide.eclipse.maven_scm</artifactId>
         <version>${maven_scm.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.maven.ide.components</groupId>
-        <artifactId>org.maven.ide.components.archetype_common</artifactId>
+        <groupId>org.maven.ide.eclipse</groupId>
+        <artifactId>org.maven.ide.eclipse.archetype_common</artifactId>
         <version>${archetype_common.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.maven.ide.components</groupId>
-        <artifactId>org.maven.ide.components.nexus_indexer</artifactId>
+        <groupId>org.maven.ide.eclipse</groupId>
+        <artifactId>org.maven.ide.eclipse.nexus_indexer</artifactId>
         <version>${nexus_indexer.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.maven.ide.components</groupId>
-        <artifactId>org.maven.ide.components.pom</artifactId>
+        <groupId>org.maven.ide.eclipse</groupId>
+        <artifactId>org.maven.ide.eclipse.pom</artifactId>
         <version>${maven_pom.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.maven.ide.components</groupId>
-        <artifactId>org.maven.ide.components.maven_model_edit</artifactId>
+        <groupId>org.maven.ide.eclipse</groupId>
+        <artifactId>org.maven.ide.eclipse.maven_model_edit</artifactId>
         <version>${maven_model_edit.version}</version>
       </dependency>
 
