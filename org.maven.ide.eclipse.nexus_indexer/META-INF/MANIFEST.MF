@@ -15,8 +15,8 @@ Bundle-ClassPath: jars/nexus-indexer-2.0.5-SNAPSHOT.jar,
  jars/lucene-core-2.3.2.jar
 Bundle-Name: Nexus Indexer Bundle
 Bundle-RequiredExecutionEnvironment: J2SE-1.5, JavaSE-1.6
-Require-Bundle: org.maven.ide.eclipse.maven_embedder;bundle-version="[0.10,0.11)",
- org.maven.ide.eclipse.archetype_common;bundle-version="[0.10,0.11)"
+Require-Bundle: org.maven.ide.eclipse.maven_embedder;bundle-version="[0.10.0,0.11.0)",
+ org.maven.ide.eclipse.archetype_common;bundle-version="[0.10.0,0.11.0)"
 Bundle-Vendor: Sonatype, Inc.
 MavenArtifact-BaseVersion: 2.0.4-SNAPSHOT
 Bundle-Version: 0.10.0.qualifier

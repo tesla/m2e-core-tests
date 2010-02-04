@@ -8,7 +8,7 @@ Bundle-Name: Maven Dependency Tree Bundle
 Bundle-RequiredExecutionEnvironment: J2SE-1.5,
  JavaSE-1.6
 Require-Bundle: org.maven.ide.eclipse.maven_embedder;bundle-version="[
- 0.10,0.11)"
+ 0.10.0,0.11.0)"
 Bundle-Vendor: Sonatype
 MavenArtifact-BaseVersion: 1.2.1.20090519-1900
 Bundle-Version: 0.10.0.qualifier

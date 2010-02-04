@@ -36,7 +36,7 @@ Bundle-Name: Maven Archetype Common Bundle
 Bundle-RequiredExecutionEnvironment: J2SE-1.5,
  JavaSE-1.6
 Require-Bundle: org.maven.ide.eclipse.maven_embedder;bundle-version="[
- 0.10,0.11)"
+ 0.10.0,0.11.0)"
 Bundle-Vendor: Sonatype
 MavenArtifact-BaseVersion: 2.0.1.20090526-1230
 Bundle-Version: 0.10.0.qualifier
