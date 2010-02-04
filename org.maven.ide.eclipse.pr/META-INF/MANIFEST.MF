@@ -4,8 +4,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui,
  org.eclipse.ui.console,
  org.eclipse.jface.text,
- org.maven.ide.eclipse.maven_embedder,
- org.maven.ide.eclipse,
+ org.maven.ide.eclipse.maven_embedder;bundle-version="[0.10,0.11)",
+ org.maven.ide.eclipse;bundle-version="[0.10,0.11)",
  org.eclipse.jdt.core,
  org.eclipse.ui.ide
 Bundle-Vendor: Sonatype, Inc.
@@ -32,6 +32,6 @@ Bundle-SymbolicName: org.maven.ide.eclipse.pr;singleton:=true
 Bundle-RequiredExecutionEnvironment: J2SE-1.5,JavaSE-1.6
 Export-Package: org.maven.ide.eclipse.pr,
  org.maven.ide.eclipse.pr.sources,
- org.maven.ide.eclipse.pr.internal.data;x-friends:="org.maven.ide.eclipse.pr.te
- sts"
+ org.maven.ide.eclipse.pr.internal.data;
+ x-friends:="org.maven.ide.eclipse.pr.tests"
 
