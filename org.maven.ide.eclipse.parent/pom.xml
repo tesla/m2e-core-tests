@@ -77,11 +77,11 @@
 
   <modules>
     <module>../org.maven.ide.eclipse.maven-embedder</module>
-    <module>../org.maven.ide.components.archetype-common</module>
-    <module>../org.maven.ide.components.nexus-indexer</module>
-    <module>../org.maven.ide.components.maven-model-edit</module>
-    <module>../org.maven.ide.components.maven-scm</module>
-    <module>../org.maven.ide.components.dependency-tree</module>
+    <module>../org.maven.ide.eclipse.archetype-common</module>
+    <module>../org.maven.ide.eclipse.nexus-indexer</module>
+    <module>../org.maven.ide.eclipse.maven-model-edit</module>
+    <module>../org.maven.ide.eclipse.maven-scm</module>
+    <module>../org.maven.ide.eclipse.dependency-tree</module>
 
     <!--
     <module>../org.maven.ide.eclipse.cliresolver</module>

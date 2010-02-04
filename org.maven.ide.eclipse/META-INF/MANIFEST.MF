@@ -24,10 +24,10 @@ Require-Bundle:
  org.eclipse.emf.common,
  org.eclipse.wst.common.emf,
  org.maven.ide.eclipse.maven_embedder;bundle-version="[0.10,0.11)",
- org.maven.ide.components.archetype_common;bundle-version="[0.10,0.11)",
- org.maven.ide.components.nexus_indexer;bundle-version="[0.10,0.11)",
- org.maven.ide.components.maven_model_edit;bundle-version="[0.10,0.11)",
- org.maven.ide.components.dependency_tree;bundle-version="[0.10,0.11)"
+ org.maven.ide.eclipse.archetype_common;bundle-version="[0.10,0.11)",
+ org.maven.ide.eclipse.nexus_indexer;bundle-version="[0.10,0.11)",
+ org.maven.ide.eclipse.maven_model_edit;bundle-version="[0.10,0.11)",
+ org.maven.ide.eclipse.dependency_tree;bundle-version="[0.10,0.11)"
 Eclipse-LazyStart: true
 Bundle-ClassPath: .
 Bundle-RequiredExecutionEnvironment: J2SE-1.5,

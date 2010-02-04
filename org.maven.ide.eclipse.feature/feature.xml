@@ -41,19 +41,19 @@ http://www.eclipse.org/legal/epl-v10.html
    </requires>
 
    <plugin
-         id="org.maven.ide.components.archetype_common"
+         id="org.maven.ide.eclipse.archetype_common"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
 
    <plugin
-         id="org.maven.ide.components.nexus_indexer"
+         id="org.maven.ide.eclipse.nexus_indexer"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
 
    <plugin
-         id="org.maven.ide.components.maven_model_edit"
+         id="org.maven.ide.eclipse.maven_model_edit"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -88,7 +88,7 @@ http://www.eclipse.org/legal/epl-v10.html
          unpack="false"/>
 
    <plugin
-         id="org.maven.ide.components.dependency_tree"
+         id="org.maven.ide.eclipse.dependency_tree"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
