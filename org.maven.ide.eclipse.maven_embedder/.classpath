@@ -29,6 +29,6 @@
 	<classpathentry exported="true" kind="lib" path="jars/jetty-http-7.0.0.v20091005.jar"/>
 	<classpathentry exported="true" kind="lib" path="jars/jetty-io-7.0.0.v20091005.jar"/>
 	<classpathentry exported="true" kind="lib" path="jars/jetty-util-7.0.0.v20091005.jar"/>
-	<classpathentry exported="true" kind="lib" path="jars/plexus-build-api-0.0.6-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="jars/plexus-build-api-0.0.6.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

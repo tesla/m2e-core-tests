@@ -94,7 +94,7 @@ Bundle-ClassPath: jars/maven-embedder-3.0-SNAPSHOT.jar,jars/maven-sett
  jar,jars/wagon-http-jetty-client-1.0-SNAPSHOT.jar,jars/jetty-client-7
  .0.0.v20091005.jar,jars/jetty-http-7.0.0.v20091005.jar,jars/jetty-io-
  7.0.0.v20091005.jar,jars/jetty-util-7.0.0.v20091005.jar,jars/plexus-b
- uild-api-0.0.6-SNAPSHOT.jar
+ uild-api-0.0.6.jar
 MavenArtifact-BaseVersion: 3.0.0.SNAPSHOT-maven-r904309-jetty-r11077
 Bundle-Version: 0.10.0.qualifier
 MavenArtifact-ArtifactId: org.maven.ide.eclipse.maven_embedder
