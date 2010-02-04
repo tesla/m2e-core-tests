@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Export-Package: org.apache.maven.shared.dependency.tree,
+ org.apache.maven.shared.dependency.tree.filter,
+ org.apache.maven.shared.dependency.tree.traversal,
+ META-INF.plexus
+Bundle-ClassPath: jars/maven-dependency-tree-1.2-SNAPSHOT.jar
+Bundle-Name: Maven Dependency Tree Bundle
+Bundle-RequiredExecutionEnvironment: J2SE-1.5,
+ JavaSE-1.6
+Require-Bundle: org.maven.ide.eclipse.maven_embedder;bundle-version="[
+ 0.10,0.11)"
+Bundle-Vendor: Sonatype
+MavenArtifact-BaseVersion: 1.2.1.20090519-1900
+Bundle-Version: 0.10.0.qualifier
+MavenArtifact-GroupId: org.maven.ide.components
+MavenArtifact-ArtifactId: org.maven.ide.components.dependency_tree
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: org.maven.ide.eclipse.dependency_tree;singleton:=true
+

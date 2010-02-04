@@ -76,12 +76,12 @@
   </ciManagement>
 
   <modules>
-    <module>../org.maven.ide.eclipse.maven-embedder</module>
-    <module>../org.maven.ide.eclipse.archetype-common</module>
-    <module>../org.maven.ide.eclipse.nexus-indexer</module>
-    <module>../org.maven.ide.eclipse.maven-model-edit</module>
-    <module>../org.maven.ide.eclipse.maven-scm</module>
-    <module>../org.maven.ide.eclipse.dependency-tree</module>
+    <module>../org.maven.ide.eclipse.maven_embedder</module>
+    <module>../org.maven.ide.eclipse.archetype_common</module>
+    <module>../org.maven.ide.eclipse.nexus_indexer</module>
+    <module>../org.maven.ide.eclipse.maven_model_edit</module>
+    <module>../org.maven.ide.eclipse.maven_scm</module>
+    <module>../org.maven.ide.eclipse.dependency_tree</module>
 
     <!--
     <module>../org.maven.ide.eclipse.cliresolver</module>
