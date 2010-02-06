@@ -15,18 +15,17 @@
 
   <groupId>org.maven.ide.eclipse</groupId>
   <artifactId>parent</artifactId>
-  <version>0.10.0-SNAPSHOT</version>
+  <version>0.10.0</version>
   <packaging>pom</packaging>
 
   <name>Maven Integration for Eclipse (parent)</name>
   <description>Maven Integration for Eclipse provides tight integration for Maven into the IDE</description>
-  <url>http://m2eclipse.codehaus.org/</url>
+  <url>http://m2eclipse.sonatype.org/</url>
   <inceptionYear>2005</inceptionYear>
 
   <properties>
-    <m2eclipse.version>0.10.0-SNAPSHOT</m2eclipse.version>
+    <forceContextQualifier>20100205-2200</forceContextQualifier>
 
-    <maven_embedder.version>${m2eclipse.version}</maven_embedder.version>
     <maven.version>3.0-alpha-5</maven.version>
 
     <archetype_common.version>2.0.2.200911171109</archetype_common.version>
@@ -263,7 +262,7 @@
             <artifact>
               <groupId>org.maven.ide.eclipse</groupId>
               <artifactId>target-platform</artifactId>
-              <version>${m2eclipse.version}</version>
+              <version>${project.version}</version>
               <classifier>${target.platform}</classifier>
             </artifact>
           </target>
@@ -284,6 +283,10 @@
           <groupId>org.sonatype.tycho</groupId>
           <artifactId>maven-osgi-packaging-plugin</artifactId>
           <version>${tycho-version}</version>
+          <configuration>
+            <!-- workaround for TYCHO-349 or TYCHO-313 -->
+            <strictVersions>false</strictVersions>
+          </configuration>
         </plugin>
         <plugin>
           <groupId>org.sonatype.tycho</groupId>
