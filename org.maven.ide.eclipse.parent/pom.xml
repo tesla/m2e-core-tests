@@ -426,6 +426,21 @@
       <id>krel</id>
       <name>Lukáš Křečan</name>
     </developer>
+    <developer>
+      <id>bentmann</id>
+      <name>Benjamin Bentmann</name>
+      <organization>Sonatype Inc.</organization>
+    </developer>
+    <developer>
+      <id>dip</id>
+      <name>Dmitry Platonoff</name>
+      <organization>Sonatype Inc.</organization>
+    </developer>
+    <developer>
+      <id>rseddon</id>
+      <name>Rich Seddon</name>
+      <organization>Sonatype Inc.</organization>
+    </developer>
   </developers>
 
   <mailingLists>
