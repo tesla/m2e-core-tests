@@ -337,7 +337,7 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
 //    assertEquals(NexusIndex.DETAILS_FULL, index.getIndexDetails());
 //  }
 
-  public void _testMngEclipse1710() throws Exception {
+  public void testMngEclipse1710() throws Exception {
     final File settingsFile = new File("src/org/maven/ide/eclipse/internal/index/proxy_settings.xml");
     assertTrue(settingsFile.exists());
 
