@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.maven.ide.eclipse.pr.IDataTarget;
 import org.maven.ide.eclipse.pr.internal.sources.ConfigurationDetailsSource;
 import org.maven.ide.eclipse.pr.internal.sources.EffectivePomSource;
+import org.maven.ide.eclipse.pr.internal.sources.ObfuscatedSettingsSource;
 import org.maven.ide.eclipse.pr.internal.sources.TextConsoleSource;
 import org.maven.ide.eclipse.pr.internal.sources.WorkspaceFileSource;
 import org.maven.ide.eclipse.pr.sources.ExternalFileSource;
@@ -40,7 +41,7 @@ public enum Data {
       if(settings==null || settings.trim().length() == 0) {
         settings = MavenCli.DEFAULT_USER_SETTINGS_FILE.getAbsolutePath();
       }
-      gatherer.gather("config", target, new ExternalFileSource(settings, "user-settings.xml"));
+      gatherer.gather("config", target, new ObfuscatedSettingsSource(settings, "user-settings.xml"));
       
       // TODO user profiles and toolchain
     }
@@ -49,7 +50,7 @@ public enum Data {
   MAVEN_GLOBAL_SETTINGS("Maven global settings.xml") {
     public void gather(DataGatherer gatherer, IDataTarget target, IProgressMonitor monitor) {
       String settings = gatherer.getMavenConfiguration().getGlobalSettingsFile();
-      gatherer.gather("config", target, new ExternalFileSource(settings, "global-settings.xml"));
+      gatherer.gather("config", target, new ObfuscatedSettingsSource(settings, "global-settings.xml"));
     }
   },
 

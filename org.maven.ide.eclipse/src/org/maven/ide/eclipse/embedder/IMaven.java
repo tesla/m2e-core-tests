@@ -124,6 +124,8 @@ public interface IMaven {
 
   public Settings buildSettings(String globalSettings, String userSettings) throws CoreException;
 
+  public void writeSettings(Settings settings, OutputStream out) throws CoreException;
+
   public SettingsValidationResult validateSettings(String settings);
 
   public List<Mirror> getMirrors() throws CoreException;

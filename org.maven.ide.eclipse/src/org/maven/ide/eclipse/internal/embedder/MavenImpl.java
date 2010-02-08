@@ -97,6 +97,7 @@ import org.apache.maven.settings.crypto.DefaultSettingsDecryptionRequest;
 import org.apache.maven.settings.crypto.SettingsDecrypter;
 import org.apache.maven.settings.crypto.SettingsDecryptionRequest;
 import org.apache.maven.settings.crypto.SettingsDecryptionResult;
+import org.apache.maven.settings.io.SettingsWriter;
 import org.apache.maven.settings.validation.SettingsValidationResult;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 
@@ -131,6 +132,8 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
 
   private final SettingsDecrypter settingsDecrypter;
 
+  private final SettingsWriter settingsWriter;
+
   private final IMavenConfiguration mavenConfiguration;
 
   private final MavenExecutionRequestPopulator populator;
@@ -157,6 +160,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
       this.repositorySystem = plexus.lookup(RepositorySystem.class);
       this.settingsBuilder = plexus.lookup(SettingsBuilder.class);
       this.settingsDecrypter = plexus.lookup(SettingsDecrypter.class);
+      this.settingsWriter = plexus.lookup(SettingsWriter.class);
       this.populator = plexus.lookup(MavenExecutionRequestPopulator.class);
       this.pluginManager = plexus.lookup(BuildPluginManager.class);
       this.lifecycleExecutor = plexus.lookup(LifecycleExecutor.class);
@@ -295,6 +299,15 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
       return settingsBuilder.build(request).getEffectiveSettings();
     } catch(SettingsBuildingException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not read settings.xml",
+          ex));
+    }
+  }
+
+  public void writeSettings(Settings settings, OutputStream out) throws CoreException {
+    try {
+      settingsWriter.write(out, null, settings);
+    } catch(IOException ex) {
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not write settings.xml",
           ex));
     }
   }
