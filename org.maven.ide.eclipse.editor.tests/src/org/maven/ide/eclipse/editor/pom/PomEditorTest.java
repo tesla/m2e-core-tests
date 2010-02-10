@@ -260,7 +260,7 @@ public class PomEditorTest extends PomEditorTestBase {
     findText("</project>");
     bot.activeEditor().toTextEditor().pressShortcut(SWT.NONE, SWT.LEFT, (char) 0);
 
-    // TODO dip where is this?  copy("<properties><sample>sample</sample></properties>");
+    copy("<properties><sample>sample</sample></properties>");
     bot.activeEditor().toTextEditor().pressShortcut(SWT.CONTROL, 'v');
     waitForEditorDirtyState(editor, true);
 

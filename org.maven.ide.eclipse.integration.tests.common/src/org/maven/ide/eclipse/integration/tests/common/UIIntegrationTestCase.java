@@ -55,6 +55,9 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWTException;
+import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotEditor;
@@ -1399,4 +1402,15 @@ public abstract class UIIntegrationTestCase {
 		return new String(out.toByteArray(), "UTF-8");
 	}
 
+	protected void copy(final String str) throws Exception {
+		Display.getDefault().syncExec(new Runnable() {
+			public void run() {
+				Clipboard clipboard = new Clipboard(Display.getDefault());
+				TextTransfer transfer = TextTransfer.getInstance();
+				clipboard.setContents(new String[] { str },
+						new Transfer[] { transfer });
+				clipboard.dispose();
+			}
+		});
+	}
 }
