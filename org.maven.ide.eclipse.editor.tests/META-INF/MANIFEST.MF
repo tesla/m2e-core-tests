@@ -1,6 +1,12 @@
 Bundle-ManifestVersion: 2
 Bundle-RequiredExecutionEnvironment: J2SE-1.5,JavaSE-1.6
-Require-Bundle: org.eclipse.core.runtime,
+Require-Bundle: org.junit4;bundle-version="4.4.0",
+ org.hamcrest,
+ org.eclipse.swtbot.eclipse.finder,
+ org.eclipse.swtbot.swt.finder,
+ org.eclipse.swtbot.junit4_x,
+ org.maven.ide.eclipse.integration.tests.common,
+ org.eclipse.core.runtime,
  org.eclipse.core.resources,
  org.eclipse.jdt.core,
  org.eclipse.debug.core,
@@ -13,20 +19,13 @@ Require-Bundle: org.eclipse.core.runtime,
  org.maven.ide.eclipse.maven_embedder,
  org.maven.ide.eclipse.maven_model_edit,
  org.maven.ide.eclipse.archetype_common,
- org.junit,
- com.windowtester.runtime,
- com.windowtester.swt.runtime,
- com.windowtester.swing.runtime,
- com.instantiations.eclipse.debug,
- com.instantiations.common.core,
- com.instantiations.eclipse.util,
  org.eclipse.swt,
  org.maven.ide.eclipse.editor,
  org.maven.ide.eclipse.editor.xml,
  org.eclipse.ui.forms,
+ org.eclipse.wst.sse.core,
  org.eclipse.wst.sse.ui,
- org.eclipse.search,
- org.maven.ide.eclipse.integration.tests
+ org.eclipse.search
 Bundle-Name: Maven Integration Tests Plug-in
 Bundle-Version: 0.10.1.qualifier
 MavenArtifact-ArtifactId: org.maven.ide.eclipse.test

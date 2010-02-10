@@ -8,122 +8,106 @@
 
 package org.maven.ide.eclipse.integration.tests;
 
+import static org.hamcrest.Matchers.startsWith;
+
 import java.util.List;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.swt.SWT;
+import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotEclipseEditor;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
+import org.junit.Assert;
+import org.junit.Test;
 import org.maven.ide.eclipse.MavenPlugin;
+import org.maven.ide.eclipse.integration.tests.common.SwtbotUtil;
 import org.maven.ide.eclipse.internal.index.NexusIndex;
 import org.maven.ide.eclipse.internal.index.NexusIndexManager;
 import org.maven.ide.eclipse.repository.IRepository;
 import org.maven.ide.eclipse.repository.IRepositoryRegistry;
-import org.maven.ide.eclipse.tests.common.AbstractMavenProjectTestCase;
-
-import com.windowtester.runtime.swt.condition.SWTIdleCondition;
-import com.windowtester.runtime.swt.condition.eclipse.JobsCompleteCondition;
-import com.windowtester.runtime.swt.condition.shell.ShellDisposedCondition;
-import com.windowtester.runtime.swt.condition.shell.ShellShowingCondition;
-import com.windowtester.runtime.swt.locator.ButtonLocator;
-import com.windowtester.runtime.swt.locator.CTabItemLocator;
-import com.windowtester.runtime.swt.locator.NamedWidgetLocator;
-import com.windowtester.runtime.swt.locator.TreeItemLocator;
-import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
 
 
 /**
  * @author Rich Seddon
  */
+@SuppressWarnings("restriction")
 public class MEclipse163ResolveDependenciesTest extends M2EUIIntegrationTestCase {
 
-  
   private String projectName = "ResolveDepProject";
-  
-  protected void updateRepo(){
-    
+
+  protected void updateRepo() {
+
   }
+
+  @Test
   public void testResolveDependencies() throws Exception {
-    
     importZippedProject("projects/resolve_deps_test.zip");
     final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-    assertTrue(project.exists());
+    Assert.assertTrue(project.exists());
     waitForAllBuildsToComplete();
     //rebuild the mirror
     IRepositoryRegistry registry = MavenPlugin.getDefault().getRepositoryRegistry();
-    AbstractMavenProjectTestCase.waitForJobsToComplete(new NullProgressMonitor());
+    waitForAllBuildsToComplete();
     List<IRepository> repos = registry.getRepositories(registry.SCOPE_SETTINGS);
-    
-    for(IRepository repo : repos){
-        buildFullRepoDetails(repo);
-    }
-    
-    openFile(project, "src/main/java/org/sonatype/test/ResolveDepProject/App.java");
 
-    
+    for(IRepository repo : repos) {
+      buildFullRepoDetails(repo);
+    }
+
     // there should be compile errors
     int severity = project.findMaxProblemSeverity(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
-    assertEquals(IMarker.SEVERITY_ERROR, severity);
+    Assert.assertEquals(IMarker.SEVERITY_ERROR, severity);
 
-    //Workaround for Window tester bug, close & reopen tab to prevent editor from being in invalid state.
-    getUI().close(new CTabItemLocator("App.java"));
-    openFile(project, "src/main/java/org/sonatype/test/ResolveDepProject/App.java");
+    SWTBotEclipseEditor editor = bot.editorByTitle(
+        openFile(project, "src/main/java/org/sonatype/test/ResolveDepProject/App.java").getTitle()).toTextEditor();
 
-    //launch quick fix for SessionFactory dependency
-    getUI().click(new TreeItemLocator(projectName+".*", new ViewLocator(PACKAGE_EXPLORER_VIEW_ID)));
-    getUI().keyClick(SWT.MOD1 | SWT.SHIFT, 't');
-    getUI().wait(new ShellShowingCondition("Open Type"));
-    getUI().enterText("app");
-    getUI().wait(new SWTIdleCondition());
-    getUI().click(new ButtonLocator("OK"));
-    getUI().wait(new ShellDisposedCondition("Open Type"));
-    getUI().wait(new JobsCompleteCondition(), 60000);
+    editor.pressShortcut(SWT.MOD1, '.'); // next annotation
 
-    getUI().keyClick(SWT.MOD1, '.'); // next annotation
+    editor.pressShortcut(SWT.MOD1, '1');
+    editor.pressShortcut(KeyStroke.getInstance(SWT.END));
+    editor.pressShortcut(KeyStroke.getInstance(SWT.ARROW_UP));
+    editor.pressShortcut(KeyStroke.getInstance(SWT.LF));
 
-    getUI().keyClick(SWT.MOD1, '1');
-    getUI().wait(new ShellShowingCondition(""));
-    getUI().keyClick(SWT.END);
-    getUI().keyClick(SWT.ARROW_UP);
+    SWTBotShell shell = bot.shell("Search in Maven repositories");
+    try {
+      shell.activate();
 
-    getUI().keyClick(SWT.CR);
-    getUI().wait(new ShellShowingCondition("Search in Maven repositories"));
-    getUI().wait(new SWTIdleCondition());
-
-    getUI().click(new TreeItemLocator("JFreeChart   org.jfree.chart   com.google.gwt   gwt-benchmark-viewer",
-        new NamedWidgetLocator("searchResultTree")));
-    getUI().click(new TreeItemLocator(
-            "JFreeChart   org.jfree.chart   jfree   jfreechart/1.0.7 - jfreechart-1.0.7.jar .*",
-            new NamedWidgetLocator("searchResultTree")));
-
-    getUI().wait(new SWTIdleCondition());
-    getUI().keyClick(SWT.CR);
-
-    getUI().wait(new ShellDisposedCondition("Search in Maven repositories"));
+      String groupId = "org.jfree.chart";
+      String artifactId = "jfreechart";
+      String version = "1.0.7";
+      bot.text().setText(artifactId);
+      SWTBotTreeItem node = bot.tree().expandNode(groupId + "   " + artifactId);
+      node.select(findNodeName(node, startsWith(version)));
+    } finally {
+      SwtbotUtil.waitForClose(shell);
+    }
 
     waitForAllBuildsToComplete();
 
     assertProjectsHaveNoErrors();
-    
+
   }
+
   /**
    * For any class details, we need a FULL_DETAILS
+   * 
    * @param repo
    */
-  private void buildFullRepoDetails(IRepository repo) throws Exception{
-    NexusIndexManager indexManager = (NexusIndexManager)MavenPlugin.getDefault().getIndexManager();
+  private void buildFullRepoDetails(IRepository repo) throws Exception {
+    NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getDefault().getIndexManager();
     NexusIndex index = indexManager.getIndex(repo);
     IRepositoryRegistry registry = MavenPlugin.getDefault().getRepositoryRegistry();
-    
+
     //build full repo details for the enabled non local/workspace repo
-    if(index.isEnabled() && 
-        !(repo.equals(registry.getLocalRepository())) && 
-            !(repo.equals(registry.getWorkspaceRepository()))){
+    if(index.isEnabled() && !(repo.equals(registry.getLocalRepository()))
+        && !(repo.equals(registry.getWorkspaceRepository()))) {
       indexManager.setIndexDetails(repo, "full", null);
       indexManager.updateIndex(repo, true, null);
-      waitForAllBuildsToComplete(600000);
+      waitForAllBuildsToComplete();
     }
   }
 }

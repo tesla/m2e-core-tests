@@ -1,140 +1,177 @@
+
 package org.maven.ide.eclipse.editor.pom;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.util.List;
+
+import junit.framework.Assert;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.swt.SWT;
+import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotEclipseEditor;
+import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotEditor;
+import org.eclipse.swtbot.swt.finder.SWTBot;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotTable;
+import org.junit.Before;
+import org.junit.Test;
+import org.maven.ide.eclipse.integration.tests.common.SwtbotUtil;
 
-import com.windowtester.runtime.IUIContext;
-import com.windowtester.runtime.WT;
-import com.windowtester.runtime.WaitTimedOutException;
-import com.windowtester.runtime.WidgetSearchException;
-import com.windowtester.runtime.swt.condition.SWTIdleCondition;
-import com.windowtester.runtime.swt.condition.eclipse.JobsCompleteCondition;
-import com.windowtester.runtime.swt.condition.shell.ShellDisposedCondition;
-import com.windowtester.runtime.swt.condition.shell.ShellShowingCondition;
-import com.windowtester.runtime.swt.locator.ButtonLocator;
-import com.windowtester.runtime.swt.locator.CTabItemLocator;
-import com.windowtester.runtime.swt.locator.NamedWidgetLocator;
-import com.windowtester.runtime.swt.locator.TableItemLocator;
 
 public class PomEditor2Test extends PomEditorTestBase {
-  
+
   ///MNGECLIPSE-912
+  @Test
   public void testCloseAllAndSave() throws Exception {
     createArchetypeProject("maven-archetype-quickstart", "projectC");
-    openPomFile("projectC/pom.xml");
-    getUI().click(new CTabItemLocator("projectC/pom.xml"));
-    selectEditorTab(TAB_POM_XML);
+    SWTBotEclipseEditor editor = bot.editorByTitle(openPomFile("projectC/pom.xml").getTitle()).toTextEditor();
+    SWTBot ebot = editor.bot();
+    ebot.cTabItem("pom.xml").activate();
+
     replaceText("org.sonatype.test", "org.sonatype.test1");
-    selectEditorTab(TAB_OVERVIEW);
-    getUI().keyClick(SWT.CONTROL|SWT.SHIFT, 'w');
-    getUI().wait(new ShellDisposedCondition("Progress Information"));
-    getUI().wait(new ShellShowingCondition("Save Resource"));
-    getUI().click(new ButtonLocator("&Yes"));
-    getUI().wait(new ShellDisposedCondition("Save Resource"));
+    ebot.cTabItem("Overview").activate();
 
-    openPomFile("projectC/pom.xml");
-    selectEditorTab(TAB_OVERVIEW);
+    editor.saveAndClose();
+
+    editor = bot.editorByTitle(openPomFile("projectC/pom.xml").getTitle()).toTextEditor();
+    editor.bot().cTabItem("Overview").activate();
     assertTextValue("groupId", "org.sonatype.test1");
-  }
-  
-  public void testNewPropertiesSectionModel2XML() throws Exception {
-    openPomFile(TEST_POM_POM_XML);
 
-    selectEditorTab(TAB_OVERVIEW);
-    
+    editor.saveAndClose();
+  }
+
+  @Test
+  public void testNewPropertiesSectionModel2XML() throws Exception {
+    SWTBotEclipseEditor editor = bot.editorByTitle(openPomFile(TEST_POM_POM_XML).getTitle()).toTextEditor();
+    editor.bot().cTabItem("Overview").activate();
+
     expandSectionIfRequired("propertiesSection", "Properties");
     collapseSectionIfRequired("modulesSection", "Modules");
+
+    SWTBotTable properties = bot.table();
+    assertEquals(0, properties.rowCount());
 
     addProperty("pz", "pz");
-    getUI().click(2, new TableItemLocator("pz : pz"));
-    getUI().wait(new ShellShowingCondition("Edit property"));
-    getUI().keyClick(SWT.CTRL, 'a');
-    getUI().enterText("p12");
-    getUI().keyClick(WT.TAB);
-    getUI().keyClick(SWT.CTRL, 'a');
-    getUI().enterText("p12");
-    getUI().click(new ButtonLocator("OK"));
-    getUI().wait(new ShellDisposedCondition("Edit property"));
+
+    properties.select(0);
+    properties.pressShortcut(KeyStroke.getInstance(SWT.LF));
+
+    SWTBotShell shell = bot.shell("Edit property");
+    try {
+      bot.textWithLabel("Name:").setText("p12");
+      bot.textWithLabel("Value:").setText("p12");
+
+      bot.button("OK").click();
+    } finally {
+      SwtbotUtil.waitForClose(shell);
+    }
     addProperty("p2", "p2");
-    getUI().click(new TableItemLocator("p12 : p12"));
-    getUI().click(new ButtonLocator("Delete"));
-    
-    selectEditorTab(TAB_POM_XML);
-    String editorText = getEditorText();
+
+    properties.select(0);
+    bot.button("Delete").click();
+
+    editor.bot().cTabItem("pom.xml").activate();
+
+    String editorText = editor.getText();
     assertTrue(editorText, editorText.contains("<p2>p2</p2>"));
 
-    getUI().keyClick(SWT.CTRL, 'z');
-    getUI().keyClick(SWT.CTRL, 'z');
-    getUI().keyClick(SWT.CTRL, 'z');
-    editorText = getEditorText();
+    editor.pressShortcut(SWT.CTRL, 'z');
+    editor.pressShortcut(SWT.CTRL, 'z');
+    editor.pressShortcut(SWT.CTRL, 'z');
+
+    editorText = editor.getText();
     assertTrue(editorText, editorText.contains("<pz>pz</pz>"));
-    
-    getUI().keyClick(SWT.CTRL, 'z');
-    editorText = getEditorText();
+
+    editor.pressShortcut(SWT.CTRL, 'z');
+    editorText = editor.getText();
     assertFalse(editorText, editorText.contains("<properties>"));
-    getUI().keyClick(SWT.CTRL, 'y');
-    editorText = getEditorText();
+    editor.pressShortcut(SWT.CTRL, 'y');
+    editorText = editor.getText();
     assertTrue(editorText, editorText.contains("<pz>pz</pz>"));
-    getUI().keyClick(SWT.CTRL, 's');
+
+    editor.saveAndClose();
   }
 
+  @Test
   public void testPropertiesSectionXML2Model() throws Exception {
-    openPomFile(TEST_POM_POM_XML);
+    SWTBotEclipseEditor editor = bot.editorByTitle(openPomFile(TEST_POM_POM_XML).getTitle()).toTextEditor();
 
     expandSectionIfRequired("propertiesSection", "Properties");
     collapseSectionIfRequired("modulesSection", "Modules");
 
-    selectEditorTab(TAB_POM_XML);
-    
+    SWTBotTable table = editor.bot().table();
+
+    editor.bot().cTabItem("Overview").activate();
+    validateProperty(table, "pz", "pz");
+
+    editor.bot().cTabItem("pom.xml").activate();
+
     replaceText("<pz>pz</pz>", "<prop>hoho</prop>");
     replaceText("<prop>hoho</prop>", "<prop>hoho</prop><prop1>hoho1</prop1>");
 
-    selectEditorTab(TAB_OVERVIEW);
+    editor.bot().cTabItem("Overview").activate();
+    validateProperty(table, "prop", "hoho");
+    validateProperty(table, "prop1", "hoho1");
 
-    getUI().click(2, new TableItemLocator("prop : hoho"));
-    getUI().wait(new ShellShowingCondition("Edit property"));
-    getUI().click(new ButtonLocator("OK"));
-    getUI().wait(new ShellDisposedCondition("Edit property"));
-    getUI().click(2, new TableItemLocator("prop1 : hoho1"));
-    getUI().wait(new ShellShowingCondition("Edit property"));
-    getUI().click(new ButtonLocator("OK"));
-    getUI().wait(new ShellDisposedCondition("Edit property"));
-
-    selectEditorTab(TAB_POM_XML);
+    editor.bot().cTabItem("pom.xml").activate();
     replaceText("<prop>hoho</prop><prop1>hoho1</prop1>", "<prop>hoho</prop>");
-    selectEditorTab(TAB_OVERVIEW);
+    editor.bot().cTabItem("Overview").activate();
 
-    getUI().click(2, new TableItemLocator("prop : hoho"));
-    getUI().wait(new ShellShowingCondition("Edit property"));
-    getUI().click(new ButtonLocator("OK"));
-    getUI().wait(new ShellDisposedCondition("Edit property"));
-    getUI().keyClick(SWT.CTRL, 's');
+    validateProperty(table, "prop", "hoho");
+    editor.saveAndClose();
   }
 
- 
-  
-  private void addProperty(String name, String value) throws WidgetSearchException, WaitTimedOutException {
-    getUI().click(new ButtonLocator("Create...").findAll(getUI())[0]);
-    getUI().wait(new ShellShowingCondition("Add property"));
-    getUI().enterText(name);
-    getUI().keyClick(WT.TAB);
-    getUI().enterText(value);
-    getUI().keyClick(WT.CR);
-    getUI().wait(new ShellDisposedCondition("Add property"));
+  private void validateProperty(SWTBotTable table, String key, String value) {
+    if(table.rowCount() == 0) {
+      return;
+    }
+
+    table.select(table.indexOf(key));
+    table.pressShortcut(KeyStroke.getInstance(SWT.LF));
+
+    SWTBotShell shell = bot.shell("Edit property");
+    try {
+      Assert.assertEquals(key, bot.textWithLabel("Name:").getText());
+      Assert.assertEquals(value, bot.textWithLabel("Value:").getText());
+
+      bot.button("OK").click();
+    } finally {
+      SwtbotUtil.waitForClose(shell);
+    }
   }
-  
+
+  private void addProperty(String name, String value) {
+    bot.button("Create...").click();
+
+    SWTBotShell shell = bot.shell("Add property");
+    try {
+      shell.activate();
+
+      bot.textWithLabel("Name:").setText(name);
+      bot.textWithLabel("Value:").setText(value);
+
+      bot.button("OK").click();
+    } finally {
+      SwtbotUtil.waitForClose(shell);
+    }
+  }
+
+  @Test
   public void testInternalModificationUpdatesModel() throws Exception {
-    openPomFile(TEST_POM_POM_XML);
+    SWTBotEclipseEditor editor = bot.editorByTitle(openPomFile(TEST_POM_POM_XML).getTitle()).toTextEditor();
 
     assertTextValue("version", "1.0.0");
-    
+
     // internally replace file contents
     IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
     IFile file = root.getFile(new Path(TEST_POM_POM_XML));
@@ -143,51 +180,48 @@ public class PomEditor2Test extends PomEditorTestBase {
     file.setContents(new ByteArrayInputStream(text.replace("1.0.0", "1.0.1").getBytes()), true, true, null);
 
     file.refreshLocal(IResource.DEPTH_ZERO, null);
-    getUI().wait(new JobsCompleteCondition());
-    
+    waitForAllBuildsToComplete();
+
     assertTextValue("version", "1.0.1");
-    
+
     selectEditorTab(TAB_POM_XML);
     String editorText = getEditorText();
     assertTrue(editorText, editorText.contains("<version>1.0.1</version>"));
-    
+
   }
 
+  @Test
   public void testMutlipleMNGEclipse1312() throws Exception {
     clearProjects();
-    
+
     createArchetypeProject("maven-archetype-quickstart", "projectA");
     createArchetypeProject("maven-archetype-quickstart", "projectB");
-    
-    MavenPomEditor editorA = openPomFile("projectA/pom.xml");
-    MavenPomEditor editorB = openPomFile("projectB/pom.xml");
-    
+
+    SWTBotEclipseEditor editorA = bot.editorByTitle(openPomFile("projectA/pom.xml").getTitle()).toTextEditor();
+    SWTBotEclipseEditor editorB = bot.editorByTitle(openPomFile("projectB/pom.xml").getTitle()).toTextEditor();
+
     assertFalse(editorA.isDirty());
     assertFalse(editorB.isDirty());
-    
-    IUIContext ui = getUI();
-    
-    ui.click(new CTabItemLocator("projectA/pom.xml"));
-    replaceText(new NamedWidgetLocator("version"), "0.0.2-SNAPSHOT");
-    
-    ui.click(new CTabItemLocator("projectB/pom.xml"));
-    replaceText(new NamedWidgetLocator("version"), "0.0.2-SNAPSHOT");
-    
+
+    editorA.show();
+    editorA.bot().textWithLabel("Version:").setText("0.0.2-SNAPSHOT");
+    editorB.show();
+    editorB.bot().textWithLabel("Version:").setText("0.0.2-SNAPSHOT");
+
     assertTrue(editorA.isDirty());
     assertTrue(editorB.isDirty());
-    
-    ui.keyClick(SWT.MOD1, 's');
-    Thread.sleep(5000);
-    ui.wait(new JobsCompleteCondition(), 240000);
-    
+
+    editorB.save();
+
+    waitForAllBuildsToComplete();
+
     assertTrue(editorA.isDirty());
     assertFalse(editorB.isDirty());
-    
-    ui.keyClick(SWT.MOD1|SWT.SHIFT, 's');
-    
-    ui.wait(new SWTIdleCondition());
-    ui.wait(new JobsCompleteCondition());
-    
+
+    editorA.save();
+
+    waitForAllBuildsToComplete();
+
     assertFalse(editorA.isDirty());
     assertFalse(editorB.isDirty());
   }

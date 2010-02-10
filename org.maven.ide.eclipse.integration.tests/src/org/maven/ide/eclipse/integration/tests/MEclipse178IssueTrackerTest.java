@@ -1,49 +1,53 @@
+
 package org.maven.ide.eclipse.integration.tests;
 
-import org.eclipse.swt.SWT;
+import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotEditor;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
+import org.junit.Test;
+import org.maven.ide.eclipse.integration.tests.common.SwtbotUtil;
 
-import com.windowtester.runtime.IUIContext;
-import com.windowtester.runtime.swt.condition.shell.ShellDisposedCondition;
-import com.windowtester.runtime.swt.condition.shell.ShellShowingCondition;
-import com.windowtester.runtime.swt.locator.ButtonLocator;
-import com.windowtester.runtime.swt.locator.CTabItemLocator;
-import com.windowtester.runtime.swt.locator.TreeItemLocator;
-import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
-import com.windowtester.runtime.util.ScreenCapture;
 
 public class MEclipse178IssueTrackerTest extends M2EUIIntegrationTestCase {
 
+  /**
+   * 
+   */
+  private static final String TEST_PROJECT = "test-project";
 
-	public void testIssueTracker() throws Exception {
-	  setXmlPrefs();
-	  createQuickstartProject("test-project");
+  @Test
+  public void testIssueTracker() throws Exception {
+    setXmlPrefs();
 
-		IUIContext ui = getUI();
-		ui.click(new TreeItemLocator("test-project", new ViewLocator(
-				"org.eclipse.jdt.ui.PackageExplorer")));
-		ui.contextClick(new TreeItemLocator("test-project", new ViewLocator(
-				"org.eclipse.jdt.ui.PackageExplorer")),
-				"Maven/Open Issue Tracker");
-		ui.wait(new ShellShowingCondition("Open Browser"));
-		ui.click(new ButtonLocator("OK"));
-		ui.wait(new ShellDisposedCondition("Open Browser"));
-		
-		openPomFile("test-project/pom.xml");
-		ui.click(new CTabItemLocator("pom.xml"));
-		replaceText("</dependencies>", "</dependencies><issueManagement><system>JIRA</system><url>http://jira.codehaus.org</url></issueManagement>");
-		ui.keyClick(SWT.MOD1, 's');
-		  waitForAllBuildsToComplete();
-		ui.click(new TreeItemLocator("test-project", new ViewLocator(
-				"org.eclipse.jdt.ui.PackageExplorer")));
-		ui.contextClick(new TreeItemLocator("test-project", new ViewLocator(
-				"org.eclipse.jdt.ui.PackageExplorer")),
-				"Maven/Open Issue Tracker");
-		Thread.sleep(10000);
-		waitForAllBuildsToComplete();
-		ScreenCapture.createScreenCapture();
-		ui.close(new CTabItemLocator("http://jira.codehaus.org"));
-		
-	}
+    createQuickstartProject(TEST_PROJECT);
 
+    openIssueTracking(TEST_PROJECT);
+
+    SWTBotShell shell = bot.shell("Open Browser");
+    try {
+      shell.activate();
+
+      bot.button("OK").click();
+    } finally {
+      SwtbotUtil.waitForClose(shell);
+    }
+
+    SWTBotEditor editor = bot.editorByTitle(openPomFile("test-project/pom.xml").getTitle());
+    editor.bot().cTabItem("pom.xml").activate();
+//    ui.click(new CTabItemLocator("pom.xml"));
+    replaceText("</dependencies>",
+        "</dependencies><issueManagement><system>JIRA</system><url>http://jira.codehaus.org</url></issueManagement>");
+
+    editor.saveAndClose();
+
+    waitForAllBuildsToComplete();
+
+    openIssueTracking(TEST_PROJECT);
+
+    bot.sleep(10000);
+    waitForAllBuildsToComplete();
+
+    takeScreenShot("issue-tracking");
+    bot.editorByTitle("http://jira.codehaus.org").close();
+  }
 
 }

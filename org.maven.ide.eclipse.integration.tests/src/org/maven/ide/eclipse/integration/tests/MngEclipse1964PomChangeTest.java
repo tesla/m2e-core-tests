@@ -8,16 +8,11 @@
 
 package org.maven.ide.eclipse.integration.tests;
 
-import org.eclipse.swt.SWT;
+import static org.junit.Assert.fail;
 
-import com.windowtester.runtime.IUIContext;
-import com.windowtester.runtime.WaitTimedOutException;
-import com.windowtester.runtime.swt.condition.shell.ShellShowingCondition;
-import com.windowtester.runtime.swt.locator.ButtonLocator;
-import com.windowtester.runtime.swt.locator.CTabItemLocator;
-import com.windowtester.runtime.swt.locator.FilteredTreeItemLocator;
-import com.windowtester.runtime.swt.locator.TreeItemLocator;
-import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
+import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
+import org.junit.Test;
+import org.maven.ide.eclipse.core.Messages;
 
 
 /**
@@ -35,55 +30,49 @@ import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
  */
 public class MngEclipse1964PomChangeTest extends M2EUIIntegrationTestCase {
 
+  @Test
   public void testPomChange() throws Exception {
-    IUIContext ui = getUI();
 
-    // new project
-    ui.keyClick(SWT.CTRL, 'N');
-    ui.wait(new ShellShowingCondition("New"));
-    // maven project
-    ui.click(new FilteredTreeItemLocator("Maven/Maven Project"));
-    ui.click(new ButtonLocator("Next >"));
-    // parent project
-    ui.click(new ButtonLocator("Create a simple project (skip archetype selection)"));
-    ui.click(new ButtonLocator("Next >"));
-    ui.enterText("group");
-    ui.keyClick(SWT.TAB);
-    ui.enterText("parent");
-    ui.keyClick(SWT.TAB);
-    ui.keyClick(SWT.TAB);
-    ui.enterText("pom");
-    ui.click(new ButtonLocator("Finish"));
+    // new parent project
+    bot.menu("File").menu("New").menu("Project...").click();
+    bot.shell("New Project").activate();
+    bot.tree().expandNode("Maven").getNode("Maven Project").doubleClick();
+
+    bot.checkBox(Messages.getString("wizard.project.page.project.simpleProject")).select();
+    bot.button("Next >").click();
+
+    bot.comboBoxWithLabel(Messages.getString("artifactComponent.groupId")).setText("group");
+    bot.comboBoxWithLabel(Messages.getString("artifactComponent.artifactId")).setText("parent");
+    bot.comboBoxWithLabel(Messages.getString("artifactComponent.packaging")).setText("pom");
+    bot.button("Finish").click();
+
     waitForAllBuildsToComplete();
 
-    // open pom
-    ui.click(new TreeItemLocator("parent/pom.xml", new ViewLocator(PACKAGE_EXPLORER_VIEW_ID)));
-    ui.keyClick(SWT.F3);
-    ui.click(new CTabItemLocator("pom.xml"));
+    // open pom in the editor
+    bot.viewById(PACKAGE_EXPLORER_VIEW_ID).setFocus();
+    selectProject("parent").expandNode("parent").getNode("pom.xml").doubleClick();
+    bot.editorByTitle("parent/pom.xml").setFocus();
+    bot.cTabItem("pom.xml").activate();
 
-    // new project
-    ui.keyClick(SWT.CTRL, 'N');
-    ui.wait(new ShellShowingCondition("New"));
-    // maven module
-    ui.click(new FilteredTreeItemLocator("Maven/Maven Module"));
-    ui.click(new ButtonLocator("Next >"));
+    // new child project
+    bot.menu("File").menu("New").menu("Project...").click();
+    bot.shell("New Project").activate();
+    bot.tree().expandNode("Maven").getNode("Maven Module").doubleClick();
+
     // child project
-    ui.click(new ButtonLocator("Create a simple project (skip archetype selection)"));
-    ui.keyClick(SWT.TAB);
-    ui.enterText("child");
-    ui.keyClick(SWT.TAB);
-    ui.keyClick(SWT.TAB);
-    ui.keyClick(SWT.CR);
-    ui.wait(new ShellShowingCondition("Select a Maven project"));
-    ui.click(new TreeItemLocator("parent"));
-    ui.click(new ButtonLocator("OK"));
-    ui.click(new ButtonLocator("Finish"));
+    bot.checkBox(Messages.getString("wizard.project.page.project.simpleProject")).select();
+    bot.comboBoxWithLabel(Messages.getString("wizard.module.page.parent.moduleName")).setText("child");
+    bot.button(Messages.getString("wizard.module.page.parent.browse")).click();
+    bot.shell(Messages.getString("projectSelectionDialog.title")).activate();
+    bot.tree().getTreeItem("parent").doubleClick();
+    bot.button("Finish").click();
+
     waitForAllBuildsToComplete();
 
     try {
-      ui.wait(new ShellShowingCondition("File Changed"), 1000);
-      fail();
-    } catch(WaitTimedOutException e) {
+      bot.shell("File Changed");
+      fail("The \"File has changed on disk\" message should not be displayed");
+    } catch(WidgetNotFoundException e) {
       //no dialog should be displayed
     }
   }

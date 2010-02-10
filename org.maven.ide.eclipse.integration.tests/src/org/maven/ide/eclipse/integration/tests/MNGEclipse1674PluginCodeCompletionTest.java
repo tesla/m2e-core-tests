@@ -12,76 +12,76 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.swt.SWT;
+import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotEclipseEditor;
+import org.junit.Assert;
+import org.junit.Test;
 import org.maven.ide.eclipse.jdt.BuildPathManager;
 
-import abbot.finder.swt.WidgetSearchException;
-
-import com.windowtester.internal.runtime.locator.ContextMenuItemLocator;
-import com.windowtester.runtime.WT;
-import com.windowtester.runtime.locator.IWidgetLocator;
-import com.windowtester.runtime.locator.MenuItemLocator;
-import com.windowtester.runtime.swt.locator.CTabItemLocator;
-import com.windowtester.runtime.swt.locator.TextLocator;
 
 /**
  * @author dyocum
- *
  */
 public class MNGEclipse1674PluginCodeCompletionTest extends M2EUIIntegrationTestCase {
 
-  
+  @Test
   public void testSchemaCodeAssist() throws Exception {
-    
     doImport(PLUGIN_ID, "projects/cc_sample2.zip", false);
-    
+
     IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("cc_sample2");
-    IJavaProject jp = (IJavaProject)project.getNature(JavaCore.NATURE_ID);
-    assertTrue(project.exists());
-    
+    IJavaProject jp = (IJavaProject) project.getNature(JavaCore.NATURE_ID);
+    Assert.assertTrue(project.exists());
+
     // Add a dependency.
-    openFile(project, "pom.xml");
+    SWTBotEclipseEditor editor = bot.editorByTitle(openFile(project, "pom.xml").getTitle()).toTextEditor();
     waitForAllBuildsToComplete();
-    getUI().click(new CTabItemLocator("pom.xml"));
-    
+    bot.cTabItem("pom.xml").activate();
+
+    Assert.assertTrue(editor.getText().contains("<project>"));
+
     findTextWithWrap("<project>", true);
-    
-    getUI().keyClick(WT.CTRL, '1');
-    getUI().keyClick(WT.CR);
+
+    editor.pressShortcut(SWT.CTRL, '1');
+    editor.pressShortcut(KeyStroke.getInstance(SWT.LF));
+    editor.saveAndClose();
+
     waitForAllBuildsToComplete();
     assertProjectsHaveNoErrors();
+
+    Assert.assertFalse(editor.getText(), editor.getText().contains("<project>"));
   }
+
+  @Test
   public void testPluginCodeCompletion() throws Exception {
-    
+
     doImport("projects/cc_sample.zip");
-    
+
     IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("cc_sample");
-    IJavaProject jp = (IJavaProject)project.getNature(JavaCore.NATURE_ID);
-    
-    assertTrue(project.exists());
+    IJavaProject jp = (IJavaProject) project.getNature(JavaCore.NATURE_ID);
+
+    Assert.assertTrue(project.exists());
 
     // Sample project has no maven2 dependencies initially
-    assertTrue(BuildPathManager.getMaven2ClasspathContainer(jp).getClasspathEntries().length == 0);
-    
-    // Add a dependency.
-    openFile(project, "pom.xml");
-    waitForAllBuildsToComplete();
-    getUI().click(new CTabItemLocator("pom.xml"));
-    findText("</plugins");
-    
-    getUI().keyClick(SWT.ARROW_LEFT);
-    getUI().enterText("<plugin></");
-    
-    findTextWithWrap("</plugin", true);
-    findTextWithWrap("</plugin", false); 
-    getUI().keyClick(SWT.ARROW_LEFT);
-    //control space
-    getUI().keyClick(WT.CTRL, '\u0020');
-    getUI().keyClick(WT.ARROW_DOWN);
-    getUI().keyClick(WT.CR);
-    getUI().keyClick(SWT.MOD1, 's');
-    
-    assertTrue(searchForText("configuration", true, false));
+    Assert.assertTrue(BuildPathManager.getMaven2ClasspathContainer(jp).getClasspathEntries().length == 0);
 
+    // Add a dependency.
+    SWTBotEclipseEditor editor = bot.editorByTitle(openFile(project, "pom.xml").getTitle()).toTextEditor();
+    waitForAllBuildsToComplete();
+    bot.cTabItem("pom.xml").activate();
+
+    findText("</plugins>");
+//    editor.pressShortcut(KeyStroke.getInstance(SWT.ARROW_LEFT));
+//    
+//    editor.insertText("<plugin></plugin>");
+//
+//    findText("</plugin>");
+    editor.pressShortcut(KeyStroke.getInstance(SWT.ARROW_LEFT));
+    editor.pressShortcut(SWT.CTRL, ' ');
+    editor.pressShortcut(KeyStroke.getInstance(SWT.ARROW_DOWN));
+    editor.pressShortcut(KeyStroke.getInstance(SWT.LF));
+
+    editor.saveAndClose();
   }
+
 }

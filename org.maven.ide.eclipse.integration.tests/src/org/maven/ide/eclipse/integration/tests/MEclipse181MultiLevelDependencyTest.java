@@ -11,14 +11,8 @@ package org.maven.ide.eclipse.integration.tests;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.swt.widgets.Tree;
-
-import com.windowtester.runtime.swt.condition.shell.ShellShowingCondition;
-import com.windowtester.runtime.swt.locator.ButtonLocator;
-import com.windowtester.runtime.swt.locator.LabeledLocator;
-import com.windowtester.runtime.swt.locator.TreeItemLocator;
-import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
-import com.windowtester.runtime.util.ScreenCapture;
+import org.junit.Assert;
+import org.junit.Test;
 
 
 /**
@@ -30,25 +24,17 @@ public class MEclipse181MultiLevelDependencyTest extends M2EUIIntegrationTestCas
     IProject childProject = createArchetypeProject("maven-archetype-quickstart", childName);
 
     waitForAllBuildsToComplete();
-    getUI().click(new TreeItemLocator(parent.getName(), new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")));
-    getUI().contextClick(new TreeItemLocator(parent.getName(), new ViewLocator("org.eclipse.jdt.ui.PackageExplorer")),
-        "Maven/Add Dependency");
-    getUI().wait(new ShellShowingCondition("Add Dependency"));
-    getUI().enterText(childName);
-    getUI().click(
-        new TreeItemLocator("org.sonatype.test   " + childName, new LabeledLocator(Tree.class, "&Search Results:")));
-    ScreenCapture.createScreenCapture();
-    getUI().click(
-        new TreeItemLocator("org.sonatype.test   " + childName + "/0.0.1-SNAPSHOT.*", new LabeledLocator(Tree.class,
-            "&Search Results:")));
-    getUI().click(new ButtonLocator("OK"));
-
+    
+    addDependency(parent.getName(), "org.sonatype.test", childName, "0.0.1-SNAPSHOT");
+    
     waitForAllBuildsToComplete();
     IJavaProject jp = (IJavaProject) parent.getNature(JavaCore.NATURE_ID);
-    assertTrue("classpath dependency for "+ childName + " not found", childName.equals(jp.getRequiredProjectNames()[0]));
+    Assert.assertTrue("classpath dependency for "+ childName + " not found", childName.equals(jp.getRequiredProjectNames()[0]));
     return childProject;
   }
   
+
+  @Test
   public void testMultiLevelDependencies() throws Exception {
     IProject project = createArchetypeProject("maven-archetype-quickstart", "multiProject0");
     //dropped it to three to speed things up

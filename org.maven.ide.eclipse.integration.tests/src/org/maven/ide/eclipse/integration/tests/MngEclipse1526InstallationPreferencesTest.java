@@ -1,3 +1,4 @@
+
 package org.maven.ide.eclipse.integration.tests;
 
 import java.io.File;
@@ -12,206 +13,186 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Text;
+import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
+import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotEditor;
+import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
+import org.hamcrest.text.StringStartsWith;
+import org.junit.Assert;
+import org.junit.Test;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.editor.pom.MavenPomEditor;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
+import org.maven.ide.eclipse.integration.tests.common.SwtbotUtil;
 import org.maven.ide.eclipse.internal.embedder.MavenEmbeddedRuntime;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 
-import com.windowtester.runtime.WT;
-import com.windowtester.runtime.WidgetSearchException;
-import com.windowtester.runtime.locator.IWidgetLocator;
-import com.windowtester.runtime.locator.IWidgetReference;
-import com.windowtester.runtime.swt.condition.SWTIdleCondition;
-import com.windowtester.runtime.swt.condition.eclipse.JobsCompleteCondition;
-import com.windowtester.runtime.swt.condition.shell.ShellDisposedCondition;
-import com.windowtester.runtime.swt.condition.shell.ShellShowingCondition;
-import com.windowtester.runtime.swt.locator.ButtonLocator;
-import com.windowtester.runtime.swt.locator.CTabItemLocator;
-import com.windowtester.runtime.swt.locator.FilteredTreeItemLocator;
-import com.windowtester.runtime.swt.locator.MenuItemLocator;
-import com.windowtester.runtime.swt.locator.NamedWidgetLocator;
-import com.windowtester.runtime.swt.locator.TableItemLocator;
-import com.windowtester.runtime.swt.locator.TreeItemLocator;
 
 public class MngEclipse1526InstallationPreferencesTest extends M2EUIIntegrationTestCase {
 
   protected String externalRuntime;
-  
-  public MngEclipse1526InstallationPreferencesTest(){
+
+  public MngEclipse1526InstallationPreferencesTest() {
     super();
-    this.setSkipIndexes(true);
-    externalRuntime = "C:\\apache-maven-2.1.0";
+    externalRuntime = new File("target/maven/apache-maven-2.0.10").getAbsolutePath();
   }
 
-	/**
-	 * Main test method.
-	 */
-	public void testInstallationPrefs() throws Exception {
+  /**
+   * Main test method.
+   */
+  @Test
+  public void testInstallationPrefs() throws Exception {
     File tempDir = importMavenProjects("projects/someproject.zip");
-    MavenEmbeddedRuntime runtime = (MavenEmbeddedRuntime)MavenPlugin.getDefault().getMavenRuntimeManager().getDefaultRuntime();
+    MavenEmbeddedRuntime runtime = (MavenEmbeddedRuntime) MavenPlugin.getDefault().getMavenRuntimeManager()
+        .getDefaultRuntime();
     String version = runtime.toString();
-    IMavenProjectFacade mavenProject = MavenPlugin.getDefault().getMavenProjectManager().getMavenProject("org.sonatype.test", "someproject", "0.0.1-SNAPSHOT");
-    assertNotNull(mavenProject);
-    
-	  ButtonLocator addButton = new ButtonLocator("Add...");
-	  ButtonLocator removeButton = new ButtonLocator("Remove");
-	  //add external maven runtime
-	  
+    IMavenProjectFacade mavenProject = MavenPlugin.getDefault().getMavenProjectManager().getMavenProject(
+        "org.sonatype.test", "someproject", "0.0.1-SNAPSHOT");
+    Assert.assertNotNull(mavenProject);
+
+    //add external maven runtime
+
     MavenRuntime newRuntime = MavenRuntimeManager.createExternalRuntime(externalRuntime);
     List<MavenRuntime> currRuntimes = MavenPlugin.getDefault().getMavenRuntimeManager().getMavenRuntimes();
     ArrayList<MavenRuntime> list = new ArrayList<MavenRuntime>(currRuntimes);
     list.add(newRuntime);
     MavenPlugin.getDefault().getMavenRuntimeManager().setRuntimes(list);
     MavenPlugin.getDefault().getMavenRuntimeManager().setDefaultRuntime(newRuntime);
-    
+
     //create the global_settings.xml file to use
     FileOutputStream out = null;
     File repoDir = createTempDir("testing_repo");
     File globalSettingsFile = File.createTempFile("global_settings", ".xml");
-    try{
+    try {
       out = new FileOutputStream(globalSettingsFile);
       XMLWriter writer = new XMLWriter(out);
       writer.println("<settings>");
-      writer.println("<localRepository>"+repoDir.getAbsolutePath()+"</localRepository>");
+      writer.println("<localRepository>" + repoDir.getAbsolutePath() + "</localRepository>");
       writer.println("</settings>");
       writer.flush();
     } finally {
-     out.close(); 
+      out.close();
     }
- 
+
     IProject project = mavenProject.getProject();
     IPath externalLocation = new Path(globalSettingsFile.getAbsolutePath());
     IFile linkedFile = project.getFile(externalLocation.lastSegment());
     linkedFile.createLink(externalLocation, IResource.NONE, null);
-    
-    openFile(project, externalLocation.lastSegment());
-    getUI().click(new CTabItemLocator("Source"));
-    
-		showInstallationPrefs();
-		//assertFalse(new ButtonLocator("Browse...").isEnabled(getUI()));
-		
-		IWidgetReference browseButtonRef = (IWidgetReference)getUI().find(new ButtonLocator("Browse..."));
-		verifyGlobalSettingsValue(externalRuntime+"\\conf\\settings.xml");
 
-		//now check the embedded and make sure its blank
-		TableItemLocator locator = new TableItemLocator(WT.CHECK, version);
-		getUI().click(locator);
+    SWTBotEditor editor = bot.editorByTitle(openFile(project, externalLocation.lastSegment()).getTitle());
+    editor.bot().cTabItem("Source");
 
-		verifyGlobalSettingsValue("");
-		assertTrue(new ButtonLocator("Browse...").isEnabled(getUI()));
-    getUI().click(new NamedWidgetLocator("globalSettingsText"));
+    bot.menu("Window").menu("Preferences").click();
+    SWTBotShell shell = bot.shell("Preferences");
+    try {
+      shell.activate();
 
-    getUI().enterText(globalSettingsFile.getAbsolutePath());
-    closeInstallationPrefs();
-    
+      bot.tree().expandNode("Maven").select("Installations");
+      //assertFalse(new ButtonLocator("Browse...").isEnabled(getUI()));
+
+      Assert.assertFalse(bot.button("Browse...").isEnabled());
+      Assert.assertEquals(new File(externalRuntime, "conf/settings.xml"), new File(bot
+          .textWithName("globalSettingsText").getText()));
+//      "Global settings from installation directory (open file):"
+      //now check the embedded and make sure its blank
+      bot.table().getTableItem(0).check();
+
+      Assert.assertEquals("", bot.textWithName("globalSettingsText").getText());
+
+      Assert.assertTrue(bot.button("Browse...").isEnabled());
+      bot.textWithName("globalSettingsText").setText(globalSettingsFile.getAbsolutePath());
+
+      bot.button("OK");
+    } finally {
+      SwtbotUtil.waitForClose(shell);
+    }
+
     //now open the index view and make sure 'local' has the right value, 
-    showView("org.maven.ide.eclipse.views.MavenRepositoryView");
-    getUI().click(new CTabItemLocator("Maven Repositories"));
-    IWidgetLocator localRepo = getUI().find(new TreeItemLocator("Local Repositories"));
-    assertNotNull(localRepo);
-    
-    //now for the user settings test
-    showUserSettingsPrefs();
-    verifyRepoSettingsValue(repoDir.getAbsolutePath());
-    
-    String newRepoDir = setUserSettingsXML(mavenProject.getProject());
-    getUI().wait(new SWTIdleCondition());
-    
-    getUI().click(new ButtonLocator("OK"));
-    waitForAllBuildsToComplete();
-    showUserSettingsPrefs();
-    verifyRepoSettingsValue(newRepoDir);
-    closeUserSettingPrefs();
-    
-    //now open the index view and make sure 'local' has the right new value, 
-    showView("org.maven.ide.eclipse.views.MavenRepositoryView");
-    getUI().click(new CTabItemLocator("Maven Repositories"));
-    IWidgetLocator newLocalRepo = getUI().find(new TreeItemLocator("Local Repositories"));
-    assertNotNull(newLocalRepo);
-	}
+    checkLocalRepo();
 
-	protected String setUserSettingsXML(IProject project)throws Exception{
+    //now for the user settings test
+    String newRepoDir;
+
+    shell = showUserSettingsPrefs();
+    try {
+      verifyRepoSettingsValue(repoDir.getAbsolutePath());
+      newRepoDir = setUserSettingsXML(mavenProject.getProject());
+    } finally {
+      closeUserSettingPrefs(shell);
+    }
+
+    waitForAllBuildsToComplete();
+
+    shell = showUserSettingsPrefs();
+    try {
+      verifyRepoSettingsValue(newRepoDir);
+    } finally {
+      closeUserSettingPrefs(shell);
+    }
+
+    //now open the index view and make sure 'local' has the right new value, 
+    checkLocalRepo();
+  }
+
+  private void checkLocalRepo() throws Exception {
+    showView("org.maven.ide.eclipse.views.MavenRepositoryView");
+    SWTBotView view = openView("org.maven.ide.eclipse.views.MavenRepositoryView");
+    SWTBotTree tree = view.bot().tree();
+    Assert.assertNotNull(findItem(tree.expandNode("Local Repositories"),
+        StringStartsWith.startsWith("Local repository")).select());
+  }
+
+  protected String setUserSettingsXML(IProject project) throws Exception {
     //create the global_settings.xml file to use
     FileOutputStream userOut = null;
     File userRepoDir = createTempDir("user_testing_repo");
     File userSettings = File.createTempFile("user_settings", ".xml");
-    try{
+    try {
       userOut = new FileOutputStream(userSettings);
       XMLWriter writer = new XMLWriter(userOut);
       writer.println("<settings>");
-      writer.println("<localRepository>"+userRepoDir.getAbsolutePath()+"</localRepository>");
+      writer.println("<localRepository>" + userRepoDir.getAbsolutePath() + "</localRepository>");
       writer.println("</settings>");
       writer.flush();
     } finally {
-     userOut.close(); 
+      userOut.close();
     }
     IPath userExternalLocation = new Path(userSettings.getAbsolutePath());
     IFile linkedUserFile = project.getFile(userExternalLocation.lastSegment());
     linkedUserFile.createLink(userExternalLocation, IResource.NONE, null);
-    updateUserSettingsValue(userSettings.getAbsolutePath());  
+    updateUserSettingsValue(userSettings.getAbsolutePath());
     return userRepoDir.getAbsolutePath();
-	}
-	
-	protected ButtonLocator getApplyButton(){
-	  return new ButtonLocator("Apply");
-	}
-	
-	protected ButtonLocator getRestoreButton(){
-	  return new ButtonLocator("Restore Defaults");
-	}
-	protected void updateUserSettingsValue(final String value) throws Exception{
-	  getUI().click(new NamedWidgetLocator("userSettingsText"));
-    Display.getDefault().syncExec(new Runnable(){
-      public void run(){
-        try{
-          final IWidgetReference ref = (IWidgetReference)getUI().find(new NamedWidgetLocator("userSettingsText"));
-          assertNotNull(ref);
-          Text userSettingsText = (Text)ref.getWidget();
-          userSettingsText.selectAll();
-         
-          getUI().keyClick(WT.DEL);
-          getUI().click(new NamedWidgetLocator("userSettingsText"));
-          getUI().enterText(value);
-           
-        } catch(Exception e){
-          assertFalse("Value for settings file was wrong", true);
+  }
+
+  protected void updateUserSettingsValue(final String value) throws Exception {
+    final SWTWorkbenchBot swtbot = bot;
+    Display.getDefault().syncExec(new Runnable() {
+      public void run() {
+        try {
+          assert (swtbot.textWithLabel("User Settings (open file):").getText().endsWith(value));
+        } catch(Exception e) {
+          Assert.fail("Value for settings file was wrong");
         }
       }
     });
-	}
-  protected void verifyRepoSettingsValue(final String value) throws Exception{
-    Display.getDefault().syncExec(new Runnable(){
-      public void run(){
-        try{
-          final IWidgetReference ref = (IWidgetReference)getUI().find(new NamedWidgetLocator("localRepositoryText"));
-          assertNotNull(ref);
-          Text localRepoText = (Text)ref.getWidget();
-          String settingsValue = localRepoText.getText();
-          assert(settingsValue.endsWith(value));        
-        } catch(Exception e){
-          assertFalse("Value for settings file was wrong", true);
+  }
+
+  protected void verifyRepoSettingsValue(final String value) throws Exception {
+    final SWTWorkbenchBot swtbot = bot;
+    Display.getDefault().syncExec(new Runnable() {
+      public void run() {
+        try {
+          assert (swtbot.textWithLabel("Local Repository (From merged user and global settings):").getText()
+              .endsWith(value));
+        } catch(Exception e) {
+          Assert.fail("Value for settings file was wrong");
         }
       }
     });
-  }	
-  protected void verifyGlobalSettingsValue(final String value) throws Exception{
-	  Display.getDefault().syncExec(new Runnable(){
-      public void run(){
-        try{
-          final IWidgetReference ref = (IWidgetReference)getUI().find(new NamedWidgetLocator("globalSettingsText"));
-          assertNotNull(ref);
-          Text globalSettingsText = (Text)ref.getWidget();
-          String settingsValue = globalSettingsText.getText();
-          assert(settingsValue.equals(value));        
-        } catch(Exception e){
-          assertFalse("Value for settings file was wrong", true);
-        }
-      }
-    });
-	}
+  }
+
   protected void selectEditorTab(final String id) throws Exception {
     final MavenPomEditor editor = (MavenPomEditor) getActivePage().getActiveEditor();
     Display.getDefault().syncExec(new Runnable() {
@@ -219,30 +200,25 @@ public class MngEclipse1526InstallationPreferencesTest extends M2EUIIntegrationT
         editor.setActivePage(id);
       }
     });
-    getUI().wait(new SWTIdleCondition());
+    waitForAllBuildsToComplete();
   }
 
-  private void closeInstallationPrefs() throws Exception {
-    getUI().click(new ButtonLocator("OK"));
-    getUI().wait(new ShellDisposedCondition("Preferences"));
+  private void closeUserSettingPrefs(SWTBotShell shell) throws Exception {
+    try {
+      bot.button("OK").click();
+    } finally {
+      SwtbotUtil.waitForClose(shell);
+    }
+
   }
-  private void closeUserSettingPrefs() throws Exception {
-    getUI().click(new ButtonLocator("OK"));
-    getUI().wait(new ShellDisposedCondition("Preferences"));
-  }
-  /**
-   * @throws WidgetSearchException 
-   * 
-   */
-  private void showInstallationPrefs() throws WidgetSearchException {
-    getUI().click(new MenuItemLocator("Window/Preferences"));
-    getUI().wait(new ShellShowingCondition("Preferences"));
-    getUI().click(new FilteredTreeItemLocator("Maven/Installations"));
-  }
-  private void showUserSettingsPrefs() throws WidgetSearchException {
-    getUI().click(new MenuItemLocator("Window/Preferences"));
-    getUI().wait(new ShellShowingCondition("Preferences"));
-    getUI().click(new FilteredTreeItemLocator("Maven/User Settings"));
+
+  private SWTBotShell showUserSettingsPrefs() {
+    bot.menu("Window").menu("Preferences").click();
+    SWTBotShell shell = bot.shell("Preferences");
+    shell.activate();
+
+    bot.tree().expandNode("Maven").select("User Settings");
+    return shell;
   }
 
 }

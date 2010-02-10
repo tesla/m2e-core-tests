@@ -8,97 +8,82 @@
 
 package org.maven.ide.eclipse.integration.tests;
 
-import static org.maven.ide.eclipse.integration.tests.M2EUIIntegrationTestCase.PLUGIN_ID;
+import static org.junit.Assert.assertTrue;
 
 import java.net.URL;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.swt.SWT;
-import org.maven.ide.eclipse.jdt.BuildPathManager;
+import org.junit.Test;
+import org.maven.ide.eclipse.core.Messages;
 
-import abbot.finder.swt.WidgetSearchException;
-
-import com.windowtester.internal.runtime.locator.ContextMenuItemLocator;
-import com.windowtester.runtime.WT;
-import com.windowtester.runtime.locator.IWidgetLocator;
-import com.windowtester.runtime.locator.MenuItemLocator;
-import com.windowtester.runtime.swt.condition.shell.ShellDisposedCondition;
-import com.windowtester.runtime.swt.condition.shell.ShellShowingCondition;
-import com.windowtester.runtime.swt.locator.ButtonLocator;
-import com.windowtester.runtime.swt.locator.CTabItemLocator;
-import com.windowtester.runtime.swt.locator.FilteredTreeItemLocator;
-import com.windowtester.runtime.swt.locator.NamedWidgetLocator;
-import com.windowtester.runtime.swt.locator.TextLocator;
-import com.windowtester.runtime.swt.locator.TreeItemLocator;
-import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
 
 /**
  * @author dyocum
- *
  */
 public class MNGEclipse1687ArchetypeCreationTest extends M2EUIIntegrationTestCase {
 
   private static final String GROUP_ID = "org.jboss.portletbridge.archetypes";
+  
+  private static final String ARCHETYPE_ID = "seam-basic";
+
   private static final String VERSION_ID = "2.0.0.ALPHA";
   
+  private static final String PROJECT_NAME = "archetypeTestProjext";
+
+  @Test
   public void testArchetypeCreation() throws Exception {
-    
-//    URL url = FileLocator.find(Platform.getBundle(PLUGIN_ID), new Path("/projects/seam-basic-2.0.0.ALPHA.jar"), null);
-//    
-//    createProjectFromArchetype("seam-basic", "", url.toString());
-//    IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("project");
-//    assertTrue(project.exists());
+
+    URL url = FileLocator.find(Platform.getBundle(PLUGIN_ID), new Path("/projects/seam-basic-2.0.0.ALPHA.jar"), null);
+
+    createProjectFromArchetype(ARCHETYPE_ID, "", url.toString());
+    IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(PROJECT_NAME);
+    assertTrue("The project is expected to exist", project.exists());
   }
-  
+
   /**
-   * The jboss archetype has a packaging type of maven-plugin, so its a good test to make sure we find 
-   * an archetype and create it with the right packaging type. This was originally filed as MNG-Eclipse1687
+   * The jboss archetype has a packaging type of maven-plugin, so its a good test to make sure we find an archetype and
+   * create it with the right packaging type. This was originally filed as MNG-Eclipse1687
+   * 
    * @param artifactID
    * @param extraConfig
    * @param repoUrl
    * @throws Exception
    */
   public void createProjectFromArchetype(String artifactID, String extraConfig, String repoUrl) throws Exception {
-    String projName = "archetypeTestProjext";
-    getUI().click(new MenuItemLocator("File/New/Project..."));
-    getUI().wait(new ShellShowingCondition("New Project"));
-    getUI().click(new FilteredTreeItemLocator("Maven/Maven Project"));
-    getUI().click(new ButtonLocator("&Next >"));
-    getUI().click(new ButtonLocator("&Next >"));
-    getUI().click(new NamedWidgetLocator("addArchetypeButton"));
+    bot.menu("File").menu("New").menu("Project...").click();
+    bot.shell("New Project").activate();
+    bot.tree().expandNode("Maven").getNode("Maven Project").doubleClick();
+    bot.button("Next >").click();
 
-    getUI().wait(new ShellShowingCondition("Add Archetype"));
+    bot.button("Add Archetype...").click();
+    bot.shell("Add Archetype").activate();
 
-    replaceText(new NamedWidgetLocator("archetypeGroupId"), GROUP_ID);
-    replaceText(new NamedWidgetLocator("archetypeArtifactId"), artifactID);
-    replaceText(new NamedWidgetLocator("archetypeVersion"), VERSION_ID);
-    replaceText(new NamedWidgetLocator("repository"), repoUrl);
+    bot.comboBoxWithLabel("Archetype Group Id:").setText(GROUP_ID);
+    bot.comboBoxWithLabel("Archetype Artifact Id:").setText(artifactID);
+    bot.comboBoxWithLabel("Archetype Version:").setText(VERSION_ID);
+    bot.comboBoxWithLabel("Repository URL:").setText(repoUrl);
 
-    getUI().click(new ButtonLocator("OK"));
-    getUI().wait(new ShellDisposedCondition("Add Archetype"));
-    
+    bot.button("OK").click();
     waitForAllBuildsToComplete();
-    getUI().click(new ButtonLocator("&Next >"));
+    assertWizardError(null);
+    assertWizardMessage("Select an Archetype");
 
-    replaceText(new NamedWidgetLocator("groupId"), "org.sonatype.test");
-    replaceText(new NamedWidgetLocator("artifactId"), projName);
-    replaceText(new NamedWidgetLocator("package"), "org.sonatype.test");
-    
-    getUI().click(new ButtonLocator("&Finish"));
-    getUI().wait(new ShellDisposedCondition("New Maven Project"));
+    bot.button("Next >").click();
+
+    bot.comboBoxWithLabel(Messages.getString("artifactComponent.groupId")).setText("org.sonatype.test");
+    bot.comboBoxWithLabel(Messages.getString("artifactComponent.artifactId")).setText(PROJECT_NAME);
+    bot.comboBoxWithLabel(Messages.getString("artifactComponent.package")).setText("org.sonatype.test");
+    bot.button("Finish").click();
 
     waitForAllBuildsToComplete();
-    
-    getUI().click(new TreeItemLocator(projName, new ViewLocator(PACKAGE_EXPLORER_VIEW_ID)));
-    getUI().keyClick(SWT.F5);
-    
+
+    selectProject(PROJECT_NAME);
+    bot.menu("File").menu("Refresh").click();
+
     waitForAllBuildsToComplete();
     assertProjectsHaveNoErrors();
   }

@@ -13,18 +13,14 @@ import java.io.File;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.swt.SWT;
+import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotEclipseEditor;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Test;
 import org.maven.ide.eclipse.integration.tests.M2EUIIntegrationTestCase;
-
-import com.windowtester.runtime.swt.condition.eclipse.JobsCompleteCondition;
-import com.windowtester.runtime.swt.condition.shell.ShellDisposedCondition;
-import com.windowtester.runtime.swt.condition.shell.ShellShowingCondition;
-import com.windowtester.runtime.swt.locator.ButtonLocator;
-import com.windowtester.runtime.swt.locator.CTabItemLocator;
-import com.windowtester.runtime.swt.locator.MenuItemLocator;
-import com.windowtester.runtime.swt.locator.NamedWidgetLocator;
-import com.windowtester.runtime.swt.locator.TreeItemLocator;
-import com.windowtester.runtime.swt.locator.eclipse.ViewLocator;
+import org.maven.ide.eclipse.integration.tests.common.ContextMenuHelper;
+import org.maven.ide.eclipse.integration.tests.common.SwtbotUtil;
 
 
 public class MEclipse173SimpleWebAppTest extends M2EUIIntegrationTestCase {
@@ -33,10 +29,7 @@ public class MEclipse173SimpleWebAppTest extends M2EUIIntegrationTestCase {
 
   private File tempDir;
 
-  public MEclipse173SimpleWebAppTest(){
-    super();
-    this.setUseExternalMaven(true);
-  }
+  @Test
   public void testSimpleWebApp() throws Exception {
     setXmlPrefs();
     installTomcat6();
@@ -46,30 +39,34 @@ public class MEclipse173SimpleWebAppTest extends M2EUIIntegrationTestCase {
 
     // Add the hsqldb.jar to the dependencies so it can be found at runtime
     IProject simpleWebAppProject = ResourcesPlugin.getWorkspace().getRoot().getProject("simple-webapp");
-    openFile(simpleWebAppProject, "pom.xml");
-    getUI().click(new CTabItemLocator("pom.xml"));
-    getUI().wait(new JobsCompleteCondition(), 120000);
-    findText("</dependencies");
-    getUI().keyClick(SWT.ARROW_LEFT);
-    getUI().enterText("<dependency><groupId>hsqldb</<artifactId>hsqldb</<version>1.8.0.7</</");
-    getUI().keyClick(SWT.MOD1, 's');
-    Thread.sleep(5000);
-    getUI().wait(new JobsCompleteCondition(), 120000);
+    SWTBotEclipseEditor editor = bot.editorByTitle(openFile(simpleWebAppProject, "pom.xml").getTitle()).toTextEditor();
+    editor.bot().cTabItem("pom.xml").activate();
+
+    replaceText("</dependencies>","<dependency>" + //
+        "<groupId>hsqldb</groupId>" + //
+        "<artifactId>hsqldb</artifactId>" + //
+        "<version>1.8.0.7</version>" + //
+        "</dependency>" +//
+        "</dependencies>");
+
+    editor.save();
+    waitForAllBuildsToComplete();
 
     // Generate the database using maven goal hibernate3:hbm2ddl
-    getUI().click(new TreeItemLocator("simple-webapp", new ViewLocator(PACKAGE_EXPLORER_VIEW_ID)));
-    getUI().click(new MenuItemLocator("Run/Run As/.*Maven build..."));
-    String shellName = isEclipseVersion(3,3) ? "simple-webapp" : "Edit Configuration";
-    getUI().wait(new ShellShowingCondition(shellName));
-    getUI().click(new NamedWidgetLocator("goalsText"));
-    getUI().enterText("org.codehaus.mojo:hibernate3-maven-plugin:2.1:hbm2ddl");
-    getUI().click(new NamedWidgetLocator("enableWorkspaceResolution"));
-    getUI().click(new ButtonLocator("&Run"));
-    getUI().wait(new ShellDisposedCondition(shellName));
-    getUI().wait(new JobsCompleteCondition(), 60000);
-    getUI().click(new TreeItemLocator("simple-webapp", new ViewLocator(PACKAGE_EXPLORER_VIEW_ID)));
-    getUI().keyClick(SWT.F5);
-    getUI().wait(new JobsCompleteCondition());
+    ContextMenuHelper.clickContextMenu(selectProject("simple-webapp"), "Run As", "8 Maven build...");
+    String shellName = isEclipseVersion(3, 3) ? "simple-webapp" : "Edit Configuration";
+    SWTBotShell shell = bot.shell(shellName);
+    try {
+      bot.textWithName("goalsText").setText("org.codehaus.mojo:hibernate3-maven-plugin:2.1:hbm2ddl");
+      bot.checkBoxWithName("enableWorkspaceResolution").select();
+      bot.button("Run").click();
+    } finally {
+      SwtbotUtil.waitForClose(shell);
+    }
+
+    waitForAllBuildsToComplete();
+    ContextMenuHelper.clickContextMenu(selectProject("simple-webapp"), "Refresh");
+    waitForAllBuildsToComplete();
 
     assertProjectsHaveNoErrors();
 
@@ -78,7 +75,7 @@ public class MEclipse173SimpleWebAppTest extends M2EUIIntegrationTestCase {
       if("Servers".equals(project.getName())) {
         continue;
       }
-      assertTrue("project:" + project.getName() + " should have maven nature", project
+      Assert.assertTrue("project:" + project.getName() + " should have maven nature", project
           .hasNature("org.maven.ide.eclipse.maven2Nature"));
     }
 
@@ -86,22 +83,16 @@ public class MEclipse173SimpleWebAppTest extends M2EUIIntegrationTestCase {
     IFolder data = simpleWebAppProject.getFolder("data");
 
     IProject simplePersistProject = ResourcesPlugin.getWorkspace().getRoot().getProject("simple-persist");
-    openFile(simplePersistProject, "src/main/resources/applicationContext-persist.xml");
+    editor = bot.editorByTitle(
+        openFile(simplePersistProject, "src/main/resources/applicationContext-persist.xml").getTitle()).toTextEditor();
+    editor.bot().cTabItem("Source").activate();
 
-    getUI().click(new CTabItemLocator("Source"));
-    getUI().keyClick(SWT.MOD1, 'f');
-    getUI().wait(new ShellShowingCondition("Find/Replace"));
-    getUI().keyClick(SWT.MOD1, 'a');
-    getUI().enterText("data/weather");
-    getUI().keyClick(SWT.TAB);
-    getUI().enterText(data.getLocation().toFile().getAbsolutePath() + "/weather");
-    getUI().click(new ButtonLocator("Replace &All"));
-    getUI().click(new ButtonLocator("Close"));
-    getUI().wait(new ShellDisposedCondition("Find/Replace"));
-    getUI().keyClick(SWT.MOD1, 's');
+    editor.setFocus();
+    replaceText("data/weather", data.getLocation().toFile().getAbsolutePath() + "/weather");
 
-    getUI().wait(new JobsCompleteCondition(), 120000);
+    editor.save();
 
+    waitForAllBuildsToComplete();
     deployProjectsIntoTomcat();
 
     // Verify deployment worked (attempt to get weather forcast for Moss Beach CA)
@@ -112,20 +103,14 @@ public class MEclipse173SimpleWebAppTest extends M2EUIIntegrationTestCase {
 //    System.out.println("page: "+s);
 //    System.out.println("==================================");
 //    System.out.println("!!!!!!!!!!!!!!!!index is: "+dex);
-    assertTrue("Couldn't find Moss Beach weather in web page", (dex >=0));
+    Assert.assertTrue("Couldn't find Moss Beach weather in web page", (dex >= 0));
 
   }
 
-  protected void tearDown() throws Exception {
-   
-    try {
-      shutdownTomcat();
-    } catch(Exception ex) {
-      ex.printStackTrace();
-    }
+  @After
+  public void tearDown() throws Exception {
+    shutdownServer();
 
-    super.tearDown();
-    
     if(tempDir != null && tempDir.exists()) {
       deleteDirectory(tempDir);
       tempDir = null;

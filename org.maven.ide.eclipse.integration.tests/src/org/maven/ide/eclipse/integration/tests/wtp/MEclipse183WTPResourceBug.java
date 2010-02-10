@@ -8,8 +8,9 @@
 
 package org.maven.ide.eclipse.integration.tests.wtp;
 
-import junit.framework.ComparisonFailure;
-
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Test;
 import org.maven.ide.eclipse.integration.tests.M2EUIIntegrationTestCase;
 
 
@@ -20,6 +21,7 @@ public class MEclipse183WTPResourceBug extends M2EUIIntegrationTestCase {
 
   private static final String SERVER_URL = "http://localhost:8080/bug.MNGECLIPSE-1189--war-dep/Test";
 
+  @Test
   public void testResourceInDependentJar() throws Exception {
 
     installTomcat6();
@@ -31,25 +33,13 @@ public class MEclipse183WTPResourceBug extends M2EUIIntegrationTestCase {
     deployProjectsIntoTomcat();
 
     String s = retrieveWebPage(SERVER_URL);
-    try {
-      assertEquals("SUCCESS", s);
-    } catch(ComparisonFailure cf) {
-      System.out.println("Test has failed, catching exception: " + cf.getMessage());
-      cf.printStackTrace();
-    }
 
+    Assert.assertEquals("SUCCESS", s);
   }
 
-  protected void tearDown() throws Exception {
-
-    try {
-      shutdownTomcat();
-    } catch(Exception ex) {
-      ex.printStackTrace();
-    }
-
-    super.tearDown();
-
+  @After
+  public void tearDown() throws Exception {
+    shutdownServer();
   }
 
 }
