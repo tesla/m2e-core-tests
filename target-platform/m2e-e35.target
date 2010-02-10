@@ -35,11 +35,6 @@
 <repository location="http://download.eclipse.org/releases/galileo"/>
 </location>
 <location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
-<unit id="com.windowtester.launcher.feature.group" version="4.0.0.200910201414"/>
-<unit id="com.windowtester.runtime.feature.group" version="4.0.0.200910201517"/>
-<repository location="http://download.instantiations.com/WindowTesterPro/release/latest/update/3.5"/>
-</location>
-<location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
 <unit id="org.tigris.subversion.subclipse.feature.group" version="1.6.5"/>
 <unit id="org.tigris.subversion.clientadapter.feature.feature.group" version="1.6.4.1"/>
 <unit id="org.tigris.subversion.clientadapter.javahl.feature.feature.group" version="1.6.6"/>
@@ -48,9 +43,15 @@
 <repository location="http://subclipse.tigris.org/update_1.6.x"/>
 </location>
 <location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
-<unit id="org.eclipse.swtbot.feature.group" version="2.0.0.467-dev-e35" />
-<unit id="org.eclipse.swtbot.eclipse.feature.group" version="2.0.0.467-dev-e35" />
-<repository location="http://download.eclipse.org/technology/swtbot/galileo/dev-build/update-site/" />
+<unit id="org.eclipse.swtbot.feature.group" version="2.0.0.467-dev-e35"/>
+<unit id="org.eclipse.swtbot.eclipse.feature.group" version="2.0.0.467-dev-e35"/>
+<repository location="http://download.eclipse.org/technology/swtbot/galileo/dev-build/update-site/"/>
+</location>
+<location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
+<unit id="org.eclipse.swtbot.eclipse.feature.group" version="2.0.0.486-dev-e35"/>
+<unit id="org.eclipse.swtbot.eclipse.gef.feature.group" version="2.0.0.486-dev-e35"/>
+<unit id="org.eclipse.swtbot.feature.group" version="2.0.0.486-dev-e35"/>
+<repository location="http://download.eclipse.org/technology/swtbot/galileo/dev-build/update-site"/>
 </location>
 </locations>
 </target>

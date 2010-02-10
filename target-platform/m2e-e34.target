@@ -25,11 +25,6 @@
 <repository location="http://download.eclipse.org/releases/ganymede"/>
 </location>
 <location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
-<unit id="com.windowtester.runtime.feature.group" version="4.0.0.200910201517"/>
-<unit id="com.windowtester.launcher.feature.group" version="4.0.0.200910201414"/>
-<repository location="http://download.instantiations.com/WindowTesterPro/release/latest/update/3.4"/>
-</location>
-<location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
 <unit id="org.tigris.subversion.subclipse.feature.group" version="1.6.5"/>
 <unit id="org.tigris.subversion.clientadapter.feature.feature.group" version="1.6.4.1"/>
 <unit id="org.tigris.subversion.clientadapter.javahl.feature.feature.group" version="1.6.6"/>
@@ -40,6 +35,12 @@
 <location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
 <unit id="org.eclipse.mylyn_feature.feature.group" version="3.0.5.v20090218-1800-e3x"/>
 <repository location="http://download.eclipse.org/releases/ganymede"/>
+</location>
+<location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
+<unit id="org.eclipse.swtbot.eclipse.feature.group" version="2.0.0.486-dev-e34"/>
+<unit id="org.eclipse.swtbot.eclipse.gef.feature.group" version="2.0.0.486-dev-e34"/>
+<unit id="org.eclipse.swtbot.feature.group" version="2.0.0.486-dev-e34"/>
+<repository location="http://download.eclipse.org/technology/swtbot/ganymede/dev-build/update-site"/>
 </location>
 </locations>
 </target>
