@@ -19,8 +19,6 @@ import org.junit.Test;
  */
 public class MEclipse162ImportMavenProjectTest extends M2EUIIntegrationTestCase {
 
-  private File tempDir;
-
   public MEclipse162ImportMavenProjectTest() {
     super();
   }

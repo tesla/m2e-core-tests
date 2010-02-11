@@ -1,6 +1,8 @@
 
 package org.maven.ide.eclipse.integration.tests;
 
+import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.withMnemonic;
+
 import java.io.File;
 import java.util.List;
 
@@ -26,6 +28,7 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.integration.tests.common.ContextMenuHelper;
+import org.maven.ide.eclipse.integration.tests.common.matchers.ContainsMnemonic;
 import org.maven.ide.eclipse.jdt.BuildPathManager;
 
 
@@ -99,7 +102,8 @@ public class MEclipse193IndexerTest extends M2EUIIntegrationTestCase {
     createSimpleMavenProject(dependencyName);
 
     // mvn install "dependency" project
-    ContextMenuHelper.clickContextMenu(selectProject(dependencyName), "Run As", "Maven install");
+    ContextMenuHelper.clickContextMenu(selectProject(dependencyName), withMnemonic("Run As"), ContainsMnemonic
+        .containsMnemonic("Maven install"));
     waitForAllBuildsToComplete();
 
     // bump version # of "dependency" project
