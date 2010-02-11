@@ -8,6 +8,8 @@
 
 package org.maven.ide.eclipse.integration.tests;
 
+import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.withMnemonic;
+
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -16,6 +18,7 @@ import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotEditor;
 import org.junit.Assert;
 import org.junit.Test;
 import org.maven.ide.eclipse.integration.tests.common.ContextMenuHelper;
+import org.maven.ide.eclipse.integration.tests.common.matchers.ContainsMnemonic;
 
 
 /**
@@ -30,7 +33,7 @@ public class MEclipse182RangeHandlingTest extends M2EUIIntegrationTestCase {
     importZippedProject("projects/versionRange.zip");
 
     //Install version 1.0-SNAPSHOT of project2
-    ContextMenuHelper.clickContextMenu(selectProject(project2Name),  "Run As", "Maven install");
+    ContextMenuHelper.clickContextMenu(selectProject(project2Name),  withMnemonic("Run As"), ContainsMnemonic.containsMnemonic("Maven install"));
 
     waitForAllBuildsToComplete();
     assertProjectsHaveNoErrors();

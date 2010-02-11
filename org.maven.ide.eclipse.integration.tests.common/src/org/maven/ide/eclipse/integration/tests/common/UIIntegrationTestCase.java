@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.apache.maven.project.Project;
 import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -62,6 +63,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotEditor;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
+import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.finders.UIThreadRunnable;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
@@ -69,6 +71,7 @@ import org.eclipse.swtbot.swt.finder.results.Result;
 import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
 import org.eclipse.swtbot.swt.finder.utils.SWTUtils;
 import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
+import org.eclipse.swtbot.swt.finder.waits.ICondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotButton;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
@@ -120,7 +123,7 @@ public abstract class UIIntegrationTestCase {
 	protected static final IProgressMonitor monitor = new NullProgressMonitor();
 
 	@BeforeClass
-	public static void beforeClass() throws Exception {
+	public final static void beforeClass() throws Exception {
 		bot = new SonatypeSWTBot();
 
 		SWTBotPreferences.KEYBOARD_LAYOUT = "EN_US";
@@ -176,7 +179,7 @@ public abstract class UIIntegrationTestCase {
 	}
 
 	@Before
-	public void waitMenu() {
+	public final void waitMenu() {
 		bot.waitUntil(new DefaultCondition() {
 
 			public boolean test() throws Exception {
@@ -190,14 +193,14 @@ public abstract class UIIntegrationTestCase {
 	}
 
 	@AfterClass
-	public static void sleep() throws Exception {
+	public final static void sleep() throws Exception {
 		removeServer();
 		clearProjects();
 		takeScreenShot("cleared projects");
 	}
 
 	@After
-	public void finalShot() throws IOException {
+	public final void finalShot() throws IOException {
 		takeScreenShot(getClass().getSimpleName());
 	}
 
@@ -610,7 +613,7 @@ public abstract class UIIntegrationTestCase {
 		// Thread.sleep(3000);
 	}
 
-	protected void shutdownServer() {
+	protected static void shutdownServer() {
 		try {
 			// shutdown the server
 			SWTBotView serversView = bot.viewById(SERVERS_VIEW_ID);
@@ -640,6 +643,15 @@ public abstract class UIIntegrationTestCase {
 
 			for (int i = 0; i < tree.getAllItems().length; i++) {
 				SWTBotTree server = tree.select(0);
+
+				// stop it first
+				try {
+					ContextMenuHelper.clickContextMenu(server, "Stop");
+				} catch (Exception e) {
+					// was not started
+				}
+				waitForAllBuildsToComplete();
+
 				ContextMenuHelper.clickContextMenu(server, "Delete");
 
 				SWTBotShell shell = bot.shell("Delete Server");
@@ -665,8 +677,7 @@ public abstract class UIIntegrationTestCase {
 		}
 	}
 
-	protected void restartServer(boolean republish)
-			throws Exception {
+	protected void restartServer(boolean republish) throws Exception {
 		// shutdown the server
 		SWTBotView serversView = bot.viewById(SERVERS_VIEW_ID);
 		serversView.show();
@@ -888,7 +899,7 @@ public abstract class UIIntegrationTestCase {
 		return temp;
 	}
 
-	protected void deleteDirectory(File dir) {
+	private void deleteDirectory(File dir) {
 		File[] fileArray = dir.listFiles();
 		if (fileArray != null) {
 			for (int i = 0; i < fileArray.length; i++) {
@@ -912,6 +923,8 @@ public abstract class UIIntegrationTestCase {
 	public static final String TOMCAT_SERVER_NAME = "Tomcat.*";
 
 	public static void clearProjects() {
+		waitForAllBuildsToComplete();
+
 		WorkspaceJob job = new WorkspaceJob("deleting test projects") {
 			public IStatus runInWorkspace(IProgressMonitor monitor)
 					throws CoreException {
@@ -921,7 +934,7 @@ public abstract class UIIntegrationTestCase {
 						.getProjects();
 				for (IProject project : projects) {
 					// project.delete(true, true, monitor);
-					project.delete(true, monitor);
+					project.delete(true, true, monitor);
 				}
 				return Status.OK_STATUS;
 			}
@@ -936,6 +949,19 @@ public abstract class UIIntegrationTestCase {
 		} catch (InterruptedException ex) {
 			throw new RuntimeException(ex);
 		}
+
+		waitForAllBuildsToComplete();
+
+		bot.waitUntil(new DefaultCondition() {
+
+			public boolean test() throws Exception {
+				return ResourcesPlugin.getWorkspace().getRoot().getProjects().length == 0;
+			}
+
+			public String getFailureMessage() {
+				return "Projects still there";
+			}
+		});
 	}
 
 	protected MavenPomEditor openPomFile(String name) throws Exception {
@@ -1211,11 +1237,13 @@ public abstract class UIIntegrationTestCase {
 		bot.menu("File").menu("Save").click();
 	}
 
-	protected static void assertWizardError(final String message) throws Exception {
+	protected static void assertWizardError(final String message)
+			throws Exception {
 		assertWizardMessage(message, WizardPage.ERROR);
 	}
 
-	protected static void assertWizardMessage(final String message) throws Exception {
+	protected static void assertWizardMessage(final String message)
+			throws Exception {
 		assertWizardMessage(message, WizardPage.INFORMATION);
 	}
 

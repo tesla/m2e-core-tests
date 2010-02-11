@@ -28,7 +28,7 @@ public class MEclipse162ImportMavenProjectTest extends M2EUIIntegrationTestCase 
   @Test
   public void testSimpleModuleImport() throws Exception {
     try {
-      tempDir = doImport("projects/commons-collections-3.2.1-src.zip");
+      doImport("projects/commons-collections-3.2.1-src.zip");
     } catch(Exception e) {
       throw takeScreenShot(e);
     }
@@ -37,7 +37,7 @@ public class MEclipse162ImportMavenProjectTest extends M2EUIIntegrationTestCase 
   @Test
   public void testMultiModuleImport() throws Exception {
     try {
-      tempDir = doImport("projects/httpcomponents-core-4.0-beta3-src.zip");
+      doImport("projects/httpcomponents-core-4.0-beta3-src.zip");
     } catch(Exception e) {
       throw takeScreenShot(e);
     }
@@ -46,7 +46,7 @@ public class MEclipse162ImportMavenProjectTest extends M2EUIIntegrationTestCase 
   @Test
   public void testMultiModuleImport2() throws Exception {
     try {
-      tempDir = doImport("projects/testMultiModule.zip");
+      doImport("projects/testMultiModule.zip");
     } catch(Exception e) {
       throw takeScreenShot(e);
     }
@@ -62,11 +62,6 @@ public class MEclipse162ImportMavenProjectTest extends M2EUIIntegrationTestCase 
   @After
   public void tearDown() throws Exception {
     clearProjects();
-
-    if(tempDir != null && tempDir.exists()) {
-      deleteDirectory(tempDir);
-      tempDir = null;
-    }
   }
 
 }

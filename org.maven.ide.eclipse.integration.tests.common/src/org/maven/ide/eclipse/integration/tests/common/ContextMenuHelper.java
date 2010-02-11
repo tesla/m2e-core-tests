@@ -11,6 +11,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.Widget;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.finders.UIThreadRunnable;
 import org.eclipse.swtbot.swt.finder.results.VoidResult;
@@ -20,17 +21,9 @@ import org.hamcrest.Matcher;
 
 public class ContextMenuHelper {
 
-	/**
-	 * Clicks the context menu matching the text.
-	 * 
-	 * @param text
-	 *            the text on the context menu.
-	 * @throws WidgetNotFoundException
-	 *             if the widget is not found.
-	 */
-	public static void clickContextMenu(final AbstractSWTBot<? extends Control> bot,
-			final String... texts) {
-
+	public static void clickContextMenu(
+			final AbstractSWTBot<? extends Control> bot,
+			final Matcher<? extends org.eclipse.swt.widgets.Widget>...matchers) {
 		// show
 		final MenuItem menuItem = UIThreadRunnable
 				.syncExec(new WidgetResult<MenuItem>() {
@@ -39,10 +32,9 @@ public class ContextMenuHelper {
 						MenuItem menuItem = null;
 						Control control = (Control) bot.widget;
 						Menu menu = control.getMenu();
-						for (String text : texts) {
+						for (Matcher<? extends org.eclipse.swt.widgets.Widget> m : matchers) {
 							Matcher<?> matcher = allOf(
-									instanceOf(MenuItem.class),
-									withMnemonic(text));
+									instanceOf(MenuItem.class), m);
 							menuItem = show(menu, matcher);
 							if (menuItem != null) {
 								menu = menuItem.getMenu();
@@ -51,7 +43,7 @@ public class ContextMenuHelper {
 
 								throw new WidgetNotFoundException(
 										"ContextMenuHelper was looking for: '"
-												+ text + "' but only found: '"
+												+ m + "' but only found: '"
 												+ availableItems(menu) + "'");
 
 							}
@@ -63,7 +55,7 @@ public class ContextMenuHelper {
 				});
 		if (menuItem == null) {
 			throw new WidgetNotFoundException("Could not find menu: "
-					+ Arrays.asList(texts));
+					+ Arrays.asList(matchers));
 		}
 
 		// click
@@ -75,6 +67,24 @@ public class ContextMenuHelper {
 				hide(menuItem.getParent());
 			}
 		});
+
+	}
+
+	/**
+	 * Clicks the context menu matching the text.
+	 * 
+	 * @param text
+	 *            the text on the context menu.
+	 * @throws WidgetNotFoundException
+	 *             if the widget is not found.
+	 */
+	public static void clickContextMenu(
+			final AbstractSWTBot<? extends Control> bot, final String... texts) {
+		Matcher<? extends Widget>[] matchers =  new Matcher[texts.length];
+		for (int i = 0; i < texts.length; i++) {
+			matchers[i] = withMnemonic(texts[i]);
+		}
+		clickContextMenu(bot, matchers);
 	}
 
 	static MenuItem show(final Menu menu, final Matcher<?> matcher) {

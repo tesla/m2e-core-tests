@@ -8,8 +8,6 @@
 
 package org.maven.ide.eclipse.integration.tests.wtp;
 
-import java.io.File;
-
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -27,15 +25,13 @@ public class MEclipse173SimpleWebAppTest extends M2EUIIntegrationTestCase {
 
   private static final String DEPLOYED_URL = "http://localhost:8080/simple-webapp/weather.x?zip=94038";
 
-  private File tempDir;
-
   @Test
   public void testSimpleWebApp() throws Exception {
     setXmlPrefs();
     installTomcat6();
 
     // Import the test project
-    tempDir = doImport("projects/ch07project.zip");
+    doImport("projects/ch07project.zip");
 
     // Add the hsqldb.jar to the dependencies so it can be found at runtime
     IProject simpleWebAppProject = ResourcesPlugin.getWorkspace().getRoot().getProject("simple-webapp");
@@ -49,7 +45,7 @@ public class MEclipse173SimpleWebAppTest extends M2EUIIntegrationTestCase {
         "</dependency>" +//
         "</dependencies>");
 
-    editor.save();
+    editor.saveAndClose();
     waitForAllBuildsToComplete();
 
     // Generate the database using maven goal hibernate3:hbm2ddl
@@ -90,7 +86,7 @@ public class MEclipse173SimpleWebAppTest extends M2EUIIntegrationTestCase {
     editor.setFocus();
     replaceText("data/weather", data.getLocation().toFile().getAbsolutePath() + "/weather");
 
-    editor.save();
+    editor.saveAndClose();
 
     waitForAllBuildsToComplete();
     deployProjectsIntoTomcat();
@@ -110,12 +106,6 @@ public class MEclipse173SimpleWebAppTest extends M2EUIIntegrationTestCase {
   @After
   public void tearDown() throws Exception {
     shutdownServer();
-
-    if(tempDir != null && tempDir.exists()) {
-      deleteDirectory(tempDir);
-      tempDir = null;
-    }
-
   }
 
 }
