@@ -97,12 +97,12 @@
     <module>../org.maven.ide.eclipse.pr</module>
 
     <module>../org.maven.ide.eclipse.tests.common</module>
-    <!--<module>../org.maven.ide.eclipse.tests</module>
+    <module>../org.maven.ide.eclipse.tests</module>
     <module>../org.maven.ide.eclipse.editor.xml.tests</module>
-    <module>../org.maven.ide.eclipse.pr.tests</module>-->
+    <module>../org.maven.ide.eclipse.pr.tests</module>
    
     <module>../org.maven.ide.eclipse.wtp</module>
-    <!--<module>../org.maven.ide.eclipse.wtp.tests</module>-->
+    <module>../org.maven.ide.eclipse.wtp.tests</module>
 
     <!-- features -->
     <module>../org.maven.ide.eclipse.feature</module>
