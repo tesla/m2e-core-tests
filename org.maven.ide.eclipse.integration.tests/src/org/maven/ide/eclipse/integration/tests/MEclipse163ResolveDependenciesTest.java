@@ -21,7 +21,9 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotEclipseEditor;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.integration.tests.common.SwtbotUtil;
@@ -40,8 +42,16 @@ public class MEclipse163ResolveDependenciesTest extends M2EUIIntegrationTestCase
 
   private String projectName = "ResolveDepProject";
 
-  protected void updateRepo() {
+  private String oldUserSettings;
 
+  @Before
+  public void setUp() {
+    oldUserSettings = setUserSettings("settings.xml");
+  }
+
+  @After
+  public void tearDown() {
+    setUserSettings(oldUserSettings);
   }
 
   @SuppressWarnings("unchecked")
@@ -57,7 +67,9 @@ public class MEclipse163ResolveDependenciesTest extends M2EUIIntegrationTestCase
     List<IRepository> repos = registry.getRepositories(registry.SCOPE_SETTINGS);
 
     for(IRepository repo : repos) {
-      buildFullRepoDetails(repo);
+      if(repo.getUrl().endsWith("resources/remote-repo")) {
+        buildFullRepoDetails(repo);
+      }
     }
 
     // there should be compile errors
@@ -78,11 +90,11 @@ public class MEclipse163ResolveDependenciesTest extends M2EUIIntegrationTestCase
     try {
       shell.activate();
 
-      String packaging = "org.jfree.chart";
-      String groupId = "jfree";
-      String artifactId = "jfreechart";
-      String version = "1.0.7";
-      bot.text().setText(artifactId);
+      String packaging = "junit.framework";
+      String groupId = "junit";
+      String artifactId = "junit";
+      String version = "3.8.2";
+      bot.text().setText("AssertionFailedError");
       SWTBotTreeItem node = bot.tree().getTreeItem(ContainsMnemonic.containsMnemonic(packaging),
           ContainsMnemonic.containsMnemonic(groupId), ContainsMnemonic.containsMnemonic(artifactId));
       node.expand();
@@ -92,6 +104,7 @@ public class MEclipse163ResolveDependenciesTest extends M2EUIIntegrationTestCase
     } finally {
       SwtbotUtil.waitForClose(shell);
     }
+    bot.sleep(100);
 
     waitForAllBuildsToComplete();
 
