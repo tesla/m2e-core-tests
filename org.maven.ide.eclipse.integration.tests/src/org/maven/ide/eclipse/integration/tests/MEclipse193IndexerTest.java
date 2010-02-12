@@ -51,6 +51,7 @@ public class MEclipse193IndexerTest extends M2EUIIntegrationTestCase {
     mavenConfiguration.setUserSettingsFile(settingsXML.getAbsolutePath());
     IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
     indexManager.getWorkspaceIndex().updateIndex(true, new NullProgressMonitor());
+    waitForAllBuildsToComplete();
   }
 
   @SuppressWarnings("deprecation")
