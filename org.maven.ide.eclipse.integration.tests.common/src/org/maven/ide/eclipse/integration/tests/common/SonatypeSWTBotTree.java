@@ -1,12 +1,14 @@
 package org.maven.ide.eclipse.integration.tests.common;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.swt.widgets.Widget;
 import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
+import org.eclipse.swtbot.swt.finder.results.ArrayResult;
 import org.eclipse.swtbot.swt.finder.results.WidgetResult;
 import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
 import org.eclipse.swtbot.swt.finder.widgets.AbstractSWTBot;
@@ -44,7 +46,7 @@ public class SonatypeSWTBotTree extends SWTBotTree {
 		try {
 			new SWTBot().waitUntil(new DefaultCondition() {
 				public String getFailureMessage() {
-					return "Could not find node with text " + matchers; //$NON-NLS-1$
+					return "Could not find node with text " + Arrays.toString(matchers) + "\nAvailable items: " + Arrays.toString(getItemsText()); //$NON-NLS-1$
 				}
 
 				public boolean test() throws Exception {
@@ -53,9 +55,25 @@ public class SonatypeSWTBotTree extends SWTBotTree {
 			});
 		} catch (TimeoutException e) {
 			throw new WidgetNotFoundException(
-					"Timed out waiting for tree item " + matchers, e); //$NON-NLS-1$
+					"Timed out waiting for tree item " + Arrays.toString(matchers), e); //$NON-NLS-1$
 		}
 		return new SWTBotTreeItem(getItem(matchers));
+	}
+
+	protected String[] getItemsText() {
+		return syncExec(new ArrayResult<String>() {
+			public String[] run() {
+				TreeItem[] treeItems = widget.getItems();
+				String[] names = new String[treeItems.length];
+
+				for (int i = 0; i < treeItems.length; i++) {
+					TreeItem treeItem = treeItems[i];
+					names[i] = treeItem.getText();
+				}
+
+				return names;
+			}
+		});
 	}
 
 	protected TreeItem getItem(final Matcher<Widget>... matchers) {

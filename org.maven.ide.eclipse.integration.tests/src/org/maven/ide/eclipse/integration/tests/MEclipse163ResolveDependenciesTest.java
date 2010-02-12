@@ -78,13 +78,17 @@ public class MEclipse163ResolveDependenciesTest extends M2EUIIntegrationTestCase
     try {
       shell.activate();
 
-      String groupId = "org.jfree.chart";
+      String packaging = "org.jfree.chart";
+      String groupId = "jfree";
       String artifactId = "jfreechart";
       String version = "1.0.7";
       bot.text().setText(artifactId);
-      SWTBotTreeItem node = bot.tree().getTreeItem(ContainsMnemonic.containsMnemonic(groupId),  ContainsMnemonic.containsMnemonic(artifactId));
+      SWTBotTreeItem node = bot.tree().getTreeItem(ContainsMnemonic.containsMnemonic(packaging),
+          ContainsMnemonic.containsMnemonic(groupId), ContainsMnemonic.containsMnemonic(artifactId));
       node.expand();
       node.select(findNodeName(node, startsWith(version)));
+
+      bot.button("OK").click();
     } finally {
       SwtbotUtil.waitForClose(shell);
     }
