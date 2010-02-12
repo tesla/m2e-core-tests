@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.apache.maven.project.Project;
 import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -63,7 +62,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotEditor;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
-import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.finders.UIThreadRunnable;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
@@ -71,7 +69,6 @@ import org.eclipse.swtbot.swt.finder.results.Result;
 import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
 import org.eclipse.swtbot.swt.finder.utils.SWTUtils;
 import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
-import org.eclipse.swtbot.swt.finder.waits.ICondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotButton;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
@@ -101,6 +98,7 @@ import org.junit.runner.RunWith;
 import org.maven.ide.components.pom.Model;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.editor.pom.MavenPomEditor;
+import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.integration.tests.common.matchers.ContainsMnemonic;
@@ -181,7 +179,7 @@ public abstract class UIIntegrationTestCase {
 
 	@Before
 	public final void waitMenu() {
-		bot.waitUntil(new DefaultCondition() {
+	    bot.waitUntil(new DefaultCondition() {
 
 			public boolean test() throws Exception {
 				return bot.menu("File").isEnabled();
@@ -1445,4 +1443,25 @@ public abstract class UIIntegrationTestCase {
 			}
 		});
 	}
+
+    @SuppressWarnings( "deprecation" )
+    protected String setUserSettings( String settingsFile )
+    {
+        if ( settingsFile != null )
+        {
+            settingsFile = new File( settingsFile ).getAbsolutePath();
+        }
+        IMavenConfiguration mavenConfiguration = MavenPlugin.lookup( IMavenConfiguration.class );
+        String oldUserSettingsFile = mavenConfiguration.getUserSettingsFile();
+        mavenConfiguration.setUserSettingsFile( settingsFile );
+        return oldUserSettingsFile;
+    }
+
+    @SuppressWarnings( "deprecation" )
+    protected String getUserSettings()
+    {
+        IMavenConfiguration mavenConfiguration = MavenPlugin.lookup( IMavenConfiguration.class );
+        return mavenConfiguration.getUserSettingsFile();
+    }
+
 }
