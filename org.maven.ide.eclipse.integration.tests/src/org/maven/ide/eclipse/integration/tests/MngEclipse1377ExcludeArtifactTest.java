@@ -39,10 +39,12 @@ public class MngEclipse1377ExcludeArtifactTest extends M2EUIIntegrationTestCase 
 
     openPomFile(projectName + "/pom.xml");
     addDependency(project, "commons-collections", "commons-collections", "3.2.1");
+    waitForAllBuildsToComplete();
 
     assertMavenCPEntry(jp, "commons-collections-3.2.1.jar", true);
 
     excludeArtifact(projectName, "commons-collections-3.2.1.jar");
+    waitForAllBuildsToComplete();
 
     assertMavenCPEntry(jp, "commons-collections-3.2.1.jar", false);
   }
@@ -56,16 +58,20 @@ public class MngEclipse1377ExcludeArtifactTest extends M2EUIIntegrationTestCase 
 
     openPomFile(projectName + "/pom.xml");
     addDependency(project, "org.hibernate", "hibernate", "3.2.4.ga");
+    waitForAllBuildsToComplete();
 
     assertMavenCPEntry(jp, "hibernate-3.2.4.ga.jar", true);
     assertMavenCPEntry(jp, "ehcache-1.2.3.jar", true);
 
     excludeArtifact(projectName, "ehcache-1.2.3.jar");
+    waitForAllBuildsToComplete();
 
     assertMavenCPEntry(jp, "ehcache-1.2.3.jar", false);
     assertMavenCPEntry(jp, "hibernate-3.2.4.ga.jar", true);
 
     excludeArtifact(projectName, "hibernate-3.2.4.ga.jar");
+    waitForAllBuildsToComplete();
+
     assertMavenCPEntry(jp, "hibernate-3.2.4.ga.jar", false);
   }
 
