@@ -25,6 +25,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.integration.tests.common.SwtbotUtil;
+import org.maven.ide.eclipse.integration.tests.common.matchers.ContainsMnemonic;
 import org.maven.ide.eclipse.internal.index.NexusIndex;
 import org.maven.ide.eclipse.internal.index.NexusIndexManager;
 import org.maven.ide.eclipse.repository.IRepository;
@@ -43,6 +44,7 @@ public class MEclipse163ResolveDependenciesTest extends M2EUIIntegrationTestCase
 
   }
 
+  @SuppressWarnings("unchecked")
   @Test
   public void testResolveDependencies() throws Exception {
     importZippedProject("projects/resolve_deps_test.zip");
@@ -80,7 +82,8 @@ public class MEclipse163ResolveDependenciesTest extends M2EUIIntegrationTestCase
       String artifactId = "jfreechart";
       String version = "1.0.7";
       bot.text().setText(artifactId);
-      SWTBotTreeItem node = bot.tree().expandNode(groupId + "   " + artifactId);
+      SWTBotTreeItem node = bot.tree().getTreeItem(ContainsMnemonic.containsMnemonic(groupId),  ContainsMnemonic.containsMnemonic(artifactId));
+      node.expand();
       node.select(findNodeName(node, startsWith(version)));
     } finally {
       SwtbotUtil.waitForClose(shell);

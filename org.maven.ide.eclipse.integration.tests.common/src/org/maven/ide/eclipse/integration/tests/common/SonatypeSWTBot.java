@@ -29,14 +29,15 @@ public class SonatypeSWTBot extends SWTWorkbenchBot {
 		Matcher matcher = allOf(widgetOfType(Text.class), withId("name", value));
 		return new SWTBotText((Text) widget(matcher, index), matcher);
 	}
-	
+
 	public SWTBotCheckBox checkBoxWithName(String name) {
 		return checkBoxWithName(name, 0);
 	}
 
 	@SuppressWarnings("unchecked")
 	public SWTBotCheckBox checkBoxWithName(String name, int index) {
-		Matcher matcher = allOf(widgetOfType(Button.class), withId("name", name), withStyle(SWT.CHECK, "SWT.CHECK"));
+		Matcher matcher = allOf(widgetOfType(Button.class),
+				withId("name", name), withStyle(SWT.CHECK, "SWT.CHECK"));
 		return new SWTBotCheckBox((Button) widget(matcher, index), matcher);
 	}
 
@@ -71,5 +72,10 @@ public class SonatypeSWTBot extends SWTWorkbenchBot {
 			shell.close();
 		}
 		return false;
+	}
+
+	@Override
+	public SonatypeSWTBotTree tree() {
+		return new SonatypeSWTBotTree(super.tree());
 	}
 }
