@@ -1,21 +1,18 @@
 package org.maven.ide.eclipse.integration.tests.common;
 
-import org.eclipse.swtbot.swt.finder.results.*;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
 
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.swt.widgets.Widget;
+import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
-import org.eclipse.swtbot.swt.finder.finders.UIThreadRunnable;
-import org.eclipse.swtbot.swt.finder.results.VoidResult;
 import org.eclipse.swtbot.swt.finder.results.WidgetResult;
+import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
 import org.eclipse.swtbot.swt.finder.widgets.AbstractSWTBot;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
+import org.eclipse.swtbot.swt.finder.widgets.TimeoutException;
 import org.hamcrest.Matcher;
 import org.hamcrest.SelfDescribing;
 
@@ -44,10 +41,25 @@ public class SonatypeSWTBotTree extends SWTBotTree {
 	}
 
 	public SWTBotTreeItem getTreeItem(final Matcher<Widget>... matchers) {
-		waitForEnabled();
-		setFocus();
-		return new SWTBotTreeItem( UIThreadRunnable.syncExec(super.display, new Result<TreeItem>() {
+		try {
+			new SWTBot().waitUntil(new DefaultCondition() {
+				public String getFailureMessage() {
+					return "Could not find node with text " + matchers; //$NON-NLS-1$
+				}
 
+				public boolean test() throws Exception {
+					return getItem(matchers) != null;
+				}
+			});
+		} catch (TimeoutException e) {
+			throw new WidgetNotFoundException(
+					"Timed out waiting for tree item " + matchers, e); //$NON-NLS-1$
+		}
+		return new SWTBotTreeItem(getItem(matchers));
+	}
+
+	protected TreeItem getItem(final Matcher<Widget>... matchers) {
+		return syncExec(new WidgetResult<TreeItem>() {
 			public TreeItem run() {
 				TreeItem[] treeItems = widget.getItems();
 				item: for (TreeItem treeItem : treeItems) {
@@ -62,7 +74,6 @@ public class SonatypeSWTBotTree extends SWTBotTree {
 
 				return null;
 			}
-		}));
+		});
 	}
-
 }

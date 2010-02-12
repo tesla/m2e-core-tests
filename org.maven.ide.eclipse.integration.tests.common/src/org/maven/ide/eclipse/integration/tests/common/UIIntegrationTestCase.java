@@ -103,6 +103,7 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.editor.pom.MavenPomEditor;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
+import org.maven.ide.eclipse.integration.tests.common.matchers.ContainsMnemonic;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 
@@ -1288,6 +1289,7 @@ public abstract class UIIntegrationTestCase {
 		addDependency(project.getName(), groupId, artifactId, version);
 	}
 
+	@SuppressWarnings("unchecked")
 	protected void addDependency(String projectName, String groupId,
 			String artifactId, String version) {
 		ContextMenuHelper.clickContextMenu(selectProject(projectName), "Maven",
@@ -1298,8 +1300,10 @@ public abstract class UIIntegrationTestCase {
 			shell.activate();
 
 			bot.text().setText(artifactId);
-			SWTBotTreeItem node = bot.tree().expandNode(
-					groupId + "   " + artifactId);
+			SWTBotTreeItem node = bot.tree().getTreeItem(
+					ContainsMnemonic.containsMnemonic(groupId),
+					ContainsMnemonic.containsMnemonic(artifactId));
+			node.expand();
 			node.select(findNodeName(node, startsWith(version)));
 
 			bot.button("OK").click();
