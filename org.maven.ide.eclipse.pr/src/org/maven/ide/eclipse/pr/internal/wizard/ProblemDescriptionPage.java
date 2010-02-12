@@ -8,6 +8,8 @@
 
 package org.maven.ide.eclipse.pr.internal.wizard;
 
+import java.io.File;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
@@ -16,13 +18,21 @@ import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.ImageTransfer;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
@@ -41,8 +51,11 @@ import org.maven.ide.eclipse.wizards.AbstractMavenWizardPage;
 public class ProblemDescriptionPage extends AbstractMavenWizardPage {
 
   String description = "";
+
   String summary = "";
+
   private CheckboxTableViewer projectsViewer;
+
   private IStructuredSelection selection;
 
   protected ProblemDescriptionPage(IStructuredSelection selection) {
@@ -100,43 +113,55 @@ public class ProblemDescriptionPage extends AbstractMavenWizardPage {
         updatePage();
       }
     });
-    GridData data= new GridData(SWT.FILL, SWT.FILL, true, true);
-    projectsViewer.getTable().setLayoutData(data);
-    
+    GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
+    gridData.heightHint = 62;
+    projectsViewer.getTable().setLayoutData(gridData);
+
     projectsViewer.setContentProvider(new WorkbenchContentProvider());
     projectsViewer.setLabelProvider(new WorkbenchLabelProvider());
-    
+
     projectsViewer.setInput(ResourcesPlugin.getWorkspace().getRoot());
-    if (selection != null && selection.getFirstElement() instanceof IProject) {
+    if(selection != null && selection.getFirstElement() instanceof IProject) {
       projectsViewer.setCheckedElements(new Object[] {(IProject) selection.getFirstElement()});
     }
     
-    Link link= new Link(composite, SWT.NONE);
-    link.setFont(composite.getFont());
-    link.setText("<A>Set Jira user (optional)</A>");  //$NON-NLS-1$//$NON-NLS-2$
-    link.addSelectionListener(new SelectionListener() {
-      public void widgetSelected(SelectionEvent e) {
-        doLaunchProblemReportingPrefs();
-      }
+        Link link = new Link(composite, SWT.NONE);
+        link.setFont(composite.getFont());
+        link.setText("<A>Set Jira user (optional)</A>");
+        link.addSelectionListener(new SelectionListener() {
+          public void widgetSelected(SelectionEvent e) {
+            doLaunchProblemReportingPrefs();
+          }
 
-      public void widgetDefaultSelected(SelectionEvent e) {
-        doLaunchProblemReportingPrefs();
-      }
-    });
-    data= new GridData(SWT.FILL, SWT.CENTER, true, false);
-    link.setLayoutData(data);
-    
+          public void widgetDefaultSelected(SelectionEvent e) {
+            doLaunchProblemReportingPrefs();
+          }
+        });
+    new Label(composite, SWT.NONE);
+        
+        Button button = new Button(composite, SWT.RIGHT);
+        button.setAlignment(SWT.RIGHT);
+        button.addSelectionListener(new SelectionAdapter() {
+          @Override
+          public void widgetSelected(SelectionEvent e) {
+            captureScreenFromClipboard();
+          }
+        });
+        button.setText("Capture");
+
   }
-  
+
   private void doLaunchProblemReportingPrefs() {
-    PreferencesUtil.createPreferenceDialogOn(getShell(), "org.maven.ide.eclipse.preferences.ProblemReportingPreferencePage", new String[] { "org.maven.ide.eclipse.preferences.ProblemReportingPreferencePage" }, null).open();
+    PreferencesUtil.createPreferenceDialogOn(getShell(),
+        "org.maven.ide.eclipse.preferences.ProblemReportingPreferencePage",
+        new String[] {"org.maven.ide.eclipse.preferences.ProblemReportingPreferencePage"}, null).open();
   }
 
   protected void updatePage() {
-    boolean isSummaryBlank = summary.trim().length()==0;
-    boolean isDescriptionBlank = description.trim().length()==0;
+    boolean isSummaryBlank = summary.trim().length() == 0;
+    boolean isDescriptionBlank = description.trim().length() == 0;
     boolean isComplete = true;
-    
+
     if(isSummaryBlank) {
       if(isDescriptionBlank) {
         setErrorMessage("Problem summary and description should not be blank");
@@ -148,11 +173,11 @@ public class ProblemDescriptionPage extends AbstractMavenWizardPage {
       setErrorMessage("Problem description should not be blank");
       isComplete = false;
     }
-    
+
     setPageComplete(isComplete);
     if(isComplete) {
       setErrorMessage(null);
-      
+
       selection = new StructuredSelection(projectsViewer.getCheckedElements());
     }
   }
@@ -168,6 +193,25 @@ public class ProblemDescriptionPage extends AbstractMavenWizardPage {
   public IStructuredSelection getSelectedProjects() {
     return selection;
   }
-  
 
+  private File screenCapture;
+  
+  public File getScreenCapture() {
+    return screenCapture;
+  }
+  
+  private void captureScreenFromClipboard() {
+    final Display display = Display.getDefault();
+    final Clipboard clipboard = new Clipboard(display);
+    ImageData imageData = (ImageData) clipboard.getContents(ImageTransfer.getInstance());
+    if(imageData != null) {
+      Image image = new Image(display, imageData);
+      ImageLoader loader = new ImageLoader();
+      loader.data = new ImageData[] {image.getImageData()};
+      screenCapture = new File(ResourcesPlugin.getPlugin().getStateLocation().toFile(), "capture.png" );  
+      System.out.println( "file: " + screenCapture);
+      loader.save(screenCapture.getAbsolutePath(), SWT.IMAGE_PNG);
+      image.dispose();
+    }
+  }
 }

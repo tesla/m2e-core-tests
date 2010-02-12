@@ -123,13 +123,22 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
           r.setProjectId(PROJECT);
           r.setSummary(descriptionPage.getProblemSummary());
           r.setDescription(descriptionPage.getProblemDescription());
-//          r.setAssignee(USERNAME);
           r.setReporter(username);
+          r.setEnvironment(getEnvironment());
+
+          //
+          // Problem Report Bundles
+          //
           for (File bundleFile : bundleFiles) {
             r.addProblemReportBundle(bundleFile);
           }
-          r.setEnvironment(getEnvironment());
-
+          
+          //
+          // Screen Captures
+          //
+          r.addScreenCapture(descriptionPage.getScreenCapture());
+          
+    
           IssueSubmissionResult res = is.submitIssue(r);
 
           showHyperlink("Successfully submitted issue to:", res.getIssueUrl());
