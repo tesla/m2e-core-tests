@@ -39,16 +39,16 @@ public class MEclipse193IndexerTest extends M2EUIIntegrationTestCase {
   public MEclipse193IndexerTest() {
   }
 
-  @SuppressWarnings("deprecation")
   @BeforeClass
   public static void init() throws Exception {
-    File projectDir = unzipProject("projects/m2.zip");
+//    File projectDir = unzipProject("projects/m2.zip");
 
-    File settingsXML = new File(projectDir.getAbsolutePath() + "/m2/settings.xml");
-    System.out.println("path to settings.xml: " + settingsXML.getAbsolutePath());
-    IMavenConfiguration mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
+//    File settingsXML = new File(projectDir.getAbsolutePath() + "/m2/settings.xml");
+//    System.out.println("path to settings.xml: " + settingsXML.getAbsolutePath());
+    IMavenConfiguration mavenConfiguration = MavenPlugin.getDefault().getMavenConfiguration();
     originalUserSettingsFile = mavenConfiguration.getUserSettingsFile();
-    mavenConfiguration.setUserSettingsFile(settingsXML.getAbsolutePath());
+//    mavenConfiguration.setUserSettingsFile(settingsXML.getAbsolutePath());
+    mavenConfiguration.setUserSettingsFile(new File( "resources/settings_mirror.xml" ).getAbsolutePath());
     IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
     indexManager.getWorkspaceIndex().updateIndex(true, new NullProgressMonitor());
     waitForAllBuildsToComplete();
