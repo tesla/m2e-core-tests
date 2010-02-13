@@ -1,0 +1,40 @@
+<settings>
+  <profiles>
+    <profile>
+      <id>test</id>
+        <repositories>
+          <repository>
+            <id>m2e-its</id>
+            <url>file:resources/remote-repo</url>
+            <snapshots>
+              <enabled>true</enabled>
+              <checksumPolicy>ignore</checksumPolicy>
+            </snapshots>
+            <releases>
+              <enabled>true</enabled>
+              <checksumPolicy>ignore</checksumPolicy>
+            </releases>
+          </repository>
+        </repositories>
+        <pluginRepositories>
+          <pluginRepository>
+            <id>m2e-its</id>
+            <url>file:resources/remote-repo</url>
+            <snapshots>
+              <enabled>true</enabled>
+              <checksumPolicy>ignore</checksumPolicy>
+            </snapshots>
+            <releases>
+              <enabled>true</enabled>
+              <checksumPolicy>ignore</checksumPolicy>
+            </releases>
+          </pluginRepository>
+        </pluginRepositories>
+    </profile>
+  </profiles>
+
+  <activeProfiles>
+    <activeProfile>test</activeProfile>
+  </activeProfiles>
+
+</settings>
