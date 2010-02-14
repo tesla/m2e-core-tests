@@ -1302,9 +1302,11 @@ public abstract class UIIntegrationTestCase {
 					ContainsMnemonic.containsMnemonic(groupId),
 					ContainsMnemonic.containsMnemonic(artifactId));
 			node.expand();
-			node.select(findNodeName(node, startsWith(version)));
+			String[] selection = findNodeName(node, startsWith(version));
+			assertEquals("The matcher is expected to find one node", 1, selection.length);
+			node.getNode(selection[0]).doubleClick();
 
-			bot.button("OK").click();
+//			bot.button("OK").click();
 		} finally {
 			SwtbotUtil.waitForClose(shell);
 		}
