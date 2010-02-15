@@ -23,6 +23,14 @@ import org.maven.ide.eclipse.jdt.BuildPathManager;
  */
 public class MngEclipse1377ExcludeArtifactTest extends M2EUIIntegrationTestCase {
 
+  private static final String GROUP_ID = "org.apache.maven";
+
+  private static final String ARTIFACT_ID = "maven-core";
+
+  private static final String VERSION = "2.2.0";
+
+  private static final String JAR = ARTIFACT_ID + "-" + VERSION + ".jar";
+
   @Test
   public void testEclipseArtifact() throws Exception {
     setXmlPrefs();
@@ -35,18 +43,18 @@ public class MngEclipse1377ExcludeArtifactTest extends M2EUIIntegrationTestCase 
     }
     IJavaProject jp = (IJavaProject) project.getNature(JavaCore.NATURE_ID);
 
-    assertMavenCPEntry(jp, "commons-collections-3.2.1.jar", false);
+    assertMavenCPEntry(jp, JAR, false);
 
     openPomFile(projectName + "/pom.xml");
-    addDependency(project, "commons-collections", "commons-collections", "3.2.1");
+    addDependency(project, GROUP_ID, ARTIFACT_ID, VERSION);
     waitForAllBuildsToComplete();
 
-    assertMavenCPEntry(jp, "commons-collections-3.2.1.jar", true);
+    assertMavenCPEntry(jp, JAR, true);
 
-    excludeArtifact(projectName, "commons-collections-3.2.1.jar");
+    excludeArtifact(projectName, JAR);
     waitForAllBuildsToComplete();
 
-    assertMavenCPEntry(jp, "commons-collections-3.2.1.jar", false);
+    assertMavenCPEntry(jp, JAR, false);
   }
 
   public void testExcludeTransitiveArtifact() throws Exception {
