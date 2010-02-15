@@ -13,7 +13,9 @@ import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.maven.ide.eclipse.jdt.BuildPathManager;
 
@@ -23,13 +25,27 @@ import org.maven.ide.eclipse.jdt.BuildPathManager;
  */
 public class MngEclipse1377ExcludeArtifactTest extends M2EUIIntegrationTestCase {
 
-  private static final String GROUP_ID = "org.apache.maven";
+  private static final String GROUP_ID = "org.maven.ide.eclipse.its";
 
-  private static final String ARTIFACT_ID = "maven-core";
+  private static final String ARTIFACT_ID = "m2e-its-a";
 
-  private static final String VERSION = "2.2.0";
+  private static final String VERSION = "0.1";
 
   private static final String JAR = ARTIFACT_ID + "-" + VERSION + ".jar";
+
+  private static String oldUserSettings;
+
+  @BeforeClass
+  public static void setUpBeforeClass() {
+    oldUserSettings = setUserSettings("resources/settings.xml");
+    updateRepositoryRegistry();
+    updateIndex("file:resources/remote-repo");
+  }
+
+  @AfterClass
+  public static void tearDownAfterclass() {
+    setUserSettings(oldUserSettings);
+  }
 
   @Test
   public void testEclipseArtifact() throws Exception {

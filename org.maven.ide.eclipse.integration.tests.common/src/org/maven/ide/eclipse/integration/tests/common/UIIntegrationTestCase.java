@@ -102,6 +102,10 @@ import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.integration.tests.common.matchers.ContainsMnemonic;
+import org.maven.ide.eclipse.internal.index.NexusIndexManager;
+import org.maven.ide.eclipse.internal.repository.RepositoryRegistry;
+import org.maven.ide.eclipse.repository.IRepository;
+import org.maven.ide.eclipse.repository.IRepositoryRegistry;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 
@@ -1447,7 +1451,7 @@ public abstract class UIIntegrationTestCase {
 	}
 
     @SuppressWarnings( "deprecation" )
-    protected String setUserSettings( String settingsFile )
+    protected static String setUserSettings( String settingsFile )
     {
         if ( settingsFile != null )
         {
@@ -1460,10 +1464,44 @@ public abstract class UIIntegrationTestCase {
     }
 
     @SuppressWarnings( "deprecation" )
-    protected String getUserSettings()
+    protected static String getUserSettings()
     {
         IMavenConfiguration mavenConfiguration = MavenPlugin.lookup( IMavenConfiguration.class );
         return mavenConfiguration.getUserSettingsFile();
+    }
+
+    @SuppressWarnings( "restriction" )
+    protected static void updateRepositoryRegistry()
+    {
+        try
+        {
+            ( (RepositoryRegistry) MavenPlugin.getDefault().getRepositoryRegistry() ).updateRegistry( monitor );
+        }
+        catch ( CoreException e )
+        {
+            throw new IllegalStateException( e );
+        }
+    }
+
+    @SuppressWarnings( "restriction" )
+    protected static void updateIndex( String repoUrl )
+    {
+        IRepositoryRegistry repositoryRegistry = MavenPlugin.getDefault().getRepositoryRegistry();
+        for ( IRepository repository : repositoryRegistry.getRepositories( IRepositoryRegistry.SCOPE_SETTINGS ) )
+        {
+            if ( repository.getUrl().equals( repoUrl ) )
+            {
+                try
+                {
+                    NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getDefault().getIndexManager();
+                    indexManager.updateIndex( repository, true, monitor );
+                }
+                catch ( CoreException e )
+                {
+                    throw new IllegalStateException( e );
+                }
+            }
+        }
     }
 
 }
