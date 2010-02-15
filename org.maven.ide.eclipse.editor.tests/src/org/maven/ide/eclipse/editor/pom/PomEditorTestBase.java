@@ -117,6 +117,7 @@ public class PomEditorTestBase extends UIIntegrationTestCase {
     model.setGroupId("org.foo");
     model.setArtifactId("test-pom");
     model.setVersion("1.0.0");
+    model.setName("Test-Name");
 
     //ResourcesPlugin.getWorkspace().getRoot().refreshLocal(IResource.DEPTH_INFINITE, null);
 

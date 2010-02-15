@@ -8,8 +8,7 @@
 
 package org.maven.ide.eclipse.editor.pom;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.io.File;
 
@@ -76,6 +75,7 @@ public class PomEditorTest extends PomEditorTestBase {
   public void testUndoRedo() throws Exception {
     openPomFile(TEST_POM_POM_XML);
 
+    bot.sectionWithName("organizationSection").expand();
     SWTBotText text = bot.textWithName("organizationName");
     text.setFocus();
     text.setText("");
@@ -108,6 +108,7 @@ public class PomEditorTest extends PomEditorTestBase {
     selectEditorTab(TAB_POM_XML);
     delete("<organization>", "</organization>");
     selectEditorTab(TAB_OVERVIEW);
+    bot.sectionWithName("organizationSection").expand();
     assertTextValue("organizationName", "");
     setTextValue("scmUrl", "http://m2eclipse");
     assertTextValue("scmUrl", "http://m2eclipse");
@@ -122,7 +123,10 @@ public class PomEditorTest extends PomEditorTestBase {
     IFile file = root.getFile(new Path(TEST_POM_POM_XML));
     File f = new File(file.getLocation().toOSString());
     String text = getEditorText();
-    setContents(f, text.replace("parent3", "parent4"));
+    assertFalse(text.contains("PASSED"));
+    text = text.replace("Test-Name", "PASSED");
+    assertTrue(text.contains("PASSED"));
+    setContents(f, text);
 
     // reload the file
     selectProject(PROJECT_NAME).expandNode(PROJECT_NAME).getNode("pom.xml").doubleClick();
@@ -130,12 +134,13 @@ public class PomEditorTest extends PomEditorTestBase {
     bot.shell("File Changed").activate();
     bot.button("Yes").click();
 
-    assertTextValue("parentArtifactId", "parent4");
+    bot.sectionWithName("projectSection").expand();
+    assertTextValue("projectName", "PASSED");
 
     // verify that value changed in xml and in the form
     selectEditorTab(TAB_POM_XML);
     String editorText = getEditorText();
-    assertTrue(editorText, editorText.contains("<artifactId>parent4</artifactId>"));
+    assertTrue(editorText, editorText.contains("<name>PASSED</name>"));
 
     // XXX verify that value changed on a page haven't been active before
   }
@@ -160,7 +165,7 @@ public class PomEditorTest extends PomEditorTestBase {
 
     // make a change 
     selectEditorTab(TAB_POM_XML);
-    replaceText("parent4", "parent7");
+    replaceText("Test-Name", "FAILED");
     selectEditorTab(TAB_OVERVIEW);
 
     //save file
@@ -169,14 +174,16 @@ public class PomEditorTest extends PomEditorTestBase {
     // test the editor is clean
     waitForEditorDirtyState(editor, false);
 
+    assertTextValue("projectName", "FAILED");
+
     // undo change
-    bot.textWithName("parentArtifactId").pressShortcut(SWT.CONTROL, 'z');
+    bot.textWithName("projectName").pressShortcut(SWT.CONTROL, 'z');
 
     // test the editor is dirty
     waitForEditorDirtyState(editor, true);
 
     //test the value
-    assertTextValue("parentArtifactId", "parent4");
+    assertTextValue("projectName", "Test-Name");
 
     //save file
     save();
@@ -250,15 +257,13 @@ public class PomEditorTest extends PomEditorTestBase {
         + "<version>0.0.1-SNAPSHOT</version>" //
         + "</project>";
     createFile(name, str);
-//		IFile file = root.getFile(new Path(name));
-//		file.create(new ByteArrayInputStream(str.getBytes()), true, null);
 
     MavenPomEditor editor = openPomFile(name);
 
     selectEditorTab(TAB_POM_XML);
     waitForEditorDirtyState(editor, false);
     findText("</project>");
-    bot.activeEditor().toTextEditor().pressShortcut(SWT.NONE, SWT.LEFT, (char) 0);
+    bot.activeEditor().toTextEditor().pressShortcut(SWT.NONE, SWT.ARROW_LEFT, (char) 0);
 
     copy("<properties><sample>sample</sample></properties>");
     bot.activeEditor().toTextEditor().pressShortcut(SWT.CONTROL, 'v');
