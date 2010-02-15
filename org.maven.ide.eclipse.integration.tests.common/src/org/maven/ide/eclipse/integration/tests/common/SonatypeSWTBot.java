@@ -53,6 +53,12 @@ public class SonatypeSWTBot extends SWTWorkbenchBot {
 				widgetOfType(Section.class), withText(title))));
 	}
 
+    @SuppressWarnings("unchecked")
+    public SectionBot sectionWithName(String value) {
+        return new SectionBot((Section) widget(allOf(
+                widgetOfType(Section.class), withId("name", value))));
+    }
+
 	public boolean waitForShellToClose(String title) {
 		SWTBotShell shell = activeShell();
 		if (title != null && title.equals(shell.getText())) {
