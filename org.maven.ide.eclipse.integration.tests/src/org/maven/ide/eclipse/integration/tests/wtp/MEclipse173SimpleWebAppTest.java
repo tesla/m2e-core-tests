@@ -90,6 +90,7 @@ public class MEclipse173SimpleWebAppTest extends M2EUIIntegrationTestCase {
 
     waitForAllBuildsToComplete();
     deployProjectsIntoTomcat();
+    waitForAllBuildsToComplete();
 
     // Verify deployment worked (attempt to get weather forcast for Moss Beach CA)
     String s = retrieveWebPage(DEPLOYED_URL);
