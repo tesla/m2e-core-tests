@@ -22,7 +22,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
+import java.net.Socket;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -612,6 +615,7 @@ public abstract class UIIntegrationTestCase {
 		ContextMenuHelper.clickContextMenu(tree, "Start");
 
 		waitForAllBuildsToComplete();
+		waitForServer( 8080, 10000 );
 		// getUI().click(new CTabItemLocator("Servers"));
 		// Thread.sleep(3000);
 	}
@@ -1425,6 +1429,28 @@ public abstract class UIIntegrationTestCase {
 
 		waitForAllBuildsToComplete();
 	}
+
+    protected static void waitForServer( int port, int timeout ) {
+        Socket socket = new Socket();
+        try {
+            socket.bind(null);
+        } catch ( IOException e ) {
+            return;
+        }
+        for ( int i = 0; i <= timeout / 100; i++ ) {
+            try {
+                socket.connect(new InetSocketAddress(InetAddress.getByName(null), port), 100);
+                break;
+            } catch ( IOException e ) {
+                // ignored, retry
+            }
+        }
+        try {
+            socket.close();
+        } catch ( IOException e ) {
+            // ignored
+        }
+    }
 
 	protected String retrieveWebPage(String urlString) throws Exception {
 		URL url = new URL(urlString);
