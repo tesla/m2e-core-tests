@@ -125,8 +125,8 @@ public class MEclipse163ResolveDependenciesTest extends M2EUIIntegrationTestCase
     //build full repo details for the enabled non local/workspace repo
     if(index.isEnabled() && !(repo.equals(registry.getLocalRepository()))
         && !(repo.equals(registry.getWorkspaceRepository()))) {
-      indexManager.setIndexDetails(repo, "full", null);
-      indexManager.updateIndex(repo, true, null);
+      indexManager.setIndexDetails(repo, "full", monitor);
+      indexManager.updateIndex(repo, true, monitor);
       waitForAllBuildsToComplete();
     }
   }
