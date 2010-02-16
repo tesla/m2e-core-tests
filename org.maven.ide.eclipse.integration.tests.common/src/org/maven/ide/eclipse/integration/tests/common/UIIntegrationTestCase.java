@@ -1097,8 +1097,11 @@ public abstract class UIIntegrationTestCase {
 				bot.tree().expandNode("Maven").select("Maven Project");
 				// click the first next button
 				bot.button("Next >").click();
+				bot.checkBox( "Create a simple project (skip archetype selection)" ).deselect();
+
 				// then the first page with only 'default' values
 				bot.button("Next >").click();
+				bot.comboBoxWithId("name", "catalogsCombo").setSelection(0);
 
 				bot.waitUntil(SwtbotUtil.waitForLoad(bot.table()));
 
