@@ -119,6 +119,7 @@ import org.osgi.framework.Version;
  * @author Marvin Froeder
  * 
  */
+@SuppressWarnings("restriction")
 @RunWith(SWTBotJunit4ClassRunner.class)
 public abstract class UIIntegrationTestCase {
 
@@ -188,7 +189,7 @@ public abstract class UIIntegrationTestCase {
 
 	@Before
 	public final void waitMenu() {
-	    bot.waitUntil(new DefaultCondition() {
+		bot.waitUntil(new DefaultCondition() {
 
 			public boolean test() throws Exception {
 				return bot.menu("File").isEnabled();
@@ -617,11 +618,12 @@ public abstract class UIIntegrationTestCase {
 		ContextMenuHelper.clickContextMenu(tree, "Start");
 
 		waitForAllBuildsToComplete();
-    if(!waitForServer(8080, 10000)) {
-      ContextMenuHelper.clickContextMenu(tree, Matchers.anyOf(withMnemonic("Start"), withMnemonic("Restart")));
-      waitForAllBuildsToComplete();
-      waitForServer(8080, 10000);
-    }
+		if (!waitForServer(8080, 10000)) {
+			ContextMenuHelper.clickContextMenu(tree, Matchers.anyOf(
+					withMnemonic("Start"), withMnemonic("Restart")));
+			waitForAllBuildsToComplete();
+			waitForServer(8080, 10000);
+		}
 	}
 
 	protected static void shutdownServer() {
@@ -1101,7 +1103,9 @@ public abstract class UIIntegrationTestCase {
 				bot.tree().expandNode("Maven").select("Maven Project");
 				// click the first next button
 				bot.button("Next >").click();
-				bot.checkBox( "Create a simple project (skip archetype selection)" ).deselect();
+				bot.checkBox(
+						"Create a simple project (skip archetype selection)")
+						.deselect();
 
 				// then the first page with only 'default' values
 				bot.button("Next >").click();
@@ -1121,6 +1125,9 @@ public abstract class UIIntegrationTestCase {
 				bot.comboBoxWithLabel("Artifact Id:").setText(projectName);
 
 				bot.button("Finish").click();
+			} catch (Throwable ex) {
+				throw new Exception("Failed to create project for archetype:"
+						+ archetypeName + " - " + takeScreenShot(), ex);
 			} finally {
 				SwtbotUtil.waitForClose(shell);
 			}
@@ -1318,10 +1325,11 @@ public abstract class UIIntegrationTestCase {
 					ContainsMnemonic.containsMnemonic(artifactId));
 			node.expand();
 			String[] selection = findNodeName(node, startsWith(version));
-			assertEquals("The matcher is expected to find one node", 1, selection.length);
+			assertEquals("The matcher is expected to find one node", 1,
+					selection.length);
 			node.getNode(selection[0]).doubleClick();
 
-//			bot.button("OK").click();
+			// bot.button("OK").click();
 		} finally {
 			SwtbotUtil.waitForClose(shell);
 		}
@@ -1437,42 +1445,64 @@ public abstract class UIIntegrationTestCase {
 		waitForAllBuildsToComplete();
 	}
 
-  protected static boolean waitForServer(int port, int timeout) {
-    Socket socket = new Socket();
-    try {
-      socket.bind(null);
-    } catch(IOException e) {
-      return false;
-    }
-    try {
-      for(int i = 0; i <= timeout / 100; i++ ) {
-        try {
-          socket.connect(new InetSocketAddress(InetAddress.getByName(null), port), 100);
-          return true;
-        } catch(IOException e) {
-          // ignored, retry
-        }
-      }
-      return false;
-    } finally {
-      try {
-        socket.close();
-      } catch(IOException e) {
-        // ignored
-      }
-    }
-  }
+	protected static boolean waitForServer(int port, int timeout) {
+		Socket socket = new Socket();
+		try {
+			socket.bind(null);
+		} catch (IOException e) {
+			return false;
+		}
+		try {
+			for (int i = 0; i <= timeout / 100; i++) {
+				try {
+					socket.connect(new InetSocketAddress(InetAddress
+							.getByName(null), port), 100);
+					return true;
+				} catch (IOException e) {
+					// ignored, retry
+				}
+			}
+			return false;
+		} finally {
+			try {
+				socket.close();
+			} catch (IOException e) {
+				// ignored
+			}
+		}
+	}
 
-	protected String retrieveWebPage(String urlString) throws Exception {
-		URL url = new URL(urlString);
-		URLConnection conn = url.openConnection();
-		conn.setDoInput(true);
-		conn.connect();
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		IOUtil.copy(conn.getInputStream(), out);
-		conn.getInputStream().close();
+	protected String retrieveWebPage(String urlString) throws IOException,
+			InterruptedException {
+		int i = 0;
+		do {
+			URL url = new URL(urlString);
+			URLConnection conn;
+			try {
+				conn = url.openConnection();
+			} catch (IOException e) {
+				continue;
+			}
+			conn.setDoInput(true);
+			try {
+				conn.connect();
+			} catch (IOException e) {
+				Thread.sleep(1000);
+				continue;
+			}
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			IOUtil.copy(conn.getInputStream(), out);
 
-		return new String(out.toByteArray(), "UTF-8");
+			try {
+				conn.getInputStream().close();
+			} catch (IOException e) {
+				// not relevant
+			}
+
+			return new String(out.toByteArray(), "UTF-8");
+		} while (i < 10);
+
+		return null;
 	}
 
 	protected void copy(final String str) throws Exception {
@@ -1487,58 +1517,49 @@ public abstract class UIIntegrationTestCase {
 		});
 	}
 
-    @SuppressWarnings( "deprecation" )
-    protected static String setUserSettings( String settingsFile )
-    {
-        if ( settingsFile != null )
-        {
-            settingsFile = new File( settingsFile ).getAbsolutePath();
-        }
-        IMavenConfiguration mavenConfiguration = MavenPlugin.lookup( IMavenConfiguration.class );
-        String oldUserSettingsFile = mavenConfiguration.getUserSettingsFile();
-        mavenConfiguration.setUserSettingsFile( settingsFile );
-        return oldUserSettingsFile;
-    }
+	@SuppressWarnings("deprecation")
+	protected static String setUserSettings(String settingsFile) {
+		if (settingsFile != null) {
+			settingsFile = new File(settingsFile).getAbsolutePath();
+		}
+		IMavenConfiguration mavenConfiguration = MavenPlugin
+				.lookup(IMavenConfiguration.class);
+		String oldUserSettingsFile = mavenConfiguration.getUserSettingsFile();
+		mavenConfiguration.setUserSettingsFile(settingsFile);
+		return oldUserSettingsFile;
+	}
 
-    @SuppressWarnings( "deprecation" )
-    protected static String getUserSettings()
-    {
-        IMavenConfiguration mavenConfiguration = MavenPlugin.lookup( IMavenConfiguration.class );
-        return mavenConfiguration.getUserSettingsFile();
-    }
+	@SuppressWarnings("deprecation")
+	protected static String getUserSettings() {
+		IMavenConfiguration mavenConfiguration = MavenPlugin
+				.lookup(IMavenConfiguration.class);
+		return mavenConfiguration.getUserSettingsFile();
+	}
 
-    @SuppressWarnings( "restriction" )
-    protected static void updateRepositoryRegistry()
-    {
-        try
-        {
-            ( (RepositoryRegistry) MavenPlugin.getDefault().getRepositoryRegistry() ).updateRegistry( monitor );
-        }
-        catch ( CoreException e )
-        {
-            throw new IllegalStateException( e );
-        }
-    }
+	protected static void updateRepositoryRegistry() {
+		try {
+			((RepositoryRegistry) MavenPlugin.getDefault()
+					.getRepositoryRegistry()).updateRegistry(monitor);
+		} catch (CoreException e) {
+			throw new IllegalStateException(e);
+		}
+	}
 
-    @SuppressWarnings( "restriction" )
-    protected static void updateIndex( String repoUrl )
-    {
-        IRepositoryRegistry repositoryRegistry = MavenPlugin.getDefault().getRepositoryRegistry();
-        for ( IRepository repository : repositoryRegistry.getRepositories( IRepositoryRegistry.SCOPE_SETTINGS ) )
-        {
-            if ( repository.getUrl().equals( repoUrl ) )
-            {
-                try
-                {
-                    NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getDefault().getIndexManager();
-                    indexManager.updateIndex( repository, true, monitor );
-                }
-                catch ( CoreException e )
-                {
-                    throw new IllegalStateException( e );
-                }
-            }
-        }
-    }
+	protected static void updateIndex(String repoUrl) {
+		IRepositoryRegistry repositoryRegistry = MavenPlugin.getDefault()
+				.getRepositoryRegistry();
+		for (IRepository repository : repositoryRegistry
+				.getRepositories(IRepositoryRegistry.SCOPE_SETTINGS)) {
+			if (repository.getUrl().equals(repoUrl)) {
+				try {
+					NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin
+							.getDefault().getIndexManager();
+					indexManager.updateIndex(repository, true, monitor);
+				} catch (CoreException e) {
+					throw new IllegalStateException(e);
+				}
+			}
+		}
+	}
 
 }
