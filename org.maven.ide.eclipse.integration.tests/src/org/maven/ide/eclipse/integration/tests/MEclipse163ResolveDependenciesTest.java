@@ -64,7 +64,7 @@ public class MEclipse163ResolveDependenciesTest extends M2EUIIntegrationTestCase
     //rebuild the mirror
     IRepositoryRegistry registry = MavenPlugin.getDefault().getRepositoryRegistry();
     waitForAllBuildsToComplete();
-    List<IRepository> repos = registry.getRepositories(registry.SCOPE_SETTINGS);
+    List<IRepository> repos = registry.getRepositories(IRepositoryRegistry.SCOPE_SETTINGS);
 
     for(IRepository repo : repos) {
       if(repo.getUrl().endsWith("resources/remote-repo")) {

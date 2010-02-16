@@ -30,7 +30,7 @@ public class MNGEclipse1674PluginCodeCompletionTest extends M2EUIIntegrationTest
     doImport(PLUGIN_ID, "projects/cc_sample2.zip", false);
 
     IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("cc_sample2");
-    IJavaProject jp = (IJavaProject) project.getNature(JavaCore.NATURE_ID);
+    project.getNature(JavaCore.NATURE_ID);
     Assert.assertTrue(project.exists());
 
     // Add a dependency.

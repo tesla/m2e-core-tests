@@ -1,7 +1,7 @@
 
 package org.maven.ide.eclipse.integration.tests;
-
-import java.io.File;
+ 
+ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,10 +26,10 @@ import org.maven.ide.eclipse.editor.pom.MavenPomEditor;
 import org.maven.ide.eclipse.embedder.MavenRuntime;
 import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.integration.tests.common.SwtbotUtil;
-import org.maven.ide.eclipse.internal.embedder.MavenEmbeddedRuntime;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 
 
+@SuppressWarnings("restriction")
 public class MngEclipse1526InstallationPreferencesTest extends M2EUIIntegrationTestCase {
 
   protected String externalRuntime;
@@ -44,10 +44,8 @@ public class MngEclipse1526InstallationPreferencesTest extends M2EUIIntegrationT
    */
   @Test
   public void testInstallationPrefs() throws Exception {
-    File tempDir = importMavenProjects("projects/someproject.zip");
-    MavenEmbeddedRuntime runtime = (MavenEmbeddedRuntime) MavenPlugin.getDefault().getMavenRuntimeManager()
-        .getDefaultRuntime();
-    String version = runtime.toString();
+    importMavenProjects("projects/someproject.zip");
+    MavenPlugin.getDefault().getMavenRuntimeManager().getDefaultRuntime();
     IMavenProjectFacade mavenProject = MavenPlugin.getDefault().getMavenProjectManager().getMavenProject(
         "org.sonatype.test", "someproject", "0.0.1-SNAPSHOT");
     Assert.assertNotNull(mavenProject);
@@ -73,7 +71,9 @@ public class MngEclipse1526InstallationPreferencesTest extends M2EUIIntegrationT
       writer.println("</settings>");
       writer.flush();
     } finally {
-      out.close();
+      if(out != null) {
+        out.close();
+      }
     }
 
     IProject project = mavenProject.getProject();
@@ -93,8 +93,8 @@ public class MngEclipse1526InstallationPreferencesTest extends M2EUIIntegrationT
       //assertFalse(new ButtonLocator("Browse...").isEnabled(getUI()));
 
       Assert.assertFalse(bot.button("Browse...").isEnabled());
-      Assert.assertEquals(new File(externalRuntime, "conf/settings.xml"), new File(bot
-          .textWithName("globalSettingsText").getText()));
+      Assert.assertEquals(new File(externalRuntime, "conf/settings.xml"), new File(bot.textWithName(
+          "globalSettingsText").getText()));
 //      "Global settings from installation directory (open file):"
       //now check the embedded and make sure its blank
       bot.table().getTableItem(0).check();
@@ -157,7 +157,9 @@ public class MngEclipse1526InstallationPreferencesTest extends M2EUIIntegrationT
       writer.println("</settings>");
       writer.flush();
     } finally {
-      userOut.close();
+      if(userOut != null) {
+        userOut.close();
+      }
     }
     IPath userExternalLocation = new Path(userSettings.getAbsolutePath());
     IFile linkedUserFile = project.getFile(userExternalLocation.lastSegment());

@@ -8,8 +8,6 @@
 
 package org.maven.ide.eclipse.integration.tests;
 
-import java.io.File;
-
 import org.junit.After;
 import org.junit.Test;
 

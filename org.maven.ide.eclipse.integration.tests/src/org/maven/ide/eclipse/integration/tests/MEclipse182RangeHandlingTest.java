@@ -26,6 +26,7 @@ import org.maven.ide.eclipse.integration.tests.common.matchers.ContainsMnemonic;
  */
 public class MEclipse182RangeHandlingTest extends M2EUIIntegrationTestCase {
 
+  @SuppressWarnings("unchecked")
   @Test
   public void testRangeHandling() throws Exception {
     String project1Name = "versionProject1";

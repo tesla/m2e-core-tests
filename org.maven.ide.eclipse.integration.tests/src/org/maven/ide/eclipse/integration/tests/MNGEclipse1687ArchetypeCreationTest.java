@@ -10,15 +10,12 @@ package org.maven.ide.eclipse.integration.tests;
 
 import static org.junit.Assert.assertTrue;
 
-import java.net.URL;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.junit.Test;
 import org.maven.ide.eclipse.core.Messages;
+import org.maven.ide.eclipse.integration.tests.common.SwtbotUtil;
 
 
 /**
@@ -26,24 +23,17 @@ import org.maven.ide.eclipse.core.Messages;
  */
 public class MNGEclipse1687ArchetypeCreationTest extends M2EUIIntegrationTestCase {
 
-  private static final String GROUP_ID = "org.jboss.portletbridge.archetypes";
-  
-  private static final String ARCHETYPE_ID = "seam-basic";
+  private static final String GROUP_ID = "org.sonatype.flexmojos";
 
-  private static final String VERSION_ID = "2.0.0.ALPHA";
-  
+  private static final String ARCHETYPE_ID = "flexmojos-archetypes-application";
+
+  private static final String VERSION_ID = "3.5.0";
+
   private static final String PROJECT_NAME = "archetypeTestProjext";
 
   @Test()
   public void testArchetypeCreation() throws Exception {
-
-    if(true) {
-      return;
-    }
-    
-    URL url = FileLocator.find(Platform.getBundle(PLUGIN_ID), new Path("/projects/seam-basic-2.0.0.ALPHA.jar"), null);
-
-    createProjectFromArchetype(ARCHETYPE_ID, "", url.toString());
+    createProjectFromArchetype(ARCHETYPE_ID, "", "http://repository.sonatype.org/content/groups/flexgroup/");
     IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(PROJECT_NAME);
     assertTrue("The project is expected to exist", project.exists());
   }
@@ -59,29 +49,46 @@ public class MNGEclipse1687ArchetypeCreationTest extends M2EUIIntegrationTestCas
    */
   public void createProjectFromArchetype(String artifactID, String extraConfig, String repoUrl) throws Exception {
     bot.menu("File").menu("New").menu("Project...").click();
-    bot.shell("New Project").activate();
-    bot.tree().expandNode("Maven").getNode("Maven Project").doubleClick();
-    bot.button("Next >").click();
+    SWTBotShell shell = bot.shell("New Project");
+    try {
+      shell.activate();
+      bot.tree().expandNode("Maven").getNode("Maven Project").doubleClick();
+      bot.button("Next >").click();
 
-    bot.button("Add Archetype...").click();
-    bot.shell("Add Archetype").activate();
+      bot.checkBox("Show the last version of Archetype only").deselect();
 
-    bot.comboBoxWithLabel("Archetype Group Id:").setText(GROUP_ID);
-    bot.comboBoxWithLabel("Archetype Artifact Id:").setText(artifactID);
-    bot.comboBoxWithLabel("Archetype Version:").setText(VERSION_ID);
-    bot.comboBoxWithLabel("Repository URL:").setText(repoUrl);
+      bot.button("Add Archetype...").click();
+      SWTBotShell addShell = bot.shell("Add Archetype");
+      try {
+        addShell.activate();
 
-    bot.button("OK").click();
-    waitForAllBuildsToComplete();
-    assertWizardError(null);
-    assertWizardMessage("Select an Archetype");
+        bot.comboBoxWithLabel("Archetype Group Id:").setText(GROUP_ID);
+        bot.comboBoxWithLabel("Archetype Artifact Id:").setText(artifactID);
+        bot.comboBoxWithLabel("Archetype Version:").setText(VERSION_ID);
+        bot.comboBoxWithLabel("Repository URL:").setText(repoUrl);
 
-    bot.button("Next >").click();
+        bot.button("OK").click();
+      } finally {
+        SwtbotUtil.waitForClose(addShell);
+      }
 
-    bot.comboBoxWithLabel(Messages.getString("artifactComponent.groupId")).setText("org.sonatype.test");
-    bot.comboBoxWithLabel(Messages.getString("artifactComponent.artifactId")).setText(PROJECT_NAME);
-    bot.comboBoxWithLabel(Messages.getString("artifactComponent.package")).setText("org.sonatype.test");
-    bot.button("Finish").click();
+      waitForAllBuildsToComplete();
+
+      bot.table().select(bot.table().indexOf(artifactID, 1));
+
+      try {
+        bot.button("Next >").click();
+      } catch(Exception ex) {
+        takeScreenShot(ex);
+      }
+
+      bot.comboBoxWithLabel(Messages.getString("artifactComponent.groupId")).setText("org.sonatype.test");
+      bot.comboBoxWithLabel(Messages.getString("artifactComponent.artifactId")).setText(PROJECT_NAME);
+      bot.comboBoxWithLabel(Messages.getString("artifactComponent.package")).setText("org.sonatype.test");
+      bot.button("Finish").click();
+    } finally {
+      SwtbotUtil.waitForClose(shell);
+    }
 
     waitForAllBuildsToComplete();
 

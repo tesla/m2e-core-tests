@@ -93,6 +93,7 @@ public class MEclipse193IndexerTest extends M2EUIIntegrationTestCase {
     waitForAllBuildsToComplete();
   }
 
+  @SuppressWarnings("unchecked")
   @Test
   public void testLocalResolution() throws Exception {
     String projectName = "localResolutionProject";
