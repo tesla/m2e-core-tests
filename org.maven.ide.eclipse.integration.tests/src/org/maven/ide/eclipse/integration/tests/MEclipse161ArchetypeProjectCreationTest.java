@@ -33,12 +33,14 @@ public class MEclipse161ArchetypeProjectCreationTest extends M2EUIIntegrationTes
     IProject project = createArchetypeProjct("maven-archetype-quickstart");
     Assert.assertTrue(project.hasNature(JavaCore.NATURE_ID));
     IFile f = project.getFile("src/main/java/org/sonatype/test/project/App.java");
+    Assert.assertTrue(f.getLocation().toFile().isFile());
     Assert.assertTrue(f.exists());
     f = project.getFile("pom.xml");
+    Assert.assertTrue(f.getLocation().toFile().isFile());
     Assert.assertTrue(f.exists());
     f = project.getFile("src/test/java/org/sonatype/test/project/AppTest.java");
+    Assert.assertTrue(f.getLocation().toFile().isFile());
     Assert.assertTrue(f.exists());
-
   }
 
   public void testCreateMojo() throws Exception {
