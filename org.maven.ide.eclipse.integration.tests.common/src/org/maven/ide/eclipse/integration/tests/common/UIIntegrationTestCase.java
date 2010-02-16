@@ -8,6 +8,7 @@
 
 package org.maven.ide.eclipse.integration.tests.common;
 
+import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.withMnemonic;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -91,6 +92,7 @@ import org.eclipse.ui.internal.WorkbenchPlugin;
 import org.eclipse.ui.internal.util.PrefUtil;
 import org.eclipse.ui.part.FileEditorInput;
 import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
 import org.hamcrest.text.StringStartsWith;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -615,9 +617,11 @@ public abstract class UIIntegrationTestCase {
 		ContextMenuHelper.clickContextMenu(tree, "Start");
 
 		waitForAllBuildsToComplete();
-		waitForServer( 8080, 10000 );
-		// getUI().click(new CTabItemLocator("Servers"));
-		// Thread.sleep(3000);
+    if(!waitForServer(8080, 10000)) {
+      ContextMenuHelper.clickContextMenu(tree, Matchers.anyOf(withMnemonic("Start"), withMnemonic("Restart")));
+      waitForAllBuildsToComplete();
+      waitForServer(8080, 10000);
+    }
 	}
 
 	protected static void shutdownServer() {
@@ -1433,27 +1437,31 @@ public abstract class UIIntegrationTestCase {
 		waitForAllBuildsToComplete();
 	}
 
-    protected static void waitForServer( int port, int timeout ) {
-        Socket socket = new Socket();
-        try {
-            socket.bind(null);
-        } catch ( IOException e ) {
-            return;
-        }
-        for ( int i = 0; i <= timeout / 100; i++ ) {
-            try {
-                socket.connect(new InetSocketAddress(InetAddress.getByName(null), port), 100);
-                break;
-            } catch ( IOException e ) {
-                // ignored, retry
-            }
-        }
-        try {
-            socket.close();
-        } catch ( IOException e ) {
-            // ignored
-        }
+  protected static boolean waitForServer(int port, int timeout) {
+    Socket socket = new Socket();
+    try {
+      socket.bind(null);
+    } catch(IOException e) {
+      return false;
     }
+    try {
+      for(int i = 0; i <= timeout / 100; i++ ) {
+        try {
+          socket.connect(new InetSocketAddress(InetAddress.getByName(null), port), 100);
+          return true;
+        } catch(IOException e) {
+          // ignored, retry
+        }
+      }
+      return false;
+    } finally {
+      try {
+        socket.close();
+      } catch(IOException e) {
+        // ignored
+      }
+    }
+  }
 
 	protected String retrieveWebPage(String urlString) throws Exception {
 		URL url = new URL(urlString);
