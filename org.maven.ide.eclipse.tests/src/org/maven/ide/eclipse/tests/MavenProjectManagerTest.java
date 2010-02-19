@@ -916,4 +916,13 @@ public class MavenProjectManagerTest extends AbstractMavenProjectTestCase {
     assertEquals(projects[0].getFile("pom.xml").getLocation().toFile(), artifact.getFile());
   }
 
+  public void testPluginMainArtifactNotResolvedFromWorkspace() throws Exception {
+    IProject[] projects = importProjects("projects/MNGECLIPSE-2116",
+        new String[] {"plugin/pom.xml", "project/pom.xml"}, new ResolverConfiguration());
+    waitForJobsToComplete();
+    assertEquals(2, projects.length);
+    assertNotNull(projects[0]);
+    assertNotNull(projects[1]);
+  }
+
 }

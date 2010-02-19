@@ -66,7 +66,7 @@ import org.codehaus.plexus.configuration.PlexusConfigurationException;
 import org.codehaus.plexus.context.Context;
 
 import org.apache.maven.classrealm.ClassRealmManagerDelegate;
-import org.apache.maven.plugin.MavenPluginManager;
+import org.apache.maven.plugin.internal.PluginDependenciesResolver;
 import org.apache.maven.project.artifact.MavenMetadataCache;
 import org.apache.maven.repository.LocalRepositoryMaintainer;
 
@@ -97,7 +97,7 @@ import org.maven.ide.eclipse.internal.index.IndexingTransferListener;
 import org.maven.ide.eclipse.internal.index.NexusIndexManager;
 import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;
 import org.maven.ide.eclipse.internal.project.EclipseMavenMetadataCache;
-import org.maven.ide.eclipse.internal.project.EclipseMavenPluginManager;
+import org.maven.ide.eclipse.internal.project.EclipsePluginDependenciesResolver;
 import org.maven.ide.eclipse.internal.project.IManagedCache;
 import org.maven.ide.eclipse.internal.project.MavenMarkerManager;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerImpl;
@@ -266,8 +266,8 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
             desc.setImplementationClass(EclipseMavenMetadataCache.class);
           } else if (BuildContext.class.getName().equals(desc.getRole())) {
             desc.setImplementationClass(ThreadBuildContext.class);
-          } else if (MavenPluginManager.class.getName().equals(desc.getRole())) {
-            desc.setImplementationClass(EclipseMavenPluginManager.class);
+          } else if(PluginDependenciesResolver.class.getName().equals(desc.getRole())) {
+            desc.setImplementationClass(EclipsePluginDependenciesResolver.class);
           }
         }
       }
