@@ -25,7 +25,7 @@ public class CustomRepositoriesNode extends AbstractRepositoriesNode {
   }
 
   public String getName() {
-    return "Custom repositories";
+    return "Custom Repositories";
   }
 
 }

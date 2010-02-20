@@ -25,7 +25,7 @@ public class LocalRepositoryNode extends AbstractIndexedRepositoryNode {
   public String getName() {
     IRepository repository = index.getRepository();
     StringBuilder sb = new StringBuilder();
-    sb.append("Local repository");
+    sb.append("Local Repository");
     if (repository.getBasedir() != null) {
       sb.append(" (").append(repository.getBasedir().getAbsolutePath()).append(')');
     }

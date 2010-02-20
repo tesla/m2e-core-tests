@@ -22,7 +22,7 @@ public class WorkspaceRepositoryNode extends AbstractIndexedRepositoryNode {
   }
 
   public String getName() {
-    return "Workspace projects";
+    return "Workspace Projects";
   }
 
 }
