@@ -30,7 +30,7 @@ public class ContextMenuHelper {
 					@SuppressWarnings("unchecked")
 					public MenuItem run() {
 						MenuItem menuItem = null;
-						Control control = (Control) bot.widget;
+						Control control = bot.widget;
 						Menu menu = control.getMenu();
 						for (Matcher<? extends org.eclipse.swt.widgets.Widget> m : matchers) {
 							Matcher<?> matcher = allOf(

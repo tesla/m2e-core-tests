@@ -40,9 +40,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
@@ -53,8 +51,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.IJobManager;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jface.wizard.WizardPage;
@@ -111,6 +107,7 @@ import org.maven.ide.eclipse.internal.index.NexusIndexManager;
 import org.maven.ide.eclipse.internal.repository.RepositoryRegistry;
 import org.maven.ide.eclipse.repository.IRepository;
 import org.maven.ide.eclipse.repository.IRepositoryRegistry;
+import org.maven.ide.eclipse.tests.common.JobHelpers;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 
@@ -271,12 +268,7 @@ public abstract class UIIntegrationTestCase {
 	protected static void waitForAllBuildsToComplete() {
 		bot.sleep(5000);
 
-		try {
-			waitForJobsToComplete(monitor);
-		} catch (Exception ex) {
-			throw new RuntimeException(ex);
-		}
-
+		JobHelpers.waitForJobsToComplete();
 	}
 
 	protected void createNewFolder(String projectName, String folderName) {
@@ -1012,75 +1004,6 @@ public abstract class UIIntegrationTestCase {
 					}
 				});
 		return model;
-	}
-
-	// TODO duplicated from AsbtractMavenProjectTestCase
-
-	public static void waitForJobsToComplete(IProgressMonitor monitor)
-			throws InterruptedException, CoreException {
-		/*
-		 * First, make sure refresh job gets all resource change events
-		 * 
-		 * Resource change events are delivered after
-		 * WorkspaceJob#runInWorkspace returns and during IWorkspace#run. Each
-		 * change notification is delivered by only one thread/job, so we make
-		 * sure no other workspaceJob is running then call IWorkspace#run from
-		 * this thread.
-		 * 
-		 * Unfortunately, this does not catch other jobs and threads that call
-		 * IWorkspace#run so we have to hard-code workarounds
-		 * 
-		 * See
-		 * http://www.eclipse.org/articles/Article-Resource-deltas/resource-deltas
-		 * .html
-		 */
-		IWorkspace workspace = ResourcesPlugin.getWorkspace();
-		IJobManager jobManager = Job.getJobManager();
-		jobManager.suspend();
-		try {
-			Job[] jobs = jobManager.find(null);
-			for (int i = 0; i < jobs.length; i++) {
-				Job job = jobs[i];
-				if (!job.isSystem()) {
-					job.join();
-				}
-			}
-			workspace.run(new IWorkspaceRunnable() {
-				public void run(IProgressMonitor monitor) throws CoreException {
-				}
-			}, workspace.getRoot(), 0, monitor);
-
-			// Now we flush all background processing queues
-			boolean processed = flushProcessingQueues(jobManager, monitor);
-			for (int i = 0; i < 10 && processed; i++) {
-				processed = flushProcessingQueues(jobManager, monitor);
-			}
-
-			Assert.assertFalse("Could not flush background processing queues: "
-					+ getProcessingQueues(jobManager), processed);
-		} finally {
-			jobManager.resume();
-		}
-
-	}
-
-	private static boolean flushProcessingQueues(IJobManager jobManager,
-			IProgressMonitor monitor) throws InterruptedException {
-		boolean processed = false;
-		for (Job queue : getProcessingQueues(jobManager)) {
-			queue.join();
-		}
-		return processed;
-	}
-
-	private static List<Job> getProcessingQueues(IJobManager jobManager) {
-		ArrayList<Job> queues = new ArrayList<Job>();
-		for (Job job : jobManager.find(null)) {
-			if (!job.isSystem()) {
-				queues.add(job);
-			}
-		}
-		return queues;
 	}
 
 	/**

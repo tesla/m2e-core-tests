@@ -39,14 +39,12 @@ import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -62,7 +60,6 @@ import org.maven.ide.eclipse.internal.embedder.MavenImpl;
 import org.maven.ide.eclipse.internal.project.MavenProjectManagerRefreshJob;
 import org.maven.ide.eclipse.jdt.BuildPathManager;
 import org.maven.ide.eclipse.jdt.MavenJdtPlugin;
-import org.maven.ide.eclipse.jobs.IBackgroundProcessingQueue;
 import org.maven.ide.eclipse.project.IMavenProjectImportResult;
 import org.maven.ide.eclipse.project.MavenProjectInfo;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
@@ -387,70 +384,7 @@ public abstract class AbstractMavenProjectTestCase extends TestCase {
   }
 
   public static void waitForJobsToComplete(IProgressMonitor monitor) throws InterruptedException, CoreException {
-    /*
-     * First, make sure refresh job gets all resource change events
-     * 
-     * Resource change events are delivered after WorkspaceJob#runInWorkspace returns
-     * and during IWorkspace#run. Each change notification is delivered by
-     * only one thread/job, so we make sure no other workspaceJob is running then
-     * call IWorkspace#run from this thread. 
-     * 
-     * Unfortunately, this does not catch other jobs and threads that call IWorkspace#run
-     * so we have to hard-code workarounds
-     *  
-     * See http://www.eclipse.org/articles/Article-Resource-deltas/resource-deltas.html
-     */
-    IWorkspace workspace = ResourcesPlugin.getWorkspace();
-    IJobManager jobManager = Job.getJobManager();
-    jobManager.suspend();
-    try {
-      Job[] jobs = jobManager.find(null);
-      for (int i = 0; i < jobs.length; i++) {
-        if(jobs[i] instanceof WorkspaceJob || jobs[i].getClass().getName().endsWith("JREUpdateJob")) {
-          jobs[i].join();
-        }
-      }
-      workspace.run(new IWorkspaceRunnable() {
-        public void run(IProgressMonitor monitor) throws CoreException {
-        }
-      }, workspace.getRoot(), 0, monitor);
-
-      // Now we flush all background processing queues
-      boolean processed = flushProcessingQueues(jobManager, monitor);
-      for (int i = 0; i < 10 && processed; i++) {
-        processed = flushProcessingQueues(jobManager, monitor);
-      }
-
-      assertFalse("Could not flush background processing queues: " + getProcessingQueues(jobManager), processed);
-    } finally {
-      jobManager.resume();
-    }
-
-  }
-
-  private static boolean flushProcessingQueues(IJobManager jobManager, IProgressMonitor monitor) throws InterruptedException {
-    boolean processed = false;
-    for (IBackgroundProcessingQueue queue : getProcessingQueues(jobManager)) {
-      queue.join();
-      if (!queue.isEmpty()) {
-        queue.run(monitor);
-        processed = true;
-      }
-      if (queue.isEmpty()) {
-        queue.cancel();
-      }
-    }
-    return processed;
-  }
-
-  private static List<IBackgroundProcessingQueue> getProcessingQueues(IJobManager jobManager) {
-    ArrayList<IBackgroundProcessingQueue> queues = new ArrayList<IBackgroundProcessingQueue>();
-    for (Job job : jobManager.find(null)) {
-      if (job instanceof IBackgroundProcessingQueue) {
-        queues.add((IBackgroundProcessingQueue) job);
-      }
-    }
-    return queues;
+    JobHelpers.waitForJobsToComplete(monitor);
   }
 
   protected IClasspathEntry[] getMavenContainerEntries(IProject project) throws JavaModelException {
