@@ -18,6 +18,7 @@ import java.util.Set;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.layout.GridData;
@@ -55,6 +56,7 @@ public abstract class AbstractMavenWizardPage extends WizardPage {
 
   private boolean isHistoryLoaded = false;
 
+  /** @wbp.parser.constructor */
   protected AbstractMavenWizardPage(String pageName) {
     this(pageName, null);
   }
@@ -119,7 +121,16 @@ public abstract class AbstractMavenWizardPage extends WizardPage {
 
   /** Loads the dialog settings using the page name as a section name. */
   private void initDialogSettings() {
-    IDialogSettings pluginSettings = MavenPlugin.getDefault().getDialogSettings();
+    IDialogSettings pluginSettings;
+    
+    // This is strictly to get SWT Designer working locally without blowing up.
+    if( MavenPlugin.getDefault() == null ) {
+      pluginSettings = new DialogSettings("Workbench");
+    }
+    else {
+      pluginSettings = MavenPlugin.getDefault().getDialogSettings();      
+    }
+    
     dialogSettings = pluginSettings.getSection(getName());
     if(dialogSettings == null) {
       dialogSettings = pluginSettings.addNewSection(getName());
