@@ -25,10 +25,6 @@
 <repository location="http://localhost:8081/nexus/content/groups/m2e-e34"/>
 </location>
 <location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
-<unit id="org.tigris.subversion.subclipse.feature.group" version="1.6.3"/>
-<repository location="http://localhost:8081/nexus/content/groups/m2e-e34"/>
-</location>
-<location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
 <unit id="org.eclipse.mylyn_feature.feature.group" version="3.0.5.v20090218-1800-e3x"/>
 <repository location="http://localhost:8081/nexus/content/groups/m2e-e34"/>
 </location>

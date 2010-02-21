@@ -88,7 +88,6 @@
     <module>../org.maven.ide.eclipse.launching</module>
     <module>../org.maven.ide.eclipse.jdt</module>
     <module>../org.maven.ide.eclipse.mylyn3</module>
-    <module>../org.maven.ide.eclipse.subclipse</module>
     <module>../org.maven.ide.eclipse.scm</module>
     <module>../org.maven.ide.eclipse.cvs</module>
     <module>../org.maven.ide.eclipse.refactoring</module>
@@ -100,6 +99,7 @@
     <module>../org.maven.ide.eclipse.tests</module>
     <module>../org.maven.ide.eclipse.editor.xml.tests</module>
     <module>../org.maven.ide.eclipse.pr.tests</module>
+    <module>../org.maven.ide.eclipse.integration.tests.common</module>
    
     <module>../org.maven.ide.eclipse.wtp</module>
     <module>../org.maven.ide.eclipse.wtp.tests</module>
@@ -111,7 +111,6 @@
 
     <module>../org.maven.ide.eclipse.scm.feature</module>
     <module>../org.maven.ide.eclipse.cvs.feature</module>
-    <module>../org.maven.ide.eclipse.subclipse.feature</module>
 
     <module>../org.maven.ide.eclipse.mylyn3.feature</module>
 
@@ -143,11 +142,6 @@
       <dependency>
         <groupId>org.maven.ide.eclipse</groupId>
         <artifactId>org.maven.ide.eclipse.mylyn3</artifactId>
-        <version>${m2eclipse.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.maven.ide.eclipse</groupId>
-        <artifactId>org.maven.ide.eclipse.subclipse</artifactId>
         <version>${m2eclipse.version}</version>
       </dependency>
       <dependency>
@@ -369,7 +363,7 @@
         </property>
       </activation>
       <properties>
-        <target.platform>m2e-e35-nowt</target.platform>        
+        <target.platform>m2e-e35</target.platform>        
         <tycho.test.jvmArgs>-Xmx800m -XX:MaxPermSize=256m -Dosgi.ws=cocoa -XstartOnFirstThread</tycho.test.jvmArgs>
         <osgi.ws>cocoa</osgi.ws>
       </properties>      
@@ -378,7 +372,6 @@
     <profile>
       <id>its</id>
       <modules>
-        <module>../org.maven.ide.eclipse.integration.tests.common</module>
         <module>../org.maven.ide.eclipse.integration.tests</module>
         <module>../org.maven.ide.eclipse.editor.tests</module>
       </modules>

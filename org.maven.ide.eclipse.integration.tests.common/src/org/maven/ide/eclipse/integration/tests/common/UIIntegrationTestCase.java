@@ -66,6 +66,7 @@ import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.finders.UIThreadRunnable;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.swtbot.swt.finder.results.Result;
+import org.eclipse.swtbot.swt.finder.results.VoidResult;
 import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
 import org.eclipse.swtbot.swt.finder.utils.SWTUtils;
 import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
@@ -186,6 +187,15 @@ public abstract class UIIntegrationTestCase {
 
 	@Before
 	public final void waitMenu() {
+        // The following seems to be needed to run SWTBot tests in Xvfb (the 'fake' X-server).
+        // see http://dev.eclipse.org/mhonarc/newsLists/news.eclipse.swtbot/msg01134.html
+        UIThreadRunnable.syncExec(new VoidResult() {
+            public void run() {
+                PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell()
+                        .forceActive();
+            }
+        });
+
 		bot.waitUntil(new DefaultCondition() {
 
 			public boolean test() throws Exception {
