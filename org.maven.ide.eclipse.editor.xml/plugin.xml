@@ -223,7 +223,7 @@
       <pattern>&lt;plugin&gt;
         &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
         &lt;artifactId&gt;maven-war-plugin&lt;/artifactId&gt;
-        &lt;version&gt;2.0.2&lt;/version&gt;
+        &lt;version&gt;2.1-beta-1&lt;/version&gt;
         &lt;configuration&gt;
           &lt;!-- http://maven.apache.org/plugins/maven-war-plugin/ --&gt;
           &lt;warSourceDirectory&gt;src/main/webapp&lt;/warSourceDirectory&gt;
@@ -261,7 +261,7 @@
       <pattern>&lt;plugin&gt;
         &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
         &lt;artifactId&gt;maven-ear-plugin&lt;/artifactId&gt;
-        &lt;version&gt;2.3.2&lt;/version&gt;
+        &lt;version&gt;2.4.1&lt;/version&gt;
         &lt;configuration&gt;
           &lt;!-- http://maven.apache.org/plugins/maven-ear-plugin/ --&gt;
           &lt;version&gt;5&lt;/version&gt;
