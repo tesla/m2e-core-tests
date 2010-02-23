@@ -276,8 +276,6 @@ public abstract class UIIntegrationTestCase {
 	}
 
 	protected static void waitForAllBuildsToComplete() {
-		bot.sleep(5000);
-
 		JobHelpers.waitForJobsToComplete();
 	}
 
@@ -1344,7 +1342,7 @@ public abstract class UIIntegrationTestCase {
 		SWTBotView view = openView("org.maven.ide.eclipse.views.MavenRepositoryView");
 		SWTBotTree tree = view.bot().tree();
 		findItem(tree.expandNode("Local Repositories"),
-				StringStartsWith.startsWith("Local repository")).select();
+				StringStartsWith.startsWith("Local Repository")).select();
 		ContextMenuHelper.clickContextMenu(tree, "Rebuild Index");
 
 		SWTBotShell shell = bot.shell("Rebuild Index");

@@ -36,6 +36,8 @@ public class JobHelpers {
   }
 
   public static void waitForJobsToComplete(IProgressMonitor monitor) throws InterruptedException, CoreException {
+    waitForBuildJobs();
+
     /*
      * First, make sure refresh job gets all resource change events
      * 
@@ -75,6 +77,7 @@ public class JobHelpers {
       jobManager.resume();
     }
 
+    waitForBuildJobs();
   }
 
   private static boolean flushProcessingQueues(IJobManager jobManager, IProgressMonitor monitor) throws InterruptedException {
@@ -100,6 +103,34 @@ public class JobHelpers {
       }
     }
     return queues;
+  }
+
+  private static void waitForBuildJobs() {
+    waitForJobs("(.*\\.AutoBuild.*)", 10000);
+  }
+
+  private static void waitForJobs(String classNameRegex, int maxWaitMillis) {
+    final int waitMillis = 100;
+    for(int i = maxWaitMillis / waitMillis; i >= 0; i-- ) {
+      if(!hasJob(classNameRegex)) {
+        return;
+      }
+      try {
+        Thread.sleep(waitMillis);
+      } catch(InterruptedException e) {
+        // ignore
+      }
+    }
+  }
+
+  private static boolean hasJob(String classNameRegex) {
+    Job[] jobs = Job.getJobManager().find(null);
+    for(Job job : jobs) {
+      if(job.getClass().getName().matches(classNameRegex)) {
+        return true;
+      }
+    }
+    return false;
   }
 
 }

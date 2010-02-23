@@ -304,21 +304,21 @@ public class PomEditorTest extends PomEditorTestBase {
   }
 
   private void waitForEditorDirtyState(MavenPomEditor editor, boolean dirtyState) {
-    for(int n = 0; n < 10; n++ ) {
+    for(int n = 0; n < 100; n++ ) {
       if(dirtyState == editor.isDirty()) {
         return;
       }
-      bot.sleep(1000);
+      bot.sleep(100);
     }
     fail("Timed out waiting for editor dirty state: " + dirtyState);
   }
 
   private void waitForFileToDisappear(IFile file) {
-    for(int n = 0; n < 10; n++ ) {
+    for(int n = 0; n < 100; n++ ) {
       if(!file.exists()) {
         return;
       }
-      bot.sleep(1000);
+      bot.sleep(100);
     }
     fail("Timed out waiting for file to be deleted: " + file);
   }

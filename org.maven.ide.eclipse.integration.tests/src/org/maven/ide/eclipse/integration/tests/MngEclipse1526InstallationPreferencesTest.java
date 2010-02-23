@@ -141,7 +141,7 @@ public class MngEclipse1526InstallationPreferencesTest extends M2EUIIntegrationT
     SWTBotView view = openView("org.maven.ide.eclipse.views.MavenRepositoryView");
     SWTBotTree tree = view.bot().tree();
     Assert.assertNotNull(findItem(tree.expandNode("Local Repositories"),
-        StringStartsWith.startsWith("Local repository")).select());
+        StringStartsWith.startsWith("Local Repository")).select());
   }
 
   protected String setUserSettingsXML(IProject project) throws Exception {

@@ -23,17 +23,17 @@ import org.maven.ide.eclipse.integration.tests.common.SwtbotUtil;
  */
 public class MNGEclipse1687ArchetypeCreationTest extends M2EUIIntegrationTestCase {
 
-  private static final String GROUP_ID = "org.sonatype.flexmojos";
+  private static final String GROUP_ID = "org.maven.ide.eclipse.its";
 
-  private static final String ARCHETYPE_ID = "flexmojos-archetypes-application";
+  private static final String ARCHETYPE_ID = "maven-plugin-packaging";
 
-  private static final String VERSION_ID = "3.5.0";
+  private static final String VERSION_ID = "1.0";
 
   private static final String PROJECT_NAME = "archetypeTestProjext";
 
   @Test()
   public void testArchetypeCreation() throws Exception {
-    createProjectFromArchetype(ARCHETYPE_ID, "", "http://repository.sonatype.org/content/groups/flexgroup/");
+    createProjectFromArchetype(ARCHETYPE_ID, "", "file:resources/remote-repo");
     IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(PROJECT_NAME);
     assertTrue("The project is expected to exist", project.exists());
   }
