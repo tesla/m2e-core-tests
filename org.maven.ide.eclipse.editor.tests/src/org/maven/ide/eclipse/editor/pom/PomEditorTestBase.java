@@ -41,7 +41,7 @@ import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 
 
 @SuppressWarnings("restriction")
-public class PomEditorTestBase extends UIIntegrationTestCase {
+public abstract class PomEditorTestBase extends UIIntegrationTestCase {
 
   protected static final String TEST_POM_POM_XML = "test-pom/pom.xml";
 
