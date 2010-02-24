@@ -94,6 +94,7 @@ public class MavenProjectWizardArtifactPage extends AbstractMavenWizardPage {
   /**
    * Sets the title and description of this wizard page and marks it as not being complete as user input is required for
    * continuing.
+   * @wbp.parser.constructor
    */
   public MavenProjectWizardArtifactPage(ProjectImportConfiguration projectImportConfiguration) {
     this("MavenProjectWizardArtifactPage", projectImportConfiguration);
