@@ -112,7 +112,16 @@ class BasicProjectRegistry implements Serializable {
         && workspaceDependencies != null //
         && inprojectDependencies != null //
         && workspaceModules != null //
-        && workspacePoms != null;
+        && workspacePoms != null && areFacadesValid();
+  }
+
+  private boolean areFacadesValid() {
+    for(MavenProjectFacade facade : workspacePoms.values()) {
+      if(facade == null || facade.getPom() == null || facade.getPom().getLocation() == null) {
+        return false;
+      }
+    }
+    return true;
   }
 
 }

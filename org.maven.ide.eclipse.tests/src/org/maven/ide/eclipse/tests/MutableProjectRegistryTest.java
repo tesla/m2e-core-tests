@@ -1,5 +1,6 @@
 package org.maven.ide.eclipse.tests;
 
+import java.io.File;
 import java.util.List;
 
 import org.apache.maven.project.MavenProject;
@@ -10,6 +11,7 @@ import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.internal.project.MavenProjectFacade;
 import org.maven.ide.eclipse.internal.project.ProjectRegistry;
 import org.maven.ide.eclipse.internal.project.MutableProjectRegistry;
+import org.maven.ide.eclipse.internal.project.ProjectRegistryReader;
 import org.maven.ide.eclipse.project.MavenProjectChangedEvent;
 import org.maven.ide.eclipse.tests.common.AbstractMavenProjectTestCase;
 
@@ -143,6 +145,30 @@ public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
       //
     }
 
+  }
+
+  public void testDetectNoLongerExistingProjectsInWorkspaceState() throws Exception {
+    ProjectRegistry state = new ProjectRegistry();
+    MutableProjectRegistry delta = new MutableProjectRegistry(state);
+
+    IProject project = createExisting("dummy", "resources/dummy");
+    IFile pom = project.getFile("p1.xml");
+    delta.addProject(pom, newProjectFacade(pom));
+    state.apply(delta);
+
+    File tmpDir = File.createTempFile("m2e-" + getName(), "dir");
+    tmpDir.delete();
+    tmpDir.mkdir();
+    ProjectRegistryReader reader = new ProjectRegistryReader(tmpDir);
+    reader.writeWorkspaceState(state);
+
+    project.delete(true, true, monitor);
+
+    state = reader.readWorkspaceState(null);
+    assertFalse(state.isValid());
+
+    new File(tmpDir, "workspaceState.ser").delete();
+    tmpDir.delete();
   }
 
   private MavenProjectFacade newProjectFacade(IFile pom) throws Exception {
