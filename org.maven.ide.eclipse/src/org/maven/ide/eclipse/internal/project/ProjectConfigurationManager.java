@@ -53,8 +53,6 @@ import org.apache.maven.archetype.ArchetypeGenerationResult;
 import org.apache.maven.archetype.catalog.Archetype;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.repository.DefaultArtifactRepositoryFactory;
-import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Model;
@@ -536,8 +534,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
       }
   
       if (StringUtils.isNotBlank(artifactRemoteRepository)) {
-        ArtifactRepository archetypeRepository = new DefaultArtifactRepositoryFactory()
-        .createArtifactRepository("archetype", a.getRepository().trim(), new DefaultRepositoryLayout(), null, null);
+        ArtifactRepository archetypeRepository = maven.createArtifactRepository("archetype", a.getRepository().trim());
         repos.add(0,archetypeRepository);//If the archetype doesn't exist locally, this will be the first remote repo to be searched.
       }
     

@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -640,6 +641,24 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
         MavenLogger.log("Could not dispose of project extensions class realm", ex);
       }
     }
+  }
+
+  public ArtifactRepository createArtifactRepository(String id, String url) throws CoreException {
+    Repository repository = new Repository();
+    repository.setId(id);
+    repository.setUrl(url);
+    repository.setLayout("default");
+
+    ArtifactRepository repo;
+    try {
+      repo = repositorySystem.buildArtifactRepository(repository);
+      ArrayList<ArtifactRepository> repos = new ArrayList<ArtifactRepository>(Arrays.asList(repo));
+      injectSettings(repos);
+    } catch(InvalidRepositoryException ex) {
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
+          "Could not create artifact repository", ex));
+    }
+    return repo;
   }
 
   public List<ArtifactRepository> getArtifactRepositories() throws CoreException {

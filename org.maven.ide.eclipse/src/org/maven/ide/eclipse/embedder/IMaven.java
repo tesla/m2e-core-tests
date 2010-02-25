@@ -103,6 +103,8 @@ public interface IMaven {
 
   public void populateDefaults(MavenExecutionRequest request) throws CoreException;
 
+  public ArtifactRepository createArtifactRepository(String id, String url) throws CoreException;
+
   /**
    * Convenience method, fully equivalent to getArtifactRepositories(true)
    */

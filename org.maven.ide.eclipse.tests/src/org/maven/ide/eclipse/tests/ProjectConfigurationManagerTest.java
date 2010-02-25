@@ -4,11 +4,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
+import org.apache.maven.archetype.catalog.Archetype;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
@@ -17,6 +20,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
+import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.MavenProjectInfo;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
@@ -93,6 +97,30 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
         Job.getJobManager().removeJobChangeListener(jobChangeListener);
       }
       assertTrue("Dependency resolution was attempted from remote repository: " + requests, requests.isEmpty());
+    } finally {
+      mavenConfiguration.setUserSettingsFile(oldSettings);
+    }
+  }
+
+  public void testResolutionOfArchetypeFromRepository() throws Exception {
+    String oldSettings = mavenConfiguration.getUserSettingsFile();
+    try {
+      mavenConfiguration.setUserSettingsFile(new File("settingsWithDefaultRepos.xml").getAbsolutePath());
+
+      Archetype archetype = new Archetype();
+      archetype.setGroupId("org.maven.ide.eclipse.its");
+      archetype.setArtifactId("mngeclipse-2110");
+      archetype.setVersion("1.0");
+      archetype.setRepository("http://bad.host"); // should be mirrored by settings
+
+      IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("mngeclipse-2110");
+      ProjectImportConfiguration pic = new ProjectImportConfiguration(new ResolverConfiguration());
+
+      IProjectConfigurationManager manager = MavenPlugin.getDefault().getProjectConfigurationManager();
+      manager.createArchetypeProject(project, null, archetype, "m2e.its", "mngeclipse-2110", "1.0-SNAPSHOT", "jar",
+          new Properties(), pic, monitor);
+
+      assertTrue(project.isAccessible());
     } finally {
       mavenConfiguration.setUserSettingsFile(oldSettings);
     }
