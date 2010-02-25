@@ -22,6 +22,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunch;
 
 import org.maven.ide.eclipse.jobs.IBackgroundProcessingQueue;
 
@@ -106,7 +108,7 @@ public class JobHelpers {
   }
 
   private static void waitForBuildJobs() {
-    waitForJobs("(.*\\.AutoBuild.*)", 10000);
+    waitForJobs("(.*\\.AutoBuild.*)|(.*\\.DebugUIPlugin.*)", 15000);
   }
 
   private static void waitForJobs(String classNameRegex, int maxWaitMillis) {
@@ -121,6 +123,7 @@ public class JobHelpers {
         // ignore
       }
     }
+    Assert.fail("Timeout while waiting for completion of jobs: " + classNameRegex);
   }
 
   private static boolean hasJob(String classNameRegex) {
@@ -128,6 +131,33 @@ public class JobHelpers {
     for(Job job : jobs) {
       if(job.getClass().getName().matches(classNameRegex)) {
         return true;
+      }
+    }
+    return false;
+  }
+
+  public static void waitForLaunchesToComplete(int maxWaitMillis) {
+    final int waitMillis = 100;
+    for(int i = maxWaitMillis / waitMillis; i >= 0; i-- ) {
+      if(!hasActiveLaunch()) {
+        return;
+      }
+      try {
+        Thread.sleep(waitMillis);
+      } catch(InterruptedException e) {
+        // ignore
+      }
+    }
+    Assert.fail("Timeout while waiting for completion of launches");
+  }
+
+  private static boolean hasActiveLaunch() {
+    ILaunch[] launches = DebugPlugin.getDefault().getLaunchManager().getLaunches();
+    if(launches != null) {
+      for(ILaunch launch : launches) {
+        if(!launch.isTerminated()) {
+          return true;
+        }
       }
     }
     return false;

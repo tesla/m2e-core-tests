@@ -250,6 +250,9 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
     String settings = configuration.getAttribute(MavenLaunchConstants.ATTR_USER_SETTINGS, (String) null);
     if(settings == null || settings.trim().length() <= 0) {
       settings = mavenConfiguration.getUserSettingsFile();
+      if(settings != null && settings.trim().length() > 0 && !new File(settings.trim()).exists()) {
+        settings = null;
+      }
     }
     if(settings != null && settings.trim().length() > 0) {
       sb.append(" -s ").append(quote(settings));

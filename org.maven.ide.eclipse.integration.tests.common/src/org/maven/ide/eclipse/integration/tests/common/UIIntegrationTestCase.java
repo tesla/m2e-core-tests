@@ -279,6 +279,10 @@ public abstract class UIIntegrationTestCase {
 		JobHelpers.waitForJobsToComplete();
 	}
 
+  protected static void waitForAllLaunchesToComplete(int maxWaitMillis) {
+    JobHelpers.waitForLaunchesToComplete(maxWaitMillis);
+  }
+
 	protected void createNewFolder(String projectName, String folderName) {
 		// Add a new src folder with simple source file
 		SWTBotTree tree = selectProject(projectName, true);
