@@ -3,15 +3,17 @@
 		<proxy>
 			<active>true</active>
 			<protocol>http</protocol>
-			<host>repository.sonatype.org</host>
-			<port>80</port>
+			<host>localhost</host>
+			<port>@port.http@</port>
+			<username>proxyuser</username>
+			<password>proxypass</password>
 		</proxy>
 	</proxies>
 	<mirrors>
 		<mirror>
 			<id>nexus</id>
 			<mirrorOf>external:*</mirrorOf>
-			<url>http://bad.host/content/repositories/eclipse</url>
+			<url>http://bad.host/remoterepo</url>
 		</mirror>
 	</mirrors>
 </settings>

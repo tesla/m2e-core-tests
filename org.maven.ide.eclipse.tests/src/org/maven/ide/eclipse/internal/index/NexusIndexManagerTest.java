@@ -11,6 +11,7 @@ package org.maven.ide.eclipse.internal.index;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +30,8 @@ import org.maven.ide.eclipse.project.MavenProjectChangedEvent;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 import org.maven.ide.eclipse.repository.IRepository;
 import org.maven.ide.eclipse.repository.IRepositoryRegistry;
+import org.maven.ide.eclipse.tests.common.FileHelpers;
+import org.maven.ide.eclipse.tests.common.HttpServer;
 import org.sonatype.nexus.index.ArtifactInfo;
 
 
@@ -338,14 +341,24 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
 //  }
 
   public void testMngEclipse1710() throws Exception {
-    final File settingsFile = new File("src/org/maven/ide/eclipse/internal/index/proxy_settings.xml");
-    assertTrue(settingsFile.exists());
+    HttpServer httpServer = new HttpServer();
+    httpServer.addResources("/", "");
+    httpServer.setProxyAuth("proxyuser", "proxypass");
+    httpServer.start();
+    try {
+      final File settingsFile = new File("target/settings-mngeclipse-1710.xml");
+      FileHelpers.filterXmlFile(new File("src/org/maven/ide/eclipse/internal/index/proxy_settings.xml"), settingsFile,
+          Collections.singletonMap("@port.http@", Integer.toString(httpServer.getHttpPort())));
+      assertTrue(settingsFile.exists());
 
-    mavenConfiguration.setUserSettingsFile(settingsFile.getCanonicalPath());
-    waitForJobsToComplete();
+      mavenConfiguration.setUserSettingsFile(settingsFile.getCanonicalPath());
+      waitForJobsToComplete();
 
-    IndexedArtifactGroup[] rootGroups = indexManager.getRootGroups(getRepository("http://bad.host/content/repositories/eclipse"));
-    assertTrue(rootGroups.length > 0);
+      IndexedArtifactGroup[] rootGroups = indexManager.getRootGroups(getRepository("http://bad.host/remoterepo"));
+      assertTrue(rootGroups.length > 0);
+    } finally {
+      httpServer.stop();
+    }
   }
 
   public void testMngEclipse1907() throws Exception {
