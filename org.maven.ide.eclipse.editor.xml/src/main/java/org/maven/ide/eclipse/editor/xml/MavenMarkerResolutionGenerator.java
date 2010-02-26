@@ -14,6 +14,7 @@ import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.IMarkerResolutionGenerator;
 
 import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.core.MavenLogger;
 
 
 /**
@@ -27,7 +28,14 @@ public class MavenMarkerResolutionGenerator implements IMarkerResolutionGenerato
    * @see org.eclipse.ui.IMarkerResolutionGenerator#getResolutions(org.eclipse.core.resources.IMarker)
    */
   public IMarkerResolution[] getResolutions(IMarker marker) {
-    if(IMavenConstants.MARKER_ID.equals(marker.getId())) {
+    String type;
+    try {
+      type = marker.getType();
+    } catch(CoreException e) {
+      MavenLogger.log(e);
+      type = "";
+    }
+    if(IMavenConstants.MARKER_ID.equals(type)) {
       Integer offset = (Integer) marker.getAttribute("offset", -1);
       //only provide a quickfix for the schema marker
       if(offset != -1) {

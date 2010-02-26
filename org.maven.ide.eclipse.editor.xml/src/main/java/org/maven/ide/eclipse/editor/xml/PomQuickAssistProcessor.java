@@ -16,7 +16,6 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext;
 import org.eclipse.jface.text.quickassist.IQuickAssistProcessor;
 import org.eclipse.jface.text.source.Annotation;
-import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
@@ -32,7 +31,7 @@ public class PomQuickAssistProcessor implements IQuickAssistProcessor {
 
   public static final String PROJECT_NODE = "project";
   public static final String XSI_VALUE = " xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"+
-  "xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd\"";
+  "xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\"";
   public static final String NO_SCHEMA_ERR = "There is no schema defined for this pom.xml. Code completion will not work without a schema defined.";
   
   public boolean canAssist(IQuickAssistInvocationContext arg0) {
@@ -44,11 +43,9 @@ public class PomQuickAssistProcessor implements IQuickAssistProcessor {
   }
   
   public ICompletionProposal[] computeQuickAssistProposals(IQuickAssistInvocationContext context) {
-    IAnnotationModel annotationModel = context.getSourceViewer().getAnnotationModel();
-    // TODO Auto-generated method stub
-   Iterator annotationIterator = context.getSourceViewer().getAnnotationModel().getAnnotationIterator();
+   Iterator<Annotation> annotationIterator = context.getSourceViewer().getAnnotationModel().getAnnotationIterator();
    while(annotationIterator.hasNext()){
-     Annotation annotation = (Annotation)annotationIterator.next();
+     Annotation annotation = annotationIterator.next();
      if(NO_SCHEMA_ERR.equals(annotation.getText())){
        IDOMNode node = (IDOMNode) ContentAssistUtils.getNodeAt(context.getSourceViewer(), context.getOffset());
        if(node != null && PROJECT_NODE.equals(node.getNodeName())){
