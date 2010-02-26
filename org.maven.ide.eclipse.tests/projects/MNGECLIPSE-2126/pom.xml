@@ -1,0 +1,40 @@
+<project>
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.maven.ide.eclipse.its</groupId>
+  <artifactId>proxy</artifactId>
+  <version>1.0</version>
+  <packaging>m2e-test</packaging>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.maven.ide.eclipse.its.mngeclipse-2126</groupId>
+      <artifactId>dep</artifactId>
+      <version>0.1</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.maven.ide.eclipse.its.mngeclipse-2126</groupId>
+        <artifactId>ext</artifactId>
+        <version>0.1</version>
+        <extensions>true</extensions>
+      </plugin>
+      <plugin>
+        <groupId>org.maven.ide.eclipse.its.mngeclipse-2126</groupId>
+        <artifactId>plugin</artifactId>
+        <version>0.1</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>touch</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

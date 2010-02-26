@@ -15,8 +15,14 @@ import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
+import java.util.Map;
 
 import org.codehaus.plexus.util.FileUtils;
+import org.codehaus.plexus.util.IOUtil;
+import org.codehaus.plexus.util.ReaderFactory;
+import org.codehaus.plexus.util.WriterFactory;
 
 
 public class FileHelpers {
@@ -66,6 +72,38 @@ public class FileHelpers {
 
     out.close();
     in.close();
+  }
+
+  public static void filterXmlFile(File src, File dst, Map<String, String> tokens) throws IOException {
+    String text;
+
+    Reader reader = ReaderFactory.newXmlReader(src);
+    try {
+      text = IOUtil.toString(reader);
+    } finally {
+      reader.close();
+    }
+
+    for(String token : tokens.keySet()) {
+      text = text.replace(token, tokens.get(token));
+    }
+
+    dst.getParentFile().mkdirs();
+    Writer writer = WriterFactory.newXmlWriter(dst);
+    try {
+      writer.write(text);
+    } finally {
+      writer.close();
+    }
+  }
+
+  public static boolean deleteDirectory(File directory) {
+    try {
+      FileUtils.deleteDirectory(directory);
+      return true;
+    } catch(IOException e) {
+      return false;
+    }
   }
 
 }

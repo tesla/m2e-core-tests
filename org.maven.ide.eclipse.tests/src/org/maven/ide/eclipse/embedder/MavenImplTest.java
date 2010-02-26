@@ -4,6 +4,7 @@ package org.maven.ide.eclipse.embedder;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.maven.artifact.Artifact;
@@ -24,6 +25,8 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.internal.embedder.MavenImpl;
 import org.maven.ide.eclipse.internal.repository.RepositoryRegistry;
 import org.maven.ide.eclipse.tests.common.AbstractMavenProjectTestCase;
+import org.maven.ide.eclipse.tests.common.FileHelpers;
+import org.maven.ide.eclipse.tests.common.HttpServer;
 
 
 public class MavenImplTest extends AbstractMavenProjectTestCase {
@@ -261,7 +264,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
       request.getProjectBuildingRequest().setResolveDependencies(true);
       request.setPom(new File("projects/dependencies/pom.xml"));
       MavenExecutionResult result = maven.readProject(request, monitor);
-      assertFalse(result.hasExceptions());
+      assertFalse(result.getExceptions().toString(), result.hasExceptions());
       assertFalse(result.getArtifactResolutionResult().getMissingArtifacts().toString(), result
           .getArtifactResolutionResult().hasMissingArtifacts());
       assertFalse(result.getArtifactResolutionResult().hasExceptions());
@@ -270,6 +273,44 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
       assertEquals(result.getProject().getArtifacts().toString(), 2, result.getProject().getArtifacts().size());
     } finally {
       configuration.setUserSettingsFile(origSettings);
+    }
+  }
+
+  public void testProxySupport() throws Exception {
+    FileHelpers.deleteDirectory(new File("target/localrepo/org/maven/ide/eclipse/its/mngeclipse-2126"));
+
+    HttpServer httpServer = new HttpServer();
+    httpServer.addResources("/", "");
+    httpServer.addSecuredRealm("/remoterepo/*", "auth");
+    httpServer.addUser("testuser", "testpass", "auth");
+    httpServer.setProxyAuth("proxyuser", "proxypass");
+    httpServer.start();
+
+    String origSettings = configuration.getUserSettingsFile();
+    try {
+      File settingsFile = new File("target/settings-mngeclipse-2126.xml");
+      FileHelpers.filterXmlFile(new File("projects/MNGECLIPSE-2126/settings-template.xml"), settingsFile, Collections
+          .singletonMap("@port.http@", Integer.toString(httpServer.getHttpPort())));
+      configuration.setUserSettingsFile(settingsFile.getCanonicalPath());
+
+      MavenExecutionRequest request = maven.createExecutionRequest(monitor);
+      request.getProjectBuildingRequest().setResolveDependencies(true);
+      request.setPom(new File("projects/MNGECLIPSE-2126/pom.xml"));
+      MavenExecutionResult result = maven.readProject(request, monitor);
+      assertFalse(result.getExceptions().toString(), result.hasExceptions());
+      assertFalse(result.getArtifactResolutionResult().getMissingArtifacts().toString(), result
+          .getArtifactResolutionResult().hasMissingArtifacts());
+      assertFalse(result.getArtifactResolutionResult().hasExceptions());
+      assertNotNull(result.getProject());
+      assertNotNull(result.getProject().getArtifacts());
+      assertEquals(result.getProject().getArtifacts().toString(), 1, result.getProject().getArtifacts().size());
+
+      request.setGoals(Arrays.asList("verify"));
+      MavenExecutionPlan plan = maven.calculateExecutionPlan(request, result.getProject(), monitor);
+      assertEquals(plan.getExecutions().toString(), 2, plan.getExecutions().size());
+    } finally {
+      configuration.setUserSettingsFile(origSettings);
+      httpServer.stop();
     }
   }
 

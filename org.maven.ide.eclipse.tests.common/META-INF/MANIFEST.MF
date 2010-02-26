@@ -15,7 +15,10 @@ Require-Bundle: org.junit,
 Eclipse-LazyStart: true
 Bundle-RequiredExecutionEnvironment: J2SE-1.5,
  JavaSE-1.6
-Bundle-ClassPath: .
+Bundle-ClassPath: .,
+ jars/servlet-api-2.5-20081211.jar,
+ jars/jetty-util-6.1.22.jar,
+ jars/jetty-6.1.22.jar
 Bundle-Vendor: Sonatype, Inc.
 MavenArtifact-GroupId: org.maven.ide.eclipse
 MavenArtifact-ArtifactId: org.maven.ide.eclipse.tests.common
