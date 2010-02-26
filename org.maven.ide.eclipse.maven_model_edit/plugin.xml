@@ -24,6 +24,8 @@
     <catalogContribution>
       <system systemId="http://maven.apache.org/maven-v4_0_0.xsd"
               uri="xsd/maven-v4_0_0.xsd"/>
+      <system systemId="http://maven.apache.org/xsd/maven-4.0.0.xsd"
+              uri="xsd/maven-v4_0_0.xsd"/>
       <system systemId="http://maven.apache.org/xsd/settings-1.0.0.xsd"
               uri="xsd/settings-v1_0_0.xsd"/>
       <system systemId="http://maven.apache.org/xsd/profiles-1.0.0.xsd"

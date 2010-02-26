@@ -268,7 +268,7 @@ public class MavenModelManagerTest extends TestCase {
 
     testCreateMavenModel("<project xmlns=\"http://maven.apache.org/POM/4.0.0\" " + //
         "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " + // 
-        "xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd\">\n" + // 
+        "xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" + // 
         "  <modelVersion>4.0.0</modelVersion>\n" + //
         "  <groupId>org.sonatype.projects</groupId>\n" + // 
         "  <artifactId>foo</artifactId>\n" + //
@@ -303,7 +303,7 @@ public class MavenModelManagerTest extends TestCase {
 
     assertEquals("<project xmlns=\"http://maven.apache.org/POM/4.0.0\" " //
         + "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " //
-        + "xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd\">\n" //
+        + "xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" //
         + "  <modelVersion>4.0.0</modelVersion>\n" //
         + "  <groupId>org.sonatype.projects</groupId>\n" //
         + "  <artifactId>foo</artifactId>\n" //
@@ -331,8 +331,7 @@ public class MavenModelManagerTest extends TestCase {
 //
 //  Map<Object, Object> loadOptions = new HashMap<Object, Object>();
 //  loadOptions.put(XMLResource.XML_NS, "http://maven.apache.org/POM/4.0.0");
-//  loadOptions.put(XMLResource.XML_SCHEMA_URI, "http://maven.apache.org/maven-v4_0_0.xsd");
-//  loadOptions.put(XMLResource.XML_NS, "http://maven.apache.org/maven-v4_0_0.xsd");
+//  loadOptions.put(XMLResource.XML_SCHEMA_URI, "http://maven.apache.org/xsd/maven-4.0.0.xsd");
 //  
 //  ExtendedMetaData extendedMetaData = new BasicExtendedMetaData();
 //  extendedMetaData.setDocumentRoot(PomPackage.eINSTANCE.getDocumentRoot());
@@ -346,7 +345,7 @@ public class MavenModelManagerTest extends TestCase {
 //  // xmlOptions.setProcessAnyXML(true);
 //  xmlOptions.setProcessSchemaLocations(true);
 //  
-//  xmlOptions.setExternalSchemaLocations(Collections.singletonMap("http://maven.apache.org/POM/4.0.0", URI.createURI("http://maven.apache.org/maven-v4_0_0.xsd")));
+//  xmlOptions.setExternalSchemaLocations(Collections.singletonMap("http://maven.apache.org/POM/4.0.0", URI.createURI("http://maven.apache.org/xsd/maven-4.0.0.xsd")));
 //  
 //  loadOptions.put(XMLResource.OPTION_XML_OPTIONS, xmlOptions);    
 //  

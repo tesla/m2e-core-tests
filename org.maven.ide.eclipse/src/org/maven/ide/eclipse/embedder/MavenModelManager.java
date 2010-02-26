@@ -141,7 +141,7 @@ public class MavenModelManager {
       Document document = documentBuilder.parse(new ByteArrayInputStream(buf.toByteArray()));
       Element documentElement = document.getDocumentElement();
 
-      NamedNodeMap attributes = document.getAttributes();
+      NamedNodeMap attributes = documentElement.getAttributes();
 
       if(attributes == null || attributes.getNamedItem("xmlns") == null) {
         Attr attr = document.createAttribute("xmlns");
@@ -157,7 +157,7 @@ public class MavenModelManager {
 
       if(attributes == null || attributes.getNamedItem("xsi:schemaLocation") == null) {
         Attr attr = document.createAttributeNS("http://www.w3.org/2001/XMLSchema-instance", "xsi:schemaLocation");
-        attr.setTextContent("http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd");
+        attr.setTextContent("http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd");
         documentElement.setAttributeNode(attr);
       }
       
@@ -295,7 +295,7 @@ public class MavenModelManager {
 //
 //      // xmlns="http://maven.apache.org/POM/4.0.0" 
 //      // xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-//      // xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"      
+//      // xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"      
 //      
 ////      XmlCursor cursor = project.newCursor();
 ////      cursor.toNextToken();
@@ -308,7 +308,7 @@ public class MavenModelManager {
 ////      cursor.insertNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
 ////      cursor.insertAttributeWithValue( //
 ////          new QName("http://www.w3.org/2001/XMLSchema-instance", "schemaLocation", "xsi"), uri
-////              + " http://maven.apache.org/maven-v4_0_0.xsd");
+////              + " http://maven.apache.org/xsd/maven-4.0.0.xsd");
 //    }
 //
 //  }
