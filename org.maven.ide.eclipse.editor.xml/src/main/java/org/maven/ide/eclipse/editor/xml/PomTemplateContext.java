@@ -8,44 +8,28 @@
 
 package org.maven.ide.eclipse.editor.xml;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.descriptor.MojoDescriptor;
 import org.apache.maven.plugin.descriptor.Parameter;
 import org.apache.maven.plugin.descriptor.PluginDescriptor;
-import org.apache.maven.plugin.descriptor.PluginDescriptorBuilder;
-import org.codehaus.plexus.util.IOUtil;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.persistence.TemplateStore;
 
-import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.editor.xml.search.ArtifactInfo;
 import org.maven.ide.eclipse.editor.xml.search.Packaging;
 import org.maven.ide.eclipse.editor.xml.search.SearchEngine;
-import org.maven.ide.eclipse.embedder.IMaven;
 
 
 /**
@@ -81,7 +65,6 @@ public enum PomTemplateContext {
   REPOSITORIES("repositories"), //
   
   CONFIGURATION("configuration") {
-    private final Map<String, PluginDescriptor> descriptors = new HashMap<String, PluginDescriptor>();
 
     @Override
     protected void addTemplates(IProject project, Collection<Template> proposals, Node node, String prefix) throws CoreException {
@@ -104,13 +87,11 @@ public enum PomTemplateContext {
         version = versions.iterator().next();
       }
       
-      PluginDescriptor descriptor = getPluginDescriptor(groupId, artifactId, version);
+      PluginDescriptor descriptor = PomTemplateContextUtil.INSTANCE.getPluginDescriptor(groupId, artifactId, version);
       if(descriptor!=null) {
-        @SuppressWarnings("unchecked")
         List<MojoDescriptor> mojos = descriptor.getMojos();
         HashSet<String> params = new HashSet<String>();
         for(MojoDescriptor mojo : mojos) {
-          @SuppressWarnings("unchecked")
           List<Parameter> parameters = (List<Parameter>) mojo.getParameters();
           for(Parameter parameter : parameters) {
             boolean editable = parameter.isEditable();
@@ -142,67 +123,6 @@ public enum PomTemplateContext {
           }
         }
       }
-    }
-
-    private PluginDescriptor getPluginDescriptor(String groupId, String artifactId, String version) {
-      String name = groupId + ":" + artifactId + ":" + version;
-      PluginDescriptor descriptor = descriptors.get(name);
-      if(descriptor!=null) {
-        return descriptor;
-      }
-      
-      MavenPlugin plugin = MavenPlugin.getDefault();
-      MavenConsole console = plugin.getConsole();
-      try {
-        IMaven embedder = MavenPlugin.lookup(IMaven.class);
-
-        List<ArtifactRepository> repositories = embedder.getArtifactRepositories();
-
-        Artifact artifact = embedder.resolve(groupId, artifactId, version, "maven-plugin", null,  repositories, null);
-
-        File file = artifact.getFile();
-        if(file == null) {
-          String msg = "Can't resolve plugin " + name;
-          console.logError(msg);
-        } else {
-          InputStream is = null;
-          ZipFile zf = null;
-          try {
-            zf = new ZipFile(file);
-            ZipEntry entry = zf.getEntry("META-INF/maven/plugin.xml");
-            if(entry != null) {
-              is = zf.getInputStream(entry);
-              PluginDescriptorBuilder builder = new PluginDescriptorBuilder();
-              descriptor = builder.build(new InputStreamReader(is));
-              descriptors.put(name, descriptor);
-              return descriptor;
-            }
-
-          } catch(Exception ex) {
-            String msg = "Can't read configuration for " + name;
-            console.logError(msg);
-            MavenLogger.log(msg, ex);
-
-          } finally {
-            IOUtil.close(is);
-            try {
-              zf.close();
-            } catch(IOException ex) {
-              // ignore
-            }
-          }
-        }
-
-      } catch(CoreException ex) {
-        IStatus status = ex.getStatus();
-        if(status.getException() != null) {
-          console.logError(status.getMessage() + "; " + status.getException().getMessage());
-        } else {
-          console.logError(status.getMessage());
-        }
-        MavenLogger.log(ex);
-      }
-      return null;
     }
   },
   
@@ -349,6 +269,49 @@ public enum PomTemplateContext {
       add(proposals, contextTypeId, "site", "Generates the project's site documentation");
       add(proposals, contextTypeId, "post-site", "Executes processes needed to finalize the site generation, and to prepare for site deployment");
       add(proposals, contextTypeId, "site-deploy", "Deploys the generated site documentation to the specified web server");
+    }
+  },
+
+  GOAL("goal") {
+    @Override
+    public void addTemplates(IProject project, Collection<Template> proposals, Node node, String prefix)  throws CoreException {
+      if(!"goals".equals(node.getParentNode().getNodeName())) {
+        return;
+      }
+      node = node.getParentNode();
+      if(!"execution".equals(node.getParentNode().getNodeName())) {
+        return;
+      }
+      node = node.getParentNode();
+      if(!"executions".equals(node.getParentNode().getNodeName())) {
+        return;
+      }
+      node = node.getParentNode();
+
+      String groupId = getGroupId(node);
+      if(groupId==null) {
+        groupId = "org.apache.maven.plugins";
+      }
+      String artifactId = getArtifactId(node);
+      String version = getVersion(node);
+      if(version==null) {
+        Collection<String> versions = getSearchEngine(project).findVersions(groupId, artifactId, "", Packaging.PLUGIN);
+        if(versions.isEmpty()) {
+          return;
+        }
+        version = versions.iterator().next();
+      }
+      
+      PluginDescriptor descriptor = PomTemplateContextUtil.INSTANCE.getPluginDescriptor(groupId, artifactId, version);
+      if (descriptor != null) {
+        List<MojoDescriptor> mojos = descriptor.getMojos();
+        if (mojos != null) {
+          String contextTypeId = getContextTypeId();
+          for (MojoDescriptor mojo : mojos) {
+            add(proposals, contextTypeId, mojo.getGoal(), mojo.getDescription());
+          }
+        }
+      }
     }
   };
 

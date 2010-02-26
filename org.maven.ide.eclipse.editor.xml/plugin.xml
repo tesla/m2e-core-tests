@@ -121,6 +121,10 @@
       class="org.eclipse.jface.text.templates.TemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.phase"/>
 
+    <contextType name="Goal"
+      class="org.eclipse.jface.text.templates.TemplateContextType"
+      id="org.maven.ide.eclipse.editor.xml.templates.contextType.goal"/>
+
     <template id="org.maven.ide.eclipse.editor.xml.templates.project.skeleton"
          contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.#document"
          name="project" 

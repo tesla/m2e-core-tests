@@ -110,4 +110,22 @@ public class PomTemplateContextTest extends AbstractMavenProjectTestCase {
     assertContextTypeId(PREFIX + "configuration", templates);
   }
 
+  public void testGetTemplatesGoal() throws Exception {
+    Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+    Element plugin = doc.createElement("plugin");
+    addNode(plugin, "artifactId", "maven-clean-plugin");
+    addNode(plugin, "version", "2.4");
+    Element goal = addNode(addNode(addNode(addNode(plugin, "executions"), "execution"), "goals"), "goal");
+
+    PomTemplateContext context = PomTemplateContext.fromNodeName("goal");
+
+    assertNotNull(context);
+    assertSame(PomTemplateContext.GOAL, context);
+
+    Template[] templates = context.getTemplates(null, goal, "");
+    assertNotNull(templates);
+    assertEquals(2, templates.length);
+    assertContextTypeId(PREFIX + "goal", templates);
+  }
+
 }
