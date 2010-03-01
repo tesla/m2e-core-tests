@@ -16,7 +16,9 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.swt.SWT;
+import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotEclipseEditor;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
 import org.junit.Test;
 import org.maven.ide.eclipse.integration.tests.common.ContextMenuHelper;
@@ -301,6 +303,37 @@ public class PomEditorTest extends PomEditorTestBase {
 
     // test the editor is clean
     waitForEditorDirtyState(editor, false);
+  }
+
+  /*
+   * Verify that the POM XML editor is smart enough to offer proper content assist even if the POM does not explicitly
+   * declare a schema (MNGECLIPSE-1770).
+   */
+  @Test
+  public void testContentAssistWithoutSchema() throws Exception {
+    String name = PROJECT_NAME + "/ca.pom";
+    String str = "<project>\n" //
+        + "<modelVersion>4.0.0</modelVersion>\n" //
+        + "<groupId>test</groupId>\n" //
+        + "<artifactId>ca</artifactId>\n" //
+        + "<packaging>jar</packaging>\n" //
+        + "<version>0.0.1-SNAPSHOT</version>\n" //
+        + "<build>\n" //
+        + "</build>\n" //
+        + "</project>\n";
+    createFile(name, str);
+
+    openPomFile(name);
+
+    selectEditorTab(TAB_POM_XML);
+    findText("</build>");
+
+    SWTBotEclipseEditor editor = bot.activeEditor().toTextEditor();
+    editor.pressShortcut(KeyStroke.getInstance(SWT.ARROW_LEFT));
+    editor.pressShortcut(SWT.CTRL, ' ');
+    editor.pressShortcut(KeyStroke.getInstance(SWT.LF));
+    String text = editor.getText();
+    assertTrue(text, text.contains("<defaultGoal>"));
   }
 
   private void waitForEditorDirtyState(MavenPomEditor editor, boolean dirtyState) {
