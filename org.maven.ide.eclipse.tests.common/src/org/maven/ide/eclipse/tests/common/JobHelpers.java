@@ -108,7 +108,7 @@ public class JobHelpers {
   }
 
   private static void waitForBuildJobs() {
-    waitForJobs("(.*\\.AutoBuild.*)|(.*\\.DebugUIPlugin.*)", 15000);
+    waitForJobs("(.*\\.AutoBuild.*)|(.*\\.DebugUIPlugin.*)", 30000);
   }
 
   private static void waitForJobs(String classNameRegex, int maxWaitMillis) {
