@@ -136,12 +136,14 @@ public abstract class UIIntegrationTestCase {
 		SWTBotPreferences.KEYBOARD_LAYOUT = "EN_US";
 
 		// close the Welcome view if it's open
-		SWTBotView view = bot.activeView();
-		if (view != null
-				&& "org.eclipse.ui.internal.introview".equals(view
-						.getViewReference().getId())) {
-			view.close();
-		}
+    try {
+      SWTBotView view = bot.activeView();
+      if(view != null && "org.eclipse.ui.internal.introview".equals(view.getViewReference().getId())) {
+        view.close();
+      }
+    } catch(WidgetNotFoundException e) {
+      // no active view
+    }
 
 		SWTBotShell[] shells = bot.shells();
 		for (SWTBotShell shell : shells) {
