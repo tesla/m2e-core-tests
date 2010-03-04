@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.model.PluginExecution;
 import org.apache.maven.plugin.MojoExecution;
 
 import org.maven.ide.eclipse.MavenPlugin;
@@ -169,8 +170,17 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
     }
   }
 
+  @Deprecated
   protected <T> T getParameterValue(MavenSession session, MojoExecution execution, String parameter, Class<T> asType) throws CoreException {
     return maven.getMojoParameterValue(session, execution, parameter, asType);
+  }
+
+  protected <T> T getParameterValue(String parameter, Class<T> asType, MavenSession session, MojoExecution mojoExecution)
+      throws CoreException {
+    PluginExecution execution = new PluginExecution();
+    execution.setConfiguration(mojoExecution.getConfiguration());
+    return maven.getMojoParameterValue(parameter, asType, session, mojoExecution.getPlugin(), execution, mojoExecution
+        .getGoal());
   }
 
   protected void assertHasNature(IProject project, String natureId) throws CoreException {
