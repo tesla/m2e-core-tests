@@ -37,8 +37,11 @@
         <configuration>
           <mappingId>customizable</mappingId>
           <configurators>
-            <!-- NOTE: Disable any other configurators which might suffer the same issue and fail the test -->
             <configurator id="org.maven.ide.eclipse.jdt.javaConfigurator" />
+            <configurator id="org.maven.ide.eclipse.buildhelper.buildhelperConfigurator" />
+            <configurator id="org.maven.ide.eclipse.modello.modelloConfigurator" />
+            <configurator id="org.maven.ide.eclipse.antlr.antlrConfigurator" />
+            <configurator id="org.maven.ide.eclipse.mavenarchiver.pomProperties" />
           </configurators>
         </configuration>
       </plugin>

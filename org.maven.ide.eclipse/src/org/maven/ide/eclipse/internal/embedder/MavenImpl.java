@@ -82,6 +82,10 @@ import org.apache.maven.plugin.PluginNotFoundException;
 import org.apache.maven.plugin.PluginParameterExpressionEvaluator;
 import org.apache.maven.plugin.PluginResolutionException;
 import org.apache.maven.plugin.descriptor.MojoDescriptor;
+import org.apache.maven.plugin.version.DefaultPluginVersionRequest;
+import org.apache.maven.plugin.version.PluginVersionRequest;
+import org.apache.maven.plugin.version.PluginVersionResolutionException;
+import org.apache.maven.plugin.version.PluginVersionResolver;
 import org.apache.maven.project.DuplicateProjectException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuilder;
@@ -150,6 +154,8 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
 
   private final LifecycleExecutor lifecycleExecutor;
 
+  private final PluginVersionResolver pluginVersionResolver;
+
   private final ConverterLookup converterLookup = new DefaultConverterLookup();
   
   private final MavenConsole console;
@@ -172,6 +178,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
       this.populator = plexus.lookup(MavenExecutionRequestPopulator.class);
       this.pluginManager = plexus.lookup(BuildPluginManager.class);
       this.lifecycleExecutor = plexus.lookup(LifecycleExecutor.class);
+      this.pluginVersionResolver = plexus.lookup(PluginVersionResolver.class);
     } catch(ComponentLookupException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
           "Could not lookup required component", ex));
@@ -928,4 +935,17 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
   public RepositorySystem getRepositorySystem() {
     return repositorySystem;
   }
+
+  public String resolvePluginVersion(String groupId, String artifactId, MavenSession session) throws CoreException {
+    Plugin plugin = new Plugin();
+    plugin.setGroupId(groupId);
+    plugin.setArtifactId(artifactId);
+    PluginVersionRequest request = new DefaultPluginVersionRequest(plugin, session);
+    try {
+      return pluginVersionResolver.resolve(request).getVersion();
+    } catch(PluginVersionResolutionException ex) {
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, ex.getMessage(), ex));
+    }
+  }
+
 }

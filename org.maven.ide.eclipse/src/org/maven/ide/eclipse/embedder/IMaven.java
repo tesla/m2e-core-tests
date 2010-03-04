@@ -176,4 +176,7 @@ public interface IMaven {
    *  Sort projects by build order
    */
   public List<MavenProject> getSortedProjects(List<MavenProject> projects) throws CoreException;
+
+  public String resolvePluginVersion(String groupId, String artifactId, MavenSession session) throws CoreException;
+
 }
