@@ -185,7 +185,7 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
 
   protected void assertHasNature(IProject project, String natureId) throws CoreException {
     if (project.getNature(natureId) == null) {
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Project does not have required natute " + natureId, null));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Project does not have required nature " + natureId, null));
     }
   }
 
