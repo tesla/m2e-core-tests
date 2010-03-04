@@ -261,7 +261,9 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
         throw new OperationCanceledException();
       }
       progress.subTask("Updating configuration for "+facade.getProject().getName());
-      ProjectConfigurationRequest request = new ProjectConfigurationRequest(facade, facade.getMavenProject(subProgress.newChild(5)), createMavenSession(facade, subProgress.newChild(5)), false /*updateSources*/);
+      MavenProject mavenProject = facade.getMavenProject(subProgress.newChild(5));
+      MavenSession mavenSession = createMavenSession(facade, subProgress.newChild(5));
+      ProjectConfigurationRequest request = new ProjectConfigurationRequest(facade, mavenProject, mavenSession, false /*updateSources*/);
       updateProjectConfiguration(request, subProgress.newChild(90));
     }
   }

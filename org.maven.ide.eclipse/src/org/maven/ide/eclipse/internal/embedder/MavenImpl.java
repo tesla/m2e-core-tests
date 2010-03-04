@@ -52,6 +52,7 @@ import org.apache.maven.Maven;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.InvalidRepositoryException;
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.repository.DefaultRepositoryRequest;
 import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
 import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
 import org.apache.maven.execution.DefaultMavenExecutionRequest;
@@ -63,15 +64,21 @@ import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.lifecycle.LifecycleExecutor;
 import org.apache.maven.lifecycle.MavenExecutionPlan;
+import org.apache.maven.model.ConfigurationContainer;
 import org.apache.maven.model.Model;
+import org.apache.maven.model.Plugin;
 import org.apache.maven.model.Profile;
 import org.apache.maven.model.Repository;
 import org.apache.maven.model.building.ModelBuildingRequest;
 import org.apache.maven.model.io.ModelReader;
 import org.apache.maven.model.io.ModelWriter;
 import org.apache.maven.plugin.BuildPluginManager;
+import org.apache.maven.plugin.InvalidPluginDescriptorException;
 import org.apache.maven.plugin.MojoExecution;
+import org.apache.maven.plugin.MojoNotFoundException;
+import org.apache.maven.plugin.PluginDescriptorParsingException;
 import org.apache.maven.plugin.PluginManagerException;
+import org.apache.maven.plugin.PluginNotFoundException;
 import org.apache.maven.plugin.PluginParameterExpressionEvaluator;
 import org.apache.maven.plugin.PluginResolutionException;
 import org.apache.maven.plugin.descriptor.MojoDescriptor;
@@ -625,6 +632,74 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
           "Could not get mojo execution paramater value", ex));
     } catch(PluginResolutionException ex) {
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
+          "Could not get mojo execution paramater value", ex));
+    }
+  }
+
+  public <T> T getMojoParameterValue(String parameter, Class<T> type, MavenSession session, Plugin plugin,
+      ConfigurationContainer configuration, String goal) throws CoreException {
+    Xpp3Dom config = (Xpp3Dom) configuration.getConfiguration();
+    config = (config != null) ? config.getChild(parameter) : null;
+
+    PlexusConfiguration paramConfig = null;
+
+    if(config == null) {
+      MojoDescriptor mojoDescriptor;
+
+      DefaultRepositoryRequest request = new DefaultRepositoryRequest();
+      request.setCache(session.getRepositoryCache());
+      request.setLocalRepository(session.getLocalRepository());
+      request.setRemoteRepositories(session.getCurrentProject().getPluginArtifactRepositories());
+      request.setOffline(session.isOffline());
+      request.setForceUpdate(session.getRequest().isUpdateSnapshots());
+      request.setTransferListener(session.getRequest().getTransferListener());
+
+      try {
+        mojoDescriptor = pluginManager.getMojoDescriptor(plugin, goal, request);
+      } catch(PluginNotFoundException ex) {
+        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
+            "Could not get mojo execution paramater value", ex));
+      } catch(PluginResolutionException ex) {
+        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
+            "Could not get mojo execution paramater value", ex));
+      } catch(PluginDescriptorParsingException ex) {
+        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
+            "Could not get mojo execution paramater value", ex));
+      } catch(MojoNotFoundException ex) {
+        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
+            "Could not get mojo execution paramater value", ex));
+      } catch(InvalidPluginDescriptorException ex) {
+        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
+            "Could not get mojo execution paramater value", ex));
+      }
+
+      PlexusConfiguration defaultConfig = mojoDescriptor.getMojoConfiguration();
+      if(defaultConfig != null) {
+        paramConfig = defaultConfig.getChild(parameter, false);
+      }
+    } else {
+      paramConfig = new XmlPlexusConfiguration(config);
+    }
+
+    if(paramConfig == null) {
+      return null;
+    }
+
+    try {
+      MojoExecution mojoExecution = new MojoExecution(plugin, goal, "default");
+
+      ExpressionEvaluator expressionEvaluator = new PluginParameterExpressionEvaluator(session, mojoExecution);
+
+      ConfigurationConverter typeConverter = converterLookup.lookupConverterForType(type);
+
+      Object value = typeConverter.fromConfiguration(converterLookup, paramConfig, type, Object.class, plexus
+          .getContainerRealm(), expressionEvaluator, null);
+      return type.cast(value);
+    } catch(ComponentConfigurationException ex) {
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
+          "Could not get mojo execution paramater value", ex));
+    } catch(ClassCastException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
           "Could not get mojo execution paramater value", ex));
     }

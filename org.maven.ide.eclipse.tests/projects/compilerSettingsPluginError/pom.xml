@@ -1,0 +1,47 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.maven.ide.eclipse.projects</groupId>
+  <artifactId>compilerSettingsPluginError</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+  <description>MNGECLIPSE-2136</description>
+
+  <build>
+    <defaultGoal>package</defaultGoal>
+    <plugins>
+      <plugin>
+        <!-- This plugin is unresolvable (e.g. due to a repository issue) but the failure to resolve it must not prevent extraction of the compiler settings -->
+        <artifactId>maven-missing-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>missing</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.6</source>
+          <target>1.5</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.maven.ide.eclipse</groupId>
+        <artifactId>lifecycle-mapping</artifactId>
+        <version>0.10.0</version>
+        <configuration>
+          <mappingId>customizable</mappingId>
+          <configurators>
+            <!-- NOTE: Disable any other configurators which might suffer the same issue and fail the test -->
+            <configurator id="org.maven.ide.eclipse.jdt.javaConfigurator" />
+          </configurators>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

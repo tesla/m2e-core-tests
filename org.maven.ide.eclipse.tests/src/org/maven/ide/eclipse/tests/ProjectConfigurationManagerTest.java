@@ -18,6 +18,8 @@ import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.IProjectConfigurationManager;
@@ -124,6 +126,19 @@ public class ProjectConfigurationManagerTest extends AbstractMavenProjectTestCas
     } finally {
       mavenConfiguration.setUserSettingsFile(oldSettings);
     }
+  }
+
+  public void testExtractionOfCompilerSettingsDespiteErrorsInExecutionPlan() throws Exception {
+    IProject[] projects = importProjects("projects/compilerSettingsPluginError", new String[] {"pom.xml"},
+        new ResolverConfiguration());
+    assertNotNull(projects);
+    assertEquals(1, projects.length);
+    IProject project = projects[0];
+    assertNotNull(project);
+
+    IJavaProject javaProject = JavaCore.create(project);
+    assertEquals("1.6", javaProject.getOption(JavaCore.COMPILER_SOURCE, true));
+    assertEquals("1.5", javaProject.getOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, true));
   }
 
 }

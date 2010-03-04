@@ -22,7 +22,9 @@ import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.lifecycle.MavenExecutionPlan;
+import org.apache.maven.model.ConfigurationContainer;
 import org.apache.maven.model.Model;
+import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.settings.Mirror;
@@ -91,6 +93,9 @@ public interface IMaven {
 
   public <T> T getMojoParameterValue(MavenSession session, MojoExecution mojoExecution, String parameter,
       Class<T> asType) throws CoreException;
+
+  public <T> T getMojoParameterValue(String parameter, Class<T> type, MavenSession session, Plugin plugin,
+      ConfigurationContainer configuration, String goal) throws CoreException;
 
   // configuration
 
