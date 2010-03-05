@@ -952,7 +952,6 @@ public abstract class UIIntegrationTestCase {
 				IProject[] projects = ResourcesPlugin.getWorkspace().getRoot()
 						.getProjects();
 				for (IProject project : projects) {
-					// project.delete(true, true, monitor);
 					project.delete(true, true, monitor);
 				}
 				return Status.OK_STATUS;
@@ -977,10 +976,10 @@ public abstract class UIIntegrationTestCase {
 				return ResourcesPlugin.getWorkspace().getRoot().getProjects().length == 0;
 			}
 
-			public String getFailureMessage() {
-				return "Projects still there";
+      public String getFailureMessage() {
+        return "Projects still there: " + Arrays.asList(ResourcesPlugin.getWorkspace().getRoot().getProjects());
 			}
-		});
+		}, 10 * 1000);
 	}
 
 	protected MavenPomEditor openPomFile(String name) throws Exception {
