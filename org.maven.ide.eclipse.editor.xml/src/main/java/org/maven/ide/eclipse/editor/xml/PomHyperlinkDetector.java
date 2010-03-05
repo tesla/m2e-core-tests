@@ -56,8 +56,6 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
 
     String fragment = getFragment(text, offset, "<dependency>", "</dependency>");
     if(fragment == null) {
-      fragment = getFragment(text, offset, "<dependencyManagement>", "</dependencyManagement>");
-      if(fragment == null) {
         fragment = getFragment(text, offset, "<parent>", "</parent>");
         if(fragment == null) {
           fragment = getFragment(text, offset, "<plugin>", "</plugin>");
@@ -65,7 +63,6 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
             return null;
           }
         }
-      }
     }
 
     final String groupId = getValue(fragment, "<groupId>", "</groupId>");
@@ -104,17 +101,17 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
     return new IHyperlink[] {pomHyperlink};
   }
 
-  private String getValue(String dependency, String startTag, String endTag) {
-    int start = dependency.indexOf(startTag);
+  private String getValue(String section, String startTag, String endTag) {
+    int start = section.indexOf(startTag);
     if(start == -1) {
       return null;
     }
-    int end = dependency.indexOf(endTag);
+    int end = section.indexOf(endTag);
     if(end == -1) {
       return null;
     }
 
-    return dependency.substring(start + startTag.length(), end).trim();
+    return section.substring(start + startTag.length(), end).trim();
   }
 
   private String getFragment(String text, int offset, String startTag, String endTag) {
