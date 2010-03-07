@@ -16,6 +16,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 
@@ -27,6 +28,13 @@ import org.maven.ide.eclipse.actions.OpenPomAction;
  */
 class PomHyperlinkDetector implements IHyperlinkDetector {
 
+  private final String[] versioned = new String[] {
+      "dependency>",
+      "parent>",
+      "plugin>",
+      "reportPlugin>",
+      "extension>"
+  };
   public IHyperlink[] detectHyperlinks(ITextViewer textViewer, final IRegion region, boolean canShowMultipleHyperlinks) {
     if(region == null || textViewer == null) {
       return null;
@@ -53,28 +61,36 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
     final int offset = region.getOffset();
 
     final String text = document.get();
-
-    String fragment = getFragment(text, offset, "<dependency>", "</dependency>");
-    if(fragment == null) {
-        fragment = getFragment(text, offset, "<parent>", "</parent>");
-        if(fragment == null) {
-          fragment = getFragment(text, offset, "<plugin>", "</plugin>");
-          if(fragment == null) {
-            return null;
-          }
-        }
+    Fragment fragment = null;
+    for (String el : versioned) {
+      fragment = getFragment(text, offset, "<" + el, "</" + el);
+      if (fragment != null) break;
     }
-
-    final String groupId = getValue(fragment, "<groupId>", "</groupId>");
-    final String artifactId = getValue(fragment, "<artifactId>", "</artifactId>");
-    final String version = getValue(fragment, "<version>", "</version>");
-
+    
+    if (fragment == null) {
+      //TODO add different rules here.
+      return null;
+    }
+    
+    final Fragment groupId = getValue(fragment, "<groupId>", "</groupId>");
+    final Fragment artifactId = getValue(fragment, "<artifactId>", "</artifactId>");
+    final Fragment version = getValue(fragment, "<version>", "</version>");
+    if (version == null) {
+      // better exit now until we are capable of resolving the version from resolved project. 
+      return null;
+    } 
     IHyperlink pomHyperlink = new IHyperlink() {
-
       public IRegion getHyperlinkRegion() {
-        // int start = text.substring(0, offset).lastIndexOf('>');
-        // int end = text.indexOf("</", start);
-        return region;
+        //the goal here is to have the groupid/artifactid/version combo underscored by the link.
+        //that will prevent underscoring big portions (like plugin config) underscored and
+        // will also handle cases like dependencies within plugins.
+        int max = groupId != null ? groupId.offset + groupId.length : Integer.MIN_VALUE;
+        int min = groupId != null ? groupId.offset : Integer.MAX_VALUE;
+        max = Math.max(max, artifactId != null ? artifactId.offset + artifactId.length : Integer.MIN_VALUE);
+        min = Math.min(min, artifactId != null ? artifactId.offset : Integer.MAX_VALUE);
+        max = Math.max(max, version != null ? version.offset + version.length : Integer.MIN_VALUE);
+        min = Math.min(min, version != null ? version.offset : Integer.MAX_VALUE);
+        return new Region(min, max - min);
       }
 
       public String getHyperlinkText() {
@@ -90,7 +106,9 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
           protected IStatus run(IProgressMonitor monitor) {
             // TODO resolve groupId if groupId==null
             // TODO resolve version if version==null
-            OpenPomAction.openEditor(groupId, artifactId, version, monitor);
+            OpenPomAction.openEditor(groupId == null ? "org.apache.maven.plugins" : groupId.text, 
+                                     artifactId == null ? null : artifactId.text, 
+                                     version == null ? null : version.text, monitor);
             return Status.OK_STATUS;
           }
         }.schedule();
@@ -101,20 +119,27 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
     return new IHyperlink[] {pomHyperlink};
   }
 
-  private String getValue(String section, String startTag, String endTag) {
-    int start = section.indexOf(startTag);
+  /**
+   * fragment offset returned contains the xml elements 
+   * while the text only includes the element text value
+   */
+  private Fragment getValue(Fragment section, String startTag, String endTag) {
+    int start = section.text.indexOf(startTag);
     if(start == -1) {
       return null;
     }
-    int end = section.indexOf(endTag);
+    int end = section.text.indexOf(endTag);
     if(end == -1) {
       return null;
     }
 
-    return section.substring(start + startTag.length(), end).trim();
+    return new Fragment(section.text.substring(start + startTag.length(), end).trim(), section.offset + start, end + endTag.length() - start);
   }
 
-  private String getFragment(String text, int offset, String startTag, String endTag) {
+  /**
+   * returns the text, offset and length of the xml element. text includes the xml tags. 
+   */
+  private Fragment getFragment(String text, int offset, String startTag, String endTag) {
     int start = text.substring(0, offset).lastIndexOf(startTag);
     if(start == -1) {
       return null;
@@ -124,8 +149,27 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
     if(end == -1 || end <= offset) {
       return null;
     }
+    end = end + endTag.length();
+    return new Fragment(text.substring(start, end), start, end - start);
+  }
+  
+  private static class Fragment {
+    final int length;
+    final int offset;
+    final String text;
+    
+    Fragment(String text, int start, int len) {
+      this.text = text;
+      this.offset = start;
+      
+      this.length = len;
+      
+    }
 
-    return text.substring(start, end + endTag.length());
+    @Override
+    public String toString() {
+      return text;
+    }
   }
 
 //  private int findChar(String text, char c, int offset, int step) {
