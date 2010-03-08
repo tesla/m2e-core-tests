@@ -59,7 +59,7 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
     }
 
     final int offset = region.getOffset();
-
+    //first check all elements that have id (groupId+artifactId+version) combo
     final String text = document.get();
     Fragment fragment = null;
     for (String el : versioned) {
@@ -67,11 +67,14 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
       if (fragment != null) break;
     }
     
-    if (fragment == null) {
-      //TODO add different rules here.
-      return null;
+    if (fragment != null) {
+      return openPOMbyID(fragment);
     }
     
+    return null;
+  }
+
+  private IHyperlink[] openPOMbyID(Fragment fragment) {
     final Fragment groupId = getValue(fragment, "<groupId>", "</groupId>");
     final Fragment artifactId = getValue(fragment, "<artifactId>", "</artifactId>");
     final Fragment version = getValue(fragment, "<version>", "</version>");
