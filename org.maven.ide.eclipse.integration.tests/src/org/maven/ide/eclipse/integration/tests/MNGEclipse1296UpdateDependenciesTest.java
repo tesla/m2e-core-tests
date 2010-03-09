@@ -27,8 +27,6 @@ public class MNGEclipse1296UpdateDependenciesTest extends M2EUIIntegrationTestCa
 
   @Test
   public void testUpdateDependencies() throws Exception {
-    setXmlPrefs();
-
     doImport("projects/update_deps.zip");
 
     IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("sample");

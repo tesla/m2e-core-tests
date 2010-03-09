@@ -28,7 +28,6 @@ public class MngEclipse1515LifecyleMappingTest extends M2EUIIntegrationTestCase 
    */
   @Test
   public void testMgnEclipse1515() throws Exception {
-    setXmlPrefs();
     String projectName = "lifecycleTest";
     IProject project = createQuickstartProject(projectName);
     Assert.assertNotNull(project);

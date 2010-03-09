@@ -1158,10 +1158,10 @@ public abstract class UIIntegrationTestCase {
 		return editor;
 	}
 
-	private boolean xmlPrefsSet = false;
+	private static boolean xmlPrefsSet = false;
 
 	protected void setXmlPrefs() throws Exception {
-		if (isEclipseVersion(3, 5) && !xmlPrefsSet) {
+		if (!xmlPrefsSet && isEclipseVersion(3, 5)) {
 			// Disable new xml completion behavior to preserver compatibility
 			// with previous versions.
 			bot.menu("Window").menu("Preferences").click();

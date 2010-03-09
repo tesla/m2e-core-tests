@@ -27,7 +27,6 @@ public class MEclipse173SimpleWebAppTest extends M2EUIIntegrationTestCase {
 
   @Test
   public void testSimpleWebApp() throws Exception {
-    setXmlPrefs();
     installTomcat6();
 
     // Import the test project

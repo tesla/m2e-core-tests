@@ -49,7 +49,6 @@ public class MngEclipse1377ExcludeArtifactTest extends M2EUIIntegrationTestCase 
 
   @Test
   public void testEclipseArtifact() throws Exception {
-    setXmlPrefs();
     String projectName = "eclipseArtifactProject";
     IProject project = null;
     try {
@@ -74,7 +73,6 @@ public class MngEclipse1377ExcludeArtifactTest extends M2EUIIntegrationTestCase 
   }
 
   public void testExcludeTransitiveArtifact() throws Exception {
-    setXmlPrefs();
     String projectName = "excludeProject";
     //IProject project = setupDefaultProject();
     IProject project = createQuickstartProject(projectName);

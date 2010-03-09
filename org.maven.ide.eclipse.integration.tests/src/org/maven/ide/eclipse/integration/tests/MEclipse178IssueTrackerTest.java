@@ -16,8 +16,6 @@ public class MEclipse178IssueTrackerTest extends M2EUIIntegrationTestCase {
 
   @Test
   public void testIssueTracker() throws Exception {
-    setXmlPrefs();
-
     createQuickstartProject(TEST_PROJECT);
 
     openIssueTracking(TEST_PROJECT);
