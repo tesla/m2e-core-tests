@@ -8,10 +8,16 @@
 
 package org.maven.ide.eclipse.editor.xml;
 
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileStore;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -19,6 +25,12 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.ide.IDE;
 
 import org.maven.ide.eclipse.actions.OpenPomAction;
 
@@ -39,7 +51,7 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
     if(region == null || textViewer == null) {
       return null;
     }
-
+    
     IDocument document = textViewer.getDocument();
     if(document == null) {
       return null;
@@ -70,8 +82,65 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
     if (fragment != null) {
       return openPOMbyID(fragment);
     }
+    //check if <module> text is selected.
+    fragment = getFragment(text, offset, "<module>", "</module>");
+    if (fragment != null) {
+      return openModule(fragment, textViewer);
+    }
     
     return null;
+  }
+
+  private IHyperlink[] openModule(Fragment fragment, ITextViewer textViewer) {
+    final Fragment module = getValue(fragment, "<module>", "</module>");
+    
+      ITextFileBuffer buf = FileBuffers.getTextFileBufferManager().getTextFileBuffer(textViewer.getDocument());
+      IPath folder = buf.getLocation().removeLastSegments(1);
+      String path = module.text;
+      //construct IPath for the child pom file, handle relative paths..
+      while (path.startsWith("../")) { //NOI18N
+        folder = folder.removeLastSegments(1);
+        path = path.substring("../".length());//NOI18N
+      }
+      IPath modulePom = folder.append(path);
+      if (!"xml".equals(modulePom.getFileExtension())) {//NOI18N
+        modulePom = modulePom.append("pom.xml");//NOI18N
+      }
+      final IPath fmodulePom = modulePom;
+
+    IHyperlink pomHyperlink = new IHyperlink() {
+      public IRegion getHyperlinkRegion() {
+        return new Region(module.offset, module.length);
+      }
+
+      public String getHyperlinkText() {
+        return "Open module project pom.xml at " + module.text;
+      }
+
+      public String getTypeLabel() {
+        return "pom-module";
+      }
+
+      public void open() {
+        IFileStore fileStore = EFS.getLocalFileSystem().getStore(fmodulePom);
+        IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+        if(window != null) {
+          IWorkbenchPage page = window.getActivePage();
+          if(page != null) {
+            try {
+              IDE.openEditorOnFileStore(page, fileStore);
+            } catch(PartInitException e) {
+              MessageDialog.openInformation(Display.getDefault().getActiveShell(), //
+                  "Open Maven POM", "Can't open editor for " + fmodulePom + "\n" + e.toString());
+
+            }
+          }
+        }
+      }
+    };
+
+    return new IHyperlink[] {pomHyperlink};
+
   }
 
   private IHyperlink[] openPOMbyID(Fragment fragment) {
