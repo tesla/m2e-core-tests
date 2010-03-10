@@ -139,15 +139,15 @@ public class ProblemDescriptionPage extends AbstractMavenWizardPage {
         });
     new Label(composite, SWT.NONE);
         
-        Button button = new Button(composite, SWT.RIGHT);
-        button.setAlignment(SWT.RIGHT);
+        Button button = new Button(composite, SWT.NONE);
+        button.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, true, false));
         button.addSelectionListener(new SelectionAdapter() {
           @Override
           public void widgetSelected(SelectionEvent e) {
             captureScreenFromClipboard();
           }
         });
-        button.setText("Capture");
+        button.setText("&Capture Screenshot from Clipboard");
 
   }
 
@@ -208,7 +208,7 @@ public class ProblemDescriptionPage extends AbstractMavenWizardPage {
       Image image = new Image(display, imageData);
       ImageLoader loader = new ImageLoader();
       loader.data = new ImageData[] {image.getImageData()};
-      screenCapture = new File(ResourcesPlugin.getPlugin().getStateLocation().toFile(), "capture.png" );  
+      screenCapture = new File(ResourcesPlugin.getPlugin().getStateLocation().toFile(), "capture.png" );
       System.out.println( "file: " + screenCapture);
       loader.save(screenCapture.getAbsolutePath(), SWT.IMAGE_PNG);
       image.dispose();
