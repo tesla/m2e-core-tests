@@ -133,7 +133,8 @@ public abstract class UIIntegrationTestCase {
 	public final static void beforeClass() throws Exception {
 		bot = new SonatypeSWTBot();
 
-		SWTBotPreferences.KEYBOARD_LAYOUT = "EN_US";
+    SWTBotPreferences.KEYBOARD_LAYOUT = "EN_US";
+    SWTBotPreferences.TIMEOUT = 10 * 1000;
 
 		// close the Welcome view if it's open
     try {
