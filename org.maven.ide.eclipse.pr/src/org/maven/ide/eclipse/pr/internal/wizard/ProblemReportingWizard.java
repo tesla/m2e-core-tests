@@ -136,9 +136,10 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
           //
           // Screen Captures
           //
-          r.addScreenCapture(descriptionPage.getScreenCapture());
-          
-    
+          if(descriptionPage.getScreenCapture() != null && descriptionPage.getScreenCapture().isFile()) {
+            r.addScreenCapture(descriptionPage.getScreenCapture());
+          }          
+
           IssueSubmissionResult res = is.submitIssue(r);
 
           showHyperlink("Successfully submitted issue to:", res.getIssueUrl());
@@ -240,7 +241,7 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
     MavenPlugin mavenPlugin = MavenPlugin.getDefault();
     DataGatherer gatherer = new DataGatherer(MavenPlugin.lookup(IMavenConfiguration.class), //
         mavenPlugin.getMavenProjectManager(), mavenPlugin.getConsole(), //
-        ResourcesPlugin.getWorkspace(), projects);
+        ResourcesPlugin.getWorkspace(), projects, getClass().getResource("/apr/public-key.txt"));
 
     return gatherer.gather(bundleDir, dataSet, monitor);
   }

@@ -12,6 +12,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
@@ -27,7 +28,7 @@ import org.maven.ide.eclipse.tests.common.AbstractMavenProjectTestCase;
 public class DataGathererTest extends AbstractMavenProjectTestCase {
 
   public void testRobustnessAgainstFailingGatherers() throws Exception {
-    DataGatherer gatherer = new DataGatherer(null, null, null, null, null);
+    DataGatherer gatherer = new DataGatherer(null, null, null, null, null, null);
     List<File> files = gatherer.gather(null, EnumSet.allOf(Data.class), new NullProgressMonitor());
     for(File tmpFile : files) {
       tmpFile.deleteOnExit();
@@ -50,7 +51,7 @@ public class DataGathererTest extends AbstractMavenProjectTestCase {
     project.create(new NullProgressMonitor());
     try {
       project.open(new NullProgressMonitor());
-      DataGatherer gatherer = new DataGatherer(null, null, null, null, Collections.singleton(project));
+      DataGatherer gatherer = new DataGatherer(null, null, null, null, Collections.singleton(project), null);
       List<File> files = gatherer.gather(null, EnumSet.allOf(Data.class), new NullProgressMonitor());
       for(File tmpFile : files) {
         tmpFile.deleteOnExit();
@@ -76,7 +77,7 @@ public class DataGathererTest extends AbstractMavenProjectTestCase {
     try {
       mavenConfiguration.setUserSettingsFile(new File("settings/user-settings.xml").getAbsolutePath());
       mavenConfiguration.setGlobalSettingsFile(new File("settings/global-settings.xml").getAbsolutePath());
-      DataGatherer gatherer = new DataGatherer(mavenConfiguration, null, null, null, null);
+      DataGatherer gatherer = new DataGatherer(mavenConfiguration, null, null, null, null, null);
       List<File> files = gatherer.gather(null, EnumSet.of(Data.MAVEN_USER_SETTINGS, Data.MAVEN_GLOBAL_SETTINGS),
           new NullProgressMonitor());
       for(File tmpFile : files) {
@@ -128,6 +129,30 @@ public class DataGathererTest extends AbstractMavenProjectTestCase {
       baos.write(buffer, 0, n);
     }
     return baos.toString("UTF-8");
+  }
+
+  public void testBundleEncryption() throws Exception {
+    URL publicKey = getClass().getResource("/apr/public-key.txt");
+    assertNotNull(publicKey);
+    URL privateKey = getClass().getResource("/apr/private-key.txt");
+    assertNotNull(privateKey);
+
+    DataGatherer gatherer = new DataGatherer(null, null, null, ResourcesPlugin.getWorkspace(), null, publicKey);
+    List<File> files = gatherer.gather(null, EnumSet.of(Data.ECLIPSE_LOG), new NullProgressMonitor());
+    files = gatherer.decryptBundles(files, null, privateKey);
+    for(File tmpFile : files) {
+      tmpFile.deleteOnExit();
+    }
+    assertEquals(1, files.size());
+    File tmpFile = files.get(0);
+
+    assertTrue(tmpFile.isFile());
+    ZipFile zip = new ZipFile(tmpFile);
+    try {
+      assertNotNull(zip.getEntry("config/error.log"));
+    } finally {
+      zip.close();
+    }
   }
 
 }

@@ -10,8 +10,13 @@ package org.maven.ide.eclipse.pr.internal.data;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -26,6 +31,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
@@ -35,6 +41,8 @@ import org.maven.ide.eclipse.pr.IDataTarget;
 import org.maven.ide.eclipse.pr.internal.ProblemReportingPlugin;
 import org.maven.ide.eclipse.pr.internal.sources.StatusSource;
 import org.maven.ide.eclipse.project.MavenProjectManager;
+import org.sonatype.plexus.encryptor.PlexusEncryptor;
+import org.sonatype.plexus.encryptor.RsaAesPlexusEncryptor;
 
 
 /**
@@ -54,13 +62,16 @@ public class DataGatherer {
 
   private final List<IStatus> statuses = new ArrayList<IStatus>();
 
+  private final URL publicKey;
+
   public DataGatherer(IMavenConfiguration mavenConfiguration, MavenProjectManager mavenProjectManager,
-      MavenConsole console, IWorkspace workspace, Set<IProject> projects) {
+      MavenConsole console, IWorkspace workspace, Set<IProject> projects, URL publicKey) {
     this.mavenConfiguration = mavenConfiguration;
     this.projectManager = mavenProjectManager;
     this.console = console;
     this.workspace = workspace;
     this.projects = projects;
+    this.publicKey = publicKey;
   }
 
   public IMavenConfiguration getMavenConfiguration() {
@@ -89,7 +100,7 @@ public class DataGatherer {
 
     List<IDataGatherer> dataGatherers = DataGathererFactory.getDataGatherers();
 
-    monitor.beginTask("Gathering", dataSet.size() + dataGatherers.size());
+    SubMonitor progress = SubMonitor.convert(monitor, "Gathering problem data", dataSet.size() + dataGatherers.size() + 1);
 
     // There's a size limit on JIRA attachments, so we split logs, config etc. from the project sources
     Set<Data> set1 = EnumSet.copyOf(dataSet);
@@ -102,7 +113,7 @@ public class DataGatherer {
         File bundleFile = File.createTempFile("bundle", ".zip", bundleDir);
         bundleFiles.add(bundleFile);
 
-        gather(bundleFile, set2, Collections.<IDataGatherer> emptyList(), false, monitor);
+        gather(bundleFile, set2, Collections.<IDataGatherer> emptyList(), false, progress);
 
         if(bundleFile.length() <= 0) {
           bundleFile.delete();
@@ -115,7 +126,7 @@ public class DataGatherer {
         File bundleFile = File.createTempFile("bundle", ".zip", bundleDir);
         bundleFiles.add(0, bundleFile);
 
-        gather(bundleFile, set1, dataGatherers, true, monitor);
+        gather(bundleFile, set1, dataGatherers, true, progress);
       }
     } catch(IOException e) {
       for(File bundleFile : bundleFiles) {
@@ -124,7 +135,9 @@ public class DataGatherer {
       throw e;
     }
 
-    monitor.done();
+    bundleFiles = encryptBundles(bundleFiles, bundleDir, progress.newChild(1));
+
+    progress.done();
 
     return bundleFiles;
   }
@@ -200,5 +213,66 @@ public class DataGatherer {
   public void addStatus(IStatus status) {
     statuses.add(status);
   }
-  
+
+  private List<File> encryptBundles(List<File> inputFiles, File bundleDir, IProgressMonitor monitor) throws IOException {
+    SubMonitor progress = SubMonitor.convert(monitor, "Encrypting problem data", inputFiles.size());
+
+    if(publicKey == null) {
+      return inputFiles;
+    }
+
+    List<File> bundleFiles = new ArrayList<File>();
+
+    PlexusEncryptor encryptor = new RsaAesPlexusEncryptor();
+
+    for(File input : inputFiles) {
+      File output = File.createTempFile("bundle", ".ezip", bundleDir);
+      bundleFiles.add(output);
+      try {
+        encryptor.encrypt(input, output, publicKey.openStream());
+      } catch(GeneralSecurityException ex) {
+        throw (IOException) new IOException(ex.getMessage()).initCause(ex);
+      }
+      input.delete();
+      progress.worked(1);
+    }
+
+    return bundleFiles;
+  }
+
+  // NOTE: This exists solely to allow unit testing
+  public List<File> decryptBundles(List<File> inputFiles, File bundleDir, URL privateKey) throws IOException {
+    if(privateKey == null) {
+      return inputFiles;
+    }
+
+    List<File> bundleFiles = new ArrayList<File>();
+
+    PlexusEncryptor encryptor = new RsaAesPlexusEncryptor();
+
+    for(File input : inputFiles) {
+      File output = File.createTempFile("bundle", ".zip", bundleDir);
+      bundleFiles.add(output);
+      InputStream is = null;
+      OutputStream os = null;
+      try {
+        is = new FileInputStream(input);
+        os = new FileOutputStream(output);
+        encryptor.decrypt(is, os, privateKey.openStream());
+      } catch(GeneralSecurityException ex) {
+        throw (IOException) new IOException(ex.getMessage()).initCause(ex);
+      } finally {
+        if(is != null) {
+          is.close();
+        }
+        if(os != null) {
+          os.close();
+        }
+      }
+      input.delete();
+    }
+
+    return bundleFiles;
+  }
+
 }
