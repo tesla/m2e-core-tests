@@ -112,28 +112,31 @@ public class JobHelpers {
   }
 
   private static void waitForJobs(String classNameRegex, int maxWaitMillis) {
-    final int waitMillis = 100;
+    Job job = null;
+    final int waitMillis = 50;
     for(int i = maxWaitMillis / waitMillis; i >= 0; i-- ) {
-      if(!hasJob(classNameRegex)) {
+      job = getJob(classNameRegex);
+      if(job == null) {
         return;
       }
+      job.wakeUp();
       try {
         Thread.sleep(waitMillis);
       } catch(InterruptedException e) {
         // ignore
       }
     }
-    Assert.fail("Timeout while waiting for completion of jobs: " + classNameRegex);
+    Assert.fail("Timeout while waiting for completion of job: " + job);
   }
 
-  private static boolean hasJob(String classNameRegex) {
+  private static Job getJob(String classNameRegex) {
     Job[] jobs = Job.getJobManager().find(null);
     for(Job job : jobs) {
       if(job.getClass().getName().matches(classNameRegex)) {
-        return true;
+        return job;
       }
     }
-    return false;
+    return null;
   }
 
   @SuppressWarnings("null")
@@ -143,7 +146,7 @@ public class JobHelpers {
 
     // wait for the launches themselves
     ILaunch launch = null;
-    final int waitMillis = 100;
+    final int waitMillis = 50;
     for(int i = maxWaitMillis / waitMillis; i >= 0; i-- ) {
       launch = getActiveLaunch();
       if(launch == null) {

@@ -156,8 +156,6 @@ public abstract class AbstractMavenProjectTestCase extends TestCase {
   }
 
   private void doCleanWorkspace() throws InterruptedException, CoreException, IOException {
-    waitForJobsToComplete();
-
     workspace.run(new IWorkspaceRunnable() {
       public void run(IProgressMonitor monitor) throws CoreException {
         IProject[] projects = workspace.getRoot().getProjects();
