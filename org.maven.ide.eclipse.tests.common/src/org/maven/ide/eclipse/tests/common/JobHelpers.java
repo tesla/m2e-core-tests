@@ -136,14 +136,17 @@ public class JobHelpers {
     return false;
   }
 
+  @SuppressWarnings("null")
   public static void waitForLaunchesToComplete(int maxWaitMillis) {
     // wait for any jobs that actually start the launch
     waitForJobs("(.*\\.DebugUIPlugin.*)", maxWaitMillis);
 
     // wait for the launches themselves
+    ILaunch launch = null;
     final int waitMillis = 100;
     for(int i = maxWaitMillis / waitMillis; i >= 0; i-- ) {
-      if(!hasActiveLaunch()) {
+      launch = getActiveLaunch();
+      if(launch == null) {
         return;
       }
       try {
@@ -152,19 +155,19 @@ public class JobHelpers {
         // ignore
       }
     }
-    Assert.fail("Timeout while waiting for completion of launches");
+    Assert.fail("Timeout while waiting for completion of launch: " + launch.getLaunchConfiguration());
   }
 
-  private static boolean hasActiveLaunch() {
+  private static ILaunch getActiveLaunch() {
     ILaunch[] launches = DebugPlugin.getDefault().getLaunchManager().getLaunches();
     if(launches != null) {
       for(ILaunch launch : launches) {
         if(!launch.isTerminated()) {
-          return true;
+          return launch;
         }
       }
     }
-    return false;
+    return null;
   }
 
 }
