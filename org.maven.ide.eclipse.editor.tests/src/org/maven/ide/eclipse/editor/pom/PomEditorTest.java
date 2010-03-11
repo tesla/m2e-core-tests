@@ -22,6 +22,7 @@ import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotEclipseEditor;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
 import org.junit.Test;
 import org.maven.ide.eclipse.integration.tests.common.ContextMenuHelper;
+import org.maven.ide.eclipse.integration.tests.common.SwtbotUtil;
 
 
 /**
@@ -87,10 +88,10 @@ public class PomEditorTest extends PomEditorTestBase {
     text.typeText("1");
 
     // test undo
-    text.pressShortcut(SWT.CONTROL, 'z');
+    text.pressShortcut(SwtbotUtil.getUndoShortcut());
     assertTextValue("organizationName", "orgfoo");
     // test redo
-    text.pressShortcut(SWT.CONTROL, 'y');
+    text.pressShortcut(SwtbotUtil.getRedoShortcut());
     assertTextValue("organizationName", "orgfoo1");
   }
 
@@ -179,7 +180,7 @@ public class PomEditorTest extends PomEditorTestBase {
     assertTextValue("projectName", "FAILED");
 
     // undo change
-    bot.textWithName("projectName").pressShortcut(SWT.CONTROL, 'z');
+    bot.textWithName("projectName").pressShortcut(SwtbotUtil.getUndoShortcut());
 
     // test the editor is dirty
     waitForEditorDirtyState(editor, true);
@@ -200,7 +201,7 @@ public class PomEditorTest extends PomEditorTestBase {
     replaceText("parent4", "parent7");
     selectEditorTab(TAB_OVERVIEW);
     // undo change
-    bot.activeEditor().toTextEditor().pressShortcut(SWT.CONTROL, 'z');
+    bot.activeEditor().toTextEditor().pressShortcut(SwtbotUtil.getUndoShortcut());
 
     // test the editor is clean
     waitForEditorDirtyState(editor, false);
@@ -232,7 +233,7 @@ public class PomEditorTest extends PomEditorTestBase {
     openPomFile(name);
     setTextValue("groupId", "abc");
 
-    bot.activeEditor().toTextEditor().pressShortcut(SWT.CONTROL, 'w');
+    bot.activeEditor().toTextEditor().pressShortcut(SwtbotUtil.getCloseShortcut());
     bot.shell("Save Resource").activate();
     bot.button("No").click();
 
@@ -268,12 +269,12 @@ public class PomEditorTest extends PomEditorTestBase {
     bot.activeEditor().toTextEditor().pressShortcut(SWT.NONE, SWT.ARROW_LEFT, (char) 0);
 
     copy("<properties><sample>sample</sample></properties>");
-    bot.activeEditor().toTextEditor().pressShortcut(SWT.CONTROL, 'v');
+    bot.activeEditor().toTextEditor().pressShortcut(SwtbotUtil.getPasteShortcut());
     waitForEditorDirtyState(editor, true);
 
     save();
     waitForEditorDirtyState(editor, false);
-    bot.activeEditor().toTextEditor().pressShortcut(SWT.CONTROL, 'w');
+    bot.activeEditor().toTextEditor().pressShortcut(SwtbotUtil.getCloseShortcut());
   }
 
   // MNGECLIPSE-835
@@ -281,7 +282,7 @@ public class PomEditorTest extends PomEditorTestBase {
   public void testModulesEditorActivation() throws Exception {
     MavenPomEditor editor = openPomFile(TEST_POM_POM_XML);
 
-    bot.activeEditor().toTextEditor().pressShortcut(SWT.CONTROL, 'm');
+    bot.activeEditor().toTextEditor().pressShortcut(SwtbotUtil.getMaximizeEditorShortcut());
 
     bot.section("Parent").expand();
     // getUI().click(new SWTWidgetLocator(Label.class, "Properties"));
@@ -299,7 +300,7 @@ public class PomEditorTest extends PomEditorTestBase {
     selectEditorTab(TAB_OVERVIEW);
     bot.table().getTableItem("foo1").select();
 
-    bot.activeEditor().toTextEditor().pressShortcut(SWT.CONTROL, 'm');
+    bot.activeEditor().toTextEditor().pressShortcut(SwtbotUtil.getMaximizeEditorShortcut());
 
     // test the editor is clean
     waitForEditorDirtyState(editor, false);

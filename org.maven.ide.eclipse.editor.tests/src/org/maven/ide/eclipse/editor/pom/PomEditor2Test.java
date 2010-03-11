@@ -85,17 +85,17 @@ public class PomEditor2Test extends PomEditorTestBase {
     String editorText = editor.getText();
     assertTrue(editorText, editorText.contains("<p2>p2</p2>"));
 
-    editor.pressShortcut(SWT.CTRL, 'z');
-    editor.pressShortcut(SWT.CTRL, 'z');
-    editor.pressShortcut(SWT.CTRL, 'z');
+    editor.pressShortcut(SwtbotUtil.getUndoShortcut());
+    editor.pressShortcut(SwtbotUtil.getUndoShortcut());
+    editor.pressShortcut(SwtbotUtil.getUndoShortcut());
 
     editorText = editor.getText();
     assertTrue(editorText, editorText.contains("<pz>pz</pz>"));
 
-    editor.pressShortcut(SWT.CTRL, 'z');
+    editor.pressShortcut(SwtbotUtil.getUndoShortcut());
     editorText = editor.getText();
     assertFalse(editorText, editorText.contains("<properties>"));
-    editor.pressShortcut(SWT.CTRL, 'y');
+    editor.pressShortcut(SwtbotUtil.getRedoShortcut());
     editorText = editor.getText();
     assertTrue(editorText, editorText.contains("<pz>pz</pz>"));
 
