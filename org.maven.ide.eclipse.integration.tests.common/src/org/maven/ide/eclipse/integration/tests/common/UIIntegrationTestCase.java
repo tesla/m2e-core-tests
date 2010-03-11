@@ -968,6 +968,7 @@ public abstract class UIIntegrationTestCase {
 		} catch (InterruptedException ex) {
 			throw new RuntimeException(ex);
 		}
+    assertTrue(job.getResult().toString(), job.getResult().isOK());
 
 		waitForAllBuildsToComplete();
 
