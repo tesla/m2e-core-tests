@@ -36,7 +36,7 @@ public class MEclipse182RangeHandlingTest extends M2EUIIntegrationTestCase {
     //Install version 1.0-SNAPSHOT of project2
     ContextMenuHelper.clickContextMenu(selectProject(project2Name),  withMnemonic("Run As"), ContainsMnemonic.containsMnemonic("Maven install"));
 
-    waitForAllLaunchesToComplete(10000);
+    waitForAllLaunchesToComplete(30000);
     waitForAllBuildsToComplete();
     assertProjectsHaveNoErrors();
 
