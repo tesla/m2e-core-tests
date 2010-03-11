@@ -36,6 +36,7 @@ public class MEclipse182RangeHandlingTest extends M2EUIIntegrationTestCase {
     //Install version 1.0-SNAPSHOT of project2
     ContextMenuHelper.clickContextMenu(selectProject(project2Name),  withMnemonic("Run As"), ContainsMnemonic.containsMnemonic("Maven install"));
 
+    waitForAllLaunchesToComplete(10000);
     waitForAllBuildsToComplete();
     assertProjectsHaveNoErrors();
 
@@ -53,7 +54,7 @@ public class MEclipse182RangeHandlingTest extends M2EUIIntegrationTestCase {
     replaceText("add(", "add2(");
     editor.saveAndClose();
     
-    // There should be no compile errors, project2:1.1-SNAPSHOT should come from local repository.
+    // There should be no compile errors, project2:1.0-SNAPSHOT should come from local repository.
     waitForAllBuildsToComplete();
     assertProjectsHaveNoErrors();
 

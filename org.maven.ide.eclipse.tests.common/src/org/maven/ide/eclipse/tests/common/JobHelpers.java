@@ -137,6 +137,10 @@ public class JobHelpers {
   }
 
   public static void waitForLaunchesToComplete(int maxWaitMillis) {
+    // wait for any jobs that actually start the launch
+    waitForJobs("(.*\\.DebugUIPlugin.*)", maxWaitMillis);
+
+    // wait for the launches themselves
     final int waitMillis = 100;
     for(int i = maxWaitMillis / waitMillis; i >= 0; i-- ) {
       if(!hasActiveLaunch()) {
