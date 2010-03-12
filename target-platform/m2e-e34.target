@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.5"?>
 
-<target>
+<target name="m2e-e34">
 <locations>
 <location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
 <unit id="org.eclipse.jst.feature.group" version="3.0.4.v200811190840-7U1959LJIHM6ogLbhvbrAnWtxuyM"/>
@@ -29,9 +29,8 @@
 <repository location="http://download.eclipse.org/releases/ganymede"/>
 </location>
 <location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
-<unit id="org.eclipse.swtbot.eclipse.feature.group" version="2.0.0.486-dev-e34"/>
-<unit id="org.eclipse.swtbot.eclipse.gef.feature.group" version="2.0.0.486-dev-e34"/>
-<unit id="org.eclipse.swtbot.feature.group" version="2.0.0.486-dev-e34"/>
+<unit id="org.eclipse.swtbot.feature.group" version="2.0.0.512-dev-e34"/>
+<unit id="org.eclipse.swtbot.eclipse.feature.group" version="2.0.0.512-dev-e34"/>
 <repository location="http://download.eclipse.org/technology/swtbot/ganymede/dev-build/update-site"/>
 </location>
 </locations>
