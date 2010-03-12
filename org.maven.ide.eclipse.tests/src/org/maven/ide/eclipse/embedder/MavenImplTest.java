@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
@@ -309,6 +310,51 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
       MavenExecutionPlan plan = maven.calculateExecutionPlan(request, result.getProject(), monitor);
       assertEquals(plan.getExecutions().toString(), 2, plan.getExecutions().size());
     } finally {
+      configuration.setUserSettingsFile(origSettings);
+      httpServer.stop();
+    }
+  }
+
+  public void testSslWithMutualHandshake() throws Exception {
+    FileHelpers.deleteDirectory(new File("target/localrepo/org/maven/ide/eclipse/its/mngeclipse-2149"));
+
+    HttpServer httpServer = new HttpServer();
+    httpServer.setHttpPort(-1);
+    httpServer.setHttpsPort(0);
+    httpServer.addResources("/", "");
+    httpServer.setKeyStore("resources/ssl/server-store", "server-pwd");
+    httpServer.setTrustStore("resources/ssl/client-store", "client-pwd");
+    httpServer.setNeedClientAuth(true);
+    httpServer.start();
+
+    String origSettings = configuration.getUserSettingsFile();
+    Properties props = System.getProperties();
+    try {
+      System.setProperty("javax.net.ssl.keyStore", new File("resources/ssl/client-store").getAbsolutePath());
+      System.setProperty("javax.net.ssl.keyStorePassword", "client-pwd");
+      System.setProperty("javax.net.ssl.keyStoreType", "jks");
+      System.setProperty("javax.net.ssl.trustStore", new File("resources/ssl/server-store").getAbsolutePath());
+      System.setProperty("javax.net.ssl.trustStorePassword", "server-pwd");
+      System.setProperty("javax.net.ssl.trustStoreType", "jks");
+
+      File settingsFile = new File("target/settings-mngeclipse-2149.xml");
+      FileHelpers.filterXmlFile(new File("projects/MNGECLIPSE-2149/settings-template.xml"), settingsFile, Collections
+          .singletonMap("@port.https@", Integer.toString(httpServer.getHttpsPort())));
+      configuration.setUserSettingsFile(settingsFile.getCanonicalPath());
+
+      MavenExecutionRequest request = maven.createExecutionRequest(monitor);
+      request.getProjectBuildingRequest().setResolveDependencies(true);
+      request.setPom(new File("projects/MNGECLIPSE-2149/pom.xml"));
+      MavenExecutionResult result = maven.readProject(request, monitor);
+      assertFalse(result.getExceptions().toString(), result.hasExceptions());
+      assertFalse(result.getArtifactResolutionResult().getMissingArtifacts().toString(), result
+          .getArtifactResolutionResult().hasMissingArtifacts());
+      assertFalse(result.getArtifactResolutionResult().hasExceptions());
+      assertNotNull(result.getProject());
+      assertNotNull(result.getProject().getArtifacts());
+      assertEquals(result.getProject().getArtifacts().toString(), 1, result.getProject().getArtifacts().size());
+    } finally {
+      System.setProperties(props);
       configuration.setUserSettingsFile(origSettings);
       httpServer.stop();
     }

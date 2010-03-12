@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -59,7 +58,15 @@ public class HttpServer {
 
   private int httpsPort = -1;
 
-  private String sslKeyStore = "resources/ssl/keystore";
+  private String keyStoreLocation = "resources/ssl/keystore";
+
+  private String keyStorePassword;
+
+  private String trustStoreLocation;
+
+  private String trustStorePassword;
+
+  private boolean needClientAuth;
 
   private String proxyUsername;
 
@@ -93,11 +100,13 @@ public class HttpServer {
 
   protected Connector newHttpsConnector() {
     SslSocketConnector connector = new SslSocketConnector();
-    String keystore = new File(sslKeyStore).getAbsolutePath();
     connector.setPort(httpsPort);
-    connector.setKeystore(keystore);
-    connector.setPassword("storepwd");
-    connector.setKeyPassword("keypwd");
+    connector.setKeystore(new File(keyStoreLocation).getAbsolutePath());
+    connector.setPassword(keyStorePassword);
+    connector.setKeyPassword(keyStorePassword);
+    connector.setTruststore(new File(trustStoreLocation).getAbsolutePath());
+    connector.setTrustPassword(trustStorePassword);
+    connector.setNeedClientAuth(needClientAuth);
     return connector;
   }
 
@@ -170,13 +179,40 @@ public class HttpServer {
   }
 
   /**
-   * Sets the path to the keystore to use for the SSL connector.
+   * Sets the keystore to use for the server certificate on the SSL connector.
    * 
-   * @param path The path to the keystore to use for SSL, may be {@code null}.
+   * @param path The path to the keystore to use for the server certificate, may be {@code null}.
+   * @param password The password for the keystore, may be {@code null}.
    * @return This server, never {@code null}.
    */
-  public HttpServer setKeyStore(String path) {
-    sslKeyStore = path;
+  public HttpServer setKeyStore(String path, String password) {
+    keyStoreLocation = path;
+    keyStorePassword = password;
+    return this;
+  }
+
+  /**
+   * Sets the truststore to use for validating client credentials via the SSL connector.
+   * 
+   * @param path The path to the truststore to use for the trusted client certificates, may be {@code null}.
+   * @param password The password for the truststore, may be {@code null}.
+   * @return This server, never {@code null}.
+   */
+  public HttpServer setTrustStore(String path, String password) {
+    trustStoreLocation = path;
+    trustStorePassword = password;
+    return this;
+  }
+
+  /**
+   * Enables/disables client-side certificate authentication.
+   * 
+   * @param needClientAuth Whether the server should reject clients whose certificate can't be verified via the
+   *          truststore.
+   * @return This server, never {@code null}.
+   */
+  public HttpServer setNeedClientAuth(boolean needClientAuth) {
+    this.needClientAuth = needClientAuth;
     return this;
   }
 
@@ -398,8 +434,7 @@ public class HttpServer {
   protected Handler newSleepHandler(final long millis) {
     return new AbstractHandler() {
 
-      public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
-          throws IOException, ServletException {
+      public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) {
         if(millis >= 0) {
           try {
             Thread.sleep(millis);
@@ -437,7 +472,7 @@ public class HttpServer {
     if(httpPort >= 0) {
       connectors.add(newHttpConnector());
     }
-    if(httpsPort >= 0 && sslKeyStore != null) {
+    if(httpsPort >= 0 && keyStoreLocation != null) {
       connectors.add(newHttpsConnector());
     }
 
