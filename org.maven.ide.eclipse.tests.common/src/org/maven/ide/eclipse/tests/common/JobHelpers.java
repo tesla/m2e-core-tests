@@ -29,6 +29,8 @@ import org.maven.ide.eclipse.jobs.IBackgroundProcessingQueue;
 
 public class JobHelpers {
 
+  private static final int POLLING_DELAY = 10;
+
   public static void waitForJobsToComplete() {
     try {
       waitForJobsToComplete(new NullProgressMonitor());
@@ -108,57 +110,56 @@ public class JobHelpers {
   }
 
   private static void waitForBuildJobs() {
-    waitForJobs("(.*\\.AutoBuild.*)|(.*\\.DebugUIPlugin.*)", 30000);
+    waitForJobs(BuildJobMatcher.INSTANCE, 60 * 1000);
   }
 
-  private static void waitForJobs(String classNameRegex, int maxWaitMillis) {
-    Job job = null;
-    final int waitMillis = 50;
-    for(int i = maxWaitMillis / waitMillis; i >= 0; i-- ) {
-      job = getJob(classNameRegex);
+  private static void waitForJobs(IJobMatcher matcher, int maxWaitMillis) {
+    final long limit = System.currentTimeMillis() + maxWaitMillis;
+    while(true) {
+      Job job = getJob(matcher);
       if(job == null) {
         return;
       }
+      boolean timeout = System.currentTimeMillis() > limit;
+      Assert.assertFalse("Timeout while waiting for completion of job: " + job, timeout);
       job.wakeUp();
       try {
-        Thread.sleep(waitMillis);
+        Thread.sleep(POLLING_DELAY);
       } catch(InterruptedException e) {
-        // ignore
+        // ignore and keep waiting
       }
     }
-    Assert.fail("Timeout while waiting for completion of job: " + job);
   }
 
-  private static Job getJob(String classNameRegex) {
+  private static Job getJob(IJobMatcher matcher) {
     Job[] jobs = Job.getJobManager().find(null);
     for(Job job : jobs) {
-      if(job.getClass().getName().matches(classNameRegex)) {
+      if(matcher.matches(job)) {
         return job;
       }
     }
     return null;
   }
 
-  @SuppressWarnings("null")
   public static void waitForLaunchesToComplete(int maxWaitMillis) {
     // wait for any jobs that actually start the launch
-    waitForJobs("(.*\\.DebugUIPlugin.*)", maxWaitMillis);
+    waitForJobs(LaunchJobMatcher.INSTANCE, maxWaitMillis);
 
     // wait for the launches themselves
-    ILaunch launch = null;
-    final int waitMillis = 50;
-    for(int i = maxWaitMillis / waitMillis; i >= 0; i-- ) {
-      launch = getActiveLaunch();
+    final long limit = System.currentTimeMillis() + maxWaitMillis;
+    while(true) {
+      ILaunch launch = getActiveLaunch();
       if(launch == null) {
         return;
       }
+      boolean timeout = System.currentTimeMillis() > limit;
+      Assert.assertFalse("Timeout while waiting for completion of launch: " + launch.getLaunchConfiguration(), timeout);
       try {
-        Thread.sleep(waitMillis);
+        Thread.sleep(POLLING_DELAY);
       } catch(InterruptedException e) {
-        // ignore
+        // ignore and keep waiting
       }
     }
-    Assert.fail("Timeout while waiting for completion of launch: " + launch.getLaunchConfiguration());
   }
 
   private static ILaunch getActiveLaunch() {
@@ -171,6 +172,33 @@ public class JobHelpers {
       }
     }
     return null;
+  }
+
+  static interface IJobMatcher {
+
+    boolean matches(Job job);
+
+  }
+
+  static class LaunchJobMatcher implements IJobMatcher {
+
+    public static final IJobMatcher INSTANCE = new LaunchJobMatcher();
+
+    public boolean matches(Job job) {
+      return job.getClass().getName().matches("(.*\\.DebugUIPlugin.*)");
+    }
+
+  }
+
+  static class BuildJobMatcher implements IJobMatcher {
+
+    public static final IJobMatcher INSTANCE = new BuildJobMatcher();
+
+    public boolean matches(Job job) {
+      return (job instanceof WorkspaceJob) || job.getClass().getName().matches("(.*\\.AutoBuild.*)")
+          || job.getClass().getName().endsWith("JREUpdateJob");
+    }
+
   }
 
 }
