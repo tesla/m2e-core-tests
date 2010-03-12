@@ -113,7 +113,7 @@ public class JobHelpers {
     waitForJobs(BuildJobMatcher.INSTANCE, 60 * 1000);
   }
 
-  private static void waitForJobs(IJobMatcher matcher, int maxWaitMillis) {
+  public static void waitForJobs(IJobMatcher matcher, int maxWaitMillis) {
     final long limit = System.currentTimeMillis() + maxWaitMillis;
     while(true) {
       Job job = getJob(matcher);
@@ -174,7 +174,7 @@ public class JobHelpers {
     return null;
   }
 
-  static interface IJobMatcher {
+  public static interface IJobMatcher {
 
     boolean matches(Job job);
 

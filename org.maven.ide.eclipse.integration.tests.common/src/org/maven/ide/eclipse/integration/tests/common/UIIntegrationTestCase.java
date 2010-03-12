@@ -51,6 +51,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jface.wizard.WizardPage;
@@ -88,6 +89,7 @@ import org.eclipse.ui.internal.IPreferenceConstants;
 import org.eclipse.ui.internal.WorkbenchPlugin;
 import org.eclipse.ui.internal.util.PrefUtil;
 import org.eclipse.ui.part.FileEditorInput;
+import org.eclipse.ui.progress.UIJob;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.hamcrest.text.StringStartsWith;
@@ -129,7 +131,14 @@ public abstract class UIIntegrationTestCase {
 
 	protected static final IProgressMonitor monitor = new NullProgressMonitor();
 
-	@BeforeClass
+  private static JobHelpers.IJobMatcher EDITOR_JOB_MATCHER = new JobHelpers.IJobMatcher() {
+    public boolean matches(Job job) {
+      // wait for the job from MavenPomEditor.doSave() 
+      return (job instanceof UIJob) && "Saving".equals(job.getName());
+    }
+  };
+
+  @BeforeClass
 	public final static void beforeClass() throws Exception {
 		bot = new SonatypeSWTBot();
 
@@ -278,12 +287,18 @@ public abstract class UIIntegrationTestCase {
 		}
 	}
 
-	protected static void waitForAllBuildsToComplete() {
-		JobHelpers.waitForJobsToComplete();
-	}
+  protected static void waitForAllBuildsToComplete() {
+    waitForAllEditorsToSave();
+    JobHelpers.waitForJobsToComplete();
+  }
 
   protected static void waitForAllLaunchesToComplete(int maxWaitMillis) {
+    waitForAllEditorsToSave();
     JobHelpers.waitForLaunchesToComplete(maxWaitMillis);
+  }
+
+  protected static void waitForAllEditorsToSave() {
+    JobHelpers.waitForJobs(EDITOR_JOB_MATCHER, 30 * 1000);
   }
 
 	protected void createNewFolder(String projectName, String folderName) {

@@ -42,6 +42,7 @@ public class PomEditor2Test extends PomEditorTestBase {
     ebot.cTabItem("Overview").activate();
 
     editor.saveAndClose();
+    waitForAllEditorsToSave();
 
     editor = bot.editorByTitle(openPomFile("projectC/pom.xml").getTitle()).toTextEditor();
     editor.bot().cTabItem("Overview").activate();
