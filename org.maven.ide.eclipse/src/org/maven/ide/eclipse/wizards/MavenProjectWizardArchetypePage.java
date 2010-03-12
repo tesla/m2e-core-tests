@@ -146,7 +146,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
   Button addArchetypeButton;
   
   /** the list of available archetypes */
-  Collection<Archetype> archetypes;
+  volatile Collection<Archetype> archetypes;
 
   Collection<Archetype> lastVersionArchetypes;
 
@@ -517,7 +517,6 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
     Job job = new Job(Messages.getString("wizard.project.page.archetype.retrievingArchetypes")) {
       protected IStatus run(IProgressMonitor monitor) {
           try{
-            @SuppressWarnings("unchecked")
             List<Archetype> catalogArchetypes = getArchetypesForCatalog();
   
             if(catalogArchetypes == null || catalogArchetypes.size() == 0){
@@ -538,8 +537,9 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
             if(catalogArchetypes == null){
               return Status.CANCEL_STATUS;
             }
-            archetypes = new TreeSet<Archetype>(ARCHETYPE_COMPARATOR);
-            archetypes.addAll(catalogArchetypes);
+            TreeSet<Archetype> archs = new TreeSet<Archetype>(ARCHETYPE_COMPARATOR);
+            archs.addAll(catalogArchetypes);
+            archetypes = archs;
             
             Display.getDefault().asyncExec(new Runnable() {
               public void run() {
