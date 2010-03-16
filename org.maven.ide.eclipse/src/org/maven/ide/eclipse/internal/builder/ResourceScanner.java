@@ -58,7 +58,7 @@ public class ResourceScanner extends AbstractScanner {
   private void scanResource() throws CoreException {
     resource.accept(new IResourceVisitor() {
 
-      public boolean visit(IResource resource) throws CoreException {
+      public boolean visit(IResource resource) {
         String relpath = getRelativePath(resource);
         if (isIncluded(relpath) && !isExcluded(relpath)) {
           if (resource instanceof IContainer) {
@@ -78,7 +78,7 @@ public class ResourceScanner extends AbstractScanner {
   }
 
   protected String getRelativePath(IResource resource) {
-    return resource.getFullPath().removeFirstSegments(this.resource.getFullPath().segmentCount()).toPortableString();
+    return resource.getFullPath().removeFirstSegments(this.resource.getFullPath().segmentCount()).toOSString();
   }
 
   public File getBasedir() {

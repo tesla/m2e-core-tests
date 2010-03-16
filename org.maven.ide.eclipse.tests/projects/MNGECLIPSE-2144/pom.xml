@@ -1,0 +1,7 @@
+<project>
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.maven.ide.eclipse.its</groupId>
+  <artifactId>resource-scanning</artifactId>
+  <version>1.0</version>
+</project>

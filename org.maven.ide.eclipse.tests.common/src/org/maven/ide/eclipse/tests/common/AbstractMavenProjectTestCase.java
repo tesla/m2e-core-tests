@@ -287,6 +287,16 @@ public abstract class AbstractMavenProjectTestCase extends TestCase {
    * Import a test project into the Eclipse workspace
    * 
    * @param pomLocation - a relative location of the pom file for the project to import
+   * @return created project
+   */
+  protected IProject importProject(String pomLocation) throws IOException, CoreException {
+    return importProject(pomLocation, new ResolverConfiguration());
+  }
+
+  /**
+   * Import a test project into the Eclipse workspace
+   * 
+   * @param pomLocation - a relative location of the pom file for the project to import
    * @param configuration - a resolver configuration to be used to configure imported project 
    * @return created project
    */
