@@ -19,12 +19,20 @@ import org.maven.ide.eclipse.tests.common.AbstractMavenProjectTestCase;
 
 
 @SuppressWarnings("restriction")
-public class EclipseBuildContextTest extends AbstractMavenProjectTestCase {
+public class EclipseIncrementalBuildContextTest extends AbstractMavenProjectTestCase {
 
   public void testScanner() throws Exception {
     IProject project = importProject("projects/MNGECLIPSE-2144/pom.xml");
 
-    EclipseBuildContext context = new EclipseBuildContext(project, new HashMap<String, Object>());
+    ResourceDeltaStub delta = new ResourceDeltaStub(project);
+    ResourceDeltaStub child = delta.addChild(new ResourceDeltaStub(project.getFolder("src")));
+    child = child.addChild(new ResourceDeltaStub(project.getFolder("src/main")));
+    child = child.addChild(new ResourceDeltaStub(project.getFolder("src/main/resources")));
+    child = child.addChild(new ResourceDeltaStub(project.getFolder("src/main/resources/sub")));
+    child = child.addChild(new ResourceDeltaStub(project.getFolder("src/main/resources/sub/dir")));
+    child = child.addChild(new ResourceDeltaStub(project.getFile("src/main/resources/sub/dir/file.txt")));
+
+    EclipseIncrementalBuildContext context = new EclipseIncrementalBuildContext(delta, new HashMap<String, Object>());
     Scanner scanner;
 
     scanner = context.newScanner(new File(project.getLocation().toFile(), "src/main/resources"), true);
