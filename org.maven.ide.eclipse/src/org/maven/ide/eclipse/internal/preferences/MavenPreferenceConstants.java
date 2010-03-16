@@ -62,6 +62,9 @@ public interface MavenPreferenceConstants {
   /** boolean */
   public static final String P_DISABLE_JDK_WARNING = PREFIX + "disableJdkwarning";
 
+  /** boolean */
+  public static final String P_DISABLE_JDK_CHECK = PREFIX + "disableJdkCheck";
+
   /** String */
   public static final String P_RUNTIMES = PREFIX + "runtimes";
 

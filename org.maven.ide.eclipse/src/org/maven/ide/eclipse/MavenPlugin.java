@@ -406,6 +406,9 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   }
 
   private void checkJdk() {
+    if(getPreferenceStore().getBoolean(MavenPreferenceConstants.P_DISABLE_JDK_CHECK)) {
+      return;
+    }
     // There is no tools.jar on Mac OS X
     // http://developer.apple.com/documentation/Java/Conceptual/Java14Development/02-JavaDevTools/JavaDevTools.html
     String osName = System.getProperty("os.name", "");
