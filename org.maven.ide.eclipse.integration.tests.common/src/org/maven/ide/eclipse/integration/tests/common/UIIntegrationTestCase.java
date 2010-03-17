@@ -161,7 +161,7 @@ public abstract class UIIntegrationTestCase {
 			Object parent = UIThreadRunnable.syncExec(shell.display,
 					new Result<Object>() {
 						public Object run() {
-							return widget.getParent();
+							return widget.isDisposed() ? null : widget.getParent();
 						}
 					});
 
