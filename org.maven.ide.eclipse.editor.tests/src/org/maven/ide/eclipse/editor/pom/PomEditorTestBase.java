@@ -101,7 +101,7 @@ public abstract class PomEditorTestBase extends UIIntegrationTestCase {
   }
 
   @Before
-  public void createTestProject() {
+  public void createTestProject() throws Exception {
 
     clearProjects();
 

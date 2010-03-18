@@ -42,15 +42,12 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -111,6 +108,7 @@ import org.maven.ide.eclipse.internal.repository.RepositoryRegistry;
 import org.maven.ide.eclipse.repository.IRepository;
 import org.maven.ide.eclipse.repository.IRepositoryRegistry;
 import org.maven.ide.eclipse.tests.common.JobHelpers;
+import org.maven.ide.eclipse.tests.common.WorkspaceHelpers;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 
@@ -957,47 +955,9 @@ public abstract class UIIntegrationTestCase {
 
 	public static final String TOMCAT_SERVER_NAME = "Tomcat.*";
 
-	public static void clearProjects() {
-		waitForAllBuildsToComplete();
-
-		WorkspaceJob job = new WorkspaceJob("deleting test projects") {
-			public IStatus runInWorkspace(IProgressMonitor monitor)
-					throws CoreException {
-				ResourcesPlugin.getWorkspace().getRoot().refreshLocal(
-						IResource.DEPTH_INFINITE, null);
-				IProject[] projects = ResourcesPlugin.getWorkspace().getRoot()
-						.getProjects();
-				for (IProject project : projects) {
-					project.delete(true, true, monitor);
-				}
-				return Status.OK_STATUS;
-			}
-		};
-		job
-				.setRule(ResourcesPlugin.getWorkspace().getRuleFactory()
-						.buildRule());
-		job.schedule();
-
-		try {
-			job.join();
-		} catch (InterruptedException ex) {
-			throw new RuntimeException(ex);
-		}
-    assertTrue(job.getResult().toString(), job.getResult().isOK());
-
-		waitForAllBuildsToComplete();
-
-		bot.waitUntil(new DefaultCondition() {
-
-			public boolean test() throws Exception {
-				return ResourcesPlugin.getWorkspace().getRoot().getProjects().length == 0;
-			}
-
-      public String getFailureMessage() {
-        return "Projects still there: " + Arrays.asList(ResourcesPlugin.getWorkspace().getRoot().getProjects());
-			}
-		}, 10 * 1000);
-	}
+  public static void clearProjects() throws Exception {
+    WorkspaceHelpers.cleanWorkspace();
+  }
 
 	protected MavenPomEditor openPomFile(String name) throws Exception {
 

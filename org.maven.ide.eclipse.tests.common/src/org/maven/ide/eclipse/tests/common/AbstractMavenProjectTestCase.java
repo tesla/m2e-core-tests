@@ -27,7 +27,6 @@ import org.apache.maven.model.Model;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.component.repository.ComponentDescriptor;
-import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -118,69 +117,18 @@ public abstract class AbstractMavenProjectTestCase extends TestCase {
       fail("Cannot determine local repository path");
     }
 
-    cleanWorkspace();
+    WorkspaceHelpers.cleanWorkspace();
   }
 
   protected void tearDown() throws Exception {
     super.tearDown();
 
-    cleanWorkspace();
+    WorkspaceHelpers.cleanWorkspace();
 
     projectRefreshJob.wakeUp();
     IWorkspaceDescription description = workspace.getDescription();
     description.setAutoBuilding(true);
     workspace.setDescription(description);
-  }
-
-  private void cleanWorkspace() throws Exception {
-    Exception cause = null;
-    for (int  i = 0; i < DELETE_RETRY_COUNT; i++) {
-      try {
-        doCleanWorkspace();
-      } catch (InterruptedException e) {
-        throw e;
-      } catch (OperationCanceledException e) {
-        throw e;
-      } catch (Exception e) {
-        cause = e;
-        Thread.sleep(DELETE_RETRY_DELAY);
-        continue;
-      }
-
-      // all clear
-      return;
-    }
-
-    // must be a timeout
-    throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, "Could not delete workspace resources", cause));
-  }
-
-  private void doCleanWorkspace() throws InterruptedException, CoreException, IOException {
-    workspace.run(new IWorkspaceRunnable() {
-      public void run(IProgressMonitor monitor) throws CoreException {
-        IProject[] projects = workspace.getRoot().getProjects();
-        for(int i = 0; i < projects.length; i++ ) {
-          projects[i].delete(true, true, monitor);
-        }
-      }
-    }, new NullProgressMonitor());
-
-    waitForJobsToComplete();
-
-    File[] files = workspace.getRoot().getLocation().toFile().listFiles();
-    if (files != null) {
-      for (File file : files) {
-        if (!".metadata".equals(file.getName())) {
-          if (file.isDirectory()) {
-            FileUtils.deleteDirectory(file);
-          } else {
-            if (!file.delete()) {
-              throw new IOException("Could not delete file " + file.getCanonicalPath());
-            }
-          }
-        }
-      }
-    }
   }
 
   protected void deleteProject(String projectName) throws CoreException, InterruptedException {
