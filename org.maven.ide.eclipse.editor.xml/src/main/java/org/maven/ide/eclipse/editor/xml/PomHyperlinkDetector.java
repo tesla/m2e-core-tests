@@ -10,9 +10,7 @@ package org.maven.ide.eclipse.editor.xml;
 
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
-import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -26,10 +24,12 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.forms.editor.FormEditor;
 import org.eclipse.ui.ide.IDE;
 
 import org.maven.ide.eclipse.actions.OpenPomAction;
@@ -93,20 +93,24 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
 
   private IHyperlink[] openModule(Fragment fragment, ITextViewer textViewer) {
     final Fragment module = getValue(fragment, "<module>", "</module>");
-    
-      ITextFileBuffer buf = FileBuffers.getTextFileBufferManager().getTextFileBuffer(textViewer.getDocument());
-      IPath folder = buf.getLocation().removeLastSegments(1);
-      String path = module.text;
-      //construct IPath for the child pom file, handle relative paths..
-      while (path.startsWith("../")) { //NOI18N
-        folder = folder.removeLastSegments(1);
-        path = path.substring("../".length());//NOI18N
-      }
-      IPath modulePom = folder.append(path);
-      if (!"xml".equals(modulePom.getFileExtension())) {//NOI18N
-        modulePom = modulePom.append("pom.xml");//NOI18N
-      }
-      final IPath fmodulePom = modulePom;
+
+    ITextFileBuffer buf = FileBuffers.getTextFileBufferManager().getTextFileBuffer(textViewer.getDocument());
+    IFileStore folder = buf.getFileStore().getParent();
+
+    String path = module.text;
+    //construct IPath for the child pom file, handle relative paths..
+    while(folder != null && path.startsWith("../")) { //NOI18N
+      folder = folder.getParent();
+      path = path.substring("../".length());//NOI18N
+    }
+    if(folder == null) {
+      return new IHyperlink[0];
+    }
+    IFileStore modulePom = folder.getChild(path);
+    if(!modulePom.getName().endsWith("xml")) {//NOI18N
+      modulePom = modulePom.getChild("pom.xml");//NOI18N
+    }
+    final IFileStore fileStore = modulePom;
 
     IHyperlink pomHyperlink = new IHyperlink() {
       public IRegion getHyperlinkRegion() {
@@ -122,16 +126,19 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
       }
 
       public void open() {
-        IFileStore fileStore = EFS.getLocalFileSystem().getStore(fmodulePom);
         IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
         if(window != null) {
           IWorkbenchPage page = window.getActivePage();
           if(page != null) {
             try {
-              IDE.openEditorOnFileStore(page, fileStore);
+              IEditorPart part = IDE.openEditorOnFileStore(page, fileStore);
+              if(part instanceof FormEditor) {
+                FormEditor ed = (FormEditor) part;
+                ed.setActivePage(null); //null means source, always or just in the case of MavenPomEditor?
+              }
             } catch(PartInitException e) {
               MessageDialog.openInformation(Display.getDefault().getActiveShell(), //
-                  "Open Maven POM", "Can't open editor for " + fmodulePom + "\n" + e.toString());
+                  "Open Maven POM", "Can't open editor for " + fileStore + "\n" + e.toString());
 
             }
           }
