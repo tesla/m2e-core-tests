@@ -47,7 +47,10 @@ public class MavenLogger {
   }
 
   public static void log(String msg, Throwable t) {
-    log(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, 0, msg, t));
+    log(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, msg, t));
   }
 
+  public static void log(String msg) {
+    log(new Status(IStatus.OK, IMavenConstants.PLUGIN_ID, msg));
+  }
 }

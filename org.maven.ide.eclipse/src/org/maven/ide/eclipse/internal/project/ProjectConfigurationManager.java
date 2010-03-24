@@ -583,6 +583,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
       private static final long serialVersionUID = 1L;
       public Set<MavenProjectInfo> collectProjects(Collection<MavenProjectInfo> projects) {
         for(MavenProjectInfo projectInfo : projects) {
+          console.logMessage("Collecting project info " + projectInfo);
           add(projectInfo);
           collectProjects(projectInfo.getProjects());
         }

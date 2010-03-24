@@ -9,6 +9,7 @@
 package org.maven.ide.eclipse.project;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -17,6 +18,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.maven.model.Model;
+
+import org.maven.ide.eclipse.core.MavenLogger;
+
 
 /**
  * @author Eugene Kuleshov
@@ -110,11 +114,22 @@ public class MavenProjectInfo {
   }
 
   public void add(MavenProjectInfo info) {
-    String key = info.getLabel();
+    String key;
+    try {
+      if(info.getPomFile() == null) {
+        // Is this possible?
+        key = info.getLabel();
+      } else {
+        key = info.getPomFile().getCanonicalPath();
+      }
+    } catch(IOException ex) {
+      throw new RuntimeException(ex);
+    }
     MavenProjectInfo i = projects.get(key);
     if(i==null) {
       projects.put(key, info);
     } else {
+      MavenLogger.log("Project info " + this + " already has a child project info with key '" + key + "'");
       for(Iterator<String> it = info.getProfiles().iterator(); it.hasNext();) {
         i.addProfile(it.next());
       }
@@ -175,7 +190,6 @@ public class MavenProjectInfo {
   }
 
   public String toString() {
-    return label + (pomFile == null ? "" : " " + pomFile.getAbsolutePath());
+    return "'" + label + "'" + (pomFile == null ? "" : " " + pomFile.getAbsolutePath());
   }
-  
 }
