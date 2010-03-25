@@ -191,7 +191,7 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
     return null;
   }
   
-  protected String extractPrefix(ITextViewer viewer, int offset) {
+  public static final String extractPrefix(ITextViewer viewer, int offset) {
     int i = offset;
     IDocument document = viewer.getDocument();
     if(i > document.getLength()) {
@@ -201,7 +201,7 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
     try {
       while(i > 0) {
         char ch = document.getChar(i - 1);
-        if(!Character.isJavaIdentifierPart(ch) && ch != '.' && ch != '-') {
+        if(ch == '>' || ch == '\n') {
           break;
         }
         i-- ;
