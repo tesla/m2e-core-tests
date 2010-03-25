@@ -436,12 +436,13 @@ public class OverviewPage extends MavenPomEditorPage {
           compoundCommand.append(removeCommand);
           n++ ;
         }
-        if(model.getModules().size() - n == 0) {
-          Command removeModules = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Modules(), null);
-          compoundCommand.append(removeModules);
-        }
-
+        //MNGECLIPSE-1850 this is a partial fix, have the remove commands executed separately and
+        // then remove the whole <modules> section. Unfortunately that one doesn't work.
         editingDomain.getCommandStack().execute(compoundCommand);
+        if(model.getModules().size() == 0) {
+          Command removeModules = SetCommand.create(editingDomain, model, POM_PACKAGE.getModel_Modules(), null);
+          editingDomain.getCommandStack().execute(removeModules);
+        }
         // modulesEditor.refresh();
       }
     });
