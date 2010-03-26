@@ -6,10 +6,10 @@ Require-Bundle: org.eclipse.core.runtime,
  org.junit,
  org.maven.ide.eclipse.tests.common,
  org.maven.ide.eclipse.editor.xml,
- org.eclipse.jface;bundle-version="3.5.1",
- org.eclipse.wst.xml.core;bundle-version="1.1.401",
- org.eclipse.jface.text;bundle-version="3.5.1",
- org.eclipse.wst.xml.ui;bundle-version="1.1.1"
+ org.eclipse.jface,
+ org.eclipse.jface.text,
+ org.eclipse.wst.xml.core,
+ org.eclipse.wst.xml.ui
 Bundle-Name: Maven POM XML Editor Tests Plug-In
 Bundle-Version: 0.10.1.qualifier
 MavenArtifact-ArtifactId: org.maven.ide.eclipse.editor.xml.tests
