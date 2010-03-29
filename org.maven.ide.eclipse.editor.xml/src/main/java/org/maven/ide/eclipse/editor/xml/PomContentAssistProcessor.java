@@ -8,6 +8,7 @@
 
 package org.maven.ide.eclipse.editor.xml;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -16,7 +17,14 @@ import java.util.List;
 import org.w3c.dom.Node;
 import org.w3c.dom.Text;
 
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filesystem.IFileStore;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -80,8 +88,14 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
 
   private void addProposals(ContentAssistRequest request, PomTemplateContext context) {
     if(request != null) {
-      ICompletionProposal[] templateProposals = getTemplateProposals(
-          null, // XXX project context
+      ITextFileBuffer buf = FileBuffers.getTextFileBufferManager().getTextFileBuffer(sourceViewer.getDocument());
+      IFileStore folder = buf.getFileStore();
+      File file = new File(folder.toURI());
+      IPath path = Path.fromOSString(file.getAbsolutePath());
+      IFile ifile = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(path);
+      IProject prj = ifile != null ? ifile.getProject() : null;
+
+      ICompletionProposal[] templateProposals = getTemplateProposals(prj,
           sourceViewer, //
           request.getReplacementBeginPosition(), context.getContextTypeId(), getCurrentNode(request));
       for(ICompletionProposal proposal : templateProposals) {
