@@ -8,6 +8,8 @@
 
 package org.maven.ide.eclipse.editor.xml;
 
+import java.io.File;
+import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -17,6 +19,7 @@ import java.util.List;
 import org.apache.maven.plugin.descriptor.MojoDescriptor;
 import org.apache.maven.plugin.descriptor.Parameter;
 import org.apache.maven.plugin.descriptor.PluginDescriptor;
+import org.codehaus.plexus.util.StringUtils;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
@@ -48,6 +51,8 @@ public enum PomTemplateContext {
   
   PARENT("parent"), //
   
+  MODULES("modules"), //
+
   PROPERTIES("properties"), //
   
   DEPENDENCIES("dependencies"), //
@@ -63,7 +68,7 @@ public enum PomTemplateContext {
   PROFILES("profiles"), //
   
   REPOSITORIES("repositories"), //
-  
+
   CONFIGURATION("configuration") {
 
     @Override
@@ -309,6 +314,50 @@ public enum PomTemplateContext {
           String contextTypeId = getContextTypeId();
           for (MojoDescriptor mojo : mojos) {
             add(proposals, contextTypeId, mojo.getGoal(), mojo.getDescription());
+          }
+        }
+      }
+    }
+  },
+
+  MODULE("module") {
+    @Override
+    public void addTemplates(IProject project, Collection<Template> proposals, Node node, String prefix)
+        throws CoreException {
+      if(project == null) {
+        //shall not happen just double check.
+        return;
+      }
+      File currentPom = new File(project.getLocationURI());
+      File directory = currentPom;
+      String path = prefix;
+      boolean endingSlash = path.endsWith("/");
+      String[] elems = StringUtils.split(path, "/");
+      String lastElement = null;
+      for(int i = 0; i < elems.length; i++ ) {
+        if("..".equals(elems[i])) {
+          directory = directory != null ? directory.getParentFile() : null;
+        } else if(i < elems.length - (endingSlash ? 0 : 1)) {
+          directory = directory != null ? new File(directory, elems[i]) : null;
+        } else {
+          lastElement = elems[i];
+        }
+      }
+      path = lastElement != null ? path.substring(0, path.length() - lastElement.length()) : path;
+      if (directory != null && directory.exists() && directory.isDirectory()) {
+        File[] offerings = directory.listFiles(new FileFilter() {
+          public boolean accept(File pathname) {
+            if (pathname.isDirectory()) {
+              File pom = new File(pathname, "pom.xml");
+              //TODO shall also handle polyglot maven :)
+              return pom.exists() && pom.isFile();
+            }
+            return false;
+          }
+        });
+        for (File candidate : offerings) {
+          if(lastElement == null || candidate.getName().startsWith(lastElement)) {
+            add(proposals, getContextTypeId(), path + candidate.getName(), "Maven project at " + candidate);
           }
         }
       }
