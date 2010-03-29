@@ -95,8 +95,7 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
       IFile ifile = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(path);
       IProject prj = ifile != null ? ifile.getProject() : null;
 
-      ICompletionProposal[] templateProposals = getTemplateProposals(prj,
-          sourceViewer, //
+      ICompletionProposal[] templateProposals = getTemplateProposals(prj, sourceViewer,
           request.getReplacementBeginPosition(), context.getContextTypeId(), getCurrentNode(request));
       for(ICompletionProposal proposal : templateProposals) {
         if(request.shouldSeparate()) {
