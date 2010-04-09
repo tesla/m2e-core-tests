@@ -231,8 +231,9 @@ public class OverviewPage extends MavenPomEditorPage {
     artifactPackagingCombo.add("ear");
     artifactPackagingCombo.add("pom");
     artifactPackagingCombo.add("maven-plugin");
-    artifactPackagingCombo.add("osgi-bundle");
-    artifactPackagingCombo.add("eclipse-feature");
+// uncomment this only if you are able to not to break the project    
+//    artifactPackagingCombo.add("osgi-bundle");
+//    artifactPackagingCombo.add("eclipse-feature");
     
     toolkit.adapt(artifactPackagingCombo, true, true);
     GridData gd_packagingText = new GridData(SWT.LEFT, SWT.CENTER, true, false);
