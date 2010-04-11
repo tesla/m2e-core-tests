@@ -103,10 +103,12 @@ public class MEclipse193IndexerTest extends M2EUIIntegrationTestCase {
     IProject project = createSimpleMavenProject(projectName);
     createSimpleMavenProject(dependencyName);
 
+    waitForAllBuildsToComplete();
+
     // mvn install "dependency" project
     ContextMenuHelper.clickContextMenu(selectProject(dependencyName), withMnemonic("Run As"), ContainsMnemonic
         .containsMnemonic("Maven install"));
-    waitForAllBuildsToComplete();
+    waitForAllLaunchesToComplete(30 * 1000);
 
     // bump version # of "dependency" project
     SWTBotEditor editor = bot.editorByTitle(openPomFile(dependencyName + "/pom.xml").getTitle());

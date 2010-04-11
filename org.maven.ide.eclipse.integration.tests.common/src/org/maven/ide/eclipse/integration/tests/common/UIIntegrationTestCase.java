@@ -474,8 +474,8 @@ public abstract class UIIntegrationTestCase {
 			Assert.assertFalse(part == null);
 
 			view = bot.viewById(id);
-			view.show();
 		}
+		view.show();
 
 		return view;
 	}
@@ -612,6 +612,7 @@ public abstract class UIIntegrationTestCase {
 	protected void deployProjectsIntoTomcat() throws Exception {
 		// Deploy the test project into tomcat
 		SWTBotView serversView = bot.viewById(SERVERS_VIEW_ID);
+		serversView.show();
 		serversView.setFocus();
 
 		SWTBotTree tree = serversView.bot().tree().select(0);
@@ -650,6 +651,7 @@ public abstract class UIIntegrationTestCase {
 		try {
 			// shutdown the server
 			SWTBotView serversView = bot.viewById(SERVERS_VIEW_ID);
+			serversView.show();
 			SWTBotTree tree = serversView.bot().tree().select(0);
 
 			ContextMenuHelper.clickContextMenu(tree, "Stop");

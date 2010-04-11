@@ -53,7 +53,7 @@ public class MngEclipse1882LaunchNoSettingsTest extends M2EUIIntegrationTestCase
     SWTBotTreeItem node = tree.getTreeItem("mngeclipse-1882").expand().getNode("pom.xml");
     new SWTBotMenuEx(node.contextMenu("Run As")).menuContains("Maven clean").click();
     waitForAllBuildsToComplete();
-    waitForAllLaunchesToComplete(15000);
+    waitForAllLaunchesToComplete(30 * 1000);
 
     assertFalse(path.getAbsolutePath(), path.exists());
   }
