@@ -61,7 +61,7 @@ public class MEclipse182RangeHandlingTest extends M2EUIIntegrationTestCase {
     // Change original project to depend on version range which includes 1.1-SNAPSHOT
     editor = bot.editorByTitle(openPomFile(project1Name + "/pom.xml").getTitle());
     editor.bot().cTabItem("pom.xml").activate();
-    replaceText("1.0-SNAPSHOT", "[1.0-SNAPSHOT,2.0-SNAPSHOT)");
+    replaceText("1.0-SNAPSHOT", "[1.0-SNAPSHOT,1.1-SNAPSHOT]");
     editor.saveAndClose();
 
     waitForAllBuildsToComplete();
