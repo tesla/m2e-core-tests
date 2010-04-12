@@ -3,6 +3,7 @@ package org.maven.ide.eclipse.ui.internal.preferences;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
@@ -45,7 +46,7 @@ import org.eclipse.ui.ide.IDE;
 import org.apache.maven.cli.MavenCli;
 import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.settings.Settings;
-import org.apache.maven.settings.validation.SettingsValidationResult;
+import org.apache.maven.settings.building.SettingsProblem;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
@@ -343,9 +344,9 @@ public class MavenSettingsPreferencePage extends PreferencePage implements IWork
       userSettings = null;
     }
     updateSettingsLink(fileExists);
-    SettingsValidationResult result = maven.validateSettings(userSettings);
-    if(result.getMessageCount() > 0) {
-      setMessage("Unable to parse user settings file; " + result.getMessage(0), IMessageProvider.WARNING);
+    List<SettingsProblem> result = maven.validateSettings(userSettings);
+    if(result.size() > 0) {
+      setMessage("Unable to parse user settings file; " + result.get(0).getMessage(), IMessageProvider.WARNING);
     }
   }
 

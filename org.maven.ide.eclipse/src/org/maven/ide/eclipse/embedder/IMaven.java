@@ -30,7 +30,7 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.settings.Mirror;
 import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
-import org.apache.maven.settings.validation.SettingsValidationResult;
+import org.apache.maven.settings.building.SettingsProblem;
 import org.apache.maven.wagon.events.TransferListener;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 
@@ -133,7 +133,7 @@ public interface IMaven {
 
   public void writeSettings(Settings settings, OutputStream out) throws CoreException;
 
-  public SettingsValidationResult validateSettings(String settings);
+  public List<SettingsProblem> validateSettings(String settings);
 
   public List<Mirror> getMirrors() throws CoreException;
 

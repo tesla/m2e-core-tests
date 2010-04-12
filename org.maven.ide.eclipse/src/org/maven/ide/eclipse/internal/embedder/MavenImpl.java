@@ -101,6 +101,7 @@ import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.settings.SettingsUtils;
 import org.apache.maven.settings.building.DefaultSettingsBuildingRequest;
+import org.apache.maven.settings.building.DefaultSettingsProblem;
 import org.apache.maven.settings.building.SettingsBuilder;
 import org.apache.maven.settings.building.SettingsBuildingException;
 import org.apache.maven.settings.building.SettingsBuildingRequest;
@@ -110,7 +111,6 @@ import org.apache.maven.settings.crypto.SettingsDecrypter;
 import org.apache.maven.settings.crypto.SettingsDecryptionRequest;
 import org.apache.maven.settings.crypto.SettingsDecryptionResult;
 import org.apache.maven.settings.io.SettingsWriter;
-import org.apache.maven.settings.validation.SettingsValidationResult;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 
 import org.maven.ide.eclipse.MavenPlugin;
@@ -327,8 +327,8 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
     }
   }
 
-  public SettingsValidationResult validateSettings(String settings) {
-    SettingsValidationResult result = new SettingsValidationResult();
+  public List<SettingsProblem> validateSettings(String settings) {
+    List<SettingsProblem> problems = new ArrayList<SettingsProblem>();
     if(settings != null) {
       File settingsFile = new File(settings);
       if(settingsFile.canRead()) {
@@ -337,16 +337,15 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
         try {
           settingsBuilder.build(request);
         } catch(SettingsBuildingException ex) {
-          for(SettingsProblem problem : ex.getProblems()) {
-            result.addMessage(problem.getMessage());
-          }
+          problems.addAll(ex.getProblems());
         }
       } else {
-        result.addMessage("Can not read settings file " + settings);
+        problems.add(new DefaultSettingsProblem("Can not read settings file " + settings,
+            SettingsProblem.Severity.ERROR, settings, -1, -1, null));
       }
     }
 
-    return result;
+    return problems;
   }
 
   public void reloadSettings() throws CoreException {

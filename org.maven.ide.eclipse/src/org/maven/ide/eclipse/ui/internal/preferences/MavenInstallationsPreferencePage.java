@@ -60,7 +60,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.ide.IDE;
 
-import org.apache.maven.settings.validation.SettingsValidationResult;
+import org.apache.maven.settings.building.SettingsProblem;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
@@ -555,9 +555,9 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
       globalSettings = null;
     }
 
-    SettingsValidationResult result = maven.validateSettings(globalSettings);
-    if(result.getMessageCount() > 0) {
-      setMessage("Unable to parse global settings file; " + result.getMessage(0), IMessageProvider.WARNING);
+    List<SettingsProblem> result = maven.validateSettings(globalSettings);
+    if(result.size() > 0) {
+      setMessage("Unable to parse global settings file; " + result.get(0).getMessage(), IMessageProvider.WARNING);
     }
 
   }
