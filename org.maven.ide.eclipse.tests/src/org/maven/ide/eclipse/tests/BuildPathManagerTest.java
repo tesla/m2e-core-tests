@@ -606,14 +606,14 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 
     cp = javaProject.getRawClasspath();
 
-    assertEquals(log4jPath, cp[cp.length - 2].getPath());
+    assertEquals(log4jJar.getAbsoluteFile(), cp[cp.length - 2].getPath().toFile());
     assertEquals("log4j-1.2.13-sources.jar", cp[cp.length - 2].getSourceAttachmentPath().lastSegment());
     assertEquals(true, cp[cp.length - 2].isExported());
 
     getBuildPathManager().scheduleDownload(javaProject.findPackageFragmentRoot(junitPath), true, false);
     waitForJobsToComplete();
 
-    assertEquals(junitPath, cp[cp.length - 1].getPath());
+    assertEquals(junitJar.getAbsoluteFile(), cp[cp.length - 1].getPath().toFile());
     assertEquals("junit-3.8.1-sources.jar", cp[cp.length - 1].getSourceAttachmentPath().lastSegment());
     assertEquals(false, cp[cp.length - 1].isExported());
   }
