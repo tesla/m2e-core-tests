@@ -10,6 +10,7 @@
   <groupId>resourcefiltering</groupId>
   <artifactId>p003-m1</artifactId>
   <version>0.0.1-SNAPSHOT</version>
+  <name>p003-m1</name>
 
   <build>
     <resources>

@@ -46,11 +46,11 @@ public class MavenBuilderTest extends AbstractMavenProjectTestCase {
     waitForJobsToComplete();
 
     Properties properties = loadProperties(aPath);
-    assertEquals("Unnamed - resourcefiltering:p001:jar:0.0.1-SNAPSHOT", properties.getProperty("a.name"));
+    assertEquals("p001", properties.getProperty("a.name"));
     assertEquals("0.0.1-SNAPSHOT", properties.getProperty("a.version"));
 
     properties = loadProperties(bPath);
-    assertEquals("Unnamed - resourcefiltering:p001:jar:0.0.1-SNAPSHOT", properties.getProperty("b.name"));
+    assertEquals("p001", properties.getProperty("b.name"));
     assertEquals("0.0.1-SNAPSHOT", properties.getProperty("b.version"));
   }
 
@@ -83,11 +83,11 @@ public class MavenBuilderTest extends AbstractMavenProjectTestCase {
     waitForJobsToComplete();
 
     Properties properties = loadProperties(aPath);
-    assertEquals("Unnamed - resourcefiltering:p002:jar:0.0.1-SNAPSHOT", properties.getProperty("a.name"));
+    assertEquals("p002", properties.getProperty("a.name"));
     assertEquals("0.0.1-SNAPSHOT", properties.getProperty("a.version"));
 
     properties = loadProperties(bPath);
-    assertEquals("Unnamed - resourcefiltering:p002:jar:0.0.1-SNAPSHOT", properties.getProperty("b.name"));
+    assertEquals("p002", properties.getProperty("b.name"));
     assertEquals("0.0.1-SNAPSHOT", properties.getProperty("b.version"));
   }
 
@@ -109,11 +109,11 @@ public class MavenBuilderTest extends AbstractMavenProjectTestCase {
     waitForJobsToComplete();
 
     Properties properties = loadProperties(aPath);
-    assertEquals("Unnamed - resourcefiltering:p003-m1:jar:0.0.1-SNAPSHOT", properties.getProperty("a.name"));
+    assertEquals("p003-m1", properties.getProperty("a.name"));
     assertEquals("0.0.1-SNAPSHOT", properties.getProperty("a.version"));
 
     properties = loadProperties(bPath);
-    assertEquals("Unnamed - resourcefiltering:p003-m1:jar:0.0.1-SNAPSHOT", properties.getProperty("b.name"));
+    assertEquals("p003-m1", properties.getProperty("b.name"));
     assertEquals("0.0.1-SNAPSHOT", properties.getProperty("b.version"));
   }
 
@@ -133,7 +133,7 @@ public class MavenBuilderTest extends AbstractMavenProjectTestCase {
     waitForJobsToComplete();
 
     Properties properties = loadProperties(aPath);
-    assertEquals("Unnamed - resourcefiltering:p004:jar:0.0.1-SNAPSHOT", properties.getProperty("a.name"));
+    assertEquals("p004", properties.getProperty("a.name"));
     assertEquals("0.0.1-SNAPSHOT", properties.getProperty("a.version"));
   }
 
@@ -153,7 +153,7 @@ public class MavenBuilderTest extends AbstractMavenProjectTestCase {
     project.build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
 
     Properties properties = loadProperties(a.getFullPath());
-    assertEquals("Unnamed - resourcefiltering:p005:jar:0.0.1-SNAPSHOT", properties.getProperty("a.name"));
+    assertEquals("p005", properties.getProperty("a.name"));
     assertEquals("0.0.1-SNAPSHOT", properties.getProperty("a.version"));
   }
 

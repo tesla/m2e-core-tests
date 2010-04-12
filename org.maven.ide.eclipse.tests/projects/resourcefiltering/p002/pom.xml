@@ -3,6 +3,7 @@
   <groupId>resourcefiltering</groupId>
   <artifactId>p002</artifactId>
   <version>0.0.1-SNAPSHOT</version>
+  <name>p002</name>
 
   <build>
     <resources>
