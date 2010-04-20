@@ -104,13 +104,16 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
       path = path.substring("../".length());//NOI18N
     }
     if(folder == null) {
-      return new IHyperlink[0];
+      return null;
     }
     IFileStore modulePom = folder.getChild(path);
     if(!modulePom.getName().endsWith("xml")) {//NOI18N
       modulePom = modulePom.getChild("pom.xml");//NOI18N
     }
     final IFileStore fileStore = modulePom;
+    if (!fileStore.fetchInfo().exists()) {
+      return null;
+    }
 
     IHyperlink pomHyperlink = new IHyperlink() {
       public IRegion getHyperlinkRegion() {
