@@ -76,7 +76,7 @@
 
                   <serverId>forge-releases</serverId>
                   <repositoryUrl>${m2e.site-compressed}</repositoryUrl>
-                  <repositoryPath>m2e/${unqualifiedVersion}/S/${project.version}</repositoryPath>
+                  <repositoryPath>m2e/0.10.1/S/${project.version}</repositoryPath>
                 </configuration>
               </execution>
             </executions>
