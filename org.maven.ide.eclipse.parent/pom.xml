@@ -15,7 +15,7 @@
 
   <groupId>org.maven.ide.eclipse</groupId>
   <artifactId>parent</artifactId>
-  <version>0.10.1-SNAPSHOT</version>
+  <version>0.10.2-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Maven Integration for Eclipse (parent)</name>

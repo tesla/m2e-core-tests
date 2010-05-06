@@ -97,7 +97,7 @@ Bundle-ClassPath: jars/maven-embedder-3.0-SNAPSHOT.jar,jars/maven-sett
  uild-api-0.0.6.jar
 MavenArtifact-BaseVersion: 3.0.0.SNAPSHOT-maven-r911645-jetty-r5136355
  d
-Bundle-Version: 0.10.1.qualifier
+Bundle-Version: 0.10.2.qualifier
 MavenArtifact-ArtifactId: org.maven.ide.eclipse.maven_embedder
 MavenArtifact-GroupId: org.maven.ide.eclipse
 Bundle-Name: Maven Embedder Bundle
