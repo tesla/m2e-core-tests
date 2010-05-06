@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Maven Integration for Eclipse Refactoring
 Bundle-Vendor: Sonatype, Inc.
 Bundle-SymbolicName: org.maven.ide.eclipse.refactoring;singleton:=true
-Bundle-Version: 0.10.1.qualifier
+Bundle-Version: 0.10.1.20100506-1407
 Bundle-Activator: org.maven.ide.eclipse.refactoring.internal.Activator
 Require-Bundle: org.maven.ide.eclipse;bundle-version="[0.10.0,0.11.0)",
  org.maven.ide.eclipse.maven_model_edit;bundle-version="[0.10.0,0.11.0)",
