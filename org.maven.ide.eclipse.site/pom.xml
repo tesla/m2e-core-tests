@@ -61,9 +61,9 @@
       <build>
         <plugins>
           <plugin>
-            <groupId>com.sonatype.maven.plugins</groupId>
+            <groupId>org.sonatype.maven.plugins</groupId>
             <artifactId>maven-upload-plugin</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>0.0.1</version>
             <executions>
               <execution>
                 <id>publish-site</id>
