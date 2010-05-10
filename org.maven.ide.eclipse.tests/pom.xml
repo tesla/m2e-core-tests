@@ -12,7 +12,7 @@
   <parent>
     <groupId>org.maven.ide.eclipse</groupId>
     <artifactId>parent</artifactId>
-    <version>0.10.1.20100506-1407</version>
+    <version>0.10.1.20100510-1546</version>
     <relativePath>../org.maven.ide.eclipse.parent</relativePath>
   </parent>
 

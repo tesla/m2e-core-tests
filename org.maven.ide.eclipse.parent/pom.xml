@@ -15,7 +15,7 @@
 
   <groupId>org.maven.ide.eclipse</groupId>
   <artifactId>parent</artifactId>
-  <version>0.10.1.20100506-1407</version>
+  <version>0.10.1.20100510-1546</version>
   <packaging>pom</packaging>
 
   <name>Maven Integration for Eclipse (parent)</name>
