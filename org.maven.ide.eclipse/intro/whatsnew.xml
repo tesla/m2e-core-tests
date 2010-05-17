@@ -5,7 +5,7 @@
 		<group id="content-group" style-id="content-group">
 			<link id="m2eclipse-noteworthy" style-id="content-link" 
 			      label="Maven Integration for Eclipse"
-            url="http://docs.codehaus.org/display/M2ECLIPSE/New+and+Noteworthy">
+            url="http://m2eclipse.sonatype.org/new-and-noteworthy.html">
 				<text>
 					See some of the more interesting or significant changes in the 
 					Maven Integration for Eclipse.
