@@ -58,6 +58,7 @@ import org.maven.ide.eclipse.project.ResolverConfiguration;
 import org.maven.ide.eclipse.repository.IRepository;
 import org.maven.ide.eclipse.repository.IRepositoryRegistry;
 import org.maven.ide.eclipse.tests.common.AbstractMavenProjectTestCase;
+import org.maven.ide.eclipse.tests.common.WorkspaceHelpers;
 
 
 /**
@@ -93,7 +94,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     }
     waitForJobsToComplete();
 
-    assertNoErrors(project1);
+    WorkspaceHelpers.assertNoErrors(project1);
 
 //    IClasspathEntry[] project1entries = getMavenContainerEntries(project1);
 //    assertEquals(1, project1entries.length);
@@ -110,7 +111,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     configurationManager.updateProjectConfiguration(project2, configuration, "", monitor);
     waitForJobsToComplete();
 
-    assertMarkers(project2, 0);
+    WorkspaceHelpers.assertMarkers(project2, 0);
   }
 
   public void testDisableMavenNature() throws Exception {
@@ -185,7 +186,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertEquals("junit-3.8.1.jar", classpathEntries[0].getPath().lastSegment());
     assertEquals("jaxb-api-1.5.jar", classpathEntries[1].getPath().lastSegment());
 
-    assertMarkers(project, 0);
+    WorkspaceHelpers.assertMarkers(project, 0);
   }
 
   public void testProjectImportWithProfile2() throws Exception {
@@ -209,7 +210,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertEquals("jsr173_api-1.0.jar", classpathEntries[2].getPath().lastSegment());
     assertEquals("activation-1.1.jar", classpathEntries[3].getPath().lastSegment());
 
-    assertMarkers(project, 0);
+    WorkspaceHelpers.assertMarkers(project, 0);
   }
 
   public void testProjectImport001_useMavenOutputFolders() throws Exception {
@@ -261,8 +262,8 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     project.build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
 
     IMarker[] markers = project.findMarkers(null, true, IResource.DEPTH_INFINITE);
-    assertEquals(toString(markers), 1, markers.length);
-    assertEquals(toString(markers), "pom.xml", markers[0].getResource().getFullPath().lastSegment());
+    assertEquals(WorkspaceHelpers.toString(markers), 1, markers.length);
+    assertEquals(WorkspaceHelpers.toString(markers), "pom.xml", markers[0].getResource().getFullPath().lastSegment());
   }
 
   public void testClasspathOrderWorkspace001() throws Exception {
@@ -765,7 +766,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     IProject project = workspace.getRoot().getProject("compilerSettingsJsr14");
     assertTrue(project.exists());
 
-    assertMarkers(project, 0);
+    WorkspaceHelpers.assertMarkers(project, 0);
 
     IJavaProject javaProject = JavaCore.create(project);
     assertEquals("1.5", javaProject.getOption(JavaCore.COMPILER_SOURCE, true));
@@ -789,7 +790,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 
     // Build path specifies execution environment J2SE-1.4. 
     // There are no JREs in the workspace strictly compatible with this environment.
-    assertMarkers(project, 0);
+    WorkspaceHelpers.assertMarkers(project, 0);
 
     IJavaProject javaProject = JavaCore.create(project);
     assertEquals("1.4", javaProject.getOption(JavaCore.COMPILER_SOURCE, true));
@@ -878,13 +879,13 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     }
     waitForJobsToComplete();
 
-    assertMarkers(project2, 0);
+    WorkspaceHelpers.assertMarkers(project2, 0);
 
     // update configuration
     configurationManager.updateProjectConfiguration(project2, configuration, "", monitor);
     waitForJobsToComplete();
 
-    assertMarkers(project2, 0);
+    WorkspaceHelpers.assertMarkers(project2, 0);
   }
 
   private void verifyNaturesAndBuilders(IProject project) throws CoreException {
@@ -1050,7 +1051,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     final IProject project = importProject("projects/" + projectName + "/pom.xml", configuration);
     waitForJobsToComplete();
 
-    assertMarkers(project, 0);
+    WorkspaceHelpers.assertMarkers(project, 0);
 
     final IJavaProject javaProject = JavaCore.create(project);
     final IClasspathEntry[] cp = javaProject.getRawClasspath();

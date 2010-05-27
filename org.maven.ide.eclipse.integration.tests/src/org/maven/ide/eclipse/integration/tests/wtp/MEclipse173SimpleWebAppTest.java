@@ -15,12 +15,14 @@ import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotEclipseEditor;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.maven.ide.eclipse.integration.tests.M2EUIIntegrationTestCase;
 import org.maven.ide.eclipse.integration.tests.common.ContextMenuHelper;
 import org.maven.ide.eclipse.integration.tests.common.SwtbotUtil;
 
 
+@Ignore
 public class MEclipse173SimpleWebAppTest extends M2EUIIntegrationTestCase {
 
   private static final String DEPLOYED_URL = "http://localhost:8080/simple-webapp/weather.x?zip=94038";

@@ -44,6 +44,7 @@ import org.maven.ide.eclipse.project.MavenUpdateRequest;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 import org.maven.ide.eclipse.tests.common.AbstractMavenProjectTestCase;
 import org.maven.ide.eclipse.tests.common.FilexWagon;
+import org.maven.ide.eclipse.tests.common.WorkspaceHelpers;
 
 
 public class MavenProjectManagerTest extends AbstractMavenProjectTestCase {
@@ -235,7 +236,7 @@ public class MavenProjectManagerTest extends AbstractMavenProjectTestCase {
     assertNull(manager.create(p2, monitor));
 
     IMarker[] markers = p2.findMarkers(null, true, IResource.DEPTH_INFINITE);
-    assertEquals(toString(markers), 1, markers.length);
+    assertEquals(WorkspaceHelpers.toString(markers), 1, markers.length);
 
     IProject p3 = createExisting("t001-p3");
     waitForJobsToComplete();
@@ -539,7 +540,7 @@ public class MavenProjectManagerTest extends AbstractMavenProjectTestCase {
     assertEquals(0, getTestArtifacts(f1).size());
 
     IMarker[] markers = p1.findMarkers(null, true, IResource.DEPTH_INFINITE);
-    assertEquals(toString(markers), 3, markers.length);
+    assertEquals(WorkspaceHelpers.toString(markers), 3, markers.length);
   }
 
   private IMavenProjectFacade[] getAllMavenProjects(IMavenProjectFacade facade) throws CoreException {
@@ -582,11 +583,11 @@ public class MavenProjectManagerTest extends AbstractMavenProjectTestCase {
 
     assertNull(manager.create(p1, monitor));
     IMarker[] markers = p1.findMarkers(null, true, IResource.DEPTH_INFINITE);
-    assertEquals(toString(markers), 1, markers.length);
+    assertEquals(WorkspaceHelpers.toString(markers), 1, markers.length);
 
     copyContent(p1, "pom_good.xml", "pom.xml");
     markers = p1.findMarkers(null, true, IResource.DEPTH_INFINITE);
-    assertEquals(toString(markers), 0, markers.length);
+    assertEquals(WorkspaceHelpers.toString(markers), 0, markers.length);
     assertNotNull(manager.create(p1, monitor));
   }
 
@@ -600,7 +601,7 @@ public class MavenProjectManagerTest extends AbstractMavenProjectTestCase {
     // (jdt) The container 'Maven Dependencies' references non existing library ...missing/missing/0.0.0/missing-0.0.0.jar'
     // (jdt) The project cannot be built until build path errors are resolved
     // (maven) Missing artifact missing:missing:jar:0.0.0:compile
-    assertEquals(toString(markers), 4, markers.length); 
+    assertEquals(WorkspaceHelpers.toString(markers), 4, markers.length); 
   }
 
   public void __test014_resolveDependencies() throws Exception {

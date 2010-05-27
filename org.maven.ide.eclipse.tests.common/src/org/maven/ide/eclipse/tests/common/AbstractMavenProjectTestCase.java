@@ -15,7 +15,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
@@ -349,28 +348,12 @@ public abstract class AbstractMavenProjectTestCase extends TestCase {
     return container.getClasspathEntries();
   }
 
-
-  protected String toString(IMarker[] markers) {
-    if (markers != null) {
-      return toString(Arrays.asList(markers));  
-    }
-    return "";  
+  protected static String toString(IMarker[] markers) {
+    return WorkspaceHelpers.toString(markers);
   }
 
-  protected String toString(List<IMarker> markers) {
-    String sep = "";
-    StringBuilder sb = new StringBuilder();
-    if (markers != null) {
-      for(IMarker marker : markers) {
-        try { 
-          sb.append(sep).append(marker.getType()+":"+marker.getAttribute(IMarker.MESSAGE));
-        } catch(CoreException ex) {
-          // ignore
-        }
-        sep = ", ";
-      }
-    }
-    return sb.toString();
+  protected static String toString(List<IMarker> markers) {
+    return WorkspaceHelpers.toString(markers);
   }
 
 protected void copyContent(IProject project, String from, String to) throws Exception {
@@ -396,31 +379,20 @@ protected void copyContent(IProject project, String from, String to) throws Exce
     FileHelpers.copyDir(src, dst, filter);
   }
 
-  protected List<IMarker> findErrorMarkers(IProject project) throws CoreException {
-    return findMarkers(project, IMarker.SEVERITY_ERROR);
+  protected static List<IMarker> findErrorMarkers(IProject project) throws CoreException {
+    return WorkspaceHelpers.findErrorMarkers(project);
   }
 
-  protected List<IMarker> findMarkers(IProject project, int targetSeverity) throws CoreException {
-    ArrayList<IMarker> errors = new ArrayList<IMarker>();
-    for(IMarker marker : project.findMarkers(null /* all markers */, true /* subtypes */, IResource.DEPTH_INFINITE)) {
-      int severity = marker.getAttribute(IMarker.SEVERITY, 0);
-      if(severity==targetSeverity) {
-        errors.add(marker);
-      }
-    }
-    return errors;
+  protected static List<IMarker> findMarkers(IProject project, int targetSeverity) throws CoreException {
+    return WorkspaceHelpers.findMarkers(project, targetSeverity);
   }
 
-  protected void assertMarkers(IProject project, int expected) throws CoreException {
-    List<IMarker> markers = findErrorMarkers(project);
-    assertEquals(project.getName() + " : " + toString(markers.toArray(new IMarker[markers.size()])), //
-        expected, markers.size());
+  protected static void assertMarkers(IProject project, int expected) throws CoreException {
+    WorkspaceHelpers.assertMarkers(project, expected);
   }
 
-  protected void assertNoErrors(IProject project) throws CoreException {
-    int severity = project.findMaxProblemSeverity(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
-    IMarker[] markers = project.findMarkers(null, true, IResource.DEPTH_INFINITE);
-    assertTrue("Unexpected error markers " + toString(markers), severity < IMarker.SEVERITY_ERROR);
+  protected static void assertNoErrors(IProject project) throws CoreException {
+    WorkspaceHelpers.assertNoErrors(project);
   }
 
   protected void injectFilexWagon() throws Exception {

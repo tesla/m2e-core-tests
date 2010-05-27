@@ -9,6 +9,7 @@
 package org.maven.ide.eclipse.integration.tests;
 
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Test;
 
 
@@ -48,7 +49,7 @@ public class MEclipse162ImportMavenProjectTest extends M2EUIIntegrationTestCase 
     }
   }
 
-  @Test
+  @Test @Ignore
   public void testMNGEclipse1028ImportOrderMatters() throws Exception {
     //this is dependent on WTP tests which are disabled for now
     checkoutProjectsFromSVN("http://svn.sonatype.org/m2eclipse/trunk/org.maven.ide.eclipse.wtp.tests/projects/import-order-matters/");

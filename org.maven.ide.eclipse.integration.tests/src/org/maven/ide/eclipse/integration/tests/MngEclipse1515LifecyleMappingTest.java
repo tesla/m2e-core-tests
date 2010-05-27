@@ -15,6 +15,7 @@ import org.junit.Test;
 import org.maven.ide.eclipse.editor.pom.MavenPomEditor;
 import org.maven.ide.eclipse.integration.tests.common.ContextMenuHelper;
 import org.maven.ide.eclipse.integration.tests.common.SwtbotUtil;
+import org.maven.ide.eclipse.tests.common.WorkspaceHelpers;
 
 
 public class MngEclipse1515LifecyleMappingTest extends M2EUIIntegrationTestCase {
@@ -39,7 +40,7 @@ public class MngEclipse1515LifecyleMappingTest extends M2EUIIntegrationTestCase 
     editor.bot().cTabItem("pom.xml").activate();
 
     //then set to customizable and make sure that one is showing
-    findText("</project");
+    findText("</project>");
     editor.pressShortcut(KeyStroke.getInstance(SWT.ARROW_LEFT));
 
     editor.insertText("<build>" + //
@@ -58,6 +59,9 @@ public class MngEclipse1515LifecyleMappingTest extends M2EUIIntegrationTestCase 
         "</build>");
     editor.save();
     waitForAllBuildsToComplete();
+    
+    WorkspaceHelpers.assertNoErrors(project);
+
     showCustomizableLifecycle(projectName);
 
     editor.setFocus();

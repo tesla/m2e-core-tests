@@ -35,6 +35,7 @@ import org.maven.ide.eclipse.jdt.internal.launch.MavenSourcePathProvider;
 import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 import org.maven.ide.eclipse.tests.common.AbstractMavenProjectTestCase;
+import org.maven.ide.eclipse.tests.common.WorkspaceHelpers;
 
 public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
 
@@ -46,7 +47,7 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
 
     workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
 
-    assertMarkers(cptest, 0);
+    WorkspaceHelpers.assertMarkers(cptest, 0);
     
     ILaunchConfiguration configuration = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(cptest.getFile("TestApp.launch"));
 

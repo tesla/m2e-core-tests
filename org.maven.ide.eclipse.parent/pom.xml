@@ -14,7 +14,7 @@
   </prerequisites>
 
   <groupId>org.maven.ide.eclipse</groupId>
-  <artifactId>parent</artifactId>
+  <artifactId>org.maven.ide.eclipse.parent</artifactId>
   <version>0.10.2-SNAPSHOT</version>
   <packaging>pom</packaging>
 

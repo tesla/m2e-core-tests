@@ -10,9 +10,15 @@ package org.maven.ide.eclipse.tests.common;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
+import junit.framework.Assert;
+
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -82,6 +88,56 @@ public class WorkspaceHelpers {
         }
       }
     }
+  }
+
+  public static String toString(IMarker[] markers) {
+    if (markers != null) {
+      return toString(Arrays.asList(markers));  
+    }
+    return "";  
+  }
+
+  public static String toString(List<IMarker> markers) {
+    String sep = "";
+    StringBuilder sb = new StringBuilder();
+    if (markers != null) {
+      for(IMarker marker : markers) {
+        try { 
+          sb.append(sep).append(marker.getType()+":"+marker.getAttribute(IMarker.MESSAGE));
+        } catch(CoreException ex) {
+          // ignore
+        }
+        sep = ", ";
+      }
+    }
+    return sb.toString();
+  }
+
+  public static void assertMarkers(IProject project, int expected) throws CoreException {
+    List<IMarker> markers = WorkspaceHelpers.findErrorMarkers(project);
+    Assert.assertEquals(project.getName() + " : " + toString(markers.toArray(new IMarker[markers.size()])), //
+        expected, markers.size());
+  }
+
+  public static List<IMarker> findMarkers(IProject project, int targetSeverity) throws CoreException {
+    ArrayList<IMarker> errors = new ArrayList<IMarker>();
+    for(IMarker marker : project.findMarkers(null /* all markers */, true /* subtypes */, IResource.DEPTH_INFINITE)) {
+      int severity = marker.getAttribute(IMarker.SEVERITY, 0);
+      if(severity==targetSeverity) {
+        errors.add(marker);
+      }
+    }
+    return errors;
+  }
+
+  public static List<IMarker> findErrorMarkers(IProject project) throws CoreException {
+    return findMarkers(project, IMarker.SEVERITY_ERROR);
+  }
+
+  public static void assertNoErrors(IProject project) throws CoreException {
+    int severity = project.findMaxProblemSeverity(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
+    IMarker[] markers = project.findMarkers(null, true, IResource.DEPTH_INFINITE);
+    Assert.assertTrue("Unexpected error markers " + toString(markers), severity < IMarker.SEVERITY_ERROR);
   }
 
 }

@@ -46,4 +46,5 @@ Require-Bundle: org.junit4;bundle-version="4.4.0",
  org.maven.ide.eclipse.nexus_indexer,
  org.maven.ide.eclipse.plexus.annotations,
  org.maven.ide.eclipse.pr,
- org.maven.ide.eclipse.temporary.mojos
+ org.maven.ide.eclipse.temporary.mojos,
+ org.maven.ide.eclipse.tests.common;bundle-version="0.10.2"
