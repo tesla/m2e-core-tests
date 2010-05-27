@@ -77,7 +77,7 @@ public enum PomTemplateContext {
           || "reportSet".equals(node.getParentNode().getNodeName())) {
         node = node.getParentNode().getParentNode();
       }
-
+      System.out.println("prefix=" + prefix);
       String groupId = getGroupId(node);
       if(groupId==null) {
         groupId = "org.apache.maven.plugins";  // TODO support other default groups
@@ -102,7 +102,7 @@ public enum PomTemplateContext {
             boolean editable = parameter.isEditable();
             if(editable) {
               String name = parameter.getName();
-              if(!params.contains(name)) {
+              if(!params.contains(name) && name.startsWith(prefix)) {
                 params.add(name);
                 
                 String text = "<b>required:</b> " + parameter.isRequired() + "<br>" //
