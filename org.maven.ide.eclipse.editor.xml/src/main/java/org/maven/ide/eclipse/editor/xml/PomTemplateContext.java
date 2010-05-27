@@ -77,7 +77,7 @@ public enum PomTemplateContext {
           || "reportSet".equals(node.getParentNode().getNodeName())) {
         node = node.getParentNode().getParentNode();
       }
-      System.out.println("prefix=" + prefix);
+//      System.out.println("prefix=" + prefix + "-");
       String groupId = getGroupId(node);
       if(groupId==null) {
         groupId = "org.apache.maven.plugins";  // TODO support other default groups

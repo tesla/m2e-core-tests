@@ -64,22 +64,18 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
   protected void addTagNameProposals(ContentAssistRequest contentAssistRequest, int childPosition) {
     String currentNodeName = getCurrentNode(contentAssistRequest).getNodeName();
     PomTemplateContext context = PomTemplateContext.fromNodeName(currentNodeName);
-    System.out.println("context=" + context);
-    System.out.println("currentname=" + currentNodeName);
-    System.out.println("ms=" + contentAssistRequest.getMatchString()+ "-");
-    System.out.println("t=" + contentAssistRequest.getText() + "-");
     if(PomTemplateContext.CONFIGURATION == context) 
     {
-      addProposals(contentAssistRequest, context);
+      contentAssistRequest.setReplacementBeginPosition(contentAssistRequest.getReplacementBeginPosition() - 1);
+      contentAssistRequest.setReplacementLength(contentAssistRequest.getReplacementLength() + 1);
+      addProposals(contentAssistRequest, context, getCurrentNode(contentAssistRequest), contentAssistRequest.getMatchString());
     }
     if(PomTemplateContext.UNKNOWN == context) 
     {
       context = PomTemplateContext.fromNodeName(getCurrentNode(contentAssistRequest).getParentNode().getNodeName());
       if(PomTemplateContext.CONFIGURATION == context) 
       {
-        contentAssistRequest.setReplacementBeginPosition(contentAssistRequest.getReplacementBeginPosition() - 2);
-        contentAssistRequest.setReplacementLength(contentAssistRequest.getReplacementLength() + 2);
-        addProposals(contentAssistRequest, context, getCurrentNode(contentAssistRequest).getParentNode());
+        addProposals(contentAssistRequest, context, getCurrentNode(contentAssistRequest).getParentNode(), contentAssistRequest.getMatchString());
       }
     }
     super.addTagNameProposals(contentAssistRequest, childPosition);
@@ -103,10 +99,19 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
   }
 
   private void addProposals(ContentAssistRequest request, PomTemplateContext context) {
-    addProposals(request, context, getCurrentNode(request));
+    ITextSelection selection = (ITextSelection) sourceViewer.getSelectionProvider().getSelection();
+    int offset = request.getReplacementBeginPosition();
+    // adjust offset to end of normalized selection
+    if(selection.getOffset() == offset) {
+      offset = selection.getOffset() + selection.getLength();
+    }
+
+    String prefix = extractPrefix(sourceViewer, offset);
+    
+    addProposals(request, context, getCurrentNode(request), prefix);
   }
   
-  private void addProposals(ContentAssistRequest request, PomTemplateContext context, Node currentNode) {
+  private void addProposals(ContentAssistRequest request, PomTemplateContext context, Node currentNode, String prefix) {
     if(request != null) {
       ITextFileBuffer buf = FileBuffers.getTextFileBufferManager().getTextFileBuffer(sourceViewer.getDocument());
       IFileStore folder = buf.getFileStore();
@@ -116,7 +121,7 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
       IProject prj = ifile != null ? ifile.getProject() : null;
 
       ICompletionProposal[] templateProposals = getTemplateProposals(prj, sourceViewer,
-          request.getReplacementBeginPosition(), context.getContextTypeId(), currentNode);
+          request.getReplacementBeginPosition(), context.getContextTypeId(), currentNode, prefix);
       for(ICompletionProposal proposal : templateProposals) {
         if(request.shouldSeparate()) {
           request.addMacro(proposal);
@@ -127,7 +132,7 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
     }
   }
   
-  private ICompletionProposal[] getTemplateProposals(IProject project, ITextViewer viewer, int offset, String contextTypeId, Node currentNode) {
+  private ICompletionProposal[] getTemplateProposals(IProject project, ITextViewer viewer, int offset, String contextTypeId, Node currentNode, String prefix) {
     ITextSelection selection = (ITextSelection) viewer.getSelectionProvider().getSelection();
 
     // adjust offset to end of normalized selection
@@ -135,7 +140,7 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
       offset = selection.getOffset() + selection.getLength();
     }
 
-    String prefix = extractPrefix(viewer, offset);
+//    String prefix = extractPrefix(viewer, offset);
     Region region = new Region(offset - prefix.length(), prefix.length()); 
     TemplateContext context = createContext(viewer, region, contextTypeId);
     if(context == null) {
