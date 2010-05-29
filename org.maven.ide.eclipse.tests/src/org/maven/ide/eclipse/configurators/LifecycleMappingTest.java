@@ -29,8 +29,8 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertTrue(lifecycleMapping instanceof CustomizableLifecycleMapping);
 
     List<AbstractProjectConfigurator> configurators = lifecycleMapping.getProjectConfigurators(facade, monitor);
-    assertEquals(4, configurators.size());
-    assertTrue(configurators.get(3) instanceof MojoExecutionProjectConfigurator);
+    assertEquals(2, configurators.size());
+    assertTrue(configurators.get(1) instanceof MojoExecutionProjectConfigurator);
   }
 
   public void testMissingMapping() throws Exception {
