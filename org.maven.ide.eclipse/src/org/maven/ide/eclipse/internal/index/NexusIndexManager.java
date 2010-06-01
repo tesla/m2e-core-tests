@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -26,6 +25,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.WeakHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -42,6 +42,7 @@ import org.codehaus.plexus.util.FileUtils;
 
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.FilteredQuery;
 import org.apache.lucene.search.PrefixQuery;
@@ -49,7 +50,6 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.QueryWrapperFilter;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.WildcardQuery;
-import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 
@@ -153,7 +153,14 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
 
   private static final EquinoxLocker locker = new EquinoxLocker();
 
-  private final Map<String, Object> indexLocks = new HashMap<String, Object>();
+  /**
+   * Maps repository UID to the lock object associated with the repository. Entries are only added
+   * but never directly removed from the map, although jvm garbage collector may remove otherwise
+   * unused entries to reclaim the little memory they use. 
+   * 
+   * Never access this map directly. #getIndexLock must be used to get repository lock object.
+   */
+  private final Map<String, Object> indexLocks = new WeakHashMap<String, Object>();
 
   public static String nvl( String v )
   {
@@ -793,12 +800,10 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
   }
 
   public void repositoryAdded(IRepository repository, IProgressMonitor monitor) throws CoreException {
-    synchronized(indexLocks) {
-      String details = getIndexDetails(repository);
+    String details = getIndexDetails(repository);
 
-      // for consistency, always process indexes using our background thread
-      setIndexDetails(repository, null, details, null/*async*/);
-    }
+    // for consistency, always process indexes using our background thread
+    setIndexDetails(repository, null, details, null/*async*/);
   }
 
   public String getIndexDetails(IRepository repository) {
@@ -908,20 +913,17 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
   }
 
   public void repositoryRemoved(IRepository repository, IProgressMonitor monitor) {
-    synchronized(indexLocks) {
-      synchronized(getIndexLock(repository)) {
-        try {
-          IndexingContext context = getIndexingContext(repository);
-          if(context == null) {
-            return;
-          }
-          getIndexer().removeIndexingContext(context, false);
-        } catch(IOException ie) {
-          String msg = "Unable to delete files for index";
-          MavenLogger.log(msg, ie);
+    synchronized(getIndexLock(repository)) {
+      try {
+        IndexingContext context = getIndexingContext(repository);
+        if(context == null) {
+          return;
         }
+        getIndexer().removeIndexingContext(context, false);
+      } catch(IOException ie) {
+        String msg = "Unable to delete files for index";
+        MavenLogger.log(msg, ie);
       }
-      indexLocks.remove(repository.getUid());
     }
 
     fireIndexRemoved(repository);
@@ -1025,6 +1027,9 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
   }
 
+  /*
+   * Callers must hold repository access synchronisation lock 
+   */
   private void updateRemoteIndex(IRepository repository, boolean force, IProgressMonitor monitor) {
     if (repository == null) {
       return;
@@ -1037,66 +1042,64 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     try {
       fireIndexUpdating(repository);
 
-      synchronized(getIndexLock(repository)) {
-        IndexingContext context = getIndexingContext(repository);
+      IndexingContext context = getIndexingContext(repository);
 
-        if (context != null) {
-          IndexUpdateRequest request = newIndexUpdateRequest(repository, context);
+      if (context != null) {
+        IndexUpdateRequest request = newIndexUpdateRequest(repository, context);
 
-          TransferListener transferListener = maven.createTransferListener(monitor);
-          ProxyInfo proxyInfo = maven.getProxyInfo(repository.getProtocol());
-          AuthenticationInfo authenticationInfo = repository.getAuthenticationInfo();
-          request.setProxyInfo(proxyInfo);
-          request.setAuthenticationInfo(authenticationInfo);
-          request.setTransferListener(transferListener);
-          request.setForceFullUpdate(force);
-          request.setResourceFetcher(new DefaultIndexUpdater.WagonFetcher(wagonManager, transferListener, authenticationInfo, proxyInfo));
+        TransferListener transferListener = maven.createTransferListener(monitor);
+        ProxyInfo proxyInfo = maven.getProxyInfo(repository.getProtocol());
+        AuthenticationInfo authenticationInfo = repository.getAuthenticationInfo();
+        request.setProxyInfo(proxyInfo);
+        request.setAuthenticationInfo(authenticationInfo);
+        request.setTransferListener(transferListener);
+        request.setForceFullUpdate(force);
+        request.setResourceFetcher(new DefaultIndexUpdater.WagonFetcher(wagonManager, transferListener, authenticationInfo, proxyInfo));
 
-          Lock cacheLock = locker.lock(request.getLocalIndexCacheDir());
-          try {
-            boolean updated;
+        Lock cacheLock = locker.lock(request.getLocalIndexCacheDir());
+        try {
+          boolean updated;
 
-            request.setCacheOnly(true);
-            IndexUpdateResult result = indexUpdater.fetchAndUpdateIndex(request);
-            if(result.isFullUpdate() || !context.isSearchable()) {
-              // need to fully recreate index
+          request.setCacheOnly(true);
+          IndexUpdateResult result = indexUpdater.fetchAndUpdateIndex(request);
+          if(result.isFullUpdate() || !context.isSearchable()) {
+            // need to fully recreate index
 
-              // 1. process index gz into cached/shared lucene index. this can be a noop if cache is uptodate
-              String details = getIndexDetails(repository);
-              String id = repository.getUid() + "-cache";
-              File luceneCache = new File(request.getLocalIndexCacheDir(), details);
-              Directory directory = FSDirectory.getDirectory(luceneCache);
-              IndexingContext cacheCtx = getIndexer().addIndexingContextForced(id, id, null, directory, null, null,
-                  getIndexers(details));
-              request=newIndexUpdateRequest(repository, cacheCtx);
-              request.setOffline(true);
-              indexUpdater.fetchAndUpdateIndex(request);
+            // 1. process index gz into cached/shared lucene index. this can be a noop if cache is uptodate
+            String details = getIndexDetails(repository);
+            String id = repository.getUid() + "-cache";
+            File luceneCache = new File(request.getLocalIndexCacheDir(), details);
+            Directory directory = FSDirectory.getDirectory(luceneCache);
+            IndexingContext cacheCtx = getIndexer().addIndexingContextForced(id, id, null, directory, null, null,
+                getIndexers(details));
+            request=newIndexUpdateRequest(repository, cacheCtx);
+            request.setOffline(true);
+            indexUpdater.fetchAndUpdateIndex(request);
 
-              // 2. copy cached/shared (lets play dirty here!)
-              getIndexer().removeIndexingContext(context, true); // nuke workspace index files
-              getIndexer().removeIndexingContext(cacheCtx, false); // keep the cache!
-              FileUtils.cleanDirectory(context.getIndexDirectoryFile());
-              FileUtils.copyDirectory(luceneCache, context.getIndexDirectoryFile()); // copy cached lucene index
-              context=createIndexingContext(repository, details); // re-create indexing context
+            // 2. copy cached/shared (lets play dirty here!)
+            getIndexer().removeIndexingContext(context, true); // nuke workspace index files
+            getIndexer().removeIndexingContext(cacheCtx, false); // keep the cache!
+            FileUtils.cleanDirectory(context.getIndexDirectoryFile());
+            FileUtils.copyDirectory(luceneCache, context.getIndexDirectoryFile()); // copy cached lucene index
+            context=createIndexingContext(repository, details); // re-create indexing context
 
-              updated=true;
-            } else {
-              // incremental change
-              request = newIndexUpdateRequest(repository, context);
-              request.setOffline(true); // local cache is already uptodate, no need to
-              result = indexUpdater.fetchAndUpdateIndex(request);
-              updated=result.getTimestamp()!=null;
-            }
-
-            if(updated) {
-              console.logMessage("Updated index for " + repository.toString());
-            } else {
-              console.logMessage("No index update available for " + repository.toString());
-            }
-
-          } finally {
-            cacheLock.release();
+            updated=true;
+          } else {
+            // incremental change
+            request = newIndexUpdateRequest(repository, context);
+            request.setOffline(true); // local cache is already uptodate, no need to
+            result = indexUpdater.fetchAndUpdateIndex(request);
+            updated=result.getTimestamp()!=null;
           }
+
+          if(updated) {
+            console.logMessage("Updated index for " + repository.toString());
+          } else {
+            console.logMessage("No index update available for " + repository.toString());
+          }
+
+        } finally {
+          cacheLock.release();
         }
       }
     } catch (FileNotFoundException e) {
