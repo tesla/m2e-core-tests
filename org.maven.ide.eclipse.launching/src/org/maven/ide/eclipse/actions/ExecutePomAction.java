@@ -29,6 +29,7 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugModelPresentation;
+import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.debug.ui.ILaunchShortcut;
 import org.eclipse.debug.ui.RefreshTab;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -189,10 +190,10 @@ public class ExecutePomAction implements ILaunchShortcut, IExecutableExtension {
           .getLaunchConfigurationType(MavenLaunchConstants.LAUNCH_CONFIGURATION_TYPE_ID);
 
       ILaunchConfigurationWorkingCopy workingCopy = launchConfigurationType.newInstance(null, //
-          "Executing " + goal + " in " + basedir.getLocation());
+          "Executing " + goal + " in " + basedir.getLocation().toString().replace('/', '-'));
       workingCopy.setAttribute(MavenLaunchConstants.ATTR_POM_DIR, basedir.getLocation().toOSString());
       workingCopy.setAttribute(MavenLaunchConstants.ATTR_GOALS, goal);
-      
+      workingCopy.setAttribute(IDebugUIConstants.ATTR_PRIVATE, true);
       workingCopy.setAttribute(RefreshTab.ATTR_REFRESH_SCOPE, "${project}");
       workingCopy.setAttribute(RefreshTab.ATTR_REFRESH_RECURSIVE, true);
       
