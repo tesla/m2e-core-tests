@@ -13,6 +13,12 @@
     <maven>3.0</maven>
   </prerequisites>
 
+  <parent>
+    <groupId>org.sonatype.forge</groupId>
+    <artifactId>forge-parent</artifactId>
+    <version>5</version>
+  </parent>
+
   <groupId>org.maven.ide.eclipse</groupId>
   <artifactId>org.maven.ide.eclipse.parent</artifactId>
   <version>0.10.2-SNAPSHOT</version>
@@ -36,10 +42,6 @@
 
     <maven_scm.version>1.0.0.20080602-2350</maven_scm.version>
 
-    <!-- disable accidental deployment -->
-    <m2e.releases>http://localhost</m2e.releases>
-    <m2e.snapshots>http://localhost</m2e.snapshots>
-    <m2e.site>http://localhost</m2e.site>
     <m2e.site-compressed>http://repository.sonatype.org/service/local/repositories/forge-sites/content-compressed/</m2e.site-compressed>
 
     <tycho-version>0.8.0</tycho-version>
@@ -300,21 +302,6 @@
       </releases>
     </pluginRepository>
   </pluginRepositories>
-
-  <distributionManagement>
-    <repository>
-      <id>forge-releases</id>
-      <url>${m2e.releases}</url>
-    </repository>
-    <snapshotRepository>
-      <id>forge-snapshots</id>
-      <url>${m2e.snapshots}</url>
-    </snapshotRepository>
-    <site>
-      <id>m2e-site</id>
-      <url>${m2e.site}</url>
-    </site>
-  </distributionManagement>
 
   <profiles>
     <profile>
