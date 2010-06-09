@@ -8,6 +8,8 @@
 
 package org.maven.ide.eclipse.project;
 
+import java.io.File;
+
 import org.apache.maven.model.Model;
 
 
@@ -23,6 +25,9 @@ public class MavenProjectScmInfo extends MavenProjectInfo {
   
   private String username;
   private String password;
+
+  private File sslCertificate;
+  private String sslCertificatePassphrase;
 
   public MavenProjectScmInfo(String label, Model model, MavenProjectInfo parent, //
       String revision, String folderUrl, String repositoryUrl) {
@@ -84,4 +89,17 @@ public class MavenProjectScmInfo extends MavenProjectInfo {
     this.password = password;
   }
 
+  public void setSSLCertificate(File certificate) {
+    this.sslCertificate = certificate;
+  }
+  public File getSSLCertificate() {
+    return sslCertificate;
+  }
+
+  public String getSSLCertificatePassphrase() {
+    return sslCertificatePassphrase;
+  }
+  public void setSSLCertificatePassphrase(String passphrase) {
+    this.sslCertificatePassphrase = passphrase;
+  }
 }
