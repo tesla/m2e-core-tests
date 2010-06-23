@@ -11,7 +11,7 @@ Require-Bundle: org.maven.ide.eclipse.maven_embedder;bundle-version="[
  0.10.0,0.11.0)"
 Bundle-Vendor: Sonatype
 MavenArtifact-BaseVersion: 1.2.1.20090519-1900
-Bundle-Version: 0.10.2.qualifier
+Bundle-Version: 0.10.2.20100623-1649
 MavenArtifact-GroupId: org.maven.ide.eclipse
 MavenArtifact-ArtifactId: org.maven.ide.eclipse.dependency_tree
 Bundle-ManifestVersion: 2
