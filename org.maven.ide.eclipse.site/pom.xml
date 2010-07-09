@@ -12,12 +12,12 @@
   <parent>
     <groupId>org.maven.ide.eclipse</groupId>
     <artifactId>org.maven.ide.eclipse.parent</artifactId>
-    <version>0.10.2-SNAPSHOT</version>
+    <version>0.10.3-SNAPSHOT</version>
     <relativePath>../org.maven.ide.eclipse.parent</relativePath>
   </parent>
 
   <artifactId>org.maven.ide.eclipse.site</artifactId>
-  <packaging>eclipse-update-site</packaging>
+  <packaging>eclipse-feature</packaging>
 
   <name>Maven Integration for Eclipse Update Site</name>
 
@@ -27,10 +27,28 @@
         <groupId>org.sonatype.tycho</groupId>
         <artifactId>maven-osgi-packaging-plugin</artifactId>
         <configuration>
-          <metadataRepositoryName>Maven Integration for Eclipse</metadataRepositoryName>
-          <artifactRepositoryName>Maven Integration for Eclipse</artifactRepositoryName>
+          <deployableFeature>true</deployableFeature>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.sonatype.tycho</groupId>
+        <artifactId>tycho-p2-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>categorization</id>
+            <phase>package</phase>
+            <goals>
+              <goal>category-p2-metadata</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <metadataRepositoryName>Maven Integration for Eclipse</metadataRepositoryName>
+          <artifactRepositoryName>Maven Integration for Eclipse</artifactRepositoryName>
+          <compressRepository>false</compressRepository>
+        </configuration>
+      </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
@@ -76,7 +94,7 @@
 
                   <serverId>forge-releases</serverId>
                   <repositoryUrl>${m2e.site-compressed}</repositoryUrl>
-                  <repositoryPath>m2e/${unqualifiedVersion}/N/${buildQualifier}</repositoryPath>
+                  <repositoryPath>m2e/${unqualifiedVersion}/N/${unqualifiedVersion}.${buildQualifier}</repositoryPath>
                 </configuration>
               </execution>
             </executions>
