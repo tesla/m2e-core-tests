@@ -1,0 +1,30 @@
+<project><modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>p001.core</groupId>
+    <artifactId>core</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+  <artifactId>module038</artifactId>
+  <dependencies>
+    <dependency>
+      <groupId>p001.core</groupId>
+      <artifactId>module083</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>p001.core</groupId>
+      <artifactId>module087</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>p001.core</groupId>
+      <artifactId>module107</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>p001.core</groupId>
+      <artifactId>module102</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
+</project>

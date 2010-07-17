@@ -1,0 +1,8 @@
+<project><modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>p001.libs</groupId>
+    <artifactId>libs</artifactId>
+    <version>0.0.1</version>
+  </parent>
+  <artifactId>lib027</artifactId>
+</project>

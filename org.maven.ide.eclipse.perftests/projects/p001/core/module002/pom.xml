@@ -1,0 +1,15 @@
+<project><modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>p001.core</groupId>
+    <artifactId>core</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+  <artifactId>module002</artifactId>
+  <dependencies>
+    <dependency>
+      <groupId>p001.core</groupId>
+      <artifactId>module030</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
+</project>

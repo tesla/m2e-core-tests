@@ -1,0 +1,20 @@
+<project><modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>p001.plugins</groupId>
+    <artifactId>plugins</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+  <artifactId>plugin056</artifactId>
+  <dependencies>
+    <dependency>
+      <groupId>p001.plugins</groupId>
+      <artifactId>plugin036</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>p001.plugins</groupId>
+      <artifactId>plugin030</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
+</project>

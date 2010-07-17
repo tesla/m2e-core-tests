@@ -1,0 +1,20 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Maven Integration Performance Regression Tests
+Bundle-SymbolicName: org.maven.ide.eclipse.perftests;singleton:=true
+Bundle-Version: 0.10.3.qualifier
+Eclipse-LazyStart: true
+Bundle-RequiredExecutionEnvironment: J2SE-1.5,
+ JavaSE-1.6
+Bundle-ClassPath: .
+Bundle-Vendor: Sonatype, Inc.
+Require-Bundle: org.junit;bundle-version="4.0.0",
+ org.maven.ide.eclipse.maven_embedder;bundle-version="0.10.3",
+ org.maven.ide.eclipse;bundle-version="0.10.3",
+ org.eclipse.equinox.common;bundle-version="3.5.0",
+ org.eclipse.core.resources;bundle-version="3.5.0",
+ org.eclipse.core.jobs;bundle-version="3.5.0",
+ org.maven.ide.eclipse.tests.common;bundle-version="0.10.3",
+ org.eclipse.test.performance;bundle-version="3.6.0",
+ org.apache.derby.core;bundle-version="10.6.1",
+ org.eclipse.osgi;bundle-version="3.6.0"

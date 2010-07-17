@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.apache.maven.pts</groupId>
+    <artifactId>corporate-pom</artifactId>
+    <version>3.0-SNAPSHOT</version>
+  </parent>
+  <groupId>org.apache.maven.pts</groupId>
+  <artifactId>maven</artifactId>
+  <version>3.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <name>Apache Maven</name>
+  <description>
+    Tests a big reactor build where effectively each module imports another POM via this parent. This calls for a
+    (reactor-scoped) model cache so that we don't build the imported POM over and over again.
+  </description>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>imported-pom</artifactId>
+        <version>${project.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+  <modules>
+    <module>module-001</module>
+    <module>module-002</module>
+    <module>module-003</module>
+    <module>module-004</module>
+    <module>module-005</module>
+    <module>module-006</module>
+    <module>module-007</module>
+    <module>module-008</module>
+    <module>module-009</module>
+    <module>module-010</module>
+    <module>module-011</module>
+    <module>module-012</module>
+    <module>module-013</module>
+    <module>module-014</module>
+    <module>module-015</module>
+    <module>module-016</module>
+    <module>module-017</module>
+    <module>module-018</module>
+    <module>module-019</module>
+    <module>module-020</module>
+    <module>module-021</module>
+    <module>module-022</module>
+    <module>module-023</module>
+    <module>module-024</module>
+    <module>module-025</module>
+    <module>module-026</module>
+    <module>module-027</module>
+    <module>module-028</module>
+    <module>module-029</module>
+    <module>module-030</module>
+    <module>module-031</module>
+    <module>module-032</module>
+    <module>module-033</module>
+    <module>module-034</module>
+    <module>module-035</module>
+    <module>module-036</module>
+    <module>module-037</module>
+    <module>module-038</module>
+    <module>module-039</module>
+    <module>module-040</module>
+    <module>module-041</module>
+    <module>module-042</module>
+    <module>module-043</module>
+    <module>module-044</module>
+    <module>module-045</module>
+    <module>module-046</module>
+    <module>module-047</module>
+    <module>module-048</module>
+    <module>module-049</module>
+    <module>module-050</module>
+    <module>module-051</module>
+    <module>module-052</module>
+    <module>module-053</module>
+    <module>module-054</module>
+    <module>module-055</module>
+    <module>module-056</module>
+    <module>module-057</module>
+    <module>module-058</module>
+    <module>module-059</module>
+    <module>module-060</module>
+    <module>module-061</module>
+    <module>module-062</module>
+    <module>module-063</module>
+    <module>module-064</module>
+    <module>module-065</module>
+    <module>module-066</module>
+    <module>module-067</module>
+    <module>module-068</module>
+    <module>module-069</module>
+    <module>module-070</module>
+    <module>module-071</module>
+    <module>module-072</module>
+    <module>module-073</module>
+    <module>module-074</module>
+    <module>module-075</module>
+    <module>module-076</module>
+    <module>module-077</module>
+    <module>module-078</module>
+    <module>module-079</module>
+    <module>module-080</module>
+    <module>module-081</module>
+    <module>module-082</module>
+    <module>module-083</module>
+    <module>module-084</module>
+    <module>module-085</module>
+    <module>module-086</module>
+    <module>module-087</module>
+    <module>module-088</module>
+    <module>module-089</module>
+    <module>module-090</module>
+    <module>module-091</module>
+    <module>module-092</module>
+    <module>module-093</module>
+    <module>module-094</module>
+    <module>module-095</module>
+    <module>module-096</module>
+    <module>module-097</module>
+    <module>module-098</module>
+    <module>module-099</module>
+    <module>module-100</module>
+    <module>module-101</module>
+    <module>module-102</module>
+    <module>module-103</module>
+    <module>module-104</module>
+    <module>module-105</module>
+    <module>module-106</module>
+    <module>module-107</module>
+    <module>module-108</module>
+    <module>module-109</module>
+    <module>module-110</module>
+    <module>module-111</module>
+    <module>module-112</module>
+    <module>module-113</module>
+    <module>module-114</module>
+    <module>module-115</module>
+    <module>module-116</module>
+    <module>module-117</module>
+    <module>module-118</module>
+    <module>module-119</module>
+    <module>module-120</module>
+    <module>module-121</module>
+    <module>module-122</module>
+    <module>module-123</module>
+    <module>module-124</module>
+    <module>module-125</module>
+    <module>module-126</module>
+    <module>module-127</module>
+    <module>module-128</module>
+    <module>module-129</module>
+    <module>module-130</module>
+    <module>module-131</module>
+    <module>module-132</module>
+    <module>module-133</module>
+    <module>module-134</module>
+    <module>module-135</module>
+    <module>module-136</module>
+    <module>module-137</module>
+    <module>module-138</module>
+    <module>module-139</module>
+    <module>module-140</module>
+    <module>module-141</module>
+    <module>module-142</module>
+    <module>module-143</module>
+    <module>module-144</module>
+    <module>module-145</module>
+    <module>module-146</module>
+    <module>module-147</module>
+    <module>module-148</module>
+    <module>module-149</module>
+    <module>module-150</module>
+    <module>module-151</module>
+    <module>module-152</module>
+    <module>module-153</module>
+    <module>module-154</module>
+    <module>module-155</module>
+    <module>module-156</module>
+    <module>module-157</module>
+    <module>module-158</module>
+    <module>module-159</module>
+    <module>module-160</module>
+  </modules>
+</project>
