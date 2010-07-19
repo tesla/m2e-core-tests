@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Maven Integration for Eclipse
 Bundle-SymbolicName: org.maven.ide.eclipse;singleton:=true
-Bundle-Version: 0.10.3.qualifier
+Bundle-Version: 0.11.0.qualifier
 Bundle-Activator: org.maven.ide.eclipse.MavenPlugin
 Bundle-Vendor: Sonatype, Inc.
 Bundle-Localization: plugin
@@ -23,11 +23,11 @@ Require-Bundle:
  org.eclipse.ui.workbench.texteditor,
  org.eclipse.emf.common,
  org.eclipse.wst.common.emf,
- org.maven.ide.eclipse.maven_embedder;bundle-version="[0.10.0,0.11.0)",
- org.maven.ide.eclipse.archetype_common;bundle-version="[0.10.0,0.11.0)",
- org.maven.ide.eclipse.nexus_indexer;bundle-version="[0.10.0,0.11.0)",
- org.maven.ide.eclipse.maven_model_edit;bundle-version="[0.10.0,0.11.0)",
- org.maven.ide.eclipse.dependency_tree;bundle-version="[0.10.0,0.11.0)"
+ org.maven.ide.eclipse.maven_embedder;bundle-version="[0.11.0,0.12.0)",
+ org.maven.ide.eclipse.archetype_common;bundle-version="[0.11.0,0.12.0)",
+ org.maven.ide.eclipse.nexus_indexer;bundle-version="[0.11.0,0.12.0)",
+ org.maven.ide.eclipse.maven_model_edit;bundle-version="[0.11.0,0.12.0)",
+ org.maven.ide.eclipse.dependency_tree;bundle-version="[0.11.0,0.12.0)"
 Eclipse-LazyStart: true
 Bundle-ClassPath: .
 Bundle-RequiredExecutionEnvironment: J2SE-1.5,

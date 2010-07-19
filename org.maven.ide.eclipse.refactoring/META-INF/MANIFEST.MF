@@ -3,12 +3,12 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Maven Integration for Eclipse Refactoring
 Bundle-Vendor: Sonatype, Inc.
 Bundle-SymbolicName: org.maven.ide.eclipse.refactoring;singleton:=true
-Bundle-Version: 0.10.3.qualifier
+Bundle-Version: 0.11.0.qualifier
 Bundle-Activator: org.maven.ide.eclipse.refactoring.internal.Activator
-Require-Bundle: org.maven.ide.eclipse;bundle-version="[0.10.0,0.11.0)",
- org.maven.ide.eclipse.maven_model_edit;bundle-version="[0.10.0,0.11.0)",
- org.maven.ide.eclipse.maven_embedder;bundle-version="[0.10.0,0.11.0)",
- org.maven.ide.eclipse.dependency_tree;bundle-version="[0.10.0,0.11.0)",
+Require-Bundle: org.maven.ide.eclipse;bundle-version="[0.11.0,0.12.0)",
+ org.maven.ide.eclipse.maven_model_edit;bundle-version="[0.11.0,0.12.0)",
+ org.maven.ide.eclipse.maven_embedder;bundle-version="[0.11.0,0.12.0)",
+ org.maven.ide.eclipse.dependency_tree;bundle-version="[0.11.0,0.12.0)",
  org.eclipse.core.runtime,
  org.eclipse.core.resources,
  org.eclipse.core.filebuffers,
