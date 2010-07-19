@@ -255,7 +255,7 @@ public class ImportPerformanceTest extends AbstractMavenProjectTestCase {
           throw new CoreException(new Status(IStatus.ERROR, "pluginId", "Interrupted", e));
         }
 
-        Set<MavenProjectInfo> projectInfos = configurationManager.collectProjects(scanner.getProjects(), false);
+        Set<MavenProjectInfo> projectInfos = configurationManager.collectProjects(scanner.getProjects());
 
         results.addAll(configurationManager.importProjects(projectInfos, configuration, monitor));
       }

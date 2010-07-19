@@ -22,7 +22,6 @@ import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
-import org.maven.ide.eclipse.project.ResolverConfiguration;
 
 /**
  * MavenModuleFilter
@@ -39,12 +38,6 @@ public class MavenModuleFilter extends ViewerFilter {
         if(project.hasNature(IMavenConstants.NATURE_ID)) {
           MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
 
-          // disable filter for multi-module project
-          ResolverConfiguration configuration = projectManager.getResolverConfiguration(project);
-          if(configuration.shouldIncludeModules()) {
-            return true;
-          }
-          
           IMavenProjectFacade projectFacade = projectManager.create(project, null);
           if(projectFacade != null) {
             // XXX implement corner cases

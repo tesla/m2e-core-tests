@@ -307,7 +307,7 @@ public class SelectionUtil {
   }
   
   private static MavenProject readMavenProject(File pomFile) throws CoreException {
-    IMaven maven = MavenPlugin.lookup(IMaven.class);
+    IMaven maven = MavenPlugin.getDefault().getMaven();
     
     IProgressMonitor monitor = new NullProgressMonitor();
 

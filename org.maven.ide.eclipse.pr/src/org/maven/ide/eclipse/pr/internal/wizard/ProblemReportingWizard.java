@@ -109,7 +109,7 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
           String tmpPath = ResourcesPlugin.getPlugin().getStateLocation().toOSString();
           File tmpDir = new File(tmpPath);
           bundleFiles = saveData(tmpDir, dataSet, monitor);
-          IMavenConfiguration mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
+          IMavenConfiguration mavenConfiguration = MavenPlugin.getDefault().getMavenConfiguration();
           String username = mavenConfiguration.getJiraUsername();
           String password = mavenConfiguration.getJiraPassword();
           if(username == null || username.trim().equals("")) {
@@ -239,7 +239,7 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
     sub.done();
     
     MavenPlugin mavenPlugin = MavenPlugin.getDefault();
-    DataGatherer gatherer = new DataGatherer(MavenPlugin.lookup(IMavenConfiguration.class), //
+    DataGatherer gatherer = new DataGatherer(MavenPlugin.getDefault().getMavenConfiguration(), //
         mavenPlugin.getMavenProjectManager(), mavenPlugin.getConsole(), //
         ResourcesPlugin.getWorkspace(), projects, getClass().getResource("/apr/public-key.txt"));
 

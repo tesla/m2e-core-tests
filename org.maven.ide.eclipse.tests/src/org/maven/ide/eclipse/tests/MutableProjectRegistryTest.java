@@ -1,23 +1,26 @@
 package org.maven.ide.eclipse.tests;
 
 import java.io.File;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.maven.project.MavenProject;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.embedder.IMaven;
-import org.maven.ide.eclipse.internal.project.MavenProjectFacade;
-import org.maven.ide.eclipse.internal.project.ProjectRegistry;
-import org.maven.ide.eclipse.internal.project.MutableProjectRegistry;
-import org.maven.ide.eclipse.internal.project.ProjectRegistryReader;
+import org.maven.ide.eclipse.internal.project.registry.Capability;
+import org.maven.ide.eclipse.internal.project.registry.MavenProjectFacade;
+import org.maven.ide.eclipse.internal.project.registry.MutableProjectRegistry;
+import org.maven.ide.eclipse.internal.project.registry.ProjectRegistry;
+import org.maven.ide.eclipse.internal.project.registry.ProjectRegistryReader;
 import org.maven.ide.eclipse.project.MavenProjectChangedEvent;
 import org.maven.ide.eclipse.tests.common.AbstractMavenProjectTestCase;
 
 public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
 
-  private IMaven maven = MavenPlugin.lookup(IMaven.class);
+  private IMaven maven = MavenPlugin.getDefault().getMaven();
 
   public void testAddProject() throws Exception {
     IProject project = createExisting("dummy", "resources/dummy");
@@ -29,7 +32,7 @@ public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
 
     MutableProjectRegistry delta1 = new MutableProjectRegistry(state);
 
-    delta1.addProject(f1.getPom(), f1);
+    delta1.setProject(f1.getPom(), f1);
 
     List<MavenProjectChangedEvent> events = state.apply(delta1);
     assertEquals(1, events.size());
@@ -37,7 +40,7 @@ public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
     assertSame(f1, events.get(0).getMavenProject());
 
     MutableProjectRegistry delta2 = new MutableProjectRegistry(state);
-    delta2.addProject(f2.getPom(), f2);
+    delta2.setProject(f2.getPom(), f2);
 
     MavenProjectFacade[] facades = delta2.getProjects();
     assertEquals(2, facades.length);
@@ -60,11 +63,11 @@ public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
     MavenProjectFacade f2 = newProjectFacade(project.getFile("p1.xml"));
 
     MutableProjectRegistry delta = new MutableProjectRegistry(state);
-    delta.addProject(f1.getPom(), f1);
+    delta.setProject(f1.getPom(), f1);
     state.apply(delta);
 
     delta = new MutableProjectRegistry(state);
-    delta.addProject(f2.getPom(), f2);
+    delta.setProject(f2.getPom(), f2);
 
     MavenProjectFacade[] facades = delta.getProjects();
     assertEquals(1, facades.length);
@@ -88,7 +91,7 @@ public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
     MavenProjectFacade f1 = newProjectFacade(project.getFile("p1.xml"));
 
     MutableProjectRegistry delta = new MutableProjectRegistry(state);
-    delta.addProject(f1.getPom(), f1);
+    delta.setProject(f1.getPom(), f1);
     state.apply(delta);
 
     delta = new MutableProjectRegistry(state);
@@ -153,7 +156,7 @@ public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
 
     IProject project = createExisting("dummy", "resources/dummy");
     IFile pom = project.getFile("p1.xml");
-    delta.addProject(pom, newProjectFacade(pom));
+    delta.setProject(pom, newProjectFacade(pom));
     state.apply(delta);
 
     File tmpDir = File.createTempFile("m2e-" + getName(), "dir");
@@ -171,8 +174,33 @@ public class MutableProjectRegistryTest extends AbstractMavenProjectTestCase {
     tmpDir.delete();
   }
 
+  public void testForeignClassesInSerializedProjectRegistry() throws Exception {
+    ProjectRegistry state = new ProjectRegistry();
+    MutableProjectRegistry delta = new MutableProjectRegistry(state);
+
+    IProject project = createExisting("dummy", "resources/dummy");
+    IFile pom = project.getFile("p1.xml");
+    delta.setProject(pom, newProjectFacade(pom));
+    Set<Capability> capabilities = new HashSet<Capability>();
+    capabilities.add(new TestCapability("test", "test", "1"));
+    delta.setCapabilities(pom, capabilities);
+    state.apply(delta);
+
+    File tmpDir = File.createTempFile("m2e-" + getName(), "dir");
+    tmpDir.delete();
+    tmpDir.mkdir();
+    ProjectRegistryReader reader = new ProjectRegistryReader(tmpDir);
+    reader.writeWorkspaceState(state);
+
+    state = reader.readWorkspaceState(null);
+    assertTrue(state.isValid());
+
+    new File(tmpDir, "workspaceState.ser").delete();
+    tmpDir.delete();
+  }
+
   private MavenProjectFacade newProjectFacade(IFile pom) throws Exception {
     MavenProject mavenProject = maven.readProject(pom.getLocation().toFile(), monitor);
-    return new MavenProjectFacade(null, pom, mavenProject, null);
+    return new MavenProjectFacade(null, pom, mavenProject, null, null);
   }
 }

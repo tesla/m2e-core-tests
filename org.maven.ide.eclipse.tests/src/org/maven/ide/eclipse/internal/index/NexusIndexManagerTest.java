@@ -23,7 +23,7 @@ import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.index.IIndex;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
-import org.maven.ide.eclipse.internal.project.MavenProjectFacade;
+import org.maven.ide.eclipse.internal.project.registry.MavenProjectFacade;
 import org.maven.ide.eclipse.internal.repository.RepositoryRegistry;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectChangedEvent;
@@ -46,7 +46,7 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
   private static final String REPO_URL_ECLIPSE = "http://repository.sonatype.org/content/repositories/eclipse";
   private static final String REPO_URL_PUBLIC = "http://repository.sonatype.org/content/groups/public/";
   
-  private IMavenConfiguration mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
+  private IMavenConfiguration mavenConfiguration = MavenPlugin.getDefault().getMavenConfiguration();
   private NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getDefault().getIndexManager();
   private RepositoryRegistry repositoryRegistry = (RepositoryRegistry) MavenPlugin.getDefault().getRepositoryRegistry();
 

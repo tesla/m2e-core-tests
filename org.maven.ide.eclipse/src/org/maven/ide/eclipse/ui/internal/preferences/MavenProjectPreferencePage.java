@@ -134,7 +134,7 @@ public class MavenProjectPreferencePage extends PropertyPage {
           WorkspaceJob job = new WorkspaceJob("Updating " + project.getName() + " Sources") {
             public IStatus runInWorkspace(IProgressMonitor monitor) {
               try {
-                final IMavenConfiguration mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
+                final IMavenConfiguration mavenConfiguration = MavenPlugin.getDefault().getMavenConfiguration();
                 plugin.getProjectConfigurationManager().updateProjectConfiguration(project, configuration,
                     mavenConfiguration.getGoalOnUpdate(), monitor);
               } catch(CoreException ex) {

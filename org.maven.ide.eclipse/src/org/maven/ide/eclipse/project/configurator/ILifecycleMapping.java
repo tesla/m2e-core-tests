@@ -43,6 +43,6 @@ public interface ILifecycleMapping {
    */
   List<AbstractBuildParticipant> getBuildParticipants(IMavenProjectFacade facade, IProgressMonitor monitor) throws CoreException;
 
-  /** TODO this does not belong here */
+  /** TODO does this belong here? */
   List<AbstractProjectConfigurator> getProjectConfigurators(IMavenProjectFacade facade, IProgressMonitor monitor) throws CoreException;
 }

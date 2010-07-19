@@ -380,13 +380,13 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
         public void run(IProgressMonitor monitor) {
           monitor.beginTask("Downloading Archetype " + archetypeName, IProgressMonitor.UNKNOWN);
           try {
-            IMaven maven = MavenPlugin.lookup(IMaven.class);
+            IMaven maven = MavenPlugin.getDefault().getMaven();
 
             ArtifactRepository localRepository = maven.getLocalRepository();
 
             List<ArtifactRepository> repositories = maven.getArtifactRepositories();
 
-            ArchetypeArtifactManager aaMgr = MavenPlugin.lookup(ArchetypeArtifactManager.class);
+            ArchetypeArtifactManager aaMgr = MavenPlugin.getDefault().getArchetypeArtifactManager();
             if(aaMgr.isFileSetArchetype(groupId, artifactId, version, null, localRepository, repositories)) {
               ArchetypeDescriptor descriptor = aaMgr.getFileSetArchetypeDescriptor(groupId, artifactId, version, null,
                   localRepository, repositories);

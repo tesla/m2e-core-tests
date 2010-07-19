@@ -40,14 +40,11 @@ public class LegacyBuildPathManager {
 
     String containerPath = entry.getPath().toString();
 
-    boolean includeModules = containerPath.indexOf("/" + IMavenConstants.INCLUDE_MODULES) > -1;
-
     boolean resolveWorkspaceProjects = containerPath.indexOf("/" + IMavenConstants.NO_WORKSPACE_PROJECTS) == -1;
 
     // boolean filterResources = containerPath.indexOf("/" + MavenPlugin.FILTER_RESOURCES) != -1;
 
     ResolverConfiguration configuration = new ResolverConfiguration();
-    configuration.setIncludeModules(includeModules);
     configuration.setResolveWorkspaceProjects(resolveWorkspaceProjects);
     configuration.setActiveProfiles(getActiveProfiles(entry));
     return configuration;

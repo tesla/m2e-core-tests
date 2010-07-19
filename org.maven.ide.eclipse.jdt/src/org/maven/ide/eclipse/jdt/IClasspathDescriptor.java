@@ -10,7 +10,6 @@ package org.maven.ide.eclipse.jdt;
 
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IClasspathEntry;
 
@@ -20,10 +19,10 @@ import org.maven.ide.eclipse.project.IMavenProjectFacade;
 
 
 /**
- * IClasspathDescriptor
- *
- * @author igor
+ * Instances of this class can be used to incrementally define IClasspathEntry[] arrays used by JDT to decribe Java
+ * Project classpath and contents of Java classpath containers.
  * 
+ * @author igor
  * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface IClasspathDescriptor {
@@ -37,23 +36,75 @@ public interface IClasspathDescriptor {
    */
   public boolean containsPath(IPath path);
 
-  public void addSourceEntry(IPath sourcePath, IPath outputLocation, boolean generated) throws CoreException;
+  /**
+   * Convenience method, equivalent to
+   * <code>addSourceEntry(sourcePath, outputLocation, new IPath[0], new IPath[0], generated)</code>
+   */
+  public IClasspathEntryDescriptor addSourceEntry(IPath sourcePath, IPath outputLocation, boolean generated);
 
-  public void removeEntry(IPath path);
+  /**
+   * Adds project source folder to the classpath. The source folder must exist in the workspace unless generated is
+   * true. In the latter case, the source classpath entry will be marked as optional. 
+   */
+  public IClasspathEntryDescriptor addSourceEntry(IPath sourcePath, IPath outputLocation, IPath[] inclusion,
+      IPath[] exclusion, boolean generated);
 
-  public void removeEntry(EntryFilter filter);
+  /**
+   * Adds fully populated IClasspathEntry instance to the classpath.
+   */
+  public IClasspathEntryDescriptor addEntry(IClasspathEntry entry);
 
-  public void addSourceEntry(IPath sourcePath, IPath outputLocation, IPath[] inclusion, IPath[] exclusion,
-      boolean generated) throws CoreException;
+  /**
+   * Adds and returns new project classpath entry.
+   */
+  public IClasspathEntryDescriptor addProjectEntry(IPath entryPath);
 
+  /**
+   * Adds and returns new library entry to the classpath
+   */
+  public IClasspathEntryDescriptor addLibraryEntry(IPath entryPath);
+
+  /**
+   * Removes entry with specified path from the classpath. That this can remove multiple entries because classpath does
+   * not enforce uniqueness of entry paths
+   * 
+   * @TODO should really be removeEntries (i.e. plural)
+   */
+  public List<IClasspathEntryDescriptor> removeEntry(IPath path);
+
+  /**
+   * Removed entries that match EntryFilter (i.e. EntryFilter#accept(entry) returns true) from the classpath
+   * 
+   * @TODO should really be removeEntries (i.e. plural)
+   */
+  public List<IClasspathEntryDescriptor> removeEntry(EntryFilter filter);
+
+  /**
+   * Renders classpath as IClasspathEntry[] array
+   * 
+   * @TODO should really be toEntriesArray
+   */
   public IClasspathEntry[] getEntries();
 
+  /**
+   * Returns underlying "live" list of IClasspathEntryDescriptor instances. Changes to the list will be immediately
+   * reflected in the classpath.
+   */
   public List<IClasspathEntryDescriptor> getEntryDescriptors();
 
-  public void addEntry(IClasspathEntry entry);
+  // deprecated, to be removed before 1.0
 
-  public void addProjectEntry(Artifact artifact, IMavenProjectFacade projectFacade);
+  /**
+   * Adds Maven artifact with corresponding sources and javadoc paths to the classpath.
+   * 
+   * @deprecated this method exposes Maven core classes, which are not part of m2eclipse-jdt API
+   */
+  public IClasspathEntryDescriptor addLibraryEntry(Artifact artifact, IPath srcPath, IPath srcRoot, String javaDocUrl);
 
-  public void addLibraryEntry(Artifact artifact, IPath srcPath, IPath srcRoot, String javaDocUrl);
-
+  /**
+   * Adds worksapce Maven project dependency to the classpath
+   * 
+   * @deprecated this method exposes Maven core classes, which are not part of m2eclipse-jdt API
+   */
+  public IClasspathEntryDescriptor addProjectEntry(Artifact artifact, IMavenProjectFacade projectFacade);
 }

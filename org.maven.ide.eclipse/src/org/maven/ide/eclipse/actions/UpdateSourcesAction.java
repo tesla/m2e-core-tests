@@ -37,7 +37,6 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
-import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.util.M2EUtils;
 
@@ -92,7 +91,7 @@ public class UpdateSourcesAction implements IObjectActionDelegate {
             try {
               plugin.getProjectConfigurationManager().updateProjectConfiguration(project, //
                   projectFacade.getResolverConfiguration(), //
-                  MavenPlugin.lookup(IMavenConfiguration.class).getGoalOnUpdate(), //
+                  MavenPlugin.getDefault().getMavenConfiguration().getGoalOnUpdate(), //
                   new SubProgressMonitor(monitor, 1));
             } catch(CoreException ex) {
               if (status == null) {

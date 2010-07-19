@@ -44,8 +44,6 @@ public class EnableNatureAction implements IObjectActionDelegate, IExecutableExt
   
   static final String ID_MODULES = "org.maven.ide.eclipse.enableModulesAction";
   
-  private boolean includeModules = false;
-
   private boolean workspaceProjects = true;
   
   private ISelection selection;
@@ -58,9 +56,7 @@ public class EnableNatureAction implements IObjectActionDelegate, IExecutableExt
   }
 
   public void setInitializationData(IConfigurationElement config, String propertyName, Object data) {
-    if(IMavenConstants.INCLUDE_MODULES.equals(data)) {
-      this.includeModules = true;
-    } else if(IMavenConstants.NO_WORKSPACE_PROJECTS.equals(data)) {
+    if(IMavenConstants.NO_WORKSPACE_PROJECTS.equals(data)) {
       this.workspaceProjects = false;
     }
   }
@@ -111,7 +107,6 @@ public class EnableNatureAction implements IObjectActionDelegate, IExecutableExt
       }
 
       ResolverConfiguration configuration = new ResolverConfiguration();
-      configuration.setIncludeModules(includeModules);
       configuration.setResolveWorkspaceProjects(workspaceProjects);
       configuration.setActiveProfiles("");
       
@@ -122,7 +117,7 @@ public class EnableNatureAction implements IObjectActionDelegate, IExecutableExt
       configurationManager.enableMavenNature(project, configuration, new NullProgressMonitor());
       
       if(!hasMavenNature) {
-        IMavenConfiguration mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
+        IMavenConfiguration mavenConfiguration = MavenPlugin.getDefault().getMavenConfiguration();
         configurationManager.updateProjectConfiguration(project, configuration, //
             mavenConfiguration.getGoalOnUpdate(), new NullProgressMonitor());
       }

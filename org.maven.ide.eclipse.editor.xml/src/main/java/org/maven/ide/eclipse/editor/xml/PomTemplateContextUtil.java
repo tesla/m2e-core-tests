@@ -48,7 +48,7 @@ class PomTemplateContextUtil {
     MavenPlugin plugin = MavenPlugin.getDefault();
     MavenConsole console = plugin.getConsole();
     try {
-      IMaven embedder = MavenPlugin.lookup(IMaven.class);
+      IMaven embedder = MavenPlugin.getDefault().getMaven();
 
       List<ArtifactRepository> repositories = embedder.getArtifactRepositories();
 

@@ -102,7 +102,6 @@ import org.eclipse.ui.ide.IGotoMarker;
 import org.eclipse.ui.part.MultiPageEditorActionBarContributor;
 import org.eclipse.ui.progress.UIJob;
 import org.eclipse.ui.texteditor.IDocumentProvider;
-import org.eclipse.ui.texteditor.IDocumentProviderExtension;
 import org.eclipse.ui.texteditor.IDocumentProviderExtension3;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.wst.sse.core.StructuredModelManager;
@@ -125,7 +124,6 @@ import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.editor.MavenEditorPlugin;
 import org.maven.ide.eclipse.editor.lifecycle.internal.LifecyclePage;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
-import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.util.Util;
 import org.maven.ide.eclipse.util.Util.FileStoreEditorInputStub;
@@ -832,14 +830,14 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
         }
         monitor.setTaskName("Building dependency tree");
 
-        ArtifactFactory artifactFactory = MavenPlugin.lookup(ArtifactFactory.class);
-        ArtifactMetadataSource artifactMetadataSource = MavenPlugin.lookup(ArtifactMetadataSource.class);
+        ArtifactFactory artifactFactory = MavenPlugin.getDefault().getArtifactFactory();
+        ArtifactMetadataSource artifactMetadataSource = MavenPlugin.getDefault().getArtifactMetadataSource();
 
-        ArtifactCollector artifactCollector = MavenPlugin.lookup(ArtifactCollector.class);
+        ArtifactCollector artifactCollector = MavenPlugin.getDefault().getArtifactCollector();
 
-        ArtifactRepository localRepository = MavenPlugin.lookup(IMaven.class).getLocalRepository();
+        ArtifactRepository localRepository = MavenPlugin.getDefault().getMaven().getLocalRepository();
 
-        DependencyTreeBuilder builder = MavenPlugin.lookup(DependencyTreeBuilder.class);
+        DependencyTreeBuilder builder = MavenPlugin.getDefault().getDependencyTreeBuilder();
         DependencyNode node = builder.buildDependencyTree(mavenProject, localRepository, artifactFactory,
             artifactMetadataSource, null, artifactCollector);
 

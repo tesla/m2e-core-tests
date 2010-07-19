@@ -48,7 +48,6 @@ import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.jdt.BuildPathManager;
 import org.maven.ide.eclipse.jdt.MavenJdtPlugin;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
-import org.maven.ide.eclipse.project.IMavenProjectVisitor;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 
@@ -168,12 +167,7 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
         return BuildPathManager.CLASSPATH_RUNTIME;
       }
       
-      facade.accept(new IMavenProjectVisitor() {
-        public boolean visit(IMavenProjectFacade projectFacade) {
-          testSources.addAll(Arrays.asList(projectFacade.getTestCompileSourceLocations()));
-          return true; // keep visiting
-        }
-      }, IMavenProjectVisitor.NESTED_MODULES);
+      testSources.addAll(Arrays.asList(facade.getTestCompileSourceLocations()));
 
       for (int i = 0; i < resources.length; i++) {
         for (IPath testPath : testSources) {
@@ -208,17 +202,9 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
     final Set<IPath> allClasses = new LinkedHashSet<IPath>();
     final Set<IPath> allTestClasses = new LinkedHashSet<IPath>();
 
-    projectFacade.accept(new IMavenProjectVisitor() {
-      public boolean visit(IMavenProjectFacade projectFacade) throws CoreException {
-        // add real resources output folders
-        Build build = projectFacade.getMavenProject(monitor).getBuild();
-        allClasses.add(projectFacade.getProjectRelativePath(build.getOutputDirectory()));
-        allTestClasses.add(projectFacade.getProjectRelativePath(build.getTestOutputDirectory()));
-
-        // continue traversal
-        return true; 
-      }
-    }, IMavenProjectVisitor.NESTED_MODULES);
+    Build build = projectFacade.getMavenProject(monitor).getBuild();
+    allClasses.add(projectFacade.getProjectRelativePath(build.getOutputDirectory()));
+    allTestClasses.add(projectFacade.getProjectRelativePath(build.getTestOutputDirectory()));
 
     IJavaProject javaProject = JavaCore.create(project);
 

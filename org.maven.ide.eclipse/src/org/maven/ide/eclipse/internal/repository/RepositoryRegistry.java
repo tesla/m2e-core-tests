@@ -54,7 +54,7 @@ public class RepositoryRegistry implements IRepositoryRegistry, IMavenProjectCha
 
   private RepositoryInfo localRepository;
 
-  private RepositoryInfo workspaceRepository;
+  private final RepositoryInfo workspaceRepository;
 
   private ArrayList<IRepositoryIndexer> indexers = new ArrayList<IRepositoryIndexer>();
 
@@ -62,16 +62,15 @@ public class RepositoryRegistry implements IRepositoryRegistry, IMavenProjectCha
 
   private final RepositoryRegistryUpdateJob job = new RepositoryRegistryUpdateJob(this);
   
-  public RepositoryRegistry(IMaven maven, MavenProjectManager projectManager) throws CoreException {
+  public RepositoryRegistry(IMaven maven, MavenProjectManager projectManager) {
     this.maven = maven;
     this.projectManager = projectManager;
 
-    this.localRepository = newLocalRepositoryInfo();
     this.workspaceRepository = new RepositoryInfo(null/*id*/, "workspace://"/*url*/, null/*basedir*/, SCOPE_WORKSPACE, null/*auth*/);
   }
 
-  private RepositoryInfo newLocalRepositoryInfo() throws CoreException {
-    File localBasedir = new File(maven.getLocalRepository().getBasedir());
+  private RepositoryInfo newLocalRepositoryInfo() {
+    File localBasedir = new File(maven.getLocalRepositoryPath());
     try {
       localBasedir = localBasedir.getCanonicalFile();
     } catch (IOException e) {
@@ -111,12 +110,16 @@ public class RepositoryRegistry implements IRepositoryRegistry, IMavenProjectCha
       }
       IMavenProjectFacade facade = event.getMavenProject();
       if(facade != null) {
-        addProjectRepositories(settings, facade, null /*asyncUpdate*/);
+        try {
+          addProjectRepositories(settings, facade, null /*asyncUpdate*/);
+        } catch(CoreException ex) {
+          MavenLogger.log(ex);
+        }
       }
     }
   }
 
-  private void addProjectRepositories(Settings settings, IMavenProjectFacade facade, IProgressMonitor monitor) {
+  private void addProjectRepositories(Settings settings, IMavenProjectFacade facade, IProgressMonitor monitor) throws CoreException {
     ArrayList<ArtifactRepositoryRef> repositories = getProjectRepositories(facade);
 
     for (ArtifactRepositoryRef repo : repositories) {
@@ -181,7 +184,7 @@ public class RepositoryRegistry implements IRepositoryRegistry, IMavenProjectCha
   }
 
 
-  public AuthenticationInfo getAuthenticationInfo(Settings settings, String id) {
+  public AuthenticationInfo getAuthenticationInfo(Settings settings, String id) throws CoreException {
     if (settings == null) {
       return null;
     }
@@ -199,7 +202,7 @@ public class RepositoryRegistry implements IRepositoryRegistry, IMavenProjectCha
     return info;
   }
 
-  public void updateRegistry(IProgressMonitor monitor) throws CoreException {
+  public synchronized void updateRegistry(IProgressMonitor monitor) throws CoreException {
     Settings settings = maven.getSettings();
     List<Mirror> mirrors = maven.getMirrors();
 
@@ -288,7 +291,11 @@ public class RepositoryRegistry implements IRepositoryRegistry, IMavenProjectCha
     return workspaceRepository;
   }
 
-  public IRepository getLocalRepository() {
+  public synchronized IRepository getLocalRepository() {
+    if(localRepository == null) {
+      localRepository = newLocalRepositoryInfo();
+    }
+
     return localRepository;
   }
   

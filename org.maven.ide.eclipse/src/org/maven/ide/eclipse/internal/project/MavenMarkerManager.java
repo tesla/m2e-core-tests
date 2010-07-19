@@ -35,13 +35,11 @@ import org.apache.maven.model.building.ModelProblem.Severity;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuildingException;
 
-import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.core.Messages;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
-import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.project.IMavenMarkerManager;
 
 public class MavenMarkerManager implements IMavenMarkerManager {
@@ -60,9 +58,9 @@ public class MavenMarkerManager implements IMavenMarkerManager {
   private final MavenConsole console;
   private final IMavenConfiguration mavenConfiguration; 
 
-  public MavenMarkerManager(MavenRuntimeManager runtimeManager, MavenConsole console) {
+  public MavenMarkerManager(MavenConsole console, IMavenConfiguration mavenConfiguration) {
     this.console = console;
-    this.mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
+    this.mavenConfiguration = mavenConfiguration;
   }
   
   public void addMarkers(IResource pomFile, MavenExecutionResult result) {

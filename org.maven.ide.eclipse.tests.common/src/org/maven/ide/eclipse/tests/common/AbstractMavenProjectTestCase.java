@@ -21,12 +21,6 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.model.Model;
-import org.apache.maven.wagon.Wagon;
-import org.codehaus.plexus.PlexusContainer;
-import org.codehaus.plexus.component.repository.ComponentDescriptor;
-import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -49,13 +43,21 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.codehaus.plexus.PlexusContainer;
+import org.codehaus.plexus.component.repository.ComponentDescriptor;
+import org.codehaus.plexus.util.IOUtil;
+
+import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.model.Model;
+import org.apache.maven.wagon.Wagon;
+
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
-import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.internal.embedder.MavenImpl;
-import org.maven.ide.eclipse.internal.project.MavenProjectManagerRefreshJob;
+import org.maven.ide.eclipse.internal.project.registry.ProjectRegistryRefreshJob;
 import org.maven.ide.eclipse.jdt.BuildPathManager;
 import org.maven.ide.eclipse.jdt.MavenJdtPlugin;
 import org.maven.ide.eclipse.project.IMavenProjectImportResult;
@@ -74,7 +76,7 @@ public abstract class AbstractMavenProjectTestCase extends TestCase {
   protected IWorkspace workspace;
   protected File repo;
   
-  protected MavenProjectManagerRefreshJob projectRefreshJob;
+  protected ProjectRegistryRefreshJob projectRefreshJob;
   protected Job downloadSourcesJob;
 
   protected MavenPlugin plugin;
@@ -102,14 +104,14 @@ public abstract class AbstractMavenProjectTestCase extends TestCase {
     downloadSourcesJob = MavenJdtPlugin.getDefault().getBuildpathManager().getDownloadSourcesJob();
     downloadSourcesJob.sleep();
 
-    mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
+    mavenConfiguration = MavenPlugin.getDefault().getMavenConfiguration();
 
     File settings = new File("settings.xml").getCanonicalFile();
     if (settings.canRead()) {
       mavenConfiguration.setUserSettingsFile(settings.getAbsolutePath());
     }
 
-    ArtifactRepository localRepository = MavenPlugin.lookup(IMaven.class).getLocalRepository();
+    ArtifactRepository localRepository = MavenPlugin.getDefault().getMaven().getLocalRepository();
     if(localRepository != null) {
       repo =  new File(localRepository.getBasedir());
     } else {

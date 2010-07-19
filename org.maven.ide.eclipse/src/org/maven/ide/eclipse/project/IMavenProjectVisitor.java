@@ -18,10 +18,6 @@ public interface IMavenProjectVisitor {
   public static int NONE = 0;
 
   public static int LOAD = 1 << 0;
-  
-  public static int NESTED_MODULES = 1 << 1;
-
-  public static int FORCE_MODULES = 1 << 2;
 
   /**
    * Visit Maven project or project module

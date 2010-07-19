@@ -26,9 +26,7 @@ import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 
-import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.Messages;
-import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;
 import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 
@@ -52,8 +50,6 @@ public class ResolverConfigurationComponent extends ExpandableComposite {
   private ModifyListener modifyListener;
 
   Button resolveWorkspaceProjects;
-
-  Button projectsForModules;
 
   Text profiles;
 
@@ -95,19 +91,6 @@ public class ResolverConfigurationComponent extends ExpandableComposite {
       }
     });
 
-    if(MavenPlugin.getDefault().getPreferenceStore().getBoolean(
-        MavenPreferenceConstants.P_SUPPORT_SEPARATE_PROJECTS_FOR_MODULES)) {
-
-      projectsForModules = new Button(advancedComposite, SWT.CHECK);
-      projectsForModules.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
-      projectsForModules.setText(Messages.getString("resolverConfiguration.projectsForModules"));
-      projectsForModules.addSelectionListener(new SelectionAdapter() {
-        public void widgetSelected(SelectionEvent e) {
-          resolverConfiguration.setIncludeModules(!projectsForModules.getSelection());
-        }
-      });
-    }
-
     Label profilesLabel = new Label(advancedComposite, SWT.NONE);
     profilesLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
     profilesLabel.setText(Messages.getString("resolverConfiguration.profiles"));
@@ -141,9 +124,6 @@ public class ResolverConfigurationComponent extends ExpandableComposite {
 
   public void loadData() {
     resolveWorkspaceProjects.setSelection(resolverConfiguration.shouldResolveWorkspaceProjects());
-    if(projectsForModules != null) {
-      projectsForModules.setSelection(!resolverConfiguration.shouldIncludeModules());
-    }
     profiles.setText(resolverConfiguration.getActiveProfiles());
     if(template != null) {
       template.setText(projectImportConfiguration.getProjectNameTemplate());

@@ -107,8 +107,7 @@ public abstract class MavenProjectCheckoutJob extends WorkspaceJob {
           true, modelManager, console);
       scanner.run(monitor);
 
-      boolean includeModules = configuration.getResolverConfiguration().shouldIncludeModules();
-      this.projects = plugin.getProjectConfigurationManager().collectProjects(scanner.getProjects(), includeModules);
+      this.projects = plugin.getProjectConfigurationManager().collectProjects(scanner.getProjects());
 
       if(checkoutAllProjects) {
         // check if there any project name conflicts 
@@ -207,8 +206,7 @@ public abstract class MavenProjectCheckoutJob extends WorkspaceJob {
         final MavenPlugin plugin = MavenPlugin.getDefault();
         WorkspaceJob job = new WorkspaceJob("Importing Maven projects") {
           public IStatus runInWorkspace(IProgressMonitor monitor) {
-            Set<MavenProjectInfo> projectSet = plugin.getProjectConfigurationManager().collectProjects(projects, //
-                configuration.getResolverConfiguration().shouldIncludeModules());
+            Set<MavenProjectInfo> projectSet = plugin.getProjectConfigurationManager().collectProjects(projects);
 
             try {
               plugin.getProjectConfigurationManager().importProjects(projectSet, configuration, monitor);

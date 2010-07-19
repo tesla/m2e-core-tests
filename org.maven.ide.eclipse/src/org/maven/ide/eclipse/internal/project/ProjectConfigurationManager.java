@@ -14,10 +14,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -46,7 +44,6 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.ui.IWorkingSet;
 
 import org.codehaus.plexus.util.StringUtils;
-import org.codehaus.plexus.util.xml.Xpp3Dom;
 
 import org.apache.maven.archetype.ArchetypeGenerationRequest;
 import org.apache.maven.archetype.ArchetypeGenerationResult;
@@ -56,21 +53,17 @@ import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Model;
-import org.apache.maven.model.Plugin;
 import org.apache.maven.project.MavenProject;
 
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.archetype.ArchetypeManager;
 import org.maven.ide.eclipse.archetype.ArchetypeCatalogFactory.RemoteCatalogFactory;
+import org.maven.ide.eclipse.archetype.ArchetypeManager;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
-import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
-import org.maven.ide.eclipse.index.IndexManager;
-import org.maven.ide.eclipse.internal.ExtensionReader;
 import org.maven.ide.eclipse.project.IMavenMarkerManager;
 import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
@@ -85,7 +78,6 @@ import org.maven.ide.eclipse.project.ProjectImportConfiguration;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
 import org.maven.ide.eclipse.project.configurator.ILifecycleMapping;
-import org.maven.ide.eclipse.project.configurator.NoopLifecycleMapping;
 import org.maven.ide.eclipse.project.configurator.ProjectConfigurationRequest;
 import org.maven.ide.eclipse.util.Util;
 
@@ -99,15 +91,7 @@ import org.maven.ide.eclipse.util.Util;
  */
 public class ProjectConfigurationManager implements IProjectConfigurationManager, IMavenProjectChangedListener {
 
-  private static final String DEFAULT_LIFECYCLE_MAPPING_ID = "generic";
-
-  private static final String PROP_LIFECYCLE_MAPPING = ProjectConfigurationManager.class.getName() + "/lifecycleMapping";
-
-  final MavenModelManager modelManager;
-
   final MavenConsole console;
-
-  final MavenRuntimeManager runtimeManager;
 
   final MavenProjectManager projectManager;
 
@@ -117,27 +101,16 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
 
   final IMaven maven;
 
-  /**
-   * mappingId->ILifecycleMapping
-   */
-  private Map<String, ILifecycleMapping> lifecycleMappings;
+  final IMavenConfiguration mavenConfiguration;
 
-  /**
-   * packaging->mappingId
-   */
-  private Map<String, String> defaultLifecycleMappings;
-
-  public ProjectConfigurationManager(MavenModelManager modelManager, MavenConsole console,
-      MavenRuntimeManager runtimeManager, MavenProjectManager projectManager,
-      IndexManager indexManager,
-      MavenModelManager mavenModelManager, IMavenMarkerManager mavenMarkerManager) {
-    this.modelManager = modelManager;
+  public ProjectConfigurationManager(IMaven maven, MavenConsole console, MavenProjectManager projectManager,
+      MavenModelManager mavenModelManager, IMavenMarkerManager mavenMarkerManager, IMavenConfiguration mavenConfiguration) {
     this.console = console;
-    this.runtimeManager = runtimeManager;
     this.projectManager = projectManager;
     this.mavenModelManager = mavenModelManager;
     this.mavenMarkerManager = mavenMarkerManager;
-    this.maven = MavenPlugin.lookup(IMaven.class);
+    this.maven = maven;
+    this.mavenConfiguration = mavenConfiguration;
   }
 
   public List<IMavenProjectImportResult> importProjects(Collection<MavenProjectInfo> projectInfos, ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException {
@@ -191,7 +164,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
   
   private void hideNestedProjectsFromParents(List<IProject> projects) {
     
-    if (!MavenPlugin.lookup(IMavenConfiguration.class).isHideFoldersOfNestedProjects()) {
+    if (!MavenPlugin.getDefault().getMavenConfiguration().isHideFoldersOfNestedProjects()) {
       return;
     }
     // Prevent child project folders from showing up in parent project folders.
@@ -228,7 +201,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     //SubProgressMonitor sub = new SubProgressMonitor(monitor, projects.size()+1);
     
       // first, resolve maven dependencies for all projects
-      MavenUpdateRequest updateRequest = new MavenUpdateRequest(false, false);
+      MavenUpdateRequest updateRequest = new MavenUpdateRequest(mavenConfiguration.isOffline(), false);
       for (IProject project : projects) {
         updateRequest.addPomFile(project);
       }
@@ -312,6 +285,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
   public void updateProjectConfiguration(IProject project, ResolverConfiguration configuration, String goalToExecute, IProgressMonitor monitor) throws CoreException {
     IFile pom = project.getFile(IMavenConstants.POM_FILE_NAME);
     if (pom.isAccessible()) {
+      projectManager.refresh(new MavenUpdateRequest(project, mavenConfiguration.isOffline(), false), monitor); 
       IMavenProjectFacade facade = projectManager.create(pom, false, monitor);
       if (facade != null) { // facade is null if pom.xml cannot be read
         ProjectConfigurationRequest request = new ProjectConfigurationRequest(facade, facade.getMavenProject(monitor), createMavenSession(facade, monitor), true /*updateSources*/);
@@ -426,7 +400,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
 
     monitor.subTask("Creating the POM file...");
     IFile pomFile = project.getFile(IMavenConstants.POM_FILE_NAME);    
-    modelManager.createMavenModel(pomFile, model);
+    mavenModelManager.createMavenModel(pomFile, model);
     monitor.worked(1);
 
     monitor.subTask("Creating project folders...");
@@ -492,8 +466,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
           projectFolder, true, mavenModelManager, console);
       scanner.run(monitor);
       
-      Set<MavenProjectInfo> projectSet = collectProjects(scanner.getProjects(), //
-          configuration.getResolverConfiguration().shouldIncludeModules());
+      Set<MavenProjectInfo> projectSet = collectProjects(scanner.getProjects());
       
       importProjects(projectSet, configuration, monitor);
       
@@ -522,7 +495,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     
       if (StringUtils.isBlank(artifactRemoteRepository)){
         
-        IMavenConfiguration mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
+        IMavenConfiguration mavenConfiguration = MavenPlugin.getDefault().getMavenConfiguration();
         if (!mavenConfiguration.isOffline()){
           //Try to find the repository from remote catalog if needed
           final ArchetypeManager archetypeManager = MavenPlugin.getDefault().getArchetypeManager();
@@ -551,36 +524,15 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
   }
 
   private org.apache.maven.archetype.Archetype getArchetyper() {
-    return MavenPlugin.lookup(org.apache.maven.archetype.Archetype.class);
+    return MavenPlugin.getDefault().getArchetype();
   }
 
-  /**
-   * Flatten hierarchical projects
-   *   
-   * @param projects a collection of {@link MavenProjectInfo}
-   * @param includeModules of true 
-   * 
-   * @return flattened collection of {@link MavenProjectInfo}
-   */
-  public Set<MavenProjectInfo> collectProjects(Collection<MavenProjectInfo> projects, boolean includeModules) {
-    Set<MavenProjectInfo> projectSet = collectProjects(projects);
-    if(!includeModules) {
-      return projectSet;
-    }
-    
-    Set<MavenProjectInfo> parentProjects = new HashSet<MavenProjectInfo>();
-    for(MavenProjectInfo projectInfo : projectSet) {
-      MavenProjectInfo parent = projectInfo.getParent();
-      if(parent==null || !projectSet.contains(parent)) {
-        parentProjects.add(projectInfo);
-      }
-    }
-    return parentProjects;
-  }
+  public Set<MavenProjectInfo> collectProjects(Collection<MavenProjectInfo> projects) {
 
-  private Set<MavenProjectInfo> collectProjects(Collection<MavenProjectInfo> projects) {
+    // TODO what does this do?
     return new LinkedHashSet<MavenProjectInfo>() {
       private static final long serialVersionUID = 1L;
+
       public Set<MavenProjectInfo> collectProjects(Collection<MavenProjectInfo> projects) {
         for(MavenProjectInfo projectInfo : projects) {
           console.logMessage("Collecting project info " + projectInfo);
@@ -603,7 +555,7 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     File pomFile = projectInfo.getPomFile(); 
     Model model = projectInfo.getModel();
     if(model == null) {
-      model = modelManager.readMavenModel(pomFile);
+      model = maven.readModel(pomFile);
       projectInfo.setModel(model);
     }
 
@@ -694,84 +646,6 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
       return null;
     }
 
-    ILifecycleMapping mapping = (ILifecycleMapping) projectFacade.getSessionProperty(PROP_LIFECYCLE_MAPPING);
-
-    if (mapping == null) {
-      mapping = doGetLifecycleMapping(projectFacade, monitor);
-      projectFacade.setSessionProperty(PROP_LIFECYCLE_MAPPING, mapping);
-    }
-
-    return mapping;
-  }
-
-  private ILifecycleMapping doGetLifecycleMapping(IMavenProjectFacade projectFacade, IProgressMonitor monitor)
-      throws CoreException {
-    String mappingId = null;
-
-    MavenProject project = projectFacade.getMavenProject(monitor);
-
-    if (project.equals(projectFacade.getPom().getParent())) {
-      throw new IllegalArgumentException("Nested workspace module " + projectFacade.getPom());
-    }
-
-    if (projectFacade.getResolverConfiguration().shouldIncludeModules()) {
-      return getLifecycleMapping(DEFAULT_LIFECYCLE_MAPPING_ID);
-    }
-
-    if ("pom".equals(projectFacade.getPackaging())) {
-      return new NoopLifecycleMapping();
-    }
-
-    Plugin plugin = project.getPlugin( "org.maven.ide.eclipse:lifecycle-mapping" );
-
-    if (plugin != null) {
-      Xpp3Dom configuration = (Xpp3Dom) plugin.getConfiguration();
-      if (configuration != null) {
-        Xpp3Dom mappingIdDom = configuration.getChild("mappingId");
-        if (mappingIdDom != null) {
-          mappingId = mappingIdDom.getValue();
-        }
-      }
-    }
-
-    if (mappingId == null || mappingId.length() <= 0) {
-      mappingId = getDefaultLifecycleMappingId(project.getPackaging());
-    }
-
-    if (mappingId == null || mappingId.length() <= 0) {
-      mappingId = DEFAULT_LIFECYCLE_MAPPING_ID;
-    }
-
-    ILifecycleMapping lifecycleMapping = getLifecycleMapping(mappingId);
-
-    if (lifecycleMapping == null) {
-      // TODO create error marker
-      console.logError("Project " + projectFacade.getProject().getName() + " uses unknown or missing lifecycle mapping with id=`" + mappingId + "'");
-      return new MissingLifecycleMapping(mappingId);
-    }
-
-    return lifecycleMapping;
-  }
-
-  private String getDefaultLifecycleMappingId(String packaging) {
-    Map<String, String> defaultLifecycleMappings;
-    synchronized(this) {
-      if(this.defaultLifecycleMappings == null) {
-        this.defaultLifecycleMappings = ExtensionReader.readDefaultLifecycleMappingExtensions();
-      }
-      defaultLifecycleMappings = this.defaultLifecycleMappings;
-    }
-    return defaultLifecycleMappings.get(packaging);
-  }
-
-  private ILifecycleMapping getLifecycleMapping(String mappingId) {
-    Map<String, ILifecycleMapping> lifecycleMappings;
-    synchronized(this) {
-      if(this.lifecycleMappings == null) {
-        this.lifecycleMappings = ExtensionReader.readLifecycleMappingExtensions();
-      }
-      lifecycleMappings = this.lifecycleMappings;
-    }
-    return lifecycleMappings.get(mappingId);
+    return projectFacade.getLifecycleMapping(monitor);
   }
 }

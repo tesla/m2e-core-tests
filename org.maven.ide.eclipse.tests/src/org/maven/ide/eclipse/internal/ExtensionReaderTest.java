@@ -23,7 +23,7 @@ public class ExtensionReaderTest extends TestCase {
   public void testReadProjectConfiguratorExtensions() throws Exception {
     MavenPlugin plugin = MavenPlugin.getDefault();
     List<AbstractProjectConfigurator> configurators = ExtensionReader.readProjectConfiguratorExtensions(plugin
-        .getMavenProjectManager(), MavenPlugin.lookup(IMavenConfiguration.class), plugin.getMavenMarkerManager(),
+        .getMavenProjectManager(), MavenPlugin.getDefault().getMavenConfiguration(), plugin.getMavenMarkerManager(),
         plugin.getConsole());
 
     for(AbstractProjectConfigurator configurator : configurators) {

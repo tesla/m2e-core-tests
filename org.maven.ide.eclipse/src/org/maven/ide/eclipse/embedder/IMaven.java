@@ -68,6 +68,13 @@ public interface IMaven {
       List<ArtifactRepository> artifactRepositories, IProgressMonitor monitor) throws CoreException;
 
   /**
+   * Returns path of the specified artifact relative to repository baseDir. Can use used to access local repository
+   * files bypassing maven resolution logic.
+   */
+  public String getArtifactPath(ArtifactRepository repository, String groupId, String artifactId, String version,
+      String type, String classifier) throws CoreException;
+
+  /**
    * Returns true if the artifact does NOT exist in the local repository and
    * known to be UNavailable from all specified repositories.
    */
@@ -78,7 +85,7 @@ public interface IMaven {
 
   public MavenProject readProject(File pomFile, IProgressMonitor monitor) throws CoreException;
 
-  public MavenExecutionResult readProject(MavenExecutionRequest request, IProgressMonitor monitor);
+  public MavenExecutionResult readProject(MavenExecutionRequest request, IProgressMonitor monitor) throws CoreException;
 
   // execution
 
@@ -103,6 +110,8 @@ public interface IMaven {
    * TODO should we expose Settings or provide access to servers and proxies instead?
    */
   public Settings getSettings() throws CoreException;
+
+  public String getLocalRepositoryPath();
 
   public ArtifactRepository getLocalRepository() throws CoreException;
 
@@ -145,7 +154,7 @@ public interface IMaven {
 
   public void reloadSettings() throws CoreException;
 
-  public Server decryptPassword(Server server);
+  public Server decryptPassword(Server server) throws CoreException;
 
   /**
    * Temporary solution/workaround for http://jira.codehaus.org/browse/MNG-4194. Extensions realm is created each time
@@ -178,5 +187,17 @@ public interface IMaven {
   public List<MavenProject> getSortedProjects(List<MavenProject> projects) throws CoreException;
 
   public String resolvePluginVersion(String groupId, String artifactId, MavenSession session) throws CoreException;
+
+  /**
+   * Returns new mojo instances configured according to provided mojoExecution. Caller must release returned mojo with
+   * {@link #releaseMojo(Object, MojoExecution)}. This method is intended to allow introspection of mojo configuration
+   * parameters, use {@link #execute(MavenSession, MojoExecution, IProgressMonitor)} to execute mojo.
+   */
+  public <T> T getConfiguredMojo(MavenSession session, MojoExecution mojoExecution, Class<T> clazz) throws CoreException;
+
+  /**
+   * Releases resources used by Mojo acquired with {@link #getConfiguredMojo(MavenSession, MojoExecution, Class)}
+   */
+  void releaseMojo(Object mojo, MojoExecution mojoExecution) throws CoreException;
 
 }

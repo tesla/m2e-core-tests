@@ -31,8 +31,6 @@ import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.embedder.AbstractMavenConfigurationChangeListener;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.embedder.MavenConfigurationChangeEvent;
-import org.maven.ide.eclipse.embedder.MavenModelManager;
-import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.jdt.internal.launch.MavenLaunchConfigurationListener;
 import org.maven.ide.eclipse.project.MavenProjectManager;
@@ -68,14 +66,11 @@ public class MavenJdtPlugin extends AbstractUIPlugin {
     MavenProjectManager projectManager = mavenPlugin.getMavenProjectManager();
     MavenConsole console = mavenPlugin.getConsole();
     IndexManager indexManager = mavenPlugin.getIndexManager();
-    MavenModelManager modelManager = mavenPlugin.getMavenModelManager();
-    MavenRuntimeManager runtimeManager = mavenPlugin.getMavenRuntimeManager();
-    IMavenConfiguration mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
+    IMavenConfiguration mavenConfiguration = MavenPlugin.getDefault().getMavenConfiguration();
 
     File stateLocationDir = mavenPlugin.getStateLocation().toFile(); // TODO migrate JDT settings to this plugin's store
 
-    this.buildpathManager = new BuildPathManager(console, projectManager, indexManager, modelManager,
-        runtimeManager, bundleContext, stateLocationDir);
+    this.buildpathManager = new BuildPathManager(console, projectManager, indexManager, bundleContext, stateLocationDir);
     workspace.addResourceChangeListener(buildpathManager, IResourceChangeEvent.PRE_DELETE);
 
     projectManager.addMavenProjectChangedListener(this.buildpathManager);

@@ -20,8 +20,8 @@ import org.apache.maven.artifact.repository.MavenArtifactRepository;
 import org.apache.maven.execution.MavenExecutionRequest;
 
 import org.maven.ide.eclipse.core.IMavenConstants;
-import org.maven.ide.eclipse.internal.project.MavenProjectManagerImpl;
-import org.maven.ide.eclipse.internal.project.MavenProjectManagerRefreshJob;
+import org.maven.ide.eclipse.internal.project.registry.ProjectRegistryManager;
+import org.maven.ide.eclipse.internal.project.registry.ProjectRegistryRefreshJob;
 
 
 /**
@@ -32,13 +32,13 @@ public class MavenProjectManager {
 
   public static final String STATE_FILENAME = "workspacestate.properties";
   
-  private final MavenProjectManagerImpl manager;
+  private final ProjectRegistryManager manager;
 
-  private final MavenProjectManagerRefreshJob mavenBackgroundJob;
+  private final ProjectRegistryRefreshJob mavenBackgroundJob;
 
   private final File workspaceStateFile;
   
-  public MavenProjectManager(MavenProjectManagerImpl manager, MavenProjectManagerRefreshJob mavenBackgroundJob, File stateLocation) {
+  public MavenProjectManager(ProjectRegistryManager manager, ProjectRegistryRefreshJob mavenBackgroundJob, File stateLocation) {
     this.manager = manager;
     this.mavenBackgroundJob = mavenBackgroundJob;
     this.workspaceStateFile = new File(stateLocation, STATE_FILENAME);

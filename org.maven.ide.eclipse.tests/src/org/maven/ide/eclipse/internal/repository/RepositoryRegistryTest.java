@@ -13,6 +13,7 @@ import java.io.File;
 import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
+import org.eclipse.core.runtime.CoreException;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.tests.common.AbstractMavenProjectTestCase;
 
@@ -46,7 +47,7 @@ public class RepositoryRegistryTest extends AbstractMavenProjectTestCase {
     return server;
   }
 
-  public void testSettingsDecryption() {
+  public void testSettingsDecryption() throws CoreException {
     Settings settings = new Settings();
     settings.addServer(newServer("test", "user", "{9k2z8UPSVlYHp1+h2s05Qe4Zzpx46wGmzlGqJPgL3lQ=}"));
 

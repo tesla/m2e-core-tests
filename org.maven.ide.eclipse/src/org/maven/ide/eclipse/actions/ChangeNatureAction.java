@@ -40,16 +40,11 @@ public class ChangeNatureAction implements IObjectActionDelegate {
 
   public static final String ID_ENABLE_WORKSPACE = "org.maven.ide.eclipse.enableWorkspaceResolutionAction";
   
-  public static final String ID_ENABLE_MODULES = "org.maven.ide.eclipse.enableModulesAction";
-  
   public static final String ID_DISABLE_WORKSPACE = "org.maven.ide.eclipse.disableWorkspaceResolutionAction";
-  
-  public static final String ID_DISABLE_MODULES = "org.maven.ide.eclipse.disableModulesAction";
 
   public static final int ENABLE_WORKSPACE = 1;
+
   public static final int DISABLE_WORKSPACE = 2;
-  public static final int ENABLE_MODULES = 3;
-  public static final int DISABLE_MODULES = 4;
   
   private ISelection selection;
   
@@ -104,7 +99,7 @@ public class ChangeNatureAction implements IObjectActionDelegate {
       this.importManager = plugin.getProjectConfigurationManager();
       this.projectManager = plugin.getMavenProjectManager();
       
-      this.mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
+      this.mavenConfiguration = MavenPlugin.getDefault().getMavenConfiguration();
     }
     
     public IStatus runInWorkspace(IProgressMonitor monitor) {
@@ -148,14 +143,6 @@ public class ChangeNatureAction implements IObjectActionDelegate {
           break;
         case DISABLE_WORKSPACE:
           configuration.setResolveWorkspaceProjects(false);
-          break;
-        case ENABLE_MODULES:
-          configuration.setIncludeModules(true);
-          updateSourceFolders = true;
-          break;
-        case DISABLE_MODULES:
-          configuration.setIncludeModules(false);
-          updateSourceFolders = true;
           break;
       }
 

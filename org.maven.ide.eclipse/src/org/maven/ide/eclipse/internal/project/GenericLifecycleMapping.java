@@ -66,8 +66,8 @@ public class GenericLifecycleMapping extends AbstractLifecycleMapping implements
     List<String> mojos = new LinkedList<String>();
     if(!goals.isEmpty()) {
       try {
-        MavenProjectManager manager = MavenPlugin.lookup(MavenProjectManager.class);
-        IMaven maven = MavenPlugin.lookup(IMaven.class);
+        MavenProjectManager manager = MavenPlugin.getDefault().getMavenProjectManager();
+        IMaven maven = MavenPlugin.getDefault().getMaven();
         ResolverConfiguration configuration = projectFacade.getResolverConfiguration();
         MavenExecutionRequest request = manager.createExecutionRequest(projectFacade.getPom(), configuration, progressMonitor);
         request.setGoals(goals);

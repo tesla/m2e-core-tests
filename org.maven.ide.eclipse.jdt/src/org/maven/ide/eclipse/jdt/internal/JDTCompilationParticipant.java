@@ -36,7 +36,7 @@ public class JDTCompilationParticipant extends CompilationParticipant {
     }
 
     MavenPlugin plugin = MavenPlugin.getDefault();
-    IMavenConfiguration configuration = MavenPlugin.lookup(IMavenConfiguration.class);
+    IMavenConfiguration configuration = MavenPlugin.getDefault().getMavenConfiguration();
     if (configuration.isDebugOutput()) {
       MavenConsole console = plugin.getConsole();
       console.logMessage("Maven compilation participant: clean starting");

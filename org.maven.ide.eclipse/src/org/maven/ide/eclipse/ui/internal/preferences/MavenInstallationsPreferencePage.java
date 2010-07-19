@@ -105,8 +105,8 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
 
     this.mavenPlugin = MavenPlugin.getDefault();
     this.runtimeManager = mavenPlugin.getMavenRuntimeManager();
-    this.mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
-    this.maven = MavenPlugin.lookup(IMaven.class);
+    this.mavenConfiguration = MavenPlugin.getDefault().getMavenConfiguration();
+    this.maven = MavenPlugin.getDefault().getMaven();
   
   }
 

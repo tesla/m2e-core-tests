@@ -59,7 +59,7 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
   protected IMavenConfiguration mavenConfiguration;
   protected IMavenMarkerManager markerManager; 
   protected MavenConsole console;
-  protected IMaven maven = MavenPlugin.lookup(IMaven.class);
+  protected IMaven maven = MavenPlugin.getDefault().getMaven();
 
   
   public void setProjectManager(MavenProjectManager projectManager) {

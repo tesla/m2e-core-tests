@@ -74,7 +74,7 @@ public abstract class AbstractLifecycleMapping implements IExtensionLifecycleMap
         MavenPlugin plugin = MavenPlugin.getDefault();
         MavenProjectManager projectManager = plugin.getMavenProjectManager();
         IMavenConfiguration mavenConfiguration;
-        mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
+        mavenConfiguration = MavenPlugin.getDefault().getMavenConfiguration();
         IMavenMarkerManager mavenMarkerManager = plugin.getMavenMarkerManager();
         MavenConsole console = plugin.getConsole();
         configurators = new ArrayList<AbstractProjectConfigurator>(ExtensionReader
@@ -93,6 +93,18 @@ public abstract class AbstractLifecycleMapping implements IExtensionLifecycleMap
       }
     }
     return result;
+  }
+
+  public static AbstractProjectConfigurator getProjectConfigurator(String id) {
+    if(id == null) {
+      return null;
+    }
+    for(AbstractProjectConfigurator configurator : getProjectConfigurators()) {
+      if(id.equals(configurator.getId())) {
+        return configurator;
+      }
+    }
+    return null;
   }
 
   /**

@@ -39,7 +39,7 @@ public interface IProjectConfigurationManager {
       String groupId, String artifactId, String version, String javaPackage, Properties properties, //
       ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException;
 
-  Set<MavenProjectInfo> collectProjects(Collection<MavenProjectInfo> projects, boolean includeModules);
+  Set<MavenProjectInfo> collectProjects(Collection<MavenProjectInfo> projects);
 
   void enableMavenNature(IProject project, ResolverConfiguration configuration, IProgressMonitor monitor)
       throws CoreException;

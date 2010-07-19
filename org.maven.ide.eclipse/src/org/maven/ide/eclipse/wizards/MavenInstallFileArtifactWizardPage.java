@@ -271,7 +271,7 @@ public class MavenInstallFileArtifactWizardPage extends WizardPage {
         // read pom file
         
         try {
-          IMaven maven = MavenPlugin.lookup(IMaven.class);
+          IMaven maven = MavenPlugin.getDefault().getMaven();
           MavenProject mavenProject = maven.readProject(new File(pomFileName), null);
 
           groupIdCombo.setText(mavenProject.getGroupId());

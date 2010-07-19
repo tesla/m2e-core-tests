@@ -27,7 +27,6 @@ public class ResolverConfiguration implements Serializable {
   public static final String DEFAULT_FILTERING_GOALS = "process-resources resources:testResources";
   public static final String DEFAULT_FULL_BUILD_GOALS = "process-test-resources";
 
-  private boolean includeModules = false;
   private boolean resolveWorkspaceProjects = true;
   private String activeProfiles = "";
   private String resourceFilteringGoals = DEFAULT_FILTERING_GOALS;
@@ -37,24 +36,6 @@ public class ResolverConfiguration implements Serializable {
    * Skip execution of Maven compiler plugin
    */
   private boolean skipCompiler = true;
-
-//  public ResolverConfiguration() {
-//  }
-//  
-//  private ResolverConfiguration(boolean includeModules, boolean resolveWorkspaceProjects, String activeProfiles, boolean filterResources, boolean useMavenOutputFolders) {
-//    this.includeModules = includeModules;
-//    this.resolveWorkspaceProjects = resolveWorkspaceProjects;
-//    this.activeProfiles = activeProfiles;
-//    this.filterResources = filterResources;
-//    this.useMavenOutputFolders = useMavenOutputFolders;
-//  }
-
-  /**
-   * @deprecated see {@link #setIncludeModules(boolean)}
-   */
-  public boolean shouldIncludeModules() {
-    return this.includeModules;
-  }
 
   public boolean shouldResolveWorkspaceProjects() {
     return this.resolveWorkspaceProjects;
@@ -73,14 +54,6 @@ public class ResolverConfiguration implements Serializable {
 
   public void setResolveWorkspaceProjects(boolean resolveWorkspaceProjects) {
     this.resolveWorkspaceProjects = resolveWorkspaceProjects;
-  }
-  
-  /**
-   * @deprecated ability to map multiple Maven modules to a single workspace project
-   *    is unsupported and will likely be removed in future m2e versions
-   */
-  public void setIncludeModules(boolean includeModules) {
-    this.includeModules = includeModules;
   }
   
   public void setActiveProfiles(String activeProfiles) {

@@ -38,12 +38,17 @@ import org.apache.maven.model.PluginExecution;
 import org.apache.maven.model.Resource;
 import org.apache.maven.project.MavenProject;
 
+import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.jdt.BuildPathManager;
 import org.maven.ide.eclipse.jdt.IClasspathDescriptor;
 import org.maven.ide.eclipse.jdt.IClasspathEntryDescriptor;
+import org.maven.ide.eclipse.jdt.IJavaProjectConfigurator;
 import org.maven.ide.eclipse.jdt.MavenJdtPlugin;
+import org.maven.ide.eclipse.project.IMavenProjectFacade;
+import org.maven.ide.eclipse.project.IProjectConfigurationManager;
 import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
+import org.maven.ide.eclipse.project.configurator.ILifecycleMapping;
 import org.maven.ide.eclipse.project.configurator.ProjectConfigurationRequest;
 import org.maven.ide.eclipse.util.Util;
 
@@ -53,7 +58,7 @@ import org.maven.ide.eclipse.util.Util;
  * 
  * @author igor
  */
-abstract class AbstractJavaProjectConfigurator extends AbstractProjectConfigurator {
+public abstract class AbstractJavaProjectConfigurator extends AbstractProjectConfigurator {
 
   protected static final List<String> SOURCES = Arrays.asList("1.1,1.2,1.3,1.4,1.5,1.6,1.7".split(","));
 
@@ -79,71 +84,88 @@ abstract class AbstractJavaProjectConfigurator extends AbstractProjectConfigurat
 
     monitor.setTaskName("Configuring java project " + project.getName());
 
-    addNature(project, JavaCore.NATURE_ID, monitor);
+    addJavaNature(project, monitor);
 
     IJavaProject javaProject = JavaCore.create(project);
 
-    List<MavenProject> mavenProjects = getMavenProjects(request, monitor);
-    
-    if (mavenProjects == null) {
-      return;
-    }
+    MavenProject mavenProject = getMavenProject(request, monitor);
+
+    Map<String, String> options = new HashMap<String, String>();
+
+    addJavaProjectOptions(options, request, mavenProject, monitor);
 
     IClasspathDescriptor classpath = new ClasspathDescriptor(javaProject);
 
-    Map<String, String> options = collectOptions(mavenProjects, request, monitor);
-
-    for(MavenProject mavenProject : mavenProjects) {
-      addProjectSourceFolders(classpath, project, mavenProject, request, monitor);
-    }
+    addProjectSourceFolders(classpath, request, mavenProject, monitor);
 
     addClasspathEntries(classpath, request, monitor);
 
-    // classpath containers
-    addJREClasspathContainer(classpath, options.get(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM));
+    String environmentId = getExecutionEnvironmentId(options);
+
+    addJREClasspathContainer(classpath, environmentId);
+
     addMavenClasspathContainer(classpath);
+
+    addCustomClasspathEntries(javaProject, classpath);
+
+    // now apply new configuration
 
     // A single setOptions call erases everything else from an existing settings file.
     // Must invoke setOption individually to preserve previous options. 
-    for (Map.Entry<String, String> option : options.entrySet()) {
+    for(Map.Entry<String, String> option : options.entrySet()) {
       javaProject.setOption(option.getKey(), option.getValue());
     }
 
-    IContainer classesFolder;
-    if(!mavenProjects.isEmpty()) {
-      classesFolder = getFolder(project, //
-          mavenProjects.get(0).getBuild().getOutputDirectory());
-    } else {
-      classesFolder = project;
-    }
+    IContainer classesFolder = getFolder(project, mavenProject.getBuild().getOutputDirectory());
 
+    javaProject.setRawClasspath(classpath.getEntries(), classesFolder.getFullPath(), monitor);
+
+    MavenJdtPlugin.getDefault().getBuildpathManager().updateClasspath(project, monitor);
+  }
+
+  protected String getExecutionEnvironmentId(Map<String, String> options) {
+    return ENVIRONMENTS.get(options.get(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM));
+  }
+
+  protected void addJavaNature(IProject project, IProgressMonitor monitor) throws CoreException {
+    addNature(project, JavaCore.NATURE_ID, monitor);
+  }
+
+  protected void addCustomClasspathEntries(IJavaProject javaProject, IClasspathDescriptor classpath)
+      throws JavaModelException {
     //Preserve existing libraries and classpath order (sort of) 
     // as other containers would have been added AFTER the JRE and M2 ones anyway 
     IClasspathEntry[] cpEntries = javaProject.getRawClasspath();
-    if (cpEntries != null && cpEntries.length>0){
-      for (IClasspathEntry entry : cpEntries){
-        if (IClasspathEntry.CPE_CONTAINER == entry.getEntryKind() && 
-            !JavaRuntime.JRE_CONTAINER.equals(entry.getPath().segment(0)) &&
-            !BuildPathManager.isMaven2ClasspathContainer(entry.getPath())){
+    if(cpEntries != null && cpEntries.length > 0) {
+      for(IClasspathEntry entry : cpEntries) {
+        if(IClasspathEntry.CPE_CONTAINER == entry.getEntryKind()
+            && !JavaRuntime.JRE_CONTAINER.equals(entry.getPath().segment(0))
+            && !BuildPathManager.isMaven2ClasspathContainer(entry.getPath())) {
           classpath.addEntry(entry);
         }
       }
     }
-
-    
-    javaProject.setRawClasspath(classpath.getEntries(), classesFolder.getFullPath(), monitor);
-
-    MavenJdtPlugin.getDefault().getBuildpathManager().updateClasspath(project, monitor);
-
   }
 
   @SuppressWarnings("unused")
+  protected MavenProject getMavenProject(ProjectConfigurationRequest request, IProgressMonitor monitor)
+      throws CoreException {
+    return request.getMavenProject();
+  }
+
   protected void addClasspathEntries(IClasspathDescriptor classpath, ProjectConfigurationRequest request,
       final IProgressMonitor monitor) throws CoreException {
-    
+    IMavenProjectFacade facade = request.getMavenProjectFacade();
+    IProjectConfigurationManager configurationManager = MavenPlugin.getDefault().getProjectConfigurationManager();
+    ILifecycleMapping lifecycleMapping = configurationManager.getLifecycleMapping(facade, monitor);
+    for(AbstractProjectConfigurator configurator : lifecycleMapping.getProjectConfigurators(facade, monitor)) {
+      if(configurator instanceof IJavaProjectConfigurator) {
+        ((IJavaProjectConfigurator) configurator).configureRawClasspath(request, classpath, monitor);
+      }
+    }
   }
-  
-  private void addJREClasspathContainer(IClasspathDescriptor classpath, String target) {
+
+  private void addJREClasspathContainer(IClasspathDescriptor classpath, String environmentId) {
     // remove existing JRE entry
     classpath.removeEntry(new ClasspathDescriptor.EntryFilter() {
       public boolean accept(IClasspathEntryDescriptor descriptor) {
@@ -152,7 +174,7 @@ abstract class AbstractJavaProjectConfigurator extends AbstractProjectConfigurat
     });
 
     IClasspathEntry cpe;
-    IExecutionEnvironment executionEnvironment = getExecutionEnvironment(ENVIRONMENTS.get(target));
+    IExecutionEnvironment executionEnvironment = getExecutionEnvironment(environmentId);
     if(executionEnvironment == null) {
       cpe = JavaRuntime.getDefaultJREContainerEntry();
     } else {
@@ -172,7 +194,7 @@ abstract class AbstractJavaProjectConfigurator extends AbstractProjectConfigurat
     }
     return null;
   }
-  
+
   private void addMavenClasspathContainer(IClasspathDescriptor classpath) {
     // remove any old maven classpath container entries
     classpath.removeEntry(new ClasspathDescriptor.EntryFilter() {
@@ -186,9 +208,10 @@ abstract class AbstractJavaProjectConfigurator extends AbstractProjectConfigurat
     classpath.addEntry(cpe);
   }
 
-  protected void addProjectSourceFolders(IClasspathDescriptor classpath, IProject project, MavenProject mavenProject,
-                                          ProjectConfigurationRequest request, IProgressMonitor monitor)
-      throws CoreException {
+  protected void addProjectSourceFolders(IClasspathDescriptor classpath, ProjectConfigurationRequest request,
+      MavenProject mavenProject, IProgressMonitor monitor) throws CoreException {
+    IProject project = request.getProject();
+
     IFolder classes = getFolder(project, mavenProject.getBuild().getOutputDirectory());
     IFolder testClasses = getFolder(project, mavenProject.getBuild().getTestOutputDirectory());
 
@@ -222,15 +245,15 @@ abstract class AbstractJavaProjectConfigurator extends AbstractProjectConfigurat
               }
             } else if("testCompile".equals(goal)) {
               try {
-                inclusionTest = toPaths(maven.getMojoParameterValue("testIncludes", String[].class, request
-                    .getMavenSession(), plugin, execution, goal));
+                inclusionTest = toPaths(maven.getMojoParameterValue("testIncludes", String[].class,
+                    request.getMavenSession(), plugin, execution, goal));
               } catch(CoreException ex) {
                 MavenLogger.log(ex);
                 console.logError("Failed to determine compiler test inclusions, assuming defaults");
               }
               try {
-                exclusionTest = toPaths(maven.getMojoParameterValue("testExcludes", String[].class, request
-                    .getMavenSession(), plugin, execution, goal));
+                exclusionTest = toPaths(maven.getMojoParameterValue("testExcludes", String[].class,
+                    request.getMavenSession(), plugin, execution, goal));
               } catch(CoreException ex) {
                 MavenLogger.log(ex);
                 console.logError("Failed to determine compiler test exclusions, assuming defaults");
@@ -244,7 +267,8 @@ abstract class AbstractJavaProjectConfigurator extends AbstractProjectConfigurat
     addSourceDirs(classpath, project, mavenProject.getCompileSourceRoots(), classes.getFullPath(), inclusion, exclusion);
     addResourceDirs(classpath, project, mavenProject.getBuild().getResources(), classes.getFullPath());
 
-    addSourceDirs(classpath, project, mavenProject.getTestCompileSourceRoots(), testClasses.getFullPath(), inclusionTest, exclusionTest);
+    addSourceDirs(classpath, project, mavenProject.getTestCompileSourceRoots(), testClasses.getFullPath(),
+        inclusionTest, exclusionTest);
     addResourceDirs(classpath, project, mavenProject.getBuild().getTestResources(), testClasses.getFullPath());
   }
 
@@ -302,49 +326,27 @@ abstract class AbstractJavaProjectConfigurator extends AbstractProjectConfigurat
           console.logError("Skipping resource folder " + r.getFullPath());
         } else if(r != null && !classpath.containsPath(r.getFullPath())) {
           console.logMessage("Adding resource folder " + r.getFullPath());
-          classpath.addSourceEntry(r.getFullPath(), outputPath, new IPath[0] /*inclusions*/,  
-              new IPath[] {new Path("**")} /*exclusion*/, false /*optional*/);
+          classpath.addSourceEntry(r.getFullPath(), outputPath, new IPath[0] /*inclusions*/, new IPath[] {new Path(
+              "**")} /*exclusion*/, false /*optional*/);
         }
       }
     }
   }
+  
+  
 
-  protected IPath getProjectRelativePath(IProject project, String absolutePath) {
-    File basedir = project.getLocation().toFile();
-    String relative;
-    if(absolutePath.equals(basedir.getAbsolutePath())) {
-      relative = ".";
-    } else if(absolutePath.startsWith(basedir.getAbsolutePath())) {
-      relative = absolutePath.substring(basedir.getAbsolutePath().length() + 1);
-    } else {
-      relative = absolutePath;
-    }
-    return new Path(relative.replace('\\', '/')); //$NON-NLS-1$ //$NON-NLS-2$
-  }
-
-  private IFolder getFolder(IProject project, String absolutePath) {
-    return project.getFolder(getProjectRelativePath(project, absolutePath));
-  }
-
-  protected abstract List<MavenProject> getMavenProjects(ProjectConfigurationRequest request, IProgressMonitor monitor)
-      throws CoreException;
-
-  private Map<String, String> collectOptions(List<MavenProject> mavenProjects, ProjectConfigurationRequest request,
+  protected void addJavaProjectOptions(Map<String, String> options, ProjectConfigurationRequest request, MavenProject mavenProject,
       IProgressMonitor monitor) {
-    Map<String, String> options = new HashMap<String, String>();
-
     MavenSession mavenSession = request.getMavenSession();
 
     String source = null, target = null;
 
-    for(MavenProject mavenProject : mavenProjects) {
-      for(Plugin plugin : mavenProject.getBuildPlugins()) {
-        if(isJavaCompilerExecution(plugin)) {
-          for(PluginExecution execution : plugin.getExecutions()) {
-            for(String goal : execution.getGoals()) {
-              source = getCompilerLevel(mavenSession, plugin, execution, goal, "source", source, SOURCES);
-              target = getCompilerLevel(mavenSession, plugin, execution, goal, "target", target, TARGETS);
-            }
+    for(Plugin plugin : mavenProject.getBuildPlugins()) {
+      if(isJavaCompilerExecution(plugin)) {
+        for(PluginExecution execution : plugin.getExecutions()) {
+          for(String goal : execution.getGoals()) {
+            source = getCompilerLevel(mavenSession, plugin, execution, goal, "source", source, SOURCES);
+            target = getCompilerLevel(mavenSession, plugin, execution, goal, "target", target, TARGETS);
           }
         }
       }
@@ -357,15 +359,13 @@ abstract class AbstractJavaProjectConfigurator extends AbstractProjectConfigurat
 
     if(target == null) {
       target = DEFAULT_COMPILER_LEVEL;
-      console.logMessage("Could not determine target level, using default " + source);
+      console.logMessage("Could not determine target level, using default " + target);
     }
 
     options.put(JavaCore.COMPILER_SOURCE, source);
     options.put(JavaCore.COMPILER_COMPLIANCE, source);
     options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, target);
     options.put(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE, "warning");
-
-    return options;
   }
 
   private String getCompilerLevel(MavenSession session, Plugin plugin, PluginExecution execution, String goal,
@@ -409,7 +409,7 @@ abstract class AbstractJavaProjectConfigurator extends AbstractProjectConfigurat
     super.unconfigure(request, monitor);
     removeMavenClasspathContainer(request.getProject());
   }
-  
+
   private void removeMavenClasspathContainer(IProject project) throws JavaModelException {
     IJavaProject javaProject = JavaCore.create(project);
     if(javaProject != null) {
@@ -422,6 +422,23 @@ abstract class AbstractJavaProjectConfigurator extends AbstractProjectConfigurat
       }
       javaProject.setRawClasspath(newEntries.toArray(new IClasspathEntry[newEntries.size()]), null);
     }
+  }
+
+  protected IFolder getFolder(IProject project, String absolutePath) {
+    return project.getFolder(getProjectRelativePath(project, absolutePath));
+  }
+
+  protected IPath getProjectRelativePath(IProject project, String absolutePath) {
+    File basedir = project.getLocation().toFile();
+    String relative;
+    if(absolutePath.equals(basedir.getAbsolutePath())) {
+      relative = ".";
+    } else if(absolutePath.startsWith(basedir.getAbsolutePath())) {
+      relative = absolutePath.substring(basedir.getAbsolutePath().length() + 1);
+    } else {
+      relative = absolutePath;
+    }
+    return new Path(relative.replace('\\', '/')); //$NON-NLS-1$ //$NON-NLS-2$
   }
 
 }

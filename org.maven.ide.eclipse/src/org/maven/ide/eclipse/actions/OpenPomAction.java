@@ -181,7 +181,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
     String tooltip = groupId + ":" + artifactId + ":" + version + "/" + fileName;
 
     try {
-      IMaven maven = MavenPlugin.lookup(IMaven.class);
+      IMaven maven = MavenPlugin.getDefault().getMaven();
 
       List<ArtifactRepository> artifactRepositories = maven.getArtifactRepositories();
 
@@ -225,7 +225,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
           return openEditor(new FileEditorInput(pomFile), name);
         }
 
-        IMaven maven = MavenPlugin.lookup(IMaven.class);
+        IMaven maven = MavenPlugin.getDefault().getMaven();
 
         List<ArtifactRepository> artifactRepositories = maven.getArtifactRepositories();
 

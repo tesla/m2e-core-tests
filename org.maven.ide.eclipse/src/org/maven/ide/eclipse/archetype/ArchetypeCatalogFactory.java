@@ -59,7 +59,7 @@ public abstract class ArchetypeCatalogFactory {
   }
 
   protected Archetype getArchetyper() {
-    return MavenPlugin.lookup(Archetype.class);
+    return MavenPlugin.getDefault().getArchetype();
   }
 
   /**
@@ -74,7 +74,7 @@ public abstract class ArchetypeCatalogFactory {
 
     public ArchetypeCatalog getArchetypeCatalog() throws CoreException {
       try {
-        ArchetypeDataSource source = MavenPlugin.lookup(ArchetypeDataSource.class, "nexus");
+        ArchetypeDataSource source = MavenPlugin.getDefault().getArchetypeDataSource("nexus");
         return source.getArchetypeCatalog(new Properties());
       } catch(ArchetypeDataSourceException ex) {
         String msg = "Error looking up archetype catalog; " + ex.getMessage();

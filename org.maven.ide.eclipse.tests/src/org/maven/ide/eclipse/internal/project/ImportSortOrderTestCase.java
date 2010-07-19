@@ -8,6 +8,8 @@ import java.util.Map;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.internal.embedder.MavenImpl;
+import org.maven.ide.eclipse.internal.project.registry.ProjectRegistryManager;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenUpdateRequest;
 import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
@@ -25,8 +27,8 @@ public class ImportSortOrderTestCase extends AbstractMavenProjectTestCase {
 
     List<IMavenProjectFacade> facades =  new ArrayList<IMavenProjectFacade>();
     
-    MavenProjectManagerImpl manager = new MavenProjectManagerImpl(plugin.getConsole(), //
-        null, false, plugin.getMavenRuntimeManager(), plugin.getMavenMarkerManager());
+    ProjectRegistryManager manager = new ProjectRegistryManager((MavenImpl) plugin.getMaven(), plugin.getConsole(), null, false,
+        plugin.getMavenMarkerManager());
     
     List<IProject> projects = new ArrayList<IProject>();
     

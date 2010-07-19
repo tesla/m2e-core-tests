@@ -1432,22 +1432,18 @@ public abstract class UIIntegrationTestCase {
 		});
 	}
 
-	@SuppressWarnings("deprecation")
 	protected static String setUserSettings(String settingsFile) {
 		if (settingsFile != null) {
 			settingsFile = new File(settingsFile).getAbsolutePath();
 		}
-		IMavenConfiguration mavenConfiguration = MavenPlugin
-				.lookup(IMavenConfiguration.class);
+		IMavenConfiguration mavenConfiguration = MavenPlugin.getDefault().getMavenConfiguration();
 		String oldUserSettingsFile = mavenConfiguration.getUserSettingsFile();
 		mavenConfiguration.setUserSettingsFile(settingsFile);
 		return oldUserSettingsFile;
 	}
 
-	@SuppressWarnings("deprecation")
 	protected static String getUserSettings() {
-		IMavenConfiguration mavenConfiguration = MavenPlugin
-				.lookup(IMavenConfiguration.class);
+		IMavenConfiguration mavenConfiguration = MavenPlugin.getDefault().getMavenConfiguration();
 		return mavenConfiguration.getUserSettingsFile();
 	}
 

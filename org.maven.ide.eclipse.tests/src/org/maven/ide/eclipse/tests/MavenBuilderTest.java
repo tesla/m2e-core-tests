@@ -91,32 +91,6 @@ public class MavenBuilderTest extends AbstractMavenProjectTestCase {
     assertEquals("0.0.1-SNAPSHOT", properties.getProperty("b.version"));
   }
 
-  public void test003_modules() throws Exception {
-    deleteProject("resourcefiltering-p003");
-    IProject project = createExisting("resourcefiltering-p003", "projects/resourcefiltering/p003");
-    waitForJobsToComplete();
-
-    IPath resourcesPath = project.getFolder("p003-m1/target/classes").getFullPath();
-    IPath testResourcesPath = project.getFolder("p003-m1/target/test-classes").getFullPath();
-
-    IPath aPath = resourcesPath.append("a.properties");
-    IPath bPath = testResourcesPath.append("b.properties");
-
-    workspace.getRoot().getFile(aPath).delete(true, new NullProgressMonitor());
-    workspace.getRoot().getFile(bPath).delete(true, new NullProgressMonitor());
-
-    project.build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
-    waitForJobsToComplete();
-
-    Properties properties = loadProperties(aPath);
-    assertEquals("p003-m1", properties.getProperty("a.name"));
-    assertEquals("0.0.1-SNAPSHOT", properties.getProperty("a.version"));
-
-    properties = loadProperties(bPath);
-    assertEquals("p003-m1", properties.getProperty("b.name"));
-    assertEquals("0.0.1-SNAPSHOT", properties.getProperty("b.version"));
-  }
-
   public void test004_useMavenOutputFolders() throws Exception {
     deleteProject("resourcefiltering-p004");
     IProject project = createExisting("resourcefiltering-p004", "projects/resourcefiltering/p004");

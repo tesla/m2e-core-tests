@@ -556,7 +556,7 @@ public class MavenLaunchMainTab extends AbstractLaunchConfigurationTab implement
     
       MavenPlugin plugin = MavenPlugin.getDefault();
       MavenRuntimeManager runtimeManager = plugin.getMavenRuntimeManager();
-      IMavenConfiguration mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
+      IMavenConfiguration mavenConfiguration = MavenPlugin.getDefault().getMavenConfiguration();
       
       this.offlineButton.setSelection(getAttribute(configuration, ATTR_OFFLINE, mavenConfiguration.isOffline()));
       this.debugOutputButton.setSelection(getAttribute(configuration, ATTR_DEBUG_OUTPUT, mavenConfiguration.isDebugOutput()));

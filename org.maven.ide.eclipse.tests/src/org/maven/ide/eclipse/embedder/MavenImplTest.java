@@ -34,9 +34,9 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
 
   private IProgressMonitor monitor = new NullProgressMonitor();
 
-  private MavenImpl maven = (MavenImpl) MavenPlugin.lookup(IMaven.class);
+  private MavenImpl maven = (MavenImpl) MavenPlugin.getDefault().getMaven();
 
-  private IMavenConfiguration configuration = MavenPlugin.lookup(IMavenConfiguration.class);
+  private IMavenConfiguration configuration = MavenPlugin.getDefault().getMavenConfiguration();
 
   public void testGetMojoParameterValue() throws Exception {
     MavenExecutionRequest request = maven.createExecutionRequest(monitor);

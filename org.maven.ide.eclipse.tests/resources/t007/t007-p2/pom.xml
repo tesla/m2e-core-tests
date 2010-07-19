@@ -4,7 +4,4 @@
   <groupId>t007</groupId>
   <artifactId>t007-p2</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-
-  <packaging>pom</packaging>
-
 </project>

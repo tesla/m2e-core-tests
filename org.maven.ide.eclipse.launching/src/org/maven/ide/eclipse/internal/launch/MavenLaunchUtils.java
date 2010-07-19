@@ -79,7 +79,7 @@ public class MavenLaunchUtils {
     }
 
     MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
-    IMaven maven = MavenPlugin.lookup(IMaven.class);
+    IMaven maven = MavenPlugin.getDefault().getMaven();
     for(String gav : list) {
       // groupId:artifactId:version
       StringTokenizer st = new StringTokenizer(gav, ":");

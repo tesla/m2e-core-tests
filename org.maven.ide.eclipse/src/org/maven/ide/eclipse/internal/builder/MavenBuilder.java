@@ -82,7 +82,7 @@ public class MavenBuilder extends IncrementalProjectBuilder {
     MavenConsole console = plugin.getConsole();
     MavenProjectManager projectManager = plugin.getMavenProjectManager();
     IProjectConfigurationManager configurationManager = plugin.getProjectConfigurationManager();
-    IMavenConfiguration mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
+    IMavenConfiguration mavenConfiguration = MavenPlugin.getDefault().getMavenConfiguration();
     IMavenMarkerManager markerManager = plugin.getMavenMarkerManager();
     deleteProjectMarkers();
     
@@ -125,7 +125,7 @@ public class MavenBuilder extends IncrementalProjectBuilder {
 
       Set<IProject> dependencies = new HashSet<IProject>();
 
-      IMaven maven = MavenPlugin.lookup(IMaven.class);
+      IMaven maven = MavenPlugin.getDefault().getMaven();
       MavenExecutionRequest request = projectManager.createExecutionRequest(pomResource, projectFacade.getResolverConfiguration(), monitor);
       
       MavenProject mavenProject = null;
@@ -270,7 +270,7 @@ public class MavenBuilder extends IncrementalProjectBuilder {
         return;
       }
 
-      IMaven maven = MavenPlugin.lookup(IMaven.class);
+      IMaven maven = MavenPlugin.getDefault().getMaven();
       
       // TODO flush relevant caches
 

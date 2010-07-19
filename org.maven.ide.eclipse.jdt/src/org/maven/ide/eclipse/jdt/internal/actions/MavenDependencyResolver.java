@@ -57,7 +57,6 @@ import org.maven.ide.eclipse.index.IIndex;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
-import org.maven.ide.eclipse.project.IMavenProjectVisitor;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.ui.dialogs.MavenRepositorySearchDialog;
 
@@ -180,16 +179,8 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
         }
 
         try {
-          IMavenProjectFacade facade = getModuleFacade(resource, projectFacade);
-          if(facade != null) {
-            pomFile = facade.getPom();
-            artifacts = ArtifactRef.toArtifactKey(facade.getMavenProjectArtifacts());
-
-          } else {
-            MessageDialog.openError(Display.getCurrent().getActiveShell(), "Add Dependency",
-                "Unable to locate pom.xml for " + cu.getPath().toString());
-            return;
-          }
+          pomFile = projectFacade.getPom();
+          artifacts = ArtifactRef.toArtifactKey(projectFacade.getMavenProjectArtifacts());
         } catch(Exception ex) {
           String msg = "Unable to locate Maven project";
           MavenLogger.log(msg, ex);
@@ -320,31 +311,6 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
       }
 
       return null;
-    }
-
-    private IMavenProjectFacade getModuleFacade(IResource resource, IMavenProjectFacade projectFacade) throws CoreException {
-      final IPath resourcePath = resource.getLocation();
-
-      class ModulePomLocator implements IMavenProjectVisitor {
-        IMavenProjectFacade facade;
-
-        public boolean visit(IMavenProjectFacade projectFacade) {
-          if(facade == null) {
-            facade = projectFacade;
-          }
-
-          IPath location = projectFacade.getPom().getParent().getLocation();
-          if(location.matchingFirstSegments(resourcePath) == location.segmentCount()
-              && location.segmentCount() > facade.getPom().getParent().getLocation().segmentCount()) {
-            facade = projectFacade;
-          }
-          return true;
-        }
-      }
-
-      ModulePomLocator locator = new ModulePomLocator();
-      projectFacade.accept(locator, IMavenProjectVisitor.NESTED_MODULES);
-      return locator.facade;
     }
 
     public String getAdditionalProposalInfo() {

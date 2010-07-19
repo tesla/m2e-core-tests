@@ -149,11 +149,9 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     final IProject project1 = createProject("MNGECLIPSE-248parent", "projects/MNGECLIPSE-248parent/pom.xml");
     final IProject project2 = createProject("MNGECLIPSE-248child", "projects/MNGECLIPSE-248child/pom.xml");
 
-    NullProgressMonitor monitor = new NullProgressMonitor();
     IProjectConfigurationManager importManager = MavenPlugin.getDefault().getProjectConfigurationManager();
 
     ResolverConfiguration configuration = new ResolverConfiguration();
-    configuration.setIncludeModules(false);
     configuration.setResolveWorkspaceProjects(false);
     configuration.setActiveProfiles("");
 
@@ -171,7 +169,6 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     deleteProject("MNGECLIPSE-353");
 
     ResolverConfiguration configuration = new ResolverConfiguration();
-    configuration.setIncludeModules(false);
     configuration.setResolveWorkspaceProjects(true);
     configuration.setActiveProfiles("jaxb1");
 
@@ -193,7 +190,6 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     deleteProject("MNGECLIPSE-353");
 
     ResolverConfiguration configuration = new ResolverConfiguration();
-    configuration.setIncludeModules(false);
     configuration.setResolveWorkspaceProjects(true);
     configuration.setActiveProfiles("jaxb20");
 
@@ -233,11 +229,11 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertEquals(new Path("/projectimport-p001/target/test-classes"), cp[1].getOutputLocation());
   }
 
-  public void testProjectImport002_useMavenOutputFolders() throws Exception {
+  // disabled nested modules tests 
+  public void _testProjectImport002_useMavenOutputFolders() throws Exception {
     deleteProject("projectimport-p002");
 
     ResolverConfiguration configuration = new ResolverConfiguration();
-    configuration.setIncludeModules(true);
     IProject project = importProject("projectimport-p002", "projects/projectimport/p002", configuration);
 
     waitForJobsToComplete();
@@ -271,7 +267,6 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     deleteProject("p2");
 
     ResolverConfiguration configuration = new ResolverConfiguration();
-    configuration.setIncludeModules(false);
     configuration.setResolveWorkspaceProjects(true);
     configuration.setActiveProfiles("");
 
@@ -298,7 +293,6 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     deleteProject("p3");
 
     ResolverConfiguration configuration = new ResolverConfiguration();
-    configuration.setIncludeModules(false);
     configuration.setResolveWorkspaceProjects(true);
     configuration.setActiveProfiles("");
 
@@ -445,7 +439,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
         return container.getPath();
       }
     };
-    buildpathManager.updateClasspathContainer(javaProject, containerSuggestion, monitor);
+    buildpathManager.persistAttachedSourcesAndJavadoc(javaProject, containerSuggestion, monitor);
     waitForJobsToComplete();
 
     // check custom source/javadoc
@@ -682,11 +676,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
   public void testCreateSimpleProject() throws CoreException {
     final MavenPlugin plugin = MavenPlugin.getDefault();
 
-    final boolean modules = true;
-    IProject project = createSimpleProject("simple-project", null, modules);
-
-    ResolverConfiguration configuration = plugin.getMavenProjectManager().getResolverConfiguration(project);
-    assertEquals(modules, configuration.shouldIncludeModules());
+    IProject project = createSimpleProject("simple-project", null);
 
     IJavaProject javaProject = JavaCore.create(project);
 
@@ -902,7 +892,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     }
   }
 
-  private IProject createSimpleProject(final String projectName, final IPath location, final boolean modules)
+  private IProject createSimpleProject(final String projectName, final IPath location)
       throws CoreException {
     final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 
@@ -924,7 +914,6 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
         String[] directories = {"src/main/java", "src/test/java", "src/main/resources", "src/test/resources"};
 
         ProjectImportConfiguration config = new ProjectImportConfiguration();
-        config.getResolverConfiguration().setIncludeModules(modules);
 
         plugin.getProjectConfigurationManager().createSimpleProject(project, location, model, directories, config,
             monitor);
@@ -936,22 +925,19 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 
   public void testSimpleProjectInExternalLocation() throws CoreException, IOException {
     final MavenPlugin plugin = MavenPlugin.getDefault();
-    final boolean modules = true;
 
     File tmp = File.createTempFile("m2eclipse", "test");
     tmp.delete(); //deleting a tmp file so we can use the name for a folder
 
     final String projectName1 = "external-simple-project-1";
-    IProject project1 = createSimpleProject(projectName1, new Path(tmp.getAbsolutePath()).append(projectName1), modules);
-    ResolverConfiguration configuration = plugin.getMavenProjectManager().getResolverConfiguration(project1);
-    assertEquals(modules, configuration.shouldIncludeModules());
+    IProject project1 = createSimpleProject(projectName1, new Path(tmp.getAbsolutePath()).append(projectName1));
 
     final String projectName2 = "external-simple-project-2";
     File existingFolder = new File(tmp, projectName2);
     existingFolder.mkdirs();
     new File(existingFolder, IMavenConstants.POM_FILE_NAME).createNewFile();
     try {
-      createSimpleProject(projectName2, new Path(tmp.getAbsolutePath()).append(projectName2), modules);
+      createSimpleProject(projectName2, new Path(tmp.getAbsolutePath()).append(projectName2));
       fail("Project creation should fail if the POM exists in the target folder");
     } catch(CoreException e) {
       final String msg = IMavenConstants.POM_FILE_NAME + " already exists";
@@ -963,19 +949,15 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
   }
 
   public void testArchetypeProject() throws CoreException {
-    MavenPlugin plugin = MavenPlugin.getDefault();
-    boolean modules = true;
     Archetype quickStart = findQuickStartArchetype();
 
-    IProject project = createArchetypeProject("archetype-project", null, quickStart, modules);
+    IProject project = createArchetypeProject("archetype-project", null, quickStart);
 
-    ResolverConfiguration configuration = plugin.getMavenProjectManager().getResolverConfiguration(project);
-    assertEquals(modules, configuration.shouldIncludeModules());
+    assertNotNull(JavaCore.create(project)); // TODO more meaningful assertion 
   }
 
   public void testArchetypeProjectInExternalLocation() throws CoreException, IOException {
     final MavenPlugin plugin = MavenPlugin.getDefault();
-    final boolean modules = true;
     Archetype quickStart = findQuickStartArchetype();
 
     File tmp = File.createTempFile("m2eclipse", "test");
@@ -983,16 +965,15 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
 
     final String projectName1 = "external-archetype-project-1";
     IProject project1 = createArchetypeProject(projectName1, new Path(tmp.getAbsolutePath()).append(projectName1),
-        quickStart, modules);
-    ResolverConfiguration configuration = plugin.getMavenProjectManager().getResolverConfiguration(project1);
-    assertEquals(modules, configuration.shouldIncludeModules());
+        quickStart);
+    assertNotNull(JavaCore.create(project1)); // TODO more meaningful assertion 
 
     final String projectName2 = "external-archetype-project-2";
     File existingFolder = new File(tmp, projectName2);
     existingFolder.mkdirs();
     new File(existingFolder, IMavenConstants.POM_FILE_NAME).createNewFile();
     try {
-      createArchetypeProject(projectName2, new Path(tmp.getAbsolutePath()).append(projectName2), quickStart, modules);
+      createArchetypeProject(projectName2, new Path(tmp.getAbsolutePath()).append(projectName2), quickStart);
       fail("Project creation should fail if the POM exists in the target folder");
     } catch(CoreException e) {
       // this is supposed to happen
@@ -1018,14 +999,13 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     return null;
   }
 
-  private IProject createArchetypeProject(final String projectName, final IPath location, final Archetype archetype,
-      final boolean modules) throws CoreException {
+  private IProject createArchetypeProject(final String projectName, final IPath location, final Archetype archetype)
+      throws CoreException {
     final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 
     workspace.run(new IWorkspaceRunnable() {
       public void run(IProgressMonitor monitor) throws CoreException {
         ResolverConfiguration resolverConfiguration = new ResolverConfiguration();
-        resolverConfiguration.setIncludeModules(modules);
         ProjectImportConfiguration pic = new ProjectImportConfiguration(resolverConfiguration);
 
         plugin.getProjectConfigurationManager().createArchetypeProject(project, location, archetype, //

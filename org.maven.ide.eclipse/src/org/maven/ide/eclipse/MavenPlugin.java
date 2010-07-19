@@ -11,10 +11,6 @@ package org.maven.ide.eclipse;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -54,24 +50,19 @@ import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.MutablePlexusContainer;
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.classworlds.ClassWorld;
-import org.codehaus.plexus.classworlds.realm.ClassRealm;
-import org.codehaus.plexus.component.discovery.ComponentDiscoverer;
-import org.codehaus.plexus.component.discovery.ComponentDiscoveryEvent;
-import org.codehaus.plexus.component.discovery.ComponentDiscoveryListener;
-import org.codehaus.plexus.component.repository.ComponentDescriptor;
-import org.codehaus.plexus.component.repository.ComponentRequirement;
-import org.codehaus.plexus.component.repository.ComponentSetDescriptor;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
-import org.codehaus.plexus.configuration.PlexusConfigurationException;
-import org.codehaus.plexus.context.Context;
 
-import org.apache.maven.classrealm.ClassRealmManagerDelegate;
-import org.apache.maven.plugin.internal.PluginDependenciesResolver;
-import org.apache.maven.project.artifact.MavenMetadataCache;
-import org.apache.maven.repository.LocalRepositoryMaintainer;
+import org.apache.maven.archetype.Archetype;
+import org.apache.maven.archetype.common.ArchetypeArtifactManager;
+import org.apache.maven.archetype.source.ArchetypeDataSource;
+import org.apache.maven.artifact.factory.ArtifactFactory;
+import org.apache.maven.artifact.manager.WagonManager;
+import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
+import org.apache.maven.artifact.resolver.ArtifactCollector;
+import org.apache.maven.shared.dependency.tree.DependencyTreeBuilder;
 
-import org.sonatype.plexus.build.incremental.BuildContext;
-import org.sonatype.plexus.build.incremental.ThreadBuildContext;
+import org.sonatype.nexus.index.NexusIndexer;
+import org.sonatype.nexus.index.updater.IndexUpdater;
 
 import org.maven.ide.eclipse.archetype.ArchetypeCatalogFactory;
 import org.maven.ide.eclipse.archetype.ArchetypeManager;
@@ -85,9 +76,6 @@ import org.maven.ide.eclipse.embedder.MavenRuntimeManager;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.internal.ExtensionReader;
 import org.maven.ide.eclipse.internal.console.MavenConsoleImpl;
-import org.maven.ide.eclipse.internal.embedder.EclipseClassRealmManagerDelegate;
-import org.maven.ide.eclipse.internal.embedder.EclipseLocalRepositoryMaintainer;
-import org.maven.ide.eclipse.internal.embedder.EclipseLoggerManager;
 import org.maven.ide.eclipse.internal.embedder.MavenConfigurationImpl;
 import org.maven.ide.eclipse.internal.embedder.MavenEmbeddedRuntime;
 import org.maven.ide.eclipse.internal.embedder.MavenImpl;
@@ -96,14 +84,11 @@ import org.maven.ide.eclipse.internal.index.IndexesExtensionReader;
 import org.maven.ide.eclipse.internal.index.IndexingTransferListener;
 import org.maven.ide.eclipse.internal.index.NexusIndexManager;
 import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;
-import org.maven.ide.eclipse.internal.project.EclipseMavenMetadataCache;
-import org.maven.ide.eclipse.internal.project.EclipsePluginDependenciesResolver;
-import org.maven.ide.eclipse.internal.project.IManagedCache;
 import org.maven.ide.eclipse.internal.project.MavenMarkerManager;
-import org.maven.ide.eclipse.internal.project.MavenProjectManagerImpl;
-import org.maven.ide.eclipse.internal.project.MavenProjectManagerRefreshJob;
 import org.maven.ide.eclipse.internal.project.ProjectConfigurationManager;
 import org.maven.ide.eclipse.internal.project.WorkspaceStateWriter;
+import org.maven.ide.eclipse.internal.project.registry.ProjectRegistryManager;
+import org.maven.ide.eclipse.internal.project.registry.ProjectRegistryRefreshJob;
 import org.maven.ide.eclipse.internal.repository.RepositoryRegistry;
 import org.maven.ide.eclipse.project.IMavenMarkerManager;
 import org.maven.ide.eclipse.project.IProjectConfigurationManager;
@@ -120,29 +105,14 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   // preferences
   private static final String PREFS_ARCHETYPES = "archetypesInfo.xml";
   
-  public static final String PREFS_NO_REBUILD_ON_START = "forceRebuildOnUpgrade";
-  
-  public static final String PREFS_ENABLED_INDEXES = "enabledIndexes.xml";
-
   // The shared instance
   private static MavenPlugin plugin;
-
-  /** 
-   * In-process maven runtime. MavenProject and mojo caches must be
-   * populated using components looked up from this container.
-   */
-  private MutablePlexusContainer mavenCore;
 
   /**
    * General purpose plexus container. Contains components from maven embedder
    * and all other bundles visible from this bundle's classloader.
    */
   private MutablePlexusContainer plexus;
-
-  /**
-   * Poor man's component registry
-   */
-  private Map<Class<?>, Object> components = new HashMap<Class<?>, Object>();
 
   private MavenConsole console;
 
@@ -158,11 +128,11 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   
   private ProjectConfigurationManager configurationManager;
 
-  private MavenProjectManagerRefreshJob mavenBackgroundJob;
+  private ProjectRegistryRefreshJob mavenBackgroundJob;
 
   private ArchetypeManager archetypeManager;
 
-  private MavenProjectManagerImpl managerImpl;
+  private ProjectRegistryManager managerImpl;
 
   private IMavenMarkerManager mavenMarkerManager;
 
@@ -173,6 +143,8 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   private String qualifiedVersion = "0.0.0.qualifier";
 
   private IMavenConfiguration mavenConfiguration;
+
+  private MavenImpl maven;
   
   public MavenPlugin() {
     plugin = this;
@@ -184,7 +156,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   }
   
   public IMaven getMaven(){
-    return lookup(IMaven.class);
+    return maven;
   }
 
   /**
@@ -216,93 +188,18 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
       MavenLogger.log(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Unable to start console: " + ex.toString(), ex));
     }
 
-    final String mavenCoreRealmId = "plexus.core";
-    ContainerConfiguration mavenCoreCC = new DefaultContainerConfiguration()
-      .setClassWorld( new ClassWorld(mavenCoreRealmId, ClassWorld.class.getClassLoader()) )
-      .setName("mavenCore");
-    
-    mavenCoreCC.addComponentDiscoverer(new ComponentDiscoverer() {
-
-      public List<ComponentSetDescriptor> findComponents(Context context, ClassRealm classRealm)
-          throws PlexusConfigurationException {
-
-        List<ComponentSetDescriptor> componentSetDescriptors = new ArrayList<ComponentSetDescriptor>();
-
-        if (mavenCoreRealmId.equals(classRealm.getId())) {
-          ComponentSetDescriptor componentSetDescriptor = new ComponentSetDescriptor();
-
-          // register EclipseClassRealmManagerDelegate
-          ComponentDescriptor componentDescriptor = new ComponentDescriptor();
-          componentDescriptor.setRealm(classRealm);
-          componentDescriptor.setRole(ClassRealmManagerDelegate.class.getName());
-          componentDescriptor.setImplementationClass(EclipseClassRealmManagerDelegate.class);
-          ComponentRequirement plexusRequirement = new ComponentRequirement();
-          plexusRequirement.setRole("org.codehaus.plexus.PlexusContainer");
-          plexusRequirement.setFieldName("plexus");
-          componentDescriptor.addRequirement(plexusRequirement );
-          componentSetDescriptor.addComponentDescriptor(componentDescriptor);
-
-          // register EclipseLocalRepositoryMaintainer
-          componentDescriptor = new ComponentDescriptor();
-          componentDescriptor.setRealm(classRealm);
-          componentDescriptor.setRole(LocalRepositoryMaintainer.class.getName());
-          componentDescriptor.setImplementationClass(EclipseLocalRepositoryMaintainer.class);
-          componentSetDescriptor.addComponentDescriptor(componentDescriptor);
-
-          componentSetDescriptors.add(componentSetDescriptor);
-        }
-
-        return componentSetDescriptors;
-      }
-
-    });
-    
-    mavenCoreCC.addComponentDiscoveryListener(new ComponentDiscoveryListener() {
-      @SuppressWarnings("unchecked")
-      public void componentDiscovered(ComponentDiscoveryEvent event) {
-        ComponentSetDescriptor set = event.getComponentSetDescriptor();
-        for (ComponentDescriptor desc : set.getComponents()) {
-          if (MavenMetadataCache.class.getName().equals(desc.getRole())) {
-            desc.setImplementationClass(EclipseMavenMetadataCache.class);
-          } else if (BuildContext.class.getName().equals(desc.getRole())) {
-            desc.setImplementationClass(ThreadBuildContext.class);
-          } else if(PluginDependenciesResolver.class.getName().equals(desc.getRole())) {
-            desc.setImplementationClass(EclipsePluginDependenciesResolver.class);
-          }
-        }
-      }
-    });
-
     this.mavenConfiguration = new MavenConfigurationImpl(getPreferenceStore());
 
-    this.mavenCore = new DefaultPlexusContainer( mavenCoreCC );
-    this.mavenCore.setLoggerManager(new EclipseLoggerManager(console, mavenConfiguration));
-
-    MavenImpl maven = new MavenImpl(mavenCore, mavenConfiguration, console);
-
-    components.put(IMavenConfiguration.class, mavenConfiguration);
-    components.put(IMaven.class, maven);
-
     ClassLoader cl = MavenPlugin.class.getClassLoader();
-
     ContainerConfiguration cc = new DefaultContainerConfiguration()
-      .setClassWorld(new ClassWorld(mavenCoreRealmId, cl))
+      .setClassWorld(new ClassWorld("plexus.core", cl))
       .setName("plexus");
     this.plexus = new DefaultPlexusContainer( cc);
 
-    this.runtimeManager = new MavenRuntimeManager(getPreferenceStore());
-    
-    this.runtimeManager.setEmbeddedRuntime(new MavenEmbeddedRuntime(getBundleContext()));
-    
     File stateLocationDir = getStateLocation().toFile();
-    
-    this.archetypeManager = new ArchetypeManager(new File(stateLocationDir, PREFS_ARCHETYPES));
-    this.archetypeManager.addArchetypeCatalogFactory(new ArchetypeCatalogFactory.NexusIndexerCatalogFactory());
-    this.archetypeManager.addArchetypeCatalogFactory(new ArchetypeCatalogFactory.InternalCatalogFactory());
-    this.archetypeManager.addArchetypeCatalogFactory(new ArchetypeCatalogFactory.DefaultLocalCatalogFactory());
-    for(ArchetypeCatalogFactory archetypeCatalogFactory : ExtensionReader.readArchetypeExtensions()) {
-      archetypeManager.addArchetypeCatalogFactory(archetypeCatalogFactory);
-    }
+
+    // TODO this is broken, need to make it lazy, otherwise we'll deadlock or timeout... or both 
+    this.archetypeManager = newArchetypeManager(stateLocationDir);
     try {
       this.archetypeManager.readCatalogs();
     } catch (Exception ex) {
@@ -311,24 +208,25 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
       MavenLogger.log(msg, ex);
     }
 
+    this.mavenMarkerManager = new MavenMarkerManager(console, mavenConfiguration);
 
     boolean updateProjectsOnStartup = mavenConfiguration.isUpdateProjectsOnStartup();
 
-    mavenMarkerManager = new MavenMarkerManager(runtimeManager, console);
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    this.managerImpl = new MavenProjectManagerImpl(console,
-        stateLocationDir, !updateProjectsOnStartup /* readState */, runtimeManager, mavenMarkerManager);
-    this.components.put(MavenProjectManagerImpl.class, managerImpl);
-    this.managerImpl.addManagedCache((IManagedCache) mavenCore.lookup(MavenMetadataCache.class));
+    this.maven = new MavenImpl(mavenConfiguration, console);
 
-    this.mavenBackgroundJob = new MavenProjectManagerRefreshJob(managerImpl, runtimeManager, console);
+    // TODO eagerly reads workspace state cache
+    this.managerImpl = new ProjectRegistryManager(maven, console, stateLocationDir,
+        !updateProjectsOnStartup /* readState */, mavenMarkerManager);
+
+    this.mavenBackgroundJob = new ProjectRegistryRefreshJob(managerImpl, console, mavenConfiguration);
 
     IWorkspace workspace = ResourcesPlugin.getWorkspace();
     workspace.addResourceChangeListener(mavenBackgroundJob, IResourceChangeEvent.POST_CHANGE
         | IResourceChangeEvent.PRE_CLOSE | IResourceChangeEvent.PRE_DELETE);
 
     this.projectManager = new MavenProjectManager(managerImpl, mavenBackgroundJob, stateLocationDir);
-    this.components.put(MavenProjectManager.class, projectManager);
     this.projectManager.addMavenProjectChangedListener(new WorkspaceStateWriter(projectManager));
     if(updateProjectsOnStartup || managerImpl.getProjects().length == 0) {
       this.projectManager.refresh(new MavenUpdateRequest(workspace.getRoot().getProjects(), //
@@ -337,28 +235,41 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
     this.modelManager = new MavenModelManager(maven, projectManager, console);
     
+    this.runtimeManager = new MavenRuntimeManager(getPreferenceStore());
+    this.runtimeManager.setEmbeddedRuntime(new MavenEmbeddedRuntime(getBundleContext()));
     this.runtimeManager.setWorkspaceRuntime(new MavenWorkspaceRuntime(projectManager));
-    
-    this.configurationManager = new ProjectConfigurationManager(modelManager, console, 
-        runtimeManager, projectManager, 
-        indexManager, modelManager, mavenMarkerManager);
-    projectManager.addMavenProjectChangedListener(this.configurationManager);
+
+    this.configurationManager = new ProjectConfigurationManager(maven, console, projectManager, modelManager,
+        mavenMarkerManager, mavenConfiguration);
+    this.projectManager.addMavenProjectChangedListener(this.configurationManager);
 
     //create repository registry
     this.repositoryRegistry = new RepositoryRegistry(maven, projectManager);
-    maven.addSettingsChangeListener(repositoryRegistry);
+    this.maven.addSettingsChangeListener(repositoryRegistry);
+    this.projectManager.addMavenProjectChangedListener(repositoryRegistry);  
 
     //create the index manager
     this.indexManager = new NexusIndexManager(console, projectManager, repositoryRegistry, stateLocationDir);
     this.projectManager.addMavenProjectChangedListener(indexManager);
-    maven.addLocalRepositoryListener(new IndexingTransferListener(indexManager));
-
+    this.maven.addLocalRepositoryListener(new IndexingTransferListener(indexManager));
     this.repositoryRegistry.addRepositoryIndexer(indexManager);
     this.repositoryRegistry.addRepositoryDiscoverer(new IndexesExtensionReader(indexManager));
+
+    // fork repository registry update. must after index manager registered as a listener
     this.repositoryRegistry.updateRegistry();
-    this.projectManager.addMavenProjectChangedListener(repositoryRegistry);  
-    this.getPreferenceStore().setValue(PREFS_NO_REBUILD_ON_START, true);
+
     checkJdk();
+  }
+
+  private static ArchetypeManager newArchetypeManager(File stateLocationDir) {
+    ArchetypeManager archetypeManager = new ArchetypeManager(new File(stateLocationDir, PREFS_ARCHETYPES));
+    archetypeManager.addArchetypeCatalogFactory(new ArchetypeCatalogFactory.NexusIndexerCatalogFactory());
+    archetypeManager.addArchetypeCatalogFactory(new ArchetypeCatalogFactory.InternalCatalogFactory());
+    archetypeManager.addArchetypeCatalogFactory(new ArchetypeCatalogFactory.DefaultLocalCatalogFactory());
+    for(ArchetypeCatalogFactory archetypeCatalogFactory : ExtensionReader.readArchetypeExtensions()) {
+      archetypeManager.addArchetypeCatalogFactory(archetypeCatalogFactory);
+    }
+    return archetypeManager;
   }
 
   public void earlyStartup() {
@@ -390,10 +301,8 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     this.projectManager.removeMavenProjectChangedListener(repositoryRegistry);
     this.projectManager = null;
 
-    managerImpl.removeManagedCache((IManagedCache) mavenCore.lookup(MavenMetadataCache.class));
-
     this.plexus.dispose();
-    this.mavenCore.dispose();
+    this.maven.disposeContainer();
 
     this.configurationManager = null;
 
@@ -401,7 +310,6 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
       this.console.shutdown();
     }
 
-    components.clear();
     plugin = null;
   }
 
@@ -505,6 +413,10 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     return this.projectManager;
   }
 
+  public ProjectRegistryManager getMavenProjectManagerImpl() {
+    return this.managerImpl;
+  }
+
   public IndexManager getIndexManager() {
     return this.indexManager;
   }
@@ -555,32 +467,21 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   }
 
   /** for use by unit tests */
-  public MavenProjectManagerRefreshJob getProjectManagerRefreshJob() {
+  public ProjectRegistryRefreshJob getProjectManagerRefreshJob() {
     return mavenBackgroundJob;
   }
   
-  /**
-   * @deprecated will likely be removed before 1.0
-   */
-  public static <C> C lookup(Class<C> role) {
-    C c = role.cast(plugin.components.get(role));
-    if (c != null) {
-      return c;
-    }
-
+  private <C> C lookup(Class<C> role) {
     try {
-      return plugin.plexus.lookup(role);
+      return plexus.lookup(role);
     } catch(ComponentLookupException ex) {
       throw new NoSuchComponentException(ex);
     }
   }
 
-  /**
-   * @deprecated will likely be removed before 1.0
-   */
-  public static <T> T lookup(Class<T> role, String roleHint) {
+  private <T> T lookup(Class<T> role, String roleHint) {
     try {
-      return plugin.plexus.lookup(role, roleHint);
+      return plexus.lookup(role, roleHint);
     } catch(ComponentLookupException ex) {
       throw new NoSuchComponentException(ex);
     }
@@ -598,4 +499,43 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     return repositoryRegistry;
   }
 
+  public Archetype getArchetype() {
+    return lookup(Archetype.class);
+  }
+
+  public ArchetypeDataSource getArchetypeDataSource(String hint) {
+    return lookup(ArchetypeDataSource.class, hint);
+  }
+
+  public ArchetypeArtifactManager getArchetypeArtifactManager() {
+    return lookup(ArchetypeArtifactManager.class);
+  }
+
+  public IndexUpdater getIndexUpdater() {
+    return lookup(IndexUpdater.class);
+  }
+  
+  public WagonManager getWagonManager() {
+    return lookup(WagonManager.class);
+  }
+
+  public NexusIndexer getNexusIndexer() {
+    return lookup(NexusIndexer.class);
+  }
+
+  public ArtifactFactory getArtifactFactory() {
+    return lookup(ArtifactFactory.class);
+  }
+
+  public ArtifactMetadataSource getArtifactMetadataSource() {
+    return lookup(ArtifactMetadataSource.class);
+  }
+
+  public ArtifactCollector getArtifactCollector() {
+    return lookup(ArtifactCollector.class);
+  }
+
+  public DependencyTreeBuilder getDependencyTreeBuilder() {
+    return lookup(DependencyTreeBuilder.class);
+  }
 }

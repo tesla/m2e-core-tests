@@ -219,7 +219,7 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
    * Construct string with preferences to pass to JVM as system properties
    */
   private String getPreferences(ILaunchConfiguration configuration) throws CoreException {
-    IMavenConfiguration mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
+    IMavenConfiguration mavenConfiguration = MavenPlugin.getDefault().getMavenConfiguration();
 
     StringBuffer sb = new StringBuffer();
 

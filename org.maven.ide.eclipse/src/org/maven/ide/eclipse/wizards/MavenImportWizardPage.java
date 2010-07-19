@@ -12,7 +12,6 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -405,15 +404,7 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
       checkedProjects.add((MavenProjectInfo) o);
     }
 
-    if(!getImportConfiguration().getResolverConfiguration().shouldIncludeModules()) {
-      return checkedProjects;
-    }
-
-    List<MavenProjectInfo> mavenProjects = new ArrayList<MavenProjectInfo>();
-    @SuppressWarnings("unchecked")
-    List<MavenProjectInfo> sourceProjects = (List<MavenProjectInfo>) projectTreeViewer.getInput();
-    collectProjects(mavenProjects, new LinkedHashSet<MavenProjectInfo>(checkedProjects), sourceProjects);
-    return mavenProjects;
+    return checkedProjects;
   }
 
   private void collectProjects(List<MavenProjectInfo> mavenProjects, Set<MavenProjectInfo> checkedProjects,

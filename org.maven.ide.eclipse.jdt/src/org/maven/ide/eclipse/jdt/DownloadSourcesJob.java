@@ -109,7 +109,7 @@ class DownloadSourcesJob extends Job implements IBackgroundProcessingQueue {
     super("Download sources and javadoc");
     this.manager = manager;
 
-    this.maven = MavenPlugin.lookup(IMaven.class);
+    this.maven = MavenPlugin.getDefault().getMaven();
 
     MavenPlugin plugin = MavenPlugin.getDefault();
     this.projectManager = plugin.getMavenProjectManager();

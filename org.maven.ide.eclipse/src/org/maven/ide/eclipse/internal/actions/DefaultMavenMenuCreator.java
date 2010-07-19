@@ -28,7 +28,6 @@ import org.maven.ide.eclipse.actions.RefreshMavenModelsAction;
 import org.maven.ide.eclipse.actions.SelectionUtil;
 import org.maven.ide.eclipse.actions.UpdateSourcesAction;
 import org.maven.ide.eclipse.core.Messages;
-import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
@@ -99,7 +98,6 @@ public class DefaultMavenMenuCreator extends AbstractMavenMenuCreator {
           "Open Continuous Integration"));
 
       boolean enableWorkspaceResolution = true;
-      boolean enableNestedModules = true;
       if(selection.size() == 1) {
         IProject project = SelectionUtil.getType(selection.getFirstElement(), IProject.class);
         if(project != null) {
@@ -108,7 +106,6 @@ public class DefaultMavenMenuCreator extends AbstractMavenMenuCreator {
           if(projectFacade != null) {
             ResolverConfiguration configuration = projectFacade.getResolverConfiguration();
             enableWorkspaceResolution = !configuration.shouldResolveWorkspaceProjects();
-            enableNestedModules = !configuration.shouldIncludeModules();
           }
         }
       }
@@ -120,17 +117,6 @@ public class DefaultMavenMenuCreator extends AbstractMavenMenuCreator {
       } else {
         mgr.appendToGroup(NATURE, getAction(new ChangeNatureAction(ChangeNatureAction.DISABLE_WORKSPACE),
             ChangeNatureAction.ID_DISABLE_WORKSPACE, "Disable Workspace Resolution"));
-      }
-
-      if(MavenPlugin.getDefault().getPreferenceStore().getBoolean(
-          MavenPreferenceConstants.P_SUPPORT_SEPARATE_PROJECTS_FOR_MODULES)) {
-        if(enableNestedModules) {
-          mgr.appendToGroup(NATURE, getAction(new ChangeNatureAction(ChangeNatureAction.ENABLE_MODULES),
-              ChangeNatureAction.ID_ENABLE_MODULES, "Enable Nested Modules"));
-        } else {
-          mgr.appendToGroup(NATURE, getAction(new ChangeNatureAction(ChangeNatureAction.DISABLE_MODULES),
-              ChangeNatureAction.ID_DISABLE_MODULES, "Disable Nested Modules"));
-        }
       }
 
       mgr.appendToGroup(NATURE, getAction(new DisableNatureAction(), //

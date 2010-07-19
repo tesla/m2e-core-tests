@@ -82,7 +82,7 @@ public class EclipseMavenMetadataCache extends DefaultMavenMetadataCache impleme
         && eq(key.getVersion(), artifact.getBaseVersion());
   }
 
-  private <T> boolean eq(T a, T b) {
+  private static <T> boolean eq(T a, T b) {
     return a != null ? a.equals(b) : b == null;
   }
 }

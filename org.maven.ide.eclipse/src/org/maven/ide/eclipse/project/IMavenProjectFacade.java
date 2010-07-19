@@ -24,6 +24,7 @@ import org.apache.maven.project.MavenProject;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.ArtifactRef;
 import org.maven.ide.eclipse.embedder.ArtifactRepositoryRef;
+import org.maven.ide.eclipse.project.configurator.ILifecycleMapping;
 
 /**
  * IMavenProjectFacade
@@ -145,4 +146,5 @@ public interface IMavenProjectFacade {
 
   public Set<ArtifactRepositoryRef> getPluginArtifactRepositoryRefs();
 
+  public ILifecycleMapping getLifecycleMapping(IProgressMonitor monitor) throws CoreException;
 }

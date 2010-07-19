@@ -689,7 +689,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
           monitor.beginTask("Downloading Archetype " + archetypeName, IProgressMonitor.UNKNOWN);
 
           try {
-            final IMaven maven = MavenPlugin.lookup(IMaven.class);
+            final IMaven maven = MavenPlugin.getDefault().getMaven();
 
             final MavenPlugin plugin = MavenPlugin.getDefault();
             
@@ -740,7 +740,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
               archetype.setArtifactId(archetypeArtifactId);
               archetype.setVersion(archetypeVersion);
               archetype.setRepository(repositoryUrl);
-              org.apache.maven.archetype.Archetype archetyper = MavenPlugin.lookup(org.apache.maven.archetype.Archetype.class);
+              org.apache.maven.archetype.Archetype archetyper = MavenPlugin.getDefault().getArchetype();
               archetyper.updateLocalCatalog(archetype);
 
               loadArchetypes(archetypeGroupId, archetypeArtifactId, archetypeVersion);
@@ -749,11 +749,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
               //the user tried to add an archetype that couldn't be resolved on the server
               getShell().getDisplay().asyncExec(new Runnable() {
                 public void run() {
-                  if(pom != null){
-                    setErrorMessage("The archetype "+pom.toString()+" could not be resolved.");
-                  } else {
-                    setErrorMessage("The specified archetype could not be resolved");
-                  }
+                  setErrorMessage("The archetype "+pom.toString()+" could not be resolved.");
                 }
               });
             }

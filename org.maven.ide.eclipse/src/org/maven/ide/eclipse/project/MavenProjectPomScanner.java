@@ -56,7 +56,7 @@ public class MavenProjectPomScanner<T> extends AbstractProjectScanner<MavenProje
     this.developer = developer;
     this.dependencies = dependencies;
     this.console = console;
-    this.maven = MavenPlugin.lookup(IMaven.class);
+    this.maven = MavenPlugin.getDefault().getMaven();
   }
 
   public String getDescription() {

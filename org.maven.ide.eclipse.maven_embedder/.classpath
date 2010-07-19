@@ -5,12 +5,11 @@
 	<classpathentry exported="true" kind="lib" path="jars/maven-embedder-3.0-SNAPSHOT.jar"/>
 	<classpathentry exported="true" kind="lib" path="jars/maven-settings-3.0-SNAPSHOT.jar"/>
 	<classpathentry exported="true" kind="lib" path="jars/plexus-utils-2.0.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="jars/maven-core-3.0-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="jars/maven-core-3.0-SNAPSHOT.jar" sourcepath="/home/igor/.m2/repository/org/apache/maven/maven-core/3.0-beta-1/maven-core-3.0-beta-1-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="jars/maven-model-3.0-SNAPSHOT.jar"/>
 	<classpathentry exported="true" kind="lib" path="jars/maven-artifact-3.0-SNAPSHOT.jar"/>
 	<classpathentry exported="true" kind="lib" path="jars/maven-plugin-api-3.0-SNAPSHOT.jar"/>
-	<classpathentry exported="true" kind="lib" path="jars/plexus-container-default-1.5.4.jar"/>
-	<classpathentry exported="true" kind="lib" path="jars/plexus-classworlds-2.2.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="jars/plexus-container-default-1.5.4.jar" sourcepath="/home/igor/.m2/repository/org/codehaus/plexus/plexus-container-default/1.5.4/plexus-container-default-1.5.4-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="jars/xbean-reflect-3.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="jars/log4j-1.2.12.jar"/>
 	<classpathentry exported="true" kind="lib" path="jars/commons-logging-api-1.1.jar"/>
@@ -30,5 +29,6 @@
 	<classpathentry exported="true" kind="lib" path="jars/jetty-io-7.0.0.v20091005.jar"/>
 	<classpathentry exported="true" kind="lib" path="jars/jetty-util-7.0.0.v20091005.jar"/>
 	<classpathentry exported="true" kind="lib" path="jars/plexus-build-api-0.0.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="jars/plexus-classworlds-2.2.4-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

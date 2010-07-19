@@ -183,13 +183,12 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     this.repositoryRegistry = repositoryRegistry;
     this.baseIndexDir = new File(stateDir, "nexus");
 
-    this.maven = MavenPlugin.lookup(IMaven.class);
-    this.indexUpdater = MavenPlugin.lookup(IndexUpdater.class);
-    this.wagonManager = MavenPlugin.lookup(WagonManager.class);
+    this.maven = MavenPlugin.getDefault().getMaven();
+    this.indexUpdater = MavenPlugin.getDefault().getIndexUpdater();
+    this.wagonManager = MavenPlugin.getDefault().getWagonManager();
 
     this.updaterJob = new IndexUpdaterJob(this, console);
 
-    this.localIndex = newLocalIndex(repositoryRegistry.getLocalRepository());
     this.workspaceIndex = new NexusIndex(this, repositoryRegistry.getWorkspaceRepository(), NexusIndex.DETAILS_MIN);
   }
 
@@ -664,7 +663,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
 
   private synchronized NexusIndexer getIndexer() {
     if(indexer == null) {
-      indexer = MavenPlugin.lookup(NexusIndexer.class);
+      indexer = MavenPlugin.getDefault().getNexusIndexer();
     }
     return indexer;
   }
@@ -732,7 +731,10 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     return workspaceIndex;
   }
 
-  public NexusIndex getLocalIndex() {
+  public synchronized NexusIndex getLocalIndex() {
+    if(localIndex == null) {
+      localIndex = newLocalIndex(repositoryRegistry.getLocalRepository());
+    }
     return localIndex;
   }
 
@@ -1010,7 +1012,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
           } else {
             if(!force){
               //if 'force' is not set, then only do the remote update if this value is set
-              IMavenConfiguration mavenConfig = MavenPlugin.lookup(IMavenConfiguration.class);
+              IMavenConfiguration mavenConfig = MavenPlugin.getDefault().getMavenConfiguration();
               if(mavenConfig.isUpdateIndexesOnStartup()){
                 updateRemoteIndex(repository, force, monitor);
               }

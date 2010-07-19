@@ -8,8 +8,6 @@
 
 package org.maven.ide.eclipse.jdt.internal;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -19,7 +17,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.jdt.core.JavaCore;
 
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionResult;
@@ -27,16 +24,14 @@ import org.apache.maven.project.MavenProject;
 
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.jdt.IClasspathDescriptor;
-import org.maven.ide.eclipse.project.IMavenProjectFacade;
-import org.maven.ide.eclipse.project.IMavenProjectVisitor;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 import org.maven.ide.eclipse.project.configurator.ProjectConfigurationRequest;
 
 
 public class GenericJavaProjectConfigurator extends AbstractJavaProjectConfigurator {
-  
+
   @Override
-  protected List<MavenProject> getMavenProjects(ProjectConfigurationRequest request, final IProgressMonitor monitor)
+  protected MavenProject getMavenProject(ProjectConfigurationRequest request, final IProgressMonitor monitor)
       throws CoreException {
 
     IProject project = request.getProject();
@@ -49,23 +44,16 @@ public class GenericJavaProjectConfigurator extends AbstractJavaProjectConfigura
     if(mavenConfiguration.isDebugOutput()) {
       console.logMessage("Reading " + pomResource.getFullPath());
     }
-    
+
     String goalsToExecute = "";
-    if (request.isProjectConfigure()) {
+    if(request.isProjectConfigure()) {
       goalsToExecute = mavenConfiguration.getGoalOnUpdate();
-    } else if (request.isProjectImport()) {
+    } else if(request.isProjectImport()) {
       goalsToExecute = mavenConfiguration.getGoalOnImport();
     }
 
-    if (goalsToExecute == null || goalsToExecute.trim().length() <= 0) {
-      final ArrayList<MavenProject> result = new ArrayList<MavenProject>();
-      request.getMavenProjectFacade().accept(new IMavenProjectVisitor() {
-        public boolean visit(IMavenProjectFacade projectFacade) throws CoreException {
-          result.add(projectFacade.getMavenProject(monitor));
-          return true; // keep visiting
-        }
-      }, IMavenProjectVisitor.NESTED_MODULES);
-      return result;
+    if(goalsToExecute == null || goalsToExecute.trim().length() <= 0) {
+      return request.getMavenProject();
     }
 
     MavenExecutionRequest executionRequest = projectManager.createExecutionRequest(pomResource, configuration, monitor);
@@ -88,54 +76,17 @@ public class GenericJavaProjectConfigurator extends AbstractJavaProjectConfigura
     project.getFolder("target").refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 1));
 
     List<MavenProject> mavenProjects = result.getTopologicallySortedProjects();
-    
-    if (mavenProjects == null) {
-      mavenProjects = new ArrayList<MavenProject>();
-      try {
-        mavenProjects.add(maven.readProject(pomResource.getLocation().toFile(), monitor));
-      } catch (CoreException e) {
-        String msg = "Unable to read project " + pomResource.getFullPath();
-        console.logError(msg + "; " + e.toString());
-        MavenLogger.log(msg, e);
-        markerManager.addErrorMarkers(pomResource, e);
-        return null;
-      }
+
+    if(mavenProjects == null) {
+      return request.getMavenProject();
     }
 
-    return mavenProjects;
+    return mavenProjects.get(0);
   }
 
   @Override
-  protected void addProjectSourceFolders(IClasspathDescriptor classpath, IProject project, MavenProject mavenProject,
-      ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException {
-
-    super.addProjectSourceFolders(classpath, project, mavenProject, request, monitor);
-
-    // HACK to support xmlbeans generated classes MNGECLIPSE-374
-    File generatedClassesDir = new File(mavenProject.getBuild().getDirectory(), //
-        "generated-classes" + File.separator + "xmlbeans");
-    IResource generatedClasses = project.findMember(getProjectRelativePath(project, //
-        generatedClassesDir.getAbsolutePath()));
-    if(generatedClasses != null && generatedClasses.isAccessible() && generatedClasses.getType() == IResource.FOLDER) {
-      classpath.addEntry(JavaCore.newLibraryEntry(generatedClasses.getFullPath(), null, null));
-    }
+  protected void addClasspathEntries(IClasspathDescriptor classpath, ProjectConfigurationRequest request,
+      final IProgressMonitor monitor) {
   }
 
-
-/*
- * XXX move to project configuration manager
- * 
-    if(mavenProject != null && !configuration.shouldIncludeModules()) {
-      List<String> modules = mavenProject.getModules();
-      for(String module : modules) {
-        if(!module.startsWith("..")) {
-          IFolder moduleDir = project.getFolder(module);
-          if(moduleDir.isAccessible()) {
-            // TODO don't set derived on modules that are not in Eclipse workspace
-            moduleDir.setDerived(true);
-          }
-        }
-      }
-    }
-*/
 }

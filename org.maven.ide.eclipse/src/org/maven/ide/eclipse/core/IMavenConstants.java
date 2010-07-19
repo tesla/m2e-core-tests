@@ -29,8 +29,6 @@ public interface IMavenConstants {
 
   public static final String PREFERENCE_PAGE_ID = PLUGIN_ID + ".MavenProjectPreferencePage";
   
-  public static final String INCLUDE_MODULES = "modules"; //$NON-NLS-1$
-
   public static final String NO_WORKSPACE_PROJECTS = "noworkspace"; //$NON-NLS-1$
 
   public static final String ACTIVE_PROFILES = "profiles"; //$NON-NLS-1$

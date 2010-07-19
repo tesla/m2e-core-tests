@@ -31,7 +31,7 @@ public class NexusIndexManagerFullIndexSearchTest extends AbstractNexusIndexMana
   
   private static final String REPO_URL_ECLIPSE = "http://repository.sonatype.org/content/repositories/eclipse";
   
-  private IMavenConfiguration mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
+  private IMavenConfiguration mavenConfiguration = MavenPlugin.getDefault().getMavenConfiguration();
   private NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getDefault().getIndexManager();
   private RepositoryRegistry repositoryRegistry = (RepositoryRegistry) MavenPlugin.getDefault().getRepositoryRegistry();
 

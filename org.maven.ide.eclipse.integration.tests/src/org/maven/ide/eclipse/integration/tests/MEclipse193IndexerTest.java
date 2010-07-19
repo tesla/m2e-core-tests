@@ -54,10 +54,9 @@ public class MEclipse193IndexerTest extends M2EUIIntegrationTestCase {
     waitForAllBuildsToComplete();
   }
 
-  @SuppressWarnings("deprecation")
   @AfterClass
   public static void restoreUserSettings() {
-    IMavenConfiguration mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
+    IMavenConfiguration mavenConfiguration = MavenPlugin.getDefault().getMavenConfiguration();
     mavenConfiguration.setUserSettingsFile(originalUserSettingsFile);
   }
 

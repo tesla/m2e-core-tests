@@ -25,6 +25,8 @@ import org.maven.ide.eclipse.embedder.ILocalRepositoryListener;
  */
 public class EclipseLocalRepositoryMaintainer implements LocalRepositoryMaintainer {
 
+  public static final String ROLE_HINT = EclipseLocalRepositoryMaintainer.class.getName();
+
   public void artifactDownloaded(LocalRepositoryMaintainerEvent event) {
     notifyListeners(event);
   }

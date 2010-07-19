@@ -200,14 +200,14 @@ public class MavenModelManager {
 
       monitor.setTaskName("Building dependency tree");
 
-      ArtifactFactory artifactFactory = MavenPlugin.lookup(ArtifactFactory.class);
-      ArtifactMetadataSource artifactMetadataSource = MavenPlugin.lookup(ArtifactMetadataSource.class);
+      ArtifactFactory artifactFactory = MavenPlugin.getDefault().getArtifactFactory();
+      ArtifactMetadataSource artifactMetadataSource = MavenPlugin.getDefault().getArtifactMetadataSource();
 
-      ArtifactCollector artifactCollector = MavenPlugin.lookup(ArtifactCollector.class);
+      ArtifactCollector artifactCollector = MavenPlugin.getDefault().getArtifactCollector();
 
       ArtifactRepository localRepository = maven.getLocalRepository();
 
-      DependencyTreeBuilder builder = MavenPlugin.lookup(DependencyTreeBuilder.class);
+      DependencyTreeBuilder builder = MavenPlugin.getDefault().getDependencyTreeBuilder();
       DependencyNode node = builder.buildDependencyTree(mavenProject, localRepository, artifactFactory,
           artifactMetadataSource, null, artifactCollector);
 

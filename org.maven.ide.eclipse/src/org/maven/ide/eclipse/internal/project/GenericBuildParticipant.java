@@ -38,7 +38,6 @@ import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
-import org.maven.ide.eclipse.project.IMavenProjectVisitor;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
 import org.maven.ide.eclipse.project.configurator.AbstractBuildParticipant;
@@ -58,7 +57,7 @@ public class GenericBuildParticipant extends AbstractBuildParticipant {
   public Set<IProject> build(int kind, IProgressMonitor monitor) throws Exception {
     MavenPlugin plugin = MavenPlugin.getDefault();
     MavenConsole console = plugin.getConsole();
-    IMavenConfiguration configuration = MavenPlugin.lookup(IMavenConfiguration.class);
+    IMavenConfiguration configuration = MavenPlugin.getDefault().getMavenConfiguration();
 
     IMavenProjectFacade projectFacade = getMavenProjectFacade();
 
@@ -120,8 +119,8 @@ public class GenericBuildParticipant extends AbstractBuildParticipant {
   private void executePostBuild(final IMavenProjectFacade projectFacade, //
       final boolean offline, final IProgressMonitor monitor) throws CoreException {
     
-    MavenProjectManager manager = MavenPlugin.lookup(MavenProjectManager.class);
-    IMaven maven = MavenPlugin.lookup(IMaven.class);
+    MavenProjectManager manager = MavenPlugin.getDefault().getMavenProjectManager();
+    IMaven maven = MavenPlugin.getDefault().getMaven();
 
     ResolverConfiguration configuration = projectFacade.getResolverConfiguration();
 
@@ -130,7 +129,7 @@ public class GenericBuildParticipant extends AbstractBuildParticipant {
     List<String> filteredGoals = getFilteredGoals(maven, goals, projectFacade, monitor);
     request.setGoals(filteredGoals.isEmpty() ? goals : filteredGoals);
 
-    request.setRecursive(configuration.shouldIncludeModules());
+    request.setRecursive(false);
 
     if(offline) {
       request.setOffline(true);
@@ -145,42 +144,32 @@ public class GenericBuildParticipant extends AbstractBuildParticipant {
 
   private void refreshBuildFolders(final IMavenProjectFacade projectFacade, final IProgressMonitor monitor)
       throws CoreException {
-    projectFacade.accept(new IMavenProjectVisitor() {
-      public boolean visit(IMavenProjectFacade projectFacade) throws CoreException {
-        Build build = projectFacade.getMavenProject(monitor).getBuild();
-        IFolder folder = projectFacade.getProject().getFolder(projectFacade.getProjectRelativePath(build.getDirectory()));
-        if(folder != null) {
-          folder.refreshLocal(IResource.DEPTH_INFINITE, monitor);
-        }
-        return true; // keep visiting
-      }
-    }, IMavenProjectVisitor.NESTED_MODULES);
+    Build build = projectFacade.getMavenProject(monitor).getBuild();
+    IFolder folder = projectFacade.getProject().getFolder(projectFacade.getProjectRelativePath(build.getDirectory()));
+    if(folder != null) {
+      folder.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+    }
   }
 
   private void processResources(IMavenProjectFacade projectFacade, final IProgressMonitor monitor) throws CoreException {
     final IResourceDelta delta = getDelta(projectFacade.getProject());
-    projectFacade.accept(new IMavenProjectVisitor() {
-      public boolean visit(IMavenProjectFacade projectFacade) throws CoreException {
-        MavenExecutionResult result = null;
-        if(hasChangedResources(projectFacade, delta, true, monitor)) {
-          result = filterResources(projectFacade, monitor);
-        } else if(hasChangedResources(projectFacade, delta, false, monitor)) {
-          // XXX optimize! no filtering, just copy the changed resources
-          result = filterResources(projectFacade, monitor);
-        }
-        if(result != null) {
-          logErrors(result, projectFacade.getProject().getName());
-        }
-        return true;
-      }
-    }, IMavenProjectVisitor.NESTED_MODULES);
+    MavenExecutionResult result = null;
+    if(hasChangedResources(projectFacade, delta, true, monitor)) {
+      result = filterResources(projectFacade, monitor);
+    } else if(hasChangedResources(projectFacade, delta, false, monitor)) {
+      // XXX optimize! no filtering, just copy the changed resources
+      result = filterResources(projectFacade, monitor);
+    }
+    if(result != null) {
+      logErrors(result, projectFacade.getProject().getName());
+    }
   }
 
   protected MavenExecutionResult filterResources(final IMavenProjectFacade projectFacade, //
       final IProgressMonitor monitor) throws CoreException {
 
-    MavenProjectManager manager = MavenPlugin.lookup(MavenProjectManager.class);
-    IMaven maven = MavenPlugin.lookup(IMaven.class);
+    MavenProjectManager manager = MavenPlugin.getDefault().getMavenProjectManager();
+    IMaven maven = MavenPlugin.getDefault().getMaven();
 
     ResolverConfiguration configuration = projectFacade.getResolverConfiguration();
     
@@ -189,7 +178,7 @@ public class GenericBuildParticipant extends AbstractBuildParticipant {
     List<String> filteredGoals = getFilteredGoals(maven, goals, projectFacade, monitor);
     request.setGoals(filteredGoals.isEmpty() ? goals : filteredGoals);
 
-    request.setRecursive(configuration.shouldIncludeModules());
+    request.setRecursive(false);
     request.setOffline(true); // always execute resource filtering offline
 
     MavenExecutionResult result = maven.execute(request, monitor);

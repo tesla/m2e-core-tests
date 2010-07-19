@@ -91,8 +91,8 @@ public class MavenSettingsPreferencePage extends PreferencePage implements IWork
 
     this.mavenPlugin = MavenPlugin.getDefault();
     this.runtimeManager = mavenPlugin.getMavenRuntimeManager();
-    this.mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
-    this.maven = MavenPlugin.lookup(IMaven.class);
+    this.mavenConfiguration = MavenPlugin.getDefault().getMavenConfiguration();
+    this.maven = MavenPlugin.getDefault().getMaven();
   }
 
   public void init(IWorkbench workbench) {
@@ -144,7 +144,7 @@ public class MavenSettingsPreferencePage extends PreferencePage implements IWork
                 subMonitor.beginTask("Updating progress for "+projects[i].getProject().getName(), 1);
                 allProjects.add(projects[i].getProject());
               }
-              IMavenConfiguration configuration = MavenPlugin.lookup(IMavenConfiguration.class);
+              IMavenConfiguration configuration = MavenPlugin.getDefault().getMavenConfiguration();
               MavenPlugin.getDefault().getMavenProjectManager().refresh(new MavenUpdateRequest(allProjects.toArray(new IProject[]{}), configuration.isOffline(), true));
               subMonitor.done();
             }

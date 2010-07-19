@@ -74,9 +74,6 @@ public class MavenPreferencePage extends FieldEditorPreferencePage implements IW
     addField(new BooleanFieldEditor(MavenPreferenceConstants.P_HIDE_FOLDERS_OF_NESTED_PROJECTS, //
         "Hide folders of physically nested modules (experimental)", getFieldEditorParent()));
     
-    addField(new BooleanFieldEditor(MavenPreferenceConstants.P_SUPPORT_SEPARATE_PROJECTS_FOR_MODULES, //
-        Messages.getString("preferences.separateProjectsForModules"), getFieldEditorParent()));
-
     GridData comboCompositeGridData = new GridData();
     comboCompositeGridData.verticalIndent = 25;
     comboCompositeGridData.horizontalSpan = 3;

@@ -16,20 +16,18 @@ import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 
 public class MavenHelpers {
 
-  @SuppressWarnings("deprecation")
   public static String setUserSettings(String settingsFile) {
     if(settingsFile != null && settingsFile.length() > 0) {
       settingsFile = new File(settingsFile).getAbsolutePath();
     }
-    IMavenConfiguration mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
+    IMavenConfiguration mavenConfiguration = MavenPlugin.getDefault().getMavenConfiguration();
     String oldUserSettingsFile = mavenConfiguration.getUserSettingsFile();
     mavenConfiguration.setUserSettingsFile(settingsFile);
     return oldUserSettingsFile;
   }
 
-  @SuppressWarnings("deprecation")
   public static String getUserSettings() {
-    IMavenConfiguration mavenConfiguration = MavenPlugin.lookup(IMavenConfiguration.class);
+    IMavenConfiguration mavenConfiguration = MavenPlugin.getDefault().getMavenConfiguration();
     return mavenConfiguration.getUserSettingsFile();
   }
 

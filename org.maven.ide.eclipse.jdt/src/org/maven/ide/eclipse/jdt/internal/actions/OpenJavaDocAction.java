@@ -88,7 +88,7 @@ public class OpenJavaDocAction extends ActionDelegate {
     final String name = groupId + ":" + artifactId + ":" + version + ":javadoc";
 
     try {
-      IMaven maven = MavenPlugin.lookup(IMaven.class);
+      IMaven maven = MavenPlugin.getDefault().getMaven();
 
       List<ArtifactRepository> artifactRepositories = maven.getArtifactRepositories();
       

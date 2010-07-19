@@ -12,43 +12,32 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 
 import org.apache.maven.artifact.Artifact;
 
-import org.maven.ide.eclipse.jdt.BuildPathManager;
+import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.jdt.IClasspathDescriptor;
 import org.maven.ide.eclipse.jdt.IClasspathEntryDescriptor;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
-import org.maven.ide.eclipse.util.Util;
 
 
 /**
- * This class is an attempt to encapsulate list of IClasspathEntry's and operations on the list such as
- * "removeEntry", "addSourceEntry" and "addEntryAttribute". The idea is to provide JavaProjectConfigurator's classpath
- * whiteboard they can use to incrementally define classpath in a consistent manner.
+ * This class is an attempt to encapsulate list of IClasspathEntry's and operations on the list such as "removeEntry",
+ * "addSourceEntry" and "addEntryAttribute". The idea is to provide JavaProjectConfigurator's classpath whiteboard they
+ * can use to incrementally define classpath in a consistent manner.
  * 
  * @author igor
  */
 public class ClasspathDescriptor implements IClasspathDescriptor {
 
-  private static final IClasspathAttribute ATTR_OPTIONAL = JavaCore.newClasspathAttribute(IClasspathAttribute.OPTIONAL,
-      "true");
-
   private final ArrayList<IClasspathEntryDescriptor> entries = new ArrayList<IClasspathEntryDescriptor>();
 
-  private final IJavaProject project;
-  
   public ClasspathDescriptor(IJavaProject project) {
-    this.project = project;
   }
 
   /**
@@ -56,68 +45,68 @@ public class ClasspathDescriptor implements IClasspathDescriptor {
    */
   public boolean containsPath(IPath path) {
     for(IClasspathEntryDescriptor descriptor : entries) {
-      if(path.equals(descriptor.getClasspathEntry().getPath())) {
+      if(path.equals(descriptor.getPath())) {
         return true;
       }
     }
     return false;
   }
 
-  public void addSourceEntry(IPath sourcePath, IPath outputLocation, boolean generated) throws CoreException {
-    addSourceEntry(sourcePath, //
+  public ClasspathEntryDescriptor addSourceEntry(IPath sourcePath, IPath outputLocation, boolean generated) {
+    return addSourceEntry(sourcePath, //
         outputLocation, //
         new IPath[0] /* inclusion */, //
         new IPath[0] /* exclusion */, //
-        generated );
+        generated);
   }
 
-  public void removeEntry(final IPath path) {
-    removeEntry(new EntryFilter() {
+  public List<IClasspathEntryDescriptor> removeEntry(final IPath path) {
+    return removeEntry(new EntryFilter() {
       public boolean accept(IClasspathEntryDescriptor descriptor) {
-        return path.equals(descriptor.getClasspathEntry().getPath());
+        return path.equals(descriptor.getPath());
       }
     });
   }
-  
-  public void removeEntry(EntryFilter filter) {
+
+  public List<IClasspathEntryDescriptor> removeEntry(EntryFilter filter) {
+    ArrayList<IClasspathEntryDescriptor> result = new ArrayList<IClasspathEntryDescriptor>();
+
     Iterator<IClasspathEntryDescriptor> iter = entries.iterator();
     while(iter.hasNext()) {
       IClasspathEntryDescriptor descriptor = iter.next();
       if(filter.accept(descriptor)) {
+        result.add(descriptor);
         iter.remove();
       }
     }
+
+    return result;
   }
 
-  public void addSourceEntry(IPath sourcePath, IPath outputLocation, IPath[] inclusion, IPath[] exclusion,
-      boolean generated) throws CoreException {
-    IWorkspaceRoot workspaceRoot = project.getProject().getWorkspace().getRoot();
+  public ClasspathEntryDescriptor addSourceEntry(IPath sourcePath, IPath outputLocation, IPath[] inclusion,
+      IPath[] exclusion, boolean generated) {
+//    IWorkspaceRoot workspaceRoot = project.getProject().getWorkspace().getRoot();
+//
+//    Util.createFolder(workspaceRoot.getFolder(sourcePath), generated);
 
-    Util.createFolder(workspaceRoot.getFolder(sourcePath), generated);
-
-    IClasspathAttribute[] attrs;
+    ClasspathEntryDescriptor descriptor = new ClasspathEntryDescriptor(IClasspathEntry.CPE_SOURCE, sourcePath);
+    descriptor.setOutputLocation(outputLocation);
+    descriptor.setInclusionPatterns(inclusion);
+    descriptor.setExclusionPatterns(exclusion);
     if(generated) {
-      attrs = new IClasspathAttribute[] {ATTR_OPTIONAL};
-    } else {
-      attrs = new IClasspathAttribute[0];
+      descriptor.setClasspathAttribute(IClasspathAttribute.OPTIONAL, "true");
     }
 
-    IClasspathEntry entry = JavaCore.newSourceEntry(sourcePath, //
-        inclusion, //
-        exclusion, //
-        outputLocation, //
-        attrs);
-
-    ClasspathEntryDescriptor descriptor = new ClasspathEntryDescriptor(entry);
-
     entries.add(descriptor);
+
+    return descriptor;
   }
 
   public IClasspathEntry[] getEntries() {
     IClasspathEntry[] result = new IClasspathEntry[entries.size()];
 
-    for (int i = 0; i < entries.size(); i++) {
-      result[i] = entries.get(i).getClasspathEntry();
+    for(int i = 0; i < entries.size(); i++ ) {
+      result[i] = entries.get(i).toClasspathEntry();
     }
 
     return result;
@@ -127,52 +116,49 @@ public class ClasspathDescriptor implements IClasspathDescriptor {
     return entries;
   }
 
-  public void addEntry(IClasspathEntry entry) {
-    entries.add(new ClasspathEntryDescriptor(entry));
+  public ClasspathEntryDescriptor addEntry(IClasspathEntry cpe) {
+    ClasspathEntryDescriptor entry = new ClasspathEntryDescriptor(cpe);
+    entries.add(entry);
+    return entry;
   }
 
-  public void addProjectEntry(Artifact artifact, IMavenProjectFacade projectFacade) {
-    ArrayList<IClasspathAttribute> attributes = getMavenAttributes(artifact);
-    IClasspathEntry entry = JavaCore.newProjectEntry(projectFacade.getFullPath(), // 
-        new IAccessRule[0] /*accessRules*/, //
-        true /*combineAccessRules*/, //
-        attributes.toArray(new IClasspathAttribute[attributes.size()]), //
-        false /*isExported*/);
-    entries.add(new ClasspathEntryDescriptor(artifact, entry));
+  @SuppressWarnings("deprecation")
+  public ClasspathEntryDescriptor addProjectEntry(Artifact a, IMavenProjectFacade projectFacade) {
+    ClasspathEntryDescriptor entry = addProjectEntry(projectFacade.getFullPath());
+    entry.setArtifactKey(new ArtifactKey(a.getGroupId(), a.getArtifactId(), a.getBaseVersion(), a.getClassifier()));
+    entry.setScope(a.getScope());
+    entry.setOptionalDependency(a.isOptional());
+    return entry;
   }
 
-  public void addLibraryEntry(Artifact artifact, IPath srcPath, IPath srcRoot, String javaDocUrl) {
+  public ClasspathEntryDescriptor addProjectEntry(IPath entryPath) {
+    ClasspathEntryDescriptor entry = new ClasspathEntryDescriptor(IClasspathEntry.CPE_PROJECT, entryPath);
+
+    entries.add(entry);
+
+    return entry;
+  }
+
+  @SuppressWarnings("deprecation")
+  public ClasspathEntryDescriptor addLibraryEntry(Artifact artifact, IPath srcPath, IPath srcRoot, String javaDocUrl) {
+    ArtifactKey artifactKey = new ArtifactKey(artifact);
     IPath entryPath = new Path(artifact.getFile().getAbsolutePath());
-    
-    ArrayList<IClasspathAttribute> attributes = getMavenAttributes(artifact);
+
+    ClasspathEntryDescriptor entry = addLibraryEntry(entryPath);
+    entry.setArtifactKey(artifactKey);
 
     if(javaDocUrl != null) {
-      attributes.add(JavaCore.newClasspathAttribute(IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME,
-          javaDocUrl));
+      entry.setClasspathAttribute(IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME, javaDocUrl);
     }
 
-    IClasspathEntry entry = JavaCore.newLibraryEntry(entryPath, //
-        srcPath, //
-        srcRoot, //
-        new IAccessRule[0], //
-        attributes.toArray(new IClasspathAttribute[attributes.size()]), // 
-        false /*not exported*/);
-
-    entries.add(new ClasspathEntryDescriptor(artifact, entry));
+    return entry;
   }
 
-  private ArrayList<IClasspathAttribute> getMavenAttributes(Artifact artifact) {
-    ArrayList<IClasspathAttribute> attributes = new ArrayList<IClasspathAttribute>();
-    attributes.add(JavaCore.newClasspathAttribute(BuildPathManager.GROUP_ID_ATTRIBUTE, artifact.getGroupId()));
-    attributes.add(JavaCore.newClasspathAttribute(BuildPathManager.ARTIFACT_ID_ATTRIBUTE, artifact.getArtifactId()));
-    attributes.add(JavaCore.newClasspathAttribute(BuildPathManager.VERSION_ATTRIBUTE, artifact.getVersion()));
-    if (artifact.getClassifier() != null) {
-      attributes.add(JavaCore.newClasspathAttribute(BuildPathManager.CLASSIFIER_ATTRIBUTE, artifact.getClassifier()));
-    }
-    if (artifact.getScope() != null) {
-      attributes.add(JavaCore.newClasspathAttribute(BuildPathManager.SCOPE_ATTRIBUTE, artifact.getScope()));
-    }
-    return attributes;
-  }
+  public ClasspathEntryDescriptor addLibraryEntry(IPath entryPath) {
+    ClasspathEntryDescriptor entry = new ClasspathEntryDescriptor(IClasspathEntry.CPE_LIBRARY, entryPath);
 
+    entries.add(entry);
+
+    return entry;
+  }
 }

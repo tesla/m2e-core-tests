@@ -59,7 +59,7 @@ public class MavenProjectConfigurator extends AbstractProjectConfigurator {
         ResolverConfiguration resolverConfiguration = request.getResolverConfiguration();
         // MavenPlugin plugin = MavenPlugin.getDefault();
         try {
-          IMaven maven = MavenPlugin.lookup(IMaven.class);
+          IMaven maven = MavenPlugin.getDefault().getMaven();
           MavenExecutionRequest executionRequest = projectManager.createExecutionRequest(pomFile, resolverConfiguration, monitor);
           executionRequest.setGoals(goals);
           maven.execute(executionRequest, monitor);

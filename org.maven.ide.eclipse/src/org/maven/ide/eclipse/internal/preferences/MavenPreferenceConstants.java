@@ -91,8 +91,5 @@ public interface MavenPreferenceConstants {
   public static final String P_SHOW_CONSOLE_ON_OUTPUT = PREFIX+"showConsoleOnOutput"; 
   
   /** boolean */
-  public static final String P_SUPPORT_SEPARATE_PROJECTS_FOR_MODULES = PREFIX+"separateProjectsForModules"; 
-  
-  /** boolean */
   public static final String P_FULL_INDEX= PREFIX+"fullIndex";
 }

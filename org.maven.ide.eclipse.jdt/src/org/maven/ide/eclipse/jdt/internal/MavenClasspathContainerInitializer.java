@@ -51,7 +51,7 @@ public class MavenClasspathContainerInitializer extends ClasspathContainerInitia
       }
 
       // force refresh if can't read persisted state
-      IMavenConfiguration configuration = MavenPlugin.lookup(IMavenConfiguration.class);
+      IMavenConfiguration configuration = MavenPlugin.getDefault().getMavenConfiguration();
       MavenUpdateRequest request = new MavenUpdateRequest(project.getProject(), configuration.isOffline(), false);
       getMavenProjectManager().refresh(request);
     }
@@ -67,7 +67,7 @@ public class MavenClasspathContainerInitializer extends ClasspathContainerInitia
     new Job("Persist classpath container changes") {
       protected IStatus run(IProgressMonitor monitor) {
         try {
-          getBuildPathManager().updateClasspathContainer(project, containerSuggestion, monitor);
+          getBuildPathManager().persistAttachedSourcesAndJavadoc(project, containerSuggestion, monitor);
         } catch(CoreException ex) {
           MavenLogger.log(ex);
           return new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, 0, "Can't persist classpath container", ex);

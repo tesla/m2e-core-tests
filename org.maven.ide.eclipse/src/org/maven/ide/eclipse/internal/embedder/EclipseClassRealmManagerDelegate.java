@@ -30,6 +30,8 @@ import org.apache.maven.classrealm.ClassRealmRequest;
  */
 public class EclipseClassRealmManagerDelegate implements ClassRealmManagerDelegate {
 
+  public static final String ROLE_HINT = EclipseClassRealmManagerDelegate.class.getName();
+
   private PlexusContainer plexus;
 
   private final ArtifactVersion currentBuildApiVersion;
