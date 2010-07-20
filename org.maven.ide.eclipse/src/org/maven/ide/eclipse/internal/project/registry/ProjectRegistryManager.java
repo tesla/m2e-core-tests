@@ -96,7 +96,6 @@ public class ProjectRegistryManager {
   public static final String ARTIFACT_TYPE_JAVADOC = "javadoc";
 
   private static final String P_VERSION = "version";
-  private static final String P_INCLUDE_MODULES = "includeModules";
   private static final String P_RESOLVE_WORKSPACE_PROJECTS = "resolveWorkspaceProjects";
   private static final String P_RESOURCE_FILTER_GOALS = "resourceFilterGoals";
   private static final String P_FULL_BUILD_GOALS = "fullBuildGoals";
@@ -472,7 +471,7 @@ public class ProjectRegistryManager {
         // if our capabilities changed, recalculate everyone who depends on new/changed/removed capabilities
         Set<Capability> changedCapabilities = diff(oldCapabilities, capabilities);
         for(Capability capability : changedCapabilities) {
-          context.forcePomFiles(newState.getDependents(capability.getVersionlessKey(), true));
+          context.forcePomFiles(newState.getDependents(capability, true));
         }
 
         Set<RequiredCapability> oldRequirements = newState.setRequirements(pom, requirements);

@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.embedder.ArtifactRef;
+import org.maven.ide.eclipse.internal.project.registry.MavenProjectFacade;
 import org.maven.ide.eclipse.internal.project.registry.ProjectRegistryManager;
 import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
@@ -45,24 +46,24 @@ import org.maven.ide.eclipse.tests.common.WorkspaceHelpers;
 
 
 public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
-  
+
   MavenPlugin plugin = MavenPlugin.getDefault();
 
   ProjectRegistryManager manager;
-  
+
   ArrayList<MavenProjectChangedEvent> events;
-  
+
   IMavenProjectChangedListener listener = new IMavenProjectChangedListener() {
     public void mavenProjectChanged(MavenProjectChangedEvent[] event, IProgressMonitor monitor) {
       events.addAll(Arrays.asList(event));
     }
   };
-  
+
   protected void setUp() throws Exception {
     super.setUp();
 
     manager = MavenPlugin.getDefault().getMavenProjectManagerImpl();
-    
+
     events = new ArrayList<MavenProjectChangedEvent>();
     manager.addMavenProjectChangedListener(listener);
   }
@@ -79,10 +80,10 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
   private IProject createExisting(String name) throws Exception {
     String test = name.substring(0, name.indexOf('-'));
     File dir = new File("resources/" + test, name);
-    
+
     return createExisting(name, dir.getAbsolutePath());
   }
-  
+
   private MavenProjectChangedEvent[] getEvents() {
     return events.toArray(new MavenProjectChangedEvent[events.size()]);
   }
@@ -99,10 +100,10 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
 
   public void test000_simple() throws Exception {
 //    System.out.println("ENTER!"); System.in.read();
-    
+
     IProject p1 = createExisting("t000-p1");
     waitForJobsToComplete();
-    
+
     IMavenProjectFacade f1 = manager.create(p1, monitor);
     assertEquals(p1.getFullPath(), f1.getFullPath());
 
@@ -297,7 +298,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
       assertStartWith(repo.getAbsolutePath(), a.getFile().getAbsolutePath());
     }
   }
-  
+
   public void test005_snapshotAvailableFromLocalRepoAndWorkspace() throws Exception {
     IProject p1 = createExisting("t005-p3");
     waitForJobsToComplete();
@@ -332,7 +333,8 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
 
     IMavenProjectFacade f1 = manager.create(p1, monitor);
     f1.getMavenProject(monitor).getParent();
-    assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME).getLocation().toFile(), f1.getMavenProject(monitor).getParentArtifact().getFile());
+    assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME).getLocation().toFile(), f1.getMavenProject(monitor)
+        .getParentArtifact().getFile());
 
     deleteProject(p2);
     waitForJobsToComplete();
@@ -385,7 +387,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     copyContent(p2, "pom_updated.xml", "pom.xml");
 
     f1 = manager.create(p1, monitor);
-    List<Artifact> a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts()); 
+    List<Artifact> a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
     assertEquals(2, a1.size());
     assertEquals("t007-p2", a1.get(0).getArtifactId());
     assertEquals("junit", a1.get(1).getArtifactId());
@@ -441,7 +443,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME), event.getSource());
     assertEquals(MavenProjectChangedEvent.KIND_ADDED, event.getKind());
   }
-  
+
   public void test009_noworkspaceResolution() throws Exception {
     IProject p1 = createExisting("t009-p1");
     IProject p2 = createExisting("t009-p2");
@@ -451,13 +453,13 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     {
       IMavenProjectFacade f1 = manager.create(p1, monitor);
       IMavenProjectFacade f2 = manager.create(p2, monitor);
-  
+
       assertEquals(2, f1.getMavenProjectArtifacts().size());
       Artifact[] a1 = getMavenProjectArtifacts(f1).toArray(new Artifact[0]);
       // assertTrue(a1[0].getFile().getAbsolutePath().startsWith(workspace.getRoot().getLocation().toFile().getAbsolutePath()));
       assertStartWith(workspace.getRoot().getLocation().toFile().getAbsolutePath(), a1[0].getFile().getAbsolutePath());
       assertEquals(p2.getFile("pom.xml").getLocation().toFile(), a1[1].getFile());
-  
+
       assertEquals(1, f2.getMavenProjectArtifacts().size());
       Artifact a2 = getMavenProjectArtifacts(f2).iterator().next();
       // assertTrue(a2.getFile().getAbsolutePath().startsWith(repo.getAbsolutePath()));
@@ -465,7 +467,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     }
 
     this.events.clear();
-    
+
     deleteProject(p3);
     waitForJobsToComplete();
 
@@ -473,13 +475,13 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
       IMavenProjectFacade f1 = manager.create(p1, monitor);
       IMavenProjectFacade f2 = manager.create(p2, monitor);
       assertNull(manager.create(p3, monitor));
-  
+
       assertEquals(2, f1.getMavenProjectArtifacts().size());
       Artifact[] a1 = getMavenProjectArtifacts(f1).toArray(new Artifact[0]);
       // assertTrue(a1[0].getFile().getAbsolutePath().startsWith(repo.getAbsolutePath()));
       assertStartWith(repo.getAbsolutePath(), a1[0].getFile().getAbsolutePath());
       assertEquals(p2.getFile("pom.xml").getLocation().toFile(), a1[1].getFile());
-  
+
       assertEquals(1, f2.getMavenProjectArtifacts().size());
       Artifact a2 = getMavenProjectArtifacts(f1).iterator().next();
       // assertTrue(a2.getFile().getAbsolutePath().startsWith(repo.getAbsolutePath()));
@@ -499,7 +501,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
       IMavenProjectFacade f1 = manager.create(p1, monitor);
       assertNull(manager.create(p2, monitor));
       assertNull(manager.create(p3, monitor));
-  
+
       Artifact[] a1 = getMavenProjectArtifacts(f1).toArray(new Artifact[0]);
       // assertTrue(a1[0].getFile().getAbsolutePath().startsWith(repo.getAbsolutePath()));
       assertStartWith(repo.getAbsolutePath(), a1[0].getFile().getAbsolutePath());
@@ -521,7 +523,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
 
     jar.delete();
 
-    MavenUpdateRequest request = new MavenUpdateRequest(p1, false /*offline*/, false /*updateSnapshots*/ );
+    MavenUpdateRequest request = new MavenUpdateRequest(p1, false /*offline*/, false /*updateSnapshots*/);
     plugin.getMavenProjectManager().refresh(request);
     waitForJobsToComplete();
 
@@ -552,20 +554,20 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     waitForJobsToComplete();
 
     workspace.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
-    
+
     IMarker[] markers = p2.findMarkers(null, true, IResource.DEPTH_INFINITE);
     // (jdt) The container 'Maven Dependencies' references non existing library ...missing/missing/0.0.0/missing-0.0.0.jar'
     // (jdt) The project cannot be built until build path errors are resolved
     // (maven) Missing artifact missing:missing:jar:0.0.0:compile
-    assertEquals(WorkspaceHelpers.toString(markers), 4, markers.length); 
+    assertEquals(WorkspaceHelpers.toString(markers), 4, markers.length);
   }
 
   public void test015_refreshOffline() throws Exception {
     // XXX fix this test on Windows and remove this condition 
-    if(System.getProperty("os.name", "").toLowerCase().indexOf("windows")>-1) {
-      return;  
+    if(System.getProperty("os.name", "").toLowerCase().indexOf("windows") > -1) {
+      return;
     }
-    
+
     IProject p1 = createExisting("t015-p1");
     waitForJobsToComplete();
 
@@ -606,8 +608,8 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     MavenProject mavenProject = manager.create(pom, false, null).getMavenProject(monitor);
     Artifact a = mavenProject.getArtifacts().iterator().next();
     assertTrue(a.isResolved());
-    assertEquals(p4.getFile(IMavenConstants.POM_FILE_NAME).getLocation().toFile().getAbsoluteFile(), 
-        a.getFile().getAbsoluteFile());
+    assertEquals(p4.getFile(IMavenConstants.POM_FILE_NAME).getLocation().toFile().getAbsoluteFile(), a.getFile()
+        .getAbsoluteFile());
 
     copyContent(p2, "pom_changed.xml", "pom.xml");
 
@@ -643,7 +645,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
   }
 
   /**
-   * This test disabled until https://issues.sonatype.org/browse/MNGECLIPSE-1448 is resolved 
+   * This test disabled until https://issues.sonatype.org/browse/MNGECLIPSE-1448 is resolved
    */
   public void _testExtensionPluginResolution() throws Exception {
     IProject p1 = createExisting("MNGECLIPSE380-plugin", "resources/MNGECLIPSE380/plugin");
@@ -667,15 +669,15 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     waitForJobsToComplete();
 
     p1.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
-    
+
     IMavenProjectFacade f1 = manager.create(p1, monitor);
     MavenProject m1 = f1.getMavenProject(monitor);
-    
+
     assertEquals("t019-p1", m1.getArtifactId());
     assertEquals("1.0.0-SNAPSHOT", m1.getVersion());
     assertEquals("plain description", m1.getDescription());
   }
-  
+
   private void assertStartWith(String expected, String actual) {
     assertTrue("Expected to start with " + expected + " but got " + actual, actual.startsWith(expected));
   }
@@ -695,14 +697,14 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
   }
 
   public void testDependencyScopeChanged() throws Exception {
-	//Changing the scope of a dependency should trigger a project update
+    //Changing the scope of a dependency should trigger a project update
     IProject p1 = createExisting("changedscope-p01");
     IProject p2 = createExisting("changedscope-p02");
     waitForJobsToComplete();
 
     IFile pom1 = p1.getFile("pom.xml");
     IFile pom2 = p2.getFile("pom.xml");
-    
+
     {
       IMavenProjectFacade f = manager.create(pom2, false, null);
       Artifact[] a = getMavenProjectArtifacts(f).toArray(new Artifact[0]);
@@ -722,9 +724,8 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
   }
 
   public void testJdkProfileActivation() throws Exception {
-    IProject[] projects = importProjects("projects/jdkprofileactivation", 
-        new String[] {"p001/pom.xml", "p002/pom.xml"}, 
-        new ResolverConfiguration());
+    IProject[] projects = importProjects("projects/jdkprofileactivation",
+        new String[] {"p001/pom.xml", "p002/pom.xml"}, new ResolverConfiguration());
     waitForJobsToComplete();
 
     IMavenProjectFacade f1 = manager.create(projects[0], monitor);
@@ -734,8 +735,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
   }
 
   public void testWorkspaceDependencyVersionRange() throws Exception {
-    IProject[] projects = importProjects("projects/versionrange", 
-        new String[] {"p001/pom.xml", "p002/pom.xml"}, 
+    IProject[] projects = importProjects("projects/versionrange", new String[] {"p001/pom.xml", "p002/pom.xml"},
         new ResolverConfiguration());
     waitForJobsToComplete();
 
@@ -818,4 +818,21 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertNotNull(projects[1]);
   }
 
+  public void test021_dependencyVersionRange() throws Exception {
+    IProject p1 = importProject("resources/t021_dependencyVersionRange/t021-p1/pom.xml");
+    waitForJobsToComplete();
+
+    MavenProjectFacade f1 = manager.create(p1, monitor);
+    List<Artifact> a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
+    assertEquals(1, a1.size());
+    assertStartWith(repo.getAbsolutePath(), a1.get(0).getFile().getAbsolutePath());
+
+    IProject p2 = importProject("resources/t021_dependencyVersionRange/t021-p2/pom.xml");
+    waitForJobsToComplete();
+
+    f1 = manager.create(p1, monitor);
+    a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
+    assertEquals(1, a1.size());
+    assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME).getLocation().toFile(), a1.get(0).getFile());
+  }
 }

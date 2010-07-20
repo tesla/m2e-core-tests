@@ -8,6 +8,11 @@
 
 package org.maven.ide.eclipse.internal.project.registry;
 
+import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
+import org.apache.maven.artifact.versioning.VersionRange;
+
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 
 
@@ -44,9 +49,15 @@ public class MavenRequiredCapability extends RequiredCapability {
   }
 
   public boolean isPotentialMatch(Capability capability) {
-    if(capability instanceof MavenCapability) {
-      return getVersionlessKey().equals(capability.getVersionlessKey()) //
-          && versionRange.equals(((MavenCapability) capability).getVersion());
+    if(capability instanceof MavenCapability && getVersionlessKey().equals(capability.getVersionlessKey())) {
+      try {
+        // TODO may need to cache parsed version and versionRange for performance reasons
+        ArtifactVersion version = new DefaultArtifactVersion(((MavenCapability) capability).getVersion());
+        VersionRange range = VersionRange.createFromVersionSpec(versionRange);
+        return range.containsVersion(version);
+      } catch(InvalidVersionSpecificationException ex) {
+        return true; // better safe than sorry
+      }
     }
     return false;
   }

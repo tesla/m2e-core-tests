@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>t021_dependencyVersionRange</groupId>
+  <artifactId>t021-p2</artifactId>
+  <version>0.0.2-SNAPSHOT</version>
+
+  <distributionManagement>
+    <repository>
+      <uniqueVersion>false</uniqueVersion>
+      <id>tmp</id>
+      <url>file:///tmp/repo</url>
+    </repository>
+    <snapshotRepository>
+      <uniqueVersion>true</uniqueVersion>
+      <id>tmp</id>
+      <url>file:///tmp/repo</url>
+    </snapshotRepository>
+  </distributionManagement>
+</project>
