@@ -384,7 +384,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     events.clear();
 
     // update p2 to have new dependency on junit
-    copyContent(p2, "pom_updated.xml", "pom.xml");
+    copyContent(p2, "pom_newDependency.xml", "pom.xml");
 
     f1 = manager.create(p1, monitor);
     List<Artifact> a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
@@ -393,6 +393,32 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     assertEquals("junit", a1.get(1).getArtifactId());
 
     assertEquals(2, events.size());
+  }
+
+  public void test007_changedVersion() throws Exception {
+    // p1 depends on p2
+    IProject p1 = createExisting("t007-p1");
+    IProject p2 = createExisting("t007-p2");
+    waitForJobsToComplete();
+
+    IMavenProjectFacade f1 = manager.create(p1, monitor);
+    List<Artifact> a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
+    assertEquals(1, f1.getMavenProject(monitor).getArtifacts().size());
+    assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME).getLocation().toFile(), a1.get(0).getFile());
+
+    // update p2 to have new version
+    copyContent(p2, "pom_newVersion.xml", "pom.xml");
+    f1 = manager.create(p1, monitor);
+    a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
+    assertEquals(1, f1.getMavenProject(monitor).getArtifacts().size());
+    assertStartWith(repo.getAbsolutePath(), a1.get(0).getFile().getAbsolutePath());
+  
+    // update p2 back to the original version
+    copyContent(p2, "pom_original.xml", "pom.xml");
+    f1 = manager.create(p1, monitor);
+    a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
+    assertEquals(1, f1.getMavenProject(monitor).getArtifacts().size());
+    assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME).getLocation().toFile(), a1.get(0).getFile());
   }
 
   public void test008_staleMissingParent() throws Exception {

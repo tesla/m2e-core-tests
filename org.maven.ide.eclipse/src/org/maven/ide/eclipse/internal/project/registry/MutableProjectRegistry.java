@@ -51,13 +51,12 @@ public class MutableProjectRegistry extends BasicProjectRegistry implements IPro
   public void setProject(IFile pom, MavenProjectFacade facade) {
     assertNotClosed();
 
-    if(facade == null) {
-      // remove
-      MavenProjectFacade oldFacade = workspacePoms.remove(pom);
-      if(oldFacade != null) {
-        workspaceArtifacts.remove(oldFacade.getArtifactKey());
-      }
-    } else {
+    // remove
+    MavenProjectFacade oldFacade = workspacePoms.remove(pom);
+    if(oldFacade != null) {
+      workspaceArtifacts.remove(oldFacade.getArtifactKey());
+    }
+    if(facade != null) {
       // Add the project to workspaceProjects map
       workspacePoms.put(pom, facade);
 
