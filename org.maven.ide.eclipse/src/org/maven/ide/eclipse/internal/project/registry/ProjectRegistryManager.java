@@ -9,7 +9,6 @@
 package org.maven.ide.eclipse.internal.project.registry;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -588,59 +587,6 @@ public class ProjectRegistryManager {
     MavenExecutionRequest request = createExecutionRequest(state, facade.getPom(), facade.getResolverConfiguration(), monitor);
     request.setGoals(Arrays.asList("package"));
     return getMaven().calculateExecutionPlan(request, facade.getMavenProject(monitor), monitor);
-  }
-
-  private Set<IFile> refreshNestedModules(IFile pom, MavenProject mavenProject) {
-    if (mavenProject == null) {
-      return Collections.emptySet();
-    }
-    
-    Set<IFile> pomSet = new LinkedHashSet<IFile>();
-    for(String module : getMavenProjectModules(mavenProject)) {
-      IFile modulePom = getModulePom(pom, module);
-      if (modulePom != null) {
-        pomSet.add(modulePom);
-      }
-    }
-    return pomSet;
-  }
-
-  private Set<IFile> removeNestedModules(MutableProjectRegistry state, IFile pom, List<String> modules) {
-    if (modules == null || modules.isEmpty()) {
-      return Collections.emptySet();
-    }
-
-    Set<IFile> pomSet = new LinkedHashSet<IFile>();
-    for(String module : modules) {
-      IFile modulePom = getModulePom(pom, module);
-      if (modulePom != null) {
-        pomSet.addAll(remove(state, modulePom));
-      }
-    }
-    return pomSet;
-  }
-
-  private List<String> getMavenProjectModules(MavenProject mavenProject) {
-    return mavenProject == null ? new ArrayList<String>() : mavenProject.getModules();
-  }
-
-  /**
-   * Returns Set<IFile> of nested module POMs that are present in oldMavenProject
-   * but not in mavenProjec.
-   */
-  private Set<IFile> getRemovedNestedModules(IFile pom, List<String> oldModules, List<String> modules) {
-    Set<IFile> result = new LinkedHashSet<IFile>();
-
-    for(String oldModule : oldModules) {
-      if (!modules.contains(oldModule)) {
-        IFile modulePOM = getModulePom(pom, oldModule);
-        if (modulePOM != null) {
-          result.add(modulePOM);
-        }
-      }
-    }
-
-    return result;
   }
 
   public IFile getModulePom(IFile pom, String moduleName) {
