@@ -119,8 +119,16 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
 
   private final GavCalculator gavCalculator = new M2GavCalculator();
 
+  /**
+   * Lazy instantiated nexus indexer instance.
+   */
   private NexusIndexer indexer;
-  
+
+  /**
+   * Lock guarding lazy instantiation of indexerLock instance
+   */
+  private final Object indexerLock = new Object();
+
   private IMaven maven;
 
   private MavenProjectManager projectManager;
@@ -661,9 +669,11 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     return repository == null ? null : getIndexer().getIndexingContexts().get(repository.getUid());
   }
 
-  private synchronized NexusIndexer getIndexer() {
-    if(indexer == null) {
-      indexer = MavenPlugin.getDefault().getNexusIndexer();
+  private NexusIndexer getIndexer() {
+    synchronized(indexerLock) {
+      if(indexer == null) {
+        indexer = MavenPlugin.getDefault().getNexusIndexer();
+      }
     }
     return indexer;
   }
@@ -731,9 +741,12 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     return workspaceIndex;
   }
 
-  public synchronized NexusIndex getLocalIndex() {
-    if(localIndex == null) {
-      localIndex = newLocalIndex(repositoryRegistry.getLocalRepository());
+  public NexusIndex getLocalIndex() {
+    IRepository localRepository = repositoryRegistry.getLocalRepository();
+    synchronized(getIndexLock(localRepository)) {
+      if(localIndex == null) {
+        localIndex = newLocalIndex(localRepository);
+      }
     }
     return localIndex;
   }
@@ -876,10 +889,11 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
         MavenLogger.log(msg, ex);
         throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not add repository index", ex));
       }
-    }
 
-    if (repository.isScope(IRepositoryRegistry.SCOPE_LOCAL)) {
-      this.localIndex = newLocalIndex(repositoryRegistry.getLocalRepository());
+      if (repository.isScope(IRepositoryRegistry.SCOPE_LOCAL)) {
+        // note that we are still synchronized on repository lock at this point
+        this.localIndex = newLocalIndex(repositoryRegistry.getLocalRepository());
+      }
     }
   }
 

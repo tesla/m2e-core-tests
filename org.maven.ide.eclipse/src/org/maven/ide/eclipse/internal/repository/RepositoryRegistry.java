@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -36,9 +37,10 @@ import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.repository.IRepository;
 import org.maven.ide.eclipse.repository.IRepositoryRegistry;
 
+
 /**
  * RepositoryRegistry
- *
+ * 
  * @author igor
  */
 public class RepositoryRegistry implements IRepositoryRegistry, IMavenProjectChangedListener, ISettingsChangeListener {
@@ -50,9 +52,17 @@ public class RepositoryRegistry implements IRepositoryRegistry, IMavenProjectCha
   /**
    * Maps repositoryUrl to IndexInfo of repository index
    */
-  private final Map<String, RepositoryInfo> repositories = new HashMap<String, RepositoryInfo>();
+  private final Map<String, RepositoryInfo> repositories = new ConcurrentHashMap<String, RepositoryInfo>();
 
+  /**
+   * Lazy instantiated local repository instance.
+   */
   private RepositoryInfo localRepository;
+
+  /**
+   * Lock guarding lazy instantiation of localRepository instance
+   */
+  private final Object localRepositoryLock = new Object();
 
   private final RepositoryInfo workspaceRepository;
 
@@ -202,7 +212,7 @@ public class RepositoryRegistry implements IRepositoryRegistry, IMavenProjectCha
     return info;
   }
 
-  public synchronized void updateRegistry(IProgressMonitor monitor) throws CoreException {
+  public void updateRegistry(IProgressMonitor monitor) throws CoreException {
     Settings settings = maven.getSettings();
     List<Mirror> mirrors = maven.getMirrors();
 
@@ -218,7 +228,9 @@ public class RepositoryRegistry implements IRepositoryRegistry, IMavenProjectCha
 
     addRepository(this.workspaceRepository, monitor);
 
-    this.localRepository = newLocalRepositoryInfo();
+    synchronized(localRepository) {
+      this.localRepository = newLocalRepositoryInfo();
+    }
     addRepository(this.localRepository, monitor);
 
     // mirrors
@@ -291,9 +303,11 @@ public class RepositoryRegistry implements IRepositoryRegistry, IMavenProjectCha
     return workspaceRepository;
   }
 
-  public synchronized IRepository getLocalRepository() {
-    if(localRepository == null) {
-      localRepository = newLocalRepositoryInfo();
+  public IRepository getLocalRepository() {
+    synchronized(localRepositoryLock) {
+      if(localRepository == null) {
+        localRepository = newLocalRepositoryInfo();
+      }
     }
 
     return localRepository;
