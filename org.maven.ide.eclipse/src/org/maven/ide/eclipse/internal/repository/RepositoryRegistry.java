@@ -228,7 +228,7 @@ public class RepositoryRegistry implements IRepositoryRegistry, IMavenProjectCha
 
     addRepository(this.workspaceRepository, monitor);
 
-    synchronized(localRepository) {
+    synchronized(localRepositoryLock) {
       this.localRepository = newLocalRepositoryInfo();
     }
     addRepository(this.localRepository, monitor);
