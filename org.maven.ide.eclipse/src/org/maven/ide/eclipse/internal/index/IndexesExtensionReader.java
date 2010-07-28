@@ -33,11 +33,11 @@ public class IndexesExtensionReader implements IRepositoryDiscoverer {
 
   private static final String ATTR_INDEX_ID = "indexId";
 
-  private static final String ATTR_INDEX_ARCHIVE = "archive";
+//  private static final String ATTR_INDEX_ARCHIVE = "archive";
 
   private static final String ATTR_REPOSITORY_URL = "repositoryUrl";
 
-  private static final String ATTR_UPDATE_URL = "updateUrl";
+//  private static final String ATTR_UPDATE_URL = "updateUrl";
 
   private static final String ATTR_IS_SHORT = "isShort";
 
@@ -67,8 +67,8 @@ public class IndexesExtensionReader implements IRepositoryDiscoverer {
     String repositoryUrl = element.getAttribute(ATTR_REPOSITORY_URL);
     boolean isShort = Boolean.valueOf(element.getAttribute(ATTR_IS_SHORT)).booleanValue();
 
-    String indexUpdateUrl = element.getAttribute(ATTR_UPDATE_URL);
-    String archive = element.getAttribute(ATTR_INDEX_ARCHIVE);
+//    String indexUpdateUrl = element.getAttribute(ATTR_UPDATE_URL);
+//    String archive = element.getAttribute(ATTR_INDEX_ARCHIVE);
 
     RepositoryInfo repository = new RepositoryInfo(indexId, repositoryUrl, IRepositoryRegistry.SCOPE_UNKNOWN, null);
     registry.addRepository(repository, monitor);
