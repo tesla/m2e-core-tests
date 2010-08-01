@@ -31,6 +31,11 @@
       <configurator id="org.maven.ide.eclipse.configurator.incompatibleApi"
             class="org.maven.ide.eclipse.configurators.IncompatibleProjectConfigurator"
             name="AJDT-0.9.8" priority="1002"/>
+      <configurator
+            class="org.maven.ide.eclipse.configurators.MNGECLIPSE2313MarkAllRawClasspathEntriesConfigurator"
+            generic="false"
+            id="MNGECLIPSE-2313_markAllRawClasspathEntries">
+      </configurator>
             
    </extension>
    <extension

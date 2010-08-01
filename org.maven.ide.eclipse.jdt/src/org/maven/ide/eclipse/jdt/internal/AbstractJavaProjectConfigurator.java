@@ -98,8 +98,6 @@ public abstract class AbstractJavaProjectConfigurator extends AbstractProjectCon
 
     addProjectSourceFolders(classpath, request, mavenProject, monitor);
 
-    addClasspathEntries(classpath, request, monitor);
-
     String environmentId = getExecutionEnvironmentId(options);
 
     addJREClasspathContainer(classpath, environmentId);
@@ -107,6 +105,8 @@ public abstract class AbstractJavaProjectConfigurator extends AbstractProjectCon
     addMavenClasspathContainer(classpath);
 
     addCustomClasspathEntries(javaProject, classpath);
+
+    invokeJavaProjectConfigurators(classpath, request, monitor);
 
     // now apply new configuration
 
@@ -153,7 +153,7 @@ public abstract class AbstractJavaProjectConfigurator extends AbstractProjectCon
     return request.getMavenProject();
   }
 
-  protected void addClasspathEntries(IClasspathDescriptor classpath, ProjectConfigurationRequest request,
+  protected void invokeJavaProjectConfigurators(IClasspathDescriptor classpath, ProjectConfigurationRequest request,
       final IProgressMonitor monitor) throws CoreException {
     IMavenProjectFacade facade = request.getMavenProjectFacade();
     IProjectConfigurationManager configurationManager = MavenPlugin.getDefault().getProjectConfigurationManager();

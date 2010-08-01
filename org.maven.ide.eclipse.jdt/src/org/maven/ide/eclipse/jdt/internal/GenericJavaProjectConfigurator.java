@@ -85,7 +85,7 @@ public class GenericJavaProjectConfigurator extends AbstractJavaProjectConfigura
   }
 
   @Override
-  protected void addClasspathEntries(IClasspathDescriptor classpath, ProjectConfigurationRequest request,
+  protected void invokeJavaProjectConfigurators(IClasspathDescriptor classpath, ProjectConfigurationRequest request,
       final IProgressMonitor monitor) {
   }
 
