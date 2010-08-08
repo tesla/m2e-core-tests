@@ -24,9 +24,12 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.ModifyEvent;
@@ -104,7 +107,7 @@ public class MavenPomSelectionComponent extends Composite {
 
   public MavenPomSelectionComponent(Composite parent, int style) {
     super(parent, style);
-    createSearchComposite();
+    createSearchComposite();    
   }
   
   private void createSearchComposite() {
@@ -123,9 +126,11 @@ public class MavenPomSelectionComponent extends Composite {
       public void keyPressed(KeyEvent e) {
         if(e.keyCode == SWT.ARROW_DOWN) {
           searchResultViewer.getTree().setFocus();
+          selectFirstElementInTheArtifactTreeIfNoSelectionHasBeenMade();
         }
-      }
+      }      
     });
+    
     searchText.addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent e) {
         scheduleSearch(searchText.getText(), true);
@@ -139,9 +144,29 @@ public class MavenPomSelectionComponent extends Composite {
     Tree tree = new Tree(this, SWT.BORDER | SWT.SINGLE);
     tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
     tree.setData("name", "searchResultTree");
+    tree.addFocusListener( new FocusListener() {
 
-    searchResultViewer = new TreeViewer(tree);
+      public void focusGained(FocusEvent e) {
+        selectFirstElementInTheArtifactTreeIfNoSelectionHasBeenMade();
+      }
+
+      public void focusLost(FocusEvent e) {
+        
+      }
+    });
     
+    searchResultViewer = new TreeViewer(tree);
+  }
+  
+  void selectFirstElementInTheArtifactTreeIfNoSelectionHasBeenMade() {
+    //
+    // If we have started a new search when focus is passed to the tree viewer we will automatically select
+    // the first element if no element has been selected from a previous expedition into the tree viewer.
+    //
+    if(searchResultViewer.getTree().getItemCount()>0 && searchResultViewer.getSelection().isEmpty()) {
+      Object artifact = searchResultViewer.getTree().getTopItem().getData();
+      searchResultViewer.setSelection(new StructuredSelection(artifact), true);
+    }            
   }
   
   protected boolean showClassifiers(){
@@ -373,13 +398,12 @@ public class MavenPomSelectionComponent extends Composite {
           setStatus(severity, message);
           if(result != null) {
             if(!searchResultViewer.getControl().isDisposed()){
-              searchResultViewer.setInput(result);
+              searchResultViewer.setInput(result);              
             }
           }
         }
       });
     }
-
   }
 
   public static class SearchResultLabelProvider extends LabelProvider implements IColorProvider {
@@ -487,6 +511,5 @@ public class MavenPomSelectionComponent extends Composite {
     }
 
   }
-
 }
 

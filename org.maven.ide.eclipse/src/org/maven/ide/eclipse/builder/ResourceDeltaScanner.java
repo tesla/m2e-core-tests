@@ -12,15 +12,14 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.codehaus.plexus.util.AbstractScanner;
-
-
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.runtime.CoreException;
+
+import org.codehaus.plexus.util.AbstractScanner;
 
 public class ResourceDeltaScanner extends AbstractScanner {
 

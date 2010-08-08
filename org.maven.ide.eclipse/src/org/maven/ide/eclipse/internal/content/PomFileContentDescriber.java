@@ -14,9 +14,10 @@ import java.io.Reader;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.eclipse.core.runtime.content.IContentDescription;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+
+import org.eclipse.core.runtime.content.IContentDescription;
 
 
 /**

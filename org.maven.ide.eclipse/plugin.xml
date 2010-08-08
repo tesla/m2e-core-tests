@@ -258,9 +258,23 @@
       <command id="org.maven.ide.eclipse.ui.command.openPom"
                categoryId="org.eclipse.ui.category.navigate"
                name="%m2.shortcut.open.pom"/>
-      <command id="org.maven.ide.eclipse.ui.command.openType"
-               categoryId="org.eclipse.ui.category.navigate"
-               name="%m2.shortcut.open.type"/>
+      <command
+            categoryId="org.eclipse.ui.category.navigate"
+            description="Open Maven Type"
+            id="org.maven.ide.eclipse.ui.command.openType"
+            name="%m2.shortcut.open.type"/>
+      <command
+            categoryId="org.eclipse.ui.category.edit"
+            description="Add Maven Dependency"
+            id="org.maven.ide.eclipse.ui.command.addDependency"
+            name="%m2.shortcut.addDependency">
+      </command>
+      <command
+            categoryId="org.eclipse.ui.category.edit"
+            description="Add Maven Plugin"
+            id="org.maven.ide.eclipse.ui.command.addPlugin"
+            name="%m2.shortcut.addPlugin">
+      </command>
    </extension>
 
    <extension point="org.eclipse.core.resources.markers"
@@ -420,24 +434,15 @@
                style="push"
                menubarPath="navigate/open.ext"
                tooltip="Open Type from Maven"/>
-       <action id="org.maven.ide.eclipse.ui.open.pom"
-               class="org.maven.ide.eclipse.actions.OpenPomAction:artifact"
-               definitionId="org.maven.ide.eclipse.ui.command.openPom"
-               label="Open Maven POM..."
-               icon="icons/open_pom.gif"
-               style="push"
-               menubarPath="navigate/open.ext"
-               tooltip="Open Maven POM"/>
-      </actionSet>
-     <actionSet
-           id="org.maven.ide.eclipse.actionSet"
-           label="Maven"
-           visible="true">
-        <menu
-              id="mavenMenu"
-              label="Maven"
-              path="project/additions">
-        </menu>
+       <action
+             class="org.maven.ide.eclipse.actions.OpenPomAction:artifact"
+             definitionId="org.maven.ide.eclipse.ui.command.openPom"
+             icon="icons/open_pom.gif"
+             id="org.maven.ide.eclipse.ui.open.pom"
+             label="Open Maven POM..."
+             menubarPath="navigate/open.ext"
+             style="push"
+             tooltip="Open Maven POM"/>
         <action
               class="org.maven.ide.eclipse.actions.RefreshMavenModelsAction"
               icon="icons/update_dependencies.gif"
@@ -446,6 +451,30 @@
               menubarPath="project/additions"
               tooltip="Refresh Maven Models">
         </action>
+      </actionSet>
+      
+      <actionSet
+            id="org.maven.ide.eclipse.actions.maven"
+            label="Maven"
+            visible="true">
+         <action
+               class="org.maven.ide.eclipse.actions.AddDependencyAction"
+               definitionId="org.maven.ide.eclipse.ui.command.addDependency"
+               icon="icons/open_pom.gif"
+               id="org.maven.ide.eclipse.actions.add.dependency"
+               label="Add Maven Dependency"
+               menubarPath="navigate/open.ext"
+               style="push"
+               tooltip="Add Maven Dependency">
+         </action>
+         <action
+               class="org.maven.ide.eclipse.actions.AddPluginAction"
+               definitionId="org.maven.ide.eclipse.ui.command.addPlugin"
+               id="org.maven.ide.eclipse.actions.add.plugin"
+               label="Add Maven Plugin"
+               style="push"
+               tooltip="Add Maven Plugin">
+         </action>      
      </actionSet>
    </extension>
 
@@ -528,6 +557,21 @@
       <configurator
             class="org.maven.ide.eclipse.internal.embedder.DefaultMavenContainerConfigurator">
       </configurator>
+   </extension>
+   
+   <extension point="org.eclipse.ui.bindings">
+      <key
+            commandId="org.maven.ide.eclipse.ui.command.addDependency"
+            contextId="org.eclipse.core.runtime.xml"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="Ctrl+Shift+D">
+      </key>
+      <key
+            commandId="org.maven.ide.eclipse.ui.command.addPlugin"
+            contextId="org.eclipse.core.runtime.xml"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="Ctrl+Shift+P">
+      </key>
    </extension>
 
    <!--

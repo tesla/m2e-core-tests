@@ -8,6 +8,7 @@
 package org.maven.ide.eclipse.internal.index;
 
 import org.eclipse.core.runtime.internal.adaptor.Locker;
+
 import org.sonatype.nexus.index.fs.Lock;
 
 @SuppressWarnings("restriction")

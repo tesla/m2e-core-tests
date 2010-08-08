@@ -15,9 +15,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.apache.lucene.index.Term;
+import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.TermQuery;
-import org.apache.lucene.search.BooleanClause.Occur;
 
 import org.sonatype.nexus.index.ArtifactInfo;
 

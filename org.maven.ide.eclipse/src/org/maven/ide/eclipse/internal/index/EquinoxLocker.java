@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.eclipse.core.runtime.internal.adaptor.BasicLocation;
+
 import org.sonatype.nexus.index.fs.Lock;
 import org.sonatype.nexus.index.fs.Locker;
 
