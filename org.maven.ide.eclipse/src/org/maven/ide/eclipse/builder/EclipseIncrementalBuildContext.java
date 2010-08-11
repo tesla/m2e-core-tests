@@ -18,11 +18,10 @@ import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
-import org.sonatype.plexus.build.incremental.EmptyScanner;
-
-
 import org.codehaus.plexus.util.DirectoryScanner;
 import org.codehaus.plexus.util.Scanner;
+
+import org.sonatype.plexus.build.incremental.EmptyScanner;
 
 public class EclipseIncrementalBuildContext extends AbstractEclipseBuildContext {
 

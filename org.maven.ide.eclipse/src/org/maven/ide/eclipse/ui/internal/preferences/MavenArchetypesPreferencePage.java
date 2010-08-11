@@ -42,9 +42,9 @@ import org.eclipse.ui.browser.IWebBrowser;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.archetype.ArchetypeCatalogFactory;
-import org.maven.ide.eclipse.archetype.ArchetypeManager;
 import org.maven.ide.eclipse.archetype.ArchetypeCatalogFactory.LocalCatalogFactory;
 import org.maven.ide.eclipse.archetype.ArchetypeCatalogFactory.RemoteCatalogFactory;
+import org.maven.ide.eclipse.archetype.ArchetypeManager;
 import org.maven.ide.eclipse.core.MavenLogger;
 
 
