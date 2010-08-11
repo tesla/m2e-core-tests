@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Maven POM XML Editor
 Bundle-SymbolicName: org.maven.ide.eclipse.editor.xml;singleton:=true
-Bundle-Version: 0.11.0.qualifier
+Bundle-Version: 0.11.0.20100811-1422
 Bundle-Activator: org.maven.ide.eclipse.editor.xml.MvnIndexPlugin
 Eclipse-LazyStart: true
 Require-Bundle: org.eclipse.core.runtime,

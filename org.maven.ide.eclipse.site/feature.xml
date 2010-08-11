@@ -2,7 +2,7 @@
 <feature
       id="org.maven.ide.eclipse.site"
       label="Maven Integration for Eclipse Update Site"
-      version="0.11.0.qualifier"
+      version="0.11.0.20100811-1422"
       provider-name="Sonatype, Inc.">
 
    <includes
