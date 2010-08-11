@@ -24,10 +24,11 @@ import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTable;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.maven.ide.eclipse.integration.tests.common.SwtbotUtil;
 
-
+@Ignore
 public class PomEditor2Test extends PomEditorTestBase {
 
   ///MNGECLIPSE-912

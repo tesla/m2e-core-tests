@@ -20,6 +20,7 @@ import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.swt.SWT;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotEclipseEditor;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.maven.ide.eclipse.integration.tests.common.ContextMenuHelper;
 import org.maven.ide.eclipse.integration.tests.common.SwtbotUtil;
@@ -29,6 +30,7 @@ import org.maven.ide.eclipse.integration.tests.common.SwtbotUtil;
  * @author Eugene Kuleshov
  * @author Anton Kraev
  */
+@Ignore
 public class PomEditorTest extends PomEditorTestBase {
 
   @Test
