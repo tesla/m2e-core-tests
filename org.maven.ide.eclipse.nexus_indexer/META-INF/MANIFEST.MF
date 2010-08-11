@@ -19,7 +19,7 @@ Require-Bundle: org.maven.ide.eclipse.maven_embedder;bundle-version="[0.11.0,0.1
  org.maven.ide.eclipse.archetype_common;bundle-version="[0.11.0,0.12.0)"
 Bundle-Vendor: Sonatype, Inc.
 MavenArtifact-BaseVersion: 2.0.4-SNAPSHOT
-Bundle-Version: 0.11.0.qualifier
+Bundle-Version: 0.11.1.qualifier
 MavenArtifact-GroupId: org.maven.ide.eclipse
 MavenArtifact-ArtifactId: org.maven.ide.eclipse.nexus_indexer
 Bundle-ManifestVersion: 2
