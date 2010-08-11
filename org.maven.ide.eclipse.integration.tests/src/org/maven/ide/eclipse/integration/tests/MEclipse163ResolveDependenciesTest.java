@@ -24,6 +24,7 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.integration.tests.common.SwtbotUtil;
@@ -37,6 +38,7 @@ import org.maven.ide.eclipse.repository.IRepositoryRegistry;
 /**
  * @author Rich Seddon
  */
+@Ignore
 @SuppressWarnings("restriction")
 public class MEclipse163ResolveDependenciesTest extends M2EUIIntegrationTestCase {
 

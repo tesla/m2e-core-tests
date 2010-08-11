@@ -12,12 +12,14 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 
 /**
  * @author rseddon
  */
+@Ignore
 public class MEclipse161ArchetypeProjectCreationTest extends M2EUIIntegrationTestCase {
 
   public MEclipse161ArchetypeProjectCreationTest() {

@@ -11,13 +11,14 @@ import org.eclipse.swt.widgets.Widget;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotEclipseEditor;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.maven.ide.eclipse.editor.pom.MavenPomEditor;
 import org.maven.ide.eclipse.integration.tests.common.ContextMenuHelper;
 import org.maven.ide.eclipse.integration.tests.common.SwtbotUtil;
 import org.maven.ide.eclipse.tests.common.WorkspaceHelpers;
 
-
+@Ignore
 public class MngEclipse1515LifecyleMappingTest extends M2EUIIntegrationTestCase {
 
   public MngEclipse1515LifecyleMappingTest() {

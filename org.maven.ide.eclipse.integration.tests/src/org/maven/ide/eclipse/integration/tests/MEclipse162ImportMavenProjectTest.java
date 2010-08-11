@@ -16,6 +16,7 @@ import org.junit.Test;
 /**
  * @author Rich Seddon
  */
+@Ignore
 public class MEclipse162ImportMavenProjectTest extends M2EUIIntegrationTestCase {
 
   public MEclipse162ImportMavenProjectTest() {
