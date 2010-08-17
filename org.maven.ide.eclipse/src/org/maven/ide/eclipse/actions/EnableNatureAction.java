@@ -130,7 +130,6 @@ public class EnableNatureAction implements IObjectActionDelegate, IExecutableExt
           } catch(CoreException ex) {
             MavenLogger.log(ex);
           }
-          // TODO Auto-generated method run
           return Status.OK_STATUS;
         }
       };
