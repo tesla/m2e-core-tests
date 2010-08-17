@@ -16,7 +16,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -86,9 +90,8 @@ public class EnableNatureAction implements IObjectActionDelegate, IExecutableExt
     }
   }
 
-  private void enableNature(IProject project, boolean isSingle) {
-    try {
-      MavenPlugin plugin = MavenPlugin.getDefault();
+  private void enableNature(final IProject project, boolean isSingle) {
+      final MavenPlugin plugin = MavenPlugin.getDefault();
       IFile pom = project.getFile(IMavenConstants.POM_FILE_NAME);
       if(isSingle && !pom.exists()) {
         // XXX move into AbstractProjectConfigurator and use Eclipse project settings
@@ -105,26 +108,34 @@ public class EnableNatureAction implements IObjectActionDelegate, IExecutableExt
           return;
         }
       }
+      Job job = new Job("Enabling Maven Dependency Management") {
+  
+        protected IStatus run(IProgressMonitor monitor) {
+          try {
+            ResolverConfiguration configuration = new ResolverConfiguration();
+            configuration.setResolveWorkspaceProjects(workspaceProjects);
+            configuration.setActiveProfiles("");
+  
+            boolean hasMavenNature = project.hasNature(IMavenConstants.NATURE_ID);
+  
+            IProjectConfigurationManager configurationManager = plugin.getProjectConfigurationManager();
+  
+            configurationManager.enableMavenNature(project, configuration, new NullProgressMonitor());
+  
+            if(!hasMavenNature) {
+              IMavenConfiguration mavenConfiguration = MavenPlugin.getDefault().getMavenConfiguration();
+              configurationManager.updateProjectConfiguration(project, configuration, //
+                  mavenConfiguration.getGoalOnUpdate(), new NullProgressMonitor());
+            }
+          } catch(CoreException ex) {
+            MavenLogger.log(ex);
+          }
+          // TODO Auto-generated method run
+          return Status.OK_STATUS;
+        }
+      };
+      job.schedule();
 
-      ResolverConfiguration configuration = new ResolverConfiguration();
-      configuration.setResolveWorkspaceProjects(workspaceProjects);
-      configuration.setActiveProfiles("");
-      
-      boolean hasMavenNature = project.hasNature(IMavenConstants.NATURE_ID);
-      
-      IProjectConfigurationManager configurationManager = plugin.getProjectConfigurationManager();
-      
-      configurationManager.enableMavenNature(project, configuration, new NullProgressMonitor());
-      
-      if(!hasMavenNature) {
-        IMavenConfiguration mavenConfiguration = MavenPlugin.getDefault().getMavenConfiguration();
-        configurationManager.updateProjectConfiguration(project, configuration, //
-            mavenConfiguration.getGoalOnUpdate(), new NullProgressMonitor());
-      }
-
-    } catch(CoreException ex) {
-      MavenLogger.log(ex);
-    }
   }
 
 }
