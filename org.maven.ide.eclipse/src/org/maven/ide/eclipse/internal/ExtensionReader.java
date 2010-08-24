@@ -32,6 +32,7 @@ import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.project.IMavenMarkerManager;
+import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
 import org.maven.ide.eclipse.project.configurator.IExtensionLifecycleMapping;
@@ -46,38 +47,42 @@ import org.maven.ide.eclipse.project.configurator.ILifecycleMapping;
 public class ExtensionReader {
 
   public static final String EXTENSION_ARCHETYPES = "org.maven.ide.eclipse.archetypeCatalogs";
-  
+
   public static final String EXTENSION_PROJECT_CONFIGURATORS = "org.maven.ide.eclipse.projectConfigurators";
 
   public static final String EXTENSION_LIFECYCLE_MAPPINGS = "org.maven.ide.eclipse.lifecycleMappings";
 
   public static final String EXTENSION_DEFAULT_LIFECYCLE_MAPPINGS = "org.maven.ide.eclipse.defaultLifecycleMappings";
 
+  public static final String EXTENSION_PROJECT_CHANGED_EVENT_LISTENERS = "org.maven.ide.eclipse.mavenProjectChangedListeners";
+
   private static final String ELEMENT_LOCAL_ARCHETYPE = "local";
 
   private static final String ELEMENT_REMOTE_ARCHETYPE = "remote";
 
   private static final String ATTR_ID = "id";
-  
+
   private static final String ATTR_NAME = "name";
 
   private static final String ATTR_URL = "url";
-  
+
   private static final String ATTR_DESCRIPTION = "description";
 
   private static final String ELEMENT_CONFIGURATOR = "configurator";
-  
+
   private static final String ELEMENT_LIFECYCLE_MAPPING = "lifecycleMapping";
 
   private static final String ELEMENT_DEFAULT_LIFECYCLE_MAPPING = "defaultLifecycleMapping";
 
+  private static final String ELEMENT_LISTENER = "listener";
+
   private static final String ATTR_PACKAGING = "packaging";
-  
+
   private static final String ATTR_LIFECYCLE_MAPPING_ID = "lifecycleMappingId";
 
   public static List<ArchetypeCatalogFactory> readArchetypeExtensions() {
     List<ArchetypeCatalogFactory> archetypeCatalogs = new ArrayList<ArchetypeCatalogFactory>();
-    
+
     IExtensionRegistry registry = Platform.getExtensionRegistry();
     IExtensionPoint archetypesExtensionPoint = registry.getExtensionPoint(EXTENSION_ARCHETYPES);
     if(archetypesExtensionPoint != null) {
@@ -98,24 +103,25 @@ public class ExtensionReader {
   private static ArchetypeCatalogFactory readArchetypeCatalogs(IConfigurationElement element, IContributor contributor) {
     if(ELEMENT_LOCAL_ARCHETYPE.equals(element.getName())) {
       String name = element.getAttribute(ATTR_NAME);
-      if(name!=null) {
+      if(name != null) {
         Bundle[] bundles = Platform.getBundles(contributor.getName(), null);
         URL catalogUrl = null;
         for(int i = 0; i < bundles.length; i++ ) {
           Bundle bundle = bundles[i];
           catalogUrl = bundle.getEntry(name);
-          if(catalogUrl!=null) {
+          if(catalogUrl != null) {
             String description = element.getAttribute(ATTR_DESCRIPTION);
             String url = catalogUrl.toString();
             // XXX ARCHETYPE-161: RemoteCatalogArchetypeDataSource don't allow to download arbitrary urls
-            return new ArchetypeCatalogFactory.RemoteCatalogFactory(url.substring(0, url.lastIndexOf("/")), description, false);
+            return new ArchetypeCatalogFactory.RemoteCatalogFactory(url.substring(0, url.lastIndexOf("/")),
+                description, false);
           }
         }
         MavenLogger.log("Unable to find Archetype catalog " + name + " in " + contributor.getName(), null);
       }
     } else if(ELEMENT_REMOTE_ARCHETYPE.equals(element.getName())) {
       String url = element.getAttribute(ATTR_URL);
-      if(url!=null) {
+      if(url != null) {
         String description = element.getAttribute(ATTR_DESCRIPTION);
         return new ArchetypeCatalogFactory.RemoteCatalogFactory(url, description, false);
       }
@@ -126,7 +132,7 @@ public class ExtensionReader {
   public static List<AbstractProjectConfigurator> readProjectConfiguratorExtensions(MavenProjectManager projectManager,
       IMavenConfiguration runtimeManager, IMavenMarkerManager markerManager, MavenConsole console) {
     ArrayList<AbstractProjectConfigurator> projectConfigurators = new ArrayList<AbstractProjectConfigurator>();
-    
+
     IExtensionRegistry registry = Platform.getExtensionRegistry();
     IExtensionPoint configuratorsExtensionPoint = registry.getExtensionPoint(EXTENSION_PROJECT_CONFIGURATORS);
     if(configuratorsExtensionPoint != null) {
@@ -164,15 +170,13 @@ public class ExtensionReader {
         }
       }
     }
-    
+
     return projectConfigurators;
   }
 
-
-  
   public static Map<String, ILifecycleMapping> readLifecycleMappingExtensions() {
     Map<String, ILifecycleMapping> lifecycleMappings = new HashMap<String, ILifecycleMapping>();
-    
+
     IExtensionRegistry registry = Platform.getExtensionRegistry();
     IExtensionPoint configuratorsExtensionPoint = registry.getExtensionPoint(EXTENSION_LIFECYCLE_MAPPINGS);
     if(configuratorsExtensionPoint != null) {
@@ -183,7 +187,7 @@ public class ExtensionReader {
           if(element.getName().equals(ELEMENT_LIFECYCLE_MAPPING)) {
             try {
               Object o = element.createExecutableExtension(AbstractProjectConfigurator.ATTR_CLASS);
-              
+
               IExtensionLifecycleMapping lifecycleMapping = (IExtensionLifecycleMapping) o;
               String id = element.getAttribute(ATTR_ID);
               lifecycleMapping.setName(element.getAttribute(ATTR_NAME));
@@ -195,7 +199,7 @@ public class ExtensionReader {
               MavenLogger.log(ex);
             }
           }
-          
+
         }
       }
     }
@@ -204,7 +208,7 @@ public class ExtensionReader {
 
   public static Map<String, String> readDefaultLifecycleMappingExtensions() {
     Map<String, String> defaultLifecycleMappings = new HashMap<String, String>();
-    
+
     IExtensionRegistry registry = Platform.getExtensionRegistry();
     IExtensionPoint mappingsExtensionPoint = registry.getExtensionPoint(EXTENSION_DEFAULT_LIFECYCLE_MAPPINGS);
     if(mappingsExtensionPoint != null) {
@@ -216,7 +220,7 @@ public class ExtensionReader {
             String packaging = element.getAttribute(ATTR_PACKAGING);
             String lifecycleMappingId = element.getAttribute(ATTR_LIFECYCLE_MAPPING_ID);
 
-            if (packaging != null && lifecycleMappingId != null) {
+            if(packaging != null && lifecycleMappingId != null) {
               defaultLifecycleMappings.put(packaging, lifecycleMappingId);
             }
           }
@@ -226,5 +230,28 @@ public class ExtensionReader {
     return defaultLifecycleMappings;
   }
 
-}
+  public static List<IMavenProjectChangedListener> readProjectChangedEventListenerExtentions() {
+    ArrayList<IMavenProjectChangedListener> listeners = new ArrayList<IMavenProjectChangedListener>();
 
+    IExtensionRegistry registry = Platform.getExtensionRegistry();
+    IExtensionPoint mappingsExtensionPoint = registry.getExtensionPoint(EXTENSION_PROJECT_CHANGED_EVENT_LISTENERS);
+    if(mappingsExtensionPoint != null) {
+      IExtension[] mappingsExtensions = mappingsExtensionPoint.getExtensions();
+      for(IExtension extension : mappingsExtensions) {
+        IConfigurationElement[] elements = extension.getConfigurationElements();
+        for(IConfigurationElement element : elements) {
+          if(element.getName().equals(ELEMENT_LISTENER)) {
+            try {
+              listeners.add( (IMavenProjectChangedListener) element.createExecutableExtension("class") );
+            } catch(CoreException ex) {
+              MavenLogger.log(ex);
+            }
+          }
+        }
+      }
+    }
+
+    return listeners;
+  }
+
+}

@@ -9,6 +9,7 @@
 package org.maven.ide.eclipse.internal.project.registry;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -617,14 +618,15 @@ public class ProjectRegistryManager {
   }
 
   public void notifyProjectChangeListeners(List<MavenProjectChangedEvent> events, IProgressMonitor monitor) {
-    if (events.size() > 0) {
+    if(events.size() > 0) {
       MavenProjectChangedEvent[] eventsArray = events.toArray(new MavenProjectChangedEvent[events.size()]);
-      IMavenProjectChangedListener[] listeners;
-      synchronized (this.projectChangeListeners) {
-        listeners = this.projectChangeListeners.toArray(new IMavenProjectChangedListener[this.projectChangeListeners.size()]);
+      ArrayList<IMavenProjectChangedListener> listeners = new ArrayList<IMavenProjectChangedListener>();
+      synchronized(this.projectChangeListeners) {
+        listeners.addAll(this.projectChangeListeners);
       }
-      for (int i = 0; i < listeners.length; i++) {
-        listeners[i].mavenProjectChanged(eventsArray, monitor);
+      listeners.addAll(ExtensionReader.readProjectChangedEventListenerExtentions());
+      for(IMavenProjectChangedListener listener : listeners) {
+        listener.mavenProjectChanged(eventsArray, monitor);
       }
     }
   }

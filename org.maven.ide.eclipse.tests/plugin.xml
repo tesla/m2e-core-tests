@@ -45,5 +45,11 @@
             repositoryUrl="file:testIndex">
       </index>
    </extension>
+   <extension
+         point="org.maven.ide.eclipse.mavenProjectChangedListeners">
+      <listener
+            class="org.maven.ide.eclipse.internal.project.TestMavenProjectChangedListener">
+      </listener>
+   </extension>
 
 </plugin>

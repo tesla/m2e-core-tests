@@ -18,6 +18,7 @@
    <extension-point id="lifecycleMappingPropertyPage" name = "Maven Lifecycle Mapping Property Page" schema = "schema/lifecycleMappingPropertyPage.exsd"/>
    <extension-point id="defaultLifecycleMappings" name="Default Maven Lifecycle Mappings" schema="schema/defaultLifecycleMappings.exsd"/>
    <extension-point id="mavenContainerConfigurators" name="Maven Core Plexus Container Configurators" schema="schema/mavenContainerConfigurators.exsd"/>
+   <extension-point id="mavenProjectChangedListeners" name="mavenProjectChangedListeners" schema="schema/mavenProjectChangedListeners.exsd"/>
    <extension point="org.eclipse.ui.intro.configExtension">
       <configExtension configId="org.eclipse.ui.intro.universalConfig"
                        content="intro/overview.xml"/>
