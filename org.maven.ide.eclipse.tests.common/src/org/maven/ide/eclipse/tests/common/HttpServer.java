@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -91,6 +92,8 @@ public class HttpServer {
   private Collection<String> recordedPatterns = new HashSet<String>();
 
   private List<String> recordedRequests = new ArrayList<String>();
+
+  private Map<String, Map<String, String>> recordedHeaders = new HashMap<String, Map<String, String>>();
 
   protected Connector newHttpConnector() {
     SelectChannelConnector connector = new SelectChannelConnector();
@@ -398,6 +401,16 @@ public class HttpServer {
   }
 
   /**
+   * Gets the headers sent in the most recent request to the specified path.
+   * 
+   * @param uri the path
+   * @return the http request headers
+   */
+  public Map<String, String> getRecordedHeaders(String uri) {
+    return recordedHeaders.get(uri);
+  }
+
+  /**
    * Sets a token to replace during resource filtering. Upon server start, the following tokens will be defined
    * automatically: <code>@basedir@</code>, <code>@baseurl@</code>, <code>@baseuri@</code>, <code>@port.http@</code> and
    * <code>@port.https@</code>.
@@ -668,6 +681,13 @@ public class HttpServer {
         if(uri.matches(pattern)) {
           String req = request.getMethod() + " " + uri;
           recordedRequests.add(req);
+
+          Map<String, String> headers = new HashMap<String, String>();
+          recordedHeaders.put(uri, headers);
+          for(Enumeration<String> h = request.getHeaderNames(); h.hasMoreElements();) {
+            String headername = h.nextElement();
+            headers.put(headername, request.getHeader(headername));
+          }
         }
       }
     }
