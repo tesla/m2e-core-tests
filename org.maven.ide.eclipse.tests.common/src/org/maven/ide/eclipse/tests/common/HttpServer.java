@@ -607,7 +607,14 @@ public class HttpServer {
           File basedir = resourceDirs.get(contextRoot);
           File file = new File(basedir, path);
 
-          if(HttpMethods.PUT.equals(request.getMethod())) {
+          if(HttpMethods.HEAD.equals(request.getMethod())) {
+            if(file.exists())
+              response.setStatus(HttpServletResponse.SC_OK);
+            else
+              response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            ((Request) request).setHandled(true);
+            return;
+          } else if(HttpMethods.PUT.equals(request.getMethod())) {
             file.getParentFile().mkdirs();
             FileOutputStream os = new FileOutputStream(file);
             try {
