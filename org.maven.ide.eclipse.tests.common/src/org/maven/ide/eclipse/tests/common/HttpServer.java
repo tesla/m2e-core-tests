@@ -614,7 +614,7 @@ public class HttpServer {
               response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             ((Request) request).setHandled(true);
             return;
-          } else if(HttpMethods.PUT.equals(request.getMethod())) {
+          } else if(HttpMethods.PUT.equals(request.getMethod()) || HttpMethods.POST.equals(request.getMethod())) {
             file.getParentFile().mkdirs();
             FileOutputStream os = new FileOutputStream(file);
             try {
@@ -623,7 +623,7 @@ public class HttpServer {
               os.close();
             }
 
-            response.setStatus(HttpServletResponse.SC_OK);
+            response.setStatus(HttpServletResponse.SC_CREATED);
             ((Request) request).setHandled(true);
           } else if(file.isFile()) {
             FileInputStream is = new FileInputStream(file);
