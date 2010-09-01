@@ -10,7 +10,6 @@ package org.maven.ide.eclipse.scm;
 
 import java.io.File;
 import java.io.InputStream;
-import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -18,7 +17,6 @@ import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.maven.ide.eclipse.core.MavenLogger;
-import org.maven.ide.eclipse.project.IMavenProjectImportResult;
 import org.maven.ide.eclipse.project.MavenProjectScmInfo;
 
 /**
@@ -125,11 +123,6 @@ public abstract class ScmHandler implements Comparable<ScmHandler>, IExecutableE
       return false;
     }
     return true;
-  }
-  
-  public void afterProjectsImport(Set<IMavenProjectImportResult> projectImportResults, File scmRepositoryLocation,
-      IProgressMonitor monitor) throws CoreException {
-    // Do nothing by default
   }
 
 }
