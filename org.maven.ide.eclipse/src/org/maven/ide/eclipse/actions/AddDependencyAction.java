@@ -15,6 +15,8 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 
 import org.apache.maven.model.Dependency;
 
@@ -27,7 +29,7 @@ import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.ui.dialogs.MavenRepositorySearchDialog;
 
 
-public class AddDependencyAction extends MavenActionSupport {
+public class AddDependencyAction extends MavenActionSupport implements IWorkbenchWindowActionDelegate {
 
   public static final String ID = "org.maven.ide.eclipse.addDependencyAction";
 
@@ -58,5 +60,11 @@ public class AddDependencyAction extends MavenActionSupport {
         }
       }
     }
+  }
+
+  public void dispose() {
+  }
+
+  public void init(IWorkbenchWindow window) {
   }
 }
