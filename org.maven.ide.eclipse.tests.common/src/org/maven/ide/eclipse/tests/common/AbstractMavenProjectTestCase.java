@@ -358,8 +358,19 @@ public abstract class AbstractMavenProjectTestCase extends TestCase {
     return WorkspaceHelpers.toString(markers);
   }
 
-protected void copyContent(IProject project, String from, String to) throws Exception {
-    InputStream contents = project.getFile(from).getContents();
+  protected void copyContent(IProject project, String from, String to) throws Exception {
+    copyContent(project, project.getFile(from).getContents(), to);
+  }
+
+  protected void copyContent(IProject project, File from, String to) throws Exception {
+    copyContent(project, new FileInputStream(from), to);
+  }
+
+  /**
+   * closes contents stream
+   */
+  private void copyContent(IProject project, InputStream contents, String to) throws CoreException, IOException,
+      InterruptedException {
     try {
       IFile file = project.getFile(to);
       if (!file.exists()) {
