@@ -113,19 +113,21 @@ public abstract class MavenActionSupport implements IObjectActionDelegate {
         }
       }
     }    
+
     //
     // Otherwise we will assume a pom.xml file or IProject is being selected in the
     // package explorer and we'll get the IFile from that. Otherwise we'll bail.
     //
-    if(file == null) {
-      Object o = selection.iterator().next();
+    Object o = selection.iterator().next();
 
-      if(o instanceof IProject) {
-        file = ((IProject) o).getFile(IMavenConstants.POM_FILE_NAME);
-      } else if(o instanceof IFile) {
-        file = (IFile) o;
-      } 
-    }    
-    return null;
+    if(o instanceof IProject) {
+      file = ((IProject) o).getFile(IMavenConstants.POM_FILE_NAME);
+    } else if(o instanceof IFile) {
+      file = (IFile) o;
+    } else {
+      file = null;
+    }
+
+    return file;
   }
 }

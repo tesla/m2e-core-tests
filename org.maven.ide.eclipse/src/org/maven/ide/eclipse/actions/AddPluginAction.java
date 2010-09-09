@@ -13,6 +13,8 @@ import java.util.Collections;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.window.Window;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
@@ -23,7 +25,7 @@ import org.maven.ide.eclipse.index.IndexedArtifactFile;
 import org.maven.ide.eclipse.ui.dialogs.MavenRepositorySearchDialog;
 
 
-public class AddPluginAction extends MavenActionSupport {
+public class AddPluginAction extends MavenActionSupport implements IWorkbenchWindowActionDelegate {
 
   public static final String ID = "org.maven.ide.eclipse.addPluginAction";
 
@@ -49,5 +51,11 @@ public class AddPluginAction extends MavenActionSupport {
         }
       }
     }
+  }
+
+  public void dispose() {
+  }
+
+  public void init(IWorkbenchWindow window) {
   }
 }
