@@ -13,6 +13,7 @@ import static org.junit.Assert.assertTrue;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.maven.ide.eclipse.core.Messages;
 import org.maven.ide.eclipse.integration.tests.common.SwtbotUtil;
@@ -21,6 +22,7 @@ import org.maven.ide.eclipse.integration.tests.common.SwtbotUtil;
 /**
  * @author dyocum
  */
+@Ignore
 public class MNGEclipse1687ArchetypeCreationTest extends M2EUIIntegrationTestCase {
 
   private static final String GROUP_ID = "org.maven.ide.eclipse.its";
