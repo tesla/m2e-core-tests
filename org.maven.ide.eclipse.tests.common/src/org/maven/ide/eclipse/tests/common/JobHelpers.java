@@ -19,6 +19,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
@@ -84,12 +85,15 @@ public class JobHelpers {
     waitForBuildJobs();
   }
 
-  private static boolean flushProcessingQueues(IJobManager jobManager, IProgressMonitor monitor) throws InterruptedException {
+  private static boolean flushProcessingQueues(IJobManager jobManager, IProgressMonitor monitor) throws InterruptedException, CoreException {
     boolean processed = false;
     for (IBackgroundProcessingQueue queue : getProcessingQueues(jobManager)) {
       queue.join();
       if (!queue.isEmpty()) {
-        queue.run(monitor);
+        IStatus status = queue.run(monitor);
+        if (!status.isOK()) {
+          throw new CoreException(status);
+        }
         processed = true;
       }
       if (queue.isEmpty()) {
