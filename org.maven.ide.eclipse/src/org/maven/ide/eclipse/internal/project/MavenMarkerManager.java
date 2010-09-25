@@ -27,13 +27,15 @@ import org.eclipse.wst.xml.core.internal.regions.DOMRegionContext;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.AbstractArtifactResolutionException;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
-import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
 import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.model.building.ModelBuildingException;
 import org.apache.maven.model.building.ModelProblem;
 import org.apache.maven.model.building.ModelProblem.Severity;
+import org.apache.maven.project.DependencyResolutionResult;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuildingException;
+
+import org.sonatype.aether.graph.Dependency;
 
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenConsole;
@@ -79,13 +81,13 @@ public class MavenMarkerManager implements IMavenMarkerManager {
       }
     }
 
-    ArtifactResolutionResult resolutionResult = result.getArtifactResolutionResult();
+    DependencyResolutionResult resolutionResult = result.getDependencyResolutionResult();
     if(resolutionResult != null) {
       // @see also addMissingArtifactMarkers
-      addErrorMarkers(pomFile, "Metadata resolution error", resolutionResult.getMetadataResolutionExceptions());
-      addErrorMarkers(pomFile, "Artifact error", resolutionResult.getErrorArtifactExceptions());
-      addErrorMarkers(pomFile, "Version range violation", resolutionResult.getVersionRangeViolations());
-      addErrorMarkers(pomFile, "Circular dependency error", resolutionResult.getCircularDependencyExceptions());
+      addErrorMarkers(pomFile, "Metadata resolution error", resolutionResult.getCollectionErrors());
+      for(Dependency dependency : resolutionResult.getUnresolvedDependencies()) {
+        addErrorMarkers(pomFile, "Artifact error", resolutionResult.getResolutionErrors(dependency));
+      }
     }
 
     MavenProject mavenProject = result.getProject();
@@ -226,7 +228,9 @@ public class MavenMarkerManager implements IMavenMarkerManager {
   private void addErrorMarkers(IResource pomFile, String msg, List<? extends Exception> exceptions) {
     if(exceptions != null) {
       for(Exception ex : exceptions) {
-        if(ex instanceof AbstractArtifactResolutionException) {
+        if(ex instanceof org.sonatype.aether.transfer.ArtifactNotFoundException) {
+          // ignored here, handled by addMissingArtifactMarkers
+        } else if(ex instanceof AbstractArtifactResolutionException) {
           AbstractArtifactResolutionException rex = (AbstractArtifactResolutionException) ex;
           String errorMessage = getArtifactId(rex) + " " + getErrorMessage(ex);
           addMarker(pomFile, errorMessage, 1, IMarker.SEVERITY_ERROR);

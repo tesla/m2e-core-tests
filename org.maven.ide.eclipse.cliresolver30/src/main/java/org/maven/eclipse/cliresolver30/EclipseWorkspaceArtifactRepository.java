@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * Copyright (c) 2008 Sonatype, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *******************************************************************************/
+
 package org.maven.eclipse.cliresolver30;
 
 import java.util.Properties;
@@ -7,6 +15,9 @@ import org.apache.maven.repository.LocalArtifactRepository;
 import org.codehaus.plexus.component.annotations.Component;
 import org.maven.eclipse.cli.WorkspaceState;
 
+/**
+ * Enables workspace resolution in Maven 3.0-beta-2 and below.
+ */
 @Component( role = LocalArtifactRepository.class, hint = LocalArtifactRepository.IDE_WORKSPACE )
 public final class EclipseWorkspaceArtifactRepository
     extends LocalArtifactRepository

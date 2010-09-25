@@ -9,7 +9,7 @@
     <dependency>
 	  <groupId>t021_dependencyVersionRange</groupId>
 	  <artifactId>t021-p2</artifactId>
-	  <version>[0.0.1,0.0.3)</version>
+	  <version>[0.0.1,0.0.2-SNAPSHOT]</version>
 	</dependency>
   </dependencies>
 

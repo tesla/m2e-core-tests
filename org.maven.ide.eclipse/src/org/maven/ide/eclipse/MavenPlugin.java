@@ -59,6 +59,8 @@ import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactCollector;
+import org.apache.maven.execution.MavenSession;
+import org.apache.maven.plugin.LegacySupport;
 import org.apache.maven.shared.dependency.tree.DependencyTreeBuilder;
 
 import org.sonatype.nexus.index.NexusIndexer;
@@ -537,5 +539,12 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
   public DependencyTreeBuilder getDependencyTreeBuilder() {
     return lookup(DependencyTreeBuilder.class);
+  }
+
+  public MavenSession setSession(MavenSession session) {
+    LegacySupport legacy = lookup(LegacySupport.class);
+    MavenSession old = legacy.getSession();
+    legacy.setSession(session);
+    return old;
   }
 }

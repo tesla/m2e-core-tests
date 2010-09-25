@@ -43,7 +43,6 @@ import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 
-import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.MavenArtifactRepository;
 import org.apache.maven.execution.DefaultMavenExecutionRequest;
 import org.apache.maven.execution.DefaultMavenExecutionResult;
@@ -715,25 +714,29 @@ public class ProjectRegistryManager {
     // eclipse workspace repository implements both workspace dependency resolution
     // and inter-module dependency resolution for multi-module projects.
 
-    request.setLocalRepository(getLocalRepository(state, pom, resolverConfiguration));
+    request.setLocalRepository(getMaven().getLocalRepository());
+    request.setWorkspaceReader(getWorkspaceReader(state, pom, resolverConfiguration));
 
     return request;
   }
 
-  private MavenArtifactRepository getLocalRepository(IProjectRegistry state, IFile pom,
-      ResolverConfiguration resolverConfiguration) throws CoreException {
+  private EclipseWorkspaceArtifactRepository getWorkspaceReader(IProjectRegistry state, IFile pom,
+      ResolverConfiguration resolverConfiguration) {
     Context context = new Context(state, resolverConfiguration, pom);
-    ArtifactRepository localRepository = getMaven().getLocalRepository();
-    EclipseWorkspaceArtifactRepository workspaceRepsotory = new EclipseWorkspaceArtifactRepository(context);
-    DelegatingLocalArtifactRepository repository = new DelegatingLocalArtifactRepository(localRepository);
-    repository.setIdeWorkspace(workspaceRepsotory);
-    return repository;
+    EclipseWorkspaceArtifactRepository workspaceReader = new EclipseWorkspaceArtifactRepository(context);
+    return workspaceReader;
   }
 
   public MavenArtifactRepository getWorkspaceLocalRepository() throws CoreException {
     ResolverConfiguration resolverConfiguration = new ResolverConfiguration();
     resolverConfiguration.setResolveWorkspaceProjects(true);
-    return getLocalRepository(projectRegistry, null, resolverConfiguration );
+    EclipseWorkspaceArtifactRepository workspaceReader = getWorkspaceReader(projectRegistry, null,
+        resolverConfiguration);
+
+    DelegatingLocalArtifactRepository localRepo = new DelegatingLocalArtifactRepository(getMaven().getLocalRepository());
+    localRepo.setIdeWorkspace(workspaceReader);
+
+    return localRepo;
   }
 
   MutableProjectRegistry newMutableProjectRegistry() {

@@ -10,9 +10,11 @@ package org.maven.ide.eclipse.internal.embedder;
 
 import java.io.File;
 
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.repository.LocalRepositoryMaintainer;
-import org.apache.maven.repository.LocalRepositoryMaintainerEvent;
+import org.codehaus.plexus.component.annotations.Component;
+
+import org.sonatype.aether.artifact.Artifact;
+import org.sonatype.aether.impl.LocalRepositoryEvent;
+import org.sonatype.aether.impl.LocalRepositoryMaintainer;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
@@ -23,25 +25,27 @@ import org.maven.ide.eclipse.embedder.ILocalRepositoryListener;
  *
  * @author igor
  */
+@Component(role = LocalRepositoryMaintainer.class)
 public class EclipseLocalRepositoryMaintainer implements LocalRepositoryMaintainer {
 
   public static final String ROLE_HINT = EclipseLocalRepositoryMaintainer.class.getName();
 
-  public void artifactDownloaded(LocalRepositoryMaintainerEvent event) {
+  public void artifactDownloaded(LocalRepositoryEvent event) {
     notifyListeners(event);
   }
 
-  public void artifactInstalled(LocalRepositoryMaintainerEvent event) {
+  public void artifactInstalled(LocalRepositoryEvent event) {
     notifyListeners(event);
   }
 
-  private void notifyListeners(LocalRepositoryMaintainerEvent event) {
+  private void notifyListeners(LocalRepositoryEvent event) {
     MavenImpl maven = (MavenImpl) MavenPlugin.getDefault().getMaven();
 
-    ArtifactRepository repository = event.getLocalRepository();
-    File basedir = new File(repository.getBasedir());
-    ArtifactKey key = new ArtifactKey(event.getGroupId(), event.getArtifactId(), event.getVersion(), event.getClassifier());
-    for (ILocalRepositoryListener listener : maven.getLocalRepositoryListeners()) {
+    File basedir = event.getRepository().getBasedir();
+    Artifact artifact = event.getArtifact();
+    ArtifactKey key = new ArtifactKey(artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion(),
+        artifact.getClassifier());
+    for(ILocalRepositoryListener listener : maven.getLocalRepositoryListeners()) {
       listener.artifactInstalled(basedir, key, event.getFile());
     }
   }

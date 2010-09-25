@@ -10,11 +10,14 @@ package org.maven.ide.eclipse.internal.embedder;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.classworlds.realm.ClassRealm;
+import org.codehaus.plexus.component.annotations.Component;
+import org.codehaus.plexus.component.annotations.Requirement;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
@@ -28,10 +31,12 @@ import org.apache.maven.classrealm.ClassRealmRequest;
  * 
  * @author igor
  */
+@Component(role = ClassRealmManagerDelegate.class)
 public class EclipseClassRealmManagerDelegate implements ClassRealmManagerDelegate {
 
   public static final String ROLE_HINT = EclipseClassRealmManagerDelegate.class.getName();
 
+  @Requirement
   private PlexusContainer plexus;
 
   private final ArtifactVersion currentBuildApiVersion;
@@ -61,11 +66,17 @@ public class EclipseClassRealmManagerDelegate implements ClassRealmManagerDelega
   }
 
   private boolean supportsBuildApi(List<ClassRealmConstituent> constituents) {
-    for(ClassRealmConstituent constituent : constituents) {
+    for(Iterator<ClassRealmConstituent> it = constituents.iterator(); it.hasNext();) {
+      ClassRealmConstituent constituent = it.next();
       if("org.sonatype.plexus".equals(constituent.getGroupId())
           && "plexus-build-api".equals(constituent.getArtifactId())) {
         ArtifactVersion version = new DefaultArtifactVersion(constituent.getVersion());
-        return currentBuildApiVersion.compareTo(version) >= 0;
+        boolean compatible = currentBuildApiVersion.compareTo(version) >= 0;
+        if(compatible) {
+          // removing the JAR from the plugin realm to prevent discovery of the DefaultBuildContext
+          it.remove();
+        }
+        return compatible;
       }
     }
     return false;

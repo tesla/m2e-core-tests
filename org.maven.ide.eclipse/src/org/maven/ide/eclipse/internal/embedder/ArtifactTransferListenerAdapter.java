@@ -10,11 +10,10 @@ package org.maven.ide.eclipse.internal.embedder;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.apache.maven.repository.ArtifactTransferEvent;
-import org.apache.maven.repository.ArtifactTransferListener;
+import org.sonatype.aether.transfer.TransferEvent;
+import org.sonatype.aether.transfer.TransferListener;
 
 import org.maven.ide.eclipse.core.MavenConsole;
-
 
 /**
  * ArtifactTransferListenerAdapter
@@ -22,36 +21,36 @@ import org.maven.ide.eclipse.core.MavenConsole;
  * @author igor
  */
 public class ArtifactTransferListenerAdapter extends AbstractTransferListenerAdapter implements
-    ArtifactTransferListener {
+    TransferListener {
 
   ArtifactTransferListenerAdapter(MavenImpl maven, IProgressMonitor monitor, MavenConsole console) {
     super(maven, monitor, console);
   }
 
-  public boolean isShowChecksumEvents() {
-    return false;
+  public void transferInitiated(TransferEvent event) {
+    transferInitiated(event.getResource().getRepositoryUrl() + event.getResource().getResourceName());
   }
 
-  public void setShowChecksumEvents(boolean showChecksumEvents) {
+  public void transferProgressed(TransferEvent event) {
+    long total = event.getResource().getContentLength();
+    String artifactUrl = event.getResource().getRepositoryUrl() + event.getResource().getResourceName();
+
+    transferProgress(artifactUrl, total, event.getDataBuffer().remaining());
   }
 
-  public void transferCompleted(ArtifactTransferEvent transferEvent) {
-    transferCompleted(transferEvent.getResource().getUrl());
+  public void transferStarted(TransferEvent event) {
+    transferStarted(event.getResource().getRepositoryUrl() + event.getResource().getResourceName());
   }
 
-  public void transferInitiated(ArtifactTransferEvent transferEvent) {
-    transferInitiated(transferEvent.getResource().getUrl());
+  public void transferCorrupted(TransferEvent event) {
   }
 
-  public void transferProgress(ArtifactTransferEvent transferEvent) {
-    long total = transferEvent.getResource().getContentLength();
-    String artifactUrl = transferEvent.getResource().getUrl();
-
-    transferProgress(artifactUrl, total, transferEvent.getDataLength());
+  public void transferSucceeded(TransferEvent event) {
+    transferCompleted(event.getResource().getRepositoryUrl() + event.getResource().getResourceName());
   }
 
-  public void transferStarted(ArtifactTransferEvent transferEvent) {
-    transferStarted(transferEvent.getResource().getUrl());
+  public void transferFailed(TransferEvent event) {
+    transferCompleted(event.getResource().getRepositoryUrl() + event.getResource().getResourceName());
   }
 
 }

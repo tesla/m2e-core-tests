@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * Copyright (c) 2008 Sonatype, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *******************************************************************************/
+
 package org.maven.eclipse.cli;
 
 import java.io.BufferedInputStream;
@@ -31,21 +39,38 @@ public class WorkspaceState {
 		return state;
 	}
 
-	public static boolean resolveArtifact(Artifact artifact) {
-		String key = artifact.getGroupId() + ":" + artifact.getArtifactId() + ":" + artifact.getType() + ":" + artifact.getBaseVersion();
-		String value = getState().getProperty(key);
+  public static boolean resolveArtifact(Artifact artifact) {
+    File file = findArtifact(artifact.getGroupId(), artifact.getArtifactId(), artifact.getType(),
+        artifact.getBaseVersion());
 
-		if (value == null || value.length() == 0) {
-			return false;
-		}
+    if(file == null) {
+      return false;
+    }
 
-		File file = new File(value);
-		if (!file.exists()) {
-			return false;
-		}
+    artifact.setFile(file);
+    artifact.setResolved(true);
+    return true;
+  }
 
-		artifact.setFile(file);
-		artifact.setResolved(true);
-		return true;
-	}
+  public static File findArtifact(String groupId, String artifactId, String type, String baseVersion) {
+    Properties state = getState();
+    if(state == null) {
+      return null;
+    }
+
+    String key = groupId + ':' + artifactId + ':' + type + ':' + baseVersion;
+    String value = state.getProperty(key);
+
+    if(value == null || value.length() == 0) {
+      return null;
+    }
+
+    File file = new File(value);
+    if(!file.exists()) {
+      return null;
+    }
+
+    return file;
+  }
+
 }

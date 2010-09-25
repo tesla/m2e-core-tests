@@ -10,15 +10,21 @@ package org.maven.ide.eclipse.internal.project.registry;
 
 import java.util.List;
 
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
-import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
+import org.codehaus.plexus.component.annotations.Component;
+
 import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.PluginResolutionException;
 import org.apache.maven.plugin.internal.DefaultPluginDependenciesResolver;
+import org.apache.maven.plugin.internal.PluginDependenciesResolver;
+
+import org.sonatype.aether.RepositorySystemSession;
+import org.sonatype.aether.artifact.Artifact;
+import org.sonatype.aether.graph.DependencyFilter;
+import org.sonatype.aether.graph.DependencyNode;
+import org.sonatype.aether.repository.RemoteRepository;
 
 
-
+@Component(role = PluginDependenciesResolver.class)
 public class EclipsePluginDependenciesResolver extends DefaultPluginDependenciesResolver {
 
   /*
@@ -31,23 +37,24 @@ public class EclipsePluginDependenciesResolver extends DefaultPluginDependencies
    */
 
   @Override
-  public Artifact resolve(Plugin plugin, ArtifactResolutionRequest request) throws PluginResolutionException {
+  public Artifact resolve(Plugin plugin, List<RemoteRepository> repositories, RepositorySystemSession session)
+      throws PluginResolutionException {
     boolean disabled = EclipseWorkspaceArtifactRepository.isDisabled();
     EclipseWorkspaceArtifactRepository.setDisabled(true);
     try {
-      return super.resolve(plugin, request);
+      return super.resolve(plugin, repositories, session);
     } finally {
       EclipseWorkspaceArtifactRepository.setDisabled(disabled);
     }
   }
 
   @Override
-  public List<Artifact> resolve(Plugin plugin, Artifact pluginArtifact, ArtifactResolutionRequest request,
-      ArtifactFilter dependencyFilter) throws PluginResolutionException {
+  public DependencyNode resolve(Plugin plugin, Artifact pluginArtifact, DependencyFilter dependencyFilter,
+      List<RemoteRepository> repositories, RepositorySystemSession session) throws PluginResolutionException {
     boolean disabled = EclipseWorkspaceArtifactRepository.isDisabled();
     EclipseWorkspaceArtifactRepository.setDisabled(true);
     try {
-      return super.resolve(plugin, pluginArtifact, request, dependencyFilter);
+      return super.resolve(plugin, pluginArtifact, dependencyFilter, repositories, session);
     } finally {
       EclipseWorkspaceArtifactRepository.setDisabled(disabled);
     }

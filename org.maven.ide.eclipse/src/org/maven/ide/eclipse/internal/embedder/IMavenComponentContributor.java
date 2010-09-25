@@ -8,17 +8,17 @@
 
 package org.maven.ide.eclipse.internal.embedder;
 
-import org.codehaus.plexus.ContainerConfiguration;
-
-
 /**
- * DefaultMavenContainerConfigurator
- * 
- * @author igor
+ * Allows extensions to contribute components to the Maven core container.
  */
-public class DefaultMavenContainerConfigurator implements IMavenContainerConfigurator {
+public interface IMavenComponentContributor {
 
-  public void configure(ContainerConfiguration configuration) {
+  void contribute(IMavenComponentBinder binder);
+
+  public interface IMavenComponentBinder {
+
+    <T> void bind(Class<T> role, Class<? extends T> impl, String hint);
+
   }
 
 }

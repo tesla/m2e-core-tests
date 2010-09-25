@@ -410,13 +410,16 @@ public abstract class AbstractMavenProjectTestCase extends TestCase {
 
   protected void injectFilexWagon() throws Exception {
     PlexusContainer container = ((MavenImpl) MavenPlugin.getDefault().getMaven()).getPlexusContainer();
-    ComponentDescriptor<Wagon> descriptor = new ComponentDescriptor<Wagon>();
-    descriptor.setRealm(container.getContainerRealm());
-    descriptor.setRoleClass(Wagon.class);
-    descriptor.setImplementationClass(FilexWagon.class);
-    descriptor.setRoleHint("filex");
-    descriptor.setInstantiationStrategy("singleton");
-    container.addComponentDescriptor(descriptor);
+    if(container.getContainerRealm().getResource(FilexWagon.class.getName().replace('.', '/') + ".class") == null) {
+      container.getContainerRealm().importFrom(FilexWagon.class.getClassLoader(), FilexWagon.class.getName());
+      ComponentDescriptor<Wagon> descriptor = new ComponentDescriptor<Wagon>();
+      descriptor.setRealm(container.getContainerRealm());
+      descriptor.setRoleClass(Wagon.class);
+      descriptor.setImplementationClass(FilexWagon.class);
+      descriptor.setRoleHint("filex");
+      descriptor.setInstantiationStrategy("singleton");
+      container.addComponentDescriptor(descriptor);
+    }
   }
 
 }

@@ -8,6 +8,7 @@
 
 package org.maven.ide.eclipse.internal.project.registry;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,13 +18,16 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 
-import org.apache.maven.artifact.Artifact;
 import org.apache.maven.repository.LocalArtifactRepository;
+
+import org.sonatype.aether.artifact.Artifact;
+import org.sonatype.aether.repository.WorkspaceReader;
+import org.sonatype.aether.repository.WorkspaceRepository;
 
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 
 
-public final class EclipseWorkspaceArtifactRepository extends LocalArtifactRepository {
+public final class EclipseWorkspaceArtifactRepository extends LocalArtifactRepository implements WorkspaceReader {
 
   private static final long serialVersionUID = 1018465082844566543L;
 
@@ -31,32 +35,30 @@ public final class EclipseWorkspaceArtifactRepository extends LocalArtifactRepos
 
   private static final ThreadLocal<Boolean> disabled = new ThreadLocal<Boolean>();
 
+  private WorkspaceRepository workspaceRepository;
+
   public EclipseWorkspaceArtifactRepository(ProjectRegistryManager.Context context) {
     this.context = context;
+    this.workspaceRepository = new WorkspaceRepository("ide", getClass());
   }
 
-  protected boolean resolveAsEclipseProject(Artifact artifact) {
+  protected File resolveAsEclipseProject(String groupId, String artifactId, String baseVersion, String classifier, String extension) {
     if (isDisabled()) {
-      return false;
+      return null;
     }
 
     if(context == null) { // XXX this is actually a bug 
-      return false;
-    }
-
-    if(artifact == null) {
-      // according to the DefaultArtifactResolver source code, it looks like artifact can be null
-      return false;
+      return null;
     }
 
     // check in the workspace, note that workspace artifacts never have classifiers
-    ArtifactKey key = new ArtifactKey(artifact.getGroupId(), artifact.getArtifactId(), artifact.getBaseVersion(), null); 
+    ArtifactKey key = new ArtifactKey(groupId, artifactId, baseVersion, null);
     IFile pom = context.state.getWorkspaceArtifact(key);
     if(pom == null || !pom.isAccessible()) {
-      return false;
+      return null;
     }
     if(context.pom != null && pom.equals(context.pom)) {
-      return false;
+      return null;
     }
 
 //    if(!"pom".equals(artifact.getType())) {
@@ -66,7 +68,7 @@ public final class EclipseWorkspaceArtifactRepository extends LocalArtifactRepos
     if(context.resolverConfiguration.shouldResolveWorkspaceProjects()) {
       IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
       IPath file = pom.getLocation();
-      if (!"pom".equals(artifact.getType())) {
+      if (!"pom".equals(extension)) {
         MavenProjectFacade facade = context.state.getProjectFacade(pom);
         IFolder outputLocation = root.getFolder(facade.getOutputLocation());
         if (outputLocation.exists()) {
@@ -74,17 +76,26 @@ public final class EclipseWorkspaceArtifactRepository extends LocalArtifactRepos
         }
       }
 
-      artifact.setFile(file.toFile());
-      artifact.setResolved(true);
-
-      return true;
+      return file.toFile();
     }
 
-    return false;
+    return null;
   }
 
-  public Artifact find(Artifact artifact) {
-    resolveAsEclipseProject(artifact);
+  public File findArtifact(Artifact artifact) {
+    return resolveAsEclipseProject(artifact.getGroupId(), artifact.getArtifactId(), artifact.getBaseVersion(),
+        artifact.getClassifier(), artifact.getExtension());
+  }
+
+  public org.apache.maven.artifact.Artifact find(org.apache.maven.artifact.Artifact artifact) {
+    File file = resolveAsEclipseProject(artifact.getGroupId(), artifact.getArtifactId(), artifact.getBaseVersion(),
+        artifact.getClassifier(), artifact.getType());
+
+    if(file != null) {
+      artifact.setFile(file);
+      artifact.setResolved(true);
+    }
+
     return artifact;
   }
 
@@ -107,9 +118,17 @@ public final class EclipseWorkspaceArtifactRepository extends LocalArtifactRepos
   public boolean equals(Object obj) {
     return obj instanceof EclipseWorkspaceArtifactRepository;
   }
-  
-  @Override
+
   public List<String> findVersions(Artifact artifact) {
+    return findVersions(artifact.getGroupId(), artifact.getArtifactId());
+  }
+
+  @Override
+  public List<String> findVersions(org.apache.maven.artifact.Artifact artifact) {
+    return findVersions(artifact.getGroupId(), artifact.getArtifactId());
+  }
+
+  private List<String> findVersions(String groupId, String artifactId) {
     ArrayList<String> versions = new ArrayList<String>();
 
     if (isDisabled()) {
@@ -119,18 +138,19 @@ public final class EclipseWorkspaceArtifactRepository extends LocalArtifactRepos
     if(context == null) { // XXX this is actually a bug 
       return versions;
     }
-    
-    if (artifact == null) {
-      return versions;
-    }
 
     for (MavenProjectFacade facade : context.state.getProjects()) {
       ArtifactKey artifactKey = facade.getArtifactKey();
-      if (artifact.getGroupId().equals(artifactKey.getGroupId()) && artifact.getArtifactId().equals(artifactKey.getArtifactId())) {
+      if (groupId.equals(artifactKey.getGroupId()) && artifactId.equals(artifactKey.getArtifactId())) {
         versions.add(artifactKey.getVersion());
       }
     }
 
     return versions;
   }
+
+  public WorkspaceRepository getRepository() {
+    return workspaceRepository;
+  }
+
 }

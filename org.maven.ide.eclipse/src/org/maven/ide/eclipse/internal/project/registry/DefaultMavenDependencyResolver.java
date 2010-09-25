@@ -14,11 +14,13 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.model.Plugin;
+import org.apache.maven.project.DependencyResolutionResult;
 import org.apache.maven.project.MavenProject;
+
+import org.sonatype.aether.graph.Dependency;
 
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
@@ -72,12 +74,14 @@ public class DefaultMavenDependencyResolver extends AbstractMavenDependencyResol
     }
 
     // missing dependencies
-    ArtifactResolutionResult resolutionResult = mavenResult.getArtifactResolutionResult();
-    if(resolutionResult != null && resolutionResult.getMissingArtifacts() != null) {
-      for(Artifact artifact : resolutionResult.getMissingArtifacts()) {
+    DependencyResolutionResult resolutionResult = mavenResult.getDependencyResolutionResult();
+    if(resolutionResult != null && resolutionResult.getUnresolvedDependencies() != null) {
+      for(Dependency dependency : resolutionResult.getUnresolvedDependencies()) {
+        org.sonatype.aether.artifact.Artifact artifact = dependency.getArtifact();
         ArtifactKey dependencyKey = new ArtifactKey(artifact.getGroupId(), artifact.getArtifactId(),
             artifact.getVersion(), null);
-        requirements.add(MavenRequiredCapability.createMaven(dependencyKey, artifact.getScope(), artifact.isOptional()));
+        requirements.add(MavenRequiredCapability.createMaven(dependencyKey, dependency.getScope(),
+            dependency.isOptional()));
       }
     }
 

@@ -41,9 +41,9 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
-import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactCollector;
 import org.apache.maven.artifact.resolver.filter.ScopeArtifactFilter;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.dependency.tree.DependencyNode;
 import org.apache.maven.shared.dependency.tree.DependencyTreeBuilder;
@@ -205,11 +205,18 @@ public class MavenModelManager {
 
       ArtifactCollector artifactCollector = MavenPlugin.getDefault().getArtifactCollector();
 
-      ArtifactRepository localRepository = maven.getLocalRepository();
+      MavenSession session = maven.createSession(maven.createExecutionRequest(monitor), mavenProject);
 
-      DependencyTreeBuilder builder = MavenPlugin.getDefault().getDependencyTreeBuilder();
-      DependencyNode node = builder.buildDependencyTree(mavenProject, localRepository, artifactFactory,
-          artifactMetadataSource, null, artifactCollector);
+      MavenSession oldSession = MavenPlugin.getDefault().setSession(session);
+
+      DependencyNode node;
+      try {
+        DependencyTreeBuilder builder = MavenPlugin.getDefault().getDependencyTreeBuilder();
+        node = builder.buildDependencyTree(mavenProject, session.getLocalRepository(), artifactFactory,
+            artifactMetadataSource, null, artifactCollector);
+      } finally {
+        MavenPlugin.getDefault().setSession(oldSession);
+      }
 
       BuildingDependencyNodeVisitor visitor = new BuildingDependencyNodeVisitor(); 
       node.accept(new FilteringDependencyNodeVisitor(visitor,

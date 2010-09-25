@@ -59,7 +59,7 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
   }
 
   private MojoExecution getExecution(MavenExecutionPlan executionPlan, String artifactId, String goal) {
-    for(MojoExecution execution : executionPlan.getExecutions()) {
+    for(MojoExecution execution : executionPlan.getMojoExecutions()) {
       if(artifactId.equals(execution.getArtifactId()) && goal.equals(execution.getGoal())) {
         return execution;
       }
@@ -266,9 +266,9 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
       request.setPom(new File("projects/dependencies/pom.xml"));
       MavenExecutionResult result = maven.readProject(request, monitor);
       assertFalse(result.getExceptions().toString(), result.hasExceptions());
-      assertFalse(result.getArtifactResolutionResult().getMissingArtifacts().toString(), result
-          .getArtifactResolutionResult().hasMissingArtifacts());
-      assertFalse(result.getArtifactResolutionResult().hasExceptions());
+      assertTrue(result.getDependencyResolutionResult().getUnresolvedDependencies().toString(), result
+          .getDependencyResolutionResult().getUnresolvedDependencies().isEmpty());
+      assertTrue(result.getDependencyResolutionResult().getCollectionErrors().isEmpty());
       assertNotNull(result.getProject());
       assertNotNull(result.getProject().getArtifacts());
       assertEquals(result.getProject().getArtifacts().toString(), 2, result.getProject().getArtifacts().size());
@@ -299,16 +299,16 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
       request.setPom(new File("projects/MNGECLIPSE-2126/pom.xml"));
       MavenExecutionResult result = maven.readProject(request, monitor);
       assertFalse(result.getExceptions().toString(), result.hasExceptions());
-      assertFalse(result.getArtifactResolutionResult().getMissingArtifacts().toString(), result
-          .getArtifactResolutionResult().hasMissingArtifacts());
-      assertFalse(result.getArtifactResolutionResult().hasExceptions());
+      assertTrue(result.getDependencyResolutionResult().getUnresolvedDependencies().toString(), result
+          .getDependencyResolutionResult().getUnresolvedDependencies().isEmpty());
+      assertTrue(result.getDependencyResolutionResult().getCollectionErrors().isEmpty());
       assertNotNull(result.getProject());
       assertNotNull(result.getProject().getArtifacts());
       assertEquals(result.getProject().getArtifacts().toString(), 1, result.getProject().getArtifacts().size());
 
       request.setGoals(Arrays.asList("verify"));
       MavenExecutionPlan plan = maven.calculateExecutionPlan(request, result.getProject(), monitor);
-      assertEquals(plan.getExecutions().toString(), 2, plan.getExecutions().size());
+      assertEquals(plan.getMojoExecutions().toString(), 2, plan.getMojoExecutions().size());
     } finally {
       configuration.setUserSettingsFile(origSettings);
       httpServer.stop();
@@ -347,9 +347,9 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
       request.setPom(new File("projects/MNGECLIPSE-2149/pom.xml"));
       MavenExecutionResult result = maven.readProject(request, monitor);
       assertFalse(result.getExceptions().toString(), result.hasExceptions());
-      assertFalse(result.getArtifactResolutionResult().getMissingArtifacts().toString(), result
-          .getArtifactResolutionResult().hasMissingArtifacts());
-      assertFalse(result.getArtifactResolutionResult().hasExceptions());
+      assertTrue(result.getDependencyResolutionResult().getUnresolvedDependencies().toString(), result
+          .getDependencyResolutionResult().getUnresolvedDependencies().isEmpty());
+      assertTrue(result.getDependencyResolutionResult().getCollectionErrors().isEmpty());
       assertNotNull(result.getProject());
       assertNotNull(result.getProject().getArtifacts());
       assertEquals(result.getProject().getArtifacts().toString(), 1, result.getProject().getArtifacts().size());

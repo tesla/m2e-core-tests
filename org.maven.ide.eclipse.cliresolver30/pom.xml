@@ -20,6 +20,12 @@
       <version>3.0-alpha-5</version>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>org.sonatype.aether</groupId>
+      <artifactId>aether-api</artifactId>
+      <version>1.2</version>
+      <scope>provided</scope>
+    </dependency>
     
     <dependency>
       <groupId>org.maven.ide.eclipse</groupId>

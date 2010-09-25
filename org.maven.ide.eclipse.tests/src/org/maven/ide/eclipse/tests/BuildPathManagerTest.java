@@ -15,8 +15,10 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.maven.archetype.catalog.Archetype;
+import org.apache.maven.model.Build;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
+import org.apache.maven.model.Plugin;
 import org.codehaus.plexus.util.DirectoryScanner;
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IMarker;
@@ -285,8 +287,8 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     // order according to mvn -X
     assertEquals(3, cp.length);
     assertEquals(new Path("/p2"), cp[0].getPath());
-    assertEquals("junit-4.0.jar", cp[1].getPath().lastSegment());
-    assertEquals("easymock-1.0.jar", cp[2].getPath().lastSegment());
+    assertEquals("junit-4.0.jar", cp[2].getPath().lastSegment());
+    assertEquals("easymock-1.0.jar", cp[1].getPath().lastSegment());
   }
 
   public void testClasspathOrderWorkspace003() throws Exception {
@@ -687,7 +689,7 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertEquals("/simple-project/src/test/java", rawClasspath[2].getPath().toString());
     assertEquals("/simple-project/src/test/resources", rawClasspath[3].getPath().toString());
     assertEquals(
-        "org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.4",
+        "org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5",
         rawClasspath[4].getPath().toString());
     assertEquals("org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER", rawClasspath[5].getPath().toString());
 
@@ -910,6 +912,14 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
         dependency.setVersion("3.8.1");
 
         model.addDependency(dependency);
+
+        // used to derive the source/target options so lock it down
+        Plugin buildPlugin = new Plugin();
+        buildPlugin.setArtifactId("maven-compiler-plugin");
+        buildPlugin.setVersion("2.3");
+
+        model.setBuild(new Build());
+        model.getBuild().addPlugin(buildPlugin);
 
         String[] directories = {"src/main/java", "src/test/java", "src/main/resources", "src/test/resources"};
 

@@ -55,13 +55,12 @@ import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.dag.CycleDetectedException;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 
+import org.apache.maven.DefaultMaven;
 import org.apache.maven.Maven;
+import org.apache.maven.RepositoryUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.InvalidRepositoryException;
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.repository.DefaultRepositoryRequest;
-import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
-import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
 import org.apache.maven.execution.DefaultMavenExecutionRequest;
 import org.apache.maven.execution.DefaultMavenExecutionResult;
 import org.apache.maven.execution.MavenExecutionRequest;
@@ -104,8 +103,8 @@ import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.project.ProjectBuildingResult;
 import org.apache.maven.project.ProjectSorter;
-import org.apache.maven.repository.ArtifactTransferListener;
 import org.apache.maven.repository.RepositorySystem;
+import org.apache.maven.repository.internal.MavenRepositorySystemSession;
 import org.apache.maven.settings.Mirror;
 import org.apache.maven.settings.Proxy;
 import org.apache.maven.settings.Server;
@@ -124,6 +123,14 @@ import org.apache.maven.settings.crypto.SettingsDecryptionRequest;
 import org.apache.maven.settings.crypto.SettingsDecryptionResult;
 import org.apache.maven.settings.io.SettingsWriter;
 import org.apache.maven.wagon.proxy.ProxyInfo;
+
+import org.sonatype.aether.RepositorySystemSession;
+import org.sonatype.aether.repository.LocalRepository;
+import org.sonatype.aether.resolution.ArtifactRequest;
+import org.sonatype.aether.resolution.ArtifactResolutionException;
+import org.sonatype.aether.resolution.ArtifactResult;
+import org.sonatype.aether.transfer.ArtifactNotFoundException;
+import org.sonatype.aether.transfer.TransferListener;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
@@ -184,6 +191,9 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
 
     request.getUserProperties().put("m2e.version", MavenPlugin.getVersion());
 
+    request.setCacheNotFound(true);
+    request.setCacheTransferError(true);
+
     // the right way to disable snapshot update
     // request.setUpdateSnapshots(false);
     return request;
@@ -221,10 +231,20 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
   }
 
   public MavenSession createSession(MavenExecutionRequest request, MavenProject project) {
+    RepositorySystemSession repoSession = createRepositorySession(request);
     MavenExecutionResult result = new DefaultMavenExecutionResult();
-    MavenSession mavenSession = new MavenSession(plexus, request, result);
+    MavenSession mavenSession = new MavenSession(plexus, repoSession, request, result);
     mavenSession.setProjects(Collections.singletonList(project));
     return mavenSession;
+  }
+
+  private RepositorySystemSession createRepositorySession(MavenExecutionRequest request) {
+    try {
+      return ((DefaultMaven) lookup(Maven.class)).newRepositorySession(request);
+    } catch(CoreException ex) {
+      MavenLogger.log(ex);
+      throw new IllegalStateException("Could not look up Maven embedder", ex);
+    }
   }
 
   public void execute(MavenSession session, MojoExecution execution, IProgressMonitor monitor) {
@@ -422,6 +442,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
       lookup(MavenExecutionRequestPopulator.class).populateDefaults(request);
       ProjectBuildingRequest configuration = request.getProjectBuildingRequest();
       configuration.setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL);
+      configuration.setRepositorySession(createRepositorySession(request));
       return lookup(ProjectBuilder.class).build(pomFile, configuration).getProject();
     } catch(ProjectBuildingException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not read maven project",
@@ -439,9 +460,10 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
       lookup(MavenExecutionRequestPopulator.class).populateDefaults(request);
       ProjectBuildingRequest configuration = request.getProjectBuildingRequest();
       configuration.setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL);
+      configuration.setRepositorySession(createRepositorySession(request));
       ProjectBuildingResult projectBuildingResult = lookup(ProjectBuilder.class).build(pomFile, configuration);
       result.setProject(projectBuildingResult.getProject());
-      result.setArtifactResolutionResult(projectBuildingResult.getArtifactResolutionResult());
+      result.setDependencyResolutionResult(projectBuildingResult.getDependencyResolutionResult());
     } catch(ProjectBuildingException ex) {
       //don't add the exception here. this should come out as a build marker, not fill
       //the error logs with msgs
@@ -457,33 +479,50 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
     Artifact artifact = lookup(RepositorySystem.class).createArtifactWithClassifier(groupId, artifactId, version, type,
         classifier);
 
-    ArtifactResolutionRequest request = new ArtifactResolutionRequest();
-    ArtifactRepository localRepository = getLocalRepository();
-    request.setLocalRepository(localRepository);
-    if(remoteRepositories != null) {
-      request.setRemoteRepositories(remoteRepositories);
-    } else {
+    if(remoteRepositories == null) {
       try {
-        request.setRemoteRepositories(getArtifactRepositories());
+        remoteRepositories = getArtifactRepositories();
       } catch(CoreException e) {
         // we've tried
-        request.setRemoteRepositories(new ArrayList<ArtifactRepository>());
+        remoteRepositories = Collections.emptyList();
       }
     }
-    request.setArtifact(artifact);
-    request.setTransferListener(createArtifactTransferListener(monitor));
 
-    ArtifactResolutionResult result = lookup(RepositorySystem.class).resolve(request);
+    ArtifactRepository localRepository = getLocalRepository();
 
-    setLastUpdated(localRepository, request.getRemoteRepositories(), artifact);
+    org.sonatype.aether.RepositorySystem repoSystem = lookup(org.sonatype.aether.RepositorySystem.class);
 
-    if(!result.isSuccess()) {
+    MavenRepositorySystemSession session = new MavenRepositorySystemSession();
+    session.setLocalRepositoryManager(repoSystem.newLocalRepositoryManager(new LocalRepository(localRepository
+        .getBasedir())));
+    session.setTransferListener(createArtifactTransferListener(monitor));
+
+    ArtifactRequest request = new ArtifactRequest();
+    request.setArtifact(RepositoryUtils.toArtifact(artifact));
+    request.setRepositories(RepositoryUtils.toRepos(remoteRepositories));
+
+    ArtifactResult result;
+    try {
+      result = repoSystem.resolveArtifact(session, request);
+    } catch(ArtifactResolutionException ex) {
+      result = ex.getResults().get(0);
+    }
+
+    setLastUpdated(localRepository, remoteRepositories, artifact);
+
+    if(result.isResolved()) {
+      artifact.selectVersion(result.getArtifact().getVersion());
+      artifact.setFile(result.getArtifact().getFile());
+      artifact.setResolved(true);
+    } else {
       ArrayList<IStatus> members = new ArrayList<IStatus>();
       for(Exception e : result.getExceptions()) {
-        members.add(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, e.getMessage(), e));
+        if(!(e instanceof ArtifactNotFoundException)) {
+          members.add(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, e.getMessage(), e));
+        }
       }
-      for(Artifact missing : result.getMissingArtifacts()) {
-        members.add(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Missing " + missing.toString(), null));
+      if(members.isEmpty()) {
+        members.add(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Missing " + artifact, null));
       }
       IStatus[] newMembers = members.toArray(new IStatus[members.size()]);
       throw new CoreException(new MultiStatus(IMavenConstants.PLUGIN_ID, -1, newMembers, "Could not resolve artifact",
@@ -673,16 +712,9 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
     if(config == null) {
       MojoDescriptor mojoDescriptor;
 
-      DefaultRepositoryRequest request = new DefaultRepositoryRequest();
-      request.setCache(session.getRepositoryCache());
-      request.setLocalRepository(session.getLocalRepository());
-      request.setRemoteRepositories(session.getCurrentProject().getPluginArtifactRepositories());
-      request.setOffline(session.isOffline());
-      request.setForceUpdate(session.getRequest().isUpdateSnapshots());
-      request.setTransferListener(session.getRequest().getTransferListener());
-
       try {
-        mojoDescriptor = lookup(BuildPluginManager.class).getMojoDescriptor(plugin, goal, request);
+        mojoDescriptor = lookup(BuildPluginManager.class).getMojoDescriptor(plugin, goal,
+            session.getCurrentProject().getRemotePluginRepositories(), session.getRepositorySession());
       } catch(PluginNotFoundException ex) {
         throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
             "Could not get mojo execution paramater value", ex));
@@ -913,7 +945,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
     return new WagonTransferListenerAdapter(this, monitor, console);
   }
 
-  public ArtifactTransferListener createArtifactTransferListener(IProgressMonitor monitor) {
+  public TransferListener createArtifactTransferListener(IProgressMonitor monitor) {
     return new ArtifactTransferListenerAdapter(this, monitor, console);
   }
 
@@ -998,7 +1030,9 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
       }
     }
 
-    return new DefaultPlexusContainer(mavenCoreCC);
+    mavenCoreCC.setAutoWiring(true);
+
+    return new DefaultPlexusContainer(mavenCoreCC, new ExtensionModule());
   }
 
   public synchronized void disposeContainer() {

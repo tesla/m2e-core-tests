@@ -8,17 +8,15 @@
 
 package org.maven.ide.eclipse.internal.embedder;
 
-import org.codehaus.plexus.ContainerConfiguration;
+import org.codehaus.plexus.component.annotations.Component;
+
+import org.sonatype.plexus.build.incremental.BuildContext;
+import org.sonatype.plexus.build.incremental.ThreadBuildContext;
 
 
 /**
- * DefaultMavenContainerConfigurator
- * 
- * @author igor
+ * Incremental build context.
  */
-public class DefaultMavenContainerConfigurator implements IMavenContainerConfigurator {
-
-  public void configure(ContainerConfiguration configuration) {
-  }
-
+@Component(role = BuildContext.class)
+public class EclipseBuildContext extends ThreadBuildContext {
 }
