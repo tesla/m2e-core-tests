@@ -36,10 +36,10 @@ Bundle-Name: Maven Archetype Common Bundle
 Bundle-RequiredExecutionEnvironment: J2SE-1.5,
  JavaSE-1.6
 Require-Bundle: org.maven.ide.eclipse.maven_embedder;bundle-version="[
- 0.11.0,0.12.0)"
+ 0.12.0,0.13.0)"
 Bundle-Vendor: Sonatype, Inc.
 MavenArtifact-BaseVersion: 2.0.1.20090526-1230
-Bundle-Version: 0.11.1.qualifier
+Bundle-Version: 0.12.0.qualifier
 MavenArtifact-GroupId: org.maven.ide.eclipse
 MavenArtifact-ArtifactId: org.maven.ide.eclipse.archetype_common
 Bundle-ManifestVersion: 2

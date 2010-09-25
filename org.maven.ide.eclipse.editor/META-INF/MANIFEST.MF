@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Maven Integration for Eclipse (Editors)
 Bundle-SymbolicName: org.maven.ide.eclipse.editor;singleton:=true
-Bundle-Version: 0.11.1.qualifier
+Bundle-Version: 0.12.0.qualifier
 Bundle-Activator: org.maven.ide.eclipse.editor.MavenEditorPlugin
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources,
@@ -23,11 +23,11 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.wst.xml.core,
  org.eclipse.emf.ecore.edit,
  org.eclipse.emf.edit.ui;resolution:=optional,
- org.maven.ide.eclipse;bundle-version="[0.11.0,0.12.0)",
- org.maven.ide.eclipse.maven_embedder;bundle-version="[0.11.0,0.12.0)",
- org.maven.ide.eclipse.dependency_tree;bundle-version="[0.11.0,0.12.0)",
- org.maven.ide.eclipse.maven_model_edit;bundle-version="[0.11.0,0.12.0)",
- org.maven.ide.eclipse.editor.xml;bundle-version="[0.11.0,0.12.0)"
+ org.maven.ide.eclipse;bundle-version="[0.12.0,0.13.0)",
+ org.maven.ide.eclipse.maven_embedder;bundle-version="[0.12.0,0.13.0)",
+ org.maven.ide.eclipse.dependency_tree;bundle-version="[0.12.0,0.13.0)",
+ org.maven.ide.eclipse.maven_model_edit;bundle-version="[0.12.0,0.13.0)",
+ org.maven.ide.eclipse.editor.xml;bundle-version="[0.12.0,0.13.0)"
 Eclipse-LazyStart: true
 Bundle-RequiredExecutionEnvironment: J2SE-1.5,
  JavaSE-1.6
