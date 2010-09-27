@@ -110,7 +110,7 @@ Bundle-ClassPath: jars/maven-embedder-3.0-SNAPSHOT.jar,
  jars/plexus-classworlds-2.2.4-SNAPSHOT.jar
 MavenArtifact-BaseVersion: 3.0.0.SNAPSHOT-maven-r911645-jetty-r5136355
  d
-Bundle-Version: 0.11.1.qualifier
+Bundle-Version: 0.11.1.20100927-1222
 MavenArtifact-ArtifactId: org.maven.ide.eclipse.maven_embedder
 MavenArtifact-GroupId: org.maven.ide.eclipse
 Bundle-Name: Maven Embedder Bundle

@@ -2,7 +2,7 @@
 <feature
       id="org.maven.ide.eclipse.feature"
       label="Maven Integration for Eclipse (Required)"
-      version="0.11.1.qualifier"
+      version="0.11.1.20100927-1222"
       provider-name="Sonatype, Inc."
       plugin="org.maven.ide.eclipse">
    <install-handler/>

@@ -11,7 +11,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.wst.xml.core,
  org.eclipse.wst.xml.ui
 Bundle-Name: Maven POM XML Editor Tests Plug-In
-Bundle-Version: 0.11.1.qualifier
+Bundle-Version: 0.11.1.20100927-1222
 MavenArtifact-ArtifactId: org.maven.ide.eclipse.editor.xml.tests
 Bundle-Vendor: Sonatype, Inc.
 Bundle-SymbolicName: org.maven.ide.eclipse.editor.xml.tests;singleton:=true
