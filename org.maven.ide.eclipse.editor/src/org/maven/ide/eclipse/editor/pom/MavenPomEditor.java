@@ -26,6 +26,7 @@ import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactCollector;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.dependency.tree.DependencyNode;
@@ -837,9 +838,19 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 
         ArtifactRepository localRepository = MavenPlugin.getDefault().getMaven().getLocalRepository();
 
-        DependencyTreeBuilder builder = MavenPlugin.getDefault().getDependencyTreeBuilder();
-        DependencyNode node = builder.buildDependencyTree(mavenProject, localRepository, artifactFactory,
-            artifactMetadataSource, null, artifactCollector);
+        MavenSession session = MavenPlugin.getDefault().getMaven()
+            .createSession(MavenPlugin.getDefault().getMaven().createExecutionRequest(monitor), mavenProject);
+
+        MavenSession oldSession = MavenPlugin.getDefault().setSession(session);
+
+        DependencyNode node;
+        try {
+          DependencyTreeBuilder builder = MavenPlugin.getDefault().getDependencyTreeBuilder();
+          node = builder.buildDependencyTree(mavenProject, localRepository, artifactFactory, artifactMetadataSource,
+              null, artifactCollector);
+        } finally {
+          MavenPlugin.getDefault().setSession(oldSession);
+        }
 
         BuildingDependencyNodeVisitor visitor = new BuildingDependencyNodeVisitor(); 
         node.accept(new FilteringDependencyNodeVisitor(visitor,
