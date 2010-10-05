@@ -22,19 +22,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.factory.ArtifactFactory;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.resolver.ArtifactCollector;
-import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.dependency.tree.DependencyNode;
-import org.apache.maven.shared.dependency.tree.DependencyTreeBuilder;
-import org.apache.maven.shared.dependency.tree.DependencyTreeBuilderException;
-import org.apache.maven.shared.dependency.tree.filter.ArtifactDependencyNodeFilter;
-import org.apache.maven.shared.dependency.tree.traversal.BuildingDependencyNodeVisitor;
-import org.apache.maven.shared.dependency.tree.traversal.FilteringDependencyNodeVisitor;
 import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -822,49 +812,14 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
    */
   public synchronized DependencyNode readDependencies(boolean force, IProgressMonitor monitor, String scope) throws CoreException {
     if(force || !rootNode.containsKey(scope)) {
-      try {
-        monitor.setTaskName("Reading project");
-        MavenProject mavenProject = readMavenProject(force, monitor);
-        if(mavenProject == null){
-          MavenLogger.log("Unable to read maven project. Dependencies not updated.", null);
-          return null;
-        }
-        monitor.setTaskName("Building dependency tree");
-
-        ArtifactFactory artifactFactory = MavenPlugin.getDefault().getArtifactFactory();
-        ArtifactMetadataSource artifactMetadataSource = MavenPlugin.getDefault().getArtifactMetadataSource();
-
-        ArtifactCollector artifactCollector = MavenPlugin.getDefault().getArtifactCollector();
-
-        ArtifactRepository localRepository = MavenPlugin.getDefault().getMaven().getLocalRepository();
-
-        MavenSession session = MavenPlugin.getDefault().getMaven()
-            .createSession(MavenPlugin.getDefault().getMaven().createExecutionRequest(monitor), mavenProject);
-
-        MavenSession oldSession = MavenPlugin.getDefault().setSession(session);
-
-        DependencyNode node;
-        try {
-          DependencyTreeBuilder builder = MavenPlugin.getDefault().getDependencyTreeBuilder();
-          node = builder.buildDependencyTree(mavenProject, localRepository, artifactFactory, artifactMetadataSource,
-              null, artifactCollector);
-        } finally {
-          MavenPlugin.getDefault().setSession(oldSession);
-        }
-
-        BuildingDependencyNodeVisitor visitor = new BuildingDependencyNodeVisitor(); 
-        node.accept(new FilteringDependencyNodeVisitor(visitor,
-            new ArtifactDependencyNodeFilter(new ScopeArtifactFilter(scope))));
-//          node.accept(visitor);
-
-        rootNode.put(scope, visitor.getDependencyTree());
-
-      } catch(DependencyTreeBuilderException ex) {
-        String msg = "Project read error";
-        MavenLogger.log(msg, ex);
-        throw new CoreException(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, msg, ex));
-
+      monitor.setTaskName("Reading project");
+      MavenProject mavenProject = readMavenProject(force, monitor);
+      if(mavenProject == null){
+        MavenLogger.log("Unable to read maven project. Dependencies not updated.", null);
+        return null;
       }
+
+      rootNode.put(scope, MavenPlugin.getDefault().getMavenModelManager().readDependencies(mavenProject, scope, monitor));
     }
 
     return rootNode.get(scope);

@@ -194,10 +194,26 @@ public class MavenModelManager {
    * @return dependency node
    */
   public synchronized DependencyNode readDependencies(IFile file, String scope, IProgressMonitor monitor) throws CoreException {
-    try {
-      monitor.setTaskName("Reading project");
-      MavenProject mavenProject = readMavenProject(file, monitor);
+    monitor.setTaskName("Reading project");
+    MavenProject mavenProject = readMavenProject(file, monitor);
 
+    return readDependencies(mavenProject, scope, monitor);
+  }
+
+  /**
+   * @param force
+   * @param monitor
+   * @param scope one of 
+   *   {@link Artifact#SCOPE_COMPILE}, 
+   *   {@link Artifact#SCOPE_TEST}, 
+   *   {@link Artifact#SCOPE_SYSTEM}, 
+   *   {@link Artifact#SCOPE_PROVIDED}, 
+   *   {@link Artifact#SCOPE_RUNTIME}
+   *   
+   * @return dependency node
+   */
+  public synchronized DependencyNode readDependencies(MavenProject mavenProject, String scope, IProgressMonitor monitor) throws CoreException {
+    try {
       monitor.setTaskName("Building dependency tree");
 
       ArtifactFactory artifactFactory = MavenPlugin.getDefault().getArtifactFactory();
