@@ -234,7 +234,9 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
     RepositorySystemSession repoSession = createRepositorySession(request);
     MavenExecutionResult result = new DefaultMavenExecutionResult();
     MavenSession mavenSession = new MavenSession(plexus, repoSession, request, result);
-    mavenSession.setProjects(Collections.singletonList(project));
+    if(project != null) {
+      mavenSession.setProjects(Collections.singletonList(project));
+    }
     return mavenSession;
   }
 

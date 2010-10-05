@@ -450,7 +450,17 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
           .setRemoteArtifactRepositories(maven.getArtifactRepositories(true))
           .setProperties(properties).setOutputDirectory(location.toPortableString());
 
-      ArchetypeGenerationResult result = getArchetyper().generateProjectFromArchetype(request);
+      MavenSession session = maven.createSession(maven.createExecutionRequest(monitor), null);
+
+      MavenSession oldSession = MavenPlugin.getDefault().setSession(session);
+
+      ArchetypeGenerationResult result;
+      try {
+        result = getArchetyper().generateProjectFromArchetype(request);
+      } finally {
+        MavenPlugin.getDefault().setSession(oldSession);
+      }
+
       Exception cause = result.getCause();
       if(cause != null) {
         String msg = "Unable to create project from archetype " + archetype.toString();
