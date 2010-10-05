@@ -68,8 +68,6 @@ import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.ITextListener;
 import org.eclipse.jface.text.TextEvent;
 import org.eclipse.jface.text.source.IAnnotationModel;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.search.ui.text.ISearchEditorAccess;
 import org.eclipse.search.ui.text.Match;
 import org.eclipse.swt.widgets.Display;
@@ -370,37 +368,30 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
    * Show or hide the advanced pages within the editor (forced)
    */
   protected void showAdvancedPages(boolean showAdvancedTabs){
-    if(showAdvancedTabs && repositoriesPage == null){
+    if(!showAdvancedTabs) {
+      return;
+    }
+    
+    if(repositoriesPage == null){
       showAdvancedTabsAction.setChecked(true);
 
       repositoriesPage = new RepositoriesPage(this);
       addPomPage(repositoriesPage);
+
       buildPage = new BuildPage(this);
       addPomPage(buildPage);
+
       profilesPage = new ProfilesPage(this);
       addPomPage(profilesPage);
+
       teamPage = new TeamPage(this);
       addPomPage(teamPage);
+
+      graphPage = new DependencyGraphPage(this);
+      addPomPage(graphPage);
+
       lifecyclePage = new LifecyclePage(this);
       addPomPage(lifecyclePage);
-      
-    } else {
-      if(repositoriesPage == null){
-        return;
-      }
-
-      showAdvancedTabsAction.setChecked(false);
-
-      removePomPage(repositoriesPage);
-      repositoriesPage = null;
-      removePomPage(buildPage);
-      buildPage = null;
-      removePomPage(profilesPage);
-      profilesPage = null;
-      removePomPage(teamPage);
-      teamPage = null;
-      removePomPage(lifecyclePage);
-      lifecyclePage = null;
     }
   }
 
@@ -429,10 +420,6 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     
     dependencyTreePage = new DependencyTreePage(this);
     addPomPage(dependencyTreePage);
-
-    graphPage = new DependencyGraphPage(this);
-    addPomPage(graphPage);
-    
 
     addSourcePage();
     
@@ -996,7 +983,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   /**
    * Adapted from <code>org.eclipse.ui.texteditor.AbstractTextEditor.ActivationListener</code>
    */
-  class MavenPomActivationListener implements IPartListener, IWindowListener, IPropertyChangeListener {
+  class MavenPomActivationListener implements IPartListener, IWindowListener {
 
     private IWorkbenchPart activePart;
 
@@ -1006,13 +993,11 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     public MavenPomActivationListener(IPartService partService) {
       partService.addPartListener(this);
       PlatformUI.getWorkbench().addWindowListener(this);
-      MavenPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
     }
 
     public void dispose() {
       getSite().getWorkbenchWindow().getPartService().removePartListener(this);
       PlatformUI.getWorkbench().removeWindowListener(this);
-      MavenPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
     }
 
     
@@ -1103,12 +1088,6 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
           isHandlingActivation = false;
 
         }
-      }
-    }
-
-    public void propertyChange(PropertyChangeEvent event) {
-      if(event.getProperty().equals(PomEditorPreferencePage.P_SHOW_ADVANCED_TABS)){
-        showAdvancedPages();
       }
     }
   }

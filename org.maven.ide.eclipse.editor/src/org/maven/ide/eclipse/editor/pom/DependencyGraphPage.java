@@ -248,7 +248,7 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
   }
 
   String formatFormTitle() {
-    return DEPENDENCY_GRAPH + " [" + currentScope + "]";
+    return DEPENDENCY_GRAPH + " (experimental) [" + currentScope + "]";
   }
 
   void selectElements() {
