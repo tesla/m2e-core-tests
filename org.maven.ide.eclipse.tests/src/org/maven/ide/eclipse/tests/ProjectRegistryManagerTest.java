@@ -796,7 +796,8 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
       } finally {
         Job.getJobManager().removeJobChangeListener(jobChangeListener);
       }
-      assertTrue("Accessed metadata " + requests.size() + " times", requests.size() == 1);
+      // up to 2 requests (for POM and JAR) are allowed, more would indicate an issue with the cache
+      assertTrue("Accessed metadata " + requests.size() + " times", requests.size() == 1 || requests.size() == 2);
     } finally {
       mavenConfiguration.setUserSettingsFile(oldSettings);
     }
