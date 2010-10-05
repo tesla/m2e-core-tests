@@ -105,7 +105,8 @@ import org.maven.ide.components.pom.Model;
 import org.maven.ide.components.pom.util.PomResourceFactoryImpl;
 import org.maven.ide.components.pom.util.PomResourceImpl;
 import org.maven.ide.eclipse.MavenPlugin;
-import org.maven.ide.eclipse.actions.OpenPomAction;
+import org.maven.ide.eclipse.actions.OpenPomAction.MavenPathStorageEditorInput;
+import org.maven.ide.eclipse.actions.OpenPomAction.MavenStorageEditorInput;
 import org.maven.ide.eclipse.actions.SelectionUtil;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
@@ -493,7 +494,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       Display.getDefault().asyncExec(new Runnable(){
         public void run(){
           String error = "Unable to load Effective POM. See console for errors.";
-          IEditorInput editorInput = new OpenPomAction.MavenEditorStorageInput(name, name, null, error.getBytes());
+          IEditorInput editorInput = new MavenPathStorageEditorInput(name, name, null, error.getBytes());
           effectivePomSourcePage.setInput(editorInput);
         }
       });
@@ -503,7 +504,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       try{
         StringWriter sw = new StringWriter();
         final String name = getPartName() + " [effective]";
-        MavenProject mavenProject = SelectionUtil.getMavenProject(getEditorInput());
+        MavenProject mavenProject = SelectionUtil.getMavenProject(getEditorInput(), monitor);
         if(mavenProject == null){
           showEffectivePomError(name);
           return Status.CANCEL_STATUS;
@@ -514,7 +515,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
         Display.getDefault().asyncExec(new Runnable(){
           public void run() {
             try{
-              IEditorInput editorInput = new OpenPomAction.MavenEditorStorageInput(name, name, null, content.getBytes("UTF-8"));
+              IEditorInput editorInput = new MavenStorageEditorInput(name, name, null, content.getBytes("UTF-8"));
               effectivePomSourcePage.setInput(editorInput);
               effectivePomSourcePage.update();
             }catch(IOException ie){
@@ -539,7 +540,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     //put a msg in the editor saying that the effective pom is loading, in case this is a long running job
     String content = "Loading Effective POM...";
     String name = getPartName() + " [effective]";
-    IEditorInput editorInput = new OpenPomAction.MavenEditorStorageInput(name, name, null, content.getBytes());
+    IEditorInput editorInput = new MavenStorageEditorInput(name, name, null, content.getBytes());
     effectivePomSourcePage.setInput(editorInput);
     
     //then start the load
@@ -823,7 +824,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
         ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
       }
       
-      mavenProject = SelectionUtil.getMavenProject(input);
+      mavenProject = SelectionUtil.getMavenProject(input, monitor);
     }
     return mavenProject;
   }

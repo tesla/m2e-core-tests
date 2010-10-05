@@ -250,7 +250,7 @@ public class SelectionUtil {
       if(version == null) {
         IEditorPart editor = getActiveEditor();
         if(editor!=null) {
-          MavenProject mavenProject = getMavenProject(editor.getEditorInput());
+          MavenProject mavenProject = getMavenProject(editor.getEditorInput(), null);
           if(mavenProject!=null) {
             Artifact a = mavenProject.getArtifactMap().get(groupId + ":" + artifactId);
             version = a.getBaseVersion();
@@ -263,13 +263,13 @@ public class SelectionUtil {
     return SelectionUtil.getType(element, ArtifactKey.class);
   }
 
-  public static MavenProject getMavenProject(IEditorInput editorInput) throws CoreException {
+  public static MavenProject getMavenProject(IEditorInput editorInput, IProgressMonitor monitor) throws CoreException {
     if(editorInput instanceof IFileEditorInput) {
       IFile pomFile = ((IFileEditorInput) editorInput).getFile();
       MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
-      IMavenProjectFacade facade = projectManager.create(pomFile, true, null);
+      IMavenProjectFacade facade = projectManager.create(pomFile, true, monitor);
       if(facade!=null) {
-        return facade.getMavenProject(null);
+        return facade.getMavenProject(monitor);
       }
 
     } else if(editorInput instanceof IStorageEditorInput) {
@@ -285,7 +285,7 @@ public class SelectionUtil {
           os = new FileOutputStream(tempPomFile);
           is = storage.getContents();
           IOUtil.copy(is, os);
-          return readMavenProject(tempPomFile);
+          return readMavenProject(tempPomFile, monitor);
         } catch(IOException ex) {
           MavenLogger.log("Can't close stream", ex);
         } finally {
@@ -296,20 +296,22 @@ public class SelectionUtil {
           }
         }
       } else {
-        return readMavenProject(path.toFile());
+        return readMavenProject(path.toFile(), monitor);
       }
 
     } else if(editorInput.getClass().getName().endsWith("FileStoreEditorInput")) {
-      return readMavenProject(new File(Util.proxy(editorInput, FileStoreEditorInputStub.class).getURI().getPath()));
+      return readMavenProject(new File(Util.proxy(editorInput, FileStoreEditorInputStub.class).getURI().getPath()), monitor);
     }
     
     return null;
   }
   
-  private static MavenProject readMavenProject(File pomFile) throws CoreException {
-    IMaven maven = MavenPlugin.getDefault().getMaven();
+  private static MavenProject readMavenProject(File pomFile, IProgressMonitor monitor) throws CoreException {
+    if(monitor==null) {
+      monitor = new NullProgressMonitor();
+    }
     
-    IProgressMonitor monitor = new NullProgressMonitor();
+    IMaven maven = MavenPlugin.getDefault().getMaven();
 
     MavenExecutionRequest request = maven.createExecutionRequest(monitor);
     request.setOffline(false);

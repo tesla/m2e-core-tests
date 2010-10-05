@@ -199,7 +199,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
       InputStream is = new URL(url).openStream();
       byte[] buff = readStream(is);
 
-      openEditor(new MavenEditorStorageInput(name + ".java", tooltip, url, buff), name + ".java");
+      openEditor(new MavenPathStorageEditorInput(name + ".java", tooltip, url, buff), name + ".java");
 
     } catch(IOException ex) {
       String msg = "Can't open editor for " + name;
@@ -233,7 +233,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
 
         File file = artifact.getFile();
         if(file != null) {
-          return openEditor(new MavenEditorStorageInput(name, name, file.getAbsolutePath(),
+          return openEditor(new MavenPathStorageEditorInput(name, name, file.getAbsolutePath(),
               readStream(new FileInputStream(file))), name);
         }
 
@@ -311,7 +311,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
   /**
    * Storage editor input implementation for Maven poms
    */
-  public static class MavenEditorStorageInput implements IStorageEditorInput, IPathEditorInput {
+  public static class MavenStorageEditorInput implements IStorageEditorInput {
 
     private final String name;
 
@@ -321,7 +321,7 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
 
     private final byte[] content;
 
-    public MavenEditorStorageInput(String name, String tooltip, String path, byte[] content) {
+    public MavenStorageEditorInput(String name, String tooltip, String path, byte[] content) {
       this.name = name;
       this.path = path;
       this.tooltip = tooltip;
@@ -367,6 +367,12 @@ public class OpenPomAction extends ActionDelegate implements IWorkbenchWindowAct
 
   }
 
+  public static class MavenPathStorageEditorInput extends MavenStorageEditorInput implements IPathEditorInput {
+    public MavenPathStorageEditorInput(String name, String tooltip, String path, byte[] content) {
+      super(name, tooltip, path, content);
+    }
+  }
+  
   private static class MavenStorage implements IStorage {
     private String name;
 
