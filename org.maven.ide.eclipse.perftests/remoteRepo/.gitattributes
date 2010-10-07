@@ -1,0 +1,3 @@
+*.pom -text -crlf
+*.jar -text -crlf
+
