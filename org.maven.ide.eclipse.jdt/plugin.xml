@@ -167,6 +167,14 @@
                 label="Open JavaDoc"
                 enablesFor="1" icon="icons/javadoc.gif"/>
       </objectContribution>
+      <objectContribution id="org.maven.ide.eclipse.openJavaDocDependencyNode"
+          objectClass="org.sonatype.aether.graph.DependencyNode"
+          adaptable="false">
+        <action id="org.maven.ide.eclipse.ui.openJavaDocDependencyNode"
+                class="org.maven.ide.eclipse.jdt.internal.actions.OpenJavaDocAction"
+                label="Open JavaDoc"
+                enablesFor="1" icon="icons/javadoc.gif"/>
+      </objectContribution>
       <objectContribution id="org.maven.ide.eclipse.openJavaDocDependency"
             objectClass="org.maven.ide.components.pom.Dependency"
             adaptable="false">

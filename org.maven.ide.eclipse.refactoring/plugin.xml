@@ -60,6 +60,17 @@
             label="Exclude Maven Artifact..."
             menubarPath="additions"/>
      </objectContribution>
+     <objectContribution
+           id="org.maven.ide.eclipse.refactoring.exclude.dependencyContributor"
+           objectClass="org.sonatype.aether.graph.DependencyNode"
+           adaptable="true">
+        <action id="org.maven.ide.eclipse.projectMenu.action"
+            class="org.maven.ide.eclipse.refactoring.exclude.DependencyExcludeAction"
+            enablesFor="1"
+            icon="icons/exclude.gif"
+            label="Exclude Maven Artifact..."
+            menubarPath="additions"/>
+     </objectContribution>
   </extension>
   
   <extension point="org.maven.ide.eclipse.m2menu">

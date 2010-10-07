@@ -27,6 +27,10 @@ public class ArtifactKey implements Serializable {
     this(a.getGroupId(), a.getArtifactId(), a.getBaseVersion(), null);
   }
 
+  public ArtifactKey(org.sonatype.aether.artifact.Artifact a) {
+    this(a.getGroupId(), a.getArtifactId(), a.getBaseVersion(), null);
+  }
+
   public ArtifactKey(String groupId, String artifactId, String version, String classifier) {
     this.groupId = groupId;
     this.artifactId = artifactId;

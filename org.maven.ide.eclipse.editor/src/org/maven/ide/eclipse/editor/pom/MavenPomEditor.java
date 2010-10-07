@@ -171,6 +171,8 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 
   private Map<String,DependencyNode> rootNode = new HashMap<String, DependencyNode>();
 
+  private Map<String, org.sonatype.aether.graph.DependencyNode> rootNodes = new HashMap<String, org.sonatype.aether.graph.DependencyNode>();
+
   IStructuredModel structuredModel;
 
   private MavenProject mavenProject;
@@ -418,7 +420,6 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     reportingPage = new ReportingPage(this);
     addPomPage(reportingPage);
 
-    
     dependencyTreePage = new DependencyTreePage(this);
     addPomPage(dependencyTreePage);
 
@@ -811,6 +812,23 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     }
 
     return rootNode.get(scope);
+  }
+
+  public synchronized org.sonatype.aether.graph.DependencyNode readDependencyTree(boolean force, String classpath,
+      IProgressMonitor monitor) throws CoreException {
+    if(force || !rootNodes.containsKey(classpath)) {
+      monitor.setTaskName("Reading project");
+      MavenProject mavenProject = readMavenProject(force, monitor);
+      if(mavenProject == null){
+        MavenLogger.log("Unable to read maven project. Dependencies not updated.", null);
+        return null;
+      }
+
+      rootNodes.put(classpath,
+          MavenPlugin.getDefault().getMavenModelManager().readDependencyTree(mavenProject, classpath, monitor));
+    }
+
+    return rootNodes.get(classpath);
   }
 
   public MavenProject readMavenProject(boolean force, IProgressMonitor monitor) throws CoreException {

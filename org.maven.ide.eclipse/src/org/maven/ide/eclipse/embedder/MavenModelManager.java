@@ -12,8 +12,10 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -38,12 +40,14 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 
+import org.apache.maven.RepositoryUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactCollector;
 import org.apache.maven.artifact.resolver.filter.ScopeArtifactFilter;
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.dependency.tree.DependencyNode;
 import org.apache.maven.shared.dependency.tree.DependencyTreeBuilder;
@@ -51,6 +55,17 @@ import org.apache.maven.shared.dependency.tree.DependencyTreeBuilderException;
 import org.apache.maven.shared.dependency.tree.filter.ArtifactDependencyNodeFilter;
 import org.apache.maven.shared.dependency.tree.traversal.BuildingDependencyNodeVisitor;
 import org.apache.maven.shared.dependency.tree.traversal.FilteringDependencyNodeVisitor;
+
+import org.sonatype.aether.artifact.ArtifactTypeRegistry;
+import org.sonatype.aether.collection.CollectRequest;
+import org.sonatype.aether.collection.DependencyCollectionException;
+import org.sonatype.aether.collection.DependencyGraphTransformer;
+import org.sonatype.aether.util.DefaultRepositorySystemSession;
+import org.sonatype.aether.util.filter.ScopeDependencyFilter;
+import org.sonatype.aether.util.graph.CloningDependencyVisitor;
+import org.sonatype.aether.util.graph.FilteringDependencyVisitor;
+import org.sonatype.aether.util.graph.transformer.ChainedDependencyGraphTransformer;
+import org.sonatype.aether.util.graph.transformer.JavaEffectiveScopeCalculator;
 
 import org.maven.ide.components.pom.Build;
 import org.maven.ide.components.pom.Configuration;
@@ -242,6 +257,83 @@ public class MavenModelManager {
       String msg = "Project read error";
       MavenLogger.log(msg, ex);
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
+    }
+  }
+
+  public synchronized org.sonatype.aether.graph.DependencyNode readDependencyTree(IFile file, String classpath,
+      IProgressMonitor monitor) throws CoreException {
+    monitor.setTaskName("Reading project");
+    MavenProject mavenProject = readMavenProject(file, monitor);
+
+    return readDependencyTree(mavenProject, classpath, monitor);
+  }
+
+  public synchronized org.sonatype.aether.graph.DependencyNode readDependencyTree(MavenProject mavenProject,
+      String classpath, IProgressMonitor monitor) throws CoreException {
+    monitor.setTaskName("Building dependency tree");
+
+    IMaven maven = MavenPlugin.getDefault().getMaven();
+    DefaultRepositorySystemSession session = new DefaultRepositorySystemSession(maven.createSession(
+        maven.createExecutionRequest(monitor), mavenProject).getRepositorySession());
+
+    DependencyGraphTransformer transformer = new ChainedDependencyGraphTransformer(new JavaEffectiveScopeCalculator(),
+        new NearestVersionConflictResolver());
+    session.setDependencyGraphTransformer(transformer);
+
+    ClassLoader oldClassLoader = maven.selectProjectRealm(mavenProject);
+    try {
+      ArtifactTypeRegistry stereotypes = session.getArtifactTypeRegistry();
+
+      CollectRequest request = new CollectRequest();
+      request.setRequestContext("project");
+      request.setRepositories(mavenProject.getRemoteProjectRepositories());
+
+      for(org.apache.maven.model.Dependency dependency : mavenProject.getDependencies()) {
+        request.addDependency(RepositoryUtils.toDependency(dependency, stereotypes));
+      }
+
+      DependencyManagement depMngt = mavenProject.getDependencyManagement();
+      if(depMngt != null) {
+        for(org.apache.maven.model.Dependency dependency : depMngt.getDependencies()) {
+          request.addManagedDependency(RepositoryUtils.toDependency(dependency, stereotypes));
+        }
+      }
+
+      org.sonatype.aether.graph.DependencyNode node;
+      try {
+        node = MavenPlugin.getDefault().getRepositorySystem().collectDependencies(session, request).getRoot();
+      } catch(DependencyCollectionException ex) {
+        String msg = "Project read error";
+        MavenLogger.log(msg, ex);
+        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
+      }
+
+      Collection<String> scopes = new HashSet<String>();
+      Collections.addAll(scopes, Artifact.SCOPE_SYSTEM, Artifact.SCOPE_COMPILE, Artifact.SCOPE_PROVIDED,
+          Artifact.SCOPE_RUNTIME, Artifact.SCOPE_TEST);
+      if(Artifact.SCOPE_COMPILE.equals(classpath)) {
+        scopes.remove(Artifact.SCOPE_COMPILE);
+        scopes.remove(Artifact.SCOPE_SYSTEM);
+        scopes.remove(Artifact.SCOPE_PROVIDED);
+      } else if(Artifact.SCOPE_RUNTIME.equals(classpath)) {
+        scopes.remove(Artifact.SCOPE_COMPILE);
+        scopes.remove(Artifact.SCOPE_RUNTIME);
+      } else if(Artifact.SCOPE_COMPILE_PLUS_RUNTIME.equals(classpath)) {
+        scopes.remove(Artifact.SCOPE_COMPILE);
+        scopes.remove(Artifact.SCOPE_SYSTEM);
+        scopes.remove(Artifact.SCOPE_PROVIDED);
+        scopes.remove(Artifact.SCOPE_RUNTIME);
+      } else {
+        scopes.clear();
+      }
+
+      CloningDependencyVisitor cloner = new CloningDependencyVisitor();
+      node.accept(new FilteringDependencyVisitor(cloner, new ScopeDependencyFilter(null, scopes)));
+      node = cloner.getRootNode();
+
+      return node;
+    } finally {
+      Thread.currentThread().setContextClassLoader(oldClassLoader);
     }
   }
 

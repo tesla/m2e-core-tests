@@ -15,11 +15,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.repository.metadata.ArtifactMetadata;
-import org.apache.maven.repository.metadata.MetadataTreeNode;
+import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.shared.dependency.tree.DependencyNode;
-import org.apache.maven.shared.dependency.tree.traversal.DependencyNodeVisitor;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -85,10 +82,13 @@ import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectChangedEvent;
 import org.maven.ide.eclipse.project.MavenProjectManager;
+import org.sonatype.aether.graph.DependencyNode;
+import org.sonatype.aether.graph.DependencyVisitor;
 
 
 /**
  * @author Eugene Kuleshov
+ * @author Benjamin Bentmann
  */
 public class DependencyTreePage extends FormPage implements IMavenProjectChangedListener, IPomFileChangedListener {
 
@@ -124,7 +124,7 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
 
   private Job dataLoadingJob;
 
-  String currentScope = Artifact.SCOPE_TEST;
+  String currentClasspath = Artifact.SCOPE_TEST;
 
   public DependencyTreePage(MavenPomEditor pomEditor) {
     super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.dependencyTree", DEPENDENCY_HIERARCHY);
@@ -179,7 +179,7 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
   }
 
   String formatFormTitle() {
-    return DEPENDENCY_HIERARCHY + " [" + currentScope + "]";
+    return DEPENDENCY_HIERARCHY + " [" + currentClasspath + "]";
   }
 
   void loadData(final boolean force) {
@@ -194,22 +194,28 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
     dataLoadingJob = new Job("Loading pom.xml") {
       protected IStatus run(IProgressMonitor monitor) {
         try {
-          final DependencyNode dependencyNode = pomEditor.readDependencies(force, monitor, currentScope);
-          if(dependencyNode == null){
+          mavenProject = pomEditor.readMavenProject(force, monitor);
+          if(mavenProject == null){
+            MavenLogger.log("Unable to read maven project. Dependencies not updated.", null);
             return Status.CANCEL_STATUS;
           }
-          dependencyNode.accept(new DependencyNodeVisitor() {
-            public boolean visit(DependencyNode node) {
-              dependencyNodes.add(node);
+
+          final DependencyNode dependencyNode = pomEditor.readDependencyTree(force, currentClasspath, monitor);
+          if(dependencyNode == null) {
+            return Status.CANCEL_STATUS;
+          }
+          dependencyNode.accept(new DependencyVisitor() {
+            public boolean visitEnter(DependencyNode node) {
+              if(node.getDependency() != null) {
+                dependencyNodes.add(node);
+              }
               return true;
             }
 
-            public boolean endVisit(DependencyNode dependencynode) {
+            public boolean visitLeave(DependencyNode dependencynode) {
               return true;
             }
           });
-
-          mavenProject = pomEditor.readMavenProject(false, monitor);
 
           getPartControl().getDisplay().syncExec(new Runnable() {
             public void run() {
@@ -253,8 +259,8 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
     treeViewer = new TreeViewer(tree);
     treeViewer.setData(FormToolkit.KEY_DRAW_BORDER, Boolean.TRUE);
 
-    DependencyTreeLabelProvider2 treeLabelProvider = new DependencyTreeLabelProvider2();
-    treeViewer.setContentProvider(new DependencyTreeContentProvider2());
+    DependencyTreeLabelProvider treeLabelProvider = new DependencyTreeLabelProvider();
+    treeViewer.setContentProvider(new DependencyTreeContentProvider());
     treeViewer.setLabelProvider(treeLabelProvider);
 
     treeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -274,7 +280,7 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
         for(Iterator<?> it = selection.iterator(); it.hasNext();) {
           Object o = it.next();
           if(o instanceof DependencyNode) {
-            Artifact a = ((DependencyNode) o).getArtifact();
+            org.sonatype.aether.artifact.Artifact a = ((DependencyNode) o).getDependency().getArtifact();
             OpenPomAction.openEditor(a.getGroupId(), a.getArtifactId(), a.getVersion(), null);
           }
         }
@@ -284,7 +290,7 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
     createHierarchyToolbar(hierarchySection, treeLabelProvider, formToolkit);
   }
 
-  private void createHierarchyToolbar(Section hierarchySection, final DependencyTreeLabelProvider2 treeLabelProvider,
+  private void createHierarchyToolbar(Section hierarchySection, final DependencyTreeLabelProvider treeLabelProvider,
       FormToolkit formToolkit) {
     ToolBarManager hiearchyToolBarManager = new ToolBarManager(SWT.FLAT);
 
@@ -478,11 +484,11 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
     IToolBarManager toolBarManager = form.getForm().getToolBarManager();
     toolBarManager.add(searchControl);
     
-    class ScopeDropdown extends Action implements IMenuCreator {
+    class ClasspathDropdown extends Action implements IMenuCreator {
       private Menu menu;
 
-      public ScopeDropdown() {
-        setText("Scope");
+      public ClasspathDropdown() {
+        setText("Classpath");
         setImageDescriptor(MavenEditorImages.SCOPE);
         setMenuCreator(this);
       }
@@ -497,16 +503,15 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
         }
         
         menu = new Menu(parent);
-        addToMenu(menu, "all (test)", Artifact.SCOPE_TEST, currentScope);
-        addToMenu(menu, "compile", Artifact.SCOPE_COMPILE, currentScope);
-        addToMenu(menu, "runtime", Artifact.SCOPE_RUNTIME, currentScope);
-        addToMenu(menu, "provided", Artifact.SCOPE_PROVIDED, currentScope);
-        addToMenu(menu, "system", Artifact.SCOPE_SYSTEM, currentScope);
+        addToMenu(menu, "all (test)", Artifact.SCOPE_TEST, currentClasspath);
+        addToMenu(menu, "compile+runtime", Artifact.SCOPE_COMPILE_PLUS_RUNTIME, currentClasspath);
+        addToMenu(menu, "compile", Artifact.SCOPE_COMPILE, currentClasspath);
+        addToMenu(menu, "runtime", Artifact.SCOPE_RUNTIME, currentClasspath);
         return menu;
       }
       
       protected void addToMenu(Menu parent, String text, String scope, String currentScope) {
-        ScopeAction action = new ScopeAction(text, scope);
+        ClasspathAction action = new ClasspathAction(text, scope);
         action.setChecked(scope.equals(currentScope));
         new ActionContributionItem(action).fill(parent, -1);
       }
@@ -518,7 +523,7 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
         }
       }
     }
-    toolBarManager.add(new ScopeDropdown());
+    toolBarManager.add(new ClasspathDropdown());
     
     toolBarManager.add(new Separator());
     toolBarManager.add(new Action("Refresh", MavenEditorImages.REFRESH) {
@@ -563,7 +568,6 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
     listViewer.refresh();
 
     if(!matcher.isEmpty() && mavenProject != null) {
-      @SuppressWarnings("unchecked")
       Set<Artifact> projectArtifacts = mavenProject.getArtifacts();
       for(Artifact a : projectArtifacts) {
         if(matcher.isMatchingArtifact(a.getGroupId(), a.getArtifactId())) {
@@ -575,14 +579,14 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
   }
 
   void selectTreeElements(Matcher matcher) {
-    DependencyTreeLabelProvider2 treeLabelProvider = (DependencyTreeLabelProvider2) treeViewer.getLabelProvider();
+    DependencyTreeLabelProvider treeLabelProvider = (DependencyTreeLabelProvider) treeViewer.getLabelProvider();
     treeLabelProvider.setMatcher(matcher);
     treeViewer.refresh();
     treeViewer.expandAll();
 
     if(!matcher.isEmpty()) {
       for(DependencyNode node : dependencyNodes) {
-        Artifact a = node.getArtifact();
+        org.sonatype.aether.artifact.Artifact a = node.getDependency().getArtifact();
         if(matcher.isMatchingArtifact(a.getGroupId(), a.getGroupId())) {
           treeViewer.reveal(node);
           break;
@@ -607,18 +611,16 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
 
         } else if(element instanceof DependencyNode) {
           DependencyNode node = (DependencyNode) element;
-          node.getArtifact();
-          Artifact a = node.getArtifact();
+          org.sonatype.aether.artifact.Artifact a = node.getDependency().getArtifact();
           if(matcher.isMatchingArtifact(a.getGroupId(), a.getArtifactId())) {
             return true;
           }
 
-          class ChildMatcher implements DependencyNodeVisitor {
+          class ChildMatcher implements DependencyVisitor {
             protected boolean foundMatch = false;
 
-            public boolean visit(DependencyNode node) {
-              node.getArtifact();
-              Artifact a = node.getArtifact();
+            public boolean visitEnter(DependencyNode node) {
+              org.sonatype.aether.artifact.Artifact a = node.getDependency().getArtifact();
               if(matcher.isMatchingArtifact(a.getGroupId(), a.getArtifactId())) {
                 foundMatch = true;
                 return false;
@@ -626,7 +628,7 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
               return true;
             }
 
-            public boolean endVisit(DependencyNode node) {
+            public boolean visitLeave(DependencyNode node) {
               return true;
             }
           }
@@ -676,65 +678,7 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
     }
   }
 
-  static class DependencyTreeContentProvider implements ITreeContentProvider {
-
-    public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-    }
-
-    public Object[] getElements(Object element) {
-      return getChildren(element);
-    }
-
-    public Object[] getChildren(Object parent) {
-      if(parent instanceof MetadataTreeNode) {
-        MetadataTreeNode[] children = ((MetadataTreeNode) parent).getChildren();
-        if(children != null) {
-          return children;
-        }
-      }
-      return EMPTY;
-    }
-
-    public boolean hasChildren(Object element) {
-      if(element instanceof MetadataTreeNode) {
-        return ((MetadataTreeNode) element).hasChildren();
-      }
-      return false;
-    }
-
-    public Object getParent(Object element) {
-      if(element instanceof MetadataTreeNode) {
-        return ((MetadataTreeNode) element).getParent();
-      }
-      return null;
-    }
-
-    public void dispose() {
-    }
-  }
-
-  static class DependencyTreeLabelProvider extends LabelProvider {
-
-    public String getText(Object element) {
-      if(element instanceof MetadataTreeNode) {
-        MetadataTreeNode node = (MetadataTreeNode) element;
-        ArtifactMetadata md = node.getMd();
-        String label = md.getGroupId() + " : " + md.getArtifactId() + " : " + md.getVersion();
-
-        if(md.getClassifier() != null) {
-          label += " - " + md.getClassifier();
-        }
-
-        label += " [" + md.getScope() + "]";
-
-        return label;
-      }
-      return element.toString();
-    }
-
-  }
-
-  final class DependencyTreeContentProvider2 implements ITreeContentProvider {
+  final class DependencyTreeContentProvider implements ITreeContentProvider {
 
     public Object[] getElements(Object input) {
       return getChildren(input);
@@ -743,7 +687,6 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
     public Object[] getChildren(Object element) {
       if(element instanceof DependencyNode) {
         DependencyNode node = (DependencyNode) element;
-        @SuppressWarnings("unchecked")
         List<DependencyNode> children = node.getChildren();
         return children.toArray(new DependencyNode[children.size()]);
       }
@@ -751,17 +694,13 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
     }
 
     public Object getParent(Object element) {
-//      if(element instanceof DependencyNode) {
-//        DependencyNode node = (DependencyNode) element;
-//        return node.getParent();
-//      }
       return null;
     }
 
     public boolean hasChildren(Object element) {
       if(element instanceof DependencyNode) {
         DependencyNode node = (DependencyNode) element;
-        return node.hasChildren();
+        return !node.getChildren().isEmpty();
       }
       return false;
     }
@@ -774,7 +713,7 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
 
   }
 
-  final class DependencyTreeLabelProvider2 extends LabelProvider implements IColorProvider {
+  final class DependencyTreeLabelProvider extends LabelProvider implements IColorProvider {
 
     private boolean showGroupId = false;
 
@@ -793,9 +732,7 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
     public Color getForeground(Object element) {
       if(element instanceof DependencyNode) {
         DependencyNode node = (DependencyNode) element;
-        Artifact a = node.getState() == DependencyNode.OMITTED_FOR_CONFLICT ? node.getRelatedArtifact() //
-            : node.getArtifact();
-        String scope = a.getScope();
+        String scope = node.getDependency().getScope();
         if(scope != null && !"compile".equals(scope)) {
           return Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
         }
@@ -805,7 +742,7 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
 
     public Color getBackground(Object element) {
       if(matcher != null && !matcher.isEmpty() && element instanceof DependencyNode) {
-        Artifact a = ((DependencyNode) element).getArtifact();
+        org.sonatype.aether.artifact.Artifact a = ((DependencyNode) element).getDependency().getArtifact();
         if(matcher.isMatchingArtifact(a.getGroupId(), a.getArtifactId())) {
           return searchHighlightColor;
         }
@@ -820,86 +757,54 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
       if(element instanceof DependencyNode) {
         DependencyNode node = (DependencyNode) element;
 
-        Artifact a = node.getState() == DependencyNode.OMITTED_FOR_CONFLICT ? node.getRelatedArtifact() //
-            : node.getArtifact();
+        org.sonatype.aether.artifact.Artifact a = node.getDependency().getArtifact();
 
-        String label = "";
+        org.sonatype.aether.artifact.Artifact c = null;
+        if(!node.getAliases().isEmpty()) {
+          c = node.getAliases().iterator().next();
+        }
+        
+        StringBuilder label = new StringBuilder(128);
 
         if(showGroupId) {
-          label += a.getGroupId() + " : ";
+          label.append(a.getGroupId()).append(" : ");
         }
 
-        label += a.getArtifactId() + " : ";
+        label.append(a.getArtifactId()).append(" : ");
 
-        if(a.getVersion() != null || a.getBaseVersion() != null) {
-          label += a.getBaseVersion() == null ? a.getVersion() : a.getBaseVersion();
-        } else {
-          label += a.getVersionRange().toString();
+        label.append(a.getBaseVersion());
+
+        if(node.getPremanagedVersion() != null && !node.getPremanagedVersion().equals(a.getBaseVersion())) {
+          label.append(" (managed from ").append(node.getPremanagedVersion()).append(")");
         }
 
-        switch(node.getState()) {
-          case DependencyNode.INCLUDED:
-          case DependencyNode.OMITTED_FOR_CYCLE:
-          case DependencyNode.OMITTED_FOR_DUPLICATE:
-            if(node.getPremanagedVersion() != null) {
-              label += " (from " + node.getPremanagedVersion() + ")";
-            }
-            if(node.getVersionSelectedFromRange() != null) {
-              label += " (from " + node.getVersionSelectedFromRange().toString() //
-                  + " available " + node.getAvailableVersions().toString() + ")";
-            }
-            break;
-
-          case DependencyNode.OMITTED_FOR_CONFLICT:
-            label += " (conflicted " + node.getArtifact().getVersion() + ")";
-            break;
+        if(c != null) {
+          String version = c.getBaseVersion();
+          if(!a.getBaseVersion().equals(version)) {
+            label.append(" (conflicted ").append(version).append(")");
+          }
         }
 
-        if(a.getClassifier() != null) {
-          label += " - " + a.getClassifier();
+        if(a.getClassifier().length() > 0) {
+          label.append(" - ").append(a.getClassifier());
         }
 
-        label += " [" + (a.getScope() == null ? "compile" : a.getScope()) + "]";
+        label.append(" [").append(node.getDependency().getScope()).append("]");
 
         if(node.getPremanagedScope() != null) {
-          label += " (from " + node.getPremanagedScope() + ")";
+          label.append(" (from ").append(node.getPremanagedScope()).append(")");
         }
 
-        if(node.getOriginalScope() != null) {
-          label += " (from " + node.getOriginalScope() + ")";
-        }
-
-        if(node.getFailedUpdateScope() != null) {
-          label += " (not updated from " + node.getFailedUpdateScope() + ")";
-        }
-
-        return label;
+        return label.toString();
       }
       return element.toString();
     }
-
-//    private String getState(DependencyNode node) {
-//      switch(node.getState()) {
-//        case DependencyNode.INCLUDED:
-//          return "included";
-//        
-//        case DependencyNode.OMITTED_FOR_CONFLICT:
-//          return "conflict";
-//          
-//        case DependencyNode.OMITTED_FOR_CYCLE:
-//          return "cycle";
-//          
-//        case DependencyNode.OMITTED_FOR_DUPLICATE:
-//          return "duplicate";
-//      }
-//      return "?";
-//    }
 
     @Override
     public Image getImage(Object element) {
       if(element instanceof DependencyNode) {
         DependencyNode node = (DependencyNode) element;
-        Artifact a = node.getArtifact();
+        org.sonatype.aether.artifact.Artifact a = node.getDependency().getArtifact();
         MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
         IMavenProjectFacade projectFacade = projectManager.getMavenProject(a.getGroupId(), //
             a.getArtifactId(), //
@@ -953,23 +858,23 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
     public String getText(Object element) {
       if(element instanceof Artifact) {
         Artifact a = (Artifact) element;
-        String label = "";
+        StringBuilder label = new StringBuilder(64);
 
         if(showGroupId) {
-          label += a.getGroupId() + " : ";
+          label.append(a.getGroupId()).append(" : ");
         }
 
-        label += a.getArtifactId() + " : " + a.getVersion();
+        label.append(a.getArtifactId()).append(" : ").append(a.getVersion());
 
-        if(a.getClassifier() != null) {
-          label += " - " + a.getClassifier();
+        if(a.hasClassifier()) {
+          label.append(" - ").append(a.getClassifier());
         }
 
         if(a.getScope() != null) {
-          label += " [" + a.getScope() + "]";
+          label.append(" [").append(a.getScope()).append("]");
         }
 
-        return label;
+        return label.toString();
       }
       return super.getText(element);
     }
@@ -995,19 +900,10 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
       if(input instanceof MavenProject) {
         MavenProject project = (MavenProject) input;
         List<Artifact> artifacts = new ArrayList<Artifact>();
-        if(Artifact.SCOPE_COMPILE.equals(currentScope)) {
-          artifacts = project.getCompileArtifacts();
-        } else if(Artifact.SCOPE_TEST.equals(currentScope)) {
-          artifacts = project.getTestArtifacts();
-        } else if(Artifact.SCOPE_RUNTIME.equals(currentScope)) {
-          artifacts = project.getRuntimeArtifacts();
-        } else if(Artifact.SCOPE_SYSTEM.equals(currentScope)) {
-          artifacts = project.getSystemArtifacts();
-        } else if(Artifact.SCOPE_PROVIDED.equals(currentScope)) {
-          for(Artifact artifact : project.getArtifacts()) {
-            if(Artifact.SCOPE_PROVIDED.equals(artifact.getScope())) {
-              artifacts.add(artifact);
-            }
+        ArtifactFilter filter = new org.apache.maven.artifact.resolver.filter.ScopeArtifactFilter(currentClasspath);
+        for(Artifact artifact : project.getArtifacts()) {
+          if(filter.include(artifact)) {
+            artifacts.add(artifact);
           }
         }
         return artifacts.toArray(new Artifact[artifacts.size()]);
@@ -1063,7 +959,7 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
     @Override
     protected void addArtifactKey(Object o) {
       if(o instanceof DependencyNode) {
-        Artifact a = ((DependencyNode) o).getArtifact();
+        org.sonatype.aether.artifact.Artifact a = ((DependencyNode) o).getDependency().getArtifact();
         artifactKeys.add(getKey(a.getGroupId(), a.getArtifactId()));
       }
     }
@@ -1098,7 +994,6 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
     }
   }
 
-  @SuppressWarnings("unchecked")
   private Artifact getArtifact(ArtifactKey artifactKey) {
     Set<Artifact> artifacts = mavenProject.getArtifacts();
     for(Artifact artifact : artifacts) {
@@ -1110,18 +1005,18 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
   }
   
 
-  public class ScopeAction extends Action {
+  public class ClasspathAction extends Action {
 
-    private final String scope;
+    private final String classpath;
 
-    public ScopeAction(String text, String scope) {
+    public ClasspathAction(String text, String classpath) {
       super(text, IAction.AS_RADIO_BUTTON);
-      this.scope = scope;
+      this.classpath = classpath;
     }
 
     public void run() {
       if(isChecked()) {
-        currentScope = scope;
+        currentClasspath = classpath;
         IManagedForm managedForm = DependencyTreePage.this.getManagedForm();
         managedForm.getForm().setText(formatFormTitle());
         loadData(false);

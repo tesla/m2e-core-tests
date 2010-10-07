@@ -63,6 +63,7 @@ import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.LegacySupport;
 import org.apache.maven.shared.dependency.tree.DependencyTreeBuilder;
 
+import org.sonatype.aether.RepositorySystem;
 import org.sonatype.nexus.index.NexusIndexer;
 import org.sonatype.nexus.index.updater.IndexUpdater;
 
@@ -539,6 +540,10 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
   public DependencyTreeBuilder getDependencyTreeBuilder() {
     return lookup(DependencyTreeBuilder.class);
+  }
+
+  public RepositorySystem getRepositorySystem() {
+    return lookup(RepositorySystem.class);
   }
 
   public MavenSession setSession(MavenSession session) {

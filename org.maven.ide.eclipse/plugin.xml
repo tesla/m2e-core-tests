@@ -211,6 +211,14 @@
                 label="Open POM"
                 enablesFor="1"/>
       </objectContribution>
+      <objectContribution id="org.maven.ide.eclipse.openPomDependencyNode"
+          objectClass="org.sonatype.aether.graph.DependencyNode"
+          adaptable="false">
+        <action id="org.maven.ide.eclipse.ui.openPomDependency"
+                class="org.maven.ide.eclipse.actions.OpenPomAction"
+                label="Open POM"
+                enablesFor="1"/>
+      </objectContribution>
       <objectContribution id="org.maven.ide.eclipse.openPomDependency"
             objectClass="org.maven.ide.components.pom.Dependency"
             adaptable="false">
@@ -230,6 +238,14 @@
       </objectContribution>
       <objectContribution id="org.maven.ide.eclipse.openProjectPageDependencyNode"
           objectClass="org.apache.maven.shared.dependency.tree.DependencyNode"
+          adaptable="false">
+        <action id="org.maven.ide.eclipse.ui.openPomDependencyUrl"
+                class="org.maven.ide.eclipse.actions.OpenUrlAction:org.maven.ide.eclipse.openProjectPage"
+                label="Open Project Page"
+                enablesFor="1" icon="icons/web.gif"/>
+      </objectContribution>
+      <objectContribution id="org.maven.ide.eclipse.openProjectPageDependencyNode"
+          objectClass="org.sonatype.aether.graph.DependencyNode"
           adaptable="false">
         <action id="org.maven.ide.eclipse.ui.openPomDependencyUrl"
                 class="org.maven.ide.eclipse.actions.OpenUrlAction:org.maven.ide.eclipse.openProjectPage"

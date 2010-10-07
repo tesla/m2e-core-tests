@@ -241,6 +241,11 @@ public class SelectionUtil {
       Artifact artifact = ((DependencyNode) element).getArtifact();
       return new ArtifactKey(artifact);
       
+    } else if(element instanceof org.sonatype.aether.graph.DependencyNode) {
+      org.sonatype.aether.artifact.Artifact artifact = ((org.sonatype.aether.graph.DependencyNode) element)
+          .getDependency().getArtifact();
+      return new ArtifactKey(artifact);
+      
     } else if(element instanceof Dependency) {
       Dependency dependency = (Dependency) element;
       String groupId = dependency.getGroupId();

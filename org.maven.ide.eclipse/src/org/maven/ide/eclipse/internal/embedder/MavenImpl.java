@@ -1042,4 +1042,16 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
       plexus.dispose();
     }
   }
+
+  public ClassLoader selectProjectRealm(MavenProject project) {
+    ClassLoader newClassLoader = project.getClassRealm();
+    if(newClassLoader == null) {
+      newClassLoader = plexus.getContainerRealm();
+    }
+
+    ClassLoader old = Thread.currentThread().getContextClassLoader();
+    Thread.currentThread().setContextClassLoader(newClassLoader);
+    return old;
+  }
+
 }

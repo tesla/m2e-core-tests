@@ -200,4 +200,11 @@ public interface IMaven {
    */
   void releaseMojo(Object mojo, MojoExecution mojoExecution) throws CoreException;
 
+  /**
+   * Sets the thread context class loader to the class realm of the specified project.
+   * 
+   * @return The previous thread context class loader.
+   */
+  ClassLoader selectProjectRealm(MavenProject project);
+
 }
