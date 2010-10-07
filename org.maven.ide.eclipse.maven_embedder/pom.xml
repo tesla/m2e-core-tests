@@ -41,7 +41,7 @@
         <groupId>org.sonatype.tycho</groupId>
         <artifactId>maven-osgi-packaging-plugin</artifactId>
         <configuration>
-          <format>yyyyMMddHHmm'-maven-r1000119-jetty-r5136355d'</format>
+          <format>yyyyMMddHHmm'-maven-r1004208-jetty-r5136355d'</format>
         </configuration>
       </plugin>
     </plugins>
