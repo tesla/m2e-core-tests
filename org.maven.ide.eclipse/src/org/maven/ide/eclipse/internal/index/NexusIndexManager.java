@@ -53,9 +53,7 @@ import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 
-import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
-import org.apache.maven.wagon.events.TransferListener;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 
 import org.sonatype.nexus.artifact.Gav;
@@ -76,7 +74,6 @@ import org.sonatype.nexus.index.creator.MavenPluginArtifactInfoIndexCreator;
 import org.sonatype.nexus.index.creator.MinimalArtifactInfoIndexCreator;
 import org.sonatype.nexus.index.fs.Lock;
 import org.sonatype.nexus.index.locator.PomLocator;
-import org.sonatype.nexus.index.updater.DefaultIndexUpdater;
 import org.sonatype.nexus.index.updater.IndexUpdateRequest;
 import org.sonatype.nexus.index.updater.IndexUpdateResult;
 import org.sonatype.nexus.index.updater.IndexUpdater;
@@ -157,8 +154,6 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
 
   private IndexUpdater indexUpdater;
 
-  private WagonManager wagonManager;
-
   private static final EquinoxLocker locker = new EquinoxLocker();
 
   /**
@@ -193,7 +188,6 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
 
     this.maven = MavenPlugin.getDefault().getMaven();
     this.indexUpdater = MavenPlugin.getDefault().getIndexUpdater();
-    this.wagonManager = MavenPlugin.getDefault().getWagonManager();
 
     this.updaterJob = new IndexUpdaterJob(this, console);
 
@@ -1063,14 +1057,12 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       if (context != null) {
         IndexUpdateRequest request = newIndexUpdateRequest(repository, context);
 
-        TransferListener transferListener = maven.createTransferListener(monitor);
         ProxyInfo proxyInfo = maven.getProxyInfo(repository.getProtocol());
         AuthenticationInfo authenticationInfo = repository.getAuthenticationInfo();
         request.setProxyInfo(proxyInfo);
         request.setAuthenticationInfo(authenticationInfo);
-        request.setTransferListener(transferListener);
         request.setForceFullUpdate(force);
-        request.setResourceFetcher(new DefaultIndexUpdater.WagonFetcher(wagonManager, transferListener, authenticationInfo, proxyInfo));
+        request.setResourceFetcher(new AsyncFetcher(authenticationInfo, proxyInfo, monitor));
 
         Lock cacheLock = locker.lock(request.getLocalIndexCacheDir());
         try {
