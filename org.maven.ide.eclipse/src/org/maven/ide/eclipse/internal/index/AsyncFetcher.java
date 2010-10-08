@@ -147,6 +147,10 @@ class AsyncFetcher extends AbstractResourceFetcher {
 
     httpClient.prepareGet(url).setRealm(authRealm).setProxyServer(proxyServer).execute(new AsyncHandler<String>() {
 
+      private long total = -1;
+
+      private long transferred;
+
       private void finish(Throwable exception) {
         pis.setError(exception);
         try {
@@ -168,12 +172,25 @@ class AsyncFetcher extends AbstractResourceFetcher {
         if(checkCancel() == STATE.ABORT) {
           return STATE.ABORT;
         }
+        int bytes = content.getBodyByteBuffer().remaining();
         content.writeTo(pos);
+        if(total > 0) {
+          transferred += bytes;
+          monitor.subTask("Fetching " + url + " (" + transferred * 100 / total + "%)");
+        }
         return STATE.CONTINUE;
       }
 
       public STATE onHeadersReceived(HttpResponseHeaders headers) throws Exception {
-        return checkCancel();
+        if(checkCancel() == STATE.ABORT) {
+          return STATE.ABORT;
+        }
+        try {
+          total = Long.parseLong(headers.getHeaders().getFirstValue("Content-Length"));
+        } catch(Exception e) {
+          total = -1;
+        }
+        return STATE.CONTINUE;
       }
 
       public STATE onStatusReceived(HttpResponseStatus status) throws Exception {
@@ -189,6 +206,7 @@ class AsyncFetcher extends AbstractResourceFetcher {
       }
 
       public String onCompleted() throws Exception {
+        monitor.subTask("");
         finish(null);
         return "";
       }
