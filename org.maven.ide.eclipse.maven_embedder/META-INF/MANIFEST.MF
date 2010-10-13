@@ -131,5 +131,5 @@ Export-Package: org.apache.maven.project.inheritance,org.apache.maven.
  ven.usability.plugin,org.apache.maven.wagon.providers.file,org.apache
  .maven.repository.internal,com.google.inject,com.google.inject.binder
  ,org.sonatype.aether.spi.io,com.google.inject.name,com.ning.http.clie
- nt,org.sonatype.aether.connector.async
+ nt
 Bundle-Version: 0.12.0.qualifier
