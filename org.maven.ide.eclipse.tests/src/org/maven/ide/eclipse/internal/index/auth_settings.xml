@@ -1,0 +1,16 @@
+<settings>
+  <servers>
+    <server>
+      <id>nexus</id>
+      <username>testuser</username>
+      <password>testpass</password>
+    </server>
+  </servers>
+  <mirrors>
+    <mirror>
+      <id>nexus</id>
+      <mirrorOf>external:*</mirrorOf>
+      <url>http://localhost:@port.http@/remoterepo</url>
+    </mirror>
+  </mirrors>
+</settings>

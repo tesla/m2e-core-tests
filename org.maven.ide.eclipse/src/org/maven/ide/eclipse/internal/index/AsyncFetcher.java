@@ -139,82 +139,13 @@ class AsyncFetcher extends AbstractResourceFetcher {
   }
 
   public InputStream retrieve(String name) throws IOException, FileNotFoundException {
-    final String url = buildUrl(baseUrl, name);
-    final PipedErrorInputStream pis = new PipedErrorInputStream();
-    final PipedOutputStream pos = new PipedOutputStream(pis);
+    String url = buildUrl(baseUrl, name);
 
     monitor.subTask("Fetching " + url);
 
-    httpClient.prepareGet(url).setRealm(authRealm).setProxyServer(proxyServer).execute(new AsyncHandler<String>() {
+    PipedErrorInputStream pis = new PipedErrorInputStream();
 
-      private long total = -1;
-
-      private long transferred;
-
-      private void finish(Throwable exception) {
-        pis.setError(exception);
-        try {
-          pos.close();
-        } catch(IOException ex) {
-          // tried it
-        }
-      }
-
-      private STATE checkCancel() {
-        if(monitor.isCanceled()) {
-          finish(new IOException("transfer has been cancelled by user"));
-          return STATE.ABORT;
-        }
-        return STATE.CONTINUE;
-      }
-
-      public STATE onBodyPartReceived(HttpResponseBodyPart content) throws Exception {
-        if(checkCancel() == STATE.ABORT) {
-          return STATE.ABORT;
-        }
-        int bytes = content.getBodyByteBuffer().remaining();
-        content.writeTo(pos);
-        if(total > 0) {
-          transferred += bytes;
-          monitor.subTask("Fetching " + url + " (" + transferred * 100 / total + "%)");
-        }
-        return STATE.CONTINUE;
-      }
-
-      public STATE onHeadersReceived(HttpResponseHeaders headers) throws Exception {
-        if(checkCancel() == STATE.ABORT) {
-          return STATE.ABORT;
-        }
-        try {
-          total = Long.parseLong(headers.getHeaders().getFirstValue("Content-Length"));
-        } catch(Exception e) {
-          total = -1;
-        }
-        return STATE.CONTINUE;
-      }
-
-      public STATE onStatusReceived(HttpResponseStatus status) throws Exception {
-        if(checkCancel() == STATE.ABORT) {
-          return STATE.ABORT;
-        }
-        if(status.getStatusCode() != HttpURLConnection.HTTP_OK) {
-          finish(new IOException("Server returned status code " + status.getStatusCode() + ": "
-              + status.getStatusText()));
-          return STATE.ABORT;
-        }
-        return STATE.CONTINUE;
-      }
-
-      public String onCompleted() throws Exception {
-        monitor.subTask("");
-        finish(null);
-        return "";
-      }
-
-      public void onThrowable(Throwable t) {
-        finish(t);
-      }
-    });
+    httpClient.prepareGet(url).setRealm(authRealm).setProxyServer(proxyServer).execute(new RequestHandler(url, pis));
 
     return pis;
   }
@@ -235,22 +166,114 @@ class AsyncFetcher extends AbstractResourceFetcher {
 
     private volatile Throwable error;
 
+    public PipedErrorInputStream() {
+      buffer = new byte[1024 * 128];
+    }
+
     public void setError(Throwable t) {
       if(error == null) {
         error = t;
       }
     }
 
-    public synchronized int read() throws IOException {
+    private void checkError() throws IOException {
       if(error != null) {
-        if(error instanceof IOException) {
-          throw (IOException) error;
-        }
         throw (IOException) new IOException(error.getMessage()).initCause(error);
       }
-
-      return super.read();
     }
+
+    public synchronized int read() throws IOException {
+      checkError();
+      int b = super.read();
+      checkError();
+      return b;
+    }
+  }
+
+  final class RequestHandler implements AsyncHandler<String> {
+
+    private final String url;
+
+    private final PipedErrorInputStream pis;
+
+    private PipedOutputStream pos;
+
+    private long total = -1;
+
+    private long transferred;
+
+    public RequestHandler(String url, PipedErrorInputStream pis) throws IOException {
+      this.url = url;
+      this.pis = pis;
+      pos = new PipedOutputStream(pis);
+    }
+
+    private void finish(Throwable exception) {
+      pis.setError(exception);
+      if(pos != null) {
+        try {
+          pos.close();
+        } catch(IOException ex) {
+          // tried it
+        }
+        pos = null;
+      }
+    }
+
+    private STATE checkCancel() {
+      if(monitor.isCanceled()) {
+        finish(new IOException("transfer has been cancelled by user"));
+        return STATE.ABORT;
+      }
+      return STATE.CONTINUE;
+    }
+
+    public STATE onBodyPartReceived(HttpResponseBodyPart content) throws Exception {
+      if(checkCancel() == STATE.ABORT || pos == null) {
+        return STATE.ABORT;
+      }
+      int bytes = content.getBodyByteBuffer().remaining();
+      content.writeTo(pos);
+      if(total > 0) {
+        transferred += bytes;
+        monitor.subTask("Fetching " + url + " (" + transferred * 100 / total + "%)");
+      }
+      return STATE.CONTINUE;
+    }
+
+    public STATE onHeadersReceived(HttpResponseHeaders headers) throws Exception {
+      if(checkCancel() == STATE.ABORT) {
+        return STATE.ABORT;
+      }
+      try {
+        total = Long.parseLong(headers.getHeaders().getFirstValue("Content-Length"));
+      } catch(Exception e) {
+        total = -1;
+      }
+      return STATE.CONTINUE;
+    }
+
+    public STATE onStatusReceived(HttpResponseStatus status) throws Exception {
+      if(status.getStatusCode() != HttpURLConnection.HTTP_OK) {
+        finish(new IOException("Server returned status code " + status.getStatusCode() + ": " + status.getStatusText()));
+        return STATE.ABORT;
+      }
+      if(checkCancel() == STATE.ABORT) {
+        return STATE.ABORT;
+      }
+      return STATE.CONTINUE;
+    }
+
+    public String onCompleted() throws Exception {
+      monitor.subTask("");
+      finish(null);
+      return "";
+    }
+
+    public void onThrowable(Throwable t) {
+      finish(t);
+    }
+
   }
 
 }

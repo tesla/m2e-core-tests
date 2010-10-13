@@ -379,4 +379,27 @@ public class NexusIndexManagerTest extends AbstractNexusIndexManagerTest {
         new MavenProjectChangedEvent[] {event}, new NullProgressMonitor());
   }
 
+  public void testFetchIndexFromRepositoryWithAuthentication() throws Exception {
+    HttpServer httpServer = new HttpServer();
+    httpServer.addResources("/", "");
+    httpServer.addUser("testuser", "testpass", "index-reader");
+    httpServer.addSecuredRealm("/*", "index-reader");
+    httpServer.start();
+    try {
+      final File settingsFile = new File("target/settings-index-with-auth.xml");
+      FileHelpers.filterXmlFile(new File("src/org/maven/ide/eclipse/internal/index/auth_settings.xml"), settingsFile,
+          Collections.singletonMap("@port.http@", Integer.toString(httpServer.getHttpPort())));
+      assertTrue(settingsFile.exists());
+
+      mavenConfiguration.setUserSettingsFile(settingsFile.getCanonicalPath());
+      waitForJobsToComplete();
+
+      IndexedArtifactGroup[] rootGroups = indexManager.getRootGroups(getRepository(httpServer.getHttpUrl()
+          + "/remoterepo"));
+      assertTrue(rootGroups.length > 0);
+    } finally {
+      httpServer.stop();
+    }
+  }
+
 }
