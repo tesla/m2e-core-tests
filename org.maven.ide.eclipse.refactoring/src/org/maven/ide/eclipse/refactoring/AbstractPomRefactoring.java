@@ -134,8 +134,7 @@ public abstract class AbstractPomRefactoring extends Refactoring {
         MavenProject current = model.getProject();
         // add itself
         workspaceParents.add(model);
-        MavenProject parentProject = getParentProject(projectFacade, current, pm);
-        while(parentProject != null) {
+        for(MavenProject parentProject = getParentProject(projectFacade, current, pm); parentProject != null;) {
           String id = parentProject.getArtifactId();
           RefactoringModelResources parent = models.get(id);
           if(parent != null) {
@@ -143,7 +142,7 @@ public abstract class AbstractPomRefactoring extends Refactoring {
           } else {
             break;
           }
-          current = parentProject;
+          parentProject = getParentProject(projectFacade, parentProject, pm);
         }
 
         //fill properties (from the root)
