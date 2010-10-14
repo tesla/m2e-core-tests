@@ -507,12 +507,15 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
     try {
       configuration.setRemoteRepositories(child.getRemoteArtifactRepositories());
 
-      if(child.getParentFile() != null) {
-        return lookup(ProjectBuilder.class).build(child.getParentFile(), configuration).getProject();
+      File parentFile = child.getParentFile();
+      if(parentFile != null) {
+        return lookup(ProjectBuilder.class).build(parentFile, configuration).getProject();
       }
 
-      ProjectBuildingResult result = lookup(ProjectBuilder.class).build(child.getParentArtifact(), configuration);
-      return result.getProject();
+      Artifact parentArtifact = child.getParentArtifact();
+      if(parentArtifact != null) {
+        return lookup(ProjectBuilder.class).build(parentArtifact, configuration).getProject();
+      }
     } catch(ProjectBuildingException ex) {
       MavenLogger.log("Could not read parent project", ex);
     }
