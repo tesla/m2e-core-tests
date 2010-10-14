@@ -360,4 +360,31 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     }
   }
 
+  public void testReadLocalParent() throws Exception {
+    MavenExecutionRequest request = maven.createExecutionRequest(monitor);
+    request.setPom(new File("projects/readparent/local/module01/pom.xml"));
+    request.setGoals(Arrays.asList("compile"));
+
+    MavenExecutionResult result = maven.readProject(request, monitor);
+    assertFalse(result.hasExceptions());
+    MavenProject project = result.getProject();
+
+    request = maven.createExecutionRequest(monitor);
+    MavenProject parent = maven.resolveParentProject(request, project, monitor);
+    assertEquals("local-parent", parent.getArtifactId());
+  }
+  public void testReadRemoteParent() throws Exception {
+    MavenExecutionRequest request = maven.createExecutionRequest(monitor);
+    request.setPom(new File("projects/readparent/remote/module02/pom.xml"));
+    request.setGoals(Arrays.asList("compile"));
+
+    MavenExecutionResult result = maven.readProject(request, monitor);
+    assertFalse(result.hasExceptions());
+    MavenProject project = result.getProject();
+   
+    request = maven.createExecutionRequest(monitor);
+    MavenProject parent = maven.resolveParentProject(request, project, monitor);
+    assertEquals("remote-parent", parent.getArtifactId());
+  }
+
 }

@@ -15,6 +15,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.project.MavenProject;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -43,7 +44,9 @@ import org.maven.ide.components.pom.Model;
 import org.maven.ide.components.pom.PropertyElement;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.embedder.IMaven;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
+import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.refactoring.RefactoringModelResources.PropertyInfo;
 import org.maven.ide.eclipse.refactoring.internal.Activator;
 
@@ -118,8 +121,12 @@ public abstract class AbstractPomRefactoring extends Refactoring {
       }
 
       // construct properties for all models
-      for(String artifact : models.keySet()) {
-        RefactoringModelResources model = models.get(artifact);
+      for(IMavenProjectFacade projectFacade : projects) {
+        RefactoringModelResources model = models.get(projectFacade.getArtifactKey().getArtifactId());
+        if(model == null) {
+          continue;
+        }
+
         Map<String, PropertyInfo> properties = new HashMap<String, PropertyInfo>();
 
         // find all workspace parents
@@ -127,8 +134,8 @@ public abstract class AbstractPomRefactoring extends Refactoring {
         MavenProject current = model.getProject();
         // add itself
         workspaceParents.add(model);
-        while(current.getParent() != null) {
-          MavenProject parentProject = current.getParent();
+        MavenProject parentProject = getParentProject(projectFacade, current, pm);
+        while(parentProject != null) {
           String id = parentProject.getArtifactId();
           RefactoringModelResources parent = models.get(id);
           if(parent != null) {
@@ -251,6 +258,17 @@ public abstract class AbstractPomRefactoring extends Refactoring {
     }
 
     return res;
+  }
+
+  protected MavenProject getParentProject(IMavenProjectFacade project, MavenProject current, IProgressMonitor monitor)
+      throws CoreException {
+    IMaven maven = mavenPlugin.getMaven();
+    MavenProjectManager projectManager = mavenPlugin.getMavenProjectManager();
+
+    MavenExecutionRequest request = projectManager.createExecutionRequest(project.getPom(),
+        project.getResolverConfiguration(), monitor);
+
+    return maven.resolveParentProject(request, current, monitor);
   }
 
   // title for a composite change

@@ -31,7 +31,6 @@ import org.maven.ide.components.pom.util.PomResourceImpl;
 public class MavenModelUtil {
 
   // XXX find if there is a way around this without creating resources in workspace
-  @SuppressWarnings("restriction")
   public static PomResourceImpl createResource(IProject project, String pomFileName, String content) throws Exception {
     IProgressMonitor monitor = new NullProgressMonitor();
     

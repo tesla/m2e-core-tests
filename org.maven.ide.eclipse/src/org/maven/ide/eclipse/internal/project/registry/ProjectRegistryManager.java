@@ -358,6 +358,11 @@ public class ProjectRegistryManager {
 
     DependencyResolutionContext context = new DependencyResolutionContext(updateRequest, executionRequest);
   
+    refresh(newState, context, monitor);
+  }
+
+  protected void refresh(MutableProjectRegistry newState, DependencyResolutionContext context, IProgressMonitor monitor)
+      throws CoreException {
     while(!context.isEmpty()) {
       Map<IFile, MavenProjectFacade> newFacades = new LinkedHashMap<IFile, MavenProjectFacade>();
 
@@ -570,6 +575,9 @@ public class ProjectRegistryManager {
     }
 
     ILifecycleMapping lifecycleMapping = getLifecycleMapping(pom, mavenProject, resolverConfiguration, monitor);
+
+    // don't cache maven session
+    getMaven().detachFromSession(mavenProject);
 
     // create and return new project facade
     return new MavenProjectFacade(ProjectRegistryManager.this, pom, mavenProject, resolverConfiguration, lifecycleMapping);

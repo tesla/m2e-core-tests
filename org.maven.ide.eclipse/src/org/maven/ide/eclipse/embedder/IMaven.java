@@ -87,6 +87,17 @@ public interface IMaven {
 
   public MavenExecutionResult readProject(MavenExecutionRequest request, IProgressMonitor monitor) throws CoreException;
 
+  /**
+   * Makes MavenProject instances returned by #readProject methods suitable for caching and reuse with other
+   * MavenSession instances.<br/>
+   * Do note that MavenProject.getParentProject() cannot be used for detached MavenProject instances,
+   * #resolveParentProject to read parent project instance.
+   */
+  public void detachFromSession(MavenProject project) throws CoreException;
+
+  public MavenProject resolveParentProject(MavenExecutionRequest request, MavenProject project, IProgressMonitor monitor)
+      throws CoreException;
+
   // execution
 
   public MavenExecutionResult execute(MavenExecutionRequest request, IProgressMonitor monitor);

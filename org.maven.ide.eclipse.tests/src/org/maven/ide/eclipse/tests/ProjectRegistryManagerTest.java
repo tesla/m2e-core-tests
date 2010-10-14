@@ -17,6 +17,7 @@ import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
+import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.FileUtils;
 import org.eclipse.core.resources.IFile;
@@ -332,7 +333,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     waitForJobsToComplete();
 
     IMavenProjectFacade f1 = manager.create(p1, monitor);
-    f1.getMavenProject(monitor).getParent();
+    getParentProject(f1);
     assertEquals(p2.getFile(IMavenConstants.POM_FILE_NAME).getLocation().toFile(), f1.getMavenProject(monitor)
         .getParentArtifact().getFile());
 
@@ -340,9 +341,14 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     waitForJobsToComplete();
 
     f1 = manager.create(p1, monitor);
-    f1.getMavenProject(monitor).getParent();
+    getParentProject(f1);
     // assertTrue(f1.getMavenProject().getParent().getFile().getAbsolutePath().startsWith(repo.getAbsolutePath()));
     assertStartWith(repo.getAbsolutePath(), f1.getMavenProject(monitor).getParentArtifact().getFile().getAbsolutePath());
+  }
+
+  protected MavenProject getParentProject(IMavenProjectFacade f) throws CoreException {
+    MavenExecutionRequest r = manager.createExecutionRequest(f.getPom(), f.getResolverConfiguration(), monitor);
+    return plugin.getMaven().resolveParentProject(r, f.getMavenProject(monitor), monitor);
   }
 
   public void test007_staleDependencies() throws Exception {
@@ -412,7 +418,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     a1 = new ArrayList<Artifact>(f1.getMavenProject(monitor).getArtifacts());
     assertEquals(1, f1.getMavenProject(monitor).getArtifacts().size());
     assertStartWith(repo.getAbsolutePath(), a1.get(0).getFile().getAbsolutePath());
-  
+
     // update p2 back to the original version
     copyContent(p2, "pom_original.xml", "pom.xml");
     f1 = manager.create(p1, monitor);
@@ -437,7 +443,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     waitForJobsToComplete();
 
     f1 = manager.create(p1, monitor);
-    assertEquals("t008-p3", f1.getMavenProject(monitor).getParent().getArtifactId());
+    assertEquals("t008-p3", getParentProject(f1).getArtifactId());
 
     events.clear();
     IProject p2 = createExisting("t008-p2");

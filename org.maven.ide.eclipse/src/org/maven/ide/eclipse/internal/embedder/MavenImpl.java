@@ -17,6 +17,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -297,7 +298,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
           "Could not calculate build plan", ex));
     }
   }
-
+  
   public ArtifactRepository getLocalRepository() throws CoreException {
     try {
       String localRepositoryPath = getLocalRepositoryPath();
@@ -474,6 +475,49 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
       return result.addException(ex);
     }
     return result;
+  }
+
+  /**
+   * Makes MavenProject instances returned by #readProject methods suitable for caching and reuse with other
+   * MavenSession instances.<br/>
+   * Do note that MavenProject.getParentProject() cannot be used for detached MavenProject instances. Use
+   * #resolveParentProject to resolve parent project instance.
+   */
+  public void detachFromSession(MavenProject project) throws CoreException {
+    try {
+      // TODO remove reflection when we have embedder 3.0.1 or better
+      Field f = project.getClass().getDeclaredField("projectBuilderConfiguration");
+      f.setAccessible(true);
+      ProjectBuildingRequest request;
+      request = (ProjectBuildingRequest) f.get(project);
+      request.setRepositorySession(lookup(ContextRepositorySystemSession.class));
+    } catch(NoSuchFieldException ex) {
+      MavenLogger.log(ex.getMessage(), ex);
+    } catch(IllegalAccessException ex) {
+      MavenLogger.log(ex.getMessage(), ex);
+    }
+  }
+
+  public MavenProject resolveParentProject(MavenExecutionRequest request, MavenProject child, IProgressMonitor monitor)
+      throws CoreException {
+    ProjectBuildingRequest configuration = request.getProjectBuildingRequest();
+    configuration.setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL);
+    configuration.setRepositorySession(createRepositorySession(request));
+
+    try {
+      configuration.setRemoteRepositories(child.getRemoteArtifactRepositories());
+
+      if(child.getParentFile() != null) {
+        return lookup(ProjectBuilder.class).build(child.getParentFile(), configuration).getProject();
+      }
+
+      ProjectBuildingResult result = lookup(ProjectBuilder.class).build(child.getParentArtifact(), configuration);
+      return result.getProject();
+    } catch(ProjectBuildingException ex) {
+      MavenLogger.log("Could not read parent project", ex);
+    }
+
+    return null;
   }
 
   public Artifact resolve(String groupId, String artifactId, String version, String type, String classifier,
