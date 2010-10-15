@@ -387,4 +387,18 @@ public class MavenImplTest extends AbstractMavenProjectTestCase {
     assertEquals("remote-parent", parent.getArtifactId());
   }
 
+  public void testReadNoParent() throws Exception {
+    MavenExecutionRequest request = maven.createExecutionRequest(monitor);
+    request.setPom(new File("projects/readparent/noparent/pom.xml"));
+    request.setGoals(Arrays.asList("compile"));
+
+    MavenExecutionResult result = maven.readProject(request, monitor);
+    assertFalse(result.hasExceptions());
+    MavenProject project = result.getProject();
+   
+    request = maven.createExecutionRequest(monitor);
+    MavenProject parent = maven.resolveParentProject(request, project, monitor);
+    assertNull(parent);
+  }
+
 }
