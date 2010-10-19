@@ -39,6 +39,7 @@
           <environmentVariables>
             <TEMP>${java.io.tmpdir}</TEMP>
           </environmentVariables>
+          <forkedProcessTimeoutInSeconds>600</forkedProcessTimeoutInSeconds>
         </configuration>
       </plugin>
     </plugins>
