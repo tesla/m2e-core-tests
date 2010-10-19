@@ -25,6 +25,7 @@
 	<classpathentry exported="true" kind="lib" path="jars/aether-impl-1.7.jar" sourcepath="D:/m2-repo/org/sonatype/aether/aether-impl/1.7/aether-impl-1.7-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="jars/aether-spi-1.7.jar"/>
 	<classpathentry exported="true" kind="lib" path="jars/aether-connector-wagon-1.7.jar"/>
+	<classpathentry exported="true" kind="lib" path="jars/aether-connector-http-1.7.0-SNAPSHOT.jar"/>
 	<classpathentry exported="true" kind="lib" path="jars/commons-cli-1.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="jars/wagon-provider-api-1.0-beta-6.jar"/>
 	<classpathentry exported="true" kind="lib" path="jars/wagon-file-1.0-beta-6.jar"/>

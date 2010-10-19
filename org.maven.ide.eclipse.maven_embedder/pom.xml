@@ -85,9 +85,16 @@
           <version>0.0.6</version>
         </dependency>
         <dependency>
+          <!-- NOTE: Patched version from http://github.com/bentmann/async-http-client to fix progress monitoring during PUT -->
           <groupId>com.ning</groupId>
           <artifactId>async-http-client</artifactId>
-          <version>1.2.0</version>
+          <version>1.3.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+          <!-- NOTE: Built from http-tests branch -->
+          <groupId>org.sonatype.aether</groupId>
+          <artifactId>aether-connector-http</artifactId>
+          <version>1.7.0-SNAPSHOT</version>
         </dependency>
       </dependencies>
     <build>
