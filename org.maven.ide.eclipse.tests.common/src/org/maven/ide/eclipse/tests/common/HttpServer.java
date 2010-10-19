@@ -189,6 +189,7 @@ public class HttpServer {
 
   /**
    * Sets the keystore to use for the server certificate on the SSL connector.
+   * Also sets the storePassword value to be password, if it has not been set previously.
    * 
    * @param path The path to the keystore to use for the server certificate, may be {@code null}.
    * @param password The password for the keystore, may be {@code null}.
@@ -197,6 +198,9 @@ public class HttpServer {
   public HttpServer setKeyStore(String path, String password) {
     keyStoreLocation = path;
     keyStorePassword = password;
+    if (storePassword == null) {
+      storePassword = keyStorePassword;
+    }
     return this;
   }
 
