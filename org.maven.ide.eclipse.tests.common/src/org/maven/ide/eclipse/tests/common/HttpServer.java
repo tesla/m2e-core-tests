@@ -95,6 +95,8 @@ public class HttpServer {
 
   private Map<String, Map<String, String>> recordedHeaders = new HashMap<String, Map<String, String>>();
 
+  private String storePassword;
+
   protected Connector newHttpConnector() {
     SelectChannelConnector connector = new SelectChannelConnector();
     connector.setPort(httpPort);
@@ -105,10 +107,14 @@ public class HttpServer {
     SslSocketConnector connector = new SslSocketConnector();
     connector.setPort(httpsPort);
     connector.setKeystore(new File(keyStoreLocation).getAbsolutePath());
-    connector.setPassword(keyStorePassword);
+    connector.setPassword(storePassword);
     connector.setKeyPassword(keyStorePassword);
-    connector.setTruststore(new File(trustStoreLocation).getAbsolutePath());
-    connector.setTrustPassword(trustStorePassword);
+    if (trustStoreLocation != null && !trustStoreLocation.equals("")) {
+      connector.setTruststore(new File(trustStoreLocation).getAbsolutePath());
+    }
+    if (trustStorePassword != null && !trustStoreLocation.equals("")) {
+      connector.setTrustPassword(trustStorePassword);
+    }
     connector.setNeedClientAuth(needClientAuth);
     return connector;
   }
@@ -204,6 +210,17 @@ public class HttpServer {
   public HttpServer setTrustStore(String path, String password) {
     trustStoreLocation = path;
     trustStorePassword = password;
+    return this;
+  }
+  
+  /**
+   * Sets the password to use for the SSL connector store. 
+   * 
+   * @param password The password for the store, may be {@code null}.
+   * @return This server, never {@code null}.
+   */
+  public HttpServer setStorePassword(String password) {
+    this.storePassword = password;
     return this;
   }
 
@@ -358,8 +375,7 @@ public class HttpServer {
    * 
    * @param contextRoot The context root to make the resources accessible at, must not be {@code null}.
    * @param baseDirectory The local base directory whose files should be served, must not be {@code null}.
-   * @param filteredExtensions A list of extensions for files to filter, e.g. {@code "xml, "properties"}, may be {@code
-   *          null}.
+   * @param filteredExtensions A list of extensions for files to filter, e.g. {@code "xml, "properties"}, may be {@code null}.
    * @return This server, never {@code null}.
    */
   public HttpServer addResources(String contextRoot, String baseDirectory, String... filteredExtensions) {
@@ -377,8 +393,7 @@ public class HttpServer {
    * Enables request recording for the specified URI patterns. Recorded requests can be retrieved via
    * {@link #getRecordedRequests()}.
    * 
-   * @param patterns The regular expressions denoting URIs to monitor, e.g. {@code "/context/.*"}, must not be {@code
-   *          null}.
+   * @param patterns The regular expressions denoting URIs to monitor, e.g. {@code "/context/.*"}, must not be {@code null}.
    * @return This server, never {@code null}.
    */
   public HttpServer enableRecording(String... patterns) {
