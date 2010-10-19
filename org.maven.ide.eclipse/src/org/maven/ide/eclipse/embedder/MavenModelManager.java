@@ -261,8 +261,10 @@ public class MavenModelManager {
         new NearestVersionConflictResolver());
     session.setDependencyGraphTransformer(transformer);
 
-    ClassLoader oldClassLoader = maven.selectProjectRealm(mavenProject);
+    ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
     try {
+      Thread.currentThread().setContextClassLoader(maven.getProjectRealm(mavenProject));
+
       ArtifactTypeRegistry stereotypes = session.getArtifactTypeRegistry();
 
       CollectRequest request = new CollectRequest();

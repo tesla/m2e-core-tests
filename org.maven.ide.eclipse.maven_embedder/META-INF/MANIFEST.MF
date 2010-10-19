@@ -23,6 +23,7 @@ Bundle-ClassPath: jars/plexus-utils-2.0.4.jar,
  jars/aether-impl-1.7.jar,
  jars/aether-spi-1.7.jar,
  jars/aether-connector-wagon-1.7.jar,
+ jars/aether-connector-http-1.7.0-SNAPSHOT.jar,
  jars/commons-cli-1.2.jar,
  jars/wagon-provider-api-1.0-beta-6.jar,
  jars/wagon-file-1.0-beta-6.jar,
@@ -131,5 +132,5 @@ Export-Package: org.apache.maven.project.inheritance,org.apache.maven.
  ven.usability.plugin,org.apache.maven.wagon.providers.file,org.apache
  .maven.repository.internal,com.google.inject,com.google.inject.binder
  ,org.sonatype.aether.spi.io,com.google.inject.name,com.ning.http.clie
- nt
+ nt,org.sonatype.aether.connector.async
 Bundle-Version: 0.12.0.qualifier
