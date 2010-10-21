@@ -211,7 +211,7 @@
                 label="Open POM"
                 enablesFor="1"/>
       </objectContribution>
-      <objectContribution id="org.maven.ide.eclipse.openPomDependencyNode"
+      <objectContribution id="org.maven.ide.eclipse.openAetherPomDependencyNode"
           objectClass="org.sonatype.aether.graph.DependencyNode"
           adaptable="false">
         <action id="org.maven.ide.eclipse.ui.openPomDependency"
@@ -244,7 +244,7 @@
                 label="Open Project Page"
                 enablesFor="1" icon="icons/web.gif"/>
       </objectContribution>
-      <objectContribution id="org.maven.ide.eclipse.openProjectPageDependencyNode"
+      <objectContribution id="org.maven.ide.eclipse.openAetherProjectPageDependencyNode"
           objectClass="org.sonatype.aether.graph.DependencyNode"
           adaptable="false">
         <action id="org.maven.ide.eclipse.ui.openPomDependencyUrl"
