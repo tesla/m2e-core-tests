@@ -781,7 +781,7 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
         if(c != null) {
           String version = c.getBaseVersion();
           if(!a.getBaseVersion().equals(version)) {
-            label.append(" (conflicted ").append(version).append(")");
+            label.append(" (omitted for conflict with ").append(version).append(")");
           }
         }
 
