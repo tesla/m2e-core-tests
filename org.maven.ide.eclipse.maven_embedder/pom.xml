@@ -87,10 +87,9 @@
         <dependency>
           <groupId>com.ning</groupId>
           <artifactId>async-http-client</artifactId>
-          <version>1.3.0-SNAPSHOT</version>
+          <version>1.3.0</version>
         </dependency>
         <dependency>
-          <!-- NOTE: Built from http-tests branch -->
           <groupId>org.sonatype.aether</groupId>
           <artifactId>aether-connector-http</artifactId>
           <version>1.7.0-SNAPSHOT</version>
