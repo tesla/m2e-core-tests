@@ -26,13 +26,10 @@ import java.util.List;
 import java.util.Properties;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 
 import org.codehaus.plexus.ContainerConfiguration;
@@ -147,6 +144,12 @@ import org.maven.ide.eclipse.internal.preferences.MavenPreferenceConstants;
 
 
 public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
+
+  /**
+   * Id of maven core class realm
+   */
+  public static final String MAVEN_CORE_REALM_ID = "plexus.core";
+
 
   private DefaultPlexusContainer plexus;
 
@@ -1064,20 +1067,8 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
 
   private static DefaultPlexusContainer newPlexusContainer() throws PlexusContainerException {
     ContainerConfiguration mavenCoreCC = new DefaultContainerConfiguration().setClassWorld(
-        new ClassWorld(IMavenContainerConfigurator.MAVEN_CORE_REALM_ID, ClassWorld.class.getClassLoader())).setName(
+        new ClassWorld(MAVEN_CORE_REALM_ID, ClassWorld.class.getClassLoader())).setName(
         "mavenCore");
-
-    IExtensionRegistry r = Platform.getExtensionRegistry();
-    for(IConfigurationElement c : r.getConfigurationElementsFor("org.maven.ide.eclipse.mavenContainerConfigurators")) {
-      if("configurator".equals(c.getName())) { // we don't really have other elements, not yet ;-)
-        try {
-          IMavenContainerConfigurator configurator = (IMavenContainerConfigurator) c.createExecutableExtension("class");
-          configurator.configure(mavenCoreCC);
-        } catch(CoreException ex) {
-          MavenLogger.log(ex);
-        }
-      }
-    }
 
     mavenCoreCC.setAutoWiring(true);
 

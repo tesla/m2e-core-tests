@@ -17,7 +17,6 @@
    <extension-point id="lifecycleMappings" name="Maven Lifecycle Mappings" schema="schema/lifecycleMappings.exsd"/>
    <extension-point id="lifecycleMappingPropertyPage" name = "Maven Lifecycle Mapping Property Page" schema = "schema/lifecycleMappingPropertyPage.exsd"/>
    <extension-point id="defaultLifecycleMappings" name="Default Maven Lifecycle Mappings" schema="schema/defaultLifecycleMappings.exsd"/>
-   <extension-point id="mavenContainerConfigurators" name="Maven Core Plexus Container Configurators" schema="schema/mavenContainerConfigurators.exsd"/>
    <extension-point id="mavenComponentContributors" name="Maven Core Component Contributor" schema="schema/mavenComponentContributors.exsd"/>
    <extension-point id="mavenProjectChangedListeners" name="mavenProjectChangedListeners" schema="schema/mavenProjectChangedListeners.exsd"/>
    <extension point="org.eclipse.ui.intro.configExtension">
@@ -569,12 +568,6 @@
             id="NULL"
             name="Empty Lifecycle Mapping">
       </lifecycleMapping>
-   </extension>
-   <extension
-         point="org.maven.ide.eclipse.mavenContainerConfigurators">
-      <configurator
-            class="org.maven.ide.eclipse.internal.embedder.DefaultMavenContainerConfigurator">
-      </configurator>
    </extension>
    <extension
          point="org.maven.ide.eclipse.mavenComponentContributors">
