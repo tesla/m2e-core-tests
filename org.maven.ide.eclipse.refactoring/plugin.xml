@@ -61,7 +61,7 @@
             menubarPath="additions"/>
      </objectContribution>
      <objectContribution
-           id="org.maven.ide.eclipse.refactoring.exclude.dependencyContributor"
+           id="org.maven.ide.eclipse.refactoring.exclude.dependencyContributorAether"
            objectClass="org.sonatype.aether.graph.DependencyNode"
            adaptable="true">
         <action id="org.maven.ide.eclipse.projectMenu.action"
