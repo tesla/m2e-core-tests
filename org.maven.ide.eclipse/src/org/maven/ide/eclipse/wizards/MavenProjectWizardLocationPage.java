@@ -293,13 +293,19 @@ public class MavenProjectWizardLocationPage extends AbstractMavenWizardPage {
 
     // If we do not place the contents in the workspace validate the location.
     if(!isInWorkspace()) {
-      String projectName = getImportConfiguration().getProjectName(((MavenProjectWizard)getWizard()).getModel());
-      if(projectName.length()>0){
-        final IStatus locationStatus = workspace.validateProjectLocation(workspace.getRoot().getProject(projectName), projectPath);
-        if(!locationStatus.isOK()) {
-          setErrorMessage(locationStatus.getMessage());
-          setPageComplete(false);
-          return;
+      //this wizardpage is used in multiple wizards, not only in MavenProjectWizard
+      // the other wizard don't seem to have any getModel() methods.
+      //see MNGECLIPSE-1252 for more.
+      if (getWizard() instanceof MavenProjectWizard)
+      {
+        String projectName = getImportConfiguration().getProjectName(((MavenProjectWizard)getWizard()).getModel());
+        if(projectName.length()>0){
+          final IStatus locationStatus = workspace.validateProjectLocation(workspace.getRoot().getProject(projectName), projectPath);
+          if(!locationStatus.isOK()) {
+            setErrorMessage(locationStatus.getMessage());
+            setPageComplete(false);
+            return;
+          }
         }
       }
     }
