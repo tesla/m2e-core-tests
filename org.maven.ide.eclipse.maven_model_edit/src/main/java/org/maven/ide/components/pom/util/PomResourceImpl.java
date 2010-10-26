@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.xmi.impl.XMLResourceImpl;
 import org.maven.ide.components.pom.Model;
 import org.maven.ide.components.pom.translators.SSESyncResource;
 

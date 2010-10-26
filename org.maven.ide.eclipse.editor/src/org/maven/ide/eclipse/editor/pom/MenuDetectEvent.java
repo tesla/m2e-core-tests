@@ -3,7 +3,6 @@ package org.maven.ide.eclipse.editor.pom;
 
 import org.eclipse.swt.events.TypedEvent;
 import org.eclipse.swt.widgets.Event;
-import org.maven.ide.eclipse.editor.internal.Messages;
 
 /**
  * Instances of this class are sent whenever the platform-

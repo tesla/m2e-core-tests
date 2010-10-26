@@ -32,7 +32,6 @@ import org.eclipse.zest.core.viewers.GraphViewer;
 import org.eclipse.zest.core.viewers.IConnectionStyleProvider;
 import org.eclipse.zest.core.viewers.IEntityStyleProvider;
 import org.eclipse.zest.core.widgets.ZestStyles;
-import org.maven.ide.eclipse.editor.internal.Messages;
 
 public class MavenGraphLabelProvider implements ILabelProvider,
       IEntityStyleProvider, IConnectionStyleProvider, ISelectionChangedListener {

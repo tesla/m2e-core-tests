@@ -20,8 +20,6 @@ package org.maven.ide.components.pom.util;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.impl.ResourceFactoryImpl;
-import org.eclipse.emf.ecore.xmi.XMLResource;
-import org.maven.ide.components.pom.translators.SSESyncResource;
 
 /**
  * <!-- begin-user-doc --> The <b>Resource Factory</b> associated with the

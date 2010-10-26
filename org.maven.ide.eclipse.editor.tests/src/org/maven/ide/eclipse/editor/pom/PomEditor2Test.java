@@ -7,8 +7,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.util.List;
-
 import junit.framework.Assert;
 
 import org.eclipse.core.resources.IFile;
@@ -19,11 +17,9 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.swt.SWT;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotEclipseEditor;
-import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotEditor;
 import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTable;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.maven.ide.eclipse.integration.tests.common.SwtbotUtil;

@@ -34,7 +34,6 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
-import org.maven.ide.eclipse.util.Util;
 
 
 /**

@@ -12,7 +12,6 @@ import java.util.List;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.configurators.IncompatibleProjectConfigurator;
-import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
 
 import junit.framework.TestCase;

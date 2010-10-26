@@ -13,7 +13,6 @@ import org.maven.ide.components.pom.Build;
 import org.maven.ide.components.pom.Model;
 import org.maven.ide.components.pom.Plugin;
 import org.maven.ide.components.pom.PomFactory;
-import org.maven.ide.eclipse.editor.internal.Messages;
 
 public class LifecycleEditorUtils {
   public static Plugin getOrCreateLifecycleMappingPlugin(Model pom) {
