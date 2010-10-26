@@ -28,7 +28,7 @@ Require-Bundle:
  org.maven.ide.eclipse.nexus_indexer;bundle-version="[0.12.0,0.13.0)",
  org.maven.ide.eclipse.maven_model_edit;bundle-version="[0.12.0,0.13.0)",
  org.maven.ide.eclipse.dependency_tree;bundle-version="[0.12.0,0.13.0)",
- com.ibm.icu;bundle-version="4.2.1"
+ com.ibm.icu;bundle-version="4.0.1"
 Eclipse-LazyStart: true
 Bundle-ClassPath: .
 Bundle-RequiredExecutionEnvironment: J2SE-1.5,
