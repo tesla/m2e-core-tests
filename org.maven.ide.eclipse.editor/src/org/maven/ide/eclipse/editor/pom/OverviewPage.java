@@ -266,11 +266,12 @@ public class OverviewPage extends MavenPomEditorPage {
         Set<ArtifactKey> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getEditorSite().getShell(), //
             Messages.OverviewPage_searchDialog_selectParent, IIndex.SEARCH_ARTIFACT, artifacts, false);
-        if (parentGroupIdText.getText() != null && !parentGroupIdText.getText().isEmpty()) {
+        if (parentGroupIdText.getText() != null && parentGroupIdText.getText().trim().length() != 0)
+        {
           //chances are we will get good match by adding the groupid here..
           dialog.setQuery(parentGroupIdText.getText());
         } 
-        else if (artifactGroupIdText.getText() != null && !artifactGroupIdText.getText().isEmpty())
+        else if (artifactGroupIdText.getText() != null && artifactGroupIdText.getText().trim().length() != 0)
         {
           //chances are we will get good match by adding the groupid here..
           dialog.setQuery(artifactGroupIdText.getText());
