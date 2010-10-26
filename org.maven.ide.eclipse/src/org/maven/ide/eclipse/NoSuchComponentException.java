@@ -17,6 +17,8 @@ import org.codehaus.plexus.component.repository.exception.ComponentLookupExcepti
  */
 public class NoSuchComponentException extends IllegalArgumentException {
 
+  private static final long serialVersionUID = 9184391358528175461L;
+
   public NoSuchComponentException(ComponentLookupException ex) {
     super(ex);
   }

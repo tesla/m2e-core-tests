@@ -17,6 +17,7 @@ import java.io.Serializable;
  * @author igor
  */
 public class VersionlessKey implements Serializable {
+  private static final long serialVersionUID = 2125977578206347429L;
 
   private final String namespace;
 

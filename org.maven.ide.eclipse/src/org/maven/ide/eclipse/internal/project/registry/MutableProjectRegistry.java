@@ -30,6 +30,8 @@ import org.maven.ide.eclipse.embedder.ArtifactKey;
  */
 public class MutableProjectRegistry extends BasicProjectRegistry implements IProjectRegistry {
 
+  private static final long serialVersionUID = -4106047696261024741L;
+
   private final ProjectRegistry parent;
 
   private final int parentVersion;
