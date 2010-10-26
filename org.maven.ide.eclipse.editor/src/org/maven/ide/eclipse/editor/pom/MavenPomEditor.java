@@ -559,7 +559,6 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
         return;
 
       if(p instanceof IDocumentProviderExtension3)  {
-        IDocumentProviderExtension3 p3= (IDocumentProviderExtension3) p;
         fModificationStamp= p.getModificationStamp(getEditorInput());
       }
     }
@@ -693,16 +692,6 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 
   public boolean isReadOnly() {
     return !(getEditorInput() instanceof IFileEditorInput);
-  }
-
-  private void removePomPage(IFormPage page){
-    if(page == null){
-      return;
-    }
-    if(page instanceof IPomFileChangedListener){
-      fileChangeListeners.remove(page);
-    }
-    super.removePage(page.getIndex());
   }
   
   private int addPomPage(IFormPage page) {
