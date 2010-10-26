@@ -13,8 +13,6 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
-import java.text.Collator;
-import java.text.DateFormat;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
@@ -30,6 +28,9 @@ import org.eclipse.ui.about.ISystemSummarySection;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.pr.IDataSource;
 import org.maven.ide.eclipse.pr.internal.ProblemReportingPlugin;
+
+import com.ibm.icu.text.Collator;
+import com.ibm.icu.text.DateFormat;
 
 
 /**
