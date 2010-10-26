@@ -201,11 +201,9 @@ public class ListAdapter extends TranslatorAdapter {
 		for (int i = 0; i < nChildren; i++) {
 			Node child = children.item(i);
 			if (child instanceof Element) {
-				((List) list).add(getObject((Element) child, true));
+        list.add(getObject((Element) child, true));
 			}
-
 		}
-
 	}
 
 	@Override
@@ -214,5 +212,4 @@ public class ListAdapter extends TranslatorAdapter {
 			add(o, -1);
 		}
 	}
-
 }

@@ -281,7 +281,7 @@ public class ClasspathProviderTest extends AbstractMavenProjectTestCase {
       is.close();
     }
     
-    Dependency d = (Dependency) model.getDependencies().get(0);
+    Dependency d = model.getDependencies().get(0);
     d.setSystemPath(new File("remoterepo/log4j/log4j/1.2.13/log4j-1.2.13.jar").getCanonicalPath());
 
     MavenXpp3Writer writer = new MavenXpp3Writer();
