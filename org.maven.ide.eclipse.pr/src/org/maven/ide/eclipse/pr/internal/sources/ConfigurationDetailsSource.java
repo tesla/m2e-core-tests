@@ -16,7 +16,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.Locale;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -31,6 +30,7 @@ import org.maven.ide.eclipse.pr.internal.ProblemReportingPlugin;
 
 import com.ibm.icu.text.Collator;
 import com.ibm.icu.text.DateFormat;
+import com.ibm.icu.util.ULocale;
 
 
 /**
@@ -93,7 +93,7 @@ public class ConfigurationDetailsSource implements IDataSource {
         .getConfigurationElementsFor("org.eclipse.ui.systemSummarySections");
 
     Arrays.sort(configElements, new Comparator<IConfigurationElement>() {
-      Collator collator = Collator.getInstance(Locale.getDefault());
+      Collator collator = Collator.getInstance(ULocale.getDefault());
 
       public int compare(IConfigurationElement e1, IConfigurationElement e2) {
         String id1 = e1.getAttribute("id"); //$NON-NLS-1$

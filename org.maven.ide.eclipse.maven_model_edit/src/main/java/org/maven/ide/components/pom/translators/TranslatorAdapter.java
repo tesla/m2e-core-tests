@@ -19,6 +19,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
+import com.ibm.icu.lang.UCharacter;
+
+
 /**
  * A base class for all adapters that can translate a EMF to DOM and vice-versa.
  * 
@@ -300,7 +303,7 @@ public abstract class TranslatorAdapter implements INodeAdapter {
 			} catch (BadLocationException ble) {
 				// We check for bad locations so this should not happen
 			}
-			if (Character.isWhitespace(c)) {
+      if(UCharacter.isWhitespace(c)) {
 				i--;
 			}
 
@@ -350,7 +353,7 @@ public abstract class TranslatorAdapter implements INodeAdapter {
 			} catch (BadLocationException e) {
 				// We check for bad locations so this should not happen
 			}
-			if (Character.isWhitespace(c) && !(c == '\r' || c == '\n')) {
+      if(UCharacter.isWhitespace(c) && !(c == '\r' || c == '\n')) {
 				builder.insert(0, c);
 				i--;
 			} else {

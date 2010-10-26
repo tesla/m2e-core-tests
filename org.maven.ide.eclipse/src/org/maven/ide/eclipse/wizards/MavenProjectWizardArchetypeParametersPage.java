@@ -18,6 +18,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import com.ibm.icu.lang.UCharacter;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -591,7 +593,7 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
         isFirst = false;
       } else {
         if(isFirst) {
-          if(Character.isJavaIdentifierStart(c)) {
+          if(UCharacter.isJavaIdentifierStart(c)) {
             pkg.append(c);
             isFirst = false;
           }
@@ -599,7 +601,7 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
           if(c == '.') {
             pkg.append('.');
             isFirst = true;
-          } else if(Character.isJavaIdentifierPart(c)) {
+          } else if(UCharacter.isJavaIdentifierPart(c)) {
             pkg.append(c);
           }
         }

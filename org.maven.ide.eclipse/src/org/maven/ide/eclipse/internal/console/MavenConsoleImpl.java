@@ -11,10 +11,10 @@ package org.maven.ide.eclipse.internal.console;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.ibm.icu.text.DateFormat;
+import com.ibm.icu.util.ULocale;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
@@ -239,7 +239,7 @@ public class MavenConsoleImpl extends IOConsole implements MavenConsole, IProper
   }
 
   private DateFormat getDateFormat() {
-    return DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.LONG, Locale.getDefault());
+    return DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.LONG, ULocale.getDefault());
   }
 
   // MavenConsole

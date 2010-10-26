@@ -9,14 +9,14 @@
 package org.maven.ide.eclipse.core;
 
 import java.util.MissingResourceException;
-import java.util.ResourceBundle;
 
 import com.ibm.icu.text.MessageFormat;
+import com.ibm.icu.util.UResourceBundle;
 
 public class Messages {
   private static final String BUNDLE_NAME = IMavenConstants.PLUGIN_ID + ".messages"; //$NON-NLS-1$
 
-  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME);
+  private static final UResourceBundle RESOURCE_BUNDLE = UResourceBundle.getBundleInstance(BUNDLE_NAME);
 
   private Messages() {
   }
