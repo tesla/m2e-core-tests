@@ -28,7 +28,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -157,7 +157,7 @@ public class WorkingSetGroup {
       }
     });
 
-    workingsetComboViewer.setSorter(new ViewerSorter());
+    workingsetComboViewer.setComparator(new ViewerComparator());
 
     final Button newWorkingSetButton = new Button(container, SWT.NONE);
     newWorkingSetButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));

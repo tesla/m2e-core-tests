@@ -19,7 +19,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.swt.SWT;
@@ -113,7 +113,7 @@ public class MavenDependenciesWizardPage extends AbstractMavenWizardPage {
     dependencyViewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 2));
     dependencyViewer.setUseHashlookup(true);
     dependencyViewer.setLabelProvider(new ArtifactLabelProvider());
-    dependencyViewer.setSorter(new DependencySorter());
+    dependencyViewer.setComparator(new DependencySorter());
     dependencyViewer.add(dependencies);
 
     Button addDependencyButton = new Button(composite, SWT.PUSH);
@@ -255,10 +255,10 @@ public class MavenDependenciesWizardPage extends AbstractMavenWizardPage {
   }
 
   /**
-   * Simple <code>ViewerSorter</code> attached to the dependency viewer. Objects of type <code>Dependency</code> are
+   * Simple <code>ViewerComparator</code> attached to the dependency viewer. Objects of type <code>Dependency</code> are
    * sorted by (1) their groupId and (2) their artifactId.
    */
-  public static class DependencySorter extends ViewerSorter {
+  public static class DependencySorter extends ViewerComparator {
 
     /**
      * Two objects of type <code>Dependency</code> are sorted by (1) their groupId and (2) their artifactId.

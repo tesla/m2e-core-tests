@@ -38,8 +38,8 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.viewers.ViewerFilter;
-import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.swt.SWT;
@@ -347,7 +347,7 @@ public class MavenProjectWizardArchetypePage extends AbstractMavenWizardPage imp
 
     viewer.setLabelProvider(new ArchetypeLabelProvider());
 
-    viewer.setSorter(new ViewerSorter() {
+    viewer.setComparator(new ViewerComparator() {
       public int compare(Viewer viewer, Object e1, Object e2) {
         return ARCHETYPE_COMPARATOR.compare((Archetype) e1, (Archetype) e2);
       }
