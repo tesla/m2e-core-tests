@@ -654,7 +654,6 @@ public class DependenciesComposite extends Composite {
     typeCombo.add("ear");
     typeCombo.add("par");
     typeCombo.add("ejb");
-    typeCombo.add("ejb3");
     typeCombo.add("ejb-client");
     typeCombo.add("test-jar");
     typeCombo.add("java-source");
