@@ -264,13 +264,30 @@ public class OverviewPage extends MavenPomEditorPage {
         // TODO calculate current list of artifacts for the project
         Set<ArtifactKey> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getEditorSite().getShell(), //
-            "Add Dependency", IIndex.SEARCH_ARTIFACT, artifacts, false);
+            "Select Parent", IIndex.SEARCH_ARTIFACT, artifacts, false);
+        if (artifactGroupIdText.getText() != null)
+        {
+          //chances are we will get good match by adding the groupid here..
+          dialog.setQuery(artifactGroupIdText.getText());
+        }
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {
-            parentGroupIdText.setText(nvl(af.group));
+            String grid = nvl(af.group);
+            String ver = nvl(af.version);
+            parentGroupIdText.setText(grid);
             parentArtifactIdText.setText(nvl(af.artifact));
-            parentVersionText.setText(nvl(af.version));
+            parentVersionText.setText(ver);
+
+            //promote good practices ->
+            if (grid.equals(artifactGroupIdText.getText())) {
+              //if the groupId is the same, just remove it in child.
+              artifactGroupIdText.setText("");
+            }
+            if (ver.equals(artifactVersionText.getText())) {
+              //if the version is the same, just remove it in child.
+              artifactVersionText.setText("");
+            }
           }
         }
       }
