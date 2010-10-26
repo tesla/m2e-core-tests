@@ -120,7 +120,7 @@ public class MavenPomSelectionComponent extends Composite {
     searchTextlabel.setText("&Enter groupId, artifactId or sha1 prefix or pattern (*):");
     searchTextlabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 
-    searchText = new Text(this, SWT.BORDER);
+    searchText = new Text(this, SWT.BORDER | SWT.SEARCH);
     searchText.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 2, 1));
     searchText.addKeyListener(new KeyAdapter() {
       public void keyPressed(KeyEvent e) {
