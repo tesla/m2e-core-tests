@@ -642,7 +642,8 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
         ILifecycleMapping lifecycleMapping = getLifecycleMapping(event.getMavenProject(), monitor);
         if(lifecycleMapping != null) {
           for(AbstractProjectConfigurator configurator : lifecycleMapping.getProjectConfigurators(event.getMavenProject(), monitor)) {
-            configurator.mavenProjectChanged(events, monitor);
+            //MNGECLIPSE-2004 : only send the relevant event to the configurator
+            configurator.mavenProjectChanged(event, monitor);
           }
         }
       } catch (CoreException e) {

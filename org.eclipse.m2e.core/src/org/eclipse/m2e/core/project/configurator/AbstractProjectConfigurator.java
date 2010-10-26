@@ -108,7 +108,7 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
    * @param monitor a progress monitor
    */
   @SuppressWarnings("unused")
-  protected void mavenProjectChanged(MavenProjectChangedEvent event, IProgressMonitor monitor) throws CoreException {
+  public void mavenProjectChanged(MavenProjectChangedEvent event, IProgressMonitor monitor) throws CoreException {
   }
 
   // IMavenProjectChangedListener
