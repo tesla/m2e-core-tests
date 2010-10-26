@@ -74,6 +74,7 @@ import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.actions.OpenUrlAction;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
+import org.maven.ide.eclipse.editor.internal.Messages;
 import org.maven.ide.eclipse.editor.pom.FormUtils;
 import org.maven.ide.eclipse.editor.pom.MavenPomEditorPage;
 import org.maven.ide.eclipse.editor.pom.SearchControl;
@@ -203,7 +204,7 @@ public class DependenciesComposite extends Composite {
   private void createDependenciesSection(SashForm verticalSash) {
     Section dependenciesSection = toolkit.createSection(verticalSash, ExpandableComposite.TITLE_BAR);
     dependenciesSection.marginWidth = 3;
-    dependenciesSection.setText("Dependencies");
+    dependenciesSection.setText(Messages.DependenciesComposite_sectionDependencies);
 
     dependenciesEditor = new ListEditorComposite<Dependency>(dependenciesSection, SWT.NONE, true);
     dependenciesEditor.setLabelProvider(dependencyLabelProvider);
@@ -266,7 +267,7 @@ public class DependenciesComposite extends Composite {
         // TODO calculate current list of artifacts for the project
         Set<ArtifactKey> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            "Select Dependency", IIndex.SEARCH_ARTIFACT, artifacts, true);
+            Messages.DependenciesComposite_searchDialog_title, IIndex.SEARCH_ARTIFACT, artifacts, true);
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {
@@ -310,7 +311,7 @@ public class DependenciesComposite extends Composite {
 //    modulesToolBarManager.add(dependencyAddAction);
 //    modulesToolBarManager.add(new Separator());
     ToolBarManager modulesToolBarManager = new ToolBarManager(SWT.FLAT);
-    modulesToolBarManager.add(new Action("Show GroupId", MavenEditorImages.SHOW_GROUP) {
+    modulesToolBarManager.add(new Action(Messages.DependenciesComposite_action_showgroupid, MavenEditorImages.SHOW_GROUP) {
       {
         setChecked(true);
       }
@@ -323,7 +324,7 @@ public class DependenciesComposite extends Composite {
       }
     });
     
-    modulesToolBarManager.add(new Action("Filter", MavenEditorImages.FILTER) {
+    modulesToolBarManager.add(new Action(Messages.DependenciesComposite_action_filter, MavenEditorImages.FILTER) {
       public int getStyle() {
         return AS_CHECK_BOX;
       }
@@ -355,7 +356,7 @@ public class DependenciesComposite extends Composite {
   private void createDependencyManagementSection(SashForm verticalSash) {
     Section dependencyManagementSection = toolkit.createSection(verticalSash, ExpandableComposite.TITLE_BAR);
     dependencyManagementSection.marginWidth = 3;
-    dependencyManagementSection.setText("Dependency Management");
+    dependencyManagementSection.setText(Messages.DependenciesComposite_sectionDependencyManagement);
 
     dependencyManagementEditor = new ListEditorComposite<Dependency>(dependencyManagementSection, SWT.NONE, true);
     dependencyManagementSection.setClient(dependencyManagementEditor);
@@ -414,7 +415,7 @@ public class DependenciesComposite extends Composite {
         // TODO calculate current list of artifacts for the project
         Set<ArtifactKey> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            "Select Dependency", IIndex.SEARCH_ARTIFACT, artifacts, true);
+            Messages.DependenciesComposite_searchDialog_title, IIndex.SEARCH_ARTIFACT, artifacts, true);
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {
@@ -453,7 +454,7 @@ public class DependenciesComposite extends Composite {
 //    modulesToolBarManager.add(dependencyManagementAddAction);
 //    modulesToolBarManager.add(new Separator());
 
-    modulesToolBarManager.add(new Action("Show GroupId", MavenEditorImages.SHOW_GROUP) {
+    modulesToolBarManager.add(new Action(Messages.DependenciesComposite_action_showgroupid, MavenEditorImages.SHOW_GROUP) {
       {
         setChecked(true);
       }
@@ -466,7 +467,7 @@ public class DependenciesComposite extends Composite {
       }
     });
     
-    modulesToolBarManager.add(new Action("Filter", MavenEditorImages.FILTER) {
+    modulesToolBarManager.add(new Action(Messages.DependenciesComposite_action_filter, MavenEditorImages.FILTER) {
       public int getStyle() {
         return AS_CHECK_BOX;
       }
@@ -498,15 +499,15 @@ public class DependenciesComposite extends Composite {
   private void createDependencyDetails(FormToolkit toolkit, Composite dependencyDetailsComposite) {
     Section dependencyDetailsSection = toolkit.createSection(dependencyDetailsComposite, ExpandableComposite.TITLE_BAR);
     dependencyDetailsSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-    dependencyDetailsSection.setText("Dependency Details");
+    dependencyDetailsSection.setText(Messages.DependenciesComposite_section_dependency_details);
     dependencyDetailsSection.marginWidth = 3;
     
-    dependencySelectAction = new Action("Select Dependency", MavenEditorImages.SELECT_ARTIFACT) {
+    dependencySelectAction = new Action(Messages.DependenciesComposite_action_selectDependency, MavenEditorImages.SELECT_ARTIFACT) {
       public void run() {
         // TODO calculate current list of artifacts for the project
         Set<ArtifactKey> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            "Select Dependency", IIndex.SEARCH_ARTIFACT, artifacts, true);
+            Messages.DependenciesComposite_searchDialog_title, IIndex.SEARCH_ARTIFACT, artifacts, true);
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {
@@ -521,7 +522,7 @@ public class DependenciesComposite extends Composite {
     };
     dependencySelectAction.setEnabled(false);
 
-    openWebPageAction = new Action("Open Project Page", MavenEditorImages.WEB_PAGE) {
+    openWebPageAction = new Action(Messages.DependenciesComposite_action_open_project_page, MavenEditorImages.WEB_PAGE) {
       public void run() {
         final String groupId = groupIdText.getText();
         final String artifactId = artifactIdText.getText();
@@ -562,7 +563,7 @@ public class DependenciesComposite extends Composite {
     dependencyDetailsSection.setClient(dependencyComposite);
     dependencyComposite.addControlListener(detailsWidthGroup);
 
-    Label groupIdLabel = toolkit.createLabel(dependencyComposite, "Group Id:*", SWT.NONE);
+    Label groupIdLabel = toolkit.createLabel(dependencyComposite, Messages.DependenciesComposite_lblGroupId, SWT.NONE);
     groupIdLabel.setLayoutData(new GridData());
     detailsWidthGroup.addControl(groupIdLabel);
 
@@ -572,7 +573,7 @@ public class DependenciesComposite extends Composite {
     groupIdText.setLayoutData(gd_groupIdText);
     FormUtils.addGroupIdProposal(editorPage.getProject(), groupIdText, Packaging.ALL);
 
-    Hyperlink artifactIdHyperlink = toolkit.createHyperlink(dependencyComposite, "Artifact Id:*", SWT.NONE);
+    Hyperlink artifactIdHyperlink = toolkit.createHyperlink(dependencyComposite, Messages.DependenciesComposite_lblArtifactId, SWT.NONE);
     artifactIdHyperlink.setLayoutData(new GridData());
     artifactIdHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
       public void linkActivated(HyperlinkEvent e) {
@@ -598,7 +599,7 @@ public class DependenciesComposite extends Composite {
     artifactIdText.setLayoutData(gd_artifactIdText);
     FormUtils.addArtifactIdProposal(editorPage.getProject(), groupIdText, artifactIdText, Packaging.ALL);
 
-    Label versionLabel = toolkit.createLabel(dependencyComposite, "Version:", SWT.NONE);
+    Label versionLabel = toolkit.createLabel(dependencyComposite, Messages.DependenciesComposite_lblVersion, SWT.NONE);
     versionLabel.setLayoutData(new GridData());
     detailsWidthGroup.addControl(versionLabel);
 
@@ -629,7 +630,7 @@ public class DependenciesComposite extends Composite {
 //      }
 //    });
 
-    Label classifierLabel = toolkit.createLabel(dependencyComposite, "Classifier:", SWT.NONE);
+    Label classifierLabel = toolkit.createLabel(dependencyComposite, Messages.DependenciesComposite_lblClassifier, SWT.NONE);
     classifierLabel.setLayoutData(new GridData());
     detailsWidthGroup.addControl(classifierLabel);
 
@@ -640,7 +641,7 @@ public class DependenciesComposite extends Composite {
     classifierText.setLayoutData(gd_classifierText);
     FormUtils.addClassifierProposal(editorPage.getProject(), groupIdText, artifactIdText, versionText, classifierText, Packaging.ALL);
     
-    Label typeLabel = toolkit.createLabel(dependencyComposite, "Type:", SWT.NONE);
+    Label typeLabel = toolkit.createLabel(dependencyComposite, Messages.DependenciesComposite_lblType, SWT.NONE);
     typeLabel.setLayoutData(new GridData());
     detailsWidthGroup.addControl(typeLabel);
 
@@ -648,18 +649,18 @@ public class DependenciesComposite extends Composite {
     // FormUtils.addTypeProposal(groupIdText, artifactIdText, versionText, typeCombo, Packaging.ALL);
     
     // TODO retrieve artifact type from selected dependency 
-    typeCombo.add("jar");
-    typeCombo.add("war");
-    typeCombo.add("rar");
-    typeCombo.add("ear");
-    typeCombo.add("par");
-    typeCombo.add("ejb");
-    typeCombo.add("ejb-client");
-    typeCombo.add("test-jar");
-    typeCombo.add("java-source");
-    typeCombo.add("javadoc");
-    typeCombo.add("maven-plugin");
-    typeCombo.add("pom");
+    typeCombo.add("jar"); //$NON-NLS-1$
+    typeCombo.add("war"); //$NON-NLS-1$
+    typeCombo.add("rar"); //$NON-NLS-1$
+    typeCombo.add("ear"); //$NON-NLS-1$
+    typeCombo.add("par"); //$NON-NLS-1$
+    typeCombo.add("ejb"); //$NON-NLS-1$
+    typeCombo.add("ejb-client"); //$NON-NLS-1$
+    typeCombo.add("test-jar"); //$NON-NLS-1$
+    typeCombo.add("java-source"); //$NON-NLS-1$
+    typeCombo.add("javadoc"); //$NON-NLS-1$
+    typeCombo.add("maven-plugin"); //$NON-NLS-1$
+    typeCombo.add("pom"); //$NON-NLS-1$
     
     GridData gd_typeText = new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1);
     gd_typeText.horizontalIndent = 4;
@@ -668,18 +669,18 @@ public class DependenciesComposite extends Composite {
     typeCombo.setData(FormToolkit.KEY_DRAW_BORDER, FormToolkit.TEXT_BORDER);
     toolkit.adapt(typeCombo, true, true);
 
-    Label scopeLabel = toolkit.createLabel(dependencyComposite, "Scope:", SWT.NONE);
+    Label scopeLabel = toolkit.createLabel(dependencyComposite, Messages.DependenciesComposite_lblScope, SWT.NONE);
     scopeLabel.setLayoutData(new GridData());
     detailsWidthGroup.addControl(scopeLabel);
 
     scopeCombo = new CCombo(dependencyComposite, SWT.READ_ONLY | SWT.FLAT);
-    scopeCombo.add("compile");
-    scopeCombo.add("test");
-    scopeCombo.add("provided");
-    scopeCombo.add("runtime");
-    scopeCombo.add("system");
+    scopeCombo.add("compile"); //$NON-NLS-1$
+    scopeCombo.add("test"); //$NON-NLS-1$
+    scopeCombo.add("provided"); //$NON-NLS-1$
+    scopeCombo.add("runtime"); //$NON-NLS-1$
+    scopeCombo.add("system"); //$NON-NLS-1$
     // TODO should be only used on a dependency of type pom in the <dependencyManagement> section
-    scopeCombo.add("import"); 
+    scopeCombo.add("import");  //$NON-NLS-1$
     
     GridData gd_scopeText = new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1);
     gd_scopeText.horizontalIndent = 4;
@@ -688,7 +689,7 @@ public class DependenciesComposite extends Composite {
     scopeCombo.setData(FormToolkit.KEY_DRAW_BORDER, FormToolkit.TEXT_BORDER);
     toolkit.adapt(scopeCombo, true, true);
 
-    Label systemPathLabel = toolkit.createLabel(dependencyComposite, "System Path:", SWT.NONE);
+    Label systemPathLabel = toolkit.createLabel(dependencyComposite, Messages.DependenciesComposite_lblSystemPath, SWT.NONE);
     systemPathLabel.setLayoutData(new GridData());
     detailsWidthGroup.addControl(systemPathLabel);
 
@@ -698,10 +699,10 @@ public class DependenciesComposite extends Composite {
     gd_systemPathText.widthHint = 200;
     systemPathText.setLayoutData(gd_systemPathText);
 
-    selectSystemPathButton = toolkit.createButton(dependencyComposite, "Select...", SWT.NONE);
+    selectSystemPathButton = toolkit.createButton(dependencyComposite, Messages.DependenciesComposite_btnSelect, SWT.NONE);
     new Label(dependencyComposite, SWT.NONE);
 
-    optionalButton = toolkit.createButton(dependencyComposite, "Optional", SWT.CHECK);
+    optionalButton = toolkit.createButton(dependencyComposite, Messages.DependenciesComposite_btnOptional, SWT.CHECK);
     GridData gd_optionalButton = new GridData(SWT.LEFT, SWT.TOP, false, false, 2, 1);
     gd_optionalButton.horizontalIndent = 4;
     optionalButton.setLayoutData(gd_optionalButton);
@@ -712,7 +713,7 @@ public class DependenciesComposite extends Composite {
   private void createExclusionsSection(FormToolkit toolkit, Composite composite) {
     Section exclusionsSection = toolkit.createSection(composite, ExpandableComposite.TITLE_BAR);
     exclusionsSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-    exclusionsSection.setText("Exclusions");
+    exclusionsSection.setText(Messages.DependenciesComposite_sectionExclusions);
     exclusionsSection.marginWidth = 3;
 
     exclusionsEditor = new ListEditorComposite<Exclusion>(exclusionsSection, SWT.NONE, true);
@@ -765,7 +766,7 @@ public class DependenciesComposite extends Composite {
       public void widgetSelected(SelectionEvent e) {
         Set<ArtifactKey> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            "Add Exclusion", IIndex.SEARCH_ARTIFACT, artifacts);
+            Messages.DependenciesComposite_searchTitle_addExclusion, IIndex.SEARCH_ARTIFACT, artifacts);
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {
@@ -807,7 +808,7 @@ public class DependenciesComposite extends Composite {
   private void createExclusionDetailsSection(FormToolkit toolkit, Composite dependencyDetailsComposite) {
     exclusionDetailsSection = toolkit.createSection(dependencyDetailsComposite, ExpandableComposite.TITLE_BAR);
     exclusionDetailsSection.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-    exclusionDetailsSection.setText("Exclusion Details");
+    exclusionDetailsSection.setText(Messages.DependenciesComposite_section_ExclusionDetails);
 
     Composite exclusionDetailsComposite = toolkit.createComposite(exclusionDetailsSection, SWT.NONE);
     GridLayout gridLayout = new GridLayout(2, false);
@@ -818,7 +819,7 @@ public class DependenciesComposite extends Composite {
     exclusionDetailsSection.setClient(exclusionDetailsComposite);
     exclusionDetailsComposite.addControlListener(detailsWidthGroup);
     
-    Label exclusionGroupIdLabel = toolkit.createLabel(exclusionDetailsComposite, "Group Id:*", SWT.NONE);
+    Label exclusionGroupIdLabel = toolkit.createLabel(exclusionDetailsComposite, Messages.DependenciesComposite_lblExclusionGroupId, SWT.NONE);
     exclusionGroupIdLabel.setLayoutData(new GridData());
     detailsWidthGroup.addControl(exclusionGroupIdLabel);
 
@@ -847,7 +848,7 @@ public class DependenciesComposite extends Composite {
 //      }
 //    });
 
-    Label exclusionArtifactIdLabel = toolkit.createLabel(exclusionDetailsComposite, "Artifact Id:*", SWT.NONE);
+    Label exclusionArtifactIdLabel = toolkit.createLabel(exclusionDetailsComposite, Messages.DependenciesComposite_lblExclusionArtifactId, SWT.NONE);
     exclusionArtifactIdLabel.setLayoutData(new GridData());
     detailsWidthGroup.addControl(exclusionArtifactIdLabel);
 
@@ -858,12 +859,12 @@ public class DependenciesComposite extends Composite {
     // TODO handle ArtifactInfo
     FormUtils.addArtifactIdProposal(editorPage.getProject(), exclusionGroupIdText, exclusionArtifactIdText, Packaging.ALL);
     
-    exclusionSelectAction = new Action("Select Exclusion", MavenEditorImages.SELECT_ARTIFACT) {
+    exclusionSelectAction = new Action(Messages.DependenciesComposite_action_selectExclusion, MavenEditorImages.SELECT_ARTIFACT) {
       public void run() {
         // XXX calculate list available for exclusion
         Set<ArtifactKey> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            "Select Exclusion", IIndex.SEARCH_ARTIFACT, artifacts);
+            Messages.DependenciesComposite_searchDialog_selectExclusion, IIndex.SEARCH_ARTIFACT, artifacts);
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {
@@ -917,13 +918,13 @@ public class DependenciesComposite extends Composite {
     if(editorPage == null || dependency == null) {
       FormUtils.setEnabled(dependencyDetailsComposite, false);
 
-      setText(groupIdText, "");
-      setText(artifactIdText, "");
-      setText(versionText, "");
-      setText(classifierText, "");
-      setText(typeCombo, "");
-      setText(scopeCombo, "");
-      setText(systemPathText, "");
+      setText(groupIdText, ""); //$NON-NLS-1$
+      setText(artifactIdText, ""); //$NON-NLS-1$
+      setText(versionText, ""); //$NON-NLS-1$
+      setText(classifierText, ""); //$NON-NLS-1$
+      setText(typeCombo, ""); //$NON-NLS-1$
+      setText(scopeCombo, ""); //$NON-NLS-1$
+      setText(systemPathText, ""); //$NON-NLS-1$
 
       setButton(optionalButton, false);
 
@@ -955,13 +956,13 @@ public class DependenciesComposite extends Composite {
     
     // set new listeners
     ValueProvider<Dependency> dependencyProvider = new ValueProvider.DefaultValueProvider<Dependency>(dependency); 
-    editorPage.setModifyListener(groupIdText, dependencyProvider, POM_PACKAGE.getDependency_GroupId(), "");
-    editorPage.setModifyListener(artifactIdText, dependencyProvider, POM_PACKAGE.getDependency_ArtifactId(), "");
-    editorPage.setModifyListener(versionText, dependencyProvider, POM_PACKAGE.getDependency_Version(), "");
-    editorPage.setModifyListener(classifierText, dependencyProvider, POM_PACKAGE.getDependency_Classifier(), "");
-    editorPage.setModifyListener(typeCombo, dependencyProvider, POM_PACKAGE.getDependency_Type(), "jar");
-    editorPage.setModifyListener(scopeCombo, dependencyProvider, POM_PACKAGE.getDependency_Scope(), "compile");
-    editorPage.setModifyListener(systemPathText, dependencyProvider, POM_PACKAGE.getDependency_SystemPath(), "");
+    editorPage.setModifyListener(groupIdText, dependencyProvider, POM_PACKAGE.getDependency_GroupId(), ""); //$NON-NLS-1$
+    editorPage.setModifyListener(artifactIdText, dependencyProvider, POM_PACKAGE.getDependency_ArtifactId(), ""); //$NON-NLS-1$
+    editorPage.setModifyListener(versionText, dependencyProvider, POM_PACKAGE.getDependency_Version(), ""); //$NON-NLS-1$
+    editorPage.setModifyListener(classifierText, dependencyProvider, POM_PACKAGE.getDependency_Classifier(), ""); //$NON-NLS-1$
+    editorPage.setModifyListener(typeCombo, dependencyProvider, POM_PACKAGE.getDependency_Type(), "jar"); //$NON-NLS-1$
+    editorPage.setModifyListener(scopeCombo, dependencyProvider, POM_PACKAGE.getDependency_Scope(), "compile"); //$NON-NLS-1$
+    editorPage.setModifyListener(systemPathText, dependencyProvider, POM_PACKAGE.getDependency_SystemPath(), ""); //$NON-NLS-1$
     editorPage.setModifyListener(optionalButton, dependencyProvider, POM_PACKAGE.getDependency_Optional(), "false");
     
     editorPage.registerListeners();
@@ -985,8 +986,8 @@ public class DependenciesComposite extends Composite {
       FormUtils.setEnabled(exclusionDetailsSection, false);
       exclusionSelectAction.setEnabled(false);
 
-      exclusionGroupIdText.setText("");
-      exclusionArtifactIdText.setText("");
+      exclusionGroupIdText.setText(""); //$NON-NLS-1$
+      exclusionArtifactIdText.setText(""); //$NON-NLS-1$
       return;
     }
     
@@ -998,8 +999,8 @@ public class DependenciesComposite extends Composite {
     setText(exclusionArtifactIdText, exclusion.getArtifactId());
     
     ValueProvider<Exclusion> exclusionProvider = new ValueProvider.DefaultValueProvider<Exclusion>(exclusion);
-    editorPage.setModifyListener(exclusionGroupIdText, exclusionProvider, POM_PACKAGE.getExclusion_GroupId(), "");
-    editorPage.setModifyListener(exclusionArtifactIdText, exclusionProvider, POM_PACKAGE.getExclusion_ArtifactId(), "");
+    editorPage.setModifyListener(exclusionGroupIdText, exclusionProvider, POM_PACKAGE.getExclusion_GroupId(), ""); //$NON-NLS-1$
+    editorPage.setModifyListener(exclusionArtifactIdText, exclusionProvider, POM_PACKAGE.getExclusion_ArtifactId(), ""); //$NON-NLS-1$
     
     editorPage.registerListeners();
   }
@@ -1154,7 +1155,7 @@ public class DependenciesComposite extends Composite {
   String getVersion(String groupId, String artifactId, IProgressMonitor monitor) {
     try {
       MavenProject mavenProject = editorPage.getPomEditor().readMavenProject(false, monitor);
-      Artifact a = mavenProject.getArtifactMap().get(groupId + ":" + artifactId);
+      Artifact a = mavenProject.getArtifactMap().get(groupId + ":" + artifactId); //$NON-NLS-1$
       if(a!=null) {
         return a.getBaseVersion();
       }

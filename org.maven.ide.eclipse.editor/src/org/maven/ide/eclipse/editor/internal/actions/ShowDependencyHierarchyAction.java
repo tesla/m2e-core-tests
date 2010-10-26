@@ -20,6 +20,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.actions.ActionDelegate;
 import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.actions.SelectionUtil;
+import org.maven.ide.eclipse.editor.internal.Messages;
 import org.maven.ide.eclipse.editor.pom.MavenPomEditor;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
@@ -30,7 +31,7 @@ import org.maven.ide.eclipse.project.IMavenProjectFacade;
  */
 public class ShowDependencyHierarchyAction extends ActionDelegate {
 
-  public static final String ID = "org.maven.ide.eclipse.ShowDependencyHierarchy";
+  public static final String ID = "org.maven.ide.eclipse.ShowDependencyHierarchy"; //$NON-NLS-1$
 
   private IStructuredSelection selection;
 
@@ -57,7 +58,7 @@ public class ShowDependencyHierarchyAction extends ActionDelegate {
 
   private void showDependencyHierarchy(final ArtifactKey projectKey, final ArtifactKey artifactKey) {
     if(artifactKey != null) {
-      new Job("Opening POM editor") {
+      new Job(Messages.ShowDependencyHierarchyAction_job_openPomEditor) {
         protected IStatus run(IProgressMonitor monitor) {
           final IEditorPart editor = OpenPomAction.openEditor(projectKey.getGroupId(), //
               projectKey.getArtifactId(), projectKey.getVersion(), monitor);

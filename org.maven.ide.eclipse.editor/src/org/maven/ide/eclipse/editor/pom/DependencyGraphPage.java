@@ -30,12 +30,14 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.internal.cocoa.NSLayoutManager;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -61,6 +63,7 @@ import org.eclipse.zest.layouts.algorithms.RadialLayoutAlgorithm;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
+import org.maven.ide.eclipse.editor.internal.Messages;
 import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
 import org.maven.ide.eclipse.project.MavenProjectChangedEvent;
 
@@ -77,8 +80,6 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
     MavenPlugin.getDefault().getMavenProjectManager().removeMavenProjectChangedListener(this);
     super.dispose();
   }
-
-  private static final String DEPENDENCY_GRAPH = "Dependency Graph";
 
   protected static final Object[] EMPTY = new Object[0];
 
@@ -127,7 +128,7 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
   String currentScope = Artifact.SCOPE_TEST;
 
   public DependencyGraphPage(MavenPomEditor pomEditor) {
-    super(pomEditor, IMavenConstants.PLUGIN_ID + ".dependency.graph", DEPENDENCY_GRAPH);
+    super(pomEditor, IMavenConstants.PLUGIN_ID + ".dependency.graph", Messages.DependencyGraphPage_title); //$NON-NLS-1$
     this.pomEditor = pomEditor;
   }
 
@@ -211,14 +212,14 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
     viewer.setLabelProvider(graphLabelProvider);
     viewer.addSelectionChangedListener(graphLabelProvider);
 
-    searchControl = new SearchControl("Find", managedForm);
+    searchControl = new SearchControl(Messages.DependencyGraphPage_find, managedForm);
 
     IToolBarManager toolBarManager = form.getForm().getToolBarManager();
     toolBarManager.add(searchControl);
     toolBarManager.add(new ScopeDropdown());
     toolBarManager.add(new Separator());
 
-    toolBarManager.add(new Action("Refresh", MavenEditorImages.REFRESH) {
+    toolBarManager.add(new Action(Messages.DependencyGraphPage_action_refresh, MavenEditorImages.REFRESH) {
       public void run() {
         loadData();
       }
@@ -248,7 +249,7 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
   }
 
   String formatFormTitle() {
-    return DEPENDENCY_GRAPH + " (experimental) [" + currentScope + "]";
+    return NLS.bind(Messages.DependencyGraphPage_formTitle, currentScope);
   }
 
   void selectElements() {
@@ -267,42 +268,42 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
   }
 
   private void createActions() {
-    showVersionAction = new Action("Show &Version", SWT.CHECK) {
+    showVersionAction = new Action(Messages.DependencyGraphPage_action_showVersion, SWT.CHECK) {
       public void run() {
         graphLabelProvider.setShowVersion(isChecked());
       }
     };
     showVersionAction.setChecked(true);
 
-    showGroupAction = new Action("Show &Group", SWT.CHECK) {
+    showGroupAction = new Action(Messages.DependencyGraphPage_action_showGroup, SWT.CHECK) {
       public void run() {
         graphLabelProvider.setShowGroup(isChecked());
       }
     };
     showGroupAction.setChecked(false);
 
-    showScopeAction = new Action("Show &Scope", SWT.CHECK) {
+    showScopeAction = new Action(Messages.DependencyGraphPage_action_showScope, SWT.CHECK) {
       public void run() {
         graphLabelProvider.setShowScope(isChecked());
       }
     };
     showScopeAction.setChecked(true);
 
-    showIconAction = new Action("Show &Icon", SWT.CHECK) {
+    showIconAction = new Action(Messages.DependencyGraphPage_action_showIcon, SWT.CHECK) {
       public void run() {
         graphLabelProvider.setShowIcon(isChecked());
       }
     };
     showIconAction.setChecked(true);
 
-    wrapLabelAction = new Action("&Wrap Label", SWT.CHECK) {
+    wrapLabelAction = new Action(Messages.DependencyGraphPage_action_wrapLabel, SWT.CHECK) {
       public void run() {
         graphLabelProvider.setWarpLabel(isChecked());
       }
     };
     wrapLabelAction.setChecked(true);
 
-    showResolvedAction = new Action("Show Resolved", SWT.CHECK) {
+    showResolvedAction = new Action(Messages.DependencyGraphPage_action_showResolved, SWT.CHECK) {
       public void run() {
         graphContentProvider.setShowResolved(isChecked());
         updateGraphAsync(false, currentScope);
@@ -310,7 +311,7 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
     };
     showResolvedAction.setChecked(true);
 
-    radialLayoutAction = new Action("&Radial Layout", SWT.CHECK) {
+    radialLayoutAction = new Action(Messages.DependencyGraphPage_action_radialLayout, SWT.CHECK) {
       public void run() {
         if(isChecked()) {
           viewer.setLayoutAlgorithm(new CompositeLayoutAlgorithm(LayoutStyles.NO_LAYOUT_NODE_RESIZING, //
@@ -331,13 +332,13 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
     };
     radialLayoutAction.setChecked(false);
 
-    selectAllAction = new Action("Select &All") {
+    selectAllAction = new Action(Messages.DependencyGraphPage_action_selectAll) {
       public void run() {
         viewer.setSelection(new StructuredSelection(viewer.getNodeElements()));
       }
     };
 
-    showLegendAction = new Action("Show UI Legend") {
+    showLegendAction = new Action(Messages.DependencyGraphPage_action_showUILegend) {
       public void run() {
         DependencyGraphLegendPopup popup = new DependencyGraphLegendPopup(getEditor().getSite().getShell());
         popup.open();
@@ -397,7 +398,7 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
   private void initPopupMenu() {
     zoomContributionItem = new ZoomContributionViewItem(this);
 
-    MenuManager menuMgr = new MenuManager("graph");
+    MenuManager menuMgr = new MenuManager("graph"); //$NON-NLS-1$
     menuMgr.setRemoveAllWhenShown(true);
     menuMgr.addMenuListener(new IMenuListener() {
       public void menuAboutToShow(IMenuManager manager) {
@@ -408,7 +409,7 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
     Menu menu = menuMgr.createContextMenu(viewer.getControl());
     viewer.getControl().setMenu(menu);
     
-    getEditorSite().registerContextMenu(MavenPomEditor.EDITOR_ID + ".graph", menuMgr, viewer, false);
+    getEditorSite().registerContextMenu(MavenPomEditor.EDITOR_ID + ".graph", menuMgr, viewer, false); //$NON-NLS-1$
   }
 
   void updateScopeActions(IAction action) {
@@ -421,9 +422,9 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
   }
 
   void updateGraphAsync(final boolean force, final String scope) {
-    FormUtils.setMessage(getManagedForm().getForm(), "Resolving dependencies...", IMessageProvider.WARNING);
+    FormUtils.setMessage(getManagedForm().getForm(), Messages.DependencyGraphPage_message_resolving, IMessageProvider.WARNING);
 
-    new Job("Loading pom.xml") {
+    new Job(Messages.DependencyGraphPage_job_loadingPom) {
       protected IStatus run(IProgressMonitor monitor) {
         try {
           final DependencyNode dependencyNode = pomEditor.readDependencies(force, monitor, scope);
@@ -586,7 +587,7 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
     private Menu menu;
 
     public ScopeDropdown() {
-      setText("Scope");
+      setText(Messages.DependencyGraphPage_drop_scope);
       setImageDescriptor(MavenEditorImages.SCOPE);
       setMenuCreator(this);
     }
@@ -601,11 +602,11 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
       }
 
       menu = new Menu(parent);
-      addToMenu(menu, "all (test)", Artifact.SCOPE_TEST, currentScope);
-      addToMenu(menu, "compile", Artifact.SCOPE_COMPILE, currentScope);
-      addToMenu(menu, "runtime", Artifact.SCOPE_RUNTIME, currentScope);
-      addToMenu(menu, "provided", Artifact.SCOPE_PROVIDED, currentScope);
-      addToMenu(menu, "system", Artifact.SCOPE_SYSTEM, currentScope);
+      addToMenu(menu, Messages.DependencyGraphPage_scope_all, Artifact.SCOPE_TEST, currentScope);
+      addToMenu(menu, Messages.DependencyGraphPage_scope_compile, Artifact.SCOPE_COMPILE, currentScope);
+      addToMenu(menu, Messages.DependencyGraphPage_scope_runtime, Artifact.SCOPE_RUNTIME, currentScope);
+      addToMenu(menu, Messages.DependencyGraphPage_scope_provided, Artifact.SCOPE_PROVIDED, currentScope);
+      addToMenu(menu, Messages.DependencyGraphPage_scope_system, Artifact.SCOPE_SYSTEM, currentScope);
       return menu;
     }
 
@@ -634,7 +635,7 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
     for (int i=0; i<events.length; i++) {
       if (events[i].getSource().equals(((MavenPomEditor) getEditor()).getPomFile())) {
         // file has been changed. need to update graph  
-        new UIJob("Reloading") {
+        new UIJob(Messages.DependencyGraphPage_job_reloading) {
           public IStatus runInUIThread(IProgressMonitor monitor) {
             loadData();
             FormUtils.setMessage(getManagedForm().getForm(), null, IMessageProvider.WARNING);
@@ -649,9 +650,9 @@ public class DependencyGraphPage extends FormPage implements IZoomableWorkbenchP
     if (getManagedForm() == null || getManagedForm().getForm() == null)
       return;
     
-    new UIJob("Reloading") {
+    new UIJob(Messages.DependencyGraphPage_job_reloading) {
       public IStatus runInUIThread(IProgressMonitor monitor) {
-        FormUtils.setMessage(getManagedForm().getForm(), "Updating dependencies...", IMessageProvider.WARNING);
+        FormUtils.setMessage(getManagedForm().getForm(), Messages.DependencyGraphPage_message_updating, IMessageProvider.WARNING);
         return Status.OK_STATUS;
       }
     }.schedule();

@@ -44,6 +44,10 @@ import org.maven.ide.eclipse.util.Util;
  */
 public class DependencyGraphLabelProvider implements ILabelProvider, IEntityStyleProvider, IConnectionStyleProvider,
     ISelectionChangedListener {
+  private static final String SCOPE_TEST = "test";
+
+  private static final String SCOPE_COMPILE = "compile";
+
   private final GraphViewer viewer;
 
   private final DependencyGraphContentProvider contentProvider;
@@ -188,7 +192,7 @@ public class DependencyGraphLabelProvider implements ILabelProvider, IEntityStyl
         }
 
         if(showScope) {
-          label += (showVersion ? " [" : "[") + (a.getScope()==null ? "compile" : a.getScope()) + "]";
+          label += (showVersion ? " [" : "[") + (a.getScope()==null ? SCOPE_COMPILE : a.getScope()) + "]";
         }
       }
 
@@ -252,7 +256,7 @@ public class DependencyGraphLabelProvider implements ILabelProvider, IEntityStyl
         label += " " + a.getClassifier() + " \n";
       }
 
-      label += " [" + (a.getScope() == null ? "compile" : a.getScope()) + "]";
+      label += " [" + (a.getScope() == null ? SCOPE_COMPILE : a.getScope()) + "]";
 
       if(node.getPremanagedScope() != null) {
         label += " (from " + node.getPremanagedScope() + ")";
@@ -301,7 +305,7 @@ public class DependencyGraphLabelProvider implements ILabelProvider, IEntityStyl
       String scope = a.getScope();
       // if ("test".equals(scope) || "runtime".equals(scope) ||
       // "provided".equals(scope) || "system".equals(scope)) {
-      if(scope==null || "compile".equals(scope)) {
+      if(scope==null || SCOPE_COMPILE.equals(scope)) {
         return null;
       } else {
         return colorTestBackground;
@@ -311,7 +315,7 @@ public class DependencyGraphLabelProvider implements ILabelProvider, IEntityStyl
       String scope = a.getScope();
       // if ("test".equals(scope) || "runtime".equals(scope) ||
       // "provided".equals(scope) || "system".equals(scope)) {
-      if(scope==null || "compile".equals(scope)) {
+      if(scope==null || SCOPE_COMPILE.equals(scope)) {
         return null;
       } else {
         return colorTestBackground;
@@ -325,7 +329,7 @@ public class DependencyGraphLabelProvider implements ILabelProvider, IEntityStyl
       DependencyNode node = (DependencyNode) entity;
       Artifact a = node.getArtifact();
       String scope = a.getScope();
-      if(scope==null || "compile".equals(scope)) {
+      if(scope==null || SCOPE_COMPILE.equals(scope)) {
         return null;
       } else {
         return colorTestHighlight;
@@ -333,7 +337,7 @@ public class DependencyGraphLabelProvider implements ILabelProvider, IEntityStyl
     } else if(entity instanceof Artifact) {
       Artifact a = (Artifact) entity;
       String scope = a.getScope();
-      if(scope==null || "compile".equals(scope)) {
+      if(scope==null || SCOPE_COMPILE.equals(scope)) {
         return null;
       } else {
         return colorTestHighlight;
@@ -372,7 +376,7 @@ public class DependencyGraphLabelProvider implements ILabelProvider, IEntityStyl
       
       Artifact md = node.getArtifact();
       String scope = md.getScope();
-      if("test".equals(scope)) {
+      if(SCOPE_TEST.equals(scope)) {
         return null;
       }
       
@@ -403,7 +407,7 @@ public class DependencyGraphLabelProvider implements ILabelProvider, IEntityStyl
   public int getConnectionStyle(Object rel) {
     if(rel instanceof DependencyNode) {
       DependencyNode node = (DependencyNode) rel;
-      if("test".equals(node.getArtifact().getScope())) {
+      if(SCOPE_TEST.equals(node.getArtifact().getScope())) {
         return ZestStyles.CONNECTIONS_DOT;
       }
     } else if(rel instanceof EntityConnectionData) {
@@ -412,7 +416,7 @@ public class DependencyGraphLabelProvider implements ILabelProvider, IEntityStyl
       Object dest = data.dest;
       if(dest instanceof DependencyNode) {
         DependencyNode node = (DependencyNode) dest;
-        if("test".equals(node.getArtifact().getScope())) {
+        if(SCOPE_TEST.equals(node.getArtifact().getScope())) {
           return ZestStyles.CONNECTIONS_DOT | ZestStyles.CONNECTIONS_DIRECTED;
         }
       }
@@ -420,7 +424,7 @@ public class DependencyGraphLabelProvider implements ILabelProvider, IEntityStyl
       Object source = data.source;
       if(source instanceof DependencyNode) {
         DependencyNode node = (DependencyNode) source;
-        if("test".equals(node.getArtifact().getScope())) {
+        if(SCOPE_TEST.equals(node.getArtifact().getScope())) {
           return ZestStyles.CONNECTIONS_DOT | ZestStyles.CONNECTIONS_DIRECTED;
         }
       }

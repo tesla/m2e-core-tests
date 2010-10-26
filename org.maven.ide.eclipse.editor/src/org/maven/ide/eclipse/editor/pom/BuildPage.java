@@ -67,6 +67,7 @@ import org.maven.ide.eclipse.editor.composites.BuildComposite;
 import org.maven.ide.eclipse.editor.composites.DependencyLabelProvider;
 import org.maven.ide.eclipse.editor.composites.ListEditorComposite;
 import org.maven.ide.eclipse.editor.composites.ListEditorContentProvider;
+import org.maven.ide.eclipse.editor.internal.Messages;
 import org.maven.ide.eclipse.editor.xml.search.Packaging;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.index.IIndex;
@@ -103,13 +104,13 @@ public class BuildPage extends MavenPomEditorPage {
   
   
   public BuildPage(MavenPomEditor pomEditor) {
-    super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.build", "Build");
+    super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.build", Messages.BuildPage_title); //$NON-NLS-1$
   }
 
   protected void createFormContent(IManagedForm managedForm) {
     FormToolkit toolkit = managedForm.getToolkit();
     ScrolledForm form = managedForm.getForm();
-    form.setText("Build");
+    form.setText(Messages.BuildPage_form);
     // form.setExpandHorizontal(true);
     
     Composite body = form.getBody();
@@ -147,7 +148,7 @@ public class BuildPage extends MavenPomEditorPage {
     foldersSection = toolkit.createSection(buildSash, //
         ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
     foldersSection.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-    foldersSection.setText("Folders");
+    foldersSection.setText(Messages.BuildPage_section_folders);
     foldersSection.addExpansionListener(new ExpansionAdapter() {
       public void expansionStateChanged(ExpansionEvent e) {
         if(!expandingTopSections) {
@@ -167,27 +168,27 @@ public class BuildPage extends MavenPomEditorPage {
     toolkit.paintBordersFor(composite);
     foldersSection.setClient(composite);
   
-    toolkit.createLabel(composite, "Sources:", SWT.NONE);
+    toolkit.createLabel(composite, Messages.BuildPage_lblSources, SWT.NONE);
   
     sourceText = toolkit.createText(composite, null, SWT.NONE);
     sourceText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
   
-    toolkit.createLabel(composite, "Output:", SWT.NONE);
+    toolkit.createLabel(composite, Messages.BuildPage_lblOutput, SWT.NONE);
   
     outputText = toolkit.createText(composite, null, SWT.NONE);
     outputText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
   
-    toolkit.createLabel(composite, "Test Sources:", SWT.NONE);
+    toolkit.createLabel(composite, Messages.BuildPage_lblTestSources, SWT.NONE);
   
     testSourceText = toolkit.createText(composite, null, SWT.NONE);
     testSourceText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
   
-    toolkit.createLabel(composite, "Test Output:", SWT.NONE);
+    toolkit.createLabel(composite, Messages.BuildPage_lblTestOutput, SWT.NONE);
   
     testOutputText = toolkit.createText(composite, null, SWT.NONE);
     testOutputText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
   
-    toolkit.createLabel(composite, "Scripts:", SWT.NONE);
+    toolkit.createLabel(composite, Messages.BuildPage_lblScripts, SWT.NONE);
   
     scriptsSourceText = toolkit.createText(composite, null, SWT.NONE);
     scriptsSourceText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -197,7 +198,7 @@ public class BuildPage extends MavenPomEditorPage {
     extensionsSection = toolkit.createSection(buildSash, //
         ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
     extensionsSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    extensionsSection.setText("Extensions");
+    extensionsSection.setText(Messages.BuildPage_section_extensions);
     extensionsSection.addExpansionListener(new ExpansionAdapter() {
       public void expansionStateChanged(ExpansionEvent e) {
         if(!expandingTopSections) {
@@ -248,12 +249,12 @@ public class BuildPage extends MavenPomEditorPage {
       }
     });
     
-    extensionAddAction = new Action("Add Extension", MavenEditorImages.ADD_ARTIFACT) {
+    extensionAddAction = new Action(Messages.BuildPage_action_addExtension, MavenEditorImages.ADD_ARTIFACT) {
       public void run() {
         // XXX calculate list available extensions
         Set<ArtifactKey> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getEditorSite().getShell(), //
-            "Add Extension", IIndex.SEARCH_ARTIFACT, artifacts);
+            Messages.BuildPage_searchDialog_addExtension, IIndex.SEARCH_ARTIFACT, artifacts);
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {
@@ -268,7 +269,7 @@ public class BuildPage extends MavenPomEditorPage {
     toolBarManager.add(extensionAddAction);
     toolBarManager.add(new Separator());
     
-    toolBarManager.add(new Action("Show GroupId", MavenEditorImages.SHOW_GROUP) {
+    toolBarManager.add(new Action(Messages.BuildPage_action_showGroupId, MavenEditorImages.SHOW_GROUP) {
       {
         setChecked(true);
       }
@@ -296,7 +297,7 @@ public class BuildPage extends MavenPomEditorPage {
     extensionDetailsSection = toolkit.createSection(buildSash, //
         ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
     extensionDetailsSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    extensionDetailsSection.setText("Extension Details");
+    extensionDetailsSection.setText(Messages.BuildPage_section_extensionDetails);
     extensionDetailsSection.addExpansionListener(new ExpansionAdapter() {
       public void expansionStateChanged(ExpansionEvent e) {
         if(!expandingTopSections) {
@@ -316,14 +317,14 @@ public class BuildPage extends MavenPomEditorPage {
     toolkit.paintBordersFor(extensionDetialsComposite);
     extensionDetailsSection.setClient(extensionDetialsComposite);
 
-    toolkit.createLabel(extensionDetialsComposite, "Group Id:*");
+    toolkit.createLabel(extensionDetialsComposite, Messages.BuildPage_lblGroupId);
     
     extensionGroupIdText = toolkit.createText(extensionDetialsComposite, null, SWT.FLAT);
     extensionGroupIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-    extensionGroupIdText.setData("name", "extensionGroupIdText");
+    extensionGroupIdText.setData("name", "extensionGroupIdText"); //$NON-NLS-1$ //$NON-NLS-2$
     FormUtils.addGroupIdProposal(getProject(), extensionGroupIdText, Packaging.ALL);
     
-    Hyperlink extensionArtifactIdHyperlink = toolkit.createHyperlink(extensionDetialsComposite, "Artifact Id:*", SWT.NONE);
+    Hyperlink extensionArtifactIdHyperlink = toolkit.createHyperlink(extensionDetialsComposite, Messages.BuildPage_lblArtifactId, SWT.NONE);
     extensionArtifactIdHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
       public void linkActivated(HyperlinkEvent e) {
         final String groupId = extensionGroupIdText.getText();
@@ -340,14 +341,14 @@ public class BuildPage extends MavenPomEditorPage {
     
     extensionArtifactIdText = toolkit.createText(extensionDetialsComposite, null, SWT.FLAT);
     extensionArtifactIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-    extensionArtifactIdText.setData("name", "extensionArtifactIdText");
+    extensionArtifactIdText.setData("name", "extensionArtifactIdText"); //$NON-NLS-1$ //$NON-NLS-2$
     FormUtils.addArtifactIdProposal(getProject(), extensionGroupIdText, extensionArtifactIdText, Packaging.ALL);
     
-    toolkit.createLabel(extensionDetialsComposite, "Version:");
+    toolkit.createLabel(extensionDetialsComposite, Messages.BuildPage_lblVersion);
     
     extensionVersionText = toolkit.createText(extensionDetialsComposite, null, SWT.FLAT);
     extensionVersionText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-    extensionVersionText.setData("name", "extensionVersionText");
+    extensionVersionText.setData("name", "extensionVersionText"); //$NON-NLS-1$ //$NON-NLS-2$
     FormUtils.addVersionProposal(getProject(), extensionGroupIdText, extensionArtifactIdText, extensionVersionText, Packaging.ALL);
     extensionDetialsComposite.setTabList(new Control[] {extensionGroupIdText, extensionArtifactIdText, extensionVersionText});
 
@@ -370,12 +371,12 @@ public class BuildPage extends MavenPomEditorPage {
 //      }
 //    });
     
-    extensionSelectAction = new Action("Select Extension", MavenEditorImages.SELECT_ARTIFACT) {
+    extensionSelectAction = new Action(Messages.BuildPage_action_selectExtension, MavenEditorImages.SELECT_ARTIFACT) {
       public void run() {
         // XXX calculate list available extensions
         Set<ArtifactKey> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getEditorSite().getShell(), //
-            "Select Extension", IIndex.SEARCH_ARTIFACT, artifacts);
+            Messages.BuildPage_searchDialog_selectExtension, IIndex.SEARCH_ARTIFACT, artifacts);
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {
@@ -388,7 +389,7 @@ public class BuildPage extends MavenPomEditorPage {
     };
     extensionSelectAction.setEnabled(false);
 
-    openWebPageAction = new Action("Open Web Page", MavenEditorImages.WEB_PAGE) {
+    openWebPageAction = new Action(Messages.BuildPage_action_openWeb, MavenEditorImages.WEB_PAGE) {
       public void run() {
         final String groupId = extensionGroupIdText.getText();
         final String artifactId = extensionArtifactIdText.getText();
@@ -441,9 +442,9 @@ public class BuildPage extends MavenPomEditorPage {
       extensionSelectAction.setEnabled(false);
       openWebPageAction.setEnabled(false);
 
-      setText(extensionGroupIdText, "");
-      setText(extensionArtifactIdText, "");
-      setText(extensionVersionText, "");
+      setText(extensionGroupIdText, ""); //$NON-NLS-1$
+      setText(extensionArtifactIdText, ""); //$NON-NLS-1$
+      setText(extensionVersionText, ""); //$NON-NLS-1$
       
       return;
     }
@@ -458,9 +459,9 @@ public class BuildPage extends MavenPomEditorPage {
     setText(extensionVersionText, extension.getVersion());
     
     ValueProvider<Extension> extensionProvider = new ValueProvider.DefaultValueProvider<Extension>(extension); 
-    setModifyListener(extensionGroupIdText, extensionProvider, POM_PACKAGE.getExtension_GroupId(), "");
-    setModifyListener(extensionArtifactIdText, extensionProvider, POM_PACKAGE.getExtension_ArtifactId(), "");
-    setModifyListener(extensionVersionText, extensionProvider, POM_PACKAGE.getExtension_Version(), "");
+    setModifyListener(extensionGroupIdText, extensionProvider, POM_PACKAGE.getExtension_GroupId(), ""); //$NON-NLS-1$
+    setModifyListener(extensionArtifactIdText, extensionProvider, POM_PACKAGE.getExtension_ArtifactId(), ""); //$NON-NLS-1$
+    setModifyListener(extensionVersionText, extensionProvider, POM_PACKAGE.getExtension_Version(), ""); //$NON-NLS-1$
     
     registerListeners();
   }
@@ -474,11 +475,11 @@ public class BuildPage extends MavenPomEditorPage {
     
     Build build = model == null ? null : model.getBuild();
     if(build==null) {
-      setText(sourceText, "");
-      setText(outputText, "");
-      setText(testSourceText, "");
-      setText(testOutputText, "");
-      setText(scriptsSourceText, "");
+      setText(sourceText, ""); //$NON-NLS-1$
+      setText(outputText, ""); //$NON-NLS-1$
+      setText(testSourceText, ""); //$NON-NLS-1$
+      setText(testOutputText, ""); //$NON-NLS-1$
+      setText(scriptsSourceText, ""); //$NON-NLS-1$
 
       extensionsEditor.setInput(null);
       
@@ -512,11 +513,11 @@ public class BuildPage extends MavenPomEditorPage {
         return build;
       }
     };
-    setModifyListener(sourceText, modelProvider, POM_PACKAGE.getBuild_SourceDirectory(), "");
-    setModifyListener(outputText, modelProvider, POM_PACKAGE.getBuild_OutputDirectory(), "");
-    setModifyListener(testSourceText, modelProvider, POM_PACKAGE.getBuild_TestSourceDirectory(), "");
-    setModifyListener(testOutputText, modelProvider, POM_PACKAGE.getBuild_TestOutputDirectory(), "");
-    setModifyListener(scriptsSourceText, modelProvider, POM_PACKAGE.getBuild_ScriptSourceDirectory(), "");
+    setModifyListener(sourceText, modelProvider, POM_PACKAGE.getBuild_SourceDirectory(), ""); //$NON-NLS-1$
+    setModifyListener(outputText, modelProvider, POM_PACKAGE.getBuild_OutputDirectory(), ""); //$NON-NLS-1$
+    setModifyListener(testSourceText, modelProvider, POM_PACKAGE.getBuild_TestSourceDirectory(), ""); //$NON-NLS-1$
+    setModifyListener(testOutputText, modelProvider, POM_PACKAGE.getBuild_TestOutputDirectory(), ""); //$NON-NLS-1$
+    setModifyListener(scriptsSourceText, modelProvider, POM_PACKAGE.getBuild_ScriptSourceDirectory(), ""); //$NON-NLS-1$
 
     loadBuildBase();
   }

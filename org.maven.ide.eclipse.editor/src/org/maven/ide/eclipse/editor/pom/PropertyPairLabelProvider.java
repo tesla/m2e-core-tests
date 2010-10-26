@@ -9,9 +9,11 @@
 package org.maven.ide.eclipse.editor.pom;
 
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Image;
 import org.maven.ide.components.pom.PropertyElement;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
+import org.maven.ide.eclipse.editor.internal.Messages;
 
 /**
  * Label provider for <code>PropertyPair</code>
@@ -23,7 +25,7 @@ public class PropertyPairLabelProvider extends LabelProvider {
   public String getText(Object element) {
     if(element instanceof PropertyElement) {
       PropertyElement pair = (PropertyElement) element;
-      return pair.getName() + " : " + pair.getValue();
+      return NLS.bind(Messages.PropertyPairLabelProvider_0, pair.getName(), pair.getValue());
     }
     return super.getText(element);
   }

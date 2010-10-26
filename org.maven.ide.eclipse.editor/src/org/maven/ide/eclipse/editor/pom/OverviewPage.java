@@ -74,6 +74,7 @@ import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.editor.composites.ListEditorComposite;
 import org.maven.ide.eclipse.editor.composites.ListEditorContentProvider;
+import org.maven.ide.eclipse.editor.internal.Messages;
 import org.maven.ide.eclipse.editor.xml.search.Packaging;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.index.IIndex;
@@ -130,13 +131,13 @@ public class OverviewPage extends MavenPomEditorPage {
   private Action parentSelectAction;
 
   public OverviewPage(MavenPomEditor pomEditor) {
-    super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.overview", "Overview");
+    super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.overview", Messages.OverviewPage_title); //$NON-NLS-1$
   }
 
   protected void createFormContent(IManagedForm managedForm) {
     FormToolkit toolkit = managedForm.getToolkit();
     ScrolledForm form = managedForm.getForm();
-    form.setText("Overview");
+    form.setText(Messages.OverviewPage_form);
     
     Composite body = form.getBody();
     GridLayout gridLayout = new GridLayout(2, true);
@@ -184,7 +185,7 @@ public class OverviewPage extends MavenPomEditorPage {
   private void createArtifactSection(FormToolkit toolkit, Composite composite, WidthGroup widthGroup) {
     Section artifactSection = toolkit.createSection(composite, ExpandableComposite.TITLE_BAR);
     artifactSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-    artifactSection.setText("Artifact");
+    artifactSection.setText(Messages.OverviewPage_section_artifact);
   
     Composite artifactComposite = toolkit.createComposite(artifactSection, SWT.NONE);
     toolkit.adapt(artifactComposite);
@@ -195,42 +196,42 @@ public class OverviewPage extends MavenPomEditorPage {
     artifactComposite.setLayout(gridLayout);
     artifactSection.setClient(artifactComposite);
   
-    Label groupIdLabel = toolkit.createLabel(artifactComposite, "Group Id:", SWT.NONE);
+    Label groupIdLabel = toolkit.createLabel(artifactComposite, Messages.OverviewPage_lblGroupId, SWT.NONE);
   
     artifactGroupIdText = toolkit.createText(artifactComposite, null, SWT.NONE);
-    artifactGroupIdText.setData("name", "groupId");
+    artifactGroupIdText.setData("name", "groupId"); //$NON-NLS-1$ //$NON-NLS-2$
     GridData gd_artifactGroupIdText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_artifactGroupIdText.horizontalIndent = 4;
     artifactGroupIdText.setLayoutData(gd_artifactGroupIdText);
     FormUtils.addGroupIdProposal(getProject(), artifactGroupIdText, Packaging.ALL);
   
-    Label artifactIdLabel = toolkit.createLabel(artifactComposite, "Artifact Id:*", SWT.NONE);
+    Label artifactIdLabel = toolkit.createLabel(artifactComposite, Messages.OverviewPage_lblArtifactId, SWT.NONE);
   
     artifactIdText = toolkit.createText(artifactComposite, null, SWT.NONE);
-    artifactIdText.setData("name", "artifactId");
+    artifactIdText.setData("name", "artifactId"); //$NON-NLS-1$ //$NON-NLS-2$
     GridData gd_artifactIdText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_artifactIdText.horizontalIndent = 4;
     artifactIdText.setLayoutData(gd_artifactIdText);
   
-    Label versionLabel = toolkit.createLabel(artifactComposite, "Version:", SWT.NONE);
+    Label versionLabel = toolkit.createLabel(artifactComposite, Messages.OverviewPage_lblVersion, SWT.NONE);
   
     artifactVersionText = toolkit.createText(artifactComposite, null, SWT.NONE);
     GridData gd_versionText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_versionText.horizontalIndent = 4;
     gd_versionText.widthHint = 200;
     artifactVersionText.setLayoutData(gd_versionText);
-    artifactVersionText.setData("name", "version");
+    artifactVersionText.setData("name", "version"); //$NON-NLS-1$ //$NON-NLS-2$
   
-    Label packagingLabel = toolkit.createLabel(artifactComposite, "Packaging:", SWT.NONE);
+    Label packagingLabel = toolkit.createLabel(artifactComposite, Messages.OverviewPage_lblPackaging, SWT.NONE);
   
     artifactPackagingCombo = new CCombo(artifactComposite, SWT.FLAT);
     
-    artifactPackagingCombo.add("jar");
-    artifactPackagingCombo.add("war");
-    artifactPackagingCombo.add("ejb"); //MNGECLIPSE-688 : add EAR & EJB Support
-    artifactPackagingCombo.add("ear");
-    artifactPackagingCombo.add("pom");
-    artifactPackagingCombo.add("maven-plugin");
+    artifactPackagingCombo.add("jar"); //$NON-NLS-1$
+    artifactPackagingCombo.add("war"); //$NON-NLS-1$
+    artifactPackagingCombo.add("ejb"); //MNGECLIPSE-688 : add EAR & EJB Support //$NON-NLS-1$
+    artifactPackagingCombo.add("ear"); //$NON-NLS-1$
+    artifactPackagingCombo.add("pom"); //$NON-NLS-1$
+    artifactPackagingCombo.add("maven-plugin"); //$NON-NLS-1$
 // uncomment this only if you are able to not to break the project    
 //    artifactPackagingCombo.add("osgi-bundle");
 //    artifactPackagingCombo.add("eclipse-feature");
@@ -241,7 +242,7 @@ public class OverviewPage extends MavenPomEditorPage {
     gd_packagingText.widthHint = 120;
     artifactPackagingCombo.setLayoutData(gd_packagingText);
     artifactPackagingCombo.setData(FormToolkit.KEY_DRAW_BORDER, FormToolkit.TEXT_BORDER);
-    artifactPackagingCombo.setData("name", "packaging");
+    artifactPackagingCombo.setData("name", "packaging"); //$NON-NLS-1$ //$NON-NLS-2$
     toolkit.paintBordersFor(artifactPackagingCombo);
     
     widthGroup.addControl(groupIdLabel);
@@ -256,15 +257,15 @@ public class OverviewPage extends MavenPomEditorPage {
     parentSection = toolkit.createSection(composite, //
         ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
     parentSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-    parentSection.setText("Parent");
-    parentSection.setData("name", "parentSection");
+    parentSection.setText(Messages.OverviewPage_section_parent);
+    parentSection.setData("name", "parentSection"); //$NON-NLS-1$ //$NON-NLS-2$
   
-    parentSelectAction = new Action("Select Parent", MavenEditorImages.SELECT_ARTIFACT) {
+    parentSelectAction = new Action(Messages.OverviewPage_action_selectParent, MavenEditorImages.SELECT_ARTIFACT) {
       public void run() {
         // TODO calculate current list of artifacts for the project
         Set<ArtifactKey> artifacts = Collections.emptySet();
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getEditorSite().getShell(), //
-            "Select Parent", IIndex.SEARCH_ARTIFACT, artifacts, false);
+            Messages.OverviewPage_searchDialog_selectParent, IIndex.SEARCH_ARTIFACT, artifacts, false);
         if (parentGroupIdText.getText() != null && !parentGroupIdText.getText().isEmpty()) {
           //chances are we will get good match by adding the groupid here..
           dialog.setQuery(parentGroupIdText.getText());
@@ -286,11 +287,11 @@ public class OverviewPage extends MavenPomEditorPage {
             //promote good practices ->
             if (grid.equals(artifactGroupIdText.getText())) {
               //if the groupId is the same, just remove it in child.
-              artifactGroupIdText.setText("");
+              artifactGroupIdText.setText(""); //$NON-NLS-1$
             }
             if (ver.equals(artifactVersionText.getText())) {
               //if the version is the same, just remove it in child.
-              artifactVersionText.setText("");
+              artifactVersionText.setText(""); //$NON-NLS-1$
             }
           }
         }
@@ -319,16 +320,16 @@ public class OverviewPage extends MavenPomEditorPage {
     parentComposite.setLayout(gridLayout);
     parentSection.setClient(parentComposite);
 
-    Label parentGroupIdLabel = toolkit.createLabel(parentComposite, "Group Id:*", SWT.NONE);
+    Label parentGroupIdLabel = toolkit.createLabel(parentComposite, Messages.OverviewPage_lblGroupId2, SWT.NONE);
   
     parentGroupIdText = toolkit.createText(parentComposite, null, SWT.NONE);
     GridData gd_parentGroupIdText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_parentGroupIdText.horizontalIndent = 4;
     parentGroupIdText.setLayoutData(gd_parentGroupIdText);
-    parentGroupIdText.setData("name", "parentGroupId");
+    parentGroupIdText.setData("name", "parentGroupId"); //$NON-NLS-1$ //$NON-NLS-2$
     FormUtils.addGroupIdProposal(getProject(), parentGroupIdText, Packaging.POM);
     
-    Hyperlink parentArtifactIdLabel = toolkit.createHyperlink(parentComposite, "Artifact Id:*", SWT.NONE);
+    Hyperlink parentArtifactIdLabel = toolkit.createHyperlink(parentComposite, Messages.OverviewPage_lblArtifactId, SWT.NONE);
     parentArtifactIdLabel.addHyperlinkListener(new HyperlinkAdapter() {
       public void linkActivated(HyperlinkEvent e) {
         final String groupId = parentGroupIdText.getText();
@@ -347,10 +348,10 @@ public class OverviewPage extends MavenPomEditorPage {
     GridData gd_parentArtifactIdText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_parentArtifactIdText.horizontalIndent = 4;
     parentArtifactIdText.setLayoutData(gd_parentArtifactIdText);
-    parentArtifactIdText.setData("name", "parentArtifactId");
+    parentArtifactIdText.setData("name", "parentArtifactId"); //$NON-NLS-1$ //$NON-NLS-2$
     FormUtils.addArtifactIdProposal(getProject(), parentGroupIdText, parentArtifactIdText, Packaging.POM);
   
-    Label parentVersionLabel = toolkit.createLabel(parentComposite, "Version:*", SWT.NONE);
+    Label parentVersionLabel = toolkit.createLabel(parentComposite, Messages.OverviewPage_lblVersion2, SWT.NONE);
     parentVersionLabel.setLayoutData(new GridData());
   
     parentVersionText = toolkit.createText(parentComposite, null, SWT.NONE);
@@ -358,7 +359,7 @@ public class OverviewPage extends MavenPomEditorPage {
     parentVersionTextData.horizontalIndent = 4;
     parentVersionTextData.widthHint = 200;
     parentVersionText.setLayoutData(parentVersionTextData);
-    parentVersionText.setData("name", "parentVersion");
+    parentVersionText.setData("name", "parentVersion"); //$NON-NLS-1$ //$NON-NLS-2$
     FormUtils.addVersionProposal(getProject(), parentGroupIdText, parentArtifactIdText, parentVersionText, Packaging.POM);
   
 //    Button parentSelectButton = toolkit.createButton(parentComposite, "Select...", SWT.NONE);
@@ -379,13 +380,13 @@ public class OverviewPage extends MavenPomEditorPage {
 //      }
 //    });
 
-    Label parentRealtivePathLabel = toolkit.createLabel(parentComposite, "Relative Path:", SWT.NONE);
+    Label parentRealtivePathLabel = toolkit.createLabel(parentComposite, Messages.OverviewPage_lblRelPath, SWT.NONE);
 
     parentRelativePathText = toolkit.createText(parentComposite, null, SWT.NONE);
     GridData gd_parentRelativePathText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_parentRelativePathText.horizontalIndent = 4;
     parentRelativePathText.setLayoutData(gd_parentRelativePathText);
-    parentRelativePathText.setData("name", "parentRelativePath");
+    parentRelativePathText.setData("name", "parentRelativePath"); //$NON-NLS-1$ //$NON-NLS-2$
     
     widthGroup.addControl(parentGroupIdLabel);
     widthGroup.addControl(parentArtifactIdLabel);
@@ -406,11 +407,11 @@ public class OverviewPage extends MavenPomEditorPage {
     modulesSection = toolkit.createSection(composite, //
         ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
     modulesSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-    modulesSection.setText("Modules");
-    modulesSection.setData("name", "modulesSection");
+    modulesSection.setText(Messages.OverviewPage_section_modules);
+    modulesSection.setData("name", "modulesSection"); //$NON-NLS-1$ //$NON-NLS-2$
 
     modulesEditor = new ListEditorComposite<String>(modulesSection, SWT.NONE);
-    modulesEditor.getViewer().getTable().setData("name", "modulesEditor");
+    modulesEditor.getViewer().getTable().setData("name", "modulesEditor"); //$NON-NLS-1$ //$NON-NLS-2$
     toolkit.paintBordersFor(modulesEditor);
     toolkit.adapt(modulesEditor);
     modulesSection.setClient(modulesEditor);
@@ -421,7 +422,7 @@ public class OverviewPage extends MavenPomEditorPage {
     modulesEditor.setOpenListener(new IOpenListener() {
       public void open(OpenEvent openevent) {
         final List<String> selection = modulesEditor.getSelection();
-        new Job("Opening POM editors") {
+        new Job(Messages.OverviewPage_opening_editors) {
           protected IStatus run(IProgressMonitor monitor) {
             for(String module : selection) {
               IMavenProjectFacade projectFacade = findModuleProject(module);
@@ -431,7 +432,7 @@ public class OverviewPage extends MavenPomEditorPage {
               } else {
                 IFile modulePom = findModuleFile(module);
                 if(modulePom!=null && modulePom.isAccessible()) {
-                  OpenPomAction.openEditor(new FileEditorInput(modulePom), "pom.xml");
+                  OpenPomAction.openEditor(new FileEditorInput(modulePom), "pom.xml"); //$NON-NLS-1$
                 }
               }
             }
@@ -491,7 +492,7 @@ public class OverviewPage extends MavenPomEditorPage {
       }
     });
     
-    newModuleProjectAction = new Action("New module project", MavenEditorImages.ADD_MODULE) {
+    newModuleProjectAction = new Action(Messages.OverviewPage_action_new_module_project, MavenEditorImages.ADD_MODULE) {
       public void run() {
         IEditorInput editorInput = OverviewPage.this.pomEditor.getEditorInput();
         if(editorInput instanceof FileEditorInput) {
@@ -529,22 +530,22 @@ public class OverviewPage extends MavenPomEditorPage {
     projectSection = toolkit.createSection(composite, //
         ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
     projectSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-    projectSection.setText("Project");
-    projectSection.setData("name", "projectSection");
+    projectSection.setText(Messages.OverviewPage_section_project);
+    projectSection.setData("name", "projectSection"); //$NON-NLS-1$ //$NON-NLS-2$
   
     Composite projectComposite = toolkit.createComposite(projectSection, SWT.NONE);
     projectComposite.setLayout(new GridLayout(2, false));
     projectSection.setClient(projectComposite);
   
-    Label nameLabel = toolkit.createLabel(projectComposite, "Name:", SWT.NONE);
+    Label nameLabel = toolkit.createLabel(projectComposite, Messages.OverviewPage_lblName, SWT.NONE);
   
     projectNameText = toolkit.createText(projectComposite, null, SWT.NONE);
     GridData gd_projectNameText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_projectNameText.widthHint = 150;
     projectNameText.setLayoutData(gd_projectNameText);
-    projectNameText.setData("name", "projectName");
+    projectNameText.setData("name", "projectName"); //$NON-NLS-1$ //$NON-NLS-2$
   
-    Hyperlink urlLabel = toolkit.createHyperlink(projectComposite, "URL:", SWT.NONE);
+    Hyperlink urlLabel = toolkit.createHyperlink(projectComposite, Messages.OverviewPage_lblUrl, SWT.NONE);
     urlLabel.addHyperlinkListener(new HyperlinkAdapter() {
       public void linkActivated(HyperlinkEvent e) {
         FormUtils.openHyperlink(projectUrlText.getText());
@@ -555,9 +556,9 @@ public class OverviewPage extends MavenPomEditorPage {
     GridData gd_projectUrlText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_projectUrlText.widthHint = 150;
     projectUrlText.setLayoutData(gd_projectUrlText);
-    projectUrlText.setData("name", "projectUrl");
+    projectUrlText.setData("name", "projectUrl"); //$NON-NLS-1$ //$NON-NLS-2$
   
-    Label descriptionLabel = toolkit.createLabel(projectComposite, "Description:", SWT.NONE);
+    Label descriptionLabel = toolkit.createLabel(projectComposite, Messages.OverviewPage_lblDesc, SWT.NONE);
     descriptionLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
   
     projectDescriptionText = toolkit.createText(projectComposite, null, SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
@@ -565,15 +566,15 @@ public class OverviewPage extends MavenPomEditorPage {
     gd_descriptionText.widthHint = 150;
     gd_descriptionText.heightHint = 55;
     projectDescriptionText.setLayoutData(gd_descriptionText);
-    projectDescriptionText.setData("name", "projectDescription");
+    projectDescriptionText.setData("name", "projectDescription"); //$NON-NLS-1$ //$NON-NLS-2$
   
-    Label inceptionYearLabel = toolkit.createLabel(projectComposite, "Inception:", SWT.NONE);
+    Label inceptionYearLabel = toolkit.createLabel(projectComposite, Messages.OverviewPage_lblInception, SWT.NONE);
   
     inceptionYearText = toolkit.createText(projectComposite, null, SWT.NONE);
     GridData gd_inceptionYearText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_inceptionYearText.widthHint = 150;
     inceptionYearText.setLayoutData(gd_inceptionYearText);
-    inceptionYearText.setData("name", "projectInceptionYear");
+    inceptionYearText.setData("name", "projectInceptionYear"); //$NON-NLS-1$ //$NON-NLS-2$
     
     widthGroup.addControl(nameLabel);
     widthGroup.addControl(urlLabel);
@@ -588,22 +589,22 @@ public class OverviewPage extends MavenPomEditorPage {
     organizationSection = toolkit.createSection(composite, //
         ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
     organizationSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-    organizationSection.setText("Organization");
-    organizationSection.setData("name", "organizationSection");
+    organizationSection.setText(Messages.OverviewPage_section_org);
+    organizationSection.setData("name", "organizationSection"); //$NON-NLS-1$ //$NON-NLS-2$
   
     Composite organizationComposite = toolkit.createComposite(organizationSection, SWT.NONE);
     organizationComposite.setLayout(new GridLayout(2, false));
     organizationSection.setClient(organizationComposite);
   
-    Label organizationNameLabel = toolkit.createLabel(organizationComposite, "Name:", SWT.NONE);
+    Label organizationNameLabel = toolkit.createLabel(organizationComposite, Messages.OverviewPage_lblName, SWT.NONE);
   
     organizationNameText = toolkit.createText(organizationComposite, null, SWT.NONE);
     GridData gd_organizationNameText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_organizationNameText.widthHint = 150;
     organizationNameText.setLayoutData(gd_organizationNameText);
-    organizationNameText.setData("name", "organizationName");
+    organizationNameText.setData("name", "organizationName"); //$NON-NLS-1$ //$NON-NLS-2$
 
-    Hyperlink organizationUrlLabel = toolkit.createHyperlink(organizationComposite, "URL:", SWT.NONE);
+    Hyperlink organizationUrlLabel = toolkit.createHyperlink(organizationComposite, Messages.OverviewPage_lblUrl, SWT.NONE);
     organizationUrlLabel.addHyperlinkListener(new HyperlinkAdapter() {
       public void linkActivated(HyperlinkEvent e) {
         FormUtils.openHyperlink(organizationUrlText.getText());
@@ -614,7 +615,7 @@ public class OverviewPage extends MavenPomEditorPage {
     GridData gd_organizationUrlText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_organizationUrlText.widthHint = 150;
     organizationUrlText.setLayoutData(gd_organizationUrlText);
-    organizationUrlText.setData("name", "organizationUrl");
+    organizationUrlText.setData("name", "organizationUrl"); //$NON-NLS-1$ //$NON-NLS-2$
     
     widthGroup.addControl(organizationNameLabel);
     widthGroup.addControl(organizationUrlLabel);
@@ -628,14 +629,14 @@ public class OverviewPage extends MavenPomEditorPage {
         ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
     GridData gd_scmSection = new GridData(SWT.FILL, SWT.TOP, false, false);
     scmSection.setLayoutData(gd_scmSection);
-    scmSection.setText("SCM");
-    scmSection.setData("name", "scmSection");
+    scmSection.setText(Messages.OverviewPage_section_scm);
+    scmSection.setData("name", "scmSection"); //$NON-NLS-1$ //$NON-NLS-2$
   
     Composite scmComposite = toolkit.createComposite(scmSection, SWT.NONE);
     scmComposite.setLayout(new GridLayout(2, false));
     scmSection.setClient(scmComposite);
   
-    Hyperlink scmUrlLabel = toolkit.createHyperlink(scmComposite, "URL:", SWT.NONE);
+    Hyperlink scmUrlLabel = toolkit.createHyperlink(scmComposite, Messages.OverviewPage_lblUrl, SWT.NONE);
     scmUrlLabel.addHyperlinkListener(new HyperlinkAdapter() {
       public void linkActivated(HyperlinkEvent e) {
         FormUtils.openHyperlink(scmUrlText.getText());
@@ -646,31 +647,31 @@ public class OverviewPage extends MavenPomEditorPage {
     GridData gd_scmUrlText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_scmUrlText.widthHint = 150;
     scmUrlText.setLayoutData(gd_scmUrlText);
-    scmUrlText.setData("name", "scmUrl");
+    scmUrlText.setData("name", "scmUrl"); //$NON-NLS-1$ //$NON-NLS-2$
   
-    Label scmConnectionLabel = toolkit.createLabel(scmComposite, "Connection:", SWT.NONE);
+    Label scmConnectionLabel = toolkit.createLabel(scmComposite, Messages.OverviewPage_lblConnection, SWT.NONE);
   
     scmConnectionText = toolkit.createText(scmComposite, null, SWT.NONE);
     GridData gd_scmConnectionText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_scmConnectionText.widthHint = 150;
     scmConnectionText.setLayoutData(gd_scmConnectionText);
-    scmConnectionText.setData("name", "scmConnection");
+    scmConnectionText.setData("name", "scmConnection"); //$NON-NLS-1$ //$NON-NLS-2$
   
-    Label scmDevConnectionLabel = toolkit.createLabel(scmComposite, "Developer:", SWT.NONE);
+    Label scmDevConnectionLabel = toolkit.createLabel(scmComposite, Messages.OverviewPage_lblDev, SWT.NONE);
   
     scmDevConnectionText = toolkit.createText(scmComposite, null, SWT.NONE);
     GridData gd_scmDevConnectionText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_scmDevConnectionText.widthHint = 150;
     scmDevConnectionText.setLayoutData(gd_scmDevConnectionText);
-    scmDevConnectionText.setData("name", "scmDevConnection");
+    scmDevConnectionText.setData("name", "scmDevConnection"); //$NON-NLS-1$ //$NON-NLS-2$
   
-    Label scmTagLabel = toolkit.createLabel(scmComposite, "Tag:", SWT.NONE);
+    Label scmTagLabel = toolkit.createLabel(scmComposite, Messages.OverviewPage_lblTag, SWT.NONE);
   
     scmTagText = toolkit.createText(scmComposite, null, SWT.NONE);
     GridData gd_scmTagText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_scmTagText.widthHint = 150;
     scmTagText.setLayoutData(gd_scmTagText);
-    scmTagText.setData("name", "scmTag");
+    scmTagText.setData("name", "scmTag"); //$NON-NLS-1$ //$NON-NLS-2$
     
     widthGroup.addControl(scmUrlLabel);
     widthGroup.addControl(scmConnectionLabel);
@@ -684,22 +685,22 @@ public class OverviewPage extends MavenPomEditorPage {
     issueManagementSection = toolkit.createSection(composite, //
         ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
     issueManagementSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-    issueManagementSection.setText("Issue Management");
-    issueManagementSection.setData("name", "issueManagementSection");
+    issueManagementSection.setText(Messages.OverviewPage_section_issueMan);
+    issueManagementSection.setData("name", "issueManagementSection"); //$NON-NLS-1$ //$NON-NLS-2$
   
     Composite issueManagementComposite = toolkit.createComposite(issueManagementSection, SWT.NONE);
     issueManagementComposite.setLayout(new GridLayout(2, false));
     issueManagementSection.setClient(issueManagementComposite);
   
-    Label issueManagementSystemLabel = toolkit.createLabel(issueManagementComposite, "System:", SWT.NONE);
+    Label issueManagementSystemLabel = toolkit.createLabel(issueManagementComposite, Messages.OverviewPage_lblSystem, SWT.NONE);
   
     issueManagementSystemText = toolkit.createText(issueManagementComposite, null, SWT.NONE);
     GridData gd_issueManagementSystemText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_issueManagementSystemText.widthHint = 150;
     issueManagementSystemText.setLayoutData(gd_issueManagementSystemText);
-    issueManagementSystemText.setData("name", "issueManagementSystem");
+    issueManagementSystemText.setData("name", "issueManagementSystem"); //$NON-NLS-1$ //$NON-NLS-2$
   
-    Hyperlink issueManagementUrlLabel = toolkit.createHyperlink(issueManagementComposite, "URL:", SWT.NONE);
+    Hyperlink issueManagementUrlLabel = toolkit.createHyperlink(issueManagementComposite, Messages.OverviewPage_lblUrl, SWT.NONE);
     issueManagementUrlLabel.addHyperlinkListener(new HyperlinkAdapter() {
       public void linkActivated(HyperlinkEvent e) {
         FormUtils.openHyperlink(issueManagementUrlText.getText());
@@ -710,7 +711,7 @@ public class OverviewPage extends MavenPomEditorPage {
     GridData gd_issueManagementUrlText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_issueManagementUrlText.widthHint = 150;
     issueManagementUrlText.setLayoutData(gd_issueManagementUrlText);
-    issueManagementUrlText.setData("name", "issueManagementUrl");
+    issueManagementUrlText.setData("name", "issueManagementUrl"); //$NON-NLS-1$ //$NON-NLS-2$
     
     widthGroup.addControl(issueManagementSystemLabel);
     widthGroup.addControl(issueManagementUrlLabel);
@@ -723,22 +724,22 @@ public class OverviewPage extends MavenPomEditorPage {
     ciManagementSection = toolkit.createSection(composite, //
         ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
     ciManagementSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-    ciManagementSection.setText("Continuous Integration");
-    ciManagementSection.setData("name", "continuousIntegrationSection");
+    ciManagementSection.setText(Messages.OverviewPage_section_ci);
+    ciManagementSection.setData("name", "continuousIntegrationSection"); //$NON-NLS-1$ //$NON-NLS-2$
   
     Composite ciManagementComposite = toolkit.createComposite(ciManagementSection, SWT.NONE);
     ciManagementComposite.setLayout(new GridLayout(2, false));
     ciManagementSection.setClient(ciManagementComposite);
   
-    Label ciManagementSystemLabel = toolkit.createLabel(ciManagementComposite, "System:", SWT.NONE);
+    Label ciManagementSystemLabel = toolkit.createLabel(ciManagementComposite, Messages.OverviewPage_lblSystem, SWT.NONE);
   
     ciManagementSystemText = toolkit.createText(ciManagementComposite, null, SWT.NONE);
     GridData gd_ciManagementSystemText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_ciManagementSystemText.widthHint = 150;
     ciManagementSystemText.setLayoutData(gd_ciManagementSystemText);
-    ciManagementSystemText.setData("name", "ciManagementSystem");
+    ciManagementSystemText.setData("name", "ciManagementSystem"); //$NON-NLS-1$ //$NON-NLS-2$
   
-    Hyperlink ciManagementUrlLabel = toolkit.createHyperlink(ciManagementComposite, "URL:", SWT.NONE);
+    Hyperlink ciManagementUrlLabel = toolkit.createHyperlink(ciManagementComposite, Messages.OverviewPage_lblUrl, SWT.NONE);
     ciManagementUrlLabel.addHyperlinkListener(new HyperlinkAdapter() {
       public void linkActivated(HyperlinkEvent e) {
         FormUtils.openHyperlink(ciManagementUrlText.getText());
@@ -749,7 +750,7 @@ public class OverviewPage extends MavenPomEditorPage {
     GridData gd_ciManagementUrlText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_ciManagementUrlText.widthHint = 150;
     ciManagementUrlText.setLayoutData(gd_ciManagementUrlText);
-    ciManagementUrlText.setData("name", "ciManagementUrl");
+    ciManagementUrlText.setData("name", "ciManagementUrl"); //$NON-NLS-1$ //$NON-NLS-2$
     
     widthGroup.addControl(ciManagementSystemLabel);
     widthGroup.addControl(ciManagementUrlLabel);
@@ -874,15 +875,15 @@ public class OverviewPage extends MavenPomEditorPage {
         setText(inceptionYearText, model.getInceptionYear());
 
         ValueProvider<Model> modelProvider = new ValueProvider.DefaultValueProvider<Model>(model);
-        setModifyListener(artifactGroupIdText, modelProvider, POM_PACKAGE.getModel_GroupId(), "");
-        setModifyListener(artifactIdText, modelProvider, POM_PACKAGE.getModel_ArtifactId(), "");
-        setModifyListener(artifactVersionText, modelProvider, POM_PACKAGE.getModel_Version(), "");
-        setModifyListener(artifactPackagingCombo, modelProvider, POM_PACKAGE.getModel_Packaging(), "jar");
+        setModifyListener(artifactGroupIdText, modelProvider, POM_PACKAGE.getModel_GroupId(), ""); //$NON-NLS-1$
+        setModifyListener(artifactIdText, modelProvider, POM_PACKAGE.getModel_ArtifactId(), ""); //$NON-NLS-1$
+        setModifyListener(artifactVersionText, modelProvider, POM_PACKAGE.getModel_Version(), ""); //$NON-NLS-1$
+        setModifyListener(artifactPackagingCombo, modelProvider, POM_PACKAGE.getModel_Packaging(), "jar"); //$NON-NLS-1$
         
-        setModifyListener(projectNameText, modelProvider, POM_PACKAGE.getModel_Name(), "");
-        setModifyListener(projectDescriptionText, modelProvider, POM_PACKAGE.getModel_Description(), "");
-        setModifyListener(projectUrlText, modelProvider, POM_PACKAGE.getModel_Url(), "");
-        setModifyListener(inceptionYearText, modelProvider, POM_PACKAGE.getModel_InceptionYear(), "");        
+        setModifyListener(projectNameText, modelProvider, POM_PACKAGE.getModel_Name(), ""); //$NON-NLS-1$
+        setModifyListener(projectDescriptionText, modelProvider, POM_PACKAGE.getModel_Description(), ""); //$NON-NLS-1$
+        setModifyListener(projectUrlText, modelProvider, POM_PACKAGE.getModel_Url(), ""); //$NON-NLS-1$
+        setModifyListener(inceptionYearText, modelProvider, POM_PACKAGE.getModel_InceptionYear(), "");         //$NON-NLS-1$
       }
     });
 
@@ -900,10 +901,10 @@ public class OverviewPage extends MavenPomEditorPage {
       setText(parentVersionText, parent.getVersion());
       setText(parentRelativePathText, parent.getRelativePath());
     } else {
-      setText(parentGroupIdText, "");
-      setText(parentArtifactIdText, "");
-      setText(parentVersionText, "");
-      setText(parentRelativePathText, "");
+      setText(parentGroupIdText, ""); //$NON-NLS-1$
+      setText(parentArtifactIdText, ""); //$NON-NLS-1$
+      setText(parentVersionText, ""); //$NON-NLS-1$
+      setText(parentRelativePathText, ""); //$NON-NLS-1$
     }
     
 //    parentGroupIdText.setEditable(!isReadOnly());
@@ -923,10 +924,10 @@ public class OverviewPage extends MavenPomEditorPage {
         return parent;
       }
     };
-    setModifyListener(parentGroupIdText, parentProvider, POM_PACKAGE.getParent_GroupId(), "");
-    setModifyListener(parentArtifactIdText, parentProvider, POM_PACKAGE.getParent_ArtifactId(), "");
-    setModifyListener(parentVersionText, parentProvider, POM_PACKAGE.getParent_Version(), "");
-    setModifyListener(parentRelativePathText, parentProvider, POM_PACKAGE.getParent_RelativePath(), "");
+    setModifyListener(parentGroupIdText, parentProvider, POM_PACKAGE.getParent_GroupId(), ""); //$NON-NLS-1$
+    setModifyListener(parentArtifactIdText, parentProvider, POM_PACKAGE.getParent_ArtifactId(), ""); //$NON-NLS-1$
+    setModifyListener(parentVersionText, parentProvider, POM_PACKAGE.getParent_Version(), ""); //$NON-NLS-1$
+    setModifyListener(parentRelativePathText, parentProvider, POM_PACKAGE.getParent_RelativePath(), ""); //$NON-NLS-1$
   }
   
   private void loadModules(EList<String> modules) {
@@ -940,8 +941,8 @@ public class OverviewPage extends MavenPomEditorPage {
     removeNotifyListener(organizationUrlText);
 
     if(organization==null) {
-      setText(organizationNameText, "");
-      setText(organizationUrlText, "");
+      setText(organizationNameText, ""); //$NON-NLS-1$
+      setText(organizationUrlText, ""); //$NON-NLS-1$
     } else {
       setText(organizationNameText, organization.getName());
       setText(organizationUrlText, organization.getUrl());
@@ -959,8 +960,8 @@ public class OverviewPage extends MavenPomEditorPage {
         return organization;
       }
     };
-    setModifyListener(organizationNameText, organizationProvider, POM_PACKAGE.getOrganization_Name(), "");
-    setModifyListener(organizationUrlText, organizationProvider, POM_PACKAGE.getOrganization_Url(), "");
+    setModifyListener(organizationNameText, organizationProvider, POM_PACKAGE.getOrganization_Name(), ""); //$NON-NLS-1$
+    setModifyListener(organizationUrlText, organizationProvider, POM_PACKAGE.getOrganization_Url(), ""); //$NON-NLS-1$
   }
 
   private void loadScm(Scm scm) {
@@ -969,10 +970,10 @@ public class OverviewPage extends MavenPomEditorPage {
     removeNotifyListener(scmDevConnectionText);
     removeNotifyListener(scmTagText);
     if(scm==null) {
-      setText(scmUrlText, "");
-      setText(scmConnectionText, "");
-      setText(scmDevConnectionText, "");
-      setText(scmTagText, "");
+      setText(scmUrlText, ""); //$NON-NLS-1$
+      setText(scmConnectionText, ""); //$NON-NLS-1$
+      setText(scmDevConnectionText, ""); //$NON-NLS-1$
+      setText(scmTagText, ""); //$NON-NLS-1$
     } else {
       setText(scmUrlText, scm.getUrl());
       setText(scmConnectionText, scm.getConnection());
@@ -991,10 +992,10 @@ public class OverviewPage extends MavenPomEditorPage {
         return scm;
       }
     };
-    setModifyListener(scmUrlText, scmProvider, POM_PACKAGE.getScm_Url(), "");
-    setModifyListener(scmConnectionText, scmProvider, POM_PACKAGE.getScm_Connection(), "");
-    setModifyListener(scmDevConnectionText, scmProvider, POM_PACKAGE.getScm_DeveloperConnection(), "");
-    setModifyListener(scmTagText, scmProvider, POM_PACKAGE.getScm_Tag(), "");
+    setModifyListener(scmUrlText, scmProvider, POM_PACKAGE.getScm_Url(), ""); //$NON-NLS-1$
+    setModifyListener(scmConnectionText, scmProvider, POM_PACKAGE.getScm_Connection(), ""); //$NON-NLS-1$
+    setModifyListener(scmDevConnectionText, scmProvider, POM_PACKAGE.getScm_DeveloperConnection(), ""); //$NON-NLS-1$
+    setModifyListener(scmTagText, scmProvider, POM_PACKAGE.getScm_Tag(), ""); //$NON-NLS-1$
   }
 
   private void loadCiManagement(CiManagement ciManagement) {
@@ -1002,8 +1003,8 @@ public class OverviewPage extends MavenPomEditorPage {
     removeNotifyListener(ciManagementSystemText);
 
     if(ciManagement==null) {
-      setText(ciManagementSystemText, "");
-      setText(ciManagementUrlText, "");
+      setText(ciManagementSystemText, ""); //$NON-NLS-1$
+      setText(ciManagementUrlText, ""); //$NON-NLS-1$
     } else {
       setText(ciManagementSystemText, ciManagement.getSystem());
       setText(ciManagementUrlText, ciManagement.getUrl());
@@ -1021,8 +1022,8 @@ public class OverviewPage extends MavenPomEditorPage {
         return ciManagement;
       }
     };
-    setModifyListener(ciManagementUrlText, ciManagementProvider, POM_PACKAGE.getCiManagement_Url(), "");
-    setModifyListener(ciManagementSystemText, ciManagementProvider, POM_PACKAGE.getCiManagement_System(), "");
+    setModifyListener(ciManagementUrlText, ciManagementProvider, POM_PACKAGE.getCiManagement_Url(), ""); //$NON-NLS-1$
+    setModifyListener(ciManagementSystemText, ciManagementProvider, POM_PACKAGE.getCiManagement_System(), ""); //$NON-NLS-1$
   }
 
   private void loadIssueManagement(IssueManagement issueManagement) {
@@ -1030,8 +1031,8 @@ public class OverviewPage extends MavenPomEditorPage {
     removeNotifyListener(issueManagementSystemText);
 
     if(issueManagement==null) {
-      setText(issueManagementSystemText, "");
-      setText(issueManagementUrlText, "");
+      setText(issueManagementSystemText, ""); //$NON-NLS-1$
+      setText(issueManagementUrlText, ""); //$NON-NLS-1$
     } else {
       setText(issueManagementSystemText, issueManagement.getSystem());
       setText(issueManagementUrlText, issueManagement.getUrl());
@@ -1049,8 +1050,8 @@ public class OverviewPage extends MavenPomEditorPage {
         return issueManagement;
       }
     };
-    setModifyListener(issueManagementUrlText, issueManagementProvider, POM_PACKAGE.getIssueManagement_Url(), "");
-    setModifyListener(issueManagementSystemText, issueManagementProvider, POM_PACKAGE.getIssueManagement_System(), "");
+    setModifyListener(issueManagementUrlText, issueManagementProvider, POM_PACKAGE.getIssueManagement_Url(), ""); //$NON-NLS-1$
+    setModifyListener(issueManagementSystemText, issueManagementProvider, POM_PACKAGE.getIssueManagement_System(), ""); //$NON-NLS-1$
   }
 
   protected void createNewModule(String moduleName) {

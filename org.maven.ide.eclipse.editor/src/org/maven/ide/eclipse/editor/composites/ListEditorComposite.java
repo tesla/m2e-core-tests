@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.maven.ide.eclipse.editor.internal.Messages;
 
 
 /**
@@ -64,7 +65,7 @@ public class ListEditorComposite<T> extends Composite {
     setLayout(gridLayout);
 
     final Table table = toolkit.createTable(this, SWT.FLAT | SWT.MULTI | style);
-    table.setData("name", "list-editor-composite-table");
+    table.setData("name", "list-editor-composite-table"); //$NON-NLS-1$ //$NON-NLS-2$
     final TableColumn column = new TableColumn(table, SWT.NONE);
     table.addControlListener(new ControlAdapter() {
       public void controlResized(ControlEvent e) {
@@ -83,20 +84,20 @@ public class ListEditorComposite<T> extends Composite {
     viewer.setData(FormToolkit.KEY_DRAW_BORDER, Boolean.TRUE);
     GridData gd = null;
     if(includeSearch){
-      selectButton = toolkit.createButton(this, "Add...", SWT.FLAT);
+      selectButton = toolkit.createButton(this, Messages.ListEditorComposite_btnAdd, SWT.FLAT);
       gd = new GridData(SWT.FILL, SWT.TOP, false, false);
       gd.verticalIndent=0;
       selectButton.setLayoutData(gd);
       selectButton.setEnabled(false);
     }
     
-    addButton = toolkit.createButton(this, "Create...", SWT.FLAT);
+    addButton = toolkit.createButton(this, Messages.ListEditorComposite_btnCreate, SWT.FLAT);
     gd = new GridData(SWT.FILL, SWT.TOP, false, false);
     gd.verticalIndent=0;
     addButton.setLayoutData(gd);
     addButton.setEnabled(false);
 
-    removeButton = toolkit.createButton(this, "Delete", SWT.FLAT);
+    removeButton = toolkit.createButton(this, Messages.ListEditorComposite_btnDelete, SWT.FLAT);
     gd = new GridData(SWT.FILL, SWT.TOP, false, false);
     gd.verticalIndent=0;
     removeButton.setLayoutData(gd);

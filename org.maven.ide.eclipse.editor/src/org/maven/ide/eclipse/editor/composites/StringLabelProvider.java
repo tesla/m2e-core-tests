@@ -27,7 +27,7 @@ public class StringLabelProvider extends LabelProvider {
     if(element instanceof String) {
       return (String) element;
     }
-    return "";
+    return ""; //$NON-NLS-1$
   }
 
   public Image getImage(Object element) {

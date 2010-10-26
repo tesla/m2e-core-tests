@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.zest.core.viewers.GraphViewer;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.editor.internal.Messages;
 
 /**
  * @author Eugene Kuleshov
@@ -57,8 +58,8 @@ public class DependencyGraphPrintDialog extends TitleAreaDialog {
   protected Control createDialogArea(Composite parent) {
     Composite area = (Composite) super.createDialogArea(parent);
     
-    setTitle("Print Dependency Graph");
-    setMessage("Select printer and finishing preferences");
+    setTitle(Messages.DependencyGraphPrintDialog_title);
+    setMessage(Messages.DependencyGraphPrintDialog_message);
     
     Composite container = new Composite(area, SWT.NONE);
     container.setLayoutData(new GridData(GridData.FILL_BOTH));
@@ -69,11 +70,11 @@ public class DependencyGraphPrintDialog extends TitleAreaDialog {
     container.setLayout(gridLayout);
 
     Label printerLabel = new Label(container, SWT.NONE);
-    printerLabel.setData("name", "printerLabel");
-    printerLabel.setText("&Printer:");
+    printerLabel.setData("name", "printerLabel"); //$NON-NLS-1$ //$NON-NLS-2$
+    printerLabel.setText(Messages.DependencyGraphPrintDialog_lblPrinter);
 
     printerViewer = new ComboViewer(container, SWT.BORDER | SWT.READ_ONLY);
-    printerViewer.setData("name", "printerViewer");
+    printerViewer.setData("name", "printerViewer"); //$NON-NLS-1$ //$NON-NLS-2$
     printerViewer.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
     printerViewer.setContentProvider(new IStructuredContentProvider() {
       public Object[] getElements(Object input) {
@@ -116,12 +117,12 @@ public class DependencyGraphPrintDialog extends TitleAreaDialog {
     printerViewer.setSelection(new StructuredSelection(Printer.getDefaultPrinterData()), true);
 
     Button selectButton = new Button(container, SWT.NONE);
-    selectButton.setData("name", "selectButton");
-    selectButton.setText("Con&figure...");
+    selectButton.setData("name", "selectButton"); //$NON-NLS-1$ //$NON-NLS-2$
+    selectButton.setText(Messages.DependencyGraphPrintDialog_btnConfigure);
     selectButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         PrintDialog printDialog = new PrintDialog(getShell(), SWT.NONE);
-        printDialog.setText("Select Printer");
+        printDialog.setText(Messages.DependencyGraphPrintDialog_title_selectPrinter);
         PrinterData data = printDialog.open();
         if(data!=null) {
           printerViewer.setInput(Printer.getPrinterList());
@@ -132,11 +133,11 @@ public class DependencyGraphPrintDialog extends TitleAreaDialog {
     });
 
     Label modeLabel = new Label(container, SWT.NONE);
-    modeLabel.setData("name", "modeLabel");
-    modeLabel.setText("&Mode:");
+    modeLabel.setData("name", "modeLabel"); //$NON-NLS-1$ //$NON-NLS-2$
+    modeLabel.setText(Messages.DependencyGraphPrintDialog_lblMode);
 
     modeViewer = new ComboViewer(container, SWT.BORDER | SWT.READ_ONLY);
-    modeViewer.setData("name", "modeViewer");
+    modeViewer.setData("name", "modeViewer"); //$NON-NLS-1$ //$NON-NLS-2$
     modeViewer.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
     modeViewer.setContentProvider(new IStructuredContentProvider() {
       public Object[] getElements(Object input) {
@@ -154,13 +155,13 @@ public class DependencyGraphPrintDialog extends TitleAreaDialog {
         if(element instanceof Integer) {
           switch((Integer) element) {
             case PrintFigureOperation.FIT_PAGE:
-              return "Fit page";
+              return Messages.DependencyGraphPrintDialog_fit_page;
             case PrintFigureOperation.FIT_HEIGHT:
-              return "Fit height";
+              return Messages.DependencyGraphPrintDialog_fit_height;
             case PrintFigureOperation.FIT_WIDTH:
-              return "Fit width";
+              return Messages.DependencyGraphPrintDialog_fit_width;
             case PrintFigureOperation.TILE:
-              return "Tile";
+              return Messages.DependencyGraphPrintDialog_tile;
           }
         }
         return super.getText(element);
@@ -185,7 +186,7 @@ public class DependencyGraphPrintDialog extends TitleAreaDialog {
   
   protected void configureShell(Shell newShell) {
     super.configureShell(newShell);
-    newShell.setText("Print");
+    newShell.setText(Messages.DependencyGraphPrintDialog_shell);
   }  
   
   protected void okPressed() {
@@ -194,9 +195,9 @@ public class DependencyGraphPrintDialog extends TitleAreaDialog {
       PrintFigureOperation operation = new PrintFigureOperation(p, //
           ((GraphViewer) graphPage.getZoomableViewer()).getGraphControl().getContents());
       operation.setPrintMode(mode);
-      operation.run("Dependency Graph");
+      operation.run(Messages.DependencyGraphPrintDialog_print_operation);
     } catch(Exception e) {
-      MavenLogger.log("Unable to print Dependency Graph", e);
+      MavenLogger.log("Unable to print Dependency Graph", e); //$NON-NLS-1$
     } finally {
       p.dispose();
     }

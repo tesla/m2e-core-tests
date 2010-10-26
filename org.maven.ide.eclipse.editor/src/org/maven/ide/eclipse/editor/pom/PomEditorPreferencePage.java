@@ -17,8 +17,8 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.Messages;
 
 public class PomEditorPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
-  public static final String P_DEFAULT_POM_EDITOR_PAGE = "eclipse.m2.defaultPomEditorPage";
-  public static final String P_SHOW_ADVANCED_TABS = "eclipse.m2.showAdvancedTabs";
+  public static final String P_DEFAULT_POM_EDITOR_PAGE = "eclipse.m2.defaultPomEditorPage"; //$NON-NLS-1$
+  public static final String P_SHOW_ADVANCED_TABS = "eclipse.m2.showAdvancedTabs"; //$NON-NLS-1$
   
   final MavenPlugin plugin;
   private Composite parent;
@@ -40,7 +40,7 @@ public class PomEditorPreferencePage extends FieldEditorPreferencePage implement
    */
   public void createFieldEditors() {
     parent = getFieldEditorParent();
-    addField(new BooleanFieldEditor(P_DEFAULT_POM_EDITOR_PAGE, Messages.getString("pomEditor.defaultPage"), parent));
-    addField(new BooleanFieldEditor(P_SHOW_ADVANCED_TABS, Messages.getString("pomEditor.showAdvancedTabs"), parent));
+    addField(new BooleanFieldEditor(P_DEFAULT_POM_EDITOR_PAGE, Messages.getString("pomEditor.defaultPage"), parent)); //$NON-NLS-1$
+    addField(new BooleanFieldEditor(P_SHOW_ADVANCED_TABS, Messages.getString("pomEditor.showAdvancedTabs"), parent)); //$NON-NLS-1$
   }
 }

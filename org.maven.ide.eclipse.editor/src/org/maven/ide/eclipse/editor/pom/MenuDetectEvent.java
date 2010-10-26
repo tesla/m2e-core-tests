@@ -3,6 +3,7 @@ package org.maven.ide.eclipse.editor.pom;
 
 import org.eclipse.swt.events.TypedEvent;
 import org.eclipse.swt.widgets.Event;
+import org.maven.ide.eclipse.editor.internal.Messages;
 
 /**
  * Instances of this class are sent whenever the platform-
@@ -58,9 +59,9 @@ public MenuDetectEvent(Event e) {
 public String toString() {
 	String string = super.toString ();
 	return string.substring (0, string.length() - 1) // remove trailing '}'
-		+ " x=" + x
-		+ " y=" + y
-		+ " doit=" + doit
-		+ "}";
+		+ " x=" + x //$NON-NLS-1$
+		+ " y=" + y //$NON-NLS-1$
+		+ " doit=" + doit //$NON-NLS-1$
+		+ "}"; //$NON-NLS-1$
 }
 }

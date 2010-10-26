@@ -12,6 +12,7 @@ import org.eclipse.jface.action.IMenuManager;
 import org.maven.ide.eclipse.actions.AbstractMavenMenuCreator;
 import org.maven.ide.eclipse.actions.SelectionUtil;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
+import org.maven.ide.eclipse.editor.internal.Messages;
 
 
 /**
@@ -24,7 +25,7 @@ public class PomEditorMenuCreator extends AbstractMavenMenuCreator {
     if(selectionType == SelectionUtil.JAR_FILE) {
       mgr.appendToGroup(OPEN, getAction(new ShowDependencyHierarchyAction(), //
           ShowDependencyHierarchyAction.ID,
-          "Show Dependency Hierarchy", MavenEditorImages.HIERARCHY));
+          Messages.PomEditorMenuCreator_action_showDependencyHierarchy, MavenEditorImages.HIERARCHY));
     }
   }
 

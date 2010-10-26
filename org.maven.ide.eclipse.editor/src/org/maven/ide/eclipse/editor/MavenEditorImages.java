@@ -21,81 +21,81 @@ public class MavenEditorImages {
 
   // images
   
-  public static final Image IMG_CLEAR = createImage("clear.gif");
+  public static final Image IMG_CLEAR = createImage("clear.gif"); //$NON-NLS-1$
   
-  public static final Image IMG_CLEAR_DISABLED = createImage("clear_disabled.gif");
+  public static final Image IMG_CLEAR_DISABLED = createImage("clear_disabled.gif"); //$NON-NLS-1$
   
-  public static final Image IMG_PROJECT = createImage("project_obj.gif"); 
+  public static final Image IMG_PROJECT = createImage("project_obj.gif");  //$NON-NLS-1$
 
   // object images
   
-  public static final Image IMG_JAR = createImage("jar_obj.gif"); 
+  public static final Image IMG_JAR = createImage("jar_obj.gif");  //$NON-NLS-1$
 
-  public static final Image IMG_REPOSITORY = createImage("repository_obj.gif"); 
+  public static final Image IMG_REPOSITORY = createImage("repository_obj.gif");  //$NON-NLS-1$
   
-  public static final Image IMG_PLUGIN = createImage("plugin_obj.gif"); 
+  public static final Image IMG_PLUGIN = createImage("plugin_obj.gif");  //$NON-NLS-1$
 
-  public static final Image IMG_EXECUTION = createImage("execution_obj.gif");
+  public static final Image IMG_EXECUTION = createImage("execution_obj.gif"); //$NON-NLS-1$
   
-  public static final Image IMG_GOAL = createImage("goal_obj.gif"); 
+  public static final Image IMG_GOAL = createImage("goal_obj.gif");  //$NON-NLS-1$
 
-  public static final Image IMG_FILTER = createImage("filter_obj.gif"); 
+  public static final Image IMG_FILTER = createImage("filter_obj.gif");  //$NON-NLS-1$
 
-  public static final Image IMG_RESOURCE = createImage("resource_obj.gif"); 
+  public static final Image IMG_RESOURCE = createImage("resource_obj.gif");  //$NON-NLS-1$
 
-  public static final Image IMG_INCLUDE = createImage("include_obj.gif"); 
+  public static final Image IMG_INCLUDE = createImage("include_obj.gif");  //$NON-NLS-1$
   
-  public static final Image IMG_EXCLUDE = createImage("exclude_obj.gif"); 
+  public static final Image IMG_EXCLUDE = createImage("exclude_obj.gif");  //$NON-NLS-1$
   
-  public static final Image IMG_PERSON = createImage("person_obj.gif");
+  public static final Image IMG_PERSON = createImage("person_obj.gif"); //$NON-NLS-1$
   
-  public static final Image IMG_ROLE = createImage("role_obj.gif");
+  public static final Image IMG_ROLE = createImage("role_obj.gif"); //$NON-NLS-1$
   
-  public static final Image IMG_PROPERTY = createImage("property_obj.gif");
+  public static final Image IMG_PROPERTY = createImage("property_obj.gif"); //$NON-NLS-1$
 
-  public static final Image IMG_REPORT = createImage("report_obj.gif");
+  public static final Image IMG_REPORT = createImage("report_obj.gif"); //$NON-NLS-1$
 
-  public static final Image IMG_PROFILE = createImage("profile_obj.gif");
+  public static final Image IMG_PROFILE = createImage("profile_obj.gif"); //$NON-NLS-1$
 
-  public static final Image IMG_SCOPE = createImage("scope_obj.gif");
+  public static final Image IMG_SCOPE = createImage("scope_obj.gif"); //$NON-NLS-1$
   
   // image descriptors
   
-  public static final ImageDescriptor REFRESH = create("refresh.gif"); 
+  public static final ImageDescriptor REFRESH = create("refresh.gif");  //$NON-NLS-1$
   
-  public static final ImageDescriptor COLLAPSE_ALL = create("collapseall.gif");
+  public static final ImageDescriptor COLLAPSE_ALL = create("collapseall.gif"); //$NON-NLS-1$
 
-  public static final ImageDescriptor EXPAND_ALL = create("expandall.gif");
+  public static final ImageDescriptor EXPAND_ALL = create("expandall.gif"); //$NON-NLS-1$
 
-  public static final ImageDescriptor SHOW_GROUP = create("show_group.gif");
+  public static final ImageDescriptor SHOW_GROUP = create("show_group.gif"); //$NON-NLS-1$
 
-  public static final ImageDescriptor ADD_MODULE = create("new_project.gif");
+  public static final ImageDescriptor ADD_MODULE = create("new_project.gif"); //$NON-NLS-1$
 
-  public static final ImageDescriptor ADD_ARTIFACT = create("new_jar.gif");
+  public static final ImageDescriptor ADD_ARTIFACT = create("new_jar.gif"); //$NON-NLS-1$
   
-  public static final ImageDescriptor SELECT_ARTIFACT = create("select_jar.gif");
+  public static final ImageDescriptor SELECT_ARTIFACT = create("select_jar.gif"); //$NON-NLS-1$
   
-  public static final ImageDescriptor ADD_PLUGIN = create("new_plugin.gif");
+  public static final ImageDescriptor ADD_PLUGIN = create("new_plugin.gif"); //$NON-NLS-1$
   
-  public static final ImageDescriptor SELECT_PLUGIN = create("select_plugin.gif");
+  public static final ImageDescriptor SELECT_PLUGIN = create("select_plugin.gif"); //$NON-NLS-1$
   
-  public static final ImageDescriptor SORT = create("sort.gif");
+  public static final ImageDescriptor SORT = create("sort.gif"); //$NON-NLS-1$
 
-  public static final ImageDescriptor FILTER = create("filter.gif");
+  public static final ImageDescriptor FILTER = create("filter.gif"); //$NON-NLS-1$
 
-  public static final ImageDescriptor EFFECTIVE_POM = create("effective_pom.gif");
+  public static final ImageDescriptor EFFECTIVE_POM = create("effective_pom.gif"); //$NON-NLS-1$
   
-  public static final ImageDescriptor PARENT_POM = create("parent_pom.gif");
+  public static final ImageDescriptor PARENT_POM = create("parent_pom.gif"); //$NON-NLS-1$
 
-  public static final ImageDescriptor WEB_PAGE = create("web.gif");
+  public static final ImageDescriptor WEB_PAGE = create("web.gif"); //$NON-NLS-1$
 
-  public static final ImageDescriptor HIERARCHY = create("hierarchy.gif");
+  public static final ImageDescriptor HIERARCHY = create("hierarchy.gif"); //$NON-NLS-1$
 
-  public static final ImageDescriptor SCOPE = create("scope.gif");
+  public static final ImageDescriptor SCOPE = create("scope.gif"); //$NON-NLS-1$
   
-  public static final ImageDescriptor ADVANCED_TABS = create("advanced_tabs.gif");
+  public static final ImageDescriptor ADVANCED_TABS = create("advanced_tabs.gif"); //$NON-NLS-1$
 
-  public static final ImageDescriptor ELEMENT_OBJECT = create("element_obj.gif");
+  public static final ImageDescriptor ELEMENT_OBJECT = create("element_obj.gif"); //$NON-NLS-1$
   
 
   private static ImageDescriptor create(String key) {
@@ -124,7 +124,7 @@ public class MavenEditorImages {
   }
 
   private static ImageDescriptor createDescriptor(String image) {
-    return AbstractUIPlugin.imageDescriptorFromPlugin(MavenEditorPlugin.PLUGIN_ID, "icons/" + image);
+    return AbstractUIPlugin.imageDescriptorFromPlugin(MavenEditorPlugin.PLUGIN_ID, "icons/" + image); //$NON-NLS-1$
   }
   
 }

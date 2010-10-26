@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
+import org.maven.ide.eclipse.editor.internal.Messages;
 
 
 /**
@@ -48,8 +49,8 @@ public class SearchControl extends ControlContribution {
   }
 
   private boolean isMac(){
-    String os =System.getProperty("os.name");
-    return os != null && os.startsWith("Mac");
+    String os =System.getProperty("os.name"); //$NON-NLS-1$
+    return os != null && os.startsWith("Mac"); //$NON-NLS-1$
   }
   
   protected Control createControl(Composite parent) {
@@ -73,10 +74,10 @@ public class SearchControl extends ControlContribution {
     composite.setLayout(layout);
     composite.setBackground(null);
     composite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-    Control label = toolkit.createLabel(composite, "Search:");
+    Control label = toolkit.createLabel(composite, Messages.SearchControl_lblSearch);
     label.setBackground(null);
 
-    searchText = toolkit.createText(composite, "", SWT.FLAT);
+    searchText = toolkit.createText(composite, "", SWT.FLAT); //$NON-NLS-1$
     searchText.setData(FormToolkit.TEXT_BORDER, Boolean.TRUE);
     
     searchText.setLayoutData(new GridData(200, -1));
@@ -88,7 +89,7 @@ public class SearchControl extends ControlContribution {
     clearToolItem.setDisabledImage(MavenEditorImages.IMG_CLEAR_DISABLED);
     clearToolItem.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
-        searchText.setText("");
+        searchText.setText(""); //$NON-NLS-1$
       }
     });
 

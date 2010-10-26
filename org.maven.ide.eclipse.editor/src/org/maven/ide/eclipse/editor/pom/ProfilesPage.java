@@ -80,6 +80,7 @@ import org.maven.ide.eclipse.editor.composites.ListEditorContentProvider;
 import org.maven.ide.eclipse.editor.composites.PluginsComposite;
 import org.maven.ide.eclipse.editor.composites.ReportingComposite;
 import org.maven.ide.eclipse.editor.composites.RepositoriesComposite;
+import org.maven.ide.eclipse.editor.internal.Messages;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.wizards.MavenModuleWizard;
@@ -122,13 +123,13 @@ public class ProfilesPage extends MavenPomEditorPage {
   private IAction newModuleProjectAction;
   
   public ProfilesPage(MavenPomEditor pomEditor) {
-    super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.profiles", "Profiles");
+    super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.profiles", Messages.ProfilesPage_title); //$NON-NLS-1$
   }
 
   protected void createFormContent(IManagedForm managedForm) {
     FormToolkit toolkit = managedForm.getToolkit();
     ScrolledForm form = managedForm.getForm();
-    form.setText("Profiles");
+    form.setText(Messages.ProfilesPage_form);
     // form.setExpandHorizontal(true);
     
     Composite body = form.getBody();
@@ -149,7 +150,7 @@ public class ProfilesPage extends MavenPomEditorPage {
     toolkit.adapt(tabFolder, true, true);
     
     toolkit.getColors().initializeSectionToolBarColors();
-    Color selectedColor = toolkit.getColors().getColor("org.eclipse.ui.forms.TB_BG");
+    Color selectedColor = toolkit.getColors().getColor("org.eclipse.ui.forms.TB_BG"); //$NON-NLS-1$
     tabFolder.setSelectionBackground(new Color[] {selectedColor, toolkit.getColors().getBackground()}, //
         new int[] {100}, true);
     defaultForegroundColor = tabFolder.getForeground();
@@ -178,7 +179,7 @@ public class ProfilesPage extends MavenPomEditorPage {
   private void createProfilesSection(FormToolkit toolkit, Composite body) {
     Section profilesSection = toolkit.createSection(body, ExpandableComposite.TITLE_BAR);
     profilesSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 3));
-    profilesSection.setText("Profiles");
+    profilesSection.setText(Messages.ProfilesPage_section_profiles);
     profilesEditor = new ListEditorComposite<Profile>(profilesSection, SWT.NONE);
     profilesSection.setClient(profilesEditor);
     toolkit.adapt(profilesEditor);
@@ -246,9 +247,9 @@ public class ProfilesPage extends MavenPomEditorPage {
       public Object getValue(Object element, String property) {
         if(element instanceof Profile) {
           String id = ((Profile) element).getId();
-          return isEmpty(id) ? "" : id;
+          return isEmpty(id) ? "" : id; //$NON-NLS-1$
         }
-        return "";
+        return ""; //$NON-NLS-1$
       }
 
       public void modify(Object element, String property, Object value) {
@@ -275,7 +276,7 @@ public class ProfilesPage extends MavenPomEditorPage {
     modulesSection = toolkit.createSection(body, //
         ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
     modulesSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 2));
-    modulesSection.setText("Modules");
+    modulesSection.setText(Messages.ProfilesPage_section_modules);
 
     modulesEditor = new ListEditorComposite<String>(modulesSection, SWT.NONE);
     modulesEditor.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -342,7 +343,7 @@ public class ProfilesPage extends MavenPomEditorPage {
       }
     });
     
-    newModuleProjectAction = new Action("New module project", MavenEditorImages.ADD_MODULE) {
+    newModuleProjectAction = new Action(Messages.ProfilesPage_action_newModuleProject, MavenEditorImages.ADD_MODULE) {
       public void run() {
         IEditorInput editorInput = pomEditor.getEditorInput();
         if(editorInput instanceof FileEditorInput) {
@@ -436,18 +437,18 @@ public class ProfilesPage extends MavenPomEditorPage {
     Activation activation = currentProfile == null ? null : currentProfile.getActivation();
     if(activation == null) {
       setButton(activeByDefaultbutton, false);
-      setText(activationJdkText, "");
+      setText(activationJdkText, ""); //$NON-NLS-1$
 
-      setText(activationPropertyNameText, "");
-      setText(activationPropertyValueText, "");
+      setText(activationPropertyNameText, ""); //$NON-NLS-1$
+      setText(activationPropertyValueText, ""); //$NON-NLS-1$
 
-      setText(activationFileExistText, "");
-      setText(activationFileMissingText, "");
+      setText(activationFileExistText, ""); //$NON-NLS-1$
+      setText(activationFileMissingText, ""); //$NON-NLS-1$
 
-      setText(activationOsArchitectureText, "");
-      setText(activationOsFamilyText, "");
-      setText(activationOsNameText, "");
-      setText(activationOsVersionText, "");
+      setText(activationOsArchitectureText, ""); //$NON-NLS-1$
+      setText(activationOsFamilyText, ""); //$NON-NLS-1$
+      setText(activationOsNameText, ""); //$NON-NLS-1$
+      setText(activationOsVersionText, ""); //$NON-NLS-1$
       
     } else {
       setButton(activeByDefaultbutton, "true".equals(activation.getActiveByDefault()));
@@ -455,8 +456,8 @@ public class ProfilesPage extends MavenPomEditorPage {
       
       ActivationProperty property = activation.getProperty();
       if(property==null) {
-        setText(activationPropertyNameText, "");
-        setText(activationPropertyValueText, "");
+        setText(activationPropertyNameText, ""); //$NON-NLS-1$
+        setText(activationPropertyValueText, ""); //$NON-NLS-1$
       } else {
         setText(activationPropertyNameText, property.getName());
         setText(activationPropertyValueText, property.getValue());
@@ -464,8 +465,8 @@ public class ProfilesPage extends MavenPomEditorPage {
       
       ActivationFile file = activation.getFile();
       if(file==null) {
-        setText(activationFileExistText, "");
-        setText(activationFileMissingText, "");
+        setText(activationFileExistText, ""); //$NON-NLS-1$
+        setText(activationFileMissingText, ""); //$NON-NLS-1$
       } else {
         setText(activationFileExistText, file.getExists());
         setText(activationFileMissingText, file.getMissing());
@@ -473,10 +474,10 @@ public class ProfilesPage extends MavenPomEditorPage {
       
       ActivationOS os = activation.getOs();
       if(os==null) {
-        setText(activationOsArchitectureText, "");
-        setText(activationOsFamilyText, "");
-        setText(activationOsNameText, "");
-        setText(activationOsVersionText, "");
+        setText(activationOsArchitectureText, ""); //$NON-NLS-1$
+        setText(activationOsFamilyText, ""); //$NON-NLS-1$
+        setText(activationOsNameText, ""); //$NON-NLS-1$
+        setText(activationOsVersionText, ""); //$NON-NLS-1$
       } else {
         setText(activationOsArchitectureText, os.getArch());
         setText(activationOsFamilyText, os.getFamily());
@@ -494,7 +495,7 @@ public class ProfilesPage extends MavenPomEditorPage {
       }
     };
     setModifyListener(activeByDefaultbutton, activationProvider, POM_PACKAGE.getActivation_ActiveByDefault(), "false");
-    setModifyListener(activationJdkText, activationProvider, POM_PACKAGE.getActivation_Jdk(), "");
+    setModifyListener(activationJdkText, activationProvider, POM_PACKAGE.getActivation_Jdk(), ""); //$NON-NLS-1$
     
     ValueProvider<ActivationProperty> activationPropertyProvider = new ValueProvider<ActivationProperty>() {
       public ActivationProperty getValue() {
@@ -512,8 +513,8 @@ public class ProfilesPage extends MavenPomEditorPage {
         return activationProperty;
       }
     };
-    setModifyListener(activationPropertyNameText, activationPropertyProvider, POM_PACKAGE.getActivationProperty_Name(), "");
-    setModifyListener(activationPropertyValueText, activationPropertyProvider, POM_PACKAGE.getActivationProperty_Value(), "");
+    setModifyListener(activationPropertyNameText, activationPropertyProvider, POM_PACKAGE.getActivationProperty_Name(), ""); //$NON-NLS-1$
+    setModifyListener(activationPropertyValueText, activationPropertyProvider, POM_PACKAGE.getActivationProperty_Value(), ""); //$NON-NLS-1$
     
     ValueProvider<ActivationFile> activationFileProvider = new ValueProvider<ActivationFile>() {
       public ActivationFile getValue() {
@@ -531,8 +532,8 @@ public class ProfilesPage extends MavenPomEditorPage {
         return activationFile;
       }
     };
-    setModifyListener(activationFileExistText, activationFileProvider, POM_PACKAGE.getActivationFile_Exists(), "");
-    setModifyListener(activationFileMissingText, activationFileProvider, POM_PACKAGE.getActivationFile_Missing(), "");
+    setModifyListener(activationFileExistText, activationFileProvider, POM_PACKAGE.getActivationFile_Exists(), ""); //$NON-NLS-1$
+    setModifyListener(activationFileMissingText, activationFileProvider, POM_PACKAGE.getActivationFile_Missing(), ""); //$NON-NLS-1$
     
     ValueProvider<ActivationOS> activationOsProvider = new ValueProvider<ActivationOS>() {
       public ActivationOS getValue() {
@@ -550,10 +551,10 @@ public class ProfilesPage extends MavenPomEditorPage {
         return activationOS;
       }
     };
-    setModifyListener(activationOsArchitectureText, activationOsProvider, POM_PACKAGE.getActivationOS_Arch(), "");
-    setModifyListener(activationOsFamilyText, activationOsProvider, POM_PACKAGE.getActivationOS_Family(), "");
-    setModifyListener(activationOsNameText, activationOsProvider, POM_PACKAGE.getActivationOS_Name(), "");
-    setModifyListener(activationOsVersionText, activationOsProvider, POM_PACKAGE.getActivationOS_Version(), "");
+    setModifyListener(activationOsArchitectureText, activationOsProvider, POM_PACKAGE.getActivationOS_Arch(), ""); //$NON-NLS-1$
+    setModifyListener(activationOsFamilyText, activationOsProvider, POM_PACKAGE.getActivationOS_Family(), ""); //$NON-NLS-1$
+    setModifyListener(activationOsNameText, activationOsProvider, POM_PACKAGE.getActivationOS_Name(), ""); //$NON-NLS-1$
+    setModifyListener(activationOsVersionText, activationOsProvider, POM_PACKAGE.getActivationOS_Version(), ""); //$NON-NLS-1$
     
     registerListeners();
   }
@@ -697,7 +698,7 @@ public class ProfilesPage extends MavenPomEditorPage {
 
   private void createBuildTab(FormToolkit toolkit, CTabFolder tabFolder) {
     CTabItem buildTabItem = new CTabItem(tabFolder, SWT.NONE);
-    buildTabItem.setText("Build");
+    buildTabItem.setText(Messages.ProfilesPage_tab_build);
   
     buildComposite = new BuildComposite(tabFolder, SWT.NONE);
     buildTabItem.setControl(buildComposite);
@@ -706,7 +707,7 @@ public class ProfilesPage extends MavenPomEditorPage {
 
   private void createPluginsTab(FormToolkit toolkit, CTabFolder tabFolder) {
     CTabItem pluginsTabItem = new CTabItem(tabFolder, SWT.NONE);
-    pluginsTabItem.setText("Plugins");
+    pluginsTabItem.setText(Messages.ProfilesPage_tab_plugins);
 
     pluginsComposite = new PluginsComposite(tabFolder, this, SWT.NONE);
     pluginsTabItem.setControl(pluginsComposite);
@@ -715,7 +716,7 @@ public class ProfilesPage extends MavenPomEditorPage {
 
   private void createDependenciesTab(CTabFolder tabFolder, FormToolkit toolkit) {
     CTabItem dependenciesTabItem = new CTabItem(tabFolder, SWT.NONE);
-    dependenciesTabItem.setText("Dependencies");
+    dependenciesTabItem.setText(Messages.ProfilesPage_tab_dependencies);
   
     dependenciesComposite = new DependenciesComposite(tabFolder, this, SWT.NONE);
     dependenciesTabItem.setControl(dependenciesComposite);
@@ -724,7 +725,7 @@ public class ProfilesPage extends MavenPomEditorPage {
 
   private void createRepositoriesTab(FormToolkit toolkit, CTabFolder tabFolder) {
     CTabItem repositoriesTabItem = new CTabItem(tabFolder, SWT.NONE);
-    repositoriesTabItem.setText("Repositories");
+    repositoriesTabItem.setText(Messages.ProfilesPage_tab_repositories);
 
     repositoriesComposite = new RepositoriesComposite(tabFolder, SWT.NONE);
     repositoriesTabItem.setControl(repositoriesComposite);
@@ -733,7 +734,7 @@ public class ProfilesPage extends MavenPomEditorPage {
 
   private void createReportsTab(FormToolkit toolkit, CTabFolder tabFolder) {
     CTabItem reportingTabItem = new CTabItem(tabFolder, SWT.NONE);
-    reportingTabItem.setText("Reporting");
+    reportingTabItem.setText(Messages.ProfilesPage_tab_reporting);
 
     reportingComposite = new ReportingComposite(tabFolder, this, SWT.NONE);
     toolkit.adapt(reportingComposite);
@@ -742,7 +743,7 @@ public class ProfilesPage extends MavenPomEditorPage {
 
   private void createActivationTab(CTabFolder tabFolder, FormToolkit toolkit) {
     CTabItem activationTabItem = new CTabItem(tabFolder, SWT.NONE);
-    activationTabItem.setText("Activation");
+    activationTabItem.setText(Messages.ProfilesPage_tab_activation);
 
     Composite activationComposite = new Composite(tabFolder, SWT.NONE);
     toolkit.paintBordersFor(activationComposite);
@@ -752,12 +753,12 @@ public class ProfilesPage extends MavenPomEditorPage {
     activationTabItem.setControl(activationComposite);
     toolkit.adapt(activationComposite);
     
-    activeByDefaultbutton = toolkit.createButton(activationComposite, "Active by default", SWT.CHECK);
+    activeByDefaultbutton = toolkit.createButton(activationComposite, Messages.ProfilesPage_btnActivateByDefault, SWT.CHECK);
     activeByDefaultbutton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
 
     Section propertySection = toolkit.createSection(activationComposite, ExpandableComposite.TITLE_BAR);
     propertySection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-    propertySection.setText("Property");
+    propertySection.setText(Messages.ProfilesPage_section_property);
 
     Composite propertyComposite = toolkit.createComposite(propertySection, SWT.NONE);
     GridLayout propertyLayout = new GridLayout(2, false);
@@ -767,19 +768,19 @@ public class ProfilesPage extends MavenPomEditorPage {
     propertySection.setClient(propertyComposite);
     toolkit.paintBordersFor(propertyComposite);
 
-    Label propertyNameLabel = toolkit.createLabel(propertyComposite, "Name:", SWT.NONE);
+    Label propertyNameLabel = toolkit.createLabel(propertyComposite, Messages.ProfilesPage_lblName, SWT.NONE);
 
     activationPropertyNameText = toolkit.createText(propertyComposite, null, SWT.NONE);
     activationPropertyNameText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-    Label propertyValueLabel = toolkit.createLabel(propertyComposite, "Value:", SWT.NONE);
+    Label propertyValueLabel = toolkit.createLabel(propertyComposite, Messages.ProfilesPage_lblValue, SWT.NONE);
 
     activationPropertyValueText = toolkit.createText(propertyComposite, null, SWT.NONE);
     activationPropertyValueText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
     Section osSection = toolkit.createSection(activationComposite, ExpandableComposite.TITLE_BAR);
     osSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 3));
-    osSection.setText("OS");
+    osSection.setText(Messages.ProfilesPage_section_os);
 
     Composite osComposite = new Composite(osSection, SWT.NONE);
     GridLayout osLayout = new GridLayout(2, false);
@@ -790,22 +791,22 @@ public class ProfilesPage extends MavenPomEditorPage {
     toolkit.adapt(osComposite);
     osSection.setClient(osComposite);
 
-    toolkit.createLabel(osComposite, "Name:", SWT.NONE);
+    toolkit.createLabel(osComposite, Messages.ProfilesPage_lblName, SWT.NONE);
 
     activationOsNameText = toolkit.createText(osComposite, null, SWT.NONE);
     activationOsNameText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-    toolkit.createLabel(osComposite, "Family:", SWT.NONE);
+    toolkit.createLabel(osComposite, Messages.ProfilesPage_lblFamily, SWT.NONE);
 
     activationOsFamilyText = toolkit.createText(osComposite, null, SWT.NONE);
     activationOsFamilyText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-    toolkit.createLabel(osComposite, "Architecture:", SWT.NONE);
+    toolkit.createLabel(osComposite, Messages.ProfilesPage_lblArchitecture, SWT.NONE);
 
     activationOsArchitectureText = toolkit.createText(osComposite, null, SWT.NONE);
     activationOsArchitectureText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-    toolkit.createLabel(osComposite, "Version:", SWT.NONE);
+    toolkit.createLabel(osComposite, Messages.ProfilesPage_lblVersion, SWT.NONE);
 
     activationOsVersionText = toolkit.createText(osComposite, null, SWT.NONE);
     activationOsVersionText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -814,7 +815,7 @@ public class ProfilesPage extends MavenPomEditorPage {
     GridData fileGridData = new GridData(SWT.FILL, SWT.TOP, false, false);
     fileGridData.verticalIndent = 5;
     fileSection.setLayoutData(fileGridData);
-    fileSection.setText("File");
+    fileSection.setText(Messages.ProfilesPage_section_file);
 
     Composite fileComposite = toolkit.createComposite(fileSection, SWT.NONE);
     GridLayout fileCompositeLayout = new GridLayout();
@@ -825,19 +826,19 @@ public class ProfilesPage extends MavenPomEditorPage {
     toolkit.paintBordersFor(fileComposite);
     fileSection.setClient(fileComposite);
 
-    Label fileExistLabel = toolkit.createLabel(fileComposite, "Exist:", SWT.NONE);
+    Label fileExistLabel = toolkit.createLabel(fileComposite, Messages.ProfilesPage_lblExists, SWT.NONE);
 
     activationFileExistText = toolkit.createText(fileComposite, null, SWT.NONE);
     activationFileExistText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-    Label fileMissingLabel = toolkit.createLabel(fileComposite, "Missing:", SWT.NONE);
+    Label fileMissingLabel = toolkit.createLabel(fileComposite, Messages.ProfilesPage_lblMissing, SWT.NONE);
 
     activationFileMissingText = toolkit.createText(fileComposite, null, SWT.NONE);
     activationFileMissingText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
     
     Section jdkSection = toolkit.createSection(activationComposite, ExpandableComposite.TITLE_BAR);
     jdkSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-    jdkSection.setText("JDK");
+    jdkSection.setText(Messages.ProfilesPage_section_jdk);
 
     Composite composite = toolkit.createComposite(jdkSection, SWT.NONE);
     GridLayout gridLayout = new GridLayout();
@@ -848,7 +849,7 @@ public class ProfilesPage extends MavenPomEditorPage {
     toolkit.paintBordersFor(composite);
     jdkSection.setClient(composite);
 
-    Label jdkLabel = toolkit.createLabel(composite, "JDK:", SWT.NONE);
+    Label jdkLabel = toolkit.createLabel(composite, Messages.ProfilesPage_lblJdk, SWT.NONE);
 
     activationJdkText = toolkit.createText(composite, null, SWT.NONE);
     activationJdkText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));

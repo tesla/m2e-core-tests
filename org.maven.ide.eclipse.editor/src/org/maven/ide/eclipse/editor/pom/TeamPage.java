@@ -18,6 +18,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.editor.composites.TeamComposite;
+import org.maven.ide.eclipse.editor.internal.Messages;
 
 
 /**
@@ -28,7 +29,7 @@ public class TeamPage extends MavenPomEditorPage {
   private TeamComposite teamComposite;
   
   public TeamPage(MavenPomEditor pomEditor) {
-    super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.team", "Team");
+    super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.team", Messages.TeamPage_title); //$NON-NLS-1$
   }
 
   public void dispose() {
@@ -42,7 +43,7 @@ public class TeamPage extends MavenPomEditorPage {
     FormToolkit toolkit = managedForm.getToolkit();
     
     ScrolledForm form = managedForm.getForm();
-    form.setText("Team");
+    form.setText(Messages.TeamPage_form);
     
     form.getBody().setLayout(new GridLayout(1, true));
 

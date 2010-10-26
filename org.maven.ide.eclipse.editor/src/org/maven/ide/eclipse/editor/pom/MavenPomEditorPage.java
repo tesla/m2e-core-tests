@@ -64,6 +64,7 @@ import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
+import org.maven.ide.eclipse.editor.internal.Messages;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 
@@ -111,12 +112,12 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
 
     toolBarManager.add(pomEditor.showAdvancedTabsAction);
     
-    toolBarManager.add(new Action("Open Parent POM", MavenEditorImages.PARENT_POM) {
+    toolBarManager.add(new Action(Messages.MavenPomEditorPage_action_open, MavenEditorImages.PARENT_POM) {
       public void run() {
         // XXX listen to parent modification and accordingly enable/disable action
         final Parent parent = model.getParent();
         if(parent!=null && !isEmpty(parent.getGroupId()) && !isEmpty(parent.getArtifactId()) && !isEmpty(parent.getVersion())) {
-          new Job("Opening POM") {
+          new Job(Messages.MavenPomEditorPage_job_opening) {
             protected IStatus run(IProgressMonitor monitor) {
               OpenPomAction.openEditor(parent.getGroupId(), parent.getArtifactId(), parent.getVersion(), monitor);
               return Status.OK_STATUS;
@@ -127,7 +128,7 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
     });
     
     
-    toolBarManager.add(new Action("Refresh", MavenEditorImages.REFRESH) {
+    toolBarManager.add(new Action(Messages.MavenPomEditorPage_actio_refresh, MavenEditorImages.REFRESH) {
       public void run() {
         pomEditor.reload();
       }
@@ -167,7 +168,7 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
                       loadData();
                       registerListeners();
                     } catch(Throwable e) {
-                      MavenLogger.log("Error loading data", e);
+                      MavenLogger.log("Error loading data", e); //$NON-NLS-1$
                     } finally {
                       updatingModel = false;
                     }
@@ -180,7 +181,7 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
             if(pomFile!=null) {
               IMarker[] markers = pomFile.findMarkers(IMavenConstants.MARKER_ID, true, IResource.DEPTH_ZERO);
               if(markers != null && markers.length > 0) {
-                setErrorMessage(markers[0].getAttribute(IMarker.MESSAGE, "Unknown error"), IMessageProvider.ERROR);
+                setErrorMessage(markers[0].getAttribute(IMarker.MESSAGE, Messages.MavenPomEditorPage_error_unknown), IMessageProvider.ERROR);
               } else {
                 setErrorMessage(null, IMessageProvider.NONE);
               }
@@ -250,7 +251,7 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
       }
 
     } catch(Exception ex) {
-      MavenLogger.log("Can't update view", ex);
+      MavenLogger.log("Can't update view", ex); //$NON-NLS-1$
     } finally {
       updatingModel = false;
     }
@@ -519,7 +520,7 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
   }
 
   private IMavenProjectFacade findModuleProject(IFile pomFile, String module) {
-    IPath modulePath = pomFile.getParent().getLocation().append(module).append("pom.xml");
+    IPath modulePath = pomFile.getParent().getLocation().append(module).append("pom.xml"); //$NON-NLS-1$
     MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
     IMavenProjectFacade[] facades = projectManager.getProjects();
     for(int i = 0; i < facades.length; i++ ) {
@@ -533,7 +534,7 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
   public IFile findModuleFile(String moduleName) {
     IFile pomFile = pomEditor.getPomFile();
     if(pomFile!=null) {
-      IPath modulePath = pomFile.getParent().getLocation().append(moduleName).append("pom.xml");
+      IPath modulePath = pomFile.getParent().getLocation().append(moduleName).append("pom.xml"); //$NON-NLS-1$
       IFile file = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(modulePath);
       return file;
     }
@@ -541,7 +542,7 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
   }
   
   public void initPopupMenu(Viewer viewer, String id) {
-    MenuManager menuMgr = new MenuManager("#PopupMenu-" + id);
+    MenuManager menuMgr = new MenuManager("#PopupMenu-" + id); //$NON-NLS-1$
     menuMgr.setRemoveAllWhenShown(true);
     
     Menu menu = menuMgr.createContextMenu(viewer.getControl());

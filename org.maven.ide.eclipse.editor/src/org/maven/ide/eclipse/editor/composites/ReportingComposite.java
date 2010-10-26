@@ -67,6 +67,7 @@ import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.actions.OpenUrlAction;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.editor.composites.PluginsComposite.PluginFilter;
+import org.maven.ide.eclipse.editor.internal.Messages;
 import org.maven.ide.eclipse.editor.pom.FormUtils;
 import org.maven.ide.eclipse.editor.pom.MavenPomEditorPage;
 import org.maven.ide.eclipse.editor.pom.SearchControl;
@@ -178,24 +179,24 @@ public class ReportingComposite extends Composite {
     
     Section contentSection = toolkit.createSection(composite_1, ExpandableComposite.TITLE_BAR);
     contentSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    contentSection.setText("Content");
+    contentSection.setText(Messages.ReportingComposite_section_Content);
 
     Composite composite = toolkit.createComposite(contentSection, SWT.NONE);
     composite.setLayout(new GridLayout(2, false));
     contentSection.setClient(composite);
     toolkit.paintBordersFor(composite);
 
-    toolkit.createLabel(composite, "Output Folder:", SWT.NONE);
+    toolkit.createLabel(composite, Messages.ReportingComposite_lblOutputFolder, SWT.NONE);
 
     outputFolderText = toolkit.createText(composite, null, SWT.NONE);
     outputFolderText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-    excludeDefaultsButton = toolkit.createButton(composite, "Exclude Defaults", SWT.CHECK);
+    excludeDefaultsButton = toolkit.createButton(composite, Messages.ReportingComposite_btnExcludeDefaults, SWT.CHECK);
     excludeDefaultsButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 2, 1));
 
     Section reportingPluginsSection = toolkit.createSection(composite_1, ExpandableComposite.TITLE_BAR);
     reportingPluginsSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
-    reportingPluginsSection.setText("Reporting Plugins");
+    reportingPluginsSection.setText(Messages.ReportingComposite_sectionReportingPlugins);
 
     reportPluginsEditor = new ListEditorComposite<ReportPlugin>(reportingPluginsSection, SWT.NONE, true);
     reportingPluginsSection.setClient(reportPluginsEditor);
@@ -243,7 +244,7 @@ public class ReportingComposite extends Composite {
     reportPluginsEditor.setSelectListener(new SelectionAdapter(){
       public void widgetSelected(SelectionEvent e){
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            "Add Plugin", IIndex.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
+            Messages.ReportingComposite_searchDialog_addPlugin, IIndex.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {
@@ -263,7 +264,7 @@ public class ReportingComposite extends Composite {
     ToolBarManager toolBarManager = new ToolBarManager(SWT.FLAT);
 
     
-    toolBarManager.add(new Action("Show GroupId", MavenEditorImages.SHOW_GROUP) {
+    toolBarManager.add(new Action(Messages.ReportingComposite_action_showGroupId, MavenEditorImages.SHOW_GROUP) {
       {
         setChecked(true);
       }
@@ -276,7 +277,7 @@ public class ReportingComposite extends Composite {
       }
     });
     
-    toolBarManager.add(new Action("Filter", MavenEditorImages.FILTER) {
+    toolBarManager.add(new Action(Messages.ReportingComposite_action_filter, MavenEditorImages.FILTER) {
       public int getStyle() {
         return AS_CHECK_BOX;
       }
@@ -309,7 +310,7 @@ public class ReportingComposite extends Composite {
   private void createPluginDetailsSection(Composite verticalSash) {
     pluginDetailsSection = toolkit.createSection(verticalSash, ExpandableComposite.TITLE_BAR);
     pluginDetailsSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-    pluginDetailsSection.setText("Reporting Plugin Details");
+    pluginDetailsSection.setText(Messages.ReportingComposite_section_reportingPluginDetails);
 
     Composite pluginDetailsComposite = toolkit.createComposite(pluginDetailsSection, SWT.NONE);
     GridLayout gridLayout_1 = new GridLayout(2, false);
@@ -319,16 +320,16 @@ public class ReportingComposite extends Composite {
     pluginDetailsSection.setClient(pluginDetailsComposite);
     toolkit.paintBordersFor(pluginDetailsComposite);
 
-    toolkit.createLabel(pluginDetailsComposite, "Group Id:*", SWT.NONE);
+    toolkit.createLabel(pluginDetailsComposite, Messages.ReportingComposite_lblGroupId, SWT.NONE);
 
     groupIdText = toolkit.createText(pluginDetailsComposite, null, SWT.NONE);
     GridData gd_groupIdText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_groupIdText.horizontalIndent = 4;
     groupIdText.setLayoutData(gd_groupIdText);
-    groupIdText.setData("name", "groupIdText");
+    groupIdText.setData("name", "groupIdText"); //$NON-NLS-1$ //$NON-NLS-2$
     FormUtils.addGroupIdProposal(editorPage.getProject(), groupIdText, Packaging.ALL);
     
-    Hyperlink artifactIdHyperlink = toolkit.createHyperlink(pluginDetailsComposite, "Artifact Id:*", SWT.NONE);
+    Hyperlink artifactIdHyperlink = toolkit.createHyperlink(pluginDetailsComposite, Messages.ReportingComposite_lblArtifactId, SWT.NONE);
     artifactIdHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
       public void linkActivated(HyperlinkEvent e) {
         final String groupId = groupIdText.getText();
@@ -347,16 +348,16 @@ public class ReportingComposite extends Composite {
     GridData gd_artifactIdText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_artifactIdText.horizontalIndent = 4;
     artifactIdText.setLayoutData(gd_artifactIdText);
-    artifactIdText.setData("name", "artifactIdText");
+    artifactIdText.setData("name", "artifactIdText"); //$NON-NLS-1$ //$NON-NLS-2$
     FormUtils.addArtifactIdProposal(editorPage.getProject(), groupIdText, artifactIdText, Packaging.ALL);
 
-    toolkit.createLabel(pluginDetailsComposite, "Version:", SWT.NONE);
+    toolkit.createLabel(pluginDetailsComposite, Messages.ReportingComposite_lblVersion, SWT.NONE);
 
     versionText = toolkit.createText(pluginDetailsComposite, null, SWT.NONE);
     GridData gd_versionText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_versionText.horizontalIndent = 4;
     versionText.setLayoutData(gd_versionText);
-    versionText.setData("name", "versionText");
+    versionText.setData("name", "versionText"); //$NON-NLS-1$ //$NON-NLS-2$
     FormUtils.addVersionProposal(editorPage.getProject(), groupIdText, artifactIdText, versionText, Packaging.ALL);
 
     Composite pluginConfigureComposite = toolkit.createComposite(pluginDetailsComposite, SWT.NONE);
@@ -368,10 +369,10 @@ public class ReportingComposite extends Composite {
     pluginConfigureComposite.setLayout(pluginConfigureCompositeLayout);
     toolkit.paintBordersFor(pluginConfigureComposite);
 
-    pluginInheritedButton = toolkit.createButton(pluginConfigureComposite, "Inherited", SWT.CHECK);
+    pluginInheritedButton = toolkit.createButton(pluginConfigureComposite, Messages.ReportingComposite_btnInherited, SWT.CHECK);
     pluginInheritedButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
-    pluginConfigureButton = toolkit.createHyperlink(pluginConfigureComposite, "Configuration", SWT.NONE);
+    pluginConfigureButton = toolkit.createHyperlink(pluginConfigureComposite, Messages.ReportingComposite_link_Configuration, SWT.NONE);
     pluginConfigureButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
     pluginConfigureButton.addHyperlinkListener(new HyperlinkAdapter() {
       public void linkActivated(HyperlinkEvent e) {
@@ -383,7 +384,7 @@ public class ReportingComposite extends Composite {
     });
     pluginDetailsComposite.setTabList(new Control[] {groupIdText, artifactIdText, versionText, pluginConfigureComposite});
     
-    openWebPageAction = new Action("Open Web Page", MavenEditorImages.WEB_PAGE) {
+    openWebPageAction = new Action(Messages.ReportingComposite_action_openWeb, MavenEditorImages.WEB_PAGE) {
       public void run() {
         final String groupId = groupIdText.getText();
         final String artifactId = artifactIdText.getText();
@@ -399,10 +400,10 @@ public class ReportingComposite extends Composite {
     };
     openWebPageAction.setEnabled(false);
     
-    reportPluginSelectAction = new Action("Select Reporting Plugin", MavenEditorImages.SELECT_PLUGIN) {
+    reportPluginSelectAction = new Action(Messages.ReportingComposite_action_selectReportingPlugin, MavenEditorImages.SELECT_PLUGIN) {
       public void run() {
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            "Select Plugin", IIndex.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
+            Messages.ReportingComposite_searchDialog_selectPlugin, IIndex.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {
@@ -435,7 +436,7 @@ public class ReportingComposite extends Composite {
   private void createReportSetDetails(Composite verticalSash) {
     reportSetsSection = toolkit.createSection(verticalSash, ExpandableComposite.TITLE_BAR);
     reportSetsSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-    reportSetsSection.setText("Report Sets");
+    reportSetsSection.setText(Messages.ReportingComposite_section_reportSets);
 
     reportSetsEditor = new ListEditorComposite<ReportSet>(reportSetsSection, SWT.NONE);
     reportSetsSection.setClient(reportSetsEditor);
@@ -450,7 +451,7 @@ public class ReportingComposite extends Composite {
           String id = reportSet.getId();
           return id == null || id.length() == 0 ? "?" : id;
         }
-        return "";
+        return ""; //$NON-NLS-1$
       }
 
       public Image getImage(Object element) {
@@ -520,7 +521,7 @@ public class ReportingComposite extends Composite {
       public Object getValue(Object element, String property) {
         if(element instanceof ReportSet) {
           String id = ((ReportSet) element).getId();
-          return id == null ? "" : id;
+          return id == null ? "" : id; //$NON-NLS-1$
         }
         return element;
       }
@@ -536,7 +537,7 @@ public class ReportingComposite extends Composite {
 
     reportSetDetailsSection = toolkit.createSection(verticalSash, ExpandableComposite.TITLE_BAR);
     reportSetDetailsSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-    reportSetDetailsSection.setText("Report Set Reports");
+    reportSetDetailsSection.setText(Messages.ReportingComposite_section_reportSetReports);
 
     Composite reportSetDetailsComposite = toolkit.createComposite(reportSetDetailsSection, SWT.NONE);
     GridLayout gridLayout = new GridLayout(1, false);
@@ -617,10 +618,10 @@ public class ReportingComposite extends Composite {
     reportSetConfigureComposite.setLayout(reportSetConfigureCompositeLayout);
     toolkit.paintBordersFor(reportSetConfigureComposite);
 
-    reportSetInheritedButton = toolkit.createButton(reportSetConfigureComposite, "Inherited", SWT.CHECK);
+    reportSetInheritedButton = toolkit.createButton(reportSetConfigureComposite, Messages.ReportingComposite_btnInherited, SWT.CHECK);
     reportSetInheritedButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
-    reportSetConfigureButton = toolkit.createHyperlink(reportSetConfigureComposite, "Configuration", SWT.NONE);
+    reportSetConfigureButton = toolkit.createHyperlink(reportSetConfigureComposite, Messages.ReportingComposite_link_Configuration, SWT.NONE);
     reportSetConfigureButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
     reportSetConfigureButton.addHyperlinkListener(new HyperlinkAdapter() {
       public void linkActivated(HyperlinkEvent e) {
@@ -650,9 +651,9 @@ public class ReportingComposite extends Composite {
       reportPluginSelectAction.setEnabled(false);
       openWebPageAction.setEnabled(false);
 
-      setText(groupIdText, "");
-      setText(artifactIdText, "");
-      setText(versionText, "");
+      setText(groupIdText, ""); //$NON-NLS-1$
+      setText(artifactIdText, ""); //$NON-NLS-1$
+      setText(versionText, ""); //$NON-NLS-1$
 
       pluginInheritedButton.setSelection(false);
 
@@ -677,9 +678,9 @@ public class ReportingComposite extends Composite {
     pluginInheritedButton.setSelection(Boolean.parseBoolean(reportPlugin.getInherited()));
 
     ValueProvider<ReportPlugin> provider = new ValueProvider.DefaultValueProvider<ReportPlugin>(reportPlugin);
-    editorPage.setModifyListener(groupIdText, provider, POM_PACKAGE.getReportPlugin_GroupId(), "");
-    editorPage.setModifyListener(artifactIdText, provider, POM_PACKAGE.getReportPlugin_ArtifactId(), "");
-    editorPage.setModifyListener(versionText, provider, POM_PACKAGE.getReportPlugin_Version(), "");
+    editorPage.setModifyListener(groupIdText, provider, POM_PACKAGE.getReportPlugin_GroupId(), ""); //$NON-NLS-1$
+    editorPage.setModifyListener(artifactIdText, provider, POM_PACKAGE.getReportPlugin_ArtifactId(), ""); //$NON-NLS-1$
+    editorPage.setModifyListener(versionText, provider, POM_PACKAGE.getReportPlugin_Version(), ""); //$NON-NLS-1$
     editorPage.setModifyListener(pluginInheritedButton, provider, POM_PACKAGE.getReportPlugin_Inherited(), "false");
     editorPage.registerListeners();
 
@@ -729,7 +730,7 @@ public class ReportingComposite extends Composite {
     }
     
     if(reporting == null) {
-      setText(outputFolderText,"");
+      setText(outputFolderText,""); //$NON-NLS-1$
       setButton(excludeDefaultsButton, false);
       reportPluginsEditor.setInput(null);
     } else {
@@ -738,7 +739,7 @@ public class ReportingComposite extends Composite {
       reportPluginsEditor.setInput(reporting.getPlugins());
     }
     
-    editorPage.setModifyListener(outputFolderText, reportingProvider, POM_PACKAGE.getReporting_OutputDirectory(), "");
+    editorPage.setModifyListener(outputFolderText, reportingProvider, POM_PACKAGE.getReporting_OutputDirectory(), ""); //$NON-NLS-1$
     editorPage.setModifyListener(excludeDefaultsButton, reportingProvider, POM_PACKAGE.getReporting_ExcludeDefaults(), "false");
     editorPage.registerListeners();
     
@@ -844,7 +845,7 @@ public class ReportingComposite extends Composite {
         String artifactId = reportPlugin.getArtifactId();
         String version = reportPlugin.getVersion();
 
-        String label = "";
+        String label = ""; //$NON-NLS-1$
         
         if(showGroupId) {
           label = (groupId == null ? "?" : groupId) + " : ";

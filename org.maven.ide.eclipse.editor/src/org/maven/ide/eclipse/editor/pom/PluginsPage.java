@@ -29,6 +29,7 @@ import org.maven.ide.components.pom.PluginManagement;
 import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.editor.composites.PluginsComposite;
+import org.maven.ide.eclipse.editor.internal.Messages;
 
 /**
  * @author Eugene Kuleshov
@@ -39,7 +40,7 @@ public class PluginsPage extends MavenPomEditorPage {
   private SearchControl searchControl;
   
   public PluginsPage(MavenPomEditor pomEditor) {
-    super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.plugins", "Plugins");
+    super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.plugins", Messages.PluginsPage_title); //$NON-NLS-1$
   }
   
   public void dispose() {
@@ -60,7 +61,7 @@ public class PluginsPage extends MavenPomEditorPage {
   protected void createFormContent(IManagedForm managedForm) {
     FormToolkit toolkit = managedForm.getToolkit();
     ScrolledForm form = managedForm.getForm();
-    form.setText("Plugins");
+    form.setText(Messages.PluginsPage_form);
     
     Composite body = form.getBody();
     toolkit.paintBordersFor(body);
@@ -72,7 +73,7 @@ public class PluginsPage extends MavenPomEditorPage {
     pluginsComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     toolkit.adapt(pluginsComposite);
     
-    searchControl = new SearchControl("Find", managedForm);
+    searchControl = new SearchControl(Messages.PluginsPage_find, managedForm);
     
     IToolBarManager pageToolBarManager = form.getForm().getToolBarManager();
     pageToolBarManager.add(searchControl);

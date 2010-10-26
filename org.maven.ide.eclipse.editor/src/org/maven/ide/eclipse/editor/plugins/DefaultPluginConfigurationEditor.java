@@ -18,6 +18,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.maven.ide.components.pom.Configuration;
 import org.maven.ide.components.pom.Plugin;
+import org.maven.ide.eclipse.editor.internal.Messages;
 import org.maven.ide.eclipse.editor.pom.MavenPomEditorPage;
 
 public class DefaultPluginConfigurationEditor implements Adapter, IPluginConfigurationExtension {
@@ -32,7 +33,7 @@ public class DefaultPluginConfigurationEditor implements Adapter, IPluginConfigu
     composite.setLayout(new GridLayout(1, true));
 
     Label label = new Label(composite, SWT.NONE);
-    label.setText("Use the XML tab to configure this plugin");
+    label.setText(Messages.DefaultPluginConfigurationEditor_lblUseXml);
     label.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
     label.setEnabled(false);
     

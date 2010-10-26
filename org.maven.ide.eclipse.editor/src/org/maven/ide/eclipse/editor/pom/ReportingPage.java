@@ -27,6 +27,7 @@ import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.Reporting;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.editor.composites.ReportingComposite;
+import org.maven.ide.eclipse.editor.internal.Messages;
 
 
 /**
@@ -39,7 +40,7 @@ public class ReportingPage extends MavenPomEditorPage {
   private SearchControl searchControl;
 
   public ReportingPage(MavenPomEditor pomEditor) {
-    super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.reporting", "Reporting");
+    super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.reporting", Messages.ReportingPage_title); //$NON-NLS-1$
   }
 
   public void setActive(boolean active) {
@@ -53,7 +54,7 @@ public class ReportingPage extends MavenPomEditorPage {
   protected void createFormContent(IManagedForm managedForm) {
     FormToolkit toolkit = managedForm.getToolkit();
     ScrolledForm form = managedForm.getForm();
-    form.setText("Reporting");
+    form.setText(Messages.ReportingPage_form);
 
     Composite body = form.getBody();
     GridLayout gridLayout = new GridLayout(1, true);
@@ -65,7 +66,7 @@ public class ReportingPage extends MavenPomEditorPage {
     reportingComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     toolkit.adapt(reportingComposite);
 
-    searchControl = new SearchControl("Find", managedForm);
+    searchControl = new SearchControl(Messages.ReportingPage_find, managedForm);
     
     IToolBarManager pageToolBarManager = form.getForm().getToolBarManager();
     pageToolBarManager.add(searchControl);

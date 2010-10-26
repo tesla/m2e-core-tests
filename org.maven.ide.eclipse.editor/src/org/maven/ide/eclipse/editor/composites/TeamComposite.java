@@ -51,6 +51,7 @@ import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.PomPackage;
 import org.maven.ide.components.pom.PropertyElement;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
+import org.maven.ide.eclipse.editor.internal.Messages;
 import org.maven.ide.eclipse.editor.pom.FormUtils;
 import org.maven.ide.eclipse.editor.pom.MavenPomEditorPage;
 import org.maven.ide.eclipse.editor.pom.PropertiesSection;
@@ -136,7 +137,7 @@ public class TeamComposite extends Composite {
 
   private void createDevelopersSection(FormToolkit toolkit, SashForm verticalSash) {
     Section developersSection = toolkit.createSection(verticalSash, ExpandableComposite.TITLE_BAR);
-    developersSection.setText("Developers");
+    developersSection.setText(Messages.TeamComposite_section_developers);
 
     developersEditor = new ListEditorComposite<Developer>(developersSection, SWT.NONE);
 
@@ -201,7 +202,7 @@ public class TeamComposite extends Composite {
 
   private void createContributorsSection(FormToolkit toolkit, SashForm verticalSash) {
     Section contributorsSection = toolkit.createSection(verticalSash, ExpandableComposite.TITLE_BAR);
-    contributorsSection.setText("Contributors");
+    contributorsSection.setText(Messages.TeamComposite_section_contributors);
 
     contributorsEditor = new ListEditorComposite<Contributor>(contributorsSection, SWT.NONE);
     contributorsEditor.setContentProvider(new ListEditorContentProvider<Contributor>());
@@ -275,29 +276,29 @@ public class TeamComposite extends Composite {
     Section userDetailsSection = toolkit.createSection(detailsComposite, ExpandableComposite.TITLE_BAR);
     GridData gd_userDetailsSection = new GridData(SWT.FILL, SWT.CENTER, true, false);
     userDetailsSection.setLayoutData(gd_userDetailsSection);
-    userDetailsSection.setText("Details");
+    userDetailsSection.setText(Messages.TeamComposite_section_userdetails);
 
     Composite userDetailsComposite = toolkit.createComposite(userDetailsSection, SWT.NONE);
     userDetailsComposite.setLayout(new GridLayout(2, false));
     toolkit.paintBordersFor(userDetailsComposite);
     userDetailsSection.setClient(userDetailsComposite);
 
-    userIdLabel = toolkit.createLabel(userDetailsComposite, "Id:", SWT.NONE);
+    userIdLabel = toolkit.createLabel(userDetailsComposite, Messages.TeamComposite_lblId, SWT.NONE);
 
     userIdText = toolkit.createText(userDetailsComposite, null, SWT.NONE);
     userIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-    Label userNameLabel = toolkit.createLabel(userDetailsComposite, "Name:", SWT.NONE);
+    Label userNameLabel = toolkit.createLabel(userDetailsComposite, Messages.TeamComposite_lblName, SWT.NONE);
 
     userNameText = toolkit.createText(userDetailsComposite, null, SWT.NONE);
     userNameText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-    Label userEmailLabel = toolkit.createLabel(userDetailsComposite, "Email:", SWT.NONE);
+    Label userEmailLabel = toolkit.createLabel(userDetailsComposite, Messages.TeamComposite_lblEmail, SWT.NONE);
 
     userEmailText = toolkit.createText(userDetailsComposite, null, SWT.NONE);
     userEmailText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-    Hyperlink userUrlLabel = toolkit.createHyperlink(userDetailsComposite, "URL:", SWT.NONE);
+    Hyperlink userUrlLabel = toolkit.createHyperlink(userDetailsComposite, Messages.TeamComposite_lblUrl, SWT.NONE);
     userUrlLabel.addHyperlinkListener(new HyperlinkAdapter() {
       public void linkActivated(HyperlinkEvent e) {
         FormUtils.openHyperlink(userUrlText.getText());
@@ -307,7 +308,7 @@ public class TeamComposite extends Composite {
     userUrlText = toolkit.createText(userDetailsComposite, null, SWT.NONE);
     userUrlText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-    Label userTimezoneLabel = toolkit.createLabel(userDetailsComposite, "Timezone:", SWT.NONE);
+    Label userTimezoneLabel = toolkit.createLabel(userDetailsComposite, Messages.TeamComposite_lblTimezone, SWT.NONE);
 
     userTimezoneText = new CCombo(userDetailsComposite, SWT.FLAT);
     userTimezoneText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -315,19 +316,19 @@ public class TeamComposite extends Composite {
 
     Section organizationSection = toolkit.createSection(detailsComposite, ExpandableComposite.TITLE_BAR);
     organizationSection.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-    organizationSection.setText("Organization");
+    organizationSection.setText(Messages.TeamComposite_section_organization);
 
     Composite organizationComposite = toolkit.createComposite(organizationSection, SWT.NONE);
     organizationComposite.setLayout(new GridLayout(2, false));
     toolkit.paintBordersFor(organizationComposite);
     organizationSection.setClient(organizationComposite);
 
-    Label organizationNameLabel = toolkit.createLabel(organizationComposite, "Name:", SWT.NONE);
+    Label organizationNameLabel = toolkit.createLabel(organizationComposite, Messages.TeamComposite_lblName, SWT.NONE);
 
     organizationNameText = toolkit.createText(organizationComposite, null, SWT.NONE);
     organizationNameText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-    Hyperlink organizationUrlLabel = toolkit.createHyperlink(organizationComposite, "URL:", SWT.NONE);
+    Hyperlink organizationUrlLabel = toolkit.createHyperlink(organizationComposite, Messages.TeamComposite_lblUrl, SWT.NONE);
     organizationUrlLabel.addHyperlinkListener(new HyperlinkAdapter() {
       public void linkActivated(HyperlinkEvent e) {
         FormUtils.openHyperlink(organizationUrlText.getText());
@@ -357,7 +358,7 @@ public class TeamComposite extends Composite {
   private void createRolesSection(FormToolkit toolkit, Composite detailsComposite) {
     Section rolesSection = toolkit.createSection(detailsComposite, ExpandableComposite.TITLE_BAR);
     rolesSection.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-    rolesSection.setText("Roles");
+    rolesSection.setText(Messages.TeamComposite_section_roles);
 
     rolesEditor = new ListEditorComposite<String>(rolesSection, SWT.NONE);
     toolkit.paintBordersFor(rolesEditor);
@@ -482,14 +483,14 @@ public class TeamComposite extends Composite {
     if(parent == null || eo == null) {
       FormUtils.setEnabled(detailsComposite, false);
 
-      setText(userIdText, "");
-      setText(userNameText, "");
-      setText(userEmailText, "");
-      setText(userUrlText, "");
-      setText(userTimezoneText, "");
+      setText(userIdText, ""); //$NON-NLS-1$
+      setText(userNameText, ""); //$NON-NLS-1$
+      setText(userEmailText, ""); //$NON-NLS-1$
+      setText(userUrlText, ""); //$NON-NLS-1$
+      setText(userTimezoneText, ""); //$NON-NLS-1$
 
-      setText(organizationNameText, "");
-      setText(organizationUrlText, "");
+      setText(organizationNameText, ""); //$NON-NLS-1$
+      setText(organizationUrlText, ""); //$NON-NLS-1$
 
       rolesEditor.setInput(null);
 
@@ -518,7 +519,7 @@ public class TeamComposite extends Composite {
   }
 
   protected void updateContributorDetails(Contributor contributor) {
-    setText(userIdText, "");
+    setText(userIdText, ""); //$NON-NLS-1$
     setText(userNameText, contributor.getName());
     setText(userEmailText, contributor.getEmail());
     setText(userUrlText, contributor.getUrl());
@@ -530,13 +531,13 @@ public class TeamComposite extends Composite {
     userIdText.setEnabled(false);
 
     ValueProvider<Contributor> contributorProvider = new ValueProvider.DefaultValueProvider<Contributor>(contributor);
-    parent.setModifyListener(userNameText, contributorProvider, POM_PACKAGE.getContributor_Name(), "");
-    parent.setModifyListener(userEmailText, contributorProvider, POM_PACKAGE.getContributor_Email(), "");
-    parent.setModifyListener(userUrlText, contributorProvider, POM_PACKAGE.getContributor_Url(), "");
-    parent.setModifyListener(userTimezoneText, contributorProvider, POM_PACKAGE.getContributor_Timezone(), "");
-    parent.setModifyListener(organizationNameText, contributorProvider, POM_PACKAGE.getContributor_Organization(), "");
+    parent.setModifyListener(userNameText, contributorProvider, POM_PACKAGE.getContributor_Name(), ""); //$NON-NLS-1$
+    parent.setModifyListener(userEmailText, contributorProvider, POM_PACKAGE.getContributor_Email(), ""); //$NON-NLS-1$
+    parent.setModifyListener(userUrlText, contributorProvider, POM_PACKAGE.getContributor_Url(), ""); //$NON-NLS-1$
+    parent.setModifyListener(userTimezoneText, contributorProvider, POM_PACKAGE.getContributor_Timezone(), ""); //$NON-NLS-1$
+    parent.setModifyListener(organizationNameText, contributorProvider, POM_PACKAGE.getContributor_Organization(), ""); //$NON-NLS-1$
     parent
-        .setModifyListener(organizationUrlText, contributorProvider, POM_PACKAGE.getContributor_OrganizationUrl(), "");
+        .setModifyListener(organizationUrlText, contributorProvider, POM_PACKAGE.getContributor_OrganizationUrl(), ""); //$NON-NLS-1$
   }
 
   protected void updateDeveloperDetails(Developer developer) {
@@ -549,13 +550,13 @@ public class TeamComposite extends Composite {
     setText(organizationUrlText, developer.getOrganizationUrl());
 
     ValueProvider<Developer> developerProvider = new ValueProvider.DefaultValueProvider<Developer>(developer);
-    parent.setModifyListener(userIdText, developerProvider, POM_PACKAGE.getDeveloper_Id(), "");
-    parent.setModifyListener(userNameText, developerProvider, POM_PACKAGE.getDeveloper_Name(), "");
-    parent.setModifyListener(userEmailText, developerProvider, POM_PACKAGE.getDeveloper_Email(), "");
-    parent.setModifyListener(userUrlText, developerProvider, POM_PACKAGE.getDeveloper_Url(), "");
-    parent.setModifyListener(userTimezoneText, developerProvider, POM_PACKAGE.getDeveloper_Timezone(), "");
-    parent.setModifyListener(organizationNameText, developerProvider, POM_PACKAGE.getDeveloper_Organization(), "");
-    parent.setModifyListener(organizationUrlText, developerProvider, POM_PACKAGE.getDeveloper_OrganizationUrl(), "");
+    parent.setModifyListener(userIdText, developerProvider, POM_PACKAGE.getDeveloper_Id(), ""); //$NON-NLS-1$
+    parent.setModifyListener(userNameText, developerProvider, POM_PACKAGE.getDeveloper_Name(), ""); //$NON-NLS-1$
+    parent.setModifyListener(userEmailText, developerProvider, POM_PACKAGE.getDeveloper_Email(), ""); //$NON-NLS-1$
+    parent.setModifyListener(userUrlText, developerProvider, POM_PACKAGE.getDeveloper_Url(), ""); //$NON-NLS-1$
+    parent.setModifyListener(userTimezoneText, developerProvider, POM_PACKAGE.getDeveloper_Timezone(), ""); //$NON-NLS-1$
+    parent.setModifyListener(organizationNameText, developerProvider, POM_PACKAGE.getDeveloper_Organization(), ""); //$NON-NLS-1$
+    parent.setModifyListener(organizationUrlText, developerProvider, POM_PACKAGE.getDeveloper_OrganizationUrl(), ""); //$NON-NLS-1$
   }
 
   public void updateView(Notification notification) {

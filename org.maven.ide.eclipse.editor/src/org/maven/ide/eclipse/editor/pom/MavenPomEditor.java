@@ -112,6 +112,7 @@ import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
 import org.maven.ide.eclipse.editor.MavenEditorPlugin;
+import org.maven.ide.eclipse.editor.internal.Messages;
 import org.maven.ide.eclipse.editor.lifecycle.internal.LifecyclePage;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.MavenModelManager;
@@ -129,13 +130,13 @@ import org.maven.ide.eclipse.util.Util.FileStoreEditorInputStub;
 public class MavenPomEditor extends FormEditor implements IResourceChangeListener, IShowEditorInput, IGotoMarker,
     ISearchEditorAccess, IEditingDomainProvider {
 
-  public static final String EDITOR_ID = "org.maven.ide.eclipse.editor.MavenPomEditor";
+  public static final String EDITOR_ID = "org.maven.ide.eclipse.editor.MavenPomEditor"; //$NON-NLS-1$
 
-  private static final String EXTENSION_FACTORIES = MavenEditorPlugin.PLUGIN_ID + ".pageFactories";
+  private static final String EXTENSION_FACTORIES = MavenEditorPlugin.PLUGIN_ID + ".pageFactories"; //$NON-NLS-1$
 
-  private static final String ELEMENT_PAGE = "factory";
+  private static final String ELEMENT_PAGE = "factory"; //$NON-NLS-1$
   
-  private static final String EFFECTIVE_POM = "Effective POM";
+  private static final String EFFECTIVE_POM = Messages.MavenPomEditor_effective_pom;
   
   IAction showAdvancedTabsAction;
 
@@ -307,7 +308,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
           }
         });
         } catch (CoreException ex ) {
-          MavenLogger.log("Error updating pom file markers.", ex);
+          MavenLogger.log("Error updating pom file markers.", ex); //$NON-NLS-1$
         }
       }
     };
@@ -400,7 +401,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 
   protected void addPages() {
 
-    showAdvancedTabsAction = new Action("Show Advanced Tabs", IAction.AS_RADIO_BUTTON) {
+    showAdvancedTabsAction = new Action(Messages.MavenPomEditor_action_advanced, IAction.AS_RADIO_BUTTON) {
       public void run() {
         showAdvancedPages(showAdvancedTabsAction.isChecked());
 //        pomEditor.reload();
@@ -469,7 +470,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
           if(element.getName().equals(ELEMENT_PAGE)) {
             try {
               MavenPomEditorPageFactory factory;
-              factory = (MavenPomEditorPageFactory) element.createExecutableExtension("class");
+              factory = (MavenPomEditorPageFactory) element.createExecutableExtension("class"); //$NON-NLS-1$
               factory.addPages(this);
             } catch(CoreException ex) {
               MavenLogger.log(ex);
@@ -494,7 +495,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     private void showEffectivePomError(final String name){
       Display.getDefault().asyncExec(new Runnable(){
         public void run(){
-          String error = "Unable to load Effective POM. See console for errors.";
+          String error = Messages.MavenPomEditor_error_loading_effective_pom;
           IEditorInput editorInput = new MavenPathStorageEditorInput(name, name, null, error.getBytes());
           effectivePomSourcePage.setInput(editorInput);
         }
@@ -504,7 +505,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     protected IStatus run(IProgressMonitor monitor) {
       try{
         StringWriter sw = new StringWriter();
-        final String name = getPartName() + " [effective]";
+        final String name = getPartName() + Messages.MavenPomEditor_effective;
         MavenProject mavenProject = SelectionUtil.getMavenProject(getEditorInput(), monitor);
         if(mavenProject == null){
           showEffectivePomError(name);
@@ -516,19 +517,19 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
         Display.getDefault().asyncExec(new Runnable(){
           public void run() {
             try{
-              IEditorInput editorInput = new MavenStorageEditorInput(name, name, null, content.getBytes("UTF-8"));
+              IEditorInput editorInput = new MavenStorageEditorInput(name, name, null, content.getBytes("UTF-8")); //$NON-NLS-1$
               effectivePomSourcePage.setInput(editorInput);
               effectivePomSourcePage.update();
             }catch(IOException ie){
-              MavenLogger.log(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, "Failed to load Effective POM", ie));
+              MavenLogger.log(new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, Messages.MavenPomEditor_error_failed_effective, ie));
             }
           }
         });
         return Status.OK_STATUS;
       } catch(CoreException ce){
-        return new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, "Failed to load Effective POM", ce);
+        return new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, Messages.MavenPomEditor_error_failed_effective, ce);
       } catch(IOException ie){
-        return new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, "Failed to load Effective POM", ie);
+        return new Status(IStatus.ERROR, MavenEditorPlugin.PLUGIN_ID, -1, Messages.MavenPomEditor_error_failed_effective, ie);
       } 
     }
   }
@@ -539,13 +540,13 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
    */
   private void loadEffectivePOM(){
     //put a msg in the editor saying that the effective pom is loading, in case this is a long running job
-    String content = "Loading Effective POM...";
-    String name = getPartName() + " [effective]";
+    String content = Messages.MavenPomEditor_loading;
+    String name = getPartName() + Messages.MavenPomEditor_effective;
     IEditorInput editorInput = new MavenStorageEditorInput(name, name, null, content.getBytes());
     effectivePomSourcePage.setInput(editorInput);
     
     //then start the load
-    LoadEffectivePomJob job = new LoadEffectivePomJob("Loading effective POM...");
+    LoadEffectivePomJob job = new LoadEffectivePomJob(Messages.MavenPomEditor_loading);
     job.schedule();
   }
 
@@ -627,7 +628,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       setPageText(dex, EFFECTIVE_POM);
       
       sourcePageIndex = addPage(sourcePage, getEditorInput());
-      setPageText(sourcePageIndex, "pom.xml");
+      setPageText(sourcePageIndex, "pom.xml"); //$NON-NLS-1$
       sourcePage.update();
       
       IDocument doc = sourcePage.getDocumentProvider().getDocument(getEditorInput());
@@ -745,13 +746,13 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
           InputStream is = null;
           OutputStream os = null;
           try {
-            tempPomFile = File.createTempFile("maven-pom", ".pom");
+            tempPomFile = File.createTempFile("maven-pom", ".pom"); //$NON-NLS-1$ //$NON-NLS-2$
             os = new FileOutputStream(tempPomFile);
             is = storage.getContents();
             IOUtil.copy(is, os);
             projectDocument = loadModel(tempPomFile.getAbsolutePath());
           } catch(IOException ex) {
-            MavenLogger.log("Can't close stream", ex);
+            MavenLogger.log("Can't close stream", ex); //$NON-NLS-1$
           } finally {
             IOUtil.close(is);
             IOUtil.close(os);
@@ -763,7 +764,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
           projectDocument = loadModel(path.toOSString());
         }
 
-      } else if(input.getClass().getName().endsWith("FileStoreEditorInput")) {
+      } else if(input.getClass().getName().endsWith("FileStoreEditorInput")) { //$NON-NLS-1$
         projectDocument = loadModel(Util.proxy(input, FileStoreEditorInputStub.class).getURI().getPath());
       }
     }
@@ -781,7 +782,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       return (Model)resource.getContents().get(0);
 
     } catch(Exception ex) {
-      MavenLogger.log("Can't load model " + path, ex);
+      MavenLogger.log("Can't load model " + path, ex); //$NON-NLS-1$
       return null;
 
     }
@@ -801,10 +802,10 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
    */
   public synchronized DependencyNode readDependencies(boolean force, IProgressMonitor monitor, String scope) throws CoreException {
     if(force || !rootNode.containsKey(scope)) {
-      monitor.setTaskName("Reading project");
+      monitor.setTaskName(Messages.MavenPomEditor_task_reading);
       MavenProject mavenProject = readMavenProject(force, monitor);
       if(mavenProject == null){
-        MavenLogger.log("Unable to read maven project. Dependencies not updated.", null);
+        MavenLogger.log("Unable to read maven project. Dependencies not updated.", null); //$NON-NLS-1$
         return null;
       }
 
@@ -817,10 +818,10 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   public synchronized org.sonatype.aether.graph.DependencyNode readDependencyTree(boolean force, String classpath,
       IProgressMonitor monitor) throws CoreException {
     if(force || !rootNodes.containsKey(classpath)) {
-      monitor.setTaskName("Reading project");
+      monitor.setTaskName(Messages.MavenPomEditor_task_reading);
       MavenProject mavenProject = readMavenProject(force, monitor);
       if(mavenProject == null){
-        MavenLogger.log("Unable to read maven project. Dependencies not updated.", null);
+        MavenLogger.log("Unable to read maven project. Dependencies not updated.", null); //$NON-NLS-1$
         return null;
       }
 
@@ -848,7 +849,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   }
 
   public void dispose() {
-    new UIJob("Disposing") {
+    new UIJob(Messages.MavenPomEditor_job_disposing) {
       @SuppressWarnings("synthetic-access")
       public IStatus runInUIThread(IProgressMonitor monitor) {
         structuredModel.releaseFromEdit();
@@ -875,7 +876,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
    * Saves structured editor XXX form model need to be synchronized
    */
   public void doSave(IProgressMonitor monitor) {
-    new UIJob("Saving") {
+    new UIJob(Messages.MavenPomEditor_job_saving) {
       public IStatus runInUIThread(IProgressMonitor monitor) {
         sourcePage.doSave(monitor);
         return Status.OK_STATUS;

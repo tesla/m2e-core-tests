@@ -59,6 +59,7 @@ import org.eclipse.ui.progress.UIJob;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.editor.internal.Messages;
 import org.maven.ide.eclipse.editor.lifecycle.ILifecycleMappingEditorContribution;
 import org.maven.ide.eclipse.editor.lifecycle.MojoExecutionData;
 import org.maven.ide.eclipse.editor.lifecycle.generic.GenericLifecycleMappingEditorContribution;
@@ -76,10 +77,10 @@ import org.maven.ide.eclipse.project.configurator.ILifecycleMapping;
 
 
 public class LifecyclePage extends MavenPomEditorPage implements IMavenProjectChangedListener, IPomFileChangedListener {
-  public static final String[] EXEC_TABLE_COLUMN_PROPERTIES = new String[]{ "name", "incremental" };
-  public static final String EXTENSION_LIFECYLE_EDITOR = "org.maven.ide.eclipse.editor.lifecycleMappingEditorContribution";
-  public static final String ELEMENT_LIFECYCLE_EDITOR = "editContributor";
-  private static final String FORM_NAME = "Lifecycle Mappings";
+  public static final String[] EXEC_TABLE_COLUMN_PROPERTIES = new String[]{ "name", "incremental" }; //$NON-NLS-1$ //$NON-NLS-2$
+  public static final String EXTENSION_LIFECYLE_EDITOR = "org.maven.ide.eclipse.editor.lifecycleMappingEditorContribution"; //$NON-NLS-1$
+  public static final String ELEMENT_LIFECYCLE_EDITOR = "editContributor"; //$NON-NLS-1$
+  private static final String FORM_NAME = Messages.LifecyclePage_form_name;
 
   private final MavenPomEditor pomEditor;
 
@@ -105,7 +106,7 @@ public class LifecyclePage extends MavenPomEditorPage implements IMavenProjectCh
   private ILifecycleMappingEditorContribution currentContribution;
   
   public LifecyclePage(MavenPomEditor pomEditor) {
-    super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.lifecycleMappings", FORM_NAME);
+    super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.lifecycleMappings", FORM_NAME); //$NON-NLS-1$
     this.pomEditor = pomEditor;
     
     //Read in our contributors
@@ -132,7 +133,7 @@ public class LifecyclePage extends MavenPomEditorPage implements IMavenProjectCh
               Object o = element.createExecutableExtension(AbstractProjectConfigurator.ATTR_CLASS);
               
               ILifecycleMappingEditorContribution contributor = (ILifecycleMappingEditorContribution) o;
-              contributions.put(element.getAttribute("editorFor"), contributor);
+              contributions.put(element.getAttribute("editorFor"), contributor); //$NON-NLS-1$
 
             } catch(CoreException ex) {
               MavenLogger.log(ex);
@@ -147,7 +148,7 @@ public class LifecyclePage extends MavenPomEditorPage implements IMavenProjectCh
   protected void createFormContent(IManagedForm managedForm) {
     FormToolkit toolkit = managedForm.getToolkit();
     ScrolledForm form = managedForm.getForm();
-    form.setText("Lifecycle Mappings (experimental)");
+    form.setText(Messages.LifecyclePage_scrolledForm);
 
     Composite body = form.getBody();
     GridLayout gridLayout = new GridLayout(1, true);
@@ -184,7 +185,7 @@ private void buildTopSection(Composite parent, FormToolkit toolkit) {
     
     Section topSection = toolkit.createSection(parent, ExpandableComposite.TITLE_BAR);
     topSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-    topSection.setText("Lifecycle Mapping");
+    topSection.setText(Messages.LifecyclePage_section_mapping);
   
     Composite topComposite = toolkit.createComposite(topSection, SWT.NONE);
     toolkit.adapt(topComposite);
@@ -204,7 +205,7 @@ private void buildTopSection(Composite parent, FormToolkit toolkit) {
     cmbLifecycleType.setLayoutData(cmbLayout);
     
     cmbLifecycleType.setData(FormToolkit.KEY_DRAW_BORDER, FormToolkit.TEXT_BORDER);
-    cmbLifecycleType.setData("name", "lifecycle");
+    cmbLifecycleType.setData("name", "lifecycle"); //$NON-NLS-1$ //$NON-NLS-2$
     toolkit.paintBordersFor(cmbLifecycleType);
     
     cmbLifecycleType.addSelectionListener(new SelectionListener() {
@@ -222,7 +223,7 @@ private void buildTopSection(Composite parent, FormToolkit toolkit) {
   private void buildBottomSection(Composite parent, FormToolkit toolkit) {
     Section bottomSection = toolkit.createSection(parent, ExpandableComposite.TITLE_BAR);
     bottomSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-    bottomSection.setText("Mapping Details");
+    bottomSection.setText(Messages.LifecyclePage_section_details);
   
     Composite bottomComposite = toolkit.createComposite(bottomSection, SWT.NONE);
     toolkit.adapt(bottomComposite);
@@ -240,7 +241,7 @@ private void buildTopSection(Composite parent, FormToolkit toolkit) {
         column.setWidth(confTable.getClientArea().width);
       }
     });
-    column.setText("Name");
+    column.setText(Messages.LifecyclePage_column_name);
     GridData viewerData = new GridData( SWT.FILL, SWT.FILL, true, true, 1, 1);
     viewerData.widthHint = 100;
     viewerData.heightHint = 125;
@@ -259,7 +260,7 @@ private void buildTopSection(Composite parent, FormToolkit toolkit) {
     toolkit.adapt(configuratorActions);
     configuratorActions.setLayout(new GridLayout(1, true));
     configuratorActions.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, true));
-    btnAddConfigurator = toolkit.createButton(configuratorActions, "Add", SWT.FLAT);
+    btnAddConfigurator = toolkit.createButton(configuratorActions, Messages.LifecyclePage_btnAdd, SWT.FLAT);
     btnAddConfigurator.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
     btnAddConfigurator.setEnabled(false);
     btnAddConfigurator.addSelectionListener(new SelectionListener() {
@@ -268,7 +269,7 @@ private void buildTopSection(Composite parent, FormToolkit toolkit) {
         addConfigurator();
       }
     });
-    btnEditConfigurator = toolkit.createButton(configuratorActions, "Edit...", SWT.FLAT);
+    btnEditConfigurator = toolkit.createButton(configuratorActions, Messages.LifecyclePage_btnEdit, SWT.FLAT);
     btnEditConfigurator.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
     btnEditConfigurator.setEnabled(false);
     btnEditConfigurator.addSelectionListener(new SelectionListener() {
@@ -277,7 +278,7 @@ private void buildTopSection(Composite parent, FormToolkit toolkit) {
         editConfigurator();
       }
     });
-    btnRemoveConfigurator = toolkit.createButton(configuratorActions, "Remove", SWT.FLAT);
+    btnRemoveConfigurator = toolkit.createButton(configuratorActions, Messages.LifecyclePage_btnRemove, SWT.FLAT);
     btnRemoveConfigurator.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
     btnRemoveConfigurator.setEnabled(false);
     btnRemoveConfigurator.addSelectionListener(new SelectionListener() {
@@ -308,9 +309,9 @@ private void buildTopSection(Composite parent, FormToolkit toolkit) {
     tblExecutionsTable = new TableViewer(execTable);
     tblExecutionsTable.setUseHashlookup(true);
     TableViewerColumn nameColumn = new TableViewerColumn(tblExecutionsTable, SWT.LEFT);
-    nameColumn.getColumn().setText("Name");
+    nameColumn.getColumn().setText(Messages.LifecyclePage_column_name);
     final TableViewerColumn incrColumn = new TableViewerColumn(tblExecutionsTable, SWT.LEFT);
-    incrColumn.getColumn().setText("Incremental");
+    incrColumn.getColumn().setText(Messages.LifecyclePage_column_incremental);
     
     executionsContentProvider = new ExecutionsTableContentProvider();
     tblExecutionsTable.setContentProvider(executionsContentProvider);
@@ -334,7 +335,7 @@ private void buildTopSection(Composite parent, FormToolkit toolkit) {
     toolkit.adapt(executionActions);
     executionActions.setLayout(new GridLayout(1, true));
     executionActions.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, true));
-    btnEnableMojo = toolkit.createButton(executionActions, "Enable", SWT.BORDER);
+    btnEnableMojo = toolkit.createButton(executionActions, Messages.LifecyclePage_btnEnable, SWT.BORDER);
     btnEnableMojo.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
     btnEnableMojo.setEnabled(false);
     btnEnableMojo.addSelectionListener(new SelectionListener() {
@@ -343,7 +344,7 @@ private void buildTopSection(Composite parent, FormToolkit toolkit) {
         enableMojo();
       }
     });
-    btnDisableMojo = toolkit.createButton(executionActions, "Disable", SWT.BORDER);
+    btnDisableMojo = toolkit.createButton(executionActions, Messages.LifecyclePage_btnDisable, SWT.BORDER);
     btnDisableMojo.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
     btnDisableMojo.setEnabled(false);
     btnDisableMojo.addSelectionListener(new SelectionListener() {
@@ -532,7 +533,7 @@ private void buildTopSection(Composite parent, FormToolkit toolkit) {
     for(int i = 0; i < events.length; i++ ) {
       if(events[i].getSource().equals(((MavenPomEditor) getEditor()).getPomFile())) {
         // file has been changed. need to update graph  
-        new UIJob("Reloading") {
+        new UIJob(Messages.LifecyclePage_job_reloading) {
           public IStatus runInUIThread(IProgressMonitor monitor) {
             loadData();
             FormUtils.setMessage(getManagedForm().getForm(), null, IMessageProvider.WARNING);
@@ -547,9 +548,9 @@ private void buildTopSection(Composite parent, FormToolkit toolkit) {
     if(getManagedForm() == null || getManagedForm().getForm() == null)
       return;
 
-    new UIJob("Reloading") {
+    new UIJob(Messages.LifecyclePage_job_reloading) {
       public IStatus runInUIThread(IProgressMonitor monitor) {
-        FormUtils.setMessage(getManagedForm().getForm(), "Updating lifecycle mappings...", IMessageProvider.WARNING);
+        FormUtils.setMessage(getManagedForm().getForm(), Messages.LifecyclePage_message_updating, IMessageProvider.WARNING);
         return Status.OK_STATUS;
       }
     }.schedule();

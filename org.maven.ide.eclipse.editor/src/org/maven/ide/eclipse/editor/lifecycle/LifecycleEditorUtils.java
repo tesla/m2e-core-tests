@@ -13,6 +13,7 @@ import org.maven.ide.components.pom.Build;
 import org.maven.ide.components.pom.Model;
 import org.maven.ide.components.pom.Plugin;
 import org.maven.ide.components.pom.PomFactory;
+import org.maven.ide.eclipse.editor.internal.Messages;
 
 public class LifecycleEditorUtils {
   public static Plugin getOrCreateLifecycleMappingPlugin(Model pom) {
@@ -25,7 +26,7 @@ public class LifecycleEditorUtils {
     EList<Plugin> plugins = build.getPlugins();
     Plugin lifecycleMappingPlugin = null;
     for(Plugin plugin : plugins) {
-      if("org.maven.ide.eclipse".equals(plugin.getGroupId()) && "lifecycle-mapping".equals(plugin.getArtifactId())) {
+      if("org.maven.ide.eclipse".equals(plugin.getGroupId()) && "lifecycle-mapping".equals(plugin.getArtifactId())) { //$NON-NLS-1$ //$NON-NLS-2$
         lifecycleMappingPlugin = plugin;
         break;
       }
@@ -33,9 +34,9 @@ public class LifecycleEditorUtils {
     
     if(null == lifecycleMappingPlugin) {
       lifecycleMappingPlugin = PomFactory.eINSTANCE.createPlugin();
-      lifecycleMappingPlugin.setGroupId("org.maven.ide.eclipse");
-      lifecycleMappingPlugin.setArtifactId("lifecycle-mapping");
-      lifecycleMappingPlugin.setVersion("0.9.9-SNAPSHOT");
+      lifecycleMappingPlugin.setGroupId("org.maven.ide.eclipse"); //$NON-NLS-1$
+      lifecycleMappingPlugin.setArtifactId("lifecycle-mapping"); //$NON-NLS-1$
+      lifecycleMappingPlugin.setVersion("0.9.9-SNAPSHOT"); //$NON-NLS-1$
       plugins.add(lifecycleMappingPlugin);
     }
     

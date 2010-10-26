@@ -30,6 +30,7 @@ import org.eclipse.zest.core.widgets.Graph;
 import org.eclipse.zest.core.widgets.GraphConnection;
 import org.eclipse.zest.core.widgets.GraphNode;
 import org.eclipse.zest.core.widgets.ZestStyles;
+import org.maven.ide.eclipse.editor.internal.Messages;
 
 /**
  * @author Eugene Kuleshov
@@ -49,7 +50,7 @@ public class DependencyGraphLegendPopup extends PopupDialog implements DisposeLi
 	@SuppressWarnings("deprecation")
   public DependencyGraphLegendPopup(Shell parent) {
 		// super(parent, PopupDialog.INFOPOPUP_SHELLSTYLE | SWT.ON_TOP, true, false, false, false, null, "UI Legend");
-		super(parent, SWT.NONE, true, false, false, false, null, "UI Legend (Esc to close)");
+		super(parent, SWT.NONE, true, false, false, false, null, Messages.DependencyGraphLegendPopup_popup);
 	}
 
 	// DisposeListener
@@ -108,38 +109,38 @@ public class DependencyGraphLegendPopup extends PopupDialog implements DisposeLi
     g.setEnabled(false);
    
     {
-      GraphNode n1 = new GraphNode(g, SWT.NONE, " compile scope dependency ");
+      GraphNode n1 = new GraphNode(g, SWT.NONE, Messages.DependencyGraphLegendPopup_compile_node);
       n1.setLocation(10, 10);
       n1.setSize(240, 25);
     }
     
     {
-      GraphNode n1 = new GraphNode(g, SWT.NONE, " non-compile scope dependency ");
+      GraphNode n1 = new GraphNode(g, SWT.NONE, Messages.DependencyGraphLegendPopup_non_compile_node);
       n1.setLocation(10, 40);
       n1.setSize(240, 25);
       n1.setBackgroundColor(colorTestBackground);
     }
     
     {
-      GraphNode n1 = new GraphNode(g, SWT.NONE, " selected dependency ");
+      GraphNode n1 = new GraphNode(g, SWT.NONE, Messages.DependencyGraphLegendPopup_selected);
       n1.setLocation(10, 70);
       n1.setSize(240, 25);
       n1.setBackgroundColor(colorSelectedBackground);
     }
     
     {
-      GraphNode n1 = new GraphNode(g, SWT.NONE, " selected non-compile ");
+      GraphNode n1 = new GraphNode(g, SWT.NONE, Messages.DependencyGraphLegendPopup_selected_non_compile);
       n1.setLocation(10, 100);
       n1.setSize(240, 25);
       n1.setBackgroundColor(colorSelectedTestBackground);
     }
     
     {
-      GraphNode n1 = new GraphNode(g, SWT.NONE, "    ");
-      GraphNode n2 = new GraphNode(g, SWT.NONE, "    ");
+      GraphNode n1 = new GraphNode(g, SWT.NONE, "    "); //$NON-NLS-1$
+      GraphNode n2 = new GraphNode(g, SWT.NONE, "    "); //$NON-NLS-1$
       
       DependencyConnection c1 = new DependencyConnection(g, SWT.NONE, n1, n2);
-      c1.setText("compile scope");
+      c1.setText(Messages.DependencyGraphLegendPopup_compile_scope);
       c1.setConnectionStyle(ZestStyles.CONNECTIONS_DIRECTED | ZestStyles.CONNECTIONS_SOLID);
       
       n1.setLocation(10, 140);
@@ -147,12 +148,12 @@ public class DependencyGraphLegendPopup extends PopupDialog implements DisposeLi
   	}
     
     {
-      GraphNode n1 = new GraphNode(g, SWT.NONE, "    ");
-      GraphNode n2 = new GraphNode(g, SWT.NONE, "    ");
+      GraphNode n1 = new GraphNode(g, SWT.NONE, "    "); //$NON-NLS-1$
+      GraphNode n2 = new GraphNode(g, SWT.NONE, "    "); //$NON-NLS-1$
       n2.setBackgroundColor(colorTestBackground);
       
       GraphConnection c1 = new DependencyConnection(g, SWT.NONE, n1, n2);
-      c1.setText("non-compile scope");
+      c1.setText(Messages.DependencyGraphLegendPopup_scope_non_compile);
       c1.setConnectionStyle(ZestStyles.CONNECTIONS_DIRECTED | ZestStyles.CONNECTIONS_DOT);
       c1.setLineColor(colorTestRel);
       
@@ -161,11 +162,11 @@ public class DependencyGraphLegendPopup extends PopupDialog implements DisposeLi
     }
     
     {
-      GraphNode n1 = new GraphNode(g, SWT.NONE, "    ");
-      GraphNode n2 = new GraphNode(g, SWT.NONE, "    ");
+      GraphNode n1 = new GraphNode(g, SWT.NONE, "    "); //$NON-NLS-1$
+      GraphNode n2 = new GraphNode(g, SWT.NONE, "    "); //$NON-NLS-1$
       
       GraphConnection c1 = new DependencyConnection(g, SWT.NONE, n1, n2);
-      c1.setText("resolved conflict");
+      c1.setText(Messages.DependencyGraphLegendPopup_resolved_conflict);
       c1.setConnectionStyle(ZestStyles.CONNECTIONS_DIRECTED | ZestStyles.CONNECTIONS_SOLID);
       c1.setLineColor(colorRelResolved);
       
@@ -174,12 +175,12 @@ public class DependencyGraphLegendPopup extends PopupDialog implements DisposeLi
     }
     
     {
-      GraphNode n1 = new GraphNode(g, SWT.NONE, "    ");
-      GraphNode n2 = new GraphNode(g, SWT.NONE, "    ");
+      GraphNode n1 = new GraphNode(g, SWT.NONE, "    "); //$NON-NLS-1$
+      GraphNode n2 = new GraphNode(g, SWT.NONE, "    "); //$NON-NLS-1$
       n2.setBackgroundColor(colorSelectedBackground);
       
       GraphConnection c1 = new DependencyConnection(g, SWT.NONE, n1, n2);
-      c1.setText("referenced from selected");
+      c1.setText(Messages.DependencyGraphLegendPopup_ref_from_selected);
       c1.setConnectionStyle(ZestStyles.CONNECTIONS_DIRECTED | ZestStyles.CONNECTIONS_SOLID);
       c1.setLineColor(highlighted);
       c1.setLineWidth(3);
@@ -189,12 +190,12 @@ public class DependencyGraphLegendPopup extends PopupDialog implements DisposeLi
     }
     
     {
-      GraphNode n1 = new GraphNode(g, SWT.NONE, "    ");
-      GraphNode n2 = new GraphNode(g, SWT.NONE, "    ");
+      GraphNode n1 = new GraphNode(g, SWT.NONE, "    "); //$NON-NLS-1$
+      GraphNode n2 = new GraphNode(g, SWT.NONE, "    "); //$NON-NLS-1$
       n2.setBackgroundColor(colorSelectedTestBackground);
       
       GraphConnection c1 = new DependencyConnection(g, SWT.NONE, n1, n2);
-      c1.setText("referenced from non-compile");
+      c1.setText(Messages.DependencyGraphLegendPopup_ref_from_non_compile);
       c1.setConnectionStyle(ZestStyles.CONNECTIONS_DIRECTED | ZestStyles.CONNECTIONS_DOT);
       c1.setLineColor(highlighted);
       c1.setLineWidth(3);
@@ -281,7 +282,7 @@ public class DependencyGraphLegendPopup extends PopupDialog implements DisposeLi
     }
 
     private void updateConnection() {
-      label.setText(getText()!=null ? getText() : "");
+      label.setText(getText()!=null ? getText() : ""); //$NON-NLS-1$
       
       connectionFigure.setLineStyle(getConnectionStyle());
       connectionFigure.setForegroundColor(getLineColor());

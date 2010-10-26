@@ -46,6 +46,7 @@ import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.components.pom.PomPackage;
 import org.maven.ide.components.pom.Resource;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
+import org.maven.ide.eclipse.editor.internal.Messages;
 import org.maven.ide.eclipse.editor.pom.FormUtils;
 import org.maven.ide.eclipse.editor.pom.MavenPomEditorPage;
 import org.maven.ide.eclipse.editor.pom.ValueProvider;
@@ -106,7 +107,7 @@ public class BuildComposite extends Composite {
     horizontalSash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     
     Section buildSection = toolkit.createSection(horizontalSash, ExpandableComposite.TITLE_BAR);
-    buildSection.setText("Build");
+    buildSection.setText(Messages.BuildComposite_section_build);
   
     Composite composite = toolkit.createComposite(buildSection, SWT.NONE);
     GridLayout compositeLayout = new GridLayout(2, false);
@@ -116,22 +117,22 @@ public class BuildComposite extends Composite {
     toolkit.paintBordersFor(composite);
     buildSection.setClient(composite);
   
-    toolkit.createLabel(composite, "Default Goal:", SWT.NONE);
+    toolkit.createLabel(composite, Messages.BuildComposite_lblDefaultGoal, SWT.NONE);
   
     defaultGoalText = toolkit.createText(composite, null, SWT.NONE);
     defaultGoalText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
   
-    toolkit.createLabel(composite, "Directory:", SWT.NONE);
+    toolkit.createLabel(composite, Messages.BuildComposite_lblDirectory, SWT.NONE);
   
     directoryText = toolkit.createText(composite, null, SWT.NONE);
     directoryText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
   
-    toolkit.createLabel(composite, "Final Name:", SWT.NONE);
+    toolkit.createLabel(composite, Messages.BuildComposite_lblFinalName, SWT.NONE);
   
     finalNameText = toolkit.createText(composite, null, SWT.NONE);
     finalNameText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
   
-    Label filtersLabel = toolkit.createLabel(composite, "Filters:", SWT.NONE);
+    Label filtersLabel = toolkit.createLabel(composite, Messages.BuildComposite_lblFilters, SWT.NONE);
     filtersLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
   
     filtersEditor = new ListEditorComposite<String>(composite, SWT.NONE);
@@ -221,7 +222,7 @@ public class BuildComposite extends Composite {
 
   private void createResourceDetailsSection(SashForm horizontalSash) {
     resourceDetailsSection = toolkit.createSection(horizontalSash, ExpandableComposite.TITLE_BAR);
-    resourceDetailsSection.setText("Resource Details");
+    resourceDetailsSection.setText(Messages.BuildComposite_sectionResourceDetails);
   
     Composite resourceDetailsComposite = toolkit.createComposite(resourceDetailsSection, SWT.NONE);
     GridLayout gridLayout = new GridLayout(2, false);
@@ -231,22 +232,22 @@ public class BuildComposite extends Composite {
     toolkit.paintBordersFor(resourceDetailsComposite);
     resourceDetailsSection.setClient(resourceDetailsComposite);
   
-    Label resourceDirectoryLabel = toolkit.createLabel(resourceDetailsComposite, "Directory:", SWT.NONE);
+    Label resourceDirectoryLabel = toolkit.createLabel(resourceDetailsComposite, Messages.BuildComposite_lblDirectory, SWT.NONE);
     resourceDirectoryLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
   
     resourceDirectoryText = toolkit.createText(resourceDetailsComposite, null, SWT.NONE);
     resourceDirectoryText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
   
-    Label resourceTargetPathLabel = toolkit.createLabel(resourceDetailsComposite, "Target Path:", SWT.NONE);
+    Label resourceTargetPathLabel = toolkit.createLabel(resourceDetailsComposite, Messages.BuildComposite_lblTargetPath, SWT.NONE);
     resourceTargetPathLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
   
     resourceTargetPathText = toolkit.createText(resourceDetailsComposite, null, SWT.NONE);
     resourceTargetPathText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
   
-    resourceFilteringButton = toolkit.createButton(resourceDetailsComposite, "Filtering", SWT.CHECK);
+    resourceFilteringButton = toolkit.createButton(resourceDetailsComposite, Messages.BuildComposite_btnFiltering, SWT.CHECK);
     resourceFilteringButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
   
-    Label includesLabel = toolkit.createLabel(resourceDetailsComposite, "Includes:", SWT.NONE);
+    Label includesLabel = toolkit.createLabel(resourceDetailsComposite, Messages.BuildComposite_lblIncludes, SWT.NONE);
     includesLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
   
     resourceIncludesEditor = new ListEditorComposite<String>(resourceDetailsComposite, SWT.NONE);
@@ -318,7 +319,7 @@ public class BuildComposite extends Composite {
       }
     });
     
-    Label excludesLabel = toolkit.createLabel(resourceDetailsComposite, "Excludes:", SWT.NONE);
+    Label excludesLabel = toolkit.createLabel(resourceDetailsComposite, Messages.BuildComposite_lblExcludes, SWT.NONE);
     excludesLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
   
     resourceExcludesEditor = new ListEditorComposite<String>(resourceDetailsComposite, SWT.NONE);
@@ -394,7 +395,7 @@ public class BuildComposite extends Composite {
 
   private void createResourceSection(SashForm verticalSash) {
     Section resourcesSection = toolkit.createSection(verticalSash, ExpandableComposite.TITLE_BAR);
-    resourcesSection.setText("Resources");
+    resourcesSection.setText(Messages.BuildComposite_sectionResources);
   
     resourcesEditor = new ListEditorComposite<Resource>(resourcesSection, SWT.NONE);
     resourcesSection.setClient(resourcesEditor);
@@ -462,7 +463,7 @@ public class BuildComposite extends Composite {
 
   private void createTestResourcesSection(SashForm verticalSash) {
     Section testResourcesSection = toolkit.createSection(verticalSash, ExpandableComposite.TITLE_BAR);
-    testResourcesSection.setText("Test Resources");
+    testResourcesSection.setText(Messages.BuildComposite_sectionTestResources);
     toolkit.adapt(verticalSash, true, true);
     
     testResourcesEditor = new ListEditorComposite<Resource>(testResourcesSection, SWT.NONE);
@@ -603,17 +604,17 @@ public class BuildComposite extends Composite {
       setText(directoryText, build.getDirectory());
       setText(finalNameText, build.getFinalName());
     } else {
-      setText(defaultGoalText, "");
-      setText(directoryText, "");
-      setText(finalNameText, "");
+      setText(defaultGoalText, ""); //$NON-NLS-1$
+      setText(directoryText, ""); //$NON-NLS-1$
+      setText(finalNameText, ""); //$NON-NLS-1$
     }
     
     filtersEditor.setInput(build == null //
         || build.getFilters() == null ? null : build.getFilters());
     
-    parent.setModifyListener(defaultGoalText, buildProvider, POM_PACKAGE.getBuildBase_DefaultGoal(), "");
-    parent.setModifyListener(directoryText, buildProvider, POM_PACKAGE.getBuildBase_Directory(), "");
-    parent.setModifyListener(finalNameText, buildProvider, POM_PACKAGE.getBuildBase_FinalName(), "");
+    parent.setModifyListener(defaultGoalText, buildProvider, POM_PACKAGE.getBuildBase_DefaultGoal(), ""); //$NON-NLS-1$
+    parent.setModifyListener(directoryText, buildProvider, POM_PACKAGE.getBuildBase_Directory(), ""); //$NON-NLS-1$
+    parent.setModifyListener(finalNameText, buildProvider, POM_PACKAGE.getBuildBase_FinalName(), ""); //$NON-NLS-1$
   }
   
   private void loadResources() {
@@ -644,8 +645,8 @@ public class BuildComposite extends Composite {
     if(resource == null) {
       FormUtils.setEnabled(resourceDetailsSection, false);
       
-      setText(resourceDirectoryText, "");
-      setText(resourceTargetPathText, "");
+      setText(resourceDirectoryText, ""); //$NON-NLS-1$
+      setText(resourceTargetPathText, ""); //$NON-NLS-1$
       setButton(resourceFilteringButton, false);
       
       resourceIncludesEditor.setInput(null);
@@ -665,8 +666,8 @@ public class BuildComposite extends Composite {
     resourceExcludesEditor.setInput(resource.getExcludes()==null ? null : resource.getExcludes());
     
     ValueProvider<Resource> provider = new ValueProvider.DefaultValueProvider<Resource>(resource);
-    parent.setModifyListener(resourceDirectoryText, provider, POM_PACKAGE.getResource_Directory(), "");
-    parent.setModifyListener(resourceTargetPathText, provider, POM_PACKAGE.getResource_TargetPath(), "");
+    parent.setModifyListener(resourceDirectoryText, provider, POM_PACKAGE.getResource_Directory(), ""); //$NON-NLS-1$
+    parent.setModifyListener(resourceTargetPathText, provider, POM_PACKAGE.getResource_TargetPath(), ""); //$NON-NLS-1$
     parent.setModifyListener(resourceFilteringButton, provider, POM_PACKAGE.getResource_Filtering(), "false");
     
     parent.registerListeners();

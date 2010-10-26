@@ -38,6 +38,7 @@ import org.maven.ide.components.pom.PomPackage;
 import org.maven.ide.components.pom.PropertyElement;
 import org.maven.ide.eclipse.editor.composites.ListEditorComposite;
 import org.maven.ide.eclipse.editor.composites.ListEditorContentProvider;
+import org.maven.ide.eclipse.editor.internal.Messages;
 import org.maven.ide.eclipse.ui.dialogs.MavenPropertyDialog;
 
 /**
@@ -83,14 +84,14 @@ public class PropertiesSection {
     propertiesSection = toolkit.createSection(composite, //
         ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
     propertiesSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+    propertiesSection.setText(Messages.PropertiesSection_section_properties);
     propertiesSection.setText("Properties");
-    propertiesSection.setText("Properties");
-    propertiesSection.setData("name", "propertiesSection");
+    propertiesSection.setData("name", "propertiesSection"); //$NON-NLS-1$ //$NON-NLS-2$
     toolkit.paintBordersFor(propertiesSection);
 
     propertiesEditor = new ListEditorComposite<PropertyElement>(propertiesSection, SWT.NONE);
     propertiesSection.setClient(propertiesEditor);
-    propertiesEditor.getViewer().getTable().setData("name", "properties");
+    propertiesEditor.getViewer().getTable().setData("name", "properties"); //$NON-NLS-1$ //$NON-NLS-2$
     
     propertiesEditor.setContentProvider(new ListEditorContentProvider<PropertyElement>());
     propertiesEditor.setLabelProvider(new PropertyPairLabelProvider());
@@ -126,7 +127,7 @@ public class PropertiesSection {
     PropertyElement pp = list.get(0);
     
     MavenPropertyDialog dialog = new MavenPropertyDialog(propertiesSection.getShell(), //
-        "Edit property", pp.getName(), pp.getValue(), listener);
+        Messages.PropertiesSection_title_editProperty, pp.getName(), pp.getValue(), listener);
     if(dialog.open() == IDialogConstants.OK_ID) {
       String key = dialog.getName();
       String value = dialog.getValue();
@@ -144,7 +145,7 @@ public class PropertiesSection {
 
   void createNewProperty() {
     MavenPropertyDialog dialog = new MavenPropertyDialog(propertiesSection.getShell(), //
-        "Add property", "", "", listener);
+        Messages.PropertiesSection_title_addProperty, "", "", listener); //$NON-NLS-2$ //$NON-NLS-3$
     if(dialog.open() == IDialogConstants.OK_ID) {
       CompoundCommand command = new CompoundCommand();
       

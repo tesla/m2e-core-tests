@@ -46,6 +46,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.FocusAdapter;
@@ -77,6 +78,7 @@ import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
+import org.maven.ide.eclipse.editor.internal.Messages;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
@@ -91,8 +93,6 @@ import org.sonatype.aether.graph.DependencyVisitor;
  * @author Benjamin Bentmann
  */
 public class DependencyTreePage extends FormPage implements IMavenProjectChangedListener, IPomFileChangedListener {
-
-  private static final String DEPENDENCY_HIERARCHY = "Dependency Hierarchy";
 
   protected static final Object[] EMPTY = new Object[0];
 
@@ -127,7 +127,7 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
   String currentClasspath = Artifact.SCOPE_TEST;
 
   public DependencyTreePage(MavenPomEditor pomEditor) {
-    super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.dependencyTree", DEPENDENCY_HIERARCHY);
+    super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.dependencyTree", Messages.DependencyTreePage_title); //$NON-NLS-1$
     this.pomEditor = pomEditor;
   }
 
@@ -161,14 +161,14 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
     // compatibility proxy to support Eclipse 3.2
     FormUtils.decorateHeader(managedForm.getToolkit(), form.getForm());
 
-    initPopupMenu(treeViewer, ".tree");
-    initPopupMenu(listViewer, ".list");
+    initPopupMenu(treeViewer, ".tree"); //$NON-NLS-1$
+    initPopupMenu(listViewer, ".list"); //$NON-NLS-1$
 
     loadData(false);
   }
 
   private void initPopupMenu(Viewer viewer, String id) {
-    MenuManager menuMgr = new MenuManager("#PopupMenu-" + id);
+    MenuManager menuMgr = new MenuManager("#PopupMenu-" + id); //$NON-NLS-1$
     menuMgr.setRemoveAllWhenShown(true);
     
     Menu menu = menuMgr.createContextMenu(viewer.getControl());
@@ -179,7 +179,7 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
   }
 
   String formatFormTitle() {
-    return DEPENDENCY_HIERARCHY + " [" + currentClasspath + "]";
+    return NLS.bind(Messages.DependencyTreePage_form_title, currentClasspath);
   }
 
   void loadData(final boolean force) {
@@ -189,14 +189,14 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
     // helps to ensure they won't change the size when the message is set.
     treeViewer.setInput(null);
     listViewer.setInput(null);
-    FormUtils.setMessage(getManagedForm().getForm(), "Resolving dependencies...", IMessageProvider.WARNING);
+    FormUtils.setMessage(getManagedForm().getForm(), Messages.DependencyTreePage_message_resolving, IMessageProvider.WARNING);
 
-    dataLoadingJob = new Job("Loading pom.xml") {
+    dataLoadingJob = new Job(Messages.DependencyTreePage_job_loading) {
       protected IStatus run(IProgressMonitor monitor) {
         try {
           mavenProject = pomEditor.readMavenProject(force, monitor);
           if(mavenProject == null){
-            MavenLogger.log("Unable to read maven project. Dependencies not updated.", null);
+            MavenLogger.log("Unable to read maven project. Dependencies not updated.", null); //$NON-NLS-1$
             return Status.CANCEL_STATUS;
           }
 
@@ -250,7 +250,7 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
     gd_hierarchySection.widthHint = 100;
     gd_hierarchySection.minimumWidth = 100;
     hierarchySection.setLayoutData(gd_hierarchySection);
-    hierarchySection.setText(DEPENDENCY_HIERARCHY);
+    hierarchySection.setText(Messages.DependencyTreePage_section_hierarchy);
     formToolkit.paintBordersFor(hierarchySection);
 
     Tree tree = formToolkit.createTree(hierarchySection, SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI);
@@ -294,13 +294,13 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
       FormToolkit formToolkit) {
     ToolBarManager hiearchyToolBarManager = new ToolBarManager(SWT.FLAT);
 
-    hiearchyToolBarManager.add(new Action("Collapse All", MavenEditorImages.COLLAPSE_ALL) {
+    hiearchyToolBarManager.add(new Action(Messages.DependencyTreePage_action_collapseAll, MavenEditorImages.COLLAPSE_ALL) {
       public void run() {
         treeViewer.collapseAll();
       }
     });
 
-    hiearchyToolBarManager.add(new Action("Expand All", MavenEditorImages.EXPAND_ALL) {
+    hiearchyToolBarManager.add(new Action(Messages.DependencyTreePage_action_expandAll, MavenEditorImages.EXPAND_ALL) {
       public void run() {
         treeViewer.expandAll();
       }
@@ -308,7 +308,7 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
 
     hiearchyToolBarManager.add(new Separator());
 
-    hiearchyToolBarManager.add(new Action("Sort", MavenEditorImages.SORT) {
+    hiearchyToolBarManager.add(new Action(Messages.DependencyTreePage_action_sort, MavenEditorImages.SORT) {
       public int getStyle() {
         return AS_CHECK_BOX;
       }
@@ -322,7 +322,7 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
       }
     });
 
-    hiearchyToolBarManager.add(new Action("Show GroupId", MavenEditorImages.SHOW_GROUP) {
+    hiearchyToolBarManager.add(new Action(Messages.DependencyTreePage_action_showGroupId, MavenEditorImages.SHOW_GROUP) {
       public int getStyle() {
         return AS_CHECK_BOX;
       }
@@ -333,7 +333,7 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
       }
     });
 
-    hierarchyFilterAction = new Action("Filter Search Results", MavenEditorImages.FILTER) {
+    hierarchyFilterAction = new Action(Messages.DependencyTreePage_action_filterSearch, MavenEditorImages.FILTER) {
       public int getStyle() {
         return AS_CHECK_BOX;
       }
@@ -376,7 +376,7 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
     gd_listSection.widthHint = 100;
     gd_listSection.minimumWidth = 100;
     listSection.setLayoutData(gd_listSection);
-    listSection.setText("Resolved Dependencies");
+    listSection.setText(Messages.DependencyTreePage_section_resolvedDeps);
     formToolkit.paintBordersFor(listSection);
 
     final DependencyListLabelProvider listLabelProvider = new DependencyListLabelProvider();
@@ -416,7 +416,7 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
       FormToolkit formToolkit) {
     ToolBarManager listToolBarManager = new ToolBarManager(SWT.FLAT);
 
-    listToolBarManager.add(new Action("Sort", MavenEditorImages.SORT) {
+    listToolBarManager.add(new Action(Messages.DependencyTreePage_action_sort, MavenEditorImages.SORT) {
       {
         setChecked(true);
       }
@@ -434,7 +434,7 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
       }
     });
 
-    listToolBarManager.add(new Action("Show GroupId", MavenEditorImages.SHOW_GROUP) {
+    listToolBarManager.add(new Action(Messages.DependencyTreePage_action_showGroupId, MavenEditorImages.SHOW_GROUP) {
       public int getStyle() {
         return AS_CHECK_BOX;
       }
@@ -445,7 +445,7 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
       }
     });
 
-    listToolBarManager.add(new Action("Filter Search Results", MavenEditorImages.FILTER) {
+    listToolBarManager.add(new Action(Messages.DependencyTreePage_action_filter, MavenEditorImages.FILTER) {
       public int getStyle() {
         return AS_CHECK_BOX;
       }
@@ -474,7 +474,7 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
   }
 
   private void createSearchBar(IManagedForm managedForm) {
-    searchControl = new SearchControl("Find", managedForm);
+    searchControl = new SearchControl(Messages.DependencyTreePage_find, managedForm);
     searchMatcher = new SearchMatcher(searchControl);
     searchFilter = new DependencyFilter(new SearchMatcher(searchControl));
     treeViewer.addFilter(searchFilter); // by default is filtered
@@ -488,7 +488,7 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
       private Menu menu;
 
       public ClasspathDropdown() {
-        setText("Classpath");
+        setText(Messages.DependencyTreePage_classpath);
         setImageDescriptor(MavenEditorImages.SCOPE);
         setMenuCreator(this);
       }
@@ -503,10 +503,10 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
         }
         
         menu = new Menu(parent);
-        addToMenu(menu, "all (test)", Artifact.SCOPE_TEST, currentClasspath);
-        addToMenu(menu, "compile+runtime", Artifact.SCOPE_COMPILE_PLUS_RUNTIME, currentClasspath);
-        addToMenu(menu, "compile", Artifact.SCOPE_COMPILE, currentClasspath);
-        addToMenu(menu, "runtime", Artifact.SCOPE_RUNTIME, currentClasspath);
+        addToMenu(menu, Messages.DependencyTreePage_scope_all, Artifact.SCOPE_TEST, currentClasspath);
+        addToMenu(menu, Messages.DependencyTreePage_scope_comp_runtime, Artifact.SCOPE_COMPILE_PLUS_RUNTIME, currentClasspath);
+        addToMenu(menu, Messages.DependencyTreePage_scope_compile, Artifact.SCOPE_COMPILE, currentClasspath);
+        addToMenu(menu, Messages.DependencyTreePage_scope_runtime, Artifact.SCOPE_RUNTIME, currentClasspath);
         return menu;
       }
       
@@ -526,7 +526,7 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
     toolBarManager.add(new ClasspathDropdown());
     
     toolBarManager.add(new Separator());
-    toolBarManager.add(new Action("Refresh", MavenEditorImages.REFRESH) {
+    toolBarManager.add(new Action(Messages.DependencyTreePage_action_refresh, MavenEditorImages.REFRESH) {
       public void run() {
         loadData(true);
       }
@@ -733,7 +733,7 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
       if(element instanceof DependencyNode) {
         DependencyNode node = (DependencyNode) element;
         String scope = node.getDependency().getScope();
-        if(scope != null && !"compile".equals(scope)) {
+        if(scope != null && !"compile".equals(scope)) { //$NON-NLS-1$
           return Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
         }
       }
@@ -786,7 +786,7 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
         }
 
         if(a.getClassifier().length() > 0) {
-          label.append(" - ").append(a.getClassifier());
+          label.append(Messages.DependencyTreePage_0).append(a.getClassifier());
         }
 
         label.append(" [").append(node.getDependency().getScope()).append("]");
@@ -835,7 +835,7 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
       if(element instanceof Artifact) {
         Artifact a = (Artifact) element;
         String scope = a.getScope();
-        if(scope != null && !"compile".equals(scope)) {
+        if(scope != null && !"compile".equals(scope)) { //$NON-NLS-1$
           return Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
         }
       }
@@ -1035,7 +1035,7 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
     for (int i=0; i<events.length; i++) {
       if (events[i].getSource().equals(((MavenPomEditor) getEditor()).getPomFile())) {
         // file has been changed. need to update graph  
-        new UIJob("Reloading") {
+        new UIJob(Messages.DependencyTreePage_job_reloading) {
           public IStatus runInUIThread(IProgressMonitor monitor) {
             loadData();
             FormUtils.setMessage(getManagedForm().getForm(), null, IMessageProvider.WARNING);
@@ -1050,9 +1050,9 @@ public class DependencyTreePage extends FormPage implements IMavenProjectChanged
     if (getManagedForm() == null || getManagedForm().getForm() == null)
       return;
     
-    new UIJob("Reloading") {
+    new UIJob(Messages.DependencyTreePage_job_reloading) {
       public IStatus runInUIThread(IProgressMonitor monitor) {
-        FormUtils.setMessage(getManagedForm().getForm(), "Updating dependencies...", IMessageProvider.WARNING);
+        FormUtils.setMessage(getManagedForm().getForm(), Messages.DependencyTreePage_message_updating, IMessageProvider.WARNING);
         return Status.OK_STATUS;
       }
     }.schedule();

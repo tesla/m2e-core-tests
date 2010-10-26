@@ -25,6 +25,7 @@ import org.maven.ide.components.pom.DistributionManagement;
 import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.editor.composites.RepositoriesComposite;
+import org.maven.ide.eclipse.editor.internal.Messages;
 
 /**
  * @author Eugene Kuleshov
@@ -34,7 +35,7 @@ public class RepositoriesPage extends MavenPomEditorPage {
   private RepositoriesComposite repositoriesComposite;
   
   public RepositoriesPage(MavenPomEditor pomEditor) {
-    super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.repositories", "Repositories");
+    super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.repositories", Messages.RepositoriesPage_title); //$NON-NLS-1$
   }
   
   public void dispose() {
@@ -48,7 +49,7 @@ public class RepositoriesPage extends MavenPomEditorPage {
     FormToolkit toolkit = managedForm.getToolkit();
 
     ScrolledForm form = managedForm.getForm();
-    form.setText("Repositories");
+    form.setText(Messages.RepositoriesPage_form);
     
     Composite body = form.getBody();
     body.setLayout(new GridLayout(1, true));

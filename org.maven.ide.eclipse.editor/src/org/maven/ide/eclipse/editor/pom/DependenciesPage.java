@@ -26,6 +26,7 @@ import org.maven.ide.components.pom.DependencyManagement;
 import org.maven.ide.components.pom.PomFactory;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.editor.composites.DependenciesComposite;
+import org.maven.ide.eclipse.editor.internal.Messages;
 
 /**
  * @author Eugene Kuleshov
@@ -36,7 +37,7 @@ public class DependenciesPage extends MavenPomEditorPage {
   private SearchControl searchControl;
   
   public DependenciesPage(MavenPomEditor pomEditor) {
-    super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.dependencies", "Dependencies");
+    super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.dependencies", Messages.DependenciesPage_title); //$NON-NLS-1$
   }
 
   public void dispose() {
@@ -58,7 +59,7 @@ public class DependenciesPage extends MavenPomEditorPage {
     FormToolkit toolkit = managedForm.getToolkit();
     
     ScrolledForm form = managedForm.getForm();
-    form.setText("Dependencies");
+    form.setText(Messages.DependenciesPage_form);
     
     form.getBody().setLayout(new GridLayout(1, true));
 
@@ -66,7 +67,7 @@ public class DependenciesPage extends MavenPomEditorPage {
     dependenciesComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     toolkit.adapt(dependenciesComposite);
 
-    searchControl = new SearchControl("Find", managedForm);
+    searchControl = new SearchControl(Messages.DependenciesPage_find, managedForm);
     
     IToolBarManager pageToolBarManager = form.getForm().getToolBarManager();
     pageToolBarManager.add(searchControl);

@@ -69,33 +69,33 @@ public class CustomLifecycleMappingEditorContribution implements ILifecycleMappi
     while(configNode.hasChildNodes()) {
       configNode.removeChild(configNode.getFirstChild());
     }
-    lifecycleMappingPlugin.getConfiguration().setStringValue("mappingId", "customizable");
-    Element configuratorsElement = configNode.getOwnerDocument().createElement("configurators");
+    lifecycleMappingPlugin.getConfiguration().setStringValue("mappingId", "customizable"); //$NON-NLS-1$ //$NON-NLS-2$
+    Element configuratorsElement = configNode.getOwnerDocument().createElement("configurators"); //$NON-NLS-1$
     configNode.appendChild(configuratorsElement);
     
     if(templateId != null) {
       ILifecycleMapping mapping = mappings.get(templateId);
       for(AbstractProjectConfigurator configer : mapping.getProjectConfigurators(projectFacade, new NullProgressMonitor())) {
         if(!configer.isGeneric()) {
-          Element configuratorElement = configNode.getOwnerDocument().createElement("configurator");
-          configuratorElement.setAttribute("id", configer.getId());
+          Element configuratorElement = configNode.getOwnerDocument().createElement("configurator"); //$NON-NLS-1$
+          configuratorElement.setAttribute("id", configer.getId()); //$NON-NLS-1$
           configuratorsElement.appendChild(configuratorElement);
         }
       }
     }
     
-    Element mojoExecutionsElement = configNode.getOwnerDocument().createElement("mojoExecutions");
+    Element mojoExecutionsElement = configNode.getOwnerDocument().createElement("mojoExecutions"); //$NON-NLS-1$
     configNode.appendChild(mojoExecutionsElement);
     if(templateId != null) {
       ILifecycleMapping mapping = mappings.get(templateId);
       List<String> allExecutions = mapping.getPotentialMojoExecutionsForBuildKind(projectFacade, IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
       List<String> incrExecutions = mapping.getPotentialMojoExecutionsForBuildKind(projectFacade, IncrementalProjectBuilder.INCREMENTAL_BUILD, new NullProgressMonitor());
       for(String execution : allExecutions) {
-        Element mojoExecutionElement = configNode.getOwnerDocument().createElement("mojoExecution");
+        Element mojoExecutionElement = configNode.getOwnerDocument().createElement("mojoExecution"); //$NON-NLS-1$
         if(incrExecutions.contains(execution)) {
-          mojoExecutionElement.setAttribute("runOnIncremental", "true");
+          mojoExecutionElement.setAttribute("runOnIncremental", "true"); //$NON-NLS-1$ //$NON-NLS-2$
         } else {
-          mojoExecutionElement.setAttribute("runOnIncremental", "false");
+          mojoExecutionElement.setAttribute("runOnIncremental", "false"); //$NON-NLS-1$ //$NON-NLS-2$
         }
         Text t = configNode.getOwnerDocument().createTextNode(execution);
         mojoExecutionElement.appendChild(t);
@@ -112,16 +112,16 @@ public class CustomLifecycleMappingEditorContribution implements ILifecycleMappi
 
     Configuration config = lifecycleMappingPlugin.getConfiguration();
 
-    Element configuratorsDom = getChildElement((Element)config.getConfigurationNode(), "configurators");
+    Element configuratorsDom = getChildElement((Element)config.getConfigurationNode(), "configurators"); //$NON-NLS-1$
 
     List<AbstractProjectConfigurator> configurators = new ArrayList<AbstractProjectConfigurator>();
     
     if (configuratorsDom != null) {
-      for(Element configuratorDom : getChildren(configuratorsDom, "configurator")) {
-        String configuratorId = configuratorDom.getAttribute("id");
+      for(Element configuratorDom : getChildren(configuratorsDom, "configurator")) { //$NON-NLS-1$
+        String configuratorId = configuratorDom.getAttribute("id"); //$NON-NLS-1$
         AbstractProjectConfigurator configurator = configuratorsMap.get(configuratorId);
         if(configurator == null) {
-          throw new IllegalArgumentException("Unknown configurator id=" + configuratorId);
+          throw new IllegalArgumentException("Unknown configurator id=" + configuratorId); //$NON-NLS-1$
         }
 
         configurators.add(configurator);
@@ -148,11 +148,11 @@ public class CustomLifecycleMappingEditorContribution implements ILifecycleMappi
     List<AbstractProjectConfigurator> allConfigurators = new ArrayList<AbstractProjectConfigurator>(AbstractLifecycleMapping.getProjectConfigurators());
     Configuration config = lifecycleMappingPlugin.getConfiguration();
 
-    Element configuratorsDom = getChildElement((Element)config.getConfigurationNode(), "configurators");
+    Element configuratorsDom = getChildElement((Element)config.getConfigurationNode(), "configurators"); //$NON-NLS-1$
     if(null != configuratorsDom) {
       Set<String> usedIds = new LinkedHashSet<String>();
-      for(Element configuratorDom : getChildren(configuratorsDom, "configurator")) {
-        usedIds.add(configuratorDom.getAttribute("id"));
+      for(Element configuratorDom : getChildren(configuratorsDom, "configurator")) { //$NON-NLS-1$
+        usedIds.add(configuratorDom.getAttribute("id")); //$NON-NLS-1$
       }
       
       Iterator<AbstractProjectConfigurator> confItr = allConfigurators.iterator();
@@ -171,12 +171,12 @@ public class CustomLifecycleMappingEditorContribution implements ILifecycleMappi
       String selection = dialog.getSelectedConfigurator();
       if(selection != null) {
         if(null == configuratorsDom) {
-          configuratorsDom = config.getConfigurationNode().getOwnerDocument().createElement("configurators");
+          configuratorsDom = config.getConfigurationNode().getOwnerDocument().createElement("configurators"); //$NON-NLS-1$
           config.getConfigurationNode().appendChild(configuratorsDom);
         }
         
-        Element configuratorDom = configuratorsDom.getOwnerDocument().createElement("configurator");
-        configuratorDom.setAttribute("id", selection);
+        Element configuratorDom = configuratorsDom.getOwnerDocument().createElement("configurator"); //$NON-NLS-1$
+        configuratorDom.setAttribute("id", selection); //$NON-NLS-1$
         configuratorsDom.appendChild(configuratorDom);
       }
     }
@@ -188,11 +188,11 @@ public class CustomLifecycleMappingEditorContribution implements ILifecycleMappi
   public void removeProjectConfigurator(AbstractProjectConfigurator configurator) throws CoreException {
     Configuration config = lifecycleMappingPlugin.getConfiguration();
 
-    Element configuratorsDom = getChildElement((Element)config.getConfigurationNode(), "configurators");
+    Element configuratorsDom = getChildElement((Element)config.getConfigurationNode(), "configurators"); //$NON-NLS-1$
 
     if (configuratorsDom != null) {
-      for(Element configuratorDom : getChildren(configuratorsDom, "configurator")) {
-        String configuratorId = configuratorDom.getAttribute("id");
+      for(Element configuratorDom : getChildren(configuratorsDom, "configurator")) { //$NON-NLS-1$
+        String configuratorId = configuratorDom.getAttribute("id"); //$NON-NLS-1$
         if(configuratorId != null && configuratorId.equals(configurator.getId())) {
           configuratorsDom.removeChild(configuratorDom);
           break;
@@ -205,13 +205,13 @@ public class CustomLifecycleMappingEditorContribution implements ILifecycleMappi
     Configuration config = lifecycleMappingPlugin.getConfiguration();
     Element configNode = (Element) config.getConfigurationNode();
     
-    Element executionsDom = getChildElement(configNode, "mojoExecutions");
+    Element executionsDom = getChildElement(configNode, "mojoExecutions"); //$NON-NLS-1$
 
     List<MojoExecutionData> mojos = new LinkedList<MojoExecutionData>();
     
     if (executionsDom != null) {
-      for(Element execution : getChildren(executionsDom, "mojoExecution")) {
-        String strRunOnIncremental = execution.getAttribute("runOnIncremental");
+      for(Element execution : getChildren(executionsDom, "mojoExecution")) { //$NON-NLS-1$
+        String strRunOnIncremental = execution.getAttribute("runOnIncremental"); //$NON-NLS-1$
         String name = getNodeContents(execution);
         mojos.add(new MojoExecutionData(name, name, true, toBool(strRunOnIncremental, true)));
       }
@@ -242,15 +242,15 @@ public class CustomLifecycleMappingEditorContribution implements ILifecycleMappi
     Configuration config = lifecycleMappingPlugin.getConfiguration();
     Element configNode = (Element) config.getConfigurationNode();
     
-    Element executionsDom = getChildElement(configNode, "mojoExecutions");
+    Element executionsDom = getChildElement(configNode, "mojoExecutions"); //$NON-NLS-1$
 
     if(null == executionsDom) {
-      executionsDom = configNode.getOwnerDocument().createElement("mojoExecutions");
+      executionsDom = configNode.getOwnerDocument().createElement("mojoExecutions"); //$NON-NLS-1$
       configNode.appendChild(executionsDom);
     }
     
-    Element executionDom = configNode.getOwnerDocument().createElement("mojoExecution");
-    executionDom.setAttribute("runOnIncremental", "" + execution.isRunOnIncrementalBuild());
+    Element executionDom = configNode.getOwnerDocument().createElement("mojoExecution"); //$NON-NLS-1$
+    executionDom.setAttribute("runOnIncremental", "" + execution.isRunOnIncrementalBuild()); //$NON-NLS-1$ //$NON-NLS-2$
     executionDom.appendChild(configNode.getOwnerDocument().createTextNode(execution.getId()));
     executionsDom.appendChild(executionDom);
   }
@@ -259,13 +259,13 @@ public class CustomLifecycleMappingEditorContribution implements ILifecycleMappi
     Configuration config = lifecycleMappingPlugin.getConfiguration();
     Element configNode = (Element) config.getConfigurationNode();
     
-    Element executionsDom = getChildElement(configNode, "mojoExecutions");
+    Element executionsDom = getChildElement(configNode, "mojoExecutions"); //$NON-NLS-1$
 
     if(null == executionsDom) {
       return;
     }
     
-    for(Element executionDom : getChildren(executionsDom, "mojoExecution")) {
+    for(Element executionDom : getChildren(executionsDom, "mojoExecution")) { //$NON-NLS-1$
       String name = getNodeContents(executionDom);
       if(name.equals(execution.getId())) {
         executionsDom.removeChild(executionDom);
@@ -282,16 +282,16 @@ public class CustomLifecycleMappingEditorContribution implements ILifecycleMappi
     Configuration config = lifecycleMappingPlugin.getConfiguration();
     Element configNode = (Element) config.getConfigurationNode();
     
-    Element executionsDom = getChildElement(configNode, "mojoExecutions");
+    Element executionsDom = getChildElement(configNode, "mojoExecutions"); //$NON-NLS-1$
 
     if(null == executionsDom) {
       return;
     }
     
-    for(Element executionDom : getChildren(executionsDom, "mojoExecution")) {
+    for(Element executionDom : getChildren(executionsDom, "mojoExecution")) { //$NON-NLS-1$
       String name = getNodeContents(executionDom);
       if(name.equals(execution.getId())) {
-        executionDom.setAttribute("runOnIncremental", "" + incremental);
+        executionDom.setAttribute("runOnIncremental", "" + incremental); //$NON-NLS-1$ //$NON-NLS-2$
         break;
       }
     }
@@ -332,7 +332,7 @@ public class CustomLifecycleMappingEditorContribution implements ILifecycleMappi
       }
       return value.toString();
     }
-    return "";
+    return ""; //$NON-NLS-1$
   }
   
   private boolean toBool(String value, boolean def) {

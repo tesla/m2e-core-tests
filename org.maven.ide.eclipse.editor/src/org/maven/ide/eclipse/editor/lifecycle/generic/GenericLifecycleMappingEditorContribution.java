@@ -43,7 +43,7 @@ public class GenericLifecycleMappingEditorContribution implements ILifecycleMapp
   }
   
   public void initializeConfiguration()  throws CoreException {
-    LifecycleEditorUtils.getOrCreateLifecycleMappingPlugin(pom).getConfiguration().setStringValue("mappingId", mappingId);
+    LifecycleEditorUtils.getOrCreateLifecycleMappingPlugin(pom).getConfiguration().setStringValue("mappingId", mappingId); //$NON-NLS-1$
   }
   
   public List<AbstractProjectConfigurator> getProjectConfigurators() throws CoreException {

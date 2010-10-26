@@ -95,6 +95,7 @@ import org.maven.ide.eclipse.actions.OpenPomAction;
 import org.maven.ide.eclipse.actions.OpenUrlAction;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.editor.MavenEditorImages;
+import org.maven.ide.eclipse.editor.internal.Messages;
 import org.maven.ide.eclipse.editor.plugins.DefaultPluginConfigurationEditor;
 import org.maven.ide.eclipse.editor.plugins.IPluginConfigurationExtension;
 import org.maven.ide.eclipse.editor.plugins.PluginExtensionDescriptor;
@@ -116,8 +117,8 @@ import org.maven.ide.eclipse.ui.dialogs.MavenRepositorySearchDialog;
 public class PluginsComposite extends Composite{
 
   protected static PomPackage POM_PACKAGE = PomPackage.eINSTANCE;
-  public static final String EXTENSION_CONFIGURATION_EDITOR = "org.maven.ide.eclipse.editor.plugins.configurationEditorContribution";
-  public static final String ELEMENT_CONFIGURATION_EDITOR = "editContributor";
+  public static final String EXTENSION_CONFIGURATION_EDITOR = "org.maven.ide.eclipse.editor.plugins.configurationEditorContribution"; //$NON-NLS-1$
+  public static final String ELEMENT_CONFIGURATION_EDITOR = "editContributor"; //$NON-NLS-1$
   
   MavenPomEditorPage parentEditorPage;
   
@@ -212,7 +213,7 @@ public class PluginsComposite extends Composite{
 
   private void createPluginsSection(SashForm verticalSashForm) {
     Section pluginsSection = toolkit.createSection(verticalSashForm, ExpandableComposite.TITLE_BAR | ExpandableComposite.COMPACT);
-    pluginsSection.setText("Plugins");
+    pluginsSection.setText(Messages.PluginsComposite_section_Plugins);
   
     pluginsEditor = new ListEditorComposite<Plugin>(pluginsSection, SWT.NONE, true);
     pluginsSection.setClient(pluginsEditor);
@@ -245,7 +246,7 @@ public class PluginsComposite extends Composite{
     pluginsEditor.setSelectListener(new SelectionAdapter(){
       public void widgetSelected(SelectionEvent e){
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-        "Select Plugin", IIndex.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
+        Messages.PluginsComposite_searchDialog_selectPlugin, IIndex.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {
@@ -281,7 +282,7 @@ public class PluginsComposite extends Composite{
       toolBarManager.add(new Separator());
     }
     
-    toolBarManager.add(new Action("Show GroupId", MavenEditorImages.SHOW_GROUP) {
+    toolBarManager.add(new Action(Messages.PluginsComposite_action_showGroupId, MavenEditorImages.SHOW_GROUP) {
       {
         setChecked(true);
       }
@@ -294,7 +295,7 @@ public class PluginsComposite extends Composite{
       }
     });
     
-    toolBarManager.add(new Action("Filter", MavenEditorImages.FILTER) {
+    toolBarManager.add(new Action(Messages.PluginsComposite_action_Filter, MavenEditorImages.FILTER) {
       public int getStyle() {
         return AS_CHECK_BOX;
       }
@@ -325,7 +326,7 @@ public class PluginsComposite extends Composite{
 
   private void createPluginManagementSection(SashForm verticalSashForm) {
     Section pluginManagementSection = toolkit.createSection(verticalSashForm, ExpandableComposite.TITLE_BAR);
-    pluginManagementSection.setText("Plugin Management");
+    pluginManagementSection.setText(Messages.PluginsComposite_section_PluginManagent);
   
     pluginManagementEditor = new ListEditorComposite<Plugin>(pluginManagementSection, SWT.NONE, true);
     pluginManagementSection.setClient(pluginManagementEditor);
@@ -359,7 +360,7 @@ public class PluginsComposite extends Composite{
     pluginManagementEditor.setSelectListener(new SelectionAdapter(){
       public void widgetSelected(SelectionEvent e){
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-        "Select Plugin", IIndex.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
+        Messages.PluginsComposite_seachDialog_selectPlugin, IIndex.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {
@@ -395,7 +396,7 @@ public class PluginsComposite extends Composite{
       toolBarManager.add(new Separator());
     }
     
-    toolBarManager.add(new Action("Show GroupId", MavenEditorImages.SHOW_GROUP) {
+    toolBarManager.add(new Action(Messages.PluginsComposite_action_showGroupId, MavenEditorImages.SHOW_GROUP) {
       {
         setChecked(true);
       }
@@ -408,7 +409,7 @@ public class PluginsComposite extends Composite{
       }
     });
     
-    toolBarManager.add(new Action("Filter", MavenEditorImages.FILTER) {
+    toolBarManager.add(new Action(Messages.PluginsComposite_action_Filter, MavenEditorImages.FILTER) {
       public int getStyle() {
         return AS_CHECK_BOX;
       }
@@ -447,7 +448,7 @@ public class PluginsComposite extends Composite{
       
       pluginDetailsSection = toolkit.createSection(detailsComposite, ExpandableComposite.TITLE_BAR);
       pluginDetailsSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-      pluginDetailsSection.setText("Plugin Details");
+      pluginDetailsSection.setText(Messages.PluginsComposite_section_pluginDetails);
     
       Composite pluginDetailsComposite = toolkit.createComposite(pluginDetailsSection, SWT.NONE);
       GridLayout pluginDetailsLayout = new GridLayout(3, false);
@@ -457,16 +458,16 @@ public class PluginsComposite extends Composite{
       toolkit.paintBordersFor(pluginDetailsComposite);
       pluginDetailsSection.setClient(pluginDetailsComposite);
     
-      toolkit.createLabel(pluginDetailsComposite, "Group Id:*", SWT.NONE);
+      toolkit.createLabel(pluginDetailsComposite, Messages.PluginsComposite_lblGroupId, SWT.NONE);
     
       groupIdText = toolkit.createText(pluginDetailsComposite, null, SWT.NONE);
       GridData gd_groupIdText = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
       gd_groupIdText.horizontalIndent = 4;
       groupIdText.setLayoutData(gd_groupIdText);
-      groupIdText.setData("name", "groupIdText");
+      groupIdText.setData("name", "groupIdText"); //$NON-NLS-1$ //$NON-NLS-2$
       FormUtils.addGroupIdProposal(parentEditorPage.getProject(), groupIdText, Packaging.PLUGIN);
 
-      Hyperlink artifactIdHyperlink = toolkit.createHyperlink(pluginDetailsComposite, "Artifact Id:*", SWT.NONE);
+      Hyperlink artifactIdHyperlink = toolkit.createHyperlink(pluginDetailsComposite, Messages.PluginsComposite_lblArtifactId, SWT.NONE);
       artifactIdHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
         public void linkActivated(HyperlinkEvent e) {
           final String groupId = groupIdText.getText();
@@ -485,10 +486,10 @@ public class PluginsComposite extends Composite{
       GridData gd_artifactIdText = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
       gd_artifactIdText.horizontalIndent = 4;
       artifactIdText.setLayoutData(gd_artifactIdText);
-      artifactIdText.setData("name", "artifactIdText");
+      artifactIdText.setData("name", "artifactIdText"); //$NON-NLS-1$ //$NON-NLS-2$
       FormUtils.addArtifactIdProposal(parentEditorPage.getProject(), groupIdText, artifactIdText, Packaging.PLUGIN);
     
-      Label label = toolkit.createLabel(pluginDetailsComposite, "Version:", SWT.NONE);
+      Label label = toolkit.createLabel(pluginDetailsComposite, Messages.PluginsComposite_lblVersion, SWT.NONE);
       label.setLayoutData(new GridData());
     
       versionText = toolkit.createText(pluginDetailsComposite, null, SWT.NONE);
@@ -496,7 +497,7 @@ public class PluginsComposite extends Composite{
       versionTextData.horizontalIndent = 4;
       versionTextData.widthHint = 200;
       versionText.setLayoutData(versionTextData);
-      versionText.setData("name", "versionText");
+      versionText.setData("name", "versionText"); //$NON-NLS-1$ //$NON-NLS-2$
       FormUtils.addVersionProposal(parentEditorPage.getProject(), groupIdText, artifactIdText, versionText, Packaging.PLUGIN);
   
   //    pluginSelectButton = toolkit.createButton(pluginDetailsComposite, "Select...", SWT.NONE);
@@ -516,10 +517,10 @@ public class PluginsComposite extends Composite{
   //      }
   //    });
       
-      pluginSelectAction = new Action("Select Plugin", MavenEditorImages.SELECT_PLUGIN) {
+      pluginSelectAction = new Action(Messages.PluginsComposite_action_selectPlugin, MavenEditorImages.SELECT_PLUGIN) {
         public void run() {
           MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-              "Select Plugin", IIndex.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
+              Messages.PluginsComposite_searchDialog_selectPlugin, IIndex.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
           if(dialog.open() == Window.OK) {
             IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
             if(af != null) {
@@ -532,7 +533,7 @@ public class PluginsComposite extends Composite{
       };
       pluginSelectAction.setEnabled(false);
   
-      openWebPageAction = new Action("Open Web Page", MavenEditorImages.WEB_PAGE) {
+      openWebPageAction = new Action(Messages.PluginsComposite_action_openWeb, MavenEditorImages.WEB_PAGE) {
         public void run() {
           final String groupId = groupIdText.getText();
           final String artifactId = artifactIdText.getText();
@@ -572,10 +573,10 @@ public class PluginsComposite extends Composite{
       composite.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false, 1, 1));
       toolkit.adapt(composite);
     
-      pluginExtensionsButton = toolkit.createButton(composite, "Extensions", SWT.CHECK);
+      pluginExtensionsButton = toolkit.createButton(composite, Messages.PluginsComposite_btnExtensions, SWT.CHECK);
       pluginExtensionsButton.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
     
-      pluginInheritedButton = toolkit.createButton(composite, "Inherited", SWT.CHECK);
+      pluginInheritedButton = toolkit.createButton(composite, Messages.PluginsComposite_btnInherited, SWT.CHECK);
       pluginInheritedButton.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
     
       pluginDetailsComposite.setTabList(new Control[] {groupIdText, artifactIdText, versionText, composite});
@@ -597,7 +598,7 @@ public class PluginsComposite extends Composite{
       GridData gd_pluginExecutionsSection = new GridData(SWT.FILL, SWT.FILL, true, true);
       gd_pluginExecutionsSection.minimumHeight = 50;
       pluginExecutionsSection.setLayoutData(gd_pluginExecutionsSection);
-      pluginExecutionsSection.setText("Executions");
+      pluginExecutionsSection.setText(Messages.PluginsComposite_section_Executions);
   
       pluginExecutionsEditor = new ListEditorComposite<PluginExecution>(pluginExecutionsSection, SWT.NONE);
       pluginExecutionsSection.setClient(pluginExecutionsEditor);
@@ -614,7 +615,7 @@ public class PluginsComposite extends Composite{
             }
             return label;
           }
-          return "";
+          return ""; //$NON-NLS-1$
         }
         public Image getImage(Object element) {
           return MavenEditorImages.IMG_EXECUTION;
@@ -668,7 +669,7 @@ public class PluginsComposite extends Composite{
       GridData gd_pluginExecutionSection = new GridData(SWT.FILL, SWT.CENTER, true, false);
       gd_pluginExecutionSection.minimumHeight = 50;
       pluginExecutionSection.setLayoutData(gd_pluginExecutionSection);
-      pluginExecutionSection.setText("Execution Details");
+      pluginExecutionSection.setText(Messages.PluginsComposite_section_executionDetails);
       new SectionExpansionAdapter(new Section[]{pluginExecutionSection, pluginExecutionsSection});
 
       Composite executionComposite = toolkit.createComposite(pluginExecutionSection, SWT.NONE);
@@ -679,49 +680,49 @@ public class PluginsComposite extends Composite{
       pluginExecutionSection.setClient(executionComposite);
       toolkit.paintBordersFor(executionComposite);
   
-      toolkit.createLabel(executionComposite, "Id:", SWT.NONE);
+      toolkit.createLabel(executionComposite, Messages.PluginsComposite_lblId, SWT.NONE);
   
       executionIdText = toolkit.createText(executionComposite, null, SWT.NONE);
       executionIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
   
-      toolkit.createLabel(executionComposite, "Phase:", SWT.NONE);
+      toolkit.createLabel(executionComposite, Messages.PluginsComposite_lblPhase, SWT.NONE);
   
       executionPhaseCombo = new CCombo(executionComposite, SWT.FLAT);
       executionPhaseCombo.setData(FormToolkit.KEY_DRAW_BORDER, FormToolkit.TEXT_BORDER);
       executionPhaseCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
       executionPhaseCombo.setItems(new String[] { //
-          "pre-clean", // Clean Lifecycle
-          "clean", //
-          "post-clean", //
-          "validate", // Default Lifecycle
-          "generate-sources", //
-          "process-sources", //
-          "generate-resources", //
-          "process-resources", //
-          "compile", //
-          "process-classes", //
-          "generate-test-sources", //
-          "process-test-sources", //
-          "generate-test-resources", //
-          "process-test-resources", //
-          "test-compile", //
-          "process-test-classes", //
-          "test", //
-          "prepare-package", //
-          "package", //
-          "pre-integration-test", //
-          "integration-test", //
-          "post-integration-test", //
-          "verify", //
-          "install", //
-          "deploy", //
-          "pre-site", //
-          "site", // Site Lifecycle
-          "post-site", //
-          "site-deploy"});
+          "pre-clean", // Clean Lifecycle //$NON-NLS-1$
+          "clean", // //$NON-NLS-1$
+          "post-clean", // //$NON-NLS-1$
+          "validate", // Default Lifecycle //$NON-NLS-1$
+          "generate-sources", // //$NON-NLS-1$
+          "process-sources", // //$NON-NLS-1$
+          "generate-resources", // //$NON-NLS-1$
+          "process-resources", // //$NON-NLS-1$
+          "compile", // //$NON-NLS-1$
+          "process-classes", // //$NON-NLS-1$
+          "generate-test-sources", // //$NON-NLS-1$
+          "process-test-sources", // //$NON-NLS-1$
+          "generate-test-resources", // //$NON-NLS-1$
+          "process-test-resources", // //$NON-NLS-1$
+          "test-compile", // //$NON-NLS-1$
+          "process-test-classes", // //$NON-NLS-1$
+          "test", // //$NON-NLS-1$
+          "prepare-package", // //$NON-NLS-1$
+          "package", // //$NON-NLS-1$
+          "pre-integration-test", // //$NON-NLS-1$
+          "integration-test", // //$NON-NLS-1$
+          "post-integration-test", // //$NON-NLS-1$
+          "verify", // //$NON-NLS-1$
+          "install", // //$NON-NLS-1$
+          "deploy", // //$NON-NLS-1$
+          "pre-site", // //$NON-NLS-1$
+          "site", // Site Lifecycle //$NON-NLS-1$
+          "post-site", // //$NON-NLS-1$
+          "site-deploy"}); //$NON-NLS-1$
       toolkit.adapt(executionPhaseCombo, true, true);
   
-      Label goalsLabel = toolkit.createLabel(executionComposite, "Goals:", SWT.NONE);
+      Label goalsLabel = toolkit.createLabel(executionComposite, Messages.PluginsComposite_lblGoals, SWT.NONE);
       goalsLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
   
       goalsEditor = new ListEditorComposite<String>(executionComposite, SWT.NONE);
@@ -792,10 +793,10 @@ public class PluginsComposite extends Composite{
       executionConfigureComposite.setLayout(gridLayout);
       toolkit.adapt(executionConfigureComposite);
   
-      executionInheritedButton = toolkit.createButton(executionConfigureComposite, "Inherited", SWT.CHECK);
+      executionInheritedButton = toolkit.createButton(executionConfigureComposite, Messages.PluginsComposite_btnInherited, SWT.CHECK);
       executionInheritedButton.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
   
-      pluginExecutionConfigurationHyperlink = toolkit.createHyperlink(executionConfigureComposite, "Configuration", SWT.NONE);
+      pluginExecutionConfigurationHyperlink = toolkit.createHyperlink(executionConfigureComposite, Messages.PluginsComposite_linkConfiguration, SWT.NONE);
       pluginExecutionConfigurationHyperlink.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
       pluginExecutionConfigurationHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
         public void linkActivated(HyperlinkEvent e) {
@@ -809,7 +810,7 @@ public class PluginsComposite extends Composite{
       GridData pluginDependenciesSectionData = new GridData(SWT.FILL, SWT.FILL, true, true);
       pluginDependenciesSectionData.minimumHeight = 50;
       pluginDependenciesSection.setLayoutData(pluginDependenciesSectionData);
-      pluginDependenciesSection.setText("Plugin Dependencies");
+      pluginDependenciesSection.setText(Messages.PluginsComposite_section_PluginDependencies);
   
       pluginDependenciesEditor = new ListEditorComposite<Dependency>(pluginDependenciesSection, SWT.NONE);
       pluginDependenciesSection.setClient(pluginDependenciesEditor);
@@ -828,14 +829,14 @@ public class PluginsComposite extends Composite{
   private void createConfigurationSection(Composite detailsComposite) {
     pluginConfigurationSection = toolkit.createSection(detailsComposite,
         ExpandableComposite.TITLE_BAR | ExpandableComposite.TWISTIE);
-    pluginConfigurationSection.setText("Configuration");
+    pluginConfigurationSection.setText(Messages.PluginsComposite_section_configuration);
     pluginConfigurationSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
     pluginConfigurationSection.setEnabled(false);
     
     defaultConfigurationEditor = new DefaultPluginConfigurationEditor();
     setConfigurationEditor(defaultConfigurationEditor);
     
-    openConfigurationAction = new Action("Open XML Configuration", MavenEditorImages.ELEMENT_OBJECT) {
+    openConfigurationAction = new Action(Messages.PluginsComposite_action_openXml, MavenEditorImages.ELEMENT_OBJECT) {
       public void run() {
         EObject element = currentPlugin.getConfiguration();
         parentEditorPage.getPomEditor().showInSourceEditor(element==null ? currentPlugin : element);
@@ -924,9 +925,9 @@ public class PluginsComposite extends Composite{
       openWebPageAction.setEnabled(false);
       openConfigurationAction.setEnabled(false);
     
-      setText(groupIdText, "");
-      setText(artifactIdText, "");
-      setText(versionText, "");
+      setText(groupIdText, ""); //$NON-NLS-1$
+      setText(artifactIdText, ""); //$NON-NLS-1$
+      setText(versionText, ""); //$NON-NLS-1$
       setButton(pluginExtensionsButton, false);
       setButton(pluginInheritedButton, false);
       
@@ -983,9 +984,9 @@ public class PluginsComposite extends Composite{
     // register listeners
     
     ValueProvider<Plugin> provider = new ValueProvider.DefaultValueProvider<Plugin>(currentPlugin);
-    parentEditorPage.setModifyListener(groupIdText, provider, POM_PACKAGE.getPlugin_GroupId(), "");
-    parentEditorPage.setModifyListener(artifactIdText, provider, POM_PACKAGE.getPlugin_ArtifactId(), "");
-    parentEditorPage.setModifyListener(versionText, provider, POM_PACKAGE.getPlugin_Version(), "");
+    parentEditorPage.setModifyListener(groupIdText, provider, POM_PACKAGE.getPlugin_GroupId(), ""); //$NON-NLS-1$
+    parentEditorPage.setModifyListener(artifactIdText, provider, POM_PACKAGE.getPlugin_ArtifactId(), ""); //$NON-NLS-1$
+    parentEditorPage.setModifyListener(versionText, provider, POM_PACKAGE.getPlugin_Version(), ""); //$NON-NLS-1$
     parentEditorPage.setModifyListener(pluginInheritedButton, provider, POM_PACKAGE.getPlugin_Inherited(), "true");
     parentEditorPage.setModifyListener(pluginExtensionsButton, provider, POM_PACKAGE.getPlugin_Extensions(), "false");
   }
@@ -1005,8 +1006,8 @@ public class PluginsComposite extends Composite{
     if(pluginExecution==null) {
       FormUtils.setEnabled(pluginExecutionSection, false);
 
-      setText(executionIdText, "");
-      setText(executionPhaseCombo, "");
+      setText(executionIdText, ""); //$NON-NLS-1$
+      setText(executionPhaseCombo, ""); //$NON-NLS-1$
       setButton(executionInheritedButton, false);
       goalsEditor.setInput(null);
       
@@ -1025,8 +1026,8 @@ public class PluginsComposite extends Composite{
     
     // register listeners
     ValueProvider<PluginExecution> provider = new ValueProvider.DefaultValueProvider<PluginExecution>(pluginExecution);
-    parentEditorPage.setModifyListener(executionIdText, provider, POM_PACKAGE.getPluginExecution_Id(), "");
-    parentEditorPage.setModifyListener(executionPhaseCombo, provider, POM_PACKAGE.getPluginExecution_Phase(), "");
+    parentEditorPage.setModifyListener(executionIdText, provider, POM_PACKAGE.getPluginExecution_Id(), ""); //$NON-NLS-1$
+    parentEditorPage.setModifyListener(executionPhaseCombo, provider, POM_PACKAGE.getPluginExecution_Phase(), ""); //$NON-NLS-1$
     parentEditorPage.setModifyListener(executionInheritedButton, provider, POM_PACKAGE.getPluginExecution_Inherited(), "true");
   }
 
@@ -1156,7 +1157,7 @@ public class PluginsComposite extends Composite{
     public String getText(Object element) {
       if(element instanceof Plugin) {
         Plugin plugin = (Plugin) element;
-        String label = "";
+        String label = ""; //$NON-NLS-1$
         
         if(showGroupId) {
           if(!isEmpty(plugin.getGroupId())) {
@@ -1260,11 +1261,11 @@ public class PluginsComposite extends Composite{
     ValueProvider<? extends EObject> provider = null;
 
     protected PluginSelectAction(ListEditorComposite<Plugin> editor, EReference pomPackage) {
-      super("", IAction.AS_DROP_DOWN_MENU); 
+      super("", IAction.AS_DROP_DOWN_MENU);  //$NON-NLS-1$
       setImageDescriptor(MavenEditorImages.ADD_PLUGIN);
       setMenuCreator(this);
       setEnabled(false);
-      setToolTipText("Add Plugin");
+      setToolTipText(Messages.PluginsComposite_tooltip_addPlugin);
       actions = new ArrayList<IAction>();
       for(PluginExtensionDescriptor descriptor : pluginConfigurators.values()) {
         actions.add(createContributedAction(editor, pomPackage, descriptor));
@@ -1274,10 +1275,10 @@ public class PluginsComposite extends Composite{
     }
     
     private Action createDefaultAction(final ListEditorComposite<Plugin> editor, final EReference pomPackage) {
-      return new Action( "Other..." ) {
+      return new Action( Messages.PluginsComposite_action_other ) {
         public void run() {
           MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(),
-              "Add Plugin", IIndex.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
+              Messages.PluginsComposite_searchDialog_addPlugin, IIndex.SEARCH_PLUGIN, Collections.<ArtifactKey>emptySet());
           if(dialog.open() == Window.OK) {
             IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
             if(af != null) {
@@ -1293,7 +1294,7 @@ public class PluginsComposite extends Composite{
         public void run() {
           String groupId = descriptor.getGroupId();
           String artifactId = descriptor.getArtifactId();
-          String version = "";
+          String version = ""; //$NON-NLS-1$
           try {
             Collection<String> versions = MvnIndexPlugin.getDefault().getSearchEngine(parentEditorPage.getProject()).findVersions(groupId, artifactId, null, Packaging.PLUGIN);
             if(!versions.isEmpty()) {
@@ -1301,7 +1302,7 @@ public class PluginsComposite extends Composite{
             }
           } catch(CoreException e) {
             // TODO Auto-generated catch block
-            MavenLogger.log("Error retrieving available versions for " + groupId + ':' + artifactId, e);
+            MavenLogger.log("Error retrieving available versions for " + groupId + ':' + artifactId, e); //$NON-NLS-1$
           }
           
           createPlugin(editor, provider, pomPackage, groupId, artifactId, version);

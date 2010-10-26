@@ -32,9 +32,11 @@ import org.eclipse.zest.core.viewers.GraphViewer;
 import org.eclipse.zest.core.viewers.IConnectionStyleProvider;
 import org.eclipse.zest.core.viewers.IEntityStyleProvider;
 import org.eclipse.zest.core.widgets.ZestStyles;
+import org.maven.ide.eclipse.editor.internal.Messages;
 
 public class MavenGraphLabelProvider implements ILabelProvider,
       IEntityStyleProvider, IConnectionStyleProvider, ISelectionChangedListener {
+    private static final String SCOPE_COMPILE = "compile"; //$NON-NLS-1$
     private final GraphViewer viewer;
     private final MavenGraphContentProvider contentProvider;
 
@@ -188,7 +190,7 @@ public class MavenGraphLabelProvider implements ILabelProvider,
         MetadataGraphVertex v = (MetadataGraphVertex) element;
         ArtifactMetadata md = v.getMd();
 
-        String label = "";
+        String label = ""; //$NON-NLS-1$
 
         if (showGroup) {
           label += md.getGroupId() + (wrapLabel ? "\n" : " : ");
@@ -236,11 +238,11 @@ public class MavenGraphLabelProvider implements ILabelProvider,
         // return md.getGroupId() + ":" + md.getArtifactId() + "-" +
         // md.getVersion() + "-" + md.getClassifier() + " [" + md.getScope() +
         // "]";
-        String label = " " + md.getGroupId() + " \n" // 
-            + " " + md.getArtifactId() + " \n" //
-            + " " + md.getVersion() + " [" + md.getScope() + "] ";
+        String label = " " + md.getGroupId() + " \n" //  //$NON-NLS-1$
+            + " " + md.getArtifactId() + " \n" // //$NON-NLS-1$
+            + " " + md.getVersion() + " [" + md.getScope() + "] "; //$NON-NLS-1$
         if (md.getClassifier() != null) {
-          label += "\n " + md.getClassifier() + " ";
+          label += "\n " + md.getClassifier() + " "; //$NON-NLS-2$
         }
         return new Label(label);
       }
@@ -273,7 +275,7 @@ public class MavenGraphLabelProvider implements ILabelProvider,
         String scope = md.getScope();
         // if ("test".equals(scope) || "runtime".equals(scope) ||
         // "provided".equals(scope) || "system".equals(scope)) {
-        if ("compile".equals(scope)) {
+        if (SCOPE_COMPILE.equals(scope)) {
           return null;
         } else {
           return colorTestBackground;
@@ -286,7 +288,7 @@ public class MavenGraphLabelProvider implements ILabelProvider,
       if (entity instanceof MetadataGraphVertex) {
         ArtifactMetadata md = ((MetadataGraphVertex) entity).getMd();
         String scope = md.getScope();
-        if ("compile".equals(scope)) {
+        if (SCOPE_COMPILE.equals(scope)) {
           return null;
         } else {
           return colorTestHighlight;

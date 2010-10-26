@@ -16,7 +16,7 @@ import org.osgi.framework.BundleContext;
  */
 public class MavenEditorPlugin extends AbstractUIPlugin {
 
-  public static final String PLUGIN_ID = "org.maven.ide.eclipse.editor";
+  public static final String PLUGIN_ID = "org.maven.ide.eclipse.editor"; //$NON-NLS-1$
   
   private static MavenEditorPlugin instance;
 

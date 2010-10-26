@@ -14,9 +14,9 @@ import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.project.configurator.AbstractProjectConfigurator;
 
 public class PluginExtensionDescriptor {
-  public static final String ARTIFACT_ID = "artifactId";
-  public static final String GROUP_ID = "groupId";
-  public static final String NAME = "name";
+  public static final String ARTIFACT_ID = "artifactId"; //$NON-NLS-1$
+  public static final String GROUP_ID = "groupId"; //$NON-NLS-1$
+  public static final String NAME = "name"; //$NON-NLS-1$
   
   private String artifactId;
   private String groupId;

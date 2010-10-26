@@ -22,6 +22,7 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.maven.ide.eclipse.editor.internal.Messages;
 import org.maven.ide.eclipse.internal.project.CustomizableLifecycleMapping;
 
 public class CustomLifecycleParamsDialog extends Dialog {
@@ -66,7 +67,7 @@ public class CustomLifecycleParamsDialog extends Dialog {
     container.setLayout(new GridLayout(1, true));
     createEmptyButton = new Button(container, SWT.RADIO);
     createEmptyButton.setSelection(true);
-    createEmptyButton.setText("Create Empty");
+    createEmptyButton.setText(Messages.CustomLifecycleParamsDialog_btnCreateEmpty);
     createEmptyButton.addSelectionListener(new SelectionListener() {
       public void widgetSelected(SelectionEvent event) {
         templateCombo.setEnabled(false);
@@ -76,7 +77,7 @@ public class CustomLifecycleParamsDialog extends Dialog {
     });
     
     createFromTemplateButton = new Button(container, SWT.RADIO);
-    createFromTemplateButton.setText("Copy From");
+    createFromTemplateButton.setText(Messages.CustomLifecycleParamsDialog_btnCopyFrom);
     createFromTemplateButton.addSelectionListener(new SelectionListener() {
       public void widgetSelected(SelectionEvent event) {
         templateCombo.setEnabled(true);

@@ -23,6 +23,7 @@ import org.eclipse.jface.fieldassist.IContentProposal;
 import org.eclipse.jface.fieldassist.IContentProposalProvider;
 import org.eclipse.jface.fieldassist.IControlContentAdapter;
 import org.eclipse.jface.fieldassist.TextContentAdapter;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.MouseAdapter;
@@ -47,6 +48,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.editor.internal.Messages;
 import org.maven.ide.eclipse.editor.xml.MvnIndexPlugin;
 import org.maven.ide.eclipse.editor.xml.search.Packaging;
 import org.maven.ide.eclipse.editor.xml.search.SearchEngine;
@@ -60,7 +62,10 @@ import org.maven.ide.eclipse.util.Util;
 public abstract class FormUtils {
   public static final int MAX_MSG_LENGTH = 80;
 
-  public static final String MORE_DETAILS = " (Click for more details)";
+  /**
+   * @deprecated use your own string.. this should not have been made ublic in the first place.
+   */
+  public static final String MORE_DETAILS = ""; //$NON-NLS-1$
 
   public static void decorateHeader(FormToolkit toolkit, Form form) {
     Util.proxy(toolkit, FormTooliktStub.class).decorateFormHeading(form);
@@ -82,13 +87,13 @@ public abstract class FormUtils {
   public static boolean setMessage(ScrolledForm form, String message, int severity) {
     if(message != null && message.length() > MAX_MSG_LENGTH) {
       String truncMsg = message;
-      String[] lines = message.split("\n");
+      String[] lines = message.split("\n"); //$NON-NLS-1$
       if(lines.length > 0) {
         truncMsg = lines[0];
       } else {
         truncMsg = message.substring(0, MAX_MSG_LENGTH);
       }
-      setMessageAndTTip(form, truncMsg + MORE_DETAILS, message, severity);
+      setMessageAndTTip(form, NLS.bind(Messages.FormUtils_click_for_details, truncMsg), message, severity);
       return true;
     } else {
       setMessageAndTTip(form, message, message, severity);
@@ -103,7 +108,7 @@ public abstract class FormUtils {
   }
 
   public static String nvl(String s) {
-    return s == null ? "" : s;
+    return s == null ? "" : s; //$NON-NLS-1$
   }
 
   public static String nvl(String s, String defaultValue) {
@@ -138,7 +143,7 @@ public abstract class FormUtils {
   }
 
   public static void openHyperlink(String url) {
-    if(!isEmpty(url) && (url.startsWith("http://") || url.startsWith("https://"))) {
+    if(!isEmpty(url) && (url.startsWith("http://") || url.startsWith("https://"))) { //$NON-NLS-1$ //$NON-NLS-2$
       url = url.trim();
       try {
         IWorkbenchBrowserSupport browserSupport = PlatformUI.getWorkbench().getBrowserSupport();
@@ -148,7 +153,7 @@ public abstract class FormUtils {
       } catch(PartInitException ex) {
         MavenLogger.log(ex);
       } catch(MalformedURLException ex) {
-        MavenLogger.log("Malformed url " + url, ex);
+        MavenLogger.log("Malformed url " + url, ex); //$NON-NLS-1$
       }
     }
   }
@@ -253,7 +258,7 @@ public abstract class FormUtils {
           cleanupMouseListeners(kid, SWT.MouseExit);
           kid.addMouseListener(new MouseAdapter() {
             public void mouseUp(MouseEvent e) {
-              MavenMessageDialog.openInfo(form.getShell(), "Error info:", "The POM has the following error:", ttip);
+              MavenMessageDialog.openInfo(form.getShell(), Messages.FormUtils_error_info, Messages.FormUtils_pom_error, ttip);
             }
           });
           kid.addMouseTrackListener(new MouseTrackAdapter() {
