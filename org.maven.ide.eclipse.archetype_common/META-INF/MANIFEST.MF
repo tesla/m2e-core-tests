@@ -32,12 +32,12 @@ Bundle-ClassPath: jars/jchardet-1.0.jar,
  jars/commons-lang-2.1.jar,
  jars/oro-2.0.8.jar,
  jars/velocity-1.5.jar
-Bundle-Name: Maven Archetype Common Bundle
+Bundle-Name: %Bundle-Name
 Bundle-RequiredExecutionEnvironment: J2SE-1.5,
  JavaSE-1.6
 Require-Bundle: org.maven.ide.eclipse.maven_embedder;bundle-version="[
  0.12.0,0.13.0)"
-Bundle-Vendor: Sonatype, Inc.
+Bundle-Vendor: %Bundle-Vendor
 MavenArtifact-BaseVersion: 2.0.1.20090526-1230
 Bundle-Version: 0.12.0.qualifier
 MavenArtifact-GroupId: org.maven.ide.eclipse
