@@ -8,17 +8,17 @@
 -->
 <?eclipse version="3.0"?>
 <plugin>
-   <extension-point id="indexes" name="Maven Indexes" schema="schema/indexes.exsd"/>
-   <extension-point id="scmHandlers" name="SCM Handlers" schema="schema/scmHandlers.exsd"/>
-   <extension-point id="scmHandlersUi" name="SCM Handlers UI" schema="schema/scmHandlersUi.exsd"/>
-   <extension-point id="archetypeCatalogs" name="Maven Archetypes" schema="schema/archetypes.exsd"/>
-   <extension-point id="projectConfigurators" name="Project Configurators" schema="schema/projectConfigurators.exsd"/>
-   <extension-point id="m2menu" name="m2 menu items" schema="schema/m2menu.exsd"/>
-   <extension-point id="lifecycleMappings" name="Maven Lifecycle Mappings" schema="schema/lifecycleMappings.exsd"/>
-   <extension-point id="lifecycleMappingPropertyPage" name = "Maven Lifecycle Mapping Property Page" schema = "schema/lifecycleMappingPropertyPage.exsd"/>
-   <extension-point id="defaultLifecycleMappings" name="Default Maven Lifecycle Mappings" schema="schema/defaultLifecycleMappings.exsd"/>
-   <extension-point id="mavenComponentContributors" name="Maven Core Component Contributor" schema="schema/mavenComponentContributors.exsd"/>
-   <extension-point id="mavenProjectChangedListeners" name="mavenProjectChangedListeners" schema="schema/mavenProjectChangedListeners.exsd"/>
+   <extension-point id="indexes" name="%extension-point.indexes.name" schema="schema/indexes.exsd"/>
+   <extension-point id="scmHandlers" name="%extension-point.scmhandlers.name" schema="schema/scmHandlers.exsd"/>
+   <extension-point id="scmHandlersUi" name="%extension-point.scmhandlersui.name" schema="schema/scmHandlersUi.exsd"/>
+   <extension-point id="archetypeCatalogs" name="%extension-point.archetypes.name" schema="schema/archetypes.exsd"/>
+   <extension-point id="projectConfigurators" name="%extension-point.configurators.name" schema="schema/projectConfigurators.exsd"/>
+   <extension-point id="m2menu" name="%extension-point.m2menu.name" schema="schema/m2menu.exsd"/>
+   <extension-point id="lifecycleMappings" name="%extension-point.lifecyclemappings.name" schema="schema/lifecycleMappings.exsd"/>
+   <extension-point id="lifecycleMappingPropertyPage" name = "%extension-point.mapping.proppage.name" schema = "schema/lifecycleMappingPropertyPage.exsd"/>
+   <extension-point id="defaultLifecycleMappings" name="%extension-point.mappingdefault.name" schema="schema/defaultLifecycleMappings.exsd"/>
+   <extension-point id="mavenComponentContributors" name="%extension-point.component.name" schema="schema/mavenComponentContributors.exsd"/>
+   <extension-point id="mavenProjectChangedListeners" name="%extension-point.changed.name" schema="schema/mavenProjectChangedListeners.exsd"/>
    <extension point="org.eclipse.ui.intro.configExtension">
       <configExtension configId="org.eclipse.ui.intro.universalConfig"
                        content="intro/overview.xml"/>
@@ -27,7 +27,7 @@
    </extension>
 
    <extension point="org.eclipse.core.runtime.contentTypes">
-     <content-type id="pomFile" name="Maven POM XML"
+     <content-type id="pomFile" name="%content-type.name"
           base-type="org.eclipse.core.runtime.xml"
           priority="normal"
           default-charset="UTF-8"
@@ -189,7 +189,7 @@
           objectClass="org.maven.ide.eclipse.scm.ScmUrl"
           adaptable="true">
         <action id="org.maven.ide.eclipse.ui.checkoutAsMaven"
-                label="Check out as Maven Project..."
+                label="%checkoutaction.label"
                 class="org.maven.ide.eclipse.actions.CheckoutAsMavenAction"
                 menubarPath="checkoutGroup"/>
       </objectContribution>
@@ -199,7 +199,7 @@
           adaptable="false">
         <action id="org.maven.ide.eclipse.ui.openPomArtifact"
                 class="org.maven.ide.eclipse.actions.OpenPomAction"
-                label="Open POM"
+                label="%openpomaction.label"
                 enablesFor="1"/>
       </objectContribution>
       <objectContribution id="org.maven.ide.eclipse.openPomDependencyNode"
@@ -207,7 +207,7 @@
           adaptable="false">
         <action id="org.maven.ide.eclipse.ui.openPomDependency"
                 class="org.maven.ide.eclipse.actions.OpenPomAction"
-                label="Open POM"
+                label="%openpomaction.label2"
                 enablesFor="1"/>
       </objectContribution>
       <objectContribution id="org.maven.ide.eclipse.openAetherPomDependencyNode"
@@ -215,7 +215,7 @@
           adaptable="false">
         <action id="org.maven.ide.eclipse.ui.openPomDependency"
                 class="org.maven.ide.eclipse.actions.OpenPomAction"
-                label="Open POM"
+                label="%openpomaction.label3"
                 enablesFor="1"/>
       </objectContribution>
       <objectContribution id="org.maven.ide.eclipse.openPomDependency"
@@ -223,7 +223,7 @@
             adaptable="false">
         <action id="org.maven.ide.eclipse.ui.openPomDependency"
                 class="org.maven.ide.eclipse.actions.OpenPomAction"
-                label="Open POM"
+                label="%openpomaction.label4"
                 enablesFor="1"/>
       </objectContribution>
       
@@ -232,7 +232,7 @@
           adaptable="false">
         <action id="org.maven.ide.eclipse.ui.openPomArtifactUrl"
                 class="org.maven.ide.eclipse.actions.OpenUrlAction:org.maven.ide.eclipse.openProjectPage"
-                label="Open Project Page"
+                label="%openprojectaction.label"
                 enablesFor="1" icon="icons/web.gif"/>
       </objectContribution>
       <objectContribution id="org.maven.ide.eclipse.openProjectPageDependencyNode"
@@ -240,7 +240,7 @@
           adaptable="false">
         <action id="org.maven.ide.eclipse.ui.openPomDependencyUrl"
                 class="org.maven.ide.eclipse.actions.OpenUrlAction:org.maven.ide.eclipse.openProjectPage"
-                label="Open Project Page"
+                label="%openprojectaction.label2"
                 enablesFor="1" icon="icons/web.gif"/>
       </objectContribution>
       <objectContribution id="org.maven.ide.eclipse.openAetherProjectPageDependencyNode"
@@ -248,7 +248,7 @@
           adaptable="false">
         <action id="org.maven.ide.eclipse.ui.openPomDependencyUrl"
                 class="org.maven.ide.eclipse.actions.OpenUrlAction:org.maven.ide.eclipse.openProjectPage"
-                label="Open Project Page"
+                label="%openprojectaction.label3"
                 enablesFor="1" icon="icons/web.gif"/>
       </objectContribution>
       <objectContribution id="org.maven.ide.eclipse.openopenProjectPageDependency"
@@ -256,7 +256,7 @@
             adaptable="false">
         <action id="org.maven.ide.eclipse.ui.openPomArtifactUrl"
                 class="org.maven.ide.eclipse.actions.OpenUrlAction:org.maven.ide.eclipse.openProjectPage"
-                label="Open Project Page"
+                label="%openprojectaction.label4"
                 enablesFor="1" icon="icons/web.gif"/>
       </objectContribution>
 
@@ -277,18 +277,18 @@
                name="%m2.shortcut.open.pom"/>
       <command
             categoryId="org.eclipse.ui.category.navigate"
-            description="Open Maven Type"
+            description="%command.opentype.description"
             id="org.maven.ide.eclipse.ui.command.openType"
             name="%m2.shortcut.open.type"/>
       <command
             categoryId="org.eclipse.ui.category.edit"
-            description="Add Maven Dependency"
+            description="%command.adddependency.description"
             id="org.maven.ide.eclipse.ui.command.addDependency"
             name="%m2.shortcut.addDependency">
       </command>
       <command
             categoryId="org.eclipse.ui.category.edit"
-            description="Add Maven Plugin"
+            description="%command.addplugin.description"
             id="org.maven.ide.eclipse.ui.command.addPlugin"
             name="%m2.shortcut.addPlugin">
       </command>
@@ -302,7 +302,7 @@
    </extension>
 
    <extension point="org.eclipse.ui.keywords">
-      <keyword id="org.maven.ide.eclipse.maven" label="maven"/>
+      <keyword id="org.maven.ide.eclipse.maven" label="%keyword.label"/>
    </extension>
 
    <extension point="org.eclipse.ui.preferencePages">
@@ -314,25 +314,25 @@
       <page id="org.maven.ide.eclipse.preferences.MavenInstallationsPreferencePage"
             category="org.maven.ide.eclipse.preferences.Maven2PreferencePage"
             class="org.maven.ide.eclipse.ui.internal.preferences.MavenInstallationsPreferencePage"
-            name="Installations">
+            name="%page.installations.name">
          <keywordReference id="org.maven.ide.eclipse.maven"/>
       </page>
       <page id="org.maven.ide.eclipse.preferences.MavenSettingsPreferencePage"
             category="org.maven.ide.eclipse.preferences.Maven2PreferencePage"
             class="org.maven.ide.eclipse.ui.internal.preferences.MavenSettingsPreferencePage"
-            name="User Settings">
+            name="%page.usersettings.name">
       <keywordReference id="org.maven.ide.eclipse.maven"/>
       </page>
       <page id="org.maven.ide.eclipse.preferences.ProblemReportingPreferencePage"
             category="org.maven.ide.eclipse.preferences.Maven2PreferencePage"
             class="org.maven.ide.eclipse.ui.internal.preferences.ProblemReportingPreferencePage"
-            name="Problem Reporting">
+            name="%page.reporting.name">
          <keywordReference id="org.maven.ide.eclipse.maven"/>
       </page>
       <page id="org.maven.ide.eclipse.preferences.MavenArchetypesPreferencePage"
             category="org.maven.ide.eclipse.preferences.Maven2PreferencePage"
             class="org.maven.ide.eclipse.ui.internal.preferences.MavenArchetypesPreferencePage"
-            name="Archetypes">
+            name="%page.archetypes.name">
          <keywordReference id="org.maven.ide.eclipse.maven"/>
       </page>
    </extension>
@@ -372,11 +372,11 @@
       </wizard>
 
       <wizard id="org.maven.ide.eclipse.wizards.MavenCheckoutWizard"
-              name="Checkout Maven Projects from SCM"
+              name="%wizard.checkout.name"
               class="org.maven.ide.eclipse.wizards.MavenCheckoutWizard"
               category="org.maven.ide.eclipse"
               icon="icons/import_m2_project.gif" project="true">
-         <description>Check out Maven Project from SVN</description>
+         <description>%wizard.checkout.description</description>
          <!--
          <selection class="org.tigris.subversion.subclipse.core.ISVNRemoteFolder"/>
          -->
@@ -384,7 +384,7 @@
    </extension>
 
    <extension point="org.eclipse.ui.importWizards">
-     <category id="org.eclipse.ui.Basic" name="General"/>
+     <category id="org.eclipse.ui.Basic" name="%category.general.name"/>
      <category id="org.maven.ide.eclipse" name="%m2.wizard.name"/>
 
      <wizard id="org.maven.ide.eclipse.wizards.MavenPomCheckoutWizard"
@@ -398,9 +398,9 @@
      <wizard id="org.maven.ide.eclipse.wizards.MavenCheckoutWizard"
              class="org.maven.ide.eclipse.wizards.MavenCheckoutWizard"
              category="org.maven.ide.eclipse"
-             name="Check out Maven Projects from SCM"
+             name="%wizard.checkout2.name"
              icon="icons/import_m2_project.gif">
-       <description>Checkout Maven Project from SCM</description>
+       <description>%wizard.checkout2.description</description>
        <!--
        <selection class="org.tigris.subversion.subclipse.core.ISVNRemoteFolder"/>
        -->
@@ -410,9 +410,9 @@
              class="org.maven.ide.eclipse.wizards.MavenInstallFileWizard"
              category="org.maven.ide.eclipse"
              icon="icons/import_jar.gif"
-             name="Install or deploy an artifact to a Maven repository">
+             name="%wizard.install.name">
          <selection class="org.eclipse.core.resources.IFile" name="*.jar"/>
-         <description>Install or Deploy an artifact (archive) into a Maven repository</description>
+         <description>%wizard.install.description</description>
      </wizard>
      
      <wizard id="org.maven.ide.eclipse.wizards.Maven2ImportWizard"
@@ -426,7 +426,7 @@
    </extension>
 
    <extension point="org.eclipse.ui.console.consoleFactories">
-      <consoleFactory label="Maven Console" icon="icons/m2.gif"
+      <consoleFactory label="%consoleFactory.label" icon="icons/m2.gif"
             class="org.maven.ide.eclipse.ui.internal.MavenConsoleFactory"/>
    </extension>
 
@@ -442,80 +442,80 @@
 
    <extension point="org.eclipse.ui.actionSets">
      <actionSet id="org.maven.ide.eclipse.ui.navigation"
-                label="Maven Navigation" visible="true">
+                label="%actionSet.navigation.label" visible="true">
        <action id="org.maven.ide.eclipse.ui.open.pom"
                class="org.maven.ide.eclipse.actions.OpenPomAction:class"
                definitionId="org.maven.ide.eclipse.ui.command.openType"
-               label="Open Type from Maven..."
+               label="%action.open.label"
                icon="icons/open_pom.gif"
                style="push"
                menubarPath="navigate/open.ext"
-               tooltip="Open Type from Maven"/>
+               tooltip="%action.open.tooltip"/>
        <action
              class="org.maven.ide.eclipse.actions.OpenPomAction:artifact"
              definitionId="org.maven.ide.eclipse.ui.command.openPom"
              icon="icons/open_pom.gif"
              id="org.maven.ide.eclipse.ui.open.pom"
-             label="Open Maven POM..."
+             label="%action.openpom.label"
              menubarPath="navigate/open.ext"
              style="push"
-             tooltip="Open Maven POM"/>
+             tooltip="%action.openpom.tooltip"/>
         <action
               class="org.maven.ide.eclipse.actions.RefreshMavenModelsAction"
               icon="icons/update_dependencies.gif"
               id="org.maven.ide.eclipse.actions.RefreshModels"
-              label="Update All Maven Dependencies"
+              label="%action.updatedeps.label"
               menubarPath="project/additions"
-              tooltip="Refresh Maven Models">
+              tooltip="%action.updatedeps.tooltip">
         </action>
       </actionSet>
       
       <actionSet
             id="org.maven.ide.eclipse.actions.maven"
-            label="Maven"
+            label="%actionSet.maven.label"
             visible="true">
          <action
                class="org.maven.ide.eclipse.actions.AddDependencyAction"
                definitionId="org.maven.ide.eclipse.ui.command.addDependency"
                icon="icons/open_pom.gif"
                id="org.maven.ide.eclipse.actions.add.dependency"
-               label="Add Maven Dependency"
+               label="%action.adddep.label"
                menubarPath="navigate/open.ext"
                style="push"
-               tooltip="Add Maven Dependency">
+               tooltip="%action.adddep.tooltip">
          </action>
          <action
                class="org.maven.ide.eclipse.actions.AddPluginAction"
                definitionId="org.maven.ide.eclipse.ui.command.addPlugin"
                id="org.maven.ide.eclipse.actions.add.plugin"
-               label="Add Maven Plugin"
+               label="%action.addplugin.label"
                style="push"
-               tooltip="Add Maven Plugin">
+               tooltip="%action.add.plugin.tooltip">
          </action>      
      </actionSet>
    </extension>
 
    <extension point="org.eclipse.ui.views">
       <category id="org.maven.ide.eclipse.views.repositories"
-                name="Maven"/>
+                name="%category.maven.name"/>
       <view id="org.maven.ide.eclipse.views.MavenRepositoryView"
             category="org.maven.ide.eclipse.views.repositories"
             class="org.maven.ide.eclipse.ui.internal.views.MavenRepositoryView"
             icon="icons/maven_indexes.gif"
-            name="Maven Repositories"/>
+            name="%view.repos.name"/>
    </extension>
 
    <extension point="org.eclipse.ui.propertyPages">
       <page id="org.maven.ide.eclipse.MavenProjectPreferencePage"
             class="org.maven.ide.eclipse.ui.internal.preferences.MavenProjectPreferencePage"
-            name="Maven"
+            name="%page.maven.name"
             objectClass="org.eclipse.core.resources.IProject"
             adaptable="true">
          <filter name="nature" value="org.maven.ide.eclipse.maven2Nature"/>
       </page>
       <page id="org.maven.ide.eclipse.MavenProjectLifecycleMappingPage"
             class="org.maven.ide.eclipse.ui.internal.preferences.MavenProjectLifecycleMappingPage"
-            name="Lifecycle Mapping"
+            name="%page.mappings.name"
             category="org.maven.ide.eclipse.MavenProjectPreferencePage"
             objectClass="org.eclipse.core.resources.IProject"
             adaptable="true">
@@ -556,17 +556,17 @@
       <lifecycleMapping
             class="org.maven.ide.eclipse.internal.project.GenericLifecycleMapping"
             id="generic"
-            name="Generic Lifecycle Mapping">
+            name="%lifecycleMapping.generic.name">
       </lifecycleMapping>
       <lifecycleMapping
             class="org.maven.ide.eclipse.internal.project.CustomizableLifecycleMapping"
             id="customizable"
-            name="Customizable Lifecycle Mapping">
+            name="%lifecycleMapping.custom.name">
       </lifecycleMapping>
       <lifecycleMapping
             class="org.maven.ide.eclipse.project.configurator.NoopLifecycleMapping"
             id="NULL"
-            name="Empty Lifecycle Mapping">
+            name="%lifecycleMapping.empty.name">
       </lifecycleMapping>
    </extension>
    <extension
