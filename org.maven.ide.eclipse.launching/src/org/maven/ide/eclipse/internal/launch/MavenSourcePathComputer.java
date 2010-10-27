@@ -54,7 +54,7 @@ public class MavenSourcePathComputer implements ISourcePathComputer {
   }
 
   public String getId() {
-    return "org.maven.ide.eclipse.launching.MavenSourceComputer";
+    return "org.maven.ide.eclipse.launching.MavenSourceComputer"; //$NON-NLS-1$
   }
 
   public ISourceContainer[] computeSourceContainers(ILaunchConfiguration configuration, IProgressMonitor monitor)
@@ -103,7 +103,7 @@ public class MavenSourcePathComputer implements ISourcePathComputer {
       DirectoryScanner ds = new DirectoryScanner();
       ds.setBasedir(entryFile);
       ds.setIncludes(new String[] {
-          "META-INF/maven/*/*/pom.properties",
+          "META-INF/maven/*/*/pom.properties", //$NON-NLS-1$
       });
       ds.scan();
       String[] files = ds.getIncludedFiles();
@@ -128,7 +128,7 @@ public class MavenSourcePathComputer implements ISourcePathComputer {
           while (zes.hasMoreElements()) {
             JarEntry ze = zes.nextElement();
             String name = ze.getName();
-            if (!ze.isDirectory() && name.startsWith("META-INF/maven/") && name.endsWith("pom.properties")) {
+            if (!ze.isDirectory() && name.startsWith("META-INF/maven/") && name.endsWith("pom.properties")) { //$NON-NLS-1$ //$NON-NLS-2$
               addArchiveRuntimeClasspathEntry(entries, entryPath, jar.getInputStream(ze));
             }
           }
@@ -146,9 +146,9 @@ public class MavenSourcePathComputer implements ISourcePathComputer {
     Properties p = new Properties();
     p.load(is);
 
-    String groupId = p.getProperty("groupId");
-    String artifactId = p.getProperty("artifactId");
-    String version = p.getProperty("version");
+    String groupId = p.getProperty("groupId"); //$NON-NLS-1$
+    String artifactId = p.getProperty("artifactId"); //$NON-NLS-1$
+    String version = p.getProperty("version"); //$NON-NLS-1$
 
     File sourcesJar = getSourcesJar(groupId, artifactId, version);
     if (sourcesJar != null) {
@@ -164,7 +164,7 @@ public class MavenSourcePathComputer implements ISourcePathComputer {
       IMaven maven = MavenPlugin.getDefault().getMaven();
 
       try {
-        Artifact artifact = maven.resolve(groupId, artifactId, version, "jar", "sources", null, null);
+        Artifact artifact = maven.resolve(groupId, artifactId, version, "jar", "sources", null, null); //$NON-NLS-1$ //$NON-NLS-2$
         File file = artifact.getFile();
         
         if (file != null && file.exists() && file.canRead()) {

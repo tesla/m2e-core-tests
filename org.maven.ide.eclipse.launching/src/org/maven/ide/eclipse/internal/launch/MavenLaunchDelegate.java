@@ -44,9 +44,9 @@ import org.maven.ide.eclipse.util.Util;
 
 public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaunchConstants {
 
-  private static final String LAUNCHER_TYPE = "org.codehaus.classworlds.Launcher";
-  private static final String LAUNCHER_TYPE3 = "org.codehaus.plexus.classworlds.launcher.Launcher"; // classwordls 2.0
-  private static final String LAUNCH_M2CONF_FILE = "org.maven.ide.eclipse.internal.launch.M2_CONF";
+  private static final String LAUNCHER_TYPE = "org.codehaus.classworlds.Launcher"; //$NON-NLS-1$
+  private static final String LAUNCHER_TYPE3 = "org.codehaus.plexus.classworlds.launcher.Launcher"; // classwordls 2.0 //$NON-NLS-1$
+  private static final String LAUNCH_M2CONF_FILE = "org.maven.ide.eclipse.internal.launch.M2_CONF"; //$NON-NLS-1$
 
   private MavenRuntime runtime;
   private MavenLauncherConfigurationHandler m2conf;
@@ -55,8 +55,8 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
   public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor)
       throws CoreException {
     MavenConsole console = MavenPlugin.getDefault().getConsole();
-    console.logMessage("" + getWorkingDirectory(configuration));
-    console.logMessage(" mvn" + getProgramArguments(configuration));
+    console.logMessage("" + getWorkingDirectory(configuration)); //$NON-NLS-1$
+    console.logMessage(" mvn" + getProgramArguments(configuration)); //$NON-NLS-1$
 
     runtime = MavenLaunchUtils.getMavenRuntime(configuration);
 
@@ -69,9 +69,9 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
 
     File state = MavenPlugin.getDefault().getStateLocation().toFile();
     try {
-      File dir = new File(state, "launches");
+      File dir = new File(state, "launches"); //$NON-NLS-1$
       dir.mkdirs();
-      confFile = File.createTempFile("m2conf", ".tmp", dir);
+      confFile = File.createTempFile("m2conf", ".tmp", dir); //$NON-NLS-1$ //$NON-NLS-2$
       launch.setAttribute(LAUNCH_M2CONF_FILE, confFile.getCanonicalPath());
       OutputStream os = new FileOutputStream(confFile);
       try {
@@ -80,7 +80,7 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
         os.close();
       }
     } catch (IOException e) {
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Can't create m2.conf ", e));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, Messages.MavenLaunchDelegate_error_cannot_create_conf, e));
     }
     
     super.launch(configuration, mode, launch, monitor);
@@ -106,7 +106,7 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
   }
 
   public String getMainTypeName(ILaunchConfiguration configuration) throws CoreException {
-    return runtime.getVersion().startsWith("3.0")? LAUNCHER_TYPE3: LAUNCHER_TYPE;
+    return runtime.getVersion().startsWith("3.0")? LAUNCHER_TYPE3: LAUNCHER_TYPE; //$NON-NLS-1$
   }
 
   public String[] getClasspath(ILaunchConfiguration configuration) throws CoreException {
@@ -116,7 +116,7 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
 
   public String getProgramArguments(ILaunchConfiguration configuration) throws CoreException {
     return getProperties(configuration) + //
-        getPreferences(configuration) + " " + //
+        getPreferences(configuration) + " " + // //$NON-NLS-1$
         getGoals(configuration);
   }
 
@@ -137,26 +137,26 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
     // workspace artifact resolution
     if (shouldResolveWorkspaceArtifacts(configuration)) {
       File state = MavenPlugin.getDefault().getMavenProjectManager().getWorkspaceStateFile();
-      sb.append("-Dm2eclipse.workspace.state=").append(quote(state.getAbsolutePath()));
+      sb.append("-Dm2eclipse.workspace.state=").append(quote(state.getAbsolutePath())); //$NON-NLS-1$
     }
 
     // maven.home
     String location = runtime.getLocation();
     if (location != null) {
-      sb.append(" -Dmaven.home=").append(quote(location));
+      sb.append(" -Dmaven.home=").append(quote(location)); //$NON-NLS-1$
     }
 
     // m2.conf
-    sb.append(" -Dclassworlds.conf=").append(quote(confFile.getAbsolutePath()));
+    sb.append(" -Dclassworlds.conf=").append(quote(confFile.getAbsolutePath())); //$NON-NLS-1$
 
     // user configured entries
-    sb.append(" ").append(super.getVMArguments(configuration));
+    sb.append(" ").append(super.getVMArguments(configuration)); //$NON-NLS-1$
 
     return sb.toString();
   }
 
   private String quote(String string) {
-    return string.indexOf(' ') > -1 ? "\"" + string + "\"" : string;
+    return string.indexOf(' ') > -1 ? "\"" + string + "\"" : string; //$NON-NLS-1$ //$NON-NLS-2$
   }
 
   private boolean shouldResolveWorkspaceArtifacts(ILaunchConfiguration configuration) throws CoreException {
@@ -164,7 +164,7 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
   }
 
   protected String getGoals(ILaunchConfiguration configuration) throws CoreException {
-    return configuration.getAttribute(MavenLaunchConstants.ATTR_GOALS, "");
+    return configuration.getAttribute(MavenLaunchConstants.ATTR_GOALS, ""); //$NON-NLS-1$
   }
 
   public boolean buildForLaunch(ILaunchConfiguration configuration, String mode, IProgressMonitor monitor) {
@@ -192,7 +192,7 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
           }
         }
 
-        sb.append(" -D").append(name);
+        sb.append(" -D").append(name); //$NON-NLS-1$
         if(value != null) {
           sb.append('=').append(quote(value));
         }
@@ -205,7 +205,7 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
     try {
       String profiles = configuration.getAttribute(ATTR_PROFILES, (String) null);
       if(profiles != null && profiles.trim().length() > 0) {
-        sb.append(" -P").append(profiles.replaceAll("\\s+", ","));
+        sb.append(" -P").append(profiles.replaceAll("\\s+", ",")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
       }
     } catch(CoreException ex) {
       String msg = "Exception while getting configuration attribute " + ATTR_PROFILES;
@@ -223,28 +223,28 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
 
     StringBuffer sb = new StringBuffer();
 
-    sb.append(" -B");
+    sb.append(" -B"); //$NON-NLS-1$
 
     if(configuration.getAttribute(MavenLaunchConstants.ATTR_DEBUG_OUTPUT, mavenConfiguration.isDebugOutput())) {
-      sb.append(" -X").append(" -e");
+      sb.append(" -X").append(" -e"); //$NON-NLS-1$ //$NON-NLS-2$
     }
     // sb.append(" -D").append(MavenPreferenceConstants.P_DEBUG_OUTPUT).append("=").append(debugOutput);
 
     if(configuration.getAttribute(MavenLaunchConstants.ATTR_OFFLINE, mavenConfiguration.isOffline())) {
-      sb.append(" -o");
+      sb.append(" -o"); //$NON-NLS-1$
     }
     // sb.append(" -D").append(MavenPreferenceConstants.P_OFFLINE).append("=").append(offline);
 
     if(configuration.getAttribute(MavenLaunchConstants.ATTR_UPDATE_SNAPSHOTS, false)) {
-      sb.append(" -U");
+      sb.append(" -U"); //$NON-NLS-1$
     }
     
     if(configuration.getAttribute(MavenLaunchConstants.ATTR_NON_RECURSIVE, false)) {
-      sb.append(" -N");
+      sb.append(" -N"); //$NON-NLS-1$
     }
     
     if(configuration.getAttribute(MavenLaunchConstants.ATTR_SKIP_TESTS, false)) {
-      sb.append(" -Dmaven.test.skip=true");
+      sb.append(" -Dmaven.test.skip=true"); //$NON-NLS-1$
     }
 
     String settings = configuration.getAttribute(MavenLaunchConstants.ATTR_USER_SETTINGS, (String) null);
@@ -255,7 +255,7 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
       }
     }
     if(settings != null && settings.trim().length() > 0) {
-      sb.append(" -s ").append(quote(settings));
+      sb.append(" -s ").append(quote(settings)); //$NON-NLS-1$
     }
 
     // boolean b = preferenceStore.getBoolean(MavenPreferenceConstants.P_CHECK_LATEST_PLUGIN_VERSION);
@@ -328,7 +328,7 @@ public class MavenLaunchDelegate extends JavaLaunchDelegate implements MavenLaun
     protected void processResources() {
       removeTempFiles(launch);
 
-      Job job = new Job("Refreshing resources...") {
+      Job job = new Job(Messages.MavenLaunchDelegate_job_name) {
         public IStatus run(IProgressMonitor monitor) {
           try {
             RefreshTab.refreshResources(configuration, monitor);

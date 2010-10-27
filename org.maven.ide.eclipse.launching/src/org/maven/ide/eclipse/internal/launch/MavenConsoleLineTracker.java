@@ -53,13 +53,13 @@ import org.maven.ide.eclipse.project.MavenProjectManager;
  */
 public class MavenConsoleLineTracker implements IConsoleLineTracker {
 
-  private static final String PLUGIN_ID = "org.maven.ide.eclipse.launching";
+  private static final String PLUGIN_ID = "org.maven.ide.eclipse.launching"; //$NON-NLS-1$
 
   private static final String LISTENING_MARKER = "Listening for transport dt_socket at address: ";
   
   private static final String RUNNING_MARKER = "Running ";
 
-  private static final String TEST_TEMPLATE = "(?:  )test.+\\(([\\w\\.]+)\\)";
+  private static final String TEST_TEMPLATE = "(?:  )test.+\\(([\\w\\.]+)\\)"; //$NON-NLS-1$
   
   private static final Pattern PATTERN2 = Pattern.compile(TEST_TEMPLATE);
   
@@ -172,8 +172,8 @@ public class MavenConsoleLineTracker implements IConsoleLineTracker {
     workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_CONNECTOR, IJavaLaunchConfigurationConstants.ID_SOCKET_ATTACH_VM_CONNECTOR);
     
     Map<String, String> connectMap = new HashMap<String, String>();
-    connectMap.put("port", portString);
-    connectMap.put("hostname", "localhost");
+    connectMap.put("port", portString); //$NON-NLS-1$
+    connectMap.put("hostname", "localhost"); //$NON-NLS-1$ //$NON-NLS-2$
     workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CONNECT_MAP, connectMap);
 
     IProject project = getProject(baseDir);
@@ -181,7 +181,7 @@ public class MavenConsoleLineTracker implements IConsoleLineTracker {
       workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, project.getName());
     }
 
-    DebugUITools.launch(workingCopy, "debug");
+    DebugUITools.launch(workingCopy, "debug"); //$NON-NLS-1$
   }
 
   static IProject getProject(String baseDir) {
@@ -213,7 +213,7 @@ public class MavenConsoleLineTracker implements IConsoleLineTracker {
     public void linkActivated() {
       DirectoryScanner ds = new DirectoryScanner();
       ds.setBasedir(baseDir);
-      ds.setIncludes(new String[] {"**/" + testName + ".txt"});
+      ds.setIncludes(new String[] {"**/" + testName + ".txt"}); //$NON-NLS-1$ //$NON-NLS-2$
       ds.scan();
       String[] includedFiles = ds.getIncludedFiles();
 
@@ -223,7 +223,7 @@ public class MavenConsoleLineTracker implements IConsoleLineTracker {
         IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
         IWorkbenchPage page = window.getActivePage();
         
-        IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor("foo.txt");
+        IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor("foo.txt"); //$NON-NLS-1$
         
         File reportFile = new File(baseDir, includedFiles[0]);
         

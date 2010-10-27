@@ -20,6 +20,7 @@ import java.util.Map;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.osgi.util.NLS;
 import org.maven.ide.eclipse.embedder.IMavenLauncherConfiguration;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 
@@ -61,20 +62,20 @@ public class MavenLauncherConfigurationHandler implements IMavenLauncherConfigur
   }
 
   public void save(OutputStream os) throws IOException {
-    BufferedWriter out = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
-    out.write("main is " + mainType + " from " + mainRealm + "\n");
+    BufferedWriter out = new BufferedWriter(new OutputStreamWriter(os, "UTF-8")); //$NON-NLS-1$
+    out.write(NLS.bind("main is {0} from {1}\n", mainType, mainRealm));
     for (Map.Entry<String, List<String>> realm : realms.entrySet()) {
       if (LAUNCHER_REALM.equals(realm.getKey())) {
         continue;
       }
-      out.write("[" + realm.getKey() + "]\n");
+      out.write(NLS.bind("[{0}]\n", realm.getKey()));
       if (mainRealm.equals(realm.getKey())) {
         for (String entry : forcedEntries) {
-          out.write("load " + entry + "\n");
+          out.write(NLS.bind("load {0}\n", entry));
         }
       }
       for (String entry : realm.getValue()) {
-        out.write("load " + entry + "\n");
+        out.write(NLS.bind("load {0}\n", entry));
       }
     }
     out.flush();

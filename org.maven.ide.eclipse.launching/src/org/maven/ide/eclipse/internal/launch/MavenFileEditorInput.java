@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.editors.text.ILocationProvider;
@@ -62,7 +63,7 @@ public class MavenFileEditorInput implements IStorageEditorInput {
           return new FileInputStream(fileName);
         } catch(FileNotFoundException ex) {
           throw new CoreException(new Status(IStatus.ERROR, //
-              IMavenConstants.PLUGIN_ID, -1, "Unable to open " + fileName, ex));
+              IMavenConstants.PLUGIN_ID, -1, NLS.bind(Messages.MavenFileEditorInput_0, fileName), ex));
         }
       }
 

@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.osgi.util.NLS;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.actions.MavenLaunchConstants;
 import org.maven.ide.eclipse.core.IMavenConstants;
@@ -42,11 +43,11 @@ public class MavenLaunchUtils {
 
   public static MavenRuntime getMavenRuntime(ILaunchConfiguration configuration) throws CoreException {
     MavenRuntimeManager runtimeManager = MavenPlugin.getDefault().getMavenRuntimeManager();
-    String location = configuration.getAttribute(MavenLaunchConstants.ATTR_RUNTIME, "");
+    String location = configuration.getAttribute(MavenLaunchConstants.ATTR_RUNTIME, ""); //$NON-NLS-1$
     MavenRuntime runtime = runtimeManager.getRuntime(location);
     if(runtime == null) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, //
-          "Can't find Maven installation " + location, null));
+          NLS.bind(Messages.MavenLaunchUtils_error_no_maven_install, location), null));
     }
     return runtime;
   }
@@ -54,10 +55,10 @@ public class MavenLaunchUtils {
   public static String getCliResolver(MavenRuntime runtime) throws CoreException {
     String jarname;
     String runtimeVersion = runtime.getVersion();
-    if (runtimeVersion.startsWith("3.")) {
-      jarname = "org.maven.ide.eclipse.cliresolver30.jar";
+    if (runtimeVersion.startsWith("3.")) { //$NON-NLS-1$
+      jarname = "org.maven.ide.eclipse.cliresolver30.jar"; //$NON-NLS-1$
     } else {
-      jarname = "org.maven.ide.eclipse.cliresolver.jar";
+      jarname = "org.maven.ide.eclipse.cliresolver.jar"; //$NON-NLS-1$
     }
     URL url = MavenLaunchPlugin.getDefault().getBundle().getEntry(jarname);
     try {
@@ -82,7 +83,7 @@ public class MavenLaunchUtils {
     IMaven maven = MavenPlugin.getDefault().getMaven();
     for(String gav : list) {
       // groupId:artifactId:version
-      StringTokenizer st = new StringTokenizer(gav, ":");
+      StringTokenizer st = new StringTokenizer(gav, ":"); //$NON-NLS-1$
       String groupId = st.nextToken();
       String artifactId = st.nextToken();
       String version = st.nextToken();
@@ -92,9 +93,9 @@ public class MavenLaunchUtils {
       if(facade != null) {
         collector.addProjectEntry(facade);
       } else {
-        String name = groupId + ":" + artifactId + ":" + version;
+        String name = groupId + ":" + artifactId + ":" + version; //$NON-NLS-1$ //$NON-NLS-2$
         try {
-          Artifact artifact = maven.resolve(groupId, artifactId, version, "jar", null, null, null);
+          Artifact artifact = maven.resolve(groupId, artifactId, version, "jar", null, null, null); //$NON-NLS-1$
           File file = artifact.getFile();
           if(file != null) {
             collector.addArchiveEntry(file.getAbsolutePath());

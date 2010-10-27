@@ -42,6 +42,7 @@ import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
@@ -52,6 +53,7 @@ import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.internal.launch.Messages;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
@@ -72,7 +74,7 @@ public class ExecutePomAction implements ILaunchShortcut, IExecutableExtension {
   private String goalName = null;
 
   public void setInitializationData(IConfigurationElement config, String propertyName, Object data) {
-    if("WITH_DIALOG".equals(data)) {
+    if("WITH_DIALOG".equals(data)) { //$NON-NLS-1$
       this.showDialog = true;
     } else {
       this.goalName = (String) data;
@@ -192,11 +194,11 @@ public class ExecutePomAction implements ILaunchShortcut, IExecutableExtension {
       String launchSafeGoalName = goal.replace(':', '-');
 
       ILaunchConfigurationWorkingCopy workingCopy = launchConfigurationType.newInstance(null, //
-          "Executing " + launchSafeGoalName + " in " + basedir.getLocation().toString().replace('/', '-'));
+          NLS.bind(Messages.ExecutePomAction_executing, launchSafeGoalName, basedir.getLocation().toString().replace('/', '-')));
       workingCopy.setAttribute(MavenLaunchConstants.ATTR_POM_DIR, basedir.getLocation().toOSString());
       workingCopy.setAttribute(MavenLaunchConstants.ATTR_GOALS, goal);
       workingCopy.setAttribute(IDebugUIConstants.ATTR_PRIVATE, true);
-      workingCopy.setAttribute(RefreshTab.ATTR_REFRESH_SCOPE, "${project}");
+      workingCopy.setAttribute(RefreshTab.ATTR_REFRESH_SCOPE, "${project}"); //$NON-NLS-1$
       workingCopy.setAttribute(RefreshTab.ATTR_REFRESH_RECURSIVE, true);
       
       setProjectConfiguration(workingCopy, basedir);
@@ -328,11 +330,11 @@ public class ExecutePomAction implements ILaunchShortcut, IExecutableExtension {
                 }
               });
           dialog.setElements(matchingConfigs.toArray(new ILaunchConfiguration[matchingConfigs.size()]));
-          dialog.setTitle("Select Configuration");
+          dialog.setTitle(Messages.ExecutePomAction_dialog_title);
           if (mode.equals(ILaunchManager.DEBUG_MODE)) {
-            dialog.setMessage("Select a launch configuration to debug:");
+            dialog.setMessage(Messages.ExecutePomAction_dialog_debug_message);
           } else {
-            dialog.setMessage("Select a launch configuration to run:");
+            dialog.setMessage(Messages.ExecutePomAction_dialog_run_message);
           }
           dialog.setMultipleSelection(false);
           int result = dialog.open();
