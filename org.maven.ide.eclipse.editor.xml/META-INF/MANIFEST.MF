@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Maven POM XML Editor
+Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.maven.ide.eclipse.editor.xml;singleton:=true
 Bundle-Version: 0.12.0.qualifier
 Bundle-Activator: org.maven.ide.eclipse.editor.xml.MvnIndexPlugin
@@ -25,6 +25,6 @@ Require-Bundle: org.eclipse.core.runtime,
 Export-Package: org.maven.ide.eclipse.editor.xml,
  org.maven.ide.eclipse.editor.xml.search
 Bundle-ClassPath: .
-Bundle-Vendor: Sonatype, Inc.
+Bundle-Vendor: %Bundle-Vendor
 Bundle-RequiredExecutionEnvironment: J2SE-1.5,
  JavaSE-1.6

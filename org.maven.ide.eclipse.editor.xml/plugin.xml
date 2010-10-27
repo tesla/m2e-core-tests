@@ -29,110 +29,110 @@
 		</markerResolutionGenerator>
 	</extension>
   <extension  point="org.eclipse.ui.editors.templates">
-    <contextType name="Document"
+    <contextType name="%contextType.document"
       class="org.maven.ide.eclipse.editor.xml.PomTemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.#document"/>
     
-    <contextType name="Project"
+    <contextType name="%contextType.project"
       class="org.maven.ide.eclipse.editor.xml.PomTemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.project"/>
     
-    <contextType name="Parent"
+    <contextType name="%contextType.parent"
       class="org.maven.ide.eclipse.editor.xml.PomTemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.parent"/>
     
-    <contextType name="Properties"
+    <contextType name="%contextType.properties"
       class="org.maven.ide.eclipse.editor.xml.PomTemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.properties"/>
     
-    <contextType name="Properties"
+    <contextType name="%contextType.properties2"
       class="org.maven.ide.eclipse.editor.xml.PomTemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.properties"/>
     
-    <contextType name="Dependencies"
+    <contextType name="%contextType.dependencies"
       class="org.maven.ide.eclipse.editor.xml.PomTemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.dependencies"/>
     
-    <contextType name="Exclusions"
+    <contextType name="%contextType.exclusions"
       class="org.maven.ide.eclipse.editor.xml.PomTemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.exclusions"/>
     
-    <contextType name="Plugins"
+    <contextType name="%contextType.plugins"
       class="org.maven.ide.eclipse.editor.xml.PomTemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.plugins"/>
     
-    <contextType name="Plugin"
+    <contextType name="%contextType.plugin"
       class="org.maven.ide.eclipse.editor.xml.PomTemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.plugin"/>
     
-    <contextType name="Configuration"
+    <contextType name="%contextType.configuration"
       class="org.maven.ide.eclipse.editor.xml.PomTemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.configuration"/>
     
-    <contextType name="Executions"
+    <contextType name="%contextType.executions"
       class="org.maven.ide.eclipse.editor.xml.PomTemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.executions"/>
     
-    <contextType name="Execution"
+    <contextType name="%contextType.execution"
       class="org.maven.ide.eclipse.editor.xml.PomTemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.execution"/>
     
-    <contextType name="Profiles"
+    <contextType name="%contextType.profiles"
       class="org.maven.ide.eclipse.editor.xml.PomTemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.profiles"/>
     
-    <contextType name="Repositories"
+    <contextType name="%contextType.repositories"
       class="org.maven.ide.eclipse.editor.xml.PomTemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.repositories"/>
     
-    <contextType name="Group Id"
+    <contextType name="%contextType.groupid"
       class="org.eclipse.jface.text.templates.TemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.groupId"/>
     
-    <contextType name="Artifact Id"
+    <contextType name="%contextType.artifactid"
       class="org.eclipse.jface.text.templates.TemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.artifactId"/>
     
-    <contextType name="Version"
+    <contextType name="%contextType.version"
       class="org.eclipse.jface.text.templates.TemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.version"/>
     
-    <contextType name="Classifier"
+    <contextType name="%contextType.classifier"
       class="org.eclipse.jface.text.templates.TemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.classifier"/>
     
-    <contextType name="Type"
+    <contextType name="%contextType.type"
       class="org.eclipse.jface.text.templates.TemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.type"/>
 
-    <contextType name="SystemPath"
+    <contextType name="%contextType.systemPath"
       class="org.eclipse.jface.text.templates.TemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.systemPath"/>
 
-    <contextType name="Packaging"
+    <contextType name="%contextType.packaging"
       class="org.eclipse.jface.text.templates.TemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.packaging"/>
 
-    <contextType name="Scope"
+    <contextType name="%contextType.scope"
       class="org.eclipse.jface.text.templates.TemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.scope"/>
 
-    <contextType name="Phase"
+    <contextType name="%contextType.phase"
       class="org.eclipse.jface.text.templates.TemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.phase"/>
 
-    <contextType name="Goal"
+    <contextType name="%contextType.goal"
       class="org.eclipse.jface.text.templates.TemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.goal"/>
       
-    <contextType name="Module"
+    <contextType name="%contextType.module"
       class="org.eclipse.jface.text.templates.TemplateContextType"
       id="org.maven.ide.eclipse.editor.xml.templates.contextType.module"/>
 
     <template id="org.maven.ide.eclipse.editor.xml.templates.project.skeleton"
          contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.#document"
-         name="project" 
-         description="New project element">
+         name="%template.project.name" 
+         description="%template.project.description">
       <pattern>&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot;
     xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
     xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;
@@ -141,8 +141,8 @@
       
     <template id="org.maven.ide.eclipse.editor.xml.templates.parent.skeleton"
          contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.project"
-         name="parent" 
-         description="New parent element">
+         name="%template.parent.name" 
+         description="%template.parent.description">
       <pattern>&lt;parent&gt;
     &lt;groupId&gt;${cursor}&lt;/groupId&gt;
     &lt;artifactId&gt;&lt;/artifactId&gt;
@@ -152,15 +152,15 @@
 
     <template id="org.maven.ide.eclipse.editor.xml.templates.property.skeleton"
          contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.properties"
-         name="property" 
-         description="New property element">
+         name="%template.property.name" 
+         description="%template.property.description">
       <pattern>&lt;${cursor}${name}&gt;${value}&lt;/${name}&gt;</pattern>
     </template>
 
     <template id="org.maven.ide.eclipse.editor.xml.templates.dependency.skeleton"
          contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.dependencies"
-         name="dependency" 
-         description="New dependency element">
+         name="%template.dependency.name" 
+         description="%template.dependency.description">
       <pattern>&lt;dependency&gt;
       &lt;groupId&gt;${cursor}&lt;/groupId&gt;
       &lt;artifactId&gt;&lt;/artifactId&gt;
@@ -170,8 +170,8 @@
 
     <template id="org.maven.ide.eclipse.editor.xml.templates.exclusion.skeleton"
          contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.exclusions"
-         name="exclusion" 
-         description="New exclusion element">
+         name="%template.exclusion.name" 
+         description="%template.exclusion.description">
       <pattern>&lt;exclusion&gt;
           &lt;groupId&gt;${cursor}&lt;/groupId&gt;
           &lt;artifactId&gt;&lt;/artifactId&gt;
@@ -180,8 +180,8 @@
 
     <template id="org.maven.ide.eclipse.editor.xml.templates.plugin.skeleton"
          contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.plugins"
-         name="plugin" 
-         description="New plugin element">
+         name="%template.plugin.name" 
+         description="%template.plugin.description">
       <pattern>&lt;plugin&gt;
         &lt;groupId&gt;${cursor}&lt;/groupId&gt;
         &lt;artifactId&gt;&lt;/artifactId&gt;
@@ -193,8 +193,8 @@
 
     <template id="org.maven.ide.eclipse.editor.xml.templates.plugin.javac"
          contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.plugins"
-         name="javac plugin" 
-         description="Java compiler plugin configuration">
+         name="%template.compiler.name" 
+         description="%template.compiler.description">
       <pattern>&lt;plugin&gt;
         &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
         &lt;artifactId&gt;maven-compiler-plugin&lt;/artifactId&gt;
@@ -208,8 +208,8 @@
 
     <template id="org.maven.ide.eclipse.editor.xml.templates.plugin.aspectj"
          contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.plugins"
-         name="AspectJ plugin" 
-         description="AspectJ plugin configuration">
+         name="%template.aspectj.name" 
+         description="%template.aspectj.description">
       <pattern>&lt;plugin&gt;
          &lt;groupId&gt;org.codehaus.mojo&lt;/groupId&gt;
          &lt;artifactId&gt;aspectj-maven-plugin&lt;/artifactId&gt;
@@ -226,8 +226,8 @@
 
     <template id="org.maven.ide.eclipse.editor.xml.templates.plugin.war"
          contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.plugins"
-         name="war plugin" 
-         description="WAR plugin configuration">
+         name="%template.war.name" 
+         description="%template.war.description">
       <pattern>&lt;plugin&gt;
         &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
         &lt;artifactId&gt;maven-war-plugin&lt;/artifactId&gt;
@@ -249,8 +249,8 @@
 
     <template id="org.maven.ide.eclipse.editor.xml.templates.plugin.ejb"
          contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.plugins"
-         name="ejb plugin" 
-         description="EJB plugin configuration">
+         name="%template.ejb.name" 
+         description="%template.ejb.description">
       <pattern>&lt;plugin&gt;
         &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
         &lt;artifactId&gt;maven-ejb-plugin&lt;/artifactId&gt;
@@ -264,8 +264,8 @@
 
     <template id="org.maven.ide.eclipse.editor.xml.templates.plugin.ear"
          contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.plugins"
-         name="ear plugin" 
-         description="EAR plugin configuration">
+         name="%template.ear.name" 
+         description="%template.ear.description">
       <pattern>&lt;plugin&gt;
         &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
         &lt;artifactId&gt;maven-ear-plugin&lt;/artifactId&gt;
@@ -298,8 +298,8 @@
     
     <template id="org.maven.ide.eclipse.editor.xml.templates.plugin.jetty"
          contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.plugins"
-         name="jetty plugin" 
-         description="Jetty plugin configuration">
+         name="%template.jetty.name" 
+         description="%template.jetty.description">
       <pattern>&lt;plugin&gt;
         &lt;groupId&gt;org.mortbay.jetty&lt;/groupId&gt;
         &lt;artifactId&gt;maven-jetty-plugin&lt;/artifactId&gt;
@@ -318,8 +318,8 @@
 
     <template id="org.maven.ide.eclipse.editor.xml.templates.repository.skeleton"
          contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.repositories"
-         name="repository" 
-         description="New repository element">
+         name="%template.repository.name" 
+         description="%template.repository.description">
       <pattern>&lt;repository&gt;
         &lt;id&gt;${cursor}&lt;/id&gt;
         &lt;url&gt;&lt;/url&gt;
@@ -334,8 +334,8 @@
     
     <template id="org.maven.ide.eclipse.editor.xml.templates.execution.skeleton"
          contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.executions"
-         name="execution" 
-         description="New execution element">
+         name="%template.execution.name" 
+         description="%template.execution.description">
       <pattern>&lt;execution&gt;
             &lt;id&gt;${cursor}&lt;/id&gt;
             &lt;phase&gt;${verify}&lt;/phase&gt;
@@ -350,8 +350,8 @@
     
     <template id="org.maven.ide.eclipse.editor.xml.templates.profile.skeleton"
          contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.profiles"
-         name="profile" 
-         description="New profile element">
+         name="%template.profile.name" 
+         description="%template.profile.description">
       <pattern>&lt;profile&gt;
       &lt;id&gt;${cursor}${test}&lt;/id&gt;
       &lt;activation&gt;
@@ -361,8 +361,8 @@
     
     <template id="org.maven.ide.eclipse.editor.xml.templates.profile.tools.jar"
          contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.profiles"
-         name="tools.jar" 
-         description="Profile for tools.jar">
+         name="%template.tools.name" 
+         description="%template.tools.description">
       <pattern>&lt;profile&gt;
       &lt;id&gt;tools.jar&lt;/id&gt;
       &lt;activation&gt;
@@ -385,21 +385,21 @@
     
     <template id="org.maven.ide.eclipse.editor.xml.templates.systemPath.tools.jar"
          contextTypeId="org.maven.ide.eclipse.editor.xml.templates.contextType.systemPath"
-         name="tools.jar" 
-         description="Path to the tools.jar">
+         name="%template.tools2.name" 
+         description="%template.tools2.description">
       <pattern>$${java.home}/../lib/tools.jar</pattern>
     </template>
   </extension>
 
   <extension point="org.eclipse.ui.keywords">
-    <keyword id="org.maven.ide.eclipse.maven" label="maven"/>
+    <keyword id="org.maven.ide.eclipse.maven" label="%keyword.label"/>
   </extension>
 
   <extension point="org.eclipse.ui.preferencePages">
     <page id="org.maven.ide.eclipse.editor.xml.preferences.PomTemplatesPreferencePage"
           category="org.maven.ide.eclipse.preferences.Maven2PreferencePage"
           class="org.maven.ide.eclipse.editor.xml.preferences.PomTemplatesPreferencePage"
-          name="Templates">
+          name="%page.name">
        <keywordReference id="org.maven.ide.eclipse.maven"/>
     </page>
   </extension>
