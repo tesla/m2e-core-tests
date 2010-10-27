@@ -4,12 +4,12 @@ Export-Package: org.apache.maven.shared.dependency.tree,
  org.apache.maven.shared.dependency.tree.traversal,
  META-INF.plexus
 Bundle-ClassPath: jars/maven-dependency-tree-1.2-SNAPSHOT.jar
-Bundle-Name: Maven Dependency Tree Bundle
+Bundle-Name: %Bundle-Name
 Bundle-RequiredExecutionEnvironment: J2SE-1.5,
  JavaSE-1.6
 Require-Bundle: org.maven.ide.eclipse.maven_embedder;bundle-version="[
  0.12.0,0.13.0)"
-Bundle-Vendor: Sonatype, Inc.
+Bundle-Vendor: %Bundle-Vendor
 MavenArtifact-BaseVersion: 1.2.1.20090519-1900
 Bundle-Version: 0.12.0.qualifier
 MavenArtifact-GroupId: org.maven.ide.eclipse
