@@ -8,6 +8,8 @@
 
 package org.maven.ide.eclipse.editor.xml.search;
 
+import org.maven.ide.eclipse.editor.xml.internal.Messages;
+
 /**
  * Information about the artifact.
  *
@@ -57,17 +59,17 @@ public class ArtifactInfo {
    */
   public String toString()
   {
-      final String TAB = "    ";
+      final String TAB = "    "; //$NON-NLS-1$
       
-      String retValue = "";
+      String retValue = ""; //$NON-NLS-1$
       
-      retValue = "ArtifactInfo ( "
-          + "groupId = " + this.groupId + TAB
-          + "artifactId = " + this.artifactId + TAB
-          + "version = " + this.version + TAB
-          + "classfier = " + this.classfier + TAB
-          + "type = " + this.type + TAB
-          + " )";
+      retValue = "ArtifactInfo ( " //$NON-NLS-1$
+          + "groupId = " + this.groupId + TAB //$NON-NLS-1$
+          + "artifactId = " + this.artifactId + TAB //$NON-NLS-1$
+          + "version = " + this.version + TAB //$NON-NLS-1$
+          + "classfier = " + this.classfier + TAB //$NON-NLS-1$
+          + "type = " + this.type + TAB //$NON-NLS-1$
+          + " )"; //$NON-NLS-1$
   
       return retValue;
   }

@@ -21,6 +21,7 @@ import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocumentReg
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.editor.xml.internal.Messages;
 
 /**
  * MavenMarkerResolution
@@ -33,7 +34,7 @@ public class MavenMarkerResolution implements IMarkerResolution {
    * @see org.eclipse.ui.IMarkerResolution#getLabel()
    */
   public String getLabel() {
-    return "Add Schema information to the specified pom.xml";
+    return Messages.MavenMarkerResolution_schema_label;
   }
 
   /* (non-Javadoc)
@@ -43,10 +44,10 @@ public class MavenMarkerResolution implements IMarkerResolution {
     if(marker.getResource().getType() == IResource.FILE){
       try {
         IDOMModel domModel = (IDOMModel)StructuredModelManager.getModelManager().getModelForEdit((IFile)marker.getResource());
-        int offset = ((Integer)marker.getAttribute("offset"));
+        int offset = ((Integer)marker.getAttribute("offset")); //$NON-NLS-1$
         IStructuredDocumentRegion regionAtCharacterOffset = domModel.getStructuredDocument().getRegionAtCharacterOffset(offset);
         if(regionAtCharacterOffset != null && regionAtCharacterOffset.getText() != null &&
-            regionAtCharacterOffset.getText().lastIndexOf("<project") >=0){
+            regionAtCharacterOffset.getText().lastIndexOf("<project") >=0){ //$NON-NLS-1$
           //in case there are unsaved changes, find the current offset of the <project> node before inserting
           offset = regionAtCharacterOffset.getStartOffset();
           IDE.openEditor(MvnIndexPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow().getActivePage(), (IFile)marker.getResource());
@@ -56,14 +57,14 @@ public class MavenMarkerResolution implements IMarkerResolution {
             IEditorPart activeEditor = MvnIndexPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
             MvnIndexPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow().getActivePage().saveEditor(activeEditor, false);
           } catch(Exception e){
-            MavenLogger.log("Unable to insert schema info", e);
+            MavenLogger.log("Unable to insert schema info", e); //$NON-NLS-1$
           }
         } else {
-          String msg = "Unable to apply the quick fix. The file may have unsaved changes that invalidate the current quick fix.";
-          MessageDialog.openError(MvnIndexPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow().getShell(), "Error", msg);
+          String msg = Messages.MavenMarkerResolution_error;
+          MessageDialog.openError(MvnIndexPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow().getShell(), Messages.MavenMarkerResolution_error_title, msg);
         }
       } catch(Exception e) {
-        MavenLogger.log("Unable to run quick fix for maven marker", e);
+        MavenLogger.log("Unable to run quick fix for maven marker", e); //$NON-NLS-1$
       }
     }
   }

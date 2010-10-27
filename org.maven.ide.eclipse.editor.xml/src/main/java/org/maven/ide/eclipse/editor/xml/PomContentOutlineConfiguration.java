@@ -11,11 +11,14 @@ package org.maven.ide.eclipse.editor.xml;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.wst.xml.ui.views.contentoutline.XMLContentOutlineConfiguration;
+
+import org.maven.ide.eclipse.editor.xml.internal.Messages;
 
 /**
  * @author Eugene Kuleshov
@@ -31,6 +34,94 @@ public class PomContentOutlineConfiguration extends XMLContentOutlineConfigurati
    */
   private final class PomLabelProvider implements ILabelProvider {
     
+    private static final String TARGET_PATH = "targetPath"; //$NON-NLS-1$
+
+    private static final String DIRECTORY = "directory"; //$NON-NLS-1$
+
+    private static final String REPORT_SET = "reportSet"; //$NON-NLS-1$
+
+    private static final String PROPERTIES = "properties"; //$NON-NLS-1$
+
+    private static final String REPORTING = "reporting"; //$NON-NLS-1$
+
+    private static final String BUILD = "build"; //$NON-NLS-1$
+
+    private static final String EXCLUDE = "exclude"; //$NON-NLS-1$
+
+    private static final String INCLUDE = "include"; //$NON-NLS-1$
+
+    private static final String FILTER = "filter"; //$NON-NLS-1$
+
+    private static final String TEST_RESOURCE = "testResource"; //$NON-NLS-1$
+
+    private static final String RESOURCE = "resource"; //$NON-NLS-1$
+
+    private static final String TEST_RESOURCES = "testResources"; //$NON-NLS-1$
+
+    private static final String RESOURCES = "resources"; //$NON-NLS-1$
+
+    private static final String GOAL = "goal"; //$NON-NLS-1$
+
+    private static final String EXECUTION = "execution"; //$NON-NLS-1$
+
+    private static final String PLUGIN = "plugin"; //$NON-NLS-1$
+
+    private static final String PLUGINS = "plugins"; //$NON-NLS-1$
+
+    private static final String SNAPSHOT_REPOSITORY = "snapshotRepository"; //$NON-NLS-1$
+
+    private static final String PLUGIN_REPOSITORY = "pluginRepository"; //$NON-NLS-1$
+
+    private static final String REPOSITORY = "repository"; //$NON-NLS-1$
+
+    private static final String SITE = "site"; //$NON-NLS-1$
+
+    private static final String CONTRIBUTOR = "contributor"; //$NON-NLS-1$
+
+    private static final String DEVELOPER = "developer"; //$NON-NLS-1$
+
+    private static final String PROFILE = "profile"; //$NON-NLS-1$
+
+    private static final String PROFILES = "profiles"; //$NON-NLS-1$
+
+    private static final String MODULE = "module"; //$NON-NLS-1$
+
+    private static final String EXTENSION = "extension"; //$NON-NLS-1$
+
+    private static final String EXCLUSION = "exclusion"; //$NON-NLS-1$
+
+    private static final String MODULES = "modules"; //$NON-NLS-1$
+
+    private static final String EXTENSIONS = "extensions"; //$NON-NLS-1$
+
+    private static final String EXCLUSIONS = "exclusions"; //$NON-NLS-1$
+
+    private static final String DEPENDENCIES = "dependencies"; //$NON-NLS-1$
+
+    private static final String PARENT = "parent"; //$NON-NLS-1$
+
+    private static final String SCOPE = "scope"; //$NON-NLS-1$
+
+    private static final String TYPE = "type"; //$NON-NLS-1$
+
+    private static final String CLASSIFIER = "classifier"; //$NON-NLS-1$
+
+    private static final String DEPENDENCY = "dependency"; //$NON-NLS-1$
+
+    private static final String ID = "id"; //$NON-NLS-1$
+
+    private static final String EMAIL = "email"; //$NON-NLS-1$
+
+    private static final String NAME = "name"; //$NON-NLS-1$
+
+    private static final String VERSION = "version"; //$NON-NLS-1$
+
+    private static final String GROUP_ID = "groupId"; //$NON-NLS-1$
+
+    private static final String ARTIFACT_ID = "artifactId"; //$NON-NLS-1$
+
+    private static final String NAMESPACE_POM = "http://maven.apache.org/POM/4.0.0"; //$NON-NLS-1$
+
     private static final int MAX_LABEL_LENGTH = 120;
     
     private final ILabelProvider labelProvider;
@@ -48,75 +139,75 @@ public class PomContentOutlineConfiguration extends XMLContentOutlineConfigurati
         return labelProvider.getImage(element);
       }
       
-      if("http://maven.apache.org/POM/4.0.0".equals(namespace)) {
-        if("parent".equals(nodeName)) {
+      if(NAMESPACE_POM.equals(namespace)) {
+        if(PARENT.equals(nodeName)) {
           return MvnImages.IMG_JAR;
         
-        } else if("dependencies".equals(nodeName) //
-            || "exclusions".equals(nodeName) //
-            || "extensions".equals(nodeName) //
-            || "modules".equals(nodeName)) {
+        } else if(DEPENDENCIES.equals(nodeName) //
+            || EXCLUSIONS.equals(nodeName) //
+            || EXTENSIONS.equals(nodeName) //
+            || MODULES.equals(nodeName)) {
           return MvnImages.IMG_JARS;
           
-        } else if("dependency".equals(nodeName) //
-            || "exclusion".equals(nodeName) //
-            || "extension".equals(nodeName) //
-            || "module".equals(nodeName)) {
+        } else if(DEPENDENCY.equals(nodeName) //
+            || EXCLUSION.equals(nodeName) //
+            || EXTENSION.equals(nodeName) //
+            || MODULE.equals(nodeName)) {
           // TODO show folder if module is in the workspace
           return MvnImages.IMG_JAR;
         
-        } else if("repository".equals(nodeName) || "pluginRepository".equals(nodeName)
-            || "snapshotRepository".equals(nodeName) || "site".equals(nodeName)) {
+        } else if(REPOSITORY.equals(nodeName) || PLUGIN_REPOSITORY.equals(nodeName)
+            || SNAPSHOT_REPOSITORY.equals(nodeName) || SITE.equals(nodeName)) {
           return MvnImages.IMG_REPOSITORY;
           
-        } else if("profiles".equals(nodeName)) {
+        } else if(PROFILES.equals(nodeName)) {
           return MvnImages.IMG_PROFILES;
           
-        } else if("profile".equals(nodeName)) {
+        } else if(PROFILE.equals(nodeName)) {
           return MvnImages.IMG_PROFILE;
           
-        } else if("developer".equals(nodeName) || "contributor".equals(nodeName)) {
+        } else if(DEVELOPER.equals(nodeName) || CONTRIBUTOR.equals(nodeName)) {
           return MvnImages.IMG_PERSON;
           
-        } else if("plugins".equals(nodeName)) {
+        } else if(PLUGINS.equals(nodeName)) {
           return MvnImages.IMG_PLUGINS;
           
-        } else if("plugin".equals(nodeName)) {
+        } else if(PLUGIN.equals(nodeName)) {
           return MvnImages.IMG_PLUGIN;
         
-        } else if("execution".equals(nodeName)) {
+        } else if(EXECUTION.equals(nodeName)) {
           return MvnImages.IMG_EXECUTION;
           
-        } else if("goal".equals(nodeName)) {
+        } else if(GOAL.equals(nodeName)) {
           return MvnImages.IMG_GOAL;
           
-        } else if("resources".equals(nodeName) //
-            || "testResources".equals(nodeName)) {
+        } else if(RESOURCES.equals(nodeName) //
+            || TEST_RESOURCES.equals(nodeName)) {
           return MvnImages.IMG_RESOURCES;
           
-        } else if("resource".equals(nodeName) //
-            || "testResource".equals(nodeName)) {
+        } else if(RESOURCE.equals(nodeName) //
+            || TEST_RESOURCE.equals(nodeName)) {
           return MvnImages.IMG_RESOURCE;
           
-        } else if("filter".equals(nodeName)) {
+        } else if(FILTER.equals(nodeName)) {
           return MvnImages.IMG_FILTER;
           
-        } else if("include".equals(nodeName)) {
+        } else if(INCLUDE.equals(nodeName)) {
           return MvnImages.IMG_INCLUDE;
           
-        } else if("exclude".equals(nodeName)) {
+        } else if(EXCLUDE.equals(nodeName)) {
           return MvnImages.IMG_EXCLUDE;
           
-        } else if("build".equals(nodeName)) {
+        } else if(BUILD.equals(nodeName)) {
           return MvnImages.IMG_BUILD;
           
-        } else if("reporting".equals(nodeName)) {
+        } else if(REPORTING.equals(nodeName)) {
           return MvnImages.IMG_REPORT;
           
-        } else if("properties".equals(nodeName)) {
+        } else if(PROPERTIES.equals(nodeName)) {
           return MvnImages.IMG_PROPERTIES;
           
-        } else if("properties".equals(node.getParentNode().getNodeName())) {
+        } else if(PROPERTIES.equals(node.getParentNode().getNodeName())) {
           return MvnImages.IMG_PROPERTY;
 
         // } else if("mailingList".equals(nodeName)) {
@@ -141,44 +232,44 @@ public class PomContentOutlineConfiguration extends XMLContentOutlineConfigurati
         return cleanText(node);
       }
       
-      if("http://maven.apache.org/POM/4.0.0".equals(namespace)) {
-        if("parent".equals(nodeName)) {
-          return getLabel(text, node, "groupId", "artifactId", "version");
+      if(NAMESPACE_POM.equals(namespace)) {
+        if(PARENT.equals(nodeName)) {
+          return getLabel(text, node, GROUP_ID, ARTIFACT_ID, VERSION);
         
-        } else if("dependency".equals(nodeName)) {
-          return getLabel(text, node, "groupId", "artifactId", "version", "classifier", "type", "scope");
+        } else if(DEPENDENCY.equals(nodeName)) {
+          return getLabel(text, node, GROUP_ID, ARTIFACT_ID, VERSION, CLASSIFIER, TYPE, SCOPE);
         
-        } else if("exclusion".equals(nodeName)) {
-          return getLabel(text, node, "groupId", "artifactId");
+        } else if(EXCLUSION.equals(nodeName)) {
+          return getLabel(text, node, GROUP_ID, ARTIFACT_ID);
         
-        } else if("extension".equals(nodeName)) {
-          return getLabel(text, node, "groupId", "artifactId", "version");
+        } else if(EXTENSION.equals(nodeName)) {
+          return getLabel(text, node, GROUP_ID, ARTIFACT_ID, VERSION);
           
-        } else if("repository".equals(nodeName) || "pluginRepository".equals(nodeName)
-            || "snapshotRepository".equals(nodeName) || "site".equals(nodeName) || "profile".equals(nodeName)
-            || "execution".equals(nodeName)) {
-          return getLabel(text, node, "id");
+        } else if(REPOSITORY.equals(nodeName) || PLUGIN_REPOSITORY.equals(nodeName)
+            || SNAPSHOT_REPOSITORY.equals(nodeName) || SITE.equals(nodeName) || PROFILE.equals(nodeName)
+            || EXECUTION.equals(nodeName)) {
+          return getLabel(text, node, ID);
           
-        } else if("mailingList".equals(nodeName)) {
-          return getLabel(text, node, "name");
+        } else if("mailingList".equals(nodeName)) { //$NON-NLS-1$
+          return getLabel(text, node, NAME);
           
-        } else if("developer".equals(nodeName)) {
-          return getLabel(text, node, "id", "name", "email");
+        } else if(DEVELOPER.equals(nodeName)) {
+          return getLabel(text, node, ID, NAME, EMAIL);
           
-        } else if("contributor".equals(nodeName)) {
-          return getLabel(text, node, "name", "email");
+        } else if(CONTRIBUTOR.equals(nodeName)) {
+          return getLabel(text, node, NAME, EMAIL);
           
-        } else if("plugin".equals(nodeName)) {
-          return getLabel(text, node, "groupId", "artifactId", "version");
+        } else if(PLUGIN.equals(nodeName)) {
+          return getLabel(text, node, GROUP_ID, ARTIFACT_ID, VERSION);
         
-        } else if("resource".equals(nodeName) || "testResource".equals(nodeName)) {
-          return getLabel(text, node, "directory", "targetPath");
+        } else if(RESOURCE.equals(nodeName) || TEST_RESOURCE.equals(nodeName)) {
+          return getLabel(text, node, DIRECTORY, TARGET_PATH);
           
-        } else if("reportSet".equals(nodeName)) {
-          return getLabel(text, node, "id");
+        } else if(REPORT_SET.equals(nodeName)) {
+          return getLabel(text, node, ID);
           
-        } else if("execution".equals(nodeName)) {
-          return getLabel(text, node, "id");
+        } else if(EXECUTION.equals(nodeName)) {
+          return getLabel(text, node, ID);
           
         }
         
@@ -189,7 +280,7 @@ public class PomContentOutlineConfiguration extends XMLContentOutlineConfigurati
           if(nodeType==Node.TEXT_NODE || nodeType==Node.COMMENT_NODE) {
             String nodeText = item.getNodeValue();
             if(nodeText.length()>0) {
-              return text + "  " + cleanText(item);
+              return text + "  " + cleanText(item); //$NON-NLS-1$
             }
           }
         }
@@ -215,13 +306,13 @@ public class PomContentOutlineConfiguration extends XMLContentOutlineConfigurati
     }
   
     private String getLabel(String text, Node node, String... names) {
-      StringBuilder sb = new StringBuilder(text).append("  ");
-      String sep = "";
+      StringBuilder sb = new StringBuilder(text).append("  "); //$NON-NLS-1$
+      String sep = ""; //$NON-NLS-1$
       for(String name : names) {
         String value = getValue(node, name);
         if(value!=null) {
           sb.append(sep).append(value);
-          sep = " : ";
+          sep = " : "; //$NON-NLS-1$
         }
       }
       
@@ -248,13 +339,13 @@ public class PomContentOutlineConfiguration extends XMLContentOutlineConfigurati
   
     private String cleanText(Node node) {
       String value = node.getNodeValue();
-      if(value==null) {
-        return "";
+      if (value==null) {
+        return ""; //$NON-NLS-1$
       }
       
-      value = value.replaceAll("\\s", " ").replaceAll("(\\s){2,}", " ").trim();
-      if(value.length()>MAX_LABEL_LENGTH) {
-        value = value.substring(0, 120) + "...";
+      value = value.replaceAll("\\s", " ").replaceAll("(\\s){2,}", " ").trim(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+      if (value.length() > MAX_LABEL_LENGTH) {
+        value = value.substring(0, 120) + Dialog.ELLIPSIS;
       }
       
       return value;

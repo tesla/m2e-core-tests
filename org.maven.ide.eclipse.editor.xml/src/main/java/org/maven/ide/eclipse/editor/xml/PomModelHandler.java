@@ -31,15 +31,17 @@ import org.eclipse.wst.xml.core.internal.ssemodelquery.ModelQueryAdapter;
 import org.eclipse.wst.xml.core.internal.ssemodelquery.ModelQueryAdapterImpl;
 import org.eclipse.wst.common.uriresolver.internal.provisional.URIResolver;
 
+import org.maven.ide.eclipse.editor.xml.internal.Messages;
+
 
 @SuppressWarnings("restriction")
 public class PomModelHandler extends ModelHandlerForXML {
 
-  private static final String ASSOCIATED_CONTENT_TYPE_ID = "org.maven.ide.eclipse.pomFile";
+  private static final String ASSOCIATED_CONTENT_TYPE_ID = "org.maven.ide.eclipse.pomFile"; //$NON-NLS-1$
 
-  private static final String POM_NAMESPACE = "http://maven.apache.org/POM/4.0.0";
+  private static final String POM_NAMESPACE = "http://maven.apache.org/POM/4.0.0"; //$NON-NLS-1$
 
-  private static final String POM_XSD = "http://maven.apache.org/xsd/maven-4.0.0.xsd";
+  private static final String POM_XSD = "http://maven.apache.org/xsd/maven-4.0.0.xsd"; //$NON-NLS-1$
 
   public PomModelHandler() {
     super();
@@ -97,7 +99,7 @@ public class PomModelHandler extends ModelHandlerForXML {
 
     @Override
     public CMDocument getCMDocument(String publicId, String systemId, String type) {
-      if("".equals(publicId) && "".equals(systemId)) {
+      if("".equals(publicId) && "".equals(systemId)) { //$NON-NLS-1$ //$NON-NLS-2$
         return null;
       }
 
@@ -115,8 +117,8 @@ public class PomModelHandler extends ModelHandlerForXML {
         namespaceTable.addElement(rootElement);
 
         documentManager.setPropertyEnabled(CMDocumentManager.PROPERTY_ASYNC_LOAD, false);
-        documentManager.addCMDocumentReference(POM_NAMESPACE, POM_XSD, "XSD");
-        namespaceTable.addNamespaceInfo("", POM_NAMESPACE, "");
+        documentManager.addCMDocumentReference(POM_NAMESPACE, POM_XSD, "XSD"); //$NON-NLS-1$
+        namespaceTable.addNamespaceInfo("", POM_NAMESPACE, ""); //$NON-NLS-1$ //$NON-NLS-2$
 
         if(namespaceTable.isNamespaceEncountered()) {
           result = getCMElementDeclaration(element, list, namespaceTable);

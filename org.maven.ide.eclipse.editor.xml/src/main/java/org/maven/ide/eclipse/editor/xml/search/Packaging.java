@@ -8,6 +8,8 @@
 
 package org.maven.ide.eclipse.editor.xml.search;
 
+import org.maven.ide.eclipse.editor.xml.internal.Messages;
+
 /**
  * Packaging representation.
  * 
@@ -15,8 +17,8 @@ package org.maven.ide.eclipse.editor.xml.search;
  */
 public enum Packaging {
   ALL(null), //
-  PLUGIN("maven-plugin"), //
-  POM("pom");
+  PLUGIN("maven-plugin"), // //$NON-NLS-1$
+  POM("pom"); //$NON-NLS-1$
 
   private final String text;
 

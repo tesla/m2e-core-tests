@@ -23,6 +23,7 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
@@ -33,6 +34,7 @@ import org.eclipse.ui.forms.editor.FormEditor;
 import org.eclipse.ui.ide.IDE;
 
 import org.maven.ide.eclipse.actions.OpenPomAction;
+import org.maven.ide.eclipse.editor.xml.internal.Messages;
 
 
 /**
@@ -41,11 +43,11 @@ import org.maven.ide.eclipse.actions.OpenPomAction;
 class PomHyperlinkDetector implements IHyperlinkDetector {
 
   private final String[] versioned = new String[] {
-      "dependency>",
-      "parent>",
-      "plugin>",
-      "reportPlugin>",
-      "extension>"
+      "dependency>", //$NON-NLS-1$
+      "parent>", //$NON-NLS-1$
+      "plugin>", //$NON-NLS-1$
+      "reportPlugin>", //$NON-NLS-1$
+      "extension>" //$NON-NLS-1$
   };
   public IHyperlink[] detectHyperlinks(ITextViewer textViewer, final IRegion region, boolean canShowMultipleHyperlinks) {
     if(region == null || textViewer == null) {
@@ -75,7 +77,7 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
     final String text = document.get();
     Fragment fragment = null;
     for (String el : versioned) {
-      fragment = getFragment(text, offset, "<" + el, "</" + el);
+      fragment = getFragment(text, offset, "<" + el, "</" + el); //$NON-NLS-1$ //$NON-NLS-2$
       if (fragment != null) break;
     }
     
@@ -83,7 +85,7 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
       return openPOMbyID(fragment);
     }
     //check if <module> text is selected.
-    fragment = getFragment(text, offset, "<module>", "</module>");
+    fragment = getFragment(text, offset, "<module>", "</module>"); //$NON-NLS-1$ //$NON-NLS-2$
     if (fragment != null) {
       return openModule(fragment, textViewer);
     }
@@ -92,23 +94,23 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
   }
 
   private IHyperlink[] openModule(Fragment fragment, ITextViewer textViewer) {
-    final Fragment module = getValue(fragment, "<module>", "</module>");
+    final Fragment module = getValue(fragment, "<module>", "</module>"); //$NON-NLS-1$ //$NON-NLS-2$
 
     ITextFileBuffer buf = FileBuffers.getTextFileBufferManager().getTextFileBuffer(textViewer.getDocument());
     IFileStore folder = buf.getFileStore().getParent();
 
     String path = module.text;
     //construct IPath for the child pom file, handle relative paths..
-    while(folder != null && path.startsWith("../")) { //NOI18N
+    while(folder != null && path.startsWith("../")) { //NOI18N //$NON-NLS-1$
       folder = folder.getParent();
-      path = path.substring("../".length());//NOI18N
+      path = path.substring("../".length());//NOI18N //$NON-NLS-1$
     }
     if(folder == null) {
       return null;
     }
     IFileStore modulePom = folder.getChild(path);
-    if(!modulePom.getName().endsWith("xml")) {//NOI18N
-      modulePom = modulePom.getChild("pom.xml");//NOI18N
+    if(!modulePom.getName().endsWith("xml")) {//NOI18N //$NON-NLS-1$
+      modulePom = modulePom.getChild("pom.xml");//NOI18N //$NON-NLS-1$
     }
     final IFileStore fileStore = modulePom;
     if (!fileStore.fetchInfo().exists()) {
@@ -121,11 +123,11 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
       }
 
       public String getHyperlinkText() {
-        return "Open module project pom.xml at " + module.text;
+        return Messages.PomHyperlinkDetector_open_module + module.text;
       }
 
       public String getTypeLabel() {
-        return "pom-module";
+        return "pom-module"; //$NON-NLS-1$
       }
 
       public void open() {
@@ -141,7 +143,7 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
               }
             } catch(PartInitException e) {
               MessageDialog.openInformation(Display.getDefault().getActiveShell(), //
-                  "Open Maven POM", "Can't open editor for " + fileStore + "\n" + e.toString());
+                  Messages.PomHyperlinkDetector_error_title, NLS.bind(Messages.PomHyperlinkDetector_error_message, fileStore, e.toString()));
 
             }
           }
@@ -154,9 +156,9 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
   }
 
   private IHyperlink[] openPOMbyID(Fragment fragment) {
-    final Fragment groupId = getValue(fragment, "<groupId>", "</groupId>");
-    final Fragment artifactId = getValue(fragment, "<artifactId>", "</artifactId>");
-    final Fragment version = getValue(fragment, "<version>", "</version>");
+    final Fragment groupId = getValue(fragment, "<groupId>", "</groupId>"); //$NON-NLS-1$ //$NON-NLS-2$
+    final Fragment artifactId = getValue(fragment, "<artifactId>", Messages.PomHyperlinkDetector_23); //$NON-NLS-1$
+    final Fragment version = getValue(fragment, "<version>", "</version>"); //$NON-NLS-1$ //$NON-NLS-2$
     if (version == null) {
       // better exit now until we are capable of resolving the version from resolved project. 
       return null;
@@ -176,19 +178,19 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
       }
 
       public String getHyperlinkText() {
-        return groupId + " : " + artifactId + ":" + version;
+        return NLS.bind(Messages.PomHyperlinkDetector_hyperlink_pattern, new Object[] {groupId, artifactId, version});
       }
 
       public String getTypeLabel() {
-        return "pom";
+        return "pom"; //$NON-NLS-1$
       }
 
       public void open() {
-        new Job("Opening POM") {
+        new Job(Messages.PomHyperlinkDetector_job_name) {
           protected IStatus run(IProgressMonitor monitor) {
             // TODO resolve groupId if groupId==null
             // TODO resolve version if version==null
-            OpenPomAction.openEditor(groupId == null ? "org.apache.maven.plugins" : groupId.text, 
+            OpenPomAction.openEditor(groupId == null ? "org.apache.maven.plugins" : groupId.text,  //$NON-NLS-1$
                                      artifactId == null ? null : artifactId.text, 
                                      version == null ? null : version.text, monitor);
             return Status.OK_STATUS;

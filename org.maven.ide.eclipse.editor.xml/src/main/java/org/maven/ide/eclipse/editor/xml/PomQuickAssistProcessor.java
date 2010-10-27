@@ -26,12 +26,13 @@ import org.eclipse.wst.sse.ui.internal.contentassist.ContentAssistUtils;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.editor.xml.internal.Messages;
 
 public class PomQuickAssistProcessor implements IQuickAssistProcessor {
 
-  public static final String PROJECT_NODE = "project";
-  public static final String XSI_VALUE = " xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"+
-  "xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\"";
+  public static final String PROJECT_NODE = "project"; //$NON-NLS-1$
+  public static final String XSI_VALUE = " xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"+ //$NON-NLS-1$
+  "xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\""; //$NON-NLS-1$
   public static final String NO_SCHEMA_ERR = "There is no schema defined for this pom.xml. Code completion will not work without a schema defined.";
   
   public boolean canAssist(IQuickAssistInvocationContext arg0) {
@@ -85,7 +86,7 @@ class SchemaCompletionProposal implements ICompletionProposal{
         }
       });
     } catch(Exception e){
-      MavenLogger.log("Unable to insert schema info", e);
+      MavenLogger.log("Unable to insert schema info", e); //$NON-NLS-1$
     }
   }
 
@@ -98,7 +99,7 @@ class SchemaCompletionProposal implements ICompletionProposal{
   }
 
   public String getDisplayString() {
-    return "Add maven schema definiton to pom.xml";
+    return Messages.PomQuickAssistProcessor_name;
   }
 
   public Image getImage() {

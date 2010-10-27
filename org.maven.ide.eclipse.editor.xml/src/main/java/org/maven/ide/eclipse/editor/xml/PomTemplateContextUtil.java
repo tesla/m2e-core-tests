@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.editor.xml.internal.Messages;
 import org.maven.ide.eclipse.embedder.IMaven;
 
 class PomTemplateContextUtil {
@@ -52,18 +53,18 @@ class PomTemplateContextUtil {
 
       List<ArtifactRepository> repositories = embedder.getArtifactRepositories();
 
-      Artifact artifact = embedder.resolve(groupId, artifactId, version, "maven-plugin", null,  repositories, null);
+      Artifact artifact = embedder.resolve(groupId, artifactId, version, "maven-plugin", null,  repositories, null); //$NON-NLS-1$
 
       File file = artifact.getFile();
       if(file == null) {
-        String msg = "Can't resolve plugin " + name;
+        String msg = "Can't resolve plugin " + name; //$NON-NLS-1$
         console.logError(msg);
       } else {
         InputStream is = null;
         ZipFile zf = null;
         try {
           zf = new ZipFile(file);
-          ZipEntry entry = zf.getEntry("META-INF/maven/plugin.xml");
+          ZipEntry entry = zf.getEntry("META-INF/maven/plugin.xml"); //$NON-NLS-1$
           if(entry != null) {
             is = zf.getInputStream(entry);
             PluginDescriptorBuilder builder = new PluginDescriptorBuilder();
@@ -73,7 +74,7 @@ class PomTemplateContextUtil {
           }
 
         } catch(Exception ex) {
-          String msg = "Can't read configuration for " + name;
+          String msg = "Can't read configuration for " + name; //$NON-NLS-1$
           console.logError(msg);
           MavenLogger.log(msg, ex);
 

@@ -22,6 +22,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.editor.xml.internal.Messages;
 import org.maven.ide.eclipse.editor.xml.internal.search.IndexSearchEngine;
 import org.maven.ide.eclipse.editor.xml.search.SearchEngine;
 
@@ -30,9 +31,9 @@ import org.maven.ide.eclipse.editor.xml.search.SearchEngine;
  * @author Lukas Krecan
  */
 public class MvnIndexPlugin extends AbstractUIPlugin {
-  public static final String PLUGIN_ID = "org.maven.ide.eclipse.editor.xml";
+  public static final String PLUGIN_ID = "org.maven.ide.eclipse.editor.xml"; //$NON-NLS-1$
 
-  private static final String TEMPLATES_KEY = PLUGIN_ID + ".templates";
+  private static final String TEMPLATES_KEY = PLUGIN_ID + ".templates"; //$NON-NLS-1$
 
   private static MvnIndexPlugin defaultInstance;
 
@@ -71,7 +72,7 @@ public class MvnIndexPlugin extends AbstractUIPlugin {
       try {
         templateStore.load();
       } catch(IOException ex) {
-        MavenLogger.log("Unable to load pom templates", ex);
+        MavenLogger.log("Unable to load pom templates", ex); //$NON-NLS-1$
       }
     }
     return templateStore;

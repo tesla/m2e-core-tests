@@ -15,6 +15,7 @@ import org.eclipse.ui.IMarkerResolutionGenerator;
 
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.editor.xml.internal.Messages;
 
 
 /**
@@ -33,10 +34,10 @@ public class MavenMarkerResolutionGenerator implements IMarkerResolutionGenerato
       type = marker.getType();
     } catch(CoreException e) {
       MavenLogger.log(e);
-      type = "";
+      type = ""; //$NON-NLS-1$
     }
     if(IMavenConstants.MARKER_ID.equals(type)) {
-      Integer offset = (Integer) marker.getAttribute("offset", -1);
+      Integer offset = (Integer) marker.getAttribute("offset", -1); //$NON-NLS-1$
       //only provide a quickfix for the schema marker
       if(offset != -1) {
         return new IMarkerResolution[] {new MavenMarkerResolution()};

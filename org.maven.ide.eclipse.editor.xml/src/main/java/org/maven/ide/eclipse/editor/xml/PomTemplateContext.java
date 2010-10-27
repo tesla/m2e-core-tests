@@ -28,8 +28,10 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.persistence.TemplateStore;
+import org.eclipse.osgi.util.NLS;
 
 import org.maven.ide.eclipse.core.MavenLogger;
+import org.maven.ide.eclipse.editor.xml.internal.Messages;
 import org.maven.ide.eclipse.editor.xml.search.ArtifactInfo;
 import org.maven.ide.eclipse.editor.xml.search.Packaging;
 import org.maven.ide.eclipse.editor.xml.search.SearchEngine;
@@ -43,49 +45,49 @@ import org.maven.ide.eclipse.editor.xml.search.SearchEngine;
  */
 public enum PomTemplateContext {
   
-  UNKNOWN("unknown"), //
+  UNKNOWN("unknown"), // //$NON-NLS-1$
   
-  DOCUMENT("#document"), //
+  DOCUMENT("#document"), // //$NON-NLS-1$
   
-  PROJECT("project"), //
+  PROJECT("project"), // //$NON-NLS-1$
   
-  PARENT("parent"), //
+  PARENT("parent"), // //$NON-NLS-1$
   
-  MODULES("modules"), //
+  MODULES("modules"), // //$NON-NLS-1$
 
-  PROPERTIES("properties"), //
+  PROPERTIES("properties"), // //$NON-NLS-1$
   
-  DEPENDENCIES("dependencies"), //
+  DEPENDENCIES("dependencies"), // //$NON-NLS-1$
   
-  EXCLUSIONS("exclusions"), //
+  EXCLUSIONS("exclusions"), // //$NON-NLS-1$
   
-  PLUGINS("plugins"), //
+  PLUGINS("plugins"), // //$NON-NLS-1$
 
-  PLUGIN("plugin"), //
+  PLUGIN("plugin"), // //$NON-NLS-1$
 
-  EXECUTIONS("executions"), //
+  EXECUTIONS("executions"), // //$NON-NLS-1$
   
-  PROFILES("profiles"), //
+  PROFILES("profiles"), // //$NON-NLS-1$
   
-  REPOSITORIES("repositories"), //
+  REPOSITORIES("repositories"), // //$NON-NLS-1$
 
-  CONFIGURATION("configuration") {
+  CONFIGURATION("configuration") { //$NON-NLS-1$
 
     @Override
     protected void addTemplates(IProject project, Collection<Template> proposals, Node node, String prefix) throws CoreException {
-      if("execution".equals(node.getParentNode().getNodeName())
-          || "reportSet".equals(node.getParentNode().getNodeName())) {
+      if("execution".equals(node.getParentNode().getNodeName()) //$NON-NLS-1$
+          || "reportSet".equals(node.getParentNode().getNodeName())) { //$NON-NLS-1$
         node = node.getParentNode().getParentNode();
       }
 //      System.out.println("prefix=" + prefix + "-");
       String groupId = getGroupId(node);
       if(groupId==null) {
-        groupId = "org.apache.maven.plugins";  // TODO support other default groups
+        groupId = "org.apache.maven.plugins";  // TODO support other default groups //$NON-NLS-1$
       }
       String artifactId = getArtifactId(node);
       String version = getVersion(node);
       if(version==null) {
-        Collection<String> versions = getSearchEngine(project).findVersions(groupId, artifactId, "", Packaging.PLUGIN);
+        Collection<String> versions = getSearchEngine(project).findVersions(groupId, artifactId, "", Packaging.PLUGIN); //$NON-NLS-1$
         if(versions.isEmpty()) {
           return;
         }
@@ -105,24 +107,23 @@ public enum PomTemplateContext {
               if(!params.contains(name) && name.startsWith(prefix)) {
                 params.add(name);
                 
-                String text = "<b>required:</b> " + parameter.isRequired() + "<br>" //
-                    + "<b>type:</b> " + parameter.getType() + "<br>";
+                String text = NLS.bind(Messages.PomTemplateContext_param, parameter.isRequired(), parameter.getType());
                 
                 String expression = parameter.getExpression();
                 if(expression!=null) {
-                  text += "expression: " + expression + "<br>";
+                  text += NLS.bind(Messages.PomTemplateContext_param_expr, expression);
                 }
                 
                 String defaultValue = parameter.getDefaultValue();
                 if(defaultValue!=null) {
-                  text += "default: " + defaultValue + "<br>";
+                  text += NLS.bind(Messages.PomTemplateContext_param_def, defaultValue);
                 }
                 
                 String desc = parameter.getDescription().trim();
-                text += desc.startsWith("<p>") ? desc : "<br>" + desc;
+                text += desc.startsWith("<p>") ? desc : "<br>" + desc; //$NON-NLS-1$ //$NON-NLS-2$
                 
                 proposals.add(new Template(name, text, getContextTypeId(), //
-                    "<" + name + ">${cursor}</" + name + ">", false));
+                    "<" + name + ">${cursor}</" + name + ">", false)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
               }
             }
           }
@@ -131,7 +132,7 @@ public enum PomTemplateContext {
     }
   },
   
-  GROUP_ID("groupId") {
+  GROUP_ID("groupId") { //$NON-NLS-1$
     @Override
     public void addTemplates(IProject project, Collection<Template> proposals, Node node, String prefix) throws CoreException {
       String contextTypeId = getContextTypeId();
@@ -141,7 +142,7 @@ public enum PomTemplateContext {
     }
   },
 
-  ARTIFACT_ID("artifactId") {
+  ARTIFACT_ID("artifactId") { //$NON-NLS-1$
     @Override
     public void addTemplates(IProject project, Collection<Template> proposals, Node node, String prefix) throws CoreException {
       String groupId = getGroupId(node);
@@ -155,7 +156,7 @@ public enum PomTemplateContext {
     }
   },
 
-  VERSION("version") {
+  VERSION("version") { //$NON-NLS-1$
     @Override
     public void addTemplates(IProject project, Collection<Template> proposals, Node node, String prefix) throws CoreException {
       String groupId = getGroupId(node);
@@ -169,7 +170,7 @@ public enum PomTemplateContext {
     }
   },
 
-  CLASSIFIER("classifier") {
+  CLASSIFIER("classifier") { //$NON-NLS-1$
     @Override
     public void addTemplates(IProject project, Collection<Template> proposals, Node node, String prefix) throws CoreException {
       String groupId = getGroupId(node);
@@ -185,7 +186,7 @@ public enum PomTemplateContext {
     }
   },
 
-  TYPE("type") {
+  TYPE("type") { //$NON-NLS-1$
     @Override
     public void addTemplates(IProject project, Collection<Template> proposals, Node node, String prefix) throws CoreException {
       String groupId = getGroupId(node);
@@ -200,107 +201,107 @@ public enum PomTemplateContext {
     }
   },
   
-  PACKAGING("packaging") {
+  PACKAGING("packaging") { //$NON-NLS-1$
     @Override
     public void addTemplates(IProject project, Collection<Template> proposals, Node node, String prefix) {
       String contextTypeId = getContextTypeId();
       // TODO only show "pom" packaging in root section
-      add(proposals, contextTypeId, "pom");
-      add(proposals, contextTypeId, "jar");
-      add(proposals, contextTypeId, "war");
-      add(proposals, contextTypeId, "ear");
-      add(proposals, contextTypeId, "ejb");
-      add(proposals, contextTypeId, "eclipse-plugin");
-      add(proposals, contextTypeId, "eclipse-feature");
-      add(proposals, contextTypeId, "eclipse-update-site");
-      add(proposals, contextTypeId, "maven-plugin");
-      add(proposals, contextTypeId, "maven-archetype");
+      add(proposals, contextTypeId, "pom"); //$NON-NLS-1$
+      add(proposals, contextTypeId, "jar"); //$NON-NLS-1$
+      add(proposals, contextTypeId, "war"); //$NON-NLS-1$
+      add(proposals, contextTypeId, "ear"); //$NON-NLS-1$
+      add(proposals, contextTypeId, "ejb"); //$NON-NLS-1$
+      add(proposals, contextTypeId, "eclipse-plugin"); //$NON-NLS-1$
+      add(proposals, contextTypeId, "eclipse-feature"); //$NON-NLS-1$
+      add(proposals, contextTypeId, "eclipse-update-site"); //$NON-NLS-1$
+      add(proposals, contextTypeId, "maven-plugin"); //$NON-NLS-1$
+      add(proposals, contextTypeId, "maven-archetype"); //$NON-NLS-1$
     }
   },
   
-  SCOPE("scope") {
+  SCOPE("scope") { //$NON-NLS-1$
     @Override
     public void addTemplates(IProject project, Collection<Template> proposals, Node node, String prefix) {
       String contextTypeId = getContextTypeId();
-      add(proposals, contextTypeId, "compile");
-      add(proposals, contextTypeId, "test");
-      add(proposals, contextTypeId, "provided");
-      add(proposals, contextTypeId, "runtime");
-      add(proposals, contextTypeId, "system");
+      add(proposals, contextTypeId, "compile"); //$NON-NLS-1$
+      add(proposals, contextTypeId, "test"); //$NON-NLS-1$
+      add(proposals, contextTypeId, "provided"); //$NON-NLS-1$
+      add(proposals, contextTypeId, "runtime"); //$NON-NLS-1$
+      add(proposals, contextTypeId, "system"); //$NON-NLS-1$
       // TODO only show "import" scope in <dependencyManagement>
-      add(proposals, contextTypeId, "import");
+      add(proposals, contextTypeId, "import"); //$NON-NLS-1$
     }    
   },
   
-  SYSTEM_PATH("systemPath"),
+  SYSTEM_PATH("systemPath"), //$NON-NLS-1$
   
-  PHASE("phase") {
+  PHASE("phase") { //$NON-NLS-1$
     @Override
     public void addTemplates(IProject project, Collection<Template> proposals, Node node, String prefix) {
       String contextTypeId = getContextTypeId();
       // TODO the following list should be derived from the packaging handler (the actual lifecycle)
       
       // Clean Lifecycle
-      add(proposals, contextTypeId, "pre-clean", "Executes processes needed prior to the actual project cleaning");
-      add(proposals, contextTypeId, "clean", "Removes all files generated by the previous build");
-      add(proposals, contextTypeId, "post-clean", "Executes processes needed to finalize the project cleaning");
+      add(proposals, contextTypeId, "pre-clean", Messages.PomTemplateContext_preclean); //$NON-NLS-1$
+      add(proposals, contextTypeId, "clean", Messages.PomTemplateContext_clean); //$NON-NLS-1$
+      add(proposals, contextTypeId, "post-clean", Messages.PomTemplateContext_postclean); //$NON-NLS-1$
       
       // Default Lifecycle
-      add(proposals, contextTypeId, "validate", "Validate the project is correct and all necessary information is available");
-      add(proposals, contextTypeId, "generate-sources", "Generate any source code for inclusion in compilation");
-      add(proposals, contextTypeId, "process-sources", "Process the source code, for example to filter any values");
-      add(proposals, contextTypeId, "generate-resources", "Generate resources for inclusion in the package");
-      add(proposals, contextTypeId, "process-resources", "Copy and process the resources into the destination directory, ready for packaging");
-      add(proposals, contextTypeId, "compile", "Compile the source code of the project");
-      add(proposals, contextTypeId, "process-classes", "Post-process the generated files from compilation, for example to do bytecode enhancement on Java classes");
-      add(proposals, contextTypeId, "generate-test-sources", "Generate any test source code for inclusion in compilation");
-      add(proposals, contextTypeId, "process-test-sources", "Process the test source code, for example to filter any values");
-      add(proposals, contextTypeId, "generate-test-resources", "Create resources for testing");
-      add(proposals, contextTypeId, "process-test-resources", "Copy and process the resources into the test destination directory");
-      add(proposals, contextTypeId, "test-compile", "Compile the test source code into the test destination directory");
-      add(proposals, contextTypeId, "process-test-classes", "Post-process the generated files from test compilation, for example to do bytecode enhancement on Java classes. For Maven 2.0.5 and above");
-      add(proposals, contextTypeId, "test", "Run tests using a suitable unit testing framework. These tests should not require the code be packaged or deployed");
-      add(proposals, contextTypeId, "prepare-package", "Perform any operations necessary to prepare a package before the actual packaging. This often results in an unpacked, processed version of the package. (Maven 2.1 and above)");
-      add(proposals, contextTypeId, "package", "Take the compiled code and package it in its distributable format, such as a JAR");
-      add(proposals, contextTypeId, "pre-integration-test", "Perform actions required before integration tests are executed. This may involve things such as setting up the required environment");
-      add(proposals, contextTypeId, "integration-test", "Process and deploy the package if necessary into an environment where integration tests can be run");
-      add(proposals, contextTypeId, "post-integration-test", "Perform actions required after integration tests have been executed. This may including cleaning up the environment");
-      add(proposals, contextTypeId, "verify", "Run any checks to verify the package is valid and meets quality criteria");
-      add(proposals, contextTypeId, "install", "Install the package into the local repository, for use as a dependency in other projects locally");
-      add(proposals, contextTypeId, "deploy", "Done in an integration or release environment, copies the final package to the remote repository for sharing with other developers and projects");
+      add(proposals, contextTypeId, "validate", Messages.PomTemplateContext_validate); //$NON-NLS-1$
+      add(proposals, contextTypeId, "generate-sources", Messages.PomTemplateContext_generatesources); //$NON-NLS-1$
+      add(proposals, contextTypeId, "process-sources", Messages.PomTemplateContext_processsources); //$NON-NLS-1$
+      add(proposals, contextTypeId, "generate-resources", Messages.PomTemplateContext_generateresources); //$NON-NLS-1$
+      add(proposals, contextTypeId, "process-resources", Messages.PomTemplateContext_processresources); //$NON-NLS-1$
+      add(proposals, contextTypeId, "compile", Messages.PomTemplateContext_compile); //$NON-NLS-1$
+      add(proposals, contextTypeId, "process-classes", Messages.PomTemplateContext_processclasses); //$NON-NLS-1$
+      add(proposals, contextTypeId, "generate-test-sources", Messages.PomTemplateContext_generatetestsources); //$NON-NLS-1$
+      add(proposals, contextTypeId, "process-test-sources", Messages.PomTemplateContext_processtestsources); //$NON-NLS-1$
+      add(proposals, contextTypeId, "generate-test-resources", Messages.PomTemplateContext_generatetestresources); //$NON-NLS-1$
+      add(proposals, contextTypeId, "process-test-resources", Messages.PomTemplateContext_processtestresources); //$NON-NLS-1$
+      add(proposals, contextTypeId, "test-compile", Messages.PomTemplateContext_testcompile); //$NON-NLS-1$
+      add(proposals, contextTypeId, "process-test-classes", Messages.PomTemplateContext_processtestclasses); //$NON-NLS-1$
+      add(proposals, contextTypeId, "test", Messages.PomTemplateContext_test); //$NON-NLS-1$
+      add(proposals, contextTypeId, "prepare-package", Messages.PomTemplateContext_preparepackage); //$NON-NLS-1$
+      add(proposals, contextTypeId, "package", Messages.PomTemplateContext_package); //$NON-NLS-1$
+      add(proposals, contextTypeId, "pre-integration-test", Messages.PomTemplateContext_preintegrationtest); //$NON-NLS-1$
+      add(proposals, contextTypeId, "integration-test", Messages.PomTemplateContext_integrationtest); //$NON-NLS-1$
+      add(proposals, contextTypeId, "post-integration-test", Messages.PomTemplateContext_postintegrationtest); //$NON-NLS-1$
+      add(proposals, contextTypeId, "verify", Messages.PomTemplateContext_verify); //$NON-NLS-1$
+      add(proposals, contextTypeId, "install", Messages.PomTemplateContext_install); //$NON-NLS-1$
+      add(proposals, contextTypeId, "deploy", Messages.PomTemplateContext_deploy); //$NON-NLS-1$
       
       // Site Lifecycle
-      add(proposals, contextTypeId, "pre-site", "Executes processes needed prior to the actual project site generation");
-      add(proposals, contextTypeId, "site", "Generates the project's site documentation");
-      add(proposals, contextTypeId, "post-site", "Executes processes needed to finalize the site generation, and to prepare for site deployment");
-      add(proposals, contextTypeId, "site-deploy", "Deploys the generated site documentation to the specified web server");
+      add(proposals, contextTypeId, "pre-site", Messages.PomTemplateContext_presite); //$NON-NLS-1$
+      add(proposals, contextTypeId, "site", Messages.PomTemplateContext_site); //$NON-NLS-1$
+      add(proposals, contextTypeId, "post-site", Messages.PomTemplateContext_postsite); //$NON-NLS-1$
+      add(proposals, contextTypeId, "site-deploy", Messages.PomTemplateContext_sitedeploy); //$NON-NLS-1$
     }
   },
 
-  GOAL("goal") {
+  GOAL("goal") { //$NON-NLS-1$
     @Override
     public void addTemplates(IProject project, Collection<Template> proposals, Node node, String prefix)  throws CoreException {
-      if(!"goals".equals(node.getParentNode().getNodeName())) {
+      if(!"goals".equals(node.getParentNode().getNodeName())) { //$NON-NLS-1$
         return;
       }
       node = node.getParentNode();
-      if(!"execution".equals(node.getParentNode().getNodeName())) {
+      if(!"execution".equals(node.getParentNode().getNodeName())) { //$NON-NLS-1$
         return;
       }
       node = node.getParentNode();
-      if(!"executions".equals(node.getParentNode().getNodeName())) {
+      if(!"executions".equals(node.getParentNode().getNodeName())) { //$NON-NLS-1$
         return;
       }
       node = node.getParentNode();
 
       String groupId = getGroupId(node);
       if(groupId==null) {
-        groupId = "org.apache.maven.plugins";
+        groupId = "org.apache.maven.plugins"; //$NON-NLS-1$
       }
       String artifactId = getArtifactId(node);
       String version = getVersion(node);
       if(version==null) {
-        Collection<String> versions = getSearchEngine(project).findVersions(groupId, artifactId, "", Packaging.PLUGIN);
+        Collection<String> versions = getSearchEngine(project).findVersions(groupId, artifactId, "", Packaging.PLUGIN); //$NON-NLS-1$
         if(versions.isEmpty()) {
           return;
         }
@@ -320,7 +321,7 @@ public enum PomTemplateContext {
     }
   },
 
-  MODULE("module") {
+  MODULE("module") { //$NON-NLS-1$
     @Override
     public void addTemplates(IProject project, Collection<Template> proposals, Node node, String prefix)
         throws CoreException {
@@ -331,11 +332,11 @@ public enum PomTemplateContext {
       File currentPom = new File(project.getLocationURI());
       File directory = currentPom;
       String path = prefix;
-      boolean endingSlash = path.endsWith("/");
-      String[] elems = StringUtils.split(path, "/");
+      boolean endingSlash = path.endsWith("/"); //$NON-NLS-1$
+      String[] elems = StringUtils.split(path, "/"); //$NON-NLS-1$
       String lastElement = null;
       for(int i = 0; i < elems.length; i++ ) {
-        if("..".equals(elems[i])) {
+        if("..".equals(elems[i])) { //$NON-NLS-1$
           directory = directory != null ? directory.getParentFile() : null;
         } else if(i < elems.length - (endingSlash ? 0 : 1)) {
           directory = directory != null ? new File(directory, elems[i]) : null;
@@ -348,7 +349,7 @@ public enum PomTemplateContext {
         File[] offerings = directory.listFiles(new FileFilter() {
           public boolean accept(File pathname) {
             if (pathname.isDirectory()) {
-              File pom = new File(pathname, "pom.xml");
+              File pom = new File(pathname, "pom.xml"); //$NON-NLS-1$
               //TODO shall also handle polyglot maven :)
               return pom.exists() && pom.isFile();
             }
@@ -357,14 +358,14 @@ public enum PomTemplateContext {
         });
         for (File candidate : offerings) {
           if(lastElement == null || candidate.getName().startsWith(lastElement)) {
-            add(proposals, getContextTypeId(), path + candidate.getName(), "Maven project at " + candidate);
+            add(proposals, getContextTypeId(), path + candidate.getName(), NLS.bind(Messages.PomTemplateContext_candidate, candidate));
           }
         }
       }
     }
   };
 
-  private static final String PREFIX = MvnIndexPlugin.PLUGIN_ID + ".templates.contextType.";
+  private static final String PREFIX = MvnIndexPlugin.PLUGIN_ID + ".templates.contextType."; //$NON-NLS-1$
 
   private final String nodeName;
 
@@ -443,7 +444,7 @@ public enum PomTemplateContext {
    */
   private ArtifactInfo getArtifactInfo(Node node) {
     return new ArtifactInfo(getGroupId(node), getArtifactId(node), getVersion(node), //
-        getSiblingTextValue(node, "classifier"), getSiblingTextValue(node, "type"));
+        getSiblingTextValue(node, "classifier"), getSiblingTextValue(node, "type")); //$NON-NLS-1$ //$NON-NLS-2$
   }
 
   /**
@@ -462,33 +463,33 @@ public enum PomTemplateContext {
    * Returns true if user is editing plugin dependency.
    */
   private boolean isPlugin(Node currentNode) {
-    return "plugin".equals(currentNode.getParentNode().getNodeName());
+    return "plugin".equals(currentNode.getParentNode().getNodeName()); //$NON-NLS-1$
   }
   
   /**
    * Returns true if user is editing plugin dependency exclusion.
    */
   private boolean isExclusion(Node currentNode) {
-    return "exclusion".equals(currentNode.getParentNode().getNodeName());
+    return "exclusion".equals(currentNode.getParentNode().getNodeName()); //$NON-NLS-1$
   }
   
   /**
    * Returns true if user is editing parent dependency.
    */
   private boolean isParent(Node currentNode) {
-    return "parent".equals(currentNode.getParentNode().getNodeName());
+    return "parent".equals(currentNode.getParentNode().getNodeName()); //$NON-NLS-1$
   }
   
   protected String getGroupId(Node currentNode) {
-    return getSiblingTextValue(currentNode, "groupId");
+    return getSiblingTextValue(currentNode, "groupId"); //$NON-NLS-1$
   }
 
   protected static String getArtifactId(Node currentNode) {
-    return getSiblingTextValue(currentNode, "artifactId");
+    return getSiblingTextValue(currentNode, "artifactId"); //$NON-NLS-1$
   }
 
   protected static String getVersion(Node currentNode) {
-    return getSiblingTextValue(currentNode, "version");
+    return getSiblingTextValue(currentNode, "version"); //$NON-NLS-1$
   }
 
   private static String getSiblingTextValue(Node sibling, String name) {
