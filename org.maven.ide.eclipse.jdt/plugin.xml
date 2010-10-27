@@ -40,13 +40,13 @@
       <configurator
             class="org.maven.ide.eclipse.jdt.internal.GenericJavaProjectConfigurator"
             id="org.maven.ide.eclipse.jdt.genericJava"
-            name="Generic JDT"
+            name="%configurator.genericjdt.name"
             priority="10"/>
       <configurator
             class="org.maven.ide.eclipse.jdt.internal.JavaProjectConfigurator"
             generic="false"
             id="org.maven.ide.eclipse.jdt.javaConfigurator"
-            name="JDT">
+            name="%configurator.jdt.name">
       </configurator>
    </extension>
    
@@ -136,8 +136,8 @@
       <filter id="org.maven.ide.eclipse.MavenModuleFilter"
           targetId="org.eclipse.jdt.ui.PackageExplorer"
           class="org.maven.ide.eclipse.ui.internal.filter.MavenModuleFilter"
-          description="Filters module folders from the Maven projects"
-          name="Maven modules filter"
+          description="%filter.description"
+          name="%filter.name"
           enabled="false"/>
    </extension>
    
@@ -146,7 +146,7 @@
                           targetID="org.eclipse.jdt.ui.ClassFileEditor">
          <action id="org.maven.ide.eclipse.jdt.downloadSourcesAction"
               class="org.maven.ide.eclipse.jdt.DownloadSourcesActionDelegate"
-              label="label" style="push"/>
+              label="%action.label" style="push"/>
       </editorContribution>
    </extension>
 
@@ -156,7 +156,7 @@
           adaptable="false">
         <action id="org.maven.ide.eclipse.ui.openJavaDocArtifact"
                 class="org.maven.ide.eclipse.jdt.internal.actions.OpenJavaDocAction"
-                label="Open JavaDoc"
+                label="%action.javadoc.label"
                 enablesFor="1" icon="icons/javadoc.gif"/>
       </objectContribution>
       <objectContribution id="org.maven.ide.eclipse.openJavaDocDependencyNode"
@@ -164,7 +164,7 @@
           adaptable="false">
         <action id="org.maven.ide.eclipse.ui.openJavaDocDependencyNode"
                 class="org.maven.ide.eclipse.jdt.internal.actions.OpenJavaDocAction"
-                label="Open JavaDoc"
+                label="%action.javadoc2.label"
                 enablesFor="1" icon="icons/javadoc.gif"/>
       </objectContribution>
       <objectContribution id="org.maven.ide.eclipse.openJavaDocDependencyNodeAether"
@@ -172,7 +172,7 @@
           adaptable="false">
         <action id="org.maven.ide.eclipse.ui.openJavaDocDependencyNode"
                 class="org.maven.ide.eclipse.jdt.internal.actions.OpenJavaDocAction"
-                label="Open JavaDoc"
+                label="%action.javadoc3.label"
                 enablesFor="1" icon="icons/javadoc.gif"/>
       </objectContribution>
       <objectContribution id="org.maven.ide.eclipse.openJavaDocDependency"
@@ -180,7 +180,7 @@
             adaptable="false">
          <action id="org.maven.ide.eclipse.ui.openJavaDocDependency"
                class="org.maven.ide.eclipse.jdt.internal.actions.OpenJavaDocAction"
-               label="Open JavaDoc"
+               label="%action.javadoc4.label"
                enablesFor="1" icon="icons/javadoc.gif"/>
       </objectContribution>
    </extension>
