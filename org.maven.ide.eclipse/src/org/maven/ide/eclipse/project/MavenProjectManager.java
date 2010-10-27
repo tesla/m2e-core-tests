@@ -146,6 +146,13 @@ public class MavenProjectManager {
   }
 
   /**
+   * PROVISIONAL
+   */
+  public MavenExecutionRequest createExecutionRequest(IMavenProjectFacade project, IProgressMonitor monitor) throws CoreException {
+    return manager.createExecutionRequest(project.getPom(), project.getResolverConfiguration(), monitor);
+  }
+  
+  /**
    * Local repository implementation that checks artifacts in workspace first.
    * 
    * PROVISIONAL
