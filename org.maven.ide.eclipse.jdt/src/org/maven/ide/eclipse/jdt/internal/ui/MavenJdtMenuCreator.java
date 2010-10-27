@@ -19,6 +19,7 @@ import org.maven.ide.eclipse.actions.OpenUrlAction;
 import org.maven.ide.eclipse.actions.SelectionUtil;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.jdt.internal.MavenJdtImages;
+import org.maven.ide.eclipse.jdt.internal.Messages;
 import org.maven.ide.eclipse.jdt.internal.actions.DownloadSourcesAction;
 import org.maven.ide.eclipse.jdt.internal.actions.OpenJavaDocAction;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
@@ -32,9 +33,9 @@ import org.maven.ide.eclipse.project.MavenProjectManager;
  */
 public class MavenJdtMenuCreator extends AbstractMavenMenuCreator {
 
-  private static final String ID_SOURCES = "org.maven.ide.eclipse.downloadSourcesAction";
+  private static final String ID_SOURCES = "org.maven.ide.eclipse.downloadSourcesAction"; //$NON-NLS-1$
 
-  private static final String ID_JAVADOC = "org.maven.ide.eclipse.downloadJavaDocAction";
+  private static final String ID_JAVADOC = "org.maven.ide.eclipse.downloadJavaDocAction"; //$NON-NLS-1$
 
   /* (non-Javadoc)
    * @see org.maven.ide.eclipse.internal.actions.AbstractMavenMenuCreator#createMenu(org.eclipse.jface.action.MenuManager)
@@ -47,9 +48,9 @@ public class MavenJdtMenuCreator extends AbstractMavenMenuCreator {
 
     if(selectionType == SelectionUtil.PROJECT_WITH_NATURE) {
       mgr.appendToGroup(UPDATE, getAction(new DownloadSourcesAction(ID_JAVADOC), //
-          DownloadSourcesAction.ID_JAVADOC, "Download JavaDoc"));
+          DownloadSourcesAction.ID_JAVADOC, Messages.MavenJdtMenuCreator_action_javadoc));
       mgr.appendToGroup(UPDATE, getAction(new DownloadSourcesAction(ID_SOURCES), // 
-          DownloadSourcesAction.ID_SOURCES, "Download Sources"));
+          DownloadSourcesAction.ID_SOURCES, Messages.MavenJdtMenuCreator_action_sources));
     }
 
     if(selectionType == SelectionUtil.JAR_FILE) {
@@ -69,37 +70,37 @@ public class MavenJdtMenuCreator extends AbstractMavenMenuCreator {
       
       if(!isProject) {
         mgr.appendToGroup(UPDATE, getAction(new DownloadSourcesAction(ID_SOURCES), //
-            DownloadSourcesAction.ID_SOURCES, "Download Sources"));
+            DownloadSourcesAction.ID_SOURCES, Messages.MavenJdtMenuCreator_action_sources));
         mgr.appendToGroup(UPDATE, getAction(new DownloadSourcesAction(ID_JAVADOC), //
-            DownloadSourcesAction.ID_JAVADOC, "Download JavaDoc"));
+            DownloadSourcesAction.ID_JAVADOC, Messages.MavenJdtMenuCreator_action_javadoc));
         mgr.prependToGroup(OPEN, new Separator());
       }
 
-      mgr.appendToGroup(OPEN, getAction(new OpenPomAction(), OpenPomAction.ID, "Open POM"));
+      mgr.appendToGroup(OPEN, getAction(new OpenPomAction(), OpenPomAction.ID, Messages.MavenJdtMenuCreator_action_openPom));
       mgr.appendToGroup(OPEN, getAction(new OpenUrlAction(OpenUrlAction.ID_PROJECT), //
-          OpenUrlAction.ID_PROJECT, "Open Project Page", "icons/web.gif"));
+          OpenUrlAction.ID_PROJECT, Messages.MavenJdtMenuCreator_action_openProject, "icons/web.gif")); //$NON-NLS-2$
       mgr.appendToGroup(OPEN, getAction(new OpenUrlAction(OpenUrlAction.ID_ISSUES), //
-          OpenUrlAction.ID_ISSUES, "Open Issue Tracker"));
+          OpenUrlAction.ID_ISSUES, Messages.MavenJdtMenuCreator_action_open_issue));
       mgr.appendToGroup(OPEN, getAction(new OpenUrlAction(OpenUrlAction.ID_SCM), // 
-          OpenUrlAction.ID_SCM, "Open Source Control"));
+          OpenUrlAction.ID_SCM, Messages.MavenJdtMenuCreator_axtion_openScm));
       mgr.appendToGroup(OPEN, getAction(new OpenUrlAction(OpenUrlAction.ID_CI), //
-          OpenUrlAction.ID_CI, "Open Continuous Integration"));
+          OpenUrlAction.ID_CI, Messages.MavenJdtMenuCreator_action_openCI));
       mgr.appendToGroup(OPEN, getAction(new OpenJavaDocAction(), //
-          OpenJavaDocAction.ID, "Open JavaDoc", MavenJdtImages.JAVA_DOC));
+          OpenJavaDocAction.ID, Messages.MavenJdtMenuCreator_action_openJavadoc, MavenJdtImages.JAVA_DOC));
 
       if(!isProject) {
         mgr.prependToGroup(IMPORT, new Separator());
         mgr.appendToGroup(IMPORT, getAction(new MaterializeAction(), //
             MaterializeAction.ID, //
-            selection.size() == 1 ? "Import Project" : "Import Projects", "icons/import_m2_project.gif"));
+            selection.size() == 1 ? Messages.MavenJdtMenuCreator_action_materialize1 : Messages.MavenJdtMenuCreator_action_materializeMany, "icons/import_m2_project.gif")); //$NON-NLS-3$
       }
     }
     
     if(selectionType == SelectionUtil.WORKING_SET) {
       mgr.appendToGroup(UPDATE, getAction(new DownloadSourcesAction(ID_SOURCES), //
-          DownloadSourcesAction.ID_SOURCES, "Download Sources"));
+          DownloadSourcesAction.ID_SOURCES, Messages.MavenJdtMenuCreator_action_downloadSources));
       mgr.appendToGroup(UPDATE, getAction(new DownloadSourcesAction(ID_JAVADOC), //
-          DownloadSourcesAction.ID_JAVADOC, "Download JavaDoc"));
+          DownloadSourcesAction.ID_JAVADOC, Messages.MavenJdtMenuCreator_action_downloadJavadoc));
     }
   }
 

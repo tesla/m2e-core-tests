@@ -84,6 +84,7 @@ import org.maven.ide.eclipse.jdt.internal.ClasspathDescriptor;
 import org.maven.ide.eclipse.jdt.internal.DefaultClasspathManagerDelegate;
 import org.maven.ide.eclipse.jdt.internal.MavenClasspathContainer;
 import org.maven.ide.eclipse.jdt.internal.MavenClasspathContainerSaveHelper;
+import org.maven.ide.eclipse.jdt.internal.Messages;
 import org.maven.ide.eclipse.project.IMavenProjectChangedListener;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectChangedEvent;
@@ -121,13 +122,13 @@ public class BuildPathManager implements IMavenProjectChangedListener, IResource
 
   private static final String PROPERTY_JAVADOC_URL = ".javadoc"; //$NON-NLS-1$
 
-  static final String CLASSIFIER_SOURCES = "sources";
+  static final String CLASSIFIER_SOURCES = "sources"; //$NON-NLS-1$
 
-  static final String CLASSIFIER_JAVADOC = "javadoc";
+  static final String CLASSIFIER_JAVADOC = "javadoc"; //$NON-NLS-1$
 
-  static final String CLASSIFIER_TESTS = "tests";
+  static final String CLASSIFIER_TESTS = "tests"; //$NON-NLS-1$
 
-  static final String CLASSIFIER_TESTSOURCES = "test-sources";
+  static final String CLASSIFIER_TESTSOURCES = "test-sources"; //$NON-NLS-1$
 
   public static final int CLASSPATH_TEST = 0;
 
@@ -209,7 +210,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IResource
      See https://bugs.eclipse.org/bugs/show_bug.cgi?id=154071
    */
   private void forcePackageExplorerRefresh(IJavaProject javaProject) {
-    if(getJDTVersion().startsWith("3.3")) {
+    if(getJDTVersion().startsWith("3.3")) { //$NON-NLS-1$
       DeltaProcessingState state = JavaModelManager.getJavaModelManager().deltaState;
       synchronized(state) {
         for(IElementChangedListener listener : state.elementChangedListeners) {
@@ -250,7 +251,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IResource
 
   public void mavenProjectChanged(MavenProjectChangedEvent[] events, IProgressMonitor monitor) {
     Set<IProject> projects = new HashSet<IProject>();
-    monitor.setTaskName("Setting classpath containers");
+    monitor.setTaskName(Messages.BuildPathManager_monitor_setting_cp);
     for(int i = 0; i < events.length; i++ ) {
       MavenProjectChangedEvent event = events[i];
       IFile pom = event.getSource();
@@ -286,13 +287,13 @@ public class BuildPathManager implements IMavenProjectChangedListener, IResource
       is = new FileOutputStream(containerStateFile);
       new MavenClasspathContainerSaveHelper().writeContainer(container, is);
     } catch(IOException ex) {
-      MavenLogger.log("Can't save classpath container state for " + project.getName(), ex);
+      MavenLogger.log("Can't save classpath container state for " + project.getName(), ex); //$NON-NLS-1$
     } finally {
       if(is != null) {
         try {
           is.close();
         } catch(IOException ex) {
-          MavenLogger.log("Can't close output stream for " + containerStateFile.getAbsolutePath(), ex);
+          MavenLogger.log("Can't close output stream for " + containerStateFile.getAbsolutePath(), ex); //$NON-NLS-1$
         }
       }
     }
@@ -319,7 +320,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IResource
         try {
           is.close();
         } catch(IOException ex) {
-          MavenLogger.log("Can't close output stream for " + containerStateFile.getAbsolutePath(), ex);
+          MavenLogger.log("Can't close output stream for " + containerStateFile.getAbsolutePath(), ex); //$NON-NLS-1$
         }
       }
     }
@@ -405,7 +406,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IResource
   }
 
   private boolean isUnavailable(ArtifactKey a, List<ArtifactRepository> repositories) throws CoreException {
-    return maven.isUnavailable(a.getGroupId(), a.getArtifactId(), a.getVersion(), "jar" /*type*/, a.getClassifier(), repositories);
+    return maven.isUnavailable(a.getGroupId(), a.getArtifactId(), a.getVersion(), "jar" /*type*/, a.getClassifier(), repositories); //$NON-NLS-1$
   }
 
 //  public void downloadSources(IProject project, ArtifactKey artifact, boolean downloadSources, boolean downloadJavaDoc) throws CoreException {
@@ -646,12 +647,12 @@ public class BuildPathManager implements IMavenProjectChangedListener, IResource
 
   /** public for unit tests only */
   public File getSourceAttachmentPropertiesFile(IProject project) {
-    return new File(stateLocationDir, project.getName() + ".sources");
+    return new File(stateLocationDir, project.getName() + ".sources"); //$NON-NLS-1$
   }
 
   /** public for unit tests only */
   public File getContainerStateFile(IProject project) {
-    return new File(stateLocationDir, project.getName() + ".container");
+    return new File(stateLocationDir, project.getName() + ".container"); //$NON-NLS-1$
   }
 
   public void resourceChanged(IResourceChangeEvent event) {
@@ -660,13 +661,13 @@ public class BuildPathManager implements IMavenProjectChangedListener, IResource
       // remove custom source and javadoc configuration
       File attachmentProperties = getSourceAttachmentPropertiesFile((IProject) event.getResource());
       if(attachmentProperties.exists() && !attachmentProperties.delete()) {
-        MavenLogger.log("Can't delete " + attachmentProperties.getAbsolutePath(), null);
+        MavenLogger.log("Can't delete " + attachmentProperties.getAbsolutePath(), null); //$NON-NLS-1$
       }
 
       // remove classpath container state
       File containerState = getContainerStateFile((IProject) event.getResource());
       if(containerState.exists() && !containerState.delete()) {
-        MavenLogger.log("Can't delete " + containerState.getAbsolutePath(), null);
+        MavenLogger.log("Can't delete " + containerState.getAbsolutePath(), null); //$NON-NLS-1$
       }
     }
   }
@@ -733,7 +734,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IResource
     try {
       ArtifactRepository localRepository = maven.getLocalRepository();
       String relPath = maven.getArtifactPath(localRepository, a.getGroupId(), a.getArtifactId(), a.getVersion(),
-          "jar", classifier);
+          "jar", classifier); //$NON-NLS-1$
       File file = new File(localRepository.getBasedir(), relPath).getCanonicalFile();
       if(file.canRead()) {
         return file;
@@ -756,7 +757,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IResource
     try {
       if(file != null) {
         URL fileUrl = file.toURL();
-        return "jar:" + fileUrl.toExternalForm() + "!/" + getJavaDocPathInArchive(file);
+        return "jar:" + fileUrl.toExternalForm() + "!/" + getJavaDocPathInArchive(file); //$NON-NLS-1$ //$NON-NLS-2$
       }
     } catch(MalformedURLException ex) {
       // fall through
@@ -769,7 +770,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IResource
     ZipFile jarFile = null;
     try {
       jarFile = new ZipFile(file);
-      String marker = "package-list";
+      String marker = "package-list"; //$NON-NLS-1$
       for(Enumeration<? extends ZipEntry> en = jarFile.entries(); en.hasMoreElements();) {
         ZipEntry entry = en.nextElement();
         String entryName = entry.getName();
@@ -788,7 +789,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IResource
       }
     }
 
-    return "";
+    return ""; //$NON-NLS-1$
   }
 
   /**
@@ -827,7 +828,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IResource
         }
       }
     } catch(CoreException e) {
-      MavenLogger.log("Could not schedule sources/javadoc download", e);
+      MavenLogger.log("Could not schedule sources/javadoc download", e); //$NON-NLS-1$
     }
 
   }
@@ -848,7 +849,7 @@ public class BuildPathManager implements IMavenProjectChangedListener, IResource
         }
       }
     } catch(CoreException e) {
-      MavenLogger.log("Could not schedule sources/javadoc download", e);
+      MavenLogger.log("Could not schedule sources/javadoc download", e); //$NON-NLS-1$
     }
   }
 

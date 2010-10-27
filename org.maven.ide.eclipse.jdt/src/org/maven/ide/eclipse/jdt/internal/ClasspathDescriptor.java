@@ -94,7 +94,7 @@ public class ClasspathDescriptor implements IClasspathDescriptor {
     descriptor.setInclusionPatterns(inclusion);
     descriptor.setExclusionPatterns(exclusion);
     if(generated) {
-      descriptor.setClasspathAttribute(IClasspathAttribute.OPTIONAL, "true");
+      descriptor.setClasspathAttribute(IClasspathAttribute.OPTIONAL, "true"); //$NON-NLS-1$
     }
 
     entries.add(descriptor);

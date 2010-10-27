@@ -36,6 +36,7 @@ import org.maven.ide.eclipse.core.MavenConsole;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.IMaven;
+import org.maven.ide.eclipse.jdt.internal.Messages;
 import org.maven.ide.eclipse.jobs.IBackgroundProcessingQueue;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
@@ -106,7 +107,7 @@ class DownloadSourcesJob extends Job implements IBackgroundProcessingQueue {
   private final ArrayList<DownloadRequest> queue = new ArrayList<DownloadRequest>();
 
   public DownloadSourcesJob(BuildPathManager manager) {
-    super("Download sources and javadoc");
+    super(Messages.DownloadSourcesJob_job_download);
     this.manager = manager;
 
     this.maven = MavenPlugin.getDefault().getMaven();
@@ -199,7 +200,7 @@ class DownloadSourcesJob extends Job implements IBackgroundProcessingQueue {
         files[0] = download(attached[0], repositories, monitor);
         console.logMessage("Downloaded sources for " + artifact.toString());
       } catch (CoreException e) {
-        logMessage("Could not download sources for " + artifact.toString(), e);
+        logMessage("Could not download sources for " + artifact.toString(), e); //$NON-NLS-1$
       }
     }
 
@@ -208,7 +209,7 @@ class DownloadSourcesJob extends Job implements IBackgroundProcessingQueue {
         files[1] = download(attached[1], repositories, monitor);
         console.logMessage("Downloaded javadoc for " + artifact.toString());
       } catch (CoreException e) {
-        logMessage("Could not download sources for " + artifact.toString(), e);
+        logMessage("Could not download sources for " + artifact.toString(), e); //$NON-NLS-1$
       }
     }
 
@@ -219,7 +220,7 @@ class DownloadSourcesJob extends Job implements IBackgroundProcessingQueue {
     Artifact resolved = maven.resolve(artifact.getGroupId(), //
         artifact.getArtifactId(), //
         artifact.getVersion(), //
-        "jar" /*type*/, //
+        "jar" /*type*/, // //$NON-NLS-1$
         artifact.getClassifier(), // 
         repositories, //
         monitor);

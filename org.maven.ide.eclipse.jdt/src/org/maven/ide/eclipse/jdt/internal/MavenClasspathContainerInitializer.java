@@ -64,13 +64,13 @@ public class MavenClasspathContainerInitializer extends ClasspathContainerInitia
   public void requestClasspathContainerUpdate(IPath containerPath, final IJavaProject project,
       final IClasspathContainer containerSuggestion) {
     // one job per request. assumption that users are not going to change hundreds of containers simultaneously.
-    new Job("Persist classpath container changes") {
+    new Job(Messages.MavenClasspathContainerInitializer_job_name) {
       protected IStatus run(IProgressMonitor monitor) {
         try {
           getBuildPathManager().persistAttachedSourcesAndJavadoc(project, containerSuggestion, monitor);
         } catch(CoreException ex) {
           MavenLogger.log(ex);
-          return new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, 0, "Can't persist classpath container", ex);
+          return new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, 0, Messages.MavenClasspathContainerInitializer_error_cannot_persist, ex);
         }
         return Status.OK_STATUS;
       }

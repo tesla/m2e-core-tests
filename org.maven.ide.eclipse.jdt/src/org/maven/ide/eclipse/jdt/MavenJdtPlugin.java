@@ -32,13 +32,14 @@ import org.maven.ide.eclipse.embedder.AbstractMavenConfigurationChangeListener;
 import org.maven.ide.eclipse.embedder.IMavenConfiguration;
 import org.maven.ide.eclipse.embedder.MavenConfigurationChangeEvent;
 import org.maven.ide.eclipse.index.IndexManager;
+import org.maven.ide.eclipse.jdt.internal.Messages;
 import org.maven.ide.eclipse.jdt.internal.launch.MavenLaunchConfigurationListener;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 
 
 public class MavenJdtPlugin extends AbstractUIPlugin {
 
-  public static String PLUGIN_ID = "org.maven.ide.eclipse.jdt";
+  public static String PLUGIN_ID = "org.maven.ide.eclipse.jdt"; //$NON-NLS-1$
   
   private static MavenJdtPlugin instance;
 
@@ -48,14 +49,14 @@ public class MavenJdtPlugin extends AbstractUIPlugin {
   public MavenJdtPlugin() {
     instance = this;
 
-    if(Boolean.parseBoolean(Platform.getDebugOption(PLUGIN_ID + "/debug/initialization"))) {
+    if(Boolean.parseBoolean(Platform.getDebugOption(PLUGIN_ID + "/debug/initialization"))) { //$NON-NLS-1$
       System.err.println("### executing constructor " + PLUGIN_ID); //$NON-NLS-1$
       new Throwable().printStackTrace();
     }
   }
 
   public void start(BundleContext bundleContext) throws Exception {
-    if(Boolean.parseBoolean(Platform.getDebugOption(PLUGIN_ID + "/debug/initialization"))) {
+    if(Boolean.parseBoolean(Platform.getDebugOption(PLUGIN_ID + "/debug/initialization"))) { //$NON-NLS-1$
       System.err.println("### executing start() " + PLUGIN_ID); //$NON-NLS-1$
       new Throwable().printStackTrace();
     }
@@ -82,7 +83,7 @@ public class MavenJdtPlugin extends AbstractUIPlugin {
         }
 
         if (buildpathManager.setupVariables() && buildpathManager.variablesAreInUse()) {
-          WorkspaceJob job = new WorkspaceJob("Building...") {
+          WorkspaceJob job = new WorkspaceJob(Messages.MavenJdtPlugin_job_name) {
 
             public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
               ResourcesPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, monitor);

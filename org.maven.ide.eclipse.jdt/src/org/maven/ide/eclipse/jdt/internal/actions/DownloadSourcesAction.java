@@ -26,9 +26,9 @@ import org.maven.ide.eclipse.jdt.MavenJdtPlugin;
 
 public class DownloadSourcesAction implements IObjectActionDelegate {
 
-  public static final String ID_SOURCES = "org.maven.ide.eclipse.downloadSourcesAction";
+  public static final String ID_SOURCES = "org.maven.ide.eclipse.downloadSourcesAction"; //$NON-NLS-1$
 
-  public static final String ID_JAVADOC = "org.maven.ide.eclipse.downloadJavaDocAction";
+  public static final String ID_JAVADOC = "org.maven.ide.eclipse.downloadJavaDocAction"; //$NON-NLS-1$
   
   private IStructuredSelection selection;
 

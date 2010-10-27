@@ -128,7 +128,7 @@ public class ClasspathEntryDescriptor implements IClasspathEntryDescriptor {
             exported);
         break;
       default:
-        throw new IllegalArgumentException("Unsupported IClasspathEntry kind=" + entryKind);
+        throw new IllegalArgumentException("Unsupported IClasspathEntry kind=" + entryKind); //$NON-NLS-1$
     }
     return entry;
   }

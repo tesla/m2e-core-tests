@@ -27,6 +27,7 @@ import org.eclipse.jdt.ui.search.QuerySpecification;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.window.Window;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.search.ui.text.Match;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -39,6 +40,7 @@ import org.maven.ide.eclipse.index.IIndex;
 import org.maven.ide.eclipse.index.IndexManager;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
+import org.maven.ide.eclipse.jdt.internal.Messages;
 import org.maven.ide.eclipse.ui.dialogs.MavenRepositorySearchDialog;
 
 
@@ -65,7 +67,7 @@ public class MavenQueryParticipant implements IQueryParticipant, IJavaSearchCons
           public String getText(Object element) {
             if(element instanceof IndexedArtifact) {
               IndexedArtifact ia = (IndexedArtifact) element;
-              return ia.getPackageName() + "." + ia.getClassname() + " - " + ia.getGroupId() + ":" + ia.getArtifactId(); 
+              return ia.getPackageName() + "." + ia.getClassname() + " - " + ia.getGroupId() + ":" + ia.getArtifactId();  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
             }
             return null;
           }
@@ -80,14 +82,14 @@ public class MavenQueryParticipant implements IQueryParticipant, IJavaSearchCons
         Display.getDefault().asyncExec(new Runnable() {
           public void run() {
             MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(new Shell(Display.getCurrent()), //
-                "Open Type from Maven", 
+                Messages.MavenQueryParticipant_searchDialog_title, 
                 IIndex.SEARCH_CLASS_NAME, Collections.<ArtifactKey>emptySet());
             dialog.setQuery(className);
             if(dialog.open() == Window.OK) {
               final IndexedArtifact ia = dialog.getSelectedIndexedArtifact();
               final IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
-              String name = af.group + ":" + af.artifact + ":" + af.version;
-              new Job("Opening " + name) {
+              String name = af.group + ":" + af.artifact + ":" + af.version; //$NON-NLS-1$ //$NON-NLS-2$
+              new Job(NLS.bind(Messages.MavenQueryParticipant_job_name, name)) {
                 protected IStatus run(IProgressMonitor monitor) {
                   OpenPomAction.openEditor(ia, af, monitor);
                   return Status.OK_STATUS;

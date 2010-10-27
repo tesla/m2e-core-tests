@@ -28,7 +28,7 @@ public class MavenJdtImages {
   
   // descriptors
   
-  public static final ImageDescriptor JAVA_DOC = create("javadoc.gif");
+  public static final ImageDescriptor JAVA_DOC = create("javadoc.gif"); //$NON-NLS-1$
   
   
   private static ImageDescriptor create(String key) {
@@ -60,7 +60,7 @@ public class MavenJdtImages {
   }
 
   private static ImageDescriptor createDescriptor(String image) {
-    return AbstractUIPlugin.imageDescriptorFromPlugin(IMavenConstants.PLUGIN_ID, "icons/" + image);
+    return AbstractUIPlugin.imageDescriptorFromPlugin(IMavenConstants.PLUGIN_ID, "icons/" + image); //$NON-NLS-1$
   }
 
 }

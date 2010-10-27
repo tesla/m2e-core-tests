@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.maven.ide.eclipse.core.IMavenConstants;
+import org.maven.ide.eclipse.jdt.internal.Messages;
 
 
 /**
@@ -38,7 +39,7 @@ public class MavenClasspathContainerPage extends WizardPage implements IClasspat
   private IClasspathEntry containerEntry;
   
   public MavenClasspathContainerPage() {
-    super("Maven Dependencies");
+    super(Messages.MavenClasspathContainerPage_title);
   }
 
   // IClasspathContainerPageExtension
@@ -59,8 +60,8 @@ public class MavenClasspathContainerPage extends WizardPage implements IClasspat
   }
 
   public void createControl(Composite parent) {
-    setTitle("Maven Managed Dependencies");
-    setDescription("Set the dependency resolver configuration");
+    setTitle(Messages.MavenClasspathContainerPage_control_title);
+    setDescription(Messages.MavenClasspathContainerPage_control_desc);
 
 
     Composite composite = new Composite(parent, SWT.NONE);
@@ -69,7 +70,7 @@ public class MavenClasspathContainerPage extends WizardPage implements IClasspat
 
     Link link = new Link(composite, SWT.NONE);
     link.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-    link.setText("Use <a href=\"#maven\">Maven Project settings</a> to configure Maven dependency resolution");
+    link.setText(Messages.MavenClasspathContainerPage_link);
     link.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         // IWorkbenchPreferenceContainer container= (IWorkbenchPreferenceContainer) getContainer();

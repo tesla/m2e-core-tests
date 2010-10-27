@@ -29,7 +29,7 @@ public class MavenClasspathContainer implements IClasspathContainer, Serializabl
   }
   
   public String getDescription() {
-    return "Maven Dependencies";  // TODO move to properties
+    return Messages.MavenClasspathContainer_description; 
   }
   
   public int getKind() {

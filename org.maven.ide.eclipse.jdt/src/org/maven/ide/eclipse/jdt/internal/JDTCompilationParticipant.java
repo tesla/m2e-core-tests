@@ -26,7 +26,7 @@ import org.maven.ide.eclipse.jdt.MavenJdtPlugin;
 public class JDTCompilationParticipant extends CompilationParticipant {
   
   public static boolean DEBUG = MavenPlugin.getDefault().isDebugging()
-      & Boolean.parseBoolean(Platform.getDebugOption(MavenJdtPlugin.PLUGIN_ID + "/debug/compilationParticipant"));
+      & Boolean.parseBoolean(Platform.getDebugOption(MavenJdtPlugin.PLUGIN_ID + "/debug/compilationParticipant")); //$NON-NLS-1$
   
   @Override
   public synchronized void cleanStarting(IJavaProject project) {

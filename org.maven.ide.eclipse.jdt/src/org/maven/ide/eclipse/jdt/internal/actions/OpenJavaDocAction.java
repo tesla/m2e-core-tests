@@ -21,6 +21,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
@@ -36,6 +37,7 @@ import org.maven.ide.eclipse.actions.SelectionUtil;
 import org.maven.ide.eclipse.core.MavenLogger;
 import org.maven.ide.eclipse.embedder.ArtifactKey;
 import org.maven.ide.eclipse.embedder.IMaven;
+import org.maven.ide.eclipse.jdt.internal.Messages;
 
 /**
  * Open JavaDoc action
@@ -44,7 +46,7 @@ import org.maven.ide.eclipse.embedder.IMaven;
  */
 public class OpenJavaDocAction extends ActionDelegate {
 
-  public static final String ID = "org.maven.ide.eclipse.openJavaDocAction";
+  public static final String ID = "org.maven.ide.eclipse.openJavaDocAction"; //$NON-NLS-1$
   
   private IStructuredSelection selection;
 
@@ -61,11 +63,11 @@ public class OpenJavaDocAction extends ActionDelegate {
       try {
         final ArtifactKey ak = SelectionUtil.getArtifactKey(this.selection.getFirstElement());
         if(ak == null) {
-          openDialog("Unable to identify Maven artifact");
+          openDialog(Messages.OpenJavaDocAction_message1);
           return;
         }
 
-        new Job("Opening JavaDoc for " + ak) {
+        new Job(NLS.bind(Messages.OpenJavaDocAction_job_open_javadoc,ak)) {
           protected IStatus run(IProgressMonitor monitor) {
             openJavaDoc(ak.getGroupId(), ak.getArtifactId(), ak.getVersion(), monitor);
             return Status.OK_STATUS;
@@ -77,7 +79,7 @@ public class OpenJavaDocAction extends ActionDelegate {
         PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
           public void run() {
             MessageDialog.openInformation(Display.getDefault().getActiveShell(), //
-                "Open JavaDoc", "Unable to read Maven project");
+                Messages.OpenJavaDocAction_error_title, Messages.OpenJavaDocAction_error_message);
           }
         });
       }
@@ -85,25 +87,25 @@ public class OpenJavaDocAction extends ActionDelegate {
   }
 
   protected void openJavaDoc(String groupId, String artifactId, String version, IProgressMonitor monitor) {
-    final String name = groupId + ":" + artifactId + ":" + version + ":javadoc";
+    final String name = groupId + ":" + artifactId + ":" + version + ":javadoc"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
     try {
       IMaven maven = MavenPlugin.getDefault().getMaven();
 
       List<ArtifactRepository> artifactRepositories = maven.getArtifactRepositories();
       
-      Artifact artifact = maven.resolve(groupId, artifactId, version, "javadoc", "javadoc", artifactRepositories, monitor);
+      Artifact artifact = maven.resolve(groupId, artifactId, version, "javadoc", "javadoc", artifactRepositories, monitor); //$NON-NLS-1$ //$NON-NLS-2$
       
       final File file = artifact.getFile();
       if(file == null) {
-        openDialog("Can't download JavaDoc for " + name);
+        openDialog(NLS.bind(Messages.OpenJavaDocAction_error_download, name));
         return;
       }
 
       PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
         public void run() {
           try {
-            String url = "jar:" + file.toURI().toString() + "!/index.html";
+            String url = "jar:" + file.toURI().toString() + "!/index.html"; //$NON-NLS-1$ //$NON-NLS-2$
             URL helpUrl = PlatformUI.getWorkbench().getHelpSystem().resolve(url, true);
             
             IWorkbenchBrowserSupport browserSupport = PlatformUI.getWorkbench().getBrowserSupport();
@@ -118,7 +120,7 @@ public class OpenJavaDocAction extends ActionDelegate {
       
     } catch(CoreException ex) {
       MavenLogger.log("Can't download JavaDoc for " + name, ex);
-      openDialog("Can't download JavaDoc for " + name);
+      openDialog(NLS.bind(Messages.OpenJavaDocAction_error_download,name));
       // TODO search index and offer to select other version
     }    
 
@@ -128,7 +130,7 @@ public class OpenJavaDocAction extends ActionDelegate {
     PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
       public void run() {
         MessageDialog.openInformation(Display.getDefault().getActiveShell(), //
-            "Show JavaDoc", msg);
+            Messages.OpenJavaDocAction_info_title, msg);
       }
     });
   }

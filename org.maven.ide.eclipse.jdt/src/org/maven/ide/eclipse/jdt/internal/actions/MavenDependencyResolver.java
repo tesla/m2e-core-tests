@@ -33,6 +33,7 @@ import org.eclipse.jdt.ui.text.java.IQuickAssistProcessor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.window.Window;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.text.edits.InsertEdit;
@@ -56,6 +57,7 @@ import org.maven.ide.eclipse.embedder.MavenModelManager;
 import org.maven.ide.eclipse.index.IIndex;
 import org.maven.ide.eclipse.index.IndexedArtifact;
 import org.maven.ide.eclipse.index.IndexedArtifactFile;
+import org.maven.ide.eclipse.jdt.internal.Messages;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.ui.dialogs.MavenRepositorySearchDialog;
@@ -128,7 +130,7 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
     private final boolean addImport;
 
     OpenBuildPathCorrectionProposal(String query, IInvocationContext context, int relevance, boolean addImport) {
-      super("Search dependency for " + query, null, relevance, MavenImages.IMG_MAVEN_JAR);
+      super(NLS.bind(Messages.MavenDependencyResolver_proposal_search, query), null, relevance, MavenImages.IMG_MAVEN_JAR);
       this.query = query;
       this.context = context;
       this.addImport = addImport;
@@ -142,15 +144,15 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
       try {
         resource = cu.getCorrespondingResource();
       } catch(CoreException ex) {
-        MessageDialog.openError(Display.getCurrent().getActiveShell(), "Add Dependency", //
-            "Unable to retrieve corresponding resource");
+        MessageDialog.openError(Display.getCurrent().getActiveShell(), Messages.MavenDependencyResolver_error_title, //
+            Messages.MavenDependencyResolver_error_message);
         return;
       }
 
       IFile projectPom = javaProject.getProject().getFile(new Path(IMavenConstants.POM_FILE_NAME));
       if(projectPom == null || !projectPom.isAccessible()) {
-        MessageDialog.openError(Display.getCurrent().getActiveShell(), "Add Dependency",
-            "Project does not have pom.xml");
+        MessageDialog.openError(Display.getCurrent().getActiveShell(), Messages.MavenDependencyResolver_error_title,
+            Messages.MavenDependencyResolver_error_message2);
         return;
       }
 
@@ -158,8 +160,8 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
       try {
         hasMavenNature = javaProject.getProject().hasNature(IMavenConstants.NATURE_ID);
       } catch(CoreException ex1) {
-        MessageDialog.openError(Display.getCurrent().getActiveShell(), "Add Dependency", //
-            "Unable to read project natures");
+        MessageDialog.openError(Display.getCurrent().getActiveShell(), Messages.MavenDependencyResolver_error_title, //
+            Messages.MavenDependencyResolver_error_message3);
         return;
       }
 
@@ -173,8 +175,8 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
       if(hasMavenNature) {
         IMavenProjectFacade projectFacade = projectManager.create(projectPom, false, new NullProgressMonitor());
         if(projectFacade == null) {
-          MessageDialog.openError(Display.getCurrent().getActiveShell(), "Add Dependency", //
-              "Unable to read Maven project");
+          MessageDialog.openError(Display.getCurrent().getActiveShell(), Messages.MavenDependencyResolver_error_title, //
+              Messages.MavenDependencyResolver_error_message4);
           return;
         }
 
@@ -184,8 +186,8 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
         } catch(Exception ex) {
           String msg = "Unable to locate Maven project";
           MavenLogger.log(msg, ex);
-          MessageDialog.openError(Display.getCurrent().getActiveShell(), "Add Dependency",
-              "Unable to locate pom.xml for " + cu.getPath().toString());
+          MessageDialog.openError(Display.getCurrent().getActiveShell(), Messages.MavenDependencyResolver_error_title,
+              NLS.bind(Messages.MavenDependencyResolver_error_message5, cu.getPath().toString()));
           return;
         }
       } else {
@@ -198,8 +200,8 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
         } catch(CoreException ex) {
           String msg = "Unable to locate Maven project";
           MavenLogger.log(msg, ex);
-          MessageDialog.openError(Display.getCurrent().getActiveShell(), "Add Dependency",
-              "Unable to locate pom.xml for " + cu.getPath().toString());
+          MessageDialog.openError(Display.getCurrent().getActiveShell(), Messages.MavenDependencyResolver_error_title,
+              NLS.bind(Messages.MavenDependencyResolver_error_message6, cu.getPath().toString()));
           return;
         }
       }
@@ -208,7 +210,7 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
       Shell shell = workbench.getDisplay().getActiveShell();
       
       MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(shell, //
-          "Search in Maven repositories", IIndex.SEARCH_CLASS_NAME, artifacts, true);
+          Messages.MavenDependencyResolver_searchDialog_title, IIndex.SEARCH_CLASS_NAME, artifacts, true);
       dialog.setQuery(query);
 
       if(dialog.open() == Window.OK) {
@@ -274,13 +276,13 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
         }
 
         InsertEdit edit = new InsertEdit(startPosition, //
-            document.getLineDelimiter(0) + "import " + packageName + "." + className + ";");
+            document.getLineDelimiter(0) + "import " + packageName + "." + className + ";"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         edit.apply(document, TextEdit.CREATE_UNDO);
         return true;
       } catch(Exception ex) {
         MavenLogger.log("Unable to update imports", ex);
-        MessageDialog.openError(Display.getCurrent().getActiveShell(), "Add Dependency",
-            "Unable to add import statement for " + className);
+        MessageDialog.openError(Display.getCurrent().getActiveShell(), Messages.MavenDependencyResolver_error_title,
+            NLS.bind(Messages.MavenDependencyResolver_error_message7, className));
         return false;
       }
     }
@@ -314,7 +316,7 @@ public class MavenDependencyResolver implements IQuickAssistProcessor {
     }
 
     public String getAdditionalProposalInfo() {
-      return "Resolve dependencies from Maven repositories";
+      return Messages.MavenDependencyResolver_additional_info;
     }
 
   }

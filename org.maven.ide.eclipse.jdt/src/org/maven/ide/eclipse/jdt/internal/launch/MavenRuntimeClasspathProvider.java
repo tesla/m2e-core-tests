@@ -40,6 +40,7 @@ import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.StandardClasspathProvider;
+import org.eclipse.osgi.util.NLS;
 
 import org.apache.maven.model.Build;
 
@@ -47,6 +48,7 @@ import org.maven.ide.eclipse.MavenPlugin;
 import org.maven.ide.eclipse.core.IMavenConstants;
 import org.maven.ide.eclipse.jdt.BuildPathManager;
 import org.maven.ide.eclipse.jdt.MavenJdtPlugin;
+import org.maven.ide.eclipse.jdt.internal.Messages;
 import org.maven.ide.eclipse.project.IMavenProjectFacade;
 import org.maven.ide.eclipse.project.MavenProjectManager;
 import org.maven.ide.eclipse.project.ResolverConfiguration;
@@ -54,19 +56,19 @@ import org.maven.ide.eclipse.project.ResolverConfiguration;
 
 public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
   
-  public static final String MAVEN_SOURCEPATH_PROVIDER = "org.maven.ide.eclipse.launchconfig.sourcepathProvider";
+  public static final String MAVEN_SOURCEPATH_PROVIDER = "org.maven.ide.eclipse.launchconfig.sourcepathProvider"; //$NON-NLS-1$
 
-  public static final String MAVEN_CLASSPATH_PROVIDER = "org.maven.ide.eclipse.launchconfig.classpathProvider";
+  public static final String MAVEN_CLASSPATH_PROVIDER = "org.maven.ide.eclipse.launchconfig.classpathProvider"; //$NON-NLS-1$
 
-  private static final String TESTS_PROJECT_CLASSIFIER = "tests";
+  private static final String TESTS_PROJECT_CLASSIFIER = "tests"; //$NON-NLS-1$
 
-  private static final String THIS_PROJECT_CLASSIFIER = "";
+  private static final String THIS_PROJECT_CLASSIFIER = ""; //$NON-NLS-1$
 
-  public static final String JDT_JUNIT_TEST = "org.eclipse.jdt.junit.launchconfig";
+  public static final String JDT_JUNIT_TEST = "org.eclipse.jdt.junit.launchconfig"; //$NON-NLS-1$
 
-  public static final String JDT_JAVA_APPLICATION = "org.eclipse.jdt.launching.localJavaApplication";
+  public static final String JDT_JAVA_APPLICATION = "org.eclipse.jdt.launching.localJavaApplication"; //$NON-NLS-1$
   
-  public static final String JDT_TESTNG_TEST = "org.testng.eclipse.launchconfig";
+  public static final String JDT_TESTNG_TEST = "org.testng.eclipse.launchconfig"; //$NON-NLS-1$
 
   private static final Set<String> supportedTypes = new HashSet<String>();
   static {
@@ -150,7 +152,7 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
   }
 
   protected int getArtifactScope(ILaunchConfiguration configuration) throws CoreException {
-    String typeid = configuration.getType().getAttribute("id");
+    String typeid = configuration.getType().getAttribute("id"); //$NON-NLS-1$
     if (JDT_JAVA_APPLICATION.equals(typeid)) {
       IResource[] resources = configuration.getMappedResources();
 
@@ -181,7 +183,7 @@ public class MavenRuntimeClasspathProvider extends StandardClasspathProvider {
       return BuildPathManager.CLASSPATH_TEST;
     } else {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, 0,
-          "Unsupported launch configuration type " + typeid, null));
+          NLS.bind(Messages.MavenRuntimeClasspathProvider_error_unsupported, typeid), null));
     }
   }
 

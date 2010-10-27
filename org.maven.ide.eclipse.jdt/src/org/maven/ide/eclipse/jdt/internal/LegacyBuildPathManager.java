@@ -40,7 +40,7 @@ public class LegacyBuildPathManager {
 
     String containerPath = entry.getPath().toString();
 
-    boolean resolveWorkspaceProjects = containerPath.indexOf("/" + IMavenConstants.NO_WORKSPACE_PROJECTS) == -1;
+    boolean resolveWorkspaceProjects = containerPath.indexOf("/" + IMavenConstants.NO_WORKSPACE_PROJECTS) == -1; //$NON-NLS-1$
 
     // boolean filterResources = containerPath.indexOf("/" + MavenPlugin.FILTER_RESOURCES) != -1;
 
@@ -52,13 +52,13 @@ public class LegacyBuildPathManager {
 
   private static String getActiveProfiles(IClasspathEntry entry) {
     String path = entry.getPath().toString();
-    String prefix = "/" + IMavenConstants.ACTIVE_PROFILES + "[";
+    String prefix = "/" + IMavenConstants.ACTIVE_PROFILES + "["; //$NON-NLS-1$ //$NON-NLS-2$
     int n = path.indexOf(prefix);
     if(n == -1) {
-      return "";
+      return ""; //$NON-NLS-1$
     }
 
-    return path.substring(n + prefix.length(), path.indexOf("]", n));
+    return path.substring(n + prefix.length(), path.indexOf("]", n)); //$NON-NLS-1$
   }
 
   public static ResolverConfiguration getResolverConfiguration(IProject project) {

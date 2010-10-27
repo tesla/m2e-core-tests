@@ -17,6 +17,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.osgi.util.NLS;
 
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionResult;
@@ -40,12 +41,12 @@ public class GenericJavaProjectConfigurator extends AbstractJavaProjectConfigura
 
     console.logMessage("Generating sources " + pomResource.getFullPath());
 
-    monitor.subTask("reading " + pomResource.getFullPath());
+    monitor.subTask(NLS.bind(Messages.GenericJavaProjectConfigurator_subtask, pomResource.getFullPath()));
     if(mavenConfiguration.isDebugOutput()) {
       console.logMessage("Reading " + pomResource.getFullPath());
     }
 
-    String goalsToExecute = "";
+    String goalsToExecute = ""; //$NON-NLS-1$
     if(request.isProjectConfigure()) {
       goalsToExecute = mavenConfiguration.getGoalOnUpdate();
     } else if(request.isProjectImport()) {
@@ -57,7 +58,7 @@ public class GenericJavaProjectConfigurator extends AbstractJavaProjectConfigura
     }
 
     MavenExecutionRequest executionRequest = projectManager.createExecutionRequest(pomResource, configuration, monitor);
-    executionRequest.setGoals(Arrays.asList(goalsToExecute.split("[\\s,]+")));
+    executionRequest.setGoals(Arrays.asList(goalsToExecute.split("[\\s,]+"))); //$NON-NLS-1$
     MavenExecutionResult result = maven.execute(executionRequest, monitor);
 
     if(result.hasExceptions()) {
@@ -71,9 +72,9 @@ public class GenericJavaProjectConfigurator extends AbstractJavaProjectConfigura
     }
 
     // TODO optimize project refresh
-    monitor.subTask("refreshing");
+    monitor.subTask(Messages.GenericJavaProjectConfigurator_subtask_refreshing);
     // project.refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 1));
-    project.getFolder("target").refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 1));
+    project.getFolder("target").refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 1)); //$NON-NLS-1$
 
     List<MavenProject> mavenProjects = result.getTopologicallySortedProjects();
 

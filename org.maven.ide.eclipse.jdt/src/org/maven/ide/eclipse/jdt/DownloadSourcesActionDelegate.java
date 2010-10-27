@@ -48,7 +48,7 @@ public class DownloadSourcesActionDelegate implements IEditorActionDelegate {
           }
         }
       } catch(Exception ex) {
-        MavenLogger.log("Could not schedule source download", ex);
+        MavenLogger.log("Could not schedule source download", ex); //$NON-NLS-1$
       }
     }
   }
