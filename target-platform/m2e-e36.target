@@ -26,5 +26,9 @@
 <unit id="org.eclipse.swtbot.eclipse.test.junit4.feature.group" version="2.0.0.595-dev-e36"/>
 <repository location="http://download.eclipse.org/technology/swtbot/helios/dev-build/update-site/"/>
 </location>
+<location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
+<unit id="org.eclipse.equinox.p2.sdk.feature.group" version="3.6.0.v20100503-9I7VGAeG8tz-BY6jz0w2HLRYr"/>
+<repository location="http://download.eclipse.org/releases/helios"/>
+</location>
 </locations>
 </target>
