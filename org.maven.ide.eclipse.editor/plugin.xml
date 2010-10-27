@@ -8,9 +8,9 @@
 -->
 <?eclipse version="3.2"?>
 <plugin>
-   <extension-point id="pageFactories" name="Maven POM editor page factory" schema="schema/pageFactories.exsd"/>
-   <extension-point id="org.maven.ide.eclipse.editor.lifecycleMappingEditorContribution" name="Lifecycle Mapping Editor Contribution" schema="schema/org.maven.ide.eclipse.editor.lifecycleMappingEditorContribution.exsd"/>
-   <extension-point id="org.maven.ide.eclipse.editor.plugins.configurationEditorContribution" name="Plugin Configuration Editor Contribution" schema="schema/configurationEditorContribution.exsd"/>
+   <extension-point id="pageFactories" name="%extension-point.pageFactory.name" schema="schema/pageFactories.exsd"/>
+   <extension-point id="org.maven.ide.eclipse.editor.lifecycleMappingEditorContribution" name="%extension-point.lifecycleMapping.name" schema="schema/org.maven.ide.eclipse.editor.lifecycleMappingEditorContribution.exsd"/>
+   <extension-point id="org.maven.ide.eclipse.editor.plugins.configurationEditorContribution" name="%extension-point.pluginConfiguration.name" schema="schema/configurationEditorContribution.exsd"/>
    
 
   <extension point="org.eclipse.ui.editors">
@@ -19,7 +19,7 @@
           contributorClass="org.maven.ide.eclipse.editor.pom.MavenPomEditorContributor"
           icon="icons/editor-pom.gif"
           id="org.maven.ide.eclipse.editor.MavenPomEditor"
-          name="Maven POM Editor">
+          name="%editor.name">
        <contentTypeBinding contentTypeId="org.maven.ide.eclipse.pomFile"/> 
     </editor>
   </extension>
@@ -31,7 +31,7 @@
       <page id="org.maven.ide.eclipse.editor.pom.PomEditorPreferencePage"
          category="org.maven.ide.eclipse.preferences.Maven2PreferencePage"
          class="org.maven.ide.eclipse.editor.pom.PomEditorPreferencePage"
-         name="POM Editor">
+         name="%page.name">
          <keywordReference id="org.maven.ide.eclipse.maven"/>
       </page>
    </extension>

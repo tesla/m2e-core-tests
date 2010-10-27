@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Maven Integration for Eclipse (Editors)
+Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.maven.ide.eclipse.editor;singleton:=true
 Bundle-Version: 0.12.0.qualifier
 Bundle-Activator: org.maven.ide.eclipse.editor.MavenEditorPlugin
@@ -31,7 +31,7 @@ Require-Bundle: org.eclipse.core.runtime,
 Eclipse-LazyStart: true
 Bundle-RequiredExecutionEnvironment: J2SE-1.5,
  JavaSE-1.6
-Bundle-Vendor: Sonatype, Inc.
+Bundle-Vendor: %Bundle-Vendor
 Bundle-ClassPath: .
 Export-Package: org.maven.ide.eclipse.editor,
  org.maven.ide.eclipse.editor.composites,
