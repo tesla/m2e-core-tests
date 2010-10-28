@@ -45,7 +45,7 @@
       </builder>
    </extension>
    <extension point="org.eclipse.core.resources.natures"
-         id="core.maven2Nature"
+         id="maven2Nature"
          name="%m2.nature.name">
       <runtime>
          <run class="org.eclipse.m2e.core.internal.builder.MavenNature"/>
