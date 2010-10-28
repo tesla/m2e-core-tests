@@ -9,7 +9,9 @@
 package org.maven.ide.eclipse.jdt.internal;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -47,9 +49,9 @@ public class ClasspathEntryDescriptor implements IClasspathEntryDescriptor {
 
   private IPath sourceAttachmentRootPath;
 
-  private IPath[] inclusionPatterns;
+  private LinkedHashSet<IPath> inclusionPatterns;
 
-  private IPath[] exclusionPatterns;
+  private LinkedHashSet<IPath> exclusionPatterns;
 
   private boolean combineAccessRules;
 
@@ -115,8 +117,8 @@ public class ClasspathEntryDescriptor implements IClasspathEntryDescriptor {
         break;
       case IClasspathEntry.CPE_SOURCE:
         entry = JavaCore.newSourceEntry(path, //
-            inclusionPatterns, //
-            exclusionPatterns, //
+            getInclusionPatterns(), //
+            getExclusionPatterns(), //
             outputLocation, //
             attributesArray);
         break;
@@ -183,8 +185,8 @@ public class ClasspathEntryDescriptor implements IClasspathEntryDescriptor {
 
     this.sourceAttachmentPath = entry.getSourceAttachmentPath();
     this.sourceAttachmentRootPath = entry.getSourceAttachmentRootPath();
-    this.inclusionPatterns = entry.getInclusionPatterns();
-    this.exclusionPatterns = entry.getExclusionPatterns();
+    setInclusionPatterns(entry.getInclusionPatterns());
+    setExclusionPatterns(entry.getExclusionPatterns());
     this.combineAccessRules = entry.combineAccessRules();
   }
 
@@ -246,10 +248,40 @@ public class ClasspathEntryDescriptor implements IClasspathEntryDescriptor {
   }
 
   public void setInclusionPatterns(IPath[] inclusionPatterns) {
-    this.inclusionPatterns = inclusionPatterns;
+    if (inclusionPatterns!=null) {
+      this.inclusionPatterns = new LinkedHashSet<IPath>(Arrays.asList(inclusionPatterns));
+    } else {
+      this.inclusionPatterns = null;
+    }
+  }
+
+  public void addInclusionPattern(IPath pattern) {
+    if (inclusionPatterns == null) {
+      inclusionPatterns = new LinkedHashSet<IPath>();
+    }
+    inclusionPatterns.add(pattern);
+  }
+
+  public IPath[] getInclusionPatterns() {
+    return inclusionPatterns != null? inclusionPatterns.toArray(new IPath[inclusionPatterns.size()]) : null;
   }
 
   public void setExclusionPatterns(IPath[] exclusionPatterns) {
-    this.exclusionPatterns = exclusionPatterns;
+    if (exclusionPatterns!=null) {
+      this.exclusionPatterns = new LinkedHashSet<IPath>(Arrays.asList(exclusionPatterns));
+    } else {
+      this.exclusionPatterns = null;
+    }
+  }
+
+  public void addExclusionPattern(IPath pattern) {
+    if (exclusionPatterns == null) {
+      exclusionPatterns = new LinkedHashSet<IPath>();
+    }
+    exclusionPatterns.add(pattern);
+  }
+
+  public IPath[] getExclusionPatterns() {
+    return exclusionPatterns != null? exclusionPatterns.toArray(new IPath[exclusionPatterns.size()]) : null;
   }
 }
