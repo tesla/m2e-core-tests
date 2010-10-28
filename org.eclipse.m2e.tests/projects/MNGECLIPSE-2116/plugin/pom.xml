@@ -1,0 +1,32 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-resources-plugin</artifactId>
+  <packaging>maven-plugin</packaging>
+  <version>2.4.1</version>
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-plugin-api</artifactId>
+      <version>2.0</version>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-plugin-plugin</artifactId>
+        <version>2.5</version>
+      </plugin>
+      <plugin>
+        <groupId>org.eclipse.m2e</groupId>
+        <artifactId>lifecycle-mapping</artifactId>
+        <version>0.10.0</version>
+        <configuration>
+          <mappingId>customizable</mappingId>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

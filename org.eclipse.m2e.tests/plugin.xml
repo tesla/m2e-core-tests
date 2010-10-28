@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (c) 2008 Sonatype, Inc.
+  All rights reserved. This program and the accompanying materials
+  are made available under the terms of the Eclipse Public License v1.0
+  which accompanies this distribution, and is available at
+  http://www.eclipse.org/legal/epl-v10.html
+-->
+<?eclipse version="3.2"?>
+<plugin>
+
+   <extension point="org.eclipse.m2e.core.scmHandlers">
+      <handler class="org.eclipse.m2e.tests.scm.TestScmHandler"
+               priority="1000" type="test"/>
+   </extension>
+   
+   <extension point="org.eclipse.m2e.core.archetypeCatalogs">
+      <local name="archetype-catalog.xml" description="Test Catalog"/>
+      <remote url="http://repo1.maven.org/maven2/archetype-catalog.xml" description="Test Remote Catalog"/>
+   </extension>
+   
+   <extension point="org.eclipse.m2e.core.projectConfigurators">
+      <configurator id="org.eclipse.m2e.configurator.test"
+            class="org.eclipse.m2e.tests.configurators.TestProjectConfigurator"
+            name="TEST" priority="1000"/>
+
+      <configurator id="org.eclipse.m2e.configurator.testMaven"
+            class="org.eclipse.m2e.core.project.configurator.MavenProjectConfigurator:group:artifact|goal1|goal2"
+            name="TestMaven" priority="1001"/>
+
+      <configurator id="org.eclipse.m2e.configurator.incompatibleApi"
+            class="org.eclipse.m2e.tests.configurators.IncompatibleProjectConfigurator"
+            name="AJDT-0.9.8" priority="1002"/>
+      <configurator
+            class="org.eclipse.m2e.tests.configurators.MNGECLIPSE2313MarkAllRawClasspathEntriesConfigurator"
+            generic="false"
+            id="MNGECLIPSE-2313_markAllRawClasspathEntries">
+      </configurator>
+            
+   </extension>
+   <extension
+         point="org.eclipse.m2e.core.indexes">
+      <index
+            indexId="testIndex"
+            repositoryUrl="file:testIndex">
+      </index>
+   </extension>
+   <extension
+         point="org.eclipse.m2e.core.mavenProjectChangedListeners">
+      <listener
+            class="org.eclipse.m2e.tests.internal.project.TestMavenProjectChangedListener">
+      </listener>
+   </extension>
+
+</plugin>

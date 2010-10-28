@@ -1,0 +1,19 @@
+/*******************************************************************************
+ * Copyright (c) 2008 Sonatype, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *******************************************************************************/
+
+package org.eclipse.m2e.core.project.configurator;
+
+/**
+ * IExtensionLifecycleMapping
+ *
+ * @author mpoindexter
+ */
+public interface IExtensionLifecycleMapping extends ILifecycleMapping {
+  public void setId(String id);
+  public void setName(String name);
+}

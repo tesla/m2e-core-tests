@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+  <!--
+    Copyright (c) 2009 Sonatype, Inc. All rights reserved. This program and the accompanying materials are made available under the terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.eclipse.m2e</groupId>
+    <artifactId>org.eclipse.m2e.parent</artifactId>
+    <version>0.13.0-SNAPSHOT</version>
+    <relativePath>../org.eclipse.m2e.parent</relativePath>
+  </parent>
+
+  <artifactId>org.eclipse.m2e.integration.tests</artifactId>
+  <packaging>eclipse-test-plugin</packaging>
+
+  <name>Maven Integration for Eclipse System Tests</name>
+
+  <build>
+    <sourceDirectory>src</sourceDirectory>
+
+    <plugins>
+      <plugin>
+        <groupId>org.sonatype.tycho</groupId>
+        <artifactId>maven-osgi-test-plugin</artifactId>
+        <configuration>
+          <useUIThread>false</useUIThread>
+          <forkedProcessTimeoutInSeconds>7200</forkedProcessTimeoutInSeconds>
+          <appArgLine>-pluginCustomization ${project.basedir}/plugin_customization.ini</appArgLine>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>wintest</directory>
+              <followSymlinks>false</followSymlinks>
+              <includes>
+                <include>**/*.png</include>
+              </includes>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <!--
+          Unpack tomcat fails on linux with "ArchiverException: chmod exit code was: 1"
+
+          http://jira.codehaus.org/browse/MDEP-138
+          http://jira.codehaus.org/browse/PLXUTILS-64 
+         -->
+        <version>2.2-SNAPSHOT</version>
+        <executions>
+          <execution>
+            <id>unpack-dependencies</id>
+            <phase>package</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.apache.maven</groupId>
+                  <artifactId>apache-maven</artifactId>
+                  <version>2.0.10</version>
+                  <classifier>bin</classifier>
+                  <type>tar.gz</type>
+                  <outputDirectory>${project.build.directory}/maven</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.apache.tomcat</groupId>
+                  <artifactId>apache-tomcat</artifactId>
+                  <version>6.0.24</version>
+                  <type>tar.gz</type>
+                  <classifier>bundle</classifier>
+                  <outputDirectory>${project.build.directory}/tomcat</outputDirectory>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.eclipse.m2e</groupId>
+        <artifactId>lifecycle-mapping</artifactId>
+        <version>0.9.9-SNAPSHOT</version>
+        <configuration>
+          <mappingId>customizable</mappingId>
+          <configurators></configurators>
+          <mojoExecutions>
+            <mojoExecution runOnIncremental="false">org.apache.maven.plugins:maven-dependency-plugin:2.0:unpack</mojoExecution>
+          </mojoExecutions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>
