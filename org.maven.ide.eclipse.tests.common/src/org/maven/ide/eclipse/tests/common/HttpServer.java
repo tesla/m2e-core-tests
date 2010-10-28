@@ -97,6 +97,8 @@ public class HttpServer {
 
   private String storePassword;
 
+  private Map<String, Integer> resourceErrorResponses = new HashMap<String, Integer>();
+
   protected Connector newHttpConnector() {
     SelectChannelConnector connector = new SelectChannelConnector();
     connector.setPort(httpPort);
@@ -394,10 +396,22 @@ public class HttpServer {
   }
 
   /**
+   * Adds resources to the server for which the server will return http errors.
+   * 
+   * @return This server, never {@code null}.
+   */
+  public HttpServer addResourceErrorResponse(String resourcePath, int httpErrorCode) {
+    resourceErrorResponses.put(resourcePath, httpErrorCode);
+
+    return this;
+  }
+
+  /**
    * Enables request recording for the specified URI patterns. Recorded requests can be retrieved via
    * {@link #getRecordedRequests()}.
    * 
-   * @param patterns The regular expressions denoting URIs to monitor, e.g. {@code "/context/.*"}, must not be {@code null}.
+   * @param patterns The regular expressions denoting URIs to monitor, e.g. {@code "/context/.*"}, must not be
+   *          {@code null}.
    * @return This server, never {@code null}.
    */
   public HttpServer enableRecording(String... patterns) {
@@ -619,6 +633,16 @@ public class HttpServer {
     public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
         throws IOException {
       String uri = request.getRequestURI();
+      for(String resourcePath : resourceErrorResponses.keySet()) {
+        if(uri.startsWith(resourcePath)) {
+          int status = resourceErrorResponses.get(resourcePath);
+          String responseContent = "***Error" + status + "***";
+          response.getOutputStream().write(responseContent.getBytes());
+          response.setStatus(status);
+          ((Request) request).setHandled(true);
+          return;
+        }
+      }
 
       for(String contextRoot : resourceDirs.keySet()) {
         String path = URIUtil.decodePath(trimContextRoot(uri, contextRoot));
