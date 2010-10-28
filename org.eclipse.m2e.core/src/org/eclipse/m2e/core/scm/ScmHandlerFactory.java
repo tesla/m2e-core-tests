@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 
+import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.core.MavenLogger;
 
 
@@ -31,9 +32,10 @@ import org.eclipse.m2e.core.core.MavenLogger;
  */
 public class ScmHandlerFactory {
 
-  public static final String EXTENSION_SCM_HANDLERS = "org.eclipse.m2e.scmHandlers";
+ 
+  public static final String EXTENSION_SCM_HANDLERS = IMavenConstants.PLUGIN_ID + ".scmHandlers";
   
-  public static final String EXTENSION_SCM_HANDLERS_UI = "org.eclipse.m2e.scmHandlersUi";
+  public static final String EXTENSION_SCM_HANDLERS_UI = IMavenConstants.PLUGIN_ID + ".scmHandlersUi";
   
   private static final String ELEMENT_SCM_HANDLER = "handler";
 
