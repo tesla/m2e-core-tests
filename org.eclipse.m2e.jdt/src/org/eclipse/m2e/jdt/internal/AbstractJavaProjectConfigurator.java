@@ -288,15 +288,30 @@ public abstract class AbstractJavaProjectConfigurator extends AbstractProjectCon
     for(String sourceRoot : sourceRoots) {
       IFolder sourceFolder = getFolder(project, sourceRoot);
 
-      if(sourceFolder != null && sourceFolder.exists()) {
-        console.logMessage("Adding source folder " + sourceFolder.getFullPath());
-        classpath.addSourceEntry(sourceFolder.getFullPath(), outputPath, inclusion, exclusion, false);
+      if(sourceFolder != null && sourceFolder.exists() && sourceFolder.getProject().equals(project)) {
+        IClasspathEntryDescriptor cped = getEnclosingEntryDescriptor(classpath, sourceFolder.getFullPath());
+        if (cped == null) {
+          console.logMessage("Adding source folder " + sourceFolder.getFullPath());
+          classpath.addSourceEntry(sourceFolder.getFullPath(), outputPath, inclusion, exclusion, false);
+        } else {
+          console.logMessage("Not adding source folder " + sourceFolder.getFullPath() + " because it overlaps with " + cped.getPath());
+        }
+        
       } else {
         if(sourceFolder != null) {
           classpath.removeEntry(sourceFolder.getFullPath());
         }
       }
     }
+  }
+
+  private IClasspathEntryDescriptor getEnclosingEntryDescriptor(IClasspathDescriptor classpath, IPath fullPath) {
+    for(IClasspathEntryDescriptor cped : classpath.getEntryDescriptors()) {
+      if(cped.getPath().isPrefixOf(fullPath)) {
+        return cped;
+      }
+    }
+    return null;
   }
 
   private void addResourceDirs(IClasspathDescriptor classpath, IProject project, List<Resource> resources,
@@ -324,15 +339,24 @@ public abstract class AbstractJavaProjectConfigurator extends AbstractProjectCon
            *     </resource>
            */
           console.logError("Skipping resource folder " + r.getFullPath());
-        } else if(r != null && !classpath.containsPath(r.getFullPath())) {
-          console.logMessage("Adding resource folder " + r.getFullPath());
-          classpath.addSourceEntry(r.getFullPath(), outputPath, new IPath[0] /*inclusions*/, new IPath[] {new Path(
-              "**")} /*exclusion*/, false /*optional*/); //$NON-NLS-1$
+        } else if(r != null && r.getProject().equals(project)) {
+          IClasspathEntryDescriptor cped = getEnclosingEntryDescriptor(classpath, r.getFullPath());
+          if(cped == null) {
+            console.logMessage("Adding resource folder " + r.getFullPath());
+            classpath.addSourceEntry(r.getFullPath(), outputPath, new IPath[0] /*inclusions*/, new IPath[] {new Path(
+                "**")} /*exclusion*/, false /*optional*/);
+          } else {
+            // resources and sources folders overlap. make sure JDT only processes java sources.
+            console.logMessage("Resources folder " + r.getFullPath() + " overlaps with sources folder "
+                + cped.getPath());
+            cped.addInclusionPattern(new Path("**/*.java"));
+          }
+        } else {
+          console.logMessage("Not adding resources folder " + resourceDirectory.getAbsolutePath());
         }
       }
     }
-  }
-  
+  }  
   
 
   protected void addJavaProjectOptions(Map<String, String> options, ProjectConfigurationRequest request, MavenProject mavenProject,

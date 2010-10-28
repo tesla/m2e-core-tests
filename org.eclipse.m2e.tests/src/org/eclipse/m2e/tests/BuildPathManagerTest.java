@@ -1069,4 +1069,66 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
     assertEquals(new Path("org/apache/maven/tests/Excluded.java"), exclusionsTest[0]);
   }
 
+  public void testMNGECLIPSE_2367_same_sources_resources() throws Exception {
+    IProject project = importProject("projects/MNGECLIPSE-2367_sourcesResourcesOverlap/project01/pom.xml");
+    project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+
+    IJavaProject javaProject = JavaCore.create(project);
+    IClasspathEntry[] cp = javaProject.getRawClasspath();
+
+    // maven-resources-plugin handles resources, make sure JDT only deals with java sources.
+    IPath[] incl = cp[0].getInclusionPatterns();
+    assertEquals(1, incl.length);
+    assertEquals("**/*.java", incl[0].toPortableString());
+    assertEquals(0, cp[0].getExclusionPatterns().length);
+
+    // make sure resources do get copied to target/classes folder
+    assertTrue(project.getFile("target/classes/test.properties").isAccessible());
+  }
+
+  public void testMNGECLIPSE_2367_sources_encloses_resources() throws Exception {
+    IProject project = importProject("projects/MNGECLIPSE-2367_sourcesResourcesOverlap/project02/pom.xml");
+    project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+
+    IJavaProject javaProject = JavaCore.create(project);
+    IClasspathEntry[] cp = javaProject.getRawClasspath();
+
+    // maven-resources-plugin handles resources, make sure JDT only deals with java sources.
+    IPath[] incl = cp[0].getInclusionPatterns();
+    assertEquals(1, incl.length);
+    assertEquals("**/*.java", incl[0].toPortableString());
+    assertEquals(0, cp[0].getExclusionPatterns().length);
+
+    // make sure resources do get copied to target/classes folder
+    assertTrue(project.getFile("target/classes/test.properties").isAccessible());
+  }
+
+  public void testMNGECLIPSE_2367_testSources_encloses_resources() throws Exception {
+    IProject project = importProject("projects/MNGECLIPSE-2367_sourcesResourcesOverlap/project03/pom.xml");
+    project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+
+    // this project has resources and test-sources folders overlap. m2e does not support this properly
+    // so it is good enough if we don't fail with nasty exceptions
+    // see https://issues.sonatype.org/browse/MNGECLIPSE-2367
+
+    // make sure resources do get copied to target/classes folder
+    assertTrue(project.getFile("target/classes/test.properties").isAccessible());
+  }
+
+  public void testMNGECLIPSE_2433_resourcesOutsideBasdir() throws Exception {
+    IProject[] projects = importProjects("projects/MNGECLIPSE-2433_resourcesOutsideBasdir", new String[] {
+        "project01/pom.xml", "project02/pom.xml"}, new ResolverConfiguration());
+    projects[1].build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+
+    // project02 has resources folder outside of it's basedir. m2e does not support this and probably never will.
+    // so it is good enough we don't fail with nasty exceptions 
+    // ideally we need to add a warning marker on the offending pom.xml element
+    // https://issues.sonatype.org/browse/MNGECLIPSE-2433
+    
+    IJavaProject javaProject = JavaCore.create(projects[1]);
+    IClasspathEntry[] cp = javaProject.getRawClasspath();
+
+    assertEquals(2, cp.length);
+  }
+
 }

@@ -46,7 +46,15 @@ public interface IClasspathEntryDescriptor {
 
   public void setInclusionPatterns(IPath[] inclusionPatterns);
 
+  public void addInclusionPattern(IPath pattern);
+  
   public void setExclusionPatterns(IPath[] exclusionPatterns);
+
+  public IPath[] getInclusionPatterns();
+
+  public void addExclusionPattern(IPath pattern);
+
+  public IPath[] getExclusionPatterns();
 
   // maven-specific getters and setters
 
