@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 
+import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.internal.repository.IRepositoryDiscoverer;
 import org.eclipse.m2e.core.internal.repository.RepositoryInfo;
 import org.eclipse.m2e.core.internal.repository.RepositoryRegistry;
@@ -27,7 +28,7 @@ import org.eclipse.m2e.core.repository.IRepositoryRegistry;
  */
 public class IndexesExtensionReader implements IRepositoryDiscoverer {
 
-  private static final String EXTENSION_INDEXES = "org.eclipse.m2e.indexes";
+  private static final String EXTENSION_INDEXES = IMavenConstants.PLUGIN_ID + ".indexes";
 
   private static final String ELEMENT_INDEX = "index";
 

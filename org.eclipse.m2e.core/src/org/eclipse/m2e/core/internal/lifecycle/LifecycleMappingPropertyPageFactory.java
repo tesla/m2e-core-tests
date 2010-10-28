@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.m2e.core.MavenPlugin;
+import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.core.MavenLogger;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.IProjectConfigurationManager;
@@ -37,7 +38,7 @@ import org.eclipse.m2e.core.project.configurator.ILifecycleMapping;
  */
 public class LifecycleMappingPropertyPageFactory {
 
-  public static final String EXTENSION_LIFECYCLE_MAPPING_PROPERTY_PAGE = "org.eclipse.m2e.lifecycleMappingPropertyPage";
+  public static final String EXTENSION_LIFECYCLE_MAPPING_PROPERTY_PAGE = IMavenConstants.PLUGIN_ID + ".lifecycleMappingPropertyPage";
 
   private static final String ATTR_LIFECYCLE_MAPPING_ID = "lifecycleMappingId";
 

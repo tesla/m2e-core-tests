@@ -46,15 +46,15 @@ import org.eclipse.m2e.core.project.configurator.ILifecycleMapping;
  */
 public class ExtensionReader {
 
-  public static final String EXTENSION_ARCHETYPES = "org.eclipse.m2e.archetypeCatalogs";
+  public static final String EXTENSION_ARCHETYPES = IMavenConstants.PLUGIN_ID + ".archetypeCatalogs";
 
-  public static final String EXTENSION_PROJECT_CONFIGURATORS = "org.eclipse.m2e.projectConfigurators";
+  public static final String EXTENSION_PROJECT_CONFIGURATORS = IMavenConstants.PLUGIN_ID + ".projectConfigurators";
 
-  public static final String EXTENSION_LIFECYCLE_MAPPINGS = "org.eclipse.m2e.lifecycleMappings";
+  public static final String EXTENSION_LIFECYCLE_MAPPINGS = IMavenConstants.PLUGIN_ID + ".lifecycleMappings";
 
-  public static final String EXTENSION_DEFAULT_LIFECYCLE_MAPPINGS = "org.eclipse.m2e.defaultLifecycleMappings";
+  public static final String EXTENSION_DEFAULT_LIFECYCLE_MAPPINGS = IMavenConstants.PLUGIN_ID + ".defaultLifecycleMappings";
 
-  public static final String EXTENSION_PROJECT_CHANGED_EVENT_LISTENERS = "org.eclipse.m2e.mavenProjectChangedListeners";
+  public static final String EXTENSION_PROJECT_CHANGED_EVENT_LISTENERS = IMavenConstants.PLUGIN_ID + ".mavenProjectChangedListeners";
 
   private static final String ELEMENT_LOCAL_ARCHETYPE = "local";
 

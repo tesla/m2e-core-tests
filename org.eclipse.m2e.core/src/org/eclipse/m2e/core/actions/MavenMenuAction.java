@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 
+import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.core.MavenLogger;
 import org.eclipse.m2e.core.internal.actions.DefaultMavenMenuCreator;
 
@@ -44,7 +45,7 @@ import org.eclipse.m2e.core.internal.actions.DefaultMavenMenuCreator;
  */
 public class MavenMenuAction implements IObjectActionDelegate, IMenuCreator {
 
-  private static final String EXTENSION_MENU_ITEMS = "org.eclipse.m2e.m2menu";
+  private static final String EXTENSION_MENU_ITEMS = IMavenConstants.PLUGIN_ID + ".m2menu";
 
   boolean fillMenu;
 
