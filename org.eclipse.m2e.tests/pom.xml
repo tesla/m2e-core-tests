@@ -39,8 +39,6 @@
           <environmentVariables>
             <TEMP>${java.io.tmpdir}</TEMP>
           </environmentVariables>
-          <forkedProcessTimeoutInSeconds>600</forkedProcessTimeoutInSeconds>
-          <argLine>-XstartOnFirstThread -Xmx800m -XX:MaxPermSize=256m</argLine>
         </configuration>
       </plugin>
     </plugins>
