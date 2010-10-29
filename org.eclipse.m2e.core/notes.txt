@@ -1,4 +1,0 @@
-
-  See user and developer documentation on the wiki at 
-  http://docs.codehaus.org/display/M2ECLIPSE/
-
