@@ -783,7 +783,6 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
     String oldSettings = mavenConfiguration.getUserSettingsFile();
     try {
       injectFilexWagon();
-      FilexWagon.setRequestFilterPattern("mngeclipse1996/.*xml", true);
       mavenConfiguration.setUserSettingsFile(new File("projects/MNGECLIPSE-1996/settings.xml").getAbsolutePath());
       IJobChangeListener jobChangeListener = new JobChangeAdapter() {
         public void scheduled(IJobChangeEvent event) {
@@ -794,6 +793,8 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
         }
       };
       Job.getJobManager().addJobChangeListener(jobChangeListener);
+      waitForJobsToComplete();
+      FilexWagon.setRequestFilterPattern("mngeclipse1996/.*xml", true);
       List<String> requests;
       try {
         importProjects("projects/MNGECLIPSE-1996", new String[] {"pom.xml", "mod-a/pom.xml", "mod-b/pom.xml",
@@ -803,7 +804,7 @@ public class ProjectRegistryManagerTest extends AbstractMavenProjectTestCase {
         Job.getJobManager().removeJobChangeListener(jobChangeListener);
       }
       // up to 2 requests (for POM and JAR) are allowed, more would indicate an issue with the cache
-      assertTrue("Accessed metadata " + requests.size() + " times", requests.size() == 1 || requests.size() == 2);
+      assertTrue("Accessed metadata " + requests.size() + " times: " + requests, requests.size() == 1 || requests.size() == 2);
     } finally {
       mavenConfiguration.setUserSettingsFile(oldSettings);
     }
