@@ -763,7 +763,7 @@ public class OverviewPage extends MavenPomEditorPage {
   protected void doUpdate(Notification notification){
     EObject object = (EObject) notification.getNotifier();
     Object feature = notification.getFeature();
-    
+
     if (object instanceof Model) {
       loadThis();
     }
@@ -868,7 +868,7 @@ public class OverviewPage extends MavenPomEditorPage {
         setText(artifactGroupIdText, model.getGroupId());
         setText(artifactIdText, model.getArtifactId());
         setText(artifactVersionText, model.getVersion());
-        setText(artifactPackagingCombo, model.getPackaging());
+        setText(artifactPackagingCombo, "".equals(nvl(model.getPackaging())) ? "jar" : nvl(model.getPackaging()));
         
         setText(projectNameText, model.getName());
         setText(projectDescriptionText, model.getDescription());
