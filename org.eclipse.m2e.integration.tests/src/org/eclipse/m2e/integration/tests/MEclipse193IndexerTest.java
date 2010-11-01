@@ -71,7 +71,7 @@ public class MEclipse193IndexerTest extends M2EUIIntegrationTestCase {
   @Test
   //needs to be 2 'mirrored' repos in an active profile in the settings.xml. one id 'central', one id 'foo'
   public void testMirroredRepos() throws Exception {
-    SWTBotView indexView = openView("org.eclipse.m2e.views.MavenRepositoryView");
+    SWTBotView indexView = openView("org.eclipse.m2e.core.views.MavenRepositoryView");
     SWTBotTreeItem tree = indexView.bot().tree().expandNode("Global Repositories");
     Assert.assertEquals(1, findItems(tree, StringStartsWith.startsWith("nexus")).size());
     Assert.assertEquals(2, findItems(tree, StringContains.containsString("mirrored by nexus")).size());
@@ -79,7 +79,7 @@ public class MEclipse193IndexerTest extends M2EUIIntegrationTestCase {
 
   @Test
   public void testUpdateRemote() throws Exception {
-    SWTBotView indexView = openView("org.eclipse.m2e.views.MavenRepositoryView");
+    SWTBotView indexView = openView("org.eclipse.m2e.core.views.MavenRepositoryView");
 
     SWTBotTree tree = indexView.bot().tree();
     SWTBotTreeItem globalRepos = tree.expandNode("Global Repositories");

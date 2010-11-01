@@ -137,8 +137,8 @@ public class MngEclipse1526InstallationPreferencesTest extends M2EUIIntegrationT
   }
 
   private void checkLocalRepo() throws Exception {
-    showView("org.eclipse.m2e.views.MavenRepositoryView");
-    SWTBotView view = openView("org.eclipse.m2e.views.MavenRepositoryView");
+    showView("org.eclipse.m2e.core.views.MavenRepositoryView");
+    SWTBotView view = openView("org.eclipse.m2e.core.views.MavenRepositoryView");
     SWTBotTree tree = view.bot().tree();
     Assert.assertNotNull(findItem(tree.expandNode("Local Repositories"),
         StringStartsWith.startsWith("Local Repository")).select());

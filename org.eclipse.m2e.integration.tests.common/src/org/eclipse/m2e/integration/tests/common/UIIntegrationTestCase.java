@@ -1324,7 +1324,7 @@ public abstract class UIIntegrationTestCase {
 	}
 
 	protected void updateLocalIndex() throws Exception {
-		SWTBotView view = openView("org.eclipse.m2e.views.MavenRepositoryView");
+		SWTBotView view = openView("org.eclipse.m2e.core.views.MavenRepositoryView");
 		SWTBotTree tree = view.bot().tree();
 		findItem(tree.expandNode("Local Repositories"),
 				StringStartsWith.startsWith("Local Repository")).select();
@@ -1340,7 +1340,7 @@ public abstract class UIIntegrationTestCase {
 
 		waitForAllBuildsToComplete();
 
-		showView("org.eclipse.m2e.views.MavenRepositoryView");
+		showView("org.eclipse.m2e.core.views.MavenRepositoryView");
 	}
 
 	protected void excludeArtifact(String projectName, String jarName)
