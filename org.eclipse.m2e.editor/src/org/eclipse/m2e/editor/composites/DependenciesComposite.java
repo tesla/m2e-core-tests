@@ -277,7 +277,9 @@ public class DependenciesComposite extends Composite {
                 return model;
               }
             }, POM_PACKAGE.getModel_Dependencies(), //
-                af.group, af.artifact, af.version, af.classifier, af.type, dialog.getSelectedScope());
+                af.group, af.artifact, af.version, af.classifier, 
+                "jar".equals(nvl(af.type)) ? "" : nvl(af.type), //$NON-NLS-1$ //$NON-NLS-2$
+                "compile".equals(nvl(dialog.getSelectedScope())) ? "" : nvl(dialog.getSelectedScope()));//$NON-NLS-0$ //$NON-NLS-1$
             dependenciesEditor.setInput(model.getDependencies());
             dependenciesEditor.setSelection(Collections.singletonList(dependency));
             updateDependencyDetails(dependency);
@@ -420,7 +422,9 @@ public class DependenciesComposite extends Composite {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {
             Dependency dependency = createDependency(dependencyManagementProvider, POM_PACKAGE.getDependencyManagement_Dependencies(), //
-                af.group, af.artifact, af.version, af.classifier, af.type, dialog.getSelectedScope());
+                af.group, af.artifact, af.version, af.classifier, 
+                "jar".equals(nvl(af.type)) ? "" : nvl(af.type), //$NON-NLS-1$ //$NON-NLS-2$
+                "compile".equals(nvl(dialog.getSelectedScope())) ? "" : nvl(dialog.getSelectedScope()));//$NON-NLS-1$ //$NON-NLS-2$
             dependencyManagementEditor.setInput(dependencyManagementProvider.getValue().getDependencies());
             dependencyManagementEditor.setSelection(Collections.singletonList(dependency));
             updateDependencyDetails(dependency);
@@ -514,8 +518,17 @@ public class DependenciesComposite extends Composite {
             groupIdText.setText(nvl(af.group));
             artifactIdText.setText(nvl(af.artifact));
             versionText.setText(nvl(af.version));
-            typeCombo.setText(nvl(af.type));
-            scopeCombo.setText(nvl(dialog.getSelectedScope()));
+            //MNGECLIPSE-2363
+            String type = nvl(af.type);
+            if ("jar".equals(type)) {//$NON-NLS-1$
+              type = ""; //$NON-NLS-1$
+            }
+            typeCombo.setText(type);
+            String scope = nvl(dialog.getSelectedScope());
+            if ("compile".equals(scope)) {//$NON-NLS-1$
+              scope = "";//$NON-NLS-1$
+            }
+            scopeCombo.setText(scope);
           }
         }
       }
@@ -943,8 +956,8 @@ public class DependenciesComposite extends Composite {
     setText(artifactIdText, dependency.getArtifactId());
     setText(versionText, dependency.getVersion());
     setText(classifierText, dependency.getClassifier());
-    setText(typeCombo, dependency.getType());
-    setText(scopeCombo, dependency.getScope());
+    setText(typeCombo, "".equals(nvl(dependency.getType())) ? "jar" : dependency.getType());
+    setText(scopeCombo, "".equals(nvl(dependency.getScope())) ? "compile" : dependency.getScope());
     setText(systemPathText, dependency.getSystemPath());
 
     if(optionalButton.getSelection()!="true".equals(dependency.getOptional())) {
