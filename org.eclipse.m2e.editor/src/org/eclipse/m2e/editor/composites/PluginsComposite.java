@@ -653,11 +653,9 @@ public class PluginsComposite extends Composite{
           EditingDomain editingDomain = parentEditorPage.getEditingDomain();
    
           List<PluginExecution> list = pluginExecutionsEditor.getSelection();
-          for(PluginExecution pluginExecution : list) {
-            Command removeCommand = RemoveCommand.create(editingDomain, //
-                currentPlugin.getExecutions(), POM_PACKAGE.getPlugin_Executions(), pluginExecution);
-            compoundCommand.append(removeCommand);
-          }
+          Command removeCommand = RemoveCommand.create(editingDomain, //
+              currentPlugin, POM_PACKAGE.getPlugin_Executions(), list);
+          compoundCommand.append(removeCommand);
           
           editingDomain.getCommandStack().execute(compoundCommand);
           updatePluginExecution(null);
