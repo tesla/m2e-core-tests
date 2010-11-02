@@ -521,16 +521,16 @@ public class ReportPluginImpl extends EObjectImpl implements ReportPlugin {
 			return super.toString();
 
 		StringBuffer result = new StringBuffer(super.toString());
-		result.append(" (groupId: ");
+		result.append(" (groupId: "); //$NON-NLS-1$
 		if (groupIdESet)
 			result.append(groupId);
 		else
-			result.append("<unset>");
-		result.append(", artifactId: ");
+			result.append("<unset>"); //$NON-NLS-1$
+		result.append(", artifactId: "); //$NON-NLS-1$
 		result.append(artifactId);
-		result.append(", version: ");
+		result.append(", version: "); //$NON-NLS-1$
 		result.append(version);
-		result.append(", inherited: ");
+		result.append(", inherited: "); //$NON-NLS-1$
 		result.append(inherited);
 		result.append(')');
 		return result.toString();

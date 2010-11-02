@@ -186,23 +186,23 @@ public class SSESyncResource extends ResourceImpl {
               || Notification.SET == type) {
             if (null == doc.getDocumentElement()) {
               Element newRoot = doc.createElementNS(
-                  "http://maven.apache.org/POM/4.0.0",
-                  "project");
+                  "http://maven.apache.org/POM/4.0.0", //$NON-NLS-1$
+                  "project"); //$NON-NLS-1$
               newRoot
                   .setAttributeNS(
-                      "http://www.w3.org/2001/XMLSchema-instance",
-                      "xsi:schemaLocation",
-                      "http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd");
+                      "http://www.w3.org/2001/XMLSchema-instance", //$NON-NLS-1$
+                      "xsi:schemaLocation", //$NON-NLS-1$
+                      "http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"); //$NON-NLS-1$
 
               // I think this is just wrong...but can't find a
               // better way.
-              newRoot.setAttribute("xmlns",
-                  "http://maven.apache.org/POM/4.0.0");
+              newRoot.setAttribute("xmlns", //$NON-NLS-1$
+                  "http://maven.apache.org/POM/4.0.0"); //$NON-NLS-1$
               newRoot
-                  .setAttribute("xmlns:xsi",
-                      "http://www.w3.org/2001/XMLSchema-instance");
+                  .setAttribute("xmlns:xsi", //$NON-NLS-1$
+                      "http://www.w3.org/2001/XMLSchema-instance"); //$NON-NLS-1$
               doc.appendChild(newRoot);
-              pomModel.setModelVersion("4.0.0");
+              pomModel.setModelVersion("4.0.0"); //$NON-NLS-1$
               createAdapterForRootNode(newRoot).save();
             } else {
               Element root = doc.getDocumentElement();

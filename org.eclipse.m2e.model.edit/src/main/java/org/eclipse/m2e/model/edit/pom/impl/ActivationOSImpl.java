@@ -330,13 +330,13 @@ public class ActivationOSImpl extends EObjectImpl implements ActivationOS {
 			return super.toString();
 
 		StringBuffer result = new StringBuffer(super.toString());
-		result.append(" (name: ");
+		result.append(" (name: "); //$NON-NLS-1$
 		result.append(name);
-		result.append(", family: ");
+		result.append(", family: "); //$NON-NLS-1$
 		result.append(family);
-		result.append(", arch: ");
+		result.append(", arch: "); //$NON-NLS-1$
 		result.append(arch);
-		result.append(", version: ");
+		result.append(", version: "); //$NON-NLS-1$
 		result.append(version);
 		result.append(')');
 		return result.toString();

@@ -366,14 +366,14 @@ public class ReportSetImpl extends EObjectImpl implements ReportSet {
 			return super.toString();
 
 		StringBuffer result = new StringBuffer(super.toString());
-		result.append(" (id: ");
+		result.append(" (id: "); //$NON-NLS-1$
 		if (idESet)
 			result.append(id);
 		else
-			result.append("<unset>");
-		result.append(", inherited: ");
+			result.append("<unset>"); //$NON-NLS-1$
+		result.append(", inherited: "); //$NON-NLS-1$
 		result.append(inherited);
-		result.append(", reports: ");
+		result.append(", reports: "); //$NON-NLS-1$
 		result.append(reports);
 		result.append(')');
 		return result.toString();

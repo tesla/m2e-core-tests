@@ -333,13 +333,13 @@ public class ParentImpl extends EObjectImpl implements Parent {
 			return super.toString();
 
 		StringBuffer result = new StringBuffer(super.toString());
-		result.append(" (artifactId: ");
+		result.append(" (artifactId: "); //$NON-NLS-1$
 		result.append(artifactId);
-		result.append(", groupId: ");
+		result.append(", groupId: "); //$NON-NLS-1$
 		result.append(groupId);
-		result.append(", version: ");
+		result.append(", version: "); //$NON-NLS-1$
 		result.append(version);
-		result.append(", relativePath: ");
+		result.append(", relativePath: "); //$NON-NLS-1$
 		result.append(relativePath);
 		result.append(')');
 		return result.toString();

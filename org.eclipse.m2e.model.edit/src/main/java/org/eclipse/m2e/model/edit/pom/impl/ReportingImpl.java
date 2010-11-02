@@ -59,7 +59,7 @@ public class ReportingImpl extends EObjectImpl implements Reporting {
 	 * @generated
 	 * @ordered
 	 */
-	protected static final String EXCLUDE_DEFAULTS_EDEFAULT = "false";
+	protected static final String EXCLUDE_DEFAULTS_EDEFAULT = "false"; //$NON-NLS-1$
 
 	/**
 	 * The cached value of the '{@link #getExcludeDefaults()
@@ -346,12 +346,12 @@ public class ReportingImpl extends EObjectImpl implements Reporting {
 			return super.toString();
 
 		StringBuffer result = new StringBuffer(super.toString());
-		result.append(" (excludeDefaults: ");
+		result.append(" (excludeDefaults: "); //$NON-NLS-1$
 		if (excludeDefaultsESet)
 			result.append(excludeDefaults);
 		else
-			result.append("<unset>");
-		result.append(", outputDirectory: ");
+			result.append("<unset>"); //$NON-NLS-1$
+		result.append(", outputDirectory: "); //$NON-NLS-1$
 		result.append(outputDirectory);
 		result.append(')');
 		return result.toString();

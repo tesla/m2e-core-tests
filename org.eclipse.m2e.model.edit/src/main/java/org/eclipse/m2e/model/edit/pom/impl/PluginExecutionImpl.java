@@ -425,16 +425,16 @@ public class PluginExecutionImpl extends EObjectImpl implements PluginExecution 
 			return super.toString();
 
 		StringBuffer result = new StringBuffer(super.toString());
-		result.append(" (id: ");
+		result.append(" (id: "); //$NON-NLS-1$
 		if (idESet)
 			result.append(id);
 		else
-			result.append("<unset>");
-		result.append(", phase: ");
+			result.append("<unset>"); //$NON-NLS-1$
+		result.append(", phase: "); //$NON-NLS-1$
 		result.append(phase);
-		result.append(", inherited: ");
+		result.append(", inherited: "); //$NON-NLS-1$
 		result.append(inherited);
-		result.append(", goals: ");
+		result.append(", goals: "); //$NON-NLS-1$
 		result.append(goals);
 		result.append(')');
 		return result.toString();

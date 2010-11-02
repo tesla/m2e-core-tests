@@ -2760,28 +2760,28 @@ public class ModelImpl extends EObjectImpl implements Model {
 			return super.toString();
 
 		StringBuffer result = new StringBuffer(super.toString());
-		result.append(" (modelVersion: ");
+		result.append(" (modelVersion: "); //$NON-NLS-1$
 		result.append(modelVersion);
-		result.append(", groupId: ");
+		result.append(", groupId: "); //$NON-NLS-1$
 		result.append(groupId);
-		result.append(", artifactId: ");
+		result.append(", artifactId: "); //$NON-NLS-1$
 		result.append(artifactId);
-		result.append(", packaging: ");
+		result.append(", packaging: "); //$NON-NLS-1$
 		if (packagingESet)
 			result.append(packaging);
 		else
-			result.append("<unset>");
-		result.append(", name: ");
+			result.append("<unset>"); //$NON-NLS-1$
+		result.append(", name: "); //$NON-NLS-1$
 		result.append(name);
-		result.append(", version: ");
+		result.append(", version: "); //$NON-NLS-1$
 		result.append(version);
-		result.append(", description: ");
+		result.append(", description: "); //$NON-NLS-1$
 		result.append(description);
-		result.append(", url: ");
+		result.append(", url: "); //$NON-NLS-1$
 		result.append(url);
-		result.append(", inceptionYear: ");
+		result.append(", inceptionYear: "); //$NON-NLS-1$
 		result.append(inceptionYear);
-		result.append(", modules: ");
+		result.append(", modules: "); //$NON-NLS-1$
 		result.append(modules);
 		result.append(')');
 		return result.toString();

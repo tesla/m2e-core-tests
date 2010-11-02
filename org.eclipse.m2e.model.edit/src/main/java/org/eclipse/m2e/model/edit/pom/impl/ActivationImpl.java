@@ -57,7 +57,7 @@ public class ActivationImpl extends EObjectImpl implements Activation {
 	 * @generated
 	 * @ordered
 	 */
-	protected static final String ACTIVE_BY_DEFAULT_EDEFAULT = "false";
+	protected static final String ACTIVE_BY_DEFAULT_EDEFAULT = "false"; //$NON-NLS-1$
 
 	/**
 	 * The cached value of the '{@link #getActiveByDefault()
@@ -723,12 +723,12 @@ public class ActivationImpl extends EObjectImpl implements Activation {
 			return super.toString();
 
 		StringBuffer result = new StringBuffer(super.toString());
-		result.append(" (activeByDefault: ");
+		result.append(" (activeByDefault: "); //$NON-NLS-1$
 		if (activeByDefaultESet)
 			result.append(activeByDefault);
 		else
-			result.append("<unset>");
-		result.append(", jdk: ");
+			result.append("<unset>"); //$NON-NLS-1$
+		result.append(", jdk: "); //$NON-NLS-1$
 		result.append(jdk);
 		result.append(')');
 		return result.toString();

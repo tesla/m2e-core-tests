@@ -201,11 +201,11 @@ public class PrerequisitesImpl extends EObjectImpl implements Prerequisites {
 			return super.toString();
 
 		StringBuffer result = new StringBuffer(super.toString());
-		result.append(" (maven: ");
+		result.append(" (maven: "); //$NON-NLS-1$
 		if (mavenESet)
 			result.append(maven);
 		else
-			result.append("<unset>");
+			result.append("<unset>"); //$NON-NLS-1$
 		result.append(')');
 		return result.toString();
 	}

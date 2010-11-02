@@ -35,21 +35,21 @@ public interface PomPackage extends EPackage {
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
-	String eNAME = "pom";
+	String eNAME = "pom"; //$NON-NLS-1$
 
 	/**
 	 * The package namespace URI.
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
-	String eNS_URI = "http://maven.apache.org/POM/4.0.0";
+	String eNS_URI = "http://maven.apache.org/POM/4.0.0"; //$NON-NLS-1$
 
 	/**
 	 * The package namespace name.
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * @generated
 	 */
-	String eNS_PREFIX = "pom";
+	String eNS_PREFIX = "pom"; //$NON-NLS-1$
 
 	/**
 	 * The singleton instance of the package.

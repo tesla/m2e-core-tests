@@ -641,21 +641,21 @@ public class DeveloperImpl extends EObjectImpl implements Developer {
 			return super.toString();
 
 		StringBuffer result = new StringBuffer(super.toString());
-		result.append(" (id: ");
+		result.append(" (id: "); //$NON-NLS-1$
 		result.append(id);
-		result.append(", name: ");
+		result.append(", name: "); //$NON-NLS-1$
 		result.append(name);
-		result.append(", email: ");
+		result.append(", email: "); //$NON-NLS-1$
 		result.append(email);
-		result.append(", url: ");
+		result.append(", url: "); //$NON-NLS-1$
 		result.append(url);
-		result.append(", organization: ");
+		result.append(", organization: "); //$NON-NLS-1$
 		result.append(organization);
-		result.append(", organizationUrl: ");
+		result.append(", organizationUrl: "); //$NON-NLS-1$
 		result.append(organizationUrl);
-		result.append(", timezone: ");
+		result.append(", timezone: "); //$NON-NLS-1$
 		result.append(timezone);
-		result.append(", roles: ");
+		result.append(", roles: "); //$NON-NLS-1$
 		result.append(roles);
 		result.append(')');
 		return result.toString();

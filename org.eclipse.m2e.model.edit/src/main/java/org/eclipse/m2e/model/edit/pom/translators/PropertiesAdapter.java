@@ -98,7 +98,7 @@ public class PropertiesAdapter extends ListAdapter {
 
 		if (position < 0)
 			position = 0;
-		Node n = getNthChildWithName(node, "*", position);
+		Node n = getNthChildWithName(node, "*", position); //$NON-NLS-1$
 		if (n != null) {
 			node.insertBefore(newElement, n);
 		} else {
@@ -116,7 +116,7 @@ public class PropertiesAdapter extends ListAdapter {
 		if (position == -1)
 			position = 0;
 
-		Element n = getNthChildWithName(node, "*", position);
+		Element n = getNthChildWithName(node, "*", position); //$NON-NLS-1$
 		if (n != null)
 			removeChildElement(n);
 	}

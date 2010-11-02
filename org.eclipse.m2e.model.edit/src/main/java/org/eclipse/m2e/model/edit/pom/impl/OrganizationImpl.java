@@ -220,9 +220,9 @@ public class OrganizationImpl extends EObjectImpl implements Organization {
 			return super.toString();
 
 		StringBuffer result = new StringBuffer(super.toString());
-		result.append(" (name: ");
+		result.append(" (name: "); //$NON-NLS-1$
 		result.append(name);
-		result.append(", url: ");
+		result.append(", url: "); //$NON-NLS-1$
 		result.append(url);
 		result.append(')');
 		return result.toString();

@@ -331,13 +331,13 @@ public class RelocationImpl extends EObjectImpl implements Relocation {
 			return super.toString();
 
 		StringBuffer result = new StringBuffer(super.toString());
-		result.append(" (groupId: ");
+		result.append(" (groupId: "); //$NON-NLS-1$
 		result.append(groupId);
-		result.append(", artifactId: ");
+		result.append(", artifactId: "); //$NON-NLS-1$
 		result.append(artifactId);
-		result.append(", version: ");
+		result.append(", version: "); //$NON-NLS-1$
 		result.append(version);
-		result.append(", message: ");
+		result.append(", message: "); //$NON-NLS-1$
 		result.append(message);
 		result.append(')');
 		return result.toString();

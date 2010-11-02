@@ -882,9 +882,9 @@ public class DistributionManagementImpl extends EObjectImpl implements
 			return super.toString();
 
 		StringBuffer result = new StringBuffer(super.toString());
-		result.append(" (downloadUrl: ");
+		result.append(" (downloadUrl: "); //$NON-NLS-1$
 		result.append(downloadUrl);
-		result.append(", status: ");
+		result.append(", status: "); //$NON-NLS-1$
 		result.append(status);
 		result.append(')');
 		return result.toString();

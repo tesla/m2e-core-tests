@@ -276,11 +276,11 @@ public class ExtensionImpl extends EObjectImpl implements Extension {
 			return super.toString();
 
 		StringBuffer result = new StringBuffer(super.toString());
-		result.append(" (groupId: ");
+		result.append(" (groupId: "); //$NON-NLS-1$
 		result.append(groupId);
-		result.append(", artifactId: ");
+		result.append(", artifactId: "); //$NON-NLS-1$
 		result.append(artifactId);
-		result.append(", version: ");
+		result.append(", version: "); //$NON-NLS-1$
 		result.append(version);
 		result.append(')');
 		return result.toString();

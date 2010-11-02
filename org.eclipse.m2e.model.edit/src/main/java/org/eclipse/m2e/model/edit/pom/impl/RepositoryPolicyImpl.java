@@ -49,7 +49,7 @@ public class RepositoryPolicyImpl extends EObjectImpl implements
 	 * @generated
 	 * @ordered
 	 */
-	protected static final String ENABLED_EDEFAULT = "true";
+	protected static final String ENABLED_EDEFAULT = "true"; //$NON-NLS-1$
 
 	/**
 	 * The cached value of the '{@link #getEnabled() <em>Enabled</em>}'
@@ -320,14 +320,14 @@ public class RepositoryPolicyImpl extends EObjectImpl implements
 			return super.toString();
 
 		StringBuffer result = new StringBuffer(super.toString());
-		result.append(" (enabled: ");
+		result.append(" (enabled: "); //$NON-NLS-1$
 		if (enabledESet)
 			result.append(enabled);
 		else
-			result.append("<unset>");
-		result.append(", updatePolicy: ");
+			result.append("<unset>"); //$NON-NLS-1$
+		result.append(", updatePolicy: "); //$NON-NLS-1$
 		result.append(updatePolicy);
-		result.append(", checksumPolicy: ");
+		result.append(", checksumPolicy: "); //$NON-NLS-1$
 		result.append(checksumPolicy);
 		result.append(')');
 		return result.toString();

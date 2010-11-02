@@ -221,9 +221,9 @@ public class ExclusionImpl extends EObjectImpl implements Exclusion {
 			return super.toString();
 
 		StringBuffer result = new StringBuffer(super.toString());
-		result.append(" (artifactId: ");
+		result.append(" (artifactId: "); //$NON-NLS-1$
 		result.append(artifactId);
-		result.append(", groupId: ");
+		result.append(", groupId: "); //$NON-NLS-1$
 		result.append(groupId);
 		result.append(')');
 		return result.toString();

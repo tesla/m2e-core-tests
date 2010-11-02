@@ -488,15 +488,15 @@ public class BuildImpl extends BuildBaseImpl implements Build {
 			return super.toString();
 
 		StringBuffer result = new StringBuffer(super.toString());
-		result.append(" (sourceDirectory: ");
+		result.append(" (sourceDirectory: "); //$NON-NLS-1$
 		result.append(sourceDirectory);
-		result.append(", scriptSourceDirectory: ");
+		result.append(", scriptSourceDirectory: "); //$NON-NLS-1$
 		result.append(scriptSourceDirectory);
-		result.append(", testSourceDirectory: ");
+		result.append(", testSourceDirectory: "); //$NON-NLS-1$
 		result.append(testSourceDirectory);
-		result.append(", outputDirectory: ");
+		result.append(", outputDirectory: "); //$NON-NLS-1$
 		result.append(outputDirectory);
-		result.append(", testOutputDirectory: ");
+		result.append(", testOutputDirectory: "); //$NON-NLS-1$
 		result.append(testOutputDirectory);
 		result.append(')');
 		return result.toString();

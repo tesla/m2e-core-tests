@@ -1221,9 +1221,9 @@ public class ProfileImpl extends EObjectImpl implements Profile {
 			return super.toString();
 
 		StringBuffer result = new StringBuffer(super.toString());
-		result.append(" (id: ");
+		result.append(" (id: "); //$NON-NLS-1$
 		result.append(id);
-		result.append(", modules: ");
+		result.append(", modules: "); //$NON-NLS-1$
 		result.append(modules);
 		result.append(')');
 		return result.toString();

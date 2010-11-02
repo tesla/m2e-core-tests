@@ -137,7 +137,7 @@ public class PluginImpl extends EObjectImpl implements Plugin {
 	 * @generated
 	 * @ordered
 	 */
-	protected static final String EXTENSIONS_EDEFAULT = "false";
+	protected static final String EXTENSIONS_EDEFAULT = "false"; //$NON-NLS-1$
 
 	/**
 	 * The cached value of the '{@link #getExtensions() <em>Extensions</em>}'
@@ -671,21 +671,21 @@ public class PluginImpl extends EObjectImpl implements Plugin {
 			return super.toString();
 
 		StringBuffer result = new StringBuffer(super.toString());
-		result.append(" (groupId: ");
+		result.append(" (groupId: "); //$NON-NLS-1$
 		if (groupIdESet)
 			result.append(groupId);
 		else
-			result.append("<unset>");
-		result.append(", artifactId: ");
+			result.append("<unset>"); //$NON-NLS-1$
+		result.append(", artifactId: "); //$NON-NLS-1$
 		result.append(artifactId);
-		result.append(", version: ");
+		result.append(", version: "); //$NON-NLS-1$
 		result.append(version);
-		result.append(", extensions: ");
+		result.append(", extensions: "); //$NON-NLS-1$
 		if (extensionsESet)
 			result.append(extensions);
 		else
-			result.append("<unset>");
-		result.append(", inherited: ");
+			result.append("<unset>"); //$NON-NLS-1$
+		result.append(", inherited: "); //$NON-NLS-1$
 		result.append(inherited);
 		result.append(')');
 		return result.toString();

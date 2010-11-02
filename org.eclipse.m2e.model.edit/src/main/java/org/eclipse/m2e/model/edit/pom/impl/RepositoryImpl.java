@@ -679,17 +679,17 @@ public class RepositoryImpl extends EObjectImpl implements Repository {
 			return super.toString();
 
 		StringBuffer result = new StringBuffer(super.toString());
-		result.append(" (id: ");
+		result.append(" (id: "); //$NON-NLS-1$
 		result.append(id);
-		result.append(", name: ");
+		result.append(", name: "); //$NON-NLS-1$
 		result.append(name);
-		result.append(", url: ");
+		result.append(", url: "); //$NON-NLS-1$
 		result.append(url);
-		result.append(", layout: ");
+		result.append(", layout: "); //$NON-NLS-1$
 		if (layoutESet)
 			result.append(layout);
 		else
-			result.append("<unset>");
+			result.append("<unset>"); //$NON-NLS-1$
 		result.append(')');
 		return result.toString();
 	}

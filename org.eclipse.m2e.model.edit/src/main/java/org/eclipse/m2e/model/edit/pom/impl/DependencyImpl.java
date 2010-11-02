@@ -227,7 +227,7 @@ public class DependencyImpl extends EObjectImpl implements Dependency {
 	 * @generated
 	 * @ordered
 	 */
-	protected static final String OPTIONAL_EDEFAULT = "false";
+	protected static final String OPTIONAL_EDEFAULT = "false"; //$NON-NLS-1$
 
 	/**
 	 * The cached value of the '{@link #getOptional() <em>Optional</em>}'
@@ -707,28 +707,28 @@ public class DependencyImpl extends EObjectImpl implements Dependency {
 			return super.toString();
 
 		StringBuffer result = new StringBuffer(super.toString());
-		result.append(" (groupId: ");
+		result.append(" (groupId: "); //$NON-NLS-1$
 		result.append(groupId);
-		result.append(", artifactId: ");
+		result.append(", artifactId: "); //$NON-NLS-1$
 		result.append(artifactId);
-		result.append(", version: ");
+		result.append(", version: "); //$NON-NLS-1$
 		result.append(version);
-		result.append(", type: ");
+		result.append(", type: "); //$NON-NLS-1$
 		if (typeESet)
 			result.append(type);
 		else
-			result.append("<unset>");
-		result.append(", classifier: ");
+			result.append("<unset>"); //$NON-NLS-1$
+		result.append(", classifier: "); //$NON-NLS-1$
 		result.append(classifier);
-		result.append(", scope: ");
+		result.append(", scope: "); //$NON-NLS-1$
 		result.append(scope);
-		result.append(", systemPath: ");
+		result.append(", systemPath: "); //$NON-NLS-1$
 		result.append(systemPath);
-		result.append(", optional: ");
+		result.append(", optional: "); //$NON-NLS-1$
 		if (optionalESet)
 			result.append(optional);
 		else
-			result.append("<unset>");
+			result.append("<unset>"); //$NON-NLS-1$
 		result.append(')');
 		return result.toString();
 	}

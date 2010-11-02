@@ -366,16 +366,16 @@ public class ScmImpl extends EObjectImpl implements Scm {
 			return super.toString();
 
 		StringBuffer result = new StringBuffer(super.toString());
-		result.append(" (connection: ");
+		result.append(" (connection: "); //$NON-NLS-1$
 		result.append(connection);
-		result.append(", developerConnection: ");
+		result.append(", developerConnection: "); //$NON-NLS-1$
 		result.append(developerConnection);
-		result.append(", tag: ");
+		result.append(", tag: "); //$NON-NLS-1$
 		if (tagESet)
 			result.append(tag);
 		else
-			result.append("<unset>");
-		result.append(", url: ");
+			result.append("<unset>"); //$NON-NLS-1$
+		result.append(", url: "); //$NON-NLS-1$
 		result.append(url);
 		result.append(')');
 		return result.toString();

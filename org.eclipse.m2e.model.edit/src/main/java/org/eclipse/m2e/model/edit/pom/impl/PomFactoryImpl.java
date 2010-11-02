@@ -36,7 +36,7 @@ public class PomFactoryImpl extends EFactoryImpl implements PomFactory {
 	public static PomFactory init() {
 		try {
 			PomFactory thePomFactory = (PomFactory) EPackage.Registry.INSTANCE
-					.getEFactory("http://maven.apache.org/POM/4.0.0");
+					.getEFactory("http://maven.apache.org/POM/4.0.0"); //$NON-NLS-1$
 			if (thePomFactory != null) {
 				return thePomFactory;
 			}
@@ -143,8 +143,8 @@ public class PomFactoryImpl extends EFactoryImpl implements PomFactory {
 		case PomPackage.CONFIGURATION:
 			return createConfiguration();
 		default:
-			throw new IllegalArgumentException("The class '" + eClass.getName()
-					+ "' is not a valid classifier");
+			throw new IllegalArgumentException("The class '" + eClass.getName() //$NON-NLS-1$
+					+ "' is not a valid classifier"); //$NON-NLS-1$
 		}
 	}
 

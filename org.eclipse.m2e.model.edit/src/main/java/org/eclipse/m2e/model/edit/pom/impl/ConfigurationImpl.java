@@ -82,7 +82,7 @@ public class ConfigurationImpl extends EObjectImpl implements Configuration {
 		if (eIsProxy()) return super.toString();
 
 		StringBuffer result = new StringBuffer(super.toString());
-		result.append(" (configurationNode: ");
+		result.append(" (configurationNode: "); //$NON-NLS-1$
 		result.append(configurationNode);
 		result.append(')');
 		return result.toString();
@@ -214,7 +214,7 @@ public class ConfigurationImpl extends EObjectImpl implements Configuration {
     for (int i=0; i<diff; i++) {
       Node element = parent.getOwnerDocument().createElement(names[i]);
       parent.appendChild(element);
-      Text text = parent.getOwnerDocument().createTextNode("");
+      Text text = parent.getOwnerDocument().createTextNode(""); //$NON-NLS-1$
       element.appendChild(text);
       nodes.add(text);
     }

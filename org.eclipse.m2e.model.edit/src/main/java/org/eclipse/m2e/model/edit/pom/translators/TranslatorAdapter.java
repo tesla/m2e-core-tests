@@ -154,7 +154,7 @@ public abstract class TranslatorAdapter implements INodeAdapter {
 			Node child = children.item(i);
 			if (child instanceof Element) {
 				Element e = (Element) child;
-				if (e.getTagName().equals(name) || "*".equals(name)) {
+				if (e.getTagName().equals(name) || "*".equals(name)) { //$NON-NLS-1$
 					if (matchCount == n) {
 						return e;
 					} else {
@@ -202,7 +202,7 @@ public abstract class TranslatorAdapter implements INodeAdapter {
 				i--;
 			}
 			int origLen = betweenText.length();
-			int nlIndex = betweenText.lastIndexOf("\n");
+			int nlIndex = betweenText.lastIndexOf("\n"); //$NON-NLS-1$
 			if (nlIndex == -1) {
 				String nl = getNewlineString();
 				betweenText.insert(0, nl);
@@ -250,7 +250,7 @@ public abstract class TranslatorAdapter implements INodeAdapter {
 				i++;
 			}
 			int origLen = betweenText.length();
-			int nlIndex = betweenText.lastIndexOf("\n");
+			int nlIndex = betweenText.lastIndexOf("\n"); //$NON-NLS-1$
 			if (nlIndex == -1) {
 				String nl = getNewlineString();
 				betweenText.insert(0, nl);
@@ -261,7 +261,7 @@ public abstract class TranslatorAdapter implements INodeAdapter {
 			while (refNode != null && !(refNode instanceof Element)) {
 				refNode = refNode.getNextSibling();
 			}
-			String indent = "";
+			String indent = ""; //$NON-NLS-1$
 			if (refNode == null) {
 				indent = getIndentBeforeStartTag(element.getParentNode());
 			} else {
@@ -336,7 +336,7 @@ public abstract class TranslatorAdapter implements INodeAdapter {
 		}
 
 		if (null == ret) {
-			ret = getIndentBeforeStartTag(node.getParentNode()) + "\t";
+			ret = getIndentBeforeStartTag(node.getParentNode()) + "\t"; //$NON-NLS-1$
 		}
 		return ret;
 	}

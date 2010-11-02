@@ -332,13 +332,13 @@ public class LicenseImpl extends EObjectImpl implements License {
 			return super.toString();
 
 		StringBuffer result = new StringBuffer(super.toString());
-		result.append(" (name: ");
+		result.append(" (name: "); //$NON-NLS-1$
 		result.append(name);
-		result.append(", url: ");
+		result.append(", url: "); //$NON-NLS-1$
 		result.append(url);
-		result.append(", distribution: ");
+		result.append(", distribution: "); //$NON-NLS-1$
 		result.append(distribution);
-		result.append(", comments: ");
+		result.append(", comments: "); //$NON-NLS-1$
 		result.append(comments);
 		result.append(')');
 		return result.toString();

@@ -94,7 +94,7 @@ public class NotifierImpl extends EObjectImpl implements Notifier {
 	 * @generated
 	 * @ordered
 	 */
-	protected static final String SEND_ON_ERROR_EDEFAULT = "true";
+	protected static final String SEND_ON_ERROR_EDEFAULT = "true"; //$NON-NLS-1$
 
 	/**
 	 * The cached value of the '{@link #getSendOnError() <em>Send On Error</em>}
@@ -124,7 +124,7 @@ public class NotifierImpl extends EObjectImpl implements Notifier {
 	 * @generated
 	 * @ordered
 	 */
-	protected static final String SEND_ON_FAILURE_EDEFAULT = "true";
+	protected static final String SEND_ON_FAILURE_EDEFAULT = "true"; //$NON-NLS-1$
 
 	/**
 	 * The cached value of the '{@link #getSendOnFailure()
@@ -155,7 +155,7 @@ public class NotifierImpl extends EObjectImpl implements Notifier {
 	 * @generated
 	 * @ordered
 	 */
-	protected static final String SEND_ON_SUCCESS_EDEFAULT = "true";
+	protected static final String SEND_ON_SUCCESS_EDEFAULT = "true"; //$NON-NLS-1$
 
 	/**
 	 * The cached value of the '{@link #getSendOnSuccess()
@@ -186,7 +186,7 @@ public class NotifierImpl extends EObjectImpl implements Notifier {
 	 * @generated
 	 * @ordered
 	 */
-	protected static final String SEND_ON_WARNING_EDEFAULT = "true";
+	protected static final String SEND_ON_WARNING_EDEFAULT = "true"; //$NON-NLS-1$
 
 	/**
 	 * The cached value of the '{@link #getSendOnWarning()
@@ -712,32 +712,32 @@ public class NotifierImpl extends EObjectImpl implements Notifier {
 			return super.toString();
 
 		StringBuffer result = new StringBuffer(super.toString());
-		result.append(" (type: ");
+		result.append(" (type: "); //$NON-NLS-1$
 		if (typeESet)
 			result.append(type);
 		else
-			result.append("<unset>");
-		result.append(", sendOnError: ");
+			result.append("<unset>"); //$NON-NLS-1$
+		result.append(", sendOnError: "); //$NON-NLS-1$
 		if (sendOnErrorESet)
 			result.append(sendOnError);
 		else
-			result.append("<unset>");
-		result.append(", sendOnFailure: ");
+			result.append("<unset>"); //$NON-NLS-1$
+		result.append(", sendOnFailure: "); //$NON-NLS-1$
 		if (sendOnFailureESet)
 			result.append(sendOnFailure);
 		else
-			result.append("<unset>");
-		result.append(", sendOnSuccess: ");
+			result.append("<unset>"); //$NON-NLS-1$
+		result.append(", sendOnSuccess: "); //$NON-NLS-1$
 		if (sendOnSuccessESet)
 			result.append(sendOnSuccess);
 		else
-			result.append("<unset>");
-		result.append(", sendOnWarning: ");
+			result.append("<unset>"); //$NON-NLS-1$
+		result.append(", sendOnWarning: "); //$NON-NLS-1$
 		if (sendOnWarningESet)
 			result.append(sendOnWarning);
 		else
-			result.append("<unset>");
-		result.append(", address: ");
+			result.append("<unset>"); //$NON-NLS-1$
+		result.append(", address: "); //$NON-NLS-1$
 		result.append(address);
 		result.append(')');
 		return result.toString();

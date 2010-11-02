@@ -76,7 +76,7 @@ public class ResourceImpl extends EObjectImpl implements Resource {
 	 * @generated
 	 * @ordered
 	 */
-	protected static final String FILTERING_EDEFAULT = "false";
+	protected static final String FILTERING_EDEFAULT = "false"; //$NON-NLS-1$
 
 	/**
 	 * The cached value of the '{@link #getFiltering() <em>Filtering</em>}'
@@ -390,18 +390,18 @@ public class ResourceImpl extends EObjectImpl implements Resource {
 			return super.toString();
 
 		StringBuffer result = new StringBuffer(super.toString());
-		result.append(" (targetPath: ");
+		result.append(" (targetPath: "); //$NON-NLS-1$
 		result.append(targetPath);
-		result.append(", filtering: ");
+		result.append(", filtering: "); //$NON-NLS-1$
 		if (filteringESet)
 			result.append(filtering);
 		else
-			result.append("<unset>");
-		result.append(", directory: ");
+			result.append("<unset>"); //$NON-NLS-1$
+		result.append(", directory: "); //$NON-NLS-1$
 		result.append(directory);
-		result.append(", includes: ");
+		result.append(", includes: "); //$NON-NLS-1$
 		result.append(includes);
-		result.append(", excludes: ");
+		result.append(", excludes: "); //$NON-NLS-1$
 		result.append(excludes);
 		result.append(')');
 		return result.toString();

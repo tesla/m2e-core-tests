@@ -100,7 +100,7 @@ public class ListAdapter extends TranslatorAdapter {
 				String tagName = getElementName(newValue);
 				Element newElement = node.getOwnerDocument().createElement(
 						tagName);
-				Node before = getNthChildWithName(node, "*", position);
+				Node before = getNthChildWithName(node, "*", position); //$NON-NLS-1$
 				if (before != null) {
 					node.insertBefore(newElement, before);
 				} else {
@@ -121,7 +121,7 @@ public class ListAdapter extends TranslatorAdapter {
 			org.w3c.dom.Text text = node.getOwnerDocument().createTextNode(
 					value.toString());
 			newElement.appendChild(text);
-			Node before = getNthChildWithName(node, "*", position);
+			Node before = getNthChildWithName(node, "*", position); //$NON-NLS-1$
 			if (before != null) {
 				node.insertBefore(newElement, before);
 			} else {
@@ -136,7 +136,7 @@ public class ListAdapter extends TranslatorAdapter {
 		if (position == -1) {
 			position = 0;
 		}
-		Element n = getNthChildWithName(node, "*", position);
+		Element n = getNthChildWithName(node, "*", position); //$NON-NLS-1$
 
 		if (n != null)
 			removeChildElement(n);
@@ -150,10 +150,10 @@ public class ListAdapter extends TranslatorAdapter {
 
 	protected String getElementName(Object o) {
 		String name = node.getLocalName();
-		if (name.endsWith("ies"))
-			name = name.replaceAll("ies$", "y");
+		if (name.endsWith("ies")) //$NON-NLS-1$
+			name = name.replaceAll("ies$", "y"); //$NON-NLS-1$ //$NON-NLS-2$
 		else
-			name = name.replaceAll("s$", "");
+			name = name.replaceAll("s$", ""); //$NON-NLS-1$ //$NON-NLS-2$
 		return name;
 	}
 

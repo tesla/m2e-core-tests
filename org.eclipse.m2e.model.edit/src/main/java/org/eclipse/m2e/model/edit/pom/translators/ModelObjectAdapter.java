@@ -106,7 +106,7 @@ public class ModelObjectAdapter extends TranslatorAdapter implements Adapter,
 
 				case Notification.SET:
 					if (null == notification.getNewValue()
-							|| "".equals(notification.getNewValue())) {
+							|| "".equals(notification.getNewValue())) { //$NON-NLS-1$
 						removeDomChild(feature);
 					} else {
 						TranslatorAdapter setAdapter = createOrGetChildAdapter(feature);
@@ -307,7 +307,7 @@ public class ModelObjectAdapter extends TranslatorAdapter implements Adapter,
 				.getEStructuralFeatures()) {
 			if (eobject.eIsSet(feature)) {
 				Object o = eobject.eGet(feature);
-				if (!"".equals(o) && o != null) {
+				if (!"".equals(o) && o != null) { //$NON-NLS-1$
 					createOrGetChildAdapter(feature).save();
 				}
 			}

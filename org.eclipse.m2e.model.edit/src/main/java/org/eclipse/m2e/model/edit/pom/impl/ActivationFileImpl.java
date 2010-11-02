@@ -220,9 +220,9 @@ public class ActivationFileImpl extends EObjectImpl implements ActivationFile {
 			return super.toString();
 
 		StringBuffer result = new StringBuffer(super.toString());
-		result.append(" (missing: ");
+		result.append(" (missing: "); //$NON-NLS-1$
 		result.append(missing);
-		result.append(", exists: ");
+		result.append(", exists: "); //$NON-NLS-1$
 		result.append(exists);
 		result.append(')');
 		return result.toString();

@@ -452,17 +452,17 @@ public class MailingListImpl extends EObjectImpl implements MailingList {
 			return super.toString();
 
 		StringBuffer result = new StringBuffer(super.toString());
-		result.append(" (name: ");
+		result.append(" (name: "); //$NON-NLS-1$
 		result.append(name);
-		result.append(", subscribe: ");
+		result.append(", subscribe: "); //$NON-NLS-1$
 		result.append(subscribe);
-		result.append(", unsubscribe: ");
+		result.append(", unsubscribe: "); //$NON-NLS-1$
 		result.append(unsubscribe);
-		result.append(", post: ");
+		result.append(", post: "); //$NON-NLS-1$
 		result.append(post);
-		result.append(", archive: ");
+		result.append(", archive: "); //$NON-NLS-1$
 		result.append(archive);
-		result.append(", otherArchives: ");
+		result.append(", otherArchives: "); //$NON-NLS-1$
 		result.append(otherArchives);
 		result.append(')');
 		return result.toString();

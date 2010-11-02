@@ -675,13 +675,13 @@ public class BuildBaseImpl extends EObjectImpl implements BuildBase {
 			return super.toString();
 
 		StringBuffer result = new StringBuffer(super.toString());
-		result.append(" (defaultGoal: ");
+		result.append(" (defaultGoal: "); //$NON-NLS-1$
 		result.append(defaultGoal);
-		result.append(", directory: ");
+		result.append(", directory: "); //$NON-NLS-1$
 		result.append(directory);
-		result.append(", finalName: ");
+		result.append(", finalName: "); //$NON-NLS-1$
 		result.append(finalName);
-		result.append(", filters: ");
+		result.append(", filters: "); //$NON-NLS-1$
 		result.append(filters);
 		result.append(')');
 		return result.toString();

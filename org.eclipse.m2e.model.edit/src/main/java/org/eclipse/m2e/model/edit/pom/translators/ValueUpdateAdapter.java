@@ -110,7 +110,7 @@ class ValueUpdateAdapter extends TranslatorAdapter implements INodeAdapter {
 	 */
 	private void setElementTextValue(Element element, Object oldValue,
 			Object newValue) {
-		newValue = newValue == null ? "" : newValue.toString();
+		newValue = newValue == null ? "" : newValue.toString(); //$NON-NLS-1$
 		boolean replacedChild = false;
 
 		if (oldValue != null) {

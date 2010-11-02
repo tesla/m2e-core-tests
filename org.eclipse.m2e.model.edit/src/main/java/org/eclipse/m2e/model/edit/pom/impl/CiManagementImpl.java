@@ -303,9 +303,9 @@ public class CiManagementImpl extends EObjectImpl implements CiManagement {
 			return super.toString();
 
 		StringBuffer result = new StringBuffer(super.toString());
-		result.append(" (system: ");
+		result.append(" (system: "); //$NON-NLS-1$
 		result.append(system);
-		result.append(", url: ");
+		result.append(", url: "); //$NON-NLS-1$
 		result.append(url);
 		result.append(')');
 		return result.toString();

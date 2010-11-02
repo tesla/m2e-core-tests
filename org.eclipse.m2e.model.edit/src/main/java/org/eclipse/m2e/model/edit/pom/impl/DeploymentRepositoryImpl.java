@@ -55,7 +55,7 @@ public class DeploymentRepositoryImpl extends EObjectImpl implements
 	 * @generated
 	 * @ordered
 	 */
-	protected static final String UNIQUE_VERSION_EDEFAULT = "true";
+	protected static final String UNIQUE_VERSION_EDEFAULT = "true"; //$NON-NLS-1$
 
 	/**
 	 * The cached value of the '{@link #getUniqueVersion()
@@ -463,22 +463,22 @@ public class DeploymentRepositoryImpl extends EObjectImpl implements
 			return super.toString();
 
 		StringBuffer result = new StringBuffer(super.toString());
-		result.append(" (uniqueVersion: ");
+		result.append(" (uniqueVersion: "); //$NON-NLS-1$
 		if (uniqueVersionESet)
 			result.append(uniqueVersion);
 		else
-			result.append("<unset>");
-		result.append(", id: ");
+			result.append("<unset>"); //$NON-NLS-1$
+		result.append(", id: "); //$NON-NLS-1$
 		result.append(id);
-		result.append(", name: ");
+		result.append(", name: "); //$NON-NLS-1$
 		result.append(name);
-		result.append(", url: ");
+		result.append(", url: "); //$NON-NLS-1$
 		result.append(url);
-		result.append(", layout: ");
+		result.append(", layout: "); //$NON-NLS-1$
 		if (layoutESet)
 			result.append(layout);
 		else
-			result.append("<unset>");
+			result.append("<unset>"); //$NON-NLS-1$
 		result.append(')');
 		return result.toString();
 	}
