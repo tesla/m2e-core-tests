@@ -9,7 +9,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jdt.core,
  org.eclipse.ui.ide,
  com.ibm.icu;bundle-version="4.0.1"
-Bundle-Vendor: Sonatype, Inc.
+Bundle-Vendor: %Bundle-Vendor
 Bundle-ClassPath: jars/apache-mime4j-0.6.jar,
  jars/commons-codec-1.4.jar,
  jars/commons-logging-1.1.jar,
@@ -30,7 +30,7 @@ MavenArtifact-BaseVersion: 0.10.0-SNAPSHOT
 Bundle-Version: 0.13.0.qualifier
 MavenArtifact-ArtifactId: org.eclipse.m2e.pr
 MavenArtifact-GroupId: org.eclipse.m2e
-Bundle-Name: Maven Problem Reporting
+Bundle-Name: %Bundle-Name
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.eclipse.m2e.pr;singleton:=true
 Bundle-RequiredExecutionEnvironment: J2SE-1.5,JavaSE-1.6

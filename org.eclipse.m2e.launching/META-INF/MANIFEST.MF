@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Maven Integration for Eclipse Launching
+Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.eclipse.m2e.launching;singleton:=true
 Bundle-Version: 0.13.0.qualifier
 Bundle-Localization: plugin
@@ -28,6 +28,6 @@ Require-Bundle: org.eclipse.core.resources,
 Eclipse-LazyStart: true
 Bundle-RequiredExecutionEnvironment: J2SE-1.5,
  JavaSE-1.6
-Bundle-Vendor: Sonatype, Inc.
+Bundle-Vendor: %Bundle-Vendor
 Export-Package: org.eclipse.m2e.actions;x-internal:=true
 Bundle-Activator: org.eclipse.m2e.internal.launch.MavenLaunchPlugin

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.2"?>
 <plugin>
-   <extension-point id="dataGatherers" name="Maven Problem Reporting Data Gatherer" schema="schema/dataGatherers.exsd"/>
+   <extension-point id="dataGatherers" name="%extension-point.name" schema="schema/dataGatherers.exsd"/>
 
    <extension point="org.eclipse.m2e.core.m2menu">
       <factory class="org.eclipse.m2e.pr.internal.ProblemReportingMenuCreator"/>
@@ -9,12 +9,12 @@
 
   <extension point="org.eclipse.ui.actionSets">
     <actionSet id="org.eclipse.m2e.help.actionSet"
-          label="Maven Problem Reporting"
-          description="Maven Problem Reporting"
+          label="%actionSet.label"
+          description="%actionSet.description"
           visible="true">
        <action id="org.eclipse.m2e.help.report"
-           label="Report Maven Issue..."
-           tooltip="Report Maven Issue"
+           label="%action.label"
+           tooltip="%action.tooltip"
            menubarPath="help/additions"
            icon="icons/report-bug.gif"
            class="org.eclipse.m2e.pr.internal.wizard.ProblemReportingAction"/>

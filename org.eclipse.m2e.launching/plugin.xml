@@ -251,7 +251,7 @@
       <sourceLocator
             id="org.eclipse.m2e.launching.MavenSourceLocator"
             class="org.eclipse.m2e.internal.launch.MavenSourceLocator"
-            name="Maven source locator"/>
+            name="%sourceLocator.name"/>
    </extension>
    
    <extension point="org.eclipse.debug.core.sourcePathComputers">

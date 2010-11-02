@@ -17,7 +17,7 @@
         <action id="org.eclipse.m2e.editor.RenamePomAction"
               class="org.eclipse.m2e.refactoring.rename.RenameArtifactAction"
               enablesFor="1"
-              label="Rename Maven Artifact..."
+              label="%action.rename1.label"
               menubarPath="org.eclipse.jdt.ui.refactoring.menu/MavenRefactoring"/>
         <!-- add visibility condition for managed poms -->      
      </objectContribution>
@@ -27,7 +27,7 @@
         <action id="org.eclipse.m2e.editor.RenameProjectAction"
               class="org.eclipse.m2e.refactoring.rename.RenameArtifactAction"
               enablesFor="1"
-              label="Rename Maven Artifact..."
+              label="%action.rename2.label"
               menubarPath="org.eclipse.jdt.ui.refactoring.menu/MavenRefactoring"/>
         <visibility>
           <and>
@@ -46,7 +46,7 @@
               class="org.eclipse.m2e.refactoring.exclude.DependencyExcludeAction"
               enablesFor="1"
               icon="icons/exclude.gif"
-              label="Exclude Maven Artifact..."
+              label="%action.exclude1.label"
               menubarPath="additions"/>
      </objectContribution>
      <objectContribution
@@ -57,7 +57,7 @@
             class="org.eclipse.m2e.refactoring.exclude.DependencyExcludeAction"
             enablesFor="1"
             icon="icons/exclude.gif"
-            label="Exclude Maven Artifact..."
+            label="%action.exclude2.label"
             menubarPath="additions"/>
      </objectContribution>
      <objectContribution
@@ -68,7 +68,7 @@
             class="org.eclipse.m2e.refactoring.exclude.DependencyExcludeAction"
             enablesFor="1"
             icon="icons/exclude.gif"
-            label="Exclude Maven Artifact..."
+            label="%action.exclude3.label"
             menubarPath="additions"/>
      </objectContribution>
   </extension>

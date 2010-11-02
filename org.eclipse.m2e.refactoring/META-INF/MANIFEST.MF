@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Maven Integration for Eclipse Refactoring
-Bundle-Vendor: Sonatype, Inc.
+Bundle-Name: %Bundle-Name
+Bundle-Vendor: %Bundle-Vendor
 Bundle-SymbolicName: org.eclipse.m2e.refactoring;singleton:=true
 Bundle-Version: 0.13.0.qualifier
 Bundle-Activator: org.eclipse.m2e.refactoring.internal.Activator
