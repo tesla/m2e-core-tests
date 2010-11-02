@@ -11,6 +11,7 @@ package org.eclipse.m2e.editor.composites;
 import static org.eclipse.m2e.editor.pom.FormUtils.isEmpty;
 import static org.eclipse.m2e.editor.pom.FormUtils.setButton;
 import static org.eclipse.m2e.editor.pom.FormUtils.setText;
+import static org.eclipse.m2e.editor.pom.FormUtils.nvl;
 
 import java.util.Collections;
 import java.util.List;
@@ -849,8 +850,7 @@ public class RepositoriesComposite extends Composite {
 
   private void registerReleaseRepositoryListeners() {
     ValueProvider<DeploymentRepository> repositoryProvider = new ValueProvider.ParentValueProvider<DeploymentRepository>(
-        releaseRepositoryIdText, releaseRepositoryNameText, releaseRepositoryUrlText, releaseRepositoryLayoutCombo,
-        releaseRepositoryUniqueVersionButton) {
+        releaseRepositoryIdText, releaseRepositoryNameText, releaseRepositoryUrlText) {
       public DeploymentRepository getValue() {
         DistributionManagement dm = distributionManagementProvider.getValue();
         return dm == null ? null : dm.getRepository();
@@ -880,8 +880,7 @@ public class RepositoriesComposite extends Composite {
 
   private void registerSnapshotRepositoryListeners() {
     ValueProvider<DeploymentRepository> repositoryProvider = new ValueProvider.ParentValueProvider<DeploymentRepository>(
-        snapshotRepositoryIdText, snapshotRepositoryNameText, snapshotRepositoryUrlText, snapshotRepositoryLayoutCombo,
-        snapshotRepositoryUniqueVersionButton) {
+        snapshotRepositoryIdText, snapshotRepositoryNameText, snapshotRepositoryUrlText) {
       public DeploymentRepository getValue() {
         DistributionManagement dm = distributionManagementProvider.getValue();
         return dm == null ? null : dm.getSnapshotRepository();
@@ -912,8 +911,9 @@ public class RepositoriesComposite extends Composite {
   }
 
   private void registerProjectListeners() {
-    ValueProvider<DistributionManagement> dmProvider = new ValueProvider.ParentValueProvider<DistributionManagement>(
-        projectDownloadUrlText) {
+    //do not use ParentValueProvider here as it renders the other providers useless (siteProvider etc)
+    ValueProvider<DistributionManagement> dmProvider = new ValueProvider.DefaultValueProvider<DistributionManagement>(distributionManagementProvider.getValue())
+    {
       public DistributionManagement getValue() {
         return distributionManagementProvider.getValue();
       }
@@ -980,7 +980,7 @@ public class RepositoriesComposite extends Composite {
       setText(releaseRepositoryIdText, repository.getId());
       setText(releaseRepositoryNameText, repository.getName());
       setText(releaseRepositoryUrlText, repository.getUrl());
-      setText(releaseRepositoryLayoutCombo, repository.getLayout());
+      setText(releaseRepositoryLayoutCombo, "".equals(nvl(repository.getLayout())) ? "default" : nvl(repository.getLayout())); //$NON-NLS-1$ //$NON-NLS-2$
       setButton(releaseRepositoryUniqueVersionButton, "true".equals(repository.getUniqueVersion()));
     } else {
       setText(releaseRepositoryIdText, ""); //$NON-NLS-1$
@@ -998,7 +998,7 @@ public class RepositoriesComposite extends Composite {
       setText(snapshotRepositoryIdText, repository.getId());
       setText(snapshotRepositoryNameText, repository.getName());
       setText(snapshotRepositoryUrlText, repository.getUrl());
-      setText(snapshotRepositoryLayoutCombo, repository.getLayout());
+      setText(snapshotRepositoryLayoutCombo, "".equals(nvl(repository.getLayout())) ? "default" : nvl(repository.getLayout())); //$NON-NLS-1$ //$NON-NLS-2$
       setButton(snapshotRepositoryUniqueVersionButton, "true".equals(repository.getUniqueVersion()));
     } else {
       setText(snapshotRepositoryIdText, ""); //$NON-NLS-1$
@@ -1163,7 +1163,7 @@ public class RepositoriesComposite extends Composite {
 
     setText(repositoryIdText, repository.getId());
     setText(repositoryNameText, repository.getName());
-    setText(repositoryLayoutCombo, repository.getLayout());
+    setText(repositoryLayoutCombo, "".equals(nvl(repository.getLayout())) ? "default" : nvl(repository.getLayout()));//$NON-NLS-1$ //$NON-NLS-2$
     setText(repositoryUrlText, repository.getUrl());
 
     {
