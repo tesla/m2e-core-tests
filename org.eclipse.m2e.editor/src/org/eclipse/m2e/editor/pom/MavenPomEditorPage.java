@@ -35,6 +35,7 @@ import org.eclipse.emf.common.notify.Notifier;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.edit.command.RemoveCommand;
 import org.eclipse.emf.edit.command.SetCommand;
 import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.jface.action.Action;
@@ -415,6 +416,15 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
           command = SetCommand.create(getEditingDomain(), owner, feature, adapter.getText());
         }
         compoundCommand.append(command);
+        //MNGECLIPSE-1854
+        //the semantics of isEmpty() is probably not entirely correct for this context
+        // as it only takes the fields shown in ui into account, but there could be others, not
+        // managed by this valueprovider
+        if (provider.isEmpty() && owner != null) {
+            //in a way this stuff shall be recursive and remove everything that is empty all the way up..
+           command = RemoveCommand.create(getEditingDomain(), owner);
+           compoundCommand.append(command);
+        }        
         getEditingDomain().getCommandStack().execute(compoundCommand);
         registerListeners();
       }
