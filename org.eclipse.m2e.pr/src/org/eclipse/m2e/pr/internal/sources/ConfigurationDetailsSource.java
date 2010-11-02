@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.m2e.core.core.MavenLogger;
 import org.eclipse.m2e.pr.IDataSource;
+import org.eclipse.m2e.pr.internal.Messages;
 import org.eclipse.m2e.pr.internal.ProblemReportingPlugin;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.about.ISystemSummarySection;
@@ -39,13 +40,13 @@ import com.ibm.icu.util.ULocale;
 public class ConfigurationDetailsSource implements IDataSource {
 
   public String getName() {
-    return "configurationDetails.txt";
+    return "configurationDetails.txt"; //$NON-NLS-1$
   }
   
   public InputStream getInputStream() throws CoreException {
     StringWriter out = new StringWriter();
     PrintWriter writer = new PrintWriter(out);
-    writer.println(NLS.bind("*** Date: {0}", //
+    writer.println(NLS.bind(Messages.ConfigurationDetailsSource_date, //
         DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL).format(new Date())));
     writer.println();
 
@@ -54,10 +55,10 @@ public class ConfigurationDetailsSource implements IDataSource {
     writer.close();
 
     try {
-      return new ByteArrayInputStream(out.toString().getBytes("UTF-8"));
+      return new ByteArrayInputStream(out.toString().getBytes("UTF-8")); //$NON-NLS-1$
     } catch(UnsupportedEncodingException ex) {
       throw new CoreException(new Status(IStatus.ERROR, ProblemReportingPlugin.PLUGIN_ID, -1, //
-          "Can't write Eclipse configuration data", ex));
+          Messages.ConfigurationDetailsSource_error, ex));
     }
   }
 
@@ -66,15 +67,15 @@ public class ConfigurationDetailsSource implements IDataSource {
     for(int i = 0; i < configElements.length; ++i) {
       IConfigurationElement element = configElements[i];
 
-      writer.println(NLS.bind("*** {0}:", element.getAttribute("sectionTitle"))); //$NON-NLS-1$
+      writer.println(NLS.bind("*** {0}:", element.getAttribute("sectionTitle"))); //$NON-NLS-1$ //$NON-NLS-2$
 
       Object obj = null;
       try {
-        obj = element.createExecutableExtension("class");
+        obj = element.createExecutableExtension("class"); //$NON-NLS-1$
       } catch(CoreException ex) {
         MavenLogger.log(ex);
       } catch (Exception ex) {
-        MavenLogger.log("Cannot create extension", ex);
+        MavenLogger.log("Cannot create extension", ex); //$NON-NLS-1$
       }
 
       if(obj instanceof ISystemSummarySection) {
@@ -90,7 +91,7 @@ public class ConfigurationDetailsSource implements IDataSource {
 
   private static IConfigurationElement[] getSortedExtensions() {
     IConfigurationElement[] configElements = Platform.getExtensionRegistry() //
-        .getConfigurationElementsFor("org.eclipse.ui.systemSummarySections");
+        .getConfigurationElementsFor("org.eclipse.ui.systemSummarySections"); //$NON-NLS-1$
 
     Arrays.sort(configElements, new Comparator<IConfigurationElement>() {
       Collator collator = Collator.getInstance(ULocale.getDefault());

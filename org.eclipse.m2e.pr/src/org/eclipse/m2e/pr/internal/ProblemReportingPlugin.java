@@ -16,7 +16,7 @@ import org.osgi.framework.BundleContext;
  */
 public class ProblemReportingPlugin extends AbstractUIPlugin {
 
-  public static final String PLUGIN_ID = "org.eclipse.m2e.pr";
+  public static final String PLUGIN_ID = "org.eclipse.m2e.pr"; //$NON-NLS-1$
   
 	// The shared instance
 	private static ProblemReportingPlugin instance;

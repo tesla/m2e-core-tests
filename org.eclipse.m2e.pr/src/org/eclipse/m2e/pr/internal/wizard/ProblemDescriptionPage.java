@@ -18,6 +18,7 @@ import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.m2e.core.wizards.AbstractMavenWizardPage;
+import org.eclipse.m2e.pr.internal.Messages;
 import org.eclipse.m2e.pr.internal.ProblemReportingImages;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.Clipboard;
@@ -50,19 +51,19 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
  */
 public class ProblemDescriptionPage extends AbstractMavenWizardPage {
 
-  String description = "";
+  String description = ""; //$NON-NLS-1$
 
-  String summary = "";
+  String summary = ""; //$NON-NLS-1$
 
   private CheckboxTableViewer projectsViewer;
 
   private IStructuredSelection selection;
 
   protected ProblemDescriptionPage(IStructuredSelection selection) {
-    super("problemDescriptionPage");
+    super("problemDescriptionPage"); //$NON-NLS-1$
     this.selection = selection;
-    setTitle("Problem details");
-    setDescription("Enter problem summary and description");
+    setTitle(Messages.ProblemDescriptionPage_title);
+    setDescription(Messages.ProblemDescriptionPage_description);
     setImageDescriptor(ProblemReportingImages.REPORT_WIZARD);
     setPageComplete(false);
   }
@@ -73,11 +74,11 @@ public class ProblemDescriptionPage extends AbstractMavenWizardPage {
     setControl(composite);
 
     Label summaryLabel = new Label(composite, SWT.NONE);
-    summaryLabel.setData("name", "summaryLabel");
-    summaryLabel.setText("Problem &summary:");
+    summaryLabel.setData("name", "summaryLabel"); //$NON-NLS-1$ //$NON-NLS-2$
+    summaryLabel.setText(Messages.ProblemDescriptionPage_lblSummary);
 
     final Text summaryText = new Text(composite, SWT.BORDER);
-    summaryText.setData("name", "summaryText");
+    summaryText.setData("name", "summaryText"); //$NON-NLS-1$ //$NON-NLS-2$
     summaryText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
     summaryText.addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent e) {
@@ -87,11 +88,11 @@ public class ProblemDescriptionPage extends AbstractMavenWizardPage {
     });
 
     Label descriptionLabel = new Label(composite, SWT.NONE);
-    descriptionLabel.setData("name", "descriptionLabel");
-    descriptionLabel.setText("Problem &description:");
+    descriptionLabel.setData("name", "descriptionLabel"); //$NON-NLS-1$ //$NON-NLS-2$
+    descriptionLabel.setText(Messages.ProblemDescriptionPage_lblDesc);
 
     final Text descriptionText = new Text(composite, SWT.MULTI | SWT.BORDER | SWT.WRAP);
-    descriptionText.setData("name", "descriptionText");
+    descriptionText.setData("name", "descriptionText"); //$NON-NLS-1$ //$NON-NLS-2$
     GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
     gd.heightHint = 100;
     descriptionText.setLayoutData(gd);
@@ -103,11 +104,11 @@ public class ProblemDescriptionPage extends AbstractMavenWizardPage {
     });
 
     Label projectsLabel = new Label(composite, SWT.NONE);
-    projectsLabel.setData("name", "projectsLabel");
-    projectsLabel.setText("Projects to &submit (with sources):");
+    projectsLabel.setData("name", "projectsLabel"); //$NON-NLS-1$ //$NON-NLS-2$
+    projectsLabel.setText(Messages.ProblemDescriptionPage_lblProjects);
 
     projectsViewer = CheckboxTableViewer.newCheckList(composite, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.MULTI);
-    projectsViewer.setData("name", "projectsViewer");
+    projectsViewer.setData("name", "projectsViewer"); //$NON-NLS-1$ //$NON-NLS-2$
     projectsViewer.addCheckStateListener(new ICheckStateListener() {
       public void checkStateChanged(CheckStateChangedEvent event) {
         updatePage();
@@ -127,7 +128,7 @@ public class ProblemDescriptionPage extends AbstractMavenWizardPage {
     
         Link link = new Link(composite, SWT.NONE);
         link.setFont(composite.getFont());
-        link.setText("<A>Set Jira user (optional)</A>");
+        link.setText(Messages.ProblemDescriptionPage_lblLink);
         link.addSelectionListener(new SelectionListener() {
           public void widgetSelected(SelectionEvent e) {
             doLaunchProblemReportingPrefs();
@@ -147,14 +148,14 @@ public class ProblemDescriptionPage extends AbstractMavenWizardPage {
             captureScreenFromClipboard();
           }
         });
-        button.setText("&Capture Screenshot from Clipboard");
+        button.setText(Messages.ProblemDescriptionPage_btnScreenshot);
 
   }
 
   private void doLaunchProblemReportingPrefs() {
     PreferencesUtil.createPreferenceDialogOn(getShell(),
-        "org.eclipse.m2e.preferences.ProblemReportingPreferencePage",
-        new String[] {"org.eclipse.m2e.preferences.ProblemReportingPreferencePage"}, null).open();
+        "org.eclipse.m2e.preferences.ProblemReportingPreferencePage", //$NON-NLS-1$
+        new String[] {"org.eclipse.m2e.preferences.ProblemReportingPreferencePage"}, null).open(); //$NON-NLS-1$
   }
 
   protected void updatePage() {
@@ -164,13 +165,13 @@ public class ProblemDescriptionPage extends AbstractMavenWizardPage {
 
     if(isSummaryBlank) {
       if(isDescriptionBlank) {
-        setErrorMessage("Problem summary and description should not be blank");
+        setErrorMessage(Messages.ProblemDescriptionPage_error_empty_summary_desc);
       } else {
-        setErrorMessage("Problem summary should not be blank");
+        setErrorMessage(Messages.ProblemDescriptionPage_error_empty_summary);
       }
       isComplete = false;
     } else if(isDescriptionBlank) {
-      setErrorMessage("Problem description should not be blank");
+      setErrorMessage(Messages.ProblemDescriptionPage_error_empty_desc);
       isComplete = false;
     }
 
@@ -208,8 +209,8 @@ public class ProblemDescriptionPage extends AbstractMavenWizardPage {
       Image image = new Image(display, imageData);
       ImageLoader loader = new ImageLoader();
       loader.data = new ImageData[] {image.getImageData()};
-      screenCapture = new File(ResourcesPlugin.getPlugin().getStateLocation().toFile(), "capture.png" );
-      System.out.println( "file: " + screenCapture);
+      screenCapture = new File(ResourcesPlugin.getPlugin().getStateLocation().toFile(), "capture.png" ); //$NON-NLS-1$
+      System.out.println( "file: " + screenCapture); //$NON-NLS-1$
       loader.save(screenCapture.getAbsolutePath(), SWT.IMAGE_PNG);
       image.dispose();
     }

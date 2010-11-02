@@ -39,8 +39,10 @@ import org.eclipse.m2e.core.project.MavenProjectManager;
 import org.eclipse.m2e.pr.IDataGatherer;
 import org.eclipse.m2e.pr.IDataSource;
 import org.eclipse.m2e.pr.IDataTarget;
+import org.eclipse.m2e.pr.internal.Messages;
 import org.eclipse.m2e.pr.internal.ProblemReportingPlugin;
 import org.eclipse.m2e.pr.internal.sources.StatusSource;
+import org.eclipse.osgi.util.NLS;
 import org.sonatype.plexus.encryptor.PlexusEncryptor;
 import org.sonatype.plexus.encryptor.RsaAesPlexusEncryptor;
 
@@ -100,7 +102,7 @@ public class DataGatherer {
 
     List<IDataGatherer> dataGatherers = DataGathererFactory.getDataGatherers();
 
-    SubMonitor progress = SubMonitor.convert(monitor, "Gathering problem data", dataSet.size() + dataGatherers.size() + 1);
+    SubMonitor progress = SubMonitor.convert(monitor, Messages.DataGatherer_monitor_gather, dataSet.size() + dataGatherers.size() + 1);
 
     // There's a size limit on JIRA attachments, so we split logs, config etc. from the project sources
     Set<Data> set1 = EnumSet.copyOf(dataSet);
@@ -110,7 +112,7 @@ public class DataGatherer {
 
     try {
       if(!set2.isEmpty()) {
-        File bundleFile = File.createTempFile("bundle", ".zip", bundleDir);
+        File bundleFile = File.createTempFile("bundle", ".zip", bundleDir); //$NON-NLS-1$ //$NON-NLS-2$
         bundleFiles.add(bundleFile);
 
         gather(bundleFile, set2, Collections.<IDataGatherer> emptyList(), false, progress);
@@ -123,7 +125,7 @@ public class DataGatherer {
 
       // primary bundle with the potential status logs is created last
       {
-        File bundleFile = File.createTempFile("bundle", ".zip", bundleDir);
+        File bundleFile = File.createTempFile("bundle", ".zip", bundleDir); //$NON-NLS-1$ //$NON-NLS-2$
         bundleFiles.add(0, bundleFile);
 
         gather(bundleFile, set1, dataGatherers, true, progress);
@@ -164,7 +166,7 @@ public class DataGatherer {
         data.gather(this, target, monitor);
       } catch(Exception e) {
         addStatus(new Status(IStatus.ERROR, ProblemReportingPlugin.PLUGIN_ID,
-            "Failure while gathering problem report data: " + e.getMessage(), e));
+            NLS.bind(Messages.DataGatherer_error, e.getMessage()), e));
       }
       monitor.worked(1);
     }
@@ -178,7 +180,7 @@ public class DataGatherer {
         addStatus(ex.getStatus());
       } catch(Exception e) {
         addStatus(new Status(IStatus.ERROR, ProblemReportingPlugin.PLUGIN_ID,
-            "Failure while gathering problem report data: " + e.getMessage(), e));
+            NLS.bind(Messages.DataGatherer_error, e.getMessage()), e));
       }
       monitor.worked(1);
     }
@@ -192,7 +194,7 @@ public class DataGatherer {
       addStatus(ex.getStatus());
     } catch(Exception e) {
       addStatus(new Status(IStatus.ERROR, ProblemReportingPlugin.PLUGIN_ID,
-          "Failure while gathering problem report data: " + e.getMessage(), e));
+          NLS.bind(Messages.DataGatherer_error, e.getMessage()), e));
     }
   }
 
@@ -201,9 +203,9 @@ public class DataGatherer {
       int index = 0;
       for(IStatus status : statuses) {
         try {
-          target.consume("pr", new StatusSource(status, "status-" + index + ".txt"));
+          target.consume("pr", new StatusSource(status, "status-" + index + ".txt")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         } catch(Exception e) {
-          MavenLogger.log("Failed to save status to problem report", e);
+          MavenLogger.log("Failed to save status to problem report", e); //$NON-NLS-1$
         }
         index++ ;
       }
@@ -215,7 +217,7 @@ public class DataGatherer {
   }
 
   private List<File> encryptBundles(List<File> inputFiles, File bundleDir, IProgressMonitor monitor) throws IOException {
-    SubMonitor progress = SubMonitor.convert(monitor, "Encrypting problem data", inputFiles.size());
+    SubMonitor progress = SubMonitor.convert(monitor, Messages.DataGatherer_monitor_encrypting, inputFiles.size());
 
     if(publicKey == null) {
       return inputFiles;
@@ -226,7 +228,7 @@ public class DataGatherer {
     PlexusEncryptor encryptor = new RsaAesPlexusEncryptor();
 
     for(File input : inputFiles) {
-      File output = File.createTempFile("bundle", ".ezip", bundleDir);
+      File output = File.createTempFile("bundle", ".ezip", bundleDir); //$NON-NLS-1$ //$NON-NLS-2$
       bundleFiles.add(output);
       try {
         encryptor.encrypt(input, output, publicKey.openStream());
@@ -251,7 +253,7 @@ public class DataGatherer {
     PlexusEncryptor encryptor = new RsaAesPlexusEncryptor();
 
     for(File input : inputFiles) {
-      File output = File.createTempFile("bundle", ".zip", bundleDir);
+      File output = File.createTempFile("bundle", ".zip", bundleDir); //$NON-NLS-1$ //$NON-NLS-2$
       bundleFiles.add(output);
       InputStream is = null;
       OutputStream os = null;

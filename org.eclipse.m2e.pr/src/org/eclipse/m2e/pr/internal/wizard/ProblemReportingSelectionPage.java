@@ -12,6 +12,7 @@ import java.util.EnumSet;
 import java.util.Set;
 
 import org.eclipse.m2e.core.wizards.AbstractMavenWizardPage;
+import org.eclipse.m2e.pr.internal.Messages;
 import org.eclipse.m2e.pr.internal.ProblemReportingImages;
 import org.eclipse.m2e.pr.internal.data.Data;
 import org.eclipse.swt.SWT;
@@ -40,9 +41,9 @@ public class ProblemReportingSelectionPage extends AbstractMavenWizardPage {
   Set<Data> dataSet;
 
   protected ProblemReportingSelectionPage() {
-    super("problemReportingSelectionPage");
-    setTitle("Select data to include");
-    setDescription("Select data to include into reporting bundle");
+    super("problemReportingSelectionPage"); //$NON-NLS-1$
+    setTitle(Messages.ProblemReportingSelectionPage_title);
+    setDescription(Messages.ProblemReportingSelectionPage_desc);
     setImageDescriptor(ProblemReportingImages.REPORT_WIZARD);
 
     dataSet = EnumSet.allOf(Data.class);
@@ -57,17 +58,17 @@ public class ProblemReportingSelectionPage extends AbstractMavenWizardPage {
     setControl(composite);
 
     final Button exportAllDataButton = new Button(composite, SWT.CHECK);
-    exportAllDataButton.setData("name", "exportAllDataButton");
+    exportAllDataButton.setData("name", "exportAllDataButton"); //$NON-NLS-1$ //$NON-NLS-2$
     exportAllDataButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 4, 1));
-    exportAllDataButton.setText("Export &all data");
+    exportAllDataButton.setText(Messages.ProblemReportingSelectionPage_btnExportAll);
     exportAllDataButton.setSelection(false);
 
     final Button mavenUsersSettingsButton = new Button(composite, SWT.CHECK);
     GridData gd_mavenUsersSettingsButton = new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1);
     gd_mavenUsersSettingsButton.horizontalIndent = 15;
     mavenUsersSettingsButton.setLayoutData(gd_mavenUsersSettingsButton);
-    mavenUsersSettingsButton.setData("name", "mavenUsersSettingsButton");
-    mavenUsersSettingsButton.setText("Maven user's settings.xml");
+    mavenUsersSettingsButton.setData("name", "mavenUsersSettingsButton"); //$NON-NLS-1$ //$NON-NLS-2$
+    mavenUsersSettingsButton.setText(Messages.ProblemReportingSelectionPage_btnUserSettings);
     mavenUsersSettingsButton.setSelection(dataSet.contains(Data.MAVEN_USER_SETTINGS));
     mavenUsersSettingsButton.addSelectionListener(new SourceSelectionAdapter(mavenUsersSettingsButton, //
         dataSet, Data.MAVEN_USER_SETTINGS));
@@ -76,8 +77,8 @@ public class ProblemReportingSelectionPage extends AbstractMavenWizardPage {
     GridData gd_eclipseConfigurationButton = new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1);
     gd_eclipseConfigurationButton.horizontalIndent = 25;
     eclipseConfigurationButton.setLayoutData(gd_eclipseConfigurationButton);
-    eclipseConfigurationButton.setData("name", "eclipseConfigurationButton");
-    eclipseConfigurationButton.setText("Eclipse configuration details");
+    eclipseConfigurationButton.setData("name", "eclipseConfigurationButton"); //$NON-NLS-1$ //$NON-NLS-2$
+    eclipseConfigurationButton.setText(Messages.ProblemReportingSelectionPage_btnEclipseConfig);
     eclipseConfigurationButton.setSelection(dataSet.contains(Data.ECLIPSE_CONFIG));
     eclipseConfigurationButton.addSelectionListener(new SourceSelectionAdapter(eclipseConfigurationButton, //
         dataSet, Data.ECLIPSE_CONFIG));
@@ -86,8 +87,8 @@ public class ProblemReportingSelectionPage extends AbstractMavenWizardPage {
     GridData gd_mavenGlobalSettingsButton = new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1);
     gd_mavenGlobalSettingsButton.horizontalIndent = 15;
     mavenGlobalSettingsButton.setLayoutData(gd_mavenGlobalSettingsButton);
-    mavenGlobalSettingsButton.setData("name", "mavenGlobalSettingsButton");
-    mavenGlobalSettingsButton.setText("Maven global settings.xml");
+    mavenGlobalSettingsButton.setData("name", "mavenGlobalSettingsButton"); //$NON-NLS-1$ //$NON-NLS-2$
+    mavenGlobalSettingsButton.setText(Messages.ProblemReportingSelectionPage_btnGlobalSettings);
     mavenGlobalSettingsButton.setSelection(dataSet.contains(Data.MAVEN_GLOBAL_SETTINGS));
     mavenGlobalSettingsButton.addSelectionListener(new SourceSelectionAdapter(mavenGlobalSettingsButton, //
         dataSet, Data.MAVEN_GLOBAL_SETTINGS));
@@ -96,8 +97,8 @@ public class ProblemReportingSelectionPage extends AbstractMavenWizardPage {
     GridData gd_eclipseLogButton = new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1);
     gd_eclipseLogButton.horizontalIndent = 25;
     eclipseLogButton.setLayoutData(gd_eclipseLogButton);
-    eclipseLogButton.setData("name", "eclipseLogButton");
-    eclipseLogButton.setText("Eclipse error .log");
+    eclipseLogButton.setData("name", "eclipseLogButton"); //$NON-NLS-1$ //$NON-NLS-2$
+    eclipseLogButton.setText(Messages.ProblemReportingSelectionPage_btnErrorLog);
     eclipseLogButton.setSelection(dataSet.contains(Data.ECLIPSE_LOG));
     eclipseLogButton.addSelectionListener(new SourceSelectionAdapter(eclipseLogButton, //
         dataSet, Data.ECLIPSE_LOG));
@@ -106,8 +107,8 @@ public class ProblemReportingSelectionPage extends AbstractMavenWizardPage {
     GridData gd_mavenConsoleButton = new GridData(SWT.LEFT, SWT.CENTER, false, false, 4, 1);
     gd_mavenConsoleButton.horizontalIndent = 15;
     mavenConsoleButton.setLayoutData(gd_mavenConsoleButton);
-    mavenConsoleButton.setData("name", "mavenConsoleButton");
-    mavenConsoleButton.setText("Maven console");
+    mavenConsoleButton.setData("name", "mavenConsoleButton"); //$NON-NLS-1$ //$NON-NLS-2$
+    mavenConsoleButton.setText(Messages.ProblemReportingSelectionPage_btnConsole);
     mavenConsoleButton.setSelection(dataSet.contains(Data.MAVEN_CONSOLE));
     mavenConsoleButton.addSelectionListener(new SourceSelectionAdapter(mavenConsoleButton, //
         dataSet, Data.MAVEN_CONSOLE));
@@ -116,8 +117,8 @@ public class ProblemReportingSelectionPage extends AbstractMavenWizardPage {
     GridData gd_mavenPomFilesButton = new GridData(SWT.FILL, SWT.CENTER, false, false, 4, 1);
     gd_mavenPomFilesButton.horizontalIndent = 15;
     mavenPomFilesButton.setLayoutData(gd_mavenPomFilesButton);
-    mavenPomFilesButton.setData("name", "mavenPomFilesButton");
-    mavenPomFilesButton.setText("Maven pom files");
+    mavenPomFilesButton.setData("name", "mavenPomFilesButton"); //$NON-NLS-1$ //$NON-NLS-2$
+    mavenPomFilesButton.setText(Messages.ProblemReportingSelectionPage_btnPomFiles);
     mavenPomFilesButton.setSelection(dataSet.contains(Data.MAVEN_POM_FILES));
     mavenPomFilesButton.addSelectionListener(new SourceSelectionAdapter(mavenPomFilesButton, //
         dataSet, Data.MAVEN_POM_FILES));
@@ -126,8 +127,8 @@ public class ProblemReportingSelectionPage extends AbstractMavenWizardPage {
     GridData gd_completeProjectSourceButton = new GridData(SWT.FILL, SWT.CENTER, false, false, 4, 1);
     gd_completeProjectSourceButton.horizontalIndent = 15;
     mavenSourcesButton.setLayoutData(gd_completeProjectSourceButton);
-    mavenSourcesButton.setData("name", "completeProjectSourceButton");
-    mavenSourcesButton.setText("Complete project &sources");
+    mavenSourcesButton.setData("name", "completeProjectSourceButton"); //$NON-NLS-1$ //$NON-NLS-2$
+    mavenSourcesButton.setText(Messages.ProblemReportingSelectionPage_btnSources);
     mavenSourcesButton.setSelection(dataSet.contains(Data.MAVEN_SOURCES));
     mavenSourcesButton.addSelectionListener(new SourceSelectionAdapter(mavenSourcesButton, //
         dataSet, Data.MAVEN_SOURCES));
@@ -136,11 +137,11 @@ public class ProblemReportingSelectionPage extends AbstractMavenWizardPage {
     GridData gd_locationLabel = new GridData();
     gd_locationLabel.verticalIndent = 15;
     locationLabel.setLayoutData(gd_locationLabel);
-    locationLabel.setData("name", "locationLabel");
-    locationLabel.setText("&Location:");
+    locationLabel.setData("name", "locationLabel"); //$NON-NLS-1$ //$NON-NLS-2$
+    locationLabel.setText(Messages.ProblemReportingSelectionPage_lblLocation);
 
     final Combo locationCombo = new Combo(composite, SWT.NONE);
-    locationCombo.setData("name", "locationText");
+    locationCombo.setData("name", "locationText"); //$NON-NLS-1$ //$NON-NLS-2$
     GridData gd_locationText = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
     gd_locationText.verticalIndent = 15;
     locationCombo.setLayoutData(gd_locationText);
@@ -149,18 +150,18 @@ public class ProblemReportingSelectionPage extends AbstractMavenWizardPage {
         location = locationCombo.getText();
       }
     });
-    addFieldWithHistory("bundleLocation", locationCombo);
+    addFieldWithHistory("bundleLocation", locationCombo); //$NON-NLS-1$
 
     Button browseButton = new Button(composite, SWT.NONE);
     GridData gd_browseButton = new GridData(SWT.RIGHT, SWT.CENTER, false, false);
     gd_browseButton.verticalIndent = 15;
     browseButton.setLayoutData(gd_browseButton);
-    browseButton.setData("name", "browseButton");
-    browseButton.setText("&Browse...");
+    browseButton.setData("name", "browseButton"); //$NON-NLS-1$ //$NON-NLS-2$
+    browseButton.setText(Messages.ProblemReportingSelectionPage_btnBrowse);
     browseButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(final SelectionEvent e) {
         FileDialog dialog = new FileDialog(getContainer().getShell(), SWT.SAVE);
-        dialog.setText("Select file name to save problem reporting bundle");
+        dialog.setText(Messages.ProblemReportingSelectionPage_fileDialog_text);
         String fileName = dialog.open();
         if(fileName != null) {
           locationCombo.setText(fileName);

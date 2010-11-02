@@ -26,11 +26,11 @@ import org.eclipse.m2e.pr.IDataGatherer;
  */
 public class DataGathererFactory {
 
-  private static final String EXTENSION_POINT_ID = "org.eclipse.m2e.pr.dataGatherers";
+  private static final String EXTENSION_POINT_ID = "org.eclipse.m2e.pr.dataGatherers"; //$NON-NLS-1$
 
-  private static final String ELEMENT_DATA_GATHERER = "gatherer";
+  private static final String ELEMENT_DATA_GATHERER = "gatherer"; //$NON-NLS-1$
 
-  private static final String ATTRIBUTE_CLASS = "class";
+  private static final String ATTRIBUTE_CLASS = "class"; //$NON-NLS-1$
 
   public static List<IDataGatherer> getDataGatherers() {
     List<IDataGatherer> dataGatherers = new ArrayList<IDataGatherer>();

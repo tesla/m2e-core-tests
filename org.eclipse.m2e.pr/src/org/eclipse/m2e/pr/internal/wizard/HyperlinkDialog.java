@@ -34,7 +34,7 @@ public class HyperlinkDialog extends MessageDialog {
 
   protected Control createCustomArea(Composite parent) {
     Link link = new Link(parent, SWT.None);
-    link.setText("<a href=\"#\">" + url + "</a>");
+    link.setText("<a href=\"#\">" + url + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
     link.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         Program.launch(url);

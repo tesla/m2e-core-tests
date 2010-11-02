@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.m2e.pr.IDataTarget;
+import org.eclipse.m2e.pr.internal.Messages;
 import org.eclipse.m2e.pr.internal.sources.ConfigurationDetailsSource;
 import org.eclipse.m2e.pr.internal.sources.EffectivePomSource;
 import org.eclipse.m2e.pr.internal.sources.ObfuscatedSettingsSource;
@@ -35,49 +36,49 @@ import org.eclipse.m2e.pr.sources.ExternalFileSource;
  */
 public enum Data {
 
-  MAVEN_USER_SETTINGS("Maven user settings.xml") {
+  MAVEN_USER_SETTINGS(Messages.Data_user_settings) {
     public void gather(DataGatherer gatherer, IDataTarget target, IProgressMonitor monitor) {
       String settings = gatherer.getMavenConfiguration().getUserSettingsFile();
       if(settings==null || settings.trim().length() == 0) {
         settings = MavenCli.DEFAULT_USER_SETTINGS_FILE.getAbsolutePath();
       }
-      gatherer.gather("config", target, new ObfuscatedSettingsSource(settings, "user-settings.xml"));
+      gatherer.gather("config", target, new ObfuscatedSettingsSource(settings, "user-settings.xml")); //$NON-NLS-1$ //$NON-NLS-2$
       
       // TODO user profiles and toolchain
     }
   },
 
-  MAVEN_GLOBAL_SETTINGS("Maven global settings.xml") {
+  MAVEN_GLOBAL_SETTINGS(Messages.Data_global_settings) {
     public void gather(DataGatherer gatherer, IDataTarget target, IProgressMonitor monitor) {
       String settings = gatherer.getMavenConfiguration().getGlobalSettingsFile();
-      gatherer.gather("config", target, new ObfuscatedSettingsSource(settings, "global-settings.xml"));
+      gatherer.gather("config", target, new ObfuscatedSettingsSource(settings, "global-settings.xml")); //$NON-NLS-1$ //$NON-NLS-2$
     }
   },
 
-  MAVEN_CONSOLE("Maven console") {
+  MAVEN_CONSOLE(Messages.Data_console) {
     public void gather(DataGatherer gatherer, IDataTarget target, IProgressMonitor monitor) {
-      gatherer.gather("config", target, new TextConsoleSource(gatherer.getConsole(), "mavenConsole.log"));
+      gatherer.gather("config", target, new TextConsoleSource(gatherer.getConsole(), "mavenConsole.log")); //$NON-NLS-1$ //$NON-NLS-2$
     }
   },
 
-  MAVEN_POM_FILES("Maven project files") {
+  MAVEN_POM_FILES(Messages.Data_project_files) {
     public void gather(DataGatherer gatherer, IDataTarget target, IProgressMonitor monitor) {
       for(IProject project : gatherer.getProjects()) {
-        String folderName = "projects/" + project.getName();
+        String folderName = "projects/" + project.getName(); //$NON-NLS-1$
         if(project.isAccessible()) {
-          gatherer.gather(folderName, target, new WorkspaceFileSource(project.getFile("pom.xml")));
-          gatherer.gather(folderName, target, new WorkspaceFileSource(project.getFile("profiles.xml")));
-          gatherer.gather(folderName, target, new WorkspaceFileSource(project.getFile(".project")));
-          gatherer.gather(folderName, target, new WorkspaceFileSource(project.getFile(".classpath")));
+          gatherer.gather(folderName, target, new WorkspaceFileSource(project.getFile("pom.xml"))); //$NON-NLS-1$
+          gatherer.gather(folderName, target, new WorkspaceFileSource(project.getFile("profiles.xml"))); //$NON-NLS-1$
+          gatherer.gather(folderName, target, new WorkspaceFileSource(project.getFile(".project"))); //$NON-NLS-1$
+          gatherer.gather(folderName, target, new WorkspaceFileSource(project.getFile(".classpath"))); //$NON-NLS-1$
   
           gatherer.gather(folderName, target, //
-              new EffectivePomSource(gatherer.getProjectManager(), project.getFile("pom.xml"), monitor));
+              new EffectivePomSource(gatherer.getProjectManager(), project.getFile("pom.xml"), monitor)); //$NON-NLS-1$
         }
       }
     }
   },
 
-  MAVEN_SOURCES("Maven project sources") {
+  MAVEN_SOURCES(Messages.Data_project_sources) {
     public void gather(final DataGatherer gatherer, final IDataTarget target, final IProgressMonitor monitor) {
       Set<IProject> projectSet = gatherer.getProjects();
       List<IProject> projects = new ArrayList<IProject>(projectSet);
@@ -102,8 +103,8 @@ public enum Data {
                   t = System.currentTimeMillis();
                 }
                 if(resource instanceof IFile) {
-                  if(!resource.getName().endsWith(".class")) {
-                    gatherer.gather("projects" + resource.getParent().getFullPath(), target, //
+                  if(!resource.getName().endsWith(".class")) { //$NON-NLS-1$
+                    gatherer.gather("projects" + resource.getParent().getFullPath(), target, // //$NON-NLS-1$
                         new WorkspaceFileSource((IFile) resource));
                   }
                 }
@@ -118,16 +119,16 @@ public enum Data {
     }
   },
 
-  ECLIPSE_CONFIG("Eclipse configuration") {
+  ECLIPSE_CONFIG(Messages.Data_eclipse_config) {
     public void gather(DataGatherer gatherer, IDataTarget target, IProgressMonitor monitor) {
-      gatherer.gather("config", target, new ConfigurationDetailsSource());
+      gatherer.gather("config", target, new ConfigurationDetailsSource()); //$NON-NLS-1$
     }
   },
 
-  ECLIPSE_LOG("Eclipse log") {
+  ECLIPSE_LOG("Eclipse log") { //$NON-NLS-1$
     public void gather(DataGatherer gatherer, IDataTarget target, IProgressMonitor monitor) {
-      String file = gatherer.getWorkspace().getRoot().getLocation().append(".metadata/.log").toOSString();
-      gatherer.gather("config", target, new ExternalFileSource(file, "error.log"));
+      String file = gatherer.getWorkspace().getRoot().getLocation().append(".metadata/.log").toOSString(); //$NON-NLS-1$
+      gatherer.gather("config", target, new ExternalFileSource(file, "error.log")); //$NON-NLS-1$ //$NON-NLS-2$
     }
   };
   

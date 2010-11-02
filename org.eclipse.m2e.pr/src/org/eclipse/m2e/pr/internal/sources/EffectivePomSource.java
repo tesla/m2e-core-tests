@@ -22,7 +22,9 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.MavenProjectManager;
 import org.eclipse.m2e.pr.IDataSource;
+import org.eclipse.m2e.pr.internal.Messages;
 import org.eclipse.m2e.pr.internal.ProblemReportingPlugin;
+import org.eclipse.osgi.util.NLS;
 
 
 /**
@@ -48,11 +50,11 @@ public class EffectivePomSource implements IDataSource {
       projectFacade = mavenProjectManager.create(file, true, monitor);
     } catch(Exception ex) {
       throw new CoreException(new Status(IStatus.ERROR, ProblemReportingPlugin.PLUGIN_ID, -1, //
-          "Can't get project facade for " + file.getLocation(), ex));
+          NLS.bind(Messages.EffectivePomSource_error1, file.getLocation()), ex));
     }
     if(projectFacade == null) {
       throw new CoreException(new Status(IStatus.ERROR, ProblemReportingPlugin.PLUGIN_ID, -1, //
-          "Can't get project facade for " + file.getLocation(), null));
+          NLS.bind(Messages.EffectivePomSource_error2, file.getLocation()), null));
     }
 
     StringWriter sw = new StringWriter();
@@ -60,14 +62,14 @@ public class EffectivePomSource implements IDataSource {
       new MavenXpp3Writer().write(sw, projectFacade.getMavenProject(monitor).getModel());
     } catch(IOException ex) {
       throw new CoreException(new Status(IStatus.ERROR, ProblemReportingPlugin.PLUGIN_ID, -1, //
-          "Can't write effective pom source for " + file.getLocation(), ex));
+          NLS.bind(Messages.EffectivePomSource_error3, file.getLocation()), ex));
     }
 
     return new ByteArrayInputStream(sw.getBuffer().toString().getBytes());
   }
 
   public String getName() {
-    return "pom-effective.pom";
+    return "pom-effective.pom"; //$NON-NLS-1$
   }
 
 }

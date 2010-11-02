@@ -26,7 +26,7 @@ import org.eclipse.ui.IWorkbenchWindowActionDelegate;
  */
 public class ProblemReportingAction implements IWorkbenchWindowActionDelegate, IObjectActionDelegate {
 
-  public static final String ID = "org.eclipse.m2e.pr.action.ProblemReportingAction";
+  public static final String ID = "org.eclipse.m2e.pr.action.ProblemReportingAction"; //$NON-NLS-1$
   private IStructuredSelection selection;
 
   public void dispose() {

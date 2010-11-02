@@ -35,20 +35,20 @@ public class StatusSource implements IDataSource {
   public InputStream getInputStream() {
     StringWriter sw = new StringWriter(256);
 
-    format(status, new PrintWriter(sw), "");
+    format(status, new PrintWriter(sw), ""); //$NON-NLS-1$
 
     try {
-      return new ByteArrayInputStream(sw.toString().getBytes("UTF-8"));
+      return new ByteArrayInputStream(sw.toString().getBytes("UTF-8")); //$NON-NLS-1$
     } catch(UnsupportedEncodingException ex) {
       return new ByteArrayInputStream(new byte[0]);
     }
   }
 
   private void format(IStatus status, PrintWriter writer, String indent) {
-    writer.println(indent + "Severity = " + status.getSeverity());
-    writer.println(indent + "Plugin = " + status.getPlugin());
-    writer.println(indent + "Code = " + status.getCode());
-    writer.println(indent + "Message = " + status.getMessage());
+    writer.println(indent + "Severity = " + status.getSeverity()); //$NON-NLS-1$
+    writer.println(indent + "Plugin = " + status.getPlugin()); //$NON-NLS-1$
+    writer.println(indent + "Code = " + status.getCode()); //$NON-NLS-1$
+    writer.println(indent + "Message = " + status.getMessage()); //$NON-NLS-1$
 
     Throwable exception = status.getException();
     if(exception != null) {
@@ -58,7 +58,7 @@ public class StatusSource implements IDataSource {
     IStatus[] children = status.getChildren();
     if(children != null) {
       for(IStatus child : children) {
-        format(child, writer, indent + "  ");
+        format(child, writer, indent + "  "); //$NON-NLS-1$
       }
     }
   }

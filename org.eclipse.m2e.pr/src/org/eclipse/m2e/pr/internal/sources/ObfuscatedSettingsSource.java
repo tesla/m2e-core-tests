@@ -78,12 +78,12 @@ public class ObfuscatedSettingsSource implements IDataSource {
 
     MessageDigest digest;
     try {
-      digest = MessageDigest.getInstance("MD5");
+      digest = MessageDigest.getInstance("MD5"); //$NON-NLS-1$
     } catch(NoSuchAlgorithmException ex) {
       try {
-        digest = MessageDigest.getInstance("SHA");
+        digest = MessageDigest.getInstance("SHA"); //$NON-NLS-1$
       } catch(NoSuchAlgorithmException ex1) {
-        return "***";
+        return "***"; //$NON-NLS-1$
       }
     }
     digest.update(data.getBytes());

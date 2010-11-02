@@ -39,6 +39,7 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.MavenLogger;
 import org.eclipse.m2e.core.embedder.IMavenConfiguration;
+import org.eclipse.m2e.pr.internal.Messages;
 import org.eclipse.m2e.pr.internal.data.Data;
 import org.eclipse.m2e.pr.internal.data.DataGatherer;
 import org.eclipse.swt.widgets.Display;
@@ -56,15 +57,15 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
 
   private IStructuredSelection selection;
 
-  private static final String HOSTNAME = "issues.sonatype.org/";
+  private static final String HOSTNAME = "issues.sonatype.org/"; //$NON-NLS-1$
 
-  private static final String URL = "https://" + HOSTNAME;
+  private static final String URL = "https://" + HOSTNAME; //$NON-NLS-1$
 
-  private static final String USERNAME = "sonatype_problem_reporting";
+  private static final String USERNAME = "sonatype_problem_reporting"; //$NON-NLS-1$
 
-  private static final String PASSWORD = "sonatype_problem_reporting";
+  private static final String PASSWORD = "sonatype_problem_reporting"; //$NON-NLS-1$
 
-  private static final String PROJECT = "PR";
+  private static final String PROJECT = "PR"; //$NON-NLS-1$
 
   protected static String TITLE = "Problem Reporting";
 
@@ -73,7 +74,7 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
   private ProblemDescriptionPage descriptionPage;
 
   public ProblemReportingWizard() {
-    setWindowTitle("Reporting Problem");
+    setWindowTitle(Messages.ProblemReportingWizard_window_title);
   }
 
   @Override
@@ -102,7 +103,7 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
 //      }
 //    }
 
-    new Job("Gathering Information") {
+    new Job(Messages.ProblemReportingWizard_job_gathering) {
       protected IStatus run(IProgressMonitor monitor) {
         List<File> bundleFiles = null;
         try {
@@ -112,7 +113,7 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
           IMavenConfiguration mavenConfiguration = MavenPlugin.getDefault().getMavenConfiguration();
           String username = mavenConfiguration.getJiraUsername();
           String password = mavenConfiguration.getJiraPassword();
-          if(username == null || username.trim().equals("")) {
+          if(username == null || username.trim().equals("")) { //$NON-NLS-1$
             username = USERNAME;
             password = PASSWORD;
           }
@@ -142,7 +143,7 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
 
           IssueSubmissionResult res = is.submitIssue(r);
 
-          showHyperlink("Successfully submitted issue to:", res.getIssueUrl());
+          showHyperlink(Messages.ProblemReportingWizard_link_success, res.getIssueUrl());
         } catch(Exception ex) {
           MavenLogger.log("Failed to generate problem report", ex);
           showError((ex.getMessage() != null) ? ex.getMessage() : ex.toString());
@@ -181,12 +182,12 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
     return true;
   }
 
-  private static final String [] PROPERTIES=new String[]{"java.vendor","java.version","os.name","os.version","os.arch","osgi.arch","osgi.nl"};
+  private static final String [] PROPERTIES=new String[]{"java.vendor","java.version","os.name","os.version","os.arch","osgi.arch","osgi.nl"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
   
   private String getEnvironment() {
     StringBuffer sb = new StringBuffer();
     
-    String sep = System.getProperty("line.separator");
+    String sep = System.getProperty("line.separator"); //$NON-NLS-1$
     
     sb.append("M2E Version: ").append(getBundleVersion(MavenPlugin.getDefault().getBundle())).append(sep);
     sb.append("Eclipse Version: ").append(getBundleVersion(ResourcesPlugin.getPlugin().getBundle())).append(sep);
@@ -211,7 +212,7 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
     List<?> list = descriptionPage.getSelectedProjects().toList();
     int numTicks = list == null ? 0 : list.size();
     SubProgressMonitor sub = new SubProgressMonitor(monitor, numTicks);
-    sub.beginTask("Reading project information", numTicks);
+    sub.beginTask(Messages.ProblemReportingWizard_monitor_reading, numTicks);
     for(Iterator<?> i = descriptionPage.getSelectedProjects().iterator(); i.hasNext();) {
       try{
       Object o = i.next();
@@ -241,7 +242,7 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
     MavenPlugin mavenPlugin = MavenPlugin.getDefault();
     DataGatherer gatherer = new DataGatherer(MavenPlugin.getDefault().getMavenConfiguration(), //
         mavenPlugin.getMavenProjectManager(), mavenPlugin.getConsole(), //
-        ResourcesPlugin.getWorkspace(), projects, getClass().getResource("/apr/public-key.txt"));
+        ResourcesPlugin.getWorkspace(), projects, getClass().getResource("/apr/public-key.txt")); //$NON-NLS-1$
 
     return gatherer.gather(bundleDir, dataSet, monitor);
   }

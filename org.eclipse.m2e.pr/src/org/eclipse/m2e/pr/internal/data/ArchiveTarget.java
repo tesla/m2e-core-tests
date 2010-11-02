@@ -38,7 +38,7 @@ public class ArchiveTarget implements IDataTarget {
     try {
       is = source.getInputStream();
       if(is != null) {
-        ZipEntry entry = new ZipEntry(folderName + "/" + source.getName());
+        ZipEntry entry = new ZipEntry(folderName + "/" + source.getName()); //$NON-NLS-1$
         entry.setMethod(ZipEntry.DEFLATED);
         zos.putNextEntry(entry);
         IOUtil.copy(is, zos);

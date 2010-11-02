@@ -24,9 +24,9 @@ public class ProblemReportingImages {
   
   // image descriptors
   
-  public static final ImageDescriptor REPORT_BUG = create("report-bug.gif");
+  public static final ImageDescriptor REPORT_BUG = create("report-bug.gif"); //$NON-NLS-1$
   
-  public static final ImageDescriptor REPORT_WIZARD = create("report-wizard.gif"); 
+  public static final ImageDescriptor REPORT_WIZARD = create("report-wizard.gif");  //$NON-NLS-1$
   
 
   private static ImageDescriptor create(String key) {
@@ -55,7 +55,7 @@ public class ProblemReportingImages {
   }
 
   private static ImageDescriptor createDescriptor(String image) {
-    return AbstractUIPlugin.imageDescriptorFromPlugin(ProblemReportingPlugin.PLUGIN_ID, "icons/" + image);
+    return AbstractUIPlugin.imageDescriptorFromPlugin(ProblemReportingPlugin.PLUGIN_ID, "icons/" + image); //$NON-NLS-1$
   }
   
 }

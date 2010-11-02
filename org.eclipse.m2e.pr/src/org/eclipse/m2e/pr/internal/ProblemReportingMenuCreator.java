@@ -22,7 +22,7 @@ public class ProblemReportingMenuCreator extends AbstractMavenMenuCreator {
     if(selectionType == SelectionUtil.PROJECT_WITH_NATURE || selectionType == SelectionUtil.PROJECT_WITHOUT_NATURE) {
       mgr.appendToGroup(IMPORT, new Separator()); //
       mgr.appendToGroup(IMPORT, getAction(new ProblemReportingAction(), //
-          ProblemReportingAction.ID, "Report Issue...", ProblemReportingImages.REPORT_BUG));
+          ProblemReportingAction.ID, Messages.ProblemReportingMenuCreator_action_report, ProblemReportingImages.REPORT_BUG));
     }
   }
 
