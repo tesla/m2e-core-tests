@@ -24,7 +24,7 @@ public class RefactoringImages {
   
   // image descriptors
   
-  public static final ImageDescriptor EXCLUDE = create("exclude.gif"); 
+  public static final ImageDescriptor EXCLUDE = create("exclude.gif");  //$NON-NLS-1$
   
 
   private static ImageDescriptor create(String key) {
@@ -53,7 +53,7 @@ public class RefactoringImages {
   }
 
   private static ImageDescriptor createDescriptor(String image) {
-    return AbstractUIPlugin.imageDescriptorFromPlugin(Activator.PLUGIN_ID, "icons/" + image);
+    return AbstractUIPlugin.imageDescriptorFromPlugin(Activator.PLUGIN_ID, "icons/" + image); //$NON-NLS-1$
   }
   
 }

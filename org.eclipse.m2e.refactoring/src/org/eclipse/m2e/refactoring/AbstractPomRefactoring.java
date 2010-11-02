@@ -49,6 +49,7 @@ import org.eclipse.m2e.model.edit.pom.Model;
 import org.eclipse.m2e.model.edit.pom.PropertyElement;
 import org.eclipse.m2e.refactoring.RefactoringModelResources.PropertyInfo;
 import org.eclipse.m2e.refactoring.internal.Activator;
+import org.eclipse.osgi.util.NLS;
 
 
 /**
@@ -59,7 +60,7 @@ import org.eclipse.m2e.refactoring.internal.Activator;
 @SuppressWarnings("restriction")
 public abstract class AbstractPomRefactoring extends Refactoring {
 
-  protected static final String PROBLEMS_DURING_REFACTORING = "Problems during refactoring";
+  protected static final String PROBLEMS_DURING_REFACTORING = Messages.AbstractPomRefactoring_error;
 
   // main file that is being refactored
   protected IFile file;
@@ -99,7 +100,7 @@ public abstract class AbstractPomRefactoring extends Refactoring {
   public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
     CompositeChange res = new CompositeChange(getTitle());
     IMavenProjectFacade[] projects = mavenPlugin.getMavenProjectManager().getProjects();
-    pm.beginTask("Refactoring", projects.length);
+    pm.beginTask(Messages.AbstractPomRefactoring_task, projects.length);
 
     models = new HashMap<String, RefactoringModelResources>();
 
@@ -275,7 +276,7 @@ public abstract class AbstractPomRefactoring extends Refactoring {
 
   protected RefactoringModelResources loadModel(IMavenProjectFacade projectFacade, IProgressMonitor pm)
       throws CoreException, IOException {
-    pm.setTaskName("Loading " + projectFacade.getProject().getName());
+    pm.setTaskName(NLS.bind(Messages.AbstractPomRefactoring_loading, projectFacade.getProject().getName()));
     RefactoringModelResources current = new RefactoringModelResources(projectFacade);
     models.put(current.effective.getArtifactId(), current);
     pm.worked(1);

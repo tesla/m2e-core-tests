@@ -36,7 +36,7 @@ import org.eclipse.m2e.model.edit.pom.PropertyElement;
  * @author Anton Kraev
  */
 public class RefactoringModelResources {
-  private static final String TMP_PROJECT_NAME = ".m2eclipse_refactoring";
+  private static final String TMP_PROJECT_NAME = ".m2eclipse_refactoring"; //$NON-NLS-1$
   protected IFile pomFile;
   protected IFile tmpFile;
   protected ITextFileBuffer pomBuffer;
@@ -73,7 +73,7 @@ public class RefactoringModelResources {
 
     //create temp file
     IProject project = getTmpProject();
-    File f = File.createTempFile("pom", ".xml", project.getLocation().toFile());
+    File f = File.createTempFile("pom", ".xml", project.getLocation().toFile()); //$NON-NLS-1$ //$NON-NLS-2$
     f.delete();
     tmpFile = project.getFile(f.getName());
     pomFile.copy(tmpFile.getFullPath(), true, null);

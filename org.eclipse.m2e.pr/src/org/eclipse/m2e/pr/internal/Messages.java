@@ -98,6 +98,8 @@ public class Messages extends NLS {
 
   public static String ProblemReportingWizard_monitor_reading;
 
+  public static String ProblemReportingWizard_title;
+
   public static String ProblemReportingWizard_window_title;
   static {
     // initialize resource bundle

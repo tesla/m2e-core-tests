@@ -21,6 +21,7 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.Window;
+import org.eclipse.m2e.refactoring.Messages;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -42,7 +43,7 @@ import org.eclipse.ui.dialogs.ListDialog;
  * a good candidate for reuse amoung components.
  */
 public class SaveDirtyFilesDialog extends ListDialog {
-  public static final String ALL_MODIFIED_RESOURCES_MUST_BE_SAVED_BEFORE_THIS_OPERATION = "All modified resources must be saved before this operation.";
+  public static final String ALL_MODIFIED_RESOURCES_MUST_BE_SAVED_BEFORE_THIS_OPERATION = Messages.SaveDirtyFilesDialog_message_not_saved;
 
   public static boolean saveDirtyFiles(String mask)
   {
@@ -67,7 +68,7 @@ public class SaveDirtyFilesDialog extends ListDialog {
       }
       else
       {
-        MessageDialog dlg = new MessageDialog(shell, "Error", null, 
+        MessageDialog dlg = new MessageDialog(shell, Messages.SaveDirtyFilesDialog_title_error, null, 
             ALL_MODIFIED_RESOURCES_MUST_BE_SAVED_BEFORE_THIS_OPERATION,
             MessageDialog.ERROR, new String[] {IDialogConstants.OK_LABEL}, 0);
         dlg.open();
@@ -99,7 +100,7 @@ public class SaveDirtyFilesDialog extends ListDialog {
   public SaveDirtyFilesDialog(Shell parent)
   {
     super(parent);
-    setTitle("Save All Modified Resources");
+    setTitle(Messages.SaveDirtyFilesDialog_title);
     setAddCancelButton(true);
     setLabelProvider(createDialogLabelProvider());
     setMessage(ALL_MODIFIED_RESOURCES_MUST_BE_SAVED_BEFORE_THIS_OPERATION);

@@ -10,6 +10,7 @@ package org.eclipse.m2e.refactoring.rename;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
+import org.eclipse.m2e.refactoring.Messages;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -35,15 +36,15 @@ public class MavenRenameWizardPage extends UserInputWizardPage {
   private String groupId;
   private String artifactId;
   private String version;
-  private String newGroupId = "";
-  private String newArtifactId = "";
-  private String newVersion = "";
+  private String newGroupId = ""; //$NON-NLS-1$
+  private String newArtifactId = ""; //$NON-NLS-1$
+  private String newVersion = ""; //$NON-NLS-1$
   private boolean renamed;
 
   protected MavenRenameWizardPage() {
-    super("MavenRenameWizardPage");
-    setDescription("Specify new group Id, artifact Id or version");
-    setTitle("Rename Maven Artifact");
+    super("MavenRenameWizardPage"); //$NON-NLS-1$
+    setDescription(Messages.MavenRenameWizardPage_desc);
+    setTitle(Messages.MavenRenameWizardPage_title);
   }
 
   public void initialize(String groupId, String artifactID, String version) {
@@ -90,34 +91,34 @@ public class MavenRenameWizardPage extends UserInputWizardPage {
 
     Label groupIdLabel = new Label(composite, SWT.NONE);
     groupIdLabel.setLayoutData(new GridData());
-    groupIdLabel.setText("&Group Id:");
+    groupIdLabel.setText(Messages.MavenRenameWizardPage_lblGroupId);
 
     groupIdText = new Text(composite, SWT.BORDER);
     groupIdText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-    groupIdText.setData("name", "groupId");
+    groupIdText.setData("name", "groupId"); //$NON-NLS-1$ //$NON-NLS-2$
 
     Label artifactIdLabel = new Label(composite, SWT.NONE);
     artifactIdLabel.setLayoutData(new GridData());
-    artifactIdLabel.setText("&Artifact Id:");
+    artifactIdLabel.setText(Messages.MavenRenameWizardPage_lblArtifactId);
 
     artifactIdText = new Text(composite, SWT.BORDER);
     artifactIdText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-    artifactIdText.setData("name", "artifactId");
+    artifactIdText.setData("name", "artifactId"); //$NON-NLS-1$ //$NON-NLS-2$
 
     Label versionLabel = new Label(composite, SWT.NONE);
     versionLabel.setLayoutData(new GridData());
-    versionLabel.setText("&Version:");
+    versionLabel.setText(Messages.MavenRenameWizardPage_lblVersion);
 
     versionText = new Text(composite, SWT.BORDER);
     versionText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-    versionText.setData("name", "version");
+    versionText.setData("name", "version"); //$NON-NLS-1$ //$NON-NLS-2$
     
     new Label(composite, SWT.NONE);
 
     renameCheckbox = new Button(composite, SWT.CHECK);
-    renameCheckbox.setText("&Rename Eclipse project in Workspace");
+    renameCheckbox.setText(Messages.MavenRenameWizardPage_cbRenameWorkspace);
     renameCheckbox.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-    renameCheckbox.setData("name", "rename");
+    renameCheckbox.setData("name", "rename"); //$NON-NLS-1$ //$NON-NLS-2$
     renameCheckbox.setEnabled(false);
     renameCheckbox.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
@@ -145,7 +146,7 @@ public class MavenRenameWizardPage extends UserInputWizardPage {
   }
   
   private String nvl(String str) {
-    return str == null ? "" : str;
+    return str == null ? "" : str; //$NON-NLS-1$
   }
 
   public boolean getRenameEclipseProject() {

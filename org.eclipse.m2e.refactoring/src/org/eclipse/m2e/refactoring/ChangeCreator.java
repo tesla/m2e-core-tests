@@ -76,7 +76,7 @@ public class ChangeCreator {
         startLine = curr.rightStart();
         int endLine = curr.rightEnd() - 1;
         int posInsert = oldDocument.getLineOffset(curr.leftStart());
-        String newText = "";
+        String newText = ""; //$NON-NLS-1$
         for(int j = startLine; j <= endLine; j++ ) {
           int newPos = curr.leftStart() - startLine + j + insertOffset;
           newText += newDocument.get(newDocument.getLineOffset(newPos), newDocument.getLineLength(newPos));

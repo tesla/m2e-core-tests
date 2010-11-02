@@ -67,7 +67,7 @@ public class ProblemReportingWizard extends Wizard implements IImportWizard {
 
   private static final String PROJECT = "PR"; //$NON-NLS-1$
 
-  protected static String TITLE = "Problem Reporting";
+  protected static String TITLE = Messages.ProblemReportingWizard_title;
 
   //private ProblemReportingSelectionPage selectionPage;
 

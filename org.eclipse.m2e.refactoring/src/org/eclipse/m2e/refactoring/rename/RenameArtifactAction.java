@@ -49,7 +49,7 @@ public class RenameArtifactAction extends ActionDelegate {
       rename((IFile) element);
     } else if (element instanceof IProject) {
       IProject project = (IProject) element;
-      IFile file = project.getFile("pom.xml");
+      IFile file = project.getFile("pom.xml"); //$NON-NLS-1$
       if(file!=null) {
         rename(file);
       }
@@ -60,7 +60,7 @@ public class RenameArtifactAction extends ActionDelegate {
     try {
       // get the model from existing file
       Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-      boolean rc = SaveDirtyFilesDialog.saveDirtyFiles("pom.xml");
+      boolean rc = SaveDirtyFilesDialog.saveDirtyFiles("pom.xml"); //$NON-NLS-1$
       if (!rc)
         return;
       MavenRenameWizard wizard = new MavenRenameWizard(file);

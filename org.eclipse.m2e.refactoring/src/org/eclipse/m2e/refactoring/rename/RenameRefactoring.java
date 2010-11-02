@@ -27,9 +27,11 @@ import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.model.edit.pom.Model;
 import org.eclipse.m2e.model.edit.pom.util.PomResourceImpl;
 import org.eclipse.m2e.refactoring.AbstractPomRefactoring;
+import org.eclipse.m2e.refactoring.Messages;
 import org.eclipse.m2e.refactoring.PomVisitor;
 import org.eclipse.m2e.refactoring.RefactoringModelResources;
 import org.eclipse.m2e.refactoring.RefactoringModelResources.PropertyInfo;
+import org.eclipse.osgi.util.NLS;
 
 
 /**
@@ -40,12 +42,12 @@ import org.eclipse.m2e.refactoring.RefactoringModelResources.PropertyInfo;
 @SuppressWarnings("unchecked")
 public class RenameRefactoring extends AbstractPomRefactoring {
   private static final Object[] EMPTY_OBJECT_ARRAY = new Object[] {};
-  private static final String VERSION = "version";
-  private static final String GETVERSION = "getVersion";
-  private static final String ARTIFACT_ID = "artifactId";
-  private static final String GETARTIFACT_ID = "getArtifactId";
-  private static final String GROUP_ID = "groupId";
-  private static final String GETGROUP_ID = "getGroupId";
+  private static final String VERSION = "version"; //$NON-NLS-1$
+  private static final String GETVERSION = Messages.RenameRefactoring_1;
+  private static final String ARTIFACT_ID = "artifactId"; //$NON-NLS-1$
+  private static final String GETARTIFACT_ID = "getArtifactId"; //$NON-NLS-1$
+  private static final String GROUP_ID = "groupId"; //$NON-NLS-1$
+  private static final String GETGROUP_ID = "getGroupId"; //$NON-NLS-1$
 
   // this page contains new values
   MavenRenameWizardPage page;
@@ -67,7 +69,7 @@ public class RenameRefactoring extends AbstractPomRefactoring {
     }
     
     PathElement current = path.path.remove(0);
-    String getterName = "get" + current.element;
+    String getterName = "get" + current.element; //$NON-NLS-1$
     
     try {
       Method getter = root.getClass().getMethod(getterName, new Class[] {});
@@ -196,7 +198,7 @@ public class RenameRefactoring extends AbstractPomRefactoring {
       applyFeature(editingDomain, model, ARTIFACT_ID, newArtifactId, command, obj);
       // only set version if effective version is the same (already checked by the above)
       // and new version is not empty
-      if (!"".equals(newVersion)) {
+      if (!"".equals(newVersion)) { //$NON-NLS-1$
         applyFeature(editingDomain, model, VERSION, newVersion, command, obj);
       }
     }
@@ -209,14 +211,14 @@ public class RenameRefactoring extends AbstractPomRefactoring {
       String feature, String newValue, CompoundCommand command, EObjectWithPath obj) {
     PropertyInfo info = null;
     String old = getValue(obj.object, feature);
-    if (old != null && old.startsWith("${")) {
+    if (old != null && old.startsWith("${")) { //$NON-NLS-1$
       // this is a property, go find it
       String pName = old.substring(2);
       pName = pName.substring(0, pName.length() - 1).trim();
       info = model.getProperties().get(pName);
     }
     if (info != null)
-      info.setNewValue(new SetCommand(editingDomain, info.getPair(), info.getPair().eClass().getEStructuralFeature("value"), newValue));
+      info.setNewValue(new SetCommand(editingDomain, info.getPair(), info.getPair().eClass().getEStructuralFeature("value"), newValue)); //$NON-NLS-1$
     else
       applyObject(editingDomain, command, obj.object, feature, newValue);
   }
@@ -251,7 +253,7 @@ public class RenameRefactoring extends AbstractPomRefactoring {
 
   @Override
   public String getName() {
-    return "Rename Maven Artifact";
+    return Messages.RenameRefactoring_name;
   }
 
   @Override
@@ -296,7 +298,7 @@ public class RenameRefactoring extends AbstractPomRefactoring {
     }
     
     public String toString() {
-      return "/" + element + "[artifactId=" + artifactId + "]";
+      return "/" + element + "[artifactId=" + artifactId + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     }
   }
   
@@ -321,7 +323,7 @@ public class RenameRefactoring extends AbstractPomRefactoring {
   }
 
   public String getTitle() {
-    return "Renaming " + file.getParent().getName();
+    return NLS.bind(Messages.RenameRefactoring_title, file.getParent().getName());
   }
   
 }

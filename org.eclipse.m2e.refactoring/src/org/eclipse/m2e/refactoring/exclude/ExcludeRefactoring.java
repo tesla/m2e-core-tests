@@ -33,9 +33,11 @@ import org.eclipse.m2e.model.edit.pom.Exclusion;
 import org.eclipse.m2e.model.edit.pom.Model;
 import org.eclipse.m2e.model.edit.pom.impl.PomFactoryImpl;
 import org.eclipse.m2e.refactoring.AbstractPomRefactoring;
+import org.eclipse.m2e.refactoring.Messages;
 import org.eclipse.m2e.refactoring.PomRefactoringException;
 import org.eclipse.m2e.refactoring.PomVisitor;
 import org.eclipse.m2e.refactoring.RefactoringModelResources;
+import org.eclipse.osgi.util.NLS;
 import org.sonatype.aether.artifact.Artifact;
 import org.sonatype.aether.graph.DependencyNode;
 import org.sonatype.aether.graph.DependencyVisitor;
@@ -77,7 +79,7 @@ public class ExcludeRefactoring extends AbstractPomRefactoring {
 
         final IStatus[] status = new IStatus[] {null};
 
-        pm.beginTask("Loading dependency tree", 1);
+        pm.beginTask(Messages.ExcludeRefactoring_task_loading, 1);
         MavenModelManager modelManager = MavenPlugin.getDefault().getMavenModelManager();
         DependencyNode root = modelManager.readDependencyTree(resources.getPomFile(), JavaScopes.TEST, pm);
         pm.worked(1);
@@ -131,9 +133,9 @@ public class ExcludeRefactoring extends AbstractPomRefactoring {
                   // need to add exclusion to top-level dependency
                   Dependency dependency = findDependency(topLevel);
                   if(dependency == null) {
-                    status[0] = new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, "Parent dependency not found for "
-                        + topLevel.getDependency().getArtifact().getGroupId() + ':'
-                        + topLevel.getDependency().getArtifact().getArtifactId());
+                    status[0] = new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, NLS.bind(Messages.ExcludeRefactoring_error_parent,
+                        topLevel.getDependency().getArtifact().getGroupId(),
+                        topLevel.getDependency().getArtifact().getArtifactId()));
                   }
                   if(excluded.add(dependency)) {
                     addExclusion(command, dependency);
@@ -175,11 +177,11 @@ public class ExcludeRefactoring extends AbstractPomRefactoring {
   }
 
   public String getName() {
-    return "Exclude Maven Artifact";
+    return Messages.ExcludeRefactoring_name;
   }
 
   public String getTitle() {
-    return "Excluding " + excludedGroupId + ":" + excludedArtifactId + " from " + file.getParent().getName();
+    return NLS.bind(Messages.ExcludeRefactoring_title, new Object[] {excludedGroupId, excludedArtifactId, file.getParent().getName()});
   }
 
   public boolean scanAllArtifacts() {

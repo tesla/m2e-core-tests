@@ -11,6 +11,7 @@ package org.eclipse.m2e.refactoring.internal;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.m2e.core.actions.AbstractMavenMenuCreator;
 import org.eclipse.m2e.core.actions.SelectionUtil;
+import org.eclipse.m2e.refactoring.Messages;
 import org.eclipse.m2e.refactoring.exclude.DependencyExcludeAction;
 
 /**
@@ -23,7 +24,7 @@ public class RefactoringMavenMenuCreator extends AbstractMavenMenuCreator {
     if(selectionType == SelectionUtil.JAR_FILE) {
       mgr.appendToGroup(OPEN, getAction(new DependencyExcludeAction(), //
           DependencyExcludeAction.ID, //
-          "Exclude Maven artifact...", //
+          Messages.RefactoringMavenMenuCreator_action_exclude, //
           RefactoringImages.EXCLUDE));
     }
   }

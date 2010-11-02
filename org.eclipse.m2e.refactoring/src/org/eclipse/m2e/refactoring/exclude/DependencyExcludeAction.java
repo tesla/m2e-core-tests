@@ -34,7 +34,7 @@ import org.eclipse.ui.PlatformUI;
 @SuppressWarnings("restriction")
 public class DependencyExcludeAction implements IActionDelegate {
 
-  public static final String ID = "org.eclipse.m2e.refactoring.DependencyExclude";
+  public static final String ID = "org.eclipse.m2e.refactoring.DependencyExclude"; //$NON-NLS-1$
   
   private IFile file;
   private ArtifactKey artifactKey;
@@ -99,7 +99,7 @@ public class DependencyExcludeAction implements IActionDelegate {
   }
 
   private IFile getFileFromProject(IJavaProject javaProject) {
-    return javaProject.getProject().getFile("pom.xml");
+    return javaProject.getProject().getFile("pom.xml"); //$NON-NLS-1$
   }
 
   private IFile getFileFromEditor() {
