@@ -109,7 +109,7 @@ public class RepositoryInfo implements IRepository {
     }
     String uid;
     try {
-      MessageDigest digest = MessageDigest.getInstance("MD5");
+      MessageDigest digest = MessageDigest.getInstance("MD5"); //$NON-NLS-1$
       digest.update(sb.toString().getBytes());
       byte messageDigest[] = digest.digest();
       StringBuffer hexString = new StringBuffer();
@@ -135,16 +135,16 @@ public class RepositoryInfo implements IRepository {
 
   // copy&paste from MavenArtifactRepository#protocol
   public static String getProtocol(String repositoryUrl) {
-    final int pos = repositoryUrl.indexOf(":");
+    final int pos = repositoryUrl.indexOf(":"); //$NON-NLS-1$
 
     if(pos == -1) {
-      return "file";
+      return "file"; //$NON-NLS-1$
     }
     return repositoryUrl.substring(0, pos).trim();
   }
 
   public static File getBasedir(String repositoryUrl) {
-    if (getProtocol(repositoryUrl).equalsIgnoreCase("file")) {
+    if (getProtocol(repositoryUrl).equalsIgnoreCase("file")) { //$NON-NLS-1$
       // dirty hack!
       MavenArtifactRepository hack = new MavenArtifactRepository();
       hack.setUrl(repositoryUrl);

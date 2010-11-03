@@ -44,7 +44,7 @@ import org.eclipse.m2e.core.core.MavenLogger;
  */
 public class ProjectRegistryReader {
 
-  private static final String WORKSPACE_STATE = "workspaceState.ser";
+  private static final String WORKSPACE_STATE = "workspaceState.ser"; //$NON-NLS-1$
 
   private final File stateFile;
 
@@ -86,8 +86,8 @@ public class ProjectRegistryReader {
             VersionRange versionRange = new VersionRange(version, true, version, true);
             Bundle[] bundles = packageAdmin.getBundles(symbolicName, versionRange.toString());
             if(bundles == null || bundles.length != 1) {
-              throw new ClassNotFoundException("Could not find bundle " + symbolicName + "/" + version
-                  + " required to load class " + desc.getName());
+              throw new ClassNotFoundException("Could not find bundle " + symbolicName + "/" + version //$NON-NLS-1$ //$NON-NLS-2$
+                  + " required to load class " + desc.getName()); //$NON-NLS-1$
             }
             return bundles[0].loadClass(desc.getName());
           };

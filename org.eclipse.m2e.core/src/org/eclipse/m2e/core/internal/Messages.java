@@ -125,6 +125,8 @@ public class Messages extends NLS {
 
   public static String IndexUpdaterJob_title;
 
+  public static String LocalProjectScanner_task_scanning;
+
   public static String MavenConsoleImpl_title;
 
   public static String MavenConsoleRemoveAction_tooltip;
@@ -198,6 +200,12 @@ public class Messages extends NLS {
   public static String MavenPlugin_error_jre_title;
 
   public static String MavenPlugin_error_warn_again;
+
+  public static String MavenProjectFacade_error;
+
+  public static String MavenProjectPomScanner_23;
+
+  public static String MavenProjectPomScanner_task_resolving;
 
   public static String MissingLifecycleMapping_name;
   public static String NexusIndexManager_78;
@@ -308,6 +316,16 @@ public class Messages extends NLS {
   public static String ProjectConfiguratorsTable_column_name;
 
   public static String ProjectConfiguratorsTableContentProvider_no_configs;
+
+  public static String ProjectRegistryManager_task_project;
+
+  public static String ProjectRegistryManager_task_refreshing;
+
+  public static String ProjectRegistryRefreshJob_task_refreshing;
+
+  public static String ProjectRegistryRefreshJob_title;
+
+  public static String RepositoryRegistryUpdateJob_title;
 
   public static String SelectionUtil_error_cannot_read;
   public static String UpdateSourcesAction_error_cannot_update;

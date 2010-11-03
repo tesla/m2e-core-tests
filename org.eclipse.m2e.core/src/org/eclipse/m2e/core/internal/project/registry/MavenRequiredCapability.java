@@ -70,7 +70,7 @@ public class MavenRequiredCapability extends RequiredCapability {
     }
     sb.append('/').append(versionRange);
     if(optional) {
-      sb.append("(optional)");
+      sb.append("(optional)"); //$NON-NLS-1$
     }
     return sb.toString();
   }

@@ -76,7 +76,7 @@ public class RepositoryRegistry implements IRepositoryRegistry, IMavenProjectCha
     this.maven = maven;
     this.projectManager = projectManager;
 
-    this.workspaceRepository = new RepositoryInfo(null/*id*/, "workspace://"/*url*/, null/*basedir*/, SCOPE_WORKSPACE, null/*auth*/);
+    this.workspaceRepository = new RepositoryInfo(null/*id*/, "workspace://"/*url*/, null/*basedir*/, SCOPE_WORKSPACE, null/*auth*/); //$NON-NLS-1$
   }
 
   private RepositoryInfo newLocalRepositoryInfo() {
@@ -93,7 +93,7 @@ public class RepositoryRegistry implements IRepositoryRegistry, IMavenProjectCha
       localUrl = localBasedir.toURL().toExternalForm();
     } catch(MalformedURLException ex) {
       MavenLogger.log("Could not parse local repository path", ex);
-      localUrl = "file://" + localBasedir.getAbsolutePath();
+      localUrl = "file://" + localBasedir.getAbsolutePath(); //$NON-NLS-1$
     }
 
     // initialize local and workspace repositories

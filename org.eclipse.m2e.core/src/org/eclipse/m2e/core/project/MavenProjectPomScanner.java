@@ -16,6 +16,7 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.osgi.util.NLS;
 
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
@@ -35,6 +36,7 @@ import org.eclipse.m2e.core.core.MavenConsole;
 import org.eclipse.m2e.core.core.MavenLogger;
 import org.eclipse.m2e.core.embedder.IMaven;
 import org.eclipse.m2e.core.embedder.MavenModelManager;
+import org.eclipse.m2e.core.internal.Messages;
 
 /**
  * Maven project scanner using dependency list
@@ -62,9 +64,9 @@ public class MavenProjectPomScanner<T> extends AbstractProjectScanner<MavenProje
   public String getDescription() {
     if(dependencies.length==1) {
       Dependency d = dependencies[0];
-      return d.getGroupId() + ":" + d.getArtifactId() + ":" + d.getVersion() + (d.getClassifier()==null ? "" : ":" + d.getClassifier());
+      return d.getGroupId() + ":" + d.getArtifactId() + ":" + d.getVersion() + (d.getClassifier()==null ? "" : ":" + d.getClassifier()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
     }
-    return "" + dependencies.length + " projects";
+    return "" + dependencies.length + " projects"; //$NON-NLS-1$
   }
   
   public void run(IProgressMonitor monitor) throws InterruptedException {
@@ -126,12 +128,12 @@ public class MavenProjectPomScanner<T> extends AbstractProjectScanner<MavenProje
 
         // TODO add an option to select all modules/projects and optimize scan 
         
-        if(connection.endsWith("/")) {
+        if(connection.endsWith("/")) { //$NON-NLS-1$
           connection = connection.substring(0, connection.length()-1);
         }
         
-        int n = connection.lastIndexOf("/");
-        String label = (n == -1 ? connection : connection.substring(n)) + "/" + IMavenConstants.POM_FILE_NAME;
+        int n = connection.lastIndexOf("/"); //$NON-NLS-1$
+        String label = (n == -1 ? connection : connection.substring(n)) + "/" + IMavenConstants.POM_FILE_NAME; //$NON-NLS-1$
         
         addProject(new MavenProjectScmInfo(label, model, null, tag, connection, connection));
 
@@ -175,12 +177,12 @@ public class MavenProjectPomScanner<T> extends AbstractProjectScanner<MavenProje
     // heuristics for matching module names to artifactId
     String artifactId = model.getArtifactId();
     for(String module : modules) {
-      if(module.equals(artifactId) || module.endsWith("/" + artifactId)) {
+      if(module.equals(artifactId) || module.endsWith("/" + artifactId)) { //$NON-NLS-1$
         if(parentScm.getConnection()!=null) {
-          parentScm.setConnection(parentScm.getConnection() + "/" + module);
+          parentScm.setConnection(parentScm.getConnection() + "/" + module); //$NON-NLS-1$
         }
         if(parentScm.getDeveloperConnection()!=null) {
-          parentScm.setDeveloperConnection(parentScm.getDeveloperConnection() + "/" + module);
+          parentScm.setDeveloperConnection(parentScm.getDeveloperConnection() + "/" + module); //$NON-NLS-1$
         }
         return parentScm; 
       }
@@ -193,10 +195,10 @@ public class MavenProjectPomScanner<T> extends AbstractProjectScanner<MavenProje
 
   private Model resolveModel(String groupId, String artifactId, String version, IProgressMonitor monitor)
       throws CoreException {
-    monitor.subTask("Resolving artifact " + groupId + ":" + artifactId + ":" + version);
+    monitor.subTask(NLS.bind(Messages.MavenProjectPomScanner_task_resolving, new Object[] { groupId, artifactId, version}));
 
     List<ArtifactRepository> repositories = maven.getArtifactRepositories();
-    Artifact artifact = maven.resolve(groupId, artifactId, version, "pom", null, repositories, monitor);
+    Artifact artifact = maven.resolve(groupId, artifactId, version, "pom", null, repositories, monitor); //$NON-NLS-1$
 
     File file = artifact.getFile();
     if(file == null) {
@@ -206,7 +208,7 @@ public class MavenProjectPomScanner<T> extends AbstractProjectScanner<MavenProje
     // XXX this fail on reading extensions
     // MavenProject project = embedder.readProject(file);
     
-    monitor.subTask("Reading model " + groupId + ":" + artifactId + ":" + version);
+    monitor.subTask(NLS.bind(Messages.MavenProjectPomScanner_23, new Object[] {groupId, artifactId, version}));
     return maven.readModel(file);
   }
   

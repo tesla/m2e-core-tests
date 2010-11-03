@@ -129,7 +129,7 @@ public class MavenProjectInfo {
     if(i==null) {
       projects.put(key, info);
     } else {
-      MavenLogger.log("Project info " + this + " already has a child project info with key '" + key + "'");
+      MavenLogger.log("Project info " + this + " already has a child project info with key '" + key + "'"); //$NON-NLS-3$
       for(Iterator<String> it = info.getProfiles().iterator(); it.hasNext();) {
         i.addProfile(it.next());
       }
@@ -190,6 +190,6 @@ public class MavenProjectInfo {
   }
 
   public String toString() {
-    return "'" + label + "'" + (pomFile == null ? "" : " " + pomFile.getAbsolutePath());
+    return "'" + label + "'" + (pomFile == null ? "" : " " + pomFile.getAbsolutePath()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
   }
 }

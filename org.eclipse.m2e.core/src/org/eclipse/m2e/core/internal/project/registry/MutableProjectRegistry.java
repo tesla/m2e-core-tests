@@ -46,7 +46,7 @@ public class MutableProjectRegistry extends BasicProjectRegistry implements IPro
 
   private void assertNotClosed() {
     if(closed) {
-      throw new IllegalStateException("Can't modify closed MutableProjectRegistry");
+      throw new IllegalStateException("Can't modify closed MutableProjectRegistry"); //$NON-NLS-1$
     }
   }
 

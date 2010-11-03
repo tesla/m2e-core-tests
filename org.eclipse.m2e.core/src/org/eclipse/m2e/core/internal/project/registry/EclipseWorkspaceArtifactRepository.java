@@ -39,7 +39,7 @@ public final class EclipseWorkspaceArtifactRepository extends LocalArtifactRepos
 
   public EclipseWorkspaceArtifactRepository(ProjectRegistryManager.Context context) {
     this.context = context;
-    this.workspaceRepository = new WorkspaceRepository("ide", getClass());
+    this.workspaceRepository = new WorkspaceRepository("ide", getClass()); //$NON-NLS-1$
   }
 
   protected File resolveAsEclipseProject(String groupId, String artifactId, String baseVersion, String classifier, String extension) {
@@ -68,7 +68,7 @@ public final class EclipseWorkspaceArtifactRepository extends LocalArtifactRepos
     if(context.resolverConfiguration.shouldResolveWorkspaceProjects()) {
       IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
       IPath file = pom.getLocation();
-      if (!"pom".equals(extension)) {
+      if (!"pom".equals(extension)) { //$NON-NLS-1$
         MavenProjectFacade facade = context.state.getProjectFacade(pom);
         IFolder outputLocation = root.getFolder(facade.getOutputLocation());
         if (outputLocation.exists()) {

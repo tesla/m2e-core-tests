@@ -39,6 +39,7 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
+import org.eclipse.osgi.util.NLS;
 
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
@@ -65,6 +66,7 @@ import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.embedder.IMaven;
 import org.eclipse.m2e.core.embedder.IMavenConfiguration;
 import org.eclipse.m2e.core.internal.ExtensionReader;
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.internal.embedder.MavenImpl;
 import org.eclipse.m2e.core.internal.project.DependencyResolutionContext;
 import org.eclipse.m2e.core.internal.project.IManagedCache;
@@ -85,23 +87,23 @@ import org.eclipse.m2e.core.project.configurator.NoopLifecycleMapping;
 public class ProjectRegistryManager {
 
   public static boolean DEBUG = MavenPlugin.getDefault().isDebugging()
-      & Boolean.parseBoolean(Platform.getDebugOption(IMavenConstants.PLUGIN_ID + "/debug/projectManager"));
+      & Boolean.parseBoolean(Platform.getDebugOption(IMavenConstants.PLUGIN_ID + "/debug/projectManager")); //$NON-NLS-1$
 
-  private static final String DEFAULT_LIFECYCLE_MAPPING_ID = "generic";
+  private static final String DEFAULT_LIFECYCLE_MAPPING_ID = "generic"; //$NON-NLS-1$
 
-  static final String ARTIFACT_TYPE_POM = "pom";
-  static final String ARTIFACT_TYPE_JAR = "jar";
-  public static final String ARTIFACT_TYPE_JAVA_SOURCE = "java-source";
-  public static final String ARTIFACT_TYPE_JAVADOC = "javadoc";
+  static final String ARTIFACT_TYPE_POM = "pom"; //$NON-NLS-1$
+  static final String ARTIFACT_TYPE_JAR = "jar"; //$NON-NLS-1$
+  public static final String ARTIFACT_TYPE_JAVA_SOURCE = "java-source"; //$NON-NLS-1$
+  public static final String ARTIFACT_TYPE_JAVADOC = "javadoc"; //$NON-NLS-1$
 
-  private static final String P_VERSION = "version";
-  private static final String P_RESOLVE_WORKSPACE_PROJECTS = "resolveWorkspaceProjects";
-  private static final String P_RESOURCE_FILTER_GOALS = "resourceFilterGoals";
-  private static final String P_FULL_BUILD_GOALS = "fullBuildGoals";
-  private static final String P_SKIP_COMPILER_PLUGIN = "skipCompilerPlugin";
-  private static final String P_ACTIVE_PROFILES = "activeProfiles";
+  private static final String P_VERSION = "version"; //$NON-NLS-1$
+  private static final String P_RESOLVE_WORKSPACE_PROJECTS = "resolveWorkspaceProjects"; //$NON-NLS-1$
+  private static final String P_RESOURCE_FILTER_GOALS = "resourceFilterGoals"; //$NON-NLS-1$
+  private static final String P_FULL_BUILD_GOALS = "fullBuildGoals"; //$NON-NLS-1$
+  private static final String P_SKIP_COMPILER_PLUGIN = "skipCompilerPlugin"; //$NON-NLS-1$
+  private static final String P_ACTIVE_PROFILES = "activeProfiles"; //$NON-NLS-1$
 
-  private static final String VERSION = "1";
+  private static final String VERSION = "1"; //$NON-NLS-1$
 
   /**
    * Path of project metadata files, relative to the project. These
@@ -112,9 +114,9 @@ public class ProjectRegistryManager {
    * are treated separately.
    */
   public static final List<? extends IPath> METADATA_PATH = Arrays.asList( //
-      new Path(".project"), //
-      new Path(".classpath"), //
-      new Path(".settings/org.eclipse.m2e.prefs")); // dirty hack!
+      new Path(".project"), // //$NON-NLS-1$
+      new Path(".classpath"), // //$NON-NLS-1$
+      new Path(".settings/org.eclipse.m2e.prefs")); // dirty hack! //$NON-NLS-1$
 
   private final ProjectRegistry projectRegistry;
 
@@ -245,7 +247,7 @@ public class ProjectRegistryManager {
     
     configuration.setResourceFilteringGoals(projectNode.get(P_RESOURCE_FILTER_GOALS, ResolverConfiguration.DEFAULT_FILTERING_GOALS));
     configuration.setFullBuildGoals(projectNode.get(P_FULL_BUILD_GOALS, ResolverConfiguration.DEFAULT_FULL_BUILD_GOALS));
-    configuration.setActiveProfiles(projectNode.get(P_ACTIVE_PROFILES, ""));
+    configuration.setActiveProfiles(projectNode.get(P_ACTIVE_PROFILES, "")); //$NON-NLS-1$
     return configuration;
   }
 
@@ -333,7 +335,7 @@ public class ProjectRegistryManager {
    * It is meant for synchronous registry updates.
    */
   public void refresh(MavenUpdateRequest request, IProgressMonitor monitor) throws CoreException {
-    SubMonitor progress = SubMonitor.convert(monitor, "Refreshing projects", 100);
+    SubMonitor progress = SubMonitor.convert(monitor, Messages.ProjectRegistryManager_task_refreshing, 100);
     ISchedulingRule rule = ResourcesPlugin.getWorkspace().getRoot();
     Job.getJobManager().beginRule(rule, progress);
     try {
@@ -378,7 +380,7 @@ public class ProjectRegistryManager {
 
         IFile pom = context.pop();
 
-        monitor.subTask("project " + pom.getProject().getName());
+        monitor.subTask(NLS.bind(Messages.ProjectRegistryManager_task_project, pom.getProject().getName()));
         MavenProjectFacade newFacade = null;
         if(pom.isAccessible() && pom.getProject().hasNature(IMavenConstants.NATURE_ID)) {
           MavenProjectFacade oldFacade = newState.getProjectFacade(pom);
@@ -422,7 +424,7 @@ public class ProjectRegistryManager {
         Set<Capability> capabilities = null;
         Set<RequiredCapability> requirements = null;
         if(newFacade != null) {
-          monitor.subTask("project " + newFacade.getProject().getName());
+          monitor.subTask(NLS.bind(Messages.ProjectRegistryManager_task_project,newFacade.getProject().getName()));
 
           // TODO is this expansive?
           MavenExecutionRequest mavenRequest = getConfiguredExecutionRequest(context, newState, newFacade.getPom(),
@@ -593,7 +595,7 @@ public class ProjectRegistryManager {
 
   private MavenExecutionPlan calculateExecutionPlan(IProjectRegistry state, MavenProjectFacade facade, IProgressMonitor monitor) throws CoreException {
     MavenExecutionRequest request = createExecutionRequest(state, facade.getPom(), facade.getResolverConfiguration(), monitor);
-    request.setGoals(Arrays.asList("package"));
+    request.setGoals(Arrays.asList("package")); //$NON-NLS-1$
     return getMaven().calculateExecutionPlan(request, facade.getMavenProject(monitor), monitor);
   }
 
@@ -776,19 +778,19 @@ public class ProjectRegistryManager {
     String mappingId = null;
 
     if (project.equals(pom.getParent())) {
-      throw new IllegalArgumentException("Nested workspace module " + pom);
+      throw new IllegalArgumentException("Nested workspace module " + pom); //$NON-NLS-1$
     }
 
-    if ("pom".equals(project.getPackaging())) {
+    if ("pom".equals(project.getPackaging())) { //$NON-NLS-1$
       return new NoopLifecycleMapping();
     }
 
-    Plugin plugin = project.getPlugin( "org.eclipse.m2e:lifecycle-mapping" );
+    Plugin plugin = project.getPlugin( "org.eclipse.m2e:lifecycle-mapping" ); //$NON-NLS-1$
 
     if (plugin != null) {
       Xpp3Dom configuration = (Xpp3Dom) plugin.getConfiguration();
       if (configuration != null) {
-        Xpp3Dom mappingIdDom = configuration.getChild("mappingId");
+        Xpp3Dom mappingIdDom = configuration.getChild("mappingId"); //$NON-NLS-1$
         if (mappingIdDom != null) {
           mappingId = mappingIdDom.getValue();
         }

@@ -24,11 +24,11 @@ import java.util.List;
 public class ResolverConfiguration implements Serializable {
   private static final long serialVersionUID = 1258510761534886581L;
 
-  public static final String DEFAULT_FILTERING_GOALS = "process-resources resources:testResources";
-  public static final String DEFAULT_FULL_BUILD_GOALS = "process-test-resources";
+  public static final String DEFAULT_FILTERING_GOALS = "process-resources resources:testResources"; //$NON-NLS-1$
+  public static final String DEFAULT_FULL_BUILD_GOALS = "process-test-resources"; //$NON-NLS-1$
 
   private boolean resolveWorkspaceProjects = true;
-  private String activeProfiles = "";
+  private String activeProfiles = ""; //$NON-NLS-1$
   private String resourceFilteringGoals = DEFAULT_FILTERING_GOALS;
   private String fullBuildGoals = DEFAULT_FULL_BUILD_GOALS;
 
@@ -47,7 +47,7 @@ public class ResolverConfiguration implements Serializable {
   
   public List<String> getActiveProfileList() {
     if (activeProfiles.trim().length() > 0) {
-      return Arrays.asList(activeProfiles.split("[,\\s\\|]"));
+      return Arrays.asList(activeProfiles.split("[,\\s\\|]")); //$NON-NLS-1$
     }
     return new ArrayList<String>();
   }

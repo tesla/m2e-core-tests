@@ -72,7 +72,7 @@ public class MavenProjectScmInfo extends MavenProjectInfo {
   }
   
   public String toString() {
-    return getLabel() + " " + folderUrl;
+    return getLabel() + " " + folderUrl; //$NON-NLS-1$
   }
 
   public String getUsername() {

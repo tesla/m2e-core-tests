@@ -28,17 +28,17 @@ import org.eclipse.m2e.core.core.Messages;
  */
 public class ProjectImportConfiguration {
 
-  private static final String GROUP_ID = "\\[groupId\\]";
+  private static final String GROUP_ID = "\\[groupId\\]"; //$NON-NLS-1$
 
-  private static final String ARTIFACT_ID = "\\[artifactId\\]";
+  private static final String ARTIFACT_ID = "\\[artifactId\\]"; //$NON-NLS-1$
 
-  private static final String VERSION = "\\[version\\]";
+  private static final String VERSION = "\\[version\\]"; //$NON-NLS-1$
 
   /** resolver configuration bean */
   private ResolverConfiguration resolverConfiguration;
 
   /** the project name template */
-  private String projectNameTemplate = "";
+  private String projectNameTemplate = ""; //$NON-NLS-1$
   
   private IWorkingSet[] workingSets;
 
@@ -105,7 +105,7 @@ public class ProjectImportConfiguration {
 
     // XXX needs MavenProjectManager update to resolve groupId and version
     return projectNameTemplate.replaceAll(GROUP_ID, groupId).replaceAll(ARTIFACT_ID, artifactId).replaceAll(VERSION,
-        version == null ? "" : version);
+        version == null ? "" : version); //$NON-NLS-1$
   }
 
   /**
@@ -131,7 +131,7 @@ public class ProjectImportConfiguration {
 
     // check if project already exists
     if(workspace.getRoot().getProject(projectName).exists()) {
-      return new Status( IStatus.ERROR, IMavenConstants.PLUGIN_ID, 0, Messages.getString("wizard.project.page.project.validator.projectExists",projectName), null);
+      return new Status( IStatus.ERROR, IMavenConstants.PLUGIN_ID, 0, Messages.getString("wizard.project.page.project.validator.projectExists",projectName), null); //$NON-NLS-1$
     }
     
     return Status.OK_STATUS;

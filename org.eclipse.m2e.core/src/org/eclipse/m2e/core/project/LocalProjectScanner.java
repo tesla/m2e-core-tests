@@ -27,6 +27,7 @@ import org.apache.maven.model.Profile;
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.core.MavenConsole;
 import org.eclipse.m2e.core.embedder.MavenModelManager;
+import org.eclipse.m2e.core.internal.Messages;
 
 
 /**
@@ -56,7 +57,7 @@ public class LocalProjectScanner extends AbstractProjectScanner<MavenProjectInfo
   }
 
   public void run(IProgressMonitor monitor) throws InterruptedException {
-    monitor.beginTask("Scanning folders", IProgressMonitor.UNKNOWN);
+    monitor.beginTask(Messages.LocalProjectScanner_task_scanning, IProgressMonitor.UNKNOWN);
     try {
       for(String folderName : folders) {
         try {
@@ -84,7 +85,7 @@ public class LocalProjectScanner extends AbstractProjectScanner<MavenProjectInfo
       return;
     }
 
-    MavenProjectInfo projectInfo = readMavenProjectInfo(baseDir, "", null);
+    MavenProjectInfo projectInfo = readMavenProjectInfo(baseDir, "", null); //$NON-NLS-1$
     if(projectInfo != null) {
       addProject(projectInfo);
       return; // don't scan subfolders of the Maven project
@@ -119,7 +120,7 @@ public class LocalProjectScanner extends AbstractProjectScanner<MavenProjectInfo
         return null; // we already know this project
       }
 
-      String pomName = modulePath + "/" + IMavenConstants.POM_FILE_NAME;
+      String pomName = modulePath + "/" + IMavenConstants.POM_FILE_NAME; //$NON-NLS-1$
 
       MavenProjectInfo projectInfo = newMavenProjectInfo(pomName, pomFile, model, parentInfo);
       projectInfo.setBasedirRename(getBasedirRename(projectInfo));

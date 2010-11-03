@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.jobs.IBackgroundProcessingQueue;
 
 /**
@@ -30,7 +31,7 @@ public class RepositoryRegistryUpdateJob extends Job implements IBackgroundProce
   private final ArrayList<Object> queue = new ArrayList<Object>();
 
   public RepositoryRegistryUpdateJob(RepositoryRegistry registry) {
-    super("Repository registry initialization");
+    super(Messages.RepositoryRegistryUpdateJob_title);
     this.registry = registry;
   }
 

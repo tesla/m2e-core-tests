@@ -37,6 +37,7 @@ import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.embedder.ArtifactRef;
 import org.eclipse.m2e.core.embedder.ArtifactRepositoryRef;
 import org.eclipse.m2e.core.embedder.IMavenConfiguration;
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.IMavenProjectVisitor;
 import org.eclipse.m2e.core.project.IMavenProjectVisitor2;
@@ -198,7 +199,7 @@ public class MavenProjectFacade implements IMavenProjectFacade, Serializable {
           new MavenUpdateRequest(isOffline, false /* updateSnapshots */), monitor);
       mavenProject = result.getProject();
       if (mavenProject == null) {
-        MultiStatus status = new MultiStatus(IMavenConstants.PLUGIN_ID, 0, "Could not read maven project", null);
+        MultiStatus status = new MultiStatus(IMavenConstants.PLUGIN_ID, 0, Messages.MavenProjectFacade_error, null);
         List<Throwable> exceptions = result.getExceptions();
         for (Throwable e : exceptions) {
           status.add(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, 0, e.getMessage(), e));

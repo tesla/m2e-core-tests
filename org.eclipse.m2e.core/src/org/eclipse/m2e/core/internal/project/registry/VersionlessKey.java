@@ -57,6 +57,6 @@ public class VersionlessKey implements Serializable {
   }
 
   public String toString() {
-    return namespace + "/" + id;
+    return namespace + "/" + id; //$NON-NLS-1$
   }
 }

@@ -30,7 +30,7 @@ import org.eclipse.m2e.core.internal.project.registry.ProjectRegistryRefreshJob;
  */
 public class MavenProjectManager {
 
-  public static final String STATE_FILENAME = "workspacestate.properties";
+  public static final String STATE_FILENAME = "workspacestate.properties"; //$NON-NLS-1$
   
   private final ProjectRegistryManager manager;
 

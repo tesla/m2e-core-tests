@@ -69,7 +69,7 @@ public class DefaultMavenDependencyResolver extends AbstractMavenDependencyResol
       if(plugin.isExtensions()) {
         ArtifactKey artifactKey = new ArtifactKey(plugin.getGroupId(), plugin.getArtifactId(), plugin.getVersion(),
             null);
-        requirements.add(MavenRequiredCapability.createMaven(artifactKey, "plugin", false));
+        requirements.add(MavenRequiredCapability.createMaven(artifactKey, "plugin", false)); //$NON-NLS-1$
       }
     }
 

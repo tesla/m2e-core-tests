@@ -23,12 +23,12 @@ public class MavenCapability extends Capability {
   /**
    * Regular Maven dependency as defined in <dependency/> pom.xml element.
    */
-  public static final String NS_MAVEN_ARTIFACT = "maven-artifact";
+  public static final String NS_MAVEN_ARTIFACT = "maven-artifact"; //$NON-NLS-1$
 
   /**
    * Maven parent dependency as defined in <parent/> pom.xml element.
    */
-  public static final String NS_MAVEN_PARENT = "maven-parent";
+  public static final String NS_MAVEN_PARENT = "maven-parent"; //$NON-NLS-1$
 
   private final String version;
 
@@ -42,7 +42,7 @@ public class MavenCapability extends Capability {
   }
 
   public String toString() {
-    return getVersionlessKey().toString() + "/" + version;
+    return getVersionlessKey().toString() + "/" + version; //$NON-NLS-1$
   }
 
   public int hashCode() {

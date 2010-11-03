@@ -96,23 +96,23 @@ public class MavenUpdateRequest {
   }
 
   public String toString() {
-    StringBuilder sb = new StringBuilder("[");
-    String sep = "";
+    StringBuilder sb = new StringBuilder("["); //$NON-NLS-1$
+    String sep = ""; //$NON-NLS-1$
     for(IFile pomFile : pomFiles) {
       sb.append(sep);
       sb.append(pomFile.getFullPath());
-      sep = ", ";
+      sep = ", "; //$NON-NLS-1$
     }
-    sb.append("]");
+    sb.append("]"); //$NON-NLS-1$
     
     if(offline) {
-      sb.append(" offline");
+      sb.append(" offline"); //$NON-NLS-1$
     }
     if(updateSnapshots) {
-      sb.append(" updateSnapshots");
+      sb.append(" updateSnapshots"); //$NON-NLS-1$
     }
     if(force) {
-      sb.append(" force");
+      sb.append(" force"); //$NON-NLS-1$
     }
     
     return sb.toString();

@@ -38,6 +38,7 @@ import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.core.MavenConsole;
 import org.eclipse.m2e.core.core.MavenLogger;
 import org.eclipse.m2e.core.embedder.IMavenConfiguration;
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.jobs.IBackgroundProcessingQueue;
 import org.eclipse.m2e.core.project.MavenUpdateRequest;
 
@@ -55,7 +56,7 @@ public class ProjectRegistryRefreshJob extends Job implements IResourceChangeLis
   private final MavenConsole console;
 
   public ProjectRegistryRefreshJob(ProjectRegistryManager manager, MavenConsole console, IMavenConfiguration mavenConfiguration) {
-    super("Updating Maven Dependencies");
+    super(Messages.ProjectRegistryRefreshJob_title);
     this.manager = manager;
     this.mavenConfiguration = mavenConfiguration;
     this.console = console;
@@ -71,7 +72,7 @@ public class ProjectRegistryRefreshJob extends Job implements IResourceChangeLis
   // Job
   
   public IStatus run(IProgressMonitor monitor) {
-    monitor.beginTask("Refreshing Maven model", IProgressMonitor.UNKNOWN);
+    monitor.beginTask(Messages.ProjectRegistryRefreshJob_task_refreshing, IProgressMonitor.UNKNOWN);
     ArrayList<MavenUpdateRequest> requests;
     synchronized(this.queue) {
       requests = new ArrayList<MavenUpdateRequest>(this.queue);
