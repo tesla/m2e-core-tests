@@ -320,13 +320,24 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     } else if(IIndex.SEARCH_ARTIFACT.equals(type)) {
       BooleanQuery bq = new BooleanQuery();
       
-      
       bq.add(getIndexer().constructQuery(ArtifactInfo.GROUP_ID, term), Occur.SHOULD);
       bq.add(getIndexer().constructQuery(ArtifactInfo.ARTIFACT_ID, term), Occur.SHOULD);
       bq.add(new PrefixQuery(new Term(ArtifactInfo.SHA1, term)), Occur.SHOULD);
       addClassifiersToQuery(bq, classifier);
       query = bq;
 
+    } else if(IIndex.SEARCH_PARENTS.equals(type)) {
+      if( term == null || "*".equals(term) || "".equals(term)) {
+        query = new TermQuery(new Term(ArtifactInfo.PACKAGING, "pom"));
+      } else {
+        BooleanQuery bq = new BooleanQuery();
+        bq.add(getIndexer().constructQuery(ArtifactInfo.GROUP_ID, term), Occur.SHOULD);
+        bq.add(getIndexer().constructQuery(ArtifactInfo.ARTIFACT_ID, term), Occur.SHOULD);
+        bq.add(new PrefixQuery(new Term(ArtifactInfo.SHA1, term)), Occur.SHOULD);
+        TermQuery tq = new TermQuery(new Term(ArtifactInfo.PACKAGING, "pom"));
+        query = new FilteredQuery(tq, new QueryWrapperFilter(bq));
+      }
+      
     } else if(IIndex.SEARCH_PLUGIN.equals(type)) {
       if("*".equals(term)) {
         query = new TermQuery(new Term(ArtifactInfo.PACKAGING, "maven-plugin"));

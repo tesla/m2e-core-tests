@@ -38,6 +38,11 @@ public interface IIndex {
 
   public static final String SEARCH_SHA1 = "sha1";
 
+  /**
+   * like SEARCH_ARTIFACT but will only return artifacts with packaging == pom
+   */
+  public static final String SEARCH_PARENTS = "parents";
+  
   // search classifiers
 
   public static final int SEARCH_JARS = 1 << 0;
