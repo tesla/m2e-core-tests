@@ -10,6 +10,8 @@ package org.eclipse.m2e.core.embedder;
 
 import java.io.Serializable;
 
+import org.eclipse.osgi.util.NLS;
+
 import org.apache.maven.artifact.Artifact;
 
 public class ArtifactKey implements Serializable {
@@ -106,12 +108,12 @@ public class ArtifactKey implements Serializable {
   
   private static String substring(String str, int start, int end) {
     String substring = str.substring(start, end);
-    return "".equals(substring)? null: substring;
+    return "".equals(substring)? null: substring; //$NON-NLS-1$
   }
 
   private static int nextColonIndex(String str, int pos) {
     int idx = str.indexOf(':', pos);
-    if (idx < 0) throw new IllegalArgumentException("Invalid portable string: " + str);
+    if (idx < 0) throw new IllegalArgumentException(NLS.bind("Invalid portable string: {0}", str));
     return idx;
   }
 

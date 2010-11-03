@@ -36,11 +36,11 @@ import org.eclipse.m2e.core.embedder.MavenRuntimeManager;
  */
 public class MavenEmbeddedRuntime implements MavenRuntime {
 
-  private static final String MAVEN_MAVEN_EMBEDDER_BUNDLE_ID = "org.eclipse.m2e.maven.runtime";
+  private static final String MAVEN_MAVEN_EMBEDDER_BUNDLE_ID = "org.eclipse.m2e.maven.runtime"; //$NON-NLS-1$
 
   private static final String MAVEN_EXECUTOR_CLASS = org.apache.maven.cli.MavenCli.class.getName();
 
-  private static final String PLEXUS_CLASSWORLD_NAME = "plexus.core";
+  private static final String PLEXUS_CLASSWORLD_NAME = "plexus.core"; //$NON-NLS-1$
 
   private static String[] LAUNCHER_CLASSPATH;
   private static String[] CLASSPATH;
@@ -89,14 +89,14 @@ public class MavenEmbeddedRuntime implements MavenRuntime {
       List<String> lcp = new ArrayList<String>();
 
       @SuppressWarnings("unchecked")
-      Enumeration<URL> entries = bundle.findEntries("/", "*", true);
+      Enumeration<URL> entries = bundle.findEntries("/", "*", true); //$NON-NLS-1$ //$NON-NLS-2$
       while(entries.hasMoreElements()) {
         URL url = entries.nextElement();
         String path = url.getPath();
-        if(path.endsWith(".jar") || path.endsWith("bin/")) {
+        if(path.endsWith(".jar") || path.endsWith("bin/")) { //$NON-NLS-1$ //$NON-NLS-2$
           try {
             String file = FileLocator.toFileURL(url).getFile();
-            if (file.contains("plexus-classworlds")) {
+            if (file.contains("plexus-classworlds")) { //$NON-NLS-1$
               lcp.add(file);
             } else {
               cp.add(file);
@@ -128,7 +128,7 @@ public class MavenEmbeddedRuntime implements MavenRuntime {
     Bundle embedder = Platform.getBundle(MAVEN_MAVEN_EMBEDDER_BUNDLE_ID);
 
     StringBuilder sb = new StringBuilder();
-    sb.append("Embedded (").append(getVersion());
+    sb.append("Embedded (").append(getVersion()); //$NON-NLS-1$
     if (embedder != null) {
       String version = (String) embedder.getHeaders().get(Constants.BUNDLE_VERSION);
       sb.append('/').append(version);
@@ -139,7 +139,7 @@ public class MavenEmbeddedRuntime implements MavenRuntime {
   }
 
   public String getVersion() {
-    return "3.0-SNAPSHOT"; // TODO may as well discover
+    return "3.0-SNAPSHOT"; // TODO may as well discover //$NON-NLS-1$
   }
 
 }

@@ -15,6 +15,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.m2e.core.MavenImages;
 import org.eclipse.m2e.core.MavenPlugin;
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.internal.preferences.MavenPreferenceConstants;
 
 
@@ -32,7 +33,7 @@ public class MavenDebugOutputAction extends Action {
   };
 
   public MavenDebugOutputAction() {
-    setToolTipText("Debug Output");
+    setToolTipText(Messages.MavenDebugOutputAction_0);
     setImageDescriptor(MavenImages.DEBUG);
     
     getPreferenceStore().addPropertyChangeListener(listener);

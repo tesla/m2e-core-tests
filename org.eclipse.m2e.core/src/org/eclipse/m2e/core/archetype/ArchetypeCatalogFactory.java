@@ -13,6 +13,7 @@ import java.util.Properties;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.osgi.util.NLS;
 
 import org.apache.maven.archetype.Archetype;
 import org.apache.maven.archetype.catalog.ArchetypeCatalog;
@@ -22,6 +23,7 @@ import org.apache.maven.archetype.source.ArchetypeDataSourceException;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.core.MavenLogger;
+import org.eclipse.m2e.core.internal.Messages;
 
 
 /**
@@ -66,18 +68,18 @@ public abstract class ArchetypeCatalogFactory {
    * Factory for Nexus Indexer ArchetypeCatalog
    */
   public static class NexusIndexerCatalogFactory extends ArchetypeCatalogFactory {
-    public static final String ID = "nexusIndexer";
+    public static final String ID = "nexusIndexer"; //$NON-NLS-1$
 
     public NexusIndexerCatalogFactory() {
-      super(ID, "Nexus Indexer", false);
+      super(ID, Messages.ArchetypeCatalogFactory_indexer_catalog, false);
     }
 
     public ArchetypeCatalog getArchetypeCatalog() throws CoreException {
       try {
-        ArchetypeDataSource source = MavenPlugin.getDefault().getArchetypeDataSource("nexus");
+        ArchetypeDataSource source = MavenPlugin.getDefault().getArchetypeDataSource("nexus"); //$NON-NLS-1$
         return source.getArchetypeCatalog(new Properties());
       } catch(ArchetypeDataSourceException ex) {
-        String msg = "Error looking up archetype catalog; " + ex.getMessage();
+        String msg = NLS.bind(Messages.ArchetypeCatalogFactory_error_missing_catalog, ex.getMessage());
         MavenLogger.log(msg, ex);
         throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
       }
@@ -89,10 +91,10 @@ public abstract class ArchetypeCatalogFactory {
    * Factory for internal ArchetypeCatalog
    */
   public static class InternalCatalogFactory extends ArchetypeCatalogFactory {
-    public static final String ID = "internal";
+    public static final String ID = "internal"; //$NON-NLS-1$
 
     public InternalCatalogFactory() {
-      super(ID, "Internal", false);
+      super(ID, Messages.ArchetypeCatalogFactory_internal, false);
     }
 
     public ArchetypeCatalog getArchetypeCatalog() {
@@ -104,10 +106,10 @@ public abstract class ArchetypeCatalogFactory {
    * Factory for default local ArchetypeCatalog
    */
   public static class DefaultLocalCatalogFactory extends ArchetypeCatalogFactory {
-    public static final String ID = "defaultLocal";
+    public static final String ID = "defaultLocal"; //$NON-NLS-1$
 
     public DefaultLocalCatalogFactory() {
-      super(ID, "Default Local", false);
+      super(ID, Messages.ArchetypeCatalogFactory_default_local, false);
     }
 
     public ArchetypeCatalog getArchetypeCatalog() {
@@ -121,7 +123,7 @@ public abstract class ArchetypeCatalogFactory {
   public static class LocalCatalogFactory extends ArchetypeCatalogFactory {
 
     public LocalCatalogFactory(String path, String description, boolean editable) {
-      super(path, description == null || description.trim().length() == 0 ? "Local " + path : description, editable);
+      super(path, description == null || description.trim().length() == 0 ? NLS.bind(Messages.ArchetypeCatalogFactory_local, path) : description, editable);
     }
 
     public ArchetypeCatalog getArchetypeCatalog() {
@@ -137,7 +139,7 @@ public abstract class ArchetypeCatalogFactory {
     private String repositoryUrl = null;
     
     public RemoteCatalogFactory(String url, String description, boolean editable) {
-      super(url, description == null || description.trim().length() == 0 ? "Remote " + url : description, editable);
+      super(url, description == null || description.trim().length() == 0 ? NLS.bind(Messages.ArchetypeCatalogFactory_remote, url) : description, editable);
       repositoryUrl = parseCatalogUrl(url);
     }
 
@@ -151,13 +153,13 @@ public abstract class ArchetypeCatalogFactory {
         return null;
       }
       int length = url.length();
-      if (length > 1 && url.endsWith("/"))
+      if (length > 1 && url.endsWith("/")) //$NON-NLS-1$
       {
         return url.substring(0, url.length()-1);
       }
-      int idx = url.lastIndexOf("/");
+      int idx = url.lastIndexOf("/"); //$NON-NLS-1$
       idx = (idx>0)?idx:0; 
-      if (url.lastIndexOf(".") >= idx) {
+      if (url.lastIndexOf(".") >= idx) { //$NON-NLS-1$
         //Assume last fragment of the url is a file, let's keep its parent folder
         return url.substring(0, idx);
       }

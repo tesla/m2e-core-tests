@@ -11,6 +11,7 @@ package org.eclipse.m2e.core.internal.lifecycle;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.project.configurator.AbstractProjectConfigurator;
 
 /**
@@ -24,7 +25,7 @@ public class ProjectConfiguratorsTableContentProvider implements IStructuredCont
   }
   
   protected String[] getNoConfigMsg(){
-    return new String[]{"No Project Configurators"};
+    return new String[]{Messages.ProjectConfiguratorsTableContentProvider_no_configs};
   }
   /* (non-Javadoc)
    * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)

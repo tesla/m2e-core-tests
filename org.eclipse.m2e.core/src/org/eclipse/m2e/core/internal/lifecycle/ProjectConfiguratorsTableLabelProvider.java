@@ -37,11 +37,11 @@ public class ProjectConfiguratorsTableLabelProvider implements ITableLabelProvid
    */
   public String getColumnText(Object element, int columnIndex) {
     if(element == null){
-      return "";
+      return ""; //$NON-NLS-1$
     } else if(element instanceof AbstractProjectConfigurator){
       return columnIndex == 0 ? ((AbstractProjectConfigurator)element).getName() : ((AbstractProjectConfigurator)element).getId();
     } 
-    return columnIndex == 0 ? element.toString() : "";
+    return columnIndex == 0 ? element.toString() : ""; //$NON-NLS-1$
   }
 
   /* (non-Javadoc)

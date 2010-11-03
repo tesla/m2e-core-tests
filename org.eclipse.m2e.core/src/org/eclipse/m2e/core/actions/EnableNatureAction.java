@@ -35,6 +35,7 @@ import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.core.MavenLogger;
 import org.eclipse.m2e.core.embedder.IMavenConfiguration;
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.project.IProjectConfigurationManager;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.core.wizards.MavenPomWizard;
@@ -42,11 +43,11 @@ import org.eclipse.m2e.core.wizards.MavenPomWizard;
 
 public class EnableNatureAction implements IObjectActionDelegate, IExecutableExtension {
 
-  public static final String ID = "org.eclipse.m2e.enableNatureAction";
+  public static final String ID = "org.eclipse.m2e.enableNatureAction"; //$NON-NLS-1$
 
-  static final String ID_WORKSPACE = "org.eclipse.m2e.enableWorkspaceResolutionAction";
+  static final String ID_WORKSPACE = "org.eclipse.m2e.enableWorkspaceResolutionAction"; //$NON-NLS-1$
   
-  static final String ID_MODULES = "org.eclipse.m2e.enableModulesAction";
+  static final String ID_MODULES = "org.eclipse.m2e.enableModulesAction"; //$NON-NLS-1$
   
   private boolean workspaceProjects = true;
   
@@ -103,18 +104,18 @@ public class EnableNatureAction implements IObjectActionDelegate, IExecutableExt
         Shell shell = workbench.getActiveWorkbenchWindow().getShell();
         WizardDialog wizardDialog = new WizardDialog(shell, wizard);
         wizardDialog.create();
-        wizardDialog.getShell().setText("Create new POM");
+        wizardDialog.getShell().setText(Messages.EnableNatureAction_wizard_shell);
         if(wizardDialog.open() == Window.CANCEL) {
           return;
         }
       }
-      Job job = new Job("Enabling Maven Dependency Management") {
+      Job job = new Job(Messages.EnableNatureAction_job_enable) {
   
         protected IStatus run(IProgressMonitor monitor) {
           try {
             ResolverConfiguration configuration = new ResolverConfiguration();
             configuration.setResolveWorkspaceProjects(workspaceProjects);
-            configuration.setActiveProfiles("");
+            configuration.setActiveProfiles(""); //$NON-NLS-1$
   
             boolean hasMavenNature = project.hasNature(IMavenConstants.NATURE_ID);
   

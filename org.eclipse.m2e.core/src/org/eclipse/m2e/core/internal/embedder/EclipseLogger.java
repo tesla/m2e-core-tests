@@ -8,10 +8,13 @@
 
 package org.eclipse.m2e.core.internal.embedder;
 
+import org.eclipse.osgi.util.NLS;
+
 import org.codehaus.plexus.logging.Logger;
 
 import org.eclipse.m2e.core.core.MavenConsole;
 import org.eclipse.m2e.core.embedder.IMavenConfiguration;
+import org.eclipse.m2e.core.internal.Messages;
 
 class EclipseLogger implements Logger {
   private MavenConsole console;
@@ -32,61 +35,61 @@ class EclipseLogger implements Logger {
   
   public void debug( String msg ) {
     if (isDebugEnabled()) {
-      out("[DEBUG] "+msg);
+      out(NLS.bind(Messages.EclipseLogger_debug1,msg));
     }
   }
 
   public void debug( String msg, Throwable t) {
     if (isDebugEnabled()) {
-      out( "[DEBUG] "+msg+" "+t.getMessage());
+      out( NLS.bind(Messages.EclipseLogger_debug2, msg, t.getMessage()));
     }
   }
 
   public void info( String msg ) {
     if (isInfoEnabled()) {
-      out( "[INFO] "+msg);
+      out( NLS.bind(Messages.EclipseLogger_info1, msg));
     }
   }
 
   public void info( String msg, Throwable t ) {
     if (isInfoEnabled()) {
-      out( "[INFO] "+msg+" "+t.getMessage());
+      out( NLS.bind(Messages.EclipseLogger_info2, msg, t.getMessage()));
     }
   }
 
   public void warn( String msg ) {
     if (isWarnEnabled()) {
-      out("[WARN] "+msg);
+      out(NLS.bind(Messages.EclipseLogger_warn1, msg));
     }
   }
   
   public void warn( String msg, Throwable t ) {
     if (isWarnEnabled()) {
-      out( "[WARN] "+msg+" "+t.getMessage());
+      out( NLS.bind(Messages.EclipseLogger_warn2, msg, t.getMessage()));
     }
   }
   
   public void fatalError( String msg ) {
     if (isFatalErrorEnabled()) {
-      outError( "[FATAL ERROR] "+msg);
+      outError(NLS.bind(Messages.EclipseLogger_fatal1, msg));
     }
   }
   
   public void fatalError( String msg, Throwable t ) {
     if (isFatalErrorEnabled()) {
-      outError( "[FATAL ERROR] "+msg+" "+t.getMessage());
+      outError( NLS.bind(Messages.EclipseLogger_fatal2, msg, t.getMessage()));
     }
   }
   
   public void error( String msg ) {
     if (isErrorEnabled()) {
-      outError( "[ERROR] "+msg);
+      outError(NLS.bind(Messages.EclipseLogger_error1, msg));
     }
   }
   
   public void error( String msg, Throwable t ) {
     if (isErrorEnabled()) {
-      outError( "[ERROR] "+msg+" "+t.getMessage());
+      outError( NLS.bind(Messages.EclipseLogger_error2, msg, t.getMessage()));
     }
   }
   
@@ -122,7 +125,7 @@ class EclipseLogger implements Logger {
   }
 
   public String getName() {
-    return "m2e console logger";
+    return Messages.EclipseLogger_name;
   }
 
 }

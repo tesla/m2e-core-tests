@@ -91,14 +91,14 @@ public class MojoExecutionProjectConfigurator extends AbstractProjectConfigurato
 
     p = c + 1;
     String goalsStr = substring(str, p, str.length());
-    Set<String> goals = goalsStr != null? new HashSet<String>(Arrays.asList(goalsStr.split(","))): null;
+    Set<String> goals = goalsStr != null? new HashSet<String>(Arrays.asList(goalsStr.split(","))): null; //$NON-NLS-1$
 
     return new MojoExecutionProjectConfigurator(groupId, artifactId, version, goals, runOnIncremental);
   }
 
   private static String substring(String str, int start, int end) {
     String substring = str.substring(start, end);
-    return "".equals(substring) ? null : substring;
+    return "".equals(substring) ? null : substring; //$NON-NLS-1$
   }
 
   private static int nextColonIndex(String str, int pos) {

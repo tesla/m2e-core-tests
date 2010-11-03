@@ -11,10 +11,12 @@ package org.eclipse.m2e.core.internal.embedder;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.osgi.util.NLS;
 
 import org.apache.maven.wagon.WagonConstants;
 
 import org.eclipse.m2e.core.core.MavenConsole;
+import org.eclipse.m2e.core.internal.Messages;
 
 
 /**
@@ -32,7 +34,7 @@ abstract class AbstractTransferListenerAdapter {
 
   protected long complete = 0;
 
-  private static final String[] units = {"B", "KB", "MB"};
+  private static final String[] units = {Messages.AbstractTransferListenerAdapter_byte, Messages.AbstractTransferListenerAdapter_kb, Messages.AbstractTransferListenerAdapter_mb};
 
   protected AbstractTransferListenerAdapter(MavenImpl maven, IProgressMonitor monitor, MavenConsole console) {
     this.maven = maven;
@@ -58,14 +60,14 @@ abstract class AbstractTransferListenerAdapter {
   }
 
   protected void transferStarted(String artifactUrl) {
-    console.logMessage("Downloading " + artifactUrl);
+    console.logMessage(NLS.bind("Downloading {0}", artifactUrl));
     // monitor.beginTask("0% "+e.getWagon().getRepository()+"/"+e.getResource().getName(), IProgressMonitor.UNKNOWN);
-    monitor.subTask("0% " + artifactUrl);
+    monitor.subTask(Messages.AbstractTransferListenerAdapter_4 + artifactUrl);
   }
 
   protected void transferProgress(String artifactUrl, long total, int length) {
     if(monitor.isCanceled()) {
-      throw new OperationCanceledException("Transfer is canceled");
+      throw new OperationCanceledException(Messages.AbstractTransferListenerAdapter_cancelled);
     }
 
     complete += length;
@@ -88,15 +90,15 @@ abstract class AbstractTransferListenerAdapter {
   }
 
   protected void transferCompleted(String artifactUrl) {
-    console.logMessage("Downloaded " + artifactUrl);
+    console.logMessage(NLS.bind("Downloaded {0}", artifactUrl));
 
     // monitor.subTask("100% "+e.getWagon().getRepository()+"/"+e.getResource().getName());
-    monitor.subTask("");
+    monitor.subTask(""); //$NON-NLS-1$
   }
 
   protected void transferError(String artifactUrl, Exception exception) {
-    console.logMessage("Unable to download " + artifactUrl + ": " + exception);
-    monitor.subTask("error " + artifactUrl);
+    console.logMessage(NLS.bind("Unable to download {0} : {1}", artifactUrl, exception));
+    monitor.subTask(NLS.bind(Messages.AbstractTransferListenerAdapter_subtask, artifactUrl));
   }
 
 }

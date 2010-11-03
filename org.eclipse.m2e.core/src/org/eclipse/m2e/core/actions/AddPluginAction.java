@@ -22,12 +22,13 @@ import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.embedder.MavenModelManager;
 import org.eclipse.m2e.core.index.IIndex;
 import org.eclipse.m2e.core.index.IndexedArtifactFile;
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.ui.dialogs.MavenRepositorySearchDialog;
 
 
 public class AddPluginAction extends MavenActionSupport implements IWorkbenchWindowActionDelegate {
 
-  public static final String ID = "org.eclipse.m2e.addPluginAction";
+  public static final String ID = "org.eclipse.m2e.addPluginAction"; //$NON-NLS-1$
 
   public void run(IAction action) {
     IFile file = getPomFileFromPomEditorOrViewSelection();
@@ -36,7 +37,7 @@ public class AddPluginAction extends MavenActionSupport implements IWorkbenchWin
       return;
     }
 
-    MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), "Add Plugin", IIndex.SEARCH_PLUGIN, Collections.<ArtifactKey> emptySet());
+    MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), Messages.AddPluginAction_searchDialog_title, IIndex.SEARCH_PLUGIN, Collections.<ArtifactKey> emptySet());
     if(dialog.open() == Window.OK) {
       final IndexedArtifactFile indexedArtifactFile = (IndexedArtifactFile) dialog.getFirstResult();
       if(indexedArtifactFile != null) {

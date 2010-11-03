@@ -52,7 +52,7 @@ public class ConfigurationException extends Exception {
    * @param line The configuration line where the problem occurred.
    */
   public ConfigurationException(String msg, int lineNo, String line) {
-    super(msg + " (" + lineNo + "): " + line);
+    super(msg + " (" + lineNo + "): " + line); //$NON-NLS-1$ //$NON-NLS-2$
   }
 
   public ConfigurationException(Exception cause) {

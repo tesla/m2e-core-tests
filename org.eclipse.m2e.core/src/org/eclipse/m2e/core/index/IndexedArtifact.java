@@ -72,14 +72,14 @@ public class IndexedArtifact{
   }
 
   public String getPackageName(){
-    if(packageName != null && packageName.startsWith(".") && packageName.length()>1){ 
+    if(packageName != null && packageName.startsWith(".") && packageName.length()>1){  //$NON-NLS-1$
       return packageName.substring(1);
     } 
     return packageName;
   }
 
   public String toString() {
-    StringBuffer sb = new StringBuffer("\n" + getClassname() + "  " + packageName + "  " + getGroupId() + " : " + getArtifactId());
+    StringBuffer sb = new StringBuffer("\n" + getClassname() + "  " + packageName + "  " + getGroupId() + " : " + getArtifactId()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
     return sb.toString();
   }
 

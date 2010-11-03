@@ -46,39 +46,39 @@ import org.eclipse.m2e.core.project.configurator.ILifecycleMapping;
  */
 public class ExtensionReader {
 
-  public static final String EXTENSION_ARCHETYPES = IMavenConstants.PLUGIN_ID + ".archetypeCatalogs";
+  public static final String EXTENSION_ARCHETYPES = IMavenConstants.PLUGIN_ID + ".archetypeCatalogs"; //$NON-NLS-1$
 
-  public static final String EXTENSION_PROJECT_CONFIGURATORS = IMavenConstants.PLUGIN_ID + ".projectConfigurators";
+  public static final String EXTENSION_PROJECT_CONFIGURATORS = IMavenConstants.PLUGIN_ID + ".projectConfigurators"; //$NON-NLS-1$
 
-  public static final String EXTENSION_LIFECYCLE_MAPPINGS = IMavenConstants.PLUGIN_ID + ".lifecycleMappings";
+  public static final String EXTENSION_LIFECYCLE_MAPPINGS = IMavenConstants.PLUGIN_ID + ".lifecycleMappings"; //$NON-NLS-1$
 
-  public static final String EXTENSION_DEFAULT_LIFECYCLE_MAPPINGS = IMavenConstants.PLUGIN_ID + ".defaultLifecycleMappings";
+  public static final String EXTENSION_DEFAULT_LIFECYCLE_MAPPINGS = IMavenConstants.PLUGIN_ID + ".defaultLifecycleMappings"; //$NON-NLS-1$
 
-  public static final String EXTENSION_PROJECT_CHANGED_EVENT_LISTENERS = IMavenConstants.PLUGIN_ID + ".mavenProjectChangedListeners";
+  public static final String EXTENSION_PROJECT_CHANGED_EVENT_LISTENERS = IMavenConstants.PLUGIN_ID + ".mavenProjectChangedListeners"; //$NON-NLS-1$
 
-  private static final String ELEMENT_LOCAL_ARCHETYPE = "local";
+  private static final String ELEMENT_LOCAL_ARCHETYPE = "local"; //$NON-NLS-1$
 
-  private static final String ELEMENT_REMOTE_ARCHETYPE = "remote";
+  private static final String ELEMENT_REMOTE_ARCHETYPE = "remote"; //$NON-NLS-1$
 
-  private static final String ATTR_ID = "id";
+  private static final String ATTR_ID = "id"; //$NON-NLS-1$
 
-  private static final String ATTR_NAME = "name";
+  private static final String ATTR_NAME = "name"; //$NON-NLS-1$
 
-  private static final String ATTR_URL = "url";
+  private static final String ATTR_URL = "url"; //$NON-NLS-1$
 
-  private static final String ATTR_DESCRIPTION = "description";
+  private static final String ATTR_DESCRIPTION = "description"; //$NON-NLS-1$
 
-  private static final String ELEMENT_CONFIGURATOR = "configurator";
+  private static final String ELEMENT_CONFIGURATOR = "configurator"; //$NON-NLS-1$
 
-  private static final String ELEMENT_LIFECYCLE_MAPPING = "lifecycleMapping";
+  private static final String ELEMENT_LIFECYCLE_MAPPING = "lifecycleMapping"; //$NON-NLS-1$
 
-  private static final String ELEMENT_DEFAULT_LIFECYCLE_MAPPING = "defaultLifecycleMapping";
+  private static final String ELEMENT_DEFAULT_LIFECYCLE_MAPPING = "defaultLifecycleMapping"; //$NON-NLS-1$
 
-  private static final String ELEMENT_LISTENER = "listener";
+  private static final String ELEMENT_LISTENER = "listener"; //$NON-NLS-1$
 
-  private static final String ATTR_PACKAGING = "packaging";
+  private static final String ATTR_PACKAGING = "packaging"; //$NON-NLS-1$
 
-  private static final String ATTR_LIFECYCLE_MAPPING_ID = "lifecycleMappingId";
+  private static final String ATTR_LIFECYCLE_MAPPING_ID = "lifecycleMappingId"; //$NON-NLS-1$
 
   public static List<ArchetypeCatalogFactory> readArchetypeExtensions() {
     List<ArchetypeCatalogFactory> archetypeCatalogs = new ArrayList<ArchetypeCatalogFactory>();
@@ -113,7 +113,7 @@ public class ExtensionReader {
             String description = element.getAttribute(ATTR_DESCRIPTION);
             String url = catalogUrl.toString();
             // XXX ARCHETYPE-161: RemoteCatalogArchetypeDataSource don't allow to download arbitrary urls
-            return new ArchetypeCatalogFactory.RemoteCatalogFactory(url.substring(0, url.lastIndexOf("/")),
+            return new ArchetypeCatalogFactory.RemoteCatalogFactory(url.substring(0, url.lastIndexOf("/")), //$NON-NLS-1$
                 description, false);
           }
         }
@@ -242,7 +242,7 @@ public class ExtensionReader {
         for(IConfigurationElement element : elements) {
           if(element.getName().equals(ELEMENT_LISTENER)) {
             try {
-              listeners.add( (IMavenProjectChangedListener) element.createExecutableExtension("class") );
+              listeners.add( (IMavenProjectChangedListener) element.createExecutableExtension("class") ); //$NON-NLS-1$
             } catch(CoreException ex) {
               MavenLogger.log(ex);
             }

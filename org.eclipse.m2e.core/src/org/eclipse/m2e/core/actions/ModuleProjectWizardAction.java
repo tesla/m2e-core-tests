@@ -26,7 +26,7 @@ public class ModuleProjectWizardAction implements IObjectActionDelegate {
 
   /** action id */
   public static final String ID =
-    "org.eclipse.m2e.actions.moduleProjectWizardAction";
+    "org.eclipse.m2e.actions.moduleProjectWizardAction"; //$NON-NLS-1$
   
   /** the current selection */
   private IStructuredSelection selection;

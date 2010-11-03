@@ -27,6 +27,7 @@ import com.ning.http.client.Realm;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.osgi.util.NLS;
 
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
@@ -40,6 +41,7 @@ import org.apache.maven.wagon.repository.Repository;
 import org.sonatype.nexus.index.updater.AbstractResourceFetcher;
 
 import org.eclipse.m2e.core.MavenPlugin;
+import org.eclipse.m2e.core.internal.Messages;
 
 
 /**
@@ -84,7 +86,7 @@ class AsyncFetcher extends AbstractResourceFetcher {
     ProxyServer proxyServer = null;
 
     if(proxyInfo != null) {
-      ProxyServer.Protocol protocol = "https".equalsIgnoreCase(proxyInfo.getType()) ? ProxyServer.Protocol.HTTPS
+      ProxyServer.Protocol protocol = "https".equalsIgnoreCase(proxyInfo.getType()) ? ProxyServer.Protocol.HTTPS //$NON-NLS-1$
           : ProxyServer.Protocol.HTTP;
       proxyServer = new ProxyServer(protocol, proxyInfo.getHost(), proxyInfo.getPort(), proxyInfo.getUserName(),
           proxyInfo.getPassword());
@@ -95,7 +97,7 @@ class AsyncFetcher extends AbstractResourceFetcher {
 
   private ProxyServer getProxyServer(ProxyInfo proxyInfo, String url) {
     if(proxyInfo != null) {
-      Repository repo = new Repository("id", url);
+      Repository repo = new Repository("id", url); //$NON-NLS-1$
       if(!ProxyUtils.validateNonProxyHosts(proxyInfo, repo.getHost())) {
         return toProxyServer(proxyInfo);
       }
@@ -105,7 +107,7 @@ class AsyncFetcher extends AbstractResourceFetcher {
 
   public void connect(String id, String url) {
     AsyncHttpClientConfig.Builder configBuilder = new AsyncHttpClientConfig.Builder();
-    configBuilder.setUserAgent("M2Eclipse/" + MavenPlugin.getQualifiedVersion());
+    configBuilder.setUserAgent("M2Eclipse/" + MavenPlugin.getQualifiedVersion()); //$NON-NLS-1$
     configBuilder.setConnectionTimeoutInMs(15 * 1000);
     configBuilder.setRequestTimeoutInMs(60 * 1000);
     configBuilder.setCompressionEnabled(true);
@@ -113,7 +115,7 @@ class AsyncFetcher extends AbstractResourceFetcher {
 
     httpClient = new AsyncHttpClient(configBuilder.build());
 
-    baseUrl = url.endsWith("/") ? url : (url + '/');
+    baseUrl = url.endsWith("/") ? url : (url + '/'); //$NON-NLS-1$
     authRealm = toRealm(authInfo);
     proxyServer = getProxyServer(proxyInfo, url);
   }
@@ -141,7 +143,7 @@ class AsyncFetcher extends AbstractResourceFetcher {
   public InputStream retrieve(String name) throws IOException, FileNotFoundException {
     String url = buildUrl(baseUrl, name);
 
-    monitor.subTask("Fetching " + url);
+    monitor.subTask(NLS.bind(Messages.AsyncFetcher_task_fetching, url));
 
     PipedErrorInputStream pis = new PipedErrorInputStream();
 
@@ -153,7 +155,7 @@ class AsyncFetcher extends AbstractResourceFetcher {
   private static String buildUrl(String baseUrl, String resourceName) {
     String url = baseUrl;
 
-    if(resourceName.startsWith("/")) {
+    if(resourceName.startsWith("/")) { //$NON-NLS-1$
       url += resourceName.substring(1);
     } else {
       url += resourceName;
@@ -222,7 +224,7 @@ class AsyncFetcher extends AbstractResourceFetcher {
 
     private STATE checkCancel() {
       if(monitor.isCanceled()) {
-        finish(new IOException("transfer has been cancelled by user"));
+        finish(new IOException(Messages.AsyncFetcher_error_cancelled));
         return STATE.ABORT;
       }
       return STATE.CONTINUE;
@@ -236,7 +238,7 @@ class AsyncFetcher extends AbstractResourceFetcher {
       content.writeTo(pos);
       if(total > 0) {
         transferred += bytes;
-        monitor.subTask("Fetching " + url + " (" + transferred * 100 / total + "%)");
+        monitor.subTask(NLS.bind(Messages.AsyncFetcher_task_fetching2,url,  transferred * 100 / total));
       }
       return STATE.CONTINUE;
     }
@@ -246,7 +248,7 @@ class AsyncFetcher extends AbstractResourceFetcher {
         return STATE.ABORT;
       }
       try {
-        total = Long.parseLong(headers.getHeaders().getFirstValue("Content-Length"));
+        total = Long.parseLong(headers.getHeaders().getFirstValue("Content-Length")); //$NON-NLS-1$
       } catch(Exception e) {
         total = -1;
       }
@@ -255,7 +257,7 @@ class AsyncFetcher extends AbstractResourceFetcher {
 
     public STATE onStatusReceived(HttpResponseStatus status) throws Exception {
       if(status.getStatusCode() != HttpURLConnection.HTTP_OK) {
-        finish(new IOException("Server returned status code " + status.getStatusCode() + ": " + status.getStatusText()));
+        finish(new IOException(NLS.bind(Messages.AsyncFetcher_error_server, status.getStatusCode(), status.getStatusText())));
         return STATE.ABORT;
       }
       if(checkCancel() == STATE.ABORT) {
@@ -265,9 +267,9 @@ class AsyncFetcher extends AbstractResourceFetcher {
     }
 
     public String onCompleted() throws Exception {
-      monitor.subTask("");
+      monitor.subTask(""); //$NON-NLS-1$
       finish(null);
-      return "";
+      return ""; //$NON-NLS-1$
     }
 
     public void onThrowable(Throwable t) {

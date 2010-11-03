@@ -35,6 +35,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.osgi.util.NLS;
 
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
@@ -91,6 +92,7 @@ import org.eclipse.m2e.core.index.IndexListener;
 import org.eclipse.m2e.core.index.IndexManager;
 import org.eclipse.m2e.core.index.IndexedArtifact;
 import org.eclipse.m2e.core.index.IndexedArtifactFile;
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.internal.index.IndexUpdaterJob.IndexCommand;
 import org.eclipse.m2e.core.internal.repository.IRepositoryIndexer;
 import org.eclipse.m2e.core.project.IMavenProjectChangedListener;
@@ -107,12 +109,12 @@ import org.eclipse.m2e.core.repository.IRepositoryRegistry;
 public class NexusIndexManager implements IndexManager, IMavenProjectChangedListener, IRepositoryIndexer {
 
   /** Field separator */
-  public static final String FS = "|";
+  public static final String FS = "|"; //$NON-NLS-1$
 
-  public static final Pattern FS_PATTERN = Pattern.compile( Pattern.quote( "|" ) );
+  public static final Pattern FS_PATTERN = Pattern.compile( Pattern.quote( "|" ) ); //$NON-NLS-1$
 
   /** Non available value */
-  public static final String NA = "NA";
+  public static final String NA = "NA"; //$NON-NLS-1$
 
   private final GavCalculator gavCalculator = new M2GavCalculator();
 
@@ -184,7 +186,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     this.console = console;
     this.projectManager = projectManager;
     this.repositoryRegistry = repositoryRegistry;
-    this.baseIndexDir = new File(stateDir, "nexus");
+    this.baseIndexDir = new File(stateDir, "nexus"); //$NON-NLS-1$
 
     this.maven = MavenPlugin.getDefault().getMaven();
     this.indexUpdater = MavenPlugin.getDefault().getIndexUpdater();
@@ -214,7 +216,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
         fullCreators.add(mavenArchetype);
       } catch(ComponentLookupException ce) {
         String msg = "Error looking up component ";
-        console.logError(msg + "; " + ce.getMessage());
+        console.logError(msg + "; " + ce.getMessage()); //$NON-NLS-1$
         MavenLogger.log(msg, ce);
 
       }
@@ -261,7 +263,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     } catch(Exception ex) {
       String msg = "Illegal artifact coordinate " + ex.getMessage();
       MavenLogger.log(msg, ex);
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Search error", ex));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, Messages.NexusIndexManager_error_search, ex));
     } 
     return null;
   }
@@ -271,7 +273,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       ArtifactInfo artifactInfo = getIndexer().identify(file);
       return artifactInfo==null ? null : getIndexedArtifactFile(artifactInfo);
     } catch(IOException ex) {
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Search error", ex));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, Messages.NexusIndexManager_error_search, ex));
     } 
   }
   
@@ -291,17 +293,17 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     boolean includeJavaDocs = (classifier & IIndex.SEARCH_JAVADOCS) > 0;
     TermQuery tq = null;
     if(!includeJavaDocs){
-      tq = new TermQuery(new Term(ArtifactInfo.CLASSIFIER, "javadoc"));
+      tq = new TermQuery(new Term(ArtifactInfo.CLASSIFIER, "javadoc")); //$NON-NLS-1$
       bq.add(tq, Occur.MUST_NOT);
     }
     boolean includeSources = (classifier & IIndex.SEARCH_SOURCES) > 0;
     if(!includeSources){
-      tq = new TermQuery(new Term(ArtifactInfo.CLASSIFIER, "sources"));
+      tq = new TermQuery(new Term(ArtifactInfo.CLASSIFIER, "sources")); //$NON-NLS-1$
       bq.add(tq, Occur.MUST_NOT);
     }
     boolean includeTests = (classifier & IIndex.SEARCH_TESTS) > 0;
     if(!includeTests){
-      tq = new TermQuery(new Term(ArtifactInfo.CLASSIFIER, "tests"));
+      tq = new TermQuery(new Term(ArtifactInfo.CLASSIFIER, "tests")); //$NON-NLS-1$
       bq.add(tq, Occur.MUST_NOT);
     }
   }
@@ -311,7 +313,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
   public Map<String, IndexedArtifact> search(IRepository repository, String term, String type, int classifier) throws CoreException {
     Query query;
     if(IIndex.SEARCH_CLASS_NAME.equals(type)) {
-      query = getIndexer().constructQuery(ArtifactInfo.NAMES, term + "$");
+      query = getIndexer().constructQuery(ArtifactInfo.NAMES, term + "$"); //$NON-NLS-1$
       
     } else if(IIndex.SEARCH_GROUP.equals(type)) {
       query = new TermQuery(new Term(ArtifactInfo.GROUP_ID, term));
@@ -327,40 +329,40 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       query = bq;
 
     } else if(IIndex.SEARCH_PARENTS.equals(type)) {
-      if( term == null || "*".equals(term) || "".equals(term)) {
-        query = new TermQuery(new Term(ArtifactInfo.PACKAGING, "pom"));
+      if( term == null || "*".equals(term) || "".equals(term)) { //$NON-NLS-1$ //$NON-NLS-2$
+        query = new TermQuery(new Term(ArtifactInfo.PACKAGING, "pom")); //$NON-NLS-1$
       } else {
         BooleanQuery bq = new BooleanQuery();
         bq.add(getIndexer().constructQuery(ArtifactInfo.GROUP_ID, term), Occur.SHOULD);
         bq.add(getIndexer().constructQuery(ArtifactInfo.ARTIFACT_ID, term), Occur.SHOULD);
         bq.add(new PrefixQuery(new Term(ArtifactInfo.SHA1, term)), Occur.SHOULD);
-        TermQuery tq = new TermQuery(new Term(ArtifactInfo.PACKAGING, "pom"));
+        TermQuery tq = new TermQuery(new Term(ArtifactInfo.PACKAGING, "pom")); //$NON-NLS-1$
         query = new FilteredQuery(tq, new QueryWrapperFilter(bq));
       }
       
     } else if(IIndex.SEARCH_PLUGIN.equals(type)) {
-      if("*".equals(term)) {
-        query = new TermQuery(new Term(ArtifactInfo.PACKAGING, "maven-plugin"));
+      if("*".equals(term)) { //$NON-NLS-1$
+        query = new TermQuery(new Term(ArtifactInfo.PACKAGING, "maven-plugin")); //$NON-NLS-1$
       } else {
         BooleanQuery bq = new BooleanQuery();
-        bq.add(new WildcardQuery(new Term(ArtifactInfo.GROUP_ID, term + "*")), Occur.SHOULD);
-        bq.add(new WildcardQuery(new Term(ArtifactInfo.ARTIFACT_ID, term + "*")), Occur.SHOULD);
-        TermQuery tq = new TermQuery(new Term(ArtifactInfo.PACKAGING, "maven-plugin"));
+        bq.add(new WildcardQuery(new Term(ArtifactInfo.GROUP_ID, term + "*")), Occur.SHOULD); //$NON-NLS-1$
+        bq.add(new WildcardQuery(new Term(ArtifactInfo.ARTIFACT_ID, term + "*")), Occur.SHOULD); //$NON-NLS-1$
+        TermQuery tq = new TermQuery(new Term(ArtifactInfo.PACKAGING, "maven-plugin")); //$NON-NLS-1$
         query = new FilteredQuery(tq, new QueryWrapperFilter(bq));
       }
       
     } else if(IIndex.SEARCH_ARCHETYPE.equals(type)) {
       BooleanQuery bq = new BooleanQuery();
-      bq.add(new WildcardQuery(new Term(ArtifactInfo.GROUP_ID, term + "*")), Occur.SHOULD);
-      bq.add(new WildcardQuery(new Term(ArtifactInfo.ARTIFACT_ID, term + "*")), Occur.SHOULD);
-      TermQuery tq = new TermQuery(new Term(ArtifactInfo.PACKAGING, "maven-archetype"));
+      bq.add(new WildcardQuery(new Term(ArtifactInfo.GROUP_ID, term + "*")), Occur.SHOULD); //$NON-NLS-1$
+      bq.add(new WildcardQuery(new Term(ArtifactInfo.ARTIFACT_ID, term + "*")), Occur.SHOULD); //$NON-NLS-1$
+      TermQuery tq = new TermQuery(new Term(ArtifactInfo.PACKAGING, "maven-archetype")); //$NON-NLS-1$
       query = new FilteredQuery(tq, new QueryWrapperFilter(bq));
       
     } else if(IIndex.SEARCH_PACKAGING.equals(type)) {
       query = new TermQuery(new Term(ArtifactInfo.PACKAGING, term));
 
     } else if(IIndex.SEARCH_SHA1.equals(type)) {
-      query = new WildcardQuery(new Term(ArtifactInfo.SHA1, term + "*"));
+      query = new WildcardQuery(new Term(ArtifactInfo.SHA1, term + "*")); //$NON-NLS-1$
       
     } else {
       return Collections.emptyMap();
@@ -380,7 +382,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
           response = getIndexer().searchFlat(new FlatSearchRequest(query, context));
         }
 
-        String regex = "^(.*?" + term.replaceAll("\\*", ".+?") + ".*?)$";
+        String regex = "^(.*?" + term.replaceAll("\\*", ".+?") + ".*?)$"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
         Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
 
         for(ArtifactInfo artifactInfo : response.getResults()) {
@@ -399,7 +401,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
               String className;
               String packageName;
               if(n < 0) {
-                packageName = "";
+                packageName = ""; //$NON-NLS-1$
                 className = value;
               } else {
                 packageName = value.substring(0, n).replace('/', '.');
@@ -425,7 +427,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
         }
       }
     }catch(IOException ex) {
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Search error", ex));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, Messages.NexusIndexManager_error_search, ex));
     }
 
     return result;
@@ -461,7 +463,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       }
       
     } catch(IOException ex) {
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Search error", ex));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, Messages.NexusIndexManager_error_search, ex));
     }
     return result;
   }  
@@ -480,7 +482,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
   }
 
   protected String getArtifactFileKey(String group, String artifact, String packageName, String className) {
-    return className + " : " + packageName + " : " + group + " : " + artifact;
+    return className + " : " + packageName + " : " + group + " : " + artifact; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
   }
 
   public IndexedArtifactFile getIndexedArtifactFile(ArtifactInfo artifactInfo) {
@@ -492,7 +494,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     String packaging = artifactInfo.packaging;
     String fname = artifactInfo.fname;
     if(fname == null) {
-      fname = artifactId + '-' + version + (classifier != null ? '-' + classifier : "") + (packaging != null ? ('.' + packaging) : "");
+      fname = artifactId + '-' + version + (classifier != null ? '-' + classifier : "") + (packaging != null ? ('.' + packaging) : ""); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     long size = artifactInfo.size;
@@ -521,7 +523,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       
     } catch(Exception ex) {
       MavenLogger.log("Unable to re-index "+repository.toString(), ex);
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Reindexing error", ex));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, Messages.NexusIndexManager_error_reindexing, ex));
     } finally {
       fireIndexChanged(repository);
     }
@@ -554,7 +556,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
         addArtifactToIndex(context, artifactContext);
       } catch(Exception ex) {
         String msg = "Unable to add " + documentKey;
-        console.logError(msg + "; " + ex.getMessage());
+        console.logError(msg + "; " + ex.getMessage()); //$NON-NLS-1$
         MavenLogger.log(msg, ex);
       }
     }
@@ -570,7 +572,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
         IndexingContext context = getIndexingContext(repository);
         if(context == null) {
           String msg = "Unable to find document to remove"+documentKey;
-          MavenLogger.log(new Status(IStatus.ERROR,"org.eclipse.m2e", msg));
+          MavenLogger.log(new Status(IStatus.ERROR,"org.eclipse.m2e", msg)); //$NON-NLS-1$
           return;
         }
         ArtifactContext artifactContext = getArtifactContext(null, documentKey, -1, -1, //
@@ -578,7 +580,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
         getIndexer().deleteArtifactFromIndex(artifactContext, context);
       } catch(Exception ex) {
         String msg = "Unable to remove " + documentKey;
-        console.logError(msg + "; " + ex.getMessage());
+        console.logError(msg + "; " + ex.getMessage()); //$NON-NLS-1$
         MavenLogger.log(msg, ex);
       }
     }
@@ -604,15 +606,15 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     File pomFile;
     File artifactFile;
     
-    if(file==null || "pom.xml".equals(file.getName())) {
+    if(file==null || "pom.xml".equals(file.getName())) { //$NON-NLS-1$
       pomFile = file;
       artifactFile = null;
       // TODO set ai.classNames
     
-    } else if(file.getName().endsWith(".pom")) {
+    } else if(file.getName().endsWith(".pom")) { //$NON-NLS-1$
       pomFile = file;
       String path = file.getAbsolutePath();
-      artifactFile = new File(path.substring(0, path.length()-4) + ".jar");  
+      artifactFile = new File(path.substring(0, path.length()-4) + ".jar");   //$NON-NLS-1$
     } else {
       pomFile = new PomLocator().locate( file, gavCalculator, gav );
       artifactFile = file;
@@ -632,7 +634,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       Gav gav = new Gav(key.getGroupId(), key.getArtifactId(), key.getVersion());
       return new ArtifactContext(pomFile, artifactFile, null, ai, gav );
     } catch(IllegalArtifactCoordinateException ex) {
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Unexpected exception", ex));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, Messages.NexusIndexManager_error_unexpected, ex));
     }
   }
 
@@ -662,7 +664,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
           return groups;
         } catch(IOException ex) {
           throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, //
-              "Can't get root groups for " + repository.toString(), ex));
+              NLS.bind(Messages.NexusIndexManager_error_root_grp, repository.toString()), ex));
         }
       }
       return new IndexedArtifactGroup[0];
@@ -686,25 +688,25 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
   public static String getDocumentKey(ArtifactKey artifact) {
     String groupId = artifact.getGroupId();
     if(groupId == null) {
-      groupId = "[inherited]";
+      groupId = Messages.NexusIndexManager_inherited;
     }
 
     String artifactId = artifact.getArtifactId();
 
     String version = artifact.getVersion();
     if(version == null) {
-      version = "[inherited]";
+      version = Messages.NexusIndexManager_inherited;
     }
 
-    String key = groupId.replace('.', '/') + '/' + artifactId + '/' + version + '/' + artifactId + "-" + version;
+    String key = groupId.replace('.', '/') + '/' + artifactId + '/' + version + '/' + artifactId + "-" + version; //$NON-NLS-1$
 
     String classifier = artifact.getClassifier();
     if(classifier != null) {
-      key += "-" + classifier;
+      key += "-" + classifier; //$NON-NLS-1$
     }
 
     // TODO use artifact handler to retrieve extension
-    return key + ".pom";
+    return key + ".pom"; //$NON-NLS-1$
   }
 
   public void mavenProjectChanged(MavenProjectChangedEvent[] events, IProgressMonitor monitor) {
@@ -803,7 +805,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
         String groupId = a.getGroupId();
         if(groupId.equals(prefix)) {
           g.getFiles().put(a.getArtifactId(), a);
-        } else if(groupId.startsWith(prefix + ".")) {
+        } else if(groupId.startsWith(prefix + ".")) { //$NON-NLS-1$
           int start = prefix.length() + 1;
           int end = groupId.indexOf('.', start);
           String key = end > -1 ? groupId.substring(0, end) : groupId;
@@ -814,7 +816,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       return g;
   
     } catch(CoreException ex) {
-      MavenLogger.log("Can't retrieve groups for " + repository.toString() + ":" + prefix, ex);
+      MavenLogger.log("Can't retrieve groups for " + repository.toString() + ":" + prefix, ex); //$NON-NLS-2$
       return group;
     }
   }
@@ -890,9 +892,9 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
         }
       } catch(IOException ex) {
         String msg = "Error changing index details " + repository.toString();
-        console.logError(msg + "; " + ex.getMessage());
+        console.logError(msg + "; " + ex.getMessage()); //$NON-NLS-1$
         MavenLogger.log(msg, ex);
-        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not add repository index", ex));
+        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, Messages.NexusIndexManager_error_add_repo, ex));
       }
 
       if (repository.isScope(IRepositoryRegistry.SCOPE_LOCAL)) {
@@ -1057,7 +1059,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
 
     if(monitor != null){
-      monitor.setTaskName("Updating index " + repository.toString());
+      monitor.setTaskName(NLS.bind(Messages.NexusIndexManager_task_updating, repository.toString()));
     }
     console.logMessage("Updating index " + repository.toString());
     try {
@@ -1086,7 +1088,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
 
             // 1. process index gz into cached/shared lucene index. this can be a noop if cache is uptodate
             String details = getIndexDetails(repository);
-            String id = repository.getUid() + "-cache";
+            String id = repository.getUid() + "-cache"; //$NON-NLS-1$
             File luceneCache = new File(request.getLocalIndexCacheDir(), details);
             Directory directory = FSDirectory.getDirectory(luceneCache);
             IndexingContext cacheCtx = getIndexer().addIndexingContextForced(id, id, null, directory, null, null,
@@ -1122,7 +1124,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
         }
       }
     } catch (FileNotFoundException e) {
-      String msg = "Unable to update index for " + repository.toString() + ": " + e.getMessage();
+      String msg = "Unable to update index for " + repository.toString() + ": " + e.getMessage(); //$NON-NLS-2$
       console.logError(msg);
     } catch (Exception ie){
       String msg = "Unable to update index for " + repository.toString();
@@ -1137,7 +1139,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       throws IOException {
     IndexUpdateRequest request = new IndexUpdateRequest(context);
     File localRepo = repositoryRegistry.getLocalRepository().getBasedir();
-    File indexCacheBasedir = new File(localRepo, ".cache/m2e/" + MavenPlugin.getVersion()).getCanonicalFile();
+    File indexCacheBasedir = new File(localRepo, ".cache/m2e/" + MavenPlugin.getVersion()).getCanonicalFile(); //$NON-NLS-1$
     File indexCacheDir = new File(indexCacheBasedir, repository.getUid());
     indexCacheDir.mkdirs();
     request.setLocalIndexCacheDir(indexCacheDir);
@@ -1155,7 +1157,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     } catch (FileNotFoundException e) {
       // that's quite alright
     } catch (IOException e) {
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not read index details file", e));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, Messages.NexusIndexManager_error_read_index, e));
     }
   }
 
@@ -1170,12 +1172,12 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
         os.close();
       }
     } catch (IOException e) {
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not write index details file", e));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, Messages.NexusIndexManager_error_write_index, e));
     }
   }
 
   private File getIndexDetailsFile() {
-    return new File(baseIndexDir, "indexDetails.properties");
+    return new File(baseIndexDir, "indexDetails.properties"); //$NON-NLS-1$
   }
 
   /** for unit tests only */
@@ -1184,7 +1186,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
   }
   
   public String getIndexerId() {
-    return "nexus-indexer";
+    return Messages.NexusIndexManager_78;
   }
 
   private Object getIndexLock(IRepository repository) {

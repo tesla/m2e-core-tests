@@ -43,7 +43,7 @@ import org.eclipse.m2e.core.project.configurator.ProjectConfigurationRequest;
  * @author igor
  */
 public class CustomizableLifecycleMapping extends AbstractLifecycleMapping implements ILifecycleMapping {
-  public static final String EXTENSION_ID = "customizable";
+  public static final String EXTENSION_ID = "customizable"; //$NON-NLS-1$
 
   public CustomizableLifecycleMapping() {
 
@@ -52,7 +52,7 @@ public class CustomizableLifecycleMapping extends AbstractLifecycleMapping imple
   public List<AbstractProjectConfigurator> getProjectConfigurators(IMavenProjectFacade facade, IProgressMonitor monitor)
       throws CoreException {
     MavenProject mavenProject = facade.getMavenProject(monitor);
-    Plugin plugin = mavenProject.getPlugin("org.eclipse.m2e:lifecycle-mapping");
+    Plugin plugin = mavenProject.getPlugin("org.eclipse.m2e:lifecycle-mapping"); //$NON-NLS-1$
 
     if(plugin == null) {
       throw new IllegalArgumentException("no mapping");
@@ -71,14 +71,14 @@ public class CustomizableLifecycleMapping extends AbstractLifecycleMapping imple
       throw new IllegalArgumentException("Empty lifecycle mapping configuration");
     }
 
-    Xpp3Dom configuratorsDom = config.getChild("configurators");
-    Xpp3Dom executionsDom = config.getChild("mojoExecutions");
+    Xpp3Dom configuratorsDom = config.getChild("configurators"); //$NON-NLS-1$
+    Xpp3Dom executionsDom = config.getChild("mojoExecutions"); //$NON-NLS-1$
 
     List<AbstractProjectConfigurator> configurators = new ArrayList<AbstractProjectConfigurator>();
     
     if (configuratorsDom != null) {
-      for(Xpp3Dom configuratorDom : configuratorsDom.getChildren("configurator")) {
-        String configuratorId = configuratorDom.getAttribute("id");
+      for(Xpp3Dom configuratorDom : configuratorsDom.getChildren("configurator")) { //$NON-NLS-1$
+        String configuratorId = configuratorDom.getAttribute("id"); //$NON-NLS-1$
         AbstractProjectConfigurator configurator = configuratorsMap.get(configuratorId);
         if(configurator == null) {
           String message = "Configurator '"+configuratorId+"' is not available for project '"+facade.getProject().getName()+"'. To enable full functionality, install the configurator and run Maven->Update Project Configuration.";
@@ -92,8 +92,8 @@ public class CustomizableLifecycleMapping extends AbstractLifecycleMapping imple
     }
     
     if (executionsDom != null) {
-      for(Xpp3Dom execution : executionsDom.getChildren("mojoExecution")) {
-        String strRunOnIncremental = execution.getAttribute("runOnIncremental");
+      for(Xpp3Dom execution : executionsDom.getChildren("mojoExecution")) { //$NON-NLS-1$
+        String strRunOnIncremental = execution.getAttribute("runOnIncremental"); //$NON-NLS-1$
         configurators.add(MojoExecutionProjectConfigurator.fromString(execution.getValue(), toBool(strRunOnIncremental, true)));
       }
     }

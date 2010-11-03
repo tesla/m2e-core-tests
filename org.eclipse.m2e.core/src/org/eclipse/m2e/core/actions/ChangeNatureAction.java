@@ -30,6 +30,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.embedder.IMavenConfiguration;
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.project.IProjectConfigurationManager;
 import org.eclipse.m2e.core.project.MavenProjectManager;
 import org.eclipse.m2e.core.project.MavenUpdateRequest;
@@ -38,9 +39,9 @@ import org.eclipse.m2e.core.project.ResolverConfiguration;
 
 public class ChangeNatureAction implements IObjectActionDelegate {
 
-  public static final String ID_ENABLE_WORKSPACE = "org.eclipse.m2e.enableWorkspaceResolutionAction";
+  public static final String ID_ENABLE_WORKSPACE = "org.eclipse.m2e.enableWorkspaceResolutionAction"; //$NON-NLS-1$
   
-  public static final String ID_DISABLE_WORKSPACE = "org.eclipse.m2e.disableWorkspaceResolutionAction";
+  public static final String ID_DISABLE_WORKSPACE = "org.eclipse.m2e.disableWorkspaceResolutionAction"; //$NON-NLS-1$
 
   public static final int ENABLE_WORKSPACE = 1;
 
@@ -91,7 +92,7 @@ public class ChangeNatureAction implements IObjectActionDelegate {
     private final IMavenConfiguration mavenConfiguration;
 
     public UpdateJob(Set<IProject> projects, int option) {
-      super("Changing nature");
+      super(Messages.ChangeNatureAction_job_changing);
       this.projects = projects;
       this.option = option;
 
@@ -115,7 +116,7 @@ public class ChangeNatureAction implements IObjectActionDelegate {
           changeNature(project, monitor);
         } catch (CoreException ex) {
           if (status == null) {
-            status = new MultiStatus(IMavenConstants.PLUGIN_ID, IStatus.ERROR, "Can't change nature", null);
+            status = new MultiStatus(IMavenConstants.PLUGIN_ID, IStatus.ERROR, Messages.ChangeNatureAction_status_error, null);
           }
           status.add(ex.getStatus());
         }

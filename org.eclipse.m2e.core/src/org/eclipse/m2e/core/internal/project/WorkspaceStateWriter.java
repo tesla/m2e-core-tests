@@ -55,13 +55,13 @@ public class WorkspaceStateWriter implements IMavenProjectChangedListener {
           if(location != null) {
             File pom = location.toFile();
             if(pom.canRead()) {
-              String key = artifact.getGroupId() + ":" + artifact.getArtifactId() + ":pom:" + artifact.getBaseVersion();
+              String key = artifact.getGroupId() + ":" + artifact.getArtifactId() + ":pom:" + artifact.getBaseVersion(); //$NON-NLS-1$ //$NON-NLS-2$
               state.put(key, pom.getCanonicalPath());
             }
           }
           IResource outputLocation = root.findMember(projectFacade.getOutputLocation());
-          if (!"pom".equals(artifact.getType()) && outputLocation != null && outputLocation.exists()) {
-            String key = artifact.getGroupId() + ":" + artifact.getArtifactId() + ":" + artifact.getType() + ":" + artifact.getBaseVersion();
+          if (!"pom".equals(artifact.getType()) && outputLocation != null && outputLocation.exists()) { //$NON-NLS-1$
+            String key = artifact.getGroupId() + ":" + artifact.getArtifactId() + ":" + artifact.getType() + ":" + artifact.getBaseVersion(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
             state.put(key, outputLocation.getLocation().toFile().getCanonicalPath());
           }
         } catch (CoreException ex) {

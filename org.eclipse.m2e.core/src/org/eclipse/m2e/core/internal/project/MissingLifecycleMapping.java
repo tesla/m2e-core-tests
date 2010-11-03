@@ -13,6 +13,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.configurator.AbstractBuildParticipant;
 import org.eclipse.m2e.core.project.configurator.AbstractProjectConfigurator;
@@ -30,7 +31,7 @@ public class MissingLifecycleMapping implements ILifecycleMapping {
   /**
    * Lifecycle mapping id. Must match id of properties page defined in plugin.xml
    */
-  public static final String ID = "MISSING";
+  public static final String ID = "MISSING"; //$NON-NLS-1$
 
   private final String missingMappingId;
 
@@ -43,7 +44,7 @@ public class MissingLifecycleMapping implements ILifecycleMapping {
   }
 
   public String getName() {
-    return "Unknown or missing lifecycle mapping";
+    return Messages.MissingLifecycleMapping_name;
   }
 
   public List<String> getPotentialMojoExecutionsForBuildKind(IMavenProjectFacade projectFacade, int kind,

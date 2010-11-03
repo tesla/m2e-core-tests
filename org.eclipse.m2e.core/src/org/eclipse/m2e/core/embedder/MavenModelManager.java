@@ -39,6 +39,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.osgi.util.NLS;
 
 import org.apache.maven.RepositoryUtils;
 import org.apache.maven.artifact.Artifact;
@@ -71,6 +72,7 @@ import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.core.MavenConsole;
 import org.eclipse.m2e.core.core.MavenLogger;
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.MavenProjectManager;
 import org.eclipse.m2e.model.edit.pom.Build;
@@ -117,7 +119,7 @@ public class MavenModelManager {
       return (PomResourceImpl)resource;
 
     } catch(Exception ex) {
-      String msg = "Can't load model " + pomFile;
+      String msg = NLS.bind(Messages.MavenModelManager_error_cannot_load, pomFile);
       MavenLogger.log(msg, ex);
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
     }
@@ -138,7 +140,7 @@ public class MavenModelManager {
   public void createMavenModel(IFile pomFile, org.apache.maven.model.Model model) throws CoreException {
     String pomFileName = pomFile.getLocation().toString();
     if(pomFile.exists()) {
-      String msg = "POM " + pomFileName + " already exists";
+      String msg = NLS.bind(Messages.MavenModelManager_error_pom_exists, pomFileName);
       console.logError(msg);
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, null));
     }
@@ -158,27 +160,27 @@ public class MavenModelManager {
 
       NamedNodeMap attributes = documentElement.getAttributes();
 
-      if(attributes == null || attributes.getNamedItem("xmlns") == null) {
-        Attr attr = document.createAttribute("xmlns");
-        attr.setTextContent("http://maven.apache.org/POM/4.0.0");
+      if(attributes == null || attributes.getNamedItem("xmlns") == null) { //$NON-NLS-1$
+        Attr attr = document.createAttribute("xmlns"); //$NON-NLS-1$
+        attr.setTextContent("http://maven.apache.org/POM/4.0.0"); //$NON-NLS-1$
         documentElement.setAttributeNode(attr);
       }
 
-      if(attributes == null || attributes.getNamedItem("xmlns:xsi") == null) {
-        Attr attr = document.createAttribute("xmlns:xsi");
-        attr.setTextContent("http://www.w3.org/2001/XMLSchema-instance");
+      if(attributes == null || attributes.getNamedItem("xmlns:xsi") == null) { //$NON-NLS-1$
+        Attr attr = document.createAttribute("xmlns:xsi"); //$NON-NLS-1$
+        attr.setTextContent("http://www.w3.org/2001/XMLSchema-instance"); //$NON-NLS-1$
         documentElement.setAttributeNode(attr);
       }
 
-      if(attributes == null || attributes.getNamedItem("xsi:schemaLocation") == null) {
-        Attr attr = document.createAttributeNS("http://www.w3.org/2001/XMLSchema-instance", "xsi:schemaLocation");
-        attr.setTextContent("http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd");
+      if(attributes == null || attributes.getNamedItem("xsi:schemaLocation") == null) { //$NON-NLS-1$
+        Attr attr = document.createAttributeNS("http://www.w3.org/2001/XMLSchema-instance", "xsi:schemaLocation"); //$NON-NLS-1$ //$NON-NLS-2$
+        attr.setTextContent("http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"); //$NON-NLS-1$
         documentElement.setAttributeNode(attr);
       }
       
       TransformerFactory transfac = TransformerFactory.newInstance();
       Transformer trans = transfac.newTransformer();
-      trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+      trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes"); //$NON-NLS-1$
 
       buf.reset();
       trans.transform(new DOMSource(document), new StreamResult(buf));
@@ -186,11 +188,11 @@ public class MavenModelManager {
       pomFile.create(new ByteArrayInputStream(buf.toByteArray()), true, new NullProgressMonitor());
 
     } catch(RuntimeException ex) {
-      String msg = "Can't create model " + pomFileName + "; " + ex.toString();
+      String msg = NLS.bind(Messages.MavenModelManager_error_create, pomFileName, ex.toString());
       console.logError(msg);
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
     } catch(Exception ex) {
-      String msg = "Can't create model " + pomFileName + "; " + ex.toString();
+      String msg = NLS.bind(Messages.MavenModelManager_error_create, pomFileName, ex.toString());
       console.logError(msg);
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
     }
@@ -210,7 +212,7 @@ public class MavenModelManager {
    */
   public synchronized DependencyNode readDependencies(MavenProject mavenProject, String scope, IProgressMonitor monitor) throws CoreException {
     try {
-      monitor.setTaskName("Building dependency tree");
+      monitor.setTaskName(Messages.MavenModelManager_monitor_building);
 
       ArtifactFactory artifactFactory = MavenPlugin.getDefault().getArtifactFactory();
       ArtifactMetadataSource artifactMetadataSource = MavenPlugin.getDefault().getArtifactMetadataSource();
@@ -235,7 +237,7 @@ public class MavenModelManager {
           new ArtifactDependencyNodeFilter(new ScopeArtifactFilter(scope))));
       return visitor.getDependencyTree();
     } catch(DependencyTreeBuilderException ex) {
-      String msg = "Project read error";
+      String msg = Messages.MavenModelManager_error_read;
       MavenLogger.log(msg, ex);
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
     }
@@ -243,7 +245,7 @@ public class MavenModelManager {
 
   public synchronized org.sonatype.aether.graph.DependencyNode readDependencyTree(IFile file, String classpath,
       IProgressMonitor monitor) throws CoreException {
-    monitor.setTaskName("Reading project");
+    monitor.setTaskName(Messages.MavenModelManager_monitor_reading);
     MavenProject mavenProject = readMavenProject(file, monitor);
 
     return readDependencyTree(mavenProject, classpath, monitor);
@@ -251,7 +253,7 @@ public class MavenModelManager {
 
   public synchronized org.sonatype.aether.graph.DependencyNode readDependencyTree(MavenProject mavenProject,
       String classpath, IProgressMonitor monitor) throws CoreException {
-    monitor.setTaskName("Building dependency tree");
+    monitor.setTaskName(Messages.MavenModelManager_monitor_building);
 
     IMaven maven = MavenPlugin.getDefault().getMaven();
     DefaultRepositorySystemSession session = new DefaultRepositorySystemSession(maven.createSession(
@@ -268,7 +270,7 @@ public class MavenModelManager {
       ArtifactTypeRegistry stereotypes = session.getArtifactTypeRegistry();
 
       CollectRequest request = new CollectRequest();
-      request.setRequestContext("project");
+      request.setRequestContext("project"); //$NON-NLS-1$
       request.setRepositories(mavenProject.getRemoteProjectRepositories());
 
       for(org.apache.maven.model.Dependency dependency : mavenProject.getDependencies()) {
@@ -286,7 +288,7 @@ public class MavenModelManager {
       try {
         node = MavenPlugin.getDefault().getRepositorySystem().collectDependencies(session, request).getRoot();
       } catch(DependencyCollectionException ex) {
-        String msg = "Project read error";
+        String msg = Messages.MavenModelManager_error_read;
         MavenLogger.log(msg, ex);
         throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, msg, ex));
       }
@@ -364,7 +366,7 @@ public class MavenModelManager {
       resource.save(Collections.EMPTY_MAP);
     } catch(Exception ex) {
       String msg = "Unable to update " + pom;
-      console.logError(msg + "; " + ex.getMessage());
+      console.logError(msg + "; " + ex.getMessage()); //$NON-NLS-1$
       MavenLogger.log(msg, ex);
     } finally {
       if (resource != null) {
@@ -437,12 +439,12 @@ public class MavenModelManager {
       }
       
       if(this.dependency.getType() != null //
-          && !"jar".equals(this.dependency.getType()) //
-          && !"null".equals(this.dependency.getType())) { // guard against MNGECLIPSE-622
+          && !"jar".equals(this.dependency.getType()) // //$NON-NLS-1$
+          && !"null".equals(this.dependency.getType())) { // guard against MNGECLIPSE-622 //$NON-NLS-1$
         dependency.setType(this.dependency.getType());
       }
       
-      if(this.dependency.getScope() != null && !"compile".equals(this.dependency.getScope())) {
+      if(this.dependency.getScope() != null && !"compile".equals(this.dependency.getScope())) { //$NON-NLS-1$
         dependency.setScope(this.dependency.getScope());
       }
       
@@ -451,7 +453,7 @@ public class MavenModelManager {
       }
       
       if(this.dependency.isOptional()) {
-        dependency.setOptional("true");
+        dependency.setOptional("true"); //$NON-NLS-1$
       }
 
       if(!this.dependency.getExclusions().isEmpty()) {
@@ -611,7 +613,7 @@ public class MavenModelManager {
 
       Plugin plugin = POM_FACTORY.createPlugin();
       
-      if(!"org.apache.maven.plugins".equals(this.groupId)) {
+      if(!"org.apache.maven.plugins".equals(this.groupId)) { //$NON-NLS-1$
         plugin.setGroupId(this.groupId);
       }
       

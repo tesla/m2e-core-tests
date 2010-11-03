@@ -16,6 +16,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocumentRegion;
@@ -48,14 +49,14 @@ public class MavenMarkerManager implements IMavenMarkerManager {
   /**
    * 
    */
-  private static final String XSI_SCHEMA_LOCATION = "xsi:schemaLocation";
+  private static final String XSI_SCHEMA_LOCATION = "xsi:schemaLocation"; //$NON-NLS-1$
 
   /**
    * 
    */
-  private static final String PROJECT_NODE = "project";
-  public static final String OFFSET = "offset";
-  public static final String NO_SCHEMA_ERR = "There is no schema defined for this pom.xml. Code completion will not work without a schema defined.";
+  private static final String PROJECT_NODE = "project"; //$NON-NLS-1$
+  public static final String OFFSET = "offset"; //$NON-NLS-1$
+  public static final String NO_SCHEMA_ERR = org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_error_noschema;
   
   private final MavenConsole console;
   private final IMavenConfiguration mavenConfiguration; 
@@ -74,7 +75,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
   
       } else if(ex instanceof AbstractArtifactResolutionException) {
         AbstractArtifactResolutionException rex = (AbstractArtifactResolutionException) ex;
-        String errorMessage = getArtifactId(rex) + " " + getErrorMessage(ex);
+        String errorMessage = getArtifactId(rex) + " " + getErrorMessage(ex); //$NON-NLS-1$
         addMarker(pomFile, errorMessage, 1, IMarker.SEVERITY_ERROR);
       } else {
         handleBuildException(pomFile, ex);
@@ -196,12 +197,12 @@ public class MavenMarkerManager implements IMavenMarkerManager {
   }
 
   private String getArtifactId(AbstractArtifactResolutionException rex) {
-    String id = rex.getGroupId() + ":" + rex.getArtifactId() + ":" + rex.getVersion();
+    String id = rex.getGroupId() + ":" + rex.getArtifactId() + ":" + rex.getVersion(); //$NON-NLS-1$ //$NON-NLS-2$
     if(rex.getClassifier() != null) {
-      id += ":" + rex.getClassifier();
+      id += ":" + rex.getClassifier(); //$NON-NLS-1$
     }
     if(rex.getType() != null) {
-      id += ":" + rex.getType();
+      id += ":" + rex.getType(); //$NON-NLS-1$
     }
     return id;
   }
@@ -232,7 +233,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
           // ignored here, handled by addMissingArtifactMarkers
         } else if(ex instanceof AbstractArtifactResolutionException) {
           AbstractArtifactResolutionException rex = (AbstractArtifactResolutionException) ex;
-          String errorMessage = getArtifactId(rex) + " " + getErrorMessage(ex);
+          String errorMessage = getArtifactId(rex) + " " + getErrorMessage(ex); //$NON-NLS-1$
           addMarker(pomFile, errorMessage, 1, IMarker.SEVERITY_ERROR);
 //          console.logError(errorMessage);
 
@@ -259,13 +260,13 @@ public class MavenMarkerManager implements IMavenMarkerManager {
       if (!artifact.isResolved()) {
         String errorMessage;
 //        if (directDependencies.contains(artifact)) {
-          errorMessage = "Missing artifact " + artifact.toString();
+          errorMessage = NLS.bind(org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_error_missing, artifact.toString());
 //        } else {
 //          errorMessage = "Missing indirectly referenced artifact " + artifact.toString();
 //        }
         
         if(mavenConfiguration.isOffline()) {
-          errorMessage = "Offline / " + errorMessage; 
+          errorMessage = NLS.bind(org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_error_offline, errorMessage); 
         }
         
         addMarker(pomFile, errorMessage, 1, IMarker.SEVERITY_ERROR);

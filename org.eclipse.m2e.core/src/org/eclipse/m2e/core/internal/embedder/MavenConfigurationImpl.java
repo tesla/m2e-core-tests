@@ -87,7 +87,7 @@ public class MavenConfigurationImpl implements IMavenConfiguration, IPropertyCha
   }
 
   private static String nvl(String s) {
-    return s == null ? "" : s;
+    return s == null ? "" : s; //$NON-NLS-1$
   }
 
   public boolean isUpdateProjectsOnStartup() {

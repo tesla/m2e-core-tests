@@ -29,7 +29,7 @@ public interface IMavenConstants {
   
   public static final String POM_FILE_NAME = "pom.xml"; //$NON-NLS-1$
 
-  public static final String PREFERENCE_PAGE_ID = PLUGIN_ID + ".MavenProjectPreferencePage";
+  public static final String PREFERENCE_PAGE_ID = PLUGIN_ID + ".MavenProjectPreferencePage"; //$NON-NLS-1$
   
   public static final String NO_WORKSPACE_PROJECTS = "noworkspace"; //$NON-NLS-1$
 
@@ -46,13 +46,13 @@ public interface IMavenConstants {
    * Session property key used to indicate that full maven build was requested for a project.
    * It is not intended to be used by clients directly.
    */
-  public static final QualifiedName FULL_MAVEN_BUILD = new QualifiedName(PLUGIN_ID, "fullBuild");
+  public static final QualifiedName FULL_MAVEN_BUILD = new QualifiedName(PLUGIN_ID, "fullBuild"); //$NON-NLS-1$
 
   /**
    * The name of the folder containing metadata information for the workspace.
    */
   public static final String METADATA_FOLDER = ".metadata"; //$NON-NLS-1$
 
-  public static final String INDEX_UPDATE_PROP = "indexUpdate";
+  public static final String INDEX_UPDATE_PROP = "indexUpdate"; //$NON-NLS-1$
 
 }

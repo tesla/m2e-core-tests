@@ -42,7 +42,7 @@ public class ContextRepositorySystemSessionImpl implements ContextRepositorySyst
   private RepositorySystemSession getSession() {
     RepositorySystemSession session = context.getRepositorySession();
     if(session == null) {
-      throw new IllegalStateException("no context maven session");
+      throw new IllegalStateException("no context maven session"); //$NON-NLS-1$
     }
     return session;
   }

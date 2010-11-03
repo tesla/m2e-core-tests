@@ -26,11 +26,11 @@ import org.eclipse.m2e.core.internal.preferences.MavenPreferenceConstants;
  */
 public class MavenRuntimeManager {
   
-  public static final String DEFAULT = "DEFAULT";
+  public static final String DEFAULT = "DEFAULT"; //$NON-NLS-1$
   
-  public static final String EMBEDDED = "EMBEDDED"; 
+  public static final String EMBEDDED = "EMBEDDED";  //$NON-NLS-1$
 
-  public static final String WORKSPACE = "WORKSPACE";
+  public static final String WORKSPACE = "WORKSPACE"; //$NON-NLS-1$
 
   private final IPreferenceStore preferenceStore;
 
@@ -113,13 +113,13 @@ public class MavenRuntimeManager {
   public void setRuntimes(List<MavenRuntime> runtimes) {
     this.runtimes.clear();
 
-    String separator = "";
+    String separator = ""; //$NON-NLS-1$
     StringBuffer sb = new StringBuffer();
     for(MavenRuntime runtime : runtimes) {
       if(runtime.isEditable()) {
         this.runtimes.put(runtime.getLocation(), runtime);
         sb.append(separator).append(runtime.getLocation());
-        separator = "|";
+        separator = "|"; //$NON-NLS-1$
       }
     }
     preferenceStore.setValue(MavenPreferenceConstants.P_RUNTIMES, sb.toString());
@@ -134,7 +134,7 @@ public class MavenRuntimeManager {
     
     String runtimesPreference = preferenceStore.getString(MavenPreferenceConstants.P_RUNTIMES);
     if(runtimesPreference!=null && runtimesPreference.length()>0) {
-      String[] locations = runtimesPreference.split("\\|");
+      String[] locations = runtimesPreference.split("\\|"); //$NON-NLS-1$
       for(int i = 0; i < locations.length; i++ ) {
         MavenRuntime runtime = createExternalRuntime(locations[i]);
         runtimes.put(runtime.getLocation(), runtime);

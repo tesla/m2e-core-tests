@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
@@ -37,13 +38,14 @@ import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.core.MavenConsole;
 import org.eclipse.m2e.core.core.MavenLogger;
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.util.M2EUtils;
 
 
 public class UpdateSourcesAction implements IObjectActionDelegate {
   
-  public static final String ID = "org.eclipse.m2e.updateSourcesAction";
+  public static final String ID = "org.eclipse.m2e.updateSourcesAction"; //$NON-NLS-1$
   
   private IStructuredSelection selection;
 
@@ -66,7 +68,7 @@ public class UpdateSourcesAction implements IObjectActionDelegate {
   public void run(IAction action) {
     final Set<IProject> projects = getProjects();
     final MavenPlugin plugin = MavenPlugin.getDefault();
-    WorkspaceJob job = new WorkspaceJob("Updating Maven Configuration") {
+    WorkspaceJob job = new WorkspaceJob(Messages.UpdateSourcesAction_job_update_conf) {
       public IStatus runInWorkspace(IProgressMonitor monitor) {
         setProperty(IProgressConstants.ACTION_PROPERTY, new OpenMavenConsoleAction());
         monitor.beginTask(getName(), projects.size());
@@ -96,23 +98,23 @@ public class UpdateSourcesAction implements IObjectActionDelegate {
             } catch(CoreException ex) {
               if (status == null) {
                 status = new MultiStatus(IMavenConstants.PLUGIN_ID, IStatus.ERROR, //
-                    "Unable to update Maven configuration", null);
+                    Messages.UpdateSourcesAction_error_cannot_update, null);
               }
               status.add(ex.getStatus());
               updateErrors.put(project.getName(), ex);
             } catch(IllegalArgumentException e){
               status = new MultiStatus(IMavenConstants.PLUGIN_ID, IStatus.ERROR, //
-                  "Unable to update Maven configuration", null);
+                  Messages.UpdateSourcesAction_error_cannot_update, null);
               updateErrors.put(project.getName(), e);
             }
           }
         }
         if(updateErrors.size() > 0){     
-          M2EUtils.showErrorsForProjectsDialog(shell, "Error Updating Maven Configuration", 
-              "Unable to update maven configuration for the following projects:", updateErrors);
+          M2EUtils.showErrorsForProjectsDialog(shell, Messages.UpdateSourcesAction_error_title, 
+              Messages.UpdateSourcesAction_error_message, updateErrors);
         }
         long l2 = System.currentTimeMillis();
-        console.logMessage("Update completed: " + ((l2 - l1) / 1000) + " sec");
+        console.logMessage(NLS.bind("Update completed: {0} sec", ((l2 - l1) / 1000)));
 
         return status != null? status: Status.OK_STATUS;
       }

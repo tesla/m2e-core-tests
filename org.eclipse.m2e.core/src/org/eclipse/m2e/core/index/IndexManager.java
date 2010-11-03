@@ -20,9 +20,9 @@ public interface IndexManager {
 
   // well-known indexes
 
-  public static final String LOCAL_INDEX = "local";
+  public static final String LOCAL_INDEX = "local"; //$NON-NLS-1$
 
-  public static final String WORKSPACE_INDEX = "workspace";
+  public static final String WORKSPACE_INDEX = "workspace"; //$NON-NLS-1$
 
   public abstract IMutableIndex getWorkspaceIndex();
 

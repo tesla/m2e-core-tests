@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.eclipse.core.runtime.internal.adaptor.BasicLocation;
+import org.eclipse.osgi.util.NLS;
 
 import org.sonatype.nexus.index.fs.Lock;
 import org.sonatype.nexus.index.fs.Locker;
@@ -30,7 +31,7 @@ public class EquinoxLocker
             return new EquinoxLock( lock );
         }
 
-        throw new IOException( "Could not acquire lock on directory " + directory );
+        throw new IOException( NLS.bind("Could not acquire lock on directory {0}", directory ));
     }
 
 }

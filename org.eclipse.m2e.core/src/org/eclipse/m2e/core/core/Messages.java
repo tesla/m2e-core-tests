@@ -14,6 +14,8 @@ import com.ibm.icu.text.MessageFormat;
 import com.ibm.icu.util.ULocale;
 import com.ibm.icu.util.UResourceBundle;
 
+//mkleint: this class looks like not following the default eclipse way of i18n and resides in public packages
+
 public class Messages {
   private static final String BUNDLE_NAME = IMavenConstants.PLUGIN_ID + ".messages"; //$NON-NLS-1$
 

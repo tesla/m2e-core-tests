@@ -35,6 +35,7 @@ import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.IMavenConsoleListener;
 import org.eclipse.m2e.core.core.MavenConsole;
 import org.eclipse.m2e.core.core.MavenLogger;
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.internal.preferences.MavenPreferenceConstants;
 
 
@@ -65,7 +66,7 @@ public class MavenConsoleImpl extends IOConsole implements MavenConsole, IProper
   private IOConsoleOutputStream messageStream;
 
   private IOConsoleOutputStream errorStream;
-  private static final String TITLE = "Maven Console";
+  private static final String TITLE = Messages.MavenConsoleImpl_title;
 
   private List<IMavenConsoleListener> listeners = new CopyOnWriteArrayList<IMavenConsoleListener>();
 
@@ -107,7 +108,7 @@ public class MavenConsoleImpl extends IOConsole implements MavenConsole, IProper
       getErrorStream().setColor(errorColor);
 
       // install font
-      setFont(JFaceResources.getFontRegistry().get("pref_console_font"));
+      setFont(JFaceResources.getFontRegistry().get("pref_console_font")); //$NON-NLS-1$
 
       initialized = true;
     }
@@ -197,7 +198,7 @@ public class MavenConsoleImpl extends IOConsole implements MavenConsole, IProper
 
   public void propertyChange(PropertyChangeEvent event) {
     // font changed
-    setFont(JFaceResources.getFontRegistry().get("pref_console_font"));
+    setFont(JFaceResources.getFontRegistry().get("pref_console_font")); //$NON-NLS-1$
   }
 
   private void bringConsoleToFront() {

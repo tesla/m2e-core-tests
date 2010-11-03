@@ -33,9 +33,9 @@ import org.eclipse.m2e.core.project.MavenUpdateRequest;
 
 public class RefreshMavenModelsAction implements IWorkbenchWindowActionDelegate, IExecutableExtension {
 
-  public static final String ID = "org.eclipse.m2e.refreshMavenModelsAction";
+  public static final String ID = "org.eclipse.m2e.refreshMavenModelsAction"; //$NON-NLS-1$
 
-  public static final String ID_SNAPSHOTS = "org.eclipse.m2e.refreshMavenSnapshotsAction";
+  public static final String ID_SNAPSHOTS = "org.eclipse.m2e.refreshMavenSnapshotsAction"; //$NON-NLS-1$
   
   private boolean updateSnapshots = false;
 
@@ -53,7 +53,7 @@ public class RefreshMavenModelsAction implements IWorkbenchWindowActionDelegate,
   // IExecutableExtension
   
   public void setInitializationData(IConfigurationElement config, String propertyName, Object data) {
-    if("snapshots".equals(data)) {
+    if("snapshots".equals(data)) { //$NON-NLS-1$
       this.updateSnapshots = true;
     }
   }

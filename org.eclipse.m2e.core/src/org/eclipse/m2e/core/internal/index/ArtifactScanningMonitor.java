@@ -59,6 +59,6 @@ class ArtifactScanningMonitor implements ArtifactScanningListener {
 
   public void artifactError(ArtifactContext ac, Exception e) {
     String id = ac.getPom().getAbsolutePath().substring(repositoryDir.getAbsolutePath().length());
-    console.logError(id + " " + e.getMessage());
+    console.logError(id + " " + e.getMessage()); //$NON-NLS-1$
   }
 }

@@ -58,9 +58,9 @@ import org.eclipse.m2e.core.util.M2EUtils;
 public class MavenBuilder extends IncrementalProjectBuilder {
 
   public static boolean DEBUG = MavenPlugin.getDefault().isDebugging()
-      & Boolean.parseBoolean(Platform.getDebugOption(IMavenConstants.PLUGIN_ID + "/debug/builder"));
+      & Boolean.parseBoolean(Platform.getDebugOption(IMavenConstants.PLUGIN_ID + "/debug/builder")); //$NON-NLS-1$
 
-  public static QualifiedName BUILD_CONTEXT_KEY = new QualifiedName(IMavenConstants.PLUGIN_ID, "BuildContext");
+  public static QualifiedName BUILD_CONTEXT_KEY = new QualifiedName(IMavenConstants.PLUGIN_ID, "BuildContext"); //$NON-NLS-1$
 
   static interface GetDeltaCallback {
     public IResourceDelta getDelta(IProject project);
@@ -213,7 +213,7 @@ public class MavenBuilder extends IncrementalProjectBuilder {
     String msg = e.getMessage();
     String rootCause = M2EUtils.getRootCauseMessage(e);
     if(!e.equals(msg)){
-      msg = msg+": "+rootCause;
+      msg = msg+": "+rootCause; //$NON-NLS-1$
     }
 
     IMarker[] findMarkers = getProject().findMarkers(IMavenConstants.MARKER_ID, true, IResource.DEPTH_INFINITE);

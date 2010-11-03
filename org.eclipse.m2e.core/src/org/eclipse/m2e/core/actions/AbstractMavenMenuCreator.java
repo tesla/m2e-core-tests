@@ -30,11 +30,11 @@ import org.eclipse.m2e.core.MavenPlugin;
  * @author Eugene Kuleshov
  */
 public abstract class AbstractMavenMenuCreator {
-  public static final String NEW = "new";
-  public static final String OPEN = "open";
-  public static final String UPDATE = "update";
-  public static final String NATURE = "nature";
-  public static final String IMPORT = "import";
+  public static final String NEW = "new"; //$NON-NLS-1$
+  public static final String OPEN = "open"; //$NON-NLS-1$
+  public static final String UPDATE = "update"; //$NON-NLS-1$
+  public static final String NATURE = "nature"; //$NON-NLS-1$
+  public static final String IMPORT = "import"; //$NON-NLS-1$
   
   protected IStructuredSelection selection;
 

@@ -22,26 +22,26 @@ public interface IIndex {
 
   // search keys 
 
-  public static final String SEARCH_GROUP = "groupId";
+  public static final String SEARCH_GROUP = "groupId"; //$NON-NLS-1$
 
-  public static final String SEARCH_ARTIFACT = "artifact";
+  public static final String SEARCH_ARTIFACT = "artifact"; //$NON-NLS-1$
 
-  public static final String SEARCH_PLUGIN = "plugin";
+  public static final String SEARCH_PLUGIN = "plugin"; //$NON-NLS-1$
 
-  public static final String SEARCH_ARCHETYPE = "archetype";
+  public static final String SEARCH_ARCHETYPE = "archetype"; //$NON-NLS-1$
 
-  public static final String SEARCH_CLASS_NAME = "className";
+  public static final String SEARCH_CLASS_NAME = "className"; //$NON-NLS-1$
 
-  public static final String SEARCH_PACKAGING = "packaging";
+  public static final String SEARCH_PACKAGING = "packaging"; //$NON-NLS-1$
 
-  public static final String SEARCH_MD5 = "md5";
+  public static final String SEARCH_MD5 = "md5"; //$NON-NLS-1$
 
-  public static final String SEARCH_SHA1 = "sha1";
+  public static final String SEARCH_SHA1 = "sha1"; //$NON-NLS-1$
 
   /**
    * like SEARCH_ARTIFACT but will only return artifacts with packaging == pom
    */
-  public static final String SEARCH_PARENTS = "parents";
+  public static final String SEARCH_PARENTS = "parents"; //$NON-NLS-1$
   
   // search classifiers
 

@@ -50,9 +50,9 @@ public final class PomHandler extends DefaultHandler {
     }
   }
 
-  private static final String PROJECT = "project";
+  private static final String PROJECT = "project"; //$NON-NLS-1$
 
-  private static final String ARTIFACTID = "artifactId";
+  private static final String ARTIFACTID = "artifactId"; //$NON-NLS-1$
 
   /**
    * This is the name of the top-level element found in the XML file. This member variable is <code>null</code> unless
@@ -81,8 +81,8 @@ public final class PomHandler extends DefaultHandler {
     // disable DTD validation
     try {
       //  be sure validation is "off" or the feature to ignore DTD's will not apply
-      reader.setFeature("http://xml.org/sax/features/validation", false);
-      reader.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+      reader.setFeature("http://xml.org/sax/features/validation", false); //$NON-NLS-1$
+      reader.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false); //$NON-NLS-1$
     } catch(SAXNotRecognizedException e) {
       // not a big deal if the parser does not recognize the features
     } catch(SAXNotSupportedException e) {
@@ -111,7 +111,7 @@ public final class PomHandler extends DefaultHandler {
       }
       final SAXParser parser = createParser(fFactory);
       // to support external entities specified as relative URIs (see bug 63298)
-      contents.setSystemId("/");
+      contents.setSystemId("/"); //$NON-NLS-1$
       parser.parse(contents, this);
     } catch(StopParsingException e) {
       // Abort the parsing normally. Fall through...
@@ -127,7 +127,7 @@ public final class PomHandler extends DefaultHandler {
    */
   @Override
   public InputSource resolveEntity(String publicId, String systemId) {
-    return new InputSource(new StringReader(""));
+    return new InputSource(new StringReader("")); //$NON-NLS-1$
   }
 
 

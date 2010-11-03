@@ -19,6 +19,8 @@ import org.xml.sax.SAXException;
 
 import org.eclipse.core.runtime.content.IContentDescription;
 
+import org.eclipse.m2e.core.internal.Messages;
+
 
 /**
  * A content describer for POM files.
@@ -50,8 +52,7 @@ public final class PomFileContentDescriber extends XMLContentDescriber {
       return INDETERMINATE;
     } catch(ParserConfigurationException e) {
       // some bad thing happened - force this describer to be disabled
-      String message = "Internal Error: XML parser configuration error during content description for Ant buildfiles";
-      throw new RuntimeException(message);
+      throw new RuntimeException(Messages.PomFileContentDescriber_error);
     }
 
     // Check to see if we matched our criteria.

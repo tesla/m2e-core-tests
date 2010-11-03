@@ -24,6 +24,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
@@ -44,6 +45,7 @@ import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.MavenLogger;
 import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.embedder.IMaven;
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 
 
@@ -54,13 +56,13 @@ import org.eclipse.m2e.core.project.IMavenProjectFacade;
  */
 public class OpenUrlAction extends ActionDelegate implements IWorkbenchWindowActionDelegate, IExecutableExtension {
 
-  public static final String ID_PROJECT = "org.eclipse.m2e.openProjectPage";
+  public static final String ID_PROJECT = "org.eclipse.m2e.openProjectPage"; //$NON-NLS-1$
 
-  public static final String ID_ISSUES = "org.eclipse.m2e.openIssuesPage";
+  public static final String ID_ISSUES = "org.eclipse.m2e.openIssuesPage"; //$NON-NLS-1$
 
-  public static final String ID_SCM = "org.eclipse.m2e.openScmPage";
+  public static final String ID_SCM = "org.eclipse.m2e.openScmPage"; //$NON-NLS-1$
 
-  public static final String ID_CI = "org.eclipse.m2e.openCiPage";
+  public static final String ID_CI = "org.eclipse.m2e.openCiPage"; //$NON-NLS-1$
 
   String actionId;
   
@@ -93,7 +95,7 @@ public class OpenUrlAction extends ActionDelegate implements IWorkbenchWindowAct
         Object element = this.selection.getFirstElement();
         final ArtifactKey a = SelectionUtil.getArtifactKey(element);
         if(a != null) {
-          new Job("Opening Browser") {
+          new Job(Messages.OpenUrlAction_job_browser) {
             protected IStatus run(IProgressMonitor monitor) {
               openBrowser(actionId, a.getGroupId(), a.getArtifactId(), a.getVersion(), monitor);
               return Status.OK_STATUS;
@@ -107,7 +109,7 @@ public class OpenUrlAction extends ActionDelegate implements IWorkbenchWindowAct
         PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
           public void run() {
             MessageDialog.openInformation(Display.getDefault().getActiveShell(), //
-                "Open URL", "Unable to read Maven project");
+                Messages.OpenUrlAction_open_url_title, Messages.OpenUrlAction_open_url_message);
           }
         });
       }
@@ -144,7 +146,7 @@ public class OpenUrlAction extends ActionDelegate implements IWorkbenchWindowAct
     if(ID_PROJECT.equals(actionId)) {
       url = mavenProject.getUrl();
       if(url == null) {
-        openDialog("Project does't specify project URL");
+        openDialog(Messages.OpenUrlAction_error_no_url);
       }
     } else if(ID_ISSUES.equals(actionId)) {
       IssueManagement issueManagement = mavenProject.getIssueManagement();
@@ -152,7 +154,7 @@ public class OpenUrlAction extends ActionDelegate implements IWorkbenchWindowAct
         url = issueManagement.getUrl();
       }
       if(url == null) {
-        openDialog("Project does't specify issue management URL");
+        openDialog(Messages.OpenUrlAction_error_no_issues);
       }
     } else if(ID_SCM.equals(actionId)) {
       Scm scm = mavenProject.getScm();
@@ -160,7 +162,7 @@ public class OpenUrlAction extends ActionDelegate implements IWorkbenchWindowAct
         url = scm.getUrl();
       }
       if(url == null) {
-        openDialog("Project does't specify SCM URL");
+        openDialog(Messages.OpenUrlAction_error_no_scm);
       }
     } else if(ID_CI.equals(actionId)) {
       CiManagement ciManagement = mavenProject.getCiManagement();
@@ -168,7 +170,7 @@ public class OpenUrlAction extends ActionDelegate implements IWorkbenchWindowAct
         url = ciManagement.getUrl();
       }
       if(url == null) {
-        openDialog("Project does't specify Continuous Integration URL");
+        openDialog(Messages.OpenUrlAction_error_no_ci);
       }
     }
     return url;
@@ -187,11 +189,11 @@ public class OpenUrlAction extends ActionDelegate implements IWorkbenchWindowAct
 
     List<ArtifactRepository> artifactRepositories = maven.getArtifactRepositories();
 
-    Artifact a = maven.resolve(groupId, artifactId, version, "pom", null, artifactRepositories, monitor);
+    Artifact a = maven.resolve(groupId, artifactId, version, "pom", null, artifactRepositories, monitor); //$NON-NLS-1$
 
     File pomFile = a.getFile();
     if(pomFile == null) {
-      openDialog("Can't download " + name + "POM");
+      openDialog(NLS.bind(Messages.OpenUrlAction_error_open, name));
       return null;
     }
 
@@ -202,7 +204,7 @@ public class OpenUrlAction extends ActionDelegate implements IWorkbenchWindowAct
     PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
       public void run() {
         MessageDialog.openInformation(Display.getDefault().getActiveShell(), //
-            "Open Browser", msg);
+            Messages.OpenUrlAction_browser_title, msg);
       }
     });
   }

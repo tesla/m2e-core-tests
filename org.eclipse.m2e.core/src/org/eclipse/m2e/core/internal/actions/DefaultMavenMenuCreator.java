@@ -48,54 +48,54 @@ public class DefaultMavenMenuCreator extends AbstractMavenMenuCreator {
 
     if(selection.size() == 1 && selectionType == SelectionUtil.POM_FILE) {
       mgr.appendToGroup(NEW, getAction(new AddDependencyAction(), //
-          AddDependencyAction.ID, "Add Dependency"));
-      mgr.appendToGroup(NEW, getAction(new AddPluginAction(), AddPluginAction.ID, "Add Plugin"));
+          AddDependencyAction.ID, org.eclipse.m2e.core.internal.Messages.DefaultMavenMenuCreator_action_dependency));
+      mgr.appendToGroup(NEW, getAction(new AddPluginAction(), AddPluginAction.ID, org.eclipse.m2e.core.internal.Messages.DefaultMavenMenuCreator_action_plugin));
       mgr.appendToGroup(NEW, getAction(new ModuleProjectWizardAction(), //
-          ModuleProjectWizardAction.ID, Messages.getString("action.moduleProjectWizardAction")));
+          ModuleProjectWizardAction.ID, Messages.getString("action.moduleProjectWizardAction"))); //$NON-NLS-1$
 
       mgr.prependToGroup(OPEN, new Separator());
       mgr.appendToGroup(OPEN, getAction(new OpenUrlAction(OpenUrlAction.ID_PROJECT), //
-          OpenUrlAction.ID_PROJECT, "Open Project Page", "icons/web.gif"));
+          OpenUrlAction.ID_PROJECT, org.eclipse.m2e.core.internal.Messages.DefaultMavenMenuCreator_action_project_page, "icons/web.gif")); //$NON-NLS-2$
       mgr.appendToGroup(OPEN, getAction(new OpenUrlAction(OpenUrlAction.ID_ISSUES), //
-          OpenUrlAction.ID_ISSUES, "Open Issue Tracker"));
+          OpenUrlAction.ID_ISSUES, org.eclipse.m2e.core.internal.Messages.DefaultMavenMenuCreator_action_issues));
       mgr.appendToGroup(OPEN, getAction(new OpenUrlAction(OpenUrlAction.ID_SCM), //
-          OpenUrlAction.ID_SCM, "Open Source Control"));
+          OpenUrlAction.ID_SCM, org.eclipse.m2e.core.internal.Messages.DefaultMavenMenuCreator_action_scm));
       mgr.appendToGroup(OPEN, getAction(new OpenUrlAction(OpenUrlAction.ID_CI), // 
-          OpenUrlAction.ID_CI, "Open Continuous Integration"));
+          OpenUrlAction.ID_CI, org.eclipse.m2e.core.internal.Messages.DefaultMavenMenuCreator_action_ci));
     }
 
     if(selectionType == SelectionUtil.PROJECT_WITHOUT_NATURE) {
       mgr.appendToGroup(NATURE, getAction(new EnableNatureAction(), //
-          EnableNatureAction.ID, "Enable Dependency Management"));
+          EnableNatureAction.ID, org.eclipse.m2e.core.internal.Messages.DefaultMavenMenuCreator_action_enable_dm));
     }
 
     if(selectionType == SelectionUtil.PROJECT_WITH_NATURE) {
       if(selection.size() == 1) {
-        mgr.appendToGroup(NEW, getAction(new AddDependencyAction(), AddDependencyAction.ID, "Add Dependency"));
-        mgr.appendToGroup(NEW, getAction(new AddPluginAction(), AddPluginAction.ID, "Add Plugin"));
+        mgr.appendToGroup(NEW, getAction(new AddDependencyAction(), AddDependencyAction.ID, org.eclipse.m2e.core.internal.Messages.DefaultMavenMenuCreator_action_dependency));
+        mgr.appendToGroup(NEW, getAction(new AddPluginAction(), AddPluginAction.ID, org.eclipse.m2e.core.internal.Messages.DefaultMavenMenuCreator_action_plugin));
         mgr.appendToGroup(NEW, getAction(new ModuleProjectWizardAction(), //
-            ModuleProjectWizardAction.ID, Messages.getString("action.moduleProjectWizardAction")));
+            ModuleProjectWizardAction.ID, Messages.getString("action.moduleProjectWizardAction"))); //$NON-NLS-1$
         mgr.prependToGroup(UPDATE, new Separator());
       }
      
 
       mgr.appendToGroup(UPDATE, getAction(new RefreshMavenModelsAction(), RefreshMavenModelsAction.ID,
-          "Update Dependencies", "icons/update_dependencies.gif"));
+          org.eclipse.m2e.core.internal.Messages.DefaultMavenMenuCreator_action_update_deps, "icons/update_dependencies.gif")); //$NON-NLS-2$
       mgr.appendToGroup(UPDATE, getAction(new RefreshMavenModelsAction(true), RefreshMavenModelsAction.ID_SNAPSHOTS,
-          "Update Snapshots"));
+          org.eclipse.m2e.core.internal.Messages.DefaultMavenMenuCreator_action_update_snapshots));
       mgr.appendToGroup(UPDATE, getAction(new UpdateSourcesAction(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell()), //
-          UpdateSourcesAction.ID, "Update Project Configuration", "icons/update_source_folders.gif"));
+          UpdateSourcesAction.ID, org.eclipse.m2e.core.internal.Messages.DefaultMavenMenuCreator_action_update_config, "icons/update_source_folders.gif")); //$NON-NLS-2$
 
       mgr.prependToGroup(OPEN, new Separator());
-      mgr.appendToGroup(OPEN, getAction(new OpenPomAction(), OpenPomAction.ID, "Open POM"));
+      mgr.appendToGroup(OPEN, getAction(new OpenPomAction(), OpenPomAction.ID, org.eclipse.m2e.core.internal.Messages.DefaultMavenMenuCreator_action_open_pom));
       mgr.appendToGroup(OPEN, getAction(new OpenUrlAction(OpenUrlAction.ID_PROJECT), //
-          OpenUrlAction.ID_PROJECT, "Open Project Page", "icons/web.gif"));
+          OpenUrlAction.ID_PROJECT, org.eclipse.m2e.core.internal.Messages.DefaultMavenMenuCreator_action_project, "icons/web.gif")); //$NON-NLS-2$
       mgr.appendToGroup(OPEN, getAction(new OpenUrlAction(OpenUrlAction.ID_ISSUES), OpenUrlAction.ID_ISSUES,
-          "Open Issue Tracker"));
+          org.eclipse.m2e.core.internal.Messages.DefaultMavenMenuCreator_action_issues));
       mgr.appendToGroup(OPEN, getAction(new OpenUrlAction(OpenUrlAction.ID_SCM), OpenUrlAction.ID_SCM,
-          "Open Source Control"));
+          org.eclipse.m2e.core.internal.Messages.DefaultMavenMenuCreator_action_scm));
       mgr.appendToGroup(OPEN, getAction(new OpenUrlAction(OpenUrlAction.ID_CI), OpenUrlAction.ID_CI,
-          "Open Continuous Integration"));
+          org.eclipse.m2e.core.internal.Messages.DefaultMavenMenuCreator_action_ci));
 
       boolean enableWorkspaceResolution = true;
       if(selection.size() == 1) {
@@ -113,23 +113,23 @@ public class DefaultMavenMenuCreator extends AbstractMavenMenuCreator {
       mgr.prependToGroup(NATURE, new Separator());
       if(enableWorkspaceResolution) {
         mgr.appendToGroup(NATURE, getAction(new ChangeNatureAction(ChangeNatureAction.ENABLE_WORKSPACE),
-            ChangeNatureAction.ID_ENABLE_WORKSPACE, "Enable Workspace Resolution"));
+            ChangeNatureAction.ID_ENABLE_WORKSPACE, org.eclipse.m2e.core.internal.Messages.DefaultMavenMenuCreator_action_enable_workspace));
       } else {
         mgr.appendToGroup(NATURE, getAction(new ChangeNatureAction(ChangeNatureAction.DISABLE_WORKSPACE),
-            ChangeNatureAction.ID_DISABLE_WORKSPACE, "Disable Workspace Resolution"));
+            ChangeNatureAction.ID_DISABLE_WORKSPACE, org.eclipse.m2e.core.internal.Messages.DefaultMavenMenuCreator_action_disable_workspace));
       }
 
       mgr.appendToGroup(NATURE, getAction(new DisableNatureAction(), //
-          DisableNatureAction.ID, "Disable Dependency Management"));
+          DisableNatureAction.ID, org.eclipse.m2e.core.internal.Messages.DefaultMavenMenuCreator_action_disable_management));
     }
     
     if(selectionType == SelectionUtil.WORKING_SET) {
       mgr.appendToGroup(UPDATE, getAction(new RefreshMavenModelsAction(), RefreshMavenModelsAction.ID,
-          "Update Dependencies", "icons/update_dependencies.gif"));
+          org.eclipse.m2e.core.internal.Messages.DefaultMavenMenuCreator_action_update_deps, "icons/update_dependencies.gif")); //$NON-NLS-2$
       mgr.appendToGroup(UPDATE, getAction(new RefreshMavenModelsAction(true), RefreshMavenModelsAction.ID_SNAPSHOTS,
-          "Update Snapshots"));
+          org.eclipse.m2e.core.internal.Messages.DefaultMavenMenuCreator_action_update_snapshots));
       mgr.appendToGroup(UPDATE, getAction(new UpdateSourcesAction(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell()), //
-          UpdateSourcesAction.ID, "Update Project Configuration", "icons/update_source_folders.gif"));
+          UpdateSourcesAction.ID, org.eclipse.m2e.core.internal.Messages.DefaultMavenMenuCreator_action_update_config, "icons/update_source_folders.gif")); //$NON-NLS-2$
     }
   }
 

@@ -32,13 +32,13 @@ import org.eclipse.m2e.core.project.MavenProjectManager;
  */
 public class MavenWorkspaceRuntime implements MavenRuntime {
 
-  private static final ArtifactKey MAVEN_DISTRIBUTION = new ArtifactKey("org.apache.maven", "apache-maven", "3.0", null);
+  private static final ArtifactKey MAVEN_DISTRIBUTION = new ArtifactKey("org.apache.maven", "apache-maven", "3.0", null); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
-  private static final ArtifactKey PLEXUS_CLASSWORLDS = new ArtifactKey("org.codehaus.plexus", "plexus-classworlds", null, null);
+  private static final ArtifactKey PLEXUS_CLASSWORLDS = new ArtifactKey("org.codehaus.plexus", "plexus-classworlds", null, null); //$NON-NLS-1$ //$NON-NLS-2$
 
-  private static final String MAVEN_EXECUTOR_CLASS = "org.apache.maven.cli.MavenCli";
+  private static final String MAVEN_EXECUTOR_CLASS = "org.apache.maven.cli.MavenCli"; //$NON-NLS-1$
 
-  private static final String PLEXUS_CLASSWORLD_NAME = "plexus.core";
+  private static final String PLEXUS_CLASSWORLD_NAME = "plexus.core"; //$NON-NLS-1$
 
   private MavenProjectManager projectManager;
 
@@ -123,7 +123,7 @@ public class MavenWorkspaceRuntime implements MavenRuntime {
   }
 
   public String toString() {
-    return "Workspace (" + getVersion() + ")";
+    return "Workspace (" + getVersion() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
   }
 
   public String getVersion() {

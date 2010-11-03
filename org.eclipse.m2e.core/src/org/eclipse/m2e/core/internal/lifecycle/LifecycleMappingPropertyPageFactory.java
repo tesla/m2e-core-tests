@@ -38,15 +38,15 @@ import org.eclipse.m2e.core.project.configurator.ILifecycleMapping;
  */
 public class LifecycleMappingPropertyPageFactory {
 
-  public static final String EXTENSION_LIFECYCLE_MAPPING_PROPERTY_PAGE = IMavenConstants.PLUGIN_ID + ".lifecycleMappingPropertyPage";
+  public static final String EXTENSION_LIFECYCLE_MAPPING_PROPERTY_PAGE = IMavenConstants.PLUGIN_ID + ".lifecycleMappingPropertyPage"; //$NON-NLS-1$
 
-  private static final String ATTR_LIFECYCLE_MAPPING_ID = "lifecycleMappingId";
+  private static final String ATTR_LIFECYCLE_MAPPING_ID = "lifecycleMappingId"; //$NON-NLS-1$
 
-  private static final String ATTR_LIFECYCLE_PROP_NAME = "name";
+  private static final String ATTR_LIFECYCLE_PROP_NAME = "name"; //$NON-NLS-1$
 
-  private static final String ATTR_LIFECYCLE_PROP_ID = "id";
+  private static final String ATTR_LIFECYCLE_PROP_ID = "id"; //$NON-NLS-1$
 
-  private static final String ELEMENT_LIFECYCLE_MAPPING_PROPERTY_PAGE = "lifecycleMappingPropertyPage";
+  private static final String ELEMENT_LIFECYCLE_MAPPING_PROPERTY_PAGE = "lifecycleMappingPropertyPage"; //$NON-NLS-1$
 
   private static LifecycleMappingPropertyPageFactory factory;
 
@@ -72,7 +72,7 @@ public class LifecycleMappingPropertyPageFactory {
   public ILifecyclePropertyPage getPageForId(String id, IProject project, Shell shell) {
     if(id == null){
       //for the no-op (empty) lifecycle mapping, use that page
-      id = "NULL";
+      id = "NULL"; //$NON-NLS-1$
     }
     ILifecyclePropertyPage page = getFactory().pageMap.get(id);
     if(page == null){
@@ -98,7 +98,7 @@ public class LifecycleMappingPropertyPageFactory {
         for(IConfigurationElement element : elements) {
           if(element.getName().equals(ELEMENT_LIFECYCLE_MAPPING_PROPERTY_PAGE)) {
             try {
-              Object o = element.createExecutableExtension("class");
+              Object o = element.createExecutableExtension("class"); //$NON-NLS-1$
               ILifecyclePropertyPage propPage = (ILifecyclePropertyPage) o;
               String id = element.getAttribute(ATTR_LIFECYCLE_MAPPING_ID);
 

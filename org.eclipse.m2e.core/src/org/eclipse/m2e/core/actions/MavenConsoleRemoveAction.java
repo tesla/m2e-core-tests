@@ -12,11 +12,12 @@ import org.eclipse.jface.action.Action;
 
 import org.eclipse.m2e.core.MavenImages;
 import org.eclipse.m2e.core.MavenPlugin;
+import org.eclipse.m2e.core.internal.Messages;
 
 public class MavenConsoleRemoveAction extends Action {
 
   public MavenConsoleRemoveAction() {
-    setToolTipText("Close Maven2 Console");
+    setToolTipText(Messages.MavenConsoleRemoveAction_tooltip);
     setImageDescriptor(MavenImages.CLOSE);
   }
   

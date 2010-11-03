@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.osgi.util.NLS;
 
 import org.codehaus.plexus.ContainerConfiguration;
 import org.codehaus.plexus.DefaultContainerConfiguration;
@@ -140,6 +141,7 @@ import org.eclipse.m2e.core.embedder.IMavenConfiguration;
 import org.eclipse.m2e.core.embedder.IMavenConfigurationChangeListener;
 import org.eclipse.m2e.core.embedder.ISettingsChangeListener;
 import org.eclipse.m2e.core.embedder.MavenConfigurationChangeEvent;
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.internal.preferences.MavenPreferenceConstants;
 
 
@@ -148,7 +150,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
   /**
    * Id of maven core class realm
    */
-  public static final String MAVEN_CORE_REALM_ID = "plexus.core";
+  public static final String MAVEN_CORE_REALM_ID = "plexus.core"; //$NON-NLS-1$
 
 
   private DefaultPlexusContainer plexus;
@@ -182,7 +184,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
       lookup(MavenExecutionRequestPopulator.class).populateFromSettings(request, getSettings());
     } catch(MavenExecutionRequestPopulationException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
-          "Could not create maven execution request", ex));
+          Messages.MavenImpl_error_no_exec_req, ex));
     }
 
     ArtifactRepository localRepository = getLocalRepository();
@@ -193,7 +195,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
     // logging
     request.setTransferListener(createArtifactTransferListener(monitor));
 
-    request.getUserProperties().put("m2e.version", MavenPlugin.getVersion());
+    request.getUserProperties().put("m2e.version", MavenPlugin.getVersion()); //$NON-NLS-1$
 
     request.setCacheNotFound(true);
     request.setCacheTransferError(true);
@@ -270,19 +272,19 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
       return clazz.cast(lookup(MavenPluginManager.class).getConfiguredMojo(Mojo.class, session, mojoExecution));
     } catch(PluginContainerException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
-          "Could not get configured mojo for " + mojoExecution, ex));
+          NLS.bind(Messages.MavenImpl_error_mojo, mojoExecution), ex));
     } catch(PluginConfigurationException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
-          "Could not get configured mojo for " + mojoExecution, ex));
+          NLS.bind(Messages.MavenImpl_error_mojo, mojoExecution), ex));
     } catch(ClassCastException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
-          "Could not get configured mojo for " + mojoExecution, ex));
+          NLS.bind(Messages.MavenImpl_error_mojo, mojoExecution), ex));
     } catch(PluginResolutionException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
-          "Could not get configured mojo for " + mojoExecution, ex));
+          NLS.bind(Messages.MavenImpl_error_mojo, mojoExecution), ex));
     } catch(PluginManagerException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
-          "Could not get configured mojo for " + mojoExecution, ex));
+          NLS.bind(Messages.MavenImpl_error_mojo, mojoExecution), ex));
     }
   }
 
@@ -298,7 +300,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
       return lookup(LifecycleExecutor.class).calculateExecutionPlan(session, goals.toArray(new String[goals.size()]));
     } catch(Exception ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
-          "Could not calculate build plan", ex));
+          Messages.MavenImpl_error_calc_build_plan, ex));
     }
   }
   
@@ -347,7 +349,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
     try {
       return lookup(SettingsBuilder.class).build(request).getEffectiveSettings();
     } catch(SettingsBuildingException ex) {
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not read settings.xml",
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, Messages.MavenImpl_error_read_settings,
           ex));
     }
   }
@@ -356,7 +358,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
     try {
       lookup(SettingsWriter.class).write(out, null, settings);
     } catch(IOException ex) {
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not write settings.xml",
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, Messages.MavenImpl_error_write_settings,
           ex));
     }
   }
@@ -376,7 +378,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
           problems.add(new DefaultSettingsProblem(ex.getMessage(), Severity.FATAL, settings, -1, -1, ex));
         }
       } else {
-        problems.add(new DefaultSettingsProblem("Can not read settings file " + settings,
+        problems.add(new DefaultSettingsProblem(NLS.bind(Messages.MavenImpl_error_read_settings2, settings),
             SettingsProblem.Severity.ERROR, settings, -1, -1, null));
       }
     }
@@ -417,7 +419,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
     try {
       return lookup(ModelReader.class).read(in, null);
     } catch(IOException e) {
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not read pom.xml", e));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, Messages.MavenImpl_error_read_pom, e));
     }
   }
 
@@ -430,7 +432,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
         IOUtil.close(is);
       }
     } catch(IOException e) {
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not read pom.xml", e));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, Messages.MavenImpl_error_read_pom, e));
     }
   }
 
@@ -438,7 +440,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
     try {
       lookup(ModelWriter.class).write(out, null, model);
     } catch(IOException ex) {
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not write pom.xml", ex));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, Messages.MavenImpl_error_write_pom, ex));
     }
   }
 
@@ -451,10 +453,10 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
       configuration.setRepositorySession(createRepositorySession(request));
       return lookup(ProjectBuilder.class).build(pomFile, configuration).getProject();
     } catch(ProjectBuildingException ex) {
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not read maven project",
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, Messages.MavenImpl_error_read_project,
           ex));
     } catch(MavenExecutionRequestPopulationException ex) {
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not read maven project",
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, Messages.MavenImpl_error_read_project,
           ex));
     }
   }
@@ -489,7 +491,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
   public void detachFromSession(MavenProject project) throws CoreException {
     try {
       // TODO remove reflection when we have embedder 3.0.1 or better
-      Field f = project.getClass().getDeclaredField("projectBuilderConfiguration");
+      Field f = project.getClass().getDeclaredField("projectBuilderConfiguration"); //$NON-NLS-1$
       f.setAccessible(true);
       ProjectBuildingRequest request;
       request = (ProjectBuildingRequest) f.get(project);
@@ -574,10 +576,10 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
         }
       }
       if(members.isEmpty()) {
-        members.add(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Missing " + artifact, null));
+        members.add(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, NLS.bind(Messages.MavenImpl_error_missing, artifact), null));
       }
       IStatus[] newMembers = members.toArray(new IStatus[members.size()]);
-      throw new CoreException(new MultiStatus(IMavenConstants.PLUGIN_ID, -1, newMembers, "Could not resolve artifact",
+      throw new CoreException(new MultiStatus(IMavenConstants.PLUGIN_ID, -1, newMembers, Messages.MavenImpl_error_resolve,
           null));
     }
 
@@ -613,7 +615,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
       }
     } catch(IOException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
-          "Could not write artifact lastUpdated status", ex));
+          Messages.MavenImpl_error_write_lastUpdated, ex));
     }
   }
 
@@ -684,14 +686,14 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
       // that's okay
     } catch(IOException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
-          "Could not read artifact lastUpdated status", ex));
+          Messages.MavenImpl_error_read_lastUpdated, ex));
     }
     return lastUpdated;
   }
 
   private File getLastUpdatedFile(ArtifactRepository localRepository, Artifact artifact) {
-    return new File(localRepository.getBasedir(), basePathOf(localRepository, artifact) + "/"
-        + "m2e-lastUpdated.properties");
+    return new File(localRepository.getBasedir(), basePathOf(localRepository, artifact) + "/" //$NON-NLS-1$
+        + "m2e-lastUpdated.properties"); //$NON-NLS-1$
   }
 
   private static final char PATH_SEPARATOR = '/';
@@ -744,13 +746,13 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
       return asType.cast(value);
     } catch(ComponentConfigurationException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
-          "Could not get mojo execution paramater value", ex));
+          Messages.MavenImpl_error_param, ex));
     } catch(PluginManagerException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
-          "Could not get mojo execution paramater value", ex));
+          Messages.MavenImpl_error_param, ex));
     } catch(PluginResolutionException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
-          "Could not get mojo execution paramater value", ex));
+          Messages.MavenImpl_error_param, ex));
     }
   }
 
@@ -769,19 +771,19 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
             session.getCurrentProject().getRemotePluginRepositories(), session.getRepositorySession());
       } catch(PluginNotFoundException ex) {
         throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
-            "Could not get mojo execution paramater value", ex));
+            Messages.MavenImpl_error_param, ex));
       } catch(PluginResolutionException ex) {
         throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
-            "Could not get mojo execution paramater value", ex));
+            Messages.MavenImpl_error_param, ex));
       } catch(PluginDescriptorParsingException ex) {
         throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
-            "Could not get mojo execution paramater value", ex));
+            Messages.MavenImpl_error_param, ex));
       } catch(MojoNotFoundException ex) {
         throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
-            "Could not get mojo execution paramater value", ex));
+            Messages.MavenImpl_error_param, ex));
       } catch(InvalidPluginDescriptorException ex) {
         throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
-            "Could not get mojo execution paramater value", ex));
+            Messages.MavenImpl_error_param, ex));
       }
 
       PlexusConfiguration defaultConfig = mojoDescriptor.getMojoConfiguration();
@@ -797,7 +799,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
     }
 
     try {
-      MojoExecution mojoExecution = new MojoExecution(plugin, goal, "default");
+      MojoExecution mojoExecution = new MojoExecution(plugin, goal, "default"); //$NON-NLS-1$
 
       ExpressionEvaluator expressionEvaluator = new PluginParameterExpressionEvaluator(session, mojoExecution);
 
@@ -808,10 +810,10 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
       return type.cast(value);
     } catch(ComponentConfigurationException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
-          "Could not get mojo execution paramater value", ex));
+          Messages.MavenImpl_error_param, ex));
     } catch(ClassCastException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
-          "Could not get mojo execution paramater value", ex));
+          Messages.MavenImpl_error_param, ex));
     }
   }
 
@@ -832,7 +834,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
     Repository repository = new Repository();
     repository.setId(id);
     repository.setUrl(url);
-    repository.setLayout("default");
+    repository.setLayout("default"); //$NON-NLS-1$
 
     ArtifactRepository repo;
     try {
@@ -841,7 +843,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
       injectSettings(repos);
     } catch(InvalidRepositoryException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
-          "Could not create artifact repository", ex));
+          Messages.MavenImpl_error_create_repo, ex));
     }
     return repo;
   }
@@ -913,7 +915,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
         ArtifactRepository artifactRepository = lookup(RepositorySystem.class).buildArtifactRepository(repository);
         artifactRepositories.add(artifactRepository);
       } catch(InvalidRepositoryException ex) {
-        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Could not read settings.xml",
+        throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, Messages.MavenImpl_error_read_settings,
             ex));
       }
     }
@@ -962,7 +964,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
       lookup(MavenExecutionRequestPopulator.class).populateDefaults(request);
     } catch(MavenExecutionRequestPopulationException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
-          "Could not read Maven configuration", ex));
+          Messages.MavenImpl_error_read_config, ex));
     }
   }
 
@@ -1008,7 +1010,7 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
         plexus.setLoggerManager(new EclipseLoggerManager(console, mavenConfiguration));
       } catch(PlexusContainerException ex) {
         throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
-            "Could not initialize embedded maven runtime", ex));
+            Messages.MavenImpl_error_init_maven, ex));
       }
     }
     return plexus;
@@ -1038,9 +1040,9 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
       ProjectSorter rm = new ProjectSorter(projects);
       return rm.getSortedProjects();
     } catch(CycleDetectedException ex) {
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, "unable to sort projects", ex));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, Messages.MavenImpl_error_sort, ex));
     } catch(DuplicateProjectException ex) {
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, "unable to sort projects", ex));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, Messages.MavenImpl_error_sort, ex));
     }
   }
 
@@ -1061,14 +1063,14 @@ public class MavenImpl implements IMaven, IMavenConfigurationChangeListener {
       return getPlexusContainer().lookup(clazz);
     } catch(ComponentLookupException ex) {
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
-          "Could not lookup required component", ex));
+          Messages.MavenImpl_error_lookup, ex));
     }
   }
 
   private static DefaultPlexusContainer newPlexusContainer() throws PlexusContainerException {
     ContainerConfiguration mavenCoreCC = new DefaultContainerConfiguration().setClassWorld(
         new ClassWorld(MAVEN_CORE_REALM_ID, ClassWorld.class.getClassLoader())).setName(
-        "mavenCore");
+        "mavenCore"); //$NON-NLS-1$
 
     mavenCoreCC.setAutoWiring(true);
 

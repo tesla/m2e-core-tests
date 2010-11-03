@@ -43,7 +43,7 @@ public class EclipseClassRealmManagerDelegate implements ClassRealmManagerDelega
 
   public EclipseClassRealmManagerDelegate() {
     Properties props = new Properties();
-    InputStream is = getClass().getResourceAsStream("/org/sonatype/plexus/build/incremental/version.properties");
+    InputStream is = getClass().getResourceAsStream("/org/sonatype/plexus/build/incremental/version.properties"); //$NON-NLS-1$
     if(is != null) {
       try {
         props.load(is);
@@ -51,25 +51,25 @@ public class EclipseClassRealmManagerDelegate implements ClassRealmManagerDelega
         e.printStackTrace();
       }
     }
-    currentBuildApiVersion = new DefaultArtifactVersion(props.getProperty("api.version", "0.0.5"));
+    currentBuildApiVersion = new DefaultArtifactVersion(props.getProperty("api.version", "0.0.5")); //$NON-NLS-1$ //$NON-NLS-2$
   }
 
   public void setupRealm(ClassRealm realm, ClassRealmRequest request) {
     if(supportsBuildApi(request.getConstituents())) {
       ClassRealm coreRealm = plexus.getContainerRealm();
 
-      realm.importFrom(coreRealm, "org.codehaus.plexus.util.AbstractScanner");
-      realm.importFrom(coreRealm, "org.codehaus.plexus.util.Scanner");
+      realm.importFrom(coreRealm, "org.codehaus.plexus.util.AbstractScanner"); //$NON-NLS-1$
+      realm.importFrom(coreRealm, "org.codehaus.plexus.util.Scanner"); //$NON-NLS-1$
 
-      realm.importFrom(coreRealm, "org.sonatype.plexus.build.incremental");
+      realm.importFrom(coreRealm, "org.sonatype.plexus.build.incremental"); //$NON-NLS-1$
     }
   }
 
   private boolean supportsBuildApi(List<ClassRealmConstituent> constituents) {
     for(Iterator<ClassRealmConstituent> it = constituents.iterator(); it.hasNext();) {
       ClassRealmConstituent constituent = it.next();
-      if("org.sonatype.plexus".equals(constituent.getGroupId())
-          && "plexus-build-api".equals(constituent.getArtifactId())) {
+      if("org.sonatype.plexus".equals(constituent.getGroupId()) //$NON-NLS-1$
+          && "plexus-build-api".equals(constituent.getArtifactId())) { //$NON-NLS-1$
         ArtifactVersion version = new DefaultArtifactVersion(constituent.getVersion());
         boolean compatible = currentBuildApiVersion.compareTo(version) >= 0;
         if(compatible) {

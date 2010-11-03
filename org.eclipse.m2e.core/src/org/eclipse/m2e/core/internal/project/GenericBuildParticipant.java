@@ -52,7 +52,7 @@ import org.eclipse.m2e.core.project.configurator.AbstractBuildParticipant;
 public class GenericBuildParticipant extends AbstractBuildParticipant {
 
   public static boolean DEBUG = MavenPlugin.getDefault().isDebugging()
-      & Boolean.parseBoolean(Platform.getDebugOption(IMavenConstants.PLUGIN_ID + "/debug/builder"));
+      & Boolean.parseBoolean(Platform.getDebugOption(IMavenConstants.PLUGIN_ID + "/debug/builder")); //$NON-NLS-1$
 
   public Set<IProject> build(int kind, IProgressMonitor monitor) throws Exception {
     MavenPlugin plugin = MavenPlugin.getDefault();
@@ -64,12 +64,12 @@ public class GenericBuildParticipant extends AbstractBuildParticipant {
     boolean requireFullBuild = getRequireFullBuild(projectFacade);
 
     if(DEBUG) {
-      System.out.println("\nStarting Maven build for " + projectFacade.getProject().getName()
-          + " kind:" + kind + " requestedFullBuild:" + requireFullBuild
-          + " @ " + new Date(System.currentTimeMillis()));
+      System.out.println("\nStarting Maven build for " + projectFacade.getProject().getName() //$NON-NLS-1$
+          + " kind:" + kind + " requestedFullBuild:" + requireFullBuild //$NON-NLS-1$ //$NON-NLS-2$
+          + " @ " + new Date(System.currentTimeMillis())); //$NON-NLS-1$
     }
     
-    console.logMessage("Maven Builder: " + getKind(kind) + " " + (requireFullBuild ? "requireFullBuild" : ""));
+    console.logMessage("Maven Builder: " + getKind(kind) + " " + (requireFullBuild ? "requireFullBuild" : "")); //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 
     if(IncrementalProjectBuilder.FULL_BUILD == kind || IncrementalProjectBuilder.CLEAN_BUILD == kind
         || requireFullBuild) {
@@ -89,9 +89,9 @@ public class GenericBuildParticipant extends AbstractBuildParticipant {
   public List<String> getPossibleGoalsForBuildKind(IMavenProjectFacade projectFacade, int kind) {
     ResolverConfiguration configuration = projectFacade.getResolverConfiguration();
     if(IncrementalProjectBuilder.FULL_BUILD == kind || IncrementalProjectBuilder.CLEAN_BUILD == kind) {
-      return Arrays.asList(configuration.getFullBuildGoals().split("[,\\s]+"));
+      return Arrays.asList(configuration.getFullBuildGoals().split("[,\\s]+")); //$NON-NLS-1$
     }
-    return Arrays.asList(configuration.getResourceFilteringGoals().split("[,\\s]+"));
+    return Arrays.asList(configuration.getResourceFilteringGoals().split("[,\\s]+")); //$NON-NLS-1$
   }
 
   private boolean getRequireFullBuild(IMavenProjectFacade projectFacade) throws CoreException {
@@ -105,15 +105,15 @@ public class GenericBuildParticipant extends AbstractBuildParticipant {
   private String getKind(int kind) {
     switch(kind) {
       case IncrementalProjectBuilder.FULL_BUILD:
-        return "FULL_BUILD";
+        return "FULL_BUILD"; //$NON-NLS-1$
       case IncrementalProjectBuilder.AUTO_BUILD:
-        return "AUTO_BUILD";
+        return "AUTO_BUILD"; //$NON-NLS-1$
       case IncrementalProjectBuilder.INCREMENTAL_BUILD:
-        return "INCREMENTAL_BUILD";
+        return "INCREMENTAL_BUILD"; //$NON-NLS-1$
       case IncrementalProjectBuilder.CLEAN_BUILD:
-        return "CLEAN_BUILD";
+        return "CLEAN_BUILD"; //$NON-NLS-1$
     }
-    return "unknown";
+    return "unknown"; //$NON-NLS-1$
   }
 
   private void executePostBuild(final IMavenProjectFacade projectFacade, //
@@ -125,7 +125,7 @@ public class GenericBuildParticipant extends AbstractBuildParticipant {
     ResolverConfiguration configuration = projectFacade.getResolverConfiguration();
 
     MavenExecutionRequest request = manager.createExecutionRequest(projectFacade.getPom(), configuration, monitor);
-    List<String> goals = Arrays.asList(configuration.getFullBuildGoals().split("[,\\s]+"));
+    List<String> goals = Arrays.asList(configuration.getFullBuildGoals().split("[,\\s]+")); //$NON-NLS-1$
     List<String> filteredGoals = getFilteredGoals(maven, goals, projectFacade, monitor);
     request.setGoals(filteredGoals.isEmpty() ? goals : filteredGoals);
 
@@ -174,7 +174,7 @@ public class GenericBuildParticipant extends AbstractBuildParticipant {
     ResolverConfiguration configuration = projectFacade.getResolverConfiguration();
     
     MavenExecutionRequest request = manager.createExecutionRequest(projectFacade.getPom(), configuration, monitor);
-    List<String> goals = Arrays.asList(configuration.getResourceFilteringGoals().split("[,\\s]+"));
+    List<String> goals = Arrays.asList(configuration.getResourceFilteringGoals().split("[,\\s]+")); //$NON-NLS-1$
     List<String> filteredGoals = getFilteredGoals(maven, goals, projectFacade, monitor);
     request.setGoals(filteredGoals.isEmpty() ? goals : filteredGoals);
 
@@ -237,7 +237,7 @@ public class GenericBuildParticipant extends AbstractBuildParticipant {
       String msg = "Build errors for " + projectNname;
       List<Throwable> exceptions = result.getExceptions();
       for(Throwable ex : exceptions) {
-        MavenPlugin.getDefault().getConsole().logError(msg + "; " + ex.toString());
+        MavenPlugin.getDefault().getConsole().logError(msg + "; " + ex.toString()); //$NON-NLS-1$
         MavenLogger.log(msg, ex);
       }
 

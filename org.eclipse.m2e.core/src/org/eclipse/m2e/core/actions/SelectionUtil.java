@@ -54,6 +54,7 @@ import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.core.MavenLogger;
 import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.embedder.IMaven;
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.MavenProjectManager;
 import org.eclipse.m2e.core.util.Util;
@@ -257,7 +258,7 @@ public class SelectionUtil {
         if(editor!=null) {
           MavenProject mavenProject = getMavenProject(editor.getEditorInput(), null);
           if(mavenProject!=null) {
-            Artifact a = mavenProject.getArtifactMap().get(groupId + ":" + artifactId);
+            Artifact a = mavenProject.getArtifactMap().get(groupId + ":" + artifactId); //$NON-NLS-1$
             version = a.getBaseVersion();
           }
         }
@@ -286,7 +287,7 @@ public class SelectionUtil {
         InputStream is = null;
         OutputStream os = null;
         try {
-          tempPomFile = File.createTempFile("maven-pom", ".pom");
+          tempPomFile = File.createTempFile("maven-pom", ".pom"); //$NON-NLS-1$ //$NON-NLS-2$
           os = new FileOutputStream(tempPomFile);
           is = storage.getContents();
           IOUtil.copy(is, os);
@@ -304,7 +305,7 @@ public class SelectionUtil {
         return readMavenProject(path.toFile(), monitor);
       }
 
-    } else if(editorInput.getClass().getName().endsWith("FileStoreEditorInput")) {
+    } else if(editorInput.getClass().getName().endsWith("FileStoreEditorInput")) { //$NON-NLS-1$
       return readMavenProject(new File(Util.proxy(editorInput, FileStoreEditorInputStub.class).getURI().getPath()), monitor);
     }
     
@@ -339,11 +340,11 @@ public class SelectionUtil {
       }
 
       throw new CoreException(new MultiStatus(IMavenConstants.PLUGIN_ID, IStatus.ERROR, //
-          statuses.toArray(new IStatus[statuses.size()]), "Can't read Maven project", null));
+          statuses.toArray(new IStatus[statuses.size()]), Messages.SelectionUtil_error_cannot_read, null));
     }
 
     throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, //
-        "Can't read Maven project", null));
+        Messages.SelectionUtil_error_cannot_read, null));
   }
 
   private static IEditorPart getActiveEditor() {

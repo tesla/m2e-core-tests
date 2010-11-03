@@ -28,19 +28,19 @@ import org.eclipse.m2e.core.repository.IRepositoryRegistry;
  */
 public class IndexesExtensionReader implements IRepositoryDiscoverer {
 
-  private static final String EXTENSION_INDEXES = IMavenConstants.PLUGIN_ID + ".indexes";
+  private static final String EXTENSION_INDEXES = IMavenConstants.PLUGIN_ID + ".indexes"; //$NON-NLS-1$
 
-  private static final String ELEMENT_INDEX = "index";
+  private static final String ELEMENT_INDEX = "index"; //$NON-NLS-1$
 
-  private static final String ATTR_INDEX_ID = "indexId";
+  private static final String ATTR_INDEX_ID = "indexId"; //$NON-NLS-1$
 
 //  private static final String ATTR_INDEX_ARCHIVE = "archive";
 
-  private static final String ATTR_REPOSITORY_URL = "repositoryUrl";
+  private static final String ATTR_REPOSITORY_URL = "repositoryUrl"; //$NON-NLS-1$
 
 //  private static final String ATTR_UPDATE_URL = "updateUrl";
 
-  private static final String ATTR_IS_SHORT = "isShort";
+  private static final String ATTR_IS_SHORT = "isShort"; //$NON-NLS-1$
 
   private final NexusIndexManager indexManager;
 

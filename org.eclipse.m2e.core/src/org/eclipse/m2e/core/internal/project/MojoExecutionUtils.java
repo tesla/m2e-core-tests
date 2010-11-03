@@ -17,10 +17,10 @@ import org.apache.maven.plugin.MojoExecution;
  */
 public class MojoExecutionUtils {
   public static String getExecutionKey(MojoExecution execution) {
-    return nvl(execution.getGroupId()) + ":" + nvl(execution.getArtifactId()) + ":" + nvl(execution.getVersion()) + ":" + nvl(execution.getGoal());
+    return nvl(execution.getGroupId()) + ":" + nvl(execution.getArtifactId()) + ":" + nvl(execution.getVersion()) + ":" + nvl(execution.getGoal()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
   }
   
   private static String nvl(String s) {
-    return s == null ? "" : s;
+    return s == null ? "" : s; //$NON-NLS-1$
   }
 }

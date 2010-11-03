@@ -78,6 +78,7 @@ import org.eclipse.m2e.core.embedder.MavenModelManager;
 import org.eclipse.m2e.core.embedder.MavenRuntimeManager;
 import org.eclipse.m2e.core.index.IndexManager;
 import org.eclipse.m2e.core.internal.ExtensionReader;
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.internal.console.MavenConsoleImpl;
 import org.eclipse.m2e.core.internal.embedder.MavenConfigurationImpl;
 import org.eclipse.m2e.core.internal.embedder.MavenEmbeddedRuntime;
@@ -106,7 +107,7 @@ import org.eclipse.m2e.core.repository.IRepositoryRegistry;
 public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
   // preferences
-  private static final String PREFS_ARCHETYPES = "archetypesInfo.xml";
+  private static final String PREFS_ARCHETYPES = "archetypesInfo.xml"; //$NON-NLS-1$
   
   // The shared instance
   private static MavenPlugin plugin;
@@ -141,9 +142,9 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
   private RepositoryRegistry repositoryRegistry;
 
-  private String version = "0.0.0";
+  private String version = "0.0.0"; //$NON-NLS-1$
 
-  private String qualifiedVersion = "0.0.0.qualifier";
+  private String qualifiedVersion = "0.0.0.qualifier"; //$NON-NLS-1$
 
   private IMavenConfiguration mavenConfiguration;
 
@@ -152,7 +153,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   public MavenPlugin() {
     plugin = this;
 
-    if(Boolean.parseBoolean(Platform.getDebugOption(IMavenConstants.PLUGIN_ID + "/debug/initialization"))) {
+    if(Boolean.parseBoolean(Platform.getDebugOption(IMavenConstants.PLUGIN_ID + "/debug/initialization"))) { //$NON-NLS-1$
       System.err.println("### executing constructor " + IMavenConstants.PLUGIN_ID); //$NON-NLS-1$
       new Throwable().printStackTrace();
     }
@@ -168,7 +169,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
   public void start(final BundleContext context) throws Exception {
     super.start(context);
     
-    if(Boolean.parseBoolean(Platform.getDebugOption(IMavenConstants.PLUGIN_ID + "/debug/initialization"))) {
+    if(Boolean.parseBoolean(Platform.getDebugOption(IMavenConstants.PLUGIN_ID + "/debug/initialization"))) { //$NON-NLS-1$
       System.err.println("### executing start() " + IMavenConstants.PLUGIN_ID); //$NON-NLS-1$
       new Throwable().printStackTrace();
     }
@@ -178,7 +179,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     try {
       this.qualifiedVersion = (String) getBundle().getHeaders().get(Constants.BUNDLE_VERSION);
       Version bundleVersion = Version.parseVersion(this.qualifiedVersion);
-      this.version = bundleVersion.getMajor() + "." + bundleVersion.getMinor() + "." + bundleVersion.getMicro();
+      this.version = bundleVersion.getMajor() + "." + bundleVersion.getMinor() + "." + bundleVersion.getMicro(); //$NON-NLS-1$ //$NON-NLS-2$
     } catch (IllegalArgumentException e) {
       // ignored
     }
@@ -195,8 +196,8 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
 
     ClassLoader cl = MavenPlugin.class.getClassLoader();
     ContainerConfiguration cc = new DefaultContainerConfiguration()
-      .setClassWorld(new ClassWorld("plexus.core", cl))
-      .setName("plexus");
+      .setClassWorld(new ClassWorld("plexus.core", cl)) //$NON-NLS-1$
+      .setName("plexus"); //$NON-NLS-1$
     this.plexus = new DefaultPlexusContainer( cc);
 
     File stateLocationDir = getStateLocation().toFile();
@@ -207,7 +208,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
       this.archetypeManager.readCatalogs();
     } catch (Exception ex) {
       String msg = "Can't read archetype catalog configuration";
-      this.console.logError(msg + "; " + ex.getMessage());
+      this.console.logError(msg + "; " + ex.getMessage()); //$NON-NLS-1$
       MavenLogger.log(msg, ex);
     }
 
@@ -322,10 +323,10 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     }
     // There is no tools.jar on Mac OS X
     // http://developer.apple.com/documentation/Java/Conceptual/Java14Development/02-JavaDevTools/JavaDevTools.html
-    String osName = System.getProperty("os.name", "");
-    if(osName.toLowerCase().indexOf("mac os") == -1) {
-      String javaHome = System.getProperty("java.home");
-      File toolsJar = new File(javaHome, "../lib/tools.jar");
+    String osName = System.getProperty("os.name", ""); //$NON-NLS-1$ //$NON-NLS-2$
+    if(osName.toLowerCase().indexOf("mac os") == -1) { //$NON-NLS-1$
+      String javaHome = System.getProperty("java.home"); //$NON-NLS-1$
+      File toolsJar = new File(javaHome, "../lib/tools.jar"); //$NON-NLS-1$
       if(!toolsJar.exists()) {
         getConsole().logError("Eclipse is running in a JRE, but a JDK is required\n" // 
             + "  Some Maven plugins may not work when importing projects or updating source folders.");
@@ -341,14 +342,11 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
       public void run() {
         Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
         MessageDialogWithToggle dialog = new MessageDialogWithToggle(shell, //
-            "Maven Integration for Eclipse JDK Warning", //
-            null, "The Maven Integration requires that Eclipse be running in a JDK, "
-                + "because a number of Maven core plugins are using jars from the JDK.\n\n"
-                + "Please make sure the -vm option in <a>eclipse.ini</a> "
-                + "is pointing to a JDK and verify that <a>Installed JREs</a> " + "are also using JDK installs.", //
+            Messages.MavenPlugin_error_jre_title, //
+            null, Messages.MavenPlugin_error_jre_message,
             MessageDialog.WARNING, //
             new String[] {IDialogConstants.OK_LABEL}, //
-            0, "Do not warn again", false) {
+            0, Messages.MavenPlugin_error_warn_again, false) {
           protected Control createMessageArea(Composite composite) {
             Image image = getImage();
             if(image != null) {
@@ -362,7 +360,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
             link.setText(message);
             link.addSelectionListener(new SelectionAdapter() {
               public void widgetSelected(SelectionEvent e) {
-                if("eclipse.ini".equals(e.text)) {
+                if("eclipse.ini".equals(e.text)) { //$NON-NLS-1$
 //                    String href = "topic=/org.eclipse.platform.doc.user/tasks/running_eclipse.htm";
 //                    BaseHelpSystem.getHelpDisplay().displayHelpResource(href, false);
 
@@ -371,7 +369,7 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
                     // browser.openURL(new URL("http://www.eclipse.org/swt/launcher.html"));
                     browser
                         .openURL(new URL(
-                            "http://help.eclipse.org/help33/index.jsp?topic=/org.eclipse.platform.doc.user/tasks/running_eclipse.htm"));
+                            "http://help.eclipse.org/help33/index.jsp?topic=/org.eclipse.platform.doc.user/tasks/running_eclipse.htm")); //$NON-NLS-1$
                   } catch(MalformedURLException ex) {
                     MavenLogger.log("Malformed URL", ex);
                   } catch(PartInitException ex) {

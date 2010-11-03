@@ -32,9 +32,12 @@ import org.xml.sax.helpers.AttributesImpl;
 import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.XMLFilterImpl;
 
+import org.eclipse.osgi.util.NLS;
+
 import org.eclipse.m2e.core.archetype.ArchetypeCatalogFactory.LocalCatalogFactory;
 import org.eclipse.m2e.core.archetype.ArchetypeCatalogFactory.RemoteCatalogFactory;
 import org.eclipse.m2e.core.core.MavenLogger;
+import org.eclipse.m2e.core.internal.Messages;
 
 
 /**
@@ -44,19 +47,19 @@ import org.eclipse.m2e.core.core.MavenLogger;
  */
 public class ArchetypeCatalogsWriter {
 
-  private static final String ELEMENT_CATALOGS = "archetypeCatalogs";
+  private static final String ELEMENT_CATALOGS = "archetypeCatalogs"; //$NON-NLS-1$
 
-  private static final String ELEMENT_CATALOG = "catalog";
+  private static final String ELEMENT_CATALOG = "catalog"; //$NON-NLS-1$
 
-  private static final String ATT_CATALOG_TYPE = "type";
+  private static final String ATT_CATALOG_TYPE = "type"; //$NON-NLS-1$
 
-  private static final String ATT_CATALOG_LOCATION = "location";
+  private static final String ATT_CATALOG_LOCATION = "location"; //$NON-NLS-1$
   
-  public static final String ATT_CATALOG_DESCRIPTION = "description";
+  public static final String ATT_CATALOG_DESCRIPTION = "description"; //$NON-NLS-1$
   
-  private static final String TYPE_LOCAL = "local";
+  private static final String TYPE_LOCAL = "local"; //$NON-NLS-1$
 
-  private static final String TYPE_REMOTE = "remote";
+  private static final String TYPE_REMOTE = "remote"; //$NON-NLS-1$
 
   
   public Collection<ArchetypeCatalogFactory> readArchetypeCatalogs(InputStream is) throws IOException {
@@ -66,13 +69,13 @@ public class ArchetypeCatalogsWriter {
       SAXParser parser = parserFactory.newSAXParser();
       parser.parse(is, new ArchetypeCatalogsContentHandler(catalogs));
     } catch(SAXException ex) {
-      String msg = "Unable to parse Archetype catalogs list";
+      String msg = Messages.ArchetypeCatalogsWriter_error_parse;
       MavenLogger.log(msg, ex);
-      throw new IOException(msg + "; " + ex.getMessage());
+      throw new IOException(NLS.bind(msg, ex.getMessage()));
     } catch(ParserConfigurationException ex) {
-      String msg = "Unable to parse Archetype catalogs list";
+      String msg = Messages.ArchetypeCatalogsWriter_error_parse;
       MavenLogger.log(msg, ex);
-      throw new IOException(msg + "; " + ex.getMessage());
+      throw new IOException(NLS.bind(msg, ex.getMessage()));
     }
     return catalogs;
   }
@@ -83,10 +86,10 @@ public class ArchetypeCatalogsWriter {
       transformer.transform(new SAXSource(new XMLArchetypeCatalogsWriter(catalogs), new InputSource()), new StreamResult(os));
 
     } catch(TransformerFactoryConfigurationError ex) {
-      throw new IOException("Unable to write Archetype catalogs; " + ex.getMessage());
+      throw new IOException(NLS.bind(Messages.ArchetypeCatalogsWriter_error_write, ex.getMessage()));
 
     } catch(TransformerException ex) {
-      throw new IOException("Unable to write Archetype catalogs; " + ex.getMessage());
+      throw new IOException(NLS.bind(Messages.ArchetypeCatalogsWriter_error_write, ex.getMessage()));
     
     }
   }

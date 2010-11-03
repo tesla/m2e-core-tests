@@ -39,17 +39,17 @@ public class NexusIndex implements IIndex, IMutableIndex {
   /** 
    * Repository index is disabled.
    */
-  public static final String DETAILS_DISABLED = "off";
+  public static final String DETAILS_DISABLED = "off"; //$NON-NLS-1$
 
   /**
    * Only artifact index information is used. Classname index is disabled. 
    */
-  public static final String DETAILS_MIN = "min";
+  public static final String DETAILS_MIN = "min"; //$NON-NLS-1$
 
   /**
    * Both artifact and classname indexes are used.
    */
-  public static final String DETAILS_FULL = "full";
+  public static final String DETAILS_FULL = "full"; //$NON-NLS-1$
 
   private final NexusIndexManager indexManager;
 

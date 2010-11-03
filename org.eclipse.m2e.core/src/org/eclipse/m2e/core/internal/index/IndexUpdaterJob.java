@@ -24,6 +24,7 @@ import org.eclipse.ui.progress.IProgressConstants;
 import org.eclipse.m2e.core.actions.OpenMavenConsoleAction;
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.core.MavenConsole;
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.jobs.IBackgroundProcessingQueue;
 
 class IndexUpdaterJob extends Job implements IBackgroundProcessingQueue {
@@ -47,7 +48,7 @@ class IndexUpdaterJob extends Job implements IBackgroundProcessingQueue {
   private final Stack<IndexUpdaterJob.IndexCommand> updateQueue = new Stack<IndexUpdaterJob.IndexCommand>();
 
   public IndexUpdaterJob(NexusIndexManager indexManager, MavenConsole console) {
-    super("Updating indexes");
+    super(Messages.IndexUpdaterJob_title);
     setProperty(IProgressConstants.ACTION_PROPERTY, new OpenMavenConsoleAction());
     setRule(new IndexUpdaterRule());
   }

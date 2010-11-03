@@ -26,7 +26,7 @@ import org.eclipse.m2e.core.core.MavenLogger;
 class ExtensionModule extends AbstractModule implements IMavenComponentContributor.IMavenComponentBinder {
 
   public <T> void bind(Class<T> role, Class<? extends T> impl, String hint) {
-    if(hint == null || hint.length() <= 0 || "default".equals(hint)) {
+    if(hint == null || hint.length() <= 0 || "default".equals(hint)) { //$NON-NLS-1$
       bind(role).to(impl);
     } else {
       bind(role).annotatedWith(Names.named(hint)).to(impl);
@@ -36,9 +36,9 @@ class ExtensionModule extends AbstractModule implements IMavenComponentContribut
   protected void configure() {
     IExtensionRegistry r = Platform.getExtensionRegistry();
     for(IConfigurationElement c : r.getConfigurationElementsFor(IMavenConstants.MAVEN_COMPONENT_CONTRIBUTORS_XPT)) {
-      if("configurator".equals(c.getName())) {
+      if("configurator".equals(c.getName())) { //$NON-NLS-1$
         try {
-          IMavenComponentContributor contributor = (IMavenComponentContributor) c.createExecutableExtension("class");
+          IMavenComponentContributor contributor = (IMavenComponentContributor) c.createExecutableExtension("class"); //$NON-NLS-1$
           contributor.contribute(this);
         } catch(CoreException ex) {
           MavenLogger.log(ex);

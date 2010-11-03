@@ -28,6 +28,7 @@ import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.core.MavenLogger;
 import org.eclipse.m2e.core.embedder.IMavenLauncherConfiguration;
 import org.eclipse.m2e.core.embedder.MavenRuntime;
+import org.eclipse.m2e.core.internal.Messages;
 
 /**
  * Maven external runtime using ClassWorlds launcher
@@ -38,7 +39,7 @@ import org.eclipse.m2e.core.embedder.MavenRuntime;
  */
 public class MavenExternalRuntime implements MavenRuntime {
 
-  private static final String PROPERTY_MAVEN_HOME = "maven.home";
+  private static final String PROPERTY_MAVEN_HOME = "maven.home"; //$NON-NLS-1$
 
   private final String location;
   
@@ -52,7 +53,7 @@ public class MavenExternalRuntime implements MavenRuntime {
   }
 
   public boolean isAvailable() {
-    return new File(location, "bin").exists() && getLauncherClasspath() != null;
+    return new File(location, "bin").exists() && getLauncherClasspath() != null; //$NON-NLS-1$
   }
   
   public String getLocation() {
@@ -60,15 +61,15 @@ public class MavenExternalRuntime implements MavenRuntime {
   }
   
   public String getSettings() {
-    return location + File.separator + "conf" + File.separator + "settings.xml";
+    return location + File.separator + "conf" + File.separator + "settings.xml"; //$NON-NLS-1$ //$NON-NLS-2$
   }
   
   public String getMainTypeName() {
-    return "org.codehaus.classworlds.Launcher";
+    return "org.codehaus.classworlds.Launcher"; //$NON-NLS-1$
   }
 
   private File getLauncherConfigurationFile() {
-    return new File(location, "bin/m2.conf");
+    return new File(location, "bin/m2.conf"); //$NON-NLS-1$
   }
 
   public void createLauncherConfiguration(final IMavenLauncherConfiguration collector, IProgressMonitor monitor) throws CoreException {
@@ -78,7 +79,7 @@ public class MavenExternalRuntime implements MavenRuntime {
 
     ConfigurationHandler handler = new ConfigurationHandler() {
       public void addImportFrom(String relamName, String importSpec) {
-        throw new UnsupportedOperationException("Unsupported m2.conf element");
+        throw new UnsupportedOperationException(Messages.MavenExternalRuntime_exc_unsupported);
       }
       public void addLoadFile(File file) {
         try {
@@ -118,7 +119,7 @@ public class MavenExternalRuntime implements MavenRuntime {
       if (e instanceof ExceptionWrapper && e.getCause() instanceof CoreException) {
         throw (CoreException) e.getCause();
       }
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Can't parse m2.conf", e));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, Messages.MavenExternalRuntime_error_cannot_parse, e));
     }
 
     // XXX show error dialog and fail launch
@@ -136,7 +137,7 @@ public class MavenExternalRuntime implements MavenRuntime {
   }
 
   public String toString() {
-    return "External" + " " + location + " (" + getVersion() + ")";
+    return "External" + " " + location + " (" + getVersion() + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
   }
 
   private static class ExceptionWrapper extends RuntimeException {
@@ -151,9 +152,9 @@ public class MavenExternalRuntime implements MavenRuntime {
     DirectoryScanner ds = new DirectoryScanner();
     ds.setBasedir(mavenHome);
     ds.setIncludes(new String[] {
-        "core/boot/classworlds*.jar", // 2.0.4
-        "boot/classworlds*.jar", // 2.0.7
-        "boot/plexus-classworlds*.jar", // 2.1 as of 2008-03-27
+        "core/boot/classworlds*.jar", // 2.0.4 //$NON-NLS-1$
+        "boot/classworlds*.jar", // 2.0.7 //$NON-NLS-1$
+        "boot/plexus-classworlds*.jar", // 2.1 as of 2008-03-27 //$NON-NLS-1$
     });
     ds.scan();
     String[] includedFiles = ds.getIncludedFiles();
@@ -173,9 +174,9 @@ public class MavenExternalRuntime implements MavenRuntime {
       public void addImportFrom(String relamName, String importSpec) {
       }
       public void addLoadFile(File file) {
-        if (file.getName().contains("maven-core")) {
+        if (file.getName().contains("maven-core")) { //$NON-NLS-1$
           mavenCore = file;
-        } else if (file.getName().endsWith("uber.jar")) {
+        } else if (file.getName().endsWith("uber.jar")) { //$NON-NLS-1$
           uber = file;
         }
       }
@@ -209,12 +210,12 @@ public class MavenExternalRuntime implements MavenRuntime {
       }
       if (zip != null) {
         try {
-          ZipEntry zipEntry = zip.getEntry("META-INF/maven/org.apache.maven/maven-core/pom.properties");
+          ZipEntry zipEntry = zip.getEntry("META-INF/maven/org.apache.maven/maven-core/pom.properties"); //$NON-NLS-1$
           if (zipEntry != null) {
             Properties pomProperties = new Properties();
             pomProperties.load(zip.getInputStream(zipEntry));
             
-            String version = pomProperties.getProperty("version");
+            String version = pomProperties.getProperty("version"); //$NON-NLS-1$
             if (version != null) {
               return version;
             }
@@ -230,6 +231,6 @@ public class MavenExternalRuntime implements MavenRuntime {
     }
 
 
-    return "UNKNOWN";
+    return Messages.MavenExternalRuntime_unknown;
  }
 }

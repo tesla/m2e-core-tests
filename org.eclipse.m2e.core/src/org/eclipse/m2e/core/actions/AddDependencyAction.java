@@ -14,6 +14,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
@@ -26,12 +27,13 @@ import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.embedder.MavenModelManager;
 import org.eclipse.m2e.core.index.IIndex;
 import org.eclipse.m2e.core.index.IndexedArtifactFile;
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.ui.dialogs.MavenRepositorySearchDialog;
 
 
 public class AddDependencyAction extends MavenActionSupport implements IWorkbenchWindowActionDelegate {
 
-  public static final String ID = "org.eclipse.m2e.addDependencyAction";
+  public static final String ID = "org.eclipse.m2e.addDependencyAction"; //$NON-NLS-1$
 
   public void run(IAction action) {
     IFile file = getPomFileFromPomEditorOrViewSelection();
@@ -43,7 +45,7 @@ public class AddDependencyAction extends MavenActionSupport implements IWorkbenc
     MavenPlugin plugin = MavenPlugin.getDefault();
 
     Set<ArtifactKey> artifacts = getArtifacts(file, plugin);
-    MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), "Add Dependency", IIndex.SEARCH_ARTIFACT, artifacts, true);
+    MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), Messages.AddDependencyAction_searchDialog_title, IIndex.SEARCH_ARTIFACT, artifacts, true);
     if(dialog.open() == Window.OK) {
       IndexedArtifactFile indexedArtifactFile = (IndexedArtifactFile) dialog.getFirstResult();
       if(indexedArtifactFile != null) {
@@ -54,9 +56,9 @@ public class AddDependencyAction extends MavenActionSupport implements IWorkbenc
           dependency.setScope(selectedScope);
           modelManager.addDependency(file, dependency);
         } catch(Exception ex) {
-          String msg = "Can't add dependency to " + file;
+          String msg = NLS.bind(Messages.AddDependencyAction_error_msg, file);
           MavenLogger.log(msg, ex);
-          MessageDialog.openError(Display.getCurrent().getActiveShell(), "Add Dependency", msg);
+          MessageDialog.openError(Display.getCurrent().getActiveShell(), Messages.AddDependencyAction_error_title, msg);
         }
       }
     }

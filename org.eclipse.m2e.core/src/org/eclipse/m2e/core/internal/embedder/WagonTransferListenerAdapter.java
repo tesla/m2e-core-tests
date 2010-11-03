@@ -50,7 +50,7 @@ final class WagonTransferListenerAdapter extends AbstractTransferListenerAdapter
       Wagon wagon = e.getWagon();
       Repository repository = wagon.getRepository();
       String repositoryId = repository.getId();
-      sb.append(repositoryId).append(" : ");
+      sb.append(repositoryId).append(" : "); //$NON-NLS-1$
     }
     sb.append(e.getResource().getName());
     transferStarted(sb.toString());
@@ -58,20 +58,20 @@ final class WagonTransferListenerAdapter extends AbstractTransferListenerAdapter
 
   public void transferProgress(TransferEvent e, byte[] buffer, int length) {
     long total = e.getResource().getContentLength();
-    String artifactUrl = e.getWagon().getRepository() + "/" + e.getResource().getName();
+    String artifactUrl = e.getWagon().getRepository() + "/" + e.getResource().getName(); //$NON-NLS-1$
 
     transferProgress(artifactUrl, total, length);
   }
 
   public void transferCompleted(TransferEvent e) {
-    String artifactUrl = e.getWagon().getRepository() + "/" + e.getResource().getName();
+    String artifactUrl = e.getWagon().getRepository() + "/" + e.getResource().getName(); //$NON-NLS-1$
     transferCompleted(artifactUrl);
     
     notifyLocalRepositoryListeners(e);
   }
 
   public void transferError(TransferEvent e) {
-    transferError(e.getWagon().getRepository() + "/" + e.getResource().getName(), e.getException());
+    transferError(e.getWagon().getRepository() + "/" + e.getResource().getName(), e.getException()); //$NON-NLS-1$
   }
 
   public void debug(String message) {

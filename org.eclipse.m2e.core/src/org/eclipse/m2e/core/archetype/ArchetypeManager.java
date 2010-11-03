@@ -102,7 +102,7 @@ public class ArchetypeManager {
         if ((type.isAssignableFrom(factory.getClass())) 
            //temporary hack to get around https://issues.sonatype.org/browse/MNGECLIPSE-1792
            //cf. MavenProjectWizardArchetypePage.getAllArchetypes 
-           && !(factory.getDescription() != null && factory.getDescription().startsWith("Test"))
+           && !(factory.getDescription() != null && factory.getDescription().startsWith("Test")) //$NON-NLS-1$
            && factory.getArchetypeCatalog().getArchetypes().contains(a)) {
           return (T)factory; 
         }

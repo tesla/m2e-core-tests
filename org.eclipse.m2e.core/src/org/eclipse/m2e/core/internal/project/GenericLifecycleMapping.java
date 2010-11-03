@@ -73,7 +73,7 @@ public class GenericLifecycleMapping extends AbstractLifecycleMapping implements
         request.setGoals(goals);
         MavenExecutionPlan plan = maven.calculateExecutionPlan(request, projectFacade.getMavenProject(progressMonitor), progressMonitor);
         for(MojoExecution mojo : plan.getExecutions()) {
-          if("compile:compile".equals(mojo.getMojoDescriptor().getFullGoalName()) && configuration.isSkipCompiler()) {
+          if("compile:compile".equals(mojo.getMojoDescriptor().getFullGoalName()) && configuration.isSkipCompiler()) { //$NON-NLS-1$
             continue;
           }
           mojos.add(MojoExecutionUtils.getExecutionKey(mojo));

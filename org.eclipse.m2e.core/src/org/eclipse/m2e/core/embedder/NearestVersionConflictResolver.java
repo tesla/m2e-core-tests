@@ -201,7 +201,7 @@ class NearestVersionConflictResolver implements DependencyGraphTransformer {
 
     @Override
     public String toString() {
-      return key + " > " + version;
+      return key + " > " + version; //$NON-NLS-1$
     }
 
   }
@@ -238,7 +238,7 @@ class NearestVersionConflictResolver implements DependencyGraphTransformer {
 
     @Override
     public String toString() {
-      return depth + " > " + parent;
+      return depth + " > " + parent; //$NON-NLS-1$
     }
 
   }

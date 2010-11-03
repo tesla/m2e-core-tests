@@ -34,7 +34,7 @@ public class MavenPreferenceInitializer extends AbstractPreferenceInitializer {
     store.setDefault(MavenPreferenceConstants.P_USER_SETTINGS_FILE, //
         MavenCli.DEFAULT_USER_SETTINGS_FILE.getAbsolutePath());
     
-    store.setDefault(MavenPreferenceConstants.P_GLOBAL_SETTINGS_FILE, "");
+    store.setDefault(MavenPreferenceConstants.P_GLOBAL_SETTINGS_FILE, ""); //$NON-NLS-1$
 
     store.setDefault(MavenPreferenceConstants.P_DEBUG_OUTPUT, false);
 
@@ -50,10 +50,10 @@ public class MavenPreferenceInitializer extends AbstractPreferenceInitializer {
     // store.setDefault( MavenPreferenceConstants.P_UPDATE_SNAPSHOTS, false);
     // store.setDefault( MavenPreferenceConstants.P_CHECK_LATEST_PLUGIN_VERSION, false);
 
-    store.setDefault(MavenPreferenceConstants.P_OUTPUT_FOLDER, "target-eclipse");
+    store.setDefault(MavenPreferenceConstants.P_OUTPUT_FOLDER, "target-eclipse"); //$NON-NLS-1$
 
-    store.setDefault(MavenPreferenceConstants.P_RUNTIMES, "");
-    store.setDefault(MavenPreferenceConstants.P_DEFAULT_RUNTIME, "");
+    store.setDefault(MavenPreferenceConstants.P_RUNTIMES, ""); //$NON-NLS-1$
+    store.setDefault(MavenPreferenceConstants.P_DEFAULT_RUNTIME, ""); //$NON-NLS-1$
 
     store.setDefault(MavenPreferenceConstants.P_UPDATE_INDEXES, true);
     store.setDefault(MavenPreferenceConstants.P_UPDATE_PROJECTS, false);

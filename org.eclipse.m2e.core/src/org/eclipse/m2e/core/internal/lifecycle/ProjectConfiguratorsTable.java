@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.project.configurator.AbstractProjectConfigurator;
 import org.eclipse.m2e.core.project.configurator.ILifecycleMapping;
 
@@ -37,8 +38,8 @@ public class ProjectConfiguratorsTable {
   private TableViewer configuratorsTable;
   private ProjectConfiguratorsTableContentProvider configuratorsContentProvider;
   private ProjectConfiguratorsTableLabelProvider configuratorsLabelProvider;
-  public static final String[] CONFIG_TABLE_COLUMN_PROPERTIES = new String[]{ "name", "id"};
-  public static final String[] CONFIG_TABLE_COLUMN_NAMES = new String[]{ "Name", "Id"};
+  public static final String[] CONFIG_TABLE_COLUMN_PROPERTIES = new String[]{ "name", "id"}; //$NON-NLS-1$ //$NON-NLS-2$
+  public static final String[] CONFIG_TABLE_COLUMN_NAMES = new String[]{ Messages.ProjectConfiguratorsTable_column_name, Messages.ProjectConfiguratorsTable_column_id};
   private static final int TABLE_WIDTH = 500;
   
   public ProjectConfiguratorsTable(Composite parent, IProject project){
@@ -74,7 +75,7 @@ public class ProjectConfiguratorsTable {
     configuratorsTable.setContentProvider(configuratorsContentProvider);
     configuratorsTable.setLabelProvider(configuratorsLabelProvider);
     configuratorsTable.setColumnProperties(CONFIG_TABLE_COLUMN_PROPERTIES);
-    configuratorsTable.getTable().setData("name", "projectConfiguratorsTable");
+    configuratorsTable.getTable().setData("name", "projectConfiguratorsTable"); //$NON-NLS-1$ //$NON-NLS-2$
     GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1);
     gd.horizontalIndent=6;
     gd.grabExcessHorizontalSpace = true;

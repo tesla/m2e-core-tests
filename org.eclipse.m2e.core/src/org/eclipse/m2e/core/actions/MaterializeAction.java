@@ -24,7 +24,7 @@ import org.eclipse.m2e.core.wizards.MavenMaterializePomWizard;
 
 public class MaterializeAction implements IObjectActionDelegate {
 
-  public static final String ID = "org.eclipse.m2e.materializeAction";
+  public static final String ID = "org.eclipse.m2e.materializeAction"; //$NON-NLS-1$
 
   private IStructuredSelection selection;
 

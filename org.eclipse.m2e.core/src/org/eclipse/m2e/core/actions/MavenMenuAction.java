@@ -45,7 +45,7 @@ import org.eclipse.m2e.core.internal.actions.DefaultMavenMenuCreator;
  */
 public class MavenMenuAction implements IObjectActionDelegate, IMenuCreator {
 
-  private static final String EXTENSION_MENU_ITEMS = IMavenConstants.PLUGIN_ID + ".m2menu";
+  private static final String EXTENSION_MENU_ITEMS = IMavenConstants.PLUGIN_ID + ".m2menu"; //$NON-NLS-1$
 
   boolean fillMenu;
 
@@ -104,7 +104,7 @@ public class MavenMenuAction implements IObjectActionDelegate, IMenuCreator {
             item.dispose();
           }
 
-          IMenuManager mgr = new MenuManager("#maven");
+          IMenuManager mgr = new MenuManager("#maven"); //$NON-NLS-1$
           mgr.add(new GroupMarker(AbstractMavenMenuCreator.NEW));
           mgr.insertAfter(AbstractMavenMenuCreator.NEW, new GroupMarker(AbstractMavenMenuCreator.UPDATE));
           mgr.insertAfter(AbstractMavenMenuCreator.UPDATE, new GroupMarker(AbstractMavenMenuCreator.OPEN));
@@ -139,7 +139,7 @@ public class MavenMenuAction implements IObjectActionDelegate, IMenuCreator {
           IConfigurationElement[] elements = extension.getConfigurationElements();
           for(IConfigurationElement element : elements) {
             try {
-              AbstractMavenMenuCreator creator = (AbstractMavenMenuCreator) element.createExecutableExtension("class");
+              AbstractMavenMenuCreator creator = (AbstractMavenMenuCreator) element.createExecutableExtension("class"); //$NON-NLS-1$
               creators.add(creator);
             } catch(CoreException ex) {
               MavenLogger.log(ex);
