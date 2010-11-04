@@ -315,7 +315,7 @@ public class DependenciesComposite extends Composite {
     ToolBarManager modulesToolBarManager = new ToolBarManager(SWT.FLAT);
     modulesToolBarManager.add(new Action(Messages.DependenciesComposite_action_showgroupid, MavenEditorImages.SHOW_GROUP) {
       {
-        setChecked(true);
+        setChecked(false);
       }
       public int getStyle() {
         return AS_CHECK_BOX;
@@ -460,7 +460,7 @@ public class DependenciesComposite extends Composite {
 
     modulesToolBarManager.add(new Action(Messages.DependenciesComposite_action_showgroupid, MavenEditorImages.SHOW_GROUP) {
       {
-        setChecked(true);
+        setChecked(false);
       }
       public int getStyle() {
         return AS_CHECK_BOX;

@@ -39,7 +39,7 @@ public class DependencyLabelProvider extends LabelProvider implements IColorProv
 
   private MavenPomEditor pomEditor;
 
-  private boolean showGroupId = true;
+  private boolean showGroupId = false;
 
   public void setPomEditor(MavenPomEditor pomEditor) {
     this.pomEditor = pomEditor;

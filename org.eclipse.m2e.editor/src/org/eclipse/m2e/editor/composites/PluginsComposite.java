@@ -284,7 +284,7 @@ public class PluginsComposite extends Composite{
     
     toolBarManager.add(new Action(Messages.PluginsComposite_action_showGroupId, MavenEditorImages.SHOW_GROUP) {
       {
-        setChecked(true);
+        setChecked(false);
       }
       public int getStyle() {
         return AS_CHECK_BOX;
@@ -398,7 +398,7 @@ public class PluginsComposite extends Composite{
     
     toolBarManager.add(new Action(Messages.PluginsComposite_action_showGroupId, MavenEditorImages.SHOW_GROUP) {
       {
-        setChecked(true);
+        setChecked(false);
       }
       public int getStyle() {
         return AS_CHECK_BOX;
@@ -1146,7 +1146,7 @@ public class PluginsComposite extends Composite{
    */
   static final class PluginLabelProvider extends LabelProvider {
 
-    private boolean showGroupId = true;
+    private boolean showGroupId = false;
 
     public void setShowGroupId(boolean showGroupId) {
       this.showGroupId = showGroupId;
