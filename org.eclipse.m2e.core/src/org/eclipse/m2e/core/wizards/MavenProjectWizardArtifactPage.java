@@ -148,7 +148,8 @@ public class MavenProjectWizardArtifactPage extends AbstractMavenWizardPage {
     parentComponent.addBrowseButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            org.eclipse.m2e.core.internal.Messages.MavenProjectWizardArtifactPage_searchDialog_title, IIndex.SEARCH_ARTIFACT, Collections.<ArtifactKey> emptySet());
+            org.eclipse.m2e.core.internal.Messages.MavenProjectWizardArtifactPage_searchDialog_title, IIndex.SEARCH_PARENTS, Collections.<ArtifactKey> emptySet(), false);
+        
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile indexedArtifactFile = (IndexedArtifactFile) dialog.getFirstResult();
           if(indexedArtifactFile != null) {
