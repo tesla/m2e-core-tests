@@ -25,6 +25,7 @@ import org.apache.maven.model.Scm;
 
 import org.eclipse.m2e.core.actions.SelectionUtil;
 import org.eclipse.m2e.core.core.IMavenConstants;
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.project.MavenProjectScmInfo;
 import org.eclipse.m2e.core.project.ProjectImportConfiguration;
 import org.eclipse.m2e.core.scm.ScmUrl;
@@ -58,7 +59,7 @@ public class MavenCheckoutWizard extends Wizard implements IImportWizard, INewWi
   public MavenCheckoutWizard(ScmUrl[] urls) {
     setUrls(urls);
     setNeedsProgressMonitor(true);
-    setWindowTitle("Checkout as Maven project from SCM");
+    setWindowTitle(Messages.MavenCheckoutWizard_title);
   }
 
   public void init(IWorkbench workbench, IStructuredSelection selection) {
@@ -105,8 +106,8 @@ public class MavenCheckoutWizard extends Wizard implements IImportWizard, INewWi
     scheckoutPage.setParent(parentUrl);
     
     locationPage = new MavenProjectWizardLocationPage(importConfiguration, //
-        "Select Project Location",
-        "Select project location and working set");
+        Messages.MavenCheckoutWizard_location1,
+        Messages.MavenCheckoutWizard_location2);
     locationPage.setLocationPath(SelectionUtil.getSelectedLocation(selection));
     
     addPage(scheckoutPage);
@@ -147,12 +148,12 @@ public class MavenCheckoutWizard extends Wizard implements IImportWizard, INewWi
       String url = scms[i].getConnection();
       String revision = scms[i].getTag();
       
-      if(url.endsWith("/")) {
+      if(url.endsWith("/")) { //$NON-NLS-1$
         url = url.substring(0, url.length()-1);
       }
       
-      int n = url.lastIndexOf("/");
-      String label = (n == -1 ? url : url.substring(n)) + "/" + IMavenConstants.POM_FILE_NAME;
+      int n = url.lastIndexOf("/"); //$NON-NLS-1$
+      String label = (n == -1 ? url : url.substring(n)) + "/" + IMavenConstants.POM_FILE_NAME; //$NON-NLS-1$
       MavenProjectScmInfo projectInfo = new MavenProjectScmInfo(label, null, //
           null, revision, url, url);
       mavenProjects.add(projectInfo);

@@ -8,6 +8,8 @@
 
 package org.eclipse.m2e.core.ui.internal.preferences;
 
+import org.eclipse.m2e.core.internal.Messages;
+
 /**
  * EmptyLifecycleMappingPropertyPage
  * 
@@ -16,7 +18,7 @@ package org.eclipse.m2e.core.ui.internal.preferences;
 public class EmptyLifecycleMappingPropertyPage extends SimpleLifecycleMappingPropertyPage {
 
   public EmptyLifecycleMappingPropertyPage() {
-    super("No lifecycle mapping info to display for the Empty Lifecycle Mapping");
+    super(Messages.EmptyLifecycleMappingPropertyPage_title);
   }
 
 }

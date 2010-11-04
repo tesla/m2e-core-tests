@@ -33,6 +33,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
@@ -53,6 +54,7 @@ import org.eclipse.m2e.core.actions.OpenPomAction;
 import org.eclipse.m2e.core.index.IndexListener;
 import org.eclipse.m2e.core.index.IndexedArtifact;
 import org.eclipse.m2e.core.index.IndexedArtifactFile;
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.internal.index.IndexedArtifactGroup;
 import org.eclipse.m2e.core.internal.index.NexusIndex;
 import org.eclipse.m2e.core.internal.index.NexusIndexManager;
@@ -71,12 +73,12 @@ import org.eclipse.m2e.core.util.M2EUtils;
  * @author dyocum
  */
 public class MavenRepositoryView extends ViewPart {
-  private static final String ENABLE_FULL = "Enable Full Index";
-  private static final String ENABLED_FULL = "Full Index Enabled";
-  private static final String DISABLE_DETAILS = "Disable Index Details";
-  private static final String DISABLED_DETAILS = "Index Details Disabled";
-  private static final String ENABLE_MIN = "Enable Minimum Index";
-  private static final String ENABLED_MIN = "Minimum Index Enabled";
+  private static final String ENABLE_FULL = Messages.MavenRepositoryView_enable_full;
+  private static final String ENABLED_FULL = Messages.MavenRepositoryView_enabled_full;
+  private static final String DISABLE_DETAILS = Messages.MavenRepositoryView_disable_details;
+  private static final String DISABLED_DETAILS = Messages.MavenRepositoryView_details_disabled;
+  private static final String ENABLE_MIN = Messages.MavenRepositoryView_enable_minimum;
+  private static final String ENABLED_MIN = Messages.MavenRepositoryView_minimum_enabled;
   
   private NexusIndexManager indexManager = (NexusIndexManager) MavenPlugin.getDefault().getIndexManager();
 
@@ -160,7 +162,7 @@ public class MavenRepositoryView extends ViewPart {
   }
 
   private void hookContextMenu() {
-    MenuManager menuMgr = new MenuManager("#PopupMenu");
+    MenuManager menuMgr = new MenuManager("#PopupMenu"); //$NON-NLS-1$
     menuMgr.setRemoveAllWhenShown(true);
     menuMgr.addMenuListener(new IMenuListener() {
       public void menuAboutToShow(IMenuManager manager) {
@@ -239,20 +241,20 @@ public class MavenRepositoryView extends ViewPart {
   }
 
   private void makeActions() {
-    collapseAllAction = new Action("Collapse All") {
+    collapseAllAction = new Action(Messages.MavenRepositoryView_btnCollapse) {
       public void run() {
         viewer.collapseAll();
       }
     };
-    collapseAllAction.setToolTipText("Collapse All");
+    collapseAllAction.setToolTipText(Messages.MavenRepositoryView_btnCollapse_tooltip);
     collapseAllAction.setImageDescriptor(MavenImages.COLLAPSE_ALL);
-    reloadSettings = new Action("Reload settings.xml"){
+    reloadSettings = new Action(Messages.MavenRepositoryView_action_reload){
       public void run(){
-        String msg = "This will reload the settings.xml and rebuild the indexes for the repositories. Are you sure you want to reload the settings?";
+        String msg = Messages.MavenRepositoryView_reload_msg;
         boolean res = MessageDialog.openConfirm(getViewSite().getShell(), //
-            "Reload settings.xml", msg);
+            Messages.MavenRepositoryView_reload_title, msg);
         if(res){
-          Job job = new WorkspaceJob("Reloading settings.xml") {
+          Job job = new WorkspaceJob(Messages.MavenRepositoryView_job_reloading) {
             public IStatus runInWorkspace(IProgressMonitor monitor) {
               try {
                 MavenPlugin.getDefault().getMaven().reloadSettings();
@@ -289,7 +291,7 @@ public class MavenRepositoryView extends ViewPart {
     //updateAction.setImageDescriptor(MavenImages.UPD_INDEX);
 
     
-    updateAction = new BaseSelectionListenerAction("Update Index") {
+    updateAction = new BaseSelectionListenerAction(Messages.MavenRepositoryView_action_update) {
       public void run() {
         List<AbstractIndexedRepositoryNode> nodes = getSelectedRepositoryNodes(getStructuredSelection().toList());
         for(AbstractIndexedRepositoryNode node : nodes) {
@@ -307,17 +309,17 @@ public class MavenRepositoryView extends ViewPart {
           }
         }
         if(indexCount > 1){
-          setText("Update Indexes");
+          setText(Messages.MavenRepositoryView_update_more);
         } else {
-          setText("Update Index");
+          setText(Messages.MavenRepositoryView_update_one);
         }
         return indexCount > 0;
       }
     };
-    updateAction.setToolTipText("Update repository index");
+    updateAction.setToolTipText(Messages.MavenRepositoryView_btnUpdate_tooltip);
     updateAction.setImageDescriptor(MavenImages.UPD_INDEX);
 
-    rebuildAction = new BaseSelectionListenerAction("Rebuild Index") {
+    rebuildAction = new BaseSelectionListenerAction(Messages.MavenRepositoryView_action_rebuild) {
       public void run() {
         List<AbstractIndexedRepositoryNode> nodes = getSelectedRepositoryNodes(getStructuredSelection().toList());
         if(nodes.size() > 0){
@@ -325,17 +327,17 @@ public class MavenRepositoryView extends ViewPart {
             NexusIndex index = nodes.get(0).getIndex();
             if (index != null) {
               String repositoryUrl = index.getRepositoryUrl();
-              String msg = "Are you sure you want to rebuild the index '"+repositoryUrl+"'";
+              String msg = NLS.bind(Messages.MavenRepositoryView_rebuild_msg, repositoryUrl);
               boolean res = MessageDialog.openConfirm(getViewSite().getShell(), //
-                  "Rebuild Index", msg);
+                  Messages.MavenRepositoryView_rebuild_title, msg);
               if(res) {
                 index.scheduleIndexUpdate(true);
               }
             }
           } else {
-            String msg = "Are you sure you want to rebuild the selected indexes?";
+            String msg = Messages.MavenRepositoryView_rebuild_msg2;
             boolean res = MessageDialog.openConfirm(getViewSite().getShell(), //
-                "Rebuild Indexes", msg);
+                Messages.MavenRepositoryView_rebuild_title2, msg);
             if(res) {
               for(AbstractIndexedRepositoryNode node : nodes){
                 NexusIndex index = node.getIndex();
@@ -356,31 +358,31 @@ public class MavenRepositoryView extends ViewPart {
           }
         }
         if(indexCount > 1){
-          setText("Rebuild Indexes");
+          setText(Messages.MavenRepositoryView_rebuild_many);
         } else {
-          setText("Rebuild Index");
+          setText(Messages.MavenRepositoryView_rebuild_one);
         }
         return indexCount > 0;
       }
     };
     
-    rebuildAction.setToolTipText("Force a rebuild of the maven index");
+    rebuildAction.setToolTipText(Messages.MavenRepositoryView_action_rebuild_tooltip);
     rebuildAction.setImageDescriptor(MavenImages.REBUILD_INDEX);
 
     disableAction = new DisableIndexAction();
 
-    disableAction.setToolTipText("Disable repository index");
+    disableAction.setToolTipText(Messages.MavenRepositoryView_action_disable_tooltip);
     disableAction.setImageDescriptor(MavenImages.REBUILD_INDEX);
 
     enableMinAction = new EnableMinIndexAction();
-    enableMinAction.setToolTipText("Enable minimal repository index");
+    enableMinAction.setToolTipText(Messages.MavenRepositoryView_action_enable_tooltip);
     enableMinAction.setImageDescriptor(MavenImages.REBUILD_INDEX);
 
     enableFullAction = new EnableFullIndexAction();
-    enableFullAction.setToolTipText("Enable full repository index");
+    enableFullAction.setToolTipText(Messages.MavenRepositoryView_action_enableFull_tooltip);
     enableFullAction.setImageDescriptor(MavenImages.REBUILD_INDEX);
 
-    openPomAction = new BaseSelectionListenerAction("Open POM") {
+    openPomAction = new BaseSelectionListenerAction(Messages.MavenRepositoryView_action_open) {
       public void run() {
         ISelection selection = viewer.getSelection();
         Object element = ((IStructuredSelection) selection).getFirstElement();
@@ -394,10 +396,10 @@ public class MavenRepositoryView extends ViewPart {
         return selection.getFirstElement() instanceof IndexedArtifactFile;
       }
     };
-    openPomAction.setToolTipText("Open Maven POM");
+    openPomAction.setToolTipText(Messages.MavenRepositoryView_action_open_tooltip);
     openPomAction.setImageDescriptor(MavenImages.POM);
 
-    copyUrlAction = new BaseSelectionListenerAction("Copy URL") {
+    copyUrlAction = new BaseSelectionListenerAction(Messages.MavenRepositoryView_action_copy) {
       public void run() {
         Object element = getStructuredSelection().getFirstElement();
         String url = null;
@@ -406,8 +408,8 @@ public class MavenRepositoryView extends ViewPart {
         } else if(element instanceof IndexedArtifactGroup) {
           IndexedArtifactGroup group = (IndexedArtifactGroup) element;
           String repositoryUrl = group.getRepository().getUrl();
-          if(!repositoryUrl.endsWith("/")) {
-            repositoryUrl += "/";
+          if(!repositoryUrl.endsWith("/")) { //$NON-NLS-1$
+            repositoryUrl += "/"; //$NON-NLS-1$
           }
           url = repositoryUrl + group.getPrefix().replace('.', '/');
         } else if(element instanceof IndexedArtifact) {
@@ -427,10 +429,10 @@ public class MavenRepositoryView extends ViewPart {
         return element instanceof RepositoryNode;
       }
     };
-    copyUrlAction.setToolTipText("Copy URL to Clipboard");
+    copyUrlAction.setToolTipText(Messages.MavenRepositoryView_action_copy_tooltip);
     copyUrlAction.setImageDescriptor(MavenImages.COPY);
     
-    materializeProjectAction = new BaseSelectionListenerAction("Materialize Projects") {
+    materializeProjectAction = new BaseSelectionListenerAction(Messages.MavenRepositoryView_action_materialize) {
       public void run() {
         Object element = getStructuredSelection().getFirstElement();
         if(element instanceof IndexedArtifactFileNode){
@@ -462,7 +464,7 @@ public class MavenRepositoryView extends ViewPart {
       try {
         node.getIndex().setIndexDetails(details);
       } catch(CoreException ex) {
-        M2EUtils.showErrorDialog(this.getViewSite().getShell(), "Error Setting Index Details", "Unable to set the index details due to the following error:\n", ex);
+        M2EUtils.showErrorDialog(this.getViewSite().getShell(), Messages.MavenRepositoryView_error_title, Messages.MavenRepositoryView_error_message, ex);
       }
     }
   }

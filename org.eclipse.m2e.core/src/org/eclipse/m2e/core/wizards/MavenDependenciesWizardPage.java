@@ -65,12 +65,12 @@ public class MavenDependenciesWizardPage extends AbstractMavenWizardPage {
   boolean showScope = false;
 
   public MavenDependenciesWizardPage() {
-    this(null, Messages.getString("wizard.project.page.dependencies.title"), //
-        Messages.getString("wizard.project.page.dependencies.description"));
+    this(null, Messages.getString("wizard.project.page.dependencies.title"), // //$NON-NLS-1$
+        Messages.getString("wizard.project.page.dependencies.description")); //$NON-NLS-1$
   }
   
   public MavenDependenciesWizardPage(ProjectImportConfiguration projectImportConfiguration, String title, String description) {
-    super("MavenDependenciesWizardPage", projectImportConfiguration);
+    super("MavenDependenciesWizardPage", projectImportConfiguration); //$NON-NLS-1$
     setTitle(title);
     setDescription(description);
     setPageComplete(true);
@@ -107,7 +107,7 @@ public class MavenDependenciesWizardPage extends AbstractMavenWizardPage {
   private void createArtifacts(Composite composite) {
     Label mavenArtifactsLabel = new Label(composite, SWT.NONE);
     mavenArtifactsLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 3, 1));
-    mavenArtifactsLabel.setText("Maven Artifacts:");
+    mavenArtifactsLabel.setText(org.eclipse.m2e.core.internal.Messages.MavenDependenciesWizardPage_lblArtifacts);
     
     dependencyViewer = new TableViewer(composite, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
     dependencyViewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 2));
@@ -119,12 +119,12 @@ public class MavenDependenciesWizardPage extends AbstractMavenWizardPage {
     Button addDependencyButton = new Button(composite, SWT.PUSH);
     GridData gd_addDependencyButton = new GridData(SWT.FILL, SWT.TOP, false, false);
     addDependencyButton.setLayoutData(gd_addDependencyButton);
-    addDependencyButton.setText(Messages.getString("wizard.project.page.dependencies.add"));
+    addDependencyButton.setText(Messages.getString("wizard.project.page.dependencies.add")); //$NON-NLS-1$
 
     addDependencyButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            "Add Dependency", IIndex.SEARCH_ARTIFACT, Collections.<ArtifactKey>emptySet(), showScope);
+            org.eclipse.m2e.core.internal.Messages.MavenDependenciesWizardPage_searchDialog_title, IIndex.SEARCH_ARTIFACT, Collections.<ArtifactKey>emptySet(), showScope);
         if(dialog.open() == Window.OK) {
           Object result = dialog.getFirstResult();
           if(result instanceof IndexedArtifactFile) {
@@ -147,7 +147,7 @@ public class MavenDependenciesWizardPage extends AbstractMavenWizardPage {
 
     final Button removeDependencyButton = new Button(composite, SWT.PUSH);
     removeDependencyButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, true));
-    removeDependencyButton.setText(Messages.getString("wizard.project.page.dependencies.remove"));
+    removeDependencyButton.setText(Messages.getString("wizard.project.page.dependencies.remove")); //$NON-NLS-1$
     removeDependencyButton.setEnabled(false);
     
     removeDependencyButton.addSelectionListener(new SelectionAdapter() {
@@ -241,7 +241,7 @@ public class MavenDependenciesWizardPage extends AbstractMavenWizardPage {
     public String getText(Object element) {
       if(element instanceof Dependency) {
         Dependency d = (Dependency) element;
-        return d.getGroupId() + ":" + d.getArtifactId() + ":" + d.getVersion() + (d.getClassifier() == null ? "" : ":" + d.getClassifier());
+        return d.getGroupId() + ":" + d.getArtifactId() + ":" + d.getVersion() + (d.getClassifier() == null ? "" : ":" + d.getClassifier()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
       }
       return super.getText(element);
     }

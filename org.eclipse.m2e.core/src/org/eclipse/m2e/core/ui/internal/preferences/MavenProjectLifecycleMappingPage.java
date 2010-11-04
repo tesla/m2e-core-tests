@@ -16,6 +16,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.dialogs.PropertyPage;
 
 import org.eclipse.m2e.core.core.MavenLogger;
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.internal.lifecycle.ILifecyclePropertyPage;
 import org.eclipse.m2e.core.internal.lifecycle.LifecycleMappingPropertyPageFactory;
 import org.eclipse.m2e.core.project.configurator.ILifecycleMapping;
@@ -31,7 +32,7 @@ public class MavenProjectLifecycleMappingPage extends PropertyPage{
   
   public MavenProjectLifecycleMappingPage() {
     
-    setTitle("");
+    setTitle(""); //$NON-NLS-1$
   }
 
   protected Control createContents(Composite parent) {
@@ -48,7 +49,7 @@ public class MavenProjectLifecycleMappingPage extends PropertyPage{
   private ILifecyclePropertyPage getPage(ILifecycleMapping lifecycleMapping){
     ILifecyclePropertyPage page = LifecycleMappingPropertyPageFactory.getFactory().getPageForId(lifecycleMapping.getId(), getProject(), this.getShell());
     if(page == null){
-      page = getErrorPage("No lifecycle mapping property page found.");
+      page = getErrorPage(Messages.MavenProjectLifecycleMappingPage_error_no_page);
       page.setName(lifecycleMapping.getName());
     }
     return page;
@@ -59,13 +60,13 @@ public class MavenProjectLifecycleMappingPage extends PropertyPage{
     try{
       ILifecycleMapping lifecycleMapping = LifecycleMappingPropertyPageFactory.getLifecycleMapping(project);
       if(lifecycleMapping == null){
-        return getErrorPage("No lifecycle mapping strategy found.");
+        return getErrorPage(Messages.MavenProjectLifecycleMappingPage_error_no_strategy);
       }
       page = getPage(lifecycleMapping);
       return page;
     } catch(CoreException ce){
       MavenLogger.log(ce);
-      SimpleLifecycleMappingPropertyPage p = new SimpleLifecycleMappingPropertyPage("Unable to load the lifecycle mapping property page.");
+      SimpleLifecycleMappingPropertyPage p = new SimpleLifecycleMappingPropertyPage(Messages.MavenProjectLifecycleMappingPage_error_page_error);
       return p;
     }
   }

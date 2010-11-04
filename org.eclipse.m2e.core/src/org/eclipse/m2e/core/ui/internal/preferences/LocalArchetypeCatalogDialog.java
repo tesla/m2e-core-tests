@@ -40,6 +40,7 @@ import org.apache.maven.archetype.catalog.ArchetypeCatalog;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.archetype.ArchetypeCatalogFactory;
 import org.eclipse.m2e.core.archetype.ArchetypeCatalogFactory.LocalCatalogFactory;
+import org.eclipse.m2e.core.internal.Messages;
 
 /**
  * Local Archetype catalog dialog
@@ -50,7 +51,7 @@ public class LocalArchetypeCatalogDialog extends TitleAreaDialog {
 
   private static final String DIALOG_SETTINGS = LocalArchetypeCatalogDialog.class.getName();
 
-  private static final String KEY_LOCATIONS = "catalogLocation";
+  private static final String KEY_LOCATIONS = "catalogLocation"; //$NON-NLS-1$
   
   private static final int MAX_HISTORY = 15;
 
@@ -70,8 +71,8 @@ public class LocalArchetypeCatalogDialog extends TitleAreaDialog {
   protected LocalArchetypeCatalogDialog(Shell shell, ArchetypeCatalogFactory factory) {
     super(shell);
     this.archetypeCatalogFactory = factory;
-    this.title = "Local Archetype Catalog";
-    this.message = "Specify catalog location and description";
+    this.title = Messages.LocalArchetypeCatalogDialog_title;
+    this.message = Messages.LocalArchetypeCatalogDialog_message;
     setShellStyle(SWT.DIALOG_TRIM);
 
     IDialogSettings pluginSettings = MavenPlugin.getDefault().getDialogSettings();
@@ -101,7 +102,7 @@ public class LocalArchetypeCatalogDialog extends TitleAreaDialog {
     composite.setLayout(gridLayout);
 
     Label catalogLocationLabel = new Label(composite, SWT.NONE);
-    catalogLocationLabel.setText("&Catalog File:");
+    catalogLocationLabel.setText(Messages.LocalArchetypeCatalogDialog_lblCatalog);
 
     catalogLocationCombo = new Combo(composite, SWT.NONE);
     GridData gd_catalogLocationCombo = new GridData(SWT.FILL, SWT.CENTER, true, false);
@@ -110,11 +111,11 @@ public class LocalArchetypeCatalogDialog extends TitleAreaDialog {
     catalogLocationCombo.setItems(getSavedValues(KEY_LOCATIONS));
 
     Button browseButton = new Button(composite, SWT.NONE);
-    browseButton.setText("&Browse...");
+    browseButton.setText(Messages.LocalArchetypeCatalogDialog_btnBrowse);
     browseButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         FileDialog dialog = new FileDialog(getShell());
-        dialog.setText("Select Archetype catalog");
+        dialog.setText(Messages.LocalArchetypeCatalogDialog_dialog_title);
         String location = dialog.open();
         if(location!=null) {
           catalogLocationCombo.setText(location);
@@ -125,7 +126,7 @@ public class LocalArchetypeCatalogDialog extends TitleAreaDialog {
     setButtonLayoutData(browseButton);
 
     Label catalogDescriptionLabel = new Label(composite, SWT.NONE);
-    catalogDescriptionLabel.setText("Description:");
+    catalogDescriptionLabel.setText(Messages.LocalArchetypeCatalogDialog_lblDesc);
 
     catalogDescriptionText = new Text(composite, SWT.BORDER);
     catalogDescriptionText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
@@ -203,12 +204,12 @@ public class LocalArchetypeCatalogDialog extends TitleAreaDialog {
 
     String location = catalogLocationCombo.getText().trim();
     if(location.length()==0) {
-      setErrorMessage("Archetype catalog location is required");
+      setErrorMessage(Messages.LocalArchetypeCatalogDialog_error_no_location);
       return false;
     }
     
     if(!new File(location).exists()) {
-      setErrorMessage("Archetype catalog does not exist");
+      setErrorMessage(Messages.LocalArchetypeCatalogDialog_error_exist);
       return false;
     }
 
@@ -217,7 +218,7 @@ public class LocalArchetypeCatalogDialog extends TitleAreaDialog {
     @SuppressWarnings("unchecked")
     List<Archetype> archetypes = archetypeCatalog.getArchetypes();
     if(archetypes==null || archetypes.size()==0) {
-      setMessage("Archetype catalog is empty", IStatus.WARNING);
+      setMessage(Messages.LocalArchetypeCatalogDialog_error_empty, IStatus.WARNING);
     }
     
     return true;

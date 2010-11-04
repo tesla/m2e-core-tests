@@ -53,7 +53,7 @@ public class MavenProjectSelectionDialog extends AbstractMavenDialog {
     super( parent, DIALOG_SETTINGS );
 
     setShellStyle( getShellStyle() | SWT.RESIZE );
-    setTitle( Messages.getString( "projectSelectionDialog.title" ) );
+    setTitle( Messages.getString( "projectSelectionDialog.title" ) ); //$NON-NLS-1$
   }
   
   /** Produces the result of the selection. */

@@ -69,6 +69,7 @@ import org.eclipse.m2e.core.embedder.IMavenConfiguration;
 import org.eclipse.m2e.core.embedder.MavenRuntime;
 import org.eclipse.m2e.core.embedder.MavenRuntimeManager;
 import org.eclipse.m2e.core.index.IndexManager;
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.internal.embedder.MavenEmbeddedRuntime;
 import org.eclipse.m2e.core.internal.preferences.MavenPreferenceConstants;
 
@@ -101,7 +102,7 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
   boolean dirty = false;
 
   public MavenInstallationsPreferencePage() {
-    setTitle("Maven Installations");
+    setTitle(Messages.MavenInstallationsPreferencePage_title);
 
     this.mavenPlugin = MavenPlugin.getDefault();
     this.runtimeManager = mavenPlugin.getMavenRuntimeManager();
@@ -122,9 +123,9 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
     runtimesViewer.setChecked(defaultRuntime, true);
     runtimesViewer.refresh(); 
     
-    storeCustom("");
-    globalSettingsText.setText("");
-    mavenConfiguration.setGlobalSettingsFile("");
+    storeCustom(""); //$NON-NLS-1$
+    globalSettingsText.setText(""); //$NON-NLS-1$
+    mavenConfiguration.setGlobalSettingsFile(""); //$NON-NLS-1$
     
     updateGlobals(true);
     super.performDefaults();
@@ -133,7 +134,7 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
   
   
   protected void storeCustom(String dir){
-    mavenPlugin.getPreferenceStore().setValue(P_MAVEN_CUSTOM_GLOBAL, dir == null ? "" : dir);
+    mavenPlugin.getPreferenceStore().setValue(P_MAVEN_CUSTOM_GLOBAL, dir == null ? "" : dir); //$NON-NLS-1$
   }
   /* (non-Javadoc)
    * @see org.eclipse.jface.preference.PreferencePage#performApply()
@@ -143,7 +144,7 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
   }
 
   public void updateSettings(){   
-    new Job("Updating Maven installation settings") {
+    new Job(Messages.MavenInstallationsPreferencePage_job_updating) {
       protected IStatus run(IProgressMonitor monitor) {
         String dir = getGlobalSettingsText();
 
@@ -190,14 +191,14 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
     }
     File selectedDir = new File(dir);
     if(!selectedDir.isDirectory()){
-      MessageDialog.openError(getShell(), "Maven Install", "Select the directory where Maven is installed.");
+      MessageDialog.openError(getShell(), Messages.MavenInstallationsPreferencePage_error_title, Messages.MavenInstallationsPreferencePage_error_message);
       return false;
     }
-    File binDir = new File(dir, "bin");
-    File confDir = new File(dir, "conf");
-    File libDir = new File(dir, "lib");
+    File binDir = new File(dir, "bin"); //$NON-NLS-1$
+    File confDir = new File(dir, "conf"); //$NON-NLS-1$
+    File libDir = new File(dir, "lib"); //$NON-NLS-1$
     if(!binDir.exists() || !confDir.exists() || !libDir.exists()){
-      MessageDialog.openError(getShell(), "Maven Install", "The selected directory is not a valid Maven directory.");
+      MessageDialog.openError(getShell(), Messages.MavenInstallationsPreferencePage_error_title, Messages.MavenInstallationsPreferencePage_error2_message);
       return false;
     }
     return true;
@@ -214,7 +215,7 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
 
     Label link = new Label(composite, SWT.NONE);
     link.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 3, 1));
-    link.setText("Select the installation used to launch maven:");
+    link.setText(Messages.MavenInstallationsPreferencePage_link);
     
 
     createTable(composite);
@@ -247,7 +248,7 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
    */
   private void updateGlobalSettingsText(boolean useLastCustomGlobal) {
     String globalSettings = getGlobalSettingsFile(useLastCustomGlobal);
-    globalSettingsText.setText(globalSettings == null ? "" : globalSettings);
+    globalSettingsText.setText(globalSettings == null ? "" : globalSettings); //$NON-NLS-1$
   }
   
   /**
@@ -301,7 +302,7 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
   
   private void updateGlobalSettingsLink(){
     MavenRuntime runtime = getCheckedRuntime();
-    String text = "";
+    String text = ""; //$NON-NLS-1$
     String currText = globalSettingsText.getText();
     boolean showURL = false;
     
@@ -309,11 +310,11 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
     if(f.exists()){
       showURL = true;
     }
-    String openFile = showURL ? " (<a href=\"#\">open file</a>):" : ":";
+    String openFile = showURL ? Messages.MavenInstallationsPreferencePage_link_open : ":"; //$NON-NLS-2$
     if(runtime instanceof MavenEmbeddedRuntime){
-      text = "Global settings"+openFile;
+      text = Messages.MavenInstallationsPreferencePage_settings+openFile;
     } else {
-      text = "Global settings from installation directory"+openFile;
+      text = Messages.MavenInstallationsPreferencePage_settings_install+openFile;
     }
     globalSettingsLink.setText(text);
   }
@@ -327,9 +328,9 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
   
   private void createGlobalSettings(Composite composite) {
     globalSettingsLink = new Link(composite, SWT.NONE);
-    globalSettingsLink.setData("name", "globalSettingsLink");
+    globalSettingsLink.setData("name", "globalSettingsLink"); //$NON-NLS-1$ //$NON-NLS-2$
     
-    globalSettingsLink.setToolTipText("Open editor for global settings");
+    globalSettingsLink.setToolTipText(Messages.MavenInstallationsPreferencePage_link_global);
     GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1);
     gd.verticalIndent = 25;
     globalSettingsLink.setLayoutData(gd);
@@ -348,11 +349,11 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
 
     globalSettingsText = new Text(composite, SWT.BORDER);
     globalSettingsText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-    globalSettingsText.setData("name", "globalSettingsText");
+    globalSettingsText.setData("name", "globalSettingsText"); //$NON-NLS-1$ //$NON-NLS-2$
     globalSettingsBrowseButton = new Button(composite, SWT.NONE);
     GridData gd_globalSettingsBrowseButton = new GridData(SWT.FILL, SWT.CENTER, false, false);
     globalSettingsBrowseButton.setLayoutData(gd_globalSettingsBrowseButton);
-    globalSettingsBrowseButton.setText("&Browse...");
+    globalSettingsBrowseButton.setText(Messages.MavenInstallationsPreferencePage_btnGlobalBrowse);
     globalSettingsBrowseButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         FileDialog dialog = new FileDialog(getShell(), SWT.OPEN);
@@ -407,16 +408,16 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
 
     TableColumn typeColumn = new TableColumn(table, SWT.NONE);
     typeColumn.setWidth(325);
-    typeColumn.setText("");
+    typeColumn.setText(""); //$NON-NLS-1$
 
     Button addButton = new Button(composite, SWT.NONE);
     addButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-    addButton.setText("&Add...");
+    addButton.setText(Messages.MavenInstallationsPreferencePage_btnAdd);
     addButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         DirectoryDialog dlg = new DirectoryDialog(getShell());
-        dlg.setText("Maven Installation");
-        dlg.setMessage("Select Maven installation directory");
+        dlg.setText(Messages.MavenInstallationsPreferencePage_dialog_install_title);
+        dlg.setMessage(Messages.MavenInstallationsPreferencePage_dialog_install_message);
         String dir = dlg.open();
         if(dir == null){
           return;
@@ -425,7 +426,7 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
         if(ok){
           MavenRuntime runtime = MavenRuntimeManager.createExternalRuntime(dir);
           if(runtimes.contains(runtime)) {
-            MessageDialog.openError(getShell(), "Maven Install", "The selected Maven install is already registered.");
+            MessageDialog.openError(getShell(), Messages.MavenInstallationsPreferencePage_error_title, Messages.MavenInstallationsPreferencePage_error3_message);
           } else {
             runtimes.add(runtime);
             runtimesViewer.refresh();
@@ -442,20 +443,20 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
     final Button editButton = new Button(composite, SWT.NONE);
     editButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
     editButton.setEnabled(false);
-    editButton.setText("&Edit...");
+    editButton.setText(Messages.MavenInstallationsPreferencePage_btnEdit);
     editButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         MavenRuntime runtime = getSelectedMavenRuntime();
         DirectoryDialog dlg = new DirectoryDialog(Display.getCurrent().getActiveShell());
-        dlg.setText("Maven Installation");
-        dlg.setMessage("Select Maven installation directory");
+        dlg.setText(Messages.MavenInstallationsPreferencePage_dialog_title);
+        dlg.setMessage(Messages.MavenInstallationsPreferencePage_dialog_message);
         dlg.setFilterPath(runtime.getLocation());
         String dir = dlg.open();
         boolean ok = validateMavenInstall(dir);
         if(ok && !dir.equals(runtime.getLocation())) {
           MavenRuntime newRuntime = MavenRuntimeManager.createExternalRuntime(dir);
           if(runtimes.contains(newRuntime)) {
-            MessageDialog.openError(getShell(), "Maven Install", "Selected Maven install is already registered");
+            MessageDialog.openError(getShell(), Messages.MavenInstallationsPreferencePage_error_title, Messages.MavenInstallationsPreferencePage_error4_message);
           } else {
             runtimes.set(runtimes.indexOf(runtime), newRuntime);
             runtimesViewer.refresh();
@@ -471,7 +472,7 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
     final Button removeButton = new Button(composite, SWT.NONE);
     removeButton.setEnabled(false);
     removeButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-    removeButton.setText("&Remove");
+    removeButton.setText(Messages.MavenInstallationsPreferencePage_btnRemove);
     removeButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         MavenRuntime runtime = getSelectedMavenRuntime();
@@ -512,8 +513,8 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
     noteLabelData.widthHint = 100;
     
     noteLabel.setLayoutData(noteLabelData);
-    noteLabel.setText("Note: Embedded runtime is always used for dependency resolution, but " +
-        "does not use global settings when it is used to launch Maven. To learn more, visit the <a href=\"http://maven.apache.org/\">maven</a> web page.");
+    noteLabel.setText(Messages.MavenInstallationsPreferencePage_lblNote1 +
+        Messages.MavenInstallationsPreferencePage_lblNote2);
     noteLabel.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         try {
@@ -529,7 +530,7 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
     });
   }
   
-  private static final String P_MAVEN_CUSTOM_GLOBAL = "customGlobalSettingsFile";
+  private static final String P_MAVEN_CUSTOM_GLOBAL = "customGlobalSettingsFile"; //$NON-NLS-1$
   
   protected void setCheckedRuntime(MavenRuntime runtime){
     runtimesViewer.setAllChecked(false);
@@ -548,7 +549,7 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
     if(globalSettings != null && globalSettings.length() > 0) {
       File globalSettingsFile = new File(globalSettings);
       if(!globalSettingsFile.exists()) {
-        setMessage("Global settings file doesn't exist", IMessageProvider.WARNING);
+        setMessage(Messages.MavenInstallationsPreferencePage_error_global_missing, IMessageProvider.WARNING);
         globalSettings = null;
       }
     } else {
@@ -557,7 +558,7 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
 
     List<SettingsProblem> result = maven.validateSettings(globalSettings);
     if(result.size() > 0) {
-      setMessage("Unable to parse global settings file; " + result.get(0).getMessage(), IMessageProvider.WARNING);
+      setMessage(Messages.MavenInstallationsPreferencePage_error_global_parse + result.get(0).getMessage(), IMessageProvider.WARNING);
     }
 
   }
@@ -572,7 +573,7 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
     IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
     IWorkbenchPage page = window.getActivePage();
 
-    IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor("settings.xml");
+    IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor("settings.xml"); //$NON-NLS-1$
 
     File file = new File(fileName);
     IEditorInput input = null;
@@ -580,13 +581,13 @@ public class MavenInstallationsPreferencePage extends PreferencePage implements 
       //class implementing editor input for external file has been renamed in eclipse 3.3, hence reflection
       Class javaInput = null;
       try {
-        javaInput = Class.forName("org.eclipse.ui.internal.editors.text.JavaFileEditorInput");
+        javaInput = Class.forName("org.eclipse.ui.internal.editors.text.JavaFileEditorInput"); //$NON-NLS-1$
         Constructor cons = javaInput.getConstructor(new Class[] {File.class});
         input = (IEditorInput) cons.newInstance(new Object[] {file});
       } catch(Exception e) {
         try {
           IFileStore fileStore = EFS.getLocalFileSystem().fromLocalFile(file);
-          Class storeInput = Class.forName("org.eclipse.ui.ide.FileStoreEditorInput");
+          Class storeInput = Class.forName("org.eclipse.ui.ide.FileStoreEditorInput"); //$NON-NLS-1$
           Constructor cons = storeInput.getConstructor(new Class[] {IFileStore.class});
           input = (IEditorInput) cons.newInstance(new Object[] {fileStore});
         } catch(Exception ex) {

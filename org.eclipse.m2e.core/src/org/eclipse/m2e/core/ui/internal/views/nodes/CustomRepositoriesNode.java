@@ -10,6 +10,7 @@ package org.eclipse.m2e.core.ui.internal.views.nodes;
 
 import java.util.List;
 
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.repository.IRepository;
 import org.eclipse.m2e.core.repository.IRepositoryRegistry;
 
@@ -25,7 +26,7 @@ public class CustomRepositoriesNode extends AbstractRepositoriesNode {
   }
 
   public String getName() {
-    return "Custom Repositories";
+    return Messages.CustomRepositoriesNode_name;
   }
 
 }

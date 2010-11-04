@@ -27,6 +27,7 @@ import org.eclipse.m2e.core.core.MavenConsole;
 import org.eclipse.m2e.core.core.MavenLogger;
 import org.eclipse.m2e.core.embedder.IMaven;
 import org.eclipse.m2e.core.embedder.IMavenConfiguration;
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.project.IMavenMarkerManager;
 import org.eclipse.m2e.core.project.IMavenProjectChangedListener;
 import org.eclipse.m2e.core.project.MavenProjectChangedEvent;
@@ -40,15 +41,15 @@ import org.eclipse.m2e.core.project.MavenProjectManager;
  */
 public abstract class AbstractProjectConfigurator implements IExecutableExtension, IMavenProjectChangedListener {
 
-  public static final String ATTR_ID = "id";
+  public static final String ATTR_ID = "id"; //$NON-NLS-1$
   
-  public static final String ATTR_PRIORITY = "priority";
+  public static final String ATTR_PRIORITY = "priority"; //$NON-NLS-1$
   
-  public static final String ATTR_GENERIC = "generic";
+  public static final String ATTR_GENERIC = "generic"; //$NON-NLS-1$
 
-  public static final String ATTR_NAME = "name";
+  public static final String ATTR_NAME = "name"; //$NON-NLS-1$
   
-  public static final String ATTR_CLASS = "class";
+  public static final String ATTR_CLASS = "class"; //$NON-NLS-1$
   
   private int priority;
   private String id;
@@ -185,13 +186,13 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
 
   protected void assertHasNature(IProject project, String natureId) throws CoreException {
     if (project.getNature(natureId) == null) {
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Project does not have required nature " + natureId, null));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, Messages.AbstractProjectConfigurator_error_missing_nature + natureId, null));
     }
   }
 
   @Override
   public String toString() {
-    return id + ":" + name + "(" + priority + ")";
+    return id + ":" + name + "(" + priority + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
   }
 
   public AbstractBuildParticipant getBuildParticipant(MojoExecution execution) {

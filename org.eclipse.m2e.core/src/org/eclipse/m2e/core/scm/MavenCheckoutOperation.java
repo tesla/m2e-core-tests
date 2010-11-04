@@ -16,8 +16,10 @@ import java.util.List;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.m2e.core.core.MavenConsole;
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.project.MavenProjectScmInfo;
 
 
@@ -53,14 +55,14 @@ public class MavenCheckoutOperation {
 
       String folderUrl = info.getFolderUrl();
       
-      monitor.setTaskName("Scanning " + info.getLabel() + " " + info.getFolderUrl());
+      monitor.setTaskName(NLS.bind(Messages.MavenCheckoutOperation_task_scanning, info.getLabel(), info.getFolderUrl()));
 
       // XXX check if projects already exist
       boolean isNestedPath = false;
       for(MavenProjectScmInfo info2 : mavenProjects) {
         if(info != info2) {
           String path = info2.getFolderUrl();
-          if(folderUrl.startsWith(path + "/")) {
+          if(folderUrl.startsWith(path + "/")) { //$NON-NLS-1$
             isNestedPath = true;
             break;
           }
@@ -76,7 +78,7 @@ public class MavenCheckoutOperation {
         throw new InterruptedException();
       }
 
-      monitor.setTaskName("Checking out " + info.getLabel() + " " + info.getFolderUrl());
+      monitor.setTaskName(NLS.bind(Messages.MavenCheckoutOperation_task_checking,info.getLabel(), info.getFolderUrl()));
 
       // XXX if location is pointing to workspace folder need to create unique dir too 
       File workspaceRoot = ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile();
@@ -98,7 +100,7 @@ public class MavenCheckoutOperation {
   protected File getUniqueDir(File baseDir) {
     long suffix = System.currentTimeMillis();
     while(true) {
-      File tempDir = new File(baseDir, "maven." + suffix);
+      File tempDir = new File(baseDir, "maven." + suffix); //$NON-NLS-1$
       if(!tempDir.exists()) {
         return tempDir;
       }

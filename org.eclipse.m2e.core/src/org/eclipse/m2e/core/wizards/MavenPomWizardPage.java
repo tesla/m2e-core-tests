@@ -30,6 +30,8 @@ import org.eclipse.ui.dialogs.ContainerSelectionDialog;
 
 import org.apache.maven.model.Model;
 
+import org.eclipse.m2e.core.internal.Messages;
+
 
 /**
  * Wizard page used to specify basic POM parameters
@@ -42,9 +44,9 @@ public class MavenPomWizardPage extends AbstractMavenWizardPage {
   private MavenArtifactComponent pomComponent;
 
   public MavenPomWizardPage(ISelection selection) {
-    super("wizardPage");
-    setTitle("Maven2 POM");
-    setDescription("This wizard creates a new POM (pom.xml) descriptor for Maven2.");
+    super("wizardPage"); //$NON-NLS-1$
+    setTitle(Messages.MavenPomWizardPage_title);
+    setDescription(Messages.MavenPomWizardPage_desc);
     this.selection = selection;
   }
 
@@ -63,7 +65,7 @@ public class MavenPomWizardPage extends AbstractMavenWizardPage {
     };
 
     Label label = new Label(container, SWT.NULL);
-    label.setText("&Project:");
+    label.setText(Messages.MavenPomWizardPage_lblProject);
 
     projectText = new Text(container, SWT.BORDER | SWT.SINGLE);
     projectText.setEditable(false);
@@ -73,7 +75,7 @@ public class MavenPomWizardPage extends AbstractMavenWizardPage {
     Button button = new Button(container, SWT.PUSH);
     final GridData gridData_2 = new GridData();
     button.setLayoutData(gridData_2);
-    button.setText("Browse...");
+    button.setText(Messages.MavenPomWizardPage_btnBrowse);
     button.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         handleBrowse();
@@ -83,10 +85,10 @@ public class MavenPomWizardPage extends AbstractMavenWizardPage {
     pomComponent = new MavenArtifactComponent(container, SWT.NONE);
     pomComponent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1));
     pomComponent.setModifyingListener(modifyingListener);
-    addFieldWithHistory("groupId", pomComponent.getGroupIdCombo());
-    addFieldWithHistory("artifactId", pomComponent.getArtifactIdCombo());
-    addFieldWithHistory("version", pomComponent.getVersionCombo());
-    addFieldWithHistory("name", pomComponent.getNameCombo());
+    addFieldWithHistory("groupId", pomComponent.getGroupIdCombo()); //$NON-NLS-1$
+    addFieldWithHistory("artifactId", pomComponent.getArtifactIdCombo()); //$NON-NLS-1$
+    addFieldWithHistory("version", pomComponent.getVersionCombo()); //$NON-NLS-1$
+    addFieldWithHistory("name", pomComponent.getNameCombo()); //$NON-NLS-1$
 
     initialize();
     dialogChanged();
@@ -125,7 +127,7 @@ public class MavenPomWizardPage extends AbstractMavenWizardPage {
    */
   void handleBrowse() {
     ContainerSelectionDialog dialog = new ContainerSelectionDialog(getShell(),
-        ResourcesPlugin.getWorkspace().getRoot(), false, "Select project");
+        ResourcesPlugin.getWorkspace().getRoot(), false, Messages.MavenPomWizardPage_dialog_title);
     dialog.showClosedProjects(false);
     if(dialog.open() == Window.OK) {
       Object[] result = dialog.getResult();
@@ -170,33 +172,33 @@ public class MavenPomWizardPage extends AbstractMavenWizardPage {
     IResource container = ResourcesPlugin.getWorkspace().getRoot().findMember(new Path(getProject()));
 
     if(getProject().length() == 0) {
-      updateStatus("Project or folder must be specified");
+      updateStatus(Messages.MavenPomWizardPage_error_folder);
       return;
     }
     if(container == null || (container.getType() & IResource.FOLDER | IResource.PROJECT) == 0) {
-      updateStatus("Folder must exist");
+      updateStatus(Messages.MavenPomWizardPage_error_folder2);
       return;
     }
     if(!container.isAccessible()) {
-      updateStatus("Folder must be writable");
+      updateStatus(Messages.MavenPomWizardPage_error_folder_write);
       return;
     }
 
     // TODO
     if(pomComponent.getGroupId().length() == 0) {
-      updateStatus("Group Id must be specified");
+      updateStatus(Messages.MavenPomWizardPage_error_grid);
     }
 
     if(pomComponent.getArtifactId().length() == 0) {
-      updateStatus("Artifact Id must be specified");
+      updateStatus(Messages.MavenPomWizardPage_error_artid);
     }
 
     if(pomComponent.getVersion().length() == 0) {
-      updateStatus("Version must be specified");
+      updateStatus(Messages.MavenPomWizardPage_error_version);
     }
 
     if(pomComponent.getPackaging().length() == 0) {
-      updateStatus("Packaging must be specified");
+      updateStatus(Messages.MavenPomWizardPage_error_pack);
     }
 
     updateStatus(null);

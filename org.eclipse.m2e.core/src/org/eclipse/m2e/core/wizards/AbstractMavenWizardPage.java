@@ -89,7 +89,7 @@ public abstract class AbstractMavenWizardPage extends WizardPage {
 
       resolverConfigurationComponent = new ResolverConfigurationComponent(composite, importConfiguration, true);
       resolverConfigurationComponent.setLayoutData(gridData);
-      addFieldWithHistory("projectNameTemplate", resolverConfigurationComponent.template);
+      addFieldWithHistory("projectNameTemplate", resolverConfigurationComponent.template); //$NON-NLS-1$
     }
   }
 
@@ -194,20 +194,20 @@ public abstract class AbstractMavenWizardPage extends WizardPage {
 
   protected String validateIdInput(String text, String id) {
     if(text == null || text.length() == 0) {
-      return Messages.getString("wizard.project.page.maven2.validator." + id + "ID");
+      return Messages.getString("wizard.project.page.maven2.validator." + id + "ID"); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
-    if(text.contains(" ")) {
-      return Messages.getString("wizard.project.page.maven2.validator." + id + "IDnospaces");
+    if(text.contains(" ")) { //$NON-NLS-1$
+      return Messages.getString("wizard.project.page.maven2.validator." + id + "IDnospaces"); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     IStatus nameStatus = ResourcesPlugin.getWorkspace().validateName(text, IResource.PROJECT);
     if(!nameStatus.isOK()) {
-      return Messages.getString("wizard.project.page.maven2.validator." + id + "IDinvalid", nameStatus.getMessage());
+      return Messages.getString("wizard.project.page.maven2.validator." + id + "IDinvalid", nameStatus.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
-    if(!text.matches("[A-Za-z0-9_\\-.]+")) {
-      return Messages.getString("wizard.project.page.maven2.validator." + id + "IDinvalid", text);
+    if(!text.matches("[A-Za-z0-9_\\-.]+")) { //$NON-NLS-1$
+      return Messages.getString("wizard.project.page.maven2.validator." + id + "IDinvalid", text); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     return null;

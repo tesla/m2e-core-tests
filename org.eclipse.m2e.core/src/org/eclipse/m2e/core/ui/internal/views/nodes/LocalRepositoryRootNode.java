@@ -12,6 +12,7 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.m2e.core.MavenImages;
 import org.eclipse.m2e.core.MavenPlugin;
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.internal.index.NexusIndex;
 import org.eclipse.m2e.core.internal.index.NexusIndexManager;
 
@@ -33,7 +34,7 @@ public class LocalRepositoryRootNode implements IMavenRepositoryNode{
   }
 
   public String getName() {
-    return "Local Repositories";
+    return Messages.LocalRepositoryRootNode_name;
   }
 
   public boolean hasChildren() {

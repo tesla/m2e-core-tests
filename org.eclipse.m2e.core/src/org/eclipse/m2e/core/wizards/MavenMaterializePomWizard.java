@@ -28,6 +28,7 @@ import org.apache.maven.model.Dependency;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.actions.SelectionUtil;
 import org.eclipse.m2e.core.embedder.ArtifactKey;
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.project.MavenProjectPomScanner;
 import org.eclipse.m2e.core.project.MavenProjectScmInfo;
 import org.eclipse.m2e.core.project.ProjectImportConfiguration;
@@ -59,7 +60,7 @@ public class MavenMaterializePomWizard extends Wizard implements IImportWizard, 
   public MavenMaterializePomWizard() {
     importConfiguration = new ProjectImportConfiguration();
     setNeedsProgressMonitor(true);
-    setWindowTitle("Import Maven Projects");
+    setWindowTitle(Messages.MavenMaterializePomWizard_title);
   }
 
   public void setDependencies(Dependency[] dependencies) {
@@ -95,15 +96,15 @@ public class MavenMaterializePomWizard extends Wizard implements IImportWizard, 
 
   public void addPages() {
     selectionPage = new MavenDependenciesWizardPage(importConfiguration, //
-        "Select Maven artifacts", //
-        "Select Maven artifacts to import") {
+        Messages.MavenMaterializePomWizard_dialog_title, //
+        Messages.MavenMaterializePomWizard_dialog_message) {
       protected void createAdvancedSettings(Composite composite, GridData gridData) {
         checkOutAllButton = new Button(composite, SWT.CHECK);
-        checkOutAllButton.setText("&Check out All projects");
+        checkOutAllButton.setText(Messages.MavenMaterializePomWizard_btnCheckout);
         checkOutAllButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 3, 1));
         
         useDeveloperConnectionButton = new Button(composite, SWT.CHECK);
-        useDeveloperConnectionButton.setText("Use &Developer connection");
+        useDeveloperConnectionButton.setText(Messages.MavenMaterializePomWizard_btnDev);
         useDeveloperConnectionButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 3, 1));
         
         super.createAdvancedSettings(composite, gridData);
@@ -112,8 +113,8 @@ public class MavenMaterializePomWizard extends Wizard implements IImportWizard, 
     selectionPage.setDependencies(dependencies);
     
     locationPage = new MavenProjectWizardLocationPage(importConfiguration, //
-        "Select project location", 
-        "Select project location and working set");
+        Messages.MavenMaterializePomWizard_location_title, 
+        Messages.MavenMaterializePomWizard_location_message);
     locationPage.setLocationPath(SelectionUtil.getSelectedLocation(selection));
     
     addPage(selectionPage);

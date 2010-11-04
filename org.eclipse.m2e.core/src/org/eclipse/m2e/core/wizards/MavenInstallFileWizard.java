@@ -33,6 +33,7 @@ import org.eclipse.m2e.core.actions.OpenMavenConsoleAction;
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.core.MavenLogger;
 import org.eclipse.m2e.core.embedder.IMaven;
+import org.eclipse.m2e.core.internal.Messages;
 
 
 /**
@@ -55,7 +56,7 @@ public class MavenInstallFileWizard extends Wizard implements IImportWizard {
 
   public MavenInstallFileWizard() {
     setNeedsProgressMonitor(true);
-    setWindowTitle("Install artifact");
+    setWindowTitle(Messages.MavenInstallFileWizard_title);
   }
 
   public void addPages() {
@@ -70,28 +71,28 @@ public class MavenInstallFileWizard extends Wizard implements IImportWizard {
     final Properties properties = new Properties();
     
     // Mandatory Properties for install:install-file
-    properties.setProperty("file", artifactPage.getArtifactFileName());
+    properties.setProperty("file", artifactPage.getArtifactFileName()); //$NON-NLS-1$
     
-    properties.setProperty("groupId", artifactPage.getGroupId());
-    properties.setProperty("artifactId", artifactPage.getArtifactId());
-    properties.setProperty("version", artifactPage.getVersion());
-    properties.setProperty("packaging", artifactPage.getPackaging());
+    properties.setProperty("groupId", artifactPage.getGroupId()); //$NON-NLS-1$
+    properties.setProperty("artifactId", artifactPage.getArtifactId()); //$NON-NLS-1$
+    properties.setProperty("version", artifactPage.getVersion()); //$NON-NLS-1$
+    properties.setProperty("packaging", artifactPage.getPackaging()); //$NON-NLS-1$
 
     if(artifactPage.getClassifier().length()>0) {
-      properties.setProperty("classifier", artifactPage.getClassifier());
+      properties.setProperty("classifier", artifactPage.getClassifier()); //$NON-NLS-1$
     }
 
     if(artifactPage.getPomFileName().length()>0) {
-      properties.setProperty("pomFile", artifactPage.getPomFileName());
+      properties.setProperty("pomFile", artifactPage.getPomFileName()); //$NON-NLS-1$
     }
     if(artifactPage.isGeneratePom()) {
-      properties.setProperty("generatePom", "true");
+      properties.setProperty("generatePom", "true"); //$NON-NLS-1$ //$NON-NLS-2$
     }
     if(artifactPage.isCreateChecksum()) {
-      properties.setProperty("createChecksum", "true");
+      properties.setProperty("createChecksum", "true"); //$NON-NLS-1$ //$NON-NLS-2$
     }
     
-    new Job("Installing artifact") {
+    new Job(Messages.MavenInstallFileWizard_job) {
       protected IStatus run(IProgressMonitor monitor) {
         setProperty(IProgressConstants.ACTION_PROPERTY, new OpenMavenConsoleAction());
         MavenPlugin plugin = MavenPlugin.getDefault();
@@ -99,15 +100,15 @@ public class MavenInstallFileWizard extends Wizard implements IImportWizard {
           // Run the install:install-file goal
           IMaven maven = MavenPlugin.getDefault().getMaven();
           MavenExecutionRequest request = maven.createExecutionRequest(monitor);
-          request.setGoals(Arrays.asList("install:install-file"));
+          request.setGoals(Arrays.asList("install:install-file")); //$NON-NLS-1$
           request.setUserProperties(properties);
           MavenExecutionResult executionResult = maven.execute(request, monitor);
           
           List<Throwable> exceptions = executionResult.getExceptions();
           if(!exceptions.isEmpty()) {
             for(Throwable exception : exceptions) {
-              String msg = "Execution error";
-              plugin.getConsole().logError(msg + "; " + exception.toString()); 
+              String msg = Messages.MavenInstallFileWizard_error;
+              plugin.getConsole().logError(msg + "; " + exception.toString());  //$NON-NLS-1$
               MavenLogger.log(msg, exception);
             }
           }

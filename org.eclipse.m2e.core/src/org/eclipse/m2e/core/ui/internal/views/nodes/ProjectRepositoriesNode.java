@@ -14,6 +14,7 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.m2e.core.MavenImages;
 import org.eclipse.m2e.core.MavenPlugin;
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.internal.index.NexusIndex;
 import org.eclipse.m2e.core.internal.index.NexusIndexManager;
 import org.eclipse.m2e.core.repository.IRepository;
@@ -43,7 +44,7 @@ public class ProjectRepositoriesNode implements IMavenRepositoryNode {
   }
 
   public String getName() {
-    return "Project Repositories";
+    return Messages.ProjectRepositoriesNode_name;
   }
 
   public String toString() {

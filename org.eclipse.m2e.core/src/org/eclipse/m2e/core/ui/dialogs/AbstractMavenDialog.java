@@ -23,10 +23,10 @@ import org.eclipse.m2e.core.MavenPlugin;
  */
 public abstract class AbstractMavenDialog extends SelectionStatusDialog {
 
-  protected static final String KEY_WIDTH = "width";
-  protected static final String KEY_HEIGHT = "height";
-  private static final String KEY_X = "x";
-  private static final String KEY_Y = "y";
+  protected static final String KEY_WIDTH = "width"; //$NON-NLS-1$
+  protected static final String KEY_HEIGHT = "height"; //$NON-NLS-1$
+  private static final String KEY_X = "x"; //$NON-NLS-1$
+  private static final String KEY_Y = "y"; //$NON-NLS-1$
   protected IDialogSettings settings;
   private Point location;
   private Point size;

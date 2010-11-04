@@ -73,7 +73,7 @@ public class MavenPropertyDialog extends Dialog {
     gd.widthHint = 300;
     nameText.setLayoutData(gd);
     nameText.setFont(comp.getFont());
-    nameText.setText(initialName==null ? "" : initialName);
+    nameText.setText(initialName==null ? "" : initialName); //$NON-NLS-1$
     nameText.addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent e) {
         updateButtons();
@@ -89,7 +89,7 @@ public class MavenPropertyDialog extends Dialog {
     gd.widthHint = 300;
     valueText.setLayoutData(gd);
     valueText.setFont(comp.getFont());
-    valueText.setText(initialValue==null ? "" : initialValue);
+    valueText.setText(initialValue==null ? "" : initialValue); //$NON-NLS-1$
     valueText.addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent e) {
         updateButtons();

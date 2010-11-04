@@ -64,15 +64,15 @@ public class MavenPreferencePage extends FieldEditorPreferencePage implements IW
         getFieldEditorParent()));
 
     addField(new BooleanFieldEditor(MavenPreferenceConstants.P_UPDATE_INDEXES, //
-        "Download repository index updates on startup", //
+        org.eclipse.m2e.core.internal.Messages.MavenPreferencePage_download, //
         getFieldEditorParent()));
     
     addField(new BooleanFieldEditor(MavenPreferenceConstants.P_UPDATE_PROJECTS, //
-        "Update Maven projects on startup", //
+        org.eclipse.m2e.core.internal.Messages.MavenPreferencePage_update, //
         getFieldEditorParent()));
     
     addField(new BooleanFieldEditor(MavenPreferenceConstants.P_HIDE_FOLDERS_OF_NESTED_PROJECTS, //
-        "Hide folders of physically nested modules (experimental)", getFieldEditorParent()));
+        org.eclipse.m2e.core.internal.Messages.MavenPreferencePage_hide, getFieldEditorParent()));
     
     GridData comboCompositeGridData = new GridData();
     comboCompositeGridData.verticalIndent = 25;
@@ -85,10 +85,10 @@ public class MavenPreferencePage extends FieldEditorPreferencePage implements IW
     comboComposite.setLayout(new GridLayout(2, false));
     
     addField(new GoalsFieldEditor(MavenPreferenceConstants.P_GOAL_ON_IMPORT, //
-        Messages.getString("preferences.goalOnImport"), "&Select...", comboComposite)); //$NON-NLS-1$
+        Messages.getString("preferences.goalOnImport"), org.eclipse.m2e.core.internal.Messages.MavenPreferencePage_select, comboComposite)); //$NON-NLS-1$
 
     addField(new GoalsFieldEditor(MavenPreferenceConstants.P_GOAL_ON_UPDATE, //
-        Messages.getString("preferences.goalOnUpdate"), "S&elect...", comboComposite)); //$NON-NLS-1$
+        Messages.getString("preferences.goalOnUpdate"), org.eclipse.m2e.core.internal.Messages.MavenPreferencePage_select2, comboComposite)); //$NON-NLS-1$
 
     // addSeparator();
   }

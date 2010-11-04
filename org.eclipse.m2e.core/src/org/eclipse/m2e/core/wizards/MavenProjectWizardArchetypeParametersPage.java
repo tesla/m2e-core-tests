@@ -29,6 +29,7 @@ import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -66,19 +67,19 @@ import org.eclipse.m2e.core.ui.internal.components.TextComboBoxCellEditor;
  */
 public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWizardPage {
 
-  public static final String DEFAULT_VERSION = "0.0.1-SNAPSHOT";
+  public static final String DEFAULT_VERSION = "0.0.1-SNAPSHOT"; //$NON-NLS-1$
 
-  public static final String DEFAULT_PACKAGE = "foo";
+  public static final String DEFAULT_PACKAGE = "foo"; //$NON-NLS-1$
 
   Table propertiesTable;
 
   TableViewer propertiesViewer;
 
-  final public static String KEY_PROPERTY = "key";
+  final public static String KEY_PROPERTY = "key"; //$NON-NLS-1$
 
   final public static int KEY_INDEX = 0;
 
-  final public static String VALUE_PROPERTY = "value";
+  final public static String VALUE_PROPERTY = "value"; //$NON-NLS-1$
 
   final public static int VALUE_INDEX = 1;
 
@@ -111,10 +112,10 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
 
   /** Creates a new page. */
   public MavenProjectWizardArchetypeParametersPage(ProjectImportConfiguration projectImportConfiguration) {
-    super("Maven2ProjectWizardArchifactPage", projectImportConfiguration);
+    super("Maven2ProjectWizardArchifactPage", projectImportConfiguration); //$NON-NLS-1$
 
-    setTitle(Messages.getString("wizard.project.page.maven2.title"));
-    setDescription(Messages.getString("wizard.project.page.maven2.archetype.parameters.description"));
+    setTitle(Messages.getString("wizard.project.page.maven2.title")); //$NON-NLS-1$
+    setDescription(Messages.getString("wizard.project.page.maven2.archetype.parameters.description")); //$NON-NLS-1$
     setPageComplete(false);
 
     requiredProperties = new HashSet<String>();
@@ -149,12 +150,12 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
 //    artifactGroup.setLayout(new GridLayout(2, false));
 
     Label groupIdlabel = new Label(parent, SWT.NONE);
-    groupIdlabel.setText(Messages.getString("artifactComponent.groupId"));
+    groupIdlabel.setText(Messages.getString("artifactComponent.groupId")); //$NON-NLS-1$
 
     groupIdCombo = new Combo(parent, SWT.BORDER);
     groupIdCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-    addFieldWithHistory("groupId", groupIdCombo);
-    groupIdCombo.setData("name", "groupId");
+    addFieldWithHistory("groupId", groupIdCombo); //$NON-NLS-1$
+    groupIdCombo.setData("name", "groupId"); //$NON-NLS-1$ //$NON-NLS-2$
     groupIdCombo.addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent e) {
         updateJavaPackage();
@@ -163,12 +164,12 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
     });
 
     Label artifactIdLabel = new Label(parent, SWT.NONE);
-    artifactIdLabel.setText(Messages.getString("artifactComponent.artifactId"));
+    artifactIdLabel.setText(Messages.getString("artifactComponent.artifactId")); //$NON-NLS-1$
 
     artifactIdCombo = new Combo(parent, SWT.BORDER);
     artifactIdCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
-    addFieldWithHistory("artifactId", artifactIdCombo);
-    artifactIdCombo.setData("name", "artifactId");
+    addFieldWithHistory("artifactId", artifactIdCombo); //$NON-NLS-1$
+    artifactIdCombo.setData("name", "artifactId"); //$NON-NLS-1$ //$NON-NLS-2$
     artifactIdCombo.addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent e) {
         updateJavaPackage();
@@ -177,14 +178,14 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
     });
 
     Label versionLabel = new Label(parent, SWT.NONE);
-    versionLabel.setText(Messages.getString("artifactComponent.version"));
+    versionLabel.setText(Messages.getString("artifactComponent.version")); //$NON-NLS-1$
 
     versionCombo = new Combo(parent, SWT.BORDER);
     GridData gd_versionCombo = new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1);
     gd_versionCombo.widthHint = 150;
     versionCombo.setLayoutData(gd_versionCombo);
     versionCombo.setText(DEFAULT_VERSION);
-    addFieldWithHistory("version", versionCombo);
+    addFieldWithHistory("version", versionCombo); //$NON-NLS-1$
     versionCombo.addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent e) {
         validate();
@@ -192,12 +193,12 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
     });
 
     Label packageLabel = new Label(parent, SWT.NONE);
-    packageLabel.setText(Messages.getString("artifactComponent.package"));
+    packageLabel.setText(Messages.getString("artifactComponent.package")); //$NON-NLS-1$
 
     packageCombo = new Combo(parent, SWT.BORDER);
     packageCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
-    packageCombo.setData("name", "package");
-    addFieldWithHistory("package", packageCombo);
+    packageCombo.setData("name", "package"); //$NON-NLS-1$ //$NON-NLS-2$
+    addFieldWithHistory("package", packageCombo); //$NON-NLS-1$
     packageCombo.addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent e) {
         if(!packageCustomized && !packageCombo.getText().equals(getDefaultJavaPackage())) {
@@ -211,7 +212,7 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
   private void createPropertiesGroup(Composite composite) {
     Label propertiesLabel = new Label(composite, SWT.NONE);
     propertiesLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 3, 1));
-    propertiesLabel.setText("Properties available from archetype:");
+    propertiesLabel.setText(org.eclipse.m2e.core.internal.Messages.MavenProjectWizardArchetypeParametersPage_lblProps);
 
     propertiesViewer = new TableViewer(composite, SWT.BORDER | SWT.FULL_SELECTION);
     propertiesTable = propertiesViewer.getTable();
@@ -221,11 +222,11 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
 
     TableColumn propertiesTableNameColumn = new TableColumn(propertiesTable, SWT.NONE);
     propertiesTableNameColumn.setWidth(130);
-    propertiesTableNameColumn.setText("Name");
+    propertiesTableNameColumn.setText(org.eclipse.m2e.core.internal.Messages.MavenProjectWizardArchetypeParametersPage_columnName);
 
     TableColumn propertiesTableValueColumn = new TableColumn(propertiesTable, SWT.NONE);
     propertiesTableValueColumn.setWidth(230);
-    propertiesTableValueColumn.setText("Value");
+    propertiesTableValueColumn.setText(org.eclipse.m2e.core.internal.Messages.MavenProjectWizardArchetypeParametersPage_columnValue);
 
     propertiesViewer.setColumnProperties(new String[] {KEY_PROPERTY, VALUE_PROPERTY});
 
@@ -253,16 +254,16 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
 
     Button addButton = new Button(composite, SWT.NONE);
     addButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-    addButton.setText("&Add...");
+    addButton.setText(org.eclipse.m2e.core.internal.Messages.MavenProjectWizardArchetypeParametersPage_btnAdd);
     addButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
-        propertiesViewer.editElement(addTableItem("?", "?"), KEY_INDEX);
+        propertiesViewer.editElement(addTableItem("?", "?"), KEY_INDEX); //$NON-NLS-1$ //$NON-NLS-2$
       }
     });
 
     removeButton = new Button(composite, SWT.NONE);
     removeButton.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
-    removeButton.setText("&Remove");
+    removeButton.setText(org.eclipse.m2e.core.internal.Messages.MavenProjectWizardArchetypeParametersPage_btnRemove);
     removeButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         if(propertiesTable.getSelectionCount() > 0) {
@@ -301,33 +302,33 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
   }
 
   private String validateInput() {
-    String error = validateIdInput(groupIdCombo.getText().trim(), "group");
+    String error = validateIdInput(groupIdCombo.getText().trim(), "group"); //$NON-NLS-1$
     if(error != null) {
       return error;
     }
 
-    error = validateIdInput(artifactIdCombo.getText().trim(), "artifact");
+    error = validateIdInput(artifactIdCombo.getText().trim(), "artifact"); //$NON-NLS-1$
     if(error != null) {
       return error;
     }
 
     String versionValue = versionCombo.getText().trim();
     if(versionValue.length() == 0) {
-      return Messages.getString("wizard.project.page.maven2.validator.version");
+      return Messages.getString("wizard.project.page.maven2.validator.version"); //$NON-NLS-1$
     }
     //TODO: check validity of version?
 
     String packageName = packageCombo.getText();
     if(packageName.trim().length() != 0) {
-      if(!Pattern.matches("[A-Za-z_$][A-Za-z_$\\d]*(?:\\.[A-Za-z_$][A-Za-z_$\\d]*)*", packageName)) {
-        return "Invalid package name";
+      if(!Pattern.matches("[A-Za-z_$][A-Za-z_$\\d]*(?:\\.[A-Za-z_$][A-Za-z_$\\d]*)*", packageName)) { //$NON-NLS-1$
+        return org.eclipse.m2e.core.internal.Messages.MavenProjectWizardArchetypeParametersPage_error_package;
       }
     }
 
     // validate project name
     IStatus nameStatus = getImportConfiguration().validateProjectName(getModel());
     if(!nameStatus.isOK()) {
-      return Messages.getString("wizard.project.page.maven2.validator.projectNameInvalid", nameStatus.getMessage());
+      return Messages.getString("wizard.project.page.maven2.validator.projectNameInvalid", nameStatus.getMessage()); //$NON-NLS-1$
     }
 
     if(requiredProperties.size() > 0) {
@@ -335,7 +336,7 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
       for(String key : requiredProperties) {
         String value = properties.getProperty(key);
         if(value == null || value.length() == 0) {
-          return Messages.getString("wizard.project.page.maven2.validator.requiredProperty", key);
+          return Messages.getString("wizard.project.page.maven2.validator.requiredProperty", key); //$NON-NLS-1$
         }
       }
     }
@@ -375,12 +376,12 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
     final String groupId = archetype.getGroupId();
     final String artifactId = archetype.getArtifactId();
     final String version = archetype.getVersion();
-    final String archetypeName = groupId + ":" + artifactId + ":" + version;
+    final String archetypeName = groupId + ":" + artifactId + ":" + version; //$NON-NLS-1$ //$NON-NLS-2$
 
     try {
       getContainer().run(false, true, new IRunnableWithProgress() {
         public void run(IProgressMonitor monitor) {
-          monitor.beginTask("Downloading Archetype " + archetypeName, IProgressMonitor.UNKNOWN);
+          monitor.beginTask(NLS.bind(org.eclipse.m2e.core.internal.Messages.MavenProjectWizardArchetypeParametersPage_task, archetypeName), IProgressMonitor.UNKNOWN);
           try {
             IMaven maven = MavenPlugin.getDefault().getMaven();
 
@@ -404,7 +405,7 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
               }
             }
           } catch(UnknownArchetype e) {
-            MavenLogger.log("Error downloading archetype " + archetypeName, e);
+            MavenLogger.log(NLS.bind("Error downloading archetype {0}",archetypeName), e);
           } catch(CoreException ex) {
             MavenLogger.log(ex);
           } finally {
@@ -415,9 +416,9 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
     } catch(InterruptedException ex) {
       // ignore
     } catch(InvocationTargetException ex) {
-      String msg = "Error downloading archetype " + archetypeName;
+      String msg = NLS.bind(org.eclipse.m2e.core.internal.Messages.MavenProjectWizardArchetypeParametersPage_error_download, archetypeName);
       MavenLogger.log(msg, ex);
-      setErrorMessage(msg + "\n" + ex.toString());
+      setErrorMessage(msg + "\n" + ex.toString()); //$NON-NLS-1$
     }
   }
 
@@ -429,7 +430,7 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
     TableItem item = new TableItem(propertiesTable, SWT.NONE);
     item.setData(item);
     item.setText(KEY_INDEX, key);
-    item.setText(VALUE_INDEX, value == null ? "" : value);
+    item.setText(VALUE_INDEX, value == null ? "" : value); //$NON-NLS-1$
     return item;
   }
 
@@ -441,7 +442,7 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
       groupIdCombo.setText(projectName);
     }
     artifactIdCombo.setText(projectName);
-    packageCombo.setText("org." + projectName.replace('-', '.'));
+    packageCombo.setText("org." + projectName.replace('-', '.')); //$NON-NLS-1$
     validate();
   }
 
@@ -487,7 +488,7 @@ public class MavenProjectWizardArchetypeParametersPage extends AbstractMavenWiza
   public Model getModel() {
     Model model = new Model();
 
-    model.setModelVersion("4.0.0");
+    model.setModelVersion("4.0.0"); //$NON-NLS-1$
     model.setGroupId(groupIdCombo.getText());
     model.setArtifactId(artifactIdCombo.getText());
     model.setVersion(versionCombo.getText());

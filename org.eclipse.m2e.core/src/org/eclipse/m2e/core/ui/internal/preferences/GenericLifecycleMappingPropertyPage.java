@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -28,6 +29,7 @@ import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.core.MavenLogger;
 import org.eclipse.m2e.core.embedder.IMavenConfiguration;
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.internal.lifecycle.AbstractLifecyclePropertyPage;
 import org.eclipse.m2e.core.internal.lifecycle.LifecycleMappingPropertyPageFactory;
 import org.eclipse.m2e.core.internal.lifecycle.ProjectConfiguratorsTable;
@@ -41,8 +43,8 @@ import org.eclipse.m2e.core.project.ResolverConfiguration;
  */
 public class GenericLifecycleMappingPropertyPage extends AbstractLifecyclePropertyPage{
 
-  public static final String DESC_STRING = "Maven lifecycle mapping strategy: ";
-  public static final String GENERIC_STRATEGY = "Generic";
+  public static final String DESC_STRING = Messages.GenericLifecycleMappingPropertyPage_desc;
+  public static final String GENERIC_STRATEGY = Messages.GenericLifecycleMappingPropertyPage_generic;
 
   private Button skipMavenCompilerButton;
   private Text goalsCleanText;
@@ -61,24 +63,24 @@ public class GenericLifecycleMappingPropertyPage extends AbstractLifecycleProper
       GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
       gd.horizontalIndent=4;
       goalsCleanLabel.setLayoutData(gd);
-      goalsCleanLabel.setText("Goals to invoke after project clea&n:");
+      goalsCleanLabel.setText(Messages.GenericLifecycleMappingPropertyPage_lblClean);
   
       goalsCleanText = new Text(composite, SWT.BORDER);
-      goalsCleanText.setData("name", "goalsText");
+      goalsCleanText.setData("name", "goalsText"); //$NON-NLS-1$ //$NON-NLS-2$
       gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
       gd.horizontalIndent = 6;
       goalsCleanText.setLayoutData(gd);
   
       Button selectGoalsCleanButton = new Button(composite, SWT.NONE);
       selectGoalsCleanButton.setLayoutData(new GridData());
-      selectGoalsCleanButton.setText("&Select...");
+      selectGoalsCleanButton.setText(Messages.GenericLifecycleMappingPropertyPage_btnClean);
       selectGoalsCleanButton.addSelectionListener(new MavenGoalSelectionAdapter(goalsCleanText, parent.getShell()));
       
       final Label goalsChangedLabel = new Label(composite, SWT.NONE);
       gd = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
       gd.horizontalIndent = 4;
       goalsChangedLabel.setLayoutData(gd);
-      goalsChangedLabel.setText("&Goals to invoke on resource changes (may affect incremental build performance):");
+      goalsChangedLabel.setText(Messages.GenericLifecycleMappingPropertyPage_lblChanged);
       
       goalsChangedText = new Text(composite, SWT.SINGLE | SWT.BORDER);
       gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
@@ -86,15 +88,15 @@ public class GenericLifecycleMappingPropertyPage extends AbstractLifecycleProper
       goalsChangedText.setLayoutData(gd);
       
       final Button selectGoalsChangedButton = new Button(composite, SWT.NONE);
-      selectGoalsChangedButton.setText("S&elect...");
+      selectGoalsChangedButton.setText(Messages.GenericLifecycleMappingPropertyPage_btnChanged);
       selectGoalsChangedButton.addSelectionListener(new MavenGoalSelectionAdapter(goalsChangedText, parent.getShell()));
 
       skipMavenCompilerButton = new Button(composite, SWT.CHECK);
       gd = new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1);
       gd.horizontalIndent = 4;
       skipMavenCompilerButton.setLayoutData(gd);
-      skipMavenCompilerButton.setData("name", "skipMavenCompilerButton");
-      skipMavenCompilerButton.setText("Skip Maven compiler plugin when processing resources (recommended)");
+      skipMavenCompilerButton.setData("name", "skipMavenCompilerButton"); //$NON-NLS-1$ //$NON-NLS-2$
+      skipMavenCompilerButton.setText(Messages.GenericLifecycleMappingPropertyPage_btnSkip);
 
       Composite labelComp = new Composite(composite, SWT.NONE);
       GridLayout layout = new GridLayout(2, false);
@@ -109,7 +111,7 @@ public class GenericLifecycleMappingPropertyPage extends AbstractLifecycleProper
       Label configuratorsLabel = new Label(labelComp, SWT.NONE);
       gd = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
       configuratorsLabel.setLayoutData(gd);
-      configuratorsLabel.setText("Project Configurators:");
+      configuratorsLabel.setText(Messages.GenericLifecycleMappingPropertyPage_lblConfigurators);
 //      pomEditorHyperlink = new Hyperlink(labelComp, SWT.NONE);
 //      pomEditorHyperlink.setUnderlined(true);
 //      pomEditorHyperlink.addHyperlinkListener(new IHyperlinkListener() {
@@ -173,11 +175,11 @@ public class GenericLifecycleMappingPropertyPage extends AbstractLifecycleProper
     boolean isSet = projectManager.setResolverConfiguration(getProject(), configuration);
     
     if(isSet) {
-        boolean res = MessageDialog.openQuestion(this.getShell(), "Maven Settings", //
-            "Maven settings have changed. Do you want to update project configuration?");
+        boolean res = MessageDialog.openQuestion(this.getShell(), Messages.GenericLifecycleMappingPropertyPage_settings_title, //
+            Messages.GenericLifecycleMappingPropertyPage_settings_message);
         if(res) {
           final MavenPlugin plugin = MavenPlugin.getDefault();
-          WorkspaceJob job = new WorkspaceJob("Updating " + project.getName() + " Sources") {
+          WorkspaceJob job = new WorkspaceJob(NLS.bind(Messages.GenericLifecycleMappingPropertyPage_job, project.getName())) {
             public IStatus runInWorkspace(IProgressMonitor monitor) {
               try {
                 final IMavenConfiguration mavenConfiguration = MavenPlugin.getDefault().getMavenConfiguration();
@@ -198,7 +200,7 @@ public class GenericLifecycleMappingPropertyPage extends AbstractLifecycleProper
   }
 
   public String getMessage(){
-    return "Generic Lifecycle Mapping";
+    return Messages.GenericLifecycleMappingPropertyPage_message;
   }
   
   private void init(ResolverConfiguration configuration) {

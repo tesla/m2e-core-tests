@@ -11,6 +11,7 @@ package org.eclipse.m2e.core.wizards;
 import org.eclipse.jface.wizard.Wizard;
 
 import org.eclipse.m2e.core.MavenImages;
+import org.eclipse.m2e.core.internal.Messages;
 
 /**
  * WizardExtension
@@ -24,7 +25,7 @@ public class ProjectsImportWizard extends Wizard {
 
   public ProjectsImportWizard(String location) {
     this.location = location;
-    setWindowTitle("Import");
+    setWindowTitle(Messages.ProjectsImportWizard_title);
     setDefaultPageImageDescriptor(MavenImages.WIZ_IMPORT_WIZ);
   }
 

@@ -29,6 +29,7 @@ import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.index.IIndex;
 import org.eclipse.m2e.core.index.IndexedArtifact;
 import org.eclipse.m2e.core.index.IndexedArtifactFile;
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.wizards.MavenPomSelectionComponent;
 
 
@@ -124,12 +125,12 @@ public class MavenRepositorySearchDialog extends AbstractMavenDialog {
       
       Label scopeLabel = new Label(parent, SWT.NONE);
       scopeLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-      scopeLabel.setText("Scope:");
+      scopeLabel.setText(Messages.MavenRepositorySearchDialog_lblScope);
   
       scopeCombo = new Combo(parent, SWT.BORDER | SWT.READ_ONLY);
       scopeCombo.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-      scopeCombo.setItems(new String[] {"compile", "test", "runtime", "provided", "system", "import"});
-      scopeCombo.setText("compile");
+      scopeCombo.setItems(new String[] {"compile", "test", "runtime", "provided", "system", "import"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+      scopeCombo.setText(Messages.MavenRepositorySearchDialog_7);
     }
     
     super.createButtonsForButtonBar(parent);

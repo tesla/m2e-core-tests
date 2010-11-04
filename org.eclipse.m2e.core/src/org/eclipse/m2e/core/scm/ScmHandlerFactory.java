@@ -33,13 +33,13 @@ import org.eclipse.m2e.core.core.MavenLogger;
 public class ScmHandlerFactory {
 
  
-  public static final String EXTENSION_SCM_HANDLERS = IMavenConstants.PLUGIN_ID + ".scmHandlers";
+  public static final String EXTENSION_SCM_HANDLERS = IMavenConstants.PLUGIN_ID + ".scmHandlers"; //$NON-NLS-1$
   
-  public static final String EXTENSION_SCM_HANDLERS_UI = IMavenConstants.PLUGIN_ID + ".scmHandlersUi";
+  public static final String EXTENSION_SCM_HANDLERS_UI = IMavenConstants.PLUGIN_ID + ".scmHandlersUi"; //$NON-NLS-1$
   
-  private static final String ELEMENT_SCM_HANDLER = "handler";
+  private static final String ELEMENT_SCM_HANDLER = "handler"; //$NON-NLS-1$
 
-  private static final String ELEMENT_SCM_HANDLER_UI = "handlerUi";
+  private static final String ELEMENT_SCM_HANDLER_UI = "handlerUi"; //$NON-NLS-1$
   
   private static volatile Map<String, List<ScmHandler>> scms;
 

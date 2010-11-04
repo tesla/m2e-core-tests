@@ -14,6 +14,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.internal.lifecycle.AbstractLifecyclePropertyPage;
 import org.eclipse.m2e.core.internal.lifecycle.ProjectConfiguratorsTable;
 
@@ -49,6 +50,6 @@ public class CustomizableLifecycleMappingPropertyPage extends AbstractLifecycleP
    */
   public String getMessage() {
     // TODO Auto-generated method getMessage
-    return "Customizable Lifecycle Mapping";
+    return Messages.CustomizableLifecycleMappingPropertyPage_message;
   }
 }

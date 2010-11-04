@@ -19,6 +19,7 @@ import org.eclipse.ui.part.IPageBookViewPage;
 import org.eclipse.m2e.core.MavenImages;
 import org.eclipse.m2e.core.actions.MavenConsoleRemoveAction;
 import org.eclipse.m2e.core.actions.MavenDebugOutputAction;
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.internal.preferences.MavenPreferenceConstants;
 
 
@@ -30,8 +31,8 @@ public class MavenConsolePageParticipant implements IConsolePageParticipant {
   private IAction showOnErrorAction;
   private IAction showOnOutputAction;
   
-  private static final String SHOW_ON_OUTPUT_LBL = "Show Console on Any Output";
-  private static final String SHOW_ON_ERR_LBL = "Show Console on Error";
+  private static final String SHOW_ON_OUTPUT_LBL = Messages.MavenConsolePageParticipant_any;
+  private static final String SHOW_ON_ERR_LBL = Messages.MavenConsolePageParticipant_error;
   
   public void init(IPageBookViewPage page, IConsole console) {
     this.consoleRemoveAction = new MavenConsoleRemoveAction();

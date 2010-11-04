@@ -87,7 +87,7 @@ public class MavenModuleWizard extends Wizard implements INewWizard {
 
   /** Default constructor. Sets the title and image of the wizard. */
   public MavenModuleWizard() {
-    setWindowTitle(Messages.getString("wizard.module.title"));
+    setWindowTitle(Messages.getString("wizard.module.title")); //$NON-NLS-1$
     setDefaultPageImageDescriptor(MavenImages.WIZ_NEW_PROJECT);
     setNeedsProgressMonitor(true);
   }
@@ -106,8 +106,8 @@ public class MavenModuleWizard extends Wizard implements INewWizard {
     parametersPage = new MavenProjectWizardArchetypeParametersPage(configuration);
     artifactPage = new MavenProjectWizardArtifactPage(configuration);
     dependenciesPage = new MavenDependenciesWizardPage(configuration, //
-        Messages.getString("wizard.project.page.dependencies.title"), //
-        Messages.getString("wizard.project.page.dependencies.description"));
+        Messages.getString("wizard.project.page.dependencies.title"), // //$NON-NLS-1$
+        Messages.getString("wizard.project.page.dependencies.description")); //$NON-NLS-1$
     dependenciesPage.setDependencies(new Dependency[0]);
     dependenciesPage.setShowScope(true);
 
@@ -121,9 +121,9 @@ public class MavenModuleWizard extends Wizard implements INewWizard {
   /** Adds the listeners after the page controls are created. */
   public void createPageControls(Composite pageContainer) {
     artifactPage.setParentReadonly(true);
-    artifactPage.setTitle(Messages.getString("wizard.module.page.artifact.title"));
-    archetypePage.setTitle(Messages.getString("wizard.module.page.archetype.title"));
-    parametersPage.setTitle(Messages.getString("wizard.module.page.parameters.title"));
+    artifactPage.setTitle(Messages.getString("wizard.module.page.artifact.title")); //$NON-NLS-1$
+    archetypePage.setTitle(Messages.getString("wizard.module.page.archetype.title")); //$NON-NLS-1$
+    parametersPage.setTitle(Messages.getString("wizard.module.page.parameters.title")); //$NON-NLS-1$
 
     super.createPageControls(pageContainer);
 
@@ -216,7 +216,7 @@ public class MavenModuleWizard extends Wizard implements INewWizard {
 
       final String[] folders = artifactPage.getFolders();
 
-      job = new WorkspaceJob(Messages.getString("wizard.project.job.creatingProject", moduleName)) {
+      job = new WorkspaceJob(Messages.getString("wizard.project.job.creatingProject", moduleName)) { //$NON-NLS-1$
         public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
           setProperty(IProgressConstants.ACTION_PROPERTY, new OpenMavenConsoleAction());
           String projectName = configuration.getProjectName(model);
@@ -246,7 +246,7 @@ public class MavenModuleWizard extends Wizard implements INewWizard {
       final String javaPackage = parametersPage.getJavaPackage();
       final Properties properties = parametersPage.getProperties();
 
-      job = new WorkspaceJob(Messages.getString("wizard.project.job.creating", archetype.getArtifactId())) {
+      job = new WorkspaceJob(Messages.getString("wizard.project.job.creating", archetype.getArtifactId())) { //$NON-NLS-1$
         public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
           setProperty(IProgressConstants.ACTION_PROPERTY, new OpenMavenConsoleAction());
           MavenPlugin plugin = MavenPlugin.getDefault();
@@ -271,7 +271,7 @@ public class MavenModuleWizard extends Wizard implements INewWizard {
           Display.getDefault().asyncExec(new Runnable() {
             public void run() {
               MessageDialog.openError(getShell(), //
-                  Messages.getString("wizard.project.job.failed", moduleName), //
+                  Messages.getString("wizard.project.job.failed", moduleName), // //$NON-NLS-1$
                   result.getMessage());
             }
           });

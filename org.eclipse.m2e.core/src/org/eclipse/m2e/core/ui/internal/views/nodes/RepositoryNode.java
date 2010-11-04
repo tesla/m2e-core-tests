@@ -8,6 +8,7 @@
 
 package org.eclipse.m2e.core.ui.internal.views.nodes;
 
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.internal.index.NexusIndex;
 import org.eclipse.m2e.core.repository.IRepository;
 
@@ -28,15 +29,15 @@ public class RepositoryNode extends AbstractIndexedRepositoryNode {
   public String getName() {
     StringBuilder sb = new StringBuilder();
     sb.append(repository.getId());
-    sb.append(" (").append(repository.getUrl()).append(")");
+    sb.append(" (").append(repository.getUrl()).append(")"); //$NON-NLS-1$ //$NON-NLS-2$
     if (repository.getMirrorOf() != null) {
-      sb.append(" [mirrorOf=").append(repository.getMirrorOf()).append("]");
+      sb.append(" [mirrorOf=").append(repository.getMirrorOf()).append("]"); //$NON-NLS-2$
     }
     if (repository.getMirrorId() != null) {
-      sb.append(" [mirrored by ").append(repository.getMirrorId()).append("]");
+      sb.append(" [mirrored by ").append(repository.getMirrorId()).append("]"); //$NON-NLS-2$
     }
     if (isUpdating()) {
-      sb.append(" [updating]");
+      sb.append(Messages.RepositoryNode_updating);
     }
     return sb.toString();
   }

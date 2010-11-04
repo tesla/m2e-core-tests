@@ -30,7 +30,7 @@ public class MavenAdapterFactory implements IAdapterFactory {
   public Object getAdapter(final Object adaptable, Class adapterType) {
     return new IActionFilter() {
       public boolean testAttribute(Object target, String name, String value) {
-        return "label".equals(name) //
+        return "label".equals(name) // //$NON-NLS-1$
             && value.equals(getStub(adaptable, LabelProviderStub.class).getLabel());
       }
 

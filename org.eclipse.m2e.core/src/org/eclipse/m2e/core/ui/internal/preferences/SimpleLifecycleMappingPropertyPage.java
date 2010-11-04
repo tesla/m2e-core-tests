@@ -40,7 +40,7 @@ public class SimpleLifecycleMappingPropertyPage extends AbstractLifecyclePropert
     noInfoLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true, 2, 1));
     noInfoLabel.setAlignment(SWT.CENTER);
     noInfoLabel.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY));
-    noInfoLabel.setData("name", "noInfoLabel");
+    noInfoLabel.setData("name", "noInfoLabel"); //$NON-NLS-1$ //$NON-NLS-2$
     noInfoLabel.setText(getMessage());
     return composite;
   }

@@ -42,13 +42,13 @@ import org.eclipse.m2e.core.ui.dialogs.MavenRepositorySearchDialog;
  */
 public class MavenProjectWizardArtifactPage extends AbstractMavenWizardPage {
 
-  private static final ProjectFolder JAVA = new ProjectFolder("src/main/java", "target/classes");
+  private static final ProjectFolder JAVA = new ProjectFolder("src/main/java", "target/classes"); //$NON-NLS-1$ //$NON-NLS-2$
 
-  private static final ProjectFolder JAVA_TEST = new ProjectFolder("src/test/java", "target/test-classes");
+  private static final ProjectFolder JAVA_TEST = new ProjectFolder("src/test/java", "target/test-classes"); //$NON-NLS-1$ //$NON-NLS-2$
 
-  private static final ProjectFolder RESOURCES = new ProjectFolder("src/main/resources", "target/classes");
+  private static final ProjectFolder RESOURCES = new ProjectFolder("src/main/resources", "target/classes"); //$NON-NLS-1$ //$NON-NLS-2$
 
-  private static final ProjectFolder RESOURCES_TEST = new ProjectFolder("src/test/resources", "target/test-classes");
+  private static final ProjectFolder RESOURCES_TEST = new ProjectFolder("src/test/resources", "target/test-classes"); //$NON-NLS-1$ //$NON-NLS-2$
 
   // private static final ProjectFolder FILTERS = new ProjectFolder("src/main/filters", null, false);
 
@@ -58,11 +58,11 @@ public class MavenProjectWizardArtifactPage extends AbstractMavenWizardPage {
 
   // private static final ProjectFolder CONFIG = new ProjectFolder("src/main/config", null, false);
 
-  private static final ProjectFolder WEBAPP = new ProjectFolder("src/main/webapp", null);
+  private static final ProjectFolder WEBAPP = new ProjectFolder("src/main/webapp", null); //$NON-NLS-1$
 
-  private static final ProjectFolder EAR = new ProjectFolder("src/main/application", null);
+  private static final ProjectFolder EAR = new ProjectFolder("src/main/application", null); //$NON-NLS-1$
 
-  private static final ProjectFolder SITE = new ProjectFolder("src/site", null);
+  private static final ProjectFolder SITE = new ProjectFolder("src/site", null); //$NON-NLS-1$
 
   private static final ProjectFolder[] JAR_DIRS = {JAVA, JAVA_TEST, RESOURCES, RESOURCES_TEST};
 
@@ -97,7 +97,7 @@ public class MavenProjectWizardArtifactPage extends AbstractMavenWizardPage {
    * @wbp.parser.constructor
    */
   public MavenProjectWizardArtifactPage(ProjectImportConfiguration projectImportConfiguration) {
-    this("MavenProjectWizardArtifactPage", projectImportConfiguration);
+    this("MavenProjectWizardArtifactPage", projectImportConfiguration); //$NON-NLS-1$
   }
 
   /**
@@ -107,8 +107,8 @@ public class MavenProjectWizardArtifactPage extends AbstractMavenWizardPage {
   protected MavenProjectWizardArtifactPage(String name, ProjectImportConfiguration projectImportConfiguration) {
     super(name, projectImportConfiguration);
 
-    setTitle(Messages.getString("wizard.project.page.maven2.title"));
-    setDescription(Messages.getString("wizard.project.page.maven2.description"));
+    setTitle(Messages.getString("wizard.project.page.maven2.title")); //$NON-NLS-1$
+    setDescription(Messages.getString("wizard.project.page.maven2.description")); //$NON-NLS-1$
     setPageComplete(false);
   }
 
@@ -148,7 +148,7 @@ public class MavenProjectWizardArtifactPage extends AbstractMavenWizardPage {
     parentComponent.addBrowseButtonListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            "Select Parent Artifact", IIndex.SEARCH_ARTIFACT, Collections.<ArtifactKey> emptySet());
+            org.eclipse.m2e.core.internal.Messages.MavenProjectWizardArtifactPage_searchDialog_title, IIndex.SEARCH_ARTIFACT, Collections.<ArtifactKey> emptySet());
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile indexedArtifactFile = (IndexedArtifactFile) dialog.getFirstResult();
           if(indexedArtifactFile != null) {
@@ -166,14 +166,14 @@ public class MavenProjectWizardArtifactPage extends AbstractMavenWizardPage {
       }
     });
 
-    addFieldWithHistory("groupId", artifactComponent.getGroupIdCombo());
-    addFieldWithHistory("artifactId", artifactComponent.getArtifactIdCombo());
-    addFieldWithHistory("version", artifactComponent.getVersionCombo());
-    addFieldWithHistory("name", artifactComponent.getNameCombo());
+    addFieldWithHistory("groupId", artifactComponent.getGroupIdCombo()); //$NON-NLS-1$
+    addFieldWithHistory("artifactId", artifactComponent.getArtifactIdCombo()); //$NON-NLS-1$
+    addFieldWithHistory("version", artifactComponent.getVersionCombo()); //$NON-NLS-1$
+    addFieldWithHistory("name", artifactComponent.getNameCombo()); //$NON-NLS-1$
 
-    addFieldWithHistory("groupId", parentComponent.getGroupIdCombo());
-    addFieldWithHistory("artifactId", parentComponent.getArtifactIdCombo());
-    addFieldWithHistory("version", parentComponent.getVersionCombo());
+    addFieldWithHistory("groupId", parentComponent.getGroupIdCombo()); //$NON-NLS-1$
+    addFieldWithHistory("artifactId", parentComponent.getArtifactIdCombo()); //$NON-NLS-1$
+    addFieldWithHistory("version", parentComponent.getVersionCombo()); //$NON-NLS-1$
 
     container.layout();
 
@@ -252,27 +252,27 @@ public class MavenProjectWizardArtifactPage extends AbstractMavenWizardPage {
   }
 
   private String validateInput() {
-    String error = validateIdInput(artifactComponent.getGroupId().trim(), "group");
+    String error = validateIdInput(artifactComponent.getGroupId().trim(), "group"); //$NON-NLS-1$
     if(error != null) {
       return error;
     }
 
-    error = validateIdInput(artifactComponent.getArtifactId().trim(), "artifact");
+    error = validateIdInput(artifactComponent.getArtifactId().trim(), "artifact"); //$NON-NLS-1$
     if(error != null) {
       return error;
     }
 
     if(artifactComponent.getVersion().trim().length() == 0) {
-      return Messages.getString("wizard.project.page.maven2.validator.version");
+      return Messages.getString("wizard.project.page.maven2.validator.version"); //$NON-NLS-1$
     }
 
     if(artifactComponent.getPackaging().trim().length() == 0) {
-      return Messages.getString("wizard.project.page.maven2.validator.packaging");
+      return Messages.getString("wizard.project.page.maven2.validator.packaging"); //$NON-NLS-1$
     }
 
     // if the parent project is specified, all three fields must be present
     if(!parentComponent.validate()) {
-      return Messages.getString("wizard.project.page.maven2.validator.parent");
+      return Messages.getString("wizard.project.page.maven2.validator.parent"); //$NON-NLS-1$
     }
 
     // validate project name

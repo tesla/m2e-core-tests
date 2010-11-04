@@ -8,6 +8,7 @@
 
 package org.eclipse.m2e.core.ui.internal.views.nodes;
 
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.internal.index.NexusIndex;
 
 /**
@@ -22,7 +23,7 @@ public class WorkspaceRepositoryNode extends AbstractIndexedRepositoryNode {
   }
 
   public String getName() {
-    return "Workspace Projects";
+    return Messages.WorkspaceRepositoryNode_name;
   }
 
 }

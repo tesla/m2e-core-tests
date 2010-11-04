@@ -67,37 +67,37 @@ public class MavenParentComponent extends Composite {
 
     Group group = new Group(this, SWT.NONE);
     group.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-    group.setText(Messages.getString("wizard.project.page.artifact.parent.title"));
+    group.setText(Messages.getString("wizard.project.page.artifact.parent.title")); //$NON-NLS-1$
 
     GridLayout gridLayout = new GridLayout();
     gridLayout.numColumns = 3;
     group.setLayout(gridLayout);
 
     groupIdLabel = new Label(group, SWT.NONE);
-    groupIdLabel.setText(Messages.getString("wizard.project.page.artifact.parent.groupId"));
+    groupIdLabel.setText(Messages.getString("wizard.project.page.artifact.parent.groupId")); //$NON-NLS-1$
 
     parentGroupIdCombo = new Combo(group, SWT.NONE);
     parentGroupIdCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-    parentGroupIdCombo.setData("name", "parentGroupIdCombo");
+    parentGroupIdCombo.setData("name", "parentGroupIdCombo"); //$NON-NLS-1$ //$NON-NLS-2$
     parentGroupIdCombo.setEnabled(!readonly);
 
     artifactIdLabel = new Label(group, SWT.NONE);
-    artifactIdLabel.setText(Messages.getString("wizard.project.page.artifact.parent.artifactId"));
+    artifactIdLabel.setText(Messages.getString("wizard.project.page.artifact.parent.artifactId")); //$NON-NLS-1$
 
     parentArtifactIdCombo = new Combo(group, SWT.NONE);
     parentArtifactIdCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-    parentArtifactIdCombo.setData("name", "parentArtifactIdCombo");
+    parentArtifactIdCombo.setData("name", "parentArtifactIdCombo"); //$NON-NLS-1$ //$NON-NLS-2$
     parentArtifactIdCombo.setEnabled(!readonly);
 
     versionLabel = new Label(group, SWT.NONE);
-    versionLabel.setText(Messages.getString("wizard.project.page.artifact.parent.version"));
+    versionLabel.setText(Messages.getString("wizard.project.page.artifact.parent.version")); //$NON-NLS-1$
 
     parentVersionCombo = new Combo(group, SWT.NONE);
     GridData gd_versionCombo = new GridData(SWT.LEFT, SWT.CENTER, true, false);
     gd_versionCombo.widthHint = 150;
     parentVersionCombo.setLayoutData(gd_versionCombo);
     parentVersionCombo.setEnabled(!readonly);
-    parentVersionCombo.setData("name", "parentVersionCombo");
+    parentVersionCombo.setData("name", "parentVersionCombo"); //$NON-NLS-1$ //$NON-NLS-2$
 
     if(!readonly) {
       Composite buttonPanel = new Composite(group, SWT.NONE);
@@ -111,15 +111,15 @@ public class MavenParentComponent extends Composite {
       buttonPanel.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 
       parentBrowseButton = new Button(buttonPanel, SWT.NONE);
-      parentBrowseButton.setText(Messages.getString("wizard.project.page.artifact.parent.browse"));
-      parentBrowseButton.setData("name", "parentBrowseButton");
+      parentBrowseButton.setText(Messages.getString("wizard.project.page.artifact.parent.browse")); //$NON-NLS-1$
+      parentBrowseButton.setData("name", "parentBrowseButton"); //$NON-NLS-1$ //$NON-NLS-2$
 
       parentClearButton = new Button(buttonPanel, SWT.NONE);
-      parentClearButton.setText(Messages.getString("wizard.project.page.artifact.parent.clear"));
-      parentClearButton.setData("name", "parentClearButton");
+      parentClearButton.setText(Messages.getString("wizard.project.page.artifact.parent.clear")); //$NON-NLS-1$
+      parentClearButton.setData("name", "parentClearButton"); //$NON-NLS-1$ //$NON-NLS-2$
       parentClearButton.addSelectionListener(new SelectionAdapter() {
         public void widgetSelected(SelectionEvent e) {
-          setValues("", "", "");
+          setValues("", "", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         }
       });
     }
@@ -180,9 +180,9 @@ public class MavenParentComponent extends Composite {
 
   /** Sets the parent group values. */
   public void setValues(String groupId, String artifactId, String version) {
-    parentGroupIdCombo.setText(groupId==null ? "" : groupId);
-    parentArtifactIdCombo.setText(artifactId==null ? "" : artifactId);
-    parentVersionCombo.setText(version==null ? "" : version);
+    parentGroupIdCombo.setText(groupId==null ? "" : groupId); //$NON-NLS-1$
+    parentArtifactIdCombo.setText(artifactId==null ? "" : artifactId); //$NON-NLS-1$
+    parentVersionCombo.setText(version==null ? "" : version); //$NON-NLS-1$
   }
 
   /** Updates a Maven model. */

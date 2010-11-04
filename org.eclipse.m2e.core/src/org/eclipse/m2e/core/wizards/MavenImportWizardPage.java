@@ -86,8 +86,8 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
 
   protected MavenImportWizardPage(ProjectImportConfiguration importConfiguration) {
     super("MavenProjectImportWizardPage", importConfiguration);
-    setTitle("Maven Projects");
-    setDescription("Select Maven projects");
+    setTitle(org.eclipse.m2e.core.internal.Messages.MavenImportWizardPage_title);
+    setDescription(org.eclipse.m2e.core.internal.Messages.MavenImportWizardPage_desc);
     setPageComplete(false);
   }
 
@@ -107,7 +107,7 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
     if(showLocation || locations==null || locations.isEmpty()) {
       final Label selectRootDirectoryLabel = new Label(composite, SWT.NONE);
       selectRootDirectoryLabel.setLayoutData(new GridData());
-      selectRootDirectoryLabel.setText(Messages.getString("wizard.import.page.root"));
+      selectRootDirectoryLabel.setText(Messages.getString("wizard.import.page.root")); //$NON-NLS-1$
 
       rootDirectoryCombo = new Combo(composite, SWT.NONE);
       rootDirectoryCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -125,19 +125,19 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
         }
       });
       rootDirectoryCombo.setFocus();
-      addFieldWithHistory("rootDirectory", rootDirectoryCombo);
+      addFieldWithHistory("rootDirectory", rootDirectoryCombo); //$NON-NLS-1$
       
       if(locations!=null && locations.size()==1) {
         rootDirectoryCombo.setText(locations.get(0));
       }
 
       final Button browseButton = new Button(composite, SWT.NONE);
-      browseButton.setText(Messages.getString("wizard.import.page.browse"));
+      browseButton.setText(Messages.getString("wizard.import.page.browse")); //$NON-NLS-1$
       browseButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
       browseButton.addSelectionListener(new SelectionAdapter() {
         public void widgetSelected(SelectionEvent e) {
           DirectoryDialog dialog = new DirectoryDialog(getShell(), SWT.NONE);
-          dialog.setText(Messages.getString("wizard.import.page.selectRootFolder"));
+          dialog.setText(Messages.getString("wizard.import.page.selectRootFolder")); //$NON-NLS-1$
           String path = rootDirectoryCombo.getText();
           if(path.length()==0) {
             path = ResourcesPlugin.getWorkspace().getRoot().getLocation().toPortableString();
@@ -155,7 +155,7 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
 
     final Label projectsLabel = new Label(composite, SWT.NONE);
     projectsLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 3, 1));
-    projectsLabel.setText(Messages.getString("wizard.import.page.projects"));
+    projectsLabel.setText(Messages.getString("wizard.import.page.projects")); //$NON-NLS-1$
 
     projectTreeViewer = new CheckboxTreeViewer(composite, SWT.BORDER);
 
@@ -231,7 +231,7 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
 
     final Button selectAllButton = new Button(composite, SWT.NONE);
     selectAllButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-    selectAllButton.setText(Messages.getString("wizard.import.page.selectAll"));
+    selectAllButton.setText(Messages.getString("wizard.import.page.selectAll")); //$NON-NLS-1$
     selectAllButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         projectTreeViewer.expandAll();
@@ -243,7 +243,7 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
 
     final Button deselectAllButton = new Button(composite, SWT.NONE);
     deselectAllButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-    deselectAllButton.setText(Messages.getString("wizard.import.page.deselectAll"));
+    deselectAllButton.setText(Messages.getString("wizard.import.page.deselectAll")); //$NON-NLS-1$
     deselectAllButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         setAllChecked(false);
@@ -254,7 +254,7 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
 
     final Button refreshButton = new Button(composite, SWT.NONE);
     refreshButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, true));
-    refreshButton.setText(Messages.getString("wizard.import.page.refresh"));
+    refreshButton.setText(Messages.getString("wizard.import.page.refresh")); //$NON-NLS-1$
     refreshButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         scanProjects();
@@ -300,16 +300,16 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
 
       List<Throwable> errors = projectScanner.getErrors();
       if(!errors.isEmpty()) {
-        StringBuffer sb = new StringBuffer(Messages.getString("wizard.import.page.scanningErrors", errors.size()));
+        StringBuffer sb = new StringBuffer(Messages.getString("wizard.import.page.scanningErrors", errors.size())); //$NON-NLS-1$
         int n = 1;
         for(Throwable ex : errors) {
           if(ex instanceof CoreException) {
             String msg = ((CoreException) ex).getStatus().getMessage();
-            sb.append("\n  ").append(n).append(" ").append(msg.trim());
+            sb.append("\n  ").append(n).append(" ").append(msg.trim()); //$NON-NLS-1$ //$NON-NLS-2$
             
           } else {
             String msg = ex.getMessage()==null ? ex.toString() : ex.getMessage();
-            sb.append("\n  ").append(n).append(" ").append(msg.trim());
+            sb.append("\n  ").append(n).append(" ").append(msg.trim()); //$NON-NLS-1$ //$NON-NLS-2$
           }
           n++;
         }
@@ -327,7 +327,7 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
         msg = e.getMessage();
         MavenLogger.log(msg, e);
       } else {
-        msg = "Scanning error " + projectScanner.getDescription() + "; " + e.toString();
+        msg = "Scanning error " + projectScanner.getDescription() + "; " + e.toString(); //$NON-NLS-2$
         MavenPlugin.getDefault().getConsole().logError(msg);
         MavenLogger.log(msg, e);
       }
@@ -422,9 +422,9 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
     if(info!=null) {
       String projectName = getImportConfiguration().getProjectName(info.getModel());
       if(isWorkspaceFolder(info)) {
-        setMessage(Messages.getString("wizard.import.validator.workspaceFolder", projectName), IMessageProvider.WARNING);
+        setMessage(Messages.getString("wizard.import.validator.workspaceFolder", projectName), IMessageProvider.WARNING); //$NON-NLS-1$
       } else if(isAlreadyExists(info)) {
-        setMessage(Messages.getString("wizard.import.validator.projectExists", projectName), IMessageProvider.WARNING);
+        setMessage(Messages.getString("wizard.import.validator.projectExists", projectName), IMessageProvider.WARNING); //$NON-NLS-1$
       } else {
         setMessage(null, IMessageProvider.WARNING);
         return false;
@@ -460,10 +460,10 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
         MavenProjectInfo info = (MavenProjectInfo) element;
         
         if(info.getProfiles().isEmpty()) {
-          return info.getLabel() + " - " + getId(info);
+          return info.getLabel() + " - " + getId(info); //$NON-NLS-1$
         }
         
-        return info.getLabel() + " - " + getId(info) + "  " + info.getProfiles();
+        return info.getLabel() + " - " + getId(info) + "  " + info.getProfiles(); //$NON-NLS-1$ //$NON-NLS-2$
       }
       return super.getText(element);
     }
@@ -482,17 +482,17 @@ public class MavenImportWizardPage extends AbstractMavenWizardPage {
         groupId = parent.getGroupId();
       }
       if(groupId==null) {
-        groupId = "[inherited]";
+        groupId = org.eclipse.m2e.core.internal.Messages.MavenImportWizardPage_inherited;
       }
       
       if(version==null && parent!=null) {
         version = parent.getVersion();
       }
       if(version==null) {
-        version = "[inherited]";
+        version = org.eclipse.m2e.core.internal.Messages.MavenImportWizardPage_inherited;
       }
 
-      return groupId + ":" + artifactId + ":" + version + ":" + packaging;
+      return groupId + ":" + artifactId + ":" + version + ":" + packaging; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     }
 
     /* (non-Javadoc)

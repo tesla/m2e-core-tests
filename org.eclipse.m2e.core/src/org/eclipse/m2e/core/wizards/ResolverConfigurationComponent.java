@@ -36,10 +36,10 @@ import org.eclipse.m2e.core.project.ResolverConfiguration;
  */
 public class ResolverConfigurationComponent extends ExpandableComposite {
 
-  private static final String[] DEFAULT_NAME_TEMPLATES = {"[artifactId]", //
-      "[artifactId]-TRUNK", //
-      "[artifactId]-[version]", //
-      "[groupId].[artifactId]", "[groupId].[artifactId]-[version]"};
+  private static final String[] DEFAULT_NAME_TEMPLATES = {"[artifactId]", // //$NON-NLS-1$
+      "[artifactId]-TRUNK", // //$NON-NLS-1$
+      "[artifactId]-[version]", // //$NON-NLS-1$
+      "[groupId].[artifactId]", "[groupId].[artifactId]-[version]"}; //$NON-NLS-1$ //$NON-NLS-2$
 
   /** The resolver configuration */
   protected final ResolverConfiguration resolverConfiguration;
@@ -62,7 +62,7 @@ public class ResolverConfigurationComponent extends ExpandableComposite {
     this.projectImportConfiguration = propectImportConfiguration;
     this.resolverConfiguration = propectImportConfiguration.getResolverConfiguration();
 
-    setText(Messages.getString("resolverConfiguration.advanced"));
+    setText(Messages.getString("resolverConfiguration.advanced")); //$NON-NLS-1$
 
     final Composite advancedComposite = new Composite(this, SWT.NONE);
     setClient(advancedComposite);
@@ -84,7 +84,7 @@ public class ResolverConfigurationComponent extends ExpandableComposite {
 
     resolveWorkspaceProjects = new Button(advancedComposite, SWT.CHECK);
     resolveWorkspaceProjects.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
-    resolveWorkspaceProjects.setText(Messages.getString("resolverConfiguration.resolveWorkspaceProjects"));
+    resolveWorkspaceProjects.setText(Messages.getString("resolverConfiguration.resolveWorkspaceProjects")); //$NON-NLS-1$
     resolveWorkspaceProjects.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         resolverConfiguration.setResolveWorkspaceProjects(resolveWorkspaceProjects.getSelection());
@@ -93,7 +93,7 @@ public class ResolverConfigurationComponent extends ExpandableComposite {
 
     Label profilesLabel = new Label(advancedComposite, SWT.NONE);
     profilesLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
-    profilesLabel.setText(Messages.getString("resolverConfiguration.profiles"));
+    profilesLabel.setText(Messages.getString("resolverConfiguration.profiles")); //$NON-NLS-1$
 
     profiles = new Text(advancedComposite, SWT.BORDER);
     profiles.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -106,11 +106,11 @@ public class ResolverConfigurationComponent extends ExpandableComposite {
     if(enableProjectNameTemplate) {
       Label templateLabel = new Label(advancedComposite, SWT.NONE);
       templateLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
-      templateLabel.setText(Messages.getString("resolverConfiguration.template"));
+      templateLabel.setText(Messages.getString("resolverConfiguration.template")); //$NON-NLS-1$
 
       template = new Combo(advancedComposite, SWT.BORDER);
       template.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-      template.setToolTipText(Messages.getString("resolverConfiguration.templateDescription"));
+      template.setToolTipText(Messages.getString("resolverConfiguration.templateDescription")); //$NON-NLS-1$
       template.setItems(DEFAULT_NAME_TEMPLATES);
       template.addModifyListener(new ModifyListener() {
         public void modifyText(ModifyEvent e) {

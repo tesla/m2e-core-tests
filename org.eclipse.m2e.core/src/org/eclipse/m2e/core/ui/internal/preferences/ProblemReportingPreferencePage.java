@@ -43,9 +43,9 @@ public class ProblemReportingPreferencePage extends FieldEditorPreferencePage im
   public void createFieldEditors() {
     parent = getFieldEditorParent();
     
-    addField(new StringFieldEditor(MavenPreferenceConstants.P_JIRA_USERNAME, Messages.getString("jira.username"), parent));
+    addField(new StringFieldEditor(MavenPreferenceConstants.P_JIRA_USERNAME, Messages.getString("jira.username"), parent)); //$NON-NLS-1$
     
-    StringFieldEditor passwordEditor = new StringFieldEditor(MavenPreferenceConstants.P_JIRA_PASSWORD, Messages.getString("jira.password"), parent);
+    StringFieldEditor passwordEditor = new StringFieldEditor(MavenPreferenceConstants.P_JIRA_PASSWORD, Messages.getString("jira.password"), parent); //$NON-NLS-1$
     
     addField(passwordEditor);
     Text passwordField = passwordEditor.getTextControl(parent);

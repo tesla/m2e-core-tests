@@ -105,7 +105,7 @@ public class MavenProjectWizard extends Wizard implements INewWizard {
    */
   public MavenProjectWizard() {
     super();
-    setWindowTitle(Messages.getString("wizard.project.title"));
+    setWindowTitle(Messages.getString("wizard.project.title")); //$NON-NLS-1$
     setDefaultPageImageDescriptor(MavenImages.WIZ_NEW_PROJECT);
     setNeedsProgressMonitor(true);
   }
@@ -119,12 +119,12 @@ public class MavenProjectWizard extends Wizard implements INewWizard {
     configuration.setWorkingSet(SelectionUtil.getSelectedWorkingSet(selection));
     
     locationPage = new MavenProjectWizardLocationPage(configuration, //
-        Messages.getString("wizard.project.page.project.title"), //
-        Messages.getString("wizard.project.page.project.description")) {
+        Messages.getString("wizard.project.page.project.title"), // //$NON-NLS-1$
+        Messages.getString("wizard.project.page.project.description")) { //$NON-NLS-1$
       
       protected void createAdditionalControls(Composite container) {
         simpleProject = new Button(container, SWT.CHECK);
-        simpleProject.setText(Messages.getString("wizard.project.page.project.simpleProject"));
+        simpleProject.setText(Messages.getString("wizard.project.page.project.simpleProject")); //$NON-NLS-1$
         simpleProject.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 3, 1));
         simpleProject.addSelectionListener(new SelectionAdapter() {
           public void widgetSelected(SelectionEvent e) {
@@ -140,7 +140,7 @@ public class MavenProjectWizard extends Wizard implements INewWizard {
       
       /** Skips the archetype selection page if the user chooses a simple project. */
       public IWizardPage getNextPage() {
-        return getPage(simpleProject.getSelection() ? "MavenProjectWizardArtifactPage" : "MavenProjectWizardArchetypePage");
+        return getPage(simpleProject.getSelection() ? "MavenProjectWizardArtifactPage" : "MavenProjectWizardArchetypePage"); //$NON-NLS-1$ //$NON-NLS-2$
       }
     };
     locationPage.setLocationPath(SelectionUtil.getSelectedLocation(selection));
@@ -149,8 +149,8 @@ public class MavenProjectWizard extends Wizard implements INewWizard {
     parametersPage = new MavenProjectWizardArchetypeParametersPage(configuration);
     artifactPage = new MavenProjectWizardArtifactPage(configuration);
     dependenciesPage = new MavenDependenciesWizardPage(configuration, //
-        Messages.getString("wizard.project.page.dependencies.title"), //
-        Messages.getString("wizard.project.page.dependencies.description"));
+        Messages.getString("wizard.project.page.dependencies.title"), // //$NON-NLS-1$
+        Messages.getString("wizard.project.page.dependencies.description")); //$NON-NLS-1$
     dependenciesPage.setDependencies(new Dependency[0]);
     dependenciesPage.setShowScope(true);
 
@@ -220,7 +220,7 @@ public class MavenProjectWizard extends Wizard implements INewWizard {
     final String projectName = configuration.getProjectName(model);
     IStatus nameStatus = configuration.validateProjectName(model);
     if(!nameStatus.isOK()) {
-      MessageDialog.openError(getShell(), Messages.getString("wizard.project.job.failed", projectName), nameStatus.getMessage());
+      MessageDialog.openError(getShell(), Messages.getString("wizard.project.job.failed", projectName), nameStatus.getMessage()); //$NON-NLS-1$
       return false;
     }
 
@@ -233,7 +233,7 @@ public class MavenProjectWizard extends Wizard implements INewWizard {
     boolean pomExists = ( locationPage.isInWorkspace() ?
         root.getLocation().append(project.getName()) : location ).append(IMavenConstants.POM_FILE_NAME).toFile().exists();
     if ( pomExists ) {
-      MessageDialog.openError(getShell(), Messages.getString("wizard.project.job.failed", projectName), Messages.getString("wizard.project.error.pomAlreadyExists"));
+      MessageDialog.openError(getShell(), Messages.getString("wizard.project.job.failed", projectName), Messages.getString("wizard.project.error.pomAlreadyExists")); //$NON-NLS-1$ //$NON-NLS-2$
       return false;
     }
 
@@ -248,7 +248,7 @@ public class MavenProjectWizard extends Wizard implements INewWizard {
 
       final String[] folders = artifactPage.getFolders();
 
-      job = new WorkspaceJob(Messages.getString("wizard.project.job.creatingProject", projectName)) {
+      job = new WorkspaceJob(Messages.getString("wizard.project.job.creatingProject", projectName)) { //$NON-NLS-1$
         public IStatus runInWorkspace(IProgressMonitor monitor) {
           setProperty(IProgressConstants.ACTION_PROPERTY, new OpenMavenConsoleAction());
           try {
@@ -272,7 +272,7 @@ public class MavenProjectWizard extends Wizard implements INewWizard {
       final String javaPackage = parametersPage.getJavaPackage();
       final Properties properties = parametersPage.getProperties();
       
-      job = new WorkspaceJob(Messages.getString("wizard.project.job.creating", archetype.getArtifactId())) {
+      job = new WorkspaceJob(Messages.getString("wizard.project.job.creating", archetype.getArtifactId())) { //$NON-NLS-1$
         public IStatus runInWorkspace(IProgressMonitor monitor) {
           setProperty(IProgressConstants.ACTION_PROPERTY, new OpenMavenConsoleAction());
           try {
@@ -295,7 +295,7 @@ public class MavenProjectWizard extends Wizard implements INewWizard {
           Display.getDefault().asyncExec(new Runnable() {
             public void run() {
               MessageDialog.openError(getShell(), //
-                  Messages.getString("wizard.project.job.failed", projectName), result.getMessage());
+                  Messages.getString("wizard.project.job.failed", projectName), result.getMessage()); //$NON-NLS-1$
             }
           });
         }

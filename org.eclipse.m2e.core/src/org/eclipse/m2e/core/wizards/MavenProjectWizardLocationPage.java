@@ -52,7 +52,7 @@ public class MavenProjectWizardLocationPage extends AbstractMavenWizardPage {
    * @param description location page description text
    */
   public MavenProjectWizardLocationPage(ProjectImportConfiguration configuration, String title, String description) {
-    super("MavenProjectWizardLocationPage", configuration);
+    super("MavenProjectWizardLocationPage", configuration); //$NON-NLS-1$
     setTitle(title);
     setDescription(description);
     setPageComplete(false);
@@ -63,9 +63,9 @@ public class MavenProjectWizardLocationPage extends AbstractMavenWizardPage {
    * Creates Maven project location page.
    */
   public MavenProjectWizardLocationPage(ProjectImportConfiguration configuration, boolean showSimpleProject) {
-    super("MavenProjectWizardLocationPage", configuration);
-    setTitle(Messages.getString("wizard.project.page.project.title"));
-    setDescription(Messages.getString("wizard.project.page.project.description"));
+    super("MavenProjectWizardLocationPage", configuration); //$NON-NLS-1$
+    setTitle(Messages.getString("wizard.project.page.project.title")); //$NON-NLS-1$
+    setDescription(Messages.getString("wizard.project.page.project.description")); //$NON-NLS-1$
     setPageComplete(false);
   }
   
@@ -99,7 +99,7 @@ public class MavenProjectWizardLocationPage extends AbstractMavenWizardPage {
     useDefaultWorkspaceLocationButton = new Button(container, SWT.CHECK);
     GridData useDefaultWorkspaceLocationButtonData = new GridData(SWT.LEFT, SWT.CENTER, false, false, 3, 1);
     useDefaultWorkspaceLocationButton.setLayoutData(useDefaultWorkspaceLocationButtonData);
-    useDefaultWorkspaceLocationButton.setText("Use default &Workspace location");
+    useDefaultWorkspaceLocationButton.setText(org.eclipse.m2e.core.internal.Messages.MavenProjectWizardLocationPage_btnUserDefault);
     useDefaultWorkspaceLocationButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         boolean inWorkspace = isInWorkspace();
@@ -113,7 +113,7 @@ public class MavenProjectWizardLocationPage extends AbstractMavenWizardPage {
     GridData locationLabelData = new GridData();
     locationLabelData.horizontalIndent = 10;
     locationLabel.setLayoutData(locationLabelData);
-    locationLabel.setText("&Location:");
+    locationLabel.setText(org.eclipse.m2e.core.internal.Messages.MavenProjectWizardLocationPage_lblLocation);
     locationLabel.setEnabled(false);
     
     locationCombo = new Combo(container, SWT.NONE);
@@ -125,16 +125,16 @@ public class MavenProjectWizardLocationPage extends AbstractMavenWizardPage {
       }
     });
     locationCombo.setEnabled(false);
-    addFieldWithHistory("location", locationCombo);
+    addFieldWithHistory("location", locationCombo); //$NON-NLS-1$
     
     Button locationBrowseButton = new Button(container, SWT.NONE);
     GridData locationBrowseButtonData = new GridData(SWT.FILL, SWT.CENTER, false, false);
     locationBrowseButton.setLayoutData(locationBrowseButtonData);
-    locationBrowseButton.setText("Brows&e...");
+    locationBrowseButton.setText(org.eclipse.m2e.core.internal.Messages.MavenProjectWizardLocationPage_btnLocation);
     locationBrowseButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         DirectoryDialog dialog = new DirectoryDialog(getShell());
-        dialog.setText("Select Location");
+        dialog.setText(org.eclipse.m2e.core.internal.Messages.MavenProjectWizardLocationPage_dialog_location);
         
         String path = locationCombo.getText();
         if(path.length()==0) {
@@ -279,14 +279,14 @@ public class MavenProjectWizardLocationPage extends AbstractMavenWizardPage {
     // check whether location is empty
     if(location.length() == 0) {
       setErrorMessage(null);
-      setMessage(Messages.getString("wizard.project.page.project.validator.projectLocation"));
+      setMessage(Messages.getString("wizard.project.page.project.validator.projectLocation")); //$NON-NLS-1$
       setPageComplete(false);
       return;
     }
 
     // check whether the location is a syntactically correct path
     if(!Path.ROOT.isValidPath(location)) {
-      setErrorMessage(Messages.getString("wizard.project.page.project.validator.invalidLocation"));
+      setErrorMessage(Messages.getString("wizard.project.page.project.validator.invalidLocation")); //$NON-NLS-1$
       setPageComplete(false);
       return;
     }

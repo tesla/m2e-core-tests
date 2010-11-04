@@ -16,6 +16,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.m2e.core.MavenImages;
 import org.eclipse.m2e.core.index.IndexedArtifact;
 import org.eclipse.m2e.core.index.IndexedArtifactFile;
+import org.eclipse.m2e.core.internal.Messages;
 
 /**
  * IndexedArtifactNode
@@ -52,9 +53,9 @@ public class IndexedArtifactNode implements IMavenRepositoryNode, IArtifactNode 
     // return a.group + ":" + a.artifact;
     String pkg = artifact.getPackaging();
     if(pkg == null){
-      pkg = "[No Packaging]";
+      pkg = Messages.IndexedArtifactNode_no_pack;
     }
-    return artifact.getArtifactId() + " - " + pkg;
+    return artifact.getArtifactId() + " - " + pkg; //$NON-NLS-1$
   }
 
   /* (non-Javadoc)

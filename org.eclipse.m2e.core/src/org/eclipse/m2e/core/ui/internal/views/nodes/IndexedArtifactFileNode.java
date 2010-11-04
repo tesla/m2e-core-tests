@@ -45,10 +45,10 @@ public class IndexedArtifactFileNode implements IMavenRepositoryNode, IArtifactN
   public String getName() {
     String label = artifactFile.artifact;
     if(artifactFile.classifier != null) {
-      label += " : " + artifactFile.classifier;
+      label += " : " + artifactFile.classifier; //$NON-NLS-1$
     }
     if(artifactFile.version != null) {
-      label += " : " + artifactFile.version;
+      label += " : " + artifactFile.version; //$NON-NLS-1$
     }
     return label;
   }

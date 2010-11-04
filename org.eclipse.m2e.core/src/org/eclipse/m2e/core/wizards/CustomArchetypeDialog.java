@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.m2e.core.MavenPlugin;
+import org.eclipse.m2e.core.internal.Messages;
 
 /**
  * Custom Archetype dialog
@@ -39,13 +40,13 @@ public class CustomArchetypeDialog extends TitleAreaDialog {
 
   private static final String DIALOG_SETTINGS = CustomArchetypeDialog.class.getName();
 
-  private static final String KEY_ARCHETYPE_GROUP_ID = "archetypeGroupId";
+  private static final String KEY_ARCHETYPE_GROUP_ID = "archetypeGroupId"; //$NON-NLS-1$
   
-  private static final String KEY_ARCHETYPE_ARTIFACT_ID = "archetypeArtifactId";
+  private static final String KEY_ARCHETYPE_ARTIFACT_ID = "archetypeArtifactId"; //$NON-NLS-1$
 
-  private static final String KEY_ARCHETYPE_VERSION = "archetypeVersion";
+  private static final String KEY_ARCHETYPE_VERSION = "archetypeVersion"; //$NON-NLS-1$
 
-  private static final String KEY_REPOSITORY_URL = "repositoryUrl";
+  private static final String KEY_REPOSITORY_URL = "repositoryUrl"; //$NON-NLS-1$
 
   private static final int MAX_HISTORY = 15;
 
@@ -74,7 +75,7 @@ public class CustomArchetypeDialog extends TitleAreaDialog {
   protected CustomArchetypeDialog(Shell shell, String title) {
     super(shell);
     this.title = title;
-    this.message = "Specify Archetype and Maven repository URL";
+    this.message = Messages.CustomArchetypeDialog_message;
     setShellStyle(SWT.DIALOG_TRIM);
 
     IDialogSettings pluginSettings = MavenPlugin.getDefault().getDialogSettings();
@@ -104,38 +105,38 @@ public class CustomArchetypeDialog extends TitleAreaDialog {
     composite.setLayout(gridLayout);
 
     Label archetypeGroupIdLabel = new Label(composite, SWT.NONE);
-    archetypeGroupIdLabel.setText("Archetype Group Id:");
+    archetypeGroupIdLabel.setText(Messages.CustomArchetypeDialog_lblArchetypegroupId);
 
     archetypeGroupIdCombo = new Combo(composite, SWT.NONE);
     GridData archetypeGroupIdComboData = new GridData(SWT.FILL, SWT.CENTER, true, false);
     archetypeGroupIdComboData.widthHint = 350;
     archetypeGroupIdCombo.setLayoutData(archetypeGroupIdComboData);
     archetypeGroupIdCombo.setItems(getSavedValues(KEY_ARCHETYPE_GROUP_ID));
-    archetypeGroupIdCombo.setData("name", "archetypeGroupId");
+    archetypeGroupIdCombo.setData("name", "archetypeGroupId"); //$NON-NLS-1$ //$NON-NLS-2$
 
     Label archetypeArtifactIdLabel = new Label(composite, SWT.NONE);
-    archetypeArtifactIdLabel.setText("Archetype Artifact Id:");
+    archetypeArtifactIdLabel.setText(Messages.CustomArchetypeDialog_lblArchetypeartifactid);
 
     archetypeArtifactIdCombo = new Combo(composite, SWT.NONE);
     archetypeArtifactIdCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
     archetypeArtifactIdCombo.setItems(getSavedValues(KEY_ARCHETYPE_ARTIFACT_ID));
-    archetypeArtifactIdCombo.setData("name", "archetypeArtifactId");
+    archetypeArtifactIdCombo.setData("name", "archetypeArtifactId"); //$NON-NLS-1$ //$NON-NLS-2$
 
     Label archetypeVersionLabel = new Label(composite, SWT.NONE);
-    archetypeVersionLabel.setText("Archetype Version:");
+    archetypeVersionLabel.setText(Messages.CustomArchetypeDialog_lblArchetypeversion);
 
     archetypeVersionCombo = new Combo(composite, SWT.NONE);
     archetypeVersionCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
     archetypeVersionCombo.setItems(getSavedValues(KEY_ARCHETYPE_VERSION));
-    archetypeVersionCombo.setData("name", "archetypeVersion");
+    archetypeVersionCombo.setData("name", "archetypeVersion"); //$NON-NLS-1$ //$NON-NLS-2$
 
     Label repositoryLabel = new Label(composite, SWT.NONE);
-    repositoryLabel.setText("Repository URL:");
+    repositoryLabel.setText(Messages.CustomArchetypeDialog_lblRepo);
     
     repositoryCombo = new Combo(composite, SWT.NONE);
     repositoryCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
     repositoryCombo.setItems(getSavedValues(KEY_REPOSITORY_URL));
-    repositoryCombo.setData("name", "repository");
+    repositoryCombo.setData("name", "repository"); //$NON-NLS-1$ //$NON-NLS-2$
     
     ModifyListener modifyListener = new ModifyListener() {
       public void modifyText(final ModifyEvent e) {
@@ -226,17 +227,17 @@ public class CustomArchetypeDialog extends TitleAreaDialog {
     setMessage(null, IStatus.WARNING);
 
     if(archetypeGroupIdCombo.getText().trim().length()==0) {
-      setErrorMessage("Archetype Group Id is required");
+      setErrorMessage(Messages.CustomArchetypeDialog_error_grid);
       return false;
     }
     
     if(archetypeArtifactIdCombo.getText().trim().length()==0) {
-      setErrorMessage("Archetype Artifact Id is required");
+      setErrorMessage(Messages.CustomArchetypeDialog_error_artid);
       return false;
     }
     
     if(archetypeVersionCombo.getText().trim().length()==0) {
-      setErrorMessage("Archetype Version is required");
+      setErrorMessage(Messages.CustomArchetypeDialog_error_version);
       return false;
     }
     

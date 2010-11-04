@@ -74,7 +74,7 @@ public class MavenLocationComponent extends Composite {
     setLayout( gridLayout );
 
     Group locationGroup = new Group( this, SWT.NONE );
-    locationGroup.setText( Messages.getString( "locationComponent.location" ) );
+    locationGroup.setText( Messages.getString( "locationComponent.location" ) ); //$NON-NLS-1$
     locationGroup.setLayoutData( new GridData( GridData.FILL, GridData.FILL, true, true, 3, 1 ) );
     GridLayout groupLayout = new GridLayout();
     groupLayout.numColumns = 3;
@@ -86,7 +86,7 @@ public class MavenLocationComponent extends Composite {
 
     // first radio button
     inWorkspaceButton = new Button( locationGroup, SWT.RADIO );
-    inWorkspaceButton.setText( Messages.getString( "locationComponent.inWorkspace" ) );
+    inWorkspaceButton.setText( Messages.getString( "locationComponent.inWorkspace" ) ); //$NON-NLS-1$
     inWorkspaceButton.setLayoutData( new GridData(SWT.LEFT, SWT.CENTER, false, false, 3, 1) );
     inWorkspaceButton.addSelectionListener( new SelectionAdapter() {
       public void widgetSelected( SelectionEvent e ) {
@@ -102,7 +102,7 @@ public class MavenLocationComponent extends Composite {
 
     // second radio button
     inExternalLocationButton = new Button( locationGroup, SWT.RADIO );
-    inExternalLocationButton.setText( Messages.getString( "locationComponent.atExternal" ) );
+    inExternalLocationButton.setText( Messages.getString( "locationComponent.atExternal" ) ); //$NON-NLS-1$
     inExternalLocationButton.setLayoutData( gridData );
 
     // choose directory
@@ -110,13 +110,13 @@ public class MavenLocationComponent extends Composite {
     GridData gd_locationLabel = new GridData();
     gd_locationLabel.horizontalIndent = 10;
     locationLabel.setLayoutData(gd_locationLabel);
-    locationLabel.setText( Messages.getString( "locationComponent.directory" ) );
+    locationLabel.setText( Messages.getString( "locationComponent.directory" ) ); //$NON-NLS-1$
 
     locationCombo = new Combo( locationGroup, SWT.BORDER );
     locationCombo.setLayoutData( new GridData( GridData.FILL_HORIZONTAL ) );
 
     locationBrowseButton = new Button( locationGroup, SWT.PUSH );
-    locationBrowseButton.setText( Messages.getString( "locationComponent.browse" ) );
+    locationBrowseButton.setText( Messages.getString( "locationComponent.browse" ) ); //$NON-NLS-1$
 
     gridData = new GridData( SWT.FILL, SWT.DEFAULT, false, false );
     locationBrowseButton.setLayoutData( gridData );
@@ -124,7 +124,7 @@ public class MavenLocationComponent extends Composite {
     locationBrowseButton.addSelectionListener( new SelectionAdapter() {
       public void widgetSelected( SelectionEvent e ) {
         DirectoryDialog dialog = new DirectoryDialog(getShell());
-        dialog.setText(Messages.getString( "locationComponent.selectLocation" ));
+        dialog.setText(Messages.getString( "locationComponent.selectLocation" )); //$NON-NLS-1$
         
         String path = locationCombo.getText();
         if(path.length()==0) {

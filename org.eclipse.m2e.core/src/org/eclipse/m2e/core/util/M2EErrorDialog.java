@@ -29,6 +29,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
 
+import org.eclipse.m2e.core.internal.Messages;
+
 /**
  * M2EErrorDialog
  * Error dialog for displaying a list/table of error values. 
@@ -41,7 +43,7 @@ public class M2EErrorDialog extends MessageDialog {
   private TableViewer errorTable;
   private static final int PROJECT_COL = 0;
   protected static final int TABLE_WIDTH = 700;
-  protected String[] COL_NAMES = {"Project Name", "Error"};
+  protected String[] COL_NAMES = {Messages.M2EErrorDialog_column_name, Messages.M2EErrorDialog_column_error};
   protected int[] COL_STYLES = {SWT.LEFT, SWT.LEFT};
   protected Map<String, Throwable> errorMap;
   
@@ -123,7 +125,7 @@ public class M2EErrorDialog extends MessageDialog {
     for(Throwable t : values){
       String msg = M2EUtils.getRootCauseMessage(t);
       if(msg == null){
-        msg = "";
+        msg = ""; //$NON-NLS-1$
       }
       int width = gc.stringExtent(msg).x+10;
       maxWidth = Math.max(maxWidth, width);
@@ -178,7 +180,7 @@ public class M2EErrorDialog extends MessageDialog {
         return element.toString();
       }
       String msg = M2EUtils.getRootCauseMessage(errorMap.get(element));
-      return msg == null ? "" : msg;
+      return msg == null ? "" : msg; //$NON-NLS-1$
     }
 
     /* (non-Javadoc)

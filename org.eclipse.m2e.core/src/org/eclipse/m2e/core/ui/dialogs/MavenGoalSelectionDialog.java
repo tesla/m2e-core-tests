@@ -62,8 +62,8 @@ public class MavenGoalSelectionDialog extends ElementTreeSelectionDialog {
   public MavenGoalSelectionDialog(Shell parent) {
     super(parent, new GoalsLabelProvider(), new GoalsContentProvider());
 
-    setTitle(Messages.getString("launch.goalsDialog.title"));
-    setMessage("Select goal:");
+    setTitle(Messages.getString("launch.goalsDialog.title")); //$NON-NLS-1$
+    setMessage(org.eclipse.m2e.core.internal.Messages.MavenGoalSelectionDialog_message);
     setValidator(new GoalsSelectionValidator());
     setInput(new Object());
   }
@@ -79,7 +79,7 @@ public class MavenGoalSelectionDialog extends ElementTreeSelectionDialog {
     composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 
     Label selectGoalLabel = new Label(composite, SWT.NONE);
-    selectGoalLabel.setText("&Select Goal:");
+    selectGoalLabel.setText(org.eclipse.m2e.core.internal.Messages.MavenGoalSelectionDialog_lblSelect);
 
     final GoalsFilter filter = new GoalsFilter();
 
@@ -129,7 +129,7 @@ public class MavenGoalSelectionDialog extends ElementTreeSelectionDialog {
     });
 
     isQualifiedNameButton = new Button(composite, SWT.CHECK);
-    isQualifiedNameButton.setText("Use &Qualified Name");
+    isQualifiedNameButton.setText(org.eclipse.m2e.core.internal.Messages.MavenGoalSelectionDialog_btnQualified);
     isQualifiedNameButton.setSelection(true);
     isQualifiedNameButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
@@ -173,7 +173,7 @@ public class MavenGoalSelectionDialog extends ElementTreeSelectionDialog {
 
       IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
       try {
-        Map<String, IndexedArtifact> result = indexManager.search("*", IIndex.SEARCH_PLUGIN);
+        Map<String, IndexedArtifact> result = indexManager.search("*", IIndex.SEARCH_PLUGIN); //$NON-NLS-1$
         TreeMap<String, Group> map = new TreeMap<String, Group>();
         for(IndexedArtifact a : result.values()) {
           IndexedArtifactFile f = a.getFiles().iterator().next();
@@ -185,7 +185,7 @@ public class MavenGoalSelectionDialog extends ElementTreeSelectionDialog {
               }
             }
             if(goals.size()>0) {
-              map.put(f.prefix + ":" + f.group, new Group(f.prefix, f.group, f.artifact, goals));
+              map.put(f.prefix + ":" + f.group, new Group(f.prefix, f.group, f.artifact, goals)); //$NON-NLS-1$
             }
           }
         }
@@ -240,7 +240,7 @@ public class MavenGoalSelectionDialog extends ElementTreeSelectionDialog {
         if(g.groupId==null) {
           return g.name;
         }
-        return g.name + " - " + g.groupId + ":" + g.artifactId;
+        return g.name + " - " + g.groupId + ":" + g.artifactId; //$NON-NLS-1$ //$NON-NLS-2$
         
       } else if(element instanceof Entry) {
         return ((Entry) element).name;
@@ -291,13 +291,13 @@ public class MavenGoalSelectionDialog extends ElementTreeSelectionDialog {
   static class GoalsSelectionValidator implements ISelectionStatusValidator {
     public IStatus validate(Object[] selection) {
       if(selection.length == 0) {
-        return new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "Should select at least one goal", null);
+        return new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, org.eclipse.m2e.core.internal.Messages.MavenGoalSelectionDialog_error, null);
       }
       for(int j = 0; j < selection.length; j++ ) {
         if(selection[j] instanceof Entry) {
           continue;
         }
-        return new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "", null);
+        return new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "", null); //$NON-NLS-1$
       }
       return Status.OK_STATUS;
     }
@@ -338,12 +338,12 @@ public class MavenGoalSelectionDialog extends ElementTreeSelectionDialog {
     }
 
     public String getName() {
-      return prefix == null ? name : prefix + ":" + name;
+      return prefix == null ? name : prefix + ":" + name; //$NON-NLS-1$
     }
 
     public String getQualifiedName() {
       // return prefix == null ? name : prefix + ":" + name;
-      return prefix == null ? name : f.group + ":" + f.artifact + ":" + f.version + ":" + name;
+      return prefix == null ? name : f.group + ":" + f.artifact + ":" + f.version + ":" + name; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     }
   
   }

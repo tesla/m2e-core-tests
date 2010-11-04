@@ -48,6 +48,7 @@ import org.eclipse.m2e.core.actions.OpenMavenConsoleAction;
 import org.eclipse.m2e.core.core.MavenConsole;
 import org.eclipse.m2e.core.core.MavenLogger;
 import org.eclipse.m2e.core.embedder.MavenModelManager;
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.project.LocalProjectScanner;
 import org.eclipse.m2e.core.project.MavenProjectInfo;
 import org.eclipse.m2e.core.project.MavenProjectScmInfo;
@@ -73,7 +74,7 @@ public abstract class MavenProjectCheckoutJob extends WorkspaceJob {
   List<String> collectedLocations = new ArrayList<String>();
 
   public MavenProjectCheckoutJob(ProjectImportConfiguration importConfiguration, boolean checkoutAllProjects) {
-    super("Checking out Maven projects");
+    super(Messages.MavenProjectCheckoutJob_title);
     this.configuration = importConfiguration;
     this.checkoutAllProjects = checkoutAllProjects;
 
@@ -156,7 +157,7 @@ public abstract class MavenProjectCheckoutJob extends WorkspaceJob {
           
           DirectoryScanner projectScanner = new DirectoryScanner();
           projectScanner.setBasedir(location);
-          projectScanner.setIncludes(new String[] {"**/.project"});
+          projectScanner.setIncludes(new String[] {"**/.project"}); //$NON-NLS-1$
           projectScanner.scan();
           
           String[] projectFiles = projectScanner.getIncludedFiles();
@@ -164,9 +165,8 @@ public abstract class MavenProjectCheckoutJob extends WorkspaceJob {
             Display.getDefault().asyncExec(new Runnable() {
               public void run() {
                 boolean res = MessageDialog.openConfirm(Display.getDefault().getActiveShell(), //
-                    "Project Import", //
-                    "No Maven projects found, but there is Eclipse projects configuration avaialble.\n" +
-                    "Do you want to select and import Eclipse projects?");
+                    Messages.MavenProjectCheckoutJob_confirm_title, //
+                    Messages.MavenProjectCheckoutJob_confirm_message);
                 if(res) {
                   IWizard wizard = new ProjectsImportWizard(collectedLocations.get(0));
                   WizardDialog dialog = new WizardDialog(Display.getDefault().getActiveShell(), wizard);
@@ -182,9 +182,8 @@ public abstract class MavenProjectCheckoutJob extends WorkspaceJob {
           Display.getDefault().syncExec(new Runnable() {
             public void run() {
               boolean res = MessageDialog.openConfirm(Display.getDefault().getActiveShell(), //
-                  "Project Import", //
-                  "No Maven projects found. Do you want to create project using new project wizard?\n"
-                      + "Check out location will be copied into clipboard.");
+                  Messages.MavenProjectCheckoutJob_confirm2_title, //
+                  Messages.MavenProjectCheckoutJob_confirm2_message);
               if(res) {
                 Clipboard clipboard = new Clipboard(Display.getDefault());
                 clipboard.setContents(new Object[] { location }, new Transfer[] { TextTransfer.getInstance() });
@@ -204,7 +203,7 @@ public abstract class MavenProjectCheckoutJob extends WorkspaceJob {
       
       if(checkoutAllProjects) {
         final MavenPlugin plugin = MavenPlugin.getDefault();
-        WorkspaceJob job = new WorkspaceJob("Importing Maven projects") {
+        WorkspaceJob job = new WorkspaceJob(Messages.MavenProjectCheckoutJob_job) {
           public IStatus runInWorkspace(IProgressMonitor monitor) {
             Set<MavenProjectInfo> projectSet = plugin.getProjectConfigurationManager().collectProjects(projects);
 
@@ -243,7 +242,7 @@ public abstract class MavenProjectCheckoutJob extends WorkspaceJob {
           FileUtils.deleteDirectory(location);
         } catch(IOException ex) {
           String msg = "Can't delete " + location;
-          console.logError(msg + "; " + (ex.getMessage()==null ? ex.toString() : ex.getMessage()));
+          console.logError(msg + "; " + (ex.getMessage()==null ? ex.toString() : ex.getMessage())); //$NON-NLS-1$
           MavenLogger.log(msg, ex);
         }
       }

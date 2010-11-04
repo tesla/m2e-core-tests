@@ -75,7 +75,7 @@ public class MavenProjectConfigurator extends AbstractProjectConfigurator {
           IStatus status = ex.getStatus();
           String msg = status.getMessage();
           Throwable t = status.getException();
-          console.logError(msg + (t == null ? "" : "; " + t.toString()));
+          console.logError(msg + (t == null ? "" : "; " + t.toString())); //$NON-NLS-1$ //$NON-NLS-2$
           MavenLogger.log(ex);
         }
       }
@@ -96,22 +96,22 @@ public class MavenProjectConfigurator extends AbstractProjectConfigurator {
   public void setInitializationData(IConfigurationElement config, String propertyName, Object data) {
     super.setInitializationData(config, propertyName, data);
 
-    Pattern pattern = Pattern.compile("(.+?)\\:(.+?)\\|(.+)");
+    Pattern pattern = Pattern.compile("(.+?)\\:(.+?)\\|(.+)"); //$NON-NLS-1$
     String params = (String) data;
     if(params != null) {
       Matcher matcher = pattern.matcher(params);
       if(matcher.find() && matcher.groupCount() == 3) {
-        pluginKey = matcher.group(1) + ":" + matcher.group(2);
-        goals = Arrays.asList(matcher.group(3).split("\\|"));
+        pluginKey = matcher.group(1) + ":" + matcher.group(2); //$NON-NLS-1$
+        goals = Arrays.asList(matcher.group(3).split("\\|")); //$NON-NLS-1$
         return;
       }
     }
-    MavenLogger.log("Unable to parse configuration for project configurator " + getId() + "; " + data, null);
+    MavenLogger.log("Unable to parse configuration for project configurator " + getId() + "; " + data, null); //$NON-NLS-2$
   }
 
   @Override
   public String toString() {
-    return super.toString() + " " + pluginKey + goals;
+    return super.toString() + " " + pluginKey + goals; //$NON-NLS-1$
   }
   
 }

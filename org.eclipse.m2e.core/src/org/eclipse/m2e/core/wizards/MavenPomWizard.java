@@ -28,6 +28,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
@@ -43,6 +44,7 @@ import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.core.MavenLogger;
 import org.eclipse.m2e.core.embedder.MavenModelManager;
+import org.eclipse.m2e.core.internal.Messages;
 
 
 /**
@@ -61,7 +63,7 @@ public class MavenPomWizard extends Wizard implements INewWizard {
   public MavenPomWizard() {
     super();
     setNeedsProgressMonitor(true);
-    setWindowTitle("Maven POM wizard");
+    setWindowTitle(Messages.MavenPomWizard_title);
   }
 
   /**
@@ -90,7 +92,7 @@ public class MavenPomWizard extends Wizard implements INewWizard {
 
     IRunnableWithProgress op = new IRunnableWithProgress() {
       public void run(IProgressMonitor monitor) throws InvocationTargetException {
-        monitor.beginTask("Creating POM", 1);
+        monitor.beginTask(Messages.MavenPomWizard_task, 1);
         try {
           doFinish(projectName, model, monitor);
           monitor.worked(1);
@@ -108,7 +110,7 @@ public class MavenPomWizard extends Wizard implements INewWizard {
       return false;
     } catch(InvocationTargetException e) {
       Throwable realException = e.getTargetException();
-      MessageDialog.openError(getShell(), "Error", realException.getMessage());
+      MessageDialog.openError(getShell(), Messages.MavenPomWizard_error_title, realException.getMessage());
       return false;
     }
     return true;
@@ -125,14 +127,14 @@ public class MavenPomWizard extends Wizard implements INewWizard {
     if(!resource.exists() || (resource.getType() & IResource.FOLDER | IResource.PROJECT) == 0) {
       // TODO show warning popup
       throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1,
-          ("Folder \"" + projectName + "\" does not exist."), null));
+          NLS.bind(Messages.MavenPomWizard_status_not_exists, projectName), null));
     }
 
     IContainer container = (IContainer) resource;
     final IFile file = container.getFile(new Path(IMavenConstants.POM_FILE_NAME));
     if(file.exists()) {
       // TODO show warning popup
-      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, "POM already exists", null));
+      throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID, -1, Messages.MavenPomWizard_error_exists, null));
     }
 
     final File pom = file.getLocation().toFile();

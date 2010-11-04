@@ -20,6 +20,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.Window;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -46,6 +47,7 @@ import org.eclipse.m2e.core.archetype.ArchetypeCatalogFactory.LocalCatalogFactor
 import org.eclipse.m2e.core.archetype.ArchetypeCatalogFactory.RemoteCatalogFactory;
 import org.eclipse.m2e.core.archetype.ArchetypeManager;
 import org.eclipse.m2e.core.core.MavenLogger;
+import org.eclipse.m2e.core.internal.Messages;
 
 
 /**
@@ -61,7 +63,7 @@ public class MavenArchetypesPreferencePage extends PreferencePage implements IWo
   List<ArchetypeCatalogFactory> archetypeCatalogs;
   
   public MavenArchetypesPreferencePage() {
-    setTitle("Maven Archetype Catalogs");
+    setTitle(Messages.MavenArchetypesPreferencePage_title);
 
     this.archetypeManager = MavenPlugin.getDefault().getArchetypeManager();
   }
@@ -96,7 +98,7 @@ public class MavenArchetypesPreferencePage extends PreferencePage implements IWo
     try {
       archetypeManager.saveCatalogs();
     } catch(IOException ex) {
-      setErrorMessage("Can't save archetype catalog configuration\n" + ex.getMessage());
+      setErrorMessage(NLS.bind(Messages.MavenArchetypesPreferencePage_error, ex.getMessage()));
       return false;
     }
     
@@ -116,11 +118,11 @@ public class MavenArchetypesPreferencePage extends PreferencePage implements IWo
     Link addRemoveOrLink = new Link(composite, SWT.NONE);
     GridData gd_addRemoveOrLink = new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1);
     addRemoveOrLink.setLayoutData(gd_addRemoveOrLink);
-    addRemoveOrLink.setText("Add, remove or edit <a href=\"#\">Maven Archetype catalogs</a>:");
+    addRemoveOrLink.setText(Messages.MavenArchetypesPreferencePage_link);
     addRemoveOrLink.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         try {
-          URL url = new URL("http://maven.apache.org/plugins/maven-archetype-plugin/specification/archetype-catalog.html");
+          URL url = new URL("http://maven.apache.org/plugins/maven-archetype-plugin/specification/archetype-catalog.html"); //$NON-NLS-1$
           IWebBrowser browser = PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser();
           browser.openURL(url);
         } catch(MalformedURLException ex) {
@@ -160,11 +162,11 @@ public class MavenArchetypesPreferencePage extends PreferencePage implements IWo
 
     TableColumn typeColumn = new TableColumn(table, SWT.NONE);
     typeColumn.setWidth(250);
-    typeColumn.setText("");
+    typeColumn.setText(""); //$NON-NLS-1$
 
     Button addLocalButton = new Button(composite, SWT.NONE);
     addLocalButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-    addLocalButton.setText("Add &Local Catalog...");
+    addLocalButton.setText(Messages.MavenArchetypesPreferencePage_btnAddLocal);
     addLocalButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         LocalArchetypeCatalogDialog dialog = new LocalArchetypeCatalogDialog(getShell(), null);
@@ -179,7 +181,7 @@ public class MavenArchetypesPreferencePage extends PreferencePage implements IWo
 
     Button addRemoteButton = new Button(composite, SWT.NONE);
     addRemoteButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-    addRemoteButton.setText("Add &Remote Catalog...");
+    addRemoteButton.setText(Messages.MavenArchetypesPreferencePage_btnAddRemote);
     addRemoteButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         RemoteArchetypeCatalogDialog dialog = new RemoteArchetypeCatalogDialog(getShell(), null);
@@ -195,7 +197,7 @@ public class MavenArchetypesPreferencePage extends PreferencePage implements IWo
     final Button editButton = new Button(composite, SWT.NONE);
     editButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
     editButton.setEnabled(false);
-    editButton.setText("&Edit...");
+    editButton.setText(Messages.MavenArchetypesPreferencePage_btnEdit);
     editButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         ArchetypeCatalogFactory factory = getSelectedArchetypeCatalogFactory();
@@ -225,7 +227,7 @@ public class MavenArchetypesPreferencePage extends PreferencePage implements IWo
     final Button removeButton = new Button(composite, SWT.NONE);
     removeButton.setEnabled(false);
     removeButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, true));
-    removeButton.setText("&Remove");
+    removeButton.setText(Messages.MavenArchetypesPreferencePage_btnRemove);
     removeButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         ArchetypeCatalogFactory factory = getSelectedArchetypeCatalogFactory();
@@ -266,12 +268,12 @@ public class MavenArchetypesPreferencePage extends PreferencePage implements IWo
     public String getColumnText(Object element, int columnIndex) {
       ArchetypeCatalogFactory factory = (ArchetypeCatalogFactory) element;
       if(factory instanceof LocalCatalogFactory) {
-        return "Local: " + factory.getDescription();
+        return NLS.bind(Messages.MavenArchetypesPreferencePage_local, factory.getDescription());
       } else if(factory instanceof RemoteCatalogFactory) {
         if(factory.isEditable()) {
-          return "Remote: " + factory.getDescription();
+          return NLS.bind(Messages.MavenArchetypesPreferencePage_remote,factory.getDescription());
         }
-        return "Packaged: " + factory.getDescription();
+        return NLS.bind(Messages.MavenArchetypesPreferencePage_packaged, factory.getDescription());
       }
       return factory.getDescription();
     }

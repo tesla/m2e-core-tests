@@ -69,6 +69,7 @@ import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.core.MavenConsole;
 import org.eclipse.m2e.core.core.MavenLogger;
+import org.eclipse.m2e.core.internal.Messages;
 
 
 /**
@@ -86,11 +87,11 @@ public class ProjectsImportPage extends WizardPage implements IOverwriteQuery {
 
 
   public ProjectsImportPage(String location) {
-    super("wizardExternalProjectsPage");
+    super("wizardExternalProjectsPage"); //$NON-NLS-1$
     this.location = location;
     
-    setTitle("Import Projects");
-    setDescription("Select non-Maven projects to import");
+    setTitle(Messages.ProjectsImportPage_title);
+    setDescription(Messages.ProjectsImportPage_desc);
     setPageComplete(false);
   }
 
@@ -125,7 +126,7 @@ public class ProjectsImportPage extends WizardPage implements IOverwriteQuery {
    */
   private void createProjectsList(Composite workArea) {
     Label title = new Label(workArea, SWT.NONE);
-    title.setText("&Projects:");
+    title.setText(Messages.ProjectsImportPage_lstProjects);
 
     Composite listComposite = new Composite(workArea, SWT.NONE);
     GridLayout layout = new GridLayout();
@@ -169,7 +170,7 @@ public class ProjectsImportPage extends WizardPage implements IOverwriteQuery {
     projectsList.setLabelProvider(new LabelProvider() {
       public String getText(Object element) {
         ProjectRecord projectRecord = (ProjectRecord) element;
-        return projectRecord.getProjectName() + " - " + projectRecord.projectFile.getParentFile().getAbsolutePath();
+        return projectRecord.getProjectName() + " - " + projectRecord.projectFile.getParentFile().getAbsolutePath(); //$NON-NLS-1$
       }
     });
 
@@ -200,7 +201,7 @@ public class ProjectsImportPage extends WizardPage implements IOverwriteQuery {
 
     Button selectAll = new Button(buttonsComposite, SWT.PUSH);
     selectAll.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-    selectAll.setText("&Select All");
+    selectAll.setText(Messages.ProjectsImportPage_btnSelect);
     selectAll.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         projectsList.setCheckedElements(selectedProjects);
@@ -212,7 +213,7 @@ public class ProjectsImportPage extends WizardPage implements IOverwriteQuery {
 
     Button deselectAll = new Button(buttonsComposite, SWT.PUSH);
     deselectAll.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-    deselectAll.setText("&Deselect All");
+    deselectAll.setText(Messages.ProjectsImportPage_btnDeselect);
     deselectAll.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         projectsList.setCheckedElements(new Object[0]);
@@ -224,7 +225,7 @@ public class ProjectsImportPage extends WizardPage implements IOverwriteQuery {
 
     Button refresh = new Button(buttonsComposite, SWT.PUSH);
     refresh.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-    refresh.setText("R&efresh");
+    refresh.setText(Messages.ProjectsImportPage_btnRefresh);
     refresh.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         updateProjectsList(location);
@@ -243,7 +244,7 @@ public class ProjectsImportPage extends WizardPage implements IOverwriteQuery {
     try {
       getContainer().run(true, true, new IRunnableWithProgress() {
         public void run(IProgressMonitor monitor) {
-          monitor.beginTask("Searching for projects", 100);
+          monitor.beginTask(Messages.ProjectsImportPage_task_search, 100);
           File directory = new File(path);
           selectedProjects = new ProjectRecord[0];
           Collection<File> files = new ArrayList<File>();
@@ -256,7 +257,7 @@ public class ProjectsImportPage extends WizardPage implements IOverwriteQuery {
             selectedProjects = new ProjectRecord[files.size()];
             int index = 0;
             monitor.worked(50);
-            monitor.subTask("Processing results");
+            monitor.subTask(Messages.ProjectsImportPage_task_processing);
             for(File file : files) {
               selectedProjects[index] = new ProjectRecord(file);
               index++ ;
@@ -277,7 +278,7 @@ public class ProjectsImportPage extends WizardPage implements IOverwriteQuery {
     projectsList.refresh(true);
     projectsList.setCheckedElements(getValidProjects());
     if(getValidProjects().length < selectedProjects.length) {
-      setMessage("Some projects were hidden because they exist in the workspace directory", WARNING);
+      setMessage(Messages.ProjectsImportPage_message, WARNING);
     } else {
       setMessage(null, WARNING);
     }
@@ -299,7 +300,7 @@ public class ProjectsImportPage extends WizardPage implements IOverwriteQuery {
       return false;
     }
     
-    monitor.subTask(NLS.bind("Checking: {0}", directory.getPath()));
+    monitor.subTask(NLS.bind(Messages.ProjectsImportPage_task_checking, directory.getPath()));
     File[] contents = directory.listFiles();
     if(contents == null)
       return false;
@@ -376,7 +377,7 @@ public class ProjectsImportPage extends WizardPage implements IOverwriteQuery {
     } catch(InvocationTargetException e) {
       // one of the steps resulted in a core exception
       Throwable t = e.getTargetException();
-      String message = "Creation Problems";
+      String message = Messages.ProjectsImportPage_error_creation;
       IStatus status;
       if(t instanceof CoreException) {
         status = ((CoreException) t).getStatus();
@@ -424,7 +425,7 @@ public class ProjectsImportPage extends WizardPage implements IOverwriteQuery {
     }
 
     try {
-      monitor.beginTask("Creating Projects", 100);
+      monitor.beginTask(Messages.ProjectsImportPage_task_creating, 100);
       
       @SuppressWarnings("deprecation")
       IPath projectPath = record.description.getLocation();
@@ -478,13 +479,13 @@ public class ProjectsImportPage extends WizardPage implements IOverwriteQuery {
     // Break the message up if there is a file name and a directory
     // and there are at least 2 segments.
     if(path.getFileExtension() == null || path.segmentCount() < 2) {
-      messageString = NLS.bind("''{0}'' already exists.  Would you like to overwrite it?", pathString);
+      messageString = NLS.bind(Messages.ProjectsImportPage_overwrite, pathString);
     } else {
-      messageString = NLS.bind("Overwrite ''{0}'' in folder ''{1}''?",
+      messageString = NLS.bind(Messages.ProjectsImportPage_overwrite2,
           path.lastSegment(), path.removeLastSegments(1).toOSString());
     }
   
-    final MessageDialog dialog = new MessageDialog(getContainer().getShell(), "Question", null,
+    final MessageDialog dialog = new MessageDialog(getContainer().getShell(), Messages.ProjectsImportPage_dialog_title, null,
         messageString, MessageDialog.QUESTION, new String[] {IDialogConstants.YES_LABEL,
             IDialogConstants.YES_TO_ALL_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.NO_TO_ALL_LABEL,
             IDialogConstants.CANCEL_LABEL}, 0);

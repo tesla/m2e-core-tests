@@ -25,25 +25,25 @@ import org.eclipse.m2e.core.core.Messages;
 
 public class MavenArtifactComponent extends Composite {
 
-  public static final String JAR = "jar";
+  public static final String JAR = "jar"; //$NON-NLS-1$
 
-  public static final String WAR = "war";
+  public static final String WAR = "war"; //$NON-NLS-1$
 
-  public static final String EAR = "ear";
+  public static final String EAR = "ear"; //$NON-NLS-1$
 
-  public static final String RAR = "rar";
+  public static final String RAR = "rar"; //$NON-NLS-1$
 
-  public static final String POM = "pom";
+  public static final String POM = "pom"; //$NON-NLS-1$
 
   // MNGECLIPSE-688 add EJB Support
-  public static final String EJB = "ejb";
+  public static final String EJB = "ejb"; //$NON-NLS-1$
 
   public static final String[] PACKAGING_OPTIONS = {JAR, WAR, EJB, EAR, RAR, POM, //
-      "maven-plugin", "maven-archetype", "osgi-bundle", "eclipse-plugin"};
+      "maven-plugin", "maven-archetype", "osgi-bundle", "eclipse-plugin"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 
   public static final String DEFAULT_PACKAGING = JAR;
 
-  public static final String DEFAULT_VERSION = "0.0.1-SNAPSHOT";
+  public static final String DEFAULT_VERSION = "0.0.1-SNAPSHOT"; //$NON-NLS-1$
 
   /** group id text field */
   protected Combo groupIdCombo;
@@ -88,59 +88,59 @@ public class MavenArtifactComponent extends Composite {
     setLayout(layout);
 
     Group artifactGroup = new Group(this, SWT.NONE);
-    artifactGroup.setText(Messages.getString("artifactComponent.artifact"));
+    artifactGroup.setText(Messages.getString("artifactComponent.artifact")); //$NON-NLS-1$
     GridData gd_artifactGroup = new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1);
     artifactGroup.setLayoutData(gd_artifactGroup);
     artifactGroup.setLayout(new GridLayout(2, false));
 
     groupIdlabel = new Label(artifactGroup, SWT.NONE);
-    groupIdlabel.setText(Messages.getString("artifactComponent.groupId"));
+    groupIdlabel.setText(Messages.getString("artifactComponent.groupId")); //$NON-NLS-1$
 
     groupIdCombo = new Combo(artifactGroup, SWT.BORDER);
     groupIdCombo.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false));
-    groupIdCombo.setData("name", "groupIdCombo");
+    groupIdCombo.setData("name", "groupIdCombo"); //$NON-NLS-1$ //$NON-NLS-2$
 
     artifactIdLabel = new Label(artifactGroup, SWT.NONE);
-    artifactIdLabel.setText(Messages.getString("artifactComponent.artifactId"));
+    artifactIdLabel.setText(Messages.getString("artifactComponent.artifactId")); //$NON-NLS-1$
 
     artifactIdCombo = new Combo(artifactGroup, SWT.BORDER);
     artifactIdCombo.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, false, false));
-    artifactIdCombo.setData("name", "artifactIdCombo");
+    artifactIdCombo.setData("name", "artifactIdCombo"); //$NON-NLS-1$ //$NON-NLS-2$
 
     versionLabel = new Label(artifactGroup, SWT.NONE);
-    versionLabel.setText(Messages.getString("artifactComponent.version"));
+    versionLabel.setText(Messages.getString("artifactComponent.version")); //$NON-NLS-1$
 
     versionCombo = new Combo(artifactGroup, SWT.BORDER);
     versionCombo.setLayoutData(new GridData(150, SWT.DEFAULT));
     versionCombo.setText(DEFAULT_VERSION);
-    versionCombo.setData("name", "versionCombo");
+    versionCombo.setData("name", "versionCombo"); //$NON-NLS-1$ //$NON-NLS-2$
 
     packagingLabel = new Label(artifactGroup, SWT.NONE);
-    packagingLabel.setText(Messages.getString("artifactComponent.packaging"));
+    packagingLabel.setText(Messages.getString("artifactComponent.packaging")); //$NON-NLS-1$
 
     packagingCombo = new Combo(artifactGroup, SWT.NONE);
     packagingCombo.setItems(PACKAGING_OPTIONS);
     packagingCombo.setText(DEFAULT_PACKAGING);
     packagingCombo.setLayoutData(new GridData(150, SWT.DEFAULT));
-    packagingCombo.setData("name", "packagingCombo");
+    packagingCombo.setData("name", "packagingCombo"); //$NON-NLS-1$ //$NON-NLS-2$
 
     nameLabel = new Label(artifactGroup, SWT.NONE);
     nameLabel.setLayoutData(new GridData());
-    nameLabel.setText(Messages.getString("artifactComponent.name"));
+    nameLabel.setText(Messages.getString("artifactComponent.name")); //$NON-NLS-1$
 
     nameCombo = new Combo(artifactGroup, SWT.BORDER);
     nameCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-    nameCombo.setData("name", "nameCombo");
+    nameCombo.setData("name", "nameCombo"); //$NON-NLS-1$ //$NON-NLS-2$
 
     descriptionLabel = new Label(artifactGroup, SWT.NONE);
     descriptionLabel.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false));
-    descriptionLabel.setText(Messages.getString("artifactComponent.description"));
+    descriptionLabel.setText(Messages.getString("artifactComponent.description")); //$NON-NLS-1$
 
     descriptionText = new Text(artifactGroup, SWT.V_SCROLL | SWT.BORDER | SWT.WRAP);
     GridData gd_descriptionText = new GridData(SWT.FILL, SWT.FILL, false, true);
     gd_descriptionText.minimumHeight = 20;
     descriptionText.setLayoutData(gd_descriptionText);
-    descriptionText.setData("name", "descriptionText");
+    descriptionText.setData("name", "descriptionText"); //$NON-NLS-1$ //$NON-NLS-2$
   }
 
   public void setModifyingListener(ModifyListener modifyingListener) {
@@ -217,7 +217,7 @@ public class MavenArtifactComponent extends Composite {
 
   public Model getModel() {
     Model model = new Model();
-    model.setModelVersion("4.0.0");
+    model.setModelVersion("4.0.0"); //$NON-NLS-1$
     
     model.setGroupId(getGroupId());
     model.setArtifactId(getArtifactId());

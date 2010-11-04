@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -29,6 +30,7 @@ import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.core.MavenLogger;
 import org.eclipse.m2e.core.embedder.IMavenConfiguration;
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.project.MavenProjectManager;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 
@@ -45,7 +47,7 @@ public class MavenProjectPreferencePage extends PropertyPage {
   private Text activeProfilesText;
 
   public MavenProjectPreferencePage() {
-    setTitle("Maven");
+    setTitle(Messages.MavenProjectPreferencePage_title);
   }
 
   protected Control createContents(Composite parent) {
@@ -55,7 +57,7 @@ public class MavenProjectPreferencePage extends PropertyPage {
 
     Label profilesLabel = new Label(composite, SWT.NONE);
     profilesLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
-    profilesLabel.setText("Active Maven &Profiles (comma separated):");
+    profilesLabel.setText(Messages.MavenProjectPreferencePage_lblProfiles);
 
     activeProfilesText = new Text(composite, SWT.BORDER);
     activeProfilesText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
@@ -63,7 +65,7 @@ public class MavenProjectPreferencePage extends PropertyPage {
     resolveWorspaceProjectsButton = new Button(composite, SWT.CHECK);
     GridData resolveWorspaceProjectsButtonData = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
     resolveWorspaceProjectsButton.setLayoutData(resolveWorspaceProjectsButtonData);
-    resolveWorspaceProjectsButton.setText("Resolve dependencies from &Workspace projects");
+    resolveWorspaceProjectsButton.setText(Messages.MavenProjectPreferencePage_btnResolve);
 
 //    includeModulesButton = new Button(composite, SWT.CHECK);
 //    GridData gd = new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1);
@@ -127,11 +129,11 @@ public class MavenProjectPreferencePage extends PropertyPage {
     boolean isSet = projectManager.setResolverConfiguration(getProject(), configuration);
     if(isSet) {
 
-        boolean res = MessageDialog.openQuestion(getShell(), "Maven Settings", //
-            "Maven settings has changed. Do you want to update project configuration?");
+        boolean res = MessageDialog.openQuestion(getShell(), Messages.MavenProjectPreferencePage_dialog_title, //
+            Messages.MavenProjectPreferencePage_dialog_message);
         if(res) {
           final MavenPlugin plugin = MavenPlugin.getDefault();
-          WorkspaceJob job = new WorkspaceJob("Updating " + project.getName() + " Sources") {
+          WorkspaceJob job = new WorkspaceJob(NLS.bind(Messages.MavenProjectPreferencePage_job, project.getName() )) {
             public IStatus runInWorkspace(IProgressMonitor monitor) {
               try {
                 final IMavenConfiguration mavenConfiguration = MavenPlugin.getDefault().getMavenConfiguration();

@@ -26,9 +26,9 @@ import org.eclipse.m2e.core.project.MavenProjectScmInfo;
  */
 public abstract class ScmHandler implements Comparable<ScmHandler>, IExecutableExtension {
 
-  public static final String ATTR_CLASS = "class";
-  public static final String ATTR_TYPE = "type";
-  public static final String ATTR_PRIORITY = "priority";
+  public static final String ATTR_CLASS = "class"; //$NON-NLS-1$
+  public static final String ATTR_TYPE = "type"; //$NON-NLS-1$
+  public static final String ATTR_PRIORITY = "priority"; //$NON-NLS-1$
   
   private String type;
   private int priority;

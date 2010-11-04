@@ -45,6 +45,7 @@ import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.IWorkingSetSelectionDialog;
 
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.project.ProjectImportConfiguration;
 
 
@@ -56,7 +57,7 @@ import org.eclipse.m2e.core.project.ProjectImportConfiguration;
 public class WorkingSetGroup {
 
   static final List<String> WORKING_SET_IDS = Arrays.asList( //
-      "org.eclipse.ui.resourceWorkingSetPage", "org.eclipse.jdt.ui.JavaWorkingSetPage");
+      "org.eclipse.ui.resourceWorkingSetPage", "org.eclipse.jdt.ui.JavaWorkingSetPage"); //$NON-NLS-1$ //$NON-NLS-2$
 
   ComboViewer workingsetComboViewer;
 
@@ -79,8 +80,8 @@ public class WorkingSetGroup {
     gd_addToWorkingSetButton.verticalIndent = 12;
     addToWorkingSetButton.setLayoutData(gd_addToWorkingSetButton);
     addToWorkingSetButton.setSelection(true);
-    addToWorkingSetButton.setData("name", "addToWorkingSetButton");
-    addToWorkingSetButton.setText("&Add project(s) to working set");
+    addToWorkingSetButton.setData("name", "addToWorkingSetButton"); //$NON-NLS-1$ //$NON-NLS-2$
+    addToWorkingSetButton.setText(Messages.WorkingSetGroup_btnAddSet);
     addToWorkingSetButton.setSelection(false);
 
     final Label workingsetLabel = new Label(container, SWT.NONE);
@@ -88,12 +89,12 @@ public class WorkingSetGroup {
     gd_workingsetLabel.horizontalIndent = 10;
     workingsetLabel.setLayoutData(gd_workingsetLabel);
     workingsetLabel.setEnabled(false);
-    workingsetLabel.setData("name", "workingsetLabel");
-    workingsetLabel.setText("Wo&rking set:");
+    workingsetLabel.setData("name", "workingsetLabel"); //$NON-NLS-1$ //$NON-NLS-2$
+    workingsetLabel.setText(Messages.WorkingSetGroup_lblSet);
 
     Combo workingsetCombo = new Combo(container, SWT.READ_ONLY);
     workingsetCombo.setEnabled(false);
-    workingsetCombo.setData("name", "workingsetCombo");
+    workingsetCombo.setData("name", "workingsetCombo"); //$NON-NLS-1$ //$NON-NLS-2$
     workingsetCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
     workingsetComboViewer = new ComboViewer(workingsetCombo);
@@ -141,7 +142,7 @@ public class WorkingSetGroup {
           for(Object o : (List<?>) element) {
             if(o instanceof IWorkingSet) {
               if(sb.length() > 0) {
-                sb.append(", ");
+                sb.append(", "); //$NON-NLS-1$
               }
               sb.append(((IWorkingSet) o).getLabel());
             }
@@ -161,8 +162,8 @@ public class WorkingSetGroup {
 
     final Button newWorkingSetButton = new Button(container, SWT.NONE);
     newWorkingSetButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-    newWorkingSetButton.setData("name", "configureButton");
-    newWorkingSetButton.setText("Mor&e...");
+    newWorkingSetButton.setData("name", "configureButton"); //$NON-NLS-1$ //$NON-NLS-2$
+    newWorkingSetButton.setText(Messages.WorkingSetGroup_btnMore);
     newWorkingSetButton.setEnabled(false);
     newWorkingSetButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(final SelectionEvent e) {

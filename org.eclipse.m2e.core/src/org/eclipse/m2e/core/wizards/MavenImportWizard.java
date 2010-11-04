@@ -28,6 +28,7 @@ import org.eclipse.ui.progress.IProgressConstants;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.actions.OpenMavenConsoleAction;
 import org.eclipse.m2e.core.actions.SelectionUtil;
+import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.project.MavenProjectInfo;
 import org.eclipse.m2e.core.project.ProjectImportConfiguration;
 
@@ -50,7 +51,7 @@ public class MavenImportWizard extends Wizard implements IImportWizard {
   public MavenImportWizard() {
     importConfiguration = new ProjectImportConfiguration();
     setNeedsProgressMonitor(true);
-    setWindowTitle("Import Maven projects");
+    setWindowTitle(Messages.MavenImportWizard_title);
   }
 
   public MavenImportWizard(ProjectImportConfiguration importConfiguration, List<String> locations) {
@@ -87,7 +88,7 @@ public class MavenImportWizard extends Wizard implements IImportWizard {
 
     final MavenPlugin plugin = MavenPlugin.getDefault();
 
-    Job job = new WorkspaceJob("Importing Maven projects") {
+    Job job = new WorkspaceJob(Messages.MavenImportWizard_job) {
       public IStatus runInWorkspace(IProgressMonitor monitor) {
         setProperty(IProgressConstants.ACTION_PROPERTY, new OpenMavenConsoleAction());
         try {

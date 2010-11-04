@@ -13,6 +13,7 @@ import java.io.File;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -35,6 +36,7 @@ import org.eclipse.m2e.core.core.MavenLogger;
 import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.embedder.IMaven;
 import org.eclipse.m2e.core.index.IndexedArtifactFile;
+import org.eclipse.m2e.core.internal.Messages;
 
 
 /**
@@ -63,8 +65,8 @@ public class MavenInstallFileArtifactWizardPage extends WizardPage {
   public MavenInstallFileArtifactWizardPage(IFile file) {
     super("mavenInstallFileWizardPage");
     this.file = file;
-    this.setTitle("Install file in local repository");
-    this.setDescription("Install file in local repository");
+    this.setTitle(Messages.MavenInstallFileArtifactWizardPage_title);
+    this.setDescription(Messages.MavenInstallFileArtifactWizardPage_desc);
   }
 
   public void createControl(Composite parent) {
@@ -79,11 +81,11 @@ public class MavenInstallFileArtifactWizardPage extends WizardPage {
     };
 
     Label artifactFileNameLabel = new Label(container, SWT.NONE);
-    artifactFileNameLabel.setText("Artifact &file:");
+    artifactFileNameLabel.setText(Messages.MavenInstallFileArtifactWizardPage_lblFileName);
     
     artifactFileNameText = new Text(container, SWT.BORDER);
     artifactFileNameText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-    artifactFileNameText.setData("name", "artifactFileNametext");
+    artifactFileNameText.setData("name", "artifactFileNametext"); //$NON-NLS-1$ //$NON-NLS-2$
     artifactFileNameText.addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent e) {
         updateFileName(getArtifactFileName());
@@ -93,12 +95,12 @@ public class MavenInstallFileArtifactWizardPage extends WizardPage {
     
     final Button artifactFileNameButton = new Button(container, SWT.NONE);
     artifactFileNameButton.setLayoutData(new GridData());
-    artifactFileNameButton.setData("name", "externalPomFileButton");
-    artifactFileNameButton.setText("&Browse...");
+    artifactFileNameButton.setData("name", "externalPomFileButton"); //$NON-NLS-1$ //$NON-NLS-2$
+    artifactFileNameButton.setText(Messages.MavenInstallFileArtifactWizardPage_btnFilename);
     artifactFileNameButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         FileDialog fileDialog = new FileDialog(artifactFileNameButton.getShell());
-        fileDialog.setText("Select file");
+        fileDialog.setText(Messages.MavenInstallFileArtifactWizardPage_file_title);
         fileDialog.setFileName(artifactFileNameText.getText());
         String name = fileDialog.open();
         if(name!=null) {
@@ -108,10 +110,10 @@ public class MavenInstallFileArtifactWizardPage extends WizardPage {
     });
 
     Label pomFileNameLabel = new Label(container, SWT.NONE);
-    pomFileNameLabel.setText("&POM file:");
+    pomFileNameLabel.setText(Messages.MavenInstallFileArtifactWizardPage_lblPom);
 
     pomFileNameText = new Text(container, SWT.BORDER);
-    pomFileNameText.setData("name", "pomFileNameText");
+    pomFileNameText.setData("name", "pomFileNameText"); //$NON-NLS-1$ //$NON-NLS-2$
     pomFileNameText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
     pomFileNameText.addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent e) {
@@ -122,12 +124,12 @@ public class MavenInstallFileArtifactWizardPage extends WizardPage {
 
     final Button pomFileNameButton = new Button(container, SWT.NONE);
     pomFileNameButton.setLayoutData(new GridData());
-    pomFileNameButton.setData("name", "externalPomFileButton");
-    pomFileNameButton.setText("B&rowse...");
+    pomFileNameButton.setData("name", "externalPomFileButton"); //$NON-NLS-1$ //$NON-NLS-2$
+    pomFileNameButton.setText(Messages.MavenInstallFileArtifactWizardPage_btnPom);
     pomFileNameButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         FileDialog fileDialog = new FileDialog(pomFileNameButton.getShell());
-        fileDialog.setText("Select file");
+        fileDialog.setText(Messages.MavenInstallFileArtifactWizardPage_file_title);
         fileDialog.setFileName(pomFileNameText.getText());
         String res = fileDialog.open();
         if(res!=null) {
@@ -139,16 +141,16 @@ public class MavenInstallFileArtifactWizardPage extends WizardPage {
     new Label(container, SWT.NONE);
 
     generatePomButton = new Button(container, SWT.CHECK);
-    generatePomButton.setData("name", "generatePomButton");
+    generatePomButton.setData("name", "generatePomButton"); //$NON-NLS-1$ //$NON-NLS-2$
     generatePomButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
-    generatePomButton.setText("Gen&erate POM");
+    generatePomButton.setText(Messages.MavenInstallFileArtifactWizardPage_btnGenerate);
     generatePomButton.setSelection(true);
     new Label(container, SWT.NONE);
 
     createChecksumButton = new Button(container, SWT.CHECK);
-    createChecksumButton.setData("name", "createChecksumButton");
+    createChecksumButton.setData("name", "createChecksumButton"); //$NON-NLS-1$ //$NON-NLS-2$
     createChecksumButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
-    createChecksumButton.setText("Create C&hecksum");
+    createChecksumButton.setText(Messages.MavenInstallFileArtifactWizardPage_btnChecksum);
     createChecksumButton.setSelection(true);
 
     Label separator = new Label(container, SWT.HORIZONTAL | SWT.SEPARATOR);
@@ -157,28 +159,28 @@ public class MavenInstallFileArtifactWizardPage extends WizardPage {
     separator.setLayoutData(separatorData);
 
     Label groupIdlabel = new Label(container, SWT.NONE);
-    groupIdlabel.setText("&Group Id:");
+    groupIdlabel.setText(Messages.MavenInstallFileArtifactWizardPage_lblgroupid);
 
     groupIdCombo = new Combo(container, SWT.NONE);
-    groupIdCombo.setData("name", "groupIdCombo");
+    groupIdCombo.setData("name", "groupIdCombo"); //$NON-NLS-1$ //$NON-NLS-2$
     groupIdCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
     groupIdCombo.addModifyListener(modifyingListener);
     new Label(container, SWT.NONE);
 
     Label artifactIdLabel = new Label(container, SWT.NONE);
-    artifactIdLabel.setText("&Artifact Id:");
+    artifactIdLabel.setText(Messages.MavenInstallFileArtifactWizardPage_lblArtifact);
 
     artifactIdCombo = new Combo(container, SWT.NONE);
-    artifactIdCombo.setData("name", "artifactIdCombo");
+    artifactIdCombo.setData("name", "artifactIdCombo"); //$NON-NLS-1$ //$NON-NLS-2$
     artifactIdCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
     artifactIdCombo.addModifyListener(modifyingListener);
     new Label(container, SWT.NONE);
 
     Label versionLabel = new Label(container, SWT.NONE);
-    versionLabel.setText("&Version:");
+    versionLabel.setText(Messages.MavenInstallFileArtifactWizardPage_lblVersion);
 
     versionCombo = new Combo(container, SWT.NONE);
-    versionCombo.setData("name", "versionCombo");
+    versionCombo.setData("name", "versionCombo"); //$NON-NLS-1$ //$NON-NLS-2$
     versionCombo.setText(MavenArtifactComponent.DEFAULT_VERSION);
     GridData versionComboData = new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1);
     versionComboData.widthHint = 150;
@@ -186,10 +188,10 @@ public class MavenInstallFileArtifactWizardPage extends WizardPage {
     versionCombo.addModifyListener(modifyingListener);
 
     Label packagingLabel = new Label(container, SWT.NONE);
-    packagingLabel.setText("&Packaging:");
+    packagingLabel.setText(Messages.MavenInstallFileArtifactWizardPage_lblPackaging);
 
     packagingCombo = new Combo(container, SWT.NONE);
-    packagingCombo.setData("name", "packagingCombo");
+    packagingCombo.setData("name", "packagingCombo"); //$NON-NLS-1$ //$NON-NLS-2$
     packagingCombo.setText(MavenArtifactComponent.DEFAULT_PACKAGING);
     packagingCombo.setItems(MavenArtifactComponent.PACKAGING_OPTIONS);
     GridData packagingComboData = new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1);
@@ -198,11 +200,11 @@ public class MavenInstallFileArtifactWizardPage extends WizardPage {
     packagingCombo.addModifyListener(modifyingListener);
     
     Label classifierLabel = new Label(container, SWT.NONE);
-    classifierLabel.setText("&Classifier:");
+    classifierLabel.setText(Messages.MavenInstallFileArtifactWizardPage_lblClassifier);
     
     classifierCombo = new Combo(container, SWT.NONE);
-    classifierCombo.setData("name", "classifierText");
-    classifierCombo.setItems(new String[] {"sources", "javadoc"});
+    classifierCombo.setData("name", "classifierText"); //$NON-NLS-1$ //$NON-NLS-2$
+    classifierCombo.setItems(new String[] {"sources", "javadoc"}); //$NON-NLS-1$ //$NON-NLS-2$
     GridData classifierTextData = new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1);
     classifierTextData.widthHint = 150;
     classifierCombo.setLayoutData(classifierTextData);
@@ -229,18 +231,18 @@ public class MavenInstallFileArtifactWizardPage extends WizardPage {
       return;
     }
 
-    if(fileName.endsWith(".jar") || fileName.endsWith(".war") || fileName.endsWith(".ear")) {
+    if(fileName.endsWith(".jar") || fileName.endsWith(".war") || fileName.endsWith(".ear")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
       packagingCombo.setText(fileName.substring(fileName.length()-3));
     }
 
     int n = fileName.lastIndexOf('.');
     if(n>-1) {
-      String pomFileName = fileName.substring(0, n) + ".pom";
+      String pomFileName = fileName.substring(0, n) + ".pom"; //$NON-NLS-1$
       if(new File(pomFileName).exists()) {
         pomFileNameText.setText(pomFileName);
       }
     } else {
-      pomFileNameText.setText("");
+      pomFileNameText.setText(""); //$NON-NLS-1$
     }
     
     MavenPlugin plugin = MavenPlugin.getDefault();
@@ -254,9 +256,9 @@ public class MavenInstallFileArtifactWizardPage extends WizardPage {
           classifierCombo.setText(iaf.classifier);
         }
         
-        String name = iaf.group + ":" + iaf.artifact + "-" + iaf.version //
-            + (iaf.classifier == null ? "" : iaf.classifier);
-        setMessage("Selected artifact corresponds to " + name, WARNING);
+        String name = iaf.group + ":" + iaf.artifact + "-" + iaf.version // //$NON-NLS-1$ //$NON-NLS-2$
+            + (iaf.classifier == null ? "" : iaf.classifier); //$NON-NLS-1$
+        setMessage(NLS.bind(Messages.MavenInstallFileArtifactWizardPage_message, name), WARNING);
         return;
       }
     } catch(CoreException ex) {
@@ -264,7 +266,7 @@ public class MavenInstallFileArtifactWizardPage extends WizardPage {
     }
 
     if(n>-1) {
-      String pomFileName = fileName.substring(0, n) + ".pom";
+      String pomFileName = fileName.substring(0, n) + ".pom"; //$NON-NLS-1$
       if(new File(pomFileName).exists()) {
         pomFileNameText.setText(pomFileName);
         
@@ -300,41 +302,41 @@ public class MavenInstallFileArtifactWizardPage extends WizardPage {
   void pageChanged() {
     String artifactFileName = getArtifactFileName();
     if(artifactFileName.length() == 0) {
-      updateStatus("Artifact file name must be specified");
+      updateStatus(Messages.MavenInstallFileArtifactWizardPage_error_no_name);
       return;
     }
 
     File file = new File(artifactFileName);
     if(!file.exists() || !file.isFile()) {
-      updateStatus("Artifact file does not exist");
+      updateStatus(Messages.MavenInstallFileArtifactWizardPage_error_missing);
       return;
     }
     
     String pomFileName = getPomFileName();
     if(pomFileName.length()>0) {
       if(!new File(pomFileName).exists()) {
-        updateStatus("POM file does not exist");
+        updateStatus(Messages.MavenInstallFileArtifactWizardPage_error_missingpom);
         return;
       }
     }
 
     if(getGroupId().length() == 0) {
-      updateStatus("Group Id must be specified");
+      updateStatus(Messages.MavenInstallFileArtifactWizardPage_error_groupid);
       return;
     }
 
     if(getArtifactId().length() == 0) {
-      updateStatus("Artifact Id must be specified");
+      updateStatus(Messages.MavenInstallFileArtifactWizardPage_error_artifactid);
       return;
     }
 
     if(getVersion().length() == 0) {
-      updateStatus("Version must be specified");
+      updateStatus(Messages.MavenInstallFileArtifactWizardPage_error_version);
       return;
     }
 
     if(getPackaging().length() == 0) {
-      updateStatus("Packaging must be specified");
+      updateStatus(Messages.MavenInstallFileArtifactWizardPage_error_packaging);
       return;
     }
 

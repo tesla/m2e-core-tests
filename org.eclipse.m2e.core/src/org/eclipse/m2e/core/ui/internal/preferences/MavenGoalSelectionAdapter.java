@@ -35,7 +35,7 @@ public class MavenGoalSelectionAdapter extends SelectionAdapter {
       MavenGoalSelectionDialog dialog = new MavenGoalSelectionDialog(shell);
       int rc = dialog.open();
       if(rc == IDialogConstants.OK_ID) {
-        text.insert("");  // clear selected text
+        text.insert("");  // clear selected text //$NON-NLS-1$
         
         String txt = text.getText();
         int len = txt.length();
@@ -46,7 +46,7 @@ public class MavenGoalSelectionAdapter extends SelectionAdapter {
           sb.append(' ');
         }
 
-        String sep = "";
+        String sep = ""; //$NON-NLS-1$
         Object[] o = dialog.getResult();
         for(int i = 0; i < o.length; i++ ) {
           if(o[i] instanceof MavenGoalSelectionDialog.Entry) {
@@ -56,7 +56,7 @@ public class MavenGoalSelectionAdapter extends SelectionAdapter {
               sb.append(sep).append(((MavenGoalSelectionDialog.Entry) o[i]).getName());
             }
           }
-          sep = " ";
+          sep = " "; //$NON-NLS-1$
         }
         
         if(pos < len && txt.charAt(pos) != ' ') {

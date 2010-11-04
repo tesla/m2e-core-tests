@@ -18,8 +18,8 @@ import org.eclipse.swt.widgets.Shell;
  * @author Eugene Kuleshov
  */
 public abstract class ScmHandlerUi implements IExecutableExtension {
-  public static final String ATTR_TYPE = "type";
-  public static final String ATTR_CLASS = "class";
+  public static final String ATTR_TYPE = "type"; //$NON-NLS-1$
+  public static final String ATTR_CLASS = "class"; //$NON-NLS-1$
   
   private String type;
   
