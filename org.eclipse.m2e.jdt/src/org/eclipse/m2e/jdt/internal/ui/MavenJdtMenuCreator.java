@@ -78,7 +78,7 @@ public class MavenJdtMenuCreator extends AbstractMavenMenuCreator {
 
       mgr.appendToGroup(OPEN, getAction(new OpenPomAction(), OpenPomAction.ID, Messages.MavenJdtMenuCreator_action_openPom));
       mgr.appendToGroup(OPEN, getAction(new OpenUrlAction(OpenUrlAction.ID_PROJECT), //
-          OpenUrlAction.ID_PROJECT, Messages.MavenJdtMenuCreator_action_openProject, "icons/web.gif")); //$NON-NLS-2$
+          OpenUrlAction.ID_PROJECT, Messages.MavenJdtMenuCreator_action_openProject));
       mgr.appendToGroup(OPEN, getAction(new OpenUrlAction(OpenUrlAction.ID_ISSUES), //
           OpenUrlAction.ID_ISSUES, Messages.MavenJdtMenuCreator_action_open_issue));
       mgr.appendToGroup(OPEN, getAction(new OpenUrlAction(OpenUrlAction.ID_SCM), // 

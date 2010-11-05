@@ -181,7 +181,7 @@
          <action id="org.eclipse.m2e.ui.openJavaDocDependency"
                class="org.eclipse.m2e.jdt.internal.actions.OpenJavaDocAction"
                label="%action.javadoc4.label"
-               enablesFor="1" icon="icons/javadoc.gif"/>
+               enablesFor="1"/>
       </objectContribution>
    </extension>
 

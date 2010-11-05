@@ -55,7 +55,7 @@ public class DefaultMavenMenuCreator extends AbstractMavenMenuCreator {
 
       mgr.prependToGroup(OPEN, new Separator());
       mgr.appendToGroup(OPEN, getAction(new OpenUrlAction(OpenUrlAction.ID_PROJECT), //
-          OpenUrlAction.ID_PROJECT, org.eclipse.m2e.core.internal.Messages.DefaultMavenMenuCreator_action_project_page, "icons/web.gif")); //$NON-NLS-2$
+          OpenUrlAction.ID_PROJECT, org.eclipse.m2e.core.internal.Messages.DefaultMavenMenuCreator_action_project_page));
       mgr.appendToGroup(OPEN, getAction(new OpenUrlAction(OpenUrlAction.ID_ISSUES), //
           OpenUrlAction.ID_ISSUES, org.eclipse.m2e.core.internal.Messages.DefaultMavenMenuCreator_action_issues));
       mgr.appendToGroup(OPEN, getAction(new OpenUrlAction(OpenUrlAction.ID_SCM), //
@@ -89,7 +89,7 @@ public class DefaultMavenMenuCreator extends AbstractMavenMenuCreator {
       mgr.prependToGroup(OPEN, new Separator());
       mgr.appendToGroup(OPEN, getAction(new OpenPomAction(), OpenPomAction.ID, org.eclipse.m2e.core.internal.Messages.DefaultMavenMenuCreator_action_open_pom));
       mgr.appendToGroup(OPEN, getAction(new OpenUrlAction(OpenUrlAction.ID_PROJECT), //
-          OpenUrlAction.ID_PROJECT, org.eclipse.m2e.core.internal.Messages.DefaultMavenMenuCreator_action_project, "icons/web.gif")); //$NON-NLS-2$
+          OpenUrlAction.ID_PROJECT, org.eclipse.m2e.core.internal.Messages.DefaultMavenMenuCreator_action_project));
       mgr.appendToGroup(OPEN, getAction(new OpenUrlAction(OpenUrlAction.ID_ISSUES), OpenUrlAction.ID_ISSUES,
           org.eclipse.m2e.core.internal.Messages.DefaultMavenMenuCreator_action_issues));
       mgr.appendToGroup(OPEN, getAction(new OpenUrlAction(OpenUrlAction.ID_SCM), OpenUrlAction.ID_SCM,
