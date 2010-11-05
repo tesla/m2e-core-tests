@@ -129,8 +129,7 @@
                  label="%m2.popup.project.label"
                  style="pulldown"
                  menubarPath="additions"
-                 enablesFor="+"
-                 icon="icons/m2.gif"/>
+                 enablesFor="+"/>
          <visibility>
            <and>
              <objectState name="open" value="true"/>
@@ -147,8 +146,7 @@
                  label="%m2.popup.project.label"
                  style="pulldown"
                  menubarPath="additions"
-                 enablesFor="+"
-                 icon="icons/m2.gif"/>
+                 enablesFor="+"/>
          <visibility>
            <and>
              <objectState name="open" value="true"/>
@@ -167,8 +165,7 @@
                  label="%m2.popup.project.label"
                  style="pulldown"
                  menubarPath="additions"
-                 enablesFor="1"
-                 icon="icons/m2.gif"/>
+                 enablesFor="1"/>
          <visibility>
             <objectState name="name" value="pom.xml"/>
          </visibility>
@@ -181,8 +178,7 @@
                  label="%m2.popup.project.label"
                  style="pulldown"
                  menubarPath="additions"
-                 enablesFor="+"
-                 icon="icons/m2.gif"/>
+                 enablesFor="+"/>
       </objectContribution>
 
       <objectContribution id="org.eclipse.m2e.core.scmUrl"
