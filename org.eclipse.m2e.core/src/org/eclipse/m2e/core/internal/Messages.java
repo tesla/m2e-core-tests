@@ -481,6 +481,10 @@ public class Messages extends NLS {
 
   public static String MavenPomSelectionComponent_btnTests;
 
+  public static String MavenPomSelectionComponent_detail1;
+
+  public static String MavenPomSelectionComponent_details2;
+
   public static String MavenPomSelectionComponent_error;
 
   public static String MavenPomSelectionComponent_lblResults;

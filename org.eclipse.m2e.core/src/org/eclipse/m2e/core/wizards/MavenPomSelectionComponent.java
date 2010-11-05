@@ -13,6 +13,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.ibm.icu.text.DateFormat;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -215,7 +217,8 @@ public class MavenPomSelectionComponent extends Composite {
             IndexedArtifactFile f = getSelectedIndexedArtifactFile(selection.getFirstElement());
             // int severity = artifactKeys.contains(f.group + ":" + f.artifact) ? IStatus.ERROR : IStatus.OK;
             int severity = IStatus.OK;
-            setStatus(severity, f.fname + " " + f.size + " " + f.date); //$NON-NLS-1$ //$NON-NLS-2$
+            String date = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(f .date); 
+            setStatus(severity, NLS.bind(Messages.MavenPomSelectionComponent_detail1, f.fname, (f.size != -1 ? NLS.bind(Messages.MavenPomSelectionComponent_details2, date, f.size) : date)));  
           } else {
             setStatus(IStatus.OK, NLS.bind(Messages.MavenPomSelectionComponent_selected, selection.size()));
           }
@@ -416,9 +419,8 @@ public class MavenPomSelectionComponent extends Composite {
         return name;
       } else if(element instanceof IndexedArtifactFile) {
         IndexedArtifactFile f = (IndexedArtifactFile) element;
-        long size_k = (f.size + 512)/1024;
-        String displayName = getRepoDisplayName(f.repository);
-        return f.version + " - " + f.fname + " - " + size_k + "K - " + f.date + " [" + displayName + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-4$ //$NON-NLS-5$
+//        String displayName = getRepoDisplayName(f.repository);
+        return f.version + " [" + f.type + (f.classifier != null ? ", " + f.classifier : "") +  "]"; //unless there is something reasonably short " [" + displayName + "]";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
       }
       return super.getText(element);
     }
