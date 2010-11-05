@@ -296,16 +296,18 @@ public class MavenPomSelectionComponent extends Composite {
         IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
         searchJob = new SearchJob(queryType, indexManager);
       } else {
-        if(searchJob.isWaiting()){
-          searchJob.cancel();
+        if (!searchJob.cancel()) {
+          //for already running ones, just create new instance so that the previous one can piecefully die
+          //without preventing the new one from completing first
           IndexManager indexManager = MavenPlugin.getDefault().getIndexManager();
           searchJob = new SearchJob(queryType, indexManager);
         }
       }
       searchJob.setQuery(query.toLowerCase());
-      searchJob.setWaiting();
-      if(!searchJob.isRunning()) {
-        searchJob.schedule(delay ? LONG_DELAY : SHORT_DELAY);
+      searchJob.schedule(delay ? LONG_DELAY : SHORT_DELAY);
+    } else {
+      if (searchJob != null) {
+        searchJob.cancel();
       }
     }
   }
@@ -322,33 +324,23 @@ public class MavenPomSelectionComponent extends Composite {
 
     private String field;
 
-    boolean isRunning = false;
-    
-    boolean isWaiting = false;
+    private volatile boolean stop = false;
 
     public SearchJob(String field, IndexManager indexManager) {
       super(Messages.MavenPomSelectionComponent_searchJob);
       this.field = field;
       this.indexManager = indexManager;
-      this.isWaiting = true;
-    }
-
-    public boolean isRunning() {
-      return isRunning;
-    }
-    
-    public boolean isWaiting(){
-      return this.isWaiting;
     }
 
     public void setQuery(String query) {
       this.query = query;
     }
     
-    public void setWaiting(){
-      this.isWaiting = true;
+    public boolean shouldRun() {
+      stop = false;
+      return super.shouldRun();
     }
-    
+
     public int getClassifier(){
       int classifier = IIndex.SEARCH_JARS;
       if(MavenPlugin.getDefault().getPreferenceStore().getBoolean(P_SEARCH_INCLUDE_JAVADOC)){
@@ -364,16 +356,12 @@ public class MavenPomSelectionComponent extends Composite {
     }
     
     protected IStatus run(IProgressMonitor monitor) {
-      isRunning = true;
-      isWaiting = false;
-      
       int classifier = showClassifiers() ? getClassifier() : IIndex.SEARCH_ALL;
       if(searchResultViewer == null || searchResultViewer.getControl() == null || searchResultViewer.getControl().isDisposed()){
         return Status.CANCEL_STATUS;
       }
-      while(!monitor.isCanceled() && query != null) {
+      if (query != null) {
         String activeQuery = query;
-        query = null;
         try {
           setResult(IStatus.OK, NLS.bind(Messages.MavenPomSelectionComponent_searching , activeQuery.toLowerCase()), null);
           Map<String, IndexedArtifact> res = indexManager.search(activeQuery, field, classifier);
@@ -390,11 +378,15 @@ public class MavenPomSelectionComponent extends Composite {
           setResult(IStatus.ERROR, NLS.bind(Messages.MavenPomSelectionComponent_error, ex.getMessage()), Collections.<String, IndexedArtifact>emptyMap());
         }
       } 
-      isRunning = false;
       return Status.OK_STATUS;
     }
 
+    protected void canceling() {
+      stop  = true;
+    }
+
     private void setResult(final int severity, final String message, final Map<String, IndexedArtifact> result) {
+      if (stop) return;
       Display.getDefault().syncExec(new Runnable() {
         public void run() {
           setStatus(severity, message);
