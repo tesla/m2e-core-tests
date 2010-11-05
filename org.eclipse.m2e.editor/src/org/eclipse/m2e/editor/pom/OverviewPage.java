@@ -61,8 +61,11 @@ import org.eclipse.m2e.model.edit.pom.PomFactory;
 import org.eclipse.m2e.model.edit.pom.PomPackage;
 import org.eclipse.m2e.model.edit.pom.PropertyElement;
 import org.eclipse.m2e.model.edit.pom.Scm;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -129,6 +132,7 @@ public class OverviewPage extends MavenPomEditorPage {
 
   private Action newModuleProjectAction;
   private Action parentSelectAction;
+  private Action parentOpenAction;
 
   public OverviewPage(MavenPomEditor pomEditor) {
     super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.overview", Messages.OverviewPage_title); //$NON-NLS-1$
@@ -293,13 +297,30 @@ public class OverviewPage extends MavenPomEditorPage {
               //if the version is the same, just remove it in child.
               artifactVersionText.setText(""); //$NON-NLS-1$
             }
+            parentSection.setExpanded(true);
           }
         }
       }
     };
     parentSelectAction.setEnabled(false);
+    
+    parentOpenAction = new Action(Messages.OverviewPage_job_open, MavenEditorImages.PARENT_POM) {
+      public void run() {
+        final String groupId = parentGroupIdText.getText();
+        final String artifactId = parentArtifactIdText.getText();
+        final String version = parentVersionText.getText();
+        new Job(NLS.bind(Messages.OverviewPage_job, new Object[] { groupId, artifactId, version})) {
+          protected IStatus run(IProgressMonitor monitor) {
+            OpenPomAction.openEditor(groupId, artifactId, version, monitor);
+            return Status.OK_STATUS;
+          }
+        }.schedule();
+      }
+    };
+    parentOpenAction.setEnabled(false);
 
     ToolBarManager toolBarManager = new ToolBarManager(SWT.FLAT);
+    toolBarManager.add(parentOpenAction);
     toolBarManager.add(parentSelectAction);
     
     Composite toolbarComposite = toolkit.createComposite(parentSection);
@@ -329,20 +350,7 @@ public class OverviewPage extends MavenPomEditorPage {
     parentGroupIdText.setData("name", "parentGroupId"); //$NON-NLS-1$ //$NON-NLS-2$
     FormUtils.addGroupIdProposal(getProject(), parentGroupIdText, Packaging.POM);
     
-    Hyperlink parentArtifactIdLabel = toolkit.createHyperlink(parentComposite, Messages.OverviewPage_lblArtifactId, SWT.NONE);
-    parentArtifactIdLabel.addHyperlinkListener(new HyperlinkAdapter() {
-      public void linkActivated(HyperlinkEvent e) {
-        final String groupId = parentGroupIdText.getText();
-        final String artifactId = parentArtifactIdText.getText();
-        final String version = parentVersionText.getText();
-        new Job("Opening " + groupId + ":" + artifactId + ":" + version) {
-          protected IStatus run(IProgressMonitor monitor) {
-            OpenPomAction.openEditor(groupId, artifactId, version, monitor);
-            return Status.OK_STATUS;
-          }
-        }.schedule();
-      }
-    });
+    final Label parentArtifactIdLabel = toolkit.createLabel(parentComposite, Messages.OverviewPage_lblArtifactId, SWT.NONE);
   
     parentArtifactIdText = toolkit.createText(parentComposite, null, SWT.NONE);
     GridData gd_parentArtifactIdText = new GridData(SWT.FILL, SWT.CENTER, true, false);
@@ -361,7 +369,24 @@ public class OverviewPage extends MavenPomEditorPage {
     parentVersionText.setLayoutData(parentVersionTextData);
     parentVersionText.setData("name", "parentVersion"); //$NON-NLS-1$ //$NON-NLS-2$
     FormUtils.addVersionProposal(getProject(), parentGroupIdText, parentArtifactIdText, parentVersionText, Packaging.POM);
-  
+    
+
+    ModifyListener ml = new ModifyListener() {
+      public void modifyText(ModifyEvent e) {
+          String text1 =  parentArtifactIdText.getText().trim(); 
+          String text2 =  parentGroupIdText.getText().trim(); 
+          String text3 =  parentVersionText.getText().trim();
+          if (text1.length() > 0 && text2.length() > 0 && text3.length() > 0) {
+            parentOpenAction.setEnabled(true);
+          } else {
+            parentOpenAction.setEnabled(false);
+          }
+      }
+    };
+    parentArtifactIdText.addModifyListener(ml);
+    parentVersionText.addModifyListener(ml);
+    parentGroupIdText.addModifyListener(ml);
+    
 //    Button parentSelectButton = toolkit.createButton(parentComposite, "Select...", SWT.NONE);
 //    parentSelectButton.addSelectionListener(new SelectionAdapter() {
 //      public void widgetSelected(SelectionEvent e) {
@@ -444,7 +469,7 @@ public class OverviewPage extends MavenPomEditorPage {
     
     modulesEditor.setAddListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
-        createNewModule("?");
+        createNewModule("?"); //$NON-NLS-1$
       }
     });
       
@@ -831,7 +856,7 @@ public class OverviewPage extends MavenPomEditorPage {
     
     parentSection.setExpanded(parent != null //
         && (!isEmpty(parent.getGroupId()) || !isEmpty(parent.getArtifactId()) //
-            || !isEmpty(parent.getVersion()) || !isEmpty(parent.getRelativePath())));
+            || !isEmpty(parent.getVersion())));
 
     organizationSection.setExpanded(organization != null
         && (!isEmpty(organization.getName()) || !isEmpty(organization.getUrl())));
@@ -867,7 +892,7 @@ public class OverviewPage extends MavenPomEditorPage {
         setText(artifactGroupIdText, model.getGroupId());
         setText(artifactIdText, model.getArtifactId());
         setText(artifactVersionText, model.getVersion());
-        setText(artifactPackagingCombo, "".equals(nvl(model.getPackaging())) ? "jar" : nvl(model.getPackaging()));
+        setText(artifactPackagingCombo, "".equals(nvl(model.getPackaging())) ? "jar" : nvl(model.getPackaging())); //$NON-NLS-1$ //$NON-NLS-2$
         
         setText(projectNameText, model.getName());
         setText(projectDescriptionText, model.getDescription());
@@ -912,6 +937,7 @@ public class OverviewPage extends MavenPomEditorPage {
 //    parentVersionText.setEditable(!isReadOnly());
 //    parentRelativePathText.setEditable(!isReadOnly());
     parentSelectAction.setEnabled(!isReadOnly());
+    parentOpenAction.setEnabled(parent != null);
     
     ValueProvider<Parent> parentProvider = new ValueProvider.ParentValueProvider<Parent>(parentGroupIdText,
         parentArtifactIdText, parentVersionText, parentRelativePathText) {

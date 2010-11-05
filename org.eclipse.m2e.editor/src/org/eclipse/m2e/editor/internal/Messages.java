@@ -331,6 +331,10 @@ public class Messages extends NLS {
 
   public static String OverviewPage_form;
 
+  public static String OverviewPage_job;
+
+  public static String OverviewPage_job_open;
+
   public static String OverviewPage_lblArtifactId;
 
   public static String OverviewPage_lblConnection;
