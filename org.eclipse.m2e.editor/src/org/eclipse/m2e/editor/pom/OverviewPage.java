@@ -64,6 +64,7 @@ import org.eclipse.m2e.model.edit.pom.Scm;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -133,6 +134,9 @@ public class OverviewPage extends MavenPomEditorPage {
   private Action newModuleProjectAction;
   private Action parentSelectAction;
   private Action parentOpenAction;
+  private StackLayout modulesStack;
+  private Composite noModules;
+  private Composite modulesSectionComposite;
 
   public OverviewPage(MavenPomEditor pomEditor) {
     super(pomEditor, IMavenConstants.PLUGIN_ID + ".pom.overview", Messages.OverviewPage_title); //$NON-NLS-1$
@@ -435,11 +439,24 @@ public class OverviewPage extends MavenPomEditorPage {
     modulesSection.setText(Messages.OverviewPage_section_modules);
     modulesSection.setData("name", "modulesSection"); //$NON-NLS-1$ //$NON-NLS-2$
 
-    modulesEditor = new ListEditorComposite<String>(modulesSection, SWT.NONE);
+    modulesSectionComposite = toolkit.createComposite(modulesSection);
+    modulesStack = new StackLayout();
+    modulesSectionComposite.setLayout(modulesStack);
+    modulesSection.setClient(modulesSectionComposite);
+    
+    noModules = toolkit.createComposite(modulesSectionComposite);
+    noModules.setLayout(new GridLayout(1, false));
+    
+    Label label = toolkit.createLabel(noModules, Messages.OverviewPage_msg_not_pom_packaging);
+    GridData gd_label = new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1);
+    gd_label.verticalIndent = 12;
+    gd_label.horizontalIndent = 12;
+    label.setLayoutData(gd_label);
+    
+    modulesEditor = new ListEditorComposite<String>(modulesSectionComposite, SWT.NONE);
     modulesEditor.getViewer().getTable().setData("name", "modulesEditor"); //$NON-NLS-1$ //$NON-NLS-2$
     toolkit.paintBordersFor(modulesEditor);
     toolkit.adapt(modulesEditor);
-    modulesSection.setClient(modulesEditor);
 
     modulesEditor.setContentProvider(new ListEditorContentProvider<String>());
     modulesEditor.setLabelProvider(new ModulesLabelProvider(this));
@@ -893,6 +910,8 @@ public class OverviewPage extends MavenPomEditorPage {
         setText(artifactIdText, model.getArtifactId());
         setText(artifactVersionText, model.getVersion());
         setText(artifactPackagingCombo, "".equals(nvl(model.getPackaging())) ? "jar" : nvl(model.getPackaging())); //$NON-NLS-1$ //$NON-NLS-2$
+        //show/hide modules section when packaging changes..
+        loadModules(model.getModules());
         
         setText(projectNameText, model.getName());
         setText(projectDescriptionText, model.getDescription());
@@ -959,7 +978,16 @@ public class OverviewPage extends MavenPomEditorPage {
   private void loadModules(EList<String> modules) {
     modulesEditor.setInput(modules);
     modulesEditor.setReadOnly(isReadOnly());
-    newModuleProjectAction.setEnabled(!isReadOnly());
+    if ("pom".equals(model.getPackaging()) && modulesStack.topControl != modulesEditor) { //$NON-NLS-1$
+      modulesStack.topControl = modulesEditor;
+      modulesSection.setExpanded(true);
+      newModuleProjectAction.setEnabled(!isReadOnly());
+    } else if (!"pom".equals(model.getPackaging()) && modulesStack.topControl != noModules){ //$NON-NLS-1$
+      newModuleProjectAction.setEnabled(false);
+      modulesStack.topControl = noModules;
+      modulesSection.setExpanded(false);
+    }
+    modulesSectionComposite.layout();
   }
   
   private void loadOrganization(Organization organization) {

@@ -365,6 +365,8 @@ public class Messages extends NLS {
 
   public static String OverviewPage_lblVersion2;
 
+  public static String OverviewPage_msg_not_pom_packaging;
+
   public static String OverviewPage_opening_editors;
 
   public static String OverviewPage_searchDialog_selectParent;
