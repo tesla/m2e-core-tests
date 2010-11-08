@@ -240,6 +240,7 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
         case Notification.SET:
         case Notification.UNSET:
         case Notification.ADD_MANY: //this is for properties (clear/addAll is used for any properties update)
+        case Notification.REMOVE_MANY:  
           if (getManagedForm() != null)
             updateView(notification);
           break;
