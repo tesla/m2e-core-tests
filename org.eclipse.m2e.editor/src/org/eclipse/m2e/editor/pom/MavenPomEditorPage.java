@@ -531,7 +531,13 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
   }
 
   private IMavenProjectFacade findModuleProject(IFile pomFile, String module) {
-    IPath modulePath = pomFile.getParent().getLocation().append(module).append("pom.xml"); //$NON-NLS-1$
+    IPath modulePath = pomFile.getParent().getLocation();
+    if (modulePath == null) return null;
+    modulePath = modulePath.append(module);
+    //it's possible to have the pom file name in the module path..
+    if (!modulePath.lastSegment().endsWith("pom.xml")) { //$NON-NLS-1$
+      modulePath = modulePath.append("pom.xml"); //$NON-NLS-1$
+    }
     MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
     IMavenProjectFacade[] facades = projectManager.getProjects();
     for(int i = 0; i < facades.length; i++ ) {
@@ -545,7 +551,13 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
   public IFile findModuleFile(String moduleName) {
     IFile pomFile = pomEditor.getPomFile();
     if(pomFile!=null) {
-      IPath modulePath = pomFile.getParent().getLocation().append(moduleName).append("pom.xml"); //$NON-NLS-1$
+      IPath modulePath = pomFile.getParent().getLocation();
+      if (modulePath == null) return null;
+      modulePath = modulePath.append(moduleName);
+      //it's possible to have the pom file name in the module path..
+      if (!modulePath.lastSegment().endsWith("pom.xml")) { //$NON-NLS-1$
+        modulePath = modulePath.append("pom.xml"); //$NON-NLS-1$
+      }
       IFile file = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(modulePath);
       return file;
     }
