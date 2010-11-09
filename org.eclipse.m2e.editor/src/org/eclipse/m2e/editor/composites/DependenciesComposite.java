@@ -327,6 +327,9 @@ public class DependenciesComposite extends Composite {
     });
     
     modulesToolBarManager.add(new Action(Messages.DependenciesComposite_action_filter, MavenEditorImages.FILTER) {
+      {
+        setChecked(true);
+      }
       public int getStyle() {
         return AS_CHECK_BOX;
       }
@@ -472,6 +475,9 @@ public class DependenciesComposite extends Composite {
     });
     
     modulesToolBarManager.add(new Action(Messages.DependenciesComposite_action_filter, MavenEditorImages.FILTER) {
+      {
+        setChecked(true);
+      }
       public int getStyle() {
         return AS_CHECK_BOX;
       }
@@ -1144,6 +1150,12 @@ public class DependenciesComposite extends Composite {
         }
       }
     });
+    //we add filter here as the default behaviour is to filter..
+    TableViewer viewer = dependenciesEditor.getViewer();
+    viewer.addFilter(searchFilter);
+    viewer = dependencyManagementEditor.getViewer();
+    viewer.addFilter(searchFilter);
+    
   }
   
   void createExclusion(String groupId, String artifactId) {
