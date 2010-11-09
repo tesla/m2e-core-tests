@@ -62,10 +62,24 @@ public class ListAdapter extends TranslatorAdapter {
 					}
 				} else if (INodeNotifier.REMOVE == eventType
 						&& oldValue instanceof Element) {
+				  IDOMElement el = (IDOMElement)oldValue;
 					if (notifier == node) {
 						// Remove the corresponding object from the model.
 						Object o = getObject((Element) oldValue, false);
-						if (o != null) {
+						if (o instanceof String && o.toString().length() == 0) {
+						  // the removed oldValue has unfortunately no text value in it, so no way to identify the
+						  // remove entry.
+						  // -> just remove all and add the ones that stayed around.
+						  // only after checking that the object to be removed is a string, just to be sure..
+              NodeList lst = node.getChildNodes();
+              list.clear();
+              for (int i = 0; i < lst.getLength(); i++) {
+                Node nd = lst.item(i);
+                if (nd instanceof Element) {
+                  list.add(getElementText((Element)nd));
+                }
+              }
+						} else if (o != null) {
 							list.remove(o);
 						}
 						// TODO: What to do here? We don't know which model

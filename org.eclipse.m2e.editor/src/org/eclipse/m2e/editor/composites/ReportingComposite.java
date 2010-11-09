@@ -278,6 +278,9 @@ public class ReportingComposite extends Composite {
     });
     
     toolBarManager.add(new Action(Messages.ReportingComposite_action_filter, MavenEditorImages.FILTER) {
+      {
+        setChecked(true);
+      }
       public int getStyle() {
         return AS_CHECK_BOX;
       }
@@ -827,6 +830,10 @@ public class ReportingComposite extends Composite {
         editor.refresh();
       }
     });
+    //we add filter here as the default behaviour is to filter..
+    TableViewer viewer = reportPluginsEditor.getViewer();
+    viewer.addFilter(searchFilter);
+    
   }
   
   final class ReportPluginsLabelProvider extends LabelProvider {

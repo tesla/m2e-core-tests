@@ -15,10 +15,17 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Properties;
 
+import org.apache.maven.model.Plugin;
+import org.apache.maven.model.PluginManagement;
 import org.apache.maven.plugin.descriptor.MojoDescriptor;
 import org.apache.maven.plugin.descriptor.Parameter;
 import org.apache.maven.plugin.descriptor.PluginDescriptor;
+import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.interpolation.InterpolationException;
+import org.codehaus.plexus.interpolation.PropertiesBasedValueSource;
+import org.codehaus.plexus.interpolation.RegexBasedInterpolator;
 import org.codehaus.plexus.util.StringUtils;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -30,7 +37,9 @@ import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.persistence.TemplateStore;
 import org.eclipse.osgi.util.NLS;
 
+import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.MavenLogger;
+import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.editor.xml.internal.Messages;
 import org.eclipse.m2e.editor.xml.search.ArtifactInfo;
 import org.eclipse.m2e.editor.xml.search.Packaging;
@@ -79,19 +88,14 @@ public enum PomTemplateContext {
           || "reportSet".equals(node.getParentNode().getNodeName())) { //$NON-NLS-1$
         node = node.getParentNode().getParentNode();
       }
-//      System.out.println("prefix=" + prefix + "-");
       String groupId = getGroupId(node);
       if(groupId==null) {
         groupId = "org.apache.maven.plugins";  // TODO support other default groups //$NON-NLS-1$
       }
       String artifactId = getArtifactId(node);
-      String version = getVersion(node);
-      if(version==null) {
-        Collection<String> versions = getSearchEngine(project).findVersions(groupId, artifactId, "", Packaging.PLUGIN); //$NON-NLS-1$
-        if(versions.isEmpty()) {
-          return;
-        }
-        version = versions.iterator().next();
+      String version = extractPluginVersion(project, node, groupId, artifactId);
+      if (version == null) {
+        return;
       }
       
       PluginDescriptor descriptor = PomTemplateContextUtil.INSTANCE.getPluginDescriptor(groupId, artifactId, version);
@@ -299,13 +303,9 @@ public enum PomTemplateContext {
         groupId = "org.apache.maven.plugins"; //$NON-NLS-1$
       }
       String artifactId = getArtifactId(node);
-      String version = getVersion(node);
+      String version = extractPluginVersion(project, node, groupId, artifactId);
       if(version==null) {
-        Collection<String> versions = getSearchEngine(project).findVersions(groupId, artifactId, "", Packaging.PLUGIN); //$NON-NLS-1$
-        if(versions.isEmpty()) {
-          return;
-        }
-        version = versions.iterator().next();
+        return;
       }
       
       PluginDescriptor descriptor = PomTemplateContextUtil.INSTANCE.getPluginDescriptor(groupId, artifactId, version);
@@ -482,6 +482,78 @@ public enum PomTemplateContext {
   
   protected String getGroupId(Node currentNode) {
     return getSiblingTextValue(currentNode, "groupId"); //$NON-NLS-1$
+  }
+
+  private static String extractPluginVersion(IProject project, Node node, String groupId, String artifactId)
+      throws CoreException {
+    String version = getVersion(node);
+    //interpolate the version found to get rid of expressions 
+    version = simpleInterpolate(project, version);
+    
+    if (version==null) {
+      version = searchPM(project, groupId, artifactId);
+      if (version == null) {
+      
+        Collection<String> versions = getSearchEngine(project).findVersions(groupId, artifactId, "", Packaging.PLUGIN); //$NON-NLS-1$
+        if(versions.isEmpty()) {
+          return null;
+        }
+        version = versions.iterator().next();
+      }
+    }
+    return version;
+  }
+
+  private static String simpleInterpolate(IProject project, String version) {
+    if (version != null && version.contains("${")) {
+      //when expression is in the version but no project instance around
+      // just give up.
+      if(project == null) {
+        return null;
+      }
+      IMavenProjectFacade mvnproject = MavenPlugin.getDefault().getMavenProjectManager().getProject(project);
+      if (mvnproject != null) {
+        MavenProject prj = mvnproject.getMavenProject();
+        if (prj != null) {
+          Properties props = prj.getProperties();
+          if (props != null) {
+            RegexBasedInterpolator inter = new RegexBasedInterpolator();
+            inter.addValueSource(new PropertiesBasedValueSource(props));
+            try {
+              version = inter.interpolate(version);
+            } catch(InterpolationException e) {
+              version = null;
+            }
+          }
+        }
+      }
+    }
+    return version;
+  }
+  
+  private static String searchPM(IProject project, String groupId, String artifactId) {
+    if (project == null) {
+      return null;
+    }
+    String version = null;
+    //see if we can find the plugin in plugin management of resolved project.
+    IMavenProjectFacade mvnproject = MavenPlugin.getDefault().getMavenProjectManager().getProject(project);
+    if(mvnproject != null) {
+      String id = Plugin.constructKey(groupId, artifactId);
+      MavenProject prj = mvnproject.getMavenProject();
+      if(prj != null) {
+        PluginManagement pm = prj.getPluginManagement();
+        if(pm != null) {
+          for(Plugin pl : pm.getPlugins()) {
+            if(id.equals(pl.getKey())) {
+              version = pl.getVersion();
+              break;
+            }
+          }
+        }
+      }
+    }
+    return version;
   }
 
   protected static String getArtifactId(Node currentNode) {

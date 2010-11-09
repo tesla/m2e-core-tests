@@ -83,6 +83,7 @@ import org.eclipse.m2e.model.edit.pom.PluginExecution;
 import org.eclipse.m2e.model.edit.pom.PluginManagement;
 import org.eclipse.m2e.model.edit.pom.PomFactory;
 import org.eclipse.m2e.model.edit.pom.PomPackage;
+import org.eclipse.m2e.model.edit.pom.ReportPlugin;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.SashForm;
@@ -296,6 +297,9 @@ public class PluginsComposite extends Composite{
     });
     
     toolBarManager.add(new Action(Messages.PluginsComposite_action_Filter, MavenEditorImages.FILTER) {
+      {
+        setChecked(true);
+      }
       public int getStyle() {
         return AS_CHECK_BOX;
       }
@@ -410,6 +414,9 @@ public class PluginsComposite extends Composite{
     });
     
     toolBarManager.add(new Action(Messages.PluginsComposite_action_Filter, MavenEditorImages.FILTER) {
+      {
+        setChecked(true);
+      }
       public int getStyle() {
         return AS_CHECK_BOX;
       }
@@ -1211,6 +1218,12 @@ public class PluginsComposite extends Composite{
         editor.refresh();
       }
     });
+    //we add filter here as the default behaviour is to filter..
+    TableViewer viewer = pluginsEditor.getViewer();
+    viewer.addFilter(searchFilter);
+    viewer = pluginManagementEditor.getViewer();
+    viewer.addFilter(searchFilter);
+    
   }
 
   
@@ -1225,6 +1238,10 @@ public class PluginsComposite extends Composite{
     public boolean select(Viewer viewer, Object parentElement, Object element) {
       if(element instanceof Plugin) {
         Plugin p = (Plugin) element;
+        return searchMatcher.isMatchingArtifact(p.getGroupId(), p.getArtifactId());
+      }
+      if(element instanceof ReportPlugin) {
+        ReportPlugin p = (ReportPlugin) element;
         return searchMatcher.isMatchingArtifact(p.getGroupId(), p.getArtifactId());
       }
       return false;
