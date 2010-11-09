@@ -1097,7 +1097,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
             request.setOffline(true);
             indexUpdater.fetchAndUpdateIndex(request);
 
-            // 2. copy cached/shared (lets play dirty here!)
+            // 2. copy cached/shared (this is not very elegant, oh well)
             getIndexer().removeIndexingContext(context, true); // nuke workspace index files
             getIndexer().removeIndexingContext(cacheCtx, false); // keep the cache!
             FileUtils.cleanDirectory(context.getIndexDirectoryFile());
