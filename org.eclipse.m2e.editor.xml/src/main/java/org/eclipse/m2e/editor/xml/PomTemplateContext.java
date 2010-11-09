@@ -506,6 +506,11 @@ public enum PomTemplateContext {
 
   private static String simpleInterpolate(IProject project, String version) {
     if (version != null && version.contains("${")) {
+      //when expression is in the version but no project instance around
+      // just give up.
+      if(project == null) {
+        return null;
+      }
       IMavenProjectFacade mvnproject = MavenPlugin.getDefault().getMavenProjectManager().getProject(project);
       if (mvnproject != null) {
         MavenProject prj = mvnproject.getMavenProject();
