@@ -144,8 +144,18 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
         }
         path = path.removeFirstSegments(1);
       }
-    IProject prj = stack.empty() ? null : stack.pop().getProject();
-    return prj;
+    IResource res = stack.empty() ? null : stack.pop();
+    if (res != null) {
+      IProject prj = res.getProject();
+    //the project returned is in a way unrelated to nested child poms that don't have an opened project,
+    //in that case we pass along a wrong parent/aggregator
+      if (res.getProjectRelativePath().segmentCount() != 1) { 
+        //if the project were the pom's project, the relative path would be just "pom.xml", if it's not just throw it out of the window..
+        prj = null;
+      }
+      return prj;
+    }
+    return null;
   }
   
   private ICompletionProposal[] getTemplateProposals(IProject project, ITextViewer viewer, int offset, String contextTypeId, Node currentNode, String prefix) {
