@@ -13,6 +13,8 @@ import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
@@ -169,6 +171,33 @@ public enum PomTemplateContext {
         String contextTypeId = getContextTypeId();
         for(String version : getSearchEngine(project).findVersions(groupId, artifactId, prefix, getPackaging(node))) {
           add(proposals, contextTypeId, version, groupId + ":" + artifactId + ":" + version);
+        }
+      }
+      //mkleint: this concept that all versions out there are equal is questionable..
+      if (project != null && "dependency".equals(node.getParentNode().getNodeName())) { //$NON-NLS-1$
+        //see if we can complete the properties ending with .version
+        
+        IMavenProjectFacade mvnproject = MavenPlugin.getDefault().getMavenProjectManager().getProject(project);
+        if(mvnproject != null) {
+          MavenProject mvn = mvnproject.getMavenProject();
+          if (mvn != null) {
+            Properties props = mvn.getProperties();
+            if (props != null) {
+              String contextTypeId = getContextTypeId();
+              List<String> keys = new ArrayList<String>();
+              for (Object key : props.keySet()) {
+                //only add the properties following the .version convention
+                if (key.toString().endsWith(".version")) { //$NON-NLS-1$
+                  keys.add(key.toString());
+                }
+              }
+              Collections.sort(keys);
+              for (String key : keys) {
+                String expr = "${" + key + "}"; //$NON-NLS-1$ //$NON-NLS-2$
+                proposals.add(new Template(expr, Messages.PomTemplateContext_expression_description, contextTypeId, "$" + expr, false)); //$NON-NLS-2$
+              }
+            }
+          }
         }
       }
     }
@@ -505,7 +534,7 @@ public enum PomTemplateContext {
   }
 
   private static String simpleInterpolate(IProject project, String version) {
-    if (version != null && version.contains("${")) {
+    if (version != null && version.contains("${")) { //$NON-NLS-1$
       //when expression is in the version but no project instance around
       // just give up.
       if(project == null) {
