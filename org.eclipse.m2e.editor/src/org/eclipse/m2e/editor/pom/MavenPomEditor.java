@@ -28,6 +28,7 @@ import org.apache.maven.shared.dependency.tree.DependencyNode;
 import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
@@ -76,6 +77,8 @@ import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.core.MavenLogger;
 import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.embedder.MavenModelManager;
+import org.eclipse.m2e.core.project.IMavenProjectFacade;
+import org.eclipse.m2e.core.project.MavenProjectManager;
 import org.eclipse.m2e.core.util.Util;
 import org.eclipse.m2e.core.util.Util.FileStoreEditorInputStub;
 import org.eclipse.m2e.editor.MavenEditorImages;
@@ -129,6 +132,8 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMElement;
 @SuppressWarnings("restriction")
 public class MavenPomEditor extends FormEditor implements IResourceChangeListener, IShowEditorInput, IGotoMarker,
     ISearchEditorAccess, IEditingDomainProvider {
+
+  private static final String POM_XML = "pom.xml";
 
   public static final String EDITOR_ID = "org.eclipse.m2e.editor.MavenPomEditor"; //$NON-NLS-1$
 
@@ -444,6 +449,34 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
     if(EFFECTIVE_POM.equals(name)){
       loadEffectivePOM();
     }
+    if (POM_XML.equals(name)) {
+      //attempt to preload the maven project to have the caches hot for template proposals.
+      if (getEditorInput() instanceof IFileEditorInput) {
+        IFileEditorInput ei = (IFileEditorInput)getEditorInput();
+        IFile file = ei.getFile();
+        IProject prj = file != null ? file.getProject() : null;
+        if (prj != null) {
+          MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
+          final IMavenProjectFacade mvnprj = projectManager.getProject(prj);
+          if (mvnprj != null && mvnprj.getMavenProject() == null) {
+            Job jb = new Job("load maven project") {
+              @Override
+              protected IStatus run(IProgressMonitor monitor) {
+                try {
+                  mvnprj.getMavenProject(monitor);
+                } catch(CoreException e) {
+                  //just ignore
+                  MavenLogger.log("Unable to read maven project. Some content assists might not work as advertized.", e); //$NON-NLS-1$
+                }
+                return Status.OK_STATUS;
+              }
+            };
+            jb.setSystem(true);
+            jb.schedule();
+          }
+        }
+      }
+    }
     //The editor occassionally doesn't get 
     //closed if the project gets deleted. In this case, the editor
     //stays open and very bad things happen if you select it
@@ -627,7 +660,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       setPageText(dex, EFFECTIVE_POM);
       
       sourcePageIndex = addPage(sourcePage, getEditorInput());
-      setPageText(sourcePageIndex, "pom.xml"); //$NON-NLS-1$
+      setPageText(sourcePageIndex, POM_XML);
       sourcePage.update();
       
       IDocument doc = sourcePage.getDocumentProvider().getDocument(getEditorInput());
