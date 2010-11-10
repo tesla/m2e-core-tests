@@ -33,6 +33,8 @@ public class Messages extends NLS {
 
   public static String PomTemplateContext_deploy;
 
+  public static String PomTemplateContext_expression_description;
+
   public static String PomTemplateContext_generateresources;
 
   public static String PomTemplateContext_generatesources;
