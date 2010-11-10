@@ -254,6 +254,7 @@ public class SelectionUtil {
       String version = dependency.getVersion();
       
       if(version == null) {
+        //mkleint: this looks scary
         IEditorPart editor = getActiveEditor();
         if(editor!=null) {
           MavenProject mavenProject = getMavenProject(editor.getEditorInput(), null);
