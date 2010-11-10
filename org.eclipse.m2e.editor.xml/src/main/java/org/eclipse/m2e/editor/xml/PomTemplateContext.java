@@ -28,6 +28,8 @@ import org.apache.maven.plugin.descriptor.Parameter;
 import org.apache.maven.plugin.descriptor.PluginDescriptor;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.interpolation.InterpolationException;
+import org.codehaus.plexus.interpolation.ObjectBasedValueSource;
+import org.codehaus.plexus.interpolation.PrefixedObjectValueSource;
 import org.codehaus.plexus.interpolation.PropertiesBasedValueSource;
 import org.codehaus.plexus.interpolation.RegexBasedInterpolator;
 import org.codehaus.plexus.util.StringUtils;
@@ -570,6 +572,7 @@ public enum PomTemplateContext {
           if (props != null) {
             RegexBasedInterpolator inter = new RegexBasedInterpolator();
             inter.addValueSource(new PropertiesBasedValueSource(props));
+            inter.addValueSource(new PrefixedObjectValueSource(Arrays.asList( new String[]{ "pom.", "project." } ), prj.getModel(), false));
             try {
               version = inter.interpolate(version);
             } catch(InterpolationException e) {
