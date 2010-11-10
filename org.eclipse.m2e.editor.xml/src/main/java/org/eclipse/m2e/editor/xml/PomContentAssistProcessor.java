@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Stack;
 
 import org.w3c.dom.Node;
 import org.w3c.dom.Text;
@@ -20,8 +21,8 @@ import org.w3c.dom.Text;
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filesystem.IFileStore;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -113,12 +114,7 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
   
   private void addProposals(ContentAssistRequest request, PomTemplateContext context, Node currentNode, String prefix) {
     if(request != null) {
-      ITextFileBuffer buf = FileBuffers.getTextFileBufferManager().getTextFileBuffer(sourceViewer.getDocument());
-      IFileStore folder = buf.getFileStore();
-      File file = new File(folder.toURI());
-      IPath path = Path.fromOSString(file.getAbsolutePath());
-      IFile ifile = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(path);
-      IProject prj = ifile != null ? ifile.getProject() : null;
+      IProject prj = extractProject();
 
       ICompletionProposal[] templateProposals = getTemplateProposals(prj, sourceViewer,
           request.getReplacementBeginPosition(), context.getContextTypeId(), currentNode, prefix);
@@ -130,6 +126,26 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
         }
       }
     }
+  }
+
+  private IProject extractProject() {
+    ITextFileBuffer buf = FileBuffers.getTextFileBufferManager().getTextFileBuffer(sourceViewer.getDocument());
+    IFileStore folder = buf.getFileStore();
+    File file = new File(folder.toURI());
+    IPath path = Path.fromOSString(file.getAbsolutePath());
+    Stack<IResource> stack = new Stack<IResource>();
+    //here we need to find the most inner project to the path.
+    //we do so by shortening the path and remembering all the resources identified.
+    // at the end we pick the last one from the stack. is there a catch to it?
+    while (path.segmentCount() > 1) {
+        IResource ifile = ResourcesPlugin.getWorkspace().getRoot().findMember(path);
+        if (ifile != null) {
+          stack.push(ifile);
+        }
+        path = path.removeFirstSegments(1);
+      }
+    IProject prj = stack.empty() ? null : stack.pop().getProject();
+    return prj;
   }
   
   private ICompletionProposal[] getTemplateProposals(IProject project, ITextViewer viewer, int offset, String contextTypeId, Node currentNode, String prefix) {
