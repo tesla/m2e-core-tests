@@ -34,6 +34,7 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.jface.text.templates.DocumentTemplateContext;
 import org.eclipse.jface.text.templates.Template;
@@ -114,7 +115,7 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
   
   private void addProposals(ContentAssistRequest request, PomTemplateContext context, Node currentNode, String prefix) {
     if(request != null) {
-      IProject prj = extractProject();
+      IProject prj = extractProject(sourceViewer);
 
       ICompletionProposal[] templateProposals = getTemplateProposals(prj, sourceViewer,
           request.getReplacementBeginPosition(), context.getContextTypeId(), currentNode, prefix);
@@ -128,7 +129,7 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
     }
   }
 
-  private IProject extractProject() {
+  static IProject extractProject(ITextViewer sourceViewer) {
     ITextFileBuffer buf = FileBuffers.getTextFileBufferManager().getTextFileBuffer(sourceViewer.getDocument());
     IFileStore folder = buf.getFileStore();
     File file = new File(folder.toURI());

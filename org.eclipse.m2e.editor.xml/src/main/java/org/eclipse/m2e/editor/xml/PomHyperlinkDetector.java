@@ -11,6 +11,8 @@ package org.eclipse.m2e.editor.xml;
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filesystem.IFileStore;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -82,7 +84,7 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
     }
     
     if (fragment != null) {
-      return openPOMbyID(fragment);
+      return openPOMbyID(fragment, textViewer);
     }
     //check if <module> text is selected.
     fragment = getFragment(text, offset, "<module>", "</module>"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -155,14 +157,12 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
 
   }
 
-  private IHyperlink[] openPOMbyID(Fragment fragment) {
+  private IHyperlink[] openPOMbyID(Fragment fragment, final ITextViewer viewer) {
     final Fragment groupId = getValue(fragment, "<groupId>", "</groupId>"); //$NON-NLS-1$ //$NON-NLS-2$
     final Fragment artifactId = getValue(fragment, "<artifactId>", Messages.PomHyperlinkDetector_23); //$NON-NLS-1$
     final Fragment version = getValue(fragment, "<version>", "</version>"); //$NON-NLS-1$ //$NON-NLS-2$
-    if (version == null) {
-      // better exit now until we are capable of resolving the version from resolved project. 
-      return null;
-    } 
+    final IProject prj = PomContentAssistProcessor.extractProject(viewer);
+    
     IHyperlink pomHyperlink = new IHyperlink() {
       public IRegion getHyperlinkRegion() {
         //the goal here is to have the groupid/artifactid/version combo underscored by the link.
@@ -189,10 +189,25 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
         new Job(Messages.PomHyperlinkDetector_job_name) {
           protected IStatus run(IProgressMonitor monitor) {
             // TODO resolve groupId if groupId==null
-            // TODO resolve version if version==null
-            OpenPomAction.openEditor(groupId == null ? "org.apache.maven.plugins" : groupId.text,  //$NON-NLS-1$
-                                     artifactId == null ? null : artifactId.text, 
-                                     version == null ? null : version.text, monitor);
+            String gridString = groupId == null ? "org.apache.maven.plugins" : groupId.text; //$NON-NLS-1$      
+            String artidString = artifactId == null ? null : artifactId.text;
+            String versionString = version == null ? null : version.text;
+            if (prj != null && gridString != null && artidString != null && (version == null || version.text.contains("${"))) { //$NON-NLS-1$
+              try {
+                //TODO how do we decide here if the hyperlink is a dependency or a plugin
+                // hyperlink??
+                versionString = PomTemplateContext.extractVersion(prj, versionString, gridString, artidString, PomTemplateContext.EXTRACT_STRATEGY_DEPENDENCY);
+                
+              } catch(CoreException e) {
+                versionString = null;
+              }
+            }
+            if (versionString == null) {
+              return Status.OK_STATUS;
+            }
+            OpenPomAction.openEditor(gridString,  
+                                     artidString, 
+                                     versionString, monitor);
             return Status.OK_STATUS;
           }
         }.schedule();

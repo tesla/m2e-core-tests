@@ -19,6 +19,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.maven.model.Dependency;
+import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginManagement;
 import org.apache.maven.plugin.descriptor.MojoDescriptor;
@@ -95,7 +97,7 @@ public enum PomTemplateContext {
         groupId = "org.apache.maven.plugins";  // TODO support other default groups //$NON-NLS-1$
       }
       String artifactId = getArtifactId(node);
-      String version = extractPluginVersion(project, node, groupId, artifactId);
+      String version = extractVersion(project, getVersion(node), groupId, artifactId, EXTRACT_STRATEGY_PLUGIN | EXTRACT_STRATEGY_SEARCH);
       if (version == null) {
         return;
       }
@@ -332,7 +334,8 @@ public enum PomTemplateContext {
         groupId = "org.apache.maven.plugins"; //$NON-NLS-1$
       }
       String artifactId = getArtifactId(node);
-      String version = extractPluginVersion(project, node, groupId, artifactId);
+            
+      String version = extractVersion(project, getVersion(node), groupId, artifactId, EXTRACT_STRATEGY_PLUGIN | EXTRACT_STRATEGY_SEARCH);
       if(version==null) {
         return;
       }
@@ -513,17 +516,36 @@ public enum PomTemplateContext {
     return getSiblingTextValue(currentNode, "groupId"); //$NON-NLS-1$
   }
 
-  private static String extractPluginVersion(IProject project, Node node, String groupId, String artifactId)
+  /**
+   * 
+   * @param project
+   * @param version
+   * @param groupId
+   * @param artifactId
+   * @return
+   * @throws CoreException
+   */
+  
+  static int EXTRACT_STRATEGY_PLUGIN = 1;
+  static int EXTRACT_STRATEGY_DEPENDENCY = 2;
+  static int EXTRACT_STRATEGY_SEARCH = 4;
+  
+  static String extractVersion(IProject project, String version, String groupId, String artifactId, int strategy)
       throws CoreException {
-    String version = getVersion(node);
     //interpolate the version found to get rid of expressions 
     version = simpleInterpolate(project, version);
     
     if (version==null) {
-      version = searchPM(project, groupId, artifactId);
-      if (version == null) {
-      
-        Collection<String> versions = getSearchEngine(project).findVersions(groupId, artifactId, "", Packaging.PLUGIN); //$NON-NLS-1$
+      Packaging pack = Packaging.ALL; 
+      if ( (strategy & EXTRACT_STRATEGY_PLUGIN) != 0) {
+        version = searchPM(project, groupId, artifactId);
+        pack = Packaging.PLUGIN;
+      }
+      if ( (strategy & EXTRACT_STRATEGY_DEPENDENCY) != 0) {
+        version = searchDM(project, groupId, artifactId);
+      }
+      if (version == null && (strategy & EXTRACT_STRATEGY_SEARCH) != 0) {      
+        Collection<String> versions = getSearchEngine(project).findVersions(groupId, artifactId, "", pack); //$NON-NLS-1$
         if(versions.isEmpty()) {
           return null;
         }
@@ -584,6 +606,31 @@ public enum PomTemplateContext {
     }
     return version;
   }
+  
+  private static String searchDM(IProject project, String groupId, String artifactId) {
+    if (project == null) {
+      return null;
+    }
+    String version = null;
+    //see if we can find the dependency is in dependency management of resolved project.
+    IMavenProjectFacade mvnproject = MavenPlugin.getDefault().getMavenProjectManager().getProject(project);
+    if(mvnproject != null) {
+      String id = groupId + ":" + artifactId + ":";
+      MavenProject prj = mvnproject.getMavenProject();
+      if(prj != null) {
+        DependencyManagement dm = prj.getDependencyManagement();
+        if(dm != null) {
+          for(Dependency dep : dm.getDependencies()) {
+            if(dep.getManagementKey().startsWith(id)) {
+              version = dep.getVersion();
+              break;
+            }
+          }
+        }
+      }
+    }
+    return version;
+  }  
 
   protected static String getArtifactId(Node currentNode) {
     return getSiblingTextValue(currentNode, "artifactId"); //$NON-NLS-1$
