@@ -68,20 +68,7 @@ public class MavenPomEditorContributor extends MultiPageEditorActionBarContribut
         actionBars.updateActionBars();
       }
     }
-    
-    if(part instanceof DependencyGraphPage) {
-      final DependencyGraphPage graphPage = (DependencyGraphPage) part;
-      IAction printaAction = new Action() {
-        public void run() {
-          new DependencyGraphPrintDialog(graphPage.getEditorSite().getShell(), graphPage).open();
-        }
-      };
 
-      if(actionBars!=null) {
-        actionBars.setGlobalActionHandler(ActionFactory.PRINT.getId(), printaAction);
-        actionBars.updateActionBars();
-      }
-    }
   }
   
   /**

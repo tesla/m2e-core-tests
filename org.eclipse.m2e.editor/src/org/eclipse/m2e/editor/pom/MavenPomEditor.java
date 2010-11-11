@@ -21,10 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.shared.dependency.tree.DependencyNode;
 import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -163,8 +161,6 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 
   DependencyTreePage dependencyTreePage;
 
-  DependencyGraphPage graphPage;
-  
   LifecyclePage lifecyclePage;
 
   StructuredSourceTextEditor sourcePage;
@@ -174,8 +170,6 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   List<MavenPomEditorPage> pages = new ArrayList<MavenPomEditorPage>();
 
   private Model projectDocument;
-
-  private Map<String,DependencyNode> rootNode = new HashMap<String, DependencyNode>();
 
   private Map<String, org.sonatype.aether.graph.DependencyNode> rootNodes = new HashMap<String, org.sonatype.aether.graph.DependencyNode>();
 
@@ -395,9 +389,6 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
 
       teamPage = new TeamPage(this);
       addPomPage(teamPage);
-
-      graphPage = new DependencyGraphPage(this);
-      addPomPage(graphPage);
 
       lifecyclePage = new LifecyclePage(this);
       addPomPage(lifecyclePage);
@@ -808,33 +799,6 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       return null;
 
     }
-  }
-
-  /**
-   * @param force
-   * @param monitor
-   * @param scope one of 
-   *   {@link Artifact#SCOPE_COMPILE}, 
-   *   {@link Artifact#SCOPE_TEST}, 
-   *   {@link Artifact#SCOPE_SYSTEM}, 
-   *   {@link Artifact#SCOPE_PROVIDED}, 
-   *   {@link Artifact#SCOPE_RUNTIME}
-   *   
-   * @return dependency node
-   */
-  public synchronized DependencyNode readDependencies(boolean force, IProgressMonitor monitor, String scope) throws CoreException {
-    if(force || !rootNode.containsKey(scope)) {
-      monitor.setTaskName(Messages.MavenPomEditor_task_reading);
-      MavenProject mavenProject = readMavenProject(force, monitor);
-      if(mavenProject == null){
-        MavenLogger.log("Unable to read maven project. Dependencies not updated.", null); //$NON-NLS-1$
-        return null;
-      }
-
-      rootNode.put(scope, MavenPlugin.getDefault().getMavenModelManager().readDependencies(mavenProject, scope, monitor));
-    }
-
-    return rootNode.get(scope);
   }
 
   public synchronized org.sonatype.aether.graph.DependencyNode readDependencyTree(boolean force, String classpath,
