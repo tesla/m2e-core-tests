@@ -106,48 +106,6 @@
            </enablement>
         </contextualLaunch>
      </shortcut>
-     <shortcut id="org.eclipse.m2e.actions.LifeCyclePackage"
-               class="org.eclipse.m2e.actions.ExecutePomAction:package"
-               icon="icons/m2.gif"
-               label="%m2.popup.lifecycle.package"
-               modes="run,debug">
-        <contextualLaunch>
-           <contextLabel label="%m2.popup.lifecycle.package" mode="run"/>
-           <contextLabel label="%m2.popup.lifecycle.package" mode="debug"/>
-           <enablement>
-              <with variable="selection">
-                 <count value="1"/>
-                 <iterate>
-                    <and>
-                      <test property="org.eclipse.m2e.launchable"/>
-                      <adapt type="org.eclipse.core.runtime.IAdaptable"/>
-                    </and>
-                 </iterate>
-              </with>
-           </enablement>
-        </contextualLaunch>
-     </shortcut>
-     <shortcut id="org.eclipse.m2e.actions.LifeCycleSource"
-               class="org.eclipse.m2e.actions.ExecutePomAction:source:jar"
-               icon="icons/m2.gif"
-               label="%m2.popup.lifecycle.source"
-               modes="run,debug">
-        <contextualLaunch>
-           <contextLabel label="%m2.popup.lifecycle.source" mode="run"/>
-           <contextLabel label="%m2.popup.lifecycle.source" mode="debug"/>
-           <enablement>
-              <with variable="selection">
-                 <count value="1"/>
-                 <iterate>
-                    <and>
-                      <test property="org.eclipse.m2e.launchable"/>
-                      <adapt type="org.eclipse.core.runtime.IAdaptable"/>
-                    </and>
-                 </iterate>
-              </with>
-           </enablement>
-        </contextualLaunch>
-     </shortcut>
      <shortcut id="org.eclipse.m2e.actions.LifeCycleTest"
                class="org.eclipse.m2e.actions.ExecutePomAction:test"
                icon="icons/m2.gif"
@@ -177,27 +135,6 @@
         <contextualLaunch>
            <contextLabel label="%m2.popup.lifecycle.generate-sources" mode="run"/>
            <contextLabel label="%m2.popup.lifecycle.generate-sources" mode="debug"/>
-           <enablement>
-              <with variable="selection">
-                 <count value="1"/>
-                 <iterate>
-                    <and>
-                      <test property="org.eclipse.m2e.launchable"/>
-                      <adapt type="org.eclipse.core.runtime.IAdaptable"/>
-                    </and>
-                 </iterate>
-              </with>
-           </enablement>
-        </contextualLaunch>
-     </shortcut>
-     <shortcut id="org.eclipse.m2e.actions.LifeCycleAssembly"
-           class="org.eclipse.m2e.actions.ExecutePomAction:assembly:assembly"
-           icon="icons/m2.gif"
-           label="%m2.popup.lifecycle.assembly"
-           modes="run,debug">
-        <contextualLaunch>
-           <contextLabel label="%m2.popup.lifecycle.assembly" mode="run"/>
-           <contextLabel label="%m2.popup.lifecycle.assembly" mode="debug"/>
            <enablement>
               <with variable="selection">
                  <count value="1"/>
