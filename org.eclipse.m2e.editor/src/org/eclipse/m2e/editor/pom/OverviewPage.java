@@ -14,7 +14,6 @@ import static org.eclipse.m2e.editor.pom.FormUtils.setText;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -571,7 +570,7 @@ public class OverviewPage extends MavenPomEditorPage {
   private void createProjectSection(FormToolkit toolkit, Composite composite, WidthGroup widthGroup) {
     projectSection = toolkit.createSection(composite, //
         ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED | ExpandableComposite.TWISTIE);
-    projectSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+    projectSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     projectSection.setText(Messages.OverviewPage_section_project);
     projectSection.setData("name", "projectSection"); //$NON-NLS-1$ //$NON-NLS-2$
   
@@ -604,9 +603,10 @@ public class OverviewPage extends MavenPomEditorPage {
     descriptionLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
   
     projectDescriptionText = toolkit.createText(projectComposite, null, SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
-    GridData gd_descriptionText = new GridData(SWT.FILL, SWT.FILL, true, false);
+    GridData gd_descriptionText = new GridData(SWT.FILL, SWT.FILL, true, true);
     gd_descriptionText.widthHint = 150;
-    gd_descriptionText.heightHint = 55;
+    gd_descriptionText.heightHint = 100;
+    gd_descriptionText.minimumHeight = 100;
     projectDescriptionText.setLayoutData(gd_descriptionText);
     projectDescriptionText.setData("name", "projectDescription"); //$NON-NLS-1$ //$NON-NLS-2$
   
