@@ -72,7 +72,9 @@ import org.eclipse.ui.part.FileEditorInputFactory;
 import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
+import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
 import org.eclipse.wst.sse.core.internal.text.JobSafeStructuredDocument;
+import org.eclipse.wst.sse.ui.StructuredTextEditor;
 import org.eclipse.wst.sse.ui.internal.StructuredTextViewer;
 
 import org.eclipse.m2e.core.MavenPlugin;
@@ -205,7 +207,9 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
                     String loc = location.getSource().getLocation();
                     File file = new File(loc);
                     IFileStore fileStore = EFS.getLocalFileSystem().getStore(file.toURI());
-                    openXmlEditor(fileStore);
+                       
+                    
+                    openXmlEditor(fileStore, location.getLineNumber(), location.getColumnNumber());
                   }
                 }
               }
@@ -416,6 +420,10 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
   }
 
   private void openXmlEditor(final IFileStore fileStore) {
+    openXmlEditor(fileStore, -1, -1);
+  }
+  
+  private void openXmlEditor(final IFileStore fileStore, int line, int column) {
     IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
     if(window != null) {
       IWorkbenchPage page = window.getActivePage();
@@ -425,14 +433,33 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
           if(part instanceof FormEditor) {
             FormEditor ed = (FormEditor) part;
             ed.setActivePage(null); //null means source, always or just in the case of MavenPomEditor?
+            if(line != -1) {
+              if(ed.getActiveEditor() instanceof StructuredTextEditor) {
+                StructuredTextEditor structured = (StructuredTextEditor) ed.getActiveEditor();
+                // convert the line and Column numbers to an offset:
+                IDocument doc = structured.getTextViewer().getDocument();
+                if (doc instanceof IStructuredDocument) {
+                  IStructuredDocument document = (IStructuredDocument) doc;
+                  try {
+                    int offset = document.getLineOffset(line);
+                    structured.selectAndReveal(offset, offset + column);
+                  } catch(BadLocationException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                  }
+                }
+              }
+            }
           }
         } catch(PartInitException e) {
-          MessageDialog.openInformation(Display.getDefault().getActiveShell(), //
-              Messages.PomHyperlinkDetector_error_title, NLS.bind(Messages.PomHyperlinkDetector_error_message, fileStore, e.toString()));
+          MessageDialog.openInformation(
+              Display.getDefault().getActiveShell(), //
+              Messages.PomHyperlinkDetector_error_title,
+              NLS.bind(Messages.PomHyperlinkDetector_error_message, fileStore, e.toString()));
 
         }
       }
     }
-  }  
+  }
 
 }
