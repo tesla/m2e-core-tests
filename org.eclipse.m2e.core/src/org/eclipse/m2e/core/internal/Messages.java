@@ -281,6 +281,8 @@ public class Messages extends NLS {
 
   public static String MavenExternalRuntime_unknown;
 
+  public static String MavenEmbeddedRuntime_unknown;
+
   public static String MavenGoalSelectionDialog_btnQualified;
 
   public static String MavenGoalSelectionDialog_error;
