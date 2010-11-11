@@ -12,10 +12,17 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.maven.model.Build;
+import org.apache.maven.model.Dependency;
+import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.InputLocation;
 import org.apache.maven.model.Model;
+import org.apache.maven.model.Plugin;
+import org.apache.maven.model.PluginManagement;
 import org.apache.maven.project.MavenProject;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
 import org.eclipse.core.filebuffers.FileBuffers;
@@ -36,6 +43,7 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
@@ -106,6 +114,11 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
         }
       }
     }
+    //now check if the dependency/plugin has a version element or not, if not, try searching for it in DM/PM of effective pom
+    IHyperlink mLink = openDPManagement(current, textViewer, offset);
+    if (mLink != null) {
+      hyperlinks.add(mLink);
+    }
     
     //first check all elements that have id (groupId+artifactId+version) combo
     Fragment fragment = null;
@@ -134,6 +147,165 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
       return hyperlinks.toArray(new IHyperlink[0]);
     }
     return null;
+  }
+
+  private IHyperlink openDPManagement(Node current, ITextViewer textViewer, int offset) {
+    while (current != null && !( current instanceof Element)) {
+      current = current.getParentNode(); 
+    }
+    if (current != null) {
+      Node artNode = null;
+      Node groupNode = null;
+      if ("artifactId".equals(current.getNodeName())) {
+        artNode = current;
+      }
+      if ("groupId".equals(current.getNodeName())) {
+        groupNode = current;
+      }
+      //only on artifactid and groupid elements..
+      if (artNode == null && groupNode == null) {
+        return null;
+      }
+      Node root = current.getParentNode();
+      boolean isDependency = false;
+      boolean isPlugin = false;
+      if (root != null) {
+        String name = root.getNodeName();
+        if ("dependency".equals(name)) {
+          isDependency = true;
+        }
+        if ("plugin".equals(name)) {
+          isPlugin = true;
+        }
+      } else {
+        return null;
+      }
+      if (!isDependency && !isPlugin) {
+        //some kind of other identifier
+        return null;
+      }
+      //now see if version is missing
+      NodeList childs = root.getChildNodes();
+      for (int i = 0; i < childs.getLength(); i++) {
+        Node child = childs.item(i);
+        if (child instanceof Element) {
+          Element el = (Element) child;
+          if ("version".equals(el.getNodeName())) {
+            return null;
+          }
+          if (artNode == null && "artifactId".equals(el.getNodeName())) {
+            artNode = el;
+          }
+          if (groupNode == null && "groupId".equals(el.getNodeName())) {
+            groupNode = el;
+          }
+        }
+      }
+      if (groupNode != null && artNode != null) {
+        //now we can create the hyperlink I guess, 
+        final IProject prj = PomContentAssistProcessor.extractProject(textViewer);
+        //TODO we shall rely on presence of a cached model, not project alone..
+        assert groupNode instanceof IndexedRegion;
+        assert artNode instanceof IndexedRegion;
+        
+        IndexedRegion groupReg = (IndexedRegion)groupNode;
+        IndexedRegion artReg = (IndexedRegion)artNode;
+        final int startOffset = Math.min(groupReg.getStartOffset(), artReg.getStartOffset());
+        final int length = Math.max(groupReg.getEndOffset(), artReg.getEndOffset()) - startOffset;
+        final String groupId = getElementTextValue(groupNode);
+        final String artifactId = getElementTextValue(artNode);
+        final boolean fIsDependency = isDependency;
+        final boolean fIsPlugin = isPlugin;
+        
+        return new IHyperlink() {
+          public IRegion getHyperlinkRegion() {
+            return new Region(startOffset, length);
+          }
+
+          public String getHyperlinkText() {
+            return NLS.bind("Open managed location for {0}", "" + groupId + ":" + artifactId);
+          }
+
+          public String getTypeLabel() {
+            return "pom-dependency-plugin-management"; //$NON-NLS-1$
+          }
+
+          public void open() {
+            //see if we can find the plugin in plugin management of resolved project.
+            IMavenProjectFacade mvnproject = MavenPlugin.getDefault().getMavenProjectManager().getProject(prj);
+            if (mvnproject != null) {
+              MavenProject mavprj = mvnproject.getMavenProject();
+              if (mavprj != null) {
+                Model mdl = mavprj.getModel();
+                InputLocation openLocation = null;
+                if (fIsDependency) {
+                  DependencyManagement dm = mdl.getDependencyManagement();
+                  if (dm != null) {
+                    List<Dependency> list = dm.getDependencies();
+                    String id = groupId + ":" + artifactId + ":";
+                    if (list != null) {
+                      for (Dependency dep : list) {
+                        if (dep.getManagementKey().startsWith(id)) {
+                          InputLocation location = dep.getLocation("artifactId");
+                          //when would this be null?
+                          if (location != null) {
+                            openLocation = location;
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                if (fIsPlugin) {
+                  Build build = mdl.getBuild();
+                  if (build != null) {
+                    PluginManagement pm = build.getPluginManagement();
+                    if (pm != null) {
+                      List<Plugin> list = pm.getPlugins();
+                      String id = Plugin.constructKey(groupId, artifactId);
+                      if (list != null) {
+                        for (Plugin plg : list) {
+                          if (id.equals(plg.getKey())) {
+                            InputLocation location = plg.getLocation("artifactId");
+                            //when would this be null?
+                            if (location != null) {
+                              openLocation = location;
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                if (openLocation != null) {
+                  String loc = openLocation.getSource().getLocation();
+                  File file = new File(loc);
+                  IFileStore fileStore = EFS.getLocalFileSystem().getStore(file.toURI());
+
+                  openXmlEditor(fileStore, openLocation.getLineNumber(), openLocation.getColumnNumber());
+                }
+              }
+            }
+          }
+        };
+        
+      }
+    }
+    return null;
+  }
+  
+  static String getElementTextValue(Node element) {
+    if (element == null) return null;
+    StringBuffer buff = new StringBuffer();
+    NodeList list = element.getChildNodes();
+    for (int i = 0; i < list.getLength(); i++) {
+      Node child = list.item(i);
+      if (child instanceof Text) {
+        Text text = (Text)child;
+        buff.append(text.getData());
+      }
+    }
+    return buff.toString();
   }
 
   private IHyperlink openPropertyDefinition(String value, Text node, ITextViewer viewer, int offset) {
@@ -415,8 +587,8 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
                 if (doc instanceof IStructuredDocument) {
                   IStructuredDocument document = (IStructuredDocument) doc;
                   try {
-                    int offset = document.getLineOffset(line);
-                    structured.selectAndReveal(offset, offset + column);
+                    int offset = document.getLineOffset(line - 1);
+                    structured.selectAndReveal(offset + column - 1, 0);
                   } catch(BadLocationException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
