@@ -156,10 +156,10 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
     if (current != null) {
       Node artNode = null;
       Node groupNode = null;
-      if ("artifactId".equals(current.getNodeName())) {
+      if ("artifactId".equals(current.getNodeName())) { //$NON-NLS-1$
         artNode = current;
       }
-      if ("groupId".equals(current.getNodeName())) {
+      if ("groupId".equals(current.getNodeName())) { //$NON-NLS-1$
         groupNode = current;
       }
       //only on artifactid and groupid elements..
@@ -171,10 +171,10 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
       boolean isPlugin = false;
       if (root != null) {
         String name = root.getNodeName();
-        if ("dependency".equals(name)) {
+        if ("dependency".equals(name)) { //$NON-NLS-1$
           isDependency = true;
         }
-        if ("plugin".equals(name)) {
+        if ("plugin".equals(name)) { //$NON-NLS-1$
           isPlugin = true;
         }
       } else {
@@ -190,13 +190,13 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
         Node child = childs.item(i);
         if (child instanceof Element) {
           Element el = (Element) child;
-          if ("version".equals(el.getNodeName())) {
+          if ("version".equals(el.getNodeName())) { //$NON-NLS-1$
             return null;
           }
-          if (artNode == null && "artifactId".equals(el.getNodeName())) {
+          if (artNode == null && "artifactId".equals(el.getNodeName())) { //$NON-NLS-1$
             artNode = el;
           }
-          if (groupNode == null && "groupId".equals(el.getNodeName())) {
+          if (groupNode == null && "groupId".equals(el.getNodeName())) { //$NON-NLS-1$
             groupNode = el;
           }
         }
@@ -223,7 +223,7 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
           }
 
           public String getHyperlinkText() {
-            return NLS.bind("Open managed location for {0}", "" + groupId + ":" + artifactId);
+            return NLS.bind(Messages.PomHyperlinkDetector_link_managed, "" + groupId + ":" + artifactId); //$NON-NLS-2$ //$NON-NLS-3$
           }
 
           public String getTypeLabel() {
@@ -242,11 +242,11 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
                   DependencyManagement dm = mdl.getDependencyManagement();
                   if (dm != null) {
                     List<Dependency> list = dm.getDependencies();
-                    String id = groupId + ":" + artifactId + ":";
+                    String id = groupId + ":" + artifactId + ":"; //$NON-NLS-1$ //$NON-NLS-2$
                     if (list != null) {
                       for (Dependency dep : list) {
                         if (dep.getManagementKey().startsWith(id)) {
-                          InputLocation location = dep.getLocation("artifactId");
+                          InputLocation location = dep.getLocation("artifactId"); //$NON-NLS-1$
                           //when would this be null?
                           if (location != null) {
                             openLocation = location;
@@ -266,7 +266,7 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
                       if (list != null) {
                         for (Plugin plg : list) {
                           if (id.equals(plg.getKey())) {
-                            InputLocation location = plg.getLocation("artifactId");
+                            InputLocation location = plg.getLocation("artifactId"); //$NON-NLS-1$
                             //when would this be null?
                             if (location != null) {
                               openLocation = location;

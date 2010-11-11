@@ -22,6 +22,8 @@ public class Messages extends NLS {
 
   public static String PomHyperlinkDetector_job_name;
 
+  public static String PomHyperlinkDetector_link_managed;
+
   public static String PomHyperlinkDetector_open_module;
 
   public static String PomHyperlinkDetector_open_property;
