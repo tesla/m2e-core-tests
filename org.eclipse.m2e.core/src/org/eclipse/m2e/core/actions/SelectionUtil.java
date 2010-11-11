@@ -47,7 +47,6 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.shared.dependency.tree.DependencyNode;
 
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.IMavenConstants;
@@ -237,10 +236,6 @@ public class SelectionUtil {
   public static ArtifactKey getArtifactKey(Object element) throws CoreException {
     if(element instanceof Artifact) {
       return new ArtifactKey(((Artifact) element));
-    
-    } else if(element instanceof DependencyNode) {
-      Artifact artifact = ((DependencyNode) element).getArtifact();
-      return new ArtifactKey(artifact);
       
     } else if(element instanceof org.sonatype.aether.graph.DependencyNode) {
       org.sonatype.aether.artifact.Artifact artifact = ((org.sonatype.aether.graph.DependencyNode) element)

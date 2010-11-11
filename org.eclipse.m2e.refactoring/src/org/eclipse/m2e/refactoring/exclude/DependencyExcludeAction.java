@@ -9,7 +9,6 @@
 package org.eclipse.m2e.refactoring.exclude;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.shared.dependency.tree.DependencyNode;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -66,10 +65,6 @@ public class DependencyExcludeAction implements IActionDelegate {
         if (selected instanceof Artifact) {
           file = getFileFromEditor();
           artifactKey = new ArtifactKey((Artifact) selected);
-          
-        } else if (selected instanceof DependencyNode) {
-          file = getFileFromEditor();
-          artifactKey = new ArtifactKey(((DependencyNode) selected).getArtifact());
           
         } else if (selected instanceof org.sonatype.aether.graph.DependencyNode) {
           file = getFileFromEditor();
