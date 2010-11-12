@@ -17,6 +17,7 @@ import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
 
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
+import org.eclipse.m2e.editor.xml.internal.Messages;
 
 public class PomTextHover implements ITextHover {
 
@@ -33,7 +34,7 @@ public class PomTextHover implements ITextHover {
         if (mvnproject != null) {
           MavenProject mavprj = mvnproject.getMavenProject();
           if (mavprj != null) {
-            String value = PomTemplateContext.simpleInterpolate(prj, "${" + region.getProperty() + "}");
+            String value = PomTemplateContext.simpleInterpolate(prj, "${" + region.getProperty() + "}"); //$NON-NLS-1$ //$NON-NLS-2$
             String loc = null;
             Model mdl = mavprj.getModel();
             if (mdl.getProperties().containsKey(region.getProperty())) {
@@ -42,11 +43,9 @@ public class PomTextHover implements ITextHover {
                 loc = location.getSource().getModelId();
               }
             }
-            String ret = NLS.bind("<html>This expression evaluates to: <b>{0}</b>", value);
-            if (loc != null) {
-              ret = ret + NLS.bind("<br>It's based on property defined in {0}", loc);
-            }
-            return ret + "</html>";
+            String ret = NLS.bind(Messages.PomTextHover_eval1, 
+                value, loc != null ? NLS.bind(Messages.PomTextHover_eval2, loc) : ""); //$NON-NLS-2$
+            return ret;
           }
         }
       }

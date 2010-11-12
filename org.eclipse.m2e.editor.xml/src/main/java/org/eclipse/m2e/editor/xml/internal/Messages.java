@@ -107,6 +107,10 @@ public class Messages extends NLS {
   public static String PomTemplateContext_validate;
 
   public static String PomTemplateContext_verify;
+
+  public static String PomTextHover_eval1;
+
+  public static String PomTextHover_eval2;
   static {
     // initialize resource bundle
     NLS.initializeMessages(BUNDLE_NAME, Messages.class);
