@@ -1,17 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2007 IBM Corporation and others.
+ * Copyright (c) 2008-2010 Sonatype, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     IBM Corporation - initial API and implementation
- *     Red Hat, Inc - extensive changes to allow importing of Archive Files
- *     Philippe Ombredanne (pombredanne@nexb.com)
- *     		- Bug 101180 [Import/Export] Import Existing Project into Workspace default widget is back button , should be text field
- *     Martin Oberhuber (martin.oberhuber@windriver.com)
- *     		- Bug 187318[Wizards] "Import Existing Project" loops forever with cyclic symbolic links
+ *      Sonatype, Inc. - initial API and implementation
  *******************************************************************************/
 
 package org.eclipse.m2e.core.wizards;
