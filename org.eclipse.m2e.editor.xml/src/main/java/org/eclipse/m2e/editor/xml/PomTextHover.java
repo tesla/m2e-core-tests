@@ -8,10 +8,8 @@ import org.w3c.dom.Text;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextHover;
-import org.eclipse.jface.text.ITextHoverExtension;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.osgi.util.NLS;
@@ -20,17 +18,11 @@ import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 
-public class PomTextHover implements ITextHover /** ITextHoverExtension */ {
+public class PomTextHover implements ITextHover {
 
   public PomTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
   }
   
-  public IInformationControlCreator getHoverControlCreator() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-  
-
   public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
     if (hoverRegion instanceof ExpressionRegion) {
       ExpressionRegion region = (ExpressionRegion) hoverRegion;
@@ -50,11 +42,11 @@ public class PomTextHover implements ITextHover /** ITextHoverExtension */ {
                 loc = location.getSource().getModelId();
               }
             }
-            String ret = NLS.bind("This expression evaluates to: ''{0}''", value);
+            String ret = NLS.bind("<html>This expression evaluates to: <b>{0}</b>", value);
             if (loc != null) {
-              ret = ret + NLS.bind("\nIt's based on property defined in {0}", loc);
+              ret = ret + NLS.bind("<br>It's based on property defined in {0}", loc);
             }
-            return ret;
+            return ret + "</html>";
           }
         }
       }
