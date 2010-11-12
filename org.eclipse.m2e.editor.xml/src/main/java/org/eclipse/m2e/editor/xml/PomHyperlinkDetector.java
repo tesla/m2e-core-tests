@@ -70,6 +70,7 @@ import org.eclipse.m2e.editor.xml.internal.Messages;
 
 /**
  * @author Eugene Kuleshov
+ * @author Milos Kleint
  */
 class PomHyperlinkDetector implements IHyperlinkDetector {
 
@@ -542,7 +543,7 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
    * @param offset
    * @return Node either element, doctype, text, or null
    */
-  private Node getCurrentNode(IDocument document, int offset) {
+  static Node getCurrentNode(IDocument document, int offset) {
     // get the current node at the offset (returns either: element,
     // doctype, text)
     IndexedRegion inode = null;
