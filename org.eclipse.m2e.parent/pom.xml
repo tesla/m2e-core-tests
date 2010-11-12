@@ -78,7 +78,6 @@
 		<module>../org.eclipse.m2e.archetype.common</module>
 		<module>../org.eclipse.m2e.maven.indexer</module>
 		<module>../org.eclipse.m2e.model.edit</module>
-		<module>../org.eclipse.m2e.dependency_tree</module>
 
 		<!-- <module>../org.eclipse.m2e.cliresolver</module> -->
 
