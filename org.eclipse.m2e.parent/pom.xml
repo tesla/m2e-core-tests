@@ -241,21 +241,7 @@
 					<ignoreTychoRepositories>true</ignoreTychoRepositories>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>com.mycila.maven-license-plugin</groupId>
-				<artifactId>maven-license-plugin</artifactId>
-				<version>1.8.0</version>
-				<configuration>
-					<header>src/etc/header.txt</header>
-					<headerDefinitions>
-						<headerDefinition>src/etc/javaFiles.xml</headerDefinition>
-					</headerDefinitions>
-					<includes>
-						<include>**/*.java</include>
-						<include>**/build.properties</include>
-					</includes>
-				</configuration>
-			</plugin>
+
 		</plugins>
 
 		<pluginManagement>
