@@ -1,9 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2008 Sonatype, Inc.
+ * Copyright (c) 2008-2010 Sonatype, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *      Sonatype, Inc. - initial API and implementation
  *******************************************************************************/
 
 package org.eclipse.m2e.core.internal.embedder;
@@ -13,6 +16,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Properties;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -27,6 +33,7 @@ import org.eclipse.m2e.core.core.MavenLogger;
 import org.eclipse.m2e.core.embedder.IMavenLauncherConfiguration;
 import org.eclipse.m2e.core.embedder.MavenRuntime;
 import org.eclipse.m2e.core.embedder.MavenRuntimeManager;
+import org.eclipse.m2e.core.internal.Messages;
 
 /**
  * Embedded Maven runtime
@@ -44,6 +51,8 @@ public class MavenEmbeddedRuntime implements MavenRuntime {
 
   private static String[] LAUNCHER_CLASSPATH;
   private static String[] CLASSPATH;
+
+  private static volatile String mavenVersion;
 
   private BundleContext bundleContext;
   
@@ -138,8 +147,49 @@ public class MavenEmbeddedRuntime implements MavenRuntime {
     return  sb.toString();
   }
 
-  public String getVersion() {
-    return "3.0-SNAPSHOT"; // TODO may as well discover //$NON-NLS-1$
+  private static synchronized String getVersion(Bundle bundle) {
+    if(mavenVersion != null) {
+      return mavenVersion;
+    }
+    initClasspath(bundle);
+    try {
+      String mavenCoreJarPath = null;
+      for(String path : CLASSPATH) {
+        if(path.contains("maven-core") && path.endsWith(".jar")) {
+          mavenCoreJarPath = path;
+          break;
+        }
+      }
+
+      if(mavenCoreJarPath == null) {
+        throw new RuntimeException("Could not find maven core jar file");
+      }
+
+      ZipFile zip = new ZipFile(mavenCoreJarPath);
+      try {
+        ZipEntry zipEntry = zip.getEntry("META-INF/maven/org.apache.maven/maven-core/pom.properties"); //$NON-NLS-1$
+        if(zipEntry != null) {
+          Properties pomProperties = new Properties();
+          pomProperties.load(zip.getInputStream(zipEntry));
+
+          String version = pomProperties.getProperty("version"); //$NON-NLS-1$
+          if(version != null) {
+            mavenVersion = version;
+            return mavenVersion;
+          }
+        }
+      } finally {
+        zip.close();
+      }
+    } catch(Exception e) {
+      MavenLogger.log("Could not determine embedded maven version", e);
+    }
+
+    return Messages.MavenEmbeddedRuntime_unknown;
   }
 
+  public String getVersion() {
+    Bundle bundle = findMavenEmbedderBundle();
+    return getVersion(bundle);
+  }
 }
