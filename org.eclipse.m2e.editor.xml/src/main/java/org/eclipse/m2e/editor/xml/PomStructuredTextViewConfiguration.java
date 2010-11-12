@@ -11,6 +11,7 @@
 
 package org.eclipse.m2e.editor.xml;
 
+import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.text.quickassist.IQuickAssistAssistant;
@@ -32,6 +33,11 @@ public class PomStructuredTextViewConfiguration extends StructuredTextViewerConf
     return super.getContentAssistProcessors(sourceViewer, partitionType);
   }
   
+  @Override
+  public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
+    return new PomTextHover(sourceViewer, contentType, stateMask);
+  }
+
   @Override
   public IHyperlinkDetector[] getHyperlinkDetectors(ISourceViewer sourceViewer) {
     IHyperlinkDetector[] detectors = super.getHyperlinkDetectors(sourceViewer);

@@ -70,6 +70,7 @@ import org.eclipse.m2e.editor.xml.internal.Messages;
 
 /**
  * @author Eugene Kuleshov
+ * @author Milos Kleint
  */
 class PomHyperlinkDetector implements IHyperlinkDetector {
 
@@ -107,20 +108,14 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
     final String text = document.get();
     Node current = getCurrentNode(document, offset);
     //check if we have a property expression at cursor
-    if (current != null && current instanceof Text) {
-      Text textNode = (Text)current;
-      String value = textNode.getNodeValue();
-      if (value != null) {
-        IHyperlink link = openPropertyDefinition(value, textNode, textViewer, offset);
-        if (link != null) {
-          hyperlinks.add(link);
-        }
-      }
+    IHyperlink link = openPropertyDefinition(current, textViewer, offset);
+    if (link != null) {
+      hyperlinks.add(link);
     }
     //now check if the dependency/plugin has a version element or not, if not, try searching for it in DM/PM of effective pom
-    IHyperlink mLink = openDPManagement(current, textViewer, offset);
-    if (mLink != null) {
-      hyperlinks.add(mLink);
+    link = openDPManagement(current, textViewer, offset);
+    if (link != null) {
+      hyperlinks.add(link);
     }
     
     //first check all elements that have id (groupId+artifactId+version) combo
@@ -132,7 +127,7 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
     }
     
     if (fragment != null) {
-      IHyperlink link = openPOMbyID(fragment, textViewer);
+      link = openPOMbyID(fragment, textViewer);
       if (link != null) {
         hyperlinks.add(link);
       }
@@ -141,7 +136,7 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
     //TODO rewrite to use Nodes
     fragment = getFragment(text, offset, "<module>", "</module>"); //$NON-NLS-1$ //$NON-NLS-2$
     if (fragment != null) {
-      IHyperlink link = openModule(fragment, textViewer);
+      link = openModule(fragment, textViewer);
       if (link != null) {
         hyperlinks.add(link);
       }
@@ -152,7 +147,7 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
     return null;
   }
 
-  private IHyperlink openDPManagement(Node current, ITextViewer textViewer, int offset) {
+  static ManagedArtifactRegion findManagedArtifactRegion(Node current, ITextViewer textViewer, int offset) {
     while (current != null && !( current instanceof Element)) {
       current = current.getParentNode(); 
     }
@@ -205,28 +200,36 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
         }
       }
       if (groupNode != null && artNode != null) {
-        //now we can create the hyperlink I guess, 
-        final IProject prj = PomContentAssistProcessor.extractProject(textViewer);
-        //TODO we shall rely on presence of a cached model, not project alone..
         assert groupNode instanceof IndexedRegion;
         assert artNode instanceof IndexedRegion;
         
         IndexedRegion groupReg = (IndexedRegion)groupNode;
         IndexedRegion artReg = (IndexedRegion)artNode;
-        final int startOffset = Math.min(groupReg.getStartOffset(), artReg.getStartOffset());
-        final int length = Math.max(groupReg.getEndOffset(), artReg.getEndOffset()) - startOffset;
-        final String groupId = getElementTextValue(groupNode);
-        final String artifactId = getElementTextValue(artNode);
-        final boolean fIsDependency = isDependency;
-        final boolean fIsPlugin = isPlugin;
+        int startOffset = Math.min(groupReg.getStartOffset(), artReg.getStartOffset());
+        int length = Math.max(groupReg.getEndOffset(), artReg.getEndOffset()) - startOffset;
+        String groupId = getElementTextValue(groupNode);
+        String artifactId = getElementTextValue(artNode);
+        //TODO we shall rely on presence of a cached model, not project alone..
+        final IProject prj = PomContentAssistProcessor.extractProject(textViewer);
+        if (prj != null) {
+          //now we can create the region I guess, 
+          return new ManagedArtifactRegion(startOffset, length, groupId, artifactId, isDependency, isPlugin, prj);
+        }
+      }
+    }
+    return null;
+  }
         
+   private IHyperlink openDPManagement(Node current, ITextViewer textViewer, int offset) {
+      final ManagedArtifactRegion region = findManagedArtifactRegion(current, textViewer, offset);
+      if (region != null) {
         return new IHyperlink() {
           public IRegion getHyperlinkRegion() {
-            return new Region(startOffset, length);
+            return region;
           }
 
           public String getHyperlinkText() {
-            return NLS.bind(Messages.PomHyperlinkDetector_link_managed, "" + groupId + ":" + artifactId); //$NON-NLS-2$ //$NON-NLS-3$
+            return NLS.bind(Messages.PomHyperlinkDetector_link_managed, "" + region.groupId + ":" + region.artifactId);
           }
 
           public String getTypeLabel() {
@@ -235,68 +238,72 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
 
           public void open() {
             //see if we can find the plugin in plugin management of resolved project.
-            IMavenProjectFacade mvnproject = MavenPlugin.getDefault().getMavenProjectManager().getProject(prj);
+            IMavenProjectFacade mvnproject = MavenPlugin.getDefault().getMavenProjectManager().getProject(region.project);
             if (mvnproject != null) {
               MavenProject mavprj = mvnproject.getMavenProject();
               if (mavprj != null) {
-                Model mdl = mavprj.getModel();
-                InputLocation openLocation = null;
-                if (fIsDependency) {
-                  DependencyManagement dm = mdl.getDependencyManagement();
-                  if (dm != null) {
-                    List<Dependency> list = dm.getDependencies();
-                    String id = groupId + ":" + artifactId + ":"; //$NON-NLS-1$ //$NON-NLS-2$
-                    if (list != null) {
-                      for (Dependency dep : list) {
-                        if (dep.getManagementKey().startsWith(id)) {
-                          InputLocation location = dep.getLocation("artifactId"); //$NON-NLS-1$
-                          //when would this be null?
-                          if (location != null) {
-                            openLocation = location;
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-                if (fIsPlugin) {
-                  Build build = mdl.getBuild();
-                  if (build != null) {
-                    PluginManagement pm = build.getPluginManagement();
-                    if (pm != null) {
-                      List<Plugin> list = pm.getPlugins();
-                      String id = Plugin.constructKey(groupId, artifactId);
-                      if (list != null) {
-                        for (Plugin plg : list) {
-                          if (id.equals(plg.getKey())) {
-                            InputLocation location = plg.getLocation("artifactId"); //$NON-NLS-1$
-                            //when would this be null?
-                            if (location != null) {
-                              openLocation = location;
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
+                InputLocation openLocation = findLocationForManagedArtifact(region, mavprj);
                 if (openLocation != null) {
                   String loc = openLocation.getSource().getLocation();
                   File file = new File(loc);
                   IFileStore fileStore = EFS.getLocalFileSystem().getStore(file.toURI());
-
                   openXmlEditor(fileStore, openLocation.getLineNumber(), openLocation.getColumnNumber());
                 }
               }
             }
           }
+
         };
-        
-      }
     }
     return null;
   }
   
+   
+  static InputLocation findLocationForManagedArtifact(final ManagedArtifactRegion region, MavenProject mavprj) {
+     Model mdl = mavprj.getModel();
+     InputLocation openLocation = null;
+     if (region.isDependency) {
+       DependencyManagement dm = mdl.getDependencyManagement();
+       if (dm != null) {
+         List<Dependency> list = dm.getDependencies();
+         String id = region.groupId + ":" + region.artifactId + ":"; //$NON-NLS-1$ //$NON-NLS-2$
+         if (list != null) {
+           for (Dependency dep : list) {
+             if (dep.getManagementKey().startsWith(id)) {
+               InputLocation location = dep.getLocation("artifactId"); //$NON-NLS-1$
+               //when would this be null?
+               if (location != null) {
+                 openLocation = location;
+               }
+             }
+           }
+         }
+       }
+     }
+     if (region.isPlugin) {
+       Build build = mdl.getBuild();
+       if (build != null) {
+         PluginManagement pm = build.getPluginManagement();
+         if (pm != null) {
+           List<Plugin> list = pm.getPlugins();
+           String id = Plugin.constructKey(region.groupId, region.artifactId);
+           if (list != null) {
+             for (Plugin plg : list) {
+               if (id.equals(plg.getKey())) {
+                 InputLocation location = plg.getLocation("artifactId"); //$NON-NLS-1$
+                 //when would this be null?
+                 if (location != null) {
+                   openLocation = location;
+                 }
+               }
+             }
+           }
+         }
+       }
+     }
+     return openLocation;
+   }
+   
   static String getElementTextValue(Node element) {
     if (element == null) return null;
     StringBuffer buff = new StringBuffer();
@@ -311,32 +318,48 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
     return buff.toString();
   }
 
-  private IHyperlink openPropertyDefinition(String value, Text node, ITextViewer viewer, int offset) {
-    assert node instanceof IndexedRegion;
-    IndexedRegion reg = (IndexedRegion)node;
-    int index = offset - reg.getStartOffset();
-    String before = value.substring(0, Math.min (index + 1, value.length()));
-    String after = value.substring(Math.min (index + 1, value.length()));
-    int start = before.lastIndexOf("${"); //$NON-NLS-1$
-    int end = after.indexOf("}"); //$NON-NLS-1$
-    if (start > -1 && end > -1) {
-      final int startOffset = reg.getStartOffset() + start;
-      final String expr = before.substring(start) + after.substring(0, end + 1);
-      final int length = expr.length();
-      final String prop = before.substring(start + 2) + after.substring(0, end);
-      if (prop.startsWith("project.") || prop.startsWith("pom.")) { //$NON-NLS-1$ //$NON-NLS-2$
-        return null; //ignore these, not in properties section.
+  static ExpressionRegion findExpressionRegion(Node current, ITextViewer viewer, int offset) {
+    if (current != null && current instanceof Text) {
+      Text node = (Text)current;
+      String value = node.getNodeValue();
+      if (value != null) {
+        assert node instanceof IndexedRegion;
+        IndexedRegion reg = (IndexedRegion)node;
+        int index = offset - reg.getStartOffset();
+        String before = value.substring(0, Math.min (index + 1, value.length()));
+        String after = value.substring(Math.min (index + 1, value.length()));
+        int start = before.lastIndexOf("${"); //$NON-NLS-1$
+        int end = after.indexOf("}"); //$NON-NLS-1$
+        if (start > -1 && end > -1) {
+          final int startOffset = reg.getStartOffset() + start;
+          final String expr = before.substring(start) + after.substring(0, end + 1);
+          final int length = expr.length();
+          final String prop = before.substring(start + 2) + after.substring(0, end);
+          if (prop.startsWith("project.") || prop.startsWith("pom.")) { //$NON-NLS-1$ //$NON-NLS-2$
+            return null; //ignore these, not in properties section.
+          }
+          final IProject prj = PomContentAssistProcessor.extractProject(viewer);
+          //TODO we shall rely on presence of a cached model, not project alone.. ]MNGECLIPSE-2540
+          if (prj != null) {
+            return new ExpressionRegion(startOffset, length, prop, prj);
+          }
+        }
       }
-      final IProject prj = PomContentAssistProcessor.extractProject(viewer);
-      //TODO we shall rely on presence of a cached model, not project alone..
-      if (prj != null) {
+    }
+    return null;
+  }
+    
+        
+   private IHyperlink openPropertyDefinition(Node current, ITextViewer viewer, int offset) {
+     final ExpressionRegion region = findExpressionRegion(current, viewer, offset);
+     if (region != null) {
         return new IHyperlink() {
           public IRegion getHyperlinkRegion() {
-            return new Region(startOffset, length);
+            return region;
           }
 
           public String getHyperlinkText() {
-            return NLS.bind(Messages.PomHyperlinkDetector_open_property, prop);
+            return NLS.bind(Messages.PomHyperlinkDetector_open_property, region.property);
           }
 
           public String getTypeLabel() {
@@ -345,13 +368,13 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
 
           public void open() {
             //see if we can find the plugin in plugin management of resolved project.
-            IMavenProjectFacade mvnproject = MavenPlugin.getDefault().getMavenProjectManager().getProject(prj);
+            IMavenProjectFacade mvnproject = MavenPlugin.getDefault().getMavenProjectManager().getProject(region.project);
             if(mvnproject != null) {
               MavenProject mavprj = mvnproject.getMavenProject();
               if(mavprj != null) {
                 Model mdl = mavprj.getModel();
-                if (mdl.getProperties().containsKey(prop)) {
-                  InputLocation location = mdl.getLocation( "properties" ).getLocation( prop ); //$NON-NLS-1$
+                if (mdl.getProperties().containsKey(region.property)) {
+                  InputLocation location = mdl.getLocation( "properties" ).getLocation( region.property ); //$NON-NLS-1$
                   if (location != null) {
                     String loc = location.getSource().getLocation();
                     File file = new File(loc);
@@ -365,8 +388,6 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
             }
           }
         };
-        
-      }
     }
     return null;
   }
@@ -542,7 +563,7 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
    * @param offset
    * @return Node either element, doctype, text, or null
    */
-  private Node getCurrentNode(IDocument document, int offset) {
+  static Node getCurrentNode(IDocument document, int offset) {
     // get the current node at the offset (returns either: element,
     // doctype, text)
     IndexedRegion inode = null;
@@ -611,4 +632,58 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
     }
   }
 
+  
+  static class ExpressionRegion implements IRegion {
+
+    final String property;
+    private int length;
+    private int offset;
+    final IProject project;
+
+    public ExpressionRegion(int startOffset, int length, String prop, IProject project) {
+      this.offset = startOffset;
+      this.length = length;
+      this.property = prop;
+      this.project = project;
+    }
+
+    public int getLength() {
+      return length;
+    }
+
+    public int getOffset() {
+      return offset;
+    }
+  }
+  
+  static class ManagedArtifactRegion implements IRegion {
+
+    private int length;
+    private int offset;
+    final IProject project;
+    final String groupId;
+    final String artifactId;
+    final boolean isPlugin;
+    final boolean isDependency;
+
+    public ManagedArtifactRegion(int startOffset, int length, String groupId, String artifactId, boolean isDependency, boolean isPlugin, IProject project) {
+      this.offset = startOffset;
+      this.length = length;
+      this.project = project;
+      this.artifactId = artifactId;
+      this.groupId = groupId;
+      this.isDependency = isDependency;
+      this.isPlugin = isPlugin;
+    }
+
+    public int getLength() {
+      return length;
+    }
+
+    public int getOffset() {
+      return offset;
+    }
+  }
+  
+  
 }

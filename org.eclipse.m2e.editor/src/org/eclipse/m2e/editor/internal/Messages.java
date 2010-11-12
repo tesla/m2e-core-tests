@@ -308,6 +308,8 @@ public class Messages extends NLS {
 
   public static String OverviewPage_section_scm;
 
+  public static String OverviewPage_selectModuleProjects;
+
   public static String OverviewPage_title;
 
   public static String PluginsComposite_action_Filter;

@@ -560,8 +560,9 @@ public enum PomTemplateContext {
     return version;
   }
 
-  private static String simpleInterpolate(IProject project, String version) {
-    if (version != null && version.contains("${")) { //$NON-NLS-1$
+  //TODO MNGECLIPSE-2540 change project parameter to MavenProject I guess..
+  static String simpleInterpolate(IProject project, String text) {
+    if (text != null && text.contains("${")) { //$NON-NLS-1$
       //when expression is in the version but no project instance around
       // just give up.
       if(project == null) {
@@ -572,20 +573,21 @@ public enum PomTemplateContext {
         MavenProject prj = mvnproject.getMavenProject();
         if (prj != null) {
           Properties props = prj.getProperties();
+          RegexBasedInterpolator inter = new RegexBasedInterpolator();
           if (props != null) {
-            RegexBasedInterpolator inter = new RegexBasedInterpolator();
             inter.addValueSource(new PropertiesBasedValueSource(props));
-            inter.addValueSource(new PrefixedObjectValueSource(Arrays.asList( new String[]{ "pom.", "project." } ), prj.getModel(), false));
-            try {
-              version = inter.interpolate(version);
-            } catch(InterpolationException e) {
-              version = null;
-            }
           }
+          inter.addValueSource(new PrefixedObjectValueSource(Arrays.asList( new String[]{ "pom.", "project." } ), prj.getModel(), false));
+          try {
+            text = inter.interpolate(text);
+          } catch(InterpolationException e) {
+            text = null;
+          }
+          
         }
       }
     }
-    return version;
+    return text;
   }
   
   private static String searchPM(IProject project, String groupId, String artifactId) {
