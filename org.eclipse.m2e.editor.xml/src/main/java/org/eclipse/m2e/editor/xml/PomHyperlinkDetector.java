@@ -108,20 +108,14 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
     final String text = document.get();
     Node current = getCurrentNode(document, offset);
     //check if we have a property expression at cursor
-    if (current != null && current instanceof Text) {
-      Text textNode = (Text)current;
-      String value = textNode.getNodeValue();
-      if (value != null) {
-        IHyperlink link = openPropertyDefinition(value, textNode, textViewer, offset);
-        if (link != null) {
-          hyperlinks.add(link);
-        }
-      }
+    IHyperlink link = openPropertyDefinition(current, textViewer, offset);
+    if (link != null) {
+      hyperlinks.add(link);
     }
     //now check if the dependency/plugin has a version element or not, if not, try searching for it in DM/PM of effective pom
-    IHyperlink mLink = openDPManagement(current, textViewer, offset);
-    if (mLink != null) {
-      hyperlinks.add(mLink);
+    link = openDPManagement(current, textViewer, offset);
+    if (link != null) {
+      hyperlinks.add(link);
     }
     
     //first check all elements that have id (groupId+artifactId+version) combo
@@ -133,7 +127,7 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
     }
     
     if (fragment != null) {
-      IHyperlink link = openPOMbyID(fragment, textViewer);
+      link = openPOMbyID(fragment, textViewer);
       if (link != null) {
         hyperlinks.add(link);
       }
@@ -142,7 +136,7 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
     //TODO rewrite to use Nodes
     fragment = getFragment(text, offset, "<module>", "</module>"); //$NON-NLS-1$ //$NON-NLS-2$
     if (fragment != null) {
-      IHyperlink link = openModule(fragment, textViewer);
+      link = openModule(fragment, textViewer);
       if (link != null) {
         hyperlinks.add(link);
       }
@@ -312,32 +306,48 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
     return buff.toString();
   }
 
-  private IHyperlink openPropertyDefinition(String value, Text node, ITextViewer viewer, int offset) {
-    assert node instanceof IndexedRegion;
-    IndexedRegion reg = (IndexedRegion)node;
-    int index = offset - reg.getStartOffset();
-    String before = value.substring(0, Math.min (index + 1, value.length()));
-    String after = value.substring(Math.min (index + 1, value.length()));
-    int start = before.lastIndexOf("${"); //$NON-NLS-1$
-    int end = after.indexOf("}"); //$NON-NLS-1$
-    if (start > -1 && end > -1) {
-      final int startOffset = reg.getStartOffset() + start;
-      final String expr = before.substring(start) + after.substring(0, end + 1);
-      final int length = expr.length();
-      final String prop = before.substring(start + 2) + after.substring(0, end);
-      if (prop.startsWith("project.") || prop.startsWith("pom.")) { //$NON-NLS-1$ //$NON-NLS-2$
-        return null; //ignore these, not in properties section.
+  static ExpressionRegion findExpressionRegion(Node current, ITextViewer viewer, int offset) {
+    if (current != null && current instanceof Text) {
+      Text node = (Text)current;
+      String value = node.getNodeValue();
+      if (value != null) {
+        assert node instanceof IndexedRegion;
+        IndexedRegion reg = (IndexedRegion)node;
+        int index = offset - reg.getStartOffset();
+        String before = value.substring(0, Math.min (index + 1, value.length()));
+        String after = value.substring(Math.min (index + 1, value.length()));
+        int start = before.lastIndexOf("${"); //$NON-NLS-1$
+        int end = after.indexOf("}"); //$NON-NLS-1$
+        if (start > -1 && end > -1) {
+          final int startOffset = reg.getStartOffset() + start;
+          final String expr = before.substring(start) + after.substring(0, end + 1);
+          final int length = expr.length();
+          final String prop = before.substring(start + 2) + after.substring(0, end);
+          if (prop.startsWith("project.") || prop.startsWith("pom.")) { //$NON-NLS-1$ //$NON-NLS-2$
+            return null; //ignore these, not in properties section.
+          }
+          final IProject prj = PomContentAssistProcessor.extractProject(viewer);
+          //TODO we shall rely on presence of a cached model, not project alone.. ]MNGECLIPSE-2540
+          if (prj != null) {
+            return new ExpressionRegion(startOffset, length, prop, prj);
+          }
+        }
       }
-      final IProject prj = PomContentAssistProcessor.extractProject(viewer);
-      //TODO we shall rely on presence of a cached model, not project alone..
-      if (prj != null) {
+    }
+    return null;
+  }
+    
+        
+   private IHyperlink openPropertyDefinition(Node current, ITextViewer viewer, int offset) {
+     final ExpressionRegion region = findExpressionRegion(current, viewer, offset);
+     if (region != null) {
         return new IHyperlink() {
           public IRegion getHyperlinkRegion() {
-            return new Region(startOffset, length);
+            return region;
           }
 
           public String getHyperlinkText() {
-            return NLS.bind(Messages.PomHyperlinkDetector_open_property, prop);
+            return NLS.bind(Messages.PomHyperlinkDetector_open_property, region.property);
           }
 
           public String getTypeLabel() {
@@ -346,13 +356,13 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
 
           public void open() {
             //see if we can find the plugin in plugin management of resolved project.
-            IMavenProjectFacade mvnproject = MavenPlugin.getDefault().getMavenProjectManager().getProject(prj);
+            IMavenProjectFacade mvnproject = MavenPlugin.getDefault().getMavenProjectManager().getProject(region.project);
             if(mvnproject != null) {
               MavenProject mavprj = mvnproject.getMavenProject();
               if(mavprj != null) {
                 Model mdl = mavprj.getModel();
-                if (mdl.getProperties().containsKey(prop)) {
-                  InputLocation location = mdl.getLocation( "properties" ).getLocation( prop ); //$NON-NLS-1$
+                if (mdl.getProperties().containsKey(region.property)) {
+                  InputLocation location = mdl.getLocation( "properties" ).getLocation( region.property ); //$NON-NLS-1$
                   if (location != null) {
                     String loc = location.getSource().getLocation();
                     File file = new File(loc);
@@ -366,8 +376,6 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
             }
           }
         };
-        
-      }
     }
     return null;
   }
@@ -612,4 +620,29 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
     }
   }
 
+  
+  static class ExpressionRegion implements IRegion {
+
+    final String property;
+    private int length;
+    private int offset;
+    final IProject project;
+
+    public ExpressionRegion(int startOffset, int length, String prop, IProject project) {
+      this.offset = startOffset;
+      this.length = length;
+      this.property = prop;
+      this.project = project;
+    }
+
+    public int getLength() {
+      return length;
+    }
+
+    public int getOffset() {
+      return offset;
+    }
+    
+  }
+  
 }
