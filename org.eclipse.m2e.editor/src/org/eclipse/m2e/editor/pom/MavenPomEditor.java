@@ -301,11 +301,12 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
         IMarker[] markers = pomFile.findMarkers(IMavenConstants.MARKER_ID, true, IResource.DEPTH_ZERO);
         final String msg = markers != null && markers.length > 0 //
             ? markers[0].getAttribute(IMarker.MESSAGE, "Unknown error") : null;
+        final int severity = markers != null && markers.length > 0 ? (markers[0].getAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR) == IMarker.SEVERITY_WARNING ? IMessageProvider.WARNING : IMessageProvider.ERROR) : IMessageProvider.NONE;
         
         Display.getDefault().asyncExec(new Runnable() {
           public void run() {
             for(MavenPomEditorPage page : pages) {
-              page.setErrorMessage(msg, msg == null ? IMessageProvider.NONE : IMessageProvider.ERROR);
+              page.setErrorMessage(msg, msg == null ? IMessageProvider.NONE : severity);
             }
           }
         });
@@ -751,7 +752,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
         ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
         MavenModelManager modelManager = MavenPlugin.getDefault().getMavenModelManager();
         PomResourceImpl resource = modelManager.loadResource(pomFile);
-        projectDocument = (Model)resource.getContents().get(0);
+        projectDocument = resource.getModel();
 
       } else if(input instanceof IStorageEditorInput) {
         IStorageEditorInput storageInput = (IStorageEditorInput) input;

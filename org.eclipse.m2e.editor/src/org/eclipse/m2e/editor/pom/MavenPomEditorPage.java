@@ -192,7 +192,8 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
             if(pomFile!=null) {
               IMarker[] markers = pomFile.findMarkers(IMavenConstants.MARKER_ID, true, IResource.DEPTH_ZERO);
               if(markers != null && markers.length > 0) {
-                setErrorMessage(markers[0].getAttribute(IMarker.MESSAGE, Messages.MavenPomEditorPage_error_unknown), IMessageProvider.ERROR);
+                int severity = markers[0].getAttribute(IMarker.SEVERITY, IMarker.SEVERITY_INFO) == IMarker.SEVERITY_WARNING ? IMessageProvider.WARNING : IMessageProvider.ERROR;
+                setErrorMessage(markers[0].getAttribute(IMarker.MESSAGE, Messages.MavenPomEditorPage_error_unknown), severity);
               } else {
                 setErrorMessage(null, IMessageProvider.NONE);
               }
