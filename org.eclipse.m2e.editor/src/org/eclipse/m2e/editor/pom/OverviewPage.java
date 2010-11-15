@@ -81,6 +81,10 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.StackLayout;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DropTargetAdapter;
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -106,6 +110,7 @@ import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.part.FileEditorInput;
+import org.eclipse.ui.part.ResourceTransfer;
 
 
 /**
@@ -654,6 +659,26 @@ public class OverviewPage extends MavenPomEditorPage {
         }
       }
     });
+
+    modulesEditor.getViewer().addDropSupport(DND.DROP_COPY | DND.DROP_LINK | DND.DROP_MOVE,
+        new Transfer[] {ResourceTransfer.getInstance()}, new DropTargetAdapter() {
+          @Override
+          public void dragEnter(DropTargetEvent event) {
+            event.detail = DND.DROP_LINK;
+          }
+
+          @Override
+          public void dragOperationChanged(DropTargetEvent event) {
+            event.detail = DND.DROP_LINK;
+          }
+
+          @Override
+          public void drop(DropTargetEvent event) {
+            if(event.data instanceof Object[]) {
+              addSelectedModules((Object[]) event.data);
+            }
+          }
+        });
 
     newModuleProjectAction = new Action(Messages.OverviewPage_action_new_module_project, MavenEditorImages.ADD_MODULE) {
       public void run() {
@@ -1279,31 +1304,49 @@ public class OverviewPage extends MavenPomEditorPage {
     final IPath projectPath = getProject().getLocation();
 
     for(Object selection : result) {
-      if(selection instanceof IContainer) {
-        IContainer container = (IContainer) selection;
-        IPath resultPath = container.getLocation();
-        IFile pomFile = container.getFile(new Path(IMavenConstants.POM_FILE_NAME));
-        String path = resultPath.makeRelativeTo(projectPath).toString();
-        
-        if(!model.getModules().contains(path)) {
-          final String relativePath = projectPath.makeRelativeTo(resultPath).toString();
-          MavenPlugin.getDefault().getMavenModelManager().updateProject(pomFile, new ProjectUpdater() {
-            public void update(Model model) {
-              Parent parent = model.getParent();
-              if(parent == null) {
-                parent = PomFactory.eINSTANCE.createParent();
-                model.setParent(parent);
-              }
-              parent.setGroupId(parentGroupId);
-              parent.setArtifactId(parentArtifactId);
-              parent.setVersion(parentVersion);
-              parent.setRelativePath(relativePath);
-            }
-          });
+      IContainer container = null;
+      IFile pomFile = null;
 
-          createNewModule(path);
+      if(selection instanceof IFile) {
+        pomFile = (IFile) selection;
+        if(!IMavenConstants.POM_FILE_NAME.equals(pomFile.getName())) {
+          continue;
         }
+        container = pomFile.getParent();
+      } else if(selection instanceof IContainer && !selection.equals(getProject())) {
+        container = (IContainer) selection;
+        pomFile = container.getFile(new Path(IMavenConstants.POM_FILE_NAME));
+      }
+
+      if(pomFile == null||container == null) {
+        continue;
+      }
+
+      IPath resultPath = container.getLocation();
+      String path = resultPath.makeRelativeTo(projectPath).toString();
+
+      if(!model.getModules().contains(path)) {
+        final String relativePath = projectPath.makeRelativeTo(resultPath).toString();
+        MavenPlugin.getDefault().getMavenModelManager().updateProject(pomFile, new ProjectUpdater() {
+          public void update(Model model) {
+            Parent parent = model.getParent();
+            if(parent == null) {
+              parent = PomFactory.eINSTANCE.createParent();
+              model.setParent(parent);
+            }
+            parent.setGroupId(parentGroupId);
+            parent.setArtifactId(parentArtifactId);
+            parent.setVersion(parentVersion);
+            parent.setRelativePath(relativePath);
+          }
+        });
+
+        createNewModule(path);
       }
     }
+  }
+  
+  private boolean checkDrop( ){
+    return true;
   }
 }
