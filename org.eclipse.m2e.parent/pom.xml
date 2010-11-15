@@ -87,12 +87,12 @@
 		<module>../org.eclipse.m2e.refactoring</module>
 		<module>../org.eclipse.m2e.editor.xml</module>
 		<module>../org.eclipse.m2e.editor</module>
-		<module>../org.eclipse.m2e.pr</module>
+<!--		<module>../org.eclipse.m2e.pr</module>-->
 
 		<module>../org.eclipse.m2e.tests.common</module>
 		<module>../org.eclipse.m2e.tests</module>
 		<module>../org.eclipse.m2e.editor.xml.tests</module>
-		<module>../org.eclipse.m2e.pr.tests</module>
+<!--		<module>../org.eclipse.m2e.pr.tests</module>-->
 		<module>../org.eclipse.m2e.integration.tests.common</module>
 
 		<!-- features -->

@@ -3,7 +3,7 @@
       id="org.eclipse.m2e.site"
       label="Maven Integration for Eclipse Update Site"
       version="0.13.0.qualifier"
-      provider-name="Sonatype, Inc.">
+      provider-name="Eclipse.org">
 
    <includes
          id="org.eclipse.m2e.feature"
