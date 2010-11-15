@@ -11,7 +11,11 @@
 
 package org.eclipse.m2e.editor.xml;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+
+import org.w3c.dom.Node;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -19,6 +23,7 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext;
 import org.eclipse.jface.text.quickassist.IQuickAssistProcessor;
 import org.eclipse.jface.text.source.Annotation;
+import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
@@ -47,15 +52,20 @@ public class PomQuickAssistProcessor implements IQuickAssistProcessor {
   }
   
   public ICompletionProposal[] computeQuickAssistProposals(IQuickAssistInvocationContext context) {
+   List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
    Iterator<Annotation> annotationIterator = context.getSourceViewer().getAnnotationModel().getAnnotationIterator();
    while(annotationIterator.hasNext()){
      Annotation annotation = annotationIterator.next();
      if(NO_SCHEMA_ERR.equals(annotation.getText())){
        IDOMNode node = (IDOMNode) ContentAssistUtils.getNodeAt(context.getSourceViewer(), context.getOffset());
        if(node != null && PROJECT_NODE.equals(node.getNodeName())){
-         return new ICompletionProposal[]{new SchemaCompletionProposal(context)};
+         proposals.add(new SchemaCompletionProposal(context));
        }
      }
+   }
+   
+   if (proposals.size() > 0) {
+     return proposals.toArray(new ICompletionProposal[0]);
    }
    return null;
   }
