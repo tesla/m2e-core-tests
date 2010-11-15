@@ -8,10 +8,6 @@
 <repository location="http://download.eclipse.org/eclipse/updates/3.5"/>
 </location>
 <location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
-<unit id="org.eclipse.zest.sdk.feature.group" version="1.1.2.v20100111-1352-6658CNDT4R8WTQUMhLVdgPbPObOX"/>
-<repository location="http://download.eclipse.org/releases/galileo"/>
-</location>
-<location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
 <unit id="org.eclipse.gef.sdk.feature.group" version="3.5.2.v20100111-1352-7G7O5A5WNXWQF_OVSWjaZLTWkNKY"/>
 <repository location="http://download.eclipse.org/releases/galileo"/>
 </location>
