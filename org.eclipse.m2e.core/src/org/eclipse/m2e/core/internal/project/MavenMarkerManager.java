@@ -94,9 +94,9 @@ public class MavenMarkerManager implements IMavenMarkerManager {
     DependencyResolutionResult resolutionResult = result.getDependencyResolutionResult();
     if(resolutionResult != null) {
       // @see also addMissingArtifactMarkers
-      addErrorMarkers(pomFile, "Metadata resolution error", resolutionResult.getCollectionErrors());
+      addErrorMarkers(pomFile, org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_metadata_resolution, resolutionResult.getCollectionErrors());
       for(Dependency dependency : resolutionResult.getUnresolvedDependencies()) {
-        addErrorMarkers(pomFile, "Artifact error", resolutionResult.getResolutionErrors(dependency));
+        addErrorMarkers(pomFile, org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_error_artifact, resolutionResult.getResolutionErrors(dependency));
       }
     }
 
@@ -124,11 +124,11 @@ public class MavenMarkerManager implements IMavenMarkerManager {
       Element root = domModel.getDocument().getDocumentElement();
 
       //now check parent version and groupid against the current project's ones..
-      if (root.getNodeName().equals("project")) {
-        Element parent = findChildElement(root, "parent");
-        Element groupId = findChildElement(root, "groupId");
+      if (root.getNodeName().equals("project")) { //$NON-NLS-1$
+        Element parent = findChildElement(root, "parent"); //$NON-NLS-1$
+        Element groupId = findChildElement(root, "groupId"); //$NON-NLS-1$
         if (parent != null && groupId != null) {
-          Element parentGroupId = findChildElement(parent, "groupId");
+          Element parentGroupId = findChildElement(parent, "groupId"); //$NON-NLS-1$
           if (parentGroupId != null) {
             //now compare the values of parent and project groupid..
             String parentString = getElementTextValue(parentGroupId);
@@ -137,15 +137,17 @@ public class MavenMarkerManager implements IMavenMarkerManager {
               //now figure out the offset
               if (groupId instanceof IndexedRegion) {
                 IndexedRegion off = (IndexedRegion)groupId;
-                IMarker mark = addMarker(pomFile, "GroupId is duplicate of parent groupId", document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING);
-                mark.setAttribute("editor_hint", "parent_groupid");
+                IMarker mark = addMarker(pomFile, org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_duplicate_groupid, document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING);
+                mark.setAttribute("editor_hint", "parent_groupid"); //$NON-NLS-1$ //$NON-NLS-2$
+                mark.setAttribute(IMarker.CHAR_START, off.getStartOffset());
+                mark.setAttribute(IMarker.CHAR_END, off.getEndOffset());
               }
             }
           }
         }
-        Element version = findChildElement(root, "version");
+        Element version = findChildElement(root, "version"); //$NON-NLS-1$
         if (parent != null && version != null) {
-          Element parentVersion = findChildElement(parent, "version");
+          Element parentVersion = findChildElement(parent, "version"); //$NON-NLS-1$
           if (parentVersion != null) {
             //now compare the values of parent and project version..
             String parentString = getElementTextValue(parentVersion);
@@ -154,8 +156,10 @@ public class MavenMarkerManager implements IMavenMarkerManager {
               //now figure out the offset
               if (version instanceof IndexedRegion) {
                 IndexedRegion off = (IndexedRegion)version;
-                IMarker mark = addMarker(pomFile, "Version is duplicate of parent version", document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING);
-                mark.setAttribute("editor_hint", "parent_version");
+                IMarker mark = addMarker(pomFile, org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_duplicate_version, document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING);
+                mark.setAttribute("editor_hint", "parent_version"); //$NON-NLS-1$ //$NON-NLS-2$
+                mark.setAttribute(IMarker.CHAR_START, off.getStartOffset());
+                mark.setAttribute(IMarker.CHAR_END, off.getEndOffset());
               }
             }
           }

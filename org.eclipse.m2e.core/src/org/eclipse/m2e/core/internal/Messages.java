@@ -440,11 +440,19 @@ public class Messages extends NLS {
 
   public static String MavenInstallFileWizard_title;
 
+  public static String MavenMarkerManager_duplicate_groupid;
+
+  public static String MavenMarkerManager_duplicate_version;
+
+  public static String MavenMarkerManager_error_artifact;
+
   public static String MavenMarkerManager_error_missing;
 
   public static String MavenMarkerManager_error_noschema;
 
   public static String MavenMarkerManager_error_offline;
+
+  public static String MavenMarkerManager_metadata_resolution;
 
   public static String MavenMaterializePomWizard_btnCheckout;
 
