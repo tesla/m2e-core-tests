@@ -58,4 +58,9 @@ public interface IMavenConstants {
 
   public static final String INDEX_UPDATE_PROP = "indexUpdate"; //$NON-NLS-1$
 
+  /**
+   * 
+   */
+  public static final String MARKER_ATTR_EDITOR_HINT = "editor_hint";
+
 }

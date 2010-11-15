@@ -138,7 +138,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
               if (groupId instanceof IndexedRegion) {
                 IndexedRegion off = (IndexedRegion)groupId;
                 IMarker mark = addMarker(pomFile, org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_duplicate_groupid, document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING);
-                mark.setAttribute("editor_hint", "parent_groupid"); //$NON-NLS-1$ //$NON-NLS-2$
+                mark.setAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, "parent_groupid"); //$NON-NLS-1$ //$NON-NLS-2$
                 mark.setAttribute(IMarker.CHAR_START, off.getStartOffset());
                 mark.setAttribute(IMarker.CHAR_END, off.getEndOffset());
               }
@@ -157,7 +157,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
               if (version instanceof IndexedRegion) {
                 IndexedRegion off = (IndexedRegion)version;
                 IMarker mark = addMarker(pomFile, org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_duplicate_version, document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING);
-                mark.setAttribute("editor_hint", "parent_version"); //$NON-NLS-1$ //$NON-NLS-2$
+                mark.setAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, "parent_version"); //$NON-NLS-1$ //$NON-NLS-2$
                 mark.setAttribute(IMarker.CHAR_START, off.getStartOffset());
                 mark.setAttribute(IMarker.CHAR_END, off.getEndOffset());
               }
@@ -234,6 +234,9 @@ public class MavenMarkerManager implements IMavenMarkerManager {
                 //editor/source viewer
                 if(marker != null){
                   marker.setAttribute(OFFSET, offset);
+                  marker.setAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, "schema"); //$NON-NLS-1$ //$NON-NLS-2$
+                  marker.setAttribute(IMarker.CHAR_START, documentRegion.getStartOffset());
+                  marker.setAttribute(IMarker.CHAR_END, documentRegion.getEndOffset());
                 }
               }
               // there could only be one project tag
