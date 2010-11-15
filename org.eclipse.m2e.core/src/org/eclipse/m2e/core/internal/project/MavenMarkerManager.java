@@ -14,6 +14,11 @@ package org.eclipse.m2e.core.internal.project;
 import java.util.List;
 import java.util.Set;
 
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -21,6 +26,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.sse.core.StructuredModelManager;
+import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocumentRegion;
 import org.eclipse.wst.sse.core.internal.provisional.text.ITextRegion;
@@ -100,8 +106,99 @@ public class MavenMarkerManager implements IMavenMarkerManager {
     }
     
     checkForSchema(pomFile);
-
+    //mkleint: adding here but I'm sort of not entirely clear what the usage patter of this class is.
+    checkVarious(pomFile);
   }
+
+  /**
+   * @param pomFile
+   */
+  private void checkVarious(IResource pomFile) {
+    IDOMModel domModel = null;
+    try{
+      if(!(pomFile instanceof IFile)){
+        return;
+      }
+      domModel = (IDOMModel)StructuredModelManager.getModelManager().getModelForRead((IFile)pomFile);
+      IStructuredDocument document = domModel.getStructuredDocument();
+      Element root = domModel.getDocument().getDocumentElement();
+
+      //now check parent version and groupid against the current project's ones..
+      if (root.getNodeName().equals("project")) {
+        Element parent = findChildElement(root, "parent");
+        Element groupId = findChildElement(root, "groupId");
+        if (parent != null && groupId != null) {
+          Element parentGroupId = findChildElement(parent, "groupId");
+          if (parentGroupId != null) {
+            //now compare the values of parent and project groupid..
+            String parentString = getElementTextValue(parentGroupId);
+            String childString = getElementTextValue(groupId);
+            if (parentString != null && parentString.equals(childString)) {
+              //now figure out the offset
+              if (groupId instanceof IndexedRegion) {
+                IndexedRegion off = (IndexedRegion)groupId;
+                IMarker mark = addMarker(pomFile, "GroupId is duplicate of parent groupId", document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING);
+                mark.setAttribute("editor_hint", "parent_groupid");
+              }
+            }
+          }
+        }
+        Element version = findChildElement(root, "version");
+        if (parent != null && version != null) {
+          Element parentVersion = findChildElement(parent, "version");
+          if (parentVersion != null) {
+            //now compare the values of parent and project version..
+            String parentString = getElementTextValue(parentVersion);
+            String childString = getElementTextValue(version);
+            if (parentString != null && parentString.equals(childString)) {
+              //now figure out the offset
+              if (version instanceof IndexedRegion) {
+                IndexedRegion off = (IndexedRegion)version;
+                IMarker mark = addMarker(pomFile, "Version is duplicate of parent version", document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING);
+                mark.setAttribute("editor_hint", "parent_version");
+              }
+            }
+          }
+        }
+      }
+    }
+    catch (Throwable t) {
+      MavenLogger.log("Error checking for warnings", t);
+    }
+    finally {
+      if ( domModel != null ) {
+        domModel.releaseFromRead();
+      }
+    }
+    
+  }
+  
+  private Element findChildElement(Element parent, String name) {
+    NodeList rootList = parent.getChildNodes(); 
+    for (int i = 0; i < rootList.getLength(); i++) {
+        Node nd = rootList.item(i);
+        if (nd instanceof Element) {
+          Element el = (Element)nd;
+          if (name.equals(el.getNodeName())) {
+            return el;
+          }
+        }
+    }
+    return null;
+  }
+  static String getElementTextValue(Node element) {
+    if (element == null) return null;
+    StringBuffer buff = new StringBuffer();
+    NodeList list = element.getChildNodes();
+    for (int i = 0; i < list.getLength(); i++) {
+      Node child = list.item(i);
+      if (child instanceof Text) {
+        Text text = (Text)child;
+        buff.append(text.getData());
+      }
+    }
+    return buff.toString();
+  }  
 
   /**
    * The xsi:schema info is not part of the model, it is stored in the xml only. Need to open the DOM
@@ -154,7 +251,6 @@ public class MavenMarkerManager implements IMavenMarkerManager {
   public IMarker addMarker(IResource resource, String message, int lineNumber, int severity) {
      return addMarker(resource, message, lineNumber, severity, true); 
   }
-
 
   private IMarker addMarker(IResource resource, String message, int lineNumber, int severity, boolean isTransient) {
     IMarker marker = null;
