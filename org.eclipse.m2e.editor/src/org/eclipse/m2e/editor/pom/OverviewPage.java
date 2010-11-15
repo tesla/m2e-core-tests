@@ -1318,7 +1318,7 @@ public class OverviewPage extends MavenPomEditorPage {
         pomFile = container.getFile(new Path(IMavenConstants.POM_FILE_NAME));
       }
 
-      if(pomFile == null||container == null) {
+      if(pomFile == null || !pomFile.exists() || container == null) {
         continue;
       }
 
