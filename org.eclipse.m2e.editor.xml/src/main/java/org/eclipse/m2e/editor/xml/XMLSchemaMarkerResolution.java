@@ -31,7 +31,7 @@ import org.eclipse.m2e.editor.xml.internal.Messages;
  *
  * @author dyocum
  */
-public class MavenMarkerResolution implements IMarkerResolution {
+public class XMLSchemaMarkerResolution implements IMarkerResolution {
 
   /* (non-Javadoc)
    * @see org.eclipse.ui.IMarkerResolution#getLabel()

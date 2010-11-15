@@ -15,6 +15,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.IMarkerResolutionGenerator;
+import org.eclipse.ui.IMarkerResolutionGenerator2;
 
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.core.MavenLogger;
@@ -25,7 +26,7 @@ import org.eclipse.m2e.core.core.MavenLogger;
  * 
  * @author dyocum
  */
-public class MavenMarkerResolutionGenerator implements IMarkerResolutionGenerator {
+public class MavenMarkerResolutionGenerator implements IMarkerResolutionGenerator, IMarkerResolutionGenerator2 {
 
   /* (non-Javadoc)
    * @see org.eclipse.ui.IMarkerResolutionGenerator#getResolutions(org.eclipse.core.resources.IMarker)
@@ -39,13 +40,28 @@ public class MavenMarkerResolutionGenerator implements IMarkerResolutionGenerato
       type = ""; //$NON-NLS-1$
     }
     if(IMavenConstants.MARKER_ID.equals(type)) {
-      Integer offset = (Integer) marker.getAttribute("offset", -1); //$NON-NLS-1$
+      String hint = marker.getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, ""); //$NON-NLS-1$
       //only provide a quickfix for the schema marker
-      if(offset != -1) {
-        return new IMarkerResolution[] {new MavenMarkerResolution()};
+      if("schema".equals(hint)) {
+        return new IMarkerResolution[] {new XMLSchemaMarkerResolution()};
+      }
+      if ("parent_version".equals(hint)) {
+      }
+      if ("parent_groupid".equals(hint)) {
       }
     }
     return new IMarkerResolution[0];
+  }
+
+  public boolean hasResolutions(IMarker marker) {
+    String type;
+    try {
+      type = marker.getType();
+    } catch(CoreException e) {
+      MavenLogger.log(e);
+      type = ""; //$NON-NLS-1$
+    }
+    return IMavenConstants.MARKER_ID.equals(type);
   }
 
 }
