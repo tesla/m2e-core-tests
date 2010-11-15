@@ -2,7 +2,7 @@
 <feature
       id="org.maven.ide.eclipse.sdk.feature"
       label="M2Eclipse Extensions Development Support (Optional)"
-      version="0.12.20101114"
+      version="0.12.0.20101115-1102"
       provider-name="Sonatype, Inc.">
 
    <description url="http://m2eclipse.sonatype.org/">
