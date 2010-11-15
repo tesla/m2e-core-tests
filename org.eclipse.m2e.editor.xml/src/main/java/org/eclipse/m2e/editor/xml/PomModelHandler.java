@@ -61,8 +61,7 @@ public class PomModelHandler extends ModelHandlerForXML {
     @Override
     public List getAdapterFactories() {
       List result = new ArrayList();
-      INodeAdapterFactory factory = null;
-      factory = new ModelQueryAdapterFactoryForPom();
+      INodeAdapterFactory factory = new ModelQueryAdapterFactoryForPom();
       result.add(factory);
       return result;
     }
