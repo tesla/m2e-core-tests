@@ -58,6 +58,16 @@
             <artifactId>plexus-utils</artifactId>
             <version>2.0.4</version>
           </dependency>
+          <dependency>
+            <groupId>org.codehaus.plexus</groupId>
+            <artifactId>plexus-classworlds</artifactId>
+            <version>2.3</version>
+          </dependency>
+          <dependency>
+            <groupId>org.codehaus.plexus</groupId>
+            <artifactId>plexus-component-annotations</artifactId>
+            <version>1.5.5</version>
+          </dependency>
         </dependencies>
       </dependencyManagement>
       <dependencies>
@@ -72,6 +82,16 @@
               <groupId>org.apache.maven.wagon</groupId>
               <artifactId>wagon-http-lightweight</artifactId>
             </exclusion>
+            <!-- MNGECLIPSE-2505 Start: Exclude sisu-inject-bean and sisu-inject-plexus -->
+            <exclusion>
+              <groupId>org.sonatype.sisu</groupId>
+              <artifactId>sisu-inject-bean</artifactId>
+            </exclusion>
+            <exclusion>
+              <groupId>org.sonatype.sisu</groupId>
+              <artifactId>sisu-inject-plexus</artifactId>
+            </exclusion>
+            <!-- MNGECLIPSE-2505 End: Exclude sisu-inject-bean and sisu-inject-plexus -->
           </exclusions>
         </dependency>
         <dependency>
@@ -94,6 +114,184 @@
           <artifactId>aether-connector-http</artifactId>
           <version>1.7.0</version>
         </dependency>
+        <!-- MNGECLIPSE-2505 Start: Add replacements for sisu-inject-bean, sisu-inject-plexus, sisu-guice -->
+        <dependency>
+          <groupId>javax.inject</groupId>
+          <artifactId>javax.inject</artifactId>
+          <version>1</version>
+        </dependency>
+        <dependency>
+          <groupId>asm</groupId>
+          <artifactId>asm</artifactId>
+          <version>3.2</version>
+        </dependency>
+        <dependency>
+          <groupId>org.sonatype.sisu.inject</groupId>
+          <artifactId>guice-bean-binders</artifactId>
+          <version>1.4.2</version>
+          <exclusions>
+            <!-- MNGECLIPSE-2505 Start: Exclude sisu-guice -->
+            <exclusion>
+              <groupId>org.sonatype.sisu</groupId>
+              <artifactId>sisu-guice</artifactId>
+            </exclusion>
+            <exclusion>
+              <groupId>aopalliance</groupId>
+              <artifactId>aopalliance</artifactId>
+            </exclusion>
+            <!-- MNGECLIPSE-2505 End: Exclude sisu-guice -->
+          </exclusions>
+        </dependency>
+        <dependency>
+          <groupId>org.sonatype.sisu.inject</groupId>
+          <artifactId>guice-bean-converters</artifactId>
+          <version>1.4.2</version>
+          <exclusions>
+            <!-- MNGECLIPSE-2505 Start: Exclude sisu-guice -->
+            <exclusion>
+              <groupId>org.sonatype.sisu</groupId>
+              <artifactId>sisu-guice</artifactId>
+            </exclusion>
+            <!-- MNGECLIPSE-2505 End: Exclude sisu-guice -->
+          </exclusions>
+        </dependency>
+        <dependency>
+          <groupId>org.sonatype.sisu.inject</groupId>
+          <artifactId>guice-bean-inject</artifactId>
+          <version>1.4.2</version>
+          <exclusions>
+            <!-- MNGECLIPSE-2505 Start: Exclude sisu-guice -->
+            <exclusion>
+              <groupId>org.sonatype.sisu</groupId>
+              <artifactId>sisu-guice</artifactId>
+            </exclusion>
+            <!-- MNGECLIPSE-2505 End: Exclude sisu-guice -->
+          </exclusions>
+        </dependency>
+        <dependency>
+          <groupId>org.sonatype.sisu.inject</groupId>
+          <artifactId>guice-bean-locators</artifactId>
+          <version>1.4.2</version>
+          <exclusions>
+            <!-- MNGECLIPSE-2505 Start: Exclude sisu-guice -->
+            <exclusion>
+              <groupId>org.sonatype.sisu</groupId>
+              <artifactId>sisu-guice</artifactId>
+            </exclusion>
+            <!-- MNGECLIPSE-2505 End: Exclude sisu-guice -->
+          </exclusions>
+        </dependency>
+        <dependency>
+          <groupId>org.sonatype.sisu.inject</groupId>
+          <artifactId>guice-bean-reflect</artifactId>
+          <version>1.4.2</version>
+          <exclusions>
+            <!-- MNGECLIPSE-2505 Start: Exclude sisu-guice -->
+            <exclusion>
+              <groupId>org.sonatype.sisu</groupId>
+              <artifactId>sisu-guice</artifactId>
+            </exclusion>
+            <!-- MNGECLIPSE-2505 End: Exclude sisu-guice -->
+          </exclusions>
+        </dependency>
+        <dependency>
+          <groupId>org.sonatype.sisu.inject</groupId>
+          <artifactId>guice-bean-scanners</artifactId>
+          <version>1.4.2</version>
+        </dependency>
+        <dependency>
+          <groupId>org.sonatype.sisu.inject</groupId>
+          <artifactId>guice-plexus-binders</artifactId>
+          <version>1.4.2</version>
+          <exclusions>
+            <!-- MNGECLIPSE-2505 Start: Exclude sisu-guice -->
+            <exclusion>
+              <groupId>org.sonatype.sisu</groupId>
+              <artifactId>sisu-guice</artifactId>
+            </exclusion>
+            <!-- MNGECLIPSE-2505 End: Exclude sisu-guice -->
+          </exclusions>
+        </dependency>
+        <dependency>
+          <groupId>org.sonatype.sisu.inject</groupId>
+          <artifactId>guice-plexus-converters</artifactId>
+          <version>1.4.2</version>
+          <exclusions>
+            <!-- MNGECLIPSE-2505 Start: Exclude sisu-guice -->
+            <exclusion>
+              <groupId>org.sonatype.sisu</groupId>
+              <artifactId>sisu-guice</artifactId>
+            </exclusion>
+            <!-- MNGECLIPSE-2505 End: Exclude sisu-guice -->
+          </exclusions>
+        </dependency>
+        <dependency>
+          <groupId>org.sonatype.sisu.inject</groupId>
+          <artifactId>guice-plexus-locators</artifactId>
+          <version>1.4.2</version>
+          <exclusions>
+            <!-- MNGECLIPSE-2505 Start: Exclude sisu-guice -->
+            <exclusion>
+              <groupId>org.sonatype.sisu</groupId>
+              <artifactId>sisu-guice</artifactId>
+            </exclusion>
+            <!-- MNGECLIPSE-2505 End: Exclude sisu-guice -->
+          </exclusions>
+        </dependency>
+        <dependency>
+          <groupId>org.sonatype.sisu.inject</groupId>
+          <artifactId>guice-plexus-metadata</artifactId>
+          <version>1.4.2</version>
+          <exclusions>
+            <!-- MNGECLIPSE-2505 Start: Exclude sisu-guice -->
+            <exclusion>
+              <groupId>org.sonatype.sisu</groupId>
+              <artifactId>sisu-guice</artifactId>
+            </exclusion>
+            <!-- MNGECLIPSE-2505 End: Exclude sisu-guice -->
+          </exclusions>
+        </dependency>
+        <dependency>
+          <groupId>org.sonatype.sisu.inject</groupId>
+          <artifactId>guice-plexus-scanners</artifactId>
+          <version>1.4.2</version>
+          <exclusions>
+            <!-- MNGECLIPSE-2505 Start: Exclude sisu-guice -->
+            <exclusion>
+              <groupId>org.sonatype.sisu</groupId>
+              <artifactId>sisu-guice</artifactId>
+            </exclusion>
+            <!-- MNGECLIPSE-2505 End: Exclude sisu-guice -->
+          </exclusions>
+        </dependency>
+        <dependency>
+          <groupId>org.sonatype.sisu.inject</groupId>
+          <artifactId>guice-plexus-shim</artifactId>
+          <version>1.4.2</version>
+          <exclusions>
+            <!-- MNGECLIPSE-2505 Start: Exclude sisu-guice -->
+            <exclusion>
+              <groupId>org.sonatype.sisu</groupId>
+              <artifactId>sisu-guice</artifactId>
+            </exclusion>
+            <!-- MNGECLIPSE-2505 End: Exclude sisu-guice -->
+          </exclusions>
+        </dependency>
+        <dependency>
+          <groupId>org.sonatype.sisu</groupId>
+          <artifactId>sisu-guice</artifactId>
+          <version>2.1.7</version>
+          <classifier>noaop</classifier>
+          <exclusions>
+            <!-- MNGECLIPSE-2505 Start: Exclude aopalliance -->
+            <exclusion>
+              <groupId>aopalliance</groupId>
+              <artifactId>aopalliance</artifactId>
+            </exclusion>
+            <!-- MNGECLIPSE-2505 End: Exclude aopalliance -->
+          </exclusions>
+        </dependency>
+        <!-- MNGECLIPSE-2505 End: Add replacements for sisu-inject-bean, sisu-inject-plexus, sisu-guice -->
       </dependencies>
     <build>
       <plugins>
