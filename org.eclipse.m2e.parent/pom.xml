@@ -427,6 +427,11 @@
 			<name>Rich Seddon</name>
 			<organization>Sonatype Inc.</organization>
 		</developer>
+		<developer>
+			<id>mkleint</id>
+			<name>Milos Kleint</name>
+			<organization>Sonatype Inc.</organization>
+		</developer>
 	</developers>
 
 	<mailingLists>
