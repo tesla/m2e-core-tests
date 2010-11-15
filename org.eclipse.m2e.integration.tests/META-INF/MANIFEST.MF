@@ -1,8 +1,8 @@
 Bundle-RequiredExecutionEnvironment: J2SE-1.5,
  JavaSE-1.6
-Bundle-Name: Maven Integration Tests Plug-in
+Bundle-Name: %Bundle-Name
 Manifest-Version: 1.0
-Bundle-Vendor: Sonatype, Inc.
+Bundle-Vendor: %Bundle-Vendor
 Bundle-ClassPath: .
 Bundle-SymbolicName: org.eclipse.m2e.integration.tests;singleton:=true
 Bundle-ManifestVersion: 2
