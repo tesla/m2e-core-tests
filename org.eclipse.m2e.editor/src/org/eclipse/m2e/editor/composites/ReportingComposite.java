@@ -47,6 +47,8 @@ import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.index.IIndex;
 import org.eclipse.m2e.core.index.IndexedArtifactFile;
 import org.eclipse.m2e.core.ui.dialogs.MavenRepositorySearchDialog;
+import org.eclipse.m2e.core.util.ProposalUtil;
+import org.eclipse.m2e.core.util.search.Packaging;
 import org.eclipse.m2e.editor.MavenEditorImages;
 import org.eclipse.m2e.editor.composites.PluginsComposite.PluginFilter;
 import org.eclipse.m2e.editor.internal.Messages;
@@ -55,7 +57,6 @@ import org.eclipse.m2e.editor.pom.MavenPomEditorPage;
 import org.eclipse.m2e.editor.pom.SearchControl;
 import org.eclipse.m2e.editor.pom.SearchMatcher;
 import org.eclipse.m2e.editor.pom.ValueProvider;
-import org.eclipse.m2e.editor.xml.search.Packaging;
 import org.eclipse.m2e.model.edit.pom.PomFactory;
 import org.eclipse.m2e.model.edit.pom.PomPackage;
 import org.eclipse.m2e.model.edit.pom.ReportPlugin;
@@ -333,7 +334,7 @@ public class ReportingComposite extends Composite {
     gd_groupIdText.horizontalIndent = 4;
     groupIdText.setLayoutData(gd_groupIdText);
     groupIdText.setData("name", "groupIdText"); //$NON-NLS-1$ //$NON-NLS-2$
-    FormUtils.addGroupIdProposal(editorPage.getProject(), groupIdText, Packaging.ALL);
+    ProposalUtil.addGroupIdProposal(editorPage.getProject(), groupIdText, Packaging.ALL);
     
     Hyperlink artifactIdHyperlink = toolkit.createHyperlink(pluginDetailsComposite, Messages.ReportingComposite_lblArtifactId, SWT.NONE);
     artifactIdHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
@@ -355,7 +356,7 @@ public class ReportingComposite extends Composite {
     gd_artifactIdText.horizontalIndent = 4;
     artifactIdText.setLayoutData(gd_artifactIdText);
     artifactIdText.setData("name", "artifactIdText"); //$NON-NLS-1$ //$NON-NLS-2$
-    FormUtils.addArtifactIdProposal(editorPage.getProject(), groupIdText, artifactIdText, Packaging.ALL);
+    ProposalUtil.addArtifactIdProposal(editorPage.getProject(), groupIdText, artifactIdText, Packaging.ALL);
 
     toolkit.createLabel(pluginDetailsComposite, Messages.ReportingComposite_lblVersion, SWT.NONE);
 
@@ -364,7 +365,7 @@ public class ReportingComposite extends Composite {
     gd_versionText.horizontalIndent = 4;
     versionText.setLayoutData(gd_versionText);
     versionText.setData("name", "versionText"); //$NON-NLS-1$ //$NON-NLS-2$
-    FormUtils.addVersionProposal(editorPage.getProject(), groupIdText, artifactIdText, versionText, Packaging.ALL);
+    ProposalUtil.addVersionProposal(editorPage.getProject(), groupIdText, artifactIdText, versionText, Packaging.ALL);
 
     Composite pluginConfigureComposite = toolkit.createComposite(pluginDetailsComposite, SWT.NONE);
     GridData pluginConfigureCompositeData = new GridData(SWT.RIGHT, SWT.CENTER, false, false, 2, 1);

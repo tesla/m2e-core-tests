@@ -59,6 +59,7 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
+import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.actions.OpenPomAction;
 import org.eclipse.m2e.core.actions.OpenUrlAction;
 import org.eclipse.m2e.core.core.MavenLogger;
@@ -66,6 +67,8 @@ import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.index.IIndex;
 import org.eclipse.m2e.core.index.IndexedArtifactFile;
 import org.eclipse.m2e.core.ui.dialogs.MavenRepositorySearchDialog;
+import org.eclipse.m2e.core.util.ProposalUtil;
+import org.eclipse.m2e.core.util.search.Packaging;
 import org.eclipse.m2e.editor.MavenEditorImages;
 import org.eclipse.m2e.editor.internal.Messages;
 import org.eclipse.m2e.editor.plugins.DefaultPluginConfigurationEditor;
@@ -77,7 +80,6 @@ import org.eclipse.m2e.editor.pom.SearchControl;
 import org.eclipse.m2e.editor.pom.SearchMatcher;
 import org.eclipse.m2e.editor.pom.ValueProvider;
 import org.eclipse.m2e.editor.xml.MvnIndexPlugin;
-import org.eclipse.m2e.editor.xml.search.Packaging;
 import org.eclipse.m2e.model.edit.pom.BuildBase;
 import org.eclipse.m2e.model.edit.pom.Configuration;
 import org.eclipse.m2e.model.edit.pom.Dependency;
@@ -475,7 +477,7 @@ public class PluginsComposite extends Composite{
       gd_groupIdText.horizontalIndent = 4;
       groupIdText.setLayoutData(gd_groupIdText);
       groupIdText.setData("name", "groupIdText"); //$NON-NLS-1$ //$NON-NLS-2$
-      FormUtils.addGroupIdProposal(parentEditorPage.getProject(), groupIdText, Packaging.PLUGIN);
+      ProposalUtil.addGroupIdProposal(parentEditorPage.getProject(), groupIdText, Packaging.PLUGIN);
 
       Hyperlink artifactIdHyperlink = toolkit.createHyperlink(pluginDetailsComposite, Messages.PluginsComposite_lblArtifactId, SWT.NONE);
       artifactIdHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
@@ -497,7 +499,7 @@ public class PluginsComposite extends Composite{
       gd_artifactIdText.horizontalIndent = 4;
       artifactIdText.setLayoutData(gd_artifactIdText);
       artifactIdText.setData("name", "artifactIdText"); //$NON-NLS-1$ //$NON-NLS-2$
-      FormUtils.addArtifactIdProposal(parentEditorPage.getProject(), groupIdText, artifactIdText, Packaging.PLUGIN);
+      ProposalUtil.addArtifactIdProposal(parentEditorPage.getProject(), groupIdText, artifactIdText, Packaging.PLUGIN);
     
       Label label = toolkit.createLabel(pluginDetailsComposite, Messages.PluginsComposite_lblVersion, SWT.NONE);
       label.setLayoutData(new GridData());
@@ -508,7 +510,7 @@ public class PluginsComposite extends Composite{
       versionTextData.widthHint = 200;
       versionText.setLayoutData(versionTextData);
       versionText.setData("name", "versionText"); //$NON-NLS-1$ //$NON-NLS-2$
-      FormUtils.addVersionProposal(parentEditorPage.getProject(), groupIdText, artifactIdText, versionText, Packaging.PLUGIN);
+      ProposalUtil.addVersionProposal(parentEditorPage.getProject(), groupIdText, artifactIdText, versionText, Packaging.PLUGIN);
   
   //    pluginSelectButton = toolkit.createButton(pluginDetailsComposite, "Select...", SWT.NONE);
   //    pluginSelectButton.addSelectionListener(new SelectionAdapter() {
@@ -1314,7 +1316,7 @@ public class PluginsComposite extends Composite{
           String artifactId = descriptor.getArtifactId();
           String version = ""; //$NON-NLS-1$
           try {
-            Collection<String> versions = MvnIndexPlugin.getDefault().getSearchEngine(parentEditorPage.getProject()).findVersions(groupId, artifactId, null, Packaging.PLUGIN);
+            Collection<String> versions = MavenPlugin.getDefault().getSearchEngine(parentEditorPage.getProject()).findVersions(groupId, artifactId, null, Packaging.PLUGIN);
             if(!versions.isEmpty()) {
               version = versions.iterator().next();
             }

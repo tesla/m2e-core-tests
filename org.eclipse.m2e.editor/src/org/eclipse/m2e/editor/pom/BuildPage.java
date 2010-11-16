@@ -43,13 +43,14 @@ import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.index.IIndex;
 import org.eclipse.m2e.core.index.IndexedArtifactFile;
 import org.eclipse.m2e.core.ui.dialogs.MavenRepositorySearchDialog;
+import org.eclipse.m2e.core.util.ProposalUtil;
+import org.eclipse.m2e.core.util.search.Packaging;
 import org.eclipse.m2e.editor.MavenEditorImages;
 import org.eclipse.m2e.editor.composites.BuildComposite;
 import org.eclipse.m2e.editor.composites.DependencyLabelProvider;
 import org.eclipse.m2e.editor.composites.ListEditorComposite;
 import org.eclipse.m2e.editor.composites.ListEditorContentProvider;
 import org.eclipse.m2e.editor.internal.Messages;
-import org.eclipse.m2e.editor.xml.search.Packaging;
 import org.eclipse.m2e.model.edit.pom.Build;
 import org.eclipse.m2e.model.edit.pom.BuildBase;
 import org.eclipse.m2e.model.edit.pom.Extension;
@@ -325,7 +326,7 @@ public class BuildPage extends MavenPomEditorPage {
     extensionGroupIdText = toolkit.createText(extensionDetialsComposite, null, SWT.FLAT);
     extensionGroupIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
     extensionGroupIdText.setData("name", "extensionGroupIdText"); //$NON-NLS-1$ //$NON-NLS-2$
-    FormUtils.addGroupIdProposal(getProject(), extensionGroupIdText, Packaging.ALL);
+    ProposalUtil.addGroupIdProposal(getProject(), extensionGroupIdText, Packaging.ALL);
     
     Hyperlink extensionArtifactIdHyperlink = toolkit.createHyperlink(extensionDetialsComposite, Messages.BuildPage_lblArtifactId, SWT.NONE);
     extensionArtifactIdHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
@@ -345,14 +346,14 @@ public class BuildPage extends MavenPomEditorPage {
     extensionArtifactIdText = toolkit.createText(extensionDetialsComposite, null, SWT.FLAT);
     extensionArtifactIdText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
     extensionArtifactIdText.setData("name", "extensionArtifactIdText"); //$NON-NLS-1$ //$NON-NLS-2$
-    FormUtils.addArtifactIdProposal(getProject(), extensionGroupIdText, extensionArtifactIdText, Packaging.ALL);
+    ProposalUtil.addArtifactIdProposal(getProject(), extensionGroupIdText, extensionArtifactIdText, Packaging.ALL);
     
     toolkit.createLabel(extensionDetialsComposite, Messages.BuildPage_lblVersion);
     
     extensionVersionText = toolkit.createText(extensionDetialsComposite, null, SWT.FLAT);
     extensionVersionText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
     extensionVersionText.setData("name", "extensionVersionText"); //$NON-NLS-1$ //$NON-NLS-2$
-    FormUtils.addVersionProposal(getProject(), extensionGroupIdText, extensionArtifactIdText, extensionVersionText, Packaging.ALL);
+    ProposalUtil.addVersionProposal(getProject(), extensionGroupIdText, extensionArtifactIdText, extensionVersionText, Packaging.ALL);
     extensionDetialsComposite.setTabList(new Control[] {extensionGroupIdText, extensionArtifactIdText, extensionVersionText});
 
 //    extensionSelectButton = toolkit.createButton(extensionDetialsComposite, "Select...", SWT.FLAT);

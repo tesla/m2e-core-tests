@@ -19,9 +19,11 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
@@ -101,6 +103,8 @@ import org.eclipse.m2e.core.project.IProjectConfigurationManager;
 import org.eclipse.m2e.core.project.MavenProjectManager;
 import org.eclipse.m2e.core.project.MavenUpdateRequest;
 import org.eclipse.m2e.core.repository.IRepositoryRegistry;
+import org.eclipse.m2e.core.util.search.IndexSearchEngine;
+import org.eclipse.m2e.core.util.search.SearchEngine;
 
 
 /**
@@ -547,5 +551,9 @@ public class MavenPlugin extends AbstractUIPlugin implements IStartup {
     MavenSession old = legacy.getSession();
     legacy.setSession(session);
     return old;
+  }
+
+  public SearchEngine getSearchEngine(IProject context) throws CoreException {
+    return new IndexSearchEngine(MavenPlugin.getDefault().getIndexManager().getIndex(context));
   }
 }

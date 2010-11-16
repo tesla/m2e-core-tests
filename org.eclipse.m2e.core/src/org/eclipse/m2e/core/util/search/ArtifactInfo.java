@@ -9,7 +9,7 @@
  *      Sonatype, Inc. - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.m2e.editor.xml.search;
+package org.eclipse.m2e.core.util.search;
 
 
 /**

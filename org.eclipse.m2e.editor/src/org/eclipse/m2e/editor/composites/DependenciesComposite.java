@@ -54,6 +54,8 @@ import org.eclipse.m2e.core.index.IIndex;
 import org.eclipse.m2e.core.index.IndexedArtifactFile;
 import org.eclipse.m2e.core.ui.dialogs.AddDependencyDialog;
 import org.eclipse.m2e.core.ui.dialogs.MavenRepositorySearchDialog;
+import org.eclipse.m2e.core.util.ProposalUtil;
+import org.eclipse.m2e.core.util.search.Packaging;
 import org.eclipse.m2e.core.wizards.WidthGroup;
 import org.eclipse.m2e.editor.MavenEditorImages;
 import org.eclipse.m2e.editor.internal.Messages;
@@ -62,7 +64,6 @@ import org.eclipse.m2e.editor.pom.MavenPomEditorPage;
 import org.eclipse.m2e.editor.pom.SearchControl;
 import org.eclipse.m2e.editor.pom.SearchMatcher;
 import org.eclipse.m2e.editor.pom.ValueProvider;
-import org.eclipse.m2e.editor.xml.search.Packaging;
 import org.eclipse.m2e.model.edit.pom.Dependency;
 import org.eclipse.m2e.model.edit.pom.DependencyManagement;
 import org.eclipse.m2e.model.edit.pom.Exclusion;
@@ -590,7 +591,7 @@ public class DependenciesComposite extends Composite {
     GridData gd_groupIdText = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
     gd_groupIdText.horizontalIndent = 4;
     groupIdText.setLayoutData(gd_groupIdText);
-    FormUtils.addGroupIdProposal(editorPage.getProject(), groupIdText, Packaging.ALL);
+    ProposalUtil.addGroupIdProposal(editorPage.getProject(), groupIdText, Packaging.ALL);
 
     Hyperlink artifactIdHyperlink = toolkit.createHyperlink(dependencyComposite, Messages.DependenciesComposite_lblArtifactId, SWT.NONE);
     artifactIdHyperlink.setLayoutData(new GridData());
@@ -616,7 +617,7 @@ public class DependenciesComposite extends Composite {
     GridData gd_artifactIdText = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
     gd_artifactIdText.horizontalIndent = 4;
     artifactIdText.setLayoutData(gd_artifactIdText);
-    FormUtils.addArtifactIdProposal(editorPage.getProject(), groupIdText, artifactIdText, Packaging.ALL);
+    ProposalUtil.addArtifactIdProposal(editorPage.getProject(), groupIdText, artifactIdText, Packaging.ALL);
 
     Label versionLabel = toolkit.createLabel(dependencyComposite, Messages.DependenciesComposite_lblVersion, SWT.NONE);
     versionLabel.setLayoutData(new GridData());
@@ -627,7 +628,7 @@ public class DependenciesComposite extends Composite {
     versionTextData.horizontalIndent = 4;
     versionTextData.widthHint = 200;
     versionText.setLayoutData(versionTextData);
-    FormUtils.addVersionProposal(editorPage.getProject(), groupIdText, artifactIdText, versionText, Packaging.ALL);
+    ProposalUtil.addVersionProposal(editorPage.getProject(), groupIdText, artifactIdText, versionText, Packaging.ALL);
 
 //    dependencySelectButton = toolkit.createButton(dependencyComposite, "Select...", SWT.NONE);
 //    dependencySelectButton.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 2));
@@ -658,7 +659,7 @@ public class DependenciesComposite extends Composite {
     gd_classifierText.horizontalIndent = 4;
     gd_classifierText.widthHint = 200;
     classifierText.setLayoutData(gd_classifierText);
-    FormUtils.addClassifierProposal(editorPage.getProject(), groupIdText, artifactIdText, versionText, classifierText, Packaging.ALL);
+    ProposalUtil.addClassifierProposal(editorPage.getProject(), groupIdText, artifactIdText, versionText, classifierText, Packaging.ALL);
     
     Label typeLabel = toolkit.createLabel(dependencyComposite, Messages.DependenciesComposite_lblType, SWT.NONE);
     typeLabel.setLayoutData(new GridData());
@@ -847,7 +848,7 @@ public class DependenciesComposite extends Composite {
     gd_exclusionGroupIdText.horizontalIndent = 4;
     exclusionGroupIdText.setLayoutData(gd_exclusionGroupIdText);
     // TODO handle ArtifactInfo
-    FormUtils.addGroupIdProposal(editorPage.getProject(), exclusionGroupIdText, Packaging.ALL);
+    ProposalUtil.addGroupIdProposal(editorPage.getProject(), exclusionGroupIdText, Packaging.ALL);
 
 //    exclusionSelectButton = toolkit.createButton(exclusionDetailsComposite, "Select...", SWT.NONE);
 //    exclusionSelectButton.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 2));
@@ -876,7 +877,7 @@ public class DependenciesComposite extends Composite {
     gd_exclusionArtifactIdText.horizontalIndent = 4;
     exclusionArtifactIdText.setLayoutData(gd_exclusionArtifactIdText);
     // TODO handle ArtifactInfo
-    FormUtils.addArtifactIdProposal(editorPage.getProject(), exclusionGroupIdText, exclusionArtifactIdText, Packaging.ALL);
+    ProposalUtil.addArtifactIdProposal(editorPage.getProject(), exclusionGroupIdText, exclusionArtifactIdText, Packaging.ALL);
     
     exclusionSelectAction = new Action(Messages.DependenciesComposite_action_selectExclusion, MavenEditorImages.SELECT_ARTIFACT) {
       public void run() {

@@ -15,18 +15,13 @@ import java.io.IOException;
 
 import org.osgi.framework.BundleContext;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.jface.text.templates.persistence.TemplateStore;
 import org.eclipse.ui.editors.text.templates.ContributionContextTypeRegistry;
 import org.eclipse.ui.editors.text.templates.ContributionTemplateStore;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
-import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.MavenLogger;
-import org.eclipse.m2e.editor.xml.internal.search.IndexSearchEngine;
-import org.eclipse.m2e.editor.xml.search.SearchEngine;
 
 
 /**
@@ -57,10 +52,6 @@ public class MvnIndexPlugin extends AbstractUIPlugin {
 
   public static MvnIndexPlugin getDefault() {
     return defaultInstance;
-  }
-
-  public SearchEngine getSearchEngine(IProject context) throws CoreException {
-    return new IndexSearchEngine(MavenPlugin.getDefault().getIndexManager().getIndex(context));
   }
 
   /**

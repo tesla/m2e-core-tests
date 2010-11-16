@@ -49,10 +49,10 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.MavenLogger;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
+import org.eclipse.m2e.core.util.search.ArtifactInfo;
+import org.eclipse.m2e.core.util.search.Packaging;
+import org.eclipse.m2e.core.util.search.SearchEngine;
 import org.eclipse.m2e.editor.xml.internal.Messages;
-import org.eclipse.m2e.editor.xml.search.ArtifactInfo;
-import org.eclipse.m2e.editor.xml.search.Packaging;
-import org.eclipse.m2e.editor.xml.search.SearchEngine;
 
 
 /**
@@ -466,7 +466,7 @@ public enum PomTemplateContext {
   }
 
   private static SearchEngine getSearchEngine(IProject project) throws CoreException {
-    return MvnIndexPlugin.getDefault().getSearchEngine(project);
+    return MavenPlugin.getDefault().getSearchEngine(project);
   }
   
   

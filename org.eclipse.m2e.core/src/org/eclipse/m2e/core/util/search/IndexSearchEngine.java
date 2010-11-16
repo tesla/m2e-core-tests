@@ -10,7 +10,7 @@
  *******************************************************************************/
 
 
-package org.eclipse.m2e.editor.xml.internal.search;
+package org.eclipse.m2e.core.util.search;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,10 +28,6 @@ import org.eclipse.m2e.core.index.IIndex;
 import org.eclipse.m2e.core.index.IndexManager;
 import org.eclipse.m2e.core.index.IndexedArtifact;
 import org.eclipse.m2e.core.index.IndexedArtifactFile;
-import org.eclipse.m2e.editor.xml.search.ArtifactInfo;
-import org.eclipse.m2e.editor.xml.search.Packaging;
-import org.eclipse.m2e.editor.xml.search.SearchEngine;
-import org.eclipse.m2e.editor.xml.search.SearchException;
 
 
 /**

@@ -10,7 +10,7 @@
  *******************************************************************************/
 
 
-package org.eclipse.m2e.editor.pom;
+package org.eclipse.m2e.core.util.search;
 
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.jface.fieldassist.FieldDecoration;

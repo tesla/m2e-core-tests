@@ -9,14 +9,13 @@
  *      Sonatype, Inc. - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.m2e.editor.xml.search;
+package org.eclipse.m2e.core.util.search;
 
 import java.util.Collection;
 
 
 /**
- * Interface to be implemented by a SearchEngine. If you want to add your own SearchEngine just implement this interface
- * and add it to extensionPoint.
+ * Interface to be implemented by a SearchEngine.
  * 
  * @author Lukas Krecan
  */

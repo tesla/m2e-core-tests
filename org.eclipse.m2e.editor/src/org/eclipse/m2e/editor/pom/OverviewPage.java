@@ -61,6 +61,8 @@ import org.eclipse.m2e.core.index.IIndex;
 import org.eclipse.m2e.core.index.IndexedArtifactFile;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.ui.dialogs.MavenRepositorySearchDialog;
+import org.eclipse.m2e.core.util.ProposalUtil;
+import org.eclipse.m2e.core.util.search.Packaging;
 import org.eclipse.m2e.core.wizards.MavenModuleWizard;
 import org.eclipse.m2e.core.wizards.MavenProjectSelectionDialog;
 import org.eclipse.m2e.core.wizards.WidthGroup;
@@ -68,7 +70,6 @@ import org.eclipse.m2e.editor.MavenEditorImages;
 import org.eclipse.m2e.editor.composites.ListEditorComposite;
 import org.eclipse.m2e.editor.composites.ListEditorContentProvider;
 import org.eclipse.m2e.editor.internal.Messages;
-import org.eclipse.m2e.editor.xml.search.Packaging;
 import org.eclipse.m2e.model.edit.pom.CiManagement;
 import org.eclipse.m2e.model.edit.pom.IssueManagement;
 import org.eclipse.m2e.model.edit.pom.Model;
@@ -269,7 +270,7 @@ public class OverviewPage extends MavenPomEditorPage {
     GridData gd_artifactGroupIdText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_artifactGroupIdText.horizontalIndent = 4;
     artifactGroupIdText.setLayoutData(gd_artifactGroupIdText);
-    FormUtils.addGroupIdProposal(getProject(), artifactGroupIdText, Packaging.ALL);
+    ProposalUtil.addGroupIdProposal(getProject(), artifactGroupIdText, Packaging.ALL);
 
     Label artifactIdLabel = toolkit.createLabel(artifactComposite, Messages.OverviewPage_lblArtifactId, SWT.NONE);
 
@@ -408,7 +409,7 @@ public class OverviewPage extends MavenPomEditorPage {
     gd_parentGroupIdText.horizontalIndent = 4;
     parentGroupIdText.setLayoutData(gd_parentGroupIdText);
     parentGroupIdText.setData("name", "parentGroupId"); //$NON-NLS-1$ //$NON-NLS-2$
-    FormUtils.addGroupIdProposal(getProject(), parentGroupIdText, Packaging.POM);
+    ProposalUtil.addGroupIdProposal(getProject(), parentGroupIdText, Packaging.POM);
 
     final Label parentArtifactIdLabel = toolkit.createLabel(parentComposite, Messages.OverviewPage_lblArtifactId,
         SWT.NONE);
@@ -418,7 +419,7 @@ public class OverviewPage extends MavenPomEditorPage {
     gd_parentArtifactIdText.horizontalIndent = 4;
     parentArtifactIdText.setLayoutData(gd_parentArtifactIdText);
     parentArtifactIdText.setData("name", "parentArtifactId"); //$NON-NLS-1$ //$NON-NLS-2$
-    FormUtils.addArtifactIdProposal(getProject(), parentGroupIdText, parentArtifactIdText, Packaging.POM);
+    ProposalUtil.addArtifactIdProposal(getProject(), parentGroupIdText, parentArtifactIdText, Packaging.POM);
 
     Label parentVersionLabel = toolkit.createLabel(parentComposite, Messages.OverviewPage_lblVersion2, SWT.NONE);
     parentVersionLabel.setLayoutData(new GridData());
@@ -429,7 +430,7 @@ public class OverviewPage extends MavenPomEditorPage {
     parentVersionTextData.widthHint = 200;
     parentVersionText.setLayoutData(parentVersionTextData);
     parentVersionText.setData("name", "parentVersion"); //$NON-NLS-1$ //$NON-NLS-2$
-    FormUtils.addVersionProposal(getProject(), parentGroupIdText, parentArtifactIdText, parentVersionText,
+    ProposalUtil.addVersionProposal(getProject(), parentGroupIdText, parentArtifactIdText, parentVersionText,
         Packaging.POM);
 
     ModifyListener ml = new ModifyListener() {

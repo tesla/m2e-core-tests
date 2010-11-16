@@ -47,6 +47,7 @@ Export-Package: org.eclipse.m2e.core,
  org.eclipse.m2e.core.scm,
  org.eclipse.m2e.core.ui.dialogs,
  org.eclipse.m2e.core.util,
+ org.eclipse.m2e.core.util.search,
  org.eclipse.m2e.core.wizards
 MavenArtifact-GroupId: org.eclipse.m2e
 MavenArtifact-ArtifactId: org.eclipse.m2e.core
