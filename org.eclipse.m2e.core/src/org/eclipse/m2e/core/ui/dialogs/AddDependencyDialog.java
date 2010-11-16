@@ -15,6 +15,7 @@ import java.util.Map;
 
 import com.ibm.icu.text.DateFormat;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -54,6 +55,8 @@ import org.eclipse.m2e.core.index.IIndex;
 import org.eclipse.m2e.core.index.IndexManager;
 import org.eclipse.m2e.core.index.IndexedArtifact;
 import org.eclipse.m2e.core.index.IndexedArtifactFile;
+import org.eclipse.m2e.core.util.ProposalUtil;
+import org.eclipse.m2e.core.util.search.Packaging;
 import org.eclipse.m2e.core.wizards.MavenPomSelectionComponent;
 import org.eclipse.m2e.model.edit.pom.Dependency;
 import org.eclipse.m2e.model.edit.pom.PomFactory;
@@ -105,6 +108,8 @@ public class AddDependencyDialog extends AbstractMavenDialog {
 
   private SearchJob currentSearch;
 
+  private IProject project;
+
   /**
    * The AddDependencyDialog differs slightly in behaviour depending on context. If it is being used to apply a
    * dependency under the "dependencyManagement" context, the extra "import" scope is available. Set @param
@@ -112,9 +117,11 @@ public class AddDependencyDialog extends AbstractMavenDialog {
    * 
    * @param parent
    * @param isForDependencyManagement
+   * @param project the project which contains this POM. Used for looking up indices
    */
-  public AddDependencyDialog(Shell parent, boolean isForDependencyManagement) {
+  public AddDependencyDialog(Shell parent, boolean isForDependencyManagement, IProject project) {
     super(parent, DIALOG_SETTINGS);
+    this.project = project;
 
     setShellStyle(getShellStyle() | SWT.RESIZE);
     setTitle("Add Dependency");
@@ -189,6 +196,10 @@ public class AddDependencyDialog extends AbstractMavenDialog {
 
     versionText = new Text(composite, SWT.BORDER);
     versionText.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+    
+    ProposalUtil.addGroupIdProposal(project, groupIDtext, Packaging.ALL);
+    ProposalUtil.addArtifactIdProposal(project, groupIDtext, artifactIDtext, Packaging.ALL);
+    ProposalUtil.addVersionProposal(project, groupIDtext, artifactIDtext, versionText, Packaging.ALL);
 
     return composite;
   }

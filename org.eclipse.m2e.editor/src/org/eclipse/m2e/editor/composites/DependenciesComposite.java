@@ -271,7 +271,7 @@ public class DependenciesComposite extends Composite {
       public void widgetSelected(SelectionEvent e) {
         // TODO calculate current list of artifacts for the project
         Set<ArtifactKey> artifacts = Collections.emptySet();
-        AddDependencyDialog addDepDialog = new AddDependencyDialog(getShell(), false);
+        AddDependencyDialog addDepDialog = new AddDependencyDialog(getShell(), false, editorPage.getProject());
         if (addDepDialog.open() == Window.OK) {
           List<Dependency> deps = addDepDialog.getDependencies();
           for (Dependency dep : deps) {
