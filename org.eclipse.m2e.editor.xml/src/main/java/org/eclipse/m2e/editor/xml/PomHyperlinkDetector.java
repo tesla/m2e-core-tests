@@ -329,7 +329,15 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
         String before = value.substring(0, Math.min (index + 1, value.length()));
         String after = value.substring(Math.min (index + 1, value.length()));
         int start = before.lastIndexOf("${"); //$NON-NLS-1$
+        if (before.lastIndexOf("}") > start) {//$NON-NLS-1$
+          //we might be in between two expressions..
+          start = -1;
+        }
         int end = after.indexOf("}"); //$NON-NLS-1$
+        if (after.indexOf("${") != -1 && after.indexOf("${") < end) {//$NON-NLS-1$
+          //we might be in between two expressions..
+          end = -1;
+        }
         if (start > -1 && end > -1) {
           final int startOffset = reg.getStartOffset() + start;
           final String expr = before.substring(start) + after.substring(0, end + 1);
