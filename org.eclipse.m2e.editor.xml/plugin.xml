@@ -25,7 +25,7 @@
 		point="org.eclipse.ui.ide.markerResolution">
 		<markerResolutionGenerator
 			class="org.eclipse.m2e.editor.xml.MavenMarkerResolutionGenerator"
-			markerType="org.eclipse.m2e.core.maven2Problem">
+			markerType="org.eclipse.m2e.core.maven2ProblemHint">
 		</markerResolutionGenerator>
 	</extension>
   <extension  point="org.eclipse.ui.editors.templates">

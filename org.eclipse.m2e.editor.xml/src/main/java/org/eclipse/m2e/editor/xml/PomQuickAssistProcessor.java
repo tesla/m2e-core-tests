@@ -65,7 +65,7 @@ public class PomQuickAssistProcessor implements IQuickAssistProcessor {
     if (an instanceof MarkerAnnotation) {
       MarkerAnnotation mark = (MarkerAnnotation) an;
       try {
-        if (IMavenConstants.MARKER_ID.equals(mark.getMarker().getType())) {
+        if (IMavenConstants.MARKER_HINT_ID.equals(mark.getMarker().getType())) {
           String hint = mark.getMarker().getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, ""); //$NON-NLS-1$
           if (!hint.equals("")) { //$NON-NLS-1$
             return true;
@@ -91,7 +91,7 @@ public class PomQuickAssistProcessor implements IQuickAssistProcessor {
          int lineNum = context.getSourceViewer().getDocument().getLineOfOffset(position.getOffset()) + 1;
          int currentLineNum = context.getSourceViewer().getDocument().getLineOfOffset(context.getOffset()) + 1;
          if (currentLineNum == lineNum) {
-           if (IMavenConstants.MARKER_ID.equals(mark.getMarker().getType())) {
+           if (IMavenConstants.MARKER_HINT_ID.equals(mark.getMarker().getType())) {
              String hint = mark.getMarker().getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, ""); //$NON-NLS-1$
              if (hint.equals("parent_groupid")) { //$NON-NLS-1$
                proposals.add(new IdPartRemovalProposal(context, false, mark));

@@ -103,7 +103,10 @@ public class MavenMarkerManager implements IMavenMarkerManager {
     if (mavenProject != null) {
       addMissingArtifactMarkers(pomFile, mavenProject);
     }
-    
+    addEditorHintMarkers(pomFile);
+  }
+  
+  public void addEditorHintMarkers(IResource pomFile) {
     checkForSchema(pomFile);
     //mkleint: adding here but I'm sort of not entirely clear what the usage patter of this class is.
     checkVarious(pomFile);
@@ -136,7 +139,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
               //now figure out the offset
               if (groupId instanceof IndexedRegion) {
                 IndexedRegion off = (IndexedRegion)groupId;
-                IMarker mark = addMarker(pomFile, org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_duplicate_groupid, document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING);
+                IMarker mark = addMarker(pomFile, IMavenConstants.MARKER_HINT_ID, org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_duplicate_groupid, document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING);
                 mark.setAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, "parent_groupid"); //$NON-NLS-1$ //$NON-NLS-2$
                 mark.setAttribute(IMarker.CHAR_START, off.getStartOffset());
                 mark.setAttribute(IMarker.CHAR_END, off.getEndOffset());
@@ -155,7 +158,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
               //now figure out the offset
               if (version instanceof IndexedRegion) {
                 IndexedRegion off = (IndexedRegion)version;
-                IMarker mark = addMarker(pomFile, org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_duplicate_version, document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING);
+                IMarker mark = addMarker(pomFile, IMavenConstants.MARKER_HINT_ID, org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_duplicate_version, document.getLineOfOffset(off.getStartOffset()) + 1, IMarker.SEVERITY_WARNING);
                 mark.setAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, "parent_version"); //$NON-NLS-1$ //$NON-NLS-2$
                 mark.setAttribute(IMarker.CHAR_START, off.getStartOffset());
                 mark.setAttribute(IMarker.CHAR_END, off.getEndOffset());
@@ -228,12 +231,12 @@ public class MavenMarkerManager implements IMavenMarkerManager {
               if (documentRegion.getText().lastIndexOf(XSI_SCHEMA_LOCATION) == -1) {
                 int offset = documentRegion.getStartOffset();
                 int lineNumber = document.getLineOfOffset(offset) + 1;
-                IMarker marker = addMarker(pomFile, org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_error_noschema, lineNumber, IMarker.SEVERITY_WARNING, false);
+                IMarker marker = addMarker(pomFile, IMavenConstants.MARKER_HINT_ID, org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_error_noschema, lineNumber, IMarker.SEVERITY_WARNING, false);
                 //the quick fix in the marker view needs to know the offset, since it doesn't have access to the
                 //editor/source viewer
                 if(marker != null){
                   marker.setAttribute(OFFSET, offset);
-                  marker.setAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, "schema"); //$NON-NLS-1$ //$NON-NLS-2$
+                  marker.setAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, "schema"); //$NON-NLS-1$ 
                   marker.setAttribute(IMarker.CHAR_START, documentRegion.getStartOffset());
                   marker.setAttribute(IMarker.CHAR_END, documentRegion.getEndOffset());
                 }
@@ -254,15 +257,24 @@ public class MavenMarkerManager implements IMavenMarkerManager {
     }
   }
   
+  /* (non-Javadoc)
+   * @see org.eclipse.m2e.core.project.IMavenMarkerManager#addMarker(org.eclipse.core.resources.IResource, java.lang.String, int, int)
+   */
+  //just here to satisfy the IMavenMarkerManager contract.
   public IMarker addMarker(IResource resource, String message, int lineNumber, int severity) {
-     return addMarker(resource, message, lineNumber, severity, true); 
+    return addMarker(resource, IMavenConstants.MARKER_ID, message, lineNumber, severity);
+  }
+  
+  
+  public IMarker addMarker(IResource resource, String type, String message, int lineNumber, int severity) {
+     return addMarker(resource, type, message,  lineNumber, severity, true); 
   }
 
-  private IMarker addMarker(IResource resource, String message, int lineNumber, int severity, boolean isTransient) {
+  private IMarker addMarker(IResource resource, String type, String message, int lineNumber, int severity, boolean isTransient) {
     IMarker marker = null;
     try {
       if(resource.isAccessible()) {
-        marker= resource.createMarker(IMavenConstants.MARKER_ID);
+        marker= resource.createMarker(type);
         marker.setAttribute(IMarker.MESSAGE, message);
         marker.setAttribute(IMarker.SEVERITY, severity);
         marker.setAttribute(IMarker.TRANSIENT, isTransient);
@@ -355,6 +367,12 @@ public class MavenMarkerManager implements IMavenMarkerManager {
       resource.deleteMarkers(IMavenConstants.MARKER_ID, true, IResource.DEPTH_INFINITE);
     }
   }
+  
+  public void deleteEditorHintMarkers(IResource resource) throws CoreException {
+    if (resource != null && resource.exists()) {
+      resource.deleteMarkers(IMavenConstants.MARKER_HINT_ID, true, IResource.DEPTH_INFINITE);
+    }
+  }
 
   private void addMissingArtifactMarkers(IResource pomFile, MavenProject mavenProject) {
 //    @SuppressWarnings("unchecked")
@@ -380,23 +398,24 @@ public class MavenMarkerManager implements IMavenMarkerManager {
     }
   }
   
- public  void addErrorMarkers(IResource resource, Exception ex) {
+ public void addErrorMarkers(IResource resource, Exception ex) {
    Throwable cause = getRootCause(ex);
    if (cause instanceof CoreException) {
      CoreException cex = (CoreException)cause;
      IStatus status = cex.getStatus();
      if(status != null) {
-       addMarker(resource, status.getMessage(), 1, IMarker.SEVERITY_ERROR, false); //$NON-NLS-1$
+       addMarker(resource, IMavenConstants.MARKER_ID, status.getMessage(), 1, IMarker.SEVERITY_ERROR, false); //$NON-NLS-1$
        IStatus[] children = status.getChildren();
        if(children != null) {
          for(IStatus childStatus : children) {
-           addMarker(resource, childStatus.getMessage(), 1, IMarker.SEVERITY_ERROR, false); //$NON-NLS-1$
+           addMarker(resource, IMavenConstants.MARKER_ID, childStatus.getMessage(), 1, IMarker.SEVERITY_ERROR, false); //$NON-NLS-1$
          }
        } 
      }
    } else {
-     addMarker(resource, cause.getMessage(), 1, IMarker.SEVERITY_ERROR, false); //$NON-NLS-1$
+     addMarker(resource, IMavenConstants.MARKER_ID, cause.getMessage(), 1, IMarker.SEVERITY_ERROR, false); //$NON-NLS-1$
    }
  }
+
 
 }

@@ -39,7 +39,7 @@ public class MavenMarkerResolutionGenerator implements IMarkerResolutionGenerato
       MavenLogger.log(e);
       type = ""; //$NON-NLS-1$
     }
-    if(IMavenConstants.MARKER_ID.equals(type)) {
+    if(IMavenConstants.MARKER_HINT_ID.equals(type)) {
       String hint = marker.getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, ""); //$NON-NLS-1$
       //only provide a quickfix for the schema marker
       if("schema".equals(hint)) {
@@ -61,7 +61,7 @@ public class MavenMarkerResolutionGenerator implements IMarkerResolutionGenerato
       MavenLogger.log(e);
       type = ""; //$NON-NLS-1$
     }
-    return IMavenConstants.MARKER_ID.equals(type);
+    return IMavenConstants.MARKER_HINT_ID.equals(type);
   }
 
 }

@@ -78,6 +78,7 @@ import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.core.MavenLogger;
 import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.embedder.MavenModelManager;
+import org.eclipse.m2e.core.internal.project.MavenMarkerManager;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.MavenProjectManager;
 import org.eclipse.m2e.core.util.Util;
@@ -448,7 +449,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       //attempt to preload the maven project to have the caches hot for template proposals.
       if (getEditorInput() instanceof IFileEditorInput) {
         IFileEditorInput ei = (IFileEditorInput)getEditorInput();
-        IFile file = ei.getFile();
+        final IFile file = ei.getFile();
         IProject prj = file != null ? file.getProject() : null;
         if (prj != null) {
           MavenProjectManager projectManager = MavenPlugin.getDefault().getMavenProjectManager();
@@ -462,6 +463,14 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
                 } catch(CoreException e) {
                   //just ignore
                   MavenLogger.log("Unable to read maven project. Some content assists might not work as advertized.", e); //$NON-NLS-1$
+                }
+                MavenMarkerManager manager = (MavenMarkerManager) MavenPlugin.getDefault().getMavenMarkerManager();
+                try {
+                  manager.deleteEditorHintMarkers(file);
+                  manager.addEditorHintMarkers(file);
+                } catch(CoreException e) {
+                  // TODO Auto-generated catch block
+                  MavenLogger.log("Unable to process editor markers", e);
                 }
                 return Status.OK_STATUS;
               }
