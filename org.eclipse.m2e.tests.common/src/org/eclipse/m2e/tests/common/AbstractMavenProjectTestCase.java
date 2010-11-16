@@ -125,14 +125,17 @@ public abstract class AbstractMavenProjectTestCase extends TestCase {
   }
 
   protected void tearDown() throws Exception {
-    super.tearDown();
+    try {
+      waitForJobsToComplete();
+      WorkspaceHelpers.cleanWorkspace();
 
-    WorkspaceHelpers.cleanWorkspace();
-
-    projectRefreshJob.wakeUp();
-    IWorkspaceDescription description = workspace.getDescription();
-    description.setAutoBuilding(true);
-    workspace.setDescription(description);
+      projectRefreshJob.wakeUp();
+      IWorkspaceDescription description = workspace.getDescription();
+      description.setAutoBuilding(true);
+      workspace.setDescription(description);
+    } finally {
+      super.tearDown();
+    }
   }
 
   protected void deleteProject(String projectName) throws CoreException, InterruptedException {
