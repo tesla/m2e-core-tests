@@ -437,24 +437,17 @@
 	<mailingLists>
 		<mailingList>
 			<name>Users List</name>
-			<subscribe>user-subscribe@m2eclipse.codehaus.org</subscribe>
-			<unsubscribe>user-unsubscribe@m2eclipse.codehaus.org</unsubscribe>
-			<post>user@m2eclipse.codehaus.org</post>
-			<archive>http://archive.m2eclipse.codehaus.org/user</archive>
+			<subscribe>m2e-users@eclipse.org</subscribe>
+			<unsubscribe>https://dev.eclipse.org/mailman/listinfo/m2e-users</unsubscribe>
+			<post>m2e-users@eclipse.org</post>
+			<archive>http://dev.eclipse.org/mhonarc/lists/m2e-users</archive>
 		</mailingList>
 		<mailingList>
 			<name>Developer List</name>
-			<subscribe>dev-subscribe@m2eclipse.codehaus.org</subscribe>
-			<unsubscribe>dev-unsubscribe@m2eclipse.codehaus.org</unsubscribe>
-			<post>dev@m2eclipse.codehaus.org</post>
-			<archive>http://archive.m2eclipse.codehaus.org/dev</archive>
-		</mailingList>
-		<mailingList>
-			<name>Commits List</name>
-			<subscribe>scm-subscribe@m2eclipse.codehaus.org</subscribe>
-			<unsubscribe>scm-unsubscribe@m2eclipse.codehaus.org</unsubscribe>
-			<post>scm@m2eclipse.codehaus.org</post>
-			<archive>http://archive.m2eclipse.codehaus.org/scm</archive>
+			<subscribe>m2e-dev@eclipse.org</subscribe>
+			<unsubscribe>https://dev.eclipse.org/mailman/listinfo/m2e-dev</unsubscribe>
+			<post>m2e-dev@eclipse.org</post>
+			<archive>http://dev.eclipse.org/mhonarc/lists/m2e-dev</archive>
 		</mailingList>
 	</mailingLists>
 
