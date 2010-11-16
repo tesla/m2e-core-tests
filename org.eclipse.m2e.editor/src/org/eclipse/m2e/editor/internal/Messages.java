@@ -248,6 +248,8 @@ public class Messages extends NLS {
 
   public static String OverviewPage_action_new_module_project;
 
+  public static String OverviewPage_action_newModuleElement;
+
   public static String OverviewPage_action_selectParent;
 
   public static String OverviewPage_form;

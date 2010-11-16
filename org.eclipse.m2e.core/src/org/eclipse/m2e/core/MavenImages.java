@@ -88,6 +88,8 @@ public class MavenImages {
   public static final ImageDescriptor COLLAPSE_ALL = create("collapseall.gif"); //$NON-NLS-1$
   
   public static final ImageDescriptor EXPAND_ALL = create("expandall.gif"); //$NON-NLS-1$
+  
+  public static final ImageDescriptor NEW_POM = create("new_m2_pom.gif"); //$NON-NLS-1$
 
   public static final ImageDescriptor REFRESH = create("refresh.gif"); //$NON-NLS-1$
   

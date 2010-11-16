@@ -51,6 +51,7 @@ import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.m2e.core.MavenImages;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.actions.OpenPomAction;
 import org.eclipse.m2e.core.core.IMavenConstants;
@@ -181,7 +182,9 @@ public class OverviewPage extends MavenPomEditorPage {
 
   Section ciManagementSection;
 
-  private Action newModuleProjectAction;
+//  private Action newModuleProjectAction;
+
+  private Action newModuleElementAction;
 
   private Action parentSelectAction;
 
@@ -612,7 +615,16 @@ public class OverviewPage extends MavenPomEditorPage {
 
     modulesEditor.setAddListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
-        createNewModule("?"); //$NON-NLS-1$
+        IEditorInput editorInput = OverviewPage.this.pomEditor.getEditorInput();
+        if(editorInput instanceof FileEditorInput) {
+          MavenModuleWizard wizard = new MavenModuleWizard(true);
+          wizard.init(PlatformUI.getWorkbench(), new StructuredSelection(((FileEditorInput) editorInput).getFile()));
+          WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), wizard);
+          int res = dialog.open();
+          if(res == Window.OK) {
+            createNewModule(wizard.getModuleName());
+          }
+        }
       }
     });
 
@@ -680,23 +692,30 @@ public class OverviewPage extends MavenPomEditorPage {
           }
         });
 
-    newModuleProjectAction = new Action(Messages.OverviewPage_action_new_module_project, MavenEditorImages.ADD_MODULE) {
+    newModuleElementAction = new Action(Messages.OverviewPage_action_newModuleElement, MavenImages.NEW_POM) {
       public void run() {
-        IEditorInput editorInput = OverviewPage.this.pomEditor.getEditorInput();
-        if(editorInput instanceof FileEditorInput) {
-          MavenModuleWizard wizard = new MavenModuleWizard(true);
-          wizard.init(PlatformUI.getWorkbench(), new StructuredSelection(((FileEditorInput) editorInput).getFile()));
-          WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), wizard);
-          int res = dialog.open();
-          if(res == Window.OK) {
-            createNewModule(wizard.getModuleName());
-          }
-        }
+        createNewModule("?"); //$NON-NLS-1$
       }
     };
 
+//    newModuleProjectAction = new Action(Messages.OverviewPage_action_new_module_project, MavenEditorImages.ADD_MODULE) {
+//      public void run() {
+//        IEditorInput editorInput = OverviewPage.this.pomEditor.getEditorInput();
+//        if(editorInput instanceof FileEditorInput) {
+//          MavenModuleWizard wizard = new MavenModuleWizard(true);
+//          wizard.init(PlatformUI.getWorkbench(), new StructuredSelection(((FileEditorInput) editorInput).getFile()));
+//          WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), wizard);
+//          int res = dialog.open();
+//          if(res == Window.OK) {
+//            createNewModule(wizard.getModuleName());
+//          }
+//        }
+//      }
+//    };
+    
     ToolBarManager modulesToolBarManager = new ToolBarManager(SWT.FLAT);
-    modulesToolBarManager.add(newModuleProjectAction);
+    modulesToolBarManager.add(newModuleElementAction);
+//    modulesToolBarManager.add(newModuleProjectAction);
 
     Composite toolbarComposite = toolkit.createComposite(modulesSection);
     GridLayout toolbarLayout = new GridLayout(1, true);
@@ -709,7 +728,8 @@ public class OverviewPage extends MavenPomEditorPage {
     modulesSection.setTextClient(toolbarComposite);
 
     modulesEditor.setReadOnly(pomEditor.isReadOnly());
-    newModuleProjectAction.setEnabled(!pomEditor.isReadOnly());
+    newModuleElementAction.setEnabled(!pomEditor.isReadOnly());
+//    newModuleProjectAction.setEnabled(!pomEditor.isReadOnly());
   }
 
   // right side
@@ -1139,9 +1159,11 @@ public class OverviewPage extends MavenPomEditorPage {
     if("pom".equals(model.getPackaging()) && modulesStack.topControl != modulesEditor) { //$NON-NLS-1$
       modulesStack.topControl = modulesEditor;
       modulesSection.setExpanded(true);
-      newModuleProjectAction.setEnabled(!isReadOnly());
+//      newModuleProjectAction.setEnabled(!isReadOnly());
+      newModuleElementAction.setEnabled(!isReadOnly());
     } else if(!"pom".equals(model.getPackaging()) && modulesStack.topControl != noModules) { //$NON-NLS-1$
-      newModuleProjectAction.setEnabled(false);
+//      newModuleProjectAction.setEnabled(false);
+      newModuleElementAction.setEnabled(false);
       modulesStack.topControl = noModules;
       modulesSection.setExpanded(false);
     }
