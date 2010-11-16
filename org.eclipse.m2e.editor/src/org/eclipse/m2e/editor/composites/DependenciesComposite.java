@@ -52,6 +52,7 @@ import org.eclipse.m2e.core.core.MavenLogger;
 import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.index.IIndex;
 import org.eclipse.m2e.core.index.IndexedArtifactFile;
+import org.eclipse.m2e.core.ui.dialogs.AddDependencyDialog;
 import org.eclipse.m2e.core.ui.dialogs.MavenRepositorySearchDialog;
 import org.eclipse.m2e.core.wizards.WidthGroup;
 import org.eclipse.m2e.editor.MavenEditorImages;
@@ -269,25 +270,21 @@ public class DependenciesComposite extends Composite {
       public void widgetSelected(SelectionEvent e) {
         // TODO calculate current list of artifacts for the project
         Set<ArtifactKey> artifacts = Collections.emptySet();
-        MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-            Messages.DependenciesComposite_searchDialog_title, IIndex.SEARCH_ARTIFACT, artifacts, true);
-        if(dialog.open() == Window.OK) {
-          IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
-          if(af != null) {
-            Dependency dependency = createDependency(new ValueProvider<Model>() {
+        AddDependencyDialog addDepDialog = new AddDependencyDialog(getShell(), false);
+        if (addDepDialog.open() == Window.OK) {
+          List<Dependency> deps = addDepDialog.getDependencies();
+          for (Dependency dep : deps) {
+            setupDependency(new ValueProvider<Model>() {
               @Override
               public Model getValue() {
                 return model;
               }
-            }, POM_PACKAGE.getModel_Dependencies(), //
-                af.group, af.artifact, af.version, af.classifier, 
-                "jar".equals(nvl(af.type)) ? "" : nvl(af.type), //$NON-NLS-1$ //$NON-NLS-2$
-                "compile".equals(nvl(dialog.getSelectedScope())) ? "" : nvl(dialog.getSelectedScope()));//$NON-NLS-0$ //$NON-NLS-1$
-            dependenciesEditor.setInput(model.getDependencies());
-            dependenciesEditor.setSelection(Collections.singletonList(dependency));
-            updateDependencyDetails(dependency);
-            groupIdText.setFocus();
+            }, POM_PACKAGE.getModel_Dependencies(), dep);
           }
+          dependenciesEditor.setInput(model.getDependencies());
+          dependenciesEditor.setSelection(Collections.singletonList(deps.get(0)));
+          updateDependencyDetails(deps.get(0));
+          groupIdText.setFocus();
         }
       }
     });
@@ -1098,6 +1095,23 @@ public class DependenciesComposite extends Composite {
         }        
       }
     });
+  }
+  
+  void setupDependency(ValueProvider<? extends EObject> parentProvider, 
+      EReference feature, Dependency dependency) {
+    CompoundCommand compoundCommand = new CompoundCommand();
+    EditingDomain editingDomain = editorPage.getEditingDomain();
+    
+    EObject parent = parentProvider.getValue();
+    if(parent == null) {
+      parent = parentProvider.create(editingDomain, compoundCommand);
+    }
+    
+    Command addDependencyCommand = AddCommand.create(editingDomain, parent, 
+        feature, dependency);
+    compoundCommand.append(addDependencyCommand);
+    
+    editingDomain.getCommandStack().execute(compoundCommand);
   }
 
   Dependency createDependency(ValueProvider<? extends EObject> parentProvider, EReference feature,
