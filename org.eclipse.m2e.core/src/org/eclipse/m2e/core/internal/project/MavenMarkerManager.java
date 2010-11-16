@@ -65,7 +65,6 @@ public class MavenMarkerManager implements IMavenMarkerManager {
    */
   private static final String PROJECT_NODE = "project"; //$NON-NLS-1$
   public static final String OFFSET = "offset"; //$NON-NLS-1$
-  public static final String NO_SCHEMA_ERR = org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_error_noschema;
   
   private final MavenConsole console;
   private final IMavenConfiguration mavenConfiguration; 
@@ -229,7 +228,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
               if (documentRegion.getText().lastIndexOf(XSI_SCHEMA_LOCATION) == -1) {
                 int offset = documentRegion.getStartOffset();
                 int lineNumber = document.getLineOfOffset(offset) + 1;
-                IMarker marker = addMarker(pomFile, NO_SCHEMA_ERR, lineNumber, IMarker.SEVERITY_WARNING, false);
+                IMarker marker = addMarker(pomFile, org.eclipse.m2e.core.internal.Messages.MavenMarkerManager_error_noschema, lineNumber, IMarker.SEVERITY_WARNING, false);
                 //the quick fix in the marker view needs to know the offset, since it doesn't have access to the
                 //editor/source viewer
                 if(marker != null){
