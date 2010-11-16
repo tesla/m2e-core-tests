@@ -156,13 +156,13 @@ public class OverviewPage extends MavenPomEditorPage {
 
   Text scmTagText;
 
-  Text issueManagementSystemText;
+  CCombo issueManagementSystemCombo;
 
-  Text issueManagementUrlText;
+  CCombo issueManagementUrlCombo;
 
-  Text ciManagementUrlText;
+  CCombo ciManagementUrlCombo;
 
-  Text ciManagementSystemText;
+  CCombo ciManagementSystemCombo;
 
   ListEditorComposite<String> modulesEditor;
 
@@ -906,31 +906,39 @@ public class OverviewPage extends MavenPomEditorPage {
     Label issueManagementSystemLabel = toolkit.createLabel(issueManagementComposite, Messages.OverviewPage_lblSystem,
         SWT.NONE);
 
-    issueManagementSystemText = toolkit.createText(issueManagementComposite, null, SWT.NONE);
+    issueManagementSystemCombo = new CCombo(issueManagementComposite, SWT.FLAT);
     GridData gd_issueManagementSystemText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_issueManagementSystemText.widthHint = 150;
-    issueManagementSystemText.setLayoutData(gd_issueManagementSystemText);
-    issueManagementSystemText.setData("name", "issueManagementSystem"); //$NON-NLS-1$ //$NON-NLS-2$
+    issueManagementSystemCombo.setLayoutData(gd_issueManagementSystemText);
+    issueManagementSystemCombo.setData("name", "issueManagementSystem"); //$NON-NLS-1$ //$NON-NLS-2$
+    issueManagementSystemCombo.setData(FormToolkit.KEY_DRAW_BORDER, FormToolkit.TEXT_BORDER);
+    addToHistory(issueManagementSystemCombo);
+    toolkit.paintBordersFor(issueManagementSystemCombo);
+    toolkit.adapt(issueManagementSystemCombo, true, true);
 
     Hyperlink issueManagementUrlLabel = toolkit.createHyperlink(issueManagementComposite, Messages.OverviewPage_lblUrl,
         SWT.NONE);
     issueManagementUrlLabel.addHyperlinkListener(new HyperlinkAdapter() {
       public void linkActivated(HyperlinkEvent e) {
-        FormUtils.openHyperlink(issueManagementUrlText.getText());
+        FormUtils.openHyperlink(issueManagementUrlCombo.getText());
       }
     });
 
-    issueManagementUrlText = toolkit.createText(issueManagementComposite, null, SWT.NONE);
+    issueManagementUrlCombo = new CCombo(issueManagementComposite, SWT.FLAT);
     GridData gd_issueManagementUrlText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_issueManagementUrlText.widthHint = 150;
-    issueManagementUrlText.setLayoutData(gd_issueManagementUrlText);
-    issueManagementUrlText.setData("name", "issueManagementUrl"); //$NON-NLS-1$ //$NON-NLS-2$
+    issueManagementUrlCombo.setLayoutData(gd_issueManagementUrlText);
+    issueManagementUrlCombo.setData("name", "issueManagementUrl"); //$NON-NLS-1$ //$NON-NLS-2$
+    issueManagementUrlCombo.setData(FormToolkit.KEY_DRAW_BORDER, FormToolkit.TEXT_BORDER);
+    addToHistory(issueManagementUrlCombo);
+    toolkit.paintBordersFor(issueManagementUrlCombo);
+    toolkit.adapt(issueManagementUrlCombo, true, true);
 
     widthGroup.addControl(issueManagementSystemLabel);
     widthGroup.addControl(issueManagementUrlLabel);
 
     toolkit.paintBordersFor(issueManagementComposite);
-    issueManagementComposite.setTabList(new Control[] {issueManagementSystemText, issueManagementUrlText});
+    issueManagementComposite.setTabList(new Control[] {issueManagementSystemCombo, issueManagementUrlCombo});
   }
 
   private void createCiManagementSection(FormToolkit toolkit, Composite composite, WidthGroup widthGroup) {
@@ -947,31 +955,39 @@ public class OverviewPage extends MavenPomEditorPage {
     Label ciManagementSystemLabel = toolkit.createLabel(ciManagementComposite, Messages.OverviewPage_lblSystem,
         SWT.NONE);
 
-    ciManagementSystemText = toolkit.createText(ciManagementComposite, null, SWT.NONE);
+    ciManagementSystemCombo = new CCombo(ciManagementComposite, SWT.FLAT);
     GridData gd_ciManagementSystemText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_ciManagementSystemText.widthHint = 150;
-    ciManagementSystemText.setLayoutData(gd_ciManagementSystemText);
-    ciManagementSystemText.setData("name", "ciManagementSystem"); //$NON-NLS-1$ //$NON-NLS-2$
+    ciManagementSystemCombo.setLayoutData(gd_ciManagementSystemText);
+    ciManagementSystemCombo.setData("name", "ciManagementSystem"); //$NON-NLS-1$ //$NON-NLS-2$
+    ciManagementSystemCombo.setData(FormToolkit.KEY_DRAW_BORDER, FormToolkit.TEXT_BORDER);
+    addToHistory(ciManagementSystemCombo);
+    toolkit.paintBordersFor(ciManagementSystemCombo);
+    toolkit.adapt(ciManagementSystemCombo, true, true);
 
     Hyperlink ciManagementUrlLabel = toolkit.createHyperlink(ciManagementComposite, Messages.OverviewPage_lblUrl,
         SWT.NONE);
     ciManagementUrlLabel.addHyperlinkListener(new HyperlinkAdapter() {
       public void linkActivated(HyperlinkEvent e) {
-        FormUtils.openHyperlink(ciManagementUrlText.getText());
+        FormUtils.openHyperlink(ciManagementUrlCombo.getText());
       }
     });
 
-    ciManagementUrlText = toolkit.createText(ciManagementComposite, null, SWT.NONE);
+    ciManagementUrlCombo = new CCombo(ciManagementComposite, SWT.FLAT);
     GridData gd_ciManagementUrlText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_ciManagementUrlText.widthHint = 150;
-    ciManagementUrlText.setLayoutData(gd_ciManagementUrlText);
-    ciManagementUrlText.setData("name", "ciManagementUrl"); //$NON-NLS-1$ //$NON-NLS-2$
+    ciManagementUrlCombo.setLayoutData(gd_ciManagementUrlText);
+    ciManagementUrlCombo.setData("name", "ciManagementUrl"); //$NON-NLS-1$ //$NON-NLS-2$
+    ciManagementUrlCombo.setData(FormToolkit.KEY_DRAW_BORDER, FormToolkit.TEXT_BORDER);
+    addToHistory(ciManagementUrlCombo);
+    toolkit.paintBordersFor(ciManagementUrlCombo);
+    toolkit.adapt(ciManagementUrlCombo, true, true);
 
     widthGroup.addControl(ciManagementSystemLabel);
     widthGroup.addControl(ciManagementUrlLabel);
 
     toolkit.paintBordersFor(ciManagementComposite);
-    ciManagementComposite.setTabList(new Control[] {ciManagementSystemText, ciManagementUrlText});
+    ciManagementComposite.setTabList(new Control[] {ciManagementSystemCombo, ciManagementUrlCombo});
   }
 
   protected void doUpdate(Notification notification) {
@@ -1235,19 +1251,19 @@ public class OverviewPage extends MavenPomEditorPage {
   }
 
   private void loadCiManagement(CiManagement ciManagement) {
-    removeNotifyListener(ciManagementUrlText);
-    removeNotifyListener(ciManagementSystemText);
+    removeNotifyListener(ciManagementUrlCombo);
+    removeNotifyListener(ciManagementSystemCombo);
 
     if(ciManagement == null) {
-      setText(ciManagementSystemText, ""); //$NON-NLS-1$
-      setText(ciManagementUrlText, ""); //$NON-NLS-1$
+      setText(ciManagementSystemCombo, ""); //$NON-NLS-1$
+      setText(ciManagementUrlCombo, ""); //$NON-NLS-1$
     } else {
-      setText(ciManagementSystemText, ciManagement.getSystem());
-      setText(ciManagementUrlText, ciManagement.getUrl());
+      setText(ciManagementSystemCombo, ciManagement.getSystem());
+      setText(ciManagementUrlCombo, ciManagement.getUrl());
     }
 
     ValueProvider<CiManagement> ciManagementProvider = new ValueProvider.ParentValueProvider<CiManagement>(
-        ciManagementUrlText, ciManagementSystemText) {
+        ciManagementUrlCombo, ciManagementSystemCombo) {
       public CiManagement getValue() {
         return model.getCiManagement();
       }
@@ -1259,24 +1275,24 @@ public class OverviewPage extends MavenPomEditorPage {
         return ciManagement;
       }
     };
-    setModifyListener(ciManagementUrlText, ciManagementProvider, POM_PACKAGE.getCiManagement_Url(), ""); //$NON-NLS-1$
-    setModifyListener(ciManagementSystemText, ciManagementProvider, POM_PACKAGE.getCiManagement_System(), ""); //$NON-NLS-1$
+    setModifyListener(ciManagementUrlCombo, ciManagementProvider, POM_PACKAGE.getCiManagement_Url(), ""); //$NON-NLS-1$
+    setModifyListener(ciManagementSystemCombo, ciManagementProvider, POM_PACKAGE.getCiManagement_System(), ""); //$NON-NLS-1$
   }
 
   private void loadIssueManagement(IssueManagement issueManagement) {
-    removeNotifyListener(issueManagementUrlText);
-    removeNotifyListener(issueManagementSystemText);
+    removeNotifyListener(issueManagementUrlCombo);
+    removeNotifyListener(issueManagementSystemCombo);
 
     if(issueManagement == null) {
-      setText(issueManagementSystemText, ""); //$NON-NLS-1$
-      setText(issueManagementUrlText, ""); //$NON-NLS-1$
+      setText(issueManagementSystemCombo, ""); //$NON-NLS-1$
+      setText(issueManagementUrlCombo, ""); //$NON-NLS-1$
     } else {
-      setText(issueManagementSystemText, issueManagement.getSystem());
-      setText(issueManagementUrlText, issueManagement.getUrl());
+      setText(issueManagementSystemCombo, issueManagement.getSystem());
+      setText(issueManagementUrlCombo, issueManagement.getUrl());
     }
 
     ValueProvider<IssueManagement> issueManagementProvider = new ValueProvider.ParentValueProvider<IssueManagement>(
-        issueManagementUrlText, issueManagementSystemText) {
+        issueManagementUrlCombo, issueManagementSystemCombo) {
       public IssueManagement getValue() {
         return model.getIssueManagement();
       }
@@ -1288,8 +1304,8 @@ public class OverviewPage extends MavenPomEditorPage {
         return issueManagement;
       }
     };
-    setModifyListener(issueManagementUrlText, issueManagementProvider, POM_PACKAGE.getIssueManagement_Url(), ""); //$NON-NLS-1$
-    setModifyListener(issueManagementSystemText, issueManagementProvider, POM_PACKAGE.getIssueManagement_System(), ""); //$NON-NLS-1$
+    setModifyListener(issueManagementUrlCombo, issueManagementProvider, POM_PACKAGE.getIssueManagement_Url(), ""); //$NON-NLS-1$
+    setModifyListener(issueManagementSystemCombo, issueManagementProvider, POM_PACKAGE.getIssueManagement_System(), ""); //$NON-NLS-1$
   }
 
   protected void createNewModule(String moduleName) {

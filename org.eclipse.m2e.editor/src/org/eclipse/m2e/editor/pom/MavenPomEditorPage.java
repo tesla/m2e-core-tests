@@ -52,6 +52,7 @@ import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.core.MavenLogger;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.MavenProjectManager;
+import org.eclipse.m2e.core.ui.dialogs.InputHistory;
 import org.eclipse.m2e.editor.MavenEditorImages;
 import org.eclipse.m2e.editor.internal.Messages;
 import org.eclipse.m2e.model.edit.pom.Model;
@@ -66,6 +67,7 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.IManagedForm;
@@ -96,6 +98,8 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
   // have we loaded data?
   private boolean dataLoaded;
 
+  private InputHistory inputHistory;
+  
   protected static PomPackage POM_PACKAGE = PomPackage.eINSTANCE;
 
   protected Map<Object, List<ModifyListener>> modifyListeners = new HashMap<Object, List<ModifyListener>>();
@@ -103,6 +107,7 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
   public MavenPomEditorPage(MavenPomEditor pomEditor, String id, String title) {
     super(pomEditor, id, title);
     this.pomEditor = pomEditor;
+    this.inputHistory = new InputHistory(id);
   }
   
   public MavenPomEditor getPomEditor() {
@@ -142,6 +147,8 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
 
     // compatibility proxy to support Eclipse 3.2
     FormUtils.decorateHeader(managedForm.getToolkit(), form.getForm());
+    
+    inputHistory.load();
   }
   
   public void setActive(boolean active) {
@@ -265,6 +272,8 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
   }
 
   public void dispose() {
+    inputHistory.save();
+    
     deRegisterListeners();
     
     for(Map.Entry<Object, List<ModifyListener>> e : modifyListeners.entrySet()) {
@@ -604,4 +613,7 @@ public abstract class MavenPomEditorPage extends FormPage implements Adapter {
     return pomFile != null? pomFile.getProject(): null;
   }
 
+  protected void addToHistory(Control control) {
+    inputHistory.add(control);
+  }
 }
