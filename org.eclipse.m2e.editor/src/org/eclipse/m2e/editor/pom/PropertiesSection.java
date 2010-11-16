@@ -115,6 +115,9 @@ public class PropertiesSection {
       }
     }) ;
     
+    toolkit.paintBordersFor(propertiesEditor);
+    toolkit.adapt(propertiesEditor);
+    
     return propertiesSection;
   }
   
