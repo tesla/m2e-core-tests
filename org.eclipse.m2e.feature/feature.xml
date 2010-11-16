@@ -28,9 +28,9 @@
       <import plugin="org.eclipse.wst.sse.core"/>
       <import plugin="org.eclipse.wst.xml.core"/>
       <import plugin="org.eclipse.jem.util"/>
-      <import feature="org.eclipse.platform" version="3.3.0" match="greaterOrEqual"/>
-      <import feature="org.eclipse.rcp" version="3.3.0" match="greaterOrEqual"/>
-      <import feature="org.eclipse.jdt" version="3.3.0" match="greaterOrEqual"/>
+      <import feature="org.eclipse.platform" version="3.4.0" match="greaterOrEqual"/>
+      <import feature="org.eclipse.rcp" version="3.4.0" match="greaterOrEqual"/>
+      <import feature="org.eclipse.jdt" version="3.4.0" match="greaterOrEqual"/>
    </requires>
 
    <plugin
@@ -60,13 +60,6 @@
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.m2e.pr"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="org.eclipse.m2e.launching"
          download-size="0"
          install-size="0"
@@ -79,12 +72,6 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-
-   <plugin
-         id="org.eclipse.m2e.dependency_tree"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.m2e.editor"

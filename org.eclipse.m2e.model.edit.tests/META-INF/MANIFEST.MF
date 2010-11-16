@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: M2E Edit model tests
+Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.maven.ide.eclipse.model.edit.tests
 Bundle-Version: 0.12.0.qualifier
 Bundle-RequiredExecutionEnvironment: J2SE-1.5

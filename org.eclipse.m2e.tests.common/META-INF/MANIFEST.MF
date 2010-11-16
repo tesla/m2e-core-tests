@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: M2E Testing Helpers
+Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.eclipse.m2e.tests.common;singleton:=true
 Bundle-Version: 0.13.0.qualifier
 Require-Bundle: org.junit,
@@ -19,7 +19,7 @@ Bundle-ClassPath: .,
  jars/servlet-api-2.5-20081211.jar,
  jars/jetty-util-6.1.22.jar,
  jars/jetty-6.1.22.jar
-Bundle-Vendor: Sonatype, Inc.
+Bundle-Vendor: %Bundle-Vendor
 MavenArtifact-GroupId: org.eclipse.m2e
 MavenArtifact-ArtifactId: org.eclipse.m2e.tests.common
 Export-Package: org.eclipse.m2e.tests.common
