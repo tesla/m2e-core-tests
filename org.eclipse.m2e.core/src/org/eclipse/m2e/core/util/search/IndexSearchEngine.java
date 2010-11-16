@@ -85,7 +85,7 @@ public class IndexSearchEngine implements SearchEngine {
 
       String packagingStr = packaging == Packaging.ALL ? null : packaging.getText();
 
-      for(IndexedArtifact artifact : index.find(null, null, null, packagingStr)) {
+      for(IndexedArtifact artifact : index.find(searchExpression, null, null, packagingStr)) {
         ids.add(artifact.getGroupId());
       }
       return subSet(ids, searchExpression);
