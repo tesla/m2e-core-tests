@@ -41,7 +41,8 @@ public class WorkspaceHelpers {
 
   public static void cleanWorkspace() throws InterruptedException, CoreException {
     Exception cause = null;
-    for(int i = 0; i < 10; i++ ) {
+    int i;
+    for(i = 0; i < 10; i++ ) {
       try {
         doCleanWorkspace();
       } catch(InterruptedException e) {
@@ -50,6 +51,9 @@ public class WorkspaceHelpers {
         throw e;
       } catch(Exception e) {
         cause = e;
+        e.printStackTrace();
+        System.out.println(i);
+        System.gc();
         Thread.sleep(6 * 1000);
         continue;
       }
@@ -60,7 +64,7 @@ public class WorkspaceHelpers {
 
     // must be a timeout
     throw new CoreException(new Status(IStatus.ERROR, IMavenConstants.PLUGIN_ID,
-        "Could not delete workspace resources: "
+        "Could not delete workspace resources (after " + i + " retries): "
             + Arrays.asList(ResourcesPlugin.getWorkspace().getRoot().getProjects()), cause));
   }
 
