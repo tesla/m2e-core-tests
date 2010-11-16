@@ -469,7 +469,6 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
                   manager.deleteEditorHintMarkers(file);
                   manager.addEditorHintMarkers(file);
                 } catch(CoreException e) {
-                  // TODO Auto-generated catch block
                   MavenLogger.log("Unable to process editor markers", e);
                 }
                 return Status.OK_STATUS;
