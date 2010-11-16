@@ -185,23 +185,30 @@ public enum PomTemplateContext {
         //see if we can complete the properties ending with .version
         
         IMavenProjectFacade mvnproject = MavenPlugin.getDefault().getMavenProjectManager().getProject(project);
+        List<String> keys = new ArrayList<String>();
+        String contextTypeId = getContextTypeId();
         if(mvnproject != null) {
           MavenProject mvn = mvnproject.getMavenProject();
           if (mvn != null) {
+            //if groupid is the same, suggest ${project.version}
+            if (groupId.equals(mvn.getGroupId())) {
+              proposals.add(new Template("${project.version}", Messages.PomTemplateContext_project_version_hint, contextTypeId, "$${project.version}", false)); //$NON-NLS-1$ //$NON-NLS-3$
+            }
             Properties props = mvn.getProperties();
             if (props != null) {
-              String contextTypeId = getContextTypeId();
-              List<String> keys = new ArrayList<String>();
               for (Object key : props.keySet()) {
                 //only add the properties following the .version convention
                 if (key.toString().endsWith(".version")) { //$NON-NLS-1$
                   keys.add(key.toString());
                 }
               }
+              //sort just properties
               Collections.sort(keys);
-              for (String key : keys) {
-                String expr = "${" + key + "}"; //$NON-NLS-1$ //$NON-NLS-2$
-                proposals.add(new Template(expr, Messages.PomTemplateContext_expression_description, contextTypeId, "$" + expr, false)); //$NON-NLS-2$
+              if (keys.size() > 0) {
+                for (String key : keys) {
+                  String expr = "${" + key + "}"; //$NON-NLS-1$ //$NON-NLS-2$
+                  proposals.add(new Template(expr, Messages.PomTemplateContext_expression_description, contextTypeId, "$" + expr, false)); //$NON-NLS-2$ //$NON-NLS-1$
+                }
               }
             }
           }
@@ -577,7 +584,7 @@ public enum PomTemplateContext {
           if (props != null) {
             inter.addValueSource(new PropertiesBasedValueSource(props));
           }
-          inter.addValueSource(new PrefixedObjectValueSource(Arrays.asList( new String[]{ "pom.", "project." } ), prj.getModel(), false));
+          inter.addValueSource(new PrefixedObjectValueSource(Arrays.asList( new String[]{ "pom.", "project." } ), prj.getModel(), false)); //$NON-NLS-1$ //$NON-NLS-2$
           try {
             text = inter.interpolate(text);
           } catch(InterpolationException e) {
