@@ -177,7 +177,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
     
   }
   
-  private Element findChildElement(Element parent, String name) {
+  public static Element findChildElement(Element parent, String name) {
     NodeList rootList = parent.getChildNodes(); 
     for (int i = 0; i < rootList.getLength(); i++) {
         Node nd = rootList.item(i);
@@ -190,7 +190,7 @@ public class MavenMarkerManager implements IMavenMarkerManager {
     }
     return null;
   }
-  static String getElementTextValue(Node element) {
+  public static String getElementTextValue(Node element) {
     if (element == null) return null;
     StringBuffer buff = new StringBuffer();
     NodeList list = element.getChildNodes();

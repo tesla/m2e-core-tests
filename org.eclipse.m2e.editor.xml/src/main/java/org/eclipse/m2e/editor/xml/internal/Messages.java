@@ -40,6 +40,12 @@ public class Messages extends NLS {
   public static String PomHyperlinkDetector_open_property;
 
   public static String PomQuickAssistProcessor_name;
+
+  public static String PomQuickAssistProcessor_remove_hint;
+  public static String PomQuickAssistProcessor_title_groupId;
+
+  public static String PomQuickAssistProcessor_title_version;
+
   public static String PomTemplateContext_candidate;
 
   public static String PomTemplateContext_clean;

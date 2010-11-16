@@ -17,11 +17,11 @@ import java.util.List;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.Text;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -30,29 +30,27 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext;
 import org.eclipse.jface.text.quickassist.IQuickAssistProcessor;
 import org.eclipse.jface.text.source.Annotation;
-import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.text.edits.DeleteEdit;
 import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.ide.IDE.SharedImages;
 import org.eclipse.ui.internal.WorkbenchPlugin;
-import org.eclipse.ui.internal.util.ImageSupport;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
-import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocumentRegion;
-import org.eclipse.wst.sse.ui.internal.contentassist.ContentAssistUtils;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
-import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.core.MavenLogger;
+import org.eclipse.m2e.core.internal.project.MavenMarkerManager;
 import org.eclipse.m2e.editor.xml.internal.Messages;
 
 public class PomQuickAssistProcessor implements IQuickAssistProcessor {
+  private static final String GROUP_ID_NODE = "groupId"; //$NON-NLS-1$
+  private static final String VERSION_NODE = "version"; //$NON-NLS-1$
 
   public static final String PROJECT_NODE = "project"; //$NON-NLS-1$
   public static final String XSI_VALUE = " xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"+ //$NON-NLS-1$
@@ -68,8 +66,8 @@ public class PomQuickAssistProcessor implements IQuickAssistProcessor {
       MarkerAnnotation mark = (MarkerAnnotation) an;
       try {
         if (IMavenConstants.MARKER_ID.equals(mark.getMarker().getType())) {
-          String hint = mark.getMarker().getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, "");
-          if (!hint.equals("")) {
+          String hint = mark.getMarker().getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, ""); //$NON-NLS-1$
+          if (!hint.equals("")) { //$NON-NLS-1$
             return true;
           }
         }
@@ -94,15 +92,15 @@ public class PomQuickAssistProcessor implements IQuickAssistProcessor {
          int currentLineNum = context.getSourceViewer().getDocument().getLineOfOffset(context.getOffset()) + 1;
          if (currentLineNum == lineNum) {
            if (IMavenConstants.MARKER_ID.equals(mark.getMarker().getType())) {
-             String hint = mark.getMarker().getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, "");
-             if (hint.equals("parent_groupid")) {
-               
+             String hint = mark.getMarker().getAttribute(IMavenConstants.MARKER_ATTR_EDITOR_HINT, ""); //$NON-NLS-1$
+             if (hint.equals("parent_groupid")) { //$NON-NLS-1$
+               proposals.add(new IdPartRemovalProposal(context, false, mark));
              }
-             if (hint.equals("parent_version")) {
-               
+             if (hint.equals("parent_version")) { //$NON-NLS-1$
+               proposals.add(new IdPartRemovalProposal(context, true, mark));
              }
-             if (hint.equals("schema")) {
-               proposals.add(new SchemaCompletionProposal(context));
+             if (hint.equals("schema")) { //$NON-NLS-1$
+               proposals.add(new SchemaCompletionProposal(context, mark));
              }
            }
          }
@@ -123,44 +121,52 @@ public class PomQuickAssistProcessor implements IQuickAssistProcessor {
   public String getErrorMessage() {
     return null;
   }
-}
 
 class SchemaCompletionProposal implements ICompletionProposal, ICompletionProposalExtension5 {
 
   IQuickAssistInvocationContext context;
-  public SchemaCompletionProposal(IQuickAssistInvocationContext context){
+  private MarkerAnnotation annotation;
+  public SchemaCompletionProposal(IQuickAssistInvocationContext context, MarkerAnnotation mark){
     this.context = context;
+    annotation = mark;
   }
   
   public void apply(IDocument doc) {
-
-    IDOMModel domModel = (IDOMModel) StructuredModelManager.getModelManager().getExistingModelForRead(doc);
-    IStructuredDocument document = domModel.getStructuredDocument();
-    Element root = domModel.getDocument().getDocumentElement();
-
-    //now check parent version and groupid against the current project's ones..
-    if (root.getNodeName().equals(PomQuickAssistProcessor.PROJECT_NODE)) { //$NON-NLS-1$
-      if (root instanceof IndexedRegion) {
-        IndexedRegion off = (IndexedRegion) root;
-
-        int offset = off.getStartOffset() + PomQuickAssistProcessor.PROJECT_NODE.length() + 1;
-        if (offset <= 0) {
-          return;
+    IDOMModel domModel = null;
+    try {
+      domModel = (IDOMModel) StructuredModelManager.getModelManager().getExistingModelForRead(doc);
+      IStructuredDocument document = domModel.getStructuredDocument();
+      Element root = domModel.getDocument().getDocumentElement();
+  
+      //now check parent version and groupid against the current project's ones..
+      if (root.getNodeName().equals(PomQuickAssistProcessor.PROJECT_NODE)) { //$NON-NLS-1$
+        if (root instanceof IndexedRegion) {
+          IndexedRegion off = (IndexedRegion) root;
+  
+          int offset = off.getStartOffset() + PomQuickAssistProcessor.PROJECT_NODE.length() + 1;
+          if (offset <= 0) {
+            return;
+          }
+          InsertEdit edit = new InsertEdit(offset, PomQuickAssistProcessor.XSI_VALUE);
+          try {
+            edit.apply(doc);
+            annotation.getMarker().delete();
+            Display.getDefault().asyncExec(new Runnable() {
+              public void run() {
+                IEditorPart activeEditor = MvnIndexPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow()
+                    .getActivePage().getActiveEditor();
+                MvnIndexPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow().getActivePage()
+                    .saveEditor(activeEditor, false);
+              }
+            });
+          } catch(Exception e) {
+            MavenLogger.log("Unable to insert schema info", e); //$NON-NLS-1$
+          }
         }
-        InsertEdit edit = new InsertEdit(offset, PomQuickAssistProcessor.XSI_VALUE);
-        try {
-          edit.apply(doc);
-          Display.getDefault().asyncExec(new Runnable() {
-            public void run() {
-              IEditorPart activeEditor = MvnIndexPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow()
-                  .getActivePage().getActiveEditor();
-              MvnIndexPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow().getActivePage()
-                  .saveEditor(activeEditor, false);
-            }
-          });
-        } catch(Exception e) {
-          MavenLogger.log("Unable to insert schema info", e); //$NON-NLS-1$
-        }
+      }
+    } finally {
+      if (domModel != null) {
+        domModel.releaseFromRead();
       }
     }
   }
@@ -187,7 +193,121 @@ class SchemaCompletionProposal implements ICompletionProposal, ICompletionPropos
 
   public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
     // TODO Auto-generated method stub
-    return "<html>...<br>&lt;project <b>" + PomQuickAssistProcessor.XSI_VALUE + "</b>&gt;<br>...</html>";
+    return "<html>...<br>&lt;project <b>" + PomQuickAssistProcessor.XSI_VALUE + "</b>&gt;<br>...</html>"; //$NON-NLS-1$ //$NON-NLS-2$
   }
   
+}
+
+
+class IdPartRemovalProposal implements ICompletionProposal, ICompletionProposalExtension5 {
+
+  IQuickAssistInvocationContext context;
+  private boolean isVersion;
+  private MarkerAnnotation annotation;
+  public IdPartRemovalProposal(IQuickAssistInvocationContext context, boolean version, MarkerAnnotation mark){
+    this.context = context;
+    isVersion = version;
+    annotation = mark;
+  }
+  
+  public void apply(IDocument doc) {
+    IDOMModel domModel = null;
+    try {
+      domModel = (IDOMModel) StructuredModelManager.getModelManager().getExistingModelForRead(doc);
+      IStructuredDocument document = domModel.getStructuredDocument();
+      Element root = domModel.getDocument().getDocumentElement();
+
+      //now check parent version and groupid against the current project's ones..
+      if (root.getNodeName().equals(PomQuickAssistProcessor.PROJECT_NODE)) { //$NON-NLS-1$
+        Element value = MavenMarkerManager.findChildElement(root, isVersion ? VERSION_NODE : GROUP_ID_NODE); //$NON-NLS-1$ //$NON-NLS-2$
+        if (value != null && value instanceof IndexedRegion) {
+          IndexedRegion off = (IndexedRegion) value;
+
+          int offset = off.getStartOffset();
+          if (offset <= 0) {
+            return;
+          }
+          Node prev = value.getNextSibling();
+          if (prev instanceof Text) {
+            //check the content as well??
+            off = ((IndexedRegion) prev);
+          }
+          DeleteEdit edit = new DeleteEdit(offset, off.getEndOffset() - offset);
+          try {
+            edit.apply(doc);
+            annotation.getMarker().delete();
+          } catch(Exception e) {
+            MavenLogger.log("Unable to remove the element", e); //$NON-NLS-1$
+          }
+        }
+      }
+    } finally {
+      if (domModel != null) {
+        domModel.releaseFromRead();
+      }
+    }
+
+  }
+
+  public String getAdditionalProposalInfo() {
+    return null;
+  }
+
+  public IContextInformation getContextInformation() {
+    return null;
+  }
+
+  public String getDisplayString() {
+    return isVersion ? Messages.PomQuickAssistProcessor_title_version : Messages.PomQuickAssistProcessor_title_groupId;
+  }
+
+  public Image getImage() {
+    return WorkbenchPlugin.getDefault().getImageRegistry().get(org.eclipse.ui.internal.SharedImages.IMG_TOOL_DELETE);
+  }
+
+  public Point getSelection(IDocument arg0) {
+    return null;
+  }
+
+  public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
+    IDocument doc = context.getSourceViewer().getDocument();
+    IDOMModel domModel = null;
+    try {
+      domModel = (IDOMModel) StructuredModelManager.getModelManager().getExistingModelForRead(doc);
+      IStructuredDocument document = domModel.getStructuredDocument();
+      Element root = domModel.getDocument().getDocumentElement();
+
+      //now check parent version and groupid against the current project's ones..
+      if (root.getNodeName().equals(PomQuickAssistProcessor.PROJECT_NODE)) { //$NON-NLS-1$
+        Element value = MavenMarkerManager.findChildElement(root, isVersion ? VERSION_NODE : GROUP_ID_NODE); //$NON-NLS-1$ //$NON-NLS-2$
+        if (value != null && value instanceof IndexedRegion) {
+          IndexedRegion reg = (IndexedRegion)value;
+          try {
+            int line = doc.getLineOfOffset(reg.getStartOffset());
+            int startLine = doc.getLineOffset(line);
+            int prev2 = doc.getLineOffset(line - 2);
+            String prevString = doc.get(prev2, startLine - prev2);
+            String currentLine = doc.get(startLine, doc.getLineLength(line));
+            int next2End = doc.getLineOffset(line + 2) + doc.getLineLength(line + 2);
+            int next2Start = startLine + doc.getLineLength( line ) + 1;
+            String nextString = doc.get(next2Start, next2End - next2Start);
+            prevString = prevString.replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br>"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+            nextString = nextString.replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br>"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+            currentLine = currentLine.replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br>"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+            return "<html>...<br>" + prevString + /**"<del>" + currentLine + "</del>" +*/ nextString + "...<html>";  //$NON-NLS-1$ //$NON-NLS-2$
+          } catch(BadLocationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
+        }
+      }
+    } finally {
+      if (domModel != null) {
+        domModel.releaseFromRead();
+      }
+    }      
+    return Messages.PomQuickAssistProcessor_remove_hint;
+  }
+  
+}
 }
