@@ -60,6 +60,8 @@ import org.eclipse.m2e.core.wizards.WidthGroup;
 import org.eclipse.m2e.editor.MavenEditorImages;
 import org.eclipse.m2e.editor.internal.Messages;
 import org.eclipse.m2e.editor.pom.FormUtils;
+import org.eclipse.m2e.editor.pom.MavenPomEditor;
+import org.eclipse.m2e.editor.pom.MavenPomEditor.Callback;
 import org.eclipse.m2e.editor.pom.MavenPomEditorPage;
 import org.eclipse.m2e.editor.pom.SearchControl;
 import org.eclipse.m2e.editor.pom.SearchMatcher;
@@ -91,6 +93,7 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.Section;
+import org.sonatype.aether.graph.DependencyNode;
 
 
 /**
@@ -101,6 +104,7 @@ public class DependenciesComposite extends Composite {
   protected static PomPackage POM_PACKAGE = PomPackage.eINSTANCE;
   
   protected MavenPomEditorPage editorPage; 
+  MavenPomEditor pomEditor;
   
   private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
 
@@ -161,9 +165,11 @@ public class DependenciesComposite extends Composite {
   DependencyLabelProvider exclusionLabelProvider = new DependencyLabelProvider();
 
 
-  public DependenciesComposite(Composite composite, MavenPomEditorPage editorPage, int flags) {
+
+  public DependenciesComposite(Composite composite, MavenPomEditorPage editorPage, int flags, MavenPomEditor pomEditor) {
     super(composite, flags);
     this.editorPage = editorPage;
+    this.pomEditor = pomEditor;
     createComposite();
     editorPage.initPopupMenu(dependenciesEditor.getViewer(), ".dependencies");
     editorPage.initPopupMenu(dependencyManagementEditor.getViewer(), ".dependencyManagement");
@@ -269,9 +275,19 @@ public class DependenciesComposite extends Composite {
     
     dependenciesEditor.setSelectListener(new SelectionAdapter(){
       public void widgetSelected(SelectionEvent e) {
-        // TODO calculate current list of artifacts for the project
-        Set<ArtifactKey> artifacts = Collections.emptySet();
-        AddDependencyDialog addDepDialog = new AddDependencyDialog(getShell(), false, editorPage.getProject());
+        final AddDependencyDialog addDepDialog = new AddDependencyDialog(getShell(), false, editorPage.getProject());
+        
+        pomEditor.loadDependencies(new Callback() {
+          
+          public void onFinish(DependencyNode node) {
+            addDepDialog.setDepdencyNode(node);
+          }
+          
+          public void onException(CoreException ex) {
+            MavenLogger.log(ex);
+          }
+        }, Artifact.SCOPE_TEST);
+        
         if (addDepDialog.open() == Window.OK) {
           List<Dependency> deps = addDepDialog.getDependencies();
           for (Dependency dep : deps) {

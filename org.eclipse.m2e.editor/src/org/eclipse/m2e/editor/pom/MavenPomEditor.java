@@ -21,8 +21,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EventObject;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.apache.maven.project.MavenProject;
@@ -45,6 +48,7 @@ import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
@@ -87,6 +91,7 @@ import org.eclipse.m2e.editor.MavenEditorImages;
 import org.eclipse.m2e.editor.MavenEditorPlugin;
 import org.eclipse.m2e.editor.internal.Messages;
 import org.eclipse.m2e.editor.lifecycle.internal.LifecyclePage;
+import org.eclipse.m2e.editor.pom.MavenPomEditor.Callback;
 import org.eclipse.m2e.model.edit.pom.Model;
 import org.eclipse.m2e.model.edit.pom.util.PomResourceFactoryImpl;
 import org.eclipse.m2e.model.edit.pom.util.PomResourceImpl;
@@ -123,6 +128,8 @@ import org.eclipse.wst.sse.core.internal.undo.IStructuredTextUndoManager;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
 import org.eclipse.wst.xml.core.internal.emf2xml.EMF2DOMSSEAdapter;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMElement;
+import org.sonatype.aether.graph.DependencyNode;
+import org.sonatype.aether.graph.DependencyVisitor;
 
 
 /**
@@ -202,6 +209,8 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
   BasicCommandStack sseCommandStack;
 
   List<IPomFileChangedListener> fileChangeListeners = new ArrayList<IPomFileChangedListener>();
+
+  private LoadDependenciesJob loadDependenciesJob;
 
   public MavenPomEditor() {
     modelManager = StructuredModelManager.getModelManager();
@@ -514,6 +523,86 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
           }
         }
       }
+    }
+  }
+  
+  public void loadDependencies(Callback callback, String classpath) {
+    if (this.loadDependenciesJob != null && this.loadDependenciesJob.dependencyNode != null) {
+      //Already loaded, we're done!
+      callback.onFinish(loadDependenciesJob.dependencyNode);
+      return;
+    } else if (this.loadDependenciesJob != null && this.loadDependenciesJob.getState() != Job.NONE) {
+      //Currently running
+      loadDependenciesJob.addCallback(callback);
+      return;
+    }
+    
+    this.loadDependenciesJob = new LoadDependenciesJob(this, classpath, callback);
+    loadDependenciesJob.schedule();
+  }
+  
+  public static interface Callback {
+    /**
+     * Called when the dependency tree is done loading. The node parameter
+     * points to the root of the tree.
+     * @param node
+     */
+    public void onFinish(DependencyNode node);
+    
+    /**
+     * Called if an exception occurs while loading the dependency tree.
+     * @param ex
+     */
+    public void onException(CoreException ex);
+  }
+  
+  /**
+   * Loads the dependency tree in a Job so as to not block the UI.
+   * Once the loading is done, it calls the provided callback with the root
+   * node of the dependency tree. If there is an error, it notifies the
+   * callback's onException method.
+   */
+  class LoadDependenciesJob extends Job {
+
+    private MavenPomEditor pomEditor;
+    private String classpath;
+    private List<Callback> callbacks = new LinkedList<MavenPomEditor.Callback>();
+    DependencyNode dependencyNode;
+    
+    public LoadDependenciesJob(MavenPomEditor editor, String classpath, Callback callback) {
+      super("Resolving dependencies");
+      this.pomEditor = editor;
+      this.classpath = classpath;
+      this.callbacks.add( callback );
+    }
+    
+    void addCallback(Callback callback) {
+      if (!this.callbacks.contains(callback)) {
+        this.callbacks.add( callback );
+      }
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
+     */
+    protected IStatus run(IProgressMonitor monitor) {
+      boolean force = false;
+      try {
+        final DependencyNode dependencyNode = pomEditor.readDependencyTree(force, classpath, monitor);
+        if(dependencyNode == null) {
+          return Status.CANCEL_STATUS;
+        }
+        this.dependencyNode = dependencyNode;
+        for (Callback callback : callbacks) {
+          callback.onFinish(dependencyNode);
+        }
+      } catch(final CoreException ex) {
+        for (Callback callback : callbacks) {
+          callback.onException(ex);
+        }
+      }
+
+      return Status.OK_STATUS;
     }
   }
 
