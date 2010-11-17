@@ -74,47 +74,47 @@ import org.eclipse.m2e.model.edit.pom.PomFactory;
  */
 public class AddDependencyDialog extends AbstractMavenDialog {
 
-  private static final String[] SCOPES = new String[] {"compile", "provided", "runtime", "test", "system"};
+  protected static final String[] SCOPES = new String[] {"compile", "provided", "runtime", "test", "system"};
 
   /*
    * dependencies under dependencyManagement are permitted to use an the extra "import" scope
    */
-  private static final String[] DEP_MANAGEMENT_SCOPES = new String[] {"compile", "provided", "runtime", "test",
+  protected static final String[] DEP_MANAGEMENT_SCOPES = new String[] {"compile", "provided", "runtime", "test",
       "system", "import"};
 
-  private static final String DIALOG_SETTINGS = AddDependencyDialog.class.getName();
+  protected static final String DIALOG_SETTINGS = AddDependencyDialog.class.getName();
 
-  private static final long SEARCH_DELAY = 500L; //in milliseconds
+  protected static final long SEARCH_DELAY = 500L; //in milliseconds
 
-  private String[] scopes;
+  protected String[] scopes;
 
-  TreeViewer resultsViewer;
+  protected TreeViewer resultsViewer;
 
-  Text queryText;
+  protected Text queryText;
 
-  Text groupIDtext;
+  protected Text groupIDtext;
 
-  Text artifactIDtext;
+  protected Text artifactIDtext;
 
-  Text versionText;
+  protected Text versionText;
 
-  Text infoTextarea;
+  protected Text infoTextarea;
 
-  private List scopeList;
+  protected List scopeList;
 
-  private java.util.List<Dependency> dependencies;
+  protected java.util.List<Dependency> dependencies;
 
   /*
    * Stores selected files from the results viewer. These are later
    * converted into the above dependencies when OK is pressed.
    */
-  java.util.List<IndexedArtifactFile> artifactFiles;
+  protected java.util.List<IndexedArtifactFile> artifactFiles;
 
-  private SearchJob currentSearch;
+  protected SearchJob currentSearch;
 
-  private IProject project;
+  protected IProject project;
 
-  private DependencyNode dependencyNode;
+  protected DependencyNode dependencyNode;
 
   /**
    * The AddDependencyDialog differs slightly in behaviour depending on context. If it is being used to apply a
