@@ -18,6 +18,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.junit.Test;
 
@@ -37,46 +38,50 @@ public class InputHistoryTest extends TestCase {
 
   @Test
   public void testInputHistory() {
-    
-    // open the dialog once, set values, close
-    Dialog d = new Dialog(new Shell());
-    d.open();
-    d.combo.setText(COMBO_TEXT);
-    d.ccombo.setText(CCOMBO_TEXT);
-    d.close();
 
-    // open the dialog again, make sure the history is there
-    d = new Dialog(new Shell());
-    d.open();
-    try {
-      assertEquals("Combo default value", COMBO_TEXT, d.combo.getText());
-      assertEquals("Combo history length", 1, d.combo.getItemCount());
-      assertEquals("Combo history value", COMBO_TEXT, d.combo.getItem(0));
-      assertEquals("CCombo default value", "", d.ccombo.getText());
-      assertEquals("CCombo history length", 1, d.ccombo.getItemCount());
-      assertEquals("CCombo history value", CCOMBO_TEXT, d.ccombo.getItem(0));
-      
-      d.combo.setText(COMBO_TEXT2);
-      d.ccombo.setText(CCOMBO_TEXT2);
-    } finally {
-      d.close();
-    }
+    Display.getDefault().syncExec(new Runnable() {
+      public void run() {
+        // open the dialog once, set values, close
+        Dialog d = new Dialog(new Shell());
+        d.open();
+        d.combo.setText(COMBO_TEXT);
+        d.ccombo.setText(CCOMBO_TEXT);
+        d.close();
 
-    // open the dialog the third time, make sure the history is updated
-    d = new Dialog(new Shell());
-    d.open();
-    try {
-      assertEquals("Combo default value", COMBO_TEXT2, d.combo.getText());
-      assertEquals("Combo history length", 2, d.combo.getItemCount());
-      assertEquals("Combo history value (new)", COMBO_TEXT2, d.combo.getItem(0));
-      assertEquals("Combo history value (old)", COMBO_TEXT, d.combo.getItem(1));
-      assertEquals("CCombo default value", "", d.ccombo.getText());
-      assertEquals("CCombo history length", 2, d.ccombo.getItemCount());
-      assertEquals("CCombo history value (new)", CCOMBO_TEXT2, d.ccombo.getItem(0));
-      assertEquals("CCombo history value (old)", CCOMBO_TEXT, d.ccombo.getItem(1));
-    } finally {
-      d.close();
-    }
+        // open the dialog again, make sure the history is there
+        d = new Dialog(new Shell());
+        d.open();
+        try {
+          assertEquals("Combo default value", COMBO_TEXT, d.combo.getText());
+          assertEquals("Combo history length", 1, d.combo.getItemCount());
+          assertEquals("Combo history value", COMBO_TEXT, d.combo.getItem(0));
+          assertEquals("CCombo default value", "", d.ccombo.getText());
+          assertEquals("CCombo history length", 1, d.ccombo.getItemCount());
+          assertEquals("CCombo history value", CCOMBO_TEXT, d.ccombo.getItem(0));
+
+          d.combo.setText(COMBO_TEXT2);
+          d.ccombo.setText(CCOMBO_TEXT2);
+        } finally {
+          d.close();
+        }
+
+        // open the dialog the third time, make sure the history is updated
+        d = new Dialog(new Shell());
+        d.open();
+        try {
+          assertEquals("Combo default value", COMBO_TEXT2, d.combo.getText());
+          assertEquals("Combo history length", 2, d.combo.getItemCount());
+          assertEquals("Combo history value (new)", COMBO_TEXT2, d.combo.getItem(0));
+          assertEquals("Combo history value (old)", COMBO_TEXT, d.combo.getItem(1));
+          assertEquals("CCombo default value", "", d.ccombo.getText());
+          assertEquals("CCombo history length", 2, d.ccombo.getItemCount());
+          assertEquals("CCombo history value (new)", CCOMBO_TEXT2, d.ccombo.getItem(0));
+          assertEquals("CCombo history value (old)", CCOMBO_TEXT, d.ccombo.getItem(1));
+        } finally {
+          d.close();
+        }
+      }
+    });
   }
 
   protected class Dialog extends TitleAreaDialog {
