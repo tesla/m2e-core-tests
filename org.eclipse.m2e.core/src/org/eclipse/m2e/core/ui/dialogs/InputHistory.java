@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.swt.SWTException;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -86,6 +87,7 @@ public class InputHistory {
       Set<String> history = new LinkedHashSet<String>(MAX_HISTORY);
 
       for(ControlWrapper wrapper : e.getValue()) {
+        wrapper.collect();
         String lastValue = wrapper.text;
         if(lastValue != null && lastValue.trim().length() > 0) {
           history.add(lastValue);
@@ -139,14 +141,23 @@ public class InputHistory {
 
     protected String[] items;
 
+    private boolean collected;
+
     protected ControlWrapper(Control control) {
       this.control = control;
       control.addDisposeListener(new DisposeListener() {
         public void widgetDisposed(DisposeEvent e) {
-          text = getText();
-          items = getItems();
+          collect();
         }
       });
+    }
+
+    protected void collect() {
+      if(!collected && !isDisposed()) {
+        text = getText();
+        items = getItems();
+      }
+      collected = true;
     }
 
     protected boolean isDisposed() {
@@ -201,7 +212,12 @@ public class InputHistory {
     }
 
     protected String[] getItems() {
-      return combo.getItems();
+      try {
+        return combo.getItems();
+      } catch(SWTException swtException) {
+        //CCombo throws this if the list is disposed, but the combo itself is not disposed yet
+        return new String[0];
+      }
     }
 
     protected void setItems(String[] items) {
