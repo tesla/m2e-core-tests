@@ -48,6 +48,10 @@ import org.eclipse.swt.widgets.Tree;
 
 import org.apache.lucene.search.BooleanQuery;
 
+import org.sonatype.aether.artifact.Artifact;
+import org.sonatype.aether.graph.DependencyNode;
+import org.sonatype.aether.graph.DependencyVisitor;
+
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.IMavenConstants;
 import org.eclipse.m2e.core.core.MavenLogger;
@@ -109,6 +113,8 @@ public class AddDependencyDialog extends AbstractMavenDialog {
   private SearchJob currentSearch;
 
   private IProject project;
+
+  private DependencyNode dependencyNode;
 
   /**
    * The AddDependencyDialog differs slightly in behaviour depending on context. If it is being used to apply a
@@ -196,12 +202,53 @@ public class AddDependencyDialog extends AbstractMavenDialog {
 
     versionText = new Text(composite, SWT.BORDER);
     versionText.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-    
+
     ProposalUtil.addGroupIdProposal(project, groupIDtext, Packaging.ALL);
     ProposalUtil.addArtifactIdProposal(project, groupIDtext, artifactIDtext, Packaging.ALL);
     ProposalUtil.addVersionProposal(project, groupIDtext, artifactIDtext, versionText, Packaging.ALL);
+    
+    artifactIDtext.addModifyListener(new ModifyListener() {
+      
+      public void modifyText(ModifyEvent e) {
+        updateInfo();
+      }
+    });
+    
+    groupIDtext.addModifyListener(new ModifyListener() {
+      
+      public void modifyText(ModifyEvent e) {
+        updateInfo();
+      }
+    });
 
     return composite;
+  }
+  
+  void updateInfo() {
+    infoTextarea.setText("");
+    if (dependencyNode == null) {
+      return;
+    }
+    dependencyNode.accept(new DependencyVisitor() {
+      
+      public boolean visitLeave(DependencyNode node) {
+        if (node.getDependency() != null && node.getDependency().getArtifact() != null) {
+          Artifact artifact = node.getDependency().getArtifact();
+          if (artifact.getGroupId().equalsIgnoreCase(groupIDtext.getText().trim()) 
+              && artifact.getArtifactId().equalsIgnoreCase(artifactIDtext.getText().trim())) {
+            infoTextarea.setText(artifact.getGroupId() + "-" + artifact.getArtifactId() + "-" + artifact.getVersion()
+                + " is already a transitive dependency.\n");
+          }
+          return false;
+        }
+        return true;
+      }
+      
+      public boolean visitEnter(DependencyNode node) {
+        return true;
+      }
+    });
+    
   }
 
   private Composite createSearchControls(Composite parent) {
@@ -290,7 +337,7 @@ public class AddDependencyDialog extends AbstractMavenDialog {
           String artifact = null;
           String group = null;
           String version = null;
-          
+
           artifactFiles = new LinkedList<IndexedArtifactFile>();
           StringBuffer buffer = new StringBuffer();
           Iterator iter = selection.iterator();
@@ -300,7 +347,7 @@ public class AddDependencyDialog extends AbstractMavenDialog {
               for(IndexedArtifactFile file : ((IndexedArtifact) obj).getFiles()) {
                 appendFileInfo(buffer, file);
                 artifactFiles.add(file);
-                
+
                 artifact = chooseWidgetText(artifact, file.artifact);
                 group = chooseWidgetText(group, file.group);
                 version = chooseWidgetText(version, file.version);
@@ -309,7 +356,7 @@ public class AddDependencyDialog extends AbstractMavenDialog {
               IndexedArtifactFile file = (IndexedArtifactFile) obj;
               appendFileInfo(buffer, file);
               artifactFiles.add(file);
-              
+
               artifact = chooseWidgetText(artifact, file.artifact);
               group = chooseWidgetText(group, file.group);
               version = chooseWidgetText(version, file.version);
@@ -320,7 +367,7 @@ public class AddDependencyDialog extends AbstractMavenDialog {
           artifactIDtext.setText(artifact);
           groupIDtext.setText(group);
           versionText.setText(version);
-          
+
           boolean enabled = !(artifactFiles.size() > 1);
           artifactIDtext.setEnabled(enabled);
           groupIDtext.setEnabled(enabled);
@@ -346,28 +393,26 @@ public class AddDependencyDialog extends AbstractMavenDialog {
 
     return sashForm;
   }
-  
+
   /**
-   * Just a short helper method to determine what to display in the text
-   * widgets when the user selects multiple objects in the tree viewer.
-   * 
-   * If the objects have the same value, then we should show that to them,
-   * otherwise we show something like "(multiple selected)"
+   * Just a short helper method to determine what to display in the text widgets when the user selects multiple objects
+   * in the tree viewer. If the objects have the same value, then we should show that to them, otherwise we show
+   * something like "(multiple selected)"
    * 
    * @param current
    * @param newValue
    * @return
    */
   String chooseWidgetText(String current, String newValue) {
-    if (current == null) {
+    if(current == null) {
       return newValue;
-    } else if (!current.equals(newValue)) {
+    } else if(!current.equals(newValue)) {
       return "(multiple values selected)";
     }
     return current;
   }
 
-  void appendFileInfo(StringBuffer buffer, IndexedArtifactFile file) {
+  void appendFileInfo(final StringBuffer buffer, final IndexedArtifactFile file) {
     buffer.append(" * " + file.fname);
     if(file.size != -1) {
       buffer.append(", size: ");
@@ -379,6 +424,32 @@ public class AddDependencyDialog extends AbstractMavenDialog {
     }
     buffer.append(", date: " + DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(file.date));
     buffer.append("\n");
+
+    if(dependencyNode != null) {
+      dependencyNode.accept(new DependencyVisitor() {
+
+        public boolean visitEnter(DependencyNode node) {
+          return true;
+        }
+
+        public boolean visitLeave(DependencyNode node) {
+          if (node.getDependency() == null || node.getDependency().getArtifact() == null) {
+            return true;
+          }
+          Artifact artifact = node.getDependency().getArtifact();
+          if(artifact.getGroupId().equalsIgnoreCase(file.group) && artifact.getArtifactId().equalsIgnoreCase(file.artifact)) {
+            buffer.append("  + " + artifact.getGroupId() + "-" + artifact.getArtifactId() + "-" + artifact.getVersion()
+                + " is already a transitive dependency.\n");
+            /*
+             * DependencyNodes don't know their parents. Determining which transitive dependency 
+             * is using the selected dependency is non trivial :(
+             */
+            return false;
+          }
+          return true;
+        }
+      });
+    }
   }
 
   protected void search(String query) {
@@ -515,4 +586,7 @@ public class AddDependencyDialog extends AbstractMavenDialog {
 
   }
 
+  public void setDepdencyNode(DependencyNode node) {
+    this.dependencyNode = node;
+  }
 }

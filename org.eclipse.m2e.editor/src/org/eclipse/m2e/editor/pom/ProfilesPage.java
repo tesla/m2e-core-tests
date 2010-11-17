@@ -721,7 +721,7 @@ public class ProfilesPage extends MavenPomEditorPage {
     CTabItem dependenciesTabItem = new CTabItem(tabFolder, SWT.NONE);
     dependenciesTabItem.setText(Messages.ProfilesPage_tab_dependencies);
   
-    dependenciesComposite = new DependenciesComposite(tabFolder, this, SWT.NONE);
+    dependenciesComposite = new DependenciesComposite(tabFolder, this, SWT.NONE, pomEditor);
     dependenciesTabItem.setControl(dependenciesComposite);
     toolkit.adapt(dependenciesComposite);
   }
