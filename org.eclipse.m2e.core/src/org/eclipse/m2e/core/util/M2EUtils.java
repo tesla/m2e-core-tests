@@ -16,8 +16,13 @@ import java.util.Map;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
@@ -91,5 +96,13 @@ public class M2EUtils {
       }
     });
 
+  }
+  
+  public static void addRequiredDecoration(Control control) {
+    FieldDecoration fieldDecoration = FieldDecorationRegistry.getDefault().getFieldDecoration(
+        FieldDecorationRegistry.DEC_REQUIRED);
+    ControlDecoration controlDecoration = new ControlDecoration(control, SWT.LEFT | SWT.CENTER);
+    controlDecoration.setDescriptionText(fieldDecoration.getDescription());
+    controlDecoration.setImage(fieldDecoration.getImage());
   }
 }

@@ -61,6 +61,7 @@ import org.eclipse.m2e.core.index.IIndex;
 import org.eclipse.m2e.core.index.IndexedArtifactFile;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.ui.dialogs.MavenRepositorySearchDialog;
+import org.eclipse.m2e.core.util.M2EUtils;
 import org.eclipse.m2e.core.util.ProposalUtil;
 import org.eclipse.m2e.core.util.search.Packaging;
 import org.eclipse.m2e.core.wizards.MavenModuleWizard;
@@ -279,6 +280,7 @@ public class OverviewPage extends MavenPomEditorPage {
     GridData gd_artifactIdText = new GridData(SWT.FILL, SWT.CENTER, true, false);
     gd_artifactIdText.horizontalIndent = 4;
     artifactIdText.setLayoutData(gd_artifactIdText);
+    M2EUtils.addRequiredDecoration(artifactIdText);
 
     Label versionLabel = toolkit.createLabel(artifactComposite, Messages.OverviewPage_lblVersion, SWT.NONE);
 
@@ -410,6 +412,7 @@ public class OverviewPage extends MavenPomEditorPage {
     parentGroupIdText.setLayoutData(gd_parentGroupIdText);
     parentGroupIdText.setData("name", "parentGroupId"); //$NON-NLS-1$ //$NON-NLS-2$
     ProposalUtil.addGroupIdProposal(getProject(), parentGroupIdText, Packaging.POM);
+    M2EUtils.addRequiredDecoration(parentGroupIdText);
 
     final Label parentArtifactIdLabel = toolkit.createLabel(parentComposite, Messages.OverviewPage_lblArtifactId,
         SWT.NONE);
@@ -420,6 +423,7 @@ public class OverviewPage extends MavenPomEditorPage {
     parentArtifactIdText.setLayoutData(gd_parentArtifactIdText);
     parentArtifactIdText.setData("name", "parentArtifactId"); //$NON-NLS-1$ //$NON-NLS-2$
     ProposalUtil.addArtifactIdProposal(getProject(), parentGroupIdText, parentArtifactIdText, Packaging.POM);
+    M2EUtils.addRequiredDecoration(parentArtifactIdText);
 
     Label parentVersionLabel = toolkit.createLabel(parentComposite, Messages.OverviewPage_lblVersion2, SWT.NONE);
     parentVersionLabel.setLayoutData(new GridData());
@@ -432,6 +436,7 @@ public class OverviewPage extends MavenPomEditorPage {
     parentVersionText.setData("name", "parentVersion"); //$NON-NLS-1$ //$NON-NLS-2$
     ProposalUtil.addVersionProposal(getProject(), parentGroupIdText, parentArtifactIdText, parentVersionText,
         Packaging.POM);
+    M2EUtils.addRequiredDecoration(parentVersionText);
 
     ModifyListener ml = new ModifyListener() {
       public void modifyText(ModifyEvent e) {
