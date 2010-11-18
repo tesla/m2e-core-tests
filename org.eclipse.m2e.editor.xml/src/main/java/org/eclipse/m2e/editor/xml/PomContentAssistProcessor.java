@@ -73,6 +73,10 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
     PomTemplateContext context = PomTemplateContext.fromNodeName(currentNodeName);
     if(PomTemplateContext.CONFIGURATION == context) 
     {
+      //this is sort of hack that makes sure the config proposals appear even
+      // when you type <prefix
+      // the downside is that additional typing hides the proposals popup
+      // there has to be a better way though. the xml element completions seems to be coping with it fine..
       contentAssistRequest.setReplacementBeginPosition(contentAssistRequest.getReplacementBeginPosition() - 1);
       contentAssistRequest.setReplacementLength(contentAssistRequest.getReplacementLength() + 1);
       addProposals(contentAssistRequest, context, getCurrentNode(contentAssistRequest), contentAssistRequest.getMatchString());
