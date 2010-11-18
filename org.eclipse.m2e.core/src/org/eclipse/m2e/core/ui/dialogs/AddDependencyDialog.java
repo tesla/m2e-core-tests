@@ -122,6 +122,8 @@ public class AddDependencyDialog extends AbstractMavenDialog {
    */
   protected Runnable onLoad;
 
+  protected SelectionListener resultsListener;
+
   /**
    * The AddDependencyDialog differs slightly in behaviour depending on context. If it is being used to apply a
    * dependency under the "dependencyManagement" context, the extra "import" scope is available. Set @param
@@ -334,51 +336,8 @@ public class AddDependencyDialog extends AbstractMavenDialog {
      * Hook up events
      */
 
-    resultsViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-
-      public void selectionChanged(SelectionChangedEvent event) {
-        IStructuredSelection selection = (IStructuredSelection) event.getSelection();
-        if(selection.isEmpty()) {
-          infoTextarea.setText("");
-          artifactFiles = null;
-        } else {
-          String artifact = null;
-          String group = null;
-          String version = null;
-
-          artifactFiles = new LinkedList<IndexedArtifactFile>();
-          StringBuffer buffer = new StringBuffer();
-          Iterator iter = selection.iterator();
-          while(iter.hasNext()) {
-            Object obj = iter.next();
-            IndexedArtifactFile file = null;
-            
-            if(obj instanceof IndexedArtifact) {
-              file = ((IndexedArtifact) obj).getFiles().iterator().next();
-            } else {
-              file = (IndexedArtifactFile) obj;
-            }
-            
-            appendFileInfo(buffer, file);
-            artifactFiles.add(file);
-            
-            artifact = chooseWidgetText(artifact, file.artifact);
-            group = chooseWidgetText(group, file.group);
-            version = chooseWidgetText(version, file.version);
-          }
-          setInfo(OK, artifactFiles.size() + " items selected.");
-          infoTextarea.setText(buffer.toString());
-          artifactIDtext.setText(artifact);
-          groupIDtext.setText(group);
-          versionText.setText(version);
-
-          boolean enabled = !(artifactFiles.size() > 1);
-          artifactIDtext.setEnabled(enabled);
-          groupIDtext.setEnabled(enabled);
-          versionText.setEnabled(enabled);
-        }
-      }
-    });
+    resultsListener = new SelectionListener();
+    resultsViewer.addSelectionChangedListener(resultsListener);
 
     queryText.addKeyListener(new KeyAdapter() {
       public void keyPressed(KeyEvent e) {
@@ -519,6 +478,51 @@ public class AddDependencyDialog extends AbstractMavenDialog {
 
   void setInfo(int status, String message) {
     updateStatus(new Status(status, IMavenConstants.PLUGIN_ID, message));
+  }
+
+  public final class SelectionListener implements ISelectionChangedListener {
+    public void selectionChanged(SelectionChangedEvent event) {
+      IStructuredSelection selection = (IStructuredSelection) event.getSelection();
+      if(selection.isEmpty()) {
+        infoTextarea.setText("");
+        artifactFiles = null;
+      } else {
+        String artifact = null;
+        String group = null;
+        String version = null;
+
+        artifactFiles = new LinkedList<IndexedArtifactFile>();
+        StringBuffer buffer = new StringBuffer();
+        Iterator iter = selection.iterator();
+        while(iter.hasNext()) {
+          Object obj = iter.next();
+          IndexedArtifactFile file = null;
+          
+          if(obj instanceof IndexedArtifact) {
+            file = ((IndexedArtifact) obj).getFiles().iterator().next();
+          } else {
+            file = (IndexedArtifactFile) obj;
+          }
+          
+          appendFileInfo(buffer, file);
+          artifactFiles.add(file);
+          
+          artifact = chooseWidgetText(artifact, file.artifact);
+          group = chooseWidgetText(group, file.group);
+          version = chooseWidgetText(version, file.version);
+        }
+        setInfo(OK, artifactFiles.size() + " items selected.");
+        infoTextarea.setText(buffer.toString());
+        artifactIDtext.setText(artifact);
+        groupIDtext.setText(group);
+        versionText.setText(version);
+
+        boolean enabled = !(artifactFiles.size() > 1);
+        artifactIDtext.setEnabled(enabled);
+        groupIDtext.setEnabled(enabled);
+        versionText.setEnabled(enabled);
+      }
+    }
   }
 
   private class SearchJob extends Job {
