@@ -69,6 +69,7 @@ public class MvnImages {
   
   public static final Image IMG_ELEMENT = createImage("element_obj.gif"); //$NON-NLS-1$
   
+  public static final Image IMG_USER_TEMPLATE = createImage("template_obj.gif"); //$NON-NLS-1$
 
   private static ImageDescriptor create(String key) {
     try {

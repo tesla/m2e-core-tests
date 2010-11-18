@@ -92,7 +92,7 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
     String currentNodeName = getCurrentNode(contentAssistRequest).getNodeName();
     // TODO don't offer "parent" section if it is already present
     addProposals(contentAssistRequest, PomTemplateContext.fromNodeName(currentNodeName));
-    super.addTagInsertionProposals(contentAssistRequest, childPosition);
+      super.addTagInsertionProposals(contentAssistRequest, childPosition);
   }
 
   private Node getCurrentNode(ContentAssistRequest contentAssistRequest) {
@@ -181,30 +181,7 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
     context.setVariable("selection", selection.getText()); //$NON-NLS-1$
 
     PomTemplateContext templateContext = PomTemplateContext.fromId(contextTypeId);
-    Image image = null;
-    switch(templateContext) {
-      case CONFIGURATION:
-        image = MvnImages.IMG_PARAMETER;
-        break;
-      case PLUGINS:
-        image = MvnImages.IMG_PLUGIN;
-        break;
-      case DEPENDENCIES:
-        image = MvnImages.IMG_JAR;
-        break;
-      case EXECUTIONS:
-        image = MvnImages.IMG_EXECUTION;
-        break;
-      case PROFILES:
-        image = MvnImages.IMG_PROFILE;
-        break;
-      case PROPERTIES:
-        image = MvnImages.IMG_PROPERTY;
-        break;
-      case REPOSITORIES:
-        image = MvnImages.IMG_REPOSITORY;
-        break;
-    }
+    Image image = MvnImages.IMG_USER_TEMPLATE;
     
     List<TemplateProposal> matches = new ArrayList<TemplateProposal>();
     Template[] templates = templateContext.getTemplates(project, currentNode, prefix);
