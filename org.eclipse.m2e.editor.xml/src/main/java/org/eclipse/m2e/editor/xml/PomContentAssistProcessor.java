@@ -13,6 +13,7 @@ package org.eclipse.m2e.editor.xml;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -45,6 +46,7 @@ import org.eclipse.jface.text.templates.TemplateContext;
 import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.jface.text.templates.TemplateProposal;
+import org.eclipse.jface.text.templates.persistence.TemplateStore;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.eclipse.wst.xml.ui.internal.contentassist.XMLContentAssistProcessor;
@@ -181,29 +183,38 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
     context.setVariable("selection", selection.getText()); //$NON-NLS-1$
 
     PomTemplateContext templateContext = PomTemplateContext.fromId(contextTypeId);
-    Image image = MvnImages.IMG_USER_TEMPLATE;
     
+    // add the user defined templates - separate them from the rest of the templates
+    // so that we know what they are and can assign proper icon to them.
+    Image image = MvnImages.IMG_USER_TEMPLATE;
     List<TemplateProposal> matches = new ArrayList<TemplateProposal>();
-    Template[] templates = templateContext.getTemplates(project, currentNode, prefix);
-    for(final Template template : templates) {
-      try {
-        context.getContextType().validate(template.getPattern());
-        if(template.matches(prefix, context.getContextType().getId())) {
-          TemplateProposal proposal = new TemplateProposal(template, context, region, image, getRelevance(template, prefix)) {
-            public String getAdditionalProposalInfo() {
-              return getTemplate().getDescription();
-            }
-
-            public String getDisplayString() {
-              return template.getName();
-            }
-          };
+    TemplateStore store = MvnIndexPlugin.getDefault().getTemplateStore();
+    if(store != null) {
+      Template[] templates = store.getTemplates(contextTypeId);
+      for(Template template : templates) {
+        TemplateProposal proposal = createProposalForTemplate(prefix, region, context, image, template);
+        if (proposal != null) {
           matches.add(proposal);
         }
-      } catch(TemplateException e) {
-        // ignore
+      }
+    }    
+    if (templateContext == PomTemplateContext.CONFIGURATION) {
+      image = MvnImages.IMG_PARAMETER;
+    } else {
+      //other suggestions from the templatecontext are to be text inside the element, not actual
+      //elements..
+      image = null;
+    }
+    
+    Template[] templates = templateContext.getTemplates(project, currentNode, prefix);
+    for(Template template : templates) {
+      TemplateProposal proposal = createProposalForTemplate(prefix, region, context, image, template);
+      if (proposal != null) {
+        matches.add(proposal);
       }
     }
+    
+    
     if (templateContext!=PomTemplateContext.VERSION) {
       // versions are already sorted with o.a.m.artifact.versioning.ComparableVersion
       Collections.sort(matches, PROPOSAL_COMPARATOR);
@@ -211,6 +222,27 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
 
     return (ICompletionProposal[]) matches.toArray(new ICompletionProposal[matches.size()]);
 
+  }
+
+  private TemplateProposal createProposalForTemplate(String prefix, Region region, TemplateContext context, Image image,
+      final Template template) {
+    try {
+      context.getContextType().validate(template.getPattern());
+      if(template.matches(prefix, context.getContextType().getId())) {
+        return new TemplateProposal(template, context, region, image, getRelevance(template, prefix)) {
+          public String getAdditionalProposalInfo() {
+            return getTemplate().getDescription();
+          }
+
+          public String getDisplayString() {
+            return template.getName();
+          }
+        };
+      }
+    } catch(TemplateException e) {
+      // ignore
+    }
+    return null;
   }
 
   protected TemplateContext createContext(ITextViewer viewer, IRegion region, String contextTypeId) {

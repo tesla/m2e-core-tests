@@ -427,12 +427,6 @@ public enum PomTemplateContext {
     } catch (CoreException e) {
       MavenLogger.log(e);
     }
-    
-    TemplateStore store = MvnIndexPlugin.getDefault().getTemplateStore();
-    if(store != null) {
-      templates.addAll(Arrays.asList(store.getTemplates(getContextTypeId())));
-    }
-    
     return templates.toArray(new Template[templates.size()]);
   }
   
