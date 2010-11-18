@@ -67,6 +67,7 @@ import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.index.IIndex;
 import org.eclipse.m2e.core.index.IndexedArtifactFile;
 import org.eclipse.m2e.core.ui.dialogs.MavenRepositorySearchDialog;
+import org.eclipse.m2e.core.util.M2EUtils;
 import org.eclipse.m2e.core.util.ProposalUtil;
 import org.eclipse.m2e.core.util.search.Packaging;
 import org.eclipse.m2e.editor.MavenEditorImages;
@@ -478,6 +479,7 @@ public class PluginsComposite extends Composite{
       groupIdText.setLayoutData(gd_groupIdText);
       groupIdText.setData("name", "groupIdText"); //$NON-NLS-1$ //$NON-NLS-2$
       ProposalUtil.addGroupIdProposal(parentEditorPage.getProject(), groupIdText, Packaging.PLUGIN);
+      M2EUtils.addRequiredDecoration(groupIdText);
 
       Hyperlink artifactIdHyperlink = toolkit.createHyperlink(pluginDetailsComposite, Messages.PluginsComposite_lblArtifactId, SWT.NONE);
       artifactIdHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
@@ -500,6 +502,7 @@ public class PluginsComposite extends Composite{
       artifactIdText.setLayoutData(gd_artifactIdText);
       artifactIdText.setData("name", "artifactIdText"); //$NON-NLS-1$ //$NON-NLS-2$
       ProposalUtil.addArtifactIdProposal(parentEditorPage.getProject(), groupIdText, artifactIdText, Packaging.PLUGIN);
+      M2EUtils.addRequiredDecoration(artifactIdText);
     
       Label label = toolkit.createLabel(pluginDetailsComposite, Messages.PluginsComposite_lblVersion, SWT.NONE);
       label.setLayoutData(new GridData());

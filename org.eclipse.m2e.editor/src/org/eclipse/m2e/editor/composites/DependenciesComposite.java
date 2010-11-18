@@ -54,6 +54,7 @@ import org.eclipse.m2e.core.index.IIndex;
 import org.eclipse.m2e.core.index.IndexedArtifactFile;
 import org.eclipse.m2e.core.ui.dialogs.AddDependencyDialog;
 import org.eclipse.m2e.core.ui.dialogs.MavenRepositorySearchDialog;
+import org.eclipse.m2e.core.util.M2EUtils;
 import org.eclipse.m2e.core.util.ProposalUtil;
 import org.eclipse.m2e.core.util.search.Packaging;
 import org.eclipse.m2e.core.wizards.WidthGroup;
@@ -608,6 +609,7 @@ public class DependenciesComposite extends Composite {
     gd_groupIdText.horizontalIndent = 4;
     groupIdText.setLayoutData(gd_groupIdText);
     ProposalUtil.addGroupIdProposal(editorPage.getProject(), groupIdText, Packaging.ALL);
+    M2EUtils.addRequiredDecoration(groupIdText);
 
     Hyperlink artifactIdHyperlink = toolkit.createHyperlink(dependencyComposite, Messages.DependenciesComposite_lblArtifactId, SWT.NONE);
     artifactIdHyperlink.setLayoutData(new GridData());
@@ -634,6 +636,7 @@ public class DependenciesComposite extends Composite {
     gd_artifactIdText.horizontalIndent = 4;
     artifactIdText.setLayoutData(gd_artifactIdText);
     ProposalUtil.addArtifactIdProposal(editorPage.getProject(), groupIdText, artifactIdText, Packaging.ALL);
+    M2EUtils.addRequiredDecoration(artifactIdText);
 
     Label versionLabel = toolkit.createLabel(dependencyComposite, Messages.DependenciesComposite_lblVersion, SWT.NONE);
     versionLabel.setLayoutData(new GridData());
@@ -865,6 +868,7 @@ public class DependenciesComposite extends Composite {
     exclusionGroupIdText.setLayoutData(gd_exclusionGroupIdText);
     // TODO handle ArtifactInfo
     ProposalUtil.addGroupIdProposal(editorPage.getProject(), exclusionGroupIdText, Packaging.ALL);
+    M2EUtils.addRequiredDecoration(exclusionGroupIdText);
 
 //    exclusionSelectButton = toolkit.createButton(exclusionDetailsComposite, "Select...", SWT.NONE);
 //    exclusionSelectButton.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 2));
@@ -894,6 +898,7 @@ public class DependenciesComposite extends Composite {
     exclusionArtifactIdText.setLayoutData(gd_exclusionArtifactIdText);
     // TODO handle ArtifactInfo
     ProposalUtil.addArtifactIdProposal(editorPage.getProject(), exclusionGroupIdText, exclusionArtifactIdText, Packaging.ALL);
+    M2EUtils.addRequiredDecoration(exclusionArtifactIdText);
     
     exclusionSelectAction = new Action(Messages.DependenciesComposite_action_selectExclusion, MavenEditorImages.SELECT_ARTIFACT) {
       public void run() {
