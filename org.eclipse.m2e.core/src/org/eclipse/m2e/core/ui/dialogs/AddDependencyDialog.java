@@ -116,6 +116,12 @@ public class AddDependencyDialog extends AbstractMavenDialog {
 
   protected DependencyNode dependencyNode;
 
+  /*
+   * This is to be run when the dialog is done creating its controls, but
+   * before open() is called
+   */
+  protected Runnable onLoad;
+
   /**
    * The AddDependencyDialog differs slightly in behaviour depending on context. If it is being used to apply a
    * dependency under the "dependencyManagement" context, the extra "import" scope is available. Set @param
@@ -155,6 +161,8 @@ public class AddDependencyDialog extends AbstractMavenDialog {
     Composite searchControls = createSearchControls(composite);
     searchControls.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
+    Display.getDefault().asyncExec(this.onLoad);
+    
     return composite;
   }
 
@@ -584,5 +592,19 @@ public class AddDependencyDialog extends AbstractMavenDialog {
 
   public void setDepdencyNode(DependencyNode node) {
     this.dependencyNode = node;
+  }
+
+  /**
+   * The provided runnable will be called after createDialogArea is done,
+   * but before it returns. This provides a way for long running operations to 
+   * be executed in such a way as to not block the UI.
+   * 
+   * This is primarily intended to allow the loading of the dependencyTree.
+   * The runnable should load the tree and then call setDependencyNode()
+   * 
+   * @param runnable
+   */
+  public void onLoad(Runnable runnable) {
+    this.onLoad = runnable;
   }
 }

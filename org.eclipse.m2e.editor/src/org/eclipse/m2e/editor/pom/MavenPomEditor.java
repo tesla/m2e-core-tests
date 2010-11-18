@@ -589,6 +589,7 @@ public class MavenPomEditor extends FormEditor implements IResourceChangeListene
       boolean force = false;
       try {
         final DependencyNode dependencyNode = pomEditor.readDependencyTree(force, classpath, monitor);
+
         if(dependencyNode == null) {
           return Status.CANCEL_STATUS;
         }

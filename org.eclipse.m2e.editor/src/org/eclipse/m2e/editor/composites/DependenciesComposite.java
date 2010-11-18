@@ -278,16 +278,27 @@ public class DependenciesComposite extends Composite {
       public void widgetSelected(SelectionEvent e) {
         final AddDependencyDialog addDepDialog = new AddDependencyDialog(getShell(), false, editorPage.getProject());
         
-        pomEditor.loadDependencies(new Callback() {
+        /*
+         * Load the dependency tree for the dialog so it can show already
+         * added transitive dependencies.
+         */
+        Runnable runnable = new Runnable() {
           
-          public void onFinish(DependencyNode node) {
-            addDepDialog.setDepdencyNode(node);
+          public void run() {
+            pomEditor.loadDependencies(new Callback() {
+              
+              public void onFinish(DependencyNode node) {
+                addDepDialog.setDepdencyNode(node);
+              }
+              
+              public void onException(CoreException ex) {
+                MavenLogger.log(ex);
+              }
+            }, Artifact.SCOPE_TEST);
           }
-          
-          public void onException(CoreException ex) {
-            MavenLogger.log(ex);
-          }
-        }, Artifact.SCOPE_TEST);
+        };
+        
+        addDepDialog.onLoad(runnable);
         
         if (addDepDialog.open() == Window.OK) {
           List<Dependency> deps = addDepDialog.getDependencies();
