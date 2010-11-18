@@ -16,6 +16,8 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.apache.maven.plugin.MojoExecution;
+
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 
 /**
@@ -48,4 +50,7 @@ public interface ILifecycleMapping {
 
   /** TODO does this belong here? */
   List<AbstractProjectConfigurator> getProjectConfigurators(IMavenProjectFacade facade, IProgressMonitor monitor) throws CoreException;
+
+  List<MojoExecution> getNotCoveredMojoExecutions(IMavenProjectFacade mavenProjectFacade, IProgressMonitor monitor)
+      throws CoreException;
 }

@@ -54,4 +54,9 @@ public interface IProjectConfigurationManager {
 
   ILifecycleMapping getLifecycleMapping(IMavenProjectFacade projectFacade, IProgressMonitor monitor) throws CoreException;
 
+  /**
+   * @return true if the lifecycle mapping configuration is valid
+   */
+  boolean validateLifecycleMappingConfiguration(IMavenProjectFacade projectFacade, IProgressMonitor monitor)
+      throws CoreException;
 }

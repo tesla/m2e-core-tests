@@ -201,4 +201,8 @@ public abstract class AbstractProjectConfigurator implements IExecutableExtensio
   public AbstractBuildParticipant getBuildParticipant(MojoExecution execution) {
     return null;
   }
+  
+  public boolean isSupportedExecution(MojoExecution mojoExecution) {
+    return getBuildParticipant(mojoExecution) != null;
+  }
 }

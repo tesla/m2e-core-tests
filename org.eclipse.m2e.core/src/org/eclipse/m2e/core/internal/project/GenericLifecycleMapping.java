@@ -12,6 +12,7 @@
 package org.eclipse.m2e.core.internal.project;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -75,7 +76,7 @@ public class GenericLifecycleMapping extends AbstractLifecycleMapping implements
         MavenExecutionRequest request = manager.createExecutionRequest(projectFacade.getPom(), configuration, progressMonitor);
         request.setGoals(goals);
         MavenExecutionPlan plan = maven.calculateExecutionPlan(request, projectFacade.getMavenProject(progressMonitor), progressMonitor);
-        for(MojoExecution mojo : plan.getExecutions()) {
+        for(MojoExecution mojo : plan.getMojoExecutions()) {
           if("compile:compile".equals(mojo.getMojoDescriptor().getFullGoalName()) && configuration.isSkipCompiler()) { //$NON-NLS-1$
             continue;
           }
@@ -88,4 +89,9 @@ public class GenericLifecycleMapping extends AbstractLifecycleMapping implements
     return mojos;
   }
 
+  @Override
+  public List<MojoExecution> getNotCoveredMojoExecutions(IMavenProjectFacade mavenProjectFacade,
+      IProgressMonitor monitor) throws CoreException {
+    return Collections.EMPTY_LIST;
+  }
 }

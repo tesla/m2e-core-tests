@@ -598,7 +598,7 @@ public class ProjectRegistryManager {
 
   private MavenExecutionPlan calculateExecutionPlan(IProjectRegistry state, MavenProjectFacade facade, IProgressMonitor monitor) throws CoreException {
     MavenExecutionRequest request = createExecutionRequest(state, facade.getPom(), facade.getResolverConfiguration(), monitor);
-    request.setGoals(Arrays.asList("package")); //$NON-NLS-1$
+    request.setGoals(Arrays.asList("process-test-classes")); //$NON-NLS-1$
     return getMaven().calculateExecutionPlan(request, facade.getMavenProject(monitor), monitor);
   }
 

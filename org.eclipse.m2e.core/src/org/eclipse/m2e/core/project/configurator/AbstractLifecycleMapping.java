@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
+import org.apache.maven.lifecycle.MavenExecutionPlan;
 import org.apache.maven.plugin.MojoExecution;
 
 import org.eclipse.m2e.core.MavenPlugin;
@@ -191,7 +192,7 @@ public abstract class AbstractLifecycleMapping implements IExtensionLifecycleMap
       List<AbstractProjectConfigurator> configurators, IProgressMonitor monitor) throws CoreException {
     List<AbstractBuildParticipant> participants = new ArrayList<AbstractBuildParticipant>();
 
-    for (MojoExecution execution : facade.getExecutionPlan(monitor).getExecutions()) {
+    for(MojoExecution execution : facade.getExecutionPlan(monitor).getMojoExecutions()) {
       for (AbstractProjectConfigurator configurator : configurators) {
         AbstractBuildParticipant participant = configurator.getBuildParticipant(execution);
         if (participant != null) {
@@ -203,4 +204,25 @@ public abstract class AbstractLifecycleMapping implements IExtensionLifecycleMap
     return participants;
   }
 
+  public List<MojoExecution> getNotCoveredMojoExecutions(IMavenProjectFacade mavenProjectFacade,
+      IProgressMonitor monitor) throws CoreException {
+    List<MojoExecution> result = new ArrayList<MojoExecution>();
+
+    List<AbstractProjectConfigurator> projectConfigurators = getProjectConfigurators(mavenProjectFacade, monitor);
+    MavenExecutionPlan mavenExecutionPlan = mavenProjectFacade.getExecutionPlan(monitor);
+    List<MojoExecution> allMojoExecutions = mavenExecutionPlan.getMojoExecutions();
+    for(MojoExecution mojoExecution : allMojoExecutions) {
+      boolean isCovered = false;
+      for(AbstractProjectConfigurator configurator : projectConfigurators) {
+        if(configurator.isSupportedExecution(mojoExecution)) {
+          isCovered = true;
+          break;
+        }
+      }
+      if(!isCovered) {
+        result.add(mojoExecution);
+      }
+    }
+    return result;
+  }
 }

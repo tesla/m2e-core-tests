@@ -28,6 +28,7 @@ import org.osgi.framework.Version;
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
@@ -57,6 +58,7 @@ import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Model;
+import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
 
 import org.eclipse.m2e.core.MavenPlugin;
@@ -306,10 +308,34 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
     IProject project = request.getProject();
     addMavenNature(project, monitor);
 
-    ILifecycleMapping lifecycleMapping = getLifecycleMapping(request.getMavenProjectFacade(), monitor);
+    IMavenProjectFacade mavenProjectFacade = request.getMavenProjectFacade();
+    ILifecycleMapping lifecycleMapping = getLifecycleMapping(mavenProjectFacade, monitor);
 
+    try {
+      validateLifecycleMappingConfiguration(mavenProjectFacade, monitor);
+    } catch(CoreException e) {
+      mavenMarkerManager.addErrorMarkers(mavenProjectFacade.getPom(), e);
+    }
     lifecycleMapping.configure(request, monitor);
+  }
 
+  /* (non-Javadoc)
+   * @see org.eclipse.m2e.core.project.IProjectConfigurationManager#validateLifecycleMappingConfiguration(org.eclipse.m2e.core.project.IMavenProjectFacade, org.eclipse.core.runtime.IProgressMonitor)
+   */
+  public boolean validateLifecycleMappingConfiguration(IMavenProjectFacade mavenProjectFacade, IProgressMonitor monitor)
+      throws CoreException {
+    ILifecycleMapping lifecycleMapping = getLifecycleMapping(mavenProjectFacade, monitor);
+    List<MojoExecution> notCoveredMojoExecutions = lifecycleMapping.getNotCoveredMojoExecutions(mavenProjectFacade,
+        monitor);
+    if(notCoveredMojoExecutions != null && notCoveredMojoExecutions.size() != 0) {
+      for(MojoExecution mojoExecution : notCoveredMojoExecutions) {
+        mavenMarkerManager.addMarker(mavenProjectFacade.getPom(),
+            NLS.bind(Messages.LifecycleConfigurationMojoExecutionNotCovered, mojoExecution.toString()),
+            1 /*lineNumber*/, IMarker.SEVERITY_ERROR);
+      }
+      return false;
+    }
+    return true;
   }
 
   public void enableMavenNature(IProject project, ResolverConfiguration configuration, IProgressMonitor monitor)
@@ -659,6 +685,15 @@ public class ProjectConfigurationManager implements IProjectConfigurationManager
 
   public ILifecycleMapping getLifecycleMapping(IMavenProjectFacade projectFacade, IProgressMonitor monitor) throws CoreException {
     if (projectFacade==null) {
+      return null;
+    }
+
+    return projectFacade.getLifecycleMapping(monitor);
+  }
+
+  public ILifecycleMapping getDefaultLifecycleMapping(IMavenProjectFacade projectFacade, IProgressMonitor monitor)
+      throws CoreException {
+    if(projectFacade == null) {
       return null;
     }
 

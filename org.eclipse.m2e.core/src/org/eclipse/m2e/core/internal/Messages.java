@@ -180,6 +180,8 @@ public class Messages extends NLS {
 
   public static String IndexUpdaterJob_title;
 
+  public static String LifecycleConfigurationMojoExecutionNotCovered;
+
   public static String LocalArchetypeCatalogDialog_btnBrowse;
 
   public static String LocalArchetypeCatalogDialog_dialog_title;
