@@ -343,24 +343,20 @@ public class AddDependencyDialog extends AbstractMavenDialog {
           Iterator iter = selection.iterator();
           while(iter.hasNext()) {
             Object obj = iter.next();
+            IndexedArtifactFile file = null;
+            
             if(obj instanceof IndexedArtifact) {
-              for(IndexedArtifactFile file : ((IndexedArtifact) obj).getFiles()) {
-                appendFileInfo(buffer, file);
-                artifactFiles.add(file);
-
-                artifact = chooseWidgetText(artifact, file.artifact);
-                group = chooseWidgetText(group, file.group);
-                version = chooseWidgetText(version, file.version);
-              }
+              file = ((IndexedArtifact) obj).getFiles().iterator().next();
             } else {
-              IndexedArtifactFile file = (IndexedArtifactFile) obj;
-              appendFileInfo(buffer, file);
-              artifactFiles.add(file);
-
-              artifact = chooseWidgetText(artifact, file.artifact);
-              group = chooseWidgetText(group, file.group);
-              version = chooseWidgetText(version, file.version);
+              file = (IndexedArtifactFile) obj;
             }
+            
+            appendFileInfo(buffer, file);
+            artifactFiles.add(file);
+            
+            artifact = chooseWidgetText(artifact, file.artifact);
+            group = chooseWidgetText(group, file.group);
+            version = chooseWidgetText(version, file.version);
           }
           setInfo(OK, artifactFiles.size() + " items selected.");
           infoTextarea.setText(buffer.toString());
