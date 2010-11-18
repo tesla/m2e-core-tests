@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.maven.index.ArtifactInfo;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.m2e.core.MavenPlugin;
@@ -38,8 +39,6 @@ import org.eclipse.m2e.core.repository.IRepository;
 import org.eclipse.m2e.core.repository.IRepositoryRegistry;
 import org.eclipse.m2e.tests.common.FileHelpers;
 import org.eclipse.m2e.tests.common.HttpServer;
-import org.sonatype.nexus.index.ArtifactInfo;
-
 
 /**
  * @author dyocum

@@ -16,7 +16,7 @@
     <relativePath>../org.eclipse.m2e.parent</relativePath>
   </parent>
 
-  <artifactId>org.eclipse.m2e.nexus_indexer</artifactId>
+  <artifactId>org.eclipse.m2e.maven.indexer</artifactId>
   <packaging>eclipse-plugin</packaging>
 
   <name>Nexus Indexer Bundle</name>
@@ -89,7 +89,7 @@
                 </include>
               </includes>
               <exportPackages>
-                org.sonatype.nexus.*,
+                org.maven.sonatype.nexus.*,
                 org.apache.lucene.*,
                 META-INF.plexus,
               </exportPackages>

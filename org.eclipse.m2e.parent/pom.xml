@@ -143,7 +143,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.m2e</groupId>
-				<artifactId>org.eclipse.m2e.nexus_indexer</artifactId>
+				<artifactId>org.eclipse.m2e.maven.indexer</artifactId>
 				<version>${nexus_indexer.version}</version>
 			</dependency>
 			<dependency>

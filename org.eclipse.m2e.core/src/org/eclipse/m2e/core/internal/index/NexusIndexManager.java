@@ -57,30 +57,29 @@ import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 
+import org.apache.maven.index.ArtifactAvailablility;
+import org.apache.maven.index.ArtifactContext;
+import org.apache.maven.index.ArtifactInfo;
+import org.apache.maven.index.FlatSearchRequest;
+import org.apache.maven.index.FlatSearchResponse;
+import org.apache.maven.index.NexusIndexer;
+import org.apache.maven.index.artifact.Gav;
+import org.apache.maven.index.artifact.GavCalculator;
+import org.apache.maven.index.artifact.IllegalArtifactCoordinateException;
+import org.apache.maven.index.artifact.M2GavCalculator;
+import org.apache.maven.index.context.IndexCreator;
+import org.apache.maven.index.context.IndexingContext;
+import org.apache.maven.index.creator.JarFileContentsIndexCreator;
+import org.apache.maven.index.creator.MavenArchetypeArtifactInfoIndexCreator;
+import org.apache.maven.index.creator.MavenPluginArtifactInfoIndexCreator;
+import org.apache.maven.index.creator.MinimalArtifactInfoIndexCreator;
+import org.apache.maven.index.fs.Lock;
+import org.apache.maven.index.locator.PomLocator;
+import org.apache.maven.index.updater.IndexUpdateRequest;
+import org.apache.maven.index.updater.IndexUpdateResult;
+import org.apache.maven.index.updater.IndexUpdater;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.proxy.ProxyInfo;
-
-import org.sonatype.nexus.artifact.Gav;
-import org.sonatype.nexus.artifact.GavCalculator;
-import org.sonatype.nexus.artifact.IllegalArtifactCoordinateException;
-import org.sonatype.nexus.artifact.M2GavCalculator;
-import org.sonatype.nexus.index.ArtifactAvailablility;
-import org.sonatype.nexus.index.ArtifactContext;
-import org.sonatype.nexus.index.ArtifactInfo;
-import org.sonatype.nexus.index.FlatSearchRequest;
-import org.sonatype.nexus.index.FlatSearchResponse;
-import org.sonatype.nexus.index.NexusIndexer;
-import org.sonatype.nexus.index.context.IndexCreator;
-import org.sonatype.nexus.index.context.IndexingContext;
-import org.sonatype.nexus.index.creator.JarFileContentsIndexCreator;
-import org.sonatype.nexus.index.creator.MavenArchetypeArtifactInfoIndexCreator;
-import org.sonatype.nexus.index.creator.MavenPluginArtifactInfoIndexCreator;
-import org.sonatype.nexus.index.creator.MinimalArtifactInfoIndexCreator;
-import org.sonatype.nexus.index.fs.Lock;
-import org.sonatype.nexus.index.locator.PomLocator;
-import org.sonatype.nexus.index.updater.IndexUpdateRequest;
-import org.sonatype.nexus.index.updater.IndexUpdateResult;
-import org.sonatype.nexus.index.updater.IndexUpdater;
 
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.core.IMavenConstants;
@@ -1071,14 +1070,8 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
       IndexingContext context = getIndexingContext(repository);
 
       if (context != null) {
-        IndexUpdateRequest request = newIndexUpdateRequest(repository, context);
-
-        ProxyInfo proxyInfo = maven.getProxyInfo(repository.getProtocol());
-        AuthenticationInfo authenticationInfo = repository.getAuthenticationInfo();
-        request.setProxyInfo(proxyInfo);
-        request.setAuthenticationInfo(authenticationInfo);
+        IndexUpdateRequest request = newIndexUpdateRequest(repository, context, monitor);
         request.setForceFullUpdate(force);
-        request.setResourceFetcher(new AsyncFetcher(authenticationInfo, proxyInfo, monitor));
 
         Lock cacheLock = locker.lock(request.getLocalIndexCacheDir());
         try {
@@ -1096,7 +1089,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
             Directory directory = FSDirectory.getDirectory(luceneCache);
             IndexingContext cacheCtx = getIndexer().addIndexingContextForced(id, id, null, directory, null, null,
                 getIndexers(details));
-            request=newIndexUpdateRequest(repository, cacheCtx);
+            request=newIndexUpdateRequest(repository, cacheCtx, monitor);
             request.setOffline(true);
             indexUpdater.fetchAndUpdateIndex(request);
 
@@ -1110,7 +1103,7 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
             updated=true;
           } else {
             // incremental change
-            request = newIndexUpdateRequest(repository, context);
+            request = newIndexUpdateRequest(repository, context, monitor);
             request.setOffline(true); // local cache is already uptodate, no need to
             result = indexUpdater.fetchAndUpdateIndex(request);
             updated=result.getTimestamp()!=null;
@@ -1138,9 +1131,12 @@ public class NexusIndexManager implements IndexManager, IMavenProjectChangedList
     }
   }
 
-  protected IndexUpdateRequest newIndexUpdateRequest(IRepository repository, IndexingContext context)
-      throws IOException {
-    IndexUpdateRequest request = new IndexUpdateRequest(context);
+  protected IndexUpdateRequest newIndexUpdateRequest(IRepository repository, IndexingContext context, IProgressMonitor monitor)
+      throws IOException, CoreException {
+    ProxyInfo proxyInfo = maven.getProxyInfo(repository.getProtocol());
+    AuthenticationInfo authenticationInfo = repository.getAuthenticationInfo();
+    
+    IndexUpdateRequest request = new IndexUpdateRequest(context, new AsyncFetcher(authenticationInfo, proxyInfo, monitor));
     File localRepo = repositoryRegistry.getLocalRepository().getBasedir();
     File indexCacheBasedir = new File(localRepo, ".cache/m2e/" + MavenPlugin.getVersion()).getCanonicalFile(); //$NON-NLS-1$
     File indexCacheDir = new File(indexCacheBasedir, repository.getUid());

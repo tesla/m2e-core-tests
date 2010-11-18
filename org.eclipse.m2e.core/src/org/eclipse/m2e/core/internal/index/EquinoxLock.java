@@ -13,7 +13,7 @@ package org.eclipse.m2e.core.internal.index;
 
 import org.eclipse.core.runtime.internal.adaptor.Locker;
 
-import org.sonatype.nexus.index.fs.Lock;
+import org.apache.maven.index.fs.Lock;
 
 @SuppressWarnings("restriction")
 public class EquinoxLock

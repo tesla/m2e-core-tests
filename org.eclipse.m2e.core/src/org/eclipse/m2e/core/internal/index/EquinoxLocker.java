@@ -17,8 +17,8 @@ import java.io.IOException;
 import org.eclipse.core.runtime.internal.adaptor.BasicLocation;
 import org.eclipse.osgi.util.NLS;
 
-import org.sonatype.nexus.index.fs.Lock;
-import org.sonatype.nexus.index.fs.Locker;
+import org.apache.maven.index.fs.Lock;
+import org.apache.maven.index.fs.Locker;
 
 @SuppressWarnings("restriction")
 public class EquinoxLocker

@@ -15,10 +15,10 @@ import java.io.File;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.sonatype.nexus.index.ArtifactContext;
-import org.sonatype.nexus.index.ArtifactScanningListener;
-import org.sonatype.nexus.index.ScanningResult;
-import org.sonatype.nexus.index.context.IndexingContext;
+import org.apache.maven.index.ArtifactContext;
+import org.apache.maven.index.ArtifactScanningListener;
+import org.apache.maven.index.ScanningResult;
+import org.apache.maven.index.context.IndexingContext;
 
 import org.eclipse.m2e.core.core.MavenConsole;
 

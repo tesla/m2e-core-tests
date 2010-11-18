@@ -1,5 +1,5 @@
-#Wed Oct 27 15:03:33 EDT 2010
-activeProfiles=development,its
+#Tue Nov 16 11:32:17 EST 2010
+activeProfiles=
 eclipse.preferences.version=1
 fullBuildGoals=process-test-resources
 includeModules=false

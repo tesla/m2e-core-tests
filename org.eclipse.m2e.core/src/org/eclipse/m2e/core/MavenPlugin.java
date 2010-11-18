@@ -65,11 +65,11 @@ import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.resolver.ArtifactCollector;
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.index.NexusIndexer;
+import org.apache.maven.index.updater.IndexUpdater;
 import org.apache.maven.plugin.LegacySupport;
 
 import org.sonatype.aether.RepositorySystem;
-import org.sonatype.nexus.index.NexusIndexer;
-import org.sonatype.nexus.index.updater.IndexUpdater;
 
 import org.eclipse.m2e.core.archetype.ArchetypeCatalogFactory;
 import org.eclipse.m2e.core.archetype.ArchetypeManager;
