@@ -80,4 +80,8 @@ public class MissingLifecycleMapping implements ILifecycleMapping {
       IProgressMonitor monitor) throws CoreException {
     return Collections.emptyList();
   }
+
+  public boolean isInterestingPhase(String phase) {
+    return false;
+  }
 }
