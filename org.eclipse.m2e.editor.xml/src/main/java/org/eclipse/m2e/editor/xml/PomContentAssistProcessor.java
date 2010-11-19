@@ -183,6 +183,10 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
           if ("${project.artifactId}".startsWith(realExpressionPrefix)) { //$NON-NLS-1$
             collect.add("project.artifactId"); //$NON-NLS-1$
           }
+          if ("${project.build.directory}".startsWith(realExpressionPrefix)) { //$NON-NLS-1$
+            collect.add("project.build.directory"); //$NON-NLS-1$
+          }
+          Collections.sort(collect);
           for (String key : collect) {
             ICompletionProposal proposal = new InsertExpressionProposal(sourceViewer, region, key, mvnproject); 
             if(request.shouldSeparate()) {
@@ -199,7 +203,7 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
   private static List<PomTemplateContext> expressionproposalContexts = Arrays.asList(new PomTemplateContext[] {
      PomTemplateContext.ARTIFACT_ID,
      PomTemplateContext.CLASSIFIER,
-     PomTemplateContext.CONFIGURATION,
+//     PomTemplateContext.CONFIGURATION,
      PomTemplateContext.GOAL,
      PomTemplateContext.GROUP_ID,
      PomTemplateContext.MODULE,
