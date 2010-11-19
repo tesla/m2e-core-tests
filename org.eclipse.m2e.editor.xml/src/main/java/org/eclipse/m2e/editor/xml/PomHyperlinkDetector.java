@@ -467,7 +467,7 @@ class PomHyperlinkDetector implements IHyperlinkDetector {
       }
 
       public String getHyperlinkText() {
-        return NLS.bind(Messages.PomHyperlinkDetector_hyperlink_pattern, new Object[] {groupId, artifactId, version});
+        return NLS.bind(Messages.PomHyperlinkDetector_hyperlink_pattern, groupId, artifactId);
       }
 
       public String getTypeLabel() {
