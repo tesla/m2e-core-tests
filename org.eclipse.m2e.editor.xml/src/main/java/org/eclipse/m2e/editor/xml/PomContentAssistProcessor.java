@@ -186,6 +186,9 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
           if ("${project.build.directory}".startsWith(realExpressionPrefix)) { //$NON-NLS-1$
             collect.add("project.build.directory"); //$NON-NLS-1$
           }
+          if ("${project.build.sourceEncoding}".startsWith(realExpressionPrefix)) { //$NON-NLS-1$
+            collect.add("project.build.sourceEncoding"); //$NON-NLS-1$
+          }
           Collections.sort(collect);
           for (String key : collect) {
             ICompletionProposal proposal = new InsertExpressionProposal(sourceViewer, region, key, mvnproject); 
