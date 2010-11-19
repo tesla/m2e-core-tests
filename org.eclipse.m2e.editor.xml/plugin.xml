@@ -145,6 +145,12 @@
          description="%template.property.description">
       <pattern>&lt;${cursor}${name}&gt;${value}&lt;/${name}&gt;</pattern>
     </template>
+    <template id="org.eclipse.m2e.editor.xml.templates.property.encoding"
+         contextTypeId="org.eclipse.m2e.editor.xml.templates.contextType.properties"
+         name="%template.encoding.name" 
+         description="%template.encoding.description">
+      <pattern>&lt;project.build.sourceEncoding&gt;${encoding}&lt;/project.build.sourceEncoding&gt;</pattern>
+    </template>
 
     <template id="org.eclipse.m2e.editor.xml.templates.dependency.skeleton"
          contextTypeId="org.eclipse.m2e.editor.xml.templates.contextType.dependencies"
