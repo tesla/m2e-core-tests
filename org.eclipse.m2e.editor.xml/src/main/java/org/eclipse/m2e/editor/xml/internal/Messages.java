@@ -18,6 +18,12 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
   private static final String BUNDLE_NAME = "org.eclipse.m2e.editor.xml.internal.messages"; //$NON-NLS-1$
 
+  public static String InsertArtifactProposal_additionals;
+
+  public static String InsertArtifactProposal_display_name;
+
+  public static String InsertArtifactProposal_searchDialog_title;
+
   public static String MavenMarkerResolution_error;
 
   public static String MavenMarkerResolution_error_title;

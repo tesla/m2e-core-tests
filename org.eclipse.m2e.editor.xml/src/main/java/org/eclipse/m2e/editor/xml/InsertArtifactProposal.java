@@ -19,6 +19,7 @@ import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.index.IIndex;
 import org.eclipse.m2e.core.index.IndexedArtifactFile;
 import org.eclipse.m2e.core.ui.dialogs.MavenRepositorySearchDialog;
+import org.eclipse.m2e.editor.xml.internal.Messages;
 
 public class InsertArtifactProposal implements ICompletionProposal, ICompletionProposalExtension4, ICompletionProposalExtension5 {
 
@@ -35,7 +36,7 @@ public class InsertArtifactProposal implements ICompletionProposal, ICompletionP
 
   public void apply(IDocument document) {
     MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(sourceViewer.getTextWidget().getShell(), //
-        "Select Parent", IIndex.SEARCH_PARENTS,
+        Messages.InsertArtifactProposal_searchDialog_title, IIndex.SEARCH_PARENTS,
         Collections.<ArtifactKey> emptySet(), false);
     if (group != null) {
       dialog.setQuery(group);
@@ -49,24 +50,24 @@ public class InsertArtifactProposal implements ICompletionProposal, ICompletionP
           int initialSpace = offset - document.getLineOffset(line);
           
           StringBuffer buffer = new StringBuffer();
-          buffer.append("<parent>").append(document.getLegalLineDelimiters()[0]); //do we care? or just append \n always?
+          buffer.append("<parent>").append(document.getLegalLineDelimiters()[0]); //do we care? or just append \n always? //$NON-NLS-1$
           
           // now append the correct number of spaces or tabs (how to find out what the preference is)
           String spaces = document.get(document.getLineOffset(line), initialSpace);
           if (spaces.trim().length() != 0) {
             //hmm got, non whitespace chars on the line.. purge
-            spaces = "\t";
+            spaces = "\t"; //$NON-NLS-1$
           }
-          String ind = spaces.endsWith("\t") ? "\t" : "  ";
+          String ind = spaces.endsWith("\t") ? "\t" : "  "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
           
           buffer.append(spaces).append(ind);
-          buffer.append("<groupId>").append(af.group).append("</groupId>").append(document.getLegalLineDelimiters()[0]);
+          buffer.append("<groupId>").append(af.group).append("</groupId>").append(document.getLegalLineDelimiters()[0]); //$NON-NLS-1$ //$NON-NLS-2$
           buffer.append(spaces).append(ind);
-          buffer.append("<artifactId>").append(af.artifact).append("</artifactId>").append(document.getLegalLineDelimiters()[0]);
+          buffer.append("<artifactId>").append(af.artifact).append("</artifactId>").append(document.getLegalLineDelimiters()[0]); //$NON-NLS-1$ //$NON-NLS-2$
           buffer.append(spaces).append(ind);
-          buffer.append("<version>").append(af.version).append("</version>").append(document.getLegalLineDelimiters()[0]);
+          buffer.append("<version>").append(af.version).append("</version>").append(document.getLegalLineDelimiters()[0]); //$NON-NLS-1$ //$NON-NLS-2$
           buffer.append(spaces);
-          buffer.append("</parent>").append(document.getLegalLineDelimiters()[0]);
+          buffer.append("</parent>").append(document.getLegalLineDelimiters()[0]); //$NON-NLS-1$
           generatedLength = buffer.toString().length();
           document.replace(offset, region.getLength(), buffer.toString());
         } catch(BadLocationException e) {
@@ -86,7 +87,7 @@ public class InsertArtifactProposal implements ICompletionProposal, ICompletionP
   }
 
   public String getDisplayString() {
-    return "Insert reference to parent POM";
+    return Messages.InsertArtifactProposal_display_name;
   }
 
   public Image getImage() {
@@ -103,7 +104,7 @@ public class InsertArtifactProposal implements ICompletionProposal, ICompletionP
   }
 
   public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
-    return "Opens a search dialog where you can select the parent pom for this project.";
+    return Messages.InsertArtifactProposal_additionals;
   }
 
 }
