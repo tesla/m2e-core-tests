@@ -17,8 +17,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Properties;
 import java.util.Stack;
 
+import org.apache.maven.project.MavenProject;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.Text;
@@ -54,10 +56,12 @@ import org.eclipse.wst.sse.core.utils.StringUtils;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.eclipse.wst.xml.ui.internal.contentassist.XMLContentAssistProcessor;
 
+import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.ArtifactKey;
 import org.eclipse.m2e.core.index.IIndex;
 import org.eclipse.m2e.core.index.IndexedArtifactFile;
 import org.eclipse.m2e.core.internal.project.MavenMarkerManager;
+import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.ui.dialogs.MavenRepositorySearchDialog;
 
 /**
@@ -128,11 +132,93 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
 
     String prefix = extractPrefix(sourceViewer, offset);
     
+    addExpressionProposal(request, context, getCurrentNode(request), prefix);
+    
     addGenerateProposals(request, context, getCurrentNode(request), prefix);
     
     addProposals(request, context, getCurrentNode(request), prefix);
   }
+  /**
+   * this is a proposal method for adding expressions when ${ is typed.. 
+   * @param request
+   * @param context
+   * @param currentNode
+   * @param prefix
+   */
+  private void addExpressionProposal(ContentAssistRequest request, PomTemplateContext context, Node currentNode,
+      String prefix) {
+    int exprStart = prefix.lastIndexOf("${");
+    if (exprStart != -1) {
+      //the regular prefix is separated by whitespace and <> brackets only, we need to cut the last portion
+      String realExpressionPrefix = prefix.substring(exprStart);
+      if (realExpressionPrefix.contains("}")) {
+        //the expression is not opened..
+        return;
+      }
+      if (expressionproposalContexts.contains(context)) {
+        //add all effective pom expressions
+        IProject prj = extractProject(sourceViewer);
+        Region region = new Region(request.getReplacementBeginPosition() - realExpressionPrefix.length(), realExpressionPrefix.length());
+        if (prj != null) {
+          IMavenProjectFacade mvnproject = MavenPlugin.getDefault().getMavenProjectManager().getProject(prj);
+          List<String> collect = new ArrayList<String>();
+          if (mvnproject != null) {
+            MavenProject mp = mvnproject.getMavenProject();
+            if (mp != null) {
+              Properties props = mp.getProperties();
+              if (props != null) {
+                for (Object key : props.keySet()) {
+                  String keyString = key.toString();
+                  if (("${" + keyString).startsWith(realExpressionPrefix)) {
+                    collect.add(keyString);
+                  }
+                }
+              }
+            }
+          }
+          //add a few hardwired values as well
+          if ("${basedir}".startsWith(realExpressionPrefix)) {
+            collect.add("basedir");
+          }
+          if ("${project.version}".startsWith(realExpressionPrefix)) {
+            collect.add("project.version");
+          }
+          if ("${project.groupId}".startsWith(realExpressionPrefix)) {
+            collect.add("project.groupId");
+          }
+          if ("${project.artifactId}".startsWith(realExpressionPrefix)) {
+            collect.add("project.artifactId");
+          }
+          for (String key : collect) {
+            ICompletionProposal proposal = new InsertExpressionProposal(sourceViewer, region, key, mvnproject); 
+            if(request.shouldSeparate()) {
+              request.addMacro(proposal);
+            } else {
+              request.addProposal(proposal);
+            }
+          }
+        }
+      }
+    }
+  }
   
+  private static List<PomTemplateContext> expressionproposalContexts = Arrays.asList(new PomTemplateContext[] {
+     PomTemplateContext.ARTIFACT_ID,
+     PomTemplateContext.CLASSIFIER,
+     PomTemplateContext.CONFIGURATION,
+     PomTemplateContext.GOAL,
+     PomTemplateContext.GROUP_ID,
+     PomTemplateContext.MODULE,
+     PomTemplateContext.PACKAGING,
+     PomTemplateContext.PHASE,
+     PomTemplateContext.PROPERTIES, //??
+     PomTemplateContext.SCOPE,
+     PomTemplateContext.SYSTEM_PATH,
+     PomTemplateContext.TYPE,
+//     PomTemplateContext.VERSION, version is intentionally not included as we have specialized handling there.. 
+     PomTemplateContext.UNKNOWN //this one is both important and troubling.. but having a context for everything is weird.
+  });
+
   private void addGenerateProposals(ContentAssistRequest request, PomTemplateContext context, Node node, String prefix) {
     if (context == PomTemplateContext.PROJECT) {
       //check if we have a parent defined..
