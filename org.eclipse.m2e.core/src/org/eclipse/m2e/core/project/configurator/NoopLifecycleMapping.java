@@ -49,4 +49,7 @@ public class NoopLifecycleMapping extends AbstractLifecycleMapping {
     return Collections.emptyList();
   }
 
+  public boolean isInterestingPhase(String phase) {
+    return false;
+  }
 }

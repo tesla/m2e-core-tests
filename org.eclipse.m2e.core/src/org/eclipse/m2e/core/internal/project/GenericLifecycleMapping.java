@@ -94,4 +94,8 @@ public class GenericLifecycleMapping extends AbstractLifecycleMapping implements
       IProgressMonitor monitor) throws CoreException {
     return Collections.EMPTY_LIST;
   }
+
+  public boolean isInterestingPhase(String phase) {
+    return true;
+  }
 }

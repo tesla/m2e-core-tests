@@ -212,6 +212,9 @@ public abstract class AbstractLifecycleMapping implements IExtensionLifecycleMap
     MavenExecutionPlan mavenExecutionPlan = mavenProjectFacade.getExecutionPlan(monitor);
     List<MojoExecution> allMojoExecutions = mavenExecutionPlan.getMojoExecutions();
     for(MojoExecution mojoExecution : allMojoExecutions) {
+      if(!isInterestingPhase(mojoExecution.getLifecyclePhase())) {
+        continue;
+      }
       boolean isCovered = false;
       for(AbstractProjectConfigurator configurator : projectConfigurators) {
         if(configurator.isSupportedExecution(mojoExecution)) {

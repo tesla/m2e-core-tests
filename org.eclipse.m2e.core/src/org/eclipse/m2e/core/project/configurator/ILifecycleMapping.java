@@ -53,4 +53,6 @@ public interface ILifecycleMapping {
 
   List<MojoExecution> getNotCoveredMojoExecutions(IMavenProjectFacade mavenProjectFacade, IProgressMonitor monitor)
       throws CoreException;
+
+  boolean isInterestingPhase(String phase);
 }

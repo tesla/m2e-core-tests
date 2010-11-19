@@ -146,4 +146,14 @@ public class CustomizableLifecycleMapping extends AbstractLifecycleMapping imple
     return mojos;
   }
 
+  private static final String[] NOT_INTERESTING_PHASES = {"test", "prepare-package", "package", "pre-integration-test",
+      "integration-test", "post-integration-test", "verify", "install", "deploy"};
+  public boolean isInterestingPhase(String phase) {
+    for(String notInterestingPhase : NOT_INTERESTING_PHASES) {
+      if(notInterestingPhase.equals(phase)) {
+        return false;
+      }
+    }
+    return true;
+  }
 }

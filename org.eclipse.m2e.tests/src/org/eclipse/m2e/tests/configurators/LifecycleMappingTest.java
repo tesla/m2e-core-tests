@@ -50,7 +50,9 @@ public class LifecycleMappingTest extends AbstractLifecycleMappingTest {
     assertEquals(2, configurators.size());
     assertTrue(configurators.get(1) instanceof MojoExecutionProjectConfigurator);
 
-    assertEquals(0, lifecycleMapping.getNotCoveredMojoExecutions(facade, monitor).size());
+    List<MojoExecution> notCoveredMojoExecutions = lifecycleMapping.getNotCoveredMojoExecutions(facade, monitor);
+    assertEquals(notCoveredMojoExecutions.toString(), 0, lifecycleMapping.getNotCoveredMojoExecutions(facade, monitor)
+        .size());
   }
 
   public void testCustomizableMappingNotComplete() throws Exception {
