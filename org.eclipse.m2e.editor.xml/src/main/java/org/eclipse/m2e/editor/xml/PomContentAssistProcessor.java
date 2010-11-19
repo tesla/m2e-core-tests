@@ -41,7 +41,6 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.jface.text.templates.DocumentTemplateContext;
 import org.eclipse.jface.text.templates.Template;
@@ -50,19 +49,14 @@ import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.jface.text.templates.TemplateProposal;
 import org.eclipse.jface.text.templates.persistence.TemplateStore;
-import org.eclipse.jface.window.Window;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.wst.sse.core.utils.StringUtils;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.eclipse.wst.xml.ui.internal.contentassist.XMLContentAssistProcessor;
 
 import org.eclipse.m2e.core.MavenPlugin;
-import org.eclipse.m2e.core.embedder.ArtifactKey;
-import org.eclipse.m2e.core.index.IIndex;
-import org.eclipse.m2e.core.index.IndexedArtifactFile;
 import org.eclipse.m2e.core.internal.project.MavenMarkerManager;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
-import org.eclipse.m2e.core.ui.dialogs.MavenRepositorySearchDialog;
 
 /**
  * @author Lukas Krecan
@@ -147,11 +141,11 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
    */
   private void addExpressionProposal(ContentAssistRequest request, PomTemplateContext context, Node currentNode,
       String prefix) {
-    int exprStart = prefix.lastIndexOf("${");
+    int exprStart = prefix.lastIndexOf("${"); //$NON-NLS-1$
     if (exprStart != -1) {
       //the regular prefix is separated by whitespace and <> brackets only, we need to cut the last portion
       String realExpressionPrefix = prefix.substring(exprStart);
-      if (realExpressionPrefix.contains("}")) {
+      if (realExpressionPrefix.contains("}")) { //$NON-NLS-1$
         //the expression is not opened..
         return;
       }
@@ -169,7 +163,7 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
               if (props != null) {
                 for (Object key : props.keySet()) {
                   String keyString = key.toString();
-                  if (("${" + keyString).startsWith(realExpressionPrefix)) {
+                  if (("${" + keyString).startsWith(realExpressionPrefix)) { //$NON-NLS-1$
                     collect.add(keyString);
                   }
                 }
@@ -177,17 +171,17 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
             }
           }
           //add a few hardwired values as well
-          if ("${basedir}".startsWith(realExpressionPrefix)) {
-            collect.add("basedir");
+          if ("${basedir}".startsWith(realExpressionPrefix)) { //$NON-NLS-1$
+            collect.add("basedir"); //$NON-NLS-1$
           }
-          if ("${project.version}".startsWith(realExpressionPrefix)) {
-            collect.add("project.version");
+          if ("${project.version}".startsWith(realExpressionPrefix)) { //$NON-NLS-1$
+            collect.add("project.version"); //$NON-NLS-1$
           }
-          if ("${project.groupId}".startsWith(realExpressionPrefix)) {
-            collect.add("project.groupId");
+          if ("${project.groupId}".startsWith(realExpressionPrefix)) { //$NON-NLS-1$
+            collect.add("project.groupId"); //$NON-NLS-1$
           }
-          if ("${project.artifactId}".startsWith(realExpressionPrefix)) {
-            collect.add("project.artifactId");
+          if ("${project.artifactId}".startsWith(realExpressionPrefix)) { //$NON-NLS-1$
+            collect.add("project.artifactId"); //$NON-NLS-1$
           }
           for (String key : collect) {
             ICompletionProposal proposal = new InsertExpressionProposal(sourceViewer, region, key, mvnproject); 
@@ -228,11 +222,11 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
         project = project.getParentNode();
       }
       if (project != null && project instanceof Element) {
-        Element parent = MavenMarkerManager.findChildElement((Element)project, "parent");
+        Element parent = MavenMarkerManager.findChildElement((Element)project, "parent"); //$NON-NLS-1$
         if (parent == null) {
           //now add the proposal for parent inclusion
           Region region = new Region(request.getReplacementBeginPosition() - prefix.length(), prefix.length());
-          Element groupId = MavenMarkerManager.findChildElement((Element)project, "groupId");
+          Element groupId = MavenMarkerManager.findChildElement((Element)project, "groupId"); //$NON-NLS-1$
           String groupString = null;
           if (groupId != null) {
             groupString = MavenMarkerManager.getElementTextValue(groupId);

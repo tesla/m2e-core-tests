@@ -24,6 +24,10 @@ public class Messages extends NLS {
 
   public static String InsertArtifactProposal_searchDialog_title;
 
+  public static String InsertExpressionProposal_hint1;
+
+  public static String InsertExpressionProposal_hint2;
+
   public static String MavenMarkerResolution_error;
 
   public static String MavenMarkerResolution_error_title;

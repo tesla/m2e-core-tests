@@ -17,6 +17,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
+import org.eclipse.m2e.editor.xml.internal.Messages;
 /**
  * insertion proposal for ${ expressions
  * @author mkleint
@@ -51,20 +52,20 @@ public class InsertExpressionProposal implements ICompletionProposal, ICompletio
       }
     }
     StringBuffer buff = new StringBuffer();
-    buff.append("<html>");
+    buff.append("<html>"); //$NON-NLS-1$
     if (value != null) {
-      buff.append(NLS.bind("The expression evaluates to <b>{0}</b> in the current effective pom.", value));
+      buff.append(NLS.bind(Messages.InsertExpressionProposal_hint1, value));
     }
     if (loc != null) {
-      buff.append(NLS.bind("<br>It is based on property defined in <b>{0}</b>", loc));
+      buff.append(NLS.bind(Messages.InsertExpressionProposal_hint2, loc));
     }
-    buff.append("</html>");
+    buff.append("</html>"); //$NON-NLS-1$
     return buff.toString();
   }
 
   public void apply(IDocument document) {
     int offset = region.getOffset();
-    String replace = "${" + key + "}";
+    String replace = "${" + key + "}"; //$NON-NLS-1$ //$NON-NLS-2$
     try {
       document.replace(offset, region.getLength(), replace);
       len = replace.length();
@@ -85,7 +86,7 @@ public class InsertExpressionProposal implements ICompletionProposal, ICompletio
   }
 
   public String getDisplayString() {
-    return "${" + key + "}";
+    return "${" + key + "}"; //$NON-NLS-1$ //$NON-NLS-2$
   }
 
   public Image getImage() {
