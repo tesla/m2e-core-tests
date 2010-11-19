@@ -41,6 +41,7 @@ import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
+import org.eclipse.wst.sse.core.utils.StringUtils;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 
 import org.eclipse.m2e.core.core.IMavenConstants;
@@ -286,14 +287,11 @@ class IdPartRemovalProposal implements ICompletionProposal, ICompletionProposalE
             int line = doc.getLineOfOffset(reg.getStartOffset());
             int startLine = doc.getLineOffset(line);
             int prev2 = doc.getLineOffset(line - 2);
-            String prevString = doc.get(prev2, startLine - prev2);
+            String prevString = StringUtils.convertToHTMLContent(doc.get(prev2, startLine - prev2));
             String currentLine = doc.get(startLine, doc.getLineLength(line));
             int next2End = doc.getLineOffset(line + 2) + doc.getLineLength(line + 2);
             int next2Start = startLine + doc.getLineLength( line ) + 1;
-            String nextString = doc.get(next2Start, next2End - next2Start);
-            prevString = prevString.replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br>"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-            nextString = nextString.replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br>"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-            currentLine = currentLine.replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br>"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+            String nextString = StringUtils.convertToHTMLContent(doc.get(next2Start, next2End - next2Start));
             return "<html>...<br>" + prevString + /**"<del>" + currentLine + "</del>" +*/ nextString + "...<html>";  //$NON-NLS-1$ //$NON-NLS-2$
           } catch(BadLocationException e) {
             // TODO Auto-generated catch block
