@@ -14,7 +14,10 @@ package org.eclipse.m2e.core.internal.project;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.apache.maven.plugin.MojoExecution;
 
 import org.eclipse.m2e.core.internal.Messages;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
@@ -73,4 +76,8 @@ public class MissingLifecycleMapping implements ILifecycleMapping {
     return missingMappingId;
   }
 
+  public List<MojoExecution> getNotCoveredMojoExecutions(IMavenProjectFacade mavenProjectFacade,
+      IProgressMonitor monitor) throws CoreException {
+    return Collections.emptyList();
+  }
 }

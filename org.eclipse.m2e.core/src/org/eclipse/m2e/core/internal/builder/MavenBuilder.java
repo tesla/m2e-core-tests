@@ -145,26 +145,28 @@ public class MavenBuilder extends IncrementalProjectBuilder {
 
       ThreadBuildContext.setThreadBuildContext(buildContext);
       try {
-        List<AbstractBuildParticipant> participants = lifecycleMapping.getBuildParticipants(projectFacade, monitor);
-        for(InternalBuildParticipant participant : participants) {
-          participant.setMavenProjectFacade(projectFacade);
-          participant.setGetDeltaCallback(getDeltaCallback);
-          participant.setSession(session);
-          participant.setBuildContext(buildContext);
-          try {
-            if(FULL_BUILD == kind || delta != null || participant.callOnEmptyDelta()) {
-              Set<IProject> sub = participant.build(kind, monitor);
-              if(sub != null) {
-                dependencies.addAll(sub);
+        if(configurationManager.validateLifecycleMappingConfiguration(projectFacade, monitor)) {
+          List<AbstractBuildParticipant> participants = lifecycleMapping.getBuildParticipants(projectFacade, monitor);
+          for(InternalBuildParticipant participant : participants) {
+            participant.setMavenProjectFacade(projectFacade);
+            participant.setGetDeltaCallback(getDeltaCallback);
+            participant.setSession(session);
+            participant.setBuildContext(buildContext);
+            try {
+              if(FULL_BUILD == kind || delta != null || participant.callOnEmptyDelta()) {
+                Set<IProject> sub = participant.build(kind, monitor);
+                if(sub != null) {
+                  dependencies.addAll(sub);
+                }
               }
+            } catch(Exception e) {
+              MavenLogger.log("Exception in build participant", e);
+            } finally {
+              participant.setMavenProjectFacade(null);
+              participant.setGetDeltaCallback(null);
+              participant.setSession(null);
+              participant.setBuildContext(null);
             }
-          } catch(Exception e) {
-            MavenLogger.log("Exception in build participant", e);
-          } finally {
-            participant.setMavenProjectFacade(null);
-            participant.setGetDeltaCallback(null);
-            participant.setSession(null);
-            participant.setBuildContext(null);
           }
         }
       } catch (CoreException e) {

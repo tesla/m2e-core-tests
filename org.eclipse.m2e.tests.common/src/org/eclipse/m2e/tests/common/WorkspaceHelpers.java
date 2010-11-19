@@ -44,6 +44,7 @@ public class WorkspaceHelpers {
     int i;
     for(i = 0; i < 10; i++ ) {
       try {
+        System.gc();
         doCleanWorkspace();
       } catch(InterruptedException e) {
         throw e;
@@ -53,7 +54,6 @@ public class WorkspaceHelpers {
         cause = e;
         e.printStackTrace();
         System.out.println(i);
-        System.gc();
         Thread.sleep(6 * 1000);
         continue;
       }

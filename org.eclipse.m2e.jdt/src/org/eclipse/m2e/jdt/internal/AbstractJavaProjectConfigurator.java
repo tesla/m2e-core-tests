@@ -39,6 +39,7 @@ import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginExecution;
 import org.apache.maven.model.Resource;
+import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
 
 import org.eclipse.m2e.core.MavenPlugin;
@@ -468,4 +469,21 @@ public abstract class AbstractJavaProjectConfigurator extends AbstractProjectCon
     return new Path(relative.replace('\\', '/')); //$NON-NLS-1$ //$NON-NLS-2$
   }
 
+  @Override
+  public boolean isSupportedExecution(MojoExecution mojoExecution) {
+    // Supports java compiler plugins by default
+    if(isJavaCompilerPlugin(mojoExecution.getGroupId(), mojoExecution.getArtifactId())) {
+      return true;
+    }
+    
+    if(super.isSupportedExecution(mojoExecution)) {
+      return true;
+    }
+    
+    // Lets say it supports maven-resources-plugin for now
+    if("org.apache.maven.plugins".equals(mojoExecution.getGroupId()) && "maven-resources-plugin".equals(mojoExecution.getArtifactId())) { //$NON-NLS-1$ //$NON-NLS-2$
+      return true;
+    }
+    return false;
+  }
 }
