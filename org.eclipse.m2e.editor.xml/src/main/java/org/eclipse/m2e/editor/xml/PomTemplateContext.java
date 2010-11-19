@@ -106,7 +106,6 @@ public enum PomTemplateContext {
       if (version == null) {
         return;
       }
-      
       PluginDescriptor descriptor = PomTemplateContextUtil.INSTANCE.getPluginDescriptor(groupId, artifactId, version);
       if(descriptor!=null) {
         List<MojoDescriptor> mojos = descriptor.getMojos();

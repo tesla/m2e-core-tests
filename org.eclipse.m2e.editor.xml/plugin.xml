@@ -21,7 +21,7 @@
           id="org.eclipse.m2e.core.pomFile.handler">
    	</modelHandler>
    </extension>
-	<extension
+	<extension 
 		point="org.eclipse.ui.ide.markerResolution">
 		<markerResolutionGenerator
 			class="org.eclipse.m2e.editor.xml.MavenMarkerResolutionGenerator"
@@ -139,17 +139,6 @@
   &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;</pattern>
     </template>
       
-    <template id="org.eclipse.m2e.editor.xml.templates.parent.skeleton"
-         contextTypeId="org.eclipse.m2e.editor.xml.templates.contextType.project"
-         name="%template.parent.name" 
-         description="%template.parent.description">
-      <pattern>&lt;parent&gt;
-    &lt;groupId&gt;${cursor}&lt;/groupId&gt;
-    &lt;artifactId&gt;&lt;/artifactId&gt;
-    &lt;version&gt;&lt;/version&gt;
-  &lt;/parent&gt;</pattern>
-    </template>
-
     <template id="org.eclipse.m2e.editor.xml.templates.property.skeleton"
          contextTypeId="org.eclipse.m2e.editor.xml.templates.contextType.properties"
          name="%template.property.name" 

@@ -52,6 +52,8 @@ public class PomContentAssistProcessorTest extends TestCase {
     v.doc = new StringDocument("<module>../abc/def</module>");
     assertEquals("../abc/", PomContentAssistProcessor.extractPrefix(v, 15));
 
+    v.doc = new StringDocument("<project>\t\ta</project>");
+    assertEquals("a", PomContentAssistProcessor.extractPrefix(v, 12));
   }
 
   private class StringDocument extends AbstractDocument {

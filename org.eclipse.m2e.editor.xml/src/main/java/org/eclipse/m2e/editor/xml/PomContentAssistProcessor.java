@@ -19,6 +19,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Stack;
 
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.Text;
 
@@ -47,9 +48,16 @@ import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.jface.text.templates.TemplateProposal;
 import org.eclipse.jface.text.templates.persistence.TemplateStore;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.eclipse.wst.xml.ui.internal.contentassist.XMLContentAssistProcessor;
+
+import org.eclipse.m2e.core.embedder.ArtifactKey;
+import org.eclipse.m2e.core.index.IIndex;
+import org.eclipse.m2e.core.index.IndexedArtifactFile;
+import org.eclipse.m2e.core.internal.project.MavenMarkerManager;
+import org.eclipse.m2e.core.ui.dialogs.MavenRepositorySearchDialog;
 
 /**
  * @author Lukas Krecan
@@ -96,9 +104,9 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
   @Override
   protected void addTagInsertionProposals(ContentAssistRequest contentAssistRequest, int childPosition) {
     String currentNodeName = getCurrentNode(contentAssistRequest).getNodeName();
-    // TODO don't offer "parent" section if it is already present
+    
     addProposals(contentAssistRequest, PomTemplateContext.fromNodeName(currentNodeName));
-      super.addTagInsertionProposals(contentAssistRequest, childPosition);
+    super.addTagInsertionProposals(contentAssistRequest, childPosition);
   }
 
   private Node getCurrentNode(ContentAssistRequest contentAssistRequest) {
@@ -119,8 +127,41 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
 
     String prefix = extractPrefix(sourceViewer, offset);
     
+    addGenerateProposals(request, context, getCurrentNode(request), prefix);
+    
     addProposals(request, context, getCurrentNode(request), prefix);
   }
+  
+  private void addGenerateProposals(ContentAssistRequest request, PomTemplateContext context, Node node, String prefix) {
+    if (context == PomTemplateContext.PROJECT) {
+      //check if we have a parent defined..
+      Node project = node;
+      //is this necessary?
+      while (project != null && !PomTemplateContext.PROJECT.getNodeName().equals(project.getNodeName())) {
+        project = project.getParentNode();
+      }
+      if (project != null && project instanceof Element) {
+        Element parent = MavenMarkerManager.findChildElement((Element)project, "parent");
+        if (parent == null) {
+          //now add the proposal for parent inclusion
+          Region region = new Region(request.getReplacementBeginPosition() - prefix.length(), prefix.length());
+          Element groupId = MavenMarkerManager.findChildElement((Element)project, "groupId");
+          String groupString = null;
+          if (groupId != null) {
+            groupString = MavenMarkerManager.getElementTextValue(groupId);
+          }
+          ICompletionProposal proposal = new InsertArtifactProposal(sourceViewer, region, groupString); 
+          if(request.shouldSeparate()) {
+            request.addMacro(proposal);
+          } else {
+            request.addProposal(proposal);
+          }
+        }
+      }
+    }
+  }
+
+  
   
   private void addProposals(ContentAssistRequest request, PomTemplateContext context, Node currentNode, String prefix) {
     if(request != null) {
@@ -246,6 +287,7 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
     } catch(TemplateException e) {
       // ignore
     }
+    
     return null;
   }
 
@@ -258,6 +300,7 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
     return null;
   }
 
+  //TODO we should have different relevance for user defined templates and generated proposals..
   protected int getRelevance(Template template, String prefix) {
     if (template.getName().startsWith(prefix))
       return 90;
@@ -282,7 +325,7 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
     try {
       while(i > 0) {
         char ch = document.getChar(i - 1);
-        if(ch == '>' || ch == '<' || ch == ' ' || ch == '\n') {
+        if(ch == '>' || ch == '<' || ch == ' ' || ch == '\n' || ch == '\t') {
           break;
         }
         i-- ;
