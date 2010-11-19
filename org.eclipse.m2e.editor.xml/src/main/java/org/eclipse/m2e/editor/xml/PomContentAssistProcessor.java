@@ -50,6 +50,7 @@ import org.eclipse.jface.text.templates.TemplateProposal;
 import org.eclipse.jface.text.templates.persistence.TemplateStore;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.wst.sse.core.utils.StringUtils;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.eclipse.wst.xml.ui.internal.contentassist.XMLContentAssistProcessor;
 
@@ -237,7 +238,7 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
     if(store != null) {
       Template[] templates = store.getTemplates(contextTypeId);
       for(Template template : templates) {
-        TemplateProposal proposal = createProposalForTemplate(prefix, region, context, image, template);
+        TemplateProposal proposal = createProposalForTemplate(prefix, region, context, image, template, true);
         if (proposal != null) {
           matches.add(proposal);
         }
@@ -253,7 +254,7 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
     
     Template[] templates = templateContext.getTemplates(project, currentNode, prefix);
     for(Template template : templates) {
-      TemplateProposal proposal = createProposalForTemplate(prefix, region, context, image, template);
+      TemplateProposal proposal = createProposalForTemplate(prefix, region, context, image, template, false);
       if (proposal != null) {
         matches.add(proposal);
       }
@@ -270,19 +271,28 @@ public class PomContentAssistProcessor extends XMLContentAssistProcessor {
   }
 
   private TemplateProposal createProposalForTemplate(String prefix, Region region, TemplateContext context, Image image,
-      final Template template) {
+      final Template template, boolean isUserTemplate) {
     try {
       context.getContextType().validate(template.getPattern());
       if(template.matches(prefix, context.getContextType().getId())) {
-        return new TemplateProposal(template, context, region, image, getRelevance(template, prefix)) {
-          public String getAdditionalProposalInfo() {
-            return getTemplate().getDescription();
-          }
-
-          public String getDisplayString() {
-            return template.getName();
-          }
-        };
+        if (isUserTemplate) {
+          //for templates defined by users, preserve the default behaviour..
+          return new TemplateProposal(template, context, region, image, getRelevance(template, prefix)) {
+            public String getAdditionalProposalInfo() {
+              return StringUtils.convertToHTMLContent(super.getAdditionalProposalInfo());
+            }
+          };
+        } else {
+          return new TemplateProposal(template, context, region, image, getRelevance(template, prefix)) {
+            public String getAdditionalProposalInfo() {
+              return getTemplate().getDescription();
+            }
+  
+            public String getDisplayString() {
+              return template.getName();
+            }
+          };
+        }
       }
     } catch(TemplateException e) {
       // ignore
