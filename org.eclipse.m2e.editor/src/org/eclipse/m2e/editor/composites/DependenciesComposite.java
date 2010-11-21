@@ -12,7 +12,6 @@
 package org.eclipse.m2e.editor.composites;
 
 import static org.eclipse.m2e.editor.pom.FormUtils.nvl;
-import static org.eclipse.m2e.editor.pom.FormUtils.setButton;
 import static org.eclipse.m2e.editor.pom.FormUtils.setText;
 
 import java.util.Collections;
@@ -46,7 +45,6 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
-import org.eclipse.m2e.core.actions.OpenPomAction;
 import org.eclipse.m2e.core.actions.OpenUrlAction;
 import org.eclipse.m2e.core.core.MavenLogger;
 import org.eclipse.m2e.core.embedder.ArtifactKey;
@@ -57,7 +55,6 @@ import org.eclipse.m2e.core.ui.dialogs.MavenRepositorySearchDialog;
 import org.eclipse.m2e.core.util.M2EUtils;
 import org.eclipse.m2e.core.util.ProposalUtil;
 import org.eclipse.m2e.core.util.search.Packaging;
-import org.eclipse.m2e.core.wizards.WidthGroup;
 import org.eclipse.m2e.editor.MavenEditorImages;
 import org.eclipse.m2e.editor.internal.Messages;
 import org.eclipse.m2e.editor.pom.FormUtils;
@@ -74,7 +71,6 @@ import org.eclipse.m2e.model.edit.pom.Model;
 import org.eclipse.m2e.model.edit.pom.PomFactory;
 import org.eclipse.m2e.model.edit.pom.PomPackage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -84,15 +80,11 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.forms.events.HyperlinkAdapter;
-import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.Section;
 import org.sonatype.aether.graph.DependencyNode;
 
@@ -114,20 +106,9 @@ public class DependenciesComposite extends Composite {
   ListEditorComposite<Dependency> dependencyManagementEditor;
   ListEditorComposite<Dependency> dependenciesEditor;
 
-  Composite dependencyDetailsComposite;
-
-  WidthGroup detailsWidthGroup = new WidthGroup();
-
-  Text groupIdText;
-  Text artifactIdText;
-  Text versionText;
-  Text classifierText;
-  CCombo scopeCombo;
-  CCombo typeCombo;
-  Text systemPathText;
-  Button selectSystemPathButton;
-
-  Button optionalButton;
+  Composite rightSideComposite;
+  
+  protected DependencyDetailComposite dependencyDetailComposite;
 
   ListEditorComposite<Exclusion> exclusionsEditor;
 
@@ -197,16 +178,16 @@ public class DependenciesComposite extends Composite {
 
     verticalSash.setWeights(new int[] {1, 1});
 
-    dependencyDetailsComposite = new Composite(horizontalSash, SWT.NONE);
+    rightSideComposite = new Composite(horizontalSash, SWT.NONE);
     GridLayout dependencyDetailsLayout = new GridLayout(1, false);
     dependencyDetailsLayout.marginWidth = 0;
     dependencyDetailsLayout.marginHeight = 0;
-    dependencyDetailsComposite.setLayout(dependencyDetailsLayout);
-    toolkit.adapt(dependencyDetailsComposite, true, true);
+    rightSideComposite.setLayout(dependencyDetailsLayout);
+    toolkit.adapt(rightSideComposite, true, true);
     
-    createDependencyDetails(toolkit, dependencyDetailsComposite);
-    createExclusionsSection(toolkit, dependencyDetailsComposite);
-    createExclusionDetailsSection(toolkit, dependencyDetailsComposite);
+    createDependencyDetails(toolkit, rightSideComposite);
+    createExclusionsSection(toolkit, rightSideComposite);
+    createExclusionDetailsSection(toolkit, rightSideComposite);
     
     horizontalSash.setWeights(new int[] {1, 1});
     
@@ -233,7 +214,7 @@ public class DependenciesComposite extends Composite {
         dependenciesEditor.setInput(model.getDependencies());
         dependenciesEditor.setSelection(Collections.singletonList(dependency));
         updateDependencyDetails(dependency);
-        groupIdText.setFocus();
+        dependencyDetailComposite.setFocus();
       }
     });
 
@@ -313,7 +294,7 @@ public class DependenciesComposite extends Composite {
           dependenciesEditor.setInput(model.getDependencies());
           dependenciesEditor.setSelection(Collections.singletonList(deps.get(0)));
           updateDependencyDetails(deps.get(0));
-          groupIdText.setFocus();
+          dependencyDetailComposite.setFocus();
         }
       }
     });
@@ -404,7 +385,7 @@ public class DependenciesComposite extends Composite {
         dependencyManagementEditor.setInput(dependencyManagementProvider.getValue().getDependencies());
         dependencyManagementEditor.setSelection(Collections.singletonList(dependency));
         updateDependencyDetails(dependency);
-        groupIdText.setFocus();
+        dependencyDetailComposite.setFocus();
       }
     });
  
@@ -460,7 +441,7 @@ public class DependenciesComposite extends Composite {
             dependencyManagementEditor.setInput(dependencyManagementProvider.getValue().getDependencies());
             dependencyManagementEditor.setSelection(Collections.singletonList(dependency));
             updateDependencyDetails(dependency);
-            groupIdText.setFocus();
+            dependencyDetailComposite.setFocus();
           }
         }
       }
@@ -535,8 +516,8 @@ public class DependenciesComposite extends Composite {
     dependencyManagementSection.setTextClient(toolbarComposite);
   }
 
-  private void createDependencyDetails(FormToolkit toolkit, Composite dependencyDetailsComposite) {
-    Section dependencyDetailsSection = toolkit.createSection(dependencyDetailsComposite, ExpandableComposite.TITLE_BAR);
+  private void createDependencyDetails(FormToolkit toolkit, Composite parent) {
+    Section dependencyDetailsSection = toolkit.createSection(parent, ExpandableComposite.TITLE_BAR);
     dependencyDetailsSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
     dependencyDetailsSection.setText(Messages.DependenciesComposite_section_dependency_details);
     dependencyDetailsSection.marginWidth = 3;
@@ -550,20 +531,20 @@ public class DependenciesComposite extends Composite {
         if(dialog.open() == Window.OK) {
           IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
           if(af != null) {
-            groupIdText.setText(nvl(af.group));
-            artifactIdText.setText(nvl(af.artifact));
-            versionText.setText(nvl(af.version));
+            dependencyDetailComposite.setGroupId(af.group);
+            dependencyDetailComposite.setArtifactId(af.artifact);
+            dependencyDetailComposite.setVersion(af.version);
             //MNGECLIPSE-2363
             String type = nvl(af.type);
             if ("jar".equals(type)) {//$NON-NLS-1$
               type = ""; //$NON-NLS-1$
             }
-            typeCombo.setText(type);
+            dependencyDetailComposite.setType(type);
             String scope = nvl(dialog.getSelectedScope());
             if ("compile".equals(scope)) {//$NON-NLS-1$
               scope = "";//$NON-NLS-1$
             }
-            scopeCombo.setText(scope);
+            dependencyDetailComposite.setScope(scope);
           }
         }
       }
@@ -572,9 +553,9 @@ public class DependenciesComposite extends Composite {
 
     openWebPageAction = new Action(Messages.DependenciesComposite_action_open_project_page, MavenEditorImages.WEB_PAGE) {
       public void run() {
-        final String groupId = groupIdText.getText();
-        final String artifactId = artifactIdText.getText();
-        final String version = versionText.getText();
+        final String groupId = dependencyDetailComposite.getGroupId();
+        final String artifactId = dependencyDetailComposite.getArtifactId();
+        final String version = dependencyDetailComposite.getVersion();
         new Job("Opening " + groupId + ":" + artifactId + ":" + version) {
           protected IStatus run(IProgressMonitor monitor) {
             OpenUrlAction.openBrowser(OpenUrlAction.ID_PROJECT, groupId, artifactId, //
@@ -602,162 +583,8 @@ public class DependenciesComposite extends Composite {
     toolBarManager.createControl(toolbarComposite);
     dependencyDetailsSection.setTextClient(toolbarComposite);
     
-    Composite dependencyComposite = toolkit.createComposite(dependencyDetailsSection, SWT.NONE);
-    GridLayout dependencyCompositeLayout = new GridLayout(3, false);
-    dependencyCompositeLayout.marginWidth = 2;
-    dependencyCompositeLayout.marginHeight = 2;
-    dependencyComposite.setLayout(dependencyCompositeLayout);
-    toolkit.paintBordersFor(dependencyComposite);
-    dependencyDetailsSection.setClient(dependencyComposite);
-    dependencyComposite.addControlListener(detailsWidthGroup);
-
-    Label groupIdLabel = toolkit.createLabel(dependencyComposite, Messages.DependenciesComposite_lblGroupId, SWT.NONE);
-    groupIdLabel.setLayoutData(new GridData());
-    detailsWidthGroup.addControl(groupIdLabel);
-
-    groupIdText = toolkit.createText(dependencyComposite, null, SWT.NONE);
-    GridData gd_groupIdText = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
-    gd_groupIdText.horizontalIndent = 4;
-    groupIdText.setLayoutData(gd_groupIdText);
-    ProposalUtil.addGroupIdProposal(editorPage.getProject(), groupIdText, Packaging.ALL);
-    M2EUtils.addRequiredDecoration(groupIdText);
-
-    Hyperlink artifactIdHyperlink = toolkit.createHyperlink(dependencyComposite, Messages.DependenciesComposite_lblArtifactId, SWT.NONE);
-    artifactIdHyperlink.setLayoutData(new GridData());
-    artifactIdHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
-      public void linkActivated(HyperlinkEvent e) {
-        final String groupId = groupIdText.getText();
-        final String artifactId = artifactIdText.getText();
-        final String version = versionText.getText();
-        new Job("Opening " + groupId + ":" + artifactId + ":" + version) {
-          protected IStatus run(IProgressMonitor monitor) {
-            OpenPomAction.openEditor(groupId, artifactId, //
-                version != null ? version : getVersion(groupId, artifactId, monitor), //
-                    monitor);
-            return Status.OK_STATUS;
-          }
-        }.schedule();
-      }
-    });
-    
-    detailsWidthGroup.addControl(artifactIdHyperlink);
-
-    artifactIdText = toolkit.createText(dependencyComposite, null, SWT.NONE);
-    GridData gd_artifactIdText = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
-    gd_artifactIdText.horizontalIndent = 4;
-    artifactIdText.setLayoutData(gd_artifactIdText);
-    ProposalUtil.addArtifactIdProposal(editorPage.getProject(), groupIdText, artifactIdText, Packaging.ALL);
-    M2EUtils.addRequiredDecoration(artifactIdText);
-
-    Label versionLabel = toolkit.createLabel(dependencyComposite, Messages.DependenciesComposite_lblVersion, SWT.NONE);
-    versionLabel.setLayoutData(new GridData());
-    detailsWidthGroup.addControl(versionLabel);
-
-    versionText = toolkit.createText(dependencyComposite, null, SWT.NONE);
-    GridData versionTextData = new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1);
-    versionTextData.horizontalIndent = 4;
-    versionTextData.widthHint = 200;
-    versionText.setLayoutData(versionTextData);
-    ProposalUtil.addVersionProposal(editorPage.getProject(), groupIdText, artifactIdText, versionText, Packaging.ALL);
-
-//    dependencySelectButton = toolkit.createButton(dependencyComposite, "Select...", SWT.NONE);
-//    dependencySelectButton.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 2));
-//    dependencySelectButton.addSelectionListener(new SelectionAdapter() {
-//      public void widgetSelected(SelectionEvent e) {
-//        // TODO calculate current list of artifacts for the project
-//        Set<Dependency> artifacts = Collections.emptySet();
-//        MavenRepositorySearchDialog dialog = new MavenRepositorySearchDialog(getShell(), //
-//            "Add Dependency", IndexManager.SEARCH_ARTIFACT, artifacts);
-//        if(dialog.open() == Window.OK) {
-//          IndexedArtifactFile af = (IndexedArtifactFile) dialog.getFirstResult();
-//          if(af != null) {
-//            groupIdText.setText(nvl(af.group));
-//            artifactIdText.setText(nvl(af.artifact));
-//            versionText.setText(nvl(af.version));
-//            typeCombo.setText(nvl(af.type));
-//          }
-//        }
-//      }
-//    });
-
-    Label classifierLabel = toolkit.createLabel(dependencyComposite, Messages.DependenciesComposite_lblClassifier, SWT.NONE);
-    classifierLabel.setLayoutData(new GridData());
-    detailsWidthGroup.addControl(classifierLabel);
-
-    classifierText = toolkit.createText(dependencyComposite, null, SWT.NONE);
-    GridData gd_classifierText = new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1);
-    gd_classifierText.horizontalIndent = 4;
-    gd_classifierText.widthHint = 200;
-    classifierText.setLayoutData(gd_classifierText);
-    ProposalUtil.addClassifierProposal(editorPage.getProject(), groupIdText, artifactIdText, versionText, classifierText, Packaging.ALL);
-    
-    Label typeLabel = toolkit.createLabel(dependencyComposite, Messages.DependenciesComposite_lblType, SWT.NONE);
-    typeLabel.setLayoutData(new GridData());
-    detailsWidthGroup.addControl(typeLabel);
-
-    typeCombo = new CCombo(dependencyComposite, SWT.FLAT);
-    // FormUtils.addTypeProposal(groupIdText, artifactIdText, versionText, typeCombo, Packaging.ALL);
-    
-    // TODO retrieve artifact type from selected dependency 
-    typeCombo.add("jar"); //$NON-NLS-1$
-    typeCombo.add("war"); //$NON-NLS-1$
-    typeCombo.add("rar"); //$NON-NLS-1$
-    typeCombo.add("ear"); //$NON-NLS-1$
-    typeCombo.add("par"); //$NON-NLS-1$
-    typeCombo.add("ejb"); //$NON-NLS-1$
-    typeCombo.add("ejb-client"); //$NON-NLS-1$
-    typeCombo.add("test-jar"); //$NON-NLS-1$
-    typeCombo.add("java-source"); //$NON-NLS-1$
-    typeCombo.add("javadoc"); //$NON-NLS-1$
-    typeCombo.add("maven-plugin"); //$NON-NLS-1$
-    typeCombo.add("pom"); //$NON-NLS-1$
-    
-    GridData gd_typeText = new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1);
-    gd_typeText.horizontalIndent = 4;
-    gd_typeText.widthHint = 120;
-    typeCombo.setLayoutData(gd_typeText);
-    typeCombo.setData(FormToolkit.KEY_DRAW_BORDER, FormToolkit.TEXT_BORDER);
-    toolkit.adapt(typeCombo, true, true);
-
-    Label scopeLabel = toolkit.createLabel(dependencyComposite, Messages.DependenciesComposite_lblScope, SWT.NONE);
-    scopeLabel.setLayoutData(new GridData());
-    detailsWidthGroup.addControl(scopeLabel);
-
-    scopeCombo = new CCombo(dependencyComposite, SWT.READ_ONLY | SWT.FLAT);
-    scopeCombo.add("compile"); //$NON-NLS-1$
-    scopeCombo.add("test"); //$NON-NLS-1$
-    scopeCombo.add("provided"); //$NON-NLS-1$
-    scopeCombo.add("runtime"); //$NON-NLS-1$
-    scopeCombo.add("system"); //$NON-NLS-1$
-    // TODO should be only used on a dependency of type pom in the <dependencyManagement> section
-    scopeCombo.add("import");  //$NON-NLS-1$
-    
-    GridData gd_scopeText = new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1);
-    gd_scopeText.horizontalIndent = 4;
-    gd_scopeText.widthHint = 120;
-    scopeCombo.setLayoutData(gd_scopeText);
-    scopeCombo.setData(FormToolkit.KEY_DRAW_BORDER, FormToolkit.TEXT_BORDER);
-    toolkit.adapt(scopeCombo, true, true);
-
-    Label systemPathLabel = toolkit.createLabel(dependencyComposite, Messages.DependenciesComposite_lblSystemPath, SWT.NONE);
-    systemPathLabel.setLayoutData(new GridData());
-    detailsWidthGroup.addControl(systemPathLabel);
-
-    systemPathText = toolkit.createText(dependencyComposite, null, SWT.NONE);
-    GridData gd_systemPathText = new GridData(SWT.FILL, SWT.CENTER, true, false);
-    gd_systemPathText.horizontalIndent = 4;
-    gd_systemPathText.widthHint = 200;
-    systemPathText.setLayoutData(gd_systemPathText);
-
-    selectSystemPathButton = toolkit.createButton(dependencyComposite, Messages.DependenciesComposite_btnSelect, SWT.NONE);
-    new Label(dependencyComposite, SWT.NONE);
-
-    optionalButton = toolkit.createButton(dependencyComposite, Messages.DependenciesComposite_btnOptional, SWT.CHECK);
-    GridData gd_optionalButton = new GridData(SWT.LEFT, SWT.TOP, false, false, 2, 1);
-    gd_optionalButton.horizontalIndent = 4;
-    optionalButton.setLayoutData(gd_optionalButton);
-    dependencyComposite.setTabList(new Control[] {groupIdText, artifactIdText, versionText, classifierText, typeCombo,
-        scopeCombo, systemPathText, selectSystemPathButton, optionalButton});
+    dependencyDetailComposite = new DependencyDetailComposite(dependencyDetailsSection, editorPage);
+    dependencyDetailsSection.setClient(dependencyDetailComposite);
   }
 
   private void createExclusionsSection(FormToolkit toolkit, Composite composite) {
@@ -867,11 +694,11 @@ public class DependenciesComposite extends Composite {
     exclusionDetailsComposite.setLayout(gridLayout);
     toolkit.paintBordersFor(exclusionDetailsComposite);
     exclusionDetailsSection.setClient(exclusionDetailsComposite);
-    exclusionDetailsComposite.addControlListener(detailsWidthGroup);
+//    exclusionDetailsComposite.addControlListener(detailsWidthGroup);
     
     Label exclusionGroupIdLabel = toolkit.createLabel(exclusionDetailsComposite, Messages.DependenciesComposite_lblExclusionGroupId, SWT.NONE);
     exclusionGroupIdLabel.setLayoutData(new GridData());
-    detailsWidthGroup.addControl(exclusionGroupIdLabel);
+//    detailsWidthGroup.addControl(exclusionGroupIdLabel);
 
     exclusionGroupIdText = toolkit.createText(exclusionDetailsComposite, null, SWT.NONE);
     GridData gd_exclusionGroupIdText = new GridData(SWT.FILL, SWT.CENTER, true, false);
@@ -901,7 +728,7 @@ public class DependenciesComposite extends Composite {
 
     Label exclusionArtifactIdLabel = toolkit.createLabel(exclusionDetailsComposite, Messages.DependenciesComposite_lblExclusionArtifactId, SWT.NONE);
     exclusionArtifactIdLabel.setLayoutData(new GridData());
-    detailsWidthGroup.addControl(exclusionArtifactIdLabel);
+//    detailsWidthGroup.addControl(exclusionArtifactIdLabel);
 
     exclusionArtifactIdText = toolkit.createText(exclusionDetailsComposite, null, SWT.NONE);
     GridData gd_exclusionArtifactIdText = new GridData(SWT.FILL, SWT.CENTER, true, false);
@@ -946,39 +773,16 @@ public class DependenciesComposite extends Composite {
     if(changingSelection) {
       return;
     }
-//    if(dependency != null && dependency == currentDependency) {
-//      return;
-//    }
     
     this.currentDependency = dependency;
     
+    dependencyDetailComposite.update(dependency);
+    
     openWebPageAction.setEnabled(dependency!=null);
     dependencySelectAction.setEnabled(dependency!=null && !editorPage.isReadOnly());
-//    exclusionAddAction.setEnabled(dependency!=null && !editorPage.isReadOnly());
-    
-    if(editorPage != null) {
-      editorPage.removeNotifyListener(groupIdText);
-      editorPage.removeNotifyListener(artifactIdText);
-      editorPage.removeNotifyListener(versionText);
-      editorPage.removeNotifyListener(classifierText);
-      editorPage.removeNotifyListener(typeCombo);
-      editorPage.removeNotifyListener(scopeCombo);
-      editorPage.removeNotifyListener(systemPathText);
-      editorPage.removeNotifyListener(optionalButton);
-    }
 
     if(editorPage == null || dependency == null) {
-      FormUtils.setEnabled(dependencyDetailsComposite, false);
-
-      setText(groupIdText, ""); //$NON-NLS-1$
-      setText(artifactIdText, ""); //$NON-NLS-1$
-      setText(versionText, ""); //$NON-NLS-1$
-      setText(classifierText, ""); //$NON-NLS-1$
-      setText(typeCombo, ""); //$NON-NLS-1$
-      setText(scopeCombo, ""); //$NON-NLS-1$
-      setText(systemPathText, ""); //$NON-NLS-1$
-
-      setButton(optionalButton, false);
+      FormUtils.setEnabled(rightSideComposite, false);
 
       exclusionsEditor.setSelection(Collections.<Exclusion>emptyList());
       exclusionsEditor.setInput(null);
@@ -988,36 +792,11 @@ public class DependenciesComposite extends Composite {
       return;
     }
 
-    FormUtils.setEnabled(dependencyDetailsComposite, true);
-    FormUtils.setReadonly(dependencyDetailsComposite, editorPage.isReadOnly());
-
-    setText(groupIdText, dependency.getGroupId());
-    setText(artifactIdText, dependency.getArtifactId());
-    setText(versionText, dependency.getVersion());
-    setText(classifierText, dependency.getClassifier());
-    setText(typeCombo, "".equals(nvl(dependency.getType())) ? "jar" : dependency.getType());
-    setText(scopeCombo, "".equals(nvl(dependency.getScope())) ? "compile" : dependency.getScope());
-    setText(systemPathText, dependency.getSystemPath());
-
-    if(optionalButton.getSelection()!="true".equals(dependency.getOptional())) {
-      optionalButton.setSelection("true".equals(dependency.getOptional()));
-    }
+    FormUtils.setEnabled(rightSideComposite, true);
+    FormUtils.setReadonly(rightSideComposite, editorPage.isReadOnly());
 
     exclusionsEditor.setInput(dependency.getExclusions());
     exclusionsEditor.setSelection(Collections.<Exclusion>emptyList());
-    
-    // set new listeners
-    ValueProvider<Dependency> dependencyProvider = new ValueProvider.DefaultValueProvider<Dependency>(dependency); 
-    editorPage.setModifyListener(groupIdText, dependencyProvider, POM_PACKAGE.getDependency_GroupId(), ""); //$NON-NLS-1$
-    editorPage.setModifyListener(artifactIdText, dependencyProvider, POM_PACKAGE.getDependency_ArtifactId(), ""); //$NON-NLS-1$
-    editorPage.setModifyListener(versionText, dependencyProvider, POM_PACKAGE.getDependency_Version(), ""); //$NON-NLS-1$
-    editorPage.setModifyListener(classifierText, dependencyProvider, POM_PACKAGE.getDependency_Classifier(), ""); //$NON-NLS-1$
-    editorPage.setModifyListener(typeCombo, dependencyProvider, POM_PACKAGE.getDependency_Type(), "jar"); //$NON-NLS-1$
-    editorPage.setModifyListener(scopeCombo, dependencyProvider, POM_PACKAGE.getDependency_Scope(), "compile"); //$NON-NLS-1$
-    editorPage.setModifyListener(systemPathText, dependencyProvider, POM_PACKAGE.getDependency_SystemPath(), ""); //$NON-NLS-1$
-    editorPage.setModifyListener(optionalButton, dependencyProvider, POM_PACKAGE.getDependency_Optional(), "false");
-    
-    editorPage.registerListeners();
     
     updateExclusionDetails(null);
   }
